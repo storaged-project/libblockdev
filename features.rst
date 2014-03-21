@@ -36,6 +36,8 @@ filesystems
    change_label_FSTYPE
    snapshot_FSTYPE
 
+   wipefs
+
 
 LVM
 ----
@@ -137,6 +139,7 @@ MDRAID
    * mdresize
    * mdexamine
    * mddetail
+   * mdmemberstatus
    * md_node_from_name
    * name_from_md_node
 
