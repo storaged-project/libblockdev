@@ -47,9 +47,6 @@ gboolean bd_init (BDPluginSpec *force_plugins) {
     return TRUE;
 }
 
-int main (int argc, char* argv[]) {
-    bd_init(NULL);
-    g_printf ("max LV size: %lu\n", bd_lvm_get_max_lv_size());
-
-    return 0;
-}
+#ifdef TESTING
+#include "test_blockdev.c"
+#endif
