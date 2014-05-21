@@ -9,6 +9,7 @@ to make them dynamically loaded and GObject-introspectable.
 from collections import namedtuple
 import re
 import sys
+import os
 
 FuncInfo = namedtuple("FuncInfo", ["name", "doc", "rtype", "args"])
 FUNC_SPEC_RE = re.compile(r'(?P<rtype>\**\s*\w+\s*\**)'
@@ -146,7 +147,8 @@ if __name__ == "__main__":
         print("Usage: %s FILE_NAME", sys.argv[0])
         sys.exit(1)
 
-    mod_name, dot, _ext = sys.argv[1].partition(".")
+    file_name = os.path.basename(sys.argv[1])
+    mod_name, dot, _ext = file_name.partition(".")
     if not dot:
         print("Invalid file given, needs to be in MODNAME.[ch] format", file=sys.stderr)
         sys.exit(2)
