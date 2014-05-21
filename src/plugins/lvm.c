@@ -156,6 +156,6 @@ guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean inclu
                 bd_lvm_round_size_to_pe(MAX_THPOOL_MD_SIZE, pe_size, TRUE));
 }
 
-#ifdef TESTING
+#ifdef TESTING_LVM
 #include "test_lvm.c"
 #endif

@@ -47,6 +47,6 @@ gboolean bd_init (BDPluginSpec *force_plugins) {
     return TRUE;
 }
 
-#ifdef TESTING
+#ifdef TESTING_LIB
 #include "test_blockdev.c"
 #endif
