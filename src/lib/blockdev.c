@@ -36,6 +36,7 @@ void set_plugin_so_name (BDPluginName name, gchar *so_name) {
  */
 gboolean bd_init (BDPluginSpec *force_plugins) {
     guint8 i = 0;
+    gboolean all_loaded = TRUE;
 
     if (force_plugins)
         for (i=0; force_plugins + i; i++)
@@ -43,8 +44,10 @@ gboolean bd_init (BDPluginSpec *force_plugins) {
 
     plugins[BD_PLUGIN_LVM].loaded = load_lvm_from_plugin(plugins[BD_PLUGIN_LVM].spec.so_name);
 
-    /* TODO: check that plugins are loaded */
-    return TRUE;
+    for (i=0; (i < BD_PLUGIN_UNDEF) && all_loaded; i++)
+        all_loaded = all_loaded && plugins[i].loaded;
+
+    return all_loaded;
 }
 
 #ifdef TESTING_LIB
