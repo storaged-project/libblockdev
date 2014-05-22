@@ -38,5 +38,5 @@ test-library: generate-boilerplate-code build-plugins
 	LD_LIBRARY_PATH=src/plugins/ ./test_library
 	@rm test_library
 
-test-from-python: build-introspection-data build-library build-plugins
+test-from-python: build-library build-plugins build-introspection-data
 	GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/ python -c 'from gi.repository import BlockDev; BlockDev.init(None); print BlockDev.lvm_get_max_lv_size()'
