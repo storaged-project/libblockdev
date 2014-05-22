@@ -1,3 +1,5 @@
+#include <glib/gprintf.h>
+
 int main (int argc, char **argv) {
     gint exit_status;
     const gchar **fname = NULL;

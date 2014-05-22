@@ -18,7 +18,6 @@
  */
 
 #include <glib.h>
-#include <glib/gprintf.h>
 #include <sizes.h>
 #include <math.h>
 #include "lvm.h"
