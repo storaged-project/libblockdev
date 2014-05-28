@@ -3,6 +3,7 @@
 #include "plugins.h"
 
 #include "plugin_apis/lvm.c"
+#include "plugin_apis/swap.c"
 
 /**
  * SECTION: libblockdev
@@ -43,6 +44,7 @@ gboolean bd_init (BDPluginSpec *force_plugins) {
             set_plugin_so_name(force_plugins[i].name, force_plugins[i].so_name);
 
     plugins[BD_PLUGIN_LVM].loaded = load_lvm_from_plugin(plugins[BD_PLUGIN_LVM].spec.so_name);
+    plugins[BD_PLUGIN_SWAP].loaded = load_swap_from_plugin(plugins[BD_PLUGIN_SWAP].spec.so_name);
 
     for (i=0; (i < BD_PLUGIN_UNDEF) && all_loaded; i++)
         all_loaded = all_loaded && plugins[i].loaded;

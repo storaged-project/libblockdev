@@ -3,20 +3,25 @@ LVM_PLUGIN_FILES = src/plugins/lvm.h src/plugins/lvm.c
 SWAP_PLUGIN_FILES = src/plugins/swap.h src/plugins/swap.c
 LIBRARY_FILES = src/lib/blockdev.c src/lib/blockdev.h src/lib/plugins.h src/lib/plugin_apis/lvm.h
 
-build-plugins: ${LVM_PLUGIN_FILES} ${SIZES_FILES}
+build-plugins: ${LVM_PLUGIN_FILES} ${SWAP_PLUGIN_FILES} ${SIZES_FILES}
 	gcc -c -fPIC -I src/util/ -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0`\
 		src/util/sizes.c src/plugins/lvm.c
 	gcc -shared -o src/plugins/libbd_lvm.so lvm.o
 
-generate-boilerplate-code: src/lib/plugin_apis/lvm.h
+	gcc -c -fPIC -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0`\
+		src/plugins/swap.c
+	gcc -shared -o src/plugins/libbd_swap.so swap.o
+
+generate-boilerplate-code: src/lib/plugin_apis/lvm.h src/lib/plugin_apis/swap.h
 	./boilerplate_generator.py src/lib/plugin_apis/lvm.h > src/lib/plugin_apis/lvm.c
+	./boilerplate_generator.py src/lib/plugin_apis/swap.h > src/lib/plugin_apis/swap.c
 
 build-library: generate-boilerplate-code ${LIBRARY_FILES}
 	gcc -fPIC -c `pkg-config --libs --cflags glib-2.0` -ldl src/lib/blockdev.c
 	gcc -shared -o src/lib/libblockdev.so blockdev.o
 
 build-introspection-data: build-library ${LIBRARY_FILES}
-	LD_LIBRARY_PATH=src/lib/ g-ir-scanner `pkg-config --cflags --libs glib-2.0` --library=blockdev -I src/lib/ -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o BlockDev-1.0.gir --warn-all src/lib/blockdev.h src/lib/blockdev.c src/lib/plugins.h src/lib/plugin_apis/lvm.h
+	LD_LIBRARY_PATH=src/lib/ g-ir-scanner `pkg-config --cflags --libs glib-2.0` --library=blockdev -I src/lib/ -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o BlockDev-1.0.gir --warn-all src/lib/blockdev.h src/lib/blockdev.c src/lib/plugins.h src/lib/plugin_apis/lvm.h src/lib/plugin_apis/swap.h
 	g-ir-compiler -o BlockDev-1.0.typelib BlockDev-1.0.gir
 
 test-sizes: ${SIZES_FILES}
