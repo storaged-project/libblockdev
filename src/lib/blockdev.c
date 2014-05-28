@@ -32,7 +32,7 @@ void set_plugin_so_name (BDPluginName name, gchar *so_name) {
  * @force_plugins: (allow-none): null-terminated list of plugins that should be loaded (even if
  *                 other plugins for the same technologies are found)
  *
- * Return: whether the library was successfully initialized or not
+ * Returns: whether the library was successfully initialized or not
  */
 gboolean bd_init (BDPluginSpec *force_plugins) {
     guint8 i = 0;
