@@ -19,7 +19,7 @@ build-introspection-data: build-library ${LIBRARY_FILES}
 	g-ir-compiler -o BlockDev-1.0.typelib BlockDev-1.0.gir
 
 test-sizes: ${SIZES_FILES}
-	gcc -DTESTING_SIZES -o test_sizes -I src/util/ -lm `pkg-config --libs --cflags glib-2.0`\
+	gcc -Wall -DTESTING_SIZES -o test_sizes -I src/util/ -lm `pkg-config --libs --cflags glib-2.0`\
 		src/util/sizes.c
 	@echo "***Running tests***"
 	./test_sizes

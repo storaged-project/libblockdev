@@ -32,9 +32,9 @@ gchar* bd_size_human_readable (guint64 size) {
     }
 
     if (INT_EQ_FLOAT (value, (guint64) value))
-        g_strdup_printf ("%"G_GUINT64_FORMAT" %sB", (guint64) value, size_prefixes[i]);
+        return g_strdup_printf ("%"G_GUINT64_FORMAT" %sB", (guint64) value, size_prefixes[i]);
     else
-        g_strdup_printf ("%.2f %sB", value, size_prefixes[i]);
+        return g_strdup_printf ("%.2f %sB", value, size_prefixes[i]);
 }
 
 #ifdef TESTING_SIZES
