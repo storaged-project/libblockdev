@@ -52,7 +52,9 @@ static gboolean call_lvm (gchar **args, gchar **stdout_data, gchar **stderr_data
     GError *error = NULL;
 
     guint args_length = g_strv_length (args);
-    gchar **argv = g_new (gchar*, args_length + 1);
+
+    /* allocate enough space for the args plus "lvm" and NULL */
+    gchar **argv = g_new (gchar*, args_length + 2);
 
     /* construct argv from args with "lvm" prepended */
     argv[0] = "lvm";
@@ -68,6 +70,8 @@ static gboolean call_lvm (gchar **args, gchar **stdout_data, gchar **stderr_data
         g_error_free (error);
         return FALSE;
     }
+
+    g_free (argv);
 
     return TRUE;
 }
