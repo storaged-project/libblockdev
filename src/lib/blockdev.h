@@ -8,6 +8,8 @@
 
 gboolean bd_init (BDPluginSpec *force_plugins);
 gboolean bd_reinit (BDPluginSpec *force_plugins, gboolean replace);
-BDPlugin* bd_get_available_plugins();
+gchar** bd_get_available_plugin_names ();
+gboolean bd_is_plugin_available (BDPlugin);
+
 
 #endif  /* BD_LIB */

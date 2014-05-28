@@ -18,10 +18,13 @@ typedef struct BDPluginStatus {
     gboolean loaded;
 } BDPluginStatus;
 
-/* KEEP THE ORDERING OF THIS ARRAY MATCHING THE BDPlugin ENUM! */
+/* KEEP THE ORDERING OF THESE ARRAYS MATCHING THE BDPluginName ENUM! */
 static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_LVM, "libbd_lvm.so"}, FALSE},
     {{BD_PLUGIN_SWAP, "libbd_swap.so"}, FALSE},
+};
+static gchar* plugin_names[BD_PLUGIN_UNDEF] = {
+    "lvm", "swap"
 };
 
 void set_plugin_so_name (BDPlugin name, gchar *so_name) {
@@ -50,6 +53,45 @@ gboolean bd_init (BDPluginSpec *force_plugins) {
         all_loaded = all_loaded && plugins[i].loaded;
 
     return all_loaded;
+}
+
+/**
+ * bd_get_available_plugin_names:
+ *
+ * Returns: (transfer container) (array zero-terminated=1): an array of string
+ * names of plugins that are available
+ */
+gchar** bd_get_available_plugin_names () {
+    guint8 i = 0;
+    guint8 num_loaded = 0;
+    guint8 next = 0;
+
+    for (i=0; i < BD_PLUGIN_UNDEF; i++)
+        if (plugins[i].loaded)
+            num_loaded++;
+
+    gchar **ret_plugin_names = g_new (gchar*, num_loaded + 1);
+    for (i=0; i < BD_PLUGIN_UNDEF; i++)
+        if (plugins[i].loaded) {
+            ret_plugin_names[next] = plugin_names[i];
+            next++;
+        }
+    ret_plugin_names[next] = NULL;
+
+    return ret_plugin_names;
+}
+
+/**
+ * bd_is_plugin_available:
+ * @plugin: the queried plugin
+ *
+ * Returns: whether the given plugin is available or not
+ */
+gboolean bd_is_plugin_available (BDPlugin plugin) {
+    if (plugin < BD_PLUGIN_UNDEF)
+        return plugins[plugin].loaded;
+    else
+        return FALSE;
 }
 
 #ifdef TESTING_LIB
