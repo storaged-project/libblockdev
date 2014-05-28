@@ -7,15 +7,15 @@ typedef enum {
     BD_PLUGIN_LVM = 0,
     BD_PLUGIN_SWAP,
     BD_PLUGIN_UNDEF
-} BDPluginName;
+} BDPlugin;
 
 typedef struct BDPluginSpec {
-    BDPluginName name;
+    BDPlugin name;
     gchar *so_name;
 } BDPluginSpec;
 
-gboolean bd_plugin_available (BDPluginName name);
-BDPluginName* bd_available_plugins ();
-gboolean bd_func_available (BDPluginName plugin, gchar *func_name);
+gboolean bd_plugin_available (BDPlugin name);
+BDPlugin* bd_available_plugins ();
+gboolean bd_func_available (BDPlugin plugin, gchar *func_name);
 
 #endif  /* BD_PLUGINS */

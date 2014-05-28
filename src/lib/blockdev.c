@@ -18,13 +18,13 @@ typedef struct BDPluginStatus {
     gboolean loaded;
 } BDPluginStatus;
 
-/* KEEP THE ORDERING OF THIS ARRAY MATCHING THE BDPluginName ENUM! */
+/* KEEP THE ORDERING OF THIS ARRAY MATCHING THE BDPlugin ENUM! */
 static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_LVM, "libbd_lvm.so"}, FALSE},
     {{BD_PLUGIN_SWAP, "libbd_swap.so"}, FALSE},
 };
 
-void set_plugin_so_name (BDPluginName name, gchar *so_name) {
+void set_plugin_so_name (BDPlugin name, gchar *so_name) {
     plugins[name].spec.so_name = so_name;
 }
 
