@@ -1,5 +1,6 @@
 SIZES_FILES = src/util/sizes.c src/util/sizes.h
 LVM_PLUGIN_FILES = src/plugins/lvm.h src/plugins/lvm.c
+SWAP_PLUGIN_FILES = src/plugins/swap.h src/plugins/swap.c
 LIBRARY_FILES = src/lib/blockdev.c src/lib/blockdev.h src/lib/plugins.h src/lib/plugin_apis/lvm.h
 
 build-plugins: ${LVM_PLUGIN_FILES} ${SIZES_FILES}
@@ -31,6 +32,12 @@ test-lvm-plugin: ${LVM_PLUGIN_FILES} ${SIZES_FILES}
 	@echo "***Running tests***"
 	./test_lvm_plugin
 	@rm test_lvm_plugin
+
+test-swap-plugin: ${SWAP_PLUGIN_FILES}
+	gcc -DTESTING_SWAP -o test_swap_plugin -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0` src/plugins/swap.c
+	@echo "***Running tests***"
+	./test_swap_plugin
+	@rm test_swap_plugin
 
 test-library: generate-boilerplate-code build-plugins
 	gcc -DTESTING_LIB -o test_library `pkg-config --libs --cflags glib-2.0` -ldl src/lib/blockdev.c
