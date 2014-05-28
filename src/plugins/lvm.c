@@ -65,13 +65,13 @@ static gboolean call_lvm (gchar **args, gchar **stdout_data, gchar **stderr_data
     success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH,
                             NULL, NULL, stdout_data, stderr_data, status, &error);
 
+    g_free (argv);
+
     if (!success) {
         *error_message = g_strdup (error->message);
         g_error_free (error);
         return FALSE;
     }
-
-    g_free (argv);
 
     return TRUE;
 }
