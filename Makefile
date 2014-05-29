@@ -55,3 +55,7 @@ test-from-python: build-library build-plugins build-introspection-data
 
 run-ipython: build-library build-plugins build-introspection-data
 	GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/ ipython
+
+run-root-ipython: build-library build-plugins build-introspection-data
+	sudo GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/ ipython
+
