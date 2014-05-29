@@ -16,5 +16,11 @@ int main (int argc, char **argv) {
     else
         g_printf ("Not succeded: %s", err_msg);
 
+    succ = bd_swap_swapoff ("/dev/xd1", &err_msg);
+    if (succ)
+        puts ("Succeded.");
+    else
+        g_printf ("Not succeded: %s", err_msg);
+
     return 0;
 }

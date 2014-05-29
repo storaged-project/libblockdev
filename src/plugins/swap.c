@@ -99,6 +99,20 @@ gboolean bd_swap_swapon (gchar *device, gint priority, gchar **error_message) {
     return success;
 }
 
+/**
+ * bd_swap_swapoff:
+ * @device: swap device to deactivate
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the swap device was successfully deactivated or not
+ */
+gboolean bd_swap_swapoff (gchar *device, gchar **error_message) {
+    gchar *argv[3] = {"swapoff", NULL, NULL};
+    argv[1] = device;
+
+    return run_and_report_error (argv, error_message);
+}
+
 #ifdef TESTING_SWAP
 #include "test_swap.c"
 #endif
