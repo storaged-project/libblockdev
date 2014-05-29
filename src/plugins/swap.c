@@ -52,7 +52,7 @@ gboolean bd_swap_mkswap (gchar *device, gchar *label, gchar **error_message) {
 
     /* We use -f to force since mkswap tends to refuse creation on lvs with
        a message about erasing bootbits sectors on whole disks. Bah. */
-    gchar *argv[5] = {"mkswap", "-f", NULL, NULL, NULL};
+    gchar *argv[6] = {"mkswap", "-f", NULL, NULL, NULL, NULL};
 
     if (label) {
         argv[next_arg] = "-L";
@@ -79,7 +79,7 @@ gboolean bd_swap_swapon (gchar *device, gint priority, gchar **error_message) {
     guint8 next_arg = 1;
     guint8 to_free_idx = 0;
 
-    gchar *argv[4] = {"swapon", NULL, NULL, NULL};
+    gchar *argv[5] = {"swapon", NULL, NULL, NULL, NULL};
 
     if (priority >= 0) {
         argv[next_arg] = "-p";
