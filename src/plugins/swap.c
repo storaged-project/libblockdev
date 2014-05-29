@@ -125,6 +125,7 @@ gboolean bd_swap_swapoff (gchar *device, gchar **error_message) {
 gboolean bd_swap_swapstatus (gchar *device, gchar **error_message) {
     gchar *file_content;
     gchar *real_device = NULL;
+    gchar *symlink = NULL;
     gsize length;
     gchar *next_line;
     gboolean success;
@@ -140,12 +141,15 @@ gboolean bd_swap_swapstatus (gchar *device, gchar **error_message) {
     /* get the real device node for device-mapper devices since the ones
        with meaningful names are just symlinks */
     if (g_str_has_prefix (device, "/dev/mapper")) {
-        real_device = g_file_read_link (device, &error);
-        if (!real_device) {
+        symlink = g_file_read_link (device, &error);
+        if (!symlink) {
             *error_message = g_strdup (error->message);
             g_error_free(error);
             return FALSE;
         }
+
+        /* the symlink starts with "../" */
+        real_device = g_strdup_printf ("/dev/%s", symlink + 3);
     }
 
     /* no error, set *error_message to NULL to show it */
@@ -153,6 +157,7 @@ gboolean bd_swap_swapstatus (gchar *device, gchar **error_message) {
 
     next_line = file_content;
     if (g_str_has_prefix (next_line, real_device ? real_device : device)) {
+        g_free (symlink);
         g_free (real_device);
         g_free (file_content);
         return TRUE;
@@ -161,6 +166,7 @@ gboolean bd_swap_swapstatus (gchar *device, gchar **error_message) {
     next_line = (strchr (next_line, '\n') + 1);
     while (next_line && ((next_line - file_content) < length)) {
         if (g_str_has_prefix (next_line, real_device ? real_device : device)) {
+            g_free (symlink);
             g_free (real_device);
             g_free (file_content);
             return TRUE;
@@ -169,6 +175,7 @@ gboolean bd_swap_swapstatus (gchar *device, gchar **error_message) {
         next_line = (strchr (next_line, '\n') + 1);
     }
 
+    g_free (symlink);
     g_free (real_device);
     g_free (file_content);
     return FALSE;
