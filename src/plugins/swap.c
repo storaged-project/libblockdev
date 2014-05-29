@@ -136,6 +136,9 @@ gboolean bd_swap_swapstatus (gchar *device, gchar **error_message) {
         return FALSE;
     }
 
+    /* no error, set *error_message to NULL to show it */
+    *error_message = NULL;
+
     next_line = file_content;
     if (g_str_has_prefix (next_line, device)) {
         g_free (file_content);
