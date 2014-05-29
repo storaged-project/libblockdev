@@ -51,6 +51,60 @@ gboolean bd_swap_mkswap (gchar *device, gchar *label, gchar **error_message) {
     return TRUE;
 }
 
+/**
+ * bd_swap_swapon:
+ * @device: swap device to activate
+ * @priority: priority of the activated device or -1 to use the default
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the swap device was successfully activated or not
+ */
+gboolean bd_swap_swapon (gchar *device, gint priority, gchar **error_message) {
+    gboolean success = FALSE;
+    GError *error = NULL;
+    gint status = 0;
+    guint8 next_arg = 1;
+    guint8 to_free_idx = 0;
+    gchar *stdout_data = NULL;
+    gchar *stderr_data = NULL;
+
+    gchar *argv[4] = {"swapon", NULL, NULL, NULL};
+
+    if (priority >= 0) {
+        argv[next_arg] = "-p";
+        next_arg++;
+        to_free_idx = next_arg;
+        argv[next_arg] = g_strdup_printf ("%d", priority);
+        next_arg++;
+    }
+
+    argv[next_arg] = device;
+
+    success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH,
+                            NULL, NULL, &stdout_data, &stderr_data, &status, &error);
+
+    if (to_free_idx > 0)
+        g_free (argv[to_free_idx]);
+
+    if (!success) {
+        *error_message = g_strdup (error->message);
+        g_error_free(error);
+        return FALSE;
+    }
+
+    if (status != 0) {
+        if (stderr_data) {
+            *error_message = stderr_data;
+            g_free (stdout_data);
+        } else
+            *error_message = stdout_data;
+
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
 #ifdef TESTING_SWAP
 #include "test_swap.c"
 #endif
