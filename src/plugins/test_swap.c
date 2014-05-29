@@ -8,13 +8,13 @@ int main (int argc, char **argv) {
     if (succ)
         puts ("Succeded.");
     else
-        g_printf ("Not succeded: %s\n", err_msg);
+        g_printf ("Not succeded: %s", err_msg);
 
     succ = bd_swap_swapon ("/dev/xd1", 5, &err_msg);
     if (succ)
         puts ("Succeded.");
     else
-        g_printf ("Not succeded: %s\n", err_msg);
+        g_printf ("Not succeded: %s", err_msg);
 
     return 0;
 }
