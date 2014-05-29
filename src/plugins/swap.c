@@ -1,4 +1,5 @@
 #include <glib.h>
+#include <string.h>
 
 /**
  * run_and_report_error:
@@ -112,6 +113,49 @@ gboolean bd_swap_swapoff (gchar *device, gchar **error_message) {
 
     return run_and_report_error (argv, error_message);
 }
+
+/**
+ * bd_swap_swapstatus:
+ * @device: swap device to get status of
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: #TRUE if the swap device is active, #FALSE if not active or failed
+ * to determine (@error_message is set not a non-NULL value in such case)
+ */
+gboolean bd_swap_swapstatus (gchar *device, gchar **error_message) {
+    gchar *file_content;
+    gsize length;
+    gchar *next_line;
+    gboolean success;
+    GError *error = NULL;
+
+    success = g_file_get_contents ("/proc/swaps", &file_content, &length, &error);
+    if (!success) {
+        *error_message = g_strdup (error->message);
+        g_error_free(error);
+        return FALSE;
+    }
+
+    next_line = file_content;
+    if (g_str_has_prefix (next_line, device)) {
+        g_free (file_content);
+        return TRUE;
+    }
+
+    next_line = (strchr (next_line, '\n') + 1);
+    while (next_line && ((next_line - file_content) < length)) {
+        if (g_str_has_prefix (next_line, device)) {
+            g_free (file_content);
+            return TRUE;
+        }
+
+        next_line = (strchr (next_line, '\n') + 1);
+    }
+
+    g_free (file_content);
+    return FALSE;
+}
+
 
 #ifdef TESTING_SWAP
 #include "test_swap.c"
