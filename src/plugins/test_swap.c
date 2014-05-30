@@ -8,7 +8,7 @@ int main (int argc, char **argv) {
     if (succ)
         puts ("Succeded.");
     else
-        g_printf ("Not succeded: %s", err_msg);
+        g_printf ("Not succeded: %s\n", err_msg);
 
     g_free (err_msg);
     err_msg = NULL;
@@ -17,7 +17,7 @@ int main (int argc, char **argv) {
     if (succ)
         puts ("Succeded.");
     else
-        g_printf ("Not succeded: %s", err_msg);
+        g_printf ("Not succeded: %s\n", err_msg);
 
     g_free (err_msg);
     err_msg = NULL;
@@ -26,7 +26,7 @@ int main (int argc, char **argv) {
     if (succ)
         puts ("Succeded.");
     else
-        g_printf ("Not succeded: %s", err_msg);
+        g_printf ("Not succeded: %s\n", err_msg);
 
     g_free (err_msg);
     err_msg = NULL;

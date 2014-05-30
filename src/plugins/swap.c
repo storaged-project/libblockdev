@@ -1,5 +1,6 @@
 #include <glib.h>
 #include <string.h>
+#include <unistd.h>
 
 /**
  * run_and_report_error:
@@ -79,8 +80,54 @@ gboolean bd_swap_swapon (gchar *device, gint priority, gchar **error_message) {
     gboolean success = FALSE;
     guint8 next_arg = 1;
     guint8 to_free_idx = 0;
+    GIOChannel *dev_file = NULL;
+    GIOStatus io_status = G_IO_STATUS_ERROR;
+    gsize num_read = 0;
+    GError *error = NULL;
+    gchar dev_status[11];
+    dev_status[10] = '\0';
+    gint page_size;
 
     gchar *argv[5] = {"swapon", NULL, NULL, NULL, NULL};
+
+    /* check the device if it is an activatable swap */
+    dev_file = g_io_channel_new_file (device, "r", &error);
+    if (!dev_file) {
+        *error_message = g_strdup (error->message);
+        g_error_free (error);
+        return FALSE;
+    }
+
+    page_size = getpagesize ();
+    page_size = CLAMP (page_size, 2048, page_size);
+    io_status = g_io_channel_seek_position (dev_file, page_size - 10, G_SEEK_SET, &error);
+    if (io_status != G_IO_STATUS_NORMAL) {
+        *error_message = g_strdup_printf ("Failed to determine device's state: %s", error->message);
+        g_error_free (error);
+        g_io_channel_shutdown (dev_file, FALSE, &error);
+        return FALSE;
+    }
+
+    io_status = g_io_channel_read_chars (dev_file, dev_status, 10, &num_read, &error);
+    if ((io_status != G_IO_STATUS_NORMAL) || (num_read != 10)) {
+        *error_message = g_strdup_printf ("Failed to determine device's state: %s", error->message);
+        g_error_free (error);
+        g_io_channel_shutdown (dev_file, FALSE, &error);
+        return FALSE;
+    }
+
+    g_io_channel_shutdown (dev_file, FALSE, &error);
+
+    if (g_str_has_prefix (dev_status, "SWAP-SPACE")) {
+        *error_message = "Old swap format, cannot activate.";
+        return FALSE;
+    } else if (g_str_has_prefix (dev_status, "S1SUSPEND") || g_str_has_prefix (dev_status, "S2SUSPEND")) {
+        *error_message = "Suspended system on the swap device, cannot activate.";
+        return FALSE;
+    } else if (!g_str_has_prefix (dev_status, "SWAPSPACE2")) {
+        *error_message = "Unknown swap space format, cannot activate.";
+        return FALSE;
+    }
 
     if (priority >= 0) {
         argv[next_arg] = "-p";
