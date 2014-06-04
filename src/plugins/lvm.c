@@ -159,6 +159,16 @@ guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean inclu
                 bd_lvm_round_size_to_pe(MAX_THPOOL_MD_SIZE, pe_size, TRUE));
 }
 
+/**
+ * bd_lvm_is_valid_thpool_md_size:
+ * @size: the size to be tested
+ *
+ * Returns: whether the given size is a valid thin pool metadata size or not
+ */
+gboolean bd_lvm_is_valid_thpool_md_size (guint64 size) {
+    return ((MIN_THPOOL_MD_SIZE <= size) && (size <= MAX_THPOOL_MD_SIZE));
+}
+
 #ifdef TESTING_LVM
 #include "test_lvm.c"
 #endif

@@ -59,5 +59,10 @@ int main (int argc, char **argv) {
     result = bd_lvm_get_thpool_padding ((1 GiB), USE_DEFAULT_PE_SIZE, FALSE);
     g_printf ("1 GiB ThPool padding size (not included): %s\n", bd_size_human_readable(result));
 
+    if (bd_lvm_is_valid_thpool_md_size (512 MiB))
+        puts ("512 MiB ThPool MD size: Valid.");
+    else
+        puts ("512 MiB ThPool MD size: Invalid.");
+
     return 0;
 }

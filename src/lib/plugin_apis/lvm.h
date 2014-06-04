@@ -54,4 +54,12 @@ guint64 bd_lvm_get_lv_physical_size (guint64 lv_size, guint64 pe_size);
  */
 guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean included);
 
+/**
+ * bd_lvm_is_valid_thpool_md_size:
+ * @size: the size to be tested
+ *
+ * Returns: whether the given size is a valid thin pool metadata size or not
+ */
+gboolean bd_lvm_is_valid_thpool_md_size (guint64 size);
+
 #endif  /* BD_LVM_API */
