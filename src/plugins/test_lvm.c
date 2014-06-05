@@ -8,6 +8,8 @@ int main (int argc, char **argv) {
     gchar *stderr = NULL;
     gboolean succ;
     guint64 result = 0;
+    guint8 i;
+    guint64 *sizes= NULL;
 
     g_printf ("Supported functions:\n");
     for (fname=get_supported_functions(); (*fname); fname++) {
@@ -43,6 +45,13 @@ int main (int argc, char **argv) {
         puts ("16 MiB PE: Supported.");
     else
         puts ("16 MiB PE: Unsupported.");
+
+    sizes = bd_lvm_get_supported_pe_sizes ();
+    g_printf ("Supported PE sizes: ");
+    for (i=0; sizes[i] != 0; i++)
+        g_printf ("%s, ", bd_size_human_readable (sizes[i]));
+    puts ("");
+    g_free (sizes);
 
     g_printf ("max LV size: %s\n", bd_size_human_readable(bd_lvm_get_max_lv_size()));
 

@@ -48,7 +48,7 @@ LVM
 :functions:
    * get_global_config
    * set_global_config
-   * get_possible_pe_sizes
+   * get_possible_pe_sizes [DONE]
    * is_supported_pe_size [DONE]
    * get_max_lv_size [DONE]
    * round_size_to_pe [DONE]

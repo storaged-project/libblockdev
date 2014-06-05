@@ -78,13 +78,30 @@ static gboolean call_lvm (gchar **args, gchar **stdout_data, gchar **stderr_data
 
 /**
  * bd_lvm_is_supported_pe_size:
- *
  * @size: size (in bytes) to test
  *
  * Returns: whether the given size is supported physical extent size or not
  */
 gboolean bd_lvm_is_supported_pe_size (guint64 size) {
     return (((size % 2) == 0) && (size >= (1 KiB)) && (size <= (16 GiB)));
+}
+
+/**
+ * bd_lvm_get_supported_pe_sizes:
+ * Returns: (transfer full) (array zero-terminated=1): list of supported PE sizes
+ */
+guint64 *bd_lvm_get_supported_pe_sizes () {
+    guint8 i;
+    guint64 val = MIN_PE_SIZE;
+    guint8 num_items = ((guint8) round (log2 ((double) MAX_PE_SIZE))) - ((guint8) round (log2 ((double) MIN_PE_SIZE))) + 2;
+    guint64 *ret = g_new (guint64, num_items);
+
+    for (i=0; (val <= MAX_PE_SIZE); i++, val = val * 2)
+        ret[i] = val;
+
+    ret[num_items-1] = 0;
+
+    return ret;
 }
 
 /**
