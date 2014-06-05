@@ -22,6 +22,8 @@
 #include <math.h>
 #include "lvm.h"
 
+#define INT_FLOAT_EPS 1e-5
+
 /**
  * SECTION: lvm
  * @short_description: libblockdev plugin for operations with LVM
@@ -184,6 +186,28 @@ guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean inclu
  */
 gboolean bd_lvm_is_valid_thpool_md_size (guint64 size) {
     return ((MIN_THPOOL_MD_SIZE <= size) && (size <= MAX_THPOOL_MD_SIZE));
+}
+
+/**
+ * bd_lvm_is_valid_thpool_chunk_size:
+ * @size: the size to be tested
+ * @discard: whether discard/TRIM is required to be supported or not
+ *
+ * Returns: whether the given size is a valid thin pool chunk size or not
+ */
+gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard) {
+    gdouble size_log2 = 0.0;
+
+    if ((size < MIN_THPOOL_CHUNK_SIZE) || (size > MAX_THPOOL_CHUNK_SIZE))
+        return FALSE;
+
+    /* To support discard, chunk size must be a power of two. Otherwise it must be a
+       multiple of 64 KiB. */
+    if (discard) {
+        size_log2 = log2 ((double) size);
+        return ABS (((int) round (size_log2)) - size_log2) <= INT_FLOAT_EPS;
+    } else
+        return (size % (64 KiB)) == 0;
 }
 
 #ifdef TESTING_LVM

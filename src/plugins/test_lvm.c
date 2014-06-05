@@ -73,5 +73,15 @@ int main (int argc, char **argv) {
     else
         puts ("512 MiB ThPool MD size: Invalid.");
 
+    if (bd_lvm_is_valid_thpool_chunk_size ((192 KiB), TRUE))
+        puts ("192 KiB ThPool chunk size (discard): Valid.");
+    else
+        puts ("192 KiB ThPool chunk size (discard): Invalid.");
+
+    if (bd_lvm_is_valid_thpool_chunk_size ((192 KiB), FALSE))
+        puts ("192 KiB ThPool chunk size (no discard): Valid.");
+    else
+        puts ("192 KiB ThPool chunk size (no discard): Invalid.");
+
     return 0;
 }

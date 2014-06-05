@@ -55,7 +55,7 @@ LVM
    * get_lv_physical_size [DONE]
    * get_thpool_padding [DONE]
    * is_valid_thpool_metadata_size [DONE]
-   * is_valid_thpool_chunk_size
+   * is_valid_thpool_chunk_size [DONE]
 
    * pvcreate
    * pvresize
