@@ -46,15 +46,15 @@ LVM
    "plain LVM", LVM Thin Provisioning
 
 :functions:
-   * lvm_supported
    * get_global_config
    * set_global_config
    * get_possible_pe_sizes
-   * get_max_lv_size
-   * clamp_size
-   * get_lv_physical_size
-   * get_thpool_padding
-   * is_valid_thpool_metadata_size
+   * is_supported_pe_size [DONE]
+   * get_max_lv_size [DONE]
+   * round_size_to_pe [DONE]
+   * get_lv_physical_size [DONE]
+   * get_thpool_padding [DONE]
+   * is_valid_thpool_metadata_size [DONE]
    * is_valid_thpool_chunk_size
 
    * pvcreate
@@ -116,10 +116,10 @@ SWAP
    swap partitions/LVs, swap files
 
 :functions:
-   * mkswap
-   * swapon
-   * swapoff
-   * swapstatus
+   * mkswap [DONE]
+   * swapon [DONE]
+   * swapoff [DONE]
+   * swapstatus [DONE]
 
 
 MDRAID
