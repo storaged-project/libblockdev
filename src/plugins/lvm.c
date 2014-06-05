@@ -236,16 +236,13 @@ gboolean bd_lvm_pvcreate (gchar *device, gchar **error_message) {
     if (status != 0) {
         /* lvm was run, but some error happened, the interesting information is
            either in the stdout or in the stderr */
-        if ((stdout_data) && (g_strcmp0 ("", stdout_data) != 0)) {
-            *error_message = stdout_data;
-            g_free (stderr_data);
-            return FALSE;
-        } else if ((stderr_data) && (g_strcmp0 ("", stderr_data) != 0)) {
+        if (stderr_data && g_strcmp0 ("", stderr_data) != 0) {
             *error_message = stderr_data;
-            return FALSE;
+            g_free (stdout_data);
         } else
-            /* no additional info available */
-            return FALSE;
+            *error_message = stdout_data;
+
+        return FALSE;
     }
 
     /* gotting here means everything was okay */
