@@ -210,6 +210,48 @@ gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard) {
         return (size % (64 KiB)) == 0;
 }
 
+/**
+ * bd_lvm_pvcreate:
+ * @device: the device to make PV from
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the PV was successfully created or not
+ */
+gboolean bd_lvm_pvcreate (gchar *device, gchar **error_message) {
+    gchar *stdout_data = NULL;
+    gchar *stderr_data = NULL;
+    gint status = 0;
+    gboolean success = FALSE;
+
+    /* we force dataalignment=1024k since we cannot get lvm to tell us what
+       the pe_start will be in advance */
+    gchar *args[5] = {"pvcreate", "--dataalignment", "1024k", device, NULL};
+
+    success = call_lvm (args, &stdout_data, &stderr_data, &status, error_message);
+    if (!success)
+        /* running lvm failed, the error message already is in the error_message
+           variable so just return */
+        return FALSE;
+
+    if (status != 0) {
+        /* lvm was run, but some error happened, the interesting information is
+           either in the stdout or in the stderr */
+        if ((stdout_data) && (g_strcmp0 ("", stdout_data) != 0)) {
+            *error_message = stdout_data;
+            g_free (stderr_data);
+            return FALSE;
+        } else if ((stderr_data) && (g_strcmp0 ("", stderr_data) != 0)) {
+            *error_message = stderr_data;
+            return FALSE;
+        } else
+            /* no additional info available */
+            return FALSE;
+    }
+
+    /* gotting here means everything was okay */
+    return TRUE;
+}
+
 #ifdef TESTING_LVM
 #include "test_lvm.c"
 #endif

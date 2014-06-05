@@ -57,7 +57,7 @@ LVM
    * is_valid_thpool_metadata_size [DONE]
    * is_valid_thpool_chunk_size [DONE]
 
-   * pvcreate
+   * pvcreate [DONE]
    * pvresize
    * pvremove
    * pvmove

@@ -77,4 +77,13 @@ gboolean bd_lvm_is_valid_thpool_md_size (guint64 size);
  */
 gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard);
 
+/**
+ * bd_lvm_pvcreate:
+ * @device: the device to make PV from
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the PV was successfully created or not
+ */
+gboolean bd_lvm_pvcreate (gchar *device, gchar **error_message);
+
 #endif  /* BD_LVM_API */
