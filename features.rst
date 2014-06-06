@@ -79,11 +79,13 @@ LVM
    * lvresize
    * lvactivate
    * lvdeactivate
-   * lvsnapshot
+   * lvsnapshotcreate
+   * lvsnapshotmerge
 
    * thpoolcreate
    * thlvcreate
    * thlvpoolname
+   * thinsnapshotcreate
 
 
 BTRFS
@@ -101,6 +103,7 @@ BTRFS
    * delete_subvolume
    * list_subvolumes
    * get_default_subvolume
+   * create_snapshot
    * mkfs_btrfs
    * resize_btrfs
    * check_btrfs
