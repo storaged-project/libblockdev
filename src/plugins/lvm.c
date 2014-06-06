@@ -78,6 +78,37 @@ static gboolean call_lvm (gchar **args, gchar **stdout_data, gchar **stderr_data
     return TRUE;
 }
 
+static gboolean call_lvm_and_report_error (gchar **argv, gchar **error_message) {
+    gchar *stdout_data = NULL;
+    gchar *stderr_data = NULL;
+    gint status = 0;
+    gboolean success = FALSE;
+
+    success = call_lvm (argv, &stdout_data, &stderr_data, &status, error_message);
+    if (!success)
+        /* running lvm failed, the error message already is in the error_message
+           variable so just return */
+        return FALSE;
+
+    if (status != 0) {
+        /* lvm was run, but some error happened, the interesting information is
+           either in the stdout or in the stderr */
+        if (stderr_data && g_strcmp0 ("", stderr_data) != 0) {
+            *error_message = stderr_data;
+            g_free (stdout_data);
+        } else {
+            *error_message = stdout_data;
+            g_free (stderr_data);
+        }
+
+        return FALSE;
+    }
+
+    /* gotting here means everything was okay */
+    return TRUE;
+}
+
+
 /**
  * bd_lvm_is_supported_pe_size:
  * @size: size (in bytes) to test
@@ -218,37 +249,11 @@ gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard) {
  * Returns: whether the PV was successfully created or not
  */
 gboolean bd_lvm_pvcreate (gchar *device, gchar **error_message) {
-    gchar *stdout_data = NULL;
-    gchar *stderr_data = NULL;
-    gint status = 0;
-    gboolean success = FALSE;
-
     /* we force dataalignment=1024k since we cannot get lvm to tell us what
        the pe_start will be in advance */
     gchar *args[5] = {"pvcreate", "--dataalignment", "1024k", device, NULL};
 
-    success = call_lvm (args, &stdout_data, &stderr_data, &status, error_message);
-    if (!success)
-        /* running lvm failed, the error message already is in the error_message
-           variable so just return */
-        return FALSE;
-
-    if (status != 0) {
-        /* lvm was run, but some error happened, the interesting information is
-           either in the stdout or in the stderr */
-        if (stderr_data && g_strcmp0 ("", stderr_data) != 0) {
-            *error_message = stderr_data;
-            g_free (stdout_data);
-        } else {
-            *error_message = stdout_data;
-            g_free (stderr_data);
-        }
-
-        return FALSE;
-    }
-
-    /* gotting here means everything was okay */
-    return TRUE;
+    return call_lvm_and_report_error (args, error_message);
 }
 
 #ifdef TESTING_LVM
