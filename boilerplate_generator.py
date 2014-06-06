@@ -118,7 +118,7 @@ def get_includes_str(includes):
     return ret
 
 def get_funcs_list(fn_infos, module_name):
-    ret = "gchar* {0}_functions[] = {{\n".format(module_name)
+    ret = "static gchar* {0}_functions[] = {{\n".format(module_name)
     for info in fn_infos:
         ret += '    "{0.name}",\n'.format(info)
     ret += "    NULL};\n\n"
