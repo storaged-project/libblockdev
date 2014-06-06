@@ -239,8 +239,10 @@ gboolean bd_lvm_pvcreate (gchar *device, gchar **error_message) {
         if (stderr_data && g_strcmp0 ("", stderr_data) != 0) {
             *error_message = stderr_data;
             g_free (stdout_data);
-        } else
+        } else {
             *error_message = stdout_data;
+            g_free (stderr_data);
+        }
 
         return FALSE;
     }

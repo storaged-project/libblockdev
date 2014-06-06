@@ -32,8 +32,10 @@ static gboolean run_and_report_error (gchar **argv, gchar **error_message) {
         if (stderr_data && g_strcmp0 ("", stderr_data) != 0) {
             *error_message = stderr_data;
             g_free (stdout_data);
-        } else
+        } else {
             *error_message = stdout_data;
+            g_free (stderr_data);
+        }
 
         return FALSE;
     }
