@@ -4,6 +4,7 @@
 
 #include "plugin_apis/lvm.c"
 #include "plugin_apis/swap.c"
+#include "plugin_apis/loop.c"
 
 /**
  * SECTION: libblockdev
@@ -22,9 +23,10 @@ typedef struct BDPluginStatus {
 static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_LVM, "libbd_lvm.so"}, FALSE},
     {{BD_PLUGIN_SWAP, "libbd_swap.so"}, FALSE},
+    {{BD_PLUGIN_LOOP, "libbd_loop.so"}, FALSE}
 };
 static gchar* plugin_names[BD_PLUGIN_UNDEF] = {
-    "lvm", "swap"
+    "lvm", "swap", "loop"
 };
 
 void set_plugin_so_name (BDPlugin name, gchar *so_name) {
@@ -48,6 +50,7 @@ gboolean bd_init (BDPluginSpec *force_plugins) {
 
     plugins[BD_PLUGIN_LVM].loaded = load_lvm_from_plugin(plugins[BD_PLUGIN_LVM].spec.so_name);
     plugins[BD_PLUGIN_SWAP].loaded = load_swap_from_plugin(plugins[BD_PLUGIN_SWAP].spec.so_name);
+    plugins[BD_PLUGIN_LOOP].loaded = load_loop_from_plugin(plugins[BD_PLUGIN_LOOP].spec.so_name);
 
     for (i=0; (i < BD_PLUGIN_UNDEF) && all_loaded; i++)
         all_loaded = all_loaded && plugins[i].loaded;

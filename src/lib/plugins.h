@@ -6,6 +6,7 @@
 typedef enum {
     BD_PLUGIN_LVM = 0,
     BD_PLUGIN_SWAP,
+    BD_PLUGIN_LOOP,
     BD_PLUGIN_UNDEF
 } BDPlugin;
 
