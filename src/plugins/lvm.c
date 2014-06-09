@@ -249,9 +249,7 @@ gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard) {
  * Returns: whether the PV was successfully created or not
  */
 gboolean bd_lvm_pvcreate (gchar *device, gchar **error_message) {
-    /* we force dataalignment=1024k since we cannot get lvm to tell us what
-       the pe_start will be in advance */
-    gchar *args[5] = {"pvcreate", "--dataalignment", "1024k", device, NULL};
+    gchar *args[3] = {"pvcreate", device, NULL};
 
     return call_lvm_and_report_error (args, error_message);
 }
