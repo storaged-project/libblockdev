@@ -87,4 +87,14 @@ gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard);
  */
 gboolean bd_lvm_pvcreate (gchar *device, gchar **error_message);
 
+/**
+ * bd_lvm_pvresize:
+ * @device: the device to resize
+ * @size: the new requested size of the device
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the PV was successfully resized or not
+ */
+gboolean bd_lvm_pvresize (gchar *device, guint64 size, gchar **error_message);
+
 #endif  /* BD_LVM_API */

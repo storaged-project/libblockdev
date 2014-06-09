@@ -90,5 +90,12 @@ int main (int argc, char **argv) {
         puts ("pvcreate succeeded");
     g_free (msg);
 
+    succ = bd_lvm_pvresize ("/dev/xd1", 12 GiB, &msg);
+    if (!succ)
+        g_printf ("pvresize failed: %s\n", msg);
+    else
+        puts ("pvresize succeeded");
+    g_free (msg);
+
     return 0;
 }

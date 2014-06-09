@@ -255,6 +255,21 @@ gboolean bd_lvm_pvcreate (gchar *device, gchar **error_message) {
     return call_lvm_and_report_error (args, error_message);
 }
 
+/**
+ * bd_lvm_pvresize:
+ * @device: the device to resize
+ * @size: the new requested size of the device
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the PV was successfully resized or not
+ */
+gboolean bd_lvm_pvresize (gchar *device, guint64 size, gchar **error_message) {
+    gchar *size_str = g_strdup_printf ("%"G_GUINT64_FORMAT"m", size);
+    gchar *args[5] = {"pvresize", "--setphysicalvolumesize", size_str, device, NULL};
+
+    return call_lvm_and_report_error (args, error_message);
+}
+
 #ifdef TESTING_LVM
 #include "test_lvm.c"
 #endif
