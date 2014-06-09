@@ -1,5 +1,8 @@
 #include <glib.h>
 
+#ifndef BD_SWAP
+#define BD_SWAP
+
 /**
  * bd_swap_mkswap:
  * @device: a device to create swap space on
@@ -38,3 +41,5 @@ gboolean bd_swap_swapoff (gchar *device, gchar **error_message);
  * to determine (@error_message is set not a non-NULL value in such case)
  */
 gboolean bd_swap_swapstatus (gchar *device, gchar **error_message);
+
+#endif  /* BD_SWAP */
