@@ -258,16 +258,38 @@ gboolean bd_lvm_pvcreate (gchar *device, gchar **error_message) {
 /**
  * bd_lvm_pvresize:
  * @device: the device to resize
- * @size: the new requested size of the device
+ * @size: the new requested size of the PV or 0 if it should be adjusted to device's size
  * @error_message: (out): variable to store error message to (if any)
  *
- * Returns: whether the PV was successfully resized or not
+ * Returns: whether the PV's size was successfully changed or not
+ *
+ * If given @size different from 0, sets the PV's size to the given value (see
+ * pvresize(8)). If given @size 0, adjusts the PV's size to the underlaying
+ * block device's size.
  */
 gboolean bd_lvm_pvresize (gchar *device, guint64 size, gchar **error_message) {
-    gchar *size_str = g_strdup_printf ("%"G_GUINT64_FORMAT"b", size);
-    gchar *args[5] = {"pvresize", "--setphysicalvolumesize", size_str, device, NULL};
+    gchar *size_str = NULL;
+    gchar *args[5] = {"pvresize", NULL, NULL, NULL, NULL};
+    guint8 next_pos = 1;
+    guint8 to_free_pos = 0;
+    gboolean ret = FALSE;
 
-    return call_lvm_and_report_error (args, error_message);
+    if (size != 0) {
+        size_str = g_strdup_printf ("%"G_GUINT64_FORMAT"b", size);
+        args[next_pos] = "--setphysicalvolumesize";
+        next_pos++;
+        args[next_pos] = size_str;
+        to_free_pos = next_pos;
+        next_pos++;
+    }
+
+    args[next_pos] = device;
+
+    ret = call_lvm_and_report_error (args, error_message);
+    if (to_free_pos > 0)
+        g_free (args[to_free_pos]);
+
+    return ret;
 }
 
 #ifdef TESTING_LVM

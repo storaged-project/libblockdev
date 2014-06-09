@@ -90,10 +90,14 @@ gboolean bd_lvm_pvcreate (gchar *device, gchar **error_message);
 /**
  * bd_lvm_pvresize:
  * @device: the device to resize
- * @size: the new requested size of the device
+ * @size: the new requested size of the PV or 0 if it should be adjusted to device's size
  * @error_message: (out): variable to store error message to (if any)
  *
- * Returns: whether the PV was successfully resized or not
+ * Returns: whether the PV's size was successfully changed or not
+ *
+ * If given @size different from 0, sets the PV's size to the given value (see
+ * pvresize(8)). If given @size 0, adjusts the PV's size to the underlaying
+ * block device's size.
  */
 gboolean bd_lvm_pvresize (gchar *device, guint64 size, gchar **error_message);
 
