@@ -13,6 +13,7 @@ gboolean bd_lvm_is_supported_pe_size (guint64 size);
 
 /**
  * bd_lvm_get_supported_pe_sizes:
+ *
  * Returns: (transfer full) (array zero-terminated=1): list of supported PE sizes
  */
 guint64 *bd_lvm_get_supported_pe_sizes ();
