@@ -97,5 +97,12 @@ int main (int argc, char **argv) {
         puts ("pvresize succeeded");
     g_free (msg);
 
+    succ = bd_lvm_pvremove ("/dev/xd1", &msg);
+    if (!succ)
+        g_printf ("pvremove failed: %s\n", msg);
+    else
+        puts ("pvremove succeeded");
+    g_free (msg);
+
     return 0;
 }

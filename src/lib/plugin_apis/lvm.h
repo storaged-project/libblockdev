@@ -101,4 +101,13 @@ gboolean bd_lvm_pvcreate (gchar *device, gchar **error_message);
  */
 gboolean bd_lvm_pvresize (gchar *device, guint64 size, gchar **error_message);
 
+/**
+ * bd_lvm_pvremove:
+ * @device: the PV device to be removed/destroyed
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the PV was successfully removed/destroyed or not
+ */
+gboolean bd_lvm_pvremove (gchar *device, gchar **error_message);
+
 #endif  /* BD_LVM_API */

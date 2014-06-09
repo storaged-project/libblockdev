@@ -35,5 +35,6 @@ gboolean bd_lvm_is_valid_thpool_md_size (guint64 size);
 gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard);
 gboolean bd_lvm_pvcreate (gchar *device, gchar **error_message);
 gboolean bd_lvm_pvresize (gchar *device, guint64 size, gchar **error_message);
+gboolean bd_lvm_pvremove (gchar *device, gchar **error_message);
 
 #endif /* BD_LVM */

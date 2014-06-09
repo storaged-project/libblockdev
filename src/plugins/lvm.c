@@ -292,6 +292,21 @@ gboolean bd_lvm_pvresize (gchar *device, guint64 size, gchar **error_message) {
     return ret;
 }
 
+/**
+ * bd_lvm_pvremove:
+ * @device: the PV device to be removed/destroyed
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the PV was successfully removed/destroyed or not
+ */
+gboolean bd_lvm_pvremove (gchar *device, gchar **error_message) {
+    /* one has to be really persuasive to remove a PV (the double --force is not
+       bug, at least not in this code) */
+    gchar *args[6] = {"pvremove", "--force", "--force", "--yes", device, NULL};
+
+    return call_lvm_and_report_error (args, error_message);
+}
+
 #ifdef TESTING_LVM
 #include "test_lvm.c"
 #endif
