@@ -58,8 +58,8 @@ LVM
    * is_valid_thpool_chunk_size [DONE]
 
    * pvcreate [DONE]
-   * pvresize
-   * pvremove
+   * pvresize [DONE]
+   * pvremove [DONE]
    * pvmove
    * pvscan
    * pvinfo
@@ -185,7 +185,7 @@ LOOP
    basic operations with loop devices
 
 :functions:
-   * get_backing_file
+   * get_backing_file [DONE]
    * get_loop_name
    * loop_setup
    * loop_teardown
