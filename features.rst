@@ -60,7 +60,7 @@ LVM
    * pvcreate [DONE]
    * pvresize [DONE]
    * pvremove [DONE]
-   * pvmove
+   * pvmove [DONE]
    * pvscan
    * pvinfo
 

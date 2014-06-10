@@ -110,4 +110,17 @@ gboolean bd_lvm_pvresize (gchar *device, guint64 size, gchar **error_message);
  */
 gboolean bd_lvm_pvremove (gchar *device, gchar **error_message);
 
+/**
+ * bd_lvm_pvmove:
+ * @src: the PV device to move extents off of
+ * @dest: (allow-none): the PV device to move extents onto or #NULL
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the extents from the @src PV where successfully movd or not
+ *
+ * If @dest is #NULL, VG allocation rules are used for the extents from the @src
+ * PV (see pvmove(8)).
+ */
+gboolean bd_lvm_pvmove (gchar *src, gchar *dest, gchar **error_message);
+
 #endif  /* BD_LVM_API */

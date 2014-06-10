@@ -307,6 +307,25 @@ gboolean bd_lvm_pvremove (gchar *device, gchar **error_message) {
     return call_lvm_and_report_error (args, error_message);
 }
 
+/**
+ * bd_lvm_pvmove:
+ * @src: the PV device to move extents off of
+ * @dest: (allow-none): the PV device to move extents onto or #NULL
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the extents from the @src PV where successfully moved or not
+ *
+ * If @dest is #NULL, VG allocation rules are used for the extents from the @src
+ * PV (see pvmove(8)).
+ */
+gboolean bd_lvm_pvmove (gchar *src, gchar *dest, gchar **error_message) {
+    gchar *args[4] = {"pvmove", src, NULL, NULL};
+    if (dest)
+        args[2] = dest;
+
+    return call_lvm_and_report_error (args, error_message);
+}
+
 #ifdef TESTING_LVM
 #include "test_lvm.c"
 #endif

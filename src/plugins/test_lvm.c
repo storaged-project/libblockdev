@@ -104,5 +104,12 @@ int main (int argc, char **argv) {
         puts ("pvremove succeeded");
     g_free (msg);
 
+    succ = bd_lvm_pvmove ("/dev/xd1", NULL, &msg);
+    if (!succ)
+        g_printf ("pvmove failed: %s\n", msg);
+    else
+        puts ("pvmove succeeded");
+    g_free (msg);
+
     return 0;
 }
