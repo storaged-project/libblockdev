@@ -1,5 +1,16 @@
 #include <glib/gprintf.h>
 
+void print_hash_table (GHashTable *table) {
+    GHashTableIter iter;
+    gpointer key, value;
+
+    g_hash_table_iter_init(&iter, table);
+    g_printf("HashTable contents: \n");
+    g_printf("====================\n");
+    while (g_hash_table_iter_next(&iter, &key, &value))
+        g_printf("%s : %s\n", (gchar *) key, (gchar *) value);
+}
+
 int main (int argc, char **argv) {
     gint exit_status;
     const gchar **fname = NULL;
@@ -10,6 +21,8 @@ int main (int argc, char **argv) {
     guint64 result = 0;
     guint8 i;
     guint64 *sizes= NULL;
+    GHashTable *table = NULL;
+    guint num_items;
 
     g_printf ("Supported functions:\n");
     for (fname=get_supported_functions(); (*fname); fname++) {
@@ -125,6 +138,11 @@ int main (int argc, char **argv) {
     else
         puts ("pvscan succeeded");
     g_free (msg);
+
+    table = parse_lvm_vars ("key1=val1 key2val2 key3=val3", &num_items);
+    g_printf ("Parsed %d items\n", num_items);
+    print_hash_table (table);
+    g_hash_table_destroy (table);
 
     return 0;
 }

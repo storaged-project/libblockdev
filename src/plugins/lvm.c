@@ -137,6 +137,36 @@ static gboolean call_lvm_and_capture_output (gchar **argv, gchar **output, gchar
     }
 }
 
+/**
+ * parse_lvm_vars:
+ * @str: string to parse
+ * @num_items: (out): number of parsed items
+ *
+ * Returns: (transfer full): a GHashTable containing key-value items parsed from the @string
+ */
+static GHashTable* parse_lvm_vars (gchar *str, guint *num_items) {
+    GHashTable *table = NULL;
+    gchar **items = NULL;
+    gchar **item_p = NULL;
+    gchar **key_val = NULL;
+
+    table = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+    *num_items = 0;
+
+    items = g_strsplit_set (str, " \t\n", 0);
+    for (item_p=items; *item_p; item_p++) {
+        key_val = g_strsplit (*item_p, "=", 2);
+        if (g_strv_length (key_val) == 2) {
+            /* we only want to process valid lines (with the '=' character) */
+            g_hash_table_insert (table, key_val[0], key_val[1]);
+            (*num_items)++;
+        } else
+            /* invalid line, just free key_val */
+            g_strfreev (key_val);
+    }
+
+    return table;
+}
 
 /**
  * bd_lvm_is_supported_pe_size:
