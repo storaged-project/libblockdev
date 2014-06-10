@@ -93,7 +93,7 @@ static gboolean call_lvm_and_report_error (gchar **argv, gchar **error_message) 
     if (status != 0) {
         /* lvm was run, but some error happened, the interesting information is
            either in the stdout or in the stderr */
-        if (stderr_data && g_strcmp0 ("", stderr_data) != 0) {
+        if (stderr_data && (g_strcmp0 ("", stderr_data) != 0)) {
             *error_message = stderr_data;
             g_free (stdout_data);
         } else {
