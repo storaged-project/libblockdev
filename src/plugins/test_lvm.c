@@ -33,13 +33,21 @@ int main (int argc, char **argv) {
         puts ("Some error!");
         puts (msg);
     }
+    g_free (stdout);
+    g_free (stderr);
+    g_free (msg);
+    msg = NULL;
 
-    if (stdout)
+    succ = call_lvm_and_capture_output (args, &stdout, &msg);
+    if (succ) {
+        puts ("Called 'lvs' and captured output");
+        g_printf ("OUTPUT: %s", stdout);
         g_free (stdout);
-    if (stderr)
-        g_free (stderr);
-    if (msg)
-        g_free (msg);
+    } else {
+        puts ("Failed to call 'lvs' and capture output");
+        g_printf ("ERROR: %s", msg);
+    }
+    g_free (msg);
 
     if (bd_lvm_is_supported_pe_size(16 MEBIBYTE))
         puts ("16 MiB PE: Supported.");

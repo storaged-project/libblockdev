@@ -108,6 +108,35 @@ static gboolean call_lvm_and_report_error (gchar **argv, gchar **error_message) 
     return TRUE;
 }
 
+static gboolean call_lvm_and_capture_output (gchar **argv, gchar **output, gchar **error_message) {
+    gchar *stdout_data = NULL;
+    gchar *stderr_data = NULL;
+    gint status = 0;
+    gboolean success = FALSE;
+
+    success = call_lvm (argv, &stdout_data, &stderr_data, &status, error_message);
+    if (!success)
+        /* running lvm failed, the error message already is in the error_message
+           variable so just return */
+        return FALSE;
+
+    if ((status != 0) || (g_strcmp0 ("", stdout_data) == 0)) {
+        /* lvm was run, but some error happened or there is no output data which
+           is an error because by calling this function the caller asked for the
+           output */
+        if (stderr_data && (g_strcmp0 ("", stderr_data) != 0)) {
+            *error_message = stderr_data;
+            g_free (stdout_data);
+        }
+
+        return FALSE;
+    } else {
+        *output = stdout_data;
+        g_free (stderr_data);
+        return TRUE;
+    }
+}
+
 
 /**
  * bd_lvm_is_supported_pe_size:
