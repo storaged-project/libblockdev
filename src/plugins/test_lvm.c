@@ -111,5 +111,12 @@ int main (int argc, char **argv) {
         puts ("pvmove succeeded");
     g_free (msg);
 
+    succ = bd_lvm_pvscan ("/dev/xd1", TRUE, &msg);
+    if (!succ)
+        g_printf ("pvscan failed: %s\n", msg);
+    else
+        puts ("pvscan succeeded");
+    g_free (msg);
+
     return 0;
 }

@@ -326,6 +326,25 @@ gboolean bd_lvm_pvmove (gchar *src, gchar *dest, gchar **error_message) {
     return call_lvm_and_report_error (args, error_message);
 }
 
+/**
+ * bd_lvm_pvscan:
+ * @device: the device to scan for PVs
+ * @update_cache: whether to update the lvmetad cache or not
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @device was successfully scanned for PVs or not
+ */
+gboolean bd_lvm_pvscan (gchar *device, gboolean update_cache, gchar **error_message) {
+    gchar *args[4] = {"pvscan", NULL, NULL, NULL};
+    if (update_cache) {
+        args[1] = "--cache";
+        args[2] = device;
+    } else
+        args[1] = device;
+
+    return call_lvm_and_report_error (args, error_message);
+}
+
 #ifdef TESTING_LVM
 #include "test_lvm.c"
 #endif
