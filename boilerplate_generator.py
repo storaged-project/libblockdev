@@ -22,8 +22,13 @@ FUNC_SPEC_RE = re.compile(r'(?P<rtype>\**\s*\w+\s*\**)'
 def gather_func_info(line_iter, includes):
     name = doc = rtype = args = ""
     in_doc = False
+    in_skip = False
     for line in line_iter:
-        if line.strip() == "" or line.strip().startswith("//") or line.strip().startswith("/* "):
+        if in_skip or line.strip().startswith("/* BpG-skip"):
+            in_skip = True
+        elif in_skip and line.strip().startswith("/* BpG-skip-end"):
+            in_skip = False
+        elif line.strip() == "" or line.strip().startswith("//") or line.strip().startswith("/* "):
             # whitespace line or ignored comment, skip it
             continue
         elif line.strip().startswith("#include"):
