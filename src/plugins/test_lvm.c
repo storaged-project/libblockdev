@@ -154,5 +154,13 @@ int main (int argc, char **argv) {
     if (data)
         bd_lvm_pvdata_free (data);
 
+    gchar *pv_list[] = {"/dev/xd1", "/dev/xd2", NULL};
+    succ = bd_lvm_vgcreate ("newVG", pv_list, 0, &msg);
+    if (!succ)
+        g_printf ("vgcreate failed: %s\n", msg);
+    else
+        puts ("vgcreate succeeded");
+    g_free (msg);
+
     return 0;
 }

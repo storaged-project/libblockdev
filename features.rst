@@ -65,7 +65,7 @@ LVM
    * pvinfo [DONE]
    * pvs
 
-   * vgcreate
+   * vgcreate [DONE]
    * vgextend
    * vgremove
    * vgactivate

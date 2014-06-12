@@ -491,6 +491,38 @@ BDLVMPVdata* bd_lvm_pvinfo (gchar *device, gchar **error_message) {
     return NULL;
 }
 
+/**
+ * bd_lvm_vgcreate:
+ * @name: name of the newly created VG
+ * @pv_list: (array zero-terminated=1): list of PVs the newly created VG should use
+ * @pe_size: PE size or 0 if the default value should be used
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the VG @name was successfully created or not
+ */
+gboolean bd_lvm_vgcreate (gchar *name, gchar **pv_list, guint64 pe_size, gchar **error_message) {
+    guint8 i = 0;
+    guint8 pv_list_len = g_strv_length (pv_list);
+    gchar **argv = g_new (gchar*, pv_list_len + 5);
+    pe_size = RESOLVE_PE_SIZE (pe_size);
+    gboolean success = FALSE;
+
+    argv[0] = "vgcreate";
+    argv[1] = "-s";
+    argv[2] = g_strdup_printf ("%"G_GUINT64_FORMAT"b", pe_size);
+    argv[3] = name;
+    for (i=4; i < (pv_list_len + 4); i++) {
+        argv[i] = pv_list[i-4];
+    }
+    argv[i] = NULL;
+
+    success = call_lvm_and_report_error (argv, error_message);
+    g_free (argv[2]);
+    g_free (argv);
+
+    return success;
+}
+
 #ifdef TESTING_LVM
 #include "test_lvm.c"
 #endif

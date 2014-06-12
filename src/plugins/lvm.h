@@ -79,4 +79,6 @@ gboolean bd_lvm_pvmove (gchar *src, gchar *dest, gchar **error_message);
 gboolean bd_lvm_pvscan (gchar *device, gboolean update_cache, gchar **error_message);
 BDLVMPVdata* bd_lvm_pvinfo (gchar *device, gchar **error_message);
 
+gboolean bd_lvm_vgcreate (gchar *name, gchar **pv_list, guint64 pe_size, gchar **error_message);
+
 #endif /* BD_LVM */
