@@ -220,4 +220,35 @@ BDLVMPVdata* bd_lvm_pvinfo (gchar *device, gchar **error_message);
  */
 gboolean bd_lvm_vgcreate (gchar *name, gchar **pv_list, guint64 pe_size, gchar **error_message);
 
+/**
+ * bd_lvm_vgremove:
+ * @vg_name: name of the to be removed VG
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the VG was successfully removed or not
+ *
+ * Note: forces the VG removal.
+ */
+gboolean bd_lvm_vgremove (gchar *vg_name, gchar **error_message);
+
+/**
+ * bd_lvm_vgactivate:
+ * @vg_name: name of the to be activated VG
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the VG was successfully activated or not
+ *
+ */
+gboolean bd_lvm_vgactivate (gchar *vg_name, gchar **error_message);
+
+/**
+ * bd_lvm_vgdeactivate:
+ * @vg_name: name of the to be deactivated VG
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the VG was successfully deactivated or not
+ *
+ */
+gboolean bd_lvm_vgdeactivate (gchar *vg_name, gchar **error_message);
+
 #endif  /* BD_LVM_API */

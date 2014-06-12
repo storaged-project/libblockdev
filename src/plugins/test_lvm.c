@@ -162,5 +162,26 @@ int main (int argc, char **argv) {
         puts ("vgcreate succeeded");
     g_free (msg);
 
+    succ = bd_lvm_vgremove ("newVG", &msg);
+    if (!succ)
+        g_printf ("vgremove failed: %s\n", msg);
+    else
+        puts ("vgremove succeeded");
+    g_free (msg);
+
+    succ = bd_lvm_vgactivate ("newVG", &msg);
+    if (!succ)
+        g_printf ("vgactivate failed: %s\n", msg);
+    else
+        puts ("vgactivate succeeded");
+    g_free (msg);
+
+    succ = bd_lvm_vgdeactivate ("newVG", &msg);
+    if (!succ)
+        g_printf ("vgdeactivate failed: %s\n", msg);
+    else
+        puts ("vgdeactivate succeeded");
+    g_free (msg);
+
     return 0;
 }
