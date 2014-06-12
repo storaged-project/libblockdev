@@ -24,10 +24,10 @@ def gather_func_info(line_iter, includes):
     in_doc = False
     in_skip = False
     for line in line_iter:
-        if in_skip or line.strip().startswith("/* BpG-skip"):
-            in_skip = True
-        elif in_skip and line.strip().startswith("/* BpG-skip-end"):
+        if in_skip and line.strip().startswith("/* BpG-skip-end"):
             in_skip = False
+        elif in_skip or line.strip().startswith("/* BpG-skip"):
+            in_skip = True
         elif line.strip() == "" or line.strip().startswith("//") or line.strip().startswith("/* "):
             # whitespace line or ignored comment, skip it
             continue
