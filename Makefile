@@ -5,7 +5,7 @@ LOOP_PLUGIN_FILES = src/plugins/loop.h src/plugins/loop.c
 LIBRARY_FILES = src/lib/blockdev.c src/lib/blockdev.h src/lib/plugins.h src/lib/plugin_apis/lvm.h
 
 build-plugins: ${LVM_PLUGIN_FILES} ${SWAP_PLUGIN_FILES} ${LOOP_PLUGIN_FILES} ${SIZES_FILES}
-	gcc -c -fPIC -I src/util/ -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0`\
+	gcc -c -fPIC -I src/util/ -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0 gobject-2.0`\
 		src/util/sizes.c src/plugins/lvm.c
 	gcc -shared -o src/plugins/libbd_lvm.so lvm.o
 
@@ -27,7 +27,7 @@ build-library: generate-boilerplate-code ${LIBRARY_FILES}
 	gcc -shared -o src/lib/libblockdev.so blockdev.o
 
 build-introspection-data: build-library ${LIBRARY_FILES}
-	LD_LIBRARY_PATH=src/lib/ g-ir-scanner `pkg-config --cflags --libs glib-2.0` --library=blockdev -I src/lib/ -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o BlockDev-1.0.gir --warn-all src/lib/blockdev.h src/lib/blockdev.c src/lib/plugins.h src/lib/plugin_apis/lvm.h src/lib/plugin_apis/swap.h src/lib/plugin_apis/loop.h
+	LD_LIBRARY_PATH=src/lib/ g-ir-scanner `pkg-config --cflags --libs glib-2.0 gobject-2.0` --library=blockdev -I src/lib/ -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o BlockDev-1.0.gir --warn-all src/lib/blockdev.h src/lib/blockdev.c src/lib/plugins.h src/lib/plugin_apis/lvm.h src/lib/plugin_apis/swap.h src/lib/plugin_apis/loop.h
 	g-ir-compiler -o BlockDev-1.0.typelib BlockDev-1.0.gir
 
 test-sizes: ${SIZES_FILES}
@@ -38,7 +38,7 @@ test-sizes: ${SIZES_FILES}
 	@rm test_sizes
 
 test-lvm-plugin: ${LVM_PLUGIN_FILES} ${SIZES_FILES}
-	gcc -DTESTING_LVM -o test_lvm_plugin -I src/util/ -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0`\
+	gcc -DTESTING_LVM -o test_lvm_plugin -I src/util/ -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0 gobject-2.0`\
 		src/util/sizes.c src/plugins/lvm.c
 	@echo "***Running tests***"
 	./test_lvm_plugin

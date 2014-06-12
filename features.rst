@@ -62,7 +62,8 @@ LVM
    * pvremove [DONE]
    * pvmove [DONE]
    * pvscan [DONE]
-   * pvinfo
+   * pvinfo [DONE]
+   * pvs
 
    * vgcreate
    * vgextend

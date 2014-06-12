@@ -23,6 +23,7 @@ int main (int argc, char **argv) {
     guint64 *sizes= NULL;
     GHashTable *table = NULL;
     guint num_items;
+    BDLVMPVdata *data = NULL;
 
     g_printf ("Supported functions:\n");
     for (fname=get_supported_functions(); (*fname); fname++) {
@@ -143,6 +144,15 @@ int main (int argc, char **argv) {
     g_printf ("Parsed %d items\n", num_items);
     print_hash_table (table);
     g_hash_table_destroy (table);
+
+    data = bd_lvm_pvinfo ("/dev/xd1", &msg);
+    if (!data)
+        g_printf ("pvinfo failed: %s\n", msg);
+    else
+        puts ("pvinfo succeeded");
+    g_free (msg);
+    if (data)
+        bd_lvm_pvdata_free (data);
 
     return 0;
 }

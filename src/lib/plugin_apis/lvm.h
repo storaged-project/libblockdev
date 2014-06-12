@@ -1,7 +1,73 @@
 #include <glib.h>
+#include <glib-object.h>
 
+/* BpG-skip */
 #ifndef BD_LVM_API
 #define BD_LVM_API
+
+#define BD_LVM_TYPE_PVDATA (bd_lvm_pvdata_get_type ())
+GType bd_lvm_pvdata_get_type();
+
+typedef struct BDLVMPVdata {
+    gchar *pv_name;
+    gchar *pv_uuid;
+    guint64 pe_start;
+    gchar *vg_name;
+    gchar *vg_uuid;
+    guint64 vg_size;
+    guint64 vg_free;
+    guint64 vg_extent_size;
+    guint64 vg_extent_count;
+    guint64 vg_free_count;
+    guint64 vg_pv_count;
+} BDLVMPVdata;
+
+/**
+ * bd_lvm_pvdata_copy: (skip)
+ *
+ * Creates a new copy of @data.
+ */
+BDLVMPVdata* bd_lvm_pvdata_copy (BDLVMPVdata *data) {
+    BDLVMPVdata *new_data = g_new (BDLVMPVdata, 1);
+
+    new_data->pv_name = g_strdup (data->pv_name);
+    new_data->pv_uuid = g_strdup (data->pv_uuid);
+    new_data->pe_start = data->pe_start;
+    new_data->vg_name = g_strdup (data->vg_name);
+    new_data->vg_size = data->vg_size;
+    new_data->vg_free = data->vg_free;
+    new_data->vg_extent_size = data->vg_extent_size;
+    new_data->vg_extent_count = data->vg_extent_count;
+    new_data->vg_free_count = data->vg_free_count;
+    new_data->vg_pv_count = data->vg_pv_count;
+
+    return new_data;
+}
+
+/**
+ * bd_lvm_pvdata_free: (skip)
+ *
+ * Frees @data.
+ */
+void bd_lvm_pvdata_free (BDLVMPVdata *data) {
+    g_free (data->pv_name);
+    g_free (data->pv_uuid);
+    g_free (data->vg_name);
+    g_free (data);
+}
+
+GType bd_lvm_pvdata_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDLVMPVdata",
+                                            (GBoxedCopyFunc) bd_lvm_pvdata_copy,
+                                            (GBoxedFreeFunc) bd_lvm_pvdata_free);
+    }
+
+    return type;
+}
+/* BpG-skip-end */
 
 /**
  * bd_lvm_is_supported_pe_size:
@@ -132,5 +198,15 @@ gboolean bd_lvm_pvmove (gchar *src, gchar *dest, gchar **error_message);
  * Returns: whether the @device was successfully scanned for PVs or not
  */
 gboolean bd_lvm_pvscan (gchar *device, gboolean update_cache, gchar **error_message);
+
+/**
+ * bd_lvm_pvinfo:
+ * @device: a PV to get information about or #NULL
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (transfer full): information about the PV on the given @device or
+ * #NULL in case of error (the @error_message gets populated in those cases)
+ */
+BDLVMPVdata* bd_lvm_pvinfo (gchar *device, gchar **error_message);
 
 #endif  /* BD_LVM_API */

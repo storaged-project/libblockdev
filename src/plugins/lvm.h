@@ -25,6 +25,44 @@
 #define THPOOL_MD_FACTOR_NEW (0.2)
 #define THPOOL_MD_FACTOR_EXISTS (1 / 6.0)
 
+typedef struct BDLVMPVdata {
+    gchar *pv_name;
+    gchar *pv_uuid;
+    guint64 pe_start;
+    gchar *vg_name;
+    gchar *vg_uuid;
+    guint64 vg_size;
+    guint64 vg_free;
+    guint64 vg_extent_size;
+    guint64 vg_extent_count;
+    guint64 vg_free_count;
+    guint64 vg_pv_count;
+} BDLVMPVdata;
+
+BDLVMPVdata* bd_lvm_pvdata_copy (BDLVMPVdata *data) {
+    BDLVMPVdata *new_data = g_new (BDLVMPVdata, 1);
+
+    new_data->pv_name = g_strdup (data->pv_name);
+    new_data->pv_uuid = g_strdup (data->pv_uuid);
+    new_data->pe_start = data->pe_start;
+    new_data->vg_name = g_strdup (data->vg_name);
+    new_data->vg_size = data->vg_size;
+    new_data->vg_free = data->vg_free;
+    new_data->vg_extent_size = data->vg_extent_size;
+    new_data->vg_extent_count = data->vg_extent_count;
+    new_data->vg_free_count = data->vg_free_count;
+    new_data->vg_pv_count = data->vg_pv_count;
+
+    return new_data;
+}
+
+void bd_lvm_pvdata_free (BDLVMPVdata *data) {
+    g_free (data->pv_name);
+    g_free (data->pv_uuid);
+    g_free (data->vg_name);
+    g_free (data);
+}
+
 gboolean bd_lvm_is_supported_pe_size (guint64 size);
 guint64 *bd_lvm_get_supported_pe_sizes ();
 guint64 bd_lvm_get_max_lv_size ();
@@ -38,5 +76,6 @@ gboolean bd_lvm_pvresize (gchar *device, guint64 size, gchar **error_message);
 gboolean bd_lvm_pvremove (gchar *device, gchar **error_message);
 gboolean bd_lvm_pvmove (gchar *src, gchar *dest, gchar **error_message);
 gboolean bd_lvm_pvscan (gchar *device, gboolean update_cache, gchar **error_message);
+BDLVMPVdata* bd_lvm_pvinfo (gchar *device, gchar **error_message);
 
 #endif /* BD_LVM */

@@ -168,6 +168,50 @@ static GHashTable* parse_lvm_vars (gchar *str, guint *num_items) {
     return table;
 }
 
+static BDLVMPVdata* get_pv_data_from_table (GHashTable *table, gboolean free_table) {
+    BDLVMPVdata *data = g_new (BDLVMPVdata, 1);
+    gchar *value = NULL;
+
+    data->pv_name = g_strdup ((gchar*) g_hash_table_lookup (table, "LVM2_PV_NAME"));
+    data->pv_uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "LVM2_PV_UUID"));
+
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_PE_START");
+    if (value)
+        data->pe_start = g_ascii_strtoull (value, NULL, 0);
+
+    data->vg_name = g_strdup ((gchar*) g_hash_table_lookup (table, "LVM2_VG_NAME"));
+    data->vg_uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "LVM2_VG_UUID"));
+
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_SIZE");
+    if (value)
+        data->vg_size = g_ascii_strtoull (value, NULL, 0);
+
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_FREE");
+    if (value)
+        data->vg_free = g_ascii_strtoull (value, NULL, 0);
+
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_EXTENT_SIZE");
+    if (value)
+        data->vg_extent_size = g_ascii_strtoull (value, NULL, 0);
+
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_EXTENT_COUNT");
+    if (value)
+        data->vg_extent_count = g_ascii_strtoull (value, NULL, 0);
+
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_FREE_COUNT");
+    if (value)
+        data->vg_free_count = g_ascii_strtoull (value, NULL, 0);
+
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_PV_COUNT");
+    if (value)
+        data->vg_pv_count = g_ascii_strtoull (value, NULL, 0);
+
+    if (free_table)
+        g_hash_table_destroy (table);
+
+    return data;
+}
+
 /**
  * bd_lvm_is_supported_pe_size:
  * @size: size (in bytes) to test
@@ -402,6 +446,49 @@ gboolean bd_lvm_pvscan (gchar *device, gboolean update_cache, gchar **error_mess
         args[1] = device;
 
     return call_lvm_and_report_error (args, error_message);
+}
+
+/**
+ * bd_lvm_pvinfo:
+ * @device: a PV to get information about or #NULL
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (transfer full): information about the PV on the given @device or
+ * #NULL in case of error (the @error_message gets populated in those cases)
+ */
+BDLVMPVdata* bd_lvm_pvinfo (gchar *device, gchar **error_message) {
+    gchar *args[9] = {"pvs", "--unit=k", "--nosuffix", "--nameprefixes",
+                      "--unquoted", "--noheadings",
+                      "-opv_name,pv_uuid,pe_start,vg_name,vg_uuid,vg_size,vg_free," \
+                      "vg_extent_size,vg_extent_count,vg_free_count,pv_count",
+                      device, NULL};
+    GHashTable *table = NULL;
+    gboolean success = FALSE;
+    gchar *output = NULL;
+    gchar **lines = NULL;
+    gchar **lines_p = NULL;
+    guint num_items;
+
+    success = call_lvm_and_capture_output (args, &output, error_message);
+    if (!success)
+        /* the error_message is already populated from the call */
+        return NULL;
+
+    lines = g_strsplit (output, "\n", 0);
+    g_free (output);
+
+    for (lines_p = lines; *lines_p; lines_p++) {
+        table = parse_lvm_vars ((*lines_p), &num_items);
+        if (table && (num_items == 11)) {
+            g_strfreev (lines);
+            return get_pv_data_from_table (table, TRUE);
+        } else
+            if (table)
+                g_hash_table_destroy (table);
+    }
+
+    /* getting here means no usable info was found */
+    return NULL;
 }
 
 #ifdef TESTING_LVM
