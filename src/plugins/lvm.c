@@ -529,7 +529,6 @@ gboolean bd_lvm_vgcreate (gchar *name, gchar **pv_list, guint64 pe_size, gchar *
  * @error_message: (out): variable to store error message to (if any)
  *
  * Returns: whether the VG was successfully removed or not
- *
  */
 gboolean bd_lvm_vgremove (gchar *vg_name, gchar **error_message) {
     gchar *args[4] = {"vgremove", "--force", vg_name, NULL};
@@ -543,7 +542,6 @@ gboolean bd_lvm_vgremove (gchar *vg_name, gchar **error_message) {
  * @error_message: (out): variable to store error message to (if any)
  *
  * Returns: whether the VG was successfully activated or not
- *
  */
 gboolean bd_lvm_vgactivate (gchar *vg_name, gchar **error_message) {
     gchar *args[4] = {"vgchange", "-ay", vg_name, NULL};
@@ -557,7 +555,6 @@ gboolean bd_lvm_vgactivate (gchar *vg_name, gchar **error_message) {
  * @error_message: (out): variable to store error message to (if any)
  *
  * Returns: whether the VG was successfully deactivated or not
- *
  */
 gboolean bd_lvm_vgdeactivate (gchar *vg_name, gchar **error_message) {
     gchar *args[4] = {"vgchange", "-an", vg_name, NULL};
