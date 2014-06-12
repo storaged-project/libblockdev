@@ -562,6 +562,20 @@ gboolean bd_lvm_vgdeactivate (gchar *vg_name, gchar **error_message) {
     return call_lvm_and_report_error (args, error_message);
 }
 
+/**
+ * bd_lvm_vgextend:
+ * @vg_name: name of the to be extended VG
+ * @device: PV device to extend the @vg_name VG with
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the VG @vg_name was successfully extended with the given @device or not.
+ */
+gboolean bd_lvm_vgextend (gchar *vg_name, gchar *device, gchar **error_message) {
+    gchar *args[4] = {"vgextend", vg_name, device, NULL};
+
+    return call_lvm_and_report_error (args, error_message);
+}
+
 #ifdef TESTING_LVM
 #include "test_lvm.c"
 #endif

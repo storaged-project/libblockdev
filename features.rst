@@ -66,7 +66,7 @@ LVM
    * pvs
 
    * vgcreate [DONE]
-   * vgextend
+   * vgextend [DONE]
    * vgremove [DONE]
    * vgactivate [DONE]
    * vgdeactivate [DONE]

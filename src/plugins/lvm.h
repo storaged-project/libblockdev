@@ -83,5 +83,6 @@ gboolean bd_lvm_vgcreate (gchar *name, gchar **pv_list, guint64 pe_size, gchar *
 gboolean bd_lvm_vgremove (gchar *vg_name, gchar **error_message);
 gboolean bd_lvm_vgactivate (gchar *vg_name, gchar **error_message);
 gboolean bd_lvm_vgdeactivate (gchar *vg_name, gchar **error_message);
+gboolean bd_lvm_vgextend (gchar *vg_name, gchar *device, gchar **error_message);
 
 #endif /* BD_LVM */

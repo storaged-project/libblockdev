@@ -183,5 +183,12 @@ int main (int argc, char **argv) {
         puts ("vgdeactivate succeeded");
     g_free (msg);
 
+    succ = bd_lvm_vgextend ("newVG", "/dev/xd1", &msg);
+    if (!succ)
+        g_printf ("vgextend failed: %s\n", msg);
+    else
+        puts ("vgextend succeeded");
+    g_free (msg);
+
     return 0;
 }
