@@ -190,5 +190,20 @@ int main (int argc, char **argv) {
         puts ("vgextend succeeded");
     g_free (msg);
 
+    succ = bd_lvm_vgreduce ("newVG", "/dev/xd1", &msg);
+    if (!succ)
+        g_printf ("vgreduce with PV failed: %s\n", msg);
+    else
+        puts ("vgreduce with PV succeeded");
+    g_free (msg);
+
+    succ = bd_lvm_vgreduce ("newVG", NULL, &msg);
+    if (!succ)
+        g_printf ("vgreduce without PV failed: %s\n", msg);
+    else
+        puts ("vgextend without PV succeeded");
+    g_free (msg);
+
+
     return 0;
 }

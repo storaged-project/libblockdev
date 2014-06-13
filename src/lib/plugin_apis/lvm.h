@@ -259,4 +259,15 @@ gboolean bd_lvm_vgdeactivate (gchar *vg_name, gchar **error_message);
  */
 gboolean bd_lvm_vgextend (gchar *vg_name, gchar *device, gchar **error_message);
 
+/**
+ * bd_lvm_vgreduce:
+ * @vg_name: name of the to be reduced VG
+ * @device: (allow-none): PV device the @vg_name VG should be reduced of or #NULL
+ *                        if the VG should be reduced of the missing PVs
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the VG @vg_name was successfully reduced of the given @device or not
+ */
+gboolean bd_lvm_vgreduce (gchar *vg_name, gchar *device, gchar **error_message);
+
 #endif  /* BD_LVM_API */

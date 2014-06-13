@@ -576,6 +576,34 @@ gboolean bd_lvm_vgextend (gchar *vg_name, gchar *device, gchar **error_message) 
     return call_lvm_and_report_error (args, error_message);
 }
 
+/**
+ * bd_lvm_vgreduce:
+ * @vg_name: name of the to be reduced VG
+ * @device: (allow-none): PV device the @vg_name VG should be reduced of or #NULL
+ *                        if the VG should be reduced of the missing PVs
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the VG @vg_name was successfully reduced of the given @device or not
+ *
+ * Note: This function does not move extents off of the PV before removing
+ *       it from the VG. You must do that first by calling #bd_lvm_pvmove.
+ */
+gboolean bd_lvm_vgreduce (gchar *vg_name, gchar *device, gchar **error_message) {
+    gchar *args[5] = {"vgreduce", NULL, NULL, NULL, NULL};
+
+    if (!device) {
+        args[1] = "--removemissing";
+        args[2] = "--force";
+        args[3] = vg_name;
+    } else {
+        args[1] = vg_name;
+        args[2] = device;
+    }
+
+    return call_lvm_and_report_error (args, error_message);
+}
+
+
 #ifdef TESTING_LVM
 #include "test_lvm.c"
 #endif
