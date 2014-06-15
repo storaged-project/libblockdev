@@ -72,16 +72,18 @@ LVM
    * vgdeactivate [DONE]
    * vgreduce [DONE]
    * vginfo
+   * vgs
 
-   * lvs
    * lvorigin
    * lvcreate
    * lvremove
    * lvresize
    * lvactivate
    * lvdeactivate
+   * lvinfo
    * lvsnapshotcreate
    * lvsnapshotmerge
+   * lvs
 
    * thpoolcreate
    * thlvcreate
