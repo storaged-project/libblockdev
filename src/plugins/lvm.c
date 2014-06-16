@@ -457,11 +457,11 @@ gboolean bd_lvm_pvscan (gchar *device, gboolean update_cache, gchar **error_mess
  * #NULL in case of error (the @error_message gets populated in those cases)
  */
 BDLVMPVdata* bd_lvm_pvinfo (gchar *device, gchar **error_message) {
-    gchar *args[9] = {"pvs", "--unit=k", "--nosuffix", "--nameprefixes",
-                      "--unquoted", "--noheadings",
-                      "-opv_name,pv_uuid,pe_start,vg_name,vg_uuid,vg_size,vg_free," \
-                      "vg_extent_size,vg_extent_count,vg_free_count,pv_count",
-                      device, NULL};
+    gchar *args[10] = {"pvs", "--unit=b", "--nosuffix", "--nameprefixes",
+                       "--unquoted", "--noheadings",
+                       "-o", "pv_name,pv_uuid,pe_start,vg_name,vg_uuid,vg_size,vg_free," \
+                       "vg_extent_size,vg_extent_count,vg_free_count,pv_count",
+                       device, NULL};
     GHashTable *table = NULL;
     gboolean success = FALSE;
     gchar *output = NULL;
