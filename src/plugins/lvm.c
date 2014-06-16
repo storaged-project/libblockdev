@@ -502,7 +502,7 @@ BDLVMPVdata* bd_lvm_pvinfo (gchar *device, gchar **error_message) {
  */
 gboolean bd_lvm_vgcreate (gchar *name, gchar **pv_list, guint64 pe_size, gchar **error_message) {
     guint8 i = 0;
-    guint8 pv_list_len = g_strv_length (pv_list);
+    guint8 pv_list_len = pv_list ? g_strv_length (pv_list) : 0;
     gchar **argv = g_new (gchar*, pv_list_len + 5);
     pe_size = RESOLVE_PE_SIZE (pe_size);
     gboolean success = FALSE;
