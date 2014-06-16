@@ -74,8 +74,8 @@ LVM
    * vginfo [DONE]
    * vgs [DONE]
 
-   * lvorigin
-   * lvcreate
+   * lvorigin [DONE]
+   * lvcreate [DONE]
    * lvremove
    * lvresize
    * lvactivate

@@ -120,4 +120,7 @@ gboolean bd_lvm_vgreduce (gchar *vg_name, gchar *device, gchar **error_message);
 BDLVMVGdata* bd_lvm_vginfo (gchar *device, gchar **error_message);
 BDLVMVGdata** bd_lvm_vgs (gchar **error_message);
 
+gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, gchar **error_message);
+gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar **pv_list, gchar **error_message);
+
 #endif /* BD_LVM */

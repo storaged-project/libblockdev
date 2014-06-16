@@ -24,6 +24,7 @@ int main (int argc, char **argv) {
     GHashTable *table = NULL;
     guint num_items;
     BDLVMPVdata *data = NULL;
+    gchar *ret_str = NULL;
 
     g_printf ("Supported functions:\n");
     for (fname=get_supported_functions(); (*fname); fname++) {
@@ -204,6 +205,12 @@ int main (int argc, char **argv) {
         puts ("vgextend without PV succeeded");
     g_free (msg);
 
+    ret_str = bd_lvm_lvorigin ("newVG", "newLV", &msg);
+    if (!ret_str)
+        g_printf ("lvorigin failed: %s", msg);
+    else
+        g_printf ("lvorigin succeeded: %s", ret_str);
+    g_free(msg);
 
     return 0;
 }

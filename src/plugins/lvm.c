@@ -806,6 +806,69 @@ BDLVMVGdata** bd_lvm_vgs (gchar **error_message) {
     return ret;
 }
 
+/**
+ * bd_lvm_lvorigin:
+ * @vg_name: name of the VG containing the queried LV
+ * @lv_name: name of the queried LV
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: the origin volume for the @vg_name/@lv_name LV or #NULL if failed
+ * to determine (@error_message is set in those cases)
+ */
+gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, gchar **error_message) {
+    gboolean success = FALSE;
+    gchar *output = NULL;
+    gchar *args[6] = {"lvs", "--noheadings", "-o", "origin", NULL, NULL};
+    args[4] = g_strdup_printf ("%s/%s", vg_name, lv_name);
+
+    success = call_lvm_and_capture_output (args, &output, error_message);
+    g_free (args[4]);
+
+    if (!success)
+        /* the error_message is already populated from the call */
+        return NULL;
+
+    return g_strstrip (output);
+}
+
+/**
+ * bd_lvm_lvcreate:
+ * @vg_name: name of the VG to create a new LV in
+ * @lv_name: name of the to-be-created LV
+ * @size: requested size of the new LV
+ * @pv_list: (allow-none) (array zero-terminated=1): list of PVs the newly created LV should use or #NULL
+ * if not specified
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the given @vg_name/@lv_name LV was successfully created or not
+ */
+gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar **pv_list, gchar **error_message) {
+    guint8 pv_list_len = pv_list ? g_strv_length (pv_list) : 0;
+    gchar **args = g_new (gchar*, pv_list_len + 8);
+    gboolean success = FALSE;
+    guint8 i = 0;
+
+    args[0] = "lvcreate";
+    args[1] = "-n";
+    args[2] = lv_name;
+    args[3] = "-L";
+    args[4] = g_strdup_printf ("%"G_GUINT64_FORMAT"b", size);
+    args[5] = "-y";
+    args[6] = vg_name;
+
+    for (i=7; i < (pv_list_len + 7); i++)
+        args[i] = pv_list[i-7];
+
+    args[i] = NULL;
+
+    success = call_lvm_and_report_error (args, error_message);
+    g_free (args[4]);
+    g_free (args);
+
+    return success;
+}
+
+
 #ifdef TESTING_LVM
 #include "test_lvm.c"
 #endif
