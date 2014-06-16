@@ -267,6 +267,14 @@ gboolean bd_lvm_pvscan (gchar *device, gboolean update_cache, gchar **error_mess
 BDLVMPVdata* bd_lvm_pvinfo (gchar *device, gchar **error_message);
 
 /**
+ * bd_lvm_pvs:
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (array zero-terminated=1): information about PVs found in the system
+ */
+BDLVMPVdata** bd_lvm_pvs (gchar **error_message);
+
+/**
  * bd_lvm_vgcreate:
  * @name: name of the newly created VG
  * @pv_list: (array zero-terminated=1): list of PVs the newly created VG should use

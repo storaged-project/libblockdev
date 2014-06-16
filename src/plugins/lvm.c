@@ -530,6 +530,67 @@ BDLVMPVdata* bd_lvm_pvinfo (gchar *device, gchar **error_message) {
 }
 
 /**
+ * bd_lvm_pvs:
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (array zero-terminated=1): information about PVs found in the system
+ */
+BDLVMPVdata** bd_lvm_pvs (gchar **error_message) {
+    gchar *args[9] = {"pvs", "--unit=b", "--nosuffix", "--nameprefixes",
+                       "--unquoted", "--noheadings",
+                       "-o", "pv_name,pv_uuid,pe_start,vg_name,vg_uuid,vg_size,vg_free," \
+                       "vg_extent_size,vg_extent_count,vg_free_count,pv_count",
+                       NULL};
+    GHashTable *table = NULL;
+    gboolean success = FALSE;
+    gchar *output = NULL;
+    gchar **lines = NULL;
+    gchar **lines_p = NULL;
+    guint num_items;
+    GPtrArray *pvs = g_ptr_array_new ();
+    BDLVMPVdata *pvdata = NULL;
+    BDLVMPVdata **ret = NULL;
+    guint64 i = 0;
+
+    success = call_lvm_and_capture_output (args, &output, error_message);
+    if (!success)
+        /* the error_message is already populated from the call */
+        return NULL;
+
+    lines = g_strsplit (output, "\n", 0);
+    g_free (output);
+
+    for (lines_p = lines; *lines_p; lines_p++) {
+        table = parse_lvm_vars ((*lines_p), &num_items);
+        if (table && (num_items == 11)) {
+            /* valid line, try to parse and record it */
+            pvdata = get_pv_data_from_table (table, TRUE);
+            if (pvdata)
+                g_ptr_array_add (pvs, pvdata);
+        } else
+            if (table)
+                g_hash_table_destroy (table);
+    }
+
+    g_strfreev (lines);
+
+    if (pvs->len == 0) {
+        *error_message = g_strdup ("Failed to parse information about PVs");
+        return NULL;
+    }
+
+    /* now create the return value -- NULL-terminated array of BDLVMPVdata */
+    ret = g_new (BDLVMPVdata*, pvs->len + 1);
+    for (i=0; i < pvs->len; i++)
+        ret[i] = (BDLVMPVdata*) g_ptr_array_index (pvs, i);
+    ret[i] = NULL;
+
+    g_ptr_array_free (pvs, FALSE);
+
+    return ret;
+}
+
+/**
  * bd_lvm_vgcreate:
  * @name: name of the newly created VG
  * @pv_list: (array zero-terminated=1): list of PVs the newly created VG should use
