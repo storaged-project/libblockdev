@@ -72,7 +72,7 @@ LVM
    * vgdeactivate [DONE]
    * vgreduce [DONE]
    * vginfo [DONE]
-   * vgs
+   * vgs [DONE]
 
    * lvorigin
    * lvcreate

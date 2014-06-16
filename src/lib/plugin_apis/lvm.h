@@ -345,4 +345,12 @@ gboolean bd_lvm_vgreduce (gchar *vg_name, gchar *device, gchar **error_message);
  */
 BDLVMVGdata* bd_lvm_vginfo (gchar *vg_name, gchar **error_message);
 
+/**
+ * bd_lvm_vgs:
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (array zero-terminated=1): information about VGs found in the system
+ */
+BDLVMVGdata** bd_lvm_vgs (gchar **error_message);
+
 #endif  /* BD_LVM_API */

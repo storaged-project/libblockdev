@@ -746,6 +746,66 @@ BDLVMVGdata* bd_lvm_vginfo (gchar *vg_name, gchar **error_message) {
     return NULL;
 }
 
+/**
+ * bd_lvm_vgs:
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (array zero-terminated=1): information about VGs found in the system
+ */
+BDLVMVGdata** bd_lvm_vgs (gchar **error_message) {
+    gchar *args[9] = {"vgs", "--noheadings", "--nosuffix", "--nameprefixes",
+                      "--unquoted", "--units=b",
+                      "-o", "name,uuid,size,free,extent_size,extent_count,free_count,pv_count",
+                      NULL};
+    GHashTable *table = NULL;
+    gboolean success = FALSE;
+    gchar *output = NULL;
+    gchar **lines = NULL;
+    gchar **lines_p = NULL;
+    guint num_items;
+    GPtrArray *vgs = g_ptr_array_new ();
+    BDLVMVGdata *vgdata = NULL;
+    BDLVMVGdata **ret = NULL;
+    guint64 i = 0;
+
+    success = call_lvm_and_capture_output (args, &output, error_message);
+    if (!success)
+        /* the error_message is already populated from the call */
+        return NULL;
+
+    lines = g_strsplit (output, "\n", 0);
+    g_free (output);
+
+    for (lines_p = lines; *lines_p; lines_p++) {
+        table = parse_lvm_vars ((*lines_p), &num_items);
+        if (table && (num_items == 8)) {
+            /* valid line, try to parse and record it */
+            vgdata = get_vg_data_from_table (table, TRUE);
+            if (vgdata)
+                g_ptr_array_add (vgs, vgdata);
+        } else
+            if (table)
+                g_hash_table_destroy (table);
+    }
+
+    g_strfreev (lines);
+
+    if (vgs->len == 0) {
+        *error_message = g_strdup ("Failed to parse information about VGs");
+        return NULL;
+    }
+
+    /* now create the return value -- NULL-terminated array of BDLVMVGdata */
+    ret = g_new (BDLVMVGdata*, vgs->len + 1);
+    for (i=0; i < vgs->len; i++)
+        ret[i] = (BDLVMVGdata*) g_ptr_array_index (vgs, i);
+    ret[i] = NULL;
+
+    g_ptr_array_free (vgs, FALSE);
+
+    return ret;
+}
+
 #ifdef TESTING_LVM
 #include "test_lvm.c"
 #endif
