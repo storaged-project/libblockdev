@@ -67,6 +67,63 @@ GType bd_lvm_pvdata_get_type () {
 
     return type;
 }
+
+#define BD_LVM_TYPE_VGDATA (bd_lvm_vgdata_get_type ())
+GType bd_lvm_vgdata_get_type();
+
+typedef struct BDLVMVGdata {
+    gchar *name;
+    gchar *uuid;
+    guint64 size;
+    guint64 free;
+    guint64 extent_size;
+    guint64 extent_count;
+    guint64 free_count;
+    guint64 pv_count;
+} BDLVMVGdata;
+
+/**
+ * bd_lvm_vgdata_copy: (skip)
+ *
+ * Creates a new copy of @data.
+ */
+BDLVMVGdata* bd_lvm_vgdata_copy (BDLVMVGdata *data) {
+    BDLVMVGdata *new_data = g_new (BDLVMVGdata, 1);
+
+    new_data->name = g_strdup (data->name);
+    new_data->uuid = g_strdup (data->uuid);
+    new_data->size = data->size;
+    new_data->free = data->free;
+    new_data->extent_size = data->extent_size;
+    new_data->extent_count = data->extent_count;
+    new_data->free_count = data->free_count;
+    new_data->pv_count = data->pv_count;
+
+    return new_data;
+}
+
+/**
+ * bd_lvm_pvdata_free: (skip)
+ *
+ * Frees @data.
+ */
+void bd_lvm_vgdata_free (BDLVMVGdata *data) {
+    g_free (data->name);
+    g_free (data->uuid);
+    g_free (data);
+}
+
+GType bd_lvm_vgdata_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDLVMVGdata",
+                                            (GBoxedCopyFunc) bd_lvm_vgdata_copy,
+                                            (GBoxedFreeFunc) bd_lvm_vgdata_free);
+    }
+
+    return type;
+}
 /* BpG-skip-end */
 
 /**
@@ -269,5 +326,15 @@ gboolean bd_lvm_vgextend (gchar *vg_name, gchar *device, gchar **error_message);
  * Returns: whether the VG @vg_name was successfully reduced of the given @device or not
  */
 gboolean bd_lvm_vgreduce (gchar *vg_name, gchar *device, gchar **error_message);
+
+/**
+ * bd_lvm_vginfo:
+ * @vg_name: a VG to get information about or #NULL
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (transfer full): information about the @vg_name VG or #NULL in case
+ * of error (the @error_message gets populated in those cases)
+ */
+BDLVMVGdata* bd_lvm_vginfo (gchar *vg_name, gchar **error_message);
 
 #endif  /* BD_LVM_API */

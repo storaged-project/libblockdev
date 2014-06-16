@@ -63,6 +63,37 @@ void bd_lvm_pvdata_free (BDLVMPVdata *data) {
     g_free (data);
 }
 
+typedef struct BDLVMVGdata {
+    gchar *name;
+    gchar *uuid;
+    guint64 size;
+    guint64 free;
+    guint64 extent_size;
+    guint64 extent_count;
+    guint64 free_count;
+    guint64 pv_count;
+} BDLVMVGdata;
+
+BDLVMVGdata* bd_lvm_vgdata_copy (BDLVMVGdata *data) {
+    BDLVMVGdata *new_data = g_new (BDLVMVGdata, 1);
+
+    new_data->name = g_strdup (data->name);
+    new_data->uuid = g_strdup (data->uuid);
+    new_data->size = data->size;
+    new_data->free = data->free;
+    new_data->extent_size = data->extent_size;
+    new_data->extent_count = data->extent_count;
+    new_data->free_count = data->free_count;
+    new_data->pv_count = data->pv_count;
+    return new_data;
+}
+
+void bd_lvm_vgdata_free (BDLVMVGdata *data) {
+    g_free (data->name);
+    g_free (data->uuid);
+    g_free (data);
+}
+
 gboolean bd_lvm_is_supported_pe_size (guint64 size);
 guint64 *bd_lvm_get_supported_pe_sizes ();
 guint64 bd_lvm_get_max_lv_size ();
@@ -85,5 +116,6 @@ gboolean bd_lvm_vgactivate (gchar *vg_name, gchar **error_message);
 gboolean bd_lvm_vgdeactivate (gchar *vg_name, gchar **error_message);
 gboolean bd_lvm_vgextend (gchar *vg_name, gchar *device, gchar **error_message);
 gboolean bd_lvm_vgreduce (gchar *vg_name, gchar *device, gchar **error_message);
+BDLVMVGdata* bd_lvm_vginfo (gchar *device, gchar **error_message);
 
 #endif /* BD_LVM */

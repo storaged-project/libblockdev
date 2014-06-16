@@ -71,7 +71,7 @@ LVM
    * vgactivate [DONE]
    * vgdeactivate [DONE]
    * vgreduce [DONE]
-   * vginfo
+   * vginfo [DONE]
    * vgs
 
    * lvorigin
