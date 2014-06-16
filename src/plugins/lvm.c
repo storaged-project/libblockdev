@@ -525,6 +525,7 @@ BDLVMPVdata* bd_lvm_pvinfo (gchar *device, gchar **error_message) {
     }
 
     /* getting here means no usable info was found */
+    *error_message = "Failed to parse information about the PV"
     return NULL;
 }
 
@@ -680,6 +681,7 @@ BDLVMVGdata* bd_lvm_vginfo (gchar *vg_name, gchar **error_message) {
     }
 
     /* getting here means no usable info was found */
+    *error_message = "Failed to parse information about the VG"
     return NULL;
 }
 
