@@ -249,6 +249,27 @@ static BDLVMVGdata* get_vg_data_from_table (GHashTable *table, gboolean free_tab
     return data;
 }
 
+static BDLVMLVdata* get_lv_data_from_table (GHashTable *table, gboolean free_table) {
+    BDLVMLVdata *data = g_new (BDLVMLVdata, 1);
+    gchar *value = NULL;
+
+    data->lv_name = g_strdup (g_hash_table_lookup (table, "LVM2_LV_NAME"));
+    data->vg_name = g_strdup (g_hash_table_lookup (table, "LVM2_VG_NAME"));
+    data->uuid = g_strdup (g_hash_table_lookup (table, "LVM2_LV_UUID"));
+
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_LV_SIZE");
+    if (value)
+        data->size = g_ascii_strtoull (value, NULL, 0);
+
+    data->attr = g_strdup (g_hash_table_lookup (table, "LVM2_LV_ATTR"));
+    data->segtype = g_strdup (g_hash_table_lookup (table, "LVM2_SEGTYPE"));
+
+    if (free_table)
+        g_hash_table_destroy (table);
+
+    return data;
+}
+
 /**
  * bd_lvm_is_supported_pe_size:
  * @size: size (in bytes) to test
@@ -1008,6 +1029,55 @@ gboolean bd_lvm_lvsnapshotmerge (gchar *vg_name, gchar *snapshot_name, gchar **e
     g_free (args[2]);
 
     return success;
+}
+
+/**
+ * bd_lvm_lvinfo:
+ * @vg_name: name of the VG that contains the LV to get information about
+ * @lv_name: name of the LV to get information about
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (transfer full): information about the @vg_name/@lv_name LV or #NULL in case
+ * of error (the @error_message gets populated in those cases)
+ */
+BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, gchar **error_message) {
+    gchar *args[10] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
+                       "--unquoted", "--units=b",
+                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype",
+                       NULL, NULL};
+
+    GHashTable *table = NULL;
+    gboolean success = FALSE;
+    gchar *output = NULL;
+    gchar **lines = NULL;
+    gchar **lines_p = NULL;
+    guint num_items;
+
+    args[8] = g_strdup_printf ("%s/%s", vg_name, lv_name);
+
+    success = call_lvm_and_capture_output (args, &output, error_message);
+    g_free (args[8]);
+
+    if (!success)
+        /* the error_message is already populated from the call */
+        return NULL;
+
+    lines = g_strsplit (output, "\n", 0);
+    g_free (output);
+
+    for (lines_p = lines; *lines_p; lines_p++) {
+        table = parse_lvm_vars ((*lines_p), &num_items);
+        if (table && (num_items == 6)) {
+            g_strfreev (lines);
+            return get_lv_data_from_table (table, TRUE);
+        } else
+            if (table)
+                g_hash_table_destroy (table);
+    }
+
+    /* getting here means no usable info was found */
+    *error_message = g_strdup("Failed to parse information about the LV");
+    return NULL;
 }
 
 #ifdef TESTING_LVM

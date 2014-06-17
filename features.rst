@@ -82,7 +82,7 @@ LVM
    * lvdeactivate [DONE]
    * lvsnapshotcreate [DONE]
    * lvsnapshotmerge [DONE]
-   * lvinfo
+   * lvinfo [DONE]
    * lvs
 
    * thpoolcreate

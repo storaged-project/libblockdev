@@ -124,6 +124,61 @@ GType bd_lvm_vgdata_get_type () {
 
     return type;
 }
+
+#define BD_LVM_TYPE_LVDATA (bd_lvm_lvdata_get_type ())
+GType bd_lvm_lvdata_get_type();
+
+typedef struct BDLVMLVdata {
+    gchar *lv_name;
+    gchar *vg_name;
+    gchar *uuid;
+    guint64 size;
+    gchar *attr;
+    gchar *segtype;
+} BDLVMLVdata;
+
+/**
+ * bd_lvm_lvdata_copy: (skip)
+ *
+ * Creates a new copy of @data.
+ */
+BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
+    BDLVMLVdata *new_data = g_new (BDLVMLVdata, 1);
+
+    new_data->lv_name = g_strdup (data->lv_name);
+    new_data->vg_name = g_strdup (data->vg_name);
+    new_data->uuid = g_strdup (data->uuid);
+    new_data->size = data->size;
+    new_data->attr = g_strdup (data->attr);
+    new_data->segtype = g_strdup (data->segtype);
+    return new_data;
+}
+
+/**
+ * bd_lvm_lvdata_free: (skip)
+ *
+ * Frees @data.
+ */
+void bd_lvm_lvdata_free (BDLVMLVdata *data) {
+    g_free (data->lv_name);
+    g_free (data->vg_name);
+    g_free (data->uuid);
+    g_free (data->attr);
+    g_free (data->segtype);
+    g_free (data);
+}
+
+GType bd_lvm_lvdata_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDLVMLVdata",
+                                            (GBoxedCopyFunc) bd_lvm_lvdata_copy,
+                                            (GBoxedFreeFunc) bd_lvm_lvdata_free);
+    }
+
+    return type;
+}
 /* BpG-skip-end */
 
 /**
@@ -442,5 +497,16 @@ gboolean bd_lvm_lvsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *sna
  * Returns: whether the @vg_name/@snapshot_name LV snapshot was successfully merged or not
  */
 gboolean bd_lvm_lvsnapshotmerge (gchar *vg_name, gchar *snapshot_name, gchar **error_message);
+
+/**
+ * bd_lvm_lvinfo:
+ * @vg_name: name of the VG that contains the LV to get information about
+ * @lv_name: name of the LV to get information about
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (transfer full): information about the @vg_name/@lv_name LV or #NULL in case
+ * of error (the @error_message gets populated in those cases)
+ */
+BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, gchar **error_message);
 
 #endif  /* BD_LVM_API */

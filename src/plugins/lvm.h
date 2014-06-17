@@ -94,6 +94,36 @@ void bd_lvm_vgdata_free (BDLVMVGdata *data) {
     g_free (data);
 }
 
+typedef struct BDLVMLVdata {
+    gchar *lv_name;
+    gchar *vg_name;
+    gchar *uuid;
+    guint64 size;
+    gchar *attr;
+    gchar *segtype;
+} BDLVMLVdata;
+
+BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
+    BDLVMLVdata *new_data = g_new (BDLVMLVdata, 1);
+
+    new_data->lv_name = g_strdup (data->lv_name);
+    new_data->vg_name = g_strdup (data->vg_name);
+    new_data->uuid = g_strdup (data->uuid);
+    new_data->size = data->size;
+    new_data->attr = g_strdup (data->attr);
+    new_data->segtype = g_strdup (data->segtype);
+    return new_data;
+}
+
+void bd_lvm_lvdata_free (BDLVMLVdata *data) {
+    g_free (data->lv_name);
+    g_free (data->vg_name);
+    g_free (data->uuid);
+    g_free (data->attr);
+    g_free (data->segtype);
+    g_free (data);
+}
+
 gboolean bd_lvm_is_supported_pe_size (guint64 size);
 guint64 *bd_lvm_get_supported_pe_sizes ();
 guint64 bd_lvm_get_max_lv_size ();
@@ -128,5 +158,6 @@ gboolean bd_lvm_lvactivate (gchar *vg_name, gchar *lv_name, gboolean ignore_skip
 gboolean bd_lvm_lvdeactivate (gchar *vg_name, gchar *lv_name, gchar **error_message);
 gboolean bd_lvm_lvsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, guint64 size, gchar **error_message);
 gboolean bd_lvm_lvsnapshotmerge (gchar *vg_name, gchar *snapshot_name, gchar **error_message);
+BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, gchar **error_message);
 
 #endif /* BD_LVM */
