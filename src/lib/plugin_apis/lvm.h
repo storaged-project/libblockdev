@@ -103,7 +103,7 @@ BDLVMVGdata* bd_lvm_vgdata_copy (BDLVMVGdata *data) {
 }
 
 /**
- * bd_lvm_pvdata_free: (skip)
+ * bd_lvm_vgdata_free: (skip)
  *
  * Frees @data.
  */
@@ -337,7 +337,7 @@ gboolean bd_lvm_vgreduce (gchar *vg_name, gchar *device, gchar **error_message);
 
 /**
  * bd_lvm_vginfo:
- * @vg_name: a VG to get information about or #NULL
+ * @vg_name: a VG to get information about
  * @error_message: (out): variable to store error message to (if any)
  *
  * Returns: (transfer full): information about the @vg_name VG or #NULL in case
