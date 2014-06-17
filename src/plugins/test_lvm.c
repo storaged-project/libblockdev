@@ -207,9 +207,37 @@ int main (int argc, char **argv) {
 
     ret_str = bd_lvm_lvorigin ("newVG", "newLV", &msg);
     if (!ret_str)
-        g_printf ("lvorigin failed: %s", msg);
+        g_printf ("lvorigin failed: %s\n", msg);
     else
-        g_printf ("lvorigin succeeded: %s", ret_str);
+        g_printf ("lvorigin succeeded: %s\n", ret_str);
+    g_free(msg);
+
+    succ = bd_lvm_lvremove ("newVG", "newLV", TRUE, &msg);
+    if (!succ)
+        g_printf ("lvremove failed: %s\n", msg);
+    else
+        puts ("lvremove succeeded");
+    g_free(msg);
+
+    succ = bd_lvm_lvresize ("newVG", "newLV", 128 MiB, &msg);
+    if (!succ)
+        g_printf ("lvresize failed: %s\n", msg);
+    else
+        puts ("lvresize succeeded");
+    g_free(msg);
+
+    succ = bd_lvm_lvactivate ("newVG", "newLV", TRUE, &msg);
+    if (!succ)
+        g_printf ("lvactivate failed: %s\n", msg);
+    else
+        puts ("lvactivate succeeded");
+    g_free(msg);
+
+    succ = bd_lvm_lvdeactivate ("newVG", "newLV", &msg);
+    if (!succ)
+        g_printf ("lvdeactivate failed: %s\n", msg);
+    else
+        puts ("lvdeactivate succeeded");
     g_free(msg);
 
     return 0;

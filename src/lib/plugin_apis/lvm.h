@@ -377,4 +377,47 @@ gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, gchar **error_message);
  */
 gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar **pv_list, gchar **error_message);
 
+/**
+ * bd_lvm_lvremove:
+ * @vg_name: name of the VG containing the to-be-removed LV
+ * @lv_name: name of the to-be-removed LV
+ * @force: whether to force removal or not
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @vg_name/@lv_name LV was successfully removed or not
+ */
+gboolean bd_lvm_lvremove (gchar *vg_name, gchar *lv_name, gboolean force, gchar **error_message);
+
+/**
+ * bd_lvm_lvresize:
+ * @vg_name: name of the VG containing the to-be-resized LV
+ * @lv_name: name of the to-be-resized LV
+ * @size: the requested new size of the LV
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @vg_name/@lv_name LV was successfully resized or not
+ */
+gboolean bd_lvm_lvresize (gchar *vg_name, gchar *lv_name, guint64 size, gchar **error_message);
+
+/**
+ * bd_lvm_lvactivate:
+ * @vg_name: name of the VG containing the to-be-activated LV
+ * @lv_name: name of the to-be-activated LV
+ * @ignore_skip: whether to ignore the skip flag or not
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @vg_name/@lv_name LV was successfully activated or not
+ */
+gboolean bd_lvm_lvactivate (gchar *vg_name, gchar *lv_name, gboolean ignore_skip, gchar **error_message);
+
+/**
+ * bd_lvm_lvdeactivate:
+ * @vg_name: name of the VG containing the to-be-deactivated LV
+ * @lv_name: name of the to-be-deactivated LV
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @vg_name/@lv_name LV was successfully deactivated or not
+ */
+gboolean bd_lvm_lvdeactivate (gchar *vg_name, gchar *lv_name, gchar **error_message);
+
 #endif  /* BD_LVM_API */

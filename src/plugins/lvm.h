@@ -122,5 +122,9 @@ BDLVMVGdata** bd_lvm_vgs (gchar **error_message);
 
 gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, gchar **error_message);
 gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar **pv_list, gchar **error_message);
+gboolean bd_lvm_lvremove (gchar *vg_name, gchar *lv_name, gboolean force, gchar **error_message);
+gboolean bd_lvm_lvresize (gchar *vg_name, gchar *lv_name, guint64 size, gchar **error_message);
+gboolean bd_lvm_lvactivate (gchar *vg_name, gchar *lv_name, gboolean ignore_skip, gchar **error_message);
+gboolean bd_lvm_lvdeactivate (gchar *vg_name, gchar *lv_name, gchar **error_message);
 
 #endif /* BD_LVM */

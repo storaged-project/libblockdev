@@ -868,6 +868,102 @@ gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar **
     return success;
 }
 
+/**
+ * bd_lvm_lvremove:
+ * @vg_name: name of the VG containing the to-be-removed LV
+ * @lv_name: name of the to-be-removed LV
+ * @force: whether to force removal or not
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @vg_name/@lv_name LV was successfully removed or not
+ */
+gboolean bd_lvm_lvremove (gchar *vg_name, gchar *lv_name, gboolean force, gchar **error_message) {
+    gchar *args[5] = {"lvremove", NULL, NULL, NULL, NULL};
+    guint8 next_arg = 1;
+    gboolean success = FALSE;
+
+    if (force) {
+        args[next_arg] = "--force";
+        next_arg++;
+        args[next_arg] = "--yes";
+        next_arg++;
+    }
+    args[next_arg] = g_strdup_printf ("%s/%s", vg_name, lv_name);
+
+    success = call_lvm_and_report_error (args, error_message);
+    g_free (args[next_arg]);
+
+    return success;
+}
+
+/**
+ * bd_lvm_lvresize:
+ * @vg_name: name of the VG containing the to-be-resized LV
+ * @lv_name: name of the to-be-resized LV
+ * @size: the requested new size of the LV
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @vg_name/@lv_name LV was successfully resized or not
+ */
+gboolean bd_lvm_lvresize (gchar *vg_name, gchar *lv_name, guint64 size, gchar **error_message) {
+    gchar *args[6] = {"lvresize", "--force", "-L", NULL, NULL, NULL};
+    gboolean success = FALSE;
+
+    args[3] = g_strdup_printf ("%"G_GUINT64_FORMAT"b", size);
+    args[4] = g_strdup_printf ("%s/%s", vg_name, lv_name);
+
+    success = call_lvm_and_report_error (args, error_message);
+    g_free (args[3]);
+    g_free (args[4]);
+
+    return success;
+}
+
+/**
+ * bd_lvm_lvactivate:
+ * @vg_name: name of the VG containing the to-be-activated LV
+ * @lv_name: name of the to-be-activated LV
+ * @ignore_skip: whether to ignore the skip flag or not
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @vg_name/@lv_name LV was successfully activated or not
+ */
+gboolean bd_lvm_lvactivate (gchar *vg_name, gchar *lv_name, gboolean ignore_skip, gchar **error_message) {
+    gchar *args[5] = {"lvchange", "-ay", NULL, NULL, NULL};
+    guint8 next_arg = 2;
+    gboolean success = FALSE;
+
+    if (ignore_skip) {
+        args[next_arg] = "-K";
+        next_arg++;
+    }
+    args[next_arg] = g_strdup_printf ("%s/%s", vg_name, lv_name);
+
+    success = call_lvm_and_report_error (args, error_message);
+    g_free (args[next_arg]);
+
+    return success;
+}
+
+/**
+ * bd_lvm_lvdeactivate:
+ * @vg_name: name of the VG containing the to-be-deactivated LV
+ * @lv_name: name of the to-be-deactivated LV
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @vg_name/@lv_name LV was successfully deactivated or not
+ */
+gboolean bd_lvm_lvdeactivate (gchar *vg_name, gchar *lv_name, gchar **error_message) {
+    gchar *args[4] = {"lvchange", "-an", NULL, NULL};
+    gboolean success = FALSE;
+
+    args[2] = g_strdup_printf ("%s/%s", vg_name, lv_name);
+
+    success = call_lvm_and_report_error (args, error_message);
+    g_free (args[2]);
+
+    return success;
+}
 
 #ifdef TESTING_LVM
 #include "test_lvm.c"

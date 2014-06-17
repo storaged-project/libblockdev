@@ -76,13 +76,13 @@ LVM
 
    * lvorigin [DONE]
    * lvcreate [DONE]
-   * lvremove
-   * lvresize
-   * lvactivate
-   * lvdeactivate
-   * lvinfo
+   * lvremove [DONE]
+   * lvresize [DONE]
+   * lvactivate [DONE]
+   * lvdeactivate [DONE]
    * lvsnapshotcreate
    * lvsnapshotmerge
+   * lvinfo
    * lvs
 
    * thpoolcreate
