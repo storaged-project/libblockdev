@@ -420,4 +420,27 @@ gboolean bd_lvm_lvactivate (gchar *vg_name, gchar *lv_name, gboolean ignore_skip
  */
 gboolean bd_lvm_lvdeactivate (gchar *vg_name, gchar *lv_name, gchar **error_message);
 
+/**
+ * bd_lvm_lvsnapshotcreate:
+ * @vg_name: name of the VG containing the LV a new snapshot should be created of
+ * @origin_name: name of the LV a new snapshot should be created of
+ * @snapshot_name: name fo the to-be-created snapshot
+ * @size: requested size for the snapshot
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @snapshot_name snapshot of the @vg_name/@origin_name LV
+ * was successfully created or not.
+ */
+gboolean bd_lvm_lvsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, guint64 size, gchar **error_message);
+
+/**
+ * bd_lvm_lvsnapshotmerge:
+ * @vg_name: name of the VG containing the to-be-merged LV snapshot
+ * @snapshot_name: name of the to-be-merged LV snapshot
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @vg_name/@snapshot_name LV snapshot was successfully merged or not
+ */
+gboolean bd_lvm_lvsnapshotmerge (gchar *vg_name, gchar *snapshot_name, gchar **error_message);
+
 #endif  /* BD_LVM_API */

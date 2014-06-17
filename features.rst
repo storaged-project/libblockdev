@@ -80,8 +80,8 @@ LVM
    * lvresize [DONE]
    * lvactivate [DONE]
    * lvdeactivate [DONE]
-   * lvsnapshotcreate
-   * lvsnapshotmerge
+   * lvsnapshotcreate [DONE]
+   * lvsnapshotmerge [DONE]
    * lvinfo
    * lvs
 

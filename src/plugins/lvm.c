@@ -965,6 +965,51 @@ gboolean bd_lvm_lvdeactivate (gchar *vg_name, gchar *lv_name, gchar **error_mess
     return success;
 }
 
+/**
+ * bd_lvm_lvsnapshotcreate:
+ * @vg_name: name of the VG containing the LV a new snapshot should be created of
+ * @origin_name: name of the LV a new snapshot should be created of
+ * @snapshot_name: name fo the to-be-created snapshot
+ * @size: requested size for the snapshot
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @snapshot_name snapshot of the @vg_name/@origin_name LV
+ * was successfully created or not.
+ */
+gboolean bd_lvm_lvsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, guint64 size, gchar **error_message) {
+    gchar *args[8] = {"lvcreate", "-s", "-L", NULL, "-n", snapshot_name, NULL, NULL};
+    gboolean success = FALSE;
+
+    args[3] = g_strdup_printf ("%"G_GUINT64_FORMAT"b", size);
+    args[6] = g_strdup_printf ("%s/%s", vg_name, origin_name);
+
+    success = call_lvm_and_report_error (args, error_message);
+    g_free (args[3]);
+    g_free (args[6]);
+
+    return success;
+}
+
+/**
+ * bd_lvm_lvsnapshotmerge:
+ * @vg_name: name of the VG containing the to-be-merged LV snapshot
+ * @snapshot_name: name of the to-be-merged LV snapshot
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @vg_name/@snapshot_name LV snapshot was successfully merged or not
+ */
+gboolean bd_lvm_lvsnapshotmerge (gchar *vg_name, gchar *snapshot_name, gchar **error_message) {
+    gchar *args[4] = {"lvconvert", "--merge", NULL, NULL};
+    gboolean success = FALSE;
+
+    args[2] = g_strdup_printf ("%s/%s", vg_name, snapshot_name);
+
+    success = call_lvm_and_report_error (args, error_message);
+    g_free (args[2]);
+
+    return success;
+}
+
 #ifdef TESTING_LVM
 #include "test_lvm.c"
 #endif
