@@ -509,4 +509,14 @@ gboolean bd_lvm_lvsnapshotmerge (gchar *vg_name, gchar *snapshot_name, gchar **e
  */
 BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, gchar **error_message);
 
+/**
+ * bd_lvm_lvs:
+ * @vg_name: (allow-none): name of the VG to get information about LVs from
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (array zero-terminated=1): information about LVs found in the given
+ * @vg_name VG or in system if @vg_name is #NULL
+ */
+BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, gchar **error_message);
+
 #endif  /* BD_LVM_API */

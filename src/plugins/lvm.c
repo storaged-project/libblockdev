@@ -1080,6 +1080,73 @@ BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, gchar **error_messag
     return NULL;
 }
 
+/**
+ * bd_lvm_lvs:
+ * @vg_name: (allow-none): name of the VG to get information about LVs from
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (array zero-terminated=1): information about LVs found in the given
+ * @vg_name VG or in system if @vg_name is #NULL
+ */
+BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, gchar **error_message) {
+    gchar *args[10] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
+                       "--unquoted", "--units=b",
+                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype",
+                       NULL, NULL};
+
+    GHashTable *table = NULL;
+    gboolean success = FALSE;
+    gchar *output = NULL;
+    gchar **lines = NULL;
+    gchar **lines_p = NULL;
+    guint num_items;
+    GPtrArray *lvs = g_ptr_array_new ();
+    BDLVMLVdata *lvdata = NULL;
+    BDLVMLVdata **ret = NULL;
+    guint64 i = 0;
+
+    if (vg_name)
+        args[8] = vg_name;
+
+    success = call_lvm_and_capture_output (args, &output, error_message);
+
+    if (!success)
+        /* the error_message is already populated from the call */
+        return NULL;
+
+    lines = g_strsplit (output, "\n", 0);
+    g_free (output);
+
+    for (lines_p = lines; *lines_p; lines_p++) {
+        table = parse_lvm_vars ((*lines_p), &num_items);
+        if (table && (num_items == 6)) {
+            /* valid line, try to parse and record it */
+            lvdata = get_lv_data_from_table (table, TRUE);
+            if (lvdata)
+                g_ptr_array_add (lvs, lvdata);
+        } else
+            if (table)
+                g_hash_table_destroy (table);
+    }
+
+    g_strfreev (lines);
+
+    if (lvs->len == 0) {
+        *error_message = g_strdup ("Failed to parse information about LVs");
+        return NULL;
+    }
+
+    /* now create the return value -- NULL-terminated array of BDLVMLVdata */
+    ret = g_new (BDLVMLVdata*, lvs->len + 1);
+    for (i=0; i < lvs->len; i++)
+        ret[i] = (BDLVMLVdata*) g_ptr_array_index (lvs, i);
+    ret[i] = NULL;
+
+    g_ptr_array_free (lvs, FALSE);
+
+    return ret;
+}
+
 #ifdef TESTING_LVM
 #include "test_lvm.c"
 #endif

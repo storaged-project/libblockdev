@@ -159,5 +159,6 @@ gboolean bd_lvm_lvdeactivate (gchar *vg_name, gchar *lv_name, gchar **error_mess
 gboolean bd_lvm_lvsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, guint64 size, gchar **error_message);
 gboolean bd_lvm_lvsnapshotmerge (gchar *vg_name, gchar *snapshot_name, gchar **error_message);
 BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, gchar **error_message);
+BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, gchar **error_message);
 
 #endif /* BD_LVM */
