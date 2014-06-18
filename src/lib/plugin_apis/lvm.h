@@ -291,12 +291,12 @@ gboolean bd_lvm_pvremove (gchar *device, gchar **error_message);
 /**
  * bd_lvm_pvmove:
  * @src: the PV device to move extents off of
- * @dest: (allow-none): the PV device to move extents onto or #NULL
+ * @dest: (allow-none): the PV device to move extents onto or %NULL
  * @error_message: (out): variable to store error message to (if any)
  *
  * Returns: whether the extents from the @src PV where successfully movd or not
  *
- * If @dest is #NULL, VG allocation rules are used for the extents from the @src
+ * If @dest is %NULL, VG allocation rules are used for the extents from the @src
  * PV (see pvmove(8)).
  */
 gboolean bd_lvm_pvmove (gchar *src, gchar *dest, gchar **error_message);
@@ -313,11 +313,11 @@ gboolean bd_lvm_pvscan (gchar *device, gboolean update_cache, gchar **error_mess
 
 /**
  * bd_lvm_pvinfo:
- * @device: a PV to get information about or #NULL
+ * @device: a PV to get information about or %NULL
  * @error_message: (out): variable to store error message to (if any)
  *
  * Returns: (transfer full): information about the PV on the given @device or
- * #NULL in case of error (the @error_message gets populated in those cases)
+ * %NULL in case of error (the @error_message gets populated in those cases)
  */
 BDLVMPVdata* bd_lvm_pvinfo (gchar *device, gchar **error_message);
 
@@ -382,7 +382,7 @@ gboolean bd_lvm_vgextend (gchar *vg_name, gchar *device, gchar **error_message);
 /**
  * bd_lvm_vgreduce:
  * @vg_name: name of the to be reduced VG
- * @device: (allow-none): PV device the @vg_name VG should be reduced of or #NULL
+ * @device: (allow-none): PV device the @vg_name VG should be reduced of or %NULL
  *                        if the VG should be reduced of the missing PVs
  * @error_message: (out): variable to store error message to (if any)
  *
@@ -395,7 +395,7 @@ gboolean bd_lvm_vgreduce (gchar *vg_name, gchar *device, gchar **error_message);
  * @vg_name: a VG to get information about
  * @error_message: (out): variable to store error message to (if any)
  *
- * Returns: (transfer full): information about the @vg_name VG or #NULL in case
+ * Returns: (transfer full): information about the @vg_name VG or %NULL in case
  * of error (the @error_message gets populated in those cases)
  */
 BDLVMVGdata* bd_lvm_vginfo (gchar *vg_name, gchar **error_message);
@@ -415,7 +415,7 @@ BDLVMVGdata** bd_lvm_vgs (gchar **error_message);
  * @error_message: (out): variable to store error message to (if any)
  *
  * Returns: (transfer full): the origin volume for the @vg_name/@lv_name LV or
- * #NULL if failed to determine (@error_message is set in those cases)
+ * %NULL if failed to determine (@error_message is set in those cases)
  */
 gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, gchar **error_message);
 
@@ -424,7 +424,7 @@ gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, gchar **error_message);
  * @vg_name: name of the VG to create a new LV in
  * @lv_name: name of the to-be-created LV
  * @size: requested size of the new LV
- * @pv_list: (allow-none) (array zero-terminated=1): list of PVs the newly created LV should use or #NULL
+ * @pv_list: (allow-none) (array zero-terminated=1): list of PVs the newly created LV should use or %NULL
  * if not specified
  * @error_message: (out): variable to store error message to (if any)
  *
@@ -504,7 +504,7 @@ gboolean bd_lvm_lvsnapshotmerge (gchar *vg_name, gchar *snapshot_name, gchar **e
  * @lv_name: name of the LV to get information about
  * @error_message: (out): variable to store error message to (if any)
  *
- * Returns: (transfer full): information about the @vg_name/@lv_name LV or #NULL in case
+ * Returns: (transfer full): information about the @vg_name/@lv_name LV or %NULL in case
  * of error (the @error_message gets populated in those cases)
  */
 BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, gchar **error_message);
@@ -515,7 +515,7 @@ BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, gchar **error_messag
  * @error_message: (out): variable to store error message to (if any)
  *
  * Returns: (array zero-terminated=1): information about LVs found in the given
- * @vg_name VG or in system if @vg_name is #NULL
+ * @vg_name VG or in system if @vg_name is %NULL
  */
 BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, gchar **error_message);
 
@@ -551,7 +551,7 @@ gboolean bd_lvm_thlvcreate (gchar *vg_name, gchar *pool_name, gchar *lv_name, gu
  * @error_message: (out): variable to store error message to (if any)
  *
  * Returns: (transfer full): the name of the pool volume for the @vg_name/@lv_name
- * thin LV or #NULL if failed to determine (@error_message is set in those cases)
+ * thin LV or %NULL if failed to determine (@error_message is set in those cases)
  */
 gchar* bd_lvm_thlvpoolname (gchar *vg_name, gchar *lv_name, gchar **error_message);
 
