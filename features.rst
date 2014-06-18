@@ -85,10 +85,10 @@ LVM
    * lvinfo [DONE]
    * lvs [DONE]
 
-   * thpoolcreate
-   * thlvcreate
-   * thlvpoolname
-   * thinsnapshotcreate
+   * thpoolcreate [DONE]
+   * thlvcreate [DONE]
+   * thlvpoolname [DONE]
+   * thsnapshotcreate [DONE]
 
 
 BTRFS

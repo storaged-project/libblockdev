@@ -1147,6 +1147,125 @@ BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, gchar **error_message) {
     return ret;
 }
 
+/**
+ * bd_lvm_thpoolcreate:
+ * @vg_name: name of the VG to create a thin pool in
+ * @lv_name: name of the to-be-created pool LV
+ * @size: requested size of the to-be-created pool
+ * @md_size: requested metadata size or 0 to use the default
+ * @chunk_size: requested chunk size or 0 to use the default
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @vg_name/@lv_name thin pool was successfully created or not
+ */
+gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guint64 md_size, guint64 chunk_size, gchar **error_message) {
+    gchar *args[8] = {"lvcreate", "-T", "-L", NULL, NULL, NULL, NULL, NULL};
+    guint8 next_arg = 4;
+    gboolean success = FALSE;
+
+    args[3] = g_strdup_printf ("%"G_GUINT64_FORMAT"b", size);
+
+    if (md_size != 0) {
+        args[next_arg] = g_strdup_printf("--poolmetadatasize=%"G_GUINT64_FORMAT"b", md_size);
+        next_arg++;
+    }
+
+    if (chunk_size != 0) {
+        args[next_arg] = g_strdup_printf("--chunksize=%"G_GUINT64_FORMAT"b", chunk_size);
+        next_arg++;
+    }
+
+    args[next_arg] = g_strdup_printf ("%s/%s", vg_name, lv_name);
+
+    success = call_lvm_and_report_error (args, error_message);
+    g_free (args[3]);
+    g_free (args[4]);
+    g_free (args[5]);
+    g_free (args[6]);
+
+    return success;
+}
+
+/**
+ * bd_lvm_thinlvcreate:
+ * @vg_name: name of the VG containing the thin pool providing extents for the to-be-created thin LV
+ * @pool_name: name of the pool LV providing extents for the to-be-created thin LV
+ * @lv_name: name of the to-be-created thin LV
+ * @size: requested virtual size of the to-be-created thin LV
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @vg_name/@lv_name thin LV was successfully created or not
+ */
+gboolean bd_lvm_thlvcreate (gchar *vg_name, gchar *pool_name, gchar *lv_name, guint64 size, gchar **error_message) {
+    gchar *args[8] = {"lvcreate", "-T", NULL, "-V", NULL, "-n", lv_name, NULL};
+    gboolean success;
+
+    args[2] = g_strdup_printf ("%s/%s", vg_name, pool_name);
+    args[4] = g_strdup_printf ("%"G_GUINT64_FORMAT"b", size);
+
+    success = call_lvm_and_report_error (args, error_message);
+    g_free (args[2]);
+    g_free (args[4]);
+
+    return success;
+}
+
+/**
+ * bd_lvm_thpoolname:
+ * @vg_name: name of the VG containing the queried thin LV
+ * @lv_name: name of the queried thin LV
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (transfer full): the name of the pool volume for the @vg_name/@lv_name
+ * thin LV or #NULL if failed to determine (@error_message is set in those cases)
+ */
+gchar* bd_lvm_thlvpoolname (gchar *vg_name, gchar *lv_name, gchar **error_message) {
+    gboolean success = FALSE;
+    gchar *output = NULL;
+    gchar *args[6] = {"lvs", "--noheadings", "-o", "pool_lv", NULL, NULL};
+    args[4] = g_strdup_printf ("%s/%s", vg_name, lv_name);
+
+    success = call_lvm_and_capture_output (args, &output, error_message);
+    g_free (args[4]);
+
+    if (!success)
+        /* the error_message is already populated from the call */
+        return NULL;
+
+    return g_strstrip (output);
+}
+
+/**
+ * bd_lvm_thsnapshotcreate:
+ * @vg_name: name of the VG containing the thin LV a new snapshot should be created of
+ * @origin_name: name of the thin LV a new snapshot should be created of
+ * @snapshot_name: name fo the to-be-created snapshot
+ * @pool_name: (allow-none): name of the thin pool to create the snapshot in or %NULL if not specified
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @snapshot_name snapshot of the @vg_name/@origin_name
+ * thin LV was successfully created or not.
+ */
+gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, gchar *pool_name, gchar **error_message) {
+    gchar *args[8] = {"lvcreate", "-s", "-n", snapshot_name, NULL, NULL, NULL, NULL};
+    next_arg = 4;
+    gboolean success = FALSE;
+
+    if (pool_name) {
+        args[next_arg] = "-T";
+        next_arg++;
+        args[next_arg] = pool_name;
+        next_arg++;
+    }
+
+    args[next_arg] = g_strdup_printf ("%s/%s", vg_name, origin_name);
+
+    success = call_lvm_and_report_error (args, error_message);
+    g_free (args[next_arg]);
+
+    return success;
+}
+
 #ifdef TESTING_LVM
 #include "test_lvm.c"
 #endif

@@ -161,4 +161,9 @@ gboolean bd_lvm_lvsnapshotmerge (gchar *vg_name, gchar *snapshot_name, gchar **e
 BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, gchar **error_message);
 BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, gchar **error_message);
 
+gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guint64 md_size, guint64 chunk_size, gchar **error_message);
+gboolean bd_lvm_thlvcreate (gchar *vg_name, gchar *pool_name, gchar *lv_name, guint64 size, gchar **error_message);
+gchar* bd_lvm_thpoolname (gchar *vg_name, gchar *lv_name, gchar **error_message);
+gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, gchar *pool_name, gchar **error_message);
+
 #endif /* BD_LVM */

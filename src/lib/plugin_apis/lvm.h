@@ -519,4 +519,53 @@ BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, gchar **error_messag
  */
 BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, gchar **error_message);
 
+/**
+ * bd_lvm_thpoolcreate:
+ * @vg_name: name of the VG to create a thin pool in
+ * @lv_name: name of the to-be-created pool LV
+ * @size: requested size of the to-be-created pool
+ * @md_size: requested metadata size or 0 to use the default
+ * @chunk_size: requested chunk size or 0 to use the default
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @vg_name/@lv_name thin pool was successfully created or not
+ */
+gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guint64 md_size, guint64 chunk_size, gchar **error_message);
+
+/**
+ * bd_lvm_thinlvcreate:
+ * @vg_name: name of the VG containing the thin pool providing extents for the to-be-created thin LV
+ * @pool_name: name of the pool LV providing extents for the to-be-created thin LV
+ * @lv_name: name of the to-be-created thin LV
+ * @size: requested virtual size of the to-be-created thin LV
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @vg_name/@lv_name thin LV was successfully created or not
+ */
+gboolean bd_lvm_thlvcreate (gchar *vg_name, gchar *pool_name, gchar *lv_name, guint64 size, gchar **error_message);
+
+/**
+ * bd_lvm_thpoolname:
+ * @vg_name: name of the VG containing the queried thin LV
+ * @lv_name: name of the queried thin LV
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (transfer full): the name of the pool volume for the @vg_name/@lv_name
+ * thin LV or #NULL if failed to determine (@error_message is set in those cases)
+ */
+gchar* bd_lvm_thlvpoolname (gchar *vg_name, gchar *lv_name, gchar **error_message);
+
+/**
+ * bd_lvm_thsnapshotcreate:
+ * @vg_name: name of the VG containing the thin LV a new snapshot should be created of
+ * @origin_name: name of the thin LV a new snapshot should be created of
+ * @snapshot_name: name fo the to-be-created snapshot
+ * @pool_name: (allow-none): name of the thin pool to create the snapshot in or %NULL if not specified
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @snapshot_name snapshot of the @vg_name/@origin_name
+ * thin LV was successfully created or not.
+ */
+gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, gchar *pool_name, gchar **error_message);
+
 #endif  /* BD_LVM_API */
