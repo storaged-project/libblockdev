@@ -414,8 +414,8 @@ BDLVMVGdata** bd_lvm_vgs (gchar **error_message);
  * @lv_name: name of the queried LV
  * @error_message: (out): variable to store error message to (if any)
  *
- * Returns: the origin volume for the @vg_name/@lv_name LV or #NULL if failed
- * to determine (@error_message is set in those cases)
+ * Returns: (transfer full): the origin volume for the @vg_name/@lv_name LV or
+ * #NULL if failed to determine (@error_message is set in those cases)
  */
 gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, gchar **error_message);
 
