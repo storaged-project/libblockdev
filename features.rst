@@ -189,7 +189,7 @@ LOOP
 
 :functions:
    * get_backing_file [DONE]
-   * get_loop_name
+   * get_loop_name [DONE]
    * loop_setup
    * loop_teardown
 

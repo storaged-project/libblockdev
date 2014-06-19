@@ -19,6 +19,7 @@
 
 #include <glib.h>
 #include <unistd.h>
+#include <glob.h>
 #include "loop.h"
 
 /**
@@ -60,6 +61,54 @@ gchar* bd_loop_get_backing_file (gchar *dev_name, gchar **error_message) {
 
     g_free (sys_path);
     return g_strstrip (ret);
+}
+
+/**
+ * bd_loop_get_loop_name:
+ * @file: path of the backing file to get loop name for
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (transfer full): name of the loop device associated with the given
+ * @file or %NULL if failed to determine
+ */
+gchar* bd_loop_get_loop_name (gchar *file, gchar **error_message) {
+    glob_t globbuf;
+    gchar **path_p;
+    gboolean success = FALSE;
+    GError *error;
+    gchar *content;
+    gboolean found = FALSE;
+    gchar **parts;
+    gchar *ret;
+
+    if (glob ("/sys/block/loop*/loop/backing_file", GLOB_NOSORT, NULL, &globbuf) != 0) {
+        /* TODO: be more specific about the errors? */
+        *error_message = g_strdup_printf ("The given file %s has no associated loop device",
+                                          file);
+        return NULL;
+    }
+
+    for (path_p = globbuf.gl_pathv; *path_p && !found; path_p++) {
+        success = g_file_get_contents (*path_p, &content, NULL, &error);
+        if (!success)
+            continue;
+
+        g_strstrip (content);
+        found = (g_strcmp0 (content, file) == 0);
+        g_free (content);
+    }
+
+    if (!found) {
+        *error_message = g_strdup_printf ("The given file %s has no associated loop device",
+                                          file);
+        return NULL;
+    }
+
+    parts = g_strsplit (*(path_p - 1), "/", 5);
+    ret = g_strdup (parts[3]);
+    g_strfreev (parts);
+
+    return ret;
 }
 
 #ifdef TESTING_LOOP
