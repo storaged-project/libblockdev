@@ -26,3 +26,12 @@ gchar* bd_loop_get_loop_name (gchar *file, gchar **error_message);
  * Returns: whether the @file was successfully setup as a loop device or not
  */
 gboolean bd_loop_setup (gchar *file, gchar **loop_name, gchar **error_message);
+
+/**
+ * bd_loop_teardown:
+ * @loop: path of the loop device to tear down
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @loop device was successfully torn down or not
+ */
+gboolean bd_loop_teardown (gchar *loop, gchar **error_message);

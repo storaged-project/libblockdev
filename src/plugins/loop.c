@@ -156,6 +156,47 @@ gboolean bd_loop_setup (gchar *file, gchar **loop_name, gchar **error_message) {
     }
 }
 
+/**
+ * bd_loop_teardown:
+ * @loop: path of the loop device to tear down
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @loop device was successfully torn down or not
+ */
+gboolean bd_loop_teardown (gchar *loop, gchar **error_message) {
+    gboolean success = FALSE;
+    GError *error = NULL;
+    gint status = 0;
+    gchar *stdout_data = NULL;
+    gchar *stderr_data = NULL;
+
+    gchar *args[4] = {"losetup", "-d", loop, NULL};
+
+    success = g_spawn_sync (NULL, args, NULL, G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH,
+                            NULL, NULL, &stdout_data, &stderr_data, &status, &error);
+
+    if (!success) {
+        *error_message = g_strdup (error->message);
+        g_error_free(error);
+        return FALSE;
+    }
+
+    if (status != 0) {
+        if (stderr_data && (g_strcmp0 ("", stderr_data) != 0)) {
+            *error_message = stderr_data;
+            g_free (stdout_data);
+        } else {
+            *error_message = stdout_data;
+            g_free (stderr_data);
+        }
+
+        return FALSE;
+    } else {
+        g_free (stdout_data);
+        g_free (stderr_data);
+        return TRUE;
+    }
+}
 
 #ifdef TESTING_LOOP
 #include "test_loop.c"

@@ -191,7 +191,7 @@ LOOP
    * get_backing_file [DONE]
    * get_loop_name [DONE]
    * loop_setup [DONE]
-   * loop_teardown
+   * loop_teardown [DONE]
 
 
 DEVICE MAPPER
