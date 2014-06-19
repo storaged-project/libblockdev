@@ -69,6 +69,8 @@ static gboolean run_and_report_error (gchar **argv, gchar **error_message) {
         return FALSE;
     }
 
+    g_free (stdout_data);
+    g_free (stderr_data);
     return TRUE;
 }
 
