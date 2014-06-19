@@ -111,6 +111,52 @@ gchar* bd_loop_get_loop_name (gchar *file, gchar **error_message) {
     return ret;
 }
 
+/**
+ * bd_loop_setup:
+ * @file: file to setup as a loop device
+ * @loop_name: (out): if not %NULL, it is used to store the name of the loop device
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @file was successfully setup as a loop device or not
+ */
+gboolean bd_loop_setup (gchar *file, gchar **loop_name, gchar **error_message) {
+    gboolean success = FALSE;
+    GError *error = NULL;
+    gint status = 0;
+    gchar *stdout_data = NULL;
+    gchar *stderr_data = NULL;
+
+    gchar *args[4] = {"losetup", "-f", file, NULL};
+
+    success = g_spawn_sync (NULL, args, NULL, G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH,
+                            NULL, NULL, &stdout_data, &stderr_data, &status, &error);
+
+    if (!success) {
+        *error_message = g_strdup (error->message);
+        g_error_free(error);
+        return FALSE;
+    }
+
+    if (status != 0) {
+        if (stderr_data && (g_strcmp0 ("", stderr_data) != 0)) {
+            *error_message = stderr_data;
+            g_free (stdout_data);
+        } else {
+            *error_message = stdout_data;
+            g_free (stderr_data);
+        }
+
+        return FALSE;
+    } else {
+        if (loop_name)
+            *loop_name = bd_loop_get_loop_name (file, error_message);
+        g_free (stdout_data);
+        g_free (stderr_data);
+        return TRUE;
+    }
+}
+
+
 #ifdef TESTING_LOOP
 #include "test_loop.c"
 #endif
