@@ -71,3 +71,6 @@ run-ipython: build-library build-plugins build-introspection-data
 run-root-ipython: build-library build-plugins build-introspection-data
 	sudo GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/ ipython
 
+test: build-library build-plugins build-introspection-data
+	@echo
+	@sudo GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/ PYTHONPATH=.:tests/ python -m unittest discover -v -s tests/ -p '*_test.py'
