@@ -158,7 +158,7 @@ gboolean bd_loop_setup (gchar *file, gchar **loop_name, gchar **error_message) {
 
 /**
  * bd_loop_teardown:
- * @loop: path of the loop device to tear down
+ * @loop: path or name of the loop device to tear down
  * @error_message: (out): variable to store error message to (if any)
  *
  * Returns: whether the @loop device was successfully torn down or not
@@ -169,11 +169,20 @@ gboolean bd_loop_teardown (gchar *loop, gchar **error_message) {
     gint status = 0;
     gchar *stdout_data = NULL;
     gchar *stderr_data = NULL;
+    gchar *dev_loop = NULL;
 
-    gchar *args[4] = {"losetup", "-d", loop, NULL};
+    gchar *args[4] = {"losetup", "-d", NULL, NULL};
+
+    if (g_str_has_prefix (loop, "/dev/"))
+        args[2] = loop;
+    else {
+        dev_loop = g_strdup_printf ("/dev/%s", loop);
+        args[2] = dev_loop;
+    }
 
     success = g_spawn_sync (NULL, args, NULL, G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH,
                             NULL, NULL, &stdout_data, &stderr_data, &status, &error);
+    g_free (dev_loop);
 
     if (!success) {
         *error_message = g_strdup (error->message);
