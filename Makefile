@@ -57,7 +57,7 @@ test-loop-plugin: ${LOOP_PLUGIN_FILES}
 	@rm test_loop_plugin
 
 test-library: generate-boilerplate-code build-plugins
-	gcc -DTESTING_LIB -o test_library `pkg-config --libs --cflags glib-2.0` -ldl src/lib/blockdev.c
+	gcc -DTESTING_LIB -o test_library `pkg-config --libs --cflags glib-2.0 gobject-2.0` -ldl src/lib/blockdev.c
 	@echo "***Running tests***"
 	LD_LIBRARY_PATH=src/plugins/ ./test_library
 	@rm test_library
