@@ -1,12 +1,12 @@
-SIZES_FILES = src/util/sizes.c src/util/sizes.h
+SIZES_FILES = src/utils/sizes.c src/utils/sizes.h
 LVM_PLUGIN_FILES = src/plugins/lvm.h src/plugins/lvm.c
 SWAP_PLUGIN_FILES = src/plugins/swap.h src/plugins/swap.c
 LOOP_PLUGIN_FILES = src/plugins/loop.h src/plugins/loop.c
 LIBRARY_FILES = src/lib/blockdev.c src/lib/blockdev.h src/lib/plugins.h src/lib/plugin_apis/lvm.h
 
 build-plugins: ${LVM_PLUGIN_FILES} ${SWAP_PLUGIN_FILES} ${LOOP_PLUGIN_FILES} ${SIZES_FILES}
-	gcc -c -fPIC -I src/util/ -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0 gobject-2.0`\
-		src/util/sizes.c src/plugins/lvm.c
+	gcc -c -fPIC -I src/utils/ -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0 gobject-2.0`\
+		src/utils/sizes.c src/plugins/lvm.c
 	gcc -shared -o src/plugins/libbd_lvm.so lvm.o
 
 	gcc -c -fPIC -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0`\
@@ -31,15 +31,15 @@ build-introspection-data: build-library ${LIBRARY_FILES}
 	g-ir-compiler -o BlockDev-1.0.typelib BlockDev-1.0.gir
 
 test-sizes: ${SIZES_FILES}
-	gcc -Wall -DTESTING_SIZES -o test_sizes -I src/util/ -lm `pkg-config --libs --cflags glib-2.0`\
-		src/util/sizes.c
+	gcc -Wall -DTESTING_SIZES -o test_sizes -I src/utils/ -lm `pkg-config --libs --cflags glib-2.0`\
+		src/utils/sizes.c
 	@echo "***Running tests***"
 	./test_sizes
 	@rm test_sizes
 
 test-lvm-plugin: ${LVM_PLUGIN_FILES} ${SIZES_FILES}
-	gcc -DTESTING_LVM -o test_lvm_plugin -I src/util/ -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0 gobject-2.0`\
-		src/util/sizes.c src/plugins/lvm.c
+	gcc -DTESTING_LVM -o test_lvm_plugin -I src/utils/ -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0 gobject-2.0`\
+		src/utils/sizes.c src/plugins/lvm.c
 	@echo "***Running tests***"
 	./test_lvm_plugin
 	@rm test_lvm_plugin

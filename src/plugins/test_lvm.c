@@ -72,24 +72,24 @@ int main (int argc, char **argv) {
     sizes = bd_lvm_get_supported_pe_sizes ();
     g_printf ("Supported PE sizes: ");
     for (i=0; sizes[i] != 0; i++)
-        g_printf ("%s, ", bd_size_human_readable (sizes[i]));
+        g_printf ("%s, ", bd_utils_size_human_readable (sizes[i]));
     puts ("");
     g_free (sizes);
 
-    g_printf ("max LV size: %s\n", bd_size_human_readable(bd_lvm_get_max_lv_size()));
+    g_printf ("max LV size: %s\n", bd_utils_size_human_readable(bd_lvm_get_max_lv_size()));
 
     result = bd_lvm_round_size_to_pe ((13 MiB), USE_DEFAULT_PE_SIZE, TRUE);
-    g_printf ("up-rounded size 13 MiB: %s\n", bd_size_human_readable(result));
+    g_printf ("up-rounded size 13 MiB: %s\n", bd_utils_size_human_readable(result));
     result = bd_lvm_round_size_to_pe ((13 MiB), USE_DEFAULT_PE_SIZE, FALSE);
-    g_printf ("down-rounded size 13 MiB: %s\n", bd_size_human_readable(result));
+    g_printf ("down-rounded size 13 MiB: %s\n", bd_utils_size_human_readable(result));
 
     result = bd_lvm_get_lv_physical_size ((13 MiB), USE_DEFAULT_PE_SIZE);
-    g_printf ("13 MiB physical size: %s\n", bd_size_human_readable(result));
+    g_printf ("13 MiB physical size: %s\n", bd_utils_size_human_readable(result));
 
     result = bd_lvm_get_thpool_padding ((1 GiB), USE_DEFAULT_PE_SIZE, TRUE);
-    g_printf ("1 GiB ThPool padding size (included): %s\n", bd_size_human_readable(result));
+    g_printf ("1 GiB ThPool padding size (included): %s\n", bd_utils_size_human_readable(result));
     result = bd_lvm_get_thpool_padding ((1 GiB), USE_DEFAULT_PE_SIZE, FALSE);
-    g_printf ("1 GiB ThPool padding size (not included): %s\n", bd_size_human_readable(result));
+    g_printf ("1 GiB ThPool padding size (not included): %s\n", bd_utils_size_human_readable(result));
 
     if (bd_lvm_is_valid_thpool_md_size (512 MiB))
         puts ("512 MiB ThPool MD size: Valid.");

@@ -11,12 +11,12 @@
 static const gchar *size_prefixes[] = {"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", NULL};
 
 /**
- * bd_size_human_readable:
+ * bd_utils_size_human_readable:
  * @size: size to get human readable representation of
  *
  * Returns: human readable representation of the given @size
  */
-gchar* bd_size_human_readable (guint64 size) {
+gchar* bd_utils_size_human_readable (guint64 size) {
     guint8 i = 0;
     gdouble value = (gdouble) size;
     gdouble prev_value = (gdouble) value;

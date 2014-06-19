@@ -17,6 +17,6 @@
 #define PiB PEBIBYTE
 #define EiB EXBIBYTE
 
-gchar* bd_size_human_readable (guint64 size);
+gchar* bd_utils_size_human_readable (guint64 size);
 
 #endif /* BD_SIZES */
