@@ -1248,7 +1248,7 @@ gchar* bd_lvm_thlvpoolname (gchar *vg_name, gchar *lv_name, gchar **error_messag
  */
 gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, gchar *pool_name, gchar **error_message) {
     gchar *args[8] = {"lvcreate", "-s", "-n", snapshot_name, NULL, NULL, NULL, NULL};
-    next_arg = 4;
+    guint next_arg = 4;
     gboolean success = FALSE;
 
     if (pool_name) {
