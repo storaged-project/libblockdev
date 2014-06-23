@@ -36,7 +36,7 @@ class LvmNoDevTestCase(unittest.TestCase):
             expected = 16 * 1024**4
         else:
             # 64-bit arch
-            expected = 8 * 1024**5
+            expected = 8 * 1024**6
 
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), expected)
 
