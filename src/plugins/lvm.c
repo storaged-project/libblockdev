@@ -489,19 +489,24 @@ gboolean bd_lvm_pvmove (gchar *src, gchar *dest, gchar **error_message) {
 
 /**
  * bd_lvm_pvscan:
- * @device: the device to scan for PVs
+ * @device: (allow-none): the device to scan for PVs or %NULL
  * @update_cache: whether to update the lvmetad cache or not
  * @error_message: (out): variable to store error message to (if any)
  *
- * Returns: whether the @device was successfully scanned for PVs or not
+ * Returns: whether the system or @device was successfully scanned for PVs or not
+ *
+ * The @device argument is used only if @update_cache is %TRUE. Otherwise the
+ * whole system is scanned for PVs.
  */
 gboolean bd_lvm_pvscan (gchar *device, gboolean update_cache, gchar **error_message) {
     gchar *args[4] = {"pvscan", NULL, NULL, NULL};
     if (update_cache) {
         args[1] = "--cache";
         args[2] = device;
-    } else
-        args[1] = device;
+    }
+    else
+        if (device)
+            g_warning ("Ignoring the device argument in pvscan (cache update not requested)");
 
     return call_lvm_and_report_error (args, error_message);
 }
