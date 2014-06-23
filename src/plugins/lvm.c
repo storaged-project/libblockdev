@@ -1257,7 +1257,7 @@ gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *sna
     gboolean success = FALSE;
 
     if (pool_name) {
-        args[next_arg] = "-T";
+        args[next_arg] = "--thinpool";
         next_arg++;
         args[next_arg] = pool_name;
         next_arg++;
