@@ -277,7 +277,7 @@ static BDLVMLVdata* get_lv_data_from_table (GHashTable *table, gboolean free_tab
  * Returns: whether the given size is supported physical extent size or not
  */
 gboolean bd_lvm_is_supported_pe_size (guint64 size) {
-    return (((size % 2) == 0) && (size >= (1 KiB)) && (size <= (16 GiB)));
+    return (((size % 2) == 0) && (size >= (MIN_PE_SIZE)) && (size <= (MAX_PE_SIZE)));
 }
 
 /**
