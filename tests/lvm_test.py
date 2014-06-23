@@ -103,12 +103,19 @@ class LvmNoDevTestCase(unittest.TestCase):
 
 
 class LvmTestCase(unittest.TestCase):
+    # TODO: test pvmove (must create two PVs, a VG, a VG and some data in it
+    #       first)
     def setUp(self):
         self.dev_file = create_sparse_tempfile("lvm_test", 1024**3)
+        self.dev_file2 = create_sparse_tempfile("lvm_test", 1024**3)
         succ, loop, err = BlockDev.loop_setup(self.dev_file)
         if err or not succ:
             raise RuntimeError("Failed to setup loop device for testing")
         self.loop_dev = "/dev/%s" % loop
+        succ, loop, err = BlockDev.loop_setup(self.dev_file2)
+        if err or not succ:
+            raise RuntimeError("Failed to setup loop device for testing")
+        self.loop_dev2 = "/dev/%s" % loop
 
     def tearDown(self):
         succ, err = BlockDev.loop_teardown(self.loop_dev)
@@ -117,3 +124,54 @@ class LvmTestCase(unittest.TestCase):
             raise RuntimeError("Failed to tear down loop device used for testing")
 
         os.unlink(self.dev_file)
+        succ, err = BlockDev.loop_teardown(self.loop_dev2)
+        if err or not succ:
+            os.unlink(self.dev_file2)
+            raise RuntimeError("Failed to tear down loop device used for testing")
+
+        os.unlink(self.dev_file2)
+
+    def test_pvcreate_and_pvremove(self):
+        """Verify that it's possible to create and destroy a PV"""
+
+        succ, err = BlockDev.lvm_pvcreate(self.loop_dev)
+        self.assertTrue(succ)
+        self.assertIs(err, None)
+
+        succ, err = BlockDev.lvm_pvremove(self.loop_dev)
+        self.assertTrue(succ)
+        self.assertIs(err, None)
+
+    def test_pvresize(self):
+        """Verify that it's possible to resize a PV"""
+
+        succ, err = BlockDev.lvm_pvresize(self.loop_dev, 1 * 1024**3)
+        self.assertFalse(succ)
+        self.assertTrue(err)
+
+        succ, err = BlockDev.lvm_pvcreate(self.loop_dev)
+        self.assertTrue(succ)
+        self.assertIs(err, None)
+
+        succ, err = BlockDev.lvm_pvresize(self.loop_dev, 1 * 1024**3)
+        self.assertTrue(succ)
+        self.assertIs(err, None)
+
+        succ, err = BlockDev.lvm_pvremove(self.loop_dev)
+        self.assertTrue(succ)
+        self.assertIs(err, None)
+
+    def test_pvscan(self):
+        """Verify that pvscan runs without issues with cache or without"""
+
+        succ, err = BlockDev.lvm_pvscan(None, False)
+        self.assertTrue(succ)
+        self.assertIs(err, None)
+
+        succ, err = BlockDev.lvm_pvscan(self.loop_dev, True)
+        self.assertTrue(succ)
+        self.assertIs(err, None)
+
+        succ, err = BlockDev.lvm_pvscan(None, True)
+        self.assertTrue(succ)
+        self.assertIs(err, None)
