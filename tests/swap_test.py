@@ -7,7 +7,7 @@ BlockDev.init(None)
 
 class SwapTestCase(unittest.TestCase):
     def setUp(self):
-        self.dev_file = create_sparse_tempfile("libblockdev_create_swap_test", 1024**3)
+        self.dev_file = create_sparse_tempfile("swap_test", 1024**3)
         succ, loop, err = BlockDev.loop_setup(self.dev_file)
         if err or not succ:
             raise RuntimeError("Failed to setup loop device for testing")
@@ -50,4 +50,6 @@ class SwapTestCase(unittest.TestCase):
         if err or not succ:
             os.unlink(self.dev_file)
             raise RuntimeError("Failed to tear down loop device used for testing")
+
+        os.unlink(self.dev_file)
 

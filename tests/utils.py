@@ -8,7 +8,7 @@ def create_sparse_tempfile(name, size):
         :param :class:`~.size.Size` size: the file size
         :returns: the path to the newly created file
     """
-    (fd, path) = tempfile.mkstemp(prefix="blivet.", suffix="-%s" % name)
+    (fd, path) = tempfile.mkstemp(prefix="libblockdev.", suffix="-%s" % name)
     os.close(fd)
     create_sparse_file(path, size)
     return path

@@ -7,7 +7,7 @@ BlockDev.init(None)
 
 class LoopTestCase(unittest.TestCase):
     def setUp(self):
-        self.dev_file = create_sparse_tempfile("libblockdev_loop_test", 1024**3)
+        self.dev_file = create_sparse_tempfile("loop_test", 1024**3)
 
     def tearDown(self):
         os.unlink(self.dev_file)

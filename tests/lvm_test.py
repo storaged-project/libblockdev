@@ -104,7 +104,7 @@ class LvmNoDevTestCase(unittest.TestCase):
 
 class LvmTestCase(unittest.TestCase):
     def setUp(self):
-        self.dev_file = create_sparse_tempfile("libblockdev_lvm_test", 1024**3)
+        self.dev_file = create_sparse_tempfile("lvm_test", 1024**3)
         succ, loop, err = BlockDev.loop_setup(self.dev_file)
         if err or not succ:
             raise RuntimeError("Failed to setup loop device for testing")
@@ -116,3 +116,4 @@ class LvmTestCase(unittest.TestCase):
             os.unlink(self.dev_file)
             raise RuntimeError("Failed to tear down loop device used for testing")
 
+        os.unlink(self.dev_file)
