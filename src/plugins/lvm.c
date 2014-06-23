@@ -239,7 +239,7 @@ static BDLVMVGdata* get_vg_data_from_table (GHashTable *table, gboolean free_tab
     if (value)
         data->free_count = g_ascii_strtoull (value, NULL, 0);
 
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_PV_COUNT");
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_PV_COUNT");
     if (value)
         data->pv_count = g_ascii_strtoull (value, NULL, 0);
 
