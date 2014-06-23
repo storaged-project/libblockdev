@@ -536,7 +536,7 @@ BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, gchar **error_message);
 gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guint64 md_size, guint64 chunk_size, gchar **error_message);
 
 /**
- * bd_lvm_thinlvcreate:
+ * bd_lvm_thlvcreate:
  * @vg_name: name of the VG containing the thin pool providing extents for the to-be-created thin LV
  * @pool_name: name of the pool LV providing extents for the to-be-created thin LV
  * @lv_name: name of the to-be-created thin LV
@@ -548,7 +548,7 @@ gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guin
 gboolean bd_lvm_thlvcreate (gchar *vg_name, gchar *pool_name, gchar *lv_name, guint64 size, gchar **error_message);
 
 /**
- * bd_lvm_thpoolname:
+ * bd_lvm_thlvpoolname:
  * @vg_name: name of the VG containing the queried thin LV
  * @lv_name: name of the queried thin LV
  * @error_message: (out): variable to store error message to (if any)
