@@ -10,5 +10,6 @@
 #define BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH 20
 
 gchar* bd_crypto_generate_backup_passphrase();
+gboolean bd_crypto_device_is_luks (gchar *device, gchar **error_message);
 
 #endif  /* BD_CRYPTO */

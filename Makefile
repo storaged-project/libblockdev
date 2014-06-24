@@ -18,7 +18,7 @@ build-plugins: ${LVM_PLUGIN_FILES} ${SWAP_PLUGIN_FILES} ${LOOP_PLUGIN_FILES} ${S
 		src/plugins/loop.c
 	gcc -shared -o src/plugins/libbd_loop.so loop.o
 
-	gcc -c -Wall -Wextra -fPIC -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0`\
+	gcc -c -Wall -Wextra -fPIC -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0 libcryptsetup`\
 		src/plugins/crypto.c
 	gcc -shared -o src/plugins/libbd_crypto.so crypto.o
 
@@ -33,7 +33,7 @@ build-library: generate-boilerplate-code ${LIBRARY_FILES}
 	gcc -shared -o src/lib/libblockdev.so blockdev.o
 
 build-introspection-data: build-library ${LIBRARY_FILES}
-	LD_LIBRARY_PATH=src/lib/ g-ir-scanner `pkg-config --cflags --libs glib-2.0 gobject-2.0` --library=blockdev -I src/lib/ -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o BlockDev-1.0.gir --warn-all src/lib/blockdev.h src/lib/blockdev.c src/lib/plugins.h src/lib/plugin_apis/lvm.h src/lib/plugin_apis/swap.h src/lib/plugin_apis/loop.h src/lib/plugin_apis/crypto.h
+	LD_LIBRARY_PATH=src/lib/ g-ir-scanner `pkg-config --cflags --libs glib-2.0 gobject-2.0 libcryptsetup` --library=blockdev -I src/lib/ -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o BlockDev-1.0.gir --warn-all src/lib/blockdev.h src/lib/blockdev.c src/lib/plugins.h src/lib/plugin_apis/lvm.h src/lib/plugin_apis/swap.h src/lib/plugin_apis/loop.h src/lib/plugin_apis/crypto.h
 	g-ir-compiler -o BlockDev-1.0.typelib BlockDev-1.0.gir
 
 test-sizes: ${SIZES_FILES}

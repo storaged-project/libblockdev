@@ -19,6 +19,7 @@
 
 #include <string.h>
 #include <glib.h>
+#include <libcryptsetup.h>
 #include "crypto.h"
 
 /**
@@ -56,4 +57,28 @@ gchar* bd_crypto_generate_backup_passphrase() {
     }
 
     return ret;
+}
+
+/**
+ * bd_crypto_device_is_luks:
+ * @device: the queried device
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: %TRUE if the given @device is a LUKS device or %FALSE if not or
+ * failed to determine (the @error_message is populated with the error in such
+ * cases)
+ */
+gboolean bd_crypto_device_is_luks (gchar *device, gchar **error_message) {
+    struct crypt_device *cd = NULL;
+    gint ret;
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        *error_message = g_strdup_printf ("Failed to initialize device: %s", strerror(-ret));
+        return FALSE;
+    }
+
+    ret = crypt_load (cd, CRYPT_LUKS1, NULL);
+    crypt_free (cd);
+    return (ret == 0);
 }
