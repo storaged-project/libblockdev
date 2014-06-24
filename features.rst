@@ -160,7 +160,7 @@ CRYPTO/LUKS
    * generate_backup_passphrase [DONE]
    * device_is_luks [DONE]
    * luks_uuid [DONE]
-   * luks_status
+   * luks_status [DONE]
    * luks_format
    * luks_open
    * luks_close

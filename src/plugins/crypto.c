@@ -30,6 +30,10 @@
  *
  * A libblockdev plugin for operations with encrypted devices. For now, only
  * LUKS devices are supported.
+ *
+ * Functions taking a parameter called "device" require the backing device to be
+ * passed. On the other hand functions taking the "luks_device" parameter
+ * require the LUKS device (/dev/mapper/SOMETHING").
  */
 
 /**
@@ -113,5 +117,49 @@ gchar* bd_crypto_luks_uuid (gchar *device, gchar **error_message) {
         ret = g_strdup (ret);
     crypt_free (cd);
 
+    return ret;
+}
+
+/**
+ * bd_crypto_luks_status:
+ * @luks_device: the queried LUKS device
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (transfer none): one of "invalid", "inactive", "active" or "busy" or
+ * %NULL if failed to determine (@error_message is populated with the error in
+ * such cases)
+ */
+gchar* bd_crypto_luks_status (gchar *luks_device, gchar **error_message) {
+    struct crypt_device *cd = NULL;
+    gint ret_num;
+    gchar *ret = NULL;
+    crypt_status_info status;
+
+    ret_num = crypt_init (&cd, luks_device);
+    if (ret_num != 0) {
+        *error_message = g_strdup_printf ("Failed to initialize device: %s", strerror(-ret_num));
+        return NULL;
+    }
+
+    status = crypt_status (cd, luks_device);
+    switch (status) {
+    case CRYPT_INVALID:
+        ret = "invalid";
+        break;
+    case CRYPT_INACTIVE:
+        ret = "inactive";
+        break;
+    case CRYPT_ACTIVE:
+        ret = "active";
+        break;
+    case CRYPT_BUSY:
+        ret = "busy";
+        break;
+    default:
+        ret = NULL;
+        *error_message = g_strdup ("Unknown device's state");
+    }
+
+    crypt_free (cd);
     return ret;
 }
