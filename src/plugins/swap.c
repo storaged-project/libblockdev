@@ -44,7 +44,6 @@ static gboolean run_and_report_error (gchar **argv, gchar **error_message) {
     gboolean success = FALSE;
     GError *error = NULL;
     gint status = 0;
-    guint8 next_arg = 2;
     gchar *stdout_data = NULL;
     gchar *stderr_data = NULL;
 
