@@ -82,3 +82,36 @@ gboolean bd_crypto_device_is_luks (gchar *device, gchar **error_message) {
     crypt_free (cd);
     return (ret == 0);
 }
+
+/**
+ * bd_crypto_luks_uuid:
+ * @device: the queried device
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (transfer full): UUID of the @device or %NULL if failed to determine (@error_message
+ * is populated with the error in such cases)
+ */
+gchar* bd_crypto_luks_uuid (gchar *device, gchar **error_message) {
+    struct crypt_device *cd = NULL;
+    gint ret_num;
+    const gchar *ret;
+
+    ret_num = crypt_init (&cd, device);
+    if (ret_num != 0) {
+        *error_message = g_strdup_printf ("Failed to initialize device: %s", strerror(-ret_num));
+        return NULL;
+    }
+
+    ret_num = crypt_load (cd, CRYPT_LUKS1, NULL);
+    if (ret_num != 0) {
+        *error_message = g_strdup_printf ("Failed to load device: %s", strerror(-ret_num));
+        return NULL;
+    }
+
+    ret = crypt_get_uuid (cd);
+    if (ret)
+        ret = g_strdup (ret);
+    crypt_free (cd);
+
+    return ret;
+}

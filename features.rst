@@ -159,7 +159,7 @@ CRYPTO/LUKS
 :functions:
    * generate_backup_passphrase [DONE]
    * device_is_luks [DONE]
-   * luks_uuid
+   * luks_uuid [DONE]
    * luks_status
    * luks_format
    * luks_open
