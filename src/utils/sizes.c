@@ -8,7 +8,7 @@
 #define INT_LT_FLOAT(i, f) (((i) - (f)) < INT_FLOAT_EPS)
 #define INT_GT_FLOAT(i, f) (((i) - (f)) > INT_FLOAT_EPS)
 
-static const gchar *size_prefixes[] = {"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", NULL};
+static gchar const * const size_prefixes[] = {"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", NULL};
 
 /**
  * bd_utils_size_human_readable:

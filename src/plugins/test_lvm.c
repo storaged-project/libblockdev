@@ -13,7 +13,7 @@ void print_hash_table (GHashTable *table) {
 
 int main (int argc, char **argv) {
     gint exit_status;
-    const gchar **fname = NULL;
+    gchar const * const *fname = NULL;
     gchar *msg = NULL;
     gchar *stdout = NULL;
     gchar *stderr = NULL;

@@ -1,3 +1,3 @@
 #include <glib.h>
 
-const gchar** get_supported_functions ();
+gchar const * const * get_supported_functions ();

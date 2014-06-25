@@ -34,7 +34,7 @@
  * the functions are in bytes.
  */
 
-static const gchar* supported_functions[] = {
+static gchar const * const supported_functions[] = {
     "bd_lvm_is_supported_pe_size",
     "bd_lvm_get_max_lv_size",
     "bd_lvm_round_size_to_pe",
@@ -42,7 +42,7 @@ static const gchar* supported_functions[] = {
     "bd_lvm_get_thpool_padding",
     NULL};
 
-const gchar** get_supported_functions () {
+gchar const * const * get_supported_functions () {
     return supported_functions;
 }
 
