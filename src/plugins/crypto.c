@@ -331,7 +331,7 @@ gboolean bd_crypto_luks_close (gchar *luks_device, gchar **error_message) {
  * or not
  *
  * One of @pass, @key_file has to be != %NULL and the same applies to @npass,
- * @nkey_file. If adding @npass, @pass is required.
+ * @nkey_file.
  */
 gboolean bd_crypto_luks_add_key (gchar *device, gchar *pass, gchar *key_file, gchar *npass, gchar *nkey_file, gchar **error_message) {
     struct crypt_device *cd = NULL;
@@ -360,12 +360,17 @@ gboolean bd_crypto_luks_add_key (gchar *device, gchar *pass, gchar *key_file, gc
         return FALSE;
     }
 
-    crypt_set_password_callback (cd, give_passphrase, (void*) pass);
-    if (npass)
-        ret = crypt_keyslot_add_by_passphrase (cd, CRYPT_ANY_SLOT, NULL, 0, npass, strlen(npass));
-    else
-        /* let it use the function giving the passphrase if key_file is NULL */
+    if (pass && npass)
+        ret = crypt_keyslot_add_by_passphrase (cd, CRYPT_ANY_SLOT, pass, strlen(pass), npass, strlen(npass));
+    else {
+        if (pass)
+            /* give the old password (required if key_file is NULL) */
+            crypt_set_password_callback (cd, give_passphrase, (void*) pass);
+        else
+            /* give the new password (required if nkey_file is NULL */
+            crypt_set_password_callback (cd, give_passphrase, (void*) npass);
         ret = crypt_keyslot_add_by_keyfile (cd, CRYPT_ANY_SLOT, key_file, 0, nkey_file, 0);
+    }
 
     if (ret < 0) {
         *error_message = g_strdup_printf ("Failed to add key: %s", strerror(-ret));
