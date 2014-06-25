@@ -100,7 +100,7 @@ gboolean bd_crypto_device_is_luks (gchar *device, gchar **error_message) {
 gchar* bd_crypto_luks_uuid (gchar *device, gchar **error_message) {
     struct crypt_device *cd = NULL;
     gint ret_num;
-    const gchar *ret;
+    gchar *ret;
 
     ret_num = crypt_init (&cd, device);
     if (ret_num != 0) {
@@ -118,7 +118,7 @@ gchar* bd_crypto_luks_uuid (gchar *device, gchar **error_message) {
     ret = g_strdup (crypt_get_uuid (cd));
     crypt_free (cd);
 
-    return (gchar*) ret;
+    return ret;
 }
 
 /**
