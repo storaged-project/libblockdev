@@ -115,9 +115,7 @@ gchar* bd_crypto_luks_uuid (gchar *device, gchar **error_message) {
         return NULL;
     }
 
-    ret = crypt_get_uuid (cd);
-    if (ret)
-        ret = g_strdup (ret);
+    ret = g_strdup (crypt_get_uuid (cd));
     crypt_free (cd);
 
     return (gchar*) ret;
