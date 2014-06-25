@@ -54,3 +54,66 @@ gchar* bd_crypto_luks_status (gchar *luks_device, gchar **error_message);
  * (the @error_message contains the error in such cases)
  */
 gboolean bd_crypto_luks_format (gchar *device, gchar *cipher, guint64 key_size, gchar *passphrase, gchar *key_file, gchar **error_message);
+
+/**
+ * bd_crypto_luks_open:
+ * @device: the device to open
+ * @name: name for the LUKS device
+ * @passphrase: (allow-none): passphrase to open the @device or %NULL
+ * @key_file: (allow-none): key file path to use for opening the @device or %NULL
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * One of @passphrase, @key_file has to be != %NULL.
+ */
+gboolean bd_crypto_luks_open (gchar *device, gchar *name, gchar *passphrase, gchar *key_file, gchar **error_message);
+
+/**
+ * bd_crypto_luks_close:
+ * @luks_device: LUKS device to close
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the given @luks_device was successfully closed or not
+ */
+gboolean bd_crypto_luks_close (gchar *luks_device, gchar **error_message);
+
+/**
+ * bd_crypto_luks_add_key:
+ * @device: device to add new key to
+ * @pass: (allow-none): passphrase for the @device or %NULL
+ * @key_file: (allow-none): key file for the @device or %NULL
+ * @npass: (allow-none): passphrase to add to @device or %NULL
+ * @nkey_file: (allow-none): key file to add to @device or %NULL
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @npass or @nkey_file was successfully added to @device
+ * or not
+ *
+ * One of @pass, @key_file has to be != %NULL and the same applies to @npass,
+ * @nkey_file.
+ */
+gboolean bd_crypto_luks_add_key (gchar *device, gchar *pass, gchar *key_file, gchar *npass, gchar *nkey_file, gchar **error_message);
+
+/**
+ * bd_crypto_luks_remove_key:
+ * @device: device to add new key to
+ * @pass: (allow-none): passphrase for the @device or %NULL
+ * @key_file: (allow-none): key file for the @device or %NULL
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the key was successfully removed or not
+ *
+ * Either @pass or @key_file has to be != %NULL.
+ */
+gboolean bd_crypto_luks_remove_key (gchar *device, gchar *pass, gchar *key_file, gchar **error_message);
+
+/**
+ * bd_crypto_luks_resize:
+ * @device: device to resize
+ * @size: requested size in sectors or 0 to adapt to the backing device
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @device was successfully resized or not
+ */
+gboolean bd_crypto_luks_resize (gchar *device, guint64 size, gchar **error_message);

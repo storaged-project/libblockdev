@@ -162,11 +162,11 @@ CRYPTO/LUKS
    * luks_uuid [DONE]
    * luks_status [DONE]
    * luks_format [DONE]
-   * luks_open
-   * luks_close
-   * luks_add_key
-   * luks_remove_key
-   * luks_resize
+   * luks_open [DONE]
+   * luks_close [DONE]
+   * luks_add_key [DONE]
+   * luks_remove_key [DONE]
+   * luks_resize [DONE]
 
 
 MULTIPATH
