@@ -1,0 +1,6 @@
+.*.swp
+**/*.o
+**/*.so
+src/lib/plugin_apis/*.c
+BlockDev-1.0.gir
+BlockDev-1.0.typelib
