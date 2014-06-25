@@ -111,6 +111,7 @@ gchar* bd_crypto_luks_uuid (gchar *device, gchar **error_message) {
     ret_num = crypt_load (cd, CRYPT_LUKS1, NULL);
     if (ret_num != 0) {
         *error_message = g_strdup_printf ("Failed to load device: %s", strerror(-ret_num));
+        crypt_free (cd);
         return NULL;
     }
 
@@ -201,6 +202,7 @@ gboolean bd_crypto_luks_format (gchar *device, gchar *cipher, guint64 key_size, 
     cipher_specs = g_strsplit (cipher, "-", 2);
     if (g_strv_length (cipher_specs) != 2) {
         *error_message = g_strdup_printf ("Invalid cipher specification: '%s'", cipher);
+        crypt_free (cd);
         g_strfreev (cipher_specs);
         return FALSE;
     }
@@ -214,6 +216,7 @@ gboolean bd_crypto_luks_format (gchar *device, gchar *cipher, guint64 key_size, 
 
     if (ret != 0) {
         *error_message = g_strdup_printf ("Failed to format device: %s", strerror(-ret));
+        crypt_free (cd);
         return FALSE;
     }
 
@@ -221,6 +224,7 @@ gboolean bd_crypto_luks_format (gchar *device, gchar *cipher, guint64 key_size, 
         ret = crypt_keyslot_add_by_volume_key (cd, CRYPT_ANY_SLOT, NULL, 0, passphrase, strlen(passphrase));
         if (ret < 0) {
             *error_message = g_strdup_printf ("Failed to add passphrase: %s", strerror(-ret));
+            crypt_free (cd);
             return FALSE;
         }
     }
@@ -230,6 +234,7 @@ gboolean bd_crypto_luks_format (gchar *device, gchar *cipher, guint64 key_size, 
         ret = crypt_keyslot_add_by_keyfile (cd, CRYPT_ANY_SLOT, NULL, 0, key_file, 0);
         if (ret < 0) {
             *error_message = g_strdup_printf ("Failed to add key file: %s", strerror(-ret));
+            crypt_free (cd);
             return FALSE;
         }
     }
@@ -267,6 +272,7 @@ gboolean bd_crypto_luks_open (gchar *device, gchar *name, gchar *passphrase, gch
     ret = crypt_load (cd, CRYPT_LUKS1, NULL);
     if (ret != 0) {
         *error_message = g_strdup_printf ("Failed to load device's parameters: %s", strerror(-ret));
+        crypt_free (cd);
         return FALSE;
     }
 
@@ -277,6 +283,7 @@ gboolean bd_crypto_luks_open (gchar *device, gchar *name, gchar *passphrase, gch
 
     if (ret < 0) {
         *error_message = g_strdup_printf ("Failed to activate device: %s", strerror(-ret));
+        crypt_free (cd);
         return FALSE;
     }
 
@@ -303,9 +310,11 @@ gboolean bd_crypto_luks_close (gchar *luks_device, gchar **error_message) {
     ret = crypt_deactivate (cd, luks_device);
     if (ret != 0) {
         *error_message = g_strdup_printf ("Failed to deactivate device: %s", strerror(-ret));
+        crypt_free (cd);
         return FALSE;
     }
 
+    crypt_free (cd);
     return TRUE;
 }
 
@@ -347,6 +356,7 @@ gboolean bd_crypto_luks_add_key (gchar *device, gchar *pass, gchar *key_file, gc
     ret = crypt_load (cd, CRYPT_LUKS1, NULL);
     if (ret != 0) {
         *error_message = g_strdup_printf ("Failed to load device's parameters: %s", strerror(-ret));
+        crypt_free (cd);
         return FALSE;
     }
 
@@ -359,9 +369,11 @@ gboolean bd_crypto_luks_add_key (gchar *device, gchar *pass, gchar *key_file, gc
 
     if (ret < 0) {
         *error_message = g_strdup_printf ("Failed to add key: %s", strerror(-ret));
+        crypt_free (cd);
         return FALSE;
     }
 
+    crypt_free (cd);
     return TRUE;
 }
 
@@ -394,6 +406,7 @@ gboolean bd_crypto_luks_remove_key (gchar *device, gchar *pass, gchar *key_file,
     ret = crypt_load (cd, CRYPT_LUKS1, NULL);
     if (ret != 0) {
         *error_message = g_strdup_printf ("Failed to load device's parameters: %s", strerror(-ret));
+        crypt_free (cd);
         return FALSE;
     }
 
@@ -405,15 +418,18 @@ gboolean bd_crypto_luks_remove_key (gchar *device, gchar *pass, gchar *key_file,
 
     if (ret < 0) {
         *error_message = g_strdup_printf ("Failed to determine key slot: %s", strerror(-ret));
+        crypt_free (cd);
         return FALSE;
     }
 
     ret = crypt_keyslot_destroy (cd, ret);
     if (ret != 0) {
         *error_message = g_strdup_printf ("Failed to remove key: %s", strerror(-ret));
+        crypt_free (cd);
         return FALSE;
     }
 
+    crypt_free (cd);
     return TRUE;
 }
 
@@ -438,8 +454,10 @@ gboolean bd_crypto_luks_resize (gchar *device, guint64 size, gchar **error_messa
     ret = crypt_resize (cd, device, size);
     if (ret != 0) {
         *error_message = g_strdup_printf ("Failed to resize device: %s", strerror(-ret));
+        crypt_free (cd);
         return FALSE;
     }
 
+    crypt_free (cd);
     return TRUE;
 }
