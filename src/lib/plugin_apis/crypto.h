@@ -40,3 +40,17 @@ gchar* bd_crypto_luks_uuid (gchar *device, gchar **error_message);
  * such cases)
  */
 gchar* bd_crypto_luks_status (gchar *luks_device, gchar **error_message);
+
+/**
+ * bd_crypto_luks_format:
+ * @device: a device to format as LUKS
+ * @cipher: (allow-none): cipher specification (type-mode, e.g. "aes-xts-plain64") or %NULL to use the default
+ * @key_size: size of the volume key or 0 to use the default
+ * @passphrase: (allow-none): a passphrase for the new LUKS device or %NULL if not requested
+ * @key_file: (allow-none): a key file for the new LUKS device or %NULL if not requested
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the given @device was successfully formatted as LUKS or not
+ * (the @error_message contains the error in such cases)
+ */
+gboolean bd_crypto_luks_format (gchar *device, gchar *cipher, guint64 key_size, gchar *passphrase, gchar *key_file, gchar **error_message);

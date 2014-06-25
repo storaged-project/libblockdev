@@ -34,6 +34,8 @@
  * Functions taking a parameter called "device" require the backing device to be
  * passed. On the other hand functions taking the "luks_device" parameter
  * require the LUKS device (/dev/mapper/SOMETHING").
+ *
+ * Sizes are given in bytes unless stated otherwise.
  */
 
 /**
@@ -162,4 +164,75 @@ gchar* bd_crypto_luks_status (gchar *luks_device, gchar **error_message) {
 
     crypt_free (cd);
     return ret;
+}
+
+static int give_passphrase (const char *msg __attribute__((unused)), char *buf, size_t length __attribute__((unused)), void *usrptr) {
+    if (usrptr) {
+        strcpy (buf, (char*) usrptr);
+        return strlen ((char*) usrptr);
+    } else
+        return 0;
+}
+
+/**
+ * bd_crypto_luks_format:
+ * @device: a device to format as LUKS
+ * @cipher: (allow-none): cipher specification (type-mode, e.g. "aes-xts-plain64") or %NULL to use the default
+ * @key_size: size of the volume key or 0 to use the default
+ * @passphrase: (allow-none): a passphrase for the new LUKS device or %NULL if not requested
+ * @key_file: (allow-none): a key file for the new LUKS device or %NULL if not requested
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the given @device was successfully formatted as LUKS or not
+ * (the @error_message contains the error in such cases)
+ */
+gboolean bd_crypto_luks_format (gchar *device, gchar *cipher, guint64 key_size, gchar *passphrase, gchar *key_file, gchar **error_message) {
+    struct crypt_device *cd = NULL;
+    gint ret;
+    gchar **cipher_specs = NULL;
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        *error_message = g_strdup_printf ("Failed to initialize device: %s", strerror(-ret));
+        return FALSE;
+    }
+
+    cipher = cipher ? cipher : DEFAULT_LUKS_CIPHER;
+    cipher_specs = g_strsplit (cipher, "-", 2);
+    if (g_strv_length (cipher_specs) != 2) {
+        *error_message = g_strdup_printf ("Invalid cipher specification: '%s'", cipher);
+        g_strfreev (cipher_specs);
+        return FALSE;
+    }
+
+    /* resolve requested/default key_size (should be in bytes) */
+    key_size = (key_size != 0) ? key_size : (DEFAULT_LUKS_KEYSIZE_BITS / 8);
+
+    ret = crypt_format (cd, CRYPT_LUKS1, cipher_specs[0], cipher_specs[1],
+                        NULL, NULL, key_size, NULL);
+    g_strfreev (cipher_specs);
+
+    if (ret != 0) {
+        *error_message = g_strdup_printf ("Failed to format device: %s", strerror(-ret));
+        return FALSE;
+    }
+
+    if (passphrase) {
+        ret = crypt_keyslot_add_by_volume_key (cd, CRYPT_ANY_SLOT, NULL, 0, passphrase, strlen(passphrase));
+        if (ret < 0) {
+            *error_message = g_strdup_printf ("Failed to add passphrase: %s", strerror(-ret));
+            return FALSE;
+        }
+    }
+
+    if (key_file) {
+        crypt_set_password_callback (cd, give_passphrase, (void*) passphrase);
+        ret = crypt_keyslot_add_by_keyfile (cd, CRYPT_ANY_SLOT, NULL, 0, key_file, 0);
+        if (ret < 0) {
+            *error_message = g_strdup_printf ("Failed to add key file: %s", strerror(-ret));
+            return FALSE;
+        }
+    }
+
+    return TRUE;
 }

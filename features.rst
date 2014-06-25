@@ -161,7 +161,7 @@ CRYPTO/LUKS
    * device_is_luks [DONE]
    * luks_uuid [DONE]
    * luks_status [DONE]
-   * luks_format
+   * luks_format [DONE]
    * luks_open
    * luks_close
    * luks_add_key
