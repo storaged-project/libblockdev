@@ -243,7 +243,7 @@ gboolean bd_swap_swapstatus (gchar *device, gchar **error_message) {
     }
 
     next_line = (strchr (next_line, '\n') + 1);
-    while (next_line && ((next_line - file_content) < length)) {
+    while (next_line && ((gsize)(next_line - file_content) < length)) {
         if (g_str_has_prefix (next_line, real_device ? real_device : device)) {
             g_free (symlink);
             g_free (real_device);

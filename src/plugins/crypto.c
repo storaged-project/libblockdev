@@ -120,7 +120,7 @@ gchar* bd_crypto_luks_uuid (gchar *device, gchar **error_message) {
         ret = g_strdup (ret);
     crypt_free (cd);
 
-    return ret;
+    return (gchar*) ret;
 }
 
 /**

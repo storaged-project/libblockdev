@@ -6,19 +6,19 @@ CRYPTO_PLUGIN_FILES = src/plugins/crypto.h src/plugins/crypto.c
 LIBRARY_FILES = src/lib/blockdev.c src/lib/blockdev.h src/lib/plugins.h src/lib/plugin_apis/lvm.h
 
 build-plugins: ${LVM_PLUGIN_FILES} ${SWAP_PLUGIN_FILES} ${LOOP_PLUGIN_FILES} ${SIZES_FILES}
-	gcc -c -Wall -Wextra -fPIC -I src/utils/ -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0 gobject-2.0`\
+	gcc -c -Wall -Wextra -Werror -fPIC -I src/utils/ -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0 gobject-2.0`\
 		src/utils/sizes.c src/plugins/lvm.c
 	gcc -shared -o src/plugins/libbd_lvm.so lvm.o
 
-	gcc -c -Wall -Wextra -fPIC -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0`\
+	gcc -c -Wall -Wextra -Werror -fPIC -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0`\
 		src/plugins/swap.c
 	gcc -shared -o src/plugins/libbd_swap.so swap.o
 
-	gcc -c -Wall -Wextra -fPIC -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0`\
+	gcc -c -Wall -Wextra -Werror -fPIC -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0`\
 		src/plugins/loop.c
 	gcc -shared -o src/plugins/libbd_loop.so loop.o
 
-	gcc -c -Wall -Wextra -fPIC -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0 libcryptsetup`\
+	gcc -c -Wall -Wextra -Werror -fPIC -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0 libcryptsetup`\
 		src/plugins/crypto.c
 	gcc -shared -o src/plugins/libbd_crypto.so crypto.o
 
