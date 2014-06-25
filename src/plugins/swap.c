@@ -234,15 +234,14 @@ gboolean bd_swap_swapstatus (gchar *device, gchar **error_message) {
     /* no error, set *error_message to NULL to show it */
     *error_message = NULL;
 
-    next_line = file_content;
-    if (g_str_has_prefix (next_line, real_device ? real_device : device)) {
+    if (g_str_has_prefix (file_content, real_device ? real_device : device)) {
         g_free (symlink);
         g_free (real_device);
         g_free (file_content);
         return TRUE;
     }
 
-    next_line = (strchr (next_line, '\n') + 1);
+    next_line = (strchr (file_content, '\n') + 1);
     while (next_line && ((gsize)(next_line - file_content) < length)) {
         if (g_str_has_prefix (next_line, real_device ? real_device : device)) {
             g_free (symlink);
