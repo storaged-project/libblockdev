@@ -439,6 +439,65 @@ gboolean bd_crypto_luks_remove_key (gchar *device, gchar *pass, gchar *key_file,
 }
 
 /**
+ * bd_crypto_luks_change_key:
+ * @device: device to change key of
+ * @pass: old passphrase
+ * @npass: new passphrase
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the key was successfully changed or not
+ *
+ * No support for changing key files (yet).
+ */
+gboolean bd_crypto_luks_change_key (gchar *device, gchar *pass, gchar *npass, gchar **error_message) {
+    struct crypt_device *cd = NULL;
+    gint ret = 0;
+    gchar *volume_key = NULL;
+    gsize vk_size = 0;
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        *error_message = g_strdup_printf ("Failed to initialize device: %s", strerror(-ret));
+        return FALSE;
+    }
+
+    ret = crypt_load (cd, CRYPT_LUKS1, NULL);
+    if (ret != 0) {
+        *error_message = g_strdup_printf ("Failed to load device's parameters: %s", strerror(-ret));
+        crypt_free (cd);
+        return FALSE;
+    }
+
+    vk_size = crypt_get_volume_key_size(cd);
+    volume_key = (gchar *) g_malloc (vk_size);
+
+    ret = crypt_volume_key_get (cd, CRYPT_ANY_SLOT, volume_key, &vk_size, pass, strlen(pass));
+    if (ret < 0) {
+        *error_message = g_strdup_printf ("Failed to load device's volume key: %s", strerror(-ret));
+        crypt_free (cd);
+        return FALSE;
+    }
+
+    /* ret is the number of the slot with the given pass */
+    ret = crypt_keyslot_destroy (cd, ret);
+    if (ret != 0) {
+        *error_message = g_strdup_printf ("Failed to remove the old passphrase: %s", strerror(-ret));
+        crypt_free (cd);
+        return FALSE;
+    }
+
+    ret = crypt_keyslot_add_by_volume_key (cd, ret, volume_key, vk_size, npass, strlen(npass));
+    if (ret < 0) {
+        *error_message = g_strdup_printf ("Failed to add the new passphrase: %s", strerror(-ret));
+        crypt_free (cd);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+    return TRUE;
+}
+
+/**
  * bd_crypto_luks_resize:
  * @device: device to resize
  * @size: requested size in sectors or 0 to adapt to the backing device

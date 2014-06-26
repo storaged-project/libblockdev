@@ -109,6 +109,19 @@ gboolean bd_crypto_luks_add_key (gchar *device, gchar *pass, gchar *key_file, gc
 gboolean bd_crypto_luks_remove_key (gchar *device, gchar *pass, gchar *key_file, gchar **error_message);
 
 /**
+ * bd_crypto_luks_change_key:
+ * @device: device to change key of
+ * @pass: old passphrase
+ * @npass: new passphrase
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the key was successfully changed or not
+ *
+ * No support for changing key files (yet).
+ */
+gboolean bd_crypto_luks_change_key (gchar *device, gchar *pass, gchar *npass, gchar **error_message);
+
+/**
  * bd_crypto_luks_resize:
  * @device: device to resize
  * @size: requested size in sectors or 0 to adapt to the backing device

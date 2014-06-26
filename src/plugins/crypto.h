@@ -21,6 +21,7 @@ gboolean bd_crypto_luks_open (gchar *device, gchar *name, gchar *passphrase, gch
 gboolean bd_crypto_luks_close (gchar *device, gchar **error_message);
 gboolean bd_crypto_luks_add_key (gchar *device, gchar *pass, gchar *key_file, gchar *npass, gchar *nkey_file, gchar **error_message);
 gboolean bd_crypto_luks_remove_key (gchar *device, gchar *pass, gchar *key_file, gchar **error_message);
+gboolean bd_crypto_luks_change_key (gchar *device, gchar *pass, gchar *npass, gchar **error_message);
 gboolean bd_crypto_luks_resize (gchar *device, guint64 size, gchar **error_message);
 
 #endif  /* BD_CRYPTO */

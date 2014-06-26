@@ -166,6 +166,7 @@ CRYPTO/LUKS
    * luks_close [DONE]
    * luks_add_key [DONE]
    * luks_remove_key [DONE]
+   * luks_change_key [DONE]
    * luks_resize [DONE]
 
 
