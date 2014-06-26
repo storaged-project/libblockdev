@@ -6,16 +6,16 @@ CRYPTO_PLUGIN_FILES = src/plugins/crypto.h src/plugins/crypto.c
 LIBRARY_FILES = src/lib/blockdev.c src/lib/blockdev.h src/lib/plugins.h src/lib/plugin_apis/lvm.h
 
 build-plugins: ${LVM_PLUGIN_FILES} ${SWAP_PLUGIN_FILES} ${LOOP_PLUGIN_FILES} ${SIZES_FILES}
-	gcc -c -Wall -Wextra -Werror -fPIC -I src/utils/ -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0 gobject-2.0`\
-		src/utils/sizes.c src/plugins/lvm.c
+	gcc -c -Wall -Wextra -Werror -fPIC -I src/utils/ -I src/plugins/ \
+		`pkg-config --cflags glib-2.0 gobject-2.0` src/plugins/lvm.c
 	gcc -shared -o src/plugins/libbd_lvm.so lvm.o
 
-	gcc -c -Wall -Wextra -Werror -fPIC -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0`\
-		src/plugins/swap.c
+	gcc -c -Wall -Wextra -Werror -fPIC -I src/plugins/ -I src/utils/ \
+		`pkg-config --cflags glib-2.0` src/plugins/swap.c
 	gcc -shared -o src/plugins/libbd_swap.so swap.o
 
-	gcc -c -Wall -Wextra -Werror -fPIC -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0`\
-		src/plugins/loop.c
+	gcc -c -Wall -Wextra -Werror -fPIC -I src/plugins/ -I src/utils/ \
+		`pkg-config --libs --cflags glib-2.0` src/plugins/loop.c
 	gcc -shared -o src/plugins/libbd_loop.so loop.o
 
 	gcc -c -Wall -Wextra -Werror -fPIC -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0 libcryptsetup`\
@@ -27,6 +27,13 @@ generate-boilerplate-code: src/lib/plugin_apis/lvm.h src/lib/plugin_apis/swap.h
 	./boilerplate_generator.py src/lib/plugin_apis/swap.h > src/lib/plugin_apis/swap.c
 	./boilerplate_generator.py src/lib/plugin_apis/loop.h > src/lib/plugin_apis/loop.c
 	./boilerplate_generator.py src/lib/plugin_apis/crypto.h > src/lib/plugin_apis/crypto.c
+
+build-utils: src/utils/sizes.c src/utils/sizes.h src/utils/exec.c src/utils/exec.h
+	gcc -c -Wall -Wextra -Werror -fPIC `pkg-config --cflags glib-2.0` -I src/utils/ \
+        src/utils/sizes.c
+	gcc -c -Wall -Wextra -Werror -fPIC `pkg-config --cflags glib-2.0` -I src/utils/ \
+        src/utils/exec.c
+	gcc -shared -o src/utils/libbd_utils.so sizes.o exec.o
 
 build-library: generate-boilerplate-code ${LIBRARY_FILES}
 	gcc -fPIC -c `pkg-config --libs --cflags glib-2.0` -ldl src/lib/blockdev.c
@@ -43,23 +50,26 @@ test-sizes: ${SIZES_FILES}
 	./test_sizes
 	@rm test_sizes
 
-test-lvm-plugin: ${LVM_PLUGIN_FILES} ${SIZES_FILES}
-	gcc -DTESTING_LVM -o test_lvm_plugin -I src/utils/ -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0 gobject-2.0`\
-		src/utils/sizes.c src/plugins/lvm.c
+test-lvm-plugin: ${LVM_PLUGIN_FILES} build-utils
+	gcc -DTESTING_LVM -o test_lvm_plugin -I src/utils/ -I src/plugins/ -I src/utils/ \
+		-L src/utils/ -lbd_utils -lm `pkg-config --libs --cflags glib-2.0 gobject-2.0`\
+		src/plugins/lvm.c
 	@echo "***Running tests***"
-	./test_lvm_plugin
+	LD_LIBRARY_PATH=src/utils/	./test_lvm_plugin
 	@rm test_lvm_plugin
 
-test-swap-plugin: ${SWAP_PLUGIN_FILES}
-	gcc -DTESTING_SWAP -o test_swap_plugin -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0` src/plugins/swap.c
+test-swap-plugin: ${SWAP_PLUGIN_FILES} build-utils
+	gcc -DTESTING_SWAP -o test_swap_plugin -I src/plugins/ -I src/utils/ -L src/utils/ -lbd_utils \
+		`pkg-config --libs --cflags glib-2.0` src/plugins/swap.c
 	@echo "***Running tests***"
-	./test_swap_plugin
+	LD_LIBRARY_PATH=src/utils/ ./test_swap_plugin
 	@rm test_swap_plugin
 
-test-loop-plugin: ${LOOP_PLUGIN_FILES}
-	gcc -DTESTING_LOOP -o test_loop_plugin -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0` src/plugins/loop.c
+test-loop-plugin: ${LOOP_PLUGIN_FILES} build-utils
+	gcc -DTESTING_LOOP -o test_loop_plugin -I src/plugins/ -I src/utils/ -L src/utils/ -lbd_utils \
+		`pkg-config --libs --cflags glib-2.0` src/plugins/loop.c
 	@echo "***Running tests***"
-	./test_loop_plugin
+	LD_LIBRARY_PATH=src/utils/ ./test_loop_plugin
 	@rm test_loop_plugin
 
 test-library: generate-boilerplate-code build-plugins

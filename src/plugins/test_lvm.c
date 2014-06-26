@@ -32,27 +32,7 @@ int main (int argc, char **argv) {
     }
     puts ("");
 
-    gchar* args[] = {"lvs", "--all", NULL};
-
-    /* test calling lvm */
-    g_printf ("Calling\n");
-    succ = call_lvm (args, &stdout, &stderr, &exit_status, &msg);
-    g_printf ("Called\n");
-    if (succ) {
-        puts ("Everything ok\n");
-        g_printf ("STDOUT: %s\n", stdout);
-        g_printf ("STDERR: %s\n", stderr);
-        g_printf ("Exit status: %d\n", exit_status);
-    }
-    else {
-        puts ("Some error!");
-        puts (msg);
-    }
-    g_free (stdout);
-    g_free (stderr);
-    g_free (msg);
-    msg = NULL;
-
+    gchar *args[] = {"lvs", NULL};
     succ = call_lvm_and_capture_output (args, &stdout, &msg);
     if (succ) {
         puts ("Called 'lvs' and captured output");

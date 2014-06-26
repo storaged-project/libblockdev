@@ -20,6 +20,7 @@
 #include <glib.h>
 #include <sizes.h>
 #include <math.h>
+#include <exec.h>
 #include "lvm.h"
 
 #define INT_FLOAT_EPS 1e-5
@@ -46,13 +47,9 @@ gchar const * const * get_supported_functions () {
     return supported_functions;
 }
 
-static gboolean call_lvm (gchar **args, gchar **stdout_data, gchar **stderr_data,
-                          gint *status, gchar **error_message)
-{
+static gboolean call_lvm_and_report_error (gchar **args, gchar **error_message) {
+    gboolean success = FALSE;
     guint i = 0;
-    gboolean success;
-    GError *error = NULL;
-
     guint args_length = g_strv_length (args);
 
     /* allocate enough space for the args plus "lvm" and NULL */
@@ -64,77 +61,30 @@ static gboolean call_lvm (gchar **args, gchar **stdout_data, gchar **stderr_data
         argv[i+1] = args[i];
     argv[args_length + 1] = NULL;
 
-    success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH,
-                            NULL, NULL, stdout_data, stderr_data, status, &error);
-
+    success = bd_utils_exec_and_report_error (argv, error_message);
     g_free (argv);
 
-    if (!success) {
-        *error_message = g_strdup (error->message);
-        g_error_free (error);
-        return FALSE;
-    }
-
-    return TRUE;
+    return success;
 }
 
-static gboolean call_lvm_and_report_error (gchar **argv, gchar **error_message) {
-    gchar *stdout_data = NULL;
-    gchar *stderr_data = NULL;
-    gint status = 0;
+static gboolean call_lvm_and_capture_output (gchar **args, gchar **output, gchar **error_message) {
     gboolean success = FALSE;
+    guint i = 0;
+    guint args_length = g_strv_length (args);
 
-    success = call_lvm (argv, &stdout_data, &stderr_data, &status, error_message);
-    if (!success)
-        /* running lvm failed, the error message already is in the error_message
-           variable so just return */
-        return FALSE;
+    /* allocate enough space for the args plus "lvm" and NULL */
+    gchar **argv = g_new (gchar*, args_length + 2);
 
-    if (status != 0) {
-        /* lvm was run, but some error happened, the interesting information is
-           either in the stdout or in the stderr */
-        if (stderr_data && (g_strcmp0 ("", stderr_data) != 0)) {
-            *error_message = stderr_data;
-            g_free (stdout_data);
-        } else {
-            *error_message = stdout_data;
-            g_free (stderr_data);
-        }
+    /* construct argv from args with "lvm" prepended */
+    argv[0] = "lvm";
+    for (i=0; i < args_length; i++)
+        argv[i+1] = args[i];
+    argv[args_length + 1] = NULL;
 
-        return FALSE;
-    }
+    success = bd_utils_exec_and_capture_output (argv, output, error_message);
+    g_free (argv);
 
-    /* gotting here means everything was okay */
-    return TRUE;
-}
-
-static gboolean call_lvm_and_capture_output (gchar **argv, gchar **output, gchar **error_message) {
-    gchar *stdout_data = NULL;
-    gchar *stderr_data = NULL;
-    gint status = 0;
-    gboolean success = FALSE;
-
-    success = call_lvm (argv, &stdout_data, &stderr_data, &status, error_message);
-    if (!success)
-        /* running lvm failed, the error message already is in the error_message
-           variable so just return */
-        return FALSE;
-
-    if ((status != 0) || (g_strcmp0 ("", stdout_data) == 0)) {
-        /* lvm was run, but some error happened or there is no output data which
-           is an error because by calling this function the caller asked for the
-           output */
-        if (stderr_data && (g_strcmp0 ("", stderr_data) != 0)) {
-            *error_message = stderr_data;
-            g_free (stdout_data);
-        }
-
-        return FALSE;
-    } else {
-        *output = stdout_data;
-        g_free (stderr_data);
-        return TRUE;
-    }
+    return success;
 }
 
 /**

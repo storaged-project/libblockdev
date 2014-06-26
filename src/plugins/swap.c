@@ -20,6 +20,7 @@
 #include <glib.h>
 #include <string.h>
 #include <unistd.h>
+#include <exec.h>
 #include "swap.h"
 
 /**
@@ -30,48 +31,6 @@
  *
  * A libblockdev plugin for operations with swap space.
  */
-
-/**
- * run_and_report_error:
- * @argv: (array zero-terminated=1): the argv array for the call
- * @error_message: (out): variable to store error message to (if any)
- *
- * Returns: whether the call was successfull (no error and exit code 0) or not
- */
-/* XXX: should this be moved somewhere else so that it is available for the
-   other plugins as well? */
-static gboolean run_and_report_error (gchar **argv, gchar **error_message) {
-    gboolean success = FALSE;
-    GError *error = NULL;
-    gint status = 0;
-    gchar *stdout_data = NULL;
-    gchar *stderr_data = NULL;
-
-    success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH,
-                            NULL, NULL, &stdout_data, &stderr_data, &status, &error);
-
-    if (!success) {
-        *error_message = g_strdup (error->message);
-        g_error_free(error);
-        return FALSE;
-    }
-
-    if (status != 0) {
-        if (stderr_data && (g_strcmp0 ("", stderr_data) != 0)) {
-            *error_message = stderr_data;
-            g_free (stdout_data);
-        } else {
-            *error_message = stdout_data;
-            g_free (stderr_data);
-        }
-
-        return FALSE;
-    }
-
-    g_free (stdout_data);
-    g_free (stderr_data);
-    return TRUE;
-}
 
 /**
  * bd_swap_mkswap:
@@ -97,7 +56,7 @@ gboolean bd_swap_mkswap (gchar *device, gchar *label, gchar **error_message) {
 
     argv[next_arg] = device;
 
-    return run_and_report_error (argv, error_message);
+    return bd_utils_exec_and_report_error (argv, error_message);
 }
 
 /**
@@ -171,7 +130,7 @@ gboolean bd_swap_swapon (gchar *device, gint priority, gchar **error_message) {
 
     argv[next_arg] = device;
 
-    success = run_and_report_error (argv, error_message);
+    success = bd_utils_exec_and_report_error (argv, error_message);
 
     if (to_free_idx > 0)
         g_free (argv[to_free_idx]);
@@ -190,7 +149,7 @@ gboolean bd_swap_swapoff (gchar *device, gchar **error_message) {
     gchar *argv[3] = {"swapoff", NULL, NULL};
     argv[1] = device;
 
-    return run_and_report_error (argv, error_message);
+    return bd_utils_exec_and_report_error (argv, error_message);
 }
 
 /**

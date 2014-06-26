@@ -20,6 +20,7 @@
 #include <glib.h>
 #include <unistd.h>
 #include <glob.h>
+#include <exec.h>
 #include "loop.h"
 
 /**
@@ -120,38 +121,15 @@ gchar* bd_loop_get_loop_name (gchar *file, gchar **error_message) {
  * Returns: whether the @file was successfully setup as a loop device or not
  */
 gboolean bd_loop_setup (gchar *file, gchar **loop_name, gchar **error_message) {
-    gboolean success = FALSE;
-    GError *error = NULL;
-    gint status = 0;
-    gchar *stdout_data = NULL;
-    gchar *stderr_data = NULL;
-
     gchar *args[4] = {"losetup", "-f", file, NULL};
+    gboolean success = FALSE;
 
-    success = g_spawn_sync (NULL, args, NULL, G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH,
-                            NULL, NULL, &stdout_data, &stderr_data, &status, &error);
-
-    if (!success) {
-        *error_message = g_strdup (error->message);
-        g_error_free(error);
+    success = bd_utils_exec_and_report_error (args, error_message);
+    if (!success)
         return FALSE;
-    }
-
-    if (status != 0) {
-        if (stderr_data && (g_strcmp0 ("", stderr_data) != 0)) {
-            *error_message = stderr_data;
-            g_free (stdout_data);
-        } else {
-            *error_message = stdout_data;
-            g_free (stderr_data);
-        }
-
-        return FALSE;
-    } else {
+    else {
         if (loop_name)
             *loop_name = bd_loop_get_loop_name (file, error_message);
-        g_free (stdout_data);
-        g_free (stderr_data);
         return TRUE;
     }
 }
@@ -165,10 +143,6 @@ gboolean bd_loop_setup (gchar *file, gchar **loop_name, gchar **error_message) {
  */
 gboolean bd_loop_teardown (gchar *loop, gchar **error_message) {
     gboolean success = FALSE;
-    GError *error = NULL;
-    gint status = 0;
-    gchar *stdout_data = NULL;
-    gchar *stderr_data = NULL;
     gchar *dev_loop = NULL;
 
     gchar *args[4] = {"losetup", "-d", NULL, NULL};
@@ -180,31 +154,10 @@ gboolean bd_loop_teardown (gchar *loop, gchar **error_message) {
         args[2] = dev_loop;
     }
 
-    success = g_spawn_sync (NULL, args, NULL, G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH,
-                            NULL, NULL, &stdout_data, &stderr_data, &status, &error);
+    success = bd_utils_exec_and_report_error (args, error_message);
     g_free (dev_loop);
 
-    if (!success) {
-        *error_message = g_strdup (error->message);
-        g_error_free(error);
-        return FALSE;
-    }
-
-    if (status != 0) {
-        if (stderr_data && (g_strcmp0 ("", stderr_data) != 0)) {
-            *error_message = stderr_data;
-            g_free (stdout_data);
-        } else {
-            *error_message = stdout_data;
-            g_free (stderr_data);
-        }
-
-        return FALSE;
-    } else {
-        g_free (stdout_data);
-        g_free (stderr_data);
-        return TRUE;
-    }
+    return success;
 }
 
 #ifdef TESTING_LOOP

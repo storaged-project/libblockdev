@@ -206,3 +206,20 @@ DEVICE MAPPER
    * dm_remove
    * dm_node_from_name
    * name_from_dm_node
+
+
+utils
+------
+
+Library (not a plugin) providing utility functions usable for multiple plugins
+and any third-party code.
+
+:TODO:
+   * header files should live under a blockdev/ directory somewhere and should
+     be included as <blockdev/utils.h>, not as "exec.h" and "sizes.h"
+   * add argv logging (log function as a parameter?)
+
+:functions:
+   * exec_and_report_error
+   * exec_and_capture_output
+   * size_human_readable
