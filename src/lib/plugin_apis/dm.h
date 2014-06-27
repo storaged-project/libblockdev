@@ -20,7 +20,7 @@ gboolean bd_dm_create_linear (gchar *map_name, gchar *device, guint64 length, gc
  *
  * Returns: whether the @map_name map was successfully removed or not
  */
-gboolean bd_dm_remove (gchar *map_name);
+gboolean bd_dm_remove (gchar *map_name, gchar **error_message);
 
 /**
  * bd_dm_name_from_dm_node:

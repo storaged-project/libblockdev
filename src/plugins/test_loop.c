@@ -1,6 +1,8 @@
 #include <glib/gprintf.h>
 
-int main (int argc, char **argv) {
+#include "loop.c"
+
+int main (void) {
     gchar *ret = NULL;
     gchar *err_msg = NULL;
     gboolean success = FALSE;

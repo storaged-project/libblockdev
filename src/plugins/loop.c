@@ -159,7 +159,3 @@ gboolean bd_loop_teardown (gchar *loop, gchar **error_message) {
 
     return success;
 }
-
-#ifdef TESTING_LOOP
-#include "test_loop.c"
-#endif

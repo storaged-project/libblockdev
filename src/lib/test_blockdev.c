@@ -1,5 +1,7 @@
 #include <glib/gprintf.h>
 
+#include "blockdev.c"
+
 int main (int argc, char* argv[]) {
     bd_init(NULL);
     g_printf ("available plugins: %s\n", g_strjoinv (", ", bd_get_available_plugin_names()));

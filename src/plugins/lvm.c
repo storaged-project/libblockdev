@@ -1220,8 +1220,3 @@ gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *sna
 
     return success;
 }
-
-#ifdef TESTING_LVM
-#include "test_lvm.c"
-#endif
-

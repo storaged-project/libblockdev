@@ -1,6 +1,8 @@
 #include <glib/gprintf.h>
 
-int main (int argc, char **argv) {
+#include "swap.c"
+
+int main (void) {
     gboolean succ = FALSE;
     gchar *err_msg = NULL;
 

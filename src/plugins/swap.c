@@ -217,8 +217,3 @@ gboolean bd_swap_swapstatus (gchar *device, gchar **error_message) {
     g_free (file_content);
     return FALSE;
 }
-
-
-#ifdef TESTING_SWAP
-#include "test_swap.c"
-#endif

@@ -1,4 +1,6 @@
-int main (int argc, char **argv) {
+#include "sizes.c"
+
+int main () {
     gchar *human = NULL;
     human = bd_utils_size_human_readable ((16 MiB));
     puts (human);

@@ -2,19 +2,18 @@
 #include "blockdev.h"
 #include "plugins.h"
 
-#include "plugin_apis/lvm.c"
 #include "plugin_apis/lvm.h"
-#include "plugin_apis/swap.c"
+#include "plugin_apis/lvm.c"
 #include "plugin_apis/swap.h"
-#include "plugin_apis/loop.c"
+#include "plugin_apis/swap.c"
 #include "plugin_apis/loop.h"
-#include "plugin_apis/crypto.c"
+#include "plugin_apis/loop.c"
 #include "plugin_apis/crypto.h"
+#include "plugin_apis/crypto.c"
 #include "plugin_apis/mpath.c"
 #include "plugin_apis/mpath.h"
 #include "plugin_apis/dm.c"
 #include "plugin_apis/dm.h"
-
 
 /**
  * SECTION: libblockdev
@@ -112,7 +111,3 @@ gboolean bd_is_plugin_available (BDPlugin plugin) {
     else
         return FALSE;
 }
-
-#ifdef TESTING_LIB
-#include "test_blockdev.c"
-#endif

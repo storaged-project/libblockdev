@@ -36,7 +36,3 @@ gchar* bd_utils_size_human_readable (guint64 size) {
     else
         return g_strdup_printf ("%.2f %sB", value, size_prefixes[i]);
 }
-
-#ifdef TESTING_SIZES
-#include "test_sizes.c"
-#endif

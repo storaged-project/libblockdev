@@ -1,5 +1,7 @@
 #include <glib/gprintf.h>
 
+#include "lvm.c"
+
 void print_hash_table (GHashTable *table) {
     GHashTableIter iter;
     gpointer key, value;
@@ -11,8 +13,7 @@ void print_hash_table (GHashTable *table) {
         g_printf("%s : %s\n", (gchar *) key, (gchar *) value);
 }
 
-int main (int argc, char **argv) {
-    gint exit_status;
+int main (void) {
     gchar const * const *fname = NULL;
     gchar *msg = NULL;
     gchar *stdout = NULL;
