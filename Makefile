@@ -15,7 +15,7 @@ build-plugins: ${LVM_PLUGIN_FILES} ${SWAP_PLUGIN_FILES} ${LOOP_PLUGIN_FILES} ${S
 	gcc -shared -o src/plugins/libbd_swap.so swap.o
 
 	gcc -c -Wall -Wextra -Werror -fPIC -I src/plugins/ -I src/utils/ \
-		`pkg-config --libs --cflags glib-2.0` src/plugins/loop.c
+		`pkg-config --cflags glib-2.0` src/plugins/loop.c
 	gcc -shared -o src/plugins/libbd_loop.so loop.o
 
 	gcc -c -Wall -Wextra -Werror -fPIC -I src/plugins/ -lm `pkg-config --libs --cflags glib-2.0 libcryptsetup`\
@@ -40,7 +40,7 @@ build-library: generate-boilerplate-code ${LIBRARY_FILES}
 	gcc -shared -o src/lib/libblockdev.so blockdev.o
 
 build-introspection-data: build-library ${LIBRARY_FILES}
-	LD_LIBRARY_PATH=src/lib/ g-ir-scanner `pkg-config --cflags --libs glib-2.0 gobject-2.0 libcryptsetup` --library=blockdev -I src/lib/ -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o BlockDev-1.0.gir --warn-all src/lib/blockdev.h src/lib/blockdev.c src/lib/plugins.h src/lib/plugin_apis/lvm.h src/lib/plugin_apis/swap.h src/lib/plugin_apis/loop.h src/lib/plugin_apis/crypto.h
+	LD_LIBRARY_PATH=src/lib/:src/utils/ g-ir-scanner `pkg-config --cflags --libs glib-2.0 gobject-2.0 libcryptsetup` --library=blockdev -I src/lib/ -L src/utils -lbd_utils -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o BlockDev-1.0.gir --warn-all src/lib/blockdev.h src/lib/blockdev.c src/lib/plugins.h src/lib/plugin_apis/lvm.h src/lib/plugin_apis/swap.h src/lib/plugin_apis/loop.h src/lib/plugin_apis/crypto.h
 	g-ir-compiler -o BlockDev-1.0.typelib BlockDev-1.0.gir
 
 test-sizes: ${SIZES_FILES}
@@ -82,11 +82,12 @@ test-from-python: build-library build-plugins build-introspection-data
 	GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/ python -c 'from gi.repository import BlockDev; BlockDev.init(None); print BlockDev.lvm_get_max_lv_size()'
 
 run-ipython: build-library build-plugins build-introspection-data
-	GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/ ipython
+	GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/:src/utils/ ipython
 
 run-root-ipython: build-library build-plugins build-introspection-data
-	sudo GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/ ipython
+	sudo GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/:src/utils/ ipython
 
-test: build-library build-plugins build-introspection-data
+test: build-utils build-library build-plugins build-introspection-data
 	@echo
-	@sudo GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/ PYTHONPATH=.:tests/ python -m unittest discover -v -s tests/ -p '*_test.py'
+	@sudo GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/:src/utils/ PYTHONPATH=.:tests/ \
+		python -m unittest discover -v -s tests/ -p '*_test.py'
