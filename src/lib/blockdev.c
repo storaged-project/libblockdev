@@ -12,6 +12,8 @@
 #include "plugin_apis/crypto.h"
 #include "plugin_apis/mpath.c"
 #include "plugin_apis/mpath.h"
+#include "plugin_apis/dm.c"
+#include "plugin_apis/dm.h"
 
 
 /**
@@ -33,10 +35,11 @@ static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_SWAP, "libbd_swap.so"}, FALSE},
     {{BD_PLUGIN_LOOP, "libbd_loop.so"}, FALSE},
     {{BD_PLUGIN_CRYPTO, "libbd_crypto.so"}, FALSE},
-    {{BD_PLUGIN_MPATH, "libbd_mpath.so"}, FALSE}
+    {{BD_PLUGIN_MPATH, "libbd_mpath.so"}, FALSE},
+    {{BD_PLUGIN_DM, "libbd_dm.so"}, FALSE}
 };
 static gchar* plugin_names[BD_PLUGIN_UNDEF] = {
-    "lvm", "swap", "loop", "crypto", "mpath"
+    "lvm", "swap", "loop", "crypto", "mpath", "dm"
 };
 
 void set_plugin_so_name (BDPlugin name, gchar *so_name) {
@@ -63,6 +66,7 @@ gboolean bd_init (BDPluginSpec *force_plugins) {
     plugins[BD_PLUGIN_LOOP].loaded = load_loop_from_plugin(plugins[BD_PLUGIN_LOOP].spec.so_name);
     plugins[BD_PLUGIN_CRYPTO].loaded = load_crypto_from_plugin(plugins[BD_PLUGIN_CRYPTO].spec.so_name);
     plugins[BD_PLUGIN_MPATH].loaded = load_mpath_from_plugin(plugins[BD_PLUGIN_MPATH].spec.so_name);
+    plugins[BD_PLUGIN_DM].loaded = load_dm_from_plugin(plugins[BD_PLUGIN_DM].spec.so_name);
 
     for (i=0; (i < BD_PLUGIN_UNDEF) && all_loaded; i++)
         all_loaded = all_loaded && plugins[i].loaded;

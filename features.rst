@@ -202,10 +202,10 @@ DEVICE MAPPER
    basic operations with raw device mapper
 
 :functions:
-   * dm_create_linear
-   * dm_remove
-   * dm_node_from_name
-   * name_from_dm_node
+   * dm_create_linear [DONE]
+   * dm_remove [DONE]
+   * dm_node_from_name [DONE]
+   * name_from_dm_node [DONE]
 
 
 utils
