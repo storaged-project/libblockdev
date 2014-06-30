@@ -3,9 +3,10 @@ LVM_PLUGIN_FILES = src/plugins/lvm.h src/plugins/lvm.c
 SWAP_PLUGIN_FILES = src/plugins/swap.h src/plugins/swap.c
 LOOP_PLUGIN_FILES = src/plugins/loop.h src/plugins/loop.c
 CRYPTO_PLUGIN_FILES = src/plugins/crypto.h src/plugins/crypto.c
+MPATH_PLUGIN_FILES = src/plugins/mpath.h src/plugins/mpath.c
 LIBRARY_FILES = src/lib/blockdev.c src/lib/blockdev.h src/lib/plugins.h src/lib/plugin_apis/lvm.h
 
-build-plugins: ${LVM_PLUGIN_FILES} ${SWAP_PLUGIN_FILES} ${LOOP_PLUGIN_FILES} ${SIZES_FILES}
+build-plugins: ${LVM_PLUGIN_FILES} ${SWAP_PLUGIN_FILES} ${LOOP_PLUGIN_FILES} ${SIZES_FILES} ${MPATH_PLUGIN_FILES}
 	gcc -c -Wall -Wextra -Werror -fPIC -I src/utils/ -I src/plugins/ \
 		`pkg-config --cflags glib-2.0 gobject-2.0` src/plugins/lvm.c
 	gcc -shared -o src/plugins/libbd_lvm.so lvm.o
@@ -22,11 +23,16 @@ build-plugins: ${LVM_PLUGIN_FILES} ${SWAP_PLUGIN_FILES} ${LOOP_PLUGIN_FILES} ${S
 		src/plugins/crypto.c
 	gcc -shared -o src/plugins/libbd_crypto.so crypto.o
 
+	gcc -c -Wall -Wextra -Werror -fPIC -I src/plugins/ -I src/utils/ \
+		`pkg-config --cflags glib-2.0` src/plugins/mpath.c
+	gcc -shared -o src/plugins/libbd_mpath.so mpath.o
+
 generate-boilerplate-code: src/lib/plugin_apis/lvm.h src/lib/plugin_apis/swap.h
 	./boilerplate_generator.py src/lib/plugin_apis/lvm.h > src/lib/plugin_apis/lvm.c
 	./boilerplate_generator.py src/lib/plugin_apis/swap.h > src/lib/plugin_apis/swap.c
 	./boilerplate_generator.py src/lib/plugin_apis/loop.h > src/lib/plugin_apis/loop.c
 	./boilerplate_generator.py src/lib/plugin_apis/crypto.h > src/lib/plugin_apis/crypto.c
+	./boilerplate_generator.py src/lib/plugin_apis/mpath.h > src/lib/plugin_apis/mpath.c
 
 build-utils: src/utils/sizes.c src/utils/sizes.h src/utils/exec.c src/utils/exec.h
 	gcc -c -Wall -Wextra -Werror -fPIC `pkg-config --cflags glib-2.0` -I src/utils/ \
@@ -40,7 +46,7 @@ build-library: generate-boilerplate-code ${LIBRARY_FILES}
 	gcc -shared -o src/lib/libblockdev.so blockdev.o
 
 build-introspection-data: build-library ${LIBRARY_FILES}
-	LD_LIBRARY_PATH=src/lib/:src/utils/ g-ir-scanner `pkg-config --cflags --libs glib-2.0 gobject-2.0 libcryptsetup` --library=blockdev -I src/lib/ -L src/utils -lbd_utils -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o BlockDev-1.0.gir --warn-all src/lib/blockdev.h src/lib/blockdev.c src/lib/plugins.h src/lib/plugin_apis/lvm.h src/lib/plugin_apis/swap.h src/lib/plugin_apis/loop.h src/lib/plugin_apis/crypto.h
+	LD_LIBRARY_PATH=src/lib/:src/utils/ g-ir-scanner `pkg-config --cflags --libs glib-2.0 gobject-2.0 libcryptsetup` --library=blockdev -I src/lib/ -L src/utils -lbd_utils -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o BlockDev-1.0.gir --warn-all src/lib/blockdev.h src/lib/blockdev.c src/lib/plugins.h src/lib/plugin_apis/lvm.h src/lib/plugin_apis/swap.h src/lib/plugin_apis/loop.h src/lib/plugin_apis/crypto.h src/lib/plugin_apis/mpath.h
 	g-ir-compiler -o BlockDev-1.0.typelib BlockDev-1.0.gir
 
 test-sizes: ${SIZES_FILES}

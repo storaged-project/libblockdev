@@ -177,9 +177,9 @@ MULTIPATH
    just very basic functionality
 
 :functions:
-   * flush_mpaths
-   * device_is_mpath_member
-   * set_friendly_names
+   * flush_mpaths [DONE]
+   * device_is_mpath_member [DONE]
+   * set_friendly_names [DONE]
 
 
 LOOP

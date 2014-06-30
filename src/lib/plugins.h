@@ -8,6 +8,7 @@ typedef enum {
     BD_PLUGIN_SWAP,
     BD_PLUGIN_LOOP,
     BD_PLUGIN_CRYPTO,
+    BD_PLUGIN_MPATH,
     BD_PLUGIN_UNDEF
 } BDPlugin;
 
