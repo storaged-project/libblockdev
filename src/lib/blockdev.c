@@ -4,6 +4,8 @@
 
 #include "plugin_apis/lvm.h"
 #include "plugin_apis/lvm.c"
+#include "plugin_apis/btrfs.c"
+#include "plugin_apis/btrfs.h"
 #include "plugin_apis/swap.h"
 #include "plugin_apis/swap.c"
 #include "plugin_apis/loop.h"
@@ -31,6 +33,7 @@ typedef struct BDPluginStatus {
 /* KEEP THE ORDERING OF THESE ARRAYS MATCHING THE BDPluginName ENUM! */
 static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_LVM, "libbd_lvm.so"}, FALSE},
+    {{BD_PLUGIN_BTRFS, "libbd_btrfs.so"}, FALSE},
     {{BD_PLUGIN_SWAP, "libbd_swap.so"}, FALSE},
     {{BD_PLUGIN_LOOP, "libbd_loop.so"}, FALSE},
     {{BD_PLUGIN_CRYPTO, "libbd_crypto.so"}, FALSE},
@@ -38,7 +41,7 @@ static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_DM, "libbd_dm.so"}, FALSE}
 };
 static gchar* plugin_names[BD_PLUGIN_UNDEF] = {
-    "lvm", "swap", "loop", "crypto", "mpath", "dm"
+    "lvm", "btrfs", "swap", "loop", "crypto", "mpath", "dm"
 };
 
 void set_plugin_so_name (BDPlugin name, gchar *so_name) {
@@ -61,6 +64,7 @@ gboolean bd_init (BDPluginSpec *force_plugins) {
             set_plugin_so_name(force_plugins[i].name, force_plugins[i].so_name);
 
     plugins[BD_PLUGIN_LVM].loaded = load_lvm_from_plugin(plugins[BD_PLUGIN_LVM].spec.so_name);
+    plugins[BD_PLUGIN_BTRFS].loaded = load_btrfs_from_plugin(plugins[BD_PLUGIN_BTRFS].spec.so_name);
     plugins[BD_PLUGIN_SWAP].loaded = load_swap_from_plugin(plugins[BD_PLUGIN_SWAP].spec.so_name);
     plugins[BD_PLUGIN_LOOP].loaded = load_loop_from_plugin(plugins[BD_PLUGIN_LOOP].spec.so_name);
     plugins[BD_PLUGIN_CRYPTO].loaded = load_crypto_from_plugin(plugins[BD_PLUGIN_CRYPTO].spec.so_name);

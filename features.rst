@@ -98,7 +98,7 @@ BTRFS
    btrfs as both filesystem and multi-device volume, subvolumes, snapshots
 
 :functions:
-   * create_volume
+   * create_volume [DONE]
    * add_device
    * remove_device
    * list_devices
