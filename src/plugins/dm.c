@@ -21,6 +21,8 @@
 #include <unistd.h>
 #include <exec.h>
 
+#include "dm.h"
+
 /**
  * SECTION: dm
  * @short_description: libblockdev plugin for basic operations with device mapper
