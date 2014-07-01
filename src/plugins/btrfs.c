@@ -33,8 +33,6 @@
  * A libblockdev plugin for operations with swap space.
  */
 
-static gboolean path_is_mountpoint (gchar *path) __attribute__((unused));
-
 static gboolean path_is_mountpoint (gchar *path) {
     GError *error = NULL;
     gchar *real_path = NULL;
@@ -158,5 +156,152 @@ gboolean bd_btrfs_create_volume (gchar **devices, gchar *label, gchar *data_leve
     success = bd_utils_exec_and_report_error (argv, error_message);
     g_free (argv);
     return success;
+}
+
+/**
+ * bd_btrfs_add_device:
+ * @mountpoint: mountpoint of the btrfs volume to add new device to
+ * @device: a device to add to the btrfs volume
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @device was successfully added to the @mountpoint btrfs volume or not
+ */
+gboolean bd_btrfs_add_device (gchar *mountpoint, gchar *device, gchar **error_message) {
+    gchar *argv[6] = {"btrfs", "device", "add", device, mountpoint, NULL};
+    if (!path_is_mountpoint (mountpoint)) {
+        *error_message = g_strdup_printf ("%s not mounted", mountpoint);
+        return FALSE;
+    }
+
+    return bd_utils_exec_and_report_error (argv, error_message);
+}
+
+/**
+ * bd_btrfs_remove_device:
+ * @mountpoint: mountpoint of the btrfs volume to remove device from
+ * @device: a device to remove from the btrfs volume
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @device was successfully removed from the @mountpoint btrfs volume or not
+ */
+gboolean bd_btrfs_remove_device (gchar *mountpoint, gchar *device, gchar **error_message) {
+    gchar *argv[6] = {"btrfs", "device", "delete", device, mountpoint, NULL};
+    if (!path_is_mountpoint (mountpoint)) {
+        *error_message = g_strdup_printf ("%s not mounted", mountpoint);
+        return FALSE;
+    }
+
+    return bd_utils_exec_and_report_error (argv, error_message);
+}
+
+/**
+ * bd_btrfs_create_subvolume:
+ * @mountpoint: mountpoint of the btrfs volume to create subvolume under
+ * @name: name of the subvolume
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @mountpoint/@name subvolume was successfully created or not
+ */
+gboolean bd_btrfs_create_subvolume (gchar *mountpoint, gchar *name, gchar **error_message) {
+    gchar *path = NULL;
+    gboolean success = FALSE;
+    gchar *argv[5] = {"btrfs", "subvol", "create", NULL, NULL};
+
+    if (!path_is_mountpoint (mountpoint)) {
+        *error_message = g_strdup_printf ("%s not mounted", mountpoint);
+        return FALSE;
+    }
+
+    if (g_str_has_suffix (mountpoint, "/"))
+        path = g_strdup_printf ("%s%s", mountpoint, name);
+    else
+        path = g_strdup_printf ("%s/%s", mountpoint, name);
+    argv[3] = path;
+
+    success = bd_utils_exec_and_report_error (argv, error_message);
+    g_free (path);
+
+    return success;
+}
+
+/**
+ * bd_btrfs_delete_subvolume:
+ * @mountpoint: mountpoint of the btrfs volume to delete subvolume from
+ * @name: name of the subvolume
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @mountpoint/@name subvolume was successfully deleted or not
+ */
+gboolean bd_btrfs_delete_subvolume (gchar *mountpoint, gchar *name, gchar **error_message) {
+    gchar *path = NULL;
+    gboolean success = FALSE;
+    gchar *argv[5] = {"btrfs", "subvol", "delete", NULL, NULL};
+
+    if (!path_is_mountpoint (mountpoint)) {
+        *error_message = g_strdup_printf ("%s not mounted", mountpoint);
+        return FALSE;
+    }
+
+    if (g_str_has_suffix (mountpoint, "/"))
+        path = g_strdup_printf ("%s%s", mountpoint, name);
+    else
+        path = g_strdup_printf ("%s/%s", mountpoint, name);
+    argv[3] = path;
+
+    success = bd_utils_exec_and_report_error (argv, error_message);
+    g_free (path);
+
+    return success;
+}
+
+/**
+ * bd_btrfs_get_default_subvolume_id:
+ * @mountpoint: mountpoint of the volume to get the default subvolume ID of
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: ID of the @mountpoint volume's default subvolume. If 0,
+ * @error_message may be set to indicate error
+ */
+guint64 bd_btrfs_get_default_subvolume_id (gchar *mountpoint, gchar **error_message) {
+    GError *error = NULL;
+    GRegex *regex = NULL;
+    GMatchInfo *match_info = NULL;
+    gboolean success = FALSE;
+    gchar *output = NULL;
+    gchar *match = NULL;
+    guint64 ret = 0;
+    gchar *argv[5] = {"btrfs", "subvol", "get-default", mountpoint, NULL};
+
+    regex = g_regex_new ("ID (\\d+) .*", 0, 0, &error);
+    if (!regex) {
+        g_warning ("Failed to create new GRegex");
+        *error_message = g_strdup ("Failed to create new GRegex");
+        return 0;
+    }
+
+    success = bd_utils_exec_and_capture_output (argv, &output, error_message);
+    if (!success) {
+        g_regex_unref (regex);
+        return 0;
+    }
+
+    success = g_regex_match (regex, output, 0, &match_info);
+    if (!success) {
+        *error_message = g_strdup ("Failed to parse subvolume's ID");
+        g_regex_unref (regex);
+        g_match_info_free (match_info);
+        g_free (output);
+        return 0;
+    }
+
+    match = g_match_info_fetch (match_info, 1);
+    ret = g_ascii_strtoull (match, NULL, 0);
+
+    g_free (match);
+    g_match_info_free (match_info);
+    g_regex_unref (regex);
+    g_free (output);
+
+    return ret;
 }
 

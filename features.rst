@@ -99,13 +99,13 @@ BTRFS
 
 :functions:
    * create_volume [DONE]
-   * add_device
-   * remove_device
+   * add_device [DONE]
+   * remove_device [DONE]
    * list_devices
-   * create_subvolume
-   * delete_subvolume
+   * create_subvolume [DONE]
+   * delete_subvolume [DONE]
    * list_subvolumes
-   * get_default_subvolume
+   * get_default_subvolume [DONE]
    * create_snapshot
    * mkfs_btrfs
    * resize_btrfs
