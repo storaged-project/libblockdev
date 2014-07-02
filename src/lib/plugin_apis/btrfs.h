@@ -63,3 +63,14 @@ gboolean bd_btrfs_delete_subvolume (gchar *mountpoint, gchar *name, gchar **erro
  * @error_message may be set to indicate error
  */
 guint64 bd_btrfs_get_default_subvolume_id (gchar *mountpoint, gchar **error_message);
+
+/**
+ * bd_btrfs_create_snapshot:
+ * @source: path to source subvolume
+ * @dest: path to new snapshot volume
+ * @ro: whether the snapshot should be read-only
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @dest snapshot of @source was successfully created or not
+ */
+gboolean bd_btrfs_create_snapshot (gchar *source, gchar *dest, gboolean ro, gchar **error_message);

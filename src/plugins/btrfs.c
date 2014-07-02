@@ -305,3 +305,26 @@ guint64 bd_btrfs_get_default_subvolume_id (gchar *mountpoint, gchar **error_mess
     return ret;
 }
 
+/**
+ * bd_btrfs_create_snapshot:
+ * @source: path to source subvolume
+ * @dest: path to new snapshot volume
+ * @ro: whether the snapshot should be read-only
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @dest snapshot of @source was successfully created or not
+ */
+gboolean bd_btrfs_create_snapshot (gchar *source, gchar *dest, gboolean ro, gchar **error_message) {
+    gchar *argv[7] = {"btrfs", "subvol", "snapshot", NULL, NULL, NULL, NULL};
+    guint next_arg = 3;
+
+    if (ro) {
+        argv[next_arg] = "-r";
+        next_arg++;
+    }
+    argv[next_arg] = source;
+    next_arg++;
+    argv[next_arg] = dest;
+
+    return bd_utils_exec_and_report_error (argv, error_message);
+}
