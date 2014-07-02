@@ -4,8 +4,8 @@
 
 #include "plugin_apis/lvm.h"
 #include "plugin_apis/lvm.c"
-#include "plugin_apis/btrfs.c"
 #include "plugin_apis/btrfs.h"
+#include "plugin_apis/btrfs.c"
 #include "plugin_apis/swap.h"
 #include "plugin_apis/swap.c"
 #include "plugin_apis/loop.h"

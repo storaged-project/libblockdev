@@ -21,6 +21,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <exec.h>
+#include <sizes.h>
 
 #include "btrfs.h"
 
@@ -85,6 +86,36 @@ static gboolean path_is_mountpoint (gchar *path) {
     g_free (real_path);
     g_free (pattern);
     g_regex_unref (regex);
+
+    return ret;
+}
+
+static BDBtrfsDeviceInfo* get_device_info_from_match (GMatchInfo *match_info) {
+    BDBtrfsDeviceInfo *ret = g_new(BDBtrfsDeviceInfo, 1);
+    gchar *item = NULL;
+    gchar *error_message = NULL;
+
+    item = g_match_info_fetch_named (match_info, "id");
+    ret->id = g_ascii_strtoull (item, NULL, 0);
+    g_free (item);
+
+    ret->path = g_match_info_fetch_named (match_info, "path");
+
+    item = g_match_info_fetch_named (match_info, "size");
+    ret->size = bd_utils_size_from_spec (item, &error_message);
+    g_free (item);
+    if (error_message)
+        g_warning (error_message);
+    g_free (error_message);
+    error_message = NULL;
+
+    item = g_match_info_fetch_named (match_info, "used");
+    ret->used = bd_utils_size_from_spec (item, &error_message);
+    g_free (item);
+    if (error_message)
+        g_warning (error_message);
+    g_free (error_message);
+    error_message = NULL;
 
     return ret;
 }
@@ -327,4 +358,73 @@ gboolean bd_btrfs_create_snapshot (gchar *source, gchar *dest, gboolean ro, gcha
     argv[next_arg] = dest;
 
     return bd_utils_exec_and_report_error (argv, error_message);
+}
+
+/**
+ * bd_btrfs_list_devices:
+ * @device: a device that is part of the queried btrfs volume
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (array zero-terminated=1): information about the devices that are part of the btrfs volume
+ * containing @device
+ */
+BDBtrfsDeviceInfo** bd_btrfs_list_devices (gchar *device, gchar **error_message) {
+    gchar *argv[5] = {"btrfs", "filesystem", "show", device, NULL};
+    gchar *output = NULL;
+    gboolean success = FALSE;
+    gchar **lines = NULL;
+    gchar **line_p = NULL;
+    gchar const * const pattern = "devid[ \\t]+(?P<id>\\d+)[ \\t]+" \
+                                  "size[ \\t]+(?P<size>\\S+)[ \\t]+" \
+                                  "used[ \\t]+(?P<used>\\S+)[ \\t]+" \
+                                  "path[ \\t]+(?P<path>\\S+)\n";
+    GError *error = NULL;
+    GRegex *regex = NULL;
+    GMatchInfo *match_info = NULL;
+    guint8 i = 0;
+    GPtrArray *dev_infos = g_ptr_array_new ();
+    BDBtrfsDeviceInfo** ret = NULL;
+
+    regex = g_regex_new (pattern, G_REGEX_EXTENDED, 0, &error);
+    if (!regex) {
+        g_warning ("Failed to create new GRegex");
+        *error_message = g_strdup ("Failed to create new GRegex");
+        return NULL;
+    }
+
+    success = bd_utils_exec_and_capture_output (argv, &output, error_message);
+    if (!success)
+        /* error_message is already populated from the previous call */
+        return NULL;
+
+    lines = g_strsplit (output, "\n", 0);
+    g_free (output);
+
+    for (line_p = lines; *line_p; line_p++) {
+        success = g_regex_match (regex, *line_p, 0, &match_info);
+        if (!success) {
+            g_match_info_free (match_info);
+            continue;
+        }
+
+        g_ptr_array_add (dev_infos, get_device_info_from_match (match_info));
+        g_match_info_free (match_info);
+    }
+
+    g_strfreev (lines);
+
+    if (dev_infos->len == 0) {
+        *error_message = g_strdup ("Failed to parse information about devices");
+        return NULL;
+    }
+
+    /* now create the return value -- NULL-terminated array of BDBtrfsDeviceInfo */
+    ret = g_new (BDBtrfsDeviceInfo*, dev_infos->len + 1);
+    for (i=0; i < dev_infos->len; i++)
+        ret[i] = (BDBtrfsDeviceInfo*) g_ptr_array_index (dev_infos, i);
+    ret[i] = NULL;
+
+    g_ptr_array_free (dev_infos, FALSE);
+
+    return ret;
 }

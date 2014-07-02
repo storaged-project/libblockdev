@@ -101,7 +101,7 @@ BTRFS
    * create_volume [DONE]
    * add_device [DONE]
    * remove_device [DONE]
-   * list_devices
+   * list_devices [DONE]
    * create_subvolume [DONE]
    * delete_subvolume [DONE]
    * list_subvolumes

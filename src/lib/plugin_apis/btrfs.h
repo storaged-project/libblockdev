@@ -1,4 +1,55 @@
 #include <glib.h>
+#include <glib-object.h>
+
+/* BpG-skip */
+#define BD_BTRFS_TYPE_DEVICE_INFO (bd_btrfs_device_info_get_type ())
+GType bd_btrfs_device_info_get_type();
+
+typedef struct BDBtrfsDeviceInfo {
+    guint64 id;
+    gchar *path;
+    guint64 size;
+    guint64 used;
+} BDBtrfsDeviceInfo;
+
+/**
+ * bd_btrfs_device_info_copy: (skip)
+ *
+ * Creates a new copy of @info.
+ */
+BDBtrfsDeviceInfo* bd_btrfs_device_info_copy (BDBtrfsDeviceInfo *info) {
+    BDBtrfsDeviceInfo *new_info = g_new (BDBtrfsDeviceInfo, 1);
+
+    new_info->id = info->id;
+    new_info->path = g_strdup (info->path);
+    new_info->size = info->size;
+    new_info->used = info->used;
+
+    return new_info;
+}
+
+/**
+ * bd_btrfs_device_info_free: (skip)
+ *
+ * Frees @info.
+ */
+void bd_btrfs_device_info_free (BDBtrfsDeviceInfo *info) {
+    g_free (info->path);
+    g_free (info);
+}
+
+GType bd_btrfs_device_info_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDBtrfsDeviceInfo",
+                                            (GBoxedCopyFunc) bd_btrfs_device_info_copy,
+                                            (GBoxedFreeFunc) bd_btrfs_device_info_free);
+    }
+
+    return type;
+}
+/* BpG-skip-end */
 
 /**
  * bd_btrfs_create_volume:
@@ -74,3 +125,13 @@ guint64 bd_btrfs_get_default_subvolume_id (gchar *mountpoint, gchar **error_mess
  * Returns: whether the @dest snapshot of @source was successfully created or not
  */
 gboolean bd_btrfs_create_snapshot (gchar *source, gchar *dest, gboolean ro, gchar **error_message);
+
+/**
+ * bd_btrfs_list_devices:
+ * @device: a device that is part of the queried btrfs volume
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (array zero-terminated=1): information about the devices that are part of the btrfs volume
+ * containing @device
+ */
+BDBtrfsDeviceInfo** bd_btrfs_list_devices (gchar *device, gchar **error_message);
