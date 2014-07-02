@@ -18,5 +18,6 @@
 #define EiB EXBIBYTE
 
 gchar* bd_utils_size_human_readable (guint64 size);
+guint64 bd_utils_size_from_spec (gchar *spec, gchar **error_message);
 
 #endif /* BD_UTILS_SIZES */
