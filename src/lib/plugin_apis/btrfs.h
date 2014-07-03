@@ -179,7 +179,7 @@ gboolean bd_btrfs_create_snapshot (gchar *source, gchar *dest, gboolean ro, gcha
  * @error_message: (out): variable to store error message to (if any)
  *
  * Returns: (array zero-terminated=1): information about the devices that are part of the btrfs volume
- * containing @device
+ * containing @device or %NULL in case of error
  */
 BDBtrfsDeviceInfo** bd_btrfs_list_devices (gchar *device, gchar **error_message);
 
@@ -190,6 +190,6 @@ BDBtrfsDeviceInfo** bd_btrfs_list_devices (gchar *device, gchar **error_message)
  * @error_message: (out): variable to store error message to (if any)
  *
  * Returns: (array zero-terminated=1): information about the subvolumes that are part of the btrfs volume
- * mounted at @mountpoint
+ * mounted at @mountpoint or %NULL in case of error
  */
 BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (gchar *mountpoint, gboolean snapshots_only, gchar **error_message);
