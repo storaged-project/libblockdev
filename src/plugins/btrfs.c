@@ -140,7 +140,7 @@ static BDBtrfsSubvolumeInfo* get_subvolume_info_from_match (GMatchInfo *match_in
 /**
  * bd_btrfs_create_volume:
  * @devices: (array zero-terminated=1): list of devices to create btrfs volume from
- * @label: label for the volume
+ * @label: (allow-none): label for the volume
  * @data_level: (allow-none): RAID level for the data or %NULL to use the default
  * @md_level: (allow-none): RAID level for the metadata or %NULL to use the default
  * @error_message: (out): variable to store error message to (if any)
