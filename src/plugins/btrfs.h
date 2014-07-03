@@ -48,6 +48,30 @@ void bd_btrfs_subvolume_info_free (BDBtrfsSubvolumeInfo *info) {
     g_free (info);
 }
 
+typedef struct BDBtrfsFilesystemInfo {
+    gchar *label;
+    gchar *uuid;
+    guint64 num_devices;
+    guint64 used;
+} BDBtrfsFilesystemInfo;
+
+BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info_copy (BDBtrfsFilesystemInfo *info) {
+    BDBtrfsFilesystemInfo *new_info = g_new (BDBtrfsFilesystemInfo, 1);
+
+    new_info->label = g_strdup (info->label);
+    new_info->uuid = g_strdup (info->uuid);
+    new_info->num_devices = info->num_devices;
+    new_info->used = info->used;
+
+    return new_info;
+}
+
+void bd_btrfs_filesystem_info_free (BDBtrfsFilesystemInfo *info) {
+    g_free (info->label);
+    g_free (info->uuid);
+    g_free (info);
+}
+
 gboolean bd_btrfs_create_volume (gchar **devices, gchar *label, gchar *data_level, gchar *md_level, gchar **error_message);
 gboolean bd_btrfs_add_device (gchar *mountpoint, gchar *device, gchar **error_message);
 gboolean bd_btrfs_remove_device (gchar *mountpoint, gchar *device, gchar **error_message);
@@ -57,5 +81,6 @@ guint64 bd_btrfs_get_default_subvolume_id (gchar *mountpoint, gchar **error_mess
 gboolean bd_btrfs_create_snapshot (gchar *source, gchar *dest, gboolean ro, gchar **error_message);
 BDBtrfsDeviceInfo** bd_btrfs_list_devices (gchar *device, gchar **error_message);
 BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (gchar *mountpoint, gboolean snapshots_only, gchar **error_message);
+BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info (gchar *device, gchar **error_message);
 
 #endif  /* BD_BTRFS */

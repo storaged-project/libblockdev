@@ -137,6 +137,29 @@ static BDBtrfsSubvolumeInfo* get_subvolume_info_from_match (GMatchInfo *match_in
     return ret;
 }
 
+static BDBtrfsFilesystemInfo* get_filesystem_info_from_match (GMatchInfo *match_info) {
+    BDBtrfsFilesystemInfo *ret = g_new(BDBtrfsFilesystemInfo, 1);
+    gchar *item = NULL;
+    gchar *error_message = NULL;
+
+    ret->label = g_match_info_fetch_named (match_info, "label");
+    ret->uuid = g_match_info_fetch_named (match_info, "uuid");
+
+    item = g_match_info_fetch_named (match_info, "num_devices");
+    ret->num_devices = g_ascii_strtoull (item, NULL, 0);
+    g_free (item);
+
+    item = g_match_info_fetch_named (match_info, "used");
+    ret->used = bd_utils_size_from_spec (item, &error_message);
+    g_free (item);
+    if (error_message)
+        g_warning (error_message);
+    g_free (error_message);
+    error_message = NULL;
+
+    return ret;
+}
+
 /**
  * bd_btrfs_create_volume:
  * @devices: (array zero-terminated=1): list of devices to create btrfs volume from
@@ -522,3 +545,49 @@ BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (gchar *mountpoint, gboolean sna
     return ret;
 }
 
+/**
+ * bd_btrfs_filesystem_info:
+ * @device: a device that is part of the queried btrfs volume
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: information about the @device's volume's filesystem or %NULL in case of error
+ */
+BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info (gchar *device, gchar **error_message) {
+    gchar *argv[5] = {"btrfs", "filesystem", "show", device, NULL};
+    gchar *output = NULL;
+    gboolean success = FALSE;
+    gchar const * const pattern = "Label:\\s+(?P<label>\\S+)\\s+" \
+                                  "uuid:\\s+(?P<uuid>\\S+)\\s+" \
+                                  "Total\\sdevices\\s+(?P<num_devices>\\d+)\\s+" \
+                                  "FS\\sbytes\\sused\\s+(?P<used>\\S+)";
+    GError *error = NULL;
+    GRegex *regex = NULL;
+    GMatchInfo *match_info = NULL;
+    BDBtrfsFilesystemInfo *ret = NULL;
+
+    regex = g_regex_new (pattern, G_REGEX_EXTENDED, 0, &error);
+    if (!regex) {
+        g_warning ("Failed to create new GRegex");
+        *error_message = g_strdup ("Failed to create new GRegex");
+        return NULL;
+    }
+
+    success = bd_utils_exec_and_capture_output (argv, &output, error_message);
+    if (!success)
+        /* error_message is already populated from the call above or just empty
+           output */
+        return NULL;
+
+    success = g_regex_match (regex, output, 0, &match_info);
+    if (!success) {
+        g_regex_unref (regex);
+        g_match_info_free (match_info);
+        return NULL;
+    }
+
+    g_regex_unref (regex);
+    ret = get_filesystem_info_from_match (match_info);
+    g_match_info_free (match_info);
+
+    return ret;
+}

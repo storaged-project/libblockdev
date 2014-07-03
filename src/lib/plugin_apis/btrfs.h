@@ -96,6 +96,56 @@ GType bd_btrfs_subvolume_info_get_type () {
 
     return type;
 }
+
+
+#define BD_BTRFS_TYPE_FILESYSTEM_INFO (bd_btrfs_filesystem_info_get_type ())
+GType bd_btrfs_filesystem_info_get_type();
+
+typedef struct BDBtrfsFilesystemInfo {
+    gchar *label;
+    gchar *uuid;
+    guint64 num_devices;
+    guint64 used;
+} BDBtrfsFilesystemInfo;
+
+/**
+ * bd_btrfs_filesystem_info_copy: (skip)
+ *
+ * Creates a new copy of @info.
+ */
+BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info_copy (BDBtrfsFilesystemInfo *info) {
+    BDBtrfsFilesystemInfo *new_info = g_new (BDBtrfsFilesystemInfo, 1);
+
+    new_info->label = g_strdup (info->label);
+    new_info->uuid = g_strdup (info->uuid);
+    new_info->num_devices = info->num_devices;
+    new_info->used = info->used;
+
+    return new_info;
+}
+
+/**
+ * bd_btrfs_filesystem_info_free: (skip)
+ *
+ * Frees @info.
+ */
+void bd_btrfs_filesystem_info_free (BDBtrfsFilesystemInfo *info) {
+    g_free (info->label);
+    g_free (info->uuid);
+    g_free (info);
+}
+
+GType bd_btrfs_filesystem_info_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDBtrfsFilesystemInfo",
+                                            (GBoxedCopyFunc) bd_btrfs_filesystem_info_copy,
+                                            (GBoxedFreeFunc) bd_btrfs_filesystem_info_free);
+    }
+
+    return type;
+}
 /* BpG-skip-end */
 
 /**
@@ -193,3 +243,12 @@ BDBtrfsDeviceInfo** bd_btrfs_list_devices (gchar *device, gchar **error_message)
  * mounted at @mountpoint or %NULL in case of error
  */
 BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (gchar *mountpoint, gboolean snapshots_only, gchar **error_message);
+
+/**
+ * bd_btrfs_filesystem_info:
+ * @device: a device that is part of the queried btrfs volume
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: information about the @device's volume's filesystem or %NULL in case of error
+ */
+BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info (gchar *device, gchar **error_message);

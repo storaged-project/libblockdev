@@ -107,7 +107,7 @@ BTRFS
    * list_subvolumes [DONE]
    * get_default_subvolume [DONE]
    * create_snapshot [DONE]
-   * summarize_filesystem
+   * filesystem_info [DONE]
    * mkfs_btrfs
    * resize_btrfs
    * check_btrfs
