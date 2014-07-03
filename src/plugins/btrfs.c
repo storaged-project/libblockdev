@@ -120,6 +120,23 @@ static BDBtrfsDeviceInfo* get_device_info_from_match (GMatchInfo *match_info) {
     return ret;
 }
 
+static BDBtrfsSubvolumeInfo* get_subvolume_info_from_match (GMatchInfo *match_info) {
+    BDBtrfsSubvolumeInfo *ret = g_new(BDBtrfsSubvolumeInfo, 1);
+    gchar *item = NULL;
+
+    item = g_match_info_fetch_named (match_info, "id");
+    ret->id = g_ascii_strtoull (item, NULL, 0);
+    g_free (item);
+
+    item = g_match_info_fetch_named (match_info, "parent_id");
+    ret->parent_id = g_ascii_strtoull (item, NULL, 0);
+    g_free (item);
+
+    ret->path = g_match_info_fetch_named (match_info, "path");
+
+    return ret;
+}
+
 /**
  * bd_btrfs_create_volume:
  * @devices: (array zero-terminated=1): list of devices to create btrfs volume from
@@ -428,3 +445,80 @@ BDBtrfsDeviceInfo** bd_btrfs_list_devices (gchar *device, gchar **error_message)
 
     return ret;
 }
+
+/**
+ * bd_btrfs_list_subvolumes:
+ * @mountpoint: a mountpoint of the queried btrfs volume
+ * @snapshots_only: whether to list only snapshot subvolumes or not
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (array zero-terminated=1): information about the subvolumes that are part of the btrfs volume
+ * mounted at @mountpoint
+ */
+BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (gchar *mountpoint, gboolean snapshots_only, gchar **error_message) {
+    gchar *argv[7] = {"btrfs", "subvol", "list", "-p", NULL, NULL, NULL};
+    gchar *output = NULL;
+    gboolean success = FALSE;
+    gchar **lines = NULL;
+    gchar **line_p = NULL;
+    gchar const * const pattern = "ID\\s+(?P<id>\\d+)\\s+gen\\s+\\d+\\s+(cgen\\s+\\d+\\s+)?" \
+                                  "parent\\s+(?P<parent_id>\\d+)\\s+top\\s+level\\s+\\d+\\s+" \
+                                  "(otime\\s+\\d{4}-\\d{2}-\\d{2}\\s+\\d\\d:\\d\\d:\\d\\d\\s+)?"\
+                                  "path\\s+(?P<path>\\S+)";
+    GError *error = NULL;
+    GRegex *regex = NULL;
+    GMatchInfo *match_info = NULL;
+    guint8 i = 0;
+    GPtrArray *subvol_infos = g_ptr_array_new ();
+    BDBtrfsSubvolumeInfo** ret = NULL;
+
+    if (snapshots_only) {
+        argv[4] = "-s";
+        argv[5] = mountpoint;
+    } else
+        argv[4] = mountpoint;
+
+    regex = g_regex_new (pattern, G_REGEX_EXTENDED, 0, &error);
+    if (!regex) {
+        g_warning ("Failed to create new GRegex");
+        *error_message = g_strdup ("Failed to create new GRegex");
+        return NULL;
+    }
+
+    success = bd_utils_exec_and_capture_output (argv, &output, error_message);
+    if (!success)
+        /* error_message is already populated from the call above or simply no output*/
+        return NULL;
+
+    lines = g_strsplit (output, "\n", 0);
+    g_free (output);
+
+    for (line_p = lines; *line_p; line_p++) {
+        success = g_regex_match (regex, *line_p, 0, &match_info);
+        if (!success) {
+            g_match_info_free (match_info);
+            continue;
+        }
+
+        g_ptr_array_add (subvol_infos, get_subvolume_info_from_match (match_info));
+        g_match_info_free (match_info);
+    }
+
+    g_strfreev (lines);
+
+    if (subvol_infos->len == 0) {
+        *error_message = g_strdup ("Failed to parse information about subvolumes");
+        return NULL;
+    }
+
+    /* now create the return value -- NULL-terminated array of BDBtrfsSubvolumeInfo */
+    ret = g_new (BDBtrfsSubvolumeInfo*, subvol_infos->len + 1);
+    for (i=0; i < subvol_infos->len; i++)
+        ret[i] = (BDBtrfsSubvolumeInfo*) g_ptr_array_index (subvol_infos, i);
+    ret[i] = NULL;
+
+    g_ptr_array_free (subvol_infos, FALSE);
+
+    return ret;
+}
+

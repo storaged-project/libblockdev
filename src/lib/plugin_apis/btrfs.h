@@ -49,6 +49,53 @@ GType bd_btrfs_device_info_get_type () {
 
     return type;
 }
+
+
+#define BD_BTRFS_TYPE_SUBVOLUME_INFO (bd_btrfs_subvolume_info_get_type ())
+GType bd_btrfs_subvolume_info_get_type();
+
+typedef struct BDBtrfsSubvolumeInfo {
+    guint64 id;
+    guint64 parent_id;
+    gchar *path;
+} BDBtrfsSubvolumeInfo;
+
+/**
+ * bd_btrfs_subvolume_info_copy: (skip)
+ *
+ * Creates a new copy of @info.
+ */
+BDBtrfsSubvolumeInfo* bd_btrfs_subvolume_info_copy (BDBtrfsSubvolumeInfo *info) {
+    BDBtrfsSubvolumeInfo *new_info = g_new (BDBtrfsSubvolumeInfo, 1);
+
+    new_info->id = info->id;
+    new_info->parent_id = info->parent_id;
+    new_info->path = g_strdup (info->path);
+
+    return new_info;
+}
+
+/**
+ * bd_btrfs_subvolume_info_free: (skip)
+ *
+ * Frees @info.
+ */
+void bd_btrfs_subvolume_info_free (BDBtrfsSubvolumeInfo *info) {
+    g_free (info->path);
+    g_free (info);
+}
+
+GType bd_btrfs_subvolume_info_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDBtrfsSubvolumeInfo",
+                                            (GBoxedCopyFunc) bd_btrfs_subvolume_info_copy,
+                                            (GBoxedFreeFunc) bd_btrfs_subvolume_info_free);
+    }
+
+    return type;
+}
 /* BpG-skip-end */
 
 /**
@@ -135,3 +182,14 @@ gboolean bd_btrfs_create_snapshot (gchar *source, gchar *dest, gboolean ro, gcha
  * containing @device
  */
 BDBtrfsDeviceInfo** bd_btrfs_list_devices (gchar *device, gchar **error_message);
+
+/**
+ * bd_btrfs_list_subvolumes:
+ * @mountpoint: a mountpoint of the queried btrfs volume
+ * @snapshots_only: whether to list only snapshot subvolumes or not
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (array zero-terminated=1): information about the subvolumes that are part of the btrfs volume
+ * mounted at @mountpoint
+ */
+BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (gchar *mountpoint, gboolean snapshots_only, gchar **error_message);

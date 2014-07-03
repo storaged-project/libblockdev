@@ -104,15 +104,15 @@ BTRFS
    * list_devices [DONE]
    * create_subvolume [DONE]
    * delete_subvolume [DONE]
-   * list_subvolumes
+   * list_subvolumes [DONE]
    * get_default_subvolume [DONE]
    * create_snapshot [DONE]
+   * summarize_filesystem
    * mkfs_btrfs
    * resize_btrfs
    * check_btrfs
    * repair_btrfs
    * change_label_btrfs
-   * summarize_filesystem
 
 
 SWAP
