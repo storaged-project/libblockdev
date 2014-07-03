@@ -591,3 +591,80 @@ BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info (gchar *device, gchar **error_me
 
     return ret;
 }
+
+/**
+ * bd_btrfs_mkfs:
+ * @devices: (array zero-terminated=1): list of devices to create btrfs volume from
+ * @label: (allow-none): label for the volume
+ * @data_level: (allow-none): RAID level for the data or %NULL to use the default
+ * @md_level: (allow-none): RAID level for the metadata or %NULL to use the default
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the new btrfs volume was created from @devices or not
+ *
+ * See mkfs.btrfs(8) for details about @data_level, @md_level and btrfs in general.
+ */
+gboolean bd_btrfs_mkfs (gchar **devices, gchar *label, gchar *data_level, gchar *md_level, gchar **error_message) {
+    return bd_btrfs_create_volume (devices, label, data_level, md_level, error_message);
+}
+
+/**
+ * bd_btrfs_resize:
+ * @mountpoint: a mountpoint of the to be resized btrfs filesystem
+ * @size: requested new size
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @mountpoint filesystem was successfully resized to @size
+ * or not
+ */
+gboolean bd_btrfs_resize (gchar *mountpoint, guint64 size, gchar **error_message) {
+    gchar *argv[6] = {"btrfs", "filesystem", "resize", NULL, mountpoint, NULL};
+    gboolean ret = FALSE;
+
+    argv[3] = g_strdup_printf ("%"G_GUINT64_FORMAT, size);
+    ret = bd_utils_exec_and_report_error (argv, error_message);
+    g_free (argv[3]);
+
+    return ret;
+}
+
+/**
+ * bd_btrfs_check:
+ * @device: a device that is part of the checked btrfs volume
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the filesystem was successfully checked or not
+ */
+gboolean bd_btrfs_check (gchar *device, gchar **error_message) {
+    gchar *argv[4] = {"btrfs", "check", device, NULL};
+
+    return bd_utils_exec_and_report_error (argv, error_message);
+}
+
+/**
+ * bd_btrfs_repair:
+ * @device: a device that is part of the to be repaired btrfs volume
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the filesystem was successfully checked and repaired or not
+ */
+gboolean bd_btrfs_repair (gchar *device, gchar **error_message) {
+    gchar *argv[5] = {"btrfs", "check", "--repair", device, NULL};
+
+    return bd_utils_exec_and_report_error (argv, error_message);
+}
+
+/**
+ * bd_btrfs_change_label:
+ * @mountpoint: a mountpoint of the btrfs filesystem to change label of
+ * @label: new label for the filesystem
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the label of the @mountpoint filesystem was successfully set
+ * to @label or not
+ */
+gboolean bd_btrfs_change_label (gchar *mountpoint, gchar *label, gchar **error_message) {
+    gchar *argv[6] = {"btrfs", "filesystem", "label", mountpoint, label, NULL};
+
+    return bd_utils_exec_and_report_error (argv, error_message);
+}

@@ -83,4 +83,10 @@ BDBtrfsDeviceInfo** bd_btrfs_list_devices (gchar *device, gchar **error_message)
 BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (gchar *mountpoint, gboolean snapshots_only, gchar **error_message);
 BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info (gchar *device, gchar **error_message);
 
+gboolean bd_btrfs_mkfs (gchar **devices, gchar *label, gchar *data_level, gchar *md_level, gchar **error_message);
+gboolean bd_btrfs_resize (gchar *mountpoint, guint64 size, gchar **error_message);
+gboolean bd_btrfs_check (gchar *device, gchar **error_message);
+gboolean bd_btrfs_repair (gchar *device, gchar **error_message);
+gboolean bd_btrfs_change_label (gchar *mountpoint, gchar *label, gchar **error_message);
+
 #endif  /* BD_BTRFS */

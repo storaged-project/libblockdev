@@ -108,11 +108,11 @@ BTRFS
    * get_default_subvolume [DONE]
    * create_snapshot [DONE]
    * filesystem_info [DONE]
-   * mkfs_btrfs
-   * resize_btrfs
-   * check_btrfs
-   * repair_btrfs
-   * change_label_btrfs
+   * mkfs [DONE]
+   * resize [DONE]
+   * check [DONE]
+   * repair [DONE]
+   * change_label [DONE]
 
 
 SWAP
