@@ -220,6 +220,7 @@ and any third-party code.
    * add argv logging (log function as a parameter?)
 
 :functions:
-   * exec_and_report_error
-   * exec_and_capture_output
-   * size_human_readable
+   * exec_and_report_error [DONE]
+   * exec_and_capture_output [DONE]
+   * size_human_readable [DONE]
+   * size_from_spec [DONE]
