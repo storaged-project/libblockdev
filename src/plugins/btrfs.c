@@ -556,7 +556,7 @@ BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info (gchar *device, gchar **error_me
     gchar *argv[5] = {"btrfs", "filesystem", "show", device, NULL};
     gchar *output = NULL;
     gboolean success = FALSE;
-    gchar const * const pattern = "Label:\\s+(?P<label>\\S+)\\s+" \
+    gchar const * const pattern = "Label:\\s+'(?P<label>\\S+)'\\s+" \
                                   "uuid:\\s+(?P<uuid>\\S+)\\s+" \
                                   "Total\\sdevices\\s+(?P<num_devices>\\d+)\\s+" \
                                   "FS\\sbytes\\sused\\s+(?P<used>\\S+)";
