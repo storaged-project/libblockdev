@@ -500,6 +500,7 @@ class LvmTestCase(unittest.TestCase):
         self.assertTrue(succ)
         self.assertIs(err, None)
 
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_snapshotcreate_lvorigin_snapshotmerge(self):
         """Verify that LV snapshot support works"""
 

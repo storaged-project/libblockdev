@@ -38,6 +38,7 @@ class CryptoTestCase(unittest.TestCase):
 
         os.unlink(self.dev_file2)
 
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_format(self):
         """Verify that formating device as LUKS works"""
 
@@ -45,6 +46,7 @@ class CryptoTestCase(unittest.TestCase):
         self.assertTrue(succ)
         self.assertIs(err, None)
 
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_luks_open_close(self):
         """Verify that opening/closing LUKS device works"""
 
@@ -60,6 +62,7 @@ class CryptoTestCase(unittest.TestCase):
         self.assertTrue(succ)
         self.assertIs(err, None)
 
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_add_key(self):
         """Verify that adding key to LUKS device works"""
 
@@ -71,6 +74,7 @@ class CryptoTestCase(unittest.TestCase):
         self.assertTrue(succ)
         self.assertIs(err, None)
 
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_remove_key(self):
         """Verify that removing key from LUKS device works"""
 
@@ -86,6 +90,7 @@ class CryptoTestCase(unittest.TestCase):
         self.assertTrue(succ)
         self.assertIs(err, None)
 
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_change_key(self):
         """Verify that changing key in LUKS device works"""
 
@@ -97,6 +102,7 @@ class CryptoTestCase(unittest.TestCase):
         self.assertTrue(succ)
         self.assertIs(err, None)
 
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_is_luks(self):
         """Verify that LUKS device recognition works"""
 
@@ -112,6 +118,7 @@ class CryptoTestCase(unittest.TestCase):
         self.assertFalse(is_luks)
         self.assertIs(err, None)
 
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_get_uuid(self):
         """Verify that getting LUKS device UUID works"""
 

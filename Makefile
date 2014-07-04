@@ -107,6 +107,11 @@ test: src/utils/libbd_utils.so src/lib/libblockdev.so ${PLUGIN_LIBS} BlockDev-1.
 	@sudo GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/:src/utils/ PYTHONPATH=.:tests/ \
 		python -m unittest discover -v -s tests/ -p '*_test.py'
 
+fast-test: src/utils/libbd_utils.so src/lib/libblockdev.so ${PLUGIN_LIBS} BlockDev-1.0.typelib
+	@echo
+	@sudo SKIP_SLOW= GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/:src/utils/ PYTHONPATH=.:tests/ \
+		python -m unittest discover -v -s tests/ -p '*_test.py'
+
 clean:
 	-rm BlockDev-1.0.gir
 	-rm BlockDev-1.0.typelib
