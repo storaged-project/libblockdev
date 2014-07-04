@@ -118,3 +118,5 @@ clean:
 	-rm src/utils/test_sizes
 	find . -name '*.o' -exec rm {} \;
 	find . -name '*.so' -exec rm {} \;
+	find . -name '*.pyc' -exec rm -f {} \;
+	find . -name '*.pyo' -exec rm -f {} \;
