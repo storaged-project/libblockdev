@@ -63,13 +63,13 @@ gboolean bd_init (BDPluginSpec *force_plugins) {
         for (i=0; force_plugins + i; i++)
             set_plugin_so_name(force_plugins[i].name, force_plugins[i].so_name);
 
-    plugins[BD_PLUGIN_LVM].loaded = load_lvm_from_plugin(plugins[BD_PLUGIN_LVM].spec.so_name);
-    plugins[BD_PLUGIN_BTRFS].loaded = load_btrfs_from_plugin(plugins[BD_PLUGIN_BTRFS].spec.so_name);
-    plugins[BD_PLUGIN_SWAP].loaded = load_swap_from_plugin(plugins[BD_PLUGIN_SWAP].spec.so_name);
-    plugins[BD_PLUGIN_LOOP].loaded = load_loop_from_plugin(plugins[BD_PLUGIN_LOOP].spec.so_name);
-    plugins[BD_PLUGIN_CRYPTO].loaded = load_crypto_from_plugin(plugins[BD_PLUGIN_CRYPTO].spec.so_name);
-    plugins[BD_PLUGIN_MPATH].loaded = load_mpath_from_plugin(plugins[BD_PLUGIN_MPATH].spec.so_name);
-    plugins[BD_PLUGIN_DM].loaded = load_dm_from_plugin(plugins[BD_PLUGIN_DM].spec.so_name);
+    plugins[BD_PLUGIN_LVM].loaded = load_lvm_from_plugin(plugins[BD_PLUGIN_LVM].spec.so_name) != NULL;
+    plugins[BD_PLUGIN_BTRFS].loaded = load_btrfs_from_plugin(plugins[BD_PLUGIN_BTRFS].spec.so_name) != NULL;
+    plugins[BD_PLUGIN_SWAP].loaded = load_swap_from_plugin(plugins[BD_PLUGIN_SWAP].spec.so_name) != NULL;
+    plugins[BD_PLUGIN_LOOP].loaded = load_loop_from_plugin(plugins[BD_PLUGIN_LOOP].spec.so_name) != NULL;
+    plugins[BD_PLUGIN_CRYPTO].loaded = load_crypto_from_plugin(plugins[BD_PLUGIN_CRYPTO].spec.so_name) != NULL;
+    plugins[BD_PLUGIN_MPATH].loaded = load_mpath_from_plugin(plugins[BD_PLUGIN_MPATH].spec.so_name) != NULL;
+    plugins[BD_PLUGIN_DM].loaded = load_dm_from_plugin(plugins[BD_PLUGIN_DM].spec.so_name) != NULL;
 
     for (i=0; (i < BD_PLUGIN_UNDEF) && all_loaded; i++)
         all_loaded = all_loaded && plugins[i].loaded;

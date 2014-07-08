@@ -142,14 +142,14 @@ def get_funcs_info(fn_infos, module_name):
 def get_loading_func(fn_infos, module_name):
     # TODO: only error on functions provided by the plugin that fail to load
     # TODO: implement the 'gchar **errors' argument
-    ret =  'gboolean load_{0}_from_plugin(gchar *so_name) {{\n'.format(module_name)
+    ret =  'void* load_{0}_from_plugin(gchar *so_name) {{\n'.format(module_name)
     ret += '    void *handle = NULL;\n'
     ret += '    char *error = NULL;\n\n'
 
     ret += '    handle = dlopen(so_name, RTLD_LAZY);\n'
     ret += '    if (!handle) {\n'
     ret += '        g_warning("failed to load module {0}: %s", dlerror());\n'.format(mod_name)
-    ret += '        return FALSE;\n'
+    ret += '        return NULL;\n'
     ret += '    }\n\n'
 
     for info in fn_infos:
@@ -159,7 +159,7 @@ def get_loading_func(fn_infos, module_name):
         ret += '    if ((error = dlerror()) != NULL)\n'
         ret += '        g_warning("failed to load {0.name}: %s", error);\n\n'.format(info)
 
-    ret += '    return TRUE;\n'
+    ret += '    return handle;\n'
     ret += '}\n\n'
 
     return ret
