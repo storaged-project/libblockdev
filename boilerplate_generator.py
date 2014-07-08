@@ -122,11 +122,20 @@ def get_includes_str(includes):
 
     return ret
 
-def get_funcs_list(fn_infos, module_name):
-    ret = "static gchar* {0}_functions[] = {{\n".format(module_name)
+def get_funcs_info(fn_infos, module_name):
+    ret = "static gchar const * const {0}_functions[] = {{\n".format(module_name)
     for info in fn_infos:
         ret += '    "{0.name}",\n'.format(info)
     ret += "    NULL};\n\n"
+
+    ret += ("gchar const * const * const get_{0}_functions (void) {{\n".format(module_name) +
+            "    return {0}_functions;\n".format(module_name) +
+            "}\n\n")
+
+    ret += "const guint8 {0}_num_functions = {1};\n\n".format(module_name, len(fn_infos))
+    ret += ("const guint8 get_{0}_num_functions (void) {{\n".format(module_name) +
+            "    return {0}_num_functions;\n".format(module_name) +
+            "}\n\n")
 
     return ret
 
@@ -168,7 +177,7 @@ if __name__ == "__main__":
         sys.exit(2)
 
     includes, fn_infos = process_file(open(sys.argv[1], "r"))
-    print(get_funcs_list(fn_infos, mod_name), end='')
+    print(get_funcs_info(fn_infos, mod_name), end='')
     for info in fn_infos:
         print(get_func_boilerplate(info), end='')
     print(get_loading_func(fn_infos, mod_name), end='')
