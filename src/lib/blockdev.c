@@ -27,18 +27,18 @@
 
 typedef struct BDPluginStatus {
     BDPluginSpec spec;
-    gboolean loaded;
+    gpointer handle;
 } BDPluginStatus;
 
 /* KEEP THE ORDERING OF THESE ARRAYS MATCHING THE BDPluginName ENUM! */
 static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
-    {{BD_PLUGIN_LVM, "libbd_lvm.so"}, FALSE},
-    {{BD_PLUGIN_BTRFS, "libbd_btrfs.so"}, FALSE},
-    {{BD_PLUGIN_SWAP, "libbd_swap.so"}, FALSE},
-    {{BD_PLUGIN_LOOP, "libbd_loop.so"}, FALSE},
-    {{BD_PLUGIN_CRYPTO, "libbd_crypto.so"}, FALSE},
-    {{BD_PLUGIN_MPATH, "libbd_mpath.so"}, FALSE},
-    {{BD_PLUGIN_DM, "libbd_dm.so"}, FALSE}
+    {{BD_PLUGIN_LVM, "libbd_lvm.so"}, NULL},
+    {{BD_PLUGIN_BTRFS, "libbd_btrfs.so"}, NULL},
+    {{BD_PLUGIN_SWAP, "libbd_swap.so"}, NULL},
+    {{BD_PLUGIN_LOOP, "libbd_loop.so"}, NULL},
+    {{BD_PLUGIN_CRYPTO, "libbd_crypto.so"}, NULL},
+    {{BD_PLUGIN_MPATH, "libbd_mpath.so"}, NULL},
+    {{BD_PLUGIN_DM, "libbd_dm.so"}, NULL}
 };
 static gchar* plugin_names[BD_PLUGIN_UNDEF] = {
     "lvm", "btrfs", "swap", "loop", "crypto", "mpath", "dm"
@@ -63,16 +63,16 @@ gboolean bd_init (BDPluginSpec *force_plugins) {
         for (i=0; force_plugins + i; i++)
             set_plugin_so_name(force_plugins[i].name, force_plugins[i].so_name);
 
-    plugins[BD_PLUGIN_LVM].loaded = load_lvm_from_plugin(plugins[BD_PLUGIN_LVM].spec.so_name) != NULL;
-    plugins[BD_PLUGIN_BTRFS].loaded = load_btrfs_from_plugin(plugins[BD_PLUGIN_BTRFS].spec.so_name) != NULL;
-    plugins[BD_PLUGIN_SWAP].loaded = load_swap_from_plugin(plugins[BD_PLUGIN_SWAP].spec.so_name) != NULL;
-    plugins[BD_PLUGIN_LOOP].loaded = load_loop_from_plugin(plugins[BD_PLUGIN_LOOP].spec.so_name) != NULL;
-    plugins[BD_PLUGIN_CRYPTO].loaded = load_crypto_from_plugin(plugins[BD_PLUGIN_CRYPTO].spec.so_name) != NULL;
-    plugins[BD_PLUGIN_MPATH].loaded = load_mpath_from_plugin(plugins[BD_PLUGIN_MPATH].spec.so_name) != NULL;
-    plugins[BD_PLUGIN_DM].loaded = load_dm_from_plugin(plugins[BD_PLUGIN_DM].spec.so_name) != NULL;
+    plugins[BD_PLUGIN_LVM].handle = load_lvm_from_plugin(plugins[BD_PLUGIN_LVM].spec.so_name);
+    plugins[BD_PLUGIN_BTRFS].handle = load_btrfs_from_plugin(plugins[BD_PLUGIN_BTRFS].spec.so_name);
+    plugins[BD_PLUGIN_SWAP].handle = load_swap_from_plugin(plugins[BD_PLUGIN_SWAP].spec.so_name);
+    plugins[BD_PLUGIN_LOOP].handle = load_loop_from_plugin(plugins[BD_PLUGIN_LOOP].spec.so_name);
+    plugins[BD_PLUGIN_CRYPTO].handle = load_crypto_from_plugin(plugins[BD_PLUGIN_CRYPTO].spec.so_name);
+    plugins[BD_PLUGIN_MPATH].handle = load_mpath_from_plugin(plugins[BD_PLUGIN_MPATH].spec.so_name);
+    plugins[BD_PLUGIN_DM].handle = load_dm_from_plugin(plugins[BD_PLUGIN_DM].spec.so_name);
 
     for (i=0; (i < BD_PLUGIN_UNDEF) && all_loaded; i++)
-        all_loaded = all_loaded && plugins[i].loaded;
+        all_loaded = all_loaded && plugins[i].handle;
 
     return all_loaded;
 }
@@ -89,12 +89,12 @@ gchar** bd_get_available_plugin_names () {
     guint8 next = 0;
 
     for (i=0; i < BD_PLUGIN_UNDEF; i++)
-        if (plugins[i].loaded)
+        if (plugins[i].handle)
             num_loaded++;
 
     gchar **ret_plugin_names = g_new (gchar*, num_loaded + 1);
     for (i=0; i < BD_PLUGIN_UNDEF; i++)
-        if (plugins[i].loaded) {
+        if (plugins[i].handle) {
             ret_plugin_names[next] = plugin_names[i];
             next++;
         }
@@ -111,7 +111,7 @@ gchar** bd_get_available_plugin_names () {
  */
 gboolean bd_is_plugin_available (BDPlugin plugin) {
     if (plugin < BD_PLUGIN_UNDEF)
-        return plugins[plugin].loaded;
+        return plugins[plugin].handle != NULL;
     else
         return FALSE;
 }
