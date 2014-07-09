@@ -82,7 +82,7 @@ src/lib/plugin_apis/%.c: src/lib/plugin_apis/%.h boilerplate_generator.py
 	./boilerplate_generator.py $< > $@
 
 src/lib/blockdev.o: ${LIBRARY_FILES} ${PLUGIN_SOURCE_FILES}
-	gcc -fPIC -c ${GLIB_INCLUDES} $< -o $@
+	gcc -fPIC -c -Wextra -Werror ${GLIB_INCLUDES} $< -o $@
 
 src/lib/libblockdev.so: src/lib/blockdev.o
 	gcc -shared -fPIC -o $@ $<

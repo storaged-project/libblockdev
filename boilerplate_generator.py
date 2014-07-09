@@ -123,17 +123,17 @@ def get_includes_str(includes):
     return ret
 
 def get_funcs_info(fn_infos, module_name):
-    ret = "static gchar const * const {0}_functions[] = {{\n".format(module_name)
+    ret = "static const gchar const * const {0}_functions[] = {{\n".format(module_name)
     for info in fn_infos:
         ret += '    "{0.name}",\n'.format(info)
     ret += "    NULL};\n\n"
 
-    ret += ("gchar const * const * const get_{0}_functions (void) {{\n".format(module_name) +
+    ret += ("gchar const * const * get_{0}_functions (void) {{\n".format(module_name) +
             "    return {0}_functions;\n".format(module_name) +
             "}\n\n")
 
     ret += "static const guint8 {0}_num_functions = {1};\n\n".format(module_name, len(fn_infos))
-    ret += ("const guint8 get_{0}_num_functions (void) {{\n".format(module_name) +
+    ret += ("guint8 get_{0}_num_functions (void) {{\n".format(module_name) +
             "    return {0}_num_functions;\n".format(module_name) +
             "}\n\n")
 
