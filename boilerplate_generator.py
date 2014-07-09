@@ -132,7 +132,7 @@ def get_funcs_info(fn_infos, module_name):
             "    return {0}_functions;\n".format(module_name) +
             "}\n\n")
 
-    ret += "const guint8 {0}_num_functions = {1};\n\n".format(module_name, len(fn_infos))
+    ret += "static const guint8 {0}_num_functions = {1};\n\n".format(module_name, len(fn_infos))
     ret += ("const guint8 get_{0}_num_functions (void) {{\n".format(module_name) +
             "    return {0}_num_functions;\n".format(module_name) +
             "}\n\n")
