@@ -48,6 +48,42 @@ static void set_plugin_so_name (BDPlugin name, gchar *so_name) {
     plugins[name].spec.so_name = so_name;
 }
 
+static gboolean load_plugins (BDPluginSpec *force_plugins, gboolean reload) {
+    guint8 i = 0;
+    gboolean all_loaded = TRUE;
+
+    if (reload)
+        for (i=0; i < BD_PLUGIN_UNDEF; i++) {
+            if (plugins[i].handle && (dlclose (plugins[i].handle) != 0))
+                g_warning ("Failed to close %s plugin", plugin_names[i]);
+            plugins[i].handle = NULL;
+        }
+
+    if (force_plugins)
+        for (i=0; force_plugins + i; i++)
+            set_plugin_so_name(force_plugins[i].name, force_plugins[i].so_name);
+
+    if (!plugins[BD_PLUGIN_LVM].handle)
+        plugins[BD_PLUGIN_LVM].handle = load_lvm_from_plugin(plugins[BD_PLUGIN_LVM].spec.so_name);
+    if (!plugins[BD_PLUGIN_BTRFS].handle)
+        plugins[BD_PLUGIN_BTRFS].handle = load_btrfs_from_plugin(plugins[BD_PLUGIN_BTRFS].spec.so_name);
+    if (!plugins[BD_PLUGIN_SWAP].handle)
+        plugins[BD_PLUGIN_SWAP].handle = load_swap_from_plugin(plugins[BD_PLUGIN_SWAP].spec.so_name);
+    if (!plugins[BD_PLUGIN_LOOP].handle)
+        plugins[BD_PLUGIN_LOOP].handle = load_loop_from_plugin(plugins[BD_PLUGIN_LOOP].spec.so_name);
+    if (!plugins[BD_PLUGIN_CRYPTO].handle)
+        plugins[BD_PLUGIN_CRYPTO].handle = load_crypto_from_plugin(plugins[BD_PLUGIN_CRYPTO].spec.so_name);
+    if (!plugins[BD_PLUGIN_MPATH].handle)
+        plugins[BD_PLUGIN_MPATH].handle = load_mpath_from_plugin(plugins[BD_PLUGIN_MPATH].spec.so_name);
+    if (!plugins[BD_PLUGIN_DM].handle)
+        plugins[BD_PLUGIN_DM].handle = load_dm_from_plugin(plugins[BD_PLUGIN_DM].spec.so_name);
+
+    for (i=0; (i < BD_PLUGIN_UNDEF) && all_loaded; i++)
+        all_loaded = all_loaded && plugins[i].handle;
+
+    return all_loaded;
+}
+
 /**
  * bd_init:
  * @force_plugins: (allow-none): null-terminated list of plugins that should be loaded (even if
@@ -56,25 +92,22 @@ static void set_plugin_so_name (BDPlugin name, gchar *so_name) {
  * Returns: whether the library was successfully initialized or not
  */
 gboolean bd_init (BDPluginSpec *force_plugins) {
-    guint8 i = 0;
-    gboolean all_loaded = TRUE;
+    return load_plugins (force_plugins, FALSE);
+}
 
-    if (force_plugins)
-        for (i=0; force_plugins + i; i++)
-            set_plugin_so_name(force_plugins[i].name, force_plugins[i].so_name);
-
-    plugins[BD_PLUGIN_LVM].handle = load_lvm_from_plugin(plugins[BD_PLUGIN_LVM].spec.so_name);
-    plugins[BD_PLUGIN_BTRFS].handle = load_btrfs_from_plugin(plugins[BD_PLUGIN_BTRFS].spec.so_name);
-    plugins[BD_PLUGIN_SWAP].handle = load_swap_from_plugin(plugins[BD_PLUGIN_SWAP].spec.so_name);
-    plugins[BD_PLUGIN_LOOP].handle = load_loop_from_plugin(plugins[BD_PLUGIN_LOOP].spec.so_name);
-    plugins[BD_PLUGIN_CRYPTO].handle = load_crypto_from_plugin(plugins[BD_PLUGIN_CRYPTO].spec.so_name);
-    plugins[BD_PLUGIN_MPATH].handle = load_mpath_from_plugin(plugins[BD_PLUGIN_MPATH].spec.so_name);
-    plugins[BD_PLUGIN_DM].handle = load_dm_from_plugin(plugins[BD_PLUGIN_DM].spec.so_name);
-
-    for (i=0; (i < BD_PLUGIN_UNDEF) && all_loaded; i++)
-        all_loaded = all_loaded && plugins[i].handle;
-
-    return all_loaded;
+/**
+ * bd_reinit:
+ * @force_plugins: (allow-none): null-terminated list of plugins that should be loaded (even if
+ *                 other plugins for the same technologies are found)
+ * @reload: whether to reload the already loaded plugins or not
+ *
+ * Returns: whether the library was successfully initialized or not
+ *
+ * If @reload is %TRUE all the plugins are closed and reloaded otherwise only
+ * the missing plugins are loaded.
+ */
+gboolean bd_reinit (BDPluginSpec *force_plugins, gboolean reload) {
+    return load_plugins (force_plugins, reload);
 }
 
 /**
