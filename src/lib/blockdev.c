@@ -44,7 +44,7 @@ static gchar* plugin_names[BD_PLUGIN_UNDEF] = {
     "lvm", "btrfs", "swap", "loop", "crypto", "mpath", "dm"
 };
 
-void set_plugin_so_name (BDPlugin name, gchar *so_name) {
+static void set_plugin_so_name (BDPlugin name, gchar *so_name) {
     plugins[name].spec.so_name = so_name;
 }
 
