@@ -85,7 +85,7 @@ gboolean bd_swap_swapon (gchar *device, gint priority, gchar **error_message) {
     dev_file = g_io_channel_new_file (device, "r", &error);
     if (!dev_file) {
         *error_message = g_strdup (error->message);
-        g_error_free (error);
+        g_clear_error (&error);
         return FALSE;
     }
 
@@ -94,7 +94,7 @@ gboolean bd_swap_swapon (gchar *device, gint priority, gchar **error_message) {
     io_status = g_io_channel_seek_position (dev_file, page_size - 10, G_SEEK_SET, &error);
     if (io_status != G_IO_STATUS_NORMAL) {
         *error_message = g_strdup_printf ("Failed to determine device's state: %s", error->message);
-        g_error_free (error);
+        g_clear_error (&error);
         g_io_channel_shutdown (dev_file, FALSE, &error);
         return FALSE;
     }
@@ -102,7 +102,7 @@ gboolean bd_swap_swapon (gchar *device, gint priority, gchar **error_message) {
     io_status = g_io_channel_read_chars (dev_file, dev_status, 10, &num_read, &error);
     if ((io_status != G_IO_STATUS_NORMAL) || (num_read != 10)) {
         *error_message = g_strdup_printf ("Failed to determine device's state: %s", error->message);
-        g_error_free (error);
+        g_clear_error (&error);
         g_io_channel_shutdown (dev_file, FALSE, &error);
         return FALSE;
     }

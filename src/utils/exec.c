@@ -39,7 +39,7 @@ gboolean bd_utils_exec_and_report_error (gchar **argv, gchar **error_message) {
 
     if (!success) {
         *error_message = g_strdup (error->message);
-        g_error_free(error);
+        g_clear_error (&error);
         return FALSE;
     }
 
@@ -80,7 +80,7 @@ gboolean bd_utils_exec_and_capture_output (gchar **argv, gchar **output, gchar *
 
     if (!success) {
         *error_message = g_strdup (error->message);
-        g_error_free (error);
+        g_clear_error (&error);
         return FALSE;
     }
 

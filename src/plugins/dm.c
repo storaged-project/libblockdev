@@ -102,7 +102,7 @@ gchar* bd_dm_name_from_dm_node (gchar *dm_node, gchar **error_message) {
 
     if (!success) {
         *error_message = g_strdup (error->message);
-         g_error_free (error);
+         g_clear_error (&error);
         return NULL;
     }
 

@@ -56,7 +56,7 @@ gchar* bd_loop_get_backing_file (gchar *dev_name, gchar **error_message) {
     if (!success) {
         *error_message = g_strdup (error->message);
         g_free (sys_path);
-        g_error_free (error);
+        g_clear_error (&error);
         return NULL;
     }
 
