@@ -5,8 +5,8 @@
 
 #include "plugins.h"
 
-gboolean bd_init (BDPluginSpec *force_plugins);
-gboolean bd_reinit (BDPluginSpec *force_plugins, gboolean reload);
+gboolean bd_init (BDPluginSpec **force_plugins);
+gboolean bd_reinit (BDPluginSpec **force_plugins, gboolean reload);
 gchar** bd_get_available_plugin_names ();
 gboolean bd_is_plugin_available (BDPlugin plugin);
 

@@ -48,7 +48,7 @@ static void set_plugin_so_name (BDPlugin name, gchar *so_name) {
     plugins[name].spec.so_name = so_name;
 }
 
-static gboolean load_plugins (BDPluginSpec *force_plugins, gboolean reload) {
+static gboolean load_plugins (BDPluginSpec **force_plugins, gboolean reload) {
     guint8 i = 0;
     gboolean all_loaded = TRUE;
 
@@ -60,8 +60,8 @@ static gboolean load_plugins (BDPluginSpec *force_plugins, gboolean reload) {
         }
 
     if (force_plugins)
-        for (i=0; force_plugins + i; i++)
-            set_plugin_so_name(force_plugins[i].name, force_plugins[i].so_name);
+        for (i=0; *(force_plugins + i); i++)
+            set_plugin_so_name(force_plugins[i]->name, force_plugins[i]->so_name);
 
     if (!plugins[BD_PLUGIN_LVM].handle)
         plugins[BD_PLUGIN_LVM].handle = load_lvm_from_plugin(plugins[BD_PLUGIN_LVM].spec.so_name);
@@ -86,18 +86,20 @@ static gboolean load_plugins (BDPluginSpec *force_plugins, gboolean reload) {
 
 /**
  * bd_init:
- * @force_plugins: (allow-none): null-terminated list of plugins that should be loaded (even if
+ * @force_plugins: (allow-none) (array zero-terminated=1): null-terminated list
+ *                 of plugins that should be loaded (even if
  *                 other plugins for the same technologies are found)
  *
  * Returns: whether the library was successfully initialized or not
  */
-gboolean bd_init (BDPluginSpec *force_plugins) {
+gboolean bd_init (BDPluginSpec **force_plugins) {
     return load_plugins (force_plugins, FALSE);
 }
 
 /**
  * bd_reinit:
- * @force_plugins: (allow-none): null-terminated list of plugins that should be loaded (even if
+ * @force_plugins: (allow-none) (array zero-terminated=1): null-terminated list
+ *                 of plugins that should be loaded (even if
  *                 other plugins for the same technologies are found)
  * @reload: whether to reload the already loaded plugins or not
  *
@@ -106,7 +108,7 @@ gboolean bd_init (BDPluginSpec *force_plugins) {
  * If @reload is %TRUE all the plugins are closed and reloaded otherwise only
  * the missing plugins are loaded.
  */
-gboolean bd_reinit (BDPluginSpec *force_plugins, gboolean reload) {
+gboolean bd_reinit (BDPluginSpec **force_plugins, gboolean reload) {
     return load_plugins (force_plugins, reload);
 }
 
