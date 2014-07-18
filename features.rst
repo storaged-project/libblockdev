@@ -199,13 +199,18 @@ DEVICE MAPPER
 --------------
 
 :supported technologies:
-   basic operations with raw device mapper
+   basic operations with raw device mapper and DM RAID sets
 
 :functions:
-   * dm_create_linear [DONE]
-   * dm_remove [DONE]
+   * create_linear [DONE]
+   * remove [DONE]
    * dm_node_from_name [DONE]
    * name_from_dm_node [DONE]
+   * map_exists
+   * get_mem_raid_set_name
+   * activate_raid_set
+   * deactivate_raid_set
+   * get_raid_set_type
 
 
 utils
