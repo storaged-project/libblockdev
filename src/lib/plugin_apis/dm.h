@@ -41,3 +41,15 @@ gchar* bd_dm_name_from_dm_node (gchar *dm_node, gchar **error_message);
  * the error in such cases)
  */
 gchar* bd_dm_node_from_name (gchar *map_name, gchar **error_message);
+
+/**
+ * bd_dm_map_exists:
+ * @map_name: name of the queried map
+ * @live_only: whether to go through the live maps only or not
+ * @active_only: whether to ignore suspended maps or not
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the given @map_name exists (and is live if @live_only is
+ * %TRUE (and is active if @active_only is %TRUE)).
+ */
+gboolean bd_dm_map_exists (gchar *map_name, gboolean live_only, gboolean active_only, gchar **error_message);
