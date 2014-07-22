@@ -204,8 +204,8 @@ DEVICE MAPPER
 :functions:
    * create_linear [DONE]
    * remove [DONE]
-   * dm_node_from_name [DONE]
-   * name_from_dm_node [DONE]
+   * node_from_name [DONE]
+   * name_from_node [DONE]
    * map_exists
    * get_mem_raid_set_name
    * activate_raid_set

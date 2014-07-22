@@ -23,14 +23,14 @@ gboolean bd_dm_create_linear (gchar *map_name, gchar *device, guint64 length, gc
 gboolean bd_dm_remove (gchar *map_name, gchar **error_message);
 
 /**
- * bd_dm_name_from_dm_node:
+ * bd_dm_name_from_node:
  * @dm_node: name of the DM node (e.g. "dm-0")
  * @error_message: (out): variable to store error message to (if any)
  *
  * Returns: map name of the map providing the @dm_node device or %NULL
  * (@error_message contains the error in such cases)
  */
-gchar* bd_dm_name_from_dm_node (gchar *dm_node, gchar **error_message);
+gchar* bd_dm_name_from_node (gchar *dm_node, gchar **error_message);
 
 /**
  * bd_dm_node_from_name:
