@@ -183,6 +183,7 @@ gboolean bd_dm_map_exists (gchar *map_name, gboolean live_only, gboolean active_
 
     do {
         names = (void *)names + next;
+        next = names->next;
         /* we are searching for the particular map_name map */
         if (g_strcmp0 (map_name, names->name) != 0)
             /* not matching, skip */
@@ -212,7 +213,6 @@ gboolean bd_dm_map_exists (gchar *map_name, gboolean live_only, gboolean active_
             ret = ret && !info.suspended;
 
         dm_task_destroy (task_info);
-        next = names->next;
         if (ret)
             /* found match according to restrictions */
             break;

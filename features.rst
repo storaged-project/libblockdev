@@ -206,7 +206,7 @@ DEVICE MAPPER
    * remove [DONE]
    * node_from_name [DONE]
    * name_from_node [DONE]
-   * map_exists
+   * map_exists [DONE]
    * get_mem_raid_set_name
    * activate_raid_set
    * deactivate_raid_set
