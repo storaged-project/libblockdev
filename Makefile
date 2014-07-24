@@ -89,7 +89,7 @@ src/lib/libblockdev.so: src/lib/blockdev.o
 	gcc -shared -fPIC -o $@ $<
 
 BlockDev-1.0.gir: src/utils/libbd_utils.so src/lib/libblockdev.so ${LIBRARY_FILES}
-	LD_LIBRARY_PATH=src/lib/:src/utils/ g-ir-scanner `pkg-config --cflags --libs glib-2.0 gobject-2.0 libcryptsetup devmapper` --library=blockdev -I src/lib/ -L src/utils -lbd_utils -lm -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o $@ --warn-all ${LIBRARY_FILES} ${PLUGIN_HEADER_FILES}
+	LD_LIBRARY_PATH=src/lib/:src/utils/ g-ir-scanner --warn-error `pkg-config --cflags --libs glib-2.0 gobject-2.0 libcryptsetup devmapper` --library=blockdev -I src/lib/ -L src/utils -lbd_utils -lm -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o $@ --warn-all ${LIBRARY_FILES} ${PLUGIN_HEADER_FILES}
 
 BlockDev-1.0.typelib: BlockDev-1.0.gir
 	g-ir-compiler -o $@ $<

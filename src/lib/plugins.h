@@ -59,7 +59,7 @@ GType bd_plugin_spec_get_type () {
     return type;
 }
 
-gboolean bd_is_plugin_available (BDPlugin name);
+gboolean bd_is_plugin_available (BDPlugin plugin);
 gchar** bd_get_available_plugin_names ();
 gboolean bd_func_available (BDPlugin plugin, gchar *func_name);
 
