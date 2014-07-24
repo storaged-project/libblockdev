@@ -53,3 +53,18 @@ gchar* bd_dm_node_from_name (gchar *map_name, gchar **error_message);
  * %TRUE (and is active if @active_only is %TRUE)).
  */
 gboolean bd_dm_map_exists (gchar *map_name, gboolean live_only, gboolean active_only, gchar **error_message);
+
+/**
+ * bd_dm_get_member_raid_sets:
+ * @name: (allow-none): name of the member
+ * @uuid: (allow-none): uuid of the member
+ * @major: major number of the device or -1 if not specified
+ * @minor: minor number of the device or -1 if not specified
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (transfer full) (array zero-terminated=1): list of names of the RAID sets related to
+ * the member or %NULL in case of error
+ *
+ * One of @name, @uuid or @major:@minor has to be given.
+ */
+gchar** bd_dm_get_member_raid_sets (gchar *name, gchar *uuid, gint major, gint minor, gchar **error_message);

@@ -21,6 +21,8 @@
 #include <unistd.h>
 #include <exec.h>
 #include <libdevmapper.h>
+#include <dmraid/dmraid.h>
+#include <libudev.h>
 
 #include "dm.h"
 
@@ -220,5 +222,142 @@ gboolean bd_dm_map_exists (gchar *map_name, gboolean live_only, gboolean active_
 
     dm_task_destroy (task_list);
 
+    return ret;
+}
+
+/**
+ * raid_dev_matches_spec: (skip)
+ *
+ * Returns: whether the device specified by @sysname matches the spec given by @name,
+ *          @uuid, @major and @minor
+ */
+static gboolean raid_dev_matches_spec (struct raid_dev *raid_dev, gchar *name, gchar *uuid, gint major, gint minor) {
+    gchar const *dev_name = NULL;
+    gchar const *dev_uuid;
+    gchar const *major_str;
+    gchar const *minor_str;
+    struct udev *context;
+    struct udev_device *device;
+    gboolean ret = TRUE;
+
+    /* find the second '/' to get name (the rest of the string) */
+    dev_name = strchr (raid_dev->di->path, '/');
+    if (dev_name && strlen (dev_name) > 1) {
+        dev_name++;
+        dev_name = strchr (dev_name, '/');
+    }
+    if (dev_name && strlen (dev_name) > 1) {
+        dev_name++;
+    }
+    else
+        dev_name = NULL;
+
+    /* if we don't have the name, we cannot check any match */
+    g_return_val_if_fail (dev_name, FALSE);
+
+    if (name && strcmp (dev_name, name) != 0) {
+        return FALSE;
+    }
+
+    context = udev_new ();
+    device = udev_device_new_from_subsystem_sysname (context, "block", dev_name);
+    dev_uuid = udev_device_get_property_value (device, "UUID");
+    major_str = udev_device_get_property_value (device, "MAJOR");
+    minor_str = udev_device_get_property_value (device, "MINOR");
+
+    if (uuid && (g_strcmp0 (uuid, "") != 0) && (g_strcmp0 (uuid, dev_uuid) != 0))
+        ret = FALSE;
+
+    if (major >= 0 && (atoi (major_str) != major))
+        ret = FALSE;
+
+    if (minor >= 0 && (atoi (minor_str) != minor))
+        ret = FALSE;
+
+    udev_device_unref (device);
+    udev_unref (context);
+
+    return ret;
+}
+
+/**
+ * process_raid_set: (skip)
+ */
+static void find_dev_in_raid_set (gchar *name, gchar *uuid, gint major, gint minor, struct lib_context *lc, struct raid_set *rs, GPtrArray *ret_sets) {
+    struct raid_set *subset;
+    struct raid_dev *dev;
+
+    if (T_GROUP(rs) || !list_empty(&(rs->sets))) {
+        for_each_subset (rs, subset)
+            find_dev_in_raid_set (name, uuid, major, minor, lc, subset, ret_sets);
+    } else {
+        for_each_device (rs, dev) {
+            if (raid_dev_matches_spec (dev, name, uuid, major, minor))
+                g_ptr_array_add (ret_sets, g_strdup (rs->name));
+        }
+    }
+}
+
+/**
+ * bd_dm_get_member_raid_sets:
+ * @name: (allow-none): name of the member
+ * @uuid: (allow-none): uuid of the member
+ * @major: major number of the device or -1 if not specified
+ * @minor: minor number of the device or -1 if not specified
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: (transfer full) (array zero-terminated=1): list of names of the RAID sets related to
+ * the member or %NULL in case of error
+ *
+ * One of @name, @uuid or @major:@minor has to be given.
+ */
+gchar** bd_dm_get_member_raid_sets (gchar *name, gchar *uuid, gint major, gint minor, gchar **error_message) {
+    guint64 i = 0;
+    gint rc = 0;
+    gchar *argv[] = {"blockdev.dmraid", NULL};
+    struct lib_context *lc;
+    struct raid_set *rs;
+    GPtrArray *ret_sets = g_ptr_array_new ();
+    gchar **ret = NULL;
+
+    /* the code for this function was cherry-picked from the pyblock code */
+
+    /* initialize dmraid library context */
+    lc = libdmraid_init (1, (gchar **)argv);
+
+    rc = discover_devices (lc, NULL);
+    if (!rc) {
+        *error_message = g_strdup ("Failed to discover devices");
+        libdmraid_exit (lc);
+        return NULL;
+    }
+    discover_raid_devices (lc, NULL);
+
+    if (!count_devices (lc, RAID)) {
+        *error_message = g_strdup ("No RAIDs discovered");
+        libdmraid_exit (lc);
+        return NULL;
+    }
+
+    argv[0] = NULL;
+    if (!group_set (lc, argv)) {
+        *error_message = g_strdup ("Failed to group_set");
+        libdmraid_exit (lc);
+        return NULL;
+    }
+
+    for_each_raidset (lc, rs) {
+        find_dev_in_raid_set (name, uuid, major, minor, lc, rs, ret_sets);
+    }
+
+    /* now create the return value -- NULL-terminated array of strings */
+    ret = g_new (gchar*, ret_sets->len + 1);
+    for (i=0; i < ret_sets->len; i++)
+        ret[i] = (gchar*) g_ptr_array_index (ret_sets, i);
+    ret[i] = NULL;
+
+    g_ptr_array_free (ret_sets, FALSE);
+
+    libdmraid_exit (lc);
     return ret;
 }
