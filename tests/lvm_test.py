@@ -650,7 +650,7 @@ class LvmTestCase(unittest.TestCase):
         self.assertTrue(succ)
         self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_thpoolcreate("testVG", "testPool", 512 * 1024**2, 4 * 1024**2, 512 * 1024)
+        succ, err = BlockDev.lvm_thpoolcreate("testVG", "testPool", 512 * 1024**2, 4 * 1024**2, 512 * 1024, "thin-performance")
         self.assertTrue(succ)
         self.assertIs(err, None)
 
@@ -689,7 +689,7 @@ class LvmTestCase(unittest.TestCase):
         self.assertTrue(succ)
         self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_thpoolcreate("testVG", "testPool", 512 * 1024**2, 4 * 1024**2, 512 * 1024)
+        succ, err = BlockDev.lvm_thpoolcreate("testVG", "testPool", 512 * 1024**2, 4 * 1024**2, 512 * 1024, None)
         self.assertTrue(succ)
         self.assertIs(err, None)
 
@@ -744,7 +744,7 @@ class LvmTestCase(unittest.TestCase):
         self.assertTrue(succ)
         self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_thpoolcreate("testVG", "testPool", 512 * 1024**2, 4 * 1024**2, 512 * 1024)
+        succ, err = BlockDev.lvm_thpoolcreate("testVG", "testPool", 512 * 1024**2, 4 * 1024**2, 512 * 1024, None)
         self.assertTrue(succ)
         self.assertIs(err, None)
 

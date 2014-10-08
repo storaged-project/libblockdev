@@ -1109,12 +1109,14 @@ BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, gchar **error_message) {
  * @size: requested size of the to-be-created pool
  * @md_size: requested metadata size or 0 to use the default
  * @chunk_size: requested chunk size or 0 to use the default
+ * @profile: (allow-none): profile to use (see lvm(8) for more information) or %NULL to use
+ *                         the default
  * @error_message: (out): variable to store error message to (if any)
  *
  * Returns: whether the @vg_name/@lv_name thin pool was successfully created or not
  */
-gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guint64 md_size, guint64 chunk_size, gchar **error_message) {
-    gchar *args[8] = {"lvcreate", "-T", "-L", NULL, NULL, NULL, NULL, NULL};
+gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guint64 md_size, guint64 chunk_size, gchar *profile, gchar **error_message) {
+    gchar *args[9] = {"lvcreate", "-T", "-L", NULL, NULL, NULL, NULL, NULL, NULL};
     guint8 next_arg = 4;
     gboolean success = FALSE;
 
@@ -1130,6 +1132,11 @@ gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guin
         next_arg++;
     }
 
+    if (profile) {
+        args[next_arg] = g_strdup_printf("--profile=%s", profile);
+        next_arg++;
+    }
+
     args[next_arg] = g_strdup_printf ("%s/%s", vg_name, lv_name);
 
     success = call_lvm_and_report_error (args, error_message);
@@ -1137,6 +1144,7 @@ gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guin
     g_free (args[4]);
     g_free (args[5]);
     g_free (args[6]);
+    g_free (args[7]);
 
     return success;
 }

@@ -529,11 +529,13 @@ BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, gchar **error_message);
  * @size: requested size of the to-be-created pool
  * @md_size: requested metadata size or 0 to use the default
  * @chunk_size: requested chunk size or 0 to use the default
+ * @profile: (allow-none): profile to use (see lvm(8) for more information) or %NULL to use
+ *                         the default
  * @error_message: (out): variable to store error message to (if any)
  *
  * Returns: whether the @vg_name/@lv_name thin pool was successfully created or not
  */
-gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guint64 md_size, guint64 chunk_size, gchar **error_message);
+gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guint64 md_size, guint64 chunk_size, gchar *profile, gchar **error_message);
 
 /**
  * bd_lvm_thlvcreate:

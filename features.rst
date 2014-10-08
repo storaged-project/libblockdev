@@ -85,7 +85,7 @@ LVM
    * lvinfo [DONE]
    * lvs [DONE]
 
-   * thpoolcreate [DONE] [missing the --profile argument]
+   * thpoolcreate [DONE]
    * thlvcreate [DONE]
    * thlvpoolname [DONE]
    * thsnapshotcreate [DONE]
