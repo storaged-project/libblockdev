@@ -223,6 +223,12 @@ class BtrfsTestCase (unittest.TestCase):
         self.assertTrue(succ)
         self.assertIs(err, None)
 
+        # not mounted yet, should fail
+        ret, err = BlockDev.btrfs_get_default_subvolume_id(TEST_MNT)
+        self.assertEqual(ret, 0)
+        self.assertIsNot(err, None)
+        self.assertIn("not mounted", err)
+
         mount(self.loop_dev, TEST_MNT)
 
         ret, err = BlockDev.btrfs_get_default_subvolume_id(TEST_MNT)

@@ -350,6 +350,11 @@ guint64 bd_btrfs_get_default_subvolume_id (gchar *mountpoint, gchar **error_mess
         return 0;
     }
 
+    if (!path_is_mountpoint (mountpoint)) {
+        *error_message = g_strdup_printf ("%s not mounted", mountpoint);
+        return 0;
+    }
+
     success = bd_utils_exec_and_capture_output (argv, &output, error_message);
     if (!success) {
         g_regex_unref (regex);
