@@ -78,6 +78,7 @@ gboolean bd_btrfs_remove_device (gchar *mountpoint, gchar *device, gchar **error
 gboolean bd_btrfs_create_subvolume (gchar *mountpoint, gchar *name, gchar **error_message);
 gboolean bd_btrfs_delete_subvolume (gchar *mountpoint, gchar *name, gchar **error_message);
 guint64 bd_btrfs_get_default_subvolume_id (gchar *mountpoint, gchar **error_message);
+gboolean bd_btrfs_set_default_subvolume (gchar *mountpoint, guint64 subvol_id, gchar **error_message);
 gboolean bd_btrfs_create_snapshot (gchar *source, gchar *dest, gboolean ro, gchar **error_message);
 BDBtrfsDeviceInfo** bd_btrfs_list_devices (gchar *device, gchar **error_message);
 BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (gchar *mountpoint, gboolean snapshots_only, gchar **error_message);

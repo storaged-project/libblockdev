@@ -232,6 +232,46 @@ class BtrfsTestCase (unittest.TestCase):
         umount(TEST_MNT)
         wipefs(self.loop_dev)
 
+    def test_set_default_subvolume(self):
+        """Verify that setting default subvolume works as expected"""
+
+        succ, err = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None)
+        self.assertTrue(succ)
+        self.assertIs(err, None)
+
+        mount(self.loop_dev, TEST_MNT)
+
+        ret, err = BlockDev.btrfs_get_default_subvolume_id(TEST_MNT)
+        self.assertTrue(ret == 5)
+        self.assertIs(err, None)
+
+        succ, err = BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1")
+        self.assertTrue(succ)
+        self.assertIs(err, None)
+
+        subvols, err = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
+        self.assertTrue(len(subvols) == 1)
+        self.assertIs(err, None)
+
+        new_id = next((subvol.id for subvol in subvols), None)
+        self.assertIsNot(new_id, None)
+        succ, err = BlockDev.btrfs_set_default_subvolume(TEST_MNT, new_id)
+        self.assertTrue(succ)
+        self.assertIs(err, None)
+        ret, err = BlockDev.btrfs_get_default_subvolume_id(TEST_MNT)
+        self.assertEquals(ret, new_id)
+        self.assertIs(err, None)
+
+        succ, err = BlockDev.btrfs_set_default_subvolume(TEST_MNT, 5)
+        self.assertTrue(succ)
+        self.assertIs(err, None)
+        ret, err = BlockDev.btrfs_get_default_subvolume_id(TEST_MNT)
+        self.assertEquals(ret, 5)
+        self.assertIs(err, None)
+
+        umount(TEST_MNT)
+        wipefs(self.loop_dev)
+
     def test_list_devices(self):
         """Verify that it is possible to get info about devices"""
 

@@ -213,6 +213,17 @@ gboolean bd_btrfs_delete_subvolume (gchar *mountpoint, gchar *name, gchar **erro
 guint64 bd_btrfs_get_default_subvolume_id (gchar *mountpoint, gchar **error_message);
 
 /**
+ * bd_btrfs_set_default_subvolume:
+ * @mountpoint: mountpoint of the volume to set the default subvolume ID of
+ * @subvol_id: ID of the subvolume to be set as the default subvolume
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the @mountpoint volume's default subvolume was correctly set
+ * to @subvol_id or not
+ */
+gboolean bd_btrfs_set_default_subvolume (gchar *mountpoint, guint64 subvol_id, gchar **error_message);
+
+/**
  * bd_btrfs_create_snapshot:
  * @source: path to source subvolume
  * @dest: path to new snapshot volume
