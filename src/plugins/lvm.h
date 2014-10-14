@@ -165,5 +165,7 @@ gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guin
 gboolean bd_lvm_thlvcreate (gchar *vg_name, gchar *pool_name, gchar *lv_name, guint64 size, gchar **error_message);
 gchar* bd_lvm_thpoolname (gchar *vg_name, gchar *lv_name, gchar **error_message);
 gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, gchar *pool_name, gchar **error_message);
+gboolean bd_lvm_set_global_config (gchar *new_config, gchar **error_message);
+gchar* bd_lvm_get_global_config ();
 
 #endif /* BD_LVM */

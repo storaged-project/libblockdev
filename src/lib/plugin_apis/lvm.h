@@ -573,4 +573,23 @@ gchar* bd_lvm_thlvpoolname (gchar *vg_name, gchar *lv_name, gchar **error_messag
  */
 gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, gchar *pool_name, gchar **error_message);
 
+/**
+ * bd_lvm_set_global_config:
+ * @new_config: (allow-none): string representation of the new global LVM
+ *                            configuration to set or %NULL to reset to default
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the new requested global config @new_config was successfully
+ *          set or not
+ */
+gboolean bd_lvm_set_global_config (gchar *new_config, gchar **error_message);
+
+/**
+ * bd_lvm_get_global_config:
+ *
+ * Returns: a copy of a string representation of the currently set LVM global
+ *          configuration
+ */
+gchar* bd_lvm_get_global_config ();
+
 #endif  /* BD_LVM_API */

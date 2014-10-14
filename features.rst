@@ -46,8 +46,8 @@ LVM
    "plain LVM", LVM Thin Provisioning
 
 :functions:
-   * get_global_config
-   * set_global_config
+   * get_global_config [DONE]
+   * set_global_config [DONE]
    * get_possible_pe_sizes [DONE]
    * is_supported_pe_size [DONE]
    * get_max_lv_size [DONE]

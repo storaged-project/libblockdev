@@ -17,7 +17,6 @@ int main (void) {
     gchar const * const *fname = NULL;
     gchar *msg = NULL;
     gchar *stdout = NULL;
-    gchar *stderr = NULL;
     gboolean succ;
     guint64 result = 0;
     guint8 i;

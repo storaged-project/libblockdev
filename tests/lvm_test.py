@@ -101,6 +101,38 @@ class LvmNoDevTestCase(unittest.TestCase):
         self.assertFalse(BlockDev.lvm_is_valid_thpool_chunk_size(191 * 1024, False))
         self.assertFalse(BlockDev.lvm_is_valid_thpool_chunk_size(191 * 1024, True))
 
+    def test_get_set_global_config(self):
+        """Verify that getting and setting global cofngi works as expected"""
+
+        # no global config set initially
+        self.assertEqual(BlockDev.lvm_get_global_config(), "")
+
+        # set and try to get back
+        succ, ret = BlockDev.lvm_set_global_config("bla")
+        self.assertTrue(succ)
+        self.assertIs(ret, None)
+        self.assertEqual(BlockDev.lvm_get_global_config(), "bla")
+
+        # reset and try to get back
+        succ, ret = BlockDev.lvm_set_global_config(None)
+        self.assertTrue(succ)
+        self.assertIs(ret, None)
+        self.assertEqual(BlockDev.lvm_get_global_config(), "")
+
+        # set twice and try to get back twice
+        succ, ret = BlockDev.lvm_set_global_config("foo")
+        self.assertTrue(succ)
+        self.assertIs(ret, None)
+        succ, ret = BlockDev.lvm_set_global_config("bla")
+        self.assertTrue(succ)
+        self.assertIs(ret, None)
+        self.assertEqual(BlockDev.lvm_get_global_config(), "bla")
+        self.assertEqual(BlockDev.lvm_get_global_config(), "bla")
+
+        # reset back to default
+        succ, ret = BlockDev.lvm_set_global_config(None)
+        self.assertTrue(succ)
+        self.assertIs(ret, None)
 
 class LvmTestCase(unittest.TestCase):
     # TODO: test pvmove (must create two PVs, a VG, a VG and some data in it

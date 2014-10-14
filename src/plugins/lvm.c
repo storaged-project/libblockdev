@@ -25,6 +25,8 @@
 
 #define INT_FLOAT_EPS 1e-5
 
+static gchar *global_config_str = NULL;
+
 /**
  * SECTION: lvm
  * @short_description: libblockdev plugin for operations with LVM
@@ -52,14 +54,15 @@ static gboolean call_lvm_and_report_error (gchar **args, gchar **error_message) 
     guint i = 0;
     guint args_length = g_strv_length (args);
 
-    /* allocate enough space for the args plus "lvm" and NULL */
-    gchar **argv = g_new (gchar*, args_length + 2);
+    /* allocate enough space for the args plus "lvm", "--config" and NULL */
+    gchar **argv = g_new (gchar*, args_length + 3);
 
     /* construct argv from args with "lvm" prepended */
     argv[0] = "lvm";
     for (i=0; i < args_length; i++)
         argv[i+1] = args[i];
-    argv[args_length + 1] = NULL;
+    argv[args_length + 1] = global_config_str ? global_config_str : NULL;
+    argv[args_length + 2] = NULL;
 
     success = bd_utils_exec_and_report_error (argv, error_message);
     g_free (argv);
@@ -72,16 +75,18 @@ static gboolean call_lvm_and_capture_output (gchar **args, gchar **output, gchar
     guint i = 0;
     guint args_length = g_strv_length (args);
 
-    /* allocate enough space for the args plus "lvm" and NULL */
-    gchar **argv = g_new (gchar*, args_length + 2);
+    /* allocate enough space for the args plus "lvm", "--config" and NULL */
+    gchar **argv = g_new (gchar*, args_length + 3);
 
     /* construct argv from args with "lvm" prepended */
     argv[0] = "lvm";
     for (i=0; i < args_length; i++)
         argv[i+1] = args[i];
-    argv[args_length + 1] = NULL;
+    argv[args_length + 1] = global_config_str ? global_config_str : NULL;
+    argv[args_length + 2] = NULL;
 
     success = bd_utils_exec_and_capture_output (argv, output, error_message);
+    g_free (global_config_str);
     g_free (argv);
 
     return success;
@@ -1227,4 +1232,36 @@ gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *sna
     g_free (args[next_arg]);
 
     return success;
+}
+
+/**
+ * bd_lvm_set_global_config:
+ * @new_config: (allow-none): string representation of the new global LVM
+ *                            configuration to set or %NULL to reset to default
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether the new requested global config @new_config was successfully
+ *          set or not
+ */
+gboolean bd_lvm_set_global_config (gchar *new_config, gchar **error_message __attribute__((unused))) {
+    /* XXX: the error_message attribute will likely be used in the future when
+       some validation comes into the game */
+
+    /* first free the old value */
+    g_free (global_config_str);
+
+    /* now store the new one */
+    global_config_str = g_strdup (new_config);
+
+    return TRUE;
+}
+
+/**
+ * bd_lvm_get_global_config:
+ *
+ * Returns: (transfer full): a copy of a string representation of the currently
+ *                           set LVM global configuration
+ */
+gchar* bd_lvm_get_global_config () {
+    return g_strdup (global_config_str ? global_config_str : "");
 }
