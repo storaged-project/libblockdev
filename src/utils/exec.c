@@ -19,6 +19,9 @@
 
 #include <glib.h>
 #include "exec.h"
+#include <syslog.h>
+
+static BDUtilsLogFunc log_func = NULL;
 
 /**
  * bd_utils_exec_and_report_error:
@@ -33,9 +36,22 @@ gboolean bd_utils_exec_and_report_error (gchar **argv, gchar **error_message) {
     gint status = 0;
     gchar *stdout_data = NULL;
     gchar *stderr_data = NULL;
+    gchar *str_argv = NULL;
+    gchar *log_msg = NULL;
+
+    if (log_func) {
+        str_argv = g_strjoinv (" ", argv);
+        log_msg = g_strdup_printf ("Running %s ...", str_argv);
+        log_func (LOG_INFO, log_msg);
+        g_free (str_argv);
+        g_free (log_msg);
+    }
 
     success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH,
                             NULL, NULL, &stdout_data, &stderr_data, &status, &error);
+
+    if (log_func)
+        log_func (LOG_INFO, "...done");
 
     if (!success) {
         *error_message = g_strdup (error->message);
@@ -74,9 +90,22 @@ gboolean bd_utils_exec_and_capture_output (gchar **argv, gchar **output, gchar *
     GError *error = NULL;
     gint status = 0;
     gboolean success = FALSE;
+    gchar *str_argv = NULL;
+    gchar *log_msg = NULL;
+
+    if (log_func) {
+        str_argv = g_strjoinv (" ", argv);
+        log_msg = g_strdup_printf ("Running %s ...", str_argv);
+        log_func (LOG_INFO, log_msg);
+        g_free (str_argv);
+        g_free (log_msg);
+    }
 
     success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH,
                             NULL, NULL, &stdout_data, &stderr_data, &status, &error);
+
+    if (log_func)
+        log_func (LOG_INFO, "...done");
 
     if (!success) {
         *error_message = g_strdup (error->message);
@@ -96,4 +125,21 @@ gboolean bd_utils_exec_and_capture_output (gchar **argv, gchar **output, gchar *
         g_free (stderr_data);
         return TRUE;
     }
+}
+
+/**
+ * bd_utils_init_logging:
+ * @new_log_func: (allow-none) (scope notified): logging function to use or
+ *                                               %NULL to reset to default
+ * @error_message: (out): variable to store error message to (if any)
+ *
+ * Returns: whether logging was successfully initialized or not
+ */
+gboolean bd_utils_init_logging (BDUtilsLogFunc new_log_func, gchar **error_message __attribute__((unused))) {
+    /* XXX: the error_message attribute will likely be used in the future when
+       this function gets more complicated */
+
+    log_func = new_log_func;
+
+    return TRUE;
 }
