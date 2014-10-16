@@ -14,6 +14,8 @@
 static gchar const * const size_prefixes[NUM_PREFIXES] = {"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei"};
 
 /**
+ * get_unit_prefix_power: (skip)
+ *
  * Returns: power of the @prefix or %NUM_PREFIXES if not found
  */
 static guint8 get_unit_prefix_power (gchar *prefix) {

@@ -10,8 +10,9 @@ LIBCRYPTSETUP := `pkg-config --libs libcryptsetup`
 DEVMAPPER := `pkg-config --libs devmapper`
 
 # library for internal use
-UTILS_SOURCES := src/utils/exec.c src/utils/sizes.c
-UTILS_OBJS := $(patsubst %.c,%.o,${UTILS_SOURCES})
+UTILS_SOURCE_FILES := src/utils/exec.c src/utils/sizes.c
+UTILS_OBJS := $(patsubst %.c,%.o,${UTILS_SOURCE_FILES})
+UTILS_HEADER_FILES := $(patsubst %.c,%.h,${UTILS_SOURCE_FILES})
 
 # stub functions for plugins
 PLUGIN_HEADER_NAMES = crypto.h dm.h loop.h lvm.h mpath.h swap.h btrfs.h
@@ -89,7 +90,7 @@ src/lib/libblockdev.so: src/lib/blockdev.o
 	gcc -shared -fPIC -o $@ $<
 
 BlockDev-1.0.gir: src/utils/libbd_utils.so src/lib/libblockdev.so ${LIBRARY_FILES}
-	LD_LIBRARY_PATH=src/lib/:src/utils/ g-ir-scanner --warn-error `pkg-config --cflags --libs glib-2.0 gobject-2.0 libcryptsetup devmapper` --library=blockdev -I src/lib/ -L src/utils -lbd_utils -lm -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o $@ --warn-all ${LIBRARY_FILES} ${PLUGIN_HEADER_FILES}
+	LD_LIBRARY_PATH=src/lib/:src/utils/ g-ir-scanner --warn-error `pkg-config --cflags --libs glib-2.0 gobject-2.0 libcryptsetup devmapper` --library=blockdev -I src/lib/ -L src/utils -lbd_utils -lm -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o $@ --warn-all ${LIBRARY_FILES} ${PLUGIN_HEADER_FILES} ${UTILS_HEADER_FILES} ${UTILS_SOURCE_FILES}
 
 BlockDev-1.0.typelib: BlockDev-1.0.gir
 	g-ir-compiler -o $@ $<
