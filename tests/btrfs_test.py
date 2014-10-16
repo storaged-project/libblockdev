@@ -3,7 +3,7 @@ import os
 
 from utils import create_sparse_tempfile
 from gi.repository import BlockDev
-assert BlockDev.init(None)
+assert BlockDev.init(None, None)[0]
 
 TEST_MNT = "/tmp/libblockdev_test_mnt"
 

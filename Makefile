@@ -84,19 +84,19 @@ src/lib/plugin_apis/%.c: src/lib/plugin_apis/%.h boilerplate_generator.py
 	./boilerplate_generator.py $< > $@
 
 src/lib/blockdev.o: ${LIBRARY_FILES} ${PLUGIN_SOURCE_FILES}
-	gcc -fPIC -c -Wextra -Werror ${GLIB_INCLUDES} ${GOBJECT_INCLUDES} $< -o $@
+	gcc -fPIC -c -Wextra -Werror ${GLIB_INCLUDES} ${GOBJECT_INCLUDES} -I src/utils $< -o $@
 
 src/lib/libblockdev.so: src/lib/blockdev.o
 	gcc -shared -fPIC -o $@ $<
 
 BlockDev-1.0.gir: src/utils/libbd_utils.so src/lib/libblockdev.so ${LIBRARY_FILES}
-	LD_LIBRARY_PATH=src/lib/:src/utils/ g-ir-scanner --warn-error `pkg-config --cflags --libs glib-2.0 gobject-2.0 libcryptsetup devmapper` --library=blockdev -I src/lib/ -L src/utils -lbd_utils -lm -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o $@ --warn-all ${LIBRARY_FILES} ${PLUGIN_HEADER_FILES} ${UTILS_HEADER_FILES} ${UTILS_SOURCE_FILES}
+	LD_LIBRARY_PATH=src/lib/:src/utils/ g-ir-scanner --warn-error `pkg-config --cflags --libs glib-2.0 gobject-2.0 libcryptsetup devmapper` --library=blockdev -I src/lib/ -I src/utils/ -L src/utils -lbd_utils -lm -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o $@ --warn-all ${LIBRARY_FILES} ${PLUGIN_HEADER_FILES} ${UTILS_HEADER_FILES} ${UTILS_SOURCE_FILES}
 
 BlockDev-1.0.typelib: BlockDev-1.0.gir
 	g-ir-compiler -o $@ $<
 
 test-from-python: src/lib/libblockdev.so ${PLUGIN_LIBS} BlockDev-1.0.typelib
-	GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/:src/utils python -c 'from gi.repository import BlockDev; BlockDev.init(None); print BlockDev.lvm_get_max_lv_size()'
+	GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/:src/utils python -c 'from gi.repository import BlockDev; BlockDev.init(None, None); print BlockDev.lvm_get_max_lv_size()'
 
 run-ipython: src/lib/libblockdev.so ${PLUGIN_LIBS} BlockDev-1.0.typelib
 	GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/:src/utils/ ipython

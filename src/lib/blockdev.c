@@ -1,6 +1,7 @@
 #include <dlfcn.h>
 #include "blockdev.h"
 #include "plugins.h"
+#include "exec.h"
 
 #include "plugin_apis/lvm.h"
 #include "plugin_apis/lvm.c"
@@ -89,11 +90,24 @@ static gboolean load_plugins (BDPluginSpec **force_plugins, gboolean reload) {
  * @force_plugins: (allow-none) (array zero-terminated=1): null-terminated list
  *                 of plugins that should be loaded (even if
  *                 other plugins for the same technologies are found)
+ * @log_func: (allow-none) (scope notified): logging function to use
+ * @error_message: (out): variable to store error message to (if any)
  *
  * Returns: whether the library was successfully initialized or not
  */
-gboolean bd_init (BDPluginSpec **force_plugins) {
-    return load_plugins (force_plugins, FALSE);
+gboolean bd_init (BDPluginSpec **force_plugins, BDUtilsLogFunc log_func, gchar **error_message) {
+    if (!load_plugins (force_plugins, FALSE)) {
+        *error_message = g_strdup ("Failed to load plugins");
+        /* the library is unusable without the plugins so we can just return here */
+        return FALSE;
+    }
+
+    if (log_func && !bd_utils_init_logging (log_func, error_message))
+        /* the error_message is already populated with the error */
+        return FALSE;
+
+    /* everything went okay */
+    return TRUE;
 }
 
 /**
@@ -102,14 +116,28 @@ gboolean bd_init (BDPluginSpec **force_plugins) {
  *                 of plugins that should be loaded (even if
  *                 other plugins for the same technologies are found)
  * @reload: whether to reload the already loaded plugins or not
+ * @log_func: (allow-none) (scope notified): logging function to use or %NULL
+ *                                           to keep the old one
+ * @error_message: (out): variable to store error message to (if any)
  *
  * Returns: whether the library was successfully initialized or not
  *
  * If @reload is %TRUE all the plugins are closed and reloaded otherwise only
  * the missing plugins are loaded.
  */
-gboolean bd_reinit (BDPluginSpec **force_plugins, gboolean reload) {
-    return load_plugins (force_plugins, reload);
+gboolean bd_reinit (BDPluginSpec **force_plugins, gboolean reload, BDUtilsLogFunc log_func, gchar **error_message) {
+    if (!load_plugins (force_plugins, reload)) {
+        *error_message = g_strdup ("Failed to load plugins");
+        /* the library is unusable without the plugins so we can just return here */
+        return FALSE;
+    }
+
+    if (log_func && !bd_utils_init_logging (log_func, error_message))
+        /* the error_message is already populated with the error */
+        return FALSE;
+
+    /* everything went okay */
+    return TRUE;
 }
 
 /**

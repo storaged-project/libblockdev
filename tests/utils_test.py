@@ -2,7 +2,7 @@ import unittest
 import re
 
 from gi.repository import BlockDev
-BlockDev.init(None)
+assert BlockDev.init(None, None)[0]
 
 class UtilsExecLoggingTest(unittest.TestCase):
     log = ""

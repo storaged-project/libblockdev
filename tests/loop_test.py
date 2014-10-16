@@ -3,7 +3,7 @@ import unittest
 
 from utils import create_sparse_tempfile
 from gi.repository import BlockDev
-BlockDev.init(None)
+assert BlockDev.init(None, None)[0]
 
 class LoopTestCase(unittest.TestCase):
     def setUp(self):
