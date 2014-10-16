@@ -21,7 +21,51 @@
 #include "exec.h"
 #include <syslog.h>
 
+static GMutex id_counter_lock;
+static guint64 id_counter = 0;
 static BDUtilsLogFunc log_func = NULL;
+
+/**
+ * log_running: (skip)
+ *
+ * Returns: id of the running task
+ */
+static guint64 log_running (gchar **argv) {
+    guint64 task_id = 0;
+    gchar *str_argv = NULL;
+    gchar *log_msg = NULL;
+
+    g_mutex_lock (&id_counter_lock);
+    id_counter++;
+    task_id = id_counter;
+    g_mutex_unlock (&id_counter_lock);
+
+    if (log_func) {
+        str_argv = g_strjoinv (" ", argv);
+        log_msg = g_strdup_printf ("Running [%"G_GUINT64_FORMAT"] %s ...", task_id, str_argv);
+        log_func (LOG_INFO, log_msg);
+        g_free (str_argv);
+        g_free (log_msg);
+    }
+
+    return task_id;
+}
+
+/**
+ * log_done: (skip)
+ *
+ */
+static void log_done (guint64 task_id) {
+    gchar *log_msg = NULL;
+
+    if (log_func) {
+        log_msg = g_strdup_printf ("...done [%"G_GUINT64_FORMAT"]", task_id);
+        log_func (LOG_INFO, log_msg);
+        g_free (log_msg);
+    }
+
+    return;
+}
 
 /**
  * bd_utils_exec_and_report_error:
@@ -36,22 +80,12 @@ gboolean bd_utils_exec_and_report_error (gchar **argv, gchar **error_message) {
     gint status = 0;
     gchar *stdout_data = NULL;
     gchar *stderr_data = NULL;
-    gchar *str_argv = NULL;
-    gchar *log_msg = NULL;
+    guint64 task_id = 0;
 
-    if (log_func) {
-        str_argv = g_strjoinv (" ", argv);
-        log_msg = g_strdup_printf ("Running %s ...", str_argv);
-        log_func (LOG_INFO, log_msg);
-        g_free (str_argv);
-        g_free (log_msg);
-    }
-
+    task_id = log_running (argv);
     success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH,
                             NULL, NULL, &stdout_data, &stderr_data, &status, &error);
-
-    if (log_func)
-        log_func (LOG_INFO, "...done");
+    log_done (task_id);
 
     if (!success) {
         *error_message = g_strdup (error->message);
@@ -90,22 +124,12 @@ gboolean bd_utils_exec_and_capture_output (gchar **argv, gchar **output, gchar *
     GError *error = NULL;
     gint status = 0;
     gboolean success = FALSE;
-    gchar *str_argv = NULL;
-    gchar *log_msg = NULL;
+    guint64 task_id = 0;
 
-    if (log_func) {
-        str_argv = g_strjoinv (" ", argv);
-        log_msg = g_strdup_printf ("Running %s ...", str_argv);
-        log_func (LOG_INFO, log_msg);
-        g_free (str_argv);
-        g_free (log_msg);
-    }
-
+    task_id = log_running (argv);
     success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH,
                             NULL, NULL, &stdout_data, &stderr_data, &status, &error);
-
-    if (log_func)
-        log_func (LOG_INFO, "...done");
+    log_done (task_id);
 
     if (!success) {
         *error_message = g_strdup (error->message);
