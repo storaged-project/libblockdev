@@ -37,6 +37,11 @@ static gchar *global_config_str = NULL;
  * the functions are in bytes.
  */
 
+GQuark bd_lvm_error_quark (void)
+{
+    return g_quark_from_static_string ("g-bd-lvm-error-quark");
+}
+
 static gchar const * const supported_functions[] = {
     "bd_lvm_is_supported_pe_size",
     "bd_lvm_get_max_lv_size",
@@ -49,7 +54,7 @@ gchar const * const * get_supported_functions () {
     return supported_functions;
 }
 
-static gboolean call_lvm_and_report_error (gchar **args, gchar **error_message) {
+static gboolean call_lvm_and_report_error (gchar **args, GError **error) {
     gboolean success = FALSE;
     guint i = 0;
     guint args_length = g_strv_length (args);
@@ -64,13 +69,13 @@ static gboolean call_lvm_and_report_error (gchar **args, gchar **error_message) 
     argv[args_length + 1] = global_config_str ? global_config_str : NULL;
     argv[args_length + 2] = NULL;
 
-    success = bd_utils_exec_and_report_error (argv, error_message);
+    success = bd_utils_exec_and_report_error (argv, error);
     g_free (argv);
 
     return success;
 }
 
-static gboolean call_lvm_and_capture_output (gchar **args, gchar **output, gchar **error_message) {
+static gboolean call_lvm_and_capture_output (gchar **args, gchar **output, GError **error) {
     gboolean success = FALSE;
     guint i = 0;
     guint args_length = g_strv_length (args);
@@ -85,7 +90,7 @@ static gboolean call_lvm_and_capture_output (gchar **args, gchar **output, gchar
     argv[args_length + 1] = global_config_str ? global_config_str : NULL;
     argv[args_length + 2] = NULL;
 
-    success = bd_utils_exec_and_capture_output (argv, output, error_message);
+    success = bd_utils_exec_and_capture_output (argv, output, error);
     g_free (global_config_str);
     g_free (argv);
 
@@ -361,21 +366,21 @@ gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard) {
 /**
  * bd_lvm_pvcreate:
  * @device: the device to make PV from
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the PV was successfully created or not
  */
-gboolean bd_lvm_pvcreate (gchar *device, gchar **error_message) {
+gboolean bd_lvm_pvcreate (gchar *device, GError **error) {
     gchar *args[3] = {"pvcreate", device, NULL};
 
-    return call_lvm_and_report_error (args, error_message);
+    return call_lvm_and_report_error (args, error);
 }
 
 /**
  * bd_lvm_pvresize:
  * @device: the device to resize
  * @size: the new requested size of the PV or 0 if it should be adjusted to device's size
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the PV's size was successfully changed or not
  *
@@ -383,7 +388,7 @@ gboolean bd_lvm_pvcreate (gchar *device, gchar **error_message) {
  * pvresize(8)). If given @size 0, adjusts the PV's size to the underlaying
  * block device's size.
  */
-gboolean bd_lvm_pvresize (gchar *device, guint64 size, gchar **error_message) {
+gboolean bd_lvm_pvresize (gchar *device, guint64 size, GError **error) {
     gchar *size_str = NULL;
     gchar *args[5] = {"pvresize", NULL, NULL, NULL, NULL};
     guint8 next_pos = 1;
@@ -401,7 +406,7 @@ gboolean bd_lvm_pvresize (gchar *device, guint64 size, gchar **error_message) {
 
     args[next_pos] = device;
 
-    ret = call_lvm_and_report_error (args, error_message);
+    ret = call_lvm_and_report_error (args, error);
     if (to_free_pos > 0)
         g_free (args[to_free_pos]);
 
@@ -411,49 +416,49 @@ gboolean bd_lvm_pvresize (gchar *device, guint64 size, gchar **error_message) {
 /**
  * bd_lvm_pvremove:
  * @device: the PV device to be removed/destroyed
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the PV was successfully removed/destroyed or not
  */
-gboolean bd_lvm_pvremove (gchar *device, gchar **error_message) {
+gboolean bd_lvm_pvremove (gchar *device, GError **error) {
     /* one has to be really persuasive to remove a PV (the double --force is not
        bug, at least not in this code) */
     gchar *args[6] = {"pvremove", "--force", "--force", "--yes", device, NULL};
 
-    return call_lvm_and_report_error (args, error_message);
+    return call_lvm_and_report_error (args, error);
 }
 
 /**
  * bd_lvm_pvmove:
  * @src: the PV device to move extents off of
  * @dest: (allow-none): the PV device to move extents onto or %NULL
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the extents from the @src PV where successfully moved or not
  *
  * If @dest is %NULL, VG allocation rules are used for the extents from the @src
  * PV (see pvmove(8)).
  */
-gboolean bd_lvm_pvmove (gchar *src, gchar *dest, gchar **error_message) {
+gboolean bd_lvm_pvmove (gchar *src, gchar *dest, GError **error) {
     gchar *args[4] = {"pvmove", src, NULL, NULL};
     if (dest)
         args[2] = dest;
 
-    return call_lvm_and_report_error (args, error_message);
+    return call_lvm_and_report_error (args, error);
 }
 
 /**
  * bd_lvm_pvscan:
  * @device: (allow-none): the device to scan for PVs or %NULL
  * @update_cache: whether to update the lvmetad cache or not
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the system or @device was successfully scanned for PVs or not
  *
  * The @device argument is used only if @update_cache is %TRUE. Otherwise the
  * whole system is scanned for PVs.
  */
-gboolean bd_lvm_pvscan (gchar *device, gboolean update_cache, gchar **error_message) {
+gboolean bd_lvm_pvscan (gchar *device, gboolean update_cache, GError **error) {
     gchar *args[4] = {"pvscan", NULL, NULL, NULL};
     if (update_cache) {
         args[1] = "--cache";
@@ -463,18 +468,18 @@ gboolean bd_lvm_pvscan (gchar *device, gboolean update_cache, gchar **error_mess
         if (device)
             g_warning ("Ignoring the device argument in pvscan (cache update not requested)");
 
-    return call_lvm_and_report_error (args, error_message);
+    return call_lvm_and_report_error (args, error);
 }
 
 /**
  * bd_lvm_pvinfo:
  * @device: a PV to get information about or %NULL
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): information about the PV on the given @device or
- * %NULL in case of error (the @error_message gets populated in those cases)
+ * %NULL in case of error (the @error) gets populated in those cases)
  */
-BDLVMPVdata* bd_lvm_pvinfo (gchar *device, gchar **error_message) {
+BDLVMPVdata* bd_lvm_pvinfo (gchar *device, GError **error) {
     gchar *args[10] = {"pvs", "--unit=b", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--noheadings",
                        "-o", "pv_name,pv_uuid,pe_start,vg_name,vg_uuid,vg_size,vg_free," \
@@ -487,9 +492,9 @@ BDLVMPVdata* bd_lvm_pvinfo (gchar *device, gchar **error_message) {
     gchar **lines_p = NULL;
     guint num_items;
 
-    success = call_lvm_and_capture_output (args, &output, error_message);
+    success = call_lvm_and_capture_output (args, &output, error);
     if (!success)
-        /* the error_message is already populated from the call */
+        /* the error is already populated from the call */
         return NULL;
 
     lines = g_strsplit (output, "\n", 0);
@@ -506,17 +511,18 @@ BDLVMPVdata* bd_lvm_pvinfo (gchar *device, gchar **error_message) {
     }
 
     /* getting here means no usable info was found */
-    *error_message = g_strdup ("Failed to parse information about the PV");
+    g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                 "Failed to parse information about the PV");
     return NULL;
 }
 
 /**
  * bd_lvm_pvs:
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (array zero-terminated=1): information about PVs found in the system
  */
-BDLVMPVdata** bd_lvm_pvs (gchar **error_message) {
+BDLVMPVdata** bd_lvm_pvs (GError **error) {
     gchar *args[9] = {"pvs", "--unit=b", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--noheadings",
                        "-o", "pv_name,pv_uuid,pe_start,vg_name,vg_uuid,vg_size,vg_free," \
@@ -533,9 +539,9 @@ BDLVMPVdata** bd_lvm_pvs (gchar **error_message) {
     BDLVMPVdata **ret = NULL;
     guint64 i = 0;
 
-    success = call_lvm_and_capture_output (args, &output, error_message);
+    success = call_lvm_and_capture_output (args, &output, error);
     if (!success)
-        /* the error_message is already populated from the call */
+        /* the error is already populated from the call */
         return NULL;
 
     lines = g_strsplit (output, "\n", 0);
@@ -556,7 +562,8 @@ BDLVMPVdata** bd_lvm_pvs (gchar **error_message) {
     g_strfreev (lines);
 
     if (pvs->len == 0) {
-        *error_message = g_strdup ("Failed to parse information about PVs");
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                     "Failed to parse information about PVs");
         return NULL;
     }
 
@@ -576,11 +583,11 @@ BDLVMPVdata** bd_lvm_pvs (gchar **error_message) {
  * @name: name of the newly created VG
  * @pv_list: (array zero-terminated=1): list of PVs the newly created VG should use
  * @pe_size: PE size or 0 if the default value should be used
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the VG @name was successfully created or not
  */
-gboolean bd_lvm_vgcreate (gchar *name, gchar **pv_list, guint64 pe_size, gchar **error_message) {
+gboolean bd_lvm_vgcreate (gchar *name, gchar **pv_list, guint64 pe_size, GError **error) {
     guint8 i = 0;
     guint8 pv_list_len = pv_list ? g_strv_length (pv_list) : 0;
     gchar **argv = g_new (gchar*, pv_list_len + 5);
@@ -596,7 +603,7 @@ gboolean bd_lvm_vgcreate (gchar *name, gchar **pv_list, guint64 pe_size, gchar *
     }
     argv[i] = NULL;
 
-    success = call_lvm_and_report_error (argv, error_message);
+    success = call_lvm_and_report_error (argv, error);
     g_free (argv[2]);
     g_free (argv);
 
@@ -606,54 +613,54 @@ gboolean bd_lvm_vgcreate (gchar *name, gchar **pv_list, guint64 pe_size, gchar *
 /**
  * bd_lvm_vgremove:
  * @vg_name: name of the to be removed VG
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the VG was successfully removed or not
  */
-gboolean bd_lvm_vgremove (gchar *vg_name, gchar **error_message) {
+gboolean bd_lvm_vgremove (gchar *vg_name, GError **error) {
     gchar *args[4] = {"vgremove", "--force", vg_name, NULL};
 
-    return call_lvm_and_report_error (args, error_message);
+    return call_lvm_and_report_error (args, error);
 }
 
 /**
  * bd_lvm_vgactivate:
  * @vg_name: name of the to be activated VG
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the VG was successfully activated or not
  */
-gboolean bd_lvm_vgactivate (gchar *vg_name, gchar **error_message) {
+gboolean bd_lvm_vgactivate (gchar *vg_name, GError **error) {
     gchar *args[4] = {"vgchange", "-ay", vg_name, NULL};
 
-    return call_lvm_and_report_error (args, error_message);
+    return call_lvm_and_report_error (args, error);
 }
 
 /**
  * bd_lvm_vgdeactivate:
  * @vg_name: name of the to be deactivated VG
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the VG was successfully deactivated or not
  */
-gboolean bd_lvm_vgdeactivate (gchar *vg_name, gchar **error_message) {
+gboolean bd_lvm_vgdeactivate (gchar *vg_name, GError **error) {
     gchar *args[4] = {"vgchange", "-an", vg_name, NULL};
 
-    return call_lvm_and_report_error (args, error_message);
+    return call_lvm_and_report_error (args, error);
 }
 
 /**
  * bd_lvm_vgextend:
  * @vg_name: name of the to be extended VG
  * @device: PV device to extend the @vg_name VG with
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the VG @vg_name was successfully extended with the given @device or not.
  */
-gboolean bd_lvm_vgextend (gchar *vg_name, gchar *device, gchar **error_message) {
+gboolean bd_lvm_vgextend (gchar *vg_name, gchar *device, GError **error) {
     gchar *args[4] = {"vgextend", vg_name, device, NULL};
 
-    return call_lvm_and_report_error (args, error_message);
+    return call_lvm_and_report_error (args, error);
 }
 
 /**
@@ -661,14 +668,14 @@ gboolean bd_lvm_vgextend (gchar *vg_name, gchar *device, gchar **error_message) 
  * @vg_name: name of the to be reduced VG
  * @device: (allow-none): PV device the @vg_name VG should be reduced of or %NULL
  *                        if the VG should be reduced of the missing PVs
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the VG @vg_name was successfully reduced of the given @device or not
  *
  * Note: This function does not move extents off of the PV before removing
  *       it from the VG. You must do that first by calling #bd_lvm_pvmove.
  */
-gboolean bd_lvm_vgreduce (gchar *vg_name, gchar *device, gchar **error_message) {
+gboolean bd_lvm_vgreduce (gchar *vg_name, gchar *device, GError **error) {
     gchar *args[5] = {"vgreduce", NULL, NULL, NULL, NULL};
 
     if (!device) {
@@ -680,18 +687,18 @@ gboolean bd_lvm_vgreduce (gchar *vg_name, gchar *device, gchar **error_message) 
         args[2] = device;
     }
 
-    return call_lvm_and_report_error (args, error_message);
+    return call_lvm_and_report_error (args, error);
 }
 
 /**
  * bd_lvm_vginfo:
  * @vg_name: a VG to get information about
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): information about the @vg_name VG or %NULL in case
- * of error (the @error_message gets populated in those cases)
+ * of error (the @error) gets populated in those cases)
  */
-BDLVMVGdata* bd_lvm_vginfo (gchar *vg_name, gchar **error_message) {
+BDLVMVGdata* bd_lvm_vginfo (gchar *vg_name, GError **error) {
     gchar *args[10] = {"vgs", "--noheadings", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--units=b",
                        "-o", "name,uuid,size,free,extent_size,extent_count,free_count,pv_count",
@@ -704,9 +711,9 @@ BDLVMVGdata* bd_lvm_vginfo (gchar *vg_name, gchar **error_message) {
     gchar **lines_p = NULL;
     guint num_items;
 
-    success = call_lvm_and_capture_output (args, &output, error_message);
+    success = call_lvm_and_capture_output (args, &output, error);
     if (!success)
-        /* the error_message is already populated from the call */
+        /* the error is already populated from the call */
         return NULL;
 
     lines = g_strsplit (output, "\n", 0);
@@ -723,17 +730,18 @@ BDLVMVGdata* bd_lvm_vginfo (gchar *vg_name, gchar **error_message) {
     }
 
     /* getting here means no usable info was found */
-    *error_message = g_strdup("Failed to parse information about the VG");
+    g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                 "Failed to parse information about the VG");
     return NULL;
 }
 
 /**
  * bd_lvm_vgs:
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (array zero-terminated=1): information about VGs found in the system
  */
-BDLVMVGdata** bd_lvm_vgs (gchar **error_message) {
+BDLVMVGdata** bd_lvm_vgs (GError **error) {
     gchar *args[9] = {"vgs", "--noheadings", "--nosuffix", "--nameprefixes",
                       "--unquoted", "--units=b",
                       "-o", "name,uuid,size,free,extent_size,extent_count,free_count,pv_count",
@@ -749,9 +757,9 @@ BDLVMVGdata** bd_lvm_vgs (gchar **error_message) {
     BDLVMVGdata **ret = NULL;
     guint64 i = 0;
 
-    success = call_lvm_and_capture_output (args, &output, error_message);
+    success = call_lvm_and_capture_output (args, &output, error);
     if (!success)
-        /* the error_message is already populated from the call */
+        /* the error is already populated from the call */
         return NULL;
 
     lines = g_strsplit (output, "\n", 0);
@@ -772,7 +780,8 @@ BDLVMVGdata** bd_lvm_vgs (gchar **error_message) {
     g_strfreev (lines);
 
     if (vgs->len == 0) {
-        *error_message = g_strdup ("Failed to parse information about VGs");
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                     "Failed to parse information about VGs");
         return NULL;
     }
 
@@ -791,22 +800,22 @@ BDLVMVGdata** bd_lvm_vgs (gchar **error_message) {
  * bd_lvm_lvorigin:
  * @vg_name: name of the VG containing the queried LV
  * @lv_name: name of the queried LV
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): the origin volume for the @vg_name/@lv_name LV or
- * %NULL if failed to determine (@error_message is set in those cases)
+ * %NULL if failed to determine (@error) is set in those cases)
  */
-gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, gchar **error_message) {
+gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, GError **error) {
     gboolean success = FALSE;
     gchar *output = NULL;
     gchar *args[6] = {"lvs", "--noheadings", "-o", "origin", NULL, NULL};
     args[4] = g_strdup_printf ("%s/%s", vg_name, lv_name);
 
-    success = call_lvm_and_capture_output (args, &output, error_message);
+    success = call_lvm_and_capture_output (args, &output, error);
     g_free (args[4]);
 
     if (!success)
-        /* the error_message is already populated from the call */
+        /* the error is already populated from the call */
         return NULL;
 
     return g_strstrip (output);
@@ -819,11 +828,11 @@ gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, gchar **error_message) {
  * @size: requested size of the new LV
  * @pv_list: (allow-none) (array zero-terminated=1): list of PVs the newly created LV should use or %NULL
  * if not specified
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the given @vg_name/@lv_name LV was successfully created or not
  */
-gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar **pv_list, gchar **error_message) {
+gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar **pv_list, GError **error) {
     guint8 pv_list_len = pv_list ? g_strv_length (pv_list) : 0;
     gchar **args = g_new (gchar*, pv_list_len + 8);
     gboolean success = FALSE;
@@ -842,7 +851,7 @@ gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar **
 
     args[i] = NULL;
 
-    success = call_lvm_and_report_error (args, error_message);
+    success = call_lvm_and_report_error (args, error);
     g_free (args[4]);
     g_free (args);
 
@@ -854,11 +863,11 @@ gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar **
  * @vg_name: name of the VG containing the to-be-removed LV
  * @lv_name: name of the to-be-removed LV
  * @force: whether to force removal or not
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @vg_name/@lv_name LV was successfully removed or not
  */
-gboolean bd_lvm_lvremove (gchar *vg_name, gchar *lv_name, gboolean force, gchar **error_message) {
+gboolean bd_lvm_lvremove (gchar *vg_name, gchar *lv_name, gboolean force, GError **error) {
     gchar *args[5] = {"lvremove", NULL, NULL, NULL, NULL};
     guint8 next_arg = 1;
     gboolean success = FALSE;
@@ -871,7 +880,7 @@ gboolean bd_lvm_lvremove (gchar *vg_name, gchar *lv_name, gboolean force, gchar 
     }
     args[next_arg] = g_strdup_printf ("%s/%s", vg_name, lv_name);
 
-    success = call_lvm_and_report_error (args, error_message);
+    success = call_lvm_and_report_error (args, error);
     g_free (args[next_arg]);
 
     return success;
@@ -882,18 +891,18 @@ gboolean bd_lvm_lvremove (gchar *vg_name, gchar *lv_name, gboolean force, gchar 
  * @vg_name: name of the VG containing the to-be-resized LV
  * @lv_name: name of the to-be-resized LV
  * @size: the requested new size of the LV
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @vg_name/@lv_name LV was successfully resized or not
  */
-gboolean bd_lvm_lvresize (gchar *vg_name, gchar *lv_name, guint64 size, gchar **error_message) {
+gboolean bd_lvm_lvresize (gchar *vg_name, gchar *lv_name, guint64 size, GError **error) {
     gchar *args[6] = {"lvresize", "--force", "-L", NULL, NULL, NULL};
     gboolean success = FALSE;
 
     args[3] = g_strdup_printf ("%"G_GUINT64_FORMAT"b", size);
     args[4] = g_strdup_printf ("%s/%s", vg_name, lv_name);
 
-    success = call_lvm_and_report_error (args, error_message);
+    success = call_lvm_and_report_error (args, error);
     g_free (args[3]);
     g_free (args[4]);
 
@@ -905,11 +914,11 @@ gboolean bd_lvm_lvresize (gchar *vg_name, gchar *lv_name, guint64 size, gchar **
  * @vg_name: name of the VG containing the to-be-activated LV
  * @lv_name: name of the to-be-activated LV
  * @ignore_skip: whether to ignore the skip flag or not
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @vg_name/@lv_name LV was successfully activated or not
  */
-gboolean bd_lvm_lvactivate (gchar *vg_name, gchar *lv_name, gboolean ignore_skip, gchar **error_message) {
+gboolean bd_lvm_lvactivate (gchar *vg_name, gchar *lv_name, gboolean ignore_skip, GError **error) {
     gchar *args[5] = {"lvchange", "-ay", NULL, NULL, NULL};
     guint8 next_arg = 2;
     gboolean success = FALSE;
@@ -920,7 +929,7 @@ gboolean bd_lvm_lvactivate (gchar *vg_name, gchar *lv_name, gboolean ignore_skip
     }
     args[next_arg] = g_strdup_printf ("%s/%s", vg_name, lv_name);
 
-    success = call_lvm_and_report_error (args, error_message);
+    success = call_lvm_and_report_error (args, error);
     g_free (args[next_arg]);
 
     return success;
@@ -930,17 +939,17 @@ gboolean bd_lvm_lvactivate (gchar *vg_name, gchar *lv_name, gboolean ignore_skip
  * bd_lvm_lvdeactivate:
  * @vg_name: name of the VG containing the to-be-deactivated LV
  * @lv_name: name of the to-be-deactivated LV
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @vg_name/@lv_name LV was successfully deactivated or not
  */
-gboolean bd_lvm_lvdeactivate (gchar *vg_name, gchar *lv_name, gchar **error_message) {
+gboolean bd_lvm_lvdeactivate (gchar *vg_name, gchar *lv_name, GError **error) {
     gchar *args[4] = {"lvchange", "-an", NULL, NULL};
     gboolean success = FALSE;
 
     args[2] = g_strdup_printf ("%s/%s", vg_name, lv_name);
 
-    success = call_lvm_and_report_error (args, error_message);
+    success = call_lvm_and_report_error (args, error);
     g_free (args[2]);
 
     return success;
@@ -952,19 +961,19 @@ gboolean bd_lvm_lvdeactivate (gchar *vg_name, gchar *lv_name, gchar **error_mess
  * @origin_name: name of the LV a new snapshot should be created of
  * @snapshot_name: name fo the to-be-created snapshot
  * @size: requested size for the snapshot
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @snapshot_name snapshot of the @vg_name/@origin_name LV
  * was successfully created or not.
  */
-gboolean bd_lvm_lvsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, guint64 size, gchar **error_message) {
+gboolean bd_lvm_lvsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, guint64 size, GError **error) {
     gchar *args[8] = {"lvcreate", "-s", "-L", NULL, "-n", snapshot_name, NULL, NULL};
     gboolean success = FALSE;
 
     args[3] = g_strdup_printf ("%"G_GUINT64_FORMAT"b", size);
     args[6] = g_strdup_printf ("%s/%s", vg_name, origin_name);
 
-    success = call_lvm_and_report_error (args, error_message);
+    success = call_lvm_and_report_error (args, error);
     g_free (args[3]);
     g_free (args[6]);
 
@@ -975,17 +984,17 @@ gboolean bd_lvm_lvsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *sna
  * bd_lvm_lvsnapshotmerge:
  * @vg_name: name of the VG containing the to-be-merged LV snapshot
  * @snapshot_name: name of the to-be-merged LV snapshot
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @vg_name/@snapshot_name LV snapshot was successfully merged or not
  */
-gboolean bd_lvm_lvsnapshotmerge (gchar *vg_name, gchar *snapshot_name, gchar **error_message) {
+gboolean bd_lvm_lvsnapshotmerge (gchar *vg_name, gchar *snapshot_name, GError **error) {
     gchar *args[4] = {"lvconvert", "--merge", NULL, NULL};
     gboolean success = FALSE;
 
     args[2] = g_strdup_printf ("%s/%s", vg_name, snapshot_name);
 
-    success = call_lvm_and_report_error (args, error_message);
+    success = call_lvm_and_report_error (args, error);
     g_free (args[2]);
 
     return success;
@@ -995,12 +1004,12 @@ gboolean bd_lvm_lvsnapshotmerge (gchar *vg_name, gchar *snapshot_name, gchar **e
  * bd_lvm_lvinfo:
  * @vg_name: name of the VG that contains the LV to get information about
  * @lv_name: name of the LV to get information about
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): information about the @vg_name/@lv_name LV or %NULL in case
- * of error (the @error_message gets populated in those cases)
+ * of error (the @error) gets populated in those cases)
  */
-BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, gchar **error_message) {
+BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, GError **error) {
     gchar *args[10] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--units=b",
                        "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype",
@@ -1015,11 +1024,11 @@ BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, gchar **error_messag
 
     args[8] = g_strdup_printf ("%s/%s", vg_name, lv_name);
 
-    success = call_lvm_and_capture_output (args, &output, error_message);
+    success = call_lvm_and_capture_output (args, &output, error);
     g_free (args[8]);
 
     if (!success)
-        /* the error_message is already populated from the call */
+        /* the error is already populated from the call */
         return NULL;
 
     lines = g_strsplit (output, "\n", 0);
@@ -1036,19 +1045,20 @@ BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, gchar **error_messag
     }
 
     /* getting here means no usable info was found */
-    *error_message = g_strdup("Failed to parse information about the LV");
+    g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                 "Failed to parse information about the LV");
     return NULL;
 }
 
 /**
  * bd_lvm_lvs:
  * @vg_name: (allow-none): name of the VG to get information about LVs from
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (array zero-terminated=1): information about LVs found in the given
  * @vg_name VG or in system if @vg_name is %NULL
  */
-BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, gchar **error_message) {
+BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, GError **error) {
     gchar *args[10] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--units=b",
                        "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype",
@@ -1068,10 +1078,10 @@ BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, gchar **error_message) {
     if (vg_name)
         args[8] = vg_name;
 
-    success = call_lvm_and_capture_output (args, &output, error_message);
+    success = call_lvm_and_capture_output (args, &output, error);
 
     if (!success)
-        /* the error_message is already populated from the call */
+        /* the error is already populated from the call */
         return NULL;
 
     lines = g_strsplit (output, "\n", 0);
@@ -1092,7 +1102,8 @@ BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, gchar **error_message) {
     g_strfreev (lines);
 
     if (lvs->len == 0) {
-        *error_message = g_strdup ("Failed to parse information about LVs");
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                     "Failed to parse information about LVs");
         return NULL;
     }
 
@@ -1116,11 +1127,11 @@ BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, gchar **error_message) {
  * @chunk_size: requested chunk size or 0 to use the default
  * @profile: (allow-none): profile to use (see lvm(8) for more information) or %NULL to use
  *                         the default
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @vg_name/@lv_name thin pool was successfully created or not
  */
-gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guint64 md_size, guint64 chunk_size, gchar *profile, gchar **error_message) {
+gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guint64 md_size, guint64 chunk_size, gchar *profile, GError **error) {
     gchar *args[9] = {"lvcreate", "-T", "-L", NULL, NULL, NULL, NULL, NULL, NULL};
     guint8 next_arg = 4;
     gboolean success = FALSE;
@@ -1144,7 +1155,7 @@ gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guin
 
     args[next_arg] = g_strdup_printf ("%s/%s", vg_name, lv_name);
 
-    success = call_lvm_and_report_error (args, error_message);
+    success = call_lvm_and_report_error (args, error);
     g_free (args[3]);
     g_free (args[4]);
     g_free (args[5]);
@@ -1160,18 +1171,18 @@ gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guin
  * @pool_name: name of the pool LV providing extents for the to-be-created thin LV
  * @lv_name: name of the to-be-created thin LV
  * @size: requested virtual size of the to-be-created thin LV
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @vg_name/@lv_name thin LV was successfully created or not
  */
-gboolean bd_lvm_thlvcreate (gchar *vg_name, gchar *pool_name, gchar *lv_name, guint64 size, gchar **error_message) {
+gboolean bd_lvm_thlvcreate (gchar *vg_name, gchar *pool_name, gchar *lv_name, guint64 size, GError **error) {
     gchar *args[8] = {"lvcreate", "-T", NULL, "-V", NULL, "-n", lv_name, NULL};
     gboolean success;
 
     args[2] = g_strdup_printf ("%s/%s", vg_name, pool_name);
     args[4] = g_strdup_printf ("%"G_GUINT64_FORMAT"b", size);
 
-    success = call_lvm_and_report_error (args, error_message);
+    success = call_lvm_and_report_error (args, error);
     g_free (args[2]);
     g_free (args[4]);
 
@@ -1182,22 +1193,22 @@ gboolean bd_lvm_thlvcreate (gchar *vg_name, gchar *pool_name, gchar *lv_name, gu
  * bd_lvm_thlvpoolname:
  * @vg_name: name of the VG containing the queried thin LV
  * @lv_name: name of the queried thin LV
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): the name of the pool volume for the @vg_name/@lv_name
- * thin LV or %NULL if failed to determine (@error_message is set in those cases)
+ * thin LV or %NULL if failed to determine (@error) is set in those cases)
  */
-gchar* bd_lvm_thlvpoolname (gchar *vg_name, gchar *lv_name, gchar **error_message) {
+gchar* bd_lvm_thlvpoolname (gchar *vg_name, gchar *lv_name, GError **error) {
     gboolean success = FALSE;
     gchar *output = NULL;
     gchar *args[6] = {"lvs", "--noheadings", "-o", "pool_lv", NULL, NULL};
     args[4] = g_strdup_printf ("%s/%s", vg_name, lv_name);
 
-    success = call_lvm_and_capture_output (args, &output, error_message);
+    success = call_lvm_and_capture_output (args, &output, error);
     g_free (args[4]);
 
     if (!success)
-        /* the error_message is already populated from the call */
+        /* the error is already populated from the call */
         return NULL;
 
     return g_strstrip (output);
@@ -1209,12 +1220,12 @@ gchar* bd_lvm_thlvpoolname (gchar *vg_name, gchar *lv_name, gchar **error_messag
  * @origin_name: name of the thin LV a new snapshot should be created of
  * @snapshot_name: name fo the to-be-created snapshot
  * @pool_name: (allow-none): name of the thin pool to create the snapshot in or %NULL if not specified
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @snapshot_name snapshot of the @vg_name/@origin_name
  * thin LV was successfully created or not.
  */
-gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, gchar *pool_name, gchar **error_message) {
+gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, gchar *pool_name, GError **error) {
     gchar *args[8] = {"lvcreate", "-s", "-n", snapshot_name, NULL, NULL, NULL, NULL};
     guint next_arg = 4;
     gboolean success = FALSE;
@@ -1228,7 +1239,7 @@ gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *sna
 
     args[next_arg] = g_strdup_printf ("%s/%s", vg_name, origin_name);
 
-    success = call_lvm_and_report_error (args, error_message);
+    success = call_lvm_and_report_error (args, error);
     g_free (args[next_arg]);
 
     return success;
@@ -1238,13 +1249,13 @@ gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *sna
  * bd_lvm_set_global_config:
  * @new_config: (allow-none): string representation of the new global LVM
  *                            configuration to set or %NULL to reset to default
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the new requested global config @new_config was successfully
  *          set or not
  */
-gboolean bd_lvm_set_global_config (gchar *new_config, gchar **error_message __attribute__((unused))) {
-    /* XXX: the error_message attribute will likely be used in the future when
+gboolean bd_lvm_set_global_config (gchar *new_config, GError **error __attribute__((unused))) {
+    /* XXX: the error attribute will likely be used in the future when
        some validation comes into the game */
 
     /* first free the old value */

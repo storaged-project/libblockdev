@@ -3,8 +3,8 @@ import os
 import math
 
 from utils import create_sparse_tempfile
-from gi.repository import BlockDev
-assert BlockDev.init(None, None)[0]
+from gi.repository import BlockDev, GLib
+assert BlockDev.init(None, None)
 
 class LvmNoDevTestCase(unittest.TestCase):
     def test_is_supported_pe_size(self):
@@ -108,31 +108,26 @@ class LvmNoDevTestCase(unittest.TestCase):
         self.assertEqual(BlockDev.lvm_get_global_config(), "")
 
         # set and try to get back
-        succ, ret = BlockDev.lvm_set_global_config("bla")
+        succ = BlockDev.lvm_set_global_config("bla")
         self.assertTrue(succ)
-        self.assertIs(ret, None)
         self.assertEqual(BlockDev.lvm_get_global_config(), "bla")
 
         # reset and try to get back
-        succ, ret = BlockDev.lvm_set_global_config(None)
+        succ = BlockDev.lvm_set_global_config(None)
         self.assertTrue(succ)
-        self.assertIs(ret, None)
         self.assertEqual(BlockDev.lvm_get_global_config(), "")
 
         # set twice and try to get back twice
-        succ, ret = BlockDev.lvm_set_global_config("foo")
+        succ = BlockDev.lvm_set_global_config("foo")
         self.assertTrue(succ)
-        self.assertIs(ret, None)
-        succ, ret = BlockDev.lvm_set_global_config("bla")
+        succ = BlockDev.lvm_set_global_config("bla")
         self.assertTrue(succ)
-        self.assertIs(ret, None)
         self.assertEqual(BlockDev.lvm_get_global_config(), "bla")
         self.assertEqual(BlockDev.lvm_get_global_config(), "bla")
 
         # reset back to default
-        succ, ret = BlockDev.lvm_set_global_config(None)
+        succ = BlockDev.lvm_set_global_config(None)
         self.assertTrue(succ)
-        self.assertIs(ret, None)
 
 class LvmTestCase(unittest.TestCase):
     # TODO: test pvmove (must create two PVs, a VG, a VG and some data in it
@@ -140,24 +135,24 @@ class LvmTestCase(unittest.TestCase):
     def setUp(self):
         self.dev_file = create_sparse_tempfile("lvm_test", 1024**3)
         self.dev_file2 = create_sparse_tempfile("lvm_test", 1024**3)
-        succ, loop, err = BlockDev.loop_setup(self.dev_file)
-        if err or not succ:
+        succ, loop = BlockDev.loop_setup(self.dev_file)
+        if  not succ:
             raise RuntimeError("Failed to setup loop device for testing")
         self.loop_dev = "/dev/%s" % loop
-        succ, loop, err = BlockDev.loop_setup(self.dev_file2)
-        if err or not succ:
+        succ, loop = BlockDev.loop_setup(self.dev_file2)
+        if  not succ:
             raise RuntimeError("Failed to setup loop device for testing")
         self.loop_dev2 = "/dev/%s" % loop
 
     def tearDown(self):
-        succ, err = BlockDev.loop_teardown(self.loop_dev)
-        if err or not succ:
+        succ = BlockDev.loop_teardown(self.loop_dev)
+        if  not succ:
             os.unlink(self.dev_file)
             raise RuntimeError("Failed to tear down loop device used for testing")
 
         os.unlink(self.dev_file)
-        succ, err = BlockDev.loop_teardown(self.loop_dev2)
-        if err or not succ:
+        succ = BlockDev.loop_teardown(self.loop_dev2)
+        if  not succ:
             os.unlink(self.dev_file2)
             raise RuntimeError("Failed to tear down loop device used for testing")
 
@@ -166,221 +161,175 @@ class LvmTestCase(unittest.TestCase):
     def test_pvcreate_and_pvremove(self):
         """Verify that it's possible to create and destroy a PV"""
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev)
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
     def test_pvresize(self):
         """Verify that it's possible to resize a PV"""
 
-        succ, err = BlockDev.lvm_pvresize(self.loop_dev, 1 * 1024**3)
-        self.assertFalse(succ)
-        self.assertTrue(err)
+        with self.assertRaises(GLib.GError):
+            succ = BlockDev.lvm_pvresize(self.loop_dev, 1 * 1024**3)
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvresize(self.loop_dev, 1 * 1024**3)
+        succ = BlockDev.lvm_pvresize(self.loop_dev, 1 * 1024**3)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev)
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
     def test_pvscan(self):
         """Verify that pvscan runs without issues with cache or without"""
 
-        succ, err = BlockDev.lvm_pvscan(None, False)
+        succ = BlockDev.lvm_pvscan(None, False)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvscan(self.loop_dev, True)
+        succ = BlockDev.lvm_pvscan(self.loop_dev, True)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvscan(None, True)
+        succ = BlockDev.lvm_pvscan(None, True)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
     def test_pvinfo(self):
         """Verify that it's possible to gather info about a PV"""
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        info, err = BlockDev.lvm_pvinfo(self.loop_dev)
+        info = BlockDev.lvm_pvinfo(self.loop_dev)
         self.assertTrue(info)
-        self.assertIs(err, None)
         self.assertEqual(info.pv_name, self.loop_dev)
         self.assertTrue(info.pv_uuid)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev)
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
     def test_pvs(self):
         """Verify that it's possible to gather info about PVs"""
 
-        pvs, err = BlockDev.lvm_pvs()
+        pvs = BlockDev.lvm_pvs()
         orig_len = len(pvs)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        pvs, err = BlockDev.lvm_pvs()
+        pvs = BlockDev.lvm_pvs()
         self.assertTrue(len(pvs) > orig_len)
         self.assertTrue(any(info.pv_name == self.loop_dev for info in pvs))
 
-        info, err = BlockDev.lvm_pvinfo(self.loop_dev)
+        info = BlockDev.lvm_pvinfo(self.loop_dev)
         self.assertTrue(info)
-        self.assertIs(err, None)
 
         self.assertTrue(any(info.pv_uuid == all_info.pv_uuid for all_info in pvs))
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev)
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
     def test_vgcreate_pvremove(self):
         """Verify that it is possible to create and destroy a VG"""
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev2)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgremove("testVG")
+        succ = BlockDev.lvm_vgremove("testVG")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev)
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev2)
+        succ = BlockDev.lvm_pvremove(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
     def test_vgactivate_vgdeactivate(self):
         """Verify that it is possible to (de)activate a VG"""
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev2)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgactivate("testVG")
+        succ = BlockDev.lvm_vgactivate("testVG")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgdeactivate("testVG")
+        succ = BlockDev.lvm_vgdeactivate("testVG")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgactivate("testVG")
+        succ = BlockDev.lvm_vgactivate("testVG")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgdeactivate("testVG")
+        succ = BlockDev.lvm_vgdeactivate("testVG")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgremove("testVG")
+        succ = BlockDev.lvm_vgremove("testVG")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev)
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev2)
+        succ = BlockDev.lvm_pvremove(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
     def test_vgextend_vgreduce(self):
         """Verify that it is possible to extend/reduce a VG"""
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev2)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0)
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgextend("testVG", self.loop_dev2)
+        succ = BlockDev.lvm_vgextend("testVG", self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgreduce("testVG", self.loop_dev)
+        succ = BlockDev.lvm_vgreduce("testVG", self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgextend("testVG", self.loop_dev)
+        succ = BlockDev.lvm_vgextend("testVG", self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgreduce("testVG", self.loop_dev2)
+        succ = BlockDev.lvm_vgreduce("testVG", self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgremove("testVG")
+        succ = BlockDev.lvm_vgremove("testVG")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev)
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev2)
+        succ = BlockDev.lvm_pvremove(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
     def test_vginfo(self):
         """Verify that it is possible to gather info about a VG"""
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev2)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        info, err = BlockDev.lvm_vginfo("testVG")
+        info = BlockDev.lvm_vginfo("testVG")
         self.assertTrue(info)
-        self.assertIs(err, None)
         self.assertEqual(info.name, "testVG")
         self.assertTrue(info.uuid)
         self.assertEqual(info.pv_count, 2)
@@ -388,438 +337,342 @@ class LvmTestCase(unittest.TestCase):
         self.assertEqual(info.free, info.size)
         self.assertEqual(info.extent_size, 4 * 1024**2)
 
-        succ, err = BlockDev.lvm_vgremove("testVG")
+        succ = BlockDev.lvm_vgremove("testVG")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev)
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev2)
+        succ = BlockDev.lvm_pvremove(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
     def test_vgs(self):
         """Verify that it's possible to gather info about VGs"""
 
-        vgs, err = BlockDev.lvm_vgs()
+        vgs = BlockDev.lvm_vgs()
         orig_len = len(vgs)
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0)
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        vgs, err = BlockDev.lvm_vgs()
+        vgs = BlockDev.lvm_vgs()
         self.assertTrue(len(vgs) > orig_len)
         self.assertTrue(any(info.name == "testVG" for info in vgs))
 
-        info, err = BlockDev.lvm_vginfo("testVG")
+        info = BlockDev.lvm_vginfo("testVG")
         self.assertTrue(info)
-        self.assertIs(err, None)
 
         self.assertTrue(any(info.uuid == all_info.uuid for all_info in vgs))
 
-        succ, err = BlockDev.lvm_vgremove("testVG")
+        succ = BlockDev.lvm_vgremove("testVG")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev)
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
     def test_lvcreate_lvremove(self):
         """Verify that it's possible to create/destroy an LV"""
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev2)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_lvremove("testVG", "testLV", True)
+        succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
         # not enough space (only one PV)
-        succ, err = BlockDev.lvm_lvcreate("testVG", "testLV", 1048 * 1024**2, [self.loop_dev])
-        self.assertFalse(succ)
-        self.assertIn("Insufficient free space", err)
+        with self.assertRaisesRegexp(GLib.GError, "Insufficient free space"):
+            succ = BlockDev.lvm_lvcreate("testVG", "testLV", 1048 * 1024**2, [self.loop_dev])
 
         # enough space (two PVs)
-        succ, err = BlockDev.lvm_lvcreate("testVG", "testLV", 1048 * 1024**2, [self.loop_dev, self.loop_dev2])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 1048 * 1024**2, [self.loop_dev, self.loop_dev2])
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_lvremove("testVG", "testLV", True)
+        succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgremove("testVG")
+        succ = BlockDev.lvm_vgremove("testVG")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev2)
+        succ = BlockDev.lvm_pvremove(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev)
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
     def test_lvactivate_lvdeactivate(self):
         """Verify it's possible to (de)actiavate an LV"""
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev2)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_lvactivate("testVG", "testLV", True)
+        succ = BlockDev.lvm_lvactivate("testVG", "testLV", True)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_lvdeactivate("testVG", "testLV")
+        succ = BlockDev.lvm_lvdeactivate("testVG", "testLV")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_lvactivate("testVG", "testLV", True)
+        succ = BlockDev.lvm_lvactivate("testVG", "testLV", True)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_lvdeactivate("testVG", "testLV")
+        succ = BlockDev.lvm_lvdeactivate("testVG", "testLV")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_lvremove("testVG", "testLV", True)
+        succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgremove("testVG")
+        succ = BlockDev.lvm_vgremove("testVG")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev2)
+        succ = BlockDev.lvm_pvremove(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev)
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_snapshotcreate_lvorigin_snapshotmerge(self):
         """Verify that LV snapshot support works"""
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev2)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_lvsnapshotcreate("testVG", "testLV", "testLV_bak", 256 * 1024**2)
+        succ = BlockDev.lvm_lvsnapshotcreate("testVG", "testLV", "testLV_bak", 256 * 1024**2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        origin_name, err = BlockDev.lvm_lvorigin("testVG", "testLV_bak")
-        self.assertIs(err, None)
+        origin_name = BlockDev.lvm_lvorigin("testVG", "testLV_bak")
         self.assertEqual(origin_name, "testLV")
 
-        succ, err = BlockDev.lvm_lvsnapshotmerge("testVG", "testLV_bak")
+        succ = BlockDev.lvm_lvsnapshotmerge("testVG", "testLV_bak")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_lvremove("testVG", "testLV", True)
+        succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgremove("testVG")
+        succ = BlockDev.lvm_vgremove("testVG")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev2)
+        succ = BlockDev.lvm_pvremove(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev)
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
     def test_lvinfo(self):
         """Verify that it is possible to gather info about an LV"""
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev2)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        info, err = BlockDev.lvm_lvinfo("testVG", "testLV")
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
         self.assertTrue(info)
-        self.assertIs(err, None)
         self.assertEqual(info.lv_name, "testLV")
         self.assertEqual(info.vg_name, "testVG")
         self.assertTrue(info.uuid)
         self.assertEqual(info.size, 512 * 1024**2)
 
-        succ, err = BlockDev.lvm_lvremove("testVG", "testLV", True)
+        succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgremove("testVG")
+        succ = BlockDev.lvm_vgremove("testVG")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev)
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev2)
+        succ = BlockDev.lvm_pvremove(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
     def test_lvs(self):
         """Verify that it's possible to gather info about LVs"""
 
-        lvs, err = BlockDev.lvm_lvs(None)
+        lvs = BlockDev.lvm_lvs(None)
         orig_len = len(lvs)
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0)
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        lvs, err = BlockDev.lvm_lvs(None)
+        lvs = BlockDev.lvm_lvs(None)
         self.assertTrue(len(lvs) > orig_len)
         self.assertTrue(any(info.lv_name == "testLV" and info.vg_name == "testVG" for info in lvs))
 
-        info, err = BlockDev.lvm_lvinfo("testVG", "testLV")
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
         self.assertTrue(info)
-        self.assertIs(err, None)
 
         self.assertTrue(any(info.uuid == all_info.uuid for all_info in lvs))
 
-        lvs, err = BlockDev.lvm_lvs("testVG")
+        lvs = BlockDev.lvm_lvs("testVG")
         self.assertEqual(len(lvs), 1)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_lvremove("testVG", "testLV", True)
+        succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgremove("testVG")
+        succ = BlockDev.lvm_vgremove("testVG")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev)
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
     def test_thpoolcreate(self):
         """Verify that it is possible to create a thin pool"""
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev2)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_thpoolcreate("testVG", "testPool", 512 * 1024**2, 4 * 1024**2, 512 * 1024, "thin-performance")
+        succ = BlockDev.lvm_thpoolcreate("testVG", "testPool", 512 * 1024**2, 4 * 1024**2, 512 * 1024, "thin-performance")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        info, err = BlockDev.lvm_lvinfo("testVG", "testPool")
-        self.assertIs(err, None)
+        info = BlockDev.lvm_lvinfo("testVG", "testPool")
         self.assertIn("t", info.attr)
 
-        succ, err = BlockDev.lvm_lvremove("testVG", "testPool", True)
+        succ = BlockDev.lvm_lvremove("testVG", "testPool", True)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgremove("testVG")
+        succ = BlockDev.lvm_vgremove("testVG")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev2)
+        succ = BlockDev.lvm_pvremove(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev)
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
     def test_thlvcreate_thpoolname(self):
         """Verify that it is possible to create a thin LV and get its pool name"""
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev2)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_thpoolcreate("testVG", "testPool", 512 * 1024**2, 4 * 1024**2, 512 * 1024, None)
+        succ = BlockDev.lvm_thpoolcreate("testVG", "testPool", 512 * 1024**2, 4 * 1024**2, 512 * 1024, None)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_thlvcreate("testVG", "testPool", "testThLV", 1024**3)
+        succ = BlockDev.lvm_thlvcreate("testVG", "testPool", "testThLV", 1024**3)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        info, err = BlockDev.lvm_lvinfo("testVG", "testPool")
-        self.assertIs(err, None)
+        info = BlockDev.lvm_lvinfo("testVG", "testPool")
         self.assertIn("t", info.attr)
 
-        info, err = BlockDev.lvm_lvinfo("testVG", "testThLV")
-        self.assertIs(err, None)
+        info = BlockDev.lvm_lvinfo("testVG", "testThLV")
         self.assertIn("V", info.attr)
 
-        pool, err = BlockDev.lvm_thlvpoolname("testVG", "testThLV")
-        self.assertIs(err, None)
+        pool = BlockDev.lvm_thlvpoolname("testVG", "testThLV")
         self.assertEqual(pool, "testPool")
 
-        succ, err = BlockDev.lvm_lvremove("testVG", "testThLV", True)
+        succ = BlockDev.lvm_lvremove("testVG", "testThLV", True)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_lvremove("testVG", "testPool", True)
+        succ = BlockDev.lvm_lvremove("testVG", "testPool", True)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgremove("testVG")
+        succ = BlockDev.lvm_vgremove("testVG")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev2)
+        succ = BlockDev.lvm_pvremove(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev)
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
     def test_thsnapshotcreate(self):
         """Verify that it is possible to create a thin LV snapshot"""
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvcreate(self.loop_dev2)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_thpoolcreate("testVG", "testPool", 512 * 1024**2, 4 * 1024**2, 512 * 1024, None)
+        succ = BlockDev.lvm_thpoolcreate("testVG", "testPool", 512 * 1024**2, 4 * 1024**2, 512 * 1024, None)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_thlvcreate("testVG", "testPool", "testThLV", 1024**3)
+        succ = BlockDev.lvm_thlvcreate("testVG", "testPool", "testThLV", 1024**3)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        info, err = BlockDev.lvm_lvinfo("testVG", "testPool")
-        self.assertIs(err, None)
+        info = BlockDev.lvm_lvinfo("testVG", "testPool")
         self.assertIn("t", info.attr)
 
-        info, err = BlockDev.lvm_lvinfo("testVG", "testThLV")
-        self.assertIs(err, None)
+        info = BlockDev.lvm_lvinfo("testVG", "testThLV")
         self.assertIn("V", info.attr)
 
-        succ, err = BlockDev.lvm_thsnapshotcreate("testVG", "testThLV", "testThLV_bak", "testPool")
+        succ = BlockDev.lvm_thsnapshotcreate("testVG", "testThLV", "testThLV_bak", "testPool")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        info, err = BlockDev.lvm_lvinfo("testVG", "testThLV_bak")
-        self.assertIs(err, None)
+        info = BlockDev.lvm_lvinfo("testVG", "testThLV_bak")
         self.assertIn("V", info.attr)
 
-        succ, err = BlockDev.lvm_lvremove("testVG", "testThLV_bak", True)
+        succ = BlockDev.lvm_lvremove("testVG", "testThLV_bak", True)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_lvremove("testVG", "testThLV", True)
+        succ = BlockDev.lvm_lvremove("testVG", "testThLV", True)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_lvremove("testVG", "testPool", True)
+        succ = BlockDev.lvm_lvremove("testVG", "testPool", True)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_vgremove("testVG")
+        succ = BlockDev.lvm_vgremove("testVG")
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev2)
+        succ = BlockDev.lvm_pvremove(self.loop_dev2)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.lvm_pvremove(self.loop_dev)
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
-        self.assertIs(err, None)

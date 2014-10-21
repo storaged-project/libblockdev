@@ -5,6 +5,11 @@
 #ifndef BD_LVM_API
 #define BD_LVM_API
 
+#define BD_LVM_ERROR bd_lvm_error_quark ()
+typedef enum {
+    BD_LVM_ERROR_PARSE,
+} BDLVMError;
+
 #define BD_LVM_TYPE_PVDATA (bd_lvm_pvdata_get_type ())
 GType bd_lvm_pvdata_get_type();
 
@@ -259,17 +264,17 @@ gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard);
 /**
  * bd_lvm_pvcreate:
  * @device: the device to make PV from
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the PV was successfully created or not
  */
-gboolean bd_lvm_pvcreate (gchar *device, gchar **error_message);
+gboolean bd_lvm_pvcreate (gchar *device, GError **error);
 
 /**
  * bd_lvm_pvresize:
  * @device: the device to resize
  * @size: the new requested size of the PV or 0 if it should be adjusted to device's size
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the PV's size was successfully changed or not
  *
@@ -277,150 +282,150 @@ gboolean bd_lvm_pvcreate (gchar *device, gchar **error_message);
  * pvresize(8)). If given @size 0, adjusts the PV's size to the underlaying
  * block device's size.
  */
-gboolean bd_lvm_pvresize (gchar *device, guint64 size, gchar **error_message);
+gboolean bd_lvm_pvresize (gchar *device, guint64 size, GError **error);
 
 /**
  * bd_lvm_pvremove:
  * @device: the PV device to be removed/destroyed
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the PV was successfully removed/destroyed or not
  */
-gboolean bd_lvm_pvremove (gchar *device, gchar **error_message);
+gboolean bd_lvm_pvremove (gchar *device, GError **error);
 
 /**
  * bd_lvm_pvmove:
  * @src: the PV device to move extents off of
  * @dest: (allow-none): the PV device to move extents onto or %NULL
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the extents from the @src PV where successfully moved or not
  *
  * If @dest is %NULL, VG allocation rules are used for the extents from the @src
  * PV (see pvmove(8)).
  */
-gboolean bd_lvm_pvmove (gchar *src, gchar *dest, gchar **error_message);
+gboolean bd_lvm_pvmove (gchar *src, gchar *dest, GError **error);
 
 /**
  * bd_lvm_pvscan:
  * @device: (allow-none): the device to scan for PVs or %NULL
  * @update_cache: whether to update the lvmetad cache or not
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the system or @device was successfully scanned for PVs or not
  *
  * The @device argument is used only if @update_cache is %TRUE. Otherwise the
  * whole system is scanned for PVs.
  */
-gboolean bd_lvm_pvscan (gchar *device, gboolean update_cache, gchar **error_message);
+gboolean bd_lvm_pvscan (gchar *device, gboolean update_cache, GError **error);
 
 /**
  * bd_lvm_pvinfo:
  * @device: a PV to get information about or %NULL
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): information about the PV on the given @device or
- * %NULL in case of error (the @error_message gets populated in those cases)
+ * %NULL in case of error (the @error) gets populated in those cases)
  */
-BDLVMPVdata* bd_lvm_pvinfo (gchar *device, gchar **error_message);
+BDLVMPVdata* bd_lvm_pvinfo (gchar *device, GError **error);
 
 /**
  * bd_lvm_pvs:
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (array zero-terminated=1): information about PVs found in the system
  */
-BDLVMPVdata** bd_lvm_pvs (gchar **error_message);
+BDLVMPVdata** bd_lvm_pvs (GError **error);
 
 /**
  * bd_lvm_vgcreate:
  * @name: name of the newly created VG
  * @pv_list: (array zero-terminated=1): list of PVs the newly created VG should use
  * @pe_size: PE size or 0 if the default value should be used
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the VG @name was successfully created or not
  */
-gboolean bd_lvm_vgcreate (gchar *name, gchar **pv_list, guint64 pe_size, gchar **error_message);
+gboolean bd_lvm_vgcreate (gchar *name, gchar **pv_list, guint64 pe_size, GError **error);
 
 /**
  * bd_lvm_vgremove:
  * @vg_name: name of the to be removed VG
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the VG was successfully removed or not
  *
  * Note: forces the VG removal.
  */
-gboolean bd_lvm_vgremove (gchar *vg_name, gchar **error_message);
+gboolean bd_lvm_vgremove (gchar *vg_name, GError **error);
 
 /**
  * bd_lvm_vgactivate:
  * @vg_name: name of the to be activated VG
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the VG was successfully activated or not
  */
-gboolean bd_lvm_vgactivate (gchar *vg_name, gchar **error_message);
+gboolean bd_lvm_vgactivate (gchar *vg_name, GError **error);
 
 /**
  * bd_lvm_vgdeactivate:
  * @vg_name: name of the to be deactivated VG
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the VG was successfully deactivated or not
  */
-gboolean bd_lvm_vgdeactivate (gchar *vg_name, gchar **error_message);
+gboolean bd_lvm_vgdeactivate (gchar *vg_name, GError **error);
 
 /**
  * bd_lvm_vgextend:
  * @vg_name: name of the to be extended VG
  * @device: PV device to extend the @vg_name VG with
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the VG @vg_name was successfully extended with the given @device or not.
  */
-gboolean bd_lvm_vgextend (gchar *vg_name, gchar *device, gchar **error_message);
+gboolean bd_lvm_vgextend (gchar *vg_name, gchar *device, GError **error);
 
 /**
  * bd_lvm_vgreduce:
  * @vg_name: name of the to be reduced VG
  * @device: (allow-none): PV device the @vg_name VG should be reduced of or %NULL
  *                        if the VG should be reduced of the missing PVs
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the VG @vg_name was successfully reduced of the given @device or not
  */
-gboolean bd_lvm_vgreduce (gchar *vg_name, gchar *device, gchar **error_message);
+gboolean bd_lvm_vgreduce (gchar *vg_name, gchar *device, GError **error);
 
 /**
  * bd_lvm_vginfo:
  * @vg_name: a VG to get information about
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): information about the @vg_name VG or %NULL in case
- * of error (the @error_message gets populated in those cases)
+ * of error (the @error) gets populated in those cases)
  */
-BDLVMVGdata* bd_lvm_vginfo (gchar *vg_name, gchar **error_message);
+BDLVMVGdata* bd_lvm_vginfo (gchar *vg_name, GError **error);
 
 /**
  * bd_lvm_vgs:
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (array zero-terminated=1): information about VGs found in the system
  */
-BDLVMVGdata** bd_lvm_vgs (gchar **error_message);
+BDLVMVGdata** bd_lvm_vgs (GError **error);
 
 /**
  * bd_lvm_lvorigin:
  * @vg_name: name of the VG containing the queried LV
  * @lv_name: name of the queried LV
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): the origin volume for the @vg_name/@lv_name LV or
- * %NULL if failed to determine (@error_message is set in those cases)
+ * %NULL if failed to determine (@error) is set in those cases)
  */
-gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, gchar **error_message);
+gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, GError **error);
 
 /**
  * bd_lvm_lvcreate:
@@ -429,54 +434,54 @@ gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, gchar **error_message);
  * @size: requested size of the new LV
  * @pv_list: (allow-none) (array zero-terminated=1): list of PVs the newly created LV should use or %NULL
  * if not specified
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the given @vg_name/@lv_name LV was successfully created or not
  */
-gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar **pv_list, gchar **error_message);
+gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar **pv_list, GError **error);
 
 /**
  * bd_lvm_lvremove:
  * @vg_name: name of the VG containing the to-be-removed LV
  * @lv_name: name of the to-be-removed LV
  * @force: whether to force removal or not
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @vg_name/@lv_name LV was successfully removed or not
  */
-gboolean bd_lvm_lvremove (gchar *vg_name, gchar *lv_name, gboolean force, gchar **error_message);
+gboolean bd_lvm_lvremove (gchar *vg_name, gchar *lv_name, gboolean force, GError **error);
 
 /**
  * bd_lvm_lvresize:
  * @vg_name: name of the VG containing the to-be-resized LV
  * @lv_name: name of the to-be-resized LV
  * @size: the requested new size of the LV
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @vg_name/@lv_name LV was successfully resized or not
  */
-gboolean bd_lvm_lvresize (gchar *vg_name, gchar *lv_name, guint64 size, gchar **error_message);
+gboolean bd_lvm_lvresize (gchar *vg_name, gchar *lv_name, guint64 size, GError **error);
 
 /**
  * bd_lvm_lvactivate:
  * @vg_name: name of the VG containing the to-be-activated LV
  * @lv_name: name of the to-be-activated LV
  * @ignore_skip: whether to ignore the skip flag or not
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @vg_name/@lv_name LV was successfully activated or not
  */
-gboolean bd_lvm_lvactivate (gchar *vg_name, gchar *lv_name, gboolean ignore_skip, gchar **error_message);
+gboolean bd_lvm_lvactivate (gchar *vg_name, gchar *lv_name, gboolean ignore_skip, GError **error);
 
 /**
  * bd_lvm_lvdeactivate:
  * @vg_name: name of the VG containing the to-be-deactivated LV
  * @lv_name: name of the to-be-deactivated LV
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @vg_name/@lv_name LV was successfully deactivated or not
  */
-gboolean bd_lvm_lvdeactivate (gchar *vg_name, gchar *lv_name, gchar **error_message);
+gboolean bd_lvm_lvdeactivate (gchar *vg_name, gchar *lv_name, GError **error);
 
 /**
  * bd_lvm_lvsnapshotcreate:
@@ -484,43 +489,43 @@ gboolean bd_lvm_lvdeactivate (gchar *vg_name, gchar *lv_name, gchar **error_mess
  * @origin_name: name of the LV a new snapshot should be created of
  * @snapshot_name: name fo the to-be-created snapshot
  * @size: requested size for the snapshot
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @snapshot_name snapshot of the @vg_name/@origin_name LV
  * was successfully created or not.
  */
-gboolean bd_lvm_lvsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, guint64 size, gchar **error_message);
+gboolean bd_lvm_lvsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, guint64 size, GError **error);
 
 /**
  * bd_lvm_lvsnapshotmerge:
  * @vg_name: name of the VG containing the to-be-merged LV snapshot
  * @snapshot_name: name of the to-be-merged LV snapshot
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @vg_name/@snapshot_name LV snapshot was successfully merged or not
  */
-gboolean bd_lvm_lvsnapshotmerge (gchar *vg_name, gchar *snapshot_name, gchar **error_message);
+gboolean bd_lvm_lvsnapshotmerge (gchar *vg_name, gchar *snapshot_name, GError **error);
 
 /**
  * bd_lvm_lvinfo:
  * @vg_name: name of the VG that contains the LV to get information about
  * @lv_name: name of the LV to get information about
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): information about the @vg_name/@lv_name LV or %NULL in case
- * of error (the @error_message gets populated in those cases)
+ * of error (the @error) gets populated in those cases)
  */
-BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, gchar **error_message);
+BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, GError **error);
 
 /**
  * bd_lvm_lvs:
  * @vg_name: (allow-none): name of the VG to get information about LVs from
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (array zero-terminated=1): information about LVs found in the given
  * @vg_name VG or in system if @vg_name is %NULL
  */
-BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, gchar **error_message);
+BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, GError **error);
 
 /**
  * bd_lvm_thpoolcreate:
@@ -531,11 +536,11 @@ BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, gchar **error_message);
  * @chunk_size: requested chunk size or 0 to use the default
  * @profile: (allow-none): profile to use (see lvm(8) for more information) or %NULL to use
  *                         the default
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @vg_name/@lv_name thin pool was successfully created or not
  */
-gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guint64 md_size, guint64 chunk_size, gchar *profile, gchar **error_message);
+gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guint64 md_size, guint64 chunk_size, gchar *profile, GError **error);
 
 /**
  * bd_lvm_thlvcreate:
@@ -543,22 +548,22 @@ gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guin
  * @pool_name: name of the pool LV providing extents for the to-be-created thin LV
  * @lv_name: name of the to-be-created thin LV
  * @size: requested virtual size of the to-be-created thin LV
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @vg_name/@lv_name thin LV was successfully created or not
  */
-gboolean bd_lvm_thlvcreate (gchar *vg_name, gchar *pool_name, gchar *lv_name, guint64 size, gchar **error_message);
+gboolean bd_lvm_thlvcreate (gchar *vg_name, gchar *pool_name, gchar *lv_name, guint64 size, GError **error);
 
 /**
  * bd_lvm_thlvpoolname:
  * @vg_name: name of the VG containing the queried thin LV
  * @lv_name: name of the queried thin LV
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): the name of the pool volume for the @vg_name/@lv_name
- * thin LV or %NULL if failed to determine (@error_message is set in those cases)
+ * thin LV or %NULL if failed to determine (@error) is set in those cases)
  */
-gchar* bd_lvm_thlvpoolname (gchar *vg_name, gchar *lv_name, gchar **error_message);
+gchar* bd_lvm_thlvpoolname (gchar *vg_name, gchar *lv_name, GError **error);
 
 /**
  * bd_lvm_thsnapshotcreate:
@@ -566,23 +571,23 @@ gchar* bd_lvm_thlvpoolname (gchar *vg_name, gchar *lv_name, gchar **error_messag
  * @origin_name: name of the thin LV a new snapshot should be created of
  * @snapshot_name: name fo the to-be-created snapshot
  * @pool_name: (allow-none): name of the thin pool to create the snapshot in or %NULL if not specified
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @snapshot_name snapshot of the @vg_name/@origin_name
  * thin LV was successfully created or not.
  */
-gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, gchar *pool_name, gchar **error_message);
+gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, gchar *pool_name, GError **error);
 
 /**
  * bd_lvm_set_global_config:
  * @new_config: (allow-none): string representation of the new global LVM
  *                            configuration to set or %NULL to reset to default
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the new requested global config @new_config was successfully
  *          set or not
  */
-gboolean bd_lvm_set_global_config (gchar *new_config, gchar **error_message);
+gboolean bd_lvm_set_global_config (gchar *new_config, GError **error);
 
 /**
  * bd_lvm_get_global_config:

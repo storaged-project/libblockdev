@@ -13,8 +13,14 @@
  */
 typedef void (*BDUtilsLogFunc) (gint level, gchar *msg);
 
-gboolean bd_utils_exec_and_report_error (gchar **argv, gchar **error_message);
-gboolean bd_utils_exec_and_capture_output (gchar **argv, gchar **output, gchar **error_message);
-gboolean bd_utils_init_logging (BDUtilsLogFunc new_log_func, gchar **error_message);
+#define BD_UTILS_EXEC_ERROR bd_utils_exec_error_quark ()
+typedef enum {
+    BD_UTILS_EXEC_ERROR_FAILED,
+    BD_UTILS_EXEC_ERROR_NOOUT,
+} BDUtilsExecError;
+
+gboolean bd_utils_exec_and_report_error (gchar **argv, GError **error);
+gboolean bd_utils_exec_and_capture_output (gchar **argv, gchar **output, GError **error);
+gboolean bd_utils_init_logging (BDUtilsLogFunc new_log_func, GError **error);
 
 #endif  /* BD_UTILS_EXEC */

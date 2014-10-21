@@ -33,30 +33,34 @@
  * in/out to/from the functions are in bytes.
  */
 
+GQuark bd_loop_error_quark (void)
+{
+    return g_quark_from_static_string ("g-bd-loop-error-quark");
+}
+
 /**
  * bd_loop_get_backing_file:
  * @dev_name: name of the loop device to get backing file for (e.g. "loop0")
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): path of the device's backing file
  */
-gchar* bd_loop_get_backing_file (gchar *dev_name, gchar **error_message) {
+gchar* bd_loop_get_backing_file (gchar *dev_name, GError **error) {
     gchar *sys_path = g_strdup_printf ("/sys/class/block/%s/loop/backing_file", dev_name);
     gchar *ret = NULL;
     gboolean success = FALSE;
-    GError *error;
 
     if (access (sys_path, R_OK) != 0) {
         g_free (sys_path);
-        *error_message = g_strdup ("Failed to access device's parameters under /sys");
+        g_set_error (error, BD_LOOP_ERROR, BD_LOOP_ERROR_SYS,
+                     "Failed to access device's parameters under /sys");
         return NULL;
     }
 
-    success = g_file_get_contents (sys_path, &ret, NULL, &error);
+    success = g_file_get_contents (sys_path, &ret, NULL, error);
     if (!success) {
-        *error_message = g_strdup (error->message);
+        /* error is alraedy populated */
         g_free (sys_path);
-        g_clear_error (&error);
         return NULL;
     }
 
@@ -67,16 +71,16 @@ gchar* bd_loop_get_backing_file (gchar *dev_name, gchar **error_message) {
 /**
  * bd_loop_get_loop_name:
  * @file: path of the backing file to get loop name for
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): name of the loop device associated with the given
  * @file or %NULL if failed to determine
  */
-gchar* bd_loop_get_loop_name (gchar *file, gchar **error_message) {
+gchar* bd_loop_get_loop_name (gchar *file, GError **error) {
     glob_t globbuf;
     gchar **path_p;
     gboolean success = FALSE;
-    GError *error;
+    GError *tmp_error = NULL;
     gchar *content;
     gboolean found = FALSE;
     gchar **parts;
@@ -84,15 +88,17 @@ gchar* bd_loop_get_loop_name (gchar *file, gchar **error_message) {
 
     if (glob ("/sys/block/loop*/loop/backing_file", GLOB_NOSORT, NULL, &globbuf) != 0) {
         /* TODO: be more specific about the errors? */
-        *error_message = g_strdup_printf ("The given file %s has no associated loop device",
-                                          file);
+        g_set_error (error, BD_LOOP_ERROR, BD_LOOP_ERROR_DEVICE,
+                     "The given file %s has no associated loop device", file);
         return NULL;
     }
 
     for (path_p = globbuf.gl_pathv; *path_p && !found; path_p++) {
-        success = g_file_get_contents (*path_p, &content, NULL, &error);
-        if (!success)
+        success = g_file_get_contents (*path_p, &content, NULL, &tmp_error);
+        if (!success) {
+            g_clear_error (&tmp_error);
             continue;
+        }
 
         g_strstrip (content);
         found = (g_strcmp0 (content, file) == 0);
@@ -100,8 +106,8 @@ gchar* bd_loop_get_loop_name (gchar *file, gchar **error_message) {
     }
 
     if (!found) {
-        *error_message = g_strdup_printf ("The given file %s has no associated loop device",
-                                          file);
+        g_set_error (error, BD_LOOP_ERROR, BD_LOOP_ERROR_DEVICE,
+                     "The given file %s has no associated loop device", file);
         return NULL;
     }
 
@@ -116,20 +122,20 @@ gchar* bd_loop_get_loop_name (gchar *file, gchar **error_message) {
  * bd_loop_setup:
  * @file: file to setup as a loop device
  * @loop_name: (out): if not %NULL, it is used to store the name of the loop device
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @file was successfully setup as a loop device or not
  */
-gboolean bd_loop_setup (gchar *file, gchar **loop_name, gchar **error_message) {
+gboolean bd_loop_setup (gchar *file, gchar **loop_name, GError **error) {
     gchar *args[4] = {"losetup", "-f", file, NULL};
     gboolean success = FALSE;
 
-    success = bd_utils_exec_and_report_error (args, error_message);
+    success = bd_utils_exec_and_report_error (args, error);
     if (!success)
         return FALSE;
     else {
         if (loop_name)
-            *loop_name = bd_loop_get_loop_name (file, error_message);
+            *loop_name = bd_loop_get_loop_name (file, error);
         return TRUE;
     }
 }
@@ -137,11 +143,11 @@ gboolean bd_loop_setup (gchar *file, gchar **loop_name, gchar **error_message) {
 /**
  * bd_loop_teardown:
  * @loop: path or name of the loop device to tear down
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @loop device was successfully torn down or not
  */
-gboolean bd_loop_teardown (gchar *loop, gchar **error_message) {
+gboolean bd_loop_teardown (gchar *loop, GError **error) {
     gboolean success = FALSE;
     gchar *dev_loop = NULL;
 
@@ -154,7 +160,7 @@ gboolean bd_loop_teardown (gchar *loop, gchar **error_message) {
         args[2] = dev_loop;
     }
 
-    success = bd_utils_exec_and_report_error (args, error_message);
+    success = bd_utils_exec_and_report_error (args, error);
     g_free (dev_loop);
 
     return success;

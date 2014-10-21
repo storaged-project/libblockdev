@@ -6,7 +6,12 @@
 #include "plugins.h"
 #include "exec.h"
 
-gboolean bd_init (BDPluginSpec **force_plugins, BDUtilsLogFunc log_func, gchar **error_message);
-gboolean bd_reinit (BDPluginSpec **force_plugins, gboolean reload, BDUtilsLogFunc log_func, gchar **error_message);
+#define BD_INIT_ERROR bd_init_error_quark ()
+typedef enum {
+    BD_INIT_ERROR_PLUGINS_FAILED,
+} BDInitError;
+
+gboolean bd_init (BDPluginSpec **force_plugins, BDUtilsLogFunc log_func, GError **error);
+gboolean bd_reinit (BDPluginSpec **force_plugins, gboolean reload, BDUtilsLogFunc log_func, GError **error);
 
 #endif  /* BD_LIB */

@@ -35,18 +35,23 @@
  * A libblockdev plugin for basic operations with device mapper.
  */
 
+GQuark bd_dm_error_quark (void)
+{
+    return g_quark_from_static_string ("g-bd-dm-error-quark");
+}
+
 /**
  * bd_dm_create_linear:
  * @map_name: name of the map
  * @device: device to create map for
  * @length: length of the mapping in sectors
  * @uuid: (allow-none): UUID for the new dev mapper device or %NULL if not specified
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the new linear mapping @map_name was successfully created
  * for the @device or not
  */
-gboolean bd_dm_create_linear (gchar *map_name, gchar *device, guint64 length, gchar *uuid, gchar **error_message) {
+gboolean bd_dm_create_linear (gchar *map_name, gchar *device, guint64 length, gchar *uuid, GError **error) {
     gboolean success = FALSE;
     gchar *argv[9] = {"dmsetup", "create", map_name, "--table", NULL, NULL, NULL, NULL, NULL};
 
@@ -60,7 +65,7 @@ gboolean bd_dm_create_linear (gchar *map_name, gchar *device, guint64 length, gc
     } else
         argv[5] = device;
 
-    success = bd_utils_exec_and_report_error (argv, error_message);
+    success = bd_utils_exec_and_report_error (argv, error);
     g_free (table);
 
     return success;
@@ -69,43 +74,42 @@ gboolean bd_dm_create_linear (gchar *map_name, gchar *device, guint64 length, gc
 /**
  * bd_dm_remove:
  * @map_name: name of the map to remove
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @map_name map was successfully removed or not
  */
-gboolean bd_dm_remove (gchar *map_name, gchar **error_message) {
+gboolean bd_dm_remove (gchar *map_name, GError **error) {
     gchar *argv[4] = {"dmsetup", "remove", map_name, NULL};
 
-    return bd_utils_exec_and_report_error (argv, error_message);
+    return bd_utils_exec_and_report_error (argv, error);
 }
 
 /**
  * bd_dm_name_from_node:
  * @dm_node: name of the DM node (e.g. "dm-0")
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: map name of the map providing the @dm_node device or %NULL
- * (@error_message contains the error in such cases)
+ * (@error) contains the error in such cases)
  */
-gchar* bd_dm_name_from_node (gchar *dm_node, gchar **error_message) {
+gchar* bd_dm_name_from_node (gchar *dm_node, GError **error) {
     gchar *ret = NULL;
     gboolean success = FALSE;
-    GError *error;
 
     gchar *sys_path = g_strdup_printf ("/sys/class/block/%s/dm/name", dm_node);
 
     if (access (sys_path, R_OK) != 0) {
         g_free (sys_path);
-        *error_message = g_strdup ("Failed to access dm node's parameters under /sys");
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_SYS,
+                     "Failed to access dm node's parameters under /sys");
         return NULL;
     }
 
-    success = g_file_get_contents (sys_path, &ret, NULL, &error);
+    success = g_file_get_contents (sys_path, &ret, NULL, error);
     g_free (sys_path);
 
     if (!success) {
-        *error_message = g_strdup (error->message);
-         g_clear_error (&error);
+        /* errror is already populated */
         return NULL;
     }
 
@@ -115,21 +119,19 @@ gchar* bd_dm_name_from_node (gchar *dm_node, gchar **error_message) {
 /**
  * bd_dm_node_from_name:
  * @map_name: name of the queried DM map
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
- * Returns: DM node name for the @map_name map or %NULL (@error_message contains
+ * Returns: DM node name for the @map_name map or %NULL (@error) contains
  * the error in such cases)
  */
-gchar* bd_dm_node_from_name (gchar *map_name, gchar **error_message) {
-    GError *error = NULL;
+gchar* bd_dm_node_from_name (gchar *map_name, GError **error) {
     gchar *symlink = NULL;
     gchar *ret = NULL;
     gchar *dev_mapper_path = g_strdup_printf ("/dev/mapper/%s", map_name);
 
-    symlink = g_file_read_link (dev_mapper_path, &error);
+    symlink = g_file_read_link (dev_mapper_path, error);
     if (!symlink) {
-        *error_message = g_strdup (error->message);
-        g_error_free(error);
+        /* error is already populated */
         g_free (dev_mapper_path);
         return FALSE;
     }
@@ -148,13 +150,13 @@ gchar* bd_dm_node_from_name (gchar *map_name, gchar **error_message) {
  * @map_name: name of the queried map
  * @live_only: whether to go through the live maps only or not
  * @active_only: whether to ignore suspended maps or not
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the given @map_name exists (and is live if @live_only is
  * %TRUE (and is active if @active_only is %TRUE)). If %FALSE is returned,
- * @error_message indicates whether error appeared (non-%NULL) or not (%NULL).
+ * @error) indicates whether error appeared (non-%NULL) or not (%NULL).
  */
-gboolean bd_dm_map_exists (gchar *map_name, gboolean live_only, gboolean active_only, gchar **error_message) {
+gboolean bd_dm_map_exists (gchar *map_name, gboolean live_only, gboolean active_only, GError **error) {
     struct dm_task *task_list = NULL;
     struct dm_task *task_info = NULL;
 	struct dm_names *names = NULL;
@@ -163,7 +165,8 @@ gboolean bd_dm_map_exists (gchar *map_name, gboolean live_only, gboolean active_
     gboolean ret = FALSE;
 
     if (geteuid () != 0) {
-        *error_message = g_strdup ("Not running as root, cannot query DM maps");
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_NOT_ROOT,
+                     "Not running as root, cannot query DM maps");
         return FALSE;
     }
 
@@ -173,7 +176,8 @@ gboolean bd_dm_map_exists (gchar *map_name, gboolean live_only, gboolean active_
     task_list = dm_task_create(DM_DEVICE_LIST);
 	if (!task_list) {
         g_warning ("Failed to create DM task");
-        *error_message = g_strdup ("Failed to create DM task");
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
+                     "Failed to create DM task");
         return FALSE;
     }
 
@@ -195,7 +199,8 @@ gboolean bd_dm_map_exists (gchar *map_name, gboolean live_only, gboolean active_
         task_info = dm_task_create(DM_DEVICE_INFO);
         if (!task_info) {
             g_warning ("Failed to create DM task");
-            *error_message = g_strdup ("Failed to create DM task");
+            g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
+                         "Failed to create DM task");
             break;
         }
 
@@ -304,14 +309,14 @@ static void find_dev_in_raid_set (gchar *name, gchar *uuid, gint major, gint min
  * @uuid: (allow-none): uuid of the member
  * @major: major number of the device or -1 if not specified
  * @minor: minor number of the device or -1 if not specified
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): variable to store error (if any)
  *
  * Returns: (transfer full) (array zero-terminated=1): list of names of the RAID sets related to
  * the member or %NULL in case of error
  *
  * One of @name, @uuid or @major:@minor has to be given.
  */
-gchar** bd_dm_get_member_raid_sets (gchar *name, gchar *uuid, gint major, gint minor, gchar **error_message) {
+gchar** bd_dm_get_member_raid_sets (gchar *name, gchar *uuid, gint major, gint minor, GError **error) {
     guint64 i = 0;
     gint rc = 0;
     gchar *argv[] = {"blockdev.dmraid", NULL};
@@ -327,21 +332,24 @@ gchar** bd_dm_get_member_raid_sets (gchar *name, gchar *uuid, gint major, gint m
 
     rc = discover_devices (lc, NULL);
     if (!rc) {
-        *error_message = g_strdup ("Failed to discover devices");
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_RAID_FAIL,
+                     "Failed to discover devices");
         libdmraid_exit (lc);
         return NULL;
     }
     discover_raid_devices (lc, NULL);
 
     if (!count_devices (lc, RAID)) {
-        *error_message = g_strdup ("No RAIDs discovered");
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_RAID_NO_DEVS,
+                     "No RAIDs discovered");
         libdmraid_exit (lc);
         return NULL;
     }
 
     argv[0] = NULL;
     if (!group_set (lc, argv)) {
-        *error_message = g_strdup ("Failed to group_set");
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_RAID_FAIL,
+                     "Failed to group_set");
         libdmraid_exit (lc);
         return NULL;
     }

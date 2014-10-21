@@ -25,6 +25,11 @@ static GMutex id_counter_lock;
 static guint64 id_counter = 0;
 static BDUtilsLogFunc log_func = NULL;
 
+GQuark bd_utils_exec_error_quark (void)
+{
+    return g_quark_from_static_string ("g-bd-utils-exec-error-quark");
+}
+
 /**
  * log_running: (skip)
  *
@@ -70,13 +75,12 @@ static void log_done (guint64 task_id) {
 /**
  * bd_utils_exec_and_report_error:
  * @argv: (array zero-terminated=1): the argv array for the call
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @argv was successfully executed (no error and exit code 0) or not
  */
-gboolean bd_utils_exec_and_report_error (gchar **argv, gchar **error_message) {
+gboolean bd_utils_exec_and_report_error (gchar **argv, GError **error) {
     gboolean success = FALSE;
-    GError *error = NULL;
     gint status = 0;
     gchar *stdout_data = NULL;
     gchar *stderr_data = NULL;
@@ -84,21 +88,22 @@ gboolean bd_utils_exec_and_report_error (gchar **argv, gchar **error_message) {
 
     task_id = log_running (argv);
     success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH,
-                            NULL, NULL, &stdout_data, &stderr_data, &status, &error);
+                            NULL, NULL, &stdout_data, &stderr_data, &status, error);
     log_done (task_id);
 
     if (!success) {
-        *error_message = g_strdup (error->message);
-        g_clear_error (&error);
+        /* error is already populated from the call */
         return FALSE;
     }
 
     if (status != 0) {
         if (stderr_data && (g_strcmp0 ("", stderr_data) != 0)) {
-            *error_message = stderr_data;
+            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
+                         "Process reported exit code %d: %s", status, stderr_data);
             g_free (stdout_data);
         } else {
-            *error_message = stdout_data;
+            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
+                         "Process reported exit code %d: %s", status, stdout_data);
             g_free (stderr_data);
         }
 
@@ -114,35 +119,38 @@ gboolean bd_utils_exec_and_report_error (gchar **argv, gchar **error_message) {
  * bd_utils_exec_and_capture_output:
  * @argv: (array zero-terminated=1): the argv array for the call
  * @output: (out): variable to store output to
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @argv was successfully executed capturing the output or not
  */
-gboolean bd_utils_exec_and_capture_output (gchar **argv, gchar **output, gchar **error_message) {
+gboolean bd_utils_exec_and_capture_output (gchar **argv, gchar **output, GError **error) {
     gchar *stdout_data = NULL;
     gchar *stderr_data = NULL;
-    GError *error = NULL;
     gint status = 0;
     gboolean success = FALSE;
     guint64 task_id = 0;
 
     task_id = log_running (argv);
     success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH,
-                            NULL, NULL, &stdout_data, &stderr_data, &status, &error);
+                            NULL, NULL, &stdout_data, &stderr_data, &status, error);
     log_done (task_id);
 
     if (!success) {
-        *error_message = g_strdup (error->message);
-        g_clear_error (&error);
+        /* error is already populated */
         return FALSE;
     }
 
     if ((status != 0) || (g_strcmp0 ("", stdout_data) == 0)) {
         if (stderr_data && (g_strcmp0 ("", stderr_data) != 0)) {
-            *error_message = stderr_data;
+            if (status != 0)
+                g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
+                             "Process reported exit code %d: %s", status, stderr_data);
+            else
+                g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT,
+                             "Process didn't provide any data on standard output. "
+                             "Error output: %s", stderr_data);
             g_free (stdout_data);
         }
-
         return FALSE;
     } else {
         *output = stdout_data;
@@ -155,13 +163,13 @@ gboolean bd_utils_exec_and_capture_output (gchar **argv, gchar **output, gchar *
  * bd_utils_init_logging:
  * @new_log_func: (allow-none) (scope notified): logging function to use or
  *                                               %NULL to reset to default
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether logging was successfully initialized or not
  */
-gboolean bd_utils_init_logging (BDUtilsLogFunc new_log_func, gchar **error_message __attribute__((unused))) {
-    /* XXX: the error_message attribute will likely be used in the future when
-       this function gets more complicated */
+gboolean bd_utils_init_logging (BDUtilsLogFunc new_log_func, GError **error __attribute__((unused))) {
+    /* XXX: the error attribute will likely be used in the future when this
+       function gets more complicated */
 
     log_func = new_log_func;
 

@@ -15,7 +15,6 @@ void print_hash_table (GHashTable *table) {
 
 int main (void) {
     gchar const * const *fname = NULL;
-    gchar *msg = NULL;
     gchar *stdout = NULL;
     gboolean succ;
     guint64 result = 0;
@@ -25,6 +24,7 @@ int main (void) {
     guint num_items;
     BDLVMPVdata *data = NULL;
     gchar *ret_str = NULL;
+    GError *error = NULL;
 
     g_printf ("Supported functions:\n");
     for (fname=get_supported_functions(); (*fname); fname++) {
@@ -33,16 +33,16 @@ int main (void) {
     puts ("");
 
     gchar *args[] = {"lvs", NULL};
-    succ = call_lvm_and_capture_output (args, &stdout, &msg);
+    succ = call_lvm_and_capture_output (args, &stdout, &error);
     if (succ) {
         puts ("Called 'lvs' and captured output");
         g_printf ("OUTPUT: %s", stdout);
         g_free (stdout);
     } else {
         puts ("Failed to call 'lvs' and capture output");
-        g_printf ("ERROR: %s", msg);
+        g_printf ("ERROR: %s", error->message);
     }
-    g_free (msg);
+    g_clear_error (&error);
 
     if (bd_lvm_is_supported_pe_size(16 MEBIBYTE))
         puts ("16 MiB PE: Supported.");
@@ -86,136 +86,136 @@ int main (void) {
     else
         puts ("192 KiB ThPool chunk size (no discard): Invalid.");
 
-    succ = bd_lvm_pvcreate ("/dev/xd1", &msg);
+    succ = bd_lvm_pvcreate ("/dev/xd1", &error);
     if (!succ)
-        g_printf ("pvcreate failed: %s\n", msg);
+        g_printf ("pvcreate failed: %s\n", error->message);
     else
         puts ("pvcreate succeeded");
-    g_free (msg);
+    g_clear_error (&error);
 
-    succ = bd_lvm_pvresize ("/dev/xd1", 12 GiB, &msg);
+    succ = bd_lvm_pvresize ("/dev/xd1", 12 GiB, &error);
     if (!succ)
-        g_printf ("pvresize failed: %s\n", msg);
+        g_printf ("pvresize failed: %s\n", error->message);
     else
         puts ("pvresize succeeded");
-    g_free (msg);
+    g_clear_error (&error);
 
-    succ = bd_lvm_pvremove ("/dev/xd1", &msg);
+    succ = bd_lvm_pvremove ("/dev/xd1", &error);
     if (!succ)
-        g_printf ("pvremove failed: %s\n", msg);
+        g_printf ("pvremove failed: %s\n", error->message);
     else
         puts ("pvremove succeeded");
-    g_free (msg);
+    g_clear_error (&error);
 
-    succ = bd_lvm_pvmove ("/dev/xd1", NULL, &msg);
+    succ = bd_lvm_pvmove ("/dev/xd1", NULL, &error);
     if (!succ)
-        g_printf ("pvmove failed: %s\n", msg);
+        g_printf ("pvmove failed: %s\n", error->message);
     else
         puts ("pvmove succeeded");
-    g_free (msg);
+    g_clear_error (&error);
 
-    succ = bd_lvm_pvscan ("/dev/xd1", TRUE, &msg);
+    succ = bd_lvm_pvscan ("/dev/xd1", TRUE, &error);
     if (!succ)
-        g_printf ("pvscan failed: %s\n", msg);
+        g_printf ("pvscan failed: %s\n", error->message);
     else
         puts ("pvscan succeeded");
-    g_free (msg);
+    g_clear_error (&error);
 
     table = parse_lvm_vars ("key1=val1 key2val2 key3=val3", &num_items);
     g_printf ("Parsed %d items\n", num_items);
     print_hash_table (table);
     g_hash_table_destroy (table);
 
-    data = bd_lvm_pvinfo ("/dev/xd1", &msg);
+    data = bd_lvm_pvinfo ("/dev/xd1", &error);
     if (!data)
-        g_printf ("pvinfo failed: %s\n", msg);
+        g_printf ("pvinfo failed: %s\n", error->message);
     else
         puts ("pvinfo succeeded");
-    g_free (msg);
+    g_clear_error (&error);
     if (data)
         bd_lvm_pvdata_free (data);
 
     gchar *pv_list[] = {"/dev/xd1", "/dev/xd2", NULL};
-    succ = bd_lvm_vgcreate ("newVG", pv_list, 0, &msg);
+    succ = bd_lvm_vgcreate ("newVG", pv_list, 0, &error);
     if (!succ)
-        g_printf ("vgcreate failed: %s\n", msg);
+        g_printf ("vgcreate failed: %s\n", error->message);
     else
         puts ("vgcreate succeeded");
-    g_free (msg);
+    g_clear_error (&error);
 
-    succ = bd_lvm_vgremove ("newVG", &msg);
+    succ = bd_lvm_vgremove ("newVG", &error);
     if (!succ)
-        g_printf ("vgremove failed: %s\n", msg);
+        g_printf ("vgremove failed: %s\n", error->message);
     else
         puts ("vgremove succeeded");
-    g_free (msg);
+    g_clear_error (&error);
 
-    succ = bd_lvm_vgactivate ("newVG", &msg);
+    succ = bd_lvm_vgactivate ("newVG", &error);
     if (!succ)
-        g_printf ("vgactivate failed: %s\n", msg);
+        g_printf ("vgactivate failed: %s\n", error->message);
     else
         puts ("vgactivate succeeded");
-    g_free (msg);
+    g_clear_error (&error);
 
-    succ = bd_lvm_vgdeactivate ("newVG", &msg);
+    succ = bd_lvm_vgdeactivate ("newVG", &error);
     if (!succ)
-        g_printf ("vgdeactivate failed: %s\n", msg);
+        g_printf ("vgdeactivate failed: %s\n", error->message);
     else
         puts ("vgdeactivate succeeded");
-    g_free (msg);
+    g_clear_error (&error);
 
-    succ = bd_lvm_vgextend ("newVG", "/dev/xd1", &msg);
+    succ = bd_lvm_vgextend ("newVG", "/dev/xd1", &error);
     if (!succ)
-        g_printf ("vgextend failed: %s\n", msg);
+        g_printf ("vgextend failed: %s\n", error->message);
     else
         puts ("vgextend succeeded");
-    g_free (msg);
+    g_clear_error (&error);
 
-    succ = bd_lvm_vgreduce ("newVG", "/dev/xd1", &msg);
+    succ = bd_lvm_vgreduce ("newVG", "/dev/xd1", &error);
     if (!succ)
-        g_printf ("vgreduce with PV failed: %s\n", msg);
+        g_printf ("vgreduce with PV failed: %s\n", error->message);
     else
         puts ("vgreduce with PV succeeded");
-    g_free (msg);
+    g_clear_error (&error);
 
-    succ = bd_lvm_vgreduce ("newVG", NULL, &msg);
+    succ = bd_lvm_vgreduce ("newVG", NULL, &error);
     if (!succ)
-        g_printf ("vgreduce without PV failed: %s\n", msg);
+        g_printf ("vgreduce without PV failed: %s\n", error->message);
     else
         puts ("vgextend without PV succeeded");
-    g_free (msg);
+    g_clear_error (&error);
 
-    ret_str = bd_lvm_lvorigin ("newVG", "newLV", &msg);
+    ret_str = bd_lvm_lvorigin ("newVG", "newLV", &error);
     if (!ret_str)
-        g_printf ("lvorigin failed: %s\n", msg);
+        g_printf ("lvorigin failed: %s\n", error->message);
     else
         g_printf ("lvorigin succeeded: %s\n", ret_str);
     g_free(msg);
 
-    succ = bd_lvm_lvremove ("newVG", "newLV", TRUE, &msg);
+    succ = bd_lvm_lvremove ("newVG", "newLV", TRUE, &error);
     if (!succ)
-        g_printf ("lvremove failed: %s\n", msg);
+        g_printf ("lvremove failed: %s\n", error->message);
     else
         puts ("lvremove succeeded");
     g_free(msg);
 
-    succ = bd_lvm_lvresize ("newVG", "newLV", 128 MiB, &msg);
+    succ = bd_lvm_lvresize ("newVG", "newLV", 128 MiB, &error);
     if (!succ)
-        g_printf ("lvresize failed: %s\n", msg);
+        g_printf ("lvresize failed: %s\n", error->message);
     else
         puts ("lvresize succeeded");
     g_free(msg);
 
-    succ = bd_lvm_lvactivate ("newVG", "newLV", TRUE, &msg);
+    succ = bd_lvm_lvactivate ("newVG", "newLV", TRUE, &error);
     if (!succ)
-        g_printf ("lvactivate failed: %s\n", msg);
+        g_printf ("lvactivate failed: %s\n", error->message);
     else
         puts ("lvactivate succeeded");
     g_free(msg);
 
-    succ = bd_lvm_lvdeactivate ("newVG", "newLV", &msg);
+    succ = bd_lvm_lvdeactivate ("newVG", "newLV", &error);
     if (!succ)
-        g_printf ("lvdeactivate failed: %s\n", msg);
+        g_printf ("lvdeactivate failed: %s\n", error->message);
     else
         puts ("lvdeactivate succeeded");
     g_free(msg);

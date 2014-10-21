@@ -85,25 +85,31 @@ static gboolean load_plugins (BDPluginSpec **force_plugins, gboolean reload) {
     return all_loaded;
 }
 
+GQuark bd_init_error_quark (void)
+{
+    return g_quark_from_static_string ("g-bd-init-error-quark");
+}
+
 /**
  * bd_init:
  * @force_plugins: (allow-none) (array zero-terminated=1): null-terminated list
  *                 of plugins that should be loaded (even if
  *                 other plugins for the same technologies are found)
  * @log_func: (allow-none) (scope notified): logging function to use
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the library was successfully initialized or not
  */
-gboolean bd_init (BDPluginSpec **force_plugins, BDUtilsLogFunc log_func, gchar **error_message) {
+gboolean bd_init (BDPluginSpec **force_plugins, BDUtilsLogFunc log_func, GError **error) {
     if (!load_plugins (force_plugins, FALSE)) {
-        *error_message = g_strdup ("Failed to load plugins");
+        g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
+                     "Failed to load plugins");
         /* the library is unusable without the plugins so we can just return here */
         return FALSE;
     }
 
-    if (log_func && !bd_utils_init_logging (log_func, error_message))
-        /* the error_message is already populated with the error */
+    if (log_func && !bd_utils_init_logging (log_func, error))
+        /* the error is already populated */
         return FALSE;
 
     /* everything went okay */
@@ -118,22 +124,23 @@ gboolean bd_init (BDPluginSpec **force_plugins, BDUtilsLogFunc log_func, gchar *
  * @reload: whether to reload the already loaded plugins or not
  * @log_func: (allow-none) (scope notified): logging function to use or %NULL
  *                                           to keep the old one
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the library was successfully initialized or not
  *
  * If @reload is %TRUE all the plugins are closed and reloaded otherwise only
  * the missing plugins are loaded.
  */
-gboolean bd_reinit (BDPluginSpec **force_plugins, gboolean reload, BDUtilsLogFunc log_func, gchar **error_message) {
+gboolean bd_reinit (BDPluginSpec **force_plugins, gboolean reload, BDUtilsLogFunc log_func, GError **error) {
     if (!load_plugins (force_plugins, reload)) {
-        *error_message = g_strdup ("Failed to load plugins");
+        g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
+                     "Failed to load plugins");
         /* the library is unusable without the plugins so we can just return here */
         return FALSE;
     }
 
-    if (log_func && !bd_utils_init_logging (log_func, error_message))
-        /* the error_message is already populated with the error */
+    if (log_func && !bd_utils_init_logging (log_func, error))
+        /* the error is already populated */
         return FALSE;
 
     /* everything went okay */

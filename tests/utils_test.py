@@ -2,7 +2,7 @@ import unittest
 import re
 
 from gi.repository import BlockDev
-assert BlockDev.init(None, None)[0]
+assert BlockDev.init(None, None)
 
 class UtilsExecLoggingTest(unittest.TestCase):
     log = ""
@@ -17,17 +17,14 @@ class UtilsExecLoggingTest(unittest.TestCase):
     def test_logging(self):
         """Verify that setting up and using exec logging works as expected"""
 
-        succ, err = BlockDev.utils_init_logging(self.my_log_func)
+        succ = BlockDev.utils_init_logging(self.my_log_func)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, err = BlockDev.utils_exec_and_report_error(["true"])
+        succ = BlockDev.utils_exec_and_report_error(["true"])
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
-        succ, out, err = BlockDev.utils_exec_and_capture_output(["echo", "hi"])
+        succ, out = BlockDev.utils_exec_and_capture_output(["echo", "hi"])
         self.assertTrue(succ)
-        self.assertIs(err, None)
         self.assertEqual(out, "hi\n")
 
         match = re.search(r'Running \[(\d+)\] true', self.log)
@@ -41,12 +38,10 @@ class UtilsExecLoggingTest(unittest.TestCase):
         self.assertIn("...done [%s]" % task_id2, self.log)
 
         # reset logging -> nothing more should appear in the log
-        succ, err = BlockDev.utils_init_logging(None)
+        succ = BlockDev.utils_init_logging(None)
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
         old_log = self.log
-        succ, err = BlockDev.utils_exec_and_report_error(["true"])
+        succ = BlockDev.utils_exec_and_report_error(["true"])
         self.assertTrue(succ)
-        self.assertIs(err, None)
         self.assertEqual(old_log, self.log)

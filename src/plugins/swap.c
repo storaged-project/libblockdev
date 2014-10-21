@@ -32,15 +32,20 @@
  * A libblockdev plugin for operations with swap space.
  */
 
+GQuark bd_swap_error_quark (void)
+{
+    return g_quark_from_static_string ("g-bd-swap-error-quark");
+}
+
 /**
  * bd_swap_mkswap:
  * @device: a device to create swap space on
  * @label: (allow-none): a label for the swap space device
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the swap space was successfully created or not
  */
-gboolean bd_swap_mkswap (gchar *device, gchar *label, gchar **error_message) {
+gboolean bd_swap_mkswap (gchar *device, gchar *label, GError **error) {
     guint8 next_arg = 2;
 
     /* We use -f to force since mkswap tends to refuse creation on lvs with
@@ -56,25 +61,25 @@ gboolean bd_swap_mkswap (gchar *device, gchar *label, gchar **error_message) {
 
     argv[next_arg] = device;
 
-    return bd_utils_exec_and_report_error (argv, error_message);
+    return bd_utils_exec_and_report_error (argv, error);
 }
 
 /**
  * bd_swap_swapon:
  * @device: swap device to activate
  * @priority: priority of the activated device or -1 to use the default
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the swap device was successfully activated or not
  */
-gboolean bd_swap_swapon (gchar *device, gint priority, gchar **error_message) {
+gboolean bd_swap_swapon (gchar *device, gint priority, GError **error) {
     gboolean success = FALSE;
     guint8 next_arg = 1;
     guint8 to_free_idx = 0;
     GIOChannel *dev_file = NULL;
     GIOStatus io_status = G_IO_STATUS_ERROR;
+    GError *tmp_error = NULL;
     gsize num_read = 0;
-    GError *error = NULL;
     gchar dev_status[11];
     dev_status[10] = '\0';
     gint page_size;
@@ -82,41 +87,47 @@ gboolean bd_swap_swapon (gchar *device, gint priority, gchar **error_message) {
     gchar *argv[5] = {"swapon", NULL, NULL, NULL, NULL};
 
     /* check the device if it is an activatable swap */
-    dev_file = g_io_channel_new_file (device, "r", &error);
+    dev_file = g_io_channel_new_file (device, "r", error);
     if (!dev_file) {
-        *error_message = g_strdup (error->message);
-        g_clear_error (&error);
+        /* error is already populated */
         return FALSE;
     }
 
     page_size = getpagesize ();
     page_size = CLAMP (page_size, 2048, page_size);
-    io_status = g_io_channel_seek_position (dev_file, page_size - 10, G_SEEK_SET, &error);
+    io_status = g_io_channel_seek_position (dev_file, page_size - 10, G_SEEK_SET, &tmp_error);
     if (io_status != G_IO_STATUS_NORMAL) {
-        *error_message = g_strdup_printf ("Failed to determine device's state: %s", error->message);
-        g_clear_error (&error);
-        g_io_channel_shutdown (dev_file, FALSE, &error);
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UNKNOWN_STATE,
+                     "Failed to determine device's state: %s", tmp_error->message);
+        g_clear_error (&tmp_error);
+        g_io_channel_shutdown (dev_file, FALSE, &tmp_error);
         return FALSE;
     }
 
-    io_status = g_io_channel_read_chars (dev_file, dev_status, 10, &num_read, &error);
+    io_status = g_io_channel_read_chars (dev_file, dev_status, 10, &num_read, &tmp_error);
     if ((io_status != G_IO_STATUS_NORMAL) || (num_read != 10)) {
-        *error_message = g_strdup_printf ("Failed to determine device's state: %s", error->message);
-        g_clear_error (&error);
-        g_io_channel_shutdown (dev_file, FALSE, &error);
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UNKNOWN_STATE,
+                     "Failed to determine device's state: %s", tmp_error->message);
+        g_clear_error (&tmp_error);
+        g_io_channel_shutdown (dev_file, FALSE, &tmp_error);
+        g_clear_error (&tmp_error);
         return FALSE;
     }
 
-    g_io_channel_shutdown (dev_file, FALSE, &error);
+    g_io_channel_shutdown (dev_file, FALSE, &tmp_error);
+    g_clear_error (&tmp_error);
 
     if (g_str_has_prefix (dev_status, "SWAP-SPACE")) {
-        *error_message = "Old swap format, cannot activate.";
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE,
+                     "Old swap format, cannot activate.");
         return FALSE;
     } else if (g_str_has_prefix (dev_status, "S1SUSPEND") || g_str_has_prefix (dev_status, "S2SUSPEND")) {
-        *error_message = "Suspended system on the swap device, cannot activate.";
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE,
+                     "Suspended system on the swap device, cannot activate.");
         return FALSE;
     } else if (!g_str_has_prefix (dev_status, "SWAPSPACE2")) {
-        *error_message = "Unknown swap space format, cannot activate.";
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE,
+                     "Unknown swap space format, cannot activate.");
         return FALSE;
     }
 
@@ -130,7 +141,7 @@ gboolean bd_swap_swapon (gchar *device, gint priority, gchar **error_message) {
 
     argv[next_arg] = device;
 
-    success = bd_utils_exec_and_report_error (argv, error_message);
+    success = bd_utils_exec_and_report_error (argv, error);
 
     if (to_free_idx > 0)
         g_free (argv[to_free_idx]);
@@ -141,57 +152,51 @@ gboolean bd_swap_swapon (gchar *device, gint priority, gchar **error_message) {
 /**
  * bd_swap_swapoff:
  * @device: swap device to deactivate
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the swap device was successfully deactivated or not
  */
-gboolean bd_swap_swapoff (gchar *device, gchar **error_message) {
+gboolean bd_swap_swapoff (gchar *device, GError **error) {
     gchar *argv[3] = {"swapoff", NULL, NULL};
     argv[1] = device;
 
-    return bd_utils_exec_and_report_error (argv, error_message);
+    return bd_utils_exec_and_report_error (argv, error);
 }
 
 /**
  * bd_swap_swapstatus:
  * @device: swap device to get status of
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: %TRUE if the swap device is active, %FALSE if not active or failed
- * to determine (@error_message is set not a non-NULL value in such case)
+ * to determine (@error) is set not a non-NULL value in such case)
  */
-gboolean bd_swap_swapstatus (gchar *device, gchar **error_message) {
+gboolean bd_swap_swapstatus (gchar *device, GError **error) {
     gchar *file_content;
     gchar *real_device = NULL;
     gchar *symlink = NULL;
     gsize length;
     gchar *next_line;
     gboolean success;
-    GError *error = NULL;
 
-    success = g_file_get_contents ("/proc/swaps", &file_content, &length, &error);
+    success = g_file_get_contents ("/proc/swaps", &file_content, &length, error);
     if (!success) {
-        *error_message = g_strdup (error->message);
-        g_error_free(error);
+        /* error is already populated */
         return FALSE;
     }
 
     /* get the real device node for device-mapper devices since the ones
        with meaningful names are just symlinks */
     if (g_str_has_prefix (device, "/dev/mapper")) {
-        symlink = g_file_read_link (device, &error);
+        symlink = g_file_read_link (device, error);
         if (!symlink) {
-            *error_message = g_strdup (error->message);
-            g_error_free(error);
+            /* error is already populated */
             return FALSE;
         }
 
         /* the symlink starts with "../" */
         real_device = g_strdup_printf ("/dev/%s", symlink + 3);
     }
-
-    /* no error, set *error_message to NULL to show it */
-    *error_message = NULL;
 
     if (g_str_has_prefix (file_content, real_device ? real_device : device)) {
         g_free (symlink);

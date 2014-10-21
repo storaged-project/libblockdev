@@ -2,6 +2,14 @@
 #include <glib-object.h>
 
 /* BpG-skip */
+
+#define BD_BTRFS_ERROR bd_btrfs_error_quark ()
+typedef enum {
+    BD_BTRFS_ERROR_DEVICE,
+    BD_BTRFS_ERROR_MOUNT,
+    BD_BTRFS_ERROR_PARSE,
+} BDBtrfsError;
+
 #define BD_BTRFS_TYPE_DEVICE_INFO (bd_btrfs_device_info_get_type ())
 GType bd_btrfs_device_info_get_type();
 
@@ -146,6 +154,7 @@ GType bd_btrfs_filesystem_info_get_type () {
 
     return type;
 }
+
 /* BpG-skip-end */
 
 /**
@@ -154,115 +163,115 @@ GType bd_btrfs_filesystem_info_get_type () {
  * @label: (allow-none): label for the volume
  * @data_level: (allow-none): RAID level for the data or %NULL to use the default
  * @md_level: (allow-none): RAID level for the metadata or %NULL to use the default
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the new btrfs volume was created from @devices or not
  *
  * See mkfs.btrfs(8) for details about @data_level, @md_level and btrfs in general.
  */
-gboolean bd_btrfs_create_volume (gchar **devices, gchar *label, gchar *data_level, gchar *md_level, gchar **error_message);
+gboolean bd_btrfs_create_volume (gchar **devices, gchar *label, gchar *data_level, gchar *md_level, GError **error);
 
 /**
  * bd_btrfs_add_device:
  * @mountpoint: mountpoint of the btrfs volume to add new device to
  * @device: a device to add to the btrfs volume
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @device was successfully added to the @mountpoint btrfs volume or not
  */
-gboolean bd_btrfs_add_device (gchar *mountpoint, gchar *device, gchar **error_message);
+gboolean bd_btrfs_add_device (gchar *mountpoint, gchar *device, GError **error);
 
 /**
  * bd_btrfs_remove_device:
  * @mountpoint: mountpoint of the btrfs volume to remove device from
  * @device: a device to remove from the btrfs volume
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @device was successfully removed from the @mountpoint btrfs volume or not
  */
-gboolean bd_btrfs_remove_device (gchar *mountpoint, gchar *device, gchar **error_message);
+gboolean bd_btrfs_remove_device (gchar *mountpoint, gchar *device, GError **error);
 
 /**
  * bd_btrfs_create_subvolume:
  * @mountpoint: mountpoint of the btrfs volume to create subvolume under
  * @name: name of the subvolume
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @mountpoint/@name subvolume was successfully created or not
  */
-gboolean bd_btrfs_create_subvolume (gchar *mountpoint, gchar *name, gchar **error_message);
+gboolean bd_btrfs_create_subvolume (gchar *mountpoint, gchar *name, GError **error);
 
 /**
  * bd_btrfs_delete_subvolume:
  * @mountpoint: mountpoint of the btrfs volume to delete subvolume from
  * @name: name of the subvolume
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @mountpoint/@name subvolume was successfully deleted or not
  */
-gboolean bd_btrfs_delete_subvolume (gchar *mountpoint, gchar *name, gchar **error_message);
+gboolean bd_btrfs_delete_subvolume (gchar *mountpoint, gchar *name, GError **error);
 
 /**
  * bd_btrfs_get_default_subvolume_id:
  * @mountpoint: mountpoint of the volume to get the default subvolume ID of
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: ID of the @mountpoint volume's default subvolume. If 0,
- * @error_message may be set to indicate error
+ * @error) may be set to indicate error
  */
-guint64 bd_btrfs_get_default_subvolume_id (gchar *mountpoint, gchar **error_message);
+guint64 bd_btrfs_get_default_subvolume_id (gchar *mountpoint, GError **error);
 
 /**
  * bd_btrfs_set_default_subvolume:
  * @mountpoint: mountpoint of the volume to set the default subvolume ID of
  * @subvol_id: ID of the subvolume to be set as the default subvolume
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @mountpoint volume's default subvolume was correctly set
  * to @subvol_id or not
  */
-gboolean bd_btrfs_set_default_subvolume (gchar *mountpoint, guint64 subvol_id, gchar **error_message);
+gboolean bd_btrfs_set_default_subvolume (gchar *mountpoint, guint64 subvol_id, GError **error);
 
 /**
  * bd_btrfs_create_snapshot:
  * @source: path to source subvolume
  * @dest: path to new snapshot volume
  * @ro: whether the snapshot should be read-only
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @dest snapshot of @source was successfully created or not
  */
-gboolean bd_btrfs_create_snapshot (gchar *source, gchar *dest, gboolean ro, gchar **error_message);
+gboolean bd_btrfs_create_snapshot (gchar *source, gchar *dest, gboolean ro, GError **error);
 
 /**
  * bd_btrfs_list_devices:
  * @device: a device that is part of the queried btrfs volume
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (array zero-terminated=1): information about the devices that are part of the btrfs volume
  * containing @device or %NULL in case of error
  */
-BDBtrfsDeviceInfo** bd_btrfs_list_devices (gchar *device, gchar **error_message);
+BDBtrfsDeviceInfo** bd_btrfs_list_devices (gchar *device, GError **error);
 
 /**
  * bd_btrfs_list_subvolumes:
  * @mountpoint: a mountpoint of the queried btrfs volume
  * @snapshots_only: whether to list only snapshot subvolumes or not
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: (array zero-terminated=1): information about the subvolumes that are part of the btrfs volume
  * mounted at @mountpoint or %NULL in case of error
  */
-BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (gchar *mountpoint, gboolean snapshots_only, gchar **error_message);
+BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (gchar *mountpoint, gboolean snapshots_only, GError **error);
 
 /**
  * bd_btrfs_filesystem_info:
  * @device: a device that is part of the queried btrfs volume
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: information about the @device's volume's filesystem or %NULL in case of error
  */
-BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info (gchar *device, gchar **error_message);
+BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info (gchar *device, GError **error);
 
 /**
  * bd_btrfs_mkfs:
@@ -270,50 +279,50 @@ BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info (gchar *device, gchar **error_me
  * @label: (allow-none): label for the volume
  * @data_level: (allow-none): RAID level for the data or %NULL to use the default
  * @md_level: (allow-none): RAID level for the metadata or %NULL to use the default
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the new btrfs volume was created from @devices or not
  *
  * See mkfs.btrfs(8) for details about @data_level, @md_level and btrfs in general.
  */
-gboolean bd_btrfs_mkfs (gchar **devices, gchar *label, gchar *data_level, gchar *md_level, gchar **error_message);
+gboolean bd_btrfs_mkfs (gchar **devices, gchar *label, gchar *data_level, gchar *md_level, GError **error);
 
 /**
  * bd_btrfs_resize:
  * @mountpoint: a mountpoint of the to be resized btrfs filesystem
  * @size: requested new size
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the @mountpoint filesystem was successfully resized to @size
  * or not
  */
-gboolean bd_btrfs_resize (gchar *mountpoint, guint64 size, gchar **error_message);
+gboolean bd_btrfs_resize (gchar *mountpoint, guint64 size, GError **error);
 
 /**
  * bd_btrfs_check:
  * @device: a device that is part of the checked btrfs volume
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the filesystem was successfully checked or not
  */
-gboolean bd_btrfs_check (gchar *device, gchar **error_message);
+gboolean bd_btrfs_check (gchar *device, GError **error);
 
 /**
  * bd_btrfs_repair:
  * @device: a device that is part of the to be repaired btrfs volume
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the filesystem was successfully checked and repaired or not
  */
-gboolean bd_btrfs_repair (gchar *device, gchar **error_message);
+gboolean bd_btrfs_repair (gchar *device, GError **error);
 
 /**
  * bd_btrfs_change_label:
  * @mountpoint: a mountpoint of the btrfs filesystem to change label of
  * @label: new label for the filesystem
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the label of the @mountpoint filesystem was successfully set
  * to @label or not
  */
-gboolean bd_btrfs_change_label (gchar *mountpoint, gchar *label, gchar **error_message);
+gboolean bd_btrfs_change_label (gchar *mountpoint, gchar *label, GError **error);

@@ -11,7 +11,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         """Verify that reloading plugins works as expected"""
 
         # library should successfully initialize
-        self.assertTrue(BlockDev.init(None, None)[0])
+        self.assertTrue(BlockDev.init(None, None))
 
         # max LV size should be something sane (not 1024 bytes)
         orig_max_size = BlockDev.lvm_get_max_lv_size()
@@ -22,13 +22,13 @@ class LibraryOpsTestCase(unittest.TestCase):
         os.system("make src/plugins/libbd_lvm.so > /dev/null")
 
         # library should successfully reinitialize without reloading plugins
-        self.assertTrue(BlockDev.reinit(None, False, None)[0])
+        self.assertTrue(BlockDev.reinit(None, False, None))
 
         # LVM plugin not reloaded, max LV size should be the same
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
 
         # library should successfully reinitialize reloading plugins
-        self.assertTrue(BlockDev.reinit(None, True, None)[0])
+        self.assertTrue(BlockDev.reinit(None, True, None))
 
         # LVM plugin reloaded, max LV size should be 1024 bytes
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), 1024)
@@ -38,13 +38,13 @@ class LibraryOpsTestCase(unittest.TestCase):
         os.system("make src/plugins/libbd_lvm.so > /dev/null")
 
         # library should successfully reinitialize reloading original plugins
-        self.assertTrue(BlockDev.reinit(None, True, None)[0])
+        self.assertTrue(BlockDev.reinit(None, True, None))
 
     def test_force_plugin(self):
         """Verify that forcing plugin to be used works as expected"""
 
         # library should successfully initialize
-        self.assertTrue(BlockDev.init(None, None)[0])
+        self.assertTrue(BlockDev.init(None, None))
 
         # max LV size should be something sane (not 1024 bytes)
         orig_max_size = BlockDev.lvm_get_max_lv_size()
@@ -65,7 +65,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         ps = BlockDev.PluginSpec()
         ps.name = BlockDev.Plugin.LVM
         ps.so_name = "libbd_lvm2.so"
-        self.assertTrue(BlockDev.reinit([ps], True, None)[0])
+        self.assertTrue(BlockDev.reinit([ps], True, None))
 
         # new LVM plugin loaded, max LV size should be 1024 bytes
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), 1024)
@@ -77,7 +77,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         ps = BlockDev.PluginSpec()
         ps.name = BlockDev.Plugin.LVM
         ps.so_name = "libbd_lvm.so"
-        self.assertTrue(BlockDev.reinit([ps], True, None)[0])
+        self.assertTrue(BlockDev.reinit([ps], True, None))
 
     def my_log_func(self, level, msg):
         # not much to verify here
@@ -89,18 +89,16 @@ class LibraryOpsTestCase(unittest.TestCase):
     def test_logging_setup(self):
         """Verify that setting up logging works as expected"""
 
-        self.assertTrue(BlockDev.init(None, self.my_log_func)[0])
+        self.assertTrue(BlockDev.init(None, self.my_log_func))
 
-        succ, err = BlockDev.utils_exec_and_report_error(["true"])
+        succ = BlockDev.utils_exec_and_report_error(["true"])
         self.assertTrue(succ)
-        self.assertIs(err, None)
 
         # reinit with no logging function should change nothing about logging
-        self.assertTrue(BlockDev.reinit(None, False, None)[0])
+        self.assertTrue(BlockDev.reinit(None, False, None))
 
-        succ, out, err = BlockDev.utils_exec_and_capture_output(["echo", "hi"])
+        succ, out = BlockDev.utils_exec_and_capture_output(["echo", "hi"])
         self.assertTrue(succ)
-        self.assertIs(err, None)
         self.assertEqual(out, "hi\n")
 
         match = re.search(r'Running \[(\d+)\] true', self.log)

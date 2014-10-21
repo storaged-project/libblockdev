@@ -4,44 +4,39 @@
 
 int main (void) {
     gboolean succ = FALSE;
-    gchar *err_msg = NULL;
+    GError *error = NULL;
 
-    succ = bd_swap_mkswap ("/dev/xd1", "SWAP", &err_msg);
+    succ = bd_swap_mkswap ("/dev/xd1", "SWAP", &error);
     if (succ)
         puts ("Succeded.");
     else
-        g_printf ("Not succeded: %s\n", err_msg);
+        g_printf ("Not succeded: %s\n", error->message);
+    g_clear_error(&error);
 
-    g_free (err_msg);
-    err_msg = NULL;
-
-    succ = bd_swap_swapon ("/dev/xd1", 5, &err_msg);
+    succ = bd_swap_swapon ("/dev/xd1", 5, &error);
     if (succ)
         puts ("Succeded.");
     else
-        g_printf ("Not succeded: %s\n", err_msg);
+        g_printf ("Not succeded: %s\n", error->message);
+    g_clear_error(&error);
 
-    g_free (err_msg);
-    err_msg = NULL;
-
-    succ = bd_swap_swapoff ("/dev/xd1", &err_msg);
+    succ = bd_swap_swapoff ("/dev/xd1", &error);
     if (succ)
         puts ("Succeded.");
     else
-        g_printf ("Not succeded: %s\n", err_msg);
+        g_printf ("Not succeded: %s\n", error->message);
+    g_clear_error(&error);
 
-    g_free (err_msg);
-    err_msg = NULL;
-
-    succ = bd_swap_swapstatus ("/dev/xd1", &err_msg);
+    succ = bd_swap_swapstatus ("/dev/xd1", &error);
     if (succ)
         puts ("Activated.");
     else {
-        if (err_msg)
-            g_printf ("Error: %s\n", err_msg);
+        if (error)
+            g_printf ("Error: %s\n", error->message);
         else
             puts ("Not activated.");
     }
+    g_clear_error(&error);
 
     return 0;
 }

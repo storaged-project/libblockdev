@@ -13,6 +13,11 @@
 #define NUM_PREFIXES 7
 static gchar const * const size_prefixes[NUM_PREFIXES] = {"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei"};
 
+GQuark bd_utils_size_error_quark (void)
+{
+    return g_quark_from_static_string ("g-bd-utils-size-error-quark");
+}
+
 /**
  * get_unit_prefix_power: (skip)
  *
@@ -58,15 +63,14 @@ gchar* bd_utils_size_human_readable (guint64 size) {
 /**
  * bd_utils_size_from_spec:
  * @spec: human readable size specification (e.g. "512 MiB")
- * @error_message: (out): variable to store error message to (if any)
+ * @error: (out): place to store error (if any)
  *
  * Returns: number of bytes equal to the size specification rounded to bytes, if
- * 0, @error_message may be set in case of error
+ * 0, @error) may be set in case of error
  */
-guint64 bd_utils_size_from_spec (gchar *spec, gchar **error_message) {
+guint64 bd_utils_size_from_spec (gchar *spec, GError **error) {
     gchar const * const pattern = "^\\s*(\\d+\\.?\\d*)\\s*([kmgtpeKMGTPE]i?)[bB]";
     gchar const * const zero_pattern = "^\\s*0\\.?0*\\s*$";
-    GError *error = NULL;
     GRegex *regex = NULL;
     GRegex *zero_regex = NULL;
     GMatchInfo *match_info = NULL;
@@ -77,17 +81,17 @@ guint64 bd_utils_size_from_spec (gchar *spec, gchar **error_message) {
     gdouble fnum = 0.0;
     guint8 power = 0;
 
-    regex = g_regex_new (pattern, 0, 0, &error);
+    regex = g_regex_new (pattern, 0, 0, error);
     if (!regex) {
+        /* error is already populated */
         g_warning ("Failed to create new GRegex");
-        *error_message = g_strdup ("Failed to create new GRegex");
         return 0;
     }
 
-    zero_regex = g_regex_new (zero_pattern, 0, 0, &error);
-    if (!regex) {
+    zero_regex = g_regex_new (zero_pattern, 0, 0, error);
+    if (!zero_regex) {
+        /* error is already populated */
         g_warning ("Failed to create new GRegex");
-        *error_message = g_strdup ("Failed to create new GRegex");
         return 0;
     }
 
@@ -96,7 +100,8 @@ guint64 bd_utils_size_from_spec (gchar *spec, gchar **error_message) {
         success = g_regex_match (zero_regex, spec, 0, NULL);
         if (!success) {
             /* error */
-            *error_message = g_strdup ("Failed to parse spec");
+            g_set_error (error, BD_UTILS_SIZE_ERROR, BD_UTILS_SIZE_ERROR_INVALID_SPEC,
+                         "Failed to parse spec: %s", spec);
             g_regex_unref (regex);
             g_match_info_free (match_info);
         }
@@ -113,8 +118,9 @@ guint64 bd_utils_size_from_spec (gchar *spec, gchar **error_message) {
 
     power = get_unit_prefix_power (prefix);
     if (power == NUM_PREFIXES) {
+        g_set_error (error, BD_UTILS_SIZE_ERROR, BD_UTILS_SIZE_ERROR_INVALID_SPEC,
+                     "Failed to recognize size prefix: %s", prefix);
         g_free (prefix);
-        *error_message = g_strdup ("Failed to recognize size prefix");
         return 0;
     }
 
