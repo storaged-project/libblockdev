@@ -70,7 +70,7 @@ gchar* bd_utils_size_human_readable (guint64 size) {
  */
 guint64 bd_utils_size_from_spec (gchar *spec, GError **error) {
     gchar const * const pattern = "^\\s*(\\d+\\.?\\d*)\\s*([kmgtpeKMGTPE]i?)[bB]";
-    gchar const * const zero_pattern = "^\\s*0\\.?0*\\s*$";
+    gchar const * const zero_pattern = "^\\s*0\\.?0*\\s*([kmgtpeKMGTPE]i?)?[bB]?$";
     GRegex *regex = NULL;
     GRegex *zero_regex = NULL;
     GMatchInfo *match_info = NULL;
