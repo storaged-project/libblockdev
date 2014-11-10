@@ -286,15 +286,15 @@ static gboolean raid_dev_matches_spec (struct raid_dev *raid_dev, gchar *name, g
 }
 
 /**
- * process_raid_set: (skip)
+ * find_raid_sets_for_dev: (skip)
  */
-static void find_dev_in_raid_set (gchar *name, gchar *uuid, gint major, gint minor, struct lib_context *lc, struct raid_set *rs, GPtrArray *ret_sets) {
+static void find_raid_sets_for_dev (gchar *name, gchar *uuid, gint major, gint minor, struct lib_context *lc, struct raid_set *rs, GPtrArray *ret_sets) {
     struct raid_set *subset;
     struct raid_dev *dev;
 
     if (T_GROUP(rs) || !list_empty(&(rs->sets))) {
         for_each_subset (rs, subset)
-            find_dev_in_raid_set (name, uuid, major, minor, lc, subset, ret_sets);
+            find_raid_sets_for_dev (name, uuid, major, minor, lc, subset, ret_sets);
     } else {
         for_each_device (rs, dev) {
             if (raid_dev_matches_spec (dev, name, uuid, major, minor))
@@ -355,7 +355,7 @@ gchar** bd_dm_get_member_raid_sets (gchar *name, gchar *uuid, gint major, gint m
     }
 
     for_each_raidset (lc, rs) {
-        find_dev_in_raid_set (name, uuid, major, minor, lc, rs, ret_sets);
+        find_raid_sets_for_dev (name, uuid, major, minor, lc, rs, ret_sets);
     }
 
     /* now create the return value -- NULL-terminated array of strings */
