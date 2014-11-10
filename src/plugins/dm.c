@@ -233,6 +233,51 @@ gboolean bd_dm_map_exists (gchar *map_name, gboolean live_only, gboolean active_
 }
 
 /**
+ * init_dmraid_stack: (skip)
+ *
+ * Initializes the dmraid stack by creating the library context, discovering
+ * devices, raid sets, etc.
+ */
+static struct lib_context* init_dmraid_stack (GError **error) {
+    gint rc = 0;
+    gchar *argv[] = {"blockdev.dmraid", NULL};
+    struct lib_context *lc;
+
+    /* the code for this function was cherry-picked from the pyblock code */
+    /* XXX: do this all just once, store global lc and provide a reinit
+     *      function? */
+
+    /* initialize dmraid library context */
+    lc = libdmraid_init (1, (gchar **)argv);
+
+    rc = discover_devices (lc, NULL);
+    if (!rc) {
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_RAID_FAIL,
+                     "Failed to discover devices");
+        libdmraid_exit (lc);
+        return NULL;
+    }
+    discover_raid_devices (lc, NULL);
+
+    if (!count_devices (lc, RAID)) {
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_RAID_NO_DEVS,
+                     "No RAIDs discovered");
+        libdmraid_exit (lc);
+        return NULL;
+    }
+
+    argv[0] = NULL;
+    if (!group_set (lc, argv)) {
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_RAID_FAIL,
+                     "Failed to group_set");
+        libdmraid_exit (lc);
+        return NULL;
+    }
+
+    return lc;
+}
+
+/**
  * raid_dev_matches_spec: (skip)
  *
  * Returns: whether the device specified by @sysname matches the spec given by @name,
@@ -320,41 +365,15 @@ static void find_raid_sets_for_dev (gchar *name, gchar *uuid, gint major, gint m
  */
 gchar** bd_dm_get_member_raid_sets (gchar *name, gchar *uuid, gint major, gint minor, GError **error) {
     guint64 i = 0;
-    gint rc = 0;
-    gchar *argv[] = {"blockdev.dmraid", NULL};
-    struct lib_context *lc;
-    struct raid_set *rs;
+    struct lib_context *lc = NULL;
+    struct raid_set *rs = NULL;
     GPtrArray *ret_sets = g_ptr_array_new ();
     gchar **ret = NULL;
 
-    /* the code for this function was cherry-picked from the pyblock code */
-
-    /* initialize dmraid library context */
-    lc = libdmraid_init (1, (gchar **)argv);
-
-    rc = discover_devices (lc, NULL);
-    if (!rc) {
-        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_RAID_FAIL,
-                     "Failed to discover devices");
-        libdmraid_exit (lc);
+    lc = init_dmraid_stack (error);
+    if (!lc)
+        /* error is already populated */
         return NULL;
-    }
-    discover_raid_devices (lc, NULL);
-
-    if (!count_devices (lc, RAID)) {
-        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_RAID_NO_DEVS,
-                     "No RAIDs discovered");
-        libdmraid_exit (lc);
-        return NULL;
-    }
-
-    argv[0] = NULL;
-    if (!group_set (lc, argv)) {
-        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_RAID_FAIL,
-                     "Failed to group_set");
-        libdmraid_exit (lc);
-        return NULL;
-    }
 
     for_each_raidset (lc, rs) {
         find_raid_sets_for_dev (name, uuid, major, minor, lc, rs, ret_sets);
@@ -409,40 +428,14 @@ static struct raid_set* rs_matches_name (struct raid_set *rs, gpointer *name_dat
 
 static gboolean change_set_by_name (gchar *name, enum activate_type action, GError **error) {
     gint rc = 0;
-    gchar *argv[] = {"blockdev.dmraid", NULL};
     struct lib_context *lc;
     struct raid_set *iter_rs;
     struct raid_set *match_rs = NULL;
 
-    /* the code for this function was cherry-picked from the pyblock code */
-    dm_log_init(NULL);
-
-    /* initialize dmraid library context */
-    lc = libdmraid_init (1, (gchar **)argv);
-
-    rc = discover_devices (lc, NULL);
-    if (!rc) {
-        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_RAID_FAIL,
-                     "Failed to discover devices");
-        libdmraid_exit (lc);
+    lc = init_dmraid_stack (error);
+    if (!lc)
+        /* error is already populated */
         return FALSE;
-    }
-    discover_raid_devices (lc, NULL);
-
-    if (!count_devices (lc, RAID)) {
-        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_RAID_NO_DEVS,
-                     "No RAIDs discovered");
-        libdmraid_exit (lc);
-        return FALSE;
-    }
-
-    argv[0] = NULL;
-    if (!group_set (lc, argv)) {
-        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_RAID_FAIL,
-                     "Failed to group_set");
-        libdmraid_exit (lc);
-        return FALSE;
-    }
 
     for_each_raidset (lc, iter_rs) {
         match_rs = find_in_raid_sets (iter_rs, (RSEvalFunc)rs_matches_name, name);
