@@ -209,8 +209,8 @@ DEVICE MAPPER
    * name_from_node [DONE]
    * map_exists [DONE]
    * get_member_raid_sets [DONE]
-   * activate_raid_set
-   * deactivate_raid_set
+   * activate_raid_set [DONE]
+   * deactivate_raid_set [DONE]
    * get_raid_set_type
 
 

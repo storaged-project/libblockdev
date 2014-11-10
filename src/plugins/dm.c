@@ -40,6 +40,8 @@ GQuark bd_dm_error_quark (void)
     return g_quark_from_static_string ("g-bd-dm-error-quark");
 }
 
+typedef struct raid_set* (*RSEvalFunc) (struct raid_set *rs, gpointer data);
+
 /**
  * bd_dm_create_linear:
  * @map_name: name of the map
@@ -368,4 +370,123 @@ gchar** bd_dm_get_member_raid_sets (gchar *name, gchar *uuid, gint major, gint m
 
     libdmraid_exit (lc);
     return ret;
+}
+
+/**
+ * find_in_raid_sets: (skip)
+ *
+ * Runs @eval_fn with @data on each set (traversing recursively) and returns the
+ * first RAID set that @eval_fn returns. Thus the @eval_fn should return %NULL
+ * on all RAID sets that don't fulfill the search criteria.
+ */
+static struct raid_set* find_in_raid_sets (struct raid_set *rs, RSEvalFunc eval_fn, gpointer data) {
+    struct raid_set *subset = NULL;
+    struct raid_set *ret = NULL;
+
+    ret = eval_fn (rs, data);
+    if (ret)
+        return ret;
+
+    if (T_GROUP(rs) || !list_empty(&(rs->sets))) {
+        for_each_subset (rs, subset) {
+            ret = find_in_raid_sets (subset, eval_fn, data);
+            if (ret)
+                return ret;
+        }
+    }
+
+    return ret;
+}
+
+static struct raid_set* rs_matches_name (struct raid_set *rs, gpointer *name_data) {
+    gchar *name = (gchar*) name_data;
+
+    if (g_strcmp0 (rs->name, name) == 0)
+        return rs;
+    else
+        return NULL;
+}
+
+static gboolean change_set_by_name (gchar *name, enum activate_type action, GError **error) {
+    gint rc = 0;
+    gchar *argv[] = {"blockdev.dmraid", NULL};
+    struct lib_context *lc;
+    struct raid_set *iter_rs;
+    struct raid_set *match_rs = NULL;
+
+    /* the code for this function was cherry-picked from the pyblock code */
+    dm_log_init(NULL);
+
+    /* initialize dmraid library context */
+    lc = libdmraid_init (1, (gchar **)argv);
+
+    rc = discover_devices (lc, NULL);
+    if (!rc) {
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_RAID_FAIL,
+                     "Failed to discover devices");
+        libdmraid_exit (lc);
+        return FALSE;
+    }
+    discover_raid_devices (lc, NULL);
+
+    if (!count_devices (lc, RAID)) {
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_RAID_NO_DEVS,
+                     "No RAIDs discovered");
+        libdmraid_exit (lc);
+        return FALSE;
+    }
+
+    argv[0] = NULL;
+    if (!group_set (lc, argv)) {
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_RAID_FAIL,
+                     "Failed to group_set");
+        libdmraid_exit (lc);
+        return FALSE;
+    }
+
+    for_each_raidset (lc, iter_rs) {
+        match_rs = find_in_raid_sets (iter_rs, (RSEvalFunc)rs_matches_name, name);
+        if (match_rs)
+            break;
+    }
+
+    if (!match_rs) {
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_RAID_NO_EXIST,
+                     "RAID set %s doesn't exist", name);
+        libdmraid_exit (lc);
+        return FALSE;
+    }
+
+    rc = change_set (lc, action, match_rs);
+    if (!rc) {
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_RAID_FAIL,
+                     "Failed to activate the RAID set '%s'", name);
+        libdmraid_exit (lc);
+        return FALSE;
+    }
+
+    libdmraid_exit (lc);
+    return TRUE;
+}
+
+/**
+ * bd_dm_activate_raid_set:
+ * @name: name of the DM RAID set to activate
+ * @error: (out): variable to store error (if any)
+ *
+ * Returns: whether the RAID set @name was successfully activate or not
+ */
+gboolean bd_dm_activate_raid_set (gchar *name, GError **error) {
+    return change_set_by_name (name, A_ACTIVATE, error);
+}
+
+/**
+ * bd_dm_deactivate_raid_set:
+ * @name: name of the DM RAID set to deactivate
+ * @error: (out): variable to store error (if any)
+ *
+ * Returns: whether the RAID set @name was successfully deactivate or not
+ */
+gboolean bd_dm_deactivate_raid_set (gchar *name, GError **error) {
+    return change_set_by_name (name, A_DEACTIVATE, error);
 }

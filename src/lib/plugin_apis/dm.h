@@ -79,3 +79,21 @@ gboolean bd_dm_map_exists (gchar *map_name, gboolean live_only, gboolean active_
  * One of @name, @uuid or @major:@minor has to be given.
  */
 gchar** bd_dm_get_member_raid_sets (gchar *name, gchar *uuid, gint major, gint minor, GError **error);
+
+/**
+ * bd_dm_activate_raid_set:
+ * @name: name of the DM RAID set to activate
+ * @error: (out): variable to store error (if any)
+ *
+ * Returns: whether the RAID set @name was successfully activate or not
+ */
+gboolean bd_dm_activate_raid_set (gchar *name, GError **error);
+
+/**
+ * bd_dm_deactivate_raid_set:
+ * @name: name of the DM RAID set to deactivate
+ * @error: (out): variable to store error (if any)
+ *
+ * Returns: whether the RAID set @name was successfully deactivate or not
+ */
+gboolean bd_dm_deactivate_raid_set (gchar *name, GError **error);
