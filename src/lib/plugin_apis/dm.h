@@ -97,3 +97,12 @@ gboolean bd_dm_activate_raid_set (gchar *name, GError **error);
  * Returns: whether the RAID set @name was successfully deactivate or not
  */
 gboolean bd_dm_deactivate_raid_set (gchar *name, GError **error);
+
+/**
+ * bd_dm_get_raid_set_type:
+ * @name: name of the DM RAID set to get the type of
+ * @error: (out): variable to store error (if any)
+ *
+ * Returns: string representation of the @name RAID set's type
+ */
+gchar* bd_dm_get_raid_set_type (gchar *name, GError **error);

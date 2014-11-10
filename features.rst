@@ -211,7 +211,7 @@ DEVICE MAPPER
    * get_member_raid_sets [DONE]
    * activate_raid_set [DONE]
    * deactivate_raid_set [DONE]
-   * get_raid_set_type
+   * get_raid_set_type [DONE]
 
 
 utils
