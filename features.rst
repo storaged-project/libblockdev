@@ -16,10 +16,10 @@ partitions
    MBR, GPT, partition manipulation on partitionable devices
 
 :functions:
-   mklabel
-   create_part
-   resize_part
-   remove_part
+   * mklabel
+   * create_part
+   * resize_part
+   * remove_part
 
 
 filesystems
@@ -29,14 +29,14 @@ filesystems
    ext2, ext3, ext4, xfs, vfat
 
 :functions:
-   make_FSTYPE
-   resize_FSTYPE
-   check_FSTYPE
-   repair_FSTYPE
-   change_label_FSTYPE
-   snapshot_FSTYPE
+   * make_FSTYPE
+   * resize_FSTYPE
+   * check_FSTYPE
+   * repair_FSTYPE
+   * change_label_FSTYPE
+   * snapshot_FSTYPE
 
-   wipefs
+   * wipefs
 
 
 LVM
@@ -44,6 +44,9 @@ LVM
 
 :supported technologies:
    "plain LVM", LVM Thin Provisioning
+
+:TODO:
+   * read-only locking and default config
 
 :functions:
    * get_global_config [DONE]
@@ -230,3 +233,4 @@ and any third-party code.
    * exec_and_capture_output [DONE]
    * size_human_readable [DONE]
    * size_from_spec [DONE]
+   * init_logging [DONE]
