@@ -17,6 +17,8 @@
 #include "plugin_apis/mpath.h"
 #include "plugin_apis/dm.c"
 #include "plugin_apis/dm.h"
+#include "plugin_apis/mdraid.c"
+#include "plugin_apis/mdraid.h"
 
 /**
  * SECTION: libblockdev
@@ -39,10 +41,11 @@ static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_LOOP, "libbd_loop.so"}, NULL},
     {{BD_PLUGIN_CRYPTO, "libbd_crypto.so"}, NULL},
     {{BD_PLUGIN_MPATH, "libbd_mpath.so"}, NULL},
-    {{BD_PLUGIN_DM, "libbd_dm.so"}, NULL}
+    {{BD_PLUGIN_DM, "libbd_dm.so"}, NULL},
+    {{BD_PLUGIN_MDRAID, "libbd_mdraid.so"}, NULL}
 };
 static gchar* plugin_names[BD_PLUGIN_UNDEF] = {
-    "lvm", "btrfs", "swap", "loop", "crypto", "mpath", "dm"
+    "lvm", "btrfs", "swap", "loop", "crypto", "mpath", "dm", "mdraid"
 };
 
 static void set_plugin_so_name (BDPlugin name, gchar *so_name) {
@@ -78,6 +81,8 @@ static gboolean load_plugins (BDPluginSpec **force_plugins, gboolean reload) {
         plugins[BD_PLUGIN_MPATH].handle = load_mpath_from_plugin(plugins[BD_PLUGIN_MPATH].spec.so_name);
     if (!plugins[BD_PLUGIN_DM].handle)
         plugins[BD_PLUGIN_DM].handle = load_dm_from_plugin(plugins[BD_PLUGIN_DM].spec.so_name);
+    if (!plugins[BD_PLUGIN_MDRAID].handle)
+        plugins[BD_PLUGIN_MDRAID].handle = load_mdraid_from_plugin(plugins[BD_PLUGIN_MDRAID].spec.so_name);
 
     for (i=0; (i < BD_PLUGIN_UNDEF) && all_loaded; i++)
         all_loaded = all_loaded && plugins[i].handle;

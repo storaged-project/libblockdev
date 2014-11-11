@@ -12,6 +12,7 @@ typedef enum {
     BD_PLUGIN_CRYPTO,
     BD_PLUGIN_MPATH,
     BD_PLUGIN_DM,
+    BD_PLUGIN_MDRAID,
     BD_PLUGIN_UNDEF
 } BDPlugin;
 

@@ -16,13 +16,13 @@ UTILS_OBJS := $(patsubst %.c,%.o,${UTILS_SOURCE_FILES})
 UTILS_HEADER_FILES := $(patsubst %.c,%.h,${UTILS_SOURCE_FILES})
 
 # stub functions for plugins
-PLUGIN_HEADER_NAMES = crypto.h dm.h loop.h lvm.h mpath.h swap.h btrfs.h
+PLUGIN_HEADER_NAMES = crypto.h dm.h loop.h lvm.h mpath.h swap.h btrfs.h mdraid.h
 PLUGIN_HEADER_FILES := $(addprefix src/lib/plugin_apis/, ${PLUGIN_HEADER_NAMES})
 PLUGIN_SOURCE_FILES := $(patsubst %.h,%.c,${PLUGIN_HEADER_FILES})
 
 # implemented plugins
 PLUGIN_SOURCES := src/plugins/crypto.c src/plugins/dm.c src/plugins/loop.c src/plugins/lvm.c src/plugins/mpath.c src/plugins/swap.c \
-                  src/plugins/btrfs.c
+                  src/plugins/btrfs.c src/plugins/mdraid.c
 PLUGIN_OBJS := $(patsubst %.c,%.o,${PLUGIN_SOURCES})
 PLUGIN_LIBS := $(addprefix src/plugins/,$(patsubst %.c,libbd_%.so,$(notdir ${PLUGIN_SOURCES})))
 

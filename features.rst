@@ -139,7 +139,7 @@ MDRAID
    all RAID levels supported by the MD RAID
 
 :functions:
-   * get_raid_superblock_size
+   * get_superblock_size [DONE]
    * mdcreate
    * mddestroy
    * mdadd
