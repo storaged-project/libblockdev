@@ -48,3 +48,16 @@ gboolean bd_md_destroy (gchar *device, GError **error);
  * Returns: whether the RAID device @device_name was successfully deactivated or not
  */
 gboolean bd_md_deactivate (gchar *device_name, GError **error);
+
+/**
+ * bd_md_activate:
+ * @device_name: name of the RAID device to activate
+ * @members: (allow-none) (array zero-terminated=1): member devices to be considered for @device activation
+ * @uuid: (allow-none): UUID (in the MD RAID format!) of the MD RAID to activate
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the MD RAID @device was successfully activated or not
+ *
+ * Note: either @members or @uuid (or both) have to be specified.
+ */
+gboolean bd_md_activate (gchar *device_name, gchar **members, gchar *uuid, GError **error);

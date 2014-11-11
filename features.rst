@@ -142,7 +142,7 @@ MDRAID
    * get_superblock_size [DONE]
    * create [DONE]
    * destroy [DONE]
-   * activate
+   * activate [DONE]
    * deactivate [DONE]
    * add
    * remove

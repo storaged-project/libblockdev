@@ -87,3 +87,26 @@ class MDTestCase(unittest.TestCase):
         self.assertTrue(succ)
         succ = BlockDev.md_destroy(self.loop_dev3)
         self.assertTrue(succ)
+
+    def test_activate_deactivate(self):
+        """Verify that it is possible to activate and deactivate an MD RAID"""
+
+        succ = BlockDev.md_create("md999", "raid1", [self.loop_dev, self.loop_dev2, self.loop_dev3],
+                                  1, None, True)
+        self.assertTrue(succ)
+
+        succ = BlockDev.md_deactivate("md999")
+        self.assertTrue(succ)
+
+        succ = BlockDev.md_activate("md999", [self.loop_dev, self.loop_dev2, self.loop_dev3], None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.md_deactivate("md999")
+        self.assertTrue(succ)
+
+        succ = BlockDev.md_destroy(self.loop_dev)
+        self.assertTrue(succ)
+        succ = BlockDev.md_destroy(self.loop_dev2)
+        self.assertTrue(succ)
+        succ = BlockDev.md_destroy(self.loop_dev3)
+        self.assertTrue(succ)
