@@ -12,7 +12,7 @@ typedef enum {
     BD_DM_ERROR_RAID_FAIL,
     BD_DM_ERROR_RAID_NO_DEVS,
     BD_DM_ERROR_RAID_NO_EXIST,
-} BDDmError;
+} BDDMError;
 
 /* macros taken from the pyblock/dmraid.h file plus one more*/
 #define for_each_raidset(_c, _n) list_for_each_entry(_n, LC_RS(_c), list)

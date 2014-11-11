@@ -8,7 +8,7 @@ typedef enum {
     BD_DM_ERROR_TASK,
     BD_DM_ERROR_RAID_FAIL,
     BD_DM_ERROR_RAID_NO_DEVS,
-} BDDmError;
+} BDDMError;
 /* BpG-skip-end */
 
 /**
