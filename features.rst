@@ -140,18 +140,19 @@ MDRAID
 
 :functions:
    * get_superblock_size [DONE]
-   * mdcreate
-   * mddestroy
-   * mdadd
-   * mdactivate
-   * mdremove
-   * mddeactivate
-   * mdresize
-   * mdexamine
-   * mddetail
-   * mdmemberstatus
-   * md_node_from_name
-   * name_from_md_node
+   * create [DONE]
+   * destroy [DONE]
+   * activate
+   * deactivate [DONE]
+   * add
+   * remove
+   * resize
+   * examine
+   * detail
+   * nominate
+   * memberstatus
+   * node_from_name
+   * name_from_node
 
 
 CRYPTO/LUKS
