@@ -34,9 +34,9 @@ class MDNoDevTestCase(unittest.TestCase):
 
 class MDTestCase(unittest.TestCase):
     def setUp(self):
-        self.dev_file = create_sparse_tempfile("md_test", 1024**3)
-        self.dev_file2 = create_sparse_tempfile("md_test", 1024**3)
-        self.dev_file3 = create_sparse_tempfile("md_test", 1024**3)
+        self.dev_file = create_sparse_tempfile("md_test", 10 * 1024**2)
+        self.dev_file2 = create_sparse_tempfile("md_test", 10 * 1024**2)
+        self.dev_file3 = create_sparse_tempfile("md_test", 10 * 1024**2)
 
         succ, loop = BlockDev.loop_setup(self.dev_file)
         if  not succ:
