@@ -1,5 +1,6 @@
 import os
 import tempfile
+from contextlib import contextmanager
 
 def create_sparse_tempfile(name, size):
     """ Create a temporary sparse file.
@@ -24,3 +25,7 @@ def create_sparse_file(path, size):
     os.ftruncate(fd, size)
     os.close(fd)
 
+@contextmanager
+def udev_settle():
+    yield
+    os.system("udevadm settle")
