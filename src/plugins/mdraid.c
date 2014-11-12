@@ -71,7 +71,7 @@ guint64 bd_md_get_superblock_size (guint64 size, gchar *version) {
  * bd_md_create:
  * @device_name: name of the device to create
  * @level: RAID level (as understood by mdadm, see mdadm(8))
- * @disks: (array zero-terminated=1) disks to use for the new RAID (including spares)
+ * @disks: (array zero-terminated=1): disks to use for the new RAID (including spares)
  * @spares: number of spare devices
  * @version: (allow-none): metadata version
  * @bitmap: whether to create an internal bitmap on the device or not
