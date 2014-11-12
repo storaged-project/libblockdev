@@ -18,6 +18,7 @@
  */
 
 #include <glib.h>
+#include <unistd.h>
 #include <exec.h>
 #include <sizes.h>
 
@@ -161,8 +162,19 @@ gboolean bd_md_destroy (gchar *device, GError **error) {
  */
 gboolean bd_md_deactivate (gchar *device_name, GError **error) {
     gchar *argv[] = {"mdadm", "--stop", device_name, NULL};
+    gchar *dev_md_path = NULL;
+    gboolean ret = FALSE;
 
-    return bd_utils_exec_and_report_error (argv, error);
+    /* XXX: mdadm doesn't recognize the user-defined name without the '/dev/md/'
+       prefix, but its own device (e.g. md121) is okay */
+    dev_md_path = g_strdup_printf ("/dev/md/%s", device_name);
+    if (access (dev_md_path, F_OK) == 0)
+        argv[2] = dev_md_path;
+
+    ret = bd_utils_exec_and_report_error (argv, error);
+    g_free (dev_md_path);
+
+    return ret;
 }
 
 /**
