@@ -221,3 +221,39 @@ gboolean bd_md_activate (gchar *device_name, gchar **members, gchar *uuid, GErro
 
     return ret;
 }
+
+/**
+ * bd_md_nominate:
+ * @device: device to nominate (add to its appropriate RAID) as a MD RAID device
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully nominated (added to its
+ * appropriate RAID) or not
+ *
+ * Note: may start the MD RAID if it becomes ready by adding @device.
+ */
+gboolean bd_md_nominate (gchar *device, GError **error) {
+    gchar *argv[] = {"mdadm", "--incremental", "--quiet", "--run", device, NULL};
+
+    return bd_utils_exec_and_report_error (argv, error);
+}
+
+/**
+ * bd_md_denominate:
+ * @device: device to denominate (remove from its appropriate RAID) as a MD RAID device
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully denominated (added to its
+ * appropriate RAID) or not
+ *
+ * Note: may start the MD RAID if it becomes ready by adding @device.
+ */
+gboolean bd_md_denominate (gchar *device, GError **error) {
+    gchar *argv[] = {"mdadm", "--incremental", "--fail", device, NULL};
+
+    /* XXX: stupid mdadm! --incremental --fail requires "sda1" instead of "/dev/sda1" */
+    if (g_str_has_prefix (device, "/dev/"))
+        argv[3] = (device + 5);
+
+    return bd_utils_exec_and_report_error (argv, error);
+}

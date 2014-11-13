@@ -61,3 +61,27 @@ gboolean bd_md_deactivate (gchar *device_name, GError **error);
  * Note: either @members or @uuid (or both) have to be specified.
  */
 gboolean bd_md_activate (gchar *device_name, gchar **members, gchar *uuid, GError **error);
+
+/**
+ * bd_md_nominate:
+ * @device: device to nominate (add to its appropriate RAID) as a MD RAID device
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully nominated (added to its
+ * appropriate RAID) or not
+ *
+ * Note: may start the MD RAID if it becomes ready by adding @device.
+ */
+gboolean bd_md_nominate (gchar *device, GError **error);
+
+/**
+ * bd_md_denominate:
+ * @device: device to denominate (remove from its appropriate RAID) as a MD RAID device
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully denominated (added to its
+ * appropriate RAID) or not
+ *
+ * Note: may start the MD RAID if it becomes ready by adding @device.
+ */
+gboolean bd_md_denominate (gchar *device, GError **error);

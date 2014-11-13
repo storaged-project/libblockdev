@@ -144,12 +144,13 @@ MDRAID
    * destroy [DONE]
    * activate [DONE]
    * deactivate [DONE]
+   * nominate [DONE]
+   * denominate [DONE]
    * add
    * remove
    * resize
    * examine
    * detail
-   * nominate
    * memberstatus
    * node_from_name
    * name_from_node

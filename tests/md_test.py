@@ -117,3 +117,33 @@ class MDTestCase(unittest.TestCase):
         self.assertTrue(succ)
         succ = BlockDev.md_destroy(self.loop_dev3)
         self.assertTrue(succ)
+
+    def test_nominate_denominate(self):
+        """Verify that it is possible to nominate and denominate an MD RAID"""
+
+        with udev_settle():
+            succ = BlockDev.md_create("bd_test_md", "raid1",
+                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
+                                      1, None, True)
+            self.assertTrue(succ)
+
+        with udev_settle():
+            succ = BlockDev.md_denominate(self.loop_dev)
+            self.assertTrue(succ)
+
+        with udev_settle():
+            succ = BlockDev.md_nominate(self.loop_dev)
+            self.assertTrue(succ)
+
+        succ = BlockDev.md_denominate(self.loop_dev)
+        self.assertTrue(succ)
+
+        succ = BlockDev.md_deactivate("bd_test_md");
+        self.assertTrue(succ)
+
+        succ = BlockDev.md_destroy(self.loop_dev)
+        self.assertTrue(succ)
+        succ = BlockDev.md_destroy(self.loop_dev2)
+        self.assertTrue(succ)
+        succ = BlockDev.md_destroy(self.loop_dev3)
+        self.assertTrue(succ)
