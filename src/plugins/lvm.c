@@ -125,6 +125,7 @@ static GHashTable* parse_lvm_vars (gchar *str, guint *num_items) {
             g_strfreev (key_val);
     }
 
+    g_strfreev (items);
     return table;
 }
 
