@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <exec.h>
 #include <sizes.h>
+#include <string.h>
 
 #include "mdraid.h"
 
@@ -37,6 +38,79 @@
 GQuark bd_md_error_quark (void)
 {
     return g_quark_from_static_string ("g-bd-md-error-quark");
+}
+
+/**
+ * parse_mdadm_vars: (skip):
+ * @str: string to parse
+ * @num_items: (out): number of parsed items (key-value pairs)
+ *
+ * Returns: (transfer full): GHashTable containing the key-value pairs parsed
+ * from the @str.
+ */
+static GHashTable* parse_mdadm_vars (gchar *str, guint *num_items) {
+    GHashTable *table = NULL;
+    gchar **items = NULL;
+    gchar **item_p = NULL;
+    gchar **key_val = NULL;
+
+    table = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+    *num_items = 0;
+
+    items = g_strsplit_set (str, " \t\n", 0);
+    for (item_p=items; *item_p; item_p++) {
+        key_val = g_strsplit (*item_p, "=", 2);
+        if (g_strv_length (key_val) == 2) {
+            /* we only want to process valid lines (with the '=' character) */
+            g_hash_table_insert (table, key_val[0], key_val[1]);
+            (*num_items)++;
+        } else
+            /* invalid line, just free key_val */
+            g_strfreev (key_val);
+    }
+
+    g_strfreev (items);
+    return table;
+}
+
+static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean free_table, GError **error) {
+    BDMDExamineData *data = g_new (BDMDExamineData, 1);
+    gchar *value = NULL;
+
+    data->level = g_strdup ((gchar*) g_hash_table_lookup (table, "MD_LEVEL"));
+
+    value = (gchar*) g_hash_table_lookup (table, "MD_DEVICES");
+    if (value)
+        data->num_devices = g_ascii_strtoull (value, NULL, 0);
+
+    data->name = g_strdup ((gchar*) g_hash_table_lookup (table, "MD_NAME"));
+
+    value = (gchar*) g_hash_table_lookup (table, "MD_ARRAY_SIZE");
+    if (value)
+        data->size = bd_utils_size_from_spec (value, error);
+
+    data->uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "MD_UUID"));
+
+    value = (gchar*) g_hash_table_lookup (table, "MD_UPDATE_TIME");
+    if (value)
+        data->update_time = g_ascii_strtoull (value, NULL, 0);
+
+    data->dev_uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "MD_DEV_UUID"));
+
+    value = (gchar*) g_hash_table_lookup (table, "MD_EVENTS");
+    if (value)
+        data->events = g_ascii_strtoull (value, NULL, 0);
+
+    value = (gchar*) g_hash_table_lookup (table, "MD_METADATA");
+    if (value)
+        data->metadata = g_strdup (value);
+    else
+        data->metadata = NULL;
+
+    if (free_table)
+        g_hash_table_destroy (table);
+
+    return data;
 }
 
 /**
@@ -337,6 +411,143 @@ gboolean bd_md_remove (gchar *raid_name, gchar *device, gboolean fail, GError **
 
     ret = bd_utils_exec_and_report_error (argv, error);
     g_free (raid_name_str);
+
+    return ret;
+}
+
+/**
+ * bd_md_examine:
+ * @device: name of the device (a member of an MD RAID) to examine
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: information about the MD RAID extracted from the @device
+ */
+BDMDExamineData* bd_md_examine (gchar *device, GError **error) {
+    gchar *argv[] = {"mdadm", "--examine", "--export", device, NULL};
+    gchar *output = NULL;
+    gboolean success = FALSE;
+    GHashTable *table = NULL;
+    guint num_items = 0;
+    BDMDExamineData *ret = NULL;
+    gchar *value = NULL;
+    gchar **output_fields = NULL;
+    gchar *orig_data = NULL;
+
+    success = bd_utils_exec_and_capture_output (argv, &output, error);
+    if (!success)
+        /* error is already populated */
+        return FALSE;
+
+    table = parse_mdadm_vars (output, &num_items);
+    g_free (output);
+    if (!table || (num_items < 8)) {
+        /* something bad happened or some expected items were missing  */
+        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to parse mdexamine data");
+        if (table)
+            g_hash_table_destroy (table);
+        return NULL;
+    }
+
+    ret = get_examine_data_from_table (table, TRUE, error);
+    if (!ret)
+        /* error is already populated */
+        return NULL;
+
+    /* canonicalize UUIDs */
+    orig_data = ret->uuid;
+    ret->uuid = bd_md_canonicalize_uuid (orig_data, error);
+    g_free (orig_data);
+    orig_data = ret->dev_uuid;
+    ret->dev_uuid = bd_md_canonicalize_uuid (orig_data, error);
+    g_free (orig_data);
+
+    argv[2] = "--brief";
+    success = bd_utils_exec_and_capture_output (argv, &output, error);
+    if (!success)
+        /* error is already populated */
+        return FALSE;
+
+    output_fields = g_strsplit (output, " ", 0);
+    if (g_str_has_prefix (output_fields[1], "/dev/md/"))
+        ret->device = g_strdup (output_fields[1]);
+    else
+        ret->device = NULL;
+    g_strfreev (output_fields);
+
+    table = parse_mdadm_vars (output, &num_items);
+    g_free (output);
+    if (!table) {
+        /* something bad happened or some expected items were missing  */
+        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE,
+                     "Failed to parse mdexamine metadata");
+        g_hash_table_destroy (table);
+        return NULL;
+    }
+
+    value = (gchar*) g_hash_table_lookup (table, "metadata");
+    if (value) {
+        ret->metadata = g_strdup (value);
+        g_hash_table_destroy (table);
+        return ret;
+    } else {
+        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE,
+                     "Failed to parse mdexamine metadata");
+        g_hash_table_destroy (table);
+        return NULL;
+    }
+}
+
+/**
+ * bd_md_canonicalize_uuid:
+ * @uuid: UUID to canonicalize
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): cannonicalized form of @uuid
+ *
+ * This function expects a UUID in the form that mdadm returns. The change is as
+ * follows: 3386ff85:f5012621:4a435f06:1eb47236 -> 3386ff85-f501-2621-4a43-5f061eb47236
+ */
+gchar* bd_md_canonicalize_uuid (gchar *uuid, GError **error __attribute__((unused))) {
+    /* XXX: implement check for the UUID format and report error in case of mismatch */
+    gchar *next_set = uuid;
+    gchar *ret = g_new (gchar, 37);
+    gchar *dest = ret;
+
+    /* first 8 symbols */
+    memcpy (dest, next_set, 8);
+    next_set += 9;
+    dest += 8;
+    *dest = '-';
+    dest++;
+
+    /* 4 symbols from the second 8 */
+    memcpy (dest, next_set, 4);
+    next_set += 4;
+    dest += 4;
+    *dest = '-';
+    dest++;
+
+    /* 4 symbols from the second 8 */
+    memcpy (dest, next_set, 4);
+    next_set += 5;
+    dest += 4;
+    *dest = '-';
+    dest++;
+
+    /* 4 symbols from the third 8 */
+    memcpy (dest, next_set, 4);
+    next_set += 4;
+    dest += 4;
+    *dest = '-';
+    dest++;
+
+    /* 4 symbols from the third 8 with no trailing - */
+    memcpy (dest, next_set, 4);
+    next_set += 5;
+    dest += 4;
+
+    /* 9 symbols (8 + \0) from the fourth 8 */
+    memcpy (dest, next_set, 9);
 
     return ret;
 }

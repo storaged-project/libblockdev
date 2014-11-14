@@ -17,8 +17,8 @@
 #include "plugin_apis/mpath.h"
 #include "plugin_apis/dm.c"
 #include "plugin_apis/dm.h"
-#include "plugin_apis/mdraid.c"
 #include "plugin_apis/mdraid.h"
+#include "plugin_apis/mdraid.c"
 
 /**
  * SECTION: libblockdev

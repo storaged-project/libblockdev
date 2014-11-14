@@ -1,10 +1,79 @@
 #include <glib.h>
+#include <glib-object.h>
 
 /* BpG-skip */
+#ifndef BD_MD_API
+#define BD_MD_API
+
 #define BD_MD_ERROR bd_md_error_quark ()
 typedef enum {
-    BD_MD_ERROR_BASE,
+    BD_MD_ERROR_PARSE,
 } BDMDError;
+
+#define BD_MD_TYPE_EXAMINEDATA (bd_md_examine_data_get_type ())
+GType bd_md_examine_data_get_type();
+
+typedef struct BDMDExamineData {
+    gchar *device;
+    gchar *level;
+    guint64 num_devices;
+    gchar *name;
+    guint64 size;
+    gchar *uuid;
+    guint64 update_time;
+    gchar *dev_uuid;
+    guint64 events;
+    gchar *metadata;
+} BDMDExamineData;
+
+/**
+ * bd_md_examine_data_copy: (skip)
+ *
+ * Creates a new copy of @data.
+ */
+BDMDExamineData* bd_md_examine_data_copy (BDMDExamineData *data) {
+    BDMDExamineData *new_data = g_new (BDMDExamineData, 1);
+
+    new_data->device = g_strdup (data->device);
+    new_data->level = g_strdup (data->level);
+    new_data->num_devices = data->num_devices;
+    new_data->name = g_strdup (data->name);
+    new_data->size = data->size;
+    new_data->uuid = g_strdup (data->uuid);
+    new_data->update_time = data->update_time;
+    new_data->dev_uuid = g_strdup (data->dev_uuid);
+    new_data->events = data->events;
+    new_data->metadata = g_strdup (data->metadata);
+    return new_data;
+}
+
+/**
+ * bd_md_examine_data_free: (skip)
+ *
+ * Frees @data.
+ */
+void bd_md_examine_data_free (BDMDExamineData *data) {
+    g_free (data->device);
+    g_free (data->level);
+    g_free (data->name);
+    g_free (data->uuid);
+    g_free (data->dev_uuid);
+    g_free (data->metadata);
+    g_free (data);
+}
+
+GType bd_md_examine_data_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDMDExamineData",
+                                            (GBoxedCopyFunc) bd_md_examine_data_copy,
+                                            (GBoxedFreeFunc) bd_md_examine_data_free);
+    }
+
+    return type;
+}
+
 /* BpG-skip-end */
 
 /**
@@ -117,3 +186,26 @@ gboolean bd_md_add (gchar *raid_name, gchar *device, guint64 raid_devs, GError *
  * RAID or not.
  */
 gboolean bd_md_remove (gchar *raid_name, gchar *device, gboolean fail, GError **error);
+
+/**
+ * bd_md_examine:
+ * @device: name of the device (a member of an MD RAID) to examine
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: information about the MD RAID extracted from the @device
+ */
+BDMDExamineData* bd_md_examine (gchar *device, GError **error);
+
+/**
+ * bd_md_canonicalize_uuid:
+ * @uuid: UUID to canonicalize
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): cannonicalized form of @uuid
+ *
+ * This function expects a UUID in the form that mdadm returns. The change is as
+ * follows: 3386ff85:f5012621:4a435f06:1eb47236 -> 3386ff85-f501-2621-4a43-5f061eb47236
+ */
+gchar* bd_md_canonicalize_uuid (gchar *uuid, GError **error);
+
+#endif  /* BD_MD_API */

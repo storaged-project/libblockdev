@@ -148,10 +148,9 @@ MDRAID
    * denominate [DONE]
    * add [DONE]
    * remove [DONE]
-   * resize
-   * examine
+   * examine [DONE]
+   * canonicalize_uuid [DONE]
    * detail
-   * memberstatus
    * node_from_name
    * name_from_node
 
