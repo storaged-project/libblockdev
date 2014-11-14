@@ -147,3 +147,32 @@ class MDTestCase(unittest.TestCase):
         self.assertTrue(succ)
         succ = BlockDev.md_destroy(self.loop_dev3)
         self.assertTrue(succ)
+
+    def test_add_remove(self):
+        """Verify that it is possible to add a device to and remove from an MD RAID"""
+
+        with udev_settle():
+            succ = BlockDev.md_create("bd_test_md", "raid1",
+                                      [self.loop_dev, self.loop_dev2],
+                                      0, None, False)
+            self.assertTrue(succ)
+
+        succ = BlockDev.md_add("bd_test_md", self.loop_dev3, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.md_remove("bd_test_md", self.loop_dev3, True)
+        self.assertTrue(succ)
+
+        # XXX: cannnot remove device added as a spare device?
+        succ = BlockDev.md_add("bd_test_md", self.loop_dev3, 2)
+        self.assertTrue(succ)
+
+        succ = BlockDev.md_deactivate("bd_test_md");
+        self.assertTrue(succ)
+
+        succ = BlockDev.md_destroy(self.loop_dev)
+        self.assertTrue(succ)
+        succ = BlockDev.md_destroy(self.loop_dev2)
+        self.assertTrue(succ)
+        succ = BlockDev.md_destroy(self.loop_dev3)
+        self.assertTrue(succ)

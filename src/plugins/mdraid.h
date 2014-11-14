@@ -20,5 +20,7 @@ gboolean bd_md_deactivate (gchar *device_name, GError **error);
 gboolean bd_md_activate (gchar *device_name, gchar **members, gchar *uuid, GError **error);
 gboolean bd_md_nominate (gchar *device, GError **error);
 gboolean bd_md_denominate (gchar *device, GError **error);
+gboolean bd_md_add (gchar *raid_name, gchar *device, guint64 raid_devs, GError **error);
+gboolean bd_md_remove (gchar *raid_name, gchar *device, gboolean fail, GError **error);
 
 #endif  /* BD_MD */

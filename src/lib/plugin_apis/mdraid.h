@@ -85,3 +85,35 @@ gboolean bd_md_nominate (gchar *device, GError **error);
  * Note: may start the MD RAID if it becomes ready by adding @device.
  */
 gboolean bd_md_denominate (gchar *device, GError **error);
+
+/**
+ * bd_md_add:
+ * @raid_name: name of the RAID device to add @device into
+ * @device: name of the device to add to the @raid_name RAID device
+ * @raid_devs: number of devices the @raid_name RAID should actively use (see
+ *             below) or 0 to leave unspecified
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully added to the @raid_name RAID or
+ * not
+ *
+ * The @raid_devs parameter is used when adding devices to a raid array that has
+ * no actual redundancy. In this case it is necessary to explicitly grow the
+ * array all at once rather than manage it in the sense of adding spares.
+ *
+ * Whether the new device will be added as a spare or an active member is
+ * decided by mdadm.
+ */
+gboolean bd_md_add (gchar *raid_name, gchar *device, guint64 raid_devs, GError **error);
+
+/**
+ * bd_md_remove:
+ * @raid_name: name of the RAID device to remove @device from
+ * @device: device to remove from the @raid_name RAID
+ * @fail: whether to mark the @device as failed before removing
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully removed from the @raid_name
+ * RAID or not.
+ */
+gboolean bd_md_remove (gchar *raid_name, gchar *device, gboolean fail, GError **error);

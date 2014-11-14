@@ -146,8 +146,8 @@ MDRAID
    * deactivate [DONE]
    * nominate [DONE]
    * denominate [DONE]
-   * add
-   * remove
+   * add [DONE]
+   * remove [DONE]
    * resize
    * examine
    * detail

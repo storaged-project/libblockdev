@@ -257,3 +257,86 @@ gboolean bd_md_denominate (gchar *device, GError **error) {
 
     return bd_utils_exec_and_report_error (argv, error);
 }
+
+/**
+ * bd_md_add:
+ * @raid_name: name of the RAID device to add @device into
+ * @device: name of the device to add to the @raid_name RAID device
+ * @raid_devs: number of devices the @raid_name RAID should actively use  or 0
+ *             to leave unspecified (see below)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully added to the @raid_name RAID or
+ * not
+ *
+ * The @raid_devs parameter is used when adding devices to a raid array that has
+ * no actual redundancy. In this case it is necessary to explicitly grow the
+ * array all at once rather than manage it in the sense of adding spares.
+ *
+ * Whether the new device will be added as a spare or an active member is
+ * decided by mdadm.
+ */
+gboolean bd_md_add (gchar *raid_name, gchar *device, guint64 raid_devs, GError **error) {
+    gchar *argv[7] = {"mdadm", NULL, NULL, NULL, NULL, NULL, NULL};
+    guint argv_top = 1;
+    gchar *raid_name_str = NULL;
+    gchar *raid_devs_str = NULL;
+    gboolean ret = FALSE;
+
+    raid_name_str = g_strdup_printf ("/dev/md/%s", raid_name);
+    if (access (raid_name_str, F_OK) == 0)
+        raid_name = raid_name_str;
+
+    if (raid_devs != 0) {
+        raid_devs_str = g_strdup_printf ("--raid-devices=%"G_GUINT64_FORMAT, raid_devs);
+        argv[argv_top++] = "--grow";
+        argv[argv_top++] = raid_name;
+        argv[argv_top++] = raid_devs_str;
+    } else
+        argv[argv_top++] = raid_name;
+
+    argv[argv_top++] = "--add";
+    argv[argv_top] = device;
+
+    ret = bd_utils_exec_and_report_error (argv, error);
+    g_free (raid_name_str);
+    g_free (raid_devs_str);
+
+    return ret;
+}
+
+/**
+ * bd_md_remove:
+ * @raid_name: name of the RAID device to remove @device from
+ * @device: device to remove from the @raid_name RAID
+ * @fail: whether to mark the @device as failed before removing
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully removed from the @raid_name
+ * RAID or not.
+ */
+gboolean bd_md_remove (gchar *raid_name, gchar *device, gboolean fail, GError **error) {
+    gchar *argv[] = {"mdadm", raid_name, NULL, NULL, NULL, NULL};
+    guint argv_top = 2;
+    gchar *raid_name_str = NULL;
+    gboolean ret = FALSE;
+
+    raid_name_str = g_strdup_printf ("/dev/md/%s", raid_name);
+    if (access (raid_name_str, F_OK) == 0)
+        argv[1] = raid_name_str;
+
+    if (fail)
+        argv[argv_top++] = "--fail";
+
+    argv[argv_top++] = "--remove";
+
+    if (g_str_has_prefix (device, "/dev/"))
+        argv[argv_top] = (device + 5);
+    else
+        argv[argv_top] = device;
+
+    ret = bd_utils_exec_and_report_error (argv, error);
+    g_free (raid_name_str);
+
+    return ret;
+}
