@@ -46,12 +46,14 @@ GQuark bd_md_error_quark (void)
 /**
  * parse_mdadm_vars: (skip):
  * @str: string to parse
+ * @item_sep: item separator(s) (key-value pairs separator)
+ * @key_val_sep: key-value separator(s) (typically ":" or "=")
  * @num_items: (out): number of parsed items (key-value pairs)
  *
  * Returns: (transfer full): GHashTable containing the key-value pairs parsed
  * from the @str.
  */
-static GHashTable* parse_mdadm_vars (gchar *str, guint *num_items) {
+static GHashTable* parse_mdadm_vars (gchar *str, gchar *item_sep, gchar *key_val_sep, guint *num_items) {
     GHashTable *table = NULL;
     gchar **items = NULL;
     gchar **item_p = NULL;
@@ -60,12 +62,12 @@ static GHashTable* parse_mdadm_vars (gchar *str, guint *num_items) {
     table = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
     *num_items = 0;
 
-    items = g_strsplit_set (str, " \t\n", 0);
+    items = g_strsplit_set (str, item_sep, 0);
     for (item_p=items; *item_p; item_p++) {
-        key_val = g_strsplit (*item_p, "=", 2);
+        key_val = g_strsplit (*item_p, key_val_sep, 2);
         if (g_strv_length (key_val) == 2) {
-            /* we only want to process valid lines (with the '=' character) */
-            g_hash_table_insert (table, key_val[0], key_val[1]);
+            /* we only want to process valid lines (with the separator) */
+            g_hash_table_insert (table, g_strstrip (key_val[0]), g_strstrip (key_val[1]));
             (*num_items)++;
         } else
             /* invalid line, just free key_val */
@@ -441,7 +443,7 @@ BDMDExamineData* bd_md_examine (gchar *device, GError **error) {
         /* error is already populated */
         return FALSE;
 
-    table = parse_mdadm_vars (output, &num_items);
+    table = parse_mdadm_vars (output, " \n", "=", &num_items);
     g_free (output);
     if (!table || (num_items < 8)) {
         /* something bad happened or some expected items were missing  */
@@ -477,7 +479,7 @@ BDMDExamineData* bd_md_examine (gchar *device, GError **error) {
         ret->device = NULL;
     g_strfreev (output_fields);
 
-    table = parse_mdadm_vars (output, &num_items);
+    table = parse_mdadm_vars (output, " ", "=", &num_items);
     g_free (output);
     if (!table) {
         /* something bad happened or some expected items were missing  */
