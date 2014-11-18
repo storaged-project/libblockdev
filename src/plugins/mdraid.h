@@ -58,6 +58,60 @@ void bd_md_examine_data_free (BDMDExamineData *data) {
     g_free (data);
 }
 
+typedef struct BDMDDetailData {
+    gchar *metadata;
+    gchar *creation_time;
+    gchar *level;
+    guint64 array_size;
+    guint64 use_dev_size;
+    guint64 raid_devices;
+    guint64 total_devices;
+    guint64 active_devices;
+    guint64 working_devices;
+    guint64 failed_devices;
+    guint64 spare_devices;
+    gboolean clean;
+    gchar *uuid;
+} BDMDDetailData;
+
+/**
+ * bd_md_detail_data_copy: (skip)
+ *
+ * Creates a new copy of @data.
+ */
+BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data) {
+    BDMDDetailData *new_data = g_new (BDMDDetailData, 1);
+
+    new_data->metadata = g_strdup (data->metadata);
+    new_data->creation_time = g_strdup (data->creation_time);
+    new_data->level = g_strdup (data->level);
+    new_data->array_size = data->array_size;
+    new_data->use_dev_size = data->use_dev_size;
+    new_data->raid_devices = data->raid_devices;
+    new_data->active_devices = data->active_devices;
+    new_data->working_devices = data->working_devices;
+    new_data->failed_devices = data->failed_devices;
+    new_data->spare_devices = data->spare_devices;
+    new_data->clean = data->clean;
+    new_data->uuid = g_strdup (data->uuid);
+
+    return new_data;
+}
+
+/**
+ * bd_md_detail_data_free: (skip)
+ *
+ * Frees @data.
+ */
+void bd_md_detail_data_free (BDMDDetailData *data) {
+    g_free (data->metadata);
+    g_free (data->creation_time);
+    g_free (data->level);
+    g_free (data->uuid);
+
+    g_free (data);
+}
+
 /* taken from blivet */
 // these defaults were determined empirically
 #define MD_SUPERBLOCK_SIZE (2 MiB)
@@ -74,5 +128,6 @@ gboolean bd_md_add (gchar *raid_name, gchar *device, guint64 raid_devs, GError *
 gboolean bd_md_remove (gchar *raid_name, gchar *device, gboolean fail, GError **error);
 BDMDExamineData* bd_md_examine (gchar *device, GError **error);
 gchar* bd_md_canonicalize_uuid (gchar *uuid, GError **error);
+BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error);
 
 #endif  /* BD_MD */

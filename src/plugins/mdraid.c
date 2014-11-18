@@ -118,6 +118,72 @@ static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean
     return data;
 }
 
+static BDMDDetailData* get_detail_data_from_table (GHashTable *table, gboolean free_table) {
+    BDMDDetailData *data = g_new (BDMDDetailData, 1);
+    gchar *value = NULL;
+    gchar *first_space = NULL;
+
+    data->metadata = g_strdup ((gchar*) g_hash_table_lookup (table, "Version"));
+    data->creation_time = g_strdup ((gchar*) g_hash_table_lookup (table, "Creation Time"));
+    data->level = g_strdup ((gchar*) g_hash_table_lookup (table, "Raid Level"));
+    data->uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "UUID"));
+
+    value = (gchar*) g_hash_table_lookup (table, "Array Size");
+    if (value) {
+        first_space = strchr (value, ' ');
+        if (first_space)
+            *first_space = '\0';
+        if (value && first_space)
+            data->array_size = g_ascii_strtoull (value, NULL, 0);
+    }
+
+    value = (gchar*) g_hash_table_lookup (table, "Used Dev Size");
+    if (value) {
+        first_space = strchr (value, ' ');
+        if (first_space)
+            *first_space = '\0';
+        if (value && first_space)
+            data->use_dev_size = g_ascii_strtoull (value, NULL, 0);
+    }
+
+    value = (gchar*) g_hash_table_lookup (table, "Raid Devices");
+    if (value)
+        data->raid_devices = g_ascii_strtoull (value, NULL, 0);
+
+    value = (gchar*) g_hash_table_lookup (table, "Raid Devices");
+    if (value)
+        data->raid_devices = g_ascii_strtoull (value, NULL, 0);
+
+    value = (gchar*) g_hash_table_lookup (table, "Total Devices");
+    if (value)
+        data->total_devices = g_ascii_strtoull (value, NULL, 0);
+
+    value = (gchar*) g_hash_table_lookup (table, "Active Devices");
+    if (value)
+        data->active_devices = g_ascii_strtoull (value, NULL, 0);
+
+    value = (gchar*) g_hash_table_lookup (table, "Working Devices");
+    if (value)
+        data->working_devices = g_ascii_strtoull (value, NULL, 0);
+
+    value = (gchar*) g_hash_table_lookup (table, "Failed Devices");
+    if (value)
+        data->failed_devices = g_ascii_strtoull (value, NULL, 0);
+
+    value = (gchar*) g_hash_table_lookup (table, "Spare Devices");
+    if (value)
+        data->spare_devices = g_ascii_strtoull (value, NULL, 0);
+
+    value = (gchar*) g_hash_table_lookup (table, "State");
+    if (value)
+        data->clean = (g_strcmp0 (value, "clean") == 0);
+
+    if (free_table)
+        g_hash_table_destroy (table);
+
+    return data;
+}
+
 /**
  * bd_md_get_superblock_size:
  * @size: size of the array
@@ -554,5 +620,59 @@ gchar* bd_md_canonicalize_uuid (gchar *uuid, GError **error __attribute__((unuse
     /* 9 symbols (8 + \0) from the fourth 8 */
     memcpy (dest, next_set, 9);
 
+    return ret;
+}
+
+/**
+ * bd_md_detail:
+ * @raid_name: name of the MD RAID to examine
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: information about the MD RAID @raid_name
+ */
+BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error) {
+    gchar *argv[] = {"mdadm", "--detail", raid_name, NULL};
+    gchar *output = NULL;
+    gboolean success = FALSE;
+    GHashTable *table = NULL;
+    guint num_items = 0;
+    gchar *orig_uuid = NULL;
+    gchar *raid_name_str = NULL;
+    BDMDDetailData *ret = NULL;
+
+    raid_name_str = g_strdup_printf ("/dev/md/%s", raid_name);
+    if (access (raid_name_str, F_OK) == 0)
+        argv[2] = raid_name_str;
+
+    success = bd_utils_exec_and_capture_output (argv, &output, error);
+    if (!success) {
+        g_free (raid_name_str);
+        /* error is already populated */
+        return FALSE;
+    }
+
+    table = parse_mdadm_vars (output, "\n", ":", &num_items);
+    g_free (output);
+    if (!table || (num_items < 13)) {
+        g_free (raid_name_str);
+        /* something bad happened or some expected items were missing  */
+        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to parse mddetail data");
+        if (table)
+            g_hash_table_destroy (table);
+        return NULL;
+    }
+
+    ret = get_detail_data_from_table (table, TRUE);
+    if (!ret) {
+        g_free (raid_name_str);
+        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to get mddetail data");
+        return NULL;
+    }
+
+    orig_uuid = ret->uuid;
+    ret->uuid = bd_md_canonicalize_uuid (orig_uuid, error);
+    g_free (orig_uuid);
+
+    g_free (raid_name_str);
     return ret;
 }
