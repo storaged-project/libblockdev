@@ -35,6 +35,9 @@
  * bytes unless specified otherwise.
  */
 
+/**
+ * bd_md_error_quark: (skip)
+ */
 GQuark bd_md_error_quark (void)
 {
     return g_quark_from_static_string ("g-bd-md-error-quark");

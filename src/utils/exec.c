@@ -25,6 +25,9 @@ static GMutex id_counter_lock;
 static guint64 id_counter = 0;
 static BDUtilsLogFunc log_func = NULL;
 
+/**
+ * bd_utils_exec_error_quark: (skip)
+ */
 GQuark bd_utils_exec_error_quark (void)
 {
     return g_quark_from_static_string ("g-bd-utils-exec-error-quark");

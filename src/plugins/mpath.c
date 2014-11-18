@@ -30,6 +30,9 @@
  * A libblockdev plugin for basic operations with multipath devices.
  */
 
+/**
+ * bd_mpath_error_quark: (skip)
+ */
 GQuark bd_mpath_error_quark (void)
 {
     return g_quark_from_static_string ("g-bd-mpath-error-quark");

@@ -13,6 +13,7 @@
  */
 typedef void (*BDUtilsLogFunc) (gint level, gchar *msg);
 
+GQuark bd_utils_exec_error_quark (void);
 #define BD_UTILS_EXEC_ERROR bd_utils_exec_error_quark ()
 typedef enum {
     BD_UTILS_EXEC_ERROR_FAILED,

@@ -38,6 +38,9 @@
  * Sizes are given in bytes unless stated otherwise.
  */
 
+/**
+ * bd_crypto_error_quark: (skip)
+ */
 GQuark bd_crypto_error_quark (void)
 {
     return g_quark_from_static_string ("g-bd-crypto-error-quark");

@@ -3,6 +3,7 @@
 #ifndef BD_MPATH
 #define BD_MPATH
 
+GQuark bd_mpath_error_quark (void);
 #define BD_MPATH_ERROR bd_mpath_error_quark ()
 typedef enum {
     BD_MPATH_ERROR_FLUSH,

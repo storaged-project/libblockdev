@@ -37,6 +37,9 @@ static gchar *global_config_str = NULL;
  * the functions are in bytes.
  */
 
+/**
+ * bd_lvm_error_quark: (skip)
+ */
 GQuark bd_lvm_error_quark (void)
 {
     return g_quark_from_static_string ("g-bd-lvm-error-quark");

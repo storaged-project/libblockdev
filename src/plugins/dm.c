@@ -35,6 +35,9 @@
  * A libblockdev plugin for basic operations with device mapper.
  */
 
+/**
+ * bd_dm_error_quark: (skip)
+ */
 GQuark bd_dm_error_quark (void)
 {
     return g_quark_from_static_string ("g-bd-dm-error-quark");

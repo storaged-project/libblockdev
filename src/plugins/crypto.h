@@ -3,6 +3,7 @@
 #ifndef BD_CRYPTO
 #define BD_CRYPTO
 
+GQuark bd_crypto_error_quark (void);
 #define BD_CRYPTO_ERROR bd_crypto_error_quark ()
 typedef enum {
     BD_CRYPTO_ERROR_DEVICE,

@@ -34,6 +34,9 @@
  * A libblockdev plugin for operations with swap space.
  */
 
+/**
+ * bd_btrfs_error_quark: (skip)
+ */
 GQuark bd_btrfs_error_quark (void)
 {
     return g_quark_from_static_string ("g-bd-btrfs-error-quark");

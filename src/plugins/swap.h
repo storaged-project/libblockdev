@@ -3,6 +3,7 @@
 #ifndef BD_SWAP
 #define BD_SWAP
 
+GQuark bd_swap_error_quark (void);
 #define BD_SWAP_ERROR bd_swap_error_quark ()
 typedef enum {
     BD_SWAP_ERROR_UNKNOWN_STATE,

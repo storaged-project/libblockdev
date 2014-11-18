@@ -3,6 +3,7 @@
 #ifndef BD_MD
 #define BD_MD
 
+GQuark bd_md_error_quark (void);
 #define BD_MD_ERROR bd_md_error_quark ()
 typedef enum {
     BD_MD_ERROR_PARSE,

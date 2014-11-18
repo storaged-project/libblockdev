@@ -4,6 +4,7 @@
 #ifndef BD_DM
 #define BD_DM
 
+GQuark bd_dm_error_quark (void);
 #define BD_DM_ERROR bd_dm_error_quark ()
 typedef enum {
     BD_DM_ERROR_SYS,
