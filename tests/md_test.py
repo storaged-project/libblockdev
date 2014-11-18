@@ -32,6 +32,12 @@ class MDNoDevTestCase(unittest.TestCase):
         self.assertEqual(BlockDev.md_get_superblock_size(257 * 1024**2, version="unknown version"),
                          2 * 1024**2)
 
+    def test_canonicalize_uuid(self):
+        """Verify that UUID canonicalization works as expected"""
+
+        self.assertEqual(BlockDev.md_canonicalize_uuid("3386ff85:f5012621:4a435f06:1eb47236"),
+                         "3386ff85-f501-2621-4a43-5f061eb47236")
+
 class MDTestCase(unittest.TestCase):
     def setUp(self):
         self.dev_file = create_sparse_tempfile("md_test", 10 * 1024**2)
@@ -166,6 +172,33 @@ class MDTestCase(unittest.TestCase):
         # XXX: cannnot remove device added as a spare device?
         succ = BlockDev.md_add("bd_test_md", self.loop_dev3, 2)
         self.assertTrue(succ)
+
+        succ = BlockDev.md_deactivate("bd_test_md");
+        self.assertTrue(succ)
+
+        succ = BlockDev.md_destroy(self.loop_dev)
+        self.assertTrue(succ)
+        succ = BlockDev.md_destroy(self.loop_dev2)
+        self.assertTrue(succ)
+        succ = BlockDev.md_destroy(self.loop_dev3)
+        self.assertTrue(succ)
+
+    def test_examine_detail(self):
+        """Verify that it is possible to get info about an MD RAID"""
+
+        with udev_settle():
+            succ = BlockDev.md_create("bd_test_md", "raid1",
+                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
+                                      1, None, True)
+            self.assertTrue(succ)
+
+        ex_data = BlockDev.md_examine(self.loop_dev)
+        # test that we got something
+        self.assertTrue(ex_data)
+
+        de_data = BlockDev.md_detail("bd_test_md")
+        # test that we got something
+        self.assertTrue(de_data)
 
         succ = BlockDev.md_deactivate("bd_test_md");
         self.assertTrue(succ)
