@@ -544,9 +544,19 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
     guint64 i = 0;
 
     success = call_lvm_and_capture_output (args, &output, error);
-    if (!success)
-        /* the error is already populated from the call */
-        return NULL;
+
+    if (!success) {
+        if (g_error_matches (*error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
+            /* no output => no VGs, not an error */
+            g_clear_error (error);
+            ret = g_new (BDLVMPVdata*, 1);
+            ret[0] = NULL;
+            return ret;
+        }
+        else
+            /* the error is already populated from the call */
+            return NULL;
+    }
 
     lines = g_strsplit (output, "\n", 0);
     g_free (output);
@@ -762,9 +772,18 @@ BDLVMVGdata** bd_lvm_vgs (GError **error) {
     guint64 i = 0;
 
     success = call_lvm_and_capture_output (args, &output, error);
-    if (!success)
-        /* the error is already populated from the call */
-        return NULL;
+    if (!success) {
+        if (g_error_matches (*error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
+            /* no output => no VGs, not an error */
+            g_clear_error (error);
+            ret = g_new (BDLVMVGdata*, 1);
+            ret[0] = NULL;
+            return ret;
+        }
+        else
+            /* the error is already populated from the call */
+            return NULL;
+    }
 
     lines = g_strsplit (output, "\n", 0);
     g_free (output);
@@ -1084,9 +1103,18 @@ BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, GError **error) {
 
     success = call_lvm_and_capture_output (args, &output, error);
 
-    if (!success)
-        /* the error is already populated from the call */
-        return NULL;
+    if (!success) {
+        if (g_error_matches (*error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
+            /* no output => no LVs, not an error */
+            g_clear_error (error);
+            ret = g_new (BDLVMLVdata*, 1);
+            ret[0] = NULL;
+            return ret;
+        }
+        else
+            /* the error is already populated from the call */
+            return NULL;
+    }
 
     lines = g_strsplit (output, "\n", 0);
     g_free (output);
