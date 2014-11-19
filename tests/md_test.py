@@ -1,5 +1,6 @@
 import unittest
 import os
+import re
 
 from utils import create_sparse_tempfile, udev_settle
 from gi.repository import BlockDev
@@ -196,9 +197,31 @@ class MDTestCase(unittest.TestCase):
         # test that we got something
         self.assertTrue(ex_data)
 
+        # verify some known data
+        self.assertEqual(ex_data.device, "/dev/md/bd_test_md")
+        self.assertEqual(ex_data.level, "raid1")
+        self.assertEqual(ex_data.num_devices, 2)
+        self.assertTrue(ex_data.name.endswith("bd_test_md"))
+        self.assertEqual(len(ex_data.metadata), 3)
+        self.assertTrue(ex_data.size < (10 * 1024**2))
+        self.assertTrue(re.match(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', ex_data.uuid))
+
         de_data = BlockDev.md_detail("bd_test_md")
         # test that we got something
         self.assertTrue(de_data)
+
+        # verify some known data
+        self.assertEqual(len(de_data.metadata), 3)
+        self.assertEqual(de_data.level, "raid1")
+        self.assertEqual(de_data.raid_devices, 2)
+        self.assertEqual(de_data.total_devices, 3)
+        self.assertEqual(de_data.spare_devices, 1)
+        self.assertTrue(de_data.array_size < (10 * 1024**2))
+        self.assertTrue(de_data.use_dev_size < (10 * 1024**2))
+        self.assertTrue(de_data.clean)
+        self.assertTrue(re.match(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', de_data.uuid))
+
+        self.assertEqual(ex_data.uuid, de_data.uuid)
 
         succ = BlockDev.md_deactivate("bd_test_md");
         self.assertTrue(succ)
