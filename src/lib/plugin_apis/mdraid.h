@@ -78,9 +78,11 @@ GType bd_md_examine_data_get_type () {
 GType bd_md_detail_data_get_type();
 
 typedef struct BDMDDetailData {
+    gchar *device;
     gchar *metadata;
     gchar *creation_time;
     gchar *level;
+    gchar *name;
     guint64 array_size;
     guint64 use_dev_size;
     guint64 raid_devices;
@@ -101,6 +103,8 @@ typedef struct BDMDDetailData {
 BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data) {
     BDMDDetailData *new_data = g_new (BDMDDetailData, 1);
 
+    new_data->device = g_strdup (data->device);
+    new_data->name = g_strdup (data->name);
     new_data->metadata = g_strdup (data->metadata);
     new_data->creation_time = g_strdup (data->creation_time);
     new_data->level = g_strdup (data->level);
@@ -123,6 +127,8 @@ BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data) {
  * Frees @data.
  */
 void bd_md_detail_data_free (BDMDDetailData *data) {
+    g_free (data->device);
+    g_free (data->name);
     g_free (data->metadata);
     g_free (data->creation_time);
     g_free (data->level);

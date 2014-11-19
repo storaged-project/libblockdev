@@ -127,6 +127,7 @@ static BDMDDetailData* get_detail_data_from_table (GHashTable *table, gboolean f
     data->creation_time = g_strdup ((gchar*) g_hash_table_lookup (table, "Creation Time"));
     data->level = g_strdup ((gchar*) g_hash_table_lookup (table, "Raid Level"));
     data->uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "UUID"));
+    data->name = g_strdup ((gchar*) g_hash_table_lookup (table, "Name"));
 
     value = (gchar*) g_hash_table_lookup (table, "Array Size");
     if (value) {
@@ -653,7 +654,7 @@ BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error) {
 
     table = parse_mdadm_vars (output, "\n", ":", &num_items);
     g_free (output);
-    if (!table || (num_items < 13)) {
+    if (!table || (num_items < 14)) {
         g_free (raid_name_str);
         /* something bad happened or some expected items were missing  */
         g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to parse mddetail data");
@@ -669,10 +670,13 @@ BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error) {
         return NULL;
     }
 
+    ret->device = g_strdup (argv[2]);
+
     orig_uuid = ret->uuid;
     ret->uuid = bd_md_canonicalize_uuid (orig_uuid, error);
     g_free (orig_uuid);
 
     g_free (raid_name_str);
+
     return ret;
 }

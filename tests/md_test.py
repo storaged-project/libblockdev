@@ -211,6 +211,8 @@ class MDTestCase(unittest.TestCase):
         self.assertTrue(de_data)
 
         # verify some known data
+        self.assertEqual(de_data.device, "/dev/md/bd_test_md")
+        self.assertTrue(de_data.name.endswith("bd_test_md"))
         self.assertEqual(len(de_data.metadata), 3)
         self.assertEqual(de_data.level, "raid1")
         self.assertEqual(de_data.raid_devices, 2)
