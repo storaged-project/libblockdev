@@ -125,6 +125,6 @@ clean:
 	-rm src/plugins/test_swap
 	-rm src/utils/test_sizes
 	find . -name '*.o' -exec rm {} \;
-	find . -name '*.so' -exec rm {} \;
+	find . -name '*.so' -exec rm -f {} \;
 	find . -name '*.pyc' -exec rm -f {} \;
 	find . -name '*.pyo' -exec rm -f {} \;
