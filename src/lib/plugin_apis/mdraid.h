@@ -285,6 +285,20 @@ BDMDExamineData* bd_md_examine (gchar *device, GError **error);
 gchar* bd_md_canonicalize_uuid (gchar *uuid, GError **error);
 
 /**
+ * bd_md_get_md_uuid:
+ * @uuid: UUID to transform into format used by MD RAID
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): transformed form of @uuid
+ *
+ * This function expects a UUID in the canonical (traditional format) and
+ * returns a UUID in the format used by MD RAID and is thus reverse to
+ * bd_md_canonicalize_uuid(). The change is as follows:
+ * 3386ff85-f501-2621-4a43-5f061eb47236 -> 3386ff85:f5012621:4a435f06:1eb47236
+ */
+gchar* bd_md_get_md_uuid (gchar *uuid, GError **error);
+
+/**
  * bd_md_detail:
  * @raid_name: name of the MD RAID to examine
  * @error: (out): place to store error (if any)
@@ -292,4 +306,5 @@ gchar* bd_md_canonicalize_uuid (gchar *uuid, GError **error);
  * Returns: information about the MD RAID @raid_name
  */
 BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error);
+
 #endif  /* BD_MD_API */

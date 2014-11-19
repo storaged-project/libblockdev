@@ -135,6 +135,7 @@ gboolean bd_md_add (gchar *raid_name, gchar *device, guint64 raid_devs, GError *
 gboolean bd_md_remove (gchar *raid_name, gchar *device, gboolean fail, GError **error);
 BDMDExamineData* bd_md_examine (gchar *device, GError **error);
 gchar* bd_md_canonicalize_uuid (gchar *uuid, GError **error);
+gchar* bd_md_get_md_uuid (gchar *uuid, GError **error);
 BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error);
 
 #endif  /* BD_MD */

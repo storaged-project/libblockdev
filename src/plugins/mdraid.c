@@ -638,6 +638,74 @@ gchar* bd_md_canonicalize_uuid (gchar *uuid, GError **error) {
 }
 
 /**
+ * bd_md_get_md_uuid:
+ * @uuid: UUID to transform into format used by MD RAID
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): transformed form of @uuid or %NULL in case of error
+ *
+ * This function expects a UUID in the canonical (traditional format) and
+ * returns a UUID in the format used by MD RAID and is thus reverse to
+ * bd_md_canonicalize_uuid(). The change is as follows:
+ * 3386ff85-f501-2621-4a43-5f061eb47236 -> 3386ff85:f5012621:4a435f06:1eb47236
+ */
+gchar* bd_md_get_md_uuid (gchar *uuid, GError **error) {
+    gchar *next_set = uuid;
+    gchar *ret = g_new (gchar, 37);
+    gchar *dest = ret;
+    GRegex *regex = NULL;
+
+    regex = g_regex_new ("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", 0, 0, error);
+    if (!regex)
+        /* error is already populated */
+        return NULL;
+
+    if (!g_regex_match (regex, uuid, 0, NULL)) {
+        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_BAD_FORMAT,
+                     "malformed or invalid UUID: %s", uuid);
+        g_regex_unref (regex);
+        return NULL;
+    }
+    g_regex_unref (regex);
+
+    /* first 8 symbols */
+    memcpy (dest, next_set, 8);
+    next_set += 9;
+    dest += 8;
+    *dest = ':';
+    dest++;
+
+    /* 4 symbols from the 4 */
+    memcpy (dest, next_set, 4);
+    next_set += 5;
+    dest += 4;
+
+    /* 4 symbols from the second 4 plus :*/
+    memcpy (dest, next_set, 4);
+    next_set += 5;
+    dest += 4;
+    *dest = ':';
+    dest++;
+
+    /* 4 symbols from the third 4 */
+    memcpy (dest, next_set, 4);
+    next_set += 5;
+    dest += 4;
+
+    /* 4 symbols from the 12 */
+    memcpy (dest, next_set, 4);
+    next_set += 4;
+    dest += 4;
+    *dest = ':';
+    dest++;
+
+    /* 9 symbols (8 + \0) from the 12 */
+    memcpy (dest, next_set, 9);
+
+    return ret;
+}
+
+/**
  * bd_md_detail:
  * @raid_name: name of the MD RAID to examine
  * @error: (out): place to store error (if any)

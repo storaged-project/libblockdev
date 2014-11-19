@@ -150,6 +150,7 @@ MDRAID
    * remove [DONE]
    * examine [DONE]
    * canonicalize_uuid [DONE]
+   * get_md_uuid [DONE]
    * detail [DONE]
    * node_from_name
    * name_from_node
