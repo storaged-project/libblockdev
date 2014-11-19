@@ -111,6 +111,7 @@ gchar* bd_loop_get_loop_name (gchar *file, GError **error) {
     if (!found) {
         g_set_error (error, BD_LOOP_ERROR, BD_LOOP_ERROR_DEVICE,
                      "The given file %s has no associated loop device", file);
+        globfree (&globbuf);
         return NULL;
     }
 
@@ -118,6 +119,7 @@ gchar* bd_loop_get_loop_name (gchar *file, GError **error) {
     ret = g_strdup (parts[3]);
     g_strfreev (parts);
 
+    globfree (&globbuf);
     return ret;
 }
 
