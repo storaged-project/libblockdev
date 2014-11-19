@@ -34,7 +34,7 @@ PLUGIN_TESTS := $(patsubst test_%.c,test-%,$(notdir ${PLUGIN_TEST_SOURCES}))
 # plugin management
 LIBRARY_FILES := src/lib/blockdev.c src/lib/blockdev.h src/lib/plugins.h
 
-all: BlockDev-1.0.typelib
+all: src/lib/libblockdev.so ${PLUGIN_LIBS} BlockDev-1.0.typelib
 
 # object files
 %.o: %.c %.h
@@ -96,21 +96,21 @@ BlockDev-1.0.gir: src/utils/libbd_utils.so src/lib/libblockdev.so ${LIBRARY_FILE
 BlockDev-1.0.typelib: BlockDev-1.0.gir
 	g-ir-compiler -o $@ $<
 
-test-from-python: src/lib/libblockdev.so ${PLUGIN_LIBS} BlockDev-1.0.typelib
+test-from-python: all
 	GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/:src/utils python -c 'from gi.repository import BlockDev; BlockDev.init(None, None); print BlockDev.lvm_get_max_lv_size()'
 
-run-ipython: src/lib/libblockdev.so ${PLUGIN_LIBS} BlockDev-1.0.typelib
+run-ipython: all
 	GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/:src/utils/ ipython
 
-run-root-ipython: src/lib/libblockdev.so ${PLUGIN_LIBS} BlockDev-1.0.typelib
+run-root-ipython: all
 	sudo GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/:src/utils/ ipython
 
-test: src/utils/libbd_utils.so src/lib/libblockdev.so ${PLUGIN_LIBS} BlockDev-1.0.typelib
+test: all
 	@echo
 	@sudo GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/:src/utils/ PYTHONPATH=.:tests/ \
 		python -m unittest discover -v -s tests/ -p '*_test.py'
 
-fast-test: src/utils/libbd_utils.so src/lib/libblockdev.so ${PLUGIN_LIBS} BlockDev-1.0.typelib
+fast-test: all
 	@echo
 	@sudo SKIP_SLOW= GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/:src/utils/ PYTHONPATH=.:tests/ \
 		python -m unittest discover -v -s tests/ -p '*_test.py'
