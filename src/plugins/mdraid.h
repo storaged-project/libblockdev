@@ -7,6 +7,7 @@ GQuark bd_md_error_quark (void);
 #define BD_MD_ERROR bd_md_error_quark ()
 typedef enum {
     BD_MD_ERROR_PARSE,
+    BD_MD_ERROR_BAD_FORMAT,
 } BDMDError;
 
 typedef struct BDMDExamineData {

@@ -8,6 +8,7 @@
 #define BD_MD_ERROR bd_md_error_quark ()
 typedef enum {
     BD_MD_ERROR_PARSE,
+    BD_MD_ERROR_BAD_FORMAT,
 } BDMDError;
 
 #define BD_MD_TYPE_EXAMINEDATA (bd_md_examine_data_get_type ())

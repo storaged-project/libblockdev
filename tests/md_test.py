@@ -3,7 +3,7 @@ import os
 import re
 
 from utils import create_sparse_tempfile, udev_settle
-from gi.repository import BlockDev
+from gi.repository import BlockDev, GLib
 
 def print_msg(level, msg):
     print msg
@@ -38,6 +38,9 @@ class MDNoDevTestCase(unittest.TestCase):
 
         self.assertEqual(BlockDev.md_canonicalize_uuid("3386ff85:f5012621:4a435f06:1eb47236"),
                          "3386ff85-f501-2621-4a43-5f061eb47236")
+
+        with self.assertRaisesRegexp(GLib.GError, r'malformed or invalid'):
+            BlockDev.md_canonicalize_uuid("malformed-uuid-example")
 
 class MDTestCase(unittest.TestCase):
     def setUp(self):

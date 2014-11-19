@@ -574,16 +574,29 @@ BDMDExamineData* bd_md_examine (gchar *device, GError **error) {
  * @uuid: UUID to canonicalize
  * @error: (out): place to store error (if any)
  *
- * Returns: (transfer full): cannonicalized form of @uuid
+ * Returns: (transfer full): cannonicalized form of @uuid or %NULL in case of error
  *
  * This function expects a UUID in the form that mdadm returns. The change is as
  * follows: 3386ff85:f5012621:4a435f06:1eb47236 -> 3386ff85-f501-2621-4a43-5f061eb47236
  */
-gchar* bd_md_canonicalize_uuid (gchar *uuid, GError **error __attribute__((unused))) {
-    /* XXX: implement check for the UUID format and report error in case of mismatch */
+gchar* bd_md_canonicalize_uuid (gchar *uuid, GError **error) {
     gchar *next_set = uuid;
     gchar *ret = g_new (gchar, 37);
     gchar *dest = ret;
+    GRegex *regex = NULL;
+
+    regex = g_regex_new ("[0-9a-f]{8}:[0-9a-f]{8}:[0-9a-f]{8}:[0-9a-f]{8}", 0, 0, error);
+    if (!regex)
+        /* error is already populated */
+        return NULL;
+
+    if (!g_regex_match (regex, uuid, 0, NULL)) {
+        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_BAD_FORMAT,
+                     "malformed or invalid UUID: %s", uuid);
+        g_regex_unref (regex);
+        return NULL;
+    }
+    g_regex_unref (regex);
 
     /* first 8 symbols */
     memcpy (dest, next_set, 8);
