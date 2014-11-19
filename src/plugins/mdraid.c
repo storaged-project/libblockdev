@@ -22,6 +22,7 @@
 #include <exec.h>
 #include <sizes.h>
 #include <string.h>
+#include <glob.h>
 
 #include "mdraid.h"
 
@@ -760,4 +761,79 @@ BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error) {
     g_free (raid_name_str);
 
     return ret;
+}
+
+/**
+ * bd_md_node_from_name:
+ * @name: name of the MD RAID
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: path to the @name MD RAID's device node or %NULL in case of error
+ */
+gchar* bd_md_node_from_name (gchar *name, GError **error) {
+    gchar *symlink = NULL;
+    gchar *ret = NULL;
+    gchar *md_path = g_strdup_printf ("/dev/md/%s", name);
+
+    symlink = g_file_read_link (md_path, error);
+    if (!symlink) {
+        /* error is already populated */
+        g_free (md_path);
+        return NULL;
+    }
+
+    g_strstrip (symlink);
+    ret = g_path_get_basename (symlink);
+
+    g_free (symlink);
+    g_free (md_path);
+
+    return ret;
+}
+
+/**
+ * bd_md_name_from_node:
+ * @node: path of the MD RAID's device node
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: @name of the MD RAID the device node belongs to or %NULL in case of error
+ */
+gchar* bd_md_name_from_node (gchar *node, GError **error) {
+    gchar *node_path = NULL;
+    glob_t glob_buf;
+    gchar **path_p;
+    gboolean found = FALSE;
+    gchar *symlink = NULL;
+    gchar *name = NULL;
+    gchar *node_name = NULL;
+
+    if (!g_str_has_prefix (node, "/dev/"))
+        node_path = g_strdup_printf ("/dev/%s", node);
+    else
+        node_path = g_strdup_printf (node);
+
+    if (glob ("/dev/md/*", GLOB_NOSORT, NULL, &glob_buf) != 0) {
+        g_free (node_path);
+        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_NO_MATCH,
+                     "No name found for the node '%s'", node);
+        return NULL;
+    }
+    for (path_p = glob_buf.gl_pathv; *path_p && !found; path_p++) {
+        symlink = g_file_read_link (*path_p, error);
+        if (!symlink)
+            continue;
+        node_name = g_path_get_basename (symlink);
+        if (g_strcmp0 (node_name, node) == 0) {
+            found = TRUE;
+            name = g_path_get_basename (*path_p);
+        }
+        g_free (node_name);
+    }
+    globfree (&glob_buf);
+    g_free (node_path);
+
+    if (!found)
+        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_NO_MATCH,
+                     "No name found for the node '%s'", node);
+    return name;
 }

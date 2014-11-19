@@ -8,6 +8,7 @@ GQuark bd_md_error_quark (void);
 typedef enum {
     BD_MD_ERROR_PARSE,
     BD_MD_ERROR_BAD_FORMAT,
+    BD_MD_ERROR_NO_MATCH,
 } BDMDError;
 
 typedef struct BDMDExamineData {
@@ -137,5 +138,7 @@ BDMDExamineData* bd_md_examine (gchar *device, GError **error);
 gchar* bd_md_canonicalize_uuid (gchar *uuid, GError **error);
 gchar* bd_md_get_md_uuid (gchar *uuid, GError **error);
 BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error);
+gchar* bd_md_node_from_name (gchar *name, GError **error);
+gchar* bd_md_name_from_node (gchar *node, GError **error);
 
 #endif  /* BD_MD */

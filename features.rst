@@ -152,8 +152,8 @@ MDRAID
    * canonicalize_uuid [DONE]
    * get_md_uuid [DONE]
    * detail [DONE]
-   * node_from_name
-   * name_from_node
+   * node_from_name [DONE]
+   * name_from_node [DONE]
 
 
 CRYPTO/LUKS

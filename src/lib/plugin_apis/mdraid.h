@@ -9,6 +9,7 @@
 typedef enum {
     BD_MD_ERROR_PARSE,
     BD_MD_ERROR_BAD_FORMAT,
+    BD_MD_ERROR_NO_MATCH,
 } BDMDError;
 
 #define BD_MD_TYPE_EXAMINEDATA (bd_md_examine_data_get_type ())
@@ -306,5 +307,23 @@ gchar* bd_md_get_md_uuid (gchar *uuid, GError **error);
  * Returns: information about the MD RAID @raid_name
  */
 BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error);
+
+/**
+ * bd_md_node_from_name:
+ * @name: name of the MD RAID
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: path to the @name MD RAID's device node or %NULL in case of error
+ */
+gchar* bd_md_node_from_name (gchar *name, GError **error);
+
+/**
+ * bd_md_name_from_node:
+ * @node: path of the MD RAID's device node
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: @name of the MD RAID the device node belongs to or %NULL in case of error
+ */
+gchar* bd_md_name_from_node (gchar *node, GError **error);
 
 #endif  /* BD_MD_API */

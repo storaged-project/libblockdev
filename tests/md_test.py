@@ -246,3 +246,31 @@ class MDTestCase(unittest.TestCase):
         self.assertTrue(succ)
         succ = BlockDev.md_destroy(self.loop_dev3)
         self.assertTrue(succ)
+
+    def test_name_node_bijection(self):
+        """Verify that MD RAID node and name match each other"""
+
+        with udev_settle():
+            succ = BlockDev.md_create("bd_test_md", "raid1",
+                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
+                                      1, None, True)
+            self.assertTrue(succ)
+
+        node = BlockDev.md_node_from_name("bd_test_md")
+        self.assertEqual(BlockDev.md_name_from_node(node), "bd_test_md")
+
+        with self.assertRaises(GLib.GError):
+            node = BlockDev.md_node_from_name("made_up_md")
+
+        with self.assertRaisesRegexp(GLib.GError, r'No name'):
+            BlockDev.md_name_from_node("no_such_node")
+
+        succ = BlockDev.md_deactivate("bd_test_md");
+        self.assertTrue(succ)
+
+        succ = BlockDev.md_destroy(self.loop_dev)
+        self.assertTrue(succ)
+        succ = BlockDev.md_destroy(self.loop_dev2)
+        self.assertTrue(succ)
+        succ = BlockDev.md_destroy(self.loop_dev3)
+        self.assertTrue(succ)
