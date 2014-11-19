@@ -138,7 +138,7 @@ gchar* bd_dm_node_from_name (gchar *map_name, GError **error) {
     if (!symlink) {
         /* error is already populated */
         g_free (dev_mapper_path);
-        return FALSE;
+        return NULL;
     }
 
     g_strstrip (symlink);
