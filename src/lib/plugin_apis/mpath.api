@@ -1,11 +1,9 @@
 #include <glib.h>
 
-/* BpG-skip */
 #define BD_MPATH_ERROR bd_mpath_error_quark ()
 typedef enum {
     BD_MPATH_ERROR_FLUSH,
 } BDMpathError;
-/* BpG-skip-end */
 
 /**
  * bd_mpath_flush_mpaths:

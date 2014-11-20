@@ -2,7 +2,7 @@
 **/*.o
 **/*.so
 **/*.pyc
-src/lib/plugin_apis/*.c
+src/lib/plugin_apis/*.[ch]
 src/lib/test_library
 src/plugins/test_loop
 src/plugins/test_lvm

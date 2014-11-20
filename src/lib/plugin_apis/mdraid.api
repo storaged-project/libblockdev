@@ -1,7 +1,6 @@
 #include <glib.h>
 #include <glib-object.h>
 
-/* BpG-skip */
 #ifndef BD_MD_API
 #define BD_MD_API
 
@@ -150,8 +149,6 @@ GType bd_md_detail_data_get_type () {
 
     return type;
 }
-
-/* BpG-skip-end */
 
 /**
  * bd_md_get_superblock_size:

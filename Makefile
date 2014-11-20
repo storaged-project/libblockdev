@@ -81,7 +81,7 @@ src/utils/libbd_utils.so: ${UTILS_OBJS}
 	gcc -shared -fPIC -o $@ $^
 
 # automatic generation of plugin stub functions
-src/lib/plugin_apis/%.c: src/lib/plugin_apis/%.h boilerplate_generator.py
+src/lib/plugin_apis/%.c: src/lib/plugin_apis/%.api boilerplate_generator.py
 	./boilerplate_generator.py $< src/lib/plugin_apis/
 
 src/lib/blockdev.o: ${LIBRARY_FILES} ${PLUGIN_SOURCE_FILES}
@@ -118,7 +118,7 @@ fast-test: all
 clean:
 	-rm BlockDev-1.0.gir
 	-rm BlockDev-1.0.typelib
-	-rm src/lib/plugin_apis/*.c
+	-rm src/lib/plugin_apis/*.[ch]
 	-rm src/lib/test_library
 	-rm src/plugins/test_loop
 	-rm src/plugins/test_lvm

@@ -1,7 +1,6 @@
 #include <glib.h>
 #include <glib-object.h>
 
-/* BpG-skip */
 #ifndef BD_LVM_API
 #define BD_LVM_API
 
@@ -184,7 +183,6 @@ GType bd_lvm_lvdata_get_type () {
 
     return type;
 }
-/* BpG-skip-end */
 
 /**
  * bd_lvm_is_supported_pe_size:

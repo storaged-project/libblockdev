@@ -1,6 +1,5 @@
 #include <glib.h>
 
-/* BpG-skip */
 #define BD_CRYPTO_ERROR bd_crypto_error_quark ()
 typedef enum {
     BD_CRYPTO_ERROR_DEVICE,
@@ -13,7 +12,6 @@ typedef enum {
     BD_CRYPTO_ERROR_NO_KEY,
     BD_CRYPTO_ERROR_KEY_SLOT,
 } BDCryptoError;
-/* BpG-skip-end */
 
 /**
  * bd_crypto_generate_backup_passphrase:

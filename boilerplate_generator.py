@@ -11,16 +11,19 @@ import re
 import sys
 import os
 
-FuncInfo = namedtuple("FuncInfo", ["name", "doc", "rtype", "args"])
+FuncInfo = namedtuple("FuncInfo", ["name", "doc", "rtype", "args", "body"])
 FUNC_SPEC_RE = re.compile(r'(?P<rtype>\**\s*\w+\s*\**)'
                           r'\s*'
                           r'(?P<name>\w+)'
                           r'\s*\('
                           r'(?P<args>[\w*\s,]*)'
-                          r'\);')
+                          r'\)(;| \{)')
 
-def gather_func_info(line_iter, includes):
+def gather_defs_and_func_info(line_iter, includes):
     name = doc = rtype = args = ""
+    defs = ""
+    body = ""
+    in_body = False
     in_doc = False
     in_skip = False
     for line in line_iter:
@@ -28,9 +31,12 @@ def gather_func_info(line_iter, includes):
             in_skip = False
         elif in_skip or line.strip().startswith("/* BpG-skip"):
             in_skip = True
-        elif line.strip() == "" or line.strip().startswith("//") or line.strip().startswith("/* "):
-            # whitespace line or ignored comment, skip it
-            continue
+        elif line.rstrip() == "}" and in_body:
+            in_body = False
+            # nothing more for this function
+            break
+        elif in_body:
+            body += line
         elif line.strip().startswith("#include"):
             includes.append(line.strip()[8:])
         elif line.strip().startswith("/**"):
@@ -47,30 +53,38 @@ def gather_func_info(line_iter, includes):
                 rtype = fields["rtype"]
                 args = fields["args"]
 
-                # nothing more for this function
-                break
+                if line.strip().endswith("{"):
+                    in_body = True
+                else:
+                    # nothing more for this function
+                    break
             elif in_doc:
                 doc += line
             else:
-                msg = "Skipping unknown line: '{0}'".format(line.rstrip("\n"))
-                print(msg, file=sys.stderr)
+                defs += line
     else:
-        return None
+        return (defs, None)
 
-    return FuncInfo(name, doc, rtype, args)
+    return (defs, FuncInfo(name, doc, rtype, args, body))
 
 def process_file(fobj):
     includes = []
 
     line_iter = iter(fobj)
-    fn_infos = list()
+    items = list()
 
-    fn_info = gather_func_info(line_iter, includes)
+    defs, fn_info = gather_defs_and_func_info(line_iter, includes)
     while fn_info:
-        fn_infos.append(fn_info)
-        fn_info = gather_func_info(line_iter, includes)
+        if defs:
+            items.append(defs)
+        if fn_info:
+            items.append(fn_info)
+        defs, fn_info = gather_defs_and_func_info(line_iter, includes)
 
-    return includes, fn_infos
+    if defs:
+        # definitions after the last function
+        items.append(defs)
+    return includes, items
 
 def get_arg_names(args):
     if not args.strip():
@@ -164,9 +178,19 @@ def get_loading_func(fn_infos, module_name):
 
     return ret
 
+def get_fn_code(fn_info):
+    ret = ("{0.doc}{0.rtype} {0.name} ({0.args}) {{\n" +
+            "    {0.body}" +
+            "}}\n\n").format(fn_info)
+
+    return ret
+
+def get_fn_header(fn_info):
+    return "{0.doc}{0.rtype} {0.name} ({0.args});\n\n".format(fn_info)
+
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("Needs a file name and output directory, exitting.", file=sys.stderr)
+        print("Needs a file name and output directory, exitting.")
         print("Usage: %s FILE_NAME OUTPUT_DIR", sys.argv[0])
         sys.exit(1)
 
@@ -180,13 +204,28 @@ if __name__ == "__main__":
 
     file_name = os.path.basename(sys.argv[1])
     mod_name, dot, ext = file_name.partition(".")
-    if not dot or ext not in ("c", "h"):
-        print("Invalid file given, needs to be in MODNAME.[ch] format", file=sys.stderr)
+    if not dot or ext != "api":
+        print("Invalid file given, needs to be in MODNAME.api format")
         sys.exit(2)
 
-    includes, fn_infos = process_file(open(sys.argv[1], "r"))
-    with open(os.path.join(sys.argv[2], mod_name + ".c"), "w") as out_f:
-        out_f.write(get_funcs_info(fn_infos, mod_name))
-        for info in fn_infos:
-            out_f.write(get_func_boilerplate(info))
-        out_f.write(get_loading_func(fn_infos, mod_name))
+    includes, items = process_file(open(sys.argv[1], "r"))
+    nonapi_fn_infos = [item for item in items if isinstance(item, FuncInfo) and item.body]
+    api_fn_infos = [item for item in items if isinstance(item, FuncInfo) and not item.body and item.doc]
+    with open(os.path.join(out_dir, mod_name + ".c"), "w") as src_f:
+        for info in nonapi_fn_infos:
+            src_f.write(get_fn_code(info))
+        src_f.write(get_funcs_info(api_fn_infos, mod_name))
+        for info in api_fn_infos:
+            src_f.write(get_func_boilerplate(info))
+        src_f.write(get_loading_func(api_fn_infos, mod_name))
+
+    written_fns = set()
+    with open(os.path.join(out_dir, mod_name + ".h"), "w") as hdr_f:
+        hdr_f.write(get_includes_str(includes))
+        for item in items:
+            if isinstance(item, FuncInfo):
+                if item.name not in written_fns:
+                    hdr_f.write(get_fn_header(item))
+                    written_fns.add(item.name)
+            else:
+                hdr_f.write(item)
