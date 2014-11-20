@@ -45,6 +45,71 @@ GQuark bd_lvm_error_quark (void)
     return g_quark_from_static_string ("g-bd-lvm-error-quark");
 }
 
+BDLVMPVdata* bd_lvm_pvdata_copy (BDLVMPVdata *data) {
+    BDLVMPVdata *new_data = g_new (BDLVMPVdata, 1);
+
+    new_data->pv_name = g_strdup (data->pv_name);
+    new_data->pv_uuid = g_strdup (data->pv_uuid);
+    new_data->pe_start = data->pe_start;
+    new_data->vg_name = g_strdup (data->vg_name);
+    new_data->vg_size = data->vg_size;
+    new_data->vg_free = data->vg_free;
+    new_data->vg_extent_size = data->vg_extent_size;
+    new_data->vg_extent_count = data->vg_extent_count;
+    new_data->vg_free_count = data->vg_free_count;
+    new_data->vg_pv_count = data->vg_pv_count;
+
+    return new_data;
+}
+
+void bd_lvm_pvdata_free (BDLVMPVdata *data) {
+    g_free (data->pv_name);
+    g_free (data->pv_uuid);
+    g_free (data->vg_name);
+    g_free (data);
+}
+
+BDLVMVGdata* bd_lvm_vgdata_copy (BDLVMVGdata *data) {
+    BDLVMVGdata *new_data = g_new (BDLVMVGdata, 1);
+
+    new_data->name = g_strdup (data->name);
+    new_data->uuid = g_strdup (data->uuid);
+    new_data->size = data->size;
+    new_data->free = data->free;
+    new_data->extent_size = data->extent_size;
+    new_data->extent_count = data->extent_count;
+    new_data->free_count = data->free_count;
+    new_data->pv_count = data->pv_count;
+    return new_data;
+}
+
+void bd_lvm_vgdata_free (BDLVMVGdata *data) {
+    g_free (data->name);
+    g_free (data->uuid);
+    g_free (data);
+}
+
+BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
+    BDLVMLVdata *new_data = g_new (BDLVMLVdata, 1);
+
+    new_data->lv_name = g_strdup (data->lv_name);
+    new_data->vg_name = g_strdup (data->vg_name);
+    new_data->uuid = g_strdup (data->uuid);
+    new_data->size = data->size;
+    new_data->attr = g_strdup (data->attr);
+    new_data->segtype = g_strdup (data->segtype);
+    return new_data;
+}
+
+void bd_lvm_lvdata_free (BDLVMLVdata *data) {
+    g_free (data->lv_name);
+    g_free (data->vg_name);
+    g_free (data->uuid);
+    g_free (data->attr);
+    g_free (data->segtype);
+    g_free (data);
+}
+
 static gchar const * const supported_functions[] = {
     "bd_lvm_is_supported_pe_size",
     "bd_lvm_get_max_lv_size",

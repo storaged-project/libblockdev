@@ -24,41 +24,8 @@ typedef struct BDMDExamineData {
     gchar *metadata;
 } BDMDExamineData;
 
-/**
- * bd_md_examine_data_copy: (skip)
- *
- * Creates a new copy of @data.
- */
-BDMDExamineData* bd_md_examine_data_copy (BDMDExamineData *data) {
-    BDMDExamineData *new_data = g_new (BDMDExamineData, 1);
-
-    new_data->device = g_strdup (data->device);
-    new_data->level = g_strdup (data->level);
-    new_data->num_devices = data->num_devices;
-    new_data->name = g_strdup (data->name);
-    new_data->size = data->size;
-    new_data->uuid = g_strdup (data->uuid);
-    new_data->update_time = data->update_time;
-    new_data->dev_uuid = g_strdup (data->dev_uuid);
-    new_data->events = data->events;
-    new_data->metadata = g_strdup (data->metadata);
-    return new_data;
-}
-
-/**
- * bd_md_examine_data_free: (skip)
- *
- * Frees @data.
- */
-void bd_md_examine_data_free (BDMDExamineData *data) {
-    g_free (data->device);
-    g_free (data->level);
-    g_free (data->name);
-    g_free (data->uuid);
-    g_free (data->dev_uuid);
-    g_free (data->metadata);
-    g_free (data);
-}
+BDMDExamineData* bd_md_examine_data_copy (BDMDExamineData *data);
+void bd_md_examine_data_free (BDMDExamineData *data);
 
 typedef struct BDMDDetailData {
     gchar *device;
@@ -78,47 +45,8 @@ typedef struct BDMDDetailData {
     gchar *uuid;
 } BDMDDetailData;
 
-/**
- * bd_md_detail_data_copy: (skip)
- *
- * Creates a new copy of @data.
- */
-BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data) {
-    BDMDDetailData *new_data = g_new (BDMDDetailData, 1);
-
-    new_data->device = g_strdup (data->device);
-    new_data->name = g_strdup (data->name);
-    new_data->metadata = g_strdup (data->metadata);
-    new_data->creation_time = g_strdup (data->creation_time);
-    new_data->level = g_strdup (data->level);
-    new_data->array_size = data->array_size;
-    new_data->use_dev_size = data->use_dev_size;
-    new_data->raid_devices = data->raid_devices;
-    new_data->active_devices = data->active_devices;
-    new_data->working_devices = data->working_devices;
-    new_data->failed_devices = data->failed_devices;
-    new_data->spare_devices = data->spare_devices;
-    new_data->clean = data->clean;
-    new_data->uuid = g_strdup (data->uuid);
-
-    return new_data;
-}
-
-/**
- * bd_md_detail_data_free: (skip)
- *
- * Frees @data.
- */
-void bd_md_detail_data_free (BDMDDetailData *data) {
-    g_free (data->device);
-    g_free (data->name);
-    g_free (data->metadata);
-    g_free (data->creation_time);
-    g_free (data->level);
-    g_free (data->uuid);
-
-    g_free (data);
-}
+void bd_md_detail_data_free (BDMDDetailData *data);
+BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data);
 
 /* taken from blivet */
 // these defaults were determined empirically

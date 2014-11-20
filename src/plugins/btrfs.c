@@ -42,6 +42,54 @@ GQuark bd_btrfs_error_quark (void)
     return g_quark_from_static_string ("g-bd-btrfs-error-quark");
 }
 
+BDBtrfsDeviceInfo* bd_btrfs_device_info_copy (BDBtrfsDeviceInfo *info) {
+    BDBtrfsDeviceInfo *new_info = g_new (BDBtrfsDeviceInfo, 1);
+
+    new_info->id = info->id;
+    new_info->path = g_strdup (info->path);
+    new_info->size = info->size;
+    new_info->used = info->used;
+
+    return new_info;
+}
+
+void bd_btrfs_device_info_free (BDBtrfsDeviceInfo *info) {
+    g_free (info->path);
+    g_free (info);
+}
+
+BDBtrfsSubvolumeInfo* bd_btrfs_subvolume_info_copy (BDBtrfsSubvolumeInfo *info) {
+    BDBtrfsSubvolumeInfo *new_info = g_new (BDBtrfsSubvolumeInfo, 1);
+
+    new_info->id = info->id;
+    new_info->parent_id = info->parent_id;
+    new_info->path = g_strdup (info->path);
+
+    return new_info;
+}
+
+void bd_btrfs_subvolume_info_free (BDBtrfsSubvolumeInfo *info) {
+    g_free (info->path);
+    g_free (info);
+}
+
+BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info_copy (BDBtrfsFilesystemInfo *info) {
+    BDBtrfsFilesystemInfo *new_info = g_new (BDBtrfsFilesystemInfo, 1);
+
+    new_info->label = g_strdup (info->label);
+    new_info->uuid = g_strdup (info->uuid);
+    new_info->num_devices = info->num_devices;
+    new_info->used = info->used;
+
+    return new_info;
+}
+
+void bd_btrfs_filesystem_info_free (BDBtrfsFilesystemInfo *info) {
+    g_free (info->label);
+    g_free (info->uuid);
+    g_free (info);
+}
+
 static gboolean path_is_mountpoint (gchar *path) {
     GError *error = NULL;
     gchar *real_path = NULL;
