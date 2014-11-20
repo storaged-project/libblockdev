@@ -165,19 +165,28 @@ def get_loading_func(fn_infos, module_name):
     return ret
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Needs a file name, exitting.", file=sys.stderr)
-        print("Usage: %s FILE_NAME", sys.argv[0])
+    if len(sys.argv) < 3:
+        print("Needs a file name and output directory, exitting.", file=sys.stderr)
+        print("Usage: %s FILE_NAME OUTPUT_DIR", sys.argv[0])
         sys.exit(1)
 
+    if not os.path.exists(sys.argv[1]):
+        print("Input file '%s' doesn't exist" % sys.argv[1])
+        sys.exit(1)
+
+    out_dir = sys.argv[2]
+    if not os.path.exists (out_dir):
+        os.makedirs(out_dir)
+
     file_name = os.path.basename(sys.argv[1])
-    mod_name, dot, _ext = file_name.partition(".")
-    if not dot:
+    mod_name, dot, ext = file_name.partition(".")
+    if not dot or ext not in ("c", "h"):
         print("Invalid file given, needs to be in MODNAME.[ch] format", file=sys.stderr)
         sys.exit(2)
 
     includes, fn_infos = process_file(open(sys.argv[1], "r"))
-    print(get_funcs_info(fn_infos, mod_name), end='')
-    for info in fn_infos:
-        print(get_func_boilerplate(info), end='')
-    print(get_loading_func(fn_infos, mod_name), end='')
+    with open(os.path.join(sys.argv[2], mod_name + ".c"), "w") as out_f:
+        out_f.write(get_funcs_info(fn_infos, mod_name))
+        for info in fn_infos:
+            out_f.write(get_func_boilerplate(info))
+        out_f.write(get_loading_func(fn_infos, mod_name))
