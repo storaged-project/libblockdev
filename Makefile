@@ -45,7 +45,7 @@ test_%.o: test_%.c %.c %.h
 	gcc -c -Wall -Wextra -Werror -o $@ -I src/utils/ ${GLIB_INCLUDES} $<
 
 test_%: test_%.o ${UTILS_OBJS}
-	gcc -o $@ -lm ${GLIB} $^
+	gcc -o $@ ${GLIB} $^
 
 test-%: src/plugins/test_%
 	@echo "***Running tests***"
@@ -53,7 +53,7 @@ test-%: src/plugins/test_%
 
 # test_sizes executable must avoid two copies of sizes.o
 src/utils/test_sizes: src/utils/test_sizes.o
-	gcc -o $@ -lm ${GLIB} $<
+	gcc -o $@ ${GLIB} $<
 
 test-sizes: src/utils/test_sizes
 	@echo "***Running tests***"
@@ -64,7 +64,7 @@ src/lib/test_blockdev.o: src/lib/test_blockdev.c src/lib/blockdev.c src/lib/bloc
 	gcc -c -Wextra -Werror -o $@ -I src/utils/ -I src/plugins ${GLIB_INCLUDES} $<
 
 src/lib/test_library: src/lib/test_blockdev.o ${PLUGIN_LIBS} src/utils/libbd_utils.so
-	gcc -o $@ -L src/utils/ -lm -lbd_utils -ldl ${GLIB} ${GOBJECT} $<
+	gcc -o $@ -L src/utils/ -lbd_utils -ldl ${GLIB} ${GOBJECT} $<
 
 test-library: src/lib/test_library
 	@echo "***Running tests***"
@@ -78,7 +78,7 @@ libbd_%.so: %.o
 
 # utils library
 src/utils/libbd_utils.so: ${UTILS_OBJS}
-	gcc -shared -fPIC -o $@ $^
+	gcc -shared -fPIC -o $@ $^ -lm
 
 # automatic generation of plugin stub functions
 src/lib/plugin_apis/%.c: src/lib/plugin_apis/%.api boilerplate_generator.py
@@ -91,7 +91,7 @@ src/lib/libblockdev.so: src/lib/blockdev.o
 	gcc -shared -fPIC -o $@ $<
 
 BlockDev-1.0.gir: src/utils/libbd_utils.so src/lib/libblockdev.so ${LIBRARY_FILES}
-	LD_LIBRARY_PATH=src/lib/:src/utils/ g-ir-scanner --warn-error `pkg-config --cflags --libs glib-2.0 gobject-2.0 libcryptsetup devmapper` -ldmraid --library=blockdev -I src/lib/ -I src/utils/ -L src/utils -lbd_utils -lm -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o $@ --warn-all ${LIBRARY_FILES} ${PLUGIN_HEADER_FILES} ${UTILS_HEADER_FILES} ${UTILS_SOURCE_FILES}
+	LD_LIBRARY_PATH=src/lib/:src/utils/ g-ir-scanner --warn-error `pkg-config --cflags --libs glib-2.0 gobject-2.0 libcryptsetup devmapper` -ldmraid --library=blockdev -I src/lib/ -I src/utils/ -L src/utils -lbd_utils -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o $@ --warn-all ${LIBRARY_FILES} ${PLUGIN_HEADER_FILES} ${UTILS_HEADER_FILES} ${UTILS_SOURCE_FILES}
 
 BlockDev-1.0.typelib: BlockDev-1.0.gir
 	g-ir-compiler -o $@ $<
