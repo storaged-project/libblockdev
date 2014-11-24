@@ -1,9 +1,11 @@
+#include <glib.h>
 #include <glib/gprintf.h>
 
 #include "blockdev.c"
 
 int main (int argc, char* argv[]) {
-    bd_init(NULL);
+    GError *error = NULL;
+    bd_init(NULL, NULL, &error);
     g_printf ("available plugins: %s\n", g_strjoinv (", ", bd_get_available_plugin_names()));
 
     if (bd_is_plugin_available (BD_PLUGIN_SWAP))

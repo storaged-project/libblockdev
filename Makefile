@@ -63,12 +63,12 @@ test-sizes: src/utils/test_sizes
 src/lib/test_blockdev.o: src/lib/test_blockdev.c src/lib/blockdev.c src/lib/blockdev.h ${PLUGIN_SOURCE_FILES}
 	gcc -c -Wextra -Werror -o $@ -I src/utils/ -I src/plugins ${GLIB_INCLUDES} $<
 
-src/lib/test_library: src/lib/test_blockdev.o ${PLUGIN_LIBS}
-	gcc -o $@ -ldl ${GLIB} ${GOBJECT} $<
+src/lib/test_library: src/lib/test_blockdev.o ${PLUGIN_LIBS} src/utils/libbd_utils.so
+	gcc -o $@ -L src/utils/ -lm -lbd_utils -ldl ${GLIB} ${GOBJECT} $<
 
 test-library: src/lib/test_library
 	@echo "***Running tests***"
-	LD_LIBRARY_PATH=src/plugins/ ./$<
+	LD_LIBRARY_PATH=src/plugins/:src/utils ./$<
 
 test-plugins: ${PLUGIN_TESTS}
 
