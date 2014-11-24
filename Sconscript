@@ -1,0 +1,83 @@
+import os
+from boilerplate_generator import generate_source_header
+
+MAIN_VERSION = "1.0.0"
+
+glib_env = Environment(SHLIBVERSION=MAIN_VERSION)
+glib_env.ParseConfig("pkg-config --cflags --libs glib-2.0")
+
+## the bd_utils library
+bd_utils_env = glib_env.Clone()
+bd_utils_env.SharedLibrary("bd_utils", ["src/utils/sizes.c", "src/utils/exec.c"])
+
+## plugins
+btrfs_env = glib_env.Clone()
+btrfs_env.Append(CPPPATH="src/utils")
+btrfs_env.Append(LIBPATH=".")
+btrfs_env.Append(LIBS="bd_utils")
+btrfs_env.SharedLibrary("bd_btrfs", ["src/plugins/btrfs.c"])
+
+crypto_env = glib_env.Clone()
+crypto_env.ParseConfig("pkg-config --cflags --libs libcryptsetup")
+crypto_env.SharedLibrary("bd_crypto", ["src/plugins/crypto.c"])
+
+dm_env = glib_env.Clone()
+dm_env.ParseConfig("pkg-config --cflags --libs devmapper libudev")
+dm_env.Append(CPPPATH="src/utils")
+dm_env.Append(LIBPATH=".")
+dm_env.Append(LIBS=["bd_utils", "dmraid"])
+dm_env.SharedLibrary("bd_dm", ["src/plugins/dm.c"])
+
+loop_env = glib_env.Clone()
+loop_env.Append(CPPPATH="src/utils")
+loop_env.Append(LIBPATH=".")
+loop_env.Append(LIBS="bd_utils")
+loop_env.SharedLibrary("bd_loop", ["src/plugins/loop.c"])
+
+lvm_env = glib_env.Clone()
+lvm_env.Append(CPPPATH="src/utils")
+lvm_env.Append(LIBPATH=".")
+lvm_env.Append(LIBS="bd_utils")
+lvm_env.SharedLibrary("bd_lvm", ["src/plugins/lvm.c"])
+
+mdraid_env = glib_env.Clone()
+mdraid_env.Append(CPPPATH="src/utils")
+mdraid_env.Append(LIBPATH=".")
+mdraid_env.Append(LIBS="bd_utils")
+mdraid_env.SharedLibrary("bd_mdraid", ["src/plugins/mdraid.c"])
+
+mpath_env = glib_env.Clone()
+mpath_env.Append(CPPPATH="src/utils")
+mpath_env.Append(LIBPATH=".")
+mpath_env.Append(LIBS="bd_utils")
+mpath_env.SharedLibrary("bd_mpath", ["src/plugins/mpath.c"])
+
+swap_env = glib_env.Clone()
+swap_env.Append(CPPPATH="src/utils")
+swap_env.Append(LIBPATH=".")
+swap_env.Append(LIBS="bd_utils")
+swap_env.SharedLibrary("bd_swap", ["src/plugins/swap.c"])
+
+## boilerplate code generation
+def generate_boilerplate_files (target, source, env):
+    generate_source_header(str(source[0]), os.path.dirname(str(target[0])))
+bpg_builder = Builder(action=generate_boilerplate_files)
+
+bpg_env = Environment()
+bpg_env.Append(BUILDERS={"BpG": bpg_builder})
+bpg_env.BpG(["plugin_apis/btrfs.h", "plugin_apis/btrfs.c"], "src/lib/plugin_apis/btrfs.api")
+bpg_env.BpG(["plugin_apis/crypto.h", "plugin_apis/crypto.c"], "src/lib/plugin_apis/crypto.api")
+bpg_env.BpG(["plugin_apis/dm.h", "plugin_apis/dm.c"], "src/lib/plugin_apis/dm.api")
+bpg_env.BpG(["plugin_apis/lvm.h", "plugin_apis/lvm.c"], "src/lib/plugin_apis/lvm.api")
+bpg_env.BpG(["plugin_apis/loop.h", "plugin_apis/loop.c"], "src/lib/plugin_apis/loop.api")
+bpg_env.BpG(["plugin_apis/mdraid.h", "plugin_apis/mdraid.c"], "src/lib/plugin_apis/mdraid.api")
+bpg_env.BpG(["plugin_apis/mpath.h", "plugin_apis/mpath.c"], "src/lib/plugin_apis/mpath.api")
+bpg_env.BpG(["plugin_apis/swap.h", "plugin_apis/swap.c"], "src/lib/plugin_apis/swap.api")
+
+## the library itself
+lib_env = glib_env.Clone()
+lib_env.Append(CPPPATH="src/utils")
+lib_env.Append(LIBPATH=".")
+lib_env.Append(LIBS="bd_utils")
+lib_env.Append(CPPPATH=".")
+lib_env.SharedLibrary("blockdev", ["src/lib/blockdev.c"])
