@@ -87,10 +87,10 @@ src/lib/plugin_apis/%.c: src/lib/plugin_apis/%.api boilerplate_generator.py
 src/lib/blockdev.o: ${LIBRARY_FILES} ${PLUGIN_SOURCE_FILES}
 	gcc -fPIC -c -Wextra -Werror ${GLIB_INCLUDES} ${GOBJECT_INCLUDES} -I src/utils $< -o $@
 
-src/lib/libblockdev.so: src/lib/blockdev.o
-	gcc -shared -fPIC -o $@ $<
+src/lib/libblockdev.so: src/lib/blockdev.o src/utils/libbd_utils.so
+	gcc -L src/utils -shared -fPIC -o $@ $< -lbd_utils
 
-BlockDev-1.0.gir: src/utils/libbd_utils.so src/lib/libblockdev.so ${LIBRARY_FILES}
+BlockDev-1.0.gir: src/lib/libblockdev.so ${LIBRARY_FILES}
 	LD_LIBRARY_PATH=src/lib/:src/utils/ g-ir-scanner --warn-error `pkg-config --cflags --libs glib-2.0 gobject-2.0 libcryptsetup devmapper` -ldmraid --library=blockdev -I src/lib/ -I src/utils/ -L src/utils -lbd_utils -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o $@ --warn-all ${LIBRARY_FILES} ${PLUGIN_HEADER_FILES} ${UTILS_HEADER_FILES} ${UTILS_SOURCE_FILES}
 
 BlockDev-1.0.typelib: BlockDev-1.0.gir
