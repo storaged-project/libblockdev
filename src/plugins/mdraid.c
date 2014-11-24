@@ -19,8 +19,7 @@
 
 #include <glib.h>
 #include <unistd.h>
-#include <exec.h>
-#include <sizes.h>
+#include <utils.h>
 #include <string.h>
 #include <glob.h>
 

@@ -18,9 +18,9 @@
  */
 
 #include <glib.h>
-#include <sizes.h>
 #include <math.h>
-#include <exec.h>
+#include <utils.h>
+
 #include "lvm.h"
 
 #define INT_FLOAT_EPS 1e-5

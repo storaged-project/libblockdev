@@ -1,5 +1,5 @@
-#include <sizes.h>
 #include <glib.h>
+#include <utils.h>
 
 #ifndef BD_LVM
 #define BD_LVM
