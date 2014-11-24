@@ -162,7 +162,7 @@ def get_loading_func(fn_infos, module_name):
 
     ret += '    handle = dlopen(so_name, RTLD_LAZY);\n'
     ret += '    if (!handle) {\n'
-    ret += '        g_warning("failed to load module {0}: %s", dlerror());\n'.format(mod_name)
+    ret += '        g_warning("failed to load module {0}: %s", dlerror());\n'.format(module_name)
     ret += '        return NULL;\n'
     ret += '    }\n\n'
 
@@ -188,27 +188,14 @@ def get_fn_code(fn_info):
 def get_fn_header(fn_info):
     return "{0.doc}{0.rtype} {0.name} ({0.args});\n\n".format(fn_info)
 
-if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("Needs a file name and output directory, exitting.")
-        print("Usage: %s FILE_NAME OUTPUT_DIR", sys.argv[0])
-        sys.exit(1)
-
-    if not os.path.exists(sys.argv[1]):
-        print("Input file '%s' doesn't exist" % sys.argv[1])
-        sys.exit(1)
-
-    out_dir = sys.argv[2]
-    if not os.path.exists (out_dir):
-        os.makedirs(out_dir)
-
-    file_name = os.path.basename(sys.argv[1])
+def generate_source_header(api_file, out_dir):
+    file_name = os.path.basename(api_file)
     mod_name, dot, ext = file_name.partition(".")
     if not dot or ext != "api":
         print("Invalid file given, needs to be in MODNAME.api format")
-        sys.exit(2)
+        return 1
 
-    includes, items = process_file(open(sys.argv[1], "r"))
+    includes, items = process_file(open(api_file, "r"))
     nonapi_fn_infos = [item for item in items if isinstance(item, FuncInfo) and item.body]
     api_fn_infos = [item for item in items if isinstance(item, FuncInfo) and not item.body and item.doc]
     with open(os.path.join(out_dir, mod_name + ".c"), "w") as src_f:
@@ -229,3 +216,23 @@ if __name__ == "__main__":
                     written_fns.add(item.name)
             else:
                 hdr_f.write(item)
+
+    return 0
+
+if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print("Needs a file name and output directory, exitting.")
+        print("Usage: %s FILE_NAME OUTPUT_DIR", sys.argv[0])
+        sys.exit(1)
+
+    if not os.path.exists(sys.argv[1]):
+        print("Input file '%s' doesn't exist" % sys.argv[1])
+        sys.exit(1)
+
+    out_dir = sys.argv[2]
+    if not os.path.exists (out_dir):
+        os.makedirs(out_dir)
+
+    status = generate_source_header(sys.argv[1], out_dir)
+
+    sys.exit(status)
