@@ -20,7 +20,7 @@
 #include <glib.h>
 #include <string.h>
 #include <unistd.h>
-#include <exec.h>
+#include <utils.h>
 #include "swap.h"
 
 /**

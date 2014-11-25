@@ -18,7 +18,7 @@
  */
 
 #include <glib.h>
-#include <exec.h>
+#include <utils.h>
 #include "mpath.h"
 
 /**

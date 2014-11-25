@@ -1,10 +1,10 @@
+#include <utils.h>
 #include <glib.h>
 
 #ifndef BD_LIB
 #define BD_LIB
 
 #include "plugins.h"
-#include "exec.h"
 
 #define BD_INIT_ERROR bd_init_error_quark ()
 typedef enum {
