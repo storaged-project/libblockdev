@@ -73,16 +73,17 @@ def generate_boilerplate_files(target, source, env):
     generate_source_header(str(source[0]), os.path.dirname(str(target[0])))
 bpg_builder = Builder(action=generate_boilerplate_files)
 
+boiler_code = []
 bpg_env = Environment()
 bpg_env.Append(BUILDERS={"BpG": bpg_builder})
-bpg_env.BpG(["plugin_apis/btrfs.h", "plugin_apis/btrfs.c"], "src/lib/plugin_apis/btrfs.api")
-bpg_env.BpG(["plugin_apis/crypto.h", "plugin_apis/crypto.c"], "src/lib/plugin_apis/crypto.api")
-bpg_env.BpG(["plugin_apis/dm.h", "plugin_apis/dm.c"], "src/lib/plugin_apis/dm.api")
-bpg_env.BpG(["plugin_apis/lvm.h", "plugin_apis/lvm.c"], "src/lib/plugin_apis/lvm.api")
-bpg_env.BpG(["plugin_apis/loop.h", "plugin_apis/loop.c"], "src/lib/plugin_apis/loop.api")
-bpg_env.BpG(["plugin_apis/mdraid.h", "plugin_apis/mdraid.c"], "src/lib/plugin_apis/mdraid.api")
-bpg_env.BpG(["plugin_apis/mpath.h", "plugin_apis/mpath.c"], "src/lib/plugin_apis/mpath.api")
-bpg_env.BpG(["plugin_apis/swap.h", "plugin_apis/swap.c"], "src/lib/plugin_apis/swap.api")
+boiler_code.append(bpg_env.BpG(["plugin_apis/btrfs.h", "plugin_apis/btrfs.c"], "src/lib/plugin_apis/btrfs.api"))
+boiler_code.append(bpg_env.BpG(["plugin_apis/crypto.h", "plugin_apis/crypto.c"], "src/lib/plugin_apis/crypto.api"))
+boiler_code.append(bpg_env.BpG(["plugin_apis/dm.h", "plugin_apis/dm.c"], "src/lib/plugin_apis/dm.api"))
+boiler_code.append(bpg_env.BpG(["plugin_apis/lvm.h", "plugin_apis/lvm.c"], "src/lib/plugin_apis/lvm.api"))
+boiler_code.append(bpg_env.BpG(["plugin_apis/loop.h", "plugin_apis/loop.c"], "src/lib/plugin_apis/loop.api"))
+boiler_code.append(bpg_env.BpG(["plugin_apis/mdraid.h", "plugin_apis/mdraid.c"], "src/lib/plugin_apis/mdraid.api"))
+boiler_code.append(bpg_env.BpG(["plugin_apis/mpath.h", "plugin_apis/mpath.c"], "src/lib/plugin_apis/mpath.api"))
+boiler_code.append(bpg_env.BpG(["plugin_apis/swap.h", "plugin_apis/swap.c"], "src/lib/plugin_apis/swap.api"))
 
 
 ## the library itself
@@ -92,6 +93,8 @@ lib_env.Append(LIBPATH=".")
 lib_env.Append(LIBS="bd_utils")
 lib_env.Append(CPPPATH=".")
 main_lib = lib_env.SharedLibrary("blockdev", ["src/lib/blockdev.c"])
+for build in boiler_code:
+    Depends(main_lib, boiler_code)
 
 
 ## GObject introspection data
