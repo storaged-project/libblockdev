@@ -1,14 +1,9 @@
 # includes
 GLIB_INCLUDES := `pkg-config --cflags glib-2.0`
-GOBJECT_INCLUDES := `pkg-config --cflags gobject-2.0`
-LIBCRYPTSETUP_INCLUDES := `pkg-config --cflags libcryptsetup`
 
 # libraries
 GLIB := `pkg-config --libs glib-2.0`
 GOBJECT := `pkg-config --libs gobject-2.0`
-LIBCRYPTSETUP := `pkg-config --libs libcryptsetup`
-DEVMAPPER := `pkg-config --libs devmapper`
-DMRAID := "-ldmraid"
 
 # library for internal use
 UTILS_SOURCE_FILES := src/utils/exec.c src/utils/sizes.c
@@ -31,14 +26,8 @@ PLUGIN_TEST_SOURCES := $(wildcard src/plugins/test_*.c)
 PLUGIN_TEST_EXECUTABLES := $(addprefix src/plugins/,$(patsubst test_%.c,test_%,$(notdir ${PLUGIN_TEST_SOURCES})))
 PLUGIN_TESTS := $(patsubst test_%.c,test-%,$(notdir ${PLUGIN_TEST_SOURCES}))
 
-# plugin management
-LIBRARY_FILES := src/lib/blockdev.c src/lib/blockdev.h src/lib/plugins.h
-
-all: src/lib/libblockdev.so ${PLUGIN_LIBS} BlockDev-1.0.typelib
-
-# object files
-%.o: %.c %.h
-	gcc -c -Wall -Wextra -Werror -fPIC -o $@ -I src/utils/ ${GLIB_INCLUDES} $<
+all:
+	scons -Q build
 
 # test object files include the source of the programs they test
 test_%.o: test_%.c %.c %.h
@@ -72,59 +61,40 @@ test-library: src/lib/test_library
 
 test-plugins: ${PLUGIN_TESTS}
 
-# individual plugin libraries
-libbd_%.so: %.o
-	gcc -shared -fPIC -o $@ $<
+%.so:
+	scons -Q build/$@
 
-# utils library
-src/utils/libbd_utils.so: ${UTILS_OBJS}
-	gcc -shared -fPIC -o $@ $^ -lm
+BlockDev-1.0.gir:
+	scons -Q BlockDev-1.0.gir
 
-# automatic generation of plugin stub functions
-src/lib/plugin_apis/%.c: src/lib/plugin_apis/%.api boilerplate_generator.py
-	./boilerplate_generator.py $< src/lib/plugin_apis/
-
-src/lib/blockdev.o: ${LIBRARY_FILES} ${PLUGIN_SOURCE_FILES}
-	gcc -fPIC -c -Wextra -Werror ${GLIB_INCLUDES} ${GOBJECT_INCLUDES} -I src/utils $< -o $@
-
-src/lib/libblockdev.so: src/lib/blockdev.o src/utils/libbd_utils.so
-	gcc -L src/utils -shared -fPIC -o $@ $< -lbd_utils
-
-BlockDev-1.0.gir: src/lib/libblockdev.so ${LIBRARY_FILES}
-	LD_LIBRARY_PATH=src/lib/:src/utils/ g-ir-scanner --warn-error `pkg-config --cflags --libs glib-2.0 gobject-2.0 libcryptsetup devmapper` -ldmraid --library=blockdev -I src/lib/ -I src/utils/ -L src/utils -lbd_utils -L src/lib/ --identifier-prefix=BD --symbol-prefix=bd --namespace BlockDev --nsversion=1.0 -o $@ --warn-all ${LIBRARY_FILES} ${PLUGIN_HEADER_FILES} ${UTILS_HEADER_FILES} ${UTILS_SOURCE_FILES}
-
-BlockDev-1.0.typelib: BlockDev-1.0.gir
-	g-ir-compiler -o $@ $<
+BlockDev-1.0.typelib:
+	scons -Q BlockDev-1.0.typelib
 
 test-from-python: all
-	GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/:src/utils python -c 'from gi.repository import BlockDev; BlockDev.init(None, None); print BlockDev.lvm_get_max_lv_size()'
+	GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build python -c 'from gi.repository import BlockDev; BlockDev.init(None, None); print BlockDev.lvm_get_max_lv_size()'
 
 run-ipython: all
-	GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/:src/utils/ ipython
+	GI_TYPELIB_PATH=build/ LD_LIBRARY_PATH=build ipython
 
 run-root-ipython: all
-	sudo GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/:src/utils/ ipython
+	sudo GI_TYPELIB_PATH=build/ LD_LIBRARY_PATH=build ipython
 
 test: all
 	@echo
-	@sudo GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/:src/utils/ PYTHONPATH=.:tests/ \
+	@sudo GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build PYTHONPATH=.:tests/ \
 		python -m unittest discover -v -s tests/ -p '*_test.py'
 
 fast-test: all
 	@echo
-	@sudo SKIP_SLOW= GI_TYPELIB_PATH=. LD_LIBRARY_PATH=src/plugins/:src/lib/:src/utils/ PYTHONPATH=.:tests/ \
+	@sudo SKIP_SLOW= GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build PYTHONPATH=.:tests/ \
 		python -m unittest discover -v -s tests/ -p '*_test.py'
 
 clean:
-	-rm BlockDev-1.0.gir
-	-rm BlockDev-1.0.typelib
-	-rm src/lib/plugin_apis/*.[ch]
+	-rm -rf build/
 	-rm src/lib/test_library
 	-rm src/plugins/test_loop
 	-rm src/plugins/test_lvm
 	-rm src/plugins/test_swap
 	-rm src/utils/test_sizes
-	find . -name '*.o' -exec rm {} \;
-	find . -name '*.so' -exec rm -f {} \;
 	find . -name '*.pyc' -exec rm -f {} \;
 	find . -name '*.pyo' -exec rm -f {} \;
