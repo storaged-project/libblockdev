@@ -149,8 +149,8 @@ gi_env["SYMBOL_PREFIX"] = "bd"
 gi_env["NAMESPACE"] = "BlockDev"
 gi_env["NS_VERSION"] = "1.0"
 gi_env.Append(BUILDERS={"Gir": gir_file_builder})
-gir_file = gi_env.Gir(["BlockDev.gir"], LIB_FILES + PLUGIN_HEADER_FILES + UTILS_FILES)
+gir_file = gi_env.Gir(["BlockDev-1.0.gir"], LIB_FILES + PLUGIN_HEADER_FILES + UTILS_FILES)
 Depends(gir_file, main_lib)
 
 typelib_env = Environment()
-typelib_env.Command("BlockDev.typelib", "BlockDev.gir", "g-ir-compiler -o $TARGET $SOURCE")
+typelib_env.Command("BlockDev-1.0.typelib", "BlockDev-1.0.gir", "g-ir-compiler -o $TARGET $SOURCE")
