@@ -190,35 +190,35 @@ int main (void) {
         g_printf ("lvorigin failed: %s\n", error->message);
     else
         g_printf ("lvorigin succeeded: %s\n", ret_str);
-    g_free(msg);
+    g_clear_error (&error);
 
     succ = bd_lvm_lvremove ("newVG", "newLV", TRUE, &error);
     if (!succ)
         g_printf ("lvremove failed: %s\n", error->message);
     else
         puts ("lvremove succeeded");
-    g_free(msg);
+    g_clear_error (&error);
 
     succ = bd_lvm_lvresize ("newVG", "newLV", 128 MiB, &error);
     if (!succ)
         g_printf ("lvresize failed: %s\n", error->message);
     else
         puts ("lvresize succeeded");
-    g_free(msg);
+    g_clear_error (&error);
 
     succ = bd_lvm_lvactivate ("newVG", "newLV", TRUE, &error);
     if (!succ)
         g_printf ("lvactivate failed: %s\n", error->message);
     else
         puts ("lvactivate succeeded");
-    g_free(msg);
+    g_clear_error (&error);
 
     succ = bd_lvm_lvdeactivate ("newVG", "newLV", &error);
     if (!succ)
         g_printf ("lvdeactivate failed: %s\n", error->message);
     else
         puts ("lvdeactivate succeeded");
-    g_free(msg);
+    g_clear_error (&error);
 
     return 0;
 }

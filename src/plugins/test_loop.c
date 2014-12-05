@@ -37,7 +37,6 @@ int main (void) {
         g_printf ("Failed to teardown /dev/loop0: %s", error->message);
     else
         puts ("/dev/loop0 torn down");
-    g_free (err_msg);
     g_clear_error (&error);
 
     return 0;

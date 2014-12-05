@@ -34,7 +34,7 @@ test_%.o: test_%.c %.c %.h
 	gcc -c -Wall -Wextra -Werror -o $@ -I src/utils/ ${GLIB_INCLUDES} $<
 
 test_%: test_%.o ${UTILS_OBJS}
-	gcc -o $@ ${GLIB} $^
+	gcc -o $@ -lm ${GLIB} $^
 
 test-%: src/plugins/test_%
 	@echo "***Running tests***"
