@@ -22,31 +22,17 @@ PLUGIN_OBJS := $(patsubst %.c,%.o,${PLUGIN_SOURCES})
 PLUGIN_LIBS := $(addprefix src/plugins/,$(patsubst %.c,libbd_%.so,$(notdir ${PLUGIN_SOURCES})))
 
 # plugin tests
-PLUGIN_TEST_SOURCES := $(wildcard src/plugins/test_*.c)
-PLUGIN_TEST_EXECUTABLES := $(addprefix src/plugins/,$(patsubst test_%.c,test_%,$(notdir ${PLUGIN_TEST_SOURCES})))
-PLUGIN_TESTS := $(patsubst test_%.c,test-%,$(notdir ${PLUGIN_TEST_SOURCES}))
+PLUGIN_TESTS = test-btrfs test-lvm test-loop test-swap
 
 all:
 	scons -Q build
 
-# test object files include the source of the programs they test
-test_%.o: test_%.c %.c %.h
-	gcc -c -Wall -Wextra -Werror -o $@ -I src/utils/ ${GLIB_INCLUDES} $<
+test_%:
+	scons -Q build/$@
 
-test_%: test_%.o ${UTILS_OBJS}
-	gcc -o $@ -lm ${GLIB} $^
-
-test-%: src/plugins/test_%
+test-%: test_%
 	@echo "***Running tests***"
-	./$<
-
-# test_sizes executable must avoid two copies of sizes.o
-src/utils/test_sizes: src/utils/test_sizes.o
-	gcc -o $@ ${GLIB} $<
-
-test-sizes: src/utils/test_sizes
-	@echo "***Running tests***"
-	./$<
+	build/$<
 
 # compilation does not signal all warnings, as it includes stub sources
 src/lib/test_blockdev.o: src/lib/test_blockdev.c src/lib/blockdev.c src/lib/blockdev.h ${PLUGIN_SOURCE_FILES}
@@ -59,8 +45,6 @@ test-library: src/lib/test_library
 	@echo "***Running tests***"
 	LD_LIBRARY_PATH=src/plugins/:src/utils ./$<
 
-test-plugins: ${PLUGIN_TESTS}
-
 %.so:
 	scons -Q build/$@
 
@@ -69,6 +53,8 @@ BlockDev-1.0.gir:
 
 BlockDev-1.0.typelib:
 	scons -Q BlockDev-1.0.typelib
+
+plugins-test: ${PLUGIN_TESTS}
 
 test-from-python: all
 	GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build python -c 'from gi.repository import BlockDev; BlockDev.init(None, None); print BlockDev.lvm_get_max_lv_size()'

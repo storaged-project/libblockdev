@@ -157,3 +157,12 @@ Depends(gir_file, main_lib)
 
 typelib_env = Environment()
 typelib_env.Command("BlockDev-1.0.typelib", "BlockDev-1.0.gir", "g-ir-compiler -o $TARGET $SOURCE")
+
+
+## compiled tests
+tests_env = glib_env.Clone()
+tests_env.Append(CPPPATH=["src/utils", "build/plugin_apis"])
+tests_env.Append(LIBS=["m"])
+for pname in ("btrfs", "swap", "lvm", "loop"):
+    tests_env.Program("test_%s" % pname, ["src/utils/exec.c", "src/utils/sizes.c", "src/plugins/test_%s.c" % pname])
+tests_env.Program("test_sizes", ["src/utils/test_sizes.c"])
