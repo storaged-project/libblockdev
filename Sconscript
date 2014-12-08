@@ -1,5 +1,7 @@
 import os
+import glob
 import subprocess
+import platform
 from boilerplate_generator import generate_source_header
 
 MAIN_VERSION = "1.0.0"
@@ -158,7 +160,7 @@ gir_file = gi_env.Gir(["BlockDev-1.0.gir"], LIB_FILES + PLUGIN_HEADER_FILES + UT
 Depends(gir_file, main_lib)
 
 typelib_env = Environment()
-typelib_env.Command("BlockDev-1.0.typelib", "BlockDev-1.0.gir", "g-ir-compiler -o $TARGET $SOURCE")
+typelib = typelib_env.Command("BlockDev-1.0.typelib", "BlockDev-1.0.gir", "g-ir-compiler -o $TARGET $SOURCE")
 
 
 ## compiled tests
@@ -178,3 +180,25 @@ lib_test = lib_test_env.Program("test_library", ["src/lib/test_blockdev.c"])
 Depends(lib_test, utils_lib)
 for plugin in plugins:
     Depends(lib_test, plugin)
+
+
+## installation
+import installer
+
+inst_env = Environment(SHLIBVERSION=MAIN_VERSION)
+if platform.architecture()[0] == "64bit":
+    inst_env['LIBDIR'] = "/usr/lib64"
+else:
+    inst_env['LIBDIR'] = "/usr/lib"
+
+# create the installer
+install = installer.Installer(inst_env)
+install.AddLibrary(main_lib)
+install.AddLibrary(utils_lib)
+for plugin in plugins:
+    install.AddLibrary(plugin)
+for header in ["src/utils/utils.h", "src/utils/exec.h", "src/utils/sizes.h",
+               "src/lib/blockdev.h", "src/lib/plugins.h"] + glob.glob("src/plugins/*.h"):
+    install.AddHeader(header, basedir="blockdev")
+install.AddGirFile(gir_file)
+install.AddTypelib(typelib)

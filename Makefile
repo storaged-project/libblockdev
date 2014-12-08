@@ -4,6 +4,12 @@ PLUGIN_TESTS = test-btrfs test-lvm test-loop test-swap
 all:
 	scons -Q build
 
+install:
+	scons -Q install
+
+uninstall:
+	scons -Q -c install
+
 test_%:
 	scons -Q build/$@
 
