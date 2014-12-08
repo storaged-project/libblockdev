@@ -16,6 +16,7 @@ glib_warnall_env.Append(CFLAGS=["-Wall", "-Wextra", "-Werror"])
 
 ## the bd_utils library
 bd_utils_env = glib_warnall_env.Clone()
+bd_utils_env.Append(LIBS=["m"])
 bd_utils_env.SharedLibrary("bd_utils", ["src/utils/sizes.c", "src/utils/exec.c"])
 
 
