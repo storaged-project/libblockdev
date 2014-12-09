@@ -3,7 +3,8 @@ import glob
 import platform
 from build_functions import *
 
-MAIN_VERSION = "1.0.0"
+MAIN_VERSION = "0.1.0"
+MAJOR_MINOR = MAIN_VERSION.rsplit(".", 1)[0]
 LIB_FILES = ["src/lib/blockdev.c", "src/lib/blockdev.h", "src/lib/plugins.h"]
 PLUGIN_NAMES = ["crypto", "dm", "loop", "lvm", "mpath", "swap", "btrfs", "mdraid"]
 PLUGIN_HEADER_FILES = ["build/plugin_apis/"+name+".h" for name in PLUGIN_NAMES]
@@ -120,13 +121,13 @@ gi_env["LIB_NAME"] = "blockdev"
 gi_env["IDENTIFIER_PREFIX"] = "BD"
 gi_env["SYMBOL_PREFIX"] = "bd"
 gi_env["NAMESPACE"] = "BlockDev"
-gi_env["NS_VERSION"] = "1.0"
+gi_env["NS_VERSION"] = MAJOR_MINOR
 gi_env.Append(BUILDERS={"Gir": gir_file_builder})
-gir_file = gi_env.Gir(["BlockDev-1.0.gir"], LIB_FILES + PLUGIN_HEADER_FILES + UTILS_FILES)
+gir_file = gi_env.Gir(["BlockDev-%s.gir" % MAJOR_MINOR], LIB_FILES + PLUGIN_HEADER_FILES + UTILS_FILES)
 Depends(gir_file, main_lib)
 
 typelib_env = Environment()
-typelib = typelib_env.Command("BlockDev-1.0.typelib", "BlockDev-1.0.gir", "g-ir-compiler -o $TARGET $SOURCE")
+typelib = typelib_env.Command("BlockDev-%s.typelib" % MAJOR_MINOR, "BlockDev-%s.gir" % MAJOR_MINOR, "g-ir-compiler -o $TARGET $SOURCE")
 
 
 ## compiled tests
