@@ -103,7 +103,7 @@ lib_env.Append(URL="https://github.com/vpodzime/libblockdev")
 lib_env.Append(PC_CPPPATH=["-I${includedir}/blockdev"])
 lib_env.Append(PC_REQUIRES=["glib-2.0"])
 lib_env.Append(LIB_NAME="blockdev")
-main_lib = lib_env.SharedLibrary("blockdev", ["src/lib/blockdev.c"])
+main_lib = lib_env.SharedLibrary("blockdev", ["src/lib/blockdev.c", "src/lib/plugins.c"])
 for build in boiler_code:
     Depends(main_lib, boiler_code)
 pc_file = lib_env.PkgConfig("blockdev.pc", [])
