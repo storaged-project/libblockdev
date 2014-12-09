@@ -51,10 +51,5 @@ fast-test: all
 
 clean:
 	-rm -rf build/
-	-rm src/lib/test_library
-	-rm src/plugins/test_loop
-	-rm src/plugins/test_lvm
-	-rm src/plugins/test_swap
-	-rm src/utils/test_sizes
 	find . -name '*.pyc' -exec rm -f {} \;
 	find . -name '*.pyo' -exec rm -f {} \;
