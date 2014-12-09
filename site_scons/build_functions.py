@@ -1,8 +1,9 @@
 import os
 import subprocess
+import platform
 from boilerplate_generator import generate_source_header
 
-__all__ = ["generate_boilerplate_files", "generate_gir_file"]
+__all__ = ["generate_boilerplate_files", "generate_gir_file", "generate_pc_file"]
 
 def generate_boilerplate_files(target, source, env):
     generate_source_header(str(source[0]), os.path.dirname(str(target[0])))
@@ -47,3 +48,35 @@ def generate_gir_file(target, source, env):
 
     # 0 or None means OK, anything else means NOK
     return proc.returncode
+
+def generate_pc_file(target, source, env):
+    """Generate the .pc (pkg-config) file"""
+
+    name = env['NAME']
+    description = env.get('DESCRIPTION', "No description")
+    requires = env.get('PC_REQUIRES', [])
+    url = env.get('URL', "")
+    version = env.get('SHLIBVERSION', "1.0.0")
+    cflags = " ".join(env.get('PC_CPPPATH', []))
+    libs = " ".join(env.get('PC_LIBPATH', [])) + "-l%s" % env['LIB_NAME']
+
+    if platform.architecture()[0] == "64bit":
+        libdir = "lib64"
+    else:
+        libdir = "lib"
+
+    with open(str(target[0]), "w") as pc_file:
+        pc_file.write("prefix=%s\n" % env.get('PREFIX', "/usr"))
+        pc_file.write("exec_prefix=%s\n" % env.get('EPREFIX', "${prefix}"))
+        pc_file.write("includedir=%s\n" % env.get('INCLUDEDIR', "${prefix}/include"))
+        pc_file.write("libdir=%s\n\n" % env.get('LIBDIR', "${exec_prefix}/%s" % libdir))
+
+        pc_file.write("Name: %s\n" % name)
+        pc_file.write("Description: %s\n" % description)
+        if url:
+            pc_file.write("URL: %s\n" % url)
+        pc_file.write("Version: %s\n" % version)
+        for req in requires:
+            pc_file.write("Requires: %s\n" % req)
+        pc_file.write("Cflags: %s\n" % cflags)
+        pc_file.write("Libs: %s\n" % libs)

@@ -88,14 +88,24 @@ boiler_code.append(bpg_env.BpG(["plugin_apis/swap.h", "plugin_apis/swap.c"], "sr
 
 
 ## the library itself
+pc_builder = Builder(action=generate_pc_file)
+
 lib_env = glib_env.Clone()
+lib_env.Append(BUILDERS={"PkgConfig": pc_builder})
 lib_env.Append(CPPPATH="src/utils")
 lib_env.Append(LIBPATH=".")
 lib_env.Append(LIBS="bd_utils")
 lib_env.Append(CPPPATH=".")
+lib_env.Append(NAME="BlockDev")
+lib_env.Append(DESCRIPTION="Library for doing low-level operations with block devices")
+lib_env.Append(URL="https://github.com/vpodzime/libblockdev")
+lib_env.Append(PC_CPPPATH=["-I${includedir}/blockdev"])
+lib_env.Append(PC_REQUIRES=["glib-2.0"])
+lib_env.Append(LIB_NAME="blockdev")
 main_lib = lib_env.SharedLibrary("blockdev", ["src/lib/blockdev.c"])
 for build in boiler_code:
     Depends(main_lib, boiler_code)
+pc_file = lib_env.PkgConfig("blockdev.pc", [])
 
 
 ## GObject introspection data
@@ -158,3 +168,4 @@ for header in ["src/utils/utils.h", "src/utils/exec.h", "src/utils/sizes.h",
     install.AddHeader(header, basedir="blockdev")
 install.AddGirFile(gir_file)
 install.AddTypelib(typelib)
+install.AddPkgConfig(pc_file)
