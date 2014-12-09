@@ -1,7 +1,9 @@
 # plugin tests
 PLUGIN_TESTS = test-btrfs test-lvm test-loop test-swap
 
-all:
+all: build
+
+build:
 	scons -Q build
 
 install:
