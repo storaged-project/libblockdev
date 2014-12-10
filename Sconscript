@@ -165,7 +165,7 @@ install.AddLibrary(utils_lib)
 for plugin in plugins:
     install.AddLibrary(plugin)
 for header in ["src/utils/utils.h", "src/utils/exec.h", "src/utils/sizes.h",
-               "src/lib/blockdev.h", "src/lib/plugins.h"] + glob.glob("src/plugins/*.h"):
+               "src/lib/blockdev.h", "src/lib/plugins.h"] + glob.glob("plugin_apis/*.h"):
     install.AddHeader(header, basedir="blockdev")
 install.AddGirFile(gir_file)
 install.AddTypelib(typelib)
