@@ -6,7 +6,7 @@ from boilerplate_generator import generate_source_header
 __all__ = ["generate_boilerplate_files", "generate_gir_file", "generate_pc_file"]
 
 def generate_boilerplate_files(target, source, env):
-    generate_source_header(str(source[0]), os.path.dirname(str(target[0])))
+    return generate_source_header(str(source[0]), os.path.dirname(str(target[0])))
 
 def generate_gir_file(target, source, env):
     ld_lib_path = env.get('LD_LIBRARY_PATH', None)
