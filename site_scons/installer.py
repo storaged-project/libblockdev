@@ -57,7 +57,7 @@ class Installer:
         obj = self._env.InstallVersionedLib(destination, library)
         self._env.Alias("install", destination)
         for i in obj:
-            self._env.AddPostAction(i, SCons.Defaults.Chmod(str(i), 0644))
+            self._env.AddPostAction(i, SCons.Defaults.Chmod(str(i), 0755))
 
     def AddHeader(self, header, basedir=""):
         self.Add(self._includedir, header, basedir)
