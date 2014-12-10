@@ -123,7 +123,8 @@ gi_env["SYMBOL_PREFIX"] = "bd"
 gi_env["NAMESPACE"] = "BlockDev"
 gi_env["NS_VERSION"] = MAJOR_MINOR
 gi_env.Append(BUILDERS={"Gir": gir_file_builder})
-gir_file = gi_env.Gir(["BlockDev-%s.gir" % MAJOR_MINOR], LIB_FILES + PLUGIN_HEADER_FILES + UTILS_FILES)
+boiler_headers = [result[0] for result in boiler_code]
+gir_file = gi_env.Gir(["BlockDev-%s.gir" % MAJOR_MINOR], LIB_FILES + UTILS_FILES + boiler_headers)
 Depends(gir_file, main_lib)
 
 typelib_env = Environment()
