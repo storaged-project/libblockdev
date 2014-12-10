@@ -150,13 +150,19 @@ for plugin in plugins:
 
 
 ## installation
+AddOption('--prefix',
+          dest='prefix',
+          type='string',
+          nargs=1,
+          action='store',
+          metavar='DIR',
+          help='installation prefix')
+
 import installer
 
 inst_env = Environment(SHLIBVERSION=MAIN_VERSION)
-if platform.architecture()[0] == "64bit":
-    inst_env['LIBDIR'] = "/usr/lib64"
-else:
-    inst_env['LIBDIR'] = "/usr/lib"
+prefix = os.path.join(GetOption('prefix'), "usr") if GetOption('prefix') else "/usr"
+inst_env['PREFIX'] = prefix
 
 # create the installer
 install = installer.Installer(inst_env)

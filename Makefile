@@ -7,7 +7,7 @@ build:
 	scons -Q build
 
 install:
-	scons -Q install
+	scons -Q --prefix=${PREFIX} install
 
 uninstall:
 	scons -Q -c install

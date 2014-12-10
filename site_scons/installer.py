@@ -11,12 +11,6 @@ import os
 import platform
 import SCons.Defaults
 
-PREFIX = "prefix"
-EPREFIX = "eprefix"
-BINDIR = "bindir"
-LIBDIR = "libdir"
-INCLUDEDIR = "includedir"
-
 class Installer:
     """ A basic installer. """
     def __init__(self, env):
@@ -26,14 +20,14 @@ class Installer:
         :param env: The installation environment.
         """
 
-        self._prefix = env.get(PREFIX, "/usr")
-        self._eprefix = env.get(EPREFIX, self._prefix)
-        self._bindir = env.get(BINDIR, os.path.join(self._eprefix, "bin"))
+        self._prefix = env.get('PREFIX', "/usr")
+        self._eprefix = env.get('EPREFIX', self._prefix)
+        self._bindir = env.get('BINDIR', os.path.join(self._eprefix, "bin"))
         if platform.architecture()[0] == "64bit":
-            self._libdir = env.get(LIBDIR, os.path.join(self._eprefix, "lib64"))
+            self._libdir = env.get('BUILD_LIBDIR', os.path.join(self._eprefix, "lib64"))
         else:
-            self._libdir = env.get(LIBDIR, os.path.join(self._eprefix, "lib"))
-        self._includedir = env.get(INCLUDEDIR, os.path.join(self._prefix, "include"))
+            self._libdir = env.get('BUILD_LIBDIR', os.path.join(self._eprefix, "lib"))
+        self._includedir = env.get('INCLUDEDIR', os.path.join(self._prefix, "include"))
         self._pkg_config_dir = os.path.join(self._libdir, "pkgconfig")
         self._sharedir = os.path.join(self._prefix, "share")
         self._env = env
