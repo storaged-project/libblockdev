@@ -90,7 +90,7 @@ gboolean bd_utils_exec_and_report_error (gchar **argv, GError **error) {
     guint64 task_id = 0;
 
     task_id = log_running (argv);
-    success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH,
+    success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
                             NULL, NULL, &stdout_data, &stderr_data, &status, error);
     log_done (task_id);
 
@@ -134,7 +134,7 @@ gboolean bd_utils_exec_and_capture_output (gchar **argv, gchar **output, GError 
     guint64 task_id = 0;
 
     task_id = log_running (argv);
-    success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH,
+    success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
                             NULL, NULL, &stdout_data, &stderr_data, &status, error);
     log_done (task_id);
 
