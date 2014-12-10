@@ -1,4 +1,8 @@
-# plugin tests
+PKGNAME=libblockdev
+VERSION=$(shell awk '/Version:/ { print $$2 }' dist/$(PKGNAME).spec)
+RELEASE=$(shell awk '/Release:/ { print $$2 }' dist/$(PKGNAME).spec | sed -e 's|%.*$$||g')
+TAG=libblockdev-$(VERSION)-$(RELEASE)
+
 PLUGIN_TESTS = test-btrfs test-lvm test-loop test-swap
 
 all: build
@@ -53,3 +57,29 @@ clean:
 	-rm -rf build/
 	find . -name '*.pyc' -exec rm -f {} \;
 	find . -name '*.pyo' -exec rm -f {} \;
+
+tag:
+	git tag -a -s -m "Tag as $(TAG)" -f $(TAG)
+	@echo "Tagged as $(TAG)"
+
+rpmlog:
+	@git log --pretty="format:- %s (%ae)" $(TAG).. |sed -e 's/@.*)/)/'
+	@echo
+
+bumpver:
+	@NEWSUBVER=$$((`echo $(VERSION) |cut -d . -f 2` + 1)) ; \
+	NEWVERSION=`echo $(VERSION).$$NEWSUBVER |cut -d . -f 1,3` ; \
+	DATELINE="* `date "+%a %b %d %Y"` `git config user.name` <`git config user.email`> - $$NEWVERSION-1"  ; \
+	cl=`grep -n %changelog dist/libblockdev.spec |cut -d : -f 1` ; \
+	tail --lines=+$$(($$cl + 1)) dist/libblockdev.spec > speclog ; \
+	(head -n $$cl dist/libblockdev.spec ; echo "$$DATELINE" ; make --quiet rpmlog 2>/dev/null ; echo ""; cat speclog) > dist/libblockdev.spec.new ; \
+	mv dist/libblockdev.spec.new dist/libblockdev.spec ; rm -f speclog ; \
+	sed -ri "s/Version:(\\s+)$(VERSION)/Version:\\1$$NEWVERSION/" dist/libblockdev.spec ; \
+
+archive:
+	git archive --format=tar.gz --prefix=$(PKGNAME)-$(VERSION)/ -o $(PKGNAME)-$(VERSION).tar.gz $(TAG)
+
+local:
+	git archive --format=tar.gz --prefix=$(PKGNAME)-$(VERSION)/ -o $(PKGNAME)-$(VERSION).tar.gz HEAD
+
+release: archive tag
