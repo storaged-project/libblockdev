@@ -14,7 +14,6 @@ BuildRequires: device-mapper-devel
 BuildRequires: systemd-devel
 BuildRequires: dmraid-devel
 
-Requires: glib2
 
 %description
 The libblockdev is a C library with GObject introspection support that can be
@@ -37,7 +36,6 @@ with the libblockdev library.
 
 %package utils
 Summary:     A library with utility functions for the libblockdev library.
-Requires: glib2
 
 %description utils
 The libblockdev-utils is a library providing utility functions used by the
@@ -55,8 +53,6 @@ with the libblockdev-utils library.
 
 %package btrfs
 Summary:     The BTRFS plugin for the libblockdev library.
-Requires: glib2
-Requires: %{name}-utils
 Requires: btrfs-progs
 
 %description btrfs
@@ -76,8 +72,6 @@ with the libblockdev-btrfs plugin/library.
 
 %package crypto
 Summary:     The crypto plugin for the libblockdev library.
-Requires: glib2
-Requires: cryptsetup-libs
 
 %description crypto
 The libblockdev library plugin (and in the same time a standalone library)
@@ -95,11 +89,7 @@ with the libblockdev-crypto plugin/library.
 
 %package dm
 Summary:     The Device Mapper plugin for the libblockdev library.
-Requires: glib2
-Requires: %{name}-utils
 Requires: device-mapper
-Requires: device-mapper-libs
-Requires: systemd-libs
 Requires: dmraid
 
 %description dm
@@ -122,7 +112,6 @@ with the libblockdev-dm plugin/library.
 
 %package loop
 Summary:     The loop plugin for the libblockdev library.
-Requires: %{name}-utils
 Requires: util-linux
 
 %description loop
@@ -142,7 +131,6 @@ with the libblockdev-loop plugin/library.
 
 %package lvm
 Summary:     The LVM plugin for the libblockdev library.
-Requires: %{name}-utils
 Requires: lvm2
 
 %description lvm
@@ -162,7 +150,6 @@ with the libblockdev-lvm plugin/library.
 
 %package mdraid
 Summary:     The MD RAID plugin for the libblockdev library.
-Requires: %{name}-utils
 Requires: mdadm
 
 %description mdraid
@@ -182,7 +169,6 @@ with the libblockdev-mdraid plugin/library.
 
 %package mpath
 Summary:     The multipath plugin for the libblockdev library.
-Requires: %{name}-utils
 Requires: device-mapper-multipath
 
 %description mpath
@@ -202,7 +188,6 @@ with the libblockdev-mpath plugin/library.
 
 %package swap
 Summary:     The swap plugin for the libblockdev library.
-Requires: %{name}-utils
 Requires: util-linux
 
 %description swap
