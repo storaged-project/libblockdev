@@ -205,6 +205,21 @@ This package contains header files and pkg-config files needed for development
 with the libblockdev-swap plugin/library.
 
 
+%package plugins-all
+Summary:     Metapackage that pulls all the libblockdev plugins as dependencies
+Requires: %{name}-btrfs
+Requires: %{name}-crypto
+Requires: %{name}-dm
+Requires: %{name}-loop
+Requires: %{name}-lvm
+Requires: %{name}-mdraid
+Requires: %{name}-mpath
+Requires: %{name}-swap
+
+%description plugins-all
+A metapackage that pulls all the libblockdev plugins as dependencies.
+
+
 %prep
 %setup -q -n %{name}-%{version}
 
@@ -323,6 +338,8 @@ rm -rf %{buildroot}
 %files swap-devel
 %{_libdir}/libbd_swap.so
 %{_includedir}/blockdev/swap.h
+
+%files plugins-all
 
 %changelog
 * Wed Dec 10 2014 Vratislav Podzimek <vpodzime@redhat.com> - 0.1-1
