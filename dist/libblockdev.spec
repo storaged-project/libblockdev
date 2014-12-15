@@ -209,10 +209,10 @@ with the libblockdev-swap plugin/library.
 %setup -q -n %{name}-%{version}
 
 %build
-make %{?_smp_mflags}
+CFLAGS="%{optflags}" make %{?_smp_mflags}
 
 %install
-make PREFIX=%{buildroot} %{?_smp_mflags} install
+CFLAGS="%{optflags}" make PREFIX=%{buildroot} %{?_smp_mflags} install
 
 %clean
 rm -rf %{buildroot}

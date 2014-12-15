@@ -11,6 +11,8 @@ PLUGIN_HEADER_FILES = ["build/plugin_apis/"+name+".h" for name in PLUGIN_NAMES]
 UTILS_FILES = ["src/utils/exec.c", "src/utils/sizes.c", "src/utils/exec.h", "src/utils/sizes.h"]
 
 glib_env = Environment(SHLIBVERSION=MAIN_VERSION)
+glib_env.Append(CC=os.environ.get('CC', ""))
+glib_env.Append(CFLAGS=Split(os.environ.get('CFLAGS', "")))
 glib_env.ParseConfig("pkg-config --cflags --libs glib-2.0")
 
 glib_warnall_env = glib_env.Clone()
