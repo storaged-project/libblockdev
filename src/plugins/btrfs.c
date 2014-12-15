@@ -160,14 +160,14 @@ static BDBtrfsDeviceInfo* get_device_info_from_match (GMatchInfo *match_info) {
     ret->size = bd_utils_size_from_spec (item, &error);
     g_free (item);
     if (error)
-        g_warning (error->message);
+        g_warning ("%s", error->message);
     g_clear_error (&error);
 
     item = g_match_info_fetch_named (match_info, "used");
     ret->used = bd_utils_size_from_spec (item, &error);
     g_free (item);
     if (error)
-        g_warning (error->message);
+        g_warning ("%s", error->message);
     g_clear_error (&error);
 
     return ret;
@@ -206,7 +206,7 @@ static BDBtrfsFilesystemInfo* get_filesystem_info_from_match (GMatchInfo *match_
     ret->used = bd_utils_size_from_spec (item, &error);
     g_free (item);
     if (error)
-        g_warning (error->message);
+        g_warning ("%s", error->message);
     g_clear_error (&error);
 
     return ret;
