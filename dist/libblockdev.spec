@@ -35,7 +35,7 @@ with the libblockdev library.
 
 
 %package utils
-Summary:     A library with utility functions for the libblockdev library.
+Summary:     A library with utility functions for the libblockdev library
 
 %description utils
 The libblockdev-utils is a library providing utility functions used by the
@@ -52,7 +52,7 @@ with the libblockdev-utils library.
 
 
 %package btrfs
-Summary:     The BTRFS plugin for the libblockdev library.
+Summary:     The BTRFS plugin for the libblockdev library
 Requires: btrfs-progs
 
 %description btrfs
@@ -60,7 +60,7 @@ The libblockdev library plugin (and in the same time a standalone library)
 proving the BTRFS-related functionality.
 
 %package btrfs-devel
-Summary:     Development files for the libblockdev-btrfs plugin/library.
+Summary:     Development files for the libblockdev-btrfs plugin/library
 Requires: %{name}-btrfs%{?_isa} = %{version}-%{release}
 Requires: glib2-devel
 Requires: %{name}-utils-devel
@@ -71,14 +71,14 @@ with the libblockdev-btrfs plugin/library.
 
 
 %package crypto
-Summary:     The crypto plugin for the libblockdev library.
+Summary:     The crypto plugin for the libblockdev library
 
 %description crypto
 The libblockdev library plugin (and in the same time a standalone library)
 proving the functionality related to encrypted devices (LUKS).
 
 %package crypto-devel
-Summary:     Development files for the libblockdev-crypto plugin/library.
+Summary:     Development files for the libblockdev-crypto plugin/library
 Requires: %{name}-crypto%{?_isa} = %{version}-%{release}
 Requires: glib2-devel
 
@@ -88,7 +88,7 @@ with the libblockdev-crypto plugin/library.
 
 
 %package dm
-Summary:     The Device Mapper plugin for the libblockdev library.
+Summary:     The Device Mapper plugin for the libblockdev library
 Requires: device-mapper
 Requires: dmraid
 
@@ -97,7 +97,7 @@ The libblockdev library plugin (and in the same time a standalone library)
 proving the functionality related to Device Mapper.
 
 %package dm-devel
-Summary:     Development files for the libblockdev-dm plugin/library.
+Summary:     Development files for the libblockdev-dm plugin/library
 Requires: %{name}-dm%{?_isa} = %{version}-%{release}
 Requires: glib2-devel
 Requires: device-mapper-devel
@@ -111,7 +111,7 @@ with the libblockdev-dm plugin/library.
 
 
 %package loop
-Summary:     The loop plugin for the libblockdev library.
+Summary:     The loop plugin for the libblockdev library
 Requires: util-linux
 
 %description loop
@@ -119,7 +119,7 @@ The libblockdev library plugin (and in the same time a standalone library)
 proving the functionality related to loop devices.
 
 %package loop-devel
-Summary:     Development files for the libblockdev-loop plugin/library.
+Summary:     Development files for the libblockdev-loop plugin/library
 Requires: %{name}-loop%{?_isa} = %{version}-%{release}
 Requires: %{name}-utils-devel
 Requires: glib2-devel
@@ -130,7 +130,7 @@ with the libblockdev-loop plugin/library.
 
 
 %package lvm
-Summary:     The LVM plugin for the libblockdev library.
+Summary:     The LVM plugin for the libblockdev library
 Requires: lvm2
 
 %description lvm
@@ -138,7 +138,7 @@ The libblockdev library plugin (and in the same time a standalone library)
 proving the LVM-related functionality.
 
 %package lvm-devel
-Summary:     Development files for the libblockdev-lvm plugin/library.
+Summary:     Development files for the libblockdev-lvm plugin/library
 Requires: %{name}-lvm%{?_isa} = %{version}-%{release}
 Requires: %{name}-utils-devel
 Requires: glib2-devel
@@ -149,7 +149,7 @@ with the libblockdev-lvm plugin/library.
 
 
 %package mdraid
-Summary:     The MD RAID plugin for the libblockdev library.
+Summary:     The MD RAID plugin for the libblockdev library
 Requires: mdadm
 
 %description mdraid
@@ -157,7 +157,7 @@ The libblockdev library plugin (and in the same time a standalone library)
 proving the functionality related to MD RAID.
 
 %package mdraid-devel
-Summary:     Development files for the libblockdev-mdraid plugin/library.
+Summary:     Development files for the libblockdev-mdraid plugin/library
 Requires: %{name}-mdraid%{?_isa} = %{version}-%{release}
 Requires: %{name}-utils-devel
 Requires: glib2-devel
@@ -168,7 +168,7 @@ with the libblockdev-mdraid plugin/library.
 
 
 %package mpath
-Summary:     The multipath plugin for the libblockdev library.
+Summary:     The multipath plugin for the libblockdev library
 Requires: device-mapper-multipath
 
 %description mpath
@@ -176,7 +176,7 @@ The libblockdev library plugin (and in the same time a standalone library)
 proving the functionality related to multipath devices.
 
 %package mpath-devel
-Summary:     Development files for the libblockdev-mpath plugin/library.
+Summary:     Development files for the libblockdev-mpath plugin/library
 Requires: %{name}-mpath%{?_isa} = %{version}-%{release}
 Requires: %{name}-utils-devel
 Requires: glib2-devel
@@ -187,7 +187,7 @@ with the libblockdev-mpath plugin/library.
 
 
 %package swap
-Summary:     The swap plugin for the libblockdev library.
+Summary:     The swap plugin for the libblockdev library
 Requires: util-linux
 
 %description swap
@@ -195,7 +195,7 @@ The libblockdev library plugin (and in the same time a standalone library)
 proving the functionality related to swap devices.
 
 %package swap-devel
-Summary:     Development files for the libblockdev-swap plugin/library.
+Summary:     Development files for the libblockdev-swap plugin/library
 Requires: %{name}-swap%{?_isa} = %{version}-%{release}
 Requires: %{name}-utils-devel
 Requires: glib2-devel
@@ -209,10 +209,10 @@ with the libblockdev-swap plugin/library.
 %setup -q -n %{name}-%{version}
 
 %build
-make
+make %{?_smp_mflags}
 
 %install
-make PREFIX=%{buildroot} install
+make PREFIX=%{buildroot} %{?_smp_mflags} install
 
 %clean
 rm -rf %{buildroot}
