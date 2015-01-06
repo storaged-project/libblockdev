@@ -35,7 +35,9 @@ btrfs_env.Append(LIBS="bd_utils")
 plugins.append(btrfs_env.SharedLibrary("bd_btrfs", ["src/plugins/btrfs.c"]))
 
 crypto_env = glib_warnall_env.Clone()
-crypto_env.ParseConfig("pkg-config --cflags --libs libcryptsetup")
+crypto_env.ParseConfig("pkg-config --cflags --libs libcryptsetup nss")
+crypto_env.Append(LIBS="libvolume_key")
+crypto_env.Append(CPPPATH="/usr/include/volume_key")
 plugins.append(crypto_env.SharedLibrary("bd_crypto", ["src/plugins/crypto.c"]))
 
 dm_env = glib_warnall_env.Clone()

@@ -11,6 +11,9 @@ typedef enum {
     BD_CRYPTO_ERROR_REMOVE_KEY,
     BD_CRYPTO_ERROR_NO_KEY,
     BD_CRYPTO_ERROR_KEY_SLOT,
+    BD_CRYPTO_ERROR_NSS_INIT_FAILED,
+    BD_CRYPTO_ERROR_CERT_DECODE,
+    BD_CRYPTO_ERROR_ESCROW_FAILED,
 } BDCryptoError;
 
 /**
@@ -143,3 +146,16 @@ gboolean bd_crypto_luks_change_key (gchar *device, gchar *pass, gchar *npass, GE
  * Returns: whether the @device was successfully resized or not
  */
 gboolean bd_crypto_luks_resize (gchar *device, guint64 size, GError **error);
+
+/**
+ * bd_crypto_escrow_device:
+ * @device: path of the device to create escrow data for
+ * @passphrase: passphrase used for the device
+ * @cert_data: certificate data to use for escrow
+ * @directory: directory to put escrow data into
+ * @backup_passphrase: (allow-none): backup passphrase for the device or %NULL
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the ecrow data was successfully created for @device or not
+ */
+gboolean bd_crypto_escrow_device (gchar *device, gchar *passphrase, gchar *cert_data, gchar *directory, gchar *backup_passphrase, GError **error);

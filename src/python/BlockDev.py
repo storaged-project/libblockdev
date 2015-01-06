@@ -61,6 +61,12 @@ def crypto_luks_remove_key(device, pass_=None, key_file=None):
     return _crypto_luks_remove_key(device, pass_, key_file)
 __all__.append("crypto_luks_remove_key")
 
+_crypto_escrow_device = BlockDev.crypto_escrow_device
+@override(BlockDev.crypto_escrow_device)
+def crypto_escrow_device(device, passphrase, cert_data, directory, backup_passphrase=None):
+    return _crypto_escrow_device(device, passphrase, cert_data, directory, backup_passphrase)
+__all__.append("crypto_escrow_device")
+
 
 _dm_create_linear = BlockDev.dm_create_linear
 @override(BlockDev.dm_create_linear)

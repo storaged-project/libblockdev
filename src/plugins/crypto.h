@@ -15,6 +15,9 @@ typedef enum {
     BD_CRYPTO_ERROR_REMOVE_KEY,
     BD_CRYPTO_ERROR_NO_KEY,
     BD_CRYPTO_ERROR_KEY_SLOT,
+    BD_CRYPTO_ERROR_NSS_INIT_FAILED,
+    BD_CRYPTO_ERROR_CERT_DECODE,
+    BD_CRYPTO_ERROR_ESCROW_FAILED,
 } BDCryptoError;
 
 #define BD_CRYPTO_BACKUP_PASSPHRASE_CHARSET "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz./"
@@ -37,5 +40,6 @@ gboolean bd_crypto_luks_add_key (gchar *device, gchar *pass, gchar *key_file, gc
 gboolean bd_crypto_luks_remove_key (gchar *device, gchar *pass, gchar *key_file, GError **error);
 gboolean bd_crypto_luks_change_key (gchar *device, gchar *pass, gchar *npass, GError **error);
 gboolean bd_crypto_luks_resize (gchar *device, guint64 size, GError **error);
+gboolean bd_crypto_escrow_device (gchar *device, gchar *passphrase, gchar *cert_data, gchar *directory, gchar *backup_passphrase, GError **error);
 
 #endif  /* BD_CRYPTO */

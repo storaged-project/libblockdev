@@ -13,6 +13,8 @@ BuildRequires: cryptsetup-devel
 BuildRequires: device-mapper-devel
 BuildRequires: systemd-devel
 BuildRequires: dmraid-devel
+BuildRequires: volume_key-devel
+BuildRequires: nss-devel
 BuildRequires: python2-devel
 BuildRequires: python3-devel
 

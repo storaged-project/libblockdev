@@ -20,6 +20,8 @@
 #include <string.h>
 #include <glib.h>
 #include <libcryptsetup.h>
+#include <nss.h>
+#include <libvolume_key.h>
 #include "crypto.h"
 
 /**
@@ -563,4 +565,178 @@ gboolean bd_crypto_luks_resize (gchar *device, guint64 size, GError **error) {
 
     crypt_free (cd);
     return TRUE;
+}
+
+static gchar *always_fail_cb (gpointer data __attribute__((unused)), const gchar *prompt __attribute__((unused)), int echo __attribute__((unused))) {
+    return NULL;
+}
+
+static gchar *give_passphrase_cb (gpointer data, const gchar *prompt __attribute__((unused)), unsigned failed_attempts) {
+    if (failed_attempts == 0)
+        return (gchar*) data;
+    return NULL;
+}
+
+/**
+ * Replaces all appereances of @orig in @str with @new (in place).
+ */
+static gchar *replace_char (gchar *str, gchar orig, gchar new) {
+    gchar *pos = str;
+    if (!str)
+        return str;
+
+    for (pos=str; pos; pos++)
+        *pos = *pos == orig ? new : *pos;
+
+    return str;
+}
+
+static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libvk_ui *ui, enum libvk_packet_format format, gchar *out_path,
+                                        CERTCertificate *cert, GError **error) {
+    gpointer packet_data = NULL;
+    gsize packet_data_size = 0;
+    GIOChannel *out_file = NULL;
+    GIOStatus status = G_IO_STATUS_ERROR;
+    gsize bytes_written = 0;
+    GError *tmp_error = NULL;
+
+    packet_data = libvk_volume_create_packet_asymmetric_with_format (volume, &packet_data_size, format, cert,
+                                                                     ui, LIBVK_PACKET_FORMAT_ASYMMETRIC_WRAP_SECRET_ONLY, error);
+
+    if (!packet_data) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_ESCROW_FAILED,
+                     "Failed to get escrow data");
+        libvk_volume_free (volume);
+        return FALSE;
+    }
+
+    out_file = g_io_channel_new_file (out_path, "w", error);
+    if (!out_file) {
+        /* error is already populated */
+        g_free (packet_data);
+        return FALSE;
+    }
+
+    status = g_io_channel_write_chars (out_file, (gchar *) packet_data, (gssize) packet_data_size,
+                                       &bytes_written, error);
+    g_free (packet_data);
+    if (status != G_IO_STATUS_NORMAL) {
+        /* try to shutdown the channel, but if it fails, we cannot do anything about it here */
+        g_io_channel_shutdown (out_file, TRUE, &tmp_error);
+
+        /* error is already populated */
+        g_io_channel_unref (out_file);
+        return FALSE;
+    }
+
+    if (g_io_channel_shutdown (out_file, TRUE, error) != G_IO_STATUS_NORMAL) {
+        /* error is already populated */
+        g_io_channel_unref (out_file);
+        return FALSE;
+    }
+    g_io_channel_unref (out_file);
+
+    return TRUE;
+}
+
+/**
+ * bd_crypto_escrow_device:
+ * @device: path of the device to create escrow data for
+ * @passphrase: passphrase used for the device
+ * @cert_data: certificate data to use for escrow
+ * @directory: directory to put escrow data into
+ * @backup_passphrase: (allow-none): backup passphrase for the device or %NULL
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the ecrow data was successfully created for @device or not
+ */
+gboolean bd_crypto_escrow_device (gchar *device, gchar *passphrase, gchar *cert_data, gchar *directory, gchar *backup_passphrase, GError **error) {
+    struct libvk_volume *volume = NULL;
+    struct libvk_ui *ui = NULL;
+    gchar *label = NULL;
+    gchar *uuid = NULL;
+    CERTCertificate *cert = NULL;
+    gchar *volume_ident = NULL;
+    gchar *out_path = NULL;
+    gboolean ret = FALSE;
+
+    if (!NSS_IsInitialized())
+        if (NSS_NoDB_Init(NULL) != SECSuccess) {
+            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NSS_INIT_FAILED,
+                         "Failed to initialize NSS");
+            return FALSE;
+        }
+
+    volume = libvk_volume_open (device, error);
+    if (!volume)
+        /* error is already populated */
+        return FALSE;
+
+    ui = libvk_ui_new ();
+    /* not supposed to be called -> always fail */
+    libvk_ui_set_generic_cb (ui, always_fail_cb, NULL, NULL);
+    libvk_ui_set_passphrase_cb (ui, give_passphrase_cb, passphrase, NULL);
+
+    if (libvk_volume_get_secret (volume, LIBVK_SECRET_DEFAULT, ui, error) != 0) {
+        /* error is already populated */
+        libvk_volume_free (volume);
+        libvk_ui_free (ui);
+        return FALSE;
+    }
+
+    cert = CERT_DecodeCertFromPackage (cert_data, strlen(cert_data));
+    if (!cert) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_CERT_DECODE,
+                     "Failed to decode the certificate data");
+        libvk_volume_free (volume);
+        libvk_ui_free (ui);
+        return FALSE;
+    }
+
+    label = libvk_volume_get_label (volume);
+    replace_char (label, '/', '_');
+    uuid = libvk_volume_get_uuid (volume);
+    replace_char (uuid, '/', '_');
+
+    if (label && uuid) {
+        volume_ident = g_strdup_printf ("%s-%s", label, uuid);
+        g_free (label);
+        g_free (uuid);
+    } else if (uuid)
+        volume_ident = uuid;
+    else
+        volume_ident = g_strdup ("_unknown");
+
+    out_path = g_strdup_printf ("%s/%s-ecrow", directory, volume_ident);
+    ret = write_escrow_data_file (volume, ui, LIBVK_SECRET_DEFAULT, out_path, cert, error);
+    g_free (out_path);
+
+    if (!ret) {
+        CERT_DestroyCertificate (cert);
+        libvk_volume_free (volume);
+        libvk_ui_free (ui);
+        g_free (volume_ident);
+        return FALSE;
+    }
+
+    if (backup_passphrase) {
+        if (libvk_volume_add_secret (volume, LIBVK_SECRET_PASSPHRASE, backup_passphrase, strlen (backup_passphrase), error) != 0) {
+            /* error is already populated */
+            CERT_DestroyCertificate (cert);
+            libvk_volume_free (volume);
+            libvk_ui_free (ui);
+            g_free (volume_ident);
+            return FALSE;
+        }
+
+        out_path = g_strdup_printf ("%s/%s-escrow-backup-passphrase", directory, volume_ident);
+        ret = write_escrow_data_file (volume, ui, LIBVK_SECRET_PASSPHRASE, out_path, cert, error);
+        g_free (out_path);
+    }
+
+    CERT_DestroyCertificate (cert);
+    libvk_volume_free (volume);
+    libvk_ui_free (ui);
+    g_free (volume_ident);
+    return ret;
 }

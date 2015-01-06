@@ -174,6 +174,7 @@ CRYPTO/LUKS
    * luks_remove_key [DONE]
    * luks_change_key [DONE]
    * luks_resize [DONE]
+   * escrow_device [NEEDS_TESTS]
 
 
 MULTIPATH
