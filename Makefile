@@ -11,7 +11,7 @@ build:
 	scons -Q build
 
 install:
-	scons -Q --prefix=${PREFIX} install
+	scons -Q --prefix=${PREFIX} --sitedirs=${SITEDIRS} install
 
 uninstall:
 	scons -Q -c install
@@ -35,22 +35,28 @@ BlockDev-1.0.typelib:
 plugins-test: ${PLUGIN_TESTS}
 
 test-from-python: all
-	GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build python -c 'from gi.repository import BlockDev; BlockDev.init(None, None); print BlockDev.lvm_get_max_lv_size()'
+	GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build PYTHONPATH=src/python python -c \
+         'import gi.overrides;\
+		 gi.overrides.__path__.insert(0, "src/python");\
+         from gi.repository import BlockDev;\
+         BlockDev.init();\
+         BlockDev.reinit();\
+         print BlockDev.lvm_get_max_lv_size()'
 
 run-ipython: all
-	GI_TYPELIB_PATH=build/ LD_LIBRARY_PATH=build ipython
+	GI_TYPELIB_PATH=build/ LD_LIBRARY_PATH=build PYTHONPATH=src/python ipython
 
 run-root-ipython: all
-	sudo GI_TYPELIB_PATH=build/ LD_LIBRARY_PATH=build ipython
+	sudo GI_TYPELIB_PATH=build/ LD_LIBRARY_PATH=build PYTHONPATH=src/python ipython
 
 test: all
 	@echo
-	@sudo GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build PYTHONPATH=.:tests/ \
+	@sudo GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build PYTHONPATH=.:tests/:src/python \
 		python -m unittest discover -v -s tests/ -p '*_test.py'
 
 fast-test: all
 	@echo
-	@sudo SKIP_SLOW= GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build PYTHONPATH=.:tests/ \
+	@sudo SKIP_SLOW= GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build PYTHONPATH=.:tests/:src/python \
 		python -m unittest discover -v -s tests/ -p '*_test.py'
 
 clean:

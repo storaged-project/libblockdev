@@ -9,6 +9,7 @@ well.
 
 import os
 import platform
+import site
 import SCons.Defaults
 
 class Installer:
@@ -30,6 +31,15 @@ class Installer:
         self._includedir = env.get('INCLUDEDIR', os.path.join(self._prefix, "include"))
         self._pkg_config_dir = os.path.join(self._libdir, "pkgconfig")
         self._sharedir = os.path.join(self._prefix, "share")
+        site_dirs = env.get('SITEDIRS', site.getsitepackages()[0])
+        site_dirs = site_dirs.split(",")
+        if len(site_dirs) > 1:
+            self._py2_site = site_dirs[0]
+            self._py3_site = site_dirs[1]
+        else:
+            self._py2_site = site_dirs[0]
+            self._py3_site = None
+
         self._env = env
 
     def Add(self, destdir, name, basedir="", perm=0644):
@@ -70,3 +80,8 @@ class Installer:
 
     def AddPkgConfig(self, pkg_config):
         self.Add(self._pkg_config_dir, pkg_config)
+
+    def AddGIOverrides(self, gi_overrides):
+        self.Add(os.path.join(self._py2_site, "gi/overrides/"), gi_overrides)
+        if self._py3_site:
+            self.Add(os.path.join(self._py3_site, "gi/overrides/"), gi_overrides)

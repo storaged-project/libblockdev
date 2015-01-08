@@ -163,12 +163,22 @@ AddOption('--prefix',
           action='store',
           metavar='DIR',
           help='installation prefix')
+AddOption('--sitedirs',
+          dest='sitedirs',
+          type='string',
+          nargs=1,
+          action='store',
+          metavar='DIR',
+          help='python2,python3 site directories')
 
 import installer
 
 inst_env = Environment(SHLIBVERSION=MAIN_VERSION)
 prefix = os.path.join(GetOption('prefix'), "usr") if GetOption('prefix') else "/usr"
 inst_env['PREFIX'] = prefix
+sitedirs = GetOption('sitedirs')
+if sitedirs:
+    inst_env['SITEDIRS'] = sitedirs
 
 # create the installer
 install = installer.Installer(inst_env)
@@ -182,3 +192,4 @@ for header in ["src/utils/utils.h", "src/utils/exec.h", "src/utils/sizes.h",
 install.AddGirFile(gir_file)
 install.AddTypelib(typelib)
 install.AddPkgConfig(pc_file)
+install.AddGIOverrides("src/python/BlockDev.py")

@@ -13,6 +13,8 @@ BuildRequires: cryptsetup-devel
 BuildRequires: device-mapper-devel
 BuildRequires: systemd-devel
 BuildRequires: dmraid-devel
+BuildRequires: python2-devel
+BuildRequires: python3-devel
 
 
 %description
@@ -227,7 +229,7 @@ A meta-package that pulls all the libblockdev plugins as dependencies.
 CFLAGS="%{optflags}" make %{?_smp_mflags}
 
 %install
-CFLAGS="%{optflags}" make PREFIX=%{buildroot} %{?_smp_mflags} install
+CFLAGS="%{optflags}" make PREFIX=%{buildroot} SITEDIRS=%{buildroot}%{python2_sitearch},%{buildroot}%{python3_sitearch} %{?_smp_mflags} install
 
 %clean
 rm -rf %{buildroot}
@@ -258,6 +260,8 @@ rm -rf %{buildroot}
 %{_libdir}/libblockdev.so.*
 %{_libdir}/girepository*/BlockDev*.typelib
 %{_datadir}/gir*/BlockDev*.gir
+%{python2_sitearch}
+%{python3_sitearch}
 
 %files devel
 %{_libdir}/libblockdev.so
