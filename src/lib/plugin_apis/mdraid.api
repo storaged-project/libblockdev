@@ -206,6 +206,15 @@ gboolean bd_md_deactivate (gchar *device_name, GError **error);
 gboolean bd_md_activate (gchar *device_name, gchar **members, gchar *uuid, GError **error);
 
 /**
+ * bd_md_run:
+ * @raid_name: name of the (possibly degraded) MD RAID to be started
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @raid_name was successfully started or not
+ */
+gboolean bd_md_run (gchar *raid_name, GError **error);
+
+/**
  * bd_md_nominate:
  * @device: device to nominate (add to its appropriate RAID) as a MD RAID device
  * @error: (out): place to store error (if any)

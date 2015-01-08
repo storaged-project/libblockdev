@@ -447,6 +447,29 @@ gboolean bd_md_activate (gchar *device_name, gchar **members, gchar *uuid, GErro
 }
 
 /**
+ * bd_md_run:
+ * @raid_name: name of the (possibly degraded) MD RAID to be started
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @raid_name was successfully started or not
+ */
+gboolean bd_md_run (gchar *raid_name, GError **error) {
+    gchar *argv[] = {"mdadm", "--run", NULL, NULL};
+    gchar *raid_name_str = NULL;
+    gboolean ret = FALSE;
+
+    raid_name_str = g_strdup_printf ("/dev/md/%s", raid_name);
+    if (access (raid_name_str, F_OK) == 0)
+        raid_name = raid_name_str;
+    argv[2] = raid_name;
+
+    ret = bd_utils_exec_and_report_error (argv, error);
+    g_free (raid_name_str);
+
+    return ret;
+}
+
+/**
  * bd_md_nominate:
  * @device: device to nominate (add to its appropriate RAID) as a MD RAID device
  * @error: (out): place to store error (if any)

@@ -144,6 +144,7 @@ MDRAID
    * destroy [DONE]
    * activate [DONE]
    * deactivate [DONE]
+   * run [NEEDS_TEST]
    * nominate [DONE]
    * denominate [DONE]
    * add [DONE]
