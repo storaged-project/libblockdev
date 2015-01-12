@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     0.1
+Version:     0.2
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -346,5 +346,10 @@ rm -rf %{buildroot}
 %files plugins-all
 
 %changelog
+* Mon Jan 12 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.2-1
+- Fix dependencies of the release target (vpodzime)
+- Python overrides for the GI-generated bindings (vpodzime)
+- Pass version info to the code and use it to load plugins (vpodzime)
+
 * Wed Dec 10 2014 Vratislav Podzimek <vpodzime@redhat.com> - 0.1-1
 - Initial release
