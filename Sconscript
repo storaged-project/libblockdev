@@ -5,6 +5,7 @@ from build_functions import *
 
 MAIN_VERSION = "0.1.0"
 MAJOR_MINOR = MAIN_VERSION.rsplit(".", 1)[0]
+MAJOR_VERSION = MAIN_VERSION.split(".", 1)[0]
 LIB_FILES = ["src/lib/blockdev.c", "src/lib/blockdev.h", "src/lib/plugins.h"]
 PLUGIN_NAMES = ["crypto", "dm", "loop", "lvm", "mpath", "swap", "btrfs", "mdraid"]
 PLUGIN_HEADER_FILES = ["build/plugin_apis/"+name+".h" for name in PLUGIN_NAMES]
@@ -13,6 +14,7 @@ UTILS_FILES = ["src/utils/exec.c", "src/utils/sizes.c", "src/utils/exec.h", "src
 glib_env = Environment(SHLIBVERSION=MAIN_VERSION)
 glib_env.Append(CC=os.environ.get('CC', ""))
 glib_env.Append(CFLAGS=Split(os.environ.get('CFLAGS', "")))
+glib_env.Append(CCFLAGS=('-DMAJOR_VER=\\"%s\\"' % MAJOR_VERSION))
 glib_env.ParseConfig("pkg-config --cflags --libs glib-2.0")
 
 glib_warnall_env = glib_env.Clone()

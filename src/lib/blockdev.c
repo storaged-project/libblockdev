@@ -35,14 +35,14 @@ typedef struct BDPluginStatus {
 
 /* KEEP THE ORDERING OF THESE ARRAYS MATCHING THE BDPluginName ENUM! */
 static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
-    {{BD_PLUGIN_LVM, "libbd_lvm.so"}, NULL},
-    {{BD_PLUGIN_BTRFS, "libbd_btrfs.so"}, NULL},
-    {{BD_PLUGIN_SWAP, "libbd_swap.so"}, NULL},
-    {{BD_PLUGIN_LOOP, "libbd_loop.so"}, NULL},
-    {{BD_PLUGIN_CRYPTO, "libbd_crypto.so"}, NULL},
-    {{BD_PLUGIN_MPATH, "libbd_mpath.so"}, NULL},
-    {{BD_PLUGIN_DM, "libbd_dm.so"}, NULL},
-    {{BD_PLUGIN_MDRAID, "libbd_mdraid.so"}, NULL}
+    {{BD_PLUGIN_LVM, "libbd_lvm.so."MAJOR_VER}, NULL},
+    {{BD_PLUGIN_BTRFS, "libbd_btrfs.so."MAJOR_VER}, NULL},
+    {{BD_PLUGIN_SWAP, "libbd_swap.so."MAJOR_VER}, NULL},
+    {{BD_PLUGIN_LOOP, "libbd_loop.so."MAJOR_VER}, NULL},
+    {{BD_PLUGIN_CRYPTO, "libbd_crypto.so."MAJOR_VER}, NULL},
+    {{BD_PLUGIN_MPATH, "libbd_mpath.so."MAJOR_VER}, NULL},
+    {{BD_PLUGIN_DM, "libbd_dm.so."MAJOR_VER}, NULL},
+    {{BD_PLUGIN_MDRAID, "libbd_mdraid.so."MAJOR_VER}, NULL}
 };
 static gchar* plugin_names[BD_PLUGIN_UNDEF] = {
     "lvm", "btrfs", "swap", "loop", "crypto", "mpath", "dm", "mdraid"
