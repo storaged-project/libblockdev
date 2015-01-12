@@ -88,4 +88,4 @@ archive:
 local:
 	git archive --format=tar.gz --prefix=$(PKGNAME)-$(VERSION)/ -o $(PKGNAME)-$(VERSION).tar.gz HEAD
 
-release: archive tag
+release: tag archive
