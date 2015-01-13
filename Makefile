@@ -26,11 +26,11 @@ test-%: test_%
 %.so:
 	scons -Q build/$@
 
-BlockDev-1.0.gir:
-	scons -Q BlockDev-1.0.gir
+BlockDev-0.1.gir:
+	scons -Q build/$@
 
-BlockDev-1.0.typelib:
-	scons -Q BlockDev-1.0.typelib
+BlockDev-0.1.typelib:
+	scons -Q build/$@
 
 plugins-test: ${PLUGIN_TESTS}
 
