@@ -272,7 +272,7 @@ static BDMDDetailData* get_detail_data_from_table (GHashTable *table, gboolean f
  * or default if unsupported @version is used.
  */
 guint64 bd_md_get_superblock_size (guint64 size, gchar *version) {
-    guint64 headroom = MD_SUPERBLOCK_SIZE;
+    guint64 headroom = BD_MD_SUPERBLOCK_SIZE;
     guint64 min_headroom = (1 MiB);
 
     /* mdadm 3.2.4 made a major change in the amount of space used for 1.1 and

@@ -6,22 +6,22 @@
 
 #ifdef __LP64__
 // 64bit system
-#define MAX_LV_SIZE (8 EiB)
+#define BD_LVM_MAX_LV_SIZE (8 EiB)
 #else
 // 32bit system
-#define MAX_LV_SIZE (16 TiB)
+#define BD_LVM_MAX_LV_SIZE (16 TiB)
 #endif
 
-#define DEFAULT_PE_SIZE (4 MiB)
-#define MIN_PE_SIZE (1 KiB)
-#define MAX_PE_SIZE (16 GiB)
+#define BD_LVM_DEFAULT_PE_SIZE (4 MiB)
+#define BD_LVM_MIN_PE_SIZE (1 KiB)
+#define BD_LVM_MAX_PE_SIZE (16 GiB)
 #define USE_DEFAULT_PE_SIZE 0
-#define RESOLVE_PE_SIZE(size) ((size) == USE_DEFAULT_PE_SIZE ? DEFAULT_PE_SIZE : (size))
+#define RESOLVE_PE_SIZE(size) ((size) == USE_DEFAULT_PE_SIZE ? BD_LVM_DEFAULT_PE_SIZE : (size))
 
-#define MIN_THPOOL_MD_SIZE (2 MiB)
-#define MAX_THPOOL_MD_SIZE (16 GiB)
-#define MIN_THPOOL_CHUNK_SIZE (64 KiB)
-#define MAX_THPOOL_CHUNK_SIZE (1 GiB)
+#define BD_LVM_MIN_THPOOL_MD_SIZE (2 MiB)
+#define BD_LVM_MAX_THPOOL_MD_SIZE (16 GiB)
+#define BD_LVM_MIN_THPOOL_CHUNK_SIZE (64 KiB)
+#define BD_LVM_MAX_THPOOL_CHUNK_SIZE (1 GiB)
 #define THPOOL_MD_FACTOR_NEW (0.2)
 #define THPOOL_MD_FACTOR_EXISTS (1 / 6.0)
 

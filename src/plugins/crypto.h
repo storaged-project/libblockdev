@@ -1,7 +1,10 @@
 #include <glib.h>
+#include <utils.h>
 
 #ifndef BD_CRYPTO
 #define BD_CRYPTO
+
+#define BD_CRYPTO_LUKS_METADATA_SIZE (2 MiB)
 
 GQuark bd_crypto_error_quark (void);
 #define BD_CRYPTO_ERROR bd_crypto_error_quark ()

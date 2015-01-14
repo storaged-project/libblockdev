@@ -4,6 +4,11 @@
 #ifndef BD_MD_API
 #define BD_MD_API
 
+/* taken from blivet */
+// these defaults were determined empirically
+#define BD_MD_SUPERBLOCK_SIZE (2 MiB)
+#define BD_MD_CHUNK_SIZE (512 KiB)
+
 #define BD_MD_ERROR bd_md_error_quark ()
 typedef enum {
     BD_MD_ERROR_PARSE,

@@ -18,7 +18,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertNotEqual(orig_max_size, 1024)
 
         # change the sources and recompile
-        os.system("sed -ri 's?MAX_LV_SIZE;?1024;//test-change?' src/plugins/lvm.c > /dev/null")
+        os.system("sed -ri 's?BD_LVM_MAX_LV_SIZE;?1024;//test-change?' src/plugins/lvm.c > /dev/null")
         os.system("make libbd_lvm.so > /dev/null")
 
         # library should successfully reinitialize without reloading plugins
@@ -34,7 +34,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), 1024)
 
         # change the sources back and recompile
-        os.system("sed -ri 's?1024;//test-change?MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
+        os.system("sed -ri 's?1024;//test-change?BD_LVM_MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
         os.system("make libbd_lvm.so > /dev/null")
 
         # library should successfully reinitialize reloading original plugins
@@ -51,14 +51,14 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertNotEqual(orig_max_size, 1024)
 
         # change the sources and recompile
-        os.system("sed -ri 's?MAX_LV_SIZE;?1024;//test-change?' src/plugins/lvm.c > /dev/null")
+        os.system("sed -ri 's?BD_LVM_MAX_LV_SIZE;?1024;//test-change?' src/plugins/lvm.c > /dev/null")
         os.system("make libbd_lvm.so > /dev/null")
 
         # proclaim the new build a different plugin
         os.system("cp build/libbd_lvm.so build/libbd_lvm2.so")
 
         # change the sources back and recompile
-        os.system("sed -ri 's?1024;//test-change?MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
+        os.system("sed -ri 's?1024;//test-change?BD_LVM_MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
         os.system("make libbd_lvm.so > /dev/null")
 
         # force the new plugin to be used

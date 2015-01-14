@@ -1,6 +1,8 @@
 #include <glib.h>
 #include <glib-object.h>
 
+#define BD_BTRFS_MAIN_VOLUME_ID 5
+
 #define BD_BTRFS_ERROR bd_btrfs_error_quark ()
 typedef enum {
     BD_BTRFS_ERROR_DEVICE,

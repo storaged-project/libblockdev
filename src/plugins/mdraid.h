@@ -3,6 +3,11 @@
 #ifndef BD_MD
 #define BD_MD
 
+/* taken from blivet */
+// these defaults were determined empirically
+#define BD_MD_SUPERBLOCK_SIZE (2 MiB)
+#define BD_MD_CHUNK_SIZE (512 KiB)
+
 GQuark bd_md_error_quark (void);
 #define BD_MD_ERROR bd_md_error_quark ()
 typedef enum {
@@ -47,11 +52,6 @@ typedef struct BDMDDetailData {
 
 void bd_md_detail_data_free (BDMDDetailData *data);
 BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data);
-
-/* taken from blivet */
-// these defaults were determined empirically
-#define MD_SUPERBLOCK_SIZE (2 MiB)
-#define MD_CHUNK_SIZE (512 KiB)
 
 guint64 bd_md_get_superblock_size (guint64 size, gchar *version);
 gboolean bd_md_create (gchar *device_name, gchar *level, gchar **disks, guint64 spares, gchar *version, gboolean bitmap, GError **error);

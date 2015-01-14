@@ -306,7 +306,7 @@ static BDLVMLVdata* get_lv_data_from_table (GHashTable *table, gboolean free_tab
  * Returns: whether the given size is supported physical extent size or not
  */
 gboolean bd_lvm_is_supported_pe_size (guint64 size) {
-    return (((size % 2) == 0) && (size >= (MIN_PE_SIZE)) && (size <= (MAX_PE_SIZE)));
+    return (((size % 2) == 0) && (size >= (BD_LVM_MIN_PE_SIZE)) && (size <= (BD_LVM_MAX_PE_SIZE)));
 }
 
 /**
@@ -316,11 +316,11 @@ gboolean bd_lvm_is_supported_pe_size (guint64 size) {
  */
 guint64 *bd_lvm_get_supported_pe_sizes () {
     guint8 i;
-    guint64 val = MIN_PE_SIZE;
-    guint8 num_items = ((guint8) round (log2 ((double) MAX_PE_SIZE))) - ((guint8) round (log2 ((double) MIN_PE_SIZE))) + 2;
+    guint64 val = BD_LVM_MIN_PE_SIZE;
+    guint8 num_items = ((guint8) round (log2 ((double) BD_LVM_MAX_PE_SIZE))) - ((guint8) round (log2 ((double) BD_LVM_MIN_PE_SIZE))) + 2;
     guint64 *ret = g_new (guint64, num_items);
 
-    for (i=0; (val <= MAX_PE_SIZE); i++, val = val * 2)
+    for (i=0; (val <= BD_LVM_MAX_PE_SIZE); i++, val = val * 2)
         ret[i] = val;
 
     ret[num_items-1] = 0;
@@ -333,7 +333,7 @@ guint64 *bd_lvm_get_supported_pe_sizes () {
  * Returns: maximum LV size in bytes
  */
 guint64 bd_lvm_get_max_lv_size () {
-    return MAX_LV_SIZE;
+    return BD_LVM_MAX_LV_SIZE;
 }
 
 /**
@@ -397,7 +397,7 @@ guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean inclu
         raw_md_size = (guint64) ceil (size * THPOOL_MD_FACTOR_NEW);
 
     return MIN (bd_lvm_round_size_to_pe(raw_md_size, pe_size, TRUE),
-                bd_lvm_round_size_to_pe(MAX_THPOOL_MD_SIZE, pe_size, TRUE));
+                bd_lvm_round_size_to_pe(BD_LVM_MAX_THPOOL_MD_SIZE, pe_size, TRUE));
 }
 
 /**
@@ -407,7 +407,7 @@ guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean inclu
  * Returns: whether the given size is a valid thin pool metadata size or not
  */
 gboolean bd_lvm_is_valid_thpool_md_size (guint64 size) {
-    return ((MIN_THPOOL_MD_SIZE <= size) && (size <= MAX_THPOOL_MD_SIZE));
+    return ((BD_LVM_MIN_THPOOL_MD_SIZE <= size) && (size <= BD_LVM_MAX_THPOOL_MD_SIZE));
 }
 
 /**
@@ -420,7 +420,7 @@ gboolean bd_lvm_is_valid_thpool_md_size (guint64 size) {
 gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard) {
     gdouble size_log2 = 0.0;
 
-    if ((size < MIN_THPOOL_CHUNK_SIZE) || (size > MAX_THPOOL_CHUNK_SIZE))
+    if ((size < BD_LVM_MIN_THPOOL_CHUNK_SIZE) || (size > BD_LVM_MAX_THPOOL_CHUNK_SIZE))
         return FALSE;
 
     /* To support discard, chunk size must be a power of two. Otherwise it must be a

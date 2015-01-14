@@ -4,6 +4,8 @@
 #ifndef BD_BTRFS
 #define BD_BTRFS
 
+#define BD_BTRFS_MAIN_VOLUME_ID 5
+
 GQuark bd_btrfs_error_quark (void);
 #define BD_BTRFS_ERROR bd_btrfs_error_quark ()
 typedef enum {

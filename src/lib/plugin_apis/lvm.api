@@ -1,8 +1,25 @@
 #include <glib.h>
 #include <glib-object.h>
+#include <utils.h>
 
 #ifndef BD_LVM_API
 #define BD_LVM_API
+
+#ifdef __LP64__
+// 64bit system
+#define BD_LVM_MAX_LV_SIZE (8 EiB)
+#else
+// 32bit system
+#define BD_LVM_MAX_LV_SIZE (16 TiB)
+#endif
+
+#define BD_LVM_DEFAULT_PE_SIZE (4 MiB)
+#define BD_LVM_MIN_PE_SIZE (1 KiB)
+#define BD_LVM_MAX_PE_SIZE (16 GiB)
+#define BD_LVM_MIN_THPOOL_MD_SIZE (2 MiB)
+#define BD_LVM_MAX_THPOOL_MD_SIZE (16 GiB)
+#define BD_LVM_MIN_THPOOL_CHUNK_SIZE (64 KiB)
+#define BD_LVM_MAX_THPOOL_CHUNK_SIZE (1 GiB)
 
 #define BD_LVM_ERROR bd_lvm_error_quark ()
 typedef enum {
