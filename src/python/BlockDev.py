@@ -83,8 +83,8 @@ __all__.append("dm_get_member_raid_sets")
 
 _lvm_round_size_to_pe = BlockDev.lvm_round_size_to_pe
 @override(BlockDev.lvm_round_size_to_pe)
-def lvm_round_size_to_pe(size, pe_size=0):
-    return _lvm_round_size_to_pe(size, pe_size)
+def lvm_round_size_to_pe(size, pe_size=0, roundup=True):
+    return _lvm_round_size_to_pe(size, pe_size, roundup)
 __all__.append("lvm_round_size_to_pe")
 
 _lvm_get_thpool_padding = BlockDev.lvm_get_thpool_padding
@@ -132,13 +132,13 @@ __all__.append("lvm_lvs")
 _lvm_thpoolcreate = BlockDev.lvm_thpoolcreate
 @override(BlockDev.lvm_thpoolcreate)
 def lvm_thpoolcreate(vg_name, lv_name, size, md_size=0, chunk_size=0, profile=None):
-    return _thpoolcreate(vg_name, lv_name, size, md_size, chunk_size, profile)
+    return _lvm_thpoolcreate(vg_name, lv_name, size, md_size, chunk_size, profile)
 __all__.append("lvm_thpoolcreate")
 
 _lvm_thsnapshotcreate = BlockDev.lvm_thsnapshotcreate
 @override(BlockDev.lvm_thsnapshotcreate)
 def lvm_thsnapshotcreate(vg_name, origin_name, snapshot_name, pool_name=None):
-    return _thsnapshotcreate(vg_name, origin_name, snapshot_name, pool_name)
+    return _lvm_thsnapshotcreate(vg_name, origin_name, snapshot_name, pool_name)
 __all__.append("lvm_thsnapshotcreate")
 
 _lvm_set_global_config = BlockDev.lvm_set_global_config
