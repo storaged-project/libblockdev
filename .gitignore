@@ -11,3 +11,4 @@ src/utils/test_sizes
 BlockDev-1.0.gir
 BlockDev-1.0.typelib
 **/.scons*
+build/*
