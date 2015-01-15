@@ -19,6 +19,51 @@ FUNC_SPEC_RE = re.compile(r'(?P<rtype>\**\s*\w+\s*\**)'
                           r'(?P<args>[\w*\s,]*)'
                           r'\)(;| \{)')
 
+SIZE_CONST_DEF_RE = re.compile(r'^(?P<name_num>#define\s+\w+\s*\(\s*\d+\s+)(?P<unit>[kmgtpeKMGTPE]i?[bB])\s*\)\s*$')
+
+KiB = 1024
+MiB = 1024 * KiB
+GiB = 1024 * MiB
+TiB = 1024 * GiB
+PiB = 1024 * TiB
+EiB = 1024 * PiB
+KB = 1000
+MB = 1000 * KB
+GB = 1000 * MB
+TB = 1000 * GB
+PB = 1000 * TB
+EB = 1000 * PB
+
+UNIT_MULTS = {"KiB": KiB, "MiB": MiB, "GiB": GiB, "TiB": TiB, "PiB": PiB, "EiB": EiB,
+              "KB": KB, "MB": MB, "GB": GB, "TB": TB, "PB": PB, "EB": EB}
+
+def expand_size_constants(definitions):
+    """
+    Expand macros that define size constants (e.g. '#define DEFAULT_PE_SIZE (4 MiB)').
+
+    :param str definitions: lines from a source file potentially containing
+                            definitions of size constants.
+    :returns: definitions with size constants expanded
+
+    """
+
+    ret = ""
+    for def_line in definitions.splitlines():
+        match = SIZE_CONST_DEF_RE.match(def_line)
+        if match:
+            fields = match.groupdict()
+            unit = fields["unit"]
+            if unit in UNIT_MULTS:
+                name_num = fields["name_num"]
+                ret += (name_num + "* " + "%dULL" % UNIT_MULTS[unit] + ")\n")
+            else:
+                # unknown unit, cannot expand it, just leave it as it is
+                ret += (def_line + "\n")
+        else:
+            ret += (def_line + "\n")
+
+    return ret
+
 def gather_defs_and_func_info(line_iter, includes):
     name = doc = rtype = args = ""
     defs = ""
@@ -63,9 +108,9 @@ def gather_defs_and_func_info(line_iter, includes):
             else:
                 defs += line
     else:
-        return (defs, None)
+        return (expand_size_constants(defs), None)
 
-    return (defs, FuncInfo(name, doc, rtype, args, body))
+    return (expand_size_constants(defs), FuncInfo(name, doc, rtype, args, body))
 
 def process_file(fobj):
     includes = []
