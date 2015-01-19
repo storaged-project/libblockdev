@@ -86,7 +86,7 @@ int main (void) {
     else
         puts ("192 KiB ThPool chunk size (no discard): Invalid.");
 
-    succ = bd_lvm_pvcreate ("/dev/xd1", &error);
+    succ = bd_lvm_pvcreate ("/dev/xd1", 0, &error);
     if (!succ)
         g_printf ("pvcreate failed: %s\n", error->message);
     else

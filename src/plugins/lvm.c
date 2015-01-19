@@ -435,14 +435,25 @@ gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard) {
 /**
  * bd_lvm_pvcreate:
  * @device: the device to make PV from
+ * @dataalignment: data (first PE) alignment or 0 to use the default
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the PV was successfully created or not
  */
-gboolean bd_lvm_pvcreate (gchar *device, GError **error) {
-    gchar *args[3] = {"pvcreate", device, NULL};
+gboolean bd_lvm_pvcreate (gchar *device, guint64 dataalignment, GError **error) {
+    gchar *args[4] = {"pvcreate", device, NULL, NULL};
+    gchar *dataalign_str = NULL;
+    gboolean ret = FALSE;
 
-    return call_lvm_and_report_error (args, error);
+    if (dataalignment != 0) {
+        dataalign_str = g_strdup_printf ("--dataalignment=%"G_GUINT64_FORMAT"b", dataalignment);
+        args[2] = dataalign_str;
+    }
+
+    ret = call_lvm_and_report_error (args, error);
+    g_free (dataalign_str);
+
+    return ret;
 }
 
 /**
