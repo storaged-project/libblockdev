@@ -95,8 +95,8 @@ __all__.append("lvm_get_thpool_padding")
 
 _lvm_pvcreate = BlockDev.lvm_pvcreate
 @override(BlockDev.lvm_pvcreate)
-def lvm_pvcreate(device, dataalignment=0):
-    return _lvm_pvcreate(device, dataalignment)
+def lvm_pvcreate(device, dataalignment=0, metadatasize=0):
+    return _lvm_pvcreate(device, dataalignment, metadatasize)
 __all__.append("lvm_pvcreate")
 
 _lvm_pvmove = BlockDev.lvm_pvmove

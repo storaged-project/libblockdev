@@ -161,14 +161,14 @@ class LvmTestCase(unittest.TestCase):
     def test_pvcreate_and_pvremove(self):
         """Verify that it's possible to create and destroy a PV"""
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
 
-        # this time try to specify dataalignment
-        succ = BlockDev.lvm_pvcreate(self.loop_dev, 2048)
+        # this time try to specify dataalignment and metadatasize
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 2048, 4096)
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_pvremove(self.loop_dev)
@@ -180,7 +180,7 @@ class LvmTestCase(unittest.TestCase):
         with self.assertRaises(GLib.GError):
             succ = BlockDev.lvm_pvresize(self.loop_dev, 1 * 1024**3)
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_pvresize(self.loop_dev, 1 * 1024**3)
@@ -204,7 +204,7 @@ class LvmTestCase(unittest.TestCase):
     def test_pvinfo(self):
         """Verify that it's possible to gather info about a PV"""
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
         self.assertTrue(succ)
 
         info = BlockDev.lvm_pvinfo(self.loop_dev)
@@ -221,7 +221,7 @@ class LvmTestCase(unittest.TestCase):
         pvs = BlockDev.lvm_pvs()
         orig_len = len(pvs)
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
         self.assertTrue(succ)
 
         pvs = BlockDev.lvm_pvs()
@@ -239,10 +239,10 @@ class LvmTestCase(unittest.TestCase):
     def test_vgcreate_pvremove(self):
         """Verify that it is possible to create and destroy a VG"""
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
@@ -260,10 +260,10 @@ class LvmTestCase(unittest.TestCase):
     def test_vgactivate_vgdeactivate(self):
         """Verify that it is possible to (de)activate a VG"""
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
@@ -293,10 +293,10 @@ class LvmTestCase(unittest.TestCase):
     def test_vgextend_vgreduce(self):
         """Verify that it is possible to extend/reduce a VG"""
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0)
@@ -326,10 +326,10 @@ class LvmTestCase(unittest.TestCase):
     def test_vginfo(self):
         """Verify that it is possible to gather info about a VG"""
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
@@ -359,7 +359,7 @@ class LvmTestCase(unittest.TestCase):
         vgs = BlockDev.lvm_vgs()
         orig_len = len(vgs)
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0)
@@ -383,10 +383,10 @@ class LvmTestCase(unittest.TestCase):
     def test_lvcreate_lvremove(self):
         """Verify that it's possible to create/destroy an LV"""
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
@@ -421,10 +421,10 @@ class LvmTestCase(unittest.TestCase):
     def test_lvactivate_lvdeactivate(self):
         """Verify it's possible to (de)actiavate an LV"""
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
@@ -461,10 +461,10 @@ class LvmTestCase(unittest.TestCase):
     def test_snapshotcreate_lvorigin_snapshotmerge(self):
         """Verify that LV snapshot support works"""
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
@@ -497,10 +497,10 @@ class LvmTestCase(unittest.TestCase):
     def test_lvinfo(self):
         """Verify that it is possible to gather info about an LV"""
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
@@ -534,7 +534,7 @@ class LvmTestCase(unittest.TestCase):
         lvs = BlockDev.lvm_lvs(None)
         orig_len = len(lvs)
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0)
@@ -567,10 +567,10 @@ class LvmTestCase(unittest.TestCase):
     def test_thpoolcreate(self):
         """Verify that it is possible to create a thin pool"""
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
@@ -597,10 +597,10 @@ class LvmTestCase(unittest.TestCase):
     def test_thlvcreate_thpoolname(self):
         """Verify that it is possible to create a thin LV and get its pool name"""
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
@@ -639,11 +639,11 @@ class LvmTestCase(unittest.TestCase):
     def test_thsnapshotcreate(self):
         """Verify that it is possible to create a thin LV snapshot"""
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0)
-        
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
+
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
