@@ -5,16 +5,19 @@ TAG=libblockdev-$(VERSION)-$(RELEASE)
 
 PLUGIN_TESTS = test-btrfs test-lvm test-loop test-swap
 
-all: build
+all: build documentation
 
 build:
 	scons -Q build
 
 install:
 	scons -Q --prefix=${PREFIX} --sitedirs=${SITEDIRS} install
+	-mkdir -p ${PREFIX}/usr/share/gtk-doc/html/libblockdev/
+	install -m0644 build/docs/html/* ${PREFIX}/usr/share/gtk-doc/html/libblockdev/
 
 uninstall:
 	scons -Q -c install
+	-rm -rf ${PREFIX}/usr/share/gtk-doc/html/libblockdev/
 
 test_%:
 	scons -Q build/$@
@@ -58,6 +61,15 @@ fast-test: all
 	@echo
 	@sudo SKIP_SLOW= GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build PYTHONPATH=.:tests/:src/python \
 		python -m unittest discover -v -s tests/ -p '*_test.py'
+
+documentation: $(wildcard src/plugins/*.[ch]) $(wildcard src/lib/*.[ch]) $(wildcard src/utils/*.[ch])
+	-mkdir -p build/docs
+	cp docs/libblockdev-docs.xml docs/libblockdev-sections.txt build/docs
+	(cd build/docs;	gtkdoc-scan --rebuild-types --module=libblockdev --source-dir=../../src/plugins/ --source-dir=../../src/lib/ --source-dir=../../src/utils/)
+	(cd build/docs; gtkdoc-mkdb --module=libblockdev --output-format=xml --source-dir=../../src/plugins/ --source-dir=../../src/lib/ --source-dir=../../src/utils/ --source-suffixes=c,h)
+	-mkdir build/docs/html
+	(cd build/docs/html; gtkdoc-mkhtml libblockdev ../libblockdev-docs.xml)
+	(cd build/docs/; gtkdoc-fixxref --module=libblockdev --module-dir=html  --html-dir=/usr/share/gtk-doc/html)
 
 clean:
 	-rm -rf build/

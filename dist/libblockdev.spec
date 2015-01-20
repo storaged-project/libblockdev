@@ -17,6 +17,8 @@ BuildRequires: volume_key-devel
 BuildRequires: nss-devel
 BuildRequires: python2-devel
 BuildRequires: python3-devel
+BuildRequires: gtk-doc
+BuildRequires: glib2-doc
 
 
 %description
@@ -270,6 +272,7 @@ rm -rf %{buildroot}
 %{_includedir}/blockdev/blockdev.h
 %{_includedir}/blockdev/plugins.h
 %{_libdir}/pkgconfig/blockdev.pc
+%{_datadir}
 
 
 %files utils
