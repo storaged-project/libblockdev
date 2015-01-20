@@ -21,9 +21,9 @@
 #include "plugin_apis/mdraid.c"
 
 /**
- * SECTION: libblockdev
+ * SECTION: blockdev
  * @short_description: a library for doing low-level operations with block devices
- * @title: libblockdev library
+ * @title: blockdev library
  * @include: blockdev.h
  *
  */
@@ -97,7 +97,7 @@ GQuark bd_init_error_quark (void)
 
 /**
  * bd_init:
- * @force_plugins: (allow-none) (array zero-terminated=1): null-terminated list
+ * @force_plugins: (allow-none) (array zero-terminated=1): %NULL-terminated list
  *                 of plugins that should be loaded (even if
  *                 other plugins for the same technologies are found)
  * @log_func: (allow-none) (scope notified): logging function to use
@@ -123,7 +123,7 @@ gboolean bd_init (BDPluginSpec **force_plugins, BDUtilsLogFunc log_func, GError 
 
 /**
  * bd_reinit:
- * @force_plugins: (allow-none) (array zero-terminated=1): null-terminated list
+ * @force_plugins: (allow-none) (array zero-terminated=1): %NULL-terminated list
  *                 of plugins that should be loaded (even if
  *                 other plugins for the same technologies are found)
  * @reload: whether to reload the already loaded plugins or not

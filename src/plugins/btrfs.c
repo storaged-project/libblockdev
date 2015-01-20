@@ -26,11 +26,11 @@
 
 /**
  * SECTION: btrfs
- * @short_description: libblockdev plugin for operations with btrfs devices
- * @title: Btrfs
+ * @short_description: plugin for operations with BTRFS devices
+ * @title: BTRFS
  * @include: btrfs.h
  *
- * A libblockdev plugin for operations with swap space.
+ * A plugin for operations with btrfs devices.
  */
 
 /**

@@ -25,11 +25,11 @@
 
 /**
  * SECTION: loop
- * @short_description: libblockdev plugin for operations with loop devices
+ * @short_description: plugin for operations with loop devices
  * @title: Loop
  * @include: loop.h
  *
- * A libblockdev plugin for operations with loop devices. All sizes passed
+ * A plugin for operations with loop devices. All sizes passed
  * in/out to/from the functions are in bytes.
  */
 

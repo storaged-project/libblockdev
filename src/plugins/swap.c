@@ -25,11 +25,11 @@
 
 /**
  * SECTION: swap
- * @short_description: libblockdev plugin for operations with swap space
+ * @short_description: plugin for operations with swap space
  * @title: Swap
  * @include: swap.h
  *
- * A libblockdev plugin for operations with swap space.
+ * A plugin for operations with swap space.
  */
 
 /**

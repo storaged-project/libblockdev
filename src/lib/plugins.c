@@ -3,6 +3,13 @@
 #include "plugins.h"
 
 /**
+ * SECTION: plugins
+ * @short_description: functions related to querying plugins
+ * @title: Plugins
+ * @include: blockdev.h
+ */
+
+/**
  * bd_plugin_spec_copy: (skip)
  *
  * Creates a new copy of @spec.

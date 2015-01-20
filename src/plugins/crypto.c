@@ -26,11 +26,11 @@
 
 /**
  * SECTION: crypto
- * @short_description: libblockdev plugin for operations with encrypted devices
+ * @short_description: plugin for operations with encrypted devices
  * @title: Crypto
  * @include: crypto.h
  *
- * A libblockdev plugin for operations with encrypted devices. For now, only
+ * A plugin for operations with encrypted devices. For now, only
  * LUKS devices are supported.
  *
  * Functions taking a parameter called "device" require the backing device to be
@@ -578,6 +578,8 @@ static gchar *give_passphrase_cb (gpointer data, const gchar *prompt __attribute
 }
 
 /**
+ * replace_char:
+ *
  * Replaces all appereances of @orig in @str with @new (in place).
  */
 static gchar *replace_char (gchar *str, gchar orig, gchar new) {

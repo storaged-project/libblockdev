@@ -27,11 +27,11 @@
 
 /**
  * SECTION: mdraid
- * @short_description: libblockdev plugin for basic operations with MD RAID
+ * @short_description: plugin for basic operations with MD RAID
  * @title: MD RAID
  * @include: mdraid.h
  *
- * A libblockdev plugin for basic operations with MD RAID. Also sizes are in
+ * A plugin for basic operations with MD RAID. Also sizes are in
  * bytes unless specified otherwise.
  */
 
@@ -122,7 +122,7 @@ void bd_md_detail_data_free (BDMDDetailData *data) {
 }
 
 /**
- * parse_mdadm_vars: (skip):
+ * parse_mdadm_vars: (skip)
  * @str: string to parse
  * @item_sep: item separator(s) (key-value pairs separator)
  * @key_val_sep: key-value separator(s) (typically ":" or "=")

@@ -23,11 +23,11 @@
 
 /**
  * SECTION: mpath
- * @short_description: libblockdev plugin for basic operations with multipath devices
+ * @short_description: plugin for basic operations with multipath devices
  * @title: Mpath
  * @include: mpath.h
  *
- * A libblockdev plugin for basic operations with multipath devices.
+ * A plugin for basic operations with multipath devices.
  */
 
 /**

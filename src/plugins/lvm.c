@@ -29,11 +29,11 @@ static gchar *global_config_str = NULL;
 
 /**
  * SECTION: lvm
- * @short_description: libblockdev plugin for operations with LVM
+ * @short_description: plugin for operations with LVM
  * @title: LVM
  * @include: lvm.h
  *
- * A libblockdev plugin for operations with LVM. All sizes passed in/out to/from
+ * A plugin for operations with LVM. All sizes passed in/out to/from
  * the functions are in bytes.
  */
 
@@ -330,6 +330,7 @@ guint64 *bd_lvm_get_supported_pe_sizes () {
 
 /**
  * bd_lvm_get_max_lv_size:
+ *
  * Returns: maximum LV size in bytes
  */
 guint64 bd_lvm_get_max_lv_size () {

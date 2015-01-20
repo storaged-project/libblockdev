@@ -28,11 +28,11 @@
 
 /**
  * SECTION: dm
- * @short_description: libblockdev plugin for basic operations with device mapper
+ * @short_description: plugin for basic operations with device mapper
  * @title: DeviceMapper
  * @include: dm.h
  *
- * A libblockdev plugin for basic operations with device mapper.
+ * A plugin for basic operations with device mapper.
  */
 
 /**
