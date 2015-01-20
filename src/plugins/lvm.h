@@ -97,7 +97,7 @@ gboolean bd_lvm_vgactivate (gchar *vg_name, GError **error);
 gboolean bd_lvm_vgdeactivate (gchar *vg_name, GError **error);
 gboolean bd_lvm_vgextend (gchar *vg_name, gchar *device, GError **error);
 gboolean bd_lvm_vgreduce (gchar *vg_name, gchar *device, GError **error);
-BDLVMVGdata* bd_lvm_vginfo (gchar *device, GError **error);
+BDLVMVGdata* bd_lvm_vginfo (gchar *vg_name, GError **error);
 BDLVMVGdata** bd_lvm_vgs (GError **error);
 
 gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, GError **error);
