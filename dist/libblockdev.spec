@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     0.2
+Version:     0.3
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -351,6 +351,24 @@ rm -rf %{buildroot}
 %files plugins-all
 
 %changelog
+* Wed Jan 21 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.3-1
+- Require volume_key-devel in a version that fixes build issues (vpodzime)
+- Fix Python 2 devel package name in BuildRequires (vpodzime)
+- Generate docs for the library and all plugins (vpodzime)
+- Make doc comments better for documentation generation (vpodzime)
+- Fix parameter names in function prototypes (vpodzime)
+- Add the metadatasize parameter to pvcreate (vpodzime)
+- Add the dataalignment parameter to lvm_pvcreate (vpodzime)
+- Export non-internal constants via introspection (vpodzime)
+- Expand size constants in the GI-scanned files (vpodzime)
+- Fix usage printing in the boilerplate_generator (vpodzime)
+- Add the build directory to .gitignore (vpodzime)
+- Add the md_run function (vpodzime)
+- Fix some issues in Python overrides (vpodzime)
+- Add the escrow_device function to the crypto plugin (vpodzime)
+- Fix version of GI files in the Makefile (vpodzime)
+- Make the order of release target's dependencies more explicit (vpodzime)
+
 * Mon Jan 12 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.2-1
 - Fix dependencies of the release target (vpodzime)
 - Python overrides for the GI-generated bindings (vpodzime)
