@@ -1,10 +1,12 @@
 #include <glib.h>
 #include <glib-object.h>
+#include <utils.h>
 
 #ifndef BD_BTRFS
 #define BD_BTRFS
 
 #define BD_BTRFS_MAIN_VOLUME_ID 5
+#define BD_BTRFS_MIN_MEMBER_SIZE (16 MiB)
 
 GQuark bd_btrfs_error_quark (void);
 #define BD_BTRFS_ERROR bd_btrfs_error_quark ()
