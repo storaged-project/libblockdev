@@ -76,7 +76,7 @@ gboolean bd_mpath_flush_mpaths (GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: %TRUE if the device is a multipath member, %FALSE if not or an error
- * appeared when queried (@error) is set in those cases)
+ * appeared when queried (@error is set in those cases)
  */
 gboolean bd_mpath_is_mpath_member (gchar *device, GError **error) {
     gchar *argv[4] = {"multipath", "-c", device, NULL};
