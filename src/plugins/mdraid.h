@@ -64,9 +64,9 @@ gboolean bd_md_denominate (gchar *device, GError **error);
 gboolean bd_md_add (gchar *raid_name, gchar *device, guint64 raid_devs, GError **error);
 gboolean bd_md_remove (gchar *raid_name, gchar *device, gboolean fail, GError **error);
 BDMDExamineData* bd_md_examine (gchar *device, GError **error);
+BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error);
 gchar* bd_md_canonicalize_uuid (gchar *uuid, GError **error);
 gchar* bd_md_get_md_uuid (gchar *uuid, GError **error);
-BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error);
 gchar* bd_md_node_from_name (gchar *name, GError **error);
 gchar* bd_md_name_from_node (gchar *node, GError **error);
 

@@ -671,6 +671,63 @@ BDMDExamineData* bd_md_examine (gchar *device, GError **error) {
 }
 
 /**
+ * bd_md_detail:
+ * @raid_name: name of the MD RAID to examine
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: information about the MD RAID @raid_name
+ */
+BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error) {
+    gchar *argv[] = {"mdadm", "--detail", raid_name, NULL};
+    gchar *output = NULL;
+    gboolean success = FALSE;
+    GHashTable *table = NULL;
+    guint num_items = 0;
+    gchar *orig_uuid = NULL;
+    gchar *raid_name_str = NULL;
+    BDMDDetailData *ret = NULL;
+
+    raid_name_str = g_strdup_printf ("/dev/md/%s", raid_name);
+    if (access (raid_name_str, F_OK) == 0)
+        argv[2] = raid_name_str;
+
+    success = bd_utils_exec_and_capture_output (argv, &output, error);
+    if (!success) {
+        g_free (raid_name_str);
+        /* error is already populated */
+        return FALSE;
+    }
+
+    table = parse_mdadm_vars (output, "\n", ":", &num_items);
+    g_free (output);
+    if (!table || (num_items < 14)) {
+        g_free (raid_name_str);
+        /* something bad happened or some expected items were missing  */
+        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to parse mddetail data");
+        if (table)
+            g_hash_table_destroy (table);
+        return NULL;
+    }
+
+    ret = get_detail_data_from_table (table, TRUE);
+    if (!ret) {
+        g_free (raid_name_str);
+        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to get mddetail data");
+        return NULL;
+    }
+
+    ret->device = g_strdup (argv[2]);
+
+    orig_uuid = ret->uuid;
+    ret->uuid = bd_md_canonicalize_uuid (orig_uuid, error);
+    g_free (orig_uuid);
+
+    g_free (raid_name_str);
+
+    return ret;
+}
+
+/**
  * bd_md_canonicalize_uuid:
  * @uuid: UUID to canonicalize
  * @error: (out): place to store error (if any)
@@ -802,63 +859,6 @@ gchar* bd_md_get_md_uuid (gchar *uuid, GError **error) {
 
     /* 9 symbols (8 + \0) from the 12 */
     memcpy (dest, next_set, 9);
-
-    return ret;
-}
-
-/**
- * bd_md_detail:
- * @raid_name: name of the MD RAID to examine
- * @error: (out): place to store error (if any)
- *
- * Returns: information about the MD RAID @raid_name
- */
-BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error) {
-    gchar *argv[] = {"mdadm", "--detail", raid_name, NULL};
-    gchar *output = NULL;
-    gboolean success = FALSE;
-    GHashTable *table = NULL;
-    guint num_items = 0;
-    gchar *orig_uuid = NULL;
-    gchar *raid_name_str = NULL;
-    BDMDDetailData *ret = NULL;
-
-    raid_name_str = g_strdup_printf ("/dev/md/%s", raid_name);
-    if (access (raid_name_str, F_OK) == 0)
-        argv[2] = raid_name_str;
-
-    success = bd_utils_exec_and_capture_output (argv, &output, error);
-    if (!success) {
-        g_free (raid_name_str);
-        /* error is already populated */
-        return FALSE;
-    }
-
-    table = parse_mdadm_vars (output, "\n", ":", &num_items);
-    g_free (output);
-    if (!table || (num_items < 14)) {
-        g_free (raid_name_str);
-        /* something bad happened or some expected items were missing  */
-        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to parse mddetail data");
-        if (table)
-            g_hash_table_destroy (table);
-        return NULL;
-    }
-
-    ret = get_detail_data_from_table (table, TRUE);
-    if (!ret) {
-        g_free (raid_name_str);
-        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to get mddetail data");
-        return NULL;
-    }
-
-    ret->device = g_strdup (argv[2]);
-
-    orig_uuid = ret->uuid;
-    ret->uuid = bd_md_canonicalize_uuid (orig_uuid, error);
-    g_free (orig_uuid);
-
-    g_free (raid_name_str);
 
     return ret;
 }
