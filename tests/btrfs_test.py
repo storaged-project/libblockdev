@@ -3,7 +3,8 @@ import os
 
 from utils import create_sparse_tempfile
 from gi.repository import GLib, BlockDev
-BlockDev.init(None, None)
+if not BlockDev.is_initialized():
+    BlockDev.init(None, None)
 
 TEST_MNT = "/tmp/libblockdev_test_mnt"
 

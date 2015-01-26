@@ -8,8 +8,8 @@ from gi.repository import BlockDev, GLib
 def print_msg(level, msg):
     print msg
 
-assert BlockDev.init(None, None)
-# assert BlockDev.init(None, print_msg)
+if not BlockDev.is_initialized():
+    BlockDev.init(None, None)
 
 class MDNoDevTestCase(unittest.TestCase):
     def test_get_superblock_size(self):

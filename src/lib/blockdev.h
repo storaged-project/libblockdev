@@ -13,5 +13,6 @@ typedef enum {
 
 gboolean bd_init (BDPluginSpec **force_plugins, BDUtilsLogFunc log_func, GError **error);
 gboolean bd_reinit (BDPluginSpec **force_plugins, gboolean reload, BDUtilsLogFunc log_func, GError **error);
+gboolean bd_is_initialized ();
 
 #endif  /* BD_LIB */

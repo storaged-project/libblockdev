@@ -4,7 +4,8 @@ import math
 
 from utils import create_sparse_tempfile
 from gi.repository import BlockDev, GLib
-assert BlockDev.init(None, None)
+if not BlockDev.is_initialized():
+    BlockDev.init(None, None)
 
 class LvmNoDevTestCase(unittest.TestCase):
     def test_is_supported_pe_size(self):

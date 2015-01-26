@@ -3,15 +3,14 @@ import unittest
 import re
 
 from gi.repository import BlockDev
+if not BlockDev.is_initialized():
+    assert BlockDev.init(None, None)
 
 class LibraryOpsTestCase(unittest.TestCase):
     log = ""
 
     def test_reload(self):
         """Verify that reloading plugins works as expected"""
-
-        # library should successfully initialize
-        self.assertTrue(BlockDev.init(None, None))
 
         # max LV size should be something sane (not 1024 bytes)
         orig_max_size = BlockDev.lvm_get_max_lv_size()
@@ -43,8 +42,11 @@ class LibraryOpsTestCase(unittest.TestCase):
     def test_force_plugin(self):
         """Verify that forcing plugin to be used works as expected"""
 
-        # library should successfully initialize
-        self.assertTrue(BlockDev.init(None, None))
+        # library should be successfully initialized
+        self.assertTrue(BlockDev.is_initialized())
+
+        # init() called twice, should give a warning and return False
+        self.assertFalse(BlockDev.init(None, None))
 
         # max LV size should be something sane (not 1024 bytes)
         orig_max_size = BlockDev.lvm_get_max_lv_size()
@@ -89,7 +91,7 @@ class LibraryOpsTestCase(unittest.TestCase):
     def test_logging_setup(self):
         """Verify that setting up logging works as expected"""
 
-        self.assertTrue(BlockDev.init(None, self.my_log_func))
+        self.assertTrue(BlockDev.reinit(None, False, self.my_log_func))
 
         succ = BlockDev.utils_exec_and_report_error(["true"])
         self.assertTrue(succ)

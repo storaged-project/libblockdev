@@ -3,7 +3,8 @@ import unittest
 
 from utils import create_sparse_tempfile
 from gi.repository import BlockDev
-assert BlockDev.init(None, None)
+if not BlockDev.is_initialized():
+    BlockDev.init(None, None)
 
 class LoopTestCase(unittest.TestCase):
     def setUp(self):

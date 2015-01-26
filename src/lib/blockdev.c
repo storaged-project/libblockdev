@@ -28,6 +28,9 @@
  *
  */
 
+static GMutex init_lock;
+static gboolean initialized = FALSE;
+
 typedef struct BDPluginStatus {
     BDPluginSpec spec;
     gpointer handle;
@@ -106,19 +109,30 @@ GQuark bd_init_error_quark (void)
  * Returns: whether the library was successfully initialized or not
  */
 gboolean bd_init (BDPluginSpec **force_plugins, BDUtilsLogFunc log_func, GError **error) {
+    gboolean success = TRUE;
+    g_mutex_lock (&init_lock);
+    if (initialized) {
+        g_warning ("bd_init() called more than once! Use bd_reinit() to reinitialize "
+                   "or bd_is_initialized() to get the current state.");
+        g_mutex_unlock (&init_lock);
+        return FALSE;
+    }
+
     if (!load_plugins (force_plugins, FALSE)) {
         g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
                      "Failed to load plugins");
         /* the library is unusable without the plugins so we can just return here */
-        return FALSE;
+        success = FALSE;
     }
 
     if (log_func && !bd_utils_init_logging (log_func, error))
         /* the error is already populated */
-        return FALSE;
+        success = FALSE;
 
-    /* everything went okay */
-    return TRUE;
+    initialized = success;
+    g_mutex_unlock (&init_lock);
+
+    return success;
 }
 
 /**
@@ -137,19 +151,34 @@ gboolean bd_init (BDPluginSpec **force_plugins, BDUtilsLogFunc log_func, GError 
  * the missing plugins are loaded.
  */
 gboolean bd_reinit (BDPluginSpec **force_plugins, gboolean reload, BDUtilsLogFunc log_func, GError **error) {
+    gboolean success = TRUE;
+    g_mutex_lock (&init_lock);
     if (!load_plugins (force_plugins, reload)) {
         g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
                      "Failed to load plugins");
         /* the library is unusable without the plugins so we can just return here */
-        return FALSE;
+        success = FALSE;
     }
 
     if (log_func && !bd_utils_init_logging (log_func, error))
         /* the error is already populated */
-        return FALSE;
+        success = FALSE;
 
-    /* everything went okay */
-    return TRUE;
+    g_mutex_unlock (&init_lock);
+    return success;
+}
+
+/**
+ * bd_is_initialized:
+ *
+ * Returns: whether the library is initialized (init() was called) or not
+ */
+gboolean bd_is_initialized () {
+    gboolean is = FALSE;
+    g_mutex_lock (&init_lock);
+    is = initialized;
+    g_mutex_unlock (&init_lock);
+    return is;
 }
 
 /**

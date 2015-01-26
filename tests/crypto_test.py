@@ -3,7 +3,8 @@ import os
 
 from utils import create_sparse_tempfile
 from gi.repository import BlockDev, GLib
-assert BlockDev.init(None, None)
+if not BlockDev.is_initialized():
+    BlockDev.init(None, None)
 
 PASSWD = "myshinylittlepassword"
 PASSWD2 = "myshinylittlepassword2"
