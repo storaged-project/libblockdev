@@ -45,8 +45,8 @@ __all__.append("crypto_luks_format")
 
 _crypto_luks_open = BlockDev.crypto_luks_open
 @override(BlockDev.crypto_luks_open)
-def crypto_luks_open(device, passphrase=None, key_file=None):
-    return _crypto_luks_open(device, passphrase, key_file)
+def crypto_luks_open(device, name, passphrase=None, key_file=None):
+    return _crypto_luks_open(device, name, passphrase, key_file)
 __all__.append("crypto_luks_open")
 
 _crypto_luks_add_key = BlockDev.crypto_luks_add_key
