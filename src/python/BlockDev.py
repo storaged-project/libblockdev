@@ -166,6 +166,12 @@ def md_create(device_name, level, disks, spares=0, version=None, bitmap=False):
     return _md_create(device_name, level, disks, spares, version, bitmap)
 __all__.append("md_create")
 
+_md_add = BlockDev.md_add
+@override(BlockDev.md_add)
+def md_add(raid_name, device, raid_devs=0):
+    return _md_add(raid_name, device, raid_devs)
+__all__.append("md_add")
+
 _md_activate = BlockDev.md_activate
 @override(BlockDev.md_activate)
 def md_activate(device_name, members=None, uuid=None):

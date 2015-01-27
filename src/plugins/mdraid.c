@@ -509,7 +509,7 @@ gboolean bd_md_denominate (gchar *device, GError **error) {
  * bd_md_add:
  * @raid_name: name of the RAID device to add @device into
  * @device: name of the device to add to the @raid_name RAID device
- * @raid_devs: number of devices the @raid_name RAID should actively use  or 0
+ * @raid_devs: number of devices the @raid_name RAID should actively use or 0
  *             to leave unspecified (see below)
  * @error: (out): place to store error (if any)
  *
