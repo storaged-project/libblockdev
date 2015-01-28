@@ -26,6 +26,11 @@
 
 #include "dm.h"
 
+/* macros taken from the pyblock/dmraid.h file plus one more*/
+#define for_each_raidset(_c, _n) list_for_each_entry(_n, LC_RS(_c), list)
+#define for_each_subset(_rs, _n) list_for_each_entry(_n, &(_rs)->sets, list)
+#define for_each_device(_rs, _d) list_for_each_entry(_d, &(_rs)->devs, devs)
+
 /**
  * SECTION: dm
  * @short_description: plugin for basic operations with device mapper

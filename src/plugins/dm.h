@@ -15,11 +15,6 @@ typedef enum {
     BD_DM_ERROR_RAID_NO_EXIST,
 } BDDMError;
 
-/* macros taken from the pyblock/dmraid.h file plus one more*/
-#define for_each_raidset(_c, _n) list_for_each_entry(_n, LC_RS(_c), list)
-#define for_each_subset(_rs, _n) list_for_each_entry(_n, &(_rs)->sets, list)
-#define for_each_device(_rs, _d) list_for_each_entry(_d, &(_rs)->devs, devs)
-
 gboolean bd_dm_create_linear (gchar *map_name, gchar *device, guint64 length, gchar *uuid, GError **error);
 gboolean bd_dm_remove (gchar *map_name, GError **error);
 gchar* bd_dm_name_from_node (gchar *dm_node, GError **error);
