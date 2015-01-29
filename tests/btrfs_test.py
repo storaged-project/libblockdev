@@ -55,7 +55,7 @@ class BtrfsTestCase (unittest.TestCase):
         self.assertTrue(succ)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
-        self.assertTrue(len(devs) == 1)
+        self.assertEqual(len(devs), 1)
 
         wipefs(self.loop_dev)
 
@@ -64,7 +64,7 @@ class BtrfsTestCase (unittest.TestCase):
         self.assertTrue(succ)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
-        self.assertTrue(len(devs) == 1)
+        self.assertEqual(len(devs), 1)
 
         wipefs(self.loop_dev)
 
@@ -73,7 +73,7 @@ class BtrfsTestCase (unittest.TestCase):
         self.assertTrue(succ)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
-        self.assertTrue(len(devs) == 2)
+        self.assertEqual(len(devs), 2)
 
         wipefs(self.loop_dev)
         wipefs(self.loop_dev2)
@@ -83,7 +83,7 @@ class BtrfsTestCase (unittest.TestCase):
         self.assertTrue(succ)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
-        self.assertTrue(len(devs) == 2)
+        self.assertEqual(len(devs), 2)
 
         wipefs(self.loop_dev)
         wipefs(self.loop_dev2)
@@ -93,7 +93,7 @@ class BtrfsTestCase (unittest.TestCase):
         self.assertTrue(succ)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
-        self.assertTrue(len(devs) == 2)
+        self.assertEqual(len(devs), 2)
 
         wipefs(self.loop_dev)
         wipefs(self.loop_dev2)
@@ -103,7 +103,7 @@ class BtrfsTestCase (unittest.TestCase):
         self.assertTrue(succ)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
-        self.assertTrue(len(devs) == 2)
+        self.assertEqual(len(devs), 2)
 
         wipefs(self.loop_dev)
         wipefs(self.loop_dev2)
@@ -115,7 +115,7 @@ class BtrfsTestCase (unittest.TestCase):
         self.assertTrue(succ)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
-        self.assertTrue(len(devs) == 1)
+        self.assertEqual(len(devs), 1)
 
         mount(self.loop_dev, TEST_MNT)
 
@@ -123,13 +123,13 @@ class BtrfsTestCase (unittest.TestCase):
         self.assertTrue(succ)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
-        self.assertTrue(len(devs) == 2)
+        self.assertEqual(len(devs), 2)
 
         succ = BlockDev.btrfs_remove_device(TEST_MNT, self.loop_dev2)
         self.assertTrue(succ)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
-        self.assertTrue(len(devs) == 1)
+        self.assertEqual(len(devs), 1)
 
         umount(TEST_MNT)
         wipefs(self.loop_dev)
@@ -144,19 +144,19 @@ class BtrfsTestCase (unittest.TestCase):
         mount(self.loop_dev, TEST_MNT)
 
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
-        self.assertTrue(len(subvols) == 0)
+        self.assertEqual(len(subvols), 0)
 
         succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1")
         self.assertTrue(succ)
 
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
-        self.assertTrue(len(subvols) == 1)
+        self.assertEqual(len(subvols), 1)
 
         succ = BlockDev.btrfs_delete_subvolume(TEST_MNT, "subvol1")
         self.assertTrue(succ)
 
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
-        self.assertTrue(len(subvols) == 0)
+        self.assertEqual(len(subvols), 0)
 
         umount(TEST_MNT)
         wipefs(self.loop_dev)
@@ -168,21 +168,21 @@ class BtrfsTestCase (unittest.TestCase):
         mount(self.loop_dev, TEST_MNT)
 
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, True)
-        self.assertTrue(len(subvols) == 0)
+        self.assertEqual(len(subvols), 0)
 
         # R/W snapshot
         succ = BlockDev.btrfs_create_snapshot(TEST_MNT, TEST_MNT + "/snap1", False)
         self.assertTrue(succ)
 
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, True)
-        self.assertTrue(len(subvols) == 1)
+        self.assertEqual(len(subvols), 1)
 
         # RO snapshot
         succ = BlockDev.btrfs_create_snapshot(TEST_MNT, TEST_MNT + "/snap2", True)
         self.assertTrue(succ)
 
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, True)
-        self.assertTrue(len(subvols) == 2)
+        self.assertEqual(len(subvols), 2)
 
         umount(TEST_MNT)
         wipefs(self.loop_dev)
@@ -200,7 +200,7 @@ class BtrfsTestCase (unittest.TestCase):
         mount(self.loop_dev, TEST_MNT)
 
         ret = BlockDev.btrfs_get_default_subvolume_id(TEST_MNT)
-        self.assertTrue(ret == 5)
+        self.assertEqual(ret, 5)
 
         umount(TEST_MNT)
         wipefs(self.loop_dev)
@@ -214,13 +214,13 @@ class BtrfsTestCase (unittest.TestCase):
         mount(self.loop_dev, TEST_MNT)
 
         ret = BlockDev.btrfs_get_default_subvolume_id(TEST_MNT)
-        self.assertTrue(ret == 5)
+        self.assertEqual(ret, 5)
 
         succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1")
         self.assertTrue(succ)
 
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
-        self.assertTrue(len(subvols) == 1)
+        self.assertEqual(len(subvols), 1)
 
         new_id = next((subvol.id for subvol in subvols), None)
         self.assertIsNot(new_id, None)
@@ -244,11 +244,11 @@ class BtrfsTestCase (unittest.TestCase):
         self.assertTrue(succ)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
-        self.assertTrue(len(devs) == 2)
-        self.assertTrue(devs[0].id == 1)
-        self.assertTrue(devs[1].id == 2)
-        self.assertTrue(devs[0].path == self.loop_dev)
-        self.assertTrue(devs[1].path == self.loop_dev2)
+        self.assertEqual(len(devs), 2)
+        self.assertEqual(devs[0].id, 1)
+        self.assertEqual(devs[1].id, 2)
+        self.assertEqual(devs[0].path, self.loop_dev)
+        self.assertEqual(devs[1].path, self.loop_dev2)
         self.assertTrue(devs[0].size >= 0)
         self.assertTrue(devs[1].size >= 0)
         self.assertTrue(devs[0].used >= 0)
@@ -266,15 +266,15 @@ class BtrfsTestCase (unittest.TestCase):
         mount(self.loop_dev, TEST_MNT)
 
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, True)
-        self.assertTrue(len(subvols) == 0)
+        self.assertEqual(len(subvols), 0)
 
         succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1")
         self.assertTrue(succ)
 
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
-        self.assertTrue(len(subvols) == 1)
-        self.assertTrue(subvols[0].parent_id == 5)
-        self.assertTrue(subvols[0].path == "subvol1")
+        self.assertEqual(len(subvols), 1)
+        self.assertEqual(subvols[0].parent_id, 5)
+        self.assertEqual(subvols[0].path, "subvol1")
 
         umount(TEST_MNT)
         wipefs(self.loop_dev)
