@@ -43,14 +43,14 @@ class CryptoTestCase(unittest.TestCase):
     def test_format(self):
         """Verify that formating device as LUKS works"""
 
-        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None)
+        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None, 0)
         self.assertTrue(succ)
 
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_luks_open_close(self):
         """Verify that opening/closing LUKS device works"""
 
-        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None)
+        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None, 0)
         self.assertTrue(succ)
 
         succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None)
@@ -63,7 +63,7 @@ class CryptoTestCase(unittest.TestCase):
     def test_add_key(self):
         """Verify that adding key to LUKS device works"""
 
-        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None)
+        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None, 0)
         self.assertTrue(succ)
 
         succ = BlockDev.crypto_luks_add_key(self.loop_dev, PASSWD, None, PASSWD2, None)
@@ -73,7 +73,7 @@ class CryptoTestCase(unittest.TestCase):
     def test_remove_key(self):
         """Verify that removing key from LUKS device works"""
 
-        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None)
+        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None, 0)
         self.assertTrue(succ)
 
         succ = BlockDev.crypto_luks_add_key(self.loop_dev, PASSWD, None, PASSWD2, None)
@@ -86,7 +86,7 @@ class CryptoTestCase(unittest.TestCase):
     def test_change_key(self):
         """Verify that changing key in LUKS device works"""
 
-        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None)
+        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None, 0)
         self.assertTrue(succ)
 
         succ = BlockDev.crypto_luks_change_key(self.loop_dev, PASSWD, PASSWD2)
@@ -96,7 +96,7 @@ class CryptoTestCase(unittest.TestCase):
     def test_is_luks(self):
         """Verify that LUKS device recognition works"""
 
-        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None)
+        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None, 0)
         self.assertTrue(succ)
 
         is_luks = BlockDev.crypto_device_is_luks(self.loop_dev)
@@ -109,7 +109,7 @@ class CryptoTestCase(unittest.TestCase):
     def test_get_uuid(self):
         """Verify that getting LUKS device UUID works"""
 
-        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None)
+        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None, 0)
         self.assertTrue(succ)
 
         uuid = BlockDev.crypto_luks_uuid(self.loop_dev)

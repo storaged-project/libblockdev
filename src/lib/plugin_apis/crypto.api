@@ -67,12 +67,18 @@ gchar* bd_crypto_luks_status (gchar *luks_device, GError **error);
  * @key_size: size of the volume key or 0 to use the default
  * @passphrase: (allow-none): a passphrase for the new LUKS device or %NULL if not requested
  * @key_file: (allow-none): a key file for the new LUKS device or %NULL if not requested
+ * @min_entropy: minimum random data entropy (in bits) required to format @device as LUKS
  * @error: (out): place to store error (if any)
+ *
+ * Formats the given @device as LUKS according to the other parameters given. If
+ * @min_entropy is specified (greater than 0), the function waits for enough
+ * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
+ * FOREVER).
  *
  * Returns: whether the given @device was successfully formatted as LUKS or not
  * (the @error) contains the error in such cases)
  */
-gboolean bd_crypto_luks_format (gchar *device, gchar *cipher, guint64 key_size, gchar *passphrase, gchar *key_file, GError **error);
+gboolean bd_crypto_luks_format (gchar *device, gchar *cipher, guint64 key_size, gchar *passphrase, gchar *key_file, guint64 min_entropy, GError **error);
 
 /**
  * bd_crypto_luks_open:

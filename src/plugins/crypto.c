@@ -22,6 +22,11 @@
 #include <libcryptsetup.h>
 #include <nss.h>
 #include <libvolume_key.h>
+#include <sys/fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/random.h>
+#include <unistd.h>
+
 #include "crypto.h"
 
 /**
@@ -195,15 +200,23 @@ static int give_passphrase (const char *msg __attribute__((unused)), char *buf, 
  * @key_size: size of the volume key or 0 to use the default
  * @passphrase: (allow-none): a passphrase for the new LUKS device or %NULL if not requested
  * @key_file: (allow-none): a key file for the new LUKS device or %NULL if not requested
+ * @min_entropy: minimum random data entropy (in bits) required to format @device as LUKS
  * @error: (out): place to store error (if any)
+ *
+ * Formats the given @device as LUKS according to the other parameters given. If
+ * @min_entropy is specified (greater than 0), the function waits for enough
+ * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
+ * FOREVER).
  *
  * Returns: whether the given @device was successfully formatted as LUKS or not
  * (the @error) contains the error in such cases)
  */
-gboolean bd_crypto_luks_format (gchar *device, gchar *cipher, guint64 key_size, gchar *passphrase, gchar *key_file, GError **error) {
+gboolean bd_crypto_luks_format (gchar *device, gchar *cipher, guint64 key_size, gchar *passphrase, gchar *key_file, guint64 min_entropy, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret;
     gchar **cipher_specs = NULL;
+    guint32 current_entropy = 0;
+    gint dev_random_fd = -1;
 
     ret = crypt_init (&cd, device);
     if (ret != 0) {
@@ -224,6 +237,17 @@ gboolean bd_crypto_luks_format (gchar *device, gchar *cipher, guint64 key_size, 
 
     /* resolve requested/default key_size (should be in bytes) */
     key_size = (key_size != 0) ? key_size : (DEFAULT_LUKS_KEYSIZE_BITS / 8);
+
+    /* wait for enough random data entropy (if requested) */
+    if (min_entropy > 0) {
+        dev_random_fd = open ("/dev/random", O_RDONLY);
+        ioctl (dev_random_fd, RNDGETENTCNT, &current_entropy);
+        while (current_entropy < min_entropy) {
+            sleep (1);
+            ioctl (dev_random_fd, RNDGETENTCNT, &current_entropy);
+        }
+        close (dev_random_fd);
+    }
 
     ret = crypt_format (cd, CRYPT_LUKS1, cipher_specs[0], cipher_specs[1],
                         NULL, NULL, key_size, NULL);

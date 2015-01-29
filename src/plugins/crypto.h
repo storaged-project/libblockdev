@@ -36,7 +36,7 @@ gchar* bd_crypto_generate_backup_passphrase();
 gboolean bd_crypto_device_is_luks (gchar *device, GError **error);
 gchar* bd_crypto_luks_uuid (gchar *device, GError **error);
 gchar* bd_crypto_luks_status (gchar *luks_device, GError **error);
-gboolean bd_crypto_luks_format (gchar *device, gchar *cipher, guint64 key_size, gchar *passphrase, gchar *key_file, GError **error);
+gboolean bd_crypto_luks_format (gchar *device, gchar *cipher, guint64 key_size, gchar *passphrase, gchar *key_file, guint64 min_entropy, GError **error);
 gboolean bd_crypto_luks_open (gchar *device, gchar *name, gchar *passphrase, gchar *key_file, GError **error);
 gboolean bd_crypto_luks_close (gchar *luks_device, GError **error);
 gboolean bd_crypto_luks_add_key (gchar *device, gchar *pass, gchar *key_file, gchar *npass, gchar *nkey_file, GError **error);
