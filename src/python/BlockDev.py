@@ -36,6 +36,18 @@ def btrfs_mkfs(devices, label=None, data_level=None, md_level=None):
     return _btrfs_mkfs(devices, label, data_level, md_level)
 __all__.append("btrfs_mkfs")
 
+_btrfs_list_subvolumes = BlockDev.btrfs_list_subvolumes
+@override(BlockDev.btrfs_list_subvolumes)
+def btrfs_list_subvolumes(mountpoint, snapshots_only=False):
+    return _btrfs_list_subvolumes(mountpoint, snapshots_only)
+__all__.append("btrfs_list_subvolumes")
+
+_btrfs_create_snapshot = BlockDev.btrfs_create_snapshot
+@override(BlockDev.btrfs_create_snapshot)
+def btrfs_create_snapshot(source, dest, ro=False):
+    return _btrfs_create_snapshot(source, dest, ro)
+__all__.append("btrfs_create_snapshot")
+
 
 _crypto_luks_format = BlockDev.crypto_luks_format
 @override(BlockDev.crypto_luks_format)
@@ -128,6 +140,12 @@ _lvm_lvcreate = BlockDev.lvm_lvcreate
 def lvm_lvcreate(vg_name, lv_name, size, pv_list=None):
     return _lvm_lvcreate(vg_name, lv_name, size, pv_list)
 __all__.append("lvm_lvcreate")
+
+_lvm_lvactivate = BlockDev.lvm_lvactivate
+@override(BlockDev.lvm_lvactivate)
+def lvm_lvactivate(vg_name, lv_name, ignore_skip=False):
+    return _lvm_lvactivate(vg_name, lv_name, ignore_skip)
+__all__.append("lvm_lvactivate")
 
 _lvm_lvs = BlockDev.lvm_lvs
 @override(BlockDev.lvm_lvs)
