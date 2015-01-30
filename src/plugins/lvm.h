@@ -114,7 +114,7 @@ BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, GError **error);
 
 gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guint64 md_size, guint64 chunk_size, gchar *profile, GError **error);
 gboolean bd_lvm_thlvcreate (gchar *vg_name, gchar *pool_name, gchar *lv_name, guint64 size, GError **error);
-gchar* bd_lvm_thpoolname (gchar *vg_name, gchar *lv_name, GError **error);
+gchar* bd_lvm_thlvpoolname (gchar *vg_name, gchar *lv_name, GError **error);
 gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, gchar *pool_name, GError **error);
 gboolean bd_lvm_set_global_config (gchar *new_config, GError **error);
 gchar* bd_lvm_get_global_config ();
