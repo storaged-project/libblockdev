@@ -25,6 +25,7 @@
 
 #define INT_FLOAT_EPS 1e-5
 
+GMutex global_config_lock;
 static gchar *global_config_str = NULL;
 
 /**
@@ -127,6 +128,9 @@ static gboolean call_lvm_and_report_error (gchar **args, GError **error) {
     guint i = 0;
     guint args_length = g_strv_length (args);
 
+    /* don't allow global config string changes during the run */
+    g_mutex_lock (&global_config_lock);
+
     /* allocate enough space for the args plus "lvm", "--config" and NULL */
     gchar **argv = g_new (gchar*, args_length + 3);
 
@@ -134,10 +138,12 @@ static gboolean call_lvm_and_report_error (gchar **args, GError **error) {
     argv[0] = "lvm";
     for (i=0; i < args_length; i++)
         argv[i+1] = args[i];
-    argv[args_length + 1] = global_config_str ? global_config_str : NULL;
+    argv[args_length + 1] = global_config_str ? g_strdup_printf("--config=%s", global_config_str) : NULL;
     argv[args_length + 2] = NULL;
 
     success = bd_utils_exec_and_report_error (argv, error);
+    g_mutex_unlock (&global_config_lock);
+    g_free (argv[args_length + 1]);
     g_free (argv);
 
     return success;
@@ -148,6 +154,9 @@ static gboolean call_lvm_and_capture_output (gchar **args, gchar **output, GErro
     guint i = 0;
     guint args_length = g_strv_length (args);
 
+    /* don't allow global config string changes during the run */
+    g_mutex_lock (&global_config_lock);
+
     /* allocate enough space for the args plus "lvm", "--config" and NULL */
     gchar **argv = g_new (gchar*, args_length + 3);
 
@@ -155,11 +164,12 @@ static gboolean call_lvm_and_capture_output (gchar **args, gchar **output, GErro
     argv[0] = "lvm";
     for (i=0; i < args_length; i++)
         argv[i+1] = args[i];
-    argv[args_length + 1] = global_config_str ? global_config_str : NULL;
+    argv[args_length + 1] = global_config_str ? g_strdup_printf("--config=%s", global_config_str) : NULL;
     argv[args_length + 2] = NULL;
 
     success = bd_utils_exec_and_capture_output (argv, output, error);
-    g_free (global_config_str);
+    g_mutex_unlock (&global_config_lock);
+    g_free (argv[args_length + 1]);
     g_free (argv);
 
     return success;
@@ -1376,12 +1386,15 @@ gboolean bd_lvm_set_global_config (gchar *new_config, GError **error __attribute
     /* XXX: the error attribute will likely be used in the future when
        some validation comes into the game */
 
+    g_mutex_lock (&global_config_lock);
+
     /* first free the old value */
     g_free (global_config_str);
 
     /* now store the new one */
     global_config_str = g_strdup (new_config);
 
+    g_mutex_unlock (&global_config_lock);
     return TRUE;
 }
 
@@ -1392,5 +1405,11 @@ gboolean bd_lvm_set_global_config (gchar *new_config, GError **error __attribute
  *                           set LVM global configuration
  */
 gchar* bd_lvm_get_global_config () {
-    return g_strdup (global_config_str ? global_config_str : "");
+    gchar *ret = NULL;
+
+    g_mutex_lock (&global_config_lock);
+    ret = g_strdup (global_config_str ? global_config_str : "");
+    g_mutex_unlock (&global_config_lock);
+
+    return ret;
 }
