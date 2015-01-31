@@ -8,6 +8,10 @@ if not BlockDev.is_initialized():
     BlockDev.init(None, None)
 
 class LvmNoDevTestCase(unittest.TestCase):
+    def __init__(self, *args, **kwargs):
+        super(LvmNoDevTestCase, self).__init__(*args, **kwargs)
+        self._log = ""
+
     def test_is_supported_pe_size(self):
         """Verify that lvm_is_supported_pe_size works as expected"""
 
@@ -102,8 +106,14 @@ class LvmNoDevTestCase(unittest.TestCase):
         self.assertFalse(BlockDev.lvm_is_valid_thpool_chunk_size(191 * 1024, False))
         self.assertFalse(BlockDev.lvm_is_valid_thpool_chunk_size(191 * 1024, True))
 
+    def _store_log(self, lvl, msg):
+        self._log += str((lvl, msg));
+
     def test_get_set_global_config(self):
         """Verify that getting and setting global cofngi works as expected"""
+
+        # setup logging
+        self.assertTrue(BlockDev.reinit(None, False, self._store_log))
 
         # no global config set initially
         self.assertEqual(BlockDev.lvm_get_global_config(), "")
@@ -125,6 +135,11 @@ class LvmNoDevTestCase(unittest.TestCase):
         self.assertTrue(succ)
         self.assertEqual(BlockDev.lvm_get_global_config(), "bla")
         self.assertEqual(BlockDev.lvm_get_global_config(), "bla")
+
+        # set something sane and check it's really used
+        succ = BlockDev.lvm_set_global_config("backup {backup=0 archive=0}")
+        _lvs = BlockDev.lvm_lvs(None)
+        self.assertIn("--config=backup {backup=0 archive=0}", self._log)
 
         # reset back to default
         succ = BlockDev.lvm_set_global_config(None)
