@@ -69,7 +69,7 @@ proving the BTRFS-related functionality.
 Summary:     Development files for the libblockdev-btrfs plugin/library
 Requires: %{name}-btrfs%{?_isa} = %{version}-%{release}
 Requires: glib2-devel
-Requires: %{name}-utils-devel
+Requires: %{name}-utils-devel%{?_isa}
 
 %description btrfs-devel
 This package contains header files and pkg-config files needed for development
@@ -109,7 +109,7 @@ Requires: glib2-devel
 Requires: device-mapper-devel
 Requires: systemd-devel
 Requires: dmraid-devel
-Requires: %{name}-utils-devel
+Requires: %{name}-utils-devel%{?_isa}
 
 %description dm-devel
 This package contains header files and pkg-config files needed for development
@@ -127,7 +127,7 @@ proving the functionality related to loop devices.
 %package loop-devel
 Summary:     Development files for the libblockdev-loop plugin/library
 Requires: %{name}-loop%{?_isa} = %{version}-%{release}
-Requires: %{name}-utils-devel
+Requires: %{name}-utils-devel%{?_isa}
 Requires: glib2-devel
 
 %description loop-devel
@@ -146,7 +146,7 @@ proving the LVM-related functionality.
 %package lvm-devel
 Summary:     Development files for the libblockdev-lvm plugin/library
 Requires: %{name}-lvm%{?_isa} = %{version}-%{release}
-Requires: %{name}-utils-devel
+Requires: %{name}-utils-devel%{?_isa}
 Requires: glib2-devel
 
 %description lvm-devel
@@ -165,7 +165,7 @@ proving the functionality related to MD RAID.
 %package mdraid-devel
 Summary:     Development files for the libblockdev-mdraid plugin/library
 Requires: %{name}-mdraid%{?_isa} = %{version}-%{release}
-Requires: %{name}-utils-devel
+Requires: %{name}-utils-devel%{?_isa}
 Requires: glib2-devel
 
 %description mdraid-devel
@@ -184,7 +184,7 @@ proving the functionality related to multipath devices.
 %package mpath-devel
 Summary:     Development files for the libblockdev-mpath plugin/library
 Requires: %{name}-mpath%{?_isa} = %{version}-%{release}
-Requires: %{name}-utils-devel
+Requires: %{name}-utils-devel%{?_isa}
 Requires: glib2-devel
 
 %description mpath-devel
@@ -203,7 +203,7 @@ proving the functionality related to swap devices.
 %package swap-devel
 Summary:     Development files for the libblockdev-swap plugin/library
 Requires: %{name}-swap%{?_isa} = %{version}-%{release}
-Requires: %{name}-utils-devel
+Requires: %{name}-utils-devel%{?_isa}
 Requires: glib2-devel
 
 %description swap-devel
@@ -269,6 +269,7 @@ rm -rf %{buildroot}
 
 %files devel
 %{_libdir}/libblockdev.so
+%{_includedir}/blockdev
 %{_includedir}/blockdev/blockdev.h
 %{_includedir}/blockdev/plugins.h
 %{_libdir}/pkgconfig/blockdev.pc
@@ -280,6 +281,7 @@ rm -rf %{buildroot}
 
 %files utils-devel
 %{_libdir}/libbd_utils.so
+%{_includedir}/blockdev
 %{_includedir}/blockdev/utils.h
 %{_includedir}/blockdev/sizes.h
 %{_includedir}/blockdev/exec.h
@@ -290,6 +292,7 @@ rm -rf %{buildroot}
 
 %files btrfs-devel
 %{_libdir}/libbd_btrfs.so
+%{_includedir}/blockdev
 %{_includedir}/blockdev/btrfs.h
 
 
@@ -298,6 +301,7 @@ rm -rf %{buildroot}
 
 %files crypto-devel
 %{_libdir}/libbd_crypto.so
+%{_includedir}/blockdev
 %{_includedir}/blockdev/crypto.h
 
 
@@ -306,6 +310,7 @@ rm -rf %{buildroot}
 
 %files dm-devel
 %{_libdir}/libbd_dm.so
+%{_includedir}/blockdev
 %{_includedir}/blockdev/dm.h
 
 
@@ -314,6 +319,7 @@ rm -rf %{buildroot}
 
 %files loop-devel
 %{_libdir}/libbd_loop.so
+%{_includedir}/blockdev
 %{_includedir}/blockdev/loop.h
 
 
@@ -322,6 +328,7 @@ rm -rf %{buildroot}
 
 %files lvm-devel
 %{_libdir}/libbd_lvm.so
+%{_includedir}/blockdev
 %{_includedir}/blockdev/lvm.h
 
 
@@ -330,6 +337,7 @@ rm -rf %{buildroot}
 
 %files mdraid-devel
 %{_libdir}/libbd_mdraid.so
+%{_includedir}/blockdev
 %{_includedir}/blockdev/mdraid.h
 
 
@@ -338,6 +346,7 @@ rm -rf %{buildroot}
 
 %files mpath-devel
 %{_libdir}/libbd_mpath.so
+%{_includedir}/blockdev
 %{_includedir}/blockdev/mpath.h
 
 
@@ -346,6 +355,7 @@ rm -rf %{buildroot}
 
 %files swap-devel
 %{_libdir}/libbd_swap.so
+%{_includedir}/blockdev
 %{_includedir}/blockdev/swap.h
 
 %files plugins-all
