@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     0.3
+Version:     0.4
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -361,6 +361,23 @@ rm -rf %{buildroot}
 %files plugins-all
 
 %changelog
+* Sat Jan 31 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.4-1
+- Improve the test for lvm_set_global_config (vpodzime)
+- Fix some minor issues in the spec file (vpodzime)
+- Fix issues with the LVM global config str (vpodzime)
+- Add couple more Python overrides (vpodzime)
+- Fix the name of the lvm_thlvpoolname() function in the header file (vpodzime)
+- Use assertEqual instead of assertTrue(a == b) (vpodzime)
+- Add the min_entropy parameter to luks_format (vpodzime)
+- Move internal dmraid-related macros into the source file (vpodzime)
+- Add an override for the md_add function (vpodzime)
+- Fix parameters in luks_open python overrides (vpodzime)
+- Prevent init() from being done multiple times and provide a test function (vpodzime)
+- Add the roadmap.rst document (vpodzime)
+- Remove an extra parenthesis in one of the docstrings (vpodzime)
+- Move the mddetail function next to the mdexamine function (vpodzime)
+- Add some more constants required by blivet (vpodzime)
+
 * Wed Jan 21 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.3-1
 - Require volume_key-devel in a version that fixes build issues (vpodzime)
 - Fix Python 2 devel package name in BuildRequires (vpodzime)
