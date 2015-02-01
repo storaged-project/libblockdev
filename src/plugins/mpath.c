@@ -80,8 +80,16 @@ gboolean bd_mpath_flush_mpaths (GError **error) {
  */
 gboolean bd_mpath_is_mpath_member (gchar *device, GError **error) {
     gchar *argv[4] = {"multipath", "-c", device, NULL};
+    gboolean ret = FALSE;
 
-    return bd_utils_exec_and_report_error (argv, error);
+    ret = bd_utils_exec_and_report_error (argv, error);
+    if (!ret && g_error_matches (*error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED))
+        /* multipath's exit code != 0 (e.g. 256) means that the device is not a
+           multipath member so just clear the error (there's none really) and
+           return FALSE */
+        g_clear_error (error);
+
+    return ret;
 }
 
 /**
