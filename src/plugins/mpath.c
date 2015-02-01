@@ -92,7 +92,7 @@ gboolean bd_mpath_is_mpath_member (gchar *device, GError **error) {
  * Returns: if successfully set or not
  */
 gboolean bd_mpath_set_friendly_names (gboolean enabled, GError **error) {
-    gchar *argv[8] = {"multipath", "--find_multipaths", "y", "--user_friendly_names", NULL, "--with_multipathd", "y", NULL};
+    gchar *argv[8] = {"mpathconf", "--find_multipaths", "y", "--user_friendly_names", NULL, "--with_multipathd", "y", NULL};
     argv[4] = enabled ? "y" : "n";
 
     return bd_utils_exec_and_report_error (argv, error);
