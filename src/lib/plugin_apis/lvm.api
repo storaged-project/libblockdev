@@ -280,13 +280,13 @@ gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard);
 /**
  * bd_lvm_pvcreate:
  * @device: the device to make PV from
- * @dataalignment: data (first PE) alignment or 0 to use the default
- * @metadatasize: size of the area reserved for metadata or 0 to use the default
+ * @data_alignment: data (first PE) alignment or 0 to use the default
+ * @metadata_size: size of the area reserved for metadata or 0 to use the default
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the PV was successfully created or not
  */
-gboolean bd_lvm_pvcreate (gchar *device, guint64 dataalignment, guint64 metadatasize, GError **error);
+gboolean bd_lvm_pvcreate (gchar *device, guint64 data_alignment, guint64 metadata_size, GError **error);
 
 /**
  * bd_lvm_pvresize:

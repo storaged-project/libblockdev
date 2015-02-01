@@ -384,7 +384,7 @@ rm -rf %{buildroot}
 - Generate docs for the library and all plugins (vpodzime)
 - Make doc comments better for documentation generation (vpodzime)
 - Fix parameter names in function prototypes (vpodzime)
-- Add the metadatasize parameter to pvcreate (vpodzime)
+- Add the metadata_size parameter to pvcreate (vpodzime)
 - Add the dataalignment parameter to lvm_pvcreate (vpodzime)
 - Export non-internal constants via introspection (vpodzime)
 - Expand size constants in the GI-scanned files (vpodzime)

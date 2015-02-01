@@ -183,7 +183,7 @@ class LvmTestCase(unittest.TestCase):
         succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
 
-        # this time try to specify dataalignment and metadatasize
+        # this time try to specify data_alignment and metadata_size
         succ = BlockDev.lvm_pvcreate(self.loop_dev, 2048, 4096)
         self.assertTrue(succ)
 
