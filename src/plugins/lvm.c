@@ -961,7 +961,7 @@ gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar **
     args[1] = "-n";
     args[2] = lv_name;
     args[3] = "-L";
-    args[4] = g_strdup_printf ("%"G_GUINT64_FORMAT"b", size);
+    args[4] = g_strdup_printf ("%"G_GUINT64_FORMAT"K", size/1024);
     args[5] = "-y";
     args[6] = vg_name;
 
