@@ -197,7 +197,7 @@ static int give_passphrase (const char *msg __attribute__((unused)), char *buf, 
  * bd_crypto_luks_format:
  * @device: a device to format as LUKS
  * @cipher: (allow-none): cipher specification (type-mode, e.g. "aes-xts-plain64") or %NULL to use the default
- * @key_size: size of the volume key or 0 to use the default
+ * @key_size: size of the volume key in bits or 0 to use the default
  * @passphrase: (allow-none): a passphrase for the new LUKS device or %NULL if not requested
  * @key_file: (allow-none): a key file for the new LUKS device or %NULL if not requested
  * @min_entropy: minimum random data entropy (in bits) required to format @device as LUKS
@@ -236,7 +236,7 @@ gboolean bd_crypto_luks_format (gchar *device, gchar *cipher, guint64 key_size, 
     }
 
     /* resolve requested/default key_size (should be in bytes) */
-    key_size = (key_size != 0) ? key_size : (DEFAULT_LUKS_KEYSIZE_BITS / 8);
+    key_size = (key_size != 0) ? (key_size / 8) : (DEFAULT_LUKS_KEYSIZE_BITS / 8);
 
     /* wait for enough random data entropy (if requested) */
     if (min_entropy > 0) {
