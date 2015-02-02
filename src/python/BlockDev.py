@@ -51,8 +51,8 @@ __all__.append("btrfs_create_snapshot")
 
 _crypto_luks_format = BlockDev.crypto_luks_format
 @override(BlockDev.crypto_luks_format)
-def crypto_luks_format(device, cipher=None, key_size=0, passphrase=None, key_file=None):
-    return _crypto_luks_format(device, cipher, key_size, passphrase, key_file)
+def crypto_luks_format(device, cipher=None, key_size=0, passphrase=None, key_file=None, min_entropy=0):
+    return _crypto_luks_format(device, cipher, key_size, passphrase, key_file, min_entropy)
 __all__.append("crypto_luks_format")
 
 _crypto_luks_open = BlockDev.crypto_luks_open
