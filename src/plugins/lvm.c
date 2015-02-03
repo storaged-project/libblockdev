@@ -1267,7 +1267,7 @@ gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guin
     args[3] = g_strdup_printf ("%"G_GUINT64_FORMAT"b", size);
 
     if (md_size != 0) {
-        args[next_arg] = g_strdup_printf("--poolmetadata_size=%"G_GUINT64_FORMAT"b", md_size);
+        args[next_arg] = g_strdup_printf("--poolmetadatasize=%"G_GUINT64_FORMAT"b", md_size);
         next_arg++;
     }
 
