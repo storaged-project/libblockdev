@@ -217,6 +217,8 @@ static BDLVMPVdata* get_pv_data_from_table (GHashTable *table, gboolean free_tab
     value = (gchar*) g_hash_table_lookup (table, "LVM2_PE_START");
     if (value)
         data->pe_start = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->pe_start = 0;
 
     data->vg_name = g_strdup ((gchar*) g_hash_table_lookup (table, "LVM2_VG_NAME"));
     data->vg_uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "LVM2_VG_UUID"));
@@ -224,26 +226,37 @@ static BDLVMPVdata* get_pv_data_from_table (GHashTable *table, gboolean free_tab
     value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_SIZE");
     if (value)
         data->vg_size = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->vg_size = 0;
 
     value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_FREE");
     if (value)
         data->vg_free = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->vg_free = 0;
 
     value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_EXTENT_SIZE");
     if (value)
         data->vg_extent_size = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->vg_extent_size = 0;
 
     value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_EXTENT_COUNT");
     if (value)
         data->vg_extent_count = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->vg_extent_count = 0;
 
     value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_FREE_COUNT");
     if (value)
         data->vg_free_count = g_ascii_strtoull (value, NULL, 0);
-
+    else
+        data->vg_free_count = 0;
     value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_PV_COUNT");
     if (value)
         data->vg_pv_count = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->vg_pv_count = 0;
 
     if (free_table)
         g_hash_table_destroy (table);
@@ -261,26 +274,38 @@ static BDLVMVGdata* get_vg_data_from_table (GHashTable *table, gboolean free_tab
     value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_SIZE");
     if (value)
         data->size = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->size = 0;
 
     value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_FREE");
     if (value)
         data->free = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->free= 0;
 
     value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_EXTENT_SIZE");
     if (value)
         data->extent_size = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->extent_size = 0;
 
     value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_EXTENT_COUNT");
     if (value)
         data->extent_count = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->extent_count = 0;
 
     value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_FREE_COUNT");
     if (value)
         data->free_count = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->free_count = 0;
 
     value = (gchar*) g_hash_table_lookup (table, "LVM2_PV_COUNT");
     if (value)
         data->pv_count = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->pv_count = 0;
 
     if (free_table)
         g_hash_table_destroy (table);
@@ -299,6 +324,8 @@ static BDLVMLVdata* get_lv_data_from_table (GHashTable *table, gboolean free_tab
     value = (gchar*) g_hash_table_lookup (table, "LVM2_LV_SIZE");
     if (value)
         data->size = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->size = 0;
 
     data->attr = g_strdup (g_hash_table_lookup (table, "LVM2_LV_ATTR"));
     data->segtype = g_strdup (g_hash_table_lookup (table, "LVM2_SEGTYPE"));

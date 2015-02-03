@@ -165,24 +165,32 @@ static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean
     value = (gchar*) g_hash_table_lookup (table, "MD_DEVICES");
     if (value)
         data->num_devices = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->num_devices = 0;
 
     data->name = g_strdup ((gchar*) g_hash_table_lookup (table, "MD_NAME"));
 
     value = (gchar*) g_hash_table_lookup (table, "MD_ARRAY_SIZE");
     if (value)
         data->size = bd_utils_size_from_spec (value, error);
+    else
+        data->size = 0;
 
     data->uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "MD_UUID"));
 
     value = (gchar*) g_hash_table_lookup (table, "MD_UPDATE_TIME");
     if (value)
         data->update_time = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->update_time = 0;
 
     data->dev_uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "MD_DEV_UUID"));
 
     value = (gchar*) g_hash_table_lookup (table, "MD_EVENTS");
     if (value)
         data->events = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->events = 0;
 
     value = (gchar*) g_hash_table_lookup (table, "MD_METADATA");
     if (value)
@@ -215,6 +223,8 @@ static BDMDDetailData* get_detail_data_from_table (GHashTable *table, gboolean f
         if (value && first_space)
             data->array_size = g_ascii_strtoull (value, NULL, 0);
     }
+    else
+        data->array_size = 0;
 
     value = (gchar*) g_hash_table_lookup (table, "Used Dev Size");
     if (value) {
@@ -224,38 +234,50 @@ static BDMDDetailData* get_detail_data_from_table (GHashTable *table, gboolean f
         if (value && first_space)
             data->use_dev_size = g_ascii_strtoull (value, NULL, 0);
     }
+    else
+        data->use_dev_size = 0;
 
     value = (gchar*) g_hash_table_lookup (table, "Raid Devices");
     if (value)
         data->raid_devices = g_ascii_strtoull (value, NULL, 0);
-
-    value = (gchar*) g_hash_table_lookup (table, "Raid Devices");
-    if (value)
-        data->raid_devices = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->raid_devices = 0;
 
     value = (gchar*) g_hash_table_lookup (table, "Total Devices");
     if (value)
         data->total_devices = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->total_devices = 0;
 
     value = (gchar*) g_hash_table_lookup (table, "Active Devices");
     if (value)
         data->active_devices = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->active_devices = 0;
 
     value = (gchar*) g_hash_table_lookup (table, "Working Devices");
     if (value)
         data->working_devices = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->working_devices = 0;
 
     value = (gchar*) g_hash_table_lookup (table, "Failed Devices");
     if (value)
         data->failed_devices = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->failed_devices = 0;
 
     value = (gchar*) g_hash_table_lookup (table, "Spare Devices");
     if (value)
         data->spare_devices = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->spare_devices = 0;
 
     value = (gchar*) g_hash_table_lookup (table, "State");
     if (value)
         data->clean = (g_strcmp0 (value, "clean") == 0);
+    else
+        data->clean = 0;
 
     if (free_table)
         g_hash_table_destroy (table);
