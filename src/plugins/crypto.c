@@ -322,7 +322,7 @@ gboolean bd_crypto_luks_open (gchar *device, gchar *name, gchar *passphrase, gch
     }
 
     if (passphrase)
-        ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, passphrase, strlen(passphrase), 1);
+        ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, passphrase, strlen(passphrase), 0);
     else
         ret = crypt_activate_by_keyfile (cd, name, CRYPT_ANY_SLOT, key_file, 0, 0);
 

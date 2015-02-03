@@ -117,3 +117,20 @@ class CryptoTestCase(unittest.TestCase):
 
         with self.assertRaises(GLib.GError):
             uuid = BlockDev.crypto_luks_uuid(self.loop_dev2)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_luks_open_rw(self):
+        """Verify that opened LUKS device is usable (activated as RW)"""
+
+        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None)
+        self.assertTrue(succ)
+
+        # tests that we can write something to the raw LUKS device
+        succ = BlockDev.utils_exec_and_report_error(["dd", "if=/dev/zero", "of=/dev/mapper/libblockdevTestLUKS", "bs=1M", "count=1"])
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_close("/dev/mapper/libblockdevTestLUKS")
+        self.assertTrue(succ)
