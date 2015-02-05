@@ -252,7 +252,8 @@ static BDLVMPVdata* get_pv_data_from_table (GHashTable *table, gboolean free_tab
         data->vg_free_count = g_ascii_strtoull (value, NULL, 0);
     else
         data->vg_free_count = 0;
-    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_PV_COUNT");
+
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_PV_COUNT");
     if (value)
         data->vg_pv_count = g_ascii_strtoull (value, NULL, 0);
     else
@@ -630,6 +631,7 @@ BDLVMPVdata* bd_lvm_pvinfo (gchar *device, GError **error) {
     for (lines_p = lines; *lines_p; lines_p++) {
         table = parse_lvm_vars ((*lines_p), &num_items);
         if (table && (num_items == 11)) {
+            g_clear_error (error);
             g_strfreev (lines);
             return get_pv_data_from_table (table, TRUE);
         } else
