@@ -204,7 +204,8 @@ def get_loading_func(fn_infos, module_name):
     ret =  'gpointer load_{0}_from_plugin(gchar *so_name) {{\n'.format(module_name)
     ret += '    void *handle = NULL;\n'
     ret += '    char *error = NULL;\n'
-    ret += '    gboolean (*check_fn) (void) = NULL;\n\n'
+    ret += '    gboolean (*check_fn) (void) = NULL;\n'
+    ret += '    gboolean (*init_fn) (void) = NULL;\n\n'
 
     ret += '    handle = dlopen(so_name, RTLD_LAZY);\n'
     ret += '    if (!handle) {\n'
@@ -217,6 +218,13 @@ def get_loading_func(fn_infos, module_name):
     ret += '    if ((error = dlerror()) != NULL)\n'
     ret += '        g_debug("failed to load the check() function for {0}: %s", error);\n'.format(module_name)
     ret += '    if (check_fn && !check_fn())\n'
+    ret += '        return NULL;\n\n'
+
+    ret += '    dlerror();\n'
+    ret += '    * (void**) (&init_fn) = dlsym(handle, "init");\n'
+    ret += '    if ((error = dlerror()) != NULL)\n'
+    ret += '        g_debug("failed to load the init() function for {0}: %s", error);\n'.format(module_name)
+    ret += '    if (init_fn && !init_fn())\n'
     ret += '        return NULL;\n\n'
 
     for info in fn_infos:
