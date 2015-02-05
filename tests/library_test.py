@@ -112,3 +112,13 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         self.assertIn("...done [%s]" % task_id1, self.log)
         self.assertIn("...done [%s]" % task_id2, self.log)
+
+    def test_require_plugins(self):
+        """Verify that loading only required plugins works as expected"""
+
+        ps = BlockDev.PluginSpec()
+        ps.name = BlockDev.Plugin.BTRFS
+        ps.so_name = ""
+        self.assertTrue(BlockDev.reinit([ps], True, None))
+        self.assertEqual(BlockDev.get_available_plugin_names(), ["btrfs"])
+        self.assertTrue(BlockDev.reinit(None, True, None))
