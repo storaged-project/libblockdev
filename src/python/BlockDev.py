@@ -11,16 +11,26 @@ from gi.overrides import override
 BlockDev = modules['BlockDev']._introspection_module
 __all__ = []
 
+bd_plugins = { "lvm": BlockDev.Plugin.LVM,
+               "btrfs": BlockDev.Plugin.BTRFS,
+               "crypto": BlockDev.Plugin.CRYPTO,
+               "dm": BlockDev.Plugin.DM,
+               "loop": BlockDev.Plugin.LOOP,
+               "swap": BlockDev.Plugin.SWAP,
+               "mdraid": BlockDev.Plugin.MDRAID,
+               "mpath": BlockDev.Plugin.MPATH,
+}
+
 _init = BlockDev.init
 @override(BlockDev.init)
-def init(force_plugins=None, log_func=None):
-    return _init(force_plugins, log_func)
+def init(require_plugins=None, log_func=None):
+    return _init(require_plugins, log_func)
 __all__.append("init")
 
 _reinit = BlockDev.reinit
 @override(BlockDev.reinit)
-def reinit(force_plugins=None, reload=True, log_func=None):
-    return _reinit(force_plugins, reload, log_func)
+def reinit(require_plugins=None, reload=True, log_func=None):
+    return _reinit(require_plugins, reload, log_func)
 __all__.append("reinit")
 
 
@@ -208,3 +218,14 @@ _swap_swapon = BlockDev.swap_swapon
 def swap_swapon(device, priority=-1):
     return _swap_swapon(device, priority)
 __all__.append("swap_swapon")
+
+def plugin_specs_from_names(plugin_names):
+    ret = []
+    for name in plugin_names:
+        plugin = BlockDev.PluginSpec()
+        plugin.name = bd_plugins[name.lower()]
+        plugin.so_name = None
+        ret.append(plugin)
+
+    return ret
+__all__.append("plugin_specs_from_names")
