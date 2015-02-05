@@ -203,13 +203,21 @@ def get_loading_func(fn_infos, module_name):
     # TODO: implement the 'gchar **errors' argument
     ret =  'gpointer load_{0}_from_plugin(gchar *so_name) {{\n'.format(module_name)
     ret += '    void *handle = NULL;\n'
-    ret += '    char *error = NULL;\n\n'
+    ret += '    char *error = NULL;\n'
+    ret += '    gboolean (*check_fn) (void) = NULL;\n\n'
 
     ret += '    handle = dlopen(so_name, RTLD_LAZY);\n'
     ret += '    if (!handle) {\n'
     ret += '        g_warning("failed to load module {0}: %s", dlerror());\n'.format(module_name)
     ret += '        return NULL;\n'
     ret += '    }\n\n'
+
+    ret += '    dlerror();\n'
+    ret += '    * (void**) (&check_fn) = dlsym(handle, "check");\n'
+    ret += '    if ((error = dlerror()) != NULL)\n'
+    ret += '        g_debug("failed to load the check() function for {0}: %s", error);\n'.format(module_name)
+    ret += '    if (check_fn && !check_fn())\n'
+    ret += '        return NULL;\n\n'
 
     for info in fn_infos:
         # clear any previous error and load the function
