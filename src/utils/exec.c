@@ -60,6 +60,26 @@ static guint64 log_running (gchar **argv) {
 }
 
 /**
+ * log_out: (skip)
+ *
+ */
+static void log_out (guint64 task_id, gchar *stdout, gchar *stderr) {
+    gchar *log_msg = NULL;
+
+    if (log_func) {
+        log_msg = g_strdup_printf ("stdout[%"G_GUINT64_FORMAT"]: %s", task_id, stdout);
+        log_func (LOG_INFO, log_msg);
+        g_free (log_msg);
+
+        log_msg = g_strdup_printf ("stderr[%"G_GUINT64_FORMAT"]: %s", task_id, stderr);
+        log_func (LOG_INFO, log_msg);
+        g_free (log_msg);
+    }
+
+    return;
+}
+
+/**
  * log_done: (skip)
  *
  */
@@ -92,6 +112,7 @@ gboolean bd_utils_exec_and_report_error (gchar **argv, GError **error) {
     task_id = log_running (argv);
     success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
                             NULL, NULL, &stdout_data, &stderr_data, &status, error);
+    log_out (task_id, stdout_data, stderr_data);
     log_done (task_id);
 
     if (!success) {
@@ -136,6 +157,7 @@ gboolean bd_utils_exec_and_capture_output (gchar **argv, gchar **output, GError 
     task_id = log_running (argv);
     success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
                             NULL, NULL, &stdout_data, &stderr_data, &status, error);
+    log_out (task_id, stdout_data, stderr_data);
     log_done (task_id);
 
     if (!success) {

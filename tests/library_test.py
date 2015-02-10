@@ -111,6 +111,11 @@ class LibraryOpsTestCase(unittest.TestCase):
         task_id2 = match.group(1)
 
         self.assertIn("...done [%s]" % task_id1, self.log)
+        self.assertIn("stdout[%s]:" % task_id1, self.log)
+        self.assertIn("stderr[%s]:" % task_id1, self.log)
+
+        self.assertIn("stdout[%s]: hi" % task_id2, self.log)
+        self.assertIn("stderr[%s]:" % task_id2, self.log)
         self.assertIn("...done [%s]" % task_id2, self.log)
 
     def test_require_plugins(self):
