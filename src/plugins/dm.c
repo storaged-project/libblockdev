@@ -51,6 +51,24 @@ GQuark bd_dm_error_quark (void)
 typedef struct raid_set* (*RSEvalFunc) (struct raid_set *rs, gpointer data);
 
 /**
+ * discard_dm_log: (skip)
+ */
+static void discard_dm_log (int level __attribute__((unused)), const char *file __attribute__((unused)), int line __attribute__((unused)),
+                            int dm_errno_or_class __attribute__((unused)), const char *f __attribute__((unused)), ...) {
+    return;
+}
+
+/**
+ * init: (skip)
+ */
+gboolean init () {
+    dm_log_with_errno_init ((dm_log_with_errno_fn) discard_dm_log);
+    dm_log_init_verbose (0);
+
+    return TRUE;
+}
+
+/**
  * bd_dm_create_linear:
  * @map_name: name of the map
  * @device: device to create map for
@@ -179,9 +197,6 @@ gboolean bd_dm_map_exists (gchar *map_name, gboolean live_only, gboolean active_
                      "Not running as root, cannot query DM maps");
         return FALSE;
     }
-
-    /* TODO: init DM logging here to throw discard errors? (they will appear on
-       stderr by default) */
 
     task_list = dm_task_create(DM_DEVICE_LIST);
 	if (!task_list) {
