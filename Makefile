@@ -47,10 +47,10 @@ test-from-python: all
          print BlockDev.lvm_get_max_lv_size()'
 
 run-ipython: all
-	GI_TYPELIB_PATH=build/ LD_LIBRARY_PATH=build PYTHONPATH=src/python ipython
+	GI_TYPELIB_PATH=build/ LD_LIBRARY_PATH=build PYTHONPATH=src/python G_MESSAGES_DEBUG=all ipython
 
 run-root-ipython: all
-	sudo GI_TYPELIB_PATH=build/ LD_LIBRARY_PATH=build PYTHONPATH=src/python ipython
+	sudo GI_TYPELIB_PATH=build/ LD_LIBRARY_PATH=build PYTHONPATH=src/python G_MESSAGES_DEBUG=all ipython
 
 test: all
 	@echo
