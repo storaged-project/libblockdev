@@ -37,7 +37,7 @@ BlockDev-0.1.typelib:
 
 plugins-test: ${PLUGIN_TESTS}
 
-test-from-python: all
+test-from-python: build
 	GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build PYTHONPATH=src/python python -c \
          'import gi.overrides;\
 		 gi.overrides.__path__.insert(0, "src/python");\
@@ -46,18 +46,18 @@ test-from-python: all
          BlockDev.reinit();\
          print BlockDev.lvm_get_max_lv_size()'
 
-run-ipython: all
+run-ipython: build
 	GI_TYPELIB_PATH=build/ LD_LIBRARY_PATH=build PYTHONPATH=src/python G_MESSAGES_DEBUG=all ipython
 
-run-root-ipython: all
+run-root-ipython: build
 	sudo GI_TYPELIB_PATH=build/ LD_LIBRARY_PATH=build PYTHONPATH=src/python G_MESSAGES_DEBUG=all ipython
 
-test: all
+test: build
 	@echo
 	@sudo GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build PYTHONPATH=.:tests/:src/python \
 		python -m unittest discover -v -s tests/ -p '*_test.py'
 
-fast-test: all
+fast-test: build
 	@echo
 	@sudo SKIP_SLOW= GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build PYTHONPATH=.:tests/:src/python \
 		python -m unittest discover -v -s tests/ -p '*_test.py'
