@@ -127,3 +127,17 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertTrue(BlockDev.reinit([ps], True, None))
         self.assertEqual(BlockDev.get_available_plugin_names(), ["btrfs"])
         self.assertTrue(BlockDev.reinit(None, True, None))
+
+    def test_try_init(self):
+        """Verify that try_init just returns when already initialized"""
+
+        ps = BlockDev.PluginSpec()
+        ps.name = BlockDev.Plugin.BTRFS
+        ps.so_name = "nonexisting.so"
+        avail_plugs = BlockDev.get_available_plugin_names()
+
+        # try init should exit early enough to not hit the issue with
+        # non-existing so file since the library is already initialized here, it
+        # shouldn't report any error and it shouldn't affect the loaded plugins
+        self.assertTrue(BlockDev.try_init([ps], None))
+        self.assertEqual(avail_plugs, BlockDev.get_available_plugin_names())

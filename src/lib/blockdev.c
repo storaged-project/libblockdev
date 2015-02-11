@@ -159,6 +159,55 @@ gboolean bd_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GErro
 }
 
 /**
+ * bd_try_init:
+ * @require_plugins: (allow-none) (array zero-terminated=1): %NULL-terminated list
+ *                 of plugins that should be loaded (if no so_name is specified
+ *                 for the plugin, the default is used) or %NULL to load all
+ *                 plugins
+ * @log_func: (allow-none) (scope notified): logging function to use
+ * @error: (out): place to store error (if any)
+ *
+ * Checks the state of the library and if it is uninitialized, tries to
+ * initialize it. Otherwise just returns early. The difference between:
+ *
+ * <code>
+ * if (!bd_is_initialized())
+ *     bd_init(None, None, &error);
+ * </code>
+ *
+ * and this function is that this function does the check and init in an atomic
+ * way (holding the lock preventing other threads from doing changes in
+ * between).
+ *
+ * Returns: whether the library was or had already been successfully initialized
+ *          or not
+ */
+gboolean bd_try_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GError **error) {
+    gboolean success = TRUE;
+    g_mutex_lock (&init_lock);
+    if (initialized) {
+        g_mutex_unlock (&init_lock);
+        return TRUE;
+    }
+
+    if (!load_plugins (require_plugins, FALSE)) {
+        g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
+                     "Failed to load plugins");
+        /* the library is unusable without the plugins so we can just return here */
+        success = FALSE;
+    }
+
+    if (log_func && !bd_utils_init_logging (log_func, error))
+        /* the error is already populated */
+        success = FALSE;
+
+    initialized = success;
+    g_mutex_unlock (&init_lock);
+
+    return success;
+}
+
+/**
  * bd_reinit:
  * @require_plugins: (allow-none) (array zero-terminated=1): %NULL-terminated list
  *                 of plugins that should be loaded (if no so_name is specified
