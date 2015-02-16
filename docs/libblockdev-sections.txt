@@ -3,12 +3,15 @@
 BD_INIT_ERROR
 BDInitError
 bd_init
+bd_try_init
 bd_reinit
+bd_is_initialized
 </SECTION>
 
 <SECTION>
 <FILE>btrfs</FILE>
 BD_BTRFS_MAIN_VOLUME_ID
+BD_BTRFS_MIN_MEMBER_SIZE
 bd_btrfs_error_quark
 BD_BTRFS_ERROR
 BDBtrfsError
@@ -124,6 +127,7 @@ bd_loop_teardown
 <FILE>lvm</FILE>
 BD_LVM_MAX_LV_SIZE
 BD_LVM_DEFAULT_PE_SIZE
+BD_LVM_DEFAULT_PE_START
 BD_LVM_MIN_PE_SIZE
 BD_LVM_MAX_PE_SIZE
 USE_DEFAULT_PE_SIZE
@@ -181,7 +185,7 @@ bd_lvm_lvinfo
 bd_lvm_lvs
 bd_lvm_thpoolcreate
 bd_lvm_thlvcreate
-bd_lvm_thpoolname
+bd_lvm_thlvpoolname
 bd_lvm_thsnapshotcreate
 bd_lvm_set_global_config
 bd_lvm_get_global_config
