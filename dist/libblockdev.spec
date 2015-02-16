@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     0.4
+Version:     0.5
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -361,6 +361,31 @@ rm -rf %{buildroot}
 %files plugins-all
 
 %changelog
+* Mon Feb 16 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.5-1
+- Add tests for what we can easily test from the mpath plugin (vpodzime)
+- Add link to sources to the documentation (vpodzime)
+- Add missing symbols into the libblockdev-sections.txt file (vpodzime)
+- Do not build docs for testing (vpodzime)
+- Add the bd_try_init function (vpodzime)
+- Log stdout and stderr output when running processes (vpodzime)
+- Allow a subset of plugins to be load instead of all (vpodzime)
+- Make sure devmapper doesn't spam stdout with tons of messages (vpodzime)
+- Let debug messages go to stderr when running ipython (vpodzime)
+- Give plugins a way to initialize themselves (vpodzime)
+- Give plugins a way how to check if they could run properly (vpodzime)
+- Allow a subset of plugins to be load instead of all [TEST NEEDED] (vpodzime)
+- Make sure we use the whole /dev/mapper path for cryptsetup (vpodzime)
+- Fix vg_pv_count parsing when getting info about PV (vpodzime)
+- Set default values to data structures if real values are not available (vpodzime)
+- Fix the parameter name specifying pool metadata size (vpodzime)
+- Activate LUKS as ReadWrite in luks_open (vpodzime)
+- Make sure we pass key_size to cryptsetup in bytes (vpodzime)
+- Add the min_entropy parameter to luks_format Python overrides (vpodzime)
+- Pass size in KiB instead of B to lvcreate (vpodzime)
+- Add underscore into dataalignment and metadatasize parameter names (vpodzime)
+- Don't report error if non-mpath device is tested for being mpath member (vpodzime)
+- Fix name of the invoked utility in mpath_set_friendly_names (vpodzime)
+
 * Sat Jan 31 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.4-1
 - Improve the test for lvm_set_global_config (vpodzime)
 - Fix some minor issues in the spec file (vpodzime)
