@@ -10,7 +10,11 @@
     <releaseinfo>
       for libblockdev 0.1.
       The latest version of this documentation can be found on-line at
-      <ulink role="online-location" url="https://vpodzime.fedorapeople.org/libblockdev_doc/index.html">https://vpodzime.fedorapeople.org/libblockdev_doc/</ulink>.
+      <ulink role="online-location"
+             url="https://vpodzime.fedorapeople.org/libblockdev_doc/index.html">https://vpodzime.fedorapeople.org/libblockdev_doc/</ulink>.
+      The latest version of the code can be found at
+      <ulink role="online-location"
+             url="https://github.com/rhinstaller/libblockdev">https://github.com/rhinstaller/libblockdev</ulink>
     </releaseinfo>
   </bookinfo>
 
