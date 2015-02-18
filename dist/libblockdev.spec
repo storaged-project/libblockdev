@@ -213,14 +213,14 @@ with the libblockdev-swap plugin/library.
 
 %package plugins-all
 Summary:     Meta-package that pulls all the libblockdev plugins as dependencies
-Requires: %{name}-btrfs%{?_isa}
-Requires: %{name}-crypto%{?_isa}
-Requires: %{name}-dm%{?_isa}
-Requires: %{name}-loop%{?_isa}
-Requires: %{name}-lvm%{?_isa}
-Requires: %{name}-mdraid%{?_isa}
-Requires: %{name}-mpath%{?_isa}
-Requires: %{name}-swap%{?_isa}
+Requires: %{name}-btrfs%{?_isa} = %{version}-%{release}
+Requires: %{name}-crypto%{?_isa} = %{version}-%{release}
+Requires: %{name}-dm%{?_isa} = %{version}-%{release}
+Requires: %{name}-loop%{?_isa} = %{version}-%{release}
+Requires: %{name}-lvm%{?_isa} = %{version}-%{release}
+Requires: %{name}-mdraid%{?_isa} = %{version}-%{release}
+Requires: %{name}-mpath%{?_isa} = %{version}-%{release}
+Requires: %{name}-swap%{?_isa} = %{version}-%{release}
 
 %description plugins-all
 A meta-package that pulls all the libblockdev plugins as dependencies.
