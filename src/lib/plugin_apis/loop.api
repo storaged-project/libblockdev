@@ -11,6 +11,8 @@ typedef enum {
  * @dev_name: name of the loop device to get backing file for (e.g. "loop0")
  * @error: (out): place to store error (if any)
  *
+ * Returns: (transfer full): path of the device's backing file or %NULL if none
+ *                           is found
  */
 gchar* bd_loop_get_backing_file (gchar *dev_name, GError **error);
 

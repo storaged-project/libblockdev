@@ -34,6 +34,8 @@ class LoopTestCase(unittest.TestCase):
     def testLoop_get_backing_file(self):
         """Verify that loop_get_backing_file works as expected"""
 
+        self.assertIs(BlockDev.loop_get_backing_file("/non/existing"), None)
+
         succ, loop = BlockDev.loop_setup(self.dev_file)
         f_name = BlockDev.loop_get_backing_file(loop)
         self.assertEqual(f_name, self.dev_file)

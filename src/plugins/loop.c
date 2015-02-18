@@ -46,7 +46,8 @@ GQuark bd_loop_error_quark (void)
  * @dev_name: name of the loop device to get backing file for (e.g. "loop0")
  * @error: (out): place to store error (if any)
  *
- * Returns: (transfer full): path of the device's backing file
+ * Returns: (transfer full): path of the device's backing file or %NULL if none
+ *                           is found
  */
 gchar* bd_loop_get_backing_file (gchar *dev_name, GError **error) {
     gchar *sys_path = g_strdup_printf ("/sys/class/block/%s/loop/backing_file", dev_name);
@@ -55,8 +56,6 @@ gchar* bd_loop_get_backing_file (gchar *dev_name, GError **error) {
 
     if (access (sys_path, R_OK) != 0) {
         g_free (sys_path);
-        g_set_error (error, BD_LOOP_ERROR, BD_LOOP_ERROR_SYS,
-                     "Failed to access device's parameters under /sys");
         return NULL;
     }
 
