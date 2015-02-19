@@ -193,7 +193,8 @@ gboolean bd_swap_swapstatus (gchar *device, GError **error) {
     if (g_str_has_prefix (device, "/dev/mapper")) {
         symlink = g_file_read_link (device, error);
         if (!symlink) {
-            /* error is already populated */
+            /* the device doesn't exist and thus is not an active swap */
+            g_clear_error (error);
             return FALSE;
         }
 
