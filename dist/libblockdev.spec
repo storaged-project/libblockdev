@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     0.5
+Version:     0.6
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -361,6 +361,12 @@ rm -rf %{buildroot}
 %files plugins-all
 
 %changelog
+* Thu Feb 19 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.6-1
+- Don't report error when non-existing swap's status is queried (vpodzime)
+- Make libblockdev-plugins-all pull the same version of plugins (vpodzime)
+- Don't report error when asked for a backing file of an uknown loop (vpodzime)
+- Fix accidental change in the spec's changelog (vpodzime)
+
 * Mon Feb 16 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.5-1
 - Add tests for what we can easily test from the mpath plugin (vpodzime)
 - Add link to sources to the documentation (vpodzime)
