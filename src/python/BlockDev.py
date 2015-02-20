@@ -151,6 +151,12 @@ def lvm_lvcreate(vg_name, lv_name, size, pv_list=None):
     return _lvm_lvcreate(vg_name, lv_name, size, pv_list)
 __all__.append("lvm_lvcreate")
 
+_lvm_lvremove = BlockDev.lvm_lvremove
+@override(BlockDev.lvm_lvremove)
+def lvm_lvremove(vg_name, lv_name, force=False):
+    return _lvm_lvremove(vg_name, lv_name, force)
+__all__.append("lvm_lvremove")
+
 _lvm_lvactivate = BlockDev.lvm_lvactivate
 @override(BlockDev.lvm_lvactivate)
 def lvm_lvactivate(vg_name, lv_name, ignore_skip=False):
