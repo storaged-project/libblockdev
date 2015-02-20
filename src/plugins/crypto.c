@@ -153,8 +153,12 @@ gchar* bd_crypto_luks_status (gchar *luks_device, GError **error) {
     gint ret_num;
     gchar *ret = NULL;
     crypt_status_info status;
+    gchar *luks_device_path = NULL;
 
-    ret_num = crypt_init (&cd, luks_device);
+    if (!g_str_has_prefix (luks_device, "/dev/mapper"))
+        luks_device_path = g_strdup_printf ("/dev/mapper/%s", luks_device);
+
+    ret_num = crypt_init (&cd, luks_device_path ? luks_device_path : luks_device);
     if (ret_num != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror(-ret_num));
@@ -182,6 +186,7 @@ gchar* bd_crypto_luks_status (gchar *luks_device, GError **error) {
     }
 
     crypt_free (cd);
+    g_free (luks_device_path);
     return ret;
 }
 
