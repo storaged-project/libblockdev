@@ -213,6 +213,8 @@ static int give_passphrase (const char *msg __attribute__((unused)), char *buf, 
  * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
  * FOREVER).
  *
+ * Either @passhphrase or @key_file has to be != %NULL.
+ *
  * Returns: whether the given @device was successfully formatted as LUKS or not
  * (the @error) contains the error in such cases)
  */
@@ -222,6 +224,12 @@ gboolean bd_crypto_luks_format (gchar *device, gchar *cipher, guint64 key_size, 
     gchar **cipher_specs = NULL;
     guint32 current_entropy = 0;
     gint dev_random_fd = -1;
+
+    if (!passphrase && !key_file) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
+                     "At least one of passphrase and key file have to be specified!");
+        return FALSE;
+    }
 
     ret = crypt_init (&cd, device);
     if (ret != 0) {
