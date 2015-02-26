@@ -9,6 +9,8 @@ if not BlockDev.is_initialized():
 class LibraryOpsTestCase(unittest.TestCase):
     log = ""
 
+    # recompiles the LVM plugin
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_reload(self):
         """Verify that reloading plugins works as expected"""
 
@@ -39,6 +41,8 @@ class LibraryOpsTestCase(unittest.TestCase):
         # library should successfully reinitialize reloading original plugins
         self.assertTrue(BlockDev.reinit(None, True, None))
 
+    # recompiles the LVM plugin
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_force_plugin(self):
         """Verify that forcing plugin to be used works as expected"""
 
