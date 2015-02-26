@@ -146,8 +146,10 @@ class LvmNoDevTestCase(unittest.TestCase):
         self.assertTrue(succ)
 
 class LvmTestCase(unittest.TestCase):
-    # TODO: test pvmove (must create two PVs, a VG, a VG and some data in it
+    # :TODO:
+    #     * test pvmove (must create two PVs, a VG, a VG and some data in it
     #       first)
+    #     * some complex test for pvs, vgs, lvs, pvinfo, vginfo and lvinfo
     def setUp(self):
         self.dev_file = create_sparse_tempfile("lvm_test", 1024**3)
         self.dev_file2 = create_sparse_tempfile("lvm_test", 1024**3)
@@ -177,6 +179,9 @@ class LvmTestCase(unittest.TestCase):
     def test_pvcreate_and_pvremove(self):
         """Verify that it's possible to create and destroy a PV"""
 
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_pvcreate("/non/existing/device", 0, 0)
+
         succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
         self.assertTrue(succ)
 
@@ -187,6 +192,13 @@ class LvmTestCase(unittest.TestCase):
         succ = BlockDev.lvm_pvcreate(self.loop_dev, 2048, 4096)
         self.assertTrue(succ)
 
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_pvremove("/non/existing/device")
+
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
+        self.assertTrue(succ)
+
+        # already removed -- not an issue
         succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
 
@@ -194,12 +206,18 @@ class LvmTestCase(unittest.TestCase):
         """Verify that it's possible to resize a PV"""
 
         with self.assertRaises(GLib.GError):
-            succ = BlockDev.lvm_pvresize(self.loop_dev, 1 * 1024**3)
+            succ = BlockDev.lvm_pvresize(self.loop_dev, 200 * 1024**2)
+
+        with self.assertRaises(GLib.GError):
+            succ = BlockDev.lvm_pvresize("/non/existing/device", 200 * 1024**2)
 
         succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_pvresize(self.loop_dev, 1 * 1024**3)
+        succ = BlockDev.lvm_pvresize(self.loop_dev, 200 * 1024**2)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvresize(self.loop_dev, 200 * 1024**3)
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_pvremove(self.loop_dev)
@@ -252,7 +270,7 @@ class LvmTestCase(unittest.TestCase):
         succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
 
-    def test_vgcreate_pvremove(self):
+    def test_vgcreate_vgremove(self):
         """Verify that it is possible to create and destroy a VG"""
 
         succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
@@ -261,8 +279,15 @@ class LvmTestCase(unittest.TestCase):
         succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
         self.assertTrue(succ)
 
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_vgcreate("testVG", ["/non/existing/device"], 0)
+
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
+
+        # VG already exists
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
 
         succ = BlockDev.lvm_vgremove("testVG")
         self.assertTrue(succ)
@@ -285,8 +310,14 @@ class LvmTestCase(unittest.TestCase):
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
 
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_vgactivate("nonexistingVG")
+
         succ = BlockDev.lvm_vgactivate("testVG")
         self.assertTrue(succ)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_vgdeactivate("nonexistingVG")
 
         succ = BlockDev.lvm_vgdeactivate("testVG")
         self.assertTrue(succ)
@@ -317,6 +348,12 @@ class LvmTestCase(unittest.TestCase):
 
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0)
         self.assertTrue(succ)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_vgextend("nonexistingVG", self.loop_dev2)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_vgextend("testVG", "/non/existing/device")
 
         succ = BlockDev.lvm_vgextend("testVG", self.loop_dev2)
         self.assertTrue(succ)
@@ -390,8 +427,15 @@ class LvmTestCase(unittest.TestCase):
 
         self.assertTrue(any(info.uuid == all_info.uuid for all_info in vgs))
 
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_vgremove("nonexistingVG")
+
         succ = BlockDev.lvm_vgremove("testVG")
         self.assertTrue(succ)
+
+        # already removed
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_vgremove("testVG")
 
         succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
@@ -408,6 +452,12 @@ class LvmTestCase(unittest.TestCase):
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
 
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_lvcreate("nonexistingVG", "testLV", 512 * 1024**2, [self.loop_dev])
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, ["/non/existing/device"])
+
         succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
         self.assertTrue(succ)
 
@@ -422,8 +472,21 @@ class LvmTestCase(unittest.TestCase):
         succ = BlockDev.lvm_lvcreate("testVG", "testLV", 1048 * 1024**2, [self.loop_dev, self.loop_dev2])
         self.assertTrue(succ)
 
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_lvremove("nonexistingVG", "testLV", True)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_lvremove("testVG", "nonexistingLV", True)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_lvremove("nonexistingVG", "nonexistingLV", True)
+
         succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
         self.assertTrue(succ)
+
+        # already removed
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_lvremove("testVG", "testLV", True)
 
         succ = BlockDev.lvm_vgremove("testVG")
         self.assertTrue(succ)
@@ -449,13 +512,79 @@ class LvmTestCase(unittest.TestCase):
         succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
         self.assertTrue(succ)
 
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_lvactivate("nonexistingVG", "testLV", True)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_lvactivate("testVG", "nonexistingLV", True)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_lvactivate("nonexistingVG", "nonexistingLV", True)
+
+        succ = BlockDev.lvm_lvactivate("testVG", "testLV", True)
+        self.assertTrue(succ)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_lvdeactivate("nonexistingVG", "testLV")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_lvdeactivate("testVG", "nonexistingLV")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_lvdeactivate("nonexistingVG", "nonexistingLV")
+
+        succ = BlockDev.lvm_lvdeactivate("testVG", "testLV")
+        self.assertTrue(succ)
+
         succ = BlockDev.lvm_lvactivate("testVG", "testLV", True)
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_lvdeactivate("testVG", "testLV")
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_lvactivate("testVG", "testLV", True)
+        succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgremove("testVG")
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvremove(self.loop_dev2)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
+        self.assertTrue(succ)
+
+    def test_lvresize(self):
+        """Verify that it's possible to resize an LV"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
+        self.assertTrue(succ)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_lvresize("nonexistingVG", "testLV", 768 * 1024**2)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_lvresize("testVG", "nonexistingLV", 768 * 1024**2)
+
+        # grow
+        succ = BlockDev.lvm_lvresize("testVG", "testLV", 768 * 1024**2)
+        self.assertTrue(succ)
+
+        # same size
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_lvresize("testVG", "testLV", 768 * 1024**2)
+
+        # shrink
+        succ = BlockDev.lvm_lvresize("testVG", "testLV", 512 * 1024**2)
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_lvdeactivate("testVG", "testLV")

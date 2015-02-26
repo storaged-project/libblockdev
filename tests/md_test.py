@@ -93,6 +93,11 @@ class MDTestCase(unittest.TestCase):
     def test_create_deactivate_destroy(self):
         """Verify that it is possible to create, deactivate and destroy an MD RAID"""
 
+        with self.assertRaises(GLib.GError):
+            BlockDev.md_create("bd_test_md2", "raid1",
+                               ["/non/existing/device", self.loop_dev2],
+                               1, None, True)
+
         with udev_settle():
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
@@ -118,9 +123,16 @@ class MDTestCase(unittest.TestCase):
                                       1, None, True)
             self.assertTrue(succ)
 
+        with self.assertRaises(GLib.GError):
+            BlockDev.md_deactivate("non_existing_md")
+
         with udev_settle():
             succ = BlockDev.md_deactivate("bd_test_md")
             self.assertTrue(succ)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.md_activate("bd_test_md",
+                                 ["/non/existing/device", self.loop_dev2, self.loop_dev3], None)
 
         with udev_settle():
             succ = BlockDev.md_activate("bd_test_md",
@@ -138,12 +150,12 @@ class MDTestCase(unittest.TestCase):
         self.assertTrue(succ)
 
     def test_nominate_denominate(self):
-        """Verify that it is possible to nominate and denominate an MD RAID"""
+        """Verify that it is possible to nominate and denominate an MD RAID device"""
 
         with udev_settle():
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, True)
+                                      1, None, False)
             self.assertTrue(succ)
 
         with udev_settle():
@@ -154,8 +166,13 @@ class MDTestCase(unittest.TestCase):
             succ = BlockDev.md_nominate(self.loop_dev)
             self.assertTrue(succ)
 
-        succ = BlockDev.md_denominate(self.loop_dev)
-        self.assertTrue(succ)
+        with udev_settle():
+            succ = BlockDev.md_denominate(self.loop_dev)
+            self.assertTrue(succ)
+
+        with udev_settle():
+            succ = BlockDev.md_nominate(self.loop_dev)
+            self.assertTrue(succ)
 
         succ = BlockDev.md_deactivate("bd_test_md");
         self.assertTrue(succ)
@@ -167,8 +184,45 @@ class MDTestCase(unittest.TestCase):
         succ = BlockDev.md_destroy(self.loop_dev3)
         self.assertTrue(succ)
 
+
+    def test_nominate_denominate_active(self):
+        """Verify that nominate and denominate deivice works as expected on (de)activated MD RAID"""
+
+        with udev_settle():
+            succ = BlockDev.md_create("bd_test_md", "raid1",
+                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
+                                      1, None, False)
+            self.assertTrue(succ)
+
+        # can not re-add in incremental mode because the array is active
+        with self.assertRaises(GLib.GError):
+            BlockDev.md_nominate(self.loop_dev3)
+
+        succ = BlockDev.md_deactivate("bd_test_md");
+        self.assertTrue(succ)
+
+        # once the array is deactivated, can add in incremental mode
+        succ = BlockDev.md_nominate(self.loop_dev3)
+        self.assertTrue(succ)
+
+        # cannot re-add twice
+        with self.assertRaises(GLib.GError):
+            succ = BlockDev.md_nominate(self.loop_dev3)
+            self.assertTrue(succ)
+
+        succ = BlockDev.md_destroy(self.loop_dev)
+        self.assertTrue(succ)
+        succ = BlockDev.md_destroy(self.loop_dev2)
+        self.assertTrue(succ)
+        succ = BlockDev.md_destroy(self.loop_dev3)
+        self.assertTrue(succ)
+
     def test_add_remove(self):
         """Verify that it is possible to add a device to and remove from an MD RAID"""
+
+        # the MD array doesn't exist yet
+        with self.assertRaises(GLib.GError):
+            BlockDev.md_add("bd_test_md", self.loop_dev3, 0)
 
         with udev_settle():
             succ = BlockDev.md_create("bd_test_md", "raid1",
@@ -176,13 +230,20 @@ class MDTestCase(unittest.TestCase):
                                       0, None, False)
             self.assertTrue(succ)
 
+        with self.assertRaises(GLib.GError):
+            BlockDev.md_add("bd_test_md", "/non/existing/device", 0)
+
         succ = BlockDev.md_add("bd_test_md", self.loop_dev3, 0)
         self.assertTrue(succ)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.md_add("bd_test_md", self.loop_dev3, 0)
 
         succ = BlockDev.md_remove("bd_test_md", self.loop_dev3, True)
         self.assertTrue(succ)
 
-        # XXX: cannnot remove device added as a spare device?
+        # XXX: cannnot remove device added as a spare device nor a different
+        # device?
         succ = BlockDev.md_add("bd_test_md", self.loop_dev3, 2)
         self.assertTrue(succ)
 

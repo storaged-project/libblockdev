@@ -2,7 +2,7 @@ import unittest
 import os
 
 from utils import create_sparse_tempfile
-from gi.repository import BlockDev
+from gi.repository import BlockDev, GLib
 if not BlockDev.is_initialized():
     BlockDev.init(None, None)
 
@@ -17,6 +17,28 @@ class SwapTestCase(unittest.TestCase):
     def test_all(self):
         """Verify that swap_* functions work as expected"""
 
+        with self.assertRaises(GLib.GError):
+            BlockDev.swap_mkswap("/non/existing/device", None)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.swap_swapon("/non/existing/device", -1)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.swap_swapoff("/non/existing/device")
+
+        self.assertFalse(BlockDev.swap_swapstatus("/non/existing/device"))
+
+        # not a swap device (yet)
+        with self.assertRaises(GLib.GError):
+            BlockDev.swap_swapon(self.loop_dev, -1)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.swap_swapoff(self.loop_dev)
+
+        on = BlockDev.swap_swapstatus(self.loop_dev)
+        self.assertFalse(on)
+
+        # the common/expected sequence of calls
         succ = BlockDev.swap_mkswap(self.loop_dev, None)
         self.assertTrue(succ)
 
@@ -28,6 +50,10 @@ class SwapTestCase(unittest.TestCase):
 
         succ = BlockDev.swap_swapoff(self.loop_dev)
         self.assertTrue(succ)
+
+        # already off
+        with self.assertRaises(GLib.GError):
+            BlockDev.swap_swapoff(self.loop_dev)
 
         on = BlockDev.swap_swapstatus(self.loop_dev)
         self.assertFalse(on)

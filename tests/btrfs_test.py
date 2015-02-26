@@ -1,3 +1,5 @@
+from __future__ import division
+
 import unittest
 import os
 
@@ -50,9 +52,25 @@ class BtrfsTestCase (unittest.TestCase):
     def test_create_and_query_volume(self):
         """Verify that btrfs volume creation and querying works"""
 
+        with self.assertRaises(GLib.GError):
+            BlockDev.btrfs_create_volume([], None, None, None)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.btrfs_create_volume(["/non/existing/device"], None, None, None)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.btrfs_create_volume([self.loop_dev], None, "RaID7", None)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.btrfs_create_volume([self.loop_dev], None, None, "RaID7")
+
         # one device, no label
         succ = BlockDev.btrfs_create_volume([self.loop_dev], None, None, None)
         self.assertTrue(succ)
+
+        # already created
+        with self.assertRaises(GLib.GError):
+            BlockDev.btrfs_create_volume([self.loop_dev], None, None, None)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
         self.assertEqual(len(devs), 1)
@@ -152,11 +170,33 @@ class BtrfsTestCase (unittest.TestCase):
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
         self.assertEqual(len(subvols), 1)
 
+        # already there
+        with self.assertRaises(GLib.GError):
+            BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1")
+
         succ = BlockDev.btrfs_delete_subvolume(TEST_MNT, "subvol1")
         self.assertTrue(succ)
 
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
         self.assertEqual(len(subvols), 0)
+
+        # already removed
+        with self.assertRaises(GLib.GError):
+            BlockDev.btrfs_delete_subvolume(TEST_MNT, "subvol1")
+
+        succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1")
+        self.assertTrue(succ)
+
+        # add it back
+        subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
+        self.assertEqual(len(subvols), 1)
+
+        # # and create another subvolume in it
+        # succ = BlockDev.btrfs_create_subvolume(os.path.join(TEST_MNT, "subvol1"), "subvol1.1")
+        # self.assertTrue(succ)
+
+        # subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
+        # self.assertEqual(len(subvols), 2)
 
         umount(TEST_MNT)
         wipefs(self.loop_dev)
@@ -257,8 +297,8 @@ class BtrfsTestCase (unittest.TestCase):
         wipefs(self.loop_dev)
         wipefs(self.loop_dev2)
 
-    def test_list_snapshots(self):
-        """Verify that it is possible to get info about snapshots"""
+    def test_list_subvolumes(self):
+        """Verify that it is possible to get info about subvolumes"""
 
         succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None)
         self.assertTrue(succ)
@@ -354,3 +394,72 @@ class BtrfsTestCase (unittest.TestCase):
 
         umount(TEST_MNT)
         wipefs(self.loop_dev)
+
+class BtrfsTooSmallTestCase (unittest.TestCase):
+    def setUp(self):
+        self.dev_file = create_sparse_tempfile("lvm_test", BlockDev.BTRFS_MIN_MEMBER_SIZE)
+        self.dev_file2 = create_sparse_tempfile("lvm_test", BlockDev.BTRFS_MIN_MEMBER_SIZE//2)
+        succ, loop = BlockDev.loop_setup(self.dev_file)
+        if  not succ:
+            raise RuntimeError("Failed to setup loop device for testing")
+        self.loop_dev = "/dev/%s" % loop
+        succ, loop = BlockDev.loop_setup(self.dev_file2)
+        if  not succ:
+            raise RuntimeError("Failed to setup loop device for testing")
+        self.loop_dev2 = "/dev/%s" % loop
+
+    def tearDown(self):
+        succ = BlockDev.loop_teardown(self.loop_dev)
+        if  not succ:
+            os.unlink(self.dev_file)
+            raise RuntimeError("Failed to tear down loop device used for testing")
+
+        os.unlink(self.dev_file)
+        succ = BlockDev.loop_teardown(self.loop_dev2)
+        if  not succ:
+            os.unlink(self.dev_file2)
+            raise RuntimeError("Failed to tear down loop device used for testing")
+
+        os.unlink(self.dev_file2)
+
+    def test_create_too_small(self):
+        """Verify that an attempt to create BTRFS on a too small device fails"""
+
+        # even one small devices is enough for the fail
+        with self.assertRaises(GLib.GError):
+            BlockDev.btrfs_create_volume([self.loop_dev, self.loop_dev2],
+                                         None, None, None)
+
+class BtrfsJustBigEnoughTestCase (unittest.TestCase):
+    def setUp(self):
+        self.dev_file = create_sparse_tempfile("lvm_test", BlockDev.BTRFS_MIN_MEMBER_SIZE)
+        self.dev_file2 = create_sparse_tempfile("lvm_test", BlockDev.BTRFS_MIN_MEMBER_SIZE)
+        succ, loop = BlockDev.loop_setup(self.dev_file)
+        if  not succ:
+            raise RuntimeError("Failed to setup loop device for testing")
+        self.loop_dev = "/dev/%s" % loop
+        succ, loop = BlockDev.loop_setup(self.dev_file2)
+        if  not succ:
+            raise RuntimeError("Failed to setup loop device for testing")
+        self.loop_dev2 = "/dev/%s" % loop
+
+    def tearDown(self):
+        succ = BlockDev.loop_teardown(self.loop_dev)
+        if  not succ:
+            os.unlink(self.dev_file)
+            raise RuntimeError("Failed to tear down loop device used for testing")
+
+        os.unlink(self.dev_file)
+        succ = BlockDev.loop_teardown(self.loop_dev2)
+        if  not succ:
+            os.unlink(self.dev_file2)
+            raise RuntimeError("Failed to tear down loop device used for testing")
+
+        os.unlink(self.dev_file2)
+
+    def test_create_just_enough(self):
+        """Verify that creating BTRFS on a just big enough devices works"""
+
+        succ = BlockDev.btrfs_create_volume([self.loop_dev, self.loop_dev2],
+                                            None, None, None)
+        self.assertTrue(succ)
