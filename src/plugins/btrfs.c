@@ -231,7 +231,7 @@ gboolean bd_btrfs_create_volume (gchar **devices, gchar *label, gchar *data_leve
     guint8 next_arg = 1;
     gboolean success = FALSE;
 
-    if (!devices) {
+    if (!devices || (g_strv_length (devices) < 1)) {
         g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_DEVICE, "No devices given");
         return FALSE;
     }
