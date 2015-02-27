@@ -114,13 +114,13 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertIsNot(match, None)
         task_id2 = match.group(1)
 
-        self.assertIn("...done [%s]" % task_id1, self.log)
+        self.assertIn("...done [%s] (exit code: 0)" % task_id1, self.log)
         self.assertIn("stdout[%s]:" % task_id1, self.log)
         self.assertIn("stderr[%s]:" % task_id1, self.log)
 
         self.assertIn("stdout[%s]: hi" % task_id2, self.log)
         self.assertIn("stderr[%s]:" % task_id2, self.log)
-        self.assertIn("...done [%s]" % task_id2, self.log)
+        self.assertIn("...done [%s] (exit code: 0)" % task_id2, self.log)
 
     def test_require_plugins(self):
         """Verify that loading only required plugins works as expected"""

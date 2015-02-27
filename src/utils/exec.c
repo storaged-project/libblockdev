@@ -83,11 +83,11 @@ static void log_out (guint64 task_id, gchar *stdout, gchar *stderr) {
  * log_done: (skip)
  *
  */
-static void log_done (guint64 task_id) {
+static void log_done (guint64 task_id, gint exit_code) {
     gchar *log_msg = NULL;
 
     if (log_func) {
-        log_msg = g_strdup_printf ("...done [%"G_GUINT64_FORMAT"]", task_id);
+        log_msg = g_strdup_printf ("...done [%"G_GUINT64_FORMAT"] (exit code: %d)", task_id, exit_code);
         log_func (LOG_INFO, log_msg);
         g_free (log_msg);
     }
@@ -113,7 +113,7 @@ gboolean bd_utils_exec_and_report_error (gchar **argv, GError **error) {
     success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
                             NULL, NULL, &stdout_data, &stderr_data, &status, error);
     log_out (task_id, stdout_data, stderr_data);
-    log_done (task_id);
+    log_done (task_id, status);
 
     if (!success) {
         /* error is already populated from the call */
@@ -158,7 +158,7 @@ gboolean bd_utils_exec_and_capture_output (gchar **argv, gchar **output, GError 
     success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
                             NULL, NULL, &stdout_data, &stderr_data, &status, error);
     log_out (task_id, stdout_data, stderr_data);
-    log_done (task_id);
+    log_done (task_id, status);
 
     if (!success) {
         /* error is already populated */
