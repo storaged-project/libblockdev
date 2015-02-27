@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     0.6
+Version:     0.7
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -361,6 +361,16 @@ rm -rf %{buildroot}
 %files plugins-all
 
 %changelog
+* Fri Feb 27 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.7-1
+- Be ready for mdadm --examine to not provide some of the values we want (vpodzime)
+- Add exit code information to exec logging (vpodzime)
+- Improve and add tests (vpodzime)
+- Mark the test_force_plugin and test_reload as slow (vpodzime)
+- Make sure we get some devices when creating btrfs volume (vpodzime)
+- Add override for the lvremove function (vpodzime)
+- Do not create LUKS format with no passphrase and no key file (vpodzime)
+- Make sure we use the /dev/mapper/... path for luks_status (vpodzime)
+
 * Thu Feb 19 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.6-1
 - Don't report error when non-existing swap's status is queried (vpodzime)
 - Make libblockdev-plugins-all pull the same version of plugins (vpodzime)
