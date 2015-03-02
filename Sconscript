@@ -143,7 +143,7 @@ typelib = typelib_env.Command("BlockDev-%s.typelib" % MAJOR_MINOR, "BlockDev-%s.
 tests_env = glib_env.Clone()
 tests_env.Append(CPPPATH=["src/utils", "build/plugin_apis"])
 tests_env.Append(LIBS=["m"])
-for pname in ("btrfs", "swap", "lvm", "loop"):
+for pname in ("swap", "lvm", "loop"):
     tests_env.Program("test_%s" % pname, ["src/utils/exec.c", "src/utils/sizes.c", "src/plugins/test_%s.c" % pname])
 tests_env.Program("test_sizes", ["src/utils/test_sizes.c"])
 

@@ -12,7 +12,6 @@ GQuark bd_btrfs_error_quark (void);
 #define BD_BTRFS_ERROR bd_btrfs_error_quark ()
 typedef enum {
     BD_BTRFS_ERROR_DEVICE,
-    BD_BTRFS_ERROR_MOUNT,
     BD_BTRFS_ERROR_PARSE,
 } BDBtrfsError;
 

@@ -89,62 +89,6 @@ void bd_btrfs_filesystem_info_free (BDBtrfsFilesystemInfo *info) {
     g_free (info);
 }
 
-static gboolean path_is_mountpoint (gchar *path) {
-    GError *error = NULL;
-    gchar *real_path = NULL;
-    gchar *slash_p = NULL;
-    gchar *file_contents = NULL;
-    gchar *pattern = NULL;
-    GRegex *regex;
-    gboolean success = FALSE;
-    gboolean ret = FALSE;
-
-    /* try to resolve symlink and store the real path*/
-    real_path = g_file_read_link (path, &error);
-    if (!real_path) {
-        real_path = g_strdup (path);
-    }
-
-    g_clear_error (&error);
-
-    /* remove trailing slashes */
-    if (g_str_has_suffix (real_path, "/")) {
-        slash_p = strrchr (real_path, '/');
-        while (*slash_p == '/') {
-            *slash_p = '\0';
-            slash_p--;
-        }
-    }
-
-    success = g_file_get_contents ("/proc/self/mountinfo", &file_contents, NULL, &error);
-    if (!success) {
-        g_warning ("Failed to read /proc/self/moutinfo: %s", error->message);
-        g_clear_error (&error);
-        g_free (real_path);
-        return FALSE;
-    }
-
-    g_clear_error (&error);
-
-    /* see if the real_path without trailing slashes is in the file_contents */
-    pattern = g_strdup_printf ("\\s+%s\\s+", real_path);
-    regex = g_regex_new (pattern, 0, 0, &error);
-    if (!regex) {
-        g_warning ("Failed to create new GRegex: %s", error->message);
-        g_clear_error (&error);
-        g_free (real_path);
-        g_free (pattern);
-        return FALSE;
-    }
-    ret = g_regex_match (regex, file_contents, 0, NULL);
-    g_free (file_contents);
-    g_free (real_path);
-    g_free (pattern);
-    g_regex_unref (regex);
-
-    return ret;
-}
-
 static BDBtrfsDeviceInfo* get_device_info_from_match (GMatchInfo *match_info) {
     BDBtrfsDeviceInfo *ret = g_new(BDBtrfsDeviceInfo, 1);
     gchar *item = NULL;
@@ -291,11 +235,6 @@ gboolean bd_btrfs_create_volume (gchar **devices, gchar *label, gchar *data_leve
  */
 gboolean bd_btrfs_add_device (gchar *mountpoint, gchar *device, GError **error) {
     gchar *argv[6] = {"btrfs", "device", "add", device, mountpoint, NULL};
-    if (!path_is_mountpoint (mountpoint)) {
-        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_MOUNT, "%s not mounted", mountpoint);
-        return FALSE;
-    }
-
     return bd_utils_exec_and_report_error (argv, error);
 }
 
@@ -309,11 +248,6 @@ gboolean bd_btrfs_add_device (gchar *mountpoint, gchar *device, GError **error) 
  */
 gboolean bd_btrfs_remove_device (gchar *mountpoint, gchar *device, GError **error) {
     gchar *argv[6] = {"btrfs", "device", "delete", device, mountpoint, NULL};
-    if (!path_is_mountpoint (mountpoint)) {
-        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_MOUNT, "%s not mounted", mountpoint);
-        return FALSE;
-    }
-
     return bd_utils_exec_and_report_error (argv, error);
 }
 
@@ -329,11 +263,6 @@ gboolean bd_btrfs_create_subvolume (gchar *mountpoint, gchar *name, GError **err
     gchar *path = NULL;
     gboolean success = FALSE;
     gchar *argv[5] = {"btrfs", "subvol", "create", NULL, NULL};
-
-    if (!path_is_mountpoint (mountpoint)) {
-        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_MOUNT, "%s not mounted", mountpoint);
-        return FALSE;
-    }
 
     if (g_str_has_suffix (mountpoint, "/"))
         path = g_strdup_printf ("%s%s", mountpoint, name);
@@ -359,11 +288,6 @@ gboolean bd_btrfs_delete_subvolume (gchar *mountpoint, gchar *name, GError **err
     gchar *path = NULL;
     gboolean success = FALSE;
     gchar *argv[5] = {"btrfs", "subvol", "delete", NULL, NULL};
-
-    if (!path_is_mountpoint (mountpoint)) {
-        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_MOUNT, "%s not mounted", mountpoint);
-        return FALSE;
-    }
 
     if (g_str_has_suffix (mountpoint, "/"))
         path = g_strdup_printf ("%s%s", mountpoint, name);
@@ -398,11 +322,6 @@ guint64 bd_btrfs_get_default_subvolume_id (gchar *mountpoint, GError **error) {
     if (!regex) {
         g_warning ("Failed to create new GRegex");
         /* error is already populated */
-        return 0;
-    }
-
-    if (!path_is_mountpoint (mountpoint)) {
-        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_MOUNT, "%s not mounted", mountpoint);
         return 0;
     }
 
@@ -444,11 +363,6 @@ guint64 bd_btrfs_get_default_subvolume_id (gchar *mountpoint, GError **error) {
 gboolean bd_btrfs_set_default_subvolume (gchar *mountpoint, guint64 subvol_id, GError **error) {
     gchar *argv[6] = {"btrfs", "subvol", "set-default", NULL, mountpoint, NULL};
     gboolean ret = FALSE;
-
-    if (!path_is_mountpoint (mountpoint)) {
-        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_MOUNT, "%s not mounted", mountpoint);
-        return FALSE;
-    }
 
     argv[3] = g_strdup_printf ("%"G_GUINT64_FORMAT, subvol_id);
     ret = bd_utils_exec_and_report_error (argv, error);

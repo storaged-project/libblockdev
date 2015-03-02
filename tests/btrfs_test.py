@@ -191,12 +191,12 @@ class BtrfsTestCase (unittest.TestCase):
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
         self.assertEqual(len(subvols), 1)
 
-        # # and create another subvolume in it
-        # succ = BlockDev.btrfs_create_subvolume(os.path.join(TEST_MNT, "subvol1"), "subvol1.1")
-        # self.assertTrue(succ)
+        # and create another subvolume in it
+        succ = BlockDev.btrfs_create_subvolume(os.path.join(TEST_MNT, "subvol1"), "subvol1.1")
+        self.assertTrue(succ)
 
-        # subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
-        # self.assertEqual(len(subvols), 2)
+        subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
+        self.assertEqual(len(subvols), 2)
 
         umount(TEST_MNT)
         wipefs(self.loop_dev)
@@ -234,7 +234,7 @@ class BtrfsTestCase (unittest.TestCase):
         self.assertTrue(succ)
 
         # not mounted yet, should fail
-        with self.assertRaisesRegexp(GLib.GError, r".*not mounted.*"):
+        with self.assertRaisesRegexp(GLib.GError, r".*can't access.*"):
             ret = BlockDev.btrfs_get_default_subvolume_id(TEST_MNT)
 
         mount(self.loop_dev, TEST_MNT)
