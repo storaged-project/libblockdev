@@ -1,11 +1,9 @@
 +-----------+----------------------------------------------------------------------------------------+
 | **Date**  | **Item**                                                                               |
 +===========+========================================================================================+
-| Feb  1    | finish porting blivet to libblockdev -- will likely require some additions and fixes   |
+| Apr  1    | ``scons`` replaced by ``autotools``                                                    |
 +-----------+----------------------------------------------------------------------------------------+
-| Mar  1    | ``scons`` replaced by ``autotools``                                                    |
+| Apr 15    | the *part* plugin -- ``mklabel``, ``create_part``, ``resize_part``, ``remove_part``    |
 +-----------+----------------------------------------------------------------------------------------+
-| Mar 15    | the *part* plugin -- ``mklabel``, ``create_part``, ``resize_part``, ``remove_part``    |
-+-----------+----------------------------------------------------------------------------------------+
-| Apr  1    | the *fs* plugin -- various filesystem-related functions for ``ext``, ``xfs``, ``vfat`` |
+| Jul  1    | the *fs* plugin -- various filesystem-related functions for ``ext``, ``xfs``, ``vfat`` |
 +-----------+----------------------------------------------------------------------------------------+
