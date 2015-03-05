@@ -71,6 +71,23 @@ class MDTestCase(unittest.TestCase):
         self.loop_dev3 = "/dev/%s" % loop
 
     def tearDown(self):
+        try:
+            BlockDev.md_deactivate("bd_test_md")
+        except:
+            pass
+        try:
+            BlockDev.md_destroy(self.loop_dev)
+        except:
+            pass
+        try:
+            BlockDev.md_destroy(self.loop_dev2)
+        except:
+            pass
+        try:
+            BlockDev.md_destroy(self.loop_dev3)
+        except:
+            pass
+
         succ = BlockDev.loop_teardown(self.loop_dev)
         if  not succ:
             os.unlink(self.dev_file)
@@ -90,6 +107,7 @@ class MDTestCase(unittest.TestCase):
 
         os.unlink(self.dev_file3)
 
+class MDTestCreateDeactivateDestroy(MDTestCase):
     def test_create_deactivate_destroy(self):
         """Verify that it is possible to create, deactivate and destroy an MD RAID"""
 
@@ -114,6 +132,7 @@ class MDTestCase(unittest.TestCase):
         succ = BlockDev.md_destroy(self.loop_dev3)
         self.assertTrue(succ)
 
+class MDTestActivateDeactivate(MDTestCase):
     def test_activate_deactivate(self):
         """Verify that it is possible to activate and deactivate an MD RAID"""
 
@@ -139,16 +158,7 @@ class MDTestCase(unittest.TestCase):
                                         [self.loop_dev, self.loop_dev2, self.loop_dev3], None)
             self.assertTrue(succ)
 
-        succ = BlockDev.md_deactivate("bd_test_md")
-        self.assertTrue(succ)
-
-        succ = BlockDev.md_destroy(self.loop_dev)
-        self.assertTrue(succ)
-        succ = BlockDev.md_destroy(self.loop_dev2)
-        self.assertTrue(succ)
-        succ = BlockDev.md_destroy(self.loop_dev3)
-        self.assertTrue(succ)
-
+class MDTestNominateDenominate(MDTestCase):
     def test_nominate_denominate(self):
         """Verify that it is possible to nominate and denominate an MD RAID device"""
 
@@ -174,17 +184,7 @@ class MDTestCase(unittest.TestCase):
             succ = BlockDev.md_nominate(self.loop_dev)
             self.assertTrue(succ)
 
-        succ = BlockDev.md_deactivate("bd_test_md");
-        self.assertTrue(succ)
-
-        succ = BlockDev.md_destroy(self.loop_dev)
-        self.assertTrue(succ)
-        succ = BlockDev.md_destroy(self.loop_dev2)
-        self.assertTrue(succ)
-        succ = BlockDev.md_destroy(self.loop_dev3)
-        self.assertTrue(succ)
-
-
+class MDTestNominateDenominateActive(MDTestCase):
     def test_nominate_denominate_active(self):
         """Verify that nominate and denominate deivice works as expected on (de)activated MD RAID"""
 
@@ -210,13 +210,7 @@ class MDTestCase(unittest.TestCase):
             succ = BlockDev.md_nominate(self.loop_dev3)
             self.assertTrue(succ)
 
-        succ = BlockDev.md_destroy(self.loop_dev)
-        self.assertTrue(succ)
-        succ = BlockDev.md_destroy(self.loop_dev2)
-        self.assertTrue(succ)
-        succ = BlockDev.md_destroy(self.loop_dev3)
-        self.assertTrue(succ)
-
+class MDTestAddRemove(MDTestCase):
     def test_add_remove(self):
         """Verify that it is possible to add a device to and remove from an MD RAID"""
 
@@ -247,16 +241,7 @@ class MDTestCase(unittest.TestCase):
         succ = BlockDev.md_add("bd_test_md", self.loop_dev3, 2)
         self.assertTrue(succ)
 
-        succ = BlockDev.md_deactivate("bd_test_md");
-        self.assertTrue(succ)
-
-        succ = BlockDev.md_destroy(self.loop_dev)
-        self.assertTrue(succ)
-        succ = BlockDev.md_destroy(self.loop_dev2)
-        self.assertTrue(succ)
-        succ = BlockDev.md_destroy(self.loop_dev3)
-        self.assertTrue(succ)
-
+class MDTestExamineDetail(MDTestCase):
     def test_examine_detail(self):
         """Verify that it is possible to get info about an MD RAID"""
 
@@ -298,16 +283,7 @@ class MDTestCase(unittest.TestCase):
 
         self.assertEqual(ex_data.uuid, de_data.uuid)
 
-        succ = BlockDev.md_deactivate("bd_test_md");
-        self.assertTrue(succ)
-
-        succ = BlockDev.md_destroy(self.loop_dev)
-        self.assertTrue(succ)
-        succ = BlockDev.md_destroy(self.loop_dev2)
-        self.assertTrue(succ)
-        succ = BlockDev.md_destroy(self.loop_dev3)
-        self.assertTrue(succ)
-
+class MDTestNameNodeBijection(MDTestCase):
     def test_name_node_bijection(self):
         """Verify that MD RAID node and name match each other"""
 
