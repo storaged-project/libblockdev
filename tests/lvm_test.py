@@ -107,10 +107,10 @@ class LvmNoDevTestCase(unittest.TestCase):
         self.assertFalse(BlockDev.lvm_is_valid_thpool_chunk_size(191 * 1024, True))
 
     def _store_log(self, lvl, msg):
-        self._log += str((lvl, msg));
+        self._log += str((lvl, msg))
 
     def test_get_set_global_config(self):
-        """Verify that getting and setting global cofngi works as expected"""
+        """Verify that getting and setting global config works as expected"""
 
         # setup logging
         self.assertTrue(BlockDev.reinit(None, False, self._store_log))
@@ -138,14 +138,14 @@ class LvmNoDevTestCase(unittest.TestCase):
 
         # set something sane and check it's really used
         succ = BlockDev.lvm_set_global_config("backup {backup=0 archive=0}")
-        _lvs = BlockDev.lvm_lvs(None)
+        BlockDev.lvm_lvs(None)
         self.assertIn("--config=backup {backup=0 archive=0}", self._log)
 
         # reset back to default
         succ = BlockDev.lvm_set_global_config(None)
         self.assertTrue(succ)
 
-class LvmTestCase(unittest.TestCase):
+class LvmPVonlyTestCase(unittest.TestCase):
     # :TODO:
     #     * test pvmove (must create two PVs, a VG, a VG and some data in it
     #       first)
@@ -163,11 +163,20 @@ class LvmTestCase(unittest.TestCase):
         self.loop_dev2 = "/dev/%s" % loop
 
     def tearDown(self):
+        try:
+            BlockDev.lvm_pvremove(self.loop_dev)
+        except:
+            pass
+
         succ = BlockDev.loop_teardown(self.loop_dev)
         if  not succ:
             os.unlink(self.dev_file)
             raise RuntimeError("Failed to tear down loop device used for testing")
 
+        try:
+            BlockDev.lvm_pvremove(self.loop_dev2)
+        except:
+            pass
         os.unlink(self.dev_file)
         succ = BlockDev.loop_teardown(self.loop_dev2)
         if  not succ:
@@ -176,6 +185,7 @@ class LvmTestCase(unittest.TestCase):
 
         os.unlink(self.dev_file2)
 
+class LvmTestPVcreateRemove(LvmPVonlyTestCase):
     def test_pvcreate_and_pvremove(self):
         """Verify that it's possible to create and destroy a PV"""
 
@@ -202,6 +212,7 @@ class LvmTestCase(unittest.TestCase):
         succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
 
+class LvmTestPVresize(LvmPVonlyTestCase):
     def test_pvresize(self):
         """Verify that it's possible to resize a PV"""
 
@@ -220,9 +231,7 @@ class LvmTestCase(unittest.TestCase):
         succ = BlockDev.lvm_pvresize(self.loop_dev, 200 * 1024**3)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_pvremove(self.loop_dev)
-        self.assertTrue(succ)
-
+class LvmTestPVscan(LvmPVonlyTestCase):
     def test_pvscan(self):
         """Verify that pvscan runs without issues with cache or without"""
 
@@ -235,6 +244,7 @@ class LvmTestCase(unittest.TestCase):
         succ = BlockDev.lvm_pvscan(None, True)
         self.assertTrue(succ)
 
+class LvmTestPVinfo(LvmPVonlyTestCase):
     def test_pvinfo(self):
         """Verify that it's possible to gather info about a PV"""
 
@@ -246,9 +256,7 @@ class LvmTestCase(unittest.TestCase):
         self.assertEqual(info.pv_name, self.loop_dev)
         self.assertTrue(info.pv_uuid)
 
-        succ = BlockDev.lvm_pvremove(self.loop_dev)
-        self.assertTrue(succ)
-
+class LvmTestPVs(LvmPVonlyTestCase):
     def test_pvs(self):
         """Verify that it's possible to gather info about PVs"""
 
@@ -267,9 +275,16 @@ class LvmTestCase(unittest.TestCase):
 
         self.assertTrue(any(info.pv_uuid == all_info.pv_uuid for all_info in pvs))
 
-        succ = BlockDev.lvm_pvremove(self.loop_dev)
-        self.assertTrue(succ)
+class LvmPVVGTestCase(LvmPVonlyTestCase):
+    def tearDown(self):
+        try:
+            BlockDev.lvm_vgremove("testVG")
+        except:
+            pass
 
+        LvmPVonlyTestCase.tearDown(self)
+
+class LvmTestVGcreateRemove(LvmPVVGTestCase):
     def test_vgcreate_vgremove(self):
         """Verify that it is possible to create and destroy a VG"""
 
@@ -292,12 +307,11 @@ class LvmTestCase(unittest.TestCase):
         succ = BlockDev.lvm_vgremove("testVG")
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_pvremove(self.loop_dev)
-        self.assertTrue(succ)
+        # no longer exists
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_vgremove("testVG")
 
-        succ = BlockDev.lvm_pvremove(self.loop_dev2)
-        self.assertTrue(succ)
-
+class LvmTestVGactivateDeactivate(LvmPVVGTestCase):
     def test_vgactivate_vgdeactivate(self):
         """Verify that it is possible to (de)activate a VG"""
 
@@ -328,15 +342,7 @@ class LvmTestCase(unittest.TestCase):
         succ = BlockDev.lvm_vgdeactivate("testVG")
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_vgremove("testVG")
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev)
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev2)
-        self.assertTrue(succ)
-
+class LvmTestVGextendReduce(LvmPVVGTestCase):
     def test_vgextend_vgreduce(self):
         """Verify that it is possible to extend/reduce a VG"""
 
@@ -367,15 +373,7 @@ class LvmTestCase(unittest.TestCase):
         succ = BlockDev.lvm_vgreduce("testVG", self.loop_dev2)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_vgremove("testVG")
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev)
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev2)
-        self.assertTrue(succ)
-
+class LvmTestVGinfo(LvmPVVGTestCase):
     def test_vginfo(self):
         """Verify that it is possible to gather info about a VG"""
 
@@ -397,15 +395,7 @@ class LvmTestCase(unittest.TestCase):
         self.assertEqual(info.free, info.size)
         self.assertEqual(info.extent_size, 4 * 1024**2)
 
-        succ = BlockDev.lvm_vgremove("testVG")
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev)
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev2)
-        self.assertTrue(succ)
-
+class LvmTestVGs(LvmPVVGTestCase):
     def test_vgs(self):
         """Verify that it's possible to gather info about VGs"""
 
@@ -440,6 +430,16 @@ class LvmTestCase(unittest.TestCase):
         succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
 
+class LvmPVVGLVTestCase(LvmPVVGTestCase):
+    def tearDown(self):
+        try:
+            BlockDev.lvm_lvremove("testVG", "testLV", True)
+        except:
+            pass
+
+        LvmPVVGTestCase.tearDown(self)
+
+class LvmTestLVcreateRemove(LvmPVVGLVTestCase):
     def test_lvcreate_lvremove(self):
         """Verify that it's possible to create/destroy an LV"""
 
@@ -488,15 +488,7 @@ class LvmTestCase(unittest.TestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.lvm_lvremove("testVG", "testLV", True)
 
-        succ = BlockDev.lvm_vgremove("testVG")
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev2)
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev)
-        self.assertTrue(succ)
-
+class LvmTestLVactivateDeactivate(LvmPVVGLVTestCase):
     def test_lvactivate_lvdeactivate(self):
         """Verify it's possible to (de)actiavate an LV"""
 
@@ -542,18 +534,7 @@ class LvmTestCase(unittest.TestCase):
         succ = BlockDev.lvm_lvdeactivate("testVG", "testLV")
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_vgremove("testVG")
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev2)
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev)
-        self.assertTrue(succ)
-
+class LvmTestLVresize(LvmPVVGLVTestCase):
     def test_lvresize(self):
         """Verify that it's possible to resize an LV"""
 
@@ -590,18 +571,7 @@ class LvmTestCase(unittest.TestCase):
         succ = BlockDev.lvm_lvdeactivate("testVG", "testLV")
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_vgremove("testVG")
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev2)
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev)
-        self.assertTrue(succ)
-
+class LvmTestLVsnapshots(LvmPVVGLVTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_snapshotcreate_lvorigin_snapshotmerge(self):
         """Verify that LV snapshot support works"""
@@ -627,18 +597,7 @@ class LvmTestCase(unittest.TestCase):
         succ = BlockDev.lvm_lvsnapshotmerge("testVG", "testLV_bak")
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_vgremove("testVG")
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev2)
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev)
-        self.assertTrue(succ)
-
+class LvmTestLVinfo(LvmPVVGLVTestCase):
     def test_lvinfo(self):
         """Verify that it is possible to gather info about an LV"""
 
@@ -661,18 +620,7 @@ class LvmTestCase(unittest.TestCase):
         self.assertTrue(info.uuid)
         self.assertEqual(info.size, 512 * 1024**2)
 
-        succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_vgremove("testVG")
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev)
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev2)
-        self.assertTrue(succ)
-
+class LvmTestLVs(LvmPVVGLVTestCase):
     def test_lvs(self):
         """Verify that it's possible to gather info about LVs"""
 
@@ -700,15 +648,13 @@ class LvmTestCase(unittest.TestCase):
         lvs = BlockDev.lvm_lvs("testVG")
         self.assertEqual(len(lvs), 1)
 
-        succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
-        self.assertTrue(succ)
+class LvmPVVGthpoolTestCase(LvmPVVGTestCase):
+    def tearDown(self):
+        BlockDev.lvm_lvremove("testVG", "testPool", True)
 
-        succ = BlockDev.lvm_vgremove("testVG")
-        self.assertTrue(succ)
+        LvmPVVGTestCase.tearDown(self)
 
-        succ = BlockDev.lvm_pvremove(self.loop_dev)
-        self.assertTrue(succ)
-
+class LvmTestThpoolCreate(LvmPVVGthpoolTestCase):
     def test_thpoolcreate(self):
         """Verify that it is possible to create a thin pool"""
 
@@ -727,18 +673,13 @@ class LvmTestCase(unittest.TestCase):
         info = BlockDev.lvm_lvinfo("testVG", "testPool")
         self.assertIn("t", info.attr)
 
-        succ = BlockDev.lvm_lvremove("testVG", "testPool", True)
-        self.assertTrue(succ)
+class LvmPVVGLVthLVTestCase(LvmPVVGthpoolTestCase):
+    def tearDown(self):
+        BlockDev.lvm_lvremove("testVG", "testThLV", True)
 
-        succ = BlockDev.lvm_vgremove("testVG")
-        self.assertTrue(succ)
+        LvmPVVGthpoolTestCase.tearDown(self)
 
-        succ = BlockDev.lvm_pvremove(self.loop_dev2)
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev)
-        self.assertTrue(succ)
-
+class LvmTestThLVcreate(LvmPVVGLVthLVTestCase):
     def test_thlvcreate_thpoolname(self):
         """Verify that it is possible to create a thin LV and get its pool name"""
 
@@ -766,21 +707,13 @@ class LvmTestCase(unittest.TestCase):
         pool = BlockDev.lvm_thlvpoolname("testVG", "testThLV")
         self.assertEqual(pool, "testPool")
 
-        succ = BlockDev.lvm_lvremove("testVG", "testThLV", True)
-        self.assertTrue(succ)
+class LvmPVVGLVthLVsnapshotTestCase(LvmPVVGLVthLVTestCase):
+    def tearDown(self):
+        BlockDev.lvm_lvremove("testVG", "testThLV_bak", True)
 
-        succ = BlockDev.lvm_lvremove("testVG", "testPool", True)
-        self.assertTrue(succ)
+        LvmPVVGLVthLVTestCase.tearDown(self)
 
-        succ = BlockDev.lvm_vgremove("testVG")
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev2)
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev)
-        self.assertTrue(succ)
-
+class LvmTestThSnapshotCreate(LvmPVVGLVthLVsnapshotTestCase):
     def test_thsnapshotcreate(self):
         """Verify that it is possible to create a thin LV snapshot"""
 
@@ -811,21 +744,3 @@ class LvmTestCase(unittest.TestCase):
 
         info = BlockDev.lvm_lvinfo("testVG", "testThLV_bak")
         self.assertIn("V", info.attr)
-
-        succ = BlockDev.lvm_lvremove("testVG", "testThLV_bak", True)
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_lvremove("testVG", "testThLV", True)
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_lvremove("testVG", "testPool", True)
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_vgremove("testVG")
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev2)
-        self.assertTrue(succ)
-
-        succ = BlockDev.lvm_pvremove(self.loop_dev)
-        self.assertTrue(succ)
