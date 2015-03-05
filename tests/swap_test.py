@@ -14,6 +14,19 @@ class SwapTestCase(unittest.TestCase):
             raise RuntimeError("Failed to setup loop device for testing")
         self.loop_dev = "/dev/%s" % loop
 
+    def tearDown(self):
+        try:
+            BlockDev.swap_swapoff(self.loop_dev)
+        except:
+            pass
+
+        succ = BlockDev.loop_teardown(self.loop_dev)
+        if  not succ:
+            os.unlink(self.dev_file)
+            raise RuntimeError("Failed to tear down loop device used for testing")
+
+        os.unlink(self.dev_file)
+
     def test_all(self):
         """Verify that swap_* functions work as expected"""
 
@@ -65,12 +78,4 @@ class SwapTestCase(unittest.TestCase):
         self.assertTrue(succ)
 
         os.path.exists ("/dev/disk/by-label/TestBlockDevSwap")
-
-    def tearDown(self):
-        succ = BlockDev.loop_teardown(self.loop_dev)
-        if  not succ:
-            os.unlink(self.dev_file)
-            raise RuntimeError("Failed to tear down loop device used for testing")
-
-        os.unlink(self.dev_file)
 
