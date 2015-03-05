@@ -277,7 +277,7 @@ static BDMDDetailData* get_detail_data_from_table (GHashTable *table, gboolean f
     if (value)
         data->clean = (g_strcmp0 (value, "clean") == 0);
     else
-        data->clean = 0;
+        data->clean = FALSE;
 
     if (free_table)
         g_hash_table_destroy (table);
