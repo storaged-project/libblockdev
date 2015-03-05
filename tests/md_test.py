@@ -1,6 +1,7 @@
 import unittest
 import os
 import re
+import time
 
 from utils import create_sparse_tempfile, udev_settle
 from gi.repository import BlockDev, GLib
@@ -242,6 +243,8 @@ class MDTestAddRemove(MDTestCase):
         self.assertTrue(succ)
 
 class MDTestExamineDetail(MDTestCase):
+    # sleeps to let MD RAID sync things
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_examine_detail(self):
         """Verify that it is possible to get info about an MD RAID"""
 
@@ -250,6 +253,8 @@ class MDTestExamineDetail(MDTestCase):
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
                                       1, None, True)
             self.assertTrue(succ)
+
+        time.sleep(10)
 
         ex_data = BlockDev.md_examine(self.loop_dev)
         # test that we got something
