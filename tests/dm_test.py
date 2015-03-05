@@ -20,8 +20,14 @@ class DevMapperTestCase(unittest.TestCase):
             os.unlink(self.dev_file)
             raise RuntimeError("Failed to tear down loop device used for testing")
 
+        try:
+            BlockDev.dm_remove("testMap")
+        except:
+            pass
+
         os.unlink(self.dev_file)
 
+class DevMapperCreateRemoveLinear(DevMapperTestCase):
     def test_create_remove_linear(self):
         """Verify that it is possible to create new linear mapping and remove it"""
 
@@ -31,6 +37,7 @@ class DevMapperTestCase(unittest.TestCase):
         succ = BlockDev.dm_remove("testMap")
         self.assertTrue(succ)
 
+class DevMapperMapExists(DevMapperTestCase):
     def test_map_exists(self):
         """Verify that testing if map exists works as expected"""
 
@@ -58,6 +65,7 @@ class DevMapperTestCase(unittest.TestCase):
         succ = BlockDev.dm_map_exists("testMap", False, False)
         self.assertFalse(succ)
 
+class DevMapperNameNodeBijection(DevMapperTestCase):
     def test_name_node_bijection(self):
         """Verify that the map's node and map name points to each other"""
 
@@ -67,5 +75,4 @@ class DevMapperTestCase(unittest.TestCase):
         self.assertEqual(BlockDev.dm_name_from_node(BlockDev.dm_node_from_name("testMap")),
                          "testMap")
 
-        succ = BlockDev.dm_remove("testMap")
         self.assertTrue(succ)
