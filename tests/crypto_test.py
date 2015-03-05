@@ -10,6 +10,14 @@ if not BlockDev.is_initialized():
 PASSWD = "myshinylittlepassword"
 PASSWD2 = "myshinylittlepassword2"
 
+class CryptoTestGenerateBackupPassphrase(unittest.TestCase):
+    def test_generate_backup_passhprase(self):
+        """Verify that backup passphrase generation works as expected"""
+
+        exp = r"([0-9A-Za-z./]{5}-)*[0-9A-Za-z./]{0,4}"
+        bp = BlockDev.crypto_generate_backup_passphrase()
+        self.assertRegexpMatches(bp, exp)
+
 class CryptoTestCase(unittest.TestCase):
     def setUp(self):
         self.dev_file = create_sparse_tempfile("crypto_test", 1024**3)
@@ -30,6 +38,11 @@ class CryptoTestCase(unittest.TestCase):
         os.close(handle)
 
     def tearDown(self):
+        try:
+            BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        except:
+            pass
+
         succ = BlockDev.loop_teardown(self.loop_dev)
         if not succ:
             os.unlink(self.dev_file)
@@ -43,9 +56,9 @@ class CryptoTestCase(unittest.TestCase):
             raise RuntimeError("Failed to tear down loop device used for testing")
 
         os.unlink(self.dev_file2)
-
         os.unlink(self.keyfile)
 
+class CryptoTestFormat(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_format(self):
         """Verify that formating device as LUKS works"""
@@ -62,6 +75,7 @@ class CryptoTestCase(unittest.TestCase):
         succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0)
         self.assertTrue(succ)
 
+class CryptoTestOpenClose(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_luks_open_close(self):
         """Verify that opening/closing LUKS device works"""
@@ -93,6 +107,7 @@ class CryptoTestCase(unittest.TestCase):
         succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
         self.assertTrue(succ)
 
+class CryptoTestAddKey(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_add_key(self):
         """Verify that adding key to LUKS device works"""
@@ -106,6 +121,7 @@ class CryptoTestCase(unittest.TestCase):
         succ = BlockDev.crypto_luks_add_key(self.loop_dev, PASSWD, None, PASSWD2, None)
         self.assertTrue(succ)
 
+class CryptoTestRemoveKey(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_remove_key(self):
         """Verify that removing key from LUKS device works"""
@@ -122,6 +138,7 @@ class CryptoTestCase(unittest.TestCase):
         succ = BlockDev.crypto_luks_remove_key(self.loop_dev, PASSWD, None)
         self.assertTrue(succ)
 
+class CryptoTestChangeKey(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_change_key(self):
         """Verify that changing key in LUKS device works"""
@@ -132,6 +149,7 @@ class CryptoTestCase(unittest.TestCase):
         succ = BlockDev.crypto_luks_change_key(self.loop_dev, PASSWD, PASSWD2)
         self.assertTrue(succ)
 
+class CryptoTestIsLuks(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_is_luks(self):
         """Verify that LUKS device recognition works"""
@@ -148,6 +166,7 @@ class CryptoTestCase(unittest.TestCase):
         is_luks = BlockDev.crypto_device_is_luks(self.loop_dev2)
         self.assertFalse(is_luks)
 
+class CryptoTestLuksStatus(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_luks_status(self):
         """Verify that LUKS device status reporting works"""
@@ -170,6 +189,7 @@ class CryptoTestCase(unittest.TestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.crypto_luks_status("libblockdevTestLUKS")
 
+class CryptoTestGetUUID(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_get_uuid(self):
         """Verify that getting LUKS device UUID works"""
@@ -183,6 +203,7 @@ class CryptoTestCase(unittest.TestCase):
         with self.assertRaises(GLib.GError):
             uuid = BlockDev.crypto_luks_uuid(self.loop_dev2)
 
+class CryptoTestLuksOpenRW(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_luks_open_rw(self):
         """Verify that opened LUKS device is usable (activated as RW)"""
@@ -199,10 +220,3 @@ class CryptoTestCase(unittest.TestCase):
 
         succ = BlockDev.crypto_luks_close("/dev/mapper/libblockdevTestLUKS")
         self.assertTrue(succ)
-
-    def test_generate_backup_passhprase(self):
-        """Verify that backup passphrase generation works as expected"""
-
-        exp = r"([0-9A-Za-z./]{5}-)*[0-9A-Za-z./]{0,4}"
-        bp = BlockDev.crypto_generate_backup_passphrase()
-        self.assertRegexpMatches(bp, exp)
