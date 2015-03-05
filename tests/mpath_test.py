@@ -14,13 +14,6 @@ class MpathTestCase(unittest.TestCase):
             raise RuntimeError("Failed to setup loop device for testing")
         self.loop_dev = "/dev/%s" % loop
 
-    def test_is_mpath_member(self):
-        """Verify that is_mpath_member works as expected"""
-
-        # just test that some non-mpath is not reported as a multipath member
-        # device and no error is reported
-        self.assertFalse(BlockDev.mpath_is_mpath_member("/dev/loop0"))
-
     def tearDown(self):
         succ = BlockDev.loop_teardown(self.loop_dev)
         if  not succ:
@@ -28,3 +21,10 @@ class MpathTestCase(unittest.TestCase):
             raise RuntimeError("Failed to tear down loop device used for testing")
 
         os.unlink(self.dev_file)
+
+    def test_is_mpath_member(self):
+        """Verify that is_mpath_member works as expected"""
+
+        # just test that some non-mpath is not reported as a multipath member
+        # device and no error is reported
+        self.assertFalse(BlockDev.mpath_is_mpath_member("/dev/loop0"))
