@@ -9,35 +9,38 @@ if not BlockDev.is_initialized():
 class LoopTestCase(unittest.TestCase):
     def setUp(self):
         self.dev_file = create_sparse_tempfile("loop_test", 1024**3)
+        self.loop = None
 
     def tearDown(self):
+        try:
+            BlockDev.loop_teardown(self.loop)
+        except:
+            pass
         os.unlink(self.dev_file)
 
     def testLoop_setup_teardown(self):
         """Verify that loop_setup and loop_teardown work as expected"""
 
-        succ, loop = BlockDev.loop_setup(self.dev_file)
+        succ, self.loop = BlockDev.loop_setup(self.dev_file)
         self.assertTrue(succ)
-        self.assertTrue(loop)
+        self.assertTrue(self.loop)
 
-        succ = BlockDev.loop_teardown(loop)
+        succ = BlockDev.loop_teardown(self.loop)
         self.assertTrue(succ)
 
     def testLoop_get_loop_name(self):
         """Verify that loop_get_loop_name works as expected"""
 
-        succ, loop = BlockDev.loop_setup(self.dev_file)
+        succ, self.loop = BlockDev.loop_setup(self.dev_file)
         ret_loop = BlockDev.loop_get_loop_name(self.dev_file)
-        self.assertEqual(ret_loop, loop)
-        BlockDev.loop_teardown(loop)
+        self.assertEqual(ret_loop, self.loop)
 
     def testLoop_get_backing_file(self):
         """Verify that loop_get_backing_file works as expected"""
 
         self.assertIs(BlockDev.loop_get_backing_file("/non/existing"), None)
 
-        succ, loop = BlockDev.loop_setup(self.dev_file)
-        f_name = BlockDev.loop_get_backing_file(loop)
+        succ, self.loop = BlockDev.loop_setup(self.dev_file)
+        f_name = BlockDev.loop_get_backing_file(self.loop)
         self.assertEqual(f_name, self.dev_file)
-        BlockDev.loop_teardown(loop)
 
