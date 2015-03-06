@@ -263,17 +263,18 @@ rm -rf %{buildroot}
 %files
 %{_libdir}/libblockdev.so.*
 %{_libdir}/girepository*/BlockDev*.typelib
-%{_datadir}/gir*/BlockDev*.gir
-%{python2_sitearch}
-%{python3_sitearch}
+%{python2_sitearch}/gi/overrides/*
+%{python3_sitearch}/gi/overrides/BlockDev*
+%{python3_sitearch}/gi/overrides/__pycache__/BlockDev*
 
 %files devel
 %{_libdir}/libblockdev.so
-%{_includedir}/blockdev
+%dir %{_includedir}/blockdev
 %{_includedir}/blockdev/blockdev.h
 %{_includedir}/blockdev/plugins.h
 %{_libdir}/pkgconfig/blockdev.pc
-%{_datadir}
+%{_datadir}/gtk-doc/html/libblockdev
+%{_datadir}/gir*/BlockDev*.gir
 
 
 %files utils
@@ -281,7 +282,7 @@ rm -rf %{buildroot}
 
 %files utils-devel
 %{_libdir}/libbd_utils.so
-%{_includedir}/blockdev
+%dir %{_includedir}/blockdev
 %{_includedir}/blockdev/utils.h
 %{_includedir}/blockdev/sizes.h
 %{_includedir}/blockdev/exec.h
@@ -292,7 +293,7 @@ rm -rf %{buildroot}
 
 %files btrfs-devel
 %{_libdir}/libbd_btrfs.so
-%{_includedir}/blockdev
+%dir %{_includedir}/blockdev
 %{_includedir}/blockdev/btrfs.h
 
 
@@ -301,7 +302,7 @@ rm -rf %{buildroot}
 
 %files crypto-devel
 %{_libdir}/libbd_crypto.so
-%{_includedir}/blockdev
+%dir %{_includedir}/blockdev
 %{_includedir}/blockdev/crypto.h
 
 
@@ -310,7 +311,7 @@ rm -rf %{buildroot}
 
 %files dm-devel
 %{_libdir}/libbd_dm.so
-%{_includedir}/blockdev
+%dir %{_includedir}/blockdev
 %{_includedir}/blockdev/dm.h
 
 
@@ -319,7 +320,7 @@ rm -rf %{buildroot}
 
 %files loop-devel
 %{_libdir}/libbd_loop.so
-%{_includedir}/blockdev
+%dir %{_includedir}/blockdev
 %{_includedir}/blockdev/loop.h
 
 
@@ -328,7 +329,7 @@ rm -rf %{buildroot}
 
 %files lvm-devel
 %{_libdir}/libbd_lvm.so
-%{_includedir}/blockdev
+%dir %{_includedir}/blockdev
 %{_includedir}/blockdev/lvm.h
 
 
@@ -337,7 +338,7 @@ rm -rf %{buildroot}
 
 %files mdraid-devel
 %{_libdir}/libbd_mdraid.so
-%{_includedir}/blockdev
+%dir %{_includedir}/blockdev
 %{_includedir}/blockdev/mdraid.h
 
 
@@ -346,7 +347,7 @@ rm -rf %{buildroot}
 
 %files mpath-devel
 %{_libdir}/libbd_mpath.so
-%{_includedir}/blockdev
+%dir %{_includedir}/blockdev
 %{_includedir}/blockdev/mpath.h
 
 
@@ -355,7 +356,7 @@ rm -rf %{buildroot}
 
 %files swap-devel
 %{_libdir}/libbd_swap.so
-%{_includedir}/blockdev
+%dir %{_includedir}/blockdev
 %{_includedir}/blockdev/swap.h
 
 %files plugins-all
