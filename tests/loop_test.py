@@ -31,6 +31,8 @@ class LoopTestCase(unittest.TestCase):
     def testLoop_get_loop_name(self):
         """Verify that loop_get_loop_name works as expected"""
 
+        self.assertIs(BlockDev.loop_get_loop_name("/non/existing"), None)
+
         succ, self.loop = BlockDev.loop_setup(self.dev_file)
         ret_loop = BlockDev.loop_get_loop_name(self.dev_file)
         self.assertEqual(ret_loop, self.loop)

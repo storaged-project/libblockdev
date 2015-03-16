@@ -78,7 +78,7 @@ gchar* bd_loop_get_backing_file (gchar *dev_name, GError **error) {
  * Returns: (transfer full): name of the loop device associated with the given
  * @file or %NULL if failed to determine
  */
-gchar* bd_loop_get_loop_name (gchar *file, GError **error) {
+gchar* bd_loop_get_loop_name (gchar *file, GError **error __attribute__((unused))) {
     glob_t globbuf;
     gchar **path_p;
     gboolean success = FALSE;
@@ -89,9 +89,6 @@ gchar* bd_loop_get_loop_name (gchar *file, GError **error) {
     gchar *ret;
 
     if (glob ("/sys/block/loop*/loop/backing_file", GLOB_NOSORT, NULL, &globbuf) != 0) {
-        /* TODO: be more specific about the errors? */
-        g_set_error (error, BD_LOOP_ERROR, BD_LOOP_ERROR_DEVICE,
-                     "The given file %s has no associated loop device", file);
         return NULL;
     }
 
@@ -108,8 +105,6 @@ gchar* bd_loop_get_loop_name (gchar *file, GError **error) {
     }
 
     if (!found) {
-        g_set_error (error, BD_LOOP_ERROR, BD_LOOP_ERROR_DEVICE,
-                     "The given file %s has no associated loop device", file);
         globfree (&globbuf);
         return NULL;
     }
