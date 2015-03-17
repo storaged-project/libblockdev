@@ -383,8 +383,10 @@ guint64 bd_lvm_get_max_lv_size () {
  *
  * Returns: @size rounded to @pe_size according to the @roundup
  *
- * Rounds given @size up/down to a multiple of @pe_size according to the value of
- * the @roundup parameter.
+ * Rounds given @size up/down to a multiple of @pe_size according to the value
+ * of the @roundup parameter. If the rounded value is too big to fit in the
+ * return type, the result is rounded down (floored) regardless of the @roundup
+ * parameter.
  */
 guint64 bd_lvm_round_size_to_pe (guint64 size, guint64 pe_size, gboolean roundup) {
     pe_size = RESOLVE_PE_SIZE(pe_size);
@@ -392,7 +394,7 @@ guint64 bd_lvm_round_size_to_pe (guint64 size, guint64 pe_size, gboolean roundup
     if (delta == 0)
         return size;
 
-    if (roundup)
+    if (roundup && (((G_MAXUINT64 - (pe_size - delta)) >= size)))
         return size + (pe_size - delta);
     else
         return size - delta;
