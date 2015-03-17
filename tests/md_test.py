@@ -122,6 +122,7 @@ class MDTestCase(unittest.TestCase):
         os.unlink(self.dev_file3)
 
 class MDTestCreateDeactivateDestroy(MDTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_create_deactivate_destroy(self):
         """Verify that it is possible to create, deactivate and destroy an MD RAID"""
 
@@ -147,6 +148,7 @@ class MDTestCreateDeactivateDestroy(MDTestCase):
         self.assertTrue(succ)
 
 class MDTestActivateDeactivate(MDTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_activate_deactivate(self):
         """Verify that it is possible to activate and deactivate an MD RAID"""
 
@@ -173,6 +175,7 @@ class MDTestActivateDeactivate(MDTestCase):
             self.assertTrue(succ)
 
 class MDTestNominateDenominate(MDTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_nominate_denominate(self):
         """Verify that it is possible to nominate and denominate an MD RAID device"""
 
@@ -199,6 +202,7 @@ class MDTestNominateDenominate(MDTestCase):
             self.assertTrue(succ)
 
 class MDTestNominateDenominateActive(MDTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_nominate_denominate_active(self):
         """Verify that nominate and denominate deivice works as expected on (de)activated MD RAID"""
 
@@ -225,6 +229,7 @@ class MDTestNominateDenominateActive(MDTestCase):
             self.assertTrue(succ)
 
 class MDTestAddRemove(MDTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_add_remove(self):
         """Verify that it is possible to add a device to and remove from an MD RAID"""
 
@@ -304,6 +309,7 @@ class MDTestExamineDetail(MDTestCase):
         self.assertEqual(ex_data.uuid, de_data.uuid)
 
 class MDTestNameNodeBijection(MDTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_name_node_bijection(self):
         """Verify that MD RAID node and name match each other"""
 
