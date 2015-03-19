@@ -303,6 +303,7 @@ class ErrorProxy(object):
         else:
             self._xrules = dict()
         self._use_local = use_local
+        self._wrapped_cache = dict()
 
     def __getattr__(self, attr):
         if self._use_local and attr in locals():
@@ -313,6 +314,9 @@ class ErrorProxy(object):
         if not callable(orig_obj):
             # not a callable, just return the original object
             return orig_obj
+
+        if attr in self._wrapped_cache:
+            return self._wrapped_cache[attr]
 
         def wrapped(*args, **kwargs):
             try:
@@ -339,6 +343,7 @@ class ErrorProxy(object):
 
             return ret
 
+        self._wrapped_cache[attr] = wrapped
         return wrapped
 
 class BlockDevError(Exception):
