@@ -2,7 +2,29 @@
 This code wraps the bindings automatically created by gobject-introspection.
 They allow for creating more pythonic bindings where necessary.  For instance
 this code allows many functions with default-value arguments to be called
-without specifying such arguments.
+without specifying values for such arguments.
+
+
+A bit more special is the :class:`ErrorProxy` class defined in the second half
+of this file. It enhances work with libblockdev in the area of error reporting
+and exception handling. While native libblockdev functions only raise
+GLib.GError instances via the GObject introspection it is desired to have the
+exceptions more granular -- e.g. raise SwapError instances from swap-related
+functions or even raise SwapErrorNoDev instances from swap-related functions if
+the particular device passed as an argument doesn't exist etc. Also, it is
+desired to be able to distinguish libblockdev errors/exceptions from other
+GLib.GError errors/exceptions by having all libblockdev exception instances
+inherited from a single class -- BlockDevError. That's what the
+:class:`ErrorProxy` class and its instances (one for each libblockdev plugin)
+implement. If for example ``BlockDev.swap.swapon("/dev/sda2")`` is used instead
+of ``BlockDev.swap_swapon("/dev/sda2")`` (note the ``.`` instead of ``_``), then
+if the function raises an error/exception, the exception is transformed into a
+SwapError instance and thus can be caught by ``except BlockDev.SwapError`` or
+even ``BlockDev.BlockDevError``. The ``BlockDev.swap`` object is an instance of
+the :class:`ErrorProxy` class and makes sure the exception transformation
+happens. It of course calls the ``swap_swapon`` function internally so there's
+no code duplication and it propagates non-callable objects directly.
+
 """
 
 from collections import namedtuple
