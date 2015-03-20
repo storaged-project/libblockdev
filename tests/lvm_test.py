@@ -1,6 +1,7 @@
 import unittest
 import os
 import math
+import overrides_hack
 
 from utils import create_sparse_tempfile
 from gi.repository import BlockDev, GLib

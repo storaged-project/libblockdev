@@ -3,6 +3,7 @@ from __future__ import division
 import unittest
 import os
 
+import overrides_hack
 from utils import create_sparse_tempfile
 from gi.repository import GLib, BlockDev
 if not BlockDev.is_initialized():

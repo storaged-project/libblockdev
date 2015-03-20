@@ -1,4 +1,5 @@
 import unittest
+import overrides_hack
 from gi.repository import BlockDev
 
 class OverridesTestCase(unittest.TestCase):

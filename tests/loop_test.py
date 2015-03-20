@@ -1,5 +1,6 @@
 import os
 import unittest
+import overrides_hack
 
 from utils import create_sparse_tempfile
 from gi.repository import BlockDev
