@@ -100,5 +100,13 @@ archive:
 local:
 	git archive --format=tar.gz --prefix=$(PKGNAME)-$(VERSION)/ -o $(PKGNAME)-$(VERSION).tar.gz HEAD
 
+srpm: local
+	rpmbuild -ts --nodeps $(PKGNAME)-$(VERSION).tar.gz
+	rm -f $(PKGNAME)-$(VERSION).tar.gz
+
+rpm: local
+	rpmbuild -tb --nodeps $(PKGNAME)-$(VERSION).tar.gz
+	rm -f $(PKGNAME)-$(VERSION).tar.gz
+
 release: tag
 	$(MAKE) archive
