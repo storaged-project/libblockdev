@@ -323,9 +323,9 @@ class ErrorProxy(object):
                 ret = orig_obj(*args, **kwargs)
             except tuple(tr_t[0] for tr_t in self._tr_excs) as e:
                 if hasattr(e, "msg"):
-                    msg = e.msg
+                    msg = e.msg # pylint: disable=no-member
                 elif hasattr(e, "message"):
-                    msg = e.message
+                    msg = e.message # pylint: disable=no-member
                 else:
                     msg = str(e)
 

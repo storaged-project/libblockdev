@@ -9,6 +9,7 @@ all: build documentation
 
 build:
 	scons -Q build
+	@echo
 
 install:
 	scons -Q --prefix=${PREFIX} --sitedirs=${SITEDIRS} install
@@ -53,12 +54,12 @@ run-root-ipython: build
 	sudo GI_TYPELIB_PATH=build/ LD_LIBRARY_PATH=build PYTHONPATH=src/python G_MESSAGES_DEBUG=all ipython
 
 test: build
-	@echo
+	pylint -E src/python/gi/overrides/BlockDev.py
 	@sudo GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build PYTHONPATH=.:tests/:src/python \
 		python -m unittest discover -v -s tests/ -p '*_test.py'
 
 fast-test: build
-	@echo
+	pylint -E src/python/gi/overrides/BlockDev.py
 	@sudo SKIP_SLOW= GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build PYTHONPATH=.:tests/:src/python \
 		python -m unittest discover -v -s tests/ -p '*_test.py'
 
