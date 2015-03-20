@@ -327,6 +327,17 @@ class ErrorProxy(object):
         self._use_local = use_local
         self._wrapped_cache = dict()
 
+    def __dir__(self):
+        """Let's make TAB-TAB in ipython work!"""
+
+        if self._use_local:
+            items = set(dir(self._mod) + locals().keys())
+        else:
+            items = set(dir(self._mod))
+
+        prefix_len = len(self._prefix) + 1 # prefix + "_"
+        return [item[prefix_len:] for item in items if item.startswith(self._prefix)]
+
     def __getattr__(self, attr):
         if self._use_local and attr in locals():
             orig_obj = locals()[self._prefix + "_" + attr]
