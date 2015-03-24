@@ -584,24 +584,30 @@ gboolean bd_crypto_luks_change_key (gchar *device, gchar *pass, gchar *npass, GE
 
 /**
  * bd_crypto_luks_resize:
- * @device: device to resize
+ * @luks_device: opened LUKS device to resize
  * @size: requested size in sectors or 0 to adapt to the backing device
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @device was successfully resized or not
  */
-gboolean bd_crypto_luks_resize (gchar *device, guint64 size, GError **error) {
+gboolean bd_crypto_luks_resize (gchar *luks_device, guint64 size, GError **error) {
     struct crypt_device *cd = NULL;
+    gchar *luks_device_path = NULL;
     gint ret = 0;
 
-    ret = crypt_init (&cd, device);
+    if (g_str_has_prefix (luks_device, "/dev/mapper"))
+        luks_device_path = g_strdup (luks_device);
+    else
+        luks_device_path = g_strdup_printf ("/dev/mapper/%s", luks_device);
+
+    ret = crypt_init_by_name (&cd, luks_device_path);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror(-ret));
         return FALSE;
     }
 
-    ret = crypt_resize (cd, device, size);
+    ret = crypt_resize (cd, luks_device_path, size);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_RESIZE_FAILED,
                      "Failed to resize device: %s", strerror(-ret));
@@ -609,6 +615,7 @@ gboolean bd_crypto_luks_resize (gchar *device, guint64 size, GError **error) {
         return FALSE;
     }
 
+    g_free (luks_device_path);
     crypt_free (cd);
     return TRUE;
 }

@@ -148,13 +148,13 @@ gboolean bd_crypto_luks_change_key (gchar *device, gchar *pass, gchar *npass, GE
 
 /**
  * bd_crypto_luks_resize:
- * @device: device to resize
+ * @luks_device: opened LUKS device to resize
  * @size: requested size in sectors or 0 to adapt to the backing device
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @device was successfully resized or not
  */
-gboolean bd_crypto_luks_resize (gchar *device, guint64 size, GError **error);
+gboolean bd_crypto_luks_resize (gchar *luks_device, guint64 size, GError **error);
 
 /**
  * bd_crypto_escrow_device:

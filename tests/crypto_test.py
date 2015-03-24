@@ -75,6 +75,29 @@ class CryptoTestFormat(CryptoTestCase):
         succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0)
         self.assertTrue(succ)
 
+class CryptoTestResize(CryptoTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_resize(self):
+        """Verify that resizing LUKS device works"""
+
+        # the simple case with password
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, PASSWD, None, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None)
+        self.assertTrue(succ)
+
+        # resize to 512 KiB (1024 * 512B sectors)
+        succ = BlockDev.crypto_luks_resize("libblockdevTestLUKS", 1024)
+        self.assertTrue(succ)
+
+        # resize back to full size
+        succ = BlockDev.crypto_luks_resize("libblockdevTestLUKS", 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
 class CryptoTestOpenClose(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_luks_open_close(self):
