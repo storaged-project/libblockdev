@@ -206,6 +206,12 @@ class BtrfsTestCreateDeleteSubvolume(BtrfsTestCase):
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
         self.assertEqual(len(subvols), 2)
 
+        # make sure subvolumes are sorted properly (parents before children)
+        seen = set()
+        for subvol in subvols:
+            seen.add(subvol)
+            self.assertTrue(subvol.parent_id == BlockDev.BTRFS_MAIN_VOLUME_ID or any(subvol.parent_id == other.id for other in seen))
+
 class BtrfsTestCreateSnapshot(BtrfsTestCase):
     def test_create_snapshot(self):
         succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None)
