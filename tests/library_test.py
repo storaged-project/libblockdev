@@ -2,7 +2,7 @@ import os
 import unittest
 import re
 
-from gi.repository import BlockDev
+from gi.repository import GLib, BlockDev
 if not BlockDev.is_initialized():
     assert BlockDev.init(None, None)
 
@@ -131,6 +131,27 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertTrue(BlockDev.reinit([ps], True, None))
         self.assertEqual(BlockDev.get_available_plugin_names(), ["btrfs"])
         self.assertTrue(BlockDev.reinit(None, True, None))
+
+    def test_not_implemented(self):
+        """Verify that unloaded/unimplemented functions report errors"""
+
+        # should be loaded and working
+        self.assertTrue(BlockDev.lvm_get_max_lv_size() > 0)
+
+        ps = BlockDev.PluginSpec()
+        ps.name = BlockDev.Plugin.BTRFS
+        ps.so_name = ""
+        self.assertTrue(BlockDev.reinit([ps], True, None))
+        self.assertEqual(BlockDev.get_available_plugin_names(), ["btrfs"])
+
+        # no longer loaded
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_get_max_lv_size()
+
+        self.assertTrue(BlockDev.reinit(None, True, None))
+
+        # loaded again
+        self.assertTrue(BlockDev.lvm_get_max_lv_size() > 0)
 
     def test_try_init(self):
         """Verify that try_init just returns when already initialized"""
