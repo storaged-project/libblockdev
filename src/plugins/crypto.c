@@ -55,12 +55,13 @@ GQuark bd_crypto_error_quark (void)
 
 /**
  * bd_crypto_generate_backup_passphrase:
+ * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): A newly generated %BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH-long passphrase.
  *
  * See %BD_CRYPTO_BACKUP_PASSPHRASE_CHARSET for the definition of the charset used for the passphrase.
  */
-gchar* bd_crypto_generate_backup_passphrase() {
+gchar* bd_crypto_generate_backup_passphrase(GError **error __attribute__((unused))) {
     guint8 i = 0;
     guint8 offset = 0;
     guint8 charset_length = strlen (BD_CRYPTO_BACKUP_PASSPHRASE_CHARSET);

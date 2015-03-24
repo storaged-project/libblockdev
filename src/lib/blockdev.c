@@ -115,7 +115,7 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload) {
     return requested_loaded;
 }
 
-GQuark bd_init_error_quark (void)
+GQuark bd_init_error_quark ()
 {
     return g_quark_from_static_string ("g-bd-init-error-quark");
 }

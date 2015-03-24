@@ -75,14 +75,14 @@ typedef struct BDLVMLVdata {
 void bd_lvm_lvdata_free (BDLVMLVdata *data);
 BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data);
 
-gboolean bd_lvm_is_supported_pe_size (guint64 size);
-guint64 *bd_lvm_get_supported_pe_sizes ();
-guint64 bd_lvm_get_max_lv_size ();
-guint64 bd_lvm_round_size_to_pe (guint64 size, guint64 pe_size, gboolean roundup);
-guint64 bd_lvm_get_lv_physical_size (guint64 lv_size, guint64 pe_size);
-guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean included);
-gboolean bd_lvm_is_valid_thpool_md_size (guint64 size);
-gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard);
+gboolean bd_lvm_is_supported_pe_size (guint64 size, GError **error);
+guint64 *bd_lvm_get_supported_pe_sizes (GError **error);
+guint64 bd_lvm_get_max_lv_size (GError **error);
+guint64 bd_lvm_round_size_to_pe (guint64 size, guint64 pe_size, gboolean roundup, GError **error);
+guint64 bd_lvm_get_lv_physical_size (guint64 lv_size, guint64 pe_size, GError **error);
+guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean included, GError **error);
+gboolean bd_lvm_is_valid_thpool_md_size (guint64 size, GError **error);
+gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard, GError **error);
 
 gboolean bd_lvm_pvcreate (gchar *device, guint64 data_alignment, guint64 metadata_size, GError **error);
 gboolean bd_lvm_pvresize (gchar *device, guint64 size, GError **error);
@@ -117,6 +117,6 @@ gboolean bd_lvm_thlvcreate (gchar *vg_name, gchar *pool_name, gchar *lv_name, gu
 gchar* bd_lvm_thlvpoolname (gchar *vg_name, gchar *lv_name, GError **error);
 gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, gchar *pool_name, GError **error);
 gboolean bd_lvm_set_global_config (gchar *new_config, GError **error);
-gchar* bd_lvm_get_global_config ();
+gchar* bd_lvm_get_global_config (GError **error);
 
 #endif /* BD_LVM */

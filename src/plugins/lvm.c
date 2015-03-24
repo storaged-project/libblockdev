@@ -340,19 +340,21 @@ static BDLVMLVdata* get_lv_data_from_table (GHashTable *table, gboolean free_tab
 /**
  * bd_lvm_is_supported_pe_size:
  * @size: size (in bytes) to test
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the given size is supported physical extent size or not
  */
-gboolean bd_lvm_is_supported_pe_size (guint64 size) {
+gboolean bd_lvm_is_supported_pe_size (guint64 size, GError **error __attribute__((unused))) {
     return (((size % 2) == 0) && (size >= (BD_LVM_MIN_PE_SIZE)) && (size <= (BD_LVM_MAX_PE_SIZE)));
 }
 
 /**
  * bd_lvm_get_supported_pe_sizes:
+ * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full) (array zero-terminated=1): list of supported PE sizes
  */
-guint64 *bd_lvm_get_supported_pe_sizes () {
+guint64 *bd_lvm_get_supported_pe_sizes (GError **error __attribute__((unused))) {
     guint8 i;
     guint64 val = BD_LVM_MIN_PE_SIZE;
     guint8 num_items = ((guint8) round (log2 ((double) BD_LVM_MAX_PE_SIZE))) - ((guint8) round (log2 ((double) BD_LVM_MIN_PE_SIZE))) + 2;
@@ -368,10 +370,11 @@ guint64 *bd_lvm_get_supported_pe_sizes () {
 
 /**
  * bd_lvm_get_max_lv_size:
+ * @error: (out): place to store error (if any)
  *
  * Returns: maximum LV size in bytes
  */
-guint64 bd_lvm_get_max_lv_size () {
+guint64 bd_lvm_get_max_lv_size (GError **error __attribute__((unused))) {
     return BD_LVM_MAX_LV_SIZE;
 }
 
@@ -380,6 +383,7 @@ guint64 bd_lvm_get_max_lv_size () {
  * @size: size to be rounded
  * @pe_size: physical extent (PE) size or 0 to use the default
  * @roundup: whether to round up or down (ceil or floor)
+ * @error: (out): place to store error (if any)
  *
  * Returns: @size rounded to @pe_size according to the @roundup
  *
@@ -388,7 +392,7 @@ guint64 bd_lvm_get_max_lv_size () {
  * return type, the result is rounded down (floored) regardless of the @roundup
  * parameter.
  */
-guint64 bd_lvm_round_size_to_pe (guint64 size, guint64 pe_size, gboolean roundup) {
+guint64 bd_lvm_round_size_to_pe (guint64 size, guint64 pe_size, gboolean roundup, GError **error __attribute__((unused))) {
     pe_size = RESOLVE_PE_SIZE(pe_size);
     guint64 delta = size % pe_size;
     if (delta == 0)
@@ -404,19 +408,20 @@ guint64 bd_lvm_round_size_to_pe (guint64 size, guint64 pe_size, gboolean roundup
  * bd_lvm_get_lv_physical_size:
  * @lv_size: LV size
  * @pe_size: PE size
+ * @error: (out): place to store error (if any)
  *
  * Returns: space taken on disk(s) by the LV with given @size
  *
  * Gives number of bytes needed for an LV with the size @lv_size on an LVM stack
  * using given @pe_size.
  */
-guint64 bd_lvm_get_lv_physical_size (guint64 lv_size, guint64 pe_size) {
+guint64 bd_lvm_get_lv_physical_size (guint64 lv_size, guint64 pe_size, GError **error) {
     /* TODO: should take into account mirroring and RAID in general? */
 
     /* add one PE for metadata */
     pe_size = RESOLVE_PE_SIZE(pe_size);
 
-    return bd_lvm_round_size_to_pe (lv_size, pe_size, TRUE) + pe_size;
+    return bd_lvm_round_size_to_pe (lv_size, pe_size, TRUE, error) + pe_size;
 }
 
 /**
@@ -424,11 +429,12 @@ guint64 bd_lvm_get_lv_physical_size (guint64 lv_size, guint64 pe_size) {
  * @size: size of the thin pool
  * @pe_size: PE size or 0 if the default value should be used
  * @included: if padding is already included in the size
+ * @error: (out): place to store error (if any)
  *
  * Returns: size of the padding needed for a thin pool with the given @size
  *         according to the @pe_size and @included
  */
-guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean included) {
+guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean included, GError **error) {
     guint64 raw_md_size;
     pe_size = RESOLVE_PE_SIZE(pe_size);
 
@@ -437,17 +443,18 @@ guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean inclu
     else
         raw_md_size = (guint64) ceil (size * THPOOL_MD_FACTOR_NEW);
 
-    return MIN (bd_lvm_round_size_to_pe(raw_md_size, pe_size, TRUE),
-                bd_lvm_round_size_to_pe(BD_LVM_MAX_THPOOL_MD_SIZE, pe_size, TRUE));
+    return MIN (bd_lvm_round_size_to_pe(raw_md_size, pe_size, TRUE, error),
+                bd_lvm_round_size_to_pe(BD_LVM_MAX_THPOOL_MD_SIZE, pe_size, TRUE, error));
 }
 
 /**
  * bd_lvm_is_valid_thpool_md_size:
  * @size: the size to be tested
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the given size is a valid thin pool metadata size or not
  */
-gboolean bd_lvm_is_valid_thpool_md_size (guint64 size) {
+gboolean bd_lvm_is_valid_thpool_md_size (guint64 size, GError **error __attribute__((unused))) {
     return ((BD_LVM_MIN_THPOOL_MD_SIZE <= size) && (size <= BD_LVM_MAX_THPOOL_MD_SIZE));
 }
 
@@ -455,10 +462,11 @@ gboolean bd_lvm_is_valid_thpool_md_size (guint64 size) {
  * bd_lvm_is_valid_thpool_chunk_size:
  * @size: the size to be tested
  * @discard: whether discard/TRIM is required to be supported or not
+ * @error: (out): place to store error (if any)
  *
  * Returns: whether the given size is a valid thin pool chunk size or not
  */
-gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard) {
+gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard, GError **error __attribute__((unused))) {
     gdouble size_log2 = 0.0;
 
     if ((size < BD_LVM_MIN_THPOOL_CHUNK_SIZE) || (size > BD_LVM_MAX_THPOOL_CHUNK_SIZE))
@@ -1431,11 +1439,12 @@ gboolean bd_lvm_set_global_config (gchar *new_config, GError **error __attribute
 
 /**
  * bd_lvm_get_global_config:
+ * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): a copy of a string representation of the currently
  *                           set LVM global configuration
  */
-gchar* bd_lvm_get_global_config () {
+gchar* bd_lvm_get_global_config (GError **error __attribute__((unused))) {
     gchar *ret = NULL;
 
     g_mutex_lock (&global_config_lock);

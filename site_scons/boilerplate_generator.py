@@ -154,7 +154,9 @@ def get_func_boilerplate(fn_info):
 
     # first add the stub function doing nothing and just reporting error
     ret = ("{0.rtype} {0.name}_stub ({0.args}) {{\n" +
-           "    g_critical(\"The function '{0.name}' called, but not implemented!\");\n" +
+           "    g_critical (\"The function '{0.name}' called, but not implemented!\");\n" +
+           "    g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_NOT_IMPLEMENTED,\n"+
+           "                \"The function '{0.name}' called, but not implemented!\");\n"
            "    return {1};\n"
            "}}\n\n").format(fn_info, default_ret)
 

@@ -32,7 +32,7 @@ typedef enum {
 #define DEFAULT_LUKS_KEYSIZE_BITS 256
 #define DEFAULT_LUKS_CIPHER "aes-xts-plain64"
 
-gchar* bd_crypto_generate_backup_passphrase();
+gchar* bd_crypto_generate_backup_passphrase(GError **error);
 gboolean bd_crypto_device_is_luks (gchar *device, GError **error);
 gchar* bd_crypto_luks_uuid (gchar *device, GError **error);
 gchar* bd_crypto_luks_status (gchar *luks_device, GError **error);
