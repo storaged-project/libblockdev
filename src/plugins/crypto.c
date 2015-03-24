@@ -145,7 +145,7 @@ gchar* bd_crypto_luks_uuid (gchar *device, GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: (transfer none): one of "invalid", "inactive", "active" or "busy" or
- * %NULL if failed to determine (@error) is populated with the error in
+ * %NULL if failed to determine (@error is populated with the error in
  * such cases)
  */
 gchar* bd_crypto_luks_status (gchar *luks_device, GError **error) {
@@ -153,12 +153,8 @@ gchar* bd_crypto_luks_status (gchar *luks_device, GError **error) {
     gint ret_num;
     gchar *ret = NULL;
     crypt_status_info status;
-    gchar *luks_device_path = NULL;
 
-    if (!g_str_has_prefix (luks_device, "/dev/mapper"))
-        luks_device_path = g_strdup_printf ("/dev/mapper/%s", luks_device);
-
-    ret_num = crypt_init (&cd, luks_device_path ? luks_device_path : luks_device);
+    ret_num = crypt_init_by_name (&cd, luks_device);
     if (ret_num != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror(-ret_num));
@@ -186,7 +182,6 @@ gchar* bd_crypto_luks_status (gchar *luks_device, GError **error) {
     }
 
     crypt_free (cd);
-    g_free (luks_device_path);
     return ret;
 }
 
@@ -358,32 +353,23 @@ gboolean bd_crypto_luks_open (gchar *device, gchar *name, gchar *passphrase, gch
  */
 gboolean bd_crypto_luks_close (gchar *luks_device, GError **error) {
     struct crypt_device *cd = NULL;
-    gchar *luks_device_path = NULL;
     gint ret = 0;
 
-    if (g_str_has_prefix (luks_device, "/dev/mapper"))
-        luks_device_path = g_strdup (luks_device);
-    else
-        luks_device_path = g_strdup_printf ("/dev/mapper/%s", luks_device);
-
-    ret = crypt_init (&cd, luks_device_path);
+    ret = crypt_init_by_name (&cd, luks_device);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror(-ret));
-        g_free (luks_device_path);
         return FALSE;
     }
 
-    ret = crypt_deactivate (cd, luks_device_path);
+    ret = crypt_deactivate (cd, luks_device);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to deactivate device: %s", strerror(-ret));
-        g_free (luks_device_path);
         crypt_free (cd);
         return FALSE;
     }
 
-    g_free (luks_device_path);
     crypt_free (cd);
     return TRUE;
 }
@@ -592,22 +578,16 @@ gboolean bd_crypto_luks_change_key (gchar *device, gchar *pass, gchar *npass, GE
  */
 gboolean bd_crypto_luks_resize (gchar *luks_device, guint64 size, GError **error) {
     struct crypt_device *cd = NULL;
-    gchar *luks_device_path = NULL;
     gint ret = 0;
 
-    if (g_str_has_prefix (luks_device, "/dev/mapper"))
-        luks_device_path = g_strdup (luks_device);
-    else
-        luks_device_path = g_strdup_printf ("/dev/mapper/%s", luks_device);
-
-    ret = crypt_init_by_name (&cd, luks_device_path);
+    ret = crypt_init_by_name (&cd, luks_device);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror(-ret));
         return FALSE;
     }
 
-    ret = crypt_resize (cd, luks_device_path, size);
+    ret = crypt_resize (cd, luks_device, size);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_RESIZE_FAILED,
                      "Failed to resize device: %s", strerror(-ret));
@@ -615,7 +595,6 @@ gboolean bd_crypto_luks_resize (gchar *luks_device, guint64 size, GError **error
         return FALSE;
     }
 
-    g_free (luks_device_path);
     crypt_free (cd);
     return TRUE;
 }

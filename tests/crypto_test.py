@@ -121,12 +121,14 @@ class CryptoTestOpenClose(CryptoTestCase):
         succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None)
         self.assertTrue(succ)
 
+        # use the full /dev/mapper/ path
         succ = BlockDev.crypto_luks_close("/dev/mapper/libblockdevTestLUKS")
         self.assertTrue(succ)
 
         succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", None, self.keyfile)
         self.assertTrue(succ)
 
+        # use just the LUKS device name
         succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
         self.assertTrue(succ)
 
@@ -203,6 +205,11 @@ class CryptoTestLuksStatus(CryptoTestCase):
         succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None)
         self.assertTrue(succ)
 
+        # use the full /dev/mapper path
+        status = BlockDev.crypto_luks_status("/dev/mapper/libblockdevTestLUKS")
+        self.assertEqual(status, "active")
+
+        # use just the LUKS device name
         status = BlockDev.crypto_luks_status("libblockdevTestLUKS")
         self.assertEqual(status, "active")
 
@@ -241,5 +248,5 @@ class CryptoTestLuksOpenRW(CryptoTestCase):
         succ = BlockDev.utils_exec_and_report_error(["dd", "if=/dev/zero", "of=/dev/mapper/libblockdevTestLUKS", "bs=1M", "count=1"])
         self.assertTrue(succ)
 
-        succ = BlockDev.crypto_luks_close("/dev/mapper/libblockdevTestLUKS")
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
         self.assertTrue(succ)
