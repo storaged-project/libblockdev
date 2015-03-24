@@ -241,6 +241,17 @@ def get_loading_func(fn_infos, module_name):
 
     return ret
 
+def get_unloading_func(fn_infos, module_name):
+    ret = 'gboolean unload_{0} (gpointer handle) {{\n'.format(module_name)
+    for info in fn_infos:
+        # revert the functions to stubs
+        ret += '    _{0.name} = {0.name}_stub;\n'.format(info)
+    ret += '\n'
+    ret += '    return dlclose(handle) == 0;\n'
+    ret += '}\n\n'
+
+    return ret
+
 def get_fn_code(fn_info):
     ret = ("{0.doc}{0.rtype} {0.name} ({0.args}) {{\n" +
             "    {0.body}" +
@@ -268,6 +279,7 @@ def generate_source_header(api_file, out_dir):
         for info in api_fn_infos:
             src_f.write(get_func_boilerplate(info))
         src_f.write(get_loading_func(api_fn_infos, mod_name))
+        src_f.write(get_unloading_func(api_fn_infos, mod_name))
 
     written_fns = set()
     with open(os.path.join(out_dir, mod_name + ".h"), "w") as hdr_f:
