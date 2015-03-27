@@ -635,9 +635,8 @@ BDMDExamineData* bd_md_examine (gchar *device, GError **error) {
 
     table = parse_mdadm_vars (output, " \n", "=", &num_items);
     g_free (output);
-    /* we expect at least MD_LEVEL, MD_DEVICES, MD_NAME, MD_UUID, MD_UPDATE_TIME, MD_DEV_UUID, MD_EVENTS */
-    if (!table || (num_items < 7)) {
-        /* something bad happened or some expected items were missing  */
+    if (!table || (num_items == 0)) {
+        /* something bad happened */
         g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to parse mdexamine data");
         if (table)
             g_hash_table_destroy (table);
