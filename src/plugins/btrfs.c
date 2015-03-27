@@ -471,6 +471,9 @@ BDBtrfsDeviceInfo** bd_btrfs_list_devices (gchar *device, GError **error) {
  *
  * Returns: (array zero-terminated=1): information about the subvolumes that are part of the btrfs volume
  * mounted at @mountpoint or %NULL in case of error
+ *
+ * The subvolumes are sorted in a way that no child subvolume appears in the
+ * list before its parent (sub)volume.
  */
 BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (gchar *mountpoint, gboolean snapshots_only, GError **error) {
     gchar *argv[7] = {"btrfs", "subvol", "list", "-p", NULL, NULL, NULL};
@@ -484,8 +487,12 @@ BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (gchar *mountpoint, gboolean sna
                                   "path\\s+(?P<path>\\S+)";
     GRegex *regex = NULL;
     GMatchInfo *match_info = NULL;
-    guint8 i = 0;
+    guint64 i = 0;
+    guint64 y = 0;
+    guint64 next_sorted_idx = 0;
     GPtrArray *subvol_infos = g_ptr_array_new ();
+    BDBtrfsSubvolumeInfo* item = NULL;
+    BDBtrfsSubvolumeInfo* swap_item = NULL;
     BDBtrfsSubvolumeInfo** ret = NULL;
 
     if (snapshots_only) {
@@ -527,13 +534,41 @@ BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (gchar *mountpoint, gboolean sna
         return NULL;
     }
 
-    /* now create the return value -- NULL-terminated array of BDBtrfsSubvolumeInfo */
+    /* now we know how much space to allocate for the result (subvols + NULL) */
     ret = g_new (BDBtrfsSubvolumeInfo*, subvol_infos->len + 1);
-    for (i=0; i < subvol_infos->len; i++)
-        ret[i] = (BDBtrfsSubvolumeInfo*) g_ptr_array_index (subvol_infos, i);
-    ret[i] = NULL;
 
-    g_ptr_array_free (subvol_infos, FALSE);
+    /* we need to sort the subvolumes in a way that no child subvolume appears
+       in the list before its parent (sub)volume */
+
+    /* let's start by moving all top-level (sub)volumes to the beginning */
+    for (i=0; i < subvol_infos->len; i++) {
+        item = (BDBtrfsSubvolumeInfo*) g_ptr_array_index (subvol_infos, i);
+        if (item->parent_id == BD_BTRFS_MAIN_VOLUME_ID)
+            /* top-level (sub)volume */
+            ret[next_sorted_idx++] = item;
+    }
+    /* top-level (sub)volumes are now processed */
+    for (i=0; i < next_sorted_idx; i++)
+        g_ptr_array_remove_fast (subvol_infos, ret[i]);
+
+    /* now sort the rest in a way that we search for an already sorted parent or sibling */
+    for (i=0; i < subvol_infos->len; i++) {
+        item = (BDBtrfsSubvolumeInfo*) g_ptr_array_index (subvol_infos, i);
+        ret[next_sorted_idx] = item;
+        /* move the item towards beginning of the array checking if some parent
+           or sibling has been already processed/sorted before or we reached the
+           top-level (sub)volumes */
+        for (y=next_sorted_idx; (y > 0 && (ret[y-1]->id != item->parent_id) && (ret[y-1]->parent_id != item->parent_id) && (ret[y-1]->parent_id != BD_BTRFS_MAIN_VOLUME_ID)); y--) {
+            swap_item = ret[y-1];
+            ret[y-1] = ret[y];
+            ret[y] = swap_item;
+        }
+        next_sorted_idx++;
+    }
+    ret[next_sorted_idx] = NULL;
+
+    /* now just free the pointer array */
+    g_ptr_array_free (subvol_infos, TRUE);
 
     return ret;
 }
