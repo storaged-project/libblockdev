@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     0.7
+Version:     0.8
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -362,6 +362,36 @@ rm -rf %{buildroot}
 %files plugins-all
 
 %changelog
+* Fri Mar 27 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.8-1
+- Merge pull request #6 from vpodzime/master-sort_btrfs_subvolumes (vpodzime)
+- Don't be naïve about mdadm providing us data we would like (#1206394) (vpodzime)
+- Sort BTRFS subvolumes in a way that child never appears before parent (#1201120) (vpodzime)
+- Let libcryptsetup handle LUKSname->/dev/mapper/LUKSname for us (vpodzime)
+- Fix the crypto_luks_resize and create a test for it (vpodzime)
+- Add targets to create the SRPM and RPM files easily (vpodzime)
+- Don't round up to multiple of PE size bigger than max value of the rtype (vpodzime)
+- Mark majority of MD RAID tests as slow (vpodzime)
+- Merge pull request #1 from dashea/file-paths (vpodzime)
+- Don't report error for no loop device associated with given file (vpodzime)
+- Skip the detail_data.clean check when running tests in Jenkins (vpodzime)
+- Make package file paths more specific (dshea)
+- Implement and use MD RAID-specific wait for tests (vpodzime)
+- Try to give MD RAID time to sync things before querying them (vpodzime)
+- Fix the default value of the BDMDDetailData.clean field (vpodzime)
+- Do cleanup after every single MD RAID tests (vpodzime)
+- Do cleanup after every single LVM test (vpodzime)
+- Do cleanup after every single BTRFS test (vpodzime)
+- Make sure the LUKS device is closed and removed after tests (vpodzime)
+- Make sure DM maps from tests are removed after tests (vpodzime)
+- Make sure that loop devices are deactivated after tests (vpodzime)
+- Make the tearDown method of the mpath test case better visible (vpodzime)
+- Make sure that the swap is deactivated after tests (vpodzime)
+- Fix docstrings in tests' utils helper functions (vpodzime)
+- Improve the logging tests in utils_test.py (vpodzime)
+- Update the features.rst file (vpodzime)
+- Update the roadmap (vpodzime)
+- Don't check if we get a mountpoint for BTRFS operations (vpodzime)
+
 * Fri Feb 27 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.7-1
 - Be ready for mdadm --examine to not provide some of the values we want (vpodzime)
 - Add exit code information to exec logging (vpodzime)
