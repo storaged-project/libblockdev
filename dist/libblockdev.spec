@@ -213,6 +213,7 @@ with the libblockdev-swap plugin/library.
 
 %package plugins-all
 Summary:     Meta-package that pulls all the libblockdev plugins as dependencies
+Requires: %{name}%{?_isa} = %{version}-%{release}
 Requires: %{name}-btrfs%{?_isa} = %{version}-%{release}
 Requires: %{name}-crypto%{?_isa} = %{version}-%{release}
 Requires: %{name}-dm%{?_isa} = %{version}-%{release}
@@ -235,8 +236,6 @@ CFLAGS="%{optflags}" make %{?_smp_mflags}
 %install
 CFLAGS="%{optflags}" make PREFIX=%{buildroot} SITEDIRS=%{buildroot}%{python2_sitearch},%{buildroot}%{python3_sitearch} %{?_smp_mflags} install
 
-%clean
-rm -rf %{buildroot}
 
 %post -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
@@ -261,6 +260,8 @@ rm -rf %{buildroot}
 
 
 %files
+%{!?_licensedir:%global license %%doc}
+%license LICENSE
 %{_libdir}/libblockdev.so.*
 %{_libdir}/girepository*/BlockDev*.typelib
 %{python2_sitearch}/gi/overrides/*
@@ -268,6 +269,7 @@ rm -rf %{buildroot}
 %{python3_sitearch}/gi/overrides/__pycache__/BlockDev*
 
 %files devel
+%doc features.rst specs.rst
 %{_libdir}/libblockdev.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/blockdev.h
@@ -391,6 +393,11 @@ rm -rf %{buildroot}
 - Update the features.rst file (vpodzime)
 - Update the roadmap (vpodzime)
 - Don't check if we get a mountpoint for BTRFS operations (vpodzime)
+
+* Sun Mar 22 2015 Peter Robinson <pbrobinson@fedoraproject.org> 0.7-2
+- Ship license as per packaging guidelines
+- plugins-all should depend on base library too
+- Add dev docs
 
 * Fri Feb 27 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.7-1
 - Be ready for mdadm --examine to not provide some of the values we want (vpodzime)
