@@ -2,6 +2,7 @@
 **/*.o
 **/*.so
 **/*.pyc
+*libblockdev*.tar.gz
 src/lib/plugin_apis/*.[ch]
 src/lib/test_library
 src/plugins/test_loop
