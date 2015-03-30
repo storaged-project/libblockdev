@@ -648,13 +648,18 @@ BDMDExamineData* bd_md_examine (gchar *device, GError **error) {
         /* error is already populated */
         return NULL;
 
-    /* canonicalize UUIDs */
+    /* canonicalize UUIDs (as long as we got them) */
     orig_data = ret->uuid;
-    ret->uuid = bd_md_canonicalize_uuid (orig_data, error);
-    g_free (orig_data);
+    if (orig_data) {
+        ret->uuid = bd_md_canonicalize_uuid (orig_data, error);
+        g_free (orig_data);
+    }
+
     orig_data = ret->dev_uuid;
-    ret->dev_uuid = bd_md_canonicalize_uuid (orig_data, error);
-    g_free (orig_data);
+    if (orig_data) {
+        ret->dev_uuid = bd_md_canonicalize_uuid (orig_data, error);
+        g_free (orig_data);
+    }
 
     argv[2] = "--brief";
     success = bd_utils_exec_and_capture_output (argv, &output, error);
