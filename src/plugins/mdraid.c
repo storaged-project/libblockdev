@@ -727,7 +727,7 @@ BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error) {
 
     table = parse_mdadm_vars (output, "\n", ":", &num_items);
     g_free (output);
-    if (!table || (num_items < 14)) {
+    if (!table || (num_items == 0)) {
         g_free (raid_name_str);
         /* something bad happened or some expected items were missing  */
         g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to parse mddetail data");
@@ -746,8 +746,10 @@ BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error) {
     ret->device = g_strdup (argv[2]);
 
     orig_uuid = ret->uuid;
-    ret->uuid = bd_md_canonicalize_uuid (orig_uuid, error);
-    g_free (orig_uuid);
+    if (orig_uuid) {
+        ret->uuid = bd_md_canonicalize_uuid (orig_uuid, error);
+        g_free (orig_uuid);
+    }
 
     g_free (raid_name_str);
 
