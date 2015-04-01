@@ -4,7 +4,7 @@ import re
 import time
 from contextlib import contextmanager
 
-from utils import create_sparse_tempfile
+from utils import create_sparse_tempfile, fake_utils
 from gi.repository import BlockDev, GLib
 
 def print_msg(level, msg):
@@ -337,3 +337,14 @@ class MDTestNameNodeBijection(MDTestCase):
         self.assertTrue(succ)
         succ = BlockDev.md_destroy(self.loop_dev3)
         self.assertTrue(succ)
+
+class FakeMDADMutilTest(unittest.TestCase):
+    # no setUp nor tearDown needed, we are gonna use fake utils
+
+    def test_fw_raid_examine(self):
+        """Verify that md_examine works as expected on FW RAID data"""
+
+        with fake_utils("tests/mdadm_fw_raid_examine"):
+            ex_data = BlockDev.md_examine("fake_dev")
+
+        self.assertEqual(ex_data.device, "/dev/md/Volume0")
