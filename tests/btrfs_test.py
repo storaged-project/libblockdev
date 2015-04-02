@@ -3,7 +3,7 @@ from __future__ import division
 import unittest
 import os
 
-from utils import create_sparse_tempfile
+from utils import create_sparse_tempfile, fake_utils
 from gi.repository import GLib, BlockDev
 if not BlockDev.is_initialized():
     BlockDev.init(None, None)
@@ -487,3 +487,22 @@ class BtrfsJustBigEnoughTestCase (unittest.TestCase):
         succ = BlockDev.btrfs_create_volume([self.loop_dev, self.loop_dev2],
                                             None, None, None)
         self.assertTrue(succ)
+
+
+class FakeBtrfsUtilsTestCase(unittest.TestCase):
+    # no setUp nor tearDown needed, we are gonna use fake utils
+
+    def test_list_subvols_weird_docker_data(self):
+        """Verify that list_subvolumes works as expected on weird data from one Docker use case"""
+
+        with fake_utils("tests/btrfs_subvols_docker"):
+            subvols = BlockDev.btrfs_list_subvolumes("fake_dev", False)
+
+        # make sure subvolumes are sorted properly (parents before children)
+        seen = set()
+        for subvol in subvols:
+            seen.add(subvol)
+            self.assertTrue(subvol.parent_id == BlockDev.BTRFS_MAIN_VOLUME_ID or any(subvol.parent_id == other.id for other in seen))
+
+        # check that one of the weird subvols is in the list of subvolumes
+        self.assertTrue(any(subvol for subvol in subvols if subvol.path == "docker/btrfs/subvolumes/f2062b736fbabbe4da752632ac4deae87fcb916add6d7d8f5cecee4cbdc41fd9"))
