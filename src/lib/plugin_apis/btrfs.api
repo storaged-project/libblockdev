@@ -260,6 +260,9 @@ BDBtrfsDeviceInfo** bd_btrfs_list_devices (gchar *device, GError **error);
  *
  * Returns: (array zero-terminated=1): information about the subvolumes that are part of the btrfs volume
  * mounted at @mountpoint or %NULL in case of error
+ *
+ * The subvolumes are sorted in a way that no child subvolume appears in the
+ * list before its parent (sub)volume.
  */
 BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (gchar *mountpoint, gboolean snapshots_only, GError **error);
 

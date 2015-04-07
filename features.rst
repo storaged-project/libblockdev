@@ -47,6 +47,7 @@ LVM
 
 :TODO:
    * read-only locking and default config
+   * LVM cache
 
 :functions:
    * get_global_config [DONE]
@@ -92,6 +93,12 @@ LVM
    * thlvcreate [DONE]
    * thlvpoolname [DONE]
    * thsnapshotcreate [DONE]
+
+   * lvm_cache_create
+   * lvm_cache_destroy
+   * lvm_cache_detach
+   * lvm_cache_status
+   * lvm_get_mode
 
 
 BTRFS
@@ -221,15 +228,39 @@ DEVICE MAPPER
    * get_raid_set_type [DONE]
 
 
+s390
+-----
+
+:supported technologies:
+   DASD, zFCP
+
+:functions:
+   TBD by sbueno
+
+
+KBD (Kernel Block Devices)
+---------------------------
+
+:supported technologies:
+   bcache, zram
+
+:functions:
+   * bcache_create
+   * bcache_destroy
+   * bcache_detach
+   * bcache_status
+   * bcache_set_mode
+   * bcache_get_mode
+
+   * zram_create
+   * zram_destroy
+
+
 utils
 ------
 
 Library (not a plugin) providing utility functions usable for multiple plugins
 and any third-party code.
-
-:TODO:
-   * header files should live under a blockdev/ directory somewhere and should
-     be included as <blockdev/utils.h>, not as "exec.h" and "sizes.h"
 
 :functions:
    * exec_and_report_error [DONE]

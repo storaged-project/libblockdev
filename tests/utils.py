@@ -29,3 +29,16 @@ def create_sparse_file(path, size):
 def udev_settle():
     yield
     os.system("udevadm settle")
+
+@contextmanager
+def fake_utils(path=""):
+    old_path = os.environ.get("PATH", "")
+    if old_path:
+        new_path = path + ":" + old_path
+    else:
+        new_path = path
+    os.environ["PATH"] = new_path
+
+    yield
+
+    os.environ["PATH"] = old_path

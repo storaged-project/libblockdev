@@ -76,6 +76,29 @@ class CryptoTestFormat(CryptoTestCase):
         succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0)
         self.assertTrue(succ)
 
+class CryptoTestResize(CryptoTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_resize(self):
+        """Verify that resizing LUKS device works"""
+
+        # the simple case with password
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, PASSWD, None, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None)
+        self.assertTrue(succ)
+
+        # resize to 512 KiB (1024 * 512B sectors)
+        succ = BlockDev.crypto_luks_resize("libblockdevTestLUKS", 1024)
+        self.assertTrue(succ)
+
+        # resize back to full size
+        succ = BlockDev.crypto_luks_resize("libblockdevTestLUKS", 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
 class CryptoTestOpenClose(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_luks_open_close(self):
@@ -99,12 +122,14 @@ class CryptoTestOpenClose(CryptoTestCase):
         succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None)
         self.assertTrue(succ)
 
+        # use the full /dev/mapper/ path
         succ = BlockDev.crypto_luks_close("/dev/mapper/libblockdevTestLUKS")
         self.assertTrue(succ)
 
         succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", None, self.keyfile)
         self.assertTrue(succ)
 
+        # use just the LUKS device name
         succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
         self.assertTrue(succ)
 
@@ -181,6 +206,11 @@ class CryptoTestLuksStatus(CryptoTestCase):
         succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None)
         self.assertTrue(succ)
 
+        # use the full /dev/mapper path
+        status = BlockDev.crypto_luks_status("/dev/mapper/libblockdevTestLUKS")
+        self.assertEqual(status, "active")
+
+        # use just the LUKS device name
         status = BlockDev.crypto_luks_status("libblockdevTestLUKS")
         self.assertEqual(status, "active")
 
@@ -219,5 +249,5 @@ class CryptoTestLuksOpenRW(CryptoTestCase):
         succ = BlockDev.utils_exec_and_report_error(["dd", "if=/dev/zero", "of=/dev/mapper/libblockdevTestLUKS", "bs=1M", "count=1"])
         self.assertTrue(succ)
 
-        succ = BlockDev.crypto_luks_close("/dev/mapper/libblockdevTestLUKS")
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
         self.assertTrue(succ)

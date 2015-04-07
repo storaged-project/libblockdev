@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     0.7
+Version:     0.9
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -213,6 +213,7 @@ with the libblockdev-swap plugin/library.
 
 %package plugins-all
 Summary:     Meta-package that pulls all the libblockdev plugins as dependencies
+Requires: %{name}%{?_isa} = %{version}-%{release}
 Requires: %{name}-btrfs%{?_isa} = %{version}-%{release}
 Requires: %{name}-crypto%{?_isa} = %{version}-%{release}
 Requires: %{name}-dm%{?_isa} = %{version}-%{release}
@@ -235,8 +236,6 @@ CFLAGS="%{optflags}" make %{?_smp_mflags}
 %install
 CFLAGS="%{optflags}" make PREFIX=%{buildroot} SITEDIRS=%{buildroot}%{python2_sitearch},%{buildroot}%{python3_sitearch} %{?_smp_mflags} install
 
-%clean
-rm -rf %{buildroot}
 
 %post -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
@@ -261,6 +260,8 @@ rm -rf %{buildroot}
 
 
 %files
+%{!?_licensedir:%global license %%doc}
+%license LICENSE
 %{_libdir}/libblockdev.so.*
 %{_libdir}/girepository*/BlockDev*.typelib
 %{python2_sitearch}/gi/overrides/*
@@ -268,6 +269,7 @@ rm -rf %{buildroot}
 %{python3_sitearch}/gi/overrides/__pycache__/BlockDev*
 
 %files devel
+%doc features.rst specs.rst
 %{_libdir}/libblockdev.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/blockdev.h
@@ -362,6 +364,53 @@ rm -rf %{buildroot}
 %files plugins-all
 
 %changelog
+* Tue Apr 07 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.9-1
+- Merge pull request #7 from vpodzime/master-fw_raid_fixes (vpodzime)
+- Try a bit harder when trying to determine MD RAID name (#1207317) (vpodzime)
+- Don't be naïve about mdadm --detail telling us what we want (#1207317) (vpodzime)
+- Ignore libblockdev tarballs (vpodzime)
+- Implement a test of btrfs_list_subvolumes on data from bug report (vpodzime)
+- Implement a context manager for running tests with fake utils (vpodzime)
+- Do not try to cannonicalize MD UUIDs if we didn't get them (#1207317) (vpodzime)
+- Fix the table in roadmap.rst (vpodzime)
+- Enrich the roadmap.rst file and add info about new plans (vpodzime)
+- Sync spec file with downstream (vpodzime)
+
+* Fri Mar 27 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.8-1
+- Merge pull request #6 from vpodzime/master-sort_btrfs_subvolumes (vpodzime)
+- Don't be naïve about mdadm providing us data we would like (#1206394) (vpodzime)
+- Sort BTRFS subvolumes in a way that child never appears before parent (#1201120) (vpodzime)
+- Let libcryptsetup handle LUKSname->/dev/mapper/LUKSname for us (vpodzime)
+- Fix the crypto_luks_resize and create a test for it (vpodzime)
+- Add targets to create the SRPM and RPM files easily (vpodzime)
+- Don't round up to multiple of PE size bigger than max value of the rtype (vpodzime)
+- Mark majority of MD RAID tests as slow (vpodzime)
+- Merge pull request #1 from dashea/file-paths (vpodzime)
+- Don't report error for no loop device associated with given file (vpodzime)
+- Skip the detail_data.clean check when running tests in Jenkins (vpodzime)
+- Make package file paths more specific (dshea)
+- Implement and use MD RAID-specific wait for tests (vpodzime)
+- Try to give MD RAID time to sync things before querying them (vpodzime)
+- Fix the default value of the BDMDDetailData.clean field (vpodzime)
+- Do cleanup after every single MD RAID tests (vpodzime)
+- Do cleanup after every single LVM test (vpodzime)
+- Do cleanup after every single BTRFS test (vpodzime)
+- Make sure the LUKS device is closed and removed after tests (vpodzime)
+- Make sure DM maps from tests are removed after tests (vpodzime)
+- Make sure that loop devices are deactivated after tests (vpodzime)
+- Make the tearDown method of the mpath test case better visible (vpodzime)
+- Make sure that the swap is deactivated after tests (vpodzime)
+- Fix docstrings in tests' utils helper functions (vpodzime)
+- Improve the logging tests in utils_test.py (vpodzime)
+- Update the features.rst file (vpodzime)
+- Update the roadmap (vpodzime)
+- Don't check if we get a mountpoint for BTRFS operations (vpodzime)
+
+* Sun Mar 22 2015 Peter Robinson <pbrobinson@fedoraproject.org> 0.7-2
+- Ship license as per packaging guidelines
+- plugins-all should depend on base library too
+- Add dev docs
+
 * Fri Feb 27 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.7-1
 - Be ready for mdadm --examine to not provide some of the values we want (vpodzime)
 - Add exit code information to exec logging (vpodzime)
