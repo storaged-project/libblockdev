@@ -2,11 +2,36 @@
 This code wraps the bindings automatically created by gobject-introspection.
 They allow for creating more pythonic bindings where necessary.  For instance
 this code allows many functions with default-value arguments to be called
-without specifying such arguments.
+without specifying values for such arguments.
+
+
+A bit more special is the :class:`ErrorProxy` class defined in the second half
+of this file. It enhances work with libblockdev in the area of error reporting
+and exception handling. While native libblockdev functions only raise
+GLib.GError instances via the GObject introspection it is desired to have the
+exceptions more granular -- e.g. raise SwapError instances from swap-related
+functions or even raise SwapErrorNoDev instances from swap-related functions if
+the particular device passed as an argument doesn't exist etc. Also, it is
+desired to be able to distinguish libblockdev errors/exceptions from other
+GLib.GError errors/exceptions by having all libblockdev exception instances
+inherited from a single class -- BlockDevError. That's what the
+:class:`ErrorProxy` class and its instances (one for each libblockdev plugin)
+implement. If for example ``BlockDev.swap.swapon("/dev/sda2")`` is used instead
+of ``BlockDev.swap_swapon("/dev/sda2")`` (note the ``.`` instead of ``_``), then
+if the function raises an error/exception, the exception is transformed into a
+SwapError instance and thus can be caught by ``except BlockDev.SwapError`` or
+even ``BlockDev.BlockDevError``. The ``BlockDev.swap`` object is an instance of
+the :class:`ErrorProxy` class and makes sure the exception transformation
+happens. It of course calls the ``swap_swapon`` function internally so there's
+no code duplication and it propagates non-callable objects directly.
+
 """
+
+from collections import namedtuple
 
 from gi.importer import modules
 from gi.overrides import override
+from gi.repository import GLib
 
 BlockDev = modules['BlockDev']._introspection_module
 __all__ = []
@@ -231,6 +256,8 @@ def swap_swapon(device, priority=-1):
     return _swap_swapon(device, priority)
 __all__.append("swap_swapon")
 
+
+## defined in this overrides only!
 def plugin_specs_from_names(plugin_names):
     ret = []
     for name in plugin_names:
@@ -241,3 +268,179 @@ def plugin_specs_from_names(plugin_names):
 
     return ret
 __all__.append("plugin_specs_from_names")
+
+
+XRule = namedtuple("XRule", ["orig_exc", "regexp", "new_exc"])
+# XXX: how to document namedtuple fields?
+"""
+:field orig_exc: exception class to be transformed
+:field regexp: regexp that needs to match exception msg for this rule to be
+               applicable or None if no match is required
+:field new_exc: exception class to transform the :field:`orig_exc` into
+
+"""
+
+class ErrorProxy(object):
+    """
+    Class that defines a proxy that can be used to transform errors/exceptions
+    reported/raised by functions into different exception instances of given
+    class(es).
+
+    """
+
+    def __init__(self, prefix, mod, tr_excs, xrules=None, use_local=True):
+        """Constructor for the :class:`ErrorProxy` class.
+
+        :param str prefix: prefix of the proxied set of functions
+        :param mod: module that provides the original functions
+        :type mod: module
+        :param tr_excs: list of pairs of exception classes that should be transformed (the first item into the second one)
+        :type tr_excs: list of 2-tuples of exception classes
+        :param xrules: transformation rules for exception transformations which
+                       take precedence over the :param:`orig_excs` ->
+                       :param:`new_excs` mapping (see below for details)
+        :type xrules: set of XRule instances
+        :param bool use_local: if original functions should be first searched in
+                               the local scope (the current module) or not
+
+        The :param:`tr_excs` parameter specifies the basic transformations. If
+        an instance of an error/exception contained in the list as first item of
+        some tuple is raised, it is transformed in an instance of the second
+        item of the same tuple. For example::
+
+          tr_excs = [(GLib.Error, SwapError), (OverflowError, ValueError)]
+
+        would result in every GLib.GError instance raised from any of the
+        functions being transformed into an instance of a SwapError class and
+        similarly for the (OverflowError, ValueError) pair.
+
+        If the :param:`xrules` parameter is specified, it takes precedence over
+        the :param:`tr_excs` list above in the following way -- if raised
+        exception/error is of type equal to :field:`orig_exc` field of any of
+        the :param:`xrules` items then the transformation rule defined by the
+        mapped XRule instance is used unless the :field:`regexp` is not None and
+        doesn't match exception's/error's :attribute:`msg` attribute.
+
+        """
+
+        self._prefix = prefix
+        self._mod = mod
+        self._tr_excs = tr_excs
+        if xrules:
+            self._xrules = {xrule.orig_exc: xrule for xrule in xrules}
+        else:
+            self._xrules = dict()
+        self._use_local = use_local
+        self._wrapped_cache = dict()
+
+    def __dir__(self):
+        """Let's make TAB-TAB in ipython work!"""
+
+        if self._use_local:
+            items = set(dir(self._mod) + locals().keys())
+        else:
+            items = set(dir(self._mod))
+
+        prefix_len = len(self._prefix) + 1 # prefix + "_"
+        return [item[prefix_len:] for item in items if item.startswith(self._prefix)]
+
+    def __getattr__(self, attr):
+        if self._use_local and attr in locals():
+            orig_obj = locals()[self._prefix + "_" + attr]
+        else:
+            orig_obj = getattr(self._mod, self._prefix + "_" + attr)
+
+        if not callable(orig_obj):
+            # not a callable, just return the original object
+            return orig_obj
+
+        if attr in self._wrapped_cache:
+            return self._wrapped_cache[attr]
+
+        def wrapped(*args, **kwargs):
+            try:
+                ret = orig_obj(*args, **kwargs)
+            except tuple(tr_t[0] for tr_t in self._tr_excs) as e:
+                if hasattr(e, "msg"):
+                    msg = e.msg # pylint: disable=no-member
+                elif hasattr(e, "message"):
+                    msg = e.message # pylint: disable=no-member
+                else:
+                    msg = str(e)
+
+                if e in self._xrules:
+                    if self._xrules[e].regexp and self._xrules[e].regexp.match(msg):
+                        raise self._xrules[e].new_exc(msg)
+
+                # try to find exact type match
+                transform = next((tr_t for tr_t in self._tr_excs if self._tr_excs == type(e)), None)
+                if not transform:
+                    # no exact match, but we still caught the exception -> must be some child class
+                    transform = next(tr_t for tr_t in self._tr_excs if isinstance(e, tr_t[0]))
+
+                raise transform[1](msg)
+
+            return ret
+
+        self._wrapped_cache[attr] = wrapped
+        return wrapped
+
+class BlockDevError(Exception):
+    pass
+__all__.append("BlockDevError")
+
+class BtrfsError(BlockDevError):
+    pass
+__all__.append("BtrfsError")
+
+class CryptoError(BlockDevError):
+    pass
+__all__.append("CryptoError")
+
+class DMError(BlockDevError):
+    pass
+__all__.append("DMError")
+
+class LoopError(BlockDevError):
+    pass
+__all__.append("LoopError")
+
+class LVMError(BlockDevError):
+    pass
+__all__.append("LVMError")
+
+class MDRaidError(BlockDevError):
+    pass
+__all__.append("MDRaidError")
+
+class MpathError(BlockDevError):
+    pass
+__all__.append("MpathError")
+
+class SwapError(BlockDevError):
+    pass
+__all__.append("SwapError")
+
+btrfs = ErrorProxy("btrfs", BlockDev, [(GLib.Error, BtrfsError)])
+__all__.append("btrfs")
+
+crypto = ErrorProxy("crypto", BlockDev, [(GLib.Error, CryptoError)])
+__all__.append("crypto")
+
+dm = ErrorProxy("dm", BlockDev, [(GLib.Error, DMError)])
+__all__.append("dm")
+
+loop = ErrorProxy("loop", BlockDev, [(GLib.Error, LoopError)])
+__all__.append("loop")
+
+lvm = ErrorProxy("lvm", BlockDev, [(GLib.Error, LVMError)])
+__all__.append("lvm")
+
+md = ErrorProxy("md", BlockDev, [(GLib.Error, MDRaidError)])
+__all__.append("md")
+
+mpath = ErrorProxy("mpath", BlockDev, [(GLib.Error, MpathError)])
+__all__.append("mpath")
+
+swap = ErrorProxy("swap", BlockDev, [(GLib.Error, SwapError)])
+__all__.append("swap")

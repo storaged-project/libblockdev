@@ -32,6 +32,26 @@
     <xi:include href="xml/swap.xml"/>
     <xi:include href="xml/utils.xml"/>
   </chapter>
+
+  <chapter>
+    <title>GI Overrides</title>
+    <para>
+      The libblockdev library supports <emphasis>GObject introspection</emphasis> and thus
+      can be used from a variety of languages. To make such use even easier and to make
+      the code using libblockdev from different languages than C feel more natural the
+      library also provides so-called <emphasis>overrides</emphasis> &mdash; pieces of
+      code that usually wrap the original libblockdev functions with language-native
+      objects (usually functions) that provide language-specific features like default
+      values for parameters etc.
+    </para>
+    <para>
+      The overrides are not documented here (yet), but it should be easy to directly check
+      the sources for anybody who understands their language of choice. The overrides are
+      located in the <filename class="directory">src/LANG_NAME</filename> directory in the
+      source tree. The only language that libblockdev provides overrides for right now is
+      Python (under the <filename class="directory">src/python</filename> directory).
+    </para>
+  </chapter>
   <index id="api-index-full">
     <title>API Index</title>
     <xi:include href="xml/api-index-full.xml"><xi:fallback /></xi:include>

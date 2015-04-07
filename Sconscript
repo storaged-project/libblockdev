@@ -195,4 +195,4 @@ for header in ["src/utils/utils.h", "src/utils/exec.h", "src/utils/sizes.h",
 install.AddGirFile(gir_file)
 install.AddTypelib(typelib)
 install.AddPkgConfig(pc_file)
-install.AddGIOverrides("src/python/BlockDev.py")
+install.AddGIOverrides("src/python/gi/overrides/BlockDev.py")

@@ -1,6 +1,7 @@
 import os
 import unittest
 import re
+import overrides_hack
 
 from gi.repository import GLib, BlockDev
 if not BlockDev.is_initialized():
