@@ -369,12 +369,13 @@ class ErrorProxy(object):
                 else:
                     msg = str(e)
 
-                if e in self._xrules:
-                    if self._xrules[e].regexp and self._xrules[e].regexp.match(msg):
-                        raise self._xrules[e].new_exc(msg)
+                e_type = type(e)
+                if e_type in self._xrules:
+                    if self._xrules[e_type].regexp and self._xrules[e_type].regexp.match(msg):
+                        raise self._xrules[e_type].new_exc(msg)
 
                 # try to find exact type match
-                transform = next((tr_t for tr_t in self._tr_excs if self._tr_excs == type(e)), None)
+                transform = next((tr_t for tr_t in self._tr_excs if self._tr_excs == e_type), None)
                 if not transform:
                     # no exact match, but we still caught the exception -> must be some child class
                     transform = next(tr_t for tr_t in self._tr_excs if isinstance(e, tr_t[0]))

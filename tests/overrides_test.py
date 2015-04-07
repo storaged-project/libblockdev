@@ -31,3 +31,34 @@ class OverridesTestCase(unittest.TestCase):
         self.assertTrue(BlockDev.lvm.is_supported_pe_size(4 * 1024))
         self.assertEqual(BlockDev.lvm.round_size_to_pe(11 * 1024**2, 4 * 1024**2, True), 12 * 1024**2)
 
+class OverridesUnloadTestCase(unittest.TestCase):
+    def tearDown(self):
+        # make sure the library is initialized with all plugins loaded for other
+        # tests
+        self.assertTrue(BlockDev.reinit(None, True, None))
+
+    def test_xrules(self):
+        """Verify that regexp-based transformation rules work as expected"""
+
+        # unload all plugins first
+        self.assertTrue(BlockDev.reinit([], True, None))
+
+        # no longer loaded
+        with self.assertRaises(BlockDev.BlockDevNotImplementedError):
+            BlockDev.lvm.get_max_lv_size()
+
+        # load the plugins back
+        self.assertTrue(BlockDev.reinit(None, True, None))
+
+    def test_exception_inheritance(self):
+        # unload all plugins first
+        self.assertTrue(BlockDev.reinit([], True, None))
+
+        # the exception should be properly inherited from two classes
+        with self.assertRaises(NotImplementedError):
+            BlockDev.lvm.get_max_lv_size()
+        with self.assertRaises(BlockDev.BlockDevError):
+            BlockDev.lvm.get_max_lv_size()
+
+        # load the plugins back
+        self.assertTrue(BlockDev.reinit(None, True, None))
