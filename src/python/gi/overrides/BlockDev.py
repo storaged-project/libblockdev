@@ -27,6 +27,7 @@ no code duplication and it propagates non-callable objects directly.
 
 """
 
+import re
 from collections import namedtuple
 
 from gi.importer import modules
@@ -421,26 +422,32 @@ class SwapError(BlockDevError):
     pass
 __all__.append("SwapError")
 
-btrfs = ErrorProxy("btrfs", BlockDev, [(GLib.Error, BtrfsError)])
+class BlockDevNotImplementedError(NotImplementedError, BlockDevError):
+    pass
+__all__.append("BlockDevNotImplementedError")
+
+not_implemented_rule = XRule(GLib.Error, re.compile(r".*The function '.*' called, but not implemented!"), BlockDevNotImplementedError)
+
+btrfs = ErrorProxy("btrfs", BlockDev, [(GLib.Error, BtrfsError)], [not_implemented_rule])
 __all__.append("btrfs")
 
-crypto = ErrorProxy("crypto", BlockDev, [(GLib.Error, CryptoError)])
+crypto = ErrorProxy("crypto", BlockDev, [(GLib.Error, CryptoError)], [not_implemented_rule])
 __all__.append("crypto")
 
-dm = ErrorProxy("dm", BlockDev, [(GLib.Error, DMError)])
+dm = ErrorProxy("dm", BlockDev, [(GLib.Error, DMError)], [not_implemented_rule])
 __all__.append("dm")
 
-loop = ErrorProxy("loop", BlockDev, [(GLib.Error, LoopError)])
+loop = ErrorProxy("loop", BlockDev, [(GLib.Error, LoopError)], [not_implemented_rule])
 __all__.append("loop")
 
-lvm = ErrorProxy("lvm", BlockDev, [(GLib.Error, LVMError)])
+lvm = ErrorProxy("lvm", BlockDev, [(GLib.Error, LVMError)], [not_implemented_rule])
 __all__.append("lvm")
 
-md = ErrorProxy("md", BlockDev, [(GLib.Error, MDRaidError)])
+md = ErrorProxy("md", BlockDev, [(GLib.Error, MDRaidError)], [not_implemented_rule])
 __all__.append("md")
 
-mpath = ErrorProxy("mpath", BlockDev, [(GLib.Error, MpathError)])
+mpath = ErrorProxy("mpath", BlockDev, [(GLib.Error, MpathError)], [not_implemented_rule])
 __all__.append("mpath")
 
-swap = ErrorProxy("swap", BlockDev, [(GLib.Error, SwapError)])
+swap = ErrorProxy("swap", BlockDev, [(GLib.Error, SwapError)], [not_implemented_rule])
 __all__.append("swap")
