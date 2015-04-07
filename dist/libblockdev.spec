@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     0.8
+Version:     0.9
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -364,6 +364,18 @@ CFLAGS="%{optflags}" make PREFIX=%{buildroot} SITEDIRS=%{buildroot}%{python2_sit
 %files plugins-all
 
 %changelog
+* Tue Apr 07 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.9-1
+- Merge pull request #7 from vpodzime/master-fw_raid_fixes (vpodzime)
+- Try a bit harder when trying to determine MD RAID name (#1207317) (vpodzime)
+- Don't be naïve about mdadm --detail telling us what we want (#1207317) (vpodzime)
+- Ignore libblockdev tarballs (vpodzime)
+- Implement a test of btrfs_list_subvolumes on data from bug report (vpodzime)
+- Implement a context manager for running tests with fake utils (vpodzime)
+- Do not try to cannonicalize MD UUIDs if we didn't get them (#1207317) (vpodzime)
+- Fix the table in roadmap.rst (vpodzime)
+- Enrich the roadmap.rst file and add info about new plans (vpodzime)
+- Sync spec file with downstream (vpodzime)
+
 * Fri Mar 27 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.8-1
 - Merge pull request #6 from vpodzime/master-sort_btrfs_subvolumes (vpodzime)
 - Don't be naïve about mdadm providing us data we would like (#1206394) (vpodzime)
