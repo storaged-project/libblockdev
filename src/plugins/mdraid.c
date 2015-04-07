@@ -627,6 +627,8 @@ BDMDExamineData* bd_md_examine (gchar *device, GError **error) {
     gchar *value = NULL;
     gchar **output_fields = NULL;
     gchar *orig_data = NULL;
+    guint i = 0;
+    gboolean found_dev_name = FALSE;
 
     success = bd_utils_exec_and_capture_output (argv, &output, error);
     if (!success)
@@ -667,10 +669,15 @@ BDMDExamineData* bd_md_examine (gchar *device, GError **error) {
         /* error is already populated */
         return FALSE;
 
-    output_fields = g_strsplit (output, " ", 0);
-    if (g_str_has_prefix (output_fields[1], "/dev/md/"))
-        ret->device = g_strdup (output_fields[1]);
-    else
+    /* try to find the "ARRAY /dev/md/something" pair in the output */
+    output_fields = g_strsplit_set (output, " \n", 0);
+    for (i=0; !found_dev_name && (i < g_strv_length (output_fields) - 1); i++)
+        if (g_strcmp0 (output_fields[i], "ARRAY") == 0)
+            if (g_str_has_prefix (output_fields[i+1], "/dev/md/")) {
+                ret->device = g_strdup (output_fields[i+1]);
+                found_dev_name = TRUE;
+            }
+    if (!found_dev_name)
         ret->device = NULL;
     g_strfreev (output_fields);
 
@@ -727,7 +734,7 @@ BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error) {
 
     table = parse_mdadm_vars (output, "\n", ":", &num_items);
     g_free (output);
-    if (!table || (num_items < 14)) {
+    if (!table || (num_items == 0)) {
         g_free (raid_name_str);
         /* something bad happened or some expected items were missing  */
         g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to parse mddetail data");
@@ -746,8 +753,10 @@ BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error) {
     ret->device = g_strdup (argv[2]);
 
     orig_uuid = ret->uuid;
-    ret->uuid = bd_md_canonicalize_uuid (orig_uuid, error);
-    g_free (orig_uuid);
+    if (orig_uuid) {
+        ret->uuid = bd_md_canonicalize_uuid (orig_uuid, error);
+        g_free (orig_uuid);
+    }
 
     g_free (raid_name_str);
 
