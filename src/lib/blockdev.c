@@ -61,16 +61,46 @@ static void set_plugin_so_name (BDPlugin name, gchar *so_name) {
     plugins[name].spec.so_name = so_name;
 }
 
+static gboolean unload_plugins () {
+    if (plugins[BD_PLUGIN_LVM].handle && !unload_lvm (plugins[BD_PLUGIN_LVM].handle))
+        g_warning ("Failed to close the lvm plugin");
+    plugins[BD_PLUGIN_LVM].handle = NULL;
+
+    if (plugins[BD_PLUGIN_BTRFS].handle && !unload_btrfs (plugins[BD_PLUGIN_BTRFS].handle))
+        g_warning ("Failed to close the btrfs plugin");
+    plugins[BD_PLUGIN_BTRFS].handle = NULL;
+
+    if (plugins[BD_PLUGIN_SWAP].handle && !unload_swap (plugins[BD_PLUGIN_SWAP].handle))
+        g_warning ("Failed to close the swap plugin");
+    plugins[BD_PLUGIN_SWAP].handle = NULL;
+
+    if (plugins[BD_PLUGIN_LOOP].handle && !unload_loop (plugins[BD_PLUGIN_LOOP].handle))
+        g_warning ("Failed to close the loop plugin");
+    plugins[BD_PLUGIN_LOOP].handle = NULL;
+
+    if (plugins[BD_PLUGIN_CRYPTO].handle && !unload_crypto (plugins[BD_PLUGIN_CRYPTO].handle))
+        g_warning ("Failed to close the crypto plugin");
+    plugins[BD_PLUGIN_CRYPTO].handle = NULL;
+
+    if (plugins[BD_PLUGIN_MPATH].handle && !unload_mpath (plugins[BD_PLUGIN_MPATH].handle))
+        g_warning ("Failed to close the mpath plugin");
+    plugins[BD_PLUGIN_MPATH].handle = NULL;
+
+    if (plugins[BD_PLUGIN_DM].handle && !unload_dm (plugins[BD_PLUGIN_DM].handle))
+        g_warning ("Failed to close the dm plugin");
+    plugins[BD_PLUGIN_DM].handle = NULL;
+
+    if (plugins[BD_PLUGIN_MDRAID].handle && !unload_mdraid (plugins[BD_PLUGIN_MDRAID].handle))
+        g_warning ("Failed to close the mdraid plugin");
+    plugins[BD_PLUGIN_MDRAID].handle = NULL;
+}
+
 static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload) {
     guint8 i = 0;
     gboolean requested_loaded = TRUE;
 
     if (reload)
-        for (i=0; i < BD_PLUGIN_UNDEF; i++) {
-            if (plugins[i].handle && (dlclose (plugins[i].handle) != 0))
-                g_warning ("Failed to close %s plugin", plugin_names[i]);
-            plugins[i].handle = NULL;
-        }
+        unload_plugins ();
 
     /* clean all so names and populate back those that are requested or the
        defaults */
@@ -115,7 +145,7 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload) {
     return requested_loaded;
 }
 
-GQuark bd_init_error_quark (void)
+GQuark bd_init_error_quark ()
 {
     return g_quark_from_static_string ("g-bd-init-error-quark");
 }

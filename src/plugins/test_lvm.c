@@ -44,47 +44,57 @@ int main (void) {
     }
     g_clear_error (&error);
 
-    if (bd_lvm_is_supported_pe_size(16 MEBIBYTE))
+    if (bd_lvm_is_supported_pe_size(16 MEBIBYTE, &error))
         puts ("16 MiB PE: Supported.");
     else
         puts ("16 MiB PE: Unsupported.");
+    g_clear_error (&error);
 
-    sizes = bd_lvm_get_supported_pe_sizes ();
+    sizes = bd_lvm_get_supported_pe_sizes (&error);
     g_printf ("Supported PE sizes: ");
     for (i=0; sizes[i] != 0; i++)
         g_printf ("%s, ", bd_utils_size_human_readable (sizes[i]));
     puts ("");
+    g_clear_error (&error);
     g_free (sizes);
 
-    g_printf ("max LV size: %s\n", bd_utils_size_human_readable(bd_lvm_get_max_lv_size()));
+    g_printf ("max LV size: %s\n", bd_utils_size_human_readable(bd_lvm_get_max_lv_size(&error)));
 
-    result = bd_lvm_round_size_to_pe ((13 MiB), USE_DEFAULT_PE_SIZE, TRUE);
+    result = bd_lvm_round_size_to_pe ((13 MiB), USE_DEFAULT_PE_SIZE, TRUE, &error);
+    g_clear_error (&error);
     g_printf ("up-rounded size 13 MiB: %s\n", bd_utils_size_human_readable(result));
-    result = bd_lvm_round_size_to_pe ((13 MiB), USE_DEFAULT_PE_SIZE, FALSE);
+    result = bd_lvm_round_size_to_pe ((13 MiB), USE_DEFAULT_PE_SIZE, FALSE, &error);
+    g_clear_error (&error);
     g_printf ("down-rounded size 13 MiB: %s\n", bd_utils_size_human_readable(result));
 
-    result = bd_lvm_get_lv_physical_size ((13 MiB), USE_DEFAULT_PE_SIZE);
+    result = bd_lvm_get_lv_physical_size ((13 MiB), USE_DEFAULT_PE_SIZE, &error);
+    g_clear_error (&error);
     g_printf ("13 MiB physical size: %s\n", bd_utils_size_human_readable(result));
 
-    result = bd_lvm_get_thpool_padding ((1 GiB), USE_DEFAULT_PE_SIZE, TRUE);
+    result = bd_lvm_get_thpool_padding ((1 GiB), USE_DEFAULT_PE_SIZE, TRUE, &error);
+    g_clear_error (&error);
     g_printf ("1 GiB ThPool padding size (included): %s\n", bd_utils_size_human_readable(result));
-    result = bd_lvm_get_thpool_padding ((1 GiB), USE_DEFAULT_PE_SIZE, FALSE);
+    result = bd_lvm_get_thpool_padding ((1 GiB), USE_DEFAULT_PE_SIZE, FALSE, &error);
+    g_clear_error (&error);
     g_printf ("1 GiB ThPool padding size (not included): %s\n", bd_utils_size_human_readable(result));
 
-    if (bd_lvm_is_valid_thpool_md_size (512 MiB))
+    if (bd_lvm_is_valid_thpool_md_size (512 MiB, &error))
         puts ("512 MiB ThPool MD size: Valid.");
     else
         puts ("512 MiB ThPool MD size: Invalid.");
+    g_clear_error (&error);
 
-    if (bd_lvm_is_valid_thpool_chunk_size ((192 KiB), TRUE))
+    if (bd_lvm_is_valid_thpool_chunk_size ((192 KiB), TRUE, &error))
         puts ("192 KiB ThPool chunk size (discard): Valid.");
     else
         puts ("192 KiB ThPool chunk size (discard): Invalid.");
+    g_clear_error (&error);
 
-    if (bd_lvm_is_valid_thpool_chunk_size ((192 KiB), FALSE))
+    if (bd_lvm_is_valid_thpool_chunk_size ((192 KiB), FALSE, &error))
         puts ("192 KiB ThPool chunk size (no discard): Valid.");
     else
         puts ("192 KiB ThPool chunk size (no discard): Invalid.");
+    g_clear_error (&error);
 
     succ = bd_lvm_pvcreate ("/dev/xd1", 0, 0, &error);
     if (!succ)

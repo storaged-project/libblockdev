@@ -19,7 +19,7 @@ int main (int argc, char* argv[]) {
     else
         puts ("'undef' plugin not available");
 
-    g_printf ("max LV size: %"G_GUINT64_FORMAT"\n", bd_lvm_get_max_lv_size());
+    g_printf ("max LV size: %"G_GUINT64_FORMAT"\n", bd_lvm_get_max_lv_size(&error));
 
     return 0;
 }

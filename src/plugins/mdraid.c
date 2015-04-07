@@ -289,11 +289,12 @@ static BDMDDetailData* get_detail_data_from_table (GHashTable *table, gboolean f
  * bd_md_get_superblock_size:
  * @size: size of the array
  * @version: (allow-none): metadata version or %NULL to use the current default version
+ * @error: (out): place to store error (if any)
  *
  * Returns: Calculated superblock size for given array @size and metadata @version
  * or default if unsupported @version is used.
  */
-guint64 bd_md_get_superblock_size (guint64 size, gchar *version) {
+guint64 bd_md_get_superblock_size (guint64 size, gchar *version, GError **error __attribute__((unused))) {
     guint64 headroom = BD_MD_SUPERBLOCK_SIZE;
     guint64 min_headroom = (1 MiB);
 
