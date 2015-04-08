@@ -42,3 +42,12 @@ def fake_utils(path="."):
     yield
 
     os.environ["PATH"] = old_path
+
+@contextmanager
+def fake_path(path=None):
+    old_path = os.environ.get("PATH", "")
+    os.environ["PATH"] = path or ""
+
+    yield
+
+    os.environ["PATH"] = old_path

@@ -3,7 +3,7 @@ import os
 import math
 import overrides_hack
 
-from utils import create_sparse_tempfile
+from utils import create_sparse_tempfile, fake_utils, fake_path
 from gi.repository import BlockDev, GLib
 if not BlockDev.is_initialized():
     BlockDev.init(None, None)
@@ -759,3 +759,43 @@ class LvmTestThSnapshotCreate(LvmPVVGLVthLVsnapshotTestCase):
 
         info = BlockDev.lvm_lvinfo("testVG", "testThLV_bak")
         self.assertIn("V", info.attr)
+
+class LVMUnloadTest(unittest.TestCase):
+    def tearDown(self):
+        # make sure the library is initialized with all plugins loaded for other
+        # tests
+        self.assertTrue(BlockDev.reinit(None, True, None))
+
+    def test_check_low_version(self):
+        """Verify that checking the minimum LVM version works as expected"""
+
+        # unload all plugins first
+        self.assertTrue(BlockDev.reinit([], True, None))
+
+        with fake_utils("tests/lvm_low_version/"):
+            # too low version of LVM available, the LVM plugin should fail to load
+            with self.assertRaises(GLib.GError):
+                BlockDev.reinit(None, True, None)
+
+            self.assertNotIn("lvm", BlockDev.get_available_plugin_names())
+
+        # load the plugins back
+        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertIn("lvm", BlockDev.get_available_plugin_names())
+
+    def test_check_no_lvm(self):
+        """Verify that checking lvm tool availability works as expected"""
+
+        # unload all plugins first
+        self.assertTrue(BlockDev.reinit([], True, None))
+
+        with fake_path():
+            # no lvm tool available, the LVM plugin should fail to load
+            with self.assertRaises(GLib.GError):
+                BlockDev.reinit(None, True, None)
+
+            self.assertNotIn("lvm", BlockDev.get_available_plugin_names())
+
+        # load the plugins back
+        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertIn("lvm", BlockDev.get_available_plugin_names())

@@ -4,6 +4,8 @@
 #ifndef BD_LVM
 #define BD_LVM
 
+#define LVM_MIN_VERSION "2.02.116"
+
 #ifdef __LP64__
 // 64bit system
 #define BD_LVM_MAX_LV_SIZE (8 EiB)

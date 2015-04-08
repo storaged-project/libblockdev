@@ -123,6 +123,20 @@ gchar const * const * get_supported_functions () {
     return supported_functions;
 }
 
+/**
+ * check: (skip)
+ */
+gboolean check() {
+    GError *error = NULL;
+    gboolean ret = bd_utils_check_util_version ("lvm", LVM_MIN_VERSION, "version", "LVM version:\\s+([\\d\\.]+)", &error);
+
+    if (!ret && error) {
+        g_warning("Cannot load the LVM plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+    return ret;
+}
+
 static gboolean call_lvm_and_report_error (gchar **args, GError **error) {
     gboolean success = FALSE;
     guint i = 0;
