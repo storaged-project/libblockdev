@@ -31,6 +31,14 @@ class OverridesTestCase(unittest.TestCase):
         self.assertTrue(BlockDev.lvm.is_supported_pe_size(4 * 1024))
         self.assertEqual(BlockDev.lvm.round_size_to_pe(11 * 1024**2, 4 * 1024**2, True), 12 * 1024**2)
 
+        # test that utils functions are available via a proxy too
+        try:
+            BlockDev.utils.version_cmp("1.1", "malformed")
+        except BlockDev.BlockDevError as e:
+            self.assertTrue(isinstance(e, BlockDev.UtilsError))
+
+        self.assertEqual(BlockDev.utils.version_cmp("1.1", "1.2"), -1)
+
 class OverridesUnloadTestCase(unittest.TestCase):
     def tearDown(self):
         # make sure the library is initialized with all plugins loaded for other

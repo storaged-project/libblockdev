@@ -424,6 +424,10 @@ class SwapError(BlockDevError):
     pass
 __all__.append("SwapError")
 
+class UtilsError(BlockDevError):
+    pass
+__all__.append("UtilsError")
+
 class BlockDevNotImplementedError(NotImplementedError, BlockDevError):
     pass
 __all__.append("BlockDevNotImplementedError")
@@ -453,3 +457,6 @@ __all__.append("mpath")
 
 swap = ErrorProxy("swap", BlockDev, [(GLib.Error, SwapError)], [not_implemented_rule])
 __all__.append("swap")
+
+utils = ErrorProxy("utils", BlockDev, [(GLib.Error, UtilsError)])
+__all__.append("utils")
