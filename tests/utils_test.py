@@ -1,6 +1,7 @@
 import unittest
 import re
 import overrides_hack
+from utils import fake_utils
 
 from gi.repository import BlockDev, GLib
 if not BlockDev.is_initialized():
@@ -85,3 +86,39 @@ class UtilsExecLoggingTest(unittest.TestCase):
         self.assertEqual(BlockDev.utils_version_cmp("1.1", "1.1.1"), -1)
         self.assertEqual(BlockDev.utils_version_cmp("1.1.1", "1.1.1-1"), -1)
         self.assertEqual(BlockDev.utils_version_cmp("1.1.2", "1.2"), -1)
+
+    def test_util_version(self):
+        """Verify that checking utility availability works as expected"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.utils_check_util_version("libblockdev-fake-util", None, None, None)
+
+        with fake_utils("tests/utils_fake_util/"):
+            with self.assertRaises(GLib.GError):
+                # with no argument, the output is "Version: 1.2" which is not a
+                # valid version without regexp
+                BlockDev.utils_check_util_version("libblockdev-fake-util", "1.3", "", None)
+
+            with self.assertRaises(GLib.GError):
+                # libblockdev-fake-util with no arguments reports 1.2 which is too low
+                BlockDev.utils_check_util_version("libblockdev-fake-util", "1.3", "", "Version:\\s(.*)")
+
+            # just what we require
+            self.assertTrue(BlockDev.utils_check_util_version("libblockdev-fake-util", "1.2", "", "Version:\\s(.*)"))
+
+            with self.assertRaises(GLib.GError):
+                # libblockdev-fake-util with "version" reports 1.1 which is too low
+                BlockDev.utils_check_util_version("libblockdev-fake-util", "1.2", "version", "Version:\\s(.*)")
+
+            # just what we require
+            self.assertTrue(BlockDev.utils_check_util_version("libblockdev-fake-util", "1.1", "version", "Version:\\s(.*)"))
+
+            with self.assertRaises(GLib.GError):
+                # libblockdev-fake-util with "--version" reports 1.0 which is too low
+                BlockDev.utils_check_util_version("libblockdev-fake-util", "1.1", "--version", None)
+
+            # just what we require
+            self.assertTrue(BlockDev.utils_check_util_version("libblockdev-fake-util", "1.0", "--version", None))
+
+            # lower required version
+            self.assertTrue(BlockDev.utils_check_util_version("libblockdev-fake-util", "0.9", "--version", None))

@@ -274,3 +274,90 @@ gint bd_utils_version_cmp (gchar *ver_string1, gchar *ver_string2, GError **erro
 
     return ret;
 }
+
+/**
+ * bd_utils_check_util_version:
+ * @util: name of the utility to check
+ * @version: (allow-none): minimum required version of the utility or %NULL
+ *           if no version is required
+ * @version_arg: (allow-none): argument to use with the @util to get version
+ *               info or %NULL to use "--version"
+ * @version_regexp: (allow-none): regexp to extract version from the version
+ *                  info or %NULL if only version is printed by "$ @util @version_arg"
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @util is available in a version >= @version or not
+ *          (@error is set in such case).
+ */
+gboolean bd_utils_check_util_version (gchar *util, gchar *version, gchar *version_arg, gchar *version_regexp, GError **error) {
+    gchar *util_path = NULL;
+    gchar *argv[] = {util, version_arg ? version_arg : "--version", NULL};
+    gchar *output = NULL;
+    gboolean succ = FALSE;
+    GRegex *regex = NULL;
+    GMatchInfo *match_info = NULL;
+    gchar *version_str = NULL;
+
+    util_path = g_find_program_in_path (util);
+    if (!util_path) {
+        g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_UTIL_UNAVAILABLE,
+                     "The '%s' utility is not available", util);
+        return FALSE;
+    }
+    g_free (util_path);
+
+    if (!version)
+        /* nothing more to do here */
+        return TRUE;
+
+    succ = bd_utils_exec_and_capture_output (argv, &output, error);
+    if (!succ) {
+        /* error is already populated */
+        return FALSE;
+    }
+
+    if (version_regexp) {
+        regex = g_regex_new (version_regexp, 0, 0, error);
+        if (!regex) {
+            g_free (output);
+            /* error is already populated */
+            return FALSE;
+        }
+
+        succ = g_regex_match (regex, output, 0, &match_info);
+        if (!succ) {
+            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_UTIL_UNKNOWN_VER,
+                         "Failed to determine %s's version from: %s", util, output);
+            g_free (output);
+            g_regex_unref (regex);
+            return FALSE;
+        }
+        g_regex_unref (regex);
+
+        version_str = g_match_info_fetch (match_info, 1);
+        g_match_info_free (match_info);
+        g_free (output);
+    }
+    else
+        version_str = g_strstrip (output);
+
+    if (!version_str || (g_strcmp0 (version_str, "") == 0)) {
+        g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_UTIL_UNKNOWN_VER,
+                     "Failed to determine %s's version from: %s", util, output);
+        g_free (version_str);
+        return FALSE;
+    }
+
+    if (bd_utils_version_cmp (version_str, version, error) < 0) {
+        /* smaller version or error */
+        if (!(*error))
+            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_UTIL_LOW_VER,
+                         "Too low version of %s: %s. At least %s required.",
+                         util, version_str, version);
+        g_free (version_str);
+        return FALSE;
+    }
+
+    g_free (version_str);
+    return TRUE;
+}

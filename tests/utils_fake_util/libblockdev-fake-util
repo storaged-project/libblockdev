@@ -1,0 +1,15 @@
+#!/bin/bash
+
+echo "$@"|grep -- "--version" &>/dev/null
+is_dash_version=$?
+
+echo "$@"|grep "version" &>/dev/null
+is_version=$?
+
+if [ $is_dash_version -eq "0" ]; then
+    echo "1.0"
+elif [ $is_version -eq "0" ]; then
+    echo "Version: 1.1"
+else
+    echo "Version: 1.2"
+fi
