@@ -2,7 +2,7 @@ import unittest
 import re
 import overrides_hack
 
-from gi.repository import BlockDev
+from gi.repository import BlockDev, GLib
 if not BlockDev.is_initialized():
     BlockDev.init(None, None)
 
@@ -52,3 +52,36 @@ class UtilsExecLoggingTest(unittest.TestCase):
         succ = BlockDev.utils_exec_and_report_error(["true"])
         self.assertTrue(succ)
         self.assertEqual(old_log, self.log)
+
+    def test_version_cmp(self):
+        """Verify that version comparison works as expected"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.utils_version_cmp("malformed", "1.0")
+        with self.assertRaises(GLib.GError):
+            BlockDev.utils_version_cmp("1.0", "malformed")
+        with self.assertRaises(GLib.GError):
+            BlockDev.utils_version_cmp("1,0", "1.0")
+        with self.assertRaises(GLib.GError):
+            BlockDev.utils_version_cmp("1.0", "1,0")
+        with self.assertRaises(GLib.GError):
+            BlockDev.utils_version_cmp("1.x.0", "1.0")
+        with self.assertRaises(GLib.GError):
+            BlockDev.utils_version_cmp("1.0", "1.x.0")
+
+        self.assertEqual(BlockDev.utils_version_cmp("1", "1"), 0)
+        self.assertEqual(BlockDev.utils_version_cmp("1.0", "1.0"), 0)
+        self.assertEqual(BlockDev.utils_version_cmp("1.0.1", "1.0.1"), 0)
+        self.assertEqual(BlockDev.utils_version_cmp("1.0.1-1", "1.0.1-1"), 0)
+
+        self.assertEqual(BlockDev.utils_version_cmp("1.1", "1"), 1)
+        self.assertEqual(BlockDev.utils_version_cmp("1.1", "1.0"), 1)
+        self.assertEqual(BlockDev.utils_version_cmp("1.1.1", "1.1"), 1)
+        self.assertEqual(BlockDev.utils_version_cmp("1.1.1-1", "1.1.1"), 1)
+        self.assertEqual(BlockDev.utils_version_cmp("1.2", "1.1.2"), 1)
+
+        self.assertEqual(BlockDev.utils_version_cmp("1", "1.1"), -1)
+        self.assertEqual(BlockDev.utils_version_cmp("1.0", "1.1"), -1)
+        self.assertEqual(BlockDev.utils_version_cmp("1.1", "1.1.1"), -1)
+        self.assertEqual(BlockDev.utils_version_cmp("1.1.1", "1.1.1-1"), -1)
+        self.assertEqual(BlockDev.utils_version_cmp("1.1.2", "1.2"), -1)

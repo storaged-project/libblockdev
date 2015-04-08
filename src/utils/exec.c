@@ -200,3 +200,77 @@ gboolean bd_utils_init_logging (BDUtilsLogFunc new_log_func, GError **error __at
 
     return TRUE;
 }
+
+/**
+ * bd_utils_version_cmp:
+ * @ver_string1: first version string
+ * @ver_string2: second version string
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: -1, 0 or 1 if @ver_string1 is lower, the same or higher version as
+ *          @ver_string2 respectively. If an error occurs, returns -2 and @error
+ *          is set.
+ *
+ * **ONLY SUPPORTS VERSION STRINGS OF FORMAT X[.Y[.Z[.Z2[.Z3...[-R]]]]] where all components
+ *   are natural numbers!**
+ */
+gint bd_utils_version_cmp (gchar *ver_string1, gchar *ver_string2, GError **error) {
+    gchar **v1_fields = NULL;
+    gchar **v2_fields = NULL;
+    guint v1_fields_len = 0;
+    guint v2_fields_len = 0;
+    guint64 v1_value = 0;
+    guint64 v2_value = 0;
+    GRegex *regex = NULL;
+    gboolean success = FALSE;
+    guint i = 0;
+    gint ret = -2;
+
+    regex = g_regex_new ("^(\\d+)(\\.\\d+)*(-\\d)?$", 0, 0, error);
+    if (!regex) {
+        /* error is already populated */
+        return -2;
+    }
+
+    success = g_regex_match (regex, ver_string1, 0, NULL);
+    if (!success) {
+        g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_INVAL_VER,
+                     "Invalid or unsupported version (1) format: %s", ver_string1);
+        return -2;
+    }
+    success = g_regex_match (regex, ver_string2, 0, NULL);
+    if (!success) {
+        g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_INVAL_VER,
+                     "Invalid or unsupported version (2) format: %s", ver_string2);
+        return -2;
+    }
+    g_regex_unref (regex);
+
+    v1_fields = g_strsplit_set (ver_string1, ".-", 0);
+    v2_fields = g_strsplit_set (ver_string2, ".-", 0);
+    v1_fields_len = g_strv_length (v1_fields);
+    v2_fields_len = g_strv_length (v2_fields);
+
+    for (i=0; (i < v1_fields_len) && (i < v2_fields_len) && ret == -2; i++) {
+        v1_value = g_ascii_strtoull (v1_fields[i], NULL, 0);
+        v2_value = g_ascii_strtoull (v2_fields[i], NULL, 0);
+        if (v1_value < v2_value)
+            ret = -1;
+        else if (v1_value > v2_value)
+            ret = 1;
+    }
+
+    if (ret == -2) {
+        if (v1_fields_len < v2_fields_len)
+            ret = -1;
+        else if (v1_fields_len > v2_fields_len)
+            ret = 1;
+        else
+            ret = 0;
+    }
+
+    g_strfreev (v1_fields);
+    g_strfreev (v2_fields);
+
+    return ret;
+}
