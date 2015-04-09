@@ -122,6 +122,20 @@ void bd_md_detail_data_free (BDMDDetailData *data) {
 }
 
 /**
+ * check: (skip)
+ */
+gboolean check() {
+    GError *error = NULL;
+    gboolean ret = bd_utils_check_util_version ("mdadm", MDADM_MIN_VERSION, NULL, "mdadm - v([\\d\\.]+)", &error);
+
+    if (!ret && error) {
+        g_warning("Cannot load the MDRAID plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+    return ret;
+}
+
+/**
  * parse_mdadm_vars: (skip)
  * @str: string to parse
  * @item_sep: item separator(s) (key-value pairs separator)

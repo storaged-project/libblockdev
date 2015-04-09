@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cat <<EOF
+mdadm - v3.3.1 - 21st August 2014
+EOF
