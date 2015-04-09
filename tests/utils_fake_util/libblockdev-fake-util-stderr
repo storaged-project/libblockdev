@@ -1,0 +1,3 @@
+#!/bin/bash
+
+echo "Version: 1.1" 1>&2

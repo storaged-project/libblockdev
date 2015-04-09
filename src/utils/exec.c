@@ -312,8 +312,15 @@ gboolean bd_utils_check_util_version (gchar *util, gchar *version, gchar *versio
 
     succ = bd_utils_exec_and_capture_output (argv, &output, error);
     if (!succ) {
-        /* error is already populated */
-        return FALSE;
+        /* if we got nothing on STDOUT, try using STDERR data from error message */
+        if (g_error_matches ((*error), BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
+            output = g_strdup ((*error)->message);
+            g_clear_error (error);
+        } else if (g_error_matches ((*error), BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED)) {
+            /* exit status != 0, try using the output anyway */
+            output = g_strdup ((*error)->message);
+            g_clear_error (error);
+        }
     }
 
     if (version_regexp) {

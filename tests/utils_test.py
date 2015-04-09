@@ -122,3 +122,9 @@ class UtilsExecLoggingTest(unittest.TestCase):
 
             # lower required version
             self.assertTrue(BlockDev.utils_check_util_version("libblockdev-fake-util", "0.9", "--version", None))
+
+            # version on stderr
+            self.assertTrue(BlockDev.utils_check_util_version("libblockdev-fake-util-stderr", "1.1", "version", "Version:\\s(.*)"))
+
+            # exit code != 0
+            self.assertTrue(BlockDev.utils_check_util_version("libblockdev-fake-util-stderr", "1.1", "version", "Version:\\s(.*)"))
