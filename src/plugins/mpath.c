@@ -39,6 +39,30 @@ GQuark bd_mpath_error_quark (void)
 }
 
 /**
+ * check: (skip)
+ */
+gboolean check() {
+    GError *error = NULL;
+    gboolean ret = bd_utils_check_util_version ("multipath", MULTIPATH_MIN_VERSION, NULL, "multipath-tools v([\\d\\.]+)", &error);
+
+    if (!ret && error) {
+        g_warning("Cannot load the mpath plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+
+    if (!ret)
+        return FALSE;
+
+    /* mpathconf doesn't report its version */
+    ret = bd_utils_check_util_version ("mpathconf", NULL, NULL, NULL, &error);
+    if (!ret && error) {
+        g_warning("Cannot load the mpath plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+    return ret;
+}
+
+/**
  * bd_mpath_flush_mpaths:
  * @error: (out): place to store error (if any)
  *

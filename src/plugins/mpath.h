@@ -3,6 +3,8 @@
 #ifndef BD_MPATH
 #define BD_MPATH
 
+#define MULTIPATH_MIN_VERSION "0.4.9"
+
 GQuark bd_mpath_error_quark (void);
 #define BD_MPATH_ERROR bd_mpath_error_quark ()
 typedef enum {
