@@ -4,7 +4,7 @@ import unittest
 import os
 
 import overrides_hack
-from utils import create_sparse_tempfile, fake_utils
+from utils import create_sparse_tempfile, fake_utils, fake_path
 from gi.repository import GLib, BlockDev
 if not BlockDev.is_initialized():
     BlockDev.init(None, None)
@@ -507,3 +507,43 @@ class FakeBtrfsUtilsTestCase(unittest.TestCase):
 
         # check that one of the weird subvols is in the list of subvolumes
         self.assertTrue(any(subvol for subvol in subvols if subvol.path == "docker/btrfs/subvolumes/f2062b736fbabbe4da752632ac4deae87fcb916add6d7d8f5cecee4cbdc41fd9"))
+
+class BTRFSUnloadTest(unittest.TestCase):
+    def tearDown(self):
+        # make sure the library is initialized with all plugins loaded for other
+        # tests
+        self.assertTrue(BlockDev.reinit(None, True, None))
+
+    def test_check_low_version(self):
+        """Verify that checking the minimum BTRFS version works as expected"""
+
+        # unload all plugins first
+        self.assertTrue(BlockDev.reinit([], True, None))
+
+        with fake_utils("tests/btrfs_low_version/"):
+            # too low version of BTRFS available, the BTRFS plugin should fail to load
+            with self.assertRaises(GLib.GError):
+                BlockDev.reinit(None, True, None)
+
+            self.assertNotIn("btrfs", BlockDev.get_available_plugin_names())
+
+        # load the plugins back
+        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertIn("btrfs", BlockDev.get_available_plugin_names())
+
+    def test_check_no_btrfs(self):
+        """Verify that checking btrfs tool availability works as expected"""
+
+        # unload all plugins first
+        self.assertTrue(BlockDev.reinit([], True, None))
+
+        with fake_path():
+            # no btrfs tool available, the BTRFS plugin should fail to load
+            with self.assertRaises(GLib.GError):
+                BlockDev.reinit(None, True, None)
+
+            self.assertNotIn("btrfs", BlockDev.get_available_plugin_names())
+
+        # load the plugins back
+        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertIn("btrfs", BlockDev.get_available_plugin_names())

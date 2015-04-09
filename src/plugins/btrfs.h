@@ -5,6 +5,8 @@
 #ifndef BD_BTRFS
 #define BD_BTRFS
 
+#define BTRFS_MIN_VERSION "3.18.2"
+
 #define BD_BTRFS_MAIN_VOLUME_ID 5
 #define BD_BTRFS_MIN_MEMBER_SIZE (16 MiB)
 
