@@ -2,7 +2,7 @@ import unittest
 import os
 import overrides_hack
 
-from utils import create_sparse_tempfile
+from utils import create_sparse_tempfile, fake_utils, fake_path
 from gi.repository import BlockDev, GLib
 if not BlockDev.is_initialized():
     BlockDev.init(None, None)
@@ -80,3 +80,76 @@ class SwapTestCase(unittest.TestCase):
 
         os.path.exists ("/dev/disk/by-label/TestBlockDevSwap")
 
+class SwapUnloadTest(unittest.TestCase):
+    def tearDown(self):
+        # make sure the library is initialized with all plugins loaded for other
+        # tests
+        self.assertTrue(BlockDev.reinit(None, True, None))
+
+    def test_check_low_version(self):
+        """Verify that checking the minimum swap utils versions works as expected"""
+
+        # unload all plugins first
+        self.assertTrue(BlockDev.reinit([], True, None))
+
+        with fake_utils("tests/swap_low_version/"):
+            # too low version of mkswap available, the swap plugin should fail to load
+            with self.assertRaises(GLib.GError):
+                BlockDev.reinit(None, True, None)
+
+            self.assertNotIn("swap", BlockDev.get_available_plugin_names())
+
+        # load the plugins back
+        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertIn("swap", BlockDev.get_available_plugin_names())
+
+    def test_check_no_mkswap(self):
+        """Verify that checking mkswap tool availability works as expected"""
+
+        # unload all plugins first
+        self.assertTrue(BlockDev.reinit([], True, None))
+
+        with fake_path():
+            # no mkswap available, the swap plugin should fail to load
+            with self.assertRaises(GLib.GError):
+                BlockDev.reinit(None, True, None)
+
+            self.assertNotIn("swap", BlockDev.get_available_plugin_names())
+
+        # load the plugins back
+        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertIn("swap", BlockDev.get_available_plugin_names())
+
+    def test_check_no_swapon(self):
+        """Verify that checking swapon tool availability works as expected"""
+
+        # unload all plugins first
+        self.assertTrue(BlockDev.reinit([], True, None))
+
+        with fake_path("tests/swap_no_swapon"):
+            # no mkswap available, the swap plugin should fail to load
+            with self.assertRaises(GLib.GError):
+                BlockDev.reinit(None, True, None)
+
+            self.assertNotIn("swap", BlockDev.get_available_plugin_names())
+
+        # load the plugins back
+        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertIn("swap", BlockDev.get_available_plugin_names())
+
+    def test_check_no_swapoff(self):
+        """Verify that checking swapoff tool availability works as expected"""
+
+        # unload all plugins first
+        self.assertTrue(BlockDev.reinit([], True, None))
+
+        with fake_path("tests/swap_no_swapoff"):
+            # no mkswap available, the swap plugin should fail to load
+            with self.assertRaises(GLib.GError):
+                BlockDev.reinit(None, True, None)
+
+            self.assertNotIn("swap", BlockDev.get_available_plugin_names())
+
+        # load the plugins back
+        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertIn("swap", BlockDev.get_available_plugin_names())

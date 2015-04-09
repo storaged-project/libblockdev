@@ -41,6 +41,39 @@ GQuark bd_swap_error_quark (void)
 }
 
 /**
+ * check: (skip)
+ */
+gboolean check() {
+    GError *error = NULL;
+    gboolean ret = bd_utils_check_util_version ("mkswap", MKSWAP_MIN_VERSION, NULL, "mkswap from util-linux ([\\d\\.]+)", &error);
+
+    if (!ret && error) {
+        g_warning("Cannot load the swap plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+
+    if (!ret)
+        return FALSE;
+
+    ret = bd_utils_check_util_version ("swapon", SWAPON_MIN_VERSION, NULL, "swapon from util-linux ([\\d\\.]+)", &error);
+    if (!ret && error) {
+        g_warning("Cannot load the swap plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+
+    if (!ret)
+        return FALSE;
+
+    ret = bd_utils_check_util_version ("swapoff", SWAPOFF_MIN_VERSION, NULL, "swapoff from util-linux ([\\d\\.]+)", &error);
+    if (!ret && error) {
+        g_warning("Cannot load the swap plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+
+    return ret;
+}
+
+/**
  * bd_swap_mkswap:
  * @device: a device to create swap space on
  * @label: (allow-none): a label for the swap space device
