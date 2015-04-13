@@ -15,7 +15,7 @@ class OverridesTestCase(unittest.TestCase):
         try:
             # no need to specify priority since we are using overrides that
             # define the default value for the parameter (-1)
-            BlockDev.swap.swapon("/non/existing")
+            BlockDev.swap.swapon("/non/existing", -1)
         except BlockDev.BlockDevError as e:
             # we caught the generic error, now let's test that it is also the
             # fine-grained one
@@ -23,7 +23,7 @@ class OverridesTestCase(unittest.TestCase):
 
         # test that a second call like that works the same (should go from the cache)
         try:
-            BlockDev.swap.swapon("/non/existing")
+            BlockDev.swap.swapon("/non/existing", -1)
         except BlockDev.BlockDevError as e:
             self.assertTrue(isinstance(e, BlockDev.SwapError))
 
