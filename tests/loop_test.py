@@ -2,8 +2,8 @@ import os
 import unittest
 import overrides_hack
 
-from utils import create_sparse_tempfile
-from gi.repository import BlockDev
+from utils import create_sparse_tempfile, fake_utils, fake_path
+from gi.repository import BlockDev, GLib
 if not BlockDev.is_initialized():
     BlockDev.init(None, None)
 
@@ -47,3 +47,42 @@ class LoopTestCase(unittest.TestCase):
         f_name = BlockDev.loop_get_backing_file(self.loop)
         self.assertEqual(f_name, self.dev_file)
 
+class LoopUnloadTest(unittest.TestCase):
+    def tearDown(self):
+        # make sure the library is initialized with all plugins loaded for other
+        # tests
+        self.assertTrue(BlockDev.reinit(None, True, None))
+
+    def test_check_low_version(self):
+        """Verify that checking the minimum losetup version works as expected"""
+
+        # unload all plugins first
+        self.assertTrue(BlockDev.reinit([], True, None))
+
+        with fake_utils("tests/loop_low_version/"):
+            # too low version of losetup available, the LOOP plugin should fail to load
+            with self.assertRaises(GLib.GError):
+                BlockDev.reinit(None, True, None)
+
+            self.assertNotIn("loop", BlockDev.get_available_plugin_names())
+
+        # load the plugins back
+        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertIn("loop", BlockDev.get_available_plugin_names())
+
+    def test_check_no_loop(self):
+        """Verify that checking losetup tool availability works as expected"""
+
+        # unload all plugins first
+        self.assertTrue(BlockDev.reinit([], True, None))
+
+        with fake_path():
+            # no losetup available, the LOOP plugin should fail to load
+            with self.assertRaises(GLib.GError):
+                BlockDev.reinit(None, True, None)
+
+            self.assertNotIn("loop", BlockDev.get_available_plugin_names())
+
+        # load the plugins back
+        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertIn("loop", BlockDev.get_available_plugin_names())

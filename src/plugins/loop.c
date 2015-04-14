@@ -42,6 +42,20 @@ GQuark bd_loop_error_quark (void)
 }
 
 /**
+ * check: (skip)
+ */
+gboolean check() {
+    GError *error = NULL;
+    gboolean ret = bd_utils_check_util_version ("losetup", LOSETUP_MIN_VERSION, NULL, "losetup from util-linux\\s+([\\d\\.]+)", &error);
+
+    if (!ret && error) {
+        g_warning("Cannot load the loop plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+    return ret;
+}
+
+/**
  * bd_loop_get_backing_file:
  * @dev_name: name of the loop device to get backing file for (e.g. "loop0")
  * @error: (out): place to store error (if any)

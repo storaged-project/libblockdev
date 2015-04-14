@@ -200,3 +200,171 @@ gboolean bd_utils_init_logging (BDUtilsLogFunc new_log_func, GError **error __at
 
     return TRUE;
 }
+
+/**
+ * bd_utils_version_cmp:
+ * @ver_string1: first version string
+ * @ver_string2: second version string
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: -1, 0 or 1 if @ver_string1 is lower, the same or higher version as
+ *          @ver_string2 respectively. If an error occurs, returns -2 and @error
+ *          is set.
+ *
+ * **ONLY SUPPORTS VERSION STRINGS OF FORMAT X[.Y[.Z[.Z2[.Z3...[-R]]]]] where all components
+ *   are natural numbers!**
+ */
+gint bd_utils_version_cmp (gchar *ver_string1, gchar *ver_string2, GError **error) {
+    gchar **v1_fields = NULL;
+    gchar **v2_fields = NULL;
+    guint v1_fields_len = 0;
+    guint v2_fields_len = 0;
+    guint64 v1_value = 0;
+    guint64 v2_value = 0;
+    GRegex *regex = NULL;
+    gboolean success = FALSE;
+    guint i = 0;
+    gint ret = -2;
+
+    regex = g_regex_new ("^(\\d+)(\\.\\d+)*(-\\d)?$", 0, 0, error);
+    if (!regex) {
+        /* error is already populated */
+        return -2;
+    }
+
+    success = g_regex_match (regex, ver_string1, 0, NULL);
+    if (!success) {
+        g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_INVAL_VER,
+                     "Invalid or unsupported version (1) format: %s", ver_string1);
+        return -2;
+    }
+    success = g_regex_match (regex, ver_string2, 0, NULL);
+    if (!success) {
+        g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_INVAL_VER,
+                     "Invalid or unsupported version (2) format: %s", ver_string2);
+        return -2;
+    }
+    g_regex_unref (regex);
+
+    v1_fields = g_strsplit_set (ver_string1, ".-", 0);
+    v2_fields = g_strsplit_set (ver_string2, ".-", 0);
+    v1_fields_len = g_strv_length (v1_fields);
+    v2_fields_len = g_strv_length (v2_fields);
+
+    for (i=0; (i < v1_fields_len) && (i < v2_fields_len) && ret == -2; i++) {
+        v1_value = g_ascii_strtoull (v1_fields[i], NULL, 0);
+        v2_value = g_ascii_strtoull (v2_fields[i], NULL, 0);
+        if (v1_value < v2_value)
+            ret = -1;
+        else if (v1_value > v2_value)
+            ret = 1;
+    }
+
+    if (ret == -2) {
+        if (v1_fields_len < v2_fields_len)
+            ret = -1;
+        else if (v1_fields_len > v2_fields_len)
+            ret = 1;
+        else
+            ret = 0;
+    }
+
+    g_strfreev (v1_fields);
+    g_strfreev (v2_fields);
+
+    return ret;
+}
+
+/**
+ * bd_utils_check_util_version:
+ * @util: name of the utility to check
+ * @version: (allow-none): minimum required version of the utility or %NULL
+ *           if no version is required
+ * @version_arg: (allow-none): argument to use with the @util to get version
+ *               info or %NULL to use "--version"
+ * @version_regexp: (allow-none): regexp to extract version from the version
+ *                  info or %NULL if only version is printed by "$ @util @version_arg"
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @util is available in a version >= @version or not
+ *          (@error is set in such case).
+ */
+gboolean bd_utils_check_util_version (gchar *util, gchar *version, gchar *version_arg, gchar *version_regexp, GError **error) {
+    gchar *util_path = NULL;
+    gchar *argv[] = {util, version_arg ? version_arg : "--version", NULL};
+    gchar *output = NULL;
+    gboolean succ = FALSE;
+    GRegex *regex = NULL;
+    GMatchInfo *match_info = NULL;
+    gchar *version_str = NULL;
+
+    util_path = g_find_program_in_path (util);
+    if (!util_path) {
+        g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_UTIL_UNAVAILABLE,
+                     "The '%s' utility is not available", util);
+        return FALSE;
+    }
+    g_free (util_path);
+
+    if (!version)
+        /* nothing more to do here */
+        return TRUE;
+
+    succ = bd_utils_exec_and_capture_output (argv, &output, error);
+    if (!succ) {
+        /* if we got nothing on STDOUT, try using STDERR data from error message */
+        if (g_error_matches ((*error), BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
+            output = g_strdup ((*error)->message);
+            g_clear_error (error);
+        } else if (g_error_matches ((*error), BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED)) {
+            /* exit status != 0, try using the output anyway */
+            output = g_strdup ((*error)->message);
+            g_clear_error (error);
+        }
+    }
+
+    if (version_regexp) {
+        regex = g_regex_new (version_regexp, 0, 0, error);
+        if (!regex) {
+            g_free (output);
+            /* error is already populated */
+            return FALSE;
+        }
+
+        succ = g_regex_match (regex, output, 0, &match_info);
+        if (!succ) {
+            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_UTIL_UNKNOWN_VER,
+                         "Failed to determine %s's version from: %s", util, output);
+            g_free (output);
+            g_regex_unref (regex);
+            return FALSE;
+        }
+        g_regex_unref (regex);
+
+        version_str = g_match_info_fetch (match_info, 1);
+        g_match_info_free (match_info);
+        g_free (output);
+    }
+    else
+        version_str = g_strstrip (output);
+
+    if (!version_str || (g_strcmp0 (version_str, "") == 0)) {
+        g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_UTIL_UNKNOWN_VER,
+                     "Failed to determine %s's version from: %s", util, output);
+        g_free (version_str);
+        return FALSE;
+    }
+
+    if (bd_utils_version_cmp (version_str, version, error) < 0) {
+        /* smaller version or error */
+        if (!(*error))
+            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_UTIL_LOW_VER,
+                         "Too low version of %s: %s. At least %s required.",
+                         util, version_str, version);
+        g_free (version_str);
+        return FALSE;
+    }
+
+    g_free (version_str);
+    return TRUE;
+}

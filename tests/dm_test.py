@@ -2,8 +2,8 @@ import unittest
 import os
 import overrides_hack
 
-from utils import create_sparse_tempfile
-from gi.repository import BlockDev
+from utils import create_sparse_tempfile, fake_utils, fake_path
+from gi.repository import BlockDev, GLib
 if not BlockDev.is_initialized():
     BlockDev.init(None, None)
 
@@ -77,3 +77,43 @@ class DevMapperNameNodeBijection(DevMapperTestCase):
                          "testMap")
 
         self.assertTrue(succ)
+
+class DMUnloadTest(unittest.TestCase):
+    def tearDown(self):
+        # make sure the library is initialized with all plugins loaded for other
+        # tests
+        self.assertTrue(BlockDev.reinit(None, True, None))
+
+    def test_check_low_version(self):
+        """Verify that checking the minimum dmsetup version works as expected"""
+
+        # unload all plugins first
+        self.assertTrue(BlockDev.reinit([], True, None))
+
+        with fake_utils("tests/dm_low_version/"):
+            # too low version of dmsetup available, the DM plugin should fail to load
+            with self.assertRaises(GLib.GError):
+                BlockDev.reinit(None, True, None)
+
+            self.assertNotIn("dm", BlockDev.get_available_plugin_names())
+
+        # load the plugins back
+        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertIn("dm", BlockDev.get_available_plugin_names())
+
+    def test_check_no_dm(self):
+        """Verify that checking dmsetup tool availability works as expected"""
+
+        # unload all plugins first
+        self.assertTrue(BlockDev.reinit([], True, None))
+
+        with fake_path():
+            # no dmsetup available, the DM plugin should fail to load
+            with self.assertRaises(GLib.GError):
+                BlockDev.reinit(None, True, None)
+
+            self.assertNotIn("dm", BlockDev.get_available_plugin_names())
+
+        # load the plugins back
+        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertIn("dm", BlockDev.get_available_plugin_names())

@@ -69,6 +69,20 @@ gboolean init () {
 }
 
 /**
+ * check: (skip)
+ */
+gboolean check() {
+    GError *error = NULL;
+    gboolean ret = bd_utils_check_util_version ("dmsetup", DM_MIN_VERSION, NULL, "Library version:\\s+([\\d\\.]+)", &error);
+
+    if (!ret && error) {
+        g_warning("Cannot load the DM plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+    return ret;
+}
+
+/**
  * bd_dm_create_linear:
  * @map_name: name of the map
  * @device: device to create map for

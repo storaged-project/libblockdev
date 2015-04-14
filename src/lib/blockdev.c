@@ -171,16 +171,16 @@ gboolean bd_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GErro
         return FALSE;
     }
 
+    if (log_func && !bd_utils_init_logging (log_func, error))
+        /* the error is already populated */
+        success = FALSE;
+
     if (!load_plugins (require_plugins, FALSE)) {
         g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
                      "Failed to load plugins");
         /* the library is unusable without the plugins so we can just return here */
         success = FALSE;
     }
-
-    if (log_func && !bd_utils_init_logging (log_func, error))
-        /* the error is already populated */
-        success = FALSE;
 
     initialized = success;
     g_mutex_unlock (&init_lock);
@@ -220,16 +220,16 @@ gboolean bd_try_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, G
         return TRUE;
     }
 
+    if (log_func && !bd_utils_init_logging (log_func, error))
+        /* the error is already populated */
+        success = FALSE;
+
     if (!load_plugins (require_plugins, FALSE)) {
         g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
                      "Failed to load plugins");
         /* the library is unusable without the plugins so we can just return here */
         success = FALSE;
     }
-
-    if (log_func && !bd_utils_init_logging (log_func, error))
-        /* the error is already populated */
-        success = FALSE;
 
     initialized = success;
     g_mutex_unlock (&init_lock);
@@ -256,16 +256,16 @@ gboolean bd_try_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, G
 gboolean bd_reinit (BDPluginSpec **require_plugins, gboolean reload, BDUtilsLogFunc log_func, GError **error) {
     gboolean success = TRUE;
     g_mutex_lock (&init_lock);
+    if (log_func && !bd_utils_init_logging (log_func, error))
+        /* the error is already populated */
+        success = FALSE;
+
     if (!load_plugins (require_plugins, reload)) {
         g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
                      "Failed to load plugins");
         /* the library is unusable without the plugins so we can just return here */
         success = FALSE;
     }
-
-    if (log_func && !bd_utils_init_logging (log_func, error))
-        /* the error is already populated */
-        success = FALSE;
 
     g_mutex_unlock (&init_lock);
     return success;

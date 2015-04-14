@@ -5,7 +5,7 @@ import time
 from contextlib import contextmanager
 import overrides_hack
 
-from utils import create_sparse_tempfile, fake_utils
+from utils import create_sparse_tempfile, fake_utils, fake_path
 from gi.repository import BlockDev, GLib
 
 def print_msg(level, msg):
@@ -349,3 +349,43 @@ class FakeMDADMutilTest(unittest.TestCase):
             ex_data = BlockDev.md_examine("fake_dev")
 
         self.assertEqual(ex_data.device, "/dev/md/Volume0")
+
+class MDUnloadTest(unittest.TestCase):
+    def tearDown(self):
+        # make sure the library is initialized with all plugins loaded for other
+        # tests
+        self.assertTrue(BlockDev.reinit(None, True, None))
+
+    def test_check_low_version(self):
+        """Verify that checking the minimum mdsetup version works as expected"""
+
+        # unload all plugins first
+        self.assertTrue(BlockDev.reinit([], True, None))
+
+        with fake_utils("tests/mdraid_low_version/"):
+            # too low version of mdsetup available, the MD plugin should fail to load
+            with self.assertRaises(GLib.GError):
+                BlockDev.reinit(None, True, None)
+
+            self.assertNotIn("mdraid", BlockDev.get_available_plugin_names())
+
+        # load the plugins back
+        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertIn("mdraid", BlockDev.get_available_plugin_names())
+
+    def test_check_no_md(self):
+        """Verify that checking mdsetup tool availability works as expected"""
+
+        # unload all plugins first
+        self.assertTrue(BlockDev.reinit([], True, None))
+
+        with fake_path():
+            # no mdsetup available, the MD plugin should fail to load
+            with self.assertRaises(GLib.GError):
+                BlockDev.reinit(None, True, None)
+
+            self.assertNotIn("mdraid", BlockDev.get_available_plugin_names())
+
+        # load the plugins back
+        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertIn("mdraid", BlockDev.get_available_plugin_names())

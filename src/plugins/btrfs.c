@@ -89,6 +89,20 @@ void bd_btrfs_filesystem_info_free (BDBtrfsFilesystemInfo *info) {
     g_free (info);
 }
 
+/**
+ * check: (skip)
+ */
+gboolean check() {
+    GError *error = NULL;
+    gboolean ret = bd_utils_check_util_version ("btrfs", BTRFS_MIN_VERSION, NULL, "Btrfs v([\\d\\.]+)", &error);
+
+    if (!ret && error) {
+        g_warning("Cannot load the BTRFS plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+    return ret;
+}
+
 static BDBtrfsDeviceInfo* get_device_info_from_match (GMatchInfo *match_info) {
     BDBtrfsDeviceInfo *ret = g_new(BDBtrfsDeviceInfo, 1);
     gchar *item = NULL;

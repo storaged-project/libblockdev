@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cat <<EOF
+Library version:   1.02.92
+EOF
