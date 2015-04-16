@@ -86,6 +86,8 @@ class LibraryOpsTestCase(unittest.TestCase):
         ps.so_name = "libbd_lvm.so"
         self.assertTrue(BlockDev.reinit([ps], True, None))
 
+        self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
+
     def my_log_func(self, level, msg):
         # not much to verify here
         self.assertTrue(isinstance(level, int))
