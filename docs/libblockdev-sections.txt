@@ -98,6 +98,8 @@ BD_UTILS_SIZE_ERROR
 BDUtilsSizeError
 bd_utils_size_human_readable
 bd_utils_size_from_spec
+bd_utils_check_util_version
+bd_utils_version_cmp
 EXBIBYTE
 EiB
 GIBIBYTE
