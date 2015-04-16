@@ -268,3 +268,5 @@ and any third-party code.
    * size_human_readable [DONE]
    * size_from_spec [DONE]
    * init_logging [DONE]
+   * version_cmp [DONE]
+   * check_util_version [DONE]

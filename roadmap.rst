@@ -20,7 +20,6 @@ Releases
 Tasks
 ------
 
-* implement plugins' ``check()`` functions (vpodzime)
 * migrate from scons to autotools (vpodzime)
 * develop the *kbd* (*Kernel Block Devices*) plugin (vpodzime)
 * develop the *s390* plugin (sbueno)
