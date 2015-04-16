@@ -219,16 +219,20 @@ def get_loading_func(fn_infos, module_name):
     ret += '    * (void**) (&check_fn) = dlsym(handle, "check");\n'
     ret += '    if ((error = dlerror()) != NULL)\n'
     ret += '        g_debug("failed to load the check() function for {0}: %s", error);\n'.format(module_name)
-    ret += '    if (check_fn && !check_fn())\n'
+    ret += '    if (check_fn && !check_fn()) {\n'
+    ret += '        dlclose(handle);\n'
     ret += '        return NULL;\n'
+    ret += '    }'
     ret += '    check_fn = NULL;\n\n'
 
     ret += '    dlerror();\n'
     ret += '    * (void**) (&init_fn) = dlsym(handle, "init");\n'
     ret += '    if ((error = dlerror()) != NULL)\n'
     ret += '        g_debug("failed to load the init() function for {0}: %s", error);\n'.format(module_name)
-    ret += '    if (init_fn && !init_fn())\n'
+    ret += '    if (init_fn && !init_fn()) {\n'
+    ret += '        dlclose(handle);\n'
     ret += '        return NULL;\n'
+    ret += '    }'
     ret += '    init_fn = NULL;\n\n'
 
     for info in fn_infos:
