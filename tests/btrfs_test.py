@@ -531,6 +531,21 @@ class BTRFSUnloadTest(unittest.TestCase):
         self.assertTrue(BlockDev.reinit(None, True, None))
         self.assertIn("btrfs", BlockDev.get_available_plugin_names())
 
+    def test_check_new_version_format(self):
+        """Verify that checking the minimum BTRFS version works as expected with the new format"""
+
+        # unload all plugins first
+        self.assertTrue(BlockDev.reinit([], True, None))
+
+        # check that new version format is correctly parsed
+        with fake_utils("tests/btrfs_new_version_format/"):
+            BlockDev.reinit(None, True, None)
+
+        self.assertIn("btrfs", BlockDev.get_available_plugin_names())
+
+        BlockDev.reinit(None, True, None)
+        self.assertIn("btrfs", BlockDev.get_available_plugin_names())
+
     def test_check_no_btrfs(self):
         """Verify that checking btrfs tool availability works as expected"""
 

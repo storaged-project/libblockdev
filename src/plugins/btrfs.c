@@ -94,7 +94,7 @@ void bd_btrfs_filesystem_info_free (BDBtrfsFilesystemInfo *info) {
  */
 gboolean check() {
     GError *error = NULL;
-    gboolean ret = bd_utils_check_util_version ("btrfs", BTRFS_MIN_VERSION, NULL, "Btrfs v([\\d\\.]+)", &error);
+    gboolean ret = bd_utils_check_util_version ("btrfs", BTRFS_MIN_VERSION, NULL, "[Bb]trfs.* v([\\d\\.]+)", &error);
 
     if (!ret && error) {
         g_warning("Cannot load the BTRFS plugin: %s" , error->message);
