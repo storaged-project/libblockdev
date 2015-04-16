@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     0.9
+Version:     0.10
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -364,6 +364,48 @@ CFLAGS="%{optflags}" make PREFIX=%{buildroot} SITEDIRS=%{buildroot}%{python2_sit
 %files plugins-all
 
 %changelog
+* Thu Apr 16 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.10-1
+- Fix return type of the unload_plugins() function (vpodzime)
+- Close the DL handle when check() or init() fail (vpodzime)
+- Add one more check to the reload test (vpodzime)
+- Drop reference to check() and init() functions (vpodzime)
+- Add more cats to tests (vpodzime)
+- Make regexp for getting btrfs version more generic (vpodzime)
+- Merge pull request #8 from vpodzime/master-check_functions (vpodzime)
+- Fix parameters passed to unoverridden swapon function (vpodzime)
+- Implement and test swap plugin's check function (vpodzime)
+- Implement and test MD RAID plugin's check function (vpodzime)
+- Implement and test mpath plugin's check function (vpodzime)
+- Try harder to get util's version (vpodzime)
+- Implement and test loop plugin's check function (vpodzime)
+- Implement and test DM plugin's check function (vpodzime)
+- Implement and test BTRFS plugin's check function (vpodzime)
+- Implement and test LVM plugin's check function (vpodzime)
+- Init logging before loading plugins (vpodzime)
+- Add function for utility availability checking (vpodzime)
+- Fix default value for the fake_utils' path argument (vpodzime)
+- Add ErrorProxy instance for the utils functions (vpodzime)
+- Add function for version comparison (vpodzime)
+- Merge pull request #9 from clumens/master (vpodzime)
+- Disable pylint checking on the new exception proxy. (clumens)
+- Fix XRules application and add a test for it (vpodzime)
+- Raise NotImplementedError when an unavailable function is called (vpodzime)
+- Merge pull request #4 from vpodzime/master-error_proxy (vpodzime)
+- Merge branch 'master' into master-error_proxy (vpodzime)
+- Merge pull request #5 from vpodzime/master-not_implemented_error (vpodzime)
+- Add a simple test for unloaded/unavailable functions (vpodzime)
+- Unload the plugins properly when reinit() is called (vpodzime)
+- Raise error/exception when an unimplemented function is called (#1201475) (vpodzime)
+- Do an ugly but necessary hack to make local GI overrides work (vpodzime)
+- Add the __dir__ method to ErrorProxy (vpodzime)
+- Add a rationale for the ErrorProxy to the overrides' docstring (vpodzime)
+- Add some basic info about GI overrides to the documentation (vpodzime)
+- Use pylint to check for errors in python overrides (vpodzime)
+- Add the first small test for the ErrorProxy (vpodzime)
+- Put the GI overrides in a special dir so that they are preferred (vpodzime)
+- Add a cache for attributes already resolved by ErrorProxy (vpodzime)
+- Implement the ErrorProxy python class and use it (vpodzime)
+
 * Tue Apr 07 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.9-1
 - Merge pull request #7 from vpodzime/master-fw_raid_fixes (vpodzime)
 - Try a bit harder when trying to determine MD RAID name (#1207317) (vpodzime)
