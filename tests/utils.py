@@ -2,6 +2,8 @@ import os
 import tempfile
 from contextlib import contextmanager
 
+from gi.repository import GLib
+
 def create_sparse_tempfile(name, size):
     """ Create a temporary sparse file.
 
@@ -44,10 +46,20 @@ def fake_utils(path="."):
     os.environ["PATH"] = old_path
 
 @contextmanager
-def fake_path(path=None):
+def fake_path(path=None, keep_utils=None):
+    keep_utils = keep_utils or []
+    created_utils = set()
+    if path:
+        for util in keep_utils:
+            util_path = GLib.find_program_in_path(util)
+            if util_path:
+                os.symlink(util_path, os.path.join(path, util))
+                created_utils.add(util)
     old_path = os.environ.get("PATH", "")
     os.environ["PATH"] = path or ""
 
     yield
 
     os.environ["PATH"] = old_path
+    for util in created_utils:
+        os.unlink(os.path.join(path, util))

@@ -126,7 +126,7 @@ class SwapUnloadTest(unittest.TestCase):
         # unload all plugins first
         self.assertTrue(BlockDev.reinit([], True, None))
 
-        with fake_path("tests/swap_no_swapon"):
+        with fake_path("tests/swap_no_swapon", keep_utils=["cat"]):
             # no mkswap available, the swap plugin should fail to load
             with self.assertRaises(GLib.GError):
                 BlockDev.reinit(None, True, None)
@@ -143,7 +143,7 @@ class SwapUnloadTest(unittest.TestCase):
         # unload all plugins first
         self.assertTrue(BlockDev.reinit([], True, None))
 
-        with fake_path("tests/swap_no_swapoff"):
+        with fake_path("tests/swap_no_swapoff", keep_utils=["cat"]):
             # no mkswap available, the swap plugin should fail to load
             with self.assertRaises(GLib.GError):
                 BlockDev.reinit(None, True, None)

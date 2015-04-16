@@ -77,7 +77,7 @@ class MpathUnloadTest(unittest.TestCase):
         # unload all plugins first
         self.assertTrue(BlockDev.reinit([], True, None))
 
-        with fake_path("tests/mpath_no_mpathconf"):
+        with fake_path("tests/mpath_no_mpathconf", keep_utils=["cat"]):
             # no mpathconf available, the mpath plugin should fail to load
             with self.assertRaises(GLib.GError):
                 BlockDev.reinit(None, True, None)
