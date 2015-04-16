@@ -61,7 +61,7 @@ static void set_plugin_so_name (BDPlugin name, gchar *so_name) {
     plugins[name].spec.so_name = so_name;
 }
 
-static gboolean unload_plugins () {
+static void unload_plugins () {
     if (plugins[BD_PLUGIN_LVM].handle && !unload_lvm (plugins[BD_PLUGIN_LVM].handle))
         g_warning ("Failed to close the lvm plugin");
     plugins[BD_PLUGIN_LVM].handle = NULL;
