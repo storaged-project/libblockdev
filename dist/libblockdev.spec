@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     0.10
+Version:     0.11
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -364,6 +364,11 @@ CFLAGS="%{optflags}" make PREFIX=%{buildroot} SITEDIRS=%{buildroot}%{python2_sit
 %files plugins-all
 
 %changelog
+* Fri Apr 17 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.11-1
+- Fix issues with using overriden functions over ErrorProxy (vpodzime)
+- Update the roadmap.rst and features.rst with new stuff (vpodzime)
+- Fix two minor issues with docs generation (vpodzime)
+
 * Thu Apr 16 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.10-1
 - Fix return type of the unload_plugins() function (vpodzime)
 - Close the DL handle when check() or init() fail (vpodzime)
