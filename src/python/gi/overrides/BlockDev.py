@@ -346,8 +346,8 @@ class ErrorProxy(object):
         return [item[prefix_len:] for item in items if item.startswith(self._prefix)]
 
     def __getattr__(self, attr):
-        if self._use_local and attr in locals():
-            orig_obj = locals()[self._prefix + "_" + attr]
+        if self._use_local and (self._prefix + "_" + attr) in globals():
+            orig_obj = globals()[self._prefix + "_" + attr]
         else:
             orig_obj = getattr(self._mod, self._prefix + "_" + attr)
 

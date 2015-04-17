@@ -1,4 +1,5 @@
 import unittest
+import math
 import overrides_hack
 from gi.repository import BlockDev
 
@@ -38,6 +39,13 @@ class OverridesTestCase(unittest.TestCase):
             self.assertTrue(isinstance(e, BlockDev.UtilsError))
 
         self.assertEqual(BlockDev.utils.version_cmp("1.1", "1.2"), -1)
+
+        # test that overrides are used over the proxy
+        expected_padding = BlockDev.lvm_round_size_to_pe(int(math.ceil(11 * 1024**2 * 0.2)),
+                                                         4 * 1024**2, True)
+        # the original lvm_get_thpool_padding takes 3 arguments, but one is enough for the overriden version
+        self.assertEqual(BlockDev.lvm_get_thpool_padding(11 * 1024**2),
+                         expected_padding)
 
 class OverridesUnloadTestCase(unittest.TestCase):
     def tearDown(self):
