@@ -1,0 +1,6 @@
+#include <glib.h>
+
+#ifndef BD_KBD_API
+#define BD_KBD_API
+
+#endif  /* BD_KBD_API */

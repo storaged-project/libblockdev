@@ -7,7 +7,7 @@ MAIN_VERSION = "0.1.0"
 MAJOR_MINOR = MAIN_VERSION.rsplit(".", 1)[0]
 MAJOR_VERSION = MAIN_VERSION.split(".", 1)[0]
 LIB_FILES = ["src/lib/blockdev.c", "src/lib/blockdev.h", "src/lib/plugins.h"]
-PLUGIN_NAMES = ["crypto", "dm", "loop", "lvm", "mpath", "swap", "btrfs", "mdraid"]
+PLUGIN_NAMES = ["crypto", "dm", "loop", "lvm", "mpath", "swap", "btrfs", "mdraid", "kbd"]
 PLUGIN_HEADER_FILES = ["build/plugin_apis/"+name+".h" for name in PLUGIN_NAMES]
 UTILS_FILES = ["src/utils/exec.c", "src/utils/sizes.c", "src/utils/exec.h", "src/utils/sizes.h"]
 
@@ -78,6 +78,9 @@ swap_env.Append(LIBPATH=".")
 swap_env.Append(LIBS="bd_utils")
 plugins.append(swap_env.SharedLibrary("bd_swap", ["src/plugins/swap.c"]))
 
+kbd_env = glib_warnall_env.Clone()
+plugins.append(kbd_env.SharedLibrary("bd_kbd", ["src/plugins/kbd.c"]))
+
 
 ## boilerplate code generation
 bpg_builder = Builder(action=generate_boilerplate_files)
@@ -93,6 +96,7 @@ boiler_code.append(bpg_env.BpG(["plugin_apis/loop.h", "plugin_apis/loop.c"], "sr
 boiler_code.append(bpg_env.BpG(["plugin_apis/mdraid.h", "plugin_apis/mdraid.c"], "src/lib/plugin_apis/mdraid.api"))
 boiler_code.append(bpg_env.BpG(["plugin_apis/mpath.h", "plugin_apis/mpath.c"], "src/lib/plugin_apis/mpath.api"))
 boiler_code.append(bpg_env.BpG(["plugin_apis/swap.h", "plugin_apis/swap.c"], "src/lib/plugin_apis/swap.api"))
+boiler_code.append(bpg_env.BpG(["plugin_apis/kbd.h", "plugin_apis/kbd.c"], "src/lib/plugin_apis/kbd.api"))
 
 
 ## the library itself

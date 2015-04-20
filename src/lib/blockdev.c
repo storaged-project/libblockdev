@@ -19,6 +19,9 @@
 #include "plugin_apis/dm.h"
 #include "plugin_apis/mdraid.h"
 #include "plugin_apis/mdraid.c"
+#include "plugin_apis/kbd.h"
+#include "plugin_apis/kbd.c"
+
 
 /**
  * SECTION: blockdev
@@ -41,7 +44,8 @@ static gchar * default_plugin_so[BD_PLUGIN_UNDEF] = {
     "libbd_lvm.so."MAJOR_VER, "libbd_btrfs.so."MAJOR_VER,
     "libbd_swap.so."MAJOR_VER, "libbd_loop.so."MAJOR_VER,
     "libbd_crypto.so."MAJOR_VER, "libbd_mpath.so."MAJOR_VER,
-    "libbd_dm.so."MAJOR_VER, "libbd_mdraid.so."MAJOR_VER
+    "libbd_dm.so."MAJOR_VER, "libbd_mdraid.so."MAJOR_VER,
+    "libbd_kbd.so."MAJOR_VER,
 };
 static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_LVM, NULL}, NULL},
@@ -51,10 +55,11 @@ static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_CRYPTO, NULL}, NULL},
     {{BD_PLUGIN_MPATH, NULL}, NULL},
     {{BD_PLUGIN_DM, NULL}, NULL},
-    {{BD_PLUGIN_MDRAID, NULL}, NULL}
+    {{BD_PLUGIN_MDRAID, NULL}, NULL},
+    {{BD_PLUGIN_KBD, NULL}, NULL},
 };
 static gchar* plugin_names[BD_PLUGIN_UNDEF] = {
-    "lvm", "btrfs", "swap", "loop", "crypto", "mpath", "dm", "mdraid"
+    "lvm", "btrfs", "swap", "loop", "crypto", "mpath", "dm", "mdraid", "kbd"
 };
 
 static void set_plugin_so_name (BDPlugin name, gchar *so_name) {
@@ -93,6 +98,11 @@ static void unload_plugins () {
     if (plugins[BD_PLUGIN_MDRAID].handle && !unload_mdraid (plugins[BD_PLUGIN_MDRAID].handle))
         g_warning ("Failed to close the mdraid plugin");
     plugins[BD_PLUGIN_MDRAID].handle = NULL;
+
+    if (plugins[BD_PLUGIN_KBD].handle && !unload_kbd (plugins[BD_PLUGIN_KBD].handle))
+        g_warning ("Failed to close the kbd plugin");
+    plugins[BD_PLUGIN_KBD].handle = NULL;
+
 }
 
 static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload) {
@@ -137,6 +147,8 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload) {
         plugins[BD_PLUGIN_DM].handle = load_dm_from_plugin(plugins[BD_PLUGIN_DM].spec.so_name);
     if (!plugins[BD_PLUGIN_MDRAID].handle && plugins[BD_PLUGIN_MDRAID].spec.so_name)
         plugins[BD_PLUGIN_MDRAID].handle = load_mdraid_from_plugin(plugins[BD_PLUGIN_MDRAID].spec.so_name);
+    if (!plugins[BD_PLUGIN_KBD].handle && plugins[BD_PLUGIN_KBD].spec.so_name)
+        plugins[BD_PLUGIN_KBD].handle = load_kbd_from_plugin(plugins[BD_PLUGIN_KBD].spec.so_name);
 
     for (i=0; (i < BD_PLUGIN_UNDEF) && requested_loaded; i++)
         if (plugins[i].spec.so_name)

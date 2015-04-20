@@ -259,3 +259,6 @@ bd_swap_swapoff
 bd_swap_swapstatus
 </SECTION>
 
+<SECTION>
+<FILE>kbd</FILE>
+</SECTION>

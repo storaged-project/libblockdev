@@ -45,6 +45,7 @@ bd_plugins = { "lvm": BlockDev.Plugin.LVM,
                "swap": BlockDev.Plugin.SWAP,
                "mdraid": BlockDev.Plugin.MDRAID,
                "mpath": BlockDev.Plugin.MPATH,
+               "kbd": BlockDev.Plugin.KBD,
 }
 
 _init = BlockDev.init
