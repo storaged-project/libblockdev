@@ -223,7 +223,7 @@ gboolean bd_swap_swapstatus (gchar *device, GError **error) {
 
     /* get the real device node for device-mapper devices since the ones
        with meaningful names are just symlinks */
-    if (g_str_has_prefix (device, "/dev/mapper")) {
+    if (g_str_has_prefix (device, "/dev/mapper/") || g_str_has_prefix (device, "/dev/md/")) {
         symlink = g_file_read_link (device, error);
         if (!symlink) {
             /* the device doesn't exist and thus is not an active swap */
