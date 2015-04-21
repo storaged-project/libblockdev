@@ -3,4 +3,19 @@
 #ifndef BD_KBD_API
 #define BD_KBD_API
 
+/**
+ * bd_kbd_zram_create_devices:
+ * @num_devices: number of devices to create
+ * @sizes: (array zero-terminated=1): requested sizes (in bytes) for created zRAM
+ *                                    devices
+ * @nstreams: (allow-none) (array zero-terminated=1): numbers of streams for created
+ *                                                    zRAM devices
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether @num_devices zRAM devices were successfully created or not
+ *
+ * **Lengths of @size and @nstreams (if given) have to be >= @num_devices!**
+ */
+gboolean bd_kbd_zram_create_devices (guint64 num_devices, guint64 *sizes, guint64 *nstreams, GError **error);
+
 #endif  /* BD_KBD_API */

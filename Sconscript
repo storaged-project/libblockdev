@@ -79,6 +79,7 @@ swap_env.Append(LIBS="bd_utils")
 plugins.append(swap_env.SharedLibrary("bd_swap", ["src/plugins/swap.c"]))
 
 kbd_env = glib_warnall_env.Clone()
+kbd_env.ParseConfig("pkg-config --cflags --libs libkmod")
 plugins.append(kbd_env.SharedLibrary("bd_kbd", ["src/plugins/kbd.c"]))
 
 

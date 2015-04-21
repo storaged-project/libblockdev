@@ -259,6 +259,13 @@ def swap_swapon(device, priority=-1):
 __all__.append("swap_swapon")
 
 
+_kbd_zram_create_devices = BlockDev.kbd_zram_create_devices
+@override(BlockDev.kbd_zram_create_devices)
+def kbd_zram_create_devices(num_devices, sizes, nstreams=None):
+    return _kbd_zram_create_devices(num_devices, sizes, nstreams)
+__all__.append("kbd_zram_create_devices")
+
+
 ## defined in this overrides only!
 def plugin_specs_from_names(plugin_names):
     ret = []
