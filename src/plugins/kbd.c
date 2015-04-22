@@ -234,3 +234,17 @@ gboolean bd_kbd_zram_create_devices (guint64 num_devices, guint64 *sizes, guint6
 
     return TRUE;
 }
+
+/**
+ * bd_kbd_zram_destroy_devices:
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether zRAM devices were successfully destroyed or not
+ *
+ * The only way how to destroy zRAM device right now is to unload the 'zram'
+ * module and thus destroy all of them. That's why this function doesn't allow
+ * specification of which devices should be destroyed.
+ */
+gboolean bd_kbd_zram_destroy_devices (GError **error) {
+    return unload_kernel_module ("zram", error);
+}

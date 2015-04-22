@@ -12,5 +12,6 @@ typedef enum {
 } BDKBDError;
 
 gboolean bd_kbd_zram_create_devices (guint64 num_devices, guint64 *sizes, guint64 *nstreams, GError **error);
+gboolean bd_kbd_zram_destroy_devices (GError **error);
 
 #endif  /* BD_KBD */

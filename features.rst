@@ -253,7 +253,7 @@ KBD (Kernel Block Devices)
    * bcache_get_mode
 
    * zram_create_devices [DONE]
-   * zram_destroy_devices
+   * zram_destroy_devices [DONE]
 
 
 utils
