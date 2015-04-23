@@ -144,6 +144,25 @@ static gboolean unload_kernel_module (gchar *module_name, GError **error) {
     return TRUE;
 }
 
+static gboolean echo_str_to_file (gchar *str, gchar *file_path, GError **error) {
+    GIOChannel *out_file = NULL;
+    gsize bytes_written = 0;
+
+    out_file = g_io_channel_new_file (file_path, "w", error);
+    if (!out_file || g_io_channel_write_chars (out_file, str, -1, &bytes_written, error) != G_IO_STATUS_NORMAL) {
+        g_prefix_error (error, "Failed to write '%s' to file '%s': ", str, file_path);
+        return FALSE;
+    }
+    if (g_io_channel_shutdown (out_file, TRUE, error) != G_IO_STATUS_NORMAL) {
+        g_prefix_error (error, "Failed to flush and close the file '%s': ", file_path);
+        g_io_channel_unref (out_file);
+        return FALSE;
+    }
+    g_io_channel_unref (out_file);
+    return TRUE;
+}
+
+
 /**
  * bd_kbd_zram_create_devices:
  * @num_devices: number of devices to create
@@ -163,8 +182,6 @@ gboolean bd_kbd_zram_create_devices (guint64 num_devices, guint64 *sizes, guint6
     guint64 i = 0;
     gchar *num_str = NULL;
     gchar *file_name = NULL;
-    GIOChannel *out_file = NULL;
-    gsize bytes_written = 0;
 
     opts = g_strdup_printf ("num_devices=%"G_GUINT64_FORMAT, num_devices);
     success = load_kernel_module ("zram", opts, error);
@@ -196,40 +213,28 @@ gboolean bd_kbd_zram_create_devices (guint64 num_devices, guint64 *sizes, guint6
         for (i=0; i < num_devices; i++) {
             file_name = g_strdup_printf ("/sys/block/zram%"G_GUINT64_FORMAT"/max_comp_streams", i);
             num_str = g_strdup_printf ("%"G_GUINT64_FORMAT, nstreams[i]);
-            out_file = g_io_channel_new_file (file_name, "w", error);
+            success = echo_str_to_file (num_str, file_name, error);
             g_free (file_name);
-            if (!out_file || g_io_channel_write_chars (out_file, num_str, -1, &bytes_written, error) != G_IO_STATUS_NORMAL) {
-                g_prefix_error (error, "Failed to set the number of compression streams: ");
-                g_free (num_str);
-                return FALSE;
-            }
             g_free (num_str);
-            if (g_io_channel_shutdown (out_file, TRUE, error) != G_IO_STATUS_NORMAL) {
-                g_prefix_error (error, "Failed to set the number of compression streams: ");
-                g_io_channel_unref (out_file);
+            if (!success) {
+                g_prefix_error (error, "Failed to set number of compression streams for '/dev/zram%"G_GUINT64_FORMAT"': ",
+                                i);
                 return FALSE;
             }
-            g_io_channel_unref (out_file);
         }
 
     /* now activate the devices by setting their sizes */
     for (i=0; i < num_devices; i++) {
         file_name = g_strdup_printf ("/sys/block/zram%"G_GUINT64_FORMAT"/disksize", i);
         num_str = g_strdup_printf ("%"G_GUINT64_FORMAT, sizes[i]);
-        out_file = g_io_channel_new_file (file_name, "w", error);
+        success = echo_str_to_file (num_str, file_name, error);
         g_free (file_name);
-        if (!out_file || g_io_channel_write_chars (out_file, num_str, -1, &bytes_written, error) != G_IO_STATUS_NORMAL) {
-            g_prefix_error (error, "Failed to set the size for the device: ");
-            g_free (num_str);
-            return FALSE;
-        }
         g_free (num_str);
-        if (g_io_channel_shutdown (out_file, TRUE, error) != G_IO_STATUS_NORMAL) {
-            g_prefix_error (error, "Failed to set the size for the device: ");
-            g_io_channel_unref (out_file);
+        if (!success) {
+            g_prefix_error (error, "Failed to set size for '/dev/zram%"G_GUINT64_FORMAT"': ",
+                            i);
             return FALSE;
         }
-        g_io_channel_unref (out_file);
     }
 
     return TRUE;
