@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     0.11
+Version:     0.12
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -371,6 +371,10 @@ CFLAGS="%{optflags}" make PREFIX=%{buildroot} SITEDIRS=%{buildroot}%{python2_sit
 %files plugins-all
 
 %changelog
+* Fri Apr 24 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.12-1
+- Require minimum version of libblockdev-utils in some plugins (vpodzime)
+- Report both stdout and stderr if exit code != 0 (vpodzime)
+
 * Fri Apr 17 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.11-1
 - Fix issues with using overriden functions over ErrorProxy (vpodzime)
 - Update the roadmap.rst and features.rst with new stuff (vpodzime)
