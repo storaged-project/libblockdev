@@ -245,9 +245,10 @@ KBD (Kernel Block Devices)
    bcache, zram
 
 :functions:
-   * bcache_create
-   * bcache_destroy
-   * bcache_detach
+   * bcache_create [DONE]
+   * bcache_destroy [DONE]
+   * bcache_attach [DONE]
+   * bcache_detach [DONE]
    * bcache_status
    * bcache_set_mode
    * bcache_get_mode

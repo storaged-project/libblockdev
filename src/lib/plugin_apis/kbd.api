@@ -30,4 +30,45 @@ gboolean bd_kbd_zram_create_devices (guint64 num_devices, guint64 *sizes, guint6
  */
 gboolean bd_kbd_zram_destroy_devices (GError **error);
 
+/**
+ * bd_kbd_bcache_create:
+ * @backing_device: backing (slow) device of the cache
+ * @cache_device: cache (fast) device of the cache
+ * @bcache_device: (out) (allow-none): place to store the name of the new bcache device (if any)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the bcache device was successfully created or not
+ */
+gboolean bd_kbd_bcache_create (gchar *backing_device, gchar *cache_device, gchar **bcache_device, GError **error);
+
+/**
+ * bd_kbd_bcache_attach:
+ * @c_set_uuid: cache set UUID of the cache to attach
+ * @bcache_device: bcache device to attach @c_set_uuid cache to
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @c_set_uuid cache was successfully attached to @bcache_device or not
+ */
+gboolean bd_kbd_bcache_attach (gchar *c_set_uuid, gchar *bcache_device, GError **error);
+
+/**
+ * bd_kbd_bcache_detach:
+ * @bcache_device: bcache device to detach the cache from
+ * @c_set_uuid: (out) (allow-none) (transfer full): cache set UUID of the detached cache
+ * @error: (out): place to store error (if any)
+ * Returns: whether the bcache device @bcache_device was successfully destroyed or not
+ *
+ * Note: Flushes the cache first.
+ */
+gboolean bd_kbd_bcache_detach (gchar *bcache_device, gchar **c_set_uuid, GError **error);
+
+/**
+ * bd_kbd_bcache_destroy:
+ * @bcache_device: bcache device to destroy
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the bcache device @bcache_device was successfully destroyed or not
+ */
+gboolean bd_kbd_bcache_destroy (gchar *bcache_device, GError **error);
+
 #endif  /* BD_KBD_API */
