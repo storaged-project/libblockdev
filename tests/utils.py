@@ -1,6 +1,7 @@
 import os
 import tempfile
 from contextlib import contextmanager
+from itertools import chain
 
 from gi.repository import GLib
 
@@ -26,6 +27,10 @@ def create_sparse_file(path, size):
     fd = os.open(path, os.O_WRONLY|os.O_CREAT|os.O_TRUNC)
     os.ftruncate(fd, size)
     os.close(fd)
+
+def wipe_all(dev, *args):
+    for device in chain([dev], args):
+        os.system("wipefs -a %s &>/dev/null" % device)
 
 @contextmanager
 def udev_settle():

@@ -2,6 +2,7 @@ import unittest
 import os
 import time
 from contextlib import contextmanager
+from utils import create_sparse_tempfile, wipe_all
 import overrides_hack
 
 from gi.repository import BlockDev, GLib
@@ -81,4 +82,120 @@ class KbdZRAMTestCase(unittest.TestCase):
             time.sleep(1)
             self.assertTrue(BlockDev.kbd_zram_destroy_devices())
 
+class KbdBcacheTestCase(unittest.TestCase):
+    def setUp(self):
+        self.dev_file = create_sparse_tempfile("lvm_test", 10 * 1024**3)
+        self.dev_file2 = create_sparse_tempfile("lvm_test", 10 * 1024**3)
+        succ, loop = BlockDev.loop_setup(self.dev_file)
+        if  not succ:
+            raise RuntimeError("Failed to setup loop device for testing")
+        self.loop_dev = "/dev/%s" % loop
+        succ, loop = BlockDev.loop_setup(self.dev_file2)
+        if  not succ:
+            raise RuntimeError("Failed to setup loop device for testing")
+        self.loop_dev2 = "/dev/%s" % loop
 
+        self.bcache_dev = None
+
+    def tearDown(self):
+        if self.bcache_dev:
+            try:
+                BlockDev.kbd_bcache_destroy(self.bcache_dev)
+            except:
+                pass
+
+        succ = BlockDev.loop_teardown(self.loop_dev)
+        if not succ:
+            os.unlink(self.dev_file)
+            raise RuntimeError("Failed to tear down loop device used for testing")
+
+        os.unlink(self.dev_file)
+        succ = BlockDev.loop_teardown(self.loop_dev2)
+        if  not succ:
+            os.unlink(self.dev_file2)
+            raise RuntimeError("Failed to tear down loop device used for testing")
+
+        os.unlink(self.dev_file2)
+
+class KbdTestBcacheCreate(KbdBcacheTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_bcache_create_destroy(self):
+        """Verify that it's possible to create and destroy a bcache device"""
+
+        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2)
+        self.assertTrue(succ)
+        self.assertTrue(dev)
+        self.bcache_dev = dev
+        time.sleep(5)
+
+        succ = BlockDev.kbd_bcache_destroy(self.bcache_dev)
+        self.assertTrue(succ)
+        self.bcache_dev = None
+        time.sleep(1)
+
+        wipe_all(self.loop_dev, self.loop_dev2)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_bcache_create_destroy_full_path(self):
+        """Verify that it's possible to create and destroy a bcache device with full device path"""
+
+        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2)
+        self.assertTrue(succ)
+        self.assertTrue(dev)
+        self.bcache_dev = dev
+        time.sleep(5)
+
+        succ = BlockDev.kbd_bcache_destroy("/dev/" + self.bcache_dev)
+        self.assertTrue(succ)
+        self.bcache_dev = None
+
+        wipe_all(self.loop_dev, self.loop_dev2)
+
+class KbdTestBcacheAttachDetach(KbdBcacheTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_bcache_attach_detach(self):
+        """Verify that it's possible to detach/attach a cache from/to a bcache device"""
+
+        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2)
+        self.assertTrue(succ)
+        self.assertTrue(dev)
+        self.bcache_dev = dev
+        time.sleep(5)
+
+        succ, c_set_uuid = BlockDev.kbd_bcache_detach(self.bcache_dev)
+        self.assertTrue(succ)
+        self.assertTrue(c_set_uuid)
+
+        succ = BlockDev.kbd_bcache_attach(c_set_uuid, self.bcache_dev)
+        self.assertTrue(succ)
+
+        succ = BlockDev.kbd_bcache_destroy(self.bcache_dev)
+        self.assertTrue(succ)
+        self.bcache_dev = None
+        time.sleep(1)
+
+        wipe_all(self.loop_dev, self.loop_dev2)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_bcache_attach_detach_full_path(self):
+        """Verify that it's possible to detach/attach a cache from/to a bcache device with full device path"""
+
+        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2)
+        self.assertTrue(succ)
+        self.assertTrue(dev)
+        self.bcache_dev = dev
+        time.sleep(5)
+
+        succ, c_set_uuid = BlockDev.kbd_bcache_detach("/dev/" + self.bcache_dev)
+        self.assertTrue(succ)
+        self.assertTrue(c_set_uuid)
+
+        succ = BlockDev.kbd_bcache_attach(c_set_uuid, "/dev/" + self.bcache_dev)
+        self.assertTrue(succ)
+
+        succ = BlockDev.kbd_bcache_destroy(self.bcache_dev)
+        self.assertTrue(succ)
+        self.bcache_dev = None
+        time.sleep(1)
+
+        wipe_all(self.loop_dev, self.loop_dev2)
