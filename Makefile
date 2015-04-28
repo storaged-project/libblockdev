@@ -11,6 +11,9 @@ build:
 	scons -Q build
 	@echo
 
+rebuild: clean
+	$(MAKE) build
+
 install:
 	scons -Q --prefix=${PREFIX} --sitedirs=${SITEDIRS} install
 	-mkdir -p ${PREFIX}/usr/share/gtk-doc/html/libblockdev/
