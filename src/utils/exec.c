@@ -179,7 +179,7 @@ gboolean bd_utils_exec_and_capture_output (gchar **argv, gchar **output, GError 
         if (stderr_data && (g_strcmp0 ("", stderr_data) != 0)) {
             if (status != 0)
                 g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
-                             "Process reported exit code %d: %s", status, stderr_data);
+                             "Process reported exit code %d: %s%s", status, stdout_data, stderr_data);
             else
                 g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT,
                              "Process didn't provide any data on standard output. "

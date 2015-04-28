@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     0.11
+Version:     0.12
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -59,6 +59,7 @@ with the libblockdev-utils library.
 
 %package btrfs
 Summary:     The BTRFS plugin for the libblockdev library
+Requires: %{name}-utils%{?_isa} >= 0.11
 Requires: btrfs-progs
 
 %description btrfs
@@ -95,6 +96,7 @@ with the libblockdev-crypto plugin/library.
 
 %package dm
 Summary:     The Device Mapper plugin for the libblockdev library
+Requires: %{name}-utils%{?_isa} >= 0.11
 Requires: device-mapper
 Requires: dmraid
 
@@ -118,6 +120,7 @@ with the libblockdev-dm plugin/library.
 
 %package loop
 Summary:     The loop plugin for the libblockdev library
+Requires: %{name}-utils%{?_isa} >= 0.11
 Requires: util-linux
 
 %description loop
@@ -137,6 +140,7 @@ with the libblockdev-loop plugin/library.
 
 %package lvm
 Summary:     The LVM plugin for the libblockdev library
+Requires: %{name}-utils%{?_isa} >= 0.11
 Requires: lvm2
 
 %description lvm
@@ -156,6 +160,7 @@ with the libblockdev-lvm plugin/library.
 
 %package mdraid
 Summary:     The MD RAID plugin for the libblockdev library
+Requires: %{name}-utils%{?_isa} >= 0.11
 Requires: mdadm
 
 %description mdraid
@@ -175,6 +180,7 @@ with the libblockdev-mdraid plugin/library.
 
 %package mpath
 Summary:     The multipath plugin for the libblockdev library
+Requires: %{name}-utils%{?_isa} >= 0.11
 Requires: device-mapper-multipath
 
 %description mpath
@@ -194,6 +200,7 @@ with the libblockdev-mpath plugin/library.
 
 %package swap
 Summary:     The swap plugin for the libblockdev library
+Requires: %{name}-utils%{?_isa} >= 0.11
 Requires: util-linux
 
 %description swap
@@ -364,6 +371,10 @@ CFLAGS="%{optflags}" make PREFIX=%{buildroot} SITEDIRS=%{buildroot}%{python2_sit
 %files plugins-all
 
 %changelog
+* Fri Apr 24 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.12-1
+- Require minimum version of libblockdev-utils in some plugins (vpodzime)
+- Report both stdout and stderr if exit code != 0 (vpodzime)
+
 * Fri Apr 17 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.11-1
 - Fix issues with using overriden functions over ErrorProxy (vpodzime)
 - Update the roadmap.rst and features.rst with new stuff (vpodzime)
