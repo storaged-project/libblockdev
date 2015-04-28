@@ -43,6 +43,69 @@ GQuark bd_kbd_error_quark (void)
     return g_quark_from_static_string ("g-bd-kbd-error-quark");
 }
 
+static gboolean have_kernel_module (gchar *module_name, GError **error);
+
+/**
+ * check: (skip)
+ */
+gboolean check() {
+    GError *error = NULL;
+    gboolean ret = FALSE;
+
+    ret = have_kernel_module ("zram", &error);
+    if (!ret) {
+        if (error) {
+            g_warning("Cannot load the kbd plugin: %s" , error->message);
+            g_clear_error (&error);
+        } else
+            g_warning("Cannot load the kbd plugin: the 'zram' kernel module is not available");
+    }
+
+    if (!ret)
+        return FALSE;
+
+    ret = bd_utils_check_util_version ("make-bcache", NULL, NULL, NULL, &error);
+    if (!ret && error) {
+        g_warning("Cannot load the kbd plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+
+    return ret;
+}
+
+static gboolean have_kernel_module (gchar *module_name, GError **error) {
+    gint ret = 0;
+    struct kmod_ctx *ctx = NULL;
+    struct kmod_module *mod = NULL;
+    gchar *null_config = NULL;
+    const gchar *path = NULL;
+    gboolean have_path = FALSE;
+
+    ctx = kmod_new (NULL, (const gchar * const*) &null_config);
+    if (!ctx) {
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_KMOD_INIT_FAIL,
+                     "Failed to initialize kmod context");
+        return FALSE;
+    }
+    /* prevent libkmod from spamming our STDERR */
+    kmod_set_log_priority(ctx, LOG_CRIT);
+
+    ret = kmod_module_new_from_name (ctx, module_name, &mod);
+    if (ret < 0) {
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_MODULE_FAIL,
+                     "Failed to get the module: %s", strerror (-ret));
+        kmod_unref (ctx);
+        return FALSE;
+    }
+
+    path = kmod_module_get_path (mod);
+    have_path = (path != NULL) && (g_strcmp0 (path, "") != 0);
+    kmod_module_unref (mod);
+    kmod_unref (ctx);
+
+    return have_path;
+}
+
 static gboolean load_kernel_module (gchar *module_name, gchar *options, GError **error) {
     gint ret = 0;
     struct kmod_ctx *ctx = NULL;

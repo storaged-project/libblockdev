@@ -2,7 +2,7 @@ import unittest
 import os
 import time
 from contextlib import contextmanager
-from utils import create_sparse_tempfile, wipe_all
+from utils import create_sparse_tempfile, wipe_all, fake_path
 import overrides_hack
 
 from gi.repository import BlockDev, GLib
@@ -199,3 +199,25 @@ class KbdTestBcacheAttachDetach(KbdBcacheTestCase):
         time.sleep(1)
 
         wipe_all(self.loop_dev, self.loop_dev2)
+
+class KbdUnloadTest(unittest.TestCase):
+    def tearDown(self):
+        # make sure the library is initialized with all plugins loaded for other
+        # tests
+        self.assertTrue(BlockDev.reinit(None, True, None))
+
+    def test_check_no_bcache_progs(self):
+        """Verify that checking the availability of make-bcache works as expected"""
+
+        # unload all plugins first
+        self.assertTrue(BlockDev.reinit([], True, None))
+
+        with fake_path():
+            with self.assertRaises(GLib.GError):
+                BlockDev.reinit(None, True, None)
+
+            self.assertNotIn("kbd", BlockDev.get_available_plugin_names())
+
+        # load the plugins back
+        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertIn("kbd", BlockDev.get_available_plugin_names())
