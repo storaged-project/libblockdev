@@ -337,6 +337,7 @@ gboolean bd_utils_check_util_version (gchar *util, gchar *version, gchar *versio
                          "Failed to determine %s's version from: %s", util, output);
             g_free (output);
             g_regex_unref (regex);
+            g_match_info_free (match_info);
             return FALSE;
         }
         g_regex_unref (regex);
