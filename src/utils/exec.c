@@ -20,6 +20,9 @@
 #include <glib.h>
 #include "exec.h"
 #include <syslog.h>
+#include <stdlib.h>
+
+extern char **environ;
 
 static GMutex id_counter_lock;
 static guint64 id_counter = 0;
@@ -95,6 +98,11 @@ static void log_done (guint64 task_id, gint exit_code) {
     return;
 }
 
+static void set_c_locale(gpointer user_data __attribute__((unused))) {
+    if (setenv ("LC_ALL", "C", 1) != 0)
+        g_warning ("Failed to set LC_ALL=C for a child process!");
+}
+
 /**
  * bd_utils_exec_and_report_error:
  * @argv: (array zero-terminated=1): the argv array for the call
@@ -111,7 +119,8 @@ gboolean bd_utils_exec_and_report_error (gchar **argv, GError **error) {
 
     task_id = log_running (argv);
     success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
-                            NULL, NULL, &stdout_data, &stderr_data, &status, error);
+                            (GSpawnChildSetupFunc) set_c_locale, NULL,
+                            &stdout_data, &stderr_data, &status, error);
     log_out (task_id, stdout_data, stderr_data);
     log_done (task_id, status);
 
@@ -156,7 +165,8 @@ gboolean bd_utils_exec_and_capture_output (gchar **argv, gchar **output, GError 
 
     task_id = log_running (argv);
     success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
-                            NULL, NULL, &stdout_data, &stderr_data, &status, error);
+                            (GSpawnChildSetupFunc) set_c_locale, NULL,
+                            &stdout_data, &stderr_data, &status, error);
     log_out (task_id, stdout_data, stderr_data);
     log_done (task_id, status);
 

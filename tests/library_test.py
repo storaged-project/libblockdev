@@ -169,3 +169,15 @@ class LibraryOpsTestCase(unittest.TestCase):
         # shouldn't report any error and it shouldn't affect the loaded plugins
         self.assertTrue(BlockDev.try_init([ps], None))
         self.assertEqual(avail_plugs, BlockDev.get_available_plugin_names())
+
+    def test_non_en_init(self):
+        """Verify that the library initializes with lang different from en_US"""
+
+        orig_lang = os.environ.get("LANG")
+        os.environ["LANG"] = "cs.CZ_UTF-8"
+        self.assertTrue(BlockDev.reinit(None, True, None))
+        if orig_lang:
+            os.environ["LANG"] = orig_lang
+        else:
+            del os.environ["LANG"]
+        self.assertTrue(BlockDev.reinit(None, True, None))
