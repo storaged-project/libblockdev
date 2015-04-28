@@ -3,6 +3,66 @@
 #ifndef BD_KBD_API
 #define BD_KBD_API
 
+#define BD_KBD_TYPE_ZRAM_STATS (bd_kbd_zram_stats_get_type ())
+GType bd_kbd_zram_stats_get_type();
+
+/* see zRAM kernel documentation for details */
+typedef struct BDKBDZramStats {
+    guint64 disksize;
+    guint64 num_reads;
+    guint64 num_writes;
+    guint64 invalid_io;
+    guint64 zero_pages;
+    guint64 max_comp_streams;
+    gchar* comp_algorithm;
+    guint64 orig_data_size;
+    guint64 compr_data_size;
+    guint64 mem_used_total;
+} BDKBDZramStats;
+
+/**
+ * bd_kbd_zram_stats_copy: (skip)
+ *
+ * Creates a new copy of @data.
+ */
+BDKBDZramStats* bd_kbd_zram_stats_copy (BDKBDZramStats *data) {
+    BDKBDZramStats *new = g_new (BDKBDZramStats, 1);
+    new->disksize = data->disksize;
+    new->num_reads = data->num_reads;
+    new->num_writes = data->num_writes;
+    new->invalid_io = data->invalid_io;
+    new->zero_pages = data->zero_pages;
+    new->max_comp_streams = data->max_comp_streams;
+    new->comp_algorithm = g_strdup (data->comp_algorithm);
+    new->orig_data_size = data->orig_data_size;
+    new->compr_data_size = data->compr_data_size;
+    new->mem_used_total = data->mem_used_total;
+
+    return new;
+}
+
+/**
+ * bd_kbd_zram_stats_free: (skip)
+ *
+ * Frees @data.
+ */
+void bd_kbd_zram_stats_free (BDKBDZramStats *data) {
+    g_free (data->comp_algorithm);
+    g_free (data);
+}
+
+GType bd_kbd_zram_stats_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDKBDZramStats",
+                                            (GBoxedCopyFunc) bd_kbd_zram_stats_copy,
+                                            (GBoxedFreeFunc) bd_kbd_zram_stats_free);
+    }
+
+    return type;
+}
+
 /**
  * bd_kbd_zram_create_devices:
  * @num_devices: number of devices to create
@@ -29,6 +89,15 @@ gboolean bd_kbd_zram_create_devices (guint64 num_devices, guint64 *sizes, guint6
  * specification of which devices should be destroyed.
  */
 gboolean bd_kbd_zram_destroy_devices (GError **error);
+
+/**
+ * bd_kbd_zram_get_stats:
+ * @device: zRAM device to get stats for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): statistics for the zRAM device
+ */
+BDKBDZramStats* bd_kbd_zram_get_stats (gchar *device, GError **error);
 
 /**
  * bd_kbd_bcache_create:

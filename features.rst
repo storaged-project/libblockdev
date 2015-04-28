@@ -255,6 +255,7 @@ KBD (Kernel Block Devices)
 
    * zram_create_devices [DONE]
    * zram_destroy_devices [DONE]
+   * zram_get_stats [DONE]
 
 
 utils

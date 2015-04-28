@@ -82,6 +82,30 @@ class KbdZRAMTestCase(unittest.TestCase):
             time.sleep(1)
             self.assertTrue(BlockDev.kbd_zram_destroy_devices())
 
+class KbdZRAMStatsTestCase(KbdZRAMTestCase):
+    @unittest.skipUnless(_can_load_zram(), "cannot load the 'zram' module")
+    def test_zram_get_stats(self):
+        """Verify that it is possible to get stats for a zram device"""
+
+        with _track_module_load(self, "zram", "_loaded_zram_module"):
+            self.assertTrue(BlockDev.kbd_zram_create_devices(1, [10 * 1024**2], [2]))
+            time.sleep(1)
+
+        # XXX: this needs to get more complex/serious
+        stats = BlockDev.kbd_zram_get_stats("zram0")
+        self.assertTrue(stats)
+
+        # /dev/zram0 should work too
+        stats = BlockDev.kbd_zram_get_stats("/dev/zram0")
+        self.assertTrue(stats)
+
+        self.assertEqual(stats.disksize, 10 * 1024**2)
+        self.assertEqual(stats.max_comp_streams, 2)
+        self.assertTrue(stats.comp_algorithm)
+
+        with _track_module_load(self, "zram", "_loaded_zram_module"):
+            self.assertTrue(BlockDev.kbd_zram_destroy_devices())
+
 class KbdBcacheTestCase(unittest.TestCase):
     def setUp(self):
         self.dev_file = create_sparse_tempfile("lvm_test", 10 * 1024**3)

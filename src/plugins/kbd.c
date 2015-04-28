@@ -43,6 +43,27 @@ GQuark bd_kbd_error_quark (void)
     return g_quark_from_static_string ("g-bd-kbd-error-quark");
 }
 
+BDKBDZramStats* bd_kbd_zram_stats_copy (BDKBDZramStats *data) {
+    BDKBDZramStats *new = g_new (BDKBDZramStats, 1);
+    new->disksize = data->disksize;
+    new->num_reads = data->num_reads;
+    new->num_writes = data->num_writes;
+    new->invalid_io = data->invalid_io;
+    new->zero_pages = data->zero_pages;
+    new->max_comp_streams = data->max_comp_streams;
+    new->comp_algorithm = g_strdup (data->comp_algorithm);
+    new->orig_data_size = data->orig_data_size;
+    new->compr_data_size = data->compr_data_size;
+    new->mem_used_total = data->mem_used_total;
+
+    return new;
+}
+
+void bd_kbd_zram_stats_free (BDKBDZramStats *data) {
+    g_free (data->comp_algorithm);
+    g_free (data);
+}
+
 static gboolean have_kernel_module (gchar *module_name, GError **error);
 
 /**
@@ -319,6 +340,152 @@ gboolean bd_kbd_zram_create_devices (guint64 num_devices, guint64 *sizes, guint6
 gboolean bd_kbd_zram_destroy_devices (GError **error) {
     return unload_kernel_module ("zram", error);
 }
+
+static guint64 get_number_from_file (gchar *path, GError **error) {
+    gchar *content = NULL;
+    gboolean success = FALSE;
+    guint64 ret = 0;
+
+    success = g_file_get_contents (path, &content, NULL, error);
+    if (!success) {
+        /* error is already populated */
+        return 0;
+    }
+
+    ret = g_ascii_strtoull (content, NULL, 0);
+    g_free (content);
+
+    return ret;
+}
+
+/**
+ * bd_kbd_zram_get_stats:
+ * @device: zRAM device to get stats for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): statistics for the zRAM device
+ */
+BDKBDZramStats* bd_kbd_zram_get_stats (gchar *device, GError **error) {
+    gchar *path = NULL;
+    gboolean success = FALSE;
+    BDKBDZramStats *ret = g_new (BDKBDZramStats, 1);
+
+    if (g_str_has_prefix (device, "/dev/"))
+        device += 5;
+
+    path = g_strdup_printf ("/sys/block/%s", device);
+    if (access (path, R_OK) != 0) {
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_NOEXIST,
+                     "Device '%s' doesn't seem to exist", device);
+        g_free (path);
+        return NULL;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/disksize", device);
+    ret->disksize = get_number_from_file (path, error);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'disksize' for '%s' zRAM device", device);
+        g_free (ret);
+        return NULL;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/num_reads", device);
+    ret->num_reads = get_number_from_file (path, error);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'num_reads' for '%s' zRAM device", device);
+        g_free (ret);
+        return NULL;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/num_writes", device);
+    ret->num_writes = get_number_from_file (path, error);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'num_writes' for '%s' zRAM device", device);
+        g_free (ret);
+        return NULL;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/invalid_io", device);
+    ret->invalid_io = get_number_from_file (path, error);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'invalid_io' for '%s' zRAM device", device);
+        g_free (ret);
+        return NULL;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/zero_pages", device);
+    ret->zero_pages = get_number_from_file (path, error);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'zero_pages' for '%s' zRAM device", device);
+        g_free (ret);
+        return NULL;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/max_comp_streams", device);
+    ret->max_comp_streams = get_number_from_file (path, error);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'max_comp_streams' for '%s' zRAM device", device);
+        g_free (ret);
+        return NULL;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/orig_data_size", device);
+    ret->orig_data_size = get_number_from_file (path, error);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'orig_data_size' for '%s' zRAM device", device);
+        g_free (ret);
+        return NULL;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/compr_data_size", device);
+    ret->compr_data_size = get_number_from_file (path, error);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'compr_data_size' for '%s' zRAM device", device);
+        g_free (ret);
+        return NULL;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/mem_used_total", device);
+    ret->mem_used_total = get_number_from_file (path, error);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'mem_used_total' for '%s' zRAM device", device);
+        g_free (ret);
+        return NULL;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/comp_algorithm", device);
+    success = g_file_get_contents (path, &(ret->comp_algorithm), NULL, error);
+    if (!success) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'comp_algorithm' for '%s' zRAM device", device);
+        g_free (ret);
+        return NULL;
+    }
+    /* remove the trailing space and newline */
+    g_strstrip (ret->comp_algorithm);
+
+    return ret;
+}
+
 
 /**
  * bd_kbd_bcache_create:
