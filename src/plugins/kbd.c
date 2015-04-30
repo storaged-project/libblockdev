@@ -35,6 +35,8 @@
  * A plugin for operations with kernel block devices.
  */
 
+static const gchar * const mode_str[BD_KBD_MODE_UNKNOWN+1] = {"writethrough", "writeback", "writearound", "none", "unknown"};
+
 /**
  * bd_kbd_error_quark: (skip)
  */
@@ -729,6 +731,143 @@ gboolean bd_kbd_bcache_destroy (gchar *bcache_device, GError **error) {
         g_prefix_error (error, "Failed to stop the bcache: ");
         return FALSE;
     }
+
+    return TRUE;
+}
+
+/**
+ * bd_kbd_bcache_get_mode:
+ * @bcache_device: device to get mode of
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: current mode of the @bcache_device
+ */
+BDKBDBcacheMode bd_kbd_bcache_get_mode (gchar *bcache_device, GError **error) {
+    gchar *path = NULL;
+    gchar *content = NULL;
+    gboolean success = FALSE;
+    gchar *selected = NULL;
+    BDKBDBcacheMode ret = BD_KBD_MODE_UNKNOWN;
+
+    if (g_str_has_prefix (bcache_device, "/dev/"))
+        bcache_device += 5;
+
+    path = g_strdup_printf ("/sys/block/%s/bcache/cache_mode", bcache_device);
+    success = g_file_get_contents (path, &content, NULL, error);
+    if (!success) {
+        g_prefix_error (error, "Failed to get cache modes for '%s'", bcache_device);
+        g_free (path);
+        return BD_KBD_MODE_UNKNOWN;
+    }
+    g_free (path);
+
+    /* there are all cache modes in the file with the currently selected one
+       having square brackets around it */
+    selected = strchr (content, '[');
+    if (!selected) {
+        g_prefix_error (error, "Failed to determine cache mode for '%s'", bcache_device);
+        g_free (content);
+        return BD_KBD_MODE_UNKNOWN;
+    }
+    /* move right after the square bracket */
+    selected++;
+
+    if (g_str_has_prefix (selected, "writethrough"))
+        ret = BD_KBD_MODE_WRITETHROUGH;
+    else if (g_str_has_prefix (selected, "writeback"))
+        ret = BD_KBD_MODE_WRITEBACK;
+    else if (g_str_has_prefix (selected, "writearound"))
+        ret = BD_KBD_MODE_WRITEAROUND;
+    else if (g_str_has_prefix (selected, "none"))
+        ret = BD_KBD_MODE_NONE;
+
+    g_free (content);
+    if (ret == BD_KBD_MODE_UNKNOWN)
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_MODE_FAIL,
+                     "Failed to determine mode for '%s'", bcache_device);
+
+    return ret;
+}
+
+/**
+ * bd_kbd_bcache_get_mode_str:
+ * @mode: mode to get string representation of
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer none): string representation of @mode or %NULL in case of error
+ */
+const gchar* bd_kbd_bcache_get_mode_str (BDKBDBcacheMode mode, GError **error) {
+    if (mode <= BD_KBD_MODE_UNKNOWN)
+        return mode_str[mode];
+    else {
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_MODE_INVAL,
+                     "Invalid mode given: %d", mode);
+        return NULL;
+    }
+}
+
+/**
+ * bd_kbd_bcache_get_mode_from_str:
+ * @mode_str: string representation of mode
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: mode matching the @mode_str given or %BD_KBD_MODE_UNKNOWN in case of no match
+ */
+BDKBDBcacheMode bd_kbd_bcache_get_mode_from_str (gchar *mode_str, GError **error) {
+    if (g_strcmp0 (mode_str, "writethrough") == 0)
+        return BD_KBD_MODE_WRITETHROUGH;
+    else if (g_strcmp0 (mode_str, "writeback") == 0)
+        return BD_KBD_MODE_WRITEBACK;
+    else if (g_strcmp0 (mode_str, "writearound") == 0)
+        return BD_KBD_MODE_WRITEAROUND;
+    else if (g_strcmp0 (mode_str, "none") == 0)
+        return BD_KBD_MODE_NONE;
+    else if (g_strcmp0 (mode_str, "unknown") == 0)
+        return BD_KBD_MODE_UNKNOWN;
+    else {
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_MODE_INVAL,
+                     "Invalid mode given: '%s'", mode_str);
+        return BD_KBD_MODE_UNKNOWN;
+    }
+}
+
+
+/**
+ * bd_kbd_bcache_set_mode:
+ * @bcache_device: bcache device to set mode of
+ * @mode: mode to set
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the mode was successfully set or not
+ */
+gboolean bd_kbd_bcache_set_mode (gchar *bcache_device, BDKBDBcacheMode mode, GError **error) {
+    gchar *path = NULL;
+    gboolean success = FALSE;
+    const gchar *mode_str = NULL;
+
+    if (g_str_has_prefix (bcache_device, "/dev/"))
+        bcache_device += 5;
+
+    path = g_strdup_printf ("/sys/block/%s/bcache/cache_mode", bcache_device);
+    mode_str = bd_kbd_bcache_get_mode_str (mode, error);
+    if (!mode_str) {
+        /* error is already populated */
+        g_free (path);
+        return FALSE;
+    } else if (g_strcmp0 (mode_str, "unknown") == 0) {
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_MODE_INVAL,
+                     "Cannot set mode of '%s' to '%s'", bcache_device, mode_str);
+        g_free (path);
+        return FALSE;
+    }
+
+    success = echo_str_to_file ((gchar*) mode_str, path, error);
+    if (!success) {
+        g_prefix_error (error, "Failed to set mode '%s' to '%s'", mode_str, bcache_device);
+        g_free (path);
+        return FALSE;
+    }
+    g_free (path);
 
     return TRUE;
 }

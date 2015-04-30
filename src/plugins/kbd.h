@@ -16,7 +16,17 @@ typedef enum {
     BD_KBD_ERROR_BCACHE_DETACH_FAIL,
     BD_KBD_ERROR_BCACHE_NOT_ATTACHED,
     BD_KBD_ERROR_BCACHE_UUID,
+    BD_KBD_ERROR_BCACHE_MODE_FAIL,
+    BD_KBD_ERROR_BCACHE_MODE_INVAL,
 } BDKBDError;
+
+typedef enum {
+    BD_KBD_MODE_WRITETHROUGH,
+    BD_KBD_MODE_WRITEBACK,
+    BD_KBD_MODE_WRITEAROUND,
+    BD_KBD_MODE_NONE,
+    BD_KBD_MODE_UNKNOWN,
+} BDKBDBcacheMode;
 
 /* see zRAM kernel documentation for details */
 typedef struct BDKBDZramStats {
@@ -44,5 +54,9 @@ gboolean bd_kbd_bcache_create (gchar *backing_device, gchar *cache_device, gchar
 gboolean bd_kbd_bcache_attach (gchar *c_set_uuid, gchar *bcache_device, GError **error);
 gboolean bd_kbd_bcache_detach (gchar *bcache_device, gchar **c_set_uuid, GError **error);
 gboolean bd_kbd_bcache_destroy (gchar *bcache_device, GError **error);
+BDKBDBcacheMode bd_kbd_bcache_get_mode (gchar *bcache_device, GError **error);
+const gchar* bd_kbd_bcache_get_mode_str (BDKBDBcacheMode mode, GError **error);
+BDKBDBcacheMode bd_kbd_bcache_get_mode_from_str (gchar *mode_str, GError **error);
+gboolean bd_kbd_bcache_set_mode (gchar *bcache_device, BDKBDBcacheMode mode, GError **error);
 
 #endif  /* BD_KBD */

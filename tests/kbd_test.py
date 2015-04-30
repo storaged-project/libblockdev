@@ -106,6 +106,25 @@ class KbdZRAMStatsTestCase(KbdZRAMTestCase):
         with _track_module_load(self, "zram", "_loaded_zram_module"):
             self.assertTrue(BlockDev.kbd_zram_destroy_devices())
 
+class KbdBcacheNodevTestCase(unittest.TestCase):
+    # no setUp/tearDown methods needed
+
+    def test_bcache_mode_str_bijection(self):
+        """Verify that it's possible to transform between cache modes and their string representations"""
+
+        mode_mapping = ((BlockDev.KBDBcacheMode.WRITETHROUGH, "writethrough"),
+                        (BlockDev.KBDBcacheMode.WRITEBACK, "writeback"),
+                        (BlockDev.KBDBcacheMode.WRITEAROUND, "writearound"),
+                        (BlockDev.KBDBcacheMode.NONE, "none"),
+                        (BlockDev.KBDBcacheMode.UNKNOWN, "unknown"),
+        )
+
+        for (mode, mode_str) in mode_mapping:
+            self.assertEqual(mode, BlockDev.kbd_bcache_get_mode_from_str(mode_str))
+            self.assertEqual(mode_str, BlockDev.kbd_bcache_get_mode_str(mode))
+            self.assertEqual(mode_str, BlockDev.kbd_bcache_get_mode_str(BlockDev.kbd_bcache_get_mode_from_str(mode_str)))
+            self.assertEqual(mode, BlockDev.kbd_bcache_get_mode_from_str(BlockDev.kbd_bcache_get_mode_str(mode)))
+
 class KbdBcacheTestCase(unittest.TestCase):
     def setUp(self):
         self.dev_file = create_sparse_tempfile("lvm_test", 10 * 1024**3)
@@ -216,6 +235,45 @@ class KbdTestBcacheAttachDetach(KbdBcacheTestCase):
 
         succ = BlockDev.kbd_bcache_attach(c_set_uuid, "/dev/" + self.bcache_dev)
         self.assertTrue(succ)
+
+        succ = BlockDev.kbd_bcache_destroy(self.bcache_dev)
+        self.assertTrue(succ)
+        self.bcache_dev = None
+        time.sleep(1)
+
+        wipe_all(self.loop_dev, self.loop_dev2)
+
+class KbdTestBcacheGetSetMode(KbdBcacheTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_bcache_get_set_mode(self):
+        """Verify that it is possible to get and set Bcache mode"""
+
+        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2)
+        self.assertTrue(succ)
+        self.assertTrue(dev)
+        self.bcache_dev = dev
+        time.sleep(5)
+
+        mode = BlockDev.kbd_bcache_get_mode(self.bcache_dev)
+        self.assertNotEqual(mode, BlockDev.KBDBcacheMode.UNKNOWN)
+
+        for mode_str in ("writethrough", "writeback", "writearound", "none"):
+            mode = BlockDev.kbd_bcache_get_mode_from_str(mode_str)
+            succ = BlockDev.kbd_bcache_set_mode(self.bcache_dev, mode)
+            self.assertTrue(succ)
+            new_mode = BlockDev.kbd_bcache_get_mode(self.bcache_dev)
+            self.assertEqual(mode, new_mode)
+            self.assertEqual(mode_str, BlockDev.kbd_bcache_get_mode_str(new_mode))
+
+        mode_str = "unknown"
+        mode = BlockDev.kbd_bcache_get_mode_from_str(mode_str)
+        with self.assertRaises(GLib.GError):
+            # cannot set mode to "uknown"
+            BlockDev.kbd_bcache_set_mode(self.bcache_dev, mode)
+
+        mode_str = "bla"
+        with self.assertRaises(GLib.GError):
+            mode = BlockDev.kbd_bcache_get_mode_from_str(mode_str)
 
         succ = BlockDev.kbd_bcache_destroy(self.bcache_dev)
         self.assertTrue(succ)
