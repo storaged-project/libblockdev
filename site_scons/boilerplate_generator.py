@@ -12,7 +12,7 @@ import sys
 import os
 
 FuncInfo = namedtuple("FuncInfo", ["name", "doc", "rtype", "args", "body"])
-FUNC_SPEC_RE = re.compile(r'(?P<rtype>\**\s*\w+\s*\**)'
+FUNC_SPEC_RE = re.compile(r'(?P<rtype>(const\s+)?\**\s*\w+\s*\**)'
                           r'\s*'
                           r'(?P<name>\w+)'
                           r'\s*\('
