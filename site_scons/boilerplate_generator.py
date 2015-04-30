@@ -149,8 +149,12 @@ def get_func_boilerplate(fn_info):
         default_ret = "0.0"
     elif "bool" in fn_info.rtype:
         default_ret = "FALSE"
-    else:
+    elif fn_info.rtype.endswith("*"):
+        # a pointer
         default_ret = "NULL"
+    else:
+        # enum or whatever
+        default_ret = 0
 
     # first add the stub function doing nothing and just reporting error
     ret = ("{0.rtype} {0.name}_stub ({0.args}) {{\n" +
