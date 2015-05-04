@@ -50,7 +50,7 @@ typedef struct BDLVMPVdata {
  * Creates a new copy of @data.
  */
 BDLVMPVdata* bd_lvm_pvdata_copy (BDLVMPVdata *data) {
-    BDLVMPVdata *new_data = g_new (BDLVMPVdata, 1);
+    BDLVMPVdata *new_data = g_new0 (BDLVMPVdata, 1);
 
     new_data->pv_name = g_strdup (data->pv_name);
     new_data->pv_uuid = g_strdup (data->pv_uuid);
@@ -110,7 +110,7 @@ typedef struct BDLVMVGdata {
  * Creates a new copy of @data.
  */
 BDLVMVGdata* bd_lvm_vgdata_copy (BDLVMVGdata *data) {
-    BDLVMVGdata *new_data = g_new (BDLVMVGdata, 1);
+    BDLVMVGdata *new_data = g_new0 (BDLVMVGdata, 1);
 
     new_data->name = g_strdup (data->name);
     new_data->uuid = g_strdup (data->uuid);
@@ -165,7 +165,7 @@ typedef struct BDLVMLVdata {
  * Creates a new copy of @data.
  */
 BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
-    BDLVMLVdata *new_data = g_new (BDLVMLVdata, 1);
+    BDLVMLVdata *new_data = g_new0 (BDLVMLVdata, 1);
 
     new_data->lv_name = g_strdup (data->lv_name);
     new_data->vg_name = g_strdup (data->vg_name);

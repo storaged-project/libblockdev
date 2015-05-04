@@ -311,7 +311,7 @@ gchar** bd_get_available_plugin_names () {
         if (plugins[i].handle)
             num_loaded++;
 
-    gchar **ret_plugin_names = g_new (gchar*, num_loaded + 1);
+    gchar **ret_plugin_names = g_new0 (gchar*, num_loaded + 1);
     for (i=0; i < BD_PLUGIN_UNDEF; i++)
         if (plugins[i].handle) {
             ret_plugin_names[next] = plugin_names[i];

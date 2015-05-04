@@ -47,7 +47,7 @@ GQuark bd_lvm_error_quark (void)
 }
 
 BDLVMPVdata* bd_lvm_pvdata_copy (BDLVMPVdata *data) {
-    BDLVMPVdata *new_data = g_new (BDLVMPVdata, 1);
+    BDLVMPVdata *new_data = g_new0 (BDLVMPVdata, 1);
 
     new_data->pv_name = g_strdup (data->pv_name);
     new_data->pv_uuid = g_strdup (data->pv_uuid);
@@ -71,7 +71,7 @@ void bd_lvm_pvdata_free (BDLVMPVdata *data) {
 }
 
 BDLVMVGdata* bd_lvm_vgdata_copy (BDLVMVGdata *data) {
-    BDLVMVGdata *new_data = g_new (BDLVMVGdata, 1);
+    BDLVMVGdata *new_data = g_new0 (BDLVMVGdata, 1);
 
     new_data->name = g_strdup (data->name);
     new_data->uuid = g_strdup (data->uuid);
@@ -91,7 +91,7 @@ void bd_lvm_vgdata_free (BDLVMVGdata *data) {
 }
 
 BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
-    BDLVMLVdata *new_data = g_new (BDLVMLVdata, 1);
+    BDLVMLVdata *new_data = g_new0 (BDLVMLVdata, 1);
 
     new_data->lv_name = g_strdup (data->lv_name);
     new_data->vg_name = g_strdup (data->vg_name);
@@ -146,7 +146,7 @@ static gboolean call_lvm_and_report_error (gchar **args, GError **error) {
     g_mutex_lock (&global_config_lock);
 
     /* allocate enough space for the args plus "lvm", "--config" and NULL */
-    gchar **argv = g_new (gchar*, args_length + 3);
+    gchar **argv = g_new0 (gchar*, args_length + 3);
 
     /* construct argv from args with "lvm" prepended */
     argv[0] = "lvm";
@@ -172,7 +172,7 @@ static gboolean call_lvm_and_capture_output (gchar **args, gchar **output, GErro
     g_mutex_lock (&global_config_lock);
 
     /* allocate enough space for the args plus "lvm", "--config" and NULL */
-    gchar **argv = g_new (gchar*, args_length + 3);
+    gchar **argv = g_new0 (gchar*, args_length + 3);
 
     /* construct argv from args with "lvm" prepended */
     argv[0] = "lvm";
@@ -222,7 +222,7 @@ static GHashTable* parse_lvm_vars (gchar *str, guint *num_items) {
 }
 
 static BDLVMPVdata* get_pv_data_from_table (GHashTable *table, gboolean free_table) {
-    BDLVMPVdata *data = g_new (BDLVMPVdata, 1);
+    BDLVMPVdata *data = g_new0 (BDLVMPVdata, 1);
     gchar *value = NULL;
 
     data->pv_name = g_strdup ((gchar*) g_hash_table_lookup (table, "LVM2_PV_NAME"));
@@ -280,7 +280,7 @@ static BDLVMPVdata* get_pv_data_from_table (GHashTable *table, gboolean free_tab
 }
 
 static BDLVMVGdata* get_vg_data_from_table (GHashTable *table, gboolean free_table) {
-    BDLVMVGdata *data = g_new (BDLVMVGdata, 1);
+    BDLVMVGdata *data = g_new0 (BDLVMVGdata, 1);
     gchar *value = NULL;
 
     data->name = g_strdup (g_hash_table_lookup (table, "LVM2_VG_NAME"));
@@ -329,7 +329,7 @@ static BDLVMVGdata* get_vg_data_from_table (GHashTable *table, gboolean free_tab
 }
 
 static BDLVMLVdata* get_lv_data_from_table (GHashTable *table, gboolean free_table) {
-    BDLVMLVdata *data = g_new (BDLVMLVdata, 1);
+    BDLVMLVdata *data = g_new0 (BDLVMLVdata, 1);
     gchar *value = NULL;
 
     data->lv_name = g_strdup (g_hash_table_lookup (table, "LVM2_LV_NAME"));
@@ -372,7 +372,7 @@ guint64 *bd_lvm_get_supported_pe_sizes (GError **error __attribute__((unused))) 
     guint8 i;
     guint64 val = BD_LVM_MIN_PE_SIZE;
     guint8 num_items = ((guint8) round (log2 ((double) BD_LVM_MAX_PE_SIZE))) - ((guint8) round (log2 ((double) BD_LVM_MIN_PE_SIZE))) + 2;
-    guint64 *ret = g_new (guint64, num_items);
+    guint64 *ret = g_new0 (guint64, num_items);
 
     for (i=0; (val <= BD_LVM_MAX_PE_SIZE); i++, val = val * 2)
         ret[i] = val;
@@ -698,7 +698,7 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
         if (g_error_matches (*error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
             /* no output => no VGs, not an error */
             g_clear_error (error);
-            ret = g_new (BDLVMPVdata*, 1);
+            ret = g_new0 (BDLVMPVdata*, 1);
             ret[0] = NULL;
             return ret;
         }
@@ -731,7 +731,7 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
     }
 
     /* now create the return value -- NULL-terminated array of BDLVMPVdata */
-    ret = g_new (BDLVMPVdata*, pvs->len + 1);
+    ret = g_new0 (BDLVMPVdata*, pvs->len + 1);
     for (i=0; i < pvs->len; i++)
         ret[i] = (BDLVMPVdata*) g_ptr_array_index (pvs, i);
     ret[i] = NULL;
@@ -753,7 +753,7 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
 gboolean bd_lvm_vgcreate (gchar *name, gchar **pv_list, guint64 pe_size, GError **error) {
     guint8 i = 0;
     guint8 pv_list_len = pv_list ? g_strv_length (pv_list) : 0;
-    gchar **argv = g_new (gchar*, pv_list_len + 5);
+    gchar **argv = g_new0 (gchar*, pv_list_len + 5);
     pe_size = RESOLVE_PE_SIZE (pe_size);
     gboolean success = FALSE;
 
@@ -925,7 +925,7 @@ BDLVMVGdata** bd_lvm_vgs (GError **error) {
         if (g_error_matches (*error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
             /* no output => no VGs, not an error */
             g_clear_error (error);
-            ret = g_new (BDLVMVGdata*, 1);
+            ret = g_new0 (BDLVMVGdata*, 1);
             ret[0] = NULL;
             return ret;
         }
@@ -958,7 +958,7 @@ BDLVMVGdata** bd_lvm_vgs (GError **error) {
     }
 
     /* now create the return value -- NULL-terminated array of BDLVMVGdata */
-    ret = g_new (BDLVMVGdata*, vgs->len + 1);
+    ret = g_new0 (BDLVMVGdata*, vgs->len + 1);
     for (i=0; i < vgs->len; i++)
         ret[i] = (BDLVMVGdata*) g_ptr_array_index (vgs, i);
     ret[i] = NULL;
@@ -1006,7 +1006,7 @@ gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, GError **error) {
  */
 gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar **pv_list, GError **error) {
     guint8 pv_list_len = pv_list ? g_strv_length (pv_list) : 0;
-    gchar **args = g_new (gchar*, pv_list_len + 8);
+    gchar **args = g_new0 (gchar*, pv_list_len + 8);
     gboolean success = FALSE;
     guint8 i = 0;
 
@@ -1256,7 +1256,7 @@ BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, GError **error) {
         if (g_error_matches (*error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
             /* no output => no LVs, not an error */
             g_clear_error (error);
-            ret = g_new (BDLVMLVdata*, 1);
+            ret = g_new0 (BDLVMLVdata*, 1);
             ret[0] = NULL;
             return ret;
         }
@@ -1289,7 +1289,7 @@ BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, GError **error) {
     }
 
     /* now create the return value -- NULL-terminated array of BDLVMLVdata */
-    ret = g_new (BDLVMLVdata*, lvs->len + 1);
+    ret = g_new0 (BDLVMLVdata*, lvs->len + 1);
     for (i=0; i < lvs->len; i++)
         ret[i] = (BDLVMLVdata*) g_ptr_array_index (lvs, i);
     ret[i] = NULL;

@@ -67,7 +67,7 @@ gchar* bd_crypto_generate_backup_passphrase(GError **error __attribute__((unused
     guint8 charset_length = strlen (BD_CRYPTO_BACKUP_PASSPHRASE_CHARSET);
 
     /* passphrase with groups of 5 characters separated with dashes */
-    gchar *ret = g_new (gchar, BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH + (BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH / 5) - 1);
+    gchar *ret = g_new0 (gchar, BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH + (BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH / 5) - 1);
 
     for (i=0; i < BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH; i++) {
         if (i > 0 && (i % 5 == 0)) {

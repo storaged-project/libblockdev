@@ -48,7 +48,7 @@ GQuark bd_kbd_error_quark (void)
 }
 
 BDKBDZramStats* bd_kbd_zram_stats_copy (BDKBDZramStats *data) {
-    BDKBDZramStats *new = g_new (BDKBDZramStats, 1);
+    BDKBDZramStats *new = g_new0 (BDKBDZramStats, 1);
     new->disksize = data->disksize;
     new->num_reads = data->num_reads;
     new->num_writes = data->num_writes;
@@ -69,7 +69,7 @@ void bd_kbd_zram_stats_free (BDKBDZramStats *data) {
 }
 
 BDKBDBcacheStats* bd_kbd_bcache_stats_copy (BDKBDBcacheStats *data) {
-    BDKBDBcacheStats *new = g_new (BDKBDBcacheStats, 1);
+    BDKBDBcacheStats *new = g_new0 (BDKBDBcacheStats, 1);
 
     new->state = g_strdup (data->state);
     new->block_size = data->block_size;
@@ -392,7 +392,7 @@ static guint64 get_number_from_file (gchar *path, GError **error) {
 BDKBDZramStats* bd_kbd_zram_get_stats (gchar *device, GError **error) {
     gchar *path = NULL;
     gboolean success = FALSE;
-    BDKBDZramStats *ret = g_new (BDKBDZramStats, 1);
+    BDKBDZramStats *ret = g_new0 (BDKBDZramStats, 1);
 
     if (g_str_has_prefix (device, "/dev/"))
         device += 5;
