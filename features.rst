@@ -249,7 +249,7 @@ KBD (Kernel Block Devices)
    * bcache_destroy [DONE]
    * bcache_attach [DONE]
    * bcache_detach [DONE]
-   * bcache_status
+   * bcache_status [DONE]
    * bcache_set_mode [DONE]
    * bcache_get_mode [DONE]
 

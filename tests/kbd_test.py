@@ -282,6 +282,34 @@ class KbdTestBcacheGetSetMode(KbdBcacheTestCase):
 
         wipe_all(self.loop_dev, self.loop_dev2)
 
+class KbdTestBcacheStatusTest(KbdBcacheTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_bcache_status(self):
+        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2)
+        self.assertTrue(succ)
+        self.assertTrue(dev)
+        self.bcache_dev = dev
+        time.sleep(10)
+
+        # should work with both "bcacheX" and "/dev/bcacheX"
+        status = BlockDev.kbd_bcache_status(self.bcache_dev)
+        self.assertTrue(status)
+        status = BlockDev.kbd_bcache_status("/dev/" + self.bcache_dev)
+        self.assertTrue(status)
+
+        # check some basic values (default block size is 512)
+        self.assertTrue(status.state)
+        self.assertEqual(status.state, "clean")
+        self.assertEqual(status.block_size, 512)
+        self.assertGreater(status.cache_size, 0)
+
+        succ = BlockDev.kbd_bcache_destroy(self.bcache_dev)
+        self.assertTrue(succ)
+        self.bcache_dev = None
+        time.sleep(1)
+
+        wipe_all(self.loop_dev, self.loop_dev2)
+
 class KbdUnloadTest(unittest.TestCase):
     def tearDown(self):
         # make sure the library is initialized with all plugins loaded for other

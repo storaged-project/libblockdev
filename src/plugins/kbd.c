@@ -26,6 +26,8 @@
 
 #include "kbd.h"
 
+#define SECTOR_SIZE 512
+
 /**
  * SECTION: kbd
  * @short_description: plugin for operations with kernel block devices
@@ -63,6 +65,26 @@ BDKBDZramStats* bd_kbd_zram_stats_copy (BDKBDZramStats *data) {
 
 void bd_kbd_zram_stats_free (BDKBDZramStats *data) {
     g_free (data->comp_algorithm);
+    g_free (data);
+}
+
+BDKBDBcacheStats* bd_kbd_bcache_stats_copy (BDKBDBcacheStats *data) {
+    BDKBDBcacheStats *new = g_new (BDKBDBcacheStats, 1);
+
+    new->state = g_strdup (data->state);
+    new->block_size = data->block_size;
+    new->cache_size = data->cache_size;
+    new->cache_used = data->cache_used;
+    new->hits = data->hits;
+    new->misses = data->misses;
+    new->bypass_hits = data->bypass_hits;
+    new->bypass_misses = data->bypass_misses;
+
+    return new;
+}
+
+void bd_kbd_bcache_stats_free (BDKBDBcacheStats *data) {
+    g_free (data->state);
     g_free (data);
 }
 
@@ -881,4 +903,197 @@ gboolean bd_kbd_bcache_set_mode (gchar *bcache_device, BDKBDBcacheMode mode, GEr
     g_free (path);
 
     return TRUE;
+}
+
+static gboolean get_cache_size_used (gchar *cache_dev_sys, guint64 *size, guint64 *used, GError **error) {
+    gchar *path = NULL;
+    GIOChannel *file = NULL;
+    gchar *line = NULL;
+    gboolean found = FALSE;
+    GIOStatus status = G_IO_STATUS_NORMAL;
+    guint64 percent_unused = 0;
+
+    path = g_strdup_printf ("%s/../size", cache_dev_sys);
+    *size = get_number_from_file (path, error);
+    g_free (path);
+    if (*error) {
+        g_prefix_error (error, "Failed to get cache device size: ");
+        return FALSE;
+    }
+
+    path = g_strdup_printf ("%s/priority_stats", cache_dev_sys);
+    file = g_io_channel_new_file (path, "r", error);
+    g_free (path);
+    if (!file) {
+        g_prefix_error (error, "Failed to get cache usage data: ");
+        return FALSE;
+    }
+
+    while (!found && (status == G_IO_STATUS_NORMAL)) {
+        status = g_io_channel_read_line (file, &line, NULL, NULL, error);
+        if (status == G_IO_STATUS_NORMAL) {
+            if (g_str_has_prefix (line, "Unused:"))
+                found = TRUE;
+            else
+                g_free (line);
+        }
+    }
+    g_io_channel_shutdown (file, FALSE, error);
+    if (*error)
+        /* we just read the file, no big deal if it for some really weird reason
+           failed to get closed */
+        g_clear_error (error);
+    g_io_channel_unref (file);
+
+    if (!found) {
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_INVAL,
+                     "Failed to get cache usage data");
+        return FALSE;
+    }
+
+    /* try to read the number after "Unused:" */
+    percent_unused = g_ascii_strtoull (line + 8, NULL, 0);
+    if (percent_unused == 0) {
+        g_free (line);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_INVAL,
+                     "Failed to get cache usage data");
+        return FALSE;
+    }
+    g_free (line);
+
+    *used = (guint64) ((100ULL - percent_unused) * 0.01 * (*size));
+
+    return TRUE;
+}
+
+/**
+ * bd_kbd_bcache_status:
+ * @bcache_device: bcache device to get status for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): status of the @bcache_device or %NULL in case of
+ *                           error (@error is set)
+ */
+BDKBDBcacheStats* bd_kbd_bcache_status (gchar *bcache_device, GError **error) {
+    gchar *path = NULL;
+    gboolean success = FALSE;
+    BDKBDBcacheStats *ret = g_new0 (BDKBDBcacheStats, 1);
+    glob_t globbuf;
+    gchar **path_list;
+    guint64 size = 0;
+    guint64 used = 0;
+
+    if (g_str_has_prefix (bcache_device, "/dev/"))
+        bcache_device += 5;
+
+    path = g_strdup_printf ("/sys/block/%s/bcache", bcache_device);
+    if (access (path, R_OK) != 0) {
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_NOEXIST,
+                     "Bcache device '%s' doesn't seem to exist", bcache_device);
+        g_free (path);
+        return NULL;
+    }
+    g_free (path);
+
+    path = g_strdup_printf ("/sys/block/%s/bcache/state", bcache_device);
+    success = g_file_get_contents (path, &(ret->state), NULL, error);
+    g_free (path);
+    if (!success) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_INVAL,
+                     "Failed to get 'state' for '%s' Bcache device", bcache_device);
+        g_free (ret);
+        return NULL;
+    }
+    /* remove the trailing space and newline */
+    g_strstrip (ret->state);
+
+    if (g_strcmp0 (ret->state, "no cache") == 0)
+        /* no cache, nothing more to get */
+        return ret;
+
+    path = g_strdup_printf ("/sys/block/%s/bcache/cache/block_size", bcache_device);
+    ret->block_size = get_number_from_file (path, error);
+    g_free (path);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_INVAL,
+                     "Failed to get 'block_size' for '%s' Bcache device", bcache_device);
+        g_free (ret);
+        return NULL;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/bcache/cache/cache*/", bcache_device);
+    if (glob (path, GLOB_NOSORT, NULL, &globbuf) != 0) {
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_INVAL,
+                     "Failed to get 'cache_size' for '%s' Bcache device", bcache_device);
+        g_free (path);
+        g_free (ret);
+        return NULL;
+    }
+    g_free (path);
+
+    /* sum up sizes of all (potential) cache devices */
+    for (path_list=globbuf.gl_pathv; *path_list; path_list++) {
+        success = get_cache_size_used (*path_list, &size, &used, error);
+        if (!success) {
+            g_clear_error (error);
+            g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_INVAL,
+                         "Failed to get 'cache_size' for '%s' Bcache device", bcache_device);
+            globfree (&globbuf);
+            g_free (ret);
+            return NULL;
+        } else {
+            // the /sys/*/size values are multiples of sector size
+            ret->cache_size += (SECTOR_SIZE * size);
+            ret->cache_used += (SECTOR_SIZE * used);
+        }
+    }
+    globfree (&globbuf);
+
+    path = g_strdup_printf ("/sys/block/%s/bcache/stats_total/cache_hits", bcache_device);
+    ret->hits = get_number_from_file (path, error);
+    g_free (path);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_INVAL,
+                     "Failed to get 'hits' for '%s' Bcache device", bcache_device);
+        g_free (ret);
+        return NULL;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/bcache/stats_total/cache_misses", bcache_device);
+    ret->misses = get_number_from_file (path, error);
+    g_free (path);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_INVAL,
+                     "Failed to get 'misses' for '%s' Bcache device", bcache_device);
+        g_free (ret);
+        return NULL;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/bcache/stats_total/cache_bypass_hits", bcache_device);
+    ret->bypass_hits = get_number_from_file (path, error);
+    g_free (path);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_INVAL,
+                     "Failed to get 'bypass_hits' for '%s' Bcache device", bcache_device);
+        g_free (ret);
+        return NULL;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/bcache/stats_total/cache_bypass_misses", bcache_device);
+    ret->bypass_misses = get_number_from_file (path, error);
+    g_free (path);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_INVAL,
+                     "Failed to get 'bypass_misses' for '%s' Bcache device", bcache_device);
+        g_free (ret);
+        return NULL;
+    }
+
+    return ret;
 }

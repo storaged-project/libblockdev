@@ -18,6 +18,8 @@ typedef enum {
     BD_KBD_ERROR_BCACHE_UUID,
     BD_KBD_ERROR_BCACHE_MODE_FAIL,
     BD_KBD_ERROR_BCACHE_MODE_INVAL,
+    BD_KBD_ERROR_BCACHE_NOEXIST,
+    BD_KBD_ERROR_BCACHE_INVAL,
 } BDKBDError;
 
 typedef enum {
@@ -45,6 +47,19 @@ typedef struct BDKBDZramStats {
 BDKBDZramStats* bd_kbd_zram_stats_copy (BDKBDZramStats *data);
 void bd_kbd_zram_stats_free (BDKBDZramStats *data);
 
+typedef struct BDKBDBcacheStats {
+    gchar *state;
+    guint64 block_size;
+    guint64 cache_size;
+    guint64 cache_used;
+    guint64 hits;
+    guint64 misses;
+    guint64 bypass_hits;
+    guint64 bypass_misses;
+} BDKBDBcacheStats;
+
+BDKBDBcacheStats* bd_kbd_bcache_stats_copy (BDKBDBcacheStats *data);
+void bd_kbd_bcache_stats_free (BDKBDBcacheStats *data);
 
 gboolean bd_kbd_zram_create_devices (guint64 num_devices, guint64 *sizes, guint64 *nstreams, GError **error);
 gboolean bd_kbd_zram_destroy_devices (GError **error);
@@ -58,5 +73,6 @@ BDKBDBcacheMode bd_kbd_bcache_get_mode (gchar *bcache_device, GError **error);
 const gchar* bd_kbd_bcache_get_mode_str (BDKBDBcacheMode mode, GError **error);
 BDKBDBcacheMode bd_kbd_bcache_get_mode_from_str (gchar *mode_str, GError **error);
 gboolean bd_kbd_bcache_set_mode (gchar *bcache_device, BDKBDBcacheMode mode, GError **error);
+BDKBDBcacheStats* bd_kbd_bcache_status (gchar *bcache_device, GError **error);
 
 #endif  /* BD_KBD */

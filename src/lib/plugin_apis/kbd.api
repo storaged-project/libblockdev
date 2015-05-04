@@ -87,6 +87,63 @@ GType bd_kbd_zram_stats_get_type () {
     return type;
 }
 
+#define BD_KBD_TYPE_BCACHE_STATS (bd_kbd_bcache_stats_get_type ())
+GType bd_kbd_bcache_stats_get_type();
+
+typedef struct BDKBDBcacheStats {
+    gchar *state;
+    guint64 block_size;
+    guint64 cache_size;
+    guint64 cache_used;
+    guint64 hits;
+    guint64 misses;
+    guint64 bypass_hits;
+    guint64 bypass_misses;
+} BDKBDBcacheStats;
+
+/**
+ * bd_kbd_bcache_stats_copy: (skip)
+ *
+ * Creates a new copy of @data.
+ */
+BDKBDBcacheStats* bd_kbd_bcache_stats_copy (BDKBDBcacheStats *data) {
+    BDKBDBcacheStats *new = g_new (BDKBDBcacheStats, 1);
+
+    new->state = g_strdup (data->state);
+    new->block_size = data->block_size;
+    new->cache_size = data->cache_size;
+    new->cache_used = data->cache_used;
+    new->hits = data->hits;
+    new->misses = data->misses;
+    new->bypass_hits = data->bypass_hits;
+    new->bypass_misses = data->bypass_misses;
+
+    return new;
+}
+
+/**
+ * bd_kbd_bcache_stats_free: (skip)
+ *
+ * Frees @data.
+ */
+void bd_kbd_bcache_stats_free (BDKBDBcacheStats *data) {
+    g_free (data->state);
+    g_free (data);
+}
+
+GType bd_kbd_bcache_stats_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDKBDBcacheStats",
+                                            (GBoxedCopyFunc) bd_kbd_bcache_stats_copy,
+                                            (GBoxedFreeFunc) bd_kbd_bcache_stats_free);
+    }
+
+    return type;
+}
+
+
 /**
  * bd_kbd_zram_create_devices:
  * @num_devices: number of devices to create
@@ -200,5 +257,15 @@ BDKBDBcacheMode bd_kbd_bcache_get_mode_from_str (gchar *mode_str, GError **error
  * Returns: whether the mode was successfully set or not
  */
 gboolean bd_kbd_bcache_set_mode (gchar *bcache_device, BDKBDBcacheMode mode, GError **error);
+
+/**
+ * bd_kbd_bcache_status:
+ * @bcache_device: bcache device to get status for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): status of the @bcache_device or %NULL in case of
+ *                           error (@error is set)
+ */
+BDKBDBcacheStats* bd_kbd_bcache_status (gchar *bcache_device, GError **error);
 
 #endif  /* BD_KBD_API */
