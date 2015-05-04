@@ -382,9 +382,11 @@ BDKBDZramStats* bd_kbd_zram_get_stats (gchar *device, GError **error) {
         g_free (path);
         return NULL;
     }
+    g_free (path);
 
     path = g_strdup_printf ("/sys/block/%s/disksize", device);
     ret->disksize = get_number_from_file (path, error);
+    g_free (path);
     if (*error) {
         g_clear_error (error);
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
@@ -395,6 +397,7 @@ BDKBDZramStats* bd_kbd_zram_get_stats (gchar *device, GError **error) {
 
     path = g_strdup_printf ("/sys/block/%s/num_reads", device);
     ret->num_reads = get_number_from_file (path, error);
+    g_free (path);
     if (*error) {
         g_clear_error (error);
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
@@ -415,6 +418,7 @@ BDKBDZramStats* bd_kbd_zram_get_stats (gchar *device, GError **error) {
 
     path = g_strdup_printf ("/sys/block/%s/invalid_io", device);
     ret->invalid_io = get_number_from_file (path, error);
+    g_free (path);
     if (*error) {
         g_clear_error (error);
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
@@ -425,6 +429,7 @@ BDKBDZramStats* bd_kbd_zram_get_stats (gchar *device, GError **error) {
 
     path = g_strdup_printf ("/sys/block/%s/zero_pages", device);
     ret->zero_pages = get_number_from_file (path, error);
+    g_free (path);
     if (*error) {
         g_clear_error (error);
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
@@ -435,6 +440,7 @@ BDKBDZramStats* bd_kbd_zram_get_stats (gchar *device, GError **error) {
 
     path = g_strdup_printf ("/sys/block/%s/max_comp_streams", device);
     ret->max_comp_streams = get_number_from_file (path, error);
+    g_free (path);
     if (*error) {
         g_clear_error (error);
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
@@ -445,6 +451,7 @@ BDKBDZramStats* bd_kbd_zram_get_stats (gchar *device, GError **error) {
 
     path = g_strdup_printf ("/sys/block/%s/orig_data_size", device);
     ret->orig_data_size = get_number_from_file (path, error);
+    g_free (path);
     if (*error) {
         g_clear_error (error);
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
@@ -455,6 +462,7 @@ BDKBDZramStats* bd_kbd_zram_get_stats (gchar *device, GError **error) {
 
     path = g_strdup_printf ("/sys/block/%s/compr_data_size", device);
     ret->compr_data_size = get_number_from_file (path, error);
+    g_free (path);
     if (*error) {
         g_clear_error (error);
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
@@ -465,6 +473,7 @@ BDKBDZramStats* bd_kbd_zram_get_stats (gchar *device, GError **error) {
 
     path = g_strdup_printf ("/sys/block/%s/mem_used_total", device);
     ret->mem_used_total = get_number_from_file (path, error);
+    g_free (path);
     if (*error) {
         g_clear_error (error);
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
@@ -475,10 +484,12 @@ BDKBDZramStats* bd_kbd_zram_get_stats (gchar *device, GError **error) {
 
     path = g_strdup_printf ("/sys/block/%s/comp_algorithm", device);
     success = g_file_get_contents (path, &(ret->comp_algorithm), NULL, error);
+    g_free (path);
     if (!success) {
         g_clear_error (error);
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
                      "Failed to get 'comp_algorithm' for '%s' zRAM device", device);
+        g_free (path);
         g_free (ret);
         return NULL;
     }
