@@ -29,8 +29,10 @@ def create_sparse_file(path, size):
 
 @contextmanager
 def udev_settle():
-    yield
-    os.system("udevadm settle")
+    try:
+        yield
+    finally:
+        os.system("udevadm settle")
 
 @contextmanager
 def fake_utils(path="."):
@@ -41,9 +43,10 @@ def fake_utils(path="."):
         new_path = path
     os.environ["PATH"] = new_path
 
-    yield
-
-    os.environ["PATH"] = old_path
+    try:
+        yield
+    finally:
+        os.environ["PATH"] = old_path
 
 @contextmanager
 def fake_path(path=None, keep_utils=None):
@@ -58,8 +61,9 @@ def fake_path(path=None, keep_utils=None):
     old_path = os.environ.get("PATH", "")
     os.environ["PATH"] = path or ""
 
-    yield
-
-    os.environ["PATH"] = old_path
-    for util in created_utils:
-        os.unlink(os.path.join(path, util))
+    try:
+        yield
+    finally:
+        os.environ["PATH"] = old_path
+        for util in created_utils:
+            os.unlink(os.path.join(path, util))
