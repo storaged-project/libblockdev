@@ -706,17 +706,15 @@ BDMDExamineData* bd_md_examine (gchar *device, GError **error) {
         return NULL;
     }
 
+    /* try to get metadata version from the output (may be missing) */
     value = (gchar*) g_hash_table_lookup (table, "metadata");
-    if (value) {
+    if (value)
         ret->metadata = g_strdup (value);
-        g_hash_table_destroy (table);
-        return ret;
-    } else {
-        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE,
-                     "Failed to parse mdexamine metadata");
-        g_hash_table_destroy (table);
-        return NULL;
-    }
+    else
+        ret->metadata = NULL;
+    g_hash_table_destroy (table);
+
+    return ret;
 }
 
 /**

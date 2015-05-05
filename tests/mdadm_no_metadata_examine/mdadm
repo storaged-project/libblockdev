@@ -1,0 +1,18 @@
+#!/bin/bash
+
+echo "$@"|grep -- "--brief" &>/dev/null
+is_brief=$?
+
+if [ $is_brief -eq 0 ]; then
+    cat <<EOF
+ARRAY /dev/md126 UUID=9ac5ba17:b1a6f4ab:2f96142c:bdc740e7
+EOF
+else
+    cat <<EOF
+MD_LEVEL=raid1
+MD_DEVICES=2
+MD_UUID=9ac5ba17:b1a6f4ab:2f96142c:bdc740e7
+MD_UPDATE_TIME=1164351910
+MD_EVENTS=1287623
+EOF
+fi

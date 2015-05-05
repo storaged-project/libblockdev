@@ -350,6 +350,16 @@ class FakeMDADMutilTest(unittest.TestCase):
 
         self.assertEqual(ex_data.device, "/dev/md/Volume0")
 
+    def test_no_metadata_examine(self):
+        """Verify that md_examine works as expected with no metadata spec"""
+
+        # shouldn't raise any exception
+        with fake_utils("tests/mdadm_no_metadata_examine"):
+            ex_data = BlockDev.md_examine("fake_dev")
+
+        self.assertIs(ex_data.metadata, None)
+
+
 class MDUnloadTest(unittest.TestCase):
     def tearDown(self):
         # make sure the library is initialized with all plugins loaded for other
