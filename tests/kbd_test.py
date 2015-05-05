@@ -47,12 +47,14 @@ class KbdZRAMTestCase(unittest.TestCase):
             self.assertTrue(BlockDev.kbd_zram_create_devices(2, [10 * 1024**2, 10 * 1024**2], [1, 2]))
             time.sleep(1)
             self.assertTrue(BlockDev.kbd_zram_destroy_devices())
+            time.sleep(1)
 
         # no nstreams specified
         with _track_module_load(self, "zram", "_loaded_zram_module"):
             self.assertTrue(BlockDev.kbd_zram_create_devices(2, [10 * 1024**2, 10 * 1024**2], None))
             time.sleep(1)
             self.assertTrue(BlockDev.kbd_zram_destroy_devices())
+            time.sleep(1)
 
         # with module pre-loaded, but unsed
         self.assertEqual(os.system("modprobe zram num_devices=2"), 0)
@@ -61,6 +63,7 @@ class KbdZRAMTestCase(unittest.TestCase):
             self.assertTrue(BlockDev.kbd_zram_create_devices(2, [10 * 1024**2, 10 * 1024**2], [1, 1]))
             time.sleep(1)
             self.assertTrue(BlockDev.kbd_zram_destroy_devices())
+            time.sleep(1)
 
         # with module pre-loaded, and devices used (as active swaps)
         self.assertEqual(os.system("modprobe zram num_devices=2"), 0)
@@ -81,6 +84,7 @@ class KbdZRAMTestCase(unittest.TestCase):
             self.assertTrue(BlockDev.kbd_zram_create_devices(2, [10 * 1024**2, 10 * 1024**2], [1, 1]))
             time.sleep(1)
             self.assertTrue(BlockDev.kbd_zram_destroy_devices())
+            time.sleep(1)
 
 class KbdZRAMStatsTestCase(KbdZRAMTestCase):
     @unittest.skipUnless(_can_load_zram(), "cannot load the 'zram' module")
@@ -169,7 +173,7 @@ class KbdTestBcacheCreate(KbdBcacheTestCase):
         self.assertTrue(succ)
         self.assertTrue(dev)
         self.bcache_dev = dev
-        time.sleep(5)
+        time.sleep(10)
 
         succ = BlockDev.kbd_bcache_destroy(self.bcache_dev)
         self.assertTrue(succ)
@@ -186,7 +190,7 @@ class KbdTestBcacheCreate(KbdBcacheTestCase):
         self.assertTrue(succ)
         self.assertTrue(dev)
         self.bcache_dev = dev
-        time.sleep(5)
+        time.sleep(10)
 
         succ = BlockDev.kbd_bcache_destroy("/dev/" + self.bcache_dev)
         self.assertTrue(succ)
@@ -203,7 +207,7 @@ class KbdTestBcacheAttachDetach(KbdBcacheTestCase):
         self.assertTrue(succ)
         self.assertTrue(dev)
         self.bcache_dev = dev
-        time.sleep(5)
+        time.sleep(10)
 
         succ, c_set_uuid = BlockDev.kbd_bcache_detach(self.bcache_dev)
         self.assertTrue(succ)
@@ -227,7 +231,7 @@ class KbdTestBcacheAttachDetach(KbdBcacheTestCase):
         self.assertTrue(succ)
         self.assertTrue(dev)
         self.bcache_dev = dev
-        time.sleep(5)
+        time.sleep(10)
 
         succ, c_set_uuid = BlockDev.kbd_bcache_detach("/dev/" + self.bcache_dev)
         self.assertTrue(succ)
@@ -252,7 +256,7 @@ class KbdTestBcacheGetSetMode(KbdBcacheTestCase):
         self.assertTrue(succ)
         self.assertTrue(dev)
         self.bcache_dev = dev
-        time.sleep(5)
+        time.sleep(10)
 
         mode = BlockDev.kbd_bcache_get_mode(self.bcache_dev)
         self.assertNotEqual(mode, BlockDev.KBDBcacheMode.UNKNOWN)
