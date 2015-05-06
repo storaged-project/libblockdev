@@ -177,6 +177,16 @@ class MDTestActivateDeactivate(MDTestCase):
                                         [self.loop_dev, self.loop_dev2, self.loop_dev3], None)
             self.assertTrue(succ)
 
+        # try to deactivate using the node instead of name
+        with wait_for_resync():
+            succ = BlockDev.md_deactivate(BlockDev.md_node_from_name("bd_test_md"))
+            self.assertTrue(succ)
+
+        with wait_for_resync():
+            succ = BlockDev.md_activate("bd_test_md",
+                                        [self.loop_dev, self.loop_dev2, self.loop_dev3], None)
+            self.assertTrue(succ)
+
 class MDTestNominateDenominate(MDTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_nominate_denominate(self):
