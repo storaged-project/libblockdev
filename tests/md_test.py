@@ -93,6 +93,10 @@ class MDTestCase(unittest.TestCase):
         except:
             pass
         try:
+            BlockDev.md_deactivate(BlockDev.md_node_from_name("bd_test_md"))
+        except:
+            pass
+        try:
             BlockDev.md_destroy(self.loop_dev)
         except:
             pass
@@ -102,6 +106,10 @@ class MDTestCase(unittest.TestCase):
             pass
         try:
             BlockDev.md_destroy(self.loop_dev3)
+        except:
+            pass
+        try:
+            BlockDev.md_deactivate("bd_test_md")
         except:
             pass
 
