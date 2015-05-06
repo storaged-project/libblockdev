@@ -66,6 +66,11 @@ fast-test: build
 	@sudo SKIP_SLOW= GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build PYTHONPATH=.:tests/:src/python \
 		python -m unittest discover -v -s tests/ -p '*_test.py'
 
+test-all: build
+	pylint -E src/python/gi/overrides/BlockDev.py
+	@sudo FEELINGLUCKY= GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build PYTHONPATH=.:tests/:src/python \
+		python -m unittest discover -v -s tests/ -p '*_test.py'
+
 documentation: $(wildcard src/plugins/*.[ch]) $(wildcard src/lib/*.[ch]) $(wildcard src/utils/*.[ch])
 	-mkdir -p build/docs
 	cp docs/libblockdev-docs.xml docs/libblockdev-sections.txt build/docs

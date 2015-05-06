@@ -30,6 +30,16 @@ def _track_module_load(test_case, mod_name, loaded_attr):
     finally:
         setattr(test_case, loaded_attr, os.system("lsmod|grep %s > /dev/null" % mod_name) == 0)
 
+def _wait_for_bcache_setup(bcache_dev):
+    i = 0
+    cache_dir = "/sys/block/%s/bcache/cache" % bcache_dev
+    while not os.access(cache_dir, os.R_OK):
+        time.sleep(1)
+        i += 1
+        if i >= 30:
+            print("WARNING: Giving up waiting for bcache setup!!!")
+            break
+
 class KbdZRAMTestCase(unittest.TestCase):
     def setUp(self):
         self._loaded_zram_module = False
@@ -165,7 +175,7 @@ class KbdBcacheTestCase(unittest.TestCase):
         os.unlink(self.dev_file2)
 
 class KbdTestBcacheCreate(KbdBcacheTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
     def test_bcache_create_destroy(self):
         """Verify that it's possible to create and destroy a bcache device"""
 
@@ -173,16 +183,17 @@ class KbdTestBcacheCreate(KbdBcacheTestCase):
         self.assertTrue(succ)
         self.assertTrue(dev)
         self.bcache_dev = dev
-        time.sleep(10)
+
+        _wait_for_bcache_setup(dev)
 
         succ = BlockDev.kbd_bcache_destroy(self.bcache_dev)
         self.assertTrue(succ)
         self.bcache_dev = None
-        time.sleep(1)
+        time.sleep(5)
 
         wipe_all(self.loop_dev, self.loop_dev2)
 
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
     def test_bcache_create_destroy_full_path(self):
         """Verify that it's possible to create and destroy a bcache device with full device path"""
 
@@ -190,16 +201,18 @@ class KbdTestBcacheCreate(KbdBcacheTestCase):
         self.assertTrue(succ)
         self.assertTrue(dev)
         self.bcache_dev = dev
-        time.sleep(10)
+
+        _wait_for_bcache_setup(dev)
 
         succ = BlockDev.kbd_bcache_destroy("/dev/" + self.bcache_dev)
         self.assertTrue(succ)
         self.bcache_dev = None
+        time.sleep(5)
 
         wipe_all(self.loop_dev, self.loop_dev2)
 
 class KbdTestBcacheAttachDetach(KbdBcacheTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
     def test_bcache_attach_detach(self):
         """Verify that it's possible to detach/attach a cache from/to a bcache device"""
 
@@ -207,7 +220,8 @@ class KbdTestBcacheAttachDetach(KbdBcacheTestCase):
         self.assertTrue(succ)
         self.assertTrue(dev)
         self.bcache_dev = dev
-        time.sleep(10)
+
+        _wait_for_bcache_setup(dev)
 
         succ, c_set_uuid = BlockDev.kbd_bcache_detach(self.bcache_dev)
         self.assertTrue(succ)
@@ -223,7 +237,7 @@ class KbdTestBcacheAttachDetach(KbdBcacheTestCase):
 
         wipe_all(self.loop_dev, self.loop_dev2)
 
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
     def test_bcache_attach_detach_full_path(self):
         """Verify that it's possible to detach/attach a cache from/to a bcache device with full device path"""
 
@@ -231,7 +245,8 @@ class KbdTestBcacheAttachDetach(KbdBcacheTestCase):
         self.assertTrue(succ)
         self.assertTrue(dev)
         self.bcache_dev = dev
-        time.sleep(10)
+
+        _wait_for_bcache_setup(dev)
 
         succ, c_set_uuid = BlockDev.kbd_bcache_detach("/dev/" + self.bcache_dev)
         self.assertTrue(succ)
@@ -248,7 +263,7 @@ class KbdTestBcacheAttachDetach(KbdBcacheTestCase):
         wipe_all(self.loop_dev, self.loop_dev2)
 
 class KbdTestBcacheGetSetMode(KbdBcacheTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
     def test_bcache_get_set_mode(self):
         """Verify that it is possible to get and set Bcache mode"""
 
@@ -256,7 +271,8 @@ class KbdTestBcacheGetSetMode(KbdBcacheTestCase):
         self.assertTrue(succ)
         self.assertTrue(dev)
         self.bcache_dev = dev
-        time.sleep(10)
+
+        _wait_for_bcache_setup(dev)
 
         mode = BlockDev.kbd_bcache_get_mode(self.bcache_dev)
         self.assertNotEqual(mode, BlockDev.KBDBcacheMode.UNKNOWN)
@@ -279,6 +295,14 @@ class KbdTestBcacheGetSetMode(KbdBcacheTestCase):
         with self.assertRaises(GLib.GError):
             mode = BlockDev.kbd_bcache_get_mode_from_str(mode_str)
 
+        # set back to some caching mode
+        mode_str = "writethrough"
+        mode = BlockDev.kbd_bcache_get_mode_from_str(mode_str)
+        succ = BlockDev.kbd_bcache_set_mode(self.bcache_dev, mode)
+        self.assertTrue(succ)
+
+        _wait_for_bcache_setup(dev)
+
         succ = BlockDev.kbd_bcache_destroy(self.bcache_dev)
         self.assertTrue(succ)
         self.bcache_dev = None
@@ -287,13 +311,14 @@ class KbdTestBcacheGetSetMode(KbdBcacheTestCase):
         wipe_all(self.loop_dev, self.loop_dev2)
 
 class KbdTestBcacheStatusTest(KbdBcacheTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
     def test_bcache_status(self):
         succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2)
         self.assertTrue(succ)
         self.assertTrue(dev)
         self.bcache_dev = dev
-        time.sleep(10)
+
+        _wait_for_bcache_setup(dev)
 
         # should work with both "bcacheX" and "/dev/bcacheX"
         status = BlockDev.kbd_bcache_status(self.bcache_dev)
