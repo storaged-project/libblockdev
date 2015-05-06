@@ -6,6 +6,7 @@
 GQuark bd_kbd_error_quark (void);
 #define BD_KBD_ERROR bd_kbd_error_quark ()
 typedef enum {
+    BD_KBD_ERROR_INVAL,
     BD_KBD_ERROR_KMOD_INIT_FAIL,
     BD_KBD_ERROR_MODULE_FAIL,
     BD_KBD_ERROR_MODULE_NOEXIST,
@@ -74,5 +75,7 @@ const gchar* bd_kbd_bcache_get_mode_str (BDKBDBcacheMode mode, GError **error);
 BDKBDBcacheMode bd_kbd_bcache_get_mode_from_str (gchar *mode_str, GError **error);
 gboolean bd_kbd_bcache_set_mode (gchar *bcache_device, BDKBDBcacheMode mode, GError **error);
 BDKBDBcacheStats* bd_kbd_bcache_status (gchar *bcache_device, GError **error);
+gchar* bd_kbd_bcache_get_backing_device (gchar *bcache_device, GError **error);
+gchar* bd_kbd_bcache_get_cache_device (gchar *bcache_device, GError **error);
 
 #endif  /* BD_KBD */

@@ -1097,3 +1097,141 @@ BDKBDBcacheStats* bd_kbd_bcache_status (gchar *bcache_device, GError **error) {
 
     return ret;
 }
+
+static gchar* get_device_name (gchar *major_minor, GError **error) {
+    gchar *path = NULL;
+    gchar *link = NULL;
+    gchar *ret = NULL;
+
+    path = g_strdup_printf ("/dev/block/%s", major_minor);
+    link = g_file_read_link (path, error);
+    g_free (path);
+    if (!link) {
+        g_prefix_error (error, "Failed to determine device name for '%s'",
+                        major_minor);
+        return NULL;
+    }
+
+    /* 'link' should be something like "../sda" */
+    /* get the last '/' */
+    ret = strrchr (link, '/');
+    if (!ret) {
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_INVAL,
+                     "Failed to determine device name for '%s'",
+                     major_minor);
+        g_free (link);
+        return NULL;
+    }
+    /* move right after the last '/' */
+    ret++;
+
+    /* create a new copy and free the whole link path */
+    ret = g_strdup (ret);
+    g_free (link);
+
+    return ret;
+}
+
+/**
+ * bd_kbd_bcache_get_backing_device:
+ * @bcache_device: Bcache device to get the backing device for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): name of the backing device of the @bcache_device
+ *                           or %NULL if failed to determine (@error is populated)
+ *
+ * Note: returns the name of the first backing device of @bcache_device (in case
+ *       there are more)
+ */
+gchar* bd_kbd_bcache_get_backing_device (gchar *bcache_device, GError **error) {
+    gchar *path = NULL;
+    gboolean success = FALSE;
+    gchar *major_minor = NULL;
+    gchar *ret = NULL;
+
+    if (g_str_has_prefix (bcache_device, "/dev/"))
+        bcache_device += 5;
+
+    path = g_strdup_printf ("/sys/block/%s/bcache/cache/bdev0/../dev", bcache_device);
+    if (access (path, R_OK) != 0) {
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_NOEXIST,
+                     "Failed to get backing device for %s: there seems to be none",
+                     bcache_device);
+        g_free (path);
+        return NULL;
+    }
+
+    success = g_file_get_contents (path, &major_minor, NULL, error);
+    g_free (path);
+    if (!success) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_INVAL,
+                     "Failed to get major:minor for '%s' Bcache device's backing device",
+                     bcache_device);
+        return NULL;
+    }
+    g_strstrip (major_minor);
+
+    ret = get_device_name (major_minor, error);
+    if (!ret) {
+        g_prefix_error (error, "Failed to determine backing device's name for '%s': ",
+                        bcache_device);
+        g_free (major_minor);
+        return NULL;
+    }
+    g_free (major_minor);
+
+    return ret;
+}
+
+/**
+ * bd_kbd_bcache_get_cache_device:
+ * @bcache_device: Bcache device to get the cache device for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): name of the cache device of the @bcache_device
+ *                           or %NULL if failed to determine (@error is populated)
+ *
+ * Note: returns the name of the first cache device of @bcache_device (in case
+ *       there are more)
+ */
+gchar* bd_kbd_bcache_get_cache_device (gchar *bcache_device, GError **error) {
+    gchar *path = NULL;
+    gboolean success = FALSE;
+    gchar *major_minor = NULL;
+    gchar *ret = NULL;
+
+    if (g_str_has_prefix (bcache_device, "/dev/"))
+        bcache_device += 5;
+
+    path = g_strdup_printf ("/sys/block/%s/bcache/cache/cache0/../dev", bcache_device);
+    if (access (path, R_OK) != 0) {
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_NOEXIST,
+                     "Failed to get cache device for %s: there seems to be none",
+                     bcache_device);
+        g_free (path);
+        return NULL;
+    }
+
+    success = g_file_get_contents (path, &major_minor, NULL, error);
+    g_free (path);
+    if (!success) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_INVAL,
+                     "Failed to get major:minor for '%s' Bcache device's cache device",
+                     bcache_device);
+        return NULL;
+    }
+    g_strstrip (major_minor);
+
+    ret = get_device_name (major_minor, error);
+    if (!ret) {
+        g_prefix_error (error, "Failed to determine cache device's name for '%s': ",
+                        bcache_device);
+        g_free (major_minor);
+        return NULL;
+    }
+    g_free (major_minor);
+
+    return ret;
+}

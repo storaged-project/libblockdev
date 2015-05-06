@@ -268,4 +268,27 @@ gboolean bd_kbd_bcache_set_mode (gchar *bcache_device, BDKBDBcacheMode mode, GEr
  */
 BDKBDBcacheStats* bd_kbd_bcache_status (gchar *bcache_device, GError **error);
 
+/**
+ * bd_kbd_bcache_get_backing_device:
+ * @bcache_device: Bcache device to get the backing device for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): name of the backing device of the @bcache_device
+ *                           or %NULL if failed to determine (@error is populated)
+ */
+gchar* bd_kbd_bcache_get_backing_device (gchar *bcache_device, GError **error);
+
+/**
+ * bd_kbd_bcache_get_cache_device:
+ * @bcache_device: Bcache device to get the cache device for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): name of the cache device of the @bcache_device
+ *                           or %NULL if failed to determine (@error is populated)
+ *
+ * Note: returns the name of the first cache device of @bcache_device (in case
+ *       there are more)
+ */
+gchar* bd_kbd_bcache_get_cache_device (gchar *bcache_device, GError **error);
+
 #endif  /* BD_KBD_API */

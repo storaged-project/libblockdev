@@ -339,6 +339,28 @@ class KbdTestBcacheStatusTest(KbdBcacheTestCase):
 
         wipe_all(self.loop_dev, self.loop_dev2)
 
+class KbdTestBcacheBackingCacheDevTest(KbdBcacheTestCase):
+    @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
+    def test_bcache_backing_cache_dev(self):
+        """Verify that is is possible to get the backing and cache devices for a Bcache"""
+
+        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2)
+        self.assertTrue(succ)
+        self.assertTrue(dev)
+        self.bcache_dev = dev
+
+        _wait_for_bcache_setup(dev)
+
+        self.assertEqual("/dev/" + BlockDev.kbd_bcache_get_backing_device(self.bcache_dev), self.loop_dev)
+        self.assertEqual("/dev/" + BlockDev.kbd_bcache_get_cache_device(self.bcache_dev), self.loop_dev2)
+
+        succ = BlockDev.kbd_bcache_destroy(self.bcache_dev)
+        self.assertTrue(succ)
+        self.bcache_dev = None
+        time.sleep(1)
+
+        wipe_all(self.loop_dev, self.loop_dev2)
+
 class KbdUnloadTest(unittest.TestCase):
     def tearDown(self):
         # make sure the library is initialized with all plugins loaded for other
