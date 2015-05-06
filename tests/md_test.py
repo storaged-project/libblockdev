@@ -223,7 +223,10 @@ class MDTestNominateDenominate(MDTestCase):
             self.assertTrue(succ)
 
 class MDTestNominateDenominateActive(MDTestCase):
+    # slow and leaking an MD array because with a nominated spare device, it
+    # cannot be deactivated in the end (don't ask me why)
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipIf("JENKINS_HOME" in os.environ, "skipping leaky test in jenkins")
     def test_nominate_denominate_active(self):
         """Verify that nominate and denominate deivice works as expected on (de)activated MD RAID"""
 
