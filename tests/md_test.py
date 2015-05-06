@@ -16,15 +16,17 @@ if not BlockDev.is_initialized():
 
 @contextmanager
 def wait_for_resync():
-    yield
-    time.sleep(5)
-    resync = True
-    while resync:
-        with open("/proc/mdstat", "r") as f:
-            resync = "resync" in f
-        if resync:
-            print("Sleeping")
-            time.sleep(1)
+    try:
+        yield
+    finally:
+        time.sleep(2)
+        resync = True
+        while resync:
+            with open("/proc/mdstat", "r") as f:
+                resync = "resync" in f
+            if resync:
+                print("Sleeping")
+                time.sleep(1)
 
 class MDNoDevTestCase(unittest.TestCase):
     def test_get_superblock_size(self):
