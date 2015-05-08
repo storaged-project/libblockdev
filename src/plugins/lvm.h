@@ -28,6 +28,9 @@
 #define THPOOL_MD_FACTOR_NEW (0.2)
 #define THPOOL_MD_FACTOR_EXISTS (1 / 6.0)
 
+/* according to lvmcache (7) */
+#define BD_LVM_MIN_CACHE_MD_SIZE (8 MiB)
+
 GQuark bd_lvm_error_quark (void);
 #define BD_LVM_ERROR bd_lvm_error_quark ()
 typedef enum {
@@ -120,5 +123,7 @@ gchar* bd_lvm_thlvpoolname (gchar *vg_name, gchar *lv_name, GError **error);
 gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, gchar *pool_name, GError **error);
 gboolean bd_lvm_set_global_config (gchar *new_config, GError **error);
 gchar* bd_lvm_get_global_config (GError **error);
+
+guint64 bd_lvm_cache_get_default_md_size (guint64 cache_size, GError **error);
 
 #endif /* BD_LVM */

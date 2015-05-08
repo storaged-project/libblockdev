@@ -1473,3 +1473,15 @@ gchar* bd_lvm_get_global_config (GError **error __attribute__((unused))) {
 
     return ret;
 }
+
+/**
+ * bd_lvm_cache_get_default_md_size:
+ * @cache_size: size of the cache to determine MD size for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: recommended default size of the cache metadata LV or 0 in case of error
+ */
+guint64 bd_lvm_cache_get_default_md_size (guint64 cache_size, GError **error __attribute__((unused))) {
+    return MAX ((guint64) cache_size / 1000, BD_LVM_MIN_CACHE_MD_SIZE);
+}
+

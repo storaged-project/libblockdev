@@ -22,6 +22,9 @@
 #define BD_LVM_MIN_THPOOL_CHUNK_SIZE (64 KiB)
 #define BD_LVM_MAX_THPOOL_CHUNK_SIZE (1 GiB)
 
+/* according to lvmcache (7) */
+#define BD_LVM_MIN_CACHE_MD_SIZE (8 MiB)
+
 #define BD_LVM_ERROR bd_lvm_error_quark ()
 typedef enum {
     BD_LVM_ERROR_PARSE,
@@ -626,5 +629,14 @@ gboolean bd_lvm_set_global_config (gchar *new_config, GError **error);
  *          configuration
  */
 gchar* bd_lvm_get_global_config (GError **error);
+
+/**
+ * bd_lvm_cache_get_default_md_size:
+ * @cache_size: size of the cache to determine MD size for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: recommended default size of the cache metadata LV or 0 in case of error
+ */
+guint64 bd_lvm_cache_get_default_md_size (guint64 cache_size, GError **error);
 
 #endif  /* BD_LVM_API */
