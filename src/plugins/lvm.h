@@ -35,7 +35,28 @@ GQuark bd_lvm_error_quark (void);
 #define BD_LVM_ERROR bd_lvm_error_quark ()
 typedef enum {
     BD_LVM_ERROR_PARSE,
+    BD_LVM_ERROR_CACHE_INVAL,
 } BDLVMError;
+
+typedef enum {
+    BD_LVM_CACHE_POOL_STRIPED = 1 << 0,
+    BD_LVM_CACHE_POOL_RAID1 =    1 << 1,
+    BD_LVM_CACHE_POOL_RAID5 =    1 << 2,
+    BD_LVM_CACHE_POOL_RAID6 =    1 << 3,
+    BD_LVM_CACHE_POOL_RAID10 =   1 << 4,
+
+    BD_LVM_CACHE_POOL_META_STRIPED = 1 << 10,
+    BD_LVM_CACHE_POOL_META_RAID1 =    1 << 11,
+    BD_LVM_CACHE_POOL_META_RAID5 =    1 << 12,
+    BD_LVM_CACHE_POOL_META_RAID6 =    1 << 13,
+    BD_LVM_CACHE_POOL_META_RAID10 =   1 << 14,
+} BDLVMCachePoolFlags;
+
+typedef enum {
+    BD_LVM_CACHE_MODE_WRITETHROUGH,
+    BD_LVM_CACHE_MODE_WRITEBACK,
+    BD_LVM_CACHE_MODE_UNKNOWN,
+} BDLVMCacheMode;
 
 typedef struct BDLVMPVdata {
     gchar *pv_name;
@@ -125,5 +146,8 @@ gboolean bd_lvm_set_global_config (gchar *new_config, GError **error);
 gchar* bd_lvm_get_global_config (GError **error);
 
 guint64 bd_lvm_cache_get_default_md_size (guint64 cache_size, GError **error);
+const gchar* bd_lvm_cache_get_mode_str (BDLVMCacheMode mode, GError **error);
+BDLVMCacheMode bd_lvm_cache_get_mode_from_str (gchar *mode_str, GError **error);
+gboolean bd_lvm_cache_create_pool (gchar *vg_name, gchar *pool_name, guint64 pool_size, guint64 md_size, BDLVMCacheMode mode, BDLVMCachePoolFlags flags, gchar **fast_pvs, GError **error);
 
 #endif /* BD_LVM */

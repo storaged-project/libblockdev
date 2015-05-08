@@ -28,7 +28,28 @@
 #define BD_LVM_ERROR bd_lvm_error_quark ()
 typedef enum {
     BD_LVM_ERROR_PARSE,
+    BD_LVM_ERROR_CACHE_INVAL,
 } BDLVMError;
+
+typedef enum {
+    BD_LVM_CACHE_POOL_STRIPED = 1 << 0,
+    BD_LVM_CACHE_POOL_RAID1 =    1 << 1,
+    BD_LVM_CACHE_POOL_RAID5 =    1 << 2,
+    BD_LVM_CACHE_POOL_RAID6 =    1 << 3,
+    BD_LVM_CACHE_POOL_RAID10 =   1 << 4,
+
+    BD_LVM_CACHE_POOL_META_STRIPED = 1 << 10,
+    BD_LVM_CACHE_POOL_META_RAID1 =    1 << 11,
+    BD_LVM_CACHE_POOL_META_RAID5 =    1 << 12,
+    BD_LVM_CACHE_POOL_META_RAID6 =    1 << 13,
+    BD_LVM_CACHE_POOL_META_RAID10 =   1 << 14,
+} BDLVMCachePoolFlags;
+
+typedef enum {
+    BD_LVM_CACHE_MODE_WRITETHROUGH,
+    BD_LVM_CACHE_MODE_WRITEBACK,
+    BD_LVM_CACHE_MODE_UNKNOWN,
+} BDLVMCacheMode;
 
 #define BD_LVM_TYPE_PVDATA (bd_lvm_pvdata_get_type ())
 GType bd_lvm_pvdata_get_type();
@@ -638,5 +659,42 @@ gchar* bd_lvm_get_global_config (GError **error);
  * Returns: recommended default size of the cache metadata LV or 0 in case of error
  */
 guint64 bd_lvm_cache_get_default_md_size (guint64 cache_size, GError **error);
+
+/**
+ * bd_lvm_cache_get_mode_str:
+ * @mode: mode to get the string representation for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: string representation of @mode or %NULL in case of error
+ */
+const gchar* bd_lvm_cache_get_mode_str (BDLVMCacheMode mode, GError **error);
+
+/**
+ * bd_lvm_cache_get_mode_from_str:
+ * @mode_str: string representation of a cache mode
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: cache mode for the @mode_str or %BD_LVM_CACHE_MODE_UNKNOWN if
+ *          failed to determine
+ */
+BDLVMCacheMode bd_lvm_cache_get_mode_from_str (gchar *mode_str, GError **error);
+
+/**
+ * bd_lvm_cache_create_pool:
+ * @vg_name: name of the VG to create @pool_name in
+ * @pool_name: name of the cache pool LV to create
+ * @pool_size: desired size of the cache pool @pool_name
+ * @md_size: desired size of the @pool_name cache pool's metadata LV or 0 to
+ *           use the default
+ * @mode: cache mode of the @pool_name cache pool
+ * @flags: a combination of (ORed) #BDLVMCachePoolFlags
+ * @fast_pvs: (array zero-terminated=1): list of (fast) PVs to create the @pool_name
+ *                                       cache pool (and the metadata LV)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the cache pool @vg_name/@pool_name was successfully created or not
+ */
+gboolean bd_lvm_cache_create_pool (gchar *vg_name, gchar *pool_name, guint64 pool_size, guint64 md_size, BDLVMCacheMode mode, BDLVMCachePoolFlags flags, gchar **fast_pvs, GError **error);
+
 
 #endif  /* BD_LVM_API */
