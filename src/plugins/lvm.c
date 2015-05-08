@@ -998,28 +998,34 @@ gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, GError **error) {
  * @vg_name: name of the VG to create a new LV in
  * @lv_name: name of the to-be-created LV
  * @size: requested size of the new LV
+ * @type: (allow-none): type of the new LV ("striped", "raid1",..., see lvcreate (8))
  * @pv_list: (allow-none) (array zero-terminated=1): list of PVs the newly created LV should use or %NULL
  * if not specified
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the given @vg_name/@lv_name LV was successfully created or not
  */
-gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar **pv_list, GError **error) {
+gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar *type, gchar **pv_list, GError **error) {
     guint8 pv_list_len = pv_list ? g_strv_length (pv_list) : 0;
-    gchar **args = g_new (gchar*, pv_list_len + 8);
+    gchar **args = g_new0 (gchar*, pv_list_len + 10);
     gboolean success = FALSE;
-    guint8 i = 0;
+    guint64 i = 0;
+    guint64 j = 0;
 
-    args[0] = "lvcreate";
-    args[1] = "-n";
-    args[2] = lv_name;
-    args[3] = "-L";
-    args[4] = g_strdup_printf ("%"G_GUINT64_FORMAT"K", size/1024);
-    args[5] = "-y";
-    args[6] = vg_name;
+    args[i++] = "lvcreate";
+    args[i++] = "-n";
+    args[i++] = lv_name;
+    args[i++] = "-L";
+    args[i++] = g_strdup_printf ("%"G_GUINT64_FORMAT"K", size/1024);
+    args[i++] = "-y";
+    if (type) {
+        args[i++] = "--type";
+        args[i++] = type;
+    }
+    args[i++] = vg_name;
 
-    for (i=7; i < (pv_list_len + 7); i++)
-        args[i] = pv_list[i-7];
+    for (j=0; j < pv_list_len; j++)
+        args[i++] = pv_list[j];
 
     args[i] = NULL;
 

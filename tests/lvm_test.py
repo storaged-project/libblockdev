@@ -468,12 +468,12 @@ class LvmTestLVcreateRemove(LvmPVVGLVTestCase):
         self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.lvm_lvcreate("nonexistingVG", "testLV", 512 * 1024**2, [self.loop_dev])
+            BlockDev.lvm_lvcreate("nonexistingVG", "testLV", 512 * 1024**2, None, [self.loop_dev])
 
         with self.assertRaises(GLib.GError):
-            BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, ["/non/existing/device"])
+            BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, ["/non/existing/device"])
 
-        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [self.loop_dev])
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
@@ -481,10 +481,10 @@ class LvmTestLVcreateRemove(LvmPVVGLVTestCase):
 
         # not enough space (only one PV)
         with self.assertRaisesRegexp(GLib.GError, "Insufficient free space"):
-            succ = BlockDev.lvm_lvcreate("testVG", "testLV", 1048 * 1024**2, [self.loop_dev])
+            succ = BlockDev.lvm_lvcreate("testVG", "testLV", 1048 * 1024**2, None, [self.loop_dev])
 
         # enough space (two PVs)
-        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 1048 * 1024**2, [self.loop_dev, self.loop_dev2])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 1048 * 1024**2, None, [self.loop_dev, self.loop_dev2])
         self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
@@ -503,6 +503,41 @@ class LvmTestLVcreateRemove(LvmPVVGLVTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.lvm_lvremove("testVG", "testLV", True)
 
+class LvmTestLVcreateType(LvmPVVGLVTestCase):
+    def test_lvcreate_type(self):
+        """Verify it's possible to create LVs with various types"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        self.assertTrue(succ)
+
+        # try to create a striped LV
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "striped", [self.loop_dev, self.loop_dev2])
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
+        self.assertTrue(succ)
+
+        # try to create a mirrored LV
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "mirror", [self.loop_dev, self.loop_dev2])
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
+        self.assertTrue(succ)
+
+        # try to create a raid1 LV
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "raid1", [self.loop_dev, self.loop_dev2])
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
+        self.assertTrue(succ)
+
+
 class LvmTestLVactivateDeactivate(LvmPVVGLVTestCase):
     def test_lvactivate_lvdeactivate(self):
         """Verify it's possible to (de)actiavate an LV"""
@@ -516,7 +551,7 @@ class LvmTestLVactivateDeactivate(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [self.loop_dev])
         self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
@@ -562,7 +597,7 @@ class LvmTestLVresize(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [self.loop_dev])
         self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
@@ -600,7 +635,7 @@ class LvmTestLVsnapshots(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [self.loop_dev])
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_lvsnapshotcreate("testVG", "testLV", "testLV_bak", 256 * 1024**2)
@@ -625,7 +660,7 @@ class LvmTestLVinfo(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [self.loop_dev])
         self.assertTrue(succ)
 
         info = BlockDev.lvm_lvinfo("testVG", "testLV")
@@ -648,7 +683,7 @@ class LvmTestLVs(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [self.loop_dev])
         self.assertTrue(succ)
 
         lvs = BlockDev.lvm_lvs(None)
