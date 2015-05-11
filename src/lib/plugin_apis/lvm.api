@@ -720,4 +720,21 @@ gboolean bd_lvm_cache_attach (gchar *vg_name, gchar *data_lv, gchar *cache_pool_
  */
 gboolean bd_lvm_cache_detach (gchar *vg_name, gchar *cached_lv, gboolean destroy, GError **error);
 
+/**
+ * bd_lvm_cache_create_cached_lv:
+ * @vg_name: name of the VG to create a cached LV in
+ * @lv_name: name of the cached LV to create
+ * @data_size: size of the data LV
+ * @cache_size: size of the cache (or cached LV more precisely)
+ * @md_size: size of the cache metadata LV or 0 to use the default
+ * @mode: cache mode for the cached LV
+ * @flags: a combination of (ORed) #BDLVMCachePoolFlags
+ * @slow_pvs: (array zero-terminated=1): list of slow PVs (used for the data LV)
+ * @fast_pvs: (array zero-terminated=1): list of fast PVs (used for the cache LV)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the cached LV @lv_name was successfully created or not
+ */
+gboolean bd_lvm_cache_create_cached_lv (gchar *vg_name, gchar *lv_name, guint64 data_size, guint64 cache_size, guint64 md_size, BDLVMCacheMode mode, BDLVMCachePoolFlags flags, gchar **slow_pvs, gchar **fast_pvs, GError **error);
+
 #endif  /* BD_LVM_API */

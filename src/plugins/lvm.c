@@ -1674,3 +1674,48 @@ gboolean bd_lvm_cache_detach (gchar *vg_name, gchar *cached_lv, gboolean destroy
     g_free (args[4]);
     return success;
 }
+
+/**
+ * bd_lvm_cache_create_cached_lv:
+ * @vg_name: name of the VG to create a cached LV in
+ * @lv_name: name of the cached LV to create
+ * @data_size: size of the data LV
+ * @cache_size: size of the cache (or cached LV more precisely)
+ * @md_size: size of the cache metadata LV or 0 to use the default
+ * @mode: cache mode for the cached LV
+ * @flags: a combination of (ORed) #BDLVMCachePoolFlags
+ * @slow_pvs: (array zero-terminated=1): list of slow PVs (used for the data LV)
+ * @fast_pvs: (array zero-terminated=1): list of fast PVs (used for the cache LV)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the cached LV @lv_name was successfully created or not
+ */
+gboolean bd_lvm_cache_create_cached_lv (gchar *vg_name, gchar *lv_name, guint64 data_size, guint64 cache_size, guint64 md_size, BDLVMCacheMode mode, BDLVMCachePoolFlags flags,
+                                        gchar **slow_pvs, gchar **fast_pvs, GError **error) {
+    gboolean success = FALSE;
+    gchar *name = NULL;
+
+    success = bd_lvm_lvcreate (vg_name, lv_name, data_size, NULL, slow_pvs, error);
+    if (!success) {
+        g_prefix_error (error, "Failed to create the data LV: ");
+        return FALSE;
+    }
+
+    name = g_strdup_printf ("%s_cache", lv_name);
+    success = bd_lvm_cache_create_pool (vg_name, name, cache_size, md_size, mode, flags, fast_pvs, error);
+    if (!success) {
+        g_prefix_error (error, "Failed to create the cache pool '%s': ", name);
+        g_free (name);
+        return FALSE;
+    }
+
+    success = bd_lvm_cache_attach (vg_name, lv_name, name, error);
+    if (!success) {
+        g_prefix_error (error, "Failed to attach the cache pool '%s' to the data LV: ", name);
+        g_free (name);
+        return FALSE;
+    }
+
+    g_free (name);
+    return TRUE;
+}
