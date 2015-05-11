@@ -25,6 +25,7 @@
 #include "lvm.h"
 
 #define INT_FLOAT_EPS 1e-5
+#define SECTOR_SIZE 512
 
 GMutex global_config_lock;
 static gchar *global_config_str = NULL;
@@ -109,6 +110,28 @@ void bd_lvm_lvdata_free (BDLVMLVdata *data) {
     g_free (data->uuid);
     g_free (data->attr);
     g_free (data->segtype);
+    g_free (data);
+}
+
+BDLVMCacheStats* bd_lvm_cache_stats_copy (BDLVMCacheStats *data) {
+    BDLVMCacheStats *new = g_new0 (BDLVMCacheStats, 1);
+
+    new->block_size = data->block_size;
+    new->cache_size = data->cache_size;
+    new->cache_used = data->cache_used;
+    new->md_block_size = data->md_block_size;
+    new->md_size = data->md_size;
+    new->md_used = data->md_used;
+    new->read_hits = data->read_hits;
+    new->read_misses = data->read_misses;
+    new->write_hits = data->write_hits;
+    new->write_misses = data->write_misses;
+    new->mode = data->mode;
+
+    return new;
+}
+
+void bd_lvm_cache_stats_free (BDLVMCacheStats *data) {
     g_free (data);
 }
 
@@ -1761,4 +1784,191 @@ gchar* bd_lvm_cache_pool_name (gchar *vg_name, gchar *cached_lv, GError **error)
     g_free (ret);
 
     return pool_name;
+}
+
+/**
+ * bd_lvm_cache_stats:
+ * @vg_name: name of the VG containing the @cached_lv
+ * @cached_lv: cached LV to get stats for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: stats for the @cached_lv or %NULL in case of error
+ */
+BDLVMCacheStats* bd_lvm_cache_stats (gchar *vg_name, gchar *cached_lv, GError **error) {
+    gchar *argv[4] = {"dmsetup", "status", NULL, NULL};
+    gchar *ddashes = NULL;
+    gchar **items = NULL;
+    gchar *output = NULL;
+    gboolean success = FALSE;
+    BDLVMCacheStats *ret = NULL;
+    guint64 num = 0;
+    gchar *value = NULL;
+
+    /* translate the VG+LV names into the DM map name ('-'s are doubled) */
+    if (strchr (cached_lv, '-')) {
+        items = g_strsplit (cached_lv, "-", -1);
+        ddashes = g_strjoinv ("--", items);
+        argv[2] = g_strdup_printf ("%s-%s", vg_name, ddashes);
+        g_strfreev (items);
+        g_free (ddashes);
+    } else
+        argv[2] = g_strdup_printf ("%s-%s", vg_name, cached_lv);
+
+    success = bd_utils_exec_and_capture_output (argv, &output, error);
+    if (!success) {
+        g_prefix_error (error, "Failed to get status for the DM map '%s': ", argv[2]);
+        g_free (argv[2]);
+        return NULL;
+    }
+
+    /* the expected format of the output is (from device mapper's
+       documentation):
+
+       <start> <end> cache <metadata block size> <#used metadata blocks>/<#total metadata blocks>
+       <cache block size> <#used cache blocks>/<#total cache blocks>
+       <#read hits> <#read misses> <#write hits> <#write misses>
+       <#demotions> <#promotions> <#dirty> <#features> <features>*
+       <#core args> <core args>* <policy name> <#policy args> <policy args>*
+    */
+
+    items = g_strsplit (output, " ", -1);
+    if (g_strv_length (items) < 16) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
+                     "Failed to determine status for the DM map '%s' from: '%s'",
+                     argv[2], output);
+        g_strfreev (items);
+        g_free (argv[2]);
+        return NULL;
+    }
+
+    if (g_strcmp0 (items[2], "cache") != 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_NOCACHE,
+                     "'%s' doesn't seem to be a cached LV", cached_lv);
+        g_strfreev (items);
+        g_free (argv[2]);
+        return NULL;
+    }
+    g_free (argv[2]);
+
+    ret = g_new0 (BDLVMCacheStats, 1);
+    num = g_ascii_strtoull (items[5], NULL, 0);
+    if (num == 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
+                     "Failed to determine block size from: '%s'",
+                     items[5]);
+        g_strfreev (items);
+        g_free (ret);
+        return NULL;
+    } else
+        ret->block_size = num * SECTOR_SIZE;
+
+    /* get <used cache blocks>/<total cache blocks> */
+    value = items[6];
+    num = g_ascii_strtoull (value, NULL, 0);
+    if (num == 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
+                     "Failed to determine cache usage from: '%s'",
+                     value);
+        g_strfreev (items);
+        g_free (ret);
+        return NULL;
+    } else
+        ret->cache_used = ret->block_size * num;
+
+    /* find the '/' */
+    value = strchr (items[6], '/');
+    if (!value) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
+                     "Failed to determine cache size from: '%s'",
+                     items[6]);
+        g_strfreev (items);
+        g_free (ret);
+        return NULL;
+    }
+    /* move right after it */
+    value++;
+
+    num = g_ascii_strtoull (value, NULL, 0);
+    if (num == 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
+                     "Failed to determine cache size from: '%s'",
+                     value);
+        g_strfreev (items);
+        g_free (ret);
+        return NULL;
+    } else
+        ret->cache_size = ret->block_size * num;
+
+    num = g_ascii_strtoull (items[3], NULL, 0);
+    if (num == 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
+                     "Failed to determine metadata block size from: '%s'",
+                     items[3]);
+        g_strfreev (items);
+        g_free (ret);
+        return NULL;
+    } else
+        ret->md_block_size = num * SECTOR_SIZE;
+
+    /* get <used cache blocks>/<total cache blocks> */
+    value = items[4];
+    num = g_ascii_strtoull (value, NULL, 0);
+    if (num == 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
+                     "Failed to determine metadata usage from: '%s'",
+                     value);
+        g_strfreev (items);
+        g_free (ret);
+        return NULL;
+    } else
+        ret->md_used = ret->md_block_size * num;
+
+    /* find the '/' */
+    value = strchr (items[4], '/');
+    if (!value) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
+                     "Failed to determine metadata size from: '%s'",
+                     items[4]);
+        g_strfreev (items);
+        g_free (ret);
+        return NULL;
+    }
+    /* move right after it */
+    value++;
+
+    num = g_ascii_strtoull (value, NULL, 0);
+    if (num == 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
+                     "Failed to determine metadata size from: '%s'",
+                     value);
+        g_strfreev (items);
+        g_free (ret);
+        return NULL;
+    } else
+        ret->md_size = ret->md_block_size * num;
+
+    /* 0 is a valid value for the following stats (cannot distinguish from an invalid string) */
+    num = g_ascii_strtoull (items[7], NULL, 0);
+    ret->read_hits = num;
+
+    num = g_ascii_strtoull (items[8], NULL, 0);
+    ret->read_misses = num;
+
+    num = g_ascii_strtoull (items[9], NULL, 0);
+    ret->write_hits = num;
+
+    num = g_ascii_strtoull (items[10], NULL, 0);
+    ret->write_misses = num;
+
+    value = items[15];
+    ret->mode = bd_lvm_cache_get_mode_from_str (value, error);
+    if (*error) {
+        /* error is already populated */
+        g_strfreev (items);
+        g_free (ret);
+        return NULL;
+    }
+
+    g_strfreev (items);
+    return ret;
 }

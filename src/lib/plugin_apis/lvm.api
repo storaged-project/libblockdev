@@ -29,6 +29,7 @@
 typedef enum {
     BD_LVM_ERROR_PARSE,
     BD_LVM_ERROR_CACHE_INVAL,
+    BD_LVM_ERROR_CACHE_NOCACHE,
 } BDLVMError;
 
 typedef enum {
@@ -221,6 +222,67 @@ GType bd_lvm_lvdata_get_type () {
         type = g_boxed_type_register_static("BDLVMLVdata",
                                             (GBoxedCopyFunc) bd_lvm_lvdata_copy,
                                             (GBoxedFreeFunc) bd_lvm_lvdata_free);
+    }
+
+    return type;
+}
+
+#define BD_LVM_TYPE_CACHE_STATS (bd_lvm_cache_stats_get_type ())
+GType bd_lvm_cache_stats_get_type();
+
+typedef struct BDLVMCacheStats {
+    guint64 block_size;
+    guint64 cache_size;
+    guint64 cache_used;
+    guint64 md_block_size;
+    guint64 md_size;
+    guint64 md_used;
+    guint64 read_hits;
+    guint64 read_misses;
+    guint64 write_hits;
+    guint64 write_misses;
+    BDLVMCacheMode mode;
+} BDLVMCacheStats;
+
+/**
+ * bd_lvm_cache_stats_copy: (skip)
+ *
+ * Creates a new copy of @data.
+ */
+BDLVMCacheStats* bd_lvm_cache_stats_copy (BDLVMCacheStats *data) {
+    BDLVMCacheStats *new = g_new0 (BDLVMCacheStats, 1);
+
+    new->block_size = data->block_size;
+    new->cache_size = data->cache_size;
+    new->cache_used = data->cache_used;
+    new->md_block_size = data->md_block_size;
+    new->md_size = data->md_size;
+    new->md_used = data->md_used;
+    new->read_hits = data->read_hits;
+    new->read_misses = data->read_misses;
+    new->write_hits = data->write_hits;
+    new->write_misses = data->write_misses;
+    new->mode = data->mode;
+
+    return new;
+}
+
+/**
+ * bd_lvm_cache_stats_free: (skip)
+ *
+ * Frees @data.
+ */
+void bd_lvm_cache_stats_free (BDLVMLVdata *data) {
+    g_free (data);
+}
+
+GType bd_lvm_cache_stats_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDLVMCacheStats",
+                                            (GBoxedCopyFunc) bd_lvm_cache_stats_copy,
+                                            (GBoxedFreeFunc) bd_lvm_cache_stats_free);
     }
 
     return type;
@@ -746,5 +808,16 @@ gboolean bd_lvm_cache_create_cached_lv (gchar *vg_name, gchar *lv_name, guint64 
  * Returns: name of the cache pool LV used by the @cached_lv or %NULL in case of error
  */
 gchar* bd_lvm_cache_pool_name (gchar *vg_name, gchar *cached_lv, GError **error);
+
+/**
+ * bd_lvm_cache_stats:
+ * @vg_name: name of the VG containing the @cached_lv
+ * @cached_lv: cached LV to get stats for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: stats for the @cached_lv or %NULL in case of error
+ */
+BDLVMCacheStats* bd_lvm_cache_stats (gchar *vg_name, gchar *cached_lv, GError **error);
+
 
 #endif  /* BD_LVM_API */

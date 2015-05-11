@@ -36,6 +36,7 @@ GQuark bd_lvm_error_quark (void);
 typedef enum {
     BD_LVM_ERROR_PARSE,
     BD_LVM_ERROR_CACHE_INVAL,
+    BD_LVM_ERROR_CACHE_NOCACHE,
 } BDLVMError;
 
 typedef enum {
@@ -101,6 +102,23 @@ typedef struct BDLVMLVdata {
 void bd_lvm_lvdata_free (BDLVMLVdata *data);
 BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data);
 
+typedef struct BDLVMCacheStats {
+    guint64 block_size;
+    guint64 cache_size;
+    guint64 cache_used;
+    guint64 md_block_size;
+    guint64 md_size;
+    guint64 md_used;
+    guint64 read_hits;
+    guint64 read_misses;
+    guint64 write_hits;
+    guint64 write_misses;
+    BDLVMCacheMode mode;
+} BDLVMCacheStats;
+
+void bd_lvm_cache_stats_free (BDLVMCacheStats *data);
+BDLVMCacheStats* bd_lvm_cache_stats_copy (BDLVMCacheStats *data);
+
 gboolean bd_lvm_is_supported_pe_size (guint64 size, GError **error);
 guint64 *bd_lvm_get_supported_pe_sizes (GError **error);
 guint64 bd_lvm_get_max_lv_size (GError **error);
@@ -154,5 +172,6 @@ gboolean bd_lvm_cache_detach (gchar *vg_name, gchar *cached_lv, gboolean destroy
 gboolean bd_lvm_cache_create_cached_lv (gchar *vg_name, gchar *lv_name, guint64 data_size, guint64 cache_size, guint64 md_size, BDLVMCacheMode mode, BDLVMCachePoolFlags flags,
                                         gchar **slow_pvs, gchar **fast_pvs, GError **error);
 gchar* bd_lvm_cache_pool_name (gchar *vg_name, gchar *cached_lv, GError **error);
+BDLVMCacheStats* bd_lvm_cache_stats (gchar *vg_name, gchar *cached_lv, GError **error);
 
 #endif /* BD_LVM */
