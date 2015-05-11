@@ -19,6 +19,7 @@
 
 #include <glib.h>
 #include <math.h>
+#include <string.h>
 #include <utils.h>
 
 #include "lvm.h"
@@ -1718,4 +1719,46 @@ gboolean bd_lvm_cache_create_cached_lv (gchar *vg_name, gchar *lv_name, guint64 
 
     g_free (name);
     return TRUE;
+}
+
+/**
+ * bd_lvm_cache_pool_name:
+ * @vg_name: name of the VG containing the @cached_lv
+ * @cached_lv: cached LV to get the name of the its pool LV for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: name of the cache pool LV used by the @cached_lv or %NULL in case of error
+ */
+gchar* bd_lvm_cache_pool_name (gchar *vg_name, gchar *cached_lv, GError **error) {
+    gchar *ret = NULL;
+    gchar *name_start = NULL;
+    gchar *name_end = NULL;
+    gchar *pool_name = NULL;
+
+    /* same as for a thin LV, but with square brackets */
+    ret = bd_lvm_thlvpoolname (vg_name, cached_lv, error);
+    if (!ret)
+        return NULL;
+
+    name_start = strchr (ret, '[');
+    if (!name_start) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
+                     "Failed to determine cache pool name from: '%s'", ret);
+        g_free (ret);
+        return FALSE;
+    }
+    name_start++;
+
+    name_end = strchr (ret, ']');
+    if (!name_end) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
+                     "Failed to determine cache pool name from: '%s'", ret);
+        g_free (ret);
+        return FALSE;
+    }
+
+    pool_name = g_strndup (name_start, name_end - name_start);
+    g_free (ret);
+
+    return pool_name;
 }

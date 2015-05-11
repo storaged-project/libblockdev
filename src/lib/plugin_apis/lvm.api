@@ -737,4 +737,14 @@ gboolean bd_lvm_cache_detach (gchar *vg_name, gchar *cached_lv, gboolean destroy
  */
 gboolean bd_lvm_cache_create_cached_lv (gchar *vg_name, gchar *lv_name, guint64 data_size, guint64 cache_size, guint64 md_size, BDLVMCacheMode mode, BDLVMCachePoolFlags flags, gchar **slow_pvs, gchar **fast_pvs, GError **error);
 
+/**
+ * bd_lvm_cache_pool_name:
+ * @vg_name: name of the VG containing the @cached_lv
+ * @cached_lv: cached LV to get the name of the its pool LV for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: name of the cache pool LV used by the @cached_lv or %NULL in case of error
+ */
+gchar* bd_lvm_cache_pool_name (gchar *vg_name, gchar *cached_lv, GError **error);
+
 #endif  /* BD_LVM_API */

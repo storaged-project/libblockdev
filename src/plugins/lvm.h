@@ -153,5 +153,6 @@ gboolean bd_lvm_cache_attach (gchar *vg_name, gchar *data_lv, gchar *cache_pool_
 gboolean bd_lvm_cache_detach (gchar *vg_name, gchar *cached_lv, gboolean destroy, GError **error);
 gboolean bd_lvm_cache_create_cached_lv (gchar *vg_name, gchar *lv_name, guint64 data_size, guint64 cache_size, guint64 md_size, BDLVMCacheMode mode, BDLVMCachePoolFlags flags,
                                         gchar **slow_pvs, gchar **fast_pvs, GError **error);
+gchar* bd_lvm_cache_pool_name (gchar *vg_name, gchar *cached_lv, GError **error);
 
 #endif /* BD_LVM */
