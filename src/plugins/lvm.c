@@ -1627,3 +1627,50 @@ gboolean bd_lvm_cache_create_pool (gchar *vg_name, gchar *pool_name, guint64 poo
     /* just return the result of the last step (it sets error on fail) */
     return success;
 }
+
+/**
+ * bd_lvm_cache_attach:
+ * @vg_name: name of the VG containing the @data_lv and the @cache_pool_lv LVs
+ * @data_lv: data LV to attache the @cache_pool_lv to
+ * @cache_pool_lv: cache pool LV to attach to the @data_lv
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @cache_pool_lv was successfully attached to the @data_lv or not
+ */
+gboolean bd_lvm_cache_attach (gchar *vg_name, gchar *data_lv, gchar *cache_pool_lv, GError **error) {
+    gchar *args[7] = {"lvconvert", "--type", "cache", "--cachepool", NULL, NULL, NULL};
+    gboolean success = FALSE;
+
+    args[4] = g_strdup_printf ("%s/%s", vg_name, cache_pool_lv);
+    args[5] = g_strdup_printf ("%s/%s", vg_name, data_lv);
+    success = call_lvm_and_report_error (args, error);
+
+    g_free (args[4]);
+    g_free (args[5]);
+    return success;
+}
+
+/**
+ * bd_lvm_cache_detach:
+ * @vg_name: name of the VG containing the @cached_lv
+ * @cached_lv: name of the cached LV to detach its cache from
+ * @destroy: whether to destroy the cache after detach or not
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the cache was successfully detached from the @cached_lv or not
+ *
+ * Note: synces the cache first
+ */
+gboolean bd_lvm_cache_detach (gchar *vg_name, gchar *cached_lv, gboolean destroy, GError **error) {
+    /* need to both "assume yes" and "force" to get rid of the interactive
+       questions in case of "--uncache" */
+    gchar *args[6] = {"lvconvert", "-y", "-f", NULL, NULL, NULL};
+    gboolean success = FALSE;
+
+    args[3] = destroy ? "--uncache" : "--splitcache";
+    args[4] = g_strdup_printf ("%s/%s", vg_name, cached_lv);
+    success = call_lvm_and_report_error (args, error);
+
+    g_free (args[4]);
+    return success;
+}
