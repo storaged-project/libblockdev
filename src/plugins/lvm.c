@@ -20,6 +20,8 @@
 #include <glib.h>
 #include <math.h>
 #include <string.h>
+#include <libdevmapper.h>
+#include <unistd.h>
 #include <utils.h>
 
 #include "lvm.h"
@@ -1795,180 +1797,107 @@ gchar* bd_lvm_cache_pool_name (gchar *vg_name, gchar *cached_lv, GError **error)
  * Returns: stats for the @cached_lv or %NULL in case of error
  */
 BDLVMCacheStats* bd_lvm_cache_stats (gchar *vg_name, gchar *cached_lv, GError **error) {
-    gchar *argv[4] = {"dmsetup", "status", NULL, NULL};
-    gchar *ddashes = NULL;
-    gchar **items = NULL;
-    gchar *output = NULL;
-    gboolean success = FALSE;
+    struct dm_pool *pool = NULL;
+    struct dm_task *task = NULL;
+    struct dm_info info;
+    struct dm_status_cache *status = NULL;
+    gchar *map_name = NULL;
+    guint64 start = 0;
+    guint64 length = 0;
+    gchar *type = NULL;
+    gchar *params = NULL;
     BDLVMCacheStats *ret = NULL;
-    guint64 num = 0;
-    gchar *value = NULL;
 
-    /* translate the VG+LV names into the DM map name ('-'s are doubled) */
-    if (strchr (cached_lv, '-')) {
-        items = g_strsplit (cached_lv, "-", -1);
-        ddashes = g_strjoinv ("--", items);
-        argv[2] = g_strdup_printf ("%s-%s", vg_name, ddashes);
-        g_strfreev (items);
-        g_free (ddashes);
-    } else
-        argv[2] = g_strdup_printf ("%s-%s", vg_name, cached_lv);
-
-    success = bd_utils_exec_and_capture_output (argv, &output, error);
-    if (!success) {
-        g_prefix_error (error, "Failed to get status for the DM map '%s': ", argv[2]);
-        g_free (argv[2]);
+    if (geteuid () != 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_NOT_ROOT,
+                     "Not running as root, cannot query DM maps");
         return NULL;
     }
 
-    /* the expected format of the output is (from device mapper's
-       documentation):
+    pool = dm_pool_create("bd-pool", 20);
 
-       <start> <end> cache <metadata block size> <#used metadata blocks>/<#total metadata blocks>
-       <cache block size> <#used cache blocks>/<#total cache blocks>
-       <#read hits> <#read misses> <#write hits> <#write misses>
-       <#demotions> <#promotions> <#dirty> <#features> <features>*
-       <#core args> <core args>* <policy name> <#policy args> <policy args>*
-    */
+    /* translate the VG+LV name into the DM map name */
+    map_name = dm_build_dm_name (pool, vg_name, cached_lv, NULL);
 
-    items = g_strsplit (output, " ", -1);
-    if (g_strv_length (items) < 16) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
-                     "Failed to determine status for the DM map '%s' from: '%s'",
-                     argv[2], output);
-        g_strfreev (items);
-        g_free (argv[2]);
+    task = dm_task_create (DM_DEVICE_STATUS);
+    if (!task) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
+                     "Failed to create DM task for the cache map '%s': ", map_name);
+        dm_pool_destroy (pool);
         return NULL;
     }
 
-    if (g_strcmp0 (items[2], "cache") != 0) {
+    if (dm_task_set_name (task, map_name) == 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
+                     "Failed to create DM task for the cache map '%s': ", map_name);
+        dm_task_destroy (task);
+        dm_pool_destroy (pool);
+        return NULL;
+    }
+
+    if (dm_task_run(task) == 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
+                     "Failed to run the DM task for the cache map '%s': ", map_name);
+        dm_task_destroy (task);
+        dm_pool_destroy (pool);
+        return NULL;
+    }
+
+    if (dm_task_get_info (task, &info) == 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
+                     "Failed to get task info for the cache map '%s': ", map_name);
+        dm_task_destroy (task);
+        dm_pool_destroy (pool);
+        return NULL;
+    }
+
+    if (!info.exists) {
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_NOCACHE,
-                     "'%s' doesn't seem to be a cached LV", cached_lv);
-        g_strfreev (items);
-        g_free (argv[2]);
+                     "The cache map '%s' doesn't exist: ", map_name);
+        dm_task_destroy (task);
+        dm_pool_destroy (pool);
         return NULL;
     }
-    g_free (argv[2]);
+
+    dm_get_next_target(task, NULL, &start, &length, &type, &params);
+
+    if (dm_get_status_cache (pool, params, &status) == 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
+                     "Failed to get status of the cache map '%s': ", map_name);
+        dm_task_destroy (task);
+        dm_pool_destroy (pool);
+        return NULL;
+    }
 
     ret = g_new0 (BDLVMCacheStats, 1);
-    num = g_ascii_strtoull (items[5], NULL, 0);
-    if (num == 0) {
+    ret->block_size = status->block_size * SECTOR_SIZE;
+    ret->cache_size = status->total_blocks * ret->block_size;
+    ret->cache_used = status->used_blocks * ret->block_size;
+
+    ret->md_block_size = status->metadata_block_size * SECTOR_SIZE;
+    ret->md_size = status->metadata_total_blocks * ret->md_block_size;
+    ret->md_used = status->metadata_used_blocks * ret->md_block_size;
+
+    ret->read_hits = status->read_hits;
+    ret->read_misses = status->read_misses;
+    ret->write_hits = status->write_hits;
+    ret->write_misses = status->write_misses;
+
+    if (status->feature_flags & DM_CACHE_FEATURE_WRITETHROUGH)
+        ret->mode = BD_LVM_CACHE_MODE_WRITETHROUGH;
+    else if (status->feature_flags & DM_CACHE_FEATURE_WRITEBACK)
+        ret->mode = BD_LVM_CACHE_MODE_WRITEBACK;
+    else {
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
-                     "Failed to determine block size from: '%s'",
-                     items[5]);
-        g_strfreev (items);
-        g_free (ret);
-        return NULL;
-    } else
-        ret->block_size = num * SECTOR_SIZE;
-
-    /* get <used cache blocks>/<total cache blocks> */
-    value = items[6];
-    num = g_ascii_strtoull (value, NULL, 0);
-    if (num == 0) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
-                     "Failed to determine cache usage from: '%s'",
-                     value);
-        g_strfreev (items);
-        g_free (ret);
-        return NULL;
-    } else
-        ret->cache_used = ret->block_size * num;
-
-    /* find the '/' */
-    value = strchr (items[6], '/');
-    if (!value) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
-                     "Failed to determine cache size from: '%s'",
-                     items[6]);
-        g_strfreev (items);
-        g_free (ret);
-        return NULL;
-    }
-    /* move right after it */
-    value++;
-
-    num = g_ascii_strtoull (value, NULL, 0);
-    if (num == 0) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
-                     "Failed to determine cache size from: '%s'",
-                     value);
-        g_strfreev (items);
-        g_free (ret);
-        return NULL;
-    } else
-        ret->cache_size = ret->block_size * num;
-
-    num = g_ascii_strtoull (items[3], NULL, 0);
-    if (num == 0) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
-                     "Failed to determine metadata block size from: '%s'",
-                     items[3]);
-        g_strfreev (items);
-        g_free (ret);
-        return NULL;
-    } else
-        ret->md_block_size = num * SECTOR_SIZE;
-
-    /* get <used cache blocks>/<total cache blocks> */
-    value = items[4];
-    num = g_ascii_strtoull (value, NULL, 0);
-    if (num == 0) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
-                     "Failed to determine metadata usage from: '%s'",
-                     value);
-        g_strfreev (items);
-        g_free (ret);
-        return NULL;
-    } else
-        ret->md_used = ret->md_block_size * num;
-
-    /* find the '/' */
-    value = strchr (items[4], '/');
-    if (!value) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
-                     "Failed to determine metadata size from: '%s'",
-                     items[4]);
-        g_strfreev (items);
-        g_free (ret);
-        return NULL;
-    }
-    /* move right after it */
-    value++;
-
-    num = g_ascii_strtoull (value, NULL, 0);
-    if (num == 0) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
-                     "Failed to determine metadata size from: '%s'",
-                     value);
-        g_strfreev (items);
-        g_free (ret);
-        return NULL;
-    } else
-        ret->md_size = ret->md_block_size * num;
-
-    /* 0 is a valid value for the following stats (cannot distinguish from an invalid string) */
-    num = g_ascii_strtoull (items[7], NULL, 0);
-    ret->read_hits = num;
-
-    num = g_ascii_strtoull (items[8], NULL, 0);
-    ret->read_misses = num;
-
-    num = g_ascii_strtoull (items[9], NULL, 0);
-    ret->write_hits = num;
-
-    num = g_ascii_strtoull (items[10], NULL, 0);
-    ret->write_misses = num;
-
-    value = items[15];
-    ret->mode = bd_lvm_cache_get_mode_from_str (value, error);
-    if (*error) {
-        /* error is already populated */
-        g_strfreev (items);
-        g_free (ret);
+                      "Failed to determine status of the cache from '%"G_GUINT64_FORMAT"': ",
+                      status->feature_flags);
+        dm_task_destroy (task);
+        dm_pool_destroy (pool);
         return NULL;
     }
 
-    g_strfreev (items);
+    dm_task_destroy (task);
+    dm_pool_destroy (pool);
+
     return ret;
 }
