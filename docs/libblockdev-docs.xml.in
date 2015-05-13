@@ -8,7 +8,7 @@
   <bookinfo>
     <title>libblockdev Reference Manual</title>
     <releaseinfo>
-      for libblockdev 0.1.
+      for libblockdev @VERSION@.
       The latest version of this documentation can be found on-line at
       <ulink role="online-location"
              url="https://vpodzime.fedorapeople.org/libblockdev_doc/index.html">https://vpodzime.fedorapeople.org/libblockdev_doc/</ulink>.

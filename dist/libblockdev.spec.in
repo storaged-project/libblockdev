@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     0.13
+Version:     1.0
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -283,10 +283,12 @@ A meta-package that pulls all the libblockdev plugins as dependencies.
 %setup -q -n %{name}-%{version}
 
 %build
-CFLAGS="%{optflags}" make %{?_smp_mflags}
+%configure
+%{__make} %{?_smp_mflags}
 
 %install
-CFLAGS="%{optflags}" make PREFIX=%{buildroot} SITEDIRS=%{buildroot}%{python2_sitearch},%{buildroot}%{python3_sitearch} %{?_smp_mflags} install
+%{make_install}
+find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 
 
 %post -p /sbin/ldconfig
@@ -424,6 +426,7 @@ CFLAGS="%{optflags}" make PREFIX=%{buildroot} SITEDIRS=%{buildroot}%{python2_sit
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/swap.h
 
+%ifarch s390 s390x
 %files s390
 %{_libdir}/libbd_s390.so.*
 
@@ -431,6 +434,7 @@ CFLAGS="%{optflags}" make PREFIX=%{buildroot} SITEDIRS=%{buildroot}%{python2_sit
 %{_libdir}/libbd_s390.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/s390.h
+%endif
 
 %files plugins-all
 
