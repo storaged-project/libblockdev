@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     0.12
+Version:     0.13
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -371,6 +371,19 @@ CFLAGS="%{optflags}" make PREFIX=%{buildroot} SITEDIRS=%{buildroot}%{python2_sit
 %files plugins-all
 
 %changelog
+* Wed May 13 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.13-1
+- Prevent a leaky test from running in Jenkins (vpodzime)
+- Try harder when cleaning up after MD RAID tests (vpodzime)
+- Improve the MD RAID activate/deactivate test (vpodzime)
+- One more @contextmanager that needs try-finally (vpodzime)
+- Do not require metadata version to be reported by 'mdadm --examine' (#1217900) (vpodzime)
+- Make sure we always set things back in context managers (vpodzime)
+- Make the release date for version 1.0 more realistic (vpodzime)
+- Merge pull request #11 from vpodzime/master (vpodzime)
+- Run utilities with LC_ALL=C (vpodzime) (#1219033)
+- Free GMatchInfo instance even in case of no match (vpodzime)
+- Resolve /dev/md/ symlinks when checking swap status. (dlehman)
+
 * Fri Apr 24 2015 Vratislav Podzimek <vpodzime@redhat.com> - 0.12-1
 - Require minimum version of libblockdev-utils in some plugins (vpodzime)
 - Report both stdout and stderr if exit code != 0 (vpodzime)
