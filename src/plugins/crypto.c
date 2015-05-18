@@ -695,7 +695,7 @@ static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libv
  * @backup_passphrase: (allow-none): backup passphrase for the device or %NULL
  * @error: (out): place to store error (if any)
  *
- * Returns: whether the ecrow data was successfully created for @device or not
+ * Returns: whether the escrow data was successfully created for @device or not
  */
 gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, const gchar *cert_data, const gchar *directory, const gchar *backup_passphrase, GError **error) {
     struct libvk_volume *volume = NULL;
@@ -762,7 +762,7 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
     else
         volume_ident = g_strdup ("_unknown");
 
-    out_path = g_strdup_printf ("%s/%s-ecrow", directory, volume_ident);
+    out_path = g_strdup_printf ("%s/%s-escrow", directory, volume_ident);
     ret = write_escrow_data_file (volume, ui, LIBVK_SECRET_DEFAULT, out_path, cert, error);
     g_free (out_path);
 
