@@ -652,6 +652,18 @@ static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libv
         return FALSE;
     }
 
+    status = g_io_channel_set_encoding (out_file, NULL, error);
+    if (status != G_IO_STATUS_NORMAL) {
+        g_free(packet_data);
+
+        /* try to shutdown the channel, but if it fails, we cannot do anything about it here */
+        g_io_channel_shutdown (out_file, TRUE, &tmp_error);
+
+        /* error is already populated */
+        g_io_channel_unref (out_file);
+        return FALSE;
+    }
+
     status = g_io_channel_write_chars (out_file, (gchar *) packet_data, (gssize) packet_data_size,
                                        &bytes_written, error);
     g_free (packet_data);
