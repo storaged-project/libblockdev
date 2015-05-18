@@ -33,16 +33,16 @@ typedef enum {
 #define DEFAULT_LUKS_CIPHER "aes-xts-plain64"
 
 gchar* bd_crypto_generate_backup_passphrase(GError **error);
-gboolean bd_crypto_device_is_luks (gchar *device, GError **error);
-gchar* bd_crypto_luks_uuid (gchar *device, GError **error);
-gchar* bd_crypto_luks_status (gchar *luks_device, GError **error);
-gboolean bd_crypto_luks_format (gchar *device, gchar *cipher, guint64 key_size, gchar *passphrase, gchar *key_file, guint64 min_entropy, GError **error);
-gboolean bd_crypto_luks_open (gchar *device, gchar *name, gchar *passphrase, gchar *key_file, GError **error);
-gboolean bd_crypto_luks_close (gchar *luks_device, GError **error);
-gboolean bd_crypto_luks_add_key (gchar *device, gchar *pass, gchar *key_file, gchar *npass, gchar *nkey_file, GError **error);
-gboolean bd_crypto_luks_remove_key (gchar *device, gchar *pass, gchar *key_file, GError **error);
-gboolean bd_crypto_luks_change_key (gchar *device, gchar *pass, gchar *npass, GError **error);
-gboolean bd_crypto_luks_resize (gchar *device, guint64 size, GError **error);
-gboolean bd_crypto_escrow_device (gchar *device, gchar *passphrase, gchar *cert_data, gchar *directory, gchar *backup_passphrase, GError **error);
+gboolean bd_crypto_device_is_luks (const gchar *device, GError **error);
+gchar* bd_crypto_luks_uuid (const gchar *device, GError **error);
+gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error);
+gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint64 key_size, const gchar *passphrase, const gchar *key_file, guint64 min_entropy, GError **error);
+gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gchar *passphrase, const gchar *key_file, GError **error);
+gboolean bd_crypto_luks_close (const gchar *luks_device, GError **error);
+gboolean bd_crypto_luks_add_key (const gchar *device, const gchar *pass, const gchar *key_file, const gchar *npass, const gchar *nkey_file, GError **error);
+gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, const gchar *key_file, GError **error);
+gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, const gchar *npass, GError **error);
+gboolean bd_crypto_luks_resize (const gchar *device, guint64 size, GError **error);
+gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, const gchar *cert_data, const gchar *directory, const gchar *backup_passphrase, GError **error);
 
 #endif  /* BD_CRYPTO */
