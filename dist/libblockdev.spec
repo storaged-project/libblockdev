@@ -19,6 +19,7 @@ BuildRequires: python-devel
 BuildRequires: python3-devel
 BuildRequires: gtk-doc
 BuildRequires: glib2-doc
+BuildRequires: kmod-devel
 
 
 %description
