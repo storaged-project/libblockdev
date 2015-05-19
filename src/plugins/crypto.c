@@ -90,7 +90,7 @@ gchar* bd_crypto_generate_backup_passphrase(GError **error __attribute__((unused
  * failed to determine (the @error) is populated with the error in such
  * cases)
  */
-gboolean bd_crypto_device_is_luks (gchar *device, GError **error) {
+gboolean bd_crypto_device_is_luks (const gchar *device, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret;
 
@@ -114,7 +114,7 @@ gboolean bd_crypto_device_is_luks (gchar *device, GError **error) {
  * Returns: (transfer full): UUID of the @device or %NULL if failed to determine (@error)
  * is populated with the error in such cases)
  */
-gchar* bd_crypto_luks_uuid (gchar *device, GError **error) {
+gchar* bd_crypto_luks_uuid (const gchar *device, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret_num;
     gchar *ret;
@@ -149,7 +149,7 @@ gchar* bd_crypto_luks_uuid (gchar *device, GError **error) {
  * %NULL if failed to determine (@error is populated with the error in
  * such cases)
  */
-gchar* bd_crypto_luks_status (gchar *luks_device, GError **error) {
+gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret_num;
     gchar *ret = NULL;
@@ -188,8 +188,8 @@ gchar* bd_crypto_luks_status (gchar *luks_device, GError **error) {
 
 static int give_passphrase (const char *msg __attribute__((unused)), char *buf, size_t length __attribute__((unused)), void *usrptr) {
     if (usrptr) {
-        strcpy (buf, (char*) usrptr);
-        return strlen ((char*) usrptr);
+        strcpy (buf, (const char*) usrptr);
+        return strlen ((const char*) usrptr);
     } else
         return 0;
 }
@@ -214,7 +214,7 @@ static int give_passphrase (const char *msg __attribute__((unused)), char *buf, 
  * Returns: whether the given @device was successfully formatted as LUKS or not
  * (the @error) contains the error in such cases)
  */
-gboolean bd_crypto_luks_format (gchar *device, gchar *cipher, guint64 key_size, gchar *passphrase, gchar *key_file, guint64 min_entropy, GError **error) {
+gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint64 key_size, const gchar *passphrase, const gchar *key_file, guint64 min_entropy, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret;
     gchar **cipher_specs = NULL;
@@ -305,7 +305,7 @@ gboolean bd_crypto_luks_format (gchar *device, gchar *cipher, guint64 key_size, 
  *
  * One of @passphrase, @key_file has to be != %NULL.
  */
-gboolean bd_crypto_luks_open (gchar *device, gchar *name, gchar *passphrase, gchar *key_file, GError **error) {
+gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gchar *passphrase, const gchar *key_file, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
 
@@ -352,7 +352,7 @@ gboolean bd_crypto_luks_open (gchar *device, gchar *name, gchar *passphrase, gch
  *
  * Returns: whether the given @luks_device was successfully closed or not
  */
-gboolean bd_crypto_luks_close (gchar *luks_device, GError **error) {
+gboolean bd_crypto_luks_close (const gchar *luks_device, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
 
@@ -390,7 +390,7 @@ gboolean bd_crypto_luks_close (gchar *luks_device, GError **error) {
  * One of @pass, @key_file has to be != %NULL and the same applies to @npass,
  * @nkey_file.
  */
-gboolean bd_crypto_luks_add_key (gchar *device, gchar *pass, gchar *key_file, gchar *npass, gchar *nkey_file, GError **error) {
+gboolean bd_crypto_luks_add_key (const gchar *device, const gchar *pass, const gchar *key_file, const gchar *npass, const gchar *nkey_file, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
 
@@ -455,7 +455,7 @@ gboolean bd_crypto_luks_add_key (gchar *device, gchar *pass, gchar *key_file, gc
  *
  * Either @pass or @key_file has to be != %NULL.
  */
-gboolean bd_crypto_luks_remove_key (gchar *device, gchar *pass, gchar *key_file, GError **error) {
+gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, const gchar *key_file, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
 
@@ -516,7 +516,7 @@ gboolean bd_crypto_luks_remove_key (gchar *device, gchar *pass, gchar *key_file,
  *
  * No support for changing key files (yet).
  */
-gboolean bd_crypto_luks_change_key (gchar *device, gchar *pass, gchar *npass, GError **error) {
+gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, const gchar *npass, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
     gchar *volume_key = NULL;
@@ -577,7 +577,7 @@ gboolean bd_crypto_luks_change_key (gchar *device, gchar *pass, gchar *npass, GE
  *
  * Returns: whether the @luks_device was successfully resized or not
  */
-gboolean bd_crypto_luks_resize (gchar *luks_device, guint64 size, GError **error) {
+gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
 
@@ -626,7 +626,7 @@ static gchar *replace_char (gchar *str, gchar orig, gchar new) {
     return str;
 }
 
-static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libvk_ui *ui, enum libvk_packet_format format, gchar *out_path,
+static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libvk_ui *ui, enum libvk_packet_format format, const gchar *out_path,
                                         CERTCertificate *cert, GError **error) {
     gpointer packet_data = NULL;
     gsize packet_data_size = 0;
@@ -649,6 +649,18 @@ static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libv
     if (!out_file) {
         /* error is already populated */
         g_free (packet_data);
+        return FALSE;
+    }
+
+    status = g_io_channel_set_encoding (out_file, NULL, error);
+    if (status != G_IO_STATUS_NORMAL) {
+        g_free(packet_data);
+
+        /* try to shutdown the channel, but if it fails, we cannot do anything about it here */
+        g_io_channel_shutdown (out_file, TRUE, &tmp_error);
+
+        /* error is already populated */
+        g_io_channel_unref (out_file);
         return FALSE;
     }
 
@@ -683,9 +695,9 @@ static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libv
  * @backup_passphrase: (allow-none): backup passphrase for the device or %NULL
  * @error: (out): place to store error (if any)
  *
- * Returns: whether the ecrow data was successfully created for @device or not
+ * Returns: whether the escrow data was successfully created for @device or not
  */
-gboolean bd_crypto_escrow_device (gchar *device, gchar *passphrase, gchar *cert_data, gchar *directory, gchar *backup_passphrase, GError **error) {
+gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, const gchar *cert_data, const gchar *directory, const gchar *backup_passphrase, GError **error) {
     struct libvk_volume *volume = NULL;
     struct libvk_ui *ui = NULL;
     gchar *label = NULL;
@@ -694,6 +706,8 @@ gboolean bd_crypto_escrow_device (gchar *device, gchar *passphrase, gchar *cert_
     gchar *volume_ident = NULL;
     gchar *out_path = NULL;
     gboolean ret = FALSE;
+    gchar *passphrase_copy = NULL;
+    gchar *cert_data_copy = NULL;
 
     if (!NSS_IsInitialized())
         if (NSS_NoDB_Init(NULL) != SECSuccess) {
@@ -707,24 +721,30 @@ gboolean bd_crypto_escrow_device (gchar *device, gchar *passphrase, gchar *cert_
         /* error is already populated */
         return FALSE;
 
+
     ui = libvk_ui_new ();
+    passphrase_copy = g_strdup(passphrase);
     /* not supposed to be called -> always fail */
     libvk_ui_set_generic_cb (ui, always_fail_cb, NULL, NULL);
-    libvk_ui_set_passphrase_cb (ui, give_passphrase_cb, passphrase, NULL);
+    libvk_ui_set_passphrase_cb (ui, give_passphrase_cb, passphrase_copy, NULL);
 
     if (libvk_volume_get_secret (volume, LIBVK_SECRET_DEFAULT, ui, error) != 0) {
         /* error is already populated */
         libvk_volume_free (volume);
         libvk_ui_free (ui);
+        g_free(passphrase_copy);
         return FALSE;
     }
 
-    cert = CERT_DecodeCertFromPackage (cert_data, strlen(cert_data));
+    cert_data_copy = g_strdup(cert_data);
+    cert = CERT_DecodeCertFromPackage (cert_data_copy, strlen(cert_data_copy));
     if (!cert) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_CERT_DECODE,
                      "Failed to decode the certificate data");
         libvk_volume_free (volume);
         libvk_ui_free (ui);
+        g_free(passphrase_copy);
+        g_free(cert_data_copy);
         return FALSE;
     }
 
@@ -742,7 +762,7 @@ gboolean bd_crypto_escrow_device (gchar *device, gchar *passphrase, gchar *cert_
     else
         volume_ident = g_strdup ("_unknown");
 
-    out_path = g_strdup_printf ("%s/%s-ecrow", directory, volume_ident);
+    out_path = g_strdup_printf ("%s/%s-escrow", directory, volume_ident);
     ret = write_escrow_data_file (volume, ui, LIBVK_SECRET_DEFAULT, out_path, cert, error);
     g_free (out_path);
 
@@ -751,6 +771,8 @@ gboolean bd_crypto_escrow_device (gchar *device, gchar *passphrase, gchar *cert_
         libvk_volume_free (volume);
         libvk_ui_free (ui);
         g_free (volume_ident);
+        g_free(passphrase_copy);
+        g_free(cert_data_copy);
         return FALSE;
     }
 
@@ -761,6 +783,8 @@ gboolean bd_crypto_escrow_device (gchar *device, gchar *passphrase, gchar *cert_
             libvk_volume_free (volume);
             libvk_ui_free (ui);
             g_free (volume_ident);
+            g_free(passphrase_copy);
+            g_free(cert_data_copy);
             return FALSE;
         }
 
@@ -773,5 +797,7 @@ gboolean bd_crypto_escrow_device (gchar *device, gchar *passphrase, gchar *cert_
     libvk_volume_free (volume);
     libvk_ui_free (ui);
     g_free (volume_ident);
+    g_free(passphrase_copy);
+    g_free(cert_data_copy);
     return ret;
 }
