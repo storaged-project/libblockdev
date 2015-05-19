@@ -42,7 +42,7 @@ GQuark bd_btrfs_error_quark (void)
 }
 
 BDBtrfsDeviceInfo* bd_btrfs_device_info_copy (BDBtrfsDeviceInfo *info) {
-    BDBtrfsDeviceInfo *new_info = g_new (BDBtrfsDeviceInfo, 1);
+    BDBtrfsDeviceInfo *new_info = g_new0 (BDBtrfsDeviceInfo, 1);
 
     new_info->id = info->id;
     new_info->path = g_strdup (info->path);
@@ -58,7 +58,7 @@ void bd_btrfs_device_info_free (BDBtrfsDeviceInfo *info) {
 }
 
 BDBtrfsSubvolumeInfo* bd_btrfs_subvolume_info_copy (BDBtrfsSubvolumeInfo *info) {
-    BDBtrfsSubvolumeInfo *new_info = g_new (BDBtrfsSubvolumeInfo, 1);
+    BDBtrfsSubvolumeInfo *new_info = g_new0 (BDBtrfsSubvolumeInfo, 1);
 
     new_info->id = info->id;
     new_info->parent_id = info->parent_id;
@@ -73,7 +73,7 @@ void bd_btrfs_subvolume_info_free (BDBtrfsSubvolumeInfo *info) {
 }
 
 BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info_copy (BDBtrfsFilesystemInfo *info) {
-    BDBtrfsFilesystemInfo *new_info = g_new (BDBtrfsFilesystemInfo, 1);
+    BDBtrfsFilesystemInfo *new_info = g_new0 (BDBtrfsFilesystemInfo, 1);
 
     new_info->label = g_strdup (info->label);
     new_info->uuid = g_strdup (info->uuid);
@@ -209,7 +209,7 @@ gboolean bd_btrfs_create_volume (gchar **devices, gchar *label, gchar *data_leve
     if (md_level)
         num_args += 2;
 
-    argv = g_new (gchar*, num_args + 2);
+    argv = g_new0 (gchar*, num_args + 2);
     argv[0] = "mkfs.btrfs";
     if (label) {
         argv[next_arg] = "--label";
@@ -467,7 +467,7 @@ BDBtrfsDeviceInfo** bd_btrfs_list_devices (gchar *device, GError **error) {
     }
 
     /* now create the return value -- NULL-terminated array of BDBtrfsDeviceInfo */
-    ret = g_new (BDBtrfsDeviceInfo*, dev_infos->len + 1);
+    ret = g_new0 (BDBtrfsDeviceInfo*, dev_infos->len + 1);
     for (i=0; i < dev_infos->len; i++)
         ret[i] = (BDBtrfsDeviceInfo*) g_ptr_array_index (dev_infos, i);
     ret[i] = NULL;
@@ -549,7 +549,7 @@ BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (gchar *mountpoint, gboolean sna
     }
 
     /* now we know how much space to allocate for the result (subvols + NULL) */
-    ret = g_new (BDBtrfsSubvolumeInfo*, subvol_infos->len + 1);
+    ret = g_new0 (BDBtrfsSubvolumeInfo*, subvol_infos->len + 1);
 
     /* we need to sort the subvolumes in a way that no child subvolume appears
        in the list before its parent (sub)volume */

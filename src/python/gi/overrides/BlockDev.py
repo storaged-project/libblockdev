@@ -45,6 +45,7 @@ bd_plugins = { "lvm": BlockDev.Plugin.LVM,
                "swap": BlockDev.Plugin.SWAP,
                "mdraid": BlockDev.Plugin.MDRAID,
                "mpath": BlockDev.Plugin.MPATH,
+               "kbd": BlockDev.Plugin.KBD,
 }
 
 _init = BlockDev.init
@@ -258,6 +259,13 @@ def swap_swapon(device, priority=-1):
 __all__.append("swap_swapon")
 
 
+_kbd_zram_create_devices = BlockDev.kbd_zram_create_devices
+@override(BlockDev.kbd_zram_create_devices)
+def kbd_zram_create_devices(num_devices, sizes, nstreams=None):
+    return _kbd_zram_create_devices(num_devices, sizes, nstreams)
+__all__.append("kbd_zram_create_devices")
+
+
 ## defined in this overrides only!
 def plugin_specs_from_names(plugin_names):
     ret = []
@@ -424,6 +432,10 @@ class SwapError(BlockDevError):
     pass
 __all__.append("SwapError")
 
+class KbdError(BlockDevError):
+    pass
+__all__.append("KbdError")
+
 class UtilsError(BlockDevError):
     pass
 __all__.append("UtilsError")
@@ -457,6 +469,9 @@ __all__.append("mpath")
 
 swap = ErrorProxy("swap", BlockDev, [(GLib.Error, SwapError)], [not_implemented_rule])
 __all__.append("swap")
+
+kbd = ErrorProxy("kbd", BlockDev, [(GLib.Error, KbdError)], [not_implemented_rule])
+__all__.append("kbd")
 
 utils = ErrorProxy("utils", BlockDev, [(GLib.Error, UtilsError)])
 __all__.append("utils")

@@ -118,6 +118,27 @@ This package contains header files and pkg-config files needed for development
 with the libblockdev-dm plugin/library.
 
 
+%package kbd
+Summary:     The KBD plugin for the libblockdev library
+Requires: %{name}-utils%{?_isa} >= 0.11
+Requires: bcache-tools >= 1.0.8
+
+%description kbd
+The libblockdev library plugin (and in the same time a standalone library)
+proving the functionality related to kernel block devices (namely zRAM and
+Bcache).
+
+%package kbd-devel
+Summary:     Development files for the libblockdev-kbd plugin/library
+Requires: %{name}-kbd%{?_isa} = %{version}-%{release}
+Requires: %{name}-utils-devel%{?_isa}
+Requires: glib2-devel
+
+%description kbd-devel
+This package contains header files and pkg-config files needed for development
+with the libblockdev-kbd plugin/library.
+
+
 %package loop
 Summary:     The loop plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
@@ -224,6 +245,7 @@ Requires: %{name}%{?_isa} = %{version}-%{release}
 Requires: %{name}-btrfs%{?_isa} = %{version}-%{release}
 Requires: %{name}-crypto%{?_isa} = %{version}-%{release}
 Requires: %{name}-dm%{?_isa} = %{version}-%{release}
+Requires: %{name}-kbd%{?_isa} = %{version}-%{release}
 Requires: %{name}-loop%{?_isa} = %{version}-%{release}
 Requires: %{name}-lvm%{?_isa} = %{version}-%{release}
 Requires: %{name}-mdraid%{?_isa} = %{version}-%{release}
@@ -322,6 +344,15 @@ CFLAGS="%{optflags}" make PREFIX=%{buildroot} SITEDIRS=%{buildroot}%{python2_sit
 %{_libdir}/libbd_dm.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/dm.h
+
+
+%files kbd
+%{_libdir}/libbd_kbd.so.*
+
+%files kbd-devel
+%{_libdir}/libbd_kbd.so
+%dir %{_includedir}/blockdev
+%{_includedir}/blockdev/kbd.h
 
 
 %files loop

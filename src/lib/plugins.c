@@ -15,7 +15,7 @@
  * Creates a new copy of @spec.
  */
 BDPluginSpec* bd_plugin_spec_copy (BDPluginSpec *spec) {
-    BDPluginSpec *new_spec = g_new (BDPluginSpec, 1);
+    BDPluginSpec *new_spec = g_new0 (BDPluginSpec, 1);
 
     new_spec->name = spec->name;
     new_spec->so_name = g_strdup (spec->so_name);

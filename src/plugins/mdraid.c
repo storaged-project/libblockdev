@@ -49,7 +49,7 @@ GQuark bd_md_error_quark (void)
  * Creates a new copy of @data.
  */
 BDMDExamineData* bd_md_examine_data_copy (BDMDExamineData *data) {
-    BDMDExamineData *new_data = g_new (BDMDExamineData, 1);
+    BDMDExamineData *new_data = g_new0 (BDMDExamineData, 1);
 
     new_data->device = g_strdup (data->device);
     new_data->level = g_strdup (data->level);
@@ -85,7 +85,7 @@ void bd_md_examine_data_free (BDMDExamineData *data) {
  * Creates a new copy of @data.
  */
 BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data) {
-    BDMDDetailData *new_data = g_new (BDMDDetailData, 1);
+    BDMDDetailData *new_data = g_new0 (BDMDDetailData, 1);
 
     new_data->device = g_strdup (data->device);
     new_data->name = g_strdup (data->name);
@@ -171,7 +171,7 @@ static GHashTable* parse_mdadm_vars (gchar *str, gchar *item_sep, gchar *key_val
 }
 
 static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean free_table, GError **error) {
-    BDMDExamineData *data = g_new (BDMDExamineData, 1);
+    BDMDExamineData *data = g_new0 (BDMDExamineData, 1);
     gchar *value = NULL;
 
     data->level = g_strdup ((gchar*) g_hash_table_lookup (table, "MD_LEVEL"));
@@ -219,7 +219,7 @@ static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean
 }
 
 static BDMDDetailData* get_detail_data_from_table (GHashTable *table, gboolean free_table) {
-    BDMDDetailData *data = g_new (BDMDDetailData, 1);
+    BDMDDetailData *data = g_new0 (BDMDDetailData, 1);
     gchar *value = NULL;
     gchar *first_space = NULL;
 
@@ -363,7 +363,7 @@ gboolean bd_md_create (gchar *device_name, gchar *level, gchar **disks, guint64 
     num_disks = g_strv_length (disks);
     argv_len += num_disks;
 
-    argv = g_new (gchar*, argv_len + 1);
+    argv = g_new0 (gchar*, argv_len + 1);
 
     level_str = g_strdup_printf ("--level=%s", level);
     rdevices_str = g_strdup_printf ("--raid-devices=%"G_GUINT64_FORMAT, (num_disks - spares));
@@ -459,11 +459,11 @@ gboolean bd_md_activate (gchar *device_name, gchar **members, gchar *uuid, GErro
 
     /* mdadm, --assemble, device_name, --run, --uuid=uuid, member1, member2,..., NULL*/
     if (uuid) {
-        argv = g_new (gchar*, num_members + 6);
+        argv = g_new0 (gchar*, num_members + 6);
         uuid_str = g_strdup_printf ("--uuid=%s", uuid);
     }
     else
-        argv = g_new (gchar*, num_members + 5);
+        argv = g_new0 (gchar*, num_members + 5);
 
     argv[argv_top++] = "mdadm";
     argv[argv_top++] = "--assemble";
@@ -788,7 +788,7 @@ BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error) {
  */
 gchar* bd_md_canonicalize_uuid (gchar *uuid, GError **error) {
     gchar *next_set = uuid;
-    gchar *ret = g_new (gchar, 37);
+    gchar *ret = g_new0 (gchar, 37);
     gchar *dest = ret;
     GRegex *regex = NULL;
 
@@ -858,7 +858,7 @@ gchar* bd_md_canonicalize_uuid (gchar *uuid, GError **error) {
  */
 gchar* bd_md_get_md_uuid (gchar *uuid, GError **error) {
     gchar *next_set = uuid;
-    gchar *ret = g_new (gchar, 37);
+    gchar *ret = g_new0 (gchar, 37);
     gchar *dest = ret;
     GRegex *regex = NULL;
 

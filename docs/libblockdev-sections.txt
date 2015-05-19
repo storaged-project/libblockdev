@@ -6,6 +6,7 @@ bd_init
 bd_try_init
 bd_reinit
 bd_is_initialized
+bd_init_error_quark
 </SECTION>
 
 <SECTION>
@@ -259,3 +260,34 @@ bd_swap_swapoff
 bd_swap_swapstatus
 </SECTION>
 
+<SECTION>
+<FILE>kbd</FILE>
+BDKBDBcacheMode
+BDKBDBcacheStats
+BDKBDError
+BDKBDZramStats
+BD_KBD_ERROR
+bd_kbd_bcache_attach
+bd_kbd_bcache_create
+bd_kbd_bcache_destroy
+bd_kbd_bcache_detach
+bd_kbd_bcache_get_backing_device
+bd_kbd_bcache_get_cache_device
+bd_kbd_bcache_get_mode
+bd_kbd_bcache_get_mode_from_str
+bd_kbd_bcache_get_mode_str
+bd_kbd_bcache_set_mode
+bd_kbd_bcache_stats_copy
+bd_kbd_bcache_stats_free
+bd_kbd_bcache_status
+bd_kbd_error_quark
+bd_kbd_zram_create_devices
+bd_kbd_zram_destroy_devices
+bd_kbd_zram_get_stats
+bd_kbd_zram_stats_copy
+bd_kbd_zram_stats_free
+</SECTION>
+
+<SECTION>
+<FILE>kbd</FILE>
+</SECTION>

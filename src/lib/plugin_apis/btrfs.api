@@ -27,7 +27,7 @@ typedef struct BDBtrfsDeviceInfo {
  * Creates a new copy of @info.
  */
 BDBtrfsDeviceInfo* bd_btrfs_device_info_copy (BDBtrfsDeviceInfo *info) {
-    BDBtrfsDeviceInfo *new_info = g_new (BDBtrfsDeviceInfo, 1);
+    BDBtrfsDeviceInfo *new_info = g_new0 (BDBtrfsDeviceInfo, 1);
 
     new_info->id = info->id;
     new_info->path = g_strdup (info->path);
@@ -75,7 +75,7 @@ typedef struct BDBtrfsSubvolumeInfo {
  * Creates a new copy of @info.
  */
 BDBtrfsSubvolumeInfo* bd_btrfs_subvolume_info_copy (BDBtrfsSubvolumeInfo *info) {
-    BDBtrfsSubvolumeInfo *new_info = g_new (BDBtrfsSubvolumeInfo, 1);
+    BDBtrfsSubvolumeInfo *new_info = g_new0 (BDBtrfsSubvolumeInfo, 1);
 
     new_info->id = info->id;
     new_info->parent_id = info->parent_id;
@@ -123,7 +123,7 @@ typedef struct BDBtrfsFilesystemInfo {
  * Creates a new copy of @info.
  */
 BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info_copy (BDBtrfsFilesystemInfo *info) {
-    BDBtrfsFilesystemInfo *new_info = g_new (BDBtrfsFilesystemInfo, 1);
+    BDBtrfsFilesystemInfo *new_info = g_new0 (BDBtrfsFilesystemInfo, 1);
 
     new_info->label = g_strdup (info->label);
     new_info->uuid = g_strdup (info->uuid);

@@ -417,7 +417,7 @@ gchar** bd_dm_get_member_raid_sets (gchar *name, gchar *uuid, gint major, gint m
     }
 
     /* now create the return value -- NULL-terminated array of strings */
-    ret = g_new (gchar*, ret_sets->len + 1);
+    ret = g_new0 (gchar*, ret_sets->len + 1);
     for (i=0; i < ret_sets->len; i++)
         ret[i] = (gchar*) g_ptr_array_index (ret_sets, i);
     ret[i] = NULL;

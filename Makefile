@@ -11,6 +11,9 @@ build:
 	scons -Q build
 	@echo
 
+rebuild: clean
+	$(MAKE) build
+
 install:
 	scons -Q --prefix=${PREFIX} --sitedirs=${SITEDIRS} install
 	-mkdir -p ${PREFIX}/usr/share/gtk-doc/html/libblockdev/
@@ -61,6 +64,11 @@ test: build
 fast-test: build
 	pylint -E src/python/gi/overrides/BlockDev.py
 	@sudo SKIP_SLOW= GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build PYTHONPATH=.:tests/:src/python \
+		python -m unittest discover -v -s tests/ -p '*_test.py'
+
+test-all: build
+	pylint -E src/python/gi/overrides/BlockDev.py
+	@sudo FEELINGLUCKY= GI_TYPELIB_PATH=build LD_LIBRARY_PATH=build PYTHONPATH=.:tests/:src/python \
 		python -m unittest discover -v -s tests/ -p '*_test.py'
 
 documentation: $(wildcard src/plugins/*.[ch]) $(wildcard src/lib/*.[ch]) $(wildcard src/utils/*.[ch])
