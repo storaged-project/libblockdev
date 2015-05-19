@@ -959,7 +959,7 @@ gchar* bd_md_name_from_node (gchar *node, GError **error) {
     if (!g_str_has_prefix (node, "/dev/"))
         node_path = g_strdup_printf ("/dev/%s", node);
     else
-        node_path = g_strdup_printf (node);
+        node_path = g_strdup (node);
 
     if (glob ("/dev/md/*", GLOB_NOSORT, NULL, &glob_buf) != 0) {
         g_free (node_path);
