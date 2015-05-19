@@ -19,11 +19,15 @@
 
 #include <glib.h>
 #include <math.h>
+#include <string.h>
+#include <libdevmapper.h>
+#include <unistd.h>
 #include <utils.h>
 
 #include "lvm.h"
 
 #define INT_FLOAT_EPS 1e-5
+#define SECTOR_SIZE 512
 
 GMutex global_config_lock;
 static gchar *global_config_str = NULL;
@@ -108,6 +112,28 @@ void bd_lvm_lvdata_free (BDLVMLVdata *data) {
     g_free (data->uuid);
     g_free (data->attr);
     g_free (data->segtype);
+    g_free (data);
+}
+
+BDLVMCacheStats* bd_lvm_cache_stats_copy (BDLVMCacheStats *data) {
+    BDLVMCacheStats *new = g_new0 (BDLVMCacheStats, 1);
+
+    new->block_size = data->block_size;
+    new->cache_size = data->cache_size;
+    new->cache_used = data->cache_used;
+    new->md_block_size = data->md_block_size;
+    new->md_size = data->md_size;
+    new->md_used = data->md_used;
+    new->read_hits = data->read_hits;
+    new->read_misses = data->read_misses;
+    new->write_hits = data->write_hits;
+    new->write_misses = data->write_misses;
+    new->mode = data->mode;
+
+    return new;
+}
+
+void bd_lvm_cache_stats_free (BDLVMCacheStats *data) {
     g_free (data);
 }
 
@@ -998,28 +1024,34 @@ gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, GError **error) {
  * @vg_name: name of the VG to create a new LV in
  * @lv_name: name of the to-be-created LV
  * @size: requested size of the new LV
+ * @type: (allow-none): type of the new LV ("striped", "raid1",..., see lvcreate (8))
  * @pv_list: (allow-none) (array zero-terminated=1): list of PVs the newly created LV should use or %NULL
  * if not specified
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the given @vg_name/@lv_name LV was successfully created or not
  */
-gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar **pv_list, GError **error) {
+gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar *type, gchar **pv_list, GError **error) {
     guint8 pv_list_len = pv_list ? g_strv_length (pv_list) : 0;
-    gchar **args = g_new0 (gchar*, pv_list_len + 8);
+    gchar **args = g_new0 (gchar*, pv_list_len + 10);
     gboolean success = FALSE;
-    guint8 i = 0;
+    guint64 i = 0;
+    guint64 j = 0;
 
-    args[0] = "lvcreate";
-    args[1] = "-n";
-    args[2] = lv_name;
-    args[3] = "-L";
-    args[4] = g_strdup_printf ("%"G_GUINT64_FORMAT"K", size/1024);
-    args[5] = "-y";
-    args[6] = vg_name;
+    args[i++] = "lvcreate";
+    args[i++] = "-n";
+    args[i++] = lv_name;
+    args[i++] = "-L";
+    args[i++] = g_strdup_printf ("%"G_GUINT64_FORMAT"K", size/1024);
+    args[i++] = "-y";
+    if (type) {
+        args[i++] = "--type";
+        args[i++] = type;
+    }
+    args[i++] = vg_name;
 
-    for (i=7; i < (pv_list_len + 7); i++)
-        args[i] = pv_list[i-7];
+    for (j=0; j < pv_list_len; j++)
+        args[i++] = pv_list[j];
 
     args[i] = NULL;
 
@@ -1464,6 +1496,408 @@ gchar* bd_lvm_get_global_config (GError **error __attribute__((unused))) {
     g_mutex_lock (&global_config_lock);
     ret = g_strdup (global_config_str ? global_config_str : "");
     g_mutex_unlock (&global_config_lock);
+
+    return ret;
+}
+
+/**
+ * bd_lvm_cache_get_default_md_size:
+ * @cache_size: size of the cache to determine MD size for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: recommended default size of the cache metadata LV or 0 in case of error
+ */
+guint64 bd_lvm_cache_get_default_md_size (guint64 cache_size, GError **error __attribute__((unused))) {
+    return MAX ((guint64) cache_size / 1000, BD_LVM_MIN_CACHE_MD_SIZE);
+}
+
+/**
+ * get_lv_type_from_flags: (skip)
+ * @meta: getting type for a (future) metadata LV
+ *
+ * Get LV type string from flags.
+ */
+static gchar* get_lv_type_from_flags (BDLVMCachePoolFlags flags, gboolean meta, GError **error __attribute__((unused))) {
+    if (!meta) {
+        if (flags & BD_LVM_CACHE_POOL_STRIPED)
+            return "striped";
+        else if (flags & BD_LVM_CACHE_POOL_RAID1)
+            return "raid1";
+        else if (flags & BD_LVM_CACHE_POOL_RAID5)
+            return "raid5";
+        else if (flags & BD_LVM_CACHE_POOL_RAID6)
+            return "raid6";
+        else if (flags & BD_LVM_CACHE_POOL_RAID10)
+            return "raid10";
+        else
+            return NULL;
+    } else {
+        if (flags & BD_LVM_CACHE_POOL_META_STRIPED)
+            return "striped";
+        else if (flags & BD_LVM_CACHE_POOL_META_RAID1)
+            return "raid1";
+        else if (flags & BD_LVM_CACHE_POOL_META_RAID5)
+            return "raid5";
+        else if (flags & BD_LVM_CACHE_POOL_META_RAID6)
+            return "raid6";
+        else if (flags & BD_LVM_CACHE_POOL_META_RAID10)
+            return "raid10";
+        else
+            return NULL;
+    }
+}
+
+/**
+ * bd_lvm_cache_get_mode_str:
+ * @mode: mode to get the string representation for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: string representation of @mode or %NULL in case of error
+ */
+const gchar* bd_lvm_cache_get_mode_str (BDLVMCacheMode mode, GError **error) {
+    if (mode == BD_LVM_CACHE_MODE_WRITETHROUGH)
+        return "writethrough";
+    else if (mode == BD_LVM_CACHE_MODE_WRITEBACK)
+        return "writeback";
+    else if (mode == BD_LVM_CACHE_MODE_UNKNOWN)
+        return "unknown";
+    else {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
+                     "Invalid mode given: %d", mode);
+        return NULL;
+    }
+}
+
+/**
+ * bd_lvm_cache_get_mode_from_str:
+ * @mode_str: string representation of a cache mode
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: cache mode for the @mode_str or %BD_LVM_CACHE_MODE_UNKNOWN if
+ *          failed to determine
+ */
+BDLVMCacheMode bd_lvm_cache_get_mode_from_str (gchar *mode_str, GError **error) {
+    if (g_strcmp0 (mode_str, "writethrough") == 0)
+        return BD_LVM_CACHE_MODE_WRITETHROUGH;
+    else if (g_strcmp0 (mode_str, "writeback") == 0)
+        return BD_LVM_CACHE_MODE_WRITEBACK;
+    else if (g_strcmp0 (mode_str, "unknown") == 0)
+        return BD_LVM_CACHE_MODE_UNKNOWN;
+    else {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
+                     "Invalid mode given: %s", mode_str);
+        return BD_LVM_CACHE_MODE_UNKNOWN;
+    }
+}
+
+/**
+ * bd_lvm_cache_create_pool:
+ * @vg_name: name of the VG to create @pool_name in
+ * @pool_name: name of the cache pool LV to create
+ * @pool_size: desired size of the cache pool @pool_name
+ * @md_size: desired size of the @pool_name cache pool's metadata LV or 0 to
+ *           use the default
+ * @mode: cache mode of the @pool_name cache pool
+ * @flags: a combination of (ORed) #BDLVMCachePoolFlags
+ * @fast_pvs: (array zero-terminated=1): list of (fast) PVs to create the @pool_name
+ *                                       cache pool (and the metadata LV)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the cache pool @vg_name/@pool_name was successfully created or not
+ */
+gboolean bd_lvm_cache_create_pool (gchar *vg_name, gchar *pool_name, guint64 pool_size, guint64 md_size, BDLVMCacheMode mode, BDLVMCachePoolFlags flags, gchar **fast_pvs, GError **error) {
+    gboolean success = FALSE;
+    gchar *type = NULL;
+    gchar *name = NULL;
+    gchar *args[10] = {"lvconvert", "-y", "--type", "cache-pool", "--poolmetadata", NULL, "--cachemode", NULL, NULL, NULL};
+
+    /* create an LV for the pool */
+    type = get_lv_type_from_flags (flags, FALSE, error);
+    success = bd_lvm_lvcreate (vg_name, pool_name, pool_size, type, fast_pvs, error);
+    if (!success) {
+        g_prefix_error (error, "Failed to create the pool LV: ");
+        return FALSE;
+    }
+
+    /* determine the size of the metadata LV */
+    type = get_lv_type_from_flags (flags, TRUE, error);
+    if (md_size == 0)
+        md_size = bd_lvm_cache_get_default_md_size (pool_size, error);
+    if (*error) {
+        g_prefix_error (error, "Failed to determine size for the pool metadata LV: ");
+        return FALSE;
+    }
+    name = g_strdup_printf ("%s_meta", pool_name);
+
+    /* create the metadata LV */
+    success = bd_lvm_lvcreate (vg_name, name, md_size, type, fast_pvs, error);
+    if (!success) {
+        g_free (name);
+        g_prefix_error (error, "Failed to create the pool metadata LV: ");
+        return FALSE;
+    }
+
+    /* create the cache pool from the two LVs */
+    args[5] = name;
+    args[7] = (gchar *) bd_lvm_cache_get_mode_str (mode, error);
+    if (!args[7]) {
+        g_free (args[5]);
+        return FALSE;
+    }
+    name = g_strdup_printf ("%s/%s", vg_name, pool_name);
+    args[8] = name;
+    success = call_lvm_and_report_error (args, error);
+    g_free (args[5]);
+    g_free (args[8]);
+
+    /* just return the result of the last step (it sets error on fail) */
+    return success;
+}
+
+/**
+ * bd_lvm_cache_attach:
+ * @vg_name: name of the VG containing the @data_lv and the @cache_pool_lv LVs
+ * @data_lv: data LV to attache the @cache_pool_lv to
+ * @cache_pool_lv: cache pool LV to attach to the @data_lv
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @cache_pool_lv was successfully attached to the @data_lv or not
+ */
+gboolean bd_lvm_cache_attach (gchar *vg_name, gchar *data_lv, gchar *cache_pool_lv, GError **error) {
+    gchar *args[7] = {"lvconvert", "--type", "cache", "--cachepool", NULL, NULL, NULL};
+    gboolean success = FALSE;
+
+    args[4] = g_strdup_printf ("%s/%s", vg_name, cache_pool_lv);
+    args[5] = g_strdup_printf ("%s/%s", vg_name, data_lv);
+    success = call_lvm_and_report_error (args, error);
+
+    g_free (args[4]);
+    g_free (args[5]);
+    return success;
+}
+
+/**
+ * bd_lvm_cache_detach:
+ * @vg_name: name of the VG containing the @cached_lv
+ * @cached_lv: name of the cached LV to detach its cache from
+ * @destroy: whether to destroy the cache after detach or not
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the cache was successfully detached from the @cached_lv or not
+ *
+ * Note: synces the cache first
+ */
+gboolean bd_lvm_cache_detach (gchar *vg_name, gchar *cached_lv, gboolean destroy, GError **error) {
+    /* need to both "assume yes" and "force" to get rid of the interactive
+       questions in case of "--uncache" */
+    gchar *args[6] = {"lvconvert", "-y", "-f", NULL, NULL, NULL};
+    gboolean success = FALSE;
+
+    args[3] = destroy ? "--uncache" : "--splitcache";
+    args[4] = g_strdup_printf ("%s/%s", vg_name, cached_lv);
+    success = call_lvm_and_report_error (args, error);
+
+    g_free (args[4]);
+    return success;
+}
+
+/**
+ * bd_lvm_cache_create_cached_lv:
+ * @vg_name: name of the VG to create a cached LV in
+ * @lv_name: name of the cached LV to create
+ * @data_size: size of the data LV
+ * @cache_size: size of the cache (or cached LV more precisely)
+ * @md_size: size of the cache metadata LV or 0 to use the default
+ * @mode: cache mode for the cached LV
+ * @flags: a combination of (ORed) #BDLVMCachePoolFlags
+ * @slow_pvs: (array zero-terminated=1): list of slow PVs (used for the data LV)
+ * @fast_pvs: (array zero-terminated=1): list of fast PVs (used for the cache LV)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the cached LV @lv_name was successfully created or not
+ */
+gboolean bd_lvm_cache_create_cached_lv (gchar *vg_name, gchar *lv_name, guint64 data_size, guint64 cache_size, guint64 md_size, BDLVMCacheMode mode, BDLVMCachePoolFlags flags,
+                                        gchar **slow_pvs, gchar **fast_pvs, GError **error) {
+    gboolean success = FALSE;
+    gchar *name = NULL;
+
+    success = bd_lvm_lvcreate (vg_name, lv_name, data_size, NULL, slow_pvs, error);
+    if (!success) {
+        g_prefix_error (error, "Failed to create the data LV: ");
+        return FALSE;
+    }
+
+    name = g_strdup_printf ("%s_cache", lv_name);
+    success = bd_lvm_cache_create_pool (vg_name, name, cache_size, md_size, mode, flags, fast_pvs, error);
+    if (!success) {
+        g_prefix_error (error, "Failed to create the cache pool '%s': ", name);
+        g_free (name);
+        return FALSE;
+    }
+
+    success = bd_lvm_cache_attach (vg_name, lv_name, name, error);
+    if (!success) {
+        g_prefix_error (error, "Failed to attach the cache pool '%s' to the data LV: ", name);
+        g_free (name);
+        return FALSE;
+    }
+
+    g_free (name);
+    return TRUE;
+}
+
+/**
+ * bd_lvm_cache_pool_name:
+ * @vg_name: name of the VG containing the @cached_lv
+ * @cached_lv: cached LV to get the name of the its pool LV for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: name of the cache pool LV used by the @cached_lv or %NULL in case of error
+ */
+gchar* bd_lvm_cache_pool_name (gchar *vg_name, gchar *cached_lv, GError **error) {
+    gchar *ret = NULL;
+    gchar *name_start = NULL;
+    gchar *name_end = NULL;
+    gchar *pool_name = NULL;
+
+    /* same as for a thin LV, but with square brackets */
+    ret = bd_lvm_thlvpoolname (vg_name, cached_lv, error);
+    if (!ret)
+        return NULL;
+
+    name_start = strchr (ret, '[');
+    if (!name_start) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
+                     "Failed to determine cache pool name from: '%s'", ret);
+        g_free (ret);
+        return FALSE;
+    }
+    name_start++;
+
+    name_end = strchr (ret, ']');
+    if (!name_end) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
+                     "Failed to determine cache pool name from: '%s'", ret);
+        g_free (ret);
+        return FALSE;
+    }
+
+    pool_name = g_strndup (name_start, name_end - name_start);
+    g_free (ret);
+
+    return pool_name;
+}
+
+/**
+ * bd_lvm_cache_stats:
+ * @vg_name: name of the VG containing the @cached_lv
+ * @cached_lv: cached LV to get stats for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: stats for the @cached_lv or %NULL in case of error
+ */
+BDLVMCacheStats* bd_lvm_cache_stats (gchar *vg_name, gchar *cached_lv, GError **error) {
+    struct dm_pool *pool = NULL;
+    struct dm_task *task = NULL;
+    struct dm_info info;
+    struct dm_status_cache *status = NULL;
+    gchar *map_name = NULL;
+    guint64 start = 0;
+    guint64 length = 0;
+    gchar *type = NULL;
+    gchar *params = NULL;
+    BDLVMCacheStats *ret = NULL;
+
+    if (geteuid () != 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_NOT_ROOT,
+                     "Not running as root, cannot query DM maps");
+        return NULL;
+    }
+
+    pool = dm_pool_create("bd-pool", 20);
+
+    /* translate the VG+LV name into the DM map name */
+    map_name = dm_build_dm_name (pool, vg_name, cached_lv, NULL);
+
+    task = dm_task_create (DM_DEVICE_STATUS);
+    if (!task) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
+                     "Failed to create DM task for the cache map '%s': ", map_name);
+        dm_pool_destroy (pool);
+        return NULL;
+    }
+
+    if (dm_task_set_name (task, map_name) == 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
+                     "Failed to create DM task for the cache map '%s': ", map_name);
+        dm_task_destroy (task);
+        dm_pool_destroy (pool);
+        return NULL;
+    }
+
+    if (dm_task_run(task) == 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
+                     "Failed to run the DM task for the cache map '%s': ", map_name);
+        dm_task_destroy (task);
+        dm_pool_destroy (pool);
+        return NULL;
+    }
+
+    if (dm_task_get_info (task, &info) == 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
+                     "Failed to get task info for the cache map '%s': ", map_name);
+        dm_task_destroy (task);
+        dm_pool_destroy (pool);
+        return NULL;
+    }
+
+    if (!info.exists) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_NOCACHE,
+                     "The cache map '%s' doesn't exist: ", map_name);
+        dm_task_destroy (task);
+        dm_pool_destroy (pool);
+        return NULL;
+    }
+
+    dm_get_next_target(task, NULL, &start, &length, &type, &params);
+
+    if (dm_get_status_cache (pool, params, &status) == 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
+                     "Failed to get status of the cache map '%s': ", map_name);
+        dm_task_destroy (task);
+        dm_pool_destroy (pool);
+        return NULL;
+    }
+
+    ret = g_new0 (BDLVMCacheStats, 1);
+    ret->block_size = status->block_size * SECTOR_SIZE;
+    ret->cache_size = status->total_blocks * ret->block_size;
+    ret->cache_used = status->used_blocks * ret->block_size;
+
+    ret->md_block_size = status->metadata_block_size * SECTOR_SIZE;
+    ret->md_size = status->metadata_total_blocks * ret->md_block_size;
+    ret->md_used = status->metadata_used_blocks * ret->md_block_size;
+
+    ret->read_hits = status->read_hits;
+    ret->read_misses = status->read_misses;
+    ret->write_hits = status->write_hits;
+    ret->write_misses = status->write_misses;
+
+    if (status->feature_flags & DM_CACHE_FEATURE_WRITETHROUGH)
+        ret->mode = BD_LVM_CACHE_MODE_WRITETHROUGH;
+    else if (status->feature_flags & DM_CACHE_FEATURE_WRITEBACK)
+        ret->mode = BD_LVM_CACHE_MODE_WRITEBACK;
+    else {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
+                      "Failed to determine status of the cache from '%"G_GUINT64_FORMAT"': ",
+                      status->feature_flags);
+        dm_task_destroy (task);
+        dm_pool_destroy (pool);
+        return NULL;
+    }
+
+    dm_task_destroy (task);
+    dm_pool_destroy (pool);
 
     return ret;
 }

@@ -94,12 +94,15 @@ LVM
    * thlvpoolname [DONE]
    * thsnapshotcreate [DONE]
 
-   * lvm_cache_create
-   * lvm_cache_destroy
-   * lvm_cache_detach
-   * lvm_cache_status
-   * lvm_get_mode
-
+   * lvm_cache_get_default_md_size [DONE]
+   * lvm_cache_get_mode_str [DONE]
+   * lvm_cache_get_mode_from_str [DONE]
+   * lvm_cache_create_pool [DONE]
+   * lvm_cache_attach [DONE]
+   * lvm_cache_detach [DONE]
+   * lvm_cache_create_cached_lv [DONE]
+   * lvm_cache_pool_name [DONE]
+   * lvm_cache_stats [DONE]
 
 BTRFS
 ------

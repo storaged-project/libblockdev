@@ -180,8 +180,8 @@ __all__.append("lvm_vgreduce")
 
 _lvm_lvcreate = BlockDev.lvm_lvcreate
 @override(BlockDev.lvm_lvcreate)
-def lvm_lvcreate(vg_name, lv_name, size, pv_list=None):
-    return _lvm_lvcreate(vg_name, lv_name, size, pv_list)
+def lvm_lvcreate(vg_name, lv_name, size, type=None, pv_list=None):
+    return _lvm_lvcreate(vg_name, lv_name, size, type, pv_list)
 __all__.append("lvm_lvcreate")
 
 _lvm_lvremove = BlockDev.lvm_lvremove

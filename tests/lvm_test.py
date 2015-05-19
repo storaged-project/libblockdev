@@ -1,3 +1,4 @@
+from __future__ import division
 import unittest
 import os
 import math
@@ -159,6 +160,28 @@ class LvmNoDevTestCase(unittest.TestCase):
         # reset back to default
         succ = BlockDev.lvm_set_global_config(None)
         self.assertTrue(succ)
+
+    def test_cache_get_default_md_size(self):
+        """Verify that default cache metadata size is calculated properly"""
+
+        # 1000x smaller than the data LV size, but at least 8 MiB
+        self.assertEqual(BlockDev.lvm_cache_get_default_md_size(100 * 1024**3), (100 * 1024**3) // 1000)
+        self.assertEqual(BlockDev.lvm_cache_get_default_md_size(80 * 1024**3), (80 * 1024**3) // 1000)
+        self.assertEqual(BlockDev.lvm_cache_get_default_md_size(6 * 1024**3), 8 * 1024**2)
+
+    def test_cache_mode_bijection(self):
+        """Verify that cache modes and their string representations map to each other"""
+
+        mode_strs = {BlockDev.LVMCacheMode.WRITETHROUGH: "writethrough",
+                     BlockDev.LVMCacheMode.WRITEBACK: "writeback",
+                     BlockDev.LVMCacheMode.UNKNOWN: "unknown",
+        }
+        for mode in mode_strs.keys():
+            self.assertEqual(BlockDev.lvm_cache_get_mode_str(mode), mode_strs[mode])
+            self.assertEqual(BlockDev.lvm_cache_get_mode_from_str(mode_strs[mode]), mode)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_cache_get_mode_from_str("bla")
 
 class LvmPVonlyTestCase(unittest.TestCase):
     # :TODO:
@@ -468,12 +491,12 @@ class LvmTestLVcreateRemove(LvmPVVGLVTestCase):
         self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.lvm_lvcreate("nonexistingVG", "testLV", 512 * 1024**2, [self.loop_dev])
+            BlockDev.lvm_lvcreate("nonexistingVG", "testLV", 512 * 1024**2, None, [self.loop_dev])
 
         with self.assertRaises(GLib.GError):
-            BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, ["/non/existing/device"])
+            BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, ["/non/existing/device"])
 
-        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [self.loop_dev])
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
@@ -481,10 +504,10 @@ class LvmTestLVcreateRemove(LvmPVVGLVTestCase):
 
         # not enough space (only one PV)
         with self.assertRaisesRegexp(GLib.GError, "Insufficient free space"):
-            succ = BlockDev.lvm_lvcreate("testVG", "testLV", 1048 * 1024**2, [self.loop_dev])
+            succ = BlockDev.lvm_lvcreate("testVG", "testLV", 1048 * 1024**2, None, [self.loop_dev])
 
         # enough space (two PVs)
-        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 1048 * 1024**2, [self.loop_dev, self.loop_dev2])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 1048 * 1024**2, None, [self.loop_dev, self.loop_dev2])
         self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
@@ -503,6 +526,41 @@ class LvmTestLVcreateRemove(LvmPVVGLVTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.lvm_lvremove("testVG", "testLV", True)
 
+class LvmTestLVcreateType(LvmPVVGLVTestCase):
+    def test_lvcreate_type(self):
+        """Verify it's possible to create LVs with various types"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        self.assertTrue(succ)
+
+        # try to create a striped LV
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "striped", [self.loop_dev, self.loop_dev2])
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
+        self.assertTrue(succ)
+
+        # try to create a mirrored LV
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "mirror", [self.loop_dev, self.loop_dev2])
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
+        self.assertTrue(succ)
+
+        # try to create a raid1 LV
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "raid1", [self.loop_dev, self.loop_dev2])
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
+        self.assertTrue(succ)
+
+
 class LvmTestLVactivateDeactivate(LvmPVVGLVTestCase):
     def test_lvactivate_lvdeactivate(self):
         """Verify it's possible to (de)actiavate an LV"""
@@ -516,7 +574,7 @@ class LvmTestLVactivateDeactivate(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [self.loop_dev])
         self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
@@ -562,7 +620,7 @@ class LvmTestLVresize(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [self.loop_dev])
         self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
@@ -600,7 +658,7 @@ class LvmTestLVsnapshots(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [self.loop_dev])
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_lvsnapshotcreate("testVG", "testLV", "testLV_bak", 256 * 1024**2)
@@ -625,7 +683,7 @@ class LvmTestLVinfo(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [self.loop_dev])
         self.assertTrue(succ)
 
         info = BlockDev.lvm_lvinfo("testVG", "testLV")
@@ -648,7 +706,7 @@ class LvmTestLVs(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, [self.loop_dev])
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [self.loop_dev])
         self.assertTrue(succ)
 
         lvs = BlockDev.lvm_lvs(None)
@@ -759,6 +817,145 @@ class LvmTestThSnapshotCreate(LvmPVVGLVthLVsnapshotTestCase):
 
         info = BlockDev.lvm_lvinfo("testVG", "testThLV_bak")
         self.assertIn("V", info.attr)
+
+class LvmPVVGLVcachePoolTestCase(LvmPVVGLVTestCase):
+    def tearDown(self):
+        BlockDev.lvm_lvremove("testVG", "testCache", True)
+
+        LvmPVVGLVTestCase.tearDown(self)
+
+class LvmPVVGLVcachePoolCreateRemoveTestCase(LvmPVVGLVcachePoolTestCase):
+    def test_cache_pool_create_remove(self):
+        """Verify that is it possible to create and remove a cache pool"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_cache_create_pool("testVG", "testCache", 512 * 1024**2, 0, BlockDev.LVMCacheMode.WRITETHROUGH, 0, [self.loop_dev])
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvremove("testVG", "testCache", True)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_cache_create_pool("testVG", "testCache", 512 * 1024**2, 0, BlockDev.LVMCacheMode.WRITEBACK,
+                                              BlockDev.LVMCachePoolFlags.STRIPED|BlockDev.LVMCachePoolFlags.META_RAID1,
+                                              [self.loop_dev, self.loop_dev2])
+        self.assertTrue(succ)
+
+class LvmPVVGLVcachePoolAttachDetachTestCase(LvmPVVGLVcachePoolTestCase):
+    def test_cache_pool_attach_detach(self):
+        """Verify that is it possible to attach and detach a cache pool"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_cache_create_pool("testVG", "testCache", 512 * 1024**2, 0, BlockDev.LVMCacheMode.WRITETHROUGH, 0, [self.loop_dev2])
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [self.loop_dev])
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_cache_attach("testVG", "testLV", "testCache")
+        self.assertTrue(succ)
+
+        # detach and destroy (the last arg)
+        succ = BlockDev.lvm_cache_detach("testVG", "testLV", True)
+        self.assertTrue(succ)
+
+        # once more and do not destroy this time
+        succ = BlockDev.lvm_cache_create_pool("testVG", "testCache", 512 * 1024**2, 0, BlockDev.LVMCacheMode.WRITETHROUGH, 0, [self.loop_dev2])
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_cache_attach("testVG", "testLV", "testCache")
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_cache_detach("testVG", "testLV", False)
+        self.assertTrue(succ)
+
+        lvs = BlockDev.lvm_lvs("testVG")
+        self.assertTrue(any(info.lv_name == "testCache" for info in lvs))
+
+class LvmPVVGcachedLVTestCase(LvmPVVGLVTestCase):
+    def test_create_cached_lv(self):
+        """Verify that it is possible to create a cached LV in a single step"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_cache_create_cached_lv("testVG", "testLV", 512 * 1024**2, 256 * 1024**2, 10 * 1024**2,
+                                                   BlockDev.LVMCacheMode.WRITEBACK, 0,
+                                                   [self.loop_dev], [self.loop_dev2])
+        self.assertTrue(succ)
+
+class LvmPVVGcachedLVpoolTestCase(LvmPVVGcachedLVTestCase):
+    def test_cache_get_pool_name(self):
+        """Verify that it is possible to get the name of the cache pool"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_cache_create_pool("testVG", "testCache", 512 * 1024**2, 0, BlockDev.LVMCacheMode.WRITETHROUGH, 0, [self.loop_dev2])
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [self.loop_dev])
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_cache_attach("testVG", "testLV", "testCache")
+        self.assertTrue(succ)
+
+        self.assertEqual(BlockDev.lvm_cache_pool_name("testVG", "testLV"), "testCache")
+
+class LvmPVVGcachedLVstatsTestCase(LvmPVVGcachedLVTestCase):
+    def test_cache_get_stats(self):
+        """Verify that it is possible to get stats for a cached LV"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_cache_create_pool("testVG", "testCache", 512 * 1024**2, 0, BlockDev.LVMCacheMode.WRITETHROUGH, 0, [self.loop_dev2])
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [self.loop_dev])
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_cache_attach("testVG", "testLV", "testCache")
+        self.assertTrue(succ)
+
+        stats = BlockDev.lvm_cache_stats("testVG", "testLV")
+        self.assertTrue(stats)
+        self.assertEqual(stats.cache_size, 512 * 1024**2)
+        self.assertEqual(stats.md_size, 8 * 1024**2)
+        self.assertEqual(stats.mode, BlockDev.LVMCacheMode.WRITETHROUGH)
 
 class LVMUnloadTest(unittest.TestCase):
     def tearDown(self):

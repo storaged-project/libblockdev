@@ -141,6 +141,7 @@ BD_LVM_MIN_THPOOL_CHUNK_SIZE
 BD_LVM_MAX_THPOOL_CHUNK_SIZE
 THPOOL_MD_FACTOR_NEW
 THPOOL_MD_FACTOR_EXISTS
+BD_LVM_MIN_CACHE_MD_SIZE
 bd_lvm_error_quark
 BD_LVM_ERROR
 BDLVMError
@@ -153,6 +154,11 @@ bd_lvm_vgdata_copy
 BDLVMLVdata
 bd_lvm_lvdata_free
 bd_lvm_lvdata_copy
+BDLVMCacheMode
+BDLVMCachePoolFlags
+BDLVMCacheStats
+bd_lvm_cache_stats_copy
+bd_lvm_cache_stats_free
 bd_lvm_is_supported_pe_size
 bd_lvm_get_supported_pe_sizes
 bd_lvm_get_max_lv_size
@@ -192,6 +198,15 @@ bd_lvm_thlvpoolname
 bd_lvm_thsnapshotcreate
 bd_lvm_set_global_config
 bd_lvm_get_global_config
+bd_lvm_cache_attach
+bd_lvm_cache_create_cached_lv
+bd_lvm_cache_create_pool
+bd_lvm_cache_detach
+bd_lvm_cache_get_default_md_size
+bd_lvm_cache_get_mode_from_str
+bd_lvm_cache_get_mode_str
+bd_lvm_cache_pool_name
+bd_lvm_cache_stats
 </SECTION>
 
 <SECTION>

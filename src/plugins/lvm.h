@@ -28,11 +28,38 @@
 #define THPOOL_MD_FACTOR_NEW (0.2)
 #define THPOOL_MD_FACTOR_EXISTS (1 / 6.0)
 
+/* according to lvmcache (7) */
+#define BD_LVM_MIN_CACHE_MD_SIZE (8 MiB)
+
 GQuark bd_lvm_error_quark (void);
 #define BD_LVM_ERROR bd_lvm_error_quark ()
 typedef enum {
     BD_LVM_ERROR_PARSE,
+    BD_LVM_ERROR_DM_ERROR,
+    BD_LVM_ERROR_NOT_ROOT,
+    BD_LVM_ERROR_CACHE_INVAL,
+    BD_LVM_ERROR_CACHE_NOCACHE,
 } BDLVMError;
+
+typedef enum {
+    BD_LVM_CACHE_POOL_STRIPED = 1 << 0,
+    BD_LVM_CACHE_POOL_RAID1 =    1 << 1,
+    BD_LVM_CACHE_POOL_RAID5 =    1 << 2,
+    BD_LVM_CACHE_POOL_RAID6 =    1 << 3,
+    BD_LVM_CACHE_POOL_RAID10 =   1 << 4,
+
+    BD_LVM_CACHE_POOL_META_STRIPED = 1 << 10,
+    BD_LVM_CACHE_POOL_META_RAID1 =    1 << 11,
+    BD_LVM_CACHE_POOL_META_RAID5 =    1 << 12,
+    BD_LVM_CACHE_POOL_META_RAID6 =    1 << 13,
+    BD_LVM_CACHE_POOL_META_RAID10 =   1 << 14,
+} BDLVMCachePoolFlags;
+
+typedef enum {
+    BD_LVM_CACHE_MODE_WRITETHROUGH,
+    BD_LVM_CACHE_MODE_WRITEBACK,
+    BD_LVM_CACHE_MODE_UNKNOWN,
+} BDLVMCacheMode;
 
 typedef struct BDLVMPVdata {
     gchar *pv_name;
@@ -77,6 +104,23 @@ typedef struct BDLVMLVdata {
 void bd_lvm_lvdata_free (BDLVMLVdata *data);
 BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data);
 
+typedef struct BDLVMCacheStats {
+    guint64 block_size;
+    guint64 cache_size;
+    guint64 cache_used;
+    guint64 md_block_size;
+    guint64 md_size;
+    guint64 md_used;
+    guint64 read_hits;
+    guint64 read_misses;
+    guint64 write_hits;
+    guint64 write_misses;
+    BDLVMCacheMode mode;
+} BDLVMCacheStats;
+
+void bd_lvm_cache_stats_free (BDLVMCacheStats *data);
+BDLVMCacheStats* bd_lvm_cache_stats_copy (BDLVMCacheStats *data);
+
 gboolean bd_lvm_is_supported_pe_size (guint64 size, GError **error);
 guint64 *bd_lvm_get_supported_pe_sizes (GError **error);
 guint64 bd_lvm_get_max_lv_size (GError **error);
@@ -104,7 +148,7 @@ BDLVMVGdata* bd_lvm_vginfo (gchar *vg_name, GError **error);
 BDLVMVGdata** bd_lvm_vgs (GError **error);
 
 gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, GError **error);
-gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar **pv_list, GError **error);
+gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar *type, gchar **pv_list, GError **error);
 gboolean bd_lvm_lvremove (gchar *vg_name, gchar *lv_name, gboolean force, GError **error);
 gboolean bd_lvm_lvresize (gchar *vg_name, gchar *lv_name, guint64 size, GError **error);
 gboolean bd_lvm_lvactivate (gchar *vg_name, gchar *lv_name, gboolean ignore_skip, GError **error);
@@ -120,5 +164,16 @@ gchar* bd_lvm_thlvpoolname (gchar *vg_name, gchar *lv_name, GError **error);
 gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, gchar *pool_name, GError **error);
 gboolean bd_lvm_set_global_config (gchar *new_config, GError **error);
 gchar* bd_lvm_get_global_config (GError **error);
+
+guint64 bd_lvm_cache_get_default_md_size (guint64 cache_size, GError **error);
+const gchar* bd_lvm_cache_get_mode_str (BDLVMCacheMode mode, GError **error);
+BDLVMCacheMode bd_lvm_cache_get_mode_from_str (gchar *mode_str, GError **error);
+gboolean bd_lvm_cache_create_pool (gchar *vg_name, gchar *pool_name, guint64 pool_size, guint64 md_size, BDLVMCacheMode mode, BDLVMCachePoolFlags flags, gchar **fast_pvs, GError **error);
+gboolean bd_lvm_cache_attach (gchar *vg_name, gchar *data_lv, gchar *cache_pool_lv, GError **error);
+gboolean bd_lvm_cache_detach (gchar *vg_name, gchar *cached_lv, gboolean destroy, GError **error);
+gboolean bd_lvm_cache_create_cached_lv (gchar *vg_name, gchar *lv_name, guint64 data_size, guint64 cache_size, guint64 md_size, BDLVMCacheMode mode, BDLVMCachePoolFlags flags,
+                                        gchar **slow_pvs, gchar **fast_pvs, GError **error);
+gchar* bd_lvm_cache_pool_name (gchar *vg_name, gchar *cached_lv, GError **error);
+BDLVMCacheStats* bd_lvm_cache_stats (gchar *vg_name, gchar *cached_lv, GError **error);
 
 #endif /* BD_LVM */

@@ -55,6 +55,7 @@ loop_env.Append(LIBS="bd_utils")
 plugins.append(loop_env.SharedLibrary("bd_loop", ["src/plugins/loop.c"]))
 
 lvm_env = glib_warnall_env.Clone()
+lvm_env.ParseConfig("pkg-config --cflags --libs devmapper")
 lvm_env.Append(CPPPATH="src/utils")
 lvm_env.Append(LIBPATH=".")
 lvm_env.Append(LIBS="bd_utils")
@@ -150,6 +151,7 @@ typelib = typelib_env.Command("BlockDev-%s.typelib" % MAJOR_MINOR, "BlockDev-%s.
 
 ## compiled tests
 tests_env = glib_env.Clone()
+tests_env.ParseConfig("pkg-config --cflags --libs devmapper")
 tests_env.Append(CPPPATH=["src/utils", "build/plugin_apis"])
 tests_env.Append(LIBS=["m"])
 for pname in ("swap", "lvm", "loop"):
