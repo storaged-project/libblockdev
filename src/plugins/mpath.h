@@ -9,6 +9,9 @@ GQuark bd_mpath_error_quark (void);
 #define BD_MPATH_ERROR bd_mpath_error_quark ()
 typedef enum {
     BD_MPATH_ERROR_FLUSH,
+    BD_MPATH_ERROR_NOT_ROOT,
+    BD_MPATH_ERROR_DM_ERROR,
+    BD_MPATH_ERROR_INVAL,
 } BDMpathError;
 
 gboolean bd_mpath_flush_mpaths (GError **error);

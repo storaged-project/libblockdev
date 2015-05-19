@@ -67,6 +67,7 @@ mdraid_env.Append(LIBS="bd_utils")
 plugins.append(mdraid_env.SharedLibrary("bd_mdraid", ["src/plugins/mdraid.c"]))
 
 mpath_env = glib_warnall_env.Clone()
+mpath_env.ParseConfig("pkg-config --cflags --libs devmapper")
 mpath_env.Append(CPPPATH="src/utils")
 mpath_env.Append(LIBPATH=".")
 mpath_env.Append(LIBS="bd_utils")
