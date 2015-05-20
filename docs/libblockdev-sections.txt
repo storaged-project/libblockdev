@@ -3,8 +3,10 @@
 BD_INIT_ERROR
 BDInitError
 bd_init
+bd_ensure_init
 bd_try_init
 bd_reinit
+bd_try_reinit
 bd_is_initialized
 bd_init_error_quark
 </SECTION>
