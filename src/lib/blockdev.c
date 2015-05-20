@@ -340,7 +340,7 @@ gboolean bd_reinit (BDPluginSpec **require_plugins, gboolean reload, BDUtilsLogF
         /* the error is already populated */
         success = FALSE;
 
-    if (!load_plugins (require_plugins, FALSE, &num_loaded)) {
+    if (!load_plugins (require_plugins, reload, &num_loaded)) {
         g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
                      "Failed to load plugins");
         success = FALSE;
