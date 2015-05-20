@@ -308,7 +308,7 @@ bd_kbd_zram_stats_free
 </SECTION>
 
 <SECTION>
-+<FILE>s390</FILE>
+<FILE>s390</FILE>
 bd_s390_error_quark
 BDS390Error
 bd_s390_dasd_format
