@@ -72,9 +72,6 @@ bd_crypto_escrow_device
 bd_dm_error_quark
 BD_DM_ERROR
 BDDMError
-for_each_raidset
-for_each_subset
-for_each_device
 bd_dm_create_linear
 bd_dm_remove
 bd_dm_name_from_node
