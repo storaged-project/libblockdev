@@ -61,6 +61,17 @@ def reinit(require_plugins=None, reload=False, log_func=None):
     return _reinit(require_plugins, reload, log_func)
 __all__.append("reinit")
 
+_try_init = BlockDev.try_init
+@override(BlockDev.try_init)
+def try_init(require_plugins=None, log_func=None):
+    return _try_init(require_plugins, log_func)
+__all__.append("try_init")
+
+_try_reinit = BlockDev.try_reinit
+@override(BlockDev.try_reinit)
+def try_reinit(require_plugins=None, reload=True, log_func=None):
+    return _try_reinit(require_plugins, reload, log_func)
+__all__.append("try_reinit")
 
 _btrfs_create_volume = BlockDev.btrfs_create_volume
 @override(BlockDev.btrfs_create_volume)

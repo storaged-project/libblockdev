@@ -112,7 +112,7 @@ static void unload_plugins () {
 
 }
 
-static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload) {
+static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload, guint64 *num_loaded) {
     guint8 i = 0;
     gboolean requested_loaded = TRUE;
 
@@ -176,9 +176,15 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload) {
     if (!plugins[BD_PLUGIN_S390].handle && plugins[BD_PLUGIN_S390].spec.so_name)
         plugins[BD_PLUGIN_S390].handle = load_s390_from_plugin(plugins[BD_PLUGIN_S390].spec.so_name);
 
-    for (i=0; (i < BD_PLUGIN_UNDEF) && requested_loaded; i++)
-        if (plugins[i].spec.so_name)
-            requested_loaded = requested_loaded && plugins[i].handle;
+    *num_loaded = 0;
+    for (i=0; (i < BD_PLUGIN_UNDEF); i++)
+        if (plugins[i].spec.so_name) {
+            if (plugins[i].handle) {
+                requested_loaded = requested_loaded && TRUE;
+                (*num_loaded)++;
+            } else
+                requested_loaded = FALSE;
+        }
 
     return requested_loaded;
 }
@@ -197,10 +203,13 @@ GQuark bd_init_error_quark ()
  * @log_func: (allow-none) (scope notified): logging function to use
  * @error: (out): place to store error (if any)
  *
- * Returns: whether the library was successfully initialized or not
+ * Returns: whether the library was successfully initialized with all the
+ *          required or default (see @require_plugins) plugins or not
  */
 gboolean bd_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GError **error) {
     gboolean success = TRUE;
+    guint64 num_loaded = 0;
+
     g_mutex_lock (&init_lock);
     if (initialized) {
         g_warning ("bd_init() called more than once! Use bd_reinit() to reinitialize "
@@ -209,25 +218,35 @@ gboolean bd_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GErro
         return FALSE;
     }
 
-    if (log_func && !bd_utils_init_logging (log_func, error))
+    if (log_func && !bd_utils_init_logging (log_func, error)) {
         /* the error is already populated */
-        success = FALSE;
+        g_mutex_unlock (&init_lock);
+        return FALSE;
+    }
 
-    if (!load_plugins (require_plugins, FALSE)) {
+    if (!load_plugins (require_plugins, FALSE, &num_loaded)) {
         g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
                      "Failed to load plugins");
-        /* the library is unusable without the plugins so we can just return here */
         success = FALSE;
     }
 
-    initialized = success;
+    if (num_loaded == 0) {
+        if (require_plugins && (*require_plugins == NULL))
+            /* requested to load no plugins (NULL is the first item in the
+               array), none loaded -> OK */
+            initialized = TRUE;
+        else
+            initialized = FALSE;
+    } else
+        initialized = TRUE;
+
     g_mutex_unlock (&init_lock);
 
     return success;
 }
 
 /**
- * bd_try_init:
+ * bd_ensure_init:
  * @require_plugins: (allow-none) (array zero-terminated=1): %NULL-terminated list
  *                 of plugins that should be loaded (if no so_name is specified
  *                 for the plugin, the default is used) or %NULL to load all
@@ -235,8 +254,9 @@ gboolean bd_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GErro
  * @log_func: (allow-none) (scope notified): logging function to use
  * @error: (out): place to store error (if any)
  *
- * Checks the state of the library and if it is uninitialized, tries to
- * initialize it. Otherwise just returns early. The difference between:
+ * Checks the state of the library and if it is uninitialized or not all the
+ * @require_plugins plugins are available, tries to (re)initialize it. Otherwise
+ * just returns early. The difference between:
  *
  * <code>
  * if (!bd_is_initialized())
@@ -247,29 +267,111 @@ gboolean bd_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GErro
  * way (holding the lock preventing other threads from doing changes in
  * between).
  *
- * Returns: whether the library was or had already been successfully initialized
- *          or not
+ * Returns: whether the library was successfully initialized with all the
+ *          required or default (see @require_plugins) plugins or not either
+ *          before or by this call
  */
-gboolean bd_try_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GError **error) {
+gboolean bd_ensure_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GError **error) {
     gboolean success = TRUE;
+    BDPluginSpec **check_plugin = NULL;
+    gboolean missing = FALSE;
+    guint64 num_loaded = 0;
+    BDPlugin plugin = BD_PLUGIN_UNDEF;
+
     g_mutex_lock (&init_lock);
     if (initialized) {
-        g_mutex_unlock (&init_lock);
-        return TRUE;
+        if (require_plugins)
+            for (check_plugin=require_plugins; !missing && *check_plugin; check_plugin++)
+                missing = !bd_is_plugin_available((*check_plugin)->name);
+        else
+            /* all plugins requested */
+            for (plugin=BD_PLUGIN_LVM; plugin != BD_PLUGIN_UNDEF; plugin++)
+                missing = !bd_is_plugin_available(plugin);
+
+        if (!missing) {
+            g_mutex_unlock (&init_lock);
+            return TRUE;
+        }
     }
 
-    if (log_func && !bd_utils_init_logging (log_func, error))
+    if (log_func && !bd_utils_init_logging (log_func, error)) {
         /* the error is already populated */
-        success = FALSE;
+        g_mutex_unlock (&init_lock);
+        return FALSE;
+    }
 
-    if (!load_plugins (require_plugins, FALSE)) {
+    if (!load_plugins (require_plugins, FALSE, &num_loaded)) {
         g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
                      "Failed to load plugins");
-        /* the library is unusable without the plugins so we can just return here */
         success = FALSE;
     }
 
-    initialized = success;
+    if (num_loaded == 0) {
+        if (require_plugins && (*require_plugins == NULL))
+            /* requested to load no plugins (NULL is the first item in the
+               array), none loaded -> OK */
+            initialized = TRUE;
+        else
+            initialized = FALSE;
+    } else
+        initialized = TRUE;
+
+    g_mutex_unlock (&init_lock);
+
+    return success;
+}
+
+/**
+ * bd_try_init:
+ * @request_plugins: (allow-none) (array zero-terminated=1): %NULL-terminated list
+ *                   of plugins that should be loaded (if no so_name is specified
+ *                   for the plugin, the default is used) or %NULL to load all
+ *                   plugins
+ * @log_func: (allow-none) (scope notified): logging function to use
+ * @loaded_plugin_names: (allow-none) (out) (transfer container): names of the successfully
+ *                                                                loaded plugins
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the library was successfully initialized with all the
+ *          required or default (see @require_plugins) plugins or not
+ *
+ * *UNLIKE IN CASE OF bd_init() AND bd_ensure_init(), FAILURE TO LOAD A PLUGIN
+ *  IS NOT CONSIDERED ERROR*
+ */
+gboolean bd_try_init(BDPluginSpec **request_plugins, BDUtilsLogFunc log_func,
+                     gchar ***loaded_plugin_names, GError **error) {
+    gboolean success = TRUE;
+    guint64 num_loaded = 0;
+
+    g_mutex_lock (&init_lock);
+    if (initialized) {
+        g_warning ("bd_try_init() called more than once! Use bd_reinit() to reinitialize "
+                   "or bd_is_initialized() to get the current state.");
+        g_mutex_unlock (&init_lock);
+        return FALSE;
+    }
+
+    if (log_func && !bd_utils_init_logging (log_func, error)) {
+        /* the error is already populated */
+        g_mutex_unlock (&init_lock);
+        return FALSE;
+    }
+
+    success = load_plugins (request_plugins, FALSE, &num_loaded);
+
+    if (num_loaded == 0) {
+        if (request_plugins && (*request_plugins == NULL))
+            /* requested to load no plugins (NULL is the first item in the
+               array), none loaded -> OK */
+            initialized = TRUE;
+        else
+            initialized = FALSE;
+    } else
+        initialized = TRUE;
+
+    if (loaded_plugin_names)
+        *loaded_plugin_names = bd_get_available_plugin_names ();
+
     g_mutex_unlock (&init_lock);
 
     return success;
@@ -293,17 +395,88 @@ gboolean bd_try_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, G
  */
 gboolean bd_reinit (BDPluginSpec **require_plugins, gboolean reload, BDUtilsLogFunc log_func, GError **error) {
     gboolean success = TRUE;
-    g_mutex_lock (&init_lock);
-    if (log_func && !bd_utils_init_logging (log_func, error))
-        /* the error is already populated */
-        success = FALSE;
+    guint64 num_loaded = 0;
 
-    if (!load_plugins (require_plugins, reload)) {
+    g_mutex_lock (&init_lock);
+    if (log_func && !bd_utils_init_logging (log_func, error)) {
+        /* the error is already populated */
+        g_mutex_unlock (&init_lock);
+        return FALSE;
+    }
+
+    if (!load_plugins (require_plugins, reload, &num_loaded)) {
         g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
                      "Failed to load plugins");
-        /* the library is unusable without the plugins so we can just return here */
         success = FALSE;
+    } else
+        if (require_plugins && (*require_plugins == NULL) && reload)
+            /* requested to just unload all plugins */
+            success = (num_loaded == 0);
+
+    if (num_loaded == 0) {
+        if (require_plugins && (*require_plugins == NULL))
+            /* requested to load no plugins (NULL is the first item in the
+               array), none loaded -> OK */
+            initialized = TRUE;
+        else
+            initialized = FALSE;
+    } else
+        initialized = TRUE;
+
+    g_mutex_unlock (&init_lock);
+    return success;
+}
+
+/**
+ * bd_try_reinit:
+ * @require_plugins: (allow-none) (array zero-terminated=1): %NULL-terminated list
+ *                 of plugins that should be loaded (if no so_name is specified
+ *                 for the plugin, the default is used) or %NULL to load all
+ *                 plugins
+ * @reload: whether to reload the already loaded plugins or not
+ * @log_func: (allow-none) (scope notified): logging function to use or %NULL
+ *                                           to keep the old one
+ * @loaded_plugin_names: (allow-none) (out) (transfer container) (array zero-terminated=1): names of the successfully
+ *                                                                loaded plugins
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the library was successfully initialized or not
+ *
+ * If @reload is %TRUE all the plugins are closed and reloaded otherwise only
+ * the missing plugins are loaded.
+ *
+ * *UNLIKE IN CASE OF bd_init() AND bd_ensure_init(), FAILURE TO LOAD A PLUGIN
+ *  IS NOT CONSIDERED ERROR*
+ */
+gboolean bd_try_reinit (BDPluginSpec **require_plugins, gboolean reload, BDUtilsLogFunc log_func,
+                        gchar ***loaded_plugin_names, GError **error) {
+    gboolean success = TRUE;
+    guint64 num_loaded = 0;
+
+    g_mutex_lock (&init_lock);
+    if (log_func && !bd_utils_init_logging (log_func, error)) {
+        /* the error is already populated */
+        g_mutex_unlock (&init_lock);
+        return FALSE;
     }
+
+    success = load_plugins (require_plugins, reload, &num_loaded);
+    if (success && require_plugins && (*require_plugins == NULL) && reload)
+        /* requested to just unload all plugins */
+        success = (num_loaded == 0);
+
+    if (num_loaded == 0) {
+        if (require_plugins && (*require_plugins == NULL))
+            /* requested to load no plugins (NULL is the first item in the
+               array), none loaded -> OK */
+            initialized = TRUE;
+        else
+            initialized = FALSE;
+    } else
+        initialized = TRUE;
+
+    if (loaded_plugin_names)
+        *loaded_plugin_names = bd_get_available_plugin_names ();
 
     g_mutex_unlock (&init_lock);
     return success;

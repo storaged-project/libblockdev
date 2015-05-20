@@ -2,6 +2,7 @@ import os
 import unittest
 import re
 import overrides_hack
+from utils import fake_path
 
 from gi.repository import GLib, BlockDev
 if not BlockDev.is_initialized():
@@ -9,6 +10,10 @@ if not BlockDev.is_initialized():
 
 class LibraryOpsTestCase(unittest.TestCase):
     log = ""
+
+    def tearDown(self):
+        # try to get everything back to normal by (re)loading all plugins
+        BlockDev.reinit(None, True, None)
 
     # recompiles the LVM plugin
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
@@ -156,19 +161,56 @@ class LibraryOpsTestCase(unittest.TestCase):
         # loaded again
         self.assertTrue(BlockDev.lvm_get_max_lv_size() > 0)
 
-    def test_try_init(self):
-        """Verify that try_init just returns when already initialized"""
+    def test_ensure_init(self):
+        """Verify that ensure_init just returns when already initialized"""
 
-        ps = BlockDev.PluginSpec()
-        ps.name = BlockDev.Plugin.BTRFS
-        ps.so_name = "nonexisting.so"
+        # the library is already initialized, ensure_init() shonuld do nothing
         avail_plugs = BlockDev.get_available_plugin_names()
-
-        # try init should exit early enough to not hit the issue with
-        # non-existing so file since the library is already initialized here, it
-        # shouldn't report any error and it shouldn't affect the loaded plugins
-        self.assertTrue(BlockDev.try_init([ps], None))
+        self.assertTrue(BlockDev.ensure_init(None, None))
         self.assertEqual(avail_plugs, BlockDev.get_available_plugin_names())
+
+        # reinit with a subset of plugins
+        plugins = BlockDev.plugin_specs_from_names(["btrfs", "lvm"])
+        self.assertTrue(BlockDev.reinit(plugins, True, None))
+        self.assertEqual(set(BlockDev.get_available_plugin_names()), set(["btrfs", "lvm"]))
+
+        # ensure_init with the same subset -> nothing should change
+        self.assertTrue(BlockDev.ensure_init(plugins, None))
+        self.assertEqual(set(BlockDev.get_available_plugin_names()), set(["btrfs", "lvm"]))
+
+        # ensure_init with more plugins -> extra plugins should be loaded
+        plugins = BlockDev.plugin_specs_from_names(["btrfs", "lvm", "crypto"])
+        self.assertTrue(BlockDev.ensure_init(plugins, None))
+        self.assertEqual(set(BlockDev.get_available_plugin_names()), set(["btrfs", "lvm", "crypto"]))
+
+        # reinit to unload all plugins
+        self.assertTrue(BlockDev.reinit([], True, None))
+        self.assertEqual(BlockDev.get_available_plugin_names(), [])
+
+        # ensure_init to load all plugins back
+        self.assertTrue(BlockDev.ensure_init(None, None))
+        self.assertGreaterEqual(len(BlockDev.get_available_plugin_names()), 9)
+
+    def test_try_reinit(self):
+        """Verify that try_reinit() works as expected"""
+
+        # try reinitializing with only some utilities being available and thus
+        # only some plugins able to load
+        with fake_path("tests/lib_missing_utils", keep_utils=["swapon", "swapoff", "mkswap", "lvm", "btrfs"]):
+            succ, loaded = BlockDev.try_reinit(None, True, None)
+            self.assertFalse(succ)
+            for plug_name in ("swap", "lvm", "btrfs"):
+                self.assertIn(plug_name, loaded)
+
+        # reset back to all plugins
+        self.assertTrue(BlockDev.reinit(None, True, None))
+
+        # now the same with a subset of plugins requested
+        plugins = BlockDev.plugin_specs_from_names(["btrfs", "lvm", "swap"])
+        with fake_path("tests/lib_missing_utils", keep_utils=["swapon", "swapoff", "mkswap", "lvm", "btrfs"]):
+            succ, loaded = BlockDev.try_reinit(plugins, True, None)
+            self.assertTrue(succ)
+            self.assertEqual(set(loaded), set(["swap", "lvm", "btrfs"]))
 
     def test_non_en_init(self):
         """Verify that the library initializes with lang different from en_US"""
