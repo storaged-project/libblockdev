@@ -272,12 +272,18 @@ gboolean bd_ensure_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func
     BDPluginSpec **check_plugin = NULL;
     gboolean missing = FALSE;
     guint64 num_loaded = 0;
+    BDPlugin plugin = BD_PLUGIN_UNDEF;
 
     g_mutex_lock (&init_lock);
     if (initialized) {
         if (require_plugins)
             for (check_plugin=require_plugins; !missing && *check_plugin; check_plugin++)
                 missing = !bd_is_plugin_available((*check_plugin)->name);
+        else
+            /* all plugins requested */
+            for (plugin=BD_PLUGIN_LVM; plugin != BD_PLUGIN_UNDEF; plugin++)
+                missing = !bd_is_plugin_available(plugin);
+
         if (!missing) {
             g_mutex_unlock (&init_lock);
             return TRUE;
