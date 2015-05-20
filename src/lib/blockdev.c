@@ -134,6 +134,7 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload) {
                 if (require_plugins[i]->name == BD_PLUGIN_S390) {
                     continue;
                 }
+#endif
 
                 set_plugin_so_name(require_plugins[i]->name, default_plugin_so[require_plugins[i]->name]);
             }
@@ -147,6 +148,7 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload) {
                 if (plugins[i].spec.name == BD_PLUGIN_S390) {
                     continue;
                 }
+#endif
 
                 plugins[i].spec.so_name = default_plugin_so[i];
             }
