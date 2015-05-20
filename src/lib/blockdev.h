@@ -19,6 +19,10 @@ typedef enum {
 gboolean bd_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GError **error);
 gboolean bd_ensure_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GError **error);
 gboolean bd_reinit (BDPluginSpec **require_plugins, gboolean reload, BDUtilsLogFunc log_func, GError **error);
+gboolean bd_try_init(BDPluginSpec **request_plugins, BDUtilsLogFunc log_func,
+                     gchar ***loaded_plugin_names, GError **error);
+gboolean bd_try_reinit (BDPluginSpec **require_plugins, gboolean reload, BDUtilsLogFunc log_func,
+                        gchar ***loaded_plugin_names, GError **error);
 gboolean bd_is_initialized ();
 
 #endif  /* BD_LIB */
