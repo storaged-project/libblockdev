@@ -57,7 +57,7 @@ __all__.append("init")
 
 _reinit = BlockDev.reinit
 @override(BlockDev.reinit)
-def reinit(require_plugins=None, reload=True, log_func=None):
+def reinit(require_plugins=None, reload=False, log_func=None):
     return _reinit(require_plugins, reload, log_func)
 __all__.append("reinit")
 
