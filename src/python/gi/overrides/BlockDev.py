@@ -46,6 +46,7 @@ bd_plugins = { "lvm": BlockDev.Plugin.LVM,
                "mdraid": BlockDev.Plugin.MDRAID,
                "mpath": BlockDev.Plugin.MPATH,
                "kbd": BlockDev.Plugin.KBD,
+               "s390": BlockDev.Plugin.S390,
 }
 
 _init = BlockDev.init
@@ -436,6 +437,10 @@ class KbdError(BlockDevError):
     pass
 __all__.append("KbdError")
 
+class S390Error(BlockDevError):
+    pass
+__all__.append("S390Error")
+
 class UtilsError(BlockDevError):
     pass
 __all__.append("UtilsError")
@@ -472,6 +477,9 @@ __all__.append("swap")
 
 kbd = ErrorProxy("kbd", BlockDev, [(GLib.Error, KbdError)], [not_implemented_rule])
 __all__.append("kbd")
+
+s390 = ErrorProxy("s390", BlockDev, [(GLib.Error, S390Error)], [not_implemented_rule])
+__all__.append("s390")
 
 utils = ErrorProxy("utils", BlockDev, [(GLib.Error, UtilsError)])
 __all__.append("utils")

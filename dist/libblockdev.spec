@@ -239,6 +239,25 @@ Requires: glib2-devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev-swap plugin/library.
 
+%package s390
+Summary:    The s390 plugin for the libblockdev library
+Requires: s390utils
+
+%description s390
+The libblockdev library plugin (and in the same time a standalone library)
+providing the functionality related to s390 devices.
+
+%package s390-devel
+Summary:     Development files for the libblockdev-s390 plugin/library
+Requires: %{name}-s390%{?_isa} = %{version}-%{release}
+Requires: %{name}-utils-devel%{?_isa}
+Requires: glib2-devel
+Requires: s390utils-devel
+
+%description s390-devel
+This package contains header files and pkg-config files needed for development
+with the libblockdev-s390 plugin/library.
+
 
 %package plugins-all
 Summary:     Meta-package that pulls all the libblockdev plugins as dependencies
@@ -252,6 +271,9 @@ Requires: %{name}-lvm%{?_isa} = %{version}-%{release}
 Requires: %{name}-mdraid%{?_isa} = %{version}-%{release}
 Requires: %{name}-mpath%{?_isa} = %{version}-%{release}
 Requires: %{name}-swap%{?_isa} = %{version}-%{release}
+%ifarch s390 s390x
+Requires: %{name}-s390%{?_isa} = %{version}-%{release}
+%endif
 
 %description plugins-all
 A meta-package that pulls all the libblockdev plugins as dependencies.
@@ -287,6 +309,8 @@ CFLAGS="%{optflags}" make PREFIX=%{buildroot} SITEDIRS=%{buildroot}%{python2_sit
 %postun mpath -p /sbin/ldconfig
 %post swap -p /sbin/ldconfig
 %postun swap -p /sbin/ldconfig
+%post s390 -p /sbin/ldconfig
+%postun s390 -p /sbin/ldconfig
 
 
 %files
@@ -399,6 +423,14 @@ CFLAGS="%{optflags}" make PREFIX=%{buildroot} SITEDIRS=%{buildroot}%{python2_sit
 %{_libdir}/libbd_swap.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/swap.h
+
+%files s390
+%{_libdir}/libbd_s390.so.*
+
+%files s390-devel
+%{_libdir}/libbd_s390.so
+%dir %{_includedir}/blockdev
+%{_includedir}/blockdev/s390.h
 
 %files plugins-all
 
