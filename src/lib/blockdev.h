@@ -17,7 +17,7 @@ typedef enum {
 } BDInitError;
 
 gboolean bd_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GError **error);
-gboolean bd_try_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GError **error);
+gboolean bd_ensure_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GError **error);
 gboolean bd_reinit (BDPluginSpec **require_plugins, gboolean reload, BDUtilsLogFunc log_func, GError **error);
 gboolean bd_is_initialized ();
 

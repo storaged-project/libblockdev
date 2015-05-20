@@ -242,7 +242,7 @@ gboolean bd_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GErro
 }
 
 /**
- * bd_try_init:
+ * bd_ensure_init:
  * @require_plugins: (allow-none) (array zero-terminated=1): %NULL-terminated list
  *                 of plugins that should be loaded (if no so_name is specified
  *                 for the plugin, the default is used) or %NULL to load all
@@ -267,14 +267,21 @@ gboolean bd_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GErro
  *          required or default (see @require_plugins) plugins or not either
  *          before or by this call
  */
-gboolean bd_try_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GError **error) {
+gboolean bd_ensure_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GError **error) {
     gboolean success = TRUE;
+    BDPluginSpec **check_plugin = NULL;
+    gboolean missing = FALSE;
     guint64 num_loaded = 0;
 
     g_mutex_lock (&init_lock);
     if (initialized) {
-        g_mutex_unlock (&init_lock);
-        return TRUE;
+        if (require_plugins)
+            for (check_plugin=require_plugins; !missing && *check_plugin; check_plugin++)
+                missing = !bd_is_plugin_available((*check_plugin)->name);
+        if (!missing) {
+            g_mutex_unlock (&init_lock);
+            return TRUE;
+        }
     }
 
     if (log_func && !bd_utils_init_logging (log_func, error))
