@@ -485,7 +485,11 @@ gboolean bd_try_reinit (BDPluginSpec **require_plugins, gboolean reload, BDUtils
 /**
  * bd_is_initialized:
  *
- * Returns: whether the library is initialized (init() was called) or not
+ * Returns: whether the library is initialized or not
+ *
+ * The library is considered initialized if some of the *init*() functions
+ * was/were called and either at least one plugin is loaded or 0 plugins are
+ * loaded after an explicit call that requested 0 plugins to be loaded.
  */
 gboolean bd_is_initialized () {
     gboolean is = FALSE;
