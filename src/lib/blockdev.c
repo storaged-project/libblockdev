@@ -21,8 +21,11 @@
 #include "plugin_apis/mdraid.c"
 #include "plugin_apis/kbd.h"
 #include "plugin_apis/kbd.c"
+
+#if defined(__s390__) || defined(__s390x__)
 #include "plugin_apis/s390.h"
 #include "plugin_apis/s390.c"
+#endif
 
 
 /**
@@ -106,9 +109,11 @@ static void unload_plugins () {
         g_warning ("Failed to close the kbd plugin");
     plugins[BD_PLUGIN_KBD].handle = NULL;
 
+#if defined(__s390__) || defined(__s390x__)
     if (plugins[BD_PLUGIN_S390].handle && !unload_s390 (plugins[BD_PLUGIN_S390].handle))
         g_warning ("Failed to close the s390 plugin");
     plugins[BD_PLUGIN_S390].handle = NULL;
+#endif
 
 }
 
@@ -173,8 +178,10 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload, g
         plugins[BD_PLUGIN_MDRAID].handle = load_mdraid_from_plugin(plugins[BD_PLUGIN_MDRAID].spec.so_name);
     if (!plugins[BD_PLUGIN_KBD].handle && plugins[BD_PLUGIN_KBD].spec.so_name)
         plugins[BD_PLUGIN_KBD].handle = load_kbd_from_plugin(plugins[BD_PLUGIN_KBD].spec.so_name);
+#if defined(__s390__) || defined(__s390x__)
     if (!plugins[BD_PLUGIN_S390].handle && plugins[BD_PLUGIN_S390].spec.so_name)
         plugins[BD_PLUGIN_S390].handle = load_s390_from_plugin(plugins[BD_PLUGIN_S390].spec.so_name);
+#endif
 
     *num_loaded = 0;
     for (i=0; (i < BD_PLUGIN_UNDEF); i++)
