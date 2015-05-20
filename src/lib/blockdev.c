@@ -21,6 +21,8 @@
 #include "plugin_apis/mdraid.c"
 #include "plugin_apis/kbd.h"
 #include "plugin_apis/kbd.c"
+#include "plugin_apis/s390.h"
+#include "plugin_apis/s390.c"
 
 
 /**
@@ -45,7 +47,7 @@ static gchar * default_plugin_so[BD_PLUGIN_UNDEF] = {
     "libbd_swap.so."MAJOR_VER, "libbd_loop.so."MAJOR_VER,
     "libbd_crypto.so."MAJOR_VER, "libbd_mpath.so."MAJOR_VER,
     "libbd_dm.so."MAJOR_VER, "libbd_mdraid.so."MAJOR_VER,
-    "libbd_kbd.so."MAJOR_VER,
+    "libbd_kbd.so."MAJOR_VER, "libbd_s390.so."MAJOR_VER
 };
 static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_LVM, NULL}, NULL},
@@ -57,9 +59,10 @@ static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_DM, NULL}, NULL},
     {{BD_PLUGIN_MDRAID, NULL}, NULL},
     {{BD_PLUGIN_KBD, NULL}, NULL},
+    {{BD_PLUGIN_S390, NULL}, NULL}
 };
 static gchar* plugin_names[BD_PLUGIN_UNDEF] = {
-    "lvm", "btrfs", "swap", "loop", "crypto", "mpath", "dm", "mdraid", "kbd"
+    "lvm", "btrfs", "swap", "loop", "crypto", "mpath", "dm", "mdraid", "kbd", "s390"
 };
 
 static void set_plugin_so_name (BDPlugin name, gchar *so_name) {
@@ -103,6 +106,10 @@ static void unload_plugins () {
         g_warning ("Failed to close the kbd plugin");
     plugins[BD_PLUGIN_KBD].handle = NULL;
 
+    if (plugins[BD_PLUGIN_S390].handle && !unload_s390 (plugins[BD_PLUGIN_S390].handle))
+        g_warning ("Failed to close the s390 plugin");
+    plugins[BD_PLUGIN_S390].handle = NULL;
+
 }
 
 static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload) {
@@ -119,17 +126,32 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload) {
     if (require_plugins) {
         /* set requested so names or defaults if so names are not specified */
         for (i=0; *(require_plugins + i); i++) {
-            if (require_plugins[i]->so_name)
+            if (require_plugins[i]->so_name) {
                 set_plugin_so_name(require_plugins[i]->name, require_plugins[i]->so_name);
-            else
+            }
+            else {
+#if !defined(__s390__) && !defined(__s390x__)
+                if (require_plugins[i]->name == BD_PLUGIN_S390) {
+                    continue;
+                }
+
                 set_plugin_so_name(require_plugins[i]->name, default_plugin_so[require_plugins[i]->name]);
+            }
         }
     }
-    else
+    else {
         /* nothing requested, just use defaults for everything */
-        for (i=0; i < BD_PLUGIN_UNDEF; i++)
-            if (!plugins[i].spec.so_name)
+        for (i=0; i < BD_PLUGIN_UNDEF; i++) {
+            if (!plugins[i].spec.so_name) {
+#if !defined(__s390__) || !defined(__s390x__)
+                if (plugins[i].spec.name == BD_PLUGIN_S390) {
+                    continue;
+                }
+
                 plugins[i].spec.so_name = default_plugin_so[i];
+            }
+        }
+    }
 
     if (!plugins[BD_PLUGIN_LVM].handle && plugins[BD_PLUGIN_LVM].spec.so_name)
         plugins[BD_PLUGIN_LVM].handle = load_lvm_from_plugin(plugins[BD_PLUGIN_LVM].spec.so_name);
@@ -149,6 +171,8 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload) {
         plugins[BD_PLUGIN_MDRAID].handle = load_mdraid_from_plugin(plugins[BD_PLUGIN_MDRAID].spec.so_name);
     if (!plugins[BD_PLUGIN_KBD].handle && plugins[BD_PLUGIN_KBD].spec.so_name)
         plugins[BD_PLUGIN_KBD].handle = load_kbd_from_plugin(plugins[BD_PLUGIN_KBD].spec.so_name);
+    if (!plugins[BD_PLUGIN_S390].handle && plugins[BD_PLUGIN_S390].spec.so_name)
+        plugins[BD_PLUGIN_S390].handle = load_s390_from_plugin(plugins[BD_PLUGIN_S390].spec.so_name);
 
     for (i=0; (i < BD_PLUGIN_UNDEF) && requested_loaded; i++)
         if (plugins[i].spec.so_name)

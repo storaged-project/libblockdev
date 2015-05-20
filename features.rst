@@ -238,7 +238,15 @@ s390
    DASD, zFCP
 
 :functions:
-   TBD by sbueno
+   * s390_dasd_format [DONE]
+   * s390_dasd_needs_format [DONE]
+   * s390_dasd_online [DONE]
+   * s390_dasd_is_ldl [DONE]
+   * s390_sanitize_dev_input [DONE]
+   * s390_zfcp_sanitize_wwpn_input [DONE]
+   * s390_zfcp_sanitize_lun_input [DONE]
+   * s390_zfcp_online
+   * s390_zfcp_offline
 
 
 KBD (Kernel Block Devices)

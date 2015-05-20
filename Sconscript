@@ -7,7 +7,7 @@ MAIN_VERSION = "0.1.0"
 MAJOR_MINOR = MAIN_VERSION.rsplit(".", 1)[0]
 MAJOR_VERSION = MAIN_VERSION.split(".", 1)[0]
 LIB_FILES = ["src/lib/blockdev.c", "src/lib/blockdev.h", "src/lib/plugins.h"]
-PLUGIN_NAMES = ["crypto", "dm", "loop", "lvm", "mpath", "swap", "btrfs", "mdraid", "kbd"]
+PLUGIN_NAMES = ["crypto", "dm", "loop", "lvm", "mpath", "swap", "btrfs", "mdraid", "kbd", "s390"]
 PLUGIN_HEADER_FILES = ["build/plugin_apis/"+name+".h" for name in PLUGIN_NAMES]
 UTILS_FILES = ["src/utils/exec.c", "src/utils/sizes.c", "src/utils/exec.h", "src/utils/sizes.h"]
 
@@ -87,6 +87,12 @@ kbd_env.Append(LIBPATH=".")
 kbd_env.Append(LIBS="bd_utils")
 plugins.append(kbd_env.SharedLibrary("bd_kbd", ["src/plugins/kbd.c"]))
 
+s390_env = glib_warnall_env.Clone()
+s390_env.Append(CPPPATH="src/utils")
+s390_env.Append(LIBPATH=".")
+s390_env.Append(LIBS="bd_utils")
+plugins.append(s390_env.SharedLibrary("bd_s390", ["src/plugins/s390.c"]))
+
 
 ## boilerplate code generation
 bpg_builder = Builder(action=generate_boilerplate_files)
@@ -103,6 +109,7 @@ boiler_code.append(bpg_env.BpG(["plugin_apis/mdraid.h", "plugin_apis/mdraid.c"],
 boiler_code.append(bpg_env.BpG(["plugin_apis/mpath.h", "plugin_apis/mpath.c"], "src/lib/plugin_apis/mpath.api"))
 boiler_code.append(bpg_env.BpG(["plugin_apis/swap.h", "plugin_apis/swap.c"], "src/lib/plugin_apis/swap.api"))
 boiler_code.append(bpg_env.BpG(["plugin_apis/kbd.h", "plugin_apis/kbd.c"], "src/lib/plugin_apis/kbd.api"))
+boiler_code.append(bpg_env.BpG(["plugin_apis/s390.h", "plugin_apis/s390.c"], "src/lib/plugin_apis/s390.api"))
 
 
 ## the library itself
