@@ -65,7 +65,7 @@ Requires: btrfs-progs
 
 %description btrfs
 The libblockdev library plugin (and in the same time a standalone library)
-proving the BTRFS-related functionality.
+providing the BTRFS-related functionality.
 
 %package btrfs-devel
 Summary:     Development files for the libblockdev-btrfs plugin/library
@@ -83,7 +83,7 @@ Summary:     The crypto plugin for the libblockdev library
 
 %description crypto
 The libblockdev library plugin (and in the same time a standalone library)
-proving the functionality related to encrypted devices (LUKS).
+providing the functionality related to encrypted devices (LUKS).
 
 %package crypto-devel
 Summary:     Development files for the libblockdev-crypto plugin/library
@@ -103,7 +103,7 @@ Requires: dmraid
 
 %description dm
 The libblockdev library plugin (and in the same time a standalone library)
-proving the functionality related to Device Mapper.
+providing the functionality related to Device Mapper.
 
 %package dm-devel
 Summary:     Development files for the libblockdev-dm plugin/library
@@ -126,7 +126,7 @@ Requires: bcache-tools >= 1.0.8
 
 %description kbd
 The libblockdev library plugin (and in the same time a standalone library)
-proving the functionality related to kernel block devices (namely zRAM and
+providing the functionality related to kernel block devices (namely zRAM and
 Bcache).
 
 %package kbd-devel
@@ -147,7 +147,7 @@ Requires: util-linux
 
 %description loop
 The libblockdev library plugin (and in the same time a standalone library)
-proving the functionality related to loop devices.
+providing the functionality related to loop devices.
 
 %package loop-devel
 Summary:     Development files for the libblockdev-loop plugin/library
@@ -167,7 +167,7 @@ Requires: lvm2
 
 %description lvm
 The libblockdev library plugin (and in the same time a standalone library)
-proving the LVM-related functionality.
+providing the LVM-related functionality.
 
 %package lvm-devel
 Summary:     Development files for the libblockdev-lvm plugin/library
@@ -187,7 +187,7 @@ Requires: mdadm
 
 %description mdraid
 The libblockdev library plugin (and in the same time a standalone library)
-proving the functionality related to MD RAID.
+providing the functionality related to MD RAID.
 
 %package mdraid-devel
 Summary:     Development files for the libblockdev-mdraid plugin/library
@@ -207,7 +207,7 @@ Requires: device-mapper-multipath
 
 %description mpath
 The libblockdev library plugin (and in the same time a standalone library)
-proving the functionality related to multipath devices.
+providing the functionality related to multipath devices.
 
 %package mpath-devel
 Summary:     Development files for the libblockdev-mpath plugin/library
@@ -227,7 +227,7 @@ Requires: util-linux
 
 %description swap
 The libblockdev library plugin (and in the same time a standalone library)
-proving the functionality related to swap devices.
+providing the functionality related to swap devices.
 
 %package swap-devel
 Summary:     Development files for the libblockdev-swap plugin/library
