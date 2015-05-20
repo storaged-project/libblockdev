@@ -216,9 +216,11 @@ gboolean bd_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GErro
         return FALSE;
     }
 
-    if (log_func && !bd_utils_init_logging (log_func, error))
+    if (log_func && !bd_utils_init_logging (log_func, error)) {
         /* the error is already populated */
-        success = FALSE;
+        g_mutex_unlock (&init_lock);
+        return FALSE;
+    }
 
     if (!load_plugins (require_plugins, FALSE, &num_loaded)) {
         g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
@@ -290,9 +292,11 @@ gboolean bd_ensure_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func
         }
     }
 
-    if (log_func && !bd_utils_init_logging (log_func, error))
+    if (log_func && !bd_utils_init_logging (log_func, error)) {
         /* the error is already populated */
-        success = FALSE;
+        g_mutex_unlock (&init_lock);
+        return FALSE;
+    }
 
     if (!load_plugins (require_plugins, FALSE, &num_loaded)) {
         g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
@@ -345,9 +349,11 @@ gboolean bd_try_init(BDPluginSpec **request_plugins, BDUtilsLogFunc log_func,
         return FALSE;
     }
 
-    if (log_func && !bd_utils_init_logging (log_func, error))
+    if (log_func && !bd_utils_init_logging (log_func, error)) {
         /* the error is already populated */
-        success = FALSE;
+        g_mutex_unlock (&init_lock);
+        return FALSE;
+    }
 
     success = load_plugins (request_plugins, FALSE, &num_loaded);
 
@@ -390,9 +396,11 @@ gboolean bd_reinit (BDPluginSpec **require_plugins, gboolean reload, BDUtilsLogF
     guint64 num_loaded = 0;
 
     g_mutex_lock (&init_lock);
-    if (log_func && !bd_utils_init_logging (log_func, error))
+    if (log_func && !bd_utils_init_logging (log_func, error)) {
         /* the error is already populated */
-        success = FALSE;
+        g_mutex_unlock (&init_lock);
+        return FALSE;
+    }
 
     if (!load_plugins (require_plugins, reload, &num_loaded)) {
         g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_PLUGINS_FAILED,
@@ -444,9 +452,11 @@ gboolean bd_try_reinit (BDPluginSpec **require_plugins, gboolean reload, BDUtils
     guint64 num_loaded = 0;
 
     g_mutex_lock (&init_lock);
-    if (log_func && !bd_utils_init_logging (log_func, error))
+    if (log_func && !bd_utils_init_logging (log_func, error)) {
         /* the error is already populated */
-        success = FALSE;
+        g_mutex_unlock (&init_lock);
+        return FALSE;
+    }
 
     success = load_plugins (require_plugins, reload, &num_loaded);
     if (success && require_plugins && (*require_plugins == NULL) && reload)
