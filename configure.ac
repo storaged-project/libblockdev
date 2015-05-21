@@ -29,7 +29,8 @@ AC_CONFIG_FILES([Makefile src/Makefile \
                           docs/Makefile \
                           docs/libblockdev-docs.xml \
                           dist/Makefile \
-                          dist/libblockdev.spec])
+                          dist/libblockdev.spec \
+                          scripts/Makefile])
 
 LIBBLOCKDEV_PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.42.2])
 LIBBLOCKDEV_PKG_CHECK_MODULES([CRYPTSETUP], [libcryptsetup >= 1.6.7])

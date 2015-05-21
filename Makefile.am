@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS = --enable-introspection
 
-SUBDIRS = src docs dist
+SUBDIRS = src docs dist scripts
 
 dist_noinst_DATA = features.rst roadmap.rst specs.rst LICENSE
 
