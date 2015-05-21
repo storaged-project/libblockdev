@@ -1,4 +1,4 @@
-API_FILES := $(wildcard *.api)
+API_FILES := $(wildcard ${srcdir}/*.api)
 SOURCE_FILES := $(patsubst %.api,%.c,${API_FILES})
 HEADER_FILES := $(patsubst %.api,%.h,${API_FILES})
 
@@ -9,7 +9,7 @@ all-local: generate_boilerplate
 
 generate_boilerplate: ${SOURCE_FILES} ${HEADER_FILES}
 
-dist_noinst_HEADERS = ${SOURCE_FILES} ${HEADER_FILES}
+dist_noinst_HEADERS = ${API_FILES} ${SOURCE_FILES} ${HEADER_FILES}
 
 MAINTAINERCLEANFILES = Makefile.in
 

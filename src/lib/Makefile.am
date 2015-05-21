@@ -10,21 +10,21 @@ libblockdev_la_CPPFLAGS = -I${srcdir}/../utils/
 libblockdev_la_SOURCES = blockdev.c blockdev.h plugins.c plugins.h
 
 if HAVE_INTROSPECTION
-GIHEADERS = ${srcdir}/plugin_apis/kbd.h \
-	${srcdir}/plugin_apis/mdraid.h \
-	${srcdir}/plugin_apis/swap.h \
-	${srcdir}/plugin_apis/btrfs.h \
-	${srcdir}/plugin_apis/lvm.h \
-	${srcdir}/plugin_apis/crypto.h \
-	${srcdir}/plugin_apis/dm.h \
-	${srcdir}/plugin_apis/loop.h \
-	${srcdir}/plugin_apis/mpath.h
+GIHEADERS = ${builddir}/plugin_apis/kbd.h \
+	${builddir}/plugin_apis/mdraid.h \
+	${builddir}/plugin_apis/swap.h \
+	${builddir}/plugin_apis/btrfs.h \
+	${builddir}/plugin_apis/lvm.h \
+	${builddir}/plugin_apis/crypto.h \
+	${builddir}/plugin_apis/dm.h \
+	${builddir}/plugin_apis/loop.h \
+	${builddir}/plugin_apis/mpath.h
 
 GIHEADERS += $(wildcard ${srcdir}/../utils/*.[ch])
 GIHEADERS += blockdev.c blockdev.h plugins.c plugins.h
 
 if ON_S390
-GIHEADERS += ${srcdir}/src/lib/plugin_apis/s390.h
+GIHEADERS += ${builddir}/plugin_apis/s390.h
 endif
 
 BlockDev-1.0.gir: libblockdev.la
