@@ -47,12 +47,12 @@ girdir = $(datadir)/gir-1.0
 gir_DATA = $(INTROSPECTION_GIRS)
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = ${srcdir}/blockdev.pc
+pkgconfig_DATA = ${builddir}/blockdev.pc
 
 libincludedir = $(includedir)/blockdev
 libinclude_HEADERS = blockdev.h plugins.h
 
 CLEANFILES = BlockDev-1.0.gir $(typelib_DATA)
-MAINTAINERCLEANFILES = Makefile.in
+MAINTAINERCLEANFILES = Makefile.in blockdev.pc blockdev.c
 endif
 
