@@ -34,34 +34,39 @@ test-all: all
 		python -m unittest discover -v -s tests/ -p '*_test.py'
 
 tag:
-	git tag -a -s -m "Tag as $(TAG)" -f $(TAG)
-	@echo "Tagged as $(TAG)"
+	@TAG="$(PACKAGE_NAME)-$(PACKAGE_VERSION)-1" ; \
+	git tag -a -s -m "Tag as $$TAG" -f "$$TAG" ; \
+	echo "Tagged as $$TAG"
 
 rpmlog:
-	@git log --pretty="format:- %s (%ae)" $(TAG).. |sed -e 's/@.*)/)/'
-	@echo
+	@cl=`grep -n %changelog dist/libblockdev.spec.in |cut -d : -f 1` ; \
+	version_release=`tail --lines=+$$(($$cl + 1)) dist/libblockdev.spec.in|head -1|cut -d- -f2-3|sed 's/ //g'` ; \
+	git log --pretty="format:- %s (%ae)" "$(PACKAGE_NAME)-$$version_release.." |sed -e 's/@.*)/)/' ; \
+	echo
 
 bumpver:
-	@NEWSUBVER=$$((`echo $(VERSION) |cut -d . -f 2` + 1)) ; \
-	NEWVERSION=`echo $(VERSION).$$NEWSUBVER |cut -d . -f 1,3` ; \
-	DATELINE="* `date "+%a %b %d %Y"` `git config user.name` <`git config user.email`> - $$NEWVERSION-1"  ; \
-	cl=`grep -n %changelog dist/libblockdev.spec |cut -d : -f 1` ; \
-	tail --lines=+$$(($$cl + 1)) dist/libblockdev.spec > speclog ; \
-	(head -n $$cl dist/libblockdev.spec ; echo "$$DATELINE" ; make --quiet rpmlog 2>/dev/null ; echo ""; cat speclog) > dist/libblockdev.spec.new ; \
-	mv dist/libblockdev.spec.new dist/libblockdev.spec ; rm -f speclog ; \
-	sed -ri "s/Version:(\\s+)$(VERSION)/Version:\\1$$NEWVERSION/" dist/libblockdev.spec ;
+	@VERSION=`echo $(PACKAGE_VERSION)|sed -r 's/(.*)\.([0-9]+)/\1/'` ; \
+	SUBVERSION=`echo $(PACKAGE_VERSION)|sed -r 's/.*\.([0-9]+)/\1/'` ; \
+	NEWSUBVERSION=$$(($$SUBVERSION + 1)) ; \
+	DATELINE="* `date "+%a %b %d %Y"` `git config user.name` <`git config user.email`> - $$VERSION.$$NEWSUBVERSION-1"  ; \
+	cl=`grep -n %changelog dist/libblockdev.spec.in |cut -d : -f 1` ; \
+	tail --lines=+$$(($$cl + 1)) dist/libblockdev.spec.in > speclog ; \
+	(head -n $$cl dist/libblockdev.spec ; echo "$$DATELINE" ; make --quiet rpmlog 2>/dev/null ; echo ""; cat speclog) > dist/libblockdev.spec.in.new ; \
+	mv dist/libblockdev.spec.in.new dist/libblockdev.spec.in ; rm -f speclog ; \
+	sed -ri "s/(AC_INIT\(\[$(PACKAGE_NAME)\], \[)[0-9]+\.[0-9]+(\],.*)/\1$$VERSION.$$NEWSUBVERSION\2/" configure.ac ; \
+	sed -ri "s/Version:(\\s+)[-0-9.]+/Version:\\1$$VERSION.$$NEWSUBVERSION/" dist/libblockdev.spec.in ;
 
 archive: distcheck
 
 local: dist
 
 srpm: local
-	rpmbuild -ts --nodeps $(PKGNAME)-$(VERSION).tar.gz
-	rm -f $(PKGNAME)-$(VERSION).tar.gz
+	rpmbuild -ts --nodeps $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz
+	rm -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz
 
 rpm: local
-	rpmbuild -tb --nodeps $(PKGNAME)-$(VERSION).tar.gz
-	rm -f $(PKGNAME)-$(VERSION).tar.gz
+	rpmbuild -tb --nodeps $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz
+	rm -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz
 
 release: tag
 	$(MAKE) archive
