@@ -641,6 +641,10 @@ class LvmTestLVresize(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_lvresize("testVG", "testLV", 512 * 1024**2)
         self.assertTrue(succ)
 
+        # shrink, not a multiple of 512
+        succ = BlockDev.lvm_lvresize("testVG", "testLV", 500 * 1024**2)
+        self.assertTrue(succ)
+
         succ = BlockDev.lvm_lvdeactivate("testVG", "testLV")
         self.assertTrue(succ)
 

@@ -1103,7 +1103,7 @@ gboolean bd_lvm_lvresize (gchar *vg_name, gchar *lv_name, guint64 size, GError *
     gchar *args[6] = {"lvresize", "--force", "-L", NULL, NULL, NULL};
     gboolean success = FALSE;
 
-    args[3] = g_strdup_printf ("%"G_GUINT64_FORMAT"b", size);
+    args[3] = g_strdup_printf ("%"G_GUINT64_FORMAT"K", size/1024);
     args[4] = g_strdup_printf ("%s/%s", vg_name, lv_name);
 
     success = call_lvm_and_report_error (args, error);
