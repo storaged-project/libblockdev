@@ -1,0 +1,1089 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>BTRFS: libblockdev Reference Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
+<link rel="home" href="index.html" title="libblockdev Reference Manual">
+<link rel="up" href="ch01.html" title="libblockdev Reference Manual">
+<link rel="prev" href="libblockdev-blockdev-library.html" title="blockdev library">
+<link rel="next" href="libblockdev-Crypto.html" title="Crypto">
+<meta name="generator" content="GTK-Doc V1.21.1 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#libblockdev-BTRFS.description" class="shortcut">Description</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="libblockdev-blockdev-library.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="libblockdev-Crypto.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="refentry">
+<a name="libblockdev-BTRFS"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libblockdev-BTRFS.top_of_page"></a>BTRFS</span></h2>
+<p>BTRFS — plugin for operations with BTRFS devices</p>
+</td>
+<td class="gallery_image" valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1">
+<a name="libblockdev-BTRFS.functions"></a><h2>Functions</h2>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="functions_return">
+<col class="functions_name">
+</colgroup>
+<tbody>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-MIN-MEMBER-SIZE:CAPS" title="BD_BTRFS_MIN_MEMBER_SIZE">BD_BTRFS_MIN_MEMBER_SIZE</a></td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-error-quark" title="bd_btrfs_error_quark ()">bd_btrfs_error_quark</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-device-info-free" title="bd_btrfs_device_info_free ()">bd_btrfs_device_info_free</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-BTRFS.html#BDBtrfsDeviceInfo" title="BDBtrfsDeviceInfo"><span class="returnvalue">BDBtrfsDeviceInfo</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-device-info-copy" title="bd_btrfs_device_info_copy ()">bd_btrfs_device_info_copy</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-subvolume-info-free" title="bd_btrfs_subvolume_info_free ()">bd_btrfs_subvolume_info_free</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-BTRFS.html#BDBtrfsSubvolumeInfo" title="BDBtrfsSubvolumeInfo"><span class="returnvalue">BDBtrfsSubvolumeInfo</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-subvolume-info-copy" title="bd_btrfs_subvolume_info_copy ()">bd_btrfs_subvolume_info_copy</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-filesystem-info-free" title="bd_btrfs_filesystem_info_free ()">bd_btrfs_filesystem_info_free</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-BTRFS.html#BDBtrfsFilesystemInfo" title="BDBtrfsFilesystemInfo"><span class="returnvalue">BDBtrfsFilesystemInfo</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-filesystem-info-copy" title="bd_btrfs_filesystem_info_copy ()">bd_btrfs_filesystem_info_copy</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-create-volume" title="bd_btrfs_create_volume ()">bd_btrfs_create_volume</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-add-device" title="bd_btrfs_add_device ()">bd_btrfs_add_device</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-remove-device" title="bd_btrfs_remove_device ()">bd_btrfs_remove_device</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-create-subvolume" title="bd_btrfs_create_subvolume ()">bd_btrfs_create_subvolume</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-delete-subvolume" title="bd_btrfs_delete_subvolume ()">bd_btrfs_delete_subvolume</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-get-default-subvolume-id" title="bd_btrfs_get_default_subvolume_id ()">bd_btrfs_get_default_subvolume_id</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-set-default-subvolume" title="bd_btrfs_set_default_subvolume ()">bd_btrfs_set_default_subvolume</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-create-snapshot" title="bd_btrfs_create_snapshot ()">bd_btrfs_create_snapshot</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-BTRFS.html#BDBtrfsDeviceInfo" title="BDBtrfsDeviceInfo"><span class="returnvalue">BDBtrfsDeviceInfo</span></a> **
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-list-devices" title="bd_btrfs_list_devices ()">bd_btrfs_list_devices</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-BTRFS.html#BDBtrfsSubvolumeInfo" title="BDBtrfsSubvolumeInfo"><span class="returnvalue">BDBtrfsSubvolumeInfo</span></a> **
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-list-subvolumes" title="bd_btrfs_list_subvolumes ()">bd_btrfs_list_subvolumes</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-BTRFS.html#BDBtrfsFilesystemInfo" title="BDBtrfsFilesystemInfo"><span class="returnvalue">BDBtrfsFilesystemInfo</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-filesystem-info" title="bd_btrfs_filesystem_info ()">bd_btrfs_filesystem_info</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-mkfs" title="bd_btrfs_mkfs ()">bd_btrfs_mkfs</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-resize" title="bd_btrfs_resize ()">bd_btrfs_resize</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-check" title="bd_btrfs_check ()">bd_btrfs_check</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-repair" title="bd_btrfs_repair ()">bd_btrfs_repair</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-change-label" title="bd_btrfs_change_label ()">bd_btrfs_change_label</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="libblockdev-BTRFS.other"></a><h2>Types and Values</h2>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="name">
+<col class="description">
+</colgroup>
+<tbody>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-MAIN-VOLUME-ID:CAPS" title="BD_BTRFS_MAIN_VOLUME_ID">BD_BTRFS_MAIN_VOLUME_ID</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-ERROR:CAPS" title="BD_BTRFS_ERROR">BD_BTRFS_ERROR</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-BTRFS.html#BDBtrfsError" title="enum BDBtrfsError">BDBtrfsError</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword"> </td>
+<td class="function_name"><a class="link" href="libblockdev-BTRFS.html#BDBtrfsDeviceInfo" title="BDBtrfsDeviceInfo">BDBtrfsDeviceInfo</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword"> </td>
+<td class="function_name"><a class="link" href="libblockdev-BTRFS.html#BDBtrfsSubvolumeInfo" title="BDBtrfsSubvolumeInfo">BDBtrfsSubvolumeInfo</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword"> </td>
+<td class="function_name"><a class="link" href="libblockdev-BTRFS.html#BDBtrfsFilesystemInfo" title="BDBtrfsFilesystemInfo">BDBtrfsFilesystemInfo</a></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="libblockdev-BTRFS.includes"></a><h2>Includes</h2>
+<pre class="synopsis">#include &lt;btrfs.h&gt;
+</pre>
+</div>
+<div class="refsect1">
+<a name="libblockdev-BTRFS.description"></a><h2>Description</h2>
+<p>A plugin for operations with btrfs devices.</p>
+</div>
+<div class="refsect1">
+<a name="libblockdev-BTRFS.functions_details"></a><h2>Functions</h2>
+<div class="refsect2">
+<a name="BD-BTRFS-MIN-MEMBER-SIZE:CAPS"></a><h3>BD_BTRFS_MIN_MEMBER_SIZE</h3>
+<pre class="programlisting">#define             BD_BTRFS_MIN_MEMBER_SIZE</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-error-quark"></a><h3>bd_btrfs_error_quark ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
+bd_btrfs_error_quark (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-device-info-free"></a><h3>bd_btrfs_device_info_free ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_btrfs_device_info_free (<em class="parameter"><code><a class="link" href="libblockdev-BTRFS.html#BDBtrfsDeviceInfo" title="BDBtrfsDeviceInfo"><span class="type">BDBtrfsDeviceInfo</span></a> *info</code></em>);</pre>
+<p>Frees <em class="parameter"><code>info</code></em>
+.</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-device-info-copy"></a><h3>bd_btrfs_device_info_copy ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-BTRFS.html#BDBtrfsDeviceInfo" title="BDBtrfsDeviceInfo"><span class="returnvalue">BDBtrfsDeviceInfo</span></a> *
+bd_btrfs_device_info_copy (<em class="parameter"><code><a class="link" href="libblockdev-BTRFS.html#BDBtrfsDeviceInfo" title="BDBtrfsDeviceInfo"><span class="type">BDBtrfsDeviceInfo</span></a> *info</code></em>);</pre>
+<p>Creates a new copy of <em class="parameter"><code>info</code></em>
+.</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-subvolume-info-free"></a><h3>bd_btrfs_subvolume_info_free ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_btrfs_subvolume_info_free (<em class="parameter"><code><a class="link" href="libblockdev-BTRFS.html#BDBtrfsSubvolumeInfo" title="BDBtrfsSubvolumeInfo"><span class="type">BDBtrfsSubvolumeInfo</span></a> *info</code></em>);</pre>
+<p>Frees <em class="parameter"><code>info</code></em>
+.</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-subvolume-info-copy"></a><h3>bd_btrfs_subvolume_info_copy ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-BTRFS.html#BDBtrfsSubvolumeInfo" title="BDBtrfsSubvolumeInfo"><span class="returnvalue">BDBtrfsSubvolumeInfo</span></a> *
+bd_btrfs_subvolume_info_copy (<em class="parameter"><code><a class="link" href="libblockdev-BTRFS.html#BDBtrfsSubvolumeInfo" title="BDBtrfsSubvolumeInfo"><span class="type">BDBtrfsSubvolumeInfo</span></a> *info</code></em>);</pre>
+<p>Creates a new copy of <em class="parameter"><code>info</code></em>
+.</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-filesystem-info-free"></a><h3>bd_btrfs_filesystem_info_free ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_btrfs_filesystem_info_free (<em class="parameter"><code><a class="link" href="libblockdev-BTRFS.html#BDBtrfsFilesystemInfo" title="BDBtrfsFilesystemInfo"><span class="type">BDBtrfsFilesystemInfo</span></a> *info</code></em>);</pre>
+<p>Frees <em class="parameter"><code>info</code></em>
+.</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-filesystem-info-copy"></a><h3>bd_btrfs_filesystem_info_copy ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-BTRFS.html#BDBtrfsFilesystemInfo" title="BDBtrfsFilesystemInfo"><span class="returnvalue">BDBtrfsFilesystemInfo</span></a> *
+bd_btrfs_filesystem_info_copy (<em class="parameter"><code><a class="link" href="libblockdev-BTRFS.html#BDBtrfsFilesystemInfo" title="BDBtrfsFilesystemInfo"><span class="type">BDBtrfsFilesystemInfo</span></a> *info</code></em>);</pre>
+<p>Creates a new copy of <em class="parameter"><code>info</code></em>
+.</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-create-volume"></a><h3>bd_btrfs_create_volume ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_btrfs_create_volume (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **devices</code></em>,
+                        <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *label</code></em>,
+                        <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *data_level</code></em>,
+                        <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *md_level</code></em>,
+                        <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="id-1.2.3.7.10.4"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>devices</p></td>
+<td class="parameter_description"><p> list of devices to create btrfs volume from. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>label</p></td>
+<td class="parameter_description"><p> label for the volume. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>data_level</p></td>
+<td class="parameter_description"><p> RAID level for the data or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use the default. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>md_level</p></td>
+<td class="parameter_description"><p> RAID level for the metadata or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use the default. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.3.7.10.5"></a><h4>Returns</h4>
+<p> whether the new btrfs volume was created from <em class="parameter"><code>devices</code></em>
+or not</p>
+<p>See mkfs.btrfs(8) for details about <em class="parameter"><code>data_level</code></em>
+, <em class="parameter"><code>md_level</code></em>
+and btrfs in general.</p>
+<p></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-add-device"></a><h3>bd_btrfs_add_device ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_btrfs_add_device (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *mountpoint</code></em>,
+                     <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                     <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="id-1.2.3.7.11.4"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>mountpoint</p></td>
+<td class="parameter_description"><p>mountpoint of the btrfs volume to add new device to</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a device to add to the btrfs volume</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.3.7.11.5"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>device</code></em>
+was successfully added to the <em class="parameter"><code>mountpoint</code></em>
+btrfs volume or not</p>
+<p></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-remove-device"></a><h3>bd_btrfs_remove_device ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_btrfs_remove_device (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *mountpoint</code></em>,
+                        <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                        <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="id-1.2.3.7.12.4"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>mountpoint</p></td>
+<td class="parameter_description"><p>mountpoint of the btrfs volume to remove device from</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a device to remove from the btrfs volume</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.3.7.12.5"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>device</code></em>
+was successfully removed from the <em class="parameter"><code>mountpoint</code></em>
+btrfs volume or not</p>
+<p></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-create-subvolume"></a><h3>bd_btrfs_create_subvolume ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_btrfs_create_subvolume (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *mountpoint</code></em>,
+                           <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
+                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="id-1.2.3.7.13.4"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>mountpoint</p></td>
+<td class="parameter_description"><p>mountpoint of the btrfs volume to create subvolume under</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>name</p></td>
+<td class="parameter_description"><p>name of the subvolume</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.3.7.13.5"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>mountpoint</code></em>
+/<em class="parameter"><code>name</code></em>
+subvolume was successfully created or not</p>
+<p></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-delete-subvolume"></a><h3>bd_btrfs_delete_subvolume ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_btrfs_delete_subvolume (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *mountpoint</code></em>,
+                           <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
+                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="id-1.2.3.7.14.4"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>mountpoint</p></td>
+<td class="parameter_description"><p>mountpoint of the btrfs volume to delete subvolume from</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>name</p></td>
+<td class="parameter_description"><p>name of the subvolume</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.3.7.14.5"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>mountpoint</code></em>
+/<em class="parameter"><code>name</code></em>
+subvolume was successfully deleted or not</p>
+<p></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-get-default-subvolume-id"></a><h3>bd_btrfs_get_default_subvolume_id ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
+bd_btrfs_get_default_subvolume_id (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *mountpoint</code></em>,
+                                   <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="id-1.2.3.7.15.4"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>mountpoint</p></td>
+<td class="parameter_description"><p>mountpoint of the volume to get the default subvolume ID of</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.3.7.15.5"></a><h4>Returns</h4>
+<p> ID of the <em class="parameter"><code>mountpoint</code></em>
+volume's default subvolume. If 0,
+<em class="parameter"><code>error</code></em>
+) may be set to indicate error</p>
+<p></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-set-default-subvolume"></a><h3>bd_btrfs_set_default_subvolume ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_btrfs_set_default_subvolume (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *mountpoint</code></em>,
+                                <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> subvol_id</code></em>,
+                                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="id-1.2.3.7.16.4"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>mountpoint</p></td>
+<td class="parameter_description"><p>mountpoint of the volume to set the default subvolume ID of</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>subvol_id</p></td>
+<td class="parameter_description"><p>ID of the subvolume to be set as the default subvolume</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.3.7.16.5"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>mountpoint</code></em>
+volume's default subvolume was correctly set
+to <em class="parameter"><code>subvol_id</code></em>
+or not</p>
+<p></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-create-snapshot"></a><h3>bd_btrfs_create_snapshot ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_btrfs_create_snapshot (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *source</code></em>,
+                          <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *dest</code></em>,
+                          <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> ro</code></em>,
+                          <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="id-1.2.3.7.17.4"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>source</p></td>
+<td class="parameter_description"><p>path to source subvolume</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>dest</p></td>
+<td class="parameter_description"><p>path to new snapshot volume</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>ro</p></td>
+<td class="parameter_description"><p>whether the snapshot should be read-only</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.3.7.17.5"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>dest</code></em>
+snapshot of <em class="parameter"><code>source</code></em>
+was successfully created or not</p>
+<p></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-list-devices"></a><h3>bd_btrfs_list_devices ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-BTRFS.html#BDBtrfsDeviceInfo" title="BDBtrfsDeviceInfo"><span class="returnvalue">BDBtrfsDeviceInfo</span></a> **
+bd_btrfs_list_devices (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="id-1.2.3.7.18.4"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a device that is part of the queried btrfs volume</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.3.7.18.5"></a><h4>Returns</h4>
+<p> information about the devices that are part of the btrfs volume
+containing <em class="parameter"><code>device</code></em>
+or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error. </p>
+<p><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-list-subvolumes"></a><h3>bd_btrfs_list_subvolumes ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-BTRFS.html#BDBtrfsSubvolumeInfo" title="BDBtrfsSubvolumeInfo"><span class="returnvalue">BDBtrfsSubvolumeInfo</span></a> **
+bd_btrfs_list_subvolumes (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *mountpoint</code></em>,
+                          <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> snapshots_only</code></em>,
+                          <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="id-1.2.3.7.19.4"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>mountpoint</p></td>
+<td class="parameter_description"><p>a mountpoint of the queried btrfs volume</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>snapshots_only</p></td>
+<td class="parameter_description"><p>whether to list only snapshot subvolumes or not</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.3.7.19.5"></a><h4>Returns</h4>
+<p> information about the subvolumes that are part of the btrfs volume
+mounted at <em class="parameter"><code>mountpoint</code></em>
+or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
+<p>The subvolumes are sorted in a way that no child subvolume appears in the
+list before its parent (sub)volume. </p>
+<p><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-filesystem-info"></a><h3>bd_btrfs_filesystem_info ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-BTRFS.html#BDBtrfsFilesystemInfo" title="BDBtrfsFilesystemInfo"><span class="returnvalue">BDBtrfsFilesystemInfo</span></a> *
+bd_btrfs_filesystem_info (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                          <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="id-1.2.3.7.20.4"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a device that is part of the queried btrfs volume</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.3.7.20.5"></a><h4>Returns</h4>
+<p> information about the <em class="parameter"><code>device</code></em>
+'s volume's filesystem or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
+<p></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-mkfs"></a><h3>bd_btrfs_mkfs ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_btrfs_mkfs (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **devices</code></em>,
+               <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *label</code></em>,
+               <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *data_level</code></em>,
+               <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *md_level</code></em>,
+               <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="id-1.2.3.7.21.4"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>devices</p></td>
+<td class="parameter_description"><p> list of devices to create btrfs volume from. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>label</p></td>
+<td class="parameter_description"><p> label for the volume. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>data_level</p></td>
+<td class="parameter_description"><p> RAID level for the data or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use the default. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>md_level</p></td>
+<td class="parameter_description"><p> RAID level for the metadata or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use the default. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.3.7.21.5"></a><h4>Returns</h4>
+<p> whether the new btrfs volume was created from <em class="parameter"><code>devices</code></em>
+or not</p>
+<p>See mkfs.btrfs(8) for details about <em class="parameter"><code>data_level</code></em>
+, <em class="parameter"><code>md_level</code></em>
+and btrfs in general.</p>
+<p></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-resize"></a><h3>bd_btrfs_resize ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_btrfs_resize (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *mountpoint</code></em>,
+                 <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> size</code></em>,
+                 <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="id-1.2.3.7.22.4"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>mountpoint</p></td>
+<td class="parameter_description"><p>a mountpoint of the to be resized btrfs filesystem</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>size</p></td>
+<td class="parameter_description"><p>requested new size</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.3.7.22.5"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>mountpoint</code></em>
+filesystem was successfully resized to <em class="parameter"><code>size</code></em>
+or not</p>
+<p></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-check"></a><h3>bd_btrfs_check ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_btrfs_check (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="id-1.2.3.7.23.4"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a device that is part of the checked btrfs volume</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.3.7.23.5"></a><h4>Returns</h4>
+<p> whether the filesystem was successfully checked or not</p>
+<p></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-repair"></a><h3>bd_btrfs_repair ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_btrfs_repair (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                 <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="id-1.2.3.7.24.4"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a device that is part of the to be repaired btrfs volume</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.3.7.24.5"></a><h4>Returns</h4>
+<p> whether the filesystem was successfully checked and repaired or not</p>
+<p></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-change-label"></a><h3>bd_btrfs_change_label ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_btrfs_change_label (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *mountpoint</code></em>,
+                       <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *label</code></em>,
+                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="id-1.2.3.7.25.4"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>mountpoint</p></td>
+<td class="parameter_description"><p>a mountpoint of the btrfs filesystem to change label of</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>label</p></td>
+<td class="parameter_description"><p>new label for the filesystem</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.3.7.25.5"></a><h4>Returns</h4>
+<p> whether the label of the <em class="parameter"><code>mountpoint</code></em>
+filesystem was successfully set
+to <em class="parameter"><code>label</code></em>
+or not</p>
+<p></p>
+</div>
+</div>
+</div>
+<div class="refsect1">
+<a name="libblockdev-BTRFS.other_details"></a><h2>Types and Values</h2>
+<div class="refsect2">
+<a name="BD-BTRFS-MAIN-VOLUME-ID:CAPS"></a><h3>BD_BTRFS_MAIN_VOLUME_ID</h3>
+<pre class="programlisting">#define             BD_BTRFS_MAIN_VOLUME_ID</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-BTRFS-ERROR:CAPS"></a><h3>BD_BTRFS_ERROR</h3>
+<pre class="programlisting">#define             BD_BTRFS_ERROR</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDBtrfsError"></a><h3>enum BDBtrfsError</h3>
+<div class="refsect3">
+<a name="id-1.2.3.8.4.3"></a><h4>Members</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-BTRFS-ERROR-DEVICE:CAPS"></a>BD_BTRFS_ERROR_DEVICE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-BTRFS-ERROR-PARSE:CAPS"></a>BD_BTRFS_ERROR_PARSE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDBtrfsDeviceInfo"></a><h3>BDBtrfsDeviceInfo</h3>
+<pre class="programlisting">typedef struct {
+    guint64 id;
+    gchar *path;
+    guint64 size;
+    guint64 used;
+} BDBtrfsDeviceInfo;
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDBtrfsSubvolumeInfo"></a><h3>BDBtrfsSubvolumeInfo</h3>
+<pre class="programlisting">typedef struct {
+    guint64 id;
+    guint64 parent_id;
+    gchar *path;
+} BDBtrfsSubvolumeInfo;
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDBtrfsFilesystemInfo"></a><h3>BDBtrfsFilesystemInfo</h3>
+<pre class="programlisting">typedef struct {
+    gchar *label;
+    gchar *uuid;
+    guint64 num_devices;
+    guint64 used;
+} BDBtrfsFilesystemInfo;
+</pre>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.21.1</div>
+</body>
+</html>

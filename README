@@ -1,0 +1,4 @@
+A library for manipulating block devices. For more information about the
+library's architecture see the specs.rst file. For more infomation about the
+expected functionality and features see the features.rst file. For more
+information about the schedule see the roadmap.rst file.

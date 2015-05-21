@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cat <<EOF
+swapoff from util-linux 2.25.2
+EOF

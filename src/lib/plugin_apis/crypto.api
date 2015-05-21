@@ -1,0 +1,171 @@
+#include <glib.h>
+#include <utils.h>
+
+#define BD_CRYPTO_LUKS_METADATA_SIZE (2 MiB)
+
+#define BD_CRYPTO_ERROR bd_crypto_error_quark ()
+typedef enum {
+    BD_CRYPTO_ERROR_DEVICE,
+    BD_CRYPTO_ERROR_STATE,
+    BD_CRYPTO_ERROR_INVALID_SPEC,
+    BD_CRYPTO_ERROR_FORMAT_FAILED,
+    BD_CRYPTO_ERROR_RESIZE_FAILED,
+    BD_CRYPTO_ERROR_ADD_KEY,
+    BD_CRYPTO_ERROR_REMOVE_KEY,
+    BD_CRYPTO_ERROR_NO_KEY,
+    BD_CRYPTO_ERROR_KEY_SLOT,
+    BD_CRYPTO_ERROR_NSS_INIT_FAILED,
+    BD_CRYPTO_ERROR_CERT_DECODE,
+    BD_CRYPTO_ERROR_ESCROW_FAILED,
+} BDCryptoError;
+
+/**
+ * bd_crypto_generate_backup_passphrase:
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: A newly generated %BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH-long passphrase.
+ *
+ * See %BD_CRYPTO_BACKUP_PASSPHRASE_CHARSET for the definition of the charset used for the passphrase.
+ */
+gchar* bd_crypto_generate_backup_passphrase(GError **error);
+
+/**
+ * bd_crypto_device_is_luks:
+ * @device: the queried device
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: %TRUE if the given @device is a LUKS device or %FALSE if not or
+ * failed to determine (the @error) is populated with the error in such
+ * cases)
+ */
+gboolean bd_crypto_device_is_luks (const gchar *device, GError **error);
+
+/**
+ * bd_crypto_luks_uuid:
+ * @device: the queried device
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: UUID of the @device or %NULL if failed to determine (@error)
+ * is populated with the error in such cases)
+ */
+gchar* bd_crypto_luks_uuid (const gchar *device, GError **error);
+
+/**
+ * bd_crypto_luks_status:
+ * @luks_device: the queried LUKS device
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer none): one of "invalid", "inactive", "active" or "busy" or
+ * %NULL if failed to determine (@error is populated with the error in
+ * such cases)
+ */
+gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error);
+
+/**
+ * bd_crypto_luks_format:
+ * @device: a device to format as LUKS
+ * @cipher: (allow-none): cipher specification (type-mode, e.g. "aes-xts-plain64") or %NULL to use the default
+ * @key_size: size of the volume key in bits or 0 to use the default
+ * @passphrase: (allow-none): a passphrase for the new LUKS device or %NULL if not requested
+ * @key_file: (allow-none): a key file for the new LUKS device or %NULL if not requested
+ * @min_entropy: minimum random data entropy (in bits) required to format @device as LUKS
+ * @error: (out): place to store error (if any)
+ *
+ * Formats the given @device as LUKS according to the other parameters given. If
+ * @min_entropy is specified (greater than 0), the function waits for enough
+ * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
+ * FOREVER).
+ *
+ * Returns: whether the given @device was successfully formatted as LUKS or not
+ * (the @error) contains the error in such cases)
+ */
+gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint64 key_size, const gchar *passphrase, const gchar *key_file, guint64 min_entropy, GError **error);
+
+/**
+ * bd_crypto_luks_open:
+ * @device: the device to open
+ * @name: name for the LUKS device
+ * @passphrase: (allow-none): passphrase to open the @device or %NULL
+ * @key_file: (allow-none): key file path to use for opening the @device or %NULL
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * One of @passphrase, @key_file has to be != %NULL.
+ */
+gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gchar *passphrase, const gchar *key_file, GError **error);
+
+/**
+ * bd_crypto_luks_close:
+ * @luks_device: LUKS device to close
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the given @luks_device was successfully closed or not
+ */
+gboolean bd_crypto_luks_close (const gchar *luks_device, GError **error);
+
+/**
+ * bd_crypto_luks_add_key:
+ * @device: device to add new key to
+ * @pass: (allow-none): passphrase for the @device or %NULL
+ * @key_file: (allow-none): key file for the @device or %NULL
+ * @npass: (allow-none): passphrase to add to @device or %NULL
+ * @nkey_file: (allow-none): key file to add to @device or %NULL
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @npass or @nkey_file was successfully added to @device
+ * or not
+ *
+ * One of @pass, @key_file has to be != %NULL and the same applies to @npass,
+ * @nkey_file.
+ */
+gboolean bd_crypto_luks_add_key (const gchar *device, const gchar *pass, const gchar *key_file, const gchar *npass, const gchar *nkey_file, GError **error);
+
+/**
+ * bd_crypto_luks_remove_key:
+ * @device: device to add new key to
+ * @pass: (allow-none): passphrase for the @device or %NULL
+ * @key_file: (allow-none): key file for the @device or %NULL
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the key was successfully removed or not
+ *
+ * Either @pass or @key_file has to be != %NULL.
+ */
+gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, const gchar *key_file, GError **error);
+
+/**
+ * bd_crypto_luks_change_key:
+ * @device: device to change key of
+ * @pass: old passphrase
+ * @npass: new passphrase
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the key was successfully changed or not
+ *
+ * No support for changing key files (yet).
+ */
+gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, const gchar *npass, GError **error);
+
+/**
+ * bd_crypto_luks_resize:
+ * @luks_device: opened LUKS device to resize
+ * @size: requested size in sectors or 0 to adapt to the backing device
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @luks_device was successfully resized or not
+ */
+gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError **error);
+
+/**
+ * bd_crypto_escrow_device:
+ * @device: path of the device to create escrow data for
+ * @passphrase: passphrase used for the device
+ * @cert_data: certificate data to use for escrow
+ * @directory: directory to put escrow data into
+ * @backup_passphrase: (allow-none): backup passphrase for the device or %NULL
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the ecrow data was successfully created for @device or not
+ */
+gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, const gchar *cert_data, const gchar *directory, const gchar *backup_passphrase, GError **error);

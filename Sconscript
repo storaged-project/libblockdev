@@ -1,0 +1,216 @@
+import os
+import glob
+import platform
+from build_functions import *
+
+MAIN_VERSION = "0.1.0"
+MAJOR_MINOR = MAIN_VERSION.rsplit(".", 1)[0]
+MAJOR_VERSION = MAIN_VERSION.split(".", 1)[0]
+LIB_FILES = ["src/lib/blockdev.c", "src/lib/blockdev.h", "src/lib/plugins.h"]
+PLUGIN_NAMES = ["crypto", "dm", "loop", "lvm", "mpath", "swap", "btrfs", "mdraid", "kbd", "s390"]
+PLUGIN_HEADER_FILES = ["build/plugin_apis/"+name+".h" for name in PLUGIN_NAMES]
+UTILS_FILES = ["src/utils/exec.c", "src/utils/sizes.c", "src/utils/exec.h", "src/utils/sizes.h"]
+
+glib_env = Environment(SHLIBVERSION=MAIN_VERSION)
+glib_env.Append(CC=os.environ.get('CC', ""))
+glib_env.Append(CFLAGS=Split(os.environ.get('CFLAGS', "")))
+glib_env.Append(CCFLAGS=('-DMAJOR_VER=\\"%s\\"' % MAJOR_VERSION))
+glib_env.ParseConfig("pkg-config --cflags --libs glib-2.0")
+
+glib_warnall_env = glib_env.Clone()
+glib_warnall_env.Append(CFLAGS=["-Wall", "-Wextra", "-Werror"])
+
+## the bd_utils library
+bd_utils_env = glib_warnall_env.Clone()
+bd_utils_env.Append(LIBS=["m"])
+utils_lib = bd_utils_env.SharedLibrary("bd_utils", ["src/utils/sizes.c", "src/utils/exec.c"])
+
+plugins = []
+
+## plugins
+btrfs_env = glib_warnall_env.Clone()
+btrfs_env.Append(CPPPATH="src/utils")
+btrfs_env.Append(LIBPATH=".")
+btrfs_env.Append(LIBS="bd_utils")
+plugins.append(btrfs_env.SharedLibrary("bd_btrfs", ["src/plugins/btrfs.c"]))
+
+crypto_env = glib_warnall_env.Clone()
+crypto_env.ParseConfig("pkg-config --cflags --libs libcryptsetup nss")
+crypto_env.Append(LIBS="libvolume_key")
+crypto_env.Append(CPPPATH="src/utils")
+crypto_env.Append(CPPPATH="/usr/include/volume_key")
+plugins.append(crypto_env.SharedLibrary("bd_crypto", ["src/plugins/crypto.c"]))
+
+dm_env = glib_warnall_env.Clone()
+dm_env.ParseConfig("pkg-config --cflags --libs devmapper libudev")
+dm_env.Append(CPPPATH="src/utils")
+dm_env.Append(LIBPATH=".")
+dm_env.Append(LIBS=["bd_utils", "dmraid"])
+plugins.append(dm_env.SharedLibrary("bd_dm", ["src/plugins/dm.c"]))
+
+loop_env = glib_warnall_env.Clone()
+loop_env.Append(CPPPATH="src/utils")
+loop_env.Append(LIBPATH=".")
+loop_env.Append(LIBS="bd_utils")
+plugins.append(loop_env.SharedLibrary("bd_loop", ["src/plugins/loop.c"]))
+
+lvm_env = glib_warnall_env.Clone()
+lvm_env.ParseConfig("pkg-config --cflags --libs devmapper")
+lvm_env.Append(CPPPATH="src/utils")
+lvm_env.Append(LIBPATH=".")
+lvm_env.Append(LIBS="bd_utils")
+plugins.append(lvm_env.SharedLibrary("bd_lvm", ["src/plugins/lvm.c"]))
+
+mdraid_env = glib_warnall_env.Clone()
+mdraid_env.Append(CPPPATH="src/utils")
+mdraid_env.Append(LIBPATH=".")
+mdraid_env.Append(LIBS="bd_utils")
+plugins.append(mdraid_env.SharedLibrary("bd_mdraid", ["src/plugins/mdraid.c"]))
+
+mpath_env = glib_warnall_env.Clone()
+mpath_env.ParseConfig("pkg-config --cflags --libs devmapper")
+mpath_env.Append(CPPPATH="src/utils")
+mpath_env.Append(LIBPATH=".")
+mpath_env.Append(LIBS="bd_utils")
+plugins.append(mpath_env.SharedLibrary("bd_mpath", ["src/plugins/mpath.c"]))
+
+swap_env = glib_warnall_env.Clone()
+swap_env.Append(CPPPATH="src/utils")
+swap_env.Append(LIBPATH=".")
+swap_env.Append(LIBS="bd_utils")
+plugins.append(swap_env.SharedLibrary("bd_swap", ["src/plugins/swap.c"]))
+
+kbd_env = glib_warnall_env.Clone()
+kbd_env.ParseConfig("pkg-config --cflags --libs libkmod")
+kbd_env.Append(CPPPATH="src/utils")
+kbd_env.Append(LIBPATH=".")
+kbd_env.Append(LIBS="bd_utils")
+plugins.append(kbd_env.SharedLibrary("bd_kbd", ["src/plugins/kbd.c"]))
+
+s390_env = glib_warnall_env.Clone()
+s390_env.Append(CPPPATH="src/utils")
+s390_env.Append(LIBPATH=".")
+s390_env.Append(LIBS="bd_utils")
+plugins.append(s390_env.SharedLibrary("bd_s390", ["src/plugins/s390.c"]))
+
+
+## boilerplate code generation
+bpg_builder = Builder(action=generate_boilerplate_files)
+
+boiler_code = []
+bpg_env = Environment()
+bpg_env.Append(BUILDERS={"BpG": bpg_builder})
+boiler_code.append(bpg_env.BpG(["plugin_apis/btrfs.h", "plugin_apis/btrfs.c"], "src/lib/plugin_apis/btrfs.api"))
+boiler_code.append(bpg_env.BpG(["plugin_apis/crypto.h", "plugin_apis/crypto.c"], "src/lib/plugin_apis/crypto.api"))
+boiler_code.append(bpg_env.BpG(["plugin_apis/dm.h", "plugin_apis/dm.c"], "src/lib/plugin_apis/dm.api"))
+boiler_code.append(bpg_env.BpG(["plugin_apis/lvm.h", "plugin_apis/lvm.c"], "src/lib/plugin_apis/lvm.api"))
+boiler_code.append(bpg_env.BpG(["plugin_apis/loop.h", "plugin_apis/loop.c"], "src/lib/plugin_apis/loop.api"))
+boiler_code.append(bpg_env.BpG(["plugin_apis/mdraid.h", "plugin_apis/mdraid.c"], "src/lib/plugin_apis/mdraid.api"))
+boiler_code.append(bpg_env.BpG(["plugin_apis/mpath.h", "plugin_apis/mpath.c"], "src/lib/plugin_apis/mpath.api"))
+boiler_code.append(bpg_env.BpG(["plugin_apis/swap.h", "plugin_apis/swap.c"], "src/lib/plugin_apis/swap.api"))
+boiler_code.append(bpg_env.BpG(["plugin_apis/kbd.h", "plugin_apis/kbd.c"], "src/lib/plugin_apis/kbd.api"))
+boiler_code.append(bpg_env.BpG(["plugin_apis/s390.h", "plugin_apis/s390.c"], "src/lib/plugin_apis/s390.api"))
+
+
+## the library itself
+pc_builder = Builder(action=generate_pc_file)
+
+lib_env = glib_env.Clone()
+lib_env.ParseConfig("pkg-config --cflags --libs gobject-2.0")
+lib_env.Append(BUILDERS={"PkgConfig": pc_builder})
+lib_env.Append(CPPPATH="src/utils")
+lib_env.Append(LIBPATH=".")
+lib_env.Append(LIBS=["bd_utils", "dl"])
+lib_env.Append(CPPPATH=".")
+lib_env.Append(NAME="BlockDev")
+lib_env.Append(DESCRIPTION="Library for doing low-level operations with block devices")
+lib_env.Append(URL="https://github.com/vpodzime/libblockdev")
+lib_env.Append(PC_CPPPATH=["-I${includedir}/blockdev"])
+lib_env.Append(PC_REQUIRES=["glib-2.0"])
+lib_env.Append(LIB_NAME="blockdev")
+main_lib = lib_env.SharedLibrary("blockdev", ["src/lib/blockdev.c", "src/lib/plugins.c"])
+for build in boiler_code:
+    Depends(main_lib, boiler_code)
+pc_file = lib_env.PkgConfig("blockdev.pc", [])
+
+
+## GObject introspection data
+gir_file_builder = Builder(action=generate_gir_file)
+
+gi_env = glib_env.Clone()
+gi_env.ParseConfig("pkg-config --cflags --libs devmapper libudev libcryptsetup gobject-2.0")
+gi_env.Append(CPPPATH="src/utils")
+gi_env.Append(LIBPATH=["build"])
+gi_env.Append(LIBS=["bd_utils", "dmraid", "m"])
+gi_env["LIB_NAME"] = "blockdev"
+gi_env["IDENTIFIER_PREFIX"] = "BD"
+gi_env["SYMBOL_PREFIX"] = "bd"
+gi_env["NAMESPACE"] = "BlockDev"
+gi_env["NS_VERSION"] = MAJOR_MINOR
+gi_env.Append(BUILDERS={"Gir": gir_file_builder})
+boiler_headers = [result[0] for result in boiler_code]
+gir_file = gi_env.Gir(["BlockDev-%s.gir" % MAJOR_MINOR], LIB_FILES + UTILS_FILES + boiler_headers)
+Depends(gir_file, main_lib)
+
+typelib_env = Environment()
+typelib = typelib_env.Command("BlockDev-%s.typelib" % MAJOR_MINOR, "BlockDev-%s.gir" % MAJOR_MINOR, "g-ir-compiler -o $TARGET $SOURCE")
+
+
+## compiled tests
+tests_env = glib_env.Clone()
+tests_env.ParseConfig("pkg-config --cflags --libs devmapper")
+tests_env.Append(CPPPATH=["src/utils", "build/plugin_apis"])
+tests_env.Append(LIBS=["m"])
+for pname in ("swap", "lvm", "loop"):
+    tests_env.Program("test_%s" % pname, ["src/utils/exec.c", "src/utils/sizes.c", "src/plugins/test_%s.c" % pname])
+tests_env.Program("test_sizes", ["src/utils/test_sizes.c"])
+
+lib_test_env = glib_env.Clone()
+lib_test_env.ParseConfig("pkg-config --cflags --libs gobject-2.0")
+lib_test_env.Append(CPPPATH=["src/utils", "build"])
+lib_test_env.Append(LIBPATH=["build"])
+lib_test_env.Append(LIBS=["bd_utils", "dl"])
+lib_test = lib_test_env.Program("test_library", ["src/lib/test_blockdev.c"])
+Depends(lib_test, utils_lib)
+for plugin in plugins:
+    Depends(lib_test, plugin)
+
+
+## installation
+AddOption('--prefix',
+          dest='prefix',
+          type='string',
+          nargs=1,
+          action='store',
+          metavar='DIR',
+          help='installation prefix')
+AddOption('--sitedirs',
+          dest='sitedirs',
+          type='string',
+          nargs=1,
+          action='store',
+          metavar='DIR',
+          help='python2,python3 site directories')
+
+import installer
+
+inst_env = Environment(SHLIBVERSION=MAIN_VERSION)
+prefix = os.path.join(GetOption('prefix'), "usr") if GetOption('prefix') else "/usr"
+inst_env['PREFIX'] = prefix
+sitedirs = GetOption('sitedirs')
+if sitedirs:
+    inst_env['SITEDIRS'] = sitedirs
+
+# create the installer
+install = installer.Installer(inst_env)
+install.AddLibrary(main_lib)
+install.AddLibrary(utils_lib)
+for plugin in plugins:
+    install.AddLibrary(plugin)
+for header in ["src/utils/utils.h", "src/utils/exec.h", "src/utils/sizes.h",
+               "src/lib/blockdev.h", "src/lib/plugins.h"] + glob.glob("plugin_apis/*.h"):
+    install.AddHeader(header, basedir="blockdev")
+install.AddGirFile(gir_file)
+install.AddTypelib(typelib)
+install.AddPkgConfig(pc_file)
+install.AddGIOverrides("src/python/gi/overrides/BlockDev.py")

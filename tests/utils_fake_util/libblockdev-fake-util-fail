@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo "Version: 1.1"
+exit 1

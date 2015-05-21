@@ -1,0 +1,51 @@
+#!/bin/bash
+
+cat <<EOF
+Unknown switch: (null)
+multipath-tools v0.4.9 (05/33, 2016)
+Usage:
+  multipath [-a|-A|-c|-w|-W] [-d] [-T tm:val] [-r] [-v lvl] [-p pol] [-b fil] [-q] [dev]
+  multipath -l|-ll|-f [-v lvl] [-b fil] [dev]
+  multipath -F [-v lvl]
+  multipath -t
+  multipath -h
+
+Where:
+  -h      print this usage text
+  -l      show multipath topology (sysfs and DM info)
+  -ll     show multipath topology (maximum info)
+  -f      flush a multipath device map
+  -F      flush all multipath device maps
+  -a      add a device wwid to the wwids file
+  -A      add devices from kernel command line mpath.wwids
+          parameters to wwids file
+  -c      check if a device should be a path in a multipath device
+  -T tm:val
+          check if tm matches the multipathd timestamp. If so val is
+          whether or not the device is a path in a multipath device
+  -q      allow queue_if_no_path when multipathd is not running
+  -d      dry run, do not create or update devmaps
+  -t      dump internal hardware table
+  -r      force devmap reload
+  -B      treat the bindings file as read only
+  -p      policy failover|multibus|group_by_serial|group_by_prio
+  -b fil  bindings file location
+  -w      remove a device from the wwids file
+  -W      reset the wwids file include only the current devices
+  -p pol  force all maps to specified path grouping policy :
+          . failover            one path per priority group
+          . multibus            all paths in one priority group
+          . group_by_serial     one priority group per serial
+          . group_by_prio       one priority group per priority lvl
+          . group_by_node_name  one priority group per target node
+  -v lvl  verbosity level
+          . 0 no output
+          . 1 print created devmap names only
+          . 2 default verbosity
+          . 3 print debug information
+  dev     action limited to:
+          . multipath named 'dev' (ex: mpath0) or
+          . multipath whose wwid is 'dev' (ex: 60051..)
+          . multipath including the path named 'dev' (ex: /dev/sda)
+          . multipath including the path with maj:min 'dev' (ex: 8:0)
+EOF

@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+               "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"
+[
+  <!ENTITY % local.common.attrib "xmlns:xi  CDATA  #FIXED 'http://www.w3.org/2003/XInclude'">
+]>
+<book id="index">
+  <bookinfo>
+    <title>libblockdev Reference Manual</title>
+    <releaseinfo>
+      for libblockdev @VERSION@.
+      The latest version of this documentation can be found on-line at
+      <ulink role="online-location"
+             url="https://vpodzime.fedorapeople.org/libblockdev_doc/index.html">https://vpodzime.fedorapeople.org/libblockdev_doc/</ulink>.
+      The latest version of the code can be found at
+      <ulink role="online-location"
+             url="https://github.com/rhinstaller/libblockdev">https://github.com/rhinstaller/libblockdev</ulink>
+    </releaseinfo>
+  </bookinfo>
+
+  <chapter>
+    <title>libblockdev Reference Manual</title>
+    <xi:include href="xml/blockdev.xml"/>
+    <xi:include href="xml/btrfs.xml"/>
+    <xi:include href="xml/crypto.xml"/>
+    <xi:include href="xml/dm.xml"/>
+    <xi:include href="xml/loop.xml"/>
+    <xi:include href="xml/lvm.xml"/>
+    <xi:include href="xml/mdraid.xml"/>
+    <xi:include href="xml/mpath.xml"/>
+    <xi:include href="xml/plugins.xml"/>
+    <xi:include href="xml/swap.xml"/>
+    <xi:include href="xml/kbd.xml"/>
+    <xi:include href="xml/s390.xml"/>
+    <xi:include href="xml/utils.xml"/>
+  </chapter>
+
+  <chapter>
+    <title>GI Overrides</title>
+    <para>
+      The libblockdev library supports <emphasis>GObject introspection</emphasis> and thus
+      can be used from a variety of languages. To make such use even easier and to make
+      the code using libblockdev from different languages than C feel more natural the
+      library also provides so-called <emphasis>overrides</emphasis> &mdash; pieces of
+      code that usually wrap the original libblockdev functions with language-native
+      objects (usually functions) that provide language-specific features like default
+      values for parameters etc.
+    </para>
+    <para>
+      The overrides are not documented here (yet), but it should be easy to directly check
+      the sources for anybody who understands their language of choice. The overrides are
+      located in the <filename class="directory">src/LANG_NAME</filename> directory in the
+      source tree. The only language that libblockdev provides overrides for right now is
+      Python (under the <filename class="directory">src/python</filename> directory).
+    </para>
+  </chapter>
+  <index id="api-index-full">
+    <title>API Index</title>
+    <xi:include href="xml/api-index-full.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="deprecated-api-index" role="deprecated">
+    <title>Index of deprecated API</title>
+    <xi:include href="xml/api-index-deprecated.xml"><xi:fallback /></xi:include>
+  </index>
+
+  <xi:include href="xml/annotation-glossary.xml"><xi:fallback /></xi:include>
+</book>
