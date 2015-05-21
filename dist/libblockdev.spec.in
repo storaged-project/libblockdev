@@ -21,6 +21,10 @@ BuildRequires: gtk-doc
 BuildRequires: glib2-doc
 BuildRequires: kmod-devel
 
+%ifarch s390 s390x
+BuildRequires: s390utils-devel
+%endif
+
 
 %description
 The libblockdev is a C library with GObject introspection support that can be
