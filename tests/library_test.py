@@ -26,7 +26,7 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         # change the sources and recompile
         os.system("sed -ri 's?BD_LVM_MAX_LV_SIZE;?1024;//test-change?' src/plugins/lvm.c > /dev/null")
-        os.system("make libbd_lvm.so > /dev/null")
+        os.system("make &> /dev/null")
 
         # library should successfully reinitialize without reloading plugins
         self.assertTrue(BlockDev.reinit(None, False, None))
@@ -42,7 +42,7 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         # change the sources back and recompile
         os.system("sed -ri 's?1024;//test-change?BD_LVM_MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
-        os.system("make libbd_lvm.so > /dev/null")
+        os.system("make &> /dev/null")
 
         # library should successfully reinitialize reloading original plugins
         self.assertTrue(BlockDev.reinit(None, True, None))
@@ -64,14 +64,14 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         # change the sources and recompile
         os.system("sed -ri 's?BD_LVM_MAX_LV_SIZE;?1024;//test-change?' src/plugins/lvm.c > /dev/null")
-        os.system("make libbd_lvm.so > /dev/null")
+        os.system("make &>/dev/null")
 
         # proclaim the new build a different plugin
-        os.system("cp build/libbd_lvm.so build/libbd_lvm2.so")
+        os.system("cp src/plugins/.libs/libbd_lvm.so src/plugins/.libs/libbd_lvm2.so")
 
         # change the sources back and recompile
         os.system("sed -ri 's?1024;//test-change?BD_LVM_MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
-        os.system("make libbd_lvm.so > /dev/null")
+        os.system("make &>/dev/null")
 
         # force the new plugin to be used
         ps = BlockDev.PluginSpec()
@@ -83,7 +83,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), 1024)
 
         # clean after ourselves
-        os.system ("rm -f build/libbd_lvm2.so")
+        os.system ("rm -f src/plugins/.libs/libbd_lvm2.so")
 
         # force the old plugin to be used
         ps = BlockDev.PluginSpec()
