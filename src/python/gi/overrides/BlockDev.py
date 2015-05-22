@@ -226,6 +226,12 @@ def lvm_thsnapshotcreate(vg_name, origin_name, snapshot_name, pool_name=None):
     return _lvm_thsnapshotcreate(vg_name, origin_name, snapshot_name, pool_name)
 __all__.append("lvm_thsnapshotcreate")
 
+_lvm_is_valid_thpool_chunk_size = BlockDev.lvm_is_valid_thpool_chunk_size
+@override(BlockDev.lvm_is_valid_thpool_chunk_size)
+def lvm_is_valid_thpool_chunk_size(size, discard=False):
+    return _lvm_is_valid_thpool_chunk_size(size, discard)
+__all__.append("lvm_is_valid_thpool_chunk_size")
+
 _lvm_set_global_config = BlockDev.lvm_set_global_config
 @override(BlockDev.lvm_set_global_config)
 def lvm_set_global_config(new_config=None):
