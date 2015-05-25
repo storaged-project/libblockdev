@@ -61,6 +61,12 @@ def reinit(require_plugins=None, reload=False, log_func=None):
     return _reinit(require_plugins, reload, log_func)
 __all__.append("reinit")
 
+_ensure_init = BlockDev.ensure_init
+@override(BlockDev.ensure_init)
+def ensure_init(require_plugins=None, log_func=None):
+    return _ensure_init(require_plugins, log_func)
+__all__.append("ensure_init")
+
 _try_init = BlockDev.try_init
 @override(BlockDev.try_init)
 def try_init(require_plugins=None, log_func=None):
