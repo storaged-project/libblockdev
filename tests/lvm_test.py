@@ -731,6 +731,26 @@ class LvmPVVGthpoolTestCase(LvmPVVGTestCase):
 
         LvmPVVGTestCase.tearDown(self)
 
+class LvmTestLVsAll(LvmPVVGthpoolTestCase):
+    def test_lvs_all(self):
+        """Verify that info is gathered for all LVs"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_thpoolcreate("testVG", "testPool", 512 * 1024**2, 4 * 1024**2, 512 * 1024, "thin-performance")
+        self.assertTrue(succ)
+
+        # there should be at least 3 LVs -- testPool, [testPool_tdata], [testPool_tmeta] (plus probably some spare LVs)
+        lvs = BlockDev.lvm_lvs("testVG")
+        self.assertGreater(len(lvs), 3)
+
 class LvmTestThpoolCreate(LvmPVVGthpoolTestCase):
     def test_thpoolcreate(self):
         """Verify that it is possible to create a thin pool"""

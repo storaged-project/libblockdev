@@ -1263,8 +1263,8 @@ BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, GError **error) {
  * @vg_name VG or in system if @vg_name is %NULL
  */
 BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, GError **error) {
-    gchar *args[10] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
-                       "--unquoted", "--units=b",
+    gchar *args[11] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
+                       "--unquoted", "--units=b", "-a",
                        "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype",
                        NULL, NULL};
 
@@ -1280,7 +1280,7 @@ BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, GError **error) {
     guint64 i = 0;
 
     if (vg_name)
-        args[8] = vg_name;
+        args[9] = vg_name;
 
     success = call_lvm_and_capture_output (args, &output, error);
 
