@@ -1214,8 +1214,8 @@ gboolean bd_lvm_lvsnapshotmerge (gchar *vg_name, gchar *snapshot_name, GError **
  * of error (the @error) gets populated in those cases)
  */
 BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, GError **error) {
-    gchar *args[10] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
-                       "--unquoted", "--units=b",
+    gchar *args[11] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
+                       "--unquoted", "--units=b", "-a",
                        "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype",
                        NULL, NULL};
 
@@ -1226,10 +1226,10 @@ BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, GError **error) {
     gchar **lines_p = NULL;
     guint num_items;
 
-    args[8] = g_strdup_printf ("%s/%s", vg_name, lv_name);
+    args[9] = g_strdup_printf ("%s/%s", vg_name, lv_name);
 
     success = call_lvm_and_capture_output (args, &output, error);
-    g_free (args[8]);
+    g_free (args[9]);
 
     if (!success)
         /* the error is already populated from the call */
