@@ -1901,3 +1901,59 @@ BDLVMCacheStats* bd_lvm_cache_stats (gchar *vg_name, gchar *cached_lv, GError **
 
     return ret;
 }
+
+/**
+ * bd_lvm_data_lv_name:
+ * @vg_name: name of the VG containing the queried LV
+ * @lv_name: name of the queried LV
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): the name of the (internal) data LV of the
+ * @vg_name/@lv_name LV
+ */
+gchar* bd_lvm_data_lv_name (gchar *vg_name, gchar *lv_name, GError **error) {
+    gboolean success = FALSE;
+    gchar *output = NULL;
+    gchar *args[6] = {"lvs", "--noheadings", "-o", "data_lv", NULL, NULL};
+
+    args[4] = g_strdup_printf ("%s/%s", vg_name, lv_name);
+
+    success = call_lvm_and_capture_output (args, &output, error);
+    g_free (args[4]);
+
+    if (!success)
+        /* the error is already populated from the call */
+        return NULL;
+
+    /* replace the '[' and ']' (marking the LV as internal) with spaces and then
+       remove all the leading and trailing whitespace */
+    return g_strstrip (g_strdelimit (output, "[]", ' '));
+}
+
+/**
+ * bd_lvm_metadata_lv_name:
+ * @vg_name: name of the VG containing the queried LV
+ * @lv_name: name of the queried LV
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): the name of the (internal) metadata LV of the
+ * @vg_name/@lv_name LV
+ */
+gchar* bd_lvm_metadata_lv_name (gchar *vg_name, gchar *lv_name, GError **error) {
+    gboolean success = FALSE;
+    gchar *output = NULL;
+    gchar *args[6] = {"lvs", "--noheadings", "-o", "metadata_lv", NULL, NULL};
+
+    args[4] = g_strdup_printf ("%s/%s", vg_name, lv_name);
+
+    success = call_lvm_and_capture_output (args, &output, error);
+    g_free (args[4]);
+
+    if (!success)
+        /* the error is already populated from the call */
+        return NULL;
+
+    /* replace the '[' and ']' (marking the LV as internal) with spaces and then
+       remove all the leading and trailing whitespace */
+    return g_strstrip (g_strdelimit (output, "[]", ' '));
+}

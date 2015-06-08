@@ -770,6 +770,38 @@ class LvmTestThpoolCreate(LvmPVVGthpoolTestCase):
         info = BlockDev.lvm_lvinfo("testVG", "testPool")
         self.assertIn("t", info.attr)
 
+class LvmTestDataMetadataLV(LvmPVVGthpoolTestCase):
+    def test_data_metadata_lv_name(self):
+        """Verify that it is possible to get name of the data/metadata LV"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_thpoolcreate("testVG", "testPool", 512 * 1024**2, 4 * 1024**2, 512 * 1024, "thin-performance")
+        self.assertTrue(succ)
+
+        name = BlockDev.lvm_data_lv_name("testVG", "testPool")
+        self.assertTrue(name)
+        self.assertTrue(name.startswith("testPool"))
+        self.assertIn("_tdata", name)
+
+        info = BlockDev.lvm_lvinfo("testVG", name)
+        self.assertTrue(info.attr.startswith("T"))
+
+        name = BlockDev.lvm_metadata_lv_name("testVG", "testPool")
+        self.assertTrue(name)
+        self.assertTrue(name.startswith("testPool"))
+        self.assertIn("_tmeta", name)
+
+        info = BlockDev.lvm_lvinfo("testVG", name)
+        self.assertTrue(info.attr.startswith("e"))
+
 class LvmPVVGLVthLVTestCase(LvmPVVGthpoolTestCase):
     def tearDown(self):
         BlockDev.lvm_lvremove("testVG", "testThLV", True)

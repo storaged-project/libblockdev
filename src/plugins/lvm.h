@@ -176,4 +176,7 @@ gboolean bd_lvm_cache_create_cached_lv (gchar *vg_name, gchar *lv_name, guint64 
 gchar* bd_lvm_cache_pool_name (gchar *vg_name, gchar *cached_lv, GError **error);
 BDLVMCacheStats* bd_lvm_cache_stats (gchar *vg_name, gchar *cached_lv, GError **error);
 
+gchar* bd_lvm_data_lv_name (gchar *vg_name, gchar *lv_name, GError **error);
+gchar* bd_lvm_metadata_lv_name (gchar *vg_name, gchar *lv_name, GError **error);
+
 #endif /* BD_LVM */

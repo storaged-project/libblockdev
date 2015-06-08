@@ -821,5 +821,26 @@ gchar* bd_lvm_cache_pool_name (gchar *vg_name, gchar *cached_lv, GError **error)
  */
 BDLVMCacheStats* bd_lvm_cache_stats (gchar *vg_name, gchar *cached_lv, GError **error);
 
+/**
+ * bd_lvm_data_lv_name:
+ * @vg_name: name of the VG containing the queried LV
+ * @lv_name: name of the queried LV
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): the name of the (internal) data LV of the
+ * @vg_name/@lv_name LV
+ */
+gchar* bd_lvm_data_lv_name (gchar *vg_name, gchar *lv_name, GError **error);
+
+/**
+ * bd_lvm_metadata_lv_name:
+ * @vg_name: name of the VG containing the queried LV
+ * @lv_name: name of the queried LV
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): the name of the (internal) metadata LV of the
+ * @vg_name/@lv_name LV
+ */
+gchar* bd_lvm_metadata_lv_name (gchar *vg_name, gchar *lv_name, GError **error);
 
 #endif  /* BD_LVM_API */
