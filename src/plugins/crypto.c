@@ -290,6 +290,7 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
         }
     }
 
+    crypt_free (cd);
     return TRUE;
 }
 
@@ -342,6 +343,7 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gcha
         return FALSE;
     }
 
+    crypt_free (cd);
     return TRUE;
 }
 
