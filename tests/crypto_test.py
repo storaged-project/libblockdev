@@ -15,9 +15,10 @@ class CryptoTestGenerateBackupPassphrase(unittest.TestCase):
     def test_generate_backup_passhprase(self):
         """Verify that backup passphrase generation works as expected"""
 
-        exp = r"([0-9A-Za-z./]{5}-)*[0-9A-Za-z./]{0,4}"
-        bp = BlockDev.crypto_generate_backup_passphrase()
-        self.assertRegexpMatches(bp, exp)
+        exp = r"^([0-9A-Za-z./]{5}-){3}[0-9A-Za-z./]{5}$"
+        for _i in xrange(100):
+            bp = BlockDev.crypto_generate_backup_passphrase()
+            self.assertRegexpMatches(bp, exp)
 
 class CryptoTestCase(unittest.TestCase):
     def setUp(self):
