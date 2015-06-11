@@ -961,7 +961,7 @@ class LvmPVVGcachedLVTestCase(LvmPVVGLVTestCase):
                                                    [self.loop_dev], [self.loop_dev2])
         self.assertTrue(succ)
 
-class LvmPVVGcachedLVpoolTestCase(LvmPVVGcachedLVTestCase):
+class LvmPVVGcachedLVpoolTestCase(LvmPVVGLVTestCase):
     def test_cache_get_pool_name(self):
         """Verify that it is possible to get the name of the cache pool"""
 
@@ -985,7 +985,7 @@ class LvmPVVGcachedLVpoolTestCase(LvmPVVGcachedLVTestCase):
 
         self.assertEqual(BlockDev.lvm_cache_pool_name("testVG", "testLV"), "testCache")
 
-class LvmPVVGcachedLVstatsTestCase(LvmPVVGcachedLVTestCase):
+class LvmPVVGcachedLVstatsTestCase(LvmPVVGLVTestCase):
     def test_cache_get_stats(self):
         """Verify that it is possible to get stats for a cached LV"""
 
