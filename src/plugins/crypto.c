@@ -66,8 +66,8 @@ gchar* bd_crypto_generate_backup_passphrase(GError **error __attribute__((unused
     guint8 offset = 0;
     guint8 charset_length = strlen (BD_CRYPTO_BACKUP_PASSPHRASE_CHARSET);
 
-    /* passphrase with groups of 5 characters separated with dashes */
-    gchar *ret = g_new0 (gchar, BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH + (BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH / 5) - 1);
+    /* passphrase with groups of 5 characters separated with dashes, plus a null terminator */
+    gchar *ret = g_new0 (gchar, BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH + (BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH / 5));
 
     for (i=0; i < BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH; i++) {
         if (i > 0 && (i % 5 == 0)) {
@@ -290,6 +290,7 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
         }
     }
 
+    crypt_free (cd);
     return TRUE;
 }
 
@@ -342,6 +343,7 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gcha
         return FALSE;
     }
 
+    crypt_free (cd);
     return TRUE;
 }
 
@@ -606,8 +608,13 @@ static gchar *always_fail_cb (gpointer data __attribute__((unused)), const gchar
 
 static gchar *give_passphrase_cb (gpointer data, const gchar *prompt __attribute__((unused)), unsigned failed_attempts) {
     if (failed_attempts == 0)
-        return (gchar*) data;
+        /* Return a copy of the passphrase that will be freed by volume_key */
+        return g_strdup (data);
     return NULL;
+}
+
+static void free_passphrase_cb (gpointer data) {
+    g_free (data);
 }
 
 /**
@@ -723,16 +730,19 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
 
 
     ui = libvk_ui_new ();
-    passphrase_copy = g_strdup(passphrase);
     /* not supposed to be called -> always fail */
     libvk_ui_set_generic_cb (ui, always_fail_cb, NULL, NULL);
-    libvk_ui_set_passphrase_cb (ui, give_passphrase_cb, passphrase_copy, NULL);
+
+    /* Create a copy of the passphrase to be used by the passphrase callback.
+     * The passphrase will be freed by volume_key via the free callback.
+     */
+    passphrase_copy = g_strdup (passphrase);
+    libvk_ui_set_passphrase_cb (ui, give_passphrase_cb, passphrase_copy, free_passphrase_cb);
 
     if (libvk_volume_get_secret (volume, LIBVK_SECRET_DEFAULT, ui, error) != 0) {
         /* error is already populated */
         libvk_volume_free (volume);
         libvk_ui_free (ui);
-        g_free(passphrase_copy);
         return FALSE;
     }
 
@@ -743,7 +753,6 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
                      "Failed to decode the certificate data");
         libvk_volume_free (volume);
         libvk_ui_free (ui);
-        g_free(passphrase_copy);
         g_free(cert_data_copy);
         return FALSE;
     }
@@ -771,7 +780,6 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
         libvk_volume_free (volume);
         libvk_ui_free (ui);
         g_free (volume_ident);
-        g_free(passphrase_copy);
         g_free(cert_data_copy);
         return FALSE;
     }
@@ -783,7 +791,6 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
             libvk_volume_free (volume);
             libvk_ui_free (ui);
             g_free (volume_ident);
-            g_free(passphrase_copy);
             g_free(cert_data_copy);
             return FALSE;
         }
@@ -797,7 +804,6 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
     libvk_volume_free (volume);
     libvk_ui_free (ui);
     g_free (volume_ident);
-    g_free(passphrase_copy);
     g_free(cert_data_copy);
     return ret;
 }
