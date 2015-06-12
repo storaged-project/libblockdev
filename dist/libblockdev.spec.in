@@ -25,6 +25,13 @@ BuildRequires: kmod-devel
 BuildRequires: s390utils-devel
 %endif
 
+# Do not check the python directories for automatic Requires
+# The python gi.overrides files automatically add python(abi) entries to
+# the rpm Requires, but this is backwards. Anything using libblockdev from
+# python will require python, but libblockdev will work just fine without
+# python.
+%global __requires_exclude_from ^(%{python2_sitearch}|%{python3_sitearch})/gi/overrides/.*$
+
 
 %description
 The libblockdev is a C library with GObject introspection support that can be
