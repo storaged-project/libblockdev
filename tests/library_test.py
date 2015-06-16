@@ -12,6 +12,10 @@ class LibraryOpsTestCase(unittest.TestCase):
     log = ""
 
     def tearDown(self):
+        # change the sources back and recompile
+        os.system("sed -ri 's?1024;//test-change?BD_LVM_MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
+        os.system("make &> /dev/null")
+
         # try to get everything back to normal by (re)loading all plugins
         BlockDev.reinit(None, True, None)
 
