@@ -54,6 +54,53 @@
       Python (under the <filename class="directory">src/python</filename> directory).
     </para>
   </chapter>
+
+  <chapter>
+    <title>Testing libblockdev</title>
+    <para>
+      libblockdev's test suite is written using the standard unittest.TestCase framework
+      in Python. Tests are separated in modules, usually one per libblockdev plugin - e.g.
+      BTRFS, LVM, Crypto. There are one or more base classes in each module used to
+      setup the environment and perform some testing. More specific test scenarios
+      inherit from these base classes.
+    </para>
+
+    <para>
+      Before running the tests you have to prepare your system so that libblockdev
+      can be built from source.
+    </para>
+
+    <para>
+      Install all build requirements. On Fedora this can be done with
+      <screen><userinput>
+cat dist/libblockdev.spec.in | grep BuildRequires: | cut -f2 -d: | cut -f2 -d' ' | xargs dnf -y install
+      </userinput></screen>
+
+      Configure the build scripts
+
+      <screen><userinput>./autogen.sh
+./configure</userinput></screen>
+    </para>
+
+    <para>
+      To execute the test suite from inside the source directory run one of these
+      commands:
+
+      <screen><userinput>make test</userinput></screen>
+
+      executes all safe tests or
+
+      <screen><userinput>make fast-test</userinput></screen>
+
+      executes all fast tests or
+
+      <screen><userinput>make test-all</userinput></screen>
+
+      executes all tests, including ones which may result in kernel panic or
+      take more time to complete.
+    </para>
+  </chapter>
+
   <index id="api-index-full">
     <title>API Index</title>
     <xi:include href="xml/api-index-full.xml"><xi:fallback /></xi:include>
