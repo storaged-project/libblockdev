@@ -364,7 +364,11 @@ class CryptoTestEscrow(CryptoTestCase):
             self.assertTrue(os.path.isfile(escrow_backup_passphrase))
 
             # Check that the encrypted file contains what we put in
-            passphrase = subprocess.check_output(['volume_key', '--secrets', '-d', self.nss_dir, escrow_backup_passphrase])
+            env = os.environ
+            env.update({"LC_ALL": "C"})
+            passphrase = subprocess.check_output(
+                    ['volume_key', '--secrets', '-d', self.nss_dir, escrow_backup_passphrase],
+                    env=env)
             passphrase = passphrase.strip().split()[1]
             self.assertEquals(passphrase, backup_passphrase)
 
