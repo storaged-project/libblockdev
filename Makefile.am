@@ -12,26 +12,39 @@ MAINTAINERCLEANFILES = Makefile.in aclocal.m4 config.guess config.sub \
 LIBDIRS = src/utils/.libs:src/plugins/.libs:src/lib/.libs
 GIDIR = src/lib
 
+PYTHON ?= python2
+COVERAGE ?= coverage
+
 run-ipython: all
 	GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=src/python G_MESSAGES_DEBUG=all ipython
 
 run-root-ipython: all
 	sudo GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=src/python G_MESSAGES_DEBUG=all ipython
 
-test: all
+check: all
 	pylint -E src/python/gi/overrides/BlockDev.py
+
+test: all check
 	@sudo GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
-		python -m unittest discover -v -s tests/ -p '*_test.py'
+		$(PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
 
-fast-test: all
-	pylint -E src/python/gi/overrides/BlockDev.py
+fast-test: all check
 	@sudo SKIP_SLOW= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
-		python -m unittest discover -v -s tests/ -p '*_test.py'
+		$(PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
 
-test-all: all
-	pylint -E src/python/gi/overrides/BlockDev.py
+test-all: all check
 	@sudo FEELINGLUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
-		python -m unittest discover -v -s tests/ -p '*_test.py'
+		$(PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
+
+coverage: all
+	@sudo GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
+		$(COVERAGE) run --branch -m unittest discover -v -s tests/ -p '*_test.py'
+		$(COVERAGE) report --show-missing --include="src/*"
+
+coverage-all: all
+	@sudo FEELING_LUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
+		$(COVERAGE) run --branch -m unittest discover -v -s tests/ -p '*_test.py'
+		$(COVERAGE) report --show-missing --include="src/*"
 
 tag:
 	@TAG="$(PACKAGE_NAME)-$(PACKAGE_VERSION)-1" ; \

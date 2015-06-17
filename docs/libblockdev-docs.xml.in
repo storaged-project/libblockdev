@@ -83,6 +83,15 @@ cat dist/libblockdev.spec.in | grep BuildRequires: | cut -f2 -d: | cut -f2 -d' '
     </para>
 
     <para>
+      To execute the Pylint code analysis tool run:
+
+      <screen><userinput>make check</userinput></screen>
+
+      The check target is a dependency of all test targets and you don't have to
+      execute it explicitly when testing.
+    </para>
+
+    <para>
       To execute the test suite from inside the source directory run one of these
       commands:
 
@@ -98,6 +107,28 @@ cat dist/libblockdev.spec.in | grep BuildRequires: | cut -f2 -d: | cut -f2 -d' '
 
       executes all tests, including ones which may result in kernel panic or
       take more time to complete.
+    </para>
+
+    <para>
+      It is also possible to generate test coverage reports using the Python coverage
+      tool:
+
+      <screen><userinput>make coverage</userinput></screen>
+
+      is equivalent to `make test'.
+
+      <screen><userinput>make coverage-all</userinput></screen>
+
+      is equivalent to `make test-all'.
+    </para>
+
+    <para>
+      libblockdev also supports running the test and coverage targets using Python3.
+      To do this define the PYTHON or COVERAGE variables respectively. For example:
+
+      <screen><userinput>make PYTHON=python3 test</userinput></screen>
+
+      <screen><userinput>make COVERAGE=coverage3 coverage</userinput></screen>
     </para>
   </chapter>
 
