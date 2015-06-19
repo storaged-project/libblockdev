@@ -31,7 +31,7 @@ libbd_loop_la_SOURCES = loop.c loop.h
 
 libbd_lvm_la_CFLAGS = $(GLIB_CFLAGS) $(DEVMAPPER_CFLAGS) -Wall -Wextra -Werror
 libbd_lvm_la_LIBADD = $(GLIB_LIBS) $(DEVMAPPER_LIBS) ${builddir}/../utils/libbd_utils.la
-libbd_lvm_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 0:1:0
+libbd_lvm_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 1:1:1
 libbd_lvm_la_CPPFLAGS = -I${srcdir}/../utils/
 libbd_lvm_la_SOURCES = lvm.c lvm.h
 
