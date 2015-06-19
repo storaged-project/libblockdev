@@ -11,6 +11,8 @@ generate_boilerplate: ${SOURCE_FILES} ${HEADER_FILES}
 
 dist_noinst_HEADERS = ${API_FILES} ${SOURCE_FILES} ${HEADER_FILES}
 
+CLEANFILES = ${SOURCE_FILES} ${HEADER_FILES}
+
 MAINTAINERCLEANFILES = Makefile.in
 
 .PHONY: generate_boilerplate
