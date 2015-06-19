@@ -484,6 +484,9 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 - Merge pull request #21 from vpodzime/master-thpool_size_discard (vpodzime)
 - Add overrides for the lvm_is_valid_thpool_chunk_size() function (vpodzime)
 
+* Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
 * Thu May 21 2015 Vratislav Podzimek <vpodzime@redhat.com> - 1.0-1
 - Adapt the release helper targets to autotools (vpodzime)
 - Fixes of paths in Makefile.am's inspired by build failures on s390 (vpodzime)
