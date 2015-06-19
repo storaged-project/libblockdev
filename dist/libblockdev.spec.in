@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     1.0
+Version:     1.1
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -454,6 +454,36 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Fri Jun 19 2015 Vratislav Podzimek <vpodzime@redhat.com> - 1.1-1
+- Clean generated boilerplate code on 'make clean' (vpodzime)
+- Merge pull request #31 from atodorov/use_lang_c (vpodzime)
+- tests: use LANG=C in test_backup_passphrase() (atodorov)
+- Merge pull request #30 from atodorov/makefile_updates (vpodzime)
+- Makefile.am:   - add separate check target   - add coverage targets   - make it possible to test with Python3 (atodorov)
+- Merge pull request #29 from atodorov/fix_issue_28 (vpodzime)
+- Merge pull request #27 from atodorov/fix_docs_url (vpodzime)
+- Merge pull request #26 from atodorov/test_docs (vpodzime)
+- Change the modified sources back in tearDown() method as well. Closes #28. (atodorov)
+- update URL to on-line documentation (atodorov)
+- add test documentation (atodorov)
+- Merge pull request #22 from dashea/escrow-tests (vpodzime)
+- Merge pull request #25 from dashea/python-dep (vpodzime)
+- Filter the python files from automatic rpm requires (dshea)
+- Added tests for escrow packets and backup passphrases (dshea)
+- Free leaked contexts from crypto_init (dshea)
+- Cooperate with volume_key's memory management (dshea)
+- Fix inheritance in the LVM tests to prevent multiple runs of some tests (vpodzime)
+- Make the regexp for testing crypto_generate_backup_passphrase() stricter (vpodzime)
+- Leave room in the backup passphrase for a trailing 0 (dshea)
+- Add functions to get names of data/metadata internal LVs (vpodzime)
+- Allow getting info for an internal LV (vpodzime)
+- Gather information about all LVs (vpodzime)
+- Round requested size to KBs in lvresize() (#1221247) (vpodzime)
+- Add overrides for the ensure_init() function (vpodzime)
+- Change the default value of the 'reload' parameter of try_reinit() (vpodzime)
+- Merge pull request #21 from vpodzime/master-thpool_size_discard (vpodzime)
+- Add overrides for the lvm_is_valid_thpool_chunk_size() function (vpodzime)
+
 * Thu May 21 2015 Vratislav Podzimek <vpodzime@redhat.com> - 1.0-1
 - Adapt the release helper targets to autotools (vpodzime)
 - Fixes of paths in Makefile.am's inspired by build failures on s390 (vpodzime)
