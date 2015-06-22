@@ -1,4 +1,4 @@
-<ONLINE href="https://vpodzime.fedorapeople.org/libblockdev_doc/index.html">
+<ONLINE href="http://rhinstaller.github.io/libblockdev/">
 <ONLINE href="https://github.com/rhinstaller/libblockdev">
 <ANCHOR id="libblockdev-blockdev-library" href="libblockdev/libblockdev-blockdev-library.html">
 <ANCHOR id="libblockdev-blockdev-library.functions" href="libblockdev/libblockdev-blockdev-library.html#libblockdev-blockdev-library.functions">
@@ -212,6 +212,8 @@
 <ANCHOR id="bd-lvm-cache-get-mode-str" href="libblockdev/libblockdev-LVM.html#bd-lvm-cache-get-mode-str">
 <ANCHOR id="bd-lvm-cache-pool-name" href="libblockdev/libblockdev-LVM.html#bd-lvm-cache-pool-name">
 <ANCHOR id="bd-lvm-cache-stats" href="libblockdev/libblockdev-LVM.html#bd-lvm-cache-stats">
+<ANCHOR id="bd-lvm-data-lv-name" href="libblockdev/libblockdev-LVM.html#bd-lvm-data-lv-name">
+<ANCHOR id="bd-lvm-metadata-lv-name" href="libblockdev/libblockdev-LVM.html#bd-lvm-metadata-lv-name">
 <ANCHOR id="libblockdev-LVM.other_details" href="libblockdev/libblockdev-LVM.html#libblockdev-LVM.other_details">
 <ANCHOR id="USE-DEFAULT-PE-SIZE:CAPS" href="libblockdev/libblockdev-LVM.html#USE-DEFAULT-PE-SIZE:CAPS">
 <ANCHOR id="BD-LVM-ERROR:CAPS" href="libblockdev/libblockdev-LVM.html#BD-LVM-ERROR:CAPS">
