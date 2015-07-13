@@ -336,6 +336,21 @@ class BtrfsTestFilesystemInfo(BtrfsTestCase):
         self.assertEqual(info.num_devices, 1)
         self.assertTrue(info.used >= 0)
 
+class BtrfsTestFilesystemInfoNoLabel(BtrfsTestCase):
+    def test_filesystem_info(self):
+        """Verify that it is possible to get filesystem info for a volume with no label"""
+
+        succ = BlockDev.btrfs_create_volume([self.loop_dev], None, None, None)
+        self.assertTrue(succ)
+
+        mount(self.loop_dev, TEST_MNT)
+
+        info = BlockDev.btrfs_filesystem_info(TEST_MNT)
+        self.assertEqual(info.label, str())
+        self.assertTrue(info.uuid)
+        self.assertEqual(info.num_devices, 1)
+        self.assertTrue(info.used >= 0)
+
 class BtrfsTestMkfs(BtrfsTestCase):
     def test_mkfs(self):
         """Verify that it is possible to create a btrfs filesystem"""
