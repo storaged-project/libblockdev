@@ -83,3 +83,5 @@ rpm: local
 
 release: tag
 	$(MAKE) archive
+
+ci: test-all distcheck
