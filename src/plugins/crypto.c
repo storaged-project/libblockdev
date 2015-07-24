@@ -697,7 +697,7 @@ static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libv
  * bd_crypto_escrow_device:
  * @device: path of the device to create escrow data for
  * @passphrase: passphrase used for the device
- * @cert_data: certificate data to use for escrow
+ * @cert_data: (array zero-terminated=1) (element-type gchar): certificate data to use for escrow
  * @directory: directory to put escrow data into
  * @backup_passphrase: (allow-none): backup passphrase for the device or %NULL
  * @error: (out): place to store error (if any)
