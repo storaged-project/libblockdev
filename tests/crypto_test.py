@@ -267,39 +267,25 @@ class CryptoTestEscrow(CryptoTestCase):
         # shell commands.
 
         self.nss_dir = tempfile.mkdtemp(prefix='libblockdev_test_escrow')
-        try:
-            subprocess.check_call(['certutil', '-d', self.nss_dir, '--empty-password', '-N'])
+        self.addCleanup(shutil.rmtree, self.nss_dir)
+        subprocess.check_call(['certutil', '-d', self.nss_dir, '--empty-password', '-N'])
 
-            # Gather some entropy to keep certutil from asking for input
-            with tempfile.NamedTemporaryFile() as noise_file:
-                noise_file.write(os.urandom(20))
-                noise_file.flush()
+        # Gather some entropy to keep certutil from asking for input
+        with tempfile.NamedTemporaryFile() as noise_file:
+            noise_file.write(os.urandom(20))
+            noise_file.flush()
 
-                subprocess.check_call(['certutil', '-d', self.nss_dir, '-S', '-x', '-n',
-                    'escrow_cert', '-s', 'CN=Escrow Test', '-t', ',,TC', '-z',
-                    noise_file.name])
+            subprocess.check_call(['certutil', '-d', self.nss_dir, '-S', '-x', '-n',
+                'escrow_cert', '-s', 'CN=Escrow Test', '-t', ',,TC', '-z',
+                noise_file.name])
 
-            # Export the public certificate
-            handle, self.public_cert = tempfile.mkstemp(prefix='libblockdev_test_escrow')
+        # Export the public certificate
+        handle, self.public_cert = tempfile.mkstemp(prefix='libblockdev_test_escrow')
 
-            try:
-                os.close(handle)
-                subprocess.check_call(['certutil', '-d', self.nss_dir, '-L', '-n', 'escrow_cert',
-                    '-a', '-o', self.public_cert])
-            except:
-                os.unlink(self.public_cert)
-                raise
-
-        except:
-            # If anything went wrong, cleanup and re-raise the exception
-            shutil.rmtree(self.nss_dir)
-            raise
-
-    def tearDown(self):
-        super(CryptoTestEscrow, self).tearDown()
-
-        shutil.rmtree(self.nss_dir)
-        os.unlink(self.public_cert)
+        os.close(handle)
+        subprocess.check_call(['certutil', '-d', self.nss_dir, '-L', '-n', 'escrow_cert',
+            '-a', '-o', self.public_cert])
+        self.addCleanup(os.unlink, self.public_cert)
 
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_escrow_packet(self):
@@ -309,42 +295,40 @@ class CryptoTestEscrow(CryptoTestCase):
         self.assertTrue(succ)
 
         escrow_dir = tempfile.mkdtemp(prefix='libblockdev_test_escrow')
-        try:
-            with open(self.public_cert, 'rb') as cert_file:
-                succ = BlockDev.crypto_escrow_device(self.loop_dev, PASSWD, cert_file.read(),
-                        escrow_dir, None)
-            self.assertTrue(succ)
+        self.addCleanup(shutil.rmtree, escrow_dir)
+        with open(self.public_cert, 'rb') as cert_file:
+            succ = BlockDev.crypto_escrow_device(self.loop_dev, PASSWD, cert_file.read(),
+                    escrow_dir, None)
+        self.assertTrue(succ)
 
-            # Find the escrow packet
-            escrow_packet_file = '%s/%s-escrow' % (escrow_dir, BlockDev.crypto_luks_uuid(self.loop_dev))
-            self.assertTrue(os.path.isfile(escrow_packet_file))
+        # Find the escrow packet
+        escrow_packet_file = '%s/%s-escrow' % (escrow_dir, BlockDev.crypto_luks_uuid(self.loop_dev))
+        self.assertTrue(os.path.isfile(escrow_packet_file))
 
-            # Use the volume_key utility (see note in setUp about why not python)
-            # to decrypt the escrow packet and restore access to the volume under
-            # a new passphrase
+        # Use the volume_key utility (see note in setUp about why not python)
+        # to decrypt the escrow packet and restore access to the volume under
+        # a new passphrase
 
-            # Just use the existing temp directory to output the re-encrypted packet
-            # PASSWD2 is the passphrase of the new escrow packet
-            p = subprocess.Popen(['volume_key', '--reencrypt', '-b', '-d', self.nss_dir,
-                escrow_packet_file, '-o', '%s/escrow-out' % escrow_dir],
-                stdin=subprocess.PIPE)
-            p.communicate(input=('%s\0%s\0' % (PASSWD2, PASSWD2)).encode('utf-8'))
-            if p.returncode != 0:
-                raise subprocess.CalledProcessError(p.returncode, 'volume_key')
+        # Just use the existing temp directory to output the re-encrypted packet
+        # PASSWD2 is the passphrase of the new escrow packet
+        p = subprocess.Popen(['volume_key', '--reencrypt', '-b', '-d', self.nss_dir,
+            escrow_packet_file, '-o', '%s/escrow-out' % escrow_dir],
+            stdin=subprocess.PIPE)
+        p.communicate(input=('%s\0%s\0' % (PASSWD2, PASSWD2)).encode('utf-8'))
+        if p.returncode != 0:
+            raise subprocess.CalledProcessError(p.returncode, 'volume_key')
 
-            # Restore access to the volume
-            # PASSWD3 is the new passphrase for the LUKS device
-            p = subprocess.Popen(['volume_key', '--restore', '-b', self.loop_dev,
-                '%s/escrow-out' % escrow_dir], stdin=subprocess.PIPE)
-            p.communicate(input=('%s\0%s\0%s\0' % (PASSWD2, PASSWD3, PASSWD3)).encode('utf-8'))
-            if p.returncode != 0:
-                raise subprocess.CalledProcessError(p.returncode, 'volume_key')
+        # Restore access to the volume
+        # PASSWD3 is the new passphrase for the LUKS device
+        p = subprocess.Popen(['volume_key', '--restore', '-b', self.loop_dev,
+            '%s/escrow-out' % escrow_dir], stdin=subprocess.PIPE)
+        p.communicate(input=('%s\0%s\0%s\0' % (PASSWD2, PASSWD3, PASSWD3)).encode('utf-8'))
+        if p.returncode != 0:
+            raise subprocess.CalledProcessError(p.returncode, 'volume_key')
 
-            # Open the volume with the new passphrase
-            succ = BlockDev.crypto_luks_open(self.loop_dev, 'libblockdevTestLUKS', PASSWD3, None)
-            self.assertTrue(succ)
-        finally:
-            shutil.rmtree(escrow_dir)
+        # Open the volume with the new passphrase
+        succ = BlockDev.crypto_luks_open(self.loop_dev, 'libblockdevTestLUKS', PASSWD3, None)
+        self.assertTrue(succ)
 
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_backup_passphrase(self):
@@ -353,28 +337,26 @@ class CryptoTestEscrow(CryptoTestCase):
         self.assertTrue(succ)
 
         escrow_dir = tempfile.mkdtemp(prefix='libblockdev_test_escrow')
-        try:
-            backup_passphrase = BlockDev.crypto_generate_backup_passphrase()
-            with open(self.public_cert, 'rb') as cert_file:
-                succ = BlockDev.crypto_escrow_device(self.loop_dev, PASSWD, cert_file.read(),
-                        escrow_dir, backup_passphrase)
-            self.assertTrue(succ)
+        self.addCleanup(shutil.rmtree, escrow_dir)
+        backup_passphrase = BlockDev.crypto_generate_backup_passphrase()
+        with open(self.public_cert, 'rb') as cert_file:
+            succ = BlockDev.crypto_escrow_device(self.loop_dev, PASSWD, cert_file.read(),
+                    escrow_dir, backup_passphrase)
+        self.assertTrue(succ)
 
-            # Find the backup passphrase
-            escrow_backup_passphrase = "%s/%s-escrow-backup-passphrase" % (escrow_dir, BlockDev.crypto_luks_uuid(self.loop_dev))
-            self.assertTrue(os.path.isfile(escrow_backup_passphrase))
+        # Find the backup passphrase
+        escrow_backup_passphrase = "%s/%s-escrow-backup-passphrase" % (escrow_dir, BlockDev.crypto_luks_uuid(self.loop_dev))
+        self.assertTrue(os.path.isfile(escrow_backup_passphrase))
 
-            # Check that the encrypted file contains what we put in
-            env = os.environ
-            env.update({"LC_ALL": "C"})
-            passphrase = subprocess.check_output(
-                    ['volume_key', '--secrets', '-d', self.nss_dir, escrow_backup_passphrase],
-                    env=env)
-            passphrase = passphrase.strip().split()[1].decode('ascii')
-            self.assertEqual(passphrase, backup_passphrase)
+        # Check that the encrypted file contains what we put in
+        env = os.environ
+        env.update({"LC_ALL": "C"})
+        passphrase = subprocess.check_output(
+                ['volume_key', '--secrets', '-d', self.nss_dir, escrow_backup_passphrase],
+                env=env)
+        passphrase = passphrase.strip().split()[1].decode('ascii')
+        self.assertEqual(passphrase, backup_passphrase)
 
-            # Check that the backup passphrase works
-            succ = BlockDev.crypto_luks_open(self.loop_dev, 'libblockdevTestLUKS', backup_passphrase, None)
-            self.assertTrue(succ)
-        finally:
-            shutil.rmtree(escrow_dir)
+        # Check that the backup passphrase works
+        succ = BlockDev.crypto_luks_open(self.loop_dev, 'libblockdevTestLUKS', backup_passphrase, None)
+        self.assertTrue(succ)
