@@ -2,6 +2,7 @@ from __future__ import division
 
 import unittest
 import os
+import six
 
 import overrides_hack
 from utils import create_sparse_tempfile, fake_utils, fake_path
@@ -245,7 +246,7 @@ class BtrfsTestGetDefaultSubvolumeID(BtrfsTestCase):
         self.assertTrue(succ)
 
         # not mounted yet, should fail
-        with self.assertRaisesRegexp(GLib.GError, r".*can't access.*"):
+        with six.assertRaisesRegex(self, GLib.GError, r".*can't access.*"):
             ret = BlockDev.btrfs_get_default_subvolume_id(TEST_MNT)
 
         mount(self.loop_dev, TEST_MNT)
@@ -276,12 +277,12 @@ class BtrfsTestSetDefaultSubvolumeID(BtrfsTestCase):
         succ = BlockDev.btrfs_set_default_subvolume(TEST_MNT, new_id)
         self.assertTrue(succ)
         ret = BlockDev.btrfs_get_default_subvolume_id(TEST_MNT)
-        self.assertEquals(ret, new_id)
+        self.assertEqual(ret, new_id)
 
         succ = BlockDev.btrfs_set_default_subvolume(TEST_MNT, 5)
         self.assertTrue(succ)
         ret = BlockDev.btrfs_get_default_subvolume_id(TEST_MNT)
-        self.assertEquals(ret, 5)
+        self.assertEqual(ret, 5)
 
 class BtrfsTestListDevices(BtrfsTestCase):
     def test_list_devices(self):

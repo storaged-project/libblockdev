@@ -4,6 +4,7 @@ import tempfile
 import overrides_hack
 import shutil
 import subprocess
+import six
 
 from utils import create_sparse_tempfile
 from gi.repository import BlockDev, GLib
@@ -19,9 +20,9 @@ class CryptoTestGenerateBackupPassphrase(unittest.TestCase):
         """Verify that backup passphrase generation works as expected"""
 
         exp = r"^([0-9A-Za-z./]{5}-){3}[0-9A-Za-z./]{5}$"
-        for _i in xrange(100):
+        for _i in range(100):
             bp = BlockDev.crypto_generate_backup_passphrase()
-            self.assertRegexpMatches(bp, exp)
+            six.assertRegex(self, bp, exp)
 
 class CryptoTestCase(unittest.TestCase):
     def setUp(self):
@@ -39,7 +40,7 @@ class CryptoTestCase(unittest.TestCase):
 
         # make a key file
         handle, self.keyfile = tempfile.mkstemp(prefix="libblockdev_test_keyfile", text=False)
-        os.write(handle, "nobodyknows")
+        os.write(handle, b"nobodyknows")
         os.close(handle)
 
     def tearDown(self):
@@ -309,7 +310,7 @@ class CryptoTestEscrow(CryptoTestCase):
 
         escrow_dir = tempfile.mkdtemp(prefix='libblockdev_test_escrow')
         try:
-            with open(self.public_cert) as cert_file:
+            with open(self.public_cert, 'rb') as cert_file:
                 succ = BlockDev.crypto_escrow_device(self.loop_dev, PASSWD, cert_file.read(),
                         escrow_dir, None)
             self.assertTrue(succ)
@@ -327,7 +328,7 @@ class CryptoTestEscrow(CryptoTestCase):
             p = subprocess.Popen(['volume_key', '--reencrypt', '-b', '-d', self.nss_dir,
                 escrow_packet_file, '-o', '%s/escrow-out' % escrow_dir],
                 stdin=subprocess.PIPE)
-            p.communicate(input='%s\0%s\0' % (PASSWD2, PASSWD2))
+            p.communicate(input=('%s\0%s\0' % (PASSWD2, PASSWD2)).encode('utf-8'))
             if p.returncode != 0:
                 raise subprocess.CalledProcessError(p.returncode, 'volume_key')
 
@@ -335,7 +336,7 @@ class CryptoTestEscrow(CryptoTestCase):
             # PASSWD3 is the new passphrase for the LUKS device
             p = subprocess.Popen(['volume_key', '--restore', '-b', self.loop_dev,
                 '%s/escrow-out' % escrow_dir], stdin=subprocess.PIPE)
-            p.communicate(input='%s\0%s\0%s\0' % (PASSWD2, PASSWD3, PASSWD3))
+            p.communicate(input=('%s\0%s\0%s\0' % (PASSWD2, PASSWD3, PASSWD3)).encode('utf-8'))
             if p.returncode != 0:
                 raise subprocess.CalledProcessError(p.returncode, 'volume_key')
 
@@ -354,7 +355,7 @@ class CryptoTestEscrow(CryptoTestCase):
         escrow_dir = tempfile.mkdtemp(prefix='libblockdev_test_escrow')
         try:
             backup_passphrase = BlockDev.crypto_generate_backup_passphrase()
-            with open(self.public_cert) as cert_file:
+            with open(self.public_cert, 'rb') as cert_file:
                 succ = BlockDev.crypto_escrow_device(self.loop_dev, PASSWD, cert_file.read(),
                         escrow_dir, backup_passphrase)
             self.assertTrue(succ)
@@ -369,8 +370,8 @@ class CryptoTestEscrow(CryptoTestCase):
             passphrase = subprocess.check_output(
                     ['volume_key', '--secrets', '-d', self.nss_dir, escrow_backup_passphrase],
                     env=env)
-            passphrase = passphrase.strip().split()[1]
-            self.assertEquals(passphrase, backup_passphrase)
+            passphrase = passphrase.strip().split()[1].decode('ascii')
+            self.assertEqual(passphrase, backup_passphrase)
 
             # Check that the backup passphrase works
             succ = BlockDev.crypto_luks_open(self.loop_dev, 'libblockdevTestLUKS', backup_passphrase, None)
