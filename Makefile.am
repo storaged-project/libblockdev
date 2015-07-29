@@ -12,7 +12,7 @@ MAINTAINERCLEANFILES = Makefile.in aclocal.m4 config.guess config.sub \
 LIBDIRS = src/utils/.libs:src/plugins/.libs:src/lib/.libs
 GIDIR = src/lib
 
-PYTHON ?= python2
+TEST_PYTHON ?= $(PYTHON)
 COVERAGE ?= coverage
 
 run-ipython: all
@@ -26,15 +26,15 @@ check: all
 
 test: all check
 	@sudo GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
-		$(PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
+		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
 
 fast-test: all check
 	@sudo SKIP_SLOW= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
-		$(PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
+		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
 
 test-all: all check
 	@sudo FEELINGLUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
-		$(PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
+		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
 
 coverage: all
 	@sudo GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
@@ -84,4 +84,6 @@ rpm: local
 release: tag
 	$(MAKE) archive
 
-ci: test distcheck
+ci: distcheck
+	TEST_PYTHON=python2 $(MAKE) test
+	TEST_PYTHON=python3 $(MAKE) test
