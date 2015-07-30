@@ -3,6 +3,7 @@ import unittest
 import os
 import math
 import overrides_hack
+import six
 
 from utils import create_sparse_tempfile, fake_utils, fake_path
 from gi.repository import BlockDev, GLib
@@ -503,7 +504,7 @@ class LvmTestLVcreateRemove(LvmPVVGLVTestCase):
         self.assertTrue(succ)
 
         # not enough space (only one PV)
-        with self.assertRaisesRegexp(GLib.GError, "Insufficient free space"):
+        with six.assertRaisesRegex(self, GLib.GError, "Insufficient free space"):
             succ = BlockDev.lvm_lvcreate("testVG", "testLV", 1048 * 1024**2, None, [self.loop_dev])
 
         # enough space (two PVs)

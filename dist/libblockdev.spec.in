@@ -25,6 +25,10 @@ BuildRequires: kmod-devel
 # BuildRequires: volume_key
 # BuildRequires: nss-tools
 
+# Needed for python 2 vs. 3 compatibility in the tests, but not used to build
+# BuildRequires: python-six
+# BuildRequires: python3-six
+
 %ifarch s390 s390x
 BuildRequires: s390utils-devel
 %endif
