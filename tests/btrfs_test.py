@@ -326,13 +326,15 @@ class BtrfsTestFilesystemInfo(BtrfsTestCase):
     def test_filesystem_info(self):
         """Verify that it is possible to get filesystem info"""
 
-        succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None)
+        label = "My 'Shiny' Btrfs"
+        succ = BlockDev.btrfs_create_volume([self.loop_dev], label, None, None)
         self.assertTrue(succ)
 
         mount(self.loop_dev, TEST_MNT)
 
         info = BlockDev.btrfs_filesystem_info(TEST_MNT)
-        self.assertEqual(info.label, "myShinyBtrfs")
+        self.assertTrue(info)
+        self.assertEqual(info.label, label)
         self.assertTrue(info.uuid)
         self.assertEqual(info.num_devices, 1)
         self.assertTrue(info.used >= 0)
