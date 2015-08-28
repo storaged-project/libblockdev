@@ -76,14 +76,14 @@ class LvmNoDevTestCase(unittest.TestCase):
         """Verify that get_lv_physical_size works as expected"""
 
         self.assertEqual(BlockDev.lvm_get_lv_physical_size(25 * 1024**3, 4 * 1024**2),
-                         25 * 1024**3 + 4 * 1024**2)
+                         25 * 1024**3)
 
         # default PE size is 4 MiB
         self.assertEqual(BlockDev.lvm_get_lv_physical_size(25 * 1024**3, 0),
-                         25 * 1024**3 + 4 * 1024**2)
+                         25 * 1024**3)
 
         self.assertEqual(BlockDev.lvm_get_lv_physical_size(11 * 1024**2, 4 * 1024**2),
-                         16 * 1024**2)
+                         12 * 1024**2)
 
     def test_get_thpool_padding(self):
         """Verify that get_thpool_padding works as expected"""
