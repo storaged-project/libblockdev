@@ -55,7 +55,7 @@ typedef struct BDMDDetailData {
 void bd_md_detail_data_free (BDMDDetailData *data);
 BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data);
 
-guint64 bd_md_get_superblock_size (guint64 size, gchar *version, GError **error);
+guint64 bd_md_get_superblock_size (guint64 member_size, gchar *version, GError **error);
 gboolean bd_md_create (gchar *device_name, gchar *level, gchar **disks, guint64 spares, gchar *version, gboolean bitmap, GError **error);
 gboolean bd_md_destroy (gchar *device, GError **error);
 gboolean bd_md_deactivate (gchar *device_name, GError **error);
