@@ -157,14 +157,14 @@ GType bd_md_detail_data_get_type () {
 
 /**
  * bd_md_get_superblock_size:
- * @size: size of the array
+ * @member_size: size of an array member
  * @version: (allow-none): metadata version or %NULL to use the current default version
  * @error: (out): place to store error (if any)
  *
- * Returns: Calculated superblock size for given array @size and metadata @version
- * or default if unsupported @version is used.
+ * Returns: Calculated superblock size for an array with a given @member_size
+ * and metadata @version or default if unsupported @version is used.
  */
-guint64 bd_md_get_superblock_size (guint64 size, gchar *version, GError **error);
+guint64 bd_md_get_superblock_size (guint64 member_size, gchar *version, GError **error);
 
 /**
  * bd_md_create:
