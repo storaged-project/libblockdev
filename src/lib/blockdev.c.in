@@ -36,6 +36,8 @@
  *
  */
 
+#define DEFAULT_CONF_DIR_PATH "/etc/libblockdev/conf.d/"
+
 static GMutex init_lock;
 static gboolean initialized = FALSE;
 
@@ -70,6 +72,100 @@ static gchar* plugin_names[BD_PLUGIN_UNDEF] = {
 
 static void set_plugin_so_name (BDPlugin name, gchar *so_name) {
     plugins[name].spec.so_name = so_name;
+}
+
+static gint config_file_cmp (gconstpointer a, gconstpointer b, gpointer user_data __attribute__((unused))) {
+    const gchar *name1 = (const gchar *) a;
+    const gchar *name2 = (const gchar *) b;
+
+    return g_strcmp0 (a, b);
+}
+
+static GSequence* get_config_files (GError **error) {
+    GDir *dir = NULL;
+    GSequence *ret = NULL;
+    gchar *conf_dir_path = NULL;
+    const gchar *dirent = NULL;
+
+    conf_dir_path = g_strdup (g_getenv("LIBBLOCKDEV_CONFIG_DIR"));
+    if (!conf_dir_path)
+        conf_dir_path = g_strdup (DEFAULT_CONF_DIR_PATH);
+
+    dir = g_dir_open (conf_dir_path, 0, error);
+    if (!dir) {
+        g_prefix_error (error, "Failed to get contents of the config dir (%s)", conf_dir_path);
+        g_free (conf_dir_path);
+        return NULL;
+    }
+
+    ret = g_sequence_new ((GDestroyNotify) g_free);
+
+    dirent = g_dir_read_name(dir);
+    while (dirent) {
+        /* only process .cfg files from the directory */
+        if (g_str_has_suffix (dirent, ".cfg")) {
+            dirent = g_build_filename (conf_dir_path, dirent, NULL);
+            g_sequence_insert_sorted (ret, (gpointer) dirent, config_file_cmp, NULL);
+        }
+        dirent = g_dir_read_name(dir);
+    }
+
+    g_free (conf_dir_path);
+    g_dir_close (dir);
+    return ret;
+}
+
+static gboolean process_config_file (gchar *config_file, GSList **plugins_sonames, GError **error) {
+    GKeyFile *config = NULL;
+    BDPlugin i = 0;
+    gchar **sonames = NULL;
+    gsize n_sonames = 0;
+
+    config = g_key_file_new ();
+    if (!g_key_file_load_from_file (config, config_file, G_KEY_FILE_NONE, error))
+        return FALSE;
+
+    /* get sonames for each plugin (if specified) */
+    for (i=0; (i < BD_PLUGIN_UNDEF); i++) {
+        sonames = g_key_file_get_string_list (config, plugin_names[i], "sonames", &n_sonames, error);
+        if (!sonames) {
+            /* no sonames specified or an error occurred */
+            if (*error)
+                g_clear_error (error);
+        } else {
+            /* go through the sonames in the reversed order (because we prepend
+               them to the list) */
+            for (; n_sonames > 0; n_sonames--) {
+                plugins_sonames[i] = g_slist_prepend (plugins_sonames[i], sonames[n_sonames-1]);
+            }
+            /* we need to free only the array here not its items because those
+               were put into the list above as pointers */
+            g_free (sonames);
+        }
+    }
+
+    g_key_file_free (config);
+
+    return TRUE;
+}
+
+static gboolean load_config (GSequence *config_files, GSList **plugins_sonames, GError **error) {
+    GSequenceIter *config_file_iter = NULL;
+    gchar *config_file = NULL;
+    BDPlugin i = 0;
+
+    /* process config files one after another in order */
+    config_file_iter = g_sequence_get_begin_iter (config_files);
+    while (!g_sequence_iter_is_end (config_file_iter)) {
+        config_file = (gchar *) g_sequence_get (config_file_iter);
+        if (!process_config_file (config_file, plugins_sonames, error)) {
+            g_warning ("Cannot process the config file '%s': %s. Skipping.", config_file, (*error)->message);
+            g_clear_error (error);
+        }
+        config_file_iter = g_sequence_iter_next (config_file_iter);
+    }
+
+    return TRUE;
 }
 
 static void unload_plugins () {
