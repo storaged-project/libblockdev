@@ -31,6 +31,6 @@ void bd_plugin_spec_free (BDPluginSpec *spec);
 
 gboolean bd_is_plugin_available (BDPlugin plugin);
 gchar** bd_get_available_plugin_names ();
-gboolean bd_func_available (BDPlugin plugin, gchar *func_name);
+gchar* bd_get_plugin_soname (BDPlugin plugin);
 
 #endif  /* BD_PLUGINS */

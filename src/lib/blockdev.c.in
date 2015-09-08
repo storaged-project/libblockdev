@@ -215,35 +215,37 @@ static void unload_plugins () {
 
 }
 
-static void load_plugin_from_sonames (LoadFunc load_fn, void **handle, GSList *sonames) {
+static void load_plugin_from_sonames (BDPlugin plugin, LoadFunc load_fn, void **handle, GSList *sonames) {
     while (!(*handle) && sonames) {
         *handle = load_fn (sonames->data);
+        if (*handle)
+            set_plugin_so_name(plugin, g_strdup (sonames->data));
         sonames = g_slist_next (sonames);
     }
 }
 
 static void do_load (GSList **plugins_sonames) {
     if (!plugins[BD_PLUGIN_LVM].handle && plugins_sonames[BD_PLUGIN_LVM])
-        load_plugin_from_sonames (load_lvm_from_plugin, &(plugins[BD_PLUGIN_LVM].handle), plugins_sonames[BD_PLUGIN_LVM]);
+        load_plugin_from_sonames (BD_PLUGIN_LVM, load_lvm_from_plugin, &(plugins[BD_PLUGIN_LVM].handle), plugins_sonames[BD_PLUGIN_LVM]);
     if (!plugins[BD_PLUGIN_BTRFS].handle && plugins_sonames[BD_PLUGIN_BTRFS])
-        load_plugin_from_sonames (load_btrfs_from_plugin, &(plugins[BD_PLUGIN_BTRFS].handle), plugins_sonames[BD_PLUGIN_BTRFS]);
+        load_plugin_from_sonames (BD_PLUGIN_BTRFS, load_btrfs_from_plugin, &(plugins[BD_PLUGIN_BTRFS].handle), plugins_sonames[BD_PLUGIN_BTRFS]);
     if (!plugins[BD_PLUGIN_SWAP].handle && plugins_sonames[BD_PLUGIN_SWAP])
-        load_plugin_from_sonames (load_swap_from_plugin, &(plugins[BD_PLUGIN_SWAP].handle), plugins_sonames[BD_PLUGIN_SWAP]);
+        load_plugin_from_sonames (BD_PLUGIN_SWAP,load_swap_from_plugin, &(plugins[BD_PLUGIN_SWAP].handle), plugins_sonames[BD_PLUGIN_SWAP]);
     if (!plugins[BD_PLUGIN_LOOP].handle && plugins_sonames[BD_PLUGIN_LOOP])
-        load_plugin_from_sonames (load_loop_from_plugin, &(plugins[BD_PLUGIN_LOOP].handle), plugins_sonames[BD_PLUGIN_LOOP]);
+        load_plugin_from_sonames (BD_PLUGIN_LOOP, load_loop_from_plugin, &(plugins[BD_PLUGIN_LOOP].handle), plugins_sonames[BD_PLUGIN_LOOP]);
     if (!plugins[BD_PLUGIN_CRYPTO].handle && plugins_sonames[BD_PLUGIN_CRYPTO])
-        load_plugin_from_sonames (load_crypto_from_plugin, &(plugins[BD_PLUGIN_CRYPTO].handle), plugins_sonames[BD_PLUGIN_CRYPTO]);
+        load_plugin_from_sonames (BD_PLUGIN_CRYPTO, load_crypto_from_plugin, &(plugins[BD_PLUGIN_CRYPTO].handle), plugins_sonames[BD_PLUGIN_CRYPTO]);
     if (!plugins[BD_PLUGIN_MPATH].handle && plugins_sonames[BD_PLUGIN_MPATH])
-        load_plugin_from_sonames (load_mpath_from_plugin, &(plugins[BD_PLUGIN_MPATH].handle), plugins_sonames[BD_PLUGIN_MPATH]);
+        load_plugin_from_sonames (BD_PLUGIN_MPATH, load_mpath_from_plugin, &(plugins[BD_PLUGIN_MPATH].handle), plugins_sonames[BD_PLUGIN_MPATH]);
     if (!plugins[BD_PLUGIN_DM].handle && plugins_sonames[BD_PLUGIN_DM])
-        load_plugin_from_sonames (load_dm_from_plugin, &(plugins[BD_PLUGIN_DM].handle), plugins_sonames[BD_PLUGIN_DM]);
+        load_plugin_from_sonames (BD_PLUGIN_DM, load_dm_from_plugin, &(plugins[BD_PLUGIN_DM].handle), plugins_sonames[BD_PLUGIN_DM]);
     if (!plugins[BD_PLUGIN_MDRAID].handle && plugins_sonames[BD_PLUGIN_MDRAID])
-        load_plugin_from_sonames (load_mdraid_from_plugin, &(plugins[BD_PLUGIN_MDRAID].handle), plugins_sonames[BD_PLUGIN_MDRAID]);
+        load_plugin_from_sonames (BD_PLUGIN_MDRAID, load_mdraid_from_plugin, &(plugins[BD_PLUGIN_MDRAID].handle), plugins_sonames[BD_PLUGIN_MDRAID]);
     if (!plugins[BD_PLUGIN_KBD].handle && plugins_sonames[BD_PLUGIN_KBD])
-        load_plugin_from_sonames (load_kbd_from_plugin, &(plugins[BD_PLUGIN_KBD].handle), plugins_sonames[BD_PLUGIN_KBD]);
+        load_plugin_from_sonames (BD_PLUGIN_KBD, load_kbd_from_plugin, &(plugins[BD_PLUGIN_KBD].handle), plugins_sonames[BD_PLUGIN_KBD]);
 #if defined(__s390__) || defined(__s390x__)
     if (!plugins[BD_PLUGIN_S390].handle && plugins_sonames[BD_PLUGIN_S390])
-        load_plugin_from_sonames (load_s390_from_plugin, &(plugins[BD_PLUGIN_S390].handle), plugins_sonames[BD_PLUGIN_S390]);
+        load_plugin_from_sonames (BD_PLUGIN_S390, load_s390_from_plugin, &(plugins[BD_PLUGIN_S390].handle), plugins_sonames[BD_PLUGIN_S390]);
 #endif
 }
 
@@ -687,4 +689,18 @@ gboolean bd_is_plugin_available (BDPlugin plugin) {
         return plugins[plugin].handle != NULL;
     else
         return FALSE;
+}
+
+/**
+ * bd_get_plugin_soname:
+ * @plugin: the queried plugin
+ *
+ * Returns: (transfer full): name of the shared object loaded for the plugin or
+ * %NULL if none is loaded
+ */
+gchar* bd_get_plugin_soname (BDPlugin plugin) {
+    if (plugins[plugin].handle)
+        return g_strdup (plugins[plugin].spec.so_name);
+
+    return NULL;
 }
