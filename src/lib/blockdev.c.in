@@ -46,6 +46,8 @@ typedef struct BDPluginStatus {
     gpointer handle;
 } BDPluginStatus;
 
+typedef void* (*LoadFunc) (gchar *so_name);
+
 /* KEEP THE ORDERING OF THESE ARRAYS MATCHING THE BDPluginName ENUM! */
 static gchar * default_plugin_so[BD_PLUGIN_UNDEF] = {
     "libbd_lvm.so."@MAJOR_VER@, "libbd_btrfs.so."@MAJOR_VER@,
@@ -213,10 +215,71 @@ static void unload_plugins () {
 
 }
 
+static void load_plugin_from_sonames (LoadFunc load_fn, void **handle, GSList *sonames) {
+    while (!(*handle) && sonames) {
+        *handle = load_fn (sonames->data);
+        sonames = g_slist_next (sonames);
+    }
+}
+
+static void do_load (GSList **plugins_sonames) {
+    if (!plugins[BD_PLUGIN_LVM].handle && plugins_sonames[BD_PLUGIN_LVM])
+        load_plugin_from_sonames (load_lvm_from_plugin, &(plugins[BD_PLUGIN_LVM].handle), plugins_sonames[BD_PLUGIN_LVM]);
+    if (!plugins[BD_PLUGIN_BTRFS].handle && plugins_sonames[BD_PLUGIN_BTRFS])
+        load_plugin_from_sonames (load_btrfs_from_plugin, &(plugins[BD_PLUGIN_BTRFS].handle), plugins_sonames[BD_PLUGIN_BTRFS]);
+    if (!plugins[BD_PLUGIN_SWAP].handle && plugins_sonames[BD_PLUGIN_SWAP])
+        load_plugin_from_sonames (load_swap_from_plugin, &(plugins[BD_PLUGIN_SWAP].handle), plugins_sonames[BD_PLUGIN_SWAP]);
+    if (!plugins[BD_PLUGIN_LOOP].handle && plugins_sonames[BD_PLUGIN_LOOP])
+        load_plugin_from_sonames (load_loop_from_plugin, &(plugins[BD_PLUGIN_LOOP].handle), plugins_sonames[BD_PLUGIN_LOOP]);
+    if (!plugins[BD_PLUGIN_CRYPTO].handle && plugins_sonames[BD_PLUGIN_CRYPTO])
+        load_plugin_from_sonames (load_crypto_from_plugin, &(plugins[BD_PLUGIN_CRYPTO].handle), plugins_sonames[BD_PLUGIN_CRYPTO]);
+    if (!plugins[BD_PLUGIN_MPATH].handle && plugins_sonames[BD_PLUGIN_MPATH])
+        load_plugin_from_sonames (load_mpath_from_plugin, &(plugins[BD_PLUGIN_MPATH].handle), plugins_sonames[BD_PLUGIN_MPATH]);
+    if (!plugins[BD_PLUGIN_DM].handle && plugins_sonames[BD_PLUGIN_DM])
+        load_plugin_from_sonames (load_dm_from_plugin, &(plugins[BD_PLUGIN_DM].handle), plugins_sonames[BD_PLUGIN_DM]);
+    if (!plugins[BD_PLUGIN_MDRAID].handle && plugins_sonames[BD_PLUGIN_MDRAID])
+        load_plugin_from_sonames (load_mdraid_from_plugin, &(plugins[BD_PLUGIN_MDRAID].handle), plugins_sonames[BD_PLUGIN_MDRAID]);
+    if (!plugins[BD_PLUGIN_KBD].handle && plugins_sonames[BD_PLUGIN_KBD])
+        load_plugin_from_sonames (load_kbd_from_plugin, &(plugins[BD_PLUGIN_KBD].handle), plugins_sonames[BD_PLUGIN_KBD]);
+#if defined(__s390__) || defined(__s390x__)
+    if (!plugins[BD_PLUGIN_S390].handle && plugins_sonames[BD_PLUGIN_S390])
+        load_plugin_from_sonames (load_s390_from_plugin, &(plugins[BD_PLUGIN_S390].handle), plugins_sonames[BD_PLUGIN_S390]);
+#endif
+}
+
 static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload, guint64 *num_loaded) {
     guint8 i = 0;
     gboolean requested_loaded = TRUE;
+    GError *error = NULL;
+    GSequence *config_files = NULL;
+    GSList *plugins_sonames[BD_PLUGIN_UNDEF] = {NULL, NULL, NULL, NULL, NULL,
+                                                NULL, NULL, NULL, NULL, NULL};
+    BDPlugin plugin_name = BD_PLUGIN_UNDEF;
+    guint64 required_plugins_mask = 0;
 
+    /* load config files first */
+    config_files = get_config_files (&error);
+    if (config_files) {
+        if (!load_config (config_files, plugins_sonames, &error))
+            g_warning ("Failed to load config files: %s. Using the built-in config", error->message);
+
+        g_sequence_free (config_files);
+    } else
+        g_warning ("Failed to load config files: %s. Using the built-in config", error->message);
+    g_clear_error (&error);
+
+    /* populate missing items with the built-in defaults */
+    for (i=0; i < BD_PLUGIN_UNDEF; i++)
+        if (!plugins_sonames[i])
+            plugins_sonames[i] = g_slist_prepend (plugins_sonames[i], g_strdup (default_plugin_so[i]));
+
+#if !defined(__s390__) && !defined(__s390x__)
+    /* do not load the s390 plugin by default if not on s390(x) */
+    g_slist_free_full (plugins_sonames[BD_PLUGIN_S390], (GDestroyNotify) g_free);
+    plugins_sonames[BD_PLUGIN_S390] = NULL;
+#endif
+
+    /* unload the previously loaded plugins if requested */
     if (reload)
         unload_plugins ();
 
@@ -224,70 +287,55 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload, g
        defaults */
     for (i=0; i < BD_PLUGIN_UNDEF; i++)
         plugins[i].spec.so_name = NULL;
+
     if (require_plugins) {
-        /* set requested so names or defaults if so names are not specified */
+        /* set requested sonames */
         for (i=0; *(require_plugins + i); i++) {
+            plugin_name = require_plugins[i]->name;
+            required_plugins_mask |= (1 << plugin_name);
             if (require_plugins[i]->so_name) {
-                set_plugin_so_name(require_plugins[i]->name, require_plugins[i]->so_name);
-            }
-            else {
-#if !defined(__s390__) && !defined(__s390x__)
-                if (require_plugins[i]->name == BD_PLUGIN_S390) {
-                    continue;
-                }
-#endif
-
-                set_plugin_so_name(require_plugins[i]->name, default_plugin_so[require_plugins[i]->name]);
+                g_slist_free_full (plugins_sonames[plugin_name], (GDestroyNotify) g_free);
+                plugins_sonames[plugin_name] = NULL;
+                plugins_sonames[plugin_name] = g_slist_prepend(plugins_sonames[plugin_name], g_strdup (require_plugins[i]->so_name));
             }
         }
-    }
-    else {
-        /* nothing requested, just use defaults for everything */
-        for (i=0; i < BD_PLUGIN_UNDEF; i++) {
-            if (!plugins[i].spec.so_name) {
-#if !defined(__s390__) || !defined(__s390x__)
-                if (plugins[i].spec.name == BD_PLUGIN_S390) {
-                    continue;
-                }
-#endif
 
-                plugins[i].spec.so_name = default_plugin_so[i];
+        /* now remove the defaults for plugins that are not required */
+        for (i=0; (i < BD_PLUGIN_UNDEF); i++)
+            if (!(required_plugins_mask & (1 << i))) {
+                /* plugin not required */
+                g_slist_free_full (plugins_sonames[i], (GDestroyNotify) g_free);
+                plugins_sonames[i] = NULL;
             }
-        }
     }
 
-    if (!plugins[BD_PLUGIN_LVM].handle && plugins[BD_PLUGIN_LVM].spec.so_name)
-        plugins[BD_PLUGIN_LVM].handle = load_lvm_from_plugin(plugins[BD_PLUGIN_LVM].spec.so_name);
-    if (!plugins[BD_PLUGIN_BTRFS].handle && plugins[BD_PLUGIN_BTRFS].spec.so_name)
-        plugins[BD_PLUGIN_BTRFS].handle = load_btrfs_from_plugin(plugins[BD_PLUGIN_BTRFS].spec.so_name);
-    if (!plugins[BD_PLUGIN_SWAP].handle && plugins[BD_PLUGIN_SWAP].spec.so_name)
-        plugins[BD_PLUGIN_SWAP].handle = load_swap_from_plugin(plugins[BD_PLUGIN_SWAP].spec.so_name);
-    if (!plugins[BD_PLUGIN_LOOP].handle && plugins[BD_PLUGIN_LOOP].spec.so_name)
-        plugins[BD_PLUGIN_LOOP].handle = load_loop_from_plugin(plugins[BD_PLUGIN_LOOP].spec.so_name);
-    if (!plugins[BD_PLUGIN_CRYPTO].handle && plugins[BD_PLUGIN_CRYPTO].spec.so_name)
-        plugins[BD_PLUGIN_CRYPTO].handle = load_crypto_from_plugin(plugins[BD_PLUGIN_CRYPTO].spec.so_name);
-    if (!plugins[BD_PLUGIN_MPATH].handle && plugins[BD_PLUGIN_MPATH].spec.so_name)
-        plugins[BD_PLUGIN_MPATH].handle = load_mpath_from_plugin(plugins[BD_PLUGIN_MPATH].spec.so_name);
-    if (!plugins[BD_PLUGIN_DM].handle && plugins[BD_PLUGIN_DM].spec.so_name)
-        plugins[BD_PLUGIN_DM].handle = load_dm_from_plugin(plugins[BD_PLUGIN_DM].spec.so_name);
-    if (!plugins[BD_PLUGIN_MDRAID].handle && plugins[BD_PLUGIN_MDRAID].spec.so_name)
-        plugins[BD_PLUGIN_MDRAID].handle = load_mdraid_from_plugin(plugins[BD_PLUGIN_MDRAID].spec.so_name);
-    if (!plugins[BD_PLUGIN_KBD].handle && plugins[BD_PLUGIN_KBD].spec.so_name)
-        plugins[BD_PLUGIN_KBD].handle = load_kbd_from_plugin(plugins[BD_PLUGIN_KBD].spec.so_name);
-#if defined(__s390__) || defined(__s390x__)
-    if (!plugins[BD_PLUGIN_S390].handle && plugins[BD_PLUGIN_S390].spec.so_name)
-        plugins[BD_PLUGIN_S390].handle = load_s390_from_plugin(plugins[BD_PLUGIN_S390].spec.so_name);
-#endif
+    do_load (plugins_sonames);
 
     *num_loaded = 0;
-    for (i=0; (i < BD_PLUGIN_UNDEF); i++)
-        if (plugins[i].spec.so_name) {
-            if (plugins[i].handle) {
-                requested_loaded = requested_loaded && TRUE;
+    for (i=0; (i < BD_PLUGIN_UNDEF); i++) {
+        /* if this plugin was required or all plugins were required, check if it
+           was successfully loaded or not */
+        if (!require_plugins || (required_plugins_mask & (1 << i))) {
+#if !defined(__s390__) && !defined(__s390x__)
+            if (!require_plugins && (i == BD_PLUGIN_S390))
+                /* do not check the s390 plugin on different archs unless
+                   explicitly required */
+                continue;
+#endif
+            if (plugins[i].handle)
                 (*num_loaded)++;
-            } else
+            else
                 requested_loaded = FALSE;
         }
+    }
+
+    /* clear/free the config */
+    for (i=0; (i < BD_PLUGIN_UNDEF); i++) {
+        if (plugins_sonames[i]) {
+            g_slist_free_full (plugins_sonames[i], (GDestroyNotify) g_free);
+            plugins_sonames[i] = NULL;
+        }
+    }
 
     return requested_loaded;
 }
