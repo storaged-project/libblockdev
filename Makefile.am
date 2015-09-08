@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS = --enable-introspection
 
-SUBDIRS = src docs dist scripts
+SUBDIRS = src docs dist scripts data
 
 dist_noinst_DATA = features.rst roadmap.rst specs.rst LICENSE
 
@@ -16,33 +16,33 @@ TEST_PYTHON ?= $(PYTHON)
 COVERAGE ?= coverage
 
 run-ipython: all
-	GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=src/python G_MESSAGES_DEBUG=all ipython
+	GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=src/python G_MESSAGES_DEBUG=all LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ ipython
 
 run-root-ipython: all
-	sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=src/python G_MESSAGES_DEBUG=all ipython
+	sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=src/python G_MESSAGES_DEBUG=all LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ ipython
 
 check: all
 	pylint -E src/python/gi/overrides/BlockDev.py
 
 test: all check
-	@sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
+	@sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ \
 		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
 
 fast-test: all check
-	@sudo env SKIP_SLOW= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
+	@sudo env SKIP_SLOW= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ \
 		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
 
 test-all: all check
-	@sudo env FEELINGLUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
+	@sudo env FEELINGLUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ \
 		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
 
 coverage: all
-	@sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
+	@sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ \
 		$(COVERAGE) run --branch -m unittest discover -v -s tests/ -p '*_test.py'
 		$(COVERAGE) report --show-missing --include="src/*"
 
 coverage-all: all
-	@sudo env FEELING_LUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
+	@sudo env FEELING_LUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ \
 		$(COVERAGE) run --branch -m unittest discover -v -s tests/ -p '*_test.py'
 		$(COVERAGE) report --show-missing --include="src/*"
 

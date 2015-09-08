@@ -339,6 +339,7 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %license LICENSE
 %{_libdir}/libblockdev.so.*
 %{_libdir}/girepository*/BlockDev*.typelib
+%config %{_sysconfdir}/libblockdev/conf.d/00-default.cfg
 %{python2_sitearch}/gi/overrides/*
 %{python3_sitearch}/gi/overrides/BlockDev*
 %{python3_sitearch}/gi/overrides/__pycache__/BlockDev*

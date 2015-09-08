@@ -1,0 +1,3 @@
+SUBDIRS = conf.d
+
+MAINTAINERCLEANFILES = Makefile.in
