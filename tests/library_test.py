@@ -97,6 +97,134 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
 
+    # recompiles the LVM plugin
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_plugin_priority(self):
+        """Verify that preferring plugin to be used works as expected"""
+
+        # library should be successfully initialized
+        self.assertTrue(BlockDev.is_initialized())
+
+        # max LV size should be something sane (not 1024 bytes)
+        orig_max_size = BlockDev.lvm_get_max_lv_size()
+        self.assertNotEqual(orig_max_size, 1024)
+
+        # change the sources and recompile
+        os.system("sed -ri 's?BD_LVM_MAX_LV_SIZE;?1024;//test-change?' src/plugins/lvm.c > /dev/null")
+        os.system("make &>/dev/null")
+
+        # proclaim the new build a different plugin
+        os.system("cp src/plugins/.libs/libbd_lvm.so src/plugins/.libs/libbd_lvm2.so.0")
+
+        # change the sources back and recompile
+        os.system("sed -ri 's?1024;//test-change?BD_LVM_MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
+        os.system("make &>/dev/null")
+
+        # now reinit the library with the config preferring the new build
+        orig_conf_dir = os.environ.get("LIBBLOCKDEV_CONFIG_DIR")
+        os.environ["LIBBLOCKDEV_CONFIG_DIR"] = "tests/plugin_prio_conf.d"
+        self.assertTrue(BlockDev.reinit(None, True, None))
+
+        # new LVM plugin loaded, max LV size should be 1024 bytes
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm2.so.0")
+        self.assertEqual(BlockDev.lvm_get_max_lv_size(), 1024)
+
+        # reinit with the original config
+        if orig_conf_dir:
+            os.environ["LIBBLOCKDEV_CONFIG_DIR"] = orig_conf_dir
+        else:
+            del os.environ["LIBBLOCKDEV_CONFIG_DIR"]
+        self.assertTrue(BlockDev.reinit(None, True, None))
+
+        self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
+
+        # now reinit the library with the another config preferring the new
+        # build
+        orig_conf_dir = os.environ.get("LIBBLOCKDEV_CONFIG_DIR")
+        os.environ["LIBBLOCKDEV_CONFIG_DIR"] = "tests/plugin_multi_conf.d"
+        self.assertTrue(BlockDev.reinit(None, True, None))
+
+        # new LVM plugin loaded, max LV size should be 1024 bytes
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm2.so.0")
+        self.assertEqual(BlockDev.lvm_get_max_lv_size(), 1024)
+
+        # reinit with the original config
+        if orig_conf_dir:
+            os.environ["LIBBLOCKDEV_CONFIG_DIR"] = orig_conf_dir
+        else:
+            del os.environ["LIBBLOCKDEV_CONFIG_DIR"]
+        self.assertTrue(BlockDev.reinit(None, True, None))
+
+        self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
+
+        # clean after ourselves
+        os.system ("rm -f src/plugins/.libs/libbd_lvm2.so")
+
+    # recompiles the LVM plugin
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_plugin_fallback(self):
+        """Verify that fallback when loading plugins works as expected"""
+
+        # library should be successfully initialized
+        self.assertTrue(BlockDev.is_initialized())
+
+        # max LV size should be something sane (not 1024 bytes)
+        orig_max_size = BlockDev.lvm_get_max_lv_size()
+        self.assertNotEqual(orig_max_size, 1024)
+
+        # change the sources and recompile
+        os.system("sed -ri 's?gboolean check\(\) \{?gboolean check() { return FALSE;//test-change?' src/plugins/lvm.c > /dev/null")
+        os.system("make &>/dev/null")
+
+        # proclaim the new build a different plugin
+        os.system("cp src/plugins/.libs/libbd_lvm.so src/plugins/.libs/libbd_lvm2.so.0")
+
+        # change the sources back and recompile
+        os.system("sed -ri 's?gboolean check\(\) \{ return FALSE;//test-change?gboolean check() {?' src/plugins/lvm.c > /dev/null")
+        os.system("make &>/dev/null")
+
+        # now reinit the library with the config preferring the new build
+        orig_conf_dir = os.environ.get("LIBBLOCKDEV_CONFIG_DIR")
+        os.environ["LIBBLOCKDEV_CONFIG_DIR"] = "tests/plugin_prio_conf.d"
+        self.assertTrue(BlockDev.reinit(None, True, None))
+
+        # the original plugin should be loaded because the new one should fail
+        # to load (due to check() returning FALSE)
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm.so.0")
+        self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
+
+        # reinit with the original config
+        if orig_conf_dir:
+            os.environ["LIBBLOCKDEV_CONFIG_DIR"] = orig_conf_dir
+        else:
+            del os.environ["LIBBLOCKDEV_CONFIG_DIR"]
+        self.assertTrue(BlockDev.reinit(None, True, None))
+
+        self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
+
+        # now reinit the library with the another config preferring the new
+        # build
+        orig_conf_dir = os.environ.get("LIBBLOCKDEV_CONFIG_DIR")
+        os.environ["LIBBLOCKDEV_CONFIG_DIR"] = "tests/plugin_multi_conf.d"
+        self.assertTrue(BlockDev.reinit(None, True, None))
+
+        # the original plugin should be loaded because the new one should fail
+        # to load (due to check() returning FALSE)
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm.so.0")
+        self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
+
+        # reinit with the original config
+        if orig_conf_dir:
+            os.environ["LIBBLOCKDEV_CONFIG_DIR"] = orig_conf_dir
+        else:
+            del os.environ["LIBBLOCKDEV_CONFIG_DIR"]
+        self.assertTrue(BlockDev.reinit(None, True, None))
+
+        self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
+
+        # clean after ourselves
+        os.system ("rm -f src/plugins/.libs/libbd_lvm2.so")
+
     def my_log_func(self, level, msg):
         # not much to verify here
         self.assertTrue(isinstance(level, int))

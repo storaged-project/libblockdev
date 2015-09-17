@@ -258,7 +258,7 @@ bd_plugin_spec_copy
 bd_plugin_spec_free
 bd_is_plugin_available
 bd_get_available_plugin_names
-bd_func_available
+bd_get_plugin_soname
 <SUBSECTION Standard>
 BDPluginSpec
 BD_TYPE_PLUGIN_SPEC
