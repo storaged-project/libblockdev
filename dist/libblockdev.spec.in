@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     1.1
+Version:     1.2
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -459,6 +459,33 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Sep 23 2015 Vratislav Podzimek <vpodzime@redhat.com> - 1.2-1
+- Merge pull request #40 from vpodzime/master-config_support (vpodzime)
+- Add tests for configuration support (vpodzime)
+- Add a function for getting the loaded soname for a plugin (vpodzime)
+- Add the default configuration (vpodzime)
+- Load and respect configuration files when loading plugins (vpodzime)
+- Add functions for finding and processing configuration files (vpodzime)
+- Merge pull request #38 from vpodzime/master-md_superblock_size (vpodzime)
+- Better document how MD RAID superblock size should be calculated (vpodzime)
+- Merge pull request #36 from phatina/master (vpodzime)
+- BTRFS: allow an arbitrary label to be set for a btrfs volume (phatina)
+- Merge pull request #32 from phatina/master (vpodzime)
+- BTRFS: fix parsing empty partition label (phatina)
+- Merge pull request #35 from vpodzime/master (vpodzime)
+- Define env variables for sudo via the env utility (vpodzime)
+- Merge pull request #34 from dashea/python3-tests (vpodzime)
+- Use unittest.addCleanup to simplify crypto_test. (dshea)
+- Run tests with both python2 and python3 in the ci target. (dshea)
+- Fix python3 issues in the unittests. (dshea)
+- Do not run all tests in the 'ci' target (vpodzime)
+- Merge pull request #33 from clumens/master (vpodzime)
+- Add a new makefile target that does everything needed for jenkins. (clumens)
+- Synchronize the .spec file with downstream (vpodzime)
+
+* Fri Jul 24 2015 Vratislav Podzimek <vpodzime@redhat.com> - 1.1-2
+- Explicitly specify the type of the cert_data parameter (#1246096) (vpodzime)
+
 * Fri Jun 19 2015 Vratislav Podzimek <vpodzime@redhat.com> - 1.1-1
 - Clean generated boilerplate code on 'make clean' (vpodzime)
 - Merge pull request #31 from atodorov/use_lang_c (vpodzime)
