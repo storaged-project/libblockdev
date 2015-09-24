@@ -308,7 +308,7 @@ bd_md_detail_data_copy (<em class="parameter"><code><a class="link" href="libblo
 <div class="refsect2">
 <a name="bd-md-get-superblock-size"></a><h3>bd_md_get_superblock_size ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
-bd_md_get_superblock_size (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> size</code></em>,
+bd_md_get_superblock_size (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> member_size</code></em>,
                            <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *version</code></em>,
                            <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
@@ -321,8 +321,8 @@ bd_md_get_superblock_size (<em class="parameter"><code><a href="../glib/glib-Bas
 </colgroup>
 <tbody>
 <tr>
-<td class="parameter_name"><p>size</p></td>
-<td class="parameter_description"><p>size of the array</p></td>
+<td class="parameter_name"><p>member_size</p></td>
+<td class="parameter_description"><p>size of an array member</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
@@ -340,7 +340,7 @@ bd_md_get_superblock_size (<em class="parameter"><code><a href="../glib/glib-Bas
 </div>
 <div class="refsect3">
 <a name="id-1.2.8.7.9.5"></a><h4>Returns</h4>
-<p> Calculated superblock size for given array <em class="parameter"><code>size</code></em>
+<p> Calculated superblock size for an array with a given <em class="parameter"><code>member_size</code></em>
 and metadata <em class="parameter"><code>version</code></em>
 or default if unsupported <em class="parameter"><code>version</code></em>
 is used.</p>

@@ -220,7 +220,7 @@
     <keyword type="function" name="bd_plugin_spec_free ()" link="libblockdev-Plugins.html#bd-plugin-spec-free"/>
     <keyword type="function" name="bd_is_plugin_available ()" link="libblockdev-Plugins.html#bd-is-plugin-available"/>
     <keyword type="function" name="bd_get_available_plugin_names ()" link="libblockdev-Plugins.html#bd-get-available-plugin-names"/>
-    <keyword type="function" name="bd_func_available ()" link="libblockdev-Plugins.html#bd-func-available"/>
+    <keyword type="function" name="bd_get_plugin_soname ()" link="libblockdev-Plugins.html#bd-get-plugin-soname"/>
     <keyword type="enum" name="enum BDPlugin" link="libblockdev-Plugins.html#BDPlugin"/>
     <keyword type="function" name="bd_swap_error_quark ()" link="libblockdev-Swap.html#bd-swap-error-quark"/>
     <keyword type="function" name="bd_swap_mkswap ()" link="libblockdev-Swap.html#bd-swap-mkswap"/>

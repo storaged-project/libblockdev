@@ -306,7 +306,7 @@
 <ANCHOR id="bd-plugin-spec-free" href="libblockdev/libblockdev-Plugins.html#bd-plugin-spec-free">
 <ANCHOR id="bd-is-plugin-available" href="libblockdev/libblockdev-Plugins.html#bd-is-plugin-available">
 <ANCHOR id="bd-get-available-plugin-names" href="libblockdev/libblockdev-Plugins.html#bd-get-available-plugin-names">
-<ANCHOR id="bd-func-available" href="libblockdev/libblockdev-Plugins.html#bd-func-available">
+<ANCHOR id="bd-get-plugin-soname" href="libblockdev/libblockdev-Plugins.html#bd-get-plugin-soname">
 <ANCHOR id="libblockdev-Plugins.other_details" href="libblockdev/libblockdev-Plugins.html#libblockdev-Plugins.other_details">
 <ANCHOR id="BDPlugin" href="libblockdev/libblockdev-Plugins.html#BDPlugin">
 <ANCHOR id="BD-PLUGIN-LVM:CAPS" href="libblockdev/libblockdev-Plugins.html#BD-PLUGIN-LVM:CAPS">
@@ -447,6 +447,7 @@
 <ANCHOR id="TiB" href="libblockdev/libblockdev-Utils.html#TiB">
 <ANCHOR id="annotation-glossterm-allow-none" href="libblockdev/annotation-glossary.html#annotation-glossterm-allow-none">
 <ANCHOR id="annotation-glossterm-array" href="libblockdev/annotation-glossary.html#annotation-glossterm-array">
+<ANCHOR id="annotation-glossterm-element-type" href="libblockdev/annotation-glossary.html#annotation-glossterm-element-type">
 <ANCHOR id="annotation-glossterm-out" href="libblockdev/annotation-glossary.html#annotation-glossterm-out">
 <ANCHOR id="annotation-glossterm-scope notified" href="libblockdev/annotation-glossary.html#annotation-glossterm-scope notified">
 <ANCHOR id="annotation-glossterm-transfer container" href="libblockdev/annotation-glossary.html#annotation-glossterm-transfer container">
