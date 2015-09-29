@@ -7,7 +7,7 @@
 
 #define INT_FLOAT_EPS 1e-5
 #define INT_EQ_FLOAT(i, f) (ABS ((f) - (i)) < INT_FLOAT_EPS)
-#define INT_LT_FLOAT(i, f) (((i) - (f)) < INT_FLOAT_EPS)
+#define INT_LT_FLOAT(i, f) ((i < f) && (ABS ((i) - (f)) > INT_FLOAT_EPS))
 #define INT_GT_FLOAT(i, f) (((i) - (f)) > INT_FLOAT_EPS)
 
 #define NUM_PREFIXES 7
