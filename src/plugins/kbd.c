@@ -740,15 +740,26 @@ gboolean bd_kbd_bcache_destroy (gchar *bcache_device, GError **error) {
     gchar *path = NULL;
     gchar *c_set_uuid = NULL;
     gboolean success = FALSE;
+    BDKBDBcacheStats *status = NULL;
 
     if (g_str_has_prefix (bcache_device, "/dev/"))
         bcache_device += 5;
 
-    success = bd_kbd_bcache_detach (bcache_device, &c_set_uuid, error);
-    if (!success)
+    status = bd_kbd_bcache_status (bcache_device, error);
+    if (!status)
         /* error is already populated */
         return FALSE;
 
+    if (g_strcmp0 (status->state, "no cache") != 0) {
+        success = bd_kbd_bcache_detach (bcache_device, &c_set_uuid, error);
+        if (!success) {
+            /* error is already populated */
+            bd_kbd_bcache_stats_free (status);
+            return FALSE;
+        }
+    }
+
+    bd_kbd_bcache_stats_free (status);
     path = g_strdup_printf ("/sys/fs/bcache/%s/stop", c_set_uuid);
     success = echo_str_to_file ("1", path, error);
     g_free (path);
