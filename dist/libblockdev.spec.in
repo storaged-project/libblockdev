@@ -3,10 +3,9 @@ Version:     1.2
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
-URL:         https://github.com/vpodzime/libblockdev
-Source0:     https://github.com/vpodzime/libblockdev/archive/%{name}-%{version}.tar.gz
+URL:         https://github.com/rhinstaller/libblockdev
+Source0:     https://github.com/rhinstaller/libblockdev/archive/%{name}-%{version}.tar.gz
 
-BuildRequires: scons
 BuildRequires: glib2-devel
 BuildRequires: gobject-introspection-devel
 BuildRequires: cryptsetup-devel
