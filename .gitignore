@@ -1,4 +1,6 @@
 .*.swp
+.coverage
+coverage-report.log
 **/*.pyc
 *libblockdev*.tar.gz
 src/lib/plugin_apis/*.[ch]

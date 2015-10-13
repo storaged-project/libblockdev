@@ -40,11 +40,13 @@ coverage: all
 	@sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ \
 		$(COVERAGE) run --branch -m unittest discover -v -s tests/ -p '*_test.py'
 		$(COVERAGE) report --show-missing --include="src/*"
+		$(COVERAGE) report --include="src/*" > coverage-report.log
 
 coverage-all: all
 	@sudo env FEELING_LUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ \
 		$(COVERAGE) run --branch -m unittest discover -v -s tests/ -p '*_test.py'
 		$(COVERAGE) report --show-missing --include="src/*"
+		$(COVERAGE) report --include="src/*" > coverage-report.log
 
 tag:
 	@TAG="$(PACKAGE_NAME)-$(PACKAGE_VERSION)-1" ; \
@@ -86,4 +88,4 @@ release: tag
 
 ci: distcheck
 	TEST_PYTHON=python2 $(MAKE) test
-	TEST_PYTHON=python3 $(MAKE) test
+	COVERAGE=coverage3 $(MAKE) coverage
