@@ -340,6 +340,8 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %postun swap -p /sbin/ldconfig
 %post s390 -p /sbin/ldconfig
 %postun s390 -p /sbin/ldconfig
+%post kbd -p /sbin/ldconfig
+%postun kbd -p /sbin/ldconfig
 
 
 %files
