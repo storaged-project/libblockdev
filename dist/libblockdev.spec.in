@@ -32,14 +32,6 @@ BuildRequires: kmod-devel
 BuildRequires: s390utils-devel
 %endif
 
-# Do not check the python directories for automatic Requires
-# The python gi.overrides files automatically add python(abi) entries to
-# the rpm Requires, but this is backwards. Anything using libblockdev from
-# python will require python, but libblockdev will work just fine without
-# python.
-%global __requires_exclude_from ^(%{python2_sitearch}|%{python3_sitearch})/gi/overrides/.*$
-
-
 %description
 The libblockdev is a C library with GObject introspection support that can be
 used for doing low-level operations with block devices like setting up LVM,
@@ -58,6 +50,23 @@ Requires: glib2-devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev library.
 
+%package -n python2-blockdev
+Summary:     Python2 gobject-introspection bindings for libblockdev
+Requires: %{name}%{?_isa} = %{version}-%{release}
+%{?python_provide:%python_provide python2-blockdev}
+
+%description -n python2-blockdev
+This package contains enhancements to the gobject-introspection bindings for
+libblockdev in Python2.
+
+%package -n python3-blockdev
+Summary:     Python3 gobject-introspection bindings for libblockdev
+Requires: %{name}%{?_isa} = %{version}-%{release}
+%{?python_provide:%python_provide python3-blockdev}
+
+%description -n python3-blockdev
+This package contains enhancements to the gobject-introspection bindings for
+libblockdev in Python3.
 
 %package utils
 Summary:     A library with utility functions for the libblockdev library
@@ -339,9 +348,6 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_libdir}/libblockdev.so.*
 %{_libdir}/girepository*/BlockDev*.typelib
 %config %{_sysconfdir}/libblockdev/conf.d/00-default.cfg
-%{python2_sitearch}/gi/overrides/*
-%{python3_sitearch}/gi/overrides/BlockDev*
-%{python3_sitearch}/gi/overrides/__pycache__/BlockDev*
 
 %files devel
 %doc features.rst specs.rst
@@ -353,6 +359,12 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_datadir}/gtk-doc/html/libblockdev
 %{_datadir}/gir*/BlockDev*.gir
 
+%files -n python2-blockdev
+%{python2_sitearch}/gi/overrides/*
+
+%files -n python3-blockdev
+%{python3_sitearch}/gi/overrides/BlockDev*
+%{python3_sitearch}/gi/overrides/__pycache__/BlockDev*
 
 %files utils
 %{_libdir}/libbd_utils.so.*
