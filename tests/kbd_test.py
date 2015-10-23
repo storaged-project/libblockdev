@@ -262,6 +262,28 @@ class KbdTestBcacheAttachDetach(KbdBcacheTestCase):
 
         wipe_all(self.loop_dev, self.loop_dev2)
 
+    @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
+    def test_bcache_detach_destroy(self):
+        """Verify that it's possible to destroy a bcache device with no cache attached"""
+
+        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2)
+        self.assertTrue(succ)
+        self.assertTrue(dev)
+        self.bcache_dev = dev
+
+        _wait_for_bcache_setup(dev)
+
+        succ, c_set_uuid = BlockDev.kbd_bcache_detach(self.bcache_dev)
+        self.assertTrue(succ)
+        self.assertTrue(c_set_uuid)
+
+        succ = BlockDev.kbd_bcache_destroy(self.bcache_dev)
+        self.assertTrue(succ)
+        self.bcache_dev = None
+        time.sleep(1)
+
+        wipe_all(self.loop_dev, self.loop_dev2)
+
 class KbdTestBcacheGetSetMode(KbdBcacheTestCase):
     @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
     def test_bcache_get_set_mode(self):
