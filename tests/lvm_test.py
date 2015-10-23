@@ -544,6 +544,10 @@ class LvmTestLVcreateType(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "striped", [self.loop_dev, self.loop_dev2])
         self.assertTrue(succ)
 
+        # verify that the LV has the requested segtype
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
+        self.assertEqual(info.segtype, "striped")
+
         succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
         self.assertTrue(succ)
 
@@ -551,12 +555,20 @@ class LvmTestLVcreateType(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "mirror", [self.loop_dev, self.loop_dev2])
         self.assertTrue(succ)
 
+        # verify that the LV has the requested segtype
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
+        self.assertEqual(info.segtype, "mirror")
+
         succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
         self.assertTrue(succ)
 
         # try to create a raid1 LV
         succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "raid1", [self.loop_dev, self.loop_dev2])
         self.assertTrue(succ)
+
+        # verify that the LV has the requested segtype
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
+        self.assertEqual(info.segtype, "raid1")
 
         succ = BlockDev.lvm_lvremove("testVG", "testLV", True)
         self.assertTrue(succ)

@@ -1042,16 +1042,25 @@ gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar *t
     gboolean success = FALSE;
     guint64 i = 0;
     guint64 j = 0;
+    gchar *size_str = NULL;
+    gchar *type_str = NULL;
 
     args[i++] = "lvcreate";
     args[i++] = "-n";
     args[i++] = lv_name;
     args[i++] = "-L";
-    args[i++] = g_strdup_printf ("%"G_GUINT64_FORMAT"K", size/1024);
+    size_str = g_strdup_printf ("%"G_GUINT64_FORMAT"K", size/1024);
+    args[i++] = size_str;
     args[i++] = "-y";
     if (type) {
-        args[i++] = "--type";
-        args[i++] = type;
+        if (g_strcmp0 (type, "striped") == 0) {
+            args[i++] = "--stripes";
+            type_str = g_strdup_printf ("%d", pv_list_len);
+            args[i++] = type_str;
+        } else {
+            args[i++] = "--type";
+            args[i++] = type;
+        }
     }
     args[i++] = vg_name;
 
@@ -1061,7 +1070,8 @@ gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar *t
     args[i] = NULL;
 
     success = call_lvm_and_report_error (args, error);
-    g_free (args[4]);
+    g_free (size_str);
+    g_free (type_str);
     g_free (args);
 
     return success;
