@@ -463,12 +463,10 @@ guint64 bd_lvm_round_size_to_pe (guint64 size, guint64 pe_size, gboolean roundup
  * using given @pe_size.
  */
 guint64 bd_lvm_get_lv_physical_size (guint64 lv_size, guint64 pe_size, GError **error) {
-    /* TODO: should take into account mirroring and RAID in general? */
-
-    /* add one PE for metadata */
     pe_size = RESOLVE_PE_SIZE(pe_size);
 
-    return bd_lvm_round_size_to_pe (lv_size, pe_size, TRUE, error) + pe_size;
+    /* the LV just takes space rounded up the the a multiple of extent size */
+    return bd_lvm_round_size_to_pe (lv_size, pe_size, TRUE, error);
 }
 
 /**
