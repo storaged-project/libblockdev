@@ -53,6 +53,7 @@ with the libblockdev library.
 %package -n python2-blockdev
 Summary:     Python2 gobject-introspection bindings for libblockdev
 Requires: %{name}%{?_isa} = %{version}-%{release}
+Requires: pygobject3-base
 %{?python_provide:%python_provide python2-blockdev}
 
 %description -n python2-blockdev
@@ -62,6 +63,7 @@ libblockdev in Python2.
 %package -n python3-blockdev
 Summary:     Python3 gobject-introspection bindings for libblockdev
 Requires: %{name}%{?_isa} = %{version}-%{release}
+Requires: python3-gobject
 %{?python_provide:%python_provide python3-blockdev}
 
 %description -n python3-blockdev
