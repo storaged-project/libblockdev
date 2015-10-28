@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-LVM.html" title="LVM">
 <link rel="next" href="libblockdev-Mpath.html" title="Mpath">
-<meta name="generator" content="GTK-Doc V1.21.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.24 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -271,6 +271,7 @@ bytes unless specified otherwise.</p>
 <a name="bd-md-error-quark"></a><h3>bd_md_error_quark ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
 bd_md_error_quark (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -279,6 +280,7 @@ bd_md_error_quark (<em class="parameter"><code><span class="type">void</span></c
 bd_md_examine_data_copy (<em class="parameter"><code><a class="link" href="libblockdev-MD-RAID.html#BDMDExamineData" title="BDMDExamineData"><span class="type">BDMDExamineData</span></a> *data</code></em>);</pre>
 <p>Creates a new copy of <em class="parameter"><code>data</code></em>
 .</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -287,6 +289,7 @@ bd_md_examine_data_copy (<em class="parameter"><code><a class="link" href="libbl
 bd_md_examine_data_free (<em class="parameter"><code><a class="link" href="libblockdev-MD-RAID.html#BDMDExamineData" title="BDMDExamineData"><span class="type">BDMDExamineData</span></a> *data</code></em>);</pre>
 <p>Frees <em class="parameter"><code>data</code></em>
 .</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -295,6 +298,7 @@ bd_md_examine_data_free (<em class="parameter"><code><a class="link" href="libbl
 bd_md_detail_data_free (<em class="parameter"><code><a class="link" href="libblockdev-MD-RAID.html#BDMDDetailData" title="BDMDDetailData"><span class="type">BDMDDetailData</span></a> *data</code></em>);</pre>
 <p>Frees <em class="parameter"><code>data</code></em>
 .</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -303,6 +307,7 @@ bd_md_detail_data_free (<em class="parameter"><code><a class="link" href="libblo
 bd_md_detail_data_copy (<em class="parameter"><code><a class="link" href="libblockdev-MD-RAID.html#BDMDDetailData" title="BDMDDetailData"><span class="type">BDMDDetailData</span></a> *data</code></em>);</pre>
 <p>Creates a new copy of <em class="parameter"><code>data</code></em>
 .</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -344,7 +349,6 @@ bd_md_get_superblock_size (<em class="parameter"><code><a href="../glib/glib-Bas
 and metadata <em class="parameter"><code>version</code></em>
 or default if unsupported <em class="parameter"><code>version</code></em>
 is used.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -409,7 +413,6 @@ bd_md_create (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html
 <a name="id-1.2.8.7.10.5"></a><h4>Returns</h4>
 <p> whether the new MD RAID device <em class="parameter"><code>device_name</code></em>
 was successfully created or not</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -444,7 +447,6 @@ bd_md_destroy (<em class="parameter"><code><a href="../glib/glib-Basic-Types.htm
 <a name="id-1.2.8.7.11.5"></a><h4>Returns</h4>
 <p> whether the MD RAID metadata was successfully destroyed on <em class="parameter"><code>device</code></em>
 or not</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -479,7 +481,6 @@ bd_md_deactivate (<em class="parameter"><code><a href="../glib/glib-Basic-Types.
 <a name="id-1.2.8.7.12.5"></a><h4>Returns</h4>
 <p> whether the RAID device <em class="parameter"><code>device_name</code></em>
 was successfully deactivated or not</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -530,7 +531,6 @@ was successfully activated or not</p>
 <p>Note: either <em class="parameter"><code>members</code></em>
 or <em class="parameter"><code>uuid</code></em>
 (or both) have to be specified.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -565,7 +565,6 @@ bd_md_run (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gc
 <a name="id-1.2.8.7.14.5"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>raid_name</code></em>
 was successfully started or not</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -603,7 +602,6 @@ was successfully nominated (added to its
 appropriate RAID) or not</p>
 <p>Note: may start the MD RAID if it becomes ready by adding <em class="parameter"><code>device</code></em>
 .</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -641,7 +639,6 @@ was successfully denominated (added to its
 appropriate RAID) or not</p>
 <p>Note: may start the MD RAID if it becomes ready by adding <em class="parameter"><code>device</code></em>
 .</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -700,7 +697,6 @@ no actual redundancy. In this case it is necessary to explicitly grow the
 array all at once rather than manage it in the sense of adding spares.</p>
 <p>Whether the new device will be added as a spare or an active member is
 decided by mdadm.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -751,7 +747,6 @@ as failed before removing</p></td>
 <p> whether the <em class="parameter"><code>device</code></em>
 was successfully removed from the <em class="parameter"><code>raid_name</code></em>
 RAID or not.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -786,7 +781,6 @@ bd_md_examine (<em class="parameter"><code><a href="../glib/glib-Basic-Types.htm
 <a name="id-1.2.8.7.19.5"></a><h4>Returns</h4>
 <p> information about the MD RAID extracted from the <em class="parameter"><code>device</code></em>
 </p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -897,7 +891,6 @@ bd_md_detail (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html
 <a name="id-1.2.8.7.22.5"></a><h4>Returns</h4>
 <p> information about the MD RAID <em class="parameter"><code>raid_name</code></em>
 </p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -932,7 +925,6 @@ bd_md_node_from_name (<em class="parameter"><code><a href="../glib/glib-Basic-Ty
 <a name="id-1.2.8.7.23.5"></a><h4>Returns</h4>
 <p> path to the <em class="parameter"><code>name</code></em>
 MD RAID's device node or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -967,7 +959,6 @@ bd_md_name_from_node (<em class="parameter"><code><a href="../glib/glib-Basic-Ty
 <a name="id-1.2.8.7.24.5"></a><h4>Returns</h4>
 <p> <em class="parameter"><code>name</code></em>
 of the MD RAID the device node belongs to or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
-<p></p>
 </div>
 </div>
 </div>
@@ -1050,7 +1041,6 @@ of the MD RAID the device node belongs to or <a href="../glib/glib-Standard-Macr
 </div>
 </div>
 <div class="footer">
-<hr>
-          Generated by GTK-Doc V1.21.1</div>
+<hr>Generated by GTK-Doc V1.24</div>
 </body>
 </html>

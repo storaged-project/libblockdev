@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-Swap.html" title="Swap">
 <link rel="next" href="libblockdev-s390.html" title="s390">
-<meta name="generator" content="GTK-Doc V1.21.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.24 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -274,7 +274,6 @@ cache to</p></td>
 <p> whether the <em class="parameter"><code>c_set_uuid</code></em>
 cache was successfully attached to <em class="parameter"><code>bcache_device</code></em>
 or not</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -320,7 +319,6 @@ bd_kbd_bcache_create (<em class="parameter"><code><a href="../glib/glib-Basic-Ty
 <div class="refsect3">
 <a name="id-1.2.12.7.3.5"></a><h4>Returns</h4>
 <p> whether the bcache device was successfully created or not</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -355,7 +353,6 @@ bd_kbd_bcache_destroy (<em class="parameter"><code><a href="../glib/glib-Basic-T
 <a name="id-1.2.12.7.4.5"></a><h4>Returns</h4>
 <p> whether the bcache device <em class="parameter"><code>bcache_device</code></em>
 was successfully destroyed or not</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -365,9 +362,8 @@ was successfully destroyed or not</p>
 bd_kbd_bcache_detach (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *bcache_device</code></em>,
                       <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **c_set_uuid</code></em>,
                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
-<p>Note: Flushes the cache first.</p>
 <div class="refsect3">
-<a name="id-1.2.12.7.5.5"></a><h4>Parameters</h4>
+<a name="id-1.2.12.7.5.4"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -387,13 +383,17 @@ bd_kbd_bcache_detach (<em class="parameter"><code><a href="../glib/glib-Basic-Ty
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any)
-Returns: whether the bcache device <em class="parameter"><code>bcache_device</code></em>
-was successfully destroyed or not. </p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
+</div>
+<div class="refsect3">
+<a name="id-1.2.12.7.5.5"></a><h4>Returns</h4>
+<p> whether the bcache device <em class="parameter"><code>bcache_device</code></em>
+was successfully destroyed or not</p>
+<p>Note: Flushes the cache first.</p>
 </div>
 </div>
 <hr>
@@ -503,7 +503,6 @@ bd_kbd_bcache_get_mode (<em class="parameter"><code><a href="../glib/glib-Basic-
 <a name="id-1.2.12.7.8.5"></a><h4>Returns</h4>
 <p> current mode of the <em class="parameter"><code>bcache_device</code></em>
 </p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -538,7 +537,6 @@ bd_kbd_bcache_get_mode_from_str (<em class="parameter"><code><a href="../glib/gl
 <a name="id-1.2.12.7.9.5"></a><h4>Returns</h4>
 <p> mode matching the <em class="parameter"><code>mode_str</code></em>
 given or <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-MODE-UNKNOWN:CAPS"><code class="literal">BD_KBD_MODE_UNKNOWN</code></a> in case of no match</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -613,7 +611,6 @@ bd_kbd_bcache_set_mode (<em class="parameter"><code><a href="../glib/glib-Basic-
 <div class="refsect3">
 <a name="id-1.2.12.7.11.5"></a><h4>Returns</h4>
 <p> whether the mode was successfully set or not</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -623,6 +620,7 @@ bd_kbd_bcache_set_mode (<em class="parameter"><code><a href="../glib/glib-Basic-
 bd_kbd_bcache_stats_copy (<em class="parameter"><code><a class="link" href="libblockdev-KernelBlockDevices.html#BDKBDBcacheStats" title="BDKBDBcacheStats"><span class="type">BDKBDBcacheStats</span></a> *data</code></em>);</pre>
 <p>Creates a new copy of <em class="parameter"><code>data</code></em>
 .</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -631,6 +629,7 @@ bd_kbd_bcache_stats_copy (<em class="parameter"><code><a class="link" href="libb
 bd_kbd_bcache_stats_free (<em class="parameter"><code><a class="link" href="libblockdev-KernelBlockDevices.html#BDKBDBcacheStats" title="BDKBDBcacheStats"><span class="type">BDKBDBcacheStats</span></a> *data</code></em>);</pre>
 <p>Frees <em class="parameter"><code>data</code></em>
 .</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -674,6 +673,7 @@ is set). </p>
 <a name="bd-kbd-error-quark"></a><h3>bd_kbd_error_quark ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
 bd_kbd_error_quark (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -725,7 +725,6 @@ zRAM devices were successfully created or not</p>
 and <em class="parameter"><code>nstreams</code></em>
 (if given) have to be &gt;= <em class="parameter"><code>num_devices</code></em>
 !**</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -754,7 +753,6 @@ bd_kbd_zram_destroy_devices (<em class="parameter"><code><a href="../glib/glib-E
 <p>The only way how to destroy zRAM device right now is to unload the 'zram'
 module and thus destroy all of them. That's why this function doesn't allow
 specification of which devices should be destroyed.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -798,6 +796,7 @@ bd_kbd_zram_get_stats (<em class="parameter"><code><a href="../glib/glib-Basic-T
 bd_kbd_zram_stats_copy (<em class="parameter"><code><a class="link" href="libblockdev-KernelBlockDevices.html#BDKBDZramStats" title="BDKBDZramStats"><span class="type">BDKBDZramStats</span></a> *data</code></em>);</pre>
 <p>Creates a new copy of <em class="parameter"><code>data</code></em>
 .</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -806,6 +805,7 @@ bd_kbd_zram_stats_copy (<em class="parameter"><code><a class="link" href="libblo
 bd_kbd_zram_stats_free (<em class="parameter"><code><a class="link" href="libblockdev-KernelBlockDevices.html#BDKBDZramStats" title="BDKBDZramStats"><span class="type">BDKBDZramStats</span></a> *data</code></em>);</pre>
 <p>Frees <em class="parameter"><code>data</code></em>
 .</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
 </div>
 <div class="refsect1">
@@ -981,7 +981,6 @@ bd_kbd_zram_stats_free (<em class="parameter"><code><a class="link" href="libblo
 </div>
 </div>
 <div class="footer">
-<hr>
-          Generated by GTK-Doc V1.21.1</div>
+<hr>Generated by GTK-Doc V1.24</div>
 </body>
 </html>

@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-blockdev-library.html" title="blockdev library">
 <link rel="next" href="libblockdev-Crypto.html" title="Crypto">
-<meta name="generator" content="GTK-Doc V1.21.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.24 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -285,6 +285,7 @@
 <a name="bd-btrfs-error-quark"></a><h3>bd_btrfs_error_quark ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
 bd_btrfs_error_quark (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -293,6 +294,7 @@ bd_btrfs_error_quark (<em class="parameter"><code><span class="type">void</span>
 bd_btrfs_device_info_free (<em class="parameter"><code><a class="link" href="libblockdev-BTRFS.html#BDBtrfsDeviceInfo" title="BDBtrfsDeviceInfo"><span class="type">BDBtrfsDeviceInfo</span></a> *info</code></em>);</pre>
 <p>Frees <em class="parameter"><code>info</code></em>
 .</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -301,6 +303,7 @@ bd_btrfs_device_info_free (<em class="parameter"><code><a class="link" href="lib
 bd_btrfs_device_info_copy (<em class="parameter"><code><a class="link" href="libblockdev-BTRFS.html#BDBtrfsDeviceInfo" title="BDBtrfsDeviceInfo"><span class="type">BDBtrfsDeviceInfo</span></a> *info</code></em>);</pre>
 <p>Creates a new copy of <em class="parameter"><code>info</code></em>
 .</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -309,6 +312,7 @@ bd_btrfs_device_info_copy (<em class="parameter"><code><a class="link" href="lib
 bd_btrfs_subvolume_info_free (<em class="parameter"><code><a class="link" href="libblockdev-BTRFS.html#BDBtrfsSubvolumeInfo" title="BDBtrfsSubvolumeInfo"><span class="type">BDBtrfsSubvolumeInfo</span></a> *info</code></em>);</pre>
 <p>Frees <em class="parameter"><code>info</code></em>
 .</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -317,6 +321,7 @@ bd_btrfs_subvolume_info_free (<em class="parameter"><code><a class="link" href="
 bd_btrfs_subvolume_info_copy (<em class="parameter"><code><a class="link" href="libblockdev-BTRFS.html#BDBtrfsSubvolumeInfo" title="BDBtrfsSubvolumeInfo"><span class="type">BDBtrfsSubvolumeInfo</span></a> *info</code></em>);</pre>
 <p>Creates a new copy of <em class="parameter"><code>info</code></em>
 .</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -325,6 +330,7 @@ bd_btrfs_subvolume_info_copy (<em class="parameter"><code><a class="link" href="
 bd_btrfs_filesystem_info_free (<em class="parameter"><code><a class="link" href="libblockdev-BTRFS.html#BDBtrfsFilesystemInfo" title="BDBtrfsFilesystemInfo"><span class="type">BDBtrfsFilesystemInfo</span></a> *info</code></em>);</pre>
 <p>Frees <em class="parameter"><code>info</code></em>
 .</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -333,6 +339,7 @@ bd_btrfs_filesystem_info_free (<em class="parameter"><code><a class="link" href=
 bd_btrfs_filesystem_info_copy (<em class="parameter"><code><a class="link" href="libblockdev-BTRFS.html#BDBtrfsFilesystemInfo" title="BDBtrfsFilesystemInfo"><span class="type">BDBtrfsFilesystemInfo</span></a> *info</code></em>);</pre>
 <p>Creates a new copy of <em class="parameter"><code>info</code></em>
 .</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
 <hr>
 <div class="refsect2">
@@ -387,7 +394,6 @@ or not</p>
 <p>See mkfs.btrfs(8) for details about <em class="parameter"><code>data_level</code></em>
 , <em class="parameter"><code>md_level</code></em>
 and btrfs in general.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -429,7 +435,6 @@ bd_btrfs_add_device (<em class="parameter"><code><a href="../glib/glib-Basic-Typ
 <p> whether the <em class="parameter"><code>device</code></em>
 was successfully added to the <em class="parameter"><code>mountpoint</code></em>
 btrfs volume or not</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -471,7 +476,6 @@ bd_btrfs_remove_device (<em class="parameter"><code><a href="../glib/glib-Basic-
 <p> whether the <em class="parameter"><code>device</code></em>
 was successfully removed from the <em class="parameter"><code>mountpoint</code></em>
 btrfs volume or not</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -513,7 +517,6 @@ bd_btrfs_create_subvolume (<em class="parameter"><code><a href="../glib/glib-Bas
 <p> whether the <em class="parameter"><code>mountpoint</code></em>
 /<em class="parameter"><code>name</code></em>
 subvolume was successfully created or not</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -555,7 +558,6 @@ bd_btrfs_delete_subvolume (<em class="parameter"><code><a href="../glib/glib-Bas
 <p> whether the <em class="parameter"><code>mountpoint</code></em>
 /<em class="parameter"><code>name</code></em>
 subvolume was successfully deleted or not</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -592,7 +594,6 @@ bd_btrfs_get_default_subvolume_id (<em class="parameter"><code><a href="../glib/
 volume's default subvolume. If 0,
 <em class="parameter"><code>error</code></em>
 ) may be set to indicate error</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -635,7 +636,6 @@ bd_btrfs_set_default_subvolume (<em class="parameter"><code><a href="../glib/gli
 volume's default subvolume was correctly set
 to <em class="parameter"><code>subvol_id</code></em>
 or not</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -683,7 +683,6 @@ bd_btrfs_create_snapshot (<em class="parameter"><code><a href="../glib/glib-Basi
 <p> whether the <em class="parameter"><code>dest</code></em>
 snapshot of <em class="parameter"><code>source</code></em>
 was successfully created or not</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -798,7 +797,6 @@ bd_btrfs_filesystem_info (<em class="parameter"><code><a href="../glib/glib-Basi
 <a name="id-1.2.3.7.20.5"></a><h4>Returns</h4>
 <p> information about the <em class="parameter"><code>device</code></em>
 's volume's filesystem or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -854,7 +852,6 @@ or not</p>
 <p>See mkfs.btrfs(8) for details about <em class="parameter"><code>data_level</code></em>
 , <em class="parameter"><code>md_level</code></em>
 and btrfs in general.</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -896,7 +893,6 @@ bd_btrfs_resize (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 <p> whether the <em class="parameter"><code>mountpoint</code></em>
 filesystem was successfully resized to <em class="parameter"><code>size</code></em>
 or not</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -930,7 +926,6 @@ bd_btrfs_check (<em class="parameter"><code><a href="../glib/glib-Basic-Types.ht
 <div class="refsect3">
 <a name="id-1.2.3.7.23.5"></a><h4>Returns</h4>
 <p> whether the filesystem was successfully checked or not</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -964,7 +959,6 @@ bd_btrfs_repair (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 <div class="refsect3">
 <a name="id-1.2.3.7.24.5"></a><h4>Returns</h4>
 <p> whether the filesystem was successfully checked and repaired or not</p>
-<p></p>
 </div>
 </div>
 <hr>
@@ -1007,7 +1001,6 @@ bd_btrfs_change_label (<em class="parameter"><code><a href="../glib/glib-Basic-T
 filesystem was successfully set
 to <em class="parameter"><code>label</code></em>
 or not</p>
-<p></p>
 </div>
 </div>
 </div>
@@ -1083,7 +1076,6 @@ or not</p>
 </div>
 </div>
 <div class="footer">
-<hr>
-          Generated by GTK-Doc V1.21.1</div>
+<hr>Generated by GTK-Doc V1.24</div>
 </body>
 </html>
