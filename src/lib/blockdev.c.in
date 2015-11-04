@@ -481,8 +481,8 @@ gboolean bd_ensure_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func
  *                   for the plugin, the default is used) or %NULL to load all
  *                   plugins
  * @log_func: (allow-none) (scope notified): logging function to use
- * @loaded_plugin_names: (allow-none) (out) (transfer container): names of the successfully
- *                                                                loaded plugins
+ * @loaded_plugin_names: (allow-none) (out) (transfer container) (array zero-terminated=1): names
+ *                       of the successfully loaded plugins
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the library was successfully initialized with all the
