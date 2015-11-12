@@ -15,18 +15,24 @@ GIDIR = src/lib
 TEST_PYTHON ?= $(PYTHON)
 COVERAGE ?= coverage
 
+TEST_SUITE_LOG ?= test-suite-$(TEST_PYTHON).log
+PYLINT_LOG ?= pylint.log
+
 run-ipython: all
 	GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=src/python G_MESSAGES_DEBUG=all LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ ipython
 
 run-root-ipython: all
 	sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=src/python G_MESSAGES_DEBUG=all LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ ipython
 
-check: all
+check: all pylint
+
+pylint:
 	pylint -E src/python/gi/overrides/BlockDev.py
 
 test: all check
+	@rm -f $(TEST_SUITE_LOG)
 	@sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ \
-		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
+		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p '*_test.py' 2>&1 | tee -a $(TEST_SUITE_LOG)
 
 fast-test: all check
 	@sudo env SKIP_SLOW= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ \
@@ -37,8 +43,9 @@ test-all: all check
 		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
 
 coverage: all
+	@rm -f $(TEST_SUITE_LOG)
 	@sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ \
-		$(COVERAGE) run --branch -m unittest discover -v -s tests/ -p '*_test.py'
+		$(COVERAGE) run --branch -m unittest discover -v -s tests/ -p '*_test.py' 2>&1 | tee -a $(TEST_SUITE_LOG)
 		$(COVERAGE) report --show-missing --include="src/*"
 		$(COVERAGE) report --include="src/*" > coverage-report.log
 
@@ -87,5 +94,6 @@ release: tag
 	$(MAKE) archive
 
 ci: distcheck
+	$(MAKE) pylint > $(PYLINT_LOG)
 	TEST_PYTHON=python2 $(MAKE) test
-	COVERAGE=coverage3 $(MAKE) coverage
+	TEST_PYTHON=python3 COVERAGE=coverage3 $(MAKE) coverage
