@@ -1736,17 +1736,17 @@ gboolean bd_lvm_cache_create_cached_lv (gchar *vg_name, gchar *lv_name, guint64 
     gboolean success = FALSE;
     gchar *name = NULL;
 
-    success = bd_lvm_lvcreate (vg_name, lv_name, data_size, NULL, slow_pvs, error);
-    if (!success) {
-        g_prefix_error (error, "Failed to create the data LV: ");
-        return FALSE;
-    }
-
     name = g_strdup_printf ("%s_cache", lv_name);
     success = bd_lvm_cache_create_pool (vg_name, name, cache_size, md_size, mode, flags, fast_pvs, error);
     if (!success) {
         g_prefix_error (error, "Failed to create the cache pool '%s': ", name);
         g_free (name);
+        return FALSE;
+    }
+
+    success = bd_lvm_lvcreate (vg_name, lv_name, data_size, NULL, slow_pvs, error);
+    if (!success) {
+        g_prefix_error (error, "Failed to create the data LV: ");
         return FALSE;
     }
 
