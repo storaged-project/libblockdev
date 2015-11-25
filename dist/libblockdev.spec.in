@@ -474,6 +474,15 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Nov 25 2015 Vratislav Podzimek <vpodzime@redhat.com> - 1.3-4
+- Create the cache pool before the to-be-cached LV (vpodzime)
+
+* Thu Nov 05 2015 Robert Kuska <rkuska@redhat.com> - 1.3-3
+- Rebuilt for Python3.5 rebuild
+
+* Wed Nov 04 2015 Vratislav Podzimek <vpodzime@redhat.com> - 1.3-2
+- Fix the annotation of bd_try_init in blockdev.c (vpodzime)
+
 * Mon Oct 26 2015 Vratislav Podzimek <vpodzime@redhat.com> - 1.3-1
 - Add missing python GI requires (vpodzime)
 - Merge pull request #49 from dashea/libblockdev-python (vpodzime)
