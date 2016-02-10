@@ -65,6 +65,7 @@ typedef struct BDLVMPVdata {
     gchar *pv_name;
     gchar *pv_uuid;
     guint64 pv_free;
+    guint64 pv_size;
     guint64 pe_start;
     gchar *vg_name;
     gchar *vg_uuid;
