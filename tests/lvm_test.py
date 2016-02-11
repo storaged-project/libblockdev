@@ -238,7 +238,7 @@ class LvmTestPVcreateRemove(LvmPVonlyTestCase):
         self.assertTrue(succ)
 
         # this time try to specify data_alignment and metadata_size
-        succ = BlockDev.lvm_pvcreate(self.loop_dev, 2048, 4096)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 2*1024**2, 4*1024**2)
         self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
