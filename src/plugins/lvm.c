@@ -56,6 +56,7 @@ BDLVMPVdata* bd_lvm_pvdata_copy (BDLVMPVdata *data) {
     new_data->pv_name = g_strdup (data->pv_name);
     new_data->pv_uuid = g_strdup (data->pv_uuid);
     new_data->pv_free = data->pv_free;
+    new_data->pv_size = data->pv_size;
     new_data->pe_start = data->pe_start;
     new_data->vg_name = g_strdup (data->vg_name);
     new_data->vg_size = data->vg_size;
@@ -260,6 +261,12 @@ static BDLVMPVdata* get_pv_data_from_table (GHashTable *table, gboolean free_tab
         data->pv_free = g_ascii_strtoull (value, NULL, 0);
     else
         data->pv_free = 0;
+
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_PV_SIZE");
+    if (value)
+        data->pv_size = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->pv_size = 0;
 
     value = (gchar*) g_hash_table_lookup (table, "LVM2_PE_START");
     if (value)
@@ -665,7 +672,7 @@ gboolean bd_lvm_pvscan (gchar *device, gboolean update_cache, GError **error) {
 BDLVMPVdata* bd_lvm_pvinfo (gchar *device, GError **error) {
     gchar *args[10] = {"pvs", "--unit=b", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--noheadings",
-                       "-o", "pv_name,pv_uuid,pv_free,pe_start,vg_name,vg_uuid,vg_size," \
+                       "-o", "pv_name,pv_uuid,pv_free,pv_size,pe_start,vg_name,vg_uuid,vg_size," \
                        "vg_free,vg_extent_size,vg_extent_count,vg_free_count,pv_count",
                        device, NULL};
     GHashTable *table = NULL;
@@ -685,7 +692,7 @@ BDLVMPVdata* bd_lvm_pvinfo (gchar *device, GError **error) {
 
     for (lines_p = lines; *lines_p; lines_p++) {
         table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 12)) {
+        if (table && (num_items == 13)) {
             g_clear_error (error);
             g_strfreev (lines);
             return get_pv_data_from_table (table, TRUE);
@@ -709,7 +716,7 @@ BDLVMPVdata* bd_lvm_pvinfo (gchar *device, GError **error) {
 BDLVMPVdata** bd_lvm_pvs (GError **error) {
     gchar *args[9] = {"pvs", "--unit=b", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--noheadings",
-                       "-o", "pv_name,pv_uuid,pv_free,pe_start,vg_name,vg_uuid,vg_size," \
+                       "-o", "pv_name,pv_uuid,pv_free,pv_size,pe_start,vg_name,vg_uuid,vg_size," \
                        "vg_free,vg_extent_size,vg_extent_count,vg_free_count,pv_count",
                        NULL};
     GHashTable *table = NULL;
@@ -743,7 +750,7 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
 
     for (lines_p = lines; *lines_p; lines_p++) {
         table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 12)) {
+        if (table && (num_items == 13)) {
             /* valid line, try to parse and record it */
             pvdata = get_pv_data_from_table (table, TRUE);
             if (pvdata)
