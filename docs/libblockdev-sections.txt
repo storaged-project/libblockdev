@@ -175,6 +175,7 @@ bd_lvm_pvinfo
 bd_lvm_pvs
 bd_lvm_vgcreate
 bd_lvm_vgremove
+bd_lvm_vgrename
 bd_lvm_vgactivate
 bd_lvm_vgdeactivate
 bd_lvm_vgextend

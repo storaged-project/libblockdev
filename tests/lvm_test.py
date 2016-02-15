@@ -350,6 +350,31 @@ class LvmTestVGcreateRemove(LvmPVVGTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.lvm_vgremove("testVG")
 
+class LvmTestVGrename(LvmPVVGTestCase):
+    def test_vgrename(self):
+        """Verify that it is possible to rename a VG"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        self.assertTrue(succ)
+
+        # try rename
+        succ = BlockDev.lvm_vgrename("testVG", "testVG_new")
+        self.assertTrue(succ)
+
+        # rename back
+        succ = BlockDev.lvm_vgrename("testVG_new", "testVG")
+        self.assertTrue(succ)
+
+        # (hopefully) non-existing VG
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_vgrename("testVG_new", "testVG")
+
 class LvmTestVGactivateDeactivate(LvmPVVGTestCase):
     def test_vgactivate_vgdeactivate(self):
         """Verify that it is possible to (de)activate a VG"""
