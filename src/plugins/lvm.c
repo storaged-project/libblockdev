@@ -825,6 +825,20 @@ gboolean bd_lvm_vgremove (gchar *vg_name, GError **error) {
 }
 
 /**
+ * bd_lvm_vgrename:
+ * @old_vg_name: old name of the VG to rename
+ * @new_vg_name: new name for the @old_vg_name VG
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the VG was successfully renamed or not
+ */
+gboolean bd_lvm_vgrename (gchar *old_vg_name, gchar *new_vg_name, GError **error) {
+    gchar *args[4] = {"vgrename", old_vg_name, new_vg_name, NULL};
+
+    return call_lvm_and_report_error (args, error);
+}
+
+/**
  * bd_lvm_vgactivate:
  * @vg_name: name of the to be activated VG
  * @error: (out): place to store error (if any)
