@@ -208,6 +208,25 @@ Requires: glib2-devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev-lvm plugin/library.
 
+%package lvm-dbus
+Summary:     The LVM plugin for the libblockdev library
+Requires: %{name}-utils%{?_isa} >= 1.4
+# Requires: lvm2-dbus? (TBD)
+
+%description lvm-dbus
+The libblockdev library plugin (and in the same time a standalone library)
+providing the LVM-related functionality utilizing the LVM DBus API.
+
+%package lvm-dbus-devel
+Summary:     Development files for the libblockdev-lvm-dbus plugin/library
+Requires: %{name}-lvm-dbus%{?_isa} = %{version}-%{release}
+Requires: %{name}-utils-devel%{?_isa} >= 1.4
+Requires: glib2-devel
+
+%description lvm-dbus-devel
+This package contains header files and pkg-config files needed for development
+with the libblockdev-lvm-dbus plugin/library.
+
 
 %package mdraid
 Summary:     The MD RAID plugin for the libblockdev library
@@ -334,6 +353,8 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %postun loop -p /sbin/ldconfig
 %post lvm -p /sbin/ldconfig
 %postun lvm -p /sbin/ldconfig
+%post lvm-dbus -p /sbin/ldconfig
+%postun lvm-dbus -p /sbin/ldconfig
 %post mdraid -p /sbin/ldconfig
 %postun mdraid -p /sbin/ldconfig
 %post mpath -p /sbin/ldconfig
@@ -431,6 +452,15 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 
 %files lvm-devel
 %{_libdir}/libbd_lvm.so
+%dir %{_includedir}/blockdev
+%{_includedir}/blockdev/lvm.h
+
+%files lvm-dbus
+%{_libdir}/libbd_lvm-dbus.so.*
+%config %{_sysconfdir}/libblockdev/conf.d/10-lvm-dbus.cfg
+
+%files lvm-dbus-devel
+%{_libdir}/libbd_lvm-dbus.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/lvm.h
 
