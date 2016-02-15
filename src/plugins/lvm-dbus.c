@@ -1279,6 +1279,20 @@ gboolean bd_lvm_vgremove (gchar *vg_name, GError **error) {
 }
 
 /**
+ * bd_lvm_vgrename:
+ * @old_vg_name: old name of the VG to rename
+ * @new_vg_name: new name for the @old_vg_name VG
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the VG was successfully removed or not
+ */
+gboolean bd_lvm_vgrename (gchar *old_vg_name, gchar *new_vg_name, GError **error) {
+    GVariant *params = g_variant_new ("(s)", new_vg_name);
+    call_lvm_obj_method_sync (old_vg_name, VG_INTF, "Rename", params, NULL, error);
+    return ((*error) == NULL);
+}
+
+/**
  * bd_lvm_vgactivate:
  * @vg_name: name of the to be activated VG
  * @error: (out): place to store error (if any)
