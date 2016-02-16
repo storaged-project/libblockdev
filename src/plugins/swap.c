@@ -130,7 +130,7 @@ gboolean bd_swap_swapon (gchar *device, gint priority, GError **error) {
     }
 
     page_size = getpagesize ();
-    page_size = CLAMP (page_size, 2048, page_size);
+    page_size = MAX (2048, page_size);
     io_status = g_io_channel_seek_position (dev_file, page_size - 10, G_SEEK_SET, &tmp_error);
     if (io_status != G_IO_STATUS_NORMAL) {
         g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UNKNOWN_STATE,
