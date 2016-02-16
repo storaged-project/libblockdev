@@ -11,7 +11,10 @@ if not BlockDev.is_initialized():
 class LibraryOpsTestCase(unittest.TestCase):
     log = ""
 
-    def tearDown(self):
+    def setUp(self):
+        self.addCleanup(self._clean_up)
+
+    def _clean_up(self):
         # change the sources back and recompile
         os.system("sed -ri 's?1024;//test-change?BD_LVM_MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
         os.system("make &> /dev/null")

@@ -69,7 +69,7 @@ class S390UnloadTest(unittest.TestCase):
             self.assertNotIn("s390", BlockDev.get_available_plugin_names())
 
     @unittest.skipUnless(os.uname()[4].startswith('s390'), "s390x architecture required")
-    def tearDown(self):
+    def setUp(self):
         # make sure the library is initialized with all plugins loaded for other
         # tests
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.addCleanup(BlockDev.reinit, None, True, None)

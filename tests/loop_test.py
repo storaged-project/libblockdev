@@ -9,10 +9,11 @@ if not BlockDev.is_initialized():
 
 class LoopTestCase(unittest.TestCase):
     def setUp(self):
+        self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("loop_test", 1024**3)
         self.loop = None
 
-    def tearDown(self):
+    def _clean_up(self):
         try:
             BlockDev.loop_teardown(self.loop)
         except:
@@ -48,10 +49,10 @@ class LoopTestCase(unittest.TestCase):
         self.assertEqual(f_name, self.dev_file)
 
 class LoopUnloadTest(unittest.TestCase):
-    def tearDown(self):
+    def setUp(self):
         # make sure the library is initialized with all plugins loaded for other
         # tests
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.addCleanup(BlockDev.reinit, None, True, None)
 
     def test_check_low_version(self):
         """Verify that checking the minimum losetup version works as expected"""

@@ -206,6 +206,7 @@ class LvmPVonlyTestCase(unittest.TestCase):
     #       first)
     #     * some complex test for pvs, vgs, lvs, pvinfo, vginfo and lvinfo
     def setUp(self):
+        self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("lvm_test", 1024**3)
         self.dev_file2 = create_sparse_tempfile("lvm_test", 1024**3)
         succ, loop = BlockDev.loop_setup(self.dev_file)
@@ -217,7 +218,7 @@ class LvmPVonlyTestCase(unittest.TestCase):
             raise RuntimeError("Failed to setup loop device for testing")
         self.loop_dev2 = "/dev/%s" % loop
 
-    def tearDown(self):
+    def _clean_up(self):
         try:
             BlockDev.lvm_pvremove(self.loop_dev)
         except:
@@ -337,13 +338,13 @@ class LvmTestPVs(LvmPVonlyTestCase):
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmPVVGTestCase(LvmPVonlyTestCase):
-    def tearDown(self):
+    def _clean_up(self):
         try:
             BlockDev.lvm_vgremove("testVG")
         except:
             pass
 
-        LvmPVonlyTestCase.tearDown(self)
+        LvmPVonlyTestCase._clean_up(self)
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmTestVGcreateRemove(LvmPVVGTestCase):
@@ -523,13 +524,13 @@ class LvmTestVGs(LvmPVVGTestCase):
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmPVVGLVTestCase(LvmPVVGTestCase):
-    def tearDown(self):
+    def _clean_up(self):
         try:
             BlockDev.lvm_lvremove("testVG", "testLV", True)
         except:
             pass
 
-        LvmPVVGTestCase.tearDown(self)
+        LvmPVVGTestCase._clean_up(self)
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmTestLVcreateRemove(LvmPVVGLVTestCase):
@@ -800,13 +801,13 @@ class LvmTestLVs(LvmPVVGLVTestCase):
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmPVVGthpoolTestCase(LvmPVVGTestCase):
-    def tearDown(self):
+    def _clean_up(self):
         try:
             BlockDev.lvm_lvremove("testVG", "testPool", True)
         except:
             pass
 
-        LvmPVVGTestCase.tearDown(self)
+        LvmPVVGTestCase._clean_up(self)
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmTestLVsAll(LvmPVVGthpoolTestCase):
@@ -884,13 +885,13 @@ class LvmTestDataMetadataLV(LvmPVVGthpoolTestCase):
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmPVVGLVthLVTestCase(LvmPVVGthpoolTestCase):
-    def tearDown(self):
+    def _clean_up(self):
         try:
             BlockDev.lvm_lvremove("testVG", "testThLV", True)
         except:
             pass
 
-        LvmPVVGthpoolTestCase.tearDown(self)
+        LvmPVVGthpoolTestCase._clean_up(self)
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmTestThLVcreate(LvmPVVGLVthLVTestCase):
@@ -923,13 +924,13 @@ class LvmTestThLVcreate(LvmPVVGLVthLVTestCase):
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmPVVGLVthLVsnapshotTestCase(LvmPVVGLVthLVTestCase):
-    def tearDown(self):
+    def _clean_up(self):
         try:
             BlockDev.lvm_lvremove("testVG", "testThLV_bak", True)
         except:
             pass
 
-        LvmPVVGLVthLVTestCase.tearDown(self)
+        LvmPVVGLVthLVTestCase._clean_up(self)
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmTestThSnapshotCreate(LvmPVVGLVthLVsnapshotTestCase):
@@ -966,13 +967,13 @@ class LvmTestThSnapshotCreate(LvmPVVGLVthLVsnapshotTestCase):
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmPVVGLVcachePoolTestCase(LvmPVVGLVTestCase):
-    def tearDown(self):
+    def _clean_up(self):
         try:
             BlockDev.lvm_lvremove("testVG", "testCache", True)
         except:
             pass
 
-        LvmPVVGLVTestCase.tearDown(self)
+        LvmPVVGLVTestCase._clean_up(self)
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmPVVGLVcachePoolCreateRemoveTestCase(LvmPVVGLVcachePoolTestCase):

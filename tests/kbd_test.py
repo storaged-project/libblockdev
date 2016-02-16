@@ -42,9 +42,10 @@ def _wait_for_bcache_setup(bcache_dev):
 
 class KbdZRAMTestCase(unittest.TestCase):
     def setUp(self):
+        self.addCleanup(self._clean_up)
         self._loaded_zram_module = False
 
-    def tearDown(self):
+    def _clean_up(self):
         # make sure we unload the module if we loaded it
         if self._loaded_zram_module:
             os.system("rmmod zram")
@@ -141,6 +142,7 @@ class KbdBcacheNodevTestCase(unittest.TestCase):
 
 class KbdBcacheTestCase(unittest.TestCase):
     def setUp(self):
+        self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("lvm_test", 10 * 1024**3)
         self.dev_file2 = create_sparse_tempfile("lvm_test", 10 * 1024**3)
         succ, loop = BlockDev.loop_setup(self.dev_file)
@@ -154,7 +156,7 @@ class KbdBcacheTestCase(unittest.TestCase):
 
         self.bcache_dev = None
 
-    def tearDown(self):
+    def _clean_up(self):
         if self.bcache_dev:
             try:
                 BlockDev.kbd_bcache_destroy(self.bcache_dev)
@@ -384,10 +386,10 @@ class KbdTestBcacheBackingCacheDevTest(KbdBcacheTestCase):
         wipe_all(self.loop_dev, self.loop_dev2)
 
 class KbdUnloadTest(unittest.TestCase):
-    def tearDown(self):
+    def setUp(self):
         # make sure the library is initialized with all plugins loaded for other
         # tests
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.addCleanup(BlockDev.reinit, None, True, None)
 
     def test_check_no_bcache_progs(self):
         """Verify that checking the availability of make-bcache works as expected"""

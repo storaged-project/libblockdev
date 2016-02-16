@@ -9,13 +9,14 @@ if not BlockDev.is_initialized():
 
 class DevMapperTestCase(unittest.TestCase):
     def setUp(self):
+        self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("lvm_test", 1024**3)
         succ, loop = BlockDev.loop_setup(self.dev_file)
         if  not succ:
             raise RuntimeError("Failed to setup loop device for testing")
         self.loop_dev = "/dev/%s" % loop
 
-    def tearDown(self):
+    def _clean_up(self):
         succ = BlockDev.loop_teardown(self.loop_dev)
         if  not succ:
             os.unlink(self.dev_file)
@@ -79,10 +80,10 @@ class DevMapperNameNodeBijection(DevMapperTestCase):
         self.assertTrue(succ)
 
 class DMUnloadTest(unittest.TestCase):
-    def tearDown(self):
+    def setUp(self):
         # make sure the library is initialized with all plugins loaded for other
         # tests
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.addCleanup(BlockDev.reinit, None, True, None)
 
     def test_check_low_version(self):
         """Verify that checking the minimum dmsetup version works as expected"""
