@@ -190,6 +190,7 @@ class LvmPVonlyTestCase(unittest.TestCase):
     #       first)
     #     * some complex test for pvs, vgs, lvs, pvinfo, vginfo and lvinfo
     def setUp(self):
+        self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("lvm_test", 1024**3)
         self.dev_file2 = create_sparse_tempfile("lvm_test", 1024**3)
         succ, loop = BlockDev.loop_setup(self.dev_file)
@@ -201,7 +202,7 @@ class LvmPVonlyTestCase(unittest.TestCase):
             raise RuntimeError("Failed to setup loop device for testing")
         self.loop_dev2 = "/dev/%s" % loop
 
-    def tearDown(self):
+    def _clean_up(self):
         try:
             BlockDev.lvm_pvremove(self.loop_dev)
         except:
@@ -315,13 +316,13 @@ class LvmTestPVs(LvmPVonlyTestCase):
         self.assertTrue(any(info.pv_uuid == all_info.pv_uuid for all_info in pvs))
 
 class LvmPVVGTestCase(LvmPVonlyTestCase):
-    def tearDown(self):
+    def _clean_up(self):
         try:
             BlockDev.lvm_vgremove("testVG")
         except:
             pass
 
-        LvmPVonlyTestCase.tearDown(self)
+        LvmPVonlyTestCase._clean_up(self)
 
 class LvmTestVGcreateRemove(LvmPVVGTestCase):
     def test_vgcreate_vgremove(self):
@@ -495,13 +496,13 @@ class LvmTestVGs(LvmPVVGTestCase):
         self.assertTrue(succ)
 
 class LvmPVVGLVTestCase(LvmPVVGTestCase):
-    def tearDown(self):
+    def _clean_up(self):
         try:
             BlockDev.lvm_lvremove("testVG", "testLV", True)
         except:
             pass
 
-        LvmPVVGTestCase.tearDown(self)
+        LvmPVVGTestCase._clean_up(self)
 
 class LvmTestLVcreateRemove(LvmPVVGLVTestCase):
     def test_lvcreate_lvremove(self):
@@ -764,10 +765,10 @@ class LvmTestLVs(LvmPVVGLVTestCase):
         self.assertEqual(len(lvs), 1)
 
 class LvmPVVGthpoolTestCase(LvmPVVGTestCase):
-    def tearDown(self):
+    def _clean_up(self):
         BlockDev.lvm_lvremove("testVG", "testPool", True)
 
-        LvmPVVGTestCase.tearDown(self)
+        LvmPVVGTestCase._clean_up(self)
 
 class LvmTestLVsAll(LvmPVVGthpoolTestCase):
     def test_lvs_all(self):
@@ -841,10 +842,10 @@ class LvmTestDataMetadataLV(LvmPVVGthpoolTestCase):
         self.assertTrue(info.attr.startswith("e"))
 
 class LvmPVVGLVthLVTestCase(LvmPVVGthpoolTestCase):
-    def tearDown(self):
+    def _clean_up(self):
         BlockDev.lvm_lvremove("testVG", "testThLV", True)
 
-        LvmPVVGthpoolTestCase.tearDown(self)
+        LvmPVVGthpoolTestCase._clean_up(self)
 
 class LvmTestThLVcreate(LvmPVVGLVthLVTestCase):
     def test_thlvcreate_thpoolname(self):
@@ -875,10 +876,10 @@ class LvmTestThLVcreate(LvmPVVGLVthLVTestCase):
         self.assertEqual(pool, "testPool")
 
 class LvmPVVGLVthLVsnapshotTestCase(LvmPVVGLVthLVTestCase):
-    def tearDown(self):
+    def _clean_up(self):
         BlockDev.lvm_lvremove("testVG", "testThLV_bak", True)
 
-        LvmPVVGLVthLVTestCase.tearDown(self)
+        LvmPVVGLVthLVTestCase._clean_up(self)
 
 class LvmTestThSnapshotCreate(LvmPVVGLVthLVsnapshotTestCase):
     def test_thsnapshotcreate(self):
@@ -913,10 +914,10 @@ class LvmTestThSnapshotCreate(LvmPVVGLVthLVsnapshotTestCase):
         self.assertIn("V", info.attr)
 
 class LvmPVVGLVcachePoolTestCase(LvmPVVGLVTestCase):
-    def tearDown(self):
+    def _clean_up(self):
         BlockDev.lvm_lvremove("testVG", "testCache", True)
 
-        LvmPVVGLVTestCase.tearDown(self)
+        LvmPVVGLVTestCase._clean_up(self)
 
 class LvmPVVGLVcachePoolCreateRemoveTestCase(LvmPVVGLVcachePoolTestCase):
     def test_cache_pool_create_remove(self):
@@ -1052,10 +1053,10 @@ class LvmPVVGcachedLVstatsTestCase(LvmPVVGLVTestCase):
         self.assertEqual(stats.mode, BlockDev.LVMCacheMode.WRITETHROUGH)
 
 class LVMUnloadTest(unittest.TestCase):
-    def tearDown(self):
+    def setUp(self):
         # make sure the library is initialized with all plugins loaded for other
         # tests
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.addCleanup(BlockDev.reinit, None, True, None)
 
     def test_check_low_version(self):
         """Verify that checking the minimum LVM version works as expected"""

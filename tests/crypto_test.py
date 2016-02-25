@@ -26,6 +26,7 @@ class CryptoTestGenerateBackupPassphrase(unittest.TestCase):
 
 class CryptoTestCase(unittest.TestCase):
     def setUp(self):
+        self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("crypto_test", 1024**3)
         self.dev_file2 = create_sparse_tempfile("crypto_test2", 1024**3)
         succ, loop = BlockDev.loop_setup(self.dev_file)
@@ -43,7 +44,7 @@ class CryptoTestCase(unittest.TestCase):
         os.write(handle, b"nobodyknows")
         os.close(handle)
 
-    def tearDown(self):
+    def _clean_up(self):
         try:
             BlockDev.crypto_luks_close("libblockdevTestLUKS")
         except:

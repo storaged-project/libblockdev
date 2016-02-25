@@ -30,6 +30,7 @@ def umount(what):
 
 class BtrfsTestCase(unittest.TestCase):
     def setUp(self):
+        self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("lvm_test", 1024**3)
         self.dev_file2 = create_sparse_tempfile("lvm_test", 1024**3)
         succ, loop = BlockDev.loop_setup(self.dev_file)
@@ -41,7 +42,7 @@ class BtrfsTestCase(unittest.TestCase):
             raise RuntimeError("Failed to setup loop device for testing")
         self.loop_dev2 = "/dev/%s" % loop
 
-    def tearDown(self):
+    def _clean_up(self):
         umount(TEST_MNT)
         succ = BlockDev.loop_teardown(self.loop_dev)
         if not succ:
@@ -440,6 +441,7 @@ class BtrfsTestChangeLabel(BtrfsTestCase):
 
 class BtrfsTooSmallTestCase (unittest.TestCase):
     def setUp(self):
+        self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("lvm_test", BlockDev.BTRFS_MIN_MEMBER_SIZE)
         self.dev_file2 = create_sparse_tempfile("lvm_test", BlockDev.BTRFS_MIN_MEMBER_SIZE//2)
         succ, loop = BlockDev.loop_setup(self.dev_file)
@@ -451,7 +453,7 @@ class BtrfsTooSmallTestCase (unittest.TestCase):
             raise RuntimeError("Failed to setup loop device for testing")
         self.loop_dev2 = "/dev/%s" % loop
 
-    def tearDown(self):
+    def _clean_up(self):
         succ = BlockDev.loop_teardown(self.loop_dev)
         if  not succ:
             os.unlink(self.dev_file)
@@ -475,6 +477,7 @@ class BtrfsTooSmallTestCase (unittest.TestCase):
 
 class BtrfsJustBigEnoughTestCase (unittest.TestCase):
     def setUp(self):
+        self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("lvm_test", BlockDev.BTRFS_MIN_MEMBER_SIZE)
         self.dev_file2 = create_sparse_tempfile("lvm_test", BlockDev.BTRFS_MIN_MEMBER_SIZE)
         succ, loop = BlockDev.loop_setup(self.dev_file)
@@ -486,7 +489,7 @@ class BtrfsJustBigEnoughTestCase (unittest.TestCase):
             raise RuntimeError("Failed to setup loop device for testing")
         self.loop_dev2 = "/dev/%s" % loop
 
-    def tearDown(self):
+    def _clean_up(self):
         succ = BlockDev.loop_teardown(self.loop_dev)
         if  not succ:
             os.unlink(self.dev_file)
@@ -527,10 +530,10 @@ class FakeBtrfsUtilsTestCase(unittest.TestCase):
         self.assertTrue(any(subvol for subvol in subvols if subvol.path == "docker/btrfs/subvolumes/f2062b736fbabbe4da752632ac4deae87fcb916add6d7d8f5cecee4cbdc41fd9"))
 
 class BTRFSUnloadTest(unittest.TestCase):
-    def tearDown(self):
+    def setUp(self):
         # make sure the library is initialized with all plugins loaded for other
         # tests
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.addCleanup(BlockDev.reinit, None, True, None)
 
     def test_check_low_version(self):
         """Verify that checking the minimum BTRFS version works as expected"""

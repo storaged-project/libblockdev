@@ -68,6 +68,7 @@ class MDNoDevTestCase(unittest.TestCase):
 
 class MDTestCase(unittest.TestCase):
     def setUp(self):
+        self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("md_test", 10 * 1024**2)
         self.dev_file2 = create_sparse_tempfile("md_test", 10 * 1024**2)
         self.dev_file3 = create_sparse_tempfile("md_test", 10 * 1024**2)
@@ -85,7 +86,7 @@ class MDTestCase(unittest.TestCase):
             raise RuntimeError("Failed to setup loop device for testing")
         self.loop_dev3 = "/dev/%s" % loop
 
-    def tearDown(self):
+    def _clean_up(self):
         try:
             BlockDev.md_deactivate("bd_test_md")
         except:
@@ -382,10 +383,10 @@ class FakeMDADMutilTest(unittest.TestCase):
 
 
 class MDUnloadTest(unittest.TestCase):
-    def tearDown(self):
+    def setUp(self):
         # make sure the library is initialized with all plugins loaded for other
         # tests
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.addCleanup(BlockDev.reinit, None, True, None)
 
     def test_check_low_version(self):
         """Verify that checking the minimum mdsetup version works as expected"""
