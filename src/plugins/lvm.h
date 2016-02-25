@@ -35,6 +35,7 @@ GQuark bd_lvm_error_quark (void);
 #define BD_LVM_ERROR bd_lvm_error_quark ()
 typedef enum {
     BD_LVM_ERROR_PARSE,
+    BD_LVM_ERROR_NOEXIST,
     BD_LVM_ERROR_DM_ERROR,
     BD_LVM_ERROR_NOT_ROOT,
     BD_LVM_ERROR_CACHE_INVAL,

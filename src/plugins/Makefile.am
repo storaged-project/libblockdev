@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libbd_btrfs.la libbd_crypto.la libbd_dm.la libbd_loop.la libbd_lvm.la libbd_mdraid.la libbd_mpath.la libbd_swap.la libbd_kbd.la
+lib_LTLIBRARIES = libbd_btrfs.la libbd_crypto.la libbd_dm.la libbd_loop.la libbd_lvm.la libbd_lvm-dbus.la libbd_mdraid.la libbd_mpath.la libbd_swap.la libbd_kbd.la
 
 if ON_S390
 lib_LTLIBRARIES += libbd_s390.la
@@ -34,6 +34,12 @@ libbd_lvm_la_LIBADD = $(GLIB_LIBS) $(DEVMAPPER_LIBS) ${builddir}/../utils/libbd_
 libbd_lvm_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 3:1:3
 libbd_lvm_la_CPPFLAGS = -I${srcdir}/../utils/
 libbd_lvm_la_SOURCES = lvm.c lvm.h
+
+libbd_lvm_dbus_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(DEVMAPPER_CFLAGS) -Wall -Wextra -Werror
+libbd_lvm_dbus_la_LIBADD = $(GLIB_LIBS) $(GIO_LIBS) $(DEVMAPPER_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_lvm_dbus_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 0:1:0
+libbd_lvm_dbus_la_CPPFLAGS = -I${srcdir}/../utils/
+libbd_lvm_dbus_la_SOURCES = lvm-dbus.c lvm.h
 
 libbd_mdraid_la_CFLAGS = $(GLIB_CFLAGS) -Wall -Wextra -Werror
 libbd_mdraid_la_LIBADD = $(GLIB_LIBS) ${builddir}/../utils/libbd_utils.la

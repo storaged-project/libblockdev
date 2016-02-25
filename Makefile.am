@@ -15,6 +15,8 @@ MAINTAINERCLEANFILES = Makefile.in aclocal.m4 config.guess config.sub \
 LIBDIRS = src/utils/.libs:src/plugins/.libs:src/lib/.libs
 GIDIR = src/lib
 
+PYTHON = python3
+
 TEST_PYTHON ?= $(PYTHON)
 COVERAGE ?= coverage
 
@@ -34,27 +36,38 @@ pylint:
 
 test: all check
 	@rm -f $(TEST_SUITE_LOG)
-	@sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ \
+	@touch $(TEST_SUITE_LOG)
+	sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
 		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p '*_test.py' 2>&1 | tee -a $(TEST_SUITE_LOG)
+	sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
+		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p 'lvm_dbus_tests.py' 2>&1 | tee -a $(TEST_SUITE_LOG)
 
 fast-test: all check
-	@sudo env SKIP_SLOW= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ \
-		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
+	sudo env SKIP_SLOW= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
+		$(TEST_PYTHON) -m unittest discover -f -v -s tests/ -p '*_test.py'
+	sudo env SKIP_SLOW= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
+		$(TEST_PYTHON) -m unittest discover -f -v -s tests/ -p 'lvm_dbus_tests.py'
 
 test-all: all check
-	@sudo env FEELINGLUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ \
+	sudo env FEELINGLUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
 		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
+	sudo env FEELINGLUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
+		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p 'lvm_dbus_tests.py'
 
 coverage: all
 	@rm -f $(TEST_SUITE_LOG)
-	@sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ \
+	@sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
 		$(COVERAGE) run --branch -m unittest discover -v -s tests/ -p '*_test.py' 2>&1 | tee -a $(TEST_SUITE_LOG)
+	@sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
+		$(COVERAGE) run --branch -m unittest discover -v -s tests/ -p 'lvm_dbus_tests.py' 2>&1 | tee -a $(TEST_SUITE_LOG)
 		$(COVERAGE) report --show-missing --include="src/*"
 		$(COVERAGE) report --include="src/*" > coverage-report.log
 
 coverage-all: all
-	@sudo env FEELING_LUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ \
+	@sudo env FEELING_LUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
 		$(COVERAGE) run --branch -m unittest discover -v -s tests/ -p '*_test.py'
+	@sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
+		$(COVERAGE) run --branch -m unittest discover -v -s tests/ -p 'lvm_dbus_tests.py'
 		$(COVERAGE) report --show-missing --include="src/*"
 		$(COVERAGE) report --include="src/*" > coverage-report.log
 

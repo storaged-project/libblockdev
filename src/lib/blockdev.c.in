@@ -27,7 +27,6 @@
 #include "plugin_apis/s390.c"
 #endif
 
-
 /**
  * SECTION: blockdev
  * @short_description: a library for doing low-level operations with block devices
@@ -282,13 +281,13 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload, g
 #endif
 
     /* unload the previously loaded plugins if requested */
-    if (reload)
+    if (reload) {
         unload_plugins ();
-
-    /* clean all so names and populate back those that are requested or the
-       defaults */
-    for (i=0; i < BD_PLUGIN_UNDEF; i++)
-        plugins[i].spec.so_name = NULL;
+        /* clean all so names and populate back those that are requested or the
+           defaults */
+        for (i=0; i < BD_PLUGIN_UNDEF; i++)
+            plugins[i].spec.so_name = NULL;
+    }
 
     if (require_plugins) {
         /* set requested sonames */

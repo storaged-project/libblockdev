@@ -35,6 +35,7 @@ AC_CONFIG_FILES([Makefile src/Makefile \
                           data/conf.d/Makefile])
 
 LIBBLOCKDEV_PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.42.2])
+LIBBLOCKDEV_PKG_CHECK_MODULES([GIO], [gio-2.0 >= 2.42.2])
 LIBBLOCKDEV_PKG_CHECK_MODULES([CRYPTSETUP], [libcryptsetup >= 1.6.7])
 LIBBLOCKDEV_PKG_CHECK_MODULES([NSS], [nss >= 3.18.0])
 LIBBLOCKDEV_PKG_CHECK_MODULES([DEVMAPPER], [devmapper >= 1.02.93])
