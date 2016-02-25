@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     1.3
+Version:     1.4
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -504,6 +504,27 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Thu Feb 25 2016 Vratislav Podzimek <vpodzime@redhat.com> - 1.4-1
+- Merge pull request #62 from vpodzime/master-clean_up (vpodzime)
+- Use addCleanup() instead of tearDown() in tests (vpodzime)
+- Merge pull request #58 from vpodzime/master-lvm_dbus_pr (vpodzime)
+- Add the VG renaming functionality (vpodzime)
+- Packaging of the lvm-dbus plugin (vpodzime)
+- The LVM DBus plugin (vpodzime)
+- Add more generic functions for logging (vpodzime)
+- Use MAX(a, b) instead of CLAMP(b, a, b) (vpodzime)
+- Merge pull request #59 from vpodzime/master-vgrename (vpodzime)
+- Add a function for renaming VGs (vpodzime)
+- Merge pull request #57 from clumens/master (vpodzime)
+- Fix error reporting when running "make test". (clumens)
+- Merge pull request #54 from vojtechtrefny/master-pvsize (vpodzime)
+- Do not try to create a PV with 4KiB metadata space (vpodzime)
+- Add pv_info to BDLVMPVdata (vtrefny)
+- btrfs now requires at least 128MiB device(s) (vpodzime)
+- Merge pull request #52 from vpodzime/master (vpodzime)
+- Round size in thpoolcreate() to KiB (vpodzime)
+- Sync the %changelog in spec with downstream (vpodzime)
+
 * Wed Nov 25 2015 Vratislav Podzimek <vpodzime@redhat.com> - 1.3-4
 - Create the cache pool before the to-be-cached LV (vpodzime)
 
