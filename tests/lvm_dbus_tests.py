@@ -720,6 +720,41 @@ class LvmTestLVresize(LvmPVVGLVTestCase):
         self.assertTrue(succ)
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
+class LvmTestLVrename(LvmPVVGLVTestCase):
+    def test_lvrename(self):
+        """Verify that it's possible to rename an LV"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_lvrename("nonexistingVG", "testLV", "newTestLV")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_lvrename("testVG", "nonexistingLV", "newTestLV")
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [self.loop_dev])
+        self.assertTrue(succ)
+
+        # rename
+        succ = BlockDev.lvm_lvrename("testVG", "testLV", "newTestLV")
+        self.assertTrue(succ)
+
+        # and back
+        succ = BlockDev.lvm_lvrename("testVG", "newTestLV", "testLV")
+        self.assertTrue(succ)
+
+        # needs a change
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_lvrename("testVG", "testLV", "testLV")
+
+@unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmTestLVsnapshots(LvmPVVGLVTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_snapshotcreate_lvorigin_snapshotmerge(self):

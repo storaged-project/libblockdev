@@ -1127,6 +1127,22 @@ gboolean bd_lvm_lvremove (gchar *vg_name, gchar *lv_name, gboolean force, GError
 }
 
 /**
+ * bd_lvm_lvrename:
+ * @vg_name: name of the VG containing the to-be-renamed LV
+ * @lv_name: name of the to-be-renamed LV
+ * @new_name: new name for the @vg_name/@lv_name LV
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @vg_name/@lv_name LV was successfully renamed to
+ * @vg_name/@new_name or not
+ */
+gboolean bd_lvm_lvrename (gchar *vg_name, gchar *lv_name, gchar *new_name, GError **error) {
+    gchar *args[5] = {"lvrename", vg_name, lv_name, new_name, NULL};
+    return call_lvm_and_report_error (args, error);
+}
+
+
+/**
  * bd_lvm_lvresize:
  * @vg_name: name of the VG containing the to-be-resized LV
  * @lv_name: name of the to-be-resized LV
