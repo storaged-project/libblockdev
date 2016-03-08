@@ -25,6 +25,7 @@
 #include <sys/fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/random.h>
+#include <locale.h>
 #include <unistd.h>
 
 #include "crypto.h"
@@ -44,6 +45,17 @@
  *
  * Sizes are given in bytes unless stated otherwise.
  */
+
+/* "C" locale to get the locale-agnostic error messages */
+static locale_t c_locale = (locale_t) 0;
+
+/**
+ * init: (skip)
+ */
+gboolean init () {
+    c_locale = newlocale (LC_ALL_MASK, "C", c_locale);
+    return TRUE;
+}
 
 /**
  * bd_crypto_error_quark: (skip)
@@ -97,7 +109,7 @@ gboolean bd_crypto_device_is_luks (const gchar *device, GError **error) {
     ret = crypt_init (&cd, device);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to initialize device: %s", strerror(-ret));
+                     "Failed to initialize device: %s", strerror_l(-ret, c_locale));
         return FALSE;
     }
 
@@ -122,14 +134,14 @@ gchar* bd_crypto_luks_uuid (const gchar *device, GError **error) {
     ret_num = crypt_init (&cd, device);
     if (ret_num != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to initialize device: %s", strerror(-ret_num));
+                     "Failed to initialize device: %s", strerror_l(-ret_num, c_locale));
         return NULL;
     }
 
     ret_num = crypt_load (cd, CRYPT_LUKS1, NULL);
     if (ret_num != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to load device: %s", strerror(-ret_num));
+                     "Failed to load device: %s", strerror_l(-ret_num, c_locale));
         crypt_free (cd);
         return NULL;
     }
@@ -158,7 +170,7 @@ gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error) {
     ret_num = crypt_init_by_name (&cd, luks_device);
     if (ret_num != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to initialize device: %s", strerror(-ret_num));
+                     "Failed to initialize device: %s", strerror_l(-ret_num, c_locale));
         return NULL;
     }
 
@@ -230,7 +242,7 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
     ret = crypt_init (&cd, device);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to initialize device: %s", strerror(-ret));
+                     "Failed to initialize device: %s", strerror_l(-ret, c_locale));
         return FALSE;
     }
 
@@ -264,7 +276,7 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
 
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
-                     "Failed to format device: %s", strerror(-ret));
+                     "Failed to format device: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
         return FALSE;
     }
@@ -273,7 +285,7 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
         ret = crypt_keyslot_add_by_volume_key (cd, CRYPT_ANY_SLOT, NULL, 0, passphrase, strlen(passphrase));
         if (ret < 0) {
             g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_ADD_KEY,
-                         "Failed to add passphrase: %s", strerror(-ret));
+                         "Failed to add passphrase: %s", strerror_l(-ret, c_locale));
             crypt_free (cd);
             return FALSE;
         }
@@ -284,7 +296,7 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
         ret = crypt_keyslot_add_by_keyfile (cd, CRYPT_ANY_SLOT, NULL, 0, key_file, 0);
         if (ret < 0) {
             g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_ADD_KEY,
-                         "Failed to add key file: %s", strerror(-ret));
+                         "Failed to add key file: %s", strerror_l(-ret, c_locale));
             crypt_free (cd);
             return FALSE;
         }
@@ -319,14 +331,14 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gcha
     ret = crypt_init (&cd, device);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to initialize device: %s", strerror(-ret));
+                     "Failed to initialize device: %s", strerror_l(-ret, c_locale));
         return FALSE;
     }
 
     ret = crypt_load (cd, CRYPT_LUKS1, NULL);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to load device's parameters: %s", strerror(-ret));
+                     "Failed to load device's parameters: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
         return FALSE;
     }
@@ -338,7 +350,7 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gcha
 
     if (ret < 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to activate device: %s", strerror(-ret));
+                     "Failed to activate device: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
         return FALSE;
     }
@@ -361,14 +373,14 @@ gboolean bd_crypto_luks_close (const gchar *luks_device, GError **error) {
     ret = crypt_init_by_name (&cd, luks_device);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to initialize device: %s", strerror(-ret));
+                     "Failed to initialize device: %s", strerror_l(-ret, c_locale));
         return FALSE;
     }
 
     ret = crypt_deactivate (cd, luks_device);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to deactivate device: %s", strerror(-ret));
+                     "Failed to deactivate device: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
         return FALSE;
     }
@@ -411,14 +423,14 @@ gboolean bd_crypto_luks_add_key (const gchar *device, const gchar *pass, const g
     ret = crypt_init (&cd, device);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to initialize device: %s", strerror(-ret));
+                     "Failed to initialize device: %s", strerror_l(-ret, c_locale));
         return FALSE;
     }
 
     ret = crypt_load (cd, CRYPT_LUKS1, NULL);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to load device's parameters: %s", strerror(-ret));
+                     "Failed to load device's parameters: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
         return FALSE;
     }
@@ -437,7 +449,7 @@ gboolean bd_crypto_luks_add_key (const gchar *device, const gchar *pass, const g
 
     if (ret < 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_ADD_KEY,
-                     "Failed to add key: %s", strerror(-ret));
+                     "Failed to add key: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
         return FALSE;
     }
@@ -470,14 +482,14 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, cons
     ret = crypt_init (&cd, device);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to initialize device: %s", strerror(-ret));
+                     "Failed to initialize device: %s", strerror_l(-ret, c_locale));
         return FALSE;
     }
 
     ret = crypt_load (cd, CRYPT_LUKS1, NULL);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to load device's parameters: %s", strerror(-ret));
+                     "Failed to load device's parameters: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
         return FALSE;
     }
@@ -490,7 +502,7 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, cons
 
     if (ret < 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEY_SLOT,
-                     "Failed to determine key slot: %s", strerror(-ret));
+                     "Failed to determine key slot: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
         return FALSE;
     }
@@ -498,7 +510,7 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, cons
     ret = crypt_keyslot_destroy (cd, ret);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_REMOVE_KEY,
-                     "Failed to remove key: %s", strerror(-ret));
+                     "Failed to remove key: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
         return FALSE;
     }
@@ -527,14 +539,14 @@ gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, cons
     ret = crypt_init (&cd, device);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to initialize device: %s", strerror(-ret));
+                     "Failed to initialize device: %s", strerror_l(-ret, c_locale));
         return FALSE;
     }
 
     ret = crypt_load (cd, CRYPT_LUKS1, NULL);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to load device's parameters: %s", strerror(-ret));
+                     "Failed to load device's parameters: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
         return FALSE;
     }
@@ -545,7 +557,7 @@ gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, cons
     ret = crypt_volume_key_get (cd, CRYPT_ANY_SLOT, volume_key, &vk_size, pass, strlen(pass));
     if (ret < 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to load device's volume key: %s", strerror(-ret));
+                     "Failed to load device's volume key: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
         return FALSE;
     }
@@ -554,7 +566,7 @@ gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, cons
     ret = crypt_keyslot_destroy (cd, ret);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_REMOVE_KEY,
-                     "Failed to remove the old passphrase: %s", strerror(-ret));
+                     "Failed to remove the old passphrase: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
         return FALSE;
     }
@@ -562,7 +574,7 @@ gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, cons
     ret = crypt_keyslot_add_by_volume_key (cd, ret, volume_key, vk_size, npass, strlen(npass));
     if (ret < 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_ADD_KEY,
-                     "Failed to add the new passphrase: %s", strerror(-ret));
+                     "Failed to add the new passphrase: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
         return FALSE;
     }
@@ -586,14 +598,14 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError *
     ret = crypt_init_by_name (&cd, luks_device);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to initialize device: %s", strerror(-ret));
+                     "Failed to initialize device: %s", strerror_l(-ret, c_locale));
         return FALSE;
     }
 
     ret = crypt_resize (cd, luks_device, size);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_RESIZE_FAILED,
-                     "Failed to resize device: %s", strerror(-ret));
+                     "Failed to resize device: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
         return FALSE;
     }
