@@ -438,6 +438,10 @@ class LvmTestVGextendReduce(LvmPVVGTestCase):
         succ = BlockDev.lvm_vgreduce("testVG", self.loop_dev2)
         self.assertTrue(succ)
 
+        # try to remove missing PVs (there are none)
+        succ = BlockDev.lvm_vgreduce("testVG", None)
+        self.assertTrue(succ)
+
 class LvmTestVGinfo(LvmPVVGTestCase):
     def test_vginfo(self):
         """Verify that it is possible to gather info about a VG"""

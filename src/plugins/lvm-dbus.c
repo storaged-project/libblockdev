@@ -1364,14 +1364,16 @@ gboolean bd_lvm_vgreduce (gchar *vg_name, gchar *device, GError **error) {
     GVariant *params = NULL;
     GVariant *extra = NULL;
 
-    pv = get_object_path (device, error);
-    if (!pv)
-        return FALSE;
+    if (device) {
+        pv = get_object_path (device, error);
+        if (!pv)
+            return FALSE;
+    }
 
-    pv_var = g_variant_new ("o", pv);
     g_variant_builder_init (&builder, G_VARIANT_TYPE_TUPLE);
     if (device) {
         /* do not remove missing */
+        pv_var = g_variant_new ("o", pv);
         g_variant_builder_add_value (&builder, g_variant_new_boolean (FALSE));
         g_variant_builder_add_value (&builder, g_variant_new_array (NULL, &pv_var, 1));
         params = g_variant_builder_end (&builder);

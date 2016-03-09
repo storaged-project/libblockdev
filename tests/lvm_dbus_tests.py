@@ -463,6 +463,10 @@ class LvmTestVGextendReduce(LvmPVVGTestCase):
         succ = BlockDev.lvm_vgreduce("testVG", self.loop_dev2)
         self.assertTrue(succ)
 
+        # try to remove missing PVs (there are none)
+        succ = BlockDev.lvm_vgreduce("testVG", None)
+        self.assertTrue(succ)
+
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmTestVGinfo(LvmPVVGTestCase):
     def test_vginfo(self):
