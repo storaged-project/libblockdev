@@ -181,6 +181,7 @@
 <ANCHOR id="bd-lvm-pvs" href="libblockdev/libblockdev-LVM.html#bd-lvm-pvs">
 <ANCHOR id="bd-lvm-vgcreate" href="libblockdev/libblockdev-LVM.html#bd-lvm-vgcreate">
 <ANCHOR id="bd-lvm-vgremove" href="libblockdev/libblockdev-LVM.html#bd-lvm-vgremove">
+<ANCHOR id="bd-lvm-vgrename" href="libblockdev/libblockdev-LVM.html#bd-lvm-vgrename">
 <ANCHOR id="bd-lvm-vgactivate" href="libblockdev/libblockdev-LVM.html#bd-lvm-vgactivate">
 <ANCHOR id="bd-lvm-vgdeactivate" href="libblockdev/libblockdev-LVM.html#bd-lvm-vgdeactivate">
 <ANCHOR id="bd-lvm-vgextend" href="libblockdev/libblockdev-LVM.html#bd-lvm-vgextend">
@@ -190,6 +191,7 @@
 <ANCHOR id="bd-lvm-lvorigin" href="libblockdev/libblockdev-LVM.html#bd-lvm-lvorigin">
 <ANCHOR id="bd-lvm-lvcreate" href="libblockdev/libblockdev-LVM.html#bd-lvm-lvcreate">
 <ANCHOR id="bd-lvm-lvremove" href="libblockdev/libblockdev-LVM.html#bd-lvm-lvremove">
+<ANCHOR id="bd-lvm-lvrename" href="libblockdev/libblockdev-LVM.html#bd-lvm-lvrename">
 <ANCHOR id="bd-lvm-lvresize" href="libblockdev/libblockdev-LVM.html#bd-lvm-lvresize">
 <ANCHOR id="bd-lvm-lvactivate" href="libblockdev/libblockdev-LVM.html#bd-lvm-lvactivate">
 <ANCHOR id="bd-lvm-lvdeactivate" href="libblockdev/libblockdev-LVM.html#bd-lvm-lvdeactivate">
@@ -219,6 +221,7 @@
 <ANCHOR id="BD-LVM-ERROR:CAPS" href="libblockdev/libblockdev-LVM.html#BD-LVM-ERROR:CAPS">
 <ANCHOR id="BDLVMError" href="libblockdev/libblockdev-LVM.html#BDLVMError">
 <ANCHOR id="BD-LVM-ERROR-PARSE:CAPS" href="libblockdev/libblockdev-LVM.html#BD-LVM-ERROR-PARSE:CAPS">
+<ANCHOR id="BD-LVM-ERROR-NOEXIST:CAPS" href="libblockdev/libblockdev-LVM.html#BD-LVM-ERROR-NOEXIST:CAPS">
 <ANCHOR id="BD-LVM-ERROR-DM-ERROR:CAPS" href="libblockdev/libblockdev-LVM.html#BD-LVM-ERROR-DM-ERROR:CAPS">
 <ANCHOR id="BD-LVM-ERROR-NOT-ROOT:CAPS" href="libblockdev/libblockdev-LVM.html#BD-LVM-ERROR-NOT-ROOT:CAPS">
 <ANCHOR id="BD-LVM-ERROR-CACHE-INVAL:CAPS" href="libblockdev/libblockdev-LVM.html#BD-LVM-ERROR-CACHE-INVAL:CAPS">

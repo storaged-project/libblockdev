@@ -140,6 +140,7 @@
     <keyword type="function" name="bd_lvm_pvs ()" link="libblockdev-LVM.html#bd-lvm-pvs"/>
     <keyword type="function" name="bd_lvm_vgcreate ()" link="libblockdev-LVM.html#bd-lvm-vgcreate"/>
     <keyword type="function" name="bd_lvm_vgremove ()" link="libblockdev-LVM.html#bd-lvm-vgremove"/>
+    <keyword type="function" name="bd_lvm_vgrename ()" link="libblockdev-LVM.html#bd-lvm-vgrename"/>
     <keyword type="function" name="bd_lvm_vgactivate ()" link="libblockdev-LVM.html#bd-lvm-vgactivate"/>
     <keyword type="function" name="bd_lvm_vgdeactivate ()" link="libblockdev-LVM.html#bd-lvm-vgdeactivate"/>
     <keyword type="function" name="bd_lvm_vgextend ()" link="libblockdev-LVM.html#bd-lvm-vgextend"/>
@@ -149,6 +150,7 @@
     <keyword type="function" name="bd_lvm_lvorigin ()" link="libblockdev-LVM.html#bd-lvm-lvorigin"/>
     <keyword type="function" name="bd_lvm_lvcreate ()" link="libblockdev-LVM.html#bd-lvm-lvcreate"/>
     <keyword type="function" name="bd_lvm_lvremove ()" link="libblockdev-LVM.html#bd-lvm-lvremove"/>
+    <keyword type="function" name="bd_lvm_lvrename ()" link="libblockdev-LVM.html#bd-lvm-lvrename"/>
     <keyword type="function" name="bd_lvm_lvresize ()" link="libblockdev-LVM.html#bd-lvm-lvresize"/>
     <keyword type="function" name="bd_lvm_lvactivate ()" link="libblockdev-LVM.html#bd-lvm-lvactivate"/>
     <keyword type="function" name="bd_lvm_lvdeactivate ()" link="libblockdev-LVM.html#bd-lvm-lvdeactivate"/>
@@ -310,6 +312,7 @@
     <keyword type="constant" name="BD_DM_ERROR_RAID_NO_EXIST" link="libblockdev-DeviceMapper.html#BD-DM-ERROR-RAID-NO-EXIST:CAPS"/>
     <keyword type="constant" name="BD_LOOP_ERROR_DEVICE" link="libblockdev-Loop.html#BD-LOOP-ERROR-DEVICE:CAPS"/>
     <keyword type="constant" name="BD_LVM_ERROR_PARSE" link="libblockdev-LVM.html#BD-LVM-ERROR-PARSE:CAPS"/>
+    <keyword type="constant" name="BD_LVM_ERROR_NOEXIST" link="libblockdev-LVM.html#BD-LVM-ERROR-NOEXIST:CAPS"/>
     <keyword type="constant" name="BD_LVM_ERROR_DM_ERROR" link="libblockdev-LVM.html#BD-LVM-ERROR-DM-ERROR:CAPS"/>
     <keyword type="constant" name="BD_LVM_ERROR_NOT_ROOT" link="libblockdev-LVM.html#BD-LVM-ERROR-NOT-ROOT:CAPS"/>
     <keyword type="constant" name="BD_LVM_ERROR_CACHE_INVAL" link="libblockdev-LVM.html#BD-LVM-ERROR-CACHE-INVAL:CAPS"/>
