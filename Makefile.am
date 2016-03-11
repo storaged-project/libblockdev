@@ -6,7 +6,7 @@ DISTCHECK_CONFIGURE_FLAGS = --enable-introspection
 
 SUBDIRS = src docs dist scripts data
 
-dist_noinst_DATA = features.rst roadmap.rst specs.rst LICENSE
+dist_noinst_DATA = features.rst roadmap.rst specs.rst LICENSE tests
 
 MAINTAINERCLEANFILES = Makefile.in aclocal.m4 config.guess config.sub \
     configure depcomp install-sh ltmain.sh missing py-compile compile ar-lib \
@@ -34,6 +34,7 @@ check: all pylint
 pylint:
 	pylint -E src/python/gi/overrides/BlockDev.py
 
+if TESTS_ENABLED
 test: all check
 	@rm -f $(TEST_SUITE_LOG)
 	@touch $(TEST_SUITE_LOG)
@@ -53,6 +54,7 @@ test-all: all check
 		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
 	sudo env FEELINGLUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
 		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p 'lvm_dbus_tests.py'
+endif # TESTS_ENABLED
 
 coverage: all
 	@rm -f $(TEST_SUITE_LOG)

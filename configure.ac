@@ -67,7 +67,10 @@ PYTHON3_EXECDIR=`$PYTHON3 -c "import distutils.sysconfig; \
 AC_SUBST(py3execdir, $PYTHON3_EXECDIR)
 AM_CONDITIONAL(USE_PYTHON3, test ${use_python3} = "yes")
 
-
+# Run tests on build?
+AC_ARG_ENABLE([tests], AS_HELP_STRING([--enable-tests], [Run tests at compile time (default=yes)]))
+test "x$enable_tests" = "x" && enable_tests="yes"
+AM_CONDITIONAL([TESTS_ENABLED], [test "x$enable_tests" = "xyes"])
 
 AC_CHECK_HEADERS([dlfcn.h string.h unistd.h sys/fcntl.h sys/ioctl.h linux/random.h glob.h syslog.h math.h],
                  [],
