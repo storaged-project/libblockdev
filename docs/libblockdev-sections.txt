@@ -227,6 +227,7 @@ bd_md_detail_data_free
 bd_md_detail_data_copy
 bd_md_get_superblock_size
 bd_md_create
+bd_md_create_with_chunk_size
 bd_md_destroy
 bd_md_deactivate
 bd_md_activate

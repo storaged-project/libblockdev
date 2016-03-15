@@ -5,7 +5,7 @@ SUBDIRS = plugin_apis
 lib_LTLIBRARIES = libblockdev.la
 libblockdev_la_CFLAGS = $(GLIB_CFLAGS)
 libblockdev_la_LIBADD = $(GLIB_LIBS) ${builddir}/../utils/libbd_utils.la
-libblockdev_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 3:1:3
+libblockdev_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 4:1:4
 libblockdev_la_CPPFLAGS = -I${srcdir}/../utils/
 libblockdev_la_SOURCES = blockdev.c blockdev.h plugins.c plugins.h
 
@@ -55,4 +55,3 @@ libinclude_HEADERS = blockdev.h plugins.h
 CLEANFILES = BlockDev-1.0.gir $(typelib_DATA)
 MAINTAINERCLEANFILES = Makefile.in blockdev.pc blockdev.c
 endif
-

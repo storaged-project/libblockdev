@@ -57,6 +57,7 @@ BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data);
 
 guint64 bd_md_get_superblock_size (guint64 member_size, gchar *version, GError **error);
 gboolean bd_md_create (gchar *device_name, gchar *level, gchar **disks, guint64 spares, gchar *version, gboolean bitmap, GError **error);
+gboolean bd_md_create_with_chunk_size (gchar *device_name, gchar *level, gchar **disks, guint64 spares, gchar *version, gboolean bitmap, guint64 chunk_size, GError **error);
 gboolean bd_md_destroy (gchar *device, GError **error);
 gboolean bd_md_deactivate (gchar *device_name, GError **error);
 gboolean bd_md_activate (gchar *device_name, gchar **members, gchar *uuid, GError **error);
