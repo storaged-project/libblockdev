@@ -215,7 +215,7 @@ gboolean check() {
     }
 
     ret = g_dbus_connection_call_sync (bus, DBUS_TOP_IFACE, DBUS_TOP_OBJ, DBUS_TOP_IFACE,
-                                       "ListNames", NULL, NULL, G_DBUS_CALL_FLAGS_NONE,
+                                       "ListActivatableNames", NULL, NULL, G_DBUS_CALL_FLAGS_NONE,
                                        -1, NULL, &error);
     if (!ret) {
         g_critical ("Failed to get available DBus services: %s", error->message);
