@@ -230,10 +230,21 @@ gboolean check() {
         found = (g_strcmp0 (g_variant_get_string (service, NULL), LVM_BUS_NAME) == 0);
         g_variant_unref (service);
     }
-
     g_variant_unref (real_ret);
 
-    return found;
+    if (!found)
+        return FALSE;
+
+    /* try to introspect the root node - i.e. check we can access it and possibly
+       autostart the service */
+    ret = g_dbus_connection_call_sync (bus, LVM_BUS_NAME, LVM_OBJ_PREFIX, DBUS_INTRO_IFACE,
+                                       "Introspect", NULL, NULL, G_DBUS_CALL_FLAGS_NONE,
+                                       -1, NULL, &error);
+    if (ret)
+        g_variant_unref (ret);
+
+    /* there has to be no error reported */
+    return (error == NULL);
 }
 
 /**
