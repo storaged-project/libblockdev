@@ -157,6 +157,27 @@ class MDTestCreateDeactivateDestroy(MDTestCase):
         succ = BlockDev.md_destroy(self.loop_dev3)
         self.assertTrue(succ)
 
+class MDTestCreateWithChunkSize(MDTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_create_with_chunk_size(self):
+        """Verify that it is possible to create and MD RAID with specific chunk size """
+
+        with wait_for_resync():
+            succ = BlockDev.md_create("bd_test_md", "raid1",
+                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
+                                      1, None, True, 524288)
+            self.assertTrue(succ)
+
+        succ = BlockDev.md_deactivate("bd_test_md")
+        self.assertTrue(succ)
+
+        succ = BlockDev.md_destroy(self.loop_dev)
+        self.assertTrue(succ)
+        succ = BlockDev.md_destroy(self.loop_dev2)
+        self.assertTrue(succ)
+        succ = BlockDev.md_destroy(self.loop_dev3)
+        self.assertTrue(succ)
+
 class MDTestActivateDeactivate(MDTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_activate_deactivate(self):

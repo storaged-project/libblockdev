@@ -402,6 +402,88 @@ gboolean bd_md_create (gchar *device_name, gchar *level, gchar **disks, guint64 
 }
 
 /**
+ * bd_md_create_with_chunk_size:
+ * @device_name: name of the device to create
+ * @level: RAID level (as understood by mdadm, see mdadm(8))
+ * @disks: (array zero-terminated=1): disks to use for the new RAID (including spares)
+ * @spares: number of spare devices
+ * @version: (allow-none): metadata version
+ * @bitmap: whether to create an internal bitmap on the device or not
+ * @chunk_size: chunk size of the device to create
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the new MD RAID device @device_name was successfully created or not
+ */
+gboolean bd_md_create_with_chunk_size (gchar *device_name, gchar *level, gchar **disks, guint64 spares, gchar *version, gboolean bitmap, guint64 chunk_size, GError **error) {
+    gchar **argv = NULL;
+    /* {"mdadm", "create", device, "--run", "level", "raid-devices",...} */
+    guint argv_len = 6;
+    guint argv_top = 0;
+    guint i = 0;
+    guint num_disks = 0;
+    gchar *level_str = NULL;
+    gchar *rdevices_str = NULL;
+    gchar *spares_str = NULL;
+    gchar *version_str = NULL;
+    gchar *chunk_str = NULL;
+    gboolean ret = FALSE;
+
+    if (spares != 0)
+        argv_len++;
+    if (version)
+        argv_len++;
+    if (bitmap)
+        argv_len++;
+    if (chunk_size != 0)
+        argv_len++;
+
+    num_disks = g_strv_length (disks);
+    argv_len += num_disks;
+
+    argv = g_new0 (gchar*, argv_len + 1);
+
+    level_str = g_strdup_printf ("--level=%s", level);
+    rdevices_str = g_strdup_printf ("--raid-devices=%"G_GUINT64_FORMAT, (num_disks - spares));
+
+    argv[argv_top++] = "mdadm";
+    argv[argv_top++] = "--create";
+    argv[argv_top++] = device_name;
+    argv[argv_top++] = "--run";
+    argv[argv_top++] = level_str;
+    argv[argv_top++] = rdevices_str;
+
+    if (spares != 0) {
+        spares_str = g_strdup_printf ("--spare-devices=%"G_GUINT64_FORMAT, spares);
+        argv[argv_top++] = spares_str;
+    }
+    if (version) {
+        version_str = g_strdup_printf ("--metadata=%s", version);
+        argv[argv_top++] = version_str;
+    }
+    if (bitmap)
+        argv[argv_top++] = "--bitmap=internal";
+    if (chunk_size != 0) {
+        chunk_str = g_strdup_printf ("--chunk=%"G_GUINT64_FORMAT, chunk_size/1024);
+        argv[argv_top++] = chunk_str;
+    }
+
+    for (i=0; i < num_disks; i++)
+        argv[argv_top++] = disks[i];
+    argv[argv_top] = NULL;
+
+    ret = bd_utils_exec_and_report_error (argv, error);
+
+    g_free (level_str);
+    g_free (rdevices_str);
+    g_free (spares_str);
+    g_free (version_str);
+    g_free (chunk_str);
+    g_free (argv);
+
+    return ret;
+}
+
+/**
  * bd_md_destroy:
  * @device: device to destroy MD RAID metadata on
  * @error: (out): place to store error (if any)

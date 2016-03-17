@@ -252,9 +252,13 @@ def md_get_superblock_size(size, version=None):
 __all__.append("md_get_superblock_size")
 
 _md_create = BlockDev.md_create
+_md_create_with_chunk_size = BlockDev.md_create_with_chunk_size
 @override(BlockDev.md_create)
-def md_create(device_name, level, disks, spares=0, version=None, bitmap=False):
-    return _md_create(device_name, level, disks, spares, version, bitmap)
+def md_create(device_name, level, disks, spares=0, version=None, bitmap=False, chunk_size=0):
+    if chunk_size == 0:
+        return _md_create(device_name, level, disks, spares, version, bitmap)
+    else:
+        return _md_create_with_chunk_size(device_name, level, disks, spares, version, bitmap, chunk_size)
 __all__.append("md_create")
 
 _md_add = BlockDev.md_add
