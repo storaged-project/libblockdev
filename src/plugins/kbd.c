@@ -22,6 +22,7 @@
 #include <syslog.h>
 #include <glob.h>
 #include <unistd.h>
+#include <locale.h>
 #include <utils.h>
 
 #include "kbd.h"
@@ -38,6 +39,17 @@
  */
 
 static const gchar * const mode_str[BD_KBD_MODE_UNKNOWN+1] = {"writethrough", "writeback", "writearound", "none", "unknown"};
+
+/* "C" locale to get the locale-agnostic error messages */
+static locale_t c_locale = (locale_t) 0;
+
+/**
+ * init: (skip)
+ */
+gboolean init () {
+    c_locale = newlocale (LC_ALL_MASK, "C", c_locale);
+    return TRUE;
+}
 
 /**
  * bd_kbd_error_quark: (skip)
@@ -138,7 +150,7 @@ static gboolean have_kernel_module (gchar *module_name, GError **error) {
     ret = kmod_module_new_from_name (ctx, module_name, &mod);
     if (ret < 0) {
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_MODULE_FAIL,
-                     "Failed to get the module: %s", strerror (-ret));
+                     "Failed to get the module: %s", strerror_l (-ret, c_locale));
         kmod_unref (ctx);
         return FALSE;
     }
@@ -169,7 +181,7 @@ static gboolean load_kernel_module (gchar *module_name, gchar *options, GError *
     ret = kmod_module_new_from_name (ctx, module_name, &mod);
     if (ret < 0) {
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_MODULE_FAIL,
-                     "Failed to get the module: %s", strerror (-ret));
+                     "Failed to get the module: %s", strerror_l (-ret, c_locale));
         kmod_unref (ctx);
         return FALSE;
     }
@@ -187,7 +199,7 @@ static gboolean load_kernel_module (gchar *module_name, gchar *options, GError *
     if (ret < 0) {
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_MODULE_FAIL,
                      "Failed to load the module '%s' with options '%s': %s",
-                     module_name, options, strerror (-ret));
+                     module_name, options, strerror_l (-ret, c_locale));
         kmod_module_unref (mod);
         kmod_unref (ctx);
         return FALSE;
@@ -219,7 +231,7 @@ static gboolean unload_kernel_module (gchar *module_name, GError **error) {
     ret = kmod_module_new_from_loaded (ctx, &list);
     if (ret < 0) {
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_MODULE_FAIL,
-                     "Failed to get the module: %s", strerror (-ret));
+                     "Failed to get the module: %s", strerror_l (-ret, c_locale));
         kmod_unref (ctx);
         return FALSE;
     }
@@ -244,7 +256,7 @@ static gboolean unload_kernel_module (gchar *module_name, GError **error) {
     if (ret < 0) {
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_MODULE_FAIL,
                      "Failed to unload the module '%s': %s",
-                     module_name, strerror (-ret));
+                     module_name, strerror_l (-ret, c_locale));
         kmod_module_unref (mod);
         kmod_unref (ctx);
         return FALSE;

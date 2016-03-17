@@ -5,6 +5,7 @@ import overrides_hack
 import shutil
 import subprocess
 import six
+import locale
 
 from utils import create_sparse_tempfile
 from gi.repository import BlockDev, GLib
@@ -169,6 +170,30 @@ class CryptoTestRemoveKey(CryptoTestCase):
 
         succ = BlockDev.crypto_luks_remove_key(self.loop_dev, PASSWD, None)
         self.assertTrue(succ)
+
+class CryptoTestErrorLocale(CryptoTestCase):
+    def setUp(self):
+        self._orig_loc = None
+        CryptoTestCase.setUp(self)
+        self._orig_loc = ".".join(locale.getdefaultlocale())
+
+    def _clean_up(self):
+        CryptoTestCase._clean_up(self)
+        if self._orig_loc:
+            locale.setlocale(locale.LC_ALL, self._orig_loc)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_error_locale_key(self):
+        """Verify that the error msg is locale agnostic"""
+
+        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None, 0)
+        self.assertTrue(succ)
+
+        locale.setlocale(locale.LC_ALL, "cs_CZ.UTF-8")
+        try:
+            BlockDev.crypto_luks_remove_key(self.loop_dev, "wrong-passphrase", None)
+        except GLib.GError as e:
+            self.assertIn("Operation not permitted", str(e))
 
 class CryptoTestChangeKey(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
