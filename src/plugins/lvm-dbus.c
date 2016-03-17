@@ -275,6 +275,9 @@ static gchar** get_existing_objects (gchar *obj_prefix, GError **error) {
     intro_v = g_dbus_connection_call_sync (bus, LVM_BUS_NAME, obj_prefix, DBUS_INTRO_IFACE,
                                            "Introspect", NULL, NULL, G_DBUS_CALL_FLAGS_NONE,
                                            -1, NULL, error);
+    if (!intro_v)
+        /* no introspection data, something went wrong (error must be set) */
+        return NULL;
 
     g_variant_get (intro_v, "(s)", &intro_data);
     info = g_dbus_node_info_new_for_xml (intro_data, error);
