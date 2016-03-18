@@ -32,7 +32,7 @@ run-root-ipython: all
 check: all pylint
 
 pylint:
-	pylint -E src/python/gi/overrides/BlockDev.py
+	python3-pylint -E src/python/gi/overrides/BlockDev.py
 
 if TESTS_ENABLED
 test: all check
@@ -113,5 +113,4 @@ release: tag
 
 ci: distcheck
 	$(MAKE) pylint > $(PYLINT_LOG)
-	TEST_PYTHON=python2 $(MAKE) test
 	TEST_PYTHON=python3 COVERAGE=coverage3 $(MAKE) coverage
