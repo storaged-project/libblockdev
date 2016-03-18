@@ -35,6 +35,7 @@ src/lib/blockdev.pc
 **/Makefile
 **/Makefile.in
 **/*.stamp
+**/*.bak
 docs/libblockdev-decl-list.txt
 docs/libblockdev-decl.txt
 docs/libblockdev-overrides.txt
