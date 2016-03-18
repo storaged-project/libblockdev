@@ -111,6 +111,10 @@ class MDTestCase(unittest.TestCase):
             BlockDev.md_deactivate("bd_test_md")
         except:
             pass
+        try:
+            BlockDev.md_deactivate(BlockDev.md_node_from_name("bd_test_md"))
+        except:
+            pass
 
         succ = BlockDev.loop_teardown(self.loop_dev)
         if  not succ:
@@ -240,6 +244,10 @@ class MDTestNominateDenominate(MDTestCase):
 
         with wait_for_resync():
             succ = BlockDev.md_nominate(self.loop_dev)
+            self.assertTrue(succ)
+
+        with wait_for_resync():
+            succ = BlockDev.md_deactivate(BlockDev.md_node_from_name("bd_test_md"))
             self.assertTrue(succ)
 
 class MDTestNominateDenominateActive(MDTestCase):
