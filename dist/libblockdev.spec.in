@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     1.4
+Version:     1.5
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -63,7 +63,7 @@ libblockdev in Python2.
 %package -n python3-blockdev
 Summary:     Python3 gobject-introspection bindings for libblockdev
 Requires: %{name}%{?_isa} = %{version}-%{release}
-Requires: python3-gobject
+Requires: python3-gobject-base
 %{?python_provide:%python_provide python3-blockdev}
 
 %description -n python3-blockdev
@@ -504,6 +504,38 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Mon Mar 21 2016 Vratislav Podzimek <vpodzime@redhat.com> - 1.5-1
+- Merge pull request #72 from vpodzime/master-faster_tests (vpodzime)
+- Ignore all .bak files (vpodzime)
+- Use python3-pylint and skip Python 2 tests (vpodzime)
+- Try a bit harder when deactivating MD arrays in tests (vpodzime)
+- Recompile only the LVM plugin in tests (vpodzime)
+- Merge pull request #65 from vpodzime/master-loc_indep_error (vpodzime)
+- Merge pull request #70 from vojtechtrefny/master-chunk_size (vpodzime)
+- Add bd_md_create_with_chunk_size() function (vtrefny)
+- Merge pull request #68 from vpodzime/master-no_intro_data (vpodzime)
+- Merge pull request #71 from vpodzime/master-ipython3 (vpodzime)
+- Run coverage with the right config directories (vpodzime)
+- Merge pull request #67 from phatina/master (vpodzime)
+- Merge pull request #69 from vpodzime/master-lvm_dbus_autostart (vpodzime)
+- Use ipython3 for debugging and testing sessions (vpodzime)
+- Don't expect to always get introspection data from DBus (vpodzime)
+- Make invocation of tests configurable (phatina)
+- Make error messages locale agnostic (vpodzime)
+
+* Tue Mar 15 2016 Vratislav Podzimek <vpodzime@redhat.com> - 1.4-5
+- Search for the LVM DBus service in activatable names (vpodzime)
+- Better check for the LVM DBus API (vpodzime)
+
+* Wed Mar  9 2016 Vratislav Podzimek <vpodzime@redhat.com> - 1.4-4
+- Do not try to get object path of NULL in vgreduce (vpodzime)
+
+* Tue Mar  1 2016 Peter Robinson <pbrobinson@fedoraproject.org> 1.4-3
+- Depend on python3-gobject-base not python3-gobject so as to not pull in X components
+
+* Thu Feb 25 2016 Vratislav Podzimek <vpodzime@redhat.com> - 1.4-2
+- Add/fix the requirement for the LVM DBus daemon
+
 * Thu Feb 25 2016 Vratislav Podzimek <vpodzime@redhat.com> - 1.4-1
 - Merge pull request #62 from vpodzime/master-clean_up (vpodzime)
 - Use addCleanup() instead of tearDown() in tests (vpodzime)
