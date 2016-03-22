@@ -335,6 +335,23 @@ bd_part_error_quark
 </SECTION>
 
 <SECTION>
+<FILE>fs</FILE>
+BDFSExt4Info
+BDFsError
+bd_fs_error_quark
+bd_fs_wipe
+bd_fs_ext4_check
+bd_fs_ext4_get_info
+bd_fs_ext4_info_copy
+bd_fs_ext4_info_free
+bd_fs_ext4_mkfs
+bd_fs_ext4_repair
+bd_fs_ext4_resize
+bd_fs_ext4_set_label
+bd_fs_ext4_wipe
+</SECTION>
+
+<SECTION>
 <FILE>s390</FILE>
 bd_s390_error_quark
 BDS390Error
