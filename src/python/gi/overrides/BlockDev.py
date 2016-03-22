@@ -46,6 +46,7 @@ bd_plugins = { "lvm": BlockDev.Plugin.LVM,
                "mdraid": BlockDev.Plugin.MDRAID,
                "mpath": BlockDev.Plugin.MPATH,
                "kbd": BlockDev.Plugin.KBD,
+               "part": BlockDev.Plugin.PART,
                "s390": BlockDev.Plugin.S390,
 }
 
@@ -294,6 +295,13 @@ def kbd_zram_create_devices(num_devices, sizes, nstreams=None):
 __all__.append("kbd_zram_create_devices")
 
 
+_part_create_table = BlockDev.part_create_table
+@override(BlockDev.part_create_table)
+def part_create_table(disk, type, ignore_existing=True):
+    return _part_create_table(disk, type, ignore_existing)
+__all__.append("part_create_table")
+
+
 ## defined in this overrides only!
 def plugin_specs_from_names(plugin_names):
     ret = []
@@ -464,6 +472,10 @@ class KbdError(BlockDevError):
     pass
 __all__.append("KbdError")
 
+class PartError(BlockDevError):
+    pass
+__all__.append("PartError")
+
 class S390Error(BlockDevError):
     pass
 __all__.append("S390Error")
@@ -504,6 +516,9 @@ __all__.append("swap")
 
 kbd = ErrorProxy("kbd", BlockDev, [(GLib.Error, KbdError)], [not_implemented_rule])
 __all__.append("kbd")
+
+part = ErrorProxy("part", BlockDev, [(GLib.Error, PartError)], [not_implemented_rule])
+__all__.append("part")
 
 s390 = ErrorProxy("s390", BlockDev, [(GLib.Error, S390Error)], [not_implemented_rule])
 __all__.append("s390")

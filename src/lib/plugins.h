@@ -15,6 +15,7 @@ typedef enum {
     BD_PLUGIN_MDRAID,
     BD_PLUGIN_KBD,
     BD_PLUGIN_S390,
+    BD_PLUGIN_PART,
     BD_PLUGIN_UNDEF
 } BDPlugin;
 
