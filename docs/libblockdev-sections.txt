@@ -92,6 +92,7 @@ bd_utils_exec_error_quark
 BD_UTILS_EXEC_ERROR
 BDUtilsExecError
 bd_utils_exec_and_report_error
+bd_utils_exec_and_report_status_error
 bd_utils_exec_and_capture_output
 bd_utils_init_logging
 BD_UTILS_SIZE_ERROR
