@@ -25,6 +25,7 @@ typedef enum {
 } BDUtilsExecError;
 
 gboolean bd_utils_exec_and_report_error (gchar **argv, GError **error);
+gboolean bd_utils_exec_and_report_status_error (gchar **argv, gint *status, GError **error);
 gboolean bd_utils_exec_and_capture_output (gchar **argv, gchar **output, GError **error);
 gboolean bd_utils_init_logging (BDUtilsLogFunc new_log_func, GError **error);
 gint bd_utils_version_cmp (gchar *ver_string1, gchar *ver_string2, GError **error);

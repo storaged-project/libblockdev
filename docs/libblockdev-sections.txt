@@ -92,6 +92,7 @@ bd_utils_exec_error_quark
 BD_UTILS_EXEC_ERROR
 BDUtilsExecError
 bd_utils_exec_and_report_error
+bd_utils_exec_and_report_status_error
 bd_utils_exec_and_capture_output
 bd_utils_init_logging
 BD_UTILS_SIZE_ERROR
@@ -331,6 +332,23 @@ bd_part_get_flag_str
 bd_part_get_part_table_type_str
 bd_part_get_type_str
 bd_part_error_quark
+</SECTION>
+
+<SECTION>
+<FILE>fs</FILE>
+BDFSExt4Info
+BDFsError
+bd_fs_error_quark
+bd_fs_wipe
+bd_fs_ext4_check
+bd_fs_ext4_get_info
+bd_fs_ext4_info_copy
+bd_fs_ext4_info_free
+bd_fs_ext4_mkfs
+bd_fs_ext4_repair
+bd_fs_ext4_resize
+bd_fs_ext4_set_label
+bd_fs_ext4_wipe
 </SECTION>
 
 <SECTION>

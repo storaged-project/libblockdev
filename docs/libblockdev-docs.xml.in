@@ -24,6 +24,7 @@
     <xi:include href="xml/btrfs.xml"/>
     <xi:include href="xml/crypto.xml"/>
     <xi:include href="xml/dm.xml"/>
+    <xi:include href="xml/fs.xml"/>
     <xi:include href="xml/loop.xml"/>
     <xi:include href="xml/lvm.xml"/>
     <xi:include href="xml/mdraid.xml"/>

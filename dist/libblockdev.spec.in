@@ -20,6 +20,7 @@ BuildRequires: gtk-doc
 BuildRequires: glib2-doc
 BuildRequires: kmod-devel
 BuildRequires: parted-devel
+BuildRequires: libblkid-devel
 
 # Needed for the escrow tests in tests/crypto_test.py, but not used to build
 # BuildRequires: volume_key
@@ -147,6 +148,26 @@ Requires: %{name}-utils-devel%{?_isa}
 %description dm-devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev-dm plugin/library.
+
+
+%package fs
+Summary:     The FS plugin for the libblockdev library
+Requires: %{name}-utils%{?_isa} >= 0.11
+Requires: device-mapper-multipath
+
+%description fs
+The libblockdev library plugin (and in the same time a standalone library)
+providing the functionality related to operations with file systems.
+
+%package fs-devel
+Summary:     Development files for the libblockdev-fs plugin/library
+Requires: %{name}-fs%{?_isa} = %{version}-%{release}
+Requires: %{name}-utils-devel%{?_isa}
+Requires: glib2-devel
+
+%description fs-devel
+This package contains header files and pkg-config files needed for development
+with the libblockdev-fs plugin/library.
 
 
 %package kbd
@@ -334,6 +355,7 @@ Requires: %{name}%{?_isa} = %{version}-%{release}
 Requires: %{name}-btrfs%{?_isa} = %{version}-%{release}
 Requires: %{name}-crypto%{?_isa} = %{version}-%{release}
 Requires: %{name}-dm%{?_isa} = %{version}-%{release}
+Requires: %{name}-fs%{?_isa} = %{version}-%{release}
 Requires: %{name}-kbd%{?_isa} = %{version}-%{release}
 Requires: %{name}-loop%{?_isa} = %{version}-%{release}
 Requires: %{name}-lvm%{?_isa} = %{version}-%{release}
@@ -371,6 +393,8 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %postun crypto -p /sbin/ldconfig
 %post dm -p /sbin/ldconfig
 %postun dm -p /sbin/ldconfig
+%post fs -p /sbin/ldconfig
+%postun fs -p /sbin/ldconfig
 %post loop -p /sbin/ldconfig
 %postun loop -p /sbin/ldconfig
 %post lvm -p /sbin/ldconfig
@@ -451,6 +475,15 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_libdir}/libbd_dm.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/dm.h
+
+
+%files fs
+%{_libdir}/libbd_fs.so.*
+
+%files fs-devel
+%{_libdir}/libbd_fs.so
+%dir %{_includedir}/blockdev
+%{_includedir}/blockdev/fs.h
 
 
 %files kbd

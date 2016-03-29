@@ -47,6 +47,7 @@ bd_plugins = { "lvm": BlockDev.Plugin.LVM,
                "mpath": BlockDev.Plugin.MPATH,
                "kbd": BlockDev.Plugin.KBD,
                "part": BlockDev.Plugin.PART,
+               "fs": BlockDev.Plugin.FS,
                "s390": BlockDev.Plugin.S390,
 }
 
@@ -476,6 +477,10 @@ class PartError(BlockDevError):
     pass
 __all__.append("PartError")
 
+class FSError(BlockDevError):
+    pass
+__all__.append("FSError")
+
 class S390Error(BlockDevError):
     pass
 __all__.append("S390Error")
@@ -519,6 +524,9 @@ __all__.append("kbd")
 
 part = ErrorProxy("part", BlockDev, [(GLib.Error, PartError)], [not_implemented_rule])
 __all__.append("part")
+
+fs = ErrorProxy("fs", BlockDev, [(GLib.Error, FSError)], [not_implemented_rule])
+__all__.append("fs")
 
 s390 = ErrorProxy("s390", BlockDev, [(GLib.Error, S390Error)], [not_implemented_rule])
 __all__.append("s390")

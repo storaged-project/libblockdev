@@ -19,7 +19,8 @@ GIHEADERS = ${builddir}/plugin_apis/kbd.h \
 	${builddir}/plugin_apis/dm.h \
 	${builddir}/plugin_apis/loop.h \
 	${builddir}/plugin_apis/mpath.h \
-	${builddir}/plugin_apis/part.h
+	${builddir}/plugin_apis/part.h \
+	${builddir}/plugin_apis/fs.h
 
 GIHEADERS += $(wildcard ${srcdir}/../utils/*.[ch])
 GIHEADERS += blockdev.c blockdev.h plugins.c plugins.h
@@ -33,7 +34,7 @@ BlockDev-1.0.gir: libblockdev.la
 BlockDev_1_0_gir_FILES = $(GIHEADERS)
 BlockDev_1_0_gir_LIBS = libblockdev.la
 BlockDev_1_0_gir_INCLUDES = GObject-2.0
-BlockDev_1_0_gir_PACKAGES = devmapper libudev libcryptsetup libparted
+BlockDev_1_0_gir_PACKAGES = devmapper libudev libcryptsetup libparted blkid
 BlockDev_1_0_gir_CFLAGS = -I${srcdir}/../utils/
 BlockDev_1_0_gir_LDFLAGS = -lm -ldmraid -L${builddir}/../utils/ -lbd_utils
 BlockDev_1_0_gir_SCANNERFLAGS = --warn-error --warn-all --identifier-prefix=BD --symbol-prefix=bd

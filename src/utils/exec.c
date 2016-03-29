@@ -175,6 +175,51 @@ gboolean bd_utils_exec_and_report_error (gchar **argv, GError **error) {
 }
 
 /**
+ * bd_utils_exec_and_report_status_error:
+ * @argv: (array zero-terminated=1): the argv array for the call
+ * @status: (out): place to store the status
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @argv was successfully executed (no error and exit code 0) or not
+ */
+gboolean bd_utils_exec_and_report_status_error (gchar **argv, gint *status, GError **error) {
+    gboolean success = FALSE;
+    gchar *stdout_data = NULL;
+    gchar *stderr_data = NULL;
+    guint64 task_id = 0;
+
+    task_id = log_running (argv);
+    success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
+                            (GSpawnChildSetupFunc) set_c_locale, NULL,
+                            &stdout_data, &stderr_data, status, error);
+    log_out (task_id, stdout_data, stderr_data);
+    log_done (task_id, *status);
+
+    if (!success) {
+        /* error is already populated from the call */
+        return FALSE;
+    }
+
+    if (*status != 0) {
+        if (stderr_data && (g_strcmp0 ("", stderr_data) != 0)) {
+            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
+                         "Process reported exit code %d: %s", *status, stderr_data);
+            g_free (stdout_data);
+        } else {
+            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
+                         "Process reported exit code %d: %s", *status, stdout_data);
+            g_free (stderr_data);
+        }
+
+        return FALSE;
+    }
+
+    g_free (stdout_data);
+    g_free (stderr_data);
+    return TRUE;
+}
+
+/**
  * bd_utils_exec_and_capture_output:
  * @argv: (array zero-terminated=1): the argv array for the call
  * @output: (out): variable to store output to
