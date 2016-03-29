@@ -269,6 +269,26 @@ This package contains header files and pkg-config files needed for development
 with the libblockdev-mpath plugin/library.
 
 
+%package part
+Summary:     The partitioning plugin for the libblockdev library
+Requires: %{name}-utils%{?_isa} >= 0.11
+Requires: device-mapper-multipath
+
+%description part
+The libblockdev library plugin (and in the same time a standalone library)
+providing the functionality related to partitioning.
+
+%package part-devel
+Summary:     Development files for the libblockdev-part plugin/library
+Requires: %{name}-part%{?_isa} = %{version}-%{release}
+Requires: %{name}-utils-devel%{?_isa}
+Requires: glib2-devel
+
+%description part-devel
+This package contains header files and pkg-config files needed for development
+with the libblockdev-part plugin/library.
+
+
 %package swap
 Summary:     The swap plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
@@ -319,6 +339,7 @@ Requires: %{name}-loop%{?_isa} = %{version}-%{release}
 Requires: %{name}-lvm%{?_isa} = %{version}-%{release}
 Requires: %{name}-mdraid%{?_isa} = %{version}-%{release}
 Requires: %{name}-mpath%{?_isa} = %{version}-%{release}
+Requires: %{name}-part%{?_isa} = %{version}-%{release}
 Requires: %{name}-swap%{?_isa} = %{version}-%{release}
 %ifarch s390 s390x
 Requires: %{name}-s390%{?_isa} = %{version}-%{release}
@@ -360,6 +381,8 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %postun mdraid -p /sbin/ldconfig
 %post mpath -p /sbin/ldconfig
 %postun mpath -p /sbin/ldconfig
+%post part -p /sbin/ldconfig
+%postun part -p /sbin/ldconfig
 %post swap -p /sbin/ldconfig
 %postun swap -p /sbin/ldconfig
 %post s390 -p /sbin/ldconfig
@@ -482,6 +505,15 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_libdir}/libbd_mpath.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/mpath.h
+
+
+%files part
+%{_libdir}/libbd_part.so.*
+
+%files part-devel
+%{_libdir}/libbd_part.so
+%dir %{_includedir}/blockdev
+%{_includedir}/blockdev/part.h
 
 
 %files swap
