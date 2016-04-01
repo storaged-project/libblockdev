@@ -42,9 +42,9 @@ libbd_lvm_dbus_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 1:1:1
 libbd_lvm_dbus_la_CPPFLAGS = -I${srcdir}/../utils/
 libbd_lvm_dbus_la_SOURCES = lvm-dbus.c lvm.h
 
-libbd_mdraid_la_CFLAGS = $(GLIB_CFLAGS) -Wall -Wextra -Werror
-libbd_mdraid_la_LIBADD = $(GLIB_LIBS) ${builddir}/../utils/libbd_utils.la
-libbd_mdraid_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 0:1:0
+libbd_mdraid_la_CFLAGS = $(GLIB_CFLAGS) $(BYTESIZE_CFLAGS) -Wall -Wextra -Werror
+libbd_mdraid_la_LIBADD = $(GLIB_LIBS) $(BYTESIZE_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_mdraid_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 1:1:1
 libbd_mdraid_la_CPPFLAGS = -I${srcdir}/../utils/
 libbd_mdraid_la_SOURCES = mdraid.c mdraid.h
 

@@ -17,11 +17,15 @@
  * Author: Vratislav Podzimek <vpodzime@redhat.com>
  */
 
+#define _XOPEN_SOURCE  // needed for time.h
+
 #include <glib.h>
 #include <unistd.h>
 #include <utils.h>
 #include <string.h>
 #include <glob.h>
+#include <time.h>
+#include <bs_size.h>
 
 #include "mdraid.h"
 
@@ -61,6 +65,7 @@ BDMDExamineData* bd_md_examine_data_copy (BDMDExamineData *data) {
     new_data->dev_uuid = g_strdup (data->dev_uuid);
     new_data->events = data->events;
     new_data->metadata = g_strdup (data->metadata);
+    new_data->chunk_size = data->chunk_size;
     return new_data;
 }
 
@@ -173,44 +178,71 @@ static GHashTable* parse_mdadm_vars (gchar *str, gchar *item_sep, gchar *key_val
 static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean free_table, GError **error) {
     BDMDExamineData *data = g_new0 (BDMDExamineData, 1);
     gchar *value = NULL;
+    gchar *first_space = NULL;
+    BSError *bs_error = NULL;
+    struct tm tm;
+    char time_str[20];
 
-    data->level = g_strdup ((gchar*) g_hash_table_lookup (table, "MD_LEVEL"));
+    data->level = g_strdup ((gchar*) g_hash_table_lookup (table, "Raid Level"));
 
-    value = (gchar*) g_hash_table_lookup (table, "MD_DEVICES");
+    value = (gchar*) g_hash_table_lookup (table, "Raid Devices");
     if (value)
         data->num_devices = g_ascii_strtoull (value, NULL, 0);
     else
         data->num_devices = 0;
 
-    data->name = g_strdup ((gchar*) g_hash_table_lookup (table, "MD_NAME"));
+    data->name = g_strdup ((gchar*) g_hash_table_lookup (table, "Name"));
 
-    value = (gchar*) g_hash_table_lookup (table, "MD_ARRAY_SIZE");
-    if (value)
-        data->size = bd_utils_size_from_spec (value, error);
-    else
+    value = (gchar*) g_hash_table_lookup (table, "Array Size");
+    if (value) {
+        first_space = strchr (value, ' ');
+        if (first_space)
+            *first_space = '\0';
+        if (value && first_space)
+            /* Array Size is in KiB */
+            data->size = g_ascii_strtoull (value, NULL, 0) * 1024;
+    } else
         data->size = 0;
 
-    data->uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "MD_UUID"));
+    data->uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "Array UUID"));
 
-    value = (gchar*) g_hash_table_lookup (table, "MD_UPDATE_TIME");
-    if (value)
-        data->update_time = g_ascii_strtoull (value, NULL, 0);
-    else
+    value = (gchar*) g_hash_table_lookup (table, "Update Time");
+    if (value) {
+        memset(&tm, 0, sizeof(struct tm));
+        strptime(value, "%a %b %e %H:%M:%S %Y", &tm);
+        strftime(time_str, sizeof(time_str), "%s" , &tm);
+
+        data->update_time = g_ascii_strtoull (time_str, NULL, 0);
+    } else
         data->update_time = 0;
 
-    data->dev_uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "MD_DEV_UUID"));
+    data->dev_uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "Device UUID"));
 
-    value = (gchar*) g_hash_table_lookup (table, "MD_EVENTS");
+    value = (gchar*) g_hash_table_lookup (table, "Events");
     if (value)
         data->events = g_ascii_strtoull (value, NULL, 0);
     else
         data->events = 0;
 
-    value = (gchar*) g_hash_table_lookup (table, "MD_METADATA");
+    value = (gchar*) g_hash_table_lookup (table, "Version");
     if (value)
         data->metadata = g_strdup (value);
     else
         data->metadata = NULL;
+
+    value = (gchar*) g_hash_table_lookup (table, "Chunk Size");
+    if (value) {
+        BSSize size = bs_size_new_from_str (value, &bs_error);
+        if (size)
+            data->chunk_size = bs_size_get_bytes (size, NULL, &bs_error);
+
+        if (bs_error) {
+            g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE,
+                         "Failed to parse chunk size from mdexamine data: %s", bs_error->msg);
+            bs_clear_error (&bs_error);
+        }
+    } else
+        data->chunk_size = 0;
 
     if (free_table)
         g_hash_table_destroy (table);
@@ -715,7 +747,7 @@ gboolean bd_md_remove (gchar *raid_name, gchar *device, gboolean fail, GError **
  * Returns: information about the MD RAID extracted from the @device
  */
 BDMDExamineData* bd_md_examine (gchar *device, GError **error) {
-    gchar *argv[] = {"mdadm", "--examine", "--export", device, NULL};
+    gchar *argv[] = {"mdadm", "--examine", "-E", device, NULL};
     gchar *output = NULL;
     gboolean success = FALSE;
     GHashTable *table = NULL;
@@ -732,7 +764,7 @@ BDMDExamineData* bd_md_examine (gchar *device, GError **error) {
         /* error is already populated */
         return FALSE;
 
-    table = parse_mdadm_vars (output, " \n", "=", &num_items);
+    table = parse_mdadm_vars (output, "\n", ":", &num_items);
     g_free (output);
     if (!table || (num_items == 0)) {
         /* something bad happened */

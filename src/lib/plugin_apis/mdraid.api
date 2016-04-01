@@ -30,6 +30,7 @@ typedef struct BDMDExamineData {
     gchar *dev_uuid;
     guint64 events;
     gchar *metadata;
+    guint64 chunk_size;
 } BDMDExamineData;
 
 /**
@@ -50,6 +51,7 @@ BDMDExamineData* bd_md_examine_data_copy (BDMDExamineData *data) {
     new_data->dev_uuid = g_strdup (data->dev_uuid);
     new_data->events = data->events;
     new_data->metadata = g_strdup (data->metadata);
+    new_data->chunk_size = data->chunk_size;
     return new_data;
 }
 
