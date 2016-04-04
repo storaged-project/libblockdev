@@ -349,6 +349,17 @@ bd_fs_ext4_repair
 bd_fs_ext4_resize
 bd_fs_ext4_set_label
 bd_fs_ext4_wipe
+BDFSXfsInfo
+bd_fs_xfs_check
+bd_fs_xfs_get_info
+bd_fs_xfs_info_copy
+bd_fs_xfs_info_free
+bd_fs_xfs_info_get_type
+bd_fs_xfs_mkfs
+bd_fs_xfs_repair
+bd_fs_xfs_resize
+bd_fs_xfs_set_label
+bd_fs_xfs_wipe
 </SECTION>
 
 <SECTION>
