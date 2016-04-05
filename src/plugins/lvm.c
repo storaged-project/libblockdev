@@ -550,12 +550,12 @@ gboolean bd_lvm_pvcreate (gchar *device, guint64 data_alignment, guint64 metadat
     gboolean ret = FALSE;
 
     if (data_alignment != 0) {
-        dataalign_str = g_strdup_printf ("--dataalignment=%"G_GUINT64_FORMAT"b", data_alignment);
+        dataalign_str = g_strdup_printf ("--dataalignment=%"G_GUINT64_FORMAT"K", data_alignment / 1024);
         args[next_arg++] = dataalign_str;
     }
 
     if (metadata_size != 0) {
-        metadata_str = g_strdup_printf ("--metadatasize=%"G_GUINT64_FORMAT"b", metadata_size);
+        metadata_str = g_strdup_printf ("--metadatasize=%"G_GUINT64_FORMAT"K", metadata_size / 1024);
         args[next_arg++] = metadata_str;
     }
 
@@ -586,7 +586,7 @@ gboolean bd_lvm_pvresize (gchar *device, guint64 size, GError **error) {
     gboolean ret = FALSE;
 
     if (size != 0) {
-        size_str = g_strdup_printf ("%"G_GUINT64_FORMAT"b", size);
+        size_str = g_strdup_printf ("%"G_GUINT64_FORMAT"K", size / 1024);
         args[next_pos] = "--setphysicalvolumesize";
         next_pos++;
         args[next_pos] = size_str;
@@ -797,7 +797,7 @@ gboolean bd_lvm_vgcreate (gchar *name, gchar **pv_list, guint64 pe_size, GError 
 
     argv[0] = "vgcreate";
     argv[1] = "-s";
-    argv[2] = g_strdup_printf ("%"G_GUINT64_FORMAT"b", pe_size);
+    argv[2] = g_strdup_printf ("%"G_GUINT64_FORMAT"K", pe_size / 1024);
     argv[3] = name;
     for (i=4; i < (pv_list_len + 4); i++) {
         argv[i] = pv_list[i-4];
@@ -1226,7 +1226,7 @@ gboolean bd_lvm_lvsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *sna
     gchar *args[8] = {"lvcreate", "-s", "-L", NULL, "-n", snapshot_name, NULL, NULL};
     gboolean success = FALSE;
 
-    args[3] = g_strdup_printf ("%"G_GUINT64_FORMAT"b", size);
+    args[3] = g_strdup_printf ("%"G_GUINT64_FORMAT"K", size / 1024);
     args[6] = g_strdup_printf ("%s/%s", vg_name, origin_name);
 
     success = call_lvm_and_report_error (args, error);
@@ -1404,12 +1404,12 @@ gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guin
     args[3] = g_strdup_printf ("%"G_GUINT64_FORMAT"K", size/1024);
 
     if (md_size != 0) {
-        args[next_arg] = g_strdup_printf("--poolmetadatasize=%"G_GUINT64_FORMAT"b", md_size);
+        args[next_arg] = g_strdup_printf("--poolmetadatasize=%"G_GUINT64_FORMAT"K", md_size / 1024);
         next_arg++;
     }
 
     if (chunk_size != 0) {
-        args[next_arg] = g_strdup_printf("--chunksize=%"G_GUINT64_FORMAT"b", chunk_size);
+        args[next_arg] = g_strdup_printf("--chunksize=%"G_GUINT64_FORMAT"K", chunk_size / 1024);
         next_arg++;
     }
 
@@ -1445,7 +1445,7 @@ gboolean bd_lvm_thlvcreate (gchar *vg_name, gchar *pool_name, gchar *lv_name, gu
     gboolean success;
 
     args[2] = g_strdup_printf ("%s/%s", vg_name, pool_name);
-    args[4] = g_strdup_printf ("%"G_GUINT64_FORMAT"b", size);
+    args[4] = g_strdup_printf ("%"G_GUINT64_FORMAT"K", size / 1024);
 
     success = call_lvm_and_report_error (args, error);
     g_free (args[2]);
