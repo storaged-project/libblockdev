@@ -167,10 +167,13 @@ class MDTestCreateWithChunkSize(MDTestCase):
         """Verify that it is possible to create and MD RAID with specific chunk size """
 
         with wait_for_resync():
-            succ = BlockDev.md_create("bd_test_md", "raid1",
-                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, True, 524288)
+            succ = BlockDev.md_create("bd_test_md", "raid0",
+                                      [self.loop_dev, self.loop_dev2],
+                                      0, None, False, 512 * 1024)
             self.assertTrue(succ)
+
+        ex_data = BlockDev.md_examine(self.loop_dev)
+        self.assertEqual(ex_data.chunk_size, 512 * 1024)
 
         succ = BlockDev.md_deactivate("bd_test_md")
         self.assertTrue(succ)

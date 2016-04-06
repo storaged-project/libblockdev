@@ -34,7 +34,7 @@ BlockDev-1.0.gir: libblockdev.la
 BlockDev_1_0_gir_FILES = $(GIHEADERS)
 BlockDev_1_0_gir_LIBS = libblockdev.la
 BlockDev_1_0_gir_INCLUDES = GObject-2.0
-BlockDev_1_0_gir_PACKAGES = devmapper libudev libcryptsetup libparted blkid
+BlockDev_1_0_gir_PACKAGES = devmapper libudev libcryptsetup libparted blkid bytesize
 BlockDev_1_0_gir_CFLAGS = -I${srcdir}/../utils/
 BlockDev_1_0_gir_LDFLAGS = -lm -ldmraid -L${builddir}/../utils/ -lbd_utils
 BlockDev_1_0_gir_SCANNERFLAGS = --warn-error --warn-all --identifier-prefix=BD --symbol-prefix=bd
