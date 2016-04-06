@@ -260,6 +260,7 @@
 <ANCHOR id="bd-md-detail-data-copy" href="libblockdev/libblockdev-MD-RAID.html#bd-md-detail-data-copy">
 <ANCHOR id="bd-md-get-superblock-size" href="libblockdev/libblockdev-MD-RAID.html#bd-md-get-superblock-size">
 <ANCHOR id="bd-md-create" href="libblockdev/libblockdev-MD-RAID.html#bd-md-create">
+<ANCHOR id="bd-md-create-with-chunk-size" href="libblockdev/libblockdev-MD-RAID.html#bd-md-create-with-chunk-size">
 <ANCHOR id="bd-md-destroy" href="libblockdev/libblockdev-MD-RAID.html#bd-md-destroy">
 <ANCHOR id="bd-md-deactivate" href="libblockdev/libblockdev-MD-RAID.html#bd-md-deactivate">
 <ANCHOR id="bd-md-activate" href="libblockdev/libblockdev-MD-RAID.html#bd-md-activate">

@@ -193,6 +193,7 @@
     <keyword type="function" name="bd_md_detail_data_copy ()" link="libblockdev-MD-RAID.html#bd-md-detail-data-copy"/>
     <keyword type="function" name="bd_md_get_superblock_size ()" link="libblockdev-MD-RAID.html#bd-md-get-superblock-size"/>
     <keyword type="function" name="bd_md_create ()" link="libblockdev-MD-RAID.html#bd-md-create"/>
+    <keyword type="function" name="bd_md_create_with_chunk_size ()" link="libblockdev-MD-RAID.html#bd-md-create-with-chunk-size"/>
     <keyword type="function" name="bd_md_destroy ()" link="libblockdev-MD-RAID.html#bd-md-destroy"/>
     <keyword type="function" name="bd_md_deactivate ()" link="libblockdev-MD-RAID.html#bd-md-deactivate"/>
     <keyword type="function" name="bd_md_activate ()" link="libblockdev-MD-RAID.html#bd-md-activate"/>
