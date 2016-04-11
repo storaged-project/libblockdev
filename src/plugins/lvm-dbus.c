@@ -215,6 +215,24 @@ gboolean check() {
     }
 
     ret = g_dbus_connection_call_sync (bus, DBUS_TOP_IFACE, DBUS_TOP_OBJ, DBUS_TOP_IFACE,
+                                       "ListNames", NULL, NULL, G_DBUS_CALL_FLAGS_NONE,
+                                       -1, NULL, &error);
+    if (!ret) {
+        g_critical ("Failed to get available DBus services: %s", error->message);
+        return FALSE;
+    }
+
+    real_ret = g_variant_get_child_value (ret, 0);
+    g_variant_unref (ret);
+
+    g_variant_iter_init (&iter, real_ret);
+    while (!found && (service = g_variant_iter_next_value (&iter))) {
+        found = (g_strcmp0 (g_variant_get_string (service, NULL), LVM_BUS_NAME) == 0);
+        g_variant_unref (service);
+    }
+    g_variant_unref (real_ret);
+
+    ret = g_dbus_connection_call_sync (bus, DBUS_TOP_IFACE, DBUS_TOP_OBJ, DBUS_TOP_IFACE,
                                        "ListActivatableNames", NULL, NULL, G_DBUS_CALL_FLAGS_NONE,
                                        -1, NULL, &error);
     if (!ret) {
