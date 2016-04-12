@@ -19,6 +19,7 @@
 
 #include <glib.h>
 #include "exec.h"
+#include "extra_arg.h"
 #include <syslog.h>
 #include <stdlib.h>
 
@@ -132,64 +133,63 @@ static void set_c_locale(gpointer user_data __attribute__((unused))) {
 /**
  * bd_utils_exec_and_report_error:
  * @argv: (array zero-terminated=1): the argv array for the call
+ * @extra: (allow-none) (array zero-terminated=1): extra arguments
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @argv was successfully executed (no error and exit code 0) or not
  */
-gboolean bd_utils_exec_and_report_error (gchar **argv, GError **error) {
-    gboolean success = FALSE;
+gboolean bd_utils_exec_and_report_error (gchar **argv, BDExtraArg **extra, GError **error) {
     gint status = 0;
-    gchar *stdout_data = NULL;
-    gchar *stderr_data = NULL;
-    guint64 task_id = 0;
-
-    task_id = log_running (argv);
-    success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
-                            (GSpawnChildSetupFunc) set_c_locale, NULL,
-                            &stdout_data, &stderr_data, &status, error);
-    log_out (task_id, stdout_data, stderr_data);
-    log_done (task_id, status);
-
-    if (!success) {
-        /* error is already populated from the call */
-        return FALSE;
-    }
-
-    if (status != 0) {
-        if (stderr_data && (g_strcmp0 ("", stderr_data) != 0)) {
-            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
-                         "Process reported exit code %d: %s", status, stderr_data);
-            g_free (stdout_data);
-        } else {
-            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
-                         "Process reported exit code %d: %s", status, stdout_data);
-            g_free (stderr_data);
-        }
-
-        return FALSE;
-    }
-
-    g_free (stdout_data);
-    g_free (stderr_data);
-    return TRUE;
+    /* just use the "stronger" function and throw away the returned status */
+    return bd_utils_exec_and_report_status_error (argv, extra, &status, error);
 }
 
 /**
  * bd_utils_exec_and_report_status_error:
  * @argv: (array zero-terminated=1): the argv array for the call
+ * @extra: (allow-none) (array zero-terminated=1): extra arguments
  * @status: (out): place to store the status
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @argv was successfully executed (no error and exit code 0) or not
  */
-gboolean bd_utils_exec_and_report_status_error (gchar **argv, gint *status, GError **error) {
+gboolean bd_utils_exec_and_report_status_error (gchar **argv, BDExtraArg **extra, gint *status, GError **error) {
     gboolean success = FALSE;
     gchar *stdout_data = NULL;
     gchar *stderr_data = NULL;
     guint64 task_id = 0;
+    gchar **args = NULL;
+    guint args_len = 0;
+    gchar **arg_p = NULL;
+    BDExtraArg **extra_p = NULL;
+    guint i = 0;
 
-    task_id = log_running (argv);
-    success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
+    if (extra) {
+        args_len = g_strv_length (argv);
+        for (extra_p=extra; *extra_p; extra_p++) {
+            if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "") != 0))
+                args_len++;
+            if ((*extra_p)->val && (g_strcmp0 ((*extra_p)->val, "") != 0))
+                args_len++;
+        }
+        args = g_new0 (gchar*, args_len + 1);
+        for (arg_p=argv; *arg_p; arg_p++, i++)
+            args[i] = *arg_p;
+        for (extra_p=extra; *extra_p; extra_p++) {
+            if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "") != 0)) {
+                args[i] = (*extra_p)->opt;
+                i++;
+            }
+            if ((*extra_p)->val && (g_strcmp0 ((*extra_p)->val, "") != 0)) {
+                args[i] = (*extra_p)->val;
+                i++;
+            }
+        }
+        args[i] = NULL;
+    }
+
+    task_id = log_running (args ? args : argv);
+    success = g_spawn_sync (NULL, args ? args : argv, NULL, G_SPAWN_SEARCH_PATH,
                             (GSpawnChildSetupFunc) set_c_locale, NULL,
                             &stdout_data, &stderr_data, status, error);
     log_out (task_id, stdout_data, stderr_data);
@@ -214,6 +214,7 @@ gboolean bd_utils_exec_and_report_status_error (gchar **argv, gint *status, GErr
         return FALSE;
     }
 
+    g_free (args);
     g_free (stdout_data);
     g_free (stderr_data);
     return TRUE;
@@ -222,17 +223,47 @@ gboolean bd_utils_exec_and_report_status_error (gchar **argv, gint *status, GErr
 /**
  * bd_utils_exec_and_capture_output:
  * @argv: (array zero-terminated=1): the argv array for the call
+ * @extra: (allow-none) (array zero-terminated=1): extra arguments
  * @output: (out): variable to store output to
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @argv was successfully executed capturing the output or not
  */
-gboolean bd_utils_exec_and_capture_output (gchar **argv, gchar **output, GError **error) {
+gboolean bd_utils_exec_and_capture_output (gchar **argv, BDExtraArg **extra, gchar **output, GError **error) {
     gchar *stdout_data = NULL;
     gchar *stderr_data = NULL;
     gint status = 0;
     gboolean success = FALSE;
     guint64 task_id = 0;
+    gchar **args = NULL;
+    guint args_len = 0;
+    gchar **arg_p = NULL;
+    BDExtraArg **extra_p = NULL;
+    guint i = 0;
+
+    if (extra) {
+        args_len = g_strv_length (argv);
+        for (extra_p=extra; *extra_p; extra_p++) {
+            if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "") != 0))
+                args_len++;
+            if ((*extra_p)->val && (g_strcmp0 ((*extra_p)->val, "") != 0))
+                args_len++;
+        }
+        args = g_new0 (gchar*, args_len + 1);
+        for (arg_p=argv; *arg_p; arg_p++, i++)
+            args[i] = *arg_p;
+        for (extra_p=extra; *extra_p; extra_p++) {
+            if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "") != 0)) {
+                args[i] = (*extra_p)->opt;
+                i++;
+            }
+            if ((*extra_p)->val && (g_strcmp0 ((*extra_p)->val, "") != 0)) {
+                args[i] = (*extra_p)->val;
+                i++;
+            }
+        }
+        args[i] = NULL;
+    }
 
     task_id = log_running (argv);
     success = g_spawn_sync (NULL, argv, NULL, G_SPAWN_SEARCH_PATH,
@@ -391,7 +422,7 @@ gboolean bd_utils_check_util_version (gchar *util, gchar *version, gchar *versio
         /* nothing more to do here */
         return TRUE;
 
-    succ = bd_utils_exec_and_capture_output (argv, &output, error);
+    succ = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
     if (!succ) {
         /* if we got nothing on STDOUT, try using STDERR data from error message */
         if (g_error_matches ((*error), BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
