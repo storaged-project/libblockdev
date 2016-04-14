@@ -297,14 +297,16 @@ static gboolean wipe_fs (gchar *device, gchar *fs_type, GError **error) {
 /**
  * bd_fs_ext4_mkfs:
  * @device: the device to create a new ext4 fs on
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
+ *                                                 passed to the 'mkfs.ext4' utility)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether a new ext4 fs was successfully created on @device or not
  */
-gboolean bd_fs_ext4_mkfs (gchar *device, GError **error) {
+gboolean bd_fs_ext4_mkfs (gchar *device, BDExtraArg **extra, GError **error) {
     gchar *args[3] = {"mkfs.ext4", device, NULL};
 
-    return bd_utils_exec_and_report_error (args, error);
+    return bd_utils_exec_and_report_error (args, extra, error);
 }
 
 /**
@@ -322,11 +324,13 @@ gboolean bd_fs_ext4_wipe (gchar *device, GError **error) {
 /**
  * bd_fs_ext4_check:
  * @device: the device the file system on which to check
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the check (right now
+ *                                                 passed to the 'e2fsck' utility)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether an ext4 file system on the @device is clean or not
  */
-gboolean bd_fs_ext4_check (gchar *device, GError **error) {
+gboolean bd_fs_ext4_check (gchar *device, BDExtraArg **extra, GError **error) {
     /* Force checking even if the file system seems clean. AND
      * Open the filesystem read-only, and assume an answer of no to all
      * questions. */
@@ -334,7 +338,7 @@ gboolean bd_fs_ext4_check (gchar *device, GError **error) {
     gint status = 0;
     gboolean ret = FALSE;
 
-    ret = bd_utils_exec_and_report_status_error (args, &status, error);
+    ret = bd_utils_exec_and_report_status_error (args, extra, &status, error);
     if (!ret && (status == 4)) {
         /* no error should be reported for exit code 4 - File system errors left uncorrected */
         g_clear_error (error);
@@ -346,18 +350,20 @@ gboolean bd_fs_ext4_check (gchar *device, GError **error) {
  * bd_fs_ext4_repair:
  * @device: the device the file system on which to repair
  * @unsafe: whether to do unsafe operations too
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the repair (right now
+ *                                                 passed to the 'e2fsck' utility)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether an ext4 file system on the @device was successfully repaired
  *          (if needed) or not (error is set in that case)
  */
-gboolean bd_fs_ext4_repair (gchar *device, gboolean unsafe, GError **error) {
+gboolean bd_fs_ext4_repair (gchar *device, gboolean unsafe, BDExtraArg **extra, GError **error) {
     /* Force checking even if the file system seems clean. AND
      *     Automatically repair what can be safely repaired. OR
      *     Assume an answer of `yes' to all questions. */
     gchar *args[5] = {"e2fsck", "-f", unsafe ? "-y" : "-p", device, NULL};
 
-    return bd_utils_exec_and_report_error (args, error);
+    return bd_utils_exec_and_report_error (args, extra, error);
 }
 
 /**
@@ -372,7 +378,7 @@ gboolean bd_fs_ext4_repair (gchar *device, gboolean unsafe, GError **error) {
 gboolean bd_fs_ext4_set_label (gchar *device, gchar *label, GError **error) {
     gchar *args[5] = {"tune2fs", "-L", label, device, NULL};
 
-    return bd_utils_exec_and_report_error (args, error);
+    return bd_utils_exec_and_report_error (args, NULL, error);
 }
 
 /**
@@ -458,7 +464,7 @@ BDFSExt4Info* bd_fs_ext4_get_info (gchar *device, GError **error) {
     guint num_items = 0;
     BDFSExt4Info *ret = NULL;
 
-    success = bd_utils_exec_and_capture_output (args, &output, error);
+    success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
     if (!success) {
         /* error is already populated */
         return FALSE;
@@ -488,18 +494,20 @@ BDFSExt4Info* bd_fs_ext4_get_info (gchar *device, GError **error) {
  * @device: the device the file system of which to resize
  * @new_size: new requested size for the file system (if 0, the file system is
  *            adapted to the underlying block device)
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the resize (right now
+ *                                                 passed to the 'resize2fs' utility)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the file system on @device was successfully resized or not
  */
-gboolean bd_fs_ext4_resize (gchar *device, guint64 new_size, GError **error) {
+gboolean bd_fs_ext4_resize (gchar *device, guint64 new_size, BDExtraArg **extra, GError **error) {
     gchar *args[4] = {"resize2fs", device, NULL, NULL};
     gboolean ret = FALSE;
 
     if (new_size != 0)
         /* resize2fs doesn't understand bytes, just 512B sectors */
         args[2] = g_strdup_printf ("%"G_GUINT64_FORMAT"s", new_size / 512);
-    ret = bd_utils_exec_and_report_error (args, error);
+    ret = bd_utils_exec_and_report_error (args, extra, error);
 
     g_free (args[2]);
     return ret;
@@ -508,14 +516,16 @@ gboolean bd_fs_ext4_resize (gchar *device, guint64 new_size, GError **error) {
 /**
  * bd_fs_xfs_mkfs:
  * @device: the device to create a new xfs fs on
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
+ *                                                 passed to the 'mkfs.xfs' utility)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether a new xfs fs was successfully created on @device or not
  */
-gboolean bd_fs_xfs_mkfs (gchar *device, GError **error) {
+gboolean bd_fs_xfs_mkfs (gchar *device, BDExtraArg **extra, GError **error) {
     gchar *args[3] = {"mkfs.xfs", device, NULL};
 
-    return bd_utils_exec_and_report_error (args, error);
+    return bd_utils_exec_and_report_error (args, extra, error);
 }
 
 /**
@@ -544,7 +554,7 @@ gboolean bd_fs_xfs_check (gchar *device, GError **error) {
     gchar *args[6] = {"xfs_db", "-r", "-c", "check", device, NULL};
     gboolean ret = FALSE;
 
-    ret = bd_utils_exec_and_report_error (args, error);
+    ret = bd_utils_exec_and_report_error (args, NULL, error);
     if (!ret && *error &&  g_error_matches ((*error), BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED))
         /* non-zero exit status -> the fs is not clean, but not an error */
         /* TODO: should we check that the device exists and contains an XFS FS beforehand? */
@@ -555,15 +565,17 @@ gboolean bd_fs_xfs_check (gchar *device, GError **error) {
 /**
  * bd_fs_xfs_repair:
  * @device: the device containing the file system to repair
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the repair (right now
+ *                                                 passed to the 'xfs_repair' utility)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether an xfs file system on the @device was successfully repaired
  *          (if needed) or not (error is set in that case)
  */
-gboolean bd_fs_xfs_repair (gchar *device, GError **error) {
+gboolean bd_fs_xfs_repair (gchar *device, BDExtraArg **extra, GError **error) {
     gchar *args[3] = {"xfs_repair", device, NULL};
 
-    return bd_utils_exec_and_report_error (args, error);
+    return bd_utils_exec_and_report_error (args, extra, error);
 }
 
 /**
@@ -580,7 +592,7 @@ gboolean bd_fs_xfs_set_label (gchar *device, gchar *label, GError **error) {
     if (!label || (strncmp (label, "", 1) == 0))
         args[2] = "--";
 
-    return bd_utils_exec_and_report_error (args, error);
+    return bd_utils_exec_and_report_error (args, NULL, error);
 }
 
 /**
@@ -603,7 +615,7 @@ BDFSXfsInfo* bd_fs_xfs_get_info (gchar *device, GError **error) {
     gchar *val_start = NULL;
     gchar *val_end = NULL;
 
-    success = bd_utils_exec_and_capture_output (args, &output, error);
+    success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
     if (!success)
         /* error is already populated */
         return FALSE;
@@ -633,7 +645,7 @@ BDFSXfsInfo* bd_fs_xfs_get_info (gchar *device, GError **error) {
     args[0] = "xfs_info";
     args[1] = device;
     args[2] = NULL;
-    success = bd_utils_exec_and_capture_output (args, &output, error);
+    success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
     if (!success) {
         /* error is already populated */
         bd_fs_xfs_info_free (ret);
@@ -693,11 +705,13 @@ BDFSXfsInfo* bd_fs_xfs_get_info (gchar *device, GError **error) {
  * @mpoint: the mount point of the file system to resize
  * @new_size: new requested size for the file system *in file system blocks* (see bd_fs_xfs_get_info())
  *            (if 0, the file system is adapted to the underlying block device)
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the resize (right now
+ *                                                 passed to the 'xfs_growfs' utility)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the file system mounted on @mpoint was successfully resized or not
  */
-gboolean bd_fs_xfs_resize (gchar *mpoint, guint64 new_size, GError **error) {
+gboolean bd_fs_xfs_resize (gchar *mpoint, guint64 new_size, BDExtraArg **extra, GError **error) {
     gchar *args[5] = {"xfs_growfs", NULL, NULL, NULL, NULL};
     gchar *size_str = NULL;
     gboolean ret = FALSE;
@@ -711,7 +725,7 @@ gboolean bd_fs_xfs_resize (gchar *mpoint, guint64 new_size, GError **error) {
     } else
         args[1] = mpoint;
 
-    ret = bd_utils_exec_and_report_error (args, error);
+    ret = bd_utils_exec_and_report_error (args, extra, error);
 
     g_free (size_str);
     return ret;

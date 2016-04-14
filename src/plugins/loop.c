@@ -143,7 +143,7 @@ gboolean bd_loop_setup (gchar *file, gchar **loop_name, GError **error) {
     gchar *args[4] = {"losetup", "-f", file, NULL};
     gboolean success = FALSE;
 
-    success = bd_utils_exec_and_report_error (args, error);
+    success = bd_utils_exec_and_report_error (args, NULL, error);
     if (!success)
         return FALSE;
     else {
@@ -173,7 +173,7 @@ gboolean bd_loop_teardown (gchar *loop, GError **error) {
         args[2] = dev_loop;
     }
 
-    success = bd_utils_exec_and_report_error (args, error);
+    success = bd_utils_exec_and_report_error (args, NULL, error);
     g_free (dev_loop);
 
     return success;

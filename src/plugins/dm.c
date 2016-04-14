@@ -107,7 +107,7 @@ gboolean bd_dm_create_linear (gchar *map_name, gchar *device, guint64 length, gc
     } else
         argv[5] = device;
 
-    success = bd_utils_exec_and_report_error (argv, error);
+    success = bd_utils_exec_and_report_error (argv, NULL, error);
     g_free (table);
 
     return success;
@@ -123,7 +123,7 @@ gboolean bd_dm_create_linear (gchar *map_name, gchar *device, guint64 length, gc
 gboolean bd_dm_remove (gchar *map_name, GError **error) {
     gchar *argv[4] = {"dmsetup", "remove", map_name, NULL};
 
-    return bd_utils_exec_and_report_error (argv, error);
+    return bd_utils_exec_and_report_error (argv, NULL, error);
 }
 
 /**

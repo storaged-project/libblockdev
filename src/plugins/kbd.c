@@ -538,12 +538,14 @@ BDKBDZramStats* bd_kbd_zram_get_stats (gchar *device, GError **error) {
  * bd_kbd_bcache_create:
  * @backing_device: backing (slow) device of the cache
  * @cache_device: cache (fast) device of the cache
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
+ *                                                 passed to the 'make-bcache' utility)
  * @bcache_device: (out) (allow-none) (transfer full): place to store the name of the new bcache device (if any)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the bcache device was successfully created or not
  */
-gboolean bd_kbd_bcache_create (gchar *backing_device, gchar *cache_device, gchar **bcache_device, GError **error) {
+gboolean bd_kbd_bcache_create (gchar *backing_device, gchar *cache_device, BDExtraArg **extra, gchar **bcache_device, GError **error) {
     gchar *argv[6] = {"make-bcache", "-B", backing_device, "-C", cache_device, NULL};
     gboolean success = FALSE;
     gchar *output = NULL;
@@ -560,7 +562,7 @@ gboolean bd_kbd_bcache_create (gchar *backing_device, gchar *cache_device, gchar
     gchar *dev_name_end = NULL;
 
     /* create cache device metadata and try to get Set UUID (needed later) */
-    success = bd_utils_exec_and_capture_output (argv, &output, error);
+    success = bd_utils_exec_and_capture_output (argv, extra, &output, error);
     if (!success) {
         /* error is already populated */
         g_free (output);

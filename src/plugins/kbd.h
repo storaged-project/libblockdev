@@ -66,7 +66,7 @@ gboolean bd_kbd_zram_create_devices (guint64 num_devices, guint64 *sizes, guint6
 gboolean bd_kbd_zram_destroy_devices (GError **error);
 BDKBDZramStats* bd_kbd_zram_get_stats (gchar *device, GError **error);
 
-gboolean bd_kbd_bcache_create (gchar *backing_device, gchar *cache_device, gchar **bcache_device, GError **error);
+gboolean bd_kbd_bcache_create (gchar *backing_device, gchar *cache_device, BDExtraArg **extra, gchar **bcache_device, GError **error);
 gboolean bd_kbd_bcache_attach (gchar *c_set_uuid, gchar *bcache_device, GError **error);
 gboolean bd_kbd_bcache_detach (gchar *bcache_device, gchar **c_set_uuid, GError **error);
 gboolean bd_kbd_bcache_destroy (gchar *bcache_device, GError **error);

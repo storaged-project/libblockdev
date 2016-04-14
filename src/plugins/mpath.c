@@ -80,13 +80,13 @@ gboolean bd_mpath_flush_mpaths (GError **error) {
     gchar *output = NULL;
 
     /* try to flush the device maps */
-    success = bd_utils_exec_and_report_error (argv, error);
+    success = bd_utils_exec_and_report_error (argv, NULL, error);
     if (!success)
         return FALSE;
 
     /* list devices (there should be none) */
     argv[1] = "-ll";
-    success = bd_utils_exec_and_capture_output (argv, &output, error);
+    success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
     if (success && output && (g_strcmp0 (output, "") != 0)) {
         g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_FLUSH,
                      "Some device cannot be flushed: %s", output);
@@ -352,5 +352,5 @@ gboolean bd_mpath_set_friendly_names (gboolean enabled, GError **error) {
     gchar *argv[8] = {"mpathconf", "--find_multipaths", "y", "--user_friendly_names", NULL, "--with_multipathd", "y", NULL};
     argv[4] = enabled ? "y" : "n";
 
-    return bd_utils_exec_and_report_error (argv, error);
+    return bd_utils_exec_and_report_error (argv, NULL, error);
 }
