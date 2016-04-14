@@ -83,14 +83,14 @@ __all__.append("try_reinit")
 
 _btrfs_create_volume = BlockDev.btrfs_create_volume
 @override(BlockDev.btrfs_create_volume)
-def btrfs_create_volume(devices, label=None, data_level=None, md_level=None):
-    return _btrfs_create_volume(devices, label, data_level, md_level)
+def btrfs_create_volume(devices, label=None, data_level=None, md_level=None, extra=None):
+    return _btrfs_create_volume(devices, label, data_level, md_level, extra)
 __all__.append("btrfs_create_volume")
 
 _btrfs_mkfs = BlockDev.btrfs_mkfs
 @override(BlockDev.btrfs_mkfs)
-def btrfs_mkfs(devices, label=None, data_level=None, md_level=None):
-    return _btrfs_mkfs(devices, label, data_level, md_level)
+def btrfs_mkfs(devices, label=None, data_level=None, md_level=None, extra=None):
+    return _btrfs_mkfs(devices, label, data_level, md_level, extra)
 __all__.append("btrfs_mkfs")
 
 _btrfs_list_subvolumes = BlockDev.btrfs_list_subvolumes
@@ -101,8 +101,8 @@ __all__.append("btrfs_list_subvolumes")
 
 _btrfs_create_snapshot = BlockDev.btrfs_create_snapshot
 @override(BlockDev.btrfs_create_snapshot)
-def btrfs_create_snapshot(source, dest, ro=False):
-    return _btrfs_create_snapshot(source, dest, ro)
+def btrfs_create_snapshot(source, dest, ro=False, extra=None):
+    return _btrfs_create_snapshot(source, dest, ro, extra)
 __all__.append("btrfs_create_snapshot")
 
 
@@ -170,50 +170,50 @@ __all__.append("lvm_get_thpool_padding")
 
 _lvm_pvcreate = BlockDev.lvm_pvcreate
 @override(BlockDev.lvm_pvcreate)
-def lvm_pvcreate(device, data_alignment=0, metadata_size=0):
-    return _lvm_pvcreate(device, data_alignment, metadata_size)
+def lvm_pvcreate(device, data_alignment=0, metadata_size=0, extra=None):
+    return _lvm_pvcreate(device, data_alignment, metadata_size, extra)
 __all__.append("lvm_pvcreate")
 
 _lvm_pvmove = BlockDev.lvm_pvmove
 @override(BlockDev.lvm_pvmove)
-def lvm_pvmove(src, dest=None):
-    return _lvm_pvmove(src, dest)
+def lvm_pvmove(src, dest=None, extra=None):
+    return _lvm_pvmove(src, dest, extra)
 __all__.append("lvm_pvmove")
 
 _lvm_pvscan = BlockDev.lvm_pvscan
 @override(BlockDev.lvm_pvscan)
-def lvm_pvscan(device=None, update_cache=True):
-    return _lvm_pvscan(device, update_cache)
+def lvm_pvscan(device=None, update_cache=True, extra=None):
+    return _lvm_pvscan(device, update_cache, extra)
 __all__.append("lvm_pvscan")
 
 _lvm_vgcreate = BlockDev.lvm_vgcreate
 @override(BlockDev.lvm_vgcreate)
-def lvm_vgcreate(name, pv_list, pe_size=0):
-    return _lvm_vgcreate(name, pv_list, pe_size)
+def lvm_vgcreate(name, pv_list, pe_size=0, extra=None):
+    return _lvm_vgcreate(name, pv_list, pe_size, extra)
 __all__.append("lvm_vgcreate")
 
 _lvm_vgreduce = BlockDev.lvm_vgreduce
 @override(BlockDev.lvm_vgreduce)
-def lvm_vgreduce(vg_name, device=None):
-    return _lvm_vgreduce(vg_name, device)
+def lvm_vgreduce(vg_name, device=None, extra=None):
+    return _lvm_vgreduce(vg_name, device, extra)
 __all__.append("lvm_vgreduce")
 
 _lvm_lvcreate = BlockDev.lvm_lvcreate
 @override(BlockDev.lvm_lvcreate)
-def lvm_lvcreate(vg_name, lv_name, size, type=None, pv_list=None):
-    return _lvm_lvcreate(vg_name, lv_name, size, type, pv_list)
+def lvm_lvcreate(vg_name, lv_name, size, type=None, pv_list=None, extra=None):
+    return _lvm_lvcreate(vg_name, lv_name, size, type, pv_list, extra)
 __all__.append("lvm_lvcreate")
 
 _lvm_lvremove = BlockDev.lvm_lvremove
 @override(BlockDev.lvm_lvremove)
-def lvm_lvremove(vg_name, lv_name, force=False):
-    return _lvm_lvremove(vg_name, lv_name, force)
+def lvm_lvremove(vg_name, lv_name, force=False, extra=None):
+    return _lvm_lvremove(vg_name, lv_name, force, extra)
 __all__.append("lvm_lvremove")
 
 _lvm_lvactivate = BlockDev.lvm_lvactivate
 @override(BlockDev.lvm_lvactivate)
-def lvm_lvactivate(vg_name, lv_name, ignore_skip=False):
-    return _lvm_lvactivate(vg_name, lv_name, ignore_skip)
+def lvm_lvactivate(vg_name, lv_name, ignore_skip=False, extra=None):
+    return _lvm_lvactivate(vg_name, lv_name, ignore_skip, extra)
 __all__.append("lvm_lvactivate")
 
 _lvm_lvs = BlockDev.lvm_lvs
@@ -224,14 +224,14 @@ __all__.append("lvm_lvs")
 
 _lvm_thpoolcreate = BlockDev.lvm_thpoolcreate
 @override(BlockDev.lvm_thpoolcreate)
-def lvm_thpoolcreate(vg_name, lv_name, size, md_size=0, chunk_size=0, profile=None):
-    return _lvm_thpoolcreate(vg_name, lv_name, size, md_size, chunk_size, profile)
+def lvm_thpoolcreate(vg_name, lv_name, size, md_size=0, chunk_size=0, profile=None, extra=None):
+    return _lvm_thpoolcreate(vg_name, lv_name, size, md_size, chunk_size, profile, extra)
 __all__.append("lvm_thpoolcreate")
 
 _lvm_thsnapshotcreate = BlockDev.lvm_thsnapshotcreate
 @override(BlockDev.lvm_thsnapshotcreate)
-def lvm_thsnapshotcreate(vg_name, origin_name, snapshot_name, pool_name=None):
-    return _lvm_thsnapshotcreate(vg_name, origin_name, snapshot_name, pool_name)
+def lvm_thsnapshotcreate(vg_name, origin_name, snapshot_name, pool_name=None, extra=None):
+    return _lvm_thsnapshotcreate(vg_name, origin_name, snapshot_name, pool_name, extra)
 __all__.append("lvm_thsnapshotcreate")
 
 _lvm_is_valid_thpool_chunk_size = BlockDev.lvm_is_valid_thpool_chunk_size
@@ -256,30 +256,30 @@ __all__.append("md_get_superblock_size")
 _md_create = BlockDev.md_create
 _md_create_with_chunk_size = BlockDev.md_create_with_chunk_size
 @override(BlockDev.md_create)
-def md_create(device_name, level, disks, spares=0, version=None, bitmap=False, chunk_size=0):
+def md_create(device_name, level, disks, spares=0, version=None, bitmap=False, chunk_size=0, extra=None):
     if chunk_size == 0:
-        return _md_create(device_name, level, disks, spares, version, bitmap)
+        return _md_create(device_name, level, disks, spares, version, bitmap, extra)
     else:
-        return _md_create_with_chunk_size(device_name, level, disks, spares, version, bitmap, chunk_size)
+        return _md_create_with_chunk_size(device_name, level, disks, spares, version, bitmap, chunk_size, extra)
 __all__.append("md_create")
 
 _md_add = BlockDev.md_add
 @override(BlockDev.md_add)
-def md_add(raid_name, device, raid_devs=0):
-    return _md_add(raid_name, device, raid_devs)
+def md_add(raid_name, device, raid_devs=0, extra=None):
+    return _md_add(raid_name, device, raid_devs, extra)
 __all__.append("md_add")
 
 _md_activate = BlockDev.md_activate
 @override(BlockDev.md_activate)
-def md_activate(device_name, members=None, uuid=None):
-    return _md_activate(device_name, members, uuid)
+def md_activate(device_name, members=None, uuid=None, extra=None):
+    return _md_activate(device_name, members, uuid, extra)
 __all__.append("md_activate")
 
 
 _swap_mkswap = BlockDev.swap_mkswap
 @override(BlockDev.swap_mkswap)
-def swap_mkswap(device, label=None):
-    return _swap_mkswap(device, label)
+def swap_mkswap(device, label=None, extra=None):
+    return _swap_mkswap(device, label, extra)
 __all__.append("swap_mkswap")
 
 _swap_swapon = BlockDev.swap_swapon
