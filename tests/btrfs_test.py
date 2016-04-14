@@ -62,24 +62,24 @@ class BtrfsTestCreateQuerySimple(BtrfsTestCase):
         """Verify that btrfs volume creation and querying works"""
 
         with self.assertRaises(GLib.GError):
-            BlockDev.btrfs_create_volume([], None, None, None)
+            BlockDev.btrfs_create_volume([], None, None, None, None)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.btrfs_create_volume(["/non/existing/device"], None, None, None)
+            BlockDev.btrfs_create_volume(["/non/existing/device"], None, None, None, None)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.btrfs_create_volume([self.loop_dev], None, "RaID7", None)
+            BlockDev.btrfs_create_volume([self.loop_dev], None, "RaID7", None, None)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.btrfs_create_volume([self.loop_dev], None, None, "RaID7")
+            BlockDev.btrfs_create_volume([self.loop_dev], None, None, "RaID7", None)
 
         # one device, no label
-        succ = BlockDev.btrfs_create_volume([self.loop_dev], None, None, None)
+        succ = BlockDev.btrfs_create_volume([self.loop_dev], None, None, None, None)
         self.assertTrue(succ)
 
         # already created
         with self.assertRaises(GLib.GError):
-            BlockDev.btrfs_create_volume([self.loop_dev], None, None, None)
+            BlockDev.btrfs_create_volume([self.loop_dev], None, None, None, None)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
         self.assertEqual(len(devs), 1)
@@ -89,7 +89,7 @@ class BtrfsTestCreateQueryLabel(BtrfsTestCase):
         """Verify that btrfs volume creation with label works"""
 
         # one device, with label
-        succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None)
+        succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None, None)
         self.assertTrue(succ)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
@@ -101,7 +101,7 @@ class BtrfsTestCreateQueryTwoDevs(BtrfsTestCase):
         """Verify that btrfs volume creation with two devices works"""
 
         # two devices, no specific data/metadata layout
-        succ = BlockDev.btrfs_create_volume([self.loop_dev, self.loop_dev2], "myShinyBtrfs", None, None)
+        succ = BlockDev.btrfs_create_volume([self.loop_dev, self.loop_dev2], "myShinyBtrfs", None, None, None)
         self.assertTrue(succ)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
@@ -112,7 +112,7 @@ class BtrfsTestCreateQueryTwoDevsRaids(BtrfsTestCase):
         """Verify that btrfs volume creation with two devices and raid (meta)data works"""
 
         # two devices, raid1 data
-        succ = BlockDev.btrfs_create_volume([self.loop_dev, self.loop_dev2], "myShinyBtrfs", "raid1", None)
+        succ = BlockDev.btrfs_create_volume([self.loop_dev, self.loop_dev2], "myShinyBtrfs", "raid1", None, None)
         self.assertTrue(succ)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
@@ -122,7 +122,7 @@ class BtrfsTestCreateQueryTwoDevsRaids(BtrfsTestCase):
         wipefs(self.loop_dev2)
 
         # two devices, raid1 metadata
-        succ = BlockDev.btrfs_create_volume([self.loop_dev, self.loop_dev2], "myShinyBtrfs", None, "raid1")
+        succ = BlockDev.btrfs_create_volume([self.loop_dev, self.loop_dev2], "myShinyBtrfs", None, "raid1", None)
         self.assertTrue(succ)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
@@ -143,7 +143,7 @@ class BtrfsTestAddRemoveDevice(BtrfsTestCase):
     def test_add_remove_device(self):
         """Verify that it is possible to add/remove device to a btrfs volume"""
 
-        succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None)
+        succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None, None)
         self.assertTrue(succ)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
@@ -151,13 +151,13 @@ class BtrfsTestAddRemoveDevice(BtrfsTestCase):
 
         mount(self.loop_dev, TEST_MNT)
 
-        succ = BlockDev.btrfs_add_device(TEST_MNT, self.loop_dev2)
+        succ = BlockDev.btrfs_add_device(TEST_MNT, self.loop_dev2, None)
         self.assertTrue(succ)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
         self.assertEqual(len(devs), 2)
 
-        succ = BlockDev.btrfs_remove_device(TEST_MNT, self.loop_dev2)
+        succ = BlockDev.btrfs_remove_device(TEST_MNT, self.loop_dev2, None)
         self.assertTrue(succ)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
@@ -167,7 +167,7 @@ class BtrfsTestCreateDeleteSubvolume(BtrfsTestCase):
     def test_create_delete_subvolume(self):
         """Verify that it is possible to create/delete subvolume"""
 
-        succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None)
+        succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None, None)
         self.assertTrue(succ)
 
         mount(self.loop_dev, TEST_MNT)
@@ -175,7 +175,7 @@ class BtrfsTestCreateDeleteSubvolume(BtrfsTestCase):
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
         self.assertEqual(len(subvols), 0)
 
-        succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1")
+        succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1", None)
         self.assertTrue(succ)
 
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
@@ -183,9 +183,9 @@ class BtrfsTestCreateDeleteSubvolume(BtrfsTestCase):
 
         # already there
         with self.assertRaises(GLib.GError):
-            BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1")
+            BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1", None)
 
-        succ = BlockDev.btrfs_delete_subvolume(TEST_MNT, "subvol1")
+        succ = BlockDev.btrfs_delete_subvolume(TEST_MNT, "subvol1", None)
         self.assertTrue(succ)
 
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
@@ -193,9 +193,9 @@ class BtrfsTestCreateDeleteSubvolume(BtrfsTestCase):
 
         # already removed
         with self.assertRaises(GLib.GError):
-            BlockDev.btrfs_delete_subvolume(TEST_MNT, "subvol1")
+            BlockDev.btrfs_delete_subvolume(TEST_MNT, "subvol1", None)
 
-        succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1")
+        succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1", None)
         self.assertTrue(succ)
 
         # add it back
@@ -203,7 +203,7 @@ class BtrfsTestCreateDeleteSubvolume(BtrfsTestCase):
         self.assertEqual(len(subvols), 1)
 
         # and create another subvolume in it
-        succ = BlockDev.btrfs_create_subvolume(os.path.join(TEST_MNT, "subvol1"), "subvol1.1")
+        succ = BlockDev.btrfs_create_subvolume(os.path.join(TEST_MNT, "subvol1"), "subvol1.1", None)
         self.assertTrue(succ)
 
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
@@ -217,7 +217,7 @@ class BtrfsTestCreateDeleteSubvolume(BtrfsTestCase):
 
 class BtrfsTestCreateSnapshot(BtrfsTestCase):
     def test_create_snapshot(self):
-        succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None)
+        succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None, None)
         self.assertTrue(succ)
 
         mount(self.loop_dev, TEST_MNT)
@@ -226,14 +226,14 @@ class BtrfsTestCreateSnapshot(BtrfsTestCase):
         self.assertEqual(len(subvols), 0)
 
         # R/W snapshot
-        succ = BlockDev.btrfs_create_snapshot(TEST_MNT, TEST_MNT + "/snap1", False)
+        succ = BlockDev.btrfs_create_snapshot(TEST_MNT, TEST_MNT + "/snap1", False, None)
         self.assertTrue(succ)
 
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, True)
         self.assertEqual(len(subvols), 1)
 
         # RO snapshot
-        succ = BlockDev.btrfs_create_snapshot(TEST_MNT, TEST_MNT + "/snap2", True)
+        succ = BlockDev.btrfs_create_snapshot(TEST_MNT, TEST_MNT + "/snap2", True, None)
         self.assertTrue(succ)
 
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, True)
@@ -243,7 +243,7 @@ class BtrfsTestGetDefaultSubvolumeID(BtrfsTestCase):
     def test_get_default_subvolume_id(self):
         """Verify that getting default subvolume ID works as expected"""
 
-        succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None)
+        succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None, None)
         self.assertTrue(succ)
 
         # not mounted yet, should fail
@@ -259,7 +259,7 @@ class BtrfsTestSetDefaultSubvolumeID(BtrfsTestCase):
     def test_set_default_subvolume(self):
         """Verify that setting default subvolume works as expected"""
 
-        succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None)
+        succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None, None)
         self.assertTrue(succ)
 
         mount(self.loop_dev, TEST_MNT)
@@ -267,7 +267,7 @@ class BtrfsTestSetDefaultSubvolumeID(BtrfsTestCase):
         ret = BlockDev.btrfs_get_default_subvolume_id(TEST_MNT)
         self.assertEqual(ret, 5)
 
-        succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1")
+        succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1", None)
         self.assertTrue(succ)
 
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
@@ -275,12 +275,12 @@ class BtrfsTestSetDefaultSubvolumeID(BtrfsTestCase):
 
         new_id = next((subvol.id for subvol in subvols), None)
         self.assertIsNot(new_id, None)
-        succ = BlockDev.btrfs_set_default_subvolume(TEST_MNT, new_id)
+        succ = BlockDev.btrfs_set_default_subvolume(TEST_MNT, new_id, None)
         self.assertTrue(succ)
         ret = BlockDev.btrfs_get_default_subvolume_id(TEST_MNT)
         self.assertEqual(ret, new_id)
 
-        succ = BlockDev.btrfs_set_default_subvolume(TEST_MNT, 5)
+        succ = BlockDev.btrfs_set_default_subvolume(TEST_MNT, 5, None)
         self.assertTrue(succ)
         ret = BlockDev.btrfs_get_default_subvolume_id(TEST_MNT)
         self.assertEqual(ret, 5)
@@ -289,7 +289,7 @@ class BtrfsTestListDevices(BtrfsTestCase):
     def test_list_devices(self):
         """Verify that it is possible to get info about devices"""
 
-        succ = BlockDev.btrfs_create_volume([self.loop_dev, self.loop_dev2], "myShinyBtrfs", None, None)
+        succ = BlockDev.btrfs_create_volume([self.loop_dev, self.loop_dev2], "myShinyBtrfs", None, None, None)
         self.assertTrue(succ)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
@@ -307,7 +307,7 @@ class BtrfsTestListSubvolumes(BtrfsTestCase):
     def test_list_subvolumes(self):
         """Verify that it is possible to get info about subvolumes"""
 
-        succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None)
+        succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None, None)
         self.assertTrue(succ)
 
         mount(self.loop_dev, TEST_MNT)
@@ -315,7 +315,7 @@ class BtrfsTestListSubvolumes(BtrfsTestCase):
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, True)
         self.assertEqual(len(subvols), 0)
 
-        succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1")
+        succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1", None)
         self.assertTrue(succ)
 
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
@@ -328,7 +328,7 @@ class BtrfsTestFilesystemInfo(BtrfsTestCase):
         """Verify that it is possible to get filesystem info"""
 
         label = "My 'Shiny' Btrfs"
-        succ = BlockDev.btrfs_create_volume([self.loop_dev], label, None, None)
+        succ = BlockDev.btrfs_create_volume([self.loop_dev], label, None, None, None)
         self.assertTrue(succ)
 
         mount(self.loop_dev, TEST_MNT)
@@ -344,7 +344,7 @@ class BtrfsTestFilesystemInfoNoLabel(BtrfsTestCase):
     def test_filesystem_info(self):
         """Verify that it is possible to get filesystem info for a volume with no label"""
 
-        succ = BlockDev.btrfs_create_volume([self.loop_dev], None, None, None)
+        succ = BlockDev.btrfs_create_volume([self.loop_dev], None, None, None, None)
         self.assertTrue(succ)
 
         mount(self.loop_dev, TEST_MNT)
@@ -360,24 +360,24 @@ class BtrfsTestMkfs(BtrfsTestCase):
         """Verify that it is possible to create a btrfs filesystem"""
 
         with self.assertRaises(GLib.GError):
-            BlockDev.btrfs_mkfs([], None, None, None)
+            BlockDev.btrfs_mkfs([], None, None, None, None)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.btrfs_mkfs(["/non/existing/device"], None, None, None)
+            BlockDev.btrfs_mkfs(["/non/existing/device"], None, None, None, None)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.btrfs_mkfs([self.loop_dev], None, "RaID7", None)
+            BlockDev.btrfs_mkfs([self.loop_dev], None, "RaID7", None, None)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.btrfs_mkfs([self.loop_dev], None, None, "RaID7")
+            BlockDev.btrfs_mkfs([self.loop_dev], None, None, "RaID7", None)
 
         # one device, no label
-        succ = BlockDev.btrfs_mkfs([self.loop_dev], None, None, None)
+        succ = BlockDev.btrfs_mkfs([self.loop_dev], None, None, None, None)
         self.assertTrue(succ)
 
         # already created
         with self.assertRaises(GLib.GError):
-            BlockDev.btrfs_mkfs([self.loop_dev], None, None, None)
+            BlockDev.btrfs_mkfs([self.loop_dev], None, None, None, None)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
         self.assertEqual(len(devs), 1)
@@ -386,7 +386,7 @@ class BtrfsTestMkfsLabel(BtrfsTestCase):
     def test_mkfs_label(self):
         """Verify that it is possible to create a btrfs filesystem with a label"""
 
-        succ = BlockDev.btrfs_mkfs([self.loop_dev], "myShinyBtrfs", None, None)
+        succ = BlockDev.btrfs_mkfs([self.loop_dev], "myShinyBtrfs", None, None, None)
         self.assertTrue(succ)
 
         devs = BlockDev.btrfs_list_devices(self.loop_dev)
@@ -396,39 +396,39 @@ class BtrfsTestResize(BtrfsTestCase):
     def test_resize(self):
         """Verify that is is possible to resize a btrfs filesystem"""
 
-        succ = BlockDev.btrfs_create_volume([self.loop_dev], None, None, None)
+        succ = BlockDev.btrfs_create_volume([self.loop_dev], None, None, None, None)
         self.assertTrue(succ)
 
         mount(self.loop_dev, TEST_MNT)
 
-        succ = BlockDev.btrfs_resize(TEST_MNT, 500 * 1024**2)
+        succ = BlockDev.btrfs_resize(TEST_MNT, 500 * 1024**2, None)
         self.assertTrue(succ)
 
 class BtrfsTestCheck(BtrfsTestCase):
     def test_check(self):
         """Verify that it's possible to check the btrfs filesystem"""
 
-        succ = BlockDev.btrfs_create_volume([self.loop_dev], None, None, None)
+        succ = BlockDev.btrfs_create_volume([self.loop_dev], None, None, None, None)
         self.assertTrue(succ)
 
-        succ = BlockDev.btrfs_check(self.loop_dev)
+        succ = BlockDev.btrfs_check(self.loop_dev, None)
         self.assertTrue(succ)
 
 class BtrfsTestRepair(BtrfsTestCase):
     def test_repair(self):
         """Verify that it's possible to repair the btrfs filesystem"""
 
-        succ = BlockDev.btrfs_create_volume([self.loop_dev], None, None, None)
+        succ = BlockDev.btrfs_create_volume([self.loop_dev], None, None, None, None)
         self.assertTrue(succ)
 
-        succ = BlockDev.btrfs_repair(self.loop_dev)
+        succ = BlockDev.btrfs_repair(self.loop_dev, None)
         self.assertTrue(succ)
 
 class BtrfsTestChangeLabel(BtrfsTestCase):
     def test_change_label(self):
         """Verify that it's possible to change btrfs filesystem's label"""
 
-        succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None)
+        succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None, None)
         self.assertTrue(succ)
 
         mount(self.loop_dev, TEST_MNT)

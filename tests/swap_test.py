@@ -33,7 +33,7 @@ class SwapTestCase(unittest.TestCase):
         """Verify that swap_* functions work as expected"""
 
         with self.assertRaises(GLib.GError):
-            BlockDev.swap_mkswap("/non/existing/device", None)
+            BlockDev.swap_mkswap("/non/existing/device", None, None)
 
         with self.assertRaises(GLib.GError):
             BlockDev.swap_swapon("/non/existing/device", -1)
@@ -54,7 +54,7 @@ class SwapTestCase(unittest.TestCase):
         self.assertFalse(on)
 
         # the common/expected sequence of calls
-        succ = BlockDev.swap_mkswap(self.loop_dev, None)
+        succ = BlockDev.swap_mkswap(self.loop_dev, None, None)
         self.assertTrue(succ)
 
         succ = BlockDev.swap_swapon(self.loop_dev, -1)
@@ -76,7 +76,7 @@ class SwapTestCase(unittest.TestCase):
     def test_mkswap_with_label(self):
         """Verify that mkswap with label works as expected"""
 
-        succ = BlockDev.swap_mkswap(self.loop_dev, "TestBlockDevSwap")
+        succ = BlockDev.swap_mkswap(self.loop_dev, "TestBlockDevSwap", None)
         self.assertTrue(succ)
 
         os.path.exists ("/dev/disk/by-label/TestBlockDevSwap")

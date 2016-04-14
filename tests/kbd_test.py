@@ -181,7 +181,7 @@ class KbdTestBcacheCreate(KbdBcacheTestCase):
     def test_bcache_create_destroy(self):
         """Verify that it's possible to create and destroy a bcache device"""
 
-        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2)
+        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2, None)
         self.assertTrue(succ)
         self.assertTrue(dev)
         self.bcache_dev = dev
@@ -199,7 +199,7 @@ class KbdTestBcacheCreate(KbdBcacheTestCase):
     def test_bcache_create_destroy_full_path(self):
         """Verify that it's possible to create and destroy a bcache device with full device path"""
 
-        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2)
+        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2, None)
         self.assertTrue(succ)
         self.assertTrue(dev)
         self.bcache_dev = dev
@@ -218,7 +218,7 @@ class KbdTestBcacheAttachDetach(KbdBcacheTestCase):
     def test_bcache_attach_detach(self):
         """Verify that it's possible to detach/attach a cache from/to a bcache device"""
 
-        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2)
+        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2, None)
         self.assertTrue(succ)
         self.assertTrue(dev)
         self.bcache_dev = dev
@@ -243,7 +243,7 @@ class KbdTestBcacheAttachDetach(KbdBcacheTestCase):
     def test_bcache_attach_detach_full_path(self):
         """Verify that it's possible to detach/attach a cache from/to a bcache device with full device path"""
 
-        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2)
+        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2, None)
         self.assertTrue(succ)
         self.assertTrue(dev)
         self.bcache_dev = dev
@@ -268,7 +268,7 @@ class KbdTestBcacheAttachDetach(KbdBcacheTestCase):
     def test_bcache_detach_destroy(self):
         """Verify that it's possible to destroy a bcache device with no cache attached"""
 
-        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2)
+        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2, None)
         self.assertTrue(succ)
         self.assertTrue(dev)
         self.bcache_dev = dev
@@ -291,7 +291,7 @@ class KbdTestBcacheGetSetMode(KbdBcacheTestCase):
     def test_bcache_get_set_mode(self):
         """Verify that it is possible to get and set Bcache mode"""
 
-        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2)
+        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2, None)
         self.assertTrue(succ)
         self.assertTrue(dev)
         self.bcache_dev = dev
@@ -337,7 +337,7 @@ class KbdTestBcacheGetSetMode(KbdBcacheTestCase):
 class KbdTestBcacheStatusTest(KbdBcacheTestCase):
     @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
     def test_bcache_status(self):
-        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2)
+        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2, None)
         self.assertTrue(succ)
         self.assertTrue(dev)
         self.bcache_dev = dev
@@ -368,7 +368,7 @@ class KbdTestBcacheBackingCacheDevTest(KbdBcacheTestCase):
     def test_bcache_backing_cache_dev(self):
         """Verify that is is possible to get the backing and cache devices for a Bcache"""
 
-        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2)
+        succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2, None)
         self.assertTrue(succ)
         self.assertTrue(dev)
         self.bcache_dev = dev
