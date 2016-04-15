@@ -17,11 +17,13 @@ typedef enum {
 /**
  * bd_s390_dasd_format:
  * @dasd: dasd to format
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the formatting (right now
+ *                                                 passed to the 'dasdfmt' utility)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether dasdfmt was successful or not
  */
-gboolean bd_s390_dasd_format (const gchar *dasd, GError **error);
+gboolean bd_s390_dasd_format (const gchar *dasd, BDExtraArg **extra, GError **error);
 
 /**
  * bd_s390_dasd_needs_format:

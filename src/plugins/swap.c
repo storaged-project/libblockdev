@@ -77,11 +77,13 @@ gboolean check() {
  * bd_swap_mkswap:
  * @device: a device to create swap space on
  * @label: (allow-none): a label for the swap space device
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
+ *                                                 passed to the 'mkswap' utility)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the swap space was successfully created or not
  */
-gboolean bd_swap_mkswap (gchar *device, gchar *label, GError **error) {
+gboolean bd_swap_mkswap (gchar *device, gchar *label, BDExtraArg **extra, GError **error) {
     guint8 next_arg = 2;
 
     /* We use -f to force since mkswap tends to refuse creation on lvs with
@@ -97,7 +99,7 @@ gboolean bd_swap_mkswap (gchar *device, gchar *label, GError **error) {
 
     argv[next_arg] = device;
 
-    return bd_utils_exec_and_report_error (argv, error);
+    return bd_utils_exec_and_report_error (argv, extra, error);
 }
 
 /**
@@ -177,7 +179,7 @@ gboolean bd_swap_swapon (gchar *device, gint priority, GError **error) {
 
     argv[next_arg] = device;
 
-    success = bd_utils_exec_and_report_error (argv, error);
+    success = bd_utils_exec_and_report_error (argv, NULL, error);
 
     if (to_free_idx > 0)
         g_free (argv[to_free_idx]);
@@ -196,7 +198,7 @@ gboolean bd_swap_swapoff (gchar *device, GError **error) {
     gchar *argv[3] = {"swapoff", NULL, NULL};
     argv[1] = device;
 
-    return bd_utils_exec_and_report_error (argv, error);
+    return bd_utils_exec_and_report_error (argv, NULL, error);
 }
 
 /**

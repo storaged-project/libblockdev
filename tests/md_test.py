@@ -290,7 +290,7 @@ class MDTestAddRemove(MDTestCase):
 
         # the MD array doesn't exist yet
         with self.assertRaises(GLib.GError):
-            BlockDev.md_add("bd_test_md", self.loop_dev3, 0)
+            BlockDev.md_add("bd_test_md", self.loop_dev3, 0, None)
 
         with wait_for_resync():
             succ = BlockDev.md_create("bd_test_md", "raid1",
@@ -299,21 +299,21 @@ class MDTestAddRemove(MDTestCase):
             self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.md_add("bd_test_md", "/non/existing/device", 0)
+            BlockDev.md_add("bd_test_md", "/non/existing/device", 0, None)
 
-        succ = BlockDev.md_add("bd_test_md", self.loop_dev3, 0)
+        succ = BlockDev.md_add("bd_test_md", self.loop_dev3, 0, None)
         self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.md_add("bd_test_md", self.loop_dev3, 0)
+            BlockDev.md_add("bd_test_md", self.loop_dev3, 0, None)
 
         with wait_for_resync():
-            succ = BlockDev.md_remove("bd_test_md", self.loop_dev3, True)
+            succ = BlockDev.md_remove("bd_test_md", self.loop_dev3, True, None)
             self.assertTrue(succ)
 
         # XXX: cannnot remove device added as a spare device nor a different
         # device?
-        succ = BlockDev.md_add("bd_test_md", self.loop_dev3, 2)
+        succ = BlockDev.md_add("bd_test_md", self.loop_dev3, 2, None)
         self.assertTrue(succ)
 
 class MDTestExamineDetail(MDTestCase):

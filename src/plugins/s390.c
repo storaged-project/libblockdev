@@ -62,16 +62,18 @@ gboolean check() {
 /**
  * bd_s390_dasd_format:
  * @dasd: dasd to format
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the formatting (right now
+ *                                                 passed to the 'dasdfmt' utility)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether dasdfmt was successful or not
  */
-gboolean bd_s390_dasd_format (const gchar *dasd, GError **error) {
+gboolean bd_s390_dasd_format (const gchar *dasd, BDExtraArg **extra, GError **error) {
     gboolean rc = FALSE;
     gchar *dev = g_strdup_printf ("/dev/%s", dasd);
     gchar *argv[] = {"/sbin/dasdfmt", "-y", "-d", "cdl", "-b", "4096", dev, NULL};
 
-    rc = bd_utils_exec_and_report_error (argv, error);
+    rc = bd_utils_exec_and_report_error (argv, extra, error);
     g_free (dev);
     return rc;
 }
@@ -140,7 +142,7 @@ gboolean bd_s390_dasd_online (gchar *dasd, GError **error) {
     fd = fopen(path, "r+");
     if (!fd) {
         /* DASD might be in device ignore list; try to rm it */
-        rc = bd_utils_exec_and_report_error (argv, error);
+        rc = bd_utils_exec_and_report_error (argv, NULL, error);
 
         if (!rc) {
             g_free (path);

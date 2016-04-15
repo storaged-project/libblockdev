@@ -369,11 +369,13 @@ guint64 bd_md_get_superblock_size (guint64 member_size, gchar *version, GError *
  * @spares: number of spare devices
  * @version: (allow-none): metadata version
  * @bitmap: whether to create an internal bitmap on the device or not
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
+ *                                                 passed to the 'mdadm' utility)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the new MD RAID device @device_name was successfully created or not
  */
-gboolean bd_md_create (gchar *device_name, gchar *level, gchar **disks, guint64 spares, gchar *version, gboolean bitmap, GError **error) {
+gboolean bd_md_create (gchar *device_name, gchar *level, gchar **disks, guint64 spares, gchar *version, gboolean bitmap, BDExtraArg **extra, GError **error) {
     gchar **argv = NULL;
     /* ["mdadm", "create", device, "--run", "level", "raid-devices",...] */
     guint argv_len = 6;
@@ -422,7 +424,7 @@ gboolean bd_md_create (gchar *device_name, gchar *level, gchar **disks, guint64 
         argv[argv_top++] = disks[i];
     argv[argv_top] = NULL;
 
-    ret = bd_utils_exec_and_report_error (argv, error);
+    ret = bd_utils_exec_and_report_error (argv, extra, error);
 
     g_free (level_str);
     g_free (rdevices_str);
@@ -442,11 +444,13 @@ gboolean bd_md_create (gchar *device_name, gchar *level, gchar **disks, guint64 
  * @version: (allow-none): metadata version
  * @bitmap: whether to create an internal bitmap on the device or not
  * @chunk_size: chunk size of the device to create
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
+ *                                                 passed to the 'mdadm' utility)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the new MD RAID device @device_name was successfully created or not
  */
-gboolean bd_md_create_with_chunk_size (gchar *device_name, gchar *level, gchar **disks, guint64 spares, gchar *version, gboolean bitmap, guint64 chunk_size, GError **error) {
+gboolean bd_md_create_with_chunk_size (gchar *device_name, gchar *level, gchar **disks, guint64 spares, gchar *version, gboolean bitmap, guint64 chunk_size, BDExtraArg **extra, GError **error) {
     gchar **argv = NULL;
     /* {"mdadm", "create", device, "--run", "level", "raid-devices",...} */
     guint argv_len = 6;
@@ -503,7 +507,7 @@ gboolean bd_md_create_with_chunk_size (gchar *device_name, gchar *level, gchar *
         argv[argv_top++] = disks[i];
     argv[argv_top] = NULL;
 
-    ret = bd_utils_exec_and_report_error (argv, error);
+    ret = bd_utils_exec_and_report_error (argv, extra, error);
 
     g_free (level_str);
     g_free (rdevices_str);
@@ -525,7 +529,7 @@ gboolean bd_md_create_with_chunk_size (gchar *device_name, gchar *level, gchar *
 gboolean bd_md_destroy (gchar *device, GError **error) {
     gchar *argv[] = {"mdadm", "--zero-superblock", device, NULL};
 
-    return bd_utils_exec_and_report_error (argv, error);
+    return bd_utils_exec_and_report_error (argv, NULL, error);
 }
 
 /**
@@ -546,7 +550,7 @@ gboolean bd_md_deactivate (gchar *device_name, GError **error) {
     if (access (dev_md_path, F_OK) == 0)
         argv[2] = dev_md_path;
 
-    ret = bd_utils_exec_and_report_error (argv, error);
+    ret = bd_utils_exec_and_report_error (argv, NULL, error);
     g_free (dev_md_path);
 
     return ret;
@@ -557,13 +561,15 @@ gboolean bd_md_deactivate (gchar *device_name, GError **error) {
  * @device_name: name of the RAID device to activate
  * @members: (allow-none) (array zero-terminated=1): member devices to be considered for @device activation
  * @uuid: (allow-none): UUID (in the MD RAID format!) of the MD RAID to activate
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the activation (right now
+ *                                                 passed to the 'mdadm' utility)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the MD RAID @device was successfully activated or not
  *
  * Note: either @members or @uuid (or both) have to be specified.
  */
-gboolean bd_md_activate (gchar *device_name, gchar **members, gchar *uuid, GError **error) {
+gboolean bd_md_activate (gchar *device_name, gchar **members, gchar *uuid, BDExtraArg **extra, GError **error) {
     guint64 num_members = members ? g_strv_length (members) : 0;
     gchar **argv = NULL;
     gchar *uuid_str = NULL;
@@ -589,7 +595,7 @@ gboolean bd_md_activate (gchar *device_name, gchar **members, gchar *uuid, GErro
         argv[argv_top++] = members[i];
     argv[argv_top] = NULL;
 
-    ret = bd_utils_exec_and_report_error (argv, error);
+    ret = bd_utils_exec_and_report_error (argv, extra, error);
 
     g_free (uuid_str);
     g_free (argv);
@@ -614,7 +620,7 @@ gboolean bd_md_run (gchar *raid_name, GError **error) {
         raid_name = raid_name_str;
     argv[2] = raid_name;
 
-    ret = bd_utils_exec_and_report_error (argv, error);
+    ret = bd_utils_exec_and_report_error (argv, NULL, error);
     g_free (raid_name_str);
 
     return ret;
@@ -633,7 +639,7 @@ gboolean bd_md_run (gchar *raid_name, GError **error) {
 gboolean bd_md_nominate (gchar *device, GError **error) {
     gchar *argv[] = {"mdadm", "--incremental", "--quiet", "--run", device, NULL};
 
-    return bd_utils_exec_and_report_error (argv, error);
+    return bd_utils_exec_and_report_error (argv, NULL, error);
 }
 
 /**
@@ -653,7 +659,7 @@ gboolean bd_md_denominate (gchar *device, GError **error) {
     if (g_str_has_prefix (device, "/dev/"))
         argv[3] = (device + 5);
 
-    return bd_utils_exec_and_report_error (argv, error);
+    return bd_utils_exec_and_report_error (argv, NULL, error);
 }
 
 /**
@@ -662,6 +668,8 @@ gboolean bd_md_denominate (gchar *device, GError **error) {
  * @device: name of the device to add to the @raid_name RAID device
  * @raid_devs: number of devices the @raid_name RAID should actively use or 0
  *             to leave unspecified (see below)
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the addition (right now
+ *                                                 passed to the 'mdadm' utility)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @device was successfully added to the @raid_name RAID or
@@ -674,7 +682,7 @@ gboolean bd_md_denominate (gchar *device, GError **error) {
  * Whether the new device will be added as a spare or an active member is
  * decided by mdadm.
  */
-gboolean bd_md_add (gchar *raid_name, gchar *device, guint64 raid_devs, GError **error) {
+gboolean bd_md_add (gchar *raid_name, gchar *device, guint64 raid_devs, BDExtraArg **extra, GError **error) {
     gchar *argv[7] = {"mdadm", NULL, NULL, NULL, NULL, NULL, NULL};
     guint argv_top = 1;
     gchar *raid_name_str = NULL;
@@ -696,7 +704,7 @@ gboolean bd_md_add (gchar *raid_name, gchar *device, guint64 raid_devs, GError *
     argv[argv_top++] = "--add";
     argv[argv_top] = device;
 
-    ret = bd_utils_exec_and_report_error (argv, error);
+    ret = bd_utils_exec_and_report_error (argv, extra, error);
     g_free (raid_name_str);
     g_free (raid_devs_str);
 
@@ -708,12 +716,14 @@ gboolean bd_md_add (gchar *raid_name, gchar *device, guint64 raid_devs, GError *
  * @raid_name: name of the RAID device to remove @device from
  * @device: device to remove from the @raid_name RAID
  * @fail: whether to mark the @device as failed before removing
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the removal (right now
+ *                                                 passed to the 'mdadm' utility)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @device was successfully removed from the @raid_name
  * RAID or not.
  */
-gboolean bd_md_remove (gchar *raid_name, gchar *device, gboolean fail, GError **error) {
+gboolean bd_md_remove (gchar *raid_name, gchar *device, gboolean fail, BDExtraArg **extra, GError **error) {
     gchar *argv[] = {"mdadm", raid_name, NULL, NULL, NULL, NULL};
     guint argv_top = 2;
     gchar *raid_name_str = NULL;
@@ -733,7 +743,7 @@ gboolean bd_md_remove (gchar *raid_name, gchar *device, gboolean fail, GError **
     else
         argv[argv_top] = device;
 
-    ret = bd_utils_exec_and_report_error (argv, error);
+    ret = bd_utils_exec_and_report_error (argv, extra, error);
     g_free (raid_name_str);
 
     return ret;
@@ -759,7 +769,7 @@ BDMDExamineData* bd_md_examine (gchar *device, GError **error) {
     guint i = 0;
     gboolean found_dev_name = FALSE;
 
-    success = bd_utils_exec_and_capture_output (argv, &output, error);
+    success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
     if (!success)
         /* error is already populated */
         return FALSE;
@@ -793,7 +803,7 @@ BDMDExamineData* bd_md_examine (gchar *device, GError **error) {
     }
 
     argv[2] = "--brief";
-    success = bd_utils_exec_and_capture_output (argv, &output, error);
+    success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
     if (!success)
         /* error is already populated */
         return FALSE;
@@ -852,7 +862,7 @@ BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error) {
     if (access (raid_name_str, F_OK) == 0)
         argv[2] = raid_name_str;
 
-    success = bd_utils_exec_and_capture_output (argv, &output, error);
+    success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
     if (!success) {
         g_free (raid_name_str);
         /* error is already populated */

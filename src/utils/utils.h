@@ -3,6 +3,7 @@
 
 #include "sizes.h"
 #include "exec.h"
+#include "extra_arg.h"
 
 /**
  * SECTION: utils

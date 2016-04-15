@@ -1,4 +1,5 @@
 #include <glib.h>
+#include "extra_arg.h"
 
 #ifndef BD_UTILS_EXEC
 #define BD_UTILS_EXEC
@@ -24,9 +25,9 @@ typedef enum {
     BD_UTILS_EXEC_ERROR_UTIL_LOW_VER,
 } BDUtilsExecError;
 
-gboolean bd_utils_exec_and_report_error (gchar **argv, GError **error);
-gboolean bd_utils_exec_and_report_status_error (gchar **argv, gint *status, GError **error);
-gboolean bd_utils_exec_and_capture_output (gchar **argv, gchar **output, GError **error);
+gboolean bd_utils_exec_and_report_error (gchar **argv, BDExtraArg **extra, GError **error);
+gboolean bd_utils_exec_and_report_status_error (gchar **argv, BDExtraArg **extra, gint *status, GError **error);
+gboolean bd_utils_exec_and_capture_output (gchar **argv, BDExtraArg **extra, gchar **output, GError **error);
 gboolean bd_utils_init_logging (BDUtilsLogFunc new_log_func, GError **error);
 gint bd_utils_version_cmp (gchar *ver_string1, gchar *ver_string2, GError **error);
 gboolean bd_utils_check_util_version (gchar *util, gchar *version, gchar *version_arg, gchar *version_regexp, GError **error);

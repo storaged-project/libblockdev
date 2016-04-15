@@ -36,20 +36,20 @@ void bd_fs_xfs_info_free (BDFSXfsInfo *data);
 
 gboolean bd_fs_wipe (gchar *device, gboolean all, GError **error);
 
-gboolean bd_fs_ext4_mkfs (gchar *device, GError **error);
+gboolean bd_fs_ext4_mkfs (gchar *device, BDExtraArg **extra, GError **error);
 gboolean bd_fs_ext4_wipe (gchar *device, GError **error);
-gboolean bd_fs_ext4_check (gchar *device, GError **error);
-gboolean bd_fs_ext4_repair (gchar *device, gboolean unsafe, GError **error);
+gboolean bd_fs_ext4_check (gchar *device, BDExtraArg **extra, GError **error);
+gboolean bd_fs_ext4_repair (gchar *device, gboolean unsafe, BDExtraArg **extra, GError **error);
 gboolean bd_fs_ext4_set_label (gchar *device, gchar *label, GError **error);
 BDFSExt4Info* bd_fs_ext4_get_info (gchar *device, GError **error);
-gboolean bd_fs_ext4_resize (gchar *device, guint64 new_size, GError **error);
+gboolean bd_fs_ext4_resize (gchar *device, guint64 new_size, BDExtraArg **extra, GError **error);
 
-gboolean bd_fs_xfs_mkfs (gchar *device, GError **error);
+gboolean bd_fs_xfs_mkfs (gchar *device, BDExtraArg **extra, GError **error);
 gboolean bd_fs_xfs_wipe (gchar *device, GError **error);
 gboolean bd_fs_xfs_check (gchar *device, GError **error);
-gboolean bd_fs_xfs_repair (gchar *device, GError **error);
+gboolean bd_fs_xfs_repair (gchar *device, BDExtraArg **extra, GError **error);
 gboolean bd_fs_xfs_set_label (gchar *device, gchar *label, GError **error);
 BDFSXfsInfo* bd_fs_xfs_get_info (gchar *device, GError **error);
-gboolean bd_fs_xfs_resize (gchar *mpoint, guint64 new_size, GError **error);
+gboolean bd_fs_xfs_resize (gchar *mpoint, guint64 new_size, BDExtraArg **extra, GError **error);
 
 #endif  /* BD_PART */
