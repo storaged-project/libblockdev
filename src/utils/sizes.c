@@ -23,7 +23,7 @@ GQuark bd_utils_size_error_quark (void)
  *
  * Returns: power of the @prefix or %NUM_PREFIXES if not found
  */
-static guint8 get_unit_prefix_power (gchar *prefix) {
+static guint8 get_unit_prefix_power (const gchar *prefix) {
     guint i = 0;
 
     for (i = 0; size_prefixes[i]; i++)
@@ -68,7 +68,7 @@ gchar* bd_utils_size_human_readable (guint64 size) {
  * Returns: number of bytes equal to the size specification rounded to bytes, if
  * 0, @error) may be set in case of error
  */
-guint64 bd_utils_size_from_spec (gchar *spec, GError **error) {
+guint64 bd_utils_size_from_spec (const gchar *spec, GError **error) {
     gchar const * const pattern = "^\\s*(\\d+\\.?\\d*)\\s*([kmgtpeKMGTPE]i?)[bB]";
     gchar const * const zero_pattern = "^\\s*0\\.?0*\\s*([kmgtpeKMGTPE]i?)?[bB]?$";
     GRegex *regex = NULL;

@@ -21,7 +21,7 @@ typedef enum {
  * Returns: whether the new linear mapping @map_name was successfully created
  * for the @device or not
  */
-gboolean bd_dm_create_linear (gchar *map_name, gchar *device, guint64 length, gchar *uuid, GError **error);
+gboolean bd_dm_create_linear (const gchar *map_name, const gchar *device, guint64 length, const gchar *uuid, GError **error);
 
 /**
  * bd_dm_remove:
@@ -30,7 +30,7 @@ gboolean bd_dm_create_linear (gchar *map_name, gchar *device, guint64 length, gc
  *
  * Returns: whether the @map_name map was successfully removed or not
  */
-gboolean bd_dm_remove (gchar *map_name, GError **error);
+gboolean bd_dm_remove (const gchar *map_name, GError **error);
 
 /**
  * bd_dm_name_from_node:
@@ -40,7 +40,7 @@ gboolean bd_dm_remove (gchar *map_name, GError **error);
  * Returns: map name of the map providing the @dm_node device or %NULL
  * (@error) contains the error in such cases)
  */
-gchar* bd_dm_name_from_node (gchar *dm_node, GError **error);
+gchar* bd_dm_name_from_node (const gchar *dm_node, GError **error);
 
 /**
  * bd_dm_node_from_name:
@@ -50,7 +50,7 @@ gchar* bd_dm_name_from_node (gchar *dm_node, GError **error);
  * Returns: DM node name for the @map_name map or %NULL (@error) contains
  * the error in such cases)
  */
-gchar* bd_dm_node_from_name (gchar *map_name, GError **error);
+gchar* bd_dm_node_from_name (const gchar *map_name, GError **error);
 
 /**
  * bd_dm_map_exists:
@@ -62,7 +62,7 @@ gchar* bd_dm_node_from_name (gchar *map_name, GError **error);
  * Returns: whether the given @map_name exists (and is live if @live_only is
  * %TRUE (and is active if @active_only is %TRUE)).
  */
-gboolean bd_dm_map_exists (gchar *map_name, gboolean live_only, gboolean active_only, GError **error);
+gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean active_only, GError **error);
 
 /**
  * bd_dm_get_member_raid_sets:
@@ -77,7 +77,7 @@ gboolean bd_dm_map_exists (gchar *map_name, gboolean live_only, gboolean active_
  *
  * One of @name, @uuid or @major:@minor has to be given.
  */
-gchar** bd_dm_get_member_raid_sets (gchar *name, gchar *uuid, gint major, gint minor, GError **error);
+gchar** bd_dm_get_member_raid_sets (const gchar *name, const gchar *uuid, gint major, gint minor, GError **error);
 
 /**
  * bd_dm_activate_raid_set:
@@ -86,7 +86,7 @@ gchar** bd_dm_get_member_raid_sets (gchar *name, gchar *uuid, gint major, gint m
  *
  * Returns: whether the RAID set @name was successfully activate or not
  */
-gboolean bd_dm_activate_raid_set (gchar *name, GError **error);
+gboolean bd_dm_activate_raid_set (const gchar *name, GError **error);
 
 /**
  * bd_dm_deactivate_raid_set:
@@ -95,7 +95,7 @@ gboolean bd_dm_activate_raid_set (gchar *name, GError **error);
  *
  * Returns: whether the RAID set @name was successfully deactivate or not
  */
-gboolean bd_dm_deactivate_raid_set (gchar *name, GError **error);
+gboolean bd_dm_deactivate_raid_set (const gchar *name, GError **error);
 
 /**
  * bd_dm_get_raid_set_type:
@@ -104,4 +104,4 @@ gboolean bd_dm_deactivate_raid_set (gchar *name, GError **error);
  *
  * Returns: string representation of the @name RAID set's type
  */
-gchar* bd_dm_get_raid_set_type (gchar *name, GError **error);
+gchar* bd_dm_get_raid_set_type (const gchar *name, GError **error);

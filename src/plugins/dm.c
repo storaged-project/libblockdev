@@ -93,9 +93,9 @@ gboolean check() {
  * Returns: whether the new linear mapping @map_name was successfully created
  * for the @device or not
  */
-gboolean bd_dm_create_linear (gchar *map_name, gchar *device, guint64 length, gchar *uuid, GError **error) {
+gboolean bd_dm_create_linear (const gchar *map_name, const gchar *device, guint64 length, const gchar *uuid, GError **error) {
     gboolean success = FALSE;
-    gchar *argv[9] = {"dmsetup", "create", map_name, "--table", NULL, NULL, NULL, NULL, NULL};
+    const gchar *argv[9] = {"dmsetup", "create", map_name, "--table", NULL, NULL, NULL, NULL, NULL};
 
     gchar *table = g_strdup_printf ("0 %"G_GUINT64_FORMAT" linear %s 0", length, device);
     argv[4] = table;
@@ -120,8 +120,8 @@ gboolean bd_dm_create_linear (gchar *map_name, gchar *device, guint64 length, gc
  *
  * Returns: whether the @map_name map was successfully removed or not
  */
-gboolean bd_dm_remove (gchar *map_name, GError **error) {
-    gchar *argv[4] = {"dmsetup", "remove", map_name, NULL};
+gboolean bd_dm_remove (const gchar *map_name, GError **error) {
+    const gchar *argv[4] = {"dmsetup", "remove", map_name, NULL};
 
     return bd_utils_exec_and_report_error (argv, NULL, error);
 }
@@ -134,7 +134,7 @@ gboolean bd_dm_remove (gchar *map_name, GError **error) {
  * Returns: map name of the map providing the @dm_node device or %NULL
  * (@error) contains the error in such cases)
  */
-gchar* bd_dm_name_from_node (gchar *dm_node, GError **error) {
+gchar* bd_dm_name_from_node (const gchar *dm_node, GError **error) {
     gchar *ret = NULL;
     gboolean success = FALSE;
 
@@ -166,7 +166,7 @@ gchar* bd_dm_name_from_node (gchar *dm_node, GError **error) {
  * Returns: DM node name for the @map_name map or %NULL (@error) contains
  * the error in such cases)
  */
-gchar* bd_dm_node_from_name (gchar *map_name, GError **error) {
+gchar* bd_dm_node_from_name (const gchar *map_name, GError **error) {
     gchar *symlink = NULL;
     gchar *ret = NULL;
     gchar *dev_mapper_path = g_strdup_printf ("/dev/mapper/%s", map_name);
@@ -198,7 +198,7 @@ gchar* bd_dm_node_from_name (gchar *map_name, GError **error) {
  * %TRUE (and is active if @active_only is %TRUE)). If %FALSE is returned,
  * @error) indicates whether error appeared (non-%NULL) or not (%NULL).
  */
-gboolean bd_dm_map_exists (gchar *map_name, gboolean live_only, gboolean active_only, GError **error) {
+gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean active_only, GError **error) {
     struct dm_task *task_list = NULL;
     struct dm_task *task_info = NULL;
 	struct dm_names *names = NULL;
@@ -320,7 +320,7 @@ static struct lib_context* init_dmraid_stack (GError **error) {
  * Returns: whether the device specified by @sysname matches the spec given by @name,
  *          @uuid, @major and @minor
  */
-static gboolean raid_dev_matches_spec (struct raid_dev *raid_dev, gchar *name, gchar *uuid, gint major, gint minor) {
+static gboolean raid_dev_matches_spec (struct raid_dev *raid_dev, const gchar *name, const gchar *uuid, gint major, gint minor) {
     gchar const *dev_name = NULL;
     gchar const *dev_uuid;
     gchar const *major_str;
@@ -372,7 +372,7 @@ static gboolean raid_dev_matches_spec (struct raid_dev *raid_dev, gchar *name, g
 /**
  * find_raid_sets_for_dev: (skip)
  */
-static void find_raid_sets_for_dev (gchar *name, gchar *uuid, gint major, gint minor, struct lib_context *lc, struct raid_set *rs, GPtrArray *ret_sets) {
+static void find_raid_sets_for_dev (const gchar *name, const gchar *uuid, gint major, gint minor, struct lib_context *lc, struct raid_set *rs, GPtrArray *ret_sets) {
     struct raid_set *subset;
     struct raid_dev *dev;
 
@@ -400,7 +400,7 @@ static void find_raid_sets_for_dev (gchar *name, gchar *uuid, gint major, gint m
  *
  * One of @name, @uuid or @major:@minor has to be given.
  */
-gchar** bd_dm_get_member_raid_sets (gchar *name, gchar *uuid, gint major, gint minor, GError **error) {
+gchar** bd_dm_get_member_raid_sets (const gchar *name, const gchar *uuid, gint major, gint minor, GError **error) {
     guint64 i = 0;
     struct lib_context *lc = NULL;
     struct raid_set *rs = NULL;
@@ -463,7 +463,7 @@ static struct raid_set* rs_matches_name (struct raid_set *rs, gpointer *name_dat
         return NULL;
 }
 
-static gboolean change_set_by_name (gchar *name, enum activate_type action, GError **error) {
+static gboolean change_set_by_name (const gchar *name, enum activate_type action, GError **error) {
     gint rc = 0;
     struct lib_context *lc;
     struct raid_set *iter_rs;
@@ -475,7 +475,7 @@ static gboolean change_set_by_name (gchar *name, enum activate_type action, GErr
         return FALSE;
 
     for_each_raidset (lc, iter_rs) {
-        match_rs = find_in_raid_sets (iter_rs, (RSEvalFunc)rs_matches_name, name);
+        match_rs = find_in_raid_sets (iter_rs, (RSEvalFunc)rs_matches_name, (gchar *)name);
         if (match_rs)
             break;
     }
@@ -506,7 +506,7 @@ static gboolean change_set_by_name (gchar *name, enum activate_type action, GErr
  *
  * Returns: whether the RAID set @name was successfully activate or not
  */
-gboolean bd_dm_activate_raid_set (gchar *name, GError **error) {
+gboolean bd_dm_activate_raid_set (const gchar *name, GError **error) {
     return change_set_by_name (name, A_ACTIVATE, error);
 }
 
@@ -517,7 +517,7 @@ gboolean bd_dm_activate_raid_set (gchar *name, GError **error) {
  *
  * Returns: whether the RAID set @name was successfully deactivate or not
  */
-gboolean bd_dm_deactivate_raid_set (gchar *name, GError **error) {
+gboolean bd_dm_deactivate_raid_set (const gchar *name, GError **error) {
     return change_set_by_name (name, A_DEACTIVATE, error);
 }
 
@@ -528,7 +528,7 @@ gboolean bd_dm_deactivate_raid_set (gchar *name, GError **error) {
  *
  * Returns: string representation of the @name RAID set's type
  */
-gchar* bd_dm_get_raid_set_type (gchar *name, GError **error) {
+gchar* bd_dm_get_raid_set_type (const gchar *name, GError **error) {
     struct lib_context *lc;
     struct raid_set *iter_rs;
     struct raid_set *match_rs = NULL;
@@ -540,7 +540,7 @@ gchar* bd_dm_get_raid_set_type (gchar *name, GError **error) {
         return NULL;
 
     for_each_raidset (lc, iter_rs) {
-        match_rs = find_in_raid_sets (iter_rs, (RSEvalFunc)rs_matches_name, name);
+        match_rs = find_in_raid_sets (iter_rs, (RSEvalFunc)rs_matches_name, (gchar *)name);
         if (match_rs)
             break;
     }

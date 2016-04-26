@@ -56,22 +56,22 @@ typedef struct BDMDDetailData {
 void bd_md_detail_data_free (BDMDDetailData *data);
 BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data);
 
-guint64 bd_md_get_superblock_size (guint64 member_size, gchar *version, GError **error);
-gboolean bd_md_create (gchar *device_name, gchar *level, gchar **disks, guint64 spares, gchar *version, gboolean bitmap, BDExtraArg **extra, GError **error);
-gboolean bd_md_create_with_chunk_size (gchar *device_name, gchar *level, gchar **disks, guint64 spares, gchar *version, gboolean bitmap, guint64 chunk_size, BDExtraArg **extra, GError **error);
-gboolean bd_md_destroy (gchar *device, GError **error);
-gboolean bd_md_deactivate (gchar *device_name, GError **error);
-gboolean bd_md_activate (gchar *device_name, gchar **members, gchar *uuid, BDExtraArg **extra, GError **error);
-gboolean bd_md_run (gchar *raid_name, GError **error);
-gboolean bd_md_nominate (gchar *device, GError **error);
-gboolean bd_md_denominate (gchar *device, GError **error);
-gboolean bd_md_add (gchar *raid_name, gchar *device, guint64 raid_devs, BDExtraArg **extra, GError **error);
-gboolean bd_md_remove (gchar *raid_name, gchar *device, gboolean fail, BDExtraArg **extra, GError **error);
-BDMDExamineData* bd_md_examine (gchar *device, GError **error);
-BDMDDetailData* bd_md_detail (gchar *raid_name, GError **error);
-gchar* bd_md_canonicalize_uuid (gchar *uuid, GError **error);
-gchar* bd_md_get_md_uuid (gchar *uuid, GError **error);
-gchar* bd_md_node_from_name (gchar *name, GError **error);
-gchar* bd_md_name_from_node (gchar *node, GError **error);
+guint64 bd_md_get_superblock_size (guint64 member_size, const gchar *version, GError **error);
+gboolean bd_md_create (const gchar *device_name, const gchar *level, const gchar **disks, guint64 spares, const gchar *version, gboolean bitmap, const BDExtraArg **extra, GError **error);
+gboolean bd_md_create_with_chunk_size (const gchar *device_name, const gchar *level, const gchar **disks, guint64 spares, const gchar *version, gboolean bitmap, guint64 chunk_size, const BDExtraArg **extra, GError **error);
+gboolean bd_md_destroy (const gchar *device, GError **error);
+gboolean bd_md_deactivate (const gchar *device_name, GError **error);
+gboolean bd_md_activate (const gchar *device_name, const gchar **members, const gchar *uuid, const BDExtraArg **extra, GError **error);
+gboolean bd_md_run (const gchar *raid_name, GError **error);
+gboolean bd_md_nominate (const gchar *device, GError **error);
+gboolean bd_md_denominate (const gchar *device, GError **error);
+gboolean bd_md_add (const gchar *raid_name, const gchar *device, guint64 raid_devs, const BDExtraArg **extra, GError **error);
+gboolean bd_md_remove (const gchar *raid_name, const gchar *device, gboolean fail, const BDExtraArg **extra, GError **error);
+BDMDExamineData* bd_md_examine (const gchar *device, GError **error);
+BDMDDetailData* bd_md_detail (const gchar *raid_name, GError **error);
+gchar* bd_md_canonicalize_uuid (const gchar *uuid, GError **error);
+gchar* bd_md_get_md_uuid (const gchar *uuid, GError **error);
+gchar* bd_md_node_from_name (const gchar *name, GError **error);
+gchar* bd_md_name_from_node (const gchar *node, GError **error);
 
 #endif  /* BD_MD */

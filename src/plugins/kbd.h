@@ -62,20 +62,20 @@ typedef struct BDKBDBcacheStats {
 BDKBDBcacheStats* bd_kbd_bcache_stats_copy (BDKBDBcacheStats *data);
 void bd_kbd_bcache_stats_free (BDKBDBcacheStats *data);
 
-gboolean bd_kbd_zram_create_devices (guint64 num_devices, guint64 *sizes, guint64 *nstreams, GError **error);
+gboolean bd_kbd_zram_create_devices (guint64 num_devices, const guint64 *sizes, const guint64 *nstreams, GError **error);
 gboolean bd_kbd_zram_destroy_devices (GError **error);
-BDKBDZramStats* bd_kbd_zram_get_stats (gchar *device, GError **error);
+BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error);
 
-gboolean bd_kbd_bcache_create (gchar *backing_device, gchar *cache_device, BDExtraArg **extra, gchar **bcache_device, GError **error);
-gboolean bd_kbd_bcache_attach (gchar *c_set_uuid, gchar *bcache_device, GError **error);
-gboolean bd_kbd_bcache_detach (gchar *bcache_device, gchar **c_set_uuid, GError **error);
-gboolean bd_kbd_bcache_destroy (gchar *bcache_device, GError **error);
-BDKBDBcacheMode bd_kbd_bcache_get_mode (gchar *bcache_device, GError **error);
+gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_device, const BDExtraArg **extra, const gchar **bcache_device, GError **error);
+gboolean bd_kbd_bcache_attach (const gchar *c_set_uuid, const gchar *bcache_device, GError **error);
+gboolean bd_kbd_bcache_detach (const gchar *bcache_device, gchar **c_set_uuid, GError **error);
+gboolean bd_kbd_bcache_destroy (const gchar *bcache_device, GError **error);
+BDKBDBcacheMode bd_kbd_bcache_get_mode (const gchar *bcache_device, GError **error);
 const gchar* bd_kbd_bcache_get_mode_str (BDKBDBcacheMode mode, GError **error);
-BDKBDBcacheMode bd_kbd_bcache_get_mode_from_str (gchar *mode_str, GError **error);
-gboolean bd_kbd_bcache_set_mode (gchar *bcache_device, BDKBDBcacheMode mode, GError **error);
-BDKBDBcacheStats* bd_kbd_bcache_status (gchar *bcache_device, GError **error);
-gchar* bd_kbd_bcache_get_backing_device (gchar *bcache_device, GError **error);
-gchar* bd_kbd_bcache_get_cache_device (gchar *bcache_device, GError **error);
+BDKBDBcacheMode bd_kbd_bcache_get_mode_from_str (const gchar *mode_str, GError **error);
+gboolean bd_kbd_bcache_set_mode (const gchar *bcache_device, BDKBDBcacheMode mode, GError **error);
+BDKBDBcacheStats* bd_kbd_bcache_status (const gchar *bcache_device, GError **error);
+gchar* bd_kbd_bcache_get_backing_device (const gchar *bcache_device, GError **error);
+gchar* bd_kbd_bcache_get_cache_device (const gchar *bcache_device, GError **error);
 
 #endif  /* BD_KBD */

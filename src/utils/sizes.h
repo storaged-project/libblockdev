@@ -23,6 +23,6 @@ typedef enum {
 } BDUtilsSizeError;
 
 gchar* bd_utils_size_human_readable (guint64 size);
-guint64 bd_utils_size_from_spec (gchar *spec, GError **error);
+guint64 bd_utils_size_from_spec (const gchar *spec, GError **error);
 
 #endif /* BD_UTILS_SIZES */

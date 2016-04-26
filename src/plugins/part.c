@@ -94,7 +94,7 @@ gboolean init() {
 
 static const gchar *table_type_str[BD_PART_TABLE_UNDEF] = {"msdos", "gpt"};
 
-static gboolean disk_commit (PedDisk *disk, gchar *path, GError **error) {
+static gboolean disk_commit (PedDisk *disk, const gchar *path, GError **error) {
     gint ret = 0;
 
     ret = ped_disk_commit_to_dev (disk);
@@ -124,7 +124,7 @@ static gboolean disk_commit (PedDisk *disk, gchar *path, GError **error) {
  *
  * Returns: whether the partition table was successfully created or not
  */
-gboolean bd_part_create_table (gchar *disk, BDPartTableType type, gboolean ignore_existing, GError **error) {
+gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean ignore_existing, GError **error) {
     PedDevice *dev = NULL;
     PedDisk *ped_disk = NULL;
     PedDiskType *disk_type = NULL;
@@ -202,11 +202,11 @@ static BDPartSpec* get_part_spec (PedDevice *dev, PedPartition *part) {
  *
  * Returns: spec of the @part partition from @disk or %NULL in case of error
  */
-BDPartSpec* bd_part_get_part_spec (gchar *disk, gchar *part, GError **error) {
+BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError **error) {
     PedDevice *dev = NULL;
     PedDisk *ped_disk = NULL;
     PedPartition *ped_part = NULL;
-    gchar *part_num_str = NULL;
+    const gchar *part_num_str = NULL;
     gint part_num = 0;
     BDPartSpec *ret = NULL;
 
@@ -272,7 +272,7 @@ BDPartSpec* bd_part_get_part_spec (gchar *disk, gchar *part, GError **error) {
  *
  * Returns: (transfer full) (array zero-terminated=1): specs of the partitions from @disk or %NULL in case of error
  */
-BDPartSpec** bd_part_get_disk_parts (gchar *disk, GError **error) {
+BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error) {
     PedDevice *dev = NULL;
     PedDisk *ped_disk = NULL;
     PedPartition *ped_part = NULL;
@@ -377,7 +377,7 @@ static PedPartition* add_part_to_disk (PedDevice *dev, PedDisk *disk, BDPartType
  * NOTE: The resulting partition may start at a different position than given by
  *       @start and can have different size than @size due to alignment.
  */
-BDPartSpec* bd_part_create_part (gchar *disk, BDPartTypeReq type, guint64 start, guint64 size, BDPartAlign align, GError **error) {
+BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 start, guint64 size, BDPartAlign align, GError **error) {
     PedDevice *dev = NULL;
     PedDisk *ped_disk = NULL;
     PedPartition *ped_part = NULL;
@@ -473,11 +473,11 @@ BDPartSpec* bd_part_create_part (gchar *disk, BDPartTypeReq type, guint64 start,
  *
  * Returns: whether the @part partition was successfully deleted from @disk
  */
-gboolean bd_part_delete_part (gchar *disk, gchar *part, GError **error) {
+gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **error) {
     PedDevice *dev = NULL;
     PedDisk *ped_disk = NULL;
     PedPartition *ped_part = NULL;
-    gchar *part_num_str = NULL;
+    const gchar *part_num_str = NULL;
     gint part_num = 0;
     gint status = 0;
     gboolean ret = FALSE;
@@ -556,12 +556,12 @@ gboolean bd_part_delete_part (gchar *disk, gchar *part, GError **error) {
  * Returns: whether the flag @flag was successfully set on the @part partition
  * or not.
  */
-gboolean bd_part_set_part_flag (gchar *disk, gchar *part, BDPartFlag flag, gboolean state, GError **error) {
+gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag flag, gboolean state, GError **error) {
     PedDevice *dev = NULL;
     PedDisk *ped_disk = NULL;
     PedPartition *ped_part = NULL;
     PedPartitionFlag ped_flag = PED_PARTITION_FIRST_FLAG;
-    gchar *part_num_str = NULL;
+    const gchar *part_num_str = NULL;
     gint part_num = 0;
     gint status = 0;
     gboolean ret = FALSE;

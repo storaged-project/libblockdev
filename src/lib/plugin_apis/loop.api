@@ -15,7 +15,7 @@ typedef enum {
  * Returns: (transfer full): path of the device's backing file or %NULL if none
  *                           is found
  */
-gchar* bd_loop_get_backing_file (gchar *dev_name, GError **error);
+gchar* bd_loop_get_backing_file (const gchar *dev_name, GError **error);
 
 /**
  * bd_loop_get_loop_name:
@@ -24,7 +24,7 @@ gchar* bd_loop_get_backing_file (gchar *dev_name, GError **error);
  *
  * Returns: (transfer full): name of the loop device associated with the given @file
  */
-gchar* bd_loop_get_loop_name (gchar *file, GError **error);
+gchar* bd_loop_get_loop_name (const gchar *file, GError **error);
 
 /**
  * bd_loop_setup:
@@ -34,7 +34,7 @@ gchar* bd_loop_get_loop_name (gchar *file, GError **error);
  *
  * Returns: whether the @file was successfully setup as a loop device or not
  */
-gboolean bd_loop_setup (gchar *file, gchar **loop_name, GError **error);
+gboolean bd_loop_setup (const gchar *file, const gchar **loop_name, GError **error);
 
 /**
  * bd_loop_teardown:
@@ -43,4 +43,4 @@ gboolean bd_loop_setup (gchar *file, gchar **loop_name, GError **error);
  *
  * Returns: whether the @loop device was successfully torn down or not
  */
-gboolean bd_loop_teardown (gchar *loop, GError **error);
+gboolean bd_loop_teardown (const gchar *loop, GError **error);

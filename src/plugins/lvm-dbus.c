@@ -64,7 +64,7 @@ static GDBusConnection *bus = NULL;
 
 /* "friend" functions from the utils library */
 guint64 get_next_task_id ();
-void log_task_status (guint64 task_id, gchar *msg);
+void log_task_status (guint64 task_id, const gchar *msg);
 
 /**
  * SECTION: lvm
@@ -281,11 +281,11 @@ gboolean init() {
     return TRUE;
 }
 
-static gchar** get_existing_objects (gchar *obj_prefix, GError **error) {
+static const gchar** get_existing_objects (const gchar *obj_prefix, GError **error) {
     GVariant *intro_v = NULL;
     gchar *intro_data = NULL;
     GDBusNodeInfo *info = NULL;
-    gchar **ret = NULL;
+    const gchar **ret = NULL;
     GDBusNodeInfo **nodes;
     guint64 n_nodes = 0;
     guint64 i = 0;
@@ -304,7 +304,7 @@ static gchar** get_existing_objects (gchar *obj_prefix, GError **error) {
     for (nodes = info->nodes; (*nodes); nodes++)
         n_nodes++;
 
-    ret = g_new0 (gchar*, n_nodes + 1);
+    ret = g_new0 (const gchar*, n_nodes + 1);
     for (nodes = info->nodes, i=0; (*nodes); nodes++, i++) {
         ret[i] = g_strdup_printf ("%s/%s", obj_prefix, ((*nodes)->path));
     }
@@ -315,7 +315,7 @@ static gchar** get_existing_objects (gchar *obj_prefix, GError **error) {
     return ret;
 }
 
-static gchar* get_object_path (gchar *obj_id, GError **error) {
+static gchar* get_object_path (const gchar *obj_id, GError **error) {
     GVariant *args = NULL;
     GVariant *ret = NULL;
     gchar *obj_path = NULL;
@@ -343,7 +343,7 @@ static gchar* get_object_path (gchar *obj_id, GError **error) {
     return obj_path;
 }
 
-static GVariant* get_object_property (gchar *obj_path, gchar *iface, gchar *property, GError **error) {
+static GVariant* get_object_property (const gchar *obj_path, const gchar *iface, const gchar *property, GError **error) {
     GVariant *args = NULL;
     GVariant *ret = NULL;
     GVariant *real_ret = NULL;
@@ -365,7 +365,7 @@ static GVariant* get_object_property (gchar *obj_path, gchar *iface, gchar *prop
     return real_ret;
 }
 
-static GVariant* get_lvm_object_property (gchar *obj_id, gchar *iface, gchar *property, GError **error) {
+static GVariant* get_lvm_object_property (const gchar *obj_id, const gchar *iface, const gchar *property, GError **error) {
     gchar *obj_path = NULL;
     GVariant *ret = NULL;
 
@@ -380,7 +380,7 @@ static GVariant* get_lvm_object_property (gchar *obj_id, gchar *iface, gchar *pr
     }
 }
 
-static GVariant* call_lvm_method (gchar *obj, gchar *intf, gchar *method, GVariant *params, GVariant *extra_params, BDExtraArg **extra_args, guint64 *task_id, GError **error) {
+static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, guint64 *task_id, GError **error) {
     GVariant *config = NULL;
     GVariant *param = NULL;
     GVariantIter iter;
@@ -392,7 +392,7 @@ static GVariant* call_lvm_method (gchar *obj, gchar *intf, gchar *method, GVaria
     GVariant *ret = NULL;
     gchar *params_str = NULL;
     gchar *log_msg = NULL;
-    BDExtraArg **extra_p = NULL;
+    const BDExtraArg **extra_p = NULL;
 
     /* don't allow global config string changes during the run */
     g_mutex_lock (&global_config_lock);
@@ -469,7 +469,7 @@ static GVariant* call_lvm_method (gchar *obj, gchar *intf, gchar *method, GVaria
     return ret;
 }
 
-static void call_lvm_method_sync (gchar *obj, gchar *intf, gchar *method, GVariant *params, GVariant *extra_params, BDExtraArg **extra_args, GError **error) {
+static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, GError **error) {
     GVariant *ret = NULL;
     gchar *obj_path = NULL;
     gchar *task_path = NULL;
@@ -577,7 +577,7 @@ static void call_lvm_method_sync (gchar *obj, gchar *intf, gchar *method, GVaria
     g_free (task_path);
 }
 
-static void call_lvm_obj_method_sync (gchar *obj_id, gchar *intf, gchar *method, GVariant *params, GVariant *extra_params, BDExtraArg **extra_args, GError **error) {
+static void call_lvm_obj_method_sync (const gchar *obj_id, const gchar *intf, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, GError **error) {
     gchar *obj_path = get_object_path (obj_id, error);
     if (!obj_path)
         return;
@@ -586,21 +586,21 @@ static void call_lvm_obj_method_sync (gchar *obj_id, gchar *intf, gchar *method,
     g_free (obj_path);
 }
 
-static void call_lv_method_sync (gchar *vg_name, gchar *lv_name, gchar *method, GVariant *params, GVariant *extra_params, BDExtraArg **extra_args, GError **error) {
+static void call_lv_method_sync (const gchar *vg_name, const gchar *lv_name, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, GError **error) {
     gchar *obj_id = g_strdup_printf ("%s/%s", vg_name, lv_name);
 
     call_lvm_obj_method_sync (obj_id, LV_INTF, method, params, extra_params, extra_args, error);
     g_free (obj_id);
 }
 
-static void call_thpool_method_sync (gchar *vg_name, gchar *pool_name, gchar *method, GVariant *params, GVariant *extra_params, BDExtraArg **extra_args, GError **error) {
+static void call_thpool_method_sync (const gchar *vg_name, const gchar *pool_name, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, GError **error) {
     gchar *obj_id = g_strdup_printf ("%s/%s", vg_name, pool_name);
 
     call_lvm_obj_method_sync (obj_id, THPOOL_INTF, method, params, extra_params, extra_args, error);
     g_free (obj_id);
 }
 
-static GVariant* get_lv_property (gchar *vg_name, gchar *lv_name, gchar *property, GError **error) {
+static GVariant* get_lv_property (const gchar *vg_name, const gchar *lv_name, const gchar *property, GError **error) {
     gchar *lv_spec = NULL;
     GVariant *ret = NULL;
 
@@ -612,7 +612,7 @@ static GVariant* get_lv_property (gchar *vg_name, gchar *lv_name, gchar *propert
     return ret;
 }
 
-static GVariant* get_object_properties (gchar *obj_path, gchar *iface, GError **error) {
+static GVariant* get_object_properties (const gchar *obj_path, const gchar *iface, GError **error) {
     GVariant *args = NULL;
     GVariant *ret = NULL;
     GVariant *real_ret = NULL;
@@ -634,7 +634,7 @@ static GVariant* get_object_properties (gchar *obj_path, gchar *iface, GError **
     return real_ret;
 }
 
-static GVariant* get_lvm_object_properties (gchar *obj_id, gchar *iface, GError **error) {
+static GVariant* get_lvm_object_properties (const gchar *obj_id, const gchar *iface, GError **error) {
     GVariant *args = NULL;
     GVariant *ret = NULL;
     gchar *obj_path = NULL;
@@ -660,7 +660,7 @@ static GVariant* get_lvm_object_properties (gchar *obj_id, gchar *iface, GError 
 }
 
 
-static GVariant* get_pv_properties (gchar *pv_name, GError **error) {
+static GVariant* get_pv_properties (const gchar *pv_name, GError **error) {
     gchar *obj_id = NULL;
     GVariant *ret = NULL;
 
@@ -674,7 +674,7 @@ static GVariant* get_pv_properties (gchar *pv_name, GError **error) {
     return ret;
 }
 
-static GVariant* get_vg_properties (gchar *vg_name, GError **error) {
+static GVariant* get_vg_properties (const gchar *vg_name, GError **error) {
     GVariant *ret = NULL;
 
     ret = get_lvm_object_properties (vg_name, VG_INTF, error);
@@ -682,7 +682,7 @@ static GVariant* get_vg_properties (gchar *vg_name, GError **error) {
     return ret;
 }
 
-static GVariant* get_lv_properties (gchar *vg_name, gchar *lv_name, GError **error) {
+static GVariant* get_lv_properties (const gchar *vg_name, const gchar *lv_name, GError **error) {
     gchar *lvm_spec = NULL;
     GVariant *ret = NULL;
 
@@ -758,7 +758,7 @@ static BDLVMVGdata* get_vg_data_from_props (GVariant *props, GError **error __at
     return data;
 }
 
-static gchar get_lv_attr (GVariantDict *props, gchar *prop) {
+static gchar get_lv_attr (GVariantDict *props, const gchar *prop) {
     GVariant *value = NULL;
     gchar *letter = NULL;
     gchar *desc = NULL;
@@ -774,7 +774,7 @@ static gchar get_lv_attr (GVariantDict *props, gchar *prop) {
     return ret;
 }
 
-static gchar get_lv_attr_bool (GVariantDict *props, gchar *prop, gchar letter) {
+static gchar get_lv_attr_bool (GVariantDict *props, const gchar *prop, gchar letter) {
     gboolean set = FALSE;
     g_variant_dict_lookup (props, prop, "b", &set);
     if (set)
@@ -834,7 +834,7 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error __at
     return data;
 }
 
-static GVariant* create_size_str_param (guint64 size, gchar *unit) {
+static GVariant* create_size_str_param (guint64 size, const gchar *unit) {
     gchar *str = NULL;
 
     str = g_strdup_printf ("%"G_GUINT64_FORMAT"%s", size, unit ? unit : "");
@@ -994,7 +994,7 @@ gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard, GErr
  *
  * Returns: whether the PV was successfully created or not
  */
-gboolean bd_lvm_pvcreate (gchar *device, guint64 data_alignment, guint64 metadata_size, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_pvcreate (const gchar *device, guint64 data_alignment, guint64 metadata_size, const BDExtraArg **extra, GError **error) {
     GVariantBuilder builder;
     GVariant *param = NULL;
     GVariant *params = NULL;
@@ -1035,7 +1035,7 @@ gboolean bd_lvm_pvcreate (gchar *device, guint64 data_alignment, guint64 metadat
  * pvresize(8)). If given @size 0, adjusts the PV's size to the underlaying
  * block device's size.
  */
-gboolean bd_lvm_pvresize (gchar *device, guint64 size, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_pvresize (const gchar *device, guint64 size, const BDExtraArg **extra, GError **error) {
     GVariant *params = NULL;
     gchar *obj_path = get_object_path (device, error);
     if (!obj_path)
@@ -1056,7 +1056,7 @@ gboolean bd_lvm_pvresize (gchar *device, guint64 size, BDExtraArg **extra, GErro
  *
  * Returns: whether the PV was successfully removed/destroyed or not
  */
-gboolean bd_lvm_pvremove (gchar *device, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_pvremove (const gchar *device, const BDExtraArg **extra, GError **error) {
     GVariantBuilder builder;
     GVariant *params = NULL;
 
@@ -1097,7 +1097,7 @@ gboolean bd_lvm_pvremove (gchar *device, BDExtraArg **extra, GError **error) {
  * If @dest is %NULL, VG allocation rules are used for the extents from the @src
  * PV (see pvmove(8)).
  */
-gboolean bd_lvm_pvmove (gchar *src, gchar *dest, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_pvmove (const gchar *src, const gchar *dest, const BDExtraArg **extra, GError **error) {
     GVariant *prop = NULL;
     gchar *src_path = NULL;
     gchar *dest_path = NULL;
@@ -1165,7 +1165,7 @@ gboolean bd_lvm_pvmove (gchar *src, gchar *dest, BDExtraArg **extra, GError **er
  * The @device argument is used only if @update_cache is %TRUE. Otherwise the
  * whole system is scanned for PVs.
  */
-gboolean bd_lvm_pvscan (gchar *device, gboolean update_cache, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_pvscan (const gchar *device, gboolean update_cache, const BDExtraArg **extra, GError **error) {
     GVariantBuilder builder;
     GVariantType *type = NULL;
     GVariant *params = NULL;
@@ -1204,7 +1204,7 @@ gboolean bd_lvm_pvscan (gchar *device, gboolean update_cache, BDExtraArg **extra
  * Returns: (transfer full): information about the PV on the given @device or
  * %NULL in case of error (the @error) gets populated in those cases)
  */
-BDLVMPVdata* bd_lvm_pvinfo (gchar *device, GError **error) {
+BDLVMPVdata* bd_lvm_pvinfo (const gchar *device, GError **error) {
     GVariant *props = NULL;
     BDLVMPVdata *ret = NULL;
 
@@ -1226,7 +1226,7 @@ BDLVMPVdata* bd_lvm_pvinfo (gchar *device, GError **error) {
  * Returns: (array zero-terminated=1): information about PVs found in the system
  */
 BDLVMPVdata** bd_lvm_pvs (GError **error) {
-    gchar **objects = NULL;
+    const gchar **objects = NULL;
     guint64 n_pvs = 0;
     GVariant *props = NULL;
     BDLVMPVdata **ret = NULL;
@@ -1244,27 +1244,27 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
             return NULL;
     }
 
-    n_pvs = g_strv_length (objects);
+    n_pvs = g_strv_length ((gchar **) objects);
 
     /* now create the return value -- NULL-terminated array of BDLVMPVdata */
     ret = g_new0 (BDLVMPVdata*, n_pvs + 1);
     for (i=0; i < n_pvs; i++) {
         props = get_object_properties (objects[i], PV_INTF, error);
         if (!props) {
-            g_strfreev (objects);
+            g_strfreev ((gchar **) objects);
             g_free (ret);
             return NULL;
         }
         ret[i] = get_pv_data_from_props (props, error);
         if (!(ret[i])) {
-            g_strfreev (objects);
+            g_strfreev ((gchar **) objects);
             g_free (ret);
             return NULL;
         }
     }
     ret[i] = NULL;
 
-    g_strfreev (objects);
+    g_strfreev ((gchar **) objects);
     return ret;
 }
 
@@ -1279,17 +1279,17 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
  *
  * Returns: whether the VG @name was successfully created or not
  */
-gboolean bd_lvm_vgcreate (gchar *name, gchar **pv_list, guint64 pe_size, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_vgcreate (const gchar *name, const gchar **pv_list, guint64 pe_size, const BDExtraArg **extra, GError **error) {
     GVariantBuilder builder;
     gchar *path = NULL;
-    gchar **pv = NULL;
+    const gchar **pv = NULL;
     GVariant *pvs = NULL;
     GVariant *params = NULL;
     GVariant *extra_params = NULL;
 
     /* build the array of PVs (object paths) */
     g_variant_builder_init (&builder, G_VARIANT_TYPE_OBJECT_PATH_ARRAY);
-    for (pv = pv_list; *pv; pv++) {
+    for (pv=pv_list; *pv; pv++) {
         path = get_object_path (*pv, error);
         if (!path) {
             g_variant_builder_clear (&builder);
@@ -1327,7 +1327,7 @@ gboolean bd_lvm_vgcreate (gchar *name, gchar **pv_list, guint64 pe_size, BDExtra
  *
  * Returns: whether the VG was successfully removed or not
  */
-gboolean bd_lvm_vgremove (gchar *vg_name, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_vgremove (const gchar *vg_name, const BDExtraArg **extra, GError **error) {
     call_lvm_obj_method_sync (vg_name, VG_INTF, "Remove", NULL, NULL, extra, error);
     return ((*error) == NULL);
 }
@@ -1342,7 +1342,7 @@ gboolean bd_lvm_vgremove (gchar *vg_name, BDExtraArg **extra, GError **error) {
  *
  * Returns: whether the VG was successfully renamed or not
  */
-gboolean bd_lvm_vgrename (gchar *old_vg_name, gchar *new_vg_name, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_vgrename (const gchar *old_vg_name, const gchar *new_vg_name, const BDExtraArg **extra, GError **error) {
     GVariant *params = g_variant_new ("(s)", new_vg_name);
     call_lvm_obj_method_sync (old_vg_name, VG_INTF, "Rename", params, NULL, extra, error);
     return ((*error) == NULL);
@@ -1357,7 +1357,7 @@ gboolean bd_lvm_vgrename (gchar *old_vg_name, gchar *new_vg_name, BDExtraArg **e
  *
  * Returns: whether the VG was successfully activated or not
  */
-gboolean bd_lvm_vgactivate (gchar *vg_name, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_vgactivate (const gchar *vg_name, const BDExtraArg **extra, GError **error) {
     GVariant *params = g_variant_new ("(t)", 0);
     call_lvm_obj_method_sync (vg_name, VG_INTF, "Activate", params, NULL, extra, error);
     return ((*error) == NULL);
@@ -1372,7 +1372,7 @@ gboolean bd_lvm_vgactivate (gchar *vg_name, BDExtraArg **extra, GError **error) 
  *
  * Returns: whether the VG was successfully deactivated or not
  */
-gboolean bd_lvm_vgdeactivate (gchar *vg_name, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_vgdeactivate (const gchar *vg_name, const BDExtraArg **extra, GError **error) {
     GVariant *params = g_variant_new ("(t)", 0);
     call_lvm_obj_method_sync (vg_name, VG_INTF, "Deactivate", params, NULL, extra, error);
     return ((*error) == NULL);
@@ -1388,7 +1388,7 @@ gboolean bd_lvm_vgdeactivate (gchar *vg_name, BDExtraArg **extra, GError **error
  *
  * Returns: whether the VG @vg_name was successfully extended with the given @device or not.
  */
-gboolean bd_lvm_vgextend (gchar *vg_name, gchar *device, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_vgextend (const gchar *vg_name, const gchar *device, const BDExtraArg **extra, GError **error) {
     gchar *pv = NULL;
     GVariant *pv_var = NULL;
     GVariant *pvs = NULL;
@@ -1420,7 +1420,7 @@ gboolean bd_lvm_vgextend (gchar *vg_name, gchar *device, BDExtraArg **extra, GEr
  * Note: This function does not move extents off of the PV before removing
  *       it from the VG. You must do that first by calling #bd_lvm_pvmove.
  */
-gboolean bd_lvm_vgreduce (gchar *vg_name, gchar *device, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_vgreduce (const gchar *vg_name, const gchar *device, const BDExtraArg **extra, GError **error) {
     gchar *pv = NULL;
     GVariantBuilder builder;
     GVariantType *type = NULL;
@@ -1470,7 +1470,7 @@ gboolean bd_lvm_vgreduce (gchar *vg_name, gchar *device, BDExtraArg **extra, GEr
  * Returns: (transfer full): information about the @vg_name VG or %NULL in case
  * of error (the @error) gets populated in those cases)
  */
-BDLVMVGdata* bd_lvm_vginfo (gchar *vg_name, GError **error) {
+BDLVMVGdata* bd_lvm_vginfo (const gchar *vg_name, GError **error) {
     GVariant *props = NULL;
     BDLVMVGdata *ret = NULL;
 
@@ -1492,7 +1492,7 @@ BDLVMVGdata* bd_lvm_vginfo (gchar *vg_name, GError **error) {
  * Returns: (array zero-terminated=1): information about VGs found in the system
  */
 BDLVMVGdata** bd_lvm_vgs (GError **error) {
-    gchar **objects = NULL;
+    const gchar **objects = NULL;
     guint64 n_vgs = 0;
     GVariant *props = NULL;
     BDLVMVGdata **ret = NULL;
@@ -1510,27 +1510,27 @@ BDLVMVGdata** bd_lvm_vgs (GError **error) {
             return NULL;
     }
 
-    n_vgs = g_strv_length (objects);
+    n_vgs = g_strv_length ((gchar **) objects);
 
     /* now create the return value -- NULL-terminated array of BDLVMVGdata */
     ret = g_new0 (BDLVMVGdata*, n_vgs + 1);
     for (i=0; i < n_vgs; i++) {
         props = get_object_properties (objects[i], VG_INTF, error);
         if (!props) {
-            g_strfreev (objects);
+            g_strfreev ((gchar **) objects);
             g_free (ret);
             return NULL;
         }
         ret[i] = get_vg_data_from_props (props, error);
         if (!(ret[i])) {
-            g_strfreev (objects);
+            g_strfreev ((gchar **) objects);
             g_free (ret);
             return NULL;
         }
     }
     ret[i] = NULL;
 
-    g_strfreev (objects);
+    g_strfreev ((gchar **) objects);
     return ret;
 }
 
@@ -1543,7 +1543,7 @@ BDLVMVGdata** bd_lvm_vgs (GError **error) {
  * Returns: (transfer full): the origin volume for the @vg_name/@lv_name LV or
  * %NULL if failed to determine (@error) is set in those cases)
  */
-gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, GError **error) {
+gchar* bd_lvm_lvorigin (const gchar *vg_name, const gchar *lv_name, GError **error) {
     GVariant *prop = NULL;
     gchar *obj_path = NULL;
     gchar *ret = NULL;
@@ -1585,10 +1585,10 @@ gchar* bd_lvm_lvorigin (gchar *vg_name, gchar *lv_name, GError **error) {
  *
  * Returns: whether the given @vg_name/@lv_name LV was successfully created or not
  */
-gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar *type, gchar **pv_list, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_lvcreate (const gchar *vg_name, const gchar *lv_name, guint64 size, const gchar *type, const gchar **pv_list, const BDExtraArg **extra, GError **error) {
     GVariantBuilder builder;
     gchar *path = NULL;
-    gchar **pv = NULL;
+    const gchar **pv = NULL;
     GVariant *pvs = NULL;
     GVariantType *var_type = NULL;
     GVariant *params = NULL;
@@ -1597,7 +1597,7 @@ gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar *t
     /* build the array of PVs (object paths) */
     if (pv_list) {
         g_variant_builder_init (&builder, G_VARIANT_TYPE_ARRAY);
-        for (pv = pv_list; *pv; pv++) {
+        for (pv=pv_list; *pv; pv++) {
             path = get_object_path (*pv, error);
             if (!path) {
                 g_variant_builder_clear (&builder);
@@ -1625,7 +1625,7 @@ gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar *t
         /* and now the extra_params params */
         g_variant_builder_init (&builder, G_VARIANT_TYPE_DICTIONARY);
         if (pv_list && g_strcmp0 (type, "striped") == 0)
-            g_variant_builder_add_value (&builder, g_variant_new ("{sv}", "stripes", g_variant_new ("i", g_strv_length (pv_list))));
+            g_variant_builder_add_value (&builder, g_variant_new ("{sv}", "stripes", g_variant_new ("i", g_strv_length ((gchar **) pv_list))));
         else
             g_variant_builder_add_value (&builder, g_variant_new ("{sv}", "type", g_variant_new ("s", type)));
         extra_params = g_variant_builder_end (&builder);
@@ -1647,7 +1647,7 @@ gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar *t
  *
  * Returns: whether the @vg_name/@lv_name LV was successfully removed or not
  */
-gboolean bd_lvm_lvremove (gchar *vg_name, gchar *lv_name, gboolean force, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_lvremove (const gchar *vg_name, const gchar *lv_name, gboolean force, const BDExtraArg **extra, GError **error) {
     GVariantBuilder builder;
     GVariant *extra_params = NULL;
 
@@ -1677,7 +1677,7 @@ gboolean bd_lvm_lvremove (gchar *vg_name, gchar *lv_name, gboolean force, BDExtr
  * Returns: whether the @vg_name/@lv_name LV was successfully renamed to
  * @vg_name/@new_name or not
  */
-gboolean bd_lvm_lvrename (gchar *vg_name, gchar *lv_name, gchar *new_name, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_lvrename (const gchar *vg_name, const gchar *lv_name, const gchar *new_name, const BDExtraArg **extra, GError **error) {
     GVariant *params = NULL;
 
     params = g_variant_new ("(s)", new_name);
@@ -1696,7 +1696,7 @@ gboolean bd_lvm_lvrename (gchar *vg_name, gchar *lv_name, gchar *new_name, BDExt
  *
  * Returns: whether the @vg_name/@lv_name LV was successfully resized or not
  */
-gboolean bd_lvm_lvresize (gchar *vg_name, gchar *lv_name, guint64 size, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_lvresize (const gchar *vg_name, const gchar *lv_name, guint64 size, const BDExtraArg **extra, GError **error) {
     GVariantBuilder builder;
     GVariantType *type = NULL;
     GVariant *params = NULL;
@@ -1724,7 +1724,7 @@ gboolean bd_lvm_lvresize (gchar *vg_name, gchar *lv_name, guint64 size, BDExtraA
  *
  * Returns: whether the @vg_name/@lv_name LV was successfully activated or not
  */
-gboolean bd_lvm_lvactivate (gchar *vg_name, gchar *lv_name, gboolean ignore_skip, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_lvactivate (const gchar *vg_name, const gchar *lv_name, gboolean ignore_skip, const BDExtraArg **extra, GError **error) {
     GVariant *params = g_variant_new ("(t)", 0);
     GVariantBuilder builder;
     GVariant *extra_params = NULL;
@@ -1750,7 +1750,7 @@ gboolean bd_lvm_lvactivate (gchar *vg_name, gchar *lv_name, gboolean ignore_skip
  *
  * Returns: whether the @vg_name/@lv_name LV was successfully deactivated or not
  */
-gboolean bd_lvm_lvdeactivate (gchar *vg_name, gchar *lv_name, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_lvdeactivate (const gchar *vg_name, const gchar *lv_name, const BDExtraArg **extra, GError **error) {
     GVariant *params = g_variant_new ("(t)", 0);
     call_lv_method_sync (vg_name, lv_name, "Deactivate", params, NULL, extra, error);
     return (*error == NULL);
@@ -1769,7 +1769,7 @@ gboolean bd_lvm_lvdeactivate (gchar *vg_name, gchar *lv_name, BDExtraArg **extra
  * Returns: whether the @snapshot_name snapshot of the @vg_name/@origin_name LV
  * was successfully created or not.
  */
-gboolean bd_lvm_lvsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, guint64 size, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_lvsnapshotcreate (const gchar *vg_name, const gchar *origin_name, const gchar *snapshot_name, guint64 size, const BDExtraArg **extra, GError **error) {
     GVariantBuilder builder;
     GVariant *params = NULL;
 
@@ -1794,7 +1794,7 @@ gboolean bd_lvm_lvsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *sna
  *
  * Returns: whether the @vg_name/@snapshot_name LV snapshot was successfully merged or not
  */
-gboolean bd_lvm_lvsnapshotmerge (gchar *vg_name, gchar *snapshot_name, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_lvsnapshotmerge (const gchar *vg_name, const gchar *snapshot_name, const BDExtraArg **extra, GError **error) {
     gchar *obj_id = NULL;
     gchar *obj_path = NULL;
 
@@ -1818,7 +1818,7 @@ gboolean bd_lvm_lvsnapshotmerge (gchar *vg_name, gchar *snapshot_name, BDExtraAr
  * Returns: (transfer full): information about the @vg_name/@lv_name LV or %NULL in case
  * of error (the @error) gets populated in those cases)
  */
-BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, GError **error) {
+BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError **error) {
     GVariant *props = NULL;
 
     props = get_lv_properties (vg_name, lv_name, error);
@@ -1829,7 +1829,7 @@ BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, GError **error) {
     return get_lv_data_from_props (props, error);
 }
 
-static gchar* get_lv_vg_name (gchar *lv_obj_path, GError **error) {
+static gchar* get_lv_vg_name (const gchar *lv_obj_path, GError **error) {
     GVariant *value = NULL;
     gchar *vg_obj_path = NULL;
     gchar *ret = NULL;
@@ -1851,8 +1851,8 @@ static gchar* get_lv_vg_name (gchar *lv_obj_path, GError **error) {
  *
  * Filter LVs by VG name and prepend the matching ones to the @out list.
  */
-static gboolean filter_lvs_by_vg (gchar **lvs, gchar *vg_name, GSList **out, guint64 *n_lvs, GError **error) {
-    gchar **lv_p = NULL;
+static gboolean filter_lvs_by_vg (const gchar **lvs, const gchar *vg_name, GSList **out, guint64 *n_lvs, GError **error) {
+    const gchar **lv_p = NULL;
     gchar *lv_vg_name = NULL;
     gboolean success = TRUE;
 
@@ -1864,15 +1864,15 @@ static gboolean filter_lvs_by_vg (gchar **lvs, gchar *vg_name, GSList **out, gui
         if (vg_name) {
             lv_vg_name = get_lv_vg_name (*lv_p, error);
             if (!lv_vg_name) {
-                g_free (*lv_p);
+                g_free ((gchar *) *lv_p);
                 success = FALSE;
             }
         }
         if (!vg_name || g_strcmp0 (lv_vg_name, vg_name) == 0) {
-            *out = g_slist_prepend (*out, *lv_p);
+            *out = g_slist_prepend (*out, (gchar *) *lv_p);
             (*n_lvs)++;
         } else {
-            g_free (*lv_p);
+            g_free ((gchar *) *lv_p);
             *lv_p = NULL;
         }
         g_free (lv_vg_name);
@@ -1888,8 +1888,8 @@ static gboolean filter_lvs_by_vg (gchar **lvs, gchar *vg_name, GSList **out, gui
  * Returns: (array zero-terminated=1): information about LVs found in the given
  * @vg_name VG or in system if @vg_name is %NULL
  */
-BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, GError **error) {
-    gchar **lvs = NULL;
+BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
+    const gchar **lvs = NULL;
     guint64 n_lvs = 0;
     GVariant *props = NULL;
     BDLVMLVdata **ret = NULL;
@@ -1988,7 +1988,7 @@ BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, GError **error) {
  *
  * Returns: whether the @vg_name/@lv_name thin pool was successfully created or not
  */
-gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guint64 md_size, guint64 chunk_size, gchar *profile, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_thpoolcreate (const gchar *vg_name, const gchar *lv_name, guint64 size, guint64 md_size, guint64 chunk_size, const gchar *profile, const BDExtraArg **extra, GError **error) {
     GVariantBuilder builder;
     GVariant *params = NULL;
     GVariant *extra_params = NULL;
@@ -2032,7 +2032,7 @@ gboolean bd_lvm_thpoolcreate (gchar *vg_name, gchar *lv_name, guint64 size, guin
  *
  * Returns: whether the @vg_name/@lv_name thin LV was successfully created or not
  */
-gboolean bd_lvm_thlvcreate (gchar *vg_name, gchar *pool_name, gchar *lv_name, guint64 size, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_thlvcreate (const gchar *vg_name, const gchar *pool_name, const gchar *lv_name, guint64 size, const BDExtraArg **extra, GError **error) {
     GVariantBuilder builder;
     GVariant *params = NULL;
 
@@ -2056,7 +2056,7 @@ gboolean bd_lvm_thlvcreate (gchar *vg_name, gchar *pool_name, gchar *lv_name, gu
  * Returns: (transfer full): the name of the pool volume for the @vg_name/@lv_name
  * thin LV or %NULL if failed to determine (@error) is set in those cases)
  */
-gchar* bd_lvm_thlvpoolname (gchar *vg_name, gchar *lv_name, GError **error) {
+gchar* bd_lvm_thlvpoolname (const gchar *vg_name, const gchar *lv_name, GError **error) {
     GVariant *prop = NULL;
     gboolean is_thin = FALSE;
     gchar *pool_obj_path = NULL;
@@ -2100,7 +2100,7 @@ gchar* bd_lvm_thlvpoolname (gchar *vg_name, gchar *lv_name, GError **error) {
  * Returns: whether the @snapshot_name snapshot of the @vg_name/@origin_name
  * thin LV was successfully created or not.
  */
-gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *snapshot_name, gchar *pool_name, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_thsnapshotcreate (const gchar *vg_name, const gchar *origin_name, const gchar *snapshot_name, const gchar *pool_name, const BDExtraArg **extra, GError **error) {
     GVariantBuilder builder;
     GVariant *params = NULL;
     GVariant *extra_params = NULL;
@@ -2132,7 +2132,7 @@ gboolean bd_lvm_thsnapshotcreate (gchar *vg_name, gchar *origin_name, gchar *sna
  * Returns: whether the new requested global config @new_config was successfully
  *          set or not
  */
-gboolean bd_lvm_set_global_config (gchar *new_config, GError **error __attribute__((unused))) {
+gboolean bd_lvm_set_global_config (const gchar *new_config, GError **error __attribute__((unused))) {
     /* XXX: the error attribute will likely be used in the future when
        some validation comes into the game */
 
@@ -2241,7 +2241,7 @@ const gchar* bd_lvm_cache_get_mode_str (BDLVMCacheMode mode, GError **error) {
  * Returns: cache mode for the @mode_str or %BD_LVM_CACHE_MODE_UNKNOWN if
  *          failed to determine
  */
-BDLVMCacheMode bd_lvm_cache_get_mode_from_str (gchar *mode_str, GError **error) {
+BDLVMCacheMode bd_lvm_cache_get_mode_from_str (const gchar *mode_str, GError **error) {
     if (g_strcmp0 (mode_str, "writethrough") == 0)
         return BD_LVM_CACHE_MODE_WRITETHROUGH;
     else if (g_strcmp0 (mode_str, "writeback") == 0)
@@ -2270,7 +2270,7 @@ BDLVMCacheMode bd_lvm_cache_get_mode_from_str (gchar *mode_str, GError **error) 
  *
  * Returns: whether the cache pool @vg_name/@pool_name was successfully created or not
  */
-gboolean bd_lvm_cache_create_pool (gchar *vg_name, gchar *pool_name, guint64 pool_size, guint64 md_size, BDLVMCacheMode mode, BDLVMCachePoolFlags flags, gchar **fast_pvs, GError **error) {
+gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name, guint64 pool_size, guint64 md_size, BDLVMCacheMode mode, BDLVMCachePoolFlags flags, const gchar **fast_pvs, GError **error) {
     gboolean success = FALSE;
     gchar *type = NULL;
     gchar *name = NULL;
@@ -2355,7 +2355,7 @@ gboolean bd_lvm_cache_create_pool (gchar *vg_name, gchar *pool_name, guint64 poo
  *
  * Returns: whether the @cache_pool_lv was successfully attached to the @data_lv or not
  */
-gboolean bd_lvm_cache_attach (gchar *vg_name, gchar *data_lv, gchar *cache_pool_lv, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_cache_attach (const gchar *vg_name, const gchar *data_lv, const gchar *cache_pool_lv, const BDExtraArg **extra, GError **error) {
     GVariantBuilder builder;
     GVariant *params = NULL;
     gchar *lv_id = NULL;
@@ -2390,7 +2390,7 @@ gboolean bd_lvm_cache_attach (gchar *vg_name, gchar *data_lv, gchar *cache_pool_
  *
  * Note: synces the cache first
  */
-gboolean bd_lvm_cache_detach (gchar *vg_name, gchar *cached_lv, gboolean destroy, BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_cache_detach (const gchar *vg_name, const gchar *cached_lv, gboolean destroy, const BDExtraArg **extra, GError **error) {
     gchar *lv_id = NULL;
     gchar *cache_pool_name = NULL;
     GVariantBuilder builder;
@@ -2425,8 +2425,8 @@ gboolean bd_lvm_cache_detach (gchar *vg_name, gchar *cached_lv, gboolean destroy
  *
  * Returns: whether the cached LV @lv_name was successfully created or not
  */
-gboolean bd_lvm_cache_create_cached_lv (gchar *vg_name, gchar *lv_name, guint64 data_size, guint64 cache_size, guint64 md_size, BDLVMCacheMode mode, BDLVMCachePoolFlags flags,
-                                        gchar **slow_pvs, gchar **fast_pvs, GError **error) {
+gboolean bd_lvm_cache_create_cached_lv (const gchar *vg_name, const gchar *lv_name, guint64 data_size, guint64 cache_size, guint64 md_size, BDLVMCacheMode mode, BDLVMCachePoolFlags flags,
+                                        const gchar **slow_pvs, const gchar **fast_pvs, GError **error) {
     gboolean success = FALSE;
     gchar *name = NULL;
 
@@ -2463,7 +2463,7 @@ gboolean bd_lvm_cache_create_cached_lv (gchar *vg_name, gchar *lv_name, guint64 
  *
  * Returns: name of the cache pool LV used by the @cached_lv or %NULL in case of error
  */
-gchar* bd_lvm_cache_pool_name (gchar *vg_name, gchar *cached_lv, GError **error) {
+gchar* bd_lvm_cache_pool_name (const gchar *vg_name, const gchar *cached_lv, GError **error) {
     gchar *ret = NULL;
     gchar *name_start = NULL;
     gchar *name_end = NULL;
@@ -2517,7 +2517,7 @@ gchar* bd_lvm_cache_pool_name (gchar *vg_name, gchar *cached_lv, GError **error)
  *
  * Returns: stats for the @cached_lv or %NULL in case of error
  */
-BDLVMCacheStats* bd_lvm_cache_stats (gchar *vg_name, gchar *cached_lv, GError **error) {
+BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_lv, GError **error) {
     struct dm_pool *pool = NULL;
     struct dm_task *task = NULL;
     struct dm_info info;
@@ -2632,7 +2632,7 @@ BDLVMCacheStats* bd_lvm_cache_stats (gchar *vg_name, gchar *cached_lv, GError **
  * Returns: (transfer full): the name of the (internal) data LV of the
  * @vg_name/@lv_name LV
  */
-gchar* bd_lvm_data_lv_name (gchar *vg_name, gchar *lv_name, GError **error) {
+gchar* bd_lvm_data_lv_name (const gchar *vg_name, const gchar *lv_name, GError **error) {
     GVariant *prop = NULL;
     gchar *obj_id = NULL;
     gchar *obj_path = NULL;
@@ -2679,7 +2679,7 @@ gchar* bd_lvm_data_lv_name (gchar *vg_name, gchar *lv_name, GError **error) {
  * Returns: (transfer full): the name of the (internal) metadata LV of the
  * @vg_name/@lv_name LV
  */
-gchar* bd_lvm_metadata_lv_name (gchar *vg_name, gchar *lv_name, GError **error) {
+gchar* bd_lvm_metadata_lv_name (const gchar *vg_name, const gchar *lv_name, GError **error) {
     GVariant *prop = NULL;
     gchar *obj_id = NULL;
     gchar *obj_path = NULL;
