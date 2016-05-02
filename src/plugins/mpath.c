@@ -75,7 +75,7 @@ gboolean check() {
  * Flushes all unused multipath device maps.
  */
 gboolean bd_mpath_flush_mpaths (GError **error) {
-    gchar *argv[3] = {"multipath", "-F", NULL};
+    const gchar *argv[3] = {"multipath", "-F", NULL};
     gboolean success = FALSE;
     gchar *output = NULL;
 
@@ -98,7 +98,7 @@ gboolean bd_mpath_flush_mpaths (GError **error) {
     return TRUE;
 }
 
-static gchar* get_device_name (gchar *major_minor, GError **error) {
+static gchar* get_device_name (const gchar *major_minor, GError **error) {
     gchar *path = NULL;
     gchar *link = NULL;
     gchar *ret = NULL;
@@ -132,7 +132,7 @@ static gchar* get_device_name (gchar *major_minor, GError **error) {
     return ret;
 }
 
-static gboolean map_is_multipath (gchar *map_name, GError **error) {
+static gboolean map_is_multipath (const gchar *map_name, GError **error) {
     struct dm_task *task = NULL;
     struct dm_info info;
     guint64 start = 0;
@@ -186,7 +186,7 @@ static gboolean map_is_multipath (gchar *map_name, GError **error) {
     return ret;
 }
 
-static gchar** get_map_deps (gchar *map_name, GError **error) {
+static gchar** get_map_deps (const gchar *map_name, GError **error) {
     struct dm_task *task;
     struct dm_deps *deps;
     guint64 major = 0;
@@ -262,7 +262,7 @@ static gchar** get_map_deps (gchar *map_name, GError **error) {
  * Returns: %TRUE if the device is a multipath member, %FALSE if not or an error
  * appeared when queried (@error is set in those cases)
  */
-gboolean bd_mpath_is_mpath_member (gchar *device, GError **error) {
+gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error) {
     struct dm_task *task_names = NULL;
 	struct dm_names *names = NULL;
     gchar *symlink = NULL;
@@ -349,7 +349,7 @@ gboolean bd_mpath_is_mpath_member (gchar *device, GError **error) {
  * Returns: if successfully set or not
  */
 gboolean bd_mpath_set_friendly_names (gboolean enabled, GError **error) {
-    gchar *argv[8] = {"mpathconf", "--find_multipaths", "y", "--user_friendly_names", NULL, "--with_multipathd", "y", NULL};
+    const gchar *argv[8] = {"mpathconf", "--find_multipaths", "y", "--user_friendly_names", NULL, "--with_multipathd", "y", NULL};
     argv[4] = enabled ? "y" : "n";
 
     return bd_utils_exec_and_report_error (argv, NULL, error);

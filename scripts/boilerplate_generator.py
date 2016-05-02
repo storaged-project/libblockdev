@@ -207,7 +207,7 @@ def get_funcs_info(fn_infos, module_name):
 def get_loading_func(fn_infos, module_name):
     # TODO: only error on functions provided by the plugin that fail to load
     # TODO: implement the 'gchar **errors' argument
-    ret =  'gpointer load_{0}_from_plugin(gchar *so_name) {{\n'.format(module_name)
+    ret =  'gpointer load_{0}_from_plugin(const gchar *so_name) {{\n'.format(module_name)
     ret += '    void *handle = NULL;\n'
     ret += '    char *error = NULL;\n'
     ret += '    gboolean (*check_fn) (void) = NULL;\n'

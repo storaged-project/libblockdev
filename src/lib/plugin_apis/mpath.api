@@ -27,7 +27,7 @@ gboolean bd_mpath_flush_mpaths (GError **error);
  * Returns: %TRUE if the device is a multipath member, %FALSE if not or an error
  * appeared when queried (@error is set in those cases)
  */
-gboolean bd_mpath_is_mpath_member (gchar *device, GError **error);
+gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error);
 
 /**
  * bd_mpath_set_friendly_names:

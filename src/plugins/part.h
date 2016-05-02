@@ -71,12 +71,12 @@ typedef struct BDPartSpec {
 BDPartSpec* bd_part_spec_copy (BDPartSpec *data);
 void bd_part_spec_free (BDPartSpec *data);
 
-gboolean bd_part_create_table (gchar *disk, BDPartTableType type, gboolean ignore_existing, GError **error);
-BDPartSpec* bd_part_get_part_spec (gchar *disk, gchar *part, GError **error);
-BDPartSpec** bd_part_get_disk_parts (gchar *disk, GError **error);
-BDPartSpec* bd_part_create_part (gchar *disk, BDPartTypeReq type, guint64 start, guint64 size, BDPartAlign align, GError **error);
-gboolean bd_part_delete_part (gchar *disk, gchar *part, GError **error);
-gboolean bd_part_set_part_flag (gchar *disk, gchar *part, BDPartFlag flag, gboolean state, GError **error);
+gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean ignore_existing, GError **error);
+BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError **error);
+BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error);
+BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 start, guint64 size, BDPartAlign align, GError **error);
+gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **error);
+gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag flag, gboolean state, GError **error);
 const gchar* bd_part_get_part_table_type_str (BDPartTableType type, GError **error);
 const gchar* bd_part_get_flag_str (BDPartFlag flag, GError **error);
 const gchar* bd_part_get_type_str (BDPartType type, GError **error);

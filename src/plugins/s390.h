@@ -15,9 +15,9 @@ typedef enum {
     BD_S390_ERROR_DASDFMT,
 } BDS390Error;
 
-gboolean bd_s390_dasd_format (const gchar *dasd, BDExtraArg **extra, GError **error);
+gboolean bd_s390_dasd_format (const gchar *dasd, const BDExtraArg **extra, GError **error);
 gboolean bd_s390_dasd_needs_format (const gchar *dasd, GError **error);
-gboolean bd_s390_dasd_online (gchar *dasd, GError **error);
+gboolean bd_s390_dasd_online (const gchar *dasd, GError **error);
 gboolean bd_s390_dasd_is_ldl (const gchar *dasd, GError **error);
 gchar* bd_s390_sanitize_dev_input (const gchar *dev, GError **error);
 gchar* bd_s390_zfcp_sanitize_wwpn_input (const gchar *wwpn, GError **error);

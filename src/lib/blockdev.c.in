@@ -49,7 +49,7 @@ typedef struct BDPluginStatus {
     gpointer handle;
 } BDPluginStatus;
 
-typedef void* (*LoadFunc) (gchar *so_name);
+typedef void* (*LoadFunc) (const gchar *so_name);
 
 /* KEEP THE ORDERING OF THESE ARRAYS MATCHING THE BDPluginName ENUM! */
 static gchar * default_plugin_so[BD_PLUGIN_UNDEF] = {
@@ -78,7 +78,7 @@ static gchar* plugin_names[BD_PLUGIN_UNDEF] = {
     "lvm", "btrfs", "swap", "loop", "crypto", "mpath", "dm", "mdraid", "kbd", "s390", "part", "fs"
 };
 
-static void set_plugin_so_name (BDPlugin name, gchar *so_name) {
+static void set_plugin_so_name (BDPlugin name, const gchar *so_name) {
     plugins[name].spec.so_name = so_name;
 }
 
@@ -123,7 +123,7 @@ static GSequence* get_config_files (GError **error) {
     return ret;
 }
 
-static gboolean process_config_file (gchar *config_file, GSList **plugins_sonames, GError **error) {
+static gboolean process_config_file (const gchar *config_file, GSList **plugins_sonames, GError **error) {
     GKeyFile *config = NULL;
     BDPlugin i = 0;
     gchar **sonames = NULL;
@@ -165,7 +165,7 @@ static gboolean load_config (GSequence *config_files, GSList **plugins_sonames, 
     /* process config files one after another in order */
     config_file_iter = g_sequence_get_begin_iter (config_files);
     while (!g_sequence_iter_is_end (config_file_iter)) {
-        config_file = (gchar *) g_sequence_get (config_file_iter);
+        config_file = (const gchar *) g_sequence_get (config_file_iter);
         if (!process_config_file (config_file, plugins_sonames, error)) {
             g_warning ("Cannot process the config file '%s': %s. Skipping.", config_file, (*error)->message);
             g_clear_error (error);

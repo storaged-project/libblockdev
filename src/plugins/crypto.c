@@ -683,7 +683,7 @@ static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libv
         return FALSE;
     }
 
-    status = g_io_channel_write_chars (out_file, (gchar *) packet_data, (gssize) packet_data_size,
+    status = g_io_channel_write_chars (out_file, (const gchar *) packet_data, (gssize) packet_data_size,
                                        &bytes_written, error);
     g_free (packet_data);
     if (status != G_IO_STATUS_NORMAL) {

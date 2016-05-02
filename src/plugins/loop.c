@@ -63,7 +63,7 @@ gboolean check() {
  * Returns: (transfer full): path of the device's backing file or %NULL if none
  *                           is found
  */
-gchar* bd_loop_get_backing_file (gchar *dev_name, GError **error) {
+gchar* bd_loop_get_backing_file (const gchar *dev_name, GError **error) {
     gchar *sys_path = g_strdup_printf ("/sys/class/block/%s/loop/backing_file", dev_name);
     gchar *ret = NULL;
     gboolean success = FALSE;
@@ -92,7 +92,7 @@ gchar* bd_loop_get_backing_file (gchar *dev_name, GError **error) {
  * Returns: (transfer full): name of the loop device associated with the given
  * @file or %NULL if failed to determine
  */
-gchar* bd_loop_get_loop_name (gchar *file, GError **error __attribute__((unused))) {
+gchar* bd_loop_get_loop_name (const gchar *file, GError **error __attribute__((unused))) {
     glob_t globbuf;
     gchar **path_p;
     gboolean success = FALSE;
@@ -139,8 +139,8 @@ gchar* bd_loop_get_loop_name (gchar *file, GError **error __attribute__((unused)
  *
  * Returns: whether the @file was successfully setup as a loop device or not
  */
-gboolean bd_loop_setup (gchar *file, gchar **loop_name, GError **error) {
-    gchar *args[4] = {"losetup", "-f", file, NULL};
+gboolean bd_loop_setup (const gchar *file, const gchar **loop_name, GError **error) {
+    const gchar *args[4] = {"losetup", "-f", file, NULL};
     gboolean success = FALSE;
 
     success = bd_utils_exec_and_report_error (args, NULL, error);
@@ -160,11 +160,11 @@ gboolean bd_loop_setup (gchar *file, gchar **loop_name, GError **error) {
  *
  * Returns: whether the @loop device was successfully torn down or not
  */
-gboolean bd_loop_teardown (gchar *loop, GError **error) {
+gboolean bd_loop_teardown (const gchar *loop, GError **error) {
     gboolean success = FALSE;
     gchar *dev_loop = NULL;
 
-    gchar *args[4] = {"losetup", "-d", NULL, NULL};
+    const gchar *args[4] = {"losetup", "-d", NULL, NULL};
 
     if (g_str_has_prefix (loop, "/dev/"))
         args[2] = loop;

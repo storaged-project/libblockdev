@@ -17,7 +17,7 @@ typedef enum {
  *
  * Returns: whether the swap space was successfully created or not
  */
-gboolean bd_swap_mkswap (gchar *device, gchar *label, BDExtraArg **extra, GError **error);
+gboolean bd_swap_mkswap (const gchar *device, const gchar *label, const BDExtraArg **extra, GError **error);
 
 /**
  * bd_swap_swapon:
@@ -27,7 +27,7 @@ gboolean bd_swap_mkswap (gchar *device, gchar *label, BDExtraArg **extra, GError
  *
  * Returns: whether the swap device was successfully activated or not
  */
-gboolean bd_swap_swapon (gchar *device, gint priority, GError **error);
+gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error);
 
 /**
  * bd_swap_swapoff:
@@ -36,7 +36,7 @@ gboolean bd_swap_swapon (gchar *device, gint priority, GError **error);
  *
  * Returns: whether the swap device was successfully deactivated or not
  */
-gboolean bd_swap_swapoff (gchar *device, GError **error);
+gboolean bd_swap_swapoff (const gchar *device, GError **error);
 
 /**
  * bd_swap_swapstatus:
@@ -46,4 +46,4 @@ gboolean bd_swap_swapoff (gchar *device, GError **error);
  * Returns: %TRUE if the swap device is active, %FALSE if not active or failed
  * to determine (@error) is set not a non-NULL value in such case)
  */
-gboolean bd_swap_swapstatus (gchar *device, GError **error);
+gboolean bd_swap_swapstatus (const gchar *device, GError **error);

@@ -45,7 +45,7 @@ GType bd_extra_arg_get_type (void) {
  *
  * Returns: (transfer full): a new extra argument
  */
-BDExtraArg* bd_extra_arg_new (gchar *opt, gchar *val) {
+BDExtraArg* bd_extra_arg_new (const gchar *opt, const gchar *val) {
     BDExtraArg *ret = g_new0 (BDExtraArg, 1);
     ret->opt = g_strdup (opt);
     ret->val = g_strdup (val);

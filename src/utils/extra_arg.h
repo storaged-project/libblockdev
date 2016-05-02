@@ -14,6 +14,6 @@ typedef struct BDExtraArg {
 
 BDExtraArg* bd_extra_arg_copy (BDExtraArg *arg);
 void bd_extra_arg_free (BDExtraArg *arg);
-BDExtraArg* bd_extra_arg_new (gchar *opt, gchar *val);
+BDExtraArg* bd_extra_arg_new (const gchar *opt, const gchar *val);
 
 #endif  /* BD_UTILS_EXTRA_ARG */
