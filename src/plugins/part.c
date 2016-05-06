@@ -323,31 +323,50 @@ BDPartSpec** bd_part_get_disk_parts (gchar *disk, GError **error) {
 static PedPartition* add_part_to_disk (PedDevice *dev, PedDisk *disk, BDPartTypeReq type, guint64 start, guint64 size, BDPartAlign align, GError **error) {
     PedPartition *part = NULL;
     PedConstraint *constr = NULL;
-    guint64 end = 0;
+    PedGeometry *geom;
+    gint orig_flag_state = 0;
     gint status = 0;
 
-    /* align and convert start to sectors and determine end */
+    /* convert start to sectors */
     start = (start + (guint64)dev->sector_size - 1) / dev->sector_size;
     if (size == 0) {
         constr = ped_device_get_constraint (dev);
-        end = constr->max_size - 1;
+        size = constr->max_size - 1;
         ped_constraint_destroy (constr);
+        constr = NULL;
     } else
-        end = start + (size / dev->sector_size);
+        size = size / dev->sector_size;
 
-    part = ped_partition_new (disk, type, NULL, (PedSector)start, (PedSector)end);
+    if (align == BD_PART_ALIGN_OPTIMAL) {
+        /* cylinder alignment does really weird things when turned on, let's not
+           deal with it in 21st century (the flag is reset back in the end) */
+        if (ped_disk_is_flag_available (disk, PED_DISK_CYLINDER_ALIGNMENT)) {
+            orig_flag_state = ped_disk_get_flag (disk, PED_DISK_CYLINDER_ALIGNMENT);
+            ped_disk_set_flag (disk, PED_DISK_CYLINDER_ALIGNMENT, 0);
+        }
+        constr = ped_device_get_optimal_aligned_constraint (dev);
+    } else if (align == BD_PART_ALIGN_MINIMAL)
+        constr = ped_device_get_minimal_aligned_constraint (dev);
+
+    if (constr)
+        start = ped_alignment_align_up (constr->start_align, constr->start_range, (PedSector) start);
+
+    geom = ped_geometry_new (dev, (PedSector) start, (PedSector) size);
+    if (!geom) {
+        set_parted_error (error, BD_PART_ERROR_FAIL);
+        g_prefix_error (error, "Failed to create geometry for a new partition on device '%s'", dev->path);
+        return NULL;
+    }
+
+    if (!constr)
+        constr = ped_constraint_exact (geom);
+
+    part = ped_partition_new (disk, type, NULL, geom->start, geom->end);
     if (!part) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to create new partition on device '%s'", dev->path);
         return NULL;
     }
-
-    if (align == BD_PART_ALIGN_OPTIMAL)
-        constr = ped_device_get_optimal_aligned_constraint (dev);
-    else if (align == BD_PART_ALIGN_MINIMAL)
-        constr = ped_device_get_minimal_aligned_constraint (dev);
-    else
-        constr = ped_constraint_exact (&(part->geom));
 
     status = ped_disk_add_partition (disk, part, constr);
     if (status == 0) {
@@ -355,6 +374,11 @@ static PedPartition* add_part_to_disk (PedDevice *dev, PedDisk *disk, BDPartType
         g_prefix_error (error, "Failed add partition to device '%s'", dev->path);
         ped_partition_destroy (part);
         return NULL;
+    }
+
+    if (ped_disk_is_flag_available (disk, PED_DISK_CYLINDER_ALIGNMENT)) {
+        orig_flag_state = ped_disk_get_flag (disk, PED_DISK_CYLINDER_ALIGNMENT);
+        ped_disk_set_flag (disk, PED_DISK_CYLINDER_ALIGNMENT, orig_flag_state);
     }
 
     return part;
