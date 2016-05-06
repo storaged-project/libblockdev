@@ -355,6 +355,8 @@ static PedPartition* add_part_to_disk (PedDevice *dev, PedDisk *disk, BDPartType
     if (!geom) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to create geometry for a new partition on device '%s'", dev->path);
+        if (constr)
+            ped_constraint_destroy (constr);
         return NULL;
     }
 
@@ -365,6 +367,8 @@ static PedPartition* add_part_to_disk (PedDevice *dev, PedDisk *disk, BDPartType
     if (!part) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to create new partition on device '%s'", dev->path);
+        ped_constraint_destroy (constr);
+        ped_geometry_destroy (geom);
         return NULL;
     }
 
@@ -372,7 +376,9 @@ static PedPartition* add_part_to_disk (PedDevice *dev, PedDisk *disk, BDPartType
     if (status == 0) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed add partition to device '%s'", dev->path);
+        ped_constraint_destroy (constr);
         ped_partition_destroy (part);
+        ped_geometry_destroy (geom);
         return NULL;
     }
 
@@ -380,6 +386,9 @@ static PedPartition* add_part_to_disk (PedDevice *dev, PedDisk *disk, BDPartType
         orig_flag_state = ped_disk_get_flag (disk, PED_DISK_CYLINDER_ALIGNMENT);
         ped_disk_set_flag (disk, PED_DISK_CYLINDER_ALIGNMENT, orig_flag_state);
     }
+
+    ped_geometry_destroy (geom);
+    ped_constraint_destroy (constr);
 
     return part;
 }
