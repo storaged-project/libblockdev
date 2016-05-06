@@ -291,7 +291,6 @@ BDPartSpec** bd_part_get_disk_parts (gchar *disk, GError **error) {
     if (!ped_disk) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
-        ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
         return FALSE;
     }

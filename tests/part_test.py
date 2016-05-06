@@ -495,6 +495,12 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertTrue(abs(ps6.start - (ps5.start + ps5.size + 1)) < 512)
         self.assertEqual(ps6.size, 10 * 1024**2)
 
+class PartGetDiskPartsCase(PartTestCase):
+    def test_get_disk_parts_empty(self):
+        """Verify that getting info about partitions with no label works"""
+        with self.assertRaises(GLib.GError):
+            BlockDev.part_get_disk_parts (self.loop_dev)
+
 class PartCreateDeletePartCase(PartTestCase):
     def test_create_delete_part_simple(self):
         """Verify that it is possible to create and delete a parition"""
