@@ -35,7 +35,8 @@ typedef enum {
     BD_PART_FLAG_LEGACY_BOOT = 1 << 15,
     BD_PART_FLAG_MSFT_DATA = 1 << 16,
     BD_PART_FLAG_IRST = 1 << 17,
-    BD_PART_FLAG_ESP = 1 << 18
+    BD_PART_FLAG_ESP = 1 << 18,
+    BD_PART_FLAG_BASIC_LAST = 1 << 19,
 } BDPartFlag;
 
 typedef enum {
@@ -77,6 +78,7 @@ BDPartSpec** bd_part_get_disk_parts (gchar *disk, GError **error);
 BDPartSpec* bd_part_create_part (gchar *disk, BDPartTypeReq type, guint64 start, guint64 size, BDPartAlign align, GError **error);
 gboolean bd_part_delete_part (gchar *disk, gchar *part, GError **error);
 gboolean bd_part_set_part_flag (gchar *disk, gchar *part, BDPartFlag flag, gboolean state, GError **error);
+gboolean bd_part_set_part_flags (gchar *disk, gchar *part, guint64 flags, GError **error);
 const gchar* bd_part_get_part_table_type_str (BDPartTableType type, GError **error);
 const gchar* bd_part_get_flag_str (BDPartFlag flag, GError **error);
 const gchar* bd_part_get_type_str (BDPartType type, GError **error);

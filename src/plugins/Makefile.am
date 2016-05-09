@@ -76,7 +76,7 @@ endif
 
 libbd_part_la_CFLAGS = $(GLIB_CFLAGS) $(PARTED_CFLAGS) -Wall -Wextra -Werror
 libbd_part_la_LIBADD = $(GLIB_LIBS) $(PARTED_LIBS) ${builddir}/../utils/libbd_utils.la
-libbd_part_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 0:1:0
+libbd_part_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 1:1:1
 libbd_part_la_CPPFLAGS = -I${srcdir}/../utils/
 libbd_part_la_SOURCES = part.c part.h
 

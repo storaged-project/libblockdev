@@ -172,6 +172,21 @@ gboolean bd_part_delete_part (gchar *disk, gchar *part, GError **error);
 gboolean bd_part_set_part_flag (gchar *disk, gchar *part, BDPartFlag flag, gboolean state, GError **error);
 
 /**
+ * bd_part_set_part_flags:
+ * @disk: disk the partition belongs to
+ * @part: partition to set the flag on
+ * @flags: flags to set (mask combined from #BDPartFlag numbers)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @flags were successfully set on the @part partition or
+ *          not
+ *
+ * Note: Unsets all the other flags on the partition.
+ *
+ */
+gboolean bd_part_set_part_flags (gchar *disk, gchar *part, guint64 flags, GError **error);
+
+/**
  * bd_part_get_part_table_type_str:
  * @type: table type to get string representation for
  * @error: (out): place to store error (if any)
