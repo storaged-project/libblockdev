@@ -75,7 +75,6 @@ AC_SUBST([PYTHON3_EXEC_PREFIX], ['${exec_prefix}'])
 PYTHON3_EXECDIR=`$PYTHON3 -c "import distutils.sysconfig; \
                           print(distutils.sysconfig.get_python_lib(1,0,prefix='$PYTHON3_EXEC_PREFIX'))"`
 AC_SUBST(py3execdir, $PYTHON3_EXECDIR)
-AM_CONDITIONAL(USE_PYTHON3, test ${use_python3} = "yes")
 
 # Run tests on build?
 AC_ARG_ENABLE([tests], AS_HELP_STRING([--enable-tests], [Run tests at compile time (default=yes)]))
