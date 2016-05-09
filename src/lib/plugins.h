@@ -25,7 +25,7 @@ GType bd_plugin_spec_get_type();
 
 typedef struct BDPluginSpec {
     BDPlugin name;
-    gchar *so_name;
+    const gchar *so_name;
 } BDPluginSpec;
 
 BDPluginSpec* bd_plugin_spec_copy (BDPluginSpec *spec);

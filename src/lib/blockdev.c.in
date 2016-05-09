@@ -165,7 +165,7 @@ static gboolean load_config (GSequence *config_files, GSList **plugins_sonames, 
     /* process config files one after another in order */
     config_file_iter = g_sequence_get_begin_iter (config_files);
     while (!g_sequence_iter_is_end (config_file_iter)) {
-        config_file = (const gchar *) g_sequence_get (config_file_iter);
+        config_file = (gchar *) g_sequence_get (config_file_iter);
         if (!process_config_file (config_file, plugins_sonames, error)) {
             g_warning ("Cannot process the config file '%s': %s. Skipping.", config_file, (*error)->message);
             g_clear_error (error);

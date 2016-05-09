@@ -29,7 +29,7 @@ BDPluginSpec* bd_plugin_spec_copy (BDPluginSpec *spec) {
  * Frees @spec.
  */
 void bd_plugin_spec_free (BDPluginSpec *spec) {
-    g_free (spec->so_name);
+    g_free ((gchar *) spec->so_name);
     g_free (spec);
 }
 
