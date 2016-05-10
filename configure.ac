@@ -18,9 +18,11 @@ LT_INIT
 
 AC_CONFIG_FILES([Makefile src/Makefile \
                           src/plugins/Makefile \
+                          src/plugins/btrfs.h \
                           src/utils/Makefile \
                           src/lib/Makefile \
                           src/lib/plugin_apis/Makefile \
+                          src/lib/plugin_apis/btrfs.api \
                           src/lib/blockdev.c \
                           src/lib/blockdev.pc \
                           src/python/Makefile \
@@ -55,6 +57,11 @@ on_s390=$?
 
 AM_CONDITIONAL(ON_S390, test "$on_s390" = "0")
 
+uname -p|grep aarch64
+on_aarch64=$?
+
+AS_IF([test "$on_aarch64" = "0"], AC_SUBST([BTRFS_MIN_SIZE], ["(256 MiB)"]), AC_SUBST([BTRFS_MIN_SIZE], ["(128 MiB)"]))
+
 # Complain if introspection was not enabled
 AS_IF([test "x$found_introspection" = xyes], [:],
       [LIBBLOCKDEV_SOFT_FAILURE([GObject introspection must be enabled])])
@@ -68,7 +75,6 @@ AC_SUBST([PYTHON3_EXEC_PREFIX], ['${exec_prefix}'])
 PYTHON3_EXECDIR=`$PYTHON3 -c "import distutils.sysconfig; \
                           print(distutils.sysconfig.get_python_lib(1,0,prefix='$PYTHON3_EXEC_PREFIX'))"`
 AC_SUBST(py3execdir, $PYTHON3_EXECDIR)
-AM_CONDITIONAL(USE_PYTHON3, test ${use_python3} = "yes")
 
 # Run tests on build?
 AC_ARG_ENABLE([tests], AS_HELP_STRING([--enable-tests], [Run tests at compile time (default=yes)]))
