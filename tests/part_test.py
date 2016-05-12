@@ -647,3 +647,43 @@ class PartSetFlagCase(PartTestCase):
             BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.SWAP, True)
         with self.assertRaises(GLib.GError):
             BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.SWAP, False)
+
+class PartSetFlagsCase(PartTestCase):
+    def test_set_part_flags(self):
+        """Verify that it is possible to set multiple partition flags at once"""
+
+        # we first need a partition table
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
+        self.assertTrue(succ)
+
+        # for now, let's just create a typical primary partition starting at the
+        # sector 2048, 10 MiB big with optimal alignment
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+
+        # we should get proper data back
+        self.assertTrue(ps)
+        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
+
+        succ = BlockDev.part_set_part_flags (self.loop_dev, ps.path, BlockDev.PartFlag.BOOT)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertTrue(ps.flags & BlockDev.PartFlag.BOOT)
+
+        # 0 -> unset all
+        succ = BlockDev.part_set_part_flags (self.loop_dev, ps.path, 0)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertFalse(ps.flags & BlockDev.PartFlag.BOOT)
+
+        # add another partition and do some more tests on that one
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps.start + ps.size + 1, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+
+        succ = BlockDev.part_set_part_flags (self.loop_dev, ps.path, BlockDev.PartFlag.BOOT | BlockDev.PartFlag.LVM)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertTrue(ps.flags & BlockDev.PartFlag.BOOT)
+        self.assertTrue(ps.flags & BlockDev.PartFlag.LVM)
+
+        # SWAP label not supported on the MSDOS table
+        with self.assertRaises(GLib.GError):
+            BlockDev.part_set_part_flags (self.loop_dev, ps.path, BlockDev.PartFlag.SWAP)
