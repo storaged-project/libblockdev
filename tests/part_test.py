@@ -687,3 +687,48 @@ class PartSetFlagsCase(PartTestCase):
         # SWAP label not supported on the MSDOS table
         with self.assertRaises(GLib.GError):
             BlockDev.part_set_part_flags (self.loop_dev, ps.path, BlockDev.PartFlag.SWAP)
+
+class PartSetNameCase(PartTestCase):
+    def test_set_part_name(self):
+        """Verify that it is possible to set partition name"""
+
+        # we first need a GPT partition table
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.GPT, True)
+        self.assertTrue(succ)
+
+        # for now, let's just create a typical primary partition starting at the
+        # sector 2048, 10 MiB big with optimal alignment
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+
+        # we should get proper data back
+        self.assertTrue(ps)
+        self.assertIn(ps.name, ("", None))  # no name
+
+        succ = BlockDev.part_set_part_name (self.loop_dev, ps.path, "TEST")
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertEqual(ps.name, "TEST")
+
+        succ = BlockDev.part_set_part_name (self.loop_dev, ps.path, "")
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertEqual(ps.name, "")
+
+        # let's now test an MSDOS partition table (doesn't support names)
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
+        self.assertTrue(succ)
+
+        # for now, let's just create a typical primary partition starting at the
+        # sector 2048, 10 MiB big with optimal alignment
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+
+        # we should get proper data back
+        self.assertTrue(ps)
+        self.assertIn(ps.name, ("", None))  # no name
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.part_set_part_name (self.loop_dev, ps.path, "")
+
+        # we should still get proper data back though
+        self.assertTrue(ps)
+        self.assertIn(ps.name, ("", None))  # no name

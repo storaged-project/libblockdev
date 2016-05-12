@@ -47,6 +47,7 @@ BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
     BDPartSpec *ret = g_new0 (BDPartSpec, 1);
 
     ret->path = g_strdup (data->path);
+    ret->name = g_strdup (data->name);
     ret->type = data->type;
     ret->start = data->start;
     ret->size = data->size;
@@ -56,6 +57,7 @@ BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
 
 void bd_part_spec_free (BDPartSpec *data) {
     g_free (data->path);
+    g_free (data->name);
     g_free (data);
 }
 
@@ -91,6 +93,21 @@ gboolean init() {
     ped_exception_set_handler ((PedExceptionHandler*) exc_handler);
     return TRUE;
 }
+
+/**
+ * check: (skip)
+ */
+gboolean check() {
+    GError *error = NULL;
+    gboolean ret = bd_utils_check_util_version ("sgdisk", "1.0.1", NULL, "GPT fdisk \\(sgdisk\\) version ([\\d\\.]+)", &error);
+
+    if (!ret && error) {
+        g_warning("Cannot load the part plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+    return ret;
+}
+
 
 static const gchar *table_type_str[BD_PART_TABLE_UNDEF] = {"msdos", "gpt"};
 
@@ -170,7 +187,7 @@ gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean
 }
 
 
-static BDPartSpec* get_part_spec (PedDevice *dev, PedPartition *part) {
+static BDPartSpec* get_part_spec (PedDevice *dev, PedDisk *disk, PedPartition *part) {
     BDPartSpec *ret = NULL;
     PedPartitionFlag flag = PED_PARTITION_FIRST_FLAG;
 
@@ -179,6 +196,8 @@ static BDPartSpec* get_part_spec (PedDevice *dev, PedPartition *part) {
         ret->path = g_strdup_printf ("%sp%d", dev->path, part->num);
     else
         ret->path = g_strdup_printf ("%s%d", dev->path, part->num);
+    if (disk->type->features & PED_DISK_TYPE_PARTITION_NAME)
+        ret->name = g_strdup (ped_partition_get_name (part));
     ret->type = (BDPartType) part->type;
     ret->start = part->geom.start * dev->sector_size;
     ret->size = part->geom.length * dev->sector_size;
@@ -255,7 +274,7 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
         return FALSE;
     }
 
-    ret = get_part_spec (dev, ped_part);
+    ret = get_part_spec (dev, ped_disk, ped_part);
 
     /* the partition gets destroyed together with the disk */
     ped_disk_destroy (ped_disk);
@@ -308,7 +327,7 @@ BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error) {
     while (ped_part) {
         /* only include partitions we care about */
         if (ped_part->type <= PED_PARTITION_EXTENDED)
-            ret[i++] = get_part_spec (dev, ped_part);
+            ret[i++] = get_part_spec (dev, ped_disk, ped_part);
         ped_part = ped_disk_next_partition (ped_disk, ped_part);
     }
     ret[i] = NULL;
@@ -486,7 +505,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
 
     succ = disk_commit (ped_disk, disk, error);
     if (succ)
-        ret = get_part_spec (dev, ped_part);
+        ret = get_part_spec (dev, ped_disk, ped_part);
 
     /* the partition gets destroyed together with the disk*/
     ped_disk_destroy (ped_disk);
@@ -753,6 +772,97 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
 
     return ret;
 }
+
+
+/**
+ * bd_part_set_part_name:
+ * @disk: device the partition belongs to
+ * @part: partition the should be set for
+ * @name: name to set
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the name was successfully set or not
+ */
+gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gchar *name, GError **error) {
+    PedDevice *dev = NULL;
+    PedDisk *ped_disk = NULL;
+    PedPartition *ped_part = NULL;
+    const gchar *part_num_str = NULL;
+    gint part_num = 0;
+    gint status = 0;
+    gboolean ret = FALSE;
+
+    /* TODO: share this code with the other functions modifying a partition */
+    if (!part || (part && (*part == '\0'))) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Invalid partition path given: '%s'", part);
+        return FALSE;
+    }
+
+    dev = ped_device_get (disk);
+    if (!dev) {
+        set_parted_error (error, BD_PART_ERROR_INVAL);
+        g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+        return FALSE;
+    }
+
+    ped_disk = ped_disk_new (dev);
+    if (!ped_disk) {
+        set_parted_error (error, BD_PART_ERROR_FAIL);
+        g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
+        ped_device_destroy (dev);
+        return FALSE;
+    }
+    if (!(ped_disk->type->features & PED_DISK_TYPE_PARTITION_NAME)) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Partition names unsupported on the device '%s' ('%s')", disk,
+                     ped_disk->type->name);
+        ped_disk_destroy (ped_disk);
+        ped_device_destroy (dev);
+        return FALSE;
+    }
+
+    part_num_str = part + (strlen (part) - 1);
+    while (isdigit (*part_num_str) || (*part_num_str == '-')) {
+        part_num_str--;
+    }
+    part_num_str++;
+
+    part_num = atoi (part_num_str);
+    if (part_num == 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Invalid partition path given: '%s'. Cannot extract partition number", part);
+        ped_disk_destroy (ped_disk);
+        ped_device_destroy (dev);
+        return FALSE;
+    }
+
+    ped_part = ped_disk_get_partition (ped_disk, part_num);
+    if (!ped_part) {
+        set_parted_error (error, BD_PART_ERROR_FAIL);
+        g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
+        ped_disk_destroy (ped_disk);
+        ped_device_destroy (dev);
+        return FALSE;
+    }
+
+    status = ped_partition_set_name (ped_part, name);
+    if (status == 0) {
+        set_parted_error (error, BD_PART_ERROR_FAIL);
+        g_prefix_error (error, "Failed to set name on the partition '%d' on device '%s'", part_num, disk);
+        ped_disk_destroy (ped_disk);
+        ped_device_destroy (dev);
+        return FALSE;
+    }
+
+    ret = disk_commit (ped_disk, disk, error);
+
+    ped_disk_destroy (ped_disk);
+    ped_device_destroy (dev);
+
+    return ret;
+}
+
 
 /**
  * bd_part_get_part_table_type_str:

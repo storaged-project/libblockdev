@@ -66,6 +66,7 @@ GType bd_part_spec_get_type();
 
 typedef struct BDPartSpec {
     gchar *path;
+    gchar *name;
     BDPartType type;
     guint64 start;
     guint64 size;
@@ -76,6 +77,7 @@ BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
     BDPartSpec *ret = g_new0 (BDPartSpec, 1);
 
     ret->path = g_strdup (data->path);
+    ret->name = g_strdup (data->name);
     ret->type = data->type;
     ret->start = data->start;
     ret->size = data->size;
@@ -85,6 +87,7 @@ BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
 
 void bd_part_spec_free (BDPartSpec *data) {
     g_free (data->path);
+    g_free (data->name);
     g_free (data);
 }
 
@@ -186,6 +189,17 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
  *
  */
 gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 flags, GError **error);
+
+/**
+ * bd_part_set_part_name:
+ * @disk: device the partition belongs to
+ * @part: partition the should be set for
+ * @name: name to set
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the name was successfully set or not
+ */
+gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gchar *name, GError **error);
 
 /**
  * bd_part_get_part_table_type_str:
