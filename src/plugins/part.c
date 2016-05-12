@@ -22,7 +22,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <math.h>
-#include <sizes.h>
+#include <utils.h>
 
 #include "part.h"
 
@@ -48,6 +48,7 @@ BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
 
     ret->path = g_strdup (data->path);
     ret->name = g_strdup (data->name);
+    ret->type_guid = g_strdup (data->type_guid);
     ret->type = data->type;
     ret->start = data->start;
     ret->size = data->size;
@@ -58,6 +59,7 @@ BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
 void bd_part_spec_free (BDPartSpec *data) {
     g_free (data->path);
     g_free (data->name);
+    g_free (data->type_guid);
     g_free (data);
 }
 
@@ -186,8 +188,44 @@ gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean
     return ret;
 }
 
+static gchar* get_part_type_guid (const gchar *device, int part_num, GError **error) {
+    const gchar *args[4] = {"sgdisk", NULL, device, NULL};
+    gchar *output = NULL;
+    gchar **lines = NULL;
+    gchar **line_p = NULL;
+    gboolean found = FALSE;
+    gboolean success = FALSE;
+    gchar *guid_start = NULL;
+    gchar *space = NULL;
+    gchar *ret = NULL;
 
-static BDPartSpec* get_part_spec (PedDevice *dev, PedDisk *disk, PedPartition *part) {
+    args[1] = g_strdup_printf ("-i%d", part_num);
+    success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
+    if (!success) {
+        g_free ((gchar *) args[1]);
+        return FALSE;
+    }
+
+    lines = g_strsplit (output, "\n", 0);
+    g_free (output);
+    for (line_p=lines; !found && *line_p; line_p++)
+        found = g_str_has_prefix (*line_p, "Partition GUID code: ");
+    if (!found) {
+        g_strfreev (lines);
+        return NULL;
+    }
+
+    line_p--;
+    guid_start = (*line_p) + 21; /* strlen("Partition GUID...") */
+    space = strchr (guid_start, ' '); /* find the first space after the GUID */
+    *space = '\0';
+    ret = g_strdup (guid_start);
+
+    g_strfreev (lines);
+    return ret;
+}
+
+static BDPartSpec* get_part_spec (PedDevice *dev, PedDisk *disk, PedPartition *part, GError **error) {
     BDPartSpec *ret = NULL;
     PedPartitionFlag flag = PED_PARTITION_FIRST_FLAG;
 
@@ -198,6 +236,13 @@ static BDPartSpec* get_part_spec (PedDevice *dev, PedDisk *disk, PedPartition *p
         ret->path = g_strdup_printf ("%s%d", dev->path, part->num);
     if (disk->type->features & PED_DISK_TYPE_PARTITION_NAME)
         ret->name = g_strdup (ped_partition_get_name (part));
+    if (g_strcmp0 (disk->type->name, "gpt") == 0) {
+        ret->type_guid = get_part_type_guid (dev->path, part->num, error);
+        if (!ret->type_guid && *error) {
+            bd_part_spec_free (ret);
+            return NULL;
+        }
+    }
     ret->type = (BDPartType) part->type;
     ret->start = part->geom.start * dev->sector_size;
     ret->size = part->geom.length * dev->sector_size;
@@ -274,7 +319,7 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
         return FALSE;
     }
 
-    ret = get_part_spec (dev, ped_disk, ped_part);
+    ret = get_part_spec (dev, ped_disk, ped_part, error);
 
     /* the partition gets destroyed together with the disk */
     ped_disk_destroy (ped_disk);
@@ -327,7 +372,7 @@ BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error) {
     while (ped_part) {
         /* only include partitions we care about */
         if (ped_part->type <= PED_PARTITION_EXTENDED)
-            ret[i++] = get_part_spec (dev, ped_disk, ped_part);
+            ret[i++] = get_part_spec (dev, ped_disk, ped_part, error);
         ped_part = ped_disk_next_partition (ped_disk, ped_part);
     }
     ret[i] = NULL;
@@ -505,7 +550,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
 
     succ = disk_commit (ped_disk, disk, error);
     if (succ)
-        ret = get_part_spec (dev, ped_disk, ped_part);
+        ret = get_part_spec (dev, ped_disk, ped_part, error);
 
     /* the partition gets destroyed together with the disk*/
     ped_disk_destroy (ped_disk);
@@ -863,6 +908,45 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
     return ret;
 }
 
+/**
+ * bd_part_set_part_type:
+ * @disk: device the partition belongs to
+ * @part: partition the should be set for
+ * @type_guid: GUID of the type
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @type_guid type was successfully set for @part or not
+ */
+gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gchar *type_guid, GError **error) {
+    const gchar *args[5] = {"sgdisk", "--typecode", NULL, disk, NULL};
+    const gchar *part_num_str = NULL;
+    gboolean success = FALSE;
+
+    if (!part || (part && (*part == '\0'))) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Invalid partition path given: '%s'", part);
+        return FALSE;
+    }
+
+    part_num_str = part + (strlen (part) - 1);
+    while (isdigit (*part_num_str) || (*part_num_str == '-')) {
+        part_num_str--;
+    }
+    part_num_str++;
+
+    if ((g_strcmp0 (part_num_str, "0") != 0) && (atoi (part_num_str) == 0)) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Invalid partition path given: '%s'. Cannot extract partition number", part);
+        return FALSE;
+    }
+
+    args[2] = g_strdup_printf ("%s:%s", part_num_str, type_guid);
+
+    success = bd_utils_exec_and_report_error (args, NULL, error);
+    g_free ((gchar*) args[2]);
+
+    return success;
+}
 
 /**
  * bd_part_get_part_table_type_str:
