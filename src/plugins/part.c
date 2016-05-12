@@ -227,7 +227,6 @@ BDPartSpec* bd_part_get_part_spec (gchar *disk, gchar *part, GError **error) {
     if (!ped_disk) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
-        ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
         return FALSE;
     }
@@ -430,7 +429,6 @@ BDPartSpec* bd_part_create_part (gchar *disk, BDPartTypeReq type, guint64 start,
     if (!ped_disk) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
-        ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
         return NULL;
     }
@@ -531,7 +529,6 @@ gboolean bd_part_delete_part (gchar *disk, gchar *part, GError **error) {
     if (!ped_disk) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
-        ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
         return FALSE;
     }
@@ -616,7 +613,6 @@ gboolean bd_part_set_part_flag (gchar *disk, gchar *part, BDPartFlag flag, gbool
     if (!ped_disk) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
-        ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
         return FALSE;
     }
@@ -706,7 +702,6 @@ gboolean bd_part_set_part_flags (gchar *disk, gchar *part, guint64 flags, GError
     if (!ped_disk) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
-        ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
         return FALSE;
     }
