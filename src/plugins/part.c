@@ -22,6 +22,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <math.h>
+#include <inttypes.h>
 #include <utils.h>
 
 #include "part.h"
@@ -188,14 +189,17 @@ gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean
     return ret;
 }
 
-static gchar* get_part_type_guid (const gchar *device, int part_num, GError **error) {
+static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_num, guint64 *flags, GError **error) {
     const gchar *args[4] = {"sgdisk", NULL, device, NULL};
     gchar *output = NULL;
     gchar **lines = NULL;
     gchar **line_p = NULL;
-    gboolean found = FALSE;
-    gboolean success = FALSE;
+    gchar *guid_line = NULL;
+    gchar *attrs_line = NULL;
     gchar *guid_start = NULL;
+    gchar *attrs_start = NULL;
+    guint64 flags_mask = 0;
+    gboolean success = FALSE;
     gchar *space = NULL;
     gchar *ret = NULL;
 
@@ -208,18 +212,37 @@ static gchar* get_part_type_guid (const gchar *device, int part_num, GError **er
 
     lines = g_strsplit (output, "\n", 0);
     g_free (output);
-    for (line_p=lines; !found && *line_p; line_p++)
-        found = g_str_has_prefix (*line_p, "Partition GUID code: ");
-    if (!found) {
+    for (line_p=lines; *line_p && (!guid_line || !attrs_line); line_p++) {
+        if (g_str_has_prefix (*line_p, "Partition GUID code: "))
+            guid_line = *line_p;
+        else if (g_str_has_prefix (*line_p, "Attribute flags: "))
+            attrs_line = *line_p;
+    }
+    if (!guid_line && !attrs_line) {
         g_strfreev (lines);
         return NULL;
     }
 
-    line_p--;
-    guid_start = (*line_p) + 21; /* strlen("Partition GUID...") */
-    space = strchr (guid_start, ' '); /* find the first space after the GUID */
-    *space = '\0';
-    ret = g_strdup (guid_start);
+    if (guid_line) {
+        guid_start = guid_line + 21; /* strlen("Partition GUID...") */
+        space = strchr (guid_start, ' '); /* find the first space after the GUID */
+        *space = '\0';
+        ret = g_strdup (guid_start);
+    }
+
+    if (attrs_line) {
+        attrs_start = attrs_line + 17; /* strlen("Attribute flags: ") */
+        flags_mask = strtoull (attrs_start, NULL, 16);
+
+        if (flags_mask & 1) /* 1 << 0 */
+            *flags |= BD_PART_FLAG_GPT_SYSTEM_PART;
+        if (flags_mask & 0x1000000000000000) /* 1 << 60 */
+            *flags |= BD_PART_FLAG_GPT_READ_ONLY;
+        if (flags_mask & 0x4000000000000000) /* 1 << 62 */
+            *flags |= BD_PART_FLAG_GPT_HIDDEN;
+        if (flags_mask & 0x8000000000000000) /* 1 << 63 */
+            *flags |= BD_PART_FLAG_GPT_NO_AUTOMOUNT;
+    }
 
     g_strfreev (lines);
     return ret;
@@ -237,7 +260,7 @@ static BDPartSpec* get_part_spec (PedDevice *dev, PedDisk *disk, PedPartition *p
     if (disk->type->features & PED_DISK_TYPE_PARTITION_NAME)
         ret->name = g_strdup (ped_partition_get_name (part));
     if (g_strcmp0 (disk->type->name, "gpt") == 0) {
-        ret->type_guid = get_part_type_guid (dev->path, part->num, error);
+        ret->type_guid = get_part_type_guid_and_gpt_flags (dev->path, part->num, &(ret->flags), error);
         if (!ret->type_guid && *error) {
             bd_part_spec_free (ret);
             return NULL;
@@ -638,6 +661,51 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
     return ret;
 }
 
+static gboolean set_gpt_flag (const gchar *device, int part_num, BDPartFlag flag, gboolean state, GError **error) {
+    const gchar *args[5] = {"sgdisk", "--attributes", NULL, device, NULL};
+    int bit_num = 0;
+    gboolean success = FALSE;
+
+    if (flag == BD_PART_FLAG_GPT_SYSTEM_PART)
+        bit_num = 0;
+    else if (flag == BD_PART_FLAG_GPT_READ_ONLY)
+        bit_num = 60;
+    else if (flag == BD_PART_FLAG_GPT_HIDDEN)
+        bit_num = 62;
+    else if (flag == BD_PART_FLAG_GPT_NO_AUTOMOUNT)
+        bit_num = 63;
+
+    args[2] = g_strdup_printf ("%d:%s:%d", part_num, state ? "set" : "clear", bit_num);
+
+    success = bd_utils_exec_and_report_error (args, NULL, error);
+    g_free ((gchar *) args[2]);
+    return success;
+}
+
+static gboolean set_gpt_flags (const gchar *device, int part_num, guint64 flags, GError **error) {
+    const gchar *args[5] = {"sgdisk", "--attributes", NULL, device, NULL};
+    guint64 real_flags = 0;
+    gchar *mask_str = NULL;
+    gboolean success = FALSE;
+
+    if (flags & BD_PART_FLAG_GPT_SYSTEM_PART)
+        real_flags |=  1;       /* 1 << 0 */
+    if (flags & BD_PART_FLAG_GPT_READ_ONLY)
+        real_flags |= 0x1000000000000000; /* 1 << 60 */
+    if (flags & BD_PART_FLAG_GPT_HIDDEN)
+        real_flags |= 0x4000000000000000; /* 1 << 62 */
+    if (flags & BD_PART_FLAG_GPT_NO_AUTOMOUNT)
+        real_flags |= 0x8000000000000000; /* 1 << 63 */
+    mask_str = g_strdup_printf ("%.16"__PRI64_PREFIX"x", real_flags);
+
+    args[2] = g_strdup_printf ("%d:=:%s", part_num, mask_str);
+    g_free (mask_str);
+
+    success = bd_utils_exec_and_report_error (args, NULL, error);
+    g_free ((gchar *) args[2]);
+    return success;
+}
+
 /**
  * bd_part_set_part_flag:
  * @disk: disk the partition belongs to
@@ -707,17 +775,25 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
 
     /* our flags are 1s shifted to the bit determined by parted's flags
      * (i.e. 1 << 3 instead of 3, etc.) */
-    ped_flag = (PedPartitionFlag) log2 ((double) flag);
-    status = ped_partition_set_flag (ped_part, ped_flag, (int) state);
-    if (status == 0) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
-        ped_disk_destroy (ped_disk);
-        ped_device_destroy (dev);
-        return FALSE;
-    }
+    if (flag < BD_PART_FLAG_BASIC_LAST) {
+        ped_flag = (PedPartitionFlag) log2 ((double) flag);
+        status = ped_partition_set_flag (ped_part, ped_flag, (int) state);
+        if (status == 0) {
+            set_parted_error (error, BD_PART_ERROR_FAIL);
+            g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
+            ped_disk_destroy (ped_disk);
+            ped_device_destroy (dev);
+            return FALSE;
+        }
 
-    ret = disk_commit (ped_disk, disk, error);
+        ret = disk_commit (ped_disk, disk, error);
+    } else {
+        if (g_strcmp0 (ped_disk->type->name, "gpt") == 0)
+            ret = set_gpt_flag (disk, part_num, flag, state, error);
+        else
+            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                         "Cannot set a GPT flag on a non-GPT disk");
+    }
 
     ped_disk_destroy (ped_disk);
     ped_device_destroy (dev);
@@ -811,6 +887,9 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
     }
 
     ret = disk_commit (ped_disk, disk, error);
+
+    if (ret && (g_strcmp0 (ped_disk->type->name, "gpt") == 0))
+        ret = set_gpt_flags (disk, part_num, flags, error);
 
     ped_disk_destroy (ped_disk);
     ped_device_destroy (dev);
@@ -973,12 +1052,20 @@ const gchar* bd_part_get_part_table_type_str (BDPartTableType type, GError **err
  * Returns: (transfer none): string representation of @flag
  */
 const gchar* bd_part_get_flag_str (BDPartFlag flag, GError **error) {
-    if (flag > BD_PART_FLAG_ESP) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL, "Invalid flag given");
-        return NULL;
-    }
+    if (flag < BD_PART_FLAG_BASIC_LAST)
+        return ped_partition_flag_get_name ((PedPartitionFlag) log2 ((double) flag));
+    if (flag == BD_PART_FLAG_GPT_SYSTEM_PART)
+        return "system partition";
+    if (flag == BD_PART_FLAG_GPT_READ_ONLY)
+        return "read-only";
+    if (flag == BD_PART_FLAG_GPT_HIDDEN)
+        return "hidden";
+    if (flag == BD_PART_FLAG_GPT_NO_AUTOMOUNT)
+        return "do not automount";
 
-    return ped_partition_flag_get_name ((PedPartitionFlag) log2 ((double) flag));
+    /* no other choice */
+    g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL, "Invalid flag given");
+    return NULL;
 }
 
 /**

@@ -37,6 +37,10 @@ typedef enum {
     BD_PART_FLAG_IRST = 1 << 17,
     BD_PART_FLAG_ESP = 1 << 18,
     BD_PART_FLAG_BASIC_LAST = 1 << 19,
+    BD_PART_FLAG_GPT_SYSTEM_PART = 1 << 25,
+    BD_PART_FLAG_GPT_READ_ONLY = 1 << 26,
+    BD_PART_FLAG_GPT_HIDDEN = 1 << 27,
+    BD_PART_FLAG_GPT_NO_AUTOMOUNT = 1 << 28
 } BDPartFlag;
 
 typedef enum {
@@ -68,7 +72,7 @@ typedef struct BDPartSpec {
     BDPartType type;
     guint64 start;
     guint64 size;
-    gint flags;
+    guint64 flags;
 } BDPartSpec;
 
 BDPartSpec* bd_part_spec_copy (BDPartSpec *data);
