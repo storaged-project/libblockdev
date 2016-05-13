@@ -647,6 +647,37 @@ class PartSetFlagCase(PartTestCase):
             BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.SWAP, True)
         with self.assertRaises(GLib.GError):
             BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.SWAP, False)
+        # so isn't GPT_HIDDEN
+        with self.assertRaises(GLib.GError):
+            BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_HIDDEN, True)
+        with self.assertRaises(GLib.GError):
+            BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_HIDDEN, False)
+
+        # also try some GPT-only flags
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.GPT, True)
+        self.assertTrue(succ)
+
+        # for now, let's just create a typical primary partition starting at the
+        # sector 2048, 10 MiB big with optimal alignment
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+
+        # we should get proper data back
+        self.assertTrue(ps)
+        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
+
+        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_READ_ONLY, True)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_READ_ONLY)
+        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_HIDDEN, True)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_HIDDEN)
+        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_READ_ONLY, False)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertFalse(ps.flags & BlockDev.PartFlag.GPT_READ_ONLY)
+        self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_HIDDEN)
 
 class PartSetFlagsCase(PartTestCase):
     def test_set_part_flags(self):
@@ -687,6 +718,31 @@ class PartSetFlagsCase(PartTestCase):
         # SWAP label not supported on the MSDOS table
         with self.assertRaises(GLib.GError):
             BlockDev.part_set_part_flags (self.loop_dev, ps.path, BlockDev.PartFlag.SWAP)
+
+        # also try some GPT-only flags
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.GPT, True)
+        self.assertTrue(succ)
+
+        # for now, let's just create a typical primary partition starting at the
+        # sector 2048, 10 MiB big with optimal alignment
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+
+        # we should get proper data back
+        self.assertTrue(ps)
+        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
+
+        succ = BlockDev.part_set_part_flags (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_READ_ONLY | BlockDev.PartFlag.GPT_HIDDEN)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_READ_ONLY)
+        self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_HIDDEN)
+
+        succ = BlockDev.part_set_part_flags (self.loop_dev, ps.path, 0) # no flags
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertFalse(ps.flags & BlockDev.PartFlag.GPT_READ_ONLY)
+        self.assertFalse(ps.flags & BlockDev.PartFlag.GPT_HIDDEN)
+
 
 class PartSetNameCase(PartTestCase):
     def test_set_part_name(self):
