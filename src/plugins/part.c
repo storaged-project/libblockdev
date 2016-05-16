@@ -915,7 +915,7 @@ gboolean bd_part_set_part_flag (gchar *disk, gchar *part, BDPartFlag flag, gbool
         status = ped_partition_set_flag (ped_part, ped_flag, (int) state);
         if (status == 0) {
             set_parted_error (error, BD_PART_ERROR_FAIL);
-            g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
+            g_prefix_error (error, "Failed to set flag on partition '%d' on device '%s'", part_num, disk);
             ped_disk_destroy (ped_disk);
             ped_device_destroy (dev);
             return FALSE;
