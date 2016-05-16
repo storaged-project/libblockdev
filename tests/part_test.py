@@ -712,6 +712,79 @@ class PartGetDiskFreeRegions(PartTestCase):
         self.assertEqual(fi.start, ps.start + ps.size)
         self.assertGreater(fi.size, 89 * 1024**2)
 
+class PartGetBestFreeRegion(PartTestCase):
+    def test_get_best_free_region(self):
+        """Verify that it is possible to get info about the best free region on a disk"""
+
+        # we first need a partition table
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
+        self.assertTrue(succ)
+
+        ps1 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 1, 10 * 1024**2, BlockDev.PartAlign.NONE)
+        self.assertTrue(ps1)
+        self.assertEqual(ps1.path, self.loop_dev + "p1")
+        self.assertEqual(ps1.type, BlockDev.PartType.NORMAL)
+        self.assertEqual(ps1.start, 512)
+        self.assertEqual(ps1.size, 10 * 1024**2)
+
+        # create a 20MiB gap between the partitions
+        ps2 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps1.start + ps1.size + 20 * 1024**2,
+                                         10 * 1024**2, BlockDev.PartAlign.NONE)
+        self.assertTrue(ps2)
+        self.assertEqual(ps2.path, self.loop_dev + "p2")
+        self.assertEqual(ps2.type, BlockDev.PartType.NORMAL)
+        self.assertEqual(ps2.start, ps1.start + ps1.size + 20 * 1024**2)
+        self.assertEqual(ps2.size, 10 * 1024**2)
+
+        # normal partition should go in between the partitions because there's enough space for it
+        ps = BlockDev.part_get_best_free_region (self.loop_dev, BlockDev.PartType.NORMAL, 10 * 1024**2)
+        self.assertLess(ps.start, ps2.start)
+
+        # extended partition should be as big as possible so it shouldn't go in between the partitions
+        ps = BlockDev.part_get_best_free_region (self.loop_dev, BlockDev.PartType.EXTENDED, 10 * 1024**2)
+        self.assertGreaterEqual(ps.start, ps2.start + ps2.size)
+
+        # create a 10MiB gap between the partitions
+        ps3 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.EXTENDED, ps2.start + ps2.size + 10 * 1024**2,
+                                         45 * 1024**2, BlockDev.PartAlign.NONE)
+        self.assertTrue(ps3)
+        self.assertEqual(ps3.path, self.loop_dev + "p3")
+        self.assertEqual(ps3.type, BlockDev.PartType.EXTENDED)
+        self.assertEqual(ps3.start, ps2.start + ps2.size + 10 * 1024**2)
+        self.assertEqual(ps3.size, 45 * 1024**2)
+
+        # there should now be 5 MiB left after the third partition which is enough for a 3MiB partition
+        ps = BlockDev.part_get_best_free_region (self.loop_dev, BlockDev.PartType.NORMAL, 3 * 1024**2)
+        self.assertGreaterEqual(ps.start, ps3.start + ps3.size)
+
+        # 7MiB partition should go in between the second and third partitions because there's enough space
+        # for it there
+        ps = BlockDev.part_get_best_free_region (self.loop_dev, BlockDev.PartType.NORMAL, 7 * 1024**2)
+        self.assertGreaterEqual(ps.start, ps2.start + ps2.size)
+        self.assertLess(ps.start, ps3.start)
+
+        # 15MiB partition should go in between the first and second partitions because that's the only
+        # space big enough for it
+        ps = BlockDev.part_get_best_free_region (self.loop_dev, BlockDev.PartType.NORMAL, 15 * 1024**2)
+        self.assertGreaterEqual(ps.start, ps1.start + ps1.size)
+        self.assertLess(ps.start, ps2.start)
+
+        ps5 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps3.start + 20 * 1024**2,
+                                         15 * 1024**2, BlockDev.PartAlign.NONE)
+        self.assertEqual(ps5.path, self.loop_dev + "p5")
+        self.assertEqual(ps5.type, BlockDev.PartType.LOGICAL)
+        self.assertEqual(ps5.start, ps3.start + 20 * 1024**2)
+        self.assertEqual(ps5.size, 15 * 1024**2)
+
+        # 5MiB logical partition should go after the fifth partition because there's enough space for it
+        ps = BlockDev.part_get_best_free_region (self.loop_dev, BlockDev.PartType.LOGICAL, 5 * 1024**2)
+        self.assertGreaterEqual(ps.start, ps5.start + ps5.size)
+        self.assertLess(ps.start, ps3.start + ps3.size)
+
+        # 15MiB logical partition should go before the fifth partition because there's enough space for it
+        ps = BlockDev.part_get_best_free_region (self.loop_dev, BlockDev.PartType.LOGICAL, 15 * 1024**2)
+        self.assertGreaterEqual(ps.start, ps3.start)
+        self.assertLess(ps.start, ps5.start)
 
 class PartGetPartByPos(PartTestCase):
     def test_get_part_by_pos(self):

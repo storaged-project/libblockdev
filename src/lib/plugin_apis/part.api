@@ -216,6 +216,24 @@ BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error);
 BDPartSpec** bd_part_get_disk_free_regions (const gchar *disk, GError **error);
 
 /**
+ * bd_part_get_best_free_region:
+ * @disk: disk to get the best free region for
+ * @type: type of the partition that is planned to be added
+ * @size: size of the partition to be added
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): spec of the best free region on @disk for a new partition of type @type
+ *                           with the size of @size or %NULL if there is none such region or if
+ *                           there was an error (@error gets populated)
+ *
+ * Note: For the @type %BD_PART_TYPE_NORMAL, the smallest possible space that *is not* in an extended partition
+ *       is found. For the @type %BD_PART_TYPE_LOGICAL, the smallest possible space that *is* in an extended
+ *       partition is found. For %BD_PART_TYPE_EXTENDED, the biggest possible space is found as long as there
+ *       is no other extended partition (there can only be one).
+ */
+BDPartSpec* bd_part_get_best_free_region (const gchar *disk, BDPartType type, guint64 size, GError **error);
+
+/**
  * bd_part_create_part:
  * @disk: disk to create partition on
  * @type: type of the partition to create (if %BD_PART_TYPE_REQ_NEXT, the
