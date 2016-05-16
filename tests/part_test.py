@@ -839,6 +839,51 @@ class PartSetFlagCase(PartTestCase):
         self.assertFalse(ps.flags & BlockDev.PartFlag.GPT_READ_ONLY)
         self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_HIDDEN)
 
+class PartSetDiskFlagCase(PartTestCase):
+    def test_set_disk_flag(self):
+        """Verify that it is possible to set disk flag(s)"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.part_set_disk_flag ("/non/existing/device", BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT, True)
+
+        ps = BlockDev.part_get_disk_spec (self.loop_dev)
+        self.assertTrue(ps)
+        self.assertEqual(ps.flags, 0)
+        self.assertEqual(ps.table_type, BlockDev.PartTableType.UNDEF)
+        # no label/table
+        with self.assertRaises(GLib.GError):
+            BlockDev.part_set_disk_flag (self.loop_dev, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT, True)
+
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
+        self.assertTrue(succ)
+
+        ps = BlockDev.part_get_disk_spec (self.loop_dev)
+        self.assertTrue(ps)
+        self.assertEqual(ps.table_type, BlockDev.PartTableType.MSDOS)
+        self.assertEqual(ps.flags, 0)
+        # not supported on the MSDOS table
+        with self.assertRaises(GLib.GError):
+            BlockDev.part_set_disk_flag (self.loop_dev, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT, True)
+
+
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.GPT, True)
+        self.assertTrue(succ)
+
+        ps = BlockDev.part_get_disk_spec (self.loop_dev)
+        self.assertTrue(ps)
+        self.assertEqual(ps.table_type, BlockDev.PartTableType.GPT)
+        self.assertEqual(ps.flags, 0)
+
+        succ = BlockDev.part_set_disk_flag (self.loop_dev, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT, True)
+        ps = BlockDev.part_get_disk_spec (self.loop_dev)
+        self.assertTrue(ps)
+        self.assertEqual(ps.flags, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT)
+
+        succ = BlockDev.part_set_disk_flag (self.loop_dev, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT, False)
+        ps = BlockDev.part_get_disk_spec (self.loop_dev)
+        self.assertTrue(ps)
+        self.assertEqual(ps.flags, 0)
+
 class PartSetFlagsCase(PartTestCase):
     def test_set_part_flags(self):
         """Verify that it is possible to set multiple partition flags at once"""

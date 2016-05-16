@@ -248,6 +248,17 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
 gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag flag, gboolean state, GError **error);
 
 /**
+ * bd_part_set_disk_flag:
+ * @disk: disk the partition belongs to
+ * @flag: flag to set
+ * @state: state to set for the @flag (%TRUE = enabled)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the flag @flag was successfully set on the @disk or not
+ */
+gboolean bd_part_set_disk_flag (const gchar *disk, BDPartDiskFlag flag, gboolean state, GError **error);
+
+/**
  * bd_part_set_part_flags:
  * @disk: disk the partition belongs to
  * @part: partition to set the flag on
