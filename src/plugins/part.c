@@ -358,6 +358,60 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
 }
 
 /**
+ * bd_part_get_part_by_pos:
+ * @disk: disk to remove the partition from
+ * @position: position (in bytes) determining the partition
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): spec of the partition from @disk spanning over the @position or %NULL if no such
+ *          partition exists or in case of error (@error is set)
+ */
+BDPartSpec* bd_part_get_part_by_pos (const gchar *disk, guint64 position, GError **error) {
+    PedDevice *dev = NULL;
+    PedDisk *ped_disk = NULL;
+    PedPartition *ped_part = NULL;
+    BDPartSpec *ret = NULL;
+    PedSector sector = 0;
+
+    dev = ped_device_get (disk);
+    if (!dev) {
+        set_parted_error (error, BD_PART_ERROR_INVAL);
+        g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+        return NULL;
+    }
+
+    ped_disk = ped_disk_new (dev);
+    if (!ped_disk) {
+        set_parted_error (error, BD_PART_ERROR_FAIL);
+        g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
+        ped_device_destroy (dev);
+        return NULL;
+    }
+
+    sector = (PedSector) (position / dev->sector_size);
+    ped_part = ped_disk_get_partition_by_sector (ped_disk, sector);
+    if (!ped_part) {
+        if (set_parted_error (error, BD_PART_ERROR_FAIL))
+            g_prefix_error (error, "Failed to get partition at position %"G_GUINT64_FORMAT" (device '%s')",
+                            position, disk);
+        else
+            /* no such partition, but no error */
+            g_clear_error (error);
+        ped_disk_destroy (ped_disk);
+        ped_device_destroy (dev);
+        return NULL;
+    }
+
+    ret = get_part_spec (dev, ped_disk, ped_part, error);
+
+    /* the partition gets destroyed together with the disk */
+    ped_disk_destroy (ped_disk);
+    ped_device_destroy (dev);
+
+    return ret;
+}
+
+/**
  * bd_part_get_disk_parts:
  * @disk: disk to get information about partitions for
  * @error: (out): place to store error (if any)

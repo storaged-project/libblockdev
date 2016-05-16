@@ -72,7 +72,7 @@ typedef struct BDPartSpec {
     gchar *path;
     gchar *name;
     gchar *type_guid;
-    BDPartType type;
+    guint64 type;
     guint64 start;
     guint64 size;
     guint64 flags;
@@ -131,6 +131,17 @@ gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean
  * Returns: (transfer full): spec of the @part partition from @disk or %NULL in case of error
  */
 BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError **error);
+
+/**
+ * bd_part_get_part_by_pos:
+ * @disk: disk to remove the partition from
+ * @position: position (in bytes) determining the partition
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): spec of the partition from @disk spanning over the @position or %NULL if no such
+ *          partition exists or in case of error (@error is set)
+ */
+BDPartSpec* bd_part_get_part_by_pos (const gchar *disk, guint64 position, GError **error);
 
 /**
  * bd_part_get_disk_parts:
