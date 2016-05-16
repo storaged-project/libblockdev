@@ -19,6 +19,10 @@ typedef enum {
 } BDPartTableType;
 
 typedef enum {
+    BD_PART_DISK_FLAG_GPT_PMBR_BOOT = 1
+} BDPartDiskFlag;
+
+typedef enum {
     BD_PART_FLAG_BOOT = 1 << 1,
     BD_PART_FLAG_ROOT = 1 << 2,
     BD_PART_FLAG_SWAP = 1 << 3,
@@ -110,6 +114,47 @@ GType bd_part_spec_get_type () {
     return type;
 }
 
+#define BD_PART_TYPE_DISK_SPEC (bd_part_disk_spec_get_type ())
+GType bd_part_disk_spec_get_type();
+
+typedef struct BDPartDiskSpec {
+    gchar *path;
+    BDPartTableType table_type;
+    guint64 size;
+    guint64 sector_size;
+    guint64 flags;
+} BDPartDiskSpec;
+
+BDPartDiskSpec* bd_part_disk_spec_copy (BDPartDiskSpec *data) {
+    BDPartDiskSpec *ret = g_new0 (BDPartDiskSpec, 1);
+
+    ret->path = g_strdup (data->path);
+    ret->table_type = data->table_type;
+    ret->size = data->size;
+    ret->sector_size = data->sector_size;
+    ret->flags = data->flags;
+
+    return ret;
+}
+
+void bd_part_disk_spec_free (BDPartDiskSpec *data) {
+    g_free (data->path);
+    g_free (data);
+}
+
+GType bd_part_disk_spec_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDPartDiskSpec",
+                                            (GBoxedCopyFunc) bd_part_disk_spec_copy,
+                                            (GBoxedFreeFunc) bd_part_disk_spec_free);
+    }
+
+    return type;
+}
+
+
 /**
  * bd_part_create_table:
  * @disk: path of the disk block device to create partition table on
@@ -142,6 +187,15 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
  *          partition exists or in case of error (@error is set)
  */
 BDPartSpec* bd_part_get_part_by_pos (const gchar *disk, guint64 position, GError **error);
+
+/**
+ * bd_part_get_disk_spec:
+ * @disk: disk to get information about
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): information about the given @disk or %NULL (in case of error)
+ */
+BDPartDiskSpec* bd_part_get_disk_spec (const gchar *disk, GError **error);
 
 /**
  * bd_part_get_disk_parts:
