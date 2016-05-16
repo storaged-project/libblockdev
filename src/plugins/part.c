@@ -937,6 +937,60 @@ gboolean bd_part_set_part_flag (gchar *disk, gchar *part, BDPartFlag flag, gbool
 }
 
 /**
+ * bd_part_set_disk_flag:
+ * @disk: disk the partition belongs to
+ * @flag: flag to set
+ * @state: state to set for the @flag (%TRUE = enabled)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the flag @flag was successfully set on the @disk or not
+ */
+gboolean bd_part_set_disk_flag (gchar *disk, BDPartDiskFlag flag, gboolean state, GError **error) {
+    PedDevice *dev = NULL;
+    PedDisk *ped_disk = NULL;
+    gint status = 0;
+    gboolean ret = FALSE;
+
+    dev = ped_device_get (disk);
+    if (!dev) {
+        set_parted_error (error, BD_PART_ERROR_INVAL);
+        g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+        return FALSE;
+    }
+
+    ped_disk = ped_disk_new (dev);
+    if (!ped_disk) {
+        set_parted_error (error, BD_PART_ERROR_FAIL);
+        g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
+        ped_device_destroy (dev);
+        return FALSE;
+    }
+
+    /* right now we only support this one flag */
+    if (flag == BD_PART_DISK_FLAG_GPT_PMBR_BOOT) {
+        status = ped_disk_set_flag (ped_disk, PED_DISK_GPT_PMBR_BOOT, (int) state);
+        if (status == 0) {
+            set_parted_error (error, BD_PART_ERROR_FAIL);
+            g_prefix_error (error, "Failed to set flag on disk '%s'", disk);
+            ped_disk_destroy (ped_disk);
+            ped_device_destroy (dev);
+            return FALSE;
+        }
+
+        ret = disk_commit (ped_disk, disk, error);
+    } else {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Invalid or unsupported flag given: %d", flag);
+        ret = FALSE;
+    }
+
+    ped_disk_destroy (ped_disk);
+    ped_device_destroy (dev);
+
+    return ret;
+}
+
+/**
  * bd_part_set_part_flags:
  * @disk: disk the partition belongs to
  * @part: partition to set the flag on

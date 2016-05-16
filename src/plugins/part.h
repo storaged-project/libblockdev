@@ -105,6 +105,7 @@ BDPartSpec* bd_part_create_part (gchar *disk, BDPartTypeReq type, guint64 start,
 gboolean bd_part_delete_part (gchar *disk, gchar *part, GError **error);
 
 gboolean bd_part_set_part_flag (gchar *disk, gchar *part, BDPartFlag flag, gboolean state, GError **error);
+gboolean bd_part_set_disk_flag (gchar *disk, BDPartDiskFlag flag, gboolean state, GError **error);
 gboolean bd_part_set_part_flags (gchar *disk, gchar *part, guint64 flags, GError **error);
 gboolean bd_part_set_part_name (gchar *disk, gchar *part, gchar *name, GError **error);
 gboolean bd_part_set_part_type (gchar *disk, gchar *part, gchar *type_guid, GError **error);
