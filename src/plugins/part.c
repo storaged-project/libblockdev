@@ -259,10 +259,15 @@ static BDPartSpec* get_part_spec (PedDevice *dev, PedDisk *disk, PedPartition *p
     PedPartitionFlag flag = PED_PARTITION_FIRST_FLAG;
 
     ret = g_new0 (BDPartSpec, 1);
-    if (isdigit (dev->path[strlen(dev->path) - 1]))
-        ret->path = g_strdup_printf ("%sp%d", dev->path, part->num);
-    else
-        ret->path = g_strdup_printf ("%s%d", dev->path, part->num);
+    /* the no-partition "partitions" have num equal to -1 which never really
+       creates a valid block device path, so let's just not set path to
+       nonsense */
+    if (part->num != -1) {
+        if (isdigit (dev->path[strlen(dev->path) - 1]))
+            ret->path = g_strdup_printf ("%sp%d", dev->path, part->num);
+        else
+            ret->path = g_strdup_printf ("%s%d", dev->path, part->num);
+    }
     if (disk->type->features & PED_DISK_TYPE_PARTITION_NAME)
         ret->name = g_strdup (ped_partition_get_name (part));
     if (g_strcmp0 (disk->type->name, "gpt") == 0) {
