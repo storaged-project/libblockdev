@@ -69,7 +69,7 @@ typedef struct BDPartSpec {
     gchar *path;
     gchar *name;
     gchar *type_guid;
-    BDPartType type;
+    guint64 type;
     guint64 start;
     guint64 size;
     guint64 flags;
@@ -81,6 +81,7 @@ void bd_part_spec_free (BDPartSpec *data);
 gboolean bd_part_create_table (gchar *disk, BDPartTableType type, gboolean ignore_existing, GError **error);
 
 BDPartSpec* bd_part_get_part_spec (gchar *disk, gchar *part, GError **error);
+BDPartSpec* bd_part_get_part_by_pos (gchar *disk, guint64 position, GError **error);
 BDPartSpec** bd_part_get_disk_parts (gchar *disk, GError **error);
 
 BDPartSpec* bd_part_create_part (gchar *disk, BDPartTypeReq type, guint64 start, guint64 size, BDPartAlign align, GError **error);

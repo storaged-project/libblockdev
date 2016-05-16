@@ -586,6 +586,126 @@ class PartGetDiskPartsCase(PartTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.part_get_disk_parts (self.loop_dev)
 
+class PartGetPartByPos(PartTestCase):
+    def test_get_part_by_pos(self):
+        """Verify that getting partition by position works as expected"""
+
+        ## prepare the disk with non-trivial setup first
+
+        # we first need a partition table
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
+        self.assertTrue(succ)
+
+        # for now, let's just create a typical primary partition starting at the
+        # sector 2048, 10 MiB big with optimal alignment
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+        self.assertTrue(ps)
+        self.assertEqual(ps.path, self.loop_dev + "p1")
+        self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
+        self.assertEqual(ps.start, 2048 * 512)
+        self.assertEqual(ps.size, 10 * 1024**2)
+        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
+
+        ps2 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps.start + ps.size + 1,
+                                         10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+        self.assertTrue(ps2)
+        self.assertEqual(ps2.path, self.loop_dev + "p2")
+        self.assertEqual(ps2.type, BlockDev.PartType.NORMAL)
+        # the start has to be at most as far from the end of the previous part
+        # as is the start of the first part from the start of the disk
+        self.assertTrue(abs(ps2.start - (ps.start + ps.size + 1)) < ps.start)
+        self.assertEqual(ps2.size, 10 * 1024**2)
+        self.assertEqual(ps2.flags, 0)  # no flags (combination of bit flags)
+
+        ps3 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.EXTENDED, ps2.start + ps2.size + 1,
+                                         35 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+        self.assertTrue(ps3)
+        self.assertEqual(ps3.path, self.loop_dev + "p3")
+        self.assertEqual(ps3.type, BlockDev.PartType.EXTENDED)
+        # the start has to be at most as far from the end of the previous part
+        # as is the start of the first part from the start of the disk
+        self.assertTrue(abs(ps3.start - (ps2.start + ps2.size + 1)) < ps.start)
+        self.assertEqual(ps3.size, 35 * 1024**2)
+        self.assertEqual(ps3.flags, 0)  # no flags (combination of bit flags)
+
+        # the logical partition has number 5 even though the extended partition
+        # has number 3
+        ps5 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps3.start + 1,
+                                         10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+        self.assertTrue(ps5)
+        self.assertEqual(ps5.path, self.loop_dev + "p5")
+        self.assertEqual(ps5.type, BlockDev.PartType.LOGICAL)
+        # the start has to be somewhere in the extended partition p3 which
+        # should need at most 2 MiB extra space
+        self.assertTrue(ps3.start < ps5.start < ps3.start + ps3.size)
+        self.assertTrue(abs(ps5.size - 10 * 1024**2) < 2 * 1024**2)
+        self.assertEqual(ps5.flags, 0)  # no flags (combination of bit flags)
+
+        ps6 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps5.start + ps5.size + 1,
+                                         10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+        self.assertTrue(ps6)
+        self.assertEqual(ps6.path, self.loop_dev + "p6")
+        self.assertEqual(ps6.type, BlockDev.PartType.LOGICAL)
+        # the start has to be somewhere in the extended partition p3 which
+        # should need at most 2 MiB extra space
+        self.assertTrue(ps3.start < ps6.start < ps3.start + ps3.size)
+        self.assertEqual(ps6.size, 10 * 1024**2)
+        self.assertEqual(ps6.flags, 0)  # no flags (combination of bit flags)
+
+        ps7 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps6.start + ps6.size + 2 * 1024**2,
+                                         5 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+        self.assertTrue(ps7)
+        self.assertEqual(ps7.path, self.loop_dev + "p7")
+        self.assertEqual(ps7.type, BlockDev.PartType.LOGICAL)
+        # the start has to be somewhere in the extended partition p3 which
+        # should need at most 2 MiB extra space
+        self.assertTrue(ps3.start < ps7.start < ps3.start + ps3.size)
+        self.assertLess(abs(ps7.start - (ps6.start + ps6.size + 2 * 1024**2)), 512)
+        self.assertEqual(ps7.size, 5 * 1024**2)
+        self.assertEqual(ps7.flags, 0)  # no flags (combination of bit flags)
+
+        # here we go with the partition number 4
+        ps4 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps3.start + ps3.size + 1,
+                                         10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+        self.assertTrue(ps4)
+        self.assertEqual(ps4.path, self.loop_dev + "p4")
+        self.assertEqual(ps4.type, BlockDev.PartType.NORMAL)
+        # the start has to be at most as far from the end of the previous part
+        # as is the start of the first part from the start of the disk
+        self.assertTrue(abs(ps4.start - (ps3.start + ps3.size + 1)) < ps.start)
+        self.assertEqual(ps4.size, 10 * 1024**2)
+        self.assertEqual(ps4.flags, 0)  # no flags (combination of bit flags)
+
+
+        ## now try to get the partitions
+        # XXX: Any way to get the extended partition (ps3)? Let's just skip it now.
+        for part in (ps, ps2, ps5, ps6, ps7, ps4):
+            ret = BlockDev.part_get_part_by_pos(self.loop_dev, part.start + 1 * 1024**2)
+            self.assertIsNotNone(ret)
+            self.assertEqual(ret.path, part.path)
+            self.assertEqual(ret.start, part.start)
+            self.assertEqual(ret.size, part.size)
+            self.assertEqual(ret.type, part.type)
+            self.assertEqual(ret.flags, part.flags)
+
+        # free space in the extended partition
+        ret = BlockDev.part_get_part_by_pos(self.loop_dev, ps3.start + 33 * 1024**2)
+        self.assertIsNotNone(ret)
+        self.assertTrue(ret.type & BlockDev.PartType.FREESPACE)
+        self.assertTrue(ret.type & BlockDev.PartType.LOGICAL)
+        # there are two 10MiB and one 5MiB logical partitions
+        self.assertGreater(ret.start, ps3.start + 25 * 1024**2)
+        # the size of the extended partition is 35 MiB
+        self.assertLess(ret.size, 10 * 1024**2)
+
+        # free space at the end of the disk
+        ret = BlockDev.part_get_part_by_pos(self.loop_dev, 90 * 1024**2)
+        self.assertIsNotNone(ret)
+        self.assertTrue(ret.type & BlockDev.PartType.FREESPACE)
+        self.assertEqual(ret.start, ps4.start + ps4.size)
+        self.assertLessEqual(ret.size, (100 * 1024**2) - (ps4.start + ps4.size))
+
+
 class PartCreateDeletePartCase(PartTestCase):
     def test_create_delete_part_simple(self):
         """Verify that it is possible to create and delete a parition"""
