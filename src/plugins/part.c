@@ -284,10 +284,10 @@ static BDPartSpec* get_part_spec (PedDevice *dev, PedDisk *disk, PedPartition *p
 /**
  * bd_part_get_part_spec:
  * @disk: disk to remove the partition from
- * @part: partition to remove
+ * @part: partition to get spec for
  * @error: (out): place to store error (if any)
  *
- * Returns: spec of the @part partition from @disk or %NULL in case of error
+ * Returns: (transfer full): spec of the @part partition from @disk or %NULL in case of error
  */
 BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError **error) {
     PedDevice *dev = NULL;
@@ -300,14 +300,14 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
     if (!part || (part && (*part == '\0'))) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Invalid partition path given: '%s'", part);
-        return FALSE;
+        return NULL;
     }
 
     dev = ped_device_get (disk);
     if (!dev) {
         set_parted_error (error, BD_PART_ERROR_INVAL);
         g_prefix_error (error, "Device '%s' invalid or not existing", disk);
-        return FALSE;
+        return NULL;
     }
 
     ped_disk = ped_disk_new (dev);
@@ -315,7 +315,7 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
         ped_device_destroy (dev);
-        return FALSE;
+        return NULL;
     }
 
     part_num_str = part + (strlen (part) - 1);
@@ -330,7 +330,7 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
                      "Invalid partition path given: '%s'. Cannot extract partition number", part);
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
-        return FALSE;
+        return NULL;
     }
 
     ped_part = ped_disk_get_partition (ped_disk, part_num);
@@ -339,7 +339,7 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
         g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
-        return FALSE;
+        return NULL;
     }
 
     ret = get_part_spec (dev, ped_disk, ped_part, error);

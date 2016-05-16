@@ -125,10 +125,10 @@ gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean
 /**
  * bd_part_get_part_spec:
  * @disk: disk to remove the partition from
- * @part: partition to remove
+ * @part: partition to get spec for
  * @error: (out): place to store error (if any)
  *
- * Returns: spec of the @part partition from @disk or %NULL in case of error
+ * Returns: (transfer full): spec of the @part partition from @disk or %NULL in case of error
  */
 BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError **error);
 
