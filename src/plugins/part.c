@@ -79,14 +79,20 @@ static PedExceptionOption exc_handler (PedException *ex) {
  * Set error from the parted error stored in 'error_msg'. In case there is none,
  * the error is set up with an empty string. Otherwise it is set up with the
  * parted's error message and is a subject to later g_prefix_error() call.
+ *
+ * Returns: whether there was some message from parted or not
  */
-static void set_parted_error (GError **error, BDPartError type) {
+static gboolean set_parted_error (GError **error, BDPartError type) {
     if (error_msg) {
         g_set_error (error, BD_PART_ERROR, type,
                      " (%s)", error_msg);
         g_free (error_msg);
-    } else
+        error_msg = NULL;
+        return TRUE;
+    } else {
         g_set_error_literal (error, BD_PART_ERROR, type, "");
+        return FALSE;
+    }
 }
 
 /**
