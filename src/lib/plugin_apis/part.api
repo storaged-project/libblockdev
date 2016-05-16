@@ -206,6 +206,15 @@ BDPartDiskSpec* bd_part_get_disk_spec (gchar *disk, GError **error);
 BDPartSpec** bd_part_get_disk_parts (gchar *disk, GError **error);
 
 /**
+ * bd_part_get_disk_free_regions:
+ * @disk: disk to get free regions for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full) (array zero-terminated=1): specs of the free regions from @disk or %NULL in case of error
+ */
+BDPartSpec** bd_part_get_disk_free_regions (gchar *disk, GError **error);
+
+/**
  * bd_part_create_part:
  * @disk: disk to create partition on
  * @type: type of the partition to create (if %BD_PART_TYPE_REQ_NEXT, the

@@ -100,6 +100,7 @@ BDPartSpec* bd_part_get_part_spec (gchar *disk, gchar *part, GError **error);
 BDPartSpec* bd_part_get_part_by_pos (gchar *disk, guint64 position, GError **error);
 BDPartDiskSpec* bd_part_get_disk_spec (gchar *disk, GError **error);
 BDPartSpec** bd_part_get_disk_parts (gchar *disk, GError **error);
+BDPartSpec** bd_part_get_disk_free_regions (gchar *disk, GError **error);
 
 BDPartSpec* bd_part_create_part (gchar *disk, BDPartTypeReq type, guint64 start, guint64 size, BDPartAlign align, GError **error);
 gboolean bd_part_delete_part (gchar *disk, gchar *part, GError **error);
