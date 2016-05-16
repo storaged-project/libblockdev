@@ -559,6 +559,78 @@ BDPartSpec** bd_part_get_disk_free_regions (gchar *disk, GError **error) {
     return get_disk_parts (disk, BD_PART_TYPE_FREESPACE, 0, FALSE, error);
 }
 
+/**
+ * bd_part_get_best_free_region:
+ * @disk: disk to get the best free region for
+ * @type: type of the partition that is planned to be added
+ * @size: size of the partition to be added
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): spec of the best free region on @disk for a new partition of type @type
+ *                           with the size of @size or %NULL if there is none such region or if
+ *                           there was an error (@error gets populated)
+ *
+ * Note: For the @type %BD_PART_TYPE_NORMAL, the smallest possible space that *is not* in an extended partition
+ *       is found. For the @type %BD_PART_TYPE_LOGICAL, the smallest possible space that *is* in an extended
+ *       partition is found. For %BD_PART_TYPE_EXTENDED, the biggest possible space is found as long as there
+ *       is no other extended partition (there can only be one).
+ */
+BDPartSpec* bd_part_get_best_free_region (gchar *disk, BDPartType type, guint64 size, GError **error) {
+    BDPartSpec **free_regs = NULL;
+    BDPartSpec **free_reg_p = NULL;
+    BDPartSpec *ret = NULL;
+
+    free_regs = bd_part_get_disk_free_regions (disk, error);
+    if (!free_regs)
+        /* error should be populated */
+        return NULL;
+    if (!(*free_regs))
+        /* no free regions */
+        return NULL;
+
+    if (type == BD_PART_TYPE_NORMAL) {
+        for (free_reg_p=free_regs; *free_reg_p; free_reg_p++) {
+            /* check if it has enough space and is not inside an extended partition */
+            if ((*free_reg_p)->size > size && !((*free_reg_p)->type & BD_PART_TYPE_LOGICAL))
+                /* if it is the first that would fit or if it is smaller than
+                   what we found earlier, it is a better match */
+                if (!ret || ((*free_reg_p)->size < ret->size))
+                    ret = *free_reg_p;
+        }
+    } else if (type == BD_PART_TYPE_EXTENDED) {
+        for (free_reg_p=free_regs; *free_reg_p; free_reg_p++) {
+            /* if there already is an extended partition, there cannot be another one */
+            if ((*free_reg_p)->type & BD_PART_TYPE_LOGICAL) {
+                for (free_reg_p=free_regs; *free_reg_p; free_reg_p++)
+                    bd_part_spec_free (*free_reg_p);
+                g_free (free_regs);
+                return NULL;
+            }
+            /* check if it has enough space */
+            if ((*free_reg_p)->size > size)
+                /* if it is the first that would fit or if it is bigger than
+                   what we found earlier, it is a better match */
+                if (!ret || ((*free_reg_p)->size > ret->size))
+                    ret = *free_reg_p;
+        }
+    } else if (type == BD_PART_TYPE_LOGICAL) {
+        for (free_reg_p=free_regs; *free_reg_p; free_reg_p++) {
+            /* check if it has enough space and is inside an extended partition */
+            if ((*free_reg_p)->size > size && ((*free_reg_p)->type & BD_PART_TYPE_LOGICAL))
+                /* if it is the first that would fit or if it is smaller than
+                   what we found earlier, it is a better match */
+                if (!ret || ((*free_reg_p)->size < ret->size))
+                    ret = *free_reg_p;
+        }
+    }
+
+    /* free all the other specs and return the best one */
+    for (free_reg_p=free_regs; *free_reg_p; free_reg_p++)
+        if (*free_reg_p != ret)
+            bd_part_spec_free (*free_reg_p);
+    return ret;
+}
+
 static PedPartition* add_part_to_disk (PedDevice *dev, PedDisk *disk, BDPartTypeReq type, guint64 start, guint64 size, BDPartAlign align, GError **error) {
     PedPartition *part = NULL;
     PedConstraint *constr = NULL;
