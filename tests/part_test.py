@@ -691,6 +691,7 @@ class PartGetPartByPos(PartTestCase):
         # free space in the extended partition
         ret = BlockDev.part_get_part_by_pos(self.loop_dev, ps3.start + 33 * 1024**2)
         self.assertIsNotNone(ret)
+        self.assertIsNone(ret.path)
         self.assertTrue(ret.type & BlockDev.PartType.FREESPACE)
         self.assertTrue(ret.type & BlockDev.PartType.LOGICAL)
         # there are two 10MiB and one 5MiB logical partitions
@@ -701,6 +702,7 @@ class PartGetPartByPos(PartTestCase):
         # free space at the end of the disk
         ret = BlockDev.part_get_part_by_pos(self.loop_dev, 90 * 1024**2)
         self.assertIsNotNone(ret)
+        self.assertIsNone(ret.path)
         self.assertTrue(ret.type & BlockDev.PartType.FREESPACE)
         self.assertEqual(ret.start, ps4.start + ps4.size)
         self.assertLessEqual(ret.size, (100 * 1024**2) - (ps4.start + ps4.size))
