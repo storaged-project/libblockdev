@@ -624,6 +624,95 @@ class PartGetDiskPartsCase(PartTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.part_get_disk_parts (self.loop_dev)
 
+class PartGetDiskFreeRegions(PartTestCase):
+    def test_get_disk_free_regions(self):
+        """Verify that it is possible to get info about free regions on a disk"""
+
+        # we first need a partition table
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
+        self.assertTrue(succ)
+
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 1, 10 * 1024**2, BlockDev.PartAlign.NONE)
+
+        # we should get proper data back
+        self.assertTrue(ps)
+        self.assertEqual(ps.path, self.loop_dev + "p1")
+        self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
+        self.assertEqual(ps.start, 512)
+        self.assertEqual(ps.size, 10 * 1024**2)
+
+        fis = BlockDev.part_get_disk_free_regions (self.loop_dev)
+        self.assertEqual(len(fis), 2)  # 0-512, (512+10MiB)-EOD
+        fi = fis[0]
+        self.assertEqual(fi.start, 0)
+        self.assertEqual(fi.size, 512)
+        fi = fis[1]
+        self.assertEqual(fi.start, ps.start + ps.size)
+        self.assertGreater(fi.size, 89 * 1024**2)
+
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps.start + ps.size + 10 * 1024**2,
+                                        10 * 1024**2, BlockDev.PartAlign.NONE)
+        fis = BlockDev.part_get_disk_free_regions (self.loop_dev)
+        self.assertEqual(len(fis), 3)  # 0-512, first part, gap, second part, free
+        fi = fis[0]
+        self.assertEqual(fi.start, 0)
+        self.assertEqual(fi.size, 512)
+        fi = fis[1]
+        self.assertEqual(fi.start, 512 + 10 * 1024**2)
+        self.assertGreater(fi.size, 9 * 1024**2)
+        fi = fis[2]
+        self.assertEqual(fi.start, 512 + 30 * 1024**2)
+        self.assertGreater(fi.size, 69 * 1024**2)
+
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.EXTENDED, ps.start + ps.size + 1,
+                                        50 * 1024**2, BlockDev.PartAlign.NONE)
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps.start + 1024**2,
+                                        10 * 1024**2, BlockDev.PartAlign.NONE)
+        fis = BlockDev.part_get_disk_free_regions (self.loop_dev)
+        self.assertEqual(len(fis), 6)  # 0-512[0], first part, gap[1], second part, gap[2], extended, gap[3], logical, free extended[4], free[5]
+
+        fi = fis[0]
+        self.assertEqual(fi.start, 0)
+        self.assertEqual(fi.size, 512)
+        fi = fis[1]
+        self.assertEqual(fi.start, 512 + 10 * 1024**2)
+        self.assertGreater(fi.size, 9 * 1024**2)
+        fi = fis[2]
+        self.assertGreater(fi.start, 30 * 1024**2)
+        self.assertLessEqual(fi.size, 512)
+        fi = fis[3]
+        self.assertGreater(fi.start, 30 * 1024**2)
+        self.assertLessEqual(fi.size, 1024**2)
+        fi = fis[4]
+        self.assertGreaterEqual(fi.start, ps.start + ps.size)
+        self.assertGreaterEqual(fi.size, 38 * 1024**2)
+        fi = fis[5]
+        self.assertGreaterEqual(fi.start, 80 * 1024**2)
+        self.assertGreaterEqual(fi.size, 19 * 1024**2)
+
+        # now something simple with GPT
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
+        self.assertTrue(succ)
+
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 1, 10 * 1024**2, BlockDev.PartAlign.NONE)
+
+        # we should get proper data back
+        self.assertTrue(ps)
+        self.assertEqual(ps.path, self.loop_dev + "p1")
+        self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
+        self.assertEqual(ps.start, 512)
+        self.assertEqual(ps.size, 10 * 1024**2)
+
+        fis = BlockDev.part_get_disk_free_regions (self.loop_dev)
+        self.assertEqual(len(fis), 2)  # 0-512, (512+10MiB)-EOD
+        fi = fis[0]
+        self.assertEqual(fi.start, 0)
+        self.assertEqual(fi.size, 512)
+        fi = fis[1]
+        self.assertEqual(fi.start, ps.start + ps.size)
+        self.assertGreater(fi.size, 89 * 1024**2)
+
+
 class PartGetPartByPos(PartTestCase):
     def test_get_part_by_pos(self):
         """Verify that getting partition by position works as expected"""

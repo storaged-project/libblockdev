@@ -486,14 +486,7 @@ BDPartDiskSpec* bd_part_get_disk_spec (const gchar *disk, GError **error) {
     return ret;
 }
 
-/**
- * bd_part_get_disk_parts:
- * @disk: disk to get information about partitions for
- * @error: (out): place to store error (if any)
- *
- * Returns: (transfer full) (array zero-terminated=1): specs of the partitions from @disk or %NULL in case of error
- */
-BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error) {
+static BDPartSpec** get_disk_parts (const gchar *disk, guint64 incl, guint64 excl, gboolean incl_normal, GError **error) {
     PedDevice *dev = NULL;
     PedDisk *ped_disk = NULL;
     PedPartition *ped_part = NULL;
@@ -505,7 +498,7 @@ BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error) {
     if (!dev) {
         set_parted_error (error, BD_PART_ERROR_INVAL);
         g_prefix_error (error, "Device '%s' invalid or not existing", disk);
-        return FALSE;
+        return NULL;
     }
 
     ped_disk = ped_disk_new (dev);
@@ -513,13 +506,14 @@ BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
         ped_device_destroy (dev);
-        return FALSE;
+        return NULL;
     }
 
-    /* count the partitions we care about (ignoring FREESPACE, METADATA and PROTECTED */
+    /* count the partitions we care about */
     ped_part = ped_disk_next_partition (ped_disk, NULL);
     while (ped_part) {
-        if (ped_part->type <= PED_PARTITION_EXTENDED)
+        if (((ped_part->type & incl) && !(ped_part->type & excl)) ||
+            ((ped_part->type == 0) && incl_normal))
             num_parts++;
         ped_part = ped_disk_next_partition (ped_disk, ped_part);
     }
@@ -528,8 +522,8 @@ BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error) {
     i = 0;
     ped_part = ped_disk_next_partition (ped_disk, NULL);
     while (ped_part) {
-        /* only include partitions we care about */
-        if (ped_part->type <= PED_PARTITION_EXTENDED)
+        if (((ped_part->type & incl) && !(ped_part->type & excl)) ||
+            ((ped_part->type == 0) && incl_normal))
             ret[i++] = get_part_spec (dev, ped_disk, ped_part, error);
         ped_part = ped_disk_next_partition (ped_disk, ped_part);
     }
@@ -539,6 +533,29 @@ BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error) {
     ped_device_destroy (dev);
 
     return ret;
+}
+
+/**
+ * bd_part_get_disk_parts:
+ * @disk: disk to get information about partitions for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full) (array zero-terminated=1): specs of the partitions from @disk or %NULL in case of error
+ */
+BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error) {
+    return get_disk_parts (disk, BD_PART_TYPE_NORMAL|BD_PART_TYPE_LOGICAL|BD_PART_TYPE_EXTENDED,
+                           BD_PART_TYPE_FREESPACE|BD_PART_TYPE_METADATA|BD_PART_TYPE_PROTECTED, TRUE, error);
+}
+
+/**
+ * bd_part_get_disk_free_regions:
+ * @disk: disk to get free regions for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full) (array zero-terminated=1): specs of the free regions from @disk or %NULL in case of error
+ */
+BDPartSpec** bd_part_get_disk_free_regions (const gchar *disk, GError **error) {
+    return get_disk_parts (disk, BD_PART_TYPE_FREESPACE, 0, FALSE, error);
 }
 
 static PedPartition* add_part_to_disk (PedDevice *dev, PedDisk *disk, BDPartTypeReq type, guint64 start, guint64 size, BDPartAlign align, GError **error) {
