@@ -64,6 +64,44 @@ class PartCreateTableCase(PartTestCase):
         succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.GPT, True)
         self.assertTrue(succ)
 
+
+class PartGetDiskSpecCase(PartTestCase):
+    def test_get_disk_spec(self):
+        """Verify that it is possible to get information about disk"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.part_get_disk_spec ("/non/existing/device")
+
+        ps = BlockDev.part_get_disk_spec (self.loop_dev)
+        self.assertTrue(ps)
+        self.assertEqual(ps.path, self.loop_dev)
+        self.assertEqual(ps.sector_size, 512)
+        self.assertGreaterEqual(ps.size, 100 * 1024**2 - 512)
+        self.assertEqual(ps.table_type, BlockDev.PartTableType.UNDEF)
+        self.assertEqual(ps.flags, 0)
+
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
+        self.assertTrue(succ)
+
+        ps = BlockDev.part_get_disk_spec (self.loop_dev)
+        self.assertTrue(ps)
+        self.assertEqual(ps.path, self.loop_dev)
+        self.assertEqual(ps.sector_size, 512)
+        self.assertGreaterEqual(ps.size, 100 * 1024**2 - 512)
+        self.assertEqual(ps.table_type, BlockDev.PartTableType.MSDOS)
+        self.assertEqual(ps.flags, 0)
+
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.GPT, True)
+        self.assertTrue(succ)
+
+        ps = BlockDev.part_get_disk_spec (self.loop_dev)
+        self.assertTrue(ps)
+        self.assertEqual(ps.path, self.loop_dev)
+        self.assertEqual(ps.sector_size, 512)
+        self.assertGreaterEqual(ps.size, 100 * 1024**2 - 512)
+        self.assertEqual(ps.table_type, BlockDev.PartTableType.GPT)
+        self.assertEqual(ps.flags, 0)
+
 class PartCreatePartCase(PartTestCase):
     def test_create_part_simple(self):
         """Verify that it is possible to create a parition"""

@@ -18,6 +18,10 @@ typedef enum {
 } BDPartTableType;
 
 typedef enum {
+    BD_PART_DISK_FLAG_GPT_PMBR_BOOT = 1
+} BDPartDiskFlag;
+
+typedef enum {
     BD_PART_FLAG_BOOT = 1 << 1,
     BD_PART_FLAG_ROOT = 1 << 2,
     BD_PART_FLAG_SWAP = 1 << 3,
@@ -78,10 +82,23 @@ typedef struct BDPartSpec {
 BDPartSpec* bd_part_spec_copy (BDPartSpec *data);
 void bd_part_spec_free (BDPartSpec *data);
 
+typedef struct BDPartDiskSpec {
+    gchar *path;
+    BDPartTableType table_type;
+    guint64 size;
+    guint64 sector_size;
+    guint64 flags;
+} BDPartDiskSpec;
+
+BDPartDiskSpec* bd_part_disk_spec_copy (BDPartDiskSpec *data);
+void bd_part_disk_spec_free (BDPartDiskSpec *data);
+
+
 gboolean bd_part_create_table (gchar *disk, BDPartTableType type, gboolean ignore_existing, GError **error);
 
 BDPartSpec* bd_part_get_part_spec (gchar *disk, gchar *part, GError **error);
 BDPartSpec* bd_part_get_part_by_pos (gchar *disk, guint64 position, GError **error);
+BDPartDiskSpec* bd_part_get_disk_spec (gchar *disk, GError **error);
 BDPartSpec** bd_part_get_disk_parts (gchar *disk, GError **error);
 
 BDPartSpec* bd_part_create_part (gchar *disk, BDPartTypeReq type, guint64 start, guint64 size, BDPartAlign align, GError **error);

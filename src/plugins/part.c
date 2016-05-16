@@ -64,6 +64,23 @@ void bd_part_spec_free (BDPartSpec *data) {
     g_free (data);
 }
 
+BDPartDiskSpec* bd_part_disk_spec_copy (BDPartDiskSpec *data) {
+    BDPartDiskSpec *ret = g_new0 (BDPartDiskSpec, 1);
+
+    ret->path = g_strdup (data->path);
+    ret->table_type = data->table_type;
+    ret->size = data->size;
+    ret->sector_size = data->sector_size;
+    ret->flags = data->flags;
+
+    return ret;
+}
+
+void bd_part_disk_spec_free (BDPartDiskSpec *data) {
+    g_free (data->path);
+    g_free (data);
+}
+
 /* in order to be thread-safe, we need to make sure every thread has this
    variable for its own use */
 static __thread gchar *error_msg = NULL;
@@ -411,6 +428,59 @@ BDPartSpec* bd_part_get_part_by_pos (gchar *disk, guint64 position, GError **err
 
     /* the partition gets destroyed together with the disk */
     ped_disk_destroy (ped_disk);
+    ped_device_destroy (dev);
+
+    return ret;
+}
+
+/**
+ * bd_part_get_disk_spec:
+ * @disk: disk to get information about
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): information about the given @disk or %NULL (in case of error)
+ */
+BDPartDiskSpec* bd_part_get_disk_spec (gchar *disk, GError **error) {
+    PedDevice *dev = NULL;
+    BDPartDiskSpec *ret = NULL;
+    PedConstraint *constr = NULL;
+    PedDisk *ped_disk = NULL;
+    BDPartTableType type = BD_PART_TABLE_UNDEF;
+    gboolean found = FALSE;
+
+    dev = ped_device_get (disk);
+    if (!dev) {
+        set_parted_error (error, BD_PART_ERROR_INVAL);
+        g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+        return NULL;
+    }
+
+    ret = g_new0 (BDPartDiskSpec, 1);
+    ret->path = g_strdup (dev->path);
+    ret->sector_size = (guint64) dev->sector_size;
+    constr = ped_device_get_constraint (dev);
+    ret->size = (constr->max_size - 1) * dev->sector_size;
+    ped_constraint_destroy (constr);
+
+    ped_disk = ped_disk_new (dev);
+    if (ped_disk) {
+        for (type=BD_PART_TABLE_MSDOS; !found && type < BD_PART_TABLE_UNDEF; type++) {
+            if (g_strcmp0 (ped_disk->type->name, table_type_str[type]) == 0) {
+                ret->table_type = type;
+                found = TRUE;
+            }
+        }
+        if (!found)
+            ret->table_type = BD_PART_TABLE_UNDEF;
+        if (ped_disk_is_flag_available (ped_disk, PED_DISK_GPT_PMBR_BOOT) &&
+            ped_disk_get_flag (ped_disk, PED_DISK_GPT_PMBR_BOOT))
+            ret->flags = BD_PART_DISK_FLAG_GPT_PMBR_BOOT;
+        ped_disk_destroy (ped_disk);
+    } else {
+        ret->table_type = BD_PART_TABLE_UNDEF;
+        ret->flags = 0;
+    }
+
     ped_device_destroy (dev);
 
     return ret;
