@@ -36,7 +36,11 @@ typedef enum {
     BD_PART_FLAG_LEGACY_BOOT = 1 << 15,
     BD_PART_FLAG_MSFT_DATA = 1 << 16,
     BD_PART_FLAG_IRST = 1 << 17,
-    BD_PART_FLAG_ESP = 1 << 18
+    BD_PART_FLAG_ESP = 1 << 18,
+    BD_PART_FLAG_GPT_SYSTEM_PART = 1 << 25,
+    BD_PART_FLAG_GPT_READ_ONLY = 1 << 26,
+    BD_PART_FLAG_GPT_HIDDEN = 1 << 27,
+    BD_PART_FLAG_GPT_NO_AUTOMOUNT = 1 << 28
 } BDPartFlag;
 
 typedef enum {
@@ -66,16 +70,20 @@ GType bd_part_spec_get_type();
 
 typedef struct BDPartSpec {
     gchar *path;
+    gchar *name;
+    gchar *type_guid;
     BDPartType type;
     guint64 start;
     guint64 size;
-    gint flags;
+    guint64 flags;
 } BDPartSpec;
 
 BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
     BDPartSpec *ret = g_new0 (BDPartSpec, 1);
 
     ret->path = g_strdup (data->path);
+    ret->name = g_strdup (data->name);
+    ret->type_guid = g_strdup (data->type_guid);
     ret->type = data->type;
     ret->start = data->start;
     ret->size = data->size;
@@ -85,6 +93,8 @@ BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
 
 void bd_part_spec_free (BDPartSpec *data) {
     g_free (data->path);
+    g_free (data->name);
+    g_free (data->type_guid);
     g_free (data);
 }
 
@@ -186,6 +196,29 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
  *
  */
 gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 flags, GError **error);
+
+/**
+ * bd_part_set_part_name:
+ * @disk: device the partition belongs to
+ * @part: partition the should be set for
+ * @name: name to set
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the name was successfully set or not
+ */
+gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gchar *name, GError **error);
+
+/**
+ * bd_part_set_part_type:
+ * @disk: device the partition belongs to
+ * @part: partition the should be set for
+ * @type_guid: GUID of the type
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @type_guid type was successfully set for @part or not
+ */
+gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gchar *type_guid, GError **error);
+
 
 /**
  * bd_part_get_part_table_type_str:

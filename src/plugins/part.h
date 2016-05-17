@@ -37,6 +37,10 @@ typedef enum {
     BD_PART_FLAG_IRST = 1 << 17,
     BD_PART_FLAG_ESP = 1 << 18,
     BD_PART_FLAG_BASIC_LAST = 1 << 19,
+    BD_PART_FLAG_GPT_SYSTEM_PART = 1 << 25,
+    BD_PART_FLAG_GPT_READ_ONLY = 1 << 26,
+    BD_PART_FLAG_GPT_HIDDEN = 1 << 27,
+    BD_PART_FLAG_GPT_NO_AUTOMOUNT = 1 << 28
 } BDPartFlag;
 
 typedef enum {
@@ -63,22 +67,30 @@ typedef enum {
 
 typedef struct BDPartSpec {
     gchar *path;
+    gchar *name;
+    gchar *type_guid;
     BDPartType type;
     guint64 start;
     guint64 size;
-    gint flags;
+    guint64 flags;
 } BDPartSpec;
 
 BDPartSpec* bd_part_spec_copy (BDPartSpec *data);
 void bd_part_spec_free (BDPartSpec *data);
 
 gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean ignore_existing, GError **error);
+
 BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError **error);
 BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error);
+
 BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 start, guint64 size, BDPartAlign align, GError **error);
 gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **error);
+
 gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag flag, gboolean state, GError **error);
 gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 flags, GError **error);
+gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gchar *name, GError **error);
+gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gchar *type_guid, GError **error);
+
 const gchar* bd_part_get_part_table_type_str (BDPartTableType type, GError **error);
 const gchar* bd_part_get_flag_str (BDPartFlag flag, GError **error);
 const gchar* bd_part_get_type_str (BDPartType type, GError **error);
