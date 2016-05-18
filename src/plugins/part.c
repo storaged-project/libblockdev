@@ -64,6 +64,23 @@ void bd_part_spec_free (BDPartSpec *data) {
     g_free (data);
 }
 
+BDPartDiskSpec* bd_part_disk_spec_copy (BDPartDiskSpec *data) {
+    BDPartDiskSpec *ret = g_new0 (BDPartDiskSpec, 1);
+
+    ret->path = g_strdup (data->path);
+    ret->table_type = data->table_type;
+    ret->size = data->size;
+    ret->sector_size = data->sector_size;
+    ret->flags = data->flags;
+
+    return ret;
+}
+
+void bd_part_disk_spec_free (BDPartDiskSpec *data) {
+    g_free (data->path);
+    g_free (data);
+}
+
 /* in order to be thread-safe, we need to make sure every thread has this
    variable for its own use */
 static __thread gchar *error_msg = NULL;
@@ -79,14 +96,20 @@ static PedExceptionOption exc_handler (PedException *ex) {
  * Set error from the parted error stored in 'error_msg'. In case there is none,
  * the error is set up with an empty string. Otherwise it is set up with the
  * parted's error message and is a subject to later g_prefix_error() call.
+ *
+ * Returns: whether there was some message from parted or not
  */
-static void set_parted_error (GError **error, BDPartError type) {
+static gboolean set_parted_error (GError **error, BDPartError type) {
     if (error_msg) {
         g_set_error (error, BD_PART_ERROR, type,
                      " (%s)", error_msg);
         g_free (error_msg);
-    } else
+        error_msg = NULL;
+        return TRUE;
+    } else {
         g_set_error_literal (error, BD_PART_ERROR, type, "");
+        return FALSE;
+    }
 }
 
 /**
@@ -253,10 +276,15 @@ static BDPartSpec* get_part_spec (PedDevice *dev, PedDisk *disk, PedPartition *p
     PedPartitionFlag flag = PED_PARTITION_FIRST_FLAG;
 
     ret = g_new0 (BDPartSpec, 1);
-    if (isdigit (dev->path[strlen(dev->path) - 1]))
-        ret->path = g_strdup_printf ("%sp%d", dev->path, part->num);
-    else
-        ret->path = g_strdup_printf ("%s%d", dev->path, part->num);
+    /* the no-partition "partitions" have num equal to -1 which never really
+       creates a valid block device path, so let's just not set path to
+       nonsense */
+    if (part->num != -1) {
+        if (isdigit (dev->path[strlen(dev->path) - 1]))
+            ret->path = g_strdup_printf ("%sp%d", dev->path, part->num);
+        else
+            ret->path = g_strdup_printf ("%s%d", dev->path, part->num);
+    }
     if (disk->type->features & PED_DISK_TYPE_PARTITION_NAME)
         ret->name = g_strdup (ped_partition_get_name (part));
     if (g_strcmp0 (disk->type->name, "gpt") == 0) {
@@ -284,10 +312,10 @@ static BDPartSpec* get_part_spec (PedDevice *dev, PedDisk *disk, PedPartition *p
 /**
  * bd_part_get_part_spec:
  * @disk: disk to remove the partition from
- * @part: partition to remove
+ * @part: partition to get spec for
  * @error: (out): place to store error (if any)
  *
- * Returns: spec of the @part partition from @disk or %NULL in case of error
+ * Returns: (transfer full): spec of the @part partition from @disk or %NULL in case of error
  */
 BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError **error) {
     PedDevice *dev = NULL;
@@ -300,14 +328,14 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
     if (!part || (part && (*part == '\0'))) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Invalid partition path given: '%s'", part);
-        return FALSE;
+        return NULL;
     }
 
     dev = ped_device_get (disk);
     if (!dev) {
         set_parted_error (error, BD_PART_ERROR_INVAL);
         g_prefix_error (error, "Device '%s' invalid or not existing", disk);
-        return FALSE;
+        return NULL;
     }
 
     ped_disk = ped_disk_new (dev);
@@ -315,7 +343,7 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
         ped_device_destroy (dev);
-        return FALSE;
+        return NULL;
     }
 
     part_num_str = part + (strlen (part) - 1);
@@ -330,7 +358,7 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
                      "Invalid partition path given: '%s'. Cannot extract partition number", part);
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
-        return FALSE;
+        return NULL;
     }
 
     ped_part = ped_disk_get_partition (ped_disk, part_num);
@@ -339,12 +367,168 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
         g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
-        return FALSE;
+        return NULL;
     }
 
     ret = get_part_spec (dev, ped_disk, ped_part, error);
 
     /* the partition gets destroyed together with the disk */
+    ped_disk_destroy (ped_disk);
+    ped_device_destroy (dev);
+
+    return ret;
+}
+
+/**
+ * bd_part_get_part_by_pos:
+ * @disk: disk to remove the partition from
+ * @position: position (in bytes) determining the partition
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): spec of the partition from @disk spanning over the @position or %NULL if no such
+ *          partition exists or in case of error (@error is set)
+ */
+BDPartSpec* bd_part_get_part_by_pos (const gchar *disk, guint64 position, GError **error) {
+    PedDevice *dev = NULL;
+    PedDisk *ped_disk = NULL;
+    PedPartition *ped_part = NULL;
+    BDPartSpec *ret = NULL;
+    PedSector sector = 0;
+
+    dev = ped_device_get (disk);
+    if (!dev) {
+        set_parted_error (error, BD_PART_ERROR_INVAL);
+        g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+        return NULL;
+    }
+
+    ped_disk = ped_disk_new (dev);
+    if (!ped_disk) {
+        set_parted_error (error, BD_PART_ERROR_FAIL);
+        g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
+        ped_device_destroy (dev);
+        return NULL;
+    }
+
+    sector = (PedSector) (position / dev->sector_size);
+    ped_part = ped_disk_get_partition_by_sector (ped_disk, sector);
+    if (!ped_part) {
+        if (set_parted_error (error, BD_PART_ERROR_FAIL))
+            g_prefix_error (error, "Failed to get partition at position %"G_GUINT64_FORMAT" (device '%s')",
+                            position, disk);
+        else
+            /* no such partition, but no error */
+            g_clear_error (error);
+        ped_disk_destroy (ped_disk);
+        ped_device_destroy (dev);
+        return NULL;
+    }
+
+    ret = get_part_spec (dev, ped_disk, ped_part, error);
+
+    /* the partition gets destroyed together with the disk */
+    ped_disk_destroy (ped_disk);
+    ped_device_destroy (dev);
+
+    return ret;
+}
+
+/**
+ * bd_part_get_disk_spec:
+ * @disk: disk to get information about
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): information about the given @disk or %NULL (in case of error)
+ */
+BDPartDiskSpec* bd_part_get_disk_spec (const gchar *disk, GError **error) {
+    PedDevice *dev = NULL;
+    BDPartDiskSpec *ret = NULL;
+    PedConstraint *constr = NULL;
+    PedDisk *ped_disk = NULL;
+    BDPartTableType type = BD_PART_TABLE_UNDEF;
+    gboolean found = FALSE;
+
+    dev = ped_device_get (disk);
+    if (!dev) {
+        set_parted_error (error, BD_PART_ERROR_INVAL);
+        g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+        return NULL;
+    }
+
+    ret = g_new0 (BDPartDiskSpec, 1);
+    ret->path = g_strdup (dev->path);
+    ret->sector_size = (guint64) dev->sector_size;
+    constr = ped_device_get_constraint (dev);
+    ret->size = (constr->max_size - 1) * dev->sector_size;
+    ped_constraint_destroy (constr);
+
+    ped_disk = ped_disk_new (dev);
+    if (ped_disk) {
+        for (type=BD_PART_TABLE_MSDOS; !found && type < BD_PART_TABLE_UNDEF; type++) {
+            if (g_strcmp0 (ped_disk->type->name, table_type_str[type]) == 0) {
+                ret->table_type = type;
+                found = TRUE;
+            }
+        }
+        if (!found)
+            ret->table_type = BD_PART_TABLE_UNDEF;
+        if (ped_disk_is_flag_available (ped_disk, PED_DISK_GPT_PMBR_BOOT) &&
+            ped_disk_get_flag (ped_disk, PED_DISK_GPT_PMBR_BOOT))
+            ret->flags = BD_PART_DISK_FLAG_GPT_PMBR_BOOT;
+        ped_disk_destroy (ped_disk);
+    } else {
+        ret->table_type = BD_PART_TABLE_UNDEF;
+        ret->flags = 0;
+    }
+
+    ped_device_destroy (dev);
+
+    return ret;
+}
+
+static BDPartSpec** get_disk_parts (const gchar *disk, guint64 incl, guint64 excl, gboolean incl_normal, GError **error) {
+    PedDevice *dev = NULL;
+    PedDisk *ped_disk = NULL;
+    PedPartition *ped_part = NULL;
+    guint num_parts = 0;
+    BDPartSpec **ret = NULL;
+    guint i = 0;
+
+    dev = ped_device_get (disk);
+    if (!dev) {
+        set_parted_error (error, BD_PART_ERROR_INVAL);
+        g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+        return NULL;
+    }
+
+    ped_disk = ped_disk_new (dev);
+    if (!ped_disk) {
+        set_parted_error (error, BD_PART_ERROR_FAIL);
+        g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
+        ped_device_destroy (dev);
+        return NULL;
+    }
+
+    /* count the partitions we care about */
+    ped_part = ped_disk_next_partition (ped_disk, NULL);
+    while (ped_part) {
+        if (((ped_part->type & incl) && !(ped_part->type & excl)) ||
+            ((ped_part->type == 0) && incl_normal))
+            num_parts++;
+        ped_part = ped_disk_next_partition (ped_disk, ped_part);
+    }
+
+    ret = g_new0 (BDPartSpec*, num_parts + 1);
+    i = 0;
+    ped_part = ped_disk_next_partition (ped_disk, NULL);
+    while (ped_part) {
+        if (((ped_part->type & incl) && !(ped_part->type & excl)) ||
+            ((ped_part->type == 0) && incl_normal))
+            ret[i++] = get_part_spec (dev, ped_disk, ped_part, error);
+        ped_part = ped_disk_next_partition (ped_disk, ped_part);
+    }
+    ret[i] = NULL;
+
     ped_disk_destroy (ped_disk);
     ped_device_destroy (dev);
 
@@ -359,50 +543,90 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
  * Returns: (transfer full) (array zero-terminated=1): specs of the partitions from @disk or %NULL in case of error
  */
 BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error) {
-    PedDevice *dev = NULL;
-    PedDisk *ped_disk = NULL;
-    PedPartition *ped_part = NULL;
-    guint num_parts = 0;
-    BDPartSpec **ret = NULL;
-    guint i = 0;
+    return get_disk_parts (disk, BD_PART_TYPE_NORMAL|BD_PART_TYPE_LOGICAL|BD_PART_TYPE_EXTENDED,
+                           BD_PART_TYPE_FREESPACE|BD_PART_TYPE_METADATA|BD_PART_TYPE_PROTECTED, TRUE, error);
+}
 
-    dev = ped_device_get (disk);
-    if (!dev) {
-        set_parted_error (error, BD_PART_ERROR_INVAL);
-        g_prefix_error (error, "Device '%s' invalid or not existing", disk);
-        return FALSE;
+/**
+ * bd_part_get_disk_free_regions:
+ * @disk: disk to get free regions for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full) (array zero-terminated=1): specs of the free regions from @disk or %NULL in case of error
+ */
+BDPartSpec** bd_part_get_disk_free_regions (const gchar *disk, GError **error) {
+    return get_disk_parts (disk, BD_PART_TYPE_FREESPACE, 0, FALSE, error);
+}
+
+/**
+ * bd_part_get_best_free_region:
+ * @disk: disk to get the best free region for
+ * @type: type of the partition that is planned to be added
+ * @size: size of the partition to be added
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): spec of the best free region on @disk for a new partition of type @type
+ *                           with the size of @size or %NULL if there is none such region or if
+ *                           there was an error (@error gets populated)
+ *
+ * Note: For the @type %BD_PART_TYPE_NORMAL, the smallest possible space that *is not* in an extended partition
+ *       is found. For the @type %BD_PART_TYPE_LOGICAL, the smallest possible space that *is* in an extended
+ *       partition is found. For %BD_PART_TYPE_EXTENDED, the biggest possible space is found as long as there
+ *       is no other extended partition (there can only be one).
+ */
+BDPartSpec* bd_part_get_best_free_region (const gchar *disk, BDPartType type, guint64 size, GError **error) {
+    BDPartSpec **free_regs = NULL;
+    BDPartSpec **free_reg_p = NULL;
+    BDPartSpec *ret = NULL;
+
+    free_regs = bd_part_get_disk_free_regions (disk, error);
+    if (!free_regs)
+        /* error should be populated */
+        return NULL;
+    if (!(*free_regs))
+        /* no free regions */
+        return NULL;
+
+    if (type == BD_PART_TYPE_NORMAL) {
+        for (free_reg_p=free_regs; *free_reg_p; free_reg_p++) {
+            /* check if it has enough space and is not inside an extended partition */
+            if ((*free_reg_p)->size > size && !((*free_reg_p)->type & BD_PART_TYPE_LOGICAL))
+                /* if it is the first that would fit or if it is smaller than
+                   what we found earlier, it is a better match */
+                if (!ret || ((*free_reg_p)->size < ret->size))
+                    ret = *free_reg_p;
+        }
+    } else if (type == BD_PART_TYPE_EXTENDED) {
+        for (free_reg_p=free_regs; *free_reg_p; free_reg_p++) {
+            /* if there already is an extended partition, there cannot be another one */
+            if ((*free_reg_p)->type & BD_PART_TYPE_LOGICAL) {
+                for (free_reg_p=free_regs; *free_reg_p; free_reg_p++)
+                    bd_part_spec_free (*free_reg_p);
+                g_free (free_regs);
+                return NULL;
+            }
+            /* check if it has enough space */
+            if ((*free_reg_p)->size > size)
+                /* if it is the first that would fit or if it is bigger than
+                   what we found earlier, it is a better match */
+                if (!ret || ((*free_reg_p)->size > ret->size))
+                    ret = *free_reg_p;
+        }
+    } else if (type == BD_PART_TYPE_LOGICAL) {
+        for (free_reg_p=free_regs; *free_reg_p; free_reg_p++) {
+            /* check if it has enough space and is inside an extended partition */
+            if ((*free_reg_p)->size > size && ((*free_reg_p)->type & BD_PART_TYPE_LOGICAL))
+                /* if it is the first that would fit or if it is smaller than
+                   what we found earlier, it is a better match */
+                if (!ret || ((*free_reg_p)->size < ret->size))
+                    ret = *free_reg_p;
+        }
     }
 
-    ped_disk = ped_disk_new (dev);
-    if (!ped_disk) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
-        ped_device_destroy (dev);
-        return FALSE;
-    }
-
-    /* count the partitions we care about (ignoring FREESPACE, METADATA and PROTECTED */
-    ped_part = ped_disk_next_partition (ped_disk, NULL);
-    while (ped_part) {
-        if (ped_part->type <= PED_PARTITION_EXTENDED)
-            num_parts++;
-        ped_part = ped_disk_next_partition (ped_disk, ped_part);
-    }
-
-    ret = g_new0 (BDPartSpec*, num_parts + 1);
-    i = 0;
-    ped_part = ped_disk_next_partition (ped_disk, NULL);
-    while (ped_part) {
-        /* only include partitions we care about */
-        if (ped_part->type <= PED_PARTITION_EXTENDED)
-            ret[i++] = get_part_spec (dev, ped_disk, ped_part, error);
-        ped_part = ped_disk_next_partition (ped_disk, ped_part);
-    }
-    ret[i] = NULL;
-
-    ped_disk_destroy (ped_disk);
-    ped_device_destroy (dev);
-
+    /* free all the other specs and return the best one */
+    for (free_reg_p=free_regs; *free_reg_p; free_reg_p++)
+        if (*free_reg_p != ret)
+            bd_part_spec_free (*free_reg_p);
     return ret;
 }
 
@@ -780,7 +1004,7 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
         status = ped_partition_set_flag (ped_part, ped_flag, (int) state);
         if (status == 0) {
             set_parted_error (error, BD_PART_ERROR_FAIL);
-            g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
+            g_prefix_error (error, "Failed to set flag on partition '%d' on device '%s'", part_num, disk);
             ped_disk_destroy (ped_disk);
             ped_device_destroy (dev);
             return FALSE;
@@ -793,6 +1017,60 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
         else
             g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                          "Cannot set a GPT flag on a non-GPT disk");
+    }
+
+    ped_disk_destroy (ped_disk);
+    ped_device_destroy (dev);
+
+    return ret;
+}
+
+/**
+ * bd_part_set_disk_flag:
+ * @disk: disk the partition belongs to
+ * @flag: flag to set
+ * @state: state to set for the @flag (%TRUE = enabled)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the flag @flag was successfully set on the @disk or not
+ */
+gboolean bd_part_set_disk_flag (const gchar *disk, BDPartDiskFlag flag, gboolean state, GError **error) {
+    PedDevice *dev = NULL;
+    PedDisk *ped_disk = NULL;
+    gint status = 0;
+    gboolean ret = FALSE;
+
+    dev = ped_device_get (disk);
+    if (!dev) {
+        set_parted_error (error, BD_PART_ERROR_INVAL);
+        g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+        return FALSE;
+    }
+
+    ped_disk = ped_disk_new (dev);
+    if (!ped_disk) {
+        set_parted_error (error, BD_PART_ERROR_FAIL);
+        g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
+        ped_device_destroy (dev);
+        return FALSE;
+    }
+
+    /* right now we only support this one flag */
+    if (flag == BD_PART_DISK_FLAG_GPT_PMBR_BOOT) {
+        status = ped_disk_set_flag (ped_disk, PED_DISK_GPT_PMBR_BOOT, (int) state);
+        if (status == 0) {
+            set_parted_error (error, BD_PART_ERROR_FAIL);
+            g_prefix_error (error, "Failed to set flag on disk '%s'", disk);
+            ped_disk_destroy (ped_disk);
+            ped_device_destroy (dev);
+            return FALSE;
+        }
+
+        ret = disk_commit (ped_disk, disk, error);
+    } else {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Invalid or unsupported flag given: %d", flag);
+        ret = FALSE;
     }
 
     ped_disk_destroy (ped_disk);

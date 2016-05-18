@@ -19,6 +19,10 @@ typedef enum {
 } BDPartTableType;
 
 typedef enum {
+    BD_PART_DISK_FLAG_GPT_PMBR_BOOT = 1
+} BDPartDiskFlag;
+
+typedef enum {
     BD_PART_FLAG_BOOT = 1 << 1,
     BD_PART_FLAG_ROOT = 1 << 2,
     BD_PART_FLAG_SWAP = 1 << 3,
@@ -72,7 +76,7 @@ typedef struct BDPartSpec {
     gchar *path;
     gchar *name;
     gchar *type_guid;
-    BDPartType type;
+    guint64 type;
     guint64 start;
     guint64 size;
     guint64 flags;
@@ -110,6 +114,47 @@ GType bd_part_spec_get_type () {
     return type;
 }
 
+#define BD_PART_TYPE_DISK_SPEC (bd_part_disk_spec_get_type ())
+GType bd_part_disk_spec_get_type();
+
+typedef struct BDPartDiskSpec {
+    gchar *path;
+    BDPartTableType table_type;
+    guint64 size;
+    guint64 sector_size;
+    guint64 flags;
+} BDPartDiskSpec;
+
+BDPartDiskSpec* bd_part_disk_spec_copy (BDPartDiskSpec *data) {
+    BDPartDiskSpec *ret = g_new0 (BDPartDiskSpec, 1);
+
+    ret->path = g_strdup (data->path);
+    ret->table_type = data->table_type;
+    ret->size = data->size;
+    ret->sector_size = data->sector_size;
+    ret->flags = data->flags;
+
+    return ret;
+}
+
+void bd_part_disk_spec_free (BDPartDiskSpec *data) {
+    g_free (data->path);
+    g_free (data);
+}
+
+GType bd_part_disk_spec_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDPartDiskSpec",
+                                            (GBoxedCopyFunc) bd_part_disk_spec_copy,
+                                            (GBoxedFreeFunc) bd_part_disk_spec_free);
+    }
+
+    return type;
+}
+
+
 /**
  * bd_part_create_table:
  * @disk: path of the disk block device to create partition table on
@@ -125,12 +170,32 @@ gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean
 /**
  * bd_part_get_part_spec:
  * @disk: disk to remove the partition from
- * @part: partition to remove
+ * @part: partition to get spec for
  * @error: (out): place to store error (if any)
  *
- * Returns: spec of the @part partition from @disk or %NULL in case of error
+ * Returns: (transfer full): spec of the @part partition from @disk or %NULL in case of error
  */
 BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError **error);
+
+/**
+ * bd_part_get_part_by_pos:
+ * @disk: disk to remove the partition from
+ * @position: position (in bytes) determining the partition
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): spec of the partition from @disk spanning over the @position or %NULL if no such
+ *          partition exists or in case of error (@error is set)
+ */
+BDPartSpec* bd_part_get_part_by_pos (const gchar *disk, guint64 position, GError **error);
+
+/**
+ * bd_part_get_disk_spec:
+ * @disk: disk to get information about
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): information about the given @disk or %NULL (in case of error)
+ */
+BDPartDiskSpec* bd_part_get_disk_spec (const gchar *disk, GError **error);
 
 /**
  * bd_part_get_disk_parts:
@@ -140,6 +205,33 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
  * Returns: (transfer full) (array zero-terminated=1): specs of the partitions from @disk or %NULL in case of error
  */
 BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error);
+
+/**
+ * bd_part_get_disk_free_regions:
+ * @disk: disk to get free regions for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full) (array zero-terminated=1): specs of the free regions from @disk or %NULL in case of error
+ */
+BDPartSpec** bd_part_get_disk_free_regions (const gchar *disk, GError **error);
+
+/**
+ * bd_part_get_best_free_region:
+ * @disk: disk to get the best free region for
+ * @type: type of the partition that is planned to be added
+ * @size: size of the partition to be added
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): spec of the best free region on @disk for a new partition of type @type
+ *                           with the size of @size or %NULL if there is none such region or if
+ *                           there was an error (@error gets populated)
+ *
+ * Note: For the @type %BD_PART_TYPE_NORMAL, the smallest possible space that *is not* in an extended partition
+ *       is found. For the @type %BD_PART_TYPE_LOGICAL, the smallest possible space that *is* in an extended
+ *       partition is found. For %BD_PART_TYPE_EXTENDED, the biggest possible space is found as long as there
+ *       is no other extended partition (there can only be one).
+ */
+BDPartSpec* bd_part_get_best_free_region (const gchar *disk, BDPartType type, guint64 size, GError **error);
 
 /**
  * bd_part_create_part:
@@ -181,6 +273,17 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
  * or not.
  */
 gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag flag, gboolean state, GError **error);
+
+/**
+ * bd_part_set_disk_flag:
+ * @disk: disk the partition belongs to
+ * @flag: flag to set
+ * @state: state to set for the @flag (%TRUE = enabled)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the flag @flag was successfully set on the @disk or not
+ */
+gboolean bd_part_set_disk_flag (const gchar *disk, BDPartDiskFlag flag, gboolean state, GError **error);
 
 /**
  * bd_part_set_part_flags:
