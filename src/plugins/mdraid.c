@@ -179,6 +179,7 @@ static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean
     BDMDExamineData *data = g_new0 (BDMDExamineData, 1);
     gchar *value = NULL;
     gchar *first_space = NULL;
+    BSSize size = NULL;
     BSError *bs_error = NULL;
     struct tm tm;
     char time_str[20];
@@ -232,7 +233,7 @@ static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean
 
     value = (gchar*) g_hash_table_lookup (table, "Chunk Size");
     if (value) {
-        BSSize size = bs_size_new_from_str (value, &bs_error);
+        size = bs_size_new_from_str (value, &bs_error);
         if (size)
             data->chunk_size = bs_size_get_bytes (size, NULL, &bs_error);
 
