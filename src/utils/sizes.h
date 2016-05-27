@@ -17,12 +17,4 @@
 #define PiB PEBIBYTE
 #define EiB EXBIBYTE
 
-#define BD_UTILS_SIZE_ERROR bd_utils_size_error_quark ()
-typedef enum {
-    BD_UTILS_SIZE_ERROR_INVALID_SPEC,
-} BDUtilsSizeError;
-
-gchar* bd_utils_size_human_readable (guint64 size);
-guint64 bd_utils_size_from_spec (const gchar *spec, GError **error);
-
 #endif /* BD_UTILS_SIZES */
