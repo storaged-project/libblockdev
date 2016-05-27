@@ -5,8 +5,8 @@ if ON_S390
 lib_LTLIBRARIES += libbd_s390.la
 endif
 
-libbd_btrfs_la_CFLAGS = $(GLIB_CFLAGS) -Wall -Wextra -Werror
-libbd_btrfs_la_LIBADD = $(GLIB_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_btrfs_la_CFLAGS = $(GLIB_CFLAGS) $(BYTESIZE_CFLAGS) -Wall -Wextra -Werror
+libbd_btrfs_la_LIBADD = $(GLIB_LIBS) $(BYTESIZE_LIBS) ${builddir}/../utils/libbd_utils.la
 libbd_btrfs_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 0:1:0
 libbd_btrfs_la_CPPFLAGS = -I${srcdir}/../utils/
 libbd_btrfs_la_SOURCES = btrfs.c btrfs.h

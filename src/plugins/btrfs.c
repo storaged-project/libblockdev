@@ -21,6 +21,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <utils.h>
+#include <bs_size.h>
 
 #include "btrfs.h"
 
@@ -106,7 +107,8 @@ gboolean check() {
 static BDBtrfsDeviceInfo* get_device_info_from_match (GMatchInfo *match_info) {
     BDBtrfsDeviceInfo *ret = g_new(BDBtrfsDeviceInfo, 1);
     gchar *item = NULL;
-    GError *error = NULL;
+    BSSize size = NULL;
+    BSError *error = NULL;
 
     item = g_match_info_fetch_named (match_info, "id");
     ret->id = g_ascii_strtoull (item, NULL, 0);
@@ -115,18 +117,26 @@ static BDBtrfsDeviceInfo* get_device_info_from_match (GMatchInfo *match_info) {
     ret->path = g_match_info_fetch_named (match_info, "path");
 
     item = g_match_info_fetch_named (match_info, "size");
-    ret->size = bd_utils_size_from_spec (item, &error);
-    g_free (item);
-    if (error)
-        g_warning ("%s", error->message);
-    g_clear_error (&error);
+    if (item) {
+        size = bs_size_new_from_str (item, &error);
+        if (size)
+            ret->size = bs_size_get_bytes (size, NULL, &error);
+        if (error)
+            g_warning ("%s", error->msg);
+        bs_clear_error (&error);
+        g_free (item);
+    }
 
     item = g_match_info_fetch_named (match_info, "used");
-    ret->used = bd_utils_size_from_spec (item, &error);
-    g_free (item);
-    if (error)
-        g_warning ("%s", error->message);
-    g_clear_error (&error);
+    if (item) {
+        size = bs_size_new_from_str (item, &error);
+        if (size)
+            ret->used = bs_size_get_bytes (size, NULL, &error);
+        if (error)
+            g_warning ("%s", error->msg);
+        bs_clear_error (&error);
+        g_free (item);
+    }
 
     return ret;
 }
@@ -151,7 +161,8 @@ static BDBtrfsSubvolumeInfo* get_subvolume_info_from_match (GMatchInfo *match_in
 static BDBtrfsFilesystemInfo* get_filesystem_info_from_match (GMatchInfo *match_info) {
     BDBtrfsFilesystemInfo *ret = g_new(BDBtrfsFilesystemInfo, 1);
     gchar *item = NULL;
-    GError *error = NULL;
+    BSSize size = NULL;
+    BSError *error = NULL;
 
     ret->label = g_match_info_fetch_named (match_info, "label");
     ret->uuid = g_match_info_fetch_named (match_info, "uuid");
@@ -161,11 +172,15 @@ static BDBtrfsFilesystemInfo* get_filesystem_info_from_match (GMatchInfo *match_
     g_free (item);
 
     item = g_match_info_fetch_named (match_info, "used");
-    ret->used = bd_utils_size_from_spec (item, &error);
-    g_free (item);
-    if (error)
-        g_warning ("%s", error->message);
-    g_clear_error (&error);
+    if (item) {
+        size = bs_size_new_from_str (item, &error);
+        if (size)
+            ret->used = bs_size_get_bytes (size, NULL, &error);
+        if (error)
+            g_warning ("%s", error->msg);
+        bs_clear_error (&error);
+        g_free (item);
+    }
 
     return ret;
 }
