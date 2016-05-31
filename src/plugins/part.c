@@ -33,7 +33,18 @@
  * @title: Part
  * @include: part.h
  *
- * A plugin for operations with partition tables.
+ * A plugin for operations with partition tables. Currently supported table
+ * (disk label) types are MBR and GPT. See the functions below to get an
+ * overview of which operations are supported. If there's anything missing,
+ * please don't hesitate to report it as this plugin (just like all the others)
+ * is subject to future development and enhancements.
+ *
+ * This particular implementation of the part plugin uses libparted for
+ * manipulations of both the MBR and GPT disk label types together with the
+ * sgdisk utility for some extra GPT-specific features libparted doesn't
+ * support. In the future, there's likely to be another implementation of this
+ * plugin based on libfdisk which provides full support for both MBR and GPT
+ * tables (and possibly some others).
  */
 
 /**
