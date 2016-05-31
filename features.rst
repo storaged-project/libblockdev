@@ -16,17 +16,19 @@ partitions
    MBR, GPT, partition manipulation on partitionable devices
 
 :functions:
-   * mklabel
-   * create_part
+   * mklabel [DONE]
+   * create_part [DONE]
    * resize_part
-   * remove_part
+   * remove_part [DONE]
 
 
 filesystems
 ------------
 
 :supported technologies:
-   ext2, ext3, ext4, xfs, vfat
+   * DONE: ext4, xfs
+   * IN PROGRESS: vfat
+   * TODO?  ext2, ext3
 
 :functions:
    * make_FSTYPE
@@ -36,7 +38,8 @@ filesystems
    * change_label_FSTYPE
    * snapshot_FSTYPE
 
-   * wipefs
+   * wipefs [DONE]
+   * generic_resize
 
 
 LVM
@@ -47,7 +50,6 @@ LVM
 
 :TODO:
    * read-only locking and default config
-   * LVM cache
 
 :functions:
    * get_global_config [DONE]
@@ -185,7 +187,7 @@ CRYPTO/LUKS
    * luks_remove_key [DONE]
    * luks_change_key [DONE]
    * luks_resize [DONE]
-   * escrow_device [NEEDS_TESTS]
+   * escrow_device [DONE]
 
 
 MULTIPATH
