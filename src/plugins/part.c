@@ -212,8 +212,8 @@ gboolean bd_part_create_table (gchar *disk, BDPartTableType type, gboolean ignor
     return ret;
 }
 
-static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_num, guint64 *flags, GError **error) {
-    const gchar *args[4] = {"sgdisk", NULL, device, NULL};
+static gchar* get_part_type_guid_and_gpt_flags (gchar *device, int part_num, guint64 *flags, GError **error) {
+    gchar *args[4] = {"sgdisk", NULL, device, NULL};
     gchar *output = NULL;
     gchar **lines = NULL;
     gchar **line_p = NULL;
@@ -227,7 +227,7 @@ static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_nu
     gchar *ret = NULL;
 
     args[1] = g_strdup_printf ("-i%d", part_num);
-    success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
+    success = bd_utils_exec_and_capture_output (args, &output, error);
     if (!success) {
         g_free ((gchar *) args[1]);
         return FALSE;
@@ -487,7 +487,7 @@ BDPartDiskSpec* bd_part_get_disk_spec (gchar *disk, GError **error) {
 }
 
 
-static BDPartSpec** get_disk_parts (const gchar *disk, guint64 incl, guint64 excl, gboolean incl_normal, GError **error) {
+static BDPartSpec** get_disk_parts (gchar *disk, guint64 incl, guint64 excl, gboolean incl_normal, GError **error) {
     PedDevice *dev = NULL;
     PedDisk *ped_disk = NULL;
     PedPartition *ped_part = NULL;
@@ -886,8 +886,8 @@ gboolean bd_part_delete_part (gchar *disk, gchar *part, GError **error) {
     return ret;
 }
 
-static gboolean set_gpt_flag (const gchar *device, int part_num, BDPartFlag flag, gboolean state, GError **error) {
-    const gchar *args[5] = {"sgdisk", "--attributes", NULL, device, NULL};
+static gboolean set_gpt_flag (gchar *device, int part_num, BDPartFlag flag, gboolean state, GError **error) {
+    gchar *args[5] = {"sgdisk", "--attributes", NULL, device, NULL};
     int bit_num = 0;
     gboolean success = FALSE;
 
@@ -902,13 +902,13 @@ static gboolean set_gpt_flag (const gchar *device, int part_num, BDPartFlag flag
 
     args[2] = g_strdup_printf ("%d:%s:%d", part_num, state ? "set" : "clear", bit_num);
 
-    success = bd_utils_exec_and_report_error (args, NULL, error);
+    success = bd_utils_exec_and_report_error (args, error);
     g_free ((gchar *) args[2]);
     return success;
 }
 
-static gboolean set_gpt_flags (const gchar *device, int part_num, guint64 flags, GError **error) {
-    const gchar *args[5] = {"sgdisk", "--attributes", NULL, device, NULL};
+static gboolean set_gpt_flags (gchar *device, int part_num, guint64 flags, GError **error) {
+    gchar *args[5] = {"sgdisk", "--attributes", NULL, device, NULL};
     guint64 real_flags = 0;
     gchar *mask_str = NULL;
     gboolean success = FALSE;
@@ -926,7 +926,7 @@ static gboolean set_gpt_flags (const gchar *device, int part_num, guint64 flags,
     args[2] = g_strdup_printf ("%d:=:%s", part_num, mask_str);
     g_free (mask_str);
 
-    success = bd_utils_exec_and_report_error (args, NULL, error);
+    success = bd_utils_exec_and_report_error (args, error);
     g_free ((gchar *) args[2]);
     return success;
 }
@@ -1300,7 +1300,7 @@ gboolean bd_part_set_part_type (gchar *disk, gchar *part, gchar *type_guid, GErr
 
     args[2] = g_strdup_printf ("%s:%s", part_num_str, type_guid);
 
-    success = bd_utils_exec_and_report_error (args, NULL, error);
+    success = bd_utils_exec_and_report_error (args, error);
     g_free ((gchar*) args[2]);
 
     return success;
