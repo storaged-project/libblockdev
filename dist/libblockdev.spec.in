@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     1.5
+Version:     1.6
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -572,6 +572,50 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Jun 01 2016 Vratislav Podzimek <vpodzime@redhat.com> - 1.6-1
+- Ignore merge commits when creating changelog (vpodzime)
+- Only take the number of the first %changelog line found (vpodzime)
+- Add some more detailed description to the part plugin (vpodzime)
+- Fix a few extra issues with the const types (vpodzime)
+- Add function for getting best free region (vpodzime)
+- Add function for getting free regions (vpodzime)
+- Fix the error message when setting part flag fails (vpodzime)
+- Add function for setting disk flags (vpodzime)
+- Add function for getting information about disk(s) (vpodzime)
+- Do not set nonsense partition paths (vpodzime)
+- Add function for getting partition by position (vpodzime)
+- Indicate if there was error from parted or not in set_parted_error() (vpodzime)
+- Minor fixes for the bd_part_get_part_spec() function (vpodzime)
+- Add support for extra GPT flags (vpodzime)
+- Add functionality for partition types (GUIDs) (vpodzime)
+- Add functionality for partition names (vpodzime)
+- Do not destroy disk objects we didn't get (vpodzime)
+- Add a function for setting multiple partition flags at once (vpodzime)
+- Remove the unused definition USE_PYTHON3 from configure.ac (vpodzime)
+- Use different BTRFS_MIN_MEMBER_SIZE on aarch64 (vpodzime)
+- Better release memory from parted objects on failures (vpodzime)
+- Rework how we do optimal alignment (vpodzime)
+- Do not try to destroy object we didn't get (vpodzime)
+- Don't pass sizes in bytes to LVM (#1317373) (vpodzime)
+- Add the libbytesize-devel build requires (vpodzime)
+- Search for the LVM DBus service in both active and activatable names (vpodzime)
+- Adapt to another stupid change in btrfs-progs (vpodzime)
+- Add the XFS-related functions to the documentation (vpodzime)
+- Add tests for the XFS-related functions (vpodzime)
+- Add support for the XFS file system to the FS plugin (vpodzime)
+- Add chunk_size to BDMDExamineData (vtrefny)
+- Add the subpackage for the FS plugin (vpodzime)
+- Add the FS plugin to the docs (vpodzime)
+- Add tests for the ext4 functionality in the fs plugin (vpodzime)
+- Add the FS plugin and the ext4 support (vpodzime)
+- Add a function for running utility reporting error and exit code (vpodzime)
+- Add the subpackage for the part plugin (vpodzime)
+- Add a missing BuildRequires for parted-devel (vpodzime)
+- Tag as both libblockdev-$version and just $version (vpodzime)
+- Add the 'part' plugin to documentation (vpodzime)
+- Add tests for the newly added part plugin (vpodzime)
+- Add the part plugin with storaged-required functionality (vpodzime)
+
 * Mon Mar 21 2016 Vratislav Podzimek <vpodzime@redhat.com> - 1.5-1
 - Merge pull request #72 from vpodzime/master-faster_tests (vpodzime)
 - Ignore all .bak files (vpodzime)
