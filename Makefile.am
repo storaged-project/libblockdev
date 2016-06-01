@@ -82,7 +82,7 @@ tag:
 	echo "Tagged as $$TAG"
 
 rpmlog:
-	@cl=`grep -n %changelog dist/libblockdev.spec.in |cut -d : -f 1` ; \
+	@cl=`grep -n %changelog dist/libblockdev.spec.in |cut -d : -f 1 |head -1` ; \
 	version_release=`tail --lines=+$$(($$cl + 1)) dist/libblockdev.spec.in|head -1|cut -d- -f2-3|sed 's/ //g'` ; \
 	git log --pretty="format:- %s (%ae)" "$(PACKAGE_NAME)-$$version_release.." |sed -e 's/@.*)/)/' ; \
 	echo
@@ -92,7 +92,7 @@ bumpver:
 	SUBVERSION=`echo $(PACKAGE_VERSION)|sed -r 's/.*\.([0-9]+)/\1/'` ; \
 	NEWSUBVERSION=$$(($$SUBVERSION + 1)) ; \
 	DATELINE="* `date "+%a %b %d %Y"` `git config user.name` <`git config user.email`> - $$VERSION.$$NEWSUBVERSION-1"  ; \
-	cl=`grep -n %changelog dist/libblockdev.spec.in |cut -d : -f 1` ; \
+	cl=`grep -n %changelog dist/libblockdev.spec.in |cut -d : -f 1 |head -1` ; \
 	tail --lines=+$$(($$cl + 1)) dist/libblockdev.spec.in > speclog ; \
 	(head -n $$cl dist/libblockdev.spec ; echo "$$DATELINE" ; make --quiet rpmlog 2>/dev/null ; echo ""; cat speclog) > dist/libblockdev.spec.in.new ; \
 	mv dist/libblockdev.spec.in.new dist/libblockdev.spec.in ; rm -f speclog ; \
