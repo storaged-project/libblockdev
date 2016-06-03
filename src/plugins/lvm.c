@@ -139,18 +139,6 @@ void bd_lvm_cache_stats_free (BDLVMCacheStats *data) {
     g_free (data);
 }
 
-static gchar const * const supported_functions[] = {
-    "bd_lvm_is_supported_pe_size",
-    "bd_lvm_get_max_lv_size",
-    "bd_lvm_round_size_to_pe",
-    "bd_lvm_get_lv_physical_size",
-    "bd_lvm_get_thpool_padding",
-    NULL};
-
-gchar const * const * get_supported_functions () {
-    return supported_functions;
-}
-
 /**
  * check: (skip)
  */
