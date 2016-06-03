@@ -138,6 +138,10 @@ BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
     new_data->size = data->size;
     new_data->attr = g_strdup (data->attr);
     new_data->segtype = g_strdup (data->segtype);
+    new_data->origin = g_strdup (data->origin);
+    new_data->pool_lv = g_strdup (data->pool_lv);
+    new_data->data_lv = g_strdup (data->data_lv);
+    new_data->metadata_lv = g_strdup (data->metadata_lv);
     return new_data;
 }
 
@@ -147,6 +151,10 @@ void bd_lvm_lvdata_free (BDLVMLVdata *data) {
     g_free (data->uuid);
     g_free (data->attr);
     g_free (data->segtype);
+    g_free (data->origin);
+    g_free (data->pool_lv);
+    g_free (data->data_lv);
+    g_free (data->metadata_lv);
     g_free (data);
 }
 
@@ -775,12 +783,12 @@ static gchar get_lv_attr_bool (GVariantDict *props, gchar *prop, gchar letter) {
         return '-';
 }
 
-static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error __attribute__((unused))) {
+static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error) {
     BDLVMLVdata *data = g_new0 (BDLVMLVdata, 1);
     GVariantDict dict;
     GVariant *value = NULL;
-    gchar *vg_path = NULL;
-    GVariant *vg_name = NULL;
+    gchar *path = NULL;
+    GVariant *name = NULL;
 
     g_variant_dict_init (&dict, props);
 
@@ -814,13 +822,29 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error __at
     }
 
     /* returns an object path for the VG */
-    g_variant_dict_lookup (&dict, "Vg", "o", &vg_path);
+    g_variant_dict_lookup (&dict, "Vg", "o", &path);
+    name = get_object_property (path, VG_INTF, "Name", error);
+    g_free (path);
+    g_variant_get (name, "s", &(data->vg_name));
+    g_variant_unref (name);
 
-    vg_name = get_object_property (vg_path, VG_INTF, "Name", error);
-    g_variant_get (vg_name, "s", &(data->vg_name));
+    g_variant_dict_lookup (&dict, "OriginLv", "o", &path);
+    if (g_strcmp0 (path, "/") != 0) {
+        name = get_object_property (path, LV_CMN_INTF, "Name", error);
+        g_variant_get (name, "s", &(data->origin));
+        g_variant_unref (name);
+    }
+    g_free (path);
+
+    g_variant_dict_lookup (&dict, "PoolLv", "o", &path);
+    if (g_strcmp0 (path, "/") != 0) {
+        name = get_object_property (path, LV_CMN_INTF, "Name", error);
+        g_variant_get (name, "s", &(data->pool_lv));
+        g_variant_unref (name);
+    }
+    g_free (path);
 
     g_variant_dict_clear (&dict);
-    g_variant_unref (vg_name);
     g_variant_unref (props);
 
     return data;
@@ -1772,13 +1796,21 @@ gboolean bd_lvm_lvsnapshotmerge (gchar *vg_name, gchar *snapshot_name, GError **
  */
 BDLVMLVdata* bd_lvm_lvinfo (gchar *vg_name, gchar *lv_name, GError **error) {
     GVariant *props = NULL;
+    BDLVMLVdata* ret = NULL;
 
     props = get_lv_properties (vg_name, lv_name, error);
     if (!props)
         /* the error is already populated */
         return NULL;
 
-    return get_lv_data_from_props (props, error);
+    ret = get_lv_data_from_props (props, error);
+    if (ret && ((g_strcmp0 (ret->segtype, "thin-pool") == 0) ||
+                (g_strcmp0 (ret->segtype, "cache-pool") == 0))) {
+        ret->data_lv = bd_lvm_data_lv_name (vg_name, lv_name, error);
+        ret->metadata_lv = bd_lvm_metadata_lv_name (vg_name, lv_name, error);
+    }
+
+    return ret;
 }
 
 static gchar* get_lv_vg_name (gchar *lv_obj_path, GError **error) {
@@ -1913,6 +1945,14 @@ BDLVMLVdata** bd_lvm_lvs (gchar *vg_name, GError **error) {
         }
         ret[j] = get_lv_data_from_props (props, error);
         if (!(ret[j])) {
+            g_slist_free (matched_lvs);
+            return NULL;
+        } else if ((g_strcmp0 (ret[j]->segtype, "thin-pool") == 0) ||
+                   (g_strcmp0 (ret[j]->segtype, "cache-pool") == 0)) {
+            ret[j]->data_lv = bd_lvm_data_lv_name (ret[j]->vg_name, ret[j]->lv_name, error);
+            ret[j]->metadata_lv = bd_lvm_metadata_lv_name (ret[j]->vg_name, ret[j]->lv_name, error);
+        }
+        if (error && *error) {
             g_slist_free (matched_lvs);
             return NULL;
         }

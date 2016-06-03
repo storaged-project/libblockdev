@@ -746,7 +746,9 @@ class LvmTestLVsnapshots(LvmPVVGLVTestCase):
         self.assertTrue(succ)
 
         origin_name = BlockDev.lvm_lvorigin("testVG", "testLV_bak")
+        lvi = BlockDev.lvm_lvinfo("testVG", "testLV_bak")
         self.assertEqual(origin_name, "testLV")
+        self.assertEqual(lvi.origin, "testLV")
 
         succ = BlockDev.lvm_lvsnapshotmerge("testVG", "testLV_bak")
         self.assertTrue(succ)
@@ -864,17 +866,21 @@ class LvmTestDataMetadataLV(LvmPVVGthpoolTestCase):
         self.assertTrue(succ)
 
         name = BlockDev.lvm_data_lv_name("testVG", "testPool")
+        lvi = BlockDev.lvm_lvinfo("testVG", "testPool")
         self.assertTrue(name)
         self.assertTrue(name.startswith("testPool"))
         self.assertIn("_tdata", name)
+        self.assertEqual(name, lvi.data_lv)
 
         info = BlockDev.lvm_lvinfo("testVG", name)
         self.assertTrue(info.attr.startswith("T"))
 
         name = BlockDev.lvm_metadata_lv_name("testVG", "testPool")
+        lvi = BlockDev.lvm_lvinfo("testVG", "testPool")
         self.assertTrue(name)
         self.assertTrue(name.startswith("testPool"))
         self.assertIn("_tmeta", name)
+        self.assertEqual(name, lvi.metadata_lv)
 
         info = BlockDev.lvm_lvinfo("testVG", name)
         self.assertTrue(info.attr.startswith("e"))
@@ -911,7 +917,9 @@ class LvmTestThLVcreate(LvmPVVGLVthLVTestCase):
         self.assertIn("V", info.attr)
 
         pool = BlockDev.lvm_thlvpoolname("testVG", "testThLV")
+        lvi = BlockDev.lvm_lvinfo("testVG", "testThLV")
         self.assertEqual(pool, "testPool")
+        self.assertEqual(lvi.pool_lv, "testPool")
 
 class LvmPVVGLVthLVsnapshotTestCase(LvmPVVGLVthLVTestCase):
     def _clean_up(self):
