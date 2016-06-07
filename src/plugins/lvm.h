@@ -106,6 +106,7 @@ typedef struct BDLVMLVdata {
     gchar *pool_lv;
     gchar *data_lv;
     gchar *metadata_lv;
+    gchar *roles;
 } BDLVMLVdata;
 
 void bd_lvm_lvdata_free (BDLVMLVdata *data);
