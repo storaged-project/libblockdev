@@ -245,8 +245,9 @@ s390
    * s390_sanitize_dev_input [DONE]
    * s390_zfcp_sanitize_wwpn_input [DONE]
    * s390_zfcp_sanitize_lun_input [DONE]
-   * s390_zfcp_online
-   * s390_zfcp_offline
+   * s390_zfcp_online [DONE]
+   * s390_zfcp_scsi_offline [DONE]
+   * s390_zfcp_offline [DONE]
 
 
 KBD (Kernel Block Devices)

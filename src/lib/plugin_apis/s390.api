@@ -76,3 +76,44 @@ gchar* bd_s390_zfcp_sanitize_wwpn_input (const gchar *wwpn, GError **error);
  * Returns: (transfer full): a synthesized zFCP LUN
  */
 gchar* bd_s390_zfcp_sanitize_lun_input (const gchar *lun, GError **error);
+
+/**
+ * bd_s390_zfcp_online:
+ * @devno a zFCP device number
+ * @wwpn a zFCP WWPN identifier
+ * @lun a zFCP LUN identifier
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether a zFCP device was successfully switched online
+ */
+gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar *lun, GError **error);
+
+/*
+ * bd_s390_zfcp_scsi_offline:
+ * @devno a zFCP device number
+ * @wwpn a zFCP WWPN identifier
+ * @lun a zFCP LUN identifier
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether a LUN was successfully removed from associated WWPN
+ *
+ * This function looks through /proc/scsi/scsi and manually removes LUNs from
+ * associated WWPNs. zFCP devices are SCSI devices accessible over FCP protocol.
+ * In z/OS the IODF (I/O definition file) contains basic information about the
+ * I/O config, but WWPN and LUN configuration is done at the OS level, hence
+ * this function becomes necessary when switching the device offline. This
+ * particular sequence of actions is for some reason unnecessary when switching
+ * the device online. Chalk it up to s390x being s390x.
+ */
+gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const gchar *lun, GError **error);
+
+/*
+ * bd_s390_zfcp_offline:
+ * @devno: zfcp device number
+ * @wwpn: zfcp WWPN (World Wide Port Number)
+ * @lun: zfcp LUN (Logical Unit Number)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether a zfcp device was successfully switched offline
+ */
+gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gchar *lun, GError **error);

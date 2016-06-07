@@ -13,6 +13,7 @@ typedef enum {
     BD_S390_ERROR_DEVICE,
     BD_S390_ERROR_FORMAT_FAILED,
     BD_S390_ERROR_DASDFMT,
+    BD_S390_ERROR_IO,
 } BDS390Error;
 
 gboolean bd_s390_dasd_format (const gchar *dasd, GError **error);
@@ -22,3 +23,6 @@ gboolean bd_s390_dasd_is_ldl (const gchar *dasd, GError **error);
 gchar* bd_s390_sanitize_dev_input (const gchar *dev, GError **error);
 gchar* bd_s390_zfcp_sanitize_wwpn_input (const gchar *wwpn, GError **error);
 gchar* bd_s390_zfcp_sanitize_lun_input (const gchar *lun, GError **error);
+gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar *lun, GError **error);
+gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const gchar *lun, GError **error);
+gboolean bd_s390_zfcp_offline(const gchar *devno, const gchar *wwpn, const gchar *lun, GError **error);
