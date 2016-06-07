@@ -378,4 +378,7 @@ bd_s390_dasd_online
 bd_s390_dasd_is_ldl
 bd_s390_zfcp_sanitize_wwpn_input
 bd_s390_zfcp_sanitize_lun_input
+bd_s390_zfcp_online
+bd_s390_zfcp_scsi_offline
+bd_s390_zfcp_offline
 </SECTION>
