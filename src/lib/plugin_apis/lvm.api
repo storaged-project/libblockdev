@@ -193,6 +193,7 @@ typedef struct BDLVMLVdata {
     gchar *pool_lv;
     gchar *data_lv;
     gchar *metadata_lv;
+    gchar *roles;
 } BDLVMLVdata;
 
 /**
@@ -213,6 +214,7 @@ BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
     new_data->pool_lv = g_strdup (data->pool_lv);
     new_data->data_lv = g_strdup (data->data_lv);
     new_data->metadata_lv = g_strdup (data->metadata_lv);
+    new_data->roles = g_strdup (data->roles);
     return new_data;
 }
 
@@ -231,6 +233,7 @@ void bd_lvm_lvdata_free (BDLVMLVdata *data) {
     g_free (data->pool_lv);
     g_free (data->data_lv);
     g_free (data->metadata_lv);
+    g_free (data->roles);
     g_free (data);
 }
 

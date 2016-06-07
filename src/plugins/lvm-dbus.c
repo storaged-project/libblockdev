@@ -142,6 +142,7 @@ BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
     new_data->pool_lv = g_strdup (data->pool_lv);
     new_data->data_lv = g_strdup (data->data_lv);
     new_data->metadata_lv = g_strdup (data->metadata_lv);
+    new_data->roles = g_strdup (data->roles);
     return new_data;
 }
 
@@ -155,6 +156,7 @@ void bd_lvm_lvdata_free (BDLVMLVdata *data) {
     g_free (data->pool_lv);
     g_free (data->data_lv);
     g_free (data->metadata_lv);
+    g_free (data->roles);
     g_free (data);
 }
 
@@ -797,6 +799,9 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error) {
     GVariant *value = NULL;
     gchar *path = NULL;
     GVariant *name = NULL;
+    gsize n_children = 0;
+    gsize i = 0;
+    gchar **roles = NULL;
 
     g_variant_dict_init (&dict, props);
 
@@ -826,6 +831,17 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error) {
     value = g_variant_dict_lookup_value (&dict, "SegType", (GVariantType*) "as");
     if (value) {
         g_variant_get_child (value, 0, "s", &(data->segtype));
+        g_variant_unref (value);
+    }
+
+    value = g_variant_dict_lookup_value (&dict, "Roles", (GVariantType*) "as");
+    if (value) {
+        n_children = g_variant_n_children (value);
+        roles = g_new0 (gchar*, n_children + 1);
+        for (i=0; i < n_children; i++)
+            g_variant_get_child (value, i, "&s", roles+i);
+        data->roles = g_strjoinv (",", roles);
+        g_free (roles);
         g_variant_unref (value);
     }
 
