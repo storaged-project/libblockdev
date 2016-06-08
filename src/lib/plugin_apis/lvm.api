@@ -189,6 +189,10 @@ typedef struct BDLVMLVdata {
     guint64 size;
     gchar *attr;
     gchar *segtype;
+    gchar *origin;
+    gchar *pool_lv;
+    gchar *data_lv;
+    gchar *metadata_lv;
 } BDLVMLVdata;
 
 /**
@@ -205,6 +209,10 @@ BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
     new_data->size = data->size;
     new_data->attr = g_strdup (data->attr);
     new_data->segtype = g_strdup (data->segtype);
+    new_data->origin = g_strdup (data->origin);
+    new_data->pool_lv = g_strdup (data->pool_lv);
+    new_data->data_lv = g_strdup (data->data_lv);
+    new_data->metadata_lv = g_strdup (data->metadata_lv);
     return new_data;
 }
 
@@ -219,6 +227,10 @@ void bd_lvm_lvdata_free (BDLVMLVdata *data) {
     g_free (data->uuid);
     g_free (data->attr);
     g_free (data->segtype);
+    g_free (data->origin);
+    g_free (data->pool_lv);
+    g_free (data->data_lv);
+    g_free (data->metadata_lv);
     g_free (data);
 }
 

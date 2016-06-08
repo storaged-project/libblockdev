@@ -105,6 +105,10 @@ BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
     new_data->size = data->size;
     new_data->attr = g_strdup (data->attr);
     new_data->segtype = g_strdup (data->segtype);
+    new_data->origin = g_strdup (data->origin);
+    new_data->pool_lv = g_strdup (data->pool_lv);
+    new_data->data_lv = g_strdup (data->data_lv);
+    new_data->metadata_lv = g_strdup (data->metadata_lv);
     return new_data;
 }
 
@@ -114,6 +118,10 @@ void bd_lvm_lvdata_free (BDLVMLVdata *data) {
     g_free (data->uuid);
     g_free (data->attr);
     g_free (data->segtype);
+    g_free (data->origin);
+    g_free (data->pool_lv);
+    g_free (data->data_lv);
+    g_free (data->metadata_lv);
     g_free (data);
 }
 
@@ -137,18 +145,6 @@ BDLVMCacheStats* bd_lvm_cache_stats_copy (BDLVMCacheStats *data) {
 
 void bd_lvm_cache_stats_free (BDLVMCacheStats *data) {
     g_free (data);
-}
-
-static gchar const * const supported_functions[] = {
-    "bd_lvm_is_supported_pe_size",
-    "bd_lvm_get_max_lv_size",
-    "bd_lvm_round_size_to_pe",
-    "bd_lvm_get_lv_physical_size",
-    "bd_lvm_get_thpool_padding",
-    NULL};
-
-gchar const * const * get_supported_functions () {
-    return supported_functions;
 }
 
 /**
@@ -384,6 +380,16 @@ static BDLVMLVdata* get_lv_data_from_table (GHashTable *table, gboolean free_tab
 
     data->attr = g_strdup (g_hash_table_lookup (table, "LVM2_LV_ATTR"));
     data->segtype = g_strdup (g_hash_table_lookup (table, "LVM2_SEGTYPE"));
+    data->origin = g_strdup (g_hash_table_lookup (table, "LVM2_ORIGIN"));
+    data->pool_lv = g_strdup (g_hash_table_lookup (table, "LVM2_POOL_LV"));
+    data->data_lv = g_strdup (g_hash_table_lookup (table, "LVM2_DATA_LV"));
+    data->metadata_lv = g_strdup (g_hash_table_lookup (table, "LVM2_METADATA_LV"));
+
+    /* replace '[' and ']' (marking LVs as internal) with spaces and then
+       remove all the leading and trailing whitespace */
+    g_strstrip (g_strdelimit (data->pool_lv, "[]", ' '));
+    g_strstrip (g_strdelimit (data->data_lv, "[]", ' '));
+    g_strstrip (g_strdelimit (data->metadata_lv, "[]", ' '));
 
     if (free_table)
         g_hash_table_destroy (table);
@@ -1308,7 +1314,7 @@ gboolean bd_lvm_lvsnapshotmerge (const gchar *vg_name, const gchar *snapshot_nam
 BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError **error) {
     const gchar *args[11] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--units=b", "-a",
-                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype",
+                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv",
                        NULL, NULL};
 
     GHashTable *table = NULL;
@@ -1332,7 +1338,7 @@ BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError *
 
     for (lines_p = lines; *lines_p; lines_p++) {
         table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 6)) {
+        if (table && (num_items == 10)) {
             g_strfreev (lines);
             return get_lv_data_from_table (table, TRUE);
         } else
@@ -1357,7 +1363,7 @@ BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError *
 BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
     const gchar *args[11] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--units=b", "-a",
-                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype",
+                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv",
                        NULL, NULL};
 
     GHashTable *table = NULL;
@@ -1394,7 +1400,7 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
 
     for (lines_p = lines; *lines_p; lines_p++) {
         table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 6)) {
+        if (table && (num_items == 10)) {
             /* valid line, try to parse and record it */
             lvdata = get_lv_data_from_table (table, TRUE);
             if (lvdata)
