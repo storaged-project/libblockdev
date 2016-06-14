@@ -58,6 +58,22 @@ typedef enum {
 #define BD_LVM_TYPE_PVDATA (bd_lvm_pvdata_get_type ())
 GType bd_lvm_pvdata_get_type();
 
+/**
+ * BDLVMPVdata:
+ * @pv_name: name of the PV
+ * @pv_uuid: UUID of the PV
+ * @pv_free: size of the free space in the PV
+ * @pv_size: size of the PV
+ * @pe_start: start of the physical extents area (i.e. offset of the first PE)
+ * @vg_name: name of the VG the PV belongs to
+ * @vg_uuid: UUID of the VG the PV belongs to
+ * @vg_size: size of the VG the PV belongs to
+ * @vg_free: size of the free space in the PV's VG
+ * @vg_extent_size: extent size used by the PV's VG
+ * @vg_extent_count: number of extents in the PV's VG
+ * @vg_free_count: number of free extents in the PV's VG
+ * @vg_pv_count: number of PVs that belong to this PV's VG
+ */
 typedef struct BDLVMPVdata {
     gchar *pv_name;
     gchar *pv_uuid;
@@ -125,6 +141,17 @@ GType bd_lvm_pvdata_get_type () {
 #define BD_LVM_TYPE_VGDATA (bd_lvm_vgdata_get_type ())
 GType bd_lvm_vgdata_get_type();
 
+/**
+ * BDLVMVGdata:
+ * @name: name of the VG
+ * @uuid: UUID of the VG
+ * @size: size of the VG
+ * @free: size of the free space in the VG
+ * @extent_size: extent size used by the VG
+ * @extent_count: number of extents in the VG
+ * @free_count: number of free extents in the VG
+ * @pv_count: number of PVs that belong to the VG
+ */
 typedef struct BDLVMVGdata {
     gchar *name;
     gchar *uuid;
@@ -182,6 +209,19 @@ GType bd_lvm_vgdata_get_type () {
 #define BD_LVM_TYPE_LVDATA (bd_lvm_lvdata_get_type ())
 GType bd_lvm_lvdata_get_type();
 
+/**
+ * BDLVMLVdata:
+ * @lv_name: name of the LV
+ * @vg_name: name of the VG the LV belongs to
+ * @uuid: UUID of the LV
+ * @size: size of the LV
+ * @attr: attributes of the LV
+ * @segtype: segment type of the LV
+ * @origin: origin of the LV (for snapshots, etc.)
+ * @pool_lv: pool LV of the LV (for thin and cached LVs)
+ * @data_lv: data LV of the LV (for thin and cache pools)
+ * @metadata_lv: metadata LV of the LV (for thin and cache pools)
+ */
 typedef struct BDLVMLVdata {
     gchar *lv_name;
     gchar *vg_name;
@@ -249,6 +289,20 @@ GType bd_lvm_lvdata_get_type () {
 #define BD_LVM_TYPE_CACHE_STATS (bd_lvm_cache_stats_get_type ())
 GType bd_lvm_cache_stats_get_type();
 
+/**
+ * BDLVMCacheStats:
+ * @block_size: block size used by the cache
+ * @cache_size: size of the cache
+ * @cache_used: size of the used space in the cache
+ * @md_block_size: block size used for cache metadata
+ * @md_size: size of the metadata space of the cache
+ * @md_used: size of the used metadata space in the cache
+ * @read_hits: number of read hits
+ * @read_misses: number of read misses
+ * @write_hits: number of write hits
+ * @write_misses: number of write misses
+ * @mode: mode the cache is operating in
+ */
 typedef struct BDLVMCacheStats {
     guint64 block_size;
     guint64 cache_size;
