@@ -2685,6 +2685,8 @@ gchar* bd_lvm_data_lv_name (const gchar *vg_name, const gchar *lv_name, GError *
         return NULL;
 
     prop = get_object_property (obj_path, THPOOL_INTF, "DataLv", error);
+    if (!prop)
+        prop = get_object_property (obj_path, CACHE_POOL_INTF, "DataLv", error);
     g_free (obj_path);
     if (!prop) {
         g_clear_error (error);
@@ -2732,6 +2734,8 @@ gchar* bd_lvm_metadata_lv_name (const gchar *vg_name, const gchar *lv_name, GErr
         return NULL;
 
     prop = get_object_property (obj_path, THPOOL_INTF, "MetaDataLv", error);
+    if (!prop)
+        prop = get_object_property (obj_path, CACHE_POOL_INTF, "MetaDataLv", error);
     g_free (obj_path);
     if (!prop) {
         g_clear_error (error);
