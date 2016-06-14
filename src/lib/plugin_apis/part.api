@@ -71,6 +71,16 @@ typedef enum {
 #define BD_PART_TYPE_SPEC (bd_part_spec_get_type ())
 GType bd_part_spec_get_type();
 
+/**
+ * BDPartSpec:
+ * @path: path of the partition (block device)
+ * @name: name of the partition (for GPT partitions)
+ * @type_guid: GUID of the partition's type (GPT)
+ * @type: bit combination of partition's types (#BDPartType)
+ * @start: start of the partition
+ * @size: size of the partition
+ * @flags: bit combination of partition's flags (#BDPartFlag)
+ */
 typedef struct BDPartSpec {
     gchar *path;
     gchar *name;
@@ -116,6 +126,14 @@ GType bd_part_spec_get_type () {
 #define BD_PART_TYPE_DISK_SPEC (bd_part_disk_spec_get_type ())
 GType bd_part_disk_spec_get_type();
 
+/**
+ * BDPartDiskSpec:
+ * @path: path of the disk (block device)
+ * @table_type: type of the disk's partition table
+ * @size: size of the disk
+ * @sector_size: disk's sector size
+ * @flags: bit combination of the disk's flags (#BDPartDiskFlag)
+ */
 typedef struct BDPartDiskSpec {
     gchar *path;
     BDPartTableType table_type;

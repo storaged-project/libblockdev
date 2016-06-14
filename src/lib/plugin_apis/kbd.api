@@ -31,7 +31,12 @@ typedef enum {
 #define BD_KBD_TYPE_ZRAM_STATS (bd_kbd_zram_stats_get_type ())
 GType bd_kbd_zram_stats_get_type();
 
-/* see zRAM kernel documentation for details */
+/**
+ * BDKBDZramStats:
+ *
+ * see zRAM kernel documentation for details
+ * (https://www.kernel.org/doc/Documentation/blockdev/zram.txt)
+ */
 typedef struct BDKBDZramStats {
     guint64 disksize;
     guint64 num_reads;
@@ -91,6 +96,17 @@ GType bd_kbd_zram_stats_get_type () {
 #define BD_KBD_TYPE_BCACHE_STATS (bd_kbd_bcache_stats_get_type ())
 GType bd_kbd_bcache_stats_get_type();
 
+/**
+ * BDKBDBcacheStats:
+ * @state: state of the cache
+ * @block_size: block size used by the cache
+ * @cache_size: size of the cache
+ * @cache_used: size of the used space in the cache
+ * @hits: number of hits
+ * @misses: number of misses
+ * @bypass_hits: number of bypass hits
+ * @bypass_misses: number of bypass misses
+ */
 typedef struct BDKBDBcacheStats {
     gchar *state;
     guint64 block_size;

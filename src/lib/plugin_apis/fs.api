@@ -14,6 +14,15 @@ typedef enum {
 #define BD_FS_TYPE_EXT4_INFO (bd_fs_ext4_info_get_type ())
 GType bd_fs_ext4_info_get_type();
 
+/**
+ * BDFSExt4Info:
+ * @label: label of the filesystem
+ * @uuid: uuid of the filesystem
+ * @state: state of the filesystem (e.g. "clean")
+ * @block_size: block size used by the filesystem
+ * @block_count: number of blocks in the filesystem
+ * @free_blocks: number of free blocks in the filesystem
+ */
 typedef struct BDFSExt4Info {
     gchar *label;
     gchar *uuid;
@@ -68,6 +77,13 @@ GType bd_fs_ext4_info_get_type () {
 #define BD_FS_TYPE_XFS_INFO (bd_fs_xfs_info_get_type ())
 GType bd_fs_xfs_info_get_type();
 
+/**
+ * BDFSXfsInfo:
+ * @label: label of the filesystem
+ * @uuid: uuid of the filesystem
+ * @block_size: block size used by the filesystem
+ * @block_count: number of blocks in the filesystem
+ */
 typedef struct BDFSXfsInfo {
     gchar *label;
     gchar *uuid;
