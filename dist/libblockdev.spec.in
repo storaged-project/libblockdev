@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     1.6
+Version:     1.7
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -572,6 +572,16 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Jun 15 2016 Vratislav Podzimek <vpodzime@redhat.com> - 1.7-1
+- Include the LV roles in the LVdata (vpodzime)
+- Add a few missing items to the documentation (vpodzime)
+- Document fields of the structures (vpodzime)
+- Report (meta)data LV name properly for cache pools in lvm-dbus (vpodzime)
+- Add information about related LVs to LVMLVdata (vpodzime)
+- Remove unused code for getting supported functions (vpodzime)
+- Add zFCP functionality to s390 plugin (sbueno+anaconda)
+- Fix a few const params in the s390 plugin. (sbueno+anaconda)
+
 * Wed Jun 01 2016 Vratislav Podzimek <vpodzime@redhat.com> - 1.6-1
 - Ignore merge commits when creating changelog (vpodzime)
 - Only take the number of the first %changelog line found (vpodzime)
