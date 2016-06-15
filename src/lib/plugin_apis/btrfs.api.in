@@ -14,6 +14,13 @@ typedef enum {
 #define BD_BTRFS_TYPE_DEVICE_INFO (bd_btrfs_device_info_get_type ())
 GType bd_btrfs_device_info_get_type();
 
+/**
+ * BDBtrfsDeviceInfo:
+ * @id: ID of the device
+ * @path: path of the device
+ * @size: size of the device
+ * @used: size of the used space
+ */
 typedef struct BDBtrfsDeviceInfo {
     guint64 id;
     gchar *path;
@@ -63,6 +70,12 @@ GType bd_btrfs_device_info_get_type () {
 #define BD_BTRFS_TYPE_SUBVOLUME_INFO (bd_btrfs_subvolume_info_get_type ())
 GType bd_btrfs_subvolume_info_get_type();
 
+/**
+ * BDBtrfsSubvolumeInfo:
+ * @id: ID of the subvolume
+ * @parent_id: ID of the parent (sub)volume
+ * @path: path of the subvolume
+ */
 typedef struct BDBtrfsSubvolumeInfo {
     guint64 id;
     guint64 parent_id;
@@ -110,6 +123,13 @@ GType bd_btrfs_subvolume_info_get_type () {
 #define BD_BTRFS_TYPE_FILESYSTEM_INFO (bd_btrfs_filesystem_info_get_type ())
 GType bd_btrfs_filesystem_info_get_type();
 
+/**
+ * BDBtrfsFilesystemInfo:
+ * @label: label of the filesystem
+ * @uuid: uuid of the filesystem
+ * @num_devices: number of device in the filesystem
+ * @used: size of the used space
+ */
 typedef struct BDBtrfsFilesystemInfo {
     gchar *label;
     gchar *uuid;

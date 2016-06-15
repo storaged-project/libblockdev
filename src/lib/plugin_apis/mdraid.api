@@ -20,6 +20,20 @@ typedef enum {
 #define BD_MD_TYPE_EXAMINEDATA (bd_md_examine_data_get_type ())
 GType bd_md_examine_data_get_type();
 
+/**
+ * BDMDExamineData:
+ * @device: path of the MD device
+ * @level: RAID level of the device
+ * @num_devices: number of devices used by the MD device
+ * @name: name of the MD device
+ * @size: size of the MD device
+ * @uuid: array UUID
+ * @update_time: update time of the MD device
+ * @dev_uuid: UUID of the member device
+ * @events: number of events on the MD device
+ * @metadata: version of the metadata used by the MD device
+ * @chunk_size: chunk size used by the MD device
+ */
 typedef struct BDMDExamineData {
     gchar *device;
     gchar *level;
@@ -86,6 +100,24 @@ GType bd_md_examine_data_get_type () {
 #define BD_MD_TYPE_DETAILDATA (bd_md_detail_data_get_type ())
 GType bd_md_detail_data_get_type();
 
+/**
+ * BDMDDetailData:
+ * @device: path of the device
+ * @metadata: version of the metadata used by the device
+ * @creation_time: creation time
+ * @level: level of the MD RAID
+ * @name: name of the MD device
+ * @array_size: size of the MD array
+ * @use_dev_size: size of the used space
+ * @raid_devices: number of devices in the MD array
+ * @total_devices: total number of devices in the MD array
+ * @active_devices: number of active devices in the MD array
+ * @working_devices: number of working devices in the MD array
+ * @failed_devices: number of failed devices in the MD array
+ * @spare_devices: number of spare devices in the MD array
+ * @clean: whether the MD array is clean or not
+ * @uuid: uuid of the MD array
+ */
 typedef struct BDMDDetailData {
     gchar *device;
     gchar *metadata;

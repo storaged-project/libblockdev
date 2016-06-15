@@ -324,6 +324,8 @@ BDPartType
 BDPartTypeReq
 BDPartError
 BDPartTableType
+BDPartDiskFlag
+BDPartDiskSpec
 bd_part_create_table
 bd_part_create_part
 bd_part_delete_part
@@ -336,6 +338,14 @@ bd_part_spec_get_type
 bd_part_get_flag_str
 bd_part_get_part_table_type_str
 bd_part_get_type_str
+bd_part_get_best_free_region
+bd_part_get_disk_free_regions
+bd_part_get_disk_spec
+bd_part_get_part_by_pos
+bd_part_set_disk_flag
+bd_part_set_part_flags
+bd_part_set_part_name
+bd_part_set_part_type
 bd_part_error_quark
 </SECTION>
 
