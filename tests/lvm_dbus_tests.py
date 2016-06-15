@@ -832,6 +832,7 @@ class LvmTestLVsnapshots(LvmPVVGLVTestCase):
         lvi = BlockDev.lvm_lvinfo("testVG", "testLV_bak")
         self.assertEqual(origin_name, "testLV")
         self.assertEqual(lvi.origin, "testLV")
+        self.assertIn("snapshot", lvi.roles.split(","))
 
         succ = BlockDev.lvm_lvsnapshotmerge("testVG", "testLV_bak", None)
         self.assertTrue(succ)
@@ -859,6 +860,7 @@ class LvmTestLVinfo(LvmPVVGLVTestCase):
         self.assertEqual(info.vg_name, "testVG")
         self.assertTrue(info.uuid)
         self.assertEqual(info.size, 512 * 1024**2)
+        self.assertIn("public", info.roles.split(","))
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmTestLVs(LvmPVVGLVTestCase):
@@ -939,6 +941,7 @@ class LvmTestThpoolCreate(LvmPVVGthpoolTestCase):
 
         info = BlockDev.lvm_lvinfo("testVG", "testPool")
         self.assertIn("t", info.attr)
+        self.assertIn("private", info.roles.split(","))
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmTestDataMetadataLV(LvmPVVGthpoolTestCase):
@@ -966,6 +969,8 @@ class LvmTestDataMetadataLV(LvmPVVGthpoolTestCase):
 
         info = BlockDev.lvm_lvinfo("testVG", name)
         self.assertTrue(info.attr.startswith("T"))
+        self.assertIn("private", info.roles.split(","))
+        self.assertIn("data", info.roles.split(","))
 
         name = BlockDev.lvm_metadata_lv_name("testVG", "testPool")
         lvi = BlockDev.lvm_lvinfo("testVG", "testPool")
@@ -976,6 +981,8 @@ class LvmTestDataMetadataLV(LvmPVVGthpoolTestCase):
 
         info = BlockDev.lvm_lvinfo("testVG", name)
         self.assertTrue(info.attr.startswith("e"))
+        self.assertIn("private", info.roles.split(","))
+        self.assertIn("metadata", info.roles.split(","))
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmPVVGLVthLVTestCase(LvmPVVGthpoolTestCase):
@@ -1060,6 +1067,8 @@ class LvmTestThSnapshotCreate(LvmPVVGLVthLVsnapshotTestCase):
 
         info = BlockDev.lvm_lvinfo("testVG", "testThLV_bak")
         self.assertIn("V", info.attr)
+        self.assertIn("snapshot", info.roles.split(","))
+        self.assertIn("thinsnapshot", info.roles.split(","))
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmPVVGLVcachePoolTestCase(LvmPVVGLVTestCase):
