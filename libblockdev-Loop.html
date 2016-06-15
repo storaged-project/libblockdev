@@ -6,7 +6,7 @@
 <meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="libblockdev Reference Manual">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
-<link rel="prev" href="libblockdev-DeviceMapper.html" title="DeviceMapper">
+<link rel="prev" href="libblockdev-FS.html" title="FS">
 <link rel="next" href="libblockdev-LVM.html" title="LVM">
 <meta name="generator" content="GTK-Doc V1.24 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
@@ -19,7 +19,7 @@
 </td>
 <td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
 <td><a accesskey="u" href="ch01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
-<td><a accesskey="p" href="libblockdev-DeviceMapper.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="p" href="libblockdev-FS.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
 <td><a accesskey="n" href="libblockdev-LVM.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
 </tr></table>
 <div class="refentry">
@@ -126,7 +126,7 @@ bd_loop_error_quark (<em class="parameter"><code><span class="type">void</span><
 bd_loop_get_backing_file (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *dev_name</code></em>,
                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.6.7.3.4"></a><h4>Parameters</h4>
+<a name="id-1.2.7.7.3.4"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -148,7 +148,7 @@ bd_loop_get_backing_file (<em class="parameter"><code><a href="../glib/glib-Basi
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.6.7.3.5"></a><h4>Returns</h4>
+<a name="id-1.2.7.7.3.5"></a><h4>Returns</h4>
 <p> path of the device's backing file or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if none
 is found. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
@@ -161,7 +161,7 @@ is found. </p>
 bd_loop_get_loop_name (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *file</code></em>,
                        <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.6.7.4.4"></a><h4>Parameters</h4>
+<a name="id-1.2.7.7.4.4"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -183,7 +183,7 @@ bd_loop_get_loop_name (<em class="parameter"><code><a href="../glib/glib-Basic-T
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.6.7.4.5"></a><h4>Returns</h4>
+<a name="id-1.2.7.7.4.5"></a><h4>Returns</h4>
 <p> name of the loop device associated with the given <em class="parameter"><code>file</code></em>
 . </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
@@ -197,7 +197,7 @@ bd_loop_setup (<em class="parameter"><code><a href="../glib/glib-Basic-Types.htm
                <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **loop_name</code></em>,
                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.6.7.5.4"></a><h4>Parameters</h4>
+<a name="id-1.2.7.7.5.4"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -224,7 +224,7 @@ bd_loop_setup (<em class="parameter"><code><a href="../glib/glib-Basic-Types.htm
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.6.7.5.5"></a><h4>Returns</h4>
+<a name="id-1.2.7.7.5.5"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>file</code></em>
 was successfully setup as a loop device or not</p>
 </div>
@@ -236,7 +236,7 @@ was successfully setup as a loop device or not</p>
 bd_loop_teardown (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *loop</code></em>,
                   <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.6.7.6.4"></a><h4>Parameters</h4>
+<a name="id-1.2.7.7.6.4"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -258,7 +258,7 @@ bd_loop_teardown (<em class="parameter"><code><a href="../glib/glib-Basic-Types.
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.6.7.6.5"></a><h4>Returns</h4>
+<a name="id-1.2.7.7.6.5"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>loop</code></em>
 device was successfully torn down or not</p>
 </div>
@@ -274,7 +274,7 @@ device was successfully torn down or not</p>
 <div class="refsect2">
 <a name="BDLoopError"></a><h3>enum BDLoopError</h3>
 <div class="refsect3">
-<a name="id-1.2.6.8.3.3"></a><h4>Members</h4>
+<a name="id-1.2.7.8.3.3"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="enum_members_name">

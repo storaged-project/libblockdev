@@ -6,11 +6,13 @@
       <sub name="BTRFS" link="libblockdev-BTRFS.html"/>
       <sub name="Crypto" link="libblockdev-Crypto.html"/>
       <sub name="DeviceMapper" link="libblockdev-DeviceMapper.html"/>
+      <sub name="FS" link="libblockdev-FS.html"/>
       <sub name="Loop" link="libblockdev-Loop.html"/>
       <sub name="LVM" link="libblockdev-LVM.html"/>
       <sub name="MD RAID" link="libblockdev-MD-RAID.html"/>
       <sub name="Mpath" link="libblockdev-Mpath.html"/>
       <sub name="Plugins" link="libblockdev-Plugins.html"/>
+      <sub name="Part" link="libblockdev-Part.html"/>
       <sub name="Swap" link="libblockdev-Swap.html"/>
       <sub name="KernelBlockDevices" link="libblockdev-KernelBlockDevices.html"/>
       <sub name="s390" link="libblockdev-s390.html"/>
@@ -94,6 +96,30 @@
     <keyword type="function" name="bd_dm_get_raid_set_type ()" link="libblockdev-DeviceMapper.html#bd-dm-get-raid-set-type"/>
     <keyword type="macro" name="BD_DM_ERROR" link="libblockdev-DeviceMapper.html#BD-DM-ERROR:CAPS"/>
     <keyword type="enum" name="enum BDDMError" link="libblockdev-DeviceMapper.html#BDDMError"/>
+    <keyword type="function" name="bd_fs_error_quark ()" link="libblockdev-FS.html#bd-fs-error-quark"/>
+    <keyword type="function" name="bd_fs_wipe ()" link="libblockdev-FS.html#bd-fs-wipe"/>
+    <keyword type="function" name="bd_fs_ext4_check ()" link="libblockdev-FS.html#bd-fs-ext4-check"/>
+    <keyword type="function" name="bd_fs_ext4_get_info ()" link="libblockdev-FS.html#bd-fs-ext4-get-info"/>
+    <keyword type="function" name="bd_fs_ext4_info_copy ()" link="libblockdev-FS.html#bd-fs-ext4-info-copy"/>
+    <keyword type="function" name="bd_fs_ext4_info_free ()" link="libblockdev-FS.html#bd-fs-ext4-info-free"/>
+    <keyword type="function" name="bd_fs_ext4_mkfs ()" link="libblockdev-FS.html#bd-fs-ext4-mkfs"/>
+    <keyword type="function" name="bd_fs_ext4_repair ()" link="libblockdev-FS.html#bd-fs-ext4-repair"/>
+    <keyword type="function" name="bd_fs_ext4_resize ()" link="libblockdev-FS.html#bd-fs-ext4-resize"/>
+    <keyword type="function" name="bd_fs_ext4_set_label ()" link="libblockdev-FS.html#bd-fs-ext4-set-label"/>
+    <keyword type="function" name="bd_fs_ext4_wipe ()" link="libblockdev-FS.html#bd-fs-ext4-wipe"/>
+    <keyword type="function" name="bd_fs_xfs_check ()" link="libblockdev-FS.html#bd-fs-xfs-check"/>
+    <keyword type="function" name="bd_fs_xfs_get_info ()" link="libblockdev-FS.html#bd-fs-xfs-get-info"/>
+    <keyword type="function" name="bd_fs_xfs_info_copy ()" link="libblockdev-FS.html#bd-fs-xfs-info-copy"/>
+    <keyword type="function" name="bd_fs_xfs_info_free ()" link="libblockdev-FS.html#bd-fs-xfs-info-free"/>
+    <keyword type="function" name="bd_fs_xfs_info_get_type ()" link="libblockdev-FS.html#bd-fs-xfs-info-get-type"/>
+    <keyword type="function" name="bd_fs_xfs_mkfs ()" link="libblockdev-FS.html#bd-fs-xfs-mkfs"/>
+    <keyword type="function" name="bd_fs_xfs_repair ()" link="libblockdev-FS.html#bd-fs-xfs-repair"/>
+    <keyword type="function" name="bd_fs_xfs_resize ()" link="libblockdev-FS.html#bd-fs-xfs-resize"/>
+    <keyword type="function" name="bd_fs_xfs_set_label ()" link="libblockdev-FS.html#bd-fs-xfs-set-label"/>
+    <keyword type="function" name="bd_fs_xfs_wipe ()" link="libblockdev-FS.html#bd-fs-xfs-wipe"/>
+    <keyword type="struct" name="BDFSExt4Info" link="libblockdev-FS.html#BDFSExt4Info"/>
+    <keyword type="enum" name="enum BDFsError" link="libblockdev-FS.html#BDFsError"/>
+    <keyword type="struct" name="BDFSXfsInfo" link="libblockdev-FS.html#BDFSXfsInfo"/>
     <keyword type="function" name="bd_loop_error_quark ()" link="libblockdev-Loop.html#bd-loop-error-quark"/>
     <keyword type="function" name="bd_loop_get_backing_file ()" link="libblockdev-Loop.html#bd-loop-get-backing-file"/>
     <keyword type="function" name="bd_loop_get_loop_name ()" link="libblockdev-Loop.html#bd-loop-get-loop-name"/>
@@ -224,6 +250,38 @@
     <keyword type="function" name="bd_get_available_plugin_names ()" link="libblockdev-Plugins.html#bd-get-available-plugin-names"/>
     <keyword type="function" name="bd_get_plugin_soname ()" link="libblockdev-Plugins.html#bd-get-plugin-soname"/>
     <keyword type="enum" name="enum BDPlugin" link="libblockdev-Plugins.html#BDPlugin"/>
+    <keyword type="macro" name="BD_PART_TYPE_SPEC" link="libblockdev-Part.html#BD-PART-TYPE-SPEC:CAPS"/>
+    <keyword type="function" name="bd_part_create_table ()" link="libblockdev-Part.html#bd-part-create-table"/>
+    <keyword type="function" name="bd_part_create_part ()" link="libblockdev-Part.html#bd-part-create-part"/>
+    <keyword type="function" name="bd_part_delete_part ()" link="libblockdev-Part.html#bd-part-delete-part"/>
+    <keyword type="function" name="bd_part_get_disk_parts ()" link="libblockdev-Part.html#bd-part-get-disk-parts"/>
+    <keyword type="function" name="bd_part_get_part_spec ()" link="libblockdev-Part.html#bd-part-get-part-spec"/>
+    <keyword type="function" name="bd_part_set_part_flag ()" link="libblockdev-Part.html#bd-part-set-part-flag"/>
+    <keyword type="function" name="bd_part_spec_copy ()" link="libblockdev-Part.html#bd-part-spec-copy"/>
+    <keyword type="function" name="bd_part_spec_free ()" link="libblockdev-Part.html#bd-part-spec-free"/>
+    <keyword type="function" name="bd_part_spec_get_type ()" link="libblockdev-Part.html#bd-part-spec-get-type"/>
+    <keyword type="function" name="bd_part_get_flag_str ()" link="libblockdev-Part.html#bd-part-get-flag-str"/>
+    <keyword type="function" name="bd_part_get_part_table_type_str ()" link="libblockdev-Part.html#bd-part-get-part-table-type-str"/>
+    <keyword type="function" name="bd_part_get_type_str ()" link="libblockdev-Part.html#bd-part-get-type-str"/>
+    <keyword type="function" name="bd_part_get_best_free_region ()" link="libblockdev-Part.html#bd-part-get-best-free-region"/>
+    <keyword type="function" name="bd_part_get_disk_free_regions ()" link="libblockdev-Part.html#bd-part-get-disk-free-regions"/>
+    <keyword type="function" name="bd_part_get_disk_spec ()" link="libblockdev-Part.html#bd-part-get-disk-spec"/>
+    <keyword type="function" name="bd_part_get_part_by_pos ()" link="libblockdev-Part.html#bd-part-get-part-by-pos"/>
+    <keyword type="function" name="bd_part_set_disk_flag ()" link="libblockdev-Part.html#bd-part-set-disk-flag"/>
+    <keyword type="function" name="bd_part_set_part_flags ()" link="libblockdev-Part.html#bd-part-set-part-flags"/>
+    <keyword type="function" name="bd_part_set_part_name ()" link="libblockdev-Part.html#bd-part-set-part-name"/>
+    <keyword type="function" name="bd_part_set_part_type ()" link="libblockdev-Part.html#bd-part-set-part-type"/>
+    <keyword type="function" name="bd_part_error_quark ()" link="libblockdev-Part.html#bd-part-error-quark"/>
+    <keyword type="macro" name="BD_PART_ERROR" link="libblockdev-Part.html#BD-PART-ERROR:CAPS"/>
+    <keyword type="enum" name="enum BDPartAlign" link="libblockdev-Part.html#BDPartAlign"/>
+    <keyword type="enum" name="enum BDPartFlag" link="libblockdev-Part.html#BDPartFlag"/>
+    <keyword type="struct" name="BDPartSpec" link="libblockdev-Part.html#BDPartSpec"/>
+    <keyword type="enum" name="enum BDPartType" link="libblockdev-Part.html#BDPartType"/>
+    <keyword type="enum" name="enum BDPartTypeReq" link="libblockdev-Part.html#BDPartTypeReq"/>
+    <keyword type="enum" name="enum BDPartError" link="libblockdev-Part.html#BDPartError"/>
+    <keyword type="enum" name="enum BDPartTableType" link="libblockdev-Part.html#BDPartTableType"/>
+    <keyword type="enum" name="enum BDPartDiskFlag" link="libblockdev-Part.html#BDPartDiskFlag"/>
+    <keyword type="struct" name="BDPartDiskSpec" link="libblockdev-Part.html#BDPartDiskSpec"/>
     <keyword type="function" name="bd_swap_error_quark ()" link="libblockdev-Swap.html#bd-swap-error-quark"/>
     <keyword type="function" name="bd_swap_mkswap ()" link="libblockdev-Swap.html#bd-swap-mkswap"/>
     <keyword type="function" name="bd_swap_swapon ()" link="libblockdev-Swap.html#bd-swap-swapon"/>
@@ -263,10 +321,14 @@
     <keyword type="function" name="bd_s390_dasd_is_ldl ()" link="libblockdev-s390.html#bd-s390-dasd-is-ldl"/>
     <keyword type="function" name="bd_s390_zfcp_sanitize_wwpn_input ()" link="libblockdev-s390.html#bd-s390-zfcp-sanitize-wwpn-input"/>
     <keyword type="function" name="bd_s390_zfcp_sanitize_lun_input ()" link="libblockdev-s390.html#bd-s390-zfcp-sanitize-lun-input"/>
+    <keyword type="function" name="bd_s390_zfcp_online ()" link="libblockdev-s390.html#bd-s390-zfcp-online"/>
+    <keyword type="function" name="bd_s390_zfcp_scsi_offline ()" link="libblockdev-s390.html#bd-s390-zfcp-scsi-offline"/>
+    <keyword type="function" name="bd_s390_zfcp_offline ()" link="libblockdev-s390.html#bd-s390-zfcp-offline"/>
     <keyword type="enum" name="enum BDS390Error" link="libblockdev-s390.html#BDS390Error"/>
     <keyword type="function" name="BDUtilsLogFunc ()" link="libblockdev-Utils.html#BDUtilsLogFunc"/>
     <keyword type="function" name="bd_utils_exec_error_quark ()" link="libblockdev-Utils.html#bd-utils-exec-error-quark"/>
     <keyword type="function" name="bd_utils_exec_and_report_error ()" link="libblockdev-Utils.html#bd-utils-exec-and-report-error"/>
+    <keyword type="function" name="bd_utils_exec_and_report_status_error ()" link="libblockdev-Utils.html#bd-utils-exec-and-report-status-error"/>
     <keyword type="function" name="bd_utils_exec_and_capture_output ()" link="libblockdev-Utils.html#bd-utils-exec-and-capture-output"/>
     <keyword type="function" name="bd_utils_init_logging ()" link="libblockdev-Utils.html#bd-utils-init-logging"/>
     <keyword type="function" name="bd_utils_size_human_readable ()" link="libblockdev-Utils.html#bd-utils-size-human-readable"/>
@@ -311,6 +373,9 @@
     <keyword type="constant" name="BD_DM_ERROR_RAID_FAIL" link="libblockdev-DeviceMapper.html#BD-DM-ERROR-RAID-FAIL:CAPS"/>
     <keyword type="constant" name="BD_DM_ERROR_RAID_NO_DEVS" link="libblockdev-DeviceMapper.html#BD-DM-ERROR-RAID-NO-DEVS:CAPS"/>
     <keyword type="constant" name="BD_DM_ERROR_RAID_NO_EXIST" link="libblockdev-DeviceMapper.html#BD-DM-ERROR-RAID-NO-EXIST:CAPS"/>
+    <keyword type="constant" name="BD_FS_ERROR_INVAL" link="libblockdev-FS.html#BD-FS-ERROR-INVAL:CAPS"/>
+    <keyword type="constant" name="BD_FS_ERROR_PARSE" link="libblockdev-FS.html#BD-FS-ERROR-PARSE:CAPS"/>
+    <keyword type="constant" name="BD_FS_ERROR_FAIL" link="libblockdev-FS.html#BD-FS-ERROR-FAIL:CAPS"/>
     <keyword type="constant" name="BD_LOOP_ERROR_DEVICE" link="libblockdev-Loop.html#BD-LOOP-ERROR-DEVICE:CAPS"/>
     <keyword type="constant" name="BD_LVM_ERROR_PARSE" link="libblockdev-LVM.html#BD-LVM-ERROR-PARSE:CAPS"/>
     <keyword type="constant" name="BD_LVM_ERROR_NOEXIST" link="libblockdev-LVM.html#BD-LVM-ERROR-NOEXIST:CAPS"/>
@@ -348,7 +413,52 @@
     <keyword type="constant" name="BD_PLUGIN_MDRAID" link="libblockdev-Plugins.html#BD-PLUGIN-MDRAID:CAPS"/>
     <keyword type="constant" name="BD_PLUGIN_KBD" link="libblockdev-Plugins.html#BD-PLUGIN-KBD:CAPS"/>
     <keyword type="constant" name="BD_PLUGIN_S390" link="libblockdev-Plugins.html#BD-PLUGIN-S390:CAPS"/>
+    <keyword type="constant" name="BD_PLUGIN_PART" link="libblockdev-Plugins.html#BD-PLUGIN-PART:CAPS"/>
+    <keyword type="constant" name="BD_PLUGIN_FS" link="libblockdev-Plugins.html#BD-PLUGIN-FS:CAPS"/>
     <keyword type="constant" name="BD_PLUGIN_UNDEF" link="libblockdev-Plugins.html#BD-PLUGIN-UNDEF:CAPS"/>
+    <keyword type="constant" name="BD_PART_ALIGN_MINIMAL" link="libblockdev-Part.html#BD-PART-ALIGN-MINIMAL:CAPS"/>
+    <keyword type="constant" name="BD_PART_ALIGN_OPTIMAL" link="libblockdev-Part.html#BD-PART-ALIGN-OPTIMAL:CAPS"/>
+    <keyword type="constant" name="BD_PART_ALIGN_NONE" link="libblockdev-Part.html#BD-PART-ALIGN-NONE:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_BOOT" link="libblockdev-Part.html#BD-PART-FLAG-BOOT:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_ROOT" link="libblockdev-Part.html#BD-PART-FLAG-ROOT:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_SWAP" link="libblockdev-Part.html#BD-PART-FLAG-SWAP:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_HIDDEN" link="libblockdev-Part.html#BD-PART-FLAG-HIDDEN:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_RAID" link="libblockdev-Part.html#BD-PART-FLAG-RAID:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_LVM" link="libblockdev-Part.html#BD-PART-FLAG-LVM:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_LBA" link="libblockdev-Part.html#BD-PART-FLAG-LBA:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_HPSERVICE" link="libblockdev-Part.html#BD-PART-FLAG-HPSERVICE:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_CPALO" link="libblockdev-Part.html#BD-PART-FLAG-CPALO:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_PREP" link="libblockdev-Part.html#BD-PART-FLAG-PREP:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_MSFT_RESERVED" link="libblockdev-Part.html#BD-PART-FLAG-MSFT-RESERVED:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_BIOS_GRUB" link="libblockdev-Part.html#BD-PART-FLAG-BIOS-GRUB:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_APPLE_TV_RECOVERY" link="libblockdev-Part.html#BD-PART-FLAG-APPLE-TV-RECOVERY:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_DIAG" link="libblockdev-Part.html#BD-PART-FLAG-DIAG:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_LEGACY_BOOT" link="libblockdev-Part.html#BD-PART-FLAG-LEGACY-BOOT:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_MSFT_DATA" link="libblockdev-Part.html#BD-PART-FLAG-MSFT-DATA:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_IRST" link="libblockdev-Part.html#BD-PART-FLAG-IRST:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_ESP" link="libblockdev-Part.html#BD-PART-FLAG-ESP:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_BASIC_LAST" link="libblockdev-Part.html#BD-PART-FLAG-BASIC-LAST:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_GPT_SYSTEM_PART" link="libblockdev-Part.html#BD-PART-FLAG-GPT-SYSTEM-PART:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_GPT_READ_ONLY" link="libblockdev-Part.html#BD-PART-FLAG-GPT-READ-ONLY:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_GPT_HIDDEN" link="libblockdev-Part.html#BD-PART-FLAG-GPT-HIDDEN:CAPS"/>
+    <keyword type="constant" name="BD_PART_FLAG_GPT_NO_AUTOMOUNT" link="libblockdev-Part.html#BD-PART-FLAG-GPT-NO-AUTOMOUNT:CAPS"/>
+    <keyword type="constant" name="BD_PART_TYPE_NORMAL" link="libblockdev-Part.html#BD-PART-TYPE-NORMAL:CAPS"/>
+    <keyword type="constant" name="BD_PART_TYPE_LOGICAL" link="libblockdev-Part.html#BD-PART-TYPE-LOGICAL:CAPS"/>
+    <keyword type="constant" name="BD_PART_TYPE_EXTENDED" link="libblockdev-Part.html#BD-PART-TYPE-EXTENDED:CAPS"/>
+    <keyword type="constant" name="BD_PART_TYPE_FREESPACE" link="libblockdev-Part.html#BD-PART-TYPE-FREESPACE:CAPS"/>
+    <keyword type="constant" name="BD_PART_TYPE_METADATA" link="libblockdev-Part.html#BD-PART-TYPE-METADATA:CAPS"/>
+    <keyword type="constant" name="BD_PART_TYPE_PROTECTED" link="libblockdev-Part.html#BD-PART-TYPE-PROTECTED:CAPS"/>
+    <keyword type="constant" name="BD_PART_TYPE_REQ_NORMAL" link="libblockdev-Part.html#BD-PART-TYPE-REQ-NORMAL:CAPS"/>
+    <keyword type="constant" name="BD_PART_TYPE_REQ_LOGICAL" link="libblockdev-Part.html#BD-PART-TYPE-REQ-LOGICAL:CAPS"/>
+    <keyword type="constant" name="BD_PART_TYPE_REQ_EXTENDED" link="libblockdev-Part.html#BD-PART-TYPE-REQ-EXTENDED:CAPS"/>
+    <keyword type="constant" name="BD_PART_TYPE_REQ_NEXT" link="libblockdev-Part.html#BD-PART-TYPE-REQ-NEXT:CAPS"/>
+    <keyword type="constant" name="BD_PART_ERROR_EXISTS" link="libblockdev-Part.html#BD-PART-ERROR-EXISTS:CAPS"/>
+    <keyword type="constant" name="BD_PART_ERROR_INVAL" link="libblockdev-Part.html#BD-PART-ERROR-INVAL:CAPS"/>
+    <keyword type="constant" name="BD_PART_ERROR_FAIL" link="libblockdev-Part.html#BD-PART-ERROR-FAIL:CAPS"/>
+    <keyword type="constant" name="BD_PART_TABLE_MSDOS" link="libblockdev-Part.html#BD-PART-TABLE-MSDOS:CAPS"/>
+    <keyword type="constant" name="BD_PART_TABLE_GPT" link="libblockdev-Part.html#BD-PART-TABLE-GPT:CAPS"/>
+    <keyword type="constant" name="BD_PART_TABLE_UNDEF" link="libblockdev-Part.html#BD-PART-TABLE-UNDEF:CAPS"/>
+    <keyword type="constant" name="BD_PART_DISK_FLAG_GPT_PMBR_BOOT" link="libblockdev-Part.html#BD-PART-DISK-FLAG-GPT-PMBR-BOOT:CAPS"/>
     <keyword type="constant" name="BD_SWAP_ERROR_UNKNOWN_STATE" link="libblockdev-Swap.html#BD-SWAP-ERROR-UNKNOWN-STATE:CAPS"/>
     <keyword type="constant" name="BD_SWAP_ERROR_ACTIVATE" link="libblockdev-Swap.html#BD-SWAP-ERROR-ACTIVATE:CAPS"/>
     <keyword type="constant" name="BD_KBD_MODE_WRITETHROUGH" link="libblockdev-KernelBlockDevices.html#BD-KBD-MODE-WRITETHROUGH:CAPS"/>
@@ -374,6 +484,7 @@
     <keyword type="constant" name="BD_S390_ERROR_DEVICE" link="libblockdev-s390.html#BD-S390-ERROR-DEVICE:CAPS"/>
     <keyword type="constant" name="BD_S390_ERROR_FORMAT_FAILED" link="libblockdev-s390.html#BD-S390-ERROR-FORMAT-FAILED:CAPS"/>
     <keyword type="constant" name="BD_S390_ERROR_DASDFMT" link="libblockdev-s390.html#BD-S390-ERROR-DASDFMT:CAPS"/>
+    <keyword type="constant" name="BD_S390_ERROR_IO" link="libblockdev-s390.html#BD-S390-ERROR-IO:CAPS"/>
     <keyword type="constant" name="BD_UTILS_EXEC_ERROR_FAILED" link="libblockdev-Utils.html#BD-UTILS-EXEC-ERROR-FAILED:CAPS"/>
     <keyword type="constant" name="BD_UTILS_EXEC_ERROR_NOOUT" link="libblockdev-Utils.html#BD-UTILS-EXEC-ERROR-NOOUT:CAPS"/>
     <keyword type="constant" name="BD_UTILS_EXEC_ERROR_INVAL_VER" link="libblockdev-Utils.html#BD-UTILS-EXEC-ERROR-INVAL-VER:CAPS"/>

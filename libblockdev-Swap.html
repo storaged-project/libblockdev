@@ -6,7 +6,7 @@
 <meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="libblockdev Reference Manual">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
-<link rel="prev" href="libblockdev-Plugins.html" title="Plugins">
+<link rel="prev" href="libblockdev-Part.html" title="Part">
 <link rel="next" href="libblockdev-KernelBlockDevices.html" title="KernelBlockDevices">
 <meta name="generator" content="GTK-Doc V1.24 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
@@ -19,7 +19,7 @@
 </td>
 <td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
 <td><a accesskey="u" href="ch01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
-<td><a accesskey="p" href="libblockdev-Plugins.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="p" href="libblockdev-Part.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
 <td><a accesskey="n" href="libblockdev-KernelBlockDevices.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
 </tr></table>
 <div class="refentry">
@@ -126,7 +126,7 @@ bd_swap_mkswap (<em class="parameter"><code><a href="../glib/glib-Basic-Types.ht
                 <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *label</code></em>,
                 <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.11.7.3.4"></a><h4>Parameters</h4>
+<a name="id-1.2.13.7.3.4"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -153,7 +153,7 @@ bd_swap_mkswap (<em class="parameter"><code><a href="../glib/glib-Basic-Types.ht
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.11.7.3.5"></a><h4>Returns</h4>
+<a name="id-1.2.13.7.3.5"></a><h4>Returns</h4>
 <p> whether the swap space was successfully created or not</p>
 </div>
 </div>
@@ -165,7 +165,7 @@ bd_swap_swapon (<em class="parameter"><code><a href="../glib/glib-Basic-Types.ht
                 <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> priority</code></em>,
                 <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.11.7.4.4"></a><h4>Parameters</h4>
+<a name="id-1.2.13.7.4.4"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -192,7 +192,7 @@ bd_swap_swapon (<em class="parameter"><code><a href="../glib/glib-Basic-Types.ht
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.11.7.4.5"></a><h4>Returns</h4>
+<a name="id-1.2.13.7.4.5"></a><h4>Returns</h4>
 <p> whether the swap device was successfully activated or not</p>
 </div>
 </div>
@@ -203,7 +203,7 @@ bd_swap_swapon (<em class="parameter"><code><a href="../glib/glib-Basic-Types.ht
 bd_swap_swapoff (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.11.7.5.4"></a><h4>Parameters</h4>
+<a name="id-1.2.13.7.5.4"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -225,7 +225,7 @@ bd_swap_swapoff (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.11.7.5.5"></a><h4>Returns</h4>
+<a name="id-1.2.13.7.5.5"></a><h4>Returns</h4>
 <p> whether the swap device was successfully deactivated or not</p>
 </div>
 </div>
@@ -236,7 +236,7 @@ bd_swap_swapoff (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 bd_swap_swapstatus (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
                     <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.11.7.6.4"></a><h4>Parameters</h4>
+<a name="id-1.2.13.7.6.4"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -258,7 +258,7 @@ bd_swap_swapstatus (<em class="parameter"><code><a href="../glib/glib-Basic-Type
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.11.7.6.5"></a><h4>Returns</h4>
+<a name="id-1.2.13.7.6.5"></a><h4>Returns</h4>
 <p> <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the swap device is active, <a href="../glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> if not active or failed
 to determine (<em class="parameter"><code>error</code></em>
 ) is set not a non-NULL value in such case)</p>
@@ -275,7 +275,7 @@ to determine (<em class="parameter"><code>error</code></em>
 <div class="refsect2">
 <a name="BDSwapError"></a><h3>enum BDSwapError</h3>
 <div class="refsect3">
-<a name="id-1.2.11.8.3.3"></a><h4>Members</h4>
+<a name="id-1.2.13.8.3.3"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="enum_members_name">

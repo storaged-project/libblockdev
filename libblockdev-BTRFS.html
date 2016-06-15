@@ -1051,6 +1051,38 @@ or not</p>
     guint64 used;
 } BDBtrfsDeviceInfo;
 </pre>
+<div class="refsect3">
+<a name="id-1.2.3.8.5.4"></a><h4>Members</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="300px" class="struct_members_name">
+<col class="struct_members_description">
+<col width="200px" class="struct_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDBtrfsDeviceInfo.id"></a>id</code></em>;</p></td>
+<td class="struct_member_description"><p>ID of the device</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDBtrfsDeviceInfo.path"></a>path</code></em>;</p></td>
+<td class="struct_member_description"><p>path of the device</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDBtrfsDeviceInfo.size"></a>size</code></em>;</p></td>
+<td class="struct_member_description"><p>size of the device</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDBtrfsDeviceInfo.used"></a>used</code></em>;</p></td>
+<td class="struct_member_description"><p>size of the used space</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
 </div>
 <hr>
 <div class="refsect2">
@@ -1061,6 +1093,33 @@ or not</p>
     gchar *path;
 } BDBtrfsSubvolumeInfo;
 </pre>
+<div class="refsect3">
+<a name="id-1.2.3.8.6.4"></a><h4>Members</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="300px" class="struct_members_name">
+<col class="struct_members_description">
+<col width="200px" class="struct_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDBtrfsSubvolumeInfo.id"></a>id</code></em>;</p></td>
+<td class="struct_member_description"><p>ID of the subvolume</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDBtrfsSubvolumeInfo.parent-id"></a>parent_id</code></em>;</p></td>
+<td class="struct_member_description"><p>ID of the parent (sub)volume</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDBtrfsSubvolumeInfo.path"></a>path</code></em>;</p></td>
+<td class="struct_member_description"><p>path of the subvolume</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
 </div>
 <hr>
 <div class="refsect2">
@@ -1072,6 +1131,38 @@ or not</p>
     guint64 used;
 } BDBtrfsFilesystemInfo;
 </pre>
+<div class="refsect3">
+<a name="id-1.2.3.8.7.4"></a><h4>Members</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="300px" class="struct_members_name">
+<col class="struct_members_description">
+<col width="200px" class="struct_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDBtrfsFilesystemInfo.label"></a>label</code></em>;</p></td>
+<td class="struct_member_description"><p>label of the filesystem</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDBtrfsFilesystemInfo.uuid"></a>uuid</code></em>;</p></td>
+<td class="struct_member_description"><p>uuid of the filesystem</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDBtrfsFilesystemInfo.num-devices"></a>num_devices</code></em>;</p></td>
+<td class="struct_member_description"><p>number of device in the filesystem</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDBtrfsFilesystemInfo.used"></a>used</code></em>;</p></td>
+<td class="struct_member_description"><p>size of the used space</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
 </div>
 </div>
 </div>
