@@ -16,6 +16,7 @@ typedef enum {
 
 gboolean bd_mpath_flush_mpaths (GError **error);
 gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error);
+gchar** bd_mpath_get_mpath_members (GError **error);
 gboolean bd_mpath_set_friendly_names (gboolean enabled, GError **error);
 
 #endif  /* BD_MPATH */
