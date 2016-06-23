@@ -70,7 +70,7 @@ gboolean check() {
 gboolean bd_s390_dasd_format (const gchar *dasd, GError **error) {
     gboolean rc = FALSE;
     gchar *dev = g_strdup_printf ("/dev/%s", dasd);
-    const gchar *argv[8] = {"/sbin/dasdfmt", "-y", "-d", "cdl", "-b", "4096", dev, NULL};
+    gchar *argv[] = {"/sbin/dasdfmt", "-y", "-d", "cdl", "-b", "4096", dev, NULL};
 
     rc = bd_utils_exec_and_report_error (argv, error);
     g_free (dev);
@@ -135,7 +135,7 @@ gboolean bd_s390_dasd_online (gchar *dasd, GError **error) {
     gint online = 0;
     gchar *path = NULL;
     FILE *fd = NULL;
-    const gchar *argv[4] = {"/usr/sbin/dasd_cio_free", "-d", dasd, NULL};
+    gchar *argv[] = {"/usr/sbin/dasd_cio_free", "-d", dasd, NULL};
 
     path = g_strdup_printf ("/sys/bus/ccw/drivers/dasd-eckd/%s/online", dasd);
     fd = fopen(path, "r+");
