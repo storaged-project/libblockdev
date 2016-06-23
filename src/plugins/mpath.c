@@ -186,7 +186,7 @@ static gboolean map_is_multipath (gchar *map_name, GError **error) {
     return ret;
 }
 
-static gchar** get_map_deps (gchar *map_name, GError **error) {
+static gchar** get_map_deps (gchar *map_name, guint64 *n_deps, GError **error) {
     struct dm_task *task;
     struct dm_deps *deps;
     guint64 major = 0;
@@ -249,6 +249,8 @@ static gchar** get_map_deps (gchar *map_name, GError **error) {
         g_free (major_minor);
     }
     dep_devs[deps->count] = NULL;
+    if (n_deps)
+        *n_deps = deps->count;
 
     dm_task_destroy (task);
     return dep_devs;
@@ -280,7 +282,7 @@ gboolean bd_mpath_is_mpath_member (gchar *device, GError **error) {
     /* we check if the 'device' is a dependency of any multipath map  */
     /* get maps */
     task_names = dm_task_create(DM_DEVICE_LIST);
-	if (!task_names) {
+    if (!task_names) {
         g_warning ("Failed to create DM task");
         g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
                      "Failed to create DM task");
@@ -288,7 +290,7 @@ gboolean bd_mpath_is_mpath_member (gchar *device, GError **error) {
     }
 
     dm_task_run(task_names);
-	names = dm_task_get_names(task_names);
+    names = dm_task_get_names(task_names);
 
     if (!names || !names->dev)
         return FALSE;
@@ -318,7 +320,7 @@ gboolean bd_mpath_is_mpath_member (gchar *device, GError **error) {
 
         /* we are only interested in multipath maps */
         if (map_is_multipath (names->name, error)) {
-            deps = get_map_deps (names->name, error);
+            deps = get_map_deps (names->name, NULL, error);
             if (*error) {
                 g_prefix_error (error, "Failed to determine deps for '%s'", names->name);
                 g_free (symlink);
@@ -340,6 +342,81 @@ gboolean bd_mpath_is_mpath_member (gchar *device, GError **error) {
     dm_task_destroy (task_names);
     return ret;
 }
+
+/**
+ * bd_mpath_get_mpath_members:
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full) (array zero-terminated=1): list of names of all devices that are
+ *                                                     members of the mpath mappings
+ *                                                     (or %NULL in case of error)
+ */
+gchar** bd_mpath_get_mpath_members (GError **error) {
+    struct dm_task *task_names = NULL;
+	struct dm_names *names = NULL;
+    guint64 next = 0;
+    gchar **deps = NULL;
+    gchar **dev_name = NULL;
+    guint64 n_deps = 0;
+    guint64 n_devs = 0;
+    guint64 top_dev = 0;
+    gchar **ret = NULL;
+
+    if (geteuid () != 0) {
+        g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_NOT_ROOT,
+                     "Not running as root, cannot query DM maps");
+        return NULL;
+    }
+
+    /* we check if the 'device' is a dependency of any multipath map  */
+    /* get maps */
+    task_names = dm_task_create(DM_DEVICE_LIST);
+	if (!task_names) {
+        g_warning ("Failed to create DM task");
+        g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
+                     "Failed to create DM task");
+        return NULL;
+    }
+
+    dm_task_run(task_names);
+	names = dm_task_get_names(task_names);
+
+    if (!names || !names->dev)
+        return NULL;
+
+    ret = g_new0 (gchar*, 1);
+    n_devs = 1;
+
+    /* check all maps */
+    do {
+        names = (void *)names + next;
+        next = names->next;
+
+        /* we are only interested in multipath maps */
+        if (map_is_multipath (names->name, error)) {
+            deps = get_map_deps (names->name, &n_deps, error);
+            if (*error) {
+                g_prefix_error (error, "Failed to determine deps for '%s'", names->name);
+                dm_task_destroy (task_names);
+                return NULL;
+            }
+            if (deps) {
+                n_devs += n_deps;
+                ret = g_renew (gchar*, ret, n_devs);
+                for (dev_name=deps; *dev_name; dev_name++) {
+                    ret[top_dev] = *dev_name;
+                    top_dev += 1;
+                }
+                g_free (deps);
+            }
+        }
+    } while (next);
+
+    ret[top_dev] = NULL;
+
+    return ret;
+}
+
 
 /**
  * bd_mpath_set_friendly_names:

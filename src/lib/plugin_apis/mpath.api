@@ -29,6 +29,16 @@ gboolean bd_mpath_flush_mpaths (GError **error);
 gboolean bd_mpath_is_mpath_member (gchar *device, GError **error);
 
 /**
+ * bd_mpath_get_mpath_members:
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full) (array zero-terminated=1): list of names of all devices that are
+ *                                                     members of the mpath mappings (or %NULL
+ *                                                     in case of error)
+ */
+gchar** bd_mpath_get_mpath_members (GError **error);
+
+/**
  * bd_mpath_set_friendly_names:
  * @enabled: whether friendly names should be enabled or not
  * @error: (out): place to store error (if any)

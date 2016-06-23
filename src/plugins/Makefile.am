@@ -50,7 +50,7 @@ libbd_mdraid_la_SOURCES = mdraid.c mdraid.h
 
 libbd_mpath_la_CFLAGS = $(GLIB_CFLAGS) $(DEVMAPPER_CFLAGS) -Wall -Wextra -Werror
 libbd_mpath_la_LIBADD = $(GLIB_LIBS) $(DEVMAPPER_LIBS) ${builddir}/../utils/libbd_utils.la
-libbd_mpath_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 0:1:0
+libbd_mpath_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 1:1:1
 libbd_mpath_la_CPPFLAGS = -I${srcdir}/../utils/
 libbd_mpath_la_SOURCES = mpath.c mpath.h
 
