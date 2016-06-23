@@ -412,8 +412,8 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
     gint rc = 0;
     FILE *fd = NULL;
     DIR *pdfd = NULL;
-    const gchar *zfcp_cio_free[4] = {"/usr/sbin/zfcp_cio_free", "-d", devno, NULL};
-    const gchar *chccwdev[4] = {"/usr/sbin/chccwdev", "-e", devno, NULL};
+    gchar *zfcp_cio_free[4] = {"/usr/sbin/zfcp_cio_free", "-d", (gchar*) devno, NULL};
+    gchar *chccwdev[4] = {"/usr/sbin/chccwdev", "-e", (gchar*) devno, NULL};
 
     gchar *zfcpsysfs = "/sys/bus/ccw/drivers/zfcp";
     gchar *online = g_strdup_printf ("%s/%s/online", zfcpsysfs, devno);
@@ -424,7 +424,7 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
     /* part 01: make sure device is available/not on device ignore list */
     fd = fopen (online, "r");
     if (!fd) {
-        boolrc = bd_utils_exec_and_report_error (zfcp_cio_free, NULL, error);
+        boolrc = bd_utils_exec_and_report_error (zfcp_cio_free, error);
 
         if (!boolrc) {
             fclose (fd);
@@ -468,7 +468,7 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
     else {
         /* offline */
         fclose (fd);
-        boolrc = bd_utils_exec_and_report_error (chccwdev, NULL, error);
+        boolrc = bd_utils_exec_and_report_error (chccwdev, error);
         if (!boolrc) {
             g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                          "Could not set zFCP device %s online", devno);
@@ -730,7 +730,7 @@ gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gcha
     gchar *offline = NULL;
     gchar *unitrm = NULL;
     gchar *pattern = NULL;
-    const gchar *chccwdev[4] = {"/usr/sbin/chccwdev", "-d", devno, NULL};
+    gchar *chccwdev[4] = {"/usr/sbin/chccwdev", "-d", (gchar*) devno, NULL};
 
     failed = bd_s390_zfcp_scsi_offline(devno, wwpn, lun, error);
     if (failed == 0) {
@@ -783,7 +783,7 @@ gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gcha
 
     /* offline */
     offline = g_strdup_printf ("%s/%s/online", zfcpsysfs, devno);
-    failed = bd_utils_exec_and_report_error (chccwdev, NULL, error);
+    failed = bd_utils_exec_and_report_error (chccwdev, error);
     g_free (offline);
     if (failed == 0) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
