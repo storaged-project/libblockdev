@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     1.7
+Version:     1.8
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -572,6 +572,12 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Jun 29 2016 Vratislav Podzimek <vpodzime@redhat.com> - 1.8-1
+- Add a function to get all mpath member devices (vpodzime)
+- Fix backport issues in the zfcp-related functionality (#1348442) (vpodzime)
+- Revert "Fix a few const params in the s390 plugin." (vpodzime)
+- Fix creation of the version-only tags (vpodzime)
+
 * Wed Jun 15 2016 Vratislav Podzimek <vpodzime@redhat.com> - 1.7-1
 - Include the LV roles in the LVdata (vpodzime)
 - Add a few missing items to the documentation (vpodzime)
