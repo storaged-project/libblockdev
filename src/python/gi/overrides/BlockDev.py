@@ -493,6 +493,20 @@ def lvm_set_global_config(new_config=None):
     return _lvm_set_global_config(new_config)
 __all__.append("lvm_set_global_config")
 
+_lvm_thpool_convert = BlockDev.lvm_thpool_convert
+@override(BlockDev.lvm_thpool_convert)
+def lvm_thpool_convert(vg_name, data_lv, metadata_lv, name=None, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_thpool_convert(vg_name, data_lv, metadata_lv, name, extra)
+__all__.append("lvm_thpool_convert")
+
+_lvm_cache_pool_convert = BlockDev.lvm_cache_pool_convert
+@override(BlockDev.lvm_cache_pool_convert)
+def lvm_cache_pool_convert(vg_name, data_lv, metadata_lv, name=None, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_cache_pool_convert(vg_name, data_lv, metadata_lv, name, extra)
+__all__.append("lvm_cache_pool_convert")
+
 
 _md_get_superblock_size = BlockDev.md_get_superblock_size
 @override(BlockDev.md_get_superblock_size)

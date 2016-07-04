@@ -2776,3 +2776,100 @@ gchar* bd_lvm_metadata_lv_name (const gchar *vg_name, const gchar *lv_name, GErr
 
     return g_strstrip (g_strdelimit (ret, "[]", ' '));
 }
+
+/**
+ * bd_lvm_thpool_convert:
+ * @vg_name: name of the VG to create the new thin pool in
+ * @data_lv: name of the LV that should become the data part of the new pool
+ * @metadata_lv: name of the LV that should become the metadata part of the new pool
+ * @name: (allow-none): name for the thin pool (if %NULL, the name @data_lv is inherited)
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the thin pool creation
+ *                                                 (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Converts the @data_lv and @metadata_lv into a new thin pool in the @vg_name
+ * VG.
+ *
+ * Returns: whether the new thin pool was successfully created from @data_lv and
+ *          @metadata_lv or not
+ */
+gboolean bd_lvm_thpool_convert (const gchar *vg_name, const gchar *data_lv, const gchar *metadata_lv, const gchar *name, const BDExtraArg **extra, GError **error) {
+    GVariantBuilder builder;
+    GVariant *params = NULL;
+    gchar *obj_id = NULL;
+    gchar *data_lv_path = NULL;
+    gchar *metadata_lv_path = NULL;
+
+    obj_id = g_strdup_printf ("%s/%s", vg_name, data_lv);
+    data_lv_path = get_object_path (obj_id, error);
+    g_free (obj_id);
+    if (!data_lv_path)
+        return FALSE;
+
+    obj_id = g_strdup_printf ("%s/%s", vg_name, metadata_lv);
+    metadata_lv_path = get_object_path (obj_id, error);
+    g_free (obj_id);
+    if (!metadata_lv_path)
+        return FALSE;
+
+    g_variant_builder_init (&builder, G_VARIANT_TYPE_TUPLE);
+    g_variant_builder_add_value (&builder, g_variant_new ("o", metadata_lv_path));
+    g_variant_builder_add_value (&builder, g_variant_new ("o", data_lv_path));
+    params = g_variant_builder_end (&builder);
+    g_variant_builder_clear (&builder);
+
+    call_lvm_obj_method_sync (vg_name, VG_INTF, "CreateThinPool", params, NULL, extra, error);
+
+    if (((*error) == NULL) && name)
+        bd_lvm_lvrename (vg_name, data_lv, name, NULL, error);
+    return ((*error) == NULL);
+}
+
+/**
+ * bd_lvm_cache_pool_convert:
+ * @vg_name: name of the VG to create the new thin pool in
+ * @data_lv: name of the LV that should become the data part of the new pool
+ * @metadata_lv: name of the LV that should become the metadata part of the new pool
+ * @name: (allow-none): name for the thin pool (if %NULL, the name @data_lv is inherited)
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the thin pool creation
+ *                                                 (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Converts the @data_lv and @metadata_lv into a new cache pool in the @vg_name
+ * VG.
+ *
+ * Returns: whether the new cache pool was successfully created from @data_lv and
+ *          @metadata_lv or not
+ */
+gboolean bd_lvm_cache_pool_convert (const gchar *vg_name, const gchar *data_lv, const gchar *metadata_lv, const gchar *name, const BDExtraArg **extra, GError **error) {
+    GVariantBuilder builder;
+    GVariant *params = NULL;
+    gchar *obj_id = NULL;
+    gchar *data_lv_path = NULL;
+    gchar *metadata_lv_path = NULL;
+
+    obj_id = g_strdup_printf ("%s/%s", vg_name, data_lv);
+    data_lv_path = get_object_path (obj_id, error);
+    g_free (obj_id);
+    if (!data_lv_path)
+        return FALSE;
+
+    obj_id = g_strdup_printf ("%s/%s", vg_name, metadata_lv);
+    metadata_lv_path = get_object_path (obj_id, error);
+    g_free (obj_id);
+    if (!metadata_lv_path)
+        return FALSE;
+
+    g_variant_builder_init (&builder, G_VARIANT_TYPE_TUPLE);
+    g_variant_builder_add_value (&builder, g_variant_new ("o", metadata_lv_path));
+    g_variant_builder_add_value (&builder, g_variant_new ("o", data_lv_path));
+    params = g_variant_builder_end (&builder);
+    g_variant_builder_clear (&builder);
+
+    call_lvm_obj_method_sync (vg_name, VG_INTF, "CreateCachePool", params, NULL, extra, error);
+
+    if (((*error) == NULL) && name)
+        bd_lvm_lvrename (vg_name, data_lv, name, NULL, error);
+
+    return ((*error) == NULL);
+}

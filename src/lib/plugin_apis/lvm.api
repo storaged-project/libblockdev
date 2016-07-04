@@ -990,4 +990,40 @@ gchar* bd_lvm_data_lv_name (const gchar *vg_name, const gchar *lv_name, GError *
  */
 gchar* bd_lvm_metadata_lv_name (const gchar *vg_name, const gchar *lv_name, GError **error);
 
+/**
+ * bd_lvm_thpool_convert:
+ * @vg_name: name of the VG to create the new thin pool in
+ * @data_lv: name of the LV that should become the data part of the new pool
+ * @metadata_lv: name of the LV that should become the metadata part of the new pool
+ * @name: (allow-none): name for the thin pool (if %NULL, the name @data_lv is inherited)
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the thin pool creation
+ *                                                 (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Converts the @data_lv and @metadata_lv into a new thin pool in the @vg_name
+ * VG.
+ *
+ * Returns: whether the new thin pool was successfully created from @data_lv and
+ *          @metadata_lv or not
+ */
+gboolean bd_lvm_thpool_convert (const gchar *vg_name, const gchar *data_lv, const gchar *metadata_lv, const gchar *name, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_lvm_cache_pool_convert:
+ * @vg_name: name of the VG to create the new thin pool in
+ * @data_lv: name of the LV that should become the data part of the new pool
+ * @metadata_lv: name of the LV that should become the metadata part of the new pool
+ * @name: (allow-none): name for the thin pool (if %NULL, the name @data_lv is inherited)
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the thin pool creation
+ *                                                 (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Converts the @data_lv and @metadata_lv into a new cache pool in the @vg_name
+ * VG.
+ *
+ * Returns: whether the new cache pool was successfully created from @data_lv and
+ *          @metadata_lv or not
+ */
+gboolean bd_lvm_cache_pool_convert (const gchar *vg_name, const gchar *data_lv, const gchar *metadata_lv, const gchar *name, const BDExtraArg **extra, GError **error);
+
 #endif  /* BD_LVM_API */
