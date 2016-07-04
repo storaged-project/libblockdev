@@ -326,6 +326,7 @@
 <ANCHOR id="bd-mpath-error-quark" href="libblockdev/libblockdev-Mpath.html#bd-mpath-error-quark">
 <ANCHOR id="bd-mpath-flush-mpaths" href="libblockdev/libblockdev-Mpath.html#bd-mpath-flush-mpaths">
 <ANCHOR id="bd-mpath-is-mpath-member" href="libblockdev/libblockdev-Mpath.html#bd-mpath-is-mpath-member">
+<ANCHOR id="bd-mpath-get-mpath-members" href="libblockdev/libblockdev-Mpath.html#bd-mpath-get-mpath-members">
 <ANCHOR id="bd-mpath-set-friendly-names" href="libblockdev/libblockdev-Mpath.html#bd-mpath-set-friendly-names">
 <ANCHOR id="libblockdev-Mpath.other_details" href="libblockdev/libblockdev-Mpath.html#libblockdev-Mpath.other_details">
 <ANCHOR id="BD-MPATH-ERROR:CAPS" href="libblockdev/libblockdev-Mpath.html#BD-MPATH-ERROR:CAPS">

@@ -241,6 +241,7 @@
     <keyword type="function" name="bd_mpath_error_quark ()" link="libblockdev-Mpath.html#bd-mpath-error-quark"/>
     <keyword type="function" name="bd_mpath_flush_mpaths ()" link="libblockdev-Mpath.html#bd-mpath-flush-mpaths"/>
     <keyword type="function" name="bd_mpath_is_mpath_member ()" link="libblockdev-Mpath.html#bd-mpath-is-mpath-member"/>
+    <keyword type="function" name="bd_mpath_get_mpath_members ()" link="libblockdev-Mpath.html#bd-mpath-get-mpath-members"/>
     <keyword type="function" name="bd_mpath_set_friendly_names ()" link="libblockdev-Mpath.html#bd-mpath-set-friendly-names"/>
     <keyword type="macro" name="BD_MPATH_ERROR" link="libblockdev-Mpath.html#BD-MPATH-ERROR:CAPS"/>
     <keyword type="enum" name="enum BDMpathError" link="libblockdev-Mpath.html#BDMpathError"/>
