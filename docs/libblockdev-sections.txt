@@ -252,6 +252,7 @@ BD_MPATH_ERROR
 BDMpathError
 bd_mpath_flush_mpaths
 bd_mpath_is_mpath_member
+bd_mpath_get_mpath_members
 bd_mpath_set_friendly_names
 </SECTION>
 
