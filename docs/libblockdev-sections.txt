@@ -211,6 +211,8 @@ bd_lvm_cache_pool_name
 bd_lvm_cache_stats
 bd_lvm_data_lv_name
 bd_lvm_metadata_lv_name
+bd_lvm_cache_pool_convert
+bd_lvm_thpool_convert
 </SECTION>
 
 <SECTION>

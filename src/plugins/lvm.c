@@ -2018,3 +2018,62 @@ gchar* bd_lvm_metadata_lv_name (gchar *vg_name, gchar *lv_name, GError **error) 
        remove all the leading and trailing whitespace */
     return g_strstrip (g_strdelimit (output, "[]", ' '));
 }
+
+
+/**
+ * bd_lvm_thpool_convert:
+ * @vg_name: name of the VG to create the new thin pool in
+ * @data_lv: name of the LV that should become the data part of the new pool
+ * @metadata_lv: name of the LV that should become the metadata part of the new pool
+ * @name: (allow-none): name for the thin pool (if %NULL, the name @data_lv is inherited)
+ * @error: (out): place to store error (if any)
+ *
+ * Converts the @data_lv and @metadata_lv into a new thin pool in the @vg_name
+ * VG.
+ *
+ * Returns: whether the new thin pool was successfully created from @data_lv and
+ *          @metadata_lv or not
+ */
+gboolean bd_lvm_thpool_convert (gchar *vg_name, gchar *data_lv, gchar *metadata_lv, gchar *name, GError **error) {
+    gchar *args[8] = {"lvconvert", "--yes", "--type", "thin-pool", "--poolmetadata", metadata_lv, NULL, NULL};
+    gboolean success = FALSE;
+
+    args[6] = g_strdup_printf ("%s/%s", vg_name, data_lv);
+
+    success = call_lvm_and_report_error (args, error);
+    g_free ((gchar *) args[6]);
+
+    if (success && name)
+        success = bd_lvm_lvrename (vg_name, data_lv, name, error);
+
+    return success;
+}
+
+/**
+ * bd_lvm_cache_pool_convert:
+ * @vg_name: name of the VG to create the new thin pool in
+ * @data_lv: name of the LV that should become the data part of the new pool
+ * @metadata_lv: name of the LV that should become the metadata part of the new pool
+ * @name: (allow-none): name for the thin pool (if %NULL, the name @data_lv is inherited)
+ * @error: (out): place to store error (if any)
+ *
+ * Converts the @data_lv and @metadata_lv into a new cache pool in the @vg_name
+ * VG.
+ *
+ * Returns: whether the new cache pool was successfully created from @data_lv and
+ *          @metadata_lv or not
+ */
+gboolean bd_lvm_cache_pool_convert (gchar *vg_name, gchar *data_lv, gchar *metadata_lv, gchar *name, GError **error) {
+    gchar *args[8] = {"lvconvert", "--yes", "--type", "cache-pool", "--poolmetadata", metadata_lv, NULL, NULL};
+    gboolean success = FALSE;
+
+    args[6] = g_strdup_printf ("%s/%s", vg_name, data_lv);
+
+    success = call_lvm_and_report_error (args, error);
+    g_free ((gchar *) args[6]);
+
+    if (success && name)
+        success = bd_lvm_lvrename (vg_name, data_lv, name, error);
+
+    return success;
+}

@@ -189,4 +189,7 @@ BDLVMCacheStats* bd_lvm_cache_stats (gchar *vg_name, gchar *cached_lv, GError **
 gchar* bd_lvm_data_lv_name (gchar *vg_name, gchar *lv_name, GError **error);
 gchar* bd_lvm_metadata_lv_name (gchar *vg_name, gchar *lv_name, GError **error);
 
+gboolean bd_lvm_thpool_convert (gchar *vg_name, gchar *data_lv, gchar *metadata_lv, gchar *name, GError **error);
+gboolean bd_lvm_cache_pool_convert (gchar *vg_name, gchar *data_lv, gchar *metadata_lv, gchar *name, GError **error);
+
 #endif /* BD_LVM */
