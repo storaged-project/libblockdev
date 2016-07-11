@@ -189,4 +189,7 @@ BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_l
 gchar* bd_lvm_data_lv_name (const gchar *vg_name, const gchar *lv_name, GError **error);
 gchar* bd_lvm_metadata_lv_name (const gchar *vg_name, const gchar *lv_name, GError **error);
 
+gboolean bd_lvm_thpool_convert (const gchar *vg_name, const gchar *data_lv, const gchar *metadata_lv, const gchar *name, const BDExtraArg **extra, GError **error);
+gboolean bd_lvm_cache_pool_convert (const gchar *vg_name, const gchar *data_lv, const gchar *metadata_lv, const gchar *name, const BDExtraArg **extra, GError **error);
+
 #endif /* BD_LVM */

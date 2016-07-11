@@ -901,6 +901,33 @@ class LvmTestThpoolCreate(LvmPVVGthpoolTestCase):
         self.assertIn("t", info.attr)
         self.assertIn("private", info.roles.split(","))
 
+
+class LvmTestThpoolConvert(LvmPVVGthpoolTestCase):
+    def test_thpool_convert(self):
+        """Verify that it is possible to create a thin pool by conversion"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0, None)
+        self.assertTrue(succ)
+
+        # the name of the data LV is used for the pool
+        succ = BlockDev.lvm_lvcreate("testVG", "dataLV", 512 * 1024**2, None, [self.loop_dev], None)
+        self.assertTrue(succ)
+        succ = BlockDev.lvm_lvcreate("testVG", "metadataLV", 50 * 1024**2, None, [self.loop_dev2], None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_thpool_convert("testVG", "dataLV", "metadataLV", "testPool", None)
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_lvinfo("testVG", "testPool")
+        self.assertIn("t", info.attr)
+
+
 class LvmTestDataMetadataLV(LvmPVVGthpoolTestCase):
     def test_data_metadata_lv_name(self):
         """Verify that it is possible to get name of the data/metadata LV"""
@@ -1046,6 +1073,28 @@ class LvmPVVGLVcachePoolCreateRemoveTestCase(LvmPVVGLVcachePoolTestCase):
                                               BlockDev.LVMCachePoolFlags.STRIPED|BlockDev.LVMCachePoolFlags.META_RAID1,
                                               [self.loop_dev, self.loop_dev2])
         self.assertTrue(succ)
+
+class LvmTestCachePoolConvert(LvmPVVGLVcachePoolTestCase):
+    def test_cache_pool_convert(self):
+        """Verify that it is possible to create a cache pool by conversion"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvcreate("testVG", "dataLV", 512 * 1024**2, None, [self.loop_dev], None)
+        self.assertTrue(succ)
+        succ = BlockDev.lvm_lvcreate("testVG", "metadataLV", 50 * 1024**2, None, [self.loop_dev2], None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_cache_pool_convert("testVG", "dataLV", "metadataLV", "testCache", None)
+        self.assertTrue(succ)
+
 
 class LvmPVVGLVcachePoolAttachDetachTestCase(LvmPVVGLVcachePoolTestCase):
     def test_cache_pool_attach_detach(self):
