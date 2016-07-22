@@ -633,6 +633,23 @@ gboolean bd_lvm_pvremove (const gchar *device, const BDExtraArg **extra, GError 
     return call_lvm_and_report_error (args, extra, error);
 }
 
+static gboolean extract_pvmove_progress (const gchar *line, guint8 *completion) {
+    gchar *num_start = NULL;
+    gint n_scanned = 0;
+    guint8 try_completion = 0;
+
+    num_start = strrchr (line, ' ');
+    if (!num_start)
+        return FALSE;
+    num_start++;
+    n_scanned = sscanf (num_start, "%hhu", &try_completion);
+    if (n_scanned == 1) {
+        *completion = try_completion;
+        return TRUE;
+    }
+    return FALSE;
+}
+
 /**
  * bd_lvm_pvmove:
  * @src: the PV device to move extents off of
@@ -647,11 +664,12 @@ gboolean bd_lvm_pvremove (const gchar *device, const BDExtraArg **extra, GError 
  * PV (see pvmove(8)).
  */
 gboolean bd_lvm_pvmove (const gchar *src, const gchar *dest, const BDExtraArg **extra, GError **error) {
-    const gchar *args[4] = {"pvmove", src, NULL, NULL};
+    const gchar *args[6] = {"pvmove", "-i", "1", src, NULL, NULL};
+    gint status = 0;
     if (dest)
-        args[2] = dest;
+        args[4] = dest;
 
-    return call_lvm_and_report_error (args, extra, error);
+    return bd_exec_and_report_progress (args, extra, extract_pvmove_progress, &status, error);
 }
 
 /**
