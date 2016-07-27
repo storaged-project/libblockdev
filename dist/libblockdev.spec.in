@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     1.8
+Version:     1.9
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -572,6 +572,10 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Jul 27 2016 Vratislav Podzimek <vpodzime@redhat.com> - 1.9-1
+- Add functions for creating thin/cache pools from existing LVs (vpodzime)
+- Add the new mpath_get_members() function to the docs (vpodzime)
+
 * Wed Jun 29 2016 Vratislav Podzimek <vpodzime@redhat.com> - 1.8-1
 - Add a function to get all mpath member devices (vpodzime)
 - Fix backport issues in the zfcp-related functionality (#1348442) (vpodzime)
