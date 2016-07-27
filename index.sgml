@@ -250,6 +250,8 @@
 <ANCHOR id="bd-lvm-cache-stats" href="libblockdev/libblockdev-LVM.html#bd-lvm-cache-stats">
 <ANCHOR id="bd-lvm-data-lv-name" href="libblockdev/libblockdev-LVM.html#bd-lvm-data-lv-name">
 <ANCHOR id="bd-lvm-metadata-lv-name" href="libblockdev/libblockdev-LVM.html#bd-lvm-metadata-lv-name">
+<ANCHOR id="bd-lvm-cache-pool-convert" href="libblockdev/libblockdev-LVM.html#bd-lvm-cache-pool-convert">
+<ANCHOR id="bd-lvm-thpool-convert" href="libblockdev/libblockdev-LVM.html#bd-lvm-thpool-convert">
 <ANCHOR id="libblockdev-LVM.other_details" href="libblockdev/libblockdev-LVM.html#libblockdev-LVM.other_details">
 <ANCHOR id="USE-DEFAULT-PE-SIZE:CAPS" href="libblockdev/libblockdev-LVM.html#USE-DEFAULT-PE-SIZE:CAPS">
 <ANCHOR id="BD-LVM-ERROR:CAPS" href="libblockdev/libblockdev-LVM.html#BD-LVM-ERROR:CAPS">
