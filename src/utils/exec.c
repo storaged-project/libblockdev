@@ -394,7 +394,7 @@ gboolean bd_exec_and_report_progress (const gchar **argv, const BDExtraArg **ext
             if (fds[0].revents & G_IO_IN) {
                 io_status = g_io_channel_read_line (out_pipe, &line, NULL, NULL, error);
                 if (io_status == G_IO_STATUS_NORMAL) {
-                    if (prog_extract (line, &completion))
+                    if (prog_extract && prog_extract (line, &completion))
                         bd_utils_report_progress (progress_id, completion, NULL);
                     else
                         g_string_append (stdout_data, line);
