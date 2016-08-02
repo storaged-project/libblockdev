@@ -121,13 +121,21 @@ gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
     gchar dev_status[11];
     dev_status[10] = '\0';
     gint page_size;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
 
     const gchar *argv[5] = {"swapon", NULL, NULL, NULL, NULL};
+    msg = g_strdup_printf ("Started 'swapon %s'", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
+
+    bd_utils_report_progress (progress_id, 0, "Analysing the swap device");
     /* check the device if it is an activatable swap */
     dev_file = g_io_channel_new_file (device, "r", error);
     if (!dev_file) {
         /* error is already populated */
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -139,6 +147,7 @@ gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
                      "Failed to determine device's state: %s", tmp_error->message);
         g_clear_error (&tmp_error);
         g_io_channel_shutdown (dev_file, FALSE, &tmp_error);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -149,6 +158,7 @@ gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
         g_clear_error (&tmp_error);
         g_io_channel_shutdown (dev_file, FALSE, &tmp_error);
         g_clear_error (&tmp_error);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -158,17 +168,21 @@ gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
     if (g_str_has_prefix (dev_status, "SWAP-SPACE")) {
         g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE,
                      "Old swap format, cannot activate.");
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     } else if (g_str_has_prefix (dev_status, "S1SUSPEND") || g_str_has_prefix (dev_status, "S2SUSPEND")) {
         g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE,
                      "Suspended system on the swap device, cannot activate.");
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     } else if (!g_str_has_prefix (dev_status, "SWAPSPACE2")) {
         g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE,
                      "Unknown swap space format, cannot activate.");
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
+    bd_utils_report_progress (progress_id, 10, "Swap device analysed, enabling");
     if (priority >= 0) {
         argv[next_arg] = "-p";
         next_arg++;
@@ -179,11 +193,12 @@ gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
 
     argv[next_arg] = device;
 
-    success = bd_utils_exec_and_report_error (argv, NULL, error);
+    success = bd_utils_exec_and_report_error_no_progress (argv, NULL, error);
 
     if (to_free_idx > 0)
         g_free ((gchar *) argv[to_free_idx]);
 
+    bd_utils_report_finished (progress_id, "Completed");
     return success;
 }
 
