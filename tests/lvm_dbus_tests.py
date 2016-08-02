@@ -5,13 +5,14 @@ import math
 import overrides_hack
 import six
 import re
+from itertools import chain
 
 from utils import create_sparse_tempfile
 from gi.repository import BlockDev, GLib
 
 import dbus
 sb = dbus.SystemBus()
-lvm_dbus_running = any("lvmdbus" in name for name in sb.list_names())
+lvm_dbus_running = any("lvmdbus" in name for name in chain(sb.list_names(), sb.list_activatable_names()))
 
 if lvm_dbus_running:
     # force the new plugin to be used
