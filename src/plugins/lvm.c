@@ -1791,15 +1791,15 @@ gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name,
  * Returns: whether the @cache_pool_lv was successfully attached to the @data_lv or not
  */
 gboolean bd_lvm_cache_attach (const gchar *vg_name, const gchar *data_lv, const gchar *cache_pool_lv, const BDExtraArg **extra, GError **error) {
-    const gchar *args[7] = {"lvconvert", "--type", "cache", "--cachepool", NULL, NULL, NULL};
+    const gchar *args[8] = {"lvconvert", "-y", "--type", "cache", "--cachepool", NULL, NULL, NULL};
     gboolean success = FALSE;
 
-    args[4] = g_strdup_printf ("%s/%s", vg_name, cache_pool_lv);
-    args[5] = g_strdup_printf ("%s/%s", vg_name, data_lv);
+    args[5] = g_strdup_printf ("%s/%s", vg_name, cache_pool_lv);
+    args[6] = g_strdup_printf ("%s/%s", vg_name, data_lv);
     success = call_lvm_and_report_error (args, extra, error);
 
-    g_free ((gchar *) args[4]);
     g_free ((gchar *) args[5]);
+    g_free ((gchar *) args[6]);
     return success;
 }
 
