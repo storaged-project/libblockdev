@@ -147,6 +147,21 @@ static void set_c_locale(gpointer user_data __attribute__((unused))) {
  */
 gboolean bd_utils_exec_and_report_error (const gchar **argv, const BDExtraArg **extra, GError **error) {
     gint status = 0;
+    /* just use the "stronger" function providing dumb progress reporting (just
+       'started' and 'finished') and throw away the returned status */
+    return bd_utils_exec_and_report_progress (argv, extra, NULL, &status, error);
+}
+
+/**
+ * bd_utils_exec_and_report_error_no_progress:
+ * @argv: (array zero-terminated=1): the argv array for the call
+ * @extra: (allow-none) (array zero-terminated=1): extra arguments
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @argv was successfully executed (no error and exit code 0) or not
+ */
+gboolean bd_utils_exec_and_report_error_no_progress (const gchar **argv, const BDExtraArg **extra, GError **error) {
+    gint status = 0;
     /* just use the "stronger" function and throw away the returned status */
     return bd_utils_exec_and_report_status_error (argv, extra, &status, error);
 }
