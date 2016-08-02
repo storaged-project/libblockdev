@@ -669,7 +669,7 @@ gboolean bd_lvm_pvmove (const gchar *src, const gchar *dest, const BDExtraArg **
     if (dest)
         args[4] = dest;
 
-    return bd_exec_and_report_progress (args, extra, extract_pvmove_progress, &status, error);
+    return bd_utils_exec_and_report_progress (args, extra, extract_pvmove_progress, &status, error);
 }
 
 /**

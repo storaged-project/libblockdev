@@ -319,7 +319,7 @@ gboolean bd_utils_exec_and_capture_output (const gchar **argv, const BDExtraArg 
 }
 
 /**
- * bd_exec_and_report_progress:
+ * bd_utils_exec_and_report_progress:
  * @argv: (array zero-terminated=1): the argv array for the call
  * @extra: (allow-none) (array zero-terminated=1): extra arguments
  * @prog_extract: (scope notified): function for extracting progress information
@@ -328,7 +328,7 @@ gboolean bd_utils_exec_and_capture_output (const gchar **argv, const BDExtraArg 
  *
  * Returns: whether the @argv was successfully executed (no error and exit code 0) or not
  */
-gboolean bd_exec_and_report_progress (const gchar **argv, const BDExtraArg **extra, BDUtilsProgExtract prog_extract, gint *proc_status, GError **error) {
+gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg **extra, BDUtilsProgExtract prog_extract, gint *proc_status, GError **error) {
     const gchar **args = NULL;
     guint args_len = 0;
     const gchar **arg_p = NULL;
