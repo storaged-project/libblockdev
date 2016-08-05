@@ -557,7 +557,7 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
             g_variant_unref (ret);
             ret = NULL;
         }
-        if (!completed) {
+        if (!completed && !(*error)) {
             /* let's report progress and wait longer */
             ret = get_object_property (task_path, JOB_INTF, "Percent", error);
             if (ret) {
@@ -588,7 +588,7 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
             g_free (task_path);
             return;
         } else {
-            g_variant_get (ret, "s", &obj_path);
+            g_variant_get (ret, "o", &obj_path);
             g_variant_unref (ret);
             if (g_strcmp0 (obj_path, "/") != 0) {
                 log_msg = g_strdup_printf ("Got result: %s", obj_path);
