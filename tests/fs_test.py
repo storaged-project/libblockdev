@@ -266,9 +266,6 @@ class Ext4Resize(FSTestCase):
 
 
 
-
-
-
 class XfsTestMkfs(FSTestCase):
     def test_xfs_mkfs(self):
         """Verify that it is possible to create a new xfs file system"""
@@ -465,10 +462,7 @@ class XfsResize(FSTestCase):
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 90 * 1024**2)
-        
-        
-        
-        
+          
         
 class VfatTestMkfs(FSTestCase):
     def test_vfat_mkfs(self):

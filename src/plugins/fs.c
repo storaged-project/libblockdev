@@ -101,15 +101,6 @@ void bd_fs_xfs_info_free (BDFSXfsInfo *data) {
 }
 
 
-
-
-
-
-
-
-
-
-
 /**
  * bd_fs_vfat_info_copy: (skip)
  *
@@ -140,20 +131,6 @@ void bd_fs_xfs_info_free (BDFVfatInfo *data) {
     g_free (data->state);
     g_free (data);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /**
  * check: (skip)
@@ -785,7 +762,6 @@ gboolean bd_fs_xfs_resize (const gchar *mpoint, guint64 new_size, const BDExtraA
     g_free (size_str);
     return ret;
 }
-
 
 
 /**

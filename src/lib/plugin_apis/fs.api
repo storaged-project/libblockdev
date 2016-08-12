@@ -135,14 +135,6 @@ GType bd_fs_xfs_info_get_type () {
 }
 
 
-
-
-
-
-
-
-
-
 #define BD_FS_TYPE_VFAT_INFO (bd_fs_vfat_info_get_type ())
 GType bd_fs_vfat_info_get_type();
 
@@ -209,20 +201,6 @@ GType bd_fs_vfat_info_get_type () {
 
     return type;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /**
@@ -395,15 +373,6 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error);
 gboolean bd_fs_xfs_resize (const gchar *mpoint, guint64 new_size, const BDExtraArg **extra, GError **error);
 
 
-
-
-
-
-
-
-
-
-
 /**
  * bd_fs_vfat_mkfs:
  * @device: the device to create a new vfat fs on
@@ -485,14 +454,6 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error);
  * Returns: whether the file system mounted on @mpoint was successfully resized or not
  */
 gboolean bd_fs_vfat_resize (const gchar *mpoint, guint64 new_size, const BDExtraArg **extra, GError **error);
-
-
-
-
-
-
-
-
 
 
 #endif  /* BD_FS_API */
