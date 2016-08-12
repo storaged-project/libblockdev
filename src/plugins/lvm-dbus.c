@@ -57,8 +57,8 @@ static gchar *global_config_str = NULL;
 #define DBUS_TOP_OBJ "/org/freedesktop/DBus"
 #define DBUS_PROPS_IFACE "org.freedesktop.DBus.Properties"
 #define DBUS_INTRO_IFACE "org.freedesktop.DBus.Introspectable"
-#define DBUS_LONG_CALL_TIMEOUT 10000 /* msecs */
-#define METHOD_CALL_TIMEOUT (DBUS_LONG_CALL_TIMEOUT / 2)
+#define METHOD_CALL_TIMEOUT 5000
+#define PROGRESS_WAIT 500 * 1000 /* microseconds */
 
 static GDBusConnection *bus = NULL;
 
@@ -390,7 +390,7 @@ static GVariant* get_lvm_object_property (const gchar *obj_id, const gchar *ifac
     }
 }
 
-static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, guint64 *task_id, GError **error) {
+static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, guint64 *task_id, guint64 *progress_id, GError **error) {
     GVariant *config = NULL;
     GVariant *param = NULL;
     GVariantIter iter;
@@ -402,6 +402,7 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
     GVariant *ret = NULL;
     gchar *params_str = NULL;
     gchar *log_msg = NULL;
+    gchar *prog_msg = NULL;
     const BDExtraArg **extra_p = NULL;
 
     /* don't allow global config string changes during the run */
@@ -448,8 +449,8 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
         }
     }
 
-    /* add the timeout spec */
-    tmo = g_variant_new ("i", METHOD_CALL_TIMEOUT);
+    /* add the timeout spec (in seconds) */
+    tmo = g_variant_new ("i", 1);
     g_variant_builder_add_value (&builder, tmo);
 
     /* add extra parameters including config */
@@ -465,11 +466,16 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
                                intf, method, obj, params_str);
     log_task_status (*task_id, log_msg);
     g_free (log_msg);
+
     /* now do the call with all the parameters */
     ret = g_dbus_connection_call_sync (bus, LVM_BUS_NAME, obj, intf, method, all_params,
-                                       NULL, G_DBUS_CALL_FLAGS_NONE, DBUS_LONG_CALL_TIMEOUT, NULL, error);
+                                       NULL, G_DBUS_CALL_FLAGS_NONE, METHOD_CALL_TIMEOUT, NULL, error);
 
     g_mutex_unlock (&global_config_lock);
+    prog_msg = g_strdup_printf ("Started the '%s.%s' method on the '%s' object with the following parameters: '%s'",
+                               intf, method, obj, params_str);
+    *progress_id = bd_utils_report_started (prog_msg);
+    g_free (prog_msg);
 
     if (!ret) {
         g_prefix_error (error, "Failed to call the '%s' method on the '%s' object: ", method, obj);
@@ -484,17 +490,23 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
     gchar *obj_path = NULL;
     gchar *task_path = NULL;
     guint64 log_task_id = 0;
+    guint64 prog_id = 0;
+    gdouble progress = 0.0;
     gchar *log_msg = NULL;
+    gboolean completed = FALSE;
 
-    ret = call_lvm_method (obj, intf, method, params, extra_params, extra_args, &log_task_id, error);
+    ret = call_lvm_method (obj, intf, method, params, extra_params, extra_args, &log_task_id, &prog_id, error);
     log_task_status (log_task_id, "Done.");
     if (!ret) {
         if (*error) {
             log_msg = g_strdup_printf ("Got error: %s", (*error)->message);
             log_task_status (log_task_id, log_msg);
+            bd_utils_report_finished (prog_id, log_msg);
             g_free (log_msg);
-        } else
+        } else {
             log_task_status (log_task_id, "Got unknown error");
+            bd_utils_report_finished (prog_id, "Got unknown error");
+        }
         return;
     }
     if (g_variant_check_format_string (ret, "((oo))", TRUE)) {
@@ -507,6 +519,7 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
             g_variant_unref (ret);
             g_free (task_path);
             g_free (obj_path);
+            bd_utils_report_finished (prog_id, "Completed");
             return;
         } else {
             g_variant_unref (ret);
@@ -519,6 +532,7 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
         } else {
             log_task_status (log_task_id, "No result, no job started");
             g_free (task_path);
+            bd_utils_report_finished (prog_id, "Completed");
             return;
         }
     } else {
@@ -526,6 +540,7 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
         log_task_status (log_task_id, "Failed to parse the returned value!");
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
                      "Failed to parse the returned value!");
+        bd_utils_report_finished (prog_id, (*error)->message);
         return;
     }
 
@@ -534,12 +549,26 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
     g_free (log_msg);
 
     ret = NULL;
-    while (!ret && !(*error)) {
-        ret = g_dbus_connection_call_sync (bus, LVM_BUS_NAME, task_path, JOB_INTF, "Wait", g_variant_new ("(i)", -1),
-                                           NULL, G_DBUS_CALL_FLAGS_NONE, DBUS_LONG_CALL_TIMEOUT, NULL, error);
-        if (!ret && g_error_matches (*error, G_IO_ERROR, G_IO_ERROR_TIMED_OUT)) {
-            /* let's wait longer */
-            g_clear_error (error);
+    while (!completed && !(*error)) {
+        g_usleep (PROGRESS_WAIT);
+        ret = get_object_property (task_path, JOB_INTF, "Complete", error);
+        if (ret) {
+            g_variant_get (ret, "b", &completed);
+            g_variant_unref (ret);
+            ret = NULL;
+        }
+        if (!completed && !(*error)) {
+            /* let's report progress and wait longer */
+            ret = get_object_property (task_path, JOB_INTF, "Percent", error);
+            if (ret) {
+                g_variant_get (ret, "d", &progress);
+                bd_utils_report_progress (prog_id, (gint) progress, NULL);
+                g_variant_unref (ret);
+                ret = NULL;
+            } else {
+                g_debug ("Got error when getting progress: %s", (*error)->message);
+                g_clear_error (error);
+            }
             log_msg = g_strdup_printf ("Still waiting for job '%s' to finish", task_path);
             log_task_status (log_task_id, log_msg);
             g_free (log_msg);
@@ -550,16 +579,16 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
     log_task_status (log_task_id, log_msg);
     g_free (log_msg);
 
-    if (ret) {
-        g_variant_unref (ret);
+    if (!(*error)) {
         ret = get_object_property (task_path, JOB_INTF, "Result", error);
         if (!ret) {
             g_prefix_error (error, "Getting result after waiting for '%s' method of the '%s' object failed: ",
                             method, obj);
+            bd_utils_report_finished (prog_id, (*error)->message);
             g_free (task_path);
             return;
         } else {
-            g_variant_get (ret, "s", &obj_path);
+            g_variant_get (ret, "o", &obj_path);
             g_variant_unref (ret);
             if (g_strcmp0 (obj_path, "/") != 0) {
                 log_msg = g_strdup_printf ("Got result: %s", obj_path);
@@ -567,11 +596,12 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
                 g_free (log_msg);
             } else
                 log_task_status (log_task_id, "No result");
+            bd_utils_report_finished (prog_id, "Completed");
             g_free (obj_path);
 
             /* remove the job object and clean after ourselves */
             ret = g_dbus_connection_call_sync (bus, LVM_BUS_NAME, task_path, JOB_INTF, "Remove", NULL,
-                                               NULL, G_DBUS_CALL_FLAGS_NONE, DBUS_LONG_CALL_TIMEOUT, NULL, error);
+                                               NULL, G_DBUS_CALL_FLAGS_NONE, METHOD_CALL_TIMEOUT, NULL, error);
             if (ret)
                 g_variant_unref (ret);
             if (*error)
@@ -580,10 +610,12 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
             g_free (task_path);
             return;
         }
-    } else
+    } else {
         /* some real error */
         g_prefix_error (error, "Waiting for '%s' method of the '%s' object to finish failed: ",
                         method, obj);
+        bd_utils_report_finished (prog_id, "Completed");
+    }
     g_free (task_path);
 }
 

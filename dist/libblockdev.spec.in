@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     1.5
+Version:     1.999
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
