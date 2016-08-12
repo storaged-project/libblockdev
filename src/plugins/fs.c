@@ -115,13 +115,16 @@ void bd_fs_xfs_info_free (BDFSXfsInfo *data) {
  *
  * Creates a new copy of @data.
  */
-BDFSVfatInfo* bd_fs_vfat_info_copy (BDFSXfsInfo *data) {
+BDFSVfatInfo* bd_fs_vfat_info_copy (BDFVfatInfo *data) {
     BDFSXfsInfo *ret = g_new0 (BDFSXfsInfo, 1);
 
     ret->label = g_strdup (data->label);
     ret->uuid = g_strdup (data->uuid);
+    ret->state = g_string (data->state);
     ret->block_size = data->block_size;
     ret->block_count = data->block_count;
+    ret->free_blocks = data->freeblocks;
+
 
     return ret;
 }
@@ -131,9 +134,10 @@ BDFSVfatInfo* bd_fs_vfat_info_copy (BDFSXfsInfo *data) {
  *
  * Frees @data.
  */
-void bd_fs_xfs_info_free (BDFSXfsInfo *data) {
+void bd_fs_xfs_info_free (BDFVfatInfo *data) {
     g_free (data->label);
     g_free (data->uuid);
+    g_free (data->state);
     g_free (data);
 }
 
@@ -799,6 +803,7 @@ gboolean bd_fs_xfs_resize (const gchar *mpoint, guint64 new_size, const BDExtraA
  * @error: (out): place to store error (if any)
  *
  * Returns: whether a new vfat fs was successfully created on @device or not
+ *
  */
 gboolean bd_fs_vfat_mkfs (const gchar *device, const BDExtraArg **extra, GError **error) {
     const gchar *args[3] = {"mkfs.vfat", device, NULL};
@@ -823,20 +828,24 @@ gboolean bd_fs_vfat_wipe (const gchar *device, GError **error) {
  * @device: the device containing the file system to check
  * @error: (out): place to store error (if any)
  *
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the check (right now
+ *
+ *
  * Returns: whether an vfat file system on the @device is clean or not
  *
  * Note: if the file system is mounted it may be reported as unclean even if
  *       everything is okay and there are just some pending/in-progress writes
  */
-gboolean bd_fs_vfat_check (const gchar *device, GError **error) {
-    const gchar *args[6] = {"xfs_db", "-r", "-c", "check", device, NULL};
+gboolean bd_fs_vfat_check (const gchar *device, GError **error, const BDExtraArg **extra){
+
+    const gchar *args[5] = {"fsck.vfat", "-f", "-n", device, NULL};
+    gint status = 0;
     gboolean ret = FALSE;
 
-    ret = bd_utils_exec_and_report_error (args, NULL, error);
-    if (!ret && *error &&  g_error_matches ((*error), BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED))
-        /* non-zero exit status -> the fs is not clean, but not an error */
-        /* TODO: should we check that the device exists and contains an XFS FS beforehand? */
+    ret = bd_utils_exec_and_report_status_error (args, extra, &status, error);
+    if (!ret && (status == 4)) {
         g_clear_error (error);
+    }
     return ret;
 }
 
@@ -844,14 +853,17 @@ gboolean bd_fs_vfat_check (const gchar *device, GError **error) {
  * bd_fs_vfat_repair:
  * @device: the device containing the file system to repair
  * @extra: (allow-none) (array zero-terminated=1): extra options for the repair (right now
- *                                                 passed to the 'xfs_repair' utility)
+ *                                                 passed to the 'vfat_repair' utility)
  * @error: (out): place to store error (if any)
+ * @unsafe: whether to do unsafe operations too
  *
  * Returns: whether an vfat file system on the @device was successfully repaired
  *          (if needed) or not (error is set in that case)
  */
-gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GError **error) {
-    const gchar *args[3] = {"vfat_repair", device, NULL};
+gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GError **error, gboolean unsafe){
+
+
+    const gchar *args[5] = {"fsck.vfat", "-f", unsafe ? "-y" : "", device, NULL};
 
     return bd_utils_exec_and_report_error (args, extra, error);
 }

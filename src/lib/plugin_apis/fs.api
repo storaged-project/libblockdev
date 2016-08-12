@@ -98,6 +98,8 @@ typedef struct BDFSXfsInfo {
  *
  * Creates a new copy of @data.
  */
+ 
+ 
 BDFSXfsInfo* bd_fs_xfs_info_copy (BDFSXfsInfo *data) {
     BDFSXfsInfo *ret = g_new0 (BDFSXfsInfo, 1);
 
@@ -148,16 +150,19 @@ GType bd_fs_vfat_info_get_type();
  * BDFVfatInfo:
  * @label: label of the filesystem
  * @uuid: uuid of the filesystem
- *     //State?
+ * @state: state of the filesystem (e.g. "clean")
  * @block_size: block size used by the filesystem
  * @block_count: number of blocks in the filesystem
- *     //free blocks?
+ * @free_blocks: number of free blocks in the filesystem
  */
 typedef struct BDFSVfatInfo {
     gchar *label;
     gchar *uuid;
+    gchar *state;
     guint64 block_size;
     guint64 block_count;
+    guint64 free_blocks;
+    
 
 } BDFSVfatInfo;
 
@@ -171,8 +176,12 @@ BDFSVfatInfo* bd_fs_vfat_info_copy (BDFSVfatInfo *data) {
 
     ret->label = g_strdup (data->label);
     ret->uuid = g_strdup (data->uuid);
+    ret->state = g_strdup (data->state);
     ret->block_size = data->block_size;
     ret->block_count = data->block_count;
+    ret->free_blocks = data->free_blocks;
+    
+    
 
     return ret;
 }
@@ -185,6 +194,7 @@ BDFSVfatInfo* bd_fs_vfat_info_copy (BDFSVfatInfo *data) {
 void bd_fs_vfat_info_free (BDFSVfatInfo *data) {
     g_free (data->label);
     g_free (data->uuid);
+    g_free (data->state);
     g_free (data);
 }
 
@@ -419,13 +429,15 @@ gboolean bd_fs_vfat_wipe (const gchar *device, GError **error);
  * bd_fs_vfat_check:
  * @device: the device containing the file system to check
  * @error: (out): place to store error (if any)
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the check (right now
+ *                                                 passed to the 'e2fsck' utility)
  *
  * Returns: whether a vfat file system on the @device is clean or not
  *
  * Note: if the file system is mounted it may be reported as unclean even if
  *       everything is okay and there are just some pending/in-progress writes
  */
-gboolean bd_fs_vfat_check (const gchar *device, GError **error);
+gboolean bd_fs_vfat_check (const gchar *device, GError **error, const BDExtraArg **extra);
 
 /**
  * bd_fs_vfat_repair:
@@ -433,11 +445,12 @@ gboolean bd_fs_vfat_check (const gchar *device, GError **error);
  * @extra: (allow-none) (array zero-terminated=1): extra options for the repair (right now
  *                                                 passed to the 'vfat_repair' utility)
  * @error: (out): place to store error (if any)
+ * @unsafe: whether to do unsafe operations too
  *
  * Returns: whether an vfat file system on the @device was successfully repaired
  *          (if needed) or not (error is set in that case)
  */
-gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GError **error);
+gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GError **error, gboolean unsafe);
 
 /**
  * bd_fs_vfat_set_label:

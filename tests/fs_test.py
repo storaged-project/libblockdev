@@ -264,6 +264,8 @@ class Ext4Resize(FSTestCase):
         # at least 90 % should be available, so it should be reported
         self.assertGreater(fi.free_blocks, 0.90 * 100 * 1024**2 / 1024)
 
+
+
 class XfsTestMkfs(FSTestCase):
     def test_xfs_mkfs(self):
         """Verify that it is possible to create a new xfs file system"""
