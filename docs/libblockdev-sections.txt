@@ -360,6 +360,7 @@ bd_fs_ext4_check
 bd_fs_ext4_get_info
 bd_fs_ext4_info_copy
 bd_fs_ext4_info_free
+bd_fs_ext4_info_get_type
 bd_fs_ext4_mkfs
 bd_fs_ext4_repair
 bd_fs_ext4_resize
