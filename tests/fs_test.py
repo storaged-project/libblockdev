@@ -266,6 +266,9 @@ class Ext4Resize(FSTestCase):
 
 
 
+
+
+
 class XfsTestMkfs(FSTestCase):
     def test_xfs_mkfs(self):
         """Verify that it is possible to create a new xfs file system"""
@@ -462,3 +465,151 @@ class XfsResize(FSTestCase):
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 90 * 1024**2)
+        
+        
+        
+        
+        
+class VfatTestMkfs(FSTestCase):
+    def test_vfat_mkfs(self):
+        """Verify that it is possible to create a new vfat file system"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_vfat_mkfs("/non/existing/device", None)
+
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        # just try if we can mount the file system
+        with mounted(self.loop_dev, self.mount_dir):
+            pass
+
+        BlockDev.fs_wipe(self.loop_dev, True)
+
+class VfatTestWipe(FSTestCase):
+    def test_vfat_wipe(self):
+        """Verify that it is possible to wipe an vfat file system"""
+
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_vfat_wipe(self.loop_dev)
+        self.assertTrue(succ)
+
+        # already wiped, should fail this time
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_vfat_wipe(self.loop_dev)
+
+        os.system("pvcreate %s >/dev/null" % self.loop_dev)
+
+        # LVM PV signature, not a vfat file system
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_vfat_wipe(self.loop_dev)
+
+        BlockDev.fs_wipe(self.loop_dev, True)
+
+        os.system("mkfs.ext2 %s &>/dev/null" % self.loop_dev)
+
+        # ext2, not a vfat file system
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_vfat_wipe(self.loop_dev)
+
+        BlockDev.fs_wipe(self.loop_dev, True)
+
+class VfatTestCheck(FSTestCase):
+    def test_vfat_check(self):
+        """Verify that it is possible to check a vfat file system"""
+
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_vfat_check(self.loop_dev)
+        self.assertTrue(succ)
+
+        # mounted, but can be checked and nothing happened in/to the file
+        # system, so it should be just reported as clean
+        with mounted(self.loop_dev, self.mount_dir):
+            succ = BlockDev.fs_vfat_check(self.loop_dev)
+            self.assertTrue(succ)
+
+        succ = BlockDev.fs_vfat_check(self.loop_dev)
+        self.assertTrue(succ)
+
+class VfatTestRepair(FSTestCase):
+    def test_vfat_repair(self):
+        """Verify that it is possible to repair a vfat file system"""
+
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_vfat_repair(self.loop_dev, None)
+        self.assertTrue(succ)
+        
+        # unsafe operations should work here too
+        succ = BlockDev.fs_vfat_repair(self.loop_dev, True, None)
+        self.assertTrue(succ)
+
+        with mounted(self.loop_dev, self.mount_dir):
+            with self.assertRaises(GLib.GError):
+                BlockDev.fs_vfat_repair(self.loop_dev, None)
+
+        succ = BlockDev.fs_vfat_repair(self.loop_dev, None)
+        self.assertTrue(succ)
+
+class VfatGetInfo(FSTestCase):
+    def test_vfat_get_info(self):
+        """Verify that it is possible to get info about a vfat file system"""
+
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        with mounted(self.loop_dev, self.mount_dir):
+            fi = BlockDev.fs_vfat_get_info(self.loop_dev)
+
+        self.assertEqual(fi.block_size, 4096)
+        self.assertEqual(fi.block_count, 100 * 1024**2 / 4096)
+        self.assertEqual(fi.label, "")
+        # should be an non-empty string
+        self.assertTrue(fi.uuid)
+
+class VfatSetLabel(FSTestCase):
+    def test_vfat_set_label(self):
+        """Verify that it is possible to set label of a vfat file system"""
+
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        with mounted(self.loop_dev, self.mount_dir):
+            fi = BlockDev.fs_vfat_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "")
+
+        succ = BlockDev.fs_vfat_set_label(self.loop_dev, "TEST_LABEL")
+        self.assertTrue(succ)
+        with mounted(self.loop_dev, self.mount_dir):
+            fi = BlockDev.fs_vfat_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "TEST_LABEL")
+
+        succ = BlockDev.fs_vfat_set_label(self.loop_dev, "TEST_LABEL2")
+        self.assertTrue(succ)
+        with mounted(self.loop_dev, self.mount_dir):
+            fi = BlockDev.fs_vfat_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "TEST_LABEL2")
+
+        succ = BlockDev.fs_vfat_set_label(self.loop_dev, "")
+        self.assertTrue(succ)
+        with mounted(self.loop_dev, self.mount_dir):
+            fi = BlockDev.fs_vfat_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "")
+
+
+class VfatResize(FSTestCase):
+   #todo
+        
+        
+        
+        
+        

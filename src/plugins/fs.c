@@ -788,13 +788,6 @@ gboolean bd_fs_xfs_resize (const gchar *mpoint, guint64 new_size, const BDExtraA
 
 
 
-
-
-
-
-
-
-
 /**
  * bd_fs_vfat_mkfs:
  * @device: the device to create a new vfat fs on
@@ -877,13 +870,16 @@ gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GErro
  * Returns: whether the label of xfs file system on the @device was
  *          successfully set or not
  */
+
+
 gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError **error) {
-    const gchar *args[5] = {"xfs_admin", "-L", label, device, NULL};
+    const gchar *args[5] = {"dosfslabel", device, label, NULL};
     if (!label || (strncmp (label, "", 1) == 0))
         args[2] = "--";
 
     return bd_utils_exec_and_report_error (args, NULL, error);
 }
+
 
 /**
  * bd_fs_vfat_get_info:
@@ -894,101 +890,40 @@ gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError *
  *                           %NULL in case of error
  */
 BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
-    const gchar *args[4] = {"xfs_admin", "-lu", device, NULL};
-    gboolean success = FALSE;
-    gchar *output = NULL;
-    BDFSXfsInfo *ret = NULL;
-    gchar **lines = NULL;
-    gchar **line_p = NULL;
-    gboolean have_label = FALSE;
-    gboolean have_uuid = FALSE;
-    gchar *val_start = NULL;
-    gchar *val_end = NULL;
 
-    success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
-    if (!success)
-        /* error is already populated */
-        return FALSE;
+    const gchar *args[4] = {"lsblk", "-o FSTYPE,NAME,LABEL,UUID,SIZE,MOUNTPOINT,TYPE", device, NULL};
 
-    ret = g_new0 (BDFSXfsInfo, 1);
-    lines = g_strsplit (output, "\n", 0);
-    g_free (output);
-    for (line_p=lines; *line_p && (!have_label || !have_uuid); line_p++) {
-        if (!have_label && g_str_has_prefix (*line_p, "label")) {
-            /* extract label from something like this: label = "TEST_LABEL" */
-            val_start = strchr (*line_p, '"');
-            if (val_start)
-                val_end = strchr(val_start + 1, '"');
-            if (val_start && val_end) {
-                ret->label = g_strndup (val_start + 1, val_end - val_start - 1);
-                have_label = TRUE;
-            }
-        } else if (!have_uuid && g_str_has_prefix (*line_p, "UUID")) {
-            /* get right after the "UUID = " prefix */
-            val_start = *line_p + 7;
-            ret->uuid = g_strdup (val_start);
-            have_uuid = TRUE;
-        }
-    }
-    g_strfreev (lines);
+    BDFSVfatInfo *ret = g_new0 (BDFsVfatInfo, 1);
+        gchar *value = NULL;
 
-    args[0] = "xfs_info";
-    args[1] = device;
-    args[2] = NULL;
-    success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
-    if (!success) {
-        /* error is already populated */
-        bd_fs_xfs_info_free (ret);
-        return FALSE;
-    }
+        ret->label = g_strdup ((gchar*) g_hash_table_lookup (table, "Filesystem volume name"));
+        if ((!ret->label) || (g_strcmp0 (ret->label, "<none>") == 0))
+            ret->label = g_strdup ("");
+        ret->uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "Filesystem UUID"));
+        ret->state = g_strdup ((gchar*) g_hash_table_lookup (table, "Filesystem state"));
 
-    lines = g_strsplit (output, "\n", 0);
-    g_free (output);
-    line_p = lines;
-    /* find the beginning of the (data) section we are interested in */
-    while (*line_p && !g_str_has_prefix (*line_p, "data"))
-        line_p++;
-    if (!line_p) {
-        /* error is already populated */
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
-        g_strfreev (lines);
-        bd_fs_xfs_info_free (ret);
-        return FALSE;
-    }
+        value = (gchar*) g_hash_table_lookup (table, "Block size");
+        if (value)
+            ret->block_size = g_ascii_strtoull (value, NULL, 0);
+        else
+            ret->block_size = 0;
+        value = (gchar*) g_hash_table_lookup (table, "Block count");
+        if (value)
+            ret->block_count = g_ascii_strtoull (value, NULL, 0);
+        else
+            ret->block_count = 0;
+        value = (gchar*) g_hash_table_lookup (table, "Free blocks");
+        if (value)
+            ret->free_blocks = g_ascii_strtoull (value, NULL, 0);
+        else
+            ret->free_blocks = 0;
 
-    /* extract data from something like this: "data     =      bsize=4096   blocks=262400, imaxpct=25" */
-    val_start = strchr (*line_p, '=');
-    val_start++;
-    while (isspace (*val_start))
-        val_start++;
-    if (g_str_has_prefix (val_start, "bsize")) {
-        val_start = strchr (val_start, '=');
-        val_start++;
-        ret->block_size = g_ascii_strtoull (val_start, NULL, 0);
-    } else {
-        /* error is already populated */
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
-        g_strfreev (lines);
-        bd_fs_xfs_info_free (ret);
-        return FALSE;
-    }
-    while (isdigit (*val_start) || isspace(*val_start))
-        val_start++;
-    if (g_str_has_prefix (val_start, "blocks")) {
-        val_start = strchr (val_start, '=');
-        val_start++;
-        ret->block_count = g_ascii_strtoull (val_start, NULL, 0);
-    } else {
-        /* error is already populated */
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
-        g_strfreev (lines);
-        bd_fs_xfs_info_free (ret);
-        return FALSE;
-    }
-    g_strfreev (lines);
+        if (free_table)
+            g_hash_table_destroy (table);
 
-    return ret;
+        return ret;
 }
+
 
 /**
  * bd_fs_vfat_resize:
@@ -1001,30 +936,10 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
  *
  * Returns: whether the file system mounted on @mpoint was successfully resized or not
  */
+
 gboolean bd_fs_vfat_resize (const gchar *mpoint, guint64 new_size, const BDExtraArg **extra, GError **error) {
-    const gchar *args[5] = {"xfs_growfs", NULL, NULL, NULL, NULL};
-    gchar *size_str = NULL;
-    gboolean ret = FALSE;
-
-    if (new_size != 0) {
-        args[1] = "-D";
-        /* xfs_growfs doesn't understand bytes, just a number of blocks */
-        size_str = g_strdup_printf ("%"G_GUINT64_FORMAT, new_size);
-        args[2] = size_str;
-        args[3] = mpoint;
-    } else
-        args[1] = mpoint;
-
-    ret = bd_utils_exec_and_report_error (args, extra, error);
-
-    g_free (size_str);
-    return ret;
+  //todo
+    return true;
 }
-
-
-
-
-
-
 
 
