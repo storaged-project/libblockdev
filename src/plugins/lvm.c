@@ -1734,15 +1734,25 @@ gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name,
     gboolean success = FALSE;
     gchar *type = NULL;
     gchar *name = NULL;
+    gchar *msg = NULL;
+    guint64 progress_id = 0;
     const gchar *args[10] = {"lvconvert", "-y", "--type", "cache-pool", "--poolmetadata", NULL, "--cachemode", NULL, NULL, NULL};
+
+    msg = g_strdup_printf ("Started 'create cache pool %s/%s'", vg_name, pool_name);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     /* create an LV for the pool */
     type = get_lv_type_from_flags (flags, FALSE, error);
     success = bd_lvm_lvcreate (vg_name, pool_name, pool_size, type, fast_pvs, NULL, error);
     if (!success) {
         g_prefix_error (error, "Failed to create the pool LV: ");
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
+
+    /* 1/3 steps done */
+    bd_utils_report_progress (progress_id, 33, "Created the data LV");
 
     /* determine the size of the metadata LV */
     type = get_lv_type_from_flags (flags, TRUE, error);
@@ -1750,6 +1760,7 @@ gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name,
         md_size = bd_lvm_cache_get_default_md_size (pool_size, error);
     if (*error) {
         g_prefix_error (error, "Failed to determine size for the pool metadata LV: ");
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     name = g_strdup_printf ("%s_meta", pool_name);
@@ -1759,14 +1770,19 @@ gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name,
     if (!success) {
         g_free (name);
         g_prefix_error (error, "Failed to create the pool metadata LV: ");
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
+
+    /* 2/3 steps done */
+    bd_utils_report_progress (progress_id, 66, "Created the metadata LV");
 
     /* create the cache pool from the two LVs */
     args[5] = name;
     args[7] = (const gchar *) bd_lvm_cache_get_mode_str (mode, error);
     if (!args[7]) {
         g_free ((gchar *) args[5]);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     name = g_strdup_printf ("%s/%s", vg_name, pool_name);
@@ -1774,6 +1790,11 @@ gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name,
     success = call_lvm_and_report_error (args, NULL, error);
     g_free ((gchar *) args[5]);
     g_free ((gchar *) args[8]);
+
+    if (!success && (*error))
+        bd_utils_report_finished (progress_id, (*error)->message);
+    else
+        bd_utils_report_finished (progress_id, "Completed");
 
     /* just return the result of the last step (it sets error on fail) */
     return success;
@@ -1849,28 +1870,44 @@ gboolean bd_lvm_cache_create_cached_lv (const gchar *vg_name, const gchar *lv_na
                                         const gchar **slow_pvs, const gchar **fast_pvs, GError **error) {
     gboolean success = FALSE;
     gchar *name = NULL;
+    gchar *msg = NULL;
+    guint64 progress_id = 0;
+
+    msg = g_strdup_printf ("Started 'create cached LV %s/%s'", vg_name, lv_name);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     name = g_strdup_printf ("%s_cache", lv_name);
     success = bd_lvm_cache_create_pool (vg_name, name, cache_size, md_size, mode, flags, fast_pvs, error);
     if (!success) {
         g_prefix_error (error, "Failed to create the cache pool '%s': ", name);
         g_free (name);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
+
+    /* 3/5 steps (cache pool creation has 3 steps) done */
+    bd_utils_report_progress (progress_id, 60, "Cache pool created");
 
     success = bd_lvm_lvcreate (vg_name, lv_name, data_size, NULL, slow_pvs, NULL, error);
     if (!success) {
         g_prefix_error (error, "Failed to create the data LV: ");
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
+
+    /* 4/5 steps (cache pool creation has 3 steps) done */
+    bd_utils_report_progress (progress_id, 80, "Data LV created");
 
     success = bd_lvm_cache_attach (vg_name, lv_name, name, NULL, error);
     if (!success) {
         g_prefix_error (error, "Failed to attach the cache pool '%s' to the data LV: ", name);
         g_free (name);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
+    bd_utils_report_finished (progress_id, "Completed");
     g_free (name);
     return TRUE;
 }
