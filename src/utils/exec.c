@@ -147,6 +147,21 @@ static void set_c_locale(gpointer user_data __attribute__((unused))) {
  */
 gboolean bd_utils_exec_and_report_error (const gchar **argv, const BDExtraArg **extra, GError **error) {
     gint status = 0;
+    /* just use the "stronger" function providing dumb progress reporting (just
+       'started' and 'finished') and throw away the returned status */
+    return bd_utils_exec_and_report_progress (argv, extra, NULL, &status, error);
+}
+
+/**
+ * bd_utils_exec_and_report_error_no_progress:
+ * @argv: (array zero-terminated=1): the argv array for the call
+ * @extra: (allow-none) (array zero-terminated=1): extra arguments
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @argv was successfully executed (no error and exit code 0) or not
+ */
+gboolean bd_utils_exec_and_report_error_no_progress (const gchar **argv, const BDExtraArg **extra, GError **error) {
+    gint status = 0;
     /* just use the "stronger" function and throw away the returned status */
     return bd_utils_exec_and_report_status_error (argv, extra, &status, error);
 }
@@ -304,7 +319,7 @@ gboolean bd_utils_exec_and_capture_output (const gchar **argv, const BDExtraArg 
 }
 
 /**
- * bd_exec_and_report_progress:
+ * bd_utils_exec_and_report_progress:
  * @argv: (array zero-terminated=1): the argv array for the call
  * @extra: (allow-none) (array zero-terminated=1): extra arguments
  * @prog_extract: (scope notified): function for extracting progress information
@@ -313,7 +328,7 @@ gboolean bd_utils_exec_and_capture_output (const gchar **argv, const BDExtraArg 
  *
  * Returns: whether the @argv was successfully executed (no error and exit code 0) or not
  */
-gboolean bd_exec_and_report_progress (const gchar **argv, const BDExtraArg **extra, BDUtilsProgExtract prog_extract, gint *proc_status, GError **error) {
+gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg **extra, BDUtilsProgExtract prog_extract, gint *proc_status, GError **error) {
     const gchar **args = NULL;
     guint args_len = 0;
     const gchar **arg_p = NULL;
@@ -394,7 +409,7 @@ gboolean bd_exec_and_report_progress (const gchar **argv, const BDExtraArg **ext
             if (fds[0].revents & G_IO_IN) {
                 io_status = g_io_channel_read_line (out_pipe, &line, NULL, NULL, error);
                 if (io_status == G_IO_STATUS_NORMAL) {
-                    if (prog_extract (line, &completion))
+                    if (prog_extract && prog_extract (line, &completion))
                         bd_utils_report_progress (progress_id, completion, NULL);
                     else
                         g_string_append (stdout_data, line);
