@@ -579,6 +579,7 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
     log_task_status (log_task_id, log_msg);
     g_free (log_msg);
 
+    obj_path = NULL;
     if (!(*error)) {
         ret = get_object_property (task_path, JOB_INTF, "Result", error);
         if (!ret) {
