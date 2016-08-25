@@ -1205,9 +1205,9 @@ gboolean bd_lvm_pvmove (const gchar *src, const gchar *dest, const BDExtraArg **
 
     g_variant_builder_init (&builder, G_VARIANT_TYPE_TUPLE);
     g_variant_builder_add_value (&builder, g_variant_new ("s", src_path));
-    g_variant_builder_add_value (&builder, g_variant_new ("(tt)", 0, 0));
+    g_variant_builder_add_value (&builder, g_variant_new ("(tt)", (guint64) 0, (guint64) 0));
     if (dest) {
-        dest_var = g_variant_new ("(ott)", dest_path, 0, 0);
+        dest_var = g_variant_new ("(ott)", dest_path, (guint64) 0, (guint64) 0);
         g_variant_builder_add_value (&builder, g_variant_new_array (NULL, &dest_var, 1));
     } else {
         type = g_variant_type_new ("a(ott)");
@@ -1431,7 +1431,7 @@ gboolean bd_lvm_vgrename (const gchar *old_vg_name, const gchar *new_vg_name, co
  * Returns: whether the VG was successfully activated or not
  */
 gboolean bd_lvm_vgactivate (const gchar *vg_name, const BDExtraArg **extra, GError **error) {
-    GVariant *params = g_variant_new ("(t)", 0);
+    GVariant *params = g_variant_new ("(t)", (guint64) 0);
     call_lvm_obj_method_sync (vg_name, VG_INTF, "Activate", params, NULL, extra, error);
     return ((*error) == NULL);
 }
@@ -1446,7 +1446,7 @@ gboolean bd_lvm_vgactivate (const gchar *vg_name, const BDExtraArg **extra, GErr
  * Returns: whether the VG was successfully deactivated or not
  */
 gboolean bd_lvm_vgdeactivate (const gchar *vg_name, const BDExtraArg **extra, GError **error) {
-    GVariant *params = g_variant_new ("(t)", 0);
+    GVariant *params = g_variant_new ("(t)", (guint64) 0);
     call_lvm_obj_method_sync (vg_name, VG_INTF, "Deactivate", params, NULL, extra, error);
     return ((*error) == NULL);
 }
@@ -1676,7 +1676,7 @@ gboolean bd_lvm_lvcreate (const gchar *vg_name, const gchar *lv_name, guint64 si
                 g_variant_builder_clear (&builder);
                 return FALSE;
             }
-            g_variant_builder_add_value (&builder, g_variant_new ("(ott)", path, 0, 0));
+            g_variant_builder_add_value (&builder, g_variant_new ("(ott)", path, (guint64) 0, (guint64) 0));
         }
         pvs = g_variant_builder_end (&builder);
         g_variant_builder_clear (&builder);
@@ -1798,7 +1798,7 @@ gboolean bd_lvm_lvresize (const gchar *vg_name, const gchar *lv_name, guint64 si
  * Returns: whether the @vg_name/@lv_name LV was successfully activated or not
  */
 gboolean bd_lvm_lvactivate (const gchar *vg_name, const gchar *lv_name, gboolean ignore_skip, const BDExtraArg **extra, GError **error) {
-    GVariant *params = g_variant_new ("(t)", 0);
+    GVariant *params = g_variant_new ("(t)", (guint64) 0);
     GVariantBuilder builder;
     GVariant *extra_params = NULL;
 
@@ -1824,7 +1824,7 @@ gboolean bd_lvm_lvactivate (const gchar *vg_name, const gchar *lv_name, gboolean
  * Returns: whether the @vg_name/@lv_name LV was successfully deactivated or not
  */
 gboolean bd_lvm_lvdeactivate (const gchar *vg_name, const gchar *lv_name, const BDExtraArg **extra, GError **error) {
-    GVariant *params = g_variant_new ("(t)", 0);
+    GVariant *params = g_variant_new ("(t)", (guint64) 0);
     call_lv_method_sync (vg_name, lv_name, "Deactivate", params, NULL, extra, error);
     return (*error == NULL);
 }
@@ -2196,7 +2196,7 @@ gboolean bd_lvm_thsnapshotcreate (const gchar *vg_name, const gchar *origin_name
 
     g_variant_builder_init (&builder, G_VARIANT_TYPE_TUPLE);
     g_variant_builder_add_value (&builder, g_variant_new ("s", snapshot_name));
-    g_variant_builder_add_value (&builder, g_variant_new ("t", 0));
+    g_variant_builder_add_value (&builder, g_variant_new ("t", (guint64) 0));
     params = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
 
