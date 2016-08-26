@@ -29,7 +29,7 @@ gchar* bd_loop_get_loop_name (const gchar *file, GError **error);
 /**
  * bd_loop_setup:
  * @file: file to setup as a loop device
- * @loop_name: (out): if not %NULL, it is used to store the name of the loop device
+ * @loop_name: (allow-none) (out): if not %NULL, it is used to store the name of the loop device
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @file was successfully setup as a loop device or not
