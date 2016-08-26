@@ -507,7 +507,16 @@ static gboolean change_set_by_name (const gchar *name, enum activate_type action
  * Returns: whether the RAID set @name was successfully activate or not
  */
 gboolean bd_dm_activate_raid_set (const gchar *name, GError **error) {
-    return change_set_by_name (name, A_ACTIVATE, error);
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+    gboolean ret = FALSE;
+
+    msg = g_strdup_printf ("Activating DM RAID set '%s'", name);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+    ret = change_set_by_name (name, A_ACTIVATE, error);
+    bd_utils_report_finished (progress_id, "Completed");
+    return ret;
 }
 
 /**
@@ -518,7 +527,16 @@ gboolean bd_dm_activate_raid_set (const gchar *name, GError **error) {
  * Returns: whether the RAID set @name was successfully deactivate or not
  */
 gboolean bd_dm_deactivate_raid_set (const gchar *name, GError **error) {
-    return change_set_by_name (name, A_DEACTIVATE, error);
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+    gboolean ret = FALSE;
+
+    msg = g_strdup_printf ("Deactivating DM RAID set '%s'", name);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+    ret = change_set_by_name (name, A_DEACTIVATE, error);
+    bd_utils_report_finished (progress_id, "Completed");
+    return ret;
 }
 
 /**
