@@ -134,11 +134,18 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
     blkid_probe probe = NULL;
     gint fd = 0;
     gint status = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started wiping signatures from the device '%s'", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     probe = blkid_new_probe ();
     if (!probe) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to create a probe for the device '%s'", device);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -147,6 +154,7 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to create a probe for the device '%s'", device);
         blkid_free_probe (probe);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -156,6 +164,7 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
                      "Failed to create a probe for the device '%s'", device);
         blkid_free_probe (probe);
         synced_close (fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -170,6 +179,7 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
                      "Failed to probe the device '%s'", device);
         blkid_free_probe (probe);
         synced_close (fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -179,6 +189,7 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
                      "Failed to wipe signatures on the device '%s'", device);
         blkid_free_probe (probe);
         synced_close (fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     while (all && (blkid_do_probe (probe) == 0)) {
@@ -188,12 +199,15 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
                          "Failed to wipe signatures on the device '%s'", device);
             blkid_free_probe (probe);
             synced_close (fd);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
     }
 
     blkid_free_probe (probe);
     synced_close (fd);
+
+    bd_utils_report_finished (progress_id, "Completed");
 
     return TRUE;
 }
@@ -204,11 +218,18 @@ static gboolean wipe_fs (const gchar *device, const gchar *fs_type, GError **err
     gint status = 0;
     const gchar *value = NULL;
     size_t len = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started wiping '%s' signatures from the device '%s'", fs_type, device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     probe = blkid_new_probe ();
     if (!probe) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to create a probe for the device '%s'", device);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -217,6 +238,7 @@ static gboolean wipe_fs (const gchar *device, const gchar *fs_type, GError **err
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to create a probe for the device '%s'", device);
         blkid_free_probe (probe);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -226,6 +248,7 @@ static gboolean wipe_fs (const gchar *device, const gchar *fs_type, GError **err
                      "Failed to create a probe for the device '%s'", device);
         blkid_free_probe (probe);
         synced_close (fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -241,6 +264,7 @@ static gboolean wipe_fs (const gchar *device, const gchar *fs_type, GError **err
                      "Failed to probe the device '%s'", device);
         blkid_free_probe (probe);
         synced_close (fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -250,6 +274,7 @@ static gboolean wipe_fs (const gchar *device, const gchar *fs_type, GError **err
                      "Failed to get signature type for the device '%s'", device);
         blkid_free_probe (probe);
         synced_close (fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -258,6 +283,7 @@ static gboolean wipe_fs (const gchar *device, const gchar *fs_type, GError **err
                      "The signature on the device '%s' is of type '%s', not 'filesystem'", device, value);
         blkid_free_probe (probe);
         synced_close (fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -268,6 +294,7 @@ static gboolean wipe_fs (const gchar *device, const gchar *fs_type, GError **err
                          "Failed to get filesystem type for the device '%s'", device);
             blkid_free_probe (probe);
             synced_close (fd);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
 
@@ -276,6 +303,7 @@ static gboolean wipe_fs (const gchar *device, const gchar *fs_type, GError **err
                          "The file system type on the device '%s' is '%s', not '%s'", device, value, fs_type);
             blkid_free_probe (probe);
             synced_close (fd);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
     }
@@ -286,11 +314,15 @@ static gboolean wipe_fs (const gchar *device, const gchar *fs_type, GError **err
                      "Failed to wipe the filesystem signature on the device '%s'", device);
         blkid_free_probe (probe);
         synced_close (fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
     blkid_free_probe (probe);
     synced_close (fd);
+
+    bd_utils_report_finished (progress_id, "Completed");
+
     return TRUE;
 }
 
