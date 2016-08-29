@@ -111,6 +111,61 @@ gboolean check() {
         g_warning("Cannot load the FS plugin: %s" , error->message);
         g_clear_error (&error);
     }
+
+    ret = bd_utils_check_util_version ("e2fsck", NULL, "", NULL, &error);
+    if (!ret && error) {
+        g_warning("Cannot load the FS plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+
+    ret = bd_utils_check_util_version ("tune2fs", NULL, "", NULL, &error);
+    if (!ret && error) {
+        g_warning("Cannot load the FS plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+
+    ret = bd_utils_check_util_version ("dumpe2fs", NULL, "", NULL, &error);
+    if (!ret && error) {
+        g_warning("Cannot load the FS plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+
+    ret = bd_utils_check_util_version ("resize2fs", NULL, "", NULL, &error);
+    if (!ret && error) {
+        g_warning("Cannot load the FS plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+
+    ret = bd_utils_check_util_version ("mkfs.xfs", NULL, "", NULL, &error);
+    if (!ret && error) {
+        g_warning("Cannot load the FS plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+
+    ret = bd_utils_check_util_version ("xfs_db", NULL, "", NULL, &error);
+    if (!ret && error) {
+        g_warning("Cannot load the FS plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+
+    ret = bd_utils_check_util_version ("xfs_repair", NULL, "", NULL, &error);
+    if (!ret && error) {
+        g_warning("Cannot load the FS plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+
+    ret = bd_utils_check_util_version ("xfs_admin", NULL, "", NULL, &error);
+    if (!ret && error) {
+        g_warning("Cannot load the FS plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+
+    ret = bd_utils_check_util_version ("xfs_growfs", NULL, "", NULL, &error);
+    if (!ret && error) {
+        g_warning("Cannot load the FS plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+
     return ret;
 }
 
