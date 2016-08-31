@@ -27,6 +27,7 @@
 #include <linux/random.h>
 #include <locale.h>
 #include <unistd.h>
+#include <exec.h>
 
 #include "crypto.h"
 
@@ -232,10 +233,17 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
     gchar **cipher_specs = NULL;
     guint32 current_entropy = 0;
     gint dev_random_fd = -1;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started formatting '%s' as LUKS device", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     if (!passphrase && !key_file) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
                      "At least one of passphrase and key file have to be specified!");
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -243,6 +251,7 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l(-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -253,6 +262,7 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
                      "Invalid cipher specification: '%s'", cipher);
         crypt_free (cd);
         g_strfreev (cipher_specs);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -264,6 +274,7 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
         dev_random_fd = open ("/dev/random", O_RDONLY);
         ioctl (dev_random_fd, RNDGETENTCNT, &current_entropy);
         while (current_entropy < min_entropy) {
+            bd_utils_report_progress (progress_id, 0, "Waiting for enough random data entropy");
             sleep (1);
             ioctl (dev_random_fd, RNDGETENTCNT, &current_entropy);
         }
@@ -278,17 +289,21 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
                      "Failed to format device: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
+    bd_utils_report_progress (progress_id, (passphrase && key_file) ? 40 : 50, "Format created");
     if (passphrase) {
         ret = crypt_keyslot_add_by_volume_key (cd, CRYPT_ANY_SLOT, NULL, 0, passphrase, strlen(passphrase));
         if (ret < 0) {
             g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_ADD_KEY,
                          "Failed to add passphrase: %s", strerror_l(-ret, c_locale));
             crypt_free (cd);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
+        bd_utils_report_progress (progress_id, (passphrase && key_file) ? 70 : 100, "Added key");
     }
 
     if (key_file) {
@@ -298,11 +313,14 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
             g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_ADD_KEY,
                          "Failed to add key file: %s", strerror_l(-ret, c_locale));
             crypt_free (cd);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
     }
 
     crypt_free (cd);
+
+    bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
 }
 
@@ -321,10 +339,17 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
 gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gchar *passphrase, const gchar *key_file, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started opening '%s' LUKS device", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     if (!passphrase && !key_file) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
                      "No passphrase nor key file specified, cannot open.");
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -332,6 +357,7 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gcha
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l(-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -340,6 +366,7 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gcha
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to load device's parameters: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -352,10 +379,12 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gcha
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to activate device: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
     crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
 }
 
@@ -369,11 +398,18 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gcha
 gboolean bd_crypto_luks_close (const gchar *luks_device, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started closing LUKS device '%s'", luks_device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     ret = crypt_init_by_name (&cd, luks_device);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l(-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -382,10 +418,12 @@ gboolean bd_crypto_luks_close (const gchar *luks_device, GError **error) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to deactivate device: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
     crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
 }
 
@@ -407,16 +445,24 @@ gboolean bd_crypto_luks_close (const gchar *luks_device, GError **error) {
 gboolean bd_crypto_luks_add_key (const gchar *device, const gchar *pass, const gchar *key_file, const gchar *npass, const gchar *nkey_file, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started adding key to the LUKS device '%s'", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     if (!pass && !key_file) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
                      "No passphrase nor key file given, cannot add key.");
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
     if (!npass && !nkey_file) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
                      "No new passphrase nor key file given, nothing to add.");
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -424,6 +470,7 @@ gboolean bd_crypto_luks_add_key (const gchar *device, const gchar *pass, const g
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l(-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -432,6 +479,7 @@ gboolean bd_crypto_luks_add_key (const gchar *device, const gchar *pass, const g
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to load device's parameters: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -451,10 +499,12 @@ gboolean bd_crypto_luks_add_key (const gchar *device, const gchar *pass, const g
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_ADD_KEY,
                      "Failed to add key: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
     crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
 }
 
@@ -472,10 +522,17 @@ gboolean bd_crypto_luks_add_key (const gchar *device, const gchar *pass, const g
 gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, const gchar *key_file, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started removing key from the LUKS device '%s'", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     if (!pass && !key_file) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_REMOVE_KEY,
                      "No passphrase nor key file given, cannot remove key.");
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -483,6 +540,7 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, cons
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l(-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -491,6 +549,7 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, cons
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to load device's parameters: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -504,6 +563,7 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, cons
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEY_SLOT,
                      "Failed to determine key slot: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -512,10 +572,12 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, cons
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_REMOVE_KEY,
                      "Failed to remove key: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
     crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
 }
 
@@ -535,11 +597,18 @@ gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, cons
     gint ret = 0;
     gchar *volume_key = NULL;
     gsize vk_size = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started changing key on the LUKS device '%s'", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     ret = crypt_init (&cd, device);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l(-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -548,6 +617,7 @@ gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, cons
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to load device's parameters: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -559,6 +629,7 @@ gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, cons
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to load device's volume key: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -568,6 +639,7 @@ gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, cons
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_REMOVE_KEY,
                      "Failed to remove the old passphrase: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -576,10 +648,12 @@ gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, cons
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_ADD_KEY,
                      "Failed to add the new passphrase: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
     crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
 }
 
@@ -594,11 +668,18 @@ gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, cons
 gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started resizing LUKS device '%s'", luks_device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     ret = crypt_init_by_name (&cd, luks_device);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l(-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -607,10 +688,12 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError *
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_RESIZE_FAILED,
                      "Failed to resize device: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
     crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
 }
 
@@ -727,19 +810,26 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
     gboolean ret = FALSE;
     gchar *passphrase_copy = NULL;
     gchar *cert_data_copy = NULL;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+    msg = g_strdup_printf ("Started creating escrow data for the LUKS device '%s'", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     if (!NSS_IsInitialized())
         if (NSS_NoDB_Init(NULL) != SECSuccess) {
             g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NSS_INIT_FAILED,
                          "Failed to initialize NSS");
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
 
     volume = libvk_volume_open (device, error);
-    if (!volume)
+    if (!volume) {
         /* error is already populated */
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
-
+    }
 
     ui = libvk_ui_new ();
     /* not supposed to be called -> always fail */
@@ -755,6 +845,7 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
         /* error is already populated */
         libvk_volume_free (volume);
         libvk_ui_free (ui);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -766,6 +857,7 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
         libvk_volume_free (volume);
         libvk_ui_free (ui);
         g_free(cert_data_copy);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -793,6 +885,7 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
         libvk_ui_free (ui);
         g_free (volume_ident);
         g_free(cert_data_copy);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -804,6 +897,7 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
             libvk_ui_free (ui);
             g_free (volume_ident);
             g_free(cert_data_copy);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
 
@@ -817,5 +911,6 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
     libvk_ui_free (ui);
     g_free (volume_ident);
     g_free(cert_data_copy);
+    bd_utils_report_finished (progress_id, "Completed");
     return ret;
 }
