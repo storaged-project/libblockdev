@@ -138,15 +138,22 @@ gboolean bd_s390_dasd_online (const gchar *dasd, GError **error) {
     gchar *path = NULL;
     FILE *fd = NULL;
     const gchar *argv[4] = {"/usr/sbin/dasd_cio_free", "-d", dasd, NULL};
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started switching '%s' online", dasd);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     path = g_strdup_printf ("/sys/bus/ccw/drivers/dasd-eckd/%s/online", dasd);
     fd = fopen(path, "r+");
     if (!fd) {
         /* DASD might be in device ignore list; try to rm it */
-        rc = bd_utils_exec_and_report_error (argv, NULL, error);
+        rc = bd_utils_exec_and_report_error_no_progress (argv, NULL, error);
 
         if (!rc) {
             g_free (path);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return rc;
         }
         /* fd is NULL at this point, so try to open it */
@@ -157,7 +164,7 @@ gboolean bd_s390_dasd_online (const gchar *dasd, GError **error) {
             g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                          "Could not open device %s even after removing it from"
                          " the device ignore list.", dasd);
-            g_clear_error (error);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
     }
@@ -173,12 +180,14 @@ gboolean bd_s390_dasd_online (const gchar *dasd, GError **error) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "Error checking if device %s is online", dasd);
         fclose(fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     if (online == 1) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "DASD device %s is already online.", dasd);
         fclose(fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     else {
@@ -190,11 +199,14 @@ gboolean bd_s390_dasd_online (const gchar *dasd, GError **error) {
     fclose(fd);
 
     if (wrc == EOF) {
-        g_warning ("Could not set DASD device %s online", dasd);
+        g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
+                     "Could not set DASD device %s online", dasd);
         fclose(fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
+    bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
 }
 
@@ -422,17 +434,24 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
     gchar *portdir = NULL;
     gchar *unitadd = NULL;
     gchar *failed = NULL;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started switching zfcp '%s' online", devno);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     /* part 01: make sure device is available/not on device ignore list */
     fd = fopen (online, "r");
     if (!fd) {
-        boolrc = bd_utils_exec_and_report_error (zfcp_cio_free, NULL, error);
+        boolrc = bd_utils_exec_and_report_error_no_progress (zfcp_cio_free, NULL, error);
 
         if (!boolrc) {
             fclose (fd);
             g_free (online);
             g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                          "Could not remove device %s from device ignore list.", devno);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
         /* fd is NULL at this point, so try to open it again */
@@ -443,6 +462,7 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
             g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                          "Could not open device %s even after removing it from" " the device ignore list.", devno);
             g_free (online);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
     }
@@ -455,6 +475,7 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_IO,
                      "Error checking if device %s is online", devno);
         fclose (fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     if (rc == 1) {
@@ -470,10 +491,11 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
     else {
         /* offline */
         fclose (fd);
-        boolrc = bd_utils_exec_and_report_error (chccwdev, NULL, error);
+        boolrc = bd_utils_exec_and_report_error_no_progress (chccwdev, NULL, error);
         if (!boolrc) {
             g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                          "Could not set zFCP device %s online", devno);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
     }
@@ -486,6 +508,7 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "WWPN %s not found for zFCP device %s", wwpn, devno);
         g_free (portdir);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     closedir (pdfd);
@@ -497,6 +520,7 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
                      "Could not open %s", unitadd);
         g_free (unitadd);
         g_free (portdir);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     rc = fputs (lun, fd);
@@ -506,6 +530,7 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
         g_free (unitadd);
         g_free (portdir);
         fclose (fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     g_free (unitadd);
@@ -519,6 +544,7 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
                      "Could not open %s", failed);
         g_free (failed);
         g_free (portdir);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -530,6 +556,7 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
         g_free (failed);
         g_free (portdir);
         fclose (fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     /**
@@ -543,12 +570,14 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
         g_free (failed);
         g_free (portdir);
         fclose (fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     /* if you haven't failed yet, you deserve this */
     g_free (failed);
     g_free (portdir);
     fclose (fd);
+    bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
 }
 
@@ -595,11 +624,18 @@ gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const 
     gchar *fcpsysfs = NULL;
     gchar *scsidel = NULL;
     gchar **tokens = NULL;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started switching zfcp scsi '%s' offline", devno);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     scsifd = fopen (path, "r");
     if (!scsifd) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "Failed to open path to SCSI device: %s", path);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -631,6 +667,7 @@ gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const 
             g_free (hba_path);
             g_free (fcpsysfs);
             g_free (scsidev);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
         fclose (fd);
@@ -649,6 +686,7 @@ gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const 
             g_free (fcpsysfs);
             g_free (scsidev);
             fclose (fd);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
         fclose(fd);
@@ -668,6 +706,7 @@ gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const 
             g_free (fcphbasysfs);
             g_free (fcpsysfs);
             g_free (scsidev);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
         fclose(fd);
@@ -687,6 +726,7 @@ gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const 
                 g_free (fcpwwpnsysfs);
                 g_free (fcphbasysfs);
                 g_free (scsidev);
+                bd_utils_report_finished (progress_id, (*error)->message);
                 return FALSE;
             }
             rc = fputs ("1", fd);
@@ -699,6 +739,7 @@ gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const 
                 g_free (fcpwwpnsysfs);
                 g_free (fcphbasysfs);
                 g_free (scsidev);
+                bd_utils_report_finished (progress_id, (*error)->message);
                 return FALSE;
             }
             fclose (fd);
@@ -710,6 +751,7 @@ gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const 
     g_free (fcpwwpnsysfs);
     g_free (fcphbasysfs);
     g_free (scsidev);
+    bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
 }
 
@@ -733,11 +775,18 @@ gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gcha
     gchar *unitrm = NULL;
     gchar *pattern = NULL;
     const gchar *chccwdev[4] = {"/usr/sbin/chccwdev", "-d", devno, NULL};
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started switching zfcp '%s' offline", devno);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     failed = bd_s390_zfcp_scsi_offline(devno, wwpn, lun, error);
     if (failed == 0) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "Could not correctly delete SCSI device of zFCP %s with WWPN %s, LUN %s", devno, wwpn, lun);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -748,6 +797,7 @@ gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gcha
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "Failed to open %s", unitrm);
         g_free (unitrm);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     rc = fputs (lun, fd);
@@ -755,6 +805,7 @@ gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gcha
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "Could not remove LUN %s at WWPN %s on zFCP device %s", lun, wwpn, devno);
         g_free (unitrm);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     fclose (fd);
@@ -769,6 +820,7 @@ gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gcha
                      "An error occurred trying to determine if other LUNs are still associated with WWPN %s", wwpn);
         globfree (&luns);
         g_free (pattern);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     /* check if we have any matches found; if so, bail */
@@ -777,6 +829,7 @@ gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gcha
                      "Not setting zFCP device offline since it still has other LUNs");
         globfree (&luns);
         g_free (pattern);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     globfree (&luns);
@@ -785,13 +838,15 @@ gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gcha
 
     /* offline */
     offline = g_strdup_printf ("%s/%s/online", zfcpsysfs, devno);
-    failed = bd_utils_exec_and_report_error (chccwdev, NULL, error);
+    failed = bd_utils_exec_and_report_error_no_progress (chccwdev, NULL, error);
     g_free (offline);
     if (failed == 0) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "Could not set zFCP device %s online", devno);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
+    bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
 }
