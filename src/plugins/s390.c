@@ -765,7 +765,7 @@ gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const 
  * Returns: whether a zfcp device was successfully switched offline
  */
 gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gchar *lun, GError **error) {
-    gboolean failed = FALSE;
+    gboolean success = FALSE;
     gint rc = 0;
     FILE *fd = NULL;
     glob_t luns;
@@ -782,8 +782,8 @@ gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gcha
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    failed = bd_s390_zfcp_scsi_offline(devno, wwpn, lun, error);
-    if (failed == 0) {
+    success = bd_s390_zfcp_scsi_offline(devno, wwpn, lun, error);
+    if (!success) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "Could not correctly delete SCSI device of zFCP %s with WWPN %s, LUN %s", devno, wwpn, lun);
         bd_utils_report_finished (progress_id, (*error)->message);
@@ -838,9 +838,9 @@ gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gcha
 
     /* offline */
     offline = g_strdup_printf ("%s/%s/online", zfcpsysfs, devno);
-    failed = bd_utils_exec_and_report_error_no_progress (chccwdev, NULL, error);
+    success = bd_utils_exec_and_report_error_no_progress (chccwdev, NULL, error);
     g_free (offline);
-    if (failed == 0) {
+    if (!success) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "Could not set zFCP device %s online", devno);
         bd_utils_report_finished (progress_id, (*error)->message);
