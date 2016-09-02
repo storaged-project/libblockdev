@@ -597,7 +597,7 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
  * I/O config, but WWPN and LUN configuration is done at the OS level, hence
  * this function becomes necessary when switching the device offline. This
  * particular sequence of actions is for some reason unnecessary when switching
- * the device online. Chalk it up to s390x being s390x.
+ * the device offline. Chalk it up to s390x being s390x.
  */
 gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const gchar *lun, GError **error) {
     FILE *scsifd = NULL;
