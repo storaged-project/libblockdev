@@ -183,11 +183,18 @@ gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean
     PedDisk *ped_disk = NULL;
     PedDiskType *disk_type = NULL;
     gboolean ret = FALSE;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Starting creation of a new partition table on '%s'", disk);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     dev = ped_device_get (disk);
     if (!dev) {
         set_parted_error (error, BD_PART_ERROR_INVAL);
         g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -199,6 +206,7 @@ gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean
                          "Device '%s' already contains a partition table", disk);
             ped_disk_destroy (ped_disk);
             ped_device_destroy (dev);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
     }
@@ -210,6 +218,7 @@ gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean
         g_prefix_error (error, "Failed to create a new partition table of type '%s' on device '%s'",
                         table_type_str[type], disk);
         ped_device_destroy (dev);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -218,6 +227,8 @@ gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean
 
     ped_disk_destroy (ped_disk);
     ped_device_destroy (dev);
+
+    bd_utils_report_finished (progress_id, "Completed");
 
     /* just return what we got (error may be set) */
     return ret;
@@ -739,11 +750,18 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
     gint last_num = 0;
     gboolean succ = FALSE;
     BDPartSpec *ret = NULL;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started adding partition to '%s'", disk);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     dev = ped_device_get (disk);
     if (!dev) {
         set_parted_error (error, BD_PART_ERROR_INVAL);
         g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return NULL;
     }
 
@@ -752,6 +770,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
         ped_device_destroy (dev);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return NULL;
     }
 
@@ -770,6 +789,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
                 /* error is already populated */
                 ped_disk_destroy (ped_disk);
                 ped_device_destroy (dev);
+                bd_utils_report_finished (progress_id, (*error)->message);
                 return NULL;
             }
             type = BD_PART_TYPE_REQ_LOGICAL;
@@ -803,6 +823,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
         /* error is already populated */
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return NULL;
     }
 
@@ -813,6 +834,8 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
     /* the partition gets destroyed together with the disk*/
     ped_disk_destroy (ped_disk);
     ped_device_destroy (dev);
+
+    bd_utils_report_finished (progress_id, "Completed");
 
     return ret;
 }
@@ -833,10 +856,17 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
     gint part_num = 0;
     gint status = 0;
     gboolean ret = FALSE;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started deleting partition '%s'", part);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     if (!part || (part && (*part == '\0'))) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Invalid partition path given: '%s'", part);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -844,6 +874,7 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
     if (!dev) {
         set_parted_error (error, BD_PART_ERROR_INVAL);
         g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -852,6 +883,7 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
         ped_device_destroy (dev);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -867,6 +899,7 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
                      "Invalid partition path given: '%s'. Cannot extract partition number", part);
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -876,6 +909,7 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
         g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -885,6 +919,7 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
         g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -892,6 +927,8 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
 
     ped_disk_destroy (ped_disk);
     ped_device_destroy (dev);
+
+    bd_utils_report_finished (progress_id, "Completed");
 
     return ret;
 }
@@ -961,11 +998,18 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
     gint part_num = 0;
     gint status = 0;
     gboolean ret = FALSE;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started setting flag on the partition '%s'", part);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     /* TODO: share this code with the other functions modifying a partition */
     if (!part || (part && (*part == '\0'))) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Invalid partition path given: '%s'", part);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -973,6 +1017,7 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
     if (!dev) {
         set_parted_error (error, BD_PART_ERROR_INVAL);
         g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -981,6 +1026,7 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
         ped_device_destroy (dev);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -996,6 +1042,7 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
                      "Invalid partition path given: '%s'. Cannot extract partition number", part);
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -1005,6 +1052,7 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
         g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -1018,6 +1066,7 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
             g_prefix_error (error, "Failed to set flag on partition '%d' on device '%s'", part_num, disk);
             ped_disk_destroy (ped_disk);
             ped_device_destroy (dev);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
 
@@ -1032,6 +1081,8 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
 
     ped_disk_destroy (ped_disk);
     ped_device_destroy (dev);
+
+    bd_utils_report_finished (progress_id, "Completed");
 
     return ret;
 }
@@ -1050,11 +1101,18 @@ gboolean bd_part_set_disk_flag (const gchar *disk, BDPartDiskFlag flag, gboolean
     PedDisk *ped_disk = NULL;
     gint status = 0;
     gboolean ret = FALSE;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started setting flag on the disk '%s'", disk);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     dev = ped_device_get (disk);
     if (!dev) {
         set_parted_error (error, BD_PART_ERROR_INVAL);
         g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -1063,6 +1121,7 @@ gboolean bd_part_set_disk_flag (const gchar *disk, BDPartDiskFlag flag, gboolean
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
         ped_device_destroy (dev);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -1074,6 +1133,7 @@ gboolean bd_part_set_disk_flag (const gchar *disk, BDPartDiskFlag flag, gboolean
             g_prefix_error (error, "Failed to set flag on disk '%s'", disk);
             ped_disk_destroy (ped_disk);
             ped_device_destroy (dev);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
 
@@ -1086,6 +1146,8 @@ gboolean bd_part_set_disk_flag (const gchar *disk, BDPartDiskFlag flag, gboolean
 
     ped_disk_destroy (ped_disk);
     ped_device_destroy (dev);
+
+    bd_utils_report_finished (progress_id, "Completed");
 
     return ret;
 }
@@ -1112,11 +1174,18 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
     guint64 i = 0;
     gint status = 0;
     gboolean ret = FALSE;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started setting flags on the partition '%s'", part);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     /* TODO: share this code with the other functions modifying a partition */
     if (!part || (part && (*part == '\0'))) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Invalid partition path given: '%s'", part);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -1124,6 +1193,7 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
     if (!dev) {
         set_parted_error (error, BD_PART_ERROR_INVAL);
         g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -1132,6 +1202,7 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
         ped_device_destroy (dev);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -1147,6 +1218,7 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
                      "Invalid partition path given: '%s'. Cannot extract partition number", part);
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -1156,6 +1228,7 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
         g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -1171,6 +1244,7 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
             g_prefix_error (error, "Failed to set flag on the partition '%d' on device '%s'", part_num, disk);
             ped_disk_destroy (ped_disk);
             ped_device_destroy (dev);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
     }
@@ -1182,6 +1256,8 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
 
     ped_disk_destroy (ped_disk);
     ped_device_destroy (dev);
+
+    bd_utils_report_finished (progress_id, "Completed");
 
     return ret;
 }
@@ -1204,11 +1280,18 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
     gint part_num = 0;
     gint status = 0;
     gboolean ret = FALSE;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started setting name on the partition '%s'", part);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     /* TODO: share this code with the other functions modifying a partition */
     if (!part || (part && (*part == '\0'))) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Invalid partition path given: '%s'", part);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -1216,6 +1299,7 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
     if (!dev) {
         set_parted_error (error, BD_PART_ERROR_INVAL);
         g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -1224,6 +1308,7 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
         ped_device_destroy (dev);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     if (!(ped_disk->type->features & PED_DISK_TYPE_PARTITION_NAME)) {
@@ -1232,6 +1317,7 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
                      ped_disk->type->name);
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -1247,6 +1333,7 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
                      "Invalid partition path given: '%s'. Cannot extract partition number", part);
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -1256,6 +1343,7 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
         g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -1265,6 +1353,7 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
         g_prefix_error (error, "Failed to set name on the partition '%d' on device '%s'", part_num, disk);
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -1272,6 +1361,8 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
 
     ped_disk_destroy (ped_disk);
     ped_device_destroy (dev);
+
+    bd_utils_report_finished (progress_id, "Completed");
 
     return ret;
 }
@@ -1289,10 +1380,17 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
     const gchar *args[5] = {"sgdisk", "--typecode", NULL, disk, NULL};
     const gchar *part_num_str = NULL;
     gboolean success = FALSE;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started setting type on the partition '%s'", part);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     if (!part || (part && (*part == '\0'))) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Invalid partition path given: '%s'", part);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -1305,6 +1403,7 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
     if ((g_strcmp0 (part_num_str, "0") != 0) && (atoi (part_num_str) == 0)) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Invalid partition path given: '%s'. Cannot extract partition number", part);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -1312,6 +1411,8 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
 
     success = bd_utils_exec_and_report_error (args, NULL, error);
     g_free ((gchar*) args[2]);
+
+    bd_utils_report_finished (progress_id, "Completed");
 
     return success;
 }
