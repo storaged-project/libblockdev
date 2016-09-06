@@ -361,10 +361,14 @@ gchar** bd_mpath_get_mpath_members (GError **error) {
     guint64 n_devs = 0;
     guint64 top_dev = 0;
     gchar **ret = NULL;
+    guint64 progress_id = 0;
+
+    progress_id = bd_utils_report_started ("Started getting mpath members");
 
     if (geteuid () != 0) {
         g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_NOT_ROOT,
                      "Not running as root, cannot query DM maps");
+        bd_utils_report_finished (progress_id, (*error)->message);
         return NULL;
     }
 
@@ -375,14 +379,17 @@ gchar** bd_mpath_get_mpath_members (GError **error) {
         g_warning ("Failed to create DM task");
         g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
                      "Failed to create DM task");
+        bd_utils_report_finished (progress_id, (*error)->message);
         return NULL;
     }
 
     dm_task_run(task_names);
 	names = dm_task_get_names(task_names);
 
-    if (!names || !names->dev)
+    if (!names || !names->dev) {
+        bd_utils_report_finished (progress_id, "Completed");
         return NULL;
+    }
 
     ret = g_new0 (gchar*, 1);
     n_devs = 1;
@@ -398,6 +405,7 @@ gchar** bd_mpath_get_mpath_members (GError **error) {
             if (*error) {
                 g_prefix_error (error, "Failed to determine deps for '%s'", names->name);
                 dm_task_destroy (task_names);
+                bd_utils_report_finished (progress_id, (*error)->message);
                 return NULL;
             }
             if (deps) {
@@ -413,6 +421,7 @@ gchar** bd_mpath_get_mpath_members (GError **error) {
     } while (next);
 
     ret[top_dev] = NULL;
+    bd_utils_report_finished (progress_id, "Completed");
 
     return ret;
 }
