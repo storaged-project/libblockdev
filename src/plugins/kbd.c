@@ -305,6 +305,9 @@ gboolean bd_kbd_zram_create_devices (guint64 num_devices, const guint64 *sizes, 
     guint64 i = 0;
     gchar *num_str = NULL;
     gchar *file_name = NULL;
+    guint64 progress_id = 0;
+
+    progress_id = bd_utils_report_started ("Started creating zram devices");
 
     opts = g_strdup_printf ("num_devices=%"G_GUINT64_FORMAT, num_devices);
     success = load_kernel_module ("zram", opts, error);
@@ -316,19 +319,23 @@ gboolean bd_kbd_zram_create_devices (guint64 num_devices, const guint64 *sizes, 
         if (!success) {
             g_prefix_error (error, "zram module already loaded: ");
             g_free (opts);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
         success = load_kernel_module ("zram", opts, error);
         if (!success) {
             g_free (opts);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
     }
     g_free (opts);
 
-    if (!success)
+    if (!success) {
         /* error is already populated */
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
+    }
 
     /* compression streams have to be specified before the device is activated
        by setting its size */
@@ -342,6 +349,7 @@ gboolean bd_kbd_zram_create_devices (guint64 num_devices, const guint64 *sizes, 
             if (!success) {
                 g_prefix_error (error, "Failed to set number of compression streams for '/dev/zram%"G_GUINT64_FORMAT"': ",
                                 i);
+                bd_utils_report_finished (progress_id, (*error)->message);
                 return FALSE;
             }
         }
@@ -354,12 +362,13 @@ gboolean bd_kbd_zram_create_devices (guint64 num_devices, const guint64 *sizes, 
         g_free (file_name);
         g_free (num_str);
         if (!success) {
-            g_prefix_error (error, "Failed to set size for '/dev/zram%"G_GUINT64_FORMAT"': ",
-                            i);
+            g_prefix_error (error, "Failed to set size for '/dev/zram%"G_GUINT64_FORMAT"': ", i);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
     }
 
+    bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
 }
 
@@ -374,7 +383,16 @@ gboolean bd_kbd_zram_create_devices (guint64 num_devices, const guint64 *sizes, 
  * specification of which devices should be destroyed.
  */
 gboolean bd_kbd_zram_destroy_devices (GError **error) {
-    return unload_kernel_module ("zram", error);
+    gboolean ret = FALSE;
+    guint64 progress_id = 0;
+
+    progress_id = bd_utils_report_started ("Started destroying zram devices");
+    ret = unload_kernel_module ("zram", error);
+    if (!ret && (*error))
+        bd_utils_report_finished (progress_id, (*error)->message);
+    else
+        bd_utils_report_finished (progress_id, "Completed");
+    return ret;
 }
 
 static guint64 get_number_from_file (const gchar *path, GError **error) {
@@ -560,14 +578,23 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
     gchar *path = NULL;
     gchar *dev_name = NULL;
     gchar *dev_name_end = NULL;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started creation of bcache on '%s' and '%s'", backing_device, cache_device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     /* create cache device metadata and try to get Set UUID (needed later) */
     success = bd_utils_exec_and_capture_output (argv, extra, &output, error);
     if (!success) {
         /* error is already populated */
         g_free (output);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
+
+    bd_utils_report_progress (progress_id, 50, "Metadata written");
 
     lines = g_strsplit (output, "\n", 0);
 
@@ -576,6 +603,7 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
         /* error is already populated */
         g_free (output);
         g_strfreev (lines);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -594,6 +622,7 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_PARSE,
                      "Failed to determine Set UUID from: %s", output);
         g_free (output);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     g_free (output);
@@ -602,23 +631,29 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
     /* attach the cache device to the backing device */
     /* get the name of the bcache device based on the @backing_device being its slave */
     dev_name = strrchr (backing_device, '/');
-    if (!dev_name)
-        /* error is already populated */
+    if (!dev_name) {
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_PARSE,
+                     "Failed to get name of the backing device from '%s'", backing_device);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
+    }
     /* move right after the last '/' (that's where the device name starts) */
     dev_name++;
 
     /* make sure the bcache device is registered */
     success = echo_str_to_file (backing_device, "/sys/fs/bcache/register", error);
-    if (!success)
+    if (!success) {
         /* error is already populated */
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
+    }
 
     pattern = g_strdup_printf ("/sys/block/*/slaves/%s", dev_name);
     if (glob (pattern, GLOB_NOSORT, NULL, &globbuf) != 0) {
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_SETUP_FAIL,
                      "Failed to determine bcache device name for '%s'", dev_name);
         g_free (pattern);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     g_free (pattern);
@@ -634,6 +669,7 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
     }
     if (!dev_name) {
         globfree (&globbuf);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     /* get everything till the next '/' */
@@ -646,6 +682,7 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
     if (!success) {
         g_prefix_error (error, "Failed to attach the cache to the backing device: ");
         g_free (dev_name);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -653,6 +690,8 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
         *bcache_device = dev_name;
     else
         g_free (dev_name);
+
+    bd_utils_report_finished (progress_id, "Completed");
 
     return TRUE;
 }
@@ -668,6 +707,12 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
 gboolean bd_kbd_bcache_attach (const gchar *c_set_uuid, const gchar *bcache_device, GError **error) {
     gchar *path = NULL;
     gboolean success = FALSE;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started attaching '%s' cache to bcache device '%s'", c_set_uuid, bcache_device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     if (g_str_has_prefix (bcache_device, "/dev/"))
         bcache_device += 5;
@@ -677,6 +722,11 @@ gboolean bd_kbd_bcache_attach (const gchar *c_set_uuid, const gchar *bcache_devi
     g_free (path);
 
     /* error is already populated (if any) */
+    if (!success)
+        bd_utils_report_finished (progress_id, (*error)->message);
+    else
+        bd_utils_report_finished (progress_id, "Completed");
+
     return success;
 }
 
@@ -694,6 +744,12 @@ gboolean bd_kbd_bcache_detach (const gchar *bcache_device, gchar **c_set_uuid, G
     gchar *link = NULL;
     gchar *uuid = NULL;
     gboolean success = FALSE;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started detaching cache from the bcache device '%s'", bcache_device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     if (g_str_has_prefix (bcache_device, "/dev/"))
         bcache_device += 5;
@@ -703,6 +759,7 @@ gboolean bd_kbd_bcache_detach (const gchar *bcache_device, gchar **c_set_uuid, G
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_NOT_ATTACHED,
                      "No cache attached to '%s' or '%s' not set up", bcache_device, bcache_device);
         g_free (path);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -711,6 +768,7 @@ gboolean bd_kbd_bcache_detach (const gchar *bcache_device, gchar **c_set_uuid, G
     g_free (path);
     if (!link) {
         g_prefix_error (error, "Failed to determine cache set UUID for '%s'", bcache_device);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -720,6 +778,7 @@ gboolean bd_kbd_bcache_detach (const gchar *bcache_device, gchar **c_set_uuid, G
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_UUID,
                      "Failed to determine cache set UUID for '%s'", bcache_device);
         g_free (link);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     /* move right after the '/' */
@@ -732,6 +791,7 @@ gboolean bd_kbd_bcache_detach (const gchar *bcache_device, gchar **c_set_uuid, G
                      "Failed to detach '%s' from '%s'", uuid, bcache_device);
         g_free (link);
         g_free (path);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -740,6 +800,7 @@ gboolean bd_kbd_bcache_detach (const gchar *bcache_device, gchar **c_set_uuid, G
 
     g_free (link);
     g_free (path);
+    bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
 }
 
@@ -755,20 +816,29 @@ gboolean bd_kbd_bcache_destroy (const gchar *bcache_device, GError **error) {
     gchar *c_set_uuid = NULL;
     gboolean success = FALSE;
     BDKBDBcacheStats *status = NULL;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started destroying bcache device '%s'", bcache_device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     if (g_str_has_prefix (bcache_device, "/dev/"))
         bcache_device += 5;
 
     status = bd_kbd_bcache_status (bcache_device, error);
-    if (!status)
+    if (!status) {
         /* error is already populated */
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
+    }
 
     if (g_strcmp0 (status->state, "no cache") != 0) {
         success = bd_kbd_bcache_detach (bcache_device, &c_set_uuid, error);
         if (!success) {
             /* error is already populated */
             bd_kbd_bcache_stats_free (status);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
     }
@@ -779,6 +849,7 @@ gboolean bd_kbd_bcache_destroy (const gchar *bcache_device, GError **error) {
     g_free (path);
     if (!success) {
         g_prefix_error (error, "Failed to stop the cache set: ");
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -787,9 +858,11 @@ gboolean bd_kbd_bcache_destroy (const gchar *bcache_device, GError **error) {
     g_free (path);
     if (!success) {
         g_prefix_error (error, "Failed to stop the bcache: ");
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
+    bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
 }
 
@@ -902,6 +975,12 @@ gboolean bd_kbd_bcache_set_mode (const gchar *bcache_device, BDKBDBcacheMode mod
     gchar *path = NULL;
     gboolean success = FALSE;
     const gchar *mode_str = NULL;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started setting mode of bcache device '%s'", bcache_device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     if (g_str_has_prefix (bcache_device, "/dev/"))
         bcache_device += 5;
@@ -911,11 +990,13 @@ gboolean bd_kbd_bcache_set_mode (const gchar *bcache_device, BDKBDBcacheMode mod
     if (!mode_str) {
         /* error is already populated */
         g_free (path);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     } else if (g_strcmp0 (mode_str, "unknown") == 0) {
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_MODE_INVAL,
                      "Cannot set mode of '%s' to '%s'", bcache_device, mode_str);
         g_free (path);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
@@ -923,9 +1004,12 @@ gboolean bd_kbd_bcache_set_mode (const gchar *bcache_device, BDKBDBcacheMode mod
     if (!success) {
         g_prefix_error (error, "Failed to set mode '%s' to '%s'", mode_str, bcache_device);
         g_free (path);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     g_free (path);
+
+    bd_utils_report_finished (progress_id, "Completed");
 
     return TRUE;
 }
