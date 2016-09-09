@@ -24,6 +24,7 @@
 #include <math.h>
 #include <inttypes.h>
 #include <utils.h>
+#include <part_err.h>
 
 #include "part.h"
 
@@ -92,15 +93,6 @@ void bd_part_disk_spec_free (BDPartDiskSpec *data) {
     g_free (data);
 }
 
-/* in order to be thread-safe, we need to make sure every thread has this
-   variable for its own use */
-static __thread gchar *error_msg = NULL;
-
-static PedExceptionOption exc_handler (PedException *ex) {
-    error_msg = g_strdup (ex->message);
-    return PED_EXCEPTION_UNHANDLED;
-}
-
 /**
  * set_parted_error: (skip)
  *
@@ -111,6 +103,8 @@ static PedExceptionOption exc_handler (PedException *ex) {
  * Returns: whether there was some message from parted or not
  */
 static gboolean set_parted_error (GError **error, BDPartError type) {
+    gchar *error_msg = NULL;
+    error_msg = bd_get_error_msg ();
     if (error_msg) {
         g_set_error (error, BD_PART_ERROR, type,
                      " (%s)", error_msg);
@@ -127,7 +121,7 @@ static gboolean set_parted_error (GError **error, BDPartError type) {
  * init: (skip)
  */
 gboolean init() {
-    ped_exception_set_handler ((PedExceptionHandler*) exc_handler);
+    ped_exception_set_handler ((PedExceptionHandler*) bd_exc_handler);
     return TRUE;
 }
 

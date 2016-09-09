@@ -131,6 +131,64 @@ GType bd_fs_xfs_info_get_type () {
     return type;
 }
 
+#define BD_FS_TYPE_VFAT_INFO (bd_fs_vfat_info_get_type ())
+GType bd_fs_vfat_info_get_type();
+
+/**
+ * BDFSVfatInfo:
+ * @label: label of the filesystem
+ * @uuid: uuid of the filesystem
+ * @cluster_size: cluster size used by the filesystem
+ * @cluster_count: number of clusters in the filesystem
+ * @free_cluster_count: number of free clusters in the filesystem
+ */
+typedef struct BDFSVfatInfo {
+    gchar *label;
+    gchar *uuid;
+    guint64 cluster_size;
+    guint64 cluster_count;
+    guint64 free_cluster_count;
+} BDFSVfatInfo;
+
+/**
+ * bd_fs_vfat_info_copy: (skip)
+ *
+ * Creates a new copy of @data.
+ */
+BDFSVfatInfo* bd_fs_vfat_info_copy (BDFSVfatInfo *data) {
+    BDFSVfatInfo *ret = g_new0 (BDFSVfatInfo, 1);
+
+    ret->label = g_strdup (data->label);
+    ret->uuid = g_strdup (data->uuid);
+    ret->cluster_size = data->cluster_size;
+    ret->cluster_count = data->cluster_count;
+
+    return ret;
+}
+
+/**
+ * bd_fs_vfat_info_free: (skip)
+ *
+ * Frees @data.
+ */
+void bd_fs_vfat_info_free (BDFSVfatInfo *data) {
+    g_free (data->label);
+    g_free (data->uuid);
+    g_free (data);
+}
+
+GType bd_fs_vfat_info_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDFSVfatInfo",
+                                            (GBoxedCopyFunc) bd_fs_vfat_info_copy,
+                                            (GBoxedFreeFunc) bd_fs_vfat_info_free);
+    }
+
+    return type;
+}
+
 /**
  * bd_fs_wipe:
  * @device: the device to wipe signatures from
@@ -299,5 +357,81 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error);
  * Returns: whether the file system mounted on @mpoint was successfully resized or not
  */
 gboolean bd_fs_xfs_resize (const gchar *mpoint, guint64 new_size, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_fs_vfat_mkfs:
+ * @device: the device to create a new vfat fs on
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
+ *                                                 passed to the 'mkfs.vfat' utility)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether a new vfat fs was successfully created on @device or not
+ */
+gboolean bd_fs_vfat_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_fs_vfat_wipe:
+ * @device: the device to wipe an vfat signature from
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether an vfat signature was successfully wiped from the @device or
+ *          not
+ */
+gboolean bd_fs_vfat_wipe (const gchar *device, GError **error);
+
+/**
+ * bd_fs_vfat_check:
+ * @device: the device containing the file system to check
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the repair (right now
+ *                                                 passed to the 'fsck.vfat' utility)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether an vfat file system on the @device is clean or not
+ */
+gboolean bd_fs_vfat_check (const gchar *device, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_fs_vfat_repair:
+ * @device: the device containing the file system to repair
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the repair (right now
+ *                                                 passed to the 'fsck.vfat' utility)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether an vfat file system on the @device was successfully repaired
+ *          (if needed) or not (error is set in that case)
+ */
+gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_fs_vfat_set_label:
+ * @device: the device containing the file system to set label for
+ * @label: label to set
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the label of vfat file system on the @device was
+ *          successfully set or not
+ */
+gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError **error);
+
+/**
+ * bd_fs_vfat_get_info:
+ * @device: the device containing the file system to get info for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): information about the file system on @device or
+ *                           %NULL in case of error
+ */
+BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error);
+
+/**
+ * bd_fs_vfat_resize:
+ * @device: the device the file system of which to resize
+ * @new_size: new requested size for the file system (if 0, the file system is
+ *            adapted to the underlying block device)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the file system on @device was successfully resized or not
+ */
+gboolean bd_fs_vfat_resize (const gchar *device, guint64 new_size, GError **error);
 
 #endif  /* BD_FS_API */

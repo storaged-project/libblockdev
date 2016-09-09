@@ -286,6 +286,27 @@ def fs_xfs_resize(device, size, extra=None, **kwargs):
     return _fs_xfs_resize(device, size, extra)
 __all__.append("fs_xfs_resize")
 
+_fs_vfat_mkfs = BlockDev.fs_vfat_mkfs
+@override(BlockDev.fs_vfat_mkfs)
+def fs_vfat_mkfs(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_vfat_mkfs(device, extra)
+__all__.append("fs_vfat_mkfs")
+
+_fs_vfat_check = BlockDev.fs_vfat_check
+@override(BlockDev.fs_vfat_check)
+def fs_vfat_check(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_vfat_check(device, extra)
+__all__.append("fs_vfat_check")
+
+_fs_vfat_repair = BlockDev.fs_vfat_repair
+@override(BlockDev.fs_vfat_repair)
+def fs_vfat_repair(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_vfat_repair(device, extra)
+__all__.append("fs_vfat_repair")
+
 
 _kbd_bcache_create = BlockDev.kbd_bcache_create
 @override(BlockDev.kbd_bcache_create)
