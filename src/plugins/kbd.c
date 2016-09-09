@@ -746,6 +746,8 @@ gboolean bd_kbd_bcache_detach (const gchar *bcache_device, gchar **c_set_uuid, G
     gboolean success = FALSE;
     guint64 progress_id = 0;
     gchar *msg = NULL;
+    BDKBDBcacheStats *status = NULL;
+    gboolean done = FALSE;
 
     msg = g_strdup_printf ("Started detaching cache from the bcache device '%s'", bcache_device);
     progress_id = bd_utils_report_started (msg);
@@ -793,6 +795,21 @@ gboolean bd_kbd_bcache_detach (const gchar *bcache_device, gchar **c_set_uuid, G
         g_free (path);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
+    }
+
+    /* wait for the dirty blocks to be flushed and the cache actually detached */
+    while (!done) {
+        status = bd_kbd_bcache_status (bcache_device, error);
+        if (!status) {
+            /* error is already populated */
+            bd_utils_report_finished (progress_id, (*error)->message);
+            return FALSE;
+        }
+        done = strncmp (status->state, "no cache", 8) == 0;
+        bd_kbd_bcache_stats_free (status);
+        /* let's wait half a second before trying again */
+        if (!done)
+            g_usleep (500000);
     }
 
     if (c_set_uuid)
