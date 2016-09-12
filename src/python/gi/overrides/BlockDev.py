@@ -576,6 +576,12 @@ def kbd_zram_create_devices(num_devices, sizes, nstreams=None):
     return _kbd_zram_create_devices(num_devices, sizes, nstreams)
 __all__.append("kbd_zram_create_devices")
 
+_kbd_zram_add_device = BlockDev.kbd_zram_add_device
+@override(BlockDev.kbd_zram_add_device)
+def kbd_zram_add_device(size, nstreams=0):
+    return _kbd_zram_add_device(size, nstreams)
+__all__.append("kbd_zram_add_device")
+
 
 _part_create_table = BlockDev.part_create_table
 @override(BlockDev.part_create_table)

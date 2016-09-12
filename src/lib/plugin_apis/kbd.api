@@ -190,6 +190,26 @@ gboolean bd_kbd_zram_create_devices (guint64 num_devices, const guint64 *sizes, 
 gboolean bd_kbd_zram_destroy_devices (GError **error);
 
 /**
+ * bd_kbd_zram_add_device:
+ * @size: size of the zRAM device to add
+ * @nstreams: number of streams to use for the new device (or 0 to use the defaults)
+ * @device: (allow-none) (out): place to store the name of the newly added device
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether a new zRAM device was added or not
+ */
+gboolean bd_kbd_zram_add_device (guint64 size, guint64 nstreams, gchar **device, GError **error);
+
+/**
+ * bd_kbd_zram_remove_device:
+ * @device: zRAM device to remove
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully removed or not
+ */
+gboolean bd_kbd_zram_remove_device (const gchar *device, GError **error);
+
+/**
  * bd_kbd_zram_get_stats:
  * @device: zRAM device to get stats for
  * @error: (out): place to store error (if any)
