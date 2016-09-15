@@ -752,7 +752,7 @@ static BDLVMPVdata* get_pv_data_from_props (GVariant *props, GError **error) {
     g_variant_dict_lookup (&dict, "PeStart", "t", &(data->pe_start));
 
     /* returns an object path for the VG */
-    g_variant_dict_lookup (&dict, "Vg", "s", &value);
+    g_variant_dict_lookup (&dict, "Vg", "o", &value);
     if (g_strcmp0 (value, "/") == 0) {
         /* no VG, the PV is not part of any VG */
         g_variant_dict_clear (&dict);
@@ -1201,10 +1201,10 @@ gboolean bd_lvm_pvmove (const gchar *src, const gchar *dest, const BDExtraArg **
         g_free (src_path);
         return FALSE;
     }
-    g_variant_get (prop, "s", &vg_obj_path);
+    g_variant_get (prop, "o", &vg_obj_path);
 
     g_variant_builder_init (&builder, G_VARIANT_TYPE_TUPLE);
-    g_variant_builder_add_value (&builder, g_variant_new ("s", src_path));
+    g_variant_builder_add_value (&builder, g_variant_new ("o", src_path));
     g_variant_builder_add_value (&builder, g_variant_new ("(tt)", (guint64) 0, (guint64) 0));
     if (dest) {
         dest_var = g_variant_new ("(ott)", dest_path, (guint64) 0, (guint64) 0);
@@ -2478,7 +2478,7 @@ gboolean bd_lvm_cache_attach (const gchar *vg_name, const gchar *data_lv, const 
     if (!lv_obj_path)
         return FALSE;
     g_variant_builder_init (&builder, G_VARIANT_TYPE_TUPLE);
-    g_variant_builder_add_value (&builder, g_variant_new ("s", lv_obj_path));
+    g_variant_builder_add_value (&builder, g_variant_new ("o", lv_obj_path));
     params = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
 
@@ -2605,7 +2605,7 @@ gchar* bd_lvm_cache_pool_name (const gchar *vg_name, const gchar *cached_lv, GEr
     g_free (lv_spec);
     if (!prop)
         return NULL;
-    g_variant_get (prop, "s", &pool_obj_path);
+    g_variant_get (prop, "o", &pool_obj_path);
     prop = get_object_property (pool_obj_path, LV_CMN_INTF, "Name", error);
     g_free (pool_obj_path);
     if (!prop)
@@ -2779,7 +2779,7 @@ gchar* bd_lvm_data_lv_name (const gchar *vg_name, const gchar *lv_name, GError *
         g_clear_error (error);
         return NULL;
     }
-    g_variant_get (prop, "s", &obj_path);
+    g_variant_get (prop, "o", &obj_path);
     g_variant_unref (prop);
 
     if (g_strcmp0 (obj_path, "/") == 0) {
@@ -2828,7 +2828,7 @@ gchar* bd_lvm_metadata_lv_name (const gchar *vg_name, const gchar *lv_name, GErr
         g_clear_error (error);
         return NULL;
     }
-    g_variant_get (prop, "s", &obj_path);
+    g_variant_get (prop, "o", &obj_path);
     g_variant_unref (prop);
 
     if (g_strcmp0 (obj_path, "/") == 0) {
