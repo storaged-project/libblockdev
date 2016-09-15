@@ -842,15 +842,17 @@ gboolean bd_kbd_bcache_destroy (const gchar *bcache_device, GError **error) {
             return FALSE;
         }
     }
-
     bd_kbd_bcache_stats_free (status);
-    path = g_strdup_printf ("/sys/fs/bcache/%s/stop", c_set_uuid);
-    success = echo_str_to_file ("1", path, error);
-    g_free (path);
-    if (!success) {
-        g_prefix_error (error, "Failed to stop the cache set: ");
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
+
+    if (c_set_uuid) {
+        path = g_strdup_printf ("/sys/fs/bcache/%s/stop", c_set_uuid);
+        success = echo_str_to_file ("1", path, error);
+        g_free (path);
+        if (!success) {
+            g_prefix_error (error, "Failed to stop the cache set: ");
+            bd_utils_report_finished (progress_id, (*error)->message);
+            return FALSE;
+        }
     }
 
     path = g_strdup_printf ("/sys/block/%s/bcache/stop", bcache_device);
