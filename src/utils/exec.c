@@ -214,6 +214,10 @@ gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtr
     success = g_spawn_sync (NULL, args ? (gchar **) args : (gchar **) argv, NULL, G_SPAWN_SEARCH_PATH,
                             (GSpawnChildSetupFunc) set_c_locale, NULL,
                             &stdout_data, &stderr_data, status, error);
+
+    /* return codes shouldn't be higher than 255, kernel should do this
+       automatically, but it doesn't */
+    *status = *status % 255;
     log_out (task_id, stdout_data, stderr_data);
     log_done (task_id, *status);
 
