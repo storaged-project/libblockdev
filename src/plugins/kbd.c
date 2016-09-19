@@ -413,6 +413,109 @@ static guint64 get_number_from_file (const gchar *path, GError **error) {
 }
 
 /**
+ * bd_kbd_zram_add_device:
+ * @size: size of the zRAM device to add
+ * @nstreams: number of streams to use for the new device (or 0 to use the defaults)
+ * @device: (allow-none) (out): place to store the name of the newly added device
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether a new zRAM device was added or not
+ */
+gboolean bd_kbd_zram_add_device (guint64 size, guint64 nstreams, gchar **device, GError **error) {
+    gchar *path = NULL;
+    gboolean success = FALSE;
+    guint64 dev_num = 0;
+    gchar *num_str = NULL;
+    guint64 progress_id = 0;
+
+    progress_id = bd_utils_report_started ("Started adding new zram device");
+
+    if (access ("/sys/class/zram-control/hot_add", R_OK) != 0) {
+        success = load_kernel_module ("zram", NULL, error);
+        if (!success) {
+            g_prefix_error (error, "Failed to load the zram kernel module: ");
+            return FALSE;
+        }
+    }
+
+    dev_num = get_number_from_file ("/sys/class/zram-control/hot_add", error);
+    if (*error) {
+        g_prefix_error (error, "Failed to add new zRAM device: ");
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    if (nstreams > 0) {
+        path = g_strdup_printf ("/sys/block/zram%"G_GUINT64_FORMAT"/max_comp_streams", dev_num);
+        num_str = g_strdup_printf ("%"G_GUINT64_FORMAT, nstreams);
+        success = echo_str_to_file (num_str, path, error);
+        g_free (path);
+        g_free (num_str);
+        if (!success) {
+            g_prefix_error (error, "Failed to set number of compression streams: ");
+            bd_utils_report_finished (progress_id, (*error)->message);
+            return FALSE;
+        }
+    }
+
+    path = g_strdup_printf ("/sys/block/zram%"G_GUINT64_FORMAT"/disksize", dev_num);
+    num_str = g_strdup_printf ("%"G_GUINT64_FORMAT, size);
+    success = echo_str_to_file (num_str, path, error);
+    g_free (path);
+    g_free (num_str);
+    if (!success) {
+        g_prefix_error (error, "Failed to set device size: ");
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    if (device)
+        *device = g_strdup_printf ("/dev/zram%"G_GUINT64_FORMAT, dev_num);
+
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
+}
+
+/**
+ * bd_kbd_zram_remove_device:
+ * @device: zRAM device to remove
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully removed or not
+ */
+gboolean bd_kbd_zram_remove_device (const gchar *device, GError **error) {
+    gchar *dev_num_str = NULL;
+    gboolean success = FALSE;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started removing zram device '%s'", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    if (g_str_has_prefix (device, "/dev/zram"))
+        dev_num_str = (gchar *) device + 9;
+    else if (g_str_has_prefix (device, "zram"))
+        dev_num_str = (gchar *) device + 4;
+    else {
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Invalid zRAM device given: '%s'", device);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    success = echo_str_to_file (dev_num_str, "/sys/class/zram-control/hot_remove", error);
+    if (!success) {
+        g_prefix_error (error, "Failed to remove device '%s': ", device);
+        bd_utils_report_finished (progress_id, (*error)->message);
+    }
+
+    bd_utils_report_finished (progress_id, "Completed");
+    return success;
+}
+
+
+/**
  * bd_kbd_zram_get_stats:
  * @device: zRAM device to get stats for
  * @error: (out): place to store error (if any)

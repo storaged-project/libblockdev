@@ -97,6 +97,54 @@ class KbdZRAMTestCase(unittest.TestCase):
             self.assertTrue(BlockDev.kbd_zram_destroy_devices())
             time.sleep(1)
 
+    @unittest.skipUnless(_can_load_zram(), "cannot load the 'zram' module")
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_zram_add_remove_device(self):
+        """Verify that it is possible to add and remove a zram device"""
+
+        # the easiest case
+        with _track_module_load(self, "zram", "_loaded_zram_module"):
+            succ, device = BlockDev.kbd_zram_add_device (10 * 1024**2, 4)
+            self.assertTrue(succ)
+            self.assertTrue(device.startswith("/dev/zram"))
+            time.sleep(1)
+            self.assertTrue(BlockDev.kbd_zram_remove_device(device))
+
+        # no nstreams specified
+        with _track_module_load(self, "zram", "_loaded_zram_module"):
+            succ, device = BlockDev.kbd_zram_add_device (10 * 1024**2, 0)
+            self.assertTrue(succ)
+            self.assertTrue(device.startswith("/dev/zram"))
+            time.sleep(1)
+            self.assertTrue(BlockDev.kbd_zram_remove_device(device))
+
+        # create two devices
+        with _track_module_load(self, "zram", "_loaded_zram_module"):
+            succ, device = BlockDev.kbd_zram_add_device (10 * 1024**2, 4)
+            self.assertTrue(succ)
+            self.assertTrue(device.startswith("/dev/zram"))
+
+            succ, device2 = BlockDev.kbd_zram_add_device (10 * 1024**2, 4)
+            self.assertTrue(succ)
+            self.assertTrue(device2.startswith("/dev/zram"))
+
+            time.sleep(1)
+            self.assertTrue(BlockDev.kbd_zram_remove_device(device))
+            self.assertTrue(BlockDev.kbd_zram_remove_device(device2))
+
+        # mixture of multiple devices and a single device
+        with _track_module_load(self, "zram", "_loaded_zram_module"):
+            self.assertTrue(BlockDev.kbd_zram_create_devices(2, [10 * 1024**2, 10 * 1024**2], [1, 2]))
+            time.sleep(1)
+            succ, device = BlockDev.kbd_zram_add_device (10 * 1024**2, 4)
+            self.assertTrue(succ)
+            self.assertTrue(device.startswith("/dev/zram"))
+
+            time.sleep(1)
+            self.assertTrue(BlockDev.kbd_zram_destroy_devices())
+            time.sleep(1)
+
+
 class KbdZRAMStatsTestCase(KbdZRAMTestCase):
     @unittest.skip("unstable test failing on some arches")
     @unittest.skipUnless(_can_load_zram(), "cannot load the 'zram' module")
