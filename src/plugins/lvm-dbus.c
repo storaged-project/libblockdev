@@ -291,6 +291,20 @@ gboolean init() {
     return TRUE;
 }
 
+/**
+ * close_plugin: (skip)
+ */
+void close_plugin () {
+    GError *error = NULL;
+
+    /* the check() call should create the DBus connection for us, but let's not
+       completely rely on it */
+    if (!g_dbus_connection_flush_sync (bus, NULL, &error))
+        g_critical ("Failed to flush DBus connection: %s", error->message);
+    if (!g_dbus_connection_close_sync (bus, NULL, &error))
+        g_critical ("Failed to close DBus connection: %s", error->message);
+}
+
 static const gchar** get_existing_objects (const gchar *obj_prefix, GError **error) {
     GVariant *intro_v = NULL;
     gchar *intro_data = NULL;
