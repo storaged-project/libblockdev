@@ -252,11 +252,22 @@ def get_loading_func(fn_infos, module_name):
     return ret
 
 def get_unloading_func(fn_infos, module_name):
-    ret = 'gboolean unload_{0} (gpointer handle) {{\n'.format(module_name)
+    ret =  'gboolean unload_{0} (gpointer handle) {{\n'.format(module_name)
+    ret += '    char *error = NULL;\n'
+    ret += '    gboolean (*close_fn) (void) = NULL;\n\n'
+
+    # revert the functions to stubs
     for info in fn_infos:
-        # revert the functions to stubs
         ret += '    _{0.name} = {0.name}_stub;\n'.format(info)
+
     ret += '\n'
+    ret += '    dlerror();\n'
+    ret += '    * (void**) (&close_fn) = dlsym(handle, "close_plugin");\n'
+    ret += '    if (((error = dlerror()) != NULL) || !close_fn)\n'
+    ret += '        g_debug("failed to load the close_plugin() function for {0}: %s", error);\n'.format(module_name)
+    ret += '    if (close_fn) {\n'
+    ret += '        close_fn();\n'
+    ret += '    }\n\n'
     ret += '    return dlclose(handle) == 0;\n'
     ret += '}\n\n'
 
