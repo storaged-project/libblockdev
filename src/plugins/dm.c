@@ -69,6 +69,14 @@ gboolean init () {
 }
 
 /**
+ * close_plugin: (skip)
+ */
+void close_plugin () {
+    dm_log_with_errno_init (NULL);
+    dm_log_init_verbose (0);
+}
+
+/**
  * check: (skip)
  */
 gboolean check() {

@@ -126,6 +126,13 @@ gboolean init() {
 }
 
 /**
+ * close_plugin: (skip)
+ */
+void close_plugin () {
+    ped_exception_set_handler (NULL);
+}
+
+/**
  * check: (skip)
  */
 gboolean check() {

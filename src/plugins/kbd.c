@@ -52,6 +52,13 @@ gboolean init () {
 }
 
 /**
+ * close_plugin: (skip)
+ */
+void close_plugin () {
+    c_locale = (locale_t) 0;
+}
+
+/**
  * bd_kbd_error_quark: (skip)
  */
 GQuark bd_kbd_error_quark (void)
