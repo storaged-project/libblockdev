@@ -100,6 +100,38 @@ void bd_fs_xfs_info_free (BDFSXfsInfo *data) {
     g_free (data);
 }
 
+
+/**
+ * bd_fs_vfat_info_copy: (skip)
+ *
+ * Creates a new copy of @data.
+ */
+BDFSVfatInfo* bd_fs_vfat_info_copy (BDFVfatInfo *data) {
+    BDFSXfsInfo *ret = g_new0 (BDFSXfsInfo, 1);
+
+    ret->label = g_strdup (data->label);
+    ret->uuid = g_strdup (data->uuid);
+    ret->state = g_string (data->state);
+    ret->block_size = data->block_size;
+    ret->block_count = data->block_count;
+    ret->free_blocks = data->freeblocks;
+
+
+    return ret;
+}
+
+/**
+ * bd_fs_xfs_info_free: (skip)
+ *
+ * Frees @data.
+ */
+void bd_fs_xfs_info_free (BDFVfatInfo *data) {
+    g_free (data->label);
+    g_free (data->uuid);
+    g_free (data->state);
+    g_free (data);
+}
+
 /**
  * check: (skip)
  */
@@ -817,3 +849,160 @@ gboolean bd_fs_xfs_resize (const gchar *mpoint, guint64 new_size, const BDExtraA
     g_free (size_str);
     return ret;
 }
+
+
+/**
+ * bd_fs_vfat_mkfs:
+ * @device: the device to create a new vfat fs on
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
+ *                                                 passed to the 'mkfs.vfat' utility)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether a new vfat fs was successfully created on @device or not
+ *
+ */
+gboolean bd_fs_vfat_mkfs (const gchar *device, const BDExtraArg **extra, GError **error) {
+    const gchar *args[3] = {"mkfs.vfat", device, NULL};
+
+    return bd_utils_exec_and_report_error (args, extra, error);
+}
+
+/**
+ * bd_fs_vfat_wipe:
+ * @device: the device to wipe an vfat signature from
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether an vfat signature was successfully wiped from the @device or
+ *          not
+ */
+gboolean bd_fs_vfat_wipe (const gchar *device, GError **error) {
+    return wipe_fs (device, "vfat", error);
+}
+
+/**
+ * bd_fs_vfat_check:
+ * @device: the device containing the file system to check
+ * @error: (out): place to store error (if any)
+ *
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the check (right now
+ *
+ *
+ * Returns: whether an vfat file system on the @device is clean or not
+ *
+ * Note: if the file system is mounted it may be reported as unclean even if
+ *       everything is okay and there are just some pending/in-progress writes
+ */
+gboolean bd_fs_vfat_check (const gchar *device, GError **error, const BDExtraArg **extra){
+
+    const gchar *args[5] = {"fsck.vfat", "-f", "-n", device, NULL};
+    gint status = 0;
+    gboolean ret = FALSE;
+
+    ret = bd_utils_exec_and_report_status_error (args, extra, &status, error);
+    if (!ret && (status == 4)) {
+        g_clear_error (error);
+    }
+    return ret;
+}
+
+/**
+ * bd_fs_vfat_repair:
+ * @device: the device containing the file system to repair
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the repair (right now
+ *                                                 passed to the 'vfat_repair' utility)
+ * @error: (out): place to store error (if any)
+ * @unsafe: whether to do unsafe operations too
+ *
+ * Returns: whether an vfat file system on the @device was successfully repaired
+ *          (if needed) or not (error is set in that case)
+ */
+gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GError **error, gboolean unsafe){
+
+
+    const gchar *args[5] = {"fsck.vfat", "-f", unsafe ? "-y" : "", device, NULL};
+
+    return bd_utils_exec_and_report_error (args, extra, error);
+}
+
+/**
+ * bd_fs_vfat_set_label:
+ * @device: the device containing the file system to set label for
+ * @label: label to set
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the label of xfs file system on the @device was
+ *          successfully set or not
+ */
+
+
+gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError **error) {
+    const gchar *args[5] = {"dosfslabel", device, label, NULL};
+    if (!label || (strncmp (label, "", 1) == 0))
+        args[2] = "--";
+
+    return bd_utils_exec_and_report_error (args, NULL, error);
+}
+
+
+/**
+ * bd_fs_vfat_get_info:
+ * @device: the device containing the file system to get info for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): information about the file system on @device or
+ *                           %NULL in case of error
+ */
+BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
+
+    const gchar *args[4] = {"lsblk", "-o FSTYPE,NAME,LABEL,UUID,SIZE,MOUNTPOINT,TYPE", device, NULL};
+
+    BDFSVfatInfo *ret = g_new0 (BDFsVfatInfo, 1);
+        gchar *value = NULL;
+
+        ret->label = g_strdup ((gchar*) g_hash_table_lookup (table, "Filesystem volume name"));
+        if ((!ret->label) || (g_strcmp0 (ret->label, "<none>") == 0))
+            ret->label = g_strdup ("");
+        ret->uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "Filesystem UUID"));
+        ret->state = g_strdup ((gchar*) g_hash_table_lookup (table, "Filesystem state"));
+
+        value = (gchar*) g_hash_table_lookup (table, "Block size");
+        if (value)
+            ret->block_size = g_ascii_strtoull (value, NULL, 0);
+        else
+            ret->block_size = 0;
+        value = (gchar*) g_hash_table_lookup (table, "Block count");
+        if (value)
+            ret->block_count = g_ascii_strtoull (value, NULL, 0);
+        else
+            ret->block_count = 0;
+        value = (gchar*) g_hash_table_lookup (table, "Free blocks");
+        if (value)
+            ret->free_blocks = g_ascii_strtoull (value, NULL, 0);
+        else
+            ret->free_blocks = 0;
+
+        if (free_table)
+            g_hash_table_destroy (table);
+
+        return ret;
+}
+
+
+/**
+ * bd_fs_vfat_resize:
+ * @mpoint: the mount point of the file system to resize
+ * @new_size: new requested size for the file system *in file system blocks* (see bd_fs_xfs_get_info())
+ *            (if 0, the file system is adapted to the underlying block device)
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the resize (right now
+ *                                                 passed to the 'xfs_growfs' utility)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the file system mounted on @mpoint was successfully resized or not
+ */
+
+gboolean bd_fs_vfat_resize (const gchar *mpoint, guint64 new_size, const BDExtraArg **extra, GError **error) {
+  //todo
+    return true;
+}
+
+
