@@ -94,7 +94,13 @@ BDUtilsExecError
 bd_utils_exec_and_report_error
 bd_utils_exec_and_report_status_error
 bd_utils_exec_and_capture_output
+bd_utils_exec_and_report_error_no_progress
+bd_utils_exec_and_report_progress
 bd_utils_init_logging
+bd_utils_init_prog_reporting
+bd_utils_report_finished
+bd_utils_report_progress
+bd_utils_report_started
 BD_UTILS_SIZE_ERROR
 BDUtilsSizeError
 bd_utils_size_human_readable
@@ -200,6 +206,7 @@ bd_lvm_lvsnapshotmerge
 bd_lvm_lvinfo
 bd_lvm_lvs
 bd_lvm_thpoolcreate
+bd_lvm_thpool_convert
 bd_lvm_thlvcreate
 bd_lvm_thlvpoolname
 bd_lvm_thsnapshotcreate
@@ -208,6 +215,7 @@ bd_lvm_get_global_config
 bd_lvm_cache_attach
 bd_lvm_cache_create_cached_lv
 bd_lvm_cache_create_pool
+bd_lvm_cache_pool_convert
 bd_lvm_cache_detach
 bd_lvm_cache_get_default_md_size
 bd_lvm_cache_get_mode_from_str
@@ -257,6 +265,7 @@ BD_MPATH_ERROR
 BDMpathError
 bd_mpath_flush_mpaths
 bd_mpath_is_mpath_member
+bd_mpath_get_mpath_members
 bd_mpath_set_friendly_names
 </SECTION>
 
@@ -308,6 +317,8 @@ bd_kbd_bcache_status
 bd_kbd_error_quark
 bd_kbd_zram_create_devices
 bd_kbd_zram_destroy_devices
+bd_kbd_zram_add_device
+bd_kbd_zram_remove_device
 bd_kbd_zram_get_stats
 bd_kbd_zram_stats_copy
 bd_kbd_zram_stats_free
