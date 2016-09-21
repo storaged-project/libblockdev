@@ -1147,7 +1147,8 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
             have_cluster_size = TRUE;
         } else if (!have_cluster_count && g_str_has_prefix (*line_p, device)) {
             key_val = g_strsplit (*line_p, ",", 2);
-            sscanf (key_val[1], " %lu/%lu clusters", &full_cluster_count, &cluster_count);
+            sscanf (key_val[1], " %" G_GUINT64_FORMAT "/" "%" G_GUINT64_FORMAT " clusters",
+                    &full_cluster_count, &cluster_count);
             ret->cluster_count = cluster_count;
             ret->free_cluster_count = cluster_count - full_cluster_count;
             have_cluster_count = TRUE;
