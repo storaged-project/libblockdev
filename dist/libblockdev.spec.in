@@ -443,9 +443,11 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 
 %files utils
 %{_libdir}/libbd_utils.so.*
+%{_libdir}/libbd_part_err.so.*
 
 %files utils-devel
 %{_libdir}/libbd_utils.so
+%{_libdir}/libbd_part_err.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/utils.h
 %{_includedir}/blockdev/sizes.h
