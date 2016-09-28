@@ -44,6 +44,18 @@ typedef struct BDFSVfatInfo {
 BDFSVfatInfo* bd_fs_vfat_info_copy (BDFSVfatInfo *data);
 void bd_fs_vfat_info_free (BDFSVfatInfo *data);
 
+/*
+ * If using the plugin as a standalone library, the following functions should
+ * be called to:
+ *
+ * check_deps() - check plugin's dependencies, returning TRUE if satisfied
+ * init()       - initialize the plugin, returning TRUE on success
+ * close()      - clean after the plugin at the end or if no longer used
+ *
+ */
+gboolean bd_fs_check_deps ();
+gboolean bd_fs_init ();
+void bd_fs_close ();
 
 gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error);
 

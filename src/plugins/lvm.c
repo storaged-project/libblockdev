@@ -150,9 +150,14 @@ void bd_lvm_cache_stats_free (BDLVMCacheStats *data) {
 }
 
 /**
- * check: (skip)
+ * bd_lvm_check_deps:
+ *
+ * Returns: whether the plugin's runtime dependencies are satisfied or not
+ *
+ * Function checking plugin's runtime dependencies.
+ *
  */
-gboolean check() {
+gboolean bd_lvm_check_deps () {
     GError *error = NULL;
     gboolean ret = bd_utils_check_util_version ("lvm", LVM_MIN_VERSION, "version", "LVM version:\\s+([\\d\\.]+)", &error);
 
@@ -161,6 +166,29 @@ gboolean check() {
         g_clear_error (&error);
     }
     return ret;
+}
+
+/**
+ * bd_lvm_init:
+ *
+ * Initializes the plugin. **This function is called automatically by the
+ * library's initialization functions.**
+ *
+ */
+gboolean bd_lvm_init () {
+    /* nothing to do here */
+    return TRUE;
+};
+
+/**
+ * bd_lvm_close:
+ *
+ * Cleans up after the plugin. **This function is called automatically by the
+ * library's functions that unload it.**
+ *
+ */
+void bd_lvm_close () {
+    /* nothing to do here */
 }
 
 static gboolean call_lvm_and_report_error (const gchar **args, const BDExtraArg **extra, GError **error) {

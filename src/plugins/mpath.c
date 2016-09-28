@@ -43,9 +43,14 @@ GQuark bd_mpath_error_quark (void)
 }
 
 /**
- * check: (skip)
+ * bd_mpath_check_deps:
+ *
+ * Returns: whether the plugin's runtime dependencies are satisfied or not
+ *
+ * Function checking plugin's runtime dependencies.
+ *
  */
-gboolean check() {
+gboolean bd_mpath_check_deps () {
     GError *error = NULL;
     gboolean ret = bd_utils_check_util_version ("multipath", MULTIPATH_MIN_VERSION, NULL, "multipath-tools v([\\d\\.]+)", &error);
 
@@ -64,6 +69,29 @@ gboolean check() {
         g_clear_error (&error);
     }
     return ret;
+}
+
+/**
+ * bd_mpath_init:
+ *
+ * Initializes the plugin. **This function is called automatically by the
+ * library's initialization functions.**
+ *
+ */
+gboolean bd_mpath_init () {
+    /* nothing to do here */
+    return TRUE;
+};
+
+/**
+ * bd_mpath_close:
+ *
+ * Cleans up after the plugin. **This function is called automatically by the
+ * library's functions that unload it.**
+ *
+ */
+void bd_mpath_close () {
+    /* nothing to do here */
 }
 
 /**

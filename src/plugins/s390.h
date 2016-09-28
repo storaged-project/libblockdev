@@ -16,6 +16,19 @@ typedef enum {
     BD_S390_ERROR_IO,
 } BDS390Error;
 
+/*
+ * If using the plugin as a standalone library, the following functions should
+ * be called to:
+ *
+ * check_deps() - check plugin's dependencies, returning TRUE if satisfied
+ * init()       - initialize the plugin, returning TRUE on success
+ * close()      - clean after the plugin at the end or if no longer used
+ *
+ */
+gboolean bd_s390_check_deps ();
+gboolean bd_s390_init ();
+void bd_s390_close ();
+
 gboolean bd_s390_dasd_format (const gchar *dasd, const BDExtraArg **extra, GError **error);
 gboolean bd_s390_dasd_needs_format (const gchar *dasd, GError **error);
 gboolean bd_s390_dasd_online (const gchar *dasd, GError **error);

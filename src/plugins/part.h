@@ -93,6 +93,18 @@ typedef struct BDPartDiskSpec {
 BDPartDiskSpec* bd_part_disk_spec_copy (BDPartDiskSpec *data);
 void bd_part_disk_spec_free (BDPartDiskSpec *data);
 
+/*
+ * If using the plugin as a standalone library, the following functions should
+ * be called to:
+ *
+ * check_deps() - check plugin's dependencies, returning TRUE if satisfied
+ * init()       - initialize the plugin, returning TRUE on success
+ * close()      - clean after the plugin at the end or if no longer used
+ *
+ */
+gboolean bd_part_check_deps ();
+gboolean bd_part_init ();
+void bd_part_close ();
 
 gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean ignore_existing, GError **error);
 
