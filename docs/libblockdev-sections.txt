@@ -96,6 +96,9 @@ bd_dm_get_raid_set_type
 
 <SECTION>
 <FILE>utils</FILE>
+BDUtilsProgExtract
+BDUtilsProgFunc
+BDUtilsProgStatus
 BDUtilsLogFunc
 bd_utils_exec_error_quark
 BD_UTILS_EXEC_ERROR
