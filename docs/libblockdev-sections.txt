@@ -413,12 +413,21 @@ bd_fs_xfs_check
 bd_fs_xfs_get_info
 bd_fs_xfs_info_copy
 bd_fs_xfs_info_free
-bd_fs_xfs_info_get_type
 bd_fs_xfs_mkfs
 bd_fs_xfs_repair
 bd_fs_xfs_resize
 bd_fs_xfs_set_label
 bd_fs_xfs_wipe
+BDFSVfatInfo
+bd_fs_vfat_check
+bd_fs_vfat_get_info
+bd_fs_vfat_info_copy
+bd_fs_vfat_info_free
+bd_fs_vfat_mkfs
+bd_fs_vfat_repair
+bd_fs_vfat_resize
+bd_fs_vfat_set_label
+bd_fs_vfat_wipe
 </SECTION>
 
 <SECTION>
