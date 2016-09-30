@@ -1,0 +1,53 @@
+#!/bin/bash
+
+echo "$@"|grep -- "--brief" &>/dev/null
+is_brief=$?
+
+if [ $is_brief -eq 0 ]; then
+    cat <<EOF
+ARRAY metadata=imsm UUID=b42756a2:37e43e47:674bd1dd:6e822145
+ARRAY /dev/md/Volume0 container=b42756a2:37e43e47:674bd1dd:6e822145 member=0 UUID=8f0b5240:06168ed1:bbafeaf5:2a7b04fc
+EOF
+else
+    cat <<EOF
+/dev/sda:
+          Magic : Intel Raid ISM Cfg Sig.
+        Version : 1.0.00
+    Orig Family : e56dd6e1
+         Family : e56dd6e1
+     Generation : 0000000c
+     Attributes : All supported
+           UUID : b42756a2:37e43e47:674bd1dd:6e822145
+       Checksum : d4553058 correct
+    MPB Sectors : 1
+          Disks : 2
+   RAID Devices : 1
+
+  Disk00 Serial : 5QM2XY4V
+          State : active
+             Id : 00000000
+    Usable Size : 976768264 (465.76 GiB 500.11 GB)
+
+[Volume0]:
+           UUID : 8f0b5240:06168ed1:bbafeaf5:2a7b04fc
+     RAID Level : 0
+        Members : 2
+          Slots : [UU]
+    Failed disk : none
+      This Slot : 0
+     Array Size : 1953536000 (931.52 GiB 1000.21 GB)
+   Per Dev Size : 976768264 (465.76 GiB 500.11 GB)
+  Sector Offset : 0
+    Num Stripes : 3815500
+     Chunk Size : 128 KiB
+       Reserved : 0
+  Migrate State : idle
+      Map State : normal
+    Dirty State : clean
+
+  Disk01 Serial : 9VM1BT6B
+          State : active
+             Id : 00010000
+    Usable Size : 976768264 (465.76 GiB 500.11 GB)
+EOF
+fi

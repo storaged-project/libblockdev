@@ -184,8 +184,14 @@ static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean
     char time_str[20];
 
     data->level = g_strdup ((gchar*) g_hash_table_lookup (table, "Raid Level"));
+    if (!(data->level))
+        /* BUG: mdadm outputs "RAID Level" for some metadata formats (rhbz#1380034) */
+        data->level = g_strdup ((gchar*) g_hash_table_lookup (table, "RAID Level"));
 
     value = (gchar*) g_hash_table_lookup (table, "Raid Devices");
+    if (!value)
+        /* BUG: mdadm outputs "RAID Devices" for some metadata formats (rhbz#1380034) */
+        value = (gchar*) g_hash_table_lookup (table, "RAID Devices");
     if (value)
         data->num_devices = g_ascii_strtoull (value, NULL, 0);
     else
