@@ -58,7 +58,7 @@ static gchar *global_config_str = NULL;
 #define DBUS_PROPS_IFACE "org.freedesktop.DBus.Properties"
 #define DBUS_INTRO_IFACE "org.freedesktop.DBus.Introspectable"
 #define DBUS_LONG_CALL_TIMEOUT 10000 /* msecs */
-#define METHOD_CALL_TIMEOUT (DBUS_LONG_CALL_TIMEOUT / 2)
+#define METHOD_CALL_TIMEOUT (DBUS_LONG_CALL_TIMEOUT / 2) / 1000 /* secs */
 
 static GDBusConnection *bus = NULL;
 
