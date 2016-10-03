@@ -404,6 +404,15 @@ class FakeMDADMutilTest(unittest.TestCase):
 
         self.assertEqual(ex_data.device, "/dev/md/Volume0")
 
+    def test_fw_raid_uppercase_examine(self):
+        """Verify that md_examine works with output using "RAID" instead of "Raid" """
+
+        with fake_utils("tests/mdadm_fw_RAID_examine"):
+            ex_data = BlockDev.md_examine("fake_dev")
+
+        self.assertEqual(ex_data.level, "0")
+        self.assertEqual(ex_data.num_devices, 1)
+
     def test_no_metadata_examine(self):
         """Verify that md_examine works as expected with no metadata spec"""
 
