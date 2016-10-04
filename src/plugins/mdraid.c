@@ -798,6 +798,26 @@ BDMDExamineData* bd_md_examine (gchar *device, GError **error) {
         g_free (orig_data);
     }
 
+    argv[2] = "--export";
+    success = bd_utils_exec_and_capture_output (argv, &output, error);
+    if (!success)
+        /* error is already populated */
+        return FALSE;
+
+    /* try to get a better information about RAID level because it may be
+       misleading in the output without --export */
+    output_fields = g_strsplit (output, "\n", 0);
+    g_free (output);
+    output = NULL;
+    for (i=0; (i < g_strv_length (output_fields) - 1); i++)
+        if (g_str_has_prefix (output_fields[i], "MD_LEVEL=")) {
+            value = strchr (output_fields[i], '=');
+            value++;
+            g_free (ret->level);
+            ret->level = g_strdup (value);
+        }
+    g_strfreev (output_fields);
+
     argv[2] = "--brief";
     success = bd_utils_exec_and_capture_output (argv, &output, error);
     if (!success)

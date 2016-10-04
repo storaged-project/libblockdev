@@ -3,10 +3,20 @@
 echo "$@"|grep -- "--brief" &>/dev/null
 is_brief=$?
 
+echo "$@"|grep -- "--export" &>/dev/null
+is_export=$?
+
 if [ $is_brief -eq 0 ]; then
     cat <<EOF
 ARRAY metadata=imsm UUID=b42756a2:37e43e47:674bd1dd:6e822145
 ARRAY /dev/md/Volume0 container=b42756a2:37e43e47:674bd1dd:6e822145 member=0 UUID=8f0b5240:06168ed1:bbafeaf5:2a7b04fc
+EOF
+elif [ $is_export -eq 0 ]; then
+    cat <<EOF
+MD_METADATA=imsm
+MD_LEVEL=container
+MD_UUID=b42756a2:37e43e47:674bd1dd:6e822145
+MD_DEVICES=2
 EOF
 else
     cat <<EOF
