@@ -395,17 +395,8 @@ class MDTestNameNodeBijection(MDTestCase):
 
 class FakeMDADMutilTest(unittest.TestCase):
     # no setUp nor tearDown needed, we are gonna use fake utils
-
-    def test_fw_raid_examine(self):
-        """Verify that md_examine works as expected on FW RAID data"""
-
-        with fake_utils("tests/mdadm_fw_raid_examine"):
-            ex_data = BlockDev.md_examine("fake_dev")
-
-        self.assertEqual(ex_data.device, "/dev/md/Volume0")
-
     def test_fw_raid_uppercase_examine(self):
-        """Verify that md_examine works with output using "RAID" instead of "Raid" """
+        """Verify that md_examine works with output using "RAID" instead of "Raid" and other quirks """
 
         with fake_utils("tests/mdadm_fw_RAID_examine"):
             ex_data = BlockDev.md_examine("fake_dev")
@@ -413,6 +404,7 @@ class FakeMDADMutilTest(unittest.TestCase):
         self.assertEqual(ex_data.level, "container")
         self.assertEqual(ex_data.num_devices, 1)
         self.assertEqual(ex_data.uuid, "b42756a2-37e4-3e47-674b-d1dd6e822145")
+        self.assertEqual(ex_data.device, None)
 
     def test_no_metadata_examine(self):
         """Verify that md_examine works as expected with no metadata spec"""
