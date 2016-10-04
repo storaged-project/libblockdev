@@ -164,7 +164,9 @@ static GHashTable* parse_mdadm_vars (const gchar *str, const gchar *item_sep, co
         key_val = g_strsplit (*item_p, key_val_sep, 2);
         if (g_strv_length ((gchar **) key_val) == 2) {
             /* we only want to process valid lines (with the separator) */
-            g_hash_table_insert (table, g_strstrip (key_val[0]), g_strstrip (key_val[1]));
+            /* only use the first value for the given key */
+            if (!g_hash_table_contains (table, g_strstrip (key_val[0])))
+                g_hash_table_insert (table, g_strstrip (key_val[0]), g_strstrip (key_val[1]));
             (*num_items)++;
         } else
             /* invalid line, just free key_val */
@@ -212,6 +214,9 @@ static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean
         data->size = 0;
 
     data->uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "Array UUID"));
+    if (!data->uuid)
+        /* also try just "UUID" which may be reported e.g for IMSM FW RAID */
+        data->uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "UUID"));
 
     value = (gchar*) g_hash_table_lookup (table, "Update Time");
     if (value) {
