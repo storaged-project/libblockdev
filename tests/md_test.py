@@ -412,6 +412,7 @@ class FakeMDADMutilTest(unittest.TestCase):
 
         self.assertEqual(ex_data.level, "container")
         self.assertEqual(ex_data.num_devices, 1)
+        self.assertEqual(ex_data.uuid, "b42756a2-37e4-3e47-674b-d1dd6e822145")
 
     def test_no_metadata_examine(self):
         """Verify that md_examine works as expected with no metadata spec"""
