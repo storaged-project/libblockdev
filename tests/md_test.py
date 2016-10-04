@@ -410,7 +410,7 @@ class FakeMDADMutilTest(unittest.TestCase):
         with fake_utils("tests/mdadm_fw_RAID_examine"):
             ex_data = BlockDev.md_examine("fake_dev")
 
-        self.assertEqual(ex_data.level, "0")
+        self.assertEqual(ex_data.level, "container")
         self.assertEqual(ex_data.num_devices, 1)
 
     def test_no_metadata_examine(self):
