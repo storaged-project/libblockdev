@@ -143,6 +143,10 @@ BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
     new_data->data_lv = g_strdup (data->data_lv);
     new_data->metadata_lv = g_strdup (data->metadata_lv);
     new_data->roles = g_strdup (data->roles);
+    new_data->move_pv = g_strdup (data->move_pv);
+    new_data->data_percent = data->data_percent;
+    new_data->metadata_percent = data->metadata_percent;
+    new_data->copy_percent = data->copy_percent;
     return new_data;
 }
 
@@ -157,6 +161,7 @@ void bd_lvm_lvdata_free (BDLVMLVdata *data) {
     g_free (data->data_lv);
     g_free (data->metadata_lv);
     g_free (data->roles);
+    g_free (data->move_pv);
     g_free (data);
 }
 
@@ -904,6 +909,12 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error) {
         g_free (roles);
         g_variant_unref (value);
     }
+
+    /* XXX: these values are currently not provided by the LVM DBus API */
+    data->move_pv = NULL;
+    data->data_percent = 0;
+    data->metadata_percent = 0;
+    data->copy_percent = 0;
 
     /* returns an object path for the VG */
     g_variant_dict_lookup (&dict, "Vg", "o", &path);

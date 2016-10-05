@@ -110,6 +110,10 @@ BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
     new_data->data_lv = g_strdup (data->data_lv);
     new_data->metadata_lv = g_strdup (data->metadata_lv);
     new_data->roles = g_strdup (data->roles);
+    new_data->move_pv = g_strdup (data->move_pv);
+    new_data->data_percent = data->data_percent;
+    new_data->metadata_percent = data->metadata_percent;
+    new_data->copy_percent = data->copy_percent;
     return new_data;
 }
 
@@ -124,6 +128,7 @@ void bd_lvm_lvdata_free (BDLVMLVdata *data) {
     g_free (data->data_lv);
     g_free (data->metadata_lv);
     g_free (data->roles);
+    g_free (data->move_pv);
     g_free (data);
 }
 
@@ -415,6 +420,26 @@ static BDLVMLVdata* get_lv_data_from_table (GHashTable *table, gboolean free_tab
     data->data_lv = g_strdup (g_hash_table_lookup (table, "LVM2_DATA_LV"));
     data->metadata_lv = g_strdup (g_hash_table_lookup (table, "LVM2_METADATA_LV"));
     data->roles = g_strdup (g_hash_table_lookup (table, "LVM2_LV_ROLE"));
+
+    data->move_pv = g_strdup (g_hash_table_lookup (table, "LVM2_MOVE_PV"));
+
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_DATA_PERCENT");
+    if (value)
+        data->data_percent = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->data_percent = 0;
+
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_METADATA_PERCENT");
+    if (value)
+        data->metadata_percent = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->metadata_percent = 0;
+
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_COPY_PERCENT");
+    if (value)
+        data->copy_percent = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->copy_percent = 0;
 
     /* replace '[' and ']' (marking LVs as internal) with spaces and then
        remove all the leading and trailing whitespace */
@@ -1363,7 +1388,7 @@ gboolean bd_lvm_lvsnapshotmerge (const gchar *vg_name, const gchar *snapshot_nam
 BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError **error) {
     const gchar *args[11] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--units=b", "-a",
-                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv,role",
+                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv,role,move_pv,data_percent,metadata_percent,copy_percent",
                        NULL, NULL};
 
     GHashTable *table = NULL;
@@ -1387,7 +1412,7 @@ BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError *
 
     for (lines_p = lines; *lines_p; lines_p++) {
         table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 11)) {
+        if (table && (num_items == 15)) {
             g_strfreev (lines);
             return get_lv_data_from_table (table, TRUE);
         } else
@@ -1412,7 +1437,7 @@ BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError *
 BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
     const gchar *args[11] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--units=b", "-a",
-                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv,role",
+                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv,role,move_pv,data_percent,metadata_percent,copy_percent",
                        NULL, NULL};
 
     GHashTable *table = NULL;
@@ -1449,7 +1474,7 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
 
     for (lines_p = lines; *lines_p; lines_p++) {
         table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 11)) {
+        if (table && (num_items == 15)) {
             /* valid line, try to parse and record it */
             lvdata = get_lv_data_from_table (table, TRUE);
             if (lvdata)
