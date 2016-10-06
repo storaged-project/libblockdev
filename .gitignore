@@ -6,6 +6,8 @@ tests/error_occurred
 **/*.pyc
 *libblockdev*.tar.gz
 src/lib/plugin_apis/*.[ch]
+src/lib/plugin_apis/btrfs.api
+src/plugins/btrfs.h
 BlockDev-1.0.gir
 BlockDev-1.0.typelib
 Makefile
