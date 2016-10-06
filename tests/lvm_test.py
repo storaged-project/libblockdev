@@ -1051,6 +1051,7 @@ class LvmPVVGLVcachePoolTestCase(LvmPVVGLVTestCase):
         LvmPVVGLVTestCase._clean_up(self)
 
 class LvmPVVGLVcachePoolCreateRemoveTestCase(LvmPVVGLVcachePoolTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_cache_pool_create_remove(self):
         """Verify that is it possible to create and remove a cache pool"""
 
@@ -1075,6 +1076,7 @@ class LvmPVVGLVcachePoolCreateRemoveTestCase(LvmPVVGLVcachePoolTestCase):
         self.assertTrue(succ)
 
 class LvmTestCachePoolConvert(LvmPVVGLVcachePoolTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_cache_pool_convert(self):
         """Verify that it is possible to create a cache pool by conversion"""
 
@@ -1097,6 +1099,7 @@ class LvmTestCachePoolConvert(LvmPVVGLVcachePoolTestCase):
 
 
 class LvmPVVGLVcachePoolAttachDetachTestCase(LvmPVVGLVcachePoolTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_cache_pool_attach_detach(self):
         """Verify that is it possible to attach and detach a cache pool"""
 
@@ -1136,6 +1139,7 @@ class LvmPVVGLVcachePoolAttachDetachTestCase(LvmPVVGLVcachePoolTestCase):
         self.assertTrue(any(info.lv_name == "testCache" for info in lvs))
 
 class LvmPVVGcachedLVTestCase(LvmPVVGLVTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_create_cached_lv(self):
         """Verify that it is possible to create a cached LV in a single step"""
 
@@ -1154,6 +1158,7 @@ class LvmPVVGcachedLVTestCase(LvmPVVGLVTestCase):
         self.assertTrue(succ)
 
 class LvmPVVGcachedLVpoolTestCase(LvmPVVGLVTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_cache_get_pool_name(self):
         """Verify that it is possible to get the name of the cache pool"""
 
@@ -1178,6 +1183,7 @@ class LvmPVVGcachedLVpoolTestCase(LvmPVVGLVTestCase):
         self.assertEqual(BlockDev.lvm_cache_pool_name("testVG", "testLV"), "testCache")
 
 class LvmPVVGcachedLVstatsTestCase(LvmPVVGLVTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_cache_get_stats(self):
         """Verify that it is possible to get stats for a cached LV"""
 
