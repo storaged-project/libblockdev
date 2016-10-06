@@ -151,6 +151,6 @@ rpm: local
 release: tag
 	$(MAKE) archive
 
-ci: distcheck
+ci: all distcheck
 	$(MAKE) pylint > $(PYLINT_LOG)
-	TEST_PYTHON=python3 COVERAGE=coverage3 $(MAKE) coverage
+	TEST_PYTHON=python3 $(MAKE) --quiet test
