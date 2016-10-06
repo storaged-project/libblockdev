@@ -833,31 +833,6 @@ static BDLVMVGdata* get_vg_data_from_props (GVariant *props, GError **error __at
     return data;
 }
 
-static gchar get_lv_attr (GVariantDict *props, const gchar *prop) {
-    GVariant *value = NULL;
-    gchar *letter = NULL;
-    gchar *desc = NULL;
-    gchar ret = '\0';
-
-    value = g_variant_dict_lookup_value (props, prop, (GVariantType*) "(ss)");
-    g_variant_get (value, "(ss)", &letter, &desc);
-    ret = letter[0];
-    g_free (letter);
-    g_free (desc);
-    g_variant_unref (value);
-
-    return ret;
-}
-
-static gchar get_lv_attr_bool (GVariantDict *props, const gchar *prop, gchar letter) {
-    gboolean set = FALSE;
-    g_variant_dict_lookup (props, prop, "b", &set);
-    if (set)
-        return letter;
-    else
-        return '-';
-}
-
 static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error) {
     BDLVMLVdata *data = g_new0 (BDLVMLVdata, 1);
     GVariantDict dict;
@@ -872,24 +847,11 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error) {
 
     g_variant_dict_lookup (&dict, "Name", "s", &(data->lv_name));
     g_variant_dict_lookup (&dict, "Uuid", "s", &(data->uuid));
+    g_variant_dict_lookup (&dict, "Attr", "s", &(data->attr));
     g_variant_dict_lookup (&dict, "SizeBytes", "t", &(data->size));
-
-    /* construct attr from properties here */
-    data->attr = g_new0 (gchar, 11);
-    data->attr[0] = get_lv_attr (&dict, "VolumeType");
-    data->attr[1] = get_lv_attr (&dict, "Permissions");
-    data->attr[2] = get_lv_attr (&dict, "AllocationPolicy");
-    data->attr[3] = get_lv_attr_bool (&dict, "FixedMinor", 'm');
-    data->attr[4] = get_lv_attr (&dict, "State");
-    if (data->attr[4] == 'a')
-        /* open/unknown not reported, let's derive it from State for now */
-        data->attr[5] = 'o';
-    else
-        data->attr[5] = '-';
-    data->attr[6] = get_lv_attr (&dict, "TargetType");
-    data->attr[7] = get_lv_attr_bool (&dict, "ZeroBlocks", 'z');
-    data->attr[8] = get_lv_attr (&dict, "Health");
-    data->attr[9] = get_lv_attr_bool (&dict, "SkipActivation", 'k');
+    g_variant_dict_lookup (&dict, "DataPercent", "u", &(data->data_percent));
+    g_variant_dict_lookup (&dict, "MetaDataPercent", "u", &(data->metadata_percent));
+    g_variant_dict_lookup (&dict, "CopyPercent", "u", &(data->copy_percent));
 
     /* XXX: how to deal with LVs with multiple segment types? We are just taking
             the first one now. */
@@ -910,12 +872,6 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error) {
         g_variant_unref (value);
     }
 
-    /* XXX: these values are currently not provided by the LVM DBus API */
-    data->move_pv = NULL;
-    data->data_percent = 0;
-    data->metadata_percent = 0;
-    data->copy_percent = 0;
-
     /* returns an object path for the VG */
     g_variant_dict_lookup (&dict, "Vg", "o", &path);
     name = get_object_property (path, VG_INTF, "Name", error);
@@ -930,6 +886,7 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error) {
         g_variant_unref (name);
     }
     g_free (path);
+    path = NULL;
 
     g_variant_dict_lookup (&dict, "PoolLv", "o", &path);
     if (g_strcmp0 (path, "/") != 0) {
@@ -938,6 +895,18 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error) {
         g_variant_unref (name);
     }
     g_free (path);
+    path = NULL;
+
+    g_variant_dict_lookup (&dict, "MovePv", "o", &path);
+    if (path && g_strcmp0 (path, "/") != 0) {
+        g_debug ("Have path");
+        g_debug ("  %s", path);
+        name = get_object_property (path, PV_INTF, "Name", error);
+        g_variant_get (name, "s", &(data->move_pv));
+        g_variant_unref (name);
+    }
+    g_free (path);
+    path = NULL;
 
     g_variant_dict_clear (&dict);
     g_variant_unref (props);
