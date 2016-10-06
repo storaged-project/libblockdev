@@ -92,7 +92,7 @@ class CryptoTestResize(CryptoTestCase):
         succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, PASSWD, None, 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None)
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
         self.assertTrue(succ)
 
         # resize to 512 KiB (1024 * 512B sectors)
@@ -115,25 +115,25 @@ class CryptoTestOpenClose(CryptoTestCase):
         self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.crypto_luks_open("/non/existing/device", "libblockdevTestLUKS", PASSWD, None)
+            BlockDev.crypto_luks_open("/non/existing/device", "libblockdevTestLUKS", PASSWD, None, False)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", None, None)
+            BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", None, None, False)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", "wrong-passhprase", None)
+            BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", "wrong-passhprase", None, False)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", None, "wrong-keyfile")
+            BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", None, "wrong-keyfile", False)
 
-        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None)
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
         self.assertTrue(succ)
 
         # use the full /dev/mapper/ path
         succ = BlockDev.crypto_luks_close("/dev/mapper/libblockdevTestLUKS")
         self.assertTrue(succ)
 
-        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", None, self.keyfile)
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", None, self.keyfile, False)
         self.assertTrue(succ)
 
         # use just the LUKS device name
@@ -234,7 +234,7 @@ class CryptoTestLuksStatus(CryptoTestCase):
         succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None, 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None)
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
         self.assertTrue(succ)
 
         # use the full /dev/mapper path
@@ -268,12 +268,12 @@ class CryptoTestGetUUID(CryptoTestCase):
 class CryptoTestLuksOpenRW(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_luks_open_rw(self):
-        """Verify that opened LUKS device is usable (activated as RW)"""
+        """Verify that a LUKS device can be activated as RW as well as RO"""
 
         succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None, 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None)
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
         self.assertTrue(succ)
 
         # tests that we can write something to the raw LUKS device
@@ -282,6 +282,18 @@ class CryptoTestLuksOpenRW(CryptoTestCase):
 
         succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
         self.assertTrue(succ)
+
+        # now try the same with LUKS device opened as RO
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, True)
+        self.assertTrue(succ)
+
+        # tests that we can write something to the raw LUKS device
+        with self.assertRaises(GLib.GError):
+            BlockDev.utils_exec_and_report_error(["dd", "if=/dev/zero", "of=/dev/mapper/libblockdevTestLUKS", "bs=1M", "count=1"])
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
 
 class CryptoTestEscrow(CryptoTestCase):
     def setUp(self):

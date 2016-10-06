@@ -337,13 +337,14 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
  * @name: name for the LUKS device
  * @passphrase: (allow-none): passphrase to open the @device or %NULL
  * @key_file: (allow-none): key file path to use for opening the @device or %NULL
+ * @read_only: whether to open as read-only or not (meaning read-write)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @device was successfully opened or not
  *
  * One of @passphrase, @key_file has to be != %NULL.
  */
-gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gchar *passphrase, const gchar *key_file, GError **error) {
+gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gchar *passphrase, const gchar *key_file, gboolean read_only, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
     guint64 progress_id = 0;
@@ -378,9 +379,9 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gcha
     }
 
     if (passphrase)
-        ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, passphrase, strlen(passphrase), 0);
+        ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, passphrase, strlen(passphrase), read_only ? CRYPT_ACTIVATE_READONLY : 0);
     else
-        ret = crypt_activate_by_keyfile (cd, name, CRYPT_ANY_SLOT, key_file, 0, 0);
+        ret = crypt_activate_by_keyfile (cd, name, CRYPT_ANY_SLOT, key_file, 0, read_only ? CRYPT_ACTIVATE_READONLY : 0);
 
     if (ret < 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,

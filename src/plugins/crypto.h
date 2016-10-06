@@ -37,7 +37,7 @@ gboolean bd_crypto_device_is_luks (const gchar *device, GError **error);
 gchar* bd_crypto_luks_uuid (const gchar *device, GError **error);
 gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error);
 gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint64 key_size, const gchar *passphrase, const gchar *key_file, guint64 min_entropy, GError **error);
-gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gchar *passphrase, const gchar *key_file, GError **error);
+gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gchar *passphrase, const gchar *key_file, gboolean read_only, GError **error);
 gboolean bd_crypto_luks_close (const gchar *luks_device, GError **error);
 gboolean bd_crypto_luks_add_key (const gchar *device, const gchar *pass, const gchar *key_file, const gchar *npass, const gchar *nkey_file, GError **error);
 gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, const gchar *key_file, GError **error);
