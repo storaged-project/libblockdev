@@ -51,17 +51,38 @@
 static locale_t c_locale = (locale_t) 0;
 
 /**
- * init: (skip)
+ * bd_crypto_check_deps:
+ *
+ * Returns: whether the plugin's runtime dependencies are satisfied or not
+ *
+ * Function checking plugin's runtime dependencies.
+ *
  */
-gboolean init () {
+gboolean bd_crypto_check_deps () {
+    /* nothing to do here */
+    return TRUE;
+}
+
+/**
+ * bd_crypto_init:
+ *
+ * Initializes the plugin. **This function is called automatically by the
+ * library's initialization functions.**
+ *
+ */
+gboolean bd_crypto_init () {
     c_locale = newlocale (LC_ALL_MASK, "C", c_locale);
     return TRUE;
 }
 
 /**
- * close_plugin: (skip)
+ * bd_crypto_close:
+ *
+ * Cleans up after the plugin. **This function is called automatically by the
+ * library's functions that unload it.**
+ *
  */
-void close_plugin () {
+void bd_crypto_close () {
     c_locale = (locale_t) 0;
 }
 

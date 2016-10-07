@@ -41,9 +41,14 @@ GQuark bd_swap_error_quark (void)
 }
 
 /**
- * check: (skip)
+ * bd_swap_check_deps:
+ *
+ * Returns: whether the plugin's runtime dependencies are satisfied or not
+ *
+ * Function checking plugin's runtime dependencies.
+ *
  */
-gboolean check() {
+gboolean bd_swap_check_deps () {
     GError *error = NULL;
     gboolean ret = bd_utils_check_util_version ("mkswap", MKSWAP_MIN_VERSION, NULL, "mkswap from util-linux ([\\d\\.]+)", &error);
 
@@ -71,6 +76,29 @@ gboolean check() {
     }
 
     return ret;
+}
+
+/**
+ * bd_swap_init:
+ *
+ * Initializes the plugin. **This function is called automatically by the
+ * library's initialization functions.**
+ *
+ */
+gboolean bd_swap_init () {
+    /* nothing to do here */
+    return TRUE;
+};
+
+/**
+ * bd_swap_close:
+ *
+ * Cleans up after the plugin. **This function is called automatically by the
+ * library's functions that unload it.**
+ *
+ */
+void bd_swap_close () {
+    /* nothing to do here */
 }
 
 /**

@@ -42,9 +42,14 @@ GQuark bd_loop_error_quark (void)
 }
 
 /**
- * check: (skip)
+ * bd_loop_check_deps:
+ *
+ * Returns: whether the plugin's runtime dependencies are satisfied or not
+ *
+ * Function checking plugin's runtime dependencies.
+ *
  */
-gboolean check() {
+gboolean bd_loop_check_deps () {
     GError *error = NULL;
     gboolean ret = bd_utils_check_util_version ("losetup", LOSETUP_MIN_VERSION, NULL, "losetup from util-linux\\s+([\\d\\.]+)", &error);
 
@@ -53,6 +58,29 @@ gboolean check() {
         g_clear_error (&error);
     }
     return ret;
+}
+
+/**
+ * bd_loop_init:
+ *
+ * Initializes the plugin. **This function is called automatically by the
+ * library's initialization functions.**
+ *
+ */
+gboolean bd_loop_init () {
+    /* nothing to do here */
+    return TRUE;
+};
+
+/**
+ * bd_loop_close:
+ *
+ * Cleans up after the plugin. **This function is called automatically by the
+ * library's functions that unload it.**
+ *
+ */
+void bd_loop_close () {
+    /* nothing to do here */
 }
 
 /**

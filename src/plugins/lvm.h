@@ -129,6 +129,19 @@ typedef struct BDLVMCacheStats {
 void bd_lvm_cache_stats_free (BDLVMCacheStats *data);
 BDLVMCacheStats* bd_lvm_cache_stats_copy (BDLVMCacheStats *data);
 
+/*
+ * If using the plugin as a standalone library, the following functions should
+ * be called to:
+ *
+ * check_deps() - check plugin's dependencies, returning TRUE if satisfied
+ * init()       - initialize the plugin, returning TRUE on success
+ * close()      - clean after the plugin at the end or if no longer used
+ *
+ */
+gboolean bd_lvm_check_deps ();
+gboolean bd_lvm_init ();
+void bd_lvm_close ();
+
 gboolean bd_lvm_is_supported_pe_size (guint64 size, GError **error);
 guint64 *bd_lvm_get_supported_pe_sizes (GError **error);
 guint64 bd_lvm_get_max_lv_size (GError **error);

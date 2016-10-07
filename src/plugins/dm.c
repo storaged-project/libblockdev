@@ -59,27 +59,14 @@ static void discard_dm_log (int level __attribute__((unused)), const char *file 
 }
 
 /**
- * init: (skip)
+ * bd_dm_check_deps:
+ *
+ * Returns: whether the plugin's runtime dependencies are satisfied or not
+ *
+ * Function checking plugin's runtime dependencies.
+ *
  */
-gboolean init () {
-    dm_log_with_errno_init ((dm_log_with_errno_fn) discard_dm_log);
-    dm_log_init_verbose (0);
-
-    return TRUE;
-}
-
-/**
- * close_plugin: (skip)
- */
-void close_plugin () {
-    dm_log_with_errno_init (NULL);
-    dm_log_init_verbose (0);
-}
-
-/**
- * check: (skip)
- */
-gboolean check() {
+gboolean bd_dm_check_deps () {
     GError *error = NULL;
     gboolean ret = bd_utils_check_util_version ("dmsetup", DM_MIN_VERSION, NULL, "Library version:\\s+([\\d\\.]+)", &error);
 
@@ -88,6 +75,32 @@ gboolean check() {
         g_clear_error (&error);
     }
     return ret;
+}
+
+/**
+ * bd_dm_init:
+ *
+ * Initializes the plugin. **This function is called automatically by the
+ * library's initialization functions.**
+ *
+ */
+gboolean bd_dm_init () {
+    dm_log_with_errno_init ((dm_log_with_errno_fn) discard_dm_log);
+    dm_log_init_verbose (0);
+
+    return TRUE;
+}
+
+/**
+ * bd_dm_close:
+ *
+ * Cleans up after the plugin. **This function is called automatically by the
+ * library's functions that unload it.**
+ *
+ */
+void bd_dm_close () {
+    dm_log_with_errno_init (NULL);
+    dm_log_init_verbose (0);
 }
 
 /**

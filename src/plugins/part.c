@@ -117,25 +117,16 @@ static gboolean set_parted_error (GError **error, BDPartError type) {
     }
 }
 
-/**
- * init: (skip)
- */
-gboolean init() {
-    ped_exception_set_handler ((PedExceptionHandler*) bd_exc_handler);
-    return TRUE;
-}
 
 /**
- * close_plugin: (skip)
+ * bd_part_check_deps:
+ *
+ * Returns: whether the plugin's runtime dependencies are satisfied or not
+ *
+ * Function checking plugin's runtime dependencies.
+ *
  */
-void close_plugin () {
-    ped_exception_set_handler (NULL);
-}
-
-/**
- * check: (skip)
- */
-gboolean check() {
+gboolean bd_part_check_deps () {
     GError *error = NULL;
     gboolean ret = bd_utils_check_util_version ("sgdisk", "1.0.1", NULL, "GPT fdisk \\(sgdisk\\) version ([\\d\\.]+)", &error);
 
@@ -144,6 +135,29 @@ gboolean check() {
         g_clear_error (&error);
     }
     return ret;
+}
+
+/**
+ * bd_part_init:
+ *
+ * Initializes the plugin. **This function is called automatically by the
+ * library's initialization functions.**
+ *
+ */
+gboolean bd_part_init () {
+    ped_exception_set_handler ((PedExceptionHandler*) bd_exc_handler);
+    return TRUE;
+}
+
+/**
+ * bd_part_close:
+ *
+ * Cleans up after the plugin. **This function is called automatically by the
+ * library's functions that unload it.**
+ *
+ */
+void bd_part_close () {
+    ped_exception_set_handler (NULL);
 }
 
 

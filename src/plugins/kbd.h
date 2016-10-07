@@ -62,6 +62,19 @@ typedef struct BDKBDBcacheStats {
 BDKBDBcacheStats* bd_kbd_bcache_stats_copy (BDKBDBcacheStats *data);
 void bd_kbd_bcache_stats_free (BDKBDBcacheStats *data);
 
+/*
+ * If using the plugin as a standalone library, the following functions should
+ * be called to:
+ *
+ * check_deps() - check plugin's dependencies, returning TRUE if satisfied
+ * init()       - initialize the plugin, returning TRUE on success
+ * close()      - clean after the plugin at the end or if no longer used
+ *
+ */
+gboolean bd_kbd_check_deps ();
+gboolean bd_kbd_init ();
+void bd_kbd_close ();
+
 gboolean bd_kbd_zram_create_devices (guint64 num_devices, const guint64 *sizes, const guint64 *nstreams, GError **error);
 gboolean bd_kbd_zram_destroy_devices (GError **error);
 gboolean bd_kbd_zram_add_device (guint64 size, guint64 nstreams, gchar **device, GError **error);

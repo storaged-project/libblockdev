@@ -13,6 +13,9 @@ bd_init_error_quark
 
 <SECTION>
 <FILE>btrfs</FILE>
+bd_btrfs_check_deps
+bd_btrfs_init
+bd_btrfs_close
 BD_BTRFS_MAIN_VOLUME_ID
 BD_BTRFS_MIN_MEMBER_SIZE
 bd_btrfs_error_quark
@@ -47,6 +50,9 @@ bd_btrfs_change_label
 
 <SECTION>
 <FILE>crypto</FILE>
+bd_crypto_check_deps
+bd_crypto_close
+bd_crypto_init
 BD_CRYPTO_LUKS_METADATA_SIZE
 bd_crypto_error_quark
 BD_CRYPTO_ERROR
@@ -71,6 +77,9 @@ bd_crypto_escrow_device
 
 <SECTION>
 <FILE>dm</FILE>
+bd_dm_check_deps
+bd_dm_close
+bd_dm_init
 bd_dm_error_quark
 BD_DM_ERROR
 BDDMError
@@ -87,6 +96,9 @@ bd_dm_get_raid_set_type
 
 <SECTION>
 <FILE>utils</FILE>
+BDUtilsProgExtract
+BDUtilsProgFunc
+BDUtilsProgStatus
 BDUtilsLogFunc
 bd_utils_exec_error_quark
 BD_UTILS_EXEC_ERROR
@@ -128,6 +140,9 @@ TiB
 
 <SECTION>
 <FILE>loop</FILE>
+bd_loop_check_deps
+bd_loop_init
+bd_loop_close
 bd_loop_error_quark
 BD_LOOP_ERROR
 BDLoopError
@@ -139,6 +154,9 @@ bd_loop_teardown
 
 <SECTION>
 <FILE>lvm</FILE>
+bd_lvm_check_deps
+bd_lvm_close
+bd_lvm_init
 BD_LVM_MAX_LV_SIZE
 BD_LVM_DEFAULT_PE_SIZE
 BD_LVM_DEFAULT_PE_START
@@ -228,6 +246,9 @@ bd_lvm_metadata_lv_name
 
 <SECTION>
 <FILE>mdraid</FILE>
+bd_md_check_deps
+bd_md_init
+bd_md_close
 BD_MD_SUPERBLOCK_SIZE
 BD_MD_CHUNK_SIZE
 bd_md_error_quark
@@ -260,6 +281,9 @@ bd_md_name_from_node
 
 <SECTION>
 <FILE>mpath</FILE>
+bd_mpath_check_deps
+bd_mpath_init
+bd_mpath_close
 bd_mpath_error_quark
 BD_MPATH_ERROR
 BDMpathError
@@ -285,6 +309,9 @@ bd_plugin_spec_get_type
 
 <SECTION>
 <FILE>swap</FILE>
+bd_swap_check_deps
+bd_swap_init
+bd_swap_close
 bd_swap_error_quark
 BD_SWAP_ERROR
 BDSwapError
@@ -296,6 +323,9 @@ bd_swap_swapstatus
 
 <SECTION>
 <FILE>kbd</FILE>
+bd_kbd_check_deps
+bd_kbd_init
+bd_kbd_close
 BDKBDBcacheMode
 BDKBDBcacheStats
 BDKBDError
@@ -326,6 +356,9 @@ bd_kbd_zram_stats_free
 
 <SECTION>
 <FILE>part</FILE>
+bd_part_check_deps
+bd_part_init
+bd_part_close
 BD_PART_ERROR
 BD_PART_TYPE_SPEC
 BDPartAlign
@@ -362,6 +395,9 @@ bd_part_error_quark
 
 <SECTION>
 <FILE>fs</FILE>
+bd_fs_check_deps
+bd_fs_init
+bd_fs_close
 BDFSExt4Info
 BDFsError
 bd_fs_error_quark
@@ -380,16 +416,28 @@ bd_fs_xfs_check
 bd_fs_xfs_get_info
 bd_fs_xfs_info_copy
 bd_fs_xfs_info_free
-bd_fs_xfs_info_get_type
 bd_fs_xfs_mkfs
 bd_fs_xfs_repair
 bd_fs_xfs_resize
 bd_fs_xfs_set_label
 bd_fs_xfs_wipe
+BDFSVfatInfo
+bd_fs_vfat_check
+bd_fs_vfat_get_info
+bd_fs_vfat_info_copy
+bd_fs_vfat_info_free
+bd_fs_vfat_mkfs
+bd_fs_vfat_repair
+bd_fs_vfat_resize
+bd_fs_vfat_set_label
+bd_fs_vfat_wipe
 </SECTION>
 
 <SECTION>
 <FILE>s390</FILE>
+bd_s390_check_deps
+bd_s390_init
+bd_s390_close
 bd_s390_error_quark
 BDS390Error
 bd_s390_dasd_format

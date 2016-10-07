@@ -91,9 +91,14 @@ void bd_btrfs_filesystem_info_free (BDBtrfsFilesystemInfo *info) {
 }
 
 /**
- * check: (skip)
+ * bd_btrfs_check_deps:
+ *
+ * Returns: whether the plugin's runtime dependencies are satisfied or not
+ *
+ * Function checking plugin's runtime dependencies.
+ *
  */
-gboolean check() {
+gboolean bd_btrfs_check_deps () {
     GError *error = NULL;
     gboolean ret = bd_utils_check_util_version ("btrfs", BTRFS_MIN_VERSION, NULL, "[Bb]trfs.* v([\\d\\.]+)", &error);
 
@@ -102,6 +107,29 @@ gboolean check() {
         g_clear_error (&error);
     }
     return ret;
+}
+
+/**
+ * bd_btrfs_init:
+ *
+ * Initializes the plugin. **This function is called automatically by the
+ * library's initialization functions.**
+ *
+ */
+gboolean bd_btrfs_init () {
+    /* nothing to do here */
+    return TRUE;
+};
+
+/**
+ * bd_btrfs_close:
+ *
+ * Cleans up after the plugin. **This function is called automatically by the
+ * library's functions that unload it.**
+ *
+ */
+void bd_btrfs_close () {
+    /* nothing to do here */
 }
 
 static BDBtrfsDeviceInfo* get_device_info_from_match (GMatchInfo *match_info) {

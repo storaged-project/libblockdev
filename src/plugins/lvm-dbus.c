@@ -209,9 +209,14 @@ static gboolean setup_dbus_connection (GError **error) {
 }
 
 /**
- * check: (skip)
+ * bd_lvm_check_deps:
+ *
+ * Returns: whether the plugin's runtime dependencies are satisfied or not
+ *
+ * Function checking plugin's runtime dependencies.
+ *
  */
-gboolean check() {
+gboolean bd_lvm_check_deps () {
     GVariant *ret = NULL;
     GVariant *real_ret = NULL;
     GVariantIter iter;
@@ -276,9 +281,13 @@ gboolean check() {
 }
 
 /**
- * init: (skip)
+ * bd_lvm_init:
+ *
+ * Initializes the plugin. **This function is called automatically by the
+ * library's initialization functions.**
+ *
  */
-gboolean init() {
+gboolean bd_lvm_init () {
     GError *error = NULL;
 
     /* the check() call should create the DBus connection for us, but let's not
@@ -292,9 +301,13 @@ gboolean init() {
 }
 
 /**
- * close_plugin: (skip)
+ * bd_lvm_close:
+ *
+ * Cleans up after the plugin. **This function is called automatically by the
+ * library's functions that unload it.**
+ *
  */
-void close_plugin () {
+void bd_lvm_close () {
     GError *error = NULL;
 
     /* the check() call should create the DBus connection for us, but let's not

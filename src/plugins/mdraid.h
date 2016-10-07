@@ -56,6 +56,19 @@ typedef struct BDMDDetailData {
 void bd_md_detail_data_free (BDMDDetailData *data);
 BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data);
 
+/*
+ * If using the plugin as a standalone library, the following functions should
+ * be called to:
+ *
+ * check_deps() - check plugin's dependencies, returning TRUE if satisfied
+ * init()       - initialize the plugin, returning TRUE on success
+ * close()      - clean after the plugin at the end or if no longer used
+ *
+ */
+gboolean bd_md_check_deps ();
+gboolean bd_md_init ();
+void bd_md_close ();
+
 guint64 bd_md_get_superblock_size (guint64 member_size, const gchar *version, GError **error);
 gboolean bd_md_create (const gchar *device_name, const gchar *level, const gchar **disks, guint64 spares, const gchar *version, gboolean bitmap, const BDExtraArg **extra, GError **error);
 gboolean bd_md_create_with_chunk_size (const gchar *device_name, const gchar *level, const gchar **disks, guint64 spares, const gchar *version, gboolean bitmap, guint64 chunk_size, const BDExtraArg **extra, GError **error);

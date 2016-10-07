@@ -17,6 +17,19 @@ typedef enum {
     BD_DM_ERROR_RAID_NO_EXIST,
 } BDDMError;
 
+/*
+ * If using the plugin as a standalone library, the following functions should
+ * be called to:
+ *
+ * check_deps() - check plugin's dependencies, returning TRUE if satisfied
+ * init()       - initialize the plugin, returning TRUE on success
+ * close()      - clean after the plugin at the end or if no longer used
+ *
+ */
+gboolean bd_dm_check_deps ();
+gboolean bd_dm_init ();
+void bd_dm_close ();
+
 gboolean bd_dm_create_linear (const gchar *map_name, const gchar *device, guint64 length, const gchar *uuid, GError **error);
 gboolean bd_dm_remove (const gchar *map_name, GError **error);
 gchar* bd_dm_name_from_node (const gchar *dm_node, GError **error);

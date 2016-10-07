@@ -32,6 +32,19 @@ typedef enum {
 #define DEFAULT_LUKS_KEYSIZE_BITS 256
 #define DEFAULT_LUKS_CIPHER "aes-xts-plain64"
 
+/*
+ * If using the plugin as a standalone library, the following functions should
+ * be called to:
+ *
+ * check_deps() - check plugin's dependencies, returning TRUE if satisfied
+ * init()       - initialize the plugin, returning TRUE on success
+ * close()      - clean after the plugin at the end or if no longer used
+ *
+ */
+gboolean bd_crypto_check_deps ();
+gboolean bd_crypto_init ();
+void bd_crypto_close ();
+
 gchar* bd_crypto_generate_backup_passphrase(GError **error);
 gboolean bd_crypto_device_is_luks (const gchar *device, GError **error);
 gchar* bd_crypto_luks_uuid (const gchar *device, GError **error);

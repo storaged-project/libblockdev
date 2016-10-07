@@ -131,17 +131,14 @@ void bd_fs_vfat_info_free (BDFSVfatInfo *data) {
 }
 
 /**
- * init: (skip)
+ * bd_fs_check_deps:
+ *
+ * Returns: whether the plugin's runtime dependencies are satisfied or not
+ *
+ * Function checking plugin's runtime dependencies.
+ *
  */
-gboolean init() {
-    ped_exception_set_handler ((PedExceptionHandler*) bd_exc_handler);
-    return TRUE;
-}
-
-/**
- * check: (skip)
- */
-gboolean check() {
+gboolean bd_fs_check_deps () {
     GError *error = NULL;
     gboolean ret = bd_utils_check_util_version ("mkfs.ext4", NULL, "", NULL, &error);
 
@@ -223,6 +220,29 @@ gboolean check() {
     }
 
     return ret;
+}
+
+/**
+ * bd_fs_init:
+ *
+ * Initializes the plugin. **This function is called automatically by the
+ * library's initialization functions.**
+ *
+ */
+gboolean bd_fs_init () {
+    ped_exception_set_handler ((PedExceptionHandler*) bd_exc_handler);
+    return TRUE;
+}
+
+/**
+ * bd_fs_close:
+ *
+ * Cleans up after the plugin. **This function is called automatically by the
+ * library's functions that unload it.**
+ *
+ */
+void bd_fs_close () {
+    /* nothing to do here */
 }
 
 /**

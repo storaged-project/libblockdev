@@ -43,18 +43,61 @@ static const gchar * const mode_str[BD_KBD_MODE_UNKNOWN+1] = {"writethrough", "w
 /* "C" locale to get the locale-agnostic error messages */
 static locale_t c_locale = (locale_t) 0;
 
+static gboolean have_kernel_module (const gchar *module_name, GError **error);
+
 /**
- * init: (skip)
+ * bd_kbd_check_deps:
+ *
+ * Returns: whether the plugin's runtime dependencies are satisfied or not
+ *
+ * Function checking plugin's runtime dependencies.
+ *
  */
-gboolean init () {
+gboolean bd_kbd_check_deps () {
+    GError *error = NULL;
+    gboolean ret = FALSE;
+
+    ret = have_kernel_module ("zram", &error);
+    if (!ret) {
+        if (error) {
+            g_warning("Cannot load the kbd plugin: %s" , error->message);
+            g_clear_error (&error);
+        } else
+            g_warning("Cannot load the kbd plugin: the 'zram' kernel module is not available");
+    }
+
+    if (!ret)
+        return FALSE;
+
+    ret = bd_utils_check_util_version ("make-bcache", NULL, NULL, NULL, &error);
+    if (!ret && error) {
+        g_warning("Cannot load the kbd plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+
+    return ret;
+}
+
+/**
+ * bd_kbd_init:
+ *
+ * Initializes the plugin. **This function is called automatically by the
+ * library's initialization functions.**
+ *
+ */
+gboolean bd_kbd_init () {
     c_locale = newlocale (LC_ALL_MASK, "C", c_locale);
     return TRUE;
 }
 
 /**
- * close_plugin: (skip)
+ * bd_kbd_close:
+ *
+ * Cleans up after the plugin. **This function is called automatically by the
+ * library's functions that unload it.**
+ *
  */
-void close_plugin () {
+void bd_kbd_close () {
     c_locale = (locale_t) 0;
 }
 
@@ -105,36 +148,6 @@ BDKBDBcacheStats* bd_kbd_bcache_stats_copy (BDKBDBcacheStats *data) {
 void bd_kbd_bcache_stats_free (BDKBDBcacheStats *data) {
     g_free (data->state);
     g_free (data);
-}
-
-static gboolean have_kernel_module (const gchar *module_name, GError **error);
-
-/**
- * check: (skip)
- */
-gboolean check() {
-    GError *error = NULL;
-    gboolean ret = FALSE;
-
-    ret = have_kernel_module ("zram", &error);
-    if (!ret) {
-        if (error) {
-            g_warning("Cannot load the kbd plugin: %s" , error->message);
-            g_clear_error (&error);
-        } else
-            g_warning("Cannot load the kbd plugin: the 'zram' kernel module is not available");
-    }
-
-    if (!ret)
-        return FALSE;
-
-    ret = bd_utils_check_util_version ("make-bcache", NULL, NULL, NULL, &error);
-    if (!ret && error) {
-        g_warning("Cannot load the kbd plugin: %s" , error->message);
-        g_clear_error (&error);
-    }
-
-    return ret;
 }
 
 static gboolean have_kernel_module (const gchar *module_name, GError **error) {
