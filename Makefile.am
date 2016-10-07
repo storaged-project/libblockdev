@@ -23,6 +23,23 @@ COVERAGE ?= coverage
 TEST_SUITE_LOG ?= test-suite-$(TEST_PYTHON).log
 PYLINT_LOG ?= pylint.log
 
+PLUGINS = btrfs \
+	crypto \
+	dm \
+	fs \
+	kbd \
+	loop \
+	lvm \
+	mdraid \
+	mpath \
+	part \
+	s390 \
+	swap
+
+ALT_PLUGINS = lvm-dbus
+
+LIBRARY_TESTS = library
+
 run-ipython: all
 	GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=src/python G_MESSAGES_DEBUG=all LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ ipython3
 
@@ -36,24 +53,44 @@ pylint:
 
 if TESTS_ENABLED
 test: all check
+	@rm -f tests/error_occurred;
 	@rm -f $(TEST_SUITE_LOG)
 	@touch $(TEST_SUITE_LOG)
-	sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=tests/default_config \
-		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p '*_test.py' 2>&1 | tee -a $(TEST_SUITE_LOG)
-	sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=tests/lvm_dbus_config \
-		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p 'lvm_dbus_tests.py' 2>&1 | tee -a $(TEST_SUITE_LOG)
+	for plugin in ${PLUGINS} ${LIBRARY_TESTS}; do \
+		$(MAKE) test-plugin-$$plugin || touch tests/error_occurred; \
+	done
+	$(MAKE) test-lvm-dbus || touch tests/error_occurred
+	@test ! -f tests/error_occurred
 
 fast-test: all check
-	sudo env SKIP_SLOW= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=tests/default_config \
-		$(TEST_PYTHON) -m unittest discover -f -v -s tests/ -p '*_test.py'
-	sudo env SKIP_SLOW= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=tests/lvm_dbus_config\
-		$(TEST_PYTHON) -m unittest discover -f -v -s tests/ -p 'lvm_dbus_tests.py'
+	@rm -f tests/error_occurred;
+	for plugin in ${PLUGINS} ${LIBRARY_TESTS}; do \
+		$(MAKE) fast-test-plugin-$$plugin || touch tests/error_occurred; \
+	done
+	$(MAKE) fast-test-lvm-dbus || touch tests/error_occurred
+	@test ! -f tests/error_occurred
 
 test-all: all check
 	sudo env FEELINGLUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
 		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
 	sudo env FEELINGLUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
 		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p 'lvm_dbus_tests.py'
+
+test-plugin-%: all
+	sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=tests/default_config \
+        $(TEST_PYTHON) -m unittest discover -v -s tests/ -p $*_test.py 2>&1 | tee -a $(TEST_SUITE_LOG)
+
+fast-test-plugin-%: all
+	sudo env SKIP_SLOW= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=tests/default_config \
+		$(TEST_PYTHON) -m unittest discover -f -v -s tests/ -p $*_test.py
+
+test-lvm-dbus: all
+	sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=tests/lvm_dbus_config \
+		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p 'lvm_dbus_tests.py'
+
+fast-test-lvm-dbus: all
+	sudo env SKIP_SLOW= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=tests/lvm_dbus_config \
+		$(TEST_PYTHON) -m unittest discover -f -v -s tests/ -p 'lvm_dbus_tests.py'
 endif # TESTS_ENABLED
 
 coverage: all
@@ -114,6 +151,6 @@ rpm: local
 release: tag
 	$(MAKE) archive
 
-ci: distcheck
+ci: all distcheck
 	$(MAKE) pylint > $(PYLINT_LOG)
-	TEST_PYTHON=python3 COVERAGE=coverage3 $(MAKE) coverage
+	TEST_PYTHON=python3 $(MAKE) --quiet test
