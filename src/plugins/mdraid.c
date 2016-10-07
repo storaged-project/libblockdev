@@ -192,7 +192,9 @@ static GHashTable* parse_mdadm_vars (const gchar *str, const gchar *item_sep, co
         key_val = g_strsplit (*item_p, key_val_sep, 2);
         if (g_strv_length ((gchar **) key_val) == 2) {
             /* we only want to process valid lines (with the separator) */
-            g_hash_table_insert (table, g_strstrip (key_val[0]), g_strstrip (key_val[1]));
+            /* only use the first value for the given key */
+            if (!g_hash_table_contains (table, g_strstrip (key_val[0])))
+                g_hash_table_insert (table, g_strstrip (key_val[0]), g_strstrip (key_val[1]));
             (*num_items)++;
         } else
             /* invalid line, just free key_val */
@@ -240,6 +242,9 @@ static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean
         data->size = 0;
 
     data->uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "Array UUID"));
+    if (!data->uuid)
+        /* also try just "UUID" which may be reported e.g for IMSM FW RAID */
+        data->uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "UUID"));
 
     value = (gchar*) g_hash_table_lookup (table, "Update Time");
     if (value) {
@@ -802,7 +807,7 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
     gchar **output_fields = NULL;
     gchar *orig_data = NULL;
     guint i = 0;
-    gboolean found_dev_name = FALSE;
+    gboolean found_array_line = FALSE;
 
     success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
     if (!success)
@@ -837,6 +842,26 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
         g_free (orig_data);
     }
 
+    argv[2] = "--export";
+    success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
+    if (!success)
+        /* error is already populated */
+        return FALSE;
+
+    /* try to get a better information about RAID level because it may be
+       misleading in the output without --export */
+    output_fields = g_strsplit (output, "\n", 0);
+    g_free (output);
+    output = NULL;
+    for (i=0; (i < g_strv_length (output_fields) - 1); i++)
+        if (g_str_has_prefix (output_fields[i], "MD_LEVEL=")) {
+            value = strchr (output_fields[i], '=');
+            value++;
+            g_free (ret->level);
+            ret->level = g_strdup (value);
+        }
+    g_strfreev (output_fields);
+
     argv[2] = "--brief";
     success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
     if (!success)
@@ -845,13 +870,16 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
 
     /* try to find the "ARRAY /dev/md/something" pair in the output */
     output_fields = g_strsplit_set (output, " \n", 0);
-    for (i=0; !found_dev_name && (i < g_strv_length (output_fields) - 1); i++)
-        if (g_strcmp0 (output_fields[i], "ARRAY") == 0)
+    for (i=0; !found_array_line && (i < g_strv_length (output_fields) - 1); i++)
+        if (g_strcmp0 (output_fields[i], "ARRAY") == 0) {
+            found_array_line = TRUE;
             if (g_str_has_prefix (output_fields[i+1], "/dev/md/")) {
                 ret->device = g_strdup (output_fields[i+1]);
-                found_dev_name = TRUE;
+            } else {
+                ret->device = NULL;
             }
-    if (!found_dev_name)
+        }
+    if (!found_array_line)
         ret->device = NULL;
     g_strfreev (output_fields);
 
