@@ -29,12 +29,16 @@ gchar* bd_loop_get_loop_name (const gchar *file, GError **error);
 /**
  * bd_loop_setup:
  * @file: file to setup as a loop device
+ * @offset: offset of the start of the device (in @file)
+ * @size: maximum size of the device (or 0 to leave unspecified)
+ * @read_only: whether to setup as read-only (%TRUE) or read-write (%FALSE)
+ * @part_scan: whether to enforce partition scan on the newly created device or not
  * @loop_name: (allow-none) (out): if not %NULL, it is used to store the name of the loop device
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @file was successfully setup as a loop device or not
  */
-gboolean bd_loop_setup (const gchar *file, const gchar **loop_name, GError **error);
+gboolean bd_loop_setup (const gchar *file, guint64 offset, guint64 size, gboolean read_only, gboolean part_scan, const gchar **loop_name, GError **error);
 
 /**
  * bd_loop_teardown:

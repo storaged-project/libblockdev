@@ -237,6 +237,13 @@ def dm_get_member_raid_sets(name=None, uuid=None, major=-1, minor=-1):
 __all__.append("dm_get_member_raid_sets")
 
 
+_loop_setup = BlockDev.loop_setup
+@override(BlockDev.loop_setup)
+def loop_setup(file, offset=0, size=0, read_only=False, part_scan=True):
+    return _loop_setup(file, offset, size, read_only, part_scan)
+__all__.append("loop_setup")
+
+
 _fs_ext4_mkfs = BlockDev.fs_ext4_mkfs
 @override(BlockDev.fs_ext4_mkfs)
 def fs_ext4_mkfs(device, extra=None, **kwargs):
