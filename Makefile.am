@@ -46,13 +46,11 @@ run-ipython: all
 run-root-ipython: all
 	sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=src/python G_MESSAGES_DEBUG=all LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ ipython3
 
-check: all pylint
-
 pylint:
 	python3-pylint -E src/python/gi/overrides/BlockDev.py
 
 if TESTS_ENABLED
-test: all check
+test: all pylint
 	@rm -f tests/error_occurred;
 	@rm -f $(TEST_SUITE_LOG)
 	@touch $(TEST_SUITE_LOG)
@@ -62,7 +60,7 @@ test: all check
 	$(MAKE) test-lvm-dbus || touch tests/error_occurred
 	@test ! -f tests/error_occurred
 
-fast-test: all check
+fast-test: all pylint
 	@rm -f tests/error_occurred;
 	for plugin in ${PLUGINS} ${LIBRARY_TESTS}; do \
 		$(MAKE) fast-test-plugin-$$plugin || touch tests/error_occurred; \
@@ -70,7 +68,7 @@ fast-test: all check
 	$(MAKE) fast-test-lvm-dbus || touch tests/error_occurred
 	@test ! -f tests/error_occurred
 
-test-all: all check
+test-all: all pylint
 	sudo env FEELINGLUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
 		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
 	sudo env FEELINGLUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
