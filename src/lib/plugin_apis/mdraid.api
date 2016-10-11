@@ -254,9 +254,10 @@ gboolean bd_md_deactivate (const gchar *device_name, GError **error);
 
 /**
  * bd_md_activate:
- * @device_name: name of the RAID device to activate
+ * @device_name: (allow-none): name of the RAID device to activate (if not given "--scan" is implied and @members is ignored)
  * @members: (allow-none) (array zero-terminated=1): member devices to be considered for @device activation
  * @uuid: (allow-none): UUID (in the MD RAID format!) of the MD RAID to activate
+ * @start_degraded: whether to start the array even if it's degraded
  * @extra: (allow-none) (array zero-terminated=1): extra options for the activation (right now
  *                                                 passed to the 'mdadm' utility)
  * @error: (out): place to store error (if any)
@@ -265,7 +266,7 @@ gboolean bd_md_deactivate (const gchar *device_name, GError **error);
  *
  * Note: either @members or @uuid (or both) have to be specified.
  */
-gboolean bd_md_activate (const gchar *device_name, const gchar **members, const gchar *uuid, const BDExtraArg **extra, GError **error);
+gboolean bd_md_activate (const gchar *device_name, const gchar **members, const gchar *uuid, gboolean start_degraded, const BDExtraArg **extra, GError **error);
 
 /**
  * bd_md_run:

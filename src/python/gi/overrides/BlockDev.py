@@ -562,9 +562,9 @@ __all__.append("md_remove")
 
 _md_activate = BlockDev.md_activate
 @override(BlockDev.md_activate)
-def md_activate(device_name, members=None, uuid=None, extra=None, **kwargs):
+def md_activate(device_name=None, members=None, uuid=None, start_degraded=True, extra=None, **kwargs):
     extra = _get_extra(extra, kwargs)
-    return _md_activate(device_name, members, uuid, extra)
+    return _md_activate(device_name, members, uuid, start_degraded, extra)
 __all__.append("md_activate")
 
 

@@ -598,9 +598,10 @@ gboolean bd_md_deactivate (const gchar *device_name, GError **error) {
 
 /**
  * bd_md_activate:
- * @device_name: name of the RAID device to activate
+ * @device_name: (allow-none): name of the RAID device to activate (if not given "--scan" is implied and @members is ignored)
  * @members: (allow-none) (array zero-terminated=1): member devices to be considered for @device activation
  * @uuid: (allow-none): UUID (in the MD RAID format!) of the MD RAID to activate
+ * @start_degraded: whether to start the array even if it's degraded
  * @extra: (allow-none) (array zero-terminated=1): extra options for the activation (right now
  *                                                 passed to the 'mdadm' utility)
  * @error: (out): place to store error (if any)
@@ -609,30 +610,34 @@ gboolean bd_md_deactivate (const gchar *device_name, GError **error) {
  *
  * Note: either @members or @uuid (or both) have to be specified.
  */
-gboolean bd_md_activate (const gchar *device_name, const gchar **members, const gchar *uuid, const BDExtraArg **extra, GError **error) {
-    guint64 num_members = members ? g_strv_length ((gchar **) members) : 0;
+gboolean bd_md_activate (const gchar *device_name, const gchar **members, const gchar *uuid, gboolean start_degraded, const BDExtraArg **extra, GError **error) {
+    guint64 num_members = (device_name && members) ? g_strv_length ((gchar **) members) : 0;
     const gchar **argv = NULL;
     gchar *uuid_str = NULL;
     guint argv_top = 0;
     guint i = 0;
     gboolean ret = FALSE;
 
-    /* mdadm, --assemble, device_name, --run, --uuid=uuid, member1, member2,..., NULL*/
-    if (uuid) {
-        argv = g_new0 (const gchar*, num_members + 6);
-        uuid_str = g_strdup_printf ("--uuid=%s", uuid);
-    }
-    else
-        argv = g_new0 (const gchar*, num_members + 5);
+    /* mdadm, --assemble, device_name/--scan, --run, --uuid=uuid, member1, member2,..., NULL*/
+    argv = g_new0 (const gchar*, num_members + 6);
 
     argv[argv_top++] = "mdadm";
     argv[argv_top++] = "--assemble";
-    argv[argv_top++] = device_name;
-    argv[argv_top++] = "--run";
-    if (uuid)
+    if (device_name)
+        argv[argv_top++] = device_name;
+    else
+        argv[argv_top++] = "--scan";
+    if (start_degraded)
+        argv[argv_top++] = "--run";
+    if (uuid) {
+        uuid_str = g_strdup_printf ("--uuid=%s", uuid);
         argv[argv_top++] = uuid_str;
-    for (i=0; i < num_members; i++)
-        argv[argv_top++] = members[i];
+    }
+    /* only add member device if device_name given (a combination of --scan with
+       a list of members doesn't work) */
+    if (device_name && members)
+        for (i=0; i < num_members; i++)
+            argv[argv_top++] = members[i];
     argv[argv_top] = NULL;
 
     ret = bd_utils_exec_and_report_error (argv, extra, error);

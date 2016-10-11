@@ -74,7 +74,7 @@ gboolean bd_md_create (const gchar *device_name, const gchar *level, const gchar
 gboolean bd_md_create_with_chunk_size (const gchar *device_name, const gchar *level, const gchar **disks, guint64 spares, const gchar *version, gboolean bitmap, guint64 chunk_size, const BDExtraArg **extra, GError **error);
 gboolean bd_md_destroy (const gchar *device, GError **error);
 gboolean bd_md_deactivate (const gchar *device_name, GError **error);
-gboolean bd_md_activate (const gchar *device_name, const gchar **members, const gchar *uuid, const BDExtraArg **extra, GError **error);
+gboolean bd_md_activate (const gchar *device_name, const gchar **members, const gchar *uuid, gboolean start_degraded, const BDExtraArg **extra, GError **error);
 gboolean bd_md_run (const gchar *raid_name, GError **error);
 gboolean bd_md_nominate (const gchar *device, GError **error);
 gboolean bd_md_denominate (const gchar *device, GError **error);
