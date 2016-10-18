@@ -222,6 +222,60 @@ class MDTestActivateDeactivate(MDTestCase):
                                         [self.loop_dev, self.loop_dev2, self.loop_dev3], None)
             self.assertTrue(succ)
 
+class MDTestActivateWithUUID(MDTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_activate_with_uuid(self):
+        """Verify that it is possible to activate an MD RAID with UUID"""
+
+        with wait_for_resync():
+            succ = BlockDev.md_create("bd_test_md", "raid1",
+                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
+                                      1, None, True)
+            self.assertTrue(succ)
+
+        with wait_for_resync():
+            succ = BlockDev.md_deactivate("bd_test_md")
+            self.assertTrue(succ)
+
+        md_info = BlockDev.md_examine(self.loop_dev)
+        self.assertTrue(md_info)
+        self.assertTrue(md_info.uuid)
+
+        with wait_for_resync():
+            succ = BlockDev.md_activate("bd_test_md", [self.loop_dev, self.loop_dev2, self.loop_dev3], md_info.uuid)
+
+class MDTestActivateByUUID(MDTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_activate_by_uuid(self):
+        """Verify that it is possible to activate an MD RAID by UUID"""
+
+        with wait_for_resync():
+            succ = BlockDev.md_create("bd_test_md", "raid1",
+                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
+                                      1, None, True)
+            self.assertTrue(succ)
+
+        with wait_for_resync():
+            succ = BlockDev.md_deactivate("bd_test_md")
+            self.assertTrue(succ)
+
+        md_info = BlockDev.md_examine(self.loop_dev)
+        self.assertTrue(md_info)
+        self.assertTrue(md_info.uuid)
+
+        # should work with member devices specified
+        with wait_for_resync():
+            succ = BlockDev.md_activate(None, [self.loop_dev, self.loop_dev2, self.loop_dev3], md_info.uuid)
+
+        with wait_for_resync():
+            succ = BlockDev.md_deactivate("bd_test_md")
+            self.assertTrue(succ)
+
+        # as well as without them
+        with wait_for_resync():
+            succ = BlockDev.md_activate(None, None, md_info.uuid)
+
+
 class MDTestNominateDenominate(MDTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_nominate_denominate(self):

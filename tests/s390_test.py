@@ -1,5 +1,6 @@
 import unittest
 import os
+import overrides_hack
 
 from utils import fake_path
 from gi.repository import BlockDev, GLib

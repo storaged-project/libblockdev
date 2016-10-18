@@ -209,22 +209,6 @@ guint64 bd_md_get_superblock_size (guint64 member_size, const gchar *version, GE
  * @spares: number of spare devices
  * @version: (allow-none): metadata version
  * @bitmap: whether to create an internal bitmap on the device or not
- * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
- *                                                 passed to the 'mdadm' utility)
- * @error: (out): place to store error (if any)
- *
- * Returns: whether the new MD RAID device @device_name was successfully created or not
- */
-gboolean bd_md_create (const gchar *device_name, const gchar *level, const gchar **disks, guint64 spares, const gchar *version, gboolean bitmap, const BDExtraArg **extra, GError **error);
-
-/**
- * bd_md_create_with_chunk_size:
- * @device_name: name of the device to create
- * @level: RAID level (as understood by mdadm, see mdadm(8))
- * @disks: (array zero-terminated=1): disks to use for the new RAID (including spares)
- * @spares: number of spare devices
- * @version: (allow-none): metadata version
- * @bitmap: whether to create an internal bitmap on the device or not
  * @chunk_size: chunk size of the device to create
  * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
  *                                                 passed to the 'mdadm' utility)
@@ -232,7 +216,7 @@ gboolean bd_md_create (const gchar *device_name, const gchar *level, const gchar
  *
  * Returns: whether the new MD RAID device @device_name was successfully created or not
  */
-gboolean bd_md_create_with_chunk_size (const gchar *device_name, const gchar *level, const gchar **disks, guint64 spares, const gchar *version, gboolean bitmap, guint64 chunk_size, const BDExtraArg **extra, GError **error);
+gboolean bd_md_create (const gchar *device_name, const gchar *level, const gchar **disks, guint64 spares, const gchar *version, gboolean bitmap, guint64 chunk_size, const BDExtraArg **extra, GError **error);
 
 /**
  * bd_md_destroy:
@@ -254,9 +238,10 @@ gboolean bd_md_deactivate (const gchar *device_name, GError **error);
 
 /**
  * bd_md_activate:
- * @device_name: name of the RAID device to activate
+ * @device_name: (allow-none): name of the RAID device to activate (if not given "--scan" is implied and @members is ignored)
  * @members: (allow-none) (array zero-terminated=1): member devices to be considered for @device activation
  * @uuid: (allow-none): UUID (in the MD RAID format!) of the MD RAID to activate
+ * @start_degraded: whether to start the array even if it's degraded
  * @extra: (allow-none) (array zero-terminated=1): extra options for the activation (right now
  *                                                 passed to the 'mdadm' utility)
  * @error: (out): place to store error (if any)
@@ -265,7 +250,7 @@ gboolean bd_md_deactivate (const gchar *device_name, GError **error);
  *
  * Note: either @members or @uuid (or both) have to be specified.
  */
-gboolean bd_md_activate (const gchar *device_name, const gchar **members, const gchar *uuid, const BDExtraArg **extra, GError **error);
+gboolean bd_md_activate (const gchar *device_name, const gchar **members, const gchar *uuid, gboolean start_degraded, const BDExtraArg **extra, GError **error);
 
 /**
  * bd_md_run:
