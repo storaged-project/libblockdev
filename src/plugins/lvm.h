@@ -107,6 +107,10 @@ typedef struct BDLVMLVdata {
     gchar *data_lv;
     gchar *metadata_lv;
     gchar *roles;
+    gchar *move_pv;
+    guint64 data_percent;
+    guint64 metadata_percent;
+    guint64 copy_percent;
 } BDLVMLVdata;
 
 void bd_lvm_lvdata_free (BDLVMLVdata *data);
