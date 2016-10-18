@@ -162,16 +162,46 @@ gchar* bd_loop_get_loop_name (const gchar *file, GError **error __attribute__((u
 /**
  * bd_loop_setup:
  * @file: file to setup as a loop device
+ * @offset: offset of the start of the device (in @file)
+ * @size: maximum size of the device (or 0 to leave unspecified)
+ * @read_only: whether to setup as read-only (%TRUE) or read-write (%FALSE)
+ * @part_scan: whether to enforce partition scan on the newly created device or not
  * @loop_name: (allow-none) (out): if not %NULL, it is used to store the name of the loop device
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @file was successfully setup as a loop device or not
  */
-gboolean bd_loop_setup (const gchar *file, const gchar **loop_name, GError **error) {
-    const gchar *args[4] = {"losetup", "-f", file, NULL};
+gboolean bd_loop_setup (const gchar *file, guint64 offset, guint64 size, gboolean read_only, gboolean part_scan, const gchar **loop_name, GError **error) {
+    /* losetup -f -o offset --sizelimit size -P -r file NULL */
+    const gchar *args[10] = {"losetup", "-f", NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+    gint args_top = 2;
     gboolean success = FALSE;
+    gchar *offset_str = NULL;
+    gchar *size_str = NULL;
+
+    if (offset != 0) {
+        args[args_top++] = "-o";
+        offset_str = g_strdup_printf ("%"G_GUINT64_FORMAT, offset);
+        args[args_top++] = offset_str;
+    }
+
+    if (size != 0) {
+        args[args_top++] = "--sizelimit";
+        size_str = g_strdup_printf ("%"G_GUINT64_FORMAT, size);
+        args[args_top++] = size_str;
+    }
+
+    if (read_only)
+        args[args_top++] = "-r";
+
+    if (part_scan)
+        args[args_top++] = "-P";
+
+    args[args_top] = file;
 
     success = bd_utils_exec_and_report_error (args, NULL, error);
+    g_free (offset_str);
+    g_free (size_str);
     if (!success)
         return FALSE;
     else {

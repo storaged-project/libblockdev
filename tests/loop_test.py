@@ -20,8 +20,9 @@ class LoopTestCase(unittest.TestCase):
             pass
         os.unlink(self.dev_file)
 
-    def testLoop_setup_teardown(self):
-        """Verify that loop_setup and loop_teardown work as expected"""
+class LoopTestSetupBasic(LoopTestCase):
+    def testLoop_setup_teardown_basic(self):
+        """Verify that basic loop_setup and loop_teardown work as expected"""
 
         succ, self.loop = BlockDev.loop_setup(self.dev_file)
         self.assertTrue(succ)
@@ -30,6 +31,56 @@ class LoopTestCase(unittest.TestCase):
         succ = BlockDev.loop_teardown(self.loop)
         self.assertTrue(succ)
 
+class LoopTestSetupOffset(LoopTestCase):
+    def testLoop_setup_with_offset(self):
+        """Verify that loop_setup with offset specified works as expected"""
+
+        # now test with the offset
+        succ, self.loop = BlockDev.loop_setup(self.dev_file, 10 * 1024**2)
+        self.assertTrue(succ)
+        self.assertTrue(self.loop)
+
+        # should have smaller size due to the offset
+        with open("/sys/block/%s/size" % self.loop, "r") as f:
+            size = int(f.read()) * 512
+        self.assertEqual(size, 1024**3 - 10 * 1024 **2)
+
+        succ = BlockDev.loop_teardown(self.loop)
+        self.assertTrue(succ)
+
+
+class LoopTestSetupOffsetSize(LoopTestCase):
+    def testLoop_setup_with_offset_and_size(self):
+        """Verify that loop_setup with offset and size specified works as expected"""
+
+        # now test with the offset and size
+        succ, self.loop = BlockDev.loop_setup(self.dev_file, 10 * 1024**2, 50 * 1024**2)
+        self.assertTrue(succ)
+        self.assertTrue(self.loop)
+
+        # should have size as specified
+        with open("/sys/block/%s/size" % self.loop, "r") as f:
+            size = int(f.read()) * 512
+        self.assertEqual(size, 50 * 1024**2)
+
+        succ = BlockDev.loop_teardown(self.loop)
+        self.assertTrue(succ)
+
+class LoopTestSetupReadOnly(LoopTestCase):
+    def testLoop_setup_read_only(self):
+        """Verify that loop_setup with read_only specified works as expected"""
+        # test read-only
+        succ, self.loop = BlockDev.loop_setup(self.dev_file, 0, 0, True)
+        self.assertTrue(succ)
+        self.assertTrue(self.loop)
+
+        # should be read-only
+        with open("/sys/block/%s/ro" % self.loop, "r") as f:
+            self.assertEqual(f.read().strip(), "1")
+
+# XXX: any sane way how to test part_probe=True/False?
+
+class LoopTestGetLoopName(LoopTestCase):
     def testLoop_get_loop_name(self):
         """Verify that loop_get_loop_name works as expected"""
 
@@ -39,6 +90,7 @@ class LoopTestCase(unittest.TestCase):
         ret_loop = BlockDev.loop_get_loop_name(self.dev_file)
         self.assertEqual(ret_loop, self.loop)
 
+class LoopTestGetBackingFile(LoopTestCase):
     def testLoop_get_backing_file(self):
         """Verify that loop_get_backing_file works as expected"""
 
