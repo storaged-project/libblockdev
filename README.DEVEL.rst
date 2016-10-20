@@ -70,6 +70,11 @@ If a new plugin is being added:
 See e.g. the commit a5847cd9c266d1116b87356aa1816ddb0bfc194e for more details.
 
 
+If a new struct field is being added, it has to be added to the end of the
+structure so that original fields stay in their places from the ABI point of
+view.
+
+
 The directory structure is as follows::
 
   libblockdev
