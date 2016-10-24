@@ -155,6 +155,7 @@ static GHashTable* parse_mdadm_vars (gchar *str, gchar *item_sep, gchar *key_val
     gchar **items = NULL;
     gchar **item_p = NULL;
     gchar **key_val = NULL;
+    gchar **vals = NULL;
 
     table = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
     *num_items = 0;
@@ -165,8 +166,16 @@ static GHashTable* parse_mdadm_vars (gchar *str, gchar *item_sep, gchar *key_val
         if (g_strv_length (key_val) == 2) {
             /* we only want to process valid lines (with the separator) */
             /* only use the first value for the given key */
-            if (!g_hash_table_contains (table, g_strstrip (key_val[0])))
-                g_hash_table_insert (table, g_strstrip (key_val[0]), g_strstrip (key_val[1]));
+            if (!g_hash_table_contains (table, g_strstrip (key_val[0]))) {
+                if (strstr (key_val[1], "<--")) {
+                    /* mdadm --examine output for a set being migrated */
+                    vals = g_strsplit (key_val[1], "<--", 2);
+                    g_hash_table_insert (table, g_strstrip (key_val[0]), g_strstrip (vals[0]));
+                    g_free (vals[1]);
+                } else {
+                    g_hash_table_insert (table, g_strstrip (key_val[0]), g_strstrip (key_val[1]));
+                }
+            }
             (*num_items)++;
         } else
             /* invalid line, just free key_val */
