@@ -1,0 +1,69 @@
+#!/bin/bash
+
+echo "$@"|grep -- "--brief" &>/dev/null
+is_brief=$?
+
+echo "$@"|grep -- "--export" &>/dev/null
+is_export=$?
+
+if [ $is_brief -eq 0 ]; then
+    cat <<EOF
+ARRAY metadata=imsm UUID=83c77249:90fb26a2:882bfb52:87f71b59
+ARRAY /dev/md/Volume0 container=83c77249:90fb26a2:882bfb52:87f71b59 member=0 UUID=76508998:aea211a0:b4fa4eda:78e41fbb
+EOF
+elif [ $is_export -eq 0 ]; then
+    cat <<EOF
+MD_METADATA=imsm
+MD_LEVEL=container
+MD_UUID=83c77249:90fb26a2:882bfb52:87f71b59
+MD_DEVICES=3
+EOF
+else
+    cat <<EOF
+/dev/sda:
+          Magic : Intel Raid ISM Cfg Sig.
+        Version : 1.2.02
+    Orig Family : 56330de5
+         Family : 56330de5
+     Generation : 00000005
+     Attributes : All supported
+           UUID : 83c77249:90fb26a2:882bfb52:87f71b59
+       Checksum : 359f2642 correct
+    MPB Sectors : 2
+          Disks : 3
+   RAID Devices : 1
+
+  Disk00 Serial : 50026B723702E422
+          State : active
+             Id : 00000000
+    Usable Size : 234436872 (111.79 GiB 120.03 GB)
+
+[Volume0]:
+           UUID : 76508998:aea211a0:b4fa4eda:78e41fbb
+     RAID Level : 5 <-- 5
+        Members : 3 <-- 3
+          Slots : [UUU] <-- [UUU]
+    Failed disk : none
+      This Slot : 0
+     Array Size : 468873216 (223.58 GiB 240.06 GB)
+   Per Dev Size : 234436872 (111.79 GiB 120.03 GB)
+  Sector Offset : 0
+    Num Stripes : 915768
+     Chunk Size : 128 KiB <-- 128 KiB
+       Reserved : 0
+  Migrate State : initialize
+      Map State : normal <-- uninitialized
+     Checkpoint : 0 (768)
+    Dirty State : clean
+
+  Disk01 Serial : 2327B37FS
+          State : active
+             Id : 00000002
+    Usable Size : 976768392 (465.76 GiB 500.11 GB)
+
+  Disk02 Serial : 232K7DDFS
+          State : active
+             Id : 00000003
+    Usable Size : 976768392 (465.76 GiB 500.11 GB)
+EOF
+fi
