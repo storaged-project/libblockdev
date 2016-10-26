@@ -1,6 +1,6 @@
 # configure.ac for libblockdev
 
-AC_INIT([libblockdev], [1.999], [vpodzime@redhat.com])
+AC_INIT([libblockdev], [2.0], [vpodzime@redhat.com])
 
 # Disable building static libraries.
 # This needs to be set before initializing automake
@@ -89,7 +89,7 @@ AC_CHECK_HEADERS([dlfcn.h string.h unistd.h sys/fcntl.h sys/ioctl.h linux/random
                  [LIBBLOCKDEV_SOFT_FAILURE([Header file $ac_header not found.])],
                  [])
 
-AC_SUBST([MAJOR_VER], [\"0\"])
+AC_SUBST([MAJOR_VER], [\"2\"])
 
 AC_OUTPUT
 LIBBLOCKDEV_FAILURES
