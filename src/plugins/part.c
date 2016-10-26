@@ -157,7 +157,7 @@ static gboolean disk_commit (PedDisk *disk, gchar *path, GError **error) {
     /* XXX: try to grab an exclusive lock for the device so that udev doesn't
        trigger events for it in between the two operations we need to perform
        (see below) */
-    dev_fd = open (disk->dev->path, O_RDONLY|O_CLOEXEC);
+    dev_fd = open (disk->dev->path, O_RDWR|O_CLOEXEC);
     if (dev_fd >= 0)
         /* if this fails, we can do no better anyway, so just ignore the return
            value */
@@ -167,6 +167,7 @@ static gboolean disk_commit (PedDisk *disk, gchar *path, GError **error) {
     if (ret == 0) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to commit changes to device '%s'", path);
+        flock (dev_fd, LOCK_UN);
         close (dev_fd);
         return FALSE;
     }
@@ -175,10 +176,12 @@ static gboolean disk_commit (PedDisk *disk, gchar *path, GError **error) {
     if (ret == 0) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to inform OS about changes on the '%s' device", path);
+        flock (dev_fd, LOCK_UN);
         close (dev_fd);
         return FALSE;
     }
 
+    flock (dev_fd, LOCK_UN);
     close (dev_fd);
     return TRUE;
 }
