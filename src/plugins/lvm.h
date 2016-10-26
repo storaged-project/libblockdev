@@ -1,5 +1,5 @@
 #include <glib.h>
-#include <utils.h>
+#include <blockdev/utils.h>
 
 #ifndef BD_LVM
 #define BD_LVM

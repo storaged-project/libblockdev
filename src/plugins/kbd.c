@@ -23,7 +23,7 @@
 #include <glob.h>
 #include <unistd.h>
 #include <locale.h>
-#include <utils.h>
+#include <blockdev/utils.h>
 
 #include "kbd.h"
 

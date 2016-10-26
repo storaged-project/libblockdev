@@ -8,5 +8,4 @@ Description: Library for doing low-level operations with block devices
 URL: https://github.com/rhinstaller/libblockdev
 Version: 0.1.0
 Requires: glib-2.0
-Cflags: -I${includedir}/blockdev
 Libs: -lblockdev

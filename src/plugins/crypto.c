@@ -27,7 +27,7 @@
 #include <linux/random.h>
 #include <locale.h>
 #include <unistd.h>
-#include <exec.h>
+#include <blockdev/utils.h>
 
 #include "crypto.h"
 

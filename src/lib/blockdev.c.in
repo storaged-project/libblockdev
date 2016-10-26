@@ -1,5 +1,5 @@
 #include <dlfcn.h>
-#include <utils.h>
+#include <blockdev/utils.h>
 #include "blockdev.h"
 #include "plugins.h"
 

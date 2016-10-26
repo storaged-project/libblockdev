@@ -1,5 +1,5 @@
 #include <glib.h>
-#include <utils.h>
+#include <blockdev/utils.h>
 
 #ifndef BD_CRYPTO
 #define BD_CRYPTO

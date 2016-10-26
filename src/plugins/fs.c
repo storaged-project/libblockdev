@@ -17,7 +17,7 @@
  * Author: Vratislav Podzimek <vpodzime@redhat.com>
  */
 
-#include <exec.h>
+#include <blockdev/utils.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>

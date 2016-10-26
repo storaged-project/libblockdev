@@ -1,6 +1,6 @@
 #include <glib.h>
 #include <glib-object.h>
-#include <utils.h>
+#include <blockdev/utils.h>
 
 #ifndef BD_PART_API
 #define BD_PART_API

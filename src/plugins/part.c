@@ -25,7 +25,7 @@
 #include <inttypes.h>
 #include <unistd.h>
 #include <sys/file.h>
-#include <utils.h>
+#include <blockdev/utils.h>
 #include <part_err.h>
 
 #include "part.h"

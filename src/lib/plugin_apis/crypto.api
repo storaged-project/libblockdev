@@ -1,5 +1,5 @@
 #include <glib.h>
-#include <utils.h>
+#include <blockdev/utils.h>
 
 #define BD_CRYPTO_LUKS_METADATA_SIZE (2 MiB)
 
