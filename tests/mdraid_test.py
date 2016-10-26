@@ -469,6 +469,14 @@ class FakeMDADMutilTest(unittest.TestCase):
 
         self.assertIs(ex_data.metadata, None)
 
+    def test_fw_raid_migrating(self):
+        """Verify that md_examine works when array is migrating ("foo <-- bar" values in output) """
+
+        with fake_utils("tests/mdadm_fw_RAID_examine_migrate"):
+            ex_data = BlockDev.md_examine("fake_dev")
+
+        self.assertEqual(ex_data.chunk_size, 128 * 1024)
+
 
 class MDUnloadTest(unittest.TestCase):
     def setUp(self):
