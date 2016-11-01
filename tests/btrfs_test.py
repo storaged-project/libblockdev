@@ -3,6 +3,7 @@ from __future__ import division
 import unittest
 import os
 import six
+import time
 
 import overrides_hack
 from utils import create_sparse_tempfile, fake_utils, fake_path
@@ -420,6 +421,7 @@ class BtrfsTestRepair(BtrfsTestCase):
 
         succ = BlockDev.btrfs_create_volume([self.loop_dev], None, None, None, None)
         self.assertTrue(succ)
+        time.sleep(1)
 
         succ = BlockDev.btrfs_repair(self.loop_dev, None)
         self.assertTrue(succ)
