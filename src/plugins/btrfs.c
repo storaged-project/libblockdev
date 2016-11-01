@@ -20,7 +20,7 @@
 #include <glib.h>
 #include <string.h>
 #include <unistd.h>
-#include <utils.h>
+#include <blockdev/utils.h>
 #include <bs_size.h>
 
 #include "btrfs.h"

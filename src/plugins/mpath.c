@@ -22,7 +22,7 @@
 #include <linux/kdev_t.h>
 #include <libdevmapper.h>
 #include <unistd.h>
-#include <utils.h>
+#include <blockdev/utils.h>
 #include "mpath.h"
 
 /**

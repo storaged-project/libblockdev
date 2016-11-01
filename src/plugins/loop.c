@@ -20,7 +20,7 @@
 #include <glib.h>
 #include <unistd.h>
 #include <glob.h>
-#include <utils.h>
+#include <blockdev/utils.h>
 #include "loop.h"
 
 /**

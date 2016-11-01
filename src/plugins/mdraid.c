@@ -21,7 +21,7 @@
 
 #include <glib.h>
 #include <unistd.h>
-#include <utils.h>
+#include <blockdev/utils.h>
 #include <string.h>
 #include <glob.h>
 #include <time.h>

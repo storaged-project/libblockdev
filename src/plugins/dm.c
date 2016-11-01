@@ -19,7 +19,7 @@
 
 #include <glib.h>
 #include <unistd.h>
-#include <utils.h>
+#include <blockdev/utils.h>
 #include <libdevmapper.h>
 #include <dmraid/dmraid.h>
 #include <libudev.h>

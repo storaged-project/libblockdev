@@ -2,7 +2,7 @@
 #include <linux/fs.h>
 #include <stdio.h>
 #include <string.h>
-#include <utils.h>
+#include <blockdev/utils.h>
 #include <asm/dasd.h>
 #include <s390utils/vtoc.h>
 

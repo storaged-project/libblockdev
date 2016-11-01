@@ -4,7 +4,7 @@ SHELL = /bin/bash
 ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS = --enable-introspection
 
-SUBDIRS = src docs dist scripts data
+SUBDIRS = include src docs dist scripts data
 
 dist_noinst_DATA = features.rst roadmap.rst specs.rst LICENSE tests
 

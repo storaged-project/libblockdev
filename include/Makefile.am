@@ -1,0 +1,3 @@
+SUBDIRS = blockdev
+
+MAINTAINERCLEANFILES = Makefile.in

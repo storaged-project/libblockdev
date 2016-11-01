@@ -28,6 +28,8 @@ AC_CONFIG_FILES([Makefile src/Makefile \
                           src/python/Makefile \
                           src/python/gi/Makefile \
                           src/python/gi/overrides/Makefile \
+                          include/Makefile \
+                          include/blockdev/Makefile \
                           docs/Makefile \
                           docs/libblockdev-docs.xml \
                           dist/Makefile \

@@ -22,7 +22,7 @@
 #include <string.h>
 #include <libdevmapper.h>
 #include <unistd.h>
-#include <utils.h>
+#include <blockdev/utils.h>
 
 #include "lvm.h"
 
