@@ -1,12 +1,11 @@
 Features
 =========
 
-The libblockdev library will be state-less from the device perspective. There
-may (and probably will) be some library-wide as well as technology-wide
-configuration (e.g. default configuration for the LVM functions), but the
-library won't keep state of the devices. So if for example the lvcreate()
-function is called with a non-existing or full VG as a parameter, the function
-will fail when trying to create the LV not in any pre-processing check.
+*libblockdev* is a C library supporting GObject introspection for manipulation
+of block devices. It has a plugin-based architecture where each technology (like
+LVM, Btrfs, MD RAID, Swap,...) is implemented in a separate plugin, possibly
+with multiple implementations (e.g. using LVM CLI or the new LVM DBus
+API). Every plugin is also usable as a standalone shared library.
 
 
 partitions
@@ -16,19 +15,17 @@ partitions
    MBR, GPT, partition manipulation on partitionable devices
 
 :functions:
-   * mklabel [DONE]
-   * create_part [DONE]
+   * mklabel
+   * create_part
    * resize_part
-   * remove_part [DONE]
+   * remove_part
 
 
 filesystems
 ------------
 
 :supported technologies:
-   * DONE: ext4, xfs
-   * IN PROGRESS: vfat
-   * TODO?  ext2, ext3
+   * DONE: ext4, xfs, vfat
 
 :functions:
    * make_FSTYPE
@@ -36,10 +33,9 @@ filesystems
    * check_FSTYPE
    * repair_FSTYPE
    * change_label_FSTYPE
-   * snapshot_FSTYPE
 
-   * wipefs [DONE]
-   * generic_resize
+   * wipefs
+   * generic_resize [TODO]
 
 
 LVM
@@ -52,59 +48,65 @@ LVM
    * read-only locking and default config
 
 :functions:
-   * get_global_config [DONE]
-   * set_global_config [DONE]
-   * get_possible_pe_sizes [DONE]
-   * is_supported_pe_size [DONE]
-   * get_max_lv_size [DONE]
-   * round_size_to_pe [DONE]
-   * get_lv_physical_size [DONE]
-   * get_thpool_padding [DONE]
-   * is_valid_thpool_metadata_size [DONE]
-   * is_valid_thpool_chunk_size [DONE]
+   * get_global_config
+   * set_global_config
+   * get_possible_pe_sizes
+   * is_supported_pe_size
+   * get_max_lv_size
+   * round_size_to_pe
+   * get_lv_physical_size
+   * get_thpool_padding
+   * is_valid_thpool_metadata_size
+   * is_valid_thpool_chunk_size
 
-   * pvcreate [DONE]
-   * pvresize [DONE]
-   * pvremove [DONE]
-   * pvmove [DONE]
-   * pvscan [DONE]
-   * pvinfo [DONE]
-   * pvs [DONE]
+   * pvcreate
+   * pvresize
+   * pvremove
+   * pvmove
+   * pvscan
+   * pvinfo
+   * pvs
 
-   * vgcreate [DONE]
-   * vgextend [DONE]
-   * vgremove [DONE]
-   * vgactivate [DONE]
-   * vgdeactivate [DONE]
-   * vgreduce [DONE]
-   * vginfo [DONE]
-   * vgs [DONE]
+   * vgcreate
+   * vgextend
+   * vgremove
+   * vgactivate
+   * vgdeactivate
+   * vgreduce
+   * vginfo
+   * vgs
 
-   * lvorigin [DONE]
-   * lvcreate [DONE]
-   * lvremove [DONE]
-   * lvresize [DONE]
-   * lvactivate [DONE]
-   * lvdeactivate [DONE]
-   * lvsnapshotcreate [DONE]
-   * lvsnapshotmerge [DONE]
-   * lvinfo [DONE]
-   * lvs [DONE]
+   * lvorigin
+   * lvcreate
+   * lvremove
+   * lvresize
+   * lvactivate
+   * lvdeactivate
+   * lvsnapshotcreate
+   * lvsnapshotmerge
+   * lvinfo
+   * lvs
 
-   * thpoolcreate [DONE]
-   * thlvcreate [DONE]
-   * thlvpoolname [DONE]
-   * thsnapshotcreate [DONE]
+   * thpoolcreate
+   * thlvcreate
+   * thlvpoolname
+   * thsnapshotcreate
 
-   * lvm_cache_get_default_md_size [DONE]
-   * lvm_cache_get_mode_str [DONE]
-   * lvm_cache_get_mode_from_str [DONE]
-   * lvm_cache_create_pool [DONE]
-   * lvm_cache_attach [DONE]
-   * lvm_cache_detach [DONE]
-   * lvm_cache_create_cached_lv [DONE]
-   * lvm_cache_pool_name [DONE]
-   * lvm_cache_stats [DONE]
+   * cache_get_default_md_size
+   * cache_get_mode_str
+   * cache_get_mode_from_str
+   * cache_create_pool
+   * cache_attach
+   * cache_detach
+   * cache_create_cached_lv
+   * cache_pool_name
+   * cache_stats
+
+   * data_lv_name
+   * metadata_lv_name
+
+   * thpool_convert
+   * cache_pool_convert
 
 BTRFS
 ------
@@ -113,22 +115,22 @@ BTRFS
    btrfs as both filesystem and multi-device volume, subvolumes, snapshots
 
 :functions:
-   * create_volume [DONE]
-   * add_device [DONE]
-   * remove_device [DONE]
-   * list_devices [DONE]
-   * create_subvolume [DONE]
-   * delete_subvolume [DONE]
-   * list_subvolumes [DONE]
-   * get_default_subvolume [DONE]
-   * set_default_subvolume [DONE]
-   * create_snapshot [DONE]
-   * filesystem_info [DONE]
-   * mkfs [DONE]
-   * resize [DONE]
-   * check [DONE]
-   * repair [DONE]
-   * change_label [DONE]
+   * create_volume
+   * add_device
+   * remove_device
+   * list_devices
+   * create_subvolume
+   * delete_subvolume
+   * list_subvolumes
+   * get_default_subvolume
+   * set_default_subvolume
+   * create_snapshot
+   * filesystem_info
+   * mkfs
+   * resize
+   * check
+   * repair
+   * change_label
 
 
 SWAP
@@ -138,10 +140,10 @@ SWAP
    swap partitions/LVs, swap files
 
 :functions:
-   * mkswap [DONE]
-   * swapon [DONE]
-   * swapoff [DONE]
-   * swapstatus [DONE]
+   * mkswap
+   * swapon
+   * swapoff
+   * swapstatus
 
 
 MDRAID
@@ -151,22 +153,22 @@ MDRAID
    all RAID levels supported by the MD RAID
 
 :functions:
-   * get_superblock_size [DONE]
-   * create [DONE]
-   * destroy [DONE]
-   * activate [DONE]
-   * deactivate [DONE]
-   * run [NEEDS_TEST]
-   * nominate [DONE]
-   * denominate [DONE]
-   * add [DONE]
-   * remove [DONE]
-   * examine [DONE]
-   * canonicalize_uuid [DONE]
-   * get_md_uuid [DONE]
-   * detail [DONE]
-   * node_from_name [DONE]
-   * name_from_node [DONE]
+   * get_superblock_size
+   * create
+   * destroy
+   * activate
+   * deactivate
+   * run
+   * nominate
+   * denominate
+   * add
+   * remove
+   * examine
+   * canonicalize_uuid
+   * get_md_uuid
+   * detail
+   * node_from_name
+   * name_from_node
 
 
 CRYPTO/LUKS
@@ -176,18 +178,18 @@ CRYPTO/LUKS
    only LUKS encrypted devices
 
 :functions:
-   * generate_backup_passphrase [DONE]
-   * device_is_luks [DONE]
-   * luks_uuid [DONE]
-   * luks_status [DONE]
-   * luks_format [DONE]
-   * luks_open [DONE]
-   * luks_close [DONE]
-   * luks_add_key [DONE]
-   * luks_remove_key [DONE]
-   * luks_change_key [DONE]
-   * luks_resize [DONE]
-   * escrow_device [DONE]
+   * generate_backup_passphrase
+   * device_is_luks
+   * luks_uuid
+   * luks_status
+   * luks_format
+   * luks_open
+   * luks_close
+   * luks_add_key
+   * luks_remove_key
+   * luks_change_key
+   * luks_resize
+   * escrow_device
 
 
 MULTIPATH
@@ -197,9 +199,10 @@ MULTIPATH
    just very basic functionality
 
 :functions:
-   * flush_mpaths [DONE]
-   * device_is_mpath_member [DONE]
-   * set_friendly_names [DONE]
+   * flush_mpaths
+   * device_is_mpath_member
+   * get_mpath_members
+   * set_friendly_names
 
 
 LOOP
@@ -209,10 +212,10 @@ LOOP
    basic operations with loop devices
 
 :functions:
-   * get_backing_file [DONE]
-   * get_loop_name [DONE]
-   * loop_setup [DONE]
-   * loop_teardown [DONE]
+   * get_backing_file
+   * get_loop_name
+   * loop_setup
+   * loop_teardown
 
 
 DEVICE MAPPER
@@ -222,15 +225,15 @@ DEVICE MAPPER
    basic operations with raw device mapper and DM RAID sets
 
 :functions:
-   * create_linear [DONE]
-   * remove [DONE]
-   * node_from_name [DONE]
-   * name_from_node [DONE]
-   * map_exists [DONE]
-   * get_member_raid_sets [DONE]
-   * activate_raid_set [DONE]
-   * deactivate_raid_set [DONE]
-   * get_raid_set_type [DONE]
+   * create_linear
+   * remove
+   * node_from_name
+   * name_from_node
+   * map_exists
+   * get_member_raid_sets
+   * activate_raid_set
+   * deactivate_raid_set
+   * get_raid_set_type
 
 
 s390
@@ -240,16 +243,16 @@ s390
    DASD, zFCP
 
 :functions:
-   * s390_dasd_format [DONE]
-   * s390_dasd_needs_format [DONE]
-   * s390_dasd_online [DONE]
-   * s390_dasd_is_ldl [DONE]
-   * s390_sanitize_dev_input [DONE]
-   * s390_zfcp_sanitize_wwpn_input [DONE]
-   * s390_zfcp_sanitize_lun_input [DONE]
-   * s390_zfcp_online [DONE]
-   * s390_zfcp_scsi_offline [DONE]
-   * s390_zfcp_offline [DONE]
+   * s390_dasd_format
+   * s390_dasd_needs_format
+   * s390_dasd_online
+   * s390_dasd_is_ldl
+   * s390_sanitize_dev_input
+   * s390_zfcp_sanitize_wwpn_input
+   * s390_zfcp_sanitize_lun_input
+   * s390_zfcp_online
+   * s390_zfcp_scsi_offline
+   * s390_zfcp_offline
 
 
 KBD (Kernel Block Devices)
@@ -259,19 +262,19 @@ KBD (Kernel Block Devices)
    bcache, zram
 
 :functions:
-   * bcache_create [DONE]
-   * bcache_destroy [DONE]
-   * bcache_attach [DONE]
-   * bcache_detach [DONE]
-   * bcache_status [DONE]
-   * bcache_set_mode [DONE]
-   * bcache_get_mode [DONE]
-   * bcache_get_backing_device [DONE]
-   * bcache_get_cache_device [DONE]
+   * bcache_create
+   * bcache_destroy
+   * bcache_attach
+   * bcache_detach
+   * bcache_status
+   * bcache_set_mode
+   * bcache_get_mode
+   * bcache_get_backing_device
+   * bcache_get_cache_device
 
-   * zram_create_devices [DONE]
-   * zram_destroy_devices [DONE]
-   * zram_get_stats [DONE]
+   * zram_create_devices
+   * zram_destroy_devices
+   * zram_get_stats
 
 
 utils
@@ -281,10 +284,10 @@ Library (not a plugin) providing utility functions usable for multiple plugins
 and any third-party code.
 
 :functions:
-   * exec_and_report_error [DONE]
-   * exec_and_capture_output [DONE]
-   * size_human_readable [DONE]
-   * size_from_spec [DONE]
-   * init_logging [DONE]
-   * version_cmp [DONE]
-   * check_util_version [DONE]
+   * exec_and_report_error
+   * exec_and_capture_output
+   * size_human_readable
+   * size_from_spec
+   * init_logging
+   * version_cmp
+   * check_util_version
