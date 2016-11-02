@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     1.999
+Version:     2.0
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -575,6 +575,9 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Nov  2 2016 Vratislav Podzimek <vpodzime@redhat.com> - 2.0-1
+- New major upstream release
+
 * Thu Oct 27 2016 Vratislav Podzimek <vpodzime@redhat.com> - 1.9-7
 - Open the device file as RDWR when committing parts (vpodzime)
 - Handle mdadm --examine output during migration (adamw)
