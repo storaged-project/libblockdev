@@ -430,6 +430,7 @@ class MDTestNameNodeBijection(MDTestCase):
 
         node = BlockDev.md_node_from_name("bd_test_md")
         self.assertEqual(BlockDev.md_name_from_node(node), "bd_test_md")
+        self.assertEqual(BlockDev.md_name_from_node("/dev/" + node), "bd_test_md")
 
         with self.assertRaises(GLib.GError):
             node = BlockDev.md_node_from_name("made_up_md")
