@@ -165,6 +165,8 @@ Summary:     Development files for the libblockdev-fs plugin/library
 Requires: %{name}-fs%{?_isa} = %{version}-%{release}
 Requires: %{name}-utils-devel%{?_isa}
 Requires: glib2-devel
+Requires: xfsprogs
+Requires: dosfstools
 
 %description fs-devel
 This package contains header files and pkg-config files needed for development
