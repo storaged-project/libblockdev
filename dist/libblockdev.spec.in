@@ -296,6 +296,7 @@ Summary:     The partitioning plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
 Requires: device-mapper-multipath
 Requires: gdisk
+Requires: util-linux
 
 %description part
 The libblockdev library plugin (and in the same time a standalone library)

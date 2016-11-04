@@ -130,13 +130,23 @@ static gboolean set_parted_error (GError **error, BDPartError type) {
  */
 gboolean bd_part_check_deps () {
     GError *error = NULL;
-    gboolean ret = bd_utils_check_util_version ("sgdisk", "1.0.1", NULL, "GPT fdisk \\(sgdisk\\) version ([\\d\\.]+)", &error);
+    gboolean check_ret = TRUE;
 
+    gboolean ret = bd_utils_check_util_version ("sgdisk", "1.0.1", NULL, "GPT fdisk \\(sgdisk\\) version ([\\d\\.]+)", &error);
     if (!ret && error) {
         g_warning("Cannot load the part plugin: %s" , error->message);
         g_clear_error (&error);
+        check_ret = FALSE;
     }
-    return ret;
+
+    ret = bd_utils_check_util_version ("sfdisk", NULL, NULL, NULL, &error);
+    if (!ret && error) {
+        g_warning("Cannot load the part plugin: %s" , error->message);
+        g_clear_error (&error);
+        check_ret = FALSE;
+    }
+
+    return check_ret;
 }
 
 /**
@@ -1448,6 +1458,123 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
     bd_utils_report_finished (progress_id, "Completed");
 
     return success;
+}
+
+/**
+ * bd_part_set_part_id:
+ * @disk: device the partition belongs to
+ * @part: partition the should be set for
+ * @part_id: partition Id
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @part_id type was successfully set for @part or not
+ */
+gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar *part_id, GError **error) {
+    const gchar *args[6] = {"sfdisk", "--part-type", disk, NULL, part_id, NULL};
+    const gchar *part_num_str = NULL;
+    gboolean success = FALSE;
+    guint64 progress_id = 0;
+    guint64 part_id_int = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started setting id on the partition '%s'", part);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    if (!part || (part && (*part == '\0'))) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Invalid partition path given: '%s'", part);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    part_num_str = part + (strlen (part) - 1);
+    while (isdigit (*part_num_str) || (*part_num_str == '-')) {
+        part_num_str--;
+    }
+    part_num_str++;
+
+    part_id_int = g_ascii_strtoull (part_id, NULL, 0);
+
+    if (part_id_int == 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Invalid partition id given: '%s'.", part_id);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    if (part_id_int == 0x05 || part_id_int == 0x0f || part_id_int == 0x85) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Cannot change partition id to extended.");
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    if ((g_strcmp0 (part_num_str, "0") != 0) && (atoi (part_num_str) == 0)) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Invalid partition path given: '%s'. Cannot extract partition number", part);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    args[3] = g_strdup (part_num_str);
+
+    success = bd_utils_exec_and_report_error (args, NULL, error);
+    g_free ((gchar*) args[3]);
+
+    bd_utils_report_finished (progress_id, "Completed");
+
+    return success;
+}
+
+/**
+ * bd_part_get_part_id:
+ * @disk: device the partition belongs to
+ * @part: partition the should be set for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns (transfer full): partition id type or %NULL in case of error
+ */
+gchar* bd_part_get_part_id (const gchar *disk, const gchar *part, GError **error) {
+    const gchar *args[5] = {"sfdisk", "--part-type", disk, NULL, NULL};
+    const gchar *part_num_str = NULL;
+    gchar *output = NULL;
+    gchar *ret = NULL;
+    gboolean success = FALSE;
+
+    if (!part || (part && (*part == '\0'))) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Invalid partition path given: '%s'", part);
+        return NULL;
+    }
+
+    part_num_str = part + (strlen (part) - 1);
+    while (isdigit (*part_num_str) || (*part_num_str == '-')) {
+        part_num_str--;
+    }
+    part_num_str++;
+
+    if ((g_strcmp0 (part_num_str, "0") != 0) && (atoi (part_num_str) == 0)) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Invalid partition path given: '%s'. Cannot extract partition number", part);
+        return NULL;
+    }
+
+    args[3] = g_strdup (part_num_str);
+
+    success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
+    if (!success) {
+        g_free ((gchar *) args[3]);
+        return NULL;
+    }
+
+    output =  g_strstrip (output);
+    ret = g_strdup_printf ("0x%s", output);
+
+    g_free (output);
+    g_free ((gchar*) args[3]);
+
+    return ret;
 }
 
 /**
