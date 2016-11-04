@@ -1075,7 +1075,6 @@ gchar* bd_md_node_from_name (const gchar *name, GError **error) {
  * Returns: @name of the MD RAID the device node belongs to or %NULL in case of error
  */
 gchar* bd_md_name_from_node (const gchar *node, GError **error) {
-    gchar *node_path = NULL;
     glob_t glob_buf;
     gchar **path_p;
     gboolean found = FALSE;
@@ -1083,13 +1082,11 @@ gchar* bd_md_name_from_node (const gchar *node, GError **error) {
     gchar *name = NULL;
     gchar *node_name = NULL;
 
-    if (!g_str_has_prefix (node, "/dev/"))
-        node_path = g_strdup_printf ("/dev/%s", node);
-    else
-        node_path = g_strdup (node);
+    /* get rid of the "/dev/" prefix (if any) */
+    if (g_str_has_prefix (node, "/dev/"))
+        node = node + 5;
 
     if (glob ("/dev/md/*", GLOB_NOSORT, NULL, &glob_buf) != 0) {
-        g_free (node_path);
         g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_NO_MATCH,
                      "No name found for the node '%s'", node);
         return NULL;
@@ -1106,7 +1103,6 @@ gchar* bd_md_name_from_node (const gchar *node, GError **error) {
         g_free (node_name);
     }
     globfree (&glob_buf);
-    g_free (node_path);
 
     if (!found)
         g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_NO_MATCH,
