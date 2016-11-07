@@ -1,4 +1,5 @@
 #include <glib.h>
+#include <blockdev/utils.h>
 
 #ifndef BD_FS
 #define BD_FS
