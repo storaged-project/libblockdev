@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-FS.html" title="FS">
 <link rel="next" href="libblockdev-LVM.html" title="LVM">
-<meta name="generator" content="GTK-Doc V1.24 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -39,6 +39,30 @@
 <col class="functions_name">
 </colgroup>
 <tbody>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Loop.html#bd-loop-check-deps" title="bd_loop_check_deps ()">bd_loop_check_deps</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Loop.html#bd-loop-init" title="bd_loop_init ()">bd_loop_init</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Loop.html#bd-loop-close" title="bd_loop_close ()">bd_loop_close</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
 <tr>
 <td class="function_type">
 <a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
@@ -114,6 +138,33 @@ in/out to/from the functions are in bytes.</p>
 <div class="refsect1">
 <a name="libblockdev-Loop.functions_details"></a><h2>Functions</h2>
 <div class="refsect2">
+<a name="bd-loop-check-deps"></a><h3>bd_loop_check_deps ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_loop_check_deps ();</pre>
+<div class="refsect3">
+<a name="bd-loop-check-deps.returns"></a><h4>Returns</h4>
+<p> whether the plugin's runtime dependencies are satisfied or not</p>
+<p>Function checking plugin's runtime dependencies.</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-loop-init"></a><h3>bd_loop_init ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_loop_init ();</pre>
+<p>Initializes the plugin. **This function is called automatically by the
+library's initialization functions.**</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-loop-close"></a><h3>bd_loop_close ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_loop_close ();</pre>
+<p>Cleans up after the plugin. **This function is called automatically by the
+library's functions that unload it.**</p>
+</div>
+<hr>
+<div class="refsect2">
 <a name="bd-loop-error-quark"></a><h3>bd_loop_error_quark ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
 bd_loop_error_quark (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
@@ -123,10 +174,10 @@ bd_loop_error_quark (<em class="parameter"><code><span class="type">void</span><
 <div class="refsect2">
 <a name="bd-loop-get-backing-file"></a><h3>bd_loop_get_backing_file ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
-bd_loop_get_backing_file (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *dev_name</code></em>,
+bd_loop_get_backing_file (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *dev_name</code></em>,
                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.7.7.3.4"></a><h4>Parameters</h4>
+<a name="bd-loop-get-backing-file.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -148,7 +199,7 @@ bd_loop_get_backing_file (<em class="parameter"><code><a href="../glib/glib-Basi
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.7.7.3.5"></a><h4>Returns</h4>
+<a name="bd-loop-get-backing-file.returns"></a><h4>Returns</h4>
 <p> path of the device's backing file or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if none
 is found. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
@@ -158,10 +209,10 @@ is found. </p>
 <div class="refsect2">
 <a name="bd-loop-get-loop-name"></a><h3>bd_loop_get_loop_name ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
-bd_loop_get_loop_name (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *file</code></em>,
+bd_loop_get_loop_name (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *file</code></em>,
                        <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.7.7.4.4"></a><h4>Parameters</h4>
+<a name="bd-loop-get-loop-name.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -183,7 +234,7 @@ bd_loop_get_loop_name (<em class="parameter"><code><a href="../glib/glib-Basic-T
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.7.7.4.5"></a><h4>Returns</h4>
+<a name="bd-loop-get-loop-name.returns"></a><h4>Returns</h4>
 <p> name of the loop device associated with the given <em class="parameter"><code>file</code></em>
 . </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
@@ -193,11 +244,15 @@ bd_loop_get_loop_name (<em class="parameter"><code><a href="../glib/glib-Basic-T
 <div class="refsect2">
 <a name="bd-loop-setup"></a><h3>bd_loop_setup ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_loop_setup (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *file</code></em>,
-               <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **loop_name</code></em>,
+bd_loop_setup (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *file</code></em>,
+               <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> offset</code></em>,
+               <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> size</code></em>,
+               <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> read_only</code></em>,
+               <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> part_scan</code></em>,
+               <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **loop_name</code></em>,
                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.7.7.5.4"></a><h4>Parameters</h4>
+<a name="bd-loop-setup.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -211,9 +266,30 @@ bd_loop_setup (<em class="parameter"><code><a href="../glib/glib-Basic-Types.htm
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>offset</p></td>
+<td class="parameter_description"><p>offset of the start of the device (in <em class="parameter"><code>file</code></em>
+)</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>size</p></td>
+<td class="parameter_description"><p>maximum size of the device (or 0 to leave unspecified)</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>read_only</p></td>
+<td class="parameter_description"><p>whether to setup as read-only (<a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>) or read-write (<a href="../glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>)</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>part_scan</p></td>
+<td class="parameter_description"><p>whether to enforce partition scan on the newly created device or not</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
 <td class="parameter_name"><p>loop_name</p></td>
 <td class="parameter_description"><p> if not <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, it is used to store the name of the loop device. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
@@ -224,7 +300,7 @@ bd_loop_setup (<em class="parameter"><code><a href="../glib/glib-Basic-Types.htm
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.7.7.5.5"></a><h4>Returns</h4>
+<a name="bd-loop-setup.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>file</code></em>
 was successfully setup as a loop device or not</p>
 </div>
@@ -233,10 +309,10 @@ was successfully setup as a loop device or not</p>
 <div class="refsect2">
 <a name="bd-loop-teardown"></a><h3>bd_loop_teardown ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_loop_teardown (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *loop</code></em>,
+bd_loop_teardown (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *loop</code></em>,
                   <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.7.7.6.4"></a><h4>Parameters</h4>
+<a name="bd-loop-teardown.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -258,7 +334,7 @@ bd_loop_teardown (<em class="parameter"><code><a href="../glib/glib-Basic-Types.
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.7.7.6.5"></a><h4>Returns</h4>
+<a name="bd-loop-teardown.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>loop</code></em>
 device was successfully torn down or not</p>
 </div>
@@ -274,7 +350,7 @@ device was successfully torn down or not</p>
 <div class="refsect2">
 <a name="BDLoopError"></a><h3>enum BDLoopError</h3>
 <div class="refsect3">
-<a name="id-1.2.7.8.3.3"></a><h4>Members</h4>
+<a name="BDLoopError.members"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="enum_members_name">
@@ -292,6 +368,6 @@ device was successfully torn down or not</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.24</div>
+<hr>Generated by GTK-Doc V1.25</div>
 </body>
 </html>

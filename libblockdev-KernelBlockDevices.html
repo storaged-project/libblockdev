@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-Swap.html" title="Swap">
 <link rel="next" href="libblockdev-s390.html" title="s390">
-<meta name="generator" content="GTK-Doc V1.24 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -39,6 +39,30 @@
 <col class="functions_name">
 </colgroup>
 <tbody>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-KernelBlockDevices.html#bd-kbd-check-deps" title="bd_kbd_check_deps ()">bd_kbd_check_deps</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-KernelBlockDevices.html#bd-kbd-init" title="bd_kbd_init ()">bd_kbd_init</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-KernelBlockDevices.html#bd-kbd-close" title="bd_kbd_close ()">bd_kbd_close</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
 <tr>
 <td class="function_type">
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
@@ -168,6 +192,22 @@
 </tr>
 <tr>
 <td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-KernelBlockDevices.html#bd-kbd-zram-add-device" title="bd_kbd_zram_add_device ()">bd_kbd_zram_add_device</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-KernelBlockDevices.html#bd-kbd-zram-remove-device" title="bd_kbd_zram_remove_device ()">bd_kbd_zram_remove_device</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <a class="link" href="libblockdev-KernelBlockDevices.html#BDKBDZramStats" title="BDKBDZramStats"><span class="returnvalue">BDKBDZramStats</span></a> *
 </td>
 <td class="function_name">
@@ -236,13 +276,40 @@
 <div class="refsect1">
 <a name="libblockdev-KernelBlockDevices.functions_details"></a><h2>Functions</h2>
 <div class="refsect2">
+<a name="bd-kbd-check-deps"></a><h3>bd_kbd_check_deps ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_kbd_check_deps ();</pre>
+<div class="refsect3">
+<a name="bd-kbd-check-deps.returns"></a><h4>Returns</h4>
+<p> whether the plugin's runtime dependencies are satisfied or not</p>
+<p>Function checking plugin's runtime dependencies.</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-kbd-init"></a><h3>bd_kbd_init ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_kbd_init ();</pre>
+<p>Initializes the plugin. **This function is called automatically by the
+library's initialization functions.**</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-kbd-close"></a><h3>bd_kbd_close ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_kbd_close ();</pre>
+<p>Cleans up after the plugin. **This function is called automatically by the
+library's functions that unload it.**</p>
+</div>
+<hr>
+<div class="refsect2">
 <a name="bd-kbd-bcache-attach"></a><h3>bd_kbd_bcache_attach ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_kbd_bcache_attach (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *c_set_uuid</code></em>,
-                      <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *bcache_device</code></em>,
+bd_kbd_bcache_attach (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *c_set_uuid</code></em>,
+                      <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *bcache_device</code></em>,
                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.14.7.2.4"></a><h4>Parameters</h4>
+<a name="bd-kbd-bcache-attach.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -270,7 +337,7 @@ cache to</p></td>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.14.7.2.5"></a><h4>Returns</h4>
+<a name="bd-kbd-bcache-attach.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>c_set_uuid</code></em>
 cache was successfully attached to <em class="parameter"><code>bcache_device</code></em>
 or not</p>
@@ -280,12 +347,13 @@ or not</p>
 <div class="refsect2">
 <a name="bd-kbd-bcache-create"></a><h3>bd_kbd_bcache_create ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_kbd_bcache_create (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *backing_device</code></em>,
-                      <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *cache_device</code></em>,
-                      <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **bcache_device</code></em>,
+bd_kbd_bcache_create (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *backing_device</code></em>,
+                      <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *cache_device</code></em>,
+                      <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                      <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **bcache_device</code></em>,
                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.14.7.3.4"></a><h4>Parameters</h4>
+<a name="bd-kbd-bcache-create.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -304,9 +372,15 @@ bd_kbd_bcache_create (<em class="parameter"><code><a href="../glib/glib-Basic-Ty
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the creation (right now
+passed to the 'make-bcache' utility). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>bcache_device</p></td>
 <td class="parameter_description"><p> place to store the name of the new bcache device (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
@@ -317,7 +391,7 @@ bd_kbd_bcache_create (<em class="parameter"><code><a href="../glib/glib-Basic-Ty
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.14.7.3.5"></a><h4>Returns</h4>
+<a name="bd-kbd-bcache-create.returns"></a><h4>Returns</h4>
 <p> whether the bcache device was successfully created or not</p>
 </div>
 </div>
@@ -325,10 +399,10 @@ bd_kbd_bcache_create (<em class="parameter"><code><a href="../glib/glib-Basic-Ty
 <div class="refsect2">
 <a name="bd-kbd-bcache-destroy"></a><h3>bd_kbd_bcache_destroy ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_kbd_bcache_destroy (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *bcache_device</code></em>,
+bd_kbd_bcache_destroy (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *bcache_device</code></em>,
                        <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.14.7.4.4"></a><h4>Parameters</h4>
+<a name="bd-kbd-bcache-destroy.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -350,7 +424,7 @@ bd_kbd_bcache_destroy (<em class="parameter"><code><a href="../glib/glib-Basic-T
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.14.7.4.5"></a><h4>Returns</h4>
+<a name="bd-kbd-bcache-destroy.returns"></a><h4>Returns</h4>
 <p> whether the bcache device <em class="parameter"><code>bcache_device</code></em>
 was successfully destroyed or not</p>
 </div>
@@ -359,11 +433,11 @@ was successfully destroyed or not</p>
 <div class="refsect2">
 <a name="bd-kbd-bcache-detach"></a><h3>bd_kbd_bcache_detach ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_kbd_bcache_detach (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *bcache_device</code></em>,
+bd_kbd_bcache_detach (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *bcache_device</code></em>,
                       <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **c_set_uuid</code></em>,
                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.14.7.5.4"></a><h4>Parameters</h4>
+<a name="bd-kbd-bcache-detach.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -390,7 +464,7 @@ bd_kbd_bcache_detach (<em class="parameter"><code><a href="../glib/glib-Basic-Ty
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.14.7.5.5"></a><h4>Returns</h4>
+<a name="bd-kbd-bcache-detach.returns"></a><h4>Returns</h4>
 <p> whether the bcache device <em class="parameter"><code>bcache_device</code></em>
 was successfully destroyed or not</p>
 <p>Note: Flushes the cache first.</p>
@@ -400,10 +474,10 @@ was successfully destroyed or not</p>
 <div class="refsect2">
 <a name="bd-kbd-bcache-get-backing-device"></a><h3>bd_kbd_bcache_get_backing_device ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
-bd_kbd_bcache_get_backing_device (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *bcache_device</code></em>,
+bd_kbd_bcache_get_backing_device (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *bcache_device</code></em>,
                                   <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.14.7.6.4"></a><h4>Parameters</h4>
+<a name="bd-kbd-bcache-get-backing-device.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -425,7 +499,7 @@ bd_kbd_bcache_get_backing_device (<em class="parameter"><code><a href="../glib/g
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.14.7.6.5"></a><h4>Returns</h4>
+<a name="bd-kbd-bcache-get-backing-device.returns"></a><h4>Returns</h4>
 <p> name of the backing device of the <em class="parameter"><code>bcache_device</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if failed to determine (<em class="parameter"><code>error</code></em>
 is populated). </p>
@@ -436,10 +510,10 @@ is populated). </p>
 <div class="refsect2">
 <a name="bd-kbd-bcache-get-cache-device"></a><h3>bd_kbd_bcache_get_cache_device ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
-bd_kbd_bcache_get_cache_device (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *bcache_device</code></em>,
+bd_kbd_bcache_get_cache_device (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *bcache_device</code></em>,
                                 <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.14.7.7.4"></a><h4>Parameters</h4>
+<a name="bd-kbd-bcache-get-cache-device.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -461,7 +535,7 @@ bd_kbd_bcache_get_cache_device (<em class="parameter"><code><a href="../glib/gli
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.14.7.7.5"></a><h4>Returns</h4>
+<a name="bd-kbd-bcache-get-cache-device.returns"></a><h4>Returns</h4>
 <p> name of the cache device of the <em class="parameter"><code>bcache_device</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if failed to determine (<em class="parameter"><code>error</code></em>
 is populated)</p>
@@ -475,10 +549,10 @@ there are more). </p>
 <div class="refsect2">
 <a name="bd-kbd-bcache-get-mode"></a><h3>bd_kbd_bcache_get_mode ()</h3>
 <pre class="programlisting"><a class="link" href="libblockdev-KernelBlockDevices.html#BDKBDBcacheMode" title="enum BDKBDBcacheMode"><span class="returnvalue">BDKBDBcacheMode</span></a>
-bd_kbd_bcache_get_mode (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *bcache_device</code></em>,
+bd_kbd_bcache_get_mode (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *bcache_device</code></em>,
                         <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.14.7.8.4"></a><h4>Parameters</h4>
+<a name="bd-kbd-bcache-get-mode.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -500,7 +574,7 @@ bd_kbd_bcache_get_mode (<em class="parameter"><code><a href="../glib/glib-Basic-
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.14.7.8.5"></a><h4>Returns</h4>
+<a name="bd-kbd-bcache-get-mode.returns"></a><h4>Returns</h4>
 <p> current mode of the <em class="parameter"><code>bcache_device</code></em>
 </p>
 </div>
@@ -509,10 +583,10 @@ bd_kbd_bcache_get_mode (<em class="parameter"><code><a href="../glib/glib-Basic-
 <div class="refsect2">
 <a name="bd-kbd-bcache-get-mode-from-str"></a><h3>bd_kbd_bcache_get_mode_from_str ()</h3>
 <pre class="programlisting"><a class="link" href="libblockdev-KernelBlockDevices.html#BDKBDBcacheMode" title="enum BDKBDBcacheMode"><span class="returnvalue">BDKBDBcacheMode</span></a>
-bd_kbd_bcache_get_mode_from_str (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *mode_str</code></em>,
+bd_kbd_bcache_get_mode_from_str (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *mode_str</code></em>,
                                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.14.7.9.4"></a><h4>Parameters</h4>
+<a name="bd-kbd-bcache-get-mode-from-str.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -534,7 +608,7 @@ bd_kbd_bcache_get_mode_from_str (<em class="parameter"><code><a href="../glib/gl
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.14.7.9.5"></a><h4>Returns</h4>
+<a name="bd-kbd-bcache-get-mode-from-str.returns"></a><h4>Returns</h4>
 <p> mode matching the <em class="parameter"><code>mode_str</code></em>
 given or <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-MODE-UNKNOWN:CAPS"><code class="literal">BD_KBD_MODE_UNKNOWN</code></a> in case of no match</p>
 </div>
@@ -546,7 +620,7 @@ given or <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-MODE-U
 bd_kbd_bcache_get_mode_str (<em class="parameter"><code><a class="link" href="libblockdev-KernelBlockDevices.html#BDKBDBcacheMode" title="enum BDKBDBcacheMode"><span class="type">BDKBDBcacheMode</span></a> mode</code></em>,
                             <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.14.7.10.4"></a><h4>Parameters</h4>
+<a name="bd-kbd-bcache-get-mode-str.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -568,7 +642,7 @@ bd_kbd_bcache_get_mode_str (<em class="parameter"><code><a class="link" href="li
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.14.7.10.5"></a><h4>Returns</h4>
+<a name="bd-kbd-bcache-get-mode-str.returns"></a><h4>Returns</h4>
 <p> string representation of <em class="parameter"><code>mode</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error. </p>
 <p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
@@ -578,11 +652,11 @@ or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">N
 <div class="refsect2">
 <a name="bd-kbd-bcache-set-mode"></a><h3>bd_kbd_bcache_set_mode ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_kbd_bcache_set_mode (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *bcache_device</code></em>,
+bd_kbd_bcache_set_mode (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *bcache_device</code></em>,
                         <em class="parameter"><code><a class="link" href="libblockdev-KernelBlockDevices.html#BDKBDBcacheMode" title="enum BDKBDBcacheMode"><span class="type">BDKBDBcacheMode</span></a> mode</code></em>,
                         <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.14.7.11.4"></a><h4>Parameters</h4>
+<a name="bd-kbd-bcache-set-mode.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -609,7 +683,7 @@ bd_kbd_bcache_set_mode (<em class="parameter"><code><a href="../glib/glib-Basic-
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.14.7.11.5"></a><h4>Returns</h4>
+<a name="bd-kbd-bcache-set-mode.returns"></a><h4>Returns</h4>
 <p> whether the mode was successfully set or not</p>
 </div>
 </div>
@@ -635,10 +709,10 @@ bd_kbd_bcache_stats_free (<em class="parameter"><code><a class="link" href="libb
 <div class="refsect2">
 <a name="bd-kbd-bcache-status"></a><h3>bd_kbd_bcache_status ()</h3>
 <pre class="programlisting"><a class="link" href="libblockdev-KernelBlockDevices.html#BDKBDBcacheStats" title="BDKBDBcacheStats"><span class="returnvalue">BDKBDBcacheStats</span></a> *
-bd_kbd_bcache_status (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *bcache_device</code></em>,
+bd_kbd_bcache_status (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *bcache_device</code></em>,
                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.14.7.14.4"></a><h4>Parameters</h4>
+<a name="bd-kbd-bcache-status.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -660,7 +734,7 @@ bd_kbd_bcache_status (<em class="parameter"><code><a href="../glib/glib-Basic-Ty
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.14.7.14.5"></a><h4>Returns</h4>
+<a name="bd-kbd-bcache-status.returns"></a><h4>Returns</h4>
 <p> status of the <em class="parameter"><code>bcache_device</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of
 error (<em class="parameter"><code>error</code></em>
@@ -680,11 +754,11 @@ bd_kbd_error_quark (<em class="parameter"><code><span class="type">void</span></
 <a name="bd-kbd-zram-create-devices"></a><h3>bd_kbd_zram_create_devices ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 bd_kbd_zram_create_devices (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> num_devices</code></em>,
-                            <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> *sizes</code></em>,
-                            <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> *nstreams</code></em>,
+                            <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> *sizes</code></em>,
+                            <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> *nstreams</code></em>,
                             <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.14.7.16.4"></a><h4>Parameters</h4>
+<a name="bd-kbd-zram-create-devices.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -718,7 +792,7 @@ zRAM devices. </p></td>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.14.7.16.5"></a><h4>Returns</h4>
+<a name="bd-kbd-zram-create-devices.returns"></a><h4>Returns</h4>
 <p> whether <em class="parameter"><code>num_devices</code></em>
 zRAM devices were successfully created or not</p>
 <p>**Lengths of <em class="parameter"><code>size</code></em>
@@ -733,7 +807,7 @@ and <em class="parameter"><code>nstreams</code></em>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 bd_kbd_zram_destroy_devices (<em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.14.7.17.4"></a><h4>Parameters</h4>
+<a name="bd-kbd-zram-destroy-devices.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -748,7 +822,7 @@ bd_kbd_zram_destroy_devices (<em class="parameter"><code><a href="../glib/glib-E
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.14.7.17.5"></a><h4>Returns</h4>
+<a name="bd-kbd-zram-destroy-devices.returns"></a><h4>Returns</h4>
 <p> whether zRAM devices were successfully destroyed or not</p>
 <p>The only way how to destroy zRAM device right now is to unload the 'zram'
 module and thus destroy all of them. That's why this function doesn't allow
@@ -757,12 +831,91 @@ specification of which devices should be destroyed.</p>
 </div>
 <hr>
 <div class="refsect2">
+<a name="bd-kbd-zram-add-device"></a><h3>bd_kbd_zram_add_device ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_kbd_zram_add_device (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> size</code></em>,
+                        <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> nstreams</code></em>,
+                        <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **device</code></em>,
+                        <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-kbd-zram-add-device.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>size</p></td>
+<td class="parameter_description"><p>size of the zRAM device to add</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>nstreams</p></td>
+<td class="parameter_description"><p>number of streams to use for the new device (or 0 to use the defaults)</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p> place to store the name of the newly added device. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-kbd-zram-add-device.returns"></a><h4>Returns</h4>
+<p> whether a new zRAM device was added or not</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-kbd-zram-remove-device"></a><h3>bd_kbd_zram_remove_device ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_kbd_zram_remove_device (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-kbd-zram-remove-device.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>zRAM device to remove</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-kbd-zram-remove-device.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>device</code></em>
+was successfully removed or not</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="bd-kbd-zram-get-stats"></a><h3>bd_kbd_zram_get_stats ()</h3>
 <pre class="programlisting"><a class="link" href="libblockdev-KernelBlockDevices.html#BDKBDZramStats" title="BDKBDZramStats"><span class="returnvalue">BDKBDZramStats</span></a> *
-bd_kbd_zram_get_stats (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+bd_kbd_zram_get_stats (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
                        <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.14.7.18.4"></a><h4>Parameters</h4>
+<a name="bd-kbd-zram-get-stats.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -784,7 +937,7 @@ bd_kbd_zram_get_stats (<em class="parameter"><code><a href="../glib/glib-Basic-T
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.14.7.18.5"></a><h4>Returns</h4>
+<a name="bd-kbd-zram-get-stats.returns"></a><h4>Returns</h4>
 <p> statistics for the zRAM device. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
@@ -813,7 +966,7 @@ bd_kbd_zram_stats_free (<em class="parameter"><code><a class="link" href="libblo
 <div class="refsect2">
 <a name="BDKBDBcacheMode"></a><h3>enum BDKBDBcacheMode</h3>
 <div class="refsect3">
-<a name="id-1.2.14.8.2.3"></a><h4>Members</h4>
+<a name="BDKBDBcacheMode.members"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="enum_members_name">
@@ -865,7 +1018,7 @@ bd_kbd_zram_stats_free (<em class="parameter"><code><a class="link" href="libblo
 } BDKBDBcacheStats;
 </pre>
 <div class="refsect3">
-<a name="id-1.2.14.8.3.4"></a><h4>Members</h4>
+<a name="BDKBDBcacheStats.members"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="struct_members_name">
@@ -921,7 +1074,7 @@ bd_kbd_zram_stats_free (<em class="parameter"><code><a class="link" href="libblo
 <div class="refsect2">
 <a name="BDKBDError"></a><h3>enum BDKBDError</h3>
 <div class="refsect3">
-<a name="id-1.2.14.8.4.3"></a><h4>Members</h4>
+<a name="BDKBDError.members"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="enum_members_name">
@@ -1035,6 +1188,6 @@ bd_kbd_zram_stats_free (<em class="parameter"><code><a class="link" href="libblo
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.24</div>
+<hr>Generated by GTK-Doc V1.25</div>
 </body>
 </html>

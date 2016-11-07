@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-s390.html" title="s390">
 <link rel="next" href="ch02.html" title="GI Overrides">
-<meta name="generator" content="GTK-Doc V1.24 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -39,6 +39,22 @@
 <col class="functions_name">
 </colgroup>
 <tbody>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<span class="c_punctuation">(</span><a class="link" href="libblockdev-Utils.html#BDUtilsProgExtract" title="BDUtilsProgExtract ()">*BDUtilsProgExtract</a><span class="c_punctuation">)</span> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<span class="c_punctuation">(</span><a class="link" href="libblockdev-Utils.html#BDUtilsProgFunc" title="BDUtilsProgFunc ()">*BDUtilsProgFunc</a><span class="c_punctuation">)</span> <span class="c_punctuation">()</span>
+</td>
+</tr>
 <tr>
 <td class="function_type">
 <span class="returnvalue">void</span>
@@ -84,15 +100,47 @@
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-utils-exec-and-report-error-no-progress" title="bd_utils_exec_and_report_error_no_progress ()">bd_utils_exec_and_report_error_no_progress</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-utils-exec-and-report-progress" title="bd_utils_exec_and_report_progress ()">bd_utils_exec_and_report_progress</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
 <a class="link" href="libblockdev-Utils.html#bd-utils-init-logging" title="bd_utils_init_logging ()">bd_utils_init_logging</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
 <td class="function_type">
-<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
-<a class="link" href="libblockdev-Utils.html#bd-utils-size-human-readable" title="bd_utils_size_human_readable ()">bd_utils_size_human_readable</a> <span class="c_punctuation">()</span>
+<a class="link" href="libblockdev-Utils.html#bd-utils-init-prog-reporting" title="bd_utils_init_prog_reporting ()">bd_utils_init_prog_reporting</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-utils-report-finished" title="bd_utils_report_finished ()">bd_utils_report_finished</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-utils-report-progress" title="bd_utils_report_progress ()">bd_utils_report_progress</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -100,7 +148,7 @@
 <a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
 </td>
 <td class="function_name">
-<a class="link" href="libblockdev-Utils.html#bd-utils-size-from-spec" title="bd_utils_size_from_spec ()">bd_utils_size_from_spec</a> <span class="c_punctuation">()</span>
+<a class="link" href="libblockdev-Utils.html#bd-utils-report-started" title="bd_utils_report_started ()">bd_utils_report_started</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -119,6 +167,38 @@
 <a class="link" href="libblockdev-Utils.html#bd-utils-version-cmp" title="bd_utils_version_cmp ()">bd_utils_version_cmp</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="returnvalue">BDExtraArg</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-extra-arg-new" title="bd_extra_arg_new ()">bd_extra_arg_new</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="returnvalue">BDExtraArg</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-extra-arg-copy" title="bd_extra_arg_copy ()">bd_extra_arg_copy</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-extra-arg-free" title="bd_extra_arg_free ()">bd_extra_arg_free</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../gobject/gobject-Type-Information.html#GType"><span class="returnvalue">GType</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-extra-arg-get-type" title="bd_extra_arg_get_type ()">bd_extra_arg_get_type</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
 </tbody>
 </table></div>
 </div>
@@ -131,6 +211,10 @@
 </colgroup>
 <tbody>
 <tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#BDUtilsProgStatus" title="enum BDUtilsProgStatus">BDUtilsProgStatus</a></td>
+</tr>
+<tr>
 <td class="define_keyword">#define</td>
 <td class="function_name"><a class="link" href="libblockdev-Utils.html#BD-UTILS-EXEC-ERROR:CAPS" title="BD_UTILS_EXEC_ERROR">BD_UTILS_EXEC_ERROR</a></td>
 </tr>
@@ -139,12 +223,8 @@
 <td class="function_name"><a class="link" href="libblockdev-Utils.html#BDUtilsExecError" title="enum BDUtilsExecError">BDUtilsExecError</a></td>
 </tr>
 <tr>
-<td class="define_keyword">#define</td>
-<td class="function_name"><a class="link" href="libblockdev-Utils.html#BD-UTILS-SIZE-ERROR:CAPS" title="BD_UTILS_SIZE_ERROR">BD_UTILS_SIZE_ERROR</a></td>
-</tr>
-<tr>
-<td class="datatype_keyword">enum</td>
-<td class="function_name"><a class="link" href="libblockdev-Utils.html#BDUtilsSizeError" title="enum BDUtilsSizeError">BDUtilsSizeError</a></td>
+<td class="datatype_keyword"> </td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg">BDExtraArg</a></td>
 </tr>
 <tr>
 <td class="define_keyword">#define</td>
@@ -208,14 +288,88 @@
 <div class="refsect1">
 <a name="libblockdev-Utils.functions_details"></a><h2>Functions</h2>
 <div class="refsect2">
+<a name="BDUtilsProgExtract"></a><h3>BDUtilsProgExtract ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+<span class="c_punctuation">(</span>*BDUtilsProgExtract<span class="c_punctuation">)</span> (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *line</code></em>,
+                       <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint8"><span class="type">guint8</span></a> *completion</code></em>);</pre>
+<div class="refsect3">
+<a name="BDUtilsProgExtract.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>line</p></td>
+<td class="parameter_description"><p>line from extract progress from</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p> percentage of completion. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="BDUtilsProgExtract.returns"></a><h4>Returns</h4>
+<p> whether the line was a progress reporting line or not</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDUtilsProgFunc"></a><h3>BDUtilsProgFunc ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+<span class="c_punctuation">(</span>*BDUtilsProgFunc<span class="c_punctuation">)</span> (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> task_id</code></em>,
+                    <em class="parameter"><code><a class="link" href="libblockdev-Utils.html#BDUtilsProgStatus" title="enum BDUtilsProgStatus"><span class="type">BDUtilsProgStatus</span></a> status</code></em>,
+                    <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint8"><span class="type">guint8</span></a> completion</code></em>,
+                    <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *msg</code></em>);</pre>
+<div class="refsect3">
+<a name="BDUtilsProgFunc.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>task_id</p></td>
+<td class="parameter_description"><p>ID of the task/action the progress is reported for</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>status</p></td>
+<td class="parameter_description"><p>progress status</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p>percentage of completion</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>msg</p></td>
+<td class="parameter_description"><p> arbitrary progress message (for the user). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="BDUtilsLogFunc"></a><h3>BDUtilsLogFunc ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 <span class="c_punctuation">(</span>*BDUtilsLogFunc<span class="c_punctuation">)</span> (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> level</code></em>,
-                   <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *msg</code></em>);</pre>
+                   <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *msg</code></em>);</pre>
 <p>Function type for logging function used by the libblockdev's exec utils to
 log the information about program executing.</p>
 <div class="refsect3">
-<a name="id-1.2.16.7.2.5"></a><h4>Parameters</h4>
+<a name="BDUtilsLogFunc.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -248,10 +402,11 @@ bd_utils_exec_error_quark (<em class="parameter"><code><span class="type">void</
 <div class="refsect2">
 <a name="bd-utils-exec-and-report-error"></a><h3>bd_utils_exec_and_report_error ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_utils_exec_and_report_error (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **argv</code></em>,
+bd_utils_exec_and_report_error (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **argv</code></em>,
+                                <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                                 <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.16.7.4.4"></a><h4>Parameters</h4>
+<a name="bd-utils-exec-and-report-error.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -263,6 +418,11 @@ bd_utils_exec_and_report_error (<em class="parameter"><code><a href="../glib/gli
 <td class="parameter_name"><p>argv</p></td>
 <td class="parameter_description"><p> the argv array for the call. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra arguments. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
@@ -273,7 +433,7 @@ bd_utils_exec_and_report_error (<em class="parameter"><code><a href="../glib/gli
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.16.7.4.5"></a><h4>Returns</h4>
+<a name="bd-utils-exec-and-report-error.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>argv</code></em>
 was successfully executed (no error and exit code 0) or not</p>
 </div>
@@ -282,11 +442,12 @@ was successfully executed (no error and exit code 0) or not</p>
 <div class="refsect2">
 <a name="bd-utils-exec-and-report-status-error"></a><h3>bd_utils_exec_and_report_status_error ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_utils_exec_and_report_status_error (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **argv</code></em>,
+bd_utils_exec_and_report_status_error (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **argv</code></em>,
+                                       <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                                        <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *status</code></em>,
                                        <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.16.7.5.4"></a><h4>Parameters</h4>
+<a name="bd-utils-exec-and-report-status-error.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -298,6 +459,11 @@ bd_utils_exec_and_report_status_error (<em class="parameter"><code><a href="../g
 <td class="parameter_name"><p>argv</p></td>
 <td class="parameter_description"><p> the argv array for the call. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra arguments. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>status</p></td>
@@ -313,7 +479,7 @@ bd_utils_exec_and_report_status_error (<em class="parameter"><code><a href="../g
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.16.7.5.5"></a><h4>Returns</h4>
+<a name="bd-utils-exec-and-report-status-error.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>argv</code></em>
 was successfully executed (no error and exit code 0) or not</p>
 </div>
@@ -322,11 +488,12 @@ was successfully executed (no error and exit code 0) or not</p>
 <div class="refsect2">
 <a name="bd-utils-exec-and-capture-output"></a><h3>bd_utils_exec_and_capture_output ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_utils_exec_and_capture_output (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **argv</code></em>,
+bd_utils_exec_and_capture_output (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **argv</code></em>,
+                                  <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                                   <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **output</code></em>,
                                   <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.16.7.6.4"></a><h4>Parameters</h4>
+<a name="bd-utils-exec-and-capture-output.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -338,6 +505,11 @@ bd_utils_exec_and_capture_output (<em class="parameter"><code><a href="../glib/g
 <td class="parameter_name"><p>argv</p></td>
 <td class="parameter_description"><p> the argv array for the call. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra arguments. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>output</p></td>
@@ -353,9 +525,102 @@ bd_utils_exec_and_capture_output (<em class="parameter"><code><a href="../glib/g
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.16.7.6.5"></a><h4>Returns</h4>
+<a name="bd-utils-exec-and-capture-output.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>argv</code></em>
 was successfully executed capturing the output or not</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-utils-exec-and-report-error-no-progress"></a><h3>bd_utils_exec_and_report_error_no_progress ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_utils_exec_and_report_error_no_progress
+                               (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **argv</code></em>,
+                                <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-utils-exec-and-report-error-no-progress.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>argv</p></td>
+<td class="parameter_description"><p> the argv array for the call. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra arguments. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-utils-exec-and-report-error-no-progress.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>argv</code></em>
+was successfully executed (no error and exit code 0) or not</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-utils-exec-and-report-progress"></a><h3>bd_utils_exec_and_report_progress ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_utils_exec_and_report_progress (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **argv</code></em>,
+                                   <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                                   <em class="parameter"><code><a class="link" href="libblockdev-Utils.html#BDUtilsProgExtract" title="BDUtilsProgExtract ()"><span class="type">BDUtilsProgExtract</span></a> prog_extract</code></em>,
+                                   <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *proc_status</code></em>,
+                                   <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-utils-exec-and-report-progress.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>argv</p></td>
+<td class="parameter_description"><p> the argv array for the call. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra arguments. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>prog_extract</p></td>
+<td class="parameter_description"><p> function for extracting progress information. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>proc_status</p></td>
+<td class="parameter_description"><p> place to store the process exit status. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-utils-exec-and-report-progress.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>argv</code></em>
+was successfully executed (no error and exit code 0) or not</p>
 </div>
 </div>
 <hr>
@@ -365,7 +630,7 @@ was successfully executed capturing the output or not</p>
 bd_utils_init_logging (<em class="parameter"><code><a class="link" href="libblockdev-Utils.html#BDUtilsLogFunc" title="BDUtilsLogFunc ()"><span class="type">BDUtilsLogFunc</span></a> new_log_func</code></em>,
                        <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.16.7.7.4"></a><h4>Parameters</h4>
+<a name="bd-utils-init-logging.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -388,44 +653,18 @@ bd_utils_init_logging (<em class="parameter"><code><a class="link" href="libbloc
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.16.7.7.5"></a><h4>Returns</h4>
+<a name="bd-utils-init-logging.returns"></a><h4>Returns</h4>
 <p> whether logging was successfully initialized or not</p>
 </div>
 </div>
 <hr>
 <div class="refsect2">
-<a name="bd-utils-size-human-readable"></a><h3>bd_utils_size_human_readable ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
-bd_utils_size_human_readable (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> size</code></em>);</pre>
+<a name="bd-utils-init-prog-reporting"></a><h3>bd_utils_init_prog_reporting ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_utils_init_prog_reporting (<em class="parameter"><code><a class="link" href="libblockdev-Utils.html#BDUtilsProgFunc" title="BDUtilsProgFunc ()"><span class="type">BDUtilsProgFunc</span></a> new_prog_func</code></em>,
+                              <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.16.7.8.4"></a><h4>Parameters</h4>
-<div class="informaltable"><table width="100%" border="0">
-<colgroup>
-<col width="150px" class="parameters_name">
-<col class="parameters_description">
-<col width="200px" class="parameters_annotations">
-</colgroup>
-<tbody><tr>
-<td class="parameter_name"><p>size</p></td>
-<td class="parameter_description"><p>size to get human readable representation of</p></td>
-<td class="parameter_annotations"> </td>
-</tr></tbody>
-</table></div>
-</div>
-<div class="refsect3">
-<a name="id-1.2.16.7.8.5"></a><h4>Returns</h4>
-<p> human readable representation of the given <em class="parameter"><code>size</code></em>
-</p>
-</div>
-</div>
-<hr>
-<div class="refsect2">
-<a name="bd-utils-size-from-spec"></a><h3>bd_utils_size_from_spec ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
-bd_utils_size_from_spec (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *spec</code></em>,
-                         <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
-<div class="refsect3">
-<a name="id-1.2.16.7.9.4"></a><h4>Parameters</h4>
+<a name="bd-utils-init-prog-reporting.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -434,9 +673,10 @@ bd_utils_size_from_spec (<em class="parameter"><code><a href="../glib/glib-Basic
 </colgroup>
 <tbody>
 <tr>
-<td class="parameter_name"><p>spec</p></td>
-<td class="parameter_description"><p>human readable size specification (e.g. "512 MiB")</p></td>
-<td class="parameter_annotations"> </td>
+<td class="parameter_name"><p>new_prog_func</p></td>
+<td class="parameter_description"><p> progress reporting function to
+use or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to reset to default. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
@@ -447,23 +687,110 @@ bd_utils_size_from_spec (<em class="parameter"><code><a href="../glib/glib-Basic
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.16.7.9.5"></a><h4>Returns</h4>
-<p> number of bytes equal to the size specification rounded to bytes, if
-0, <em class="parameter"><code>error</code></em>
-) may be set in case of error</p>
+<a name="bd-utils-init-prog-reporting.returns"></a><h4>Returns</h4>
+<p> whether progress reporting was successfully initialized or not</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-utils-report-finished"></a><h3>bd_utils_report_finished ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_utils_report_finished (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> task_id</code></em>,
+                          <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *msg</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-utils-report-finished.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>task_id</p></td>
+<td class="parameter_description"><p>ID of the task/action</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>msg</p></td>
+<td class="parameter_description"><p>message describing the status of the task/action</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-utils-report-progress"></a><h3>bd_utils_report_progress ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_utils_report_progress (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> task_id</code></em>,
+                          <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> completion</code></em>,
+                          <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *msg</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-utils-report-progress.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>task_id</p></td>
+<td class="parameter_description"><p>ID of the task/action</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>completion</p></td>
+<td class="parameter_description"><p>percentage of completion</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>msg</p></td>
+<td class="parameter_description"><p>message describing the status of the task/action</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-utils-report-started"></a><h3>bd_utils_report_started ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
+bd_utils_report_started (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *msg</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-utils-report-started.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>msg</p></td>
+<td class="parameter_description"><p>message describing the started task/action</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-utils-report-started.returns"></a><h4>Returns</h4>
+<p> ID of the started task/action</p>
 </div>
 </div>
 <hr>
 <div class="refsect2">
 <a name="bd-utils-check-util-version"></a><h3>bd_utils_check_util_version ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_utils_check_util_version (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *util</code></em>,
-                             <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *version</code></em>,
-                             <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *version_arg</code></em>,
-                             <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *version_regexp</code></em>,
+bd_utils_check_util_version (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *util</code></em>,
+                             <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *version</code></em>,
+                             <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *version_arg</code></em>,
+                             <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *version_regexp</code></em>,
                              <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.16.7.10.4"></a><h4>Parameters</h4>
+<a name="bd-utils-check-util-version.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -506,7 +833,7 @@ info or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="liter
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.16.7.10.5"></a><h4>Returns</h4>
+<a name="bd-utils-check-util-version.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>util</code></em>
 is available in a version &gt;= <em class="parameter"><code>version</code></em>
 or not
@@ -518,11 +845,11 @@ is set in such case).</p>
 <div class="refsect2">
 <a name="bd-utils-version-cmp"></a><h3>bd_utils_version_cmp ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gint"><span class="returnvalue">gint</span></a>
-bd_utils_version_cmp (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *ver_string1</code></em>,
-                      <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *ver_string2</code></em>,
+bd_utils_version_cmp (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *ver_string1</code></em>,
+                      <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *ver_string2</code></em>,
                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.16.7.11.4"></a><h4>Parameters</h4>
+<a name="bd-utils-version-cmp.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -549,7 +876,7 @@ bd_utils_version_cmp (<em class="parameter"><code><a href="../glib/glib-Basic-Ty
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.16.7.11.5"></a><h4>Returns</h4>
+<a name="bd-utils-version-cmp.returns"></a><h4>Returns</h4>
 <p> -1, 0 or 1 if <em class="parameter"><code>ver_string1</code></em>
 is lower, the same or higher version as
 <em class="parameter"><code>ver_string2</code></em>
@@ -559,9 +886,98 @@ is set.</p>
 are natural numbers!**</p>
 </div>
 </div>
+<hr>
+<div class="refsect2">
+<a name="bd-extra-arg-new"></a><h3>bd_extra_arg_new ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="returnvalue">BDExtraArg</span></a> *
+bd_extra_arg_new (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *opt</code></em>,
+                  <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *val</code></em>);</pre>
+<p><span class="annotation">[<acronym title="This symbol is a constructor, not a static method."><span class="acronym">constructor</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="bd-extra-arg-new.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>opt</p></td>
+<td class="parameter_description"><p>extra option</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>val</p></td>
+<td class="parameter_description"><p>value for the extra option <em class="parameter"><code>opt</code></em>
+</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-extra-arg-new.returns"></a><h4>Returns</h4>
+<p> a new extra argument. </p>
+<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-extra-arg-copy"></a><h3>bd_extra_arg_copy ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="returnvalue">BDExtraArg</span></a> *
+bd_extra_arg_copy (<em class="parameter"><code><a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> *arg</code></em>);</pre>
+<p>Creates a new copy of <em class="parameter"><code>arg</code></em>
+.</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-extra-arg-free"></a><h3>bd_extra_arg_free ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_extra_arg_free (<em class="parameter"><code><a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> *arg</code></em>);</pre>
+<p>Frees <em class="parameter"><code>arg</code></em>
+.</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-extra-arg-get-type"></a><h3>bd_extra_arg_get_type ()</h3>
+<pre class="programlisting"><a href="../gobject/gobject-Type-Information.html#GType"><span class="returnvalue">GType</span></a>
+bd_extra_arg_get_type ();</pre>
+</div>
 </div>
 <div class="refsect1">
 <a name="libblockdev-Utils.other_details"></a><h2>Types and Values</h2>
+<div class="refsect2">
+<a name="BDUtilsProgStatus"></a><h3>enum BDUtilsProgStatus</h3>
+<div class="refsect3">
+<a name="BDUtilsProgStatus.members"></a><h4>Members</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-UTILS-PROG-STARTED:CAPS"></a>BD_UTILS_PROG_STARTED</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-UTILS-PROG-PROGRESS:CAPS"></a>BD_UTILS_PROG_PROGRESS</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-UTILS-PROG-FINISHED:CAPS"></a>BD_UTILS_PROG_FINISHED</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
 <div class="refsect2">
 <a name="BD-UTILS-EXEC-ERROR:CAPS"></a><h3>BD_UTILS_EXEC_ERROR</h3>
 <pre class="programlisting">#define BD_UTILS_EXEC_ERROR bd_utils_exec_error_quark ()
@@ -571,7 +987,7 @@ are natural numbers!**</p>
 <div class="refsect2">
 <a name="BDUtilsExecError"></a><h3>enum BDUtilsExecError</h3>
 <div class="refsect3">
-<a name="id-1.2.16.8.3.3"></a><h4>Members</h4>
+<a name="BDUtilsExecError.members"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="enum_members_name">
@@ -615,28 +1031,12 @@ are natural numbers!**</p>
 </div>
 <hr>
 <div class="refsect2">
-<a name="BD-UTILS-SIZE-ERROR:CAPS"></a><h3>BD_UTILS_SIZE_ERROR</h3>
-<pre class="programlisting">#define BD_UTILS_SIZE_ERROR bd_utils_size_error_quark ()
+<a name="BDExtraArg"></a><h3>BDExtraArg</h3>
+<pre class="programlisting">typedef struct {
+    gchar *opt;
+    gchar *val;
+} BDExtraArg;
 </pre>
-</div>
-<hr>
-<div class="refsect2">
-<a name="BDUtilsSizeError"></a><h3>enum BDUtilsSizeError</h3>
-<div class="refsect3">
-<a name="id-1.2.16.8.5.3"></a><h4>Members</h4>
-<div class="informaltable"><table width="100%" border="0">
-<colgroup>
-<col width="300px" class="enum_members_name">
-<col class="enum_members_description">
-<col width="200px" class="enum_members_annotations">
-</colgroup>
-<tbody><tr>
-<td class="enum_member_name"><p><a name="BD-UTILS-SIZE-ERROR-INVALID-SPEC:CAPS"></a>BD_UTILS_SIZE_ERROR_INVALID_SPEC</p></td>
-<td> </td>
-<td> </td>
-</tr></tbody>
-</table></div>
-</div>
 </div>
 <hr>
 <div class="refsect2">
@@ -713,6 +1113,6 @@ are natural numbers!**</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.24</div>
+<hr>Generated by GTK-Doc V1.25</div>
 </body>
 </html>

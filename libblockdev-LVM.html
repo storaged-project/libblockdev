@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-Loop.html" title="Loop">
 <link rel="next" href="libblockdev-MD-RAID.html" title="MD RAID">
-<meta name="generator" content="GTK-Doc V1.24 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -40,58 +40,34 @@
 </colgroup>
 <tbody>
 <tr>
-<td class="define_keyword">#define</td>
-<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-MAX-LV-SIZE:CAPS" title="BD_LVM_MAX_LV_SIZE">BD_LVM_MAX_LV_SIZE</a></td>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-LVM.html#bd-lvm-check-deps" title="bd_lvm_check_deps ()">bd_lvm_check_deps</a> <span class="c_punctuation">()</span>
+</td>
 </tr>
 <tr>
-<td class="define_keyword">#define</td>
-<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-DEFAULT-PE-SIZE:CAPS" title="BD_LVM_DEFAULT_PE_SIZE">BD_LVM_DEFAULT_PE_SIZE</a></td>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-LVM.html#bd-lvm-close" title="bd_lvm_close ()">bd_lvm_close</a> <span class="c_punctuation">()</span>
+</td>
 </tr>
 <tr>
-<td class="define_keyword">#define</td>
-<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-DEFAULT-PE-START:CAPS" title="BD_LVM_DEFAULT_PE_START">BD_LVM_DEFAULT_PE_START</a></td>
-</tr>
-<tr>
-<td class="define_keyword">#define</td>
-<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-MIN-PE-SIZE:CAPS" title="BD_LVM_MIN_PE_SIZE">BD_LVM_MIN_PE_SIZE</a></td>
-</tr>
-<tr>
-<td class="define_keyword">#define</td>
-<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-MAX-PE-SIZE:CAPS" title="BD_LVM_MAX_PE_SIZE">BD_LVM_MAX_PE_SIZE</a></td>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-LVM.html#bd-lvm-init" title="bd_lvm_init ()">bd_lvm_init</a> <span class="c_punctuation">()</span>
+</td>
 </tr>
 <tr>
 <td class="define_keyword">#define</td>
 <td class="function_name">
 <a class="link" href="libblockdev-LVM.html#RESOLVE-PE-SIZE:CAPS" title="RESOLVE_PE_SIZE()">RESOLVE_PE_SIZE</a><span class="c_punctuation">()</span>
 </td>
-</tr>
-<tr>
-<td class="define_keyword">#define</td>
-<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-MIN-THPOOL-MD-SIZE:CAPS" title="BD_LVM_MIN_THPOOL_MD_SIZE">BD_LVM_MIN_THPOOL_MD_SIZE</a></td>
-</tr>
-<tr>
-<td class="define_keyword">#define</td>
-<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-MAX-THPOOL-MD-SIZE:CAPS" title="BD_LVM_MAX_THPOOL_MD_SIZE">BD_LVM_MAX_THPOOL_MD_SIZE</a></td>
-</tr>
-<tr>
-<td class="define_keyword">#define</td>
-<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-MIN-THPOOL-CHUNK-SIZE:CAPS" title="BD_LVM_MIN_THPOOL_CHUNK_SIZE">BD_LVM_MIN_THPOOL_CHUNK_SIZE</a></td>
-</tr>
-<tr>
-<td class="define_keyword">#define</td>
-<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-MAX-THPOOL-CHUNK-SIZE:CAPS" title="BD_LVM_MAX_THPOOL_CHUNK_SIZE">BD_LVM_MAX_THPOOL_CHUNK_SIZE</a></td>
-</tr>
-<tr>
-<td class="define_keyword">#define</td>
-<td class="function_name"><a class="link" href="libblockdev-LVM.html#THPOOL-MD-FACTOR-NEW:CAPS" title="THPOOL_MD_FACTOR_NEW">THPOOL_MD_FACTOR_NEW</a></td>
-</tr>
-<tr>
-<td class="define_keyword">#define</td>
-<td class="function_name"><a class="link" href="libblockdev-LVM.html#THPOOL-MD-FACTOR-EXISTS:CAPS" title="THPOOL_MD_FACTOR_EXISTS">THPOOL_MD_FACTOR_EXISTS</a></td>
-</tr>
-<tr>
-<td class="define_keyword">#define</td>
-<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-MIN-CACHE-MD-SIZE:CAPS" title="BD_LVM_MIN_CACHE_MD_SIZE">BD_LVM_MIN_CACHE_MD_SIZE</a></td>
 </tr>
 <tr>
 <td class="function_type">
@@ -458,6 +434,14 @@
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
+<a class="link" href="libblockdev-LVM.html#bd-lvm-thpool-convert" title="bd_lvm_thpool_convert ()">bd_lvm_thpool_convert</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
 <a class="link" href="libblockdev-LVM.html#bd-lvm-thlvcreate" title="bd_lvm_thlvcreate ()">bd_lvm_thlvcreate</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
@@ -515,6 +499,14 @@
 </td>
 <td class="function_name">
 <a class="link" href="libblockdev-LVM.html#bd-lvm-cache-create-pool" title="bd_lvm_cache_create_pool ()">bd_lvm_cache_create_pool</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-LVM.html#bd-lvm-cache-pool-convert" title="bd_lvm_cache_pool_convert ()">bd_lvm_cache_pool_convert</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -580,22 +572,6 @@
 <a class="link" href="libblockdev-LVM.html#bd-lvm-metadata-lv-name" title="bd_lvm_metadata_lv_name ()">bd_lvm_metadata_lv_name</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
-<tr>
-<td class="function_type">
-<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-</td>
-<td class="function_name">
-<a class="link" href="libblockdev-LVM.html#bd-lvm-cache-pool-convert" title="bd_lvm_cache_pool_convert ()">bd_lvm_cache_pool_convert</a> <span class="c_punctuation">()</span>
-</td>
-</tr>
-<tr>
-<td class="function_type">
-<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-</td>
-<td class="function_name">
-<a class="link" href="libblockdev-LVM.html#bd-lvm-thpool-convert" title="bd_lvm_thpool_convert ()">bd_lvm_thpool_convert</a> <span class="c_punctuation">()</span>
-</td>
-</tr>
 </tbody>
 </table></div>
 </div>
@@ -609,7 +585,55 @@
 <tbody>
 <tr>
 <td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-MAX-LV-SIZE:CAPS" title="BD_LVM_MAX_LV_SIZE">BD_LVM_MAX_LV_SIZE</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-DEFAULT-PE-SIZE:CAPS" title="BD_LVM_DEFAULT_PE_SIZE">BD_LVM_DEFAULT_PE_SIZE</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-DEFAULT-PE-START:CAPS" title="BD_LVM_DEFAULT_PE_START">BD_LVM_DEFAULT_PE_START</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-MIN-PE-SIZE:CAPS" title="BD_LVM_MIN_PE_SIZE">BD_LVM_MIN_PE_SIZE</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-MAX-PE-SIZE:CAPS" title="BD_LVM_MAX_PE_SIZE">BD_LVM_MAX_PE_SIZE</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
 <td class="function_name"><a class="link" href="libblockdev-LVM.html#USE-DEFAULT-PE-SIZE:CAPS" title="USE_DEFAULT_PE_SIZE">USE_DEFAULT_PE_SIZE</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-MIN-THPOOL-MD-SIZE:CAPS" title="BD_LVM_MIN_THPOOL_MD_SIZE">BD_LVM_MIN_THPOOL_MD_SIZE</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-MAX-THPOOL-MD-SIZE:CAPS" title="BD_LVM_MAX_THPOOL_MD_SIZE">BD_LVM_MAX_THPOOL_MD_SIZE</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-MIN-THPOOL-CHUNK-SIZE:CAPS" title="BD_LVM_MIN_THPOOL_CHUNK_SIZE">BD_LVM_MIN_THPOOL_CHUNK_SIZE</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-MAX-THPOOL-CHUNK-SIZE:CAPS" title="BD_LVM_MAX_THPOOL_CHUNK_SIZE">BD_LVM_MAX_THPOOL_CHUNK_SIZE</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-LVM.html#THPOOL-MD-FACTOR-NEW:CAPS" title="THPOOL_MD_FACTOR_NEW">THPOOL_MD_FACTOR_NEW</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-LVM.html#THPOOL-MD-FACTOR-EXISTS:CAPS" title="THPOOL_MD_FACTOR_EXISTS">THPOOL_MD_FACTOR_EXISTS</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-LVM.html#BD-LVM-MIN-CACHE-MD-SIZE:CAPS" title="BD_LVM_MIN_CACHE_MD_SIZE">BD_LVM_MIN_CACHE_MD_SIZE</a></td>
 </tr>
 <tr>
 <td class="define_keyword">#define</td>
@@ -659,71 +683,36 @@ the functions are in bytes.</p>
 <div class="refsect1">
 <a name="libblockdev-LVM.functions_details"></a><h2>Functions</h2>
 <div class="refsect2">
-<a name="BD-LVM-MAX-LV-SIZE:CAPS"></a><h3>BD_LVM_MAX_LV_SIZE</h3>
-<pre class="programlisting">#define             BD_LVM_MAX_LV_SIZE</pre>
+<a name="bd-lvm-check-deps"></a><h3>bd_lvm_check_deps ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_lvm_check_deps ();</pre>
+<div class="refsect3">
+<a name="bd-lvm-check-deps.returns"></a><h4>Returns</h4>
+<p> whether the plugin's runtime dependencies are satisfied or not</p>
+<p>Function checking plugin's runtime dependencies.</p>
+</div>
 </div>
 <hr>
 <div class="refsect2">
-<a name="BD-LVM-DEFAULT-PE-SIZE:CAPS"></a><h3>BD_LVM_DEFAULT_PE_SIZE</h3>
-<pre class="programlisting">#define             BD_LVM_DEFAULT_PE_SIZE</pre>
+<a name="bd-lvm-close"></a><h3>bd_lvm_close ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_lvm_close ();</pre>
+<p>Cleans up after the plugin. **This function is called automatically by the
+library's functions that unload it.**</p>
 </div>
 <hr>
 <div class="refsect2">
-<a name="BD-LVM-DEFAULT-PE-START:CAPS"></a><h3>BD_LVM_DEFAULT_PE_START</h3>
-<pre class="programlisting">#define             BD_LVM_DEFAULT_PE_START</pre>
-</div>
-<hr>
-<div class="refsect2">
-<a name="BD-LVM-MIN-PE-SIZE:CAPS"></a><h3>BD_LVM_MIN_PE_SIZE</h3>
-<pre class="programlisting">#define             BD_LVM_MIN_PE_SIZE</pre>
-</div>
-<hr>
-<div class="refsect2">
-<a name="BD-LVM-MAX-PE-SIZE:CAPS"></a><h3>BD_LVM_MAX_PE_SIZE</h3>
-<pre class="programlisting">#define             BD_LVM_MAX_PE_SIZE</pre>
+<a name="bd-lvm-init"></a><h3>bd_lvm_init ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_lvm_init ();</pre>
+<p>Initializes the plugin. **This function is called automatically by the
+library's initialization functions.**</p>
 </div>
 <hr>
 <div class="refsect2">
 <a name="RESOLVE-PE-SIZE:CAPS"></a><h3>RESOLVE_PE_SIZE()</h3>
 <pre class="programlisting">#define RESOLVE_PE_SIZE(size) ((size) == USE_DEFAULT_PE_SIZE ? BD_LVM_DEFAULT_PE_SIZE : (size))
 </pre>
-</div>
-<hr>
-<div class="refsect2">
-<a name="BD-LVM-MIN-THPOOL-MD-SIZE:CAPS"></a><h3>BD_LVM_MIN_THPOOL_MD_SIZE</h3>
-<pre class="programlisting">#define             BD_LVM_MIN_THPOOL_MD_SIZE</pre>
-</div>
-<hr>
-<div class="refsect2">
-<a name="BD-LVM-MAX-THPOOL-MD-SIZE:CAPS"></a><h3>BD_LVM_MAX_THPOOL_MD_SIZE</h3>
-<pre class="programlisting">#define             BD_LVM_MAX_THPOOL_MD_SIZE</pre>
-</div>
-<hr>
-<div class="refsect2">
-<a name="BD-LVM-MIN-THPOOL-CHUNK-SIZE:CAPS"></a><h3>BD_LVM_MIN_THPOOL_CHUNK_SIZE</h3>
-<pre class="programlisting">#define             BD_LVM_MIN_THPOOL_CHUNK_SIZE</pre>
-</div>
-<hr>
-<div class="refsect2">
-<a name="BD-LVM-MAX-THPOOL-CHUNK-SIZE:CAPS"></a><h3>BD_LVM_MAX_THPOOL_CHUNK_SIZE</h3>
-<pre class="programlisting">#define             BD_LVM_MAX_THPOOL_CHUNK_SIZE</pre>
-</div>
-<hr>
-<div class="refsect2">
-<a name="THPOOL-MD-FACTOR-NEW:CAPS"></a><h3>THPOOL_MD_FACTOR_NEW</h3>
-<pre class="programlisting">#define THPOOL_MD_FACTOR_NEW (0.2)
-</pre>
-</div>
-<hr>
-<div class="refsect2">
-<a name="THPOOL-MD-FACTOR-EXISTS:CAPS"></a><h3>THPOOL_MD_FACTOR_EXISTS</h3>
-<pre class="programlisting">#define THPOOL_MD_FACTOR_EXISTS (1 / 6.0)
-</pre>
-</div>
-<hr>
-<div class="refsect2">
-<a name="BD-LVM-MIN-CACHE-MD-SIZE:CAPS"></a><h3>BD_LVM_MIN_CACHE_MD_SIZE</h3>
-<pre class="programlisting">#define             BD_LVM_MIN_CACHE_MD_SIZE</pre>
 </div>
 <hr>
 <div class="refsect2">
@@ -811,7 +800,7 @@ bd_lvm_cache_stats_free (<em class="parameter"><code><a class="link" href="libbl
 bd_lvm_is_supported_pe_size (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> size</code></em>,
                              <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.24.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-is-supported-pe-size.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -833,7 +822,7 @@ bd_lvm_is_supported_pe_size (<em class="parameter"><code><a href="../glib/glib-B
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.24.5"></a><h4>Returns</h4>
+<a name="bd-lvm-is-supported-pe-size.returns"></a><h4>Returns</h4>
 <p> whether the given size is supported physical extent size or not</p>
 </div>
 </div>
@@ -843,7 +832,7 @@ bd_lvm_is_supported_pe_size (<em class="parameter"><code><a href="../glib/glib-B
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a> *
 bd_lvm_get_supported_pe_sizes (<em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.25.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-get-supported-pe-sizes.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -858,7 +847,7 @@ bd_lvm_get_supported_pe_sizes (<em class="parameter"><code><a href="../glib/glib
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.25.5"></a><h4>Returns</h4>
+<a name="bd-lvm-get-supported-pe-sizes.returns"></a><h4>Returns</h4>
 <p> list of supported PE sizes. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></p>
 </div>
@@ -869,7 +858,7 @@ bd_lvm_get_supported_pe_sizes (<em class="parameter"><code><a href="../glib/glib
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
 bd_lvm_get_max_lv_size (<em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.26.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-get-max-lv-size.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -884,7 +873,7 @@ bd_lvm_get_max_lv_size (<em class="parameter"><code><a href="../glib/glib-Error-
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.26.5"></a><h4>Returns</h4>
+<a name="bd-lvm-get-max-lv-size.returns"></a><h4>Returns</h4>
 <p> maximum LV size in bytes</p>
 </div>
 </div>
@@ -897,7 +886,7 @@ bd_lvm_round_size_to_pe (<em class="parameter"><code><a href="../glib/glib-Basic
                          <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> roundup</code></em>,
                          <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.27.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-round-size-to-pe.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -929,7 +918,7 @@ bd_lvm_round_size_to_pe (<em class="parameter"><code><a href="../glib/glib-Basic
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.27.5"></a><h4>Returns</h4>
+<a name="bd-lvm-round-size-to-pe.returns"></a><h4>Returns</h4>
 <p> <em class="parameter"><code>size</code></em>
 rounded to <em class="parameter"><code>pe_size</code></em>
 according to the <em class="parameter"><code>roundup</code></em>
@@ -951,7 +940,7 @@ bd_lvm_get_lv_physical_size (<em class="parameter"><code><a href="../glib/glib-B
                              <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> pe_size</code></em>,
                              <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.28.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-get-lv-physical-size.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -978,7 +967,7 @@ bd_lvm_get_lv_physical_size (<em class="parameter"><code><a href="../glib/glib-B
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.28.5"></a><h4>Returns</h4>
+<a name="bd-lvm-get-lv-physical-size.returns"></a><h4>Returns</h4>
 <p> space taken on disk(s) by the LV with given <em class="parameter"><code>size</code></em>
 </p>
 <p>Gives number of bytes needed for an LV with the size <em class="parameter"><code>lv_size</code></em>
@@ -996,7 +985,7 @@ bd_lvm_get_thpool_padding (<em class="parameter"><code><a href="../glib/glib-Bas
                            <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> included</code></em>,
                            <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.29.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-get-thpool-padding.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1028,7 +1017,7 @@ bd_lvm_get_thpool_padding (<em class="parameter"><code><a href="../glib/glib-Bas
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.29.5"></a><h4>Returns</h4>
+<a name="bd-lvm-get-thpool-padding.returns"></a><h4>Returns</h4>
 <p> size of the padding needed for a thin pool with the given <em class="parameter"><code>size</code></em>
 according to the <em class="parameter"><code>pe_size</code></em>
 and <em class="parameter"><code>included</code></em>
@@ -1042,7 +1031,7 @@ and <em class="parameter"><code>included</code></em>
 bd_lvm_is_valid_thpool_md_size (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> size</code></em>,
                                 <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.30.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-is-valid-thpool-md-size.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1064,7 +1053,7 @@ bd_lvm_is_valid_thpool_md_size (<em class="parameter"><code><a href="../glib/gli
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.30.5"></a><h4>Returns</h4>
+<a name="bd-lvm-is-valid-thpool-md-size.returns"></a><h4>Returns</h4>
 <p> whether the given size is a valid thin pool metadata size or not</p>
 </div>
 </div>
@@ -1076,7 +1065,7 @@ bd_lvm_is_valid_thpool_chunk_size (<em class="parameter"><code><a href="../glib/
                                    <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> discard</code></em>,
                                    <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.31.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-is-valid-thpool-chunk-size.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1103,7 +1092,7 @@ bd_lvm_is_valid_thpool_chunk_size (<em class="parameter"><code><a href="../glib/
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.31.5"></a><h4>Returns</h4>
+<a name="bd-lvm-is-valid-thpool-chunk-size.returns"></a><h4>Returns</h4>
 <p> whether the given size is a valid thin pool chunk size or not</p>
 </div>
 </div>
@@ -1111,12 +1100,13 @@ bd_lvm_is_valid_thpool_chunk_size (<em class="parameter"><code><a href="../glib/
 <div class="refsect2">
 <a name="bd-lvm-pvcreate"></a><h3>bd_lvm_pvcreate ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_pvcreate (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+bd_lvm_pvcreate (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> data_alignment</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> metadata_size</code></em>,
+                 <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.32.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-pvcreate.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1140,6 +1130,12 @@ bd_lvm_pvcreate (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the PV creation
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1148,7 +1144,7 @@ bd_lvm_pvcreate (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.32.5"></a><h4>Returns</h4>
+<a name="bd-lvm-pvcreate.returns"></a><h4>Returns</h4>
 <p> whether the PV was successfully created or not</p>
 </div>
 </div>
@@ -1156,11 +1152,12 @@ bd_lvm_pvcreate (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 <div class="refsect2">
 <a name="bd-lvm-pvresize"></a><h3>bd_lvm_pvresize ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_pvresize (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+bd_lvm_pvresize (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> size</code></em>,
+                 <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.33.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-pvresize.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1179,6 +1176,12 @@ bd_lvm_pvresize (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the PV resize
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1187,7 +1190,7 @@ bd_lvm_pvresize (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.33.5"></a><h4>Returns</h4>
+<a name="bd-lvm-pvresize.returns"></a><h4>Returns</h4>
 <p> whether the PV's size was successfully changed or not</p>
 <p>If given <em class="parameter"><code>size</code></em>
 different from 0, sets the PV's size to the given value (see
@@ -1200,10 +1203,11 @@ block device's size.</p>
 <div class="refsect2">
 <a name="bd-lvm-pvremove"></a><h3>bd_lvm_pvremove ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_pvremove (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+bd_lvm_pvremove (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                 <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.34.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-pvremove.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1217,6 +1221,12 @@ bd_lvm_pvremove (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the PV removal
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1225,7 +1235,7 @@ bd_lvm_pvremove (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.34.5"></a><h4>Returns</h4>
+<a name="bd-lvm-pvremove.returns"></a><h4>Returns</h4>
 <p> whether the PV was successfully removed/destroyed or not</p>
 </div>
 </div>
@@ -1233,11 +1243,12 @@ bd_lvm_pvremove (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 <div class="refsect2">
 <a name="bd-lvm-pvmove"></a><h3>bd_lvm_pvmove ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_pvmove (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *src</code></em>,
-               <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *dest</code></em>,
+bd_lvm_pvmove (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *src</code></em>,
+               <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *dest</code></em>,
+               <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.35.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-pvmove.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1256,6 +1267,12 @@ bd_lvm_pvmove (<em class="parameter"><code><a href="../glib/glib-Basic-Types.htm
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the PV move
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1264,7 +1281,7 @@ bd_lvm_pvmove (<em class="parameter"><code><a href="../glib/glib-Basic-Types.htm
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.35.5"></a><h4>Returns</h4>
+<a name="bd-lvm-pvmove.returns"></a><h4>Returns</h4>
 <p> whether the extents from the <em class="parameter"><code>src</code></em>
 PV where successfully moved or not</p>
 <p>If <em class="parameter"><code>dest</code></em>
@@ -1276,11 +1293,12 @@ PV (see pvmove(8)).</p>
 <div class="refsect2">
 <a name="bd-lvm-pvscan"></a><h3>bd_lvm_pvscan ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_pvscan (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+bd_lvm_pvscan (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
                <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> update_cache</code></em>,
+               <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.36.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-pvscan.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1299,6 +1317,12 @@ bd_lvm_pvscan (<em class="parameter"><code><a href="../glib/glib-Basic-Types.htm
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the PV scan
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1307,7 +1331,7 @@ bd_lvm_pvscan (<em class="parameter"><code><a href="../glib/glib-Basic-Types.htm
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.36.5"></a><h4>Returns</h4>
+<a name="bd-lvm-pvscan.returns"></a><h4>Returns</h4>
 <p> whether the system or <em class="parameter"><code>device</code></em>
 was successfully scanned for PVs or not</p>
 <p>The <em class="parameter"><code>device</code></em>
@@ -1320,10 +1344,10 @@ whole system is scanned for PVs.</p>
 <div class="refsect2">
 <a name="bd-lvm-pvinfo"></a><h3>bd_lvm_pvinfo ()</h3>
 <pre class="programlisting"><a class="link" href="libblockdev-LVM.html#BDLVMPVdata" title="BDLVMPVdata"><span class="returnvalue">BDLVMPVdata</span></a> *
-bd_lvm_pvinfo (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+bd_lvm_pvinfo (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.37.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-pvinfo.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1345,7 +1369,7 @@ bd_lvm_pvinfo (<em class="parameter"><code><a href="../glib/glib-Basic-Types.htm
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.37.5"></a><h4>Returns</h4>
+<a name="bd-lvm-pvinfo.returns"></a><h4>Returns</h4>
 <p> information about the PV on the given <em class="parameter"><code>device</code></em>
 or
 <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error (the <em class="parameter"><code>error</code></em>
@@ -1359,7 +1383,7 @@ or
 <pre class="programlisting"><a class="link" href="libblockdev-LVM.html#BDLVMPVdata" title="BDLVMPVdata"><span class="returnvalue">BDLVMPVdata</span></a> **
 bd_lvm_pvs (<em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.38.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-pvs.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1374,7 +1398,7 @@ bd_lvm_pvs (<em class="parameter"><code><a href="../glib/glib-Error-Reporting.ht
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.38.5"></a><h4>Returns</h4>
+<a name="bd-lvm-pvs.returns"></a><h4>Returns</h4>
 <p> information about PVs found in the system. </p>
 <p><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></p>
 </div>
@@ -1383,12 +1407,13 @@ bd_lvm_pvs (<em class="parameter"><code><a href="../glib/glib-Error-Reporting.ht
 <div class="refsect2">
 <a name="bd-lvm-vgcreate"></a><h3>bd_lvm_vgcreate ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_vgcreate (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
-                 <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **pv_list</code></em>,
+bd_lvm_vgcreate (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
+                 <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **pv_list</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> pe_size</code></em>,
+                 <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.39.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-vgcreate.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1412,6 +1437,12 @@ bd_lvm_vgcreate (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the VG creation
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1420,7 +1451,7 @@ bd_lvm_vgcreate (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.39.5"></a><h4>Returns</h4>
+<a name="bd-lvm-vgcreate.returns"></a><h4>Returns</h4>
 <p> whether the VG <em class="parameter"><code>name</code></em>
 was successfully created or not</p>
 </div>
@@ -1429,10 +1460,11 @@ was successfully created or not</p>
 <div class="refsect2">
 <a name="bd-lvm-vgremove"></a><h3>bd_lvm_vgremove ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_vgremove (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+bd_lvm_vgremove (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                 <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.40.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-vgremove.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1446,6 +1478,12 @@ bd_lvm_vgremove (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the VG removal
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1454,20 +1492,20 @@ bd_lvm_vgremove (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.40.5"></a><h4>Returns</h4>
+<a name="bd-lvm-vgremove.returns"></a><h4>Returns</h4>
 <p> whether the VG was successfully removed or not</p>
-<p>Note: forces the VG removal.</p>
 </div>
 </div>
 <hr>
 <div class="refsect2">
 <a name="bd-lvm-vgrename"></a><h3>bd_lvm_vgrename ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_vgrename (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *old_vg_name</code></em>,
-                 <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *new_vg_name</code></em>,
+bd_lvm_vgrename (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *old_vg_name</code></em>,
+                 <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *new_vg_name</code></em>,
+                 <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.41.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-vgrename.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1487,6 +1525,12 @@ VG</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the VG rename
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1495,7 +1539,7 @@ VG</p></td>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.41.5"></a><h4>Returns</h4>
+<a name="bd-lvm-vgrename.returns"></a><h4>Returns</h4>
 <p> whether the VG was successfully renamed or not</p>
 </div>
 </div>
@@ -1503,10 +1547,11 @@ VG</p></td>
 <div class="refsect2">
 <a name="bd-lvm-vgactivate"></a><h3>bd_lvm_vgactivate ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_vgactivate (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+bd_lvm_vgactivate (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                   <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                    <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.42.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-vgactivate.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1520,6 +1565,12 @@ bd_lvm_vgactivate (<em class="parameter"><code><a href="../glib/glib-Basic-Types
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the VG activation
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1528,7 +1579,7 @@ bd_lvm_vgactivate (<em class="parameter"><code><a href="../glib/glib-Basic-Types
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.42.5"></a><h4>Returns</h4>
+<a name="bd-lvm-vgactivate.returns"></a><h4>Returns</h4>
 <p> whether the VG was successfully activated or not</p>
 </div>
 </div>
@@ -1536,10 +1587,11 @@ bd_lvm_vgactivate (<em class="parameter"><code><a href="../glib/glib-Basic-Types
 <div class="refsect2">
 <a name="bd-lvm-vgdeactivate"></a><h3>bd_lvm_vgdeactivate ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_vgdeactivate (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+bd_lvm_vgdeactivate (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                     <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.43.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-vgdeactivate.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1553,6 +1605,12 @@ bd_lvm_vgdeactivate (<em class="parameter"><code><a href="../glib/glib-Basic-Typ
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the VG deactivation
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1561,7 +1619,7 @@ bd_lvm_vgdeactivate (<em class="parameter"><code><a href="../glib/glib-Basic-Typ
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.43.5"></a><h4>Returns</h4>
+<a name="bd-lvm-vgdeactivate.returns"></a><h4>Returns</h4>
 <p> whether the VG was successfully deactivated or not</p>
 </div>
 </div>
@@ -1569,11 +1627,12 @@ bd_lvm_vgdeactivate (<em class="parameter"><code><a href="../glib/glib-Basic-Typ
 <div class="refsect2">
 <a name="bd-lvm-vgextend"></a><h3>bd_lvm_vgextend ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_vgextend (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                 <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+bd_lvm_vgextend (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                 <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                 <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.44.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-vgextend.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1593,6 +1652,12 @@ VG with</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the VG extension
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1601,7 +1666,7 @@ VG with</p></td>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.44.5"></a><h4>Returns</h4>
+<a name="bd-lvm-vgextend.returns"></a><h4>Returns</h4>
 <p> whether the VG <em class="parameter"><code>vg_name</code></em>
 was successfully extended with the given <em class="parameter"><code>device</code></em>
 or not.</p>
@@ -1611,11 +1676,12 @@ or not.</p>
 <div class="refsect2">
 <a name="bd-lvm-vgreduce"></a><h3>bd_lvm_vgreduce ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_vgreduce (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                 <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+bd_lvm_vgreduce (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                 <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                 <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.45.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-vgreduce.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1636,6 +1702,12 @@ if the VG should be reduced of the missing PVs. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the VG reduction
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1644,20 +1716,22 @@ if the VG should be reduced of the missing PVs. </p></td>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.45.5"></a><h4>Returns</h4>
+<a name="bd-lvm-vgreduce.returns"></a><h4>Returns</h4>
 <p> whether the VG <em class="parameter"><code>vg_name</code></em>
 was successfully reduced of the given <em class="parameter"><code>device</code></em>
 or not</p>
+<p>Note: This function does not move extents off of the PV before removing
+it from the VG. You must do that first by calling <a class="link" href="libblockdev-LVM.html#bd-lvm-pvmove" title="bd_lvm_pvmove ()"><span class="type">bd_lvm_pvmove</span></a>.</p>
 </div>
 </div>
 <hr>
 <div class="refsect2">
 <a name="bd-lvm-vginfo"></a><h3>bd_lvm_vginfo ()</h3>
 <pre class="programlisting"><a class="link" href="libblockdev-LVM.html#BDLVMVGdata" title="BDLVMVGdata"><span class="returnvalue">BDLVMVGdata</span></a> *
-bd_lvm_vginfo (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+bd_lvm_vginfo (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.46.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-vginfo.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1679,7 +1753,7 @@ bd_lvm_vginfo (<em class="parameter"><code><a href="../glib/glib-Basic-Types.htm
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.46.5"></a><h4>Returns</h4>
+<a name="bd-lvm-vginfo.returns"></a><h4>Returns</h4>
 <p> information about the <em class="parameter"><code>vg_name</code></em>
 VG or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case
 of error (the <em class="parameter"><code>error</code></em>
@@ -1693,7 +1767,7 @@ of error (the <em class="parameter"><code>error</code></em>
 <pre class="programlisting"><a class="link" href="libblockdev-LVM.html#BDLVMVGdata" title="BDLVMVGdata"><span class="returnvalue">BDLVMVGdata</span></a> **
 bd_lvm_vgs (<em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.47.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-vgs.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1708,7 +1782,7 @@ bd_lvm_vgs (<em class="parameter"><code><a href="../glib/glib-Error-Reporting.ht
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.47.5"></a><h4>Returns</h4>
+<a name="bd-lvm-vgs.returns"></a><h4>Returns</h4>
 <p> information about VGs found in the system. </p>
 <p><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></p>
 </div>
@@ -1717,11 +1791,11 @@ bd_lvm_vgs (<em class="parameter"><code><a href="../glib/glib-Error-Reporting.ht
 <div class="refsect2">
 <a name="bd-lvm-lvorigin"></a><h3>bd_lvm_lvorigin ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
-bd_lvm_lvorigin (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                 <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
+bd_lvm_lvorigin (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                 <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.48.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-lvorigin.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1748,7 +1822,7 @@ bd_lvm_lvorigin (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.48.5"></a><h4>Returns</h4>
+<a name="bd-lvm-lvorigin.returns"></a><h4>Returns</h4>
 <p> the origin volume for the <em class="parameter"><code>vg_name</code></em>
 /<em class="parameter"><code>lv_name</code></em>
 LV or
@@ -1761,14 +1835,15 @@ LV or
 <div class="refsect2">
 <a name="bd-lvm-lvcreate"></a><h3>bd_lvm_lvcreate ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_lvcreate (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                 <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
+bd_lvm_lvcreate (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                 <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> size</code></em>,
-                 <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *type</code></em>,
-                 <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **pv_list</code></em>,
+                 <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *type</code></em>,
+                 <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **pv_list</code></em>,
+                 <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.49.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-lvcreate.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1803,6 +1878,12 @@ if not specified. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the LV creation
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1811,7 +1892,7 @@ if not specified. </p></td>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.49.5"></a><h4>Returns</h4>
+<a name="bd-lvm-lvcreate.returns"></a><h4>Returns</h4>
 <p> whether the given <em class="parameter"><code>vg_name</code></em>
 /<em class="parameter"><code>lv_name</code></em>
 LV was successfully created or not</p>
@@ -1821,12 +1902,13 @@ LV was successfully created or not</p>
 <div class="refsect2">
 <a name="bd-lvm-lvremove"></a><h3>bd_lvm_lvremove ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_lvremove (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                 <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
+bd_lvm_lvremove (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                 <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> force</code></em>,
+                 <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.50.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-lvremove.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1850,6 +1932,12 @@ bd_lvm_lvremove (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the LV removal
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1858,7 +1946,7 @@ bd_lvm_lvremove (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.50.5"></a><h4>Returns</h4>
+<a name="bd-lvm-lvremove.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>vg_name</code></em>
 /<em class="parameter"><code>lv_name</code></em>
 LV was successfully removed or not</p>
@@ -1868,12 +1956,13 @@ LV was successfully removed or not</p>
 <div class="refsect2">
 <a name="bd-lvm-lvrename"></a><h3>bd_lvm_lvrename ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_lvrename (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                 <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
-                 <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *new_name</code></em>,
+bd_lvm_lvrename (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                 <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
+                 <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *new_name</code></em>,
+                 <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.51.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-lvrename.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1899,6 +1988,12 @@ LV</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the LV rename
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1907,7 +2002,7 @@ LV</p></td>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.51.5"></a><h4>Returns</h4>
+<a name="bd-lvm-lvrename.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>vg_name</code></em>
 /<em class="parameter"><code>lv_name</code></em>
 LV was successfully renamed to
@@ -1920,12 +2015,13 @@ or not</p>
 <div class="refsect2">
 <a name="bd-lvm-lvresize"></a><h3>bd_lvm_lvresize ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_lvresize (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                 <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
+bd_lvm_lvresize (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                 <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> size</code></em>,
+                 <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.52.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-lvresize.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1949,6 +2045,12 @@ bd_lvm_lvresize (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the LV resize
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1957,7 +2059,7 @@ bd_lvm_lvresize (<em class="parameter"><code><a href="../glib/glib-Basic-Types.h
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.52.5"></a><h4>Returns</h4>
+<a name="bd-lvm-lvresize.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>vg_name</code></em>
 /<em class="parameter"><code>lv_name</code></em>
 LV was successfully resized or not</p>
@@ -1967,12 +2069,13 @@ LV was successfully resized or not</p>
 <div class="refsect2">
 <a name="bd-lvm-lvactivate"></a><h3>bd_lvm_lvactivate ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_lvactivate (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                   <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
+bd_lvm_lvactivate (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                   <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
                    <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> ignore_skip</code></em>,
+                   <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                    <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.53.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-lvactivate.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1996,6 +2099,12 @@ bd_lvm_lvactivate (<em class="parameter"><code><a href="../glib/glib-Basic-Types
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the LV activation
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -2004,7 +2113,7 @@ bd_lvm_lvactivate (<em class="parameter"><code><a href="../glib/glib-Basic-Types
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.53.5"></a><h4>Returns</h4>
+<a name="bd-lvm-lvactivate.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>vg_name</code></em>
 /<em class="parameter"><code>lv_name</code></em>
 LV was successfully activated or not</p>
@@ -2014,11 +2123,12 @@ LV was successfully activated or not</p>
 <div class="refsect2">
 <a name="bd-lvm-lvdeactivate"></a><h3>bd_lvm_lvdeactivate ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_lvdeactivate (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                     <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
+bd_lvm_lvdeactivate (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                     <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
+                     <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.54.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-lvdeactivate.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2037,6 +2147,12 @@ bd_lvm_lvdeactivate (<em class="parameter"><code><a href="../glib/glib-Basic-Typ
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the LV deactivation
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -2045,7 +2161,7 @@ bd_lvm_lvdeactivate (<em class="parameter"><code><a href="../glib/glib-Basic-Typ
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.54.5"></a><h4>Returns</h4>
+<a name="bd-lvm-lvdeactivate.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>vg_name</code></em>
 /<em class="parameter"><code>lv_name</code></em>
 LV was successfully deactivated or not</p>
@@ -2055,13 +2171,14 @@ LV was successfully deactivated or not</p>
 <div class="refsect2">
 <a name="bd-lvm-lvsnapshotcreate"></a><h3>bd_lvm_lvsnapshotcreate ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_lvsnapshotcreate (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *origin_name</code></em>,
-                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *snapshot_name</code></em>,
+bd_lvm_lvsnapshotcreate (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *origin_name</code></em>,
+                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *snapshot_name</code></em>,
                          <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> size</code></em>,
+                         <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                          <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.55.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-lvsnapshotcreate.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2090,6 +2207,12 @@ bd_lvm_lvsnapshotcreate (<em class="parameter"><code><a href="../glib/glib-Basic
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the LV snapshot creation
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -2098,7 +2221,7 @@ bd_lvm_lvsnapshotcreate (<em class="parameter"><code><a href="../glib/glib-Basic
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.55.5"></a><h4>Returns</h4>
+<a name="bd-lvm-lvsnapshotcreate.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>snapshot_name</code></em>
 snapshot of the <em class="parameter"><code>vg_name</code></em>
 /<em class="parameter"><code>origin_name</code></em>
@@ -2110,11 +2233,12 @@ was successfully created or not.</p>
 <div class="refsect2">
 <a name="bd-lvm-lvsnapshotmerge"></a><h3>bd_lvm_lvsnapshotmerge ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_lvsnapshotmerge (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                        <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *snapshot_name</code></em>,
+bd_lvm_lvsnapshotmerge (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                        <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *snapshot_name</code></em>,
+                        <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                         <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.56.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-lvsnapshotmerge.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2133,6 +2257,12 @@ bd_lvm_lvsnapshotmerge (<em class="parameter"><code><a href="../glib/glib-Basic-
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the LV snapshot merge
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -2141,7 +2271,7 @@ bd_lvm_lvsnapshotmerge (<em class="parameter"><code><a href="../glib/glib-Basic-
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.56.5"></a><h4>Returns</h4>
+<a name="bd-lvm-lvsnapshotmerge.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>vg_name</code></em>
 /<em class="parameter"><code>snapshot_name</code></em>
 LV snapshot was successfully merged or not</p>
@@ -2151,11 +2281,11 @@ LV snapshot was successfully merged or not</p>
 <div class="refsect2">
 <a name="bd-lvm-lvinfo"></a><h3>bd_lvm_lvinfo ()</h3>
 <pre class="programlisting"><a class="link" href="libblockdev-LVM.html#BDLVMLVdata" title="BDLVMLVdata"><span class="returnvalue">BDLVMLVdata</span></a> *
-bd_lvm_lvinfo (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-               <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
+bd_lvm_lvinfo (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+               <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.57.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-lvinfo.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2182,7 +2312,7 @@ bd_lvm_lvinfo (<em class="parameter"><code><a href="../glib/glib-Basic-Types.htm
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.57.5"></a><h4>Returns</h4>
+<a name="bd-lvm-lvinfo.returns"></a><h4>Returns</h4>
 <p> information about the <em class="parameter"><code>vg_name</code></em>
 /<em class="parameter"><code>lv_name</code></em>
 LV or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case
@@ -2195,10 +2325,10 @@ of error (the <em class="parameter"><code>error</code></em>
 <div class="refsect2">
 <a name="bd-lvm-lvs"></a><h3>bd_lvm_lvs ()</h3>
 <pre class="programlisting"><a class="link" href="libblockdev-LVM.html#BDLVMLVdata" title="BDLVMLVdata"><span class="returnvalue">BDLVMLVdata</span></a> **
-bd_lvm_lvs (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+bd_lvm_lvs (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
             <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.58.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-lvs.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2220,7 +2350,7 @@ bd_lvm_lvs (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#g
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.58.5"></a><h4>Returns</h4>
+<a name="bd-lvm-lvs.returns"></a><h4>Returns</h4>
 <p> information about LVs found in the given
 <em class="parameter"><code>vg_name</code></em>
 VG or in system if <em class="parameter"><code>vg_name</code></em>
@@ -2232,15 +2362,16 @@ is <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">N
 <div class="refsect2">
 <a name="bd-lvm-thpoolcreate"></a><h3>bd_lvm_thpoolcreate ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_thpoolcreate (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                     <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
+bd_lvm_thpoolcreate (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                     <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
                      <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> size</code></em>,
                      <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> md_size</code></em>,
                      <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> chunk_size</code></em>,
-                     <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *profile</code></em>,
+                     <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *profile</code></em>,
+                     <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.59.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-thpoolcreate.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2280,6 +2411,12 @@ the default. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the thin pool creation
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -2288,7 +2425,7 @@ the default. </p></td>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.59.5"></a><h4>Returns</h4>
+<a name="bd-lvm-thpoolcreate.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>vg_name</code></em>
 /<em class="parameter"><code>lv_name</code></em>
 thin pool was successfully created or not</p>
@@ -2296,15 +2433,83 @@ thin pool was successfully created or not</p>
 </div>
 <hr>
 <div class="refsect2">
+<a name="bd-lvm-thpool-convert"></a><h3>bd_lvm_thpool_convert ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_lvm_thpool_convert (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                       <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *data_lv</code></em>,
+                       <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *metadata_lv</code></em>,
+                       <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
+                       <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Converts the <em class="parameter"><code>data_lv</code></em>
+ and <em class="parameter"><code>metadata_lv</code></em>
+ into a new thin pool in the <em class="parameter"><code>vg_name</code></em>
+
+VG.</p>
+<div class="refsect3">
+<a name="bd-lvm-thpool-convert.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>vg_name</p></td>
+<td class="parameter_description"><p>name of the VG to create the new thin pool in</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>data_lv</p></td>
+<td class="parameter_description"><p>name of the LV that should become the data part of the new pool</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>metadata_lv</p></td>
+<td class="parameter_description"><p>name of the LV that should become the metadata part of the new pool</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>name</p></td>
+<td class="parameter_description"><p> name for the thin pool (if <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, the name <em class="parameter"><code>data_lv</code></em>
+is inherited). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the thin pool creation
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-lvm-thpool-convert.returns"></a><h4>Returns</h4>
+<p> whether the new thin pool was successfully created from <em class="parameter"><code>data_lv</code></em>
+and
+<em class="parameter"><code>metadata_lv</code></em>
+or not</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="bd-lvm-thlvcreate"></a><h3>bd_lvm_thlvcreate ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_thlvcreate (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                   <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *pool_name</code></em>,
-                   <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
+bd_lvm_thlvcreate (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                   <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *pool_name</code></em>,
+                   <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
                    <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> size</code></em>,
+                   <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                    <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.60.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-thlvcreate.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2333,6 +2538,12 @@ bd_lvm_thlvcreate (<em class="parameter"><code><a href="../glib/glib-Basic-Types
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the thin LV creation
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -2341,7 +2552,7 @@ bd_lvm_thlvcreate (<em class="parameter"><code><a href="../glib/glib-Basic-Types
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.60.5"></a><h4>Returns</h4>
+<a name="bd-lvm-thlvcreate.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>vg_name</code></em>
 /<em class="parameter"><code>lv_name</code></em>
 thin LV was successfully created or not</p>
@@ -2351,11 +2562,11 @@ thin LV was successfully created or not</p>
 <div class="refsect2">
 <a name="bd-lvm-thlvpoolname"></a><h3>bd_lvm_thlvpoolname ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
-bd_lvm_thlvpoolname (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                     <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
+bd_lvm_thlvpoolname (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                     <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.61.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-thlvpoolname.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2382,7 +2593,7 @@ bd_lvm_thlvpoolname (<em class="parameter"><code><a href="../glib/glib-Basic-Typ
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.61.5"></a><h4>Returns</h4>
+<a name="bd-lvm-thlvpoolname.returns"></a><h4>Returns</h4>
 <p> the name of the pool volume for the <em class="parameter"><code>vg_name</code></em>
 /<em class="parameter"><code>lv_name</code></em>
 thin LV or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if failed to determine (<em class="parameter"><code>error</code></em>
@@ -2394,13 +2605,14 @@ thin LV or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="li
 <div class="refsect2">
 <a name="bd-lvm-thsnapshotcreate"></a><h3>bd_lvm_thsnapshotcreate ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_thsnapshotcreate (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *origin_name</code></em>,
-                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *snapshot_name</code></em>,
-                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *pool_name</code></em>,
+bd_lvm_thsnapshotcreate (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *origin_name</code></em>,
+                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *snapshot_name</code></em>,
+                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *pool_name</code></em>,
+                         <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                          <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.62.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-thsnapshotcreate.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2429,6 +2641,12 @@ bd_lvm_thsnapshotcreate (<em class="parameter"><code><a href="../glib/glib-Basic
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the thin LV snapshot creation
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -2437,7 +2655,7 @@ bd_lvm_thsnapshotcreate (<em class="parameter"><code><a href="../glib/glib-Basic
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.62.5"></a><h4>Returns</h4>
+<a name="bd-lvm-thsnapshotcreate.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>snapshot_name</code></em>
 snapshot of the <em class="parameter"><code>vg_name</code></em>
 /<em class="parameter"><code>origin_name</code></em>
@@ -2448,10 +2666,10 @@ thin LV was successfully created or not.</p>
 <div class="refsect2">
 <a name="bd-lvm-set-global-config"></a><h3>bd_lvm_set_global_config ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_set_global_config (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *new_config</code></em>,
+bd_lvm_set_global_config (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *new_config</code></em>,
                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.63.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-set-global-config.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2474,7 +2692,7 @@ configuration to set or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><c
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.63.5"></a><h4>Returns</h4>
+<a name="bd-lvm-set-global-config.returns"></a><h4>Returns</h4>
 <p> whether the new requested global config <em class="parameter"><code>new_config</code></em>
 was successfully
 set or not</p>
@@ -2486,7 +2704,7 @@ set or not</p>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
 bd_lvm_get_global_config (<em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.64.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-get-global-config.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2501,7 +2719,7 @@ bd_lvm_get_global_config (<em class="parameter"><code><a href="../glib/glib-Erro
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.64.5"></a><h4>Returns</h4>
+<a name="bd-lvm-get-global-config.returns"></a><h4>Returns</h4>
 <p> a copy of a string representation of the currently set LVM global
 configuration</p>
 </div>
@@ -2510,12 +2728,13 @@ configuration</p>
 <div class="refsect2">
 <a name="bd-lvm-cache-attach"></a><h3>bd_lvm_cache_attach ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_cache_attach (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                     <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *data_lv</code></em>,
-                     <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *cache_pool_lv</code></em>,
+bd_lvm_cache_attach (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                     <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *data_lv</code></em>,
+                     <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *cache_pool_lv</code></em>,
+                     <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.65.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-cache-attach.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2543,6 +2762,12 @@ to</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the cache attachment
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -2551,7 +2776,7 @@ to</p></td>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.65.5"></a><h4>Returns</h4>
+<a name="bd-lvm-cache-attach.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>cache_pool_lv</code></em>
 was successfully attached to the <em class="parameter"><code>data_lv</code></em>
 or not</p>
@@ -2561,18 +2786,18 @@ or not</p>
 <div class="refsect2">
 <a name="bd-lvm-cache-create-cached-lv"></a><h3>bd_lvm_cache_create_cached_lv ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_cache_create_cached_lv (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                               <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
+bd_lvm_cache_create_cached_lv (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                               <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
                                <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> data_size</code></em>,
                                <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> cache_size</code></em>,
                                <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> md_size</code></em>,
                                <em class="parameter"><code><a class="link" href="libblockdev-LVM.html#BDLVMCacheMode" title="enum BDLVMCacheMode"><span class="type">BDLVMCacheMode</span></a> mode</code></em>,
                                <em class="parameter"><code><a class="link" href="libblockdev-LVM.html#BDLVMCachePoolFlags" title="enum BDLVMCachePoolFlags"><span class="type">BDLVMCachePoolFlags</span></a> flags</code></em>,
-                               <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **slow_pvs</code></em>,
-                               <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **fast_pvs</code></em>,
+                               <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **slow_pvs</code></em>,
+                               <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **fast_pvs</code></em>,
                                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.66.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-cache-create-cached-lv.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2634,7 +2859,7 @@ bd_lvm_cache_create_cached_lv (<em class="parameter"><code><a href="../glib/glib
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.66.5"></a><h4>Returns</h4>
+<a name="bd-lvm-cache-create-cached-lv.returns"></a><h4>Returns</h4>
 <p> whether the cached LV <em class="parameter"><code>lv_name</code></em>
 was successfully created or not</p>
 </div>
@@ -2643,16 +2868,16 @@ was successfully created or not</p>
 <div class="refsect2">
 <a name="bd-lvm-cache-create-pool"></a><h3>bd_lvm_cache_create_pool ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_cache_create_pool (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                          <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *pool_name</code></em>,
+bd_lvm_cache_create_pool (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                          <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *pool_name</code></em>,
                           <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> pool_size</code></em>,
                           <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> md_size</code></em>,
                           <em class="parameter"><code><a class="link" href="libblockdev-LVM.html#BDLVMCacheMode" title="enum BDLVMCacheMode"><span class="type">BDLVMCacheMode</span></a> mode</code></em>,
                           <em class="parameter"><code><a class="link" href="libblockdev-LVM.html#BDLVMCachePoolFlags" title="enum BDLVMCachePoolFlags"><span class="type">BDLVMCachePoolFlags</span></a> flags</code></em>,
-                          <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **fast_pvs</code></em>,
+                          <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **fast_pvs</code></em>,
                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.67.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-cache-create-pool.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2710,7 +2935,7 @@ cache pool (and the metadata LV). </p></td>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.67.5"></a><h4>Returns</h4>
+<a name="bd-lvm-cache-create-pool.returns"></a><h4>Returns</h4>
 <p> whether the cache pool <em class="parameter"><code>vg_name</code></em>
 /<em class="parameter"><code>pool_name</code></em>
 was successfully created or not</p>
@@ -2718,14 +2943,82 @@ was successfully created or not</p>
 </div>
 <hr>
 <div class="refsect2">
+<a name="bd-lvm-cache-pool-convert"></a><h3>bd_lvm_cache_pool_convert ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_lvm_cache_pool_convert (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                           <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *data_lv</code></em>,
+                           <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *metadata_lv</code></em>,
+                           <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
+                           <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Converts the <em class="parameter"><code>data_lv</code></em>
+ and <em class="parameter"><code>metadata_lv</code></em>
+ into a new cache pool in the <em class="parameter"><code>vg_name</code></em>
+
+VG.</p>
+<div class="refsect3">
+<a name="bd-lvm-cache-pool-convert.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>vg_name</p></td>
+<td class="parameter_description"><p>name of the VG to create the new thin pool in</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>data_lv</p></td>
+<td class="parameter_description"><p>name of the LV that should become the data part of the new pool</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>metadata_lv</p></td>
+<td class="parameter_description"><p>name of the LV that should become the metadata part of the new pool</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>name</p></td>
+<td class="parameter_description"><p> name for the thin pool (if <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, the name <em class="parameter"><code>data_lv</code></em>
+is inherited). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the thin pool creation
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-lvm-cache-pool-convert.returns"></a><h4>Returns</h4>
+<p> whether the new cache pool was successfully created from <em class="parameter"><code>data_lv</code></em>
+and
+<em class="parameter"><code>metadata_lv</code></em>
+or not</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="bd-lvm-cache-detach"></a><h3>bd_lvm_cache_detach ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_cache_detach (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                     <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *cached_lv</code></em>,
+bd_lvm_cache_detach (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                     <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *cached_lv</code></em>,
                      <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> destroy</code></em>,
+                     <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.68.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-cache-detach.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2750,6 +3043,12 @@ bd_lvm_cache_detach (<em class="parameter"><code><a href="../glib/glib-Basic-Typ
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the cache detachment
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -2758,7 +3057,7 @@ bd_lvm_cache_detach (<em class="parameter"><code><a href="../glib/glib-Basic-Typ
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.68.5"></a><h4>Returns</h4>
+<a name="bd-lvm-cache-detach.returns"></a><h4>Returns</h4>
 <p> whether the cache was successfully detached from the <em class="parameter"><code>cached_lv</code></em>
 or not</p>
 <p>Note: synces the cache first</p>
@@ -2771,7 +3070,7 @@ or not</p>
 bd_lvm_cache_get_default_md_size (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> cache_size</code></em>,
                                   <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.69.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-cache-get-default-md-size.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2793,7 +3092,7 @@ bd_lvm_cache_get_default_md_size (<em class="parameter"><code><a href="../glib/g
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.69.5"></a><h4>Returns</h4>
+<a name="bd-lvm-cache-get-default-md-size.returns"></a><h4>Returns</h4>
 <p> recommended default size of the cache metadata LV or 0 in case of error</p>
 </div>
 </div>
@@ -2801,10 +3100,10 @@ bd_lvm_cache_get_default_md_size (<em class="parameter"><code><a href="../glib/g
 <div class="refsect2">
 <a name="bd-lvm-cache-get-mode-from-str"></a><h3>bd_lvm_cache_get_mode_from_str ()</h3>
 <pre class="programlisting"><a class="link" href="libblockdev-LVM.html#BDLVMCacheMode" title="enum BDLVMCacheMode"><span class="returnvalue">BDLVMCacheMode</span></a>
-bd_lvm_cache_get_mode_from_str (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *mode_str</code></em>,
+bd_lvm_cache_get_mode_from_str (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *mode_str</code></em>,
                                 <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.70.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-cache-get-mode-from-str.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2826,7 +3125,7 @@ bd_lvm_cache_get_mode_from_str (<em class="parameter"><code><a href="../glib/gli
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.70.5"></a><h4>Returns</h4>
+<a name="bd-lvm-cache-get-mode-from-str.returns"></a><h4>Returns</h4>
 <p> cache mode for the <em class="parameter"><code>mode_str</code></em>
 or <a class="link" href="libblockdev-LVM.html#BD-LVM-CACHE-MODE-UNKNOWN:CAPS"><code class="literal">BD_LVM_CACHE_MODE_UNKNOWN</code></a> if
 failed to determine</p>
@@ -2839,7 +3138,7 @@ failed to determine</p>
 bd_lvm_cache_get_mode_str (<em class="parameter"><code><a class="link" href="libblockdev-LVM.html#BDLVMCacheMode" title="enum BDLVMCacheMode"><span class="type">BDLVMCacheMode</span></a> mode</code></em>,
                            <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.71.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-cache-get-mode-str.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2861,7 +3160,7 @@ bd_lvm_cache_get_mode_str (<em class="parameter"><code><a class="link" href="lib
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.71.5"></a><h4>Returns</h4>
+<a name="bd-lvm-cache-get-mode-str.returns"></a><h4>Returns</h4>
 <p> string representation of <em class="parameter"><code>mode</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
 </div>
@@ -2870,11 +3169,11 @@ or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">N
 <div class="refsect2">
 <a name="bd-lvm-cache-pool-name"></a><h3>bd_lvm_cache_pool_name ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
-bd_lvm_cache_pool_name (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                        <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *cached_lv</code></em>,
+bd_lvm_cache_pool_name (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                        <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *cached_lv</code></em>,
                         <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.72.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-cache-pool-name.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2902,7 +3201,7 @@ bd_lvm_cache_pool_name (<em class="parameter"><code><a href="../glib/glib-Basic-
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.72.5"></a><h4>Returns</h4>
+<a name="bd-lvm-cache-pool-name.returns"></a><h4>Returns</h4>
 <p> name of the cache pool LV used by the <em class="parameter"><code>cached_lv</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
 </div>
@@ -2911,11 +3210,11 @@ or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">N
 <div class="refsect2">
 <a name="bd-lvm-cache-stats"></a><h3>bd_lvm_cache_stats ()</h3>
 <pre class="programlisting"><a class="link" href="libblockdev-LVM.html#BDLVMCacheStats" title="BDLVMCacheStats"><span class="returnvalue">BDLVMCacheStats</span></a> *
-bd_lvm_cache_stats (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                    <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *cached_lv</code></em>,
+bd_lvm_cache_stats (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                    <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *cached_lv</code></em>,
                     <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.73.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-cache-stats.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2943,7 +3242,7 @@ bd_lvm_cache_stats (<em class="parameter"><code><a href="../glib/glib-Basic-Type
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.73.5"></a><h4>Returns</h4>
+<a name="bd-lvm-cache-stats.returns"></a><h4>Returns</h4>
 <p> stats for the <em class="parameter"><code>cached_lv</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
 </div>
@@ -2952,11 +3251,11 @@ or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">N
 <div class="refsect2">
 <a name="bd-lvm-data-lv-name"></a><h3>bd_lvm_data_lv_name ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
-bd_lvm_data_lv_name (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                     <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
+bd_lvm_data_lv_name (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                     <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.74.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-data-lv-name.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -2983,7 +3282,7 @@ bd_lvm_data_lv_name (<em class="parameter"><code><a href="../glib/glib-Basic-Typ
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.74.5"></a><h4>Returns</h4>
+<a name="bd-lvm-data-lv-name.returns"></a><h4>Returns</h4>
 <p> the name of the (internal) data LV of the
 <em class="parameter"><code>vg_name</code></em>
 /<em class="parameter"><code>lv_name</code></em>
@@ -2995,11 +3294,11 @@ LV. </p>
 <div class="refsect2">
 <a name="bd-lvm-metadata-lv-name"></a><h3>bd_lvm_metadata_lv_name ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
-bd_lvm_metadata_lv_name (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
+bd_lvm_metadata_lv_name (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
                          <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.8.7.75.4"></a><h4>Parameters</h4>
+<a name="bd-lvm-metadata-lv-name.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -3026,7 +3325,7 @@ bd_lvm_metadata_lv_name (<em class="parameter"><code><a href="../glib/glib-Basic
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.8.7.75.5"></a><h4>Returns</h4>
+<a name="bd-lvm-metadata-lv-name.returns"></a><h4>Returns</h4>
 <p> the name of the (internal) metadata LV of the
 <em class="parameter"><code>vg_name</code></em>
 /<em class="parameter"><code>lv_name</code></em>
@@ -3034,133 +3333,75 @@ LV. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
-<hr>
-<div class="refsect2">
-<a name="bd-lvm-cache-pool-convert"></a><h3>bd_lvm_cache_pool_convert ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_cache_pool_convert (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                           <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *data_lv</code></em>,
-                           <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *metadata_lv</code></em>,
-                           <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
-                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
-<p>Converts the <em class="parameter"><code>data_lv</code></em>
- and <em class="parameter"><code>metadata_lv</code></em>
- into a new cache pool in the <em class="parameter"><code>vg_name</code></em>
-
-VG.</p>
-<div class="refsect3">
-<a name="id-1.2.8.7.76.5"></a><h4>Parameters</h4>
-<div class="informaltable"><table width="100%" border="0">
-<colgroup>
-<col width="150px" class="parameters_name">
-<col class="parameters_description">
-<col width="200px" class="parameters_annotations">
-</colgroup>
-<tbody>
-<tr>
-<td class="parameter_name"><p>vg_name</p></td>
-<td class="parameter_description"><p>name of the VG to create the new thin pool in</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>data_lv</p></td>
-<td class="parameter_description"><p>name of the LV that should become the data part of the new pool</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>metadata_lv</p></td>
-<td class="parameter_description"><p>name of the LV that should become the metadata part of the new pool</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>name</p></td>
-<td class="parameter_description"><p> name for the thin pool (if <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, the name <em class="parameter"><code>data_lv</code></em>
-is inherited). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
-</tr>
-<tr>
-<td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
-</tr>
-</tbody>
-</table></div>
-</div>
-<div class="refsect3">
-<a name="id-1.2.8.7.76.6"></a><h4>Returns</h4>
-<p> whether the new cache pool was successfully created from <em class="parameter"><code>data_lv</code></em>
-and
-<em class="parameter"><code>metadata_lv</code></em>
-or not</p>
-</div>
-</div>
-<hr>
-<div class="refsect2">
-<a name="bd-lvm-thpool-convert"></a><h3>bd_lvm_thpool_convert ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_lvm_thpool_convert (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
-                       <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *data_lv</code></em>,
-                       <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *metadata_lv</code></em>,
-                       <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
-                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
-<p>Converts the <em class="parameter"><code>data_lv</code></em>
- and <em class="parameter"><code>metadata_lv</code></em>
- into a new thin pool in the <em class="parameter"><code>vg_name</code></em>
-
-VG.</p>
-<div class="refsect3">
-<a name="id-1.2.8.7.77.5"></a><h4>Parameters</h4>
-<div class="informaltable"><table width="100%" border="0">
-<colgroup>
-<col width="150px" class="parameters_name">
-<col class="parameters_description">
-<col width="200px" class="parameters_annotations">
-</colgroup>
-<tbody>
-<tr>
-<td class="parameter_name"><p>vg_name</p></td>
-<td class="parameter_description"><p>name of the VG to create the new thin pool in</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>data_lv</p></td>
-<td class="parameter_description"><p>name of the LV that should become the data part of the new pool</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>metadata_lv</p></td>
-<td class="parameter_description"><p>name of the LV that should become the metadata part of the new pool</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>name</p></td>
-<td class="parameter_description"><p> name for the thin pool (if <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, the name <em class="parameter"><code>data_lv</code></em>
-is inherited). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
-</tr>
-<tr>
-<td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
-</tr>
-</tbody>
-</table></div>
-</div>
-<div class="refsect3">
-<a name="id-1.2.8.7.77.6"></a><h4>Returns</h4>
-<p> whether the new thin pool was successfully created from <em class="parameter"><code>data_lv</code></em>
-and
-<em class="parameter"><code>metadata_lv</code></em>
-or not</p>
-</div>
-</div>
 </div>
 <div class="refsect1">
 <a name="libblockdev-LVM.other_details"></a><h2>Types and Values</h2>
 <div class="refsect2">
+<a name="BD-LVM-MAX-LV-SIZE:CAPS"></a><h3>BD_LVM_MAX_LV_SIZE</h3>
+<pre class="programlisting">#define             BD_LVM_MAX_LV_SIZE</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-LVM-DEFAULT-PE-SIZE:CAPS"></a><h3>BD_LVM_DEFAULT_PE_SIZE</h3>
+<pre class="programlisting">#define             BD_LVM_DEFAULT_PE_SIZE</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-LVM-DEFAULT-PE-START:CAPS"></a><h3>BD_LVM_DEFAULT_PE_START</h3>
+<pre class="programlisting">#define             BD_LVM_DEFAULT_PE_START</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-LVM-MIN-PE-SIZE:CAPS"></a><h3>BD_LVM_MIN_PE_SIZE</h3>
+<pre class="programlisting">#define             BD_LVM_MIN_PE_SIZE</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-LVM-MAX-PE-SIZE:CAPS"></a><h3>BD_LVM_MAX_PE_SIZE</h3>
+<pre class="programlisting">#define             BD_LVM_MAX_PE_SIZE</pre>
+</div>
+<hr>
+<div class="refsect2">
 <a name="USE-DEFAULT-PE-SIZE:CAPS"></a><h3>USE_DEFAULT_PE_SIZE</h3>
 <pre class="programlisting">#define USE_DEFAULT_PE_SIZE 0
 </pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-LVM-MIN-THPOOL-MD-SIZE:CAPS"></a><h3>BD_LVM_MIN_THPOOL_MD_SIZE</h3>
+<pre class="programlisting">#define             BD_LVM_MIN_THPOOL_MD_SIZE</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-LVM-MAX-THPOOL-MD-SIZE:CAPS"></a><h3>BD_LVM_MAX_THPOOL_MD_SIZE</h3>
+<pre class="programlisting">#define             BD_LVM_MAX_THPOOL_MD_SIZE</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-LVM-MIN-THPOOL-CHUNK-SIZE:CAPS"></a><h3>BD_LVM_MIN_THPOOL_CHUNK_SIZE</h3>
+<pre class="programlisting">#define             BD_LVM_MIN_THPOOL_CHUNK_SIZE</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-LVM-MAX-THPOOL-CHUNK-SIZE:CAPS"></a><h3>BD_LVM_MAX_THPOOL_CHUNK_SIZE</h3>
+<pre class="programlisting">#define             BD_LVM_MAX_THPOOL_CHUNK_SIZE</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="THPOOL-MD-FACTOR-NEW:CAPS"></a><h3>THPOOL_MD_FACTOR_NEW</h3>
+<pre class="programlisting">#define THPOOL_MD_FACTOR_NEW (0.2)
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="THPOOL-MD-FACTOR-EXISTS:CAPS"></a><h3>THPOOL_MD_FACTOR_EXISTS</h3>
+<pre class="programlisting">#define THPOOL_MD_FACTOR_EXISTS (1 / 6.0)
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-LVM-MIN-CACHE-MD-SIZE:CAPS"></a><h3>BD_LVM_MIN_CACHE_MD_SIZE</h3>
+<pre class="programlisting">#define             BD_LVM_MIN_CACHE_MD_SIZE</pre>
 </div>
 <hr>
 <div class="refsect2">
@@ -3171,7 +3412,7 @@ or not</p>
 <div class="refsect2">
 <a name="BDLVMError"></a><h3>enum BDLVMError</h3>
 <div class="refsect3">
-<a name="id-1.2.8.8.4.3"></a><h4>Members</h4>
+<a name="BDLVMError.members"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="enum_members_name">
@@ -3233,7 +3474,7 @@ or not</p>
 } BDLVMPVdata;
 </pre>
 <div class="refsect3">
-<a name="id-1.2.8.8.5.4"></a><h4>Members</h4>
+<a name="BDLVMPVdata.members"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="struct_members_name">
@@ -3325,7 +3566,7 @@ or not</p>
 } BDLVMVGdata;
 </pre>
 <div class="refsect3">
-<a name="id-1.2.8.8.6.4"></a><h4>Members</h4>
+<a name="BDLVMVGdata.members"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="struct_members_name">
@@ -3392,10 +3633,14 @@ or not</p>
     gchar *data_lv;
     gchar *metadata_lv;
     gchar *roles;
+    gchar *move_pv;
+    guint64 data_percent;
+    guint64 metadata_percent;
+    guint64 copy_percent;
 } BDLVMLVdata;
 </pre>
 <div class="refsect3">
-<a name="id-1.2.8.8.7.4"></a><h4>Members</h4>
+<a name="BDLVMLVdata.members"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="struct_members_name">
@@ -3458,6 +3703,26 @@ or not</p>
 <td> </td>
 <td> </td>
 </tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDLVMLVdata.move-pv"></a>move_pv</code></em>;</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDLVMLVdata.data-percent"></a>data_percent</code></em>;</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDLVMLVdata.metadata-percent"></a>metadata_percent</code></em>;</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDLVMLVdata.copy-percent"></a>copy_percent</code></em>;</p></td>
+<td> </td>
+<td> </td>
+</tr>
 </tbody>
 </table></div>
 </div>
@@ -3466,7 +3731,7 @@ or not</p>
 <div class="refsect2">
 <a name="BDLVMCacheMode"></a><h3>enum BDLVMCacheMode</h3>
 <div class="refsect3">
-<a name="id-1.2.8.8.8.3"></a><h4>Members</h4>
+<a name="BDLVMCacheMode.members"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="enum_members_name">
@@ -3497,7 +3762,7 @@ or not</p>
 <div class="refsect2">
 <a name="BDLVMCachePoolFlags"></a><h3>enum BDLVMCachePoolFlags</h3>
 <div class="refsect3">
-<a name="id-1.2.8.8.9.3"></a><h4>Members</h4>
+<a name="BDLVMCachePoolFlags.members"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="enum_members_name">
@@ -3577,7 +3842,7 @@ or not</p>
 } BDLVMCacheStats;
 </pre>
 <div class="refsect3">
-<a name="id-1.2.8.8.10.4"></a><h4>Members</h4>
+<a name="BDLVMCacheStats.members"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="struct_members_name">
@@ -3647,6 +3912,6 @@ or not</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.24</div>
+<hr>Generated by GTK-Doc V1.25</div>
 </body>
 </html>

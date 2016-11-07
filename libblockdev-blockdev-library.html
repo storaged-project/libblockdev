@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="next" href="libblockdev-BTRFS.html" title="BTRFS">
-<meta name="generator" content="GTK-Doc V1.24 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -134,7 +134,7 @@ bd_init (<em class="parameter"><code><span class="type">BDPluginSpec</span> **re
          <em class="parameter"><code><a class="link" href="libblockdev-Utils.html#BDUtilsLogFunc" title="BDUtilsLogFunc ()"><span class="type">BDUtilsLogFunc</span></a> log_func</code></em>,
          <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.2.7.2.4"></a><h4>Parameters</h4>
+<a name="bd-init.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -164,7 +164,7 @@ plugins. </p></td>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.7.2.5"></a><h4>Returns</h4>
+<a name="bd-init.returns"></a><h4>Returns</h4>
 <p> whether the library was successfully initialized with all the
 required or default (see <em class="parameter"><code>require_plugins</code></em>
 ) plugins or not</p>
@@ -189,7 +189,7 @@ if (!<a class="link" href="libblockdev-blockdev-library.html#bd-is-initialized" 
 way (holding the lock preventing other threads from doing changes in
 between).</p>
 <div class="refsect3">
-<a name="id-1.2.2.7.3.7"></a><h4>Parameters</h4>
+<a name="bd-ensure-init.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -219,7 +219,7 @@ plugins. </p></td>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.7.3.8"></a><h4>Returns</h4>
+<a name="bd-ensure-init.returns"></a><h4>Returns</h4>
 <p> whether the library was successfully initialized with all the
 required or default (see <em class="parameter"><code>require_plugins</code></em>
 ) plugins or not either
@@ -235,7 +235,7 @@ bd_try_init (<em class="parameter"><code><span class="type">BDPluginSpec</span> 
              <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> ***loaded_plugin_names</code></em>,
              <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.2.7.4.4"></a><h4>Parameters</h4>
+<a name="bd-try-init.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -271,7 +271,7 @@ of the successfully loaded plugins. </p></td>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.7.4.5"></a><h4>Returns</h4>
+<a name="bd-try-init.returns"></a><h4>Returns</h4>
 <p> whether the library was successfully initialized with all the
 required or default (see <em class="parameter"><code>require_plugins</code></em>
 ) plugins or not</p>
@@ -288,7 +288,7 @@ bd_reinit (<em class="parameter"><code><span class="type">BDPluginSpec</span> **
            <em class="parameter"><code><a class="link" href="libblockdev-Utils.html#BDUtilsLogFunc" title="BDUtilsLogFunc ()"><span class="type">BDUtilsLogFunc</span></a> log_func</code></em>,
            <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.2.7.5.4"></a><h4>Parameters</h4>
+<a name="bd-reinit.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -324,7 +324,7 @@ to keep the old one. </p></td>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.7.5.5"></a><h4>Returns</h4>
+<a name="bd-reinit.returns"></a><h4>Returns</h4>
 <p> whether the library was successfully initialized or not</p>
 <p>If <em class="parameter"><code>reload</code></em>
 is <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> all the plugins are closed and reloaded otherwise only
@@ -341,7 +341,7 @@ bd_try_reinit (<em class="parameter"><code><span class="type">BDPluginSpec</span
                <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> ***loaded_plugin_names</code></em>,
                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.2.7.6.4"></a><h4>Parameters</h4>
+<a name="bd-try-reinit.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -383,7 +383,7 @@ loaded plugins. </p></td>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.2.7.6.5"></a><h4>Returns</h4>
+<a name="bd-try-reinit.returns"></a><h4>Returns</h4>
 <p> whether the library was successfully initialized or not</p>
 <p>If <em class="parameter"><code>reload</code></em>
 is <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> all the plugins are closed and reloaded otherwise only
@@ -398,7 +398,7 @@ IS NOT CONSIDERED ERROR*</p>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 bd_is_initialized ();</pre>
 <div class="refsect3">
-<a name="id-1.2.2.7.7.4"></a><h4>Returns</h4>
+<a name="bd-is-initialized.returns"></a><h4>Returns</h4>
 <p> whether the library is initialized or not</p>
 <p>The library is considered initialized if some of the *init*() functions
 was/were called and either at least one plugin is loaded or 0 plugins are
@@ -424,7 +424,7 @@ bd_init_error_quark ();</pre>
 <div class="refsect2">
 <a name="BDInitError"></a><h3>enum BDInitError</h3>
 <div class="refsect3">
-<a name="id-1.2.2.8.3.3"></a><h4>Members</h4>
+<a name="BDInitError.members"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="enum_members_name">
@@ -449,6 +449,6 @@ bd_init_error_quark ();</pre>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.24</div>
+<hr>Generated by GTK-Doc V1.25</div>
 </body>
 </html>

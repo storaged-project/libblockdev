@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-KernelBlockDevices.html" title="KernelBlockDevices">
 <link rel="next" href="libblockdev-Utils.html" title="Utils">
-<meta name="generator" content="GTK-Doc V1.24 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -39,6 +39,30 @@
 <col class="functions_name">
 </colgroup>
 <tbody>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-s390.html#bd-s390-check-deps" title="bd_s390_check_deps ()">bd_s390_check_deps</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-s390.html#bd-s390-init" title="bd_s390_init ()">bd_s390_init</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-s390.html#bd-s390-close" title="bd_s390_close ()">bd_s390_close</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
 <tr>
 <td class="function_type">
 <a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
@@ -155,6 +179,33 @@
 <div class="refsect1">
 <a name="libblockdev-s390.functions_details"></a><h2>Functions</h2>
 <div class="refsect2">
+<a name="bd-s390-check-deps"></a><h3>bd_s390_check_deps ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_s390_check_deps ();</pre>
+<div class="refsect3">
+<a name="bd-s390-check-deps.returns"></a><h4>Returns</h4>
+<p> whether the plugin's runtime dependencies are satisfied or not</p>
+<p>Function checking plugin's runtime dependencies.</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-s390-init"></a><h3>bd_s390_init ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_s390_init ();</pre>
+<p>Initializes the plugin. **This function is called automatically by the
+library's initialization functions.**</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-s390-close"></a><h3>bd_s390_close ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_s390_close ();</pre>
+<p>Cleans up after the plugin. **This function is called automatically by the
+library's functions that unload it.**</p>
+</div>
+<hr>
+<div class="refsect2">
 <a name="bd-s390-error-quark"></a><h3>bd_s390_error_quark ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
 bd_s390_error_quark (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
@@ -165,9 +216,10 @@ bd_s390_error_quark (<em class="parameter"><code><span class="type">void</span><
 <a name="bd-s390-dasd-format"></a><h3>bd_s390_dasd_format ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 bd_s390_dasd_format (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *dasd</code></em>,
+                     <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.15.7.3.4"></a><h4>Parameters</h4>
+<a name="bd-s390-dasd-format.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -181,6 +233,12 @@ bd_s390_dasd_format (<em class="parameter"><code>const <a href="../glib/glib-Bas
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the formatting (right now
+passed to the 'dasdfmt' utility). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -189,7 +247,7 @@ bd_s390_dasd_format (<em class="parameter"><code>const <a href="../glib/glib-Bas
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.15.7.3.5"></a><h4>Returns</h4>
+<a name="bd-s390-dasd-format.returns"></a><h4>Returns</h4>
 <p> whether dasdfmt was successful or not</p>
 </div>
 </div>
@@ -200,7 +258,7 @@ bd_s390_dasd_format (<em class="parameter"><code>const <a href="../glib/glib-Bas
 bd_s390_dasd_needs_format (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *dasd</code></em>,
                            <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.15.7.4.4"></a><h4>Parameters</h4>
+<a name="bd-s390-dasd-needs-format.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -222,7 +280,7 @@ bd_s390_dasd_needs_format (<em class="parameter"><code>const <a href="../glib/gl
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.15.7.4.5"></a><h4>Returns</h4>
+<a name="bd-s390-dasd-needs-format.returns"></a><h4>Returns</h4>
 <p> whether a dasd needs dasdfmt run against it</p>
 </div>
 </div>
@@ -233,7 +291,7 @@ bd_s390_dasd_needs_format (<em class="parameter"><code>const <a href="../glib/gl
 bd_s390_sanitize_dev_input (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *dev</code></em>,
                             <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.15.7.5.4"></a><h4>Parameters</h4>
+<a name="bd-s390-sanitize-dev-input.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -248,7 +306,7 @@ bd_s390_sanitize_dev_input (<em class="parameter"><code>const <a href="../glib/g
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.15.7.5.5"></a><h4>Returns</h4>
+<a name="bd-s390-sanitize-dev-input.returns"></a><h4>Returns</h4>
 <p> a synthesized dasd or zfcp device number. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
@@ -257,10 +315,10 @@ bd_s390_sanitize_dev_input (<em class="parameter"><code>const <a href="../glib/g
 <div class="refsect2">
 <a name="bd-s390-dasd-online"></a><h3>bd_s390_dasd_online ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_s390_dasd_online (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *dasd</code></em>,
+bd_s390_dasd_online (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *dasd</code></em>,
                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.15.7.6.4"></a><h4>Parameters</h4>
+<a name="bd-s390-dasd-online.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -282,7 +340,7 @@ bd_s390_dasd_online (<em class="parameter"><code><a href="../glib/glib-Basic-Typ
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.15.7.6.5"></a><h4>Returns</h4>
+<a name="bd-s390-dasd-online.returns"></a><h4>Returns</h4>
 <p> whether a dasd was successfully switched online</p>
 </div>
 </div>
@@ -293,7 +351,7 @@ bd_s390_dasd_online (<em class="parameter"><code><a href="../glib/glib-Basic-Typ
 bd_s390_dasd_is_ldl (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *dasd</code></em>,
                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.15.7.7.4"></a><h4>Parameters</h4>
+<a name="bd-s390-dasd-is-ldl.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -315,7 +373,7 @@ bd_s390_dasd_is_ldl (<em class="parameter"><code>const <a href="../glib/glib-Bas
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.15.7.7.5"></a><h4>Returns</h4>
+<a name="bd-s390-dasd-is-ldl.returns"></a><h4>Returns</h4>
 <p> whether a dasd is LDL formatted</p>
 </div>
 </div>
@@ -326,7 +384,7 @@ bd_s390_dasd_is_ldl (<em class="parameter"><code>const <a href="../glib/glib-Bas
 bd_s390_zfcp_sanitize_wwpn_input (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *wwpn</code></em>,
                                   <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.15.7.8.4"></a><h4>Parameters</h4>
+<a name="bd-s390-zfcp-sanitize-wwpn-input.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -341,7 +399,7 @@ bd_s390_zfcp_sanitize_wwpn_input (<em class="parameter"><code>const <a href="../
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.15.7.8.5"></a><h4>Returns</h4>
+<a name="bd-s390-zfcp-sanitize-wwpn-input.returns"></a><h4>Returns</h4>
 <p> a synthesized zFCP WWPN. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
@@ -353,7 +411,7 @@ bd_s390_zfcp_sanitize_wwpn_input (<em class="parameter"><code>const <a href="../
 bd_s390_zfcp_sanitize_lun_input (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lun</code></em>,
                                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.15.7.9.4"></a><h4>Parameters</h4>
+<a name="bd-s390-zfcp-sanitize-lun-input.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -368,7 +426,7 @@ bd_s390_zfcp_sanitize_lun_input (<em class="parameter"><code>const <a href="../g
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.15.7.9.5"></a><h4>Returns</h4>
+<a name="bd-s390-zfcp-sanitize-lun-input.returns"></a><h4>Returns</h4>
 <p> a synthesized zFCP LUN. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
@@ -382,7 +440,7 @@ bd_s390_zfcp_online (<em class="parameter"><code>const <a href="../glib/glib-Bas
                      <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lun</code></em>,
                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.15.7.10.4"></a><h4>Parameters</h4>
+<a name="bd-s390-zfcp-online.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -397,7 +455,7 @@ bd_s390_zfcp_online (<em class="parameter"><code>const <a href="../glib/glib-Bas
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.15.7.10.5"></a><h4>Returns</h4>
+<a name="bd-s390-zfcp-online.returns"></a><h4>Returns</h4>
 <p> whether a zFCP device was successfully switched online</p>
 </div>
 </div>
@@ -418,7 +476,7 @@ bd_s390_zfcp_scsi_offline (<em class="parameter"><code>const <a href="../glib/gl
 <em class="parameter"><code>error</code></em>
 : (out): place to store error (if any)</p>
 <div class="refsect3">
-<a name="id-1.2.15.7.11.5"></a><h4>Returns</h4>
+<a name="bd-s390-zfcp-scsi-offline.returns"></a><h4>Returns</h4>
 <p> whether a LUN was successfully removed from its associated WWPN</p>
 <p>This function looks through /proc/scsi/scsi and manually removes LUNs from
 associated WWPNs. zFCP devices are SCSI devices accessible over FCP protocol.
@@ -426,7 +484,7 @@ In z/OS the IODF (I/O definition file) contains basic information about the
 I/O config, but WWPN and LUN configuration is done at the OS level, hence
 this function becomes necessary when switching the device offline. This
 particular sequence of actions is for some reason unnecessary when switching
-the device online. Chalk it up to s390x being s390x.</p>
+the device offline. Chalk it up to s390x being s390x.</p>
 </div>
 </div>
 <hr>
@@ -438,7 +496,7 @@ bd_s390_zfcp_offline (<em class="parameter"><code>const <a href="../glib/glib-Ba
                       <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lun</code></em>,
                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.15.7.12.4"></a><h4>Parameters</h4>
+<a name="bd-s390-zfcp-offline.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -470,7 +528,7 @@ bd_s390_zfcp_offline (<em class="parameter"><code>const <a href="../glib/glib-Ba
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.15.7.12.5"></a><h4>Returns</h4>
+<a name="bd-s390-zfcp-offline.returns"></a><h4>Returns</h4>
 <p> whether a zfcp device was successfully switched offline</p>
 </div>
 </div>
@@ -480,7 +538,7 @@ bd_s390_zfcp_offline (<em class="parameter"><code>const <a href="../glib/glib-Ba
 <div class="refsect2">
 <a name="BDS390Error"></a><h3>enum BDS390Error</h3>
 <div class="refsect3">
-<a name="id-1.2.15.8.2.3"></a><h4>Members</h4>
+<a name="BDS390Error.members"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="enum_members_name">
@@ -515,6 +573,6 @@ bd_s390_zfcp_offline (<em class="parameter"><code>const <a href="../glib/glib-Ba
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.24</div>
+<hr>Generated by GTK-Doc V1.25</div>
 </body>
 </html>

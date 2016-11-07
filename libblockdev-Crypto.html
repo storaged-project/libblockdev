@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-BTRFS.html" title="BTRFS">
 <link rel="next" href="libblockdev-DeviceMapper.html" title="DeviceMapper">
-<meta name="generator" content="GTK-Doc V1.24 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -40,8 +40,28 @@
 </colgroup>
 <tbody>
 <tr>
-<td class="define_keyword">#define</td>
-<td class="function_name"><a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-LUKS-METADATA-SIZE:CAPS" title="BD_CRYPTO_LUKS_METADATA_SIZE">BD_CRYPTO_LUKS_METADATA_SIZE</a></td>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-check-deps" title="bd_crypto_check_deps ()">bd_crypto_check_deps</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-close" title="bd_crypto_close ()">bd_crypto_close</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-init" title="bd_crypto_init ()">bd_crypto_init</a> <span class="c_punctuation">()</span>
+</td>
 </tr>
 <tr>
 <td class="function_type">
@@ -160,6 +180,10 @@
 <tbody>
 <tr>
 <td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-LUKS-METADATA-SIZE:CAPS" title="BD_CRYPTO_LUKS_METADATA_SIZE">BD_CRYPTO_LUKS_METADATA_SIZE</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
 <td class="function_name"><a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-ERROR:CAPS" title="BD_CRYPTO_ERROR">BD_CRYPTO_ERROR</a></td>
 </tr>
 <tr>
@@ -202,8 +226,30 @@ require the LUKS device (/dev/mapper/SOMETHING").</p>
 <div class="refsect1">
 <a name="libblockdev-Crypto.functions_details"></a><h2>Functions</h2>
 <div class="refsect2">
-<a name="BD-CRYPTO-LUKS-METADATA-SIZE:CAPS"></a><h3>BD_CRYPTO_LUKS_METADATA_SIZE</h3>
-<pre class="programlisting">#define             BD_CRYPTO_LUKS_METADATA_SIZE</pre>
+<a name="bd-crypto-check-deps"></a><h3>bd_crypto_check_deps ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_crypto_check_deps ();</pre>
+<div class="refsect3">
+<a name="bd-crypto-check-deps.returns"></a><h4>Returns</h4>
+<p> whether the plugin's runtime dependencies are satisfied or not</p>
+<p>Function checking plugin's runtime dependencies.</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-crypto-close"></a><h3>bd_crypto_close ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_crypto_close ();</pre>
+<p>Cleans up after the plugin. **This function is called automatically by the
+library's functions that unload it.**</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-crypto-init"></a><h3>bd_crypto_init ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_crypto_init ();</pre>
+<p>Initializes the plugin. **This function is called automatically by the
+library's initialization functions.**</p>
 </div>
 <hr>
 <div class="refsect2">
@@ -218,7 +264,7 @@ bd_crypto_error_quark (<em class="parameter"><code><span class="type">void</span
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
 bd_crypto_generate_backup_passphrase (<em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.4.7.4.4"></a><h4>Parameters</h4>
+<a name="bd-crypto-generate-backup-passphrase.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -233,7 +279,7 @@ bd_crypto_generate_backup_passphrase (<em class="parameter"><code><a href="../gl
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.4.7.4.5"></a><h4>Returns</h4>
+<a name="bd-crypto-generate-backup-passphrase.returns"></a><h4>Returns</h4>
 <p> A newly generated <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-BACKUP-PASSPHRASE-LENGTH:CAPS" title="BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH"><code class="literal">BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH</code></a>-long passphrase.</p>
 <p>See <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-BACKUP-PASSPHRASE-CHARSET:CAPS" title="BD_CRYPTO_BACKUP_PASSPHRASE_CHARSET"><code class="literal">BD_CRYPTO_BACKUP_PASSPHRASE_CHARSET</code></a> for the definition of the charset used for the passphrase.</p>
 </div>
@@ -245,7 +291,7 @@ bd_crypto_generate_backup_passphrase (<em class="parameter"><code><a href="../gl
 bd_crypto_device_is_luks (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.4.7.5.4"></a><h4>Parameters</h4>
+<a name="bd-crypto-device-is-luks.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -267,7 +313,7 @@ bd_crypto_device_is_luks (<em class="parameter"><code>const <a href="../glib/gli
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.4.7.5.5"></a><h4>Returns</h4>
+<a name="bd-crypto-device-is-luks.returns"></a><h4>Returns</h4>
 <p> <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if the given <em class="parameter"><code>device</code></em>
 is a LUKS device or <a href="../glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a> if not or
 failed to determine (the <em class="parameter"><code>error</code></em>
@@ -282,7 +328,7 @@ cases)</p>
 bd_crypto_luks_uuid (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.4.7.6.4"></a><h4>Parameters</h4>
+<a name="bd-crypto-luks-uuid.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -304,7 +350,7 @@ bd_crypto_luks_uuid (<em class="parameter"><code>const <a href="../glib/glib-Bas
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.4.7.6.5"></a><h4>Returns</h4>
+<a name="bd-crypto-luks-uuid.returns"></a><h4>Returns</h4>
 <p> UUID of the <em class="parameter"><code>device</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if failed to determine (<em class="parameter"><code>error</code></em>
 )
@@ -318,7 +364,7 @@ is populated with the error in such cases)</p>
 bd_crypto_luks_status (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *luks_device</code></em>,
                        <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.4.7.7.4"></a><h4>Parameters</h4>
+<a name="bd-crypto-luks-status.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -340,7 +386,7 @@ bd_crypto_luks_status (<em class="parameter"><code>const <a href="../glib/glib-B
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.4.7.7.5"></a><h4>Returns</h4>
+<a name="bd-crypto-luks-status.returns"></a><h4>Returns</h4>
 <p> one of "invalid", "inactive", "active" or "busy" or
 <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if failed to determine (<em class="parameter"><code>error</code></em>
 is populated with the error in
@@ -366,7 +412,7 @@ bd_crypto_luks_format (<em class="parameter"><code>const <a href="../glib/glib-B
 entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
 FOREVER).</p>
 <div class="refsect3">
-<a name="id-1.2.4.7.8.5"></a><h4>Parameters</h4>
+<a name="bd-crypto-luks-format.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -414,7 +460,7 @@ as LUKS</p></td>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.4.7.8.6"></a><h4>Returns</h4>
+<a name="bd-crypto-luks-format.returns"></a><h4>Returns</h4>
 <p> whether the given <em class="parameter"><code>device</code></em>
 was successfully formatted as LUKS or not
 (the <em class="parameter"><code>error</code></em>
@@ -429,9 +475,10 @@ bd_crypto_luks_open (<em class="parameter"><code>const <a href="../glib/glib-Bas
                      <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
                      <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *passphrase</code></em>,
                      <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *key_file</code></em>,
+                     <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> read_only</code></em>,
                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.4.7.9.4"></a><h4>Parameters</h4>
+<a name="bd-crypto-luks-open.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -462,6 +509,11 @@ or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">N
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
+<td class="parameter_name"><p>read_only</p></td>
+<td class="parameter_description"><p>whether to open as read-only or not (meaning read-write)</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p> place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -470,7 +522,7 @@ or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">N
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.4.7.9.5"></a><h4>Returns</h4>
+<a name="bd-crypto-luks-open.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>device</code></em>
 was successfully opened or not</p>
 <p>One of <em class="parameter"><code>passphrase</code></em>
@@ -485,7 +537,7 @@ has to be != <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="
 bd_crypto_luks_close (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *luks_device</code></em>,
                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.4.7.10.4"></a><h4>Parameters</h4>
+<a name="bd-crypto-luks-close.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -507,7 +559,7 @@ bd_crypto_luks_close (<em class="parameter"><code>const <a href="../glib/glib-Ba
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.4.7.10.5"></a><h4>Returns</h4>
+<a name="bd-crypto-luks-close.returns"></a><h4>Returns</h4>
 <p> whether the given <em class="parameter"><code>luks_device</code></em>
 was successfully closed or not</p>
 </div>
@@ -523,7 +575,7 @@ bd_crypto_luks_add_key (<em class="parameter"><code>const <a href="../glib/glib-
                         <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *nkey_file</code></em>,
                         <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.4.7.11.4"></a><h4>Parameters</h4>
+<a name="bd-crypto-luks-add-key.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -569,7 +621,7 @@ or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">N
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.4.7.11.5"></a><h4>Returns</h4>
+<a name="bd-crypto-luks-add-key.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>npass</code></em>
 or <em class="parameter"><code>nkey_file</code></em>
 was successfully added to <em class="parameter"><code>device</code></em>
@@ -591,7 +643,7 @@ bd_crypto_luks_remove_key (<em class="parameter"><code>const <a href="../glib/gl
                            <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *key_file</code></em>,
                            <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.4.7.12.4"></a><h4>Parameters</h4>
+<a name="bd-crypto-luks-remove-key.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -625,7 +677,7 @@ or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">N
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.4.7.12.5"></a><h4>Returns</h4>
+<a name="bd-crypto-luks-remove-key.returns"></a><h4>Returns</h4>
 <p> whether the key was successfully removed or not</p>
 <p>Either <em class="parameter"><code>pass</code></em>
 or <em class="parameter"><code>key_file</code></em>
@@ -641,7 +693,7 @@ bd_crypto_luks_change_key (<em class="parameter"><code>const <a href="../glib/gl
                            <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *npass</code></em>,
                            <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.4.7.13.4"></a><h4>Parameters</h4>
+<a name="bd-crypto-luks-change-key.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -673,7 +725,7 @@ bd_crypto_luks_change_key (<em class="parameter"><code>const <a href="../glib/gl
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.4.7.13.5"></a><h4>Returns</h4>
+<a name="bd-crypto-luks-change-key.returns"></a><h4>Returns</h4>
 <p> whether the key was successfully changed or not</p>
 <p>No support for changing key files (yet).</p>
 </div>
@@ -686,7 +738,7 @@ bd_crypto_luks_resize (<em class="parameter"><code>const <a href="../glib/glib-B
                        <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> size</code></em>,
                        <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.4.7.14.4"></a><h4>Parameters</h4>
+<a name="bd-crypto-luks-resize.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -713,7 +765,7 @@ bd_crypto_luks_resize (<em class="parameter"><code>const <a href="../glib/glib-B
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.4.7.14.5"></a><h4>Returns</h4>
+<a name="bd-crypto-luks-resize.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>luks_device</code></em>
 was successfully resized or not</p>
 </div>
@@ -729,7 +781,7 @@ bd_crypto_escrow_device (<em class="parameter"><code>const <a href="../glib/glib
                          <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *backup_passphrase</code></em>,
                          <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="id-1.2.4.7.15.4"></a><h4>Parameters</h4>
+<a name="bd-crypto-escrow-device.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -771,7 +823,7 @@ bd_crypto_escrow_device (<em class="parameter"><code>const <a href="../glib/glib
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.2.4.7.15.5"></a><h4>Returns</h4>
+<a name="bd-crypto-escrow-device.returns"></a><h4>Returns</h4>
 <p> whether the ecrow data was successfully created for <em class="parameter"><code>device</code></em>
 or not</p>
 </div>
@@ -780,6 +832,11 @@ or not</p>
 <div class="refsect1">
 <a name="libblockdev-Crypto.other_details"></a><h2>Types and Values</h2>
 <div class="refsect2">
+<a name="BD-CRYPTO-LUKS-METADATA-SIZE:CAPS"></a><h3>BD_CRYPTO_LUKS_METADATA_SIZE</h3>
+<pre class="programlisting">#define             BD_CRYPTO_LUKS_METADATA_SIZE</pre>
+</div>
+<hr>
+<div class="refsect2">
 <a name="BD-CRYPTO-ERROR:CAPS"></a><h3>BD_CRYPTO_ERROR</h3>
 <pre class="programlisting">#define             BD_CRYPTO_ERROR</pre>
 </div>
@@ -787,7 +844,7 @@ or not</p>
 <div class="refsect2">
 <a name="BDCryptoError"></a><h3>enum BDCryptoError</h3>
 <div class="refsect3">
-<a name="id-1.2.4.8.3.3"></a><h4>Members</h4>
+<a name="BDCryptoError.members"></a><h4>Members</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="300px" class="enum_members_name">
@@ -886,6 +943,6 @@ or not</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.24</div>
+<hr>Generated by GTK-Doc V1.25</div>
 </body>
 </html>
