@@ -1,0 +1,87 @@
+#!/bin/bash
+
+echo "$@"|grep -- "--detail" &>/dev/null
+is_detail=$?
+
+echo "$@"|grep -- "--brief" &>/dev/null
+is_brief=$?
+
+echo "$@"|grep -- "--export" &>/dev/null
+is_export=$?
+
+if [ $is_detail -eq 0 ]; then
+    cat <<EOF
+/dev/md/localhost:fedora:
+        Version : 1.2
+  Creation Time : Fri Apr 29 12:46:43 2016
+     Raid Level : raid1
+     Array Size : 1047552 (1023.00 MiB 1072.69 MB)
+  Used Dev Size : 1047552 (1023.00 MiB 1072.69 MB)
+   Raid Devices : 2
+  Total Devices : 2
+    Persistence : Superblock is persistent
+
+  Intent Bitmap : Internal
+
+    Update Time : Thu Nov  3 16:55:14 2016
+          State : clean 
+ Active Devices : 2
+Working Devices : 2
+ Failed Devices : 0
+  Spare Devices : 0
+
+           Name : localhost:fedora (some extra BS)
+           UUID : b0a06aba:7e656e03:1faefab3:43f07c92
+         Events : 423
+
+    Number   Major   Minor   RaidDevice State
+       3       8       49        0      active sync   /dev/sdd1
+       2       8       33        1      active sync   /dev/sdc1
+
+EOF
+elif [ $is_brief -eq 0 ]; then
+    cat <<EOF
+ARRAY /dev/md/fedora  metadata=1.2 UUID=b0a06aba:7e656e03:1faefab3:43f07c92 name=localhost:fedora
+EOF
+elif [ $is_export -eq 0 ]; then
+    cat <<EOF
+MD_LEVEL=raid1
+MD_DEVICES=2
+MD_NAME=localhost:fedora
+MD_ARRAY_SIZE=1072.69MB
+MD_UUID=b0a06aba:7e656e03:1faefab3:43f07c92
+MD_UPDATE_TIME=1478188514
+MD_DEV_UUID=dcf43d12:e6159daf:82b81713:2f6f181c
+MD_EVENTS=423
+EOF
+else
+    cat <<EOF
+/dev/sdc1:
+          Magic : a92b4efc
+        Version : 1.2
+    Feature Map : 0x1
+     Array UUID : b0a06aba:7e656e03:1faefab3:43f07c92
+           Name : localhost:fedora (some extra BS)
+  Creation Time : Fri Apr 29 12:46:43 2016
+     Raid Level : raid1
+   Raid Devices : 2
+
+ Avail Dev Size : 2095104 (1023.00 MiB 1072.69 MB)
+     Array Size : 1047552 (1023.00 MiB 1072.69 MB)
+    Data Offset : 2048 sectors
+   Super Offset : 8 sectors
+   Unused Space : before=1960 sectors, after=0 sectors
+          State : clean
+    Device UUID : dcf43d12:e6159daf:82b81713:2f6f181c
+
+Internal Bitmap : 8 sectors from superblock
+    Update Time : Thu Nov  3 16:55:14 2016
+  Bad Block Log : 512 entries available at offset 72 sectors
+       Checksum : e97a3b71 - correct
+         Events : 423
+
+
+   Device Role : Active device 1
+   Array State : AA ('A' == active, '.' == missing, 'R' == replacing)
+EOF
+fi

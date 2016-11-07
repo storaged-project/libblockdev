@@ -222,6 +222,7 @@ static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean
     BSError *bs_error = NULL;
     struct tm tm;
     char time_str[20];
+    gchar *name_str = NULL;
 
     data->level = g_strdup ((gchar*) g_hash_table_lookup (table, "Raid Level"));
     if (!(data->level))
@@ -237,7 +238,14 @@ static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean
     else
         data->num_devices = 0;
 
-    data->name = g_strdup ((gchar*) g_hash_table_lookup (table, "Name"));
+    name_str = ((gchar*) g_hash_table_lookup (table, "Name"));
+    if (name_str) {
+        g_strstrip (name_str);
+        first_space = strchr (name_str, ' ');
+        if (first_space)
+            *first_space = '\0';
+        data->name = g_strdup (name_str);
+    }
 
     value = (gchar*) g_hash_table_lookup (table, "Array Size");
     if (value) {
@@ -302,13 +310,22 @@ static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean
 static BDMDDetailData* get_detail_data_from_table (GHashTable *table, gboolean free_table) {
     BDMDDetailData *data = g_new0 (BDMDDetailData, 1);
     gchar *value = NULL;
+    gchar *name_str = NULL;
     gchar *first_space = NULL;
 
     data->metadata = g_strdup ((gchar*) g_hash_table_lookup (table, "Version"));
     data->creation_time = g_strdup ((gchar*) g_hash_table_lookup (table, "Creation Time"));
     data->level = g_strdup ((gchar*) g_hash_table_lookup (table, "Raid Level"));
     data->uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "UUID"));
-    data->name = g_strdup ((gchar*) g_hash_table_lookup (table, "Name"));
+
+    name_str = ((gchar*) g_hash_table_lookup (table, "Name"));
+    if (name_str) {
+        g_strstrip (name_str);
+        first_space = strchr (name_str, ' ');
+        if (first_space)
+            *first_space = '\0';
+        data->name = g_strdup (name_str);
+    }
 
     value = (gchar*) g_hash_table_lookup (table, "Array Size");
     if (value) {

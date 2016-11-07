@@ -478,6 +478,16 @@ class FakeMDADMutilTest(unittest.TestCase):
 
         self.assertEqual(ex_data.chunk_size, 128 * 1024)
 
+    def test_mdadm_name_extra_info(self):
+        """Verify that md_examine and md_detail work with extra MD RAID name info"""
+
+        with fake_utils("tests/mdadm_extra_name_stuff"):
+            ex_data = BlockDev.md_examine("fake_dev")
+            detail_data = BlockDev.md_detail("fake_dev")
+
+        self.assertEqual(ex_data.name, "localhost:fedora")
+        self.assertEqual(detail_data.name, "localhost:fedora")
+
 
 class MDUnloadTest(unittest.TestCase):
     def setUp(self):
