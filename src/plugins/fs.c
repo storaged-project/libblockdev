@@ -140,86 +140,100 @@ void bd_fs_vfat_info_free (BDFSVfatInfo *data) {
  */
 gboolean bd_fs_check_deps () {
     GError *error = NULL;
+    gboolean check_ret = TRUE;
     gboolean ret = bd_utils_check_util_version ("mkfs.ext4", NULL, "", NULL, &error);
 
     if (!ret && error) {
         g_warning("Cannot load the FS plugin: %s" , error->message);
         g_clear_error (&error);
+        check_ret = FALSE;
     }
 
     ret = bd_utils_check_util_version ("e2fsck", NULL, "", NULL, &error);
     if (!ret && error) {
         g_warning("Cannot load the FS plugin: %s" , error->message);
         g_clear_error (&error);
+        check_ret = FALSE;
     }
 
     ret = bd_utils_check_util_version ("tune2fs", NULL, "", NULL, &error);
     if (!ret && error) {
         g_warning("Cannot load the FS plugin: %s" , error->message);
         g_clear_error (&error);
+        check_ret = FALSE;
     }
 
     ret = bd_utils_check_util_version ("dumpe2fs", NULL, "", NULL, &error);
     if (!ret && error) {
         g_warning("Cannot load the FS plugin: %s" , error->message);
         g_clear_error (&error);
+        check_ret = FALSE;
     }
 
     ret = bd_utils_check_util_version ("resize2fs", NULL, "", NULL, &error);
     if (!ret && error) {
         g_warning("Cannot load the FS plugin: %s" , error->message);
         g_clear_error (&error);
+        check_ret = FALSE;
     }
 
     ret = bd_utils_check_util_version ("mkfs.xfs", NULL, "", NULL, &error);
     if (!ret && error) {
         g_warning("Cannot load the FS plugin: %s" , error->message);
         g_clear_error (&error);
+        check_ret = FALSE;
     }
 
     ret = bd_utils_check_util_version ("xfs_db", NULL, "", NULL, &error);
     if (!ret && error) {
         g_warning("Cannot load the FS plugin: %s" , error->message);
         g_clear_error (&error);
+        check_ret = FALSE;
     }
 
     ret = bd_utils_check_util_version ("xfs_repair", NULL, "", NULL, &error);
     if (!ret && error) {
         g_warning("Cannot load the FS plugin: %s" , error->message);
         g_clear_error (&error);
+        check_ret = FALSE;
     }
 
     ret = bd_utils_check_util_version ("xfs_admin", NULL, "", NULL, &error);
     if (!ret && error) {
         g_warning("Cannot load the FS plugin: %s" , error->message);
         g_clear_error (&error);
+        check_ret = FALSE;
     }
 
     ret = bd_utils_check_util_version ("xfs_growfs", NULL, "", NULL, &error);
     if (!ret && error) {
         g_warning("Cannot load the FS plugin: %s" , error->message);
         g_clear_error (&error);
+        check_ret = FALSE;
     }
 
     ret = bd_utils_check_util_version ("mkfs.vfat", NULL, "", NULL, &error);
     if (!ret && error) {
         g_warning("Cannot load the FS plugin: %s" , error->message);
         g_clear_error (&error);
+        check_ret = FALSE;
     }
 
     ret = bd_utils_check_util_version ("fatlabel", NULL, "", NULL, &error);
     if (!ret && error) {
         g_warning("Cannot load the FS plugin: %s" , error->message);
         g_clear_error (&error);
+        check_ret = FALSE;
     }
 
     ret = bd_utils_check_util_version ("fsck.vfat", NULL, "", NULL, &error);
     if (!ret && error) {
         g_warning("Cannot load the FS plugin: %s" , error->message);
         g_clear_error (&error);
+        check_ret = FALSE;
     }
 
-    return ret;
+    return check_ret;
 }
 
 /**
