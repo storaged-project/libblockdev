@@ -340,6 +340,26 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
  */
 gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gchar *type_guid, GError **error);
 
+/**
+ * bd_part_set_part_id:
+ * @disk: device the partition belongs to
+ * @part: partition the should be set for
+ * @part_id: partition Id
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @part_id type was successfully set for @part or not
+ */
+gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar *part_id, GError **error);
+
+/**
+ * bd_part_get_part_id:
+ * @disk: device the partition belongs to
+ * @part: partition the should be set for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns (transfer full): partition id type or %NULL in case of error
+ */
+gchar* bd_part_get_part_id (const gchar *disk, const gchar *part, GError **error);
 
 /**
  * bd_part_get_part_table_type_str:

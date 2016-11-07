@@ -1200,3 +1200,27 @@ class PartSetTypeCase(PartTestCase):
         # we should still get proper data back though
         self.assertTrue(ps)
         self.assertIn(ps.type_guid, ("", None))  # no type GUID
+
+class PartSetIdCase(PartTestCase):
+    def test_set_part_id(self):
+        """Verify that it is possible to set partition id (msdos partition type)"""
+
+        # we first need an MBR partition table
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
+        self.assertTrue(succ)
+
+        # for now, let's just create a typical primary partition starting at the
+        # sector 2048, 10 MiB big with optimal alignment
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+
+        # we should get proper data back
+        self.assertTrue(ps)
+
+        succ = BlockDev.part_set_part_id (self.loop_dev, ps.path, "0x8e")
+        self.assertTrue(succ)
+        part_id = BlockDev.part_get_part_id (self.loop_dev, ps.path)
+        self.assertEqual(part_id, "0x8e")
+
+        # we can't change part id to extended partition id
+        with self.assertRaises(GLib.GError):
+            BlockDev.part_set_part_id (self.loop_dev, ps.path, "0x85")

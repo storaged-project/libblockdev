@@ -123,6 +123,8 @@ gboolean bd_part_set_disk_flag (const gchar *disk, BDPartDiskFlag flag, gboolean
 gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 flags, GError **error);
 gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gchar *name, GError **error);
 gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gchar *type_guid, GError **error);
+gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar *part_id, GError **error);
+gchar* bd_part_get_part_id (const gchar *disk, const gchar *part, GError **error);
 
 const gchar* bd_part_get_part_table_type_str (BDPartTableType type, GError **error);
 const gchar* bd_part_get_flag_str (BDPartFlag flag, GError **error);

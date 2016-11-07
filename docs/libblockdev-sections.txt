@@ -389,6 +389,8 @@ bd_part_set_disk_flag
 bd_part_set_part_flags
 bd_part_set_part_name
 bd_part_set_part_type
+bd_part_set_part_id
+bd_part_get_part_id
 bd_part_error_quark
 </SECTION>
 
