@@ -304,16 +304,17 @@ gboolean bd_utils_exec_and_capture_output (const gchar **argv, const BDExtraArg 
     }
 
     if ((status != 0) || (g_strcmp0 ("", stdout_data) == 0)) {
-        if (stderr_data && (g_strcmp0 ("", stderr_data) != 0)) {
-            if (status != 0)
-                g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
-                             "Process reported exit code %d: %s%s", status, stdout_data, stderr_data);
-            else
-                g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT,
-                             "Process didn't provide any data on standard output. "
-                             "Error output: %s", stderr_data);
-            g_free (stdout_data);
-        }
+        if (status != 0)
+            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
+                         "Process reported exit code %d: %s%s", status,
+                         stdout_data ? stdout_data : "",
+                         stderr_data ? stderr_data : "");
+        else
+            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT,
+                         "Process didn't provide any data on standard output. "
+                         "Error output: %s", stderr_data ? stderr_data : "");
+        g_free (stderr_data);
+        g_free (stdout_data);
         return FALSE;
     } else {
         *output = stdout_data;
