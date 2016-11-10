@@ -580,9 +580,17 @@ BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (const gchar *mountpoint, gboole
     }
 
     success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
-    if (!success)
-        /* error is already populated from the call above or simply no output*/
-        return NULL;
+    if (!success) {
+        if (g_error_matches (*error,  BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
+            /* no output -> no subvolumes */
+            ret = g_new0 (BDBtrfsSubvolumeInfo*, 1);
+            g_clear_error (error);
+            return ret;
+        } else {
+            /* error is already populated from the call above or simply no output*/
+            return NULL;
+        }
+    }
 
     lines = g_strsplit (output, "\n", 0);
     g_free (output);
