@@ -178,21 +178,28 @@ static const gchar *table_type_str[BD_PART_TABLE_UNDEF] = {"msdos", "gpt"};
 static gboolean disk_commit (PedDisk *disk, const gchar *path, GError **error) {
     gint ret = 0;
     gint dev_fd = 0;
+    guint num_tries = 1;
 
-    /* XXX: try to grab an exclusive lock for the device so that udev doesn't
-       trigger events for it in between the two operations we need to perform
-       (see below) */
-    dev_fd = open (disk->dev->path, O_RDWR|O_CLOEXEC);
-    if (dev_fd >= 0)
-        /* if this fails, we can do no better anyway, so just ignore the return
-           value */
-        flock (dev_fd, LOCK_EX);
+    /* XXX: try to grab a lock for the device so that udev doesn't step in
+       between the two operations we need to perform (see below) with its
+       BLKRRPART ioctl() call which makes the device busy */
+    dev_fd = open (disk->dev->path, O_RDONLY|O_CLOEXEC);
+    if (dev_fd >= 0) {
+        ret = flock (dev_fd, LOCK_SH|LOCK_NB);
+        while ((ret != 0) && (num_tries <= 5)) {
+            g_usleep (100 * 1000); /* microseconds */
+            ret = flock (dev_fd, LOCK_SH|LOCK_NB);
+            num_tries++;
+        }
+    }
+    /* Just continue even in case we don't get the lock, there's still a
+       chance things will just work. If not, an error will be reported
+       anyway with no harm. */
 
     ret = ped_disk_commit_to_dev (disk);
     if (ret == 0) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to commit changes to device '%s'", path);
-        flock (dev_fd, LOCK_UN);
         close (dev_fd);
         return FALSE;
     }
@@ -201,12 +208,10 @@ static gboolean disk_commit (PedDisk *disk, const gchar *path, GError **error) {
     if (ret == 0) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to inform OS about changes on the '%s' device", path);
-        flock (dev_fd, LOCK_UN);
         close (dev_fd);
         return FALSE;
     }
 
-    flock (dev_fd, LOCK_UN);
     close (dev_fd);
     return TRUE;
 }
