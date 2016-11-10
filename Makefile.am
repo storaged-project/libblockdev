@@ -39,6 +39,7 @@ PLUGINS = btrfs \
 ALT_PLUGINS = lvm-dbus
 
 LIBRARY_TESTS = library
+UTILS_TESTS = utils
 
 run-ipython: all
 	GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=src/python G_MESSAGES_DEBUG=all LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ ipython3
@@ -54,7 +55,7 @@ test: all pylint
 	@rm -f tests/error_occurred;
 	@rm -f $(TEST_SUITE_LOG)
 	@touch $(TEST_SUITE_LOG)
-	for plugin in ${PLUGINS} ${LIBRARY_TESTS}; do \
+	for plugin in ${PLUGINS} ${LIBRARY_TESTS} ${UTILS_TESTS}; do \
 		$(MAKE) test-plugin-$$plugin || touch tests/error_occurred; \
 	done
 	$(MAKE) test-lvm-dbus || touch tests/error_occurred
@@ -62,7 +63,7 @@ test: all pylint
 
 fast-test: all pylint
 	@rm -f tests/error_occurred;
-	for plugin in ${PLUGINS} ${LIBRARY_TESTS}; do \
+	for plugin in ${PLUGINS} ${LIBRARY_TESTS} ${UTILS_TESTS}; do \
 		$(MAKE) fast-test-plugin-$$plugin || touch tests/error_occurred; \
 	done
 	$(MAKE) fast-test-lvm-dbus || touch tests/error_occurred
