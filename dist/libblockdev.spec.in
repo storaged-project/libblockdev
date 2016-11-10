@@ -1,5 +1,5 @@
 Name:        libblockdev
-Version:     2.0
+Version:     2.1
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -578,6 +578,19 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Thu Nov 10 2016 Vratislav Podzimek <vpodzime@redhat.com> - 2.1-1
+- Do not require an exclusive lock on the device to commit part stuff (vpodzime)
+- Prevent failure if there are no btrfs subvolumes (vpodzime)
+- Fix the test for getting version of a failing utility (vpodzime)
+- Also run the utils tests (vpodzime)
+- Bump the version of the pkgconfig module (vpodzime)
+- Include utils.h in plugins that need it (vpodzime)
+- Fix dependency check in fs plugin (vtrefny)
+- Add support for setting part id (part type) on msdos part tables (vtrefny)
+- Trim the extra info for MD RAID's name (vpodzime)
+- Add xfsprogs and dosfstools as dependencies of the fs plugin (vpodzime)
+- Fix md_name_from_node to work with the "/dev/" prefix (vpodzime)
+
 * Wed Nov  2 2016 Vratislav Podzimek <vpodzime@redhat.com> - 2.0-1
 - New major upstream release
 
