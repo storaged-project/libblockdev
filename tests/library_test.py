@@ -117,7 +117,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         os.system("make -C src/plugins/ libbd_lvm.la &>/dev/null")
 
         # proclaim the new build a different plugin
-        os.system("cp src/plugins/.libs/libbd_lvm.so src/plugins/.libs/libbd_lvm2.so.0")
+        os.system("cp src/plugins/.libs/libbd_lvm.so src/plugins/.libs/libbd_lvm2.so.2")
 
         # change the sources back and recompile
         os.system("sed -ri 's?1024;//test-change?BD_LVM_MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
@@ -129,7 +129,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertTrue(BlockDev.reinit(None, True, None))
 
         # new LVM plugin loaded, max LV size should be 1024 bytes
-        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm2.so.0")
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm2.so.2")
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), 1024)
 
         # reinit with the original config
@@ -148,7 +148,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertTrue(BlockDev.reinit(None, True, None))
 
         # new LVM plugin loaded, max LV size should be 1024 bytes
-        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm2.so.0")
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm2.so.2")
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), 1024)
 
         # reinit with the original config
@@ -180,7 +180,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         os.system("make -C src/plugins/ libbd_lvm.la &>/dev/null")
 
         # proclaim the new build a different plugin
-        os.system("cp src/plugins/.libs/libbd_lvm.so src/plugins/.libs/libbd_lvm2.so.0")
+        os.system("cp src/plugins/.libs/libbd_lvm.so src/plugins/.libs/libbd_lvm2.so.2")
 
         # change the sources back and recompile
         os.system("sed -ri 's?gboolean bd_lvm_check_deps \(\) \{ return FALSE;//test-change?gboolean bd_lvm_check_deps () {?' src/plugins/lvm.c > /dev/null")
@@ -193,7 +193,7 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         # the original plugin should be loaded because the new one should fail
         # to load (due to check() returning FALSE)
-        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm.so.0")
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm.so.2")
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
 
         # reinit with the original config
@@ -213,7 +213,7 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         # the original plugin should be loaded because the new one should fail
         # to load (due to check() returning FALSE)
-        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm.so.0")
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm.so.2")
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
 
         # reinit with the original config
