@@ -21,7 +21,7 @@ def wait_for_resync():
         resync = True
         while resync:
             with open("/proc/mdstat", "r") as f:
-                resync = "resync" in f
+                resync = "resync" in f.read()
             if resync:
                 print("Sleeping")
                 time.sleep(1)
