@@ -100,6 +100,34 @@ class LoopTestGetBackingFile(LoopTestCase):
         f_name = BlockDev.loop_get_backing_file(self.loop)
         self.assertEqual(f_name, self.dev_file)
 
+class LoopTestGetSetAutoclear(LoopTestCase):
+    def testLoop_get_set_autoclear(self):
+        """Verify that getting and setting the autoclear flag works as expected"""
+
+        with self.assertRaises(GLib.Error):
+            BlockDev.loop_get_autoclear("/non/existing")
+
+        with self.assertRaises(GLib.Error):
+            BlockDev.loop_set_autoclear("/non/existing", True)
+
+        succ, self.loop = BlockDev.loop_setup(self.dev_file)
+        self.assertFalse(BlockDev.loop_get_autoclear(self.loop))
+
+        self.assertTrue(BlockDev.loop_set_autoclear(self.loop, True))
+        self.assertTrue(BlockDev.loop_get_autoclear(self.loop))
+
+        self.assertTrue(BlockDev.loop_set_autoclear(self.loop, False))
+        self.assertFalse(BlockDev.loop_get_autoclear(self.loop))
+
+        # now the same, but with the "/dev/" prefix
+        loop = "/dev/" + self.loop
+        self.assertTrue(BlockDev.loop_set_autoclear(loop, True))
+        self.assertTrue(BlockDev.loop_get_autoclear(loop))
+
+        self.assertTrue(BlockDev.loop_set_autoclear(loop, False))
+        self.assertFalse(BlockDev.loop_get_autoclear(loop))
+
+
 class LoopUnloadTest(unittest.TestCase):
     def setUp(self):
         # make sure the library is initialized with all plugins loaded for other

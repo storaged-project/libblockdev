@@ -20,6 +20,10 @@
 #include <glib.h>
 #include <unistd.h>
 #include <glob.h>
+#include <string.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/loop.h>
 #include <blockdev/utils.h>
 #include "loop.h"
 
@@ -235,4 +239,97 @@ gboolean bd_loop_teardown (const gchar *loop, GError **error) {
     g_free (dev_loop);
 
     return success;
+}
+
+/**
+ * bd_loop_get_autoclear:
+ * @loop: path or name of the loop device
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the autoclear flag is set on the @loop device or not (if %FALSE, @error may be set)
+ */
+gboolean bd_loop_get_autoclear (const gchar *loop, GError **error) {
+    gchar *dev_loop = NULL;
+    gint fd = -1;
+    struct loop_info64 li64;
+
+    if (!g_str_has_prefix (loop, "/dev/"))
+        dev_loop = g_strdup_printf ("/dev/%s", loop);
+
+    fd = open (dev_loop ? dev_loop : loop, O_RDWR);
+    g_free (dev_loop);
+    if (fd < 0) {
+        g_set_error (error, BD_LOOP_ERROR, BD_LOOP_ERROR_DEVICE,
+                     "Failed to open device %s: %m", loop);
+        return FALSE;
+    }
+
+    memset (&li64, 0, sizeof (li64));
+    if (ioctl (fd, LOOP_GET_STATUS64, &li64) < 0) {
+        g_set_error (error, BD_LOOP_ERROR, BD_LOOP_ERROR_FAIL,
+                     "Failed to get status of the device %s: %m", loop);
+        close (fd);
+        return FALSE;
+    }
+
+    close (fd);
+    return (li64.lo_flags & LO_FLAGS_AUTOCLEAR) != 0;
+}
+
+/**
+ * bd_loop_set_autoclear:
+ * @loop: path or name of the loop device
+ * @autoclear: whether to set or unset the autoclear flag
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the autoclear flag was successfully set on the @loop device or not
+ */
+gboolean bd_loop_set_autoclear (const gchar *loop, gboolean autoclear, GError **error) {
+    gchar *dev_loop = NULL;
+    gint fd = -1;
+    struct loop_info64 li64;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    if (!g_str_has_prefix (loop, "/dev/"))
+        dev_loop = g_strdup_printf ("/dev/%s", loop);
+
+    msg = g_strdup_printf ("Started setting up the autoclear flag on the /dev/%s device",
+                           dev_loop ? dev_loop : loop);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    fd = open (dev_loop ? dev_loop : loop, O_RDWR);
+    g_free (dev_loop);
+    if (fd < 0) {
+        g_set_error (error, BD_LOOP_ERROR, BD_LOOP_ERROR_DEVICE,
+                     "Failed to open device %s: %m", loop);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    memset (&li64, 0, sizeof (li64));
+    if (ioctl (fd, LOOP_GET_STATUS64, &li64) < 0) {
+        g_set_error (error, BD_LOOP_ERROR, BD_LOOP_ERROR_FAIL,
+                     "Failed to get status of the device %s: %m", loop);
+        close (fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    if (autoclear)
+        li64.lo_flags |= LO_FLAGS_AUTOCLEAR;
+    else
+        li64.lo_flags &= (~LO_FLAGS_AUTOCLEAR);
+
+    if (ioctl (fd, LOOP_SET_STATUS64, &li64) < 0) {
+        g_set_error (error, BD_LOOP_ERROR, BD_LOOP_ERROR_FAIL,
+                     "Failed to set status of the device %s: %m", loop);
+        close (fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
 }
