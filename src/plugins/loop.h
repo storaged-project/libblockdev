@@ -28,6 +28,7 @@ void bd_loop_close ();
 gchar* bd_loop_get_backing_file (const gchar *dev_name, GError **error);
 gchar* bd_loop_get_loop_name (const gchar *file, GError **error);
 gboolean bd_loop_setup (const gchar *file, guint64 offset, guint64 size, gboolean read_only, gboolean part_scan, const gchar **loop_name, GError **error);
+gboolean bd_loop_setup_from_fd (gint fd, guint64 offset, guint64 size, gboolean read_only, gboolean part_scan, const gchar **loop_name, GError **error);
 gboolean bd_loop_teardown (const gchar *loop, GError **error);
 
 gboolean bd_loop_get_autoclear (const gchar *loop, GError **error);
