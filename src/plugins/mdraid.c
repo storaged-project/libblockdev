@@ -1132,7 +1132,7 @@ gchar* bd_md_name_from_node (const gchar *node, GError **error) {
  * @raid_name: name of the RAID device to get status
  * @error: (out): place to store error (if any)
  *
- * Returns: status of the @raid_name RAID.
+ * Returns: (transfer full): status of the @raid_name RAID.
  */
 gchar* bd_md_get_status (const gchar *raid_name, GError **error) {
     gboolean success = FALSE;
@@ -1146,16 +1146,15 @@ gchar* bd_md_get_status (const gchar *raid_name, GError **error) {
         return NULL;
 
     sys_path = g_strdup_printf ("/sys/class/block/%s/md/array_state", raid_node);
+    g_free (raid_node);
 
     success = g_file_get_contents (sys_path, &ret, NULL, error);
     if (!success) {
         /* error is alraedy populated */
-        g_free (raid_node);
         g_free (sys_path);
         return NULL;
     }
 
-    g_free (raid_node);
     g_free (sys_path);
 
     return g_strstrip (ret);
@@ -1194,7 +1193,7 @@ gboolean bd_md_set_bitmap_location (const gchar *raid_name, const gchar *locatio
  * @raid_name: name of the RAID device to get the bitmap location
  * @error: (out): place to store error (if any)
  *
- * Returns: bitmap location for @raid_name
+ * Returns: (transfer full): bitmap location for @raid_name
  */
 gchar* bd_md_get_bitmap_location (const gchar *raid_name, GError **error) {
     gchar *raid_node = NULL;
@@ -1251,9 +1250,9 @@ gboolean bd_md_request_sync_action (const gchar *raid_name, const gchar *action,
         return FALSE;
 
     sys_path = g_strdup_printf ("/sys/class/block/%s/md/sync_action", raid_node);
+    g_free (raid_node);
 
     success = bd_utils_echo_str_to_file (action, sys_path, error);
-    g_free (raid_node);
     g_free (sys_path);
     if (!success) {
         g_prefix_error (error,  "Failed to set requested sync action.");

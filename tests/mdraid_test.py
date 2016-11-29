@@ -151,6 +151,10 @@ class MDTestCreateDeactivateDestroy(MDTestCase):
                                       1, None, True)
             self.assertTrue(succ)
 
+        # newly created array should be 'clean'
+        state = BlockDev.md_get_status("bd_test_md")
+        self.assertEqual(state, "clean")
+
         succ = BlockDev.md_deactivate("bd_test_md")
         self.assertTrue(succ)
 
@@ -448,6 +452,48 @@ class MDTestNameNodeBijection(MDTestCase):
         self.assertTrue(succ)
         succ = BlockDev.md_destroy(self.loop_dev3)
         self.assertTrue(succ)
+
+class MDTestSetBitmapLocation(MDTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_set_bitmap_location(self):
+        """Verify we can change bitmap location for an existing MD array"""
+
+        with wait_for_action("resync"):
+            succ = BlockDev.md_create("bd_test_md", "raid1",
+                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
+                                      1, None, True)
+            self.assertTrue(succ)
+
+        succ = BlockDev.md_set_bitmap_location("bd_test_md", "none")
+        self.assertTrue(succ)
+
+        loc = BlockDev.md_get_bitmap_location("bd_test_md")
+        self.assertEqual(loc, "none")
+
+        succ = BlockDev.md_set_bitmap_location("bd_test_md", "internal")
+        self.assertTrue(succ)
+
+        loc = BlockDev.md_get_bitmap_location("bd_test_md")
+        self.assertEqual(loc, "+8")
+
+class MDTestRequestSyncAction(MDTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_request_sync_action(self):
+        """Verify we can request sync action on an existing MD array"""
+
+        with wait_for_action("resync"):
+            succ = BlockDev.md_create("bd_test_md", "raid1",
+                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
+                                      1, None, True)
+            self.assertTrue(succ)
+
+        with wait_for_action("check"):
+            succ = BlockDev.md_request_sync_action("bd_test_md", "check")
+
+        node = BlockDev.md_node_from_name("bd_test_md")
+        with open("/sys/block/%s/md/last_sync_action" % node) as f:
+            action = f.read().strip()
+        self.assertEqual(action, "check")
 
 class FakeMDADMutilTest(unittest.TestCase):
     # no setUp nor tearDown needed, we are gonna use fake utils
