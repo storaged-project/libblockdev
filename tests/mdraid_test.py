@@ -312,6 +312,7 @@ class MDTestNominateDenominateActive(MDTestCase):
     # cannot be deactivated in the end (don't ask me why)
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     @unittest.skipIf("JENKINS_HOME" in os.environ, "skipping leaky test in jenkins")
+    @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
     def test_nominate_denominate_active(self):
         """Verify that nominate and denominate deivice works as expected on (de)activated MD RAID"""
 
