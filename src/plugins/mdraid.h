@@ -16,6 +16,8 @@ typedef enum {
     BD_MD_ERROR_PARSE,
     BD_MD_ERROR_BAD_FORMAT,
     BD_MD_ERROR_NO_MATCH,
+    BD_MD_ERROR_INVAL,
+    BD_MD_ERROR_FAIL,
 } BDMDError;
 
 typedef struct BDMDExamineData {
@@ -85,5 +87,9 @@ gchar* bd_md_canonicalize_uuid (const gchar *uuid, GError **error);
 gchar* bd_md_get_md_uuid (const gchar *uuid, GError **error);
 gchar* bd_md_node_from_name (const gchar *name, GError **error);
 gchar* bd_md_name_from_node (const gchar *node, GError **error);
+gchar* bd_md_get_status (const gchar *raid_name, GError **error);
+gboolean bd_md_set_bitmap_location (const gchar *raid_name, const gchar *location, GError **error);
+gchar* bd_md_get_bitmap_location (const gchar *raid_name, GError **error);
+gboolean bd_md_request_sync_action (const gchar *raid_name, const gchar *action, GError **error);
 
 #endif  /* BD_MD */
