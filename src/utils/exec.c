@@ -753,3 +753,30 @@ void bd_utils_report_finished (guint64 task_id, gchar *msg) {
     if (prog_func)
         prog_func (task_id, BD_UTILS_PROG_FINISHED, 100, msg);
 }
+
+/**
+ * bd_utils_echo_str_to_file:
+ * @str: string to write to @file_path
+ * @file_path: path to file
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @str was successfully written to @file_path
+ * or not.
+ */
+gboolean bd_utils_echo_str_to_file (const gchar *str, const gchar *file_path, GError **error) {
+    GIOChannel *out_file = NULL;
+    gsize bytes_written = 0;
+
+    out_file = g_io_channel_new_file (file_path, "w", error);
+    if (!out_file || g_io_channel_write_chars (out_file, str, -1, &bytes_written, error) != G_IO_STATUS_NORMAL) {
+        g_prefix_error (error, "Failed to write '%s' to file '%s': ", str, file_path);
+        return FALSE;
+    }
+    if (g_io_channel_shutdown (out_file, TRUE, error) != G_IO_STATUS_NORMAL) {
+        g_prefix_error (error, "Failed to flush and close the file '%s': ", file_path);
+        g_io_channel_unref (out_file);
+        return FALSE;
+    }
+    g_io_channel_unref (out_file);
+    return TRUE;
+}

@@ -287,25 +287,6 @@ static gboolean unload_kernel_module (const gchar *module_name, GError **error) 
     return TRUE;
 }
 
-static gboolean echo_str_to_file (const gchar *str, const gchar *file_path, GError **error) {
-    GIOChannel *out_file = NULL;
-    gsize bytes_written = 0;
-
-    out_file = g_io_channel_new_file (file_path, "w", error);
-    if (!out_file || g_io_channel_write_chars (out_file, str, -1, &bytes_written, error) != G_IO_STATUS_NORMAL) {
-        g_prefix_error (error, "Failed to write '%s' to file '%s': ", str, file_path);
-        return FALSE;
-    }
-    if (g_io_channel_shutdown (out_file, TRUE, error) != G_IO_STATUS_NORMAL) {
-        g_prefix_error (error, "Failed to flush and close the file '%s': ", file_path);
-        g_io_channel_unref (out_file);
-        return FALSE;
-    }
-    g_io_channel_unref (out_file);
-    return TRUE;
-}
-
-
 /**
  * bd_kbd_zram_create_devices:
  * @num_devices: number of devices to create
@@ -363,7 +344,7 @@ gboolean bd_kbd_zram_create_devices (guint64 num_devices, const guint64 *sizes, 
         for (i=0; i < num_devices; i++) {
             file_name = g_strdup_printf ("/sys/block/zram%"G_GUINT64_FORMAT"/max_comp_streams", i);
             num_str = g_strdup_printf ("%"G_GUINT64_FORMAT, nstreams[i]);
-            success = echo_str_to_file (num_str, file_name, error);
+            success = bd_utils_echo_str_to_file (num_str, file_name, error);
             g_free (file_name);
             g_free (num_str);
             if (!success) {
@@ -378,7 +359,7 @@ gboolean bd_kbd_zram_create_devices (guint64 num_devices, const guint64 *sizes, 
     for (i=0; i < num_devices; i++) {
         file_name = g_strdup_printf ("/sys/block/zram%"G_GUINT64_FORMAT"/disksize", i);
         num_str = g_strdup_printf ("%"G_GUINT64_FORMAT, sizes[i]);
-        success = echo_str_to_file (num_str, file_name, error);
+        success = bd_utils_echo_str_to_file (num_str, file_name, error);
         g_free (file_name);
         g_free (num_str);
         if (!success) {
@@ -468,7 +449,7 @@ gboolean bd_kbd_zram_add_device (guint64 size, guint64 nstreams, gchar **device,
     if (nstreams > 0) {
         path = g_strdup_printf ("/sys/block/zram%"G_GUINT64_FORMAT"/max_comp_streams", dev_num);
         num_str = g_strdup_printf ("%"G_GUINT64_FORMAT, nstreams);
-        success = echo_str_to_file (num_str, path, error);
+        success = bd_utils_echo_str_to_file (num_str, path, error);
         g_free (path);
         g_free (num_str);
         if (!success) {
@@ -480,7 +461,7 @@ gboolean bd_kbd_zram_add_device (guint64 size, guint64 nstreams, gchar **device,
 
     path = g_strdup_printf ("/sys/block/zram%"G_GUINT64_FORMAT"/disksize", dev_num);
     num_str = g_strdup_printf ("%"G_GUINT64_FORMAT, size);
-    success = echo_str_to_file (num_str, path, error);
+    success = bd_utils_echo_str_to_file (num_str, path, error);
     g_free (path);
     g_free (num_str);
     if (!success) {
@@ -524,7 +505,7 @@ gboolean bd_kbd_zram_remove_device (const gchar *device, GError **error) {
         return FALSE;
     }
 
-    success = echo_str_to_file (dev_num_str, "/sys/class/zram-control/hot_remove", error);
+    success = bd_utils_echo_str_to_file (dev_num_str, "/sys/class/zram-control/hot_remove", error);
     if (!success) {
         g_prefix_error (error, "Failed to remove device '%s': ", device);
         bd_utils_report_finished (progress_id, (*error)->message);
@@ -764,7 +745,7 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
     dev_name++;
 
     /* make sure the bcache device is registered */
-    success = echo_str_to_file (backing_device, "/sys/fs/bcache/register", error);
+    success = bd_utils_echo_str_to_file (backing_device, "/sys/fs/bcache/register", error);
     if (!success) {
         /* error is already populated */
         bd_utils_report_finished (progress_id, (*error)->message);
@@ -841,7 +822,7 @@ gboolean bd_kbd_bcache_attach (const gchar *c_set_uuid, const gchar *bcache_devi
         bcache_device += 5;
 
     path = g_strdup_printf ("/sys/block/%s/bcache/attach", bcache_device);
-    success = echo_str_to_file (c_set_uuid, path, error);
+    success = bd_utils_echo_str_to_file (c_set_uuid, path, error);
     g_free (path);
 
     /* error is already populated (if any) */
@@ -910,7 +891,7 @@ gboolean bd_kbd_bcache_detach (const gchar *bcache_device, gchar **c_set_uuid, G
     uuid++;
 
     path = g_strdup_printf ("/sys/block/%s/bcache/detach", bcache_device);
-    success = echo_str_to_file (uuid, path, error);
+    success = bd_utils_echo_str_to_file (uuid, path, error);
     if (!success) {
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_DETACH_FAIL,
                      "Failed to detach '%s' from '%s'", uuid, bcache_device);
@@ -986,7 +967,7 @@ gboolean bd_kbd_bcache_destroy (const gchar *bcache_device, GError **error) {
 
     if (c_set_uuid) {
         path = g_strdup_printf ("/sys/fs/bcache/%s/stop", c_set_uuid);
-        success = echo_str_to_file ("1", path, error);
+        success = bd_utils_echo_str_to_file ("1", path, error);
         g_free (path);
         if (!success) {
             g_prefix_error (error, "Failed to stop the cache set: ");
@@ -996,7 +977,7 @@ gboolean bd_kbd_bcache_destroy (const gchar *bcache_device, GError **error) {
     }
 
     path = g_strdup_printf ("/sys/block/%s/bcache/stop", bcache_device);
-    success = echo_str_to_file ("1", path, error);
+    success = bd_utils_echo_str_to_file ("1", path, error);
     g_free (path);
     if (!success) {
         g_prefix_error (error, "Failed to stop the bcache: ");
@@ -1142,7 +1123,7 @@ gboolean bd_kbd_bcache_set_mode (const gchar *bcache_device, BDKBDBcacheMode mod
         return FALSE;
     }
 
-    success = echo_str_to_file ((gchar*) mode_str, path, error);
+    success = bd_utils_echo_str_to_file ((gchar*) mode_str, path, error);
     if (!success) {
         g_prefix_error (error, "Failed to set mode '%s' to '%s'", mode_str, bcache_device);
         g_free (path);
