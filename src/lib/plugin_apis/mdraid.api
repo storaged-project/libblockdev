@@ -372,7 +372,7 @@ gchar* bd_md_get_md_uuid (const gchar *uuid, GError **error);
  * @name: name of the MD RAID
  * @error: (out): place to store error (if any)
  *
- * Returns: path to the @name MD RAID's device node or %NULL in case of error
+ * Returns: device node of the @name MD RAID or %NULL in case of error
  */
 gchar* bd_md_node_from_name (const gchar *name, GError **error);
 
