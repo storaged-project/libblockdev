@@ -149,7 +149,10 @@ BDLoopError
 bd_loop_get_backing_file
 bd_loop_get_loop_name
 bd_loop_setup
+bd_loop_setup_from_fd
 bd_loop_teardown
+bd_loop_get_autoclear
+bd_loop_set_autoclear
 </SECTION>
 
 <SECTION>
