@@ -1061,7 +1061,7 @@ gchar* bd_md_get_md_uuid (const gchar *uuid, GError **error) {
  * @name: name of the MD RAID
  * @error: (out): place to store error (if any)
  *
- * Returns: path to the @name MD RAID's device node or %NULL in case of error
+ * Returns: device node of the @name MD RAID or %NULL in case of error
  */
 gchar* bd_md_node_from_name (const gchar *name, GError **error) {
     gchar *symlink = NULL;
@@ -1125,4 +1125,139 @@ gchar* bd_md_name_from_node (const gchar *node, GError **error) {
         g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_NO_MATCH,
                      "No name found for the node '%s'", node);
     return name;
+}
+
+/**
+ * bd_md_get_status
+ * @raid_name: name of the RAID device to get status
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): status of the @raid_name RAID.
+ */
+gchar* bd_md_get_status (const gchar *raid_name, GError **error) {
+    gboolean success = FALSE;
+    gchar *ret = NULL;
+    gchar *raid_node = NULL;
+    gchar *sys_path = NULL;
+
+    raid_node = bd_md_node_from_name (raid_name, error);
+    if (!raid_node)
+        /* error is already populated */
+        return NULL;
+
+    sys_path = g_strdup_printf ("/sys/class/block/%s/md/array_state", raid_node);
+    g_free (raid_node);
+
+    success = g_file_get_contents (sys_path, &ret, NULL, error);
+    if (!success) {
+        /* error is alraedy populated */
+        g_free (sys_path);
+        return NULL;
+    }
+
+    g_free (sys_path);
+
+    return g_strstrip (ret);
+}
+
+/**
+ * bd_md_set_bitmap_location:
+ * @raid_name: name of the RAID device to set the bitmap location
+ * @location: bitmap location (none, internal or path)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: bitmap location for @raid_name RAID
+ */
+gboolean bd_md_set_bitmap_location (const gchar *raid_name, const gchar *location, GError **error) {
+    gboolean ret = FALSE;
+    gchar *md_path = g_strdup_printf ("/dev/md/%s", raid_name);
+    const gchar *argv[] = {"mdadm", "--grow", md_path, "--bitmap", location, NULL};
+
+    if ((g_strcmp0 (location, "none") != 0) && (g_strcmp0 (location, "internal") != 0) &&
+        !g_str_has_prefix (location , "/")) {
+
+        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_INVAL,
+                     "Bitmap location must start with '/' or be 'internal' or 'none'.");
+        return FALSE;
+    }
+
+    ret = bd_utils_exec_and_report_error (argv, NULL, error);
+
+    g_free (md_path);
+
+    return ret;
+}
+
+/**
+ * bd_md_get_bitmap_location:
+ * @raid_name: name of the RAID device to get the bitmap location
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): bitmap location for @raid_name
+ */
+gchar* bd_md_get_bitmap_location (const gchar *raid_name, GError **error) {
+    gchar *raid_node = NULL;
+    gchar *sys_path = NULL;
+    gchar *ret = NULL;
+    gboolean success = FALSE;
+
+    raid_node = bd_md_node_from_name (raid_name, error);
+    if (!raid_node)
+        /* error is already populated */
+        return FALSE;
+
+    sys_path = g_strdup_printf ("/sys/class/block/%s/md/bitmap/location", raid_node);
+    g_free (raid_node);
+
+    success = g_file_get_contents (sys_path, &ret, NULL, error);
+    if (!success) {
+        /* error is alraedy populated */
+        g_free (sys_path);
+        return NULL;
+    }
+
+    g_free (sys_path);
+
+    return g_strstrip (ret);
+}
+
+/**
+ * bd_md_request_sync_action:
+ * @raid_name: name of the RAID device to request sync action on
+ * @action: requested sync action (resync, recovery, check, repair or idle)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @action was successfully requested for the @raid_name
+ * RAID or not.
+ */
+gboolean bd_md_request_sync_action (const gchar *raid_name, const gchar *action, GError **error) {
+    gchar *sys_path = NULL;
+    gchar *raid_node = NULL;
+    gboolean success = FALSE;
+
+    if ((g_strcmp0 (action, "resync") != 0) && (g_strcmp0 (action, "recovery") != 0) &&
+        (g_strcmp0 (action, "check") != 0) && (g_strcmp0 (action, "repair") != 0) &&
+        (g_strcmp0 (action, "idle") != 0)) {
+
+        g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_INVAL,
+                     "Action must be one of resync, recovery, check, repair or idle.");
+        return FALSE;
+    }
+
+    raid_node = bd_md_node_from_name (raid_name, error);
+    if (!raid_node)
+        /* error is already populated */
+        return FALSE;
+
+    sys_path = g_strdup_printf ("/sys/class/block/%s/md/sync_action", raid_node);
+    g_free (raid_node);
+
+    success = bd_utils_echo_str_to_file (action, sys_path, error);
+    g_free (sys_path);
+    if (!success) {
+        g_prefix_error (error,  "Failed to set requested sync action.");
+        return FALSE;
+    }
+
+    return TRUE;
 }

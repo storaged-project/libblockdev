@@ -113,6 +113,7 @@ bd_utils_init_prog_reporting
 bd_utils_report_finished
 bd_utils_report_progress
 bd_utils_report_started
+bd_utils_echo_str_to_file
 BD_UTILS_SIZE_ERROR
 BDUtilsSizeError
 bd_utils_size_human_readable
@@ -279,6 +280,10 @@ bd_md_get_md_uuid
 bd_md_detail
 bd_md_node_from_name
 bd_md_name_from_node
+bd_md_get_status
+bd_md_set_bitmap_location
+bd_md_get_bitmap_location
+bd_md_request_sync_action
 </SECTION>
 
 <SECTION>

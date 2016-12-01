@@ -13,16 +13,16 @@ if not BlockDev.is_initialized():
     BlockDev.init(None, None)
 
 @contextmanager
-def wait_for_resync():
+def wait_for_action(action_name):
     try:
         yield
     finally:
         time.sleep(2)
-        resync = True
-        while resync:
+        action = True
+        while action:
             with open("/proc/mdstat", "r") as f:
-                resync = "resync" in f.read()
-            if resync:
+                action = action_name in f.read()
+            if action:
                 print("Sleeping")
                 time.sleep(1)
 
@@ -145,11 +145,15 @@ class MDTestCreateDeactivateDestroy(MDTestCase):
                                ["/non/existing/device", self.loop_dev2],
                                1, None, True)
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
                                       1, None, True)
             self.assertTrue(succ)
+
+        # newly created array should be 'clean'
+        state = BlockDev.md_get_status("bd_test_md")
+        self.assertEqual(state, "clean")
 
         succ = BlockDev.md_deactivate("bd_test_md")
         self.assertTrue(succ)
@@ -166,7 +170,7 @@ class MDTestCreateWithChunkSize(MDTestCase):
     def test_create_with_chunk_size(self):
         """Verify that it is possible to create and MD RAID with specific chunk size """
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid0",
                                       [self.loop_dev, self.loop_dev2],
                                       0, None, False, 512 * 1024)
@@ -190,7 +194,7 @@ class MDTestActivateDeactivate(MDTestCase):
     def test_activate_deactivate(self):
         """Verify that it is possible to activate and deactivate an MD RAID"""
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
                                       1, None, True)
@@ -199,7 +203,7 @@ class MDTestActivateDeactivate(MDTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.md_deactivate("non_existing_md")
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_deactivate("bd_test_md")
             self.assertTrue(succ)
 
@@ -207,17 +211,17 @@ class MDTestActivateDeactivate(MDTestCase):
             BlockDev.md_activate("bd_test_md",
                                  ["/non/existing/device", self.loop_dev2, self.loop_dev3], None)
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_activate("bd_test_md",
                                         [self.loop_dev, self.loop_dev2, self.loop_dev3], None)
             self.assertTrue(succ)
 
         # try to deactivate using the node instead of name
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_deactivate(BlockDev.md_node_from_name("bd_test_md"))
             self.assertTrue(succ)
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_activate("bd_test_md",
                                         [self.loop_dev, self.loop_dev2, self.loop_dev3], None)
             self.assertTrue(succ)
@@ -227,13 +231,13 @@ class MDTestActivateWithUUID(MDTestCase):
     def test_activate_with_uuid(self):
         """Verify that it is possible to activate an MD RAID with UUID"""
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
                                       1, None, True)
             self.assertTrue(succ)
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_deactivate("bd_test_md")
             self.assertTrue(succ)
 
@@ -241,7 +245,7 @@ class MDTestActivateWithUUID(MDTestCase):
         self.assertTrue(md_info)
         self.assertTrue(md_info.uuid)
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_activate("bd_test_md", [self.loop_dev, self.loop_dev2, self.loop_dev3], md_info.uuid)
 
 class MDTestActivateByUUID(MDTestCase):
@@ -249,13 +253,13 @@ class MDTestActivateByUUID(MDTestCase):
     def test_activate_by_uuid(self):
         """Verify that it is possible to activate an MD RAID by UUID"""
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
                                       1, None, True)
             self.assertTrue(succ)
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_deactivate("bd_test_md")
             self.assertTrue(succ)
 
@@ -264,15 +268,15 @@ class MDTestActivateByUUID(MDTestCase):
         self.assertTrue(md_info.uuid)
 
         # should work with member devices specified
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_activate(None, [self.loop_dev, self.loop_dev2, self.loop_dev3], md_info.uuid)
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_deactivate("bd_test_md")
             self.assertTrue(succ)
 
         # as well as without them
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_activate(None, None, md_info.uuid)
 
 
@@ -281,29 +285,29 @@ class MDTestNominateDenominate(MDTestCase):
     def test_nominate_denominate(self):
         """Verify that it is possible to nominate and denominate an MD RAID device"""
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
                                       1, None, False)
             self.assertTrue(succ)
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_denominate(self.loop_dev)
             self.assertTrue(succ)
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_nominate(self.loop_dev)
             self.assertTrue(succ)
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_denominate(self.loop_dev)
             self.assertTrue(succ)
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_nominate(self.loop_dev)
             self.assertTrue(succ)
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_deactivate(BlockDev.md_node_from_name("bd_test_md"))
             self.assertTrue(succ)
 
@@ -312,10 +316,11 @@ class MDTestNominateDenominateActive(MDTestCase):
     # cannot be deactivated in the end (don't ask me why)
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     @unittest.skipIf("JENKINS_HOME" in os.environ, "skipping leaky test in jenkins")
+    @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
     def test_nominate_denominate_active(self):
         """Verify that nominate and denominate deivice works as expected on (de)activated MD RAID"""
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
                                       1, None, False)
@@ -346,7 +351,7 @@ class MDTestAddRemove(MDTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.md_add("bd_test_md", self.loop_dev3, 0, None)
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2],
                                       0, None, False)
@@ -361,7 +366,7 @@ class MDTestAddRemove(MDTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.md_add("bd_test_md", self.loop_dev3, 0, None)
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_remove("bd_test_md", self.loop_dev3, True, None)
             self.assertTrue(succ)
 
@@ -376,7 +381,7 @@ class MDTestExamineDetail(MDTestCase):
     def test_examine_detail(self):
         """Verify that it is possible to get info about an MD RAID"""
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
                                       1, None, True)
@@ -422,7 +427,7 @@ class MDTestNameNodeBijection(MDTestCase):
     def test_name_node_bijection(self):
         """Verify that MD RAID node and name match each other"""
 
-        with wait_for_resync():
+        with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
                                       1, None, True)
@@ -447,6 +452,48 @@ class MDTestNameNodeBijection(MDTestCase):
         self.assertTrue(succ)
         succ = BlockDev.md_destroy(self.loop_dev3)
         self.assertTrue(succ)
+
+class MDTestSetBitmapLocation(MDTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_set_bitmap_location(self):
+        """Verify we can change bitmap location for an existing MD array"""
+
+        with wait_for_action("resync"):
+            succ = BlockDev.md_create("bd_test_md", "raid1",
+                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
+                                      1, None, True)
+            self.assertTrue(succ)
+
+        succ = BlockDev.md_set_bitmap_location("bd_test_md", "none")
+        self.assertTrue(succ)
+
+        loc = BlockDev.md_get_bitmap_location("bd_test_md")
+        self.assertEqual(loc, "none")
+
+        succ = BlockDev.md_set_bitmap_location("bd_test_md", "internal")
+        self.assertTrue(succ)
+
+        loc = BlockDev.md_get_bitmap_location("bd_test_md")
+        self.assertEqual(loc, "+8")
+
+class MDTestRequestSyncAction(MDTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_request_sync_action(self):
+        """Verify we can request sync action on an existing MD array"""
+
+        with wait_for_action("resync"):
+            succ = BlockDev.md_create("bd_test_md", "raid1",
+                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
+                                      1, None, True)
+            self.assertTrue(succ)
+
+        with wait_for_action("check"):
+            succ = BlockDev.md_request_sync_action("bd_test_md", "check")
+
+        node = BlockDev.md_node_from_name("bd_test_md")
+        with open("/sys/block/%s/md/last_sync_action" % node) as f:
+            action = f.read().strip()
+        self.assertEqual(action, "check")
 
 class FakeMDADMutilTest(unittest.TestCase):
     # no setUp nor tearDown needed, we are gonna use fake utils

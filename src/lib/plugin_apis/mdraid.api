@@ -15,6 +15,8 @@ typedef enum {
     BD_MD_ERROR_PARSE,
     BD_MD_ERROR_BAD_FORMAT,
     BD_MD_ERROR_NO_MATCH,
+    BD_MD_ERROR_INVAL,
+    BD_MD_ERROR_FAIL,
 } BDMDError;
 
 #define BD_MD_TYPE_EXAMINEDATA (bd_md_examine_data_get_type ())
@@ -370,7 +372,7 @@ gchar* bd_md_get_md_uuid (const gchar *uuid, GError **error);
  * @name: name of the MD RAID
  * @error: (out): place to store error (if any)
  *
- * Returns: path to the @name MD RAID's device node or %NULL in case of error
+ * Returns: device node of the @name MD RAID or %NULL in case of error
  */
 gchar* bd_md_node_from_name (const gchar *name, GError **error);
 
@@ -382,5 +384,45 @@ gchar* bd_md_node_from_name (const gchar *name, GError **error);
  * Returns: @name of the MD RAID the device node belongs to or %NULL in case of error
  */
 gchar* bd_md_name_from_node (const gchar *node, GError **error);
+
+/**
+ * bd_md_get_status
+ * @raid_name: name of the RAID device to get status
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: status of the @raid_name RAID.
+ */
+gchar* bd_md_get_status (const gchar *raid_name, GError **error);
+
+/**
+ * bd_md_set_bitmap_location:
+ * @raid_name: name of the RAID device to set the bitmap location
+ * @location: bitmap location (none, internal or path)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @location was successfully set for the @raid_name
+ * RAID or not.
+ */
+gboolean bd_md_set_bitmap_location (const gchar *raid_name, const gchar *location, GError **error);
+
+/**
+ * bd_md_get_bitmap_location:
+ * @raid_name: name of the RAID device to get the bitmap location
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: bitmap location for @raid_name
+ */
+gchar* bd_md_get_bitmap_location (const gchar *raid_name, GError **error);
+
+/**
+ * bd_md_request_sync_action:
+ * @raid_name: name of the RAID device to request sync action on
+ * @action: requested sync action (resync, recovery, check, repair or idle)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @action was successfully requested for the @raid_name
+ * RAID or not.
+ */
+gboolean bd_md_request_sync_action (const gchar *raid_name, const gchar *action, GError **error);
 
 #endif  /* BD_MD_API */
