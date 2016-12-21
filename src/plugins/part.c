@@ -132,7 +132,7 @@ gboolean bd_part_check_deps () {
     GError *error = NULL;
     gboolean check_ret = TRUE;
 
-    gboolean ret = bd_utils_check_util_version ("sgdisk", "1.0.1", NULL, "GPT fdisk \\(sgdisk\\) version ([\\d\\.]+)", &error);
+    gboolean ret = bd_utils_check_util_version ("sgdisk", "0.8.6", NULL, "GPT fdisk \\(sgdisk\\) version ([\\d\\.]+)", &error);
     if (!ret && error) {
         g_warning("Cannot load the part plugin: %s" , error->message);
         g_clear_error (&error);
