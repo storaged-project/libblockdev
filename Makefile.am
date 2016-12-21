@@ -20,8 +20,10 @@ GIDIR = src/lib
 
 if WITH_PYTHON3
 PYTHON = python3
+PYLINT = python3-pylint
 else
 PYTHON = python
+PYLINT = pylint
 endif
 
 TEST_PYTHON ?= $(PYTHON)
@@ -55,7 +57,7 @@ run-root-ipython: all
 	sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=src/python G_MESSAGES_DEBUG=all LIBBLOCKDEV_CONFIG_DIR=data/conf.d/ i${PYTHON}
 
 pylint:
-	python3-pylint -E src/python/gi/overrides/BlockDev.py
+	which $(PYLINT) && $(PYLINT) -E src/python/gi/overrides/BlockDev.py || echo "pylint not available, skipping"
 
 if TESTS_ENABLED
 test: all pylint
