@@ -38,7 +38,9 @@
  * A plugin for operations with kernel block devices.
  */
 
+#ifdef WITH_BCACHE
 static const gchar * const mode_str[BD_KBD_MODE_UNKNOWN+1] = {"writethrough", "writeback", "writearound", "none", "unknown"};
+#endif
 
 /* "C" locale to get the locale-agnostic error messages */
 static locale_t c_locale = (locale_t) 0;
@@ -69,11 +71,13 @@ gboolean bd_kbd_check_deps () {
     if (!ret)
         return FALSE;
 
+#ifdef WITH_BCACHE
     ret = bd_utils_check_util_version ("make-bcache", NULL, NULL, NULL, &error);
     if (!ret && error) {
         g_warning("Cannot load the kbd plugin: %s" , error->message);
         g_clear_error (&error);
     }
+#endif
 
     return ret;
 }
@@ -130,6 +134,7 @@ void bd_kbd_zram_stats_free (BDKBDZramStats *data) {
     g_free (data);
 }
 
+#ifdef WITH_BCACHE
 BDKBDBcacheStats* bd_kbd_bcache_stats_copy (BDKBDBcacheStats *data) {
     BDKBDBcacheStats *new = g_new0 (BDKBDBcacheStats, 1);
 
@@ -149,6 +154,7 @@ void bd_kbd_bcache_stats_free (BDKBDBcacheStats *data) {
     g_free (data->state);
     g_free (data);
 }
+#endif
 
 static gboolean have_kernel_module (const gchar *module_name, GError **error) {
     gint ret = 0;
@@ -656,6 +662,7 @@ BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error) {
 }
 
 
+#ifdef WITH_BCACHE
 /**
  * bd_kbd_bcache_create:
  * @backing_device: backing (slow) device of the cache
@@ -1467,3 +1474,4 @@ gchar* bd_kbd_bcache_get_cache_device (const gchar *bcache_device, GError **erro
 
     return ret;
 }
+#endif  /* WITH_BCACHE */

@@ -76,6 +76,8 @@ AM_CONDITIONAL(ON_S390, test "$on_s390" = "0")
 uname -p|grep aarch64
 on_aarch64=$?
 
+skip_patterns=""
+
 AS_IF([test "$on_aarch64" = "0"], AC_SUBST([BTRFS_MIN_SIZE], ["(256 MiB)"]), AC_SUBST([BTRFS_MIN_SIZE], ["(128 MiB)"]))
 
 # Complain if introspection was not enabled
@@ -134,6 +136,18 @@ AC_CHECK_HEADERS([dlfcn.h string.h unistd.h sys/fcntl.h sys/ioctl.h linux/random
                  [LIBBLOCKDEV_SOFT_FAILURE([Header file $ac_header not found.])],
                  [])
 
+AC_ARG_WITH([bcache],
+    AS_HELP_STRING([--with-bcache], [support bcache @<:@default=yes@:>@]),
+    [],
+    [with_bcache=yes])
+
+AC_SUBST([WITH_BCACHE], [0])
+AM_CONDITIONAL(WITH_BCACHE, test "x$with_bcache" != "xno")
+AS_IF([test "x$with_bcache" != "xno"],
+      [AC_DEFINE([WITH_BCACHE], [], [Define if bcache is supported]) AC_SUBST([WITH_BCACHE], [1])],
+      [skip_patterns="$skip_patterns bcache"])
+
+AC_SUBST([skip_patterns], [$skip_patterns])
 AC_SUBST([MAJOR_VER], [\"2\"])
 
 AC_OUTPUT

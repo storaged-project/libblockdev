@@ -315,12 +315,17 @@ def fs_vfat_repair(device, extra=None, **kwargs):
 __all__.append("fs_vfat_repair")
 
 
-_kbd_bcache_create = BlockDev.kbd_bcache_create
-@override(BlockDev.kbd_bcache_create)
-def kbd_bcache_create(backing_device, cache_device, extra=None, **kwargs):
-    extra = _get_extra(extra, kwargs)
-    return _kbd_bcache_create(backing_device, cache_device, extra)
-__all__.append("kbd_bcache_create")
+try:
+    _kbd_bcache_create = BlockDev.kbd_bcache_create
+    @override(BlockDev.kbd_bcache_create)
+    def kbd_bcache_create(backing_device, cache_device, extra=None, **kwargs):
+        extra = _get_extra(extra, kwargs)
+        return _kbd_bcache_create(backing_device, cache_device, extra)
+    __all__.append("kbd_bcache_create")
+except AttributeError:
+    # the bcache support may not be available
+    # TODO: do this more generically
+    pass
 
 
 _lvm_round_size_to_pe = BlockDev.lvm_round_size_to_pe
