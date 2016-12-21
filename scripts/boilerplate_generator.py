@@ -286,7 +286,8 @@ def get_fn_code(fn_info):
 def get_fn_header(fn_info):
     return "{0.doc}{0.rtype} {0.name} ({0.args});\n\n".format(fn_info)
 
-def generate_source_header(api_file, out_dir):
+def generate_source_header(api_file, out_dir, skip_patterns=None):
+    skip_patterns = skip_patterns or list()
     file_name = os.path.basename(api_file)
     mod_name, dot, ext = file_name.partition(".")
     if not dot or ext != "api":
@@ -294,6 +295,15 @@ def generate_source_header(api_file, out_dir):
         return 1
 
     includes, items = process_file(open(api_file, "r"))
+    filtered = list()
+    for item in items:
+        if isinstance(item, FuncInfo):
+            if not any(re.search(pattern, item.name) for pattern in skip_patterns):
+                filtered.append(item)
+        elif not any(re.search(pattern, item) for pattern in skip_patterns):
+            filtered.append(item)
+    items = filtered
+
     nonapi_fn_infos = [item for item in items if isinstance(item, FuncInfo) and item.body]
     api_fn_infos = [item for item in items if isinstance(item, FuncInfo) and not item.body and item.doc]
     with open(os.path.join(out_dir, mod_name + ".c"), "w") as src_f:
@@ -321,17 +331,21 @@ def generate_source_header(api_file, out_dir):
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print("Needs a file name and output directory, exitting.")
-        print("Usage: %s FILE_NAME OUTPUT_DIR" % sys.argv[0])
+        print("Usage: %s FILE_NAME OUTPUT_DIR [SKIP_PATTERNS]" % sys.argv[0])
         sys.exit(1)
 
     if not os.path.exists(sys.argv[1]):
         print("Input file '%s' doesn't exist" % sys.argv[1])
         sys.exit(1)
 
+    skip_patterns = None
+    if len(sys.argv) > 3:
+        skip_patterns = sys.argv[3:]
+
     out_dir = sys.argv[2]
     if not os.path.exists (out_dir):
         os.makedirs(out_dir)
 
-    status = generate_source_header(sys.argv[1], out_dir)
+    status = generate_source_header(sys.argv[1], out_dir, skip_patterns)
 
     sys.exit(status)
