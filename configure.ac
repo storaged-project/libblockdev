@@ -69,15 +69,47 @@ AS_IF([test "$on_aarch64" = "0"], AC_SUBST([BTRFS_MIN_SIZE], ["(256 MiB)"]), AC_
 AS_IF([test "x$found_introspection" = xyes], [:],
       [LIBBLOCKDEV_SOFT_FAILURE([GObject introspection must be enabled])])
 
-AC_PATH_PROG([PYTHON3], [python3], [no])
-AS_IF([test "x$PYTHON3" == "xno"], [LIBBLOCKDEV_SOFT_FAILURE([\
-      The python3 program was not found in the search path. Please ensure that it is installed and its directory is included in the search path.])],
-      [:])
+AC_SUBST([PYTHON_EXEC_PREFIX], ['${exec_prefix}'])
+      PYTHON_EXECDIR=`python -c "import distutils.sysconfig; \
+                                print(distutils.sysconfig.get_python_lib(1,0,prefix='${exec_prefix}'))"`
+      AC_SUBST(pyexecdir, $PYTHON_EXECDIR)
 
-AC_SUBST([PYTHON3_EXEC_PREFIX], ['${exec_prefix}'])
-PYTHON3_EXECDIR=`$PYTHON3 -c "import distutils.sysconfig; \
-                          print(distutils.sysconfig.get_python_lib(1,0,prefix='$PYTHON3_EXEC_PREFIX'))"`
-AC_SUBST(py3execdir, $PYTHON3_EXECDIR)
+AC_ARG_WITH([python3],
+    AS_HELP_STRING([--with-python3], [support python3 @<:@default=check@:>@]),
+    [],
+    [with_python3=check])
+
+AC_SUBST(WITH_PYTHON3, 0)
+if test "x$with_python3" != "xno"; then
+    AC_PATH_PROG([python3], [python3], [no])
+    AS_IF([test "x$python3" == "xno"],
+    [if test "x$with_python3" = "xyes"; then
+      LIBBLOCKDEV_SOFT_FAILURE([Python3 support requested, but python3 is not available])
+      fi],
+    [AC_SUBST([PYTHON3_EXEC_PREFIX], ['${exec_prefix}'])
+      PYTHON3_EXECDIR=`$python3 -c "import distutils.sysconfig; \
+                                print(distutils.sysconfig.get_python_lib(1,0,prefix='${exec_prefix}'))"`
+      AC_SUBST(py3execdir, $PYTHON3_EXECDIR)
+      AC_SUBST(WITH_PYTHON3, 1)])
+fi
+AM_CONDITIONAL(WITH_PYTHON3, test "x$with_python3" != "xno" -a "x$python3" != "xno")
+
+
+AC_ARG_WITH([gtk-doc],
+    AS_HELP_STRING([--with-gtk-doc], [generate documentation with gtk-doc @<:@default=check@:>@]),
+    [],
+    [with_gtk_doc=check])
+
+AC_SUBST(WITH_GTK_DOC, 0)
+if test "x$with_gtk_doc" != "xno"; then
+    AC_PATH_PROG([gtkdoc_scan], [gtkdoc-scan], [no])
+    AS_IF([test "x$gtkdoc_scan" == "xno"],
+    [if test "x$with_gtk_doc" = "xyes"; then
+      LIBBLOCKDEV_SOFT_FAILURE([Building documentation with gtk-doc requested, but not available])
+      fi],
+      [AC_SUBST(WITH_GTK_DOC, 1)])
+fi
+AM_CONDITIONAL(WITH_GTK_DOC, test "x$with_gtk_doc" != "xno" -a "x$gtkdoc_scan" != "xno")
 
 # Run tests on build?
 AC_ARG_ENABLE([tests], AS_HELP_STRING([--enable-tests], [Run tests at compile time (default=yes)]))
