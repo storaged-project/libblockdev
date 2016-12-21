@@ -45,9 +45,22 @@ LIBBLOCKDEV_PKG_CHECK_MODULES([NSS], [nss >= 3.18.0])
 LIBBLOCKDEV_PKG_CHECK_MODULES([DEVMAPPER], [devmapper >= 1.02.93])
 LIBBLOCKDEV_PKG_CHECK_MODULES([UDEV], [libudev >= 216])
 LIBBLOCKDEV_PKG_CHECK_MODULES([KMOD], [libkmod >= 19])
-LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED], [libparted >= 3.2])
-LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED_FS], [libparted-fs-resize >= 3.2])
-LIBBLOCKDEV_PKG_CHECK_MODULES([BLKID], [blkid >= 2.27.0])
+LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED], [libparted >= 3.1])
+
+# older versions of parted don't provide the libparted-fs-resize.pc file
+AS_IF([pkg-config --atleast-version=3.2 libparted],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED_FS], [libparted-fs-resize >= 3.2])],
+      [AC_SUBST([PARTED_FS_LIBS], [-lparted-fs-resize])
+       AC_SUBST([PARTED_FS_CFLAGS], [])])
+
+LIBBLOCKDEV_PKG_CHECK_MODULES([BLKID], [blkid >= 2.23.0])
+
+# older versions of libblkid don't support BLKID_SUBLKS_BADCSUM so let's just
+# define it as 0 (neutral value for bit combinations of flags)
+AS_IF([pkg-config --atleast-version=2.27.0 blkid], [],
+      [AC_DEFINE([BLKID_SUBLKS_BADCSUM], [0],
+         [Define as neutral value if libblkid doesn't provide the definition])])
+
 LIBBLOCKDEV_PKG_CHECK_MODULES([BYTESIZE], [bytesize >= 0.1])
 
 m4_ifdef([GOBJECT_INTROSPECTION_CHECK],
