@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 """
 Simple helper script generating boilerplate code for a set of functions in order
