@@ -11,7 +11,7 @@
 %endif
 
 Name:        libblockdev
-Version:     2.1
+Version:     2.2
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -600,6 +600,29 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Jan 11 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.2-1
+- Use the .in file as source when bumping version (vpodzime)
+- Run pylint based on the python version and make it optional (vpodzime)
+- Disable python3 and bcache on RHEL (vpodzime)
+- Make bcache support optional (vpodzime)
+- Teach boileplate_generator.py to skip things based on patterns (vpodzime)
+- Require lower versions of some utilities (vpodzime)
+- Do not require python3 for the boilerplate generation script (vpodzime)
+- Use a proper initialization value for 'GPollFD fds[2]' (vpodzime)
+- Deal with older parted and libblkid (vpodzime)
+- Make python3 and gtk-doc optional (vpodzime)
+- Bump the version of the utils library (vpodzime)
+- Fix docstring for 'bd_md_node_from_name' (vtrefny)
+- Add tests for added mdraid methods (vtrefny)
+- Skip 'MDTestNominateDenominateActive' unless feeling lucky (vtrefny)
+- MDRaid tests: change 'wait_for_resync' to wait for given action (vtrefny)
+- Add functionality need by storaged to mdraid plugin (vtrefny)
+- Move 'echo_str_to_file' method to utils (vtrefny)
+- Add a function to setup a loop device from a file descriptor (vpodzime)
+- Add functions to get/set the autoclear flag on a loop device (vpodzime)
+- Fix checking /proc/mdstat for resync action (vtrefny)
+- Adapt the test config files to version 2.x (vpodzime)
+
 * Thu Nov 10 2016 Vratislav Podzimek <vpodzime@redhat.com> - 2.1-1
 - Do not require an exclusive lock on the device to commit part stuff (vpodzime)
 - Prevent failure if there are no btrfs subvolumes (vpodzime)
