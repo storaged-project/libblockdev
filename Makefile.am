@@ -139,7 +139,7 @@ bumpver:
 	DATELINE="* `date "+%a %b %d %Y"` `git config user.name` <`git config user.email`> - $$VERSION.$$NEWSUBVERSION-1"  ; \
 	cl=`grep -n %changelog dist/libblockdev.spec.in |cut -d : -f 1 |head -1` ; \
 	tail --lines=+$$(($$cl + 1)) dist/libblockdev.spec.in > speclog ; \
-	(head -n $$cl dist/libblockdev.spec ; echo "$$DATELINE" ; make --quiet rpmlog 2>/dev/null ; echo ""; cat speclog) > dist/libblockdev.spec.in.new ; \
+	(head -n $$cl dist/libblockdev.spec.in ; echo "$$DATELINE" ; make --quiet rpmlog 2>/dev/null ; echo ""; cat speclog) > dist/libblockdev.spec.in.new ; \
 	mv dist/libblockdev.spec.in.new dist/libblockdev.spec.in ; rm -f speclog ; \
 	sed -ri "s/(AC_INIT\(\[$(PACKAGE_NAME)\], \[)[0-9]+\.[0-9]+(\],.*)/\1$$VERSION.$$NEWSUBVERSION\2/" configure.ac ; \
 	sed -ri "s/Version:(\\s+)[-0-9.]+/Version:\\1$$VERSION.$$NEWSUBVERSION/" dist/libblockdev.spec.in ;
