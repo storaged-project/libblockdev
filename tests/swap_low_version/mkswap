@@ -1,5 +1,5 @@
 #!/bin/bash
 
 cat <<EOF
-mkswap from util-linux 2.25.1
+mkswap from util-linux 2.22.1
 EOF
