@@ -644,8 +644,6 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 - Trim the extra info for MD RAID's name (vpodzime)
 - Add xfsprogs and dosfstools as dependencies of the fs plugin (vpodzime)
 - Fix md_name_from_node to work with the "/dev/" prefix (vpodzime)
-
-* Wed Nov  2 2016 Vratislav Podzimek <vpodzime@redhat.com> - 2.0-1
 - New major upstream release
 
 * Wed Nov  9 2016 Vratislav Podzimek <vpodzime@redhat.com> - 1.9-8
