@@ -689,6 +689,7 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
     gchar *path = NULL;
     gchar *dev_name = NULL;
     gchar *dev_name_end = NULL;
+    guint n_retry = 5;
     guint64 progress_id = 0;
     gchar *msg = NULL;
 
@@ -752,11 +753,20 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
     dev_name++;
 
     /* make sure the bcache device is registered */
-    success = bd_utils_echo_str_to_file (backing_device, "/sys/fs/bcache/register", error);
-    if (!success) {
-        /* error is already populated */
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
+    success = FALSE;
+    while (!success && (n_retry > 0)) {
+        success = bd_utils_echo_str_to_file (backing_device, "/sys/fs/bcache/register", error);
+        if (!success) {
+            if (n_retry > 0) {
+                g_clear_error (error);
+                n_retry--;
+                g_usleep (100000); /* microseconds */
+            } else {
+                /* error is already populated */
+                bd_utils_report_finished (progress_id, (*error)->message);
+                return FALSE;
+            }
+        }
     }
 
     pattern = g_strdup_printf ("/sys/block/*/slaves/%s", dev_name);
