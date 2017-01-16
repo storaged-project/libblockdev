@@ -38,7 +38,7 @@
  * A plugin for operations with kernel block devices.
  */
 
-#ifdef WITH_BCACHE
+#ifdef WITH_BD_BCACHE
 static const gchar * const mode_str[BD_KBD_MODE_UNKNOWN+1] = {"writethrough", "writeback", "writearound", "none", "unknown"};
 #endif
 
@@ -71,7 +71,7 @@ gboolean bd_kbd_check_deps () {
     if (!ret)
         return FALSE;
 
-#ifdef WITH_BCACHE
+#ifdef WITH_BD_BCACHE
     ret = bd_utils_check_util_version ("make-bcache", NULL, NULL, NULL, &error);
     if (!ret && error) {
         g_warning("Cannot load the kbd plugin: %s" , error->message);
@@ -134,7 +134,7 @@ void bd_kbd_zram_stats_free (BDKBDZramStats *data) {
     g_free (data);
 }
 
-#ifdef WITH_BCACHE
+#ifdef WITH_BD_BCACHE
 BDKBDBcacheStats* bd_kbd_bcache_stats_copy (BDKBDBcacheStats *data) {
     BDKBDBcacheStats *new = g_new0 (BDKBDBcacheStats, 1);
 
@@ -662,7 +662,7 @@ BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error) {
 }
 
 
-#ifdef WITH_BCACHE
+#ifdef WITH_BD_BCACHE
 /**
  * bd_kbd_bcache_create:
  * @backing_device: backing (slow) device of the cache
