@@ -7,6 +7,7 @@
 # python3 is not available on RHEL
 %if %{is_rhel}
 %define with_python3 0
+%define with_bcache 0
 %define configure_opts --without-python3 --without-bcache
 %endif
 
@@ -194,7 +195,9 @@ with the libblockdev-fs plugin/library.
 %package kbd
 Summary:     The KBD plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
+%if %{with_bcache}
 Requires: bcache-tools >= 1.0.8
+%endif
 
 %description kbd
 The libblockdev library plugin (and in the same time a standalone library)
