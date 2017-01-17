@@ -5,8 +5,6 @@
 #define BD_SWAP
 
 #define MKSWAP_MIN_VERSION "2.23.2"
-#define SWAPON_MIN_VERSION "2.23.2"
-#define SWAPOFF_MIN_VERSION "2.23.2"
 
 GQuark bd_swap_error_quark (void);
 #define BD_SWAP_ERROR bd_swap_error_quark ()

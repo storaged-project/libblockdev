@@ -20,6 +20,7 @@
 #include <glib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/swap.h>
 #include <blockdev/utils.h>
 #include "swap.h"
 
@@ -52,24 +53,6 @@ gboolean bd_swap_check_deps () {
     GError *error = NULL;
     gboolean ret = bd_utils_check_util_version ("mkswap", MKSWAP_MIN_VERSION, NULL, "mkswap from util-linux ([\\d\\.]+)", &error);
 
-    if (!ret && error) {
-        g_warning("Cannot load the swap plugin: %s" , error->message);
-        g_clear_error (&error);
-    }
-
-    if (!ret)
-        return FALSE;
-
-    ret = bd_utils_check_util_version ("swapon", SWAPON_MIN_VERSION, NULL, "swapon from util-linux ([\\d\\.]+)", &error);
-    if (!ret && error) {
-        g_warning("Cannot load the swap plugin: %s" , error->message);
-        g_clear_error (&error);
-    }
-
-    if (!ret)
-        return FALSE;
-
-    ret = bd_utils_check_util_version ("swapoff", SWAPOFF_MIN_VERSION, NULL, "swapoff from util-linux ([\\d\\.]+)", &error);
     if (!ret && error) {
         g_warning("Cannot load the swap plugin: %s" , error->message);
         g_clear_error (&error);
@@ -139,9 +122,6 @@ gboolean bd_swap_mkswap (const gchar *device, const gchar *label, const BDExtraA
  * Returns: whether the swap device was successfully activated or not
  */
 gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
-    gboolean success = FALSE;
-    guint8 next_arg = 1;
-    guint8 to_free_idx = 0;
     GIOChannel *dev_file = NULL;
     GIOStatus io_status = G_IO_STATUS_ERROR;
     GError *tmp_error = NULL;
@@ -149,10 +129,11 @@ gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
     gchar dev_status[11];
     dev_status[10] = '\0';
     gint page_size;
+    gint flags = 0;
+    gint ret = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
 
-    const gchar *argv[5] = {"swapon", NULL, NULL, NULL, NULL};
     msg = g_strdup_printf ("Started 'swapon %s'", device);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
@@ -212,22 +193,19 @@ gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
 
     bd_utils_report_progress (progress_id, 10, "Swap device analysed, enabling");
     if (priority >= 0) {
-        argv[next_arg] = "-p";
-        next_arg++;
-        to_free_idx = next_arg;
-        argv[next_arg] = g_strdup_printf ("%d", priority);
-        next_arg++;
+        flags = SWAP_FLAG_PREFER;
+        flags |= (priority << SWAP_FLAG_PRIO_SHIFT) & SWAP_FLAG_PRIO_MASK;
     }
 
-    argv[next_arg] = device;
-
-    success = bd_utils_exec_and_report_error_no_progress (argv, NULL, error);
-
-    if (to_free_idx > 0)
-        g_free ((gchar *) argv[to_free_idx]);
+    ret = swapon (device, flags);
+    if (ret != 0) {
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE,
+                     "Failed to activate swap on %s: %m", device);
+        bd_utils_report_finished (progress_id, (*error)->message);
+    }
 
     bd_utils_report_finished (progress_id, "Completed");
-    return success;
+    return ret == 0;
 }
 
 /**
@@ -238,10 +216,23 @@ gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
  * Returns: whether the swap device was successfully deactivated or not
  */
 gboolean bd_swap_swapoff (const gchar *device, GError **error) {
-    const gchar *argv[3] = {"swapoff", NULL, NULL};
-    argv[1] = device;
+    gint ret = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
 
-    return bd_utils_exec_and_report_error (argv, NULL, error);
+    msg = g_strdup_printf ("Started 'swapoff %s'", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    ret = swapoff (device);
+    if (ret != 0) {
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE,
+                     "Failed to deactivate swap on %s: %m", device);
+        bd_utils_report_finished (progress_id, (*error)->message);
+    }
+
+    bd_utils_report_finished (progress_id, "Completed");
+    return ret == 0;
 }
 
 /**
