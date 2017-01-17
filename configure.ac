@@ -144,7 +144,7 @@ AC_ARG_WITH([bcache],
 AC_SUBST([WITH_BCACHE], [0])
 AM_CONDITIONAL(WITH_BCACHE, test "x$with_bcache" != "xno")
 AS_IF([test "x$with_bcache" != "xno"],
-      [AC_DEFINE([WITH_BCACHE], [], [Define if bcache is supported]) AC_SUBST([WITH_BCACHE], [1])],
+      [AC_DEFINE([WITH_BD_BCACHE], [], [Define if bcache is supported]) AC_SUBST([WITH_BCACHE], [1]) AC_SUBST([WITH_BCACHE_CFLAGS], [-DWITH_BD_BCACHE])],
       [skip_patterns="$skip_patterns bcache"])
 
 AC_SUBST([skip_patterns], [$skip_patterns])

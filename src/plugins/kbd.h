@@ -24,7 +24,7 @@ typedef enum {
     BD_KBD_ERROR_BCACHE_INVAL,
 } BDKBDError;
 
-#ifdef WITH_BCACHE
+#ifdef WITH_BD_BCACHE
 typedef enum {
     BD_KBD_MODE_WRITETHROUGH,
     BD_KBD_MODE_WRITEBACK,
@@ -51,7 +51,7 @@ typedef struct BDKBDZramStats {
 BDKBDZramStats* bd_kbd_zram_stats_copy (BDKBDZramStats *data);
 void bd_kbd_zram_stats_free (BDKBDZramStats *data);
 
-#ifdef WITH_BCACHE
+#ifdef WITH_BD_BCACHE
 typedef struct BDKBDBcacheStats {
     gchar *state;
     guint64 block_size;
@@ -86,7 +86,7 @@ gboolean bd_kbd_zram_add_device (guint64 size, guint64 nstreams, gchar **device,
 gboolean bd_kbd_zram_remove_device (const gchar *device, GError **error);
 BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error);
 
-#ifdef WITH_BCACHE
+#ifdef WITH_BD_BCACHE
 gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_device, const BDExtraArg **extra, const gchar **bcache_device, GError **error);
 gboolean bd_kbd_bcache_attach (const gchar *c_set_uuid, const gchar *bcache_device, GError **error);
 gboolean bd_kbd_bcache_detach (const gchar *bcache_device, gchar **c_set_uuid, GError **error);
