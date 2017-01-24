@@ -82,7 +82,7 @@ AS_IF([test "$on_aarch64" = "0"], AC_SUBST([BTRFS_MIN_SIZE], ["(256 MiB)"]), AC_
 
 # Complain if introspection was not enabled
 AS_IF([test "x$found_introspection" = xyes], [:],
-      [LIBBLOCKDEV_SOFT_FAILURE([GObject introspection must be enabled])])
+      [LIBBLOCKDEV_SOFT_FAILURE([GObject introspection (devel) must be installed and enabled])])
 
 AC_SUBST([PYTHON_EXEC_PREFIX], ['${exec_prefix}'])
       PYTHON_EXECDIR=`python -c "import distutils.sysconfig; \
