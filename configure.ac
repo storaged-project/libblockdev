@@ -47,6 +47,9 @@ LIBBLOCKDEV_PKG_CHECK_MODULES([UDEV], [libudev >= 216])
 LIBBLOCKDEV_PKG_CHECK_MODULES([KMOD], [libkmod >= 19])
 LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED], [libparted >= 3.1])
 
+LIBBLOCKDEV_CHECK_HEADER([volume_key/libvolume_key.h], [$GLIB_CFLAGS $NSS_CFLAGS], [libvolume_key.h not available])
+LIBBLOCKDEV_CHECK_HEADER([dmraid/dmraid.h], [], [dmraid.h not available])
+
 # older versions of parted don't provide the libparted-fs-resize.pc file
 AS_IF([pkg-config --atleast-version=3.2 libparted],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED_FS], [libparted-fs-resize >= 3.2])],
