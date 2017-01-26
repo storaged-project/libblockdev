@@ -69,4 +69,5 @@ echo "*** Libblockdev encountered the following issues during configuration:"
 echo "$libblockdev_failure_messages"
 echo ""
 echo "*** Libblockdev will not successfully build without these missing dependencies"
+false
 ])])dnl
