@@ -248,6 +248,8 @@ class KbdTestBcacheCreate(KbdBcacheTestCase):
     def test_bcache_create_destroy_full_path(self):
         """Verify that it's possible to create and destroy a bcache device with full device path"""
 
+        time.sleep(5)
+
         succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2, None)
         self.assertTrue(succ)
         self.assertTrue(dev)
