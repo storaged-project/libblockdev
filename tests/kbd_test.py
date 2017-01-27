@@ -226,7 +226,7 @@ class KbdBcacheTestCase(unittest.TestCase):
         os.unlink(self.dev_file2)
 
 class KbdTestBcacheCreate(KbdBcacheTestCase):
-    @unittest.skipUnless("FEELINGLUCKY" in os.environ or os.uname()[4] == 'x86_64', "skipping, not on x86_64 and not feeling lucky")
+    @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
     def test_bcache_create_destroy(self):
         """Verify that it's possible to create and destroy a bcache device"""
 
@@ -244,11 +244,9 @@ class KbdTestBcacheCreate(KbdBcacheTestCase):
 
         wipe_all(self.loop_dev, self.loop_dev2)
 
-    @unittest.skipUnless("FEELINGLUCKY" in os.environ or os.uname()[4] == 'x86_64', "skipping, not on x86_64 and not feeling lucky")
+    @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
     def test_bcache_create_destroy_full_path(self):
         """Verify that it's possible to create and destroy a bcache device with full device path"""
-
-        time.sleep(5)
 
         succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2, None)
         self.assertTrue(succ)
