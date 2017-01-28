@@ -297,7 +297,7 @@ static gint synced_close (gint fd) {
  * @all: whether to wipe all (%TRUE) signatures or just the first (%FALSE) one
  * @error: (out): place to store error (if any)
  *
- * Returns: whether signagures were successfully wiped on @device or not
+ * Returns: whether signatures were successfully wiped on @device or not
  */
 gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
     blkid_probe probe = NULL;
