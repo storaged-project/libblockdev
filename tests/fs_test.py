@@ -1,5 +1,7 @@
 import unittest
 import os
+import time
+import subprocess
 import tempfile
 from contextlib import contextmanager
 from utils import create_sparse_tempfile
@@ -59,6 +61,62 @@ class FSTestCase(unittest.TestCase):
         except:
             pass
         os.rmdir(self.mount_dir)
+
+class TestGenericWipe(FSTestCase):
+    def test_generic_wipe(self):
+        """Verify that generic signature wipe works as expected"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_wipe("/non/existing/device", True)
+
+        ret = os.system("pvcreate %s &>/dev/null" % self.loop_dev)
+        self.assertEqual(ret, 0)
+
+        succ = BlockDev.fs_wipe(self.loop_dev, True)
+        self.assertTrue(succ)
+
+        # now test the same multiple times in a row
+        for i in range(10):
+            ret = os.system("pvcreate %s &>/dev/null" % self.loop_dev)
+            self.assertEqual(ret, 0)
+
+            succ = BlockDev.fs_wipe(self.loop_dev, True)
+            self.assertTrue(succ)
+
+        # vfat has multiple signatures on the device so it allows us to test the
+        # 'all' argument of fs_wipe()
+        ret = os.system("mkfs.vfat %s &>/dev/null" % self.loop_dev)
+        self.assertEqual(ret, 0)
+
+        time.sleep(0.5)
+        succ = BlockDev.fs_wipe(self.loop_dev, False)
+        self.assertTrue(succ)
+
+        # the second signature should still be there
+        # XXX: lsblk uses the udev db so it we need to make sure it is up to date
+        os.system("udevadm settle")
+        fs_type = subprocess.check_output(["lsblk", "-n", "-oFSTYPE", self.loop_dev]).strip()
+        self.assertEqual(fs_type, b"vfat")
+
+        # get rid of all the remaining signatures (there could be vfat + PMBR for some reason)
+        succ = BlockDev.fs_wipe(self.loop_dev, True)
+        self.assertTrue(succ)
+
+        os.system("udevadm settle")
+        fs_type = subprocess.check_output(["lsblk", "-n", "-oFSTYPE", self.loop_dev]).strip()
+        self.assertEqual(fs_type, b"")
+
+        # now do the wipe all in a one step
+        ret = os.system("mkfs.vfat %s &>/dev/null" % self.loop_dev)
+        self.assertEqual(ret, 0)
+
+        succ = BlockDev.fs_wipe(self.loop_dev, True)
+        self.assertTrue(succ)
+
+        os.system("udevadm settle")
+        fs_type = subprocess.check_output(["lsblk", "-n", "-oFSTYPE", self.loop_dev]).strip()
+        self.assertEqual(fs_type, b"")
+
 
 class Ext4TestMkfs(FSTestCase):
     def test_ext4_mkfs(self):
