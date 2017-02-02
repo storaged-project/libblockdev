@@ -1,4 +1,5 @@
 #include <glib.h>
+#include <blockdev/utils.h>
 
 #ifndef BD_MD
 #define BD_MD
