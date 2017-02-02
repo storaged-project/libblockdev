@@ -476,6 +476,22 @@ class MDTestSetBitmapLocation(MDTestCase):
         loc = BlockDev.md_get_bitmap_location("bd_test_md")
         self.assertEqual(loc, "+8")
 
+        # test some different name specifications
+        # (need to switch between internal and none because setting the same
+        # location multiple times results in an error)
+        succ = BlockDev.md_set_bitmap_location("/dev/md/bd_test_md", "none")
+        self.assertTrue(succ)
+
+        node = BlockDev.md_node_from_name("bd_test_md")
+        self.assertIsNotNone(node)
+
+        succ = BlockDev.md_set_bitmap_location(node, "internal")
+        self.assertTrue(succ)
+
+        succ = BlockDev.md_set_bitmap_location("/dev/%s" % node, "none")
+        self.assertTrue(succ)
+
+
 class MDTestRequestSyncAction(MDTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_request_sync_action(self):

@@ -1162,28 +1162,51 @@ gchar* bd_md_get_status (const gchar *raid_name, GError **error) {
 
 /**
  * bd_md_set_bitmap_location:
- * @raid_name: name of the RAID device to set the bitmap location
+ * @raid_name: name or path of the RAID device to set the bitmap location
  * @location: bitmap location (none, internal or path)
  * @error: (out): place to store error (if any)
  *
  * Returns: bitmap location for @raid_name RAID
  */
 gboolean bd_md_set_bitmap_location (const gchar *raid_name, const gchar *location, GError **error) {
+    const gchar *argv[] = {"mdadm", "--grow", NULL, "--bitmap", location, NULL};
+    gchar *md_path_str = NULL;
+    gchar *name_path_str = NULL;
     gboolean ret = FALSE;
-    gchar *md_path = g_strdup_printf ("/dev/md/%s", raid_name);
-    const gchar *argv[] = {"mdadm", "--grow", md_path, "--bitmap", location, NULL};
+
+    // XXX: This should be a separate function
+    if (g_str_has_prefix (raid_name, "/dev/"))
+        argv[2] = g_strdup (raid_name);
+    else {
+        name_path_str = g_strdup_printf ("/dev/md/%s", raid_name);
+        md_path_str = g_strdup_printf ("/dev/%s", raid_name);
+        if (access (name_path_str, F_OK) == 0)
+            argv[2] = name_path_str;
+        else if (access (md_path_str, F_OK) == 0)
+            argv[2] = md_path_str;
+        else {
+            g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_INVAL,
+                         "'%s' is not a valid specification of an MD RAID array.", raid_name);
+            g_free (name_path_str);
+            g_free (md_path_str);
+            return FALSE;
+        }
+    }
 
     if ((g_strcmp0 (location, "none") != 0) && (g_strcmp0 (location, "internal") != 0) &&
         !g_str_has_prefix (location , "/")) {
 
         g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_INVAL,
                      "Bitmap location must start with '/' or be 'internal' or 'none'.");
+        g_free (name_path_str);
+        g_free (md_path_str);
         return FALSE;
     }
 
     ret = bd_utils_exec_and_report_error (argv, NULL, error);
 
-    g_free (md_path);
+    g_free (name_path_str);
+    g_free (md_path_str);
 
     return ret;
 }
