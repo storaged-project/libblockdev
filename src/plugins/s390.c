@@ -306,7 +306,7 @@ gchar* bd_s390_sanitize_dev_input (const gchar *dev, GError **error) {
     /* first make sure we're not being played */
     if ((dev == NULL) || (!*dev)) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
-                     "You have not specified a device number or the number is invalid");
+                     "Device number not specified or invalid");
         g_clear_error (error);
         return NULL;
     }
@@ -326,7 +326,8 @@ gchar* bd_s390_sanitize_dev_input (const gchar *dev, GError **error) {
     }
 
     /* calculate if/how much to pad tok with */
-    prepend = g_strnfill((4 - strlen(tmptok)), '0');
+    if (strlen(tmptok) < 4)
+        prepend = g_strnfill((4 - strlen(tmptok)), '0');
 
     /* combine it all together */
     if (prepend == NULL) {
@@ -353,9 +354,9 @@ gchar* bd_s390_zfcp_sanitize_wwpn_input (const gchar *wwpn, GError **error) {
     gchar *lcwwpn = NULL;
 
     /* first make sure we're not being played */
-    if ((wwpn == NULL) || (!*wwpn)) {
+    if ((wwpn == NULL) || (!*wwpn) || (strlen(wwpn) < 2)) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
-                     "You have not specified a WWPN or the WWPN is invalid");
+                     "WWPN not specified or invalid");
         g_clear_error (error);
         return NULL;
     }
@@ -389,9 +390,9 @@ gchar* bd_s390_zfcp_sanitize_lun_input (const gchar *lun, GError **error) {
     gchar *append = NULL;
 
     /* first make sure we're not being played */
-    if ((lun == NULL) || (!*lun)) {
+    if ((lun == NULL) || (!*lun) || (strlen(lun) > 16)) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
-                     "You have not specified a LUN or the LUN is invalid");
+                     "LUN not specified or invalid");
         g_clear_error (error);
         return NULL;
     }
