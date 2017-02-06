@@ -47,6 +47,9 @@ LIBBLOCKDEV_PKG_CHECK_MODULES([UDEV], [libudev >= 216])
 LIBBLOCKDEV_PKG_CHECK_MODULES([KMOD], [libkmod >= 19])
 LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED], [libparted >= 3.1])
 
+LIBBLOCKDEV_CHECK_HEADER([volume_key/libvolume_key.h], [$GLIB_CFLAGS $NSS_CFLAGS], [libvolume_key.h not available])
+LIBBLOCKDEV_CHECK_HEADER([dmraid/dmraid.h], [], [dmraid.h not available])
+
 # older versions of parted don't provide the libparted-fs-resize.pc file
 AS_IF([pkg-config --atleast-version=3.2 libparted],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED_FS], [libparted-fs-resize >= 3.2])],
@@ -82,7 +85,7 @@ AS_IF([test "$on_aarch64" = "0"], AC_SUBST([BTRFS_MIN_SIZE], ["(256 MiB)"]), AC_
 
 # Complain if introspection was not enabled
 AS_IF([test "x$found_introspection" = xyes], [:],
-      [LIBBLOCKDEV_SOFT_FAILURE([GObject introspection must be enabled])])
+      [LIBBLOCKDEV_SOFT_FAILURE([GObject introspection (devel) must be installed and enabled])])
 
 AC_SUBST([PYTHON_EXEC_PREFIX], ['${exec_prefix}'])
       PYTHON_EXECDIR=`python -c "import distutils.sysconfig; \

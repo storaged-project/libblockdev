@@ -305,6 +305,7 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
     gint status = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
+    guint n_try = 0;
 
     msg = g_strdup_printf ("Started wiping signatures from the device '%s'", device);
     progress_id = bd_utils_report_started (msg);
@@ -313,7 +314,7 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
     probe = blkid_new_probe ();
     if (!probe) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to create a probe for the device '%s'", device);
+                     "Failed to create a new probe");
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
@@ -321,13 +322,19 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
     fd = open (device, O_RDWR|O_CLOEXEC);
     if (fd == -1) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to create a probe for the device '%s'", device);
+                     "Failed to open the device '%s'", device);
         blkid_free_probe (probe);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
-    status = blkid_probe_set_device (probe, fd, 0, 0);
+    /* we may need to try mutliple times with some delays in case the device is
+       busy at the very moment */
+    for (n_try=5, status=-1; (status != 0) && (n_try > 0); n_try--) {
+        status = blkid_probe_set_device (probe, fd, 0, 0);
+        if (status != 0)
+            g_usleep (100 * 1000); /* microseconds */
+    }
     if (status != 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to create a probe for the device '%s'", device);
@@ -342,7 +349,13 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
     blkid_probe_enable_superblocks(probe, 1);
     blkid_probe_set_superblocks_flags(probe, BLKID_SUBLKS_MAGIC | BLKID_SUBLKS_BADCSUM);
 
-    status = blkid_do_probe (probe);
+    /* we may need to try mutliple times with some delays in case the device is
+       busy at the very moment */
+    for (n_try=5, status=-1; (status != 0) && (n_try > 0); n_try--) {
+        status = blkid_do_probe (probe);
+        if (status != 0)
+            g_usleep (100 * 1000); /* microseconds */
+    }
     if (status != 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to probe the device '%s'", device);
@@ -420,6 +433,7 @@ static gboolean wipe_fs (const gchar *device, const gchar *fs_type, gboolean wip
     guint64 progress_id = 0;
     gchar *msg = NULL;
     gboolean has_fs_type = TRUE;
+    guint n_try = 0;
 
     msg = g_strdup_printf ("Started wiping '%s' signatures from the device '%s'", fs_type, device);
     progress_id = bd_utils_report_started (msg);
@@ -442,6 +456,11 @@ static gboolean wipe_fs (const gchar *device, const gchar *fs_type, gboolean wip
         return FALSE;
     }
 
+    for (n_try=5, status=-1; (status != 0) && (n_try > 0); n_try--) {
+        status = blkid_probe_set_device (probe, fd, 0, 0);
+        if (status != 0)
+            g_usleep (100 * 1000); /* microseconds */
+    }
     status = blkid_probe_set_device (probe, fd, 0, 0);
     if (status != 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
@@ -458,7 +477,11 @@ static gboolean wipe_fs (const gchar *device, const gchar *fs_type, gboolean wip
     blkid_probe_set_superblocks_flags(probe, BLKID_SUBLKS_USAGE | BLKID_SUBLKS_TYPE |
                                              BLKID_SUBLKS_MAGIC | BLKID_SUBLKS_BADCSUM);
 
-    status = blkid_do_probe (probe);
+    for (n_try=5, status=-1; (status != 0) && (n_try > 0); n_try--) {
+        status = blkid_do_probe (probe);
+        if (status != 0)
+            g_usleep (100 * 1000); /* microseconds */
+    }
     if (status != 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to probe the device '%s'", device);
