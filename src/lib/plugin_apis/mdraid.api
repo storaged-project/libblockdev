@@ -407,7 +407,7 @@ gboolean bd_md_set_bitmap_location (const gchar *raid_name, const gchar *locatio
 
 /**
  * bd_md_get_bitmap_location:
- * @raid_name: name of the RAID device to get the bitmap location
+ * @raid_name: name or path of the RAID device to get the bitmap location
  * @error: (out): place to store error (if any)
  *
  * Returns: bitmap location for @raid_name
