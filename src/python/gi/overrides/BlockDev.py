@@ -556,23 +556,23 @@ __all__.append("md_create")
 
 _md_add = BlockDev.md_add
 @override(BlockDev.md_add)
-def md_add(raid_name, device, raid_devs=0, extra=None, **kwargs):
+def md_add(raid_spec, device, raid_devs=0, extra=None, **kwargs):
     extra = _get_extra(extra, kwargs)
-    return _md_add(raid_name, device, raid_devs, extra)
+    return _md_add(raid_spec, device, raid_devs, extra)
 __all__.append("md_add")
 
 _md_remove = BlockDev.md_remove
 @override(BlockDev.md_remove)
-def md_remove(raid_name, device, fail, extra=None, **kwargs):
+def md_remove(raid_spec, device, fail, extra=None, **kwargs):
     extra = _get_extra(extra, kwargs)
-    return _md_remove(raid_name, device, fail, extra)
+    return _md_remove(raid_spec, device, fail, extra)
 __all__.append("md_remove")
 
 _md_activate = BlockDev.md_activate
 @override(BlockDev.md_activate)
-def md_activate(device_name=None, members=None, uuid=None, start_degraded=True, extra=None, **kwargs):
+def md_activate(raid_spec=None, members=None, uuid=None, start_degraded=True, extra=None, **kwargs):
     extra = _get_extra(extra, kwargs)
-    return _md_activate(device_name, members, uuid, start_degraded, extra)
+    return _md_activate(raid_spec, members, uuid, start_degraded, extra)
 __all__.append("md_activate")
 
 

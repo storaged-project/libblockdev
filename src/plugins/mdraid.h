@@ -73,24 +73,24 @@ gboolean bd_md_init ();
 void bd_md_close ();
 
 guint64 bd_md_get_superblock_size (guint64 member_size, const gchar *version, GError **error);
-gboolean bd_md_create (const gchar *device_name, const gchar *level, const gchar **disks, guint64 spares, const gchar *version, gboolean bitmap, guint64 chunk_size, const BDExtraArg **extra, GError **error);
+gboolean bd_md_create (const gchar *raid_spec, const gchar *level, const gchar **disks, guint64 spares, const gchar *version, gboolean bitmap, guint64 chunk_size, const BDExtraArg **extra, GError **error);
 gboolean bd_md_destroy (const gchar *device, GError **error);
-gboolean bd_md_deactivate (const gchar *device_name, GError **error);
-gboolean bd_md_activate (const gchar *device_name, const gchar **members, const gchar *uuid, gboolean start_degraded, const BDExtraArg **extra, GError **error);
-gboolean bd_md_run (const gchar *raid_name, GError **error);
+gboolean bd_md_deactivate (const gchar *raid_spec, GError **error);
+gboolean bd_md_activate (const gchar *raid_spec, const gchar **members, const gchar *uuid, gboolean start_degraded, const BDExtraArg **extra, GError **error);
+gboolean bd_md_run (const gchar *raid_spec, GError **error);
 gboolean bd_md_nominate (const gchar *device, GError **error);
 gboolean bd_md_denominate (const gchar *device, GError **error);
-gboolean bd_md_add (const gchar *raid_name, const gchar *device, guint64 raid_devs, const BDExtraArg **extra, GError **error);
-gboolean bd_md_remove (const gchar *raid_name, const gchar *device, gboolean fail, const BDExtraArg **extra, GError **error);
+gboolean bd_md_add (const gchar *raid_spec, const gchar *device, guint64 raid_devs, const BDExtraArg **extra, GError **error);
+gboolean bd_md_remove (const gchar *raid_spec, const gchar *device, gboolean fail, const BDExtraArg **extra, GError **error);
 BDMDExamineData* bd_md_examine (const gchar *device, GError **error);
-BDMDDetailData* bd_md_detail (const gchar *raid_name, GError **error);
+BDMDDetailData* bd_md_detail (const gchar *raid_spec, GError **error);
 gchar* bd_md_canonicalize_uuid (const gchar *uuid, GError **error);
 gchar* bd_md_get_md_uuid (const gchar *uuid, GError **error);
 gchar* bd_md_node_from_name (const gchar *name, GError **error);
 gchar* bd_md_name_from_node (const gchar *node, GError **error);
-gchar* bd_md_get_status (const gchar *raid_name, GError **error);
-gboolean bd_md_set_bitmap_location (const gchar *raid_name, const gchar *location, GError **error);
-gchar* bd_md_get_bitmap_location (const gchar *raid_name, GError **error);
-gboolean bd_md_request_sync_action (const gchar *raid_name, const gchar *action, GError **error);
+gchar* bd_md_get_status (const gchar *raid_spec, GError **error);
+gboolean bd_md_set_bitmap_location (const gchar *raid_spec, const gchar *location, GError **error);
+gchar* bd_md_get_bitmap_location (const gchar *raid_spec, GError **error);
+gboolean bd_md_request_sync_action (const gchar *raid_spec, const gchar *action, GError **error);
 
 #endif  /* BD_MD */

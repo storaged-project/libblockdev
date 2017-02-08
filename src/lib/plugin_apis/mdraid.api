@@ -231,16 +231,16 @@ gboolean bd_md_destroy (const gchar *device, GError **error);
 
 /**
  * bd_md_deactivate:
- * @device_name: name of the RAID device to deactivate
+ * @raid_spec: specification of the RAID device (name, node or path)
  * @error: (out): place to store error (if any)
  *
- * Returns: whether the RAID device @device_name was successfully deactivated or not
+ * Returns: whether the RAID device @raid_spec was successfully deactivated or not
  */
-gboolean bd_md_deactivate (const gchar *device_name, GError **error);
+gboolean bd_md_deactivate (const gchar *raid_spec, GError **error);
 
 /**
  * bd_md_activate:
- * @device_name: (allow-none): name of the RAID device to activate (if not given "--scan" is implied and @members is ignored)
+ * @raid_spec: (allow-none): specification of the RAID device (name, node or path) to activate (if not given "--scan" is implied and @members is ignored)
  * @members: (allow-none) (array zero-terminated=1): member devices to be considered for @device activation
  * @uuid: (allow-none): UUID (in the MD RAID format!) of the MD RAID to activate
  * @start_degraded: whether to start the array even if it's degraded
@@ -252,16 +252,16 @@ gboolean bd_md_deactivate (const gchar *device_name, GError **error);
  *
  * Note: either @members or @uuid (or both) have to be specified.
  */
-gboolean bd_md_activate (const gchar *device_name, const gchar **members, const gchar *uuid, gboolean start_degraded, const BDExtraArg **extra, GError **error);
+gboolean bd_md_activate (const gchar *raid_spec, const gchar **members, const gchar *uuid, gboolean start_degraded, const BDExtraArg **extra, GError **error);
 
 /**
  * bd_md_run:
- * @raid_name: name of the (possibly degraded) MD RAID to be started
+ * @raid_spec: specification of the (possibly degraded) RAID device (name, node or path) to be started
  * @error: (out): place to store error (if any)
  *
- * Returns: whether the @raid_name was successfully started or not
+ * Returns: whether the @raid_spec was successfully started or not
  */
-gboolean bd_md_run (const gchar *raid_name, GError **error);
+gboolean bd_md_run (const gchar *raid_spec, GError **error);
 
 /**
  * bd_md_nominate:
@@ -289,15 +289,15 @@ gboolean bd_md_denominate (const gchar *device, GError **error);
 
 /**
  * bd_md_add:
- * @raid_name: name of the RAID device to add @device into
- * @device: name of the device to add to the @raid_name RAID device
- * @raid_devs: number of devices the @raid_name RAID should actively use or 0
+ * @raid_spec: specification of the RAID device (name, node or path) to add @device into
+ * @device: name of the device to add to the @raid_spec RAID device
+ * @raid_devs: number of devices the @raid_spec RAID should actively use or 0
  *             to leave unspecified (see below)
  * @extra: (allow-none) (array zero-terminated=1): extra options for the addition (right now
  *                                                 passed to the 'mdadm' utility)
  * @error: (out): place to store error (if any)
  *
- * Returns: whether the @device was successfully added to the @raid_name RAID or
+ * Returns: whether the @device was successfully added to the @raid_spec RAID or
  * not
  *
  * The @raid_devs parameter is used when adding devices to a raid array that has
@@ -307,21 +307,21 @@ gboolean bd_md_denominate (const gchar *device, GError **error);
  * Whether the new device will be added as a spare or an active member is
  * decided by mdadm.
  */
-gboolean bd_md_add (const gchar *raid_name, const gchar *device, guint64 raid_devs, const BDExtraArg **extra, GError **error);
+gboolean bd_md_add (const gchar *raid_spec, const gchar *device, guint64 raid_devs, const BDExtraArg **extra, GError **error);
 
 /**
  * bd_md_remove:
- * @raid_name: name of the RAID device to remove @device from
- * @device: device to remove from the @raid_name RAID
+ * @raid_spec: specification of the RAID device (name, node or path) to remove @device from
+ * @device: device to remove from the @raid_spec RAID
  * @fail: whether to mark the @device as failed before removing
  * @extra: (allow-none) (array zero-terminated=1): extra options for the removal (right now
  *                                                 passed to the 'mdadm' utility)
  * @error: (out): place to store error (if any)
  *
- * Returns: whether the @device was successfully removed from the @raid_name
+ * Returns: whether the @device was successfully removed from the @raid_spec
  * RAID or not.
  */
-gboolean bd_md_remove (const gchar *raid_name, const gchar *device, gboolean fail, const BDExtraArg **extra, GError **error);
+gboolean bd_md_remove (const gchar *raid_spec, const gchar *device, gboolean fail, const BDExtraArg **extra, GError **error);
 
 /**
  * bd_md_examine:
@@ -334,12 +334,12 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error);
 
 /**
  * bd_md_detail:
- * @raid_name: name of the MD RAID to examine
+ * @raid_spec: specification of the RAID device (name, node or path) to examine
  * @error: (out): place to store error (if any)
  *
- * Returns: information about the MD RAID @raid_name
+ * Returns: information about the MD RAID @raid_spec
  */
-BDMDDetailData* bd_md_detail (const gchar *raid_name, GError **error);
+BDMDDetailData* bd_md_detail (const gchar *raid_spec, GError **error);
 
 /**
  * bd_md_canonicalize_uuid:
@@ -387,42 +387,41 @@ gchar* bd_md_name_from_node (const gchar *node, GError **error);
 
 /**
  * bd_md_get_status
- * @raid_name: name of the RAID device to get status
+ * @raid_spec: specification of the RAID device (name, node or path) to get status
  * @error: (out): place to store error (if any)
  *
- * Returns: status of the @raid_name RAID.
+ * Returns: (transfer full): status of the @raid_spec RAID.
  */
-gchar* bd_md_get_status (const gchar *raid_name, GError **error);
+gchar* bd_md_get_status (const gchar *raid_spec, GError **error);
 
 /**
  * bd_md_set_bitmap_location:
- * @raid_name: name of the RAID device to set the bitmap location
+ * @raid_spec: specification of the RAID device (name, node or path) to set the bitmap location
  * @location: bitmap location (none, internal or path)
  * @error: (out): place to store error (if any)
  *
- * Returns: whether the @location was successfully set for the @raid_name
- * RAID or not.
+ * Returns: whether @location was successfully set for @raid_spec
  */
-gboolean bd_md_set_bitmap_location (const gchar *raid_name, const gchar *location, GError **error);
+gboolean bd_md_set_bitmap_location (const gchar *raid_spec, const gchar *location, GError **error);
 
 /**
  * bd_md_get_bitmap_location:
- * @raid_name: name or path of the RAID device to get the bitmap location
+ * @raid_spec: specification of the RAID device (name, node or path) to get the bitmap location
  * @error: (out): place to store error (if any)
  *
- * Returns: bitmap location for @raid_name
+ * Returns: (transfer full): bitmap location for @raid_spec
  */
-gchar* bd_md_get_bitmap_location (const gchar *raid_name, GError **error);
+gchar* bd_md_get_bitmap_location (const gchar *raid_spec, GError **error);
 
 /**
  * bd_md_request_sync_action:
- * @raid_name: name of the RAID device to request sync action on
+ * @raid_spec: specification of the RAID device (name, node or path) to request sync action on
  * @action: requested sync action (resync, recovery, check, repair or idle)
  * @error: (out): place to store error (if any)
  *
- * Returns: whether the @action was successfully requested for the @raid_name
+ * Returns: whether the @action was successfully requested for the @raid_spec
  * RAID or not.
  */
-gboolean bd_md_request_sync_action (const gchar *raid_name, const gchar *action, GError **error);
+gboolean bd_md_request_sync_action (const gchar *raid_spec, const gchar *action, GError **error);
 
 #endif  /* BD_MD_API */
