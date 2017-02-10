@@ -422,6 +422,16 @@ class MDTestExamineDetail(MDTestCase):
 
         self.assertEqual(ex_data.uuid, de_data.uuid)
 
+        # try to get detail data with some different raid specification
+        node = BlockDev.md_node_from_name("bd_test_md")
+
+        de_data = BlockDev.md_detail("/dev/md/bd_test_md")
+        self.assertTrue(de_data)
+        de_data = BlockDev.md_detail(node)
+        self.assertTrue(de_data)
+        de_data = BlockDev.md_detail("/dev/%s" % node)
+        self.assertTrue(de_data)
+
 class MDTestNameNodeBijection(MDTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_name_node_bijection(self):
@@ -490,6 +500,10 @@ class MDTestSetBitmapLocation(MDTestCase):
 
         succ = BlockDev.md_set_bitmap_location("/dev/%s" % node, "none")
         self.assertTrue(succ)
+
+        # get_bitmap_location should accept both name and node
+        loc = BlockDev.md_get_bitmap_location(node)
+        self.assertEqual(loc, "none")
 
 
 class MDTestRequestSyncAction(MDTestCase):
