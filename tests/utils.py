@@ -125,6 +125,12 @@ def create_lio_device(fpath):
     if store_wwn is None:
         raise RuntimeError("Failed to determine '%s' backstore's wwn" % store_name)
 
+    # set the optimal alignment because the default is weird and our
+    # partitioning tests expect 2048
+    status = subprocess.call(["targetcli", "/backstores/fileio/%s set attribute optimal_sectors=2048" % store_name], stdout=DEVNULL)
+    if status != 0:
+        raise RuntimeError("Failed to set optimal alignment for '%s'" % store_name)
+
     # create a new loopback device
     out = subprocess.check_output(["targetcli", "/loopback create"])
     out = out.decode("utf-8")

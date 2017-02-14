@@ -7,7 +7,7 @@ import subprocess
 import six
 import locale
 
-from utils import create_sparse_tempfile
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device
 from gi.repository import BlockDev, GLib
 if not BlockDev.is_initialized():
     BlockDev.init(None, None)
@@ -30,15 +30,14 @@ class CryptoTestCase(unittest.TestCase):
         self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("crypto_test", 1024**3)
         self.dev_file2 = create_sparse_tempfile("crypto_test2", 1024**3)
-        succ, loop = BlockDev.loop_setup(self.dev_file)
-        if not succ:
-            raise RuntimeError("Failed to setup loop device for testing")
-        self.loop_dev = "/dev/%s" % loop
-
-        succ, loop = BlockDev.loop_setup(self.dev_file2)
-        if not succ:
-            raise RuntimeError("Failed to setup loop device for testing")
-        self.loop_dev2 = "/dev/%s" % loop
+        try:
+            self.loop_dev = create_lio_device(self.dev_file)
+        except RuntimeError as e:
+            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
+        try:
+            self.loop_dev2 = create_lio_device(self.dev_file2)
+        except RuntimeError as e:
+            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
 
         # make a key file
         handle, self.keyfile = tempfile.mkstemp(prefix="libblockdev_test_keyfile", text=False)
@@ -51,19 +50,20 @@ class CryptoTestCase(unittest.TestCase):
         except:
             pass
 
-        succ = BlockDev.loop_teardown(self.loop_dev)
-        if not succ:
-            os.unlink(self.dev_file)
-            raise RuntimeError("Failed to tear down loop device used for testing")
-
+        try:
+            delete_lio_device(self.loop_dev)
+        except RuntimeError:
+            # just move on, we can do no better here
+            pass
         os.unlink(self.dev_file)
 
-        succ = BlockDev.loop_teardown(self.loop_dev2)
-        if not succ:
-            os.unlink(self.dev_file2)
-            raise RuntimeError("Failed to tear down loop device used for testing")
-
+        try:
+            delete_lio_device(self.loop_dev2)
+        except RuntimeError:
+            # just move on, we can do no better here
+            pass
         os.unlink(self.dev_file2)
+
         os.unlink(self.keyfile)
 
 class CryptoTestFormat(CryptoTestCase):

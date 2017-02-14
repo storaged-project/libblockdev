@@ -1,6 +1,6 @@
 import unittest
 import os
-from utils import create_sparse_tempfile
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device
 import overrides_hack
 
 from gi.repository import BlockDev, GLib
@@ -12,25 +12,28 @@ class PartTestCase(unittest.TestCase):
         self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("part_test", 100 * 1024**2)
         self.dev_file2 = create_sparse_tempfile("part_test", 100 * 1024**2)
-        succ, loop = BlockDev.loop_setup(self.dev_file)
-        if not succ:
-            raise RuntimeError("Failed to setup loop device for testing")
-        self.loop_dev = "/dev/%s" % loop
-        succ, loop = BlockDev.loop_setup(self.dev_file2)
-        if not succ:
-            raise RuntimeError("Failed to setup loop device for testing")
-        self.loop_dev2 = "/dev/%s" % loop
+        try:
+            self.loop_dev = create_lio_device(self.dev_file)
+        except RuntimeError as e:
+            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
+        try:
+            self.loop_dev2 = create_lio_device(self.dev_file2)
+        except RuntimeError as e:
+            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
 
     def _clean_up(self):
-        succ = BlockDev.loop_teardown(self.loop_dev)
-        if not succ:
-            os.unlink(self.dev_file)
-            raise RuntimeError("Failed to tear down loop device used for testing")
+        try:
+            delete_lio_device(self.loop_dev)
+        except RuntimeError:
+            # just move on, we can do no better here
+            pass
         os.unlink(self.dev_file)
-        succ = BlockDev.loop_teardown(self.loop_dev2)
-        if  not succ:
-            os.unlink(self.dev_file2)
-            raise RuntimeError("Failed to tear down loop device used for testing")
+
+        try:
+            delete_lio_device(self.loop_dev2)
+        except RuntimeError:
+            # just move on, we can do no better here
+            pass
         os.unlink(self.dev_file2)
 
 class PartCreateTableCase(PartTestCase):
@@ -116,7 +119,7 @@ class PartCreatePartCase(PartTestCase):
 
         # we should get proper data back
         self.assertTrue(ps)
-        self.assertEqual(ps.path, self.loop_dev + "p1")
+        self.assertEqual(ps.path, self.loop_dev + "1")
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 10 * 1024**2)
@@ -151,7 +154,7 @@ class PartCreatePartCase(PartTestCase):
 
         # we should get proper data back
         self.assertTrue(ps)
-        self.assertEqual(ps.path, self.loop_dev + "p1")
+        self.assertEqual(ps.path, self.loop_dev + "1")
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertLessEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 2 * 1024**2)
@@ -186,7 +189,7 @@ class PartCreatePartCase(PartTestCase):
 
         # we should get proper data back
         self.assertTrue(ps)
-        self.assertEqual(ps.path, self.loop_dev + "p1")
+        self.assertEqual(ps.path, self.loop_dev + "1")
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 512)
         self.assertEqual(ps.size, 2 * 1024**2)
@@ -220,7 +223,7 @@ class PartCreatePartFullCase(PartTestCase):
         # sector 2048, 10 MiB big with optimal alignment
         ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps)
-        self.assertEqual(ps.path, self.loop_dev + "p1")
+        self.assertEqual(ps.path, self.loop_dev + "1")
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 10 * 1024**2)
@@ -229,7 +232,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps2 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps.start + ps.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps2)
-        self.assertEqual(ps2.path, self.loop_dev + "p2")
+        self.assertEqual(ps2.path, self.loop_dev + "2")
         self.assertEqual(ps2.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
@@ -240,7 +243,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps3 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps2.start + ps2.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps3)
-        self.assertEqual(ps3.path, self.loop_dev + "p3")
+        self.assertEqual(ps3.path, self.loop_dev + "3")
         self.assertEqual(ps3.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
@@ -251,7 +254,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps4 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps3.start + ps3.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps4)
-        self.assertEqual(ps4.path, self.loop_dev + "p4")
+        self.assertEqual(ps4.path, self.loop_dev + "4")
         self.assertEqual(ps4.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
@@ -278,7 +281,7 @@ class PartCreatePartFullCase(PartTestCase):
         # sector 2048, 10 MiB big with optimal alignment
         ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps)
-        self.assertEqual(ps.path, self.loop_dev + "p1")
+        self.assertEqual(ps.path, self.loop_dev + "1")
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 10 * 1024**2)
@@ -287,7 +290,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps2 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps.start + ps.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps2)
-        self.assertEqual(ps2.path, self.loop_dev + "p2")
+        self.assertEqual(ps2.path, self.loop_dev + "2")
         self.assertEqual(ps2.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
@@ -298,7 +301,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps3 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps2.start + ps2.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps3)
-        self.assertEqual(ps3.path, self.loop_dev + "p3")
+        self.assertEqual(ps3.path, self.loop_dev + "3")
         self.assertEqual(ps3.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
@@ -309,7 +312,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps4 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.EXTENDED, ps3.start + ps3.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps4)
-        self.assertEqual(ps4.path, self.loop_dev + "p4")
+        self.assertEqual(ps4.path, self.loop_dev + "4")
         self.assertEqual(ps4.type, BlockDev.PartType.EXTENDED)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
@@ -336,7 +339,7 @@ class PartCreatePartFullCase(PartTestCase):
         # sector 2048, 10 MiB big with optimal alignment
         ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps)
-        self.assertEqual(ps.path, self.loop_dev + "p1")
+        self.assertEqual(ps.path, self.loop_dev + "1")
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 10 * 1024**2)
@@ -345,7 +348,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps2 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps.start + ps.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps2)
-        self.assertEqual(ps2.path, self.loop_dev + "p2")
+        self.assertEqual(ps2.path, self.loop_dev + "2")
         self.assertEqual(ps2.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
@@ -356,7 +359,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps3 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.EXTENDED, ps2.start + ps2.size + 1,
                                          30 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps3)
-        self.assertEqual(ps3.path, self.loop_dev + "p3")
+        self.assertEqual(ps3.path, self.loop_dev + "3")
         self.assertEqual(ps3.type, BlockDev.PartType.EXTENDED)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
@@ -369,7 +372,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps5 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps3.start + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps5)
-        self.assertEqual(ps5.path, self.loop_dev + "p5")
+        self.assertEqual(ps5.path, self.loop_dev + "5")
         self.assertEqual(ps5.type, BlockDev.PartType.LOGICAL)
         # the start has to be somewhere in the extended partition p3 which
         # should need at most 2 MiB extra space
@@ -380,7 +383,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps6 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps5.start + ps5.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps6)
-        self.assertEqual(ps6.path, self.loop_dev + "p6")
+        self.assertEqual(ps6.path, self.loop_dev + "6")
         self.assertEqual(ps6.type, BlockDev.PartType.LOGICAL)
         # the start has to be somewhere in the extended partition p3 which
         # should need at most 2 MiB extra space
@@ -391,7 +394,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps7 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps6.start + ps6.size + 2 * 1024**2,
                                          5 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps7)
-        self.assertEqual(ps7.path, self.loop_dev + "p7")
+        self.assertEqual(ps7.path, self.loop_dev + "7")
         self.assertEqual(ps7.type, BlockDev.PartType.LOGICAL)
         # the start has to be somewhere in the extended partition p3 which
         # should need at most 2 MiB extra space
@@ -404,7 +407,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps4 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps3.start + ps3.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps4)
-        self.assertEqual(ps4.path, self.loop_dev + "p4")
+        self.assertEqual(ps4.path, self.loop_dev + "4")
         self.assertEqual(ps4.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
@@ -428,7 +431,7 @@ class PartCreatePartFullCase(PartTestCase):
         # sector 2048, 10 MiB big with optimal alignment
         ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps)
-        self.assertEqual(ps.path, self.loop_dev + "p1")
+        self.assertEqual(ps.path, self.loop_dev + "1")
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 10 * 1024**2)
@@ -437,7 +440,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps2 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps.start + ps.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps2)
-        self.assertEqual(ps2.path, self.loop_dev + "p2")
+        self.assertEqual(ps2.path, self.loop_dev + "2")
         self.assertEqual(ps2.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
@@ -448,7 +451,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps3 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps2.start + ps2.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps3)
-        self.assertEqual(ps3.path, self.loop_dev + "p3")
+        self.assertEqual(ps3.path, self.loop_dev + "3")
         self.assertEqual(ps3.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
@@ -476,7 +479,7 @@ class PartCreatePartFullCase(PartTestCase):
         # sector 2048, 10 MiB big with optimal alignment
         ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps)
-        self.assertEqual(ps.path, self.loop_dev + "p1")
+        self.assertEqual(ps.path, self.loop_dev + "1")
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 10 * 1024**2)
@@ -485,7 +488,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps2 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps.start + ps.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps2)
-        self.assertEqual(ps2.path, self.loop_dev + "p2")
+        self.assertEqual(ps2.path, self.loop_dev + "2")
         self.assertEqual(ps2.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
@@ -496,7 +499,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps3 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps2.start + ps2.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps3)
-        self.assertEqual(ps3.path, self.loop_dev + "p3")
+        self.assertEqual(ps3.path, self.loop_dev + "3")
         self.assertEqual(ps3.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
@@ -507,15 +510,15 @@ class PartCreatePartFullCase(PartTestCase):
         # we should get a logical partition which has number 5
         ps5 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps3.start + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
-        ps4 = BlockDev.part_get_part_spec (self.loop_dev, self.loop_dev + "p4")
+        ps4 = BlockDev.part_get_part_spec (self.loop_dev, self.loop_dev + "4")
         self.assertTrue(ps4)
-        self.assertEqual(ps4.path, self.loop_dev + "p4")
+        self.assertEqual(ps4.path, self.loop_dev + "4")
         self.assertEqual(ps4.type, BlockDev.PartType.EXTENDED)
         self.assertTrue(abs(ps4.start - (ps3.start + ps3.size + 1)) < ps.start)
         self.assertGreater(ps4.size, 65 * 1024**2)
 
         self.assertTrue(ps5)
-        self.assertEqual(ps5.path, self.loop_dev + "p5")
+        self.assertEqual(ps5.path, self.loop_dev + "5")
         self.assertEqual(ps5.type, BlockDev.PartType.LOGICAL)
         # the start has to be somewhere in the extended partition p4 no more
         # than 2 MiB after its start
@@ -526,7 +529,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps6 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps5.start + ps5.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps6)
-        self.assertEqual(ps6.path, self.loop_dev + "p6")
+        self.assertEqual(ps6.path, self.loop_dev + "6")
         self.assertEqual(ps6.type, BlockDev.PartType.LOGICAL)
         # logical partitions start 1 MiB after each other (no idea why)
         self.assertLessEqual(abs(ps6.start - (ps5.start + ps5.size + 1)), 1024**2 + 512)
@@ -536,7 +539,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps7 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps6.start + ps6.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps7)
-        self.assertEqual(ps7.path, self.loop_dev + "p7")
+        self.assertEqual(ps7.path, self.loop_dev + "7")
         self.assertEqual(ps7.type, BlockDev.PartType.LOGICAL)
         # logical partitions start 1 MiB after each other (no idea why)
         self.assertLessEqual(abs(ps7.start - (ps6.start + ps6.size + 1)), 1024**2 + 512)
@@ -563,7 +566,7 @@ class PartCreatePartFullCase(PartTestCase):
         # sector 2048, 10 MiB big with optimal alignment
         ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps)
-        self.assertEqual(ps.path, self.loop_dev + "p1")
+        self.assertEqual(ps.path, self.loop_dev + "1")
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 10 * 1024**2)
@@ -572,7 +575,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps2 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps.start + ps.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps2)
-        self.assertEqual(ps2.path, self.loop_dev + "p2")
+        self.assertEqual(ps2.path, self.loop_dev + "2")
         self.assertEqual(ps2.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
@@ -583,7 +586,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps3 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps2.start + ps2.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps3)
-        self.assertEqual(ps3.path, self.loop_dev + "p3")
+        self.assertEqual(ps3.path, self.loop_dev + "3")
         self.assertEqual(ps3.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
@@ -595,7 +598,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps4 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps3.start + ps3.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps4)
-        self.assertEqual(ps4.path, self.loop_dev + "p4")
+        self.assertEqual(ps4.path, self.loop_dev + "4")
         self.assertEqual(ps4.type, BlockDev.PartType.NORMAL)
         self.assertTrue(abs(ps4.start - (ps3.start + ps3.size + 1)) < ps.start)
         self.assertEqual(ps4.size, 10 * 1024**2)
@@ -604,7 +607,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps5 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps4.start + ps4.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps5)
-        self.assertEqual(ps5.path, self.loop_dev + "p5")
+        self.assertEqual(ps5.path, self.loop_dev + "5")
         self.assertEqual(ps5.type, BlockDev.PartType.NORMAL)
         self.assertTrue(abs(ps5.start - (ps4.start + ps4.size + 1)) < ps.start)
         self.assertEqual(ps5.size, 10 * 1024**2)
@@ -613,7 +616,7 @@ class PartCreatePartFullCase(PartTestCase):
         ps6 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps5.start + ps4.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps6)
-        self.assertEqual(ps6.path, self.loop_dev + "p6")
+        self.assertEqual(ps6.path, self.loop_dev + "6")
         self.assertEqual(ps6.type, BlockDev.PartType.NORMAL)
         self.assertTrue(abs(ps6.start - (ps5.start + ps5.size + 1)) < ps.start)
         self.assertEqual(ps6.size, 10 * 1024**2)
@@ -636,7 +639,7 @@ class PartGetDiskFreeRegions(PartTestCase):
 
         # we should get proper data back
         self.assertTrue(ps)
-        self.assertEqual(ps.path, self.loop_dev + "p1")
+        self.assertEqual(ps.path, self.loop_dev + "1")
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 512)
         self.assertEqual(ps.size, 10 * 1024**2)
@@ -698,7 +701,7 @@ class PartGetDiskFreeRegions(PartTestCase):
 
         # we should get proper data back
         self.assertTrue(ps)
-        self.assertEqual(ps.path, self.loop_dev + "p1")
+        self.assertEqual(ps.path, self.loop_dev + "1")
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 512)
         self.assertEqual(ps.size, 10 * 1024**2)
@@ -722,7 +725,7 @@ class PartGetBestFreeRegion(PartTestCase):
 
         ps1 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 1, 10 * 1024**2, BlockDev.PartAlign.NONE)
         self.assertTrue(ps1)
-        self.assertEqual(ps1.path, self.loop_dev + "p1")
+        self.assertEqual(ps1.path, self.loop_dev + "1")
         self.assertEqual(ps1.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps1.start, 512)
         self.assertEqual(ps1.size, 10 * 1024**2)
@@ -731,7 +734,7 @@ class PartGetBestFreeRegion(PartTestCase):
         ps2 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps1.start + ps1.size + 20 * 1024**2,
                                          10 * 1024**2, BlockDev.PartAlign.NONE)
         self.assertTrue(ps2)
-        self.assertEqual(ps2.path, self.loop_dev + "p2")
+        self.assertEqual(ps2.path, self.loop_dev + "2")
         self.assertEqual(ps2.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps2.start, ps1.start + ps1.size + 20 * 1024**2)
         self.assertEqual(ps2.size, 10 * 1024**2)
@@ -748,7 +751,7 @@ class PartGetBestFreeRegion(PartTestCase):
         ps3 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.EXTENDED, ps2.start + ps2.size + 10 * 1024**2,
                                          45 * 1024**2, BlockDev.PartAlign.NONE)
         self.assertTrue(ps3)
-        self.assertEqual(ps3.path, self.loop_dev + "p3")
+        self.assertEqual(ps3.path, self.loop_dev + "3")
         self.assertEqual(ps3.type, BlockDev.PartType.EXTENDED)
         self.assertEqual(ps3.start, ps2.start + ps2.size + 10 * 1024**2)
         self.assertEqual(ps3.size, 45 * 1024**2)
@@ -771,7 +774,7 @@ class PartGetBestFreeRegion(PartTestCase):
 
         ps5 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps3.start + 20 * 1024**2,
                                          15 * 1024**2, BlockDev.PartAlign.NONE)
-        self.assertEqual(ps5.path, self.loop_dev + "p5")
+        self.assertEqual(ps5.path, self.loop_dev + "5")
         self.assertEqual(ps5.type, BlockDev.PartType.LOGICAL)
         self.assertEqual(ps5.start, ps3.start + 20 * 1024**2)
         self.assertEqual(ps5.size, 15 * 1024**2)
@@ -800,7 +803,7 @@ class PartGetPartByPos(PartTestCase):
         # sector 2048, 10 MiB big with optimal alignment
         ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps)
-        self.assertEqual(ps.path, self.loop_dev + "p1")
+        self.assertEqual(ps.path, self.loop_dev + "1")
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 10 * 1024**2)
@@ -809,7 +812,7 @@ class PartGetPartByPos(PartTestCase):
         ps2 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps.start + ps.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps2)
-        self.assertEqual(ps2.path, self.loop_dev + "p2")
+        self.assertEqual(ps2.path, self.loop_dev + "2")
         self.assertEqual(ps2.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
@@ -820,7 +823,7 @@ class PartGetPartByPos(PartTestCase):
         ps3 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.EXTENDED, ps2.start + ps2.size + 1,
                                          35 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps3)
-        self.assertEqual(ps3.path, self.loop_dev + "p3")
+        self.assertEqual(ps3.path, self.loop_dev + "3")
         self.assertEqual(ps3.type, BlockDev.PartType.EXTENDED)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
@@ -833,7 +836,7 @@ class PartGetPartByPos(PartTestCase):
         ps5 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps3.start + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps5)
-        self.assertEqual(ps5.path, self.loop_dev + "p5")
+        self.assertEqual(ps5.path, self.loop_dev + "5")
         self.assertEqual(ps5.type, BlockDev.PartType.LOGICAL)
         # the start has to be somewhere in the extended partition p3 which
         # should need at most 2 MiB extra space
@@ -844,7 +847,7 @@ class PartGetPartByPos(PartTestCase):
         ps6 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps5.start + ps5.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps6)
-        self.assertEqual(ps6.path, self.loop_dev + "p6")
+        self.assertEqual(ps6.path, self.loop_dev + "6")
         self.assertEqual(ps6.type, BlockDev.PartType.LOGICAL)
         # the start has to be somewhere in the extended partition p3 which
         # should need at most 2 MiB extra space
@@ -855,7 +858,7 @@ class PartGetPartByPos(PartTestCase):
         ps7 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps6.start + ps6.size + 2 * 1024**2,
                                          5 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps7)
-        self.assertEqual(ps7.path, self.loop_dev + "p7")
+        self.assertEqual(ps7.path, self.loop_dev + "7")
         self.assertEqual(ps7.type, BlockDev.PartType.LOGICAL)
         # the start has to be somewhere in the extended partition p3 which
         # should need at most 2 MiB extra space
@@ -868,7 +871,7 @@ class PartGetPartByPos(PartTestCase):
         ps4 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps3.start + ps3.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         self.assertTrue(ps4)
-        self.assertEqual(ps4.path, self.loop_dev + "p4")
+        self.assertEqual(ps4.path, self.loop_dev + "4")
         self.assertEqual(ps4.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk

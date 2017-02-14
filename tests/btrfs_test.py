@@ -6,7 +6,7 @@ import six
 import time
 
 import overrides_hack
-from utils import create_sparse_tempfile, fake_utils, fake_path
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path
 from gi.repository import GLib, BlockDev
 if not BlockDev.is_initialized():
     BlockDev.init(None, None)
@@ -34,28 +34,29 @@ class BtrfsTestCase(unittest.TestCase):
         self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("lvm_test", 1024**3)
         self.dev_file2 = create_sparse_tempfile("lvm_test", 1024**3)
-        succ, loop = BlockDev.loop_setup(self.dev_file)
-        if  not succ:
-            raise RuntimeError("Failed to setup loop device for testing")
-        self.loop_dev = "/dev/%s" % loop
-        succ, loop = BlockDev.loop_setup(self.dev_file2)
-        if  not succ:
-            raise RuntimeError("Failed to setup loop device for testing")
-        self.loop_dev2 = "/dev/%s" % loop
+        try:
+            self.loop_dev = create_lio_device(self.dev_file)
+        except RuntimeError as e:
+            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
+        try:
+            self.loop_dev2 = create_lio_device(self.dev_file2)
+        except RuntimeError as e:
+            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
 
     def _clean_up(self):
         umount(TEST_MNT)
-        succ = BlockDev.loop_teardown(self.loop_dev)
-        if not succ:
-            os.unlink(self.dev_file)
-            raise RuntimeError("Failed to tear down loop device used for testing")
-
+        try:
+            delete_lio_device(self.loop_dev)
+        except RuntimeError:
+            # just move on, we can do no better here
+            pass
         os.unlink(self.dev_file)
-        succ = BlockDev.loop_teardown(self.loop_dev2)
-        if  not succ:
-            os.unlink(self.dev_file2)
-            raise RuntimeError("Failed to tear down loop device used for testing")
 
+        try:
+            delete_lio_device(self.loop_dev2)
+        except RuntimeError:
+            # just move on, we can do no better here
+            pass
         os.unlink(self.dev_file2)
 
 class BtrfsTestCreateQuerySimple(BtrfsTestCase):
@@ -446,27 +447,28 @@ class BtrfsTooSmallTestCase (unittest.TestCase):
         self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("lvm_test", BlockDev.BTRFS_MIN_MEMBER_SIZE)
         self.dev_file2 = create_sparse_tempfile("lvm_test", BlockDev.BTRFS_MIN_MEMBER_SIZE//2)
-        succ, loop = BlockDev.loop_setup(self.dev_file)
-        if  not succ:
-            raise RuntimeError("Failed to setup loop device for testing")
-        self.loop_dev = "/dev/%s" % loop
-        succ, loop = BlockDev.loop_setup(self.dev_file2)
-        if  not succ:
-            raise RuntimeError("Failed to setup loop device for testing")
-        self.loop_dev2 = "/dev/%s" % loop
+        try:
+            self.loop_dev = create_lio_device(self.dev_file)
+        except RuntimeError as e:
+            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
+        try:
+            self.loop_dev2 = create_lio_device(self.dev_file2)
+        except RuntimeError as e:
+            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
 
     def _clean_up(self):
-        succ = BlockDev.loop_teardown(self.loop_dev)
-        if  not succ:
-            os.unlink(self.dev_file)
-            raise RuntimeError("Failed to tear down loop device used for testing")
-
+        try:
+            delete_lio_device(self.loop_dev)
+        except RuntimeError:
+            # just move on, we can do no better here
+            pass
         os.unlink(self.dev_file)
-        succ = BlockDev.loop_teardown(self.loop_dev2)
-        if  not succ:
-            os.unlink(self.dev_file2)
-            raise RuntimeError("Failed to tear down loop device used for testing")
 
+        try:
+            delete_lio_device(self.loop_dev2)
+        except RuntimeError:
+            # just move on, we can do no better here
+            pass
         os.unlink(self.dev_file2)
 
     def test_create_too_small(self):
@@ -482,27 +484,28 @@ class BtrfsJustBigEnoughTestCase (unittest.TestCase):
         self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("lvm_test", BlockDev.BTRFS_MIN_MEMBER_SIZE)
         self.dev_file2 = create_sparse_tempfile("lvm_test", BlockDev.BTRFS_MIN_MEMBER_SIZE)
-        succ, loop = BlockDev.loop_setup(self.dev_file)
-        if  not succ:
-            raise RuntimeError("Failed to setup loop device for testing")
-        self.loop_dev = "/dev/%s" % loop
-        succ, loop = BlockDev.loop_setup(self.dev_file2)
-        if  not succ:
-            raise RuntimeError("Failed to setup loop device for testing")
-        self.loop_dev2 = "/dev/%s" % loop
+        try:
+            self.loop_dev = create_lio_device(self.dev_file)
+        except RuntimeError as e:
+            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
+        try:
+            self.loop_dev2 = create_lio_device(self.dev_file2)
+        except RuntimeError as e:
+            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
 
     def _clean_up(self):
-        succ = BlockDev.loop_teardown(self.loop_dev)
-        if  not succ:
-            os.unlink(self.dev_file)
-            raise RuntimeError("Failed to tear down loop device used for testing")
-
+        try:
+            delete_lio_device(self.loop_dev)
+        except RuntimeError:
+            # just move on, we can do no better here
+            pass
         os.unlink(self.dev_file)
-        succ = BlockDev.loop_teardown(self.loop_dev2)
-        if  not succ:
-            os.unlink(self.dev_file2)
-            raise RuntimeError("Failed to tear down loop device used for testing")
 
+        try:
+            delete_lio_device(self.loop_dev2)
+        except RuntimeError:
+            # just move on, we can do no better here
+            pass
         os.unlink(self.dev_file2)
 
     def test_create_just_enough(self):
