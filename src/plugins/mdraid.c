@@ -408,6 +408,12 @@ static gchar* get_sysfs_name_from_input(const gchar *input, GError **error) {
   gchar* sysfs_name = NULL;
   gchar* path = NULL;
 
+  /* get rid of the "/dev/" or "/dev/md/" prefix (if any) */
+  if (g_str_has_prefix (input, "/dev/md/"))
+      input = input + 8;
+  else if (g_str_has_prefix (input, "/dev/"))
+      input = input + 5;
+
   path = g_strdup_printf ("/sys/class/block/%s/md", input);
   if (access (path, F_OK) == 0)
       sysfs_name = g_strdup (input);
