@@ -85,6 +85,27 @@ void bd_swap_close () {
 }
 
 /**
+ * bd_swap_wipefs:
+ * @device: a device to wipe
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
+ *                                                 passed to the 'mkswap' utility)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the swap space was successfully created or not
+ */
+gboolean bd_swap_wipefs (const gchar *device, const BDExtraArg **extra, GError **error) {
+    guint8 next_arg = 2;
+
+    /* We use -f to force since mkswap tends to refuse creation on lvs with
+       a message about erasing bootbits sectors on whole disks. Bah. */
+    const gchar *argv[6] = {"wipefs", "-a", NULL};
+
+    argv[next_arg] = device;
+
+    return bd_utils_exec_and_report_error (argv, extra, error);
+}
+
+/**
  * bd_swap_mkswap:
  * @device: a device to create swap space on
  * @label: (allow-none): a label for the swap space device
