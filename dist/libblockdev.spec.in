@@ -12,7 +12,7 @@
 %endif
 
 Name:        libblockdev
-Version:     2.2
+Version:     2.3
 Release:     2%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -603,6 +603,26 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Tue Feb 14 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.3-1
+- Allow specifying raid 'name' in multiple way when calling md functions (vtrefny)
+- Allow using both path and raid name in bd_md_set_bitmap_location (vtrefny)
+- Fix potential memory issues in s390 sanitizate functions (vpodzime)
+- Try multiple times when probing device for wiping (vpodzime)
+- Check for libvolume_key.h and dmraid.h in configure.ac (vpodzime)
+- Define our own macro for testing required header files (vpodzime)
+- Include blockdev/utils.h in mdraid.h (vtrefny)
+- Fix misspelling (agrover)
+- Skip the bcache tests even on x86_64 (vpodzime)
+- Take a break between bcache creation tests (vpodzime)
+- Make sure ./configure fails if there are some soft failures (vpodzime)
+- Improve the error message on missing GI support (vpodzime)
+- Only require bcache-tools if supporting bcache (vpodzime)
+- Skip bcache tests on non-x86_64 architectures (vpodzime)
+- Try harder to register a new bcache device (vpodzime)
+- Reimplement swapon/swapoff functions by using syscalls (vpodzime)
+- Make sure bcache functions are correctly provided or not (vpodzime)
+- Changelog fixup (vpodzime)
+
 * Wed Jan 11 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.2-2
 - Rebuild with changelog fixed up
 
