@@ -5,6 +5,10 @@
 #ifndef BD_KBD_API
 #define BD_KBD_API
 
+GQuark bd_kbd_error_quark (void) {
+    return g_quark_from_static_string ("g-bd-kbd-error-quark");
+}
+
 #define BD_KBD_ERROR bd_kbd_error_quark ()
 typedef enum {
     BD_KBD_ERROR_KMOD_INIT_FAIL,

@@ -1,6 +1,10 @@
 #include <glib.h>
 #include <blockdev/utils.h>
 
+GQuark bd_loop_error_quark (void) {
+    return g_quark_from_static_string ("g-bd-loop-error-quark");
+}
+
 #define BD_LOOP_ERROR bd_loop_error_quark ()
 typedef enum {
     BD_LOOP_ERROR_DEVICE,

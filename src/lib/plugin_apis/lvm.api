@@ -25,6 +25,10 @@
 /* according to lvmcache (7) */
 #define BD_LVM_MIN_CACHE_MD_SIZE (8 MiB)
 
+GQuark bd_lvm_error_quark (void) {
+    return g_quark_from_static_string ("g-bd-lvm-error-quark");
+}
+
 #define BD_LVM_ERROR bd_lvm_error_quark ()
 typedef enum {
     BD_LVM_ERROR_PARSE,

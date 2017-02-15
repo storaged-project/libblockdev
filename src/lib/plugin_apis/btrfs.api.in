@@ -5,6 +5,10 @@
 #define BD_BTRFS_MAIN_VOLUME_ID 5
 #define BD_BTRFS_MIN_MEMBER_SIZE @BTRFS_MIN_SIZE@
 
+GQuark bd_btrfs_error_quark (void) {
+    return g_quark_from_static_string ("g-bd-btrfs-error-quark");
+}
+
 #define BD_BTRFS_ERROR bd_btrfs_error_quark ()
 typedef enum {
     BD_BTRFS_ERROR_DEVICE,

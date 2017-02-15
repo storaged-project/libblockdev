@@ -3,6 +3,10 @@
 
 #define BD_CRYPTO_LUKS_METADATA_SIZE (2 MiB)
 
+GQuark bd_crypto_error_quark (void) {
+    return g_quark_from_static_string ("g-bd-crypto-error-quark");
+}
+
 #define BD_CRYPTO_ERROR bd_crypto_error_quark ()
 typedef enum {
     BD_CRYPTO_ERROR_DEVICE,

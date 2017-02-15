@@ -6,7 +6,11 @@
 #include <asm/dasd.h>
 #include <s390utils/vtoc.h>
 
+GQuark bd_s390_error_quark (void) {
+    return g_quark_from_static_string ("g-bd-s390-error-quark");
+}
 
+#define BD_S390_ERROR bd_s390_error_quark ()
 typedef enum {
     BD_S390_ERROR_DEVICE,
     BD_S390_ERROR_FORMAT_FAILED,
