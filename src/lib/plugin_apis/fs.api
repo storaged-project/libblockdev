@@ -10,6 +10,7 @@ typedef enum {
     BD_FS_ERROR_INVAL,
     BD_FS_ERROR_PARSE,
     BD_FS_ERROR_FAIL,
+    BD_FS_ERROR_NOFS,
 } BDFsError;
 
 #define BD_FS_TYPE_EXT4_INFO (bd_fs_ext4_info_get_type ())

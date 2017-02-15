@@ -353,10 +353,21 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
        busy at the very moment */
     for (n_try=5, status=-1; (status != 0) && (n_try > 0); n_try--) {
         status = blkid_do_probe (probe);
-        if (status != 0)
+        if (status == 1)
+            break;
+        if (status < 0)
             g_usleep (100 * 1000); /* microseconds */
     }
-    if (status != 0) {
+    if (status == 1) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
+                     "No signature detected on the device '%s'", device);
+        blkid_free_probe (probe);
+        synced_close (fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    if (status < 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to probe the device '%s'", device);
         blkid_free_probe (probe);
