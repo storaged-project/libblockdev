@@ -501,8 +501,14 @@ class MDTestSetBitmapLocation(MDTestCase):
         succ = BlockDev.md_set_bitmap_location("/dev/%s" % node, "none")
         self.assertTrue(succ)
 
-        # get_bitmap_location should accept both name and node
+        # get_bitmap_location should accept name, node or path
         loc = BlockDev.md_get_bitmap_location(node)
+        self.assertEqual(loc, "none")
+
+        loc = BlockDev.md_get_bitmap_location("/dev/%s" % node)
+        self.assertEqual(loc, "none")
+
+        loc = BlockDev.md_get_bitmap_location("/dev/md/bd_test_md")
         self.assertEqual(loc, "none")
 
 
