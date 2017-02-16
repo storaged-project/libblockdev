@@ -10,6 +10,10 @@
 #define BD_MD_SUPERBLOCK_SIZE (2 MiB)
 #define BD_MD_CHUNK_SIZE (512 KiB)
 
+GQuark bd_md_error_quark (void) {
+    return g_quark_from_static_string ("g-bd-md-error-quark");
+}
+
 #define BD_MD_ERROR bd_md_error_quark ()
 typedef enum {
     BD_MD_ERROR_PARSE,

@@ -5,11 +5,16 @@
 #ifndef BD_FS_API
 #define BD_FS_API
 
+GQuark bd_fs_error_quark (void) {
+    return g_quark_from_static_string ("g-bd-fs-error-quark");
+}
+
 #define BD_FS_ERROR bd_fs_error_quark ()
 typedef enum {
     BD_FS_ERROR_INVAL,
     BD_FS_ERROR_PARSE,
     BD_FS_ERROR_FAIL,
+    BD_FS_ERROR_NOFS,
 } BDFsError;
 
 #define BD_FS_TYPE_EXT4_INFO (bd_fs_ext4_info_get_type ())

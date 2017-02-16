@@ -10,6 +10,7 @@ typedef enum {
     BD_FS_ERROR_INVAL,
     BD_FS_ERROR_PARSE,
     BD_FS_ERROR_FAIL,
+    BD_FS_ERROR_NOFS,
 } BDFsError;
 
 typedef struct BDFSExt4Info {

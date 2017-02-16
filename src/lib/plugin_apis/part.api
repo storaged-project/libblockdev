@@ -5,6 +5,10 @@
 #ifndef BD_PART_API
 #define BD_PART_API
 
+GQuark bd_part_error_quark (void) {
+    return g_quark_from_static_string ("g-bd-part-error-quark");
+}
+
 #define BD_PART_ERROR bd_part_error_quark ()
 typedef enum {
     BD_PART_ERROR_EXISTS,

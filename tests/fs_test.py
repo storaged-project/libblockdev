@@ -117,6 +117,10 @@ class TestGenericWipe(FSTestCase):
         fs_type = subprocess.check_output(["lsblk", "-n", "-oFSTYPE", self.loop_dev]).strip()
         self.assertEqual(fs_type, b"")
 
+        # try to wipe empty device
+        with self.assertRaisesRegex(GLib.GError, "No signature detected on the device"):
+            BlockDev.fs_wipe(self.loop_dev, True)
+
 
 class Ext4TestMkfs(FSTestCase):
     def test_ext4_mkfs(self):
