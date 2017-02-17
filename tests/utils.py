@@ -1,9 +1,15 @@
 import os
+import re
+import glob
 import tempfile
+import subprocess
+from subprocess import DEVNULL
 from contextlib import contextmanager
 from itertools import chain
 
 from gi.repository import GLib
+
+_lio_devs = dict()
 
 def create_sparse_tempfile(name, size):
     """ Create a temporary sparse file.
@@ -72,3 +78,97 @@ def fake_path(path=None, keep_utils=None):
         os.environ["PATH"] = old_path
         for util in created_utils:
             os.unlink(os.path.join(path, util))
+
+def _delete_backstore(name):
+    status = subprocess.call(["targetcli", "/backstores/fileio/ delete %s" % name], stdout=DEVNULL)
+    if status != 0:
+        raise RuntimeError("Failed to delete the '%s' fileio backstore" % name)
+
+def _delete_target(wwn, backstore=None):
+    status = subprocess.call(["targetcli", "/loopback delete %s" % wwn], stdout=DEVNULL)
+    if status != 0:
+        raise RuntimeError("Failed to delete the '%s' loopback device" % wwn)
+
+    if backstore is not None:
+        _delete_backstore(backstore)
+
+def _delete_lun(wwn, delete_target=True, backstore=None):
+    status = subprocess.call(["targetcli", "/loopback/%s/luns/lun0 delete"], stdout=DEVNULL)
+    if status != 0:
+        raise RuntimeError("Failed to delete the '%s' loopback device's lun0" % wwn)
+    if delete_target:
+        _delete_target(wwn, backstore)
+
+def create_lio_device(fpath):
+    """
+    Creates a new LIO loopback device (using targetcli) on top of the
+    :param:`fpath` backing file.
+
+    :param str fpath: path of the backing file
+    :returns: path of the newly created device (e.g. "/dev/sdb")
+    :rtype: str
+
+    """
+
+    # "register" the backing file as a fileio backstore
+    store_name = os.path.basename(fpath)
+    status = subprocess.call(["targetcli", "/backstores/fileio/ create %s %s" % (store_name, fpath)], stdout=DEVNULL)
+    if status != 0:
+        raise RuntimeError("Failed to register '%s' as a fileio backstore" % fpath)
+
+    out = subprocess.check_output(["targetcli", "/backstores/fileio/%s info" % store_name])
+    out = out.decode("utf-8")
+    store_wwn = None
+    for line in out.splitlines():
+        if line.startswith("wwn: "):
+            store_wwn = line[5:]
+    if store_wwn is None:
+        raise RuntimeError("Failed to determine '%s' backstore's wwn" % store_name)
+
+    # set the optimal alignment because the default is weird and our
+    # partitioning tests expect 2048
+    status = subprocess.call(["targetcli", "/backstores/fileio/%s set attribute optimal_sectors=2048" % store_name], stdout=DEVNULL)
+    if status != 0:
+        raise RuntimeError("Failed to set optimal alignment for '%s'" % store_name)
+
+    # create a new loopback device
+    out = subprocess.check_output(["targetcli", "/loopback create"])
+    out = out.decode("utf-8")
+    match = re.match(r'Created target (.*).', out)
+    if match:
+        tgt_wwn = match.groups()[0]
+    else:
+        _delete_backstore(store_name)
+        raise RuntimeError("Failed to create a new loopback device")
+
+    status = subprocess.call(["targetcli", "/loopback/%s/luns create /backstores/fileio/%s" % (tgt_wwn, store_name)], stdout=DEVNULL)
+    if status != 0:
+        _delete_target(tgt_wwn, store_name)
+        raise RuntimeError("Failed to create a new LUN for '%s' using '%s'" % (tgt_wwn, store_name))
+
+    # the backstore's wwn contains '-'s we need to get rid of and then take just
+    # the fist 25 characters which participate in the device's ID
+    store_wwn = store_wwn.replace("-", "")
+    store_wwn = store_wwn[:25]
+
+    globs = glob.glob("/dev/disk/by-id/wwn-*%s" % store_wwn)
+    if len(globs) != 1:
+        _delete_target(tgt_wwn, store_name)
+        raise RuntimeError("Failed to identify the resulting device for '%s'" % store_name)
+
+    dev_path = os.path.realpath(globs[0])
+    _lio_devs[dev_path] = (tgt_wwn, store_name)
+    return dev_path
+
+def delete_lio_device(dev_path):
+    """
+    Delete a previously setup/created LIO device
+
+    :param str dev_path: path of the device to delete
+
+    """
+    if dev_path in _lio_devs:
+        wwn, store_name = _lio_devs[dev_path]
+        _delete_lun(wwn, True, store_name)
+    else:
+        raise RuntimeError("Unknown device '%s'" % dev_path)
