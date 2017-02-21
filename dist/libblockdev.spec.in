@@ -13,7 +13,7 @@
 
 Name:        libblockdev
 Version:     2.3
-Release:     2%{?dist}
+Release:     3%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
 URL:         https://github.com/rhinstaller/libblockdev
@@ -603,6 +603,9 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Feb 15 2017 Vratislav Podzimek <vtrefny@redhat.com> - 2.3-3
+- Rebuild with changelog fixed up
+
 * Tue Feb 14 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.3-1
 - Allow specifying raid 'name' in multiple way when calling md functions (vtrefny)
 - Allow using both path and raid name in bd_md_set_bitmap_location (vtrefny)
@@ -622,6 +625,9 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 - Reimplement swapon/swapoff functions by using syscalls (vpodzime)
 - Make sure bcache functions are correctly provided or not (vpodzime)
 - Changelog fixup (vpodzime)
+
+* Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 2.2-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 
 * Wed Jan 11 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.2-2
 - Rebuild with changelog fixed up
