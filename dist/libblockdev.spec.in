@@ -12,8 +12,8 @@
 %endif
 
 Name:        libblockdev
-Version:     2.3
-Release:     3%{?dist}
+Version:     2.4
+Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
 URL:         https://github.com/rhinstaller/libblockdev
@@ -603,6 +603,15 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Tue Feb 21 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.4-1
+- Update specs.rst to use present-tense and current API (agrover)
+- Add functions using BLOBs as LUKS passphrases (vpodzime)
+- Make sure the _error_quark() functions are in the library (vtrefny)
+- Return a special error when trying to wipe empty device (vtrefny)
+- Adapt tests to use LIO devices instead of loop devices (vpodzime)
+- Add functions for creating and deleting LIO devices (vpodzime)
+- MDRAID: Allow path as input for functions that work with sysfs (vtrefny)
+
 * Wed Feb 15 2017 Vratislav Podzimek <vtrefny@redhat.com> - 2.3-3
 - Rebuild with changelog fixed up
 
