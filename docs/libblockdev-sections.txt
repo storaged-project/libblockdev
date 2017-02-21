@@ -66,11 +66,16 @@ bd_crypto_device_is_luks
 bd_crypto_luks_uuid
 bd_crypto_luks_status
 bd_crypto_luks_format
+bd_crypto_luks_format_blob
 bd_crypto_luks_open
+bd_crypto_luks_open_blob
 bd_crypto_luks_close
 bd_crypto_luks_add_key
+bd_crypto_luks_add_key_blob
 bd_crypto_luks_remove_key
+bd_crypto_luks_remove_key_blob
 bd_crypto_luks_change_key
+bd_crypto_luks_change_key_blob
 bd_crypto_luks_resize
 bd_crypto_escrow_device
 </SECTION>

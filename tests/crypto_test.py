@@ -83,6 +83,10 @@ class CryptoTestFormat(CryptoTestCase):
         succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0)
         self.assertTrue(succ)
 
+        # the simple case with password blob
+        succ = BlockDev.crypto_luks_format_blob(self.loop_dev, "aes-cbc-essiv:sha256", 0, [ord(c) for c in PASSWD], 0)
+        self.assertTrue(succ)
+
 class CryptoTestResize(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_resize(self):
@@ -154,6 +158,9 @@ class CryptoTestAddKey(CryptoTestCase):
         succ = BlockDev.crypto_luks_add_key(self.loop_dev, PASSWD, None, PASSWD2, None)
         self.assertTrue(succ)
 
+        succ = BlockDev.crypto_luks_add_key_blob(self.loop_dev, [ord(c) for c in PASSWD2], [ord(c) for c in PASSWD3])
+        self.assertTrue(succ)
+
 class CryptoTestRemoveKey(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_remove_key(self):
@@ -165,10 +172,16 @@ class CryptoTestRemoveKey(CryptoTestCase):
         succ = BlockDev.crypto_luks_add_key(self.loop_dev, PASSWD, None, PASSWD2, None)
         self.assertTrue(succ)
 
+        succ = BlockDev.crypto_luks_add_key(self.loop_dev, PASSWD, None, PASSWD3, None)
+        self.assertTrue(succ)
+
         with self.assertRaises(GLib.GError):
             BlockDev.crypto_luks_remove_key(self.loop_dev, "wrong-passphrase", None)
 
         succ = BlockDev.crypto_luks_remove_key(self.loop_dev, PASSWD, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_remove_key_blob(self.loop_dev, [ord(c) for c in PASSWD2])
         self.assertTrue(succ)
 
 class CryptoTestErrorLocale(CryptoTestCase):
@@ -204,6 +217,9 @@ class CryptoTestChangeKey(CryptoTestCase):
         self.assertTrue(succ)
 
         succ = BlockDev.crypto_luks_change_key(self.loop_dev, PASSWD, PASSWD2)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_change_key_blob(self.loop_dev, [ord(c) for c in PASSWD2], [ord(c) for c in PASSWD3])
         self.assertTrue(succ)
 
 class CryptoTestIsLuks(CryptoTestCase):
