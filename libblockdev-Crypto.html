@@ -116,7 +116,23 @@
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-format-blob" title="bd_crypto_luks_format_blob ()">bd_crypto_luks_format_blob</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
 <a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-open" title="bd_crypto_luks_open ()">bd_crypto_luks_open</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-open-blob" title="bd_crypto_luks_open_blob ()">bd_crypto_luks_open_blob</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -140,6 +156,14 @@
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-add-key-blob" title="bd_crypto_luks_add_key_blob ()">bd_crypto_luks_add_key_blob</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
 <a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-remove-key" title="bd_crypto_luks_remove_key ()">bd_crypto_luks_remove_key</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
@@ -148,7 +172,23 @@
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-remove-key-blob" title="bd_crypto_luks_remove_key_blob ()">bd_crypto_luks_remove_key_blob</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
 <a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-change-key" title="bd_crypto_luks_change_key ()">bd_crypto_luks_change_key</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-change-key-blob" title="bd_crypto_luks_change_key_blob ()">bd_crypto_luks_change_key_blob</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -469,6 +509,80 @@ was successfully formatted as LUKS or not
 </div>
 <hr>
 <div class="refsect2">
+<a name="bd-crypto-luks-format-blob"></a><h3>bd_crypto_luks_format_blob ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_crypto_luks_format_blob (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                            <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *cipher</code></em>,
+                            <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> key_size</code></em>,
+                            <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#guint8"><span class="type">guint8</span></a> *pass_data</code></em>,
+                            <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gsize"><span class="type">gsize</span></a> data_len</code></em>,
+                            <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> min_entropy</code></em>,
+                            <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Formats the given <em class="parameter"><code>device</code></em>
+ as LUKS according to the other parameters given. If
+<em class="parameter"><code>min_entropy</code></em>
+ is specified (greater than 0), the function waits for enough
+entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
+FOREVER).</p>
+<div class="refsect3">
+<a name="bd-crypto-luks-format-blob.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a device to format as LUKS</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>cipher</p></td>
+<td class="parameter_description"><p> cipher specification (type-mode, e.g. "aes-xts-plain64") or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use the default. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>key_size</p></td>
+<td class="parameter_description"><p>size of the volume key in bits or 0 to use the default</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>pass_data</p></td>
+<td class="parameter_description"><p> a passphrase for the new LUKS device (may contain arbitrary binary data). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=data_len]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>data_len</p></td>
+<td class="parameter_description"><p>length of the <em class="parameter"><code>pass_data</code></em>
+buffer</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>min_entropy</p></td>
+<td class="parameter_description"><p>minimum random data entropy (in bits) required to format <em class="parameter"><code>device</code></em>
+as LUKS</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-crypto-luks-format-blob.returns"></a><h4>Returns</h4>
+<p> whether the given <em class="parameter"><code>device</code></em>
+was successfully formatted as LUKS or not
+(the <em class="parameter"><code>error</code></em>
+) contains the error in such cases)</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="bd-crypto-luks-open"></a><h3>bd_crypto_luks_open ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 bd_crypto_luks_open (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
@@ -528,6 +642,65 @@ was successfully opened or not</p>
 <p>One of <em class="parameter"><code>passphrase</code></em>
 , <em class="parameter"><code>key_file</code></em>
 has to be != <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-crypto-luks-open-blob"></a><h3>bd_crypto_luks_open_blob ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_crypto_luks_open_blob (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                          <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
+                          <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#guint8"><span class="type">guint8</span></a> *pass_data</code></em>,
+                          <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gsize"><span class="type">gsize</span></a> data_len</code></em>,
+                          <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> read_only</code></em>,
+                          <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-crypto-luks-open-blob.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>the device to open</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>name</p></td>
+<td class="parameter_description"><p>name for the LUKS device</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>pass_data</p></td>
+<td class="parameter_description"><p> a passphrase for the new LUKS device (may contain arbitrary binary data). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=data_len]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>data_len</p></td>
+<td class="parameter_description"><p>length of the <em class="parameter"><code>pass_data</code></em>
+buffer</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>read_only</p></td>
+<td class="parameter_description"><p>whether to open as read-only or not (meaning read-write)</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-crypto-luks-open-blob.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>device</code></em>
+was successfully opened or not</p>
 </div>
 </div>
 <hr>
@@ -636,6 +809,67 @@ has to be != <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="
 </div>
 <hr>
 <div class="refsect2">
+<a name="bd-crypto-luks-add-key-blob"></a><h3>bd_crypto_luks_add_key_blob ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_crypto_luks_add_key_blob (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                             <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#guint8"><span class="type">guint8</span></a> *pass_data</code></em>,
+                             <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gsize"><span class="type">gsize</span></a> data_len</code></em>,
+                             <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#guint8"><span class="type">guint8</span></a> *npass_data</code></em>,
+                             <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gsize"><span class="type">gsize</span></a> ndata_len</code></em>,
+                             <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-crypto-luks-add-key-blob.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>device to add new key to</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>pass_data</p></td>
+<td class="parameter_description"><p> a passphrase for the new LUKS device (may contain arbitrary binary data). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=data_len]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>data_len</p></td>
+<td class="parameter_description"><p>length of the <em class="parameter"><code>pass_data</code></em>
+buffer</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>npass_data</p></td>
+<td class="parameter_description"><p> a new passphrase for the new LUKS device (may contain arbitrary binary data). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=ndata_len]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>ndata_len</p></td>
+<td class="parameter_description"><p>length of the <em class="parameter"><code>npass_data</code></em>
+buffer</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-crypto-luks-add-key-blob.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>npass_data</code></em>
+was successfully added to <em class="parameter"><code>device</code></em>
+or not</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="bd-crypto-luks-remove-key"></a><h3>bd_crypto_luks_remove_key ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 bd_crypto_luks_remove_key (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
@@ -686,6 +920,55 @@ has to be != <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="
 </div>
 <hr>
 <div class="refsect2">
+<a name="bd-crypto-luks-remove-key-blob"></a><h3>bd_crypto_luks_remove_key_blob ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_crypto_luks_remove_key_blob (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                                <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#guint8"><span class="type">guint8</span></a> *pass_data</code></em>,
+                                <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gsize"><span class="type">gsize</span></a> data_len</code></em>,
+                                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-crypto-luks-remove-key-blob.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>device to add new key to</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>pass_data</p></td>
+<td class="parameter_description"><p> a passphrase for the new LUKS device (may contain arbitrary binary data) to remove. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=data_len]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>data_len</p></td>
+<td class="parameter_description"><p>length of the <em class="parameter"><code>pass_data</code></em>
+buffer</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-crypto-luks-remove-key-blob.returns"></a><h4>Returns</h4>
+<p> whether the key was successfully removed or not</p>
+<p>Either <em class="parameter"><code>pass</code></em>
+or <em class="parameter"><code>key_file</code></em>
+has to be != <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="bd-crypto-luks-change-key"></a><h3>bd_crypto_luks_change_key ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 bd_crypto_luks_change_key (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
@@ -728,6 +1011,65 @@ bd_crypto_luks_change_key (<em class="parameter"><code>const <a href="../glib/gl
 <a name="bd-crypto-luks-change-key.returns"></a><h4>Returns</h4>
 <p> whether the key was successfully changed or not</p>
 <p>No support for changing key files (yet).</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-crypto-luks-change-key-blob"></a><h3>bd_crypto_luks_change_key_blob ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_crypto_luks_change_key_blob (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                                <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#guint8"><span class="type">guint8</span></a> *pass_data</code></em>,
+                                <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gsize"><span class="type">gsize</span></a> data_len</code></em>,
+                                <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#guint8"><span class="type">guint8</span></a> *npass_data</code></em>,
+                                <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gsize"><span class="type">gsize</span></a> ndata_len</code></em>,
+                                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-crypto-luks-change-key-blob.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>device to change key of</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>pass_data</p></td>
+<td class="parameter_description"><p> a passphrase for the new LUKS device (may contain arbitrary binary data). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=data_len]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>data_len</p></td>
+<td class="parameter_description"><p>length of the <em class="parameter"><code>pass_data</code></em>
+buffer</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>npass_data</p></td>
+<td class="parameter_description"><p> a new passphrase for the new LUKS device (may contain arbitrary binary data). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=ndata_len]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>ndata_len</p></td>
+<td class="parameter_description"><p>length of the <em class="parameter"><code>npass_data</code></em>
+buffer</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-crypto-luks-change-key-blob.returns"></a><h4>Returns</h4>
+<p> whether the key was successfully changed or not</p>
 </div>
 </div>
 <hr>

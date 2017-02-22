@@ -76,11 +76,16 @@
     <keyword type="function" name="bd_crypto_luks_uuid ()" link="libblockdev-Crypto.html#bd-crypto-luks-uuid"/>
     <keyword type="function" name="bd_crypto_luks_status ()" link="libblockdev-Crypto.html#bd-crypto-luks-status"/>
     <keyword type="function" name="bd_crypto_luks_format ()" link="libblockdev-Crypto.html#bd-crypto-luks-format"/>
+    <keyword type="function" name="bd_crypto_luks_format_blob ()" link="libblockdev-Crypto.html#bd-crypto-luks-format-blob"/>
     <keyword type="function" name="bd_crypto_luks_open ()" link="libblockdev-Crypto.html#bd-crypto-luks-open"/>
+    <keyword type="function" name="bd_crypto_luks_open_blob ()" link="libblockdev-Crypto.html#bd-crypto-luks-open-blob"/>
     <keyword type="function" name="bd_crypto_luks_close ()" link="libblockdev-Crypto.html#bd-crypto-luks-close"/>
     <keyword type="function" name="bd_crypto_luks_add_key ()" link="libblockdev-Crypto.html#bd-crypto-luks-add-key"/>
+    <keyword type="function" name="bd_crypto_luks_add_key_blob ()" link="libblockdev-Crypto.html#bd-crypto-luks-add-key-blob"/>
     <keyword type="function" name="bd_crypto_luks_remove_key ()" link="libblockdev-Crypto.html#bd-crypto-luks-remove-key"/>
+    <keyword type="function" name="bd_crypto_luks_remove_key_blob ()" link="libblockdev-Crypto.html#bd-crypto-luks-remove-key-blob"/>
     <keyword type="function" name="bd_crypto_luks_change_key ()" link="libblockdev-Crypto.html#bd-crypto-luks-change-key"/>
+    <keyword type="function" name="bd_crypto_luks_change_key_blob ()" link="libblockdev-Crypto.html#bd-crypto-luks-change-key-blob"/>
     <keyword type="function" name="bd_crypto_luks_resize ()" link="libblockdev-Crypto.html#bd-crypto-luks-resize"/>
     <keyword type="function" name="bd_crypto_escrow_device ()" link="libblockdev-Crypto.html#bd-crypto-escrow-device"/>
     <keyword type="macro" name="BD_CRYPTO_LUKS_METADATA_SIZE" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-METADATA-SIZE:CAPS"/>
@@ -148,7 +153,10 @@
     <keyword type="function" name="bd_loop_get_backing_file ()" link="libblockdev-Loop.html#bd-loop-get-backing-file"/>
     <keyword type="function" name="bd_loop_get_loop_name ()" link="libblockdev-Loop.html#bd-loop-get-loop-name"/>
     <keyword type="function" name="bd_loop_setup ()" link="libblockdev-Loop.html#bd-loop-setup"/>
+    <keyword type="function" name="bd_loop_setup_from_fd ()" link="libblockdev-Loop.html#bd-loop-setup-from-fd"/>
     <keyword type="function" name="bd_loop_teardown ()" link="libblockdev-Loop.html#bd-loop-teardown"/>
+    <keyword type="function" name="bd_loop_get_autoclear ()" link="libblockdev-Loop.html#bd-loop-get-autoclear"/>
+    <keyword type="function" name="bd_loop_set_autoclear ()" link="libblockdev-Loop.html#bd-loop-set-autoclear"/>
     <keyword type="macro" name="BD_LOOP_ERROR" link="libblockdev-Loop.html#BD-LOOP-ERROR:CAPS"/>
     <keyword type="enum" name="enum BDLoopError" link="libblockdev-Loop.html#BDLoopError"/>
     <keyword type="function" name="bd_lvm_check_deps ()" link="libblockdev-LVM.html#bd-lvm-check-deps"/>
@@ -263,6 +271,10 @@
     <keyword type="function" name="bd_md_detail ()" link="libblockdev-MD-RAID.html#bd-md-detail"/>
     <keyword type="function" name="bd_md_node_from_name ()" link="libblockdev-MD-RAID.html#bd-md-node-from-name"/>
     <keyword type="function" name="bd_md_name_from_node ()" link="libblockdev-MD-RAID.html#bd-md-name-from-node"/>
+    <keyword type="function" name="bd_md_get_status ()" link="libblockdev-MD-RAID.html#bd-md-get-status"/>
+    <keyword type="function" name="bd_md_set_bitmap_location ()" link="libblockdev-MD-RAID.html#bd-md-set-bitmap-location"/>
+    <keyword type="function" name="bd_md_get_bitmap_location ()" link="libblockdev-MD-RAID.html#bd-md-get-bitmap-location"/>
+    <keyword type="function" name="bd_md_request_sync_action ()" link="libblockdev-MD-RAID.html#bd-md-request-sync-action"/>
     <keyword type="macro" name="BD_MD_SUPERBLOCK_SIZE" link="libblockdev-MD-RAID.html#BD-MD-SUPERBLOCK-SIZE:CAPS"/>
     <keyword type="macro" name="BD_MD_CHUNK_SIZE" link="libblockdev-MD-RAID.html#BD-MD-CHUNK-SIZE:CAPS"/>
     <keyword type="macro" name="BD_MD_ERROR" link="libblockdev-MD-RAID.html#BD-MD-ERROR:CAPS"/>
@@ -390,6 +402,7 @@
     <keyword type="function" name="bd_utils_report_finished ()" link="libblockdev-Utils.html#bd-utils-report-finished"/>
     <keyword type="function" name="bd_utils_report_progress ()" link="libblockdev-Utils.html#bd-utils-report-progress"/>
     <keyword type="function" name="bd_utils_report_started ()" link="libblockdev-Utils.html#bd-utils-report-started"/>
+    <keyword type="function" name="bd_utils_echo_str_to_file ()" link="libblockdev-Utils.html#bd-utils-echo-str-to-file"/>
     <keyword type="function" name="bd_utils_check_util_version ()" link="libblockdev-Utils.html#bd-utils-check-util-version"/>
     <keyword type="function" name="bd_utils_version_cmp ()" link="libblockdev-Utils.html#bd-utils-version-cmp"/>
     <keyword type="function" name="bd_extra_arg_new ()" link="libblockdev-Utils.html#bd-extra-arg-new"/>
@@ -437,7 +450,9 @@
     <keyword type="constant" name="BD_FS_ERROR_INVAL" link="libblockdev-FS.html#BD-FS-ERROR-INVAL:CAPS"/>
     <keyword type="constant" name="BD_FS_ERROR_PARSE" link="libblockdev-FS.html#BD-FS-ERROR-PARSE:CAPS"/>
     <keyword type="constant" name="BD_FS_ERROR_FAIL" link="libblockdev-FS.html#BD-FS-ERROR-FAIL:CAPS"/>
+    <keyword type="constant" name="BD_FS_ERROR_NOFS" link="libblockdev-FS.html#BD-FS-ERROR-NOFS:CAPS"/>
     <keyword type="constant" name="BD_LOOP_ERROR_DEVICE" link="libblockdev-Loop.html#BD-LOOP-ERROR-DEVICE:CAPS"/>
+    <keyword type="constant" name="BD_LOOP_ERROR_FAIL" link="libblockdev-Loop.html#BD-LOOP-ERROR-FAIL:CAPS"/>
     <keyword type="constant" name="BD_LVM_ERROR_PARSE" link="libblockdev-LVM.html#BD-LVM-ERROR-PARSE:CAPS"/>
     <keyword type="constant" name="BD_LVM_ERROR_NOEXIST" link="libblockdev-LVM.html#BD-LVM-ERROR-NOEXIST:CAPS"/>
     <keyword type="constant" name="BD_LVM_ERROR_DM_ERROR" link="libblockdev-LVM.html#BD-LVM-ERROR-DM-ERROR:CAPS"/>
@@ -460,6 +475,8 @@
     <keyword type="constant" name="BD_MD_ERROR_PARSE" link="libblockdev-MD-RAID.html#BD-MD-ERROR-PARSE:CAPS"/>
     <keyword type="constant" name="BD_MD_ERROR_BAD_FORMAT" link="libblockdev-MD-RAID.html#BD-MD-ERROR-BAD-FORMAT:CAPS"/>
     <keyword type="constant" name="BD_MD_ERROR_NO_MATCH" link="libblockdev-MD-RAID.html#BD-MD-ERROR-NO-MATCH:CAPS"/>
+    <keyword type="constant" name="BD_MD_ERROR_INVAL" link="libblockdev-MD-RAID.html#BD-MD-ERROR-INVAL:CAPS"/>
+    <keyword type="constant" name="BD_MD_ERROR_FAIL" link="libblockdev-MD-RAID.html#BD-MD-ERROR-FAIL:CAPS"/>
     <keyword type="constant" name="BD_MPATH_ERROR_FLUSH" link="libblockdev-Mpath.html#BD-MPATH-ERROR-FLUSH:CAPS"/>
     <keyword type="constant" name="BD_MPATH_ERROR_NOT_ROOT" link="libblockdev-Mpath.html#BD-MPATH-ERROR-NOT-ROOT:CAPS"/>
     <keyword type="constant" name="BD_MPATH_ERROR_DM_ERROR" link="libblockdev-Mpath.html#BD-MPATH-ERROR-DM-ERROR:CAPS"/>
