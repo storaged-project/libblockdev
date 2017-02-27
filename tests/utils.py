@@ -141,7 +141,8 @@ def create_lio_device(fpath):
         _delete_backstore(store_name)
         raise RuntimeError("Failed to create a new loopback device")
 
-    status = subprocess.call(["targetcli", "/loopback/%s/luns create /backstores/fileio/%s" % (tgt_wwn, store_name)], stdout=DEVNULL)
+    with udev_settle():
+        status = subprocess.call(["targetcli", "/loopback/%s/luns create /backstores/fileio/%s" % (tgt_wwn, store_name)], stdout=DEVNULL)
     if status != 0:
         _delete_target(tgt_wwn, store_name)
         raise RuntimeError("Failed to create a new LUN for '%s' using '%s'" % (tgt_wwn, store_name))
