@@ -1655,15 +1655,15 @@ gboolean bd_lvm_lvremove (gchar *vg_name, gchar *lv_name, gboolean force, GError
     GVariantBuilder builder;
     GVariant *extra = NULL;
 
+    g_variant_builder_init (&builder, G_VARIANT_TYPE_DICTIONARY);
+    /* '--yes' is needed if DISCARD is enabled */
+    g_variant_builder_add (&builder, "{sv}", "--yes", g_variant_new ("s", ""));
     if (force) {
-        g_variant_builder_init (&builder, G_VARIANT_TYPE_DICTIONARY);
         g_variant_builder_add (&builder, "{sv}", "--force", g_variant_new ("s", ""));
-        g_variant_builder_add (&builder, "{sv}", "--yes", g_variant_new ("s", ""));
-
-        extra = g_variant_builder_end (&builder);
-        g_variant_builder_clear (&builder);
-        extra = g_variant_new ("(v)", extra);
     }
+    extra = g_variant_builder_end (&builder);
+    g_variant_builder_clear (&builder);
+    extra = g_variant_new ("(v)", extra);
     call_lv_method_sync (vg_name, lv_name, "Remove", NULL, extra, error);
 
     return (*error == NULL);

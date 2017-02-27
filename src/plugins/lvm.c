@@ -1117,16 +1117,16 @@ gboolean bd_lvm_lvcreate (gchar *vg_name, gchar *lv_name, guint64 size, gchar *t
  * Returns: whether the @vg_name/@lv_name LV was successfully removed or not
  */
 gboolean bd_lvm_lvremove (gchar *vg_name, gchar *lv_name, gboolean force, GError **error) {
-    gchar *args[5] = {"lvremove", NULL, NULL, NULL, NULL};
-    guint8 next_arg = 1;
+    /* '--yes' is needed if DISCARD is enabled */
+    gchar *args[5] = {"lvremove", "--yes", NULL, NULL, NULL};
+    guint8 next_arg = 2;
     gboolean success = FALSE;
 
     if (force) {
         args[next_arg] = "--force";
         next_arg++;
-        args[next_arg] = "--yes";
-        next_arg++;
     }
+
     args[next_arg] = g_strdup_printf ("%s/%s", vg_name, lv_name);
 
     success = call_lvm_and_report_error (args, error);
