@@ -33,6 +33,7 @@ gboolean bd_s390_dasd_format (const gchar *dasd, const BDExtraArg **extra, GErro
 gboolean bd_s390_dasd_needs_format (const gchar *dasd, GError **error);
 gboolean bd_s390_dasd_online (const gchar *dasd, GError **error);
 gboolean bd_s390_dasd_is_ldl (const gchar *dasd, GError **error);
+gboolean bd_s390_dasd_is_fba (const gchar *dasd, GError **error);
 gchar* bd_s390_sanitize_dev_input (const gchar *dev, GError **error);
 gchar* bd_s390_zfcp_sanitize_wwpn_input (const gchar *wwpn, GError **error);
 gchar* bd_s390_zfcp_sanitize_lun_input (const gchar *lun, GError **error);

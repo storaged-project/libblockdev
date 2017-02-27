@@ -247,6 +247,7 @@ s390
    * s390_dasd_needs_format
    * s390_dasd_online
    * s390_dasd_is_ldl
+   * s390_dasd_is_fba
    * s390_sanitize_dev_input
    * s390_zfcp_sanitize_wwpn_input
    * s390_zfcp_sanitize_lun_input
