@@ -228,6 +228,8 @@ gboolean bd_lvm_check_deps () {
     GVariant *service = NULL;
     gboolean found = FALSE;
     GError *error = NULL;
+    gboolean success = FALSE;
+    gboolean check_ret = FALSE;
 
     if (!bus && !setup_dbus_connection (&error)) {
         g_critical ("Failed to setup DBus connection: %s", error->message);
@@ -282,7 +284,18 @@ gboolean bd_lvm_check_deps () {
         g_variant_unref (ret);
 
     /* there has to be no error reported */
-    return (error == NULL);
+    check_ret = (error == NULL);
+    g_clear_error (&error);
+
+    /* we also need the  */
+    success = bd_utils_check_util_version ("thin_metadata_size", NULL, NULL, NULL, &error);
+    if (!success && error) {
+        g_warning("Cannot load the LVM plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+    check_ret = check_ret && success;
+
+    return check_ret;
 }
 
 /**
@@ -1027,6 +1040,52 @@ guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean inclu
 
     return MIN (bd_lvm_round_size_to_pe(raw_md_size, pe_size, TRUE, error),
                 bd_lvm_round_size_to_pe(BD_LVM_MAX_THPOOL_MD_SIZE, pe_size, TRUE, error));
+}
+
+/**
+ * bd_lvm_get_thpool_meta_size:
+ * @size: size of the thin pool
+ * @chunk_size: chunk size of the thin pool or 0 to use the default (%BD_LVM_DEFAULT_CHUNK_SIZE)
+ * @n_snapshots: number of snapshots that will be created in the pool
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: recommended size of the metadata space for the specified pool or 0
+ *          in case of error
+ */
+guint64 bd_lvm_get_thpool_meta_size (guint64 size, guint64 chunk_size, guint64 n_snapshots, GError **error) {
+    /* ub - output in bytes, n - output just the number */
+    const gchar* args[7] = {"thin_metadata_size", "-ub", "-n", NULL, NULL, NULL, NULL};
+    gchar *output = NULL;
+    gboolean success = FALSE;
+    guint64 ret = 0;
+
+    /* s - total size, b - chunk size, m - number of snapshots */
+    args[3] = g_strdup_printf ("-s%"G_GUINT64_FORMAT, size);
+    args[4] = g_strdup_printf ("-b%"G_GUINT64_FORMAT,
+                               chunk_size != 0 ? chunk_size : (guint64) BD_LVM_DEFAULT_CHUNK_SIZE);
+    args[5] = g_strdup_printf ("-m%"G_GUINT64_FORMAT, n_snapshots);
+
+    success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
+    g_free ((gchar*) args[3]);
+    g_free ((gchar*) args[4]);
+    g_free ((gchar*) args[5]);
+
+    if (!success) {
+        /* error is already set */
+        g_free (output);
+        return 0;
+    }
+
+    ret = g_ascii_strtoull (output, NULL, 0);
+    g_free (output);
+    if (ret == 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                     "Failed to parse number from thin_metadata_size's output: '%s'",
+                     output);
+        return 0;
+    }
+
+    return ret;
 }
 
 /**
