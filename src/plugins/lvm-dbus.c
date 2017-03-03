@@ -465,7 +465,9 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
         } else
             /* just use the extra_params */
             config_extra_params = extra_params;
-    } else
+    }
+
+    if (!config_extra_params)
         /* create an empty dictionary with the extra arguments */
         config_extra_params = g_variant_new_array (G_VARIANT_TYPE("{sv}"), NULL, 0);
 
