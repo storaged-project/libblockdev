@@ -436,6 +436,7 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
     gchar *log_msg = NULL;
     gchar *prog_msg = NULL;
     const BDExtraArg **extra_p = NULL;
+    gboolean added_extra = FALSE;
 
     /* don't allow global config string changes during the run */
     g_mutex_lock (&global_config_lock);
@@ -447,22 +448,29 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
 
             if (extra_params) {
                 g_variant_iter_init (&iter, extra_params);
-                while ((param = g_variant_iter_next_value (&iter)))
+                while ((param = g_variant_iter_next_value (&iter))) {
                     g_variant_builder_add_value (&extra_builder, param);
+                    added_extra = TRUE;
+                }
             }
 
-            if (extra_args)
-                for (extra_p=extra_args; *extra_p; extra_p++)
+            if (extra_args) {
+                for (extra_p=extra_args; *extra_p; extra_p++) {
                     g_variant_builder_add (&extra_builder, "{sv}",
                                            (*extra_p)->opt ? (*extra_p)->opt : "",
                                            g_variant_new ("s",
                                                           (*extra_p)->val ? (*extra_p)->val : ""));
+                    added_extra = TRUE;
+                }
+            }
             if (global_config_str) {
                 config = g_variant_new ("s", global_config_str);
                 g_variant_builder_add (&extra_builder, "{sv}", "--config", config);
+                added_extra = TRUE;
             }
 
-            config_extra_params = g_variant_builder_end (&extra_builder);
+            if (added_extra)
+                config_extra_params = g_variant_builder_end (&extra_builder);
             g_variant_builder_clear (&extra_builder);
         } else
             /* just use the extra_params */
