@@ -453,8 +453,10 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
 
             if (extra_args)
                 for (extra_p=extra_args; *extra_p; extra_p++)
-                    g_variant_builder_add (&extra_builder, "{sv}", (*extra_p)->opt,
-                                           g_variant_new ("s", (*extra_p)->val));
+                    g_variant_builder_add (&extra_builder, "{sv}",
+                                           (*extra_p)->opt ? (*extra_p)->opt : "",
+                                           g_variant_new ("s",
+                                                          (*extra_p)->val ? (*extra_p)->val : ""));
             if (global_config_str) {
                 config = g_variant_new ("s", global_config_str);
                 g_variant_builder_add (&extra_builder, "{sv}", "--config", config);
