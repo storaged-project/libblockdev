@@ -15,6 +15,7 @@ typedef enum {
     BD_FS_ERROR_PARSE,
     BD_FS_ERROR_FAIL,
     BD_FS_ERROR_NOFS,
+    BD_FS_ERROR_AUTH,
 } BDFsError;
 
 #define BD_FS_TYPE_EXT4_INFO (bd_fs_ext4_info_get_type ())
@@ -204,6 +205,40 @@ GType bd_fs_vfat_info_get_type () {
  */
 gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error);
 
+/**
+ * bd_fs_unmount:
+ * @spec: mount point or device to unmount
+ * @lazy: enable/disable lazy unmount
+ * @force: enable/disable force unmount
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the unmount
+ *                                                 currently only 'run_as_uid'
+ *                                                 and 'run_as_gid' are supported
+ *                                                 value must be a valid non zero
+ *                                                 uid (gid)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether @spec was successfully unmounted or not
+ */
+gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_fs_mount:
+ * @device: (allow-none): device to mount, if not specified @mountpoint entry
+ *                        from fstab will be used
+ * @mountpoint: (allow-none): mountpoint for @device, if not specified @device
+ *                            entry from fstab will be used
+ * @fstype: (allow-none): filesystem type
+ * @options: (allow-none): comma delimited options for mount
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the unmount
+ *                                                 currently only 'run_as_uid'
+ *                                                 and 'run_as_gid' are supported
+ *                                                 value must be a valid non zero
+ *                                                 uid (gid)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether @device (or @mountpoint) was successfully mounted or not
+ */
+gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar *fstype, const gchar *options, const BDExtraArg **extra, GError **error);
 
 /**
  * bd_fs_ext4_mkfs:

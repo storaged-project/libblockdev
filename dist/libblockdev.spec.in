@@ -39,6 +39,7 @@ BuildRequires: kmod-devel
 BuildRequires: parted-devel
 BuildRequires: libblkid-devel
 BuildRequires: libbytesize-devel
+BuildRequires: libmount-devel
 
 # Needed for the escrow tests in tests/crypto_test.py, but not used to build
 # BuildRequires: volume_key

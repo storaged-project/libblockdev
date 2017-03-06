@@ -11,6 +11,7 @@ typedef enum {
     BD_FS_ERROR_PARSE,
     BD_FS_ERROR_FAIL,
     BD_FS_ERROR_NOFS,
+    BD_FS_ERROR_AUTH, // keep this entry last
 } BDFsError;
 
 typedef struct BDFSExt4Info {
@@ -60,6 +61,8 @@ gboolean bd_fs_init ();
 void bd_fs_close ();
 
 gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error);
+gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const BDExtraArg **extra, GError **error);
+gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar *fstype, const gchar *options, const BDExtraArg **extra, GError **error);
 
 gboolean bd_fs_ext4_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_fs_ext4_wipe (const gchar *device, GError **error);

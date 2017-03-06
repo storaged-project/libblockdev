@@ -35,6 +35,8 @@ filesystems
    * change_label_FSTYPE
 
    * wipefs
+   * mount
+   * unmount
    * generic_resize [TODO]
 
 
