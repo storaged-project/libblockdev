@@ -25,6 +25,8 @@
 #define BD_LVM_MAX_THPOOL_MD_SIZE (16 GiB)
 #define BD_LVM_MIN_THPOOL_CHUNK_SIZE (64 KiB)
 #define BD_LVM_MAX_THPOOL_CHUNK_SIZE (1 GiB)
+#define BD_LVM_DEFAULT_CHUNK_SIZE (64 KiB)
+
 #define THPOOL_MD_FACTOR_NEW (0.2)
 #define THPOOL_MD_FACTOR_EXISTS (1 / 6.0)
 
@@ -152,6 +154,7 @@ guint64 bd_lvm_get_max_lv_size (GError **error);
 guint64 bd_lvm_round_size_to_pe (guint64 size, guint64 pe_size, gboolean roundup, GError **error);
 guint64 bd_lvm_get_lv_physical_size (guint64 lv_size, guint64 pe_size, GError **error);
 guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean included, GError **error);
+guint64 bd_lvm_get_thpool_meta_size (guint64 size, guint64 chunk_size, guint64 n_snapshots, GError **error);
 gboolean bd_lvm_is_valid_thpool_md_size (guint64 size, GError **error);
 gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard, GError **error);
 
