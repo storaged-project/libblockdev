@@ -12,7 +12,7 @@
 %endif
 
 Name:        libblockdev
-Version:     2.4
+Version:     2.5
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -607,6 +607,15 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Mon Mar 06 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.5-1
+- Do not try to get GVariant after not adding anything to its builder (vpodzime)
+- Replace NULL with "" when building ExtraArg (vpodzime)
+- Replace NULL with "" when adding it as a 's' GVariant (vpodzime)
+- Make sure we don't try to add NULL as GVariant to DBus params (vpodzime)
+- Add function for getting recommended thpool metadata size (vpodzime)
+- Make udev settle after we create a LIO device (vpodzime)
+- Always use '--yes' for lvremove (vpodzime)
+
 * Tue Feb 21 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.4-1
 - Update specs.rst to use present-tense and current API (agrover)
 - Add functions using BLOBs as LUKS passphrases (vpodzime)
