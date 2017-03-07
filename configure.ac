@@ -151,6 +151,21 @@ AS_IF([test "x$with_bcache" != "xno"],
       [AC_DEFINE([WITH_BD_BCACHE], [], [Define if bcache is supported]) AC_SUBST([WITH_BCACHE], [1]) AC_SUBST([WITH_BCACHE_CFLAGS], [-DWITH_BD_BCACHE])],
       [skip_patterns="$skip_patterns bcache"])
 
+LIBBLOCKDEV_PLUGIN([BTRFS], [btrfs])
+LIBBLOCKDEV_PLUGIN([CRYPTO], [crypto])
+LIBBLOCKDEV_PLUGIN([DM], [dm])
+LIBBLOCKDEV_PLUGIN([LOOP], [loop])
+LIBBLOCKDEV_PLUGIN([LVM], [lvm])
+LIBBLOCKDEV_PLUGIN([LVM_DBUS], [lvm_dbus])
+LIBBLOCKDEV_PLUGIN([MDRAID], [mdraid])
+LIBBLOCKDEV_PLUGIN([MPATH], [mpath])
+LIBBLOCKDEV_PLUGIN([SWAP], [swap])
+LIBBLOCKDEV_PLUGIN([KBD], [kbd])
+LIBBLOCKDEV_PLUGIN([PART], [part])
+LIBBLOCKDEV_PLUGIN([FS], [fs])
+
+AM_CONDITIONAL(WITH_PART_O_WITH_FS, test "x$with_part" != "xno" -o "x$with_fs" != "xno")
+
 AC_SUBST([skip_patterns], [$skip_patterns])
 AC_SUBST([MAJOR_VER], [\"2\"])
 

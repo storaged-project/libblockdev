@@ -1,70 +1,143 @@
-lib_LTLIBRARIES = libbd_btrfs.la libbd_crypto.la libbd_dm.la libbd_loop.la libbd_lvm.la libbd_lvm-dbus.la \
-			      libbd_mdraid.la libbd_mpath.la libbd_swap.la libbd_kbd.la libbd_part_err.la libbd_part.la libbd_fs.la
+lib_LTLIBRARIES =
+
+if WITH_BTRFS
+lib_LTLIBRARIES += libbd_btrfs.la
+endif
+
+if WITH_CRYPTO
+lib_LTLIBRARIES += libbd_crypto.la
+endif
+
+if WITH_DM
+lib_LTLIBRARIES += libbd_dm.la
+endif
+
+if WITH_LOOP
+lib_LTLIBRARIES += libbd_loop.la
+endif
+
+if WITH_LVM
+lib_LTLIBRARIES += libbd_lvm.la
+endif
+
+if WITH_LVM_DBUS
+lib_LTLIBRARIES += libbd_lvm-dbus.la
+endif
+
+if WITH_MDRAID
+lib_LTLIBRARIES += libbd_mdraid.la
+endif
+
+if WITH_MPATH
+lib_LTLIBRARIES += libbd_mpath.la
+endif
+
+if WITH_SWAP
+lib_LTLIBRARIES += libbd_swap.la
+endif
+
+if WITH_KBD
+lib_LTLIBRARIES += libbd_kbd.la
+endif
+
+if WITH_PART
+lib_LTLIBRARIES += libbd_part.la
+endif
+
+if WITH_FS
+lib_LTLIBRARIES += libbd_fs.la
+endif
+
+if WITH_PART_O_WITH_FS
+lib_LTLIBRARIES += libbd_part_err.la
+endif
+
 
 if ON_S390
 lib_LTLIBRARIES += libbd_s390.la
 endif
 
+
+if WITH_BTRFS
 libbd_btrfs_la_CFLAGS = $(GLIB_CFLAGS) $(BYTESIZE_CFLAGS) -Wall -Wextra -Werror
 libbd_btrfs_la_LIBADD = $(GLIB_LIBS) $(BYTESIZE_LIBS) ${builddir}/../utils/libbd_utils.la
 libbd_btrfs_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_btrfs_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_btrfs_la_SOURCES = btrfs.c btrfs.h
+endif
 
+if WITH_CRYPTO
 libbd_crypto_la_CFLAGS = $(GLIB_CFLAGS) $(CRYPTSETUP_CFLAGS) $(NSS_CFLAGS) -Wall -Wextra -Werror
 libbd_crypto_la_LIBADD = $(GLIB_LIBS) $(CRYPTSETUP_LIBS) $(NSS_LIBS) -lvolume_key ${builddir}/../utils/libbd_utils.la
 libbd_crypto_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_crypto_la_CPPFLAGS = -I${builddir}/../../include/ -I/usr/include/volume_key
 libbd_crypto_la_SOURCES = crypto.c crypto.h
+endif
 
+if WITH_DM
 libbd_dm_la_CFLAGS = $(GLIB_CFLAGS) $(DEVMAPPER_CFLAGS) $(UDEV_CFLAGS) -Wall -Wextra -Werror
 libbd_dm_la_LIBADD = $(GLIB_LIBS) $(DEVMAPPER_LIBS) $(UDEV_LIBS) -ldmraid ${builddir}/../utils/libbd_utils.la
 libbd_dm_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 # Dear author of libdmdraid, VERSION really is not a good name for an enum member!
 libbd_dm_la_CPPFLAGS = -I${builddir}/../../include/ -UVERSION
 libbd_dm_la_SOURCES = dm.c dm.h
+endif
 
+if WITH_LOOP
 libbd_loop_la_CFLAGS = $(GLIB_CFLAGS) -Wall -Wextra -Werror
 libbd_loop_la_LIBADD = $(GLIB_LIBS) ${builddir}/../utils/libbd_utils.la
 libbd_loop_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_loop_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_loop_la_SOURCES = loop.c loop.h
+endif
 
+if WITH_LVM
 libbd_lvm_la_CFLAGS = $(GLIB_CFLAGS) $(DEVMAPPER_CFLAGS) -Wall -Wextra -Werror
 libbd_lvm_la_LIBADD = $(GLIB_LIBS) $(DEVMAPPER_LIBS) ${builddir}/../utils/libbd_utils.la
 libbd_lvm_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_lvm_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_lvm_la_SOURCES = lvm.c lvm.h
+endif
 
+if WITH_LVM_DBUS
 libbd_lvm_dbus_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(DEVMAPPER_CFLAGS) -Wall -Wextra -Werror
 libbd_lvm_dbus_la_LIBADD = $(GLIB_LIBS) $(GIO_LIBS) $(DEVMAPPER_LIBS) ${builddir}/../utils/libbd_utils.la
 libbd_lvm_dbus_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_lvm_dbus_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_lvm_dbus_la_SOURCES = lvm-dbus.c lvm.h
+endif
 
+if WITH_MDRAID
 libbd_mdraid_la_CFLAGS = $(GLIB_CFLAGS) $(BYTESIZE_CFLAGS) -Wall -Wextra -Werror
 libbd_mdraid_la_LIBADD = $(GLIB_LIBS) $(BYTESIZE_LIBS) ${builddir}/../utils/libbd_utils.la
 libbd_mdraid_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_mdraid_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_mdraid_la_SOURCES = mdraid.c mdraid.h
+endif
 
+if WITH_MPATH
 libbd_mpath_la_CFLAGS = $(GLIB_CFLAGS) $(DEVMAPPER_CFLAGS) -Wall -Wextra -Werror
 libbd_mpath_la_LIBADD = $(GLIB_LIBS) $(DEVMAPPER_LIBS) ${builddir}/../utils/libbd_utils.la
 libbd_mpath_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_mpath_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_mpath_la_SOURCES = mpath.c mpath.h
+endif
 
+if WITH_SWAP
 libbd_swap_la_CFLAGS = $(GLIB_CFLAGS) -Wall -Wextra -Werror
 libbd_swap_la_LIBADD = $(GLIB_LIBS) ${builddir}/../utils/libbd_utils.la
 libbd_swap_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_swap_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_swap_la_SOURCES = swap.c swap.h
+endif
 
+if WITH_KBD
 libbd_kbd_la_CFLAGS = $(GLIB_CFLAGS) $(KMOD_CFLAGS) -Wall -Wextra -Werror
 libbd_kbd_la_LIBADD = $(GLIB_LIBS) $(KMOD_LIBS) ${builddir}/../utils/libbd_utils.la
 libbd_kbd_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_kbd_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_kbd_la_SOURCES = kbd.c kbd.h
+endif
 
 if ON_S390
 libbd_s390_la_CFLAGS = $(GLIB_CFLAGS) -Wall -Wextra -Werror
@@ -75,36 +148,76 @@ libbd_s390_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_s390_la_SOURCES = s390.c s390.h
 endif
 
+if WITH_PART
 libbd_part_la_CFLAGS = $(GLIB_CFLAGS) $(PARTED_CFLAGS) -Wall -Wextra -Werror
 libbd_part_la_LIBADD = $(GLIB_LIBS) $(PARTED_LIBS) ${builddir}/../utils/libbd_utils.la ${builddir}/libbd_part_err.la
 libbd_part_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_part_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_part_la_SOURCES = part.c part.h
+endif
 
+if WITH_FS
 libbd_fs_la_CFLAGS = $(GLIB_CFLAGS) $(BLKID_CFLAGS) $(PARTED_CFLAGS) $(PARTED_FS_CFLAGS) $(MOUNT_CFLAGS) -Wall -Wextra -Werror
 libbd_fs_la_LIBADD = $(GLIB_LIBS) $(BLKID_LIBS) $(PARTED_LIBS) $(PARTED_FS_LIBS) $(MOUNT_LIBS) ${builddir}/../utils/libbd_utils.la ${builddir}/libbd_part_err.la
 libbd_fs_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_fs_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_fs_la_SOURCES = fs.c fs.h
+endif
 
+if WITH_PART_O_WITH_FS
 libbd_part_err_la_CFLAGS = $(GLIB_CFLAGS) $(PARTED_CFLAGS) $(PARTED_FS_CFLAGS) -Wall -Wextra -Werror
 libbd_part_err_la_LIBADD = $(GLIB_LIBS) $(PARTED_LIBS) $(PARTED_FS_LIBS) ${builddir}/../utils/libbd_utils.la
 libbd_part_err_la_LDFLAGS = -L${srcdir}/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_part_err_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_part_err_la_SOURCES = part_err.c part_err.h
+endif
 
 libincludedir = $(includedir)/blockdev
-libinclude_HEADERS = crypto.h \
-	btrfs.h \
-	dm.h \
-	kbd.h \
-	loop.h \
-	lvm.h \
-	mdraid.h \
-	mpath.h \
-	swap.h \
-	part.h \
-	fs.h
+libinclude_HEADERS =
+
+if WITH_BTRFS
+libinclude_HEADERS += btrfs.h
+endif
+
+if WITH_CRYPTO
+libinclude_HEADERS += crypto.h
+endif
+
+if WITH_DM
+libinclude_HEADERS += dm.h
+endif
+
+if WITH_LOOP
+libinclude_HEADERS += loop.h
+endif
+
+if WITH_LVM
+libinclude_HEADERS += lvm.h
+endif
+
+if WITH_MDRAID
+libinclude_HEADERS += mdraid.h
+endif
+
+if WITH_MPATH
+libinclude_HEADERS += mpath.h
+endif
+
+if WITH_SWAP
+libinclude_HEADERS += swap.h
+endif
+
+if WITH_KBD
+libinclude_HEADERS += kbd.h
+endif
+
+if WITH_PART
+libinclude_HEADERS += part.h
+endif
+
+if WITH_FS
+libinclude_HEADERS += fs.h
+endif
 
 noinst_HEADERS = part_err.h
 
