@@ -80,6 +80,25 @@ else
 fi
 ])dnl
 
+
+dnl LIBBLOCKDEV_PLUGIN(NAME, name)
+dnl
+dnl Define things needed in Makefile.am`s as well as sources for making
+dnl compilation and build modular.
+AC_DEFUN([LIBBLOCKDEV_PLUGIN], [dnl
+AC_ARG_WITH([$2],
+    AS_HELP_STRING([--with-$2], [support $2 @<:@default=yes@:>@]),
+    [],
+    [with_$2=yes])
+
+AC_SUBST([WITH_$1], [0])
+AM_CONDITIONAL(WITH_$1, test "x$with_$2" != "xno")
+AS_IF([test "x$with_$2" != "xno"],
+      [AC_DEFINE([WITH_BD_$1], [], [Define if $2 is supported]) AC_SUBST([WITH_$1], [1])],
+      [])
+])dnl
+
+
 dnl LIBBLOCKDEV_FAILURES
 dnl
 dnl Print the failure messages collected by LIBBLOCKDEV_SOFT_FAILURE,
