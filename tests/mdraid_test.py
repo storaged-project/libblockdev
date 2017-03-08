@@ -68,6 +68,9 @@ class MDNoDevTestCase(unittest.TestCase):
 
 class MDTestCase(unittest.TestCase):
     def setUp(self):
+        if os.uname()[-1] == "i686":
+            self.skipTest("Skipping hanging MD RAID tests on i686")
+
         self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("md_test", 10 * 1024**2)
         self.dev_file2 = create_sparse_tempfile("md_test", 10 * 1024**2)
