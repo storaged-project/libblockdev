@@ -252,8 +252,16 @@ gboolean bd_s390_dasd_is_ldl (const gchar *dasd, GError **error) {
     dasd_information2_t dasd_info;
 
     memset(&dasd_info, 0, sizeof(dasd_info));
-    devname = g_strdup_printf ("/dev/%s", dasd);
 
+    /* complete the device name */
+    if (g_str_has_prefix (dasd, "/dev/")) {
+        devname = g_strdup (dasd);
+    }
+    else {
+        devname = g_strdup_printf ("/dev/%s", dasd);
+    }
+
+    /* open the device */
     if ((f = open(devname, O_RDONLY)) == -1) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "Unable to open device %s", devname);
@@ -263,11 +271,13 @@ gboolean bd_s390_dasd_is_ldl (const gchar *dasd, GError **error) {
 
     g_free (devname);
 
+    /* check if this is a block device */
     if (ioctl(f, BLKSSZGET, &blksize) != 0) {
         close(f);
         return FALSE;
     }
 
+    /* get some info about DASD */
     if (ioctl(f, BIODASDINFO2, &dasd_info) != 0) {
         close(f);
         return FALSE;
