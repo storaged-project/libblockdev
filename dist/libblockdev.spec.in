@@ -1,6 +1,18 @@
 %define with_python3 @WITH_PYTHON3@
 %define with_gtk_doc @WITH_GTK_DOC@
 %define with_bcache @WITH_BCACHE@
+%define with_btrfs @WITH_BTRFS@
+%define with_crypto @WITH_CRYPTO@
+%define with_dm @WITH_DM@
+%define with_loop @WITH_LOOP@
+%define with_lvm @WITH_LVM@
+%define with_lvm_dbus @WITH_LVM_DBUS@
+%define with_mdraid @WITH_MDRAID@
+%define with_mpath @WITH_MPATH@
+%define with_swap @WITH_SWAP@
+%define with_kbd @WITH_KBD@
+%define with_part @WITH_PART@
+%define with_fs @WITH_FS@
 
 %define is_rhel 0%{?rhel} != 0
 
@@ -8,8 +20,47 @@
 %if %{is_rhel}
 %define with_python3 0
 %define with_bcache 0
-%define configure_opts --without-python3 --without-bcache
+%define distro_copts --without-python3 --without-bcache
 %endif
+
+%if %{with_btrfs} != 1
+%define btrfs_copts --without-btrfs
+%endif
+%if %{with_crypto} != 1
+%define crypto_copts --without-crypto
+%endif
+%if %{with_dm} != 1
+%define dm_copts --without-dm
+%endif
+%if %{with_loop} != 1
+%define loop_copts --without-loop
+%endif
+%if %{with_lvm} != 1
+%define lvm_copts --without-lvm
+%endif
+%if %{with_lvm_dbus} != 1
+%define lvm_dbus_copts --without-lvm_dbus
+%endif
+%if %{with_mdraid} != 1
+%define mdraid_copts --without-mdraid
+%endif
+%if %{with_mpath} != 1
+%define mpath_copts --without-mpath
+%endif
+%if %{with_swap} != 1
+%define swap_copts --without-swap
+%endif
+%if %{with_kbd} != 1
+%define kbd_copts --without-kbd
+%endif
+%if %{with_part} != 1
+%define part_copts --without-part
+%endif
+%if %{with_fs} != 1
+%define fs_copts --without-fs
+%endif
+
+%define configure_opts %{?distro_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts}
 
 Name:        libblockdev
 Version:     2.5
@@ -21,12 +72,6 @@ Source0:     https://github.com/rhinstaller/libblockdev/archive/%{name}-%{versio
 
 BuildRequires: glib2-devel
 BuildRequires: gobject-introspection-devel
-BuildRequires: cryptsetup-devel
-BuildRequires: device-mapper-devel
-BuildRequires: systemd-devel
-BuildRequires: dmraid-devel
-BuildRequires: volume_key-devel >= 0.3.9-7
-BuildRequires: nss-devel
 BuildRequires: python-devel
 %if %{with_python3}
 BuildRequires: python3-devel
@@ -35,11 +80,6 @@ BuildRequires: python3-devel
 BuildRequires: gtk-doc
 %endif
 BuildRequires: glib2-doc
-BuildRequires: kmod-devel
-BuildRequires: parted-devel
-BuildRequires: libblkid-devel
-BuildRequires: libbytesize-devel
-BuildRequires: libmount-devel
 
 # Needed for the escrow tests in tests/crypto_test.py, but not used to build
 # BuildRequires: volume_key
@@ -48,10 +88,6 @@ BuildRequires: libmount-devel
 # Needed for python 2 vs. 3 compatibility in the tests, but not used to build
 # BuildRequires: python-six
 # BuildRequires: python3-six
-
-%ifarch s390 s390x
-BuildRequires: s390utils-devel
-%endif
 
 %description
 The libblockdev is a C library with GObject introspection support that can be
@@ -110,7 +146,9 @@ This package contains header files and pkg-config files needed for development
 with the libblockdev-utils library.
 
 
+%if %{with_btrfs}
 %package btrfs
+BuildRequires: libbytesize-devel
 Summary:     The BTRFS plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
 Requires: btrfs-progs
@@ -128,8 +166,13 @@ Requires: %{name}-utils-devel%{?_isa}
 %description btrfs-devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev-btrfs plugin/library.
+%endif
 
 
+%if %{with_crypto}
+BuildRequires: cryptsetup-devel
+BuildRequires: volume_key-devel >= 0.3.9-7
+BuildRequires: nss-devel
 %package crypto
 Summary:     The crypto plugin for the libblockdev library
 
@@ -145,8 +188,13 @@ Requires: glib2-devel
 %description crypto-devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev-crypto plugin/library.
+%endif
 
 
+%if %{with_dm}
+BuildRequires: device-mapper-devel
+BuildRequires: dmraid-devel
+BuildRequires: systemd-devel
 %package dm
 Summary:     The Device Mapper plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
@@ -169,9 +217,14 @@ Requires: %{name}-utils-devel%{?_isa}
 %description dm-devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev-dm plugin/library.
+%endif
 
 
+%if %{with_fs}
 %package fs
+BuildRequires: parted-devel
+BuildRequires: libblkid-devel
+BuildRequires: libmount-devel
 Summary:     The FS plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
 Requires: device-mapper-multipath
@@ -191,9 +244,12 @@ Requires: dosfstools
 %description fs-devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev-fs plugin/library.
+%endif
 
 
+%if %{with_kbd}
 %package kbd
+BuildRequires: kmod-devel
 Summary:     The KBD plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
 %if %{with_bcache}
@@ -214,8 +270,10 @@ Requires: glib2-devel
 %description kbd-devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev-kbd plugin/library.
+%endif
 
 
+%if %{with_loop}
 %package loop
 Summary:     The loop plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
@@ -234,9 +292,12 @@ Requires: glib2-devel
 %description loop-devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev-loop plugin/library.
+%endif
 
 
+%if %{with_lvm}
 %package lvm
+BuildRequires: device-mapper-devel
 Summary:     The LVM plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
 Requires: lvm2
@@ -256,8 +317,11 @@ Requires: glib2-devel
 %description lvm-devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev-lvm plugin/library.
+%endif
 
+%if %{with_lvm_dbus}
 %package lvm-dbus
+BuildRequires: device-mapper-devel
 Summary:     The LVM plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 1.4
 Requires: lvm2-dbusd >= 2.02.156
@@ -277,9 +341,12 @@ Requires: glib2-devel
 %description lvm-dbus-devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev-lvm-dbus plugin/library.
+%endif
 
 
+%if %{with_mdraid}
 %package mdraid
+BuildRequires: libbytesize-devel
 Summary:     The MD RAID plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
 Requires: mdadm
@@ -297,9 +364,12 @@ Requires: glib2-devel
 %description mdraid-devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev-mdraid plugin/library.
+%endif
 
 
+%if %{with_mpath}
 %package mpath
+BuildRequires: device-mapper-devel
 Summary:     The multipath plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
 Requires: device-mapper-multipath
@@ -317,9 +387,12 @@ Requires: glib2-devel
 %description mpath-devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev-mpath plugin/library.
+%endif
 
 
+%if %{with_part}
 %package part
+BuildRequires: parted-devel
 Summary:     The partitioning plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
 Requires: device-mapper-multipath
@@ -339,8 +412,10 @@ Requires: glib2-devel
 %description part-devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev-part plugin/library.
+%endif
 
 
+%if %{with_swap}
 %package swap
 Summary:     The swap plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
@@ -359,8 +434,12 @@ Requires: glib2-devel
 %description swap-devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev-swap plugin/library.
+%endif
 
+
+%ifarch s390 s390x
 %package s390
+BuildRequires: s390utils-devel
 Summary:    The s390 plugin for the libblockdev library
 Requires: s390utils
 
@@ -378,22 +457,56 @@ Requires: s390utils-devel
 %description s390-devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev-s390 plugin/library.
-
+%endif
 
 %package plugins-all
 Summary:     Meta-package that pulls all the libblockdev plugins as dependencies
 Requires: %{name}%{?_isa} = %{version}-%{release}
+
+%if %{with_btrfs}
 Requires: %{name}-btrfs%{?_isa} = %{version}-%{release}
+%endif
+
+%if %{with_crypto}
 Requires: %{name}-crypto%{?_isa} = %{version}-%{release}
+%endif
+
+%if %{with_dm}
 Requires: %{name}-dm%{?_isa} = %{version}-%{release}
+%endif
+
+%if %{with_fs}
 Requires: %{name}-fs%{?_isa} = %{version}-%{release}
+%endif
+
+%if %{with_kbd}
 Requires: %{name}-kbd%{?_isa} = %{version}-%{release}
+%endif
+
+%if %{with_loop}
 Requires: %{name}-loop%{?_isa} = %{version}-%{release}
+%endif
+
+%if %{with_lvm}
 Requires: %{name}-lvm%{?_isa} = %{version}-%{release}
+%endif
+
+%if %{with_mdraid}
 Requires: %{name}-mdraid%{?_isa} = %{version}-%{release}
+%endif
+
+%if %{with_mpath}
 Requires: %{name}-mpath%{?_isa} = %{version}-%{release}
+%endif
+
+%if %{with_part}
 Requires: %{name}-part%{?_isa} = %{version}-%{release}
+%endif
+
+%if %{with_swap}
 Requires: %{name}-swap%{?_isa} = %{version}-%{release}
+%endif
+
 %ifarch s390 s390x
 Requires: %{name}-s390%{?_isa} = %{version}-%{release}
 %endif
@@ -418,32 +531,71 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %postun -p /sbin/ldconfig
 %post utils -p /sbin/ldconfig
 %postun utils -p /sbin/ldconfig
+
+%if %{with_btrfs}
 %post btrfs -p /sbin/ldconfig
 %postun btrfs -p /sbin/ldconfig
+%endif
+
+%if %{with_crypto}
 %post crypto -p /sbin/ldconfig
 %postun crypto -p /sbin/ldconfig
+%endif
+
+%if %{with_dm}
 %post dm -p /sbin/ldconfig
 %postun dm -p /sbin/ldconfig
+%endif
+
+%if %{with_fs}
 %post fs -p /sbin/ldconfig
 %postun fs -p /sbin/ldconfig
+%endif
+
+%if %{with_loop}
 %post loop -p /sbin/ldconfig
 %postun loop -p /sbin/ldconfig
+%endif
+
+%if %{with_lvm}
 %post lvm -p /sbin/ldconfig
 %postun lvm -p /sbin/ldconfig
+%endif
+
+%if %{with_lvm_dbus}
 %post lvm-dbus -p /sbin/ldconfig
 %postun lvm-dbus -p /sbin/ldconfig
+%endif
+
+%if %{with_mdraid}
 %post mdraid -p /sbin/ldconfig
 %postun mdraid -p /sbin/ldconfig
+%endif
+
+%if %{with_mpath}
 %post mpath -p /sbin/ldconfig
 %postun mpath -p /sbin/ldconfig
+%endif
+
+%if %{with_part}
 %post part -p /sbin/ldconfig
 %postun part -p /sbin/ldconfig
+%endif
+
+%if %{with_swap}
 %post swap -p /sbin/ldconfig
 %postun swap -p /sbin/ldconfig
+%endif
+
+%ifarch s390 s390x
 %post s390 -p /sbin/ldconfig
 %postun s390 -p /sbin/ldconfig
+%endif
+
+%if %{with_kbd}
 %post kbd -p /sbin/ldconfig
 %postun kbd -p /sbin/ldconfig
+%endif
 
 
 %files
@@ -488,6 +640,7 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_includedir}/blockdev/extra_arg.h
 
 
+%if %{with_btrfs}
 %files btrfs
 %{_libdir}/libbd_btrfs.so.*
 
@@ -495,8 +648,10 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_libdir}/libbd_btrfs.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/btrfs.h
+%endif
 
 
+%if %{with_crypto}
 %files crypto
 %{_libdir}/libbd_crypto.so.*
 
@@ -504,8 +659,10 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_libdir}/libbd_crypto.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/crypto.h
+%endif
 
 
+%if %{with_dm}
 %files dm
 %{_libdir}/libbd_dm.so.*
 
@@ -513,8 +670,10 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_libdir}/libbd_dm.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/dm.h
+%endif
 
 
+%if %{with_fs}
 %files fs
 %{_libdir}/libbd_fs.so.*
 
@@ -522,8 +681,10 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_libdir}/libbd_fs.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/fs.h
+%endif
 
 
+%if %{with_kbd}
 %files kbd
 %{_libdir}/libbd_kbd.so.*
 
@@ -531,8 +692,10 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_libdir}/libbd_kbd.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/kbd.h
+%endif
 
 
+%if %{with_loop}
 %files loop
 %{_libdir}/libbd_loop.so.*
 
@@ -540,8 +703,10 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_libdir}/libbd_loop.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/loop.h
+%endif
 
 
+%if %{with_lvm}
 %files lvm
 %{_libdir}/libbd_lvm.so.*
 
@@ -549,7 +714,10 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_libdir}/libbd_lvm.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/lvm.h
+%endif
 
+
+%if %{with_lvm_dbus}
 %files lvm-dbus
 %{_libdir}/libbd_lvm-dbus.so.*
 %config %{_sysconfdir}/libblockdev/conf.d/10-lvm-dbus.cfg
@@ -558,8 +726,10 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_libdir}/libbd_lvm-dbus.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/lvm.h
+%endif
 
 
+%if %{with_mdraid}
 %files mdraid
 %{_libdir}/libbd_mdraid.so.*
 
@@ -567,8 +737,10 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_libdir}/libbd_mdraid.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/mdraid.h
+%endif
 
 
+%if %{with_mpath}
 %files mpath
 %{_libdir}/libbd_mpath.so.*
 
@@ -576,8 +748,10 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_libdir}/libbd_mpath.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/mpath.h
+%endif
 
 
+%if %{with_part}
 %files part
 %{_libdir}/libbd_part.so.*
 
@@ -585,8 +759,10 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_libdir}/libbd_part.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/part.h
+%endif
 
 
+%if %{with_swap}
 %files swap
 %{_libdir}/libbd_swap.so.*
 
@@ -594,6 +770,8 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_libdir}/libbd_swap.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/swap.h
+%endif
+
 
 %ifarch s390 s390x
 %files s390
