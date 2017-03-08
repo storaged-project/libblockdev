@@ -11,6 +11,7 @@ typedef enum {
     BD_FS_ERROR_PARSE,
     BD_FS_ERROR_FAIL,
     BD_FS_ERROR_NOFS,
+    BD_FS_ERROR_PIPE,
     BD_FS_ERROR_AUTH, // keep this entry last
 } BDFsError;
 

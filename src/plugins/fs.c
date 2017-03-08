@@ -590,21 +590,27 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
 
         if (run_as_gid != current_gid) {
             if (!set_gid (run_as_gid, error)) {
-                write(pipefd[1], (*error)->message, strlen((*error)->message));
-                _exit ((*error)->code);
+                if (write(pipefd[1], (*error)->message, strlen((*error)->message)) < 0)
+                    _exit (BD_FS_ERROR_PIPE);
+                else
+                    _exit ((*error)->code);
             }
         }
 
         if (run_as_uid != current_uid) {
             if (!set_uid (run_as_uid, error)) {
-                write(pipefd[1], (*error)->message, strlen((*error)->message));
-                _exit ((*error)->code);
+                if (write(pipefd[1], (*error)->message, strlen((*error)->message)) < 0)
+                    _exit (BD_FS_ERROR_PIPE);
+                else
+                    _exit ((*error)->code);
             }
         }
 
         if (!func (args, error)) {
-            write(pipefd[1], (*error)->message, strlen((*error)->message));
-            _exit ((*error)->code);
+            if (write(pipefd[1], (*error)->message, strlen((*error)->message)) < 0)
+                _exit (BD_FS_ERROR_PIPE);
+            else
+                _exit ((*error)->code);
         }
 
         _exit (EXIT_SUCCESS);
@@ -622,6 +628,12 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
 
             if (WIFEXITED (status)) {
               if (WEXITSTATUS (status) != EXIT_SUCCESS) {
+                  if (WEXITSTATUS (status) == BD_FS_ERROR_PIPE) {
+                      g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                   "Error while reading error.");
+                      return FALSE;
+                  }
+
                   channel = g_io_channel_unix_new (pipefd[0]);
                   if (g_io_channel_read_to_end (channel, &error_msg, &msglen, &local_error) != G_IO_STATUS_NORMAL) {
                       g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
@@ -642,11 +654,11 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
                   }
 
                   if (WEXITSTATUS (status) > BD_FS_ERROR_AUTH)
-                      g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                   error_msg);
+                      g_set_error_literal (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                           error_msg);
                   else
-                      g_set_error (error, BD_FS_ERROR, WEXITSTATUS (status),
-                                   error_msg);
+                      g_set_error_literal (error, BD_FS_ERROR, WEXITSTATUS (status),
+                                           error_msg);
 
                   g_io_channel_unref (channel);
                   return FALSE;
