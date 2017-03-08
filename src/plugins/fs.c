@@ -17,14 +17,20 @@
  * Author: Vratislav Podzimek <vpodzime@redhat.com>
  */
 
-#include <blockdev/utils.h>
+#define _GNU_SOURCE
 #include <unistd.h>
+
+#include <blockdev/utils.h>
 #include <fcntl.h>
 #include <string.h>
 #include <blkid.h>
 #include <ctype.h>
 #include <parted/parted.h>
 #include <part_err.h>
+#include <libmount/libmount.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <errno.h>
 
 #include "fs.h"
 
@@ -129,6 +135,18 @@ void bd_fs_vfat_info_free (BDFSVfatInfo *data) {
     g_free (data->uuid);
     g_free (data);
 }
+
+typedef struct MountArgs {
+    const gchar *mountpoint;
+    const gchar *device;
+    const gchar *fstype;
+    const gchar *options;
+    const gchar *spec;
+    gboolean lazy;
+    gboolean force;
+} MountArgs;
+
+typedef gboolean (*MountFunc) (MountArgs *args, GError **error);
 
 /**
  * bd_fs_check_deps:
@@ -289,6 +307,501 @@ static gint synced_close (gint fd) {
     if (close (fd) != 0)
         ret = 1;
     return ret;
+}
+
+static gboolean do_unmount (MountArgs *args, GError **error) {
+    struct libmnt_context *cxt = NULL;
+    int ret = 0;
+    int syscall_errno = 0;
+
+    cxt = mnt_new_context ();
+
+    if (mnt_context_set_target (cxt, args->spec) != 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to set '%s' as target for umount", args->spec);
+        mnt_free_context(cxt);
+        return FALSE;
+    }
+
+    if (args->lazy) {
+        if (mnt_context_enable_lazy (cxt, TRUE) != 0) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                         "Failed to set lazy unmount for '%s'", args->spec);
+            mnt_free_context(cxt);
+            return FALSE;
+        }
+    }
+
+    if (args->force) {
+        if (mnt_context_enable_force (cxt, TRUE) != 0) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                         "Failed to set force unmount for '%s'", args->spec);
+            mnt_free_context(cxt);
+            return FALSE;
+        }
+    }
+
+    ret = mnt_context_umount (cxt);
+    if (ret != 0) {
+        if (mnt_context_syscall_called (cxt)) {
+            syscall_errno = mnt_context_get_syscall_errno (cxt);
+            switch (syscall_errno) {
+                case EBUSY:
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Target busy.");
+                    break;
+                case EINVAL:
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Not a mount point.");
+                    break;
+                case EPERM:
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
+                                 "Operation not permitted.");
+                    break;
+                default:
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Unmount syscall failed: %d.", syscall_errno);
+                    break;
+            }
+        } else {
+            if (ret == -EPERM) {
+                if (mnt_context_tab_applied (cxt))
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
+                                 "Operation not permitted.");
+                else
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Not mounted.");
+            } else {
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Failed to unmount %s.", args->spec);
+            }
+        }
+
+        mnt_free_context(cxt);
+        return FALSE;
+    }
+
+    mnt_free_context(cxt);
+    return TRUE;
+}
+
+static gboolean do_mount (MountArgs *args, GError **error) {
+    struct libmnt_context *cxt = NULL;
+    int ret = 0;
+    int syscall_errno = 0;
+    unsigned long mflags = 0;
+
+    cxt = mnt_new_context ();
+
+    if (!args->mountpoint && !args->device) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "You must specify at least one of: mount point, device.");
+        mnt_free_context(cxt);
+        return FALSE;
+    }
+
+    if (args->mountpoint) {
+        if (mnt_context_set_target (cxt, args->mountpoint) != 0) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                         "Failed to set '%s' as target for mount", args->mountpoint);
+            mnt_free_context(cxt);
+            return FALSE;
+        }
+    }
+
+    if (args->device) {
+        if (mnt_context_set_source (cxt, args->device) != 0) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                         "Failed to set '%s' as source for mount", args->device);
+            mnt_free_context(cxt);
+            return FALSE;
+        }
+    }
+
+    if (args->fstype) {
+        if (mnt_context_set_fstype (cxt, args->fstype) != 0) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                         "Failed to set '%s' as fstype for mount", args->fstype);
+            mnt_free_context(cxt);
+            return FALSE;
+        }
+    }
+
+    if (args->options) {
+        if (mnt_context_set_options (cxt, args->options) != 0) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                         "Failed to set '%s' as options for mount", args->options);
+            mnt_free_context(cxt);
+            return FALSE;
+        }
+    }
+
+    ret = mnt_context_mount (cxt);
+    if (ret != 0) {
+        if (mnt_context_get_mflags (cxt, &mflags) != 0) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                         "Failed to get options from string '%s'.", args->options);
+            mnt_free_context(cxt);
+            return FALSE;
+        }
+
+        if (mnt_context_syscall_called (cxt) == 1) {
+            syscall_errno = mnt_context_get_syscall_errno (cxt);
+            switch (syscall_errno) {
+                case EBUSY:
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Source is already mounted or target is busy.");
+                    break;
+                case EINVAL:
+                    if (mflags & MS_REMOUNT)
+                        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                     "Remount attempted, but %s is not mounted at %s.", args->device, args->mountpoint);
+                    else if (mflags & MS_MOVE)
+                        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                     "Move attempted, but %s is not a mount point.", args->device);
+                    else
+                        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                     "%s has an invalid superblock.", args->device);
+                    break;
+                case EPERM:
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
+                                 "Operation not permitted.");
+                    break;
+                case ENOTBLK:
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "%s is not a block device.", args->device);
+                    break;
+                case ENOTDIR:
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "%s is not a directory.", args->mountpoint);
+                    break;
+                case ENODEV:
+                    if (strlen (args->fstype) == 0)
+                        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                     "Filesystem type not specified");
+                    else
+                        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                     "Filesystem type %s not configured in kernel.", args->fstype);
+                    break;
+                default:
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Mount syscall failed: %d.", syscall_errno);
+                    break;
+            }
+        } else {
+            switch (ret) {
+                case -EPERM:
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
+                                 "Only root can mount %s.", args->device);
+                    break;
+                case -EBUSY:
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "%s is already mounted.", args->device);
+                    break;
+                /* source or target explicitly defined and not found in fstab */
+                case -MNT_ERR_NOFSTAB:
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Can't find %s in %s.", args->device ? args->device : args->mountpoint, mnt_get_fstab_path ());
+                    break;
+                case -MNT_ERR_MOUNTOPT:
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Failed to parse mount options");
+                    break;
+                case -MNT_ERR_NOSOURCE:
+                    if (args->device)
+                        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                     "Can't find %s.", args->device);
+                    else
+                        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                     "Mount source not defined.");
+                    break;
+                case -MNT_ERR_LOOPDEV:
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Failed to setup loop device");
+                    break;
+                case -MNT_ERR_NOFSTYPE:
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Filesystem type not specified");
+                    break;
+                default:
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Failed to unmount %s.", args->spec);
+                    break;
+            }
+        }
+
+        mnt_free_context(cxt);
+        return FALSE;
+    }
+
+    mnt_free_context(cxt);
+    return TRUE;
+}
+
+static gboolean set_uid (uid_t uid, GError **error) {
+    if (setresuid (uid, -1, -1) != 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                    "Error setting uid: %m");
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+static gboolean set_gid (gid_t gid, GError **error) {
+    if (setresgid (gid, -1, -1) != 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                    "Error setting gid: %m");
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, gid_t run_as_gid, GError ** error) {
+    uid_t current_uid = -1;
+    gid_t current_gid = -1;
+    pid_t pid = -1;
+    pid_t wpid = -1;
+    int pipefd[2];
+    int status = 0;
+    GIOChannel *channel = NULL;
+    GError *local_error = NULL;
+    gchar *error_msg = NULL;
+    gsize msglen = 0;
+
+    current_uid = getuid ();
+    current_gid = getgid ();
+
+    if (pipe(pipefd) == -1) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Error creating pipe.");
+        return FALSE;
+    }
+
+    pid = fork ();
+
+    if (pid == -1) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Error forking.");
+        return FALSE;
+    } else if (pid == 0) {
+        close (pipefd[0]);
+
+        if (run_as_gid != current_gid) {
+            if (!set_gid (run_as_gid, error)) {
+                write(pipefd[1], (*error)->message, strlen((*error)->message));
+                _exit ((*error)->code);
+            }
+        }
+
+        if (run_as_uid != current_uid) {
+            if (!set_uid (run_as_uid, error)) {
+                write(pipefd[1], (*error)->message, strlen((*error)->message));
+                _exit ((*error)->code);
+            }
+        }
+
+        if (!func (args, error)) {
+            write(pipefd[1], (*error)->message, strlen((*error)->message));
+            _exit ((*error)->code);
+        }
+
+        _exit (EXIT_SUCCESS);
+
+    } else {
+        close (pipefd[1]);
+
+        do {
+            wpid = waitpid (pid, &status, WUNTRACED | WCONTINUED);
+            if (wpid == -1) {
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Error while waiting for process.");
+                return FALSE;
+            }
+
+            if (WIFEXITED (status)) {
+              if (WEXITSTATUS (status) != EXIT_SUCCESS) {
+                  channel = g_io_channel_unix_new (pipefd[0]);
+                  if (g_io_channel_read_to_end (channel, &error_msg, &msglen, &local_error) != G_IO_STATUS_NORMAL) {
+                      g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                   "Error while reading error: %s (%d)",
+                                   local_error->message, local_error->code);
+                      g_clear_error (&local_error);
+                      g_io_channel_unref (channel);
+                      return FALSE;
+                  }
+
+                  if (g_io_channel_shutdown (channel, TRUE, &local_error) == G_IO_STATUS_ERROR) {
+                      g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                   "Error shutting down GIO channel: %s (%d)",
+                                   local_error->message, local_error->code);
+                      g_clear_error (&local_error);
+                      g_io_channel_unref (channel);
+                      return FALSE;
+                  }
+
+                  if (WEXITSTATUS (status) > BD_FS_ERROR_AUTH)
+                      g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                   error_msg);
+                  else
+                      g_set_error (error, BD_FS_ERROR, WEXITSTATUS (status),
+                                   error_msg);
+
+                  g_io_channel_unref (channel);
+                  return FALSE;
+              } else
+                  return TRUE;
+            } else if (WIFSIGNALED (status)) {
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Killed by signal %d.", WTERMSIG(status));
+                return FALSE;
+            }
+
+        } while (!WIFEXITED (status) && !WIFSIGNALED (status));
+    }
+
+    return FALSE;
+}
+
+/**
+ * bd_fs_unmount:
+ * @spec: mount point or device to unmount
+ * @lazy: enable/disable lazy unmount
+ * @force: enable/disable force unmount
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the unmount
+ *                                                 currently only 'run_as_uid'
+ *                                                 and 'run_as_gid' are supported
+ *                                                 value must be a valid non zero
+ *                                                 uid (gid)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether @spec was successfully unmounted or not
+ */
+gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const BDExtraArg **extra, GError **error) {
+    uid_t run_as_uid = -1;
+    gid_t run_as_gid = -1;
+    uid_t current_uid = -1;
+    gid_t current_gid = -1;
+    const BDExtraArg **extra_p = NULL;
+    MountArgs args;
+
+    args.spec = spec;
+    args.lazy = lazy;
+    args.force = force;
+
+    current_uid = getuid ();
+    run_as_uid = current_uid;
+
+    current_gid = getgid ();
+    run_as_gid = current_gid;
+
+    if (extra) {
+        for (extra_p=extra; *extra_p; extra_p++) {
+            if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "run_as_uid") == 0)) {
+                run_as_uid = g_ascii_strtoull ((*extra_p)->val, NULL, 0);
+
+                /* g_ascii_strtoull returns 0 in case of error */
+                if (run_as_uid == 0 && (g_strcmp0 ((*extra_p)->opt, "0") != 0)) {
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Invalid specification of UID: '%s'", (*extra_p)->val);
+                    return FALSE;
+                }
+            } else if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "run_as_gid") == 0)) {
+                run_as_gid = g_ascii_strtoull ((*extra_p)->val, NULL, 0);
+
+                /* g_ascii_strtoull returns 0 in case of error */
+                if (run_as_gid == 0 && (g_strcmp0 ((*extra_p)->opt, "0") != 0)) {
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Invalid specification of GID: '%s'", (*extra_p)->val);
+                    return FALSE;
+                }
+            } else {
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Unsupported argument for unmount: '%s'", (*extra_p)->opt);
+                return FALSE;
+            }
+        }
+    }
+
+    if (run_as_uid != current_uid || run_as_gid != current_gid) {
+        return run_as_user ((MountFunc) do_unmount, &args, run_as_uid, run_as_gid, error);
+    } else
+        return do_unmount (&args, error);
+
+    return TRUE;
+}
+
+/**
+ * bd_fs_mount:
+ * @device: (allow-none): device to mount, if not specified @mountpoint entry
+ *                        from fstab will be used
+ * @mountpoint: (allow-none): mountpoint for @device, if not specified @device
+ *                            entry from fstab will be used
+ * @fstype: (allow-none): filesystem type
+ * @options: (allow-none): comma delimited options for mount
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the mount
+ *                                                 currently only 'run_as_uid'
+ *                                                 and 'run_as_gid' are supported
+ *                                                 value must be a valid non zero
+ *                                                 uid (gid)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether @device (or @mountpoint) was successfully mounted or not
+ */
+gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar *fstype, const gchar *options, const BDExtraArg **extra, GError **error) {
+    uid_t run_as_uid = -1;
+    gid_t run_as_gid = -1;
+    uid_t current_uid = -1;
+    gid_t current_gid = -1;
+    const BDExtraArg **extra_p = NULL;
+    MountArgs args;
+
+    args.device = device;
+    args.mountpoint = mountpoint;
+    args.fstype = fstype;
+    args.options = options;
+
+    current_uid = getuid ();
+    run_as_uid = current_uid;
+
+    current_gid = getgid ();
+    run_as_gid = current_gid;
+
+    if (extra) {
+        for (extra_p=extra; *extra_p; extra_p++) {
+            if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "run_as_uid") == 0)) {
+                run_as_uid = g_ascii_strtoull ((*extra_p)->val, NULL, 0);
+
+                /* g_ascii_strtoull returns 0 in case of error */
+                if (run_as_uid == 0 && (g_strcmp0 ((*extra_p)->opt, "0") != 0)) {
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Invalid specification of UID: '%s'", (*extra_p)->val);
+                    return FALSE;
+                }
+            } else if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "run_as_gid") == 0)) {
+                run_as_gid = g_ascii_strtoull ((*extra_p)->val, NULL, 0);
+
+                /* g_ascii_strtoull returns 0 in case of error */
+                if (run_as_gid == 0 && (g_strcmp0 ((*extra_p)->opt, "0") != 0)) {
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Invalid specification of GID: '%s'", (*extra_p)->val);
+                    return FALSE;
+                }
+            } else {
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Unsupported argument for unmount: '%s'", (*extra_p)->opt);
+                return FALSE;
+            }
+        }
+    }
+
+    if (run_as_uid != current_uid || run_as_gid != current_gid) {
+        return run_as_user ((MountFunc) do_mount, &args, run_as_uid, run_as_gid, error);
+    } else
+       return do_mount (&args, error);
+
+    return TRUE;
 }
 
 /**

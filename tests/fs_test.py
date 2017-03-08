@@ -4,7 +4,7 @@ import time
 import subprocess
 import tempfile
 from contextlib import contextmanager
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device
+import utils
 import overrides_hack
 
 from gi.repository import BlockDev, GLib
@@ -32,14 +32,14 @@ def mounted(device, where):
 class FSTestCase(unittest.TestCase):
     def setUp(self):
         self.addCleanup(self._clean_up)
-        self.dev_file = create_sparse_tempfile("part_test", 100 * 1024**2)
-        self.dev_file2 = create_sparse_tempfile("part_test", 100 * 1024**2)
+        self.dev_file = utils.create_sparse_tempfile("part_test", 100 * 1024**2)
+        self.dev_file2 = utils.create_sparse_tempfile("part_test", 100 * 1024**2)
         try:
-            self.loop_dev = create_lio_device(self.dev_file)
+            self.loop_dev = utils.create_lio_device(self.dev_file)
         except RuntimeError as e:
             raise RuntimeError("Failed to setup loop device for testing: %s" % e)
         try:
-            self.loop_dev2 = create_lio_device(self.dev_file2)
+            self.loop_dev2 = utils.create_lio_device(self.dev_file2)
         except RuntimeError as e:
             raise RuntimeError("Failed to setup loop device for testing: %s" % e)
 
@@ -47,14 +47,14 @@ class FSTestCase(unittest.TestCase):
 
     def _clean_up(self):
         try:
-            delete_lio_device(self.loop_dev)
+            utils.delete_lio_device(self.loop_dev)
         except RuntimeError:
             # just move on, we can do no better here
             pass
         os.unlink(self.dev_file)
 
         try:
-            delete_lio_device(self.loop_dev2)
+            utils.delete_lio_device(self.loop_dev2)
         except RuntimeError:
             # just move on, we can do no better here
             pass
@@ -672,3 +672,150 @@ class VfatResize(FSTestCase):
         # resize to maximum size
         succ = BlockDev.fs_vfat_resize(self.loop_dev, 0)
         self.assertTrue(succ)
+
+
+class MountTest(FSTestCase):
+
+    username = "bd_mount_test"
+
+    def _add_user(self):
+        ret, _out, err = utils.run_command("useradd -M -p \"\" %s" % self.username)
+        if ret != 0:
+            self.fail("Failed to create user '%s': %s" % (self.username, err))
+
+        ret, uid, err = utils.run_command("id -u %s" % self.username)
+        if ret != 0:
+            self.fail("Failed to get UID for user '%s': %s" % (self.username, err))
+
+        ret, gid, err = utils.run_command("id -g %s" % self.username)
+        if ret != 0:
+            self.fail("Failed to get GID for user '%s': %s" % (self.username, err))
+
+        return (uid, gid)
+
+    def _remove_user(self):
+        ret, _out, err = utils.run_command("userdel %s" % self.username)
+        if ret != 0:
+            self.fail("Failed to remove user user '%s': %s" % (self.username, err))
+
+    def test_mount(self):
+        """ Test basic mounting and unmounting """
+
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+
+        self.addCleanup(umount, self.loop_dev)
+
+        succ = BlockDev.fs_mount(self.loop_dev, tmp.name, "vfat", None)
+        self.assertTrue(succ)
+        self.assertTrue(os.path.ismount(tmp.name))
+
+        succ = BlockDev.fs_unmount(self.loop_dev, False, False, None)
+        self.assertTrue(succ)
+        self.assertFalse(os.path.ismount(tmp.name))
+
+        # mount again to test unmount using the mountpoint
+        succ = BlockDev.fs_mount(self.loop_dev, tmp.name, None, None)
+        self.assertTrue(succ)
+        self.assertTrue(os.path.ismount(tmp.name))
+
+        succ = BlockDev.fs_unmount(tmp.name, False, False, None)
+        self.assertTrue(succ)
+        self.assertFalse(os.path.ismount(tmp.name))
+
+        # mount with some options
+        succ = BlockDev.fs_mount(self.loop_dev, tmp.name, "vfat", "ro,noexec")
+        self.assertTrue(succ)
+        self.assertTrue(os.path.ismount(tmp.name))
+        _ret, out, _err = utils.run_command("grep %s /proc/mounts" % tmp.name)
+        self.assertTrue(out)
+        self.assertIn("ro,noexec", out)
+
+        succ = BlockDev.fs_unmount(self.loop_dev, False, False, None)
+        self.assertTrue(succ)
+        self.assertFalse(os.path.ismount(tmp.name))
+
+    @unittest.skipUnless("JENKINS_HOME" in os.environ, "skipping test that modifies system configuration")
+    def test_mount_fstab(self):
+        """ Test mounting and unmounting devices in /etc/fstab """
+        # this test will change /etc/fstab, we want to revert the changes when it finishes
+        fstab = utils.read_file("/etc/fstab")
+        self.addCleanup(utils.write_file, "/etc/fstab", fstab)
+
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+
+        utils.write_file("/etc/fstab", "%s %s vfat defaults 0 0\n" % (self.loop_dev, tmp.name))
+
+        # try to mount and unmount using the device
+        self.addCleanup(umount, self.loop_dev)
+        succ = BlockDev.fs_mount(device=self.loop_dev)
+        self.assertTrue(succ)
+        self.assertTrue(os.path.ismount(tmp.name))
+
+        succ = BlockDev.fs_unmount(self.loop_dev)
+        self.assertTrue(succ)
+        self.assertFalse(os.path.ismount(tmp.name))
+
+        # try to mount and unmount just using the mountpoint
+        self.addCleanup(umount, self.loop_dev)
+        succ = BlockDev.fs_mount(mountpoint=tmp.name)
+        self.assertTrue(succ)
+        self.assertTrue(os.path.ismount(tmp.name))
+
+        succ = BlockDev.fs_unmount(tmp.name)
+        self.assertTrue(succ)
+        self.assertFalse(os.path.ismount(tmp.name))
+
+    @unittest.skipUnless("JENKINS_HOME" in os.environ, "skipping test that modifies system configuration")
+    def test_mount_fstab_user(self):
+        """ Test mounting and unmounting devices in /etc/fstab as non-root user """
+        # this test will change /etc/fstab, we want to revert the changes when it finishes
+        fstab = utils.read_file("/etc/fstab")
+        self.addCleanup(utils.write_file, "/etc/fstab", fstab)
+
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+
+        utils.write_file("/etc/fstab", "%s %s vfat defaults,users 0 0\n" % (self.loop_dev, tmp.name))
+
+        uid, gid = self._add_user()
+        self.addCleanup(self._remove_user)
+
+        # try to mount and unmount the device as the user
+        self.addCleanup(umount, self.loop_dev)
+        succ = BlockDev.fs_mount(device=self.loop_dev, run_as_uid=uid, run_as_gid=gid)
+        self.assertTrue(succ)
+        self.assertTrue(os.path.ismount(tmp.name))
+
+        succ = BlockDev.fs_unmount(self.loop_dev, run_as_uid=uid, run_as_gid=gid)
+        self.assertTrue(succ)
+        self.assertFalse(os.path.ismount(tmp.name))
+
+        # remove the 'users' option
+        utils.write_file("/etc/fstab", "%s %s vfat defaults 0 0\n" % (self.loop_dev, tmp.name))
+
+        # try to mount and unmount the device as the user --> should fail now
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_mount(device=self.loop_dev, run_as_uid=uid, run_as_gid=gid)
+
+        self.assertFalse(os.path.ismount(tmp.name))
+
+        # now mount as root to test unmounting
+        self.addCleanup(umount, self.loop_dev)
+        succ = BlockDev.fs_mount(device=self.loop_dev)
+        self.assertTrue(succ)
+        self.assertTrue(os.path.ismount(tmp.name))
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_unmount(self.loop_dev, run_as_uid=uid, run_as_gid=gid)
+        self.assertTrue(os.path.ismount(tmp.name))

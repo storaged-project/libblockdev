@@ -61,7 +61,7 @@ class ExtraArg(BlockDev.ExtraArg):
 ExtraArg = override(ExtraArg)
 __all__.append("ExtraArg")
 
-def _get_extra(extra, kwargs):
+def _get_extra(extra, kwargs, cmd_extra=True):
     # pylint: disable=no-member
     # pylint doesn't really get how ExtraArg with overrides work
     if extra:
@@ -74,7 +74,10 @@ def _get_extra(extra, kwargs):
             raise ValueError(msg)
     else:
         ea = []
-    ea += [ExtraArg.new("--" + key, val) for key, val in kwargs.items()]
+    if cmd_extra:
+        ea += [ExtraArg.new("--" + key, val) for key, val in kwargs.items()]
+    else:
+        ea += [ExtraArg.new(key, val) for key, val in kwargs.items()]
     if len(ea) == 0:
         return None
     return ea
@@ -243,6 +246,20 @@ def loop_setup(file, offset=0, size=0, read_only=False, part_scan=True):
     return _loop_setup(file, offset, size, read_only, part_scan)
 __all__.append("loop_setup")
 
+
+_fs_unmount = BlockDev.fs_unmount
+@override(BlockDev.fs_unmount)
+def fs_unmount(spec, lazy=False, force=False, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs, False)
+    return _fs_unmount(spec, lazy, force, extra)
+__all__.append("fs_unmount")
+
+_fs_mount = BlockDev.fs_mount
+@override(BlockDev.fs_mount)
+def fs_mount(device=None, mountpoint=None, fstype=None, options=None, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs, False)
+    return _fs_mount(device, mountpoint, fstype, options, extra)
+__all__.append("fs_mount")
 
 _fs_ext4_mkfs = BlockDev.fs_ext4_mkfs
 @override(BlockDev.fs_ext4_mkfs)

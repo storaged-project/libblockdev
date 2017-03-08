@@ -1,6 +1,7 @@
 import os
 import re
 import glob
+import subprocess
 import tempfile
 import subprocess
 from subprocess import DEVNULL
@@ -173,3 +174,19 @@ def delete_lio_device(dev_path):
         _delete_lun(wwn, True, store_name)
     else:
         raise RuntimeError("Unknown device '%s'" % dev_path)
+
+def read_file(filename):
+    with open(filename, "r") as f:
+        content = f.read()
+    return content
+
+def write_file(filename, content):
+    with open(filename, "w") as f:
+        f.write(content)
+
+def run_command(command):
+    res = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE)
+
+    out, err = res.communicate()
+    return (res.returncode, out.decode().strip(), err.decode().strip())

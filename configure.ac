@@ -65,6 +65,7 @@ AS_IF([pkg-config --atleast-version=2.27.0 blkid], [],
          [Define as neutral value if libblkid doesn't provide the definition])])
 
 LIBBLOCKDEV_PKG_CHECK_MODULES([BYTESIZE], [bytesize >= 0.1])
+LIBBLOCKDEV_PKG_CHECK_MODULES([MOUNT], [mount >= 2.23.0])
 
 m4_ifdef([GOBJECT_INTROSPECTION_CHECK],
 [GOBJECT_INTROSPECTION_CHECK([1.3.0])],
