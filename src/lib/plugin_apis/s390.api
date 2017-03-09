@@ -57,6 +57,15 @@ gboolean bd_s390_dasd_online (const gchar *dasd, GError **error);
 gboolean bd_s390_dasd_is_ldl (const gchar *dasd, GError **error);
 
 /**
+ * bd_s390_dasd_is_fba:
+ * @dasd: dasd to check, whether it is FBA
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether a dasd is FBA
+ */
+gboolean bd_s390_dasd_is_fba (const gchar *dasd, GError **error);
+
+/**
  * bd_s390_sanitize_dev_input:
  * @dev a DASD or zFCP device number
  * @error: (out): place to store error (if any)
