@@ -461,7 +461,7 @@ static gboolean do_mount (MountArgs *args, GError **error) {
                                      "Move attempted, but %s is not a mount point.", args->device);
                     else
                         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                     "%s has an invalid superblock.", args->device);
+                                     "Wrong fs type, %s has an invalid superblock or missing helper program.", args->device);
                     break;
                 case EPERM:
                     g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
