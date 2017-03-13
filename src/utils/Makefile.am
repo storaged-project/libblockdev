@@ -1,3 +1,5 @@
+include $(top_srcdir)/flymake.mk
+
 lib_LTLIBRARIES = libbd_utils.la
 libbd_utils_la_CFLAGS = $(GLIB_CFLAGS) -Wall -Wextra -Werror
 libbd_utils_la_LDFLAGS = -version-info 3:0:1 -Wl,--no-undefined

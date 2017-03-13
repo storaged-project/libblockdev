@@ -1,3 +1,5 @@
+include $(top_srcdir)/flymake.mk
+
 lib_LTLIBRARIES = libbd_btrfs.la libbd_crypto.la libbd_dm.la libbd_loop.la libbd_lvm.la libbd_lvm-dbus.la \
 			      libbd_mdraid.la libbd_mpath.la libbd_swap.la libbd_kbd.la libbd_part_err.la libbd_part.la libbd_fs.la
 

@@ -1,4 +1,5 @@
 -include $(INTROSPECTION_MAKEFILE)
+include $(top_srcdir)/flymake.mk
 
 SUBDIRS = plugin_apis
 
