@@ -38,35 +38,6 @@ AC_CONFIG_FILES([Makefile src/Makefile \
                           data/Makefile \
                           data/conf.d/Makefile])
 
-LIBBLOCKDEV_PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.42.2])
-LIBBLOCKDEV_PKG_CHECK_MODULES([GIO], [gio-2.0 >= 2.42.2])
-LIBBLOCKDEV_PKG_CHECK_MODULES([CRYPTSETUP], [libcryptsetup >= 1.6.7])
-LIBBLOCKDEV_PKG_CHECK_MODULES([NSS], [nss >= 3.18.0])
-LIBBLOCKDEV_PKG_CHECK_MODULES([DEVMAPPER], [devmapper >= 1.02.93])
-LIBBLOCKDEV_PKG_CHECK_MODULES([UDEV], [libudev >= 216])
-LIBBLOCKDEV_PKG_CHECK_MODULES([KMOD], [libkmod >= 19])
-LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED], [libparted >= 3.1])
-
-LIBBLOCKDEV_CHECK_HEADER([volume_key/libvolume_key.h], [$GLIB_CFLAGS $NSS_CFLAGS], [libvolume_key.h not available])
-LIBBLOCKDEV_CHECK_HEADER([dmraid/dmraid.h], [], [dmraid.h not available])
-
-# older versions of parted don't provide the libparted-fs-resize.pc file
-AS_IF([pkg-config --atleast-version=3.2 libparted],
-      [LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED_FS], [libparted-fs-resize >= 3.2])],
-      [AC_SUBST([PARTED_FS_LIBS], [-lparted-fs-resize])
-       AC_SUBST([PARTED_FS_CFLAGS], [])])
-
-LIBBLOCKDEV_PKG_CHECK_MODULES([BLKID], [blkid >= 2.23.0])
-
-# older versions of libblkid don't support BLKID_SUBLKS_BADCSUM so let's just
-# define it as 0 (neutral value for bit combinations of flags)
-AS_IF([pkg-config --atleast-version=2.27.0 blkid], [],
-      [AC_DEFINE([BLKID_SUBLKS_BADCSUM], [0],
-         [Define as neutral value if libblkid doesn't provide the definition])])
-
-LIBBLOCKDEV_PKG_CHECK_MODULES([BYTESIZE], [bytesize >= 0.1])
-LIBBLOCKDEV_PKG_CHECK_MODULES([MOUNT], [mount >= 2.23.0])
-
 m4_ifdef([GOBJECT_INTROSPECTION_CHECK],
 [GOBJECT_INTROSPECTION_CHECK([1.3.0])],
 [found_introspection=no
@@ -150,6 +121,71 @@ AM_CONDITIONAL(WITH_BCACHE, test "x$with_bcache" != "xno")
 AS_IF([test "x$with_bcache" != "xno"],
       [AC_DEFINE([WITH_BD_BCACHE], [], [Define if bcache is supported]) AC_SUBST([WITH_BCACHE], [1]) AC_SUBST([WITH_BCACHE_CFLAGS], [-DWITH_BD_BCACHE])],
       [skip_patterns="$skip_patterns bcache"])
+
+LIBBLOCKDEV_PLUGIN([BTRFS], [btrfs])
+LIBBLOCKDEV_PLUGIN([CRYPTO], [crypto])
+LIBBLOCKDEV_PLUGIN([DM], [dm])
+LIBBLOCKDEV_PLUGIN([LOOP], [loop])
+LIBBLOCKDEV_PLUGIN([LVM], [lvm])
+LIBBLOCKDEV_PLUGIN([LVM_DBUS], [lvm_dbus])
+LIBBLOCKDEV_PLUGIN([MDRAID], [mdraid])
+LIBBLOCKDEV_PLUGIN([MPATH], [mpath])
+LIBBLOCKDEV_PLUGIN([SWAP], [swap])
+LIBBLOCKDEV_PLUGIN([KBD], [kbd])
+LIBBLOCKDEV_PLUGIN([PART], [part])
+LIBBLOCKDEV_PLUGIN([FS], [fs])
+
+AM_CONDITIONAL(WITH_PART_O_WITH_FS, test "x$with_part" != "xno" -o "x$with_fs" != "xno")
+
+dnl these two modules are always needed
+LIBBLOCKDEV_PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.42.2])
+LIBBLOCKDEV_PKG_CHECK_MODULES([GIO], [gio-2.0 >= 2.42.2])
+
+AS_IF([test "x$with_crypto" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([CRYPTSETUP], [libcryptsetup >= 1.6.7])
+       LIBBLOCKDEV_PKG_CHECK_MODULES([NSS], [nss >= 3.18.0])
+       LIBBLOCKDEV_CHECK_HEADER([volume_key/libvolume_key.h], [$GLIB_CFLAGS $NSS_CFLAGS], [libvolume_key.h not available])
+      ],
+      [])
+
+AS_IF([test "x$with_dm" != "xno" -o "x$with_lvm" != "xno" -o "x$with_lvm_dbus" != "xno" -o "x$with_mpath" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([DEVMAPPER], [devmapper >= 1.02.93])],
+      [])
+
+AS_IF([test "x$with_dm" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([UDEV], [libudev >= 216])
+       LIBBLOCKDEV_CHECK_HEADER([dmraid/dmraid.h], [], [dmraid.h not available])
+      ],
+      [])
+
+AS_IF([test "x$with_kbd" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([KMOD], [libkmod >= 19])],
+      [])
+
+
+AS_IF([test "x$with_part" != "xno" -o "x$with_fs" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED], [libparted >= 3.1])]
+      [])
+
+AS_IF([test "x$with_fs" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([MOUNT], [mount >= 2.23.0])
+       LIBBLOCKDEV_PKG_CHECK_MODULES([BLKID], [blkid >= 2.23.0])
+       # older versions of libblkid don't support BLKID_SUBLKS_BADCSUM so let's just
+       # define it as 0 (neutral value for bit combinations of flags)
+       AS_IF([pkg-config --atleast-version=2.27.0 blkid], [],
+             [AC_DEFINE([BLKID_SUBLKS_BADCSUM], [0],
+              [Define as neutral value if libblkid doesn't provide the definition])])
+
+       # older versions of parted don't provide the libparted-fs-resize.pc file
+       AS_IF([pkg-config --atleast-version=3.2 libparted],
+             [LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED_FS], [libparted-fs-resize >= 3.2])],
+             [AC_SUBST([PARTED_FS_LIBS], [-lparted-fs-resize])
+              AC_SUBST([PARTED_FS_CFLAGS], [])])],
+      [])
+
+AS_IF([test "x$with_btrfs" != "xno" -o "x$with_mdraid" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([BYTESIZE], [bytesize >= 0.1])],
+      [])
 
 AC_SUBST([skip_patterns], [$skip_patterns])
 AC_SUBST([MAJOR_VER], [\"2\"])
