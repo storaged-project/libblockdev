@@ -170,10 +170,10 @@ with the libblockdev-btrfs plugin/library.
 
 
 %if %{with_crypto}
+%package crypto
 BuildRequires: cryptsetup-devel
 BuildRequires: volume_key-devel >= 0.3.9-7
 BuildRequires: nss-devel
-%package crypto
 Summary:     The crypto plugin for the libblockdev library
 
 %description crypto
@@ -192,10 +192,10 @@ with the libblockdev-crypto plugin/library.
 
 
 %if %{with_dm}
+%package dm
 BuildRequires: device-mapper-devel
 BuildRequires: dmraid-devel
 BuildRequires: systemd-devel
-%package dm
 Summary:     The Device Mapper plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
 Requires: device-mapper

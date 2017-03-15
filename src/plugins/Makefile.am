@@ -40,16 +40,16 @@ if WITH_KBD
 lib_LTLIBRARIES += libbd_kbd.la
 endif
 
+if WITH_PART_O_WITH_FS
+lib_LTLIBRARIES += libbd_part_err.la
+endif
+
 if WITH_PART
 lib_LTLIBRARIES += libbd_part.la
 endif
 
 if WITH_FS
 lib_LTLIBRARIES += libbd_fs.la
-endif
-
-if WITH_PART_O_WITH_FS
-lib_LTLIBRARIES += libbd_part_err.la
 endif
 
 
