@@ -483,6 +483,39 @@ static gboolean do_mount (MountArgs *args, GError **error) {
                         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                                      "Filesystem type %s not configured in kernel.", args->fstype);
                     break;
+                case EROFS:
+                      if (mflags & MS_RDONLY) {
+                          g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                       "Cannot mount %s read-only.", args->device);
+                          break;
+                      } else if (mnt_optstr_get_option (args->options, "rw", NULL, NULL) == 0) {
+                          g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                       "%s is write-protected but `rw' option given.", args->device);
+                          break;
+                      } else if (mflags & MS_BIND) {
+                          g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                       "Mount %s on %s failed.", args->device, args->mountpoint);
+                          break;
+                      } else {
+                          MountArgs ro_args;
+                          gboolean success = FALSE;
+
+                          ro_args.device = args->device;
+                          ro_args.mountpoint = args->mountpoint;
+                          ro_args.fstype = args->fstype;
+                          if (!args->options)
+                              ro_args.options = g_strdup ("ro");
+                          else
+                              ro_args.options = g_strdup_printf ("%s,ro", args->options);
+
+                          success = do_mount (&ro_args, error);
+
+                          mnt_free_context (cxt);
+                          g_free ((gchar*) ro_args.options);
+
+                          return success;
+                      }
+
                 default:
                     g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                                  "Mount syscall failed: %d.", syscall_errno);
