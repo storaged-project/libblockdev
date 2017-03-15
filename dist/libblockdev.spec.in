@@ -63,7 +63,7 @@
 %define configure_opts %{?distro_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts}
 
 Name:        libblockdev
-Version:     2.5
+Version:     2.6
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -786,6 +786,21 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Mar 15 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.6-1
+- Move the  part_err library before part and fs (vtrefny)
+- Fix BuildRequires for crypto and dm packages (vtrefny)
+- Fix mounting read-only devices (vtrefny)
+- Fix the bd_s390_dasd_is_ldl function. (vponcova)
+- Add the bd_s390_dasd_is_fba function to check if DASD is FBA (vponcova)
+- Disable MD RAID tests on 32bit systems (vpodzime)
+- Fix error message when mounting with a wrong fs type (vtrefny)
+- Only create RPMs for requested/configured  plugins (vpodzime)
+- Only check dependencies of plugins to be built (vpodzime)
+- Only build and distribute plugins if configured so (vpodzime)
+- Fix format-security and unused-result compiler warnings (vtrefny)
+- Add an AC macro for modular builds (vpodzime)
+- Add functions for mounting and unmounting filesystems (vtrefny)
+
 * Mon Mar 06 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.5-1
 - Do not try to get GVariant after not adding anything to its builder (vpodzime)
 - Replace NULL with "" when building ExtraArg (vpodzime)
