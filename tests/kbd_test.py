@@ -2,7 +2,7 @@ import unittest
 import os
 import time
 from contextlib import contextmanager
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, wipe_all, fake_path
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, wipe_all, fake_path, read_file
 import overrides_hack
 
 from gi.repository import BlockDev, GLib
@@ -146,7 +146,6 @@ class KbdZRAMTestCase(unittest.TestCase):
 
 
 class KbdZRAMStatsTestCase(KbdZRAMTestCase):
-    @unittest.skip("unstable test failing on some arches")
     @unittest.skipUnless(_can_load_zram(), "cannot load the 'zram' module")
     def test_zram_get_stats(self):
         """Verify that it is possible to get stats for a zram device"""
@@ -164,8 +163,37 @@ class KbdZRAMStatsTestCase(KbdZRAMTestCase):
         self.assertTrue(stats)
 
         self.assertEqual(stats.disksize, 10 * 1024**2)
-        self.assertEqual(stats.max_comp_streams, 2)
+        # XXX: 'max_comp_streams' is currently broken on rawhide
+        # https://bugzilla.redhat.com/show_bug.cgi?id=1352567
+        # self.assertEqual(stats.max_comp_streams, 2)
         self.assertTrue(stats.comp_algorithm)
+
+        # read 'num_reads' and 'num_writes' from '/sys/block/zram0/stat'
+        sys_stats = read_file("/sys/block/zram0/stat").strip().split()
+        self.assertEqual(len(sys_stats), 11)
+        num_reads = int(sys_stats[0])
+        num_writes = int(sys_stats[4])
+        self.assertEqual(stats.num_reads, num_reads)
+        self.assertEqual(stats.num_writes, num_writes)
+
+        # read 'orig_data_size', 'compr_data_size', 'mem_used_total' and
+        # 'zero_pages' from '/sys/block/zram0/mm_stat'
+        sys_stats = read_file("/sys/block/zram0/mm_stat").strip().split()
+        self.assertEqual(len(sys_stats), 7)
+        orig_data_size = int(sys_stats[0])
+        compr_data_size = int(sys_stats[1])
+        mem_used_total = int(sys_stats[2])
+        zero_pages = int(sys_stats[5])
+        self.assertEqual(stats.orig_data_size, orig_data_size)
+        self.assertEqual(stats.compr_data_size, compr_data_size)
+        self.assertEqual(stats.mem_used_total, mem_used_total)
+        self.assertEqual(stats.zero_pages, zero_pages)
+
+        # read 'invalid_io' and 'num_writes' from '/sys/block/zram0/io_stat'
+        sys_stats = read_file("/sys/block/zram0/io_stat").strip().split()
+        self.assertEqual(len(sys_stats), 4)
+        invalid_io = int(sys_stats[2])
+        self.assertEqual(stats.invalid_io, invalid_io)
 
         with _track_module_load(self, "zram", "_loaded_zram_module"):
             self.assertTrue(BlockDev.kbd_zram_destroy_devices())

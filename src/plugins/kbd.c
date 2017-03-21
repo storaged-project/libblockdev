@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <locale.h>
 #include <blockdev/utils.h>
+#include <stdio.h>
 
 #include "kbd.h"
 
@@ -532,6 +533,8 @@ gboolean bd_kbd_zram_remove_device (const gchar *device, GError **error) {
 BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error) {
     gchar *path = NULL;
     gboolean success = FALSE;
+    gint scanned = 0;
+    gchar *content = NULL;
     BDKBDZramStats *ret = g_new0 (BDKBDZramStats, 1);
 
     if (g_str_has_prefix (device, "/dev/"))
@@ -557,45 +560,21 @@ BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error) {
         return NULL;
     }
 
-    path = g_strdup_printf ("/sys/block/%s/num_reads", device);
-    ret->num_reads = get_number_from_file (path, error);
+    path = g_strdup_printf ("/sys/block/%s/stat", device);
+    success = g_file_get_contents (path, &content, NULL, error);
     g_free (path);
-    if (*error) {
-        g_clear_error (error);
-        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
-                     "Failed to get 'num_reads' for '%s' zRAM device", device);
-        g_free (ret);
+    if (!success) {
+        /* error is already populated */
         return NULL;
     }
 
-    path = g_strdup_printf ("/sys/block/%s/num_writes", device);
-    ret->num_writes = get_number_from_file (path, error);
-    if (*error) {
-        g_clear_error (error);
+    scanned = sscanf (content,
+                      "%*[ \t]%" G_GUINT64_FORMAT "%*[ \t]%*[0-9]%*[ \t]%*[0-9]%*[ \t]%*[0-9]%" G_GUINT64_FORMAT "",
+                      &ret->num_reads, &ret->num_writes);
+    g_free (content);
+    if (scanned != 2) {
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
-                     "Failed to get 'num_writes' for '%s' zRAM device", device);
-        g_free (ret);
-        return NULL;
-    }
-
-    path = g_strdup_printf ("/sys/block/%s/invalid_io", device);
-    ret->invalid_io = get_number_from_file (path, error);
-    g_free (path);
-    if (*error) {
-        g_clear_error (error);
-        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
-                     "Failed to get 'invalid_io' for '%s' zRAM device", device);
-        g_free (ret);
-        return NULL;
-    }
-
-    path = g_strdup_printf ("/sys/block/%s/zero_pages", device);
-    ret->zero_pages = get_number_from_file (path, error);
-    g_free (path);
-    if (*error) {
-        g_clear_error (error);
-        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
-                     "Failed to get 'zero_pages' for '%s' zRAM device", device);
+                     "Failed to get 'stat' for '%s' zRAM device", device);
         g_free (ret);
         return NULL;
     }
@@ -611,35 +590,41 @@ BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error) {
         return NULL;
     }
 
-    path = g_strdup_printf ("/sys/block/%s/orig_data_size", device);
-    ret->orig_data_size = get_number_from_file (path, error);
+    path = g_strdup_printf ("/sys/block/%s/io_stat", device);
+    success = g_file_get_contents (path, &content, NULL, error);
     g_free (path);
-    if (*error) {
-        g_clear_error (error);
+    if (!success) {
+        /* error is already populated */
+        return NULL;
+    }
+
+    scanned = sscanf (content,
+                      "%*[ \t]%*[0-9]%*[ \t]%*[0-9]%*[ \t]%" G_GUINT64_FORMAT "",
+                      &ret->invalid_io);
+    g_free (content);
+    if (scanned != 1) {
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
-                     "Failed to get 'orig_data_size' for '%s' zRAM device", device);
+                     "Failed to get 'io_stat' for '%s' zRAM device", device);
         g_free (ret);
         return NULL;
     }
 
-    path = g_strdup_printf ("/sys/block/%s/compr_data_size", device);
-    ret->compr_data_size = get_number_from_file (path, error);
+    path = g_strdup_printf ("/sys/block/%s/mm_stat", device);
+    success = g_file_get_contents (path, &content, NULL, error);
     g_free (path);
-    if (*error) {
-        g_clear_error (error);
-        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
-                     "Failed to get 'compr_data_size' for '%s' zRAM device", device);
-        g_free (ret);
+    if (!success) {
+        /* error is already populated */
         return NULL;
     }
 
-    path = g_strdup_printf ("/sys/block/%s/mem_used_total", device);
-    ret->mem_used_total = get_number_from_file (path, error);
-    g_free (path);
-    if (*error) {
-        g_clear_error (error);
+    scanned = sscanf (content,
+                      "%*[ \t]%" G_GUINT64_FORMAT "%*[ \t]%" G_GUINT64_FORMAT "%*[ \t]%" G_GUINT64_FORMAT \
+                      "%*[ \t]%*[0-9]%*[ \t]%" G_GUINT64_FORMAT "",
+                      &ret->orig_data_size, &ret->compr_data_size, &ret->mem_used_total, &ret->zero_pages);
+    g_free (content);
+    if (scanned != 4) {
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
-                     "Failed to get 'mem_used_total' for '%s' zRAM device", device);
+                     "Failed to get 'mm_stat' for '%s' zRAM device", device);
         g_free (ret);
         return NULL;
     }
