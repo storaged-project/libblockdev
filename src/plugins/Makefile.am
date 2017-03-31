@@ -93,7 +93,7 @@ endif
 
 if WITH_LVM
 libbd_lvm_la_CFLAGS = $(GLIB_CFLAGS) $(DEVMAPPER_CFLAGS) -Wall -Wextra -Werror
-libbd_lvm_la_LIBADD = $(GLIB_LIBS) $(DEVMAPPER_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_lvm_la_LIBADD = -lm $(GLIB_LIBS) $(DEVMAPPER_LIBS) ${builddir}/../utils/libbd_utils.la
 libbd_lvm_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_lvm_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_lvm_la_SOURCES = lvm.c lvm.h
@@ -101,7 +101,7 @@ endif
 
 if WITH_LVM_DBUS
 libbd_lvm_dbus_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(DEVMAPPER_CFLAGS) -Wall -Wextra -Werror
-libbd_lvm_dbus_la_LIBADD = $(GLIB_LIBS) $(GIO_LIBS) $(DEVMAPPER_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_lvm_dbus_la_LIBADD = -lm $(GLIB_LIBS) $(GIO_LIBS) $(DEVMAPPER_LIBS) ${builddir}/../utils/libbd_utils.la
 libbd_lvm_dbus_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_lvm_dbus_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_lvm_dbus_la_SOURCES = lvm-dbus.c lvm.h
@@ -150,7 +150,7 @@ endif
 
 if WITH_PART
 libbd_part_la_CFLAGS = $(GLIB_CFLAGS) $(PARTED_CFLAGS) -Wall -Wextra -Werror
-libbd_part_la_LIBADD = $(GLIB_LIBS) $(PARTED_LIBS) ${builddir}/../utils/libbd_utils.la ${builddir}/libbd_part_err.la
+libbd_part_la_LIBADD = -lm $(GLIB_LIBS) $(PARTED_LIBS) ${builddir}/../utils/libbd_utils.la ${builddir}/libbd_part_err.la
 libbd_part_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_part_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_part_la_SOURCES = part.c part.h
