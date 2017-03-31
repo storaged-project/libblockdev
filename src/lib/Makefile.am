@@ -3,8 +3,18 @@
 SUBDIRS = plugin_apis
 
 lib_LTLIBRARIES = libblockdev.la
-libblockdev_la_CFLAGS = $(GLIB_CFLAGS)
-libblockdev_la_LIBADD = $(GLIB_LIBS) ${builddir}/../utils/libbd_utils.la -ldl
+libblockdev_la_CFLAGS =
+libblockdev_la_LIBADD =
+if WITH_BTRFS
+libblockdev_la_CFLAGS += $(GOBJECT_CFLAGS)
+libblockdev_la_LIBADD += $(GOBJECT_LIBS)
+endif
+if WITH_LVM
+libblockdev_la_CFLAGS += $(GOBJECT_CFLAGS)
+libblockdev_la_LIBADD += $(GOBJECT_LIBS)
+endif
+libblockdev_la_CFLAGS += $(GLIB_CFLAGS)
+libblockdev_la_LIBADD += $(GLIB_LIBS) ${builddir}/../utils/libbd_utils.la -ldl
 libblockdev_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libblockdev_la_CPPFLAGS = -I${builddir}/../../include/
 libblockdev_la_SOURCES = blockdev.c blockdev.h plugins.c plugins.h
