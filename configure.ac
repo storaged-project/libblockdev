@@ -177,7 +177,7 @@ AS_IF([test "x$with_fs" != "xno"],
               [Define as neutral value if libblkid doesn't provide the definition])])
 
        # older versions of parted don't provide the libparted-fs-resize.pc file
-       AS_IF([pkg-config --atleast-version=3.2 libparted],
+       AS_IF([pkg-config --atleast-version=3.3 libparted],
              [LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED_FS], [libparted-fs-resize >= 3.2])],
              [AC_SUBST([PARTED_FS_LIBS], [-lparted-fs-resize])
               AC_SUBST([PARTED_FS_CFLAGS], [])])],
