@@ -615,7 +615,7 @@ guint64 bd_lvm_get_thpool_meta_size (guint64 size, guint64 chunk_size, guint64 n
         return 0;
     }
 
-    return ret;
+    return MAX (ret, BD_LVM_MIN_THPOOL_MD_SIZE);
 }
 
 /**

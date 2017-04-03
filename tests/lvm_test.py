@@ -114,6 +114,10 @@ class LvmNoDevTestCase(unittest.TestCase):
         # twice the chunk_size -> roughly half the metadata needed
         self.assertAlmostEqual(float(out1) / float(out2), 2, places=2)
 
+        # unless thin_metadata_size gives a value that is not valid (too small)
+        self.assertEqual(BlockDev.lvm_get_thpool_meta_size (100 * 1024**2, 128 * 1024, 100),
+                         BlockDev.LVM_MIN_THPOOL_MD_SIZE)
+
     def test_is_valid_thpool_md_size(self):
         """Verify that is_valid_thpool_md_size works as expected"""
 
