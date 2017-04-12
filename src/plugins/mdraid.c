@@ -635,7 +635,6 @@ gboolean bd_md_activate (const gchar *raid_spec, const gchar **members, const gc
     guint64 num_members = (raid_spec && members) ? g_strv_length ((gchar **) members) : 0;
     const gchar **argv = NULL;
     gchar *uuid_str = NULL;
-    gchar *mdadm_spec = NULL;
     guint argv_top = 0;
     guint i = 0;
     gboolean ret = FALSE;
@@ -643,17 +642,10 @@ gboolean bd_md_activate (const gchar *raid_spec, const gchar **members, const gc
     /* mdadm, --assemble, raid_spec/--scan, --run, --uuid=uuid, member1, member2,..., NULL*/
     argv = g_new0 (const gchar*, num_members + 6);
 
-    if (raid_spec) {
-        mdadm_spec = get_mdadm_spec_from_input (raid_spec, error);
-        if (!mdadm_spec)
-            /* error is already populated */
-            return FALSE;
-    }
-
     argv[argv_top++] = "mdadm";
     argv[argv_top++] = "--assemble";
-    if (mdadm_spec)
-        argv[argv_top++] = mdadm_spec;
+    if (raid_spec)
+        argv[argv_top++] = raid_spec;
     else
         argv[argv_top++] = "--scan";
     if (start_degraded)
