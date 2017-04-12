@@ -227,8 +227,10 @@ class MDTestActivateDeactivate(MDTestCase):
             succ = BlockDev.md_deactivate(BlockDev.md_node_from_name("bd_test_md"))
             self.assertTrue(succ)
 
+        # try to activate using full path, not just the name
+        # (it should work too and blivet does this)
         with wait_for_action("resync"):
-            succ = BlockDev.md_activate("bd_test_md",
+            succ = BlockDev.md_activate("/dev/md/bd_test_md",
                                         [self.loop_dev, self.loop_dev2, self.loop_dev3], None)
             self.assertTrue(succ)
 
