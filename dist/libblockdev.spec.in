@@ -70,9 +70,6 @@ License:     LGPLv2+
 URL:         https://github.com/rhinstaller/libblockdev
 Source0:     https://github.com/rhinstaller/libblockdev/archive/%{name}-%{version}.tar.gz
 
-Patch0: valid_thpool_md_size.patch
-Patch1: md_activate_fix.patch
-
 BuildRequires: glib2-devel
 BuildRequires: gobject-introspection-devel
 BuildRequires: python-devel
@@ -520,8 +517,6 @@ A meta-package that pulls all the libblockdev plugins as dependencies.
 
 %prep
 %setup -q -n %{name}-%{version}
-%patch0 -p1
-%patch1 -p1
 
 %build
 %configure %{?configure_opts}
