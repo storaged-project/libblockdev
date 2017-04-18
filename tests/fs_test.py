@@ -89,7 +89,7 @@ class TestGenericWipe(FSTestCase):
 
         # vfat has multiple signatures on the device so it allows us to test the
         # 'all' argument of fs_wipe()
-        ret = os.system("mkfs.vfat %s &>/dev/null" % self.loop_dev)
+        ret = os.system("mkfs.vfat -I %s &>/dev/null" % self.loop_dev)
         self.assertEqual(ret, 0)
 
         time.sleep(0.5)
@@ -111,7 +111,7 @@ class TestGenericWipe(FSTestCase):
         self.assertEqual(fs_type, b"")
 
         # now do the wipe all in a one step
-        ret = os.system("mkfs.vfat %s &>/dev/null" % self.loop_dev)
+        ret = os.system("mkfs.vfat -I %s &>/dev/null" % self.loop_dev)
         self.assertEqual(ret, 0)
 
         succ = BlockDev.fs_wipe(self.loop_dev, True)
@@ -176,7 +176,7 @@ class Ext4TestWipe(FSTestCase):
 
         BlockDev.fs_wipe(self.loop_dev, True)
 
-        os.system("mkfs.ext2 %s &>/dev/null" % self.loop_dev)
+        os.system("mkfs.ext2 -F %s &>/dev/null" % self.loop_dev)
 
         # ext2, not an ext4 file system
         with self.assertRaises(GLib.GError):
@@ -368,7 +368,7 @@ class XfsTestWipe(FSTestCase):
 
         BlockDev.fs_wipe(self.loop_dev, True)
 
-        os.system("mkfs.ext2 %s &>/dev/null" % self.loop_dev)
+        os.system("mkfs.ext2 -F %s &>/dev/null" % self.loop_dev)
 
         # ext2, not an xfs file system
         with self.assertRaises(GLib.GError):
@@ -577,7 +577,7 @@ class VfatTestWipe(FSTestCase):
 
         BlockDev.fs_wipe(self.loop_dev, True)
 
-        os.system("mkfs.ext2 %s &>/dev/null" % self.loop_dev)
+        os.system("mkfs.ext2 -F %s &>/dev/null" % self.loop_dev)
 
         # ext2, not an vfat file system
         with self.assertRaises(GLib.GError):
