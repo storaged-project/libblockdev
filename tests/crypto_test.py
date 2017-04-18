@@ -7,7 +7,7 @@ import subprocess
 import six
 import locale
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on
 from gi.repository import BlockDev, GLib
 if not BlockDev.is_initialized():
     BlockDev.init(None, None)
@@ -342,6 +342,7 @@ class CryptoTestEscrow(CryptoTestCase):
         self.addCleanup(os.unlink, self.public_cert)
 
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @skip_on(("centos", "enterprise_linux"))
     def test_escrow_packet(self):
         """Verify that an escrow packet can be created for a device"""
 
