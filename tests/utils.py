@@ -3,12 +3,15 @@ import re
 import glob
 import subprocess
 import tempfile
-import subprocess
-from subprocess import DEVNULL
 from contextlib import contextmanager
 from itertools import chain
 
 from gi.repository import GLib
+
+try:
+    from subprocess import DEVNULL
+except ImportError:
+    DEVNULL = open("/dev/null", "w")
 
 _lio_devs = dict()
 
