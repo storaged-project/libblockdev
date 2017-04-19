@@ -59,11 +59,6 @@ AS_IF([test "$on_aarch64" = "0"], AC_SUBST([BTRFS_MIN_SIZE], ["(256 MiB)"]), AC_
 AS_IF([test "x$found_introspection" = xyes], [:],
       [LIBBLOCKDEV_SOFT_FAILURE([GObject introspection (devel) must be installed and enabled])])
 
-AC_SUBST([PYTHON_EXEC_PREFIX], ['${exec_prefix}'])
-      PYTHON_EXECDIR=`python -c "import distutils.sysconfig; \
-                                print(distutils.sysconfig.get_python_lib(1,0,prefix='${exec_prefix}'))"`
-      AC_SUBST(pyexecdir, $PYTHON_EXECDIR)
-
 AC_ARG_WITH([python3],
     AS_HELP_STRING([--with-python3], [support python3 @<:@default=check@:>@]),
     [],
@@ -76,11 +71,7 @@ if test "x$with_python3" != "xno"; then
     [if test "x$with_python3" = "xyes"; then
       LIBBLOCKDEV_SOFT_FAILURE([Python3 support requested, but python3 is not available])
       fi],
-    [AC_SUBST([PYTHON3_EXEC_PREFIX], ['${exec_prefix}'])
-      PYTHON3_EXECDIR=`$python3 -c "import distutils.sysconfig; \
-                                print(distutils.sysconfig.get_python_lib(1,0,prefix='${exec_prefix}'))"`
-      AC_SUBST(py3execdir, $PYTHON3_EXECDIR)
-      AC_SUBST(WITH_PYTHON3, 1)])
+    [AC_SUBST(WITH_PYTHON3, 1)])
 fi
 AM_CONDITIONAL(WITH_PYTHON3, test "x$with_python3" != "xno" -a "x$python3" != "xno")
 
