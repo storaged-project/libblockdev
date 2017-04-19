@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 from contextlib import contextmanager
 import utils
+import six
 import overrides_hack
 
 from gi.repository import BlockDev, GLib
@@ -122,7 +123,7 @@ class TestGenericWipe(FSTestCase):
         self.assertEqual(fs_type, b"")
 
         # try to wipe empty device
-        with self.assertRaisesRegex(GLib.GError, "No signature detected on the device"):
+        with six.assertRaisesRegex(self, GLib.GError, "No signature detected on the device"):
             BlockDev.fs_wipe(self.loop_dev, True)
 
 
