@@ -368,20 +368,46 @@ class MDTestAddRemove(MDTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.md_add("bd_test_md", "/non/existing/device", 0, None)
 
+        # add the device as a spare
         succ = BlockDev.md_add("bd_test_md", self.loop_dev3, 0, None)
         self.assertTrue(succ)
+
+        md_info = BlockDev.md_detail("bd_test_md")
+        self.assertEqual(md_info.raid_devices, 2)
+        self.assertEqual(md_info.spare_devices, 1)
 
         with self.assertRaises(GLib.GError):
             BlockDev.md_add("bd_test_md", self.loop_dev3, 0, None)
 
+        # now remove the spare device (should be possible without --fail)
         with wait_for_action("resync"):
-            succ = BlockDev.md_remove("bd_test_md", self.loop_dev3, True, None)
+            succ = BlockDev.md_remove("bd_test_md", self.loop_dev3, False, None)
             self.assertTrue(succ)
 
-        # XXX: cannnot remove device added as a spare device nor a different
-        # device?
-        succ = BlockDev.md_add("bd_test_md", self.loop_dev3, 2, None)
-        self.assertTrue(succ)
+        md_info = BlockDev.md_detail("bd_test_md")
+        self.assertEqual(md_info.raid_devices, 2)
+        self.assertEqual(md_info.spare_devices, 0)
+
+        # remove one of the original devices (with --fail enabled)
+        with wait_for_action("resync"):
+            succ = BlockDev.md_remove("bd_test_md", self.loop_dev2, True, None)
+            self.assertTrue(succ)
+
+        md_info = BlockDev.md_detail("bd_test_md")
+        self.assertEqual(md_info.raid_devices, 2)
+        self.assertEqual(md_info.active_devices, 1)
+        self.assertEqual(md_info.spare_devices, 0)
+
+        # now try to add it back -- it should be re-added automatically as
+        # a RAID device, not a spare device
+        with wait_for_action("recovery"):
+            succ = BlockDev.md_add("bd_test_md", self.loop_dev2, 0, None)
+            self.assertTrue(succ)
+
+        md_info = BlockDev.md_detail("bd_test_md")
+        self.assertEqual(md_info.raid_devices, 2)
+        self.assertEqual(md_info.active_devices, 2)
+        self.assertEqual(md_info.spare_devices, 0)
 
 class MDTestExamineDetail(MDTestCase):
     # sleeps to let MD RAID sync things
