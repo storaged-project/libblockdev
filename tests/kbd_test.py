@@ -2,7 +2,7 @@ import unittest
 import os
 import time
 from contextlib import contextmanager
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, wipe_all, fake_path, read_file
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, wipe_all, fake_path, read_file, skip_on
 import overrides_hack
 
 from gi.repository import BlockDev, GLib
@@ -201,6 +201,7 @@ class KbdZRAMStatsTestCase(KbdZRAMTestCase):
 class KbdBcacheNodevTestCase(unittest.TestCase):
     # no setUp/tearDown methods needed
 
+    @skip_on(("centos", "enterprise_linux"))
     def test_bcache_mode_str_bijection(self):
         """Verify that it's possible to transform between cache modes and their string representations"""
 
@@ -256,6 +257,7 @@ class KbdBcacheTestCase(unittest.TestCase):
 
 class KbdTestBcacheCreate(KbdBcacheTestCase):
     @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
+    @skip_on(("centos", "enterprise_linux"))
     def test_bcache_create_destroy(self):
         """Verify that it's possible to create and destroy a bcache device"""
 
@@ -274,6 +276,7 @@ class KbdTestBcacheCreate(KbdBcacheTestCase):
         wipe_all(self.loop_dev, self.loop_dev2)
 
     @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
+    @skip_on(("centos", "enterprise_linux"))
     def test_bcache_create_destroy_full_path(self):
         """Verify that it's possible to create and destroy a bcache device with full device path"""
 
@@ -293,6 +296,7 @@ class KbdTestBcacheCreate(KbdBcacheTestCase):
 
 class KbdTestBcacheAttachDetach(KbdBcacheTestCase):
     @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
+    @skip_on(("centos", "enterprise_linux"))
     def test_bcache_attach_detach(self):
         """Verify that it's possible to detach/attach a cache from/to a bcache device"""
 
@@ -318,6 +322,7 @@ class KbdTestBcacheAttachDetach(KbdBcacheTestCase):
         wipe_all(self.loop_dev, self.loop_dev2)
 
     @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
+    @skip_on(("centos", "enterprise_linux"))
     def test_bcache_attach_detach_full_path(self):
         """Verify that it's possible to detach/attach a cache from/to a bcache device with full device path"""
 
@@ -343,6 +348,7 @@ class KbdTestBcacheAttachDetach(KbdBcacheTestCase):
         wipe_all(self.loop_dev, self.loop_dev2)
 
     @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
+    @skip_on(("centos", "enterprise_linux"))
     def test_bcache_detach_destroy(self):
         """Verify that it's possible to destroy a bcache device with no cache attached"""
 
@@ -366,6 +372,7 @@ class KbdTestBcacheAttachDetach(KbdBcacheTestCase):
 
 class KbdTestBcacheGetSetMode(KbdBcacheTestCase):
     @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
+    @skip_on(("centos", "enterprise_linux"))
     def test_bcache_get_set_mode(self):
         """Verify that it is possible to get and set Bcache mode"""
 
@@ -414,6 +421,7 @@ class KbdTestBcacheGetSetMode(KbdBcacheTestCase):
 
 class KbdTestBcacheStatusTest(KbdBcacheTestCase):
     @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
+    @skip_on(("centos", "enterprise_linux"))
     def test_bcache_status(self):
         succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2, None)
         self.assertTrue(succ)
@@ -443,6 +451,7 @@ class KbdTestBcacheStatusTest(KbdBcacheTestCase):
 
 class KbdTestBcacheBackingCacheDevTest(KbdBcacheTestCase):
     @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
+    @skip_on(("centos", "enterprise_linux"))
     def test_bcache_backing_cache_dev(self):
         """Verify that is is possible to get the backing and cache devices for a Bcache"""
 
@@ -469,6 +478,7 @@ class KbdUnloadTest(unittest.TestCase):
         # tests
         self.addCleanup(BlockDev.reinit, None, True, None)
 
+    @skip_on(("centos", "enterprise_linux"))
     def test_check_no_bcache_progs(self):
         """Verify that checking the availability of make-bcache works as expected"""
 
