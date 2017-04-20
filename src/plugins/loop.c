@@ -329,7 +329,7 @@ gboolean bd_loop_get_autoclear (const gchar *loop, GError **error) {
     if (!g_str_has_prefix (loop, "/dev/"))
         dev_loop = g_strdup_printf ("/dev/%s", loop);
 
-    fd = open (dev_loop ? dev_loop : loop, O_RDWR);
+    fd = open (dev_loop ? dev_loop : loop, O_RDONLY);
     g_free (dev_loop);
     if (fd < 0) {
         g_set_error (error, BD_LOOP_ERROR, BD_LOOP_ERROR_DEVICE,
