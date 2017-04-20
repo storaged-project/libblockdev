@@ -697,6 +697,8 @@ BDPartSpec* bd_part_get_best_free_region (const gchar *disk, BDPartType type, gu
     for (free_reg_p=free_regs; *free_reg_p; free_reg_p++)
         if (*free_reg_p != ret)
             bd_part_spec_free (*free_reg_p);
+    g_free (free_regs);
+
     return ret;
 }
 
