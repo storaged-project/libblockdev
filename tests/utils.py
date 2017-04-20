@@ -196,7 +196,7 @@ def run_command(command):
     out, err = res.communicate()
     return (res.returncode, out.decode().strip(), err.decode().strip())
 
-def skip_on(skip_on_distros, skip_on_version=""):
+def skip_on(skip_on_distros, skip_on_version="", reason=""):
     """A function returning a decorator to skip some test on a given distribution-version combination
 
     :param skip_on_distros: distro(s) to skip the test on
@@ -219,6 +219,7 @@ def skip_on(skip_on_distros, skip_on_version=""):
 
     def decorator(func):
         if distro in skip_on_distros and (not skip_on_version or skip_on_version == version):
-            return unittest.skip("not supported on this distribution in this version")(func)
+            msg = "not supported on this distribution in this version" + (": %s" % reason if reason else "")
+            return unittest.skip(msg)(func)
 
     return decorator
