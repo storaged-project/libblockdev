@@ -508,7 +508,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps3.flags, 0)  # no flags (combination of bit flags)
 
         # we should get a logical partition which has number 5
-        ps5 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps3.start + 1,
+        ps5 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps3.start + ps3.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
         ps4 = BlockDev.part_get_part_spec (self.loop_dev, self.loop_dev + "4")
         self.assertTrue(ps4)

@@ -703,19 +703,13 @@ BDPartSpec* bd_part_get_best_free_region (const gchar *disk, BDPartType type, gu
 static PedPartition* add_part_to_disk (PedDevice *dev, PedDisk *disk, BDPartTypeReq type, guint64 start, guint64 size, BDPartAlign align, GError **error) {
     PedPartition *part = NULL;
     PedConstraint *constr = NULL;
+    PedConstraint *dev_constr = NULL;
     PedGeometry *geom;
     gint orig_flag_state = 0;
     gint status = 0;
 
     /* convert start to sectors */
     start = (start + (guint64)dev->sector_size - 1) / dev->sector_size;
-    if (size == 0) {
-        constr = ped_device_get_constraint (dev);
-        size = constr->max_size - 1;
-        ped_constraint_destroy (constr);
-        constr = NULL;
-    } else
-        size = size / dev->sector_size;
 
     if (align == BD_PART_ALIGN_OPTIMAL) {
         /* cylinder alignment does really weird things when turned on, let's not
@@ -730,6 +724,13 @@ static PedPartition* add_part_to_disk (PedDevice *dev, PedDisk *disk, BDPartType
 
     if (constr)
         start = ped_alignment_align_up (constr->start_align, constr->start_range, (PedSector) start);
+
+    if (size == 0) {
+        dev_constr = ped_device_get_constraint (dev);
+        size = dev_constr->max_size - 1 - start;
+        ped_constraint_destroy (dev_constr);
+    } else
+        size = size / dev->sector_size;
 
     geom = ped_geometry_new (dev, (PedSector) start, (PedSector) size);
     if (!geom) {
