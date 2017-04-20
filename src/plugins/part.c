@@ -1475,7 +1475,7 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
  * Returns: whether the @part_id type was successfully set for @part or not
  */
 gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar *part_id, GError **error) {
-    const gchar *args[6] = {"sfdisk", "--part-type", disk, NULL, part_id, NULL};
+    const gchar *args[6] = {"sfdisk", "--id", disk, NULL, part_id, NULL};
     const gchar *part_num_str = NULL;
     gboolean success = FALSE;
     guint64 progress_id = 0;
@@ -1541,7 +1541,7 @@ gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar 
  * Returns (transfer full): partition id type or %NULL in case of error
  */
 gchar* bd_part_get_part_id (const gchar *disk, const gchar *part, GError **error) {
-    const gchar *args[5] = {"sfdisk", "--part-type", disk, NULL, NULL};
+    const gchar *args[5] = {"sfdisk", "--id", disk, NULL, NULL};
     const gchar *part_num_str = NULL;
     gchar *output = NULL;
     gchar *ret = NULL;
