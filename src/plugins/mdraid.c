@@ -793,7 +793,7 @@ gboolean bd_md_add (const gchar *raid_spec, const gchar *device, guint64 raid_de
  * RAID or not.
  */
 gboolean bd_md_remove (const gchar *raid_spec, const gchar *device, gboolean fail, const BDExtraArg **extra, GError **error) {
-    const gchar *argv[] = {"mdadm", NULL, NULL, NULL, NULL, NULL};
+    const gchar *argv[] = {"mdadm", NULL, NULL, NULL, NULL, NULL, NULL};
     guint argv_top = 2;
     gchar *mdadm_spec = NULL;
     gboolean ret = FALSE;
@@ -805,8 +805,13 @@ gboolean bd_md_remove (const gchar *raid_spec, const gchar *device, gboolean fai
 
     argv[1] = mdadm_spec;
 
-    if (fail)
+    if (fail) {
         argv[argv_top++] = "--fail";
+        if (g_str_has_prefix (device, "/dev/"))
+            argv[argv_top++] = (device + 5);
+        else
+            argv[argv_top++] = device;
+    }
 
     argv[argv_top++] = "--remove";
 
