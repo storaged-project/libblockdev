@@ -1160,7 +1160,7 @@ static gboolean wipe_fs (const gchar *device, const gchar *fs_type, gboolean wip
  * Returns: whether a new ext4 fs was successfully created on @device or not
  */
 gboolean bd_fs_ext4_mkfs (const gchar *device, const BDExtraArg **extra, GError **error) {
-    const gchar *args[3] = {"mkfs.ext4", device, NULL};
+    const gchar *args[4] = {"mkfs.ext4", "-F", device, NULL};
 
     return bd_utils_exec_and_report_error (args, extra, error);
 }
@@ -1597,7 +1597,7 @@ gboolean bd_fs_xfs_resize (const gchar *mpoint, guint64 new_size, const BDExtraA
  * Returns: whether a new vfat fs was successfully created on @device or not
  */
 gboolean bd_fs_vfat_mkfs (const gchar *device, const BDExtraArg **extra, GError **error) {
-    const gchar *args[3] = {"mkfs.vfat", device, NULL};
+    const gchar *args[4] = {"mkfs.vfat", "-I", device, NULL};
 
     return bd_utils_exec_and_report_error (args, extra, error);
 }

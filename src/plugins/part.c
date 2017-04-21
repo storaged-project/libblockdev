@@ -697,25 +697,21 @@ BDPartSpec* bd_part_get_best_free_region (const gchar *disk, BDPartType type, gu
     for (free_reg_p=free_regs; *free_reg_p; free_reg_p++)
         if (*free_reg_p != ret)
             bd_part_spec_free (*free_reg_p);
+    g_free (free_regs);
+
     return ret;
 }
 
 static PedPartition* add_part_to_disk (PedDevice *dev, PedDisk *disk, BDPartTypeReq type, guint64 start, guint64 size, BDPartAlign align, GError **error) {
     PedPartition *part = NULL;
     PedConstraint *constr = NULL;
+    PedConstraint *dev_constr = NULL;
     PedGeometry *geom;
     gint orig_flag_state = 0;
     gint status = 0;
 
     /* convert start to sectors */
     start = (start + (guint64)dev->sector_size - 1) / dev->sector_size;
-    if (size == 0) {
-        constr = ped_device_get_constraint (dev);
-        size = constr->max_size - 1;
-        ped_constraint_destroy (constr);
-        constr = NULL;
-    } else
-        size = size / dev->sector_size;
 
     if (align == BD_PART_ALIGN_OPTIMAL) {
         /* cylinder alignment does really weird things when turned on, let's not
@@ -730,6 +726,13 @@ static PedPartition* add_part_to_disk (PedDevice *dev, PedDisk *disk, BDPartType
 
     if (constr)
         start = ped_alignment_align_up (constr->start_align, constr->start_range, (PedSector) start);
+
+    if (size == 0) {
+        dev_constr = ped_device_get_constraint (dev);
+        size = dev_constr->max_size - 1 - start;
+        ped_constraint_destroy (dev_constr);
+    } else
+        size = size / dev->sector_size;
 
     geom = ped_geometry_new (dev, (PedSector) start, (PedSector) size);
     if (!geom) {
@@ -1475,7 +1478,7 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
  * Returns: whether the @part_id type was successfully set for @part or not
  */
 gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar *part_id, GError **error) {
-    const gchar *args[6] = {"sfdisk", "--part-type", disk, NULL, part_id, NULL};
+    const gchar *args[6] = {"sfdisk", "--id", disk, NULL, part_id, NULL};
     const gchar *part_num_str = NULL;
     gboolean success = FALSE;
     guint64 progress_id = 0;
@@ -1541,7 +1544,7 @@ gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar 
  * Returns (transfer full): partition id type or %NULL in case of error
  */
 gchar* bd_part_get_part_id (const gchar *disk, const gchar *part, GError **error) {
-    const gchar *args[5] = {"sfdisk", "--part-type", disk, NULL, NULL};
+    const gchar *args[5] = {"sfdisk", "--id", disk, NULL, NULL};
     const gchar *part_num_str = NULL;
     gchar *output = NULL;
     gchar *ret = NULL;
