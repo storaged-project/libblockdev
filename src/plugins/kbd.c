@@ -522,6 +522,150 @@ gboolean bd_kbd_zram_remove_device (const gchar *device, GError **error) {
     return success;
 }
 
+/* Get the zRAM stats using the "old" sysfs files --  /sys/block/zram<id>/num_reads,
+   /sys/block/zram<id>/invalid_io etc. */
+static gboolean get_zram_stats_old (const gchar *device, BDKBDZramStats* stats, GError **error) {
+    gchar *path = NULL;
+
+    path = g_strdup_printf ("/sys/block/%s/num_reads", device);
+    stats->num_reads = get_number_from_file (path, error);
+    g_free (path);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'num_reads' for '%s' zRAM device", device);
+        return FALSE;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/num_writes", device);
+    stats->num_writes = get_number_from_file (path, error);
+    g_free (path);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'num_writes' for '%s' zRAM device", device);
+        return FALSE;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/invalid_io", device);
+    stats->invalid_io = get_number_from_file (path, error);
+    g_free (path);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'invalid_io' for '%s' zRAM device", device);
+        return FALSE;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/zero_pages", device);
+    stats->zero_pages = get_number_from_file (path, error);
+    g_free (path);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'zero_pages' for '%s' zRAM device", device);
+        return FALSE;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/orig_data_size", device);
+    stats->orig_data_size = get_number_from_file (path, error);
+    g_free (path);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'orig_data_size' for '%s' zRAM device", device);
+        return FALSE;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/compr_data_size", device);
+    stats->compr_data_size = get_number_from_file (path, error);
+    g_free (path);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'compr_data_size' for '%s' zRAM device", device);
+        return FALSE;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/mem_used_total", device);
+    stats->mem_used_total = get_number_from_file (path, error);
+    g_free (path);
+    if (*error) {
+        g_clear_error (error);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'mem_used_total' for '%s' zRAM device", device);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+/* Get the zRAM stats using the "new" sysfs files -- /sys/block/zram<id>/stat,
+  /sys/block/zram<id>/io_stat etc. */
+static gboolean get_zram_stats_new (const gchar *device, BDKBDZramStats* stats, GError **error) {
+    gchar *path = NULL;
+    gboolean success = FALSE;
+    gint scanned = 0;
+    gchar *content = NULL;
+
+    path = g_strdup_printf ("/sys/block/%s/stat", device);
+    success = g_file_get_contents (path, &content, NULL, error);
+    g_free (path);
+    if (!success) {
+        /* error is already populated */
+        return FALSE;
+    }
+
+    scanned = sscanf (content,
+                      "%*[ \t]%" G_GUINT64_FORMAT "%*[ \t]%*[0-9]%*[ \t]%*[0-9]%*[ \t]%*[0-9]%" G_GUINT64_FORMAT "",
+                      &stats->num_reads, &stats->num_writes);
+    g_free (content);
+    if (scanned != 2) {
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'stat' for '%s' zRAM device", device);
+        return FALSE;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/io_stat", device);
+    success = g_file_get_contents (path, &content, NULL, error);
+    g_free (path);
+    if (!success) {
+        /* error is already populated */
+        return FALSE;
+    }
+
+    scanned = sscanf (content,
+                      "%*[ \t]%*[0-9]%*[ \t]%*[0-9]%*[ \t]%" G_GUINT64_FORMAT "",
+                      &stats->invalid_io);
+    g_free (content);
+    if (scanned != 1) {
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'io_stat' for '%s' zRAM device", device);
+        return FALSE;
+    }
+
+    path = g_strdup_printf ("/sys/block/%s/mm_stat", device);
+    success = g_file_get_contents (path, &content, NULL, error);
+    g_free (path);
+    if (!success) {
+        /* error is already populated */
+        return FALSE;
+    }
+
+    scanned = sscanf (content,
+                      "%*[ \t]%" G_GUINT64_FORMAT "%*[ \t]%" G_GUINT64_FORMAT "%*[ \t]%" G_GUINT64_FORMAT \
+                      "%*[ \t]%*[0-9]%*[ \t]%" G_GUINT64_FORMAT "",
+                      &stats->orig_data_size, &stats->compr_data_size, &stats->mem_used_total, &stats->zero_pages);
+    g_free (content);
+    if (scanned != 4) {
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
+                     "Failed to get 'mm_stat' for '%s' zRAM device", device);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
 
 /**
  * bd_kbd_zram_get_stats:
@@ -533,8 +677,6 @@ gboolean bd_kbd_zram_remove_device (const gchar *device, GError **error) {
 BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error) {
     gchar *path = NULL;
     gboolean success = FALSE;
-    gint scanned = 0;
-    gchar *content = NULL;
     BDKBDZramStats *ret = g_new0 (BDKBDZramStats, 1);
 
     if (g_str_has_prefix (device, "/dev/"))
@@ -560,25 +702,6 @@ BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error) {
         return NULL;
     }
 
-    path = g_strdup_printf ("/sys/block/%s/stat", device);
-    success = g_file_get_contents (path, &content, NULL, error);
-    g_free (path);
-    if (!success) {
-        /* error is already populated */
-        return NULL;
-    }
-
-    scanned = sscanf (content,
-                      "%*[ \t]%" G_GUINT64_FORMAT "%*[ \t]%*[0-9]%*[ \t]%*[0-9]%*[ \t]%*[0-9]%" G_GUINT64_FORMAT "",
-                      &ret->num_reads, &ret->num_writes);
-    g_free (content);
-    if (scanned != 2) {
-        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
-                     "Failed to get 'stat' for '%s' zRAM device", device);
-        g_free (ret);
-        return NULL;
-    }
-
     path = g_strdup_printf ("/sys/block/%s/max_comp_streams", device);
     ret->max_comp_streams = get_number_from_file (path, error);
     g_free (path);
@@ -586,45 +709,6 @@ BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error) {
         g_clear_error (error);
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
                      "Failed to get 'max_comp_streams' for '%s' zRAM device", device);
-        g_free (ret);
-        return NULL;
-    }
-
-    path = g_strdup_printf ("/sys/block/%s/io_stat", device);
-    success = g_file_get_contents (path, &content, NULL, error);
-    g_free (path);
-    if (!success) {
-        /* error is already populated */
-        return NULL;
-    }
-
-    scanned = sscanf (content,
-                      "%*[ \t]%*[0-9]%*[ \t]%*[0-9]%*[ \t]%" G_GUINT64_FORMAT "",
-                      &ret->invalid_io);
-    g_free (content);
-    if (scanned != 1) {
-        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
-                     "Failed to get 'io_stat' for '%s' zRAM device", device);
-        g_free (ret);
-        return NULL;
-    }
-
-    path = g_strdup_printf ("/sys/block/%s/mm_stat", device);
-    success = g_file_get_contents (path, &content, NULL, error);
-    g_free (path);
-    if (!success) {
-        /* error is already populated */
-        return NULL;
-    }
-
-    scanned = sscanf (content,
-                      "%*[ \t]%" G_GUINT64_FORMAT "%*[ \t]%" G_GUINT64_FORMAT "%*[ \t]%" G_GUINT64_FORMAT \
-                      "%*[ \t]%*[0-9]%*[ \t]%" G_GUINT64_FORMAT "",
-                      &ret->orig_data_size, &ret->compr_data_size, &ret->mem_used_total, &ret->zero_pages);
-    g_free (content);
-    if (scanned != 4) {
-        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
-                     "Failed to get 'mm_stat' for '%s' zRAM device", device);
         g_free (ret);
         return NULL;
     }
@@ -642,6 +726,23 @@ BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error) {
     }
     /* remove the trailing space and newline */
     g_strstrip (ret->comp_algorithm);
+
+    /* We need to read stats from different files on new and old kernels.
+       e.g. "num_reads" exits only on old kernels and "stat" (that replaces
+       "num_reads/writes/etc.") exists only on newer kernels.
+    */
+    path = g_strdup_printf ("/sys/block/%s/num_reads", device);
+    if (g_file_test (path, G_FILE_TEST_EXISTS))
+      success = get_zram_stats_old (device, ret, error);
+    else
+      success = get_zram_stats_new (device, ret, error);
+    g_free (path);
+
+    if (!success) {
+        /* error is already populated */
+        g_free (ret);
+        return NULL;
+    }
 
     return ret;
 }
