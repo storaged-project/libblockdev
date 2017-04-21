@@ -355,7 +355,7 @@ static BDPartSpec* get_part_spec (PedDevice *dev, PedDisk *disk, PedPartition *p
         else
             ret->path = g_strdup_printf ("%s%d", dev->path, part->num);
     }
-    if (disk->type->features & PED_DISK_TYPE_PARTITION_NAME)
+    if (ped_partition_is_active (part) && disk->type->features & PED_DISK_TYPE_PARTITION_NAME)
         ret->name = g_strdup (ped_partition_get_name (part));
     if (g_strcmp0 (disk->type->name, "gpt") == 0) {
         ret->type_guid = get_part_type_guid_and_gpt_flags (dev->path, part->num, &(ret->flags), error);
