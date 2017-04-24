@@ -18,11 +18,9 @@ LT_INIT
 
 AC_CONFIG_FILES([Makefile src/Makefile \
                           src/plugins/Makefile \
-                          src/plugins/btrfs.h \
                           src/utils/Makefile \
                           src/lib/Makefile \
                           src/lib/plugin_apis/Makefile \
-                          src/lib/plugin_apis/btrfs.api \
                           src/lib/blockdev.c \
                           src/lib/blockdev.pc \
                           src/python/Makefile \
@@ -48,12 +46,7 @@ on_s390=$?
 
 AM_CONDITIONAL(ON_S390, test "$on_s390" = "0")
 
-uname -p|grep aarch64
-on_aarch64=$?
-
 skip_patterns=""
-
-AS_IF([test "$on_aarch64" = "0"], AC_SUBST([BTRFS_MIN_SIZE], ["(256 MiB)"]), AC_SUBST([BTRFS_MIN_SIZE], ["(128 MiB)"]))
 
 # Complain if introspection was not enabled
 AS_IF([test "x$found_introspection" = xyes], [:],
