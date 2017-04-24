@@ -147,7 +147,8 @@ class KbdZRAMTestCase(unittest.TestCase):
 
 class KbdZRAMStatsTestCase(KbdZRAMTestCase):
     @unittest.skipUnless(_can_load_zram(), "cannot load the 'zram' module")
-    def test_zram_get_stats(self):
+    @skip_on(("centos", "enterprise_linux"), reason="needs newest kernel to run")
+    def test_zram_get_stats_fedora(self):
         """Verify that it is possible to get stats for a zram device"""
 
         with _track_module_load(self, "zram", "_loaded_zram_module"):
@@ -193,6 +194,43 @@ class KbdZRAMStatsTestCase(KbdZRAMTestCase):
         sys_stats = read_file("/sys/block/zram0/io_stat").strip().split()
         self.assertEqual(len(sys_stats), 4)
         invalid_io = int(sys_stats[2])
+        self.assertEqual(stats.invalid_io, invalid_io)
+
+        with _track_module_load(self, "zram", "_loaded_zram_module"):
+            self.assertTrue(BlockDev.kbd_zram_destroy_devices())
+
+    @skip_on(("fedora"), reason="needs old kernel to run")
+    def test_zram_get_stats_centos(self):
+        with _track_module_load(self, "zram", "_loaded_zram_module"):
+            self.assertTrue(BlockDev.kbd_zram_create_devices(1, [10 * 1024**2], [2]))
+            time.sleep(1)
+
+        stats = BlockDev.kbd_zram_get_stats("zram0")
+        self.assertTrue(stats)
+
+        # /dev/zram0 should work too
+        stats = BlockDev.kbd_zram_get_stats("/dev/zram0")
+        self.assertTrue(stats)
+
+        self.assertEqual(stats.disksize, 10 * 1024**2)
+        self.assertEqual(stats.max_comp_streams, 2)
+        self.assertTrue(stats.comp_algorithm)
+
+        num_reads = int(read_file("/sys/block/zram0/num_reads").strip())
+        self.assertEqual(stats.num_reads, num_reads)
+        num_writes = int(read_file("/sys/block/zram0/num_writes").strip())
+        self.assertEqual(stats.num_writes, num_writes)
+
+        orig_data_size = int(read_file("/sys/block/zram0/orig_data_size").strip())
+        self.assertEqual(stats.orig_data_size, orig_data_size)
+        compr_data_size = int(read_file("/sys/block/zram0/compr_data_size").strip())
+        self.assertEqual(stats.compr_data_size, compr_data_size)
+        mem_used_total = int(read_file("/sys/block/zram0/mem_used_total").strip())
+        self.assertEqual(stats.mem_used_total, mem_used_total)
+        zero_pages = int(read_file("/sys/block/zram0/zero_pages").strip())
+        self.assertEqual(stats.zero_pages, zero_pages)
+
+        invalid_io = int(read_file("/sys/block/zram0/invalid_io").strip())
         self.assertEqual(stats.invalid_io, invalid_io)
 
         with _track_module_load(self, "zram", "_loaded_zram_module"):
