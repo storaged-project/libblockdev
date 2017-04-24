@@ -161,4 +161,4 @@ release: tag
 
 ci: all distcheck
 	$(MAKE) pylint > $(PYLINT_LOG)
-	TEST_PYTHON=python3 $(MAKE) --quiet test
+	$(MAKE) --quiet test
