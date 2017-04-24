@@ -403,6 +403,7 @@ gboolean bd_loop_set_autoclear (const gchar *loop, gboolean autoclear, GError **
         return FALSE;
     }
 
+    close (fd);
     bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
 }
