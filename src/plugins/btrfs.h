@@ -8,7 +8,7 @@
 #define BTRFS_MIN_VERSION "3.18.2"
 
 #define BD_BTRFS_MAIN_VOLUME_ID 5
-#define BD_BTRFS_MIN_MEMBER_SIZE @BTRFS_MIN_SIZE@
+#define BD_BTRFS_MIN_MEMBER_SIZE (128 MiB)
 
 GQuark bd_btrfs_error_quark (void);
 #define BD_BTRFS_ERROR bd_btrfs_error_quark ()
