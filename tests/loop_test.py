@@ -113,6 +113,12 @@ class LoopTestGetSetAutoclear(LoopTestCase):
         succ, self.loop = BlockDev.loop_setup(self.dev_file)
         self.assertFalse(BlockDev.loop_get_autoclear(self.loop))
 
+        # open the loop device so that it doesn't disappear once we set
+        # autoclear to True (it's otherwise not being used so it may get cleared
+        # automatically)
+        fd = os.open("/dev/" + self.loop, os.O_RDONLY)
+        self.addCleanup(os.close, fd)
+
         self.assertTrue(BlockDev.loop_set_autoclear(self.loop, True))
         self.assertTrue(BlockDev.loop_get_autoclear(self.loop))
 
