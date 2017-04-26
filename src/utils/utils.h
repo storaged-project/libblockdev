@@ -4,6 +4,7 @@
 #include "sizes.h"
 #include "exec.h"
 #include "extra_arg.h"
+#include "dev_utils.h"
 
 /**
  * SECTION: utils

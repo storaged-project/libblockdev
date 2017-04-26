@@ -638,6 +638,7 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_includedir}/blockdev/sizes.h
 %{_includedir}/blockdev/exec.h
 %{_includedir}/blockdev/extra_arg.h
+%{_includedir}/blockdev/dev_utils.h
 
 
 %if %{with_btrfs}
