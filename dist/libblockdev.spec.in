@@ -63,8 +63,8 @@
 %define configure_opts %{?distro_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts}
 
 Name:        libblockdev
-Version:     2.6
-Release:     3%{?dist}
+Version:     2.7
+Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
 URL:         https://github.com/rhinstaller/libblockdev
@@ -786,6 +786,34 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Apr 26 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.7-1
+- Skip btrfs min size tests on Fedora 25 (vtrefny)
+- Make sure the loop device doesn't disappear during tests (vpodzime)
+- Close the loop device when autoclear is (un)set (vpodzime)
+- Do not enforce Python 3 for running tests in CI (vpodzime)
+- Revert "Use different BTRFS_MIN_MEMBER_SIZE on aarch64" (vtrefny)
+- Use both 'old' and 'new' sysfs files to read zRAM stats (vtrefny)
+- Check if libparted-fs-resize pkgconfig is available (vpodzime)
+- Do not try to get name for inactive partitions (vtrefny)
+- Skip tests for getting free regions on CentOS/RHEL (vpodzime)
+- Free the container holding the specs of free regions (vpodzime)
+- Open loop devices as O_RDONLY when getting flags (vpodzime)
+- Resolve maximum partition size when we know its start (vpodzime)
+- Use --id instead of --part-type when setting partition id (vpodzime)
+- Fix mdadm command for removing failed device from an array (vtrefny)
+- Skip bcache tests on CentOS/RHEL 7 (vpodzime)
+- Use six.assertRaisesRegex in the FS tests (vpodzime)
+- Use mkdtemp() instead of TemporaryDirectory() (vpodzime)
+- Fix installation without specifying --exec-prefix (vpodzime)
+- Add options to force mkfs.ext4/vfat to create a FS on the whole device (vpodzime)
+- Skip the test for device escrow on CentOS/RHEL (vpodzime)
+- Define DEVNULL on our own if not in subprocess (vpodzime)
+- Remove the patches from the spec file (vpodzime)
+- Sync the spec file with downstream (vpodzime)
+- Stop skipping zRAM stats tests (vtrefny)
+- Add more tests for zRAM stats (vtrefny)
+- Fix reading zRAM properties from sysfs (vtrefny)
+
 * Wed Apr 12 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.6-3
 - Do not try to parse 'raid_spec' for 'bd_md_activate' (vtrefny)
   Resolves: rhbz#1439111
