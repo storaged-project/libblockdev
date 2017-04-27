@@ -1147,22 +1147,18 @@ gchar* bd_md_get_md_uuid (const gchar *uuid, GError **error) {
  * Returns: device node of the @name MD RAID or %NULL in case of error
  */
 gchar* bd_md_node_from_name (const gchar *name, GError **error) {
-    gchar *symlink = NULL;
+    gchar *dev_path = NULL;
     gchar *ret = NULL;
     gchar *md_path = g_strdup_printf ("/dev/md/%s", name);
 
-    symlink = g_file_read_link (md_path, error);
-    if (!symlink) {
-        /* error is already populated */
-        g_free (md_path);
-        return NULL;
-    }
-
-    g_strstrip (symlink);
-    ret = g_path_get_basename (symlink);
-
-    g_free (symlink);
+    dev_path = bd_utils_resolve_device (md_path, error);
     g_free (md_path);
+    if (!dev_path)
+        /* error is already populated */
+        return NULL;
+
+    ret = g_path_get_basename (dev_path);
+    g_free (dev_path);
 
     return ret;
 }
@@ -1178,7 +1174,7 @@ gchar* bd_md_name_from_node (const gchar *node, GError **error) {
     glob_t glob_buf;
     gchar **path_p;
     gboolean found = FALSE;
-    gchar *symlink = NULL;
+    gchar *dev_path = NULL;
     gchar *name = NULL;
     gchar *node_name = NULL;
 
@@ -1192,10 +1188,12 @@ gchar* bd_md_name_from_node (const gchar *node, GError **error) {
         return NULL;
     }
     for (path_p = glob_buf.gl_pathv; *path_p && !found; path_p++) {
-        symlink = g_file_read_link (*path_p, error);
-        if (!symlink)
+        dev_path = bd_utils_resolve_device (*path_p, error);
+        if (!dev_path) {
+            g_clear_error (error);
             continue;
-        node_name = g_path_get_basename (symlink);
+        }
+        node_name = g_path_get_basename (dev_path);
         if (g_strcmp0 (node_name, node) == 0) {
             found = TRUE;
             name = g_path_get_basename (*path_p);
