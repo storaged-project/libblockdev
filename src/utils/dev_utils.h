@@ -22,6 +22,14 @@
 #ifndef BD_UTILS_DEV_UTILS
 #define BD_UTILS_DEV_UTILS
 
+GQuark bd_utils_dev_utils_error_quark (void);
+#define BD_UTILS_DEV_UTILS_ERROR bd_utils_dev_utils_error_quark ()
+
+typedef enum {
+    BD_UTILS_DEV_UTILS_ERROR_FAILED,
+} BDUtilsDevUtilsError;
+
 gchar* bd_utils_resolve_device (const gchar *dev_spec, GError **error);
+gchar** bd_utils_get_device_symlinks (const gchar *dev_spec, GError **error);
 
 #endif  /* BD_UTILS_DEV_UTILS */

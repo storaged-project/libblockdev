@@ -2,7 +2,7 @@ import unittest
 import re
 import os
 import overrides_hack
-from utils import fake_utils, create_sparse_tempfile, create_lio_device, delete_lio_device
+from utils import fake_utils, create_sparse_tempfile, create_lio_device, delete_lio_device, run_command
 
 from gi.repository import BlockDev, GLib
 if not BlockDev.is_initialized():
@@ -161,3 +161,84 @@ class UtilsDevUtilsTestCase(unittest.TestCase):
 
         # should resolve the symlink even without the "/dev" prefix
         self.assertEqual(BlockDev.utils_resolve_device(dev_link[5:]), dev)
+
+class UtilsDevUtilsTestCase(unittest.TestCase):
+    def test_resolve_device(self):
+        """Verify that resolving device spec works as expected"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.utils_resolve_device("no_such_device")
+
+        dev = "/dev/libblockdev-test-dev"
+        with open(dev, "w"):
+            pass
+        self.addCleanup(os.unlink, dev)
+
+        # full path, no symlink, should just return the same
+        self.assertEqual(BlockDev.utils_resolve_device(dev), dev)
+
+        # just the name of the device, should return the full path
+        self.assertEqual(BlockDev.utils_resolve_device(dev[5:]), dev)
+
+        dev_dir = "/dev/libblockdev-test-dir"
+        os.mkdir(dev_dir)
+        self.addCleanup(os.rmdir, dev_dir)
+
+        dev_link = dev_dir + "/test-dev-link"
+        os.symlink(src="../" + dev[5:], dst=dev_link)
+        self.addCleanup(os.unlink, dev_link)
+
+        # should resolve the symlink
+        self.assertEqual(BlockDev.utils_resolve_device(dev_link), dev)
+
+        # should resolve the symlink even without the "/dev" prefix
+        self.assertEqual(BlockDev.utils_resolve_device(dev_link[5:]), dev)
+
+
+class UtilsDevUtilsSymlinksTestCase(unittest.TestCase):
+    def setUp(self):
+        self.addCleanup(self._clean_up)
+        self.dev_file = create_sparse_tempfile("lvm_test", 1024**3)
+        try:
+            self.loop_dev = create_lio_device(self.dev_file)
+        except RuntimeError as e:
+            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
+
+    def _clean_up(self):
+        try:
+            delete_lio_device(self.loop_dev)
+        except RuntimeError:
+            # just move on, we can do no better here
+            pass
+        os.unlink(self.dev_file)
+
+
+    def test_get_device_symlinks(self):
+        """Verify that getting device symlinks works as expected"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.utils_get_device_symlinks("no_such_device")
+
+        symlinks = BlockDev.utils_get_device_symlinks(self.loop_dev)
+        # there should be at least 2 symlinks for something like "/dev/sda" (in /dev/disk/by-id/)
+        self.assertGreaterEqual(len(symlinks), 2)
+
+        symlinks = BlockDev.utils_get_device_symlinks(self.loop_dev[5:])
+        self.assertGreaterEqual(len(symlinks), 2)
+
+        # create an LV to get a device with more symlinks
+        ret, _out, _err = run_command ("pvcreate %s" % self.loop_dev)
+        self.assertEqual(ret, 0)
+        self.addCleanup(run_command, "pvremove %s" % self.loop_dev)
+
+        ret, _out, _err = run_command ("vgcreate utilsTestVG %s" % self.loop_dev)
+        self.assertEqual(ret, 0)
+        self.addCleanup(run_command, "vgremove -y utilsTestVG")
+
+        ret, _out, _err = run_command ("lvcreate -n utilsTestLV -L 12M utilsTestVG")
+        self.assertEqual(ret, 0)
+        self.addCleanup(run_command, "lvremove -y utilsTestVG/utilsTestLV")
+
+        symlinks = BlockDev.utils_get_device_symlinks("utilsTestVG/utilsTestLV")
+        # there should be at least 4 symlinks for an LV
+        self.assertGreaterEqual(len(symlinks), 4)
