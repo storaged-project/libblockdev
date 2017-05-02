@@ -797,6 +797,7 @@ gboolean bd_md_remove (const gchar *raid_spec, const gchar *device, gboolean fai
     guint argv_top = 2;
     gchar *mdadm_spec = NULL;
     gboolean ret = FALSE;
+    gchar *dev_path = NULL;
 
     mdadm_spec = get_mdadm_spec_from_input (raid_spec, error);
     if (!mdadm_spec)
@@ -805,22 +806,23 @@ gboolean bd_md_remove (const gchar *raid_spec, const gchar *device, gboolean fai
 
     argv[1] = mdadm_spec;
 
+    dev_path = bd_utils_resolve_device (device, error);
+    if (!dev_path) {
+        /* error is populated */
+        g_free (mdadm_spec);
+        return FALSE;
+    }
+
     if (fail) {
         argv[argv_top++] = "--fail";
-        if (g_str_has_prefix (device, "/dev/"))
-            argv[argv_top++] = (device + 5);
-        else
-            argv[argv_top++] = device;
+        argv[argv_top++] = dev_path;
     }
 
     argv[argv_top++] = "--remove";
-
-    if (g_str_has_prefix (device, "/dev/"))
-        argv[argv_top] = (device + 5);
-    else
-        argv[argv_top] = device;
+    argv[argv_top++] = dev_path;
 
     ret = bd_utils_exec_and_report_error (argv, extra, error);
+    g_free (dev_path);
     g_free (mdadm_spec);
 
     return ret;
