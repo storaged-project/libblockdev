@@ -322,10 +322,31 @@ gboolean bd_loop_teardown (const gchar *loop, GError **error) {
  * Returns: whether the autoclear flag is set on the @loop device or not (if %FALSE, @error may be set)
  */
 gboolean bd_loop_get_autoclear (const gchar *loop, GError **error) {
+    gchar *sys_path = NULL;
+    gboolean success = FALSE;
+    gchar *contents = NULL;
+    gboolean ret = FALSE;
     gchar *dev_loop = NULL;
     gint fd = -1;
     struct loop_info64 li64;
 
+    /* first try reading the value from /sys which seems to be safer than
+       potentially stepping on each other's toes with udev during the ioctl() */
+    if (g_str_has_prefix (loop, "/dev/"))
+        sys_path = g_strdup_printf ("/sys/class/block/%s/loop/autoclear", loop + 5);
+    else
+        sys_path = g_strdup_printf ("/sys/class/block/%s/loop/autoclear", loop);
+
+    success = g_file_get_contents (sys_path, &contents, NULL, error);
+    g_free (sys_path);
+    if (success) {
+        g_strstrip (contents);
+        ret = g_strcmp0 (contents, "1") == 0;
+        g_free (contents);
+        return ret;
+    }
+
+    /* else try using the ioctl() */
     if (!g_str_has_prefix (loop, "/dev/"))
         dev_loop = g_strdup_printf ("/dev/%s", loop);
 
