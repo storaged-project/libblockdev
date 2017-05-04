@@ -277,7 +277,6 @@ with the libblockdev-kbd plugin/library.
 %package loop
 Summary:     The loop plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
-Requires: util-linux
 
 %description loop
 The libblockdev library plugin (and in the same time a standalone library)

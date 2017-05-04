@@ -1,8 +1,9 @@
 import os
 import unittest
+import time
 import overrides_hack
 
-from utils import create_sparse_tempfile, fake_utils, fake_path
+from utils import create_sparse_tempfile
 from gi.repository import BlockDev, GLib
 if not BlockDev.is_initialized():
     BlockDev.init(None, None)
@@ -30,6 +31,12 @@ class LoopTestSetupBasic(LoopTestCase):
 
         succ = BlockDev.loop_teardown(self.loop)
         self.assertTrue(succ)
+
+        # give kernel+udev time to update stuff under /sys and try to get the
+        # backing file -- there should be none after the teardown
+        time.sleep(1)
+        b_file = BlockDev.loop_get_backing_file(self.loop)
+        self.assertIsNone(b_file)
 
 class LoopTestSetupOffset(LoopTestCase):
     def testLoop_setup_with_offset(self):
@@ -132,44 +139,3 @@ class LoopTestGetSetAutoclear(LoopTestCase):
 
         self.assertTrue(BlockDev.loop_set_autoclear(loop, False))
         self.assertFalse(BlockDev.loop_get_autoclear(loop))
-
-
-class LoopUnloadTest(unittest.TestCase):
-    def setUp(self):
-        # make sure the library is initialized with all plugins loaded for other
-        # tests
-        self.addCleanup(BlockDev.reinit, None, True, None)
-
-    def test_check_low_version(self):
-        """Verify that checking the minimum losetup version works as expected"""
-
-        # unload all plugins first
-        self.assertTrue(BlockDev.reinit([], True, None))
-
-        with fake_utils("tests/loop_low_version/"):
-            # too low version of losetup available, the LOOP plugin should fail to load
-            with self.assertRaises(GLib.GError):
-                BlockDev.reinit(None, True, None)
-
-            self.assertNotIn("loop", BlockDev.get_available_plugin_names())
-
-        # load the plugins back
-        self.assertTrue(BlockDev.reinit(None, True, None))
-        self.assertIn("loop", BlockDev.get_available_plugin_names())
-
-    def test_check_no_loop(self):
-        """Verify that checking losetup tool availability works as expected"""
-
-        # unload all plugins first
-        self.assertTrue(BlockDev.reinit([], True, None))
-
-        with fake_path():
-            # no losetup available, the LOOP plugin should fail to load
-            with self.assertRaises(GLib.GError):
-                BlockDev.reinit(None, True, None)
-
-            self.assertNotIn("loop", BlockDev.get_available_plugin_names())
-
-        # load the plugins back
-        self.assertTrue(BlockDev.reinit(None, True, None))
-        self.assertIn("loop", BlockDev.get_available_plugin_names())

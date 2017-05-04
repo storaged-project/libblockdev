@@ -56,14 +56,8 @@ GQuark bd_loop_error_quark (void)
  *
  */
 gboolean bd_loop_check_deps () {
-    GError *error = NULL;
-    gboolean ret = bd_utils_check_util_version ("losetup", LOSETUP_MIN_VERSION, NULL, "losetup from util-linux\\s+([\\d\\.]+)", &error);
-
-    if (!ret && error) {
-        g_warning("Cannot load the loop plugin: %s" , error->message);
-        g_clear_error (&error);
-    }
-    return ret;
+    /* nothing to check here */
+    return TRUE;
 }
 
 /**
@@ -296,22 +290,36 @@ gboolean bd_loop_setup_from_fd (gint fd, guint64 offset, guint64 size, gboolean 
  * Returns: whether the @loop device was successfully torn down or not
  */
 gboolean bd_loop_teardown (const gchar *loop, GError **error) {
-    gboolean success = FALSE;
     gchar *dev_loop = NULL;
+    gint loop_fd = -1;
+    guint64 progress_id = 0;
 
-    const gchar *args[4] = {"losetup", "-d", NULL, NULL};
+    progress_id = bd_utils_report_started ("Started tearing down loop device");
 
-    if (g_str_has_prefix (loop, "/dev/"))
-        args[2] = loop;
-    else {
+    if (!g_str_has_prefix (loop, "/dev/"))
         dev_loop = g_strdup_printf ("/dev/%s", loop);
-        args[2] = dev_loop;
+
+    loop_fd = open (dev_loop ? dev_loop : loop, O_RDONLY);
+    g_free (dev_loop);
+    if (loop_fd == -1) {
+        g_set_error (error, BD_LOOP_ERROR, BD_LOOP_ERROR_FAIL,
+                     "Failed to open the %s device: %m", loop);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
     }
 
-    success = bd_utils_exec_and_report_error (args, NULL, error);
-    g_free (dev_loop);
+    if (ioctl (loop_fd, LOOP_CLR_FD) < 0) {
+        g_set_error (error, BD_LOOP_ERROR, BD_LOOP_ERROR_FAIL,
+                     "Failed to detach the backing file from the %s device: %m", loop);
+        close (loop_fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
 
-    return success;
+    close (loop_fd);
+    bd_utils_report_finished (progress_id, "Completed");
+
+    return TRUE;
 }
 
 /**
