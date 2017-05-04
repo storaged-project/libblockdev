@@ -354,7 +354,8 @@ gboolean bd_loop_get_autoclear (const gchar *loop, GError **error) {
         return ret;
     }
 
-    /* else try using the ioctl() */
+    /* else try using the ioctl() (and ignore all previous errors) */
+    g_clear_error (error);
     if (!g_str_has_prefix (loop, "/dev/"))
         dev_loop = g_strdup_printf ("/dev/%s", loop);
 
