@@ -130,6 +130,8 @@ bd_extra_arg_new
 bd_extra_arg_copy
 bd_extra_arg_free
 bd_extra_arg_get_type
+bd_utils_resolve_device
+bd_utils_get_device_symlinks
 EXBIBYTE
 EiB
 GIBIBYTE

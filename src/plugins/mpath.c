@@ -295,7 +295,7 @@ static gchar** get_map_deps (const gchar *map_name, guint64 *n_deps, GError **er
 gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error) {
     struct dm_task *task_names = NULL;
 	struct dm_names *names = NULL;
-    gchar *symlink = NULL;
+    gchar *dev_path = NULL;
     guint64 next = 0;
     gchar **deps = NULL;
     gchar **dev_name = NULL;
@@ -323,19 +323,19 @@ gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error) {
     if (!names || !names->dev)
         return FALSE;
 
-    /* in case the device is symlink, we need to resolve it because maps's deps
-       are devices and not their symlinks */
+    /* in case the device is dev_path, we need to resolve it because maps's deps
+       are devices and not their dev_paths */
     if (g_str_has_prefix (device, "/dev/mapper/") || g_str_has_prefix (device, "/dev/md/")) {
-        symlink = g_file_read_link (device, error);
-        if (!symlink) {
+        dev_path = bd_utils_resolve_device (device, error);
+        if (!dev_path) {
             /* the device doesn't exist and thus is not an mpath member */
             g_clear_error (error);
             dm_task_destroy (task_names);
             return FALSE;
         }
 
-        /* the symlink starts with "../" */
-        device = symlink + 3;
+        /* the dev_path starts with "../" */
+        device = dev_path + 3;
     }
 
     if (g_str_has_prefix (device, "/dev/"))
@@ -351,7 +351,7 @@ gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error) {
             deps = get_map_deps (names->name, NULL, error);
             if (*error) {
                 g_prefix_error (error, "Failed to determine deps for '%s'", names->name);
-                g_free (symlink);
+                g_free (dev_path);
                 dm_task_destroy (task_names);
                 return FALSE;
             }
@@ -360,13 +360,13 @@ gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error) {
             g_strfreev (deps);
         } else if (*error) {
             g_prefix_error (error, "Failed to determine map's target for '%s'", names->name);
-            g_free (symlink);
+            g_free (dev_path);
             dm_task_destroy (task_names);
             return FALSE;
         }
     } while (!ret && next);
 
-    g_free (symlink);
+    g_free (dev_path);
     dm_task_destroy (task_names);
     return ret;
 }

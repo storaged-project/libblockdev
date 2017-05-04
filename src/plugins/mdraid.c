@@ -797,6 +797,7 @@ gboolean bd_md_remove (const gchar *raid_spec, const gchar *device, gboolean fai
     guint argv_top = 2;
     gchar *mdadm_spec = NULL;
     gboolean ret = FALSE;
+    gchar *dev_path = NULL;
 
     mdadm_spec = get_mdadm_spec_from_input (raid_spec, error);
     if (!mdadm_spec)
@@ -805,22 +806,23 @@ gboolean bd_md_remove (const gchar *raid_spec, const gchar *device, gboolean fai
 
     argv[1] = mdadm_spec;
 
+    dev_path = bd_utils_resolve_device (device, error);
+    if (!dev_path) {
+        /* error is populated */
+        g_free (mdadm_spec);
+        return FALSE;
+    }
+
     if (fail) {
         argv[argv_top++] = "--fail";
-        if (g_str_has_prefix (device, "/dev/"))
-            argv[argv_top++] = (device + 5);
-        else
-            argv[argv_top++] = device;
+        argv[argv_top++] = dev_path;
     }
 
     argv[argv_top++] = "--remove";
-
-    if (g_str_has_prefix (device, "/dev/"))
-        argv[argv_top] = (device + 5);
-    else
-        argv[argv_top] = device;
+    argv[argv_top++] = dev_path;
 
     ret = bd_utils_exec_and_report_error (argv, extra, error);
+    g_free (dev_path);
     g_free (mdadm_spec);
 
     return ret;
@@ -1147,22 +1149,18 @@ gchar* bd_md_get_md_uuid (const gchar *uuid, GError **error) {
  * Returns: device node of the @name MD RAID or %NULL in case of error
  */
 gchar* bd_md_node_from_name (const gchar *name, GError **error) {
-    gchar *symlink = NULL;
+    gchar *dev_path = NULL;
     gchar *ret = NULL;
     gchar *md_path = g_strdup_printf ("/dev/md/%s", name);
 
-    symlink = g_file_read_link (md_path, error);
-    if (!symlink) {
-        /* error is already populated */
-        g_free (md_path);
-        return NULL;
-    }
-
-    g_strstrip (symlink);
-    ret = g_path_get_basename (symlink);
-
-    g_free (symlink);
+    dev_path = bd_utils_resolve_device (md_path, error);
     g_free (md_path);
+    if (!dev_path)
+        /* error is already populated */
+        return NULL;
+
+    ret = g_path_get_basename (dev_path);
+    g_free (dev_path);
 
     return ret;
 }
@@ -1178,7 +1176,7 @@ gchar* bd_md_name_from_node (const gchar *node, GError **error) {
     glob_t glob_buf;
     gchar **path_p;
     gboolean found = FALSE;
-    gchar *symlink = NULL;
+    gchar *dev_path = NULL;
     gchar *name = NULL;
     gchar *node_name = NULL;
 
@@ -1192,10 +1190,12 @@ gchar* bd_md_name_from_node (const gchar *node, GError **error) {
         return NULL;
     }
     for (path_p = glob_buf.gl_pathv; *path_p && !found; path_p++) {
-        symlink = g_file_read_link (*path_p, error);
-        if (!symlink)
+        dev_path = bd_utils_resolve_device (*path_p, error);
+        if (!dev_path) {
+            g_clear_error (error);
             continue;
-        node_name = g_path_get_basename (symlink);
+        }
+        node_name = g_path_get_basename (dev_path);
         if (g_strcmp0 (node_name, node) == 0) {
             found = TRUE;
             name = g_path_get_basename (*path_p);

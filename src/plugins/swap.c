@@ -246,7 +246,7 @@ gboolean bd_swap_swapoff (const gchar *device, GError **error) {
 gboolean bd_swap_swapstatus (const gchar *device, GError **error) {
     gchar *file_content;
     gchar *real_device = NULL;
-    gchar *symlink = NULL;
+    gchar *dev_path = NULL;
     gsize length;
     gchar *next_line;
     gboolean success;
@@ -258,21 +258,21 @@ gboolean bd_swap_swapstatus (const gchar *device, GError **error) {
     }
 
     /* get the real device node for device-mapper devices since the ones
-       with meaningful names are just symlinks */
+       with meaningful names are just dev_paths */
     if (g_str_has_prefix (device, "/dev/mapper/") || g_str_has_prefix (device, "/dev/md/")) {
-        symlink = g_file_read_link (device, error);
-        if (!symlink) {
+        dev_path = bd_utils_resolve_device (device, error);
+        if (!dev_path) {
             /* the device doesn't exist and thus is not an active swap */
             g_clear_error (error);
             return FALSE;
         }
 
-        /* the symlink starts with "../" */
-        real_device = g_strdup_printf ("/dev/%s", symlink + 3);
+        /* the dev_path starts with "../" */
+        real_device = g_strdup_printf ("/dev/%s", dev_path + 3);
     }
 
     if (g_str_has_prefix (file_content, real_device ? real_device : device)) {
-        g_free (symlink);
+        g_free (dev_path);
         g_free (real_device);
         g_free (file_content);
         return TRUE;
@@ -281,7 +281,7 @@ gboolean bd_swap_swapstatus (const gchar *device, GError **error) {
     next_line = (strchr (file_content, '\n') + 1);
     while (next_line && ((gsize)(next_line - file_content) < length)) {
         if (g_str_has_prefix (next_line, real_device ? real_device : device)) {
-            g_free (symlink);
+            g_free (dev_path);
             g_free (real_device);
             g_free (file_content);
             return TRUE;
@@ -290,7 +290,7 @@ gboolean bd_swap_swapstatus (const gchar *device, GError **error) {
         next_line = (strchr (next_line, '\n') + 1);
     }
 
-    g_free (symlink);
+    g_free (dev_path);
     g_free (real_device);
     g_free (file_content);
     return FALSE;

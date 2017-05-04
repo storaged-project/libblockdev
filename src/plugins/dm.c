@@ -188,22 +188,18 @@ gchar* bd_dm_name_from_node (const gchar *dm_node, GError **error) {
  * the error in such cases)
  */
 gchar* bd_dm_node_from_name (const gchar *map_name, GError **error) {
-    gchar *symlink = NULL;
+    gchar *dev_path = NULL;
     gchar *ret = NULL;
     gchar *dev_mapper_path = g_strdup_printf ("/dev/mapper/%s", map_name);
 
-    symlink = g_file_read_link (dev_mapper_path, error);
-    if (!symlink) {
-        /* error is already populated */
-        g_free (dev_mapper_path);
-        return NULL;
-    }
-
-    g_strstrip (symlink);
-    ret = g_path_get_basename (symlink);
-
-    g_free (symlink);
+    dev_path = bd_utils_resolve_device (dev_mapper_path, error);
     g_free (dev_mapper_path);
+    if (!dev_path)
+        /* error is already populated */
+        return NULL;
+
+    ret = g_path_get_basename (dev_path);
+    g_free (dev_path);
 
     return ret;
 }
