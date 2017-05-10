@@ -153,7 +153,7 @@ class UtilsDevUtilsTestCase(unittest.TestCase):
         self.addCleanup(os.rmdir, dev_dir)
 
         dev_link = dev_dir + "/test-dev-link"
-        os.symlink(src="../" + dev[5:], dst=dev_link)
+        os.symlink("../" + dev[5:], dev_link)
         self.addCleanup(os.unlink, dev_link)
 
         # should resolve the symlink
