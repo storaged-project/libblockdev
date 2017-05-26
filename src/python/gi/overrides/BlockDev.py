@@ -649,12 +649,13 @@ def plugin_specs_from_names(plugin_names):
 __all__.append("plugin_specs_from_names")
 
 
-XRule = namedtuple("XRule", ["orig_exc", "regexp", "new_exc"])
+XRule = namedtuple("XRule", ["orig_exc", "regexp", "code", "new_exc"])
 # XXX: how to document namedtuple fields?
 """
 :field orig_exc: exception class to be transformed
 :field regexp: regexp that needs to match exception msg for this rule to be
                applicable or None if no match is required
+:field code: code of the exception, if defined (e.g. for GLib.Error)
 :field new_exc: exception class to transform the :field:`orig_exc` into
 
 """
@@ -750,7 +751,12 @@ class ErrorProxy(object):
 
                 e_type = type(e)
                 if e_type in self._xrules:
-                    if self._xrules[e_type].regexp and self._xrules[e_type].regexp.match(msg):
+                    matches = True
+                    if self._xrules[e_type].code and self._xrules[e_type].code != getattr(e, "code"):
+                        matches = False
+                    if matches and self._xrules[e_type].regexp and not self._xrules[e_type].regexp.match(msg):
+                        matches = False
+                    if matches:
                         raise self._xrules[e_type].new_exc(msg)
 
                 # try to find exact type match
@@ -812,7 +818,9 @@ __all__.append("PartError")
 
 class FSError(BlockDevError):
     pass
-__all__.append("FSError")
+class FSNoFSError(FSError):
+    pass
+__all__.extend(("FSError", "FSNoFSError"))
 
 class S390Error(BlockDevError):
     pass
@@ -826,7 +834,9 @@ class BlockDevNotImplementedError(NotImplementedError, BlockDevError):
     pass
 __all__.append("BlockDevNotImplementedError")
 
-not_implemented_rule = XRule(GLib.Error, re.compile(r".*The function '.*' called, but not implemented!"), BlockDevNotImplementedError)
+not_implemented_rule = XRule(GLib.Error, re.compile(r".*The function '.*' called, but not implemented!"), None, BlockDevNotImplementedError)
+
+fs_nofs_rule = XRule(GLib.Error, None, 3, FSNoFSError)
 
 btrfs = ErrorProxy("btrfs", BlockDev, [(GLib.Error, BtrfsError)], [not_implemented_rule])
 __all__.append("btrfs")
@@ -858,7 +868,7 @@ __all__.append("kbd")
 part = ErrorProxy("part", BlockDev, [(GLib.Error, PartError)], [not_implemented_rule])
 __all__.append("part")
 
-fs = ErrorProxy("fs", BlockDev, [(GLib.Error, FSError)], [not_implemented_rule])
+fs = ErrorProxy("fs", BlockDev, [(GLib.Error, FSError)], [not_implemented_rule, fs_nofs_rule])
 __all__.append("fs")
 
 s390 = ErrorProxy("s390", BlockDev, [(GLib.Error, S390Error)], [not_implemented_rule])
