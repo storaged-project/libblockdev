@@ -25,7 +25,7 @@ filesystems
 ------------
 
 :supported technologies:
-   * DONE: ext4, xfs, vfat
+   * DONE: ext2, ext3, ext4, xfs, vfat
 
 :functions:
    * make_FSTYPE

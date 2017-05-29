@@ -261,12 +261,40 @@ def fs_mount(device=None, mountpoint=None, fstype=None, options=None, extra=None
     return _fs_mount(device, mountpoint, fstype, options, extra)
 __all__.append("fs_mount")
 
+_fs_ext2_mkfs = BlockDev.fs_ext2_mkfs
+@override(BlockDev.fs_ext2_mkfs)
+def fs_ext2_mkfs(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_ext2_mkfs(device, extra)
+__all__.append("fs_ext2_mkfs")
+
+_fs_ext3_mkfs = BlockDev.fs_ext3_mkfs
+@override(BlockDev.fs_ext3_mkfs)
+def fs_ext3_mkfs(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_ext3_mkfs(device, extra)
+__all__.append("fs_ext3_mkfs")
+
 _fs_ext4_mkfs = BlockDev.fs_ext4_mkfs
 @override(BlockDev.fs_ext4_mkfs)
 def fs_ext4_mkfs(device, extra=None, **kwargs):
     extra = _get_extra(extra, kwargs)
     return _fs_ext4_mkfs(device, extra)
 __all__.append("fs_ext4_mkfs")
+
+_fs_ext2_check = BlockDev.fs_ext2_check
+@override(BlockDev.fs_ext2_check)
+def fs_ext2_check(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_ext2_check(device, extra)
+__all__.append("fs_ext2_check")
+
+_fs_ext3_check = BlockDev.fs_ext3_check
+@override(BlockDev.fs_ext3_check)
+def fs_ext3_check(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_ext3_check(device, extra)
+__all__.append("fs_ext3_check")
 
 _fs_ext4_check = BlockDev.fs_ext4_check
 @override(BlockDev.fs_ext4_check)
@@ -275,12 +303,40 @@ def fs_ext4_check(device, extra=None, **kwargs):
     return _fs_ext4_check(device, extra)
 __all__.append("fs_ext4_check")
 
+_fs_ext2_repair = BlockDev.fs_ext2_repair
+@override(BlockDev.fs_ext2_repair)
+def fs_ext2_repair(device, unsafe=False, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_ext2_repair(device, unsafe, extra)
+__all__.append("fs_ext2_repair")
+
+_fs_ext3_repair = BlockDev.fs_ext3_repair
+@override(BlockDev.fs_ext3_repair)
+def fs_ext3_repair(device, unsafe=False, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_ext3_repair(device, unsafe, extra)
+__all__.append("fs_ext3_repair")
+
 _fs_ext4_repair = BlockDev.fs_ext4_repair
 @override(BlockDev.fs_ext4_repair)
 def fs_ext4_repair(device, unsafe=False, extra=None, **kwargs):
     extra = _get_extra(extra, kwargs)
     return _fs_ext4_repair(device, unsafe, extra)
 __all__.append("fs_ext4_repair")
+
+_fs_ext2_resize = BlockDev.fs_ext2_resize
+@override(BlockDev.fs_ext2_resize)
+def fs_ext2_resize(device, size, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_ext2_resize(device, size, extra)
+__all__.append("fs_ext2_resize")
+
+_fs_ext3_resize = BlockDev.fs_ext3_resize
+@override(BlockDev.fs_ext3_resize)
+def fs_ext3_resize(device, size, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_ext3_resize(device, size, extra)
+__all__.append("fs_ext3_resize")
 
 _fs_ext4_resize = BlockDev.fs_ext4_resize
 @override(BlockDev.fs_ext4_resize)

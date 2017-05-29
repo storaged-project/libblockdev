@@ -163,14 +163,12 @@ class TestClean(FSTestCase):
         self.assertEqual(fs_type, b"")
 
 
-class Ext4TestMkfs(FSTestCase):
-    def test_ext4_mkfs(self):
-        """Verify that it is possible to create a new ext4 file system"""
-
+class ExtTestMkfs(FSTestCase):
+    def _test_ext_mkfs(self, mkfs_function):
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_ext4_mkfs("/non/existing/device", None)
+            mkfs_function("/non/existing/device", None)
 
-        succ = BlockDev.fs_ext4_mkfs(self.loop_dev, None)
+        succ = mkfs_function(self.loop_dev, None)
         self.assertTrue(succ)
 
         # just try if we can mount the file system
@@ -179,91 +177,153 @@ class Ext4TestMkfs(FSTestCase):
 
         BlockDev.fs_wipe(self.loop_dev, True)
 
-class Ext4MkfsWithLabel(FSTestCase):
-    def test_ext4_mkfs_with_label(self):
-        """Verify that it is possible to create an ext4 file system with label"""
+    def test_ext2_mkfs(self):
+        """Verify that it is possible to create a new ext2 file system"""
+        self._test_ext_mkfs(mkfs_function=BlockDev.fs_ext2_mkfs)
 
+    def test_ext3_mkfs(self):
+        """Verify that it is possible to create a new ext3 file system"""
+        self._test_ext_mkfs(mkfs_function=BlockDev.fs_ext3_mkfs)
+
+    def test_ext4_mkfs(self):
+        """Verify that it is possible to create a new ext4 file system"""
+        self._test_ext_mkfs(mkfs_function=BlockDev.fs_ext4_mkfs)
+
+class ExtMkfsWithLabel(FSTestCase):
+    def _test_ext_mkfs_with_label(self, mkfs_function, info_function):
         ea = BlockDev.ExtraArg.new("-L", "TEST_LABEL")
-        succ = BlockDev.fs_ext4_mkfs(self.loop_dev, [ea])
+        succ = mkfs_function(self.loop_dev, [ea])
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_ext4_get_info(self.loop_dev)
+        fi = info_function(self.loop_dev)
         self.assertTrue(fi)
         self.assertEqual(fi.label, "TEST_LABEL")
 
-class Ext4TestWipe(FSTestCase):
-    def test_ext4_wipe(self):
-        """Verify that it is possible to wipe an ext4 file system"""
+    def test_ext2_mkfs_with_label(self):
+        """Verify that it is possible to create an ext2 file system with label"""
+        self._test_ext_mkfs_with_label(mkfs_function=BlockDev.fs_ext2_mkfs,
+                                       info_function=BlockDev.fs_ext2_get_info)
 
-        succ = BlockDev.fs_ext4_mkfs(self.loop_dev, None)
+    def test_ext3_mkfs_with_label(self):
+        """Verify that it is possible to create an ext3 file system with label"""
+        self._test_ext_mkfs_with_label(mkfs_function=BlockDev.fs_ext3_mkfs,
+                                       info_function=BlockDev.fs_ext3_get_info)
+
+    def test_ext4_mkfs_with_label(self):
+        """Verify that it is possible to create an ext4 file system with label"""
+        self._test_ext_mkfs_with_label(mkfs_function=BlockDev.fs_ext4_mkfs,
+                                       info_function=BlockDev.fs_ext4_get_info)
+
+class ExtTestWipe(FSTestCase):
+    def _test_ext_wipe(self, mkfs_function, wipe_function):
+        succ = mkfs_function(self.loop_dev, None)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_ext4_wipe(self.loop_dev)
+        succ = wipe_function(self.loop_dev)
         self.assertTrue(succ)
 
         # already wiped, should fail this time
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_ext4_wipe(self.loop_dev)
+            wipe_function(self.loop_dev)
 
         os.system("pvcreate %s >/dev/null" % self.loop_dev)
 
         # LVM PV signature, not an ext4 file system
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_ext4_wipe(self.loop_dev)
+            wipe_function(self.loop_dev)
 
         BlockDev.fs_wipe(self.loop_dev, True)
 
-        os.system("mkfs.ext2 -F %s &>/dev/null" % self.loop_dev)
+        os.system("mkfs.vfat %s &>/dev/null" % self.loop_dev)
 
-        # ext2, not an ext4 file system
+        # vfat, not an ext4 file system
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_ext4_wipe(self.loop_dev)
+            wipe_function(self.loop_dev)
 
         BlockDev.fs_wipe(self.loop_dev, True)
 
-class Ext4TestCheck(FSTestCase):
-    def test_ext4_check(self):
-        """Verify that it is possible to check an ext4 file system"""
+    def test_ext2_wipe(self):
+        """Verify that it is possible to wipe an ext2 file system"""
+        self._test_ext_wipe(mkfs_function=BlockDev.fs_ext2_mkfs,
+                            wipe_function=BlockDev.fs_ext2_wipe)
 
-        succ = BlockDev.fs_ext4_mkfs(self.loop_dev, None)
+    def test_ext3_wipe(self):
+        """Verify that it is possible to wipe an ext3 file system"""
+        self._test_ext_wipe(mkfs_function=BlockDev.fs_ext3_mkfs,
+                            wipe_function=BlockDev.fs_ext3_wipe)
+
+    def test_ext4_wipe(self):
+        """Verify that it is possible to wipe an ext4 file system"""
+        self._test_ext_wipe(mkfs_function=BlockDev.fs_ext4_mkfs,
+                            wipe_function=BlockDev.fs_ext4_wipe)
+
+class ExtTestCheck(FSTestCase):
+    def _test_ext_check(self, mkfs_function, check_function):
+        succ = mkfs_function(self.loop_dev, None)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_ext4_check(self.loop_dev, None)
+        succ = check_function(self.loop_dev, None)
         self.assertTrue(succ)
 
         # mounted, but can be checked
         with mounted(self.loop_dev, self.mount_dir):
-            succ = BlockDev.fs_ext4_check(self.loop_dev, None)
+            succ = check_function(self.loop_dev, None)
             self.assertTrue(succ)
 
-        succ = BlockDev.fs_ext4_check(self.loop_dev, None)
+        succ = check_function(self.loop_dev, None)
         self.assertTrue(succ)
 
-class Ext4TestRepair(FSTestCase):
-    def test_ext4_repair(self):
-        """Verify that it is possible to repair an ext4 file system"""
+    def test_ext2_check(self):
+        """Verify that it is possible to check an ext2 file system"""
+        self._test_ext_check(mkfs_function=BlockDev.fs_ext2_mkfs,
+                             check_function=BlockDev.fs_ext2_check)
 
-        succ = BlockDev.fs_ext4_mkfs(self.loop_dev, None)
+    def test_ext3_check(self):
+        """Verify that it is possible to check an ext3 file system"""
+        self._test_ext_check(mkfs_function=BlockDev.fs_ext3_mkfs,
+                             check_function=BlockDev.fs_ext3_check)
+
+    def test_ext4_check(self):
+        """Verify that it is possible to check an ext4 file system"""
+        self._test_ext_check(mkfs_function=BlockDev.fs_ext4_mkfs,
+                             check_function=BlockDev.fs_ext4_check)
+
+class ExtTestRepair(FSTestCase):
+    def _test_ext_repair(self, mkfs_function, repair_function):
+        succ = mkfs_function(self.loop_dev, None)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_ext4_repair(self.loop_dev, False, None)
+        succ = repair_function(self.loop_dev, False, None)
         self.assertTrue(succ)
 
         # unsafe operations should work here too
-        succ = BlockDev.fs_ext4_repair(self.loop_dev, True, None)
+        succ = repair_function(self.loop_dev, True, None)
         self.assertTrue(succ)
 
         with mounted(self.loop_dev, self.mount_dir):
             with self.assertRaises(GLib.GError):
-                BlockDev.fs_ext4_repair(self.loop_dev, False, None)
+                repair_function(self.loop_dev, False, None)
 
-        succ = BlockDev.fs_ext4_repair(self.loop_dev, False, None)
+        succ = repair_function(self.loop_dev, False, None)
         self.assertTrue(succ)
 
-class Ext4GetInfo(FSTestCase):
-    def test_ext4_get_info(self):
-        """Verify that it is possible to get info about an ext4 file system"""
+    def test_ext2_repair(self):
+        """Verify that it is possible to repair an ext2 file system"""
+        self._test_ext_repair(mkfs_function=BlockDev.fs_ext2_mkfs,
+                              repair_function=BlockDev.fs_ext2_repair)
 
+    def test_ext3_repair(self):
+        """Verify that it is possible to repair an ext3 file system"""
+        self._test_ext_repair(mkfs_function=BlockDev.fs_ext3_mkfs,
+                              repair_function=BlockDev.fs_ext3_repair)
+
+    def test_ext4_repair(self):
+        """Verify that it is possible to repair an ext4 file system"""
+        self._test_ext_repair(mkfs_function=BlockDev.fs_ext4_mkfs,
+                              repair_function=BlockDev.fs_ext4_repair)
+
+class ExtGetInfo(FSTestCase):
+    def _test_ext_get_info(self, mkfs_function, info_function):
         succ = BlockDev.fs_ext4_mkfs(self.loop_dev, None)
         self.assertTrue(succ)
 
@@ -289,60 +349,89 @@ class Ext4GetInfo(FSTestCase):
             self.assertTrue(fi.uuid)
             self.assertTrue(fi.state, "clean")
 
-class Ext4SetLabel(FSTestCase):
-    def test_ext4_set_label(self):
-        """Verify that it is possible to set label of an ext4 file system"""
+    def test_ext2_get_info(self):
+        """Verify that it is possible to get info about an ext2 file system"""
+        self._test_ext_get_info(mkfs_function=BlockDev.fs_ext2_mkfs,
+                                info_function=BlockDev.fs_ext2_get_info)
 
-        succ = BlockDev.fs_ext4_mkfs(self.loop_dev, None)
+    def test_ext3_get_info(self):
+        """Verify that it is possible to get info about an ext3 file system"""
+        self._test_ext_get_info(mkfs_function=BlockDev.fs_ext3_mkfs,
+                                info_function=BlockDev.fs_ext3_get_info)
+
+    def test_ext4_get_info(self):
+        """Verify that it is possible to get info about an ext4 file system"""
+        self._test_ext_get_info(mkfs_function=BlockDev.fs_ext4_mkfs,
+                                info_function=BlockDev.fs_ext4_get_info)
+
+class ExtSetLabel(FSTestCase):
+    def _test_ext_set_label(self, mkfs_function, info_function, label_function):
+        succ = mkfs_function(self.loop_dev, None)
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_ext4_get_info(self.loop_dev)
+        fi = info_function(self.loop_dev)
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
 
-        succ = BlockDev.fs_ext4_set_label(self.loop_dev, "TEST_LABEL")
+        succ = label_function(self.loop_dev, "TEST_LABEL")
         self.assertTrue(succ)
-        fi = BlockDev.fs_ext4_get_info(self.loop_dev)
+        fi = info_function(self.loop_dev)
         self.assertTrue(fi)
         self.assertEqual(fi.label, "TEST_LABEL")
 
-        succ = BlockDev.fs_ext4_set_label(self.loop_dev, "TEST_LABEL2")
+        succ = label_function(self.loop_dev, "TEST_LABEL2")
         self.assertTrue(succ)
-        fi = BlockDev.fs_ext4_get_info(self.loop_dev)
+        fi = info_function(self.loop_dev)
         self.assertTrue(fi)
         self.assertEqual(fi.label, "TEST_LABEL2")
 
-        succ = BlockDev.fs_ext4_set_label(self.loop_dev, "")
+        succ = label_function(self.loop_dev, "")
         self.assertTrue(succ)
-        fi = BlockDev.fs_ext4_get_info(self.loop_dev)
+        fi = info_function(self.loop_dev)
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
 
-class Ext4Resize(FSTestCase):
-    def test_ext4_resize(self):
-        """Verify that it is possible to resize an ext4 file system"""
+    def test_ext2_set_label(self):
+        """Verify that it is possible to set label of an ext2 file system"""
+        self._test_ext_set_label(mkfs_function=BlockDev.fs_ext2_mkfs,
+                                 info_function=BlockDev.fs_ext2_get_info,
+                                 label_function=BlockDev.fs_ext2_set_label)
 
-        succ = BlockDev.fs_ext4_mkfs(self.loop_dev, None)
+    def test_ext3_set_label(self):
+        """Verify that it is possible to set label of an ext3 file system"""
+        self._test_ext_set_label(mkfs_function=BlockDev.fs_ext3_mkfs,
+                                 info_function=BlockDev.fs_ext3_get_info,
+                                 label_function=BlockDev.fs_ext3_set_label)
+
+    def test_ext4_set_label(self):
+        """Verify that it is possible to set label of an ext4 file system"""
+        self._test_ext_set_label(mkfs_function=BlockDev.fs_ext4_mkfs,
+                                 info_function=BlockDev.fs_ext4_get_info,
+                                 label_function=BlockDev.fs_ext4_set_label)
+
+class ExtResize(FSTestCase):
+    def _test_ext_resize(self, mkfs_function, info_function, resize_function):
+        succ = mkfs_function(self.loop_dev, None)
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_ext4_get_info(self.loop_dev)
+        fi = info_function(self.loop_dev)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
         self.assertEqual(fi.block_count, 100 * 1024**2 / 1024)
         # at least 90 % should be available, so it should be reported
         self.assertGreater(fi.free_blocks, 0.90 * 100 * 1024**2 / 1024)
 
-        succ = BlockDev.fs_ext4_resize(self.loop_dev, 50 * 1024**2, None)
+        succ = resize_function(self.loop_dev, 50 * 1024**2, None)
         self.assertTrue(succ)
-        fi = BlockDev.fs_ext4_get_info(self.loop_dev)
+        fi = info_function(self.loop_dev)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
         self.assertEqual(fi.block_count, 50 * 1024**2 / 1024)
 
         # resize back
-        succ = BlockDev.fs_ext4_resize(self.loop_dev, 100 * 1024**2, None)
+        succ = resize_function(self.loop_dev, 100 * 1024**2, None)
         self.assertTrue(succ)
-        fi = BlockDev.fs_ext4_get_info(self.loop_dev)
+        fi = info_function(self.loop_dev)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
         self.assertEqual(fi.block_count, 100 * 1024**2 / 1024)
@@ -350,22 +439,40 @@ class Ext4Resize(FSTestCase):
         self.assertGreater(fi.free_blocks, 0.90 * 100 * 1024**2 / 1024)
 
         # resize again
-        succ = BlockDev.fs_ext4_resize(self.loop_dev, 50 * 1024**2, None)
+        succ = resize_function(self.loop_dev, 50 * 1024**2, None)
         self.assertTrue(succ)
-        fi = BlockDev.fs_ext4_get_info(self.loop_dev)
+        fi = info_function(self.loop_dev)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
         self.assertEqual(fi.block_count, 50 * 1024**2 / 1024)
 
         # resize back again, this time to maximum size
-        succ = BlockDev.fs_ext4_resize(self.loop_dev, 0, None)
+        succ = resize_function(self.loop_dev, 0, None)
         self.assertTrue(succ)
-        fi = BlockDev.fs_ext4_get_info(self.loop_dev)
+        fi = info_function(self.loop_dev)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
         self.assertEqual(fi.block_count, 100 * 1024**2 / 1024)
         # at least 90 % should be available, so it should be reported
         self.assertGreater(fi.free_blocks, 0.90 * 100 * 1024**2 / 1024)
+
+    def test_ext2_resize(self):
+        """Verify that it is possible to resize an ext2 file system"""
+        self._test_ext_resize(mkfs_function=BlockDev.fs_ext2_mkfs,
+                              info_function=BlockDev.fs_ext2_get_info,
+                              resize_function=BlockDev.fs_ext2_resize)
+
+    def test_ext3_resize(self):
+        """Verify that it is possible to resize an ext3 file system"""
+        self._test_ext_resize(mkfs_function=BlockDev.fs_ext3_mkfs,
+                              info_function=BlockDev.fs_ext3_get_info,
+                              resize_function=BlockDev.fs_ext3_resize)
+
+    def test_ext4_resize(self):
+        """Verify that it is possible to resize an ext4 file system"""
+        self._test_ext_resize(mkfs_function=BlockDev.fs_ext4_mkfs,
+                              info_function=BlockDev.fs_ext4_get_info,
+                              resize_function=BlockDev.fs_ext4_resize)
 
 class XfsTestMkfs(FSTestCase):
     def test_xfs_mkfs(self):
