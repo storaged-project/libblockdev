@@ -7,6 +7,11 @@
 #define BD_UTIL_TYPE_EXTRA_ARG (bd_extra_arg_get_type ())
 GType bd_extra_arg_get_type ();
 
+/**
+ * BDExtraArg:
+ *
+ * See bd_extra_arg_new() for an example on how to construct the extra args.
+ */
 typedef struct BDExtraArg {
     gchar *opt;
     gchar *val;

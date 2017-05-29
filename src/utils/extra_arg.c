@@ -43,6 +43,17 @@ GType bd_extra_arg_get_type (void) {
  * @opt: extra option
  * @val: value for the extra option @opt
  *
+ * Example of calling bd_fs_xfs_mkfs() with an extra argument.
+ * This will result in calling `mkfs.xfs` with `-L label`.
+ *
+ * |[<!-- language="C" -->
+ * BDExtraArg label_arg = {"-L", "label"};
+ * const BDExtraArg *extra_args[2] = {&label_arg, NULL};
+ *
+ * ret = bd_fs_xfs_mkfs ("/dev/sda", extra_args, error);
+ *
+ * ]|
+ *
  * Returns: (transfer full): a new extra argument
  */
 BDExtraArg* bd_extra_arg_new (const gchar *opt, const gchar *val) {

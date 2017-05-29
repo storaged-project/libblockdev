@@ -375,6 +375,20 @@ GQuark bd_init_error_quark ()
  *
  * Returns: whether the library was successfully initialized with all the
  *          required or default (see @require_plugins) plugins or not
+ *
+ * Example of libblockdev initialization with 'fs' and 'lvm' plugins. Specific
+ * version of the lvm plugin is required:
+ *
+ * |[<!-- language="C" -->
+ * GError *error = NULL;
+ * gboolean ret = FALSE;
+ * BDPluginSpec fs_plugin = {BD_PLUGIN_FS, NULL};
+ * BDPluginSpec lvm_plugin = {BD_PLUGIN_LVM, "libbd_lvm.so.2"};
+ *
+ * BDPluginSpec *plugins[] = {&fs_plugin, &lvm_plugin, NULL};
+ *
+ * ret = bd_init (plugins, NULL, &error);
+ * ]|
  */
 gboolean bd_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GError **error) {
     gboolean success = TRUE;
@@ -428,10 +442,10 @@ gboolean bd_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GErro
  * @require_plugins plugins are available, tries to (re)initialize it. Otherwise
  * just returns early. The difference between:
  *
- * <code>
+ * |[<!-- language="C" -->
  * if (!bd_is_initialized())
  *     bd_init(None, None, &error);
- * </code>
+ * ]|
  *
  * and this function is that this function does the check and init in an atomic
  * way (holding the lock preventing other threads from doing changes in
