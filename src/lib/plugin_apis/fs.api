@@ -207,6 +207,20 @@ GType bd_fs_vfat_info_get_type () {
 gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error);
 
 /**
+ * bd_fs_clean:
+ * @device: the device to clean
+ * @error: (out): place to store error (if any)
+ *
+ * Clean all signatures from @device.
+ * Difference between this and bd_fs_wipe() is that this function doesn't
+ * return error if @device is already empty. This will also always remove
+ * all signatures from @device, not only the first one.
+ *
+ * Returns: whether @device was successfully cleaned or not
+ */
+gboolean bd_fs_clean (const gchar *device, GError **error);
+
+/**
  * bd_fs_unmount:
  * @spec: mount point or device to unmount
  * @lazy: enable/disable lazy unmount

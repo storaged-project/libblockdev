@@ -963,6 +963,36 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
     return TRUE;
 }
 
+/**
+ * bd_fs_clean:
+ * @device: the device to clean
+ * @error: (out): place to store error (if any)
+ *
+ * Clean all signatures from @device.
+ * Difference between this and bd_fs_wipe() is that this function doesn't
+ * return error if @device is already empty. This will also always remove
+ * all signatures from @device, not only the first one.
+ *
+ * Returns: whether @device was successfully cleaned or not
+ */
+gboolean bd_fs_clean (const gchar *device, GError **error) {
+  gboolean ret = FALSE;
+
+  ret = bd_fs_wipe (device, TRUE, error);
+
+  if (!ret) {
+    if (g_error_matches (*error, BD_FS_ERROR, BD_FS_ERROR_NOFS)) {
+        /* ignore 'empty device' error */
+        g_clear_error (error);
+        return TRUE;
+    } else {
+        g_prefix_error (error, "Failed to clean %s:", device);
+        return FALSE;
+    }
+  } else
+      return TRUE;
+}
+
 static gboolean has_fs (blkid_probe probe, const gchar *device, const gchar *fs_type, GError **error) {
     gint status = 0;
     const gchar *value = NULL;

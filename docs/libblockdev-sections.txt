@@ -418,6 +418,7 @@ BDFSExt4Info
 BDFsError
 bd_fs_error_quark
 bd_fs_wipe
+bd_fs_clean
 bd_fs_mount
 bd_fs_unmount
 bd_fs_ext4_check
