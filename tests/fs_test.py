@@ -127,6 +127,42 @@ class TestGenericWipe(FSTestCase):
             BlockDev.fs_wipe(self.loop_dev, True)
 
 
+class TestClean(FSTestCase):
+    def test_clean(self):
+        """Verify that device clean works as expected"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_clean("/non/existing/device")
+
+        # empty device shouldn't fail
+        succ = BlockDev.fs_clean(self.loop_dev)
+        self.assertTrue(succ)
+
+        ret = os.system("pvcreate %s &>/dev/null" % self.loop_dev)
+        self.assertEqual(ret, 0)
+
+        succ = BlockDev.fs_clean(self.loop_dev)
+        self.assertTrue(succ)
+
+        # XXX: lsblk uses the udev db so it we need to make sure it is up to date
+        os.system("udevadm settle")
+        fs_type = subprocess.check_output(["lsblk", "-n", "-oFSTYPE", self.loop_dev]).strip()
+        self.assertEqual(fs_type, b"")
+
+        # vfat has multiple signatures on the device so it allows us to test
+        # that clean removes all signatures
+        ret = os.system("mkfs.vfat -I %s &>/dev/null" % self.loop_dev)
+        self.assertEqual(ret, 0)
+
+        time.sleep(0.5)
+        succ = BlockDev.fs_clean(self.loop_dev)
+        self.assertTrue(succ)
+
+        os.system("udevadm settle")
+        fs_type = subprocess.check_output(["lsblk", "-n", "-oFSTYPE", self.loop_dev]).strip()
+        self.assertEqual(fs_type, b"")
+
+
 class Ext4TestMkfs(FSTestCase):
     def test_ext4_mkfs(self):
         """Verify that it is possible to create a new ext4 file system"""
