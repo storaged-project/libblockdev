@@ -175,7 +175,7 @@ class TestClean(FSTestCase):
 
 
 class ExtTestMkfs(FSTestCase):
-    def _test_ext_mkfs(self, mkfs_function):
+    def _test_ext_mkfs(self, mkfs_function, ext_version):
         with self.assertRaises(GLib.GError):
             mkfs_function("/non/existing/device", None)
 
@@ -186,19 +186,26 @@ class ExtTestMkfs(FSTestCase):
         with mounted(self.loop_dev, self.mount_dir):
             pass
 
+        # check the fstype
+        fstype = BlockDev.fs_get_fstype(self.loop_dev)
+        self.assertEqual(fstype, ext_version)
+
         BlockDev.fs_wipe(self.loop_dev, True)
 
     def test_ext2_mkfs(self):
         """Verify that it is possible to create a new ext2 file system"""
-        self._test_ext_mkfs(mkfs_function=BlockDev.fs_ext2_mkfs)
+        self._test_ext_mkfs(mkfs_function=BlockDev.fs_ext2_mkfs,
+                            ext_version="ext2")
 
     def test_ext3_mkfs(self):
         """Verify that it is possible to create a new ext3 file system"""
-        self._test_ext_mkfs(mkfs_function=BlockDev.fs_ext3_mkfs)
+        self._test_ext_mkfs(mkfs_function=BlockDev.fs_ext3_mkfs,
+                            ext_version="ext3")
 
     def test_ext4_mkfs(self):
         """Verify that it is possible to create a new ext4 file system"""
-        self._test_ext_mkfs(mkfs_function=BlockDev.fs_ext4_mkfs)
+        self._test_ext_mkfs(mkfs_function=BlockDev.fs_ext4_mkfs,
+                            ext_version="ext4")
 
 class ExtMkfsWithLabel(FSTestCase):
     def _test_ext_mkfs_with_label(self, mkfs_function, info_function):
@@ -499,6 +506,10 @@ class XfsTestMkfs(FSTestCase):
         with mounted(self.loop_dev, self.mount_dir):
             pass
 
+        # check the fstype
+        fstype = BlockDev.fs_get_fstype(self.loop_dev)
+        self.assertEqual(fstype, "xfs")
+
         BlockDev.fs_wipe(self.loop_dev, True)
 
 class XfsTestWipe(FSTestCase):
@@ -695,6 +706,10 @@ class VfatTestMkfs(FSTestCase):
         # just try if we can mount the file system
         with mounted(self.loop_dev, self.mount_dir):
             pass
+
+        # check the fstype
+        fstype = BlockDev.fs_get_fstype(self.loop_dev)
+        self.assertEqual(fstype, "vfat")
 
         BlockDev.fs_wipe(self.loop_dev, True)
 

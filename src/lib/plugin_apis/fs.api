@@ -289,6 +289,19 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error);
 gboolean bd_fs_clean (const gchar *device, GError **error);
 
 /**
+ * bd_fs_get_fstype:
+ * @device: the device to probe
+ * @error: (out): place to store error (if any)
+ *
+ * Get first signature on @device as a string.
+ *
+ * Returns: (transfer full): type of filesystem found on @device, %NULL in case
+ *                           no signature has been detected or in case of error
+ *                           (@error is set in this case)
+ */
+gchar* bd_fs_get_fstype (const gchar *device,  GError **error);
+
+/**
  * bd_fs_unmount:
  * @spec: mount point or device to unmount
  * @lazy: enable/disable lazy unmount

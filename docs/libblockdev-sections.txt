@@ -421,6 +421,7 @@ BDFsError
 bd_fs_error_quark
 bd_fs_wipe
 bd_fs_clean
+bd_fs_get_fstype
 bd_fs_mount
 bd_fs_unmount
 bd_fs_ext2_check
