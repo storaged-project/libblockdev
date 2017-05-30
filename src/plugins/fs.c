@@ -890,6 +890,54 @@ gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar 
 }
 
 /**
+ * bd_fs_get_mountpoint:
+ * @device: device to find mountpoint for
+ * @error: (out): place to store error (if any)
+ *
+ * Get mountpoint for @device. If @device is mounted multiple times only
+ * one mountpoint will be returned.
+ *
+ * Returns: (transfer full): mountpoint for @device, %NULL in case device is
+ *                           not mounted or in case of an error (@error is set
+ *                           in this case)
+ */
+gchar* bd_fs_get_mountpoint (const gchar *device, GError **error) {
+    struct libmnt_table *table = NULL;
+    struct libmnt_fs *fs = NULL;
+    gint ret = 0;
+    gchar *mountpoint = NULL;
+    const gchar *target = NULL;
+
+    table = mnt_new_table ();
+
+    ret = mnt_table_parse_mtab (table, NULL);
+    if (ret != 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to parse mount info.");
+        mnt_free_table (table);
+        return NULL;
+    }
+
+    fs = mnt_table_find_source (table, device, MNT_ITER_FORWARD);
+    if (!fs) {
+        mnt_free_table (table);
+        return NULL;
+    }
+
+    target = mnt_fs_get_target (fs);
+    if (!target) {
+        mnt_free_fs (fs);
+        mnt_free_table (table);
+        return NULL;
+    }
+
+    mountpoint = g_strdup (target);
+    mnt_free_fs (fs);
+    mnt_free_table (table);
+    return mountpoint;
+}
+
+/**
  * bd_fs_wipe:
  * @device: the device to wipe signatures from
  * @all: whether to wipe all (%TRUE) signatures or just the first (%FALSE) one

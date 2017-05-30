@@ -77,6 +77,7 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error);
 
 gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const BDExtraArg **extra, GError **error);
 gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar *fstype, const gchar *options, const BDExtraArg **extra, GError **error);
+gchar* bd_fs_get_mountpoint (const gchar *device, GError **error);
 
 gboolean bd_fs_ext2_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_fs_ext2_wipe (const gchar *device, GError **error);
