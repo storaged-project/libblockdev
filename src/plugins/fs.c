@@ -1380,6 +1380,106 @@ static gboolean ext_mkfs (const gchar *device, const BDExtraArg **extra, const g
     return bd_utils_exec_and_report_error (args, extra, error);
 }
 
+static gboolean xfs_resize_device (const gchar *device, guint64 new_size, const BDExtraArg **extra, GError **error) {
+    g_autofree gchar* mountpoint = NULL;
+    gboolean ret = FALSE;
+    gboolean success = FALSE;
+    gboolean unmount = FALSE;
+    GError *local_error = NULL;
+
+    mountpoint = bd_fs_get_mountpoint (device, error);
+    if (!mountpoint) {
+        if (*error == NULL) {
+            /* device is not mounted -- we need to mount it */
+            mountpoint = g_build_path (G_DIR_SEPARATOR_S, g_get_tmp_dir (), "blockdev.XXXXXX", NULL);
+            mountpoint = g_mkdtemp (mountpoint);
+            if (!mountpoint) {
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Failed to create temporary directory for mounting '%s' "
+                             "before resizing it.", device);
+                return FALSE;
+            }
+            ret = bd_fs_mount (device, mountpoint, "xfs", NULL, NULL, error);
+            if (!ret) {
+                g_prefix_error (error, "Failed to mount '%s' before resizing it: ", device);
+                return FALSE;
+            } else
+                unmount = TRUE;
+        } else {
+            g_prefix_error (error, "Error when trying to get mountpoint for '%s': ", device);
+            return FALSE;
+        }
+    }
+
+    success = bd_fs_xfs_resize (mountpoint, new_size, extra, error);
+
+    if (unmount) {
+        ret = bd_fs_unmount (mountpoint, FALSE, FALSE, NULL, &local_error);
+        if (!ret) {
+            if (success) {
+                /* resize was successful but unmount failed */
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UNMOUNT_FAIL,
+                             "Failed to unmount '%s' after resizing it: %s",
+                             device, local_error->message);
+                g_clear_error (&local_error);
+                return FALSE;
+            } else
+                /* both resize and unmount were unsuccessful but the error
+                   from the resize is more important so just ignore the
+                   unmount error */
+                g_clear_error (&local_error);
+        }
+    }
+
+    return success;
+}
+
+/**
+ * bd_fs_resize:
+ * @device: the device the file system of which to resize
+ * @new_size: new requested size for the file system (if 0, the file system is
+ *            adapted to the underlying block device)
+ * @error: (out): place to store error (if any)
+ *
+ * Resize filesystem on @device. This calls other fs resize functions from this
+ * plugin based on detected filesystem (e.g. bd_fs_xfs_resize for XFS). This
+ * function will return an error for unknown/unsupported filesystems.
+ *
+ * Returns: whether the file system on @device was successfully resized or not
+ */
+gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error) {
+    g_autofree gchar* fstype = NULL;
+
+    fstype = bd_fs_get_fstype (device, error);
+    if (!fstype) {
+        if (*error == NULL) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
+                         "No filesystem detected on the device '%s'", device);
+            return FALSE;
+        } else {
+            g_prefix_error (error, "Error when trying to detect filesystem on '%s': ", device);
+            return FALSE;
+        }
+    }
+
+    if (g_strcmp0 (fstype, "ext2") == 0) {
+        return bd_fs_ext2_resize (device, new_size, NULL, error);
+    } else if (g_strcmp0 (fstype, "ext3") == 0) {
+        return bd_fs_ext3_resize (device, new_size, NULL, error);
+    } else if (g_strcmp0 (fstype, "ext4") == 0) {
+        return bd_fs_ext4_resize (device, new_size, NULL, error);
+    } else if (g_strcmp0 (fstype, "xfs") == 0) {
+        return xfs_resize_device (device, new_size, NULL, error);
+    } else if (g_strcmp0 (fstype, "vfat") == 0) {
+        return bd_fs_vfat_resize (device, new_size,  error);
+    } else {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
+                     "Resizing filesystem '%s' is not supported.", fstype);
+        return FALSE;
+    }
+
+}
+
 /**
  * bd_fs_ext2_mkfs:
  * @device: the device to create a new ext2 fs on

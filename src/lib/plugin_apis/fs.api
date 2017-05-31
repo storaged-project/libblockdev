@@ -351,6 +351,17 @@ gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar 
 gchar* bd_fs_get_mountpoint (const gchar *device, GError **error);
 
 /**
+ * bd_fs_resize:
+ * @device: the device the file system of which to resize
+ * @new_size: new requested size for the file system (if 0, the file system is
+ *            adapted to the underlying block device)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the file system on @device was successfully resized or not
+ */
+gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error);
+
+/**
  * bd_fs_ext2_mkfs:
  * @device: the device to create a new ext2 fs on
  * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
