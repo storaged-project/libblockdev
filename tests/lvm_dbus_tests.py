@@ -171,6 +171,9 @@ class LvmNoDevTestCase(unittest.TestCase):
         # no global config set initially
         self.assertEqual(BlockDev.lvm_get_global_config(), "")
 
+        # make sure we don't leave the config in some problematic shape
+        self.addCleanup(BlockDev.lvm_set_global_config, None)
+
         # set and try to get back
         succ = BlockDev.lvm_set_global_config("bla")
         self.assertTrue(succ)
@@ -192,7 +195,8 @@ class LvmNoDevTestCase(unittest.TestCase):
         # set something sane and check it's really used
         succ = BlockDev.lvm_set_global_config("backup {backup=0 archive=0}")
         BlockDev.lvm_pvscan(None, False, None)
-        self.assertIn("'--config': <'backup {backup=0 archive=0}'>", self._log)
+        self.assertIn("'--config'", self._log)
+        self.assertIn("'backup {backup=0 archive=0}'", self._log)
 
         # reset back to default
         succ = BlockDev.lvm_set_global_config(None)
