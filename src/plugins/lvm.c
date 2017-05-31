@@ -703,8 +703,8 @@ gboolean bd_lvm_pvcreate (const gchar *device, guint64 data_alignment, guint64 m
  */
 gboolean bd_lvm_pvresize (const gchar *device, guint64 size, const BDExtraArg **extra, GError **error) {
     gchar *size_str = NULL;
-    const gchar *args[5] = {"pvresize", NULL, NULL, NULL, NULL};
-    guint8 next_pos = 1;
+    const gchar *args[6] = {"pvresize", "-y", NULL, NULL, NULL, NULL};
+    guint8 next_pos = 2;
     guint8 to_free_pos = 0;
     gboolean ret = FALSE;
 
