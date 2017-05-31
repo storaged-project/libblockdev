@@ -71,7 +71,7 @@ gboolean bd_crypto_check_deps () {
  *
  */
 gboolean bd_crypto_init () {
-    c_locale = newlocale (LC_ALL_MASK, "C", c_locale);
+    c_locale = newlocale (LC_ALL_MASK, "C.UTF-8", c_locale);
     return TRUE;
 }
 
