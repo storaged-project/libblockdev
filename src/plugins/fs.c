@@ -998,7 +998,7 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
     /* we may need to try mutliple times with some delays in case the device is
        busy at the very moment */
     for (n_try=5, status=-1; (status != 0) && (n_try > 0); n_try--) {
-        status = blkid_do_probe (probe);
+        status = blkid_do_safeprobe (probe);
         if (status == 1)
             break;
         if (status < 0)
@@ -1012,6 +1012,9 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
+
+    blkid_reset_probe (probe);
+    status = blkid_do_probe (probe);
 
     if (status < 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
