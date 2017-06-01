@@ -234,7 +234,7 @@ class ExtTestWipe(FSTestCase):
 
         BlockDev.fs_wipe(self.loop_dev, True)
 
-        os.system("mkfs.vfat %s &>/dev/null" % self.loop_dev)
+        os.system("mkfs.vfat -I %s &>/dev/null" % self.loop_dev)
 
         # vfat, not an ext4 file system
         with self.assertRaises(GLib.GError):
