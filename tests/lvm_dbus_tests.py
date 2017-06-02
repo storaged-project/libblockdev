@@ -460,6 +460,7 @@ class LvmTestVGactivateDeactivate(LvmPVVGTestCase):
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmTestVGextendReduce(LvmPVVGTestCase):
+    @skip_on("fedora", "27", reason="LVM is broken in many ways on rawhide")
     def test_vgextend_vgreduce(self):
         """Verify that it is possible to extend/reduce a VG"""
 
