@@ -133,7 +133,7 @@ static void log_done (guint64 task_id, gint exit_code) {
 }
 
 static void set_c_locale(gpointer user_data __attribute__((unused))) {
-    if (setenv ("LC_ALL", "C.UTF-8", 1) != 0)
+    if (setenv ("LC_ALL", "C", 1) != 0)
         g_warning ("Failed to set LC_ALL=C for a child process!");
 }
 

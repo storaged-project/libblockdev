@@ -91,7 +91,7 @@ gboolean bd_kbd_check_deps () {
  *
  */
 gboolean bd_kbd_init () {
-    c_locale = newlocale (LC_ALL_MASK, "C.UTF-8", c_locale);
+    c_locale = newlocale (LC_ALL_MASK, "C", c_locale);
     return TRUE;
 }
 
