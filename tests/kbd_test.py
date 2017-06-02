@@ -50,6 +50,7 @@ class KbdZRAMTestCase(unittest.TestCase):
         if self._loaded_zram_module:
             os.system("rmmod zram")
 
+class KbdZRAMDevicesTestCase(unittest.TestCase):
     @unittest.skipUnless(_can_load_zram(), "cannot load the 'zram' module")
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_create_destroy_devices(self):
