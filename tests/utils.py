@@ -221,6 +221,8 @@ def skip_on(skip_on_distros, skip_on_version="", reason=""):
         if distro in skip_on_distros and (not skip_on_version or skip_on_version == version):
             msg = "not supported on this distribution in this version" + (": %s" % reason if reason else "")
             return unittest.skip(msg)(func)
+        else:
+            return func
 
     return decorator
 
