@@ -50,6 +50,7 @@ class KbdZRAMTestCase(unittest.TestCase):
         if self._loaded_zram_module:
             os.system("rmmod zram")
 
+class KbdZRAMDevicesTestCase(unittest.TestCase):
     @unittest.skipUnless(_can_load_zram(), "cannot load the 'zram' module")
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_create_destroy_devices(self):
@@ -115,7 +116,7 @@ class KbdZRAMTestCase(unittest.TestCase):
             succ, device = BlockDev.kbd_zram_add_device (10 * 1024**2, 0)
             self.assertTrue(succ)
             self.assertTrue(device.startswith("/dev/zram"))
-            time.sleep(1)
+            time.sleep(5)
             self.assertTrue(BlockDev.kbd_zram_remove_device(device))
 
         # create two devices
@@ -128,7 +129,7 @@ class KbdZRAMTestCase(unittest.TestCase):
             self.assertTrue(succ)
             self.assertTrue(device2.startswith("/dev/zram"))
 
-            time.sleep(1)
+            time.sleep(5)
             self.assertTrue(BlockDev.kbd_zram_remove_device(device))
             self.assertTrue(BlockDev.kbd_zram_remove_device(device2))
 

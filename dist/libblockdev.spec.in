@@ -20,7 +20,8 @@
 %if %{is_rhel}
 %define with_python3 0
 %define with_bcache 0
-%define distro_copts --without-python3 --without-bcache
+%define with_lvm_dbus 0
+%define distro_copts --without-python3 --without-bcache --without-lvm-dbus
 %endif
 
 %if %{with_btrfs} != 1

@@ -24,6 +24,17 @@ def umount(what):
         # no such file or directory
         pass
 
+def check_output(args, ignore_retcode=True):
+    """Just like subprocess.check_output(), but allows the return code of the process to be ignored"""
+
+    try:
+        return subprocess.check_output(args)
+    except subprocess.CalledProcessError as e:
+        if ignore_retcode:
+            return e.output
+        else:
+            raise
+
 @contextmanager
 def mounted(device, where):
     mount(device, where)
@@ -100,7 +111,7 @@ class TestGenericWipe(FSTestCase):
         # the second signature should still be there
         # XXX: lsblk uses the udev db so it we need to make sure it is up to date
         os.system("udevadm settle")
-        fs_type = subprocess.check_output(["lsblk", "-n", "-oFSTYPE", self.loop_dev]).strip()
+        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_dev]).strip()
         self.assertEqual(fs_type, b"vfat")
 
         # get rid of all the remaining signatures (there could be vfat + PMBR for some reason)
@@ -108,7 +119,7 @@ class TestGenericWipe(FSTestCase):
         self.assertTrue(succ)
 
         os.system("udevadm settle")
-        fs_type = subprocess.check_output(["lsblk", "-n", "-oFSTYPE", self.loop_dev]).strip()
+        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_dev]).strip()
         self.assertEqual(fs_type, b"")
 
         # now do the wipe all in a one step
@@ -119,7 +130,7 @@ class TestGenericWipe(FSTestCase):
         self.assertTrue(succ)
 
         os.system("udevadm settle")
-        fs_type = subprocess.check_output(["lsblk", "-n", "-oFSTYPE", self.loop_dev]).strip()
+        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_dev]).strip()
         self.assertEqual(fs_type, b"")
 
         # try to wipe empty device
@@ -146,7 +157,7 @@ class TestClean(FSTestCase):
 
         # XXX: lsblk uses the udev db so it we need to make sure it is up to date
         os.system("udevadm settle")
-        fs_type = subprocess.check_output(["lsblk", "-n", "-oFSTYPE", self.loop_dev]).strip()
+        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_dev]).strip()
         self.assertEqual(fs_type, b"")
 
         # vfat has multiple signatures on the device so it allows us to test
@@ -159,7 +170,7 @@ class TestClean(FSTestCase):
         self.assertTrue(succ)
 
         os.system("udevadm settle")
-        fs_type = subprocess.check_output(["lsblk", "-n", "-oFSTYPE", self.loop_dev]).strip()
+        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_dev]).strip()
         self.assertEqual(fs_type, b"")
 
 
