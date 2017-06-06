@@ -1025,6 +1025,7 @@ class GenericResize(FSTestCase):
         """Test generic resize function with an ext4 file system"""
         self._test_generic_resize(mkfs_function=BlockDev.fs_ext4_mkfs)
 
+    @utils.skip_on("fedora", "27", reason="VFAT resize (detection after resize) is broken on rawhide")
     def test_vfat_generic_resize(self):
         """Test generic resize function with a vfat file system"""
         self._test_generic_resize(mkfs_function=BlockDev.fs_vfat_mkfs)
