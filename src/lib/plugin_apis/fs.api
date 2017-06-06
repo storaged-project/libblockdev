@@ -289,6 +289,19 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error);
 gboolean bd_fs_clean (const gchar *device, GError **error);
 
 /**
+ * bd_fs_get_fstype:
+ * @device: the device to probe
+ * @error: (out): place to store error (if any)
+ *
+ * Get first signature on @device as a string.
+ *
+ * Returns: (transfer full): type of filesystem found on @device, %NULL in case
+ *                           no signature has been detected or in case of error
+ *                           (@error is set in this case)
+ */
+gchar* bd_fs_get_fstype (const gchar *device,  GError **error);
+
+/**
  * bd_fs_unmount:
  * @spec: mount point or device to unmount
  * @lazy: enable/disable lazy unmount
@@ -322,6 +335,31 @@ gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const 
  * Returns: whether @device (or @mountpoint) was successfully mounted or not
  */
 gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar *fstype, const gchar *options, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_fs_get_mountpoint:
+ * @device: device to find mountpoint for
+ * @error: (out): place to store error (if any)
+ *
+ * Get mountpoint for @device. If @device is mounted multiple times only
+ * one mountpoint will be returned.
+ *
+ * Returns: (transfer full): mountpoint for @device, %NULL in case device is
+ *                           not mounted or in case of an error (@error is set
+ *                           in this case)
+ */
+gchar* bd_fs_get_mountpoint (const gchar *device, GError **error);
+
+/**
+ * bd_fs_resize:
+ * @device: the device the file system of which to resize
+ * @new_size: new requested size for the file system (if 0, the file system is
+ *            adapted to the underlying block device)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the file system on @device was successfully resized or not
+ */
+gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error);
 
 /**
  * bd_fs_ext2_mkfs:

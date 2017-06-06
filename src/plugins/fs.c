@@ -890,6 +890,54 @@ gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar 
 }
 
 /**
+ * bd_fs_get_mountpoint:
+ * @device: device to find mountpoint for
+ * @error: (out): place to store error (if any)
+ *
+ * Get mountpoint for @device. If @device is mounted multiple times only
+ * one mountpoint will be returned.
+ *
+ * Returns: (transfer full): mountpoint for @device, %NULL in case device is
+ *                           not mounted or in case of an error (@error is set
+ *                           in this case)
+ */
+gchar* bd_fs_get_mountpoint (const gchar *device, GError **error) {
+    struct libmnt_table *table = NULL;
+    struct libmnt_fs *fs = NULL;
+    gint ret = 0;
+    gchar *mountpoint = NULL;
+    const gchar *target = NULL;
+
+    table = mnt_new_table ();
+
+    ret = mnt_table_parse_mtab (table, NULL);
+    if (ret != 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to parse mount info.");
+        mnt_free_table (table);
+        return NULL;
+    }
+
+    fs = mnt_table_find_source (table, device, MNT_ITER_FORWARD);
+    if (!fs) {
+        mnt_free_table (table);
+        return NULL;
+    }
+
+    target = mnt_fs_get_target (fs);
+    if (!target) {
+        mnt_free_fs (fs);
+        mnt_free_table (table);
+        return NULL;
+    }
+
+    mountpoint = g_strdup (target);
+    mnt_free_fs (fs);
+    mnt_free_table (table);
+    return mountpoint;
+}
+
+/**
  * bd_fs_wipe:
  * @device: the device to wipe signatures from
  * @all: whether to wipe all (%TRUE) signatures or just the first (%FALSE) one
@@ -950,7 +998,7 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
     /* we may need to try mutliple times with some delays in case the device is
        busy at the very moment */
     for (n_try=5, status=-1; (status != 0) && (n_try > 0); n_try--) {
-        status = blkid_do_probe (probe);
+        status = blkid_do_safeprobe (probe);
         if (status == 1)
             break;
         if (status < 0)
@@ -964,6 +1012,9 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
+
+    blkid_reset_probe (probe);
+    status = blkid_do_probe (probe);
 
     if (status < 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
@@ -1031,6 +1082,112 @@ gboolean bd_fs_clean (const gchar *device, GError **error) {
     }
   } else
       return TRUE;
+}
+
+/**
+ * bd_fs_get_fstype:
+ * @device: the device to probe
+ * @error: (out): place to store error (if any)
+ *
+ * Get first signature on @device as a string.
+ *
+ * Returns: (transfer full): type of filesystem found on @device, %NULL in case
+ *                           no signature has been detected or in case of error
+ *                           (@error is set in this case)
+ */
+gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
+    blkid_probe probe = NULL;
+    gint fd = 0;
+    gint status = 0;
+    const gchar *value = NULL;
+    gchar *fstype = NULL;
+    size_t len = 0;
+    guint n_try = 0;
+
+    probe = blkid_new_probe ();
+    if (!probe) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to create a new probe");
+        return FALSE;
+    }
+
+    fd = open (device, O_RDWR|O_CLOEXEC);
+    if (fd == -1) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to open the device '%s'", device);
+        blkid_free_probe (probe);
+        return FALSE;
+    }
+
+    /* we may need to try mutliple times with some delays in case the device is
+       busy at the very moment */
+    for (n_try=5, status=-1; (status != 0) && (n_try > 0); n_try--) {
+        status = blkid_probe_set_device (probe, fd, 0, 0);
+        if (status != 0)
+            g_usleep (100 * 1000); /* microseconds */
+    }
+    if (status != 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to create a probe for the device '%s'", device);
+        blkid_free_probe (probe);
+        synced_close (fd);
+        return FALSE;
+    }
+
+    blkid_probe_enable_partitions (probe, 1);
+    blkid_probe_set_partitions_flags (probe, BLKID_PARTS_MAGIC);
+    blkid_probe_enable_superblocks (probe, 1);
+    blkid_probe_set_superblocks_flags (probe, BLKID_SUBLKS_USAGE | BLKID_SUBLKS_TYPE |
+                                              BLKID_SUBLKS_MAGIC | BLKID_SUBLKS_BADCSUM);
+
+    /* we may need to try mutliple times with some delays in case the device is
+       busy at the very moment */
+    for (n_try=5, status=-1; (status != 0 || status != 1) && (n_try > 0); n_try--) {
+        status = blkid_do_safeprobe (probe);
+        if (status < 0)
+            g_usleep (100 * 1000); /* microseconds */
+    }
+    if (status < 0) {
+        /* -1 or -2 = error during probing*/
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to probe the device '%s'", device);
+        blkid_free_probe (probe);
+        synced_close (fd);
+        return NULL;
+    } else if (status == 1) {
+        /* 1 = nothing detected */
+        blkid_free_probe (probe);
+        synced_close (fd);
+        return NULL;
+    }
+
+    status = blkid_probe_lookup_value (probe, "USAGE", &value, &len);
+    if (status != 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to get usage for the device '%s'", device);
+        return NULL;
+    }
+
+    if (strncmp (value, "filesystem", 10) != 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_INVAL,
+                     "The signature on the device '%s' is of type '%s', not 'filesystem'", device, value);
+        blkid_free_probe (probe);
+        synced_close (fd);
+        return NULL;
+    }
+
+    status = blkid_probe_lookup_value (probe, "TYPE", &value, &len);
+    if (status != 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to get filesystem type for the device '%s'", device);
+        return NULL;
+    }
+
+    fstype = g_strdup (value);
+    blkid_free_probe (probe);
+    synced_close (fd);
+
+    return fstype;
 }
 
 static gboolean has_fs (blkid_probe probe, const gchar *device, const gchar *fs_type, GError **error) {
@@ -1224,6 +1381,106 @@ static gboolean ext_mkfs (const gchar *device, const BDExtraArg **extra, const g
     const gchar *args[6] = {"mke2fs", "-t", ext_version, "-F", device, NULL};
 
     return bd_utils_exec_and_report_error (args, extra, error);
+}
+
+static gboolean xfs_resize_device (const gchar *device, guint64 new_size, const BDExtraArg **extra, GError **error) {
+    g_autofree gchar* mountpoint = NULL;
+    gboolean ret = FALSE;
+    gboolean success = FALSE;
+    gboolean unmount = FALSE;
+    GError *local_error = NULL;
+
+    mountpoint = bd_fs_get_mountpoint (device, error);
+    if (!mountpoint) {
+        if (*error == NULL) {
+            /* device is not mounted -- we need to mount it */
+            mountpoint = g_build_path (G_DIR_SEPARATOR_S, g_get_tmp_dir (), "blockdev.XXXXXX", NULL);
+            mountpoint = g_mkdtemp (mountpoint);
+            if (!mountpoint) {
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Failed to create temporary directory for mounting '%s' "
+                             "before resizing it.", device);
+                return FALSE;
+            }
+            ret = bd_fs_mount (device, mountpoint, "xfs", NULL, NULL, error);
+            if (!ret) {
+                g_prefix_error (error, "Failed to mount '%s' before resizing it: ", device);
+                return FALSE;
+            } else
+                unmount = TRUE;
+        } else {
+            g_prefix_error (error, "Error when trying to get mountpoint for '%s': ", device);
+            return FALSE;
+        }
+    }
+
+    success = bd_fs_xfs_resize (mountpoint, new_size, extra, error);
+
+    if (unmount) {
+        ret = bd_fs_unmount (mountpoint, FALSE, FALSE, NULL, &local_error);
+        if (!ret) {
+            if (success) {
+                /* resize was successful but unmount failed */
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UNMOUNT_FAIL,
+                             "Failed to unmount '%s' after resizing it: %s",
+                             device, local_error->message);
+                g_clear_error (&local_error);
+                return FALSE;
+            } else
+                /* both resize and unmount were unsuccessful but the error
+                   from the resize is more important so just ignore the
+                   unmount error */
+                g_clear_error (&local_error);
+        }
+    }
+
+    return success;
+}
+
+/**
+ * bd_fs_resize:
+ * @device: the device the file system of which to resize
+ * @new_size: new requested size for the file system (if 0, the file system is
+ *            adapted to the underlying block device)
+ * @error: (out): place to store error (if any)
+ *
+ * Resize filesystem on @device. This calls other fs resize functions from this
+ * plugin based on detected filesystem (e.g. bd_fs_xfs_resize for XFS). This
+ * function will return an error for unknown/unsupported filesystems.
+ *
+ * Returns: whether the file system on @device was successfully resized or not
+ */
+gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error) {
+    g_autofree gchar* fstype = NULL;
+
+    fstype = bd_fs_get_fstype (device, error);
+    if (!fstype) {
+        if (*error == NULL) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
+                         "No filesystem detected on the device '%s'", device);
+            return FALSE;
+        } else {
+            g_prefix_error (error, "Error when trying to detect filesystem on '%s': ", device);
+            return FALSE;
+        }
+    }
+
+    if (g_strcmp0 (fstype, "ext2") == 0) {
+        return bd_fs_ext2_resize (device, new_size, NULL, error);
+    } else if (g_strcmp0 (fstype, "ext3") == 0) {
+        return bd_fs_ext3_resize (device, new_size, NULL, error);
+    } else if (g_strcmp0 (fstype, "ext4") == 0) {
+        return bd_fs_ext4_resize (device, new_size, NULL, error);
+    } else if (g_strcmp0 (fstype, "xfs") == 0) {
+        return xfs_resize_device (device, new_size, NULL, error);
+    } else if (g_strcmp0 (fstype, "vfat") == 0) {
+        return bd_fs_vfat_resize (device, new_size,  error);
+    } else {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
+                     "Resizing filesystem '%s' is not supported.", fstype);
+        return FALSE;
+    }
+
 }
 
 /**

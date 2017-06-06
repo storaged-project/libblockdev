@@ -175,7 +175,7 @@ class TestClean(FSTestCase):
 
 
 class ExtTestMkfs(FSTestCase):
-    def _test_ext_mkfs(self, mkfs_function):
+    def _test_ext_mkfs(self, mkfs_function, ext_version):
         with self.assertRaises(GLib.GError):
             mkfs_function("/non/existing/device", None)
 
@@ -186,19 +186,26 @@ class ExtTestMkfs(FSTestCase):
         with mounted(self.loop_dev, self.mount_dir):
             pass
 
+        # check the fstype
+        fstype = BlockDev.fs_get_fstype(self.loop_dev)
+        self.assertEqual(fstype, ext_version)
+
         BlockDev.fs_wipe(self.loop_dev, True)
 
     def test_ext2_mkfs(self):
         """Verify that it is possible to create a new ext2 file system"""
-        self._test_ext_mkfs(mkfs_function=BlockDev.fs_ext2_mkfs)
+        self._test_ext_mkfs(mkfs_function=BlockDev.fs_ext2_mkfs,
+                            ext_version="ext2")
 
     def test_ext3_mkfs(self):
         """Verify that it is possible to create a new ext3 file system"""
-        self._test_ext_mkfs(mkfs_function=BlockDev.fs_ext3_mkfs)
+        self._test_ext_mkfs(mkfs_function=BlockDev.fs_ext3_mkfs,
+                            ext_version="ext3")
 
     def test_ext4_mkfs(self):
         """Verify that it is possible to create a new ext4 file system"""
-        self._test_ext_mkfs(mkfs_function=BlockDev.fs_ext4_mkfs)
+        self._test_ext_mkfs(mkfs_function=BlockDev.fs_ext4_mkfs,
+                            ext_version="ext4")
 
 class ExtMkfsWithLabel(FSTestCase):
     def _test_ext_mkfs_with_label(self, mkfs_function, info_function):
@@ -499,6 +506,10 @@ class XfsTestMkfs(FSTestCase):
         with mounted(self.loop_dev, self.mount_dir):
             pass
 
+        # check the fstype
+        fstype = BlockDev.fs_get_fstype(self.loop_dev)
+        self.assertEqual(fstype, "xfs")
+
         BlockDev.fs_wipe(self.loop_dev, True)
 
 class XfsTestWipe(FSTestCase):
@@ -696,6 +707,10 @@ class VfatTestMkfs(FSTestCase):
         with mounted(self.loop_dev, self.mount_dir):
             pass
 
+        # check the fstype
+        fstype = BlockDev.fs_get_fstype(self.loop_dev)
+        self.assertEqual(fstype, "vfat")
+
         BlockDev.fs_wipe(self.loop_dev, True)
 
 class VfatMkfsWithLabel(FSTestCase):
@@ -868,9 +883,15 @@ class MountTest(FSTestCase):
         self.assertTrue(succ)
         self.assertTrue(os.path.ismount(tmp))
 
+        mnt = BlockDev.fs_get_mountpoint(self.loop_dev)
+        self.assertEqual(mnt, tmp)
+
         succ = BlockDev.fs_unmount(self.loop_dev, False, False, None)
         self.assertTrue(succ)
         self.assertFalse(os.path.ismount(tmp))
+
+        mnt = BlockDev.fs_get_mountpoint(self.loop_dev)
+        self.assertIsNone(mnt)
 
         # mount again to test unmount using the mountpoint
         succ = BlockDev.fs_mount(self.loop_dev, tmp, None, None)
@@ -974,3 +995,56 @@ class MountTest(FSTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_unmount(self.loop_dev, run_as_uid=uid, run_as_gid=gid)
         self.assertTrue(os.path.ismount(tmp))
+
+
+class GenericResize(FSTestCase):
+    def _test_generic_resize(self, mkfs_function):
+        # clean the device
+        succ = BlockDev.fs_clean(self.loop_dev)
+
+        succ = mkfs_function(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        # shrink
+        succ = BlockDev.fs_resize(self.loop_dev, 80 * 1024**2)
+        self.assertTrue(succ)
+
+        # resize to maximum size
+        succ = BlockDev.fs_resize(self.loop_dev, 0)
+        self.assertTrue(succ)
+
+    def test_ext2_generic_resize(self):
+        """Test generic resize function with an ext2 file system"""
+        self._test_generic_resize(mkfs_function=BlockDev.fs_ext2_mkfs)
+
+    def test_ext3_check_generic_resize(self):
+        """Test generic resize function with an ext3 file system"""
+        self._test_generic_resize(mkfs_function=BlockDev.fs_ext3_mkfs)
+
+    def test_ext4_generic_resize(self):
+        """Test generic resize function with an ext4 file system"""
+        self._test_generic_resize(mkfs_function=BlockDev.fs_ext4_mkfs)
+
+    @utils.skip_on("fedora", "27", reason="VFAT resize (detection after resize) is broken on rawhide")
+    def test_vfat_generic_resize(self):
+        """Test generic resize function with a vfat file system"""
+        self._test_generic_resize(mkfs_function=BlockDev.fs_vfat_mkfs)
+
+    def test_xfs_generic_resize(self):
+        """Test generic resize function with an xfs file system"""
+
+        # clean the device
+        succ = BlockDev.fs_clean(self.loop_dev)
+
+        succ = BlockDev.fs_xfs_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        # shrink without mounting the device (fs_resize should mount it)
+        succ = BlockDev.fs_resize(self.loop_dev, 0)
+        self.assertTrue(succ)
+
+        # resize to maximum with mounting the device (fs_resize should use
+        # the existing mountpoint)
+        with mounted(self.loop_dev, self.mount_dir):
+            succ = BlockDev.fs_resize(self.loop_dev, 0)
+        self.assertTrue(succ)
