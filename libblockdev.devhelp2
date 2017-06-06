@@ -115,8 +115,30 @@
     <keyword type="function" name="bd_fs_close ()" link="libblockdev-FS.html#bd-fs-close"/>
     <keyword type="function" name="bd_fs_error_quark ()" link="libblockdev-FS.html#bd-fs-error-quark"/>
     <keyword type="function" name="bd_fs_wipe ()" link="libblockdev-FS.html#bd-fs-wipe"/>
+    <keyword type="function" name="bd_fs_clean ()" link="libblockdev-FS.html#bd-fs-clean"/>
+    <keyword type="function" name="bd_fs_get_fstype ()" link="libblockdev-FS.html#bd-fs-get-fstype"/>
     <keyword type="function" name="bd_fs_mount ()" link="libblockdev-FS.html#bd-fs-mount"/>
     <keyword type="function" name="bd_fs_unmount ()" link="libblockdev-FS.html#bd-fs-unmount"/>
+    <keyword type="function" name="bd_fs_get_mountpoint ()" link="libblockdev-FS.html#bd-fs-get-mountpoint"/>
+    <keyword type="function" name="bd_fs_resize ()" link="libblockdev-FS.html#bd-fs-resize"/>
+    <keyword type="function" name="bd_fs_ext2_check ()" link="libblockdev-FS.html#bd-fs-ext2-check"/>
+    <keyword type="function" name="bd_fs_ext2_get_info ()" link="libblockdev-FS.html#bd-fs-ext2-get-info"/>
+    <keyword type="function" name="bd_fs_ext2_info_copy ()" link="libblockdev-FS.html#bd-fs-ext2-info-copy"/>
+    <keyword type="function" name="bd_fs_ext2_info_free ()" link="libblockdev-FS.html#bd-fs-ext2-info-free"/>
+    <keyword type="function" name="bd_fs_ext2_mkfs ()" link="libblockdev-FS.html#bd-fs-ext2-mkfs"/>
+    <keyword type="function" name="bd_fs_ext2_repair ()" link="libblockdev-FS.html#bd-fs-ext2-repair"/>
+    <keyword type="function" name="bd_fs_ext2_resize ()" link="libblockdev-FS.html#bd-fs-ext2-resize"/>
+    <keyword type="function" name="bd_fs_ext2_set_label ()" link="libblockdev-FS.html#bd-fs-ext2-set-label"/>
+    <keyword type="function" name="bd_fs_ext2_wipe ()" link="libblockdev-FS.html#bd-fs-ext2-wipe"/>
+    <keyword type="function" name="bd_fs_ext3_check ()" link="libblockdev-FS.html#bd-fs-ext3-check"/>
+    <keyword type="function" name="bd_fs_ext3_get_info ()" link="libblockdev-FS.html#bd-fs-ext3-get-info"/>
+    <keyword type="function" name="bd_fs_ext3_info_copy ()" link="libblockdev-FS.html#bd-fs-ext3-info-copy"/>
+    <keyword type="function" name="bd_fs_ext3_info_free ()" link="libblockdev-FS.html#bd-fs-ext3-info-free"/>
+    <keyword type="function" name="bd_fs_ext3_mkfs ()" link="libblockdev-FS.html#bd-fs-ext3-mkfs"/>
+    <keyword type="function" name="bd_fs_ext3_repair ()" link="libblockdev-FS.html#bd-fs-ext3-repair"/>
+    <keyword type="function" name="bd_fs_ext3_resize ()" link="libblockdev-FS.html#bd-fs-ext3-resize"/>
+    <keyword type="function" name="bd_fs_ext3_set_label ()" link="libblockdev-FS.html#bd-fs-ext3-set-label"/>
+    <keyword type="function" name="bd_fs_ext3_wipe ()" link="libblockdev-FS.html#bd-fs-ext3-wipe"/>
     <keyword type="function" name="bd_fs_ext4_check ()" link="libblockdev-FS.html#bd-fs-ext4-check"/>
     <keyword type="function" name="bd_fs_ext4_get_info ()" link="libblockdev-FS.html#bd-fs-ext4-get-info"/>
     <keyword type="function" name="bd_fs_ext4_info_copy ()" link="libblockdev-FS.html#bd-fs-ext4-info-copy"/>
@@ -144,7 +166,9 @@
     <keyword type="function" name="bd_fs_vfat_resize ()" link="libblockdev-FS.html#bd-fs-vfat-resize"/>
     <keyword type="function" name="bd_fs_vfat_set_label ()" link="libblockdev-FS.html#bd-fs-vfat-set-label"/>
     <keyword type="function" name="bd_fs_vfat_wipe ()" link="libblockdev-FS.html#bd-fs-vfat-wipe"/>
-    <keyword type="struct" name="BDFSExt4Info" link="libblockdev-FS.html#BDFSExt4Info"/>
+    <keyword type="typedef" name="BDFSExt2Info" link="libblockdev-FS.html#BDFSExt2Info"/>
+    <keyword type="typedef" name="BDFSExt3Info" link="libblockdev-FS.html#BDFSExt3Info"/>
+    <keyword type="typedef" name="BDFSExt4Info" link="libblockdev-FS.html#BDFSExt4Info"/>
     <keyword type="enum" name="enum BDFsError" link="libblockdev-FS.html#BDFsError"/>
     <keyword type="struct" name="BDFSXfsInfo" link="libblockdev-FS.html#BDFSXfsInfo"/>
     <keyword type="struct" name="BDFSVfatInfo" link="libblockdev-FS.html#BDFSVfatInfo"/>
@@ -412,6 +436,8 @@
     <keyword type="function" name="bd_extra_arg_copy ()" link="libblockdev-Utils.html#bd-extra-arg-copy"/>
     <keyword type="function" name="bd_extra_arg_free ()" link="libblockdev-Utils.html#bd-extra-arg-free"/>
     <keyword type="function" name="bd_extra_arg_get_type ()" link="libblockdev-Utils.html#bd-extra-arg-get-type"/>
+    <keyword type="function" name="bd_utils_resolve_device ()" link="libblockdev-Utils.html#bd-utils-resolve-device"/>
+    <keyword type="function" name="bd_utils_get_device_symlinks ()" link="libblockdev-Utils.html#bd-utils-get-device-symlinks"/>
     <keyword type="enum" name="enum BDUtilsProgStatus" link="libblockdev-Utils.html#BDUtilsProgStatus"/>
     <keyword type="macro" name="BD_UTILS_EXEC_ERROR" link="libblockdev-Utils.html#BD-UTILS-EXEC-ERROR:CAPS"/>
     <keyword type="enum" name="enum BDUtilsExecError" link="libblockdev-Utils.html#BDUtilsExecError"/>
@@ -455,6 +481,8 @@
     <keyword type="constant" name="BD_FS_ERROR_FAIL" link="libblockdev-FS.html#BD-FS-ERROR-FAIL:CAPS"/>
     <keyword type="constant" name="BD_FS_ERROR_NOFS" link="libblockdev-FS.html#BD-FS-ERROR-NOFS:CAPS"/>
     <keyword type="constant" name="BD_FS_ERROR_PIPE" link="libblockdev-FS.html#BD-FS-ERROR-PIPE:CAPS"/>
+    <keyword type="constant" name="BD_FS_ERROR_UNMOUNT_FAIL" link="libblockdev-FS.html#BD-FS-ERROR-UNMOUNT-FAIL:CAPS"/>
+    <keyword type="constant" name="BD_FS_ERROR_NOT_SUPPORTED" link="libblockdev-FS.html#BD-FS-ERROR-NOT-SUPPORTED:CAPS"/>
     <keyword type="constant" name="BD_FS_ERROR_AUTH" link="libblockdev-FS.html#BD-FS-ERROR-AUTH:CAPS"/>
     <keyword type="constant" name="BD_LOOP_ERROR_DEVICE" link="libblockdev-Loop.html#BD-LOOP-ERROR-DEVICE:CAPS"/>
     <keyword type="constant" name="BD_LOOP_ERROR_FAIL" link="libblockdev-Loop.html#BD-LOOP-ERROR-FAIL:CAPS"/>
@@ -588,12 +616,6 @@
     <keyword type="member" name="BDBtrfsFilesystemInfo.uuid" link="libblockdev-BTRFS.html#BDBtrfsFilesystemInfo.uuid"/>
     <keyword type="member" name="BDBtrfsFilesystemInfo.num-devices" link="libblockdev-BTRFS.html#BDBtrfsFilesystemInfo.num-devices"/>
     <keyword type="member" name="BDBtrfsFilesystemInfo.used" link="libblockdev-BTRFS.html#BDBtrfsFilesystemInfo.used"/>
-    <keyword type="member" name="BDFSExt4Info.label" link="libblockdev-FS.html#BDFSExt4Info.label"/>
-    <keyword type="member" name="BDFSExt4Info.uuid" link="libblockdev-FS.html#BDFSExt4Info.uuid"/>
-    <keyword type="member" name="BDFSExt4Info.state" link="libblockdev-FS.html#BDFSExt4Info.state"/>
-    <keyword type="member" name="BDFSExt4Info.block-size" link="libblockdev-FS.html#BDFSExt4Info.block-size"/>
-    <keyword type="member" name="BDFSExt4Info.block-count" link="libblockdev-FS.html#BDFSExt4Info.block-count"/>
-    <keyword type="member" name="BDFSExt4Info.free-blocks" link="libblockdev-FS.html#BDFSExt4Info.free-blocks"/>
     <keyword type="member" name="BDFSXfsInfo.label" link="libblockdev-FS.html#BDFSXfsInfo.label"/>
     <keyword type="member" name="BDFSXfsInfo.uuid" link="libblockdev-FS.html#BDFSXfsInfo.uuid"/>
     <keyword type="member" name="BDFSXfsInfo.block-size" link="libblockdev-FS.html#BDFSXfsInfo.block-size"/>

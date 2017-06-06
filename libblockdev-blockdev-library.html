@@ -168,6 +168,30 @@ plugins. </p></td>
 <p> whether the library was successfully initialized with all the
 required or default (see <em class="parameter"><code>require_plugins</code></em>
 ) plugins or not</p>
+<p>Example of libblockdev initialization with 'fs' and 'lvm' plugins. Specific
+version of the lvm plugin is required:</p>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="usertype">GError</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">error </span><span class="symbol">=</span><span class="normal"> <a href="../glib/glib-Standard-Macros.html#NULL:CAPS">NULL</a></span><span class="symbol">;</span>
+<span class="usertype">gboolean</span><span class="normal"> ret </span><span class="symbol">=</span><span class="normal"> <a href="../glib/glib-Standard-Macros.html#FALSE:CAPS">FALSE</a></span><span class="symbol">;</span>
+<span class="usertype">BDPluginSpec</span><span class="normal"> fs_plugin </span><span class="symbol">=</span><span class="normal"> </span><span class="cbracket">{</span><span class="normal"><a href="libblockdev-Plugins.html#BD-PLUGIN-FS:CAPS">BD_PLUGIN_FS</a></span><span class="symbol">,</span><span class="normal"> <a href="../glib/glib-Standard-Macros.html#NULL:CAPS">NULL</a></span><span class="cbracket">}</span><span class="symbol">;</span>
+<span class="usertype">BDPluginSpec</span><span class="normal"> lvm_plugin </span><span class="symbol">=</span><span class="normal"> </span><span class="cbracket">{</span><span class="normal"><a href="libblockdev-Plugins.html#BD-PLUGIN-LVM:CAPS">BD_PLUGIN_LVM</a></span><span class="symbol">,</span><span class="normal"> </span><span class="string">"libbd_lvm.so.2"</span><span class="cbracket">}</span><span class="symbol">;</span>
+<span class="usertype">BDPluginSpec</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">plugins</span><span class="symbol">[]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> </span><span class="cbracket">{</span><span class="symbol">&amp;</span><span class="normal">fs_plugin</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal">lvm_plugin</span><span class="symbol">,</span><span class="normal"> <a href="../glib/glib-Standard-Macros.html#NULL:CAPS">NULL</a></span><span class="cbracket">}</span><span class="symbol">;</span>
+<span class="normal">ret </span><span class="symbol">=</span><span class="normal"> </span><span class="function"><a href="libblockdev-blockdev-library.html#bd-init">bd_init</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">plugins</span><span class="symbol">,</span><span class="normal"> <a href="../glib/glib-Standard-Macros.html#NULL:CAPS">NULL</a></span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal">error</span><span class="symbol">);</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p></p>
 </div>
 </div>
 <hr>
@@ -181,10 +205,20 @@ bd_ensure_init (<em class="parameter"><code><span class="type">BDPluginSpec</spa
 <em class="parameter"><code>require_plugins</code></em>
  plugins are available, tries to (re)initialize it. Otherwise
 just returns early. The difference between:</p>
-<p>&lt;code&gt;
-if (!<a class="link" href="libblockdev-blockdev-library.html#bd-is-initialized" title="bd_is_initialized ()"><code class="function">bd_is_initialized()</code></a>)
-    bd_init(None, None, &amp;error);
-&lt;/code&gt;</p>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="keyword">if</span><span class="normal"> </span><span class="symbol">(!</span><span class="function"><a href="libblockdev-blockdev-library.html#bd-is-initialized">bd_is_initialized</a></span><span class="symbol">())</span>
+<span class="normal">    </span><span class="function"><a href="libblockdev-blockdev-library.html#bd-init">bd_init</a></span><span class="symbol">(</span><span class="normal">None</span><span class="symbol">,</span><span class="normal"> None</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal">error</span><span class="symbol">);</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p></p>
 <p>and this function is that this function does the check and init in an atomic
 way (holding the lock preventing other threads from doing changes in
 between).</p>
