@@ -64,7 +64,7 @@
 %define configure_opts %{?distro_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts}
 
 Name:        libblockdev
-Version:     2.7
+Version:     2.8
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -787,6 +787,43 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Tue Jun 06 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.8-1
+- Temporarily skip vfat generic resize test on rawhide (vtrefny)
+- Use "safeprobe" in "bd_fs_wipe" (vtrefny)
+- Add a generic filesystem resize function (vtrefny)
+- Add a function to get mountpoint for a device (vtrefny)
+- Add a function to get filesystem type for a device (vtrefny)
+- Only include the LVM DBus config when shipping LVM DBus (vpodzime)
+- Skip the LVM DBus vgreduce tests on Rawhide (vpodzime)
+- Do not build the lvm-dbus plugin on RHEL/CentOS (vpodzime)
+- Give zRAM more time to settle before trying to remove a device (vpodzime)
+- Put zram tests adding/removing devices into a separate class (vpodzime)
+- Skip LVM cache and RAID tests on Rawhide (vpodzime)
+- Fix the skip_on decorator factory for tests (vpodzime)
+- Use 'blkid -p' instead of lsblk to get device's FS type (vpodzime)
+- Improve the lvm_set_global_config test (vpodzime)
+- Pass '-y' to pvresize (vpodzime)
+- Create a copy of os.environ for a child process (vpodzime)
+- Revert "Use the "C.UTF-8" locale instead of just "C"" (vpodzime)
+- Fix how we create vfat FS in tests (vpodzime)
+- Skip the test if requiring unavailable locales (vpodzime)
+- Use the "C.UTF-8" locale instead of just "C" (vpodzime)
+- Add functions for working with ext2 and ext3 filesystems (vtrefny)
+- Link to gobject when lvm or btrfs is enabled (andreas)
+- Link to libm where needed (andreas)
+- Add a function for cleaning a device (vtrefny)
+- Add few code exaples to documentation (vtrefny)
+- Use a special exception for no fs signature when doing wipe (vpodzime)
+- One more incompatible os.symlink() call (vpodzime)
+- Do not use pass-by-name in the os.symlink() call (vpodzime)
+- Ignore previous errors when falling back to using ioctl() (vpodzime)
+- Use ioctl() call to teardown loop devices (vpodzime)
+- Resolve the device to remove for mdadm (vpodzime)
+- Add a function for getting device symlinks (vpodzime)
+- Use the new resolve_device() function where appropriate (vpodzime)
+- Add the resolve_device() function to the utils library (vpodzime)
+- First try to read the 'autoclear' flag from /sys/ (vpodzime)
+
 * Wed Apr 26 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.7-1
 - Skip btrfs min size tests on Fedora 25 (vtrefny)
 - Make sure the loop device doesn't disappear during tests (vpodzime)
