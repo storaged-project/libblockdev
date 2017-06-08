@@ -125,6 +125,7 @@ dnl these two modules are always needed
 LIBBLOCKDEV_PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.42.2])
 LIBBLOCKDEV_PKG_CHECK_MODULES([GOBJECT], [gobject-2.0 >= 2.42.2])
 LIBBLOCKDEV_PKG_CHECK_MODULES([GIO], [gio-2.0 >= 2.42.2])
+LIBBLOCKDEV_PKG_CHECK_MODULES([UDEV], [libudev >= 216])
 
 AS_IF([test "x$with_crypto" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([CRYPTSETUP], [libcryptsetup >= 1.6.7])
@@ -138,9 +139,7 @@ AS_IF([test "x$with_dm" != "xno" -o "x$with_lvm" != "xno" -o "x$with_lvm_dbus" !
       [])
 
 AS_IF([test "x$with_dm" != "xno"],
-      [LIBBLOCKDEV_PKG_CHECK_MODULES([UDEV], [libudev >= 216])
-       LIBBLOCKDEV_CHECK_HEADER([dmraid/dmraid.h], [], [dmraid.h not available])
-      ],
+      [LIBBLOCKDEV_CHECK_HEADER([dmraid/dmraid.h], [], [dmraid.h not available])],
       [])
 
 AS_IF([test "x$with_kbd" != "xno"],
