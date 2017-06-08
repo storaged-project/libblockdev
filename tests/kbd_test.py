@@ -108,7 +108,7 @@ class KbdZRAMDevicesTestCase(unittest.TestCase):
             succ, device = BlockDev.kbd_zram_add_device (10 * 1024**2, 4)
             self.assertTrue(succ)
             self.assertTrue(device.startswith("/dev/zram"))
-            time.sleep(1)
+            time.sleep(5)
             self.assertTrue(BlockDev.kbd_zram_remove_device(device))
 
         # no nstreams specified
@@ -136,14 +136,13 @@ class KbdZRAMDevicesTestCase(unittest.TestCase):
         # mixture of multiple devices and a single device
         with _track_module_load(self, "zram", "_loaded_zram_module"):
             self.assertTrue(BlockDev.kbd_zram_create_devices(2, [10 * 1024**2, 10 * 1024**2], [1, 2]))
-            time.sleep(1)
+            time.sleep(5)
             succ, device = BlockDev.kbd_zram_add_device (10 * 1024**2, 4)
             self.assertTrue(succ)
             self.assertTrue(device.startswith("/dev/zram"))
-
-            time.sleep(1)
+            time.sleep(5)
             self.assertTrue(BlockDev.kbd_zram_destroy_devices())
-            time.sleep(1)
+            time.sleep(5)
 
 
 class KbdZRAMStatsTestCase(KbdZRAMTestCase):
