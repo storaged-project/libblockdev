@@ -252,3 +252,11 @@ def requires_locales(locales):
         return decorated
 
     return decorator
+
+
+def run(cmd_string):
+    """
+    Run the a command with file descriptors closed as lvm is trying to
+    make sure everyone else is following best practice and not leaking FDs.
+    """
+    return subprocess.call(cmd_string, close_fds=True, shell=True)

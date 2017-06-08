@@ -883,14 +883,14 @@ static void free_passphrase_cb (gpointer data) {
 /**
  * replace_char:
  *
- * Replaces all appereances of @orig in @str with @new (in place).
+ * Replaces all occurrences of @orig in @str with @new (in place).
  */
 static gchar *replace_char (gchar *str, gchar orig, gchar new) {
     gchar *pos = str;
     if (!str)
         return str;
 
-    for (pos=str; pos; pos++)
+    for (pos=str; *pos; pos++)
         *pos = *pos == orig ? new : *pos;
 
     return str;
