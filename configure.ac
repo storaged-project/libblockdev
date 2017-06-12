@@ -40,6 +40,9 @@ m4_ifdef([GOBJECT_INTROSPECTION_CHECK],
 [GOBJECT_INTROSPECTION_CHECK([1.3.0])],
 [found_introspection=no
 AM_CONDITIONAL(HAVE_INTROSPECTION, false)])
+AS_IF([test "x$found_introspection" = xyes],
+      [AC_SUBST(WITH_GI, 1)],
+      [AC_SUBST(WITH_GI, 0)])
 
 uname -p|grep s390
 on_s390=$?
@@ -47,10 +50,6 @@ on_s390=$?
 AM_CONDITIONAL(ON_S390, test "$on_s390" = "0")
 
 skip_patterns=""
-
-# Complain if introspection was not enabled
-AS_IF([test "x$found_introspection" = xyes], [:],
-      [LIBBLOCKDEV_SOFT_FAILURE([GObject introspection (devel) must be installed and enabled])])
 
 AC_ARG_WITH([python3],
     AS_HELP_STRING([--with-python3], [support python3 @<:@default=check@:>@]),
