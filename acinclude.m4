@@ -67,7 +67,7 @@ AC_DEFUN([LIBBLOCKDEV_CHECK_HEADER], [dnl
 echo -n "Checking header [$1] existence and usability..."
 temp_file=$(mktemp --tmpdir XXXXX.c)
 echo "#include <$1>" > $temp_file
-gcc -c [$2] $temp_file
+${CC} -c [$2] $temp_file
 status=$?
 rm -f $temp_file
 rm -f $(basename ${temp_file%%.c}.o)
