@@ -13,6 +13,7 @@
 %define with_kbd @WITH_KBD@
 %define with_part @WITH_PART@
 %define with_fs @WITH_FS@
+%define with_gi @WITH_GI@
 
 %define is_rhel 0%{?rhel} != 0
 
@@ -60,8 +61,11 @@
 %if %{with_fs} != 1
 %define fs_copts --without-fs
 %endif
+%if %{with_gi} != 1
+%define gi_copts --disable-introspection
+%endif
 
-%define configure_opts %{?distro_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts}
+%define configure_opts %{?distro_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?gi_copts}
 
 Name:        libblockdev
 Version:     2.8
@@ -72,7 +76,9 @@ URL:         https://github.com/rhinstaller/libblockdev
 Source0:     https://github.com/rhinstaller/libblockdev/archive/%{name}-%{version}.tar.gz
 
 BuildRequires: glib2-devel
+%if %{with_gi}
 BuildRequires: gobject-introspection-devel
+%endif
 BuildRequires: python-devel
 %if %{with_python3}
 BuildRequires: python3-devel
@@ -602,7 +608,9 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{!?_licensedir:%global license %%doc}
 %license LICENSE
 %{_libdir}/libblockdev.so.*
+%if %{with_gi}
 %{_libdir}/girepository*/BlockDev*.typelib
+%endif
 %config %{_sysconfdir}/libblockdev/conf.d/00-default.cfg
 
 %files devel
@@ -615,7 +623,9 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %if %{with_gtk_doc}
 %{_datadir}/gtk-doc/html/libblockdev
 %endif
+%if %{with_gi}
 %{_datadir}/gir*/BlockDev*.gir
+%endif
 
 %files -n python2-blockdev
 %{python2_sitearch}/gi/overrides/*
