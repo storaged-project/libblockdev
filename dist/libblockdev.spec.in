@@ -68,7 +68,7 @@
 %define configure_opts %{?distro_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?gi_copts}
 
 Name:        libblockdev
-Version:     2.8
+Version:     2.9
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -797,6 +797,19 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Tue Jun 13 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.9-1
+- Fix hardcoded reference to gcc (timo.gurr)
+- Catch and ignore partial failures in LVM tests' cleanups (vpodzime)
+- Fix hardcoded reference to pkg-config (timo.gurr)
+- Make GObject introspection optional (vpodzime)
+- Do not link libraries required by plugins to the GI files (vpodzime)
+- Make sure the whole build status image is shown (vpodzime)
+- Show CI status in README (at the GH repo's front page) (vpodzime)
+- Always require the libudev pkg (tgurr)
+- Make sure we give kernel time to fully setup zram device(s) (vpodzime)
+- fs_test.py: Close FDs when calling utilities (tasleson)
+- crypto.c: Correct segmentation fault (tasleson)
+
 * Tue Jun 06 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.8-1
 - Temporarily skip vfat generic resize test on rawhide (vtrefny)
 - Use "safeprobe" in "bd_fs_wipe" (vtrefny)
