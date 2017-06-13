@@ -14,6 +14,9 @@ AM_PATH_PYTHON
 AM_PROG_AR
 AC_PROG_CC
 
+# Lets enable debug for default as we will likely abort
+CFLAGS+=" -g -O0"
+
 LT_INIT
 
 AC_CONFIG_FILES([Makefile src/Makefile \
