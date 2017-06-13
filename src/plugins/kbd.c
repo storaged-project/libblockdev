@@ -749,6 +749,19 @@ BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error) {
 
 
 #ifdef WITH_BD_BCACHE
+
+gboolean wait_for_file (const char *filename) {
+    gint count = 500;
+    while (count > 0) {
+        g_usleep (100000); /* microseconds */
+        if (g_file_test (filename, G_FILE_TEST_EXISTS)) {
+            break;
+        }
+        --count;
+    }
+    return (count > 0) ? TRUE : FALSE;
+}
+
 /**
  * bd_kbd_bcache_create:
  * @backing_device: backing (slow) device of the cache
@@ -767,17 +780,16 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
     gchar **lines = NULL;
     GRegex *regex = NULL;
     GMatchInfo *match_info = NULL;
-    gchar *set_uuid = NULL;
     guint i = 0;
-    gboolean found = FALSE;
     glob_t globbuf;
     gchar *pattern = NULL;
     gchar *path = NULL;
     gchar *dev_name = NULL;
     gchar *dev_name_end = NULL;
-    guint n_retry = 5;
     guint64 progress_id = 0;
     gchar *msg = NULL;
+    guint n = 0;
+    gchar device_uuid[2][64];
 
     msg = g_strdup_printf ("Started creation of bcache on '%s' and '%s'", backing_device, cache_device);
     progress_id = bd_utils_report_started (msg);
@@ -796,7 +808,7 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
 
     lines = g_strsplit (output, "\n", 0);
 
-    regex = g_regex_new ("Set UUID:\\s+([-a-z0-9]+)", 0, 0, error);
+    regex = g_regex_new ("^UUID:\\s+([-a-z0-9]+)", 0, 0, error);
     if (!regex) {
         /* error is already populated */
         g_free (output);
@@ -805,55 +817,45 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
         return FALSE;
     }
 
-    for (i=0; !found && lines[i]; i++) {
+    for (i=0; lines[i]; i++) {
         success = g_regex_match (regex, lines[i], 0, &match_info);
         if (success) {
-            found = TRUE;
-            set_uuid = g_match_info_fetch (match_info, 1);
+            strcpy(device_uuid[n++], g_match_info_fetch (match_info, 1));
+            g_match_info_free (match_info);
+            if (n == 2) {
+                break;
+            }
         }
-        g_match_info_free (match_info);
     }
     g_regex_unref (regex);
     g_strfreev (lines);
 
-    if (!found) {
+    if (n != 2) {
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_PARSE,
-                     "Failed to determine Set UUID from: %s", output);
+                     "Failed to determine UUIDs from: %s", output);
         g_free (output);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
     g_free (output);
 
+    /* Wait for the symlinks to show up, would it be better to do a udev settle? */
+    for (i=0; i < 2; i++) {
+        const char *uuid_file = g_strdup_printf ("/dev/disk/by-uuid/%s", device_uuid[i]);
+        gboolean present = wait_for_file(uuid_file);
+        g_free ((gpointer)uuid_file);
+        if (!present) {
+            g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_NOEXIST,
+                     "Failed to locate uuid symlink '%s'", device_uuid[i]);
+            return FALSE;
+        }
+     }
 
-    /* attach the cache device to the backing device */
     /* get the name of the bcache device based on the @backing_device being its slave */
     dev_name = strrchr (backing_device, '/');
-    if (!dev_name) {
-        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_PARSE,
-                     "Failed to get name of the backing device from '%s'", backing_device);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
+
     /* move right after the last '/' (that's where the device name starts) */
     dev_name++;
-
-    /* make sure the bcache device is registered */
-    success = FALSE;
-    while (!success && (n_retry > 0)) {
-        success = bd_utils_echo_str_to_file (backing_device, "/sys/fs/bcache/register", error);
-        if (!success) {
-            if (n_retry > 0) {
-                g_clear_error (error);
-                n_retry--;
-                g_usleep (100000); /* microseconds */
-            } else {
-                /* error is already populated */
-                bd_utils_report_finished (progress_id, (*error)->message);
-                return FALSE;
-            }
-        }
-    }
 
     pattern = g_strdup_printf ("/sys/block/*/slaves/%s", dev_name);
     if (glob (pattern, GLOB_NOSORT, NULL, &globbuf) != 0) {
@@ -884,14 +886,6 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
     dev_name = g_strndup (dev_name, (dev_name_end - dev_name));
 
     globfree (&globbuf);
-
-    success = bd_kbd_bcache_attach (set_uuid, dev_name, error);
-    if (!success) {
-        g_prefix_error (error, "Failed to attach the cache to the backing device: ");
-        g_free (dev_name);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
 
     if (bcache_device)
         *bcache_device = dev_name;
