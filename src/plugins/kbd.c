@@ -755,11 +755,11 @@ gboolean wait_for_file (const char *filename) {
     while (count > 0) {
         g_usleep (100000); /* microseconds */
         if (g_file_test (filename, G_FILE_TEST_EXISTS)) {
-            break;
+            return TRUE;
         }
         --count;
     }
-    return (count > 0) ? TRUE : FALSE;
+    return FALSE;
 }
 
 /**
@@ -817,14 +817,11 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
         return FALSE;
     }
 
-    for (i=0; lines[i]; i++) {
+    for (i=0; lines[i] && n < 2; i++) {
         success = g_regex_match (regex, lines[i], 0, &match_info);
         if (success) {
-            strcpy(device_uuid[n++], g_match_info_fetch (match_info, 1));
+            strcpy (device_uuid[n++], g_match_info_fetch (match_info, 1));
             g_match_info_free (match_info);
-            if (n == 2) {
-                break;
-            }
         }
     }
     g_regex_unref (regex);
@@ -842,11 +839,11 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
     /* Wait for the symlinks to show up, would it be better to do a udev settle? */
     for (i=0; i < 2; i++) {
         const char *uuid_file = g_strdup_printf ("/dev/disk/by-uuid/%s", device_uuid[i]);
-        gboolean present = wait_for_file(uuid_file);
+        gboolean present = wait_for_file (uuid_file);
         g_free ((gpointer)uuid_file);
         if (!present) {
             g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_NOEXIST,
-                     "Failed to locate uuid symlink '%s'", device_uuid[i]);
+                         "Failed to locate uuid symlink '%s'", device_uuid[i]);
             return FALSE;
         }
      }
