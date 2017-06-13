@@ -879,7 +879,10 @@ class LvmTestLVs(LvmPVVGLVTestCase):
 
 class LvmPVVGthpoolTestCase(LvmPVVGTestCase):
     def _clean_up(self):
-        BlockDev.lvm_lvremove("testVG", "testPool", True, None)
+        try:
+            BlockDev.lvm_lvremove("testVG", "testPool", True, None)
+        except:
+            pass
 
         LvmPVVGTestCase._clean_up(self)
 
@@ -992,7 +995,10 @@ class LvmTestDataMetadataLV(LvmPVVGthpoolTestCase):
 
 class LvmPVVGLVthLVTestCase(LvmPVVGthpoolTestCase):
     def _clean_up(self):
-        BlockDev.lvm_lvremove("testVG", "testThLV", True, None)
+        try:
+            BlockDev.lvm_lvremove("testVG", "testThLV", True, None)
+        except:
+            pass
 
         LvmPVVGthpoolTestCase._clean_up(self)
 
@@ -1028,7 +1034,10 @@ class LvmTestThLVcreate(LvmPVVGLVthLVTestCase):
 
 class LvmPVVGLVthLVsnapshotTestCase(LvmPVVGLVthLVTestCase):
     def _clean_up(self):
-        BlockDev.lvm_lvremove("testVG", "testThLV_bak", True, None)
+        try:
+            BlockDev.lvm_lvremove("testVG", "testThLV_bak", True, None)
+        except:
+            pass
 
         LvmPVVGLVthLVTestCase._clean_up(self)
 
@@ -1068,7 +1077,10 @@ class LvmTestThSnapshotCreate(LvmPVVGLVthLVsnapshotTestCase):
 
 class LvmPVVGLVcachePoolTestCase(LvmPVVGLVTestCase):
     def _clean_up(self):
-        BlockDev.lvm_lvremove("testVG", "testCache", True, None)
+        try:
+            BlockDev.lvm_lvremove("testVG", "testCache", True, None)
+        except:
+            pass
 
         LvmPVVGLVTestCase._clean_up(self)
 
