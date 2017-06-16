@@ -275,6 +275,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertEqual(BlockDev.get_available_plugin_names(), ["btrfs"])
         self.assertTrue(BlockDev.reinit(None, True, None))
 
+    @unittest.skipIf("G_DEBUG" in os.environ and os.environ['G_DEBUG'] == 'fatal-criticals', "skipping tests not implemented as we will abort")
     def test_not_implemented(self):
         """Verify that unloaded/unimplemented functions report errors"""
 

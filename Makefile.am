@@ -80,13 +80,13 @@ fast-test: all pylint
 
 test-all: all pylint
 	sudo env FEELINGLUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
-		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
+		G_MESSAGES_DEBUG=all G_DEBUG=fatal-criticals $(TEST_PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
 	sudo env FEELINGLUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
-		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p 'lvm_dbus_tests.py'
+		G_MESSAGES_DEBUG=all G_DEBUG=fatal-criticals $(TEST_PYTHON) -m unittest discover -v -s tests/ -p 'lvm_dbus_tests.py'
 
 test-plugin-%: all
 	sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=tests/default_config \
-        $(TEST_PYTHON) -m unittest discover -v -s tests/ -p $*_test.py 2>&1 | tee -a $(TEST_SUITE_LOG)
+        G_MESSAGES_DEBUG=all G_DEBUG=fatal-criticals $(TEST_PYTHON) -m unittest discover -v -s tests/ -p $*_test.py 2>&1 | tee -a $(TEST_SUITE_LOG)
 
 fast-test-plugin-%: all
 	sudo env SKIP_SLOW= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=tests/default_config \
@@ -94,7 +94,7 @@ fast-test-plugin-%: all
 
 test-lvm-dbus: all
 	sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=tests/lvm_dbus_config \
-		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p 'lvm_dbus_tests.py'
+		G_MESSAGES_DEBUG=all G_DEBUG=fatal-criticals $(TEST_PYTHON) -m unittest discover -v -s tests/ -p 'lvm_dbus_tests.py'
 
 fast-test-lvm-dbus: all
 	sudo env SKIP_SLOW= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=tests/lvm_dbus_config \
