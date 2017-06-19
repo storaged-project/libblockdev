@@ -23,7 +23,7 @@ def mount(device, where):
 
 def umount(what):
     try:
-        os.system("umount %s &>/dev/null" % what)
+        os.system("umount %s" % what)
         os.rmdir(what)
     except OSError:
         # no such file or directory
