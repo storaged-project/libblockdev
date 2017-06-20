@@ -21,7 +21,7 @@
 #include <glib.h>
 #include <libcryptsetup.h>
 #include <nss.h>
-#include <libvolume_key.h>
+#include <volume_key/libvolume_key.h>
 #include <sys/fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/random.h>

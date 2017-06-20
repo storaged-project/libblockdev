@@ -70,7 +70,7 @@ if WITH_CRYPTO
 libbd_crypto_la_CFLAGS = $(GLIB_CFLAGS) $(CRYPTSETUP_CFLAGS) $(NSS_CFLAGS) -Wall -Wextra -Werror
 libbd_crypto_la_LIBADD = $(GLIB_LIBS) $(CRYPTSETUP_LIBS) $(NSS_LIBS) -lvolume_key ${builddir}/../utils/libbd_utils.la
 libbd_crypto_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
-libbd_crypto_la_CPPFLAGS = -I${builddir}/../../include/ -I/usr/include/volume_key
+libbd_crypto_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_crypto_la_SOURCES = crypto.c crypto.h
 endif
 
