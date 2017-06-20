@@ -239,6 +239,28 @@ gboolean bd_crypto_luks_change_key_blob (const gchar *device, const guint8 *pass
 gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError **error);
 
 /**
+ * bd_crypto_tc_open:
+ * @device: the device to open
+ * @name: name for the TrueCrypt/VeraCrypt device
+ * @pass_data: (array length=data_len): a passphrase for the TrueCrypt/VeraCrypt volume (may contain arbitrary binary data)
+ * @data_len: length of the @pass_data buffer
+ * @read_only: whether to open as read-only or not (meaning read-write)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully opened or not
+ */
+gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);
+
+/**
+ * bd_crypto_tc_close:
+ * @tc_device: TrueCrypt/VeraCrypt device to close
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the given @tc_device was successfully closed or not
+ */
+gboolean bd_crypto_tc_close (const gchar *tc_device, GError **error);
+
+/**
  * bd_crypto_escrow_device:
  * @device: path of the device to create escrow data for
  * @passphrase: passphrase used for the device
