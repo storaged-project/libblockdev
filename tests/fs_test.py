@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 from contextlib import contextmanager
 import utils
-from utils import run
+from utils import run, create_sparse_tempfile
 import six
 import overrides_hack
 
@@ -914,6 +914,43 @@ class MountTest(FSTestCase):
         succ = BlockDev.fs_unmount(self.loop_dev, False, False, None)
         self.assertTrue(succ)
         self.assertFalse(os.path.ismount(tmp))
+
+    def test_mount_ro_device(self):
+        """ Test mounting an FS on a RO device """
+
+        backing_file = create_sparse_tempfile("ro_mount", 50 * 1024**2)
+        self.addCleanup(os.unlink, backing_file)
+        self.assertTrue(BlockDev.fs_xfs_mkfs(backing_file, None))
+
+        succ, dev = BlockDev.loop_setup(backing_file, 0, 0, True, False)
+        self.assertTrue(succ)
+        self.addCleanup(BlockDev.loop_teardown, dev)
+
+        tmp_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="mount_test")
+        self.addCleanup(os.rmdir, tmp_dir)
+
+        loop_dev = "/dev/" + dev
+        # without any options, the mount should fall back to RO
+        self.assertTrue(BlockDev.fs_mount(loop_dev, tmp_dir, None, None, None))
+        self.addCleanup(umount, dev)
+        self.assertTrue(os.path.ismount(tmp_dir))
+
+        succ = BlockDev.fs_unmount(tmp_dir, False, False, None)
+        self.assertTrue(succ)
+        self.assertFalse(os.path.ismount(tmp_dir))
+
+        # explicit "ro" should work just fine too
+        self.assertTrue(BlockDev.fs_mount(loop_dev, tmp_dir, None, "ro", None))
+        self.assertTrue(os.path.ismount(tmp_dir))
+
+        succ = BlockDev.fs_unmount(tmp_dir, False, False, None)
+        self.assertTrue(succ)
+        self.assertFalse(os.path.ismount(tmp_dir))
+
+        # explicit "rw" should fail
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_mount(loop_dev, tmp_dir, None, "rw", None)
+        self.assertFalse(os.path.ismount(tmp_dir))
 
     @unittest.skipUnless("JENKINS_HOME" in os.environ, "skipping test that modifies system configuration")
     def test_mount_fstab(self):
