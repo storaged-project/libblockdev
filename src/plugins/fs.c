@@ -524,6 +524,7 @@ static gboolean do_mount (MountArgs *args, GError **error) {
                                      "Filesystem type %s not configured in kernel.", args->fstype);
                     break;
                 case EROFS:
+                case EACCES:
                       if (mflags & MS_RDONLY) {
                           g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                                        "Cannot mount %s read-only.", args->device);
