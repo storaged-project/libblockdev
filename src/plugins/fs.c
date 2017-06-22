@@ -1395,12 +1395,27 @@ static gboolean ext_mkfs (const gchar *device, const BDExtraArg **extra, const g
     return bd_utils_exec_and_report_error (args, extra, error);
 }
 
+/**
+ * xfs_resize_device:
+ * @device: the device the file system of which to resize
+ * @new_size: new requested size for the file system *in bytes*
+ *            (if 0, the file system is adapted to the underlying block device)
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the resize (right now
+ *                                                 passed to the 'xfs_growfs' utility)
+ * @error: (out): place to store error (if any)
+ *
+ * This is just a helper function for bd_fs_resize.
+ *
+ * Returns: whether the file system on @device was successfully resized or not
+ */
+
 static gboolean xfs_resize_device (const gchar *device, guint64 new_size, const BDExtraArg **extra, GError **error) {
     g_autofree gchar* mountpoint = NULL;
     gboolean ret = FALSE;
     gboolean success = FALSE;
     gboolean unmount = FALSE;
     GError *local_error = NULL;
+    BDFSXfsInfo* xfs_info = NULL;
 
     mountpoint = bd_fs_get_mountpoint (device, error);
     if (!mountpoint) {
@@ -1425,6 +1440,14 @@ static gboolean xfs_resize_device (const gchar *device, guint64 new_size, const 
             return FALSE;
         }
     }
+
+    xfs_info = bd_fs_xfs_get_info (device, error);
+    if (!xfs_info) {
+        return FALSE;
+    }
+
+    new_size = (new_size + xfs_info->block_size - 1) / xfs_info->block_size;
+    bd_fs_xfs_info_free (xfs_info);
 
     success = bd_fs_xfs_resize (mountpoint, new_size, extra, error);
 
