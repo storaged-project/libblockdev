@@ -476,6 +476,12 @@ static gboolean do_mount (MountArgs *args, GError **error) {
         }
     }
 
+#ifdef LIBMOUNT_RO_FALLBACK
+    /* we don't want libmount to try RDONLY mounts if we were explicitly given the "rw" option */
+    if (args->options && (mnt_optstr_get_option (args->options, "rw", NULL, NULL) == 0))
+        mnt_context_enable_rwonly_mount (cxt, TRUE);
+#endif
+
     ret = mnt_context_mount (cxt);
     if (ret != 0) {
         if (mnt_context_get_mflags (cxt, &mflags) != 0) {
@@ -524,11 +530,12 @@ static gboolean do_mount (MountArgs *args, GError **error) {
                                      "Filesystem type %s not configured in kernel.", args->fstype);
                     break;
                 case EROFS:
+                case EACCES:
                       if (mflags & MS_RDONLY) {
                           g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                                        "Cannot mount %s read-only.", args->device);
                           break;
-                      } else if (mnt_optstr_get_option (args->options, "rw", NULL, NULL) == 0) {
+                      } else if (args->options && (mnt_optstr_get_option (args->options, "rw", NULL, NULL) == 0)) {
                           g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                                        "%s is write-protected but `rw' option given.", args->device);
                           break;
@@ -536,7 +543,10 @@ static gboolean do_mount (MountArgs *args, GError **error) {
                           g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                                        "Mount %s on %s failed.", args->device, args->mountpoint);
                           break;
-                      } else {
+                      }
+#ifndef LIBMOUNT_RO_FALLBACK
+                      /* new versions of libmount do this automatically */
+                      else {
                           MountArgs ro_args;
                           gboolean success = FALSE;
 
@@ -555,7 +565,9 @@ static gboolean do_mount (MountArgs *args, GError **error) {
 
                           return success;
                       }
-
+#else
+                      break;
+#endif
                 default:
                     g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                                  "Mount syscall failed: %d.", syscall_errno);

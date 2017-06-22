@@ -152,6 +152,11 @@ AS_IF([test "x$with_part" != "xno" -o "x$with_fs" != "xno"],
 
 AS_IF([test "x$with_fs" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([MOUNT], [mount >= 2.23.0])
+       # new versions of libmount behave differently -- do RO mount in case of
+       # RW mount fails by default
+       AS_IF([$PKG_CONFIG --atleast-version=2.30.0 mount],
+             [AC_DEFINE([LIBMOUNT_RO_FALLBACK])], [])
+
        LIBBLOCKDEV_PKG_CHECK_MODULES([BLKID], [blkid >= 2.23.0])
        # older versions of libblkid don't support BLKID_SUBLKS_BADCSUM so let's just
        # define it as 0 (neutral value for bit combinations of flags)
