@@ -61,6 +61,10 @@ gboolean bd_crypto_luks_remove_key_blob (const gchar *device, const guint8 *pass
 gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, const gchar *npass, GError **error);
 gboolean bd_crypto_luks_change_key_blob (const gchar *device, const guint8 *pass_data, gsize data_len, const guint8 *npass_data, gsize ndata_len, GError **error);
 gboolean bd_crypto_luks_resize (const gchar *device, guint64 size, GError **error);
+
+gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);
+gboolean bd_crypto_tc_close (const gchar *tc_device, GError **error);
+
 gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, const gchar *cert_data, const gchar *directory, const gchar *backup_passphrase, GError **error);
 
 #endif  /* BD_CRYPTO */

@@ -865,6 +865,109 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError *
     return TRUE;
 }
 
+/**
+ * bd_crypto_tc_open:
+ * @device: the device to open
+ * @name: name for the TrueCrypt/VeraCrypt device
+ * @pass_data: (array length=data_len): a passphrase for the TrueCrypt/VeraCrypt volume (may contain arbitrary binary data)
+ * @data_len: length of the @pass_data buffer
+ * @read_only: whether to open as read-only or not (meaning read-write)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully opened or not
+ */
+gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error) {
+    struct crypt_device *cd = NULL;
+    gint ret = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+    struct crypt_params_tcrypt params = {0};
+
+    msg = g_strdup_printf ("Started opening '%s' TrueCrypt/VeraCrypt device", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    if (data_len == 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
+                     "No passphrase nor key file specified, cannot open.");
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l(-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    params.passphrase = (const char*) pass_data;
+    params.passphrase_size = data_len;
+    ret = crypt_load (cd, CRYPT_TCRYPT, &params);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to load device's parameters: %s", strerror_l(-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_activate_by_volume_key (cd, name, NULL, 0,
+                                        read_only ? CRYPT_ACTIVATE_READONLY : 0);
+
+    if (ret < 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to activate device: %s", strerror_l(-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
+}
+
+/**
+ * bd_crypto_tc_close:
+ * @tc_device: TrueCrypt/VeraCrypt device to close
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the given @tc_device was successfully closed or not
+ */
+gboolean bd_crypto_tc_close (const gchar *tc_device, GError **error) {
+    struct crypt_device *cd = NULL;
+    gint ret = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started closing TrueCrypt/VeraCrypt device '%s'", tc_device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    ret = crypt_init_by_name (&cd, tc_device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l(-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_deactivate (cd, tc_device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to deactivate device: %s", strerror_l(-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
+}
+
 static gchar *always_fail_cb (gpointer data __attribute__((unused)), const gchar *prompt __attribute__((unused)), int echo __attribute__((unused))) {
     return NULL;
 }
