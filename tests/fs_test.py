@@ -1097,6 +1097,45 @@ class MountTest(FSTestCase):
             BlockDev.fs_unmount(self.loop_dev, run_as_uid=uid, run_as_gid=gid)
         self.assertTrue(os.path.ismount(tmp))
 
+class GenericCheck(FSTestCase):
+    def _test_generic_check(self, mkfs_function):
+        # clean the device
+        succ = BlockDev.fs_clean(self.loop_dev)
+
+        succ = mkfs_function(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        # check for consistency (expected to be ok)
+        succ = BlockDev.fs_check(self.loop_dev)
+        self.assertTrue(succ)
+
+    def test_ext4_generic_check(self):
+        """Test generic check function with an ext4 file system"""
+        self._test_generic_check(mkfs_function=BlockDev.fs_ext4_mkfs)
+
+    def test_xfs_generic_check(self):
+        """Test generic check function with an ext4 file system"""
+        self._test_generic_check(mkfs_function=BlockDev.fs_xfs_mkfs)
+
+class GenericRepair(FSTestCase):
+    def _test_generic_repair(self, mkfs_function):
+        # clean the device
+        succ = BlockDev.fs_clean(self.loop_dev)
+
+        succ = mkfs_function(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        # repair (expected to succeed)
+        succ = BlockDev.fs_repair(self.loop_dev)
+        self.assertTrue(succ)
+
+    def test_ext4_generic_repair(self):
+        """Test generic repair function with an ext4 file system"""
+        self._test_generic_repair(mkfs_function=BlockDev.fs_ext4_mkfs)
+
+    def test_xfs_generic_repair(self):
+        """Test generic repair function with an xfs file system"""
+        self._test_generic_repair(mkfs_function=BlockDev.fs_xfs_mkfs)
 
 class GenericResize(FSTestCase):
     def _test_generic_resize(self, mkfs_function):

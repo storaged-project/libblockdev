@@ -82,6 +82,8 @@ gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar 
 gchar* bd_fs_get_mountpoint (const gchar *device, GError **error);
 
 gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error);
+gboolean bd_fs_repair (const gchar *device, GError **error);
+gboolean bd_fs_check (const gchar *device, GError **error);
 
 typedef enum {
     BD_FS_OFFLINE_SHRINK = 1 << 1,

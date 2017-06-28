@@ -1517,20 +1517,8 @@ static gboolean xfs_resize_device (const gchar *device, guint64 new_size, const 
     return success;
 }
 
-/**
- * bd_fs_resize:
- * @device: the device the file system of which to resize
- * @new_size: new requested size for the file system (if 0, the file system is
- *            adapted to the underlying block device)
- * @error: (out): place to store error (if any)
- *
- * Resize filesystem on @device. This calls other fs resize functions from this
- * plugin based on detected filesystem (e.g. bd_fs_xfs_resize for XFS). This
- * function will return an error for unknown/unsupported filesystems.
- *
- * Returns: whether the file system on @device was successfully resized or not
- */
-gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error) {
+static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 new_size, GError **error) {
+    const gchar* op_name = NULL;
     g_autofree gchar* fstype = NULL;
 
     fstype = bd_fs_get_fstype (device, error);
@@ -1545,22 +1533,97 @@ gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error) {
         }
     }
 
-    if (g_strcmp0 (fstype, "ext2") == 0) {
-        return bd_fs_ext2_resize (device, new_size, NULL, error);
-    } else if (g_strcmp0 (fstype, "ext3") == 0) {
-        return bd_fs_ext3_resize (device, new_size, NULL, error);
-    } else if (g_strcmp0 (fstype, "ext4") == 0) {
-        return bd_fs_ext4_resize (device, new_size, NULL, error);
+    if (g_strcmp0 (fstype, "ext2") == 0 || g_strcmp0 (fstype, "ext3") == 0
+                                        || g_strcmp0 (fstype, "ext4") == 0) {
+        switch (op) {
+            case BD_FS_RESIZE:
+                return bd_fs_ext4_resize (device, new_size, NULL, error);
+            case BD_FS_REPAIR:
+                return bd_fs_ext4_repair (device, TRUE, NULL, error);
+            case BD_FS_CHECK:
+                return bd_fs_ext4_check (device, NULL, error);
+        }
     } else if (g_strcmp0 (fstype, "xfs") == 0) {
-        return xfs_resize_device (device, new_size, NULL, error);
+        switch (op) {
+            case BD_FS_RESIZE:
+                return xfs_resize_device (device, new_size, NULL, error);
+            case BD_FS_REPAIR:
+                return bd_fs_xfs_repair (device, NULL, error);
+            case BD_FS_CHECK:
+                return bd_fs_xfs_check (device, error);
+        }
     } else if (g_strcmp0 (fstype, "vfat") == 0) {
-        return bd_fs_vfat_resize (device, new_size,  error);
-    } else {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
-                     "Resizing filesystem '%s' is not supported.", fstype);
-        return FALSE;
+        switch (op) {
+            case BD_FS_RESIZE:
+                return bd_fs_vfat_resize (device, new_size, error);
+            case BD_FS_REPAIR:
+                return bd_fs_vfat_repair (device, NULL, error);
+            case BD_FS_CHECK:
+                return bd_fs_vfat_check (device, NULL, error);
+        }
     }
 
+    switch (op) {
+        case BD_FS_RESIZE:
+            op_name = "Resizing";
+            break;
+        case BD_FS_REPAIR:
+            op_name = "Repairing";
+            break;
+        case BD_FS_CHECK:
+            op_name = "Checking";
+            break;
+    }
+    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
+                 "%s filesystem '%s' is not supported.", op_name, fstype);
+    return FALSE;
+}
+
+/**
+ * bd_fs_resize:
+ * @device: the device the file system of which to resize
+ * @new_size: new requested size for the file system (if 0, the file system is
+ *            adapted to the underlying block device)
+ * @error: (out): place to store error (if any)
+ *
+ * Resize filesystem on @device. This calls other fs resize functions from this
+ * plugin based on detected filesystem (e.g. bd_fs_xfs_resize for XFS). This
+ * function will return an error for unknown/unsupported filesystems.
+ *
+ * Returns: whether the file system on @device was successfully resized or not
+ */
+gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error) {
+    return device_operation (device, BD_FS_RESIZE, new_size, error);
+}
+
+/**
+ * bd_fs_repair:
+ * @device: the device the file system of which to repair
+ * @error: (out): place to store error (if any)
+ *
+ * Repair filesystem on @device. This calls other fs repair functions from this
+ * plugin based on detected filesystem (e.g. bd_fs_xfs_repair for XFS). This
+ * function will return an error for unknown/unsupported filesystems.
+ *
+ * Returns: whether the file system on @device was successfully repaired or not
+ */
+gboolean bd_fs_repair (const gchar *device, GError **error) {
+    return device_operation (device, BD_FS_REPAIR, 0, error);
+ }
+
+/**
+ * bd_fs_check:
+ * @device: the device the file system of which to check
+ * @error: (out): place to store error (if any)
+ *
+ * Check filesystem on @device. This calls other fs check functions from this
+ * plugin based on detected filesystem (e.g. bd_fs_xfs_check for XFS). This
+ * function will return an error for unknown/unsupported filesystems.
+ *
+ * Returns: whether the file system on @device passed the consistency check or not
+ */
+gboolean bd_fs_check (const gchar *device, GError **error) {
+    return device_operation (device, BD_FS_CHECK, 0, error);
 }
 
 static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar **required_utility, BDFsResizeFlags *mode, GError **error) {

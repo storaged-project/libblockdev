@@ -361,6 +361,32 @@ gchar* bd_fs_get_mountpoint (const gchar *device, GError **error);
  */
 gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error);
 
+ /**
+ * bd_fs_repair:
+ * @device: the device the file system of which to repair
+ * @error: (out): place to store error (if any)
+ *
+ * Repair filesystem on @device. This calls other fs repair functions from this
+ * plugin based on detected filesystem (e.g. bd_fs_xfs_repair for XFS). This
+ * function will return an error for unknown/unsupported filesystems.
+ *
+ * Returns: whether the file system on @device was successfully repaired or not
+ */
+gboolean bd_fs_repair (const gchar *device, GError **error);
+
+/**
+ * bd_fs_check:
+ * @device: the device the file system of which to check
+ * @error: (out): place to store error (if any)
+ *
+ * Check filesystem on @device. This calls other fs check functions from this
+ * plugin based on detected filesystem (e.g. bd_fs_xfs_check for XFS). This
+ * function will return an error for unknown/unsupported filesystems.
+ *
+ * Returns: whether the file system on @device passed the consistency check or not
+ */
+gboolean bd_fs_check (const gchar *device, GError **error);
+
 /**
  * BDFsResizeFlags:
  * Flags indicating whether a filesystem resize action supports growing and/or
