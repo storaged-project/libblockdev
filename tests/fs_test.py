@@ -844,6 +844,69 @@ class VfatResize(FSTestCase):
         succ = BlockDev.fs_vfat_resize(self.loop_dev, 0)
         self.assertTrue(succ)
 
+class CanResizeRepairCheck(FSTestCase):
+    def test_can_resize(self):
+        """Verify that tooling query works for resize"""
+
+        avail, mode, util = BlockDev.fs_can_resize("ext4")
+        self.assertTrue(avail)
+        self.assertEqual(util, None)
+
+        old_path = os.environ.get("PATH", "")
+        os.environ["PATH"] = ""
+        avail, mode, util = BlockDev.fs_can_resize("ext4")
+        os.environ["PATH"] = old_path
+        self.assertFalse(avail)
+        self.assertEqual(util, "resize2fs")
+        self.assertEqual(mode, BlockDev.FsResizeFlags.ONLINE_GROW |
+                               BlockDev.FsResizeFlags.OFFLINE_GROW |
+                               BlockDev.FsResizeFlags.OFFLINE_SHRINK)
+
+        avail = BlockDev.fs_can_resize("vfat")
+        self.assertTrue(avail)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_resize("nilfs2")
+
+    def test_can_repair(self):
+        """Verify that tooling query works for repair"""
+
+        avail, util = BlockDev.fs_can_repair("xfs")
+        self.assertTrue(avail)
+        self.assertEqual(util, None)
+
+        old_path = os.environ.get("PATH", "")
+        os.environ["PATH"] = ""
+        avail, util = BlockDev.fs_can_repair("xfs")
+        os.environ["PATH"] = old_path
+        self.assertFalse(avail)
+        self.assertEqual(util, "xfs_repair")
+
+        avail = BlockDev.fs_can_repair("vfat")
+        self.assertTrue(avail)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_repair("nilfs2")
+
+    def test_can_check(self):
+        """Verify that tooling query works for consistency check"""
+
+        avail, util = BlockDev.fs_can_check("xfs")
+        self.assertTrue(avail)
+        self.assertEqual(util, None)
+
+        old_path = os.environ.get("PATH", "")
+        os.environ["PATH"] = ""
+        avail, util = BlockDev.fs_can_check("xfs")
+        os.environ["PATH"] = old_path
+        self.assertFalse(avail)
+        self.assertEqual(util, "xfs_db")
+
+        avail = BlockDev.fs_can_check("vfat")
+        self.assertTrue(avail)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_check("nilfs2")
 
 class MountTest(FSTestCase):
 

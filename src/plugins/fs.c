@@ -47,6 +47,51 @@
  * A plugin for operations with file systems
  */
 
+typedef enum {
+    BD_FS_RESIZE,
+    BD_FS_REPAIR,
+    BD_FS_CHECK
+} BDFsOpType;
+
+/**
+ * BDFSInfo:
+ * @type: filesystem identifier, must be present
+ * @check_util: required utility for consistency checking, "" if not needed and NULL for no support
+ * @repair_util: required utility for repair, "" if not needed and NULL for no support
+ * @resize_util: required utility for resize, "" if not needed and NULL for no support
+ * @resize_mode: resize availability flags, 0 if no support
+ */
+typedef struct BDFSInfo
+{
+    const gchar *type;
+    const gchar *check_util;
+    const gchar *repair_util;
+    const gchar *resize_util;
+    BDFsResizeFlags resize_mode;
+} BDFSInfo;
+
+const BDFSInfo fs_info[] = {
+    {"xfs", "xfs_db", "xfs_repair", "xfs_growfs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW},
+    {"ext2", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK},
+    {"ext3", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK},
+    {"ext4", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK},
+    {"vfat", "fsck.vfat", "fsck.vfat", "", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK},
+    {NULL, NULL, NULL, NULL, 0}
+};
+
+static const BDFSInfo *
+get_fs_info (const gchar *type)
+{
+    g_return_val_if_fail (type != NULL, NULL);
+
+    for (guint n = 0; fs_info[n].type != NULL; n++) {
+        if (strcmp (fs_info[n].type, type) == 0)
+            return &fs_info[n];
+    }
+
+    return NULL;
+}
+
 /**
  * bd_fs_error_quark: (skip)
  */
@@ -1517,6 +1562,107 @@ gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error) {
     }
 
 }
+
+static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar **required_utility, BDFsResizeFlags *mode, GError **error) {
+    gboolean ret;
+    const BDFSInfo *fsinfo = NULL;
+    const gchar* op_name = NULL;
+    const gchar* exec_util = NULL;
+
+    if (required_utility != NULL)
+        *required_utility = NULL;
+
+    if (mode != NULL)
+        *mode = 0;
+
+    fsinfo = get_fs_info (fs_type);
+    if (fsinfo != NULL) {
+        switch (op) {
+            case BD_FS_RESIZE:
+                op_name = "Resizing";
+                exec_util = fsinfo->resize_util;
+                break;
+            case BD_FS_REPAIR:
+                op_name = "Repairing";
+                exec_util = fsinfo->repair_util;
+                break;
+            case BD_FS_CHECK:
+                op_name = "Checking";
+                exec_util = fsinfo->check_util;
+                break;
+        }
+    }
+
+    if (fsinfo == NULL || exec_util == NULL) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
+                     "%s filesystem '%s' is not supported.", op_name, fs_type);
+        return FALSE;
+    }
+
+    if (mode != NULL)
+        *mode = fsinfo->resize_mode;
+
+    if (strlen(exec_util) == 0) { /* empty string if no util needed */
+        return TRUE;
+    }
+
+    ret = bd_utils_check_util_version (exec_util, NULL, "", NULL, NULL);
+    if (!ret && required_utility != NULL)
+        *required_utility = g_strdup (exec_util);
+
+    return ret;
+}
+
+/**
+ * bd_fs_can_resize:
+ * @type: the filesystem type to be tested for installed resize support
+ * @mode: (out): flags for allowed resizing (i.e. growing/shrinking support for online/offline)
+ * @required_utility: (out) (transfer full): the utility binary which is required for resizing (if missing i.e. returns FALSE but no error)
+ * @error: (out): place to store error (if any)
+ *
+ * Searches for the required utility to resize the given filesystem and returns whether
+ * it is installed. The mode flags indicate if growing and/or shrinking resize is available if
+ * mounted/unmounted.
+ * Unknown filesystems or filesystems which do not support resizing result in errors.
+ *
+ * Returns: whether filesystem resize is available
+ */
+gboolean bd_fs_can_resize (const gchar *type, BDFsResizeFlags *mode, gchar **required_utility, GError **error) {
+    return query_fs_operation (type, BD_FS_RESIZE, required_utility, mode, error);
+}
+
+/**
+ * bd_fs_can_check:
+ * @type: the filesystem type to be tested for installed consistency check support
+ * @required_utility: (out) (transfer full): the utility binary which is required for checking (if missing i.e. returns FALSE but no error)
+ * @error: (out): place to store error (if any)
+ *
+ * Searches for the required utility to check the given filesystem and returns whether
+ * it is installed.
+ * Unknown filesystems or filesystems which do not support checking result in errors.
+ *
+ * Returns: whether filesystem check is available
+ */
+gboolean bd_fs_can_check (const gchar *type, gchar **required_utility, GError **error) {
+    return query_fs_operation (type, BD_FS_CHECK, required_utility, NULL, error);
+}
+
+/**
+ * bd_fs_can_repair:
+ * @type: the filesystem type to be tested for installed repair support
+ * @required_utility: (out) (transfer full): the utility binary which is required for repairing (if missing i.e. return FALSE but no error)
+ * @error: (out): place to store error (if any)
+ *
+ * Searches for the required utility to repair the given filesystem and returns whether
+ * it is installed.
+ * Unknown filesystems or filesystems which do not support reparing result in errors.
+ *
+ * Returns: whether filesystem repair is available
+ */
+gboolean bd_fs_can_repair (const gchar *type, gchar **required_utility, GError **error) {
+    return query_fs_operation (type, BD_FS_REPAIR, required_utility, NULL, error);
+}
+
 
 /**
  * bd_fs_ext2_mkfs:

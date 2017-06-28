@@ -83,6 +83,17 @@ gchar* bd_fs_get_mountpoint (const gchar *device, GError **error);
 
 gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error);
 
+typedef enum {
+    BD_FS_OFFLINE_SHRINK = 1 << 1,
+    BD_FS_OFFLINE_GROW = 1 << 2,
+    BD_FS_ONLINE_SHRINK = 1 << 3,
+    BD_FS_ONLINE_GROW = 1 << 4
+} BDFsResizeFlags;
+
+gboolean bd_fs_can_resize (const gchar *type, BDFsResizeFlags *mode, gchar **required_utility, GError **error);
+gboolean bd_fs_can_check (const gchar *type, gchar **required_utility, GError **error);
+gboolean bd_fs_can_repair (const gchar *type, gchar **required_utility, GError **error);
+
 gboolean bd_fs_ext2_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_fs_ext2_wipe (const gchar *device, GError **error);
 gboolean bd_fs_ext2_check (const gchar *device, const BDExtraArg **extra, GError **error);
