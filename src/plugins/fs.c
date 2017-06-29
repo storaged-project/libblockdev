@@ -50,7 +50,8 @@
 typedef enum {
     BD_FS_RESIZE,
     BD_FS_REPAIR,
-    BD_FS_CHECK
+    BD_FS_CHECK,
+    BD_FS_LABEL
 } BDFsOpType;
 
 /**
@@ -68,15 +69,16 @@ typedef struct BDFSInfo
     const gchar *repair_util;
     const gchar *resize_util;
     BDFsResizeFlags resize_mode;
+    const gchar *label_util;
 } BDFSInfo;
 
 const BDFSInfo fs_info[] = {
-    {"xfs", "xfs_db", "xfs_repair", "xfs_growfs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW},
-    {"ext2", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK},
-    {"ext3", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK},
-    {"ext4", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK},
-    {"vfat", "fsck.vfat", "fsck.vfat", "", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK},
-    {NULL, NULL, NULL, NULL, 0}
+    {"xfs", "xfs_db", "xfs_repair", "xfs_growfs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW, "xfs_admin"},
+    {"ext2", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs"},
+    {"ext3", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs"},
+    {"ext4", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs"},
+    {"vfat", "fsck.vfat", "fsck.vfat", "", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "fatlabel"},
+    {NULL, NULL, NULL, NULL, 0, NULL}
 };
 
 static const BDFSInfo *
@@ -1517,7 +1519,7 @@ static gboolean xfs_resize_device (const gchar *device, guint64 new_size, const 
     return success;
 }
 
-static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 new_size, GError **error) {
+static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 new_size, const gchar *label, GError **error) {
     const gchar* op_name = NULL;
     g_autofree gchar* fstype = NULL;
 
@@ -1542,6 +1544,8 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
                 return bd_fs_ext4_repair (device, TRUE, NULL, error);
             case BD_FS_CHECK:
                 return bd_fs_ext4_check (device, NULL, error);
+            case BD_FS_LABEL:
+                return bd_fs_ext4_set_label (device, label, error);
         }
     } else if (g_strcmp0 (fstype, "xfs") == 0) {
         switch (op) {
@@ -1551,6 +1555,8 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
                 return bd_fs_xfs_repair (device, NULL, error);
             case BD_FS_CHECK:
                 return bd_fs_xfs_check (device, error);
+            case BD_FS_LABEL:
+                return bd_fs_xfs_set_label (device, label, error);
         }
     } else if (g_strcmp0 (fstype, "vfat") == 0) {
         switch (op) {
@@ -1560,6 +1566,8 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
                 return bd_fs_vfat_repair (device, NULL, error);
             case BD_FS_CHECK:
                 return bd_fs_vfat_check (device, NULL, error);
+            case BD_FS_LABEL:
+                return bd_fs_vfat_set_label (device, label, error);
         }
     }
 
@@ -1572,6 +1580,9 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
             break;
         case BD_FS_CHECK:
             op_name = "Checking";
+            break;
+        case BD_FS_LABEL:
+            op_name = "Setting the label of";
             break;
     }
     g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
@@ -1593,7 +1604,7 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
  * Returns: whether the file system on @device was successfully resized or not
  */
 gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error) {
-    return device_operation (device, BD_FS_RESIZE, new_size, error);
+    return device_operation (device, BD_FS_RESIZE, new_size, NULL, error);
 }
 
 /**
@@ -1608,7 +1619,7 @@ gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error) {
  * Returns: whether the file system on @device was successfully repaired or not
  */
 gboolean bd_fs_repair (const gchar *device, GError **error) {
-    return device_operation (device, BD_FS_REPAIR, 0, error);
+    return device_operation (device, BD_FS_REPAIR, 0, NULL, error);
  }
 
 /**
@@ -1623,8 +1634,23 @@ gboolean bd_fs_repair (const gchar *device, GError **error) {
  * Returns: whether the file system on @device passed the consistency check or not
  */
 gboolean bd_fs_check (const gchar *device, GError **error) {
-    return device_operation (device, BD_FS_CHECK, 0, error);
+    return device_operation (device, BD_FS_CHECK, 0, NULL, error);
 }
+
+/**
+ * bd_fs_set_label:
+ * @device: the device with file system to set the label for
+ * @error: (out): place to store error (if any)
+ *
+ * Set label for filesystem on @device. This calls other fs label functions from this
+ * plugin based on detected filesystem (e.g. bd_fs_xfs_set_label for XFS). This
+ * function will return an error for unknown/unsupported filesystems.
+ *
+ * Returns: whether the file system on @device was successfully relabled or not
+ */
+gboolean bd_fs_set_label (const gchar *device, const gchar *label, GError **error) {
+    return device_operation (device, BD_FS_LABEL, 0, label, error);
+ }
 
 static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar **required_utility, BDFsResizeFlags *mode, GError **error) {
     gboolean ret;
@@ -1652,6 +1678,10 @@ static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar *
             case BD_FS_CHECK:
                 op_name = "Checking";
                 exec_util = fsinfo->check_util;
+                break;
+            case BD_FS_LABEL:
+                op_name = "Setting the label of";
+                exec_util = fsinfo->label_util;
                 break;
         }
     }
@@ -1726,6 +1756,21 @@ gboolean bd_fs_can_repair (const gchar *type, gchar **required_utility, GError *
     return query_fs_operation (type, BD_FS_REPAIR, required_utility, NULL, error);
 }
 
+/**
+ * bd_fs_can_set_label:
+ * @type: the filesystem type to be tested for installed label support
+ * @required_utility: (out) (transfer full): the utility binary which is required for relabeling (if missing i.e. return FALSE but no error)
+ * @error: (out): place to store error (if any)
+ *
+ * Searches for the required utility to set the label of the given filesystem and returns whether
+ * it is installed.
+ * Unknown filesystems or filesystems which do not support setting the label result in errors.
+ *
+ * Returns: whether setting filesystem label is available
+ */
+gboolean bd_fs_can_set_label (const gchar *type, gchar **required_utility, GError **error) {
+    return query_fs_operation (type, BD_FS_LABEL, required_utility, NULL, error);
+}
 
 /**
  * bd_fs_ext2_mkfs:
