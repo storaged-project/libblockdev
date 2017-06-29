@@ -178,5 +178,7 @@ AS_IF([test "x$with_btrfs" != "xno" -o "x$with_mdraid" != "xno"],
 AC_SUBST([skip_patterns], [$skip_patterns])
 AC_SUBST([MAJOR_VER], [\"2\"])
 
+CFLAGS="$CFLAGS -std=gnu99"
+
 AC_OUTPUT
 LIBBLOCKDEV_FAILURES
