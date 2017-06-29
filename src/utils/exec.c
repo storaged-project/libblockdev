@@ -550,7 +550,6 @@ gint bd_utils_version_cmp (const gchar *ver_string1, const gchar *ver_string2, G
     guint64 v2_value = 0;
     GRegex *regex = NULL;
     gboolean success = FALSE;
-    guint i = 0;
     gint ret = -2;
 
     regex = g_regex_new ("^(\\d+)(\\.\\d+)*(-\\d)?$", 0, 0, error);
@@ -578,7 +577,7 @@ gint bd_utils_version_cmp (const gchar *ver_string1, const gchar *ver_string2, G
     v1_fields_len = g_strv_length (v1_fields);
     v2_fields_len = g_strv_length (v2_fields);
 
-    for (i=0; (i < v1_fields_len) && (i < v2_fields_len) && ret == -2; i++) {
+    for (guint i=0; (i < v1_fields_len) && (i < v2_fields_len) && ret == -2; i++) {
         v1_value = g_ascii_strtoull (v1_fields[i], NULL, 0);
         v2_value = g_ascii_strtoull (v2_fields[i], NULL, 0);
         if (v1_value < v2_value)
