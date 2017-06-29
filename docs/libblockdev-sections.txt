@@ -389,6 +389,7 @@ BDPartDiskSpec
 bd_part_create_table
 bd_part_create_part
 bd_part_delete_part
+bd_part_resize_part
 bd_part_get_disk_parts
 bd_part_get_part_spec
 bd_part_set_part_flag

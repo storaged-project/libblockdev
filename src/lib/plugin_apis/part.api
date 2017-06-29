@@ -284,6 +284,20 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
 gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **error);
 
 /**
+ * bd_part_resize_part:
+ * @disk: disk containing the paritition
+ * @part: partition to resize
+ * @size: new partition size, 0 for maximal size
+ * @align: alignment to use for the partition end
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @part partition was successfully resized on @disk to @size
+ *
+ * NOTE: The resulting partition may be slightly bigger than requested due to alignment.
+ */
+gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size, BDPartAlign align, GError **error);
+
+/**
  * bd_part_set_part_flag:
  * @disk: disk the partition belongs to
  * @part: partition to set the flag on
