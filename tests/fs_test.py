@@ -844,6 +844,69 @@ class VfatResize(FSTestCase):
         succ = BlockDev.fs_vfat_resize(self.loop_dev, 0)
         self.assertTrue(succ)
 
+class CanResizeRepairCheck(FSTestCase):
+    def test_can_resize(self):
+        """Verify that tooling query works for resize"""
+
+        avail, mode, util = BlockDev.fs_can_resize("ext4")
+        self.assertTrue(avail)
+        self.assertEqual(util, None)
+
+        old_path = os.environ.get("PATH", "")
+        os.environ["PATH"] = ""
+        avail, mode, util = BlockDev.fs_can_resize("ext4")
+        os.environ["PATH"] = old_path
+        self.assertFalse(avail)
+        self.assertEqual(util, "resize2fs")
+        self.assertEqual(mode, BlockDev.FsResizeFlags.ONLINE_GROW |
+                               BlockDev.FsResizeFlags.OFFLINE_GROW |
+                               BlockDev.FsResizeFlags.OFFLINE_SHRINK)
+
+        avail = BlockDev.fs_can_resize("vfat")
+        self.assertTrue(avail)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_resize("nilfs2")
+
+    def test_can_repair(self):
+        """Verify that tooling query works for repair"""
+
+        avail, util = BlockDev.fs_can_repair("xfs")
+        self.assertTrue(avail)
+        self.assertEqual(util, None)
+
+        old_path = os.environ.get("PATH", "")
+        os.environ["PATH"] = ""
+        avail, util = BlockDev.fs_can_repair("xfs")
+        os.environ["PATH"] = old_path
+        self.assertFalse(avail)
+        self.assertEqual(util, "xfs_repair")
+
+        avail = BlockDev.fs_can_repair("vfat")
+        self.assertTrue(avail)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_repair("nilfs2")
+
+    def test_can_check(self):
+        """Verify that tooling query works for consistency check"""
+
+        avail, util = BlockDev.fs_can_check("xfs")
+        self.assertTrue(avail)
+        self.assertEqual(util, None)
+
+        old_path = os.environ.get("PATH", "")
+        os.environ["PATH"] = ""
+        avail, util = BlockDev.fs_can_check("xfs")
+        os.environ["PATH"] = old_path
+        self.assertFalse(avail)
+        self.assertEqual(util, "xfs_db")
+
+        avail = BlockDev.fs_can_check("vfat")
+        self.assertTrue(avail)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_check("nilfs2")
 
 class MountTest(FSTestCase):
 
@@ -1034,6 +1097,45 @@ class MountTest(FSTestCase):
             BlockDev.fs_unmount(self.loop_dev, run_as_uid=uid, run_as_gid=gid)
         self.assertTrue(os.path.ismount(tmp))
 
+class GenericCheck(FSTestCase):
+    def _test_generic_check(self, mkfs_function):
+        # clean the device
+        succ = BlockDev.fs_clean(self.loop_dev)
+
+        succ = mkfs_function(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        # check for consistency (expected to be ok)
+        succ = BlockDev.fs_check(self.loop_dev)
+        self.assertTrue(succ)
+
+    def test_ext4_generic_check(self):
+        """Test generic check function with an ext4 file system"""
+        self._test_generic_check(mkfs_function=BlockDev.fs_ext4_mkfs)
+
+    def test_xfs_generic_check(self):
+        """Test generic check function with an ext4 file system"""
+        self._test_generic_check(mkfs_function=BlockDev.fs_xfs_mkfs)
+
+class GenericRepair(FSTestCase):
+    def _test_generic_repair(self, mkfs_function):
+        # clean the device
+        succ = BlockDev.fs_clean(self.loop_dev)
+
+        succ = mkfs_function(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        # repair (expected to succeed)
+        succ = BlockDev.fs_repair(self.loop_dev)
+        self.assertTrue(succ)
+
+    def test_ext4_generic_repair(self):
+        """Test generic repair function with an ext4 file system"""
+        self._test_generic_repair(mkfs_function=BlockDev.fs_ext4_mkfs)
+
+    def test_xfs_generic_repair(self):
+        """Test generic repair function with an xfs file system"""
+        self._test_generic_repair(mkfs_function=BlockDev.fs_xfs_mkfs)
 
 class GenericResize(FSTestCase):
     def _test_generic_resize(self, mkfs_function):

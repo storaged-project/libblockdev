@@ -361,6 +361,89 @@ gchar* bd_fs_get_mountpoint (const gchar *device, GError **error);
  */
 gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error);
 
+ /**
+ * bd_fs_repair:
+ * @device: the device the file system of which to repair
+ * @error: (out): place to store error (if any)
+ *
+ * Repair filesystem on @device. This calls other fs repair functions from this
+ * plugin based on detected filesystem (e.g. bd_fs_xfs_repair for XFS). This
+ * function will return an error for unknown/unsupported filesystems.
+ *
+ * Returns: whether the file system on @device was successfully repaired or not
+ */
+gboolean bd_fs_repair (const gchar *device, GError **error);
+
+/**
+ * bd_fs_check:
+ * @device: the device the file system of which to check
+ * @error: (out): place to store error (if any)
+ *
+ * Check filesystem on @device. This calls other fs check functions from this
+ * plugin based on detected filesystem (e.g. bd_fs_xfs_check for XFS). This
+ * function will return an error for unknown/unsupported filesystems.
+ *
+ * Returns: whether the file system on @device passed the consistency check or not
+ */
+gboolean bd_fs_check (const gchar *device, GError **error);
+
+/**
+ * BDFsResizeFlags:
+ * Flags indicating whether a filesystem resize action supports growing and/or
+ * shrinking if mounted or unmounted.
+ */
+typedef enum {
+    BD_FS_OFFLINE_SHRINK = 1 << 1,
+    BD_FS_OFFLINE_GROW = 1 << 2,
+    BD_FS_ONLINE_SHRINK = 1 << 3,
+    BD_FS_ONLINE_GROW = 1 << 4
+} BDFsResizeFlags;
+
+/**
+ * bd_fs_can_resize:
+ * @type: the filesystem type to be tested for installed resize support
+ * @mode: (out): flags for allowed resizing (i.e. growing/shrinking support for online/offline)
+ * @required_utility: (out) (transfer full): the utility binary which is required for resizing (if missing i.e. returns FALSE but no error)
+ * @error: (out): place to store error (if any)
+ *
+ * Searches for the required utility to resize the given filesystem and returns whether
+ * it is installed. The mode flags indicate if growing and/or shrinking resize is available if
+ * mounted/unmounted.
+ * Unknown filesystems or filesystems which do not support resizing result in errors.
+ *
+ * Returns: whether filesystem resize is available
+ */
+gboolean bd_fs_can_resize (const gchar *type, BDFsResizeFlags *mode, gchar **required_utility, GError **error);
+
+/**
+ * bd_fs_can_check:
+ * @type: the filesystem type to be tested for installed consistency check support
+ * @required_utility: (out) (transfer full): the utility binary which is required for checking (if missing i.e. returns FALSE but no error)
+ * @error: (out): place to store error (if any)
+ *
+ * Searches for the required utility to check the given filesystem and returns whether
+ * it is installed.
+ * Unknown filesystems or filesystems which do not support checking result in errors.
+ *
+ * Returns: whether filesystem check is available
+ */
+gboolean bd_fs_can_check (const gchar *type, gchar **required_utility, GError **error);
+
+/**
+ * bd_fs_can_repair:
+ * @type: the filesystem type to be tested for installed repair support
+ * @required_utility: (out) (transfer full): the utility binary which is required for repairing (if missing i.e. return FALSE but no error)
+ * @error: (out): place to store error (if any)
+ *
+ * Searches for the required utility to repair the given filesystem and returns whether
+ * it is installed.
+ * Unknown filesystems or filesystems which do not support reparing result in errors.
+ *
+ * Returns: whether filesystem repair is available
+ */
+gboolean bd_fs_can_repair (const gchar *type, gchar **required_utility, GError **error);
+
+
 /**
  * bd_fs_ext2_mkfs:
  * @device: the device to create a new ext2 fs on
