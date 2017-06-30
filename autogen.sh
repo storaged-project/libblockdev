@@ -1,7 +1,16 @@
 #!/bin/bash -e
-[ -d m4 ] || mkdir m4
-libtoolize --copy --force
-aclocal -I m4
-autoconf
-automake --foreign --add-missing --copy
-rm -rf autom4te.cache
+test -n "$srcdir" || srcdir=`dirname "$0"`
+test -n "$srcdir" || srcdir=.
+
+pushd $srcdir
+
+(test -f configure.ac) || {
+        echo "*** ERROR: Directory "\`$srcdir\'" does not look like the top-level project directory ***"
+        exit 1
+}
+
+PKG_NAME=`autoconf --trace 'AC_INIT:$1' configure.ac`
+
+aclocal --install || exit 1
+autoreconf --verbose --force --install -Wno-portability || exit 1
+popd
