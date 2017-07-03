@@ -825,8 +825,8 @@ static PedPartition* add_part_to_disk (PedDevice *dev, PedDisk *disk, BDPartType
         return NULL;
     }
 
-    ped_constraint_destroy (constr);
-    constr = ped_constraint_exact (geom);
+    if (!constr)
+        constr = ped_constraint_exact (geom);
 
     status = ped_disk_add_partition (disk, part, constr);
     if (status == 0) {
