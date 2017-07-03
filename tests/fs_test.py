@@ -844,7 +844,7 @@ class VfatResize(FSTestCase):
         succ = BlockDev.fs_vfat_resize(self.loop_dev, 0)
         self.assertTrue(succ)
 
-class CanResizeRepairCheck(FSTestCase):
+class CanResizeRepairCheckLabel(FSTestCase):
     def test_can_resize(self):
         """Verify that tooling query works for resize"""
 
@@ -907,6 +907,23 @@ class CanResizeRepairCheck(FSTestCase):
 
         with self.assertRaises(GLib.GError):
             BlockDev.fs_can_check("nilfs2")
+
+    def test_can_set_label(self):
+        """Verify that tooling query works for setting the label"""
+
+        avail, util = BlockDev.fs_can_set_label("xfs")
+        self.assertTrue(avail)
+        self.assertEqual(util, None)
+
+        old_path = os.environ.get("PATH", "")
+        os.environ["PATH"] = ""
+        avail, util = BlockDev.fs_can_set_label("xfs")
+        os.environ["PATH"] = old_path
+        self.assertFalse(avail)
+        self.assertEqual(util, "xfs_admin")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_set_label("nilfs2")
 
 class MountTest(FSTestCase):
 
@@ -1136,6 +1153,26 @@ class GenericRepair(FSTestCase):
     def test_xfs_generic_repair(self):
         """Test generic repair function with an xfs file system"""
         self._test_generic_repair(mkfs_function=BlockDev.fs_xfs_mkfs)
+
+class GenericSetLabel(FSTestCase):
+    def _test_generic_set_label(self, mkfs_function):
+        # clean the device
+        succ = BlockDev.fs_clean(self.loop_dev)
+
+        succ = mkfs_function(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        # set label (expected to succeed)
+        succ = BlockDev.fs_set_label(self.loop_dev, "new_label")
+        self.assertTrue(succ)
+
+    def test_ext4_generic_set_label(self):
+        """Test generic set_label function with an ext4 file system"""
+        self._test_generic_set_label(mkfs_function=BlockDev.fs_ext4_mkfs)
+
+    def test_xfs_generic_set_label(self):
+        """Test generic set_label function with a xfs file system"""
+        self._test_generic_set_label(mkfs_function=BlockDev.fs_xfs_mkfs)
 
 class GenericResize(FSTestCase):
     def _test_generic_resize(self, mkfs_function):
