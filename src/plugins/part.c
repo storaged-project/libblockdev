@@ -729,8 +729,14 @@ static gboolean resize_part (PedPartition *part, PedDevice *dev, PedDisk *disk, 
     gint orig_flag_state = 0;
     PedSector start;
     PedSector end;
+    PedSector max_end;
     PedSector new_size = 0;
     gint status = 0;
+    /* it should be possible to pass the whole drive size a partition size,
+     * so -1 MiB for the first partition alignment,
+     * -1 MiB for creating this here as a logial partition
+     * and -1 MiB for end alingment */
+    const PedSector tolerance = (PedSector) (4 MiB /  dev->sector_size);
 
     constr = prepare_alignment_constraint (dev, disk, align, &orig_flag_state);
     start = part->geom.start;
@@ -753,6 +759,7 @@ static gboolean resize_part (PedPartition *part, PedDevice *dev, PedDisk *disk, 
         new_size = (size + dev->sector_size - 1) / dev->sector_size;
     }
 
+    max_end = geom->end;
     ped_geometry_destroy (geom);
     geom = ped_geometry_new (dev, start, new_size);
     if (!geom) {
@@ -763,12 +770,23 @@ static gboolean resize_part (PedPartition *part, PedDevice *dev, PedDisk *disk, 
         return FALSE;
     }
 
-    if (size != 0)
+    if (size != 0) {
         end = ped_alignment_align_up (constr->end_align, constr->end_range, geom->end);
-    else
+        if (end > max_end && end < max_end + tolerance) {
+            end = max_end;
+        }
+    } else {
         end = geom->end;
-
+    }
     ped_constraint_destroy (constr);
+    if (!ped_geometry_set_end (geom, end)) {
+       set_parted_error (error, BD_PART_ERROR_FAIL);
+       g_prefix_error (error, "Failed to change geometry for partition on device '%s'", dev->path);
+       ped_constraint_destroy (constr);
+       ped_geometry_destroy (geom);
+       finish_alignment_constraint (disk, orig_flag_state);
+       return FALSE;
+    }
     constr = ped_constraint_exact (geom);
     status = ped_disk_set_partition_geom (disk, part, constr, start, end);
 
@@ -779,8 +797,14 @@ static gboolean resize_part (PedPartition *part, PedDevice *dev, PedDisk *disk, 
         ped_constraint_destroy (constr);
         finish_alignment_constraint (disk, orig_flag_state);
         return FALSE;
-    } else if (part->geom.start != start || part->geom.length < new_size) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL, "Failed to meet correct partition size on device '%s'", dev->path);
+    } else if (part->geom.start != start) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL, "Failed to meet partition start on device '%s'", dev->path);
+        ped_geometry_destroy (geom);
+        ped_constraint_destroy (constr);
+        finish_alignment_constraint (disk, orig_flag_state);
+        return FALSE;
+    } else if (part->geom.length < new_size - tolerance) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL, "Failed to meet partition size on device '%s'", dev->path);
         ped_geometry_destroy (geom);
         ped_constraint_destroy (constr);
         finish_alignment_constraint (disk, orig_flag_state);
@@ -825,8 +849,8 @@ static PedPartition* add_part_to_disk (PedDevice *dev, PedDisk *disk, BDPartType
         return NULL;
     }
 
-    ped_constraint_destroy (constr);
-    constr = ped_constraint_exact (geom);
+    if (!constr)
+        constr = ped_constraint_exact (geom);
 
     status = ped_disk_add_partition (disk, part, constr);
     if (status == 0) {
