@@ -1175,53 +1175,119 @@ class GenericSetLabel(FSTestCase):
         self._test_generic_set_label(mkfs_function=BlockDev.fs_xfs_mkfs)
 
 class GenericResize(FSTestCase):
-    def _test_generic_resize(self, mkfs_function):
+    def _test_generic_resize(self, mkfs_function, fs_info_func, info_size_func):
         # clean the device
         succ = BlockDev.fs_clean(self.loop_dev)
 
         succ = mkfs_function(self.loop_dev, None)
         self.assertTrue(succ)
 
+        size = info_size_func(fs_info_func(self.loop_dev))
+
         # shrink
         succ = BlockDev.fs_resize(self.loop_dev, 80 * 1024**2)
         self.assertTrue(succ)
+        new_size = info_size_func(fs_info_func(self.loop_dev))
+        # do not check the size 100% precisely there may differences due to FS block size, etc.
+        self.assertAlmostEqual(new_size, 80 * 1024**2, delta=1*1024**2)
 
         # resize to maximum size
         succ = BlockDev.fs_resize(self.loop_dev, 0)
         self.assertTrue(succ)
+        new_size = info_size_func(fs_info_func(self.loop_dev))
+        # should be back to original size
+        self.assertAlmostEqual(new_size, size, delta=1*1024**2)
 
     def test_ext2_generic_resize(self):
         """Test generic resize function with an ext2 file system"""
-        self._test_generic_resize(mkfs_function=BlockDev.fs_ext2_mkfs)
+        self._test_generic_resize(mkfs_function=BlockDev.fs_ext2_mkfs,
+                                  fs_info_func=BlockDev.fs_ext2_get_info,
+                                  info_size_func=lambda fi: fi.block_size * fi.block_count)
 
     def test_ext3_check_generic_resize(self):
         """Test generic resize function with an ext3 file system"""
-        self._test_generic_resize(mkfs_function=BlockDev.fs_ext3_mkfs)
+        self._test_generic_resize(mkfs_function=BlockDev.fs_ext3_mkfs,
+                                  fs_info_func=BlockDev.fs_ext3_get_info,
+                                  info_size_func=lambda fi: fi.block_size * fi.block_count)
 
     def test_ext4_generic_resize(self):
         """Test generic resize function with an ext4 file system"""
-        self._test_generic_resize(mkfs_function=BlockDev.fs_ext4_mkfs)
+        self._test_generic_resize(mkfs_function=BlockDev.fs_ext4_mkfs,
+                                  fs_info_func=BlockDev.fs_ext4_get_info,
+                                  info_size_func=lambda fi: fi.block_size * fi.block_count)
 
     @utils.skip_on("fedora", "27", reason="VFAT resize (detection after resize) is broken on rawhide")
     def test_vfat_generic_resize(self):
         """Test generic resize function with a vfat file system"""
-        self._test_generic_resize(mkfs_function=BlockDev.fs_vfat_mkfs)
+        self._test_generic_resize(mkfs_function=BlockDev.fs_vfat_mkfs,
+                                  fs_info_func=BlockDev.fs_vfat_get_info,
+                                  info_size_func=lambda fi: fi.cluster_size * fi.cluster_count)
+
+    def _destroy_lvm(self):
+        run("vgremove --yes libbd_fs_tests &>/dev/null")
+        run("pvremove --yes %s &>/dev/null" % self.loop_dev)
 
     def test_xfs_generic_resize(self):
         """Test generic resize function with an xfs file system"""
 
+        run("pvcreate -ff -y %s &>/dev/null" % self.loop_dev)
+        run("vgcreate -s10M libbd_fs_tests %s &>/dev/null" % self.loop_dev)
+        run("lvcreate -n xfs_test -L50M libbd_fs_tests &>/dev/null")
+        self.addCleanup(self._destroy_lvm)
+
+        lv = "/dev/libbd_fs_tests/xfs_test"
+
         # clean the device
-        succ = BlockDev.fs_clean(self.loop_dev)
+        succ = BlockDev.fs_clean(lv)
 
-        succ = BlockDev.fs_xfs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_xfs_mkfs(lv, None)
         self.assertTrue(succ)
 
-        # shrink without mounting the device (fs_resize should mount it)
-        succ = BlockDev.fs_resize(self.loop_dev, 0)
+        with mounted(lv, self.mount_dir):
+            fi = BlockDev.fs_xfs_get_info(lv)
+        self.assertTrue(fi)
+        self.assertEqual(fi.block_size * fi.block_count, 50 * 1024**2)
+
+        # no change, nothing should happen
+        with mounted(lv, self.mount_dir):
+            succ = BlockDev.fs_resize(lv, 0)
         self.assertTrue(succ)
 
-        # resize to maximum with mounting the device (fs_resize should use
-        # the existing mountpoint)
-        with mounted(self.loop_dev, self.mount_dir):
-            succ = BlockDev.fs_resize(self.loop_dev, 0)
+        with mounted(lv, self.mount_dir):
+            fi = BlockDev.fs_xfs_get_info(lv)
+        self.assertTrue(fi)
+        self.assertEqual(fi.block_size * fi.block_count, 50 * 1024**2)
+
+        # (still) impossible to shrink an XFS file system
+        with mounted(lv, self.mount_dir):
+            with self.assertRaises(GLib.GError):
+                succ = BlockDev.fs_resize(lv, 40 * 1024**2)
+
+        run("lvresize -L70M libbd_fs_tests/xfs_test &>/dev/null")
+        # should grow
+        with mounted(lv, self.mount_dir):
+            succ = BlockDev.fs_resize(lv, 0)
         self.assertTrue(succ)
+        with mounted(lv, self.mount_dir):
+            fi = BlockDev.fs_xfs_get_info(lv)
+        self.assertTrue(fi)
+        self.assertEqual(fi.block_size * fi.block_count, 70 * 1024**2)
+
+        run("lvresize -L90M libbd_fs_tests/xfs_test &>/dev/null")
+        # should grow just to 80 MiB
+        with mounted(lv, self.mount_dir):
+            succ = BlockDev.fs_resize(lv, 80 * 1024**2)
+        self.assertTrue(succ)
+        with mounted(lv, self.mount_dir):
+            fi = BlockDev.fs_xfs_get_info(lv)
+        self.assertTrue(fi)
+        self.assertEqual(fi.block_size * fi.block_count, 80 * 1024**2)
+
+        # should grow to 90 MiB
+        with mounted(lv, self.mount_dir):
+            succ = BlockDev.fs_resize(lv, 0)
+        self.assertTrue(succ)
+        with mounted(lv, self.mount_dir):
+            fi = BlockDev.fs_xfs_get_info(lv)
+        self.assertTrue(fi)
+        self.assertEqual(fi.block_size * fi.block_count, 90 * 1024**2)
