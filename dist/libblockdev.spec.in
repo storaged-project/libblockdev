@@ -68,7 +68,7 @@
 %define configure_opts %{?distro_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?gi_copts}
 
 Name:        libblockdev
-Version:     2.9
+Version:     2.10
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -797,6 +797,31 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Jul 05 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.10-1
+- Only enable partition size tolerance with alignment (vpodzime)
+- Limit the requested partition size to maximum possible (vpodzime)
+- Do not verify vfat FS' size after generic resize (vpodzime)
+- Specify tolerance for partition size (kailueke)
+- Only use the exact constraint if not using any other (vpodzime)
+- Check resulting FS size in tests for generic FS resize (vpodzime)
+- Query setting FS label support and generic relabeling (kailueke)
+- Do not strictly require all FS utilities (vpodzime)
+- Compile everything with the C99 standard (vpodzime)
+- Add partition resize function (kailueke)
+- Generic Check and Repair Functions (kailueke)
+- Query functions for FS resize and repair support (kailueke)
+- Update the project/source URL in the spec file (vpodzime)
+- Add functions for opening/closing TrueCrypt/VeraCrypt volumes (vpodzime)
+- Adapt to a change in behaviour in new libmount (vpodzime)
+- Try RO mount also if we get EACCES (vpodzime)
+- Size in bytes for xfs_resize_device (kailueke)
+- src/plugins/Makefile.am: Remove hard coded include path in /usr prefix (tristan.vanberkom)
+- Fixed include for libvolume_key.h (tristan.vanberkom)
+- Ignore parted warnings if possible (squimrel)
+- bcache tests: Remove FEELINGLUCKY checks (tasleson)
+- kbd.c: Code review corrections (tasleson)
+- kbd.c: Make bd_kbd_bcache_create work without abort (tasleson)
+
 * Tue Jun 13 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.9-1
 - Fix hardcoded reference to gcc (timo.gurr)
 - Catch and ignore partial failures in LVM tests' cleanups (vpodzime)
