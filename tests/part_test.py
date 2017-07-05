@@ -212,6 +212,31 @@ class PartCreatePartCase(PartTestCase):
         self.assertEqual(ps.flags, ps3.flags)
 
 class PartCreatePartFullCase(PartTestCase):
+    def test_full_device_partition(self):
+        # we first need a partition table
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.GPT, True)
+        self.assertTrue(succ)
+
+        # create partition spanning whole device even disregarding the partition table (loop_dev size)
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, 0, 100 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+        succ = BlockDev.part_delete_part (self.loop_dev, ps.path)
+        self.assertTrue(succ)
+
+        # same, but create a maximal partition automatically
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, 0, 0, BlockDev.PartAlign.OPTIMAL)
+        succ = BlockDev.part_delete_part (self.loop_dev, ps.path)
+        self.assertTrue(succ)
+
+        # start at byte 1 and create partition spanning whole device explicitly
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, 1, 100 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+        succ = BlockDev.part_delete_part (self.loop_dev, ps.path)
+        self.assertTrue(succ)
+
+        # start at byte 1 and create a maximal partition automatically
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, 1, 0, BlockDev.PartAlign.OPTIMAL)
+        succ = BlockDev.part_delete_part (self.loop_dev, ps.path)
+        self.assertTrue(succ)
+
     def test_create_part_all_primary(self):
         """Verify that partition creation works as expected with all primary parts"""
 
