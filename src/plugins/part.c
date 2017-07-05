@@ -732,12 +732,16 @@ static gboolean resize_part (PedPartition *part, PedDevice *dev, PedDisk *disk, 
     PedSector max_end;
     PedSector new_size = 0;
     gint status = 0;
+    PedSector tolerance = 0;
 
-    /* it should be possible to pass the whole drive size a partition size,
+    /* It should be possible to pass the whole drive size a partition size,
      * so -1 MiB for the first partition alignment,
      * -1 MiB for creating this here as a logial partition
-     * and -1 MiB for end alingment */
-    const PedSector tolerance = (PedSector) (4 MiB /  dev->sector_size);
+     * and -1 MiB for end alingment.
+     * But only if the caller doesn't request no alignment which also means
+     * they strictly care about precise numbers. */
+    if (align != BD_PART_ALIGN_NONE)
+        tolerance = (PedSector) (4 MiB /  dev->sector_size);
 
     constr = prepare_alignment_constraint (dev, disk, align, &orig_flag_state);
     start = part->geom.start;
