@@ -1175,28 +1175,31 @@ class GenericSetLabel(FSTestCase):
         self._test_generic_set_label(mkfs_function=BlockDev.fs_xfs_mkfs)
 
 class GenericResize(FSTestCase):
-    def _test_generic_resize(self, mkfs_function, fs_info_func, info_size_func):
+    def _test_generic_resize(self, mkfs_function, fs_info_func=None, info_size_func=None):
         # clean the device
         succ = BlockDev.fs_clean(self.loop_dev)
 
         succ = mkfs_function(self.loop_dev, None)
         self.assertTrue(succ)
 
-        size = info_size_func(fs_info_func(self.loop_dev))
+        if info_size_func is not None and fs_info_func is not None:
+            size = info_size_func(fs_info_func(self.loop_dev))
 
         # shrink
         succ = BlockDev.fs_resize(self.loop_dev, 80 * 1024**2)
         self.assertTrue(succ)
-        new_size = info_size_func(fs_info_func(self.loop_dev))
-        # do not check the size 100% precisely there may differences due to FS block size, etc.
-        self.assertAlmostEqual(new_size, 80 * 1024**2, delta=1*1024**2)
+        if info_size_func is not None and fs_info_func is not None:
+            new_size = info_size_func(fs_info_func(self.loop_dev))
+            # do not check the size 100% precisely there may differences due to FS block size, etc.
+            self.assertEqual(new_size, 80 * 1024**2)
 
         # resize to maximum size
         succ = BlockDev.fs_resize(self.loop_dev, 0)
         self.assertTrue(succ)
-        new_size = info_size_func(fs_info_func(self.loop_dev))
-        # should be back to original size
-        self.assertAlmostEqual(new_size, size, delta=1*1024**2)
+        if info_size_func is not None and fs_info_func is not None:
+            new_size = info_size_func(fs_info_func(self.loop_dev))
+            # should be back to original size
+            self.assertEqual(new_size, size)
 
     def test_ext2_generic_resize(self):
         """Test generic resize function with an ext2 file system"""
@@ -1219,9 +1222,7 @@ class GenericResize(FSTestCase):
     @utils.skip_on("fedora", "27", reason="VFAT resize (detection after resize) is broken on rawhide")
     def test_vfat_generic_resize(self):
         """Test generic resize function with a vfat file system"""
-        self._test_generic_resize(mkfs_function=BlockDev.fs_vfat_mkfs,
-                                  fs_info_func=BlockDev.fs_vfat_get_info,
-                                  info_size_func=lambda fi: fi.cluster_size * fi.cluster_count)
+        self._test_generic_resize(mkfs_function=BlockDev.fs_vfat_mkfs)
 
     def _destroy_lvm(self):
         run("vgremove --yes libbd_fs_tests &>/dev/null")
