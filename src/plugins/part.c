@@ -732,6 +732,7 @@ static gboolean resize_part (PedPartition *part, PedDevice *dev, PedDisk *disk, 
     PedSector max_end;
     PedSector new_size = 0;
     gint status = 0;
+
     /* it should be possible to pass the whole drive size a partition size,
      * so -1 MiB for the first partition alignment,
      * -1 MiB for creating this here as a logial partition
@@ -758,6 +759,11 @@ static gboolean resize_part (PedPartition *part, PedDevice *dev, PedDisk *disk, 
     } else {
         new_size = (size + dev->sector_size - 1) / dev->sector_size;
     }
+
+    /* If the maximum partition geometry is smaller than the requested size, but
+       the difference is acceptable, just adapt the size. */
+    if (new_size > geom->length && (new_size - geom->length) < tolerance)
+        new_size = geom->length;
 
     max_end = geom->end;
     ped_geometry_destroy (geom);
