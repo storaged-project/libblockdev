@@ -1184,7 +1184,7 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
     status = ped_disk_delete_partition (ped_disk, ped_part);
     if (status == 0) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
+        g_prefix_error (error, "Failed to delete partition '%d' on device '%s'", part_num, disk);
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
         bd_utils_report_finished (progress_id, (*error)->message);
