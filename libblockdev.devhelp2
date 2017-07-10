@@ -87,6 +87,8 @@
     <keyword type="function" name="bd_crypto_luks_change_key ()" link="libblockdev-Crypto.html#bd-crypto-luks-change-key"/>
     <keyword type="function" name="bd_crypto_luks_change_key_blob ()" link="libblockdev-Crypto.html#bd-crypto-luks-change-key-blob"/>
     <keyword type="function" name="bd_crypto_luks_resize ()" link="libblockdev-Crypto.html#bd-crypto-luks-resize"/>
+    <keyword type="function" name="bd_crypto_tc_open ()" link="libblockdev-Crypto.html#bd-crypto-tc-open"/>
+    <keyword type="function" name="bd_crypto_tc_close ()" link="libblockdev-Crypto.html#bd-crypto-tc-close"/>
     <keyword type="function" name="bd_crypto_escrow_device ()" link="libblockdev-Crypto.html#bd-crypto-escrow-device"/>
     <keyword type="macro" name="BD_CRYPTO_LUKS_METADATA_SIZE" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-METADATA-SIZE:CAPS"/>
     <keyword type="macro" name="BD_CRYPTO_ERROR" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR:CAPS"/>
@@ -121,6 +123,13 @@
     <keyword type="function" name="bd_fs_unmount ()" link="libblockdev-FS.html#bd-fs-unmount"/>
     <keyword type="function" name="bd_fs_get_mountpoint ()" link="libblockdev-FS.html#bd-fs-get-mountpoint"/>
     <keyword type="function" name="bd_fs_resize ()" link="libblockdev-FS.html#bd-fs-resize"/>
+    <keyword type="function" name="bd_fs_repair ()" link="libblockdev-FS.html#bd-fs-repair"/>
+    <keyword type="function" name="bd_fs_check ()" link="libblockdev-FS.html#bd-fs-check"/>
+    <keyword type="function" name="bd_fs_set_label ()" link="libblockdev-FS.html#bd-fs-set-label"/>
+    <keyword type="function" name="bd_fs_can_resize ()" link="libblockdev-FS.html#bd-fs-can-resize"/>
+    <keyword type="function" name="bd_fs_can_check ()" link="libblockdev-FS.html#bd-fs-can-check"/>
+    <keyword type="function" name="bd_fs_can_repair ()" link="libblockdev-FS.html#bd-fs-can-repair"/>
+    <keyword type="function" name="bd_fs_can_set_label ()" link="libblockdev-FS.html#bd-fs-can-set-label"/>
     <keyword type="function" name="bd_fs_ext2_check ()" link="libblockdev-FS.html#bd-fs-ext2-check"/>
     <keyword type="function" name="bd_fs_ext2_get_info ()" link="libblockdev-FS.html#bd-fs-ext2-get-info"/>
     <keyword type="function" name="bd_fs_ext2_info_copy ()" link="libblockdev-FS.html#bd-fs-ext2-info-copy"/>
@@ -329,6 +338,7 @@
     <keyword type="function" name="bd_part_create_table ()" link="libblockdev-Part.html#bd-part-create-table"/>
     <keyword type="function" name="bd_part_create_part ()" link="libblockdev-Part.html#bd-part-create-part"/>
     <keyword type="function" name="bd_part_delete_part ()" link="libblockdev-Part.html#bd-part-delete-part"/>
+    <keyword type="function" name="bd_part_resize_part ()" link="libblockdev-Part.html#bd-part-resize-part"/>
     <keyword type="function" name="bd_part_get_disk_parts ()" link="libblockdev-Part.html#bd-part-get-disk-parts"/>
     <keyword type="function" name="bd_part_get_part_spec ()" link="libblockdev-Part.html#bd-part-get-part-spec"/>
     <keyword type="function" name="bd_part_set_part_flag ()" link="libblockdev-Part.html#bd-part-set-part-flag"/>

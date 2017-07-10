@@ -89,6 +89,14 @@
 </tr>
 <tr>
 <td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Part.html#bd-part-resize-part" title="bd_part_resize_part ()">bd_part_resize_part</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <a class="link" href="libblockdev-Part.html#BDPartSpec" title="BDPartSpec"><span class="returnvalue">BDPartSpec</span></a> **
 </td>
 <td class="function_name">
@@ -499,6 +507,61 @@ bd_part_delete_part (<em class="parameter"><code>const <a href="../glib/glib-Bas
 <p> whether the <em class="parameter"><code>part</code></em>
 partition was successfully deleted from <em class="parameter"><code>disk</code></em>
 </p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-part-resize-part"></a><h3>bd_part_resize_part ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_part_resize_part (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *disk</code></em>,
+                     <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *part</code></em>,
+                     <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> size</code></em>,
+                     <em class="parameter"><code><a class="link" href="libblockdev-Part.html#BDPartAlign" title="enum BDPartAlign"><span class="type">BDPartAlign</span></a> align</code></em>,
+                     <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-part-resize-part.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>disk</p></td>
+<td class="parameter_description"><p>disk containing the paritition</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>part</p></td>
+<td class="parameter_description"><p>partition to resize</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>size</p></td>
+<td class="parameter_description"><p>new partition size, 0 for maximal size</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>align</p></td>
+<td class="parameter_description"><p>alignment to use for the partition end</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-part-resize-part.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>part</code></em>
+partition was successfully resized on <em class="parameter"><code>disk</code></em>
+to <em class="parameter"><code>size</code></em>
+</p>
+<p>NOTE: The resulting partition may be slightly bigger than requested due to alignment.</p>
 </div>
 </div>
 <hr>
