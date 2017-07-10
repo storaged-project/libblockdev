@@ -1,5 +1,0 @@
-#!/bin/bash
-
-cat <<EOF
-LVM version:     2.02.115
-EOF
