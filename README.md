@@ -19,4 +19,4 @@ For information about development and contributing guidelines see the
 README.DEVEL.rst file.
 
 For more information about the API see the generated documentation at
-http://rhinstaller.github.io/libblockdev/.
+http://storaged.org/libblockdev/.
