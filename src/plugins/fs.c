@@ -38,6 +38,8 @@
 #define EXT3 "ext3"
 #define EXT4 "ext4"
 
+#define MOUNT_ERR_BUF_SIZE 1024
+
 /**
  * SECTION: fs
  * @short_description: plugin for operations with file systems
@@ -235,6 +237,8 @@ typedef struct MountArgs {
 
 typedef gboolean (*MountFunc) (MountArgs *args, GError **error);
 
+static gboolean do_mount (MountArgs *args, GError **error);
+
 /**
  * bd_fs_check_deps:
  *
@@ -302,10 +306,80 @@ static gint synced_close (gint fd) {
     return ret;
 }
 
+#ifndef LIBMOUNT_NEW_ERR_API
+static void parse_unmount_error_old (struct libmnt_context *cxt, int rc, const gchar *spec, GError **error) {
+    int syscall_errno = 0;
+
+    if (mnt_context_syscall_called (cxt)) {
+        syscall_errno = mnt_context_get_syscall_errno (cxt);
+        switch (syscall_errno) {
+            case EBUSY:
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Target busy.");
+                break;
+            case EINVAL:
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Not a mount point.");
+                break;
+            case EPERM:
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
+                             "Operation not permitted.");
+                break;
+            default:
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Unmount syscall failed: %d.", syscall_errno);
+                break;
+        }
+    } else {
+        if (rc == -EPERM) {
+            if (mnt_context_tab_applied (cxt))
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
+                             "Operation not permitted.");
+            else
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Not mounted.");
+        } else {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                         "Failed to unmount %s.", spec);
+        }
+    }
+    return;
+}
+#else
+static void parse_unmount_error_new (struct libmnt_context *cxt, int rc, const gchar *spec, GError **error) {
+    int ret = 0;
+    int syscall_errno = 0;
+    char buf[MOUNT_ERR_BUF_SIZE] = {0};
+    gboolean permission = FALSE;
+
+    ret = mnt_context_get_excode (cxt, rc, buf, MOUNT_ERR_BUF_SIZE - 1);
+    if (ret != 0) {
+        /* check whether the call failed because of lack of permission */
+        if (mnt_context_syscall_called (cxt)) {
+            syscall_errno = mnt_context_get_syscall_errno (cxt);
+            permission = syscall_errno == EPERM;
+        } else
+            permission = ret == MNT_EX_USAGE && mnt_context_tab_applied (cxt);
+
+        if (permission)
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
+                         "Operation not permitted.");
+        else {
+            if (*buf == '\0')
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Unknow error when unmounting %s", spec);
+            else
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "%s", buf);
+        }
+    }
+    return;
+}
+#endif
+
 static gboolean do_unmount (MountArgs *args, GError **error) {
     struct libmnt_context *cxt = NULL;
     int ret = 0;
-    int syscall_errno = 0;
 
     cxt = mnt_new_context ();
 
@@ -336,40 +410,11 @@ static gboolean do_unmount (MountArgs *args, GError **error) {
 
     ret = mnt_context_umount (cxt);
     if (ret != 0) {
-        if (mnt_context_syscall_called (cxt)) {
-            syscall_errno = mnt_context_get_syscall_errno (cxt);
-            switch (syscall_errno) {
-                case EBUSY:
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                 "Target busy.");
-                    break;
-                case EINVAL:
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                 "Not a mount point.");
-                    break;
-                case EPERM:
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
-                                 "Operation not permitted.");
-                    break;
-                default:
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                 "Unmount syscall failed: %d.", syscall_errno);
-                    break;
-            }
-        } else {
-            if (ret == -EPERM) {
-                if (mnt_context_tab_applied (cxt))
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
-                                 "Operation not permitted.");
-                else
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                 "Not mounted.");
-            } else {
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                             "Failed to unmount %s.", args->spec);
-            }
-        }
-
+#ifdef LIBMOUNT_NEW_ERR_API
+        parse_unmount_error_new (cxt, ret, args->spec, error);
+#else
+        parse_unmount_error_old (cxt, ret, args->spec, error);
+#endif
         mnt_free_context(cxt);
         return FALSE;
     }
@@ -378,11 +423,176 @@ static gboolean do_unmount (MountArgs *args, GError **error) {
     return TRUE;
 }
 
+#ifndef LIBMOUNT_NEW_ERR_API
+static gboolean parse_mount_error_old (struct libmnt_context *cxt, int rc, MountArgs *args, GError **error) {
+    int syscall_errno = 0;
+    unsigned long mflags = 0;
+
+    if (mnt_context_get_mflags (cxt, &mflags) != 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to get options from string '%s'.", args->options);
+        return FALSE;
+    }
+
+    if (mnt_context_syscall_called (cxt) == 1) {
+        syscall_errno = mnt_context_get_syscall_errno (cxt);
+        switch (syscall_errno) {
+            case EBUSY:
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Source is already mounted or target is busy.");
+                break;
+            case EINVAL:
+                if (mflags & MS_REMOUNT)
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Remount attempted, but %s is not mounted at %s.", args->device, args->mountpoint);
+                else if (mflags & MS_MOVE)
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Move attempted, but %s is not a mount point.", args->device);
+                else
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Wrong fs type, %s has an invalid superblock or missing helper program.", args->device);
+                break;
+            case EPERM:
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
+                             "Operation not permitted.");
+                break;
+            case ENOTBLK:
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "%s is not a block device.", args->device);
+                break;
+            case ENOTDIR:
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "%s is not a directory.", args->mountpoint);
+                break;
+            case ENODEV:
+                if (strlen (args->fstype) == 0)
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Filesystem type not specified");
+                else
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Filesystem type %s not configured in kernel.", args->fstype);
+                break;
+            case EROFS:
+            case EACCES:
+                  if (mflags & MS_RDONLY) {
+                      g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                   "Cannot mount %s read-only.", args->device);
+                      break;
+                  } else if (args->options && (mnt_optstr_get_option (args->options, "rw", NULL, NULL) == 0)) {
+                      g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                   "%s is write-protected but `rw' option given.", args->device);
+                      break;
+                  } else if (mflags & MS_BIND) {
+                      g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                   "Mount %s on %s failed.", args->device, args->mountpoint);
+                      break;
+                  }
+                  /* new versions of libmount do this automatically */
+                  else {
+                      MountArgs ro_args;
+                      gboolean success = FALSE;
+
+                      ro_args.device = args->device;
+                      ro_args.mountpoint = args->mountpoint;
+                      ro_args.fstype = args->fstype;
+                      if (!args->options)
+                          ro_args.options = g_strdup ("ro");
+                      else
+                          ro_args.options = g_strdup_printf ("%s,ro", args->options);
+
+                      success = do_mount (&ro_args, error);
+
+                      g_free ((gchar*) ro_args.options);
+
+                      return success;
+                  }
+            default:
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Mount syscall failed: %d.", syscall_errno);
+                break;
+        }
+    } else {
+        switch (rc) {
+            case -EPERM:
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
+                             "Only root can mount %s.", args->device);
+                break;
+            case -EBUSY:
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "%s is already mounted.", args->device);
+                break;
+            /* source or target explicitly defined and not found in fstab */
+            case -MNT_ERR_NOFSTAB:
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Can't find %s in %s.", args->device ? args->device : args->mountpoint, mnt_get_fstab_path ());
+                break;
+            case -MNT_ERR_MOUNTOPT:
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Failed to parse mount options");
+                break;
+            case -MNT_ERR_NOSOURCE:
+                if (args->device)
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Can't find %s.", args->device);
+                else
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                 "Mount source not defined.");
+                break;
+            case -MNT_ERR_LOOPDEV:
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Failed to setup loop device");
+                break;
+            case -MNT_ERR_NOFSTYPE:
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Filesystem type not specified");
+                break;
+            default:
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Failed to mount %s.", args->device ? args->device : args->mountpoint);
+                break;
+        }
+    }
+
+    return FALSE;
+}
+
+#else
+static void parse_mount_error_new (struct libmnt_context *cxt, int rc, MountArgs *args, GError **error) {
+    int ret = 0;
+    int syscall_errno = 0;
+    char buf[MOUNT_ERR_BUF_SIZE] = {0};
+    gboolean permission = FALSE;
+
+    ret = mnt_context_get_excode (cxt, rc, buf, MOUNT_ERR_BUF_SIZE - 1);
+    if (ret != 0) {
+        /* check whether the call failed because of lack of permission */
+        if (mnt_context_syscall_called (cxt)) {
+            syscall_errno = mnt_context_get_syscall_errno (cxt);
+            permission = syscall_errno == EPERM;
+        } else
+            permission = ret == MNT_EX_USAGE && mnt_context_tab_applied (cxt);
+
+        if (permission)
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
+                         "Operation not permitted.");
+        else {
+            if (*buf == '\0')
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Unknow error when mounting %s", args->device ? args->device : args->mountpoint);
+            else
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "%s", buf);
+        }
+    }
+
+    return;
+}
+#endif
+
 static gboolean do_mount (MountArgs *args, GError **error) {
     struct libmnt_context *cxt = NULL;
     int ret = 0;
-    int syscall_errno = 0;
-    unsigned long mflags = 0;
+    gboolean success = FALSE;
 
     cxt = mnt_new_context ();
 
@@ -429,151 +639,26 @@ static gboolean do_mount (MountArgs *args, GError **error) {
         }
     }
 
-#ifdef LIBMOUNT_RO_FALLBACK
+#ifdef LIBMOUNT_NEW_ERR_API
     /* we don't want libmount to try RDONLY mounts if we were explicitly given the "rw" option */
     if (args->options && (mnt_optstr_get_option (args->options, "rw", NULL, NULL) == 0))
         mnt_context_enable_rwonly_mount (cxt, TRUE);
 #endif
 
     ret = mnt_context_mount (cxt);
+
     if (ret != 0) {
-        if (mnt_context_get_mflags (cxt, &mflags) != 0) {
-            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                         "Failed to get options from string '%s'.", args->options);
-            mnt_free_context(cxt);
-            return FALSE;
-        }
-
-        if (mnt_context_syscall_called (cxt) == 1) {
-            syscall_errno = mnt_context_get_syscall_errno (cxt);
-            switch (syscall_errno) {
-                case EBUSY:
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                 "Source is already mounted or target is busy.");
-                    break;
-                case EINVAL:
-                    if (mflags & MS_REMOUNT)
-                        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                     "Remount attempted, but %s is not mounted at %s.", args->device, args->mountpoint);
-                    else if (mflags & MS_MOVE)
-                        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                     "Move attempted, but %s is not a mount point.", args->device);
-                    else
-                        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                     "Wrong fs type, %s has an invalid superblock or missing helper program.", args->device);
-                    break;
-                case EPERM:
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
-                                 "Operation not permitted.");
-                    break;
-                case ENOTBLK:
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                 "%s is not a block device.", args->device);
-                    break;
-                case ENOTDIR:
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                 "%s is not a directory.", args->mountpoint);
-                    break;
-                case ENODEV:
-                    if (strlen (args->fstype) == 0)
-                        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                     "Filesystem type not specified");
-                    else
-                        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                     "Filesystem type %s not configured in kernel.", args->fstype);
-                    break;
-                case EROFS:
-                case EACCES:
-                      if (mflags & MS_RDONLY) {
-                          g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                       "Cannot mount %s read-only.", args->device);
-                          break;
-                      } else if (args->options && (mnt_optstr_get_option (args->options, "rw", NULL, NULL) == 0)) {
-                          g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                       "%s is write-protected but `rw' option given.", args->device);
-                          break;
-                      } else if (mflags & MS_BIND) {
-                          g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                       "Mount %s on %s failed.", args->device, args->mountpoint);
-                          break;
-                      }
-#ifndef LIBMOUNT_RO_FALLBACK
-                      /* new versions of libmount do this automatically */
-                      else {
-                          MountArgs ro_args;
-                          gboolean success = FALSE;
-
-                          ro_args.device = args->device;
-                          ro_args.mountpoint = args->mountpoint;
-                          ro_args.fstype = args->fstype;
-                          if (!args->options)
-                              ro_args.options = g_strdup ("ro");
-                          else
-                              ro_args.options = g_strdup_printf ("%s,ro", args->options);
-
-                          success = do_mount (&ro_args, error);
-
-                          mnt_free_context (cxt);
-                          g_free ((gchar*) ro_args.options);
-
-                          return success;
-                      }
+#ifdef LIBMOUNT_NEW_ERR_API
+      parse_mount_error_new (cxt, ret, args, error);
+      success = FALSE;
 #else
-                      break;
+      success = parse_mount_error_old (cxt, ret, args, error);
 #endif
-                default:
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                 "Mount syscall failed: %d.", syscall_errno);
-                    break;
-            }
-        } else {
-            switch (ret) {
-                case -EPERM:
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
-                                 "Only root can mount %s.", args->device);
-                    break;
-                case -EBUSY:
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                 "%s is already mounted.", args->device);
-                    break;
-                /* source or target explicitly defined and not found in fstab */
-                case -MNT_ERR_NOFSTAB:
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                 "Can't find %s in %s.", args->device ? args->device : args->mountpoint, mnt_get_fstab_path ());
-                    break;
-                case -MNT_ERR_MOUNTOPT:
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                 "Failed to parse mount options");
-                    break;
-                case -MNT_ERR_NOSOURCE:
-                    if (args->device)
-                        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                     "Can't find %s.", args->device);
-                    else
-                        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                     "Mount source not defined.");
-                    break;
-                case -MNT_ERR_LOOPDEV:
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                 "Failed to setup loop device");
-                    break;
-                case -MNT_ERR_NOFSTYPE:
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                 "Filesystem type not specified");
-                    break;
-                default:
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                 "Failed to unmount %s.", args->spec);
-                    break;
-            }
-        }
-
-        mnt_free_context(cxt);
-        return FALSE;
-    }
+    } else
+        success = TRUE;
 
     mnt_free_context(cxt);
-    return TRUE;
+    return success;
 }
 
 static gboolean set_uid (uid_t uid, GError **error) {
