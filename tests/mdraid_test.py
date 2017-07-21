@@ -635,8 +635,8 @@ class MDUnloadTest(unittest.TestCase):
         # unload all plugins first
         self.assertTrue(BlockDev.reinit([], True, None))
 
-        with fake_path():
-            # no mdsetup available, the MD plugin should fail to load
+        with fake_path(all_but="mdadm"):
+            # no mdadm available, the MD plugin should fail to load
             with self.assertRaises(GLib.GError):
                 BlockDev.reinit(None, True, None)
 

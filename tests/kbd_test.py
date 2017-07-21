@@ -515,7 +515,7 @@ class KbdUnloadTest(unittest.TestCase):
         # unload all plugins first
         self.assertTrue(BlockDev.reinit([], True, None))
 
-        with fake_path():
+        with fake_path(all_but="make-bcache"):
             with self.assertRaises(GLib.GError):
                 BlockDev.reinit(None, True, None)
 

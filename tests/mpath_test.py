@@ -61,7 +61,7 @@ class MpathUnloadTest(unittest.TestCase):
         # unload all plugins first
         self.assertTrue(BlockDev.reinit([], True, None))
 
-        with fake_path():
+        with fake_path(all_but="multipath"):
             # no multipath available, the mpath plugin should fail to load
             with self.assertRaises(GLib.GError):
                 BlockDev.reinit(None, True, None)
@@ -78,7 +78,7 @@ class MpathUnloadTest(unittest.TestCase):
         # unload all plugins first
         self.assertTrue(BlockDev.reinit([], True, None))
 
-        with fake_path("tests/mpath_no_mpathconf", keep_utils=["cat"]):
+        with fake_path(all_but="mpathconf"):
             # no mpathconf available, the mpath plugin should fail to load
             with self.assertRaises(GLib.GError):
                 BlockDev.reinit(None, True, None)

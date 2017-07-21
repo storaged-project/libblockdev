@@ -79,7 +79,7 @@ class S390UnloadTest(unittest.TestCase):
         # unload all plugins first
         self.assertTrue(BlockDev.reinit([], True, None))
 
-        with fake_path():
+        with fake_path(all_but="dasdfmt"):
             # dasdfmt is not available, so the s390 plugin should fail to load
             with self.assertRaises(GLib.GError):
                 BlockDev.reinit(None, True, None)
