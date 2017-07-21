@@ -358,3 +358,18 @@ class LibraryOpsTestCase(unittest.TestCase):
         else:
             del os.environ["LANG"]
         self.assertTrue(BlockDev.reinit(None, True, None))
+
+    def test_dep_checks_disabled(self):
+        """Verify that disabling runtime dep checks works"""
+
+        with fake_path(all_but="mkswap"):
+            # should fail because of 'mkswap' missing
+            with self.assertRaises(GLib.GError):
+                BlockDev.reinit(None, True, None)
+
+        os.environ["LIBBLOCKDEV_SKIP_DEP_CHECKS"] = ""
+        self.addCleanup(os.environ.pop, "LIBBLOCKDEV_SKIP_DEP_CHECKS")
+
+        with fake_path(all_but="mkswap"):
+            # should load just fine, skipping the runtime dep checks
+            self.assertTrue(BlockDev.reinit(None, True, None))
