@@ -39,6 +39,7 @@ def _wait_for_bcache_setup(bcache_dev):
         if i >= 30:
             print("WARNING: Giving up waiting for bcache setup!!!")
             break
+    time.sleep(1)
 
 class KbdZRAMTestCase(unittest.TestCase):
     @skip_on(("fedora", "27"), reason="zram module (un)loading is broken on ")
