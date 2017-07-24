@@ -41,6 +41,7 @@ def _wait_for_bcache_setup(bcache_dev):
             break
 
 class KbdZRAMTestCase(unittest.TestCase):
+    @skip_on(("fedora", "27"), reason="zram module (un)loading is broken on ")
     def setUp(self):
         self.addCleanup(self._clean_up)
         self._loaded_zram_module = False
