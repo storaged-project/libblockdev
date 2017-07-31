@@ -109,7 +109,7 @@ class DMUnloadTest(unittest.TestCase):
         # unload all plugins first
         self.assertTrue(BlockDev.reinit([], True, None))
 
-        with fake_path():
+        with fake_path(all_but="dmsetup"):
             # no dmsetup available, the DM plugin should fail to load
             with self.assertRaises(GLib.GError):
                 BlockDev.reinit(None, True, None)

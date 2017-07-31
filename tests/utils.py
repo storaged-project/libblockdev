@@ -65,11 +65,22 @@ def fake_utils(path="."):
     finally:
         os.environ["PATH"] = old_path
 
+ALL_UTILS = {"lvm", "thin_metadata_size", "btrfs", "mkswap", "multipath", "mpathconf", "dmsetup", "mdadm", "make-bcache", "sgdisk", "sfdisk"}
+
 @contextmanager
-def fake_path(path=None, keep_utils=None):
+def fake_path(path=None, keep_utils=None, all_but=None):
+    if all_but is not None:
+        if isinstance(all_but, (list, set, tuple)):
+            keep_utils = ALL_UTILS - set(all_but)
+        else:
+            keep_utils = ALL_UTILS - {all_but}
     keep_utils = keep_utils or []
     created_utils = set()
-    if path:
+    rm_path = False
+    if keep_utils:
+        if path is None:
+            path = tempfile.mkdtemp(prefix="libblockdev-fake-path", dir="/tmp")
+            rm_path = True
         for util in keep_utils:
             util_path = GLib.find_program_in_path(util)
             if util_path:
@@ -84,6 +95,8 @@ def fake_path(path=None, keep_utils=None):
         os.environ["PATH"] = old_path
         for util in created_utils:
             os.unlink(os.path.join(path, util))
+        if rm_path:
+            os.rmdir(path)
 
 def _delete_backstore(name):
     status = subprocess.call(["targetcli", "/backstores/fileio/ delete %s" % name], stdout=DEVNULL)
