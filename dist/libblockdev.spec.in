@@ -68,7 +68,7 @@
 %define configure_opts %{?distro_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?gi_copts}
 
 Name:        libblockdev
-Version:     2.10
+Version:     2.11
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -797,6 +797,16 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Mon Jul 31 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.11-1
+- Make the KbdZRAMDevicesTestCase inherit from KbdZRAMTestCase (vpodzime)
+- Allow non-source directory builds (kailueke)
+- Add a way to disable runtime dependency checks (vpodzime)
+- Link to GObject even if no plugin is activated (kailueke)
+- Skip zram tests on Rawhide (vpodzime)
+- Keep most utilities available for tests (vpodzime)
+- Use new libmount function to get (un)mount error message (vtrefny)
+- Update the documentation URL (vpodzime)
+
 * Wed Jul 05 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.10-1
 - Only enable partition size tolerance with alignment (vpodzime)
 - Limit the requested partition size to maximum possible (vpodzime)
