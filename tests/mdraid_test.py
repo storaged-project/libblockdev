@@ -9,8 +9,12 @@ import six
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path
 from gi.repository import BlockDev, GLib
 
+REQUESTED_PLUGINS = BlockDev.plugin_specs_from_names(("mdraid",))
+
 if not BlockDev.is_initialized():
-    BlockDev.init(None, None)
+    BlockDev.init(REQUESTED_PLUGINS, None)
+else:
+    BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
 @contextmanager
 def wait_for_action(action_name):
@@ -610,7 +614,7 @@ class MDUnloadTest(unittest.TestCase):
     def setUp(self):
         # make sure the library is initialized with all plugins loaded for other
         # tests
-        self.addCleanup(BlockDev.reinit, None, True, None)
+        self.addCleanup(BlockDev.reinit, REQUESTED_PLUGINS, True, None)
 
     def test_check_low_version(self):
         """Verify that checking the minimum mdsetup version works as expected"""
@@ -621,12 +625,12 @@ class MDUnloadTest(unittest.TestCase):
         with fake_utils("tests/mdraid_low_version/"):
             # too low version of mdsetup available, the MD plugin should fail to load
             with self.assertRaises(GLib.GError):
-                BlockDev.reinit(None, True, None)
+                BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
             self.assertNotIn("mdraid", BlockDev.get_available_plugin_names())
 
         # load the plugins back
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
         self.assertIn("mdraid", BlockDev.get_available_plugin_names())
 
     def test_check_no_md(self):
@@ -638,10 +642,10 @@ class MDUnloadTest(unittest.TestCase):
         with fake_path(all_but="mdadm"):
             # no mdadm available, the MD plugin should fail to load
             with self.assertRaises(GLib.GError):
-                BlockDev.reinit(None, True, None)
+                BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
             self.assertNotIn("mdraid", BlockDev.get_available_plugin_names())
 
         # load the plugins back
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
         self.assertIn("mdraid", BlockDev.get_available_plugin_names())

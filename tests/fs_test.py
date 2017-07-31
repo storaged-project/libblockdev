@@ -10,8 +10,13 @@ import six
 import overrides_hack
 
 from gi.repository import BlockDev, GLib
+
+REQUESTED_PLUGINS = BlockDev.plugin_specs_from_names(("fs", "loop"))
+
 if not BlockDev.is_initialized():
-    BlockDev.init(None, None)
+    BlockDev.init(REQUESTED_PLUGINS, None)
+else:
+    BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
 def mount(device, where):
     if not os.path.isdir(where):

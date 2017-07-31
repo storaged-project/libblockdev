@@ -6,8 +6,13 @@ from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, 
 import overrides_hack
 
 from gi.repository import BlockDev, GLib
+
+REQUESTED_PLUGINS = BlockDev.plugin_specs_from_names(("kbd", "swap"))
+
 if not BlockDev.is_initialized():
-    BlockDev.init(None, None)
+    BlockDev.init(REQUESTED_PLUGINS, None)
+else:
+    BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
 def _can_load_zram():
     """Test if we can load the zram module"""
@@ -507,7 +512,7 @@ class KbdUnloadTest(unittest.TestCase):
     def setUp(self):
         # make sure the library is initialized with all plugins loaded for other
         # tests
-        self.addCleanup(BlockDev.reinit, None, True, None)
+        self.addCleanup(BlockDev.reinit, REQUESTED_PLUGINS, True, None)
 
     @skip_on(("centos", "enterprise_linux"))
     def test_check_no_bcache_progs(self):
@@ -518,10 +523,10 @@ class KbdUnloadTest(unittest.TestCase):
 
         with fake_path(all_but="make-bcache"):
             with self.assertRaises(GLib.GError):
-                BlockDev.reinit(None, True, None)
+                BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
             self.assertNotIn("kbd", BlockDev.get_available_plugin_names())
 
         # load the plugins back
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
         self.assertIn("kbd", BlockDev.get_available_plugin_names())

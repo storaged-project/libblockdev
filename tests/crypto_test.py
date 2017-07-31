@@ -9,8 +9,13 @@ import locale
 
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on, get_avail_locales, requires_locales
 from gi.repository import BlockDev, GLib
+
+REQUESTED_PLUGINS = BlockDev.plugin_specs_from_names(("crypto",))
+
 if not BlockDev.is_initialized():
-    BlockDev.init(None, None)
+    BlockDev.init(REQUESTED_PLUGINS, None)
+else:
+    BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
 PASSWD = "myshinylittlepassword"
 PASSWD2 = "myshinylittlepassword2"

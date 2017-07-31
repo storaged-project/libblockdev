@@ -5,8 +5,17 @@ import overrides_hack
 from utils import fake_path
 
 from gi.repository import GLib, BlockDev
+
+# all plugins expcept mpath -- it doesn't have all the dependencies on Debian
+# and we don't need it for this test
+REQUESTED_PLUGINS = BlockDev.plugin_specs_from_names(("btrfs", "crypto", "dm",
+                                                      "fs", "kbd", "loop", "lvm",
+                                                      "mdraid", "part", "swap"))
+
 if not BlockDev.is_initialized():
-    assert BlockDev.init(None, None)
+    BlockDev.init(REQUESTED_PLUGINS, None)
+else:
+    BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
 class LibraryOpsTestCase(unittest.TestCase):
     log = ""
@@ -20,7 +29,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         os.system("make -C src/plugins/ libbd_lvm.la &> /dev/null")
 
         # try to get everything back to normal by (re)loading all plugins
-        BlockDev.reinit(None, True, None)
+        BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
     # recompiles the LVM plugin
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
@@ -36,13 +45,13 @@ class LibraryOpsTestCase(unittest.TestCase):
         os.system("make -C src/plugins/ libbd_lvm.la &> /dev/null")
 
         # library should successfully reinitialize without reloading plugins
-        self.assertTrue(BlockDev.reinit(None, False, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, False, None))
 
         # LVM plugin not reloaded, max LV size should be the same
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
 
         # library should successfully reinitialize reloading plugins
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
 
         # LVM plugin reloaded, max LV size should be 1024 bytes
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), 1024)
@@ -52,7 +61,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         os.system("make -C src/plugins/ libbd_lvm.la &> /dev/null")
 
         # library should successfully reinitialize reloading original plugins
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
 
     # recompiles the LVM plugin
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
@@ -63,7 +72,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertTrue(BlockDev.is_initialized())
 
         # init() called twice, should give a warning and return False
-        self.assertFalse(BlockDev.init(None, None))
+        self.assertFalse(BlockDev.init(REQUESTED_PLUGINS, None))
 
         # max LV size should be something sane (not 1024 bytes)
         orig_max_size = BlockDev.lvm_get_max_lv_size()
@@ -126,7 +135,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         # now reinit the library with the config preferring the new build
         orig_conf_dir = os.environ.get("LIBBLOCKDEV_CONFIG_DIR")
         os.environ["LIBBLOCKDEV_CONFIG_DIR"] = "tests/plugin_prio_conf.d"
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
 
         # new LVM plugin loaded, max LV size should be 1024 bytes
         self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm2.so.2")
@@ -137,7 +146,7 @@ class LibraryOpsTestCase(unittest.TestCase):
             os.environ["LIBBLOCKDEV_CONFIG_DIR"] = orig_conf_dir
         else:
             del os.environ["LIBBLOCKDEV_CONFIG_DIR"]
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
 
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
 
@@ -145,7 +154,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         # build
         orig_conf_dir = os.environ.get("LIBBLOCKDEV_CONFIG_DIR")
         os.environ["LIBBLOCKDEV_CONFIG_DIR"] = "tests/plugin_multi_conf.d"
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
 
         # new LVM plugin loaded, max LV size should be 1024 bytes
         self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm2.so.2")
@@ -156,7 +165,7 @@ class LibraryOpsTestCase(unittest.TestCase):
             os.environ["LIBBLOCKDEV_CONFIG_DIR"] = orig_conf_dir
         else:
             del os.environ["LIBBLOCKDEV_CONFIG_DIR"]
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
 
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
 
@@ -189,7 +198,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         # now reinit the library with the config preferring the new build
         orig_conf_dir = os.environ.get("LIBBLOCKDEV_CONFIG_DIR")
         os.environ["LIBBLOCKDEV_CONFIG_DIR"] = "tests/plugin_prio_conf.d"
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
 
         # the original plugin should be loaded because the new one should fail
         # to load (due to check() returning FALSE)
@@ -201,7 +210,7 @@ class LibraryOpsTestCase(unittest.TestCase):
             os.environ["LIBBLOCKDEV_CONFIG_DIR"] = orig_conf_dir
         else:
             del os.environ["LIBBLOCKDEV_CONFIG_DIR"]
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
 
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
 
@@ -209,7 +218,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         # build
         orig_conf_dir = os.environ.get("LIBBLOCKDEV_CONFIG_DIR")
         os.environ["LIBBLOCKDEV_CONFIG_DIR"] = "tests/plugin_multi_conf.d"
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
 
         # the original plugin should be loaded because the new one should fail
         # to load (due to check() returning FALSE)
@@ -221,7 +230,7 @@ class LibraryOpsTestCase(unittest.TestCase):
             os.environ["LIBBLOCKDEV_CONFIG_DIR"] = orig_conf_dir
         else:
             del os.environ["LIBBLOCKDEV_CONFIG_DIR"]
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
 
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
 
@@ -238,13 +247,13 @@ class LibraryOpsTestCase(unittest.TestCase):
     def test_logging_setup(self):
         """Verify that setting up logging works as expected"""
 
-        self.assertTrue(BlockDev.reinit(None, False, self.my_log_func))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, False, self.my_log_func))
 
         succ = BlockDev.utils_exec_and_report_error(["true"])
         self.assertTrue(succ)
 
         # reinit with no logging function should change nothing about logging
-        self.assertTrue(BlockDev.reinit(None, False, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, False, None))
 
         succ, out = BlockDev.utils_exec_and_capture_output(["echo", "hi"])
         self.assertTrue(succ)
@@ -273,7 +282,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         ps.so_name = ""
         self.assertTrue(BlockDev.reinit([ps], True, None))
         self.assertEqual(BlockDev.get_available_plugin_names(), ["btrfs"])
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
 
     def test_not_implemented(self):
         """Verify that unloaded/unimplemented functions report errors"""
@@ -291,7 +300,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.lvm_get_max_lv_size()
 
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
 
         # loaded again
         self.assertTrue(BlockDev.lvm_get_max_lv_size() > 0)
@@ -301,7 +310,7 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         # the library is already initialized, ensure_init() shonuld do nothing
         avail_plugs = BlockDev.get_available_plugin_names()
-        self.assertTrue(BlockDev.ensure_init(None, None))
+        self.assertTrue(BlockDev.ensure_init(REQUESTED_PLUGINS, None))
         self.assertEqual(avail_plugs, BlockDev.get_available_plugin_names())
 
         # reinit with a subset of plugins
@@ -323,7 +332,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertEqual(BlockDev.get_available_plugin_names(), [])
 
         # ensure_init to load all plugins back
-        self.assertTrue(BlockDev.ensure_init(None, None))
+        self.assertTrue(BlockDev.ensure_init(REQUESTED_PLUGINS, None))
         self.assertGreaterEqual(len(BlockDev.get_available_plugin_names()), 9)
 
     def test_try_reinit(self):
@@ -332,13 +341,13 @@ class LibraryOpsTestCase(unittest.TestCase):
         # try reinitializing with only some utilities being available and thus
         # only some plugins able to load
         with fake_path("tests/lib_missing_utils", keep_utils=["swapon", "swapoff", "mkswap", "lvm", "btrfs", "thin_metadata_size"]):
-            succ, loaded = BlockDev.try_reinit(None, True, None)
+            succ, loaded = BlockDev.try_reinit(REQUESTED_PLUGINS, True, None)
             self.assertFalse(succ)
             for plug_name in ("swap", "lvm", "btrfs"):
                 self.assertIn(plug_name, loaded)
 
         # reset back to all plugins
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
 
         # now the same with a subset of plugins requested
         plugins = BlockDev.plugin_specs_from_names(["btrfs", "lvm", "swap"])
@@ -352,12 +361,12 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         orig_lang = os.environ.get("LANG")
         os.environ["LANG"] = "cs.CZ_UTF-8"
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
         if orig_lang:
             os.environ["LANG"] = orig_lang
         else:
             del os.environ["LANG"]
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
 
     def test_dep_checks_disabled(self):
         """Verify that disabling runtime dep checks works"""
@@ -365,11 +374,11 @@ class LibraryOpsTestCase(unittest.TestCase):
         with fake_path(all_but="mkswap"):
             # should fail because of 'mkswap' missing
             with self.assertRaises(GLib.GError):
-                BlockDev.reinit(None, True, None)
+                BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
         os.environ["LIBBLOCKDEV_SKIP_DEP_CHECKS"] = ""
         self.addCleanup(os.environ.pop, "LIBBLOCKDEV_SKIP_DEP_CHECKS")
 
         with fake_path(all_but="mkswap"):
             # should load just fine, skipping the runtime dep checks
-            self.assertTrue(BlockDev.reinit(None, True, None))
+            self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))

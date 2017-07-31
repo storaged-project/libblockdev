@@ -9,8 +9,13 @@ import subprocess
 
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, skip_on
 from gi.repository import BlockDev, GLib
+
+REQUESTED_PLUGINS = BlockDev.plugin_specs_from_names(("lvm",))
+
 if not BlockDev.is_initialized():
-    BlockDev.init(None, None)
+    BlockDev.init(REQUESTED_PLUGINS, None)
+else:
+    BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
 class LvmNoDevTestCase(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -150,7 +155,7 @@ class LvmNoDevTestCase(unittest.TestCase):
         """Verify that getting and setting global config works as expected"""
 
         # setup logging
-        self.assertTrue(BlockDev.reinit(None, False, self._store_log))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, False, self._store_log))
 
         # no global config set initially
         self.assertEqual(BlockDev.lvm_get_global_config(), "")
@@ -598,7 +603,7 @@ class LvmTestLVcreateWithExtra(LvmPVVGLVTestCase):
         """Verify that it's possible to create an LV with extra arguments"""
 
         self.ignore_log = True
-        self.assertTrue(BlockDev.reinit(None, False, self.my_log_func))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, False, self.my_log_func))
 
         succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
         self.assertTrue(succ)
@@ -622,7 +627,7 @@ class LvmTestLVcreateWithExtra(LvmPVVGLVTestCase):
         match = re.match(r".*lvcreate.*-Z y.*", self.log)
         self.assertIsNot(match, None)
 
-        self.assertTrue(BlockDev.reinit(None, False, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, False, None))
 
         succ = BlockDev.lvm_lvremove("testVG", "testLV", True, None)
         self.assertTrue(succ)
@@ -1255,7 +1260,7 @@ class LVMUnloadTest(unittest.TestCase):
     def setUp(self):
         # make sure the library is initialized with all plugins loaded for other
         # tests
-        self.addCleanup(BlockDev.reinit, None, True, None)
+        self.addCleanup(BlockDev.reinit, REQUESTED_PLUGINS, True, None)
 
     def test_check_low_version(self):
         """Verify that checking the minimum LVM version works as expected"""
@@ -1266,12 +1271,12 @@ class LVMUnloadTest(unittest.TestCase):
         with fake_utils("tests/lvm_low_version/"):
             # too low version of LVM available, the LVM plugin should fail to load
             with self.assertRaises(GLib.GError):
-                BlockDev.reinit(None, True, None)
+                BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
             self.assertNotIn("lvm", BlockDev.get_available_plugin_names())
 
         # load the plugins back
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
         self.assertIn("lvm", BlockDev.get_available_plugin_names())
 
     def test_check_no_lvm(self):
@@ -1283,10 +1288,10 @@ class LVMUnloadTest(unittest.TestCase):
         with fake_path(all_but="lvm"):
             # no lvm tool available, the LVM plugin should fail to load
             with self.assertRaises(GLib.GError):
-                BlockDev.reinit(None, True, None)
+                BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
             self.assertNotIn("lvm", BlockDev.get_available_plugin_names())
 
         # load the plugins back
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
         self.assertIn("lvm", BlockDev.get_available_plugin_names())

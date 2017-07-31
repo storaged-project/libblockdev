@@ -5,8 +5,13 @@ import overrides_hack
 from utils import fake_utils, create_sparse_tempfile, create_lio_device, delete_lio_device, run_command
 
 from gi.repository import BlockDev, GLib
+
+REQUESTED_PLUGINS = []
+
 if not BlockDev.is_initialized():
-    BlockDev.init(None, None)
+    BlockDev.init(REQUESTED_PLUGINS, None)
+else:
+    BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
 class UtilsExecLoggingTest(unittest.TestCase):
     log = ""
