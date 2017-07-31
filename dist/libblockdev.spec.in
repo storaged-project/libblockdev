@@ -807,6 +807,9 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 - Use new libmount function to get (un)mount error message (vtrefny)
 - Update the documentation URL (vpodzime)
 
+* Wed Jul 26 2017 Fedora Release Engineering <releng@fedoraproject.org> - 2.10-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
+
 * Wed Jul 05 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.10-1
 - Only enable partition size tolerance with alignment (vpodzime)
 - Limit the requested partition size to maximum possible (vpodzime)
