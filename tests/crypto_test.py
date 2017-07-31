@@ -353,7 +353,7 @@ class CryptoTestEscrow(CryptoTestCase):
         self.addCleanup(os.unlink, self.public_cert)
 
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    @skip_on(("centos", "enterprise_linux"))
+    @skip_on(("centos", "enterprise_linux", "debian"), reason="volume_key asks for password in non-interactive mode on this release")
     def test_escrow_packet(self):
         """Verify that an escrow packet can be created for a device"""
 
