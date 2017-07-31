@@ -26,7 +26,7 @@ class LibraryOpsTestCase(unittest.TestCase):
     def _clean_up(self):
         # change the sources back and recompile
         os.system("sed -ri 's?1024;//test-change?BD_LVM_MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
-        os.system("make -C src/plugins/ libbd_lvm.la &> /dev/null")
+        os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
 
         # try to get everything back to normal by (re)loading all plugins
         BlockDev.reinit(REQUESTED_PLUGINS, True, None)
@@ -42,7 +42,7 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         # change the sources and recompile
         os.system("sed -ri 's?BD_LVM_MAX_LV_SIZE;?1024;//test-change?' src/plugins/lvm.c > /dev/null")
-        os.system("make -C src/plugins/ libbd_lvm.la &> /dev/null")
+        os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
 
         # library should successfully reinitialize without reloading plugins
         self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, False, None))
@@ -58,7 +58,7 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         # change the sources back and recompile
         os.system("sed -ri 's?1024;//test-change?BD_LVM_MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
-        os.system("make -C src/plugins/ libbd_lvm.la &> /dev/null")
+        os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
 
         # library should successfully reinitialize reloading original plugins
         self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
@@ -80,14 +80,14 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         # change the sources and recompile
         os.system("sed -ri 's?BD_LVM_MAX_LV_SIZE;?1024;//test-change?' src/plugins/lvm.c > /dev/null")
-        os.system("make -C src/plugins/ libbd_lvm.la &>/dev/null")
+        os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
 
         # proclaim the new build a different plugin
         os.system("cp src/plugins/.libs/libbd_lvm.so src/plugins/.libs/libbd_lvm2.so")
 
         # change the sources back and recompile
         os.system("sed -ri 's?1024;//test-change?BD_LVM_MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
-        os.system("make -C src/plugins/ libbd_lvm.la &>/dev/null")
+        os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
 
         # force the new plugin to be used
         ps = BlockDev.PluginSpec()
@@ -123,14 +123,14 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         # change the sources and recompile
         os.system("sed -ri 's?BD_LVM_MAX_LV_SIZE;?1024;//test-change?' src/plugins/lvm.c > /dev/null")
-        os.system("make -C src/plugins/ libbd_lvm.la &>/dev/null")
+        os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
 
         # proclaim the new build a different plugin
         os.system("cp src/plugins/.libs/libbd_lvm.so src/plugins/.libs/libbd_lvm2.so.2")
 
         # change the sources back and recompile
         os.system("sed -ri 's?1024;//test-change?BD_LVM_MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
-        os.system("make -C src/plugins/ libbd_lvm.la &>/dev/null")
+        os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
 
         # now reinit the library with the config preferring the new build
         orig_conf_dir = os.environ.get("LIBBLOCKDEV_CONFIG_DIR")
@@ -186,14 +186,14 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         # change the sources and recompile
         os.system("sed -ri 's?gboolean bd_lvm_check_deps \(\) \{?gboolean bd_lvm_check_deps () { return FALSE;//test-change?' src/plugins/lvm.c > /dev/null")
-        os.system("make -C src/plugins/ libbd_lvm.la &>/dev/null")
+        os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
 
         # proclaim the new build a different plugin
         os.system("cp src/plugins/.libs/libbd_lvm.so src/plugins/.libs/libbd_lvm2.so.2")
 
         # change the sources back and recompile
         os.system("sed -ri 's?gboolean bd_lvm_check_deps \(\) \{ return FALSE;//test-change?gboolean bd_lvm_check_deps () {?' src/plugins/lvm.c > /dev/null")
-        os.system("make -C src/plugins/ libbd_lvm.la &>/dev/null")
+        os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
 
         # now reinit the library with the config preferring the new build
         orig_conf_dir = os.environ.get("LIBBLOCKDEV_CONFIG_DIR")

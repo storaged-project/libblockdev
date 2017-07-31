@@ -43,7 +43,7 @@ def create_sparse_file(path, size):
 
 def wipe_all(dev, *args):
     for device in chain([dev], args):
-        os.system("wipefs -a %s &>/dev/null" % device)
+        os.system("wipefs -a %s >/dev/null 2>&1" % device)
 
 @contextmanager
 def udev_settle():
@@ -309,7 +309,7 @@ def mount(device, where):
 
 def umount(what, retry=True):
     try:
-        os.system("umount %s &>/dev/null" % what)
+        os.system("umount %s >/dev/null 2>&1" % what)
         os.rmdir(what)
     except OSError as e:
         # retry the umount if the device is busy
