@@ -6,7 +6,7 @@ import six
 import time
 
 import overrides_hack
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, skip_on
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, skip_on, mount, umount
 from gi.repository import GLib, BlockDev
 
 REQUESTED_PLUGINS = BlockDev.plugin_specs_from_names(("btrfs",))
@@ -20,19 +20,6 @@ TEST_MNT = "/tmp/libblockdev_test_mnt"
 
 def wipefs(device):
     os.system("wipefs -a %s > /dev/null" % device)
-
-def mount(device, where):
-    if not os.path.isdir(where):
-        os.makedirs(where)
-    os.system("mount %s %s" % (device, where))
-
-def umount(what):
-    try:
-        os.system("umount %s &>/dev/null" % what)
-        os.rmdir(what)
-    except OSError:
-        # no such file or directory
-        pass
 
 class BtrfsTestCase(unittest.TestCase):
     def setUp(self):

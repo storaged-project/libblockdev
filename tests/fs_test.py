@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 from contextlib import contextmanager
 import utils
-from utils import run, create_sparse_tempfile
+from utils import run, create_sparse_tempfile, mount, umount
 import six
 import overrides_hack
 
@@ -18,17 +18,6 @@ if not BlockDev.is_initialized():
 else:
     BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
-def mount(device, where):
-    if not os.path.isdir(where):
-        os.makedirs(where)
-    run("mount %s %s" % (device, where))
-
-def umount(what):
-    try:
-        run("umount %s &>/dev/null" % what)
-    except OSError:
-        # no such file or directory
-        pass
 
 def check_output(args, ignore_retcode=True):
     """Just like subprocess.check_output(), but allows the return code of the process to be ignored"""
@@ -82,7 +71,6 @@ class FSTestCase(unittest.TestCase):
             umount(self.mount_dir)
         except:
             pass
-        os.rmdir(self.mount_dir)
 
 class TestGenericWipe(FSTestCase):
     def test_generic_wipe(self):

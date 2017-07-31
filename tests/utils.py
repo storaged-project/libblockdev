@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 import dbus
 import unittest
+import time
 from contextlib import contextmanager
 from itertools import chain
 
@@ -298,3 +299,20 @@ def run(cmd_string):
     make sure everyone else is following best practice and not leaking FDs.
     """
     return subprocess.call(cmd_string, close_fds=True, shell=True)
+
+
+def mount(device, where):
+    if not os.path.isdir(where):
+        os.makedirs(where)
+    os.system("mount %s %s" % (device, where))
+
+
+def umount(what, retry=True):
+    try:
+        os.system("umount %s &>/dev/null" % what)
+        os.rmdir(what)
+    except OSError as e:
+        # retry the umount if the device is busy
+        if "busy" in str(e) and retry:
+            time.sleep(2)
+            umount(what, False)
