@@ -2,17 +2,30 @@ import unittest
 import os
 import overrides_hack
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, skip_on
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, skip_on, get_version
 from gi.repository import BlockDev, GLib
 
-REQUESTED_PLUGINS = BlockDev.plugin_specs_from_names(("mpath",))
+class MpathTest(unittest.TestCase):
 
-if not BlockDev.is_initialized():
-    BlockDev.init(REQUESTED_PLUGINS, None)
-else:
-    BlockDev.reinit(REQUESTED_PLUGINS, True, None)
+    requested_plugins = BlockDev.plugin_specs_from_names(("mpath",))
 
-class MpathTestCase(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        distro, _version = get_version()
+        if distro == "debian":
+            os.environ["LIBBLOCKDEV_SKIP_DEP_CHECKS"] = ""
+
+        if not BlockDev.is_initialized():
+            BlockDev.init(cls.requested_plugins, None)
+        else:
+            BlockDev.reinit(cls.requested_plugins, True, None)
+
+    @classmethod
+    def tearDownClass(cls):
+        if "LIBBLOCKDEV_SKIP_DEP_CHECKS" in os.environ.keys():
+            os.environ.pop("LIBBLOCKDEV_SKIP_DEP_CHECKS")
+
+class MpathTestCase(MpathTest):
     def setUp(self):
         self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("mpath_test", 1024**3)
@@ -36,11 +49,12 @@ class MpathTestCase(unittest.TestCase):
         # device and no error is reported
         self.assertFalse(BlockDev.mpath_is_mpath_member("/dev/loop0"))
 
-class MpathUnloadTest(unittest.TestCase):
+@skip_on("debian", reason="dependency checks are skipped on Debian")
+class MpathUnloadTest(MpathTest):
     def setUp(self):
         # make sure the library is initialized with all plugins loaded for other
         # tests
-        self.addCleanup(BlockDev.reinit, REQUESTED_PLUGINS, True, None)
+        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
 
     def test_check_low_version(self):
         """Verify that checking the minimum dmsetup version works as expected"""
@@ -52,12 +66,12 @@ class MpathUnloadTest(unittest.TestCase):
             # too low version of the multipath tool available, the mpath plugin
             # should fail to load
             with self.assertRaises(GLib.GError):
-                BlockDev.reinit(REQUESTED_PLUGINS, True, None)
+                BlockDev.reinit(self.requested_plugins, True, None)
 
             self.assertNotIn("mpath", BlockDev.get_available_plugin_names())
 
         # load the plugins back
-        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
+        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         self.assertIn("mpath", BlockDev.get_available_plugin_names())
 
     def test_check_no_multipath(self):
@@ -69,15 +83,14 @@ class MpathUnloadTest(unittest.TestCase):
         with fake_path(all_but="multipath"):
             # no multipath available, the mpath plugin should fail to load
             with self.assertRaises(GLib.GError):
-                BlockDev.reinit(REQUESTED_PLUGINS, True, None)
+                BlockDev.reinit(self.requested_plugins, True, None)
 
             self.assertNotIn("mpath", BlockDev.get_available_plugin_names())
 
         # load the plugins back
-        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
+        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         self.assertIn("mpath", BlockDev.get_available_plugin_names())
 
-    @skip_on("debian", reason="mpathconf is not available on Debian")
     def test_check_no_mpathconf(self):
         """Verify that checking mpathconf tool availability works as expected"""
 
@@ -87,10 +100,10 @@ class MpathUnloadTest(unittest.TestCase):
         with fake_path(all_but="mpathconf"):
             # no mpathconf available, the mpath plugin should fail to load
             with self.assertRaises(GLib.GError):
-                BlockDev.reinit(REQUESTED_PLUGINS, True, None)
+                BlockDev.reinit(self.requested_plugins, True, None)
 
             self.assertNotIn("mpath", BlockDev.get_available_plugin_names())
 
         # load the plugins back
-        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
+        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         self.assertIn("mpath", BlockDev.get_available_plugin_names())

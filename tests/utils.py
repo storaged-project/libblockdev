@@ -231,6 +231,26 @@ def get_version_from_pretty_name(pretty_name):
     return (distro, version)
 
 
+def get_version():
+    """ Try to get distro and version
+    """
+
+    bus = dbus.SystemBus()
+
+    # get information about the distribution from systemd (hostname1)
+    sys_info = bus.get_object("org.freedesktop.hostname1", "/org/freedesktop/hostname1")
+    cpe = str(sys_info.Get("org.freedesktop.hostname1", "OperatingSystemCPEName", dbus_interface=dbus.PROPERTIES_IFACE))
+
+    if cpe:
+        # 2nd to 4th fields from e.g. "cpe:/o:fedoraproject:fedora:25" or "cpe:/o:redhat:enterprise_linux:7.3:GA:server"
+        _project, distro, version = tuple(cpe.split(":")[2:5])
+    else:
+        pretty_name = str(sys_info.Get("org.freedesktop.hostname1", "OperatingSystemPrettyName", dbus_interface=dbus.PROPERTIES_IFACE))
+        distro, version = get_version_from_pretty_name(pretty_name)
+
+    return (distro, version)
+
+
 def skip_on(skip_on_distros, skip_on_version="", reason=""):
     """A function returning a decorator to skip some test on a given distribution-version combination
 
@@ -243,18 +263,7 @@ def skip_on(skip_on_distros, skip_on_version="", reason=""):
     if isinstance(skip_on_distros, str):
         skip_on_distros = (skip_on_distros,)
 
-    bus = dbus.SystemBus()
-
-    # get information about the distribution from systemd (hostname1)
-    sys_info = bus.get_object("org.freedesktop.hostname1", "/org/freedesktop/hostname1")
-    cpe = str(sys_info.Get("org.freedesktop.hostname1", "OperatingSystemCPEName", dbus_interface=dbus.PROPERTIES_IFACE))
-
-    if cpe:
-        # 2nd to 4th fields from e.g. "cpe:/o:fedoraproject:fedora:25" or "cpe:/o:redhat:enterprise_linux:7.3:GA:server"
-        project, distro, version = tuple(cpe.split(":")[2:5])
-    else:
-        pretty_name = str(sys_info.Get("org.freedesktop.hostname1", "OperatingSystemPrettyName", dbus_interface=dbus.PROPERTIES_IFACE))
-        distro, version = get_version_from_pretty_name(pretty_name)
+    distro, version = get_version()
 
     def decorator(func):
         if distro in skip_on_distros and (not skip_on_version or skip_on_version == version):
