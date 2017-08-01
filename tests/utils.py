@@ -276,7 +276,7 @@ def skip_on(skip_on_distros, skip_on_version="", reason=""):
 
 # taken from libbytesize's tests/locale_utils.py
 def get_avail_locales():
-    return {loc.strip() for loc in subprocess.check_output(["locale", "-a"]).split()}
+    return {loc.decode(errors="replace").strip() for loc in subprocess.check_output(["locale", "-a"]).split()}
 
 def requires_locales(locales):
     """A decorator factory to skip tests that require unavailable locales
