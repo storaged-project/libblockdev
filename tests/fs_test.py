@@ -39,8 +39,8 @@ def mounted(device, where):
 class FSTestCase(unittest.TestCase):
     def setUp(self):
         self.addCleanup(self._clean_up)
-        self.dev_file = utils.create_sparse_tempfile("part_test", 100 * 1024**2)
-        self.dev_file2 = utils.create_sparse_tempfile("part_test", 100 * 1024**2)
+        self.dev_file = utils.create_sparse_tempfile("fs_test", 100 * 1024**2)
+        self.dev_file2 = utils.create_sparse_tempfile("fs_test", 100 * 1024**2)
         try:
             self.loop_dev = utils.create_lio_device(self.dev_file)
         except RuntimeError as e:

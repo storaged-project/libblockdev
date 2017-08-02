@@ -24,8 +24,8 @@ def wipefs(device):
 class BtrfsTestCase(unittest.TestCase):
     def setUp(self):
         self.addCleanup(self._clean_up)
-        self.dev_file = create_sparse_tempfile("lvm_test", 1024**3)
-        self.dev_file2 = create_sparse_tempfile("lvm_test", 1024**3)
+        self.dev_file = create_sparse_tempfile("btrfs_test", 1024**3)
+        self.dev_file2 = create_sparse_tempfile("btrfs_test", 1024**3)
         try:
             self.loop_dev = create_lio_device(self.dev_file)
         except RuntimeError as e:
@@ -437,8 +437,8 @@ class BtrfsTestChangeLabel(BtrfsTestCase):
 class BtrfsTooSmallTestCase (unittest.TestCase):
     def setUp(self):
         self.addCleanup(self._clean_up)
-        self.dev_file = create_sparse_tempfile("lvm_test", BlockDev.BTRFS_MIN_MEMBER_SIZE)
-        self.dev_file2 = create_sparse_tempfile("lvm_test", BlockDev.BTRFS_MIN_MEMBER_SIZE//2)
+        self.dev_file = create_sparse_tempfile("btrfs_test", BlockDev.BTRFS_MIN_MEMBER_SIZE)
+        self.dev_file2 = create_sparse_tempfile("btrfs_test", BlockDev.BTRFS_MIN_MEMBER_SIZE//2)
         try:
             self.loop_dev = create_lio_device(self.dev_file)
         except RuntimeError as e:
@@ -475,8 +475,8 @@ class BtrfsTooSmallTestCase (unittest.TestCase):
 class BtrfsJustBigEnoughTestCase (unittest.TestCase):
     def setUp(self):
         self.addCleanup(self._clean_up)
-        self.dev_file = create_sparse_tempfile("lvm_test", BlockDev.BTRFS_MIN_MEMBER_SIZE)
-        self.dev_file2 = create_sparse_tempfile("lvm_test", BlockDev.BTRFS_MIN_MEMBER_SIZE)
+        self.dev_file = create_sparse_tempfile("btrfs_test", BlockDev.BTRFS_MIN_MEMBER_SIZE)
+        self.dev_file2 = create_sparse_tempfile("btrfs_test", BlockDev.BTRFS_MIN_MEMBER_SIZE)
         try:
             self.loop_dev = create_lio_device(self.dev_file)
         except RuntimeError as e:

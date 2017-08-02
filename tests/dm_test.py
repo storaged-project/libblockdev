@@ -15,7 +15,7 @@ else:
 class DevMapperTestCase(unittest.TestCase):
     def setUp(self):
         self.addCleanup(self._clean_up)
-        self.dev_file = create_sparse_tempfile("lvm_test", 1024**3)
+        self.dev_file = create_sparse_tempfile("dm_test", 1024**3)
         try:
             self.loop_dev = create_lio_device(self.dev_file)
         except RuntimeError as e:
