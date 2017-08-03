@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 import dbus
 import unittest
+import time
 from contextlib import contextmanager
 from itertools import chain
 
@@ -42,7 +43,7 @@ def create_sparse_file(path, size):
 
 def wipe_all(dev, *args):
     for device in chain([dev], args):
-        os.system("wipefs -a %s &>/dev/null" % device)
+        os.system("wipefs -a %s >/dev/null 2>&1" % device)
 
 @contextmanager
 def udev_settle():
@@ -209,7 +210,48 @@ def run_command(command):
     out, err = res.communicate()
     return (res.returncode, out.decode().strip(), err.decode().strip())
 
-def skip_on(skip_on_distros, skip_on_version="", reason=""):
+def get_version_from_pretty_name(pretty_name):
+    """ Try to get distro and version from 'OperatingSystemPrettyName'
+        hostname property.
+
+        It should look like this:
+         - "Debian GNU/Linux 9 (stretch)"
+         - "Fedora 27 (Workstation Edition)"
+         - "CentOS Linux 7 (Core)"
+
+        So just return first word as distro and first number as version.
+    """
+    distro = pretty_name.split()[0].lower()
+    match = re.search(r"\d+", pretty_name)
+    if match is not None:
+        version = match.group(0)
+    else:
+        raise RuntimeError("Cannot get distro name and version from '%s'" % pretty_name)
+
+    return (distro, version)
+
+
+def get_version():
+    """ Try to get distro and version
+    """
+
+    bus = dbus.SystemBus()
+
+    # get information about the distribution from systemd (hostname1)
+    sys_info = bus.get_object("org.freedesktop.hostname1", "/org/freedesktop/hostname1")
+    cpe = str(sys_info.Get("org.freedesktop.hostname1", "OperatingSystemCPEName", dbus_interface=dbus.PROPERTIES_IFACE))
+
+    if cpe:
+        # 2nd to 4th fields from e.g. "cpe:/o:fedoraproject:fedora:25" or "cpe:/o:redhat:enterprise_linux:7.3:GA:server"
+        _project, distro, version = tuple(cpe.split(":")[2:5])
+    else:
+        pretty_name = str(sys_info.Get("org.freedesktop.hostname1", "OperatingSystemPrettyName", dbus_interface=dbus.PROPERTIES_IFACE))
+        distro, version = get_version_from_pretty_name(pretty_name)
+
+    return (distro, version)
+
+
+def skip_on(skip_on_distros, skip_on_version="", skip_on_arch="", reason=""):
     """A function returning a decorator to skip some test on a given distribution-version combination
 
     :param skip_on_distros: distro(s) to skip the test on
@@ -221,18 +263,13 @@ def skip_on(skip_on_distros, skip_on_version="", reason=""):
     if isinstance(skip_on_distros, str):
         skip_on_distros = (skip_on_distros,)
 
-    bus = dbus.SystemBus()
-
-    # get information about the distribution from systemd (hostname1)
-    sys_info = bus.get_object("org.freedesktop.hostname1", "/org/freedesktop/hostname1")
-    cpe = str(sys_info.Get("org.freedesktop.hostname1", "OperatingSystemCPEName", dbus_interface=dbus.PROPERTIES_IFACE))
-
-    # 2nd to 4th fields from e.g. "cpe:/o:fedoraproject:fedora:25" or "cpe:/o:redhat:enterprise_linux:7.3:GA:server"
-    project, distro, version = tuple(cpe.split(":")[2:5])
+    distro, version = get_version()
+    arch = os.uname()[-1]
 
     def decorator(func):
-        if distro in skip_on_distros and (not skip_on_version or skip_on_version == version):
-            msg = "not supported on this distribution in this version" + (": %s" % reason if reason else "")
+        if distro in skip_on_distros and (not skip_on_version or skip_on_version == version) and \
+           (not skip_on_arch or skip_on_arch == arch):
+            msg = "not supported on this distribution in this version and arch" + (": %s" % reason if reason else "")
             return unittest.skip(msg)(func)
         else:
             return func
@@ -241,7 +278,7 @@ def skip_on(skip_on_distros, skip_on_version="", reason=""):
 
 # taken from libbytesize's tests/locale_utils.py
 def get_avail_locales():
-    return {loc.strip() for loc in subprocess.check_output(["locale", "-a"]).split()}
+    return {loc.decode(errors="replace").strip() for loc in subprocess.check_output(["locale", "-a"]).split()}
 
 def requires_locales(locales):
     """A decorator factory to skip tests that require unavailable locales
@@ -273,3 +310,20 @@ def run(cmd_string):
     make sure everyone else is following best practice and not leaking FDs.
     """
     return subprocess.call(cmd_string, close_fds=True, shell=True)
+
+
+def mount(device, where):
+    if not os.path.isdir(where):
+        os.makedirs(where)
+    os.system("mount %s %s" % (device, where))
+
+
+def umount(what, retry=True):
+    try:
+        os.system("umount %s >/dev/null 2>&1" % what)
+        os.rmdir(what)
+    except OSError as e:
+        # retry the umount if the device is busy
+        if "busy" in str(e) and retry:
+            time.sleep(2)
+            umount(what, False)

@@ -4,11 +4,20 @@ import overrides_hack
 
 from utils import fake_path
 from gi.repository import BlockDev, GLib
-if not BlockDev.is_initialized():
-    BlockDev.init(None, None)
 
+@unittest.skipUnless(os.uname()[4].startswith('s390'), "s390x architecture required")
 class S390TestCase(unittest.TestCase):
-    @unittest.skipUnless(os.uname()[4].startswith('s390'), "s390x architecture required")
+
+    requested_plugins = BlockDev.plugin_specs_from_names(("s390",))
+
+    @classmethod
+    def setUpClass(cls):
+
+        if not BlockDev.is_initialized():
+            BlockDev.init(cls.requested_plugins, None)
+        else:
+            BlockDev.reinit(cls.requested_plugins, True, None)
+
     def test_device_input(self):
         """Verify that s390_sanitize_dev_input works as expected"""
         dev = "1234"
@@ -33,7 +42,6 @@ class S390TestCase(unittest.TestCase):
         dev = "0.0.abcdefgh"
         self.assertEqual(BlockDev.s390.sanitize_dev_input(dev), dev)
 
-    @unittest.skipUnless(os.uname()[4].startswith('s390'), "s390x architecture required")
     def test_wwpn_input(self):
         """Verify that s390_zfcp_sanitize_wwpn_input works as expected"""
         # missing "0x" from beginning of wwpn; this should be added by fx
@@ -48,7 +56,6 @@ class S390TestCase(unittest.TestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.s390.zfcp_sanitize_wwpn_input(wwpn)
 
-    @unittest.skipUnless(os.uname()[4].startswith('s390'), "s390x architecture required")
     def test_lun_input(self):
         """Verify that s390_zfcp_sanitize_lun_input works as expected"""
         # user does not prepend lun with "0x"; this should get added
@@ -70,9 +77,20 @@ class S390TestCase(unittest.TestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.s390.zfcp_sanitize_lun_input(lun)
 
+
+@unittest.skipUnless(os.uname()[4].startswith('s390'), "s390x architecture required")
 class S390UnloadTest(unittest.TestCase):
 
-    @unittest.skipUnless(os.uname()[4].startswith('s390'), "s390x architecture required")
+    requested_plugins = BlockDev.plugin_specs_from_names(("s390",))
+
+    @classmethod
+    def setUpClass(cls):
+
+        if not BlockDev.is_initialized():
+            BlockDev.init(cls.requested_plugins, None)
+        else:
+            BlockDev.reinit(cls.requested_plugins, True, None)
+
     def test_check_no_dasdfmt(self):
         """Verify that checking dasdfmt tool availability works as expected"""
 
@@ -82,12 +100,11 @@ class S390UnloadTest(unittest.TestCase):
         with fake_path(all_but="dasdfmt"):
             # dasdfmt is not available, so the s390 plugin should fail to load
             with self.assertRaises(GLib.GError):
-                BlockDev.reinit(None, True, None)
+                BlockDev.reinit(self.requested_plugins, True, None)
 
             self.assertNotIn("s390", BlockDev.get_available_plugin_names())
 
-    @unittest.skipUnless(os.uname()[4].startswith('s390'), "s390x architecture required")
     def setUp(self):
         # make sure the library is initialized with all plugins loaded for other
         # tests
-        self.addCleanup(BlockDev.reinit, None, True, None)
+        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)

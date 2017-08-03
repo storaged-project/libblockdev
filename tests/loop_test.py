@@ -5,8 +5,13 @@ import overrides_hack
 
 from utils import create_sparse_tempfile
 from gi.repository import BlockDev, GLib
+
+REQUESTED_PLUGINS = BlockDev.plugin_specs_from_names(("loop",))
+
 if not BlockDev.is_initialized():
-    BlockDev.init(None, None)
+    BlockDev.init(REQUESTED_PLUGINS, None)
+else:
+    BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
 class LoopTestCase(unittest.TestCase):
     def setUp(self):

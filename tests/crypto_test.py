@@ -9,8 +9,13 @@ import locale
 
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on, get_avail_locales, requires_locales
 from gi.repository import BlockDev, GLib
+
+REQUESTED_PLUGINS = BlockDev.plugin_specs_from_names(("crypto",))
+
 if not BlockDev.is_initialized():
-    BlockDev.init(None, None)
+    BlockDev.init(REQUESTED_PLUGINS, None)
+else:
+    BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
 PASSWD = "myshinylittlepassword"
 PASSWD2 = "myshinylittlepassword2"
@@ -348,7 +353,7 @@ class CryptoTestEscrow(CryptoTestCase):
         self.addCleanup(os.unlink, self.public_cert)
 
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    @skip_on(("centos", "enterprise_linux"))
+    @skip_on(("centos", "enterprise_linux", "debian"), reason="volume_key asks for password in non-interactive mode on this release")
     def test_escrow_packet(self):
         """Verify that an escrow packet can be created for a device"""
 

@@ -5,25 +5,19 @@ import subprocess
 import tempfile
 from contextlib import contextmanager
 import utils
-from utils import run, create_sparse_tempfile
+from utils import run, create_sparse_tempfile, mount, umount
 import six
 import overrides_hack
 
 from gi.repository import BlockDev, GLib
+
+REQUESTED_PLUGINS = BlockDev.plugin_specs_from_names(("fs", "loop"))
+
 if not BlockDev.is_initialized():
-    BlockDev.init(None, None)
+    BlockDev.init(REQUESTED_PLUGINS, None)
+else:
+    BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
-def mount(device, where):
-    if not os.path.isdir(where):
-        os.makedirs(where)
-    run("mount %s %s" % (device, where))
-
-def umount(what):
-    try:
-        run("umount %s &>/dev/null" % what)
-    except OSError:
-        # no such file or directory
-        pass
 
 def check_output(args, ignore_retcode=True):
     """Just like subprocess.check_output(), but allows the return code of the process to be ignored"""
@@ -45,8 +39,8 @@ def mounted(device, where):
 class FSTestCase(unittest.TestCase):
     def setUp(self):
         self.addCleanup(self._clean_up)
-        self.dev_file = utils.create_sparse_tempfile("part_test", 100 * 1024**2)
-        self.dev_file2 = utils.create_sparse_tempfile("part_test", 100 * 1024**2)
+        self.dev_file = utils.create_sparse_tempfile("fs_test", 100 * 1024**2)
+        self.dev_file2 = utils.create_sparse_tempfile("fs_test", 100 * 1024**2)
         try:
             self.loop_dev = utils.create_lio_device(self.dev_file)
         except RuntimeError as e:
@@ -77,7 +71,6 @@ class FSTestCase(unittest.TestCase):
             umount(self.mount_dir)
         except:
             pass
-        os.rmdir(self.mount_dir)
 
 class TestGenericWipe(FSTestCase):
     def test_generic_wipe(self):
@@ -86,7 +79,7 @@ class TestGenericWipe(FSTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_wipe("/non/existing/device", True)
 
-        ret = run("pvcreate -ff %s &>/dev/null" % self.loop_dev)
+        ret = run("pvcreate -ff %s >/dev/null 2>&1" % self.loop_dev)
         self.assertEqual(ret, 0)
 
         succ = BlockDev.fs_wipe(self.loop_dev, True)
@@ -94,7 +87,7 @@ class TestGenericWipe(FSTestCase):
 
         # now test the same multiple times in a row
         for i in range(10):
-            ret = run("pvcreate -ff %s &>/dev/null" % self.loop_dev)
+            ret = run("pvcreate -ff %s >/dev/null 2>&1" % self.loop_dev)
             self.assertEqual(ret, 0)
 
             succ = BlockDev.fs_wipe(self.loop_dev, True)
@@ -102,7 +95,7 @@ class TestGenericWipe(FSTestCase):
 
         # vfat has multiple signatures on the device so it allows us to test the
         # 'all' argument of fs_wipe()
-        ret = run("mkfs.vfat -I %s &>/dev/null" % self.loop_dev)
+        ret = run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
         self.assertEqual(ret, 0)
 
         time.sleep(0.5)
@@ -124,7 +117,7 @@ class TestGenericWipe(FSTestCase):
         self.assertEqual(fs_type, b"")
 
         # now do the wipe all in a one step
-        ret = run("mkfs.vfat -I %s &>/dev/null" % self.loop_dev)
+        ret = run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
         self.assertEqual(ret, 0)
 
         succ = BlockDev.fs_wipe(self.loop_dev, True)
@@ -150,7 +143,7 @@ class TestClean(FSTestCase):
         succ = BlockDev.fs_clean(self.loop_dev)
         self.assertTrue(succ)
 
-        ret = run("pvcreate -ff %s &>/dev/null" % self.loop_dev)
+        ret = run("pvcreate -ff %s >/dev/null 2>&1" % self.loop_dev)
         self.assertEqual(ret, 0)
 
         succ = BlockDev.fs_clean(self.loop_dev)
@@ -163,7 +156,7 @@ class TestClean(FSTestCase):
 
         # vfat has multiple signatures on the device so it allows us to test
         # that clean removes all signatures
-        ret = run("mkfs.vfat -I %s &>/dev/null" % self.loop_dev)
+        ret = run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
         self.assertEqual(ret, 0)
 
         time.sleep(0.5)
@@ -253,7 +246,7 @@ class ExtTestWipe(FSTestCase):
 
         BlockDev.fs_wipe(self.loop_dev, True)
 
-        run("mkfs.vfat -I %s &>/dev/null" % self.loop_dev)
+        run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
 
         # vfat, not an ext4 file system
         with self.assertRaises(GLib.GError):
@@ -535,7 +528,7 @@ class XfsTestWipe(FSTestCase):
 
         BlockDev.fs_wipe(self.loop_dev, True)
 
-        run("mkfs.ext2 -F %s &>/dev/null" % self.loop_dev)
+        run("mkfs.ext2 -F %s >/dev/null 2>&1" % self.loop_dev)
 
         # ext2, not an xfs file system
         with self.assertRaises(GLib.GError):
@@ -630,15 +623,15 @@ class XfsSetLabel(FSTestCase):
 
 class XfsResize(FSTestCase):
     def _destroy_lvm(self):
-        run("vgremove --yes libbd_fs_tests &>/dev/null")
-        run("pvremove --yes %s &>/dev/null" % self.loop_dev)
+        run("vgremove --yes libbd_fs_tests >/dev/null 2>&1")
+        run("pvremove --yes %s >/dev/null 2>&1" % self.loop_dev)
 
     def test_xfs_resize(self):
         """Verify that it is possible to resize an xfs file system"""
 
-        run("pvcreate -ff -y %s &>/dev/null" % self.loop_dev)
-        run("vgcreate -s10M libbd_fs_tests %s &>/dev/null" % self.loop_dev)
-        run("lvcreate -n xfs_test -L50M libbd_fs_tests &>/dev/null")
+        run("pvcreate -ff -y %s >/dev/null 2>&1" % self.loop_dev)
+        run("vgcreate -s10M libbd_fs_tests %s >/dev/null 2>&1" % self.loop_dev)
+        run("lvcreate -n xfs_test -L50M libbd_fs_tests >/dev/null 2>&1")
         self.addCleanup(self._destroy_lvm)
         lv = "/dev/libbd_fs_tests/xfs_test"
 
@@ -665,7 +658,7 @@ class XfsResize(FSTestCase):
             with self.assertRaises(GLib.GError):
                 succ = BlockDev.fs_xfs_resize(self.mount_dir, 40 * 1024**2 / fi.block_size, None)
 
-        run("lvresize -L70M libbd_fs_tests/xfs_test &>/dev/null")
+        run("lvresize -L70M libbd_fs_tests/xfs_test >/dev/null 2>&1")
         # should grow
         with mounted(lv, self.mount_dir):
             succ = BlockDev.fs_xfs_resize(self.mount_dir, 0, None)
@@ -675,7 +668,7 @@ class XfsResize(FSTestCase):
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 70 * 1024**2)
 
-        run("lvresize -L90M libbd_fs_tests/xfs_test &>/dev/null")
+        run("lvresize -L90M libbd_fs_tests/xfs_test >/dev/null 2>&1")
         # should grow just to 80 MiB
         with mounted(lv, self.mount_dir):
             succ = BlockDev.fs_xfs_resize(self.mount_dir, 80 * 1024**2 / fi.block_size, None)
@@ -748,7 +741,7 @@ class VfatTestWipe(FSTestCase):
 
         BlockDev.fs_wipe(self.loop_dev, True)
 
-        run("mkfs.ext2 -F %s &>/dev/null" % self.loop_dev)
+        run("mkfs.ext2 -F %s >/dev/null 2>&1" % self.loop_dev)
 
         # ext2, not an vfat file system
         with self.assertRaises(GLib.GError):
@@ -1225,15 +1218,15 @@ class GenericResize(FSTestCase):
         self._test_generic_resize(mkfs_function=BlockDev.fs_vfat_mkfs)
 
     def _destroy_lvm(self):
-        run("vgremove --yes libbd_fs_tests &>/dev/null")
-        run("pvremove --yes %s &>/dev/null" % self.loop_dev)
+        run("vgremove --yes libbd_fs_tests >/dev/null 2>&1")
+        run("pvremove --yes %s >/dev/null 2>&1" % self.loop_dev)
 
     def test_xfs_generic_resize(self):
         """Test generic resize function with an xfs file system"""
 
-        run("pvcreate -ff -y %s &>/dev/null" % self.loop_dev)
-        run("vgcreate -s10M libbd_fs_tests %s &>/dev/null" % self.loop_dev)
-        run("lvcreate -n xfs_test -L50M libbd_fs_tests &>/dev/null")
+        run("pvcreate -ff -y %s >/dev/null 2>&1" % self.loop_dev)
+        run("vgcreate -s10M libbd_fs_tests %s >/dev/null 2>&1" % self.loop_dev)
+        run("lvcreate -n xfs_test -L50M libbd_fs_tests >/dev/null 2>&1")
         self.addCleanup(self._destroy_lvm)
 
         lv = "/dev/libbd_fs_tests/xfs_test"
@@ -1264,7 +1257,7 @@ class GenericResize(FSTestCase):
             with self.assertRaises(GLib.GError):
                 succ = BlockDev.fs_resize(lv, 40 * 1024**2)
 
-        run("lvresize -L70M libbd_fs_tests/xfs_test &>/dev/null")
+        run("lvresize -L70M libbd_fs_tests/xfs_test >/dev/null 2>&1")
         # should grow
         with mounted(lv, self.mount_dir):
             succ = BlockDev.fs_resize(lv, 0)
@@ -1274,7 +1267,7 @@ class GenericResize(FSTestCase):
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 70 * 1024**2)
 
-        run("lvresize -L90M libbd_fs_tests/xfs_test &>/dev/null")
+        run("lvresize -L90M libbd_fs_tests/xfs_test >/dev/null 2>&1")
         # should grow just to 80 MiB
         with mounted(lv, self.mount_dir):
             succ = BlockDev.fs_resize(lv, 80 * 1024**2)
