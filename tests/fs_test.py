@@ -86,7 +86,7 @@ class TestGenericWipe(FSTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_wipe("/non/existing/device", True)
 
-        ret = run("pvcreate %s &>/dev/null" % self.loop_dev)
+        ret = run("pvcreate -ff %s &>/dev/null" % self.loop_dev)
         self.assertEqual(ret, 0)
 
         succ = BlockDev.fs_wipe(self.loop_dev, True)
@@ -94,7 +94,7 @@ class TestGenericWipe(FSTestCase):
 
         # now test the same multiple times in a row
         for i in range(10):
-            ret = run("pvcreate %s &>/dev/null" % self.loop_dev)
+            ret = run("pvcreate -ff %s &>/dev/null" % self.loop_dev)
             self.assertEqual(ret, 0)
 
             succ = BlockDev.fs_wipe(self.loop_dev, True)
@@ -150,7 +150,7 @@ class TestClean(FSTestCase):
         succ = BlockDev.fs_clean(self.loop_dev)
         self.assertTrue(succ)
 
-        ret = run("pvcreate %s &>/dev/null" % self.loop_dev)
+        ret = run("pvcreate -ff %s &>/dev/null" % self.loop_dev)
         self.assertEqual(ret, 0)
 
         succ = BlockDev.fs_clean(self.loop_dev)
@@ -245,7 +245,7 @@ class ExtTestWipe(FSTestCase):
         with self.assertRaises(GLib.GError):
             wipe_function(self.loop_dev)
 
-        run("pvcreate %s >/dev/null" % self.loop_dev)
+        run("pvcreate -ff %s >/dev/null" % self.loop_dev)
 
         # LVM PV signature, not an ext4 file system
         with self.assertRaises(GLib.GError):
@@ -527,7 +527,7 @@ class XfsTestWipe(FSTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_xfs_wipe(self.loop_dev)
 
-        run("pvcreate %s >/dev/null" % self.loop_dev)
+        run("pvcreate -ff %s >/dev/null" % self.loop_dev)
 
         # LVM PV signature, not an xfs file system
         with self.assertRaises(GLib.GError):
@@ -740,7 +740,7 @@ class VfatTestWipe(FSTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_vfat_wipe(self.loop_dev)
 
-        run("pvcreate %s >/dev/null" % self.loop_dev)
+        run("pvcreate -ff %s >/dev/null" % self.loop_dev)
 
         # LVM PV signature, not an vfat file system
         with self.assertRaises(GLib.GError):
