@@ -25,6 +25,8 @@
 #include <inttypes.h>
 #include <unistd.h>
 #include <sys/file.h>
+#include <sys/ioctl.h>
+#include <linux/fs.h>
 #include <blockdev/utils.h>
 #include <part_err.h>
 
@@ -1117,6 +1119,8 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
     gboolean ret = FALSE;
     guint64 progress_id = 0;
     gchar *msg = NULL;
+    guint64 old_size = 0;
+    guint64 new_size = 0;
 
     msg = g_strdup_printf ("Started resizing partition '%s'", part);
     progress_id = bd_utils_report_started (msg);
@@ -1172,6 +1176,7 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
         return FALSE;
     }
 
+    old_size = ped_part->geom.length * dev->sector_size;
     if (!resize_part (ped_part, dev, ped_disk, size, align, error)) {
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
@@ -1179,7 +1184,32 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
         return FALSE;
     }
 
-    ret = disk_commit (ped_disk, disk, error);
+    new_size = ped_part->geom.length * dev->sector_size;
+    if (old_size != new_size) {
+        gint fd = 0;
+        gint wait_us = 10 * 1000 * 1000; /* 10 seconds */
+        gint step_us = 100 * 1000; /* 100 microseconds */
+        guint64 block_size = 0;
+
+        ret = disk_commit (ped_disk, disk, error);
+        /* wait for partition to appear with new size */
+        while (wait_us > 0) {
+            fd = open (part, O_RDONLY);
+            if (fd != -1) {
+                if (ioctl (fd, BLKGETSIZE64, &block_size) != -1 && block_size == new_size) {
+                    close (fd);
+                    break;
+                }
+
+                close (fd);
+            }
+
+            g_usleep (step_us);
+            wait_us -= step_us;
+        }
+    } else {
+        ret = TRUE; /* not committing to disk */
+    }
 
     ped_disk_destroy (ped_disk);
     ped_device_destroy (dev);
