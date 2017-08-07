@@ -1,6 +1,6 @@
 ### CI status
 
-<img alt="CI status" src="https://fedorapeople.org/groups/storage_apis/statuses/libblockdev-master.svg" width="100%" height="200ex" />
+<img alt="CI status" src="https://fedorapeople.org/groups/storage_apis/statuses/libblockdev-master.svg" width="100%" height="300ex" />
 
 
 ### Introduction
