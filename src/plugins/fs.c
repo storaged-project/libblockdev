@@ -2614,8 +2614,8 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
  */
 gboolean bd_fs_vfat_resize (const gchar *device, guint64 new_size, GError **error) {
     PedDevice *ped_dev = NULL;
-    PedGeometry geom = {0};
-    PedGeometry new_geom = {0};
+    PedGeometry geom = {NULL, 0, 0, 0};
+    PedGeometry new_geom = {NULL, 0, 0, 0};
     PedFileSystem *fs = NULL;
     PedSector start = 0;
     PedSector length = 0;
