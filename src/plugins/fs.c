@@ -954,23 +954,35 @@ gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar 
 gchar* bd_fs_get_mountpoint (const gchar *device, GError **error) {
     struct libmnt_table *table = NULL;
     struct libmnt_fs *fs = NULL;
+    struct libmnt_cache *cache = NULL;
     gint ret = 0;
     gchar *mountpoint = NULL;
     const gchar *target = NULL;
 
     table = mnt_new_table ();
+    cache = mnt_new_cache ();
+
+    ret = mnt_table_set_cache (table, cache);
+    if (ret != 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to set cache for mount info table.");
+        mnt_free_table (table);
+        return NULL;
+    }
 
     ret = mnt_table_parse_mtab (table, NULL);
     if (ret != 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to parse mount info.");
         mnt_free_table (table);
+        mnt_free_cache (cache);
         return NULL;
     }
 
     fs = mnt_table_find_source (table, device, MNT_ITER_FORWARD);
     if (!fs) {
         mnt_free_table (table);
+        mnt_free_cache (cache);
         return NULL;
     }
 
@@ -978,12 +990,14 @@ gchar* bd_fs_get_mountpoint (const gchar *device, GError **error) {
     if (!target) {
         mnt_free_fs (fs);
         mnt_free_table (table);
+        mnt_free_cache (cache);
         return NULL;
     }
 
     mountpoint = g_strdup (target);
     mnt_free_fs (fs);
     mnt_free_table (table);
+    mnt_free_cache (cache);
     return mountpoint;
 }
 
