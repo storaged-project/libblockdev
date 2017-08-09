@@ -2284,7 +2284,9 @@ gboolean bd_fs_xfs_set_label (const gchar *device, const gchar *label, GError **
 
 /**
  * bd_fs_xfs_get_info:
- * @device: the device containing the file system to get info for
+ * @device: the device containing the file system to get info for (device must
+            be mounted, trying to get info for an unmounted device will result
+            in an error)
  * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): information about the file system on @device or
@@ -2301,6 +2303,19 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
     gboolean have_uuid = FALSE;
     gchar *val_start = NULL;
     gchar *val_end = NULL;
+    g_autofree gchar* mountpoint = NULL;
+
+    mountpoint = bd_fs_get_mountpoint (device, error);
+    if (mountpoint == NULL) {
+        if (*error == NULL) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_MOUNTED,
+                         "Can't get xfs file system information for '%s': Device is not mounted.", device);
+            return NULL;
+        } else {
+            g_prefix_error (error, "Error when trying to get mountpoint for '%s': ", device);
+            return NULL;
+        }
+    }
 
     success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
     if (!success)
@@ -2330,7 +2345,7 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
     g_strfreev (lines);
 
     args[0] = "xfs_info";
-    args[1] = device;
+    args[1] = mountpoint;
     args[2] = NULL;
     success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
     if (!success) {

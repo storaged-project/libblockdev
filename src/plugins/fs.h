@@ -14,6 +14,7 @@ typedef enum {
     BD_FS_ERROR_PIPE,
     BD_FS_ERROR_UNMOUNT_FAIL,
     BD_FS_ERROR_NOT_SUPPORTED,
+    BD_FS_ERROR_NOT_MOUNTED,
     BD_FS_ERROR_AUTH, // keep this entry last
 } BDFsError;
 

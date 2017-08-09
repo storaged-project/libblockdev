@@ -579,6 +579,9 @@ class XfsGetInfo(FSTestCase):
         succ = BlockDev.fs_xfs_mkfs(self.loop_dev, None)
         self.assertTrue(succ)
 
+        with six.assertRaisesRegex(self, GLib.GError, "not mounted"):
+            fi = BlockDev.fs_xfs_get_info(self.loop_dev)
+
         with mounted(self.loop_dev, self.mount_dir):
             fi = BlockDev.fs_xfs_get_info(self.loop_dev)
 
