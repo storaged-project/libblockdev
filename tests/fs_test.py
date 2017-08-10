@@ -836,6 +836,7 @@ class VfatResize(FSTestCase):
         succ = BlockDev.fs_vfat_resize(self.loop_dev, 80 * 1024**2)
         self.assertTrue(succ)
 
+
         # resize to maximum size
         succ = BlockDev.fs_vfat_resize(self.loop_dev, 0)
         self.assertTrue(succ)
@@ -1215,7 +1216,6 @@ class GenericResize(FSTestCase):
                                   fs_info_func=BlockDev.fs_ext4_get_info,
                                   info_size_func=lambda fi: fi.block_size * fi.block_count)
 
-    @utils.skip_on("fedora", "27", reason="VFAT resize (detection after resize) is broken on rawhide")
     def test_vfat_generic_resize(self):
         """Test generic resize function with a vfat file system"""
         self._test_generic_resize(mkfs_function=BlockDev.fs_vfat_mkfs)
