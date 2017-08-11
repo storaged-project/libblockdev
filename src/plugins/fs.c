@@ -2699,8 +2699,8 @@ gboolean bd_fs_vfat_resize (const gchar *device, guint64 new_size, GError **erro
     if (status == 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to initialize new geometry for the filesystem on '%s'", device);
-        ped_device_close (ped_dev);
         ped_file_system_close (fs);
+        ped_device_close (ped_dev);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
@@ -2709,14 +2709,14 @@ gboolean bd_fs_vfat_resize (const gchar *device, guint64 new_size, GError **erro
     if (status == 0) {
         set_parted_error (error, BD_FS_ERROR_FAIL);
         g_prefix_error (error, "Failed to resize the filesystem on '%s'", device);
-        ped_device_close (ped_dev);
         ped_file_system_close (fs);
+        ped_device_close (ped_dev);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
-    ped_device_close (ped_dev);
     ped_file_system_close (fs);
+    ped_device_close (ped_dev);
     bd_utils_report_finished (progress_id, "Completed");
 
     return TRUE;
