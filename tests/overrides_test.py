@@ -3,7 +3,22 @@ import math
 import overrides_hack
 from gi.repository import BlockDev
 
-class OverridesTestCase(unittest.TestCase):
+
+class OverridesTest(unittest.TestCase):
+    # all plugins expcept mpath -- it doesn't have all the dependencies on Debian
+    # and we don't need it for this test
+    requested_plugins = BlockDev.plugin_specs_from_names(("btrfs", "crypto", "dm",
+                                                          "fs", "kbd", "loop", "lvm",
+                                                          "mdraid", "part", "swap"))
+
+    @classmethod
+    def setUpClass(cls):
+        if not BlockDev.is_initialized():
+            BlockDev.init(cls.requested_plugins, None)
+        else:
+            BlockDev.reinit(cls.requested_plugins, True, None)
+
+class OverridesTestCase(OverridesTest):
     def test_error_proxy(self):
         """Verify that the error proxy works as expected"""
 
@@ -47,11 +62,11 @@ class OverridesTestCase(unittest.TestCase):
         self.assertEqual(BlockDev.lvm_get_thpool_padding(11 * 1024**2),
                          expected_padding)
 
-class OverridesUnloadTestCase(unittest.TestCase):
+class OverridesUnloadTestCase(OverridesTest):
     def tearDown(self):
         # make sure the library is initialized with all plugins loaded for other
         # tests
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
 
     def test_xrules(self):
         """Verify that regexp-based transformation rules work as expected"""
@@ -64,7 +79,7 @@ class OverridesUnloadTestCase(unittest.TestCase):
             BlockDev.lvm.get_max_lv_size()
 
         # load the plugins back
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
 
     def test_exception_inheritance(self):
         # unload all plugins first
@@ -77,4 +92,4 @@ class OverridesUnloadTestCase(unittest.TestCase):
             BlockDev.lvm.get_max_lv_size()
 
         # load the plugins back
-        self.assertTrue(BlockDev.reinit(None, True, None))
+        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))

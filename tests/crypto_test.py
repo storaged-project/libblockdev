@@ -10,31 +10,23 @@ import locale
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on, get_avail_locales, requires_locales
 from gi.repository import BlockDev, GLib
 
-REQUESTED_PLUGINS = BlockDev.plugin_specs_from_names(("crypto",))
-
-if not BlockDev.is_initialized():
-    BlockDev.init(REQUESTED_PLUGINS, None)
-else:
-    BlockDev.reinit(REQUESTED_PLUGINS, True, None)
-
 PASSWD = "myshinylittlepassword"
 PASSWD2 = "myshinylittlepassword2"
 PASSWD3 = "myshinylittlepassword3"
 
-class CryptoTestGenerateBackupPassphrase(unittest.TestCase):
-    def test_generate_backup_passhprase(self):
-        """Verify that backup passphrase generation works as expected"""
-
-        exp = r"^([0-9A-Za-z./]{5}-){3}[0-9A-Za-z./]{5}$"
-        for _i in range(100):
-            bp = BlockDev.crypto_generate_backup_passphrase()
-            six.assertRegex(self, bp, exp)
-
 class CryptoTestCase(unittest.TestCase):
+
+    requested_plugins = BlockDev.plugin_specs_from_names(("crypto",))
+
     @classmethod
     def setUpClass(cls):
         unittest.TestCase.setUpClass()
         cls.avail_locales = get_avail_locales()
+
+        if not BlockDev.is_initialized():
+            BlockDev.init(cls.requested_plugins, None)
+        else:
+            BlockDev.reinit(cls.requested_plugins, True, None)
 
     def setUp(self):
         self.addCleanup(self._clean_up)
@@ -75,6 +67,19 @@ class CryptoTestCase(unittest.TestCase):
         os.unlink(self.dev_file2)
 
         os.unlink(self.keyfile)
+
+class CryptoTestGenerateBackupPassphrase(CryptoTestCase):
+    def setUp(self):
+        # we don't need block devices for this test
+        pass
+
+    def test_generate_backup_passhprase(self):
+        """Verify that backup passphrase generation works as expected"""
+
+        exp = r"^([0-9A-Za-z./]{5}-){3}[0-9A-Za-z./]{5}$"
+        for _i in range(100):
+            bp = BlockDev.crypto_generate_backup_passphrase()
+            six.assertRegex(self, bp, exp)
 
 class CryptoTestFormat(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")

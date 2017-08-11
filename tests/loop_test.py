@@ -6,14 +6,18 @@ import overrides_hack
 from utils import create_sparse_tempfile
 from gi.repository import BlockDev, GLib
 
-REQUESTED_PLUGINS = BlockDev.plugin_specs_from_names(("loop",))
-
-if not BlockDev.is_initialized():
-    BlockDev.init(REQUESTED_PLUGINS, None)
-else:
-    BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
 class LoopTestCase(unittest.TestCase):
+
+    requested_plugins = BlockDev.plugin_specs_from_names(("loop",))
+
+    @classmethod
+    def setUpClass(cls):
+        if not BlockDev.is_initialized():
+            BlockDev.init(cls.requested_plugins, None)
+        else:
+            BlockDev.reinit(cls.requested_plugins, True, None)
+
     def setUp(self):
         self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("loop_test", 1024**3)

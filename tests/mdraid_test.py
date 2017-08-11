@@ -9,12 +9,6 @@ import six
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path
 from gi.repository import BlockDev, GLib
 
-REQUESTED_PLUGINS = BlockDev.plugin_specs_from_names(("mdraid",))
-
-if not BlockDev.is_initialized():
-    BlockDev.init(REQUESTED_PLUGINS, None)
-else:
-    BlockDev.reinit(REQUESTED_PLUGINS, True, None)
 
 @contextmanager
 def wait_for_action(action_name):
@@ -30,7 +24,28 @@ def wait_for_action(action_name):
                 print("Sleeping")
                 time.sleep(1)
 
-class MDNoDevTestCase(unittest.TestCase):
+class MDTest(unittest.TestCase):
+
+    requested_plugins = BlockDev.plugin_specs_from_names(("mdraid",))
+
+    @classmethod
+    def setUpClass(cls):
+        if not BlockDev.is_initialized():
+            BlockDev.init(cls.requested_plugins, None)
+        else:
+            BlockDev.reinit(cls.requested_plugins, True, None)
+
+class MDNoDevTestCase(MDTest):
+
+    requested_plugins = BlockDev.plugin_specs_from_names(("mdraid",))
+
+    @classmethod
+    def setUpClass(cls):
+        if not BlockDev.is_initialized():
+            BlockDev.init(cls.requested_plugins, None)
+        else:
+            BlockDev.reinit(cls.requested_plugins, True, None)
+
     def test_get_superblock_size(self):
         """Verify that superblock size si calculated properly"""
 
@@ -70,7 +85,8 @@ class MDNoDevTestCase(unittest.TestCase):
         with six.assertRaisesRegex(self, GLib.GError, r'malformed or invalid'):
             BlockDev.md_get_md_uuid("malformed-uuid-example")
 
-class MDTestCase(unittest.TestCase):
+class MDTestCase(MDTest):
+
     def setUp(self):
         if os.uname()[-1] == "i686":
             self.skipTest("Skipping hanging MD RAID tests on i686")
@@ -569,7 +585,7 @@ class MDTestRequestSyncAction(MDTestCase):
             action = f.read().strip()
         self.assertEqual(action, "check")
 
-class FakeMDADMutilTest(unittest.TestCase):
+class FakeMDADMutilTest(MDTest):
     # no setUp nor tearDown needed, we are gonna use fake utils
     def test_fw_raid_uppercase_examine(self):
         """Verify that md_examine works with output using "RAID" instead of "Raid" and other quirks """
@@ -610,11 +626,11 @@ class FakeMDADMutilTest(unittest.TestCase):
         self.assertEqual(detail_data.name, "localhost:fedora")
 
 
-class MDUnloadTest(unittest.TestCase):
+class MDUnloadTest(MDTestCase):
     def setUp(self):
         # make sure the library is initialized with all plugins loaded for other
         # tests
-        self.addCleanup(BlockDev.reinit, REQUESTED_PLUGINS, True, None)
+        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
 
     def test_check_low_version(self):
         """Verify that checking the minimum mdsetup version works as expected"""
@@ -625,12 +641,12 @@ class MDUnloadTest(unittest.TestCase):
         with fake_utils("tests/mdraid_low_version/"):
             # too low version of mdsetup available, the MD plugin should fail to load
             with self.assertRaises(GLib.GError):
-                BlockDev.reinit(REQUESTED_PLUGINS, True, None)
+                BlockDev.reinit(self.requested_plugins, True, None)
 
             self.assertNotIn("mdraid", BlockDev.get_available_plugin_names())
 
         # load the plugins back
-        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
+        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         self.assertIn("mdraid", BlockDev.get_available_plugin_names())
 
     def test_check_no_md(self):
@@ -642,10 +658,10 @@ class MDUnloadTest(unittest.TestCase):
         with fake_path(all_but="mdadm"):
             # no mdadm available, the MD plugin should fail to load
             with self.assertRaises(GLib.GError):
-                BlockDev.reinit(REQUESTED_PLUGINS, True, None)
+                BlockDev.reinit(self.requested_plugins, True, None)
 
             self.assertNotIn("mdraid", BlockDev.get_available_plugin_names())
 
         # load the plugins back
-        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
+        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         self.assertIn("mdraid", BlockDev.get_available_plugin_names())
