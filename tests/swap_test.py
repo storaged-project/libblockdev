@@ -2,7 +2,7 @@ import unittest
 import os
 import overrides_hack
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, run_command
 from gi.repository import BlockDev, GLib
 
 
@@ -85,10 +85,11 @@ class SwapTestCase(SwapTest):
     def test_mkswap_with_label(self):
         """Verify that mkswap with label works as expected"""
 
-        succ = BlockDev.swap_mkswap(self.loop_dev, "TestBlockDevSwap", None)
+        succ = BlockDev.swap_mkswap(self.loop_dev, "BlockDevSwap", None)
         self.assertTrue(succ)
 
-        os.path.exists ("/dev/disk/by-label/TestBlockDevSwap")
+        _ret, out, _err = run_command("blkid -ovalue -sLABEL -p %s" % self.loop_dev)
+        self.assertEqual(out, "BlockDevSwap")
 
 class SwapUnloadTest(SwapTest):
     def setUp(self):
