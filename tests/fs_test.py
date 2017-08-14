@@ -11,13 +11,6 @@ import overrides_hack
 
 from gi.repository import BlockDev, GLib
 
-REQUESTED_PLUGINS = BlockDev.plugin_specs_from_names(("fs", "loop"))
-
-if not BlockDev.is_initialized():
-    BlockDev.init(REQUESTED_PLUGINS, None)
-else:
-    BlockDev.reinit(REQUESTED_PLUGINS, True, None)
-
 
 def check_output(args, ignore_retcode=True):
     """Just like subprocess.check_output(), but allows the return code of the process to be ignored"""
@@ -37,6 +30,16 @@ def mounted(device, where):
     umount(where)
 
 class FSTestCase(unittest.TestCase):
+
+    requested_plugins = BlockDev.plugin_specs_from_names(("fs", "loop"))
+
+    @classmethod
+    def setUpClass(cls):
+        if not BlockDev.is_initialized():
+            BlockDev.init(cls.requested_plugins, None)
+        else:
+            BlockDev.reinit(cls.requested_plugins, True, None)
+
     def setUp(self):
         self.addCleanup(self._clean_up)
         self.dev_file = utils.create_sparse_tempfile("fs_test", 100 * 1024**2)

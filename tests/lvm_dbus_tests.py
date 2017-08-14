@@ -15,20 +15,25 @@ import dbus
 sb = dbus.SystemBus()
 lvm_dbus_running = any("lvmdbus" in name for name in chain(sb.list_names(), sb.list_activatable_names()))
 
-if lvm_dbus_running:
-    # force the new plugin to be used
-    ps = BlockDev.PluginSpec()
-    ps.name = BlockDev.Plugin.LVM
-    ps.so_name = "libbd_lvm-dbus.so"
-    ps2 = BlockDev.PluginSpec()
-    ps2.name = BlockDev.Plugin.LOOP
-    if not BlockDev.is_initialized():
-        BlockDev.init([ps, ps2], None)
-    else:
-        BlockDev.reinit([ps, ps2], True, None)
+
+class LVMTestCase(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        if lvm_dbus_running:
+            # force the new plugin to be used
+            cls.ps = BlockDev.PluginSpec()
+            cls.ps.name = BlockDev.Plugin.LVM
+            cls.ps.so_name = "libbd_lvm-dbus.so"
+            cls.ps2 = BlockDev.PluginSpec()
+            cls.ps2.name = BlockDev.Plugin.LOOP
+            if not BlockDev.is_initialized():
+                BlockDev.init([cls.ps, cls.ps2], None)
+            else:
+                BlockDev.reinit([cls.ps, cls.ps2], True, None)
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
-class LvmNoDevTestCase(unittest.TestCase):
+class LvmNoDevTestCase(LVMTestCase):
+
     def __init__(self, *args, **kwargs):
         super(LvmNoDevTestCase, self).__init__(*args, **kwargs)
         self._log = ""
@@ -166,7 +171,7 @@ class LvmNoDevTestCase(unittest.TestCase):
         """Verify that getting and setting global config works as expected"""
 
         # setup logging
-        self.assertTrue(BlockDev.reinit([ps], False, self._store_log))
+        self.assertTrue(BlockDev.reinit([self.ps], False, self._store_log))
 
         # no global config set initially
         self.assertEqual(BlockDev.lvm_get_global_config(), "")
@@ -225,7 +230,7 @@ class LvmNoDevTestCase(unittest.TestCase):
             BlockDev.lvm_cache_get_mode_from_str("bla")
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
-class LvmPVonlyTestCase(unittest.TestCase):
+class LvmPVonlyTestCase(LVMTestCase):
     # :TODO:
     #     * test pvmove (must create two PVs, a VG, a VG and some data in it
     #       first)

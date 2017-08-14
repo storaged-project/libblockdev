@@ -2,17 +2,21 @@ import unittest
 import os
 import overrides_hack
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, run_command
 from gi.repository import BlockDev, GLib
 
-REQUESTED_PLUGINS = BlockDev.plugin_specs_from_names(("swap",))
 
-if not BlockDev.is_initialized():
-    BlockDev.init(REQUESTED_PLUGINS, None)
-else:
-    BlockDev.reinit(REQUESTED_PLUGINS, True, None)
+class SwapTest(unittest.TestCase):
+    requested_plugins = BlockDev.plugin_specs_from_names(("swap",))
 
-class SwapTestCase(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        if not BlockDev.is_initialized():
+            BlockDev.init(cls.requested_plugins, None)
+        else:
+            BlockDev.reinit(cls.requested_plugins, True, None)
+
+class SwapTestCase(SwapTest):
     def setUp(self):
         self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("swap_test", 1024**3)
@@ -81,16 +85,17 @@ class SwapTestCase(unittest.TestCase):
     def test_mkswap_with_label(self):
         """Verify that mkswap with label works as expected"""
 
-        succ = BlockDev.swap_mkswap(self.loop_dev, "TestBlockDevSwap", None)
+        succ = BlockDev.swap_mkswap(self.loop_dev, "BlockDevSwap", None)
         self.assertTrue(succ)
 
-        os.path.exists ("/dev/disk/by-label/TestBlockDevSwap")
+        _ret, out, _err = run_command("blkid -ovalue -sLABEL -p %s" % self.loop_dev)
+        self.assertEqual(out, "BlockDevSwap")
 
-class SwapUnloadTest(unittest.TestCase):
+class SwapUnloadTest(SwapTest):
     def setUp(self):
         # make sure the library is initialized with all plugins loaded for other
         # tests
-        self.addCleanup(BlockDev.reinit, REQUESTED_PLUGINS, True, None)
+        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
 
     def test_check_low_version(self):
         """Verify that checking the minimum swap utils versions works as expected"""
@@ -101,12 +106,12 @@ class SwapUnloadTest(unittest.TestCase):
         with fake_utils("tests/swap_low_version/"):
             # too low version of mkswap available, the swap plugin should fail to load
             with self.assertRaises(GLib.GError):
-                BlockDev.reinit(REQUESTED_PLUGINS, True, None)
+                BlockDev.reinit(self.requested_plugins, True, None)
 
             self.assertNotIn("swap", BlockDev.get_available_plugin_names())
 
         # load the plugins back
-        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
+        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         self.assertIn("swap", BlockDev.get_available_plugin_names())
 
     def test_check_no_mkswap(self):
@@ -123,5 +128,5 @@ class SwapUnloadTest(unittest.TestCase):
             self.assertNotIn("swap", BlockDev.get_available_plugin_names())
 
         # load the plugins back
-        self.assertTrue(BlockDev.reinit(REQUESTED_PLUGINS, True, None))
+        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         self.assertIn("swap", BlockDev.get_available_plugin_names())

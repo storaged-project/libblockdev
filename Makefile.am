@@ -61,44 +61,25 @@ pylint:
 
 if TESTS_ENABLED
 test: all pylint
-	@rm -f tests/error_occurred;
-	@rm -f $(TEST_SUITE_LOG)
-	@touch $(TEST_SUITE_LOG)
-	for plugin in ${PLUGINS} ${LIBRARY_TESTS} ${UTILS_TESTS}; do \
-		$(MAKE) test-plugin-$$plugin || touch tests/error_occurred; \
-	done
-	$(MAKE) test-lvm-dbus || touch tests/error_occurred
-	@test ! -f tests/error_occurred
+	sudo $(TEST_PYTHON) tests/run_tests.py
 
 fast-test: all pylint
-	@rm -f tests/error_occurred;
-	for plugin in ${PLUGINS} ${LIBRARY_TESTS} ${UTILS_TESTS}; do \
-		$(MAKE) fast-test-plugin-$$plugin || touch tests/error_occurred; \
-	done
-	$(MAKE) fast-test-lvm-dbus || touch tests/error_occurred
-	@test ! -f tests/error_occurred
+	sudo $(TEST_PYTHON) tests/run_tests.py --fast
 
 test-all: all pylint
-	sudo env FEELINGLUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
-		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p '*_test.py'
-	sudo env FEELINGLUCKY= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python \
-		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p 'lvm_dbus_tests.py'
+	sudo $(TEST_PYTHON) tests/run_tests.py --lucky
 
 test-plugin-%: all
-	sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=tests/default_config \
-        $(TEST_PYTHON) -m unittest discover -v -s tests/ -p $*_test.py 2>&1 | tee -a $(TEST_SUITE_LOG)
+	sudo $(TEST_PYTHON) tests/run_tests.py $*_test
 
 fast-test-plugin-%: all
-	sudo env SKIP_SLOW= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=tests/default_config \
-		$(TEST_PYTHON) -m unittest discover -f -v -s tests/ -p $*_test.py
+	sudo $(TEST_PYTHON) tests/run_tests.py --fast $*_test
 
 test-lvm-dbus: all
-	sudo env GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=tests/lvm_dbus_config \
-		$(TEST_PYTHON) -m unittest discover -v -s tests/ -p 'lvm_dbus_tests.py'
+	sudo $(TEST_PYTHON) tests/run_tests.py lvm_dbus_tests
 
 fast-test-lvm-dbus: all
-	sudo env SKIP_SLOW= GI_TYPELIB_PATH=${GIDIR} LD_LIBRARY_PATH=${LIBDIRS} PYTHONPATH=.:tests/:src/python LIBBLOCKDEV_CONFIG_DIR=tests/lvm_dbus_config \
-		$(TEST_PYTHON) -m unittest discover -f -v -s tests/ -p 'lvm_dbus_tests.py'
+	sudo $(TEST_PYTHON) tests/run_tests.py --fast lvm_dbus_tests
 endif # TESTS_ENABLED
 
 coverage: all
