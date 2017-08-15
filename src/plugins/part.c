@@ -196,6 +196,14 @@ static gboolean disk_commit (PedDisk *disk, const gchar *path, GError **error) {
        chance things will just work. If not, an error will be reported
        anyway with no harm. */
 
+    /* XXX: Sometimes it happens that when we try to commit the partition table
+       to disk below, libparted kills the process due to the
+       assert(disk->dev->open_count > 0). This looks like a bug to me, but we
+       have no reproducer for it. Let's just try to (re)open the device in such
+       cases. It is later closed by the ped_device_destroy() call. */
+    if (disk->dev->open_count <= 0)
+        ped_device_open (disk->dev);
+
     ret = ped_disk_commit_to_dev (disk);
     if (ret == 0) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
