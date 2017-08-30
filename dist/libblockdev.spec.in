@@ -68,7 +68,7 @@
 %define configure_opts %{?distro_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?gi_copts}
 
 Name:        libblockdev
-Version:     2.11
+Version:     2.12
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -799,6 +799,34 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Aug 30 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.12-1
+- Own directories /etc/libblockdev and /etc/libblockdev/conf.d (vtrefny)
+- Wait for resized partition (kailueke)
+- Make sure the device is opened for libparted (vpodzime)
+- Fix label check in swap_test (vtrefny)
+- Use "run_tests" script for running tests from Makefile (vtrefny)
+- Add a script for running tests (vtrefny)
+- Tests: Move library initialization to setUpClass method (vtrefny)
+- Stop skipping FAT resize tests on rawhide (vtrefny)
+- Close filesystem before closing the partition during FAT resize (vtrefny)
+- Use mountpoint for "xfs_info" calls (vtrefny)
+- Use libmount cache when parsing /proc/mounts (vtrefny)
+- Add some space for the CI status (vpodzime)
+- Confirm the force when creating PVs in FS tests (vpodzime)
+- Skip vgremove tests on 32bit Debian (vtrefny)
+- Fix names of backing files in tests (vtrefny)
+-  Fix checking for available locales (vtrefny)
+- Skip dependency checking in mpath tests on Debian (vtrefny)
+- Skip zRAM tests on Debian (vtrefny)
+- Skip the test for device escrow on Debian too (vtrefny)
+- Skip free region tests on Debian too (vtrefny)
+- Fix redirecting command output to /dev/null in tests (vtrefny)
+- Try harder to unmount devices in test cleanup (vtrefny)
+- Require only plugins that are needed for given test (vtrefny)
+- Try to get distribution info from "PrettyName" if "CPEName" isn't available (vtrefny)
+- Use -ff when creating PVs in FS tests (vpodzime)
+- Sync spec with downstream (vpodzime)
+
 * Mon Jul 31 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.11-1
 - Make the KbdZRAMDevicesTestCase inherit from KbdZRAMTestCase (vpodzime)
 - Allow non-source directory builds (kailueke)
