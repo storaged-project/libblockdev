@@ -317,6 +317,7 @@ bd_plugin_spec_free
 bd_is_plugin_available
 bd_get_available_plugin_names
 bd_get_plugin_soname
+bd_get_plugin_name
 <SUBSECTION Standard>
 BDPluginSpec
 BD_TYPE_PLUGIN_SPEC

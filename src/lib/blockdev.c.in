@@ -735,3 +735,13 @@ gchar* bd_get_plugin_soname (BDPlugin plugin) {
 
     return NULL;
 }
+
+/**
+ * bd_get_plugin_name:
+ * @plugin: the queried plugin
+ *
+ * Returns: (transfer none): name of the plugin
+ */
+gchar* bd_get_plugin_name (BDPlugin plugin) {
+    return plugin_names[plugin];
+}
