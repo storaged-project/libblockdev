@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014  Red Hat, Inc.
+ * Copyright (C) 2014-2017 Red Hat, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,9 @@
 #include <unistd.h>
 #include <sys/swap.h>
 #include <blockdev/utils.h>
+
 #include "swap.h"
+#include "check_deps.h"
 
 /**
  * SECTION: swap
@@ -41,6 +43,22 @@ GQuark bd_swap_error_quark (void)
     return g_quark_from_static_string ("g-bd-swap-error-quark");
 }
 
+
+static volatile guint avail_deps = 0;
+static GMutex deps_check_lock;
+
+#define DEPS_MKSWAP 0
+#define DEPS_MKSWAP_MASK (1 << DEPS_MKSWAP)
+#define DEPS_SWAPLABEL 1
+#define DEPS_SWAPLABEL_MASK (1 << DEPS_SWAPLABEL)
+#define DEPS_LAST 2
+
+static UtilDep deps[DEPS_LAST] = {
+    {"mkswap", MKSWAP_MIN_VERSION, NULL, "mkswap from util-linux ([\\d\\.]+)"},
+    {"swaplabel", NULL, NULL, NULL},
+};
+
+
 /**
  * bd_swap_check_deps:
  *
@@ -51,22 +69,23 @@ GQuark bd_swap_error_quark (void)
  */
 gboolean bd_swap_check_deps () {
     GError *error = NULL;
-    gboolean ret = FALSE;
-    gboolean success = FALSE;
+    guint i = 0;
+    gboolean status = FALSE;
+    gboolean ret = TRUE;
 
-    success = bd_utils_check_util_version ("mkswap", MKSWAP_MIN_VERSION, NULL, "mkswap from util-linux ([\\d\\.]+)", &error);
-    if (!success && error) {
-        g_warning("Cannot load the swap plugin: %s" , error->message);
+    for (i=0; i < DEPS_LAST; i++) {
+        status = bd_utils_check_util_version (deps[i].name, deps[i].version,
+                                              deps[i].ver_arg, deps[i].ver_regexp, &error);
+        if (!status)
+            g_warning ("%s", error->message);
+        else
+            g_atomic_int_or (&avail_deps, 1 << i);
         g_clear_error (&error);
+        ret = ret && status;
     }
-    ret = success;
 
-    success = bd_utils_check_util_version ("swaplabel", NULL, NULL, NULL, &error);
-    if (!success && error) {
-        g_warning("Cannot load the swap plugin: %s" , error->message);
-        g_clear_error (&error);
-    }
-    ret = ret && success;
+    if (!ret)
+        g_warning("Cannot load the swap plugin");
 
     return ret;
 }
@@ -106,6 +125,9 @@ void bd_swap_close () {
  */
 gboolean bd_swap_mkswap (const gchar *device, const gchar *label, const BDExtraArg **extra, GError **error) {
     guint8 next_arg = 2;
+
+    if (!check_deps (&avail_deps, DEPS_MKSWAP_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     /* We use -f to force since mkswap tends to refuse creation on lvs with
        a message about erasing bootbits sectors on whole disks. Bah. */
@@ -316,6 +338,9 @@ gboolean bd_swap_swapstatus (const gchar *device, GError **error) {
  */
 gboolean bd_swap_set_label (const gchar *device, const gchar *label, GError **error) {
     const gchar *argv[5] = {"swaplabel", "-L", label, device, NULL};
+
+    if (!check_deps (&avail_deps, DEPS_SWAPLABEL_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     return bd_utils_exec_and_report_error (argv, NULL, error);
 }

@@ -31,6 +31,7 @@
 #include <part_err.h>
 
 #include "part.h"
+#include "check_deps.h"
 
 /**
  * SECTION: part
@@ -122,6 +123,21 @@ static gboolean set_parted_error (GError **error, BDPartError type) {
 }
 
 
+static volatile guint avail_deps = 0;
+static GMutex deps_check_lock;
+
+#define DEPS_SGDISK 0
+#define DEPS_SGDISK_MASK (1 << DEPS_SGDISK)
+#define DEPS_SFDISK 1
+#define DEPS_SFDISK_MASK (1 << DEPS_SFDISK)
+#define DEPS_LAST 2
+
+static UtilDep deps[DEPS_LAST] = {
+    {"sgdisk", "0.8.6", NULL, "GPT fdisk \\(sgdisk\\) version ([\\d\\.]+)"},
+    {"sfdisk", NULL, NULL, NULL},
+};
+
+
 /**
  * bd_part_check_deps:
  *
@@ -132,23 +148,25 @@ static gboolean set_parted_error (GError **error, BDPartError type) {
  */
 gboolean bd_part_check_deps () {
     GError *error = NULL;
-    gboolean check_ret = TRUE;
+    guint i = 0;
+    gboolean status = FALSE;
+    gboolean ret = TRUE;
 
-    gboolean ret = bd_utils_check_util_version ("sgdisk", "0.8.6", NULL, "GPT fdisk \\(sgdisk\\) version ([\\d\\.]+)", &error);
-    if (!ret && error) {
-        g_warning("Cannot load the part plugin: %s" , error->message);
+    for (i=0; i < DEPS_LAST; i++) {
+        status = bd_utils_check_util_version (deps[i].name, deps[i].version,
+                                              deps[i].ver_arg, deps[i].ver_regexp, &error);
+        if (!status)
+            g_warning ("%s", error->message);
+        else
+            g_atomic_int_or (&avail_deps, 1 << i);
         g_clear_error (&error);
-        check_ret = FALSE;
+        ret = ret && status;
     }
 
-    ret = bd_utils_check_util_version ("sfdisk", NULL, NULL, NULL, &error);
-    if (!ret && error) {
-        g_warning("Cannot load the part plugin: %s" , error->message);
-        g_clear_error (&error);
-        check_ret = FALSE;
-    }
+    if (!ret)
+        g_warning("Cannot load the part plugin");
 
-    return check_ret;
+    return ret;
 }
 
 /**
@@ -305,6 +323,9 @@ static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_nu
     gboolean success = FALSE;
     gchar *space = NULL;
     gchar *ret = NULL;
+
+    if (!check_deps (&avail_deps, DEPS_SGDISK_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     args[1] = g_strdup_printf ("-i%d", part_num);
     success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
@@ -1232,6 +1253,9 @@ static gboolean set_gpt_flag (const gchar *device, int part_num, BDPartFlag flag
     int bit_num = 0;
     gboolean success = FALSE;
 
+    if (!check_deps (&avail_deps, DEPS_SGDISK_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     if (flag == BD_PART_FLAG_GPT_SYSTEM_PART)
         bit_num = 0;
     else if (flag == BD_PART_FLAG_GPT_READ_ONLY)
@@ -1253,6 +1277,9 @@ static gboolean set_gpt_flags (const gchar *device, int part_num, guint64 flags,
     guint64 real_flags = 0;
     gchar *mask_str = NULL;
     gboolean success = FALSE;
+
+    if (!check_deps (&avail_deps, DEPS_SGDISK_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     if (flags & BD_PART_FLAG_GPT_SYSTEM_PART)
         real_flags |=  1;       /* 1 << 0 */
@@ -1677,6 +1704,9 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
     guint64 progress_id = 0;
     gchar *msg = NULL;
 
+    if (!check_deps (&avail_deps, DEPS_SGDISK_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     msg = g_strdup_printf ("Started setting type on the partition '%s'", part);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
@@ -1727,6 +1757,9 @@ gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar 
     guint64 progress_id = 0;
     guint64 part_id_int = 0;
     gchar *msg = NULL;
+
+    if (!check_deps (&avail_deps, DEPS_SFDISK_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     msg = g_strdup_printf ("Started setting id on the partition '%s'", part);
     progress_id = bd_utils_report_started (msg);
@@ -1792,6 +1825,9 @@ gchar* bd_part_get_part_id (const gchar *disk, const gchar *part, GError **error
     gchar *output = NULL;
     gchar *ret = NULL;
     gboolean success = FALSE;
+
+    if (!check_deps (&avail_deps, DEPS_SFDISK_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     if (!part || (part && (*part == '\0'))) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,

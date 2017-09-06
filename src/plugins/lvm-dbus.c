@@ -26,6 +26,7 @@
 #include <gio/gio.h>
 
 #include "lvm.h"
+#include "check_deps.h"
 
 #define INT_FLOAT_EPS 1e-5
 #define SECTOR_SIZE 512
@@ -213,6 +214,18 @@ static gboolean setup_dbus_connection (GError **error) {
     return TRUE;
 }
 
+static volatile guint avail_deps = 0;
+static GMutex deps_check_lock;
+
+#define DEPS_THMS 0
+#define DEPS_THMS_MASK (1 << DEPS_THMS)
+#define DEPS_LAST 1
+
+static UtilDep deps[DEPS_LAST] = {
+    {"thin_metadata_size", NULL, NULL, NULL},
+};
+
+
 /**
  * bd_lvm_check_deps:
  *
@@ -228,6 +241,7 @@ gboolean bd_lvm_check_deps () {
     GVariant *service = NULL;
     gboolean found = FALSE;
     GError *error = NULL;
+    guint i = 0;
     gboolean success = FALSE;
     gboolean check_ret = FALSE;
 
@@ -287,13 +301,19 @@ gboolean bd_lvm_check_deps () {
     check_ret = (error == NULL);
     g_clear_error (&error);
 
-    /* we also need the  */
-    success = bd_utils_check_util_version ("thin_metadata_size", NULL, NULL, NULL, &error);
-    if (!success && error) {
-        g_warning("Cannot load the LVM plugin: %s" , error->message);
+    for (i=0; i < DEPS_LAST; i++) {
+        success = bd_utils_check_util_version (deps[i].name, deps[i].version,
+                                               deps[i].ver_arg, deps[i].ver_regexp, &error);
+        if (!success)
+            g_warning ("%s", error->message);
+        else
+            g_atomic_int_or (&avail_deps, 1 << i);
         g_clear_error (&error);
+        check_ret = check_ret && success;
     }
-    check_ret = check_ret && success;
+
+    if (!check_ret)
+        g_warning("Cannot load the LVM plugin");
 
     return check_ret;
 }
@@ -1070,6 +1090,9 @@ guint64 bd_lvm_get_thpool_meta_size (guint64 size, guint64 chunk_size, guint64 n
     gchar *output = NULL;
     gboolean success = FALSE;
     guint64 ret = 0;
+
+    if (!check_deps (&avail_deps, DEPS_THMS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return 0;
 
     /* s - total size, b - chunk size, m - number of snapshots */
     args[3] = g_strdup_printf ("-s%"G_GUINT64_FORMAT, size);
