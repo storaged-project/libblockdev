@@ -25,6 +25,7 @@
 #include <libudev.h>
 
 #include "dm.h"
+#include "check_deps.h"
 
 /* macros taken from the pyblock/dmraid.h file plus one more*/
 #define for_each_raidset(_c, _n) list_for_each_entry(_n, LC_RS(_c), list)
@@ -50,6 +51,19 @@ GQuark bd_dm_error_quark (void)
 
 typedef struct raid_set* (*RSEvalFunc) (struct raid_set *rs, gpointer data);
 
+
+static volatile guint avail_deps = 0;
+static GMutex deps_check_lock;
+
+#define DEPS_DMSETUP 0
+#define DEPS_DMSETUP_MASK (1 << DEPS_DMSETUP)
+#define DEPS_LAST 1
+
+static UtilDep deps[DEPS_LAST] = {
+    {"dmsetup", DM_MIN_VERSION, NULL, "Library version:\\s+([\\d\\.]+)"},
+};
+
+
 /**
  * discard_dm_log: (skip)
  */
@@ -68,12 +82,24 @@ static void discard_dm_log (int level __attribute__((unused)), const char *file 
  */
 gboolean bd_dm_check_deps () {
     GError *error = NULL;
-    gboolean ret = bd_utils_check_util_version ("dmsetup", DM_MIN_VERSION, NULL, "Library version:\\s+([\\d\\.]+)", &error);
+    guint i = 0;
+    gboolean status = FALSE;
+    gboolean ret = TRUE;
 
-    if (!ret && error) {
-        g_warning("Cannot load the DM plugin: %s" , error->message);
+    for (i=0; i < DEPS_LAST; i++) {
+        status = bd_utils_check_util_version (deps[i].name, deps[i].version,
+                                              deps[i].ver_arg, deps[i].ver_regexp, &error);
+        if (!status)
+            g_warning ("%s", error->message);
+        else
+            g_atomic_int_or (&avail_deps, 1 << i);
         g_clear_error (&error);
+        ret = ret && status;
     }
+
+    if (!ret)
+        g_warning("Cannot load the DM plugin");
+
     return ret;
 }
 
@@ -118,6 +144,9 @@ gboolean bd_dm_create_linear (const gchar *map_name, const gchar *device, guint6
     gboolean success = FALSE;
     const gchar *argv[9] = {"dmsetup", "create", map_name, "--table", NULL, NULL, NULL, NULL, NULL};
 
+    if (!check_deps (&avail_deps, DEPS_DMSETUP_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     gchar *table = g_strdup_printf ("0 %"G_GUINT64_FORMAT" linear %s 0", length, device);
     argv[4] = table;
 
@@ -143,6 +172,9 @@ gboolean bd_dm_create_linear (const gchar *map_name, const gchar *device, guint6
  */
 gboolean bd_dm_remove (const gchar *map_name, GError **error) {
     const gchar *argv[4] = {"dmsetup", "remove", map_name, NULL};
+
+    if (!check_deps (&avail_deps, DEPS_DMSETUP_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     return bd_utils_exec_and_report_error (argv, NULL, error);
 }

@@ -33,6 +33,7 @@
 #include <errno.h>
 
 #include "fs.h"
+#include "check_deps.h"
 
 #define EXT2 "ext2"
 #define EXT3 "ext3"
@@ -238,6 +239,58 @@ typedef struct MountArgs {
 typedef gboolean (*MountFunc) (MountArgs *args, GError **error);
 
 static gboolean do_mount (MountArgs *args, GError **error);
+
+static volatile guint avail_deps = 0;
+static GMutex deps_check_lock;
+
+#define DEPS_MKE2FS 0
+#define DEPS_MKE2FS_MASK (1 << DEPS_MKE2FS)
+#define DEPS_E2FSCK 1
+#define DEPS_E2FSCK_MASK (1 << DEPS_E2FSCK)
+#define DEPS_TUNE2FS 2
+#define DEPS_TUNE2FS_MASK (1 << DEPS_TUNE2FS)
+#define DEPS_DUMPE2FS 3
+#define DEPS_DUMPE2FS_MASK (1 << DEPS_DUMPE2FS)
+#define DEPS_RESIZE2FS 4
+#define DEPS_RESIZE2FS_MASK (1 << DEPS_RESIZE2FS)
+
+#define DEPS_MKFSXFS 5
+#define DEPS_MKFSXFS_MASK (1 << DEPS_MKFSXFS)
+#define DEPS_XFS_DB 6
+#define DEPS_XFS_DB_MASK (1 << DEPS_XFS_DB)
+#define DEPS_XFS_REPAIR 7
+#define DEPS_XFS_REPAIR_MASK (1 << DEPS_XFS_REPAIR)
+#define DEPS_XFS_ADMIN 8
+#define DEPS_XFS_ADMIN_MASK (1 << DEPS_XFS_ADMIN)
+#define DEPS_XFS_GROWFS 9
+#define DEPS_XFS_GROWFS_MASK (1 << DEPS_XFS_GROWFS)
+
+#define DEPS_MKFSVFAT 10
+#define DEPS_MKFSVFAT_MASK (1 << DEPS_MKFSVFAT)
+#define DEPS_FATLABEL 11
+#define DEPS_FATLABEL_MASK (1 << DEPS_FATLABEL)
+#define DEPS_FSCKVFAT 12
+#define DEPS_FSCKVFAT_MASK (1 << DEPS_FSCKVFAT)
+
+#define DEPS_LAST 13
+
+static UtilDep deps[DEPS_LAST] = {
+    {"mke2fs", NULL, NULL, NULL},
+    {"e2fsck", NULL, NULL, NULL},
+    {"tune2fs", NULL, NULL, NULL},
+    {"dumpe2fs", NULL, NULL, NULL},
+    {"resize2fs", NULL, NULL, NULL},
+
+    {"mkfs.xfs", NULL, NULL, NULL},
+    {"xfs_db", NULL, NULL, NULL},
+    {"xfs_repair", NULL, NULL, NULL},
+    {"xfs_admin", NULL, NULL, NULL},
+    {"xfs_growfs", NULL, NULL, NULL},
+
+    {"mkfs.vfat", NULL, NULL, NULL},
+    {"fatlabel", NULL, NULL, NULL},
+    {"fsck.vfat", NULL, NULL, NULL},
+};
 
 /**
  * bd_fs_check_deps:
@@ -1444,6 +1497,9 @@ static gboolean wipe_fs (const gchar *device, const gchar *fs_type, gboolean wip
 static gboolean ext_mkfs (const gchar *device, const BDExtraArg **extra, const gchar *ext_version, GError **error) {
     const gchar *args[6] = {"mke2fs", "-t", ext_version, "-F", device, NULL};
 
+    if (!check_deps (&avail_deps, DEPS_MKE2FS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     return bd_utils_exec_and_report_error (args, extra, error);
 }
 
@@ -1860,6 +1916,9 @@ static gboolean ext_check (const gchar *device, const BDExtraArg **extra, GError
     gint status = 0;
     gboolean ret = FALSE;
 
+    if (!check_deps (&avail_deps, DEPS_E2FSCK_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     ret = bd_utils_exec_and_report_status_error (args, extra, &status, error);
     if (!ret && (status == 4)) {
         /* no error should be reported for exit code 4 - File system errors left uncorrected */
@@ -1913,6 +1972,9 @@ static gboolean ext_repair (const gchar *device, gboolean unsafe, const BDExtraA
      *     Assume an answer of `yes' to all questions. */
     const gchar *args[5] = {"e2fsck", "-f", unsafe ? "-y" : "-p", device, NULL};
 
+    if (!check_deps (&avail_deps, DEPS_E2FSCK_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     return bd_utils_exec_and_report_error (args, extra, error);
 }
 
@@ -1963,6 +2025,9 @@ gboolean bd_fs_ext4_repair (const gchar *device, gboolean unsafe, const BDExtraA
 
 static gboolean ext_set_label (const gchar *device, const gchar *label, GError **error) {
     const gchar *args[5] = {"tune2fs", "-L", label, device, NULL};
+
+    if (!check_deps (&avail_deps, DEPS_TUNE2FS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     return bd_utils_exec_and_report_error (args, NULL, error);
 }
@@ -2081,6 +2146,9 @@ static BDFSExtInfo* ext_get_info (const gchar *device, GError **error) {
     guint num_items = 0;
     BDFSExtInfo *ret = NULL;
 
+    if (!check_deps (&avail_deps, DEPS_DUMPE2FS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
     if (!success) {
         /* error is already populated */
@@ -2145,6 +2213,9 @@ BDFSExt4Info* bd_fs_ext4_get_info (const gchar *device, GError **error) {
 static gboolean ext_resize (const gchar *device, guint64 new_size, const BDExtraArg **extra, GError **error) {
     const gchar *args[4] = {"resize2fs", device, NULL, NULL};
     gboolean ret = FALSE;
+
+    if (!check_deps (&avail_deps, DEPS_RESIZE2FS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     if (new_size != 0)
         /* resize2fs doesn't understand bytes, just 512B sectors */
@@ -2212,6 +2283,9 @@ gboolean bd_fs_ext4_resize (const gchar *device, guint64 new_size, const BDExtra
 gboolean bd_fs_xfs_mkfs (const gchar *device, const BDExtraArg **extra, GError **error) {
     const gchar *args[3] = {"mkfs.xfs", device, NULL};
 
+    if (!check_deps (&avail_deps, DEPS_MKFSXFS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     return bd_utils_exec_and_report_error (args, extra, error);
 }
 
@@ -2241,6 +2315,9 @@ gboolean bd_fs_xfs_check (const gchar *device, GError **error) {
     const gchar *args[6] = {"xfs_db", "-r", "-c", "check", device, NULL};
     gboolean ret = FALSE;
 
+    if (!check_deps (&avail_deps, DEPS_XFS_DB_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     ret = bd_utils_exec_and_report_error (args, NULL, error);
     if (!ret && *error &&  g_error_matches ((*error), BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED))
         /* non-zero exit status -> the fs is not clean, but not an error */
@@ -2262,6 +2339,9 @@ gboolean bd_fs_xfs_check (const gchar *device, GError **error) {
 gboolean bd_fs_xfs_repair (const gchar *device, const BDExtraArg **extra, GError **error) {
     const gchar *args[3] = {"xfs_repair", device, NULL};
 
+    if (!check_deps (&avail_deps, DEPS_XFS_REPAIR_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     return bd_utils_exec_and_report_error (args, extra, error);
 }
 
@@ -2278,6 +2358,9 @@ gboolean bd_fs_xfs_set_label (const gchar *device, const gchar *label, GError **
     const gchar *args[5] = {"xfs_admin", "-L", label, device, NULL};
     if (!label || (strncmp (label, "", 1) == 0))
         args[2] = "--";
+
+    if (!check_deps (&avail_deps, DEPS_XFS_ADMIN_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     return bd_utils_exec_and_report_error (args, NULL, error);
 }
@@ -2304,6 +2387,9 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
     gchar *val_start = NULL;
     gchar *val_end = NULL;
     g_autofree gchar* mountpoint = NULL;
+
+    if (!check_deps (&avail_deps, DEPS_XFS_ADMIN_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     mountpoint = bd_fs_get_mountpoint (device, error);
     if (mountpoint == NULL) {
@@ -2418,6 +2504,9 @@ gboolean bd_fs_xfs_resize (const gchar *mpoint, guint64 new_size, const BDExtraA
     gchar *size_str = NULL;
     gboolean ret = FALSE;
 
+    if (!check_deps (&avail_deps, DEPS_XFS_GROWFS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     if (new_size != 0) {
         args[1] = "-D";
         /* xfs_growfs doesn't understand bytes, just a number of blocks */
@@ -2444,6 +2533,9 @@ gboolean bd_fs_xfs_resize (const gchar *mpoint, guint64 new_size, const BDExtraA
  */
 gboolean bd_fs_vfat_mkfs (const gchar *device, const BDExtraArg **extra, GError **error) {
     const gchar *args[4] = {"mkfs.vfat", "-I", device, NULL};
+
+    if (!check_deps (&avail_deps, DEPS_MKFSVFAT_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     return bd_utils_exec_and_report_error (args, extra, error);
 }
@@ -2474,6 +2566,9 @@ gboolean bd_fs_vfat_check (const gchar *device, const BDExtraArg **extra, GError
     gint status = 0;
     gboolean ret = FALSE;
 
+    if (!check_deps (&avail_deps, DEPS_FSCKVFAT_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     ret = bd_utils_exec_and_report_status_error (args, extra, &status, error);
     if (!ret && (status == 1)) {
         /* no error should be reported for exit code 1 -- Recoverable errors have been detected */
@@ -2495,6 +2590,9 @@ gboolean bd_fs_vfat_check (const gchar *device, const BDExtraArg **extra, GError
 gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GError **error) {
     const gchar *args[4] = {"fsck.vfat", "-a", device, NULL};
 
+    if (!check_deps (&avail_deps, DEPS_FSCKVFAT_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     return bd_utils_exec_and_report_error (args, extra, error);
 }
 
@@ -2509,6 +2607,9 @@ gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GErro
  */
 gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError **error) {
     const gchar *args[4] = {"fatlabel", device, label, NULL};
+
+    if (!check_deps (&avail_deps, DEPS_FATLABEL_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     return bd_utils_exec_and_report_error (args, NULL, error);
 }
@@ -2537,6 +2638,9 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
     guint64 full_cluster_count = 0;
     guint64 cluster_count = 0;
     gchar **key_val = NULL;
+
+    if (!check_deps (&avail_deps, DEPS_FSCKVFAT_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     probe = blkid_new_probe ();
     if (!probe) {

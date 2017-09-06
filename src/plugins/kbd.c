@@ -27,6 +27,7 @@
 #include <stdio.h>
 
 #include "kbd.h"
+#include "check_deps.h"
 
 #define SECTOR_SIZE 512
 
@@ -48,6 +49,21 @@ static locale_t c_locale = (locale_t) 0;
 
 static gboolean have_kernel_module (const gchar *module_name, GError **error);
 
+
+#ifdef WITH_BD_BCACHE
+static volatile guint avail_deps = 0;
+static GMutex deps_check_lock;
+
+#define DEPS_MAKEBCACHE 0
+#define DEPS_MAKEBCACHE_MASK (1 << DEPS_MAKEBCACHE)
+#define DEPS_LAST 1
+
+static UtilDep deps[DEPS_LAST] = {
+    {"make-bcache", NULL, NULL, NULL},
+};
+#endif
+
+
 /**
  * bd_kbd_check_deps:
  *
@@ -59,6 +75,10 @@ static gboolean have_kernel_module (const gchar *module_name, GError **error);
 gboolean bd_kbd_check_deps () {
     GError *error = NULL;
     gboolean ret = FALSE;
+#ifdef WITH_BD_BCACHE
+    guint i = 0;
+    gboolean status = FALSE;
+#endif
 
     ret = have_kernel_module ("zram", &error);
     if (!ret) {
@@ -73,11 +93,20 @@ gboolean bd_kbd_check_deps () {
         return FALSE;
 
 #ifdef WITH_BD_BCACHE
-    ret = bd_utils_check_util_version ("make-bcache", NULL, NULL, NULL, &error);
-    if (!ret && error) {
-        g_warning("Cannot load the kbd plugin: %s" , error->message);
+    ret = TRUE;
+    for (i=0; i < DEPS_LAST; i++) {
+        status = bd_utils_check_util_version (deps[i].name, deps[i].version,
+                                              deps[i].ver_arg, deps[i].ver_regexp, &error);
+        if (!status)
+            g_warning ("%s", error->message);
+        else
+            g_atomic_int_or (&avail_deps, 1 << i);
         g_clear_error (&error);
+        ret = ret && status;
     }
+
+    if (!ret)
+        g_warning("Cannot load the kbd plugin");
 #endif
 
     return ret;
@@ -790,6 +819,9 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
     gchar *msg = NULL;
     guint n = 0;
     gchar device_uuid[2][64];
+
+    if (!check_deps (&avail_deps, DEPS_MAKEBCACHE_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     msg = g_strdup_printf ("Started creation of bcache on '%s' and '%s'", backing_device, cache_device);
     progress_id = bd_utils_report_started (msg);

@@ -28,6 +28,7 @@
 #include <bs_size.h>
 
 #include "mdraid.h"
+#include "check_deps.h"
 
 /**
  * SECTION: mdraid
@@ -126,6 +127,19 @@ void bd_md_detail_data_free (BDMDDetailData *data) {
     g_free (data);
 }
 
+
+static volatile guint avail_deps = 0;
+static GMutex deps_check_lock;
+
+#define DEPS_MDADM 0
+#define DEPS_MDADM_MASK (1 << DEPS_MDADM)
+#define DEPS_LAST 1
+
+static UtilDep deps[DEPS_LAST] = {
+    {"mdadm", MDADM_MIN_VERSION, NULL, "mdadm - v([\\d\\.]+)"},
+};
+
+
 /**
  * bd_md_check_deps:
  *
@@ -136,14 +150,27 @@ void bd_md_detail_data_free (BDMDDetailData *data) {
  */
 gboolean bd_md_check_deps () {
     GError *error = NULL;
-    gboolean ret = bd_utils_check_util_version ("mdadm", MDADM_MIN_VERSION, NULL, "mdadm - v([\\d\\.]+)", &error);
+    guint i = 0;
+    gboolean status = FALSE;
+    gboolean ret = TRUE;
 
-    if (!ret && error) {
-        g_warning("Cannot load the MDRAID plugin: %s" , error->message);
+    for (i=0; i < DEPS_LAST; i++) {
+        status = bd_utils_check_util_version (deps[i].name, deps[i].version,
+                                              deps[i].ver_arg, deps[i].ver_regexp, &error);
+        if (!status)
+            g_warning ("%s", error->message);
+        else
+            g_atomic_int_or (&avail_deps, 1 << i);
         g_clear_error (&error);
+        ret = ret && status;
     }
+
+    if (!ret)
+        g_warning("Cannot load the MDRAID plugin");
+
     return ret;
 }
+
 
 /**
  * bd_md_init:
@@ -524,6 +551,9 @@ gboolean bd_md_create (const gchar *device_name, const gchar *level, const gchar
     gchar *chunk_str = NULL;
     gboolean ret = FALSE;
 
+    if (!check_deps (&avail_deps, DEPS_MDADM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     if (spares != 0)
         argv_len++;
     if (version)
@@ -589,6 +619,9 @@ gboolean bd_md_create (const gchar *device_name, const gchar *level, const gchar
 gboolean bd_md_destroy (const gchar *device, GError **error) {
     const gchar *argv[] = {"mdadm", "--zero-superblock", device, NULL};
 
+    if (!check_deps (&avail_deps, DEPS_MDADM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     return bd_utils_exec_and_report_error (argv, NULL, error);
 }
 
@@ -603,6 +636,9 @@ gboolean bd_md_deactivate (const gchar *raid_spec, GError **error) {
     const gchar *argv[] = {"mdadm", "--stop", NULL, NULL};
     gchar *mdadm_spec = NULL;
     gboolean ret = FALSE;
+
+    if (!check_deps (&avail_deps, DEPS_MDADM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     mdadm_spec = get_mdadm_spec_from_input (raid_spec, error);
     if (!mdadm_spec)
@@ -638,6 +674,9 @@ gboolean bd_md_activate (const gchar *raid_spec, const gchar **members, const gc
     guint argv_top = 0;
     guint i = 0;
     gboolean ret = FALSE;
+
+    if (!check_deps (&avail_deps, DEPS_MDADM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     /* mdadm, --assemble, raid_spec/--scan, --run, --uuid=uuid, member1, member2,..., NULL*/
     argv = g_new0 (const gchar*, num_members + 6);
@@ -681,6 +720,9 @@ gboolean bd_md_run (const gchar *raid_spec, GError **error) {
     gchar *mdadm_spec = NULL;
     gboolean ret = FALSE;
 
+    if (!check_deps (&avail_deps, DEPS_MDADM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     mdadm_spec = get_mdadm_spec_from_input (raid_spec, error);
     if (!mdadm_spec)
         /* error is already populated */
@@ -706,6 +748,9 @@ gboolean bd_md_run (const gchar *raid_spec, GError **error) {
  */
 gboolean bd_md_nominate (const gchar *device, GError **error) {
     const gchar *argv[] = {"mdadm", "--incremental", "--quiet", "--run", device, NULL};
+
+    if (!check_deps (&avail_deps, DEPS_MDADM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     return bd_utils_exec_and_report_error (argv, NULL, error);
 }
@@ -757,6 +802,9 @@ gboolean bd_md_add (const gchar *raid_spec, const gchar *device, guint64 raid_de
     gchar *raid_devs_str = NULL;
     gboolean ret = FALSE;
 
+    if (!check_deps (&avail_deps, DEPS_MDADM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     mdadm_spec = get_mdadm_spec_from_input (raid_spec, error);
     if (!mdadm_spec)
         /* error is already populated */
@@ -798,6 +846,9 @@ gboolean bd_md_remove (const gchar *raid_spec, const gchar *device, gboolean fai
     gchar *mdadm_spec = NULL;
     gboolean ret = FALSE;
     gchar *dev_path = NULL;
+
+    if (!check_deps (&avail_deps, DEPS_MDADM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     mdadm_spec = get_mdadm_spec_from_input (raid_spec, error);
     if (!mdadm_spec)
@@ -847,6 +898,9 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
     gchar *orig_data = NULL;
     guint i = 0;
     gboolean found_array_line = FALSE;
+
+    if (!check_deps (&avail_deps, DEPS_MDADM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
     if (!success)
@@ -959,6 +1013,9 @@ BDMDDetailData* bd_md_detail (const gchar *raid_spec, GError **error) {
     gchar *orig_uuid = NULL;
     gchar *mdadm_spec = NULL;
     BDMDDetailData *ret = NULL;
+
+    if (!check_deps (&avail_deps, DEPS_MDADM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     mdadm_spec = get_mdadm_spec_from_input (raid_spec, error);
     if (!mdadm_spec)
@@ -1255,6 +1312,9 @@ gboolean bd_md_set_bitmap_location (const gchar *raid_spec, const gchar *locatio
     const gchar *argv[] = {"mdadm", "--grow", NULL, "--bitmap", location, NULL};
     gchar* mdadm_spec = NULL;
     gboolean ret = FALSE;
+
+    if (!check_deps (&avail_deps, DEPS_MDADM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     mdadm_spec = get_mdadm_spec_from_input (raid_spec, error);
     if (!mdadm_spec)

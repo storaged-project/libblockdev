@@ -25,6 +25,7 @@
 #include <blockdev/utils.h>
 
 #include "lvm.h"
+#include "check_deps.h"
 
 #define INT_FLOAT_EPS 1e-5
 #define SECTOR_SIZE 512
@@ -154,6 +155,22 @@ void bd_lvm_cache_stats_free (BDLVMCacheStats *data) {
     g_free (data);
 }
 
+
+static volatile guint avail_deps = 0;
+static GMutex deps_check_lock;
+
+#define DEPS_LVM 0
+#define DEPS_LVM_MASK (1 << DEPS_LVM)
+#define DEPS_THMS 1
+#define DEPS_THMS_MASK (1 << DEPS_THMS)
+#define DEPS_LAST 2
+
+static UtilDep deps[DEPS_LAST] = {
+    {"lvm", LVM_MIN_VERSION, "version", "LVM version:\\s+([\\d\\.]+)"},
+    {"thin_metadata_size", NULL, NULL, NULL},
+};
+
+
 /**
  * bd_lvm_check_deps:
  *
@@ -164,22 +181,23 @@ void bd_lvm_cache_stats_free (BDLVMCacheStats *data) {
  */
 gboolean bd_lvm_check_deps () {
     GError *error = NULL;
-    gboolean success = FALSE;
-    gboolean ret = FALSE;
+    guint i = 0;
+    gboolean status = FALSE;
+    gboolean ret = TRUE;
 
-    success = bd_utils_check_util_version ("lvm", LVM_MIN_VERSION, "version", "LVM version:\\s+([\\d\\.]+)", &error);
-    if (!success && error) {
-        g_warning("Cannot load the LVM plugin: %s" , error->message);
+    for (i=0; i < DEPS_LAST; i++) {
+        status = bd_utils_check_util_version (deps[i].name, deps[i].version,
+                                              deps[i].ver_arg, deps[i].ver_regexp, &error);
+        if (!status)
+            g_warning ("%s", error->message);
+        else
+            g_atomic_int_or (&avail_deps, 1 << i);
         g_clear_error (&error);
+        ret = ret && status;
     }
-    ret = success;
 
-    success = bd_utils_check_util_version ("thin_metadata_size", NULL, NULL, NULL, &error);
-    if (!success && error) {
-        g_warning("Cannot load the LVM plugin: %s" , error->message);
-        g_clear_error (&error);
-    }
-    ret = ret && success;
+    if (!ret)
+        g_warning("Cannot load the LVM plugin");
 
     return ret;
 }
@@ -212,6 +230,9 @@ static gboolean call_lvm_and_report_error (const gchar **args, const BDExtraArg 
     guint i = 0;
     guint args_length = g_strv_length ((gchar **) args);
 
+    if (!check_deps (&avail_deps, DEPS_LVM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     /* don't allow global config string changes during the run */
     g_mutex_lock (&global_config_lock);
 
@@ -237,6 +258,9 @@ static gboolean call_lvm_and_capture_output (const gchar **args, const BDExtraAr
     gboolean success = FALSE;
     guint i = 0;
     guint args_length = g_strv_length ((gchar **) args);
+
+    if (!check_deps (&avail_deps, DEPS_LVM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     /* don't allow global config string changes during the run */
     g_mutex_lock (&global_config_lock);
@@ -588,6 +612,9 @@ guint64 bd_lvm_get_thpool_meta_size (guint64 size, guint64 chunk_size, guint64 n
     gchar *output = NULL;
     gboolean success = FALSE;
     guint64 ret = 0;
+
+    if (!check_deps (&avail_deps, DEPS_THMS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return 0;
 
     /* s - total size, b - chunk size, m - number of snapshots */
     args[3] = g_strdup_printf ("-s%"G_GUINT64_FORMAT, size);

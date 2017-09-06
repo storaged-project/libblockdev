@@ -29,7 +29,7 @@
 #include <sys/ioctl.h>
 
 #include "s390.h"
-
+#include "check_deps.h"
 
 /**
  * SECTION: s390
@@ -48,6 +48,19 @@ GQuark bd_s390_error_quark (void) {
 }
 
 
+static volatile guint avail_deps = 0;
+static GMutex deps_check_lock;
+
+#define DEPS_DASDFMT 0
+#define DEPS_DASDFMT_MASK (1 << DEPS_DASDFMT)
+#define DEPS_LAST 1
+
+static UtilDep deps[DEPS_LAST] = {
+    /* dasdfmt doesn't return version info */
+    {"dasdfmt", NULL, NULL, NULL},
+};
+
+
 /**
  * bd_s390_check_deps:
  *
@@ -58,12 +71,24 @@ GQuark bd_s390_error_quark (void) {
  */
 gboolean bd_s390_check_deps () {
     GError *error = NULL;
-    /* dasdfmt doesn't return version info */
-    gboolean ret = bd_utils_check_util_version ("dasdfmt", NULL, NULL, NULL, &error);
-    if (!ret && error) {
-        g_warning("Cannot load the s390 plugin: %s" , error->message);
+    guint i = 0;
+    gboolean status = FALSE;
+    gboolean ret = TRUE;
+
+    for (i=0; i < DEPS_LAST; i++) {
+        status = bd_utils_check_util_version (deps[i].name, deps[i].version,
+                                              deps[i].ver_arg, deps[i].ver_regexp, &error);
+        if (!status)
+            g_warning ("%s", error->message);
+        else
+            g_atomic_int_or (&avail_deps, 1 << i);
         g_clear_error (&error);
+        ret = ret && status;
     }
+
+    if (!ret)
+        g_warning("Cannot load the s390 plugin");
+
     return ret;
 }
 
@@ -101,9 +126,13 @@ void bd_s390_close () {
  */
 gboolean bd_s390_dasd_format (const gchar *dasd, const BDExtraArg **extra, GError **error) {
     gboolean rc = FALSE;
-    gchar *dev = g_strdup_printf ("/dev/%s", dasd);
+    gchar *dev = NULL;
     const gchar *argv[8] = {"/sbin/dasdfmt", "-y", "-d", "cdl", "-b", "4096", dev, NULL};
 
+    if (!check_deps (&avail_deps, DEPS_DASDFMT_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
+    dev = g_strdup_printf ("/dev/%s", dasd);
     rc = bd_utils_exec_and_report_error (argv, extra, error);
     g_free (dev);
     return rc;
