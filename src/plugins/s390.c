@@ -447,7 +447,7 @@ gchar* bd_s390_zfcp_sanitize_lun_input (const gchar *lun, GError **error) {
     gchar *append = NULL;
 
     /* first make sure we're not being played */
-    if ((lun == NULL) || (!*lun) || (strlen(lun) > 16)) {
+    if ((lun == NULL) || (!*lun) || (strlen(lun) > 18)) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "LUN not specified or invalid");
         return NULL;
