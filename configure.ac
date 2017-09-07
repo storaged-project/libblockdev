@@ -47,9 +47,29 @@ AS_IF([test "x$found_introspection" = xyes],
 uname -p|grep s390
 on_s390=$?
 
-AM_CONDITIONAL(ON_S390, test "$on_s390" = "0")
-
 skip_patterns=""
+
+AC_ARG_WITH([s390],
+    AS_HELP_STRING([--with-s390], [support s390 @<:@default=check@:>@]),
+    [],
+    [with_s390=check])
+
+AC_SUBST(WITH_S390, 0)
+if test "x$with_s390" != "xno"; then
+    AS_IF([test "$on_s390" = "1" -a "x$with_s390" = "xyes"],
+           [LIBBLOCKDEV_SOFT_FAILURE([s390 support requested, but not on s390 arch])
+            AM_CONDITIONAL(WITH_S390, false)],
+          [test "$on_s390" == "0" -a "x$with_s390" != "xno"],
+           [AC_SUBST(WITH_S390, 1)
+            AM_CONDITIONAL(WITH_S390, true)
+            LIBBLOCKDEV_CHECK_HEADER([s390utils/vtoc.h], [], [s390utils/vtoc.h not available])
+           ],
+          [AC_SUBST(WITH_S390, 0)
+           AM_CONDITIONAL(WITH_S390, false)
+          ])
+else
+  AM_CONDITIONAL(WITH_S390, false)
+fi
 
 AC_ARG_WITH([python3],
     AS_HELP_STRING([--with-python3], [support python3 @<:@default=check@:>@]),

@@ -35,7 +35,7 @@ GIHEADERS = ${builddir}/plugin_apis/kbd.h \
 GIHEADERS += $(wildcard ${srcdir}/../utils/*.[ch])
 GIHEADERS += blockdev.c blockdev.h plugins.c plugins.h
 
-if ON_S390
+if WITH_S390
 GIHEADERS += ${builddir}/plugin_apis/s390.h
 endif
 
