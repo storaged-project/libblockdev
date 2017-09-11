@@ -10,8 +10,29 @@ typedef enum {
     BD_S390_ERROR_DEVICE,
     BD_S390_ERROR_FORMAT_FAILED,
     BD_S390_ERROR_DASDFMT,
+    BD_S390_ERROR_TECH_UNAVAIL,
 } BDS390Error;
 
+typedef enum {
+    BD_S390_TECH_DASD = 0,
+    BD_S390_TECH_ZFCP,
+} BDS390Tech;
+
+typedef enum {
+    BD_S390_TECH_MODE_MODIFY  = 1 << 0,
+    BD_S390_TECH_MODE_QUERY   = 1 << 1,
+} BDS390TechMode;
+
+/**
+ * bd_s390_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation (#BDS390TechMode) for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is available -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_s390_is_tech_avail (BDS390Tech tech, guint64 mode, GError **error);
 
 /**
  * bd_s390_dasd_format:

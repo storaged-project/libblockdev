@@ -20,6 +20,7 @@ typedef enum {
     BD_FS_ERROR_NOT_SUPPORTED,
     BD_FS_ERROR_NOT_MOUNTED,
     BD_FS_ERROR_AUTH,
+    BD_FS_ERROR_TECH_UNAVAIL,
 } BDFsError;
 
 #define BD_FS_TYPE_EXT2_INFO (bd_fs_ext2_info_get_type ())
@@ -266,6 +267,37 @@ GType bd_fs_vfat_info_get_type () {
 
     return type;
 }
+
+typedef enum {
+    BD_FS_TECH_GENERIC = 0,
+    BD_FS_TECH_MOUNT,
+    BD_FS_TECH_EXT2,
+    BD_FS_TECH_EXT3,
+    BD_FS_TECH_EXT4,
+    BD_FS_TECH_XFS,
+    BD_FS_TECH_VFAT,
+} BDFSTech;
+
+typedef enum {
+    BD_FS_TECH_MODE_MKFS      = 1 << 0,
+    BD_FS_TECH_MODE_WIPE      = 1 << 1,
+    BD_FS_TECH_MODE_CHECK     = 1 << 2,
+    BD_FS_TECH_MODE_REPAIR    = 1 << 3,
+    BD_FS_TECH_MODE_SET_LABEL = 1 << 4,
+    BD_FS_TECH_MODE_QUERY     = 1 << 5,
+    BD_FS_TECH_MODE_RESIZE    = 1 << 6,
+} BDFSTechMode;
+
+/**
+ * bd_fs_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation (#BDFSTechMode) for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is available -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_fs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
 
 /**
  * bd_fs_wipe:

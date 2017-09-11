@@ -21,7 +21,34 @@ typedef enum {
     BD_CRYPTO_ERROR_NSS_INIT_FAILED,
     BD_CRYPTO_ERROR_CERT_DECODE,
     BD_CRYPTO_ERROR_ESCROW_FAILED,
+    BD_CRYPTO_ERROR_TECH_UNAVAIL,
 } BDCryptoError;
+
+typedef enum {
+    BD_CRYPTO_TECH_LUKS = 0,
+    BD_CRYPTO_TECH_TRUECRYPT,
+    BD_CRYPTO_TECH_ESCROW,
+} BDCryptoTech;
+
+typedef enum {
+    BD_CRYPTO_TECH_MODE_CREATE     = 1 << 0,
+    BD_CRYPTO_TECH_MODE_OPEN_CLOSE = 1 << 1,
+    BD_CRYPTO_TECH_MODE_QUERY      = 1 << 2,
+    BD_CRYPTO_TECH_MODE_ADD_KEY    = 1 << 3,
+    BD_CRYPTO_TECH_MODE_REMOVE_KEY = 1 << 4,
+    BD_CRYPTO_TECH_MODE_RESIZE     = 1 << 5,
+} BDCryptoTechMode;
+
+/**
+ * bd_crypto_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation (#BDCryptoTechMode) for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is available -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **error);
 
 /**
  * bd_crypto_generate_backup_passphrase:

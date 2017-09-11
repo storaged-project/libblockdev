@@ -21,6 +21,7 @@ typedef enum {
     BD_CRYPTO_ERROR_NSS_INIT_FAILED,
     BD_CRYPTO_ERROR_CERT_DECODE,
     BD_CRYPTO_ERROR_ESCROW_FAILED,
+    BD_CRYPTO_ERROR_TECH_UNAVAIL,
 } BDCryptoError;
 
 #define BD_CRYPTO_BACKUP_PASSPHRASE_CHARSET "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz./"
@@ -31,6 +32,21 @@ typedef enum {
 
 #define DEFAULT_LUKS_KEYSIZE_BITS 256
 #define DEFAULT_LUKS_CIPHER "aes-xts-plain64"
+
+typedef enum {
+    BD_CRYPTO_TECH_LUKS = 0,
+    BD_CRYPTO_TECH_TRUECRYPT,
+    BD_CRYPTO_TECH_ESCROW,
+} BDCryptoTech;
+
+typedef enum {
+    BD_CRYPTO_TECH_MODE_CREATE     = 1 << 0,
+    BD_CRYPTO_TECH_MODE_OPEN_CLOSE = 1 << 1,
+    BD_CRYPTO_TECH_MODE_QUERY      = 1 << 2,
+    BD_CRYPTO_TECH_MODE_ADD_KEY    = 1 << 3,
+    BD_CRYPTO_TECH_MODE_REMOVE_KEY = 1 << 4,
+    BD_CRYPTO_TECH_MODE_RESIZE     = 1 << 5,
+} BDCryptoTechMode;
 
 /*
  * If using the plugin as a standalone library, the following functions should
@@ -44,6 +60,8 @@ typedef enum {
 gboolean bd_crypto_check_deps ();
 gboolean bd_crypto_init ();
 void bd_crypto_close ();
+
+gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **error);
 
 gchar* bd_crypto_generate_backup_passphrase(GError **error);
 gboolean bd_crypto_device_is_luks (const gchar *device, GError **error);

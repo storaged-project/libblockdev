@@ -192,6 +192,32 @@ void bd_part_close () {
     ped_exception_set_handler (NULL);
 }
 
+/**
+ * bd_part_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation (#BDPartTechMode) for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is available -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_part_is_tech_avail (BDPartTech tech, guint64 mode, GError **error) {
+    switch (tech) {
+    case BD_PART_TECH_MBR:
+        /* all MBR-mode combinations are supported by this implementation of the
+         * plugin, nothing extra is needed */
+        return TRUE;
+    case BD_PART_TECH_GPT:
+        if (mode & (BD_PART_TECH_MODE_MODIFY_PART|BD_PART_TECH_MODE_QUERY_PART))
+            return check_deps (&avail_deps, DEPS_SGDISK_MASK|DEPS_SFDISK_MASK,
+                               deps, DEPS_LAST, &deps_check_lock, error);
+        else
+            return TRUE;
+    default:
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_TECH_UNAVAIL, "Unknown technology");
+        return FALSE;
+    }
+}
 
 static const gchar *table_type_str[BD_PART_TABLE_UNDEF] = {"msdos", "gpt"};
 

@@ -13,6 +13,7 @@ GQuark bd_btrfs_error_quark (void) {
 typedef enum {
     BD_BTRFS_ERROR_DEVICE,
     BD_BTRFS_ERROR_PARSE,
+    BD_BTRFS_ERROR_TECH_UNAVAIL,
 } BDBtrfsError;
 
 #define BD_BTRFS_TYPE_DEVICE_INFO (bd_btrfs_device_info_get_type ())
@@ -179,6 +180,33 @@ GType bd_btrfs_filesystem_info_get_type () {
 
     return type;
 }
+
+
+typedef enum {
+    BD_BTRFS_TECH_FS = 0,
+    BD_BTRFS_TECH_MULTI_DEV,
+    BD_BTRFS_TECH_SUBVOL,
+    BD_BTRFS_TECH_SNAPSHOT,
+} BDBtrfsTech;
+
+typedef enum {
+    BD_BTRFS_TECH_MODE_CREATE = 1 << 0,
+    BD_BTRFS_TECH_MODE_DELETE = 1 << 1,
+    BD_BTRFS_TECH_MODE_MODIFY = 1 << 2,
+    BD_BTRFS_TECH_MODE_QUERY  = 1 << 3,
+} BDBtrfsTechMode;
+
+/**
+ * bd_btrfs_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation (#BDBtrfsTechMode) for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is avaible -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_btrfs_is_tech_avail (BDBtrfsTech tech, guint64 mode, GError **error);
+
 
 /**
  * bd_btrfs_create_volume:

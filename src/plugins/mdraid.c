@@ -195,6 +195,23 @@ void bd_md_close () {
     /* nothing to do here */
 }
 
+#define UNUSED __attribute__((unused))
+
+/**
+ * bd_md_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is available -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_md_is_tech_avail (BDMDTech tech UNUSED, guint64 mode UNUSED, GError **error) {
+    /* all tech-mode combinations are supported by this implementation of the
+       plugin, but it requires the 'mdadm' utility */
+    return check_deps (&avail_deps, DEPS_MDADM_MASK, deps, DEPS_LAST, &deps_check_lock, error);
+}
+
 /**
  * parse_mdadm_vars: (skip)
  * @str: string to parse

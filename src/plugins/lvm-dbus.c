@@ -356,6 +356,40 @@ void bd_lvm_close () {
         g_critical ("Failed to close DBus connection: %s", error->message);
 }
 
+/**
+ * bd_lvm_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation (#BDLVMTechMode) for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is avaible -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_lvm_is_tech_avail (BDLVMTech tech, guint64 mode, GError **error) {
+    switch (tech) {
+    case BD_LVM_TECH_THIN_CALCS:
+        if (mode & ~BD_LVM_TECH_MODE_QUERY) {
+            g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_TECH_UNAVAIL,
+                         "Only 'query' supported for thin calculations");
+            return FALSE;
+        } else if ((mode & BD_LVM_TECH_MODE_QUERY) &&
+            !check_deps (&avail_deps, DEPS_THMS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+            return FALSE;
+        else
+            return TRUE;
+    case BD_LVM_TECH_CALCS:
+        if (mode & ~BD_LVM_TECH_MODE_QUERY) {
+            g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_TECH_UNAVAIL,
+                         "Only 'query' supported for calculations");
+            return FALSE;
+        } else
+            return TRUE;
+    default:
+        /* everything is supported by this implementation of the plugin */
+        return TRUE;
+    }
+}
+
 static const gchar** get_existing_objects (const gchar *obj_prefix, GError **error) {
     GVariant *intro_v = NULL;
     gchar *intro_data = NULL;

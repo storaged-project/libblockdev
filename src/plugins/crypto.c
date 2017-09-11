@@ -87,6 +87,51 @@ void bd_crypto_close () {
 }
 
 /**
+ * bd_crypto_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation (#BDCryptoTechMode) for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is available -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **error) {
+    guint64 ret = 0;
+    switch (tech) {
+        case BD_CRYPTO_TECH_LUKS:
+            ret = mode & (BD_CRYPTO_TECH_MODE_CREATE|BD_CRYPTO_TECH_MODE_OPEN_CLOSE|BD_CRYPTO_TECH_MODE_QUERY|
+                          BD_CRYPTO_TECH_MODE_ADD_KEY|BD_CRYPTO_TECH_MODE_REMOVE_KEY|BD_CRYPTO_TECH_MODE_RESIZE);
+            if (ret != mode) {
+                g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                             "Only 'create', 'open', 'query', 'add-key', 'remove-key', 'resize' supported for LUKS");
+                return FALSE;
+            } else
+                return TRUE;
+        case BD_CRYPTO_TECH_TRUECRYPT:
+            ret = mode & BD_CRYPTO_TECH_MODE_OPEN_CLOSE;
+            if (ret != mode) {
+                g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                             "Only 'open' supported for TrueCrypt");
+                return FALSE;
+            } else
+                return TRUE;
+        case BD_CRYPTO_TECH_ESCROW:
+            ret = mode & BD_CRYPTO_TECH_MODE_CREATE;
+            if (ret != mode) {
+                g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                             "Only 'create' supported for device escrow");
+                return FALSE;
+            } else
+                return TRUE;
+        default:
+            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL, "Unknown technology");
+            return FALSE;
+    }
+
+    return TRUE;
+}
+
+/**
  * bd_crypto_error_quark: (skip)
  */
 GQuark bd_crypto_error_quark (void)

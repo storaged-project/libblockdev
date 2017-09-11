@@ -14,6 +14,7 @@ typedef enum {
     BD_PART_ERROR_EXISTS,
     BD_PART_ERROR_INVAL,
     BD_PART_ERROR_FAIL,
+    BD_PART_ERROR_TECH_UNAVAIL,
 } BDPartError;
 
 typedef enum {
@@ -176,6 +177,29 @@ GType bd_part_disk_spec_get_type () {
     return type;
 }
 
+typedef enum {
+    BD_PART_TECH_MBR = 0,
+    BD_PART_TECH_GPT,
+} BDPartTech;
+
+typedef enum {
+    BD_PART_TECH_MODE_CREATE_TABLE = 1 << 0,
+    BD_PART_TECH_MODE_MODIFY_TABLE = 1 << 1,
+    BD_PART_TECH_MODE_QUERY_TABLE  = 1 << 2,
+    BD_PART_TECH_MODE_MODIFY_PART  = 1 << 3,
+    BD_PART_TECH_MODE_QUERY_PART   = 1 << 4,
+} BDPartTechMode;
+
+/**
+ * bd_part_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation (#BDPartTechMode) for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is available -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_part_is_tech_avail (BDPartTech tech, guint64 mode, GError **error);
 
 /**
  * bd_part_create_table:
