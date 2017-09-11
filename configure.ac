@@ -44,8 +44,11 @@ AS_IF([test "x$found_introspection" = xyes],
       [AC_SUBST(WITH_GI, 1)],
       [AC_SUBST(WITH_GI, 0)])
 
-uname -p|grep s390
-on_s390=$?
+AC_CANONICAL_HOST
+case $host_cpu in
+  s390|s390x) on_s390=yes ;;
+  *) on_s390=no ;;
+esac
 
 skip_patterns=""
 
@@ -56,10 +59,10 @@ AC_ARG_WITH([s390],
 
 AC_SUBST(WITH_S390, 0)
 if test "x$with_s390" != "xno"; then
-    AS_IF([test "$on_s390" = "1" -a "x$with_s390" = "xyes"],
+    AS_IF([test "x$on_s390" = "xno" -a "x$with_s390" = "xyes"],
            [LIBBLOCKDEV_SOFT_FAILURE([s390 support requested, but not on s390 arch])
             AM_CONDITIONAL(WITH_S390, false)],
-          [test "$on_s390" == "0" -a "x$with_s390" != "xno"],
+          [test "x$on_s390" == "xyes" -a "x$with_s390" != "xno"],
            [AC_SUBST(WITH_S390, 1)
             AM_CONDITIONAL(WITH_S390, true)
             LIBBLOCKDEV_CHECK_HEADER([s390utils/vtoc.h], [], [s390utils/vtoc.h not available])
