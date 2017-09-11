@@ -21,6 +21,7 @@ typedef enum {
     BD_MD_ERROR_NO_MATCH,
     BD_MD_ERROR_INVAL,
     BD_MD_ERROR_FAIL,
+    BD_MD_ERROR_TECH_UNAVAIL,
 } BDMDError;
 
 #define BD_MD_TYPE_EXAMINEDATA (bd_md_examine_data_get_type ())
@@ -195,6 +196,28 @@ GType bd_md_detail_data_get_type () {
 
     return type;
 }
+
+typedef enum {
+    BD_MD_TECH_MDRAID = 0,
+} BDMDTech;
+
+typedef enum {
+    BD_MD_TECH_MODE_CREATE = 1 << 0,
+    BD_MD_TECH_MODE_DELETE = 1 << 1,
+    BD_MD_TECH_MODE_MODIFY = 1 << 2,
+    BD_MD_TECH_MODE_QUERY  = 1 << 3,
+} BDMDTechMode;
+
+/**
+ * bd_md_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is available -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_md_is_tech_avail (BDMDTech tech, guint64 mode, GError **error);
 
 /**
  * bd_md_get_superblock_size:

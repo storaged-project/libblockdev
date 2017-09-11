@@ -136,6 +136,32 @@ void bd_kbd_close () {
 }
 
 /**
+ * bd_kbd_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation (#BDKBDTechMode) for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is available -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+#ifdef WITH_BD_BCACHE
+    /* XXXTODO: get rid of WITH_BD_BCACHE now that we have better ways */
+gboolean bd_kbd_is_tech_avail (BDKBDTech tech, guint64 mode, GError **error) {
+    /* all combinations are supported by this implementation of the plugin, but
+       bcache creation requires the 'make-bcache' utility */
+    if (tech == BD_KBD_TECH_BCACHE && (mode & BD_KBD_TECH_MODE_CREATE))
+        return check_deps (&avail_deps, DEPS_MAKEBCACHE_MASK, deps, DEPS_LAST, &deps_check_lock, error);
+#else
+#define UNUSED __attribute__((unused))
+gboolean bd_kbd_is_tech_avail (BDKBDTech tech, guint64 mode UNUSED, GError **error UNUSED) {
+    if (tech == BD_KBD_TECH_BCACHE)
+        return FALSE;
+#endif
+    else
+        return TRUE;
+}
+
+/**
  * bd_kbd_error_quark: (skip)
  */
 GQuark bd_kbd_error_quark (void)

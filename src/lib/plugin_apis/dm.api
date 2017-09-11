@@ -12,7 +12,30 @@ typedef enum {
     BD_DM_ERROR_TASK,
     BD_DM_ERROR_RAID_FAIL,
     BD_DM_ERROR_RAID_NO_DEVS,
+    BD_DM_ERROR_TECH_UNAVAIL,
 } BDDMError;
+
+typedef enum {
+    BD_DM_TECH_MAP = 0,
+    BD_DM_TECH_RAID,
+} BDDMTech;
+
+typedef enum {
+    BD_DM_TECH_MODE_CREATE_ACTIVATE   = 1 << 0,
+    BD_DM_TECH_MODE_REMOVE_DEACTIVATE = 1 << 1,
+    BD_DM_TECH_MODE_QUERY             = 1 << 2,
+} BDDMTechMode;
+
+/**
+ * bd_dm_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation (#BDDMTechMode) for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is avaible -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_dm_is_tech_avail (BDDMTech tech, guint64 mode, GError **error);
 
 /**
  * bd_dm_create_linear:

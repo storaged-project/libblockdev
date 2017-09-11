@@ -10,7 +10,20 @@ GQuark bd_loop_error_quark (void);
 typedef enum {
     BD_LOOP_ERROR_DEVICE,
     BD_LOOP_ERROR_FAIL,
+    BD_LOOP_ERROR_TECH_UNAVAIL,
 } BDLoopError;
+
+typedef enum {
+    BD_LOOP_TECH_LOOP = 0,
+} BDLoopTech;
+
+typedef enum {
+    BD_LOOP_TECH_MODE_CREATE  = 1 << 0,
+    BD_LOOP_TECH_MODE_DESTROY = 1 << 1,
+    BD_LOOP_TECH_MODE_MODIFY  = 1 << 2,
+    BD_LOOP_TECH_MODE_QUERY   = 1 << 3,
+} BDLoopTechMode;
+
 
 /*
  * If using the plugin as a standalone library, the following functions should
@@ -24,6 +37,8 @@ typedef enum {
 gboolean bd_loop_check_deps ();
 gboolean bd_loop_init ();
 void bd_loop_close ();
+
+gboolean bd_loop_is_tech_avail (BDLoopTech tech, guint64 mode, GError **error);
 
 gchar* bd_loop_get_backing_file (const gchar *dev_name, GError **error);
 gchar* bd_loop_get_loop_name (const gchar *file, GError **error);

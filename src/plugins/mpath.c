@@ -114,6 +114,38 @@ void bd_mpath_close () {
 }
 
 /**
+ * bd_mpath_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is avaible -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_mpath_is_tech_avail (BDMpathTech tech, guint64 mode, GError **error) {
+    switch (tech) {
+    case BD_MPATH_TECH_BASE:
+        return check_deps (&avail_deps, DEPS_MPATH_MASK, deps, DEPS_LAST, &deps_check_lock, error);
+    case BD_MPATH_TECH_FRIENDLY_NAMES:
+        if (mode & ~BD_MPATH_TECH_MODE_MODIFY) {
+            g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_TECH_UNAVAIL,
+                         "Only 'modify' (setting) supported for friendly names");
+            return FALSE;
+        } else if (mode & BD_MPATH_TECH_MODE_MODIFY)
+            return check_deps (&avail_deps, DEPS_MPATHCONF_MASK, deps, DEPS_LAST, &deps_check_lock, error);
+        else {
+            g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_TECH_UNAVAIL,
+                         "Unknown mode");
+            return FALSE;
+        }
+    default:
+        g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_TECH_UNAVAIL, "Unknown technology");
+        return FALSE;
+    }
+}
+
+
+/**
  * bd_mpath_flush_mpaths:
  * @error: (out): place to store error (if any)
  *

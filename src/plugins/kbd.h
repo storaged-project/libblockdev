@@ -22,6 +22,7 @@ typedef enum {
     BD_KBD_ERROR_BCACHE_MODE_INVAL,
     BD_KBD_ERROR_BCACHE_NOEXIST,
     BD_KBD_ERROR_BCACHE_INVAL,
+    BD_KBD_ERROR_TECH_UNAVAIL,
 } BDKBDError;
 
 #ifdef WITH_BD_BCACHE
@@ -67,6 +68,19 @@ BDKBDBcacheStats* bd_kbd_bcache_stats_copy (BDKBDBcacheStats *data);
 void bd_kbd_bcache_stats_free (BDKBDBcacheStats *data);
 #endif  /* WITH_BCACHE */
 
+typedef enum {
+    BD_KBD_TECH_ZRAM = 0,
+    BD_KBD_TECH_BCACHE,
+} BDKBDTech;
+
+typedef enum {
+    BD_KBD_TECH_MODE_CREATE  = 1 << 0,
+    BD_KBD_TECH_MODE_DESTROY = 1 << 1,
+    BD_KBD_TECH_MODE_MODIFY  = 1 << 2,
+    BD_KBD_TECH_MODE_QUERY   = 1 << 3,
+} BDKBDTechMode;
+
+
 /*
  * If using the plugin as a standalone library, the following functions should
  * be called to:
@@ -79,6 +93,8 @@ void bd_kbd_bcache_stats_free (BDKBDBcacheStats *data);
 gboolean bd_kbd_check_deps ();
 gboolean bd_kbd_init ();
 void bd_kbd_close ();
+
+gboolean bd_kbd_is_tech_avail (BDKBDTech tech, guint64 mode, GError **error);
 
 gboolean bd_kbd_zram_create_devices (guint64 num_devices, const guint64 *sizes, const guint64 *nstreams, GError **error);
 gboolean bd_kbd_zram_destroy_devices (GError **error);

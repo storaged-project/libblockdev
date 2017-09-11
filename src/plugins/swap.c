@@ -113,6 +113,27 @@ void bd_swap_close () {
     /* nothing to do here */
 }
 
+#define UNUSED __attribute__((unused))
+
+/**
+ * bd_swap_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation (#BDSwapTechMode) for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is available -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_swap_is_tech_avail (BDSwapTech tech UNUSED, guint64 mode, GError **error) {
+    guint32 requires = 0;
+    if (mode & BD_SWAP_TECH_MODE_CREATE)
+        requires |= DEPS_MKSWAP_MASK;
+    if (mode & BD_SWAP_TECH_MODE_SET_LABEL)
+        requires |= DEPS_SWAPLABEL_MASK;
+
+    return check_deps (&avail_deps, requires, deps, DEPS_LAST, &deps_check_lock, error);
+}
+
 /**
  * bd_swap_mkswap:
  * @device: a device to create swap space on

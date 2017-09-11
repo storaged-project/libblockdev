@@ -42,6 +42,7 @@ typedef enum {
     BD_LVM_ERROR_NOT_ROOT,
     BD_LVM_ERROR_CACHE_INVAL,
     BD_LVM_ERROR_CACHE_NOCACHE,
+    BD_LVM_ERROR_TECH_UNAVAIL,
 } BDLVMError;
 
 typedef enum {
@@ -135,6 +136,25 @@ typedef struct BDLVMCacheStats {
 void bd_lvm_cache_stats_free (BDLVMCacheStats *data);
 BDLVMCacheStats* bd_lvm_cache_stats_copy (BDLVMCacheStats *data);
 
+typedef enum {
+    BD_LVM_TECH_BASIC = 0,
+    BD_LVM_TECH_BASIC_SNAP,
+    BD_LVM_TECH_THIN,
+    BD_LVM_TECH_CACHE,
+    BD_LVM_TECH_CALCS,
+    BD_LVM_TECH_THIN_CALCS,
+    BD_LVM_TECH_CACHE_CALCS,
+    BD_LVM_TECH_GLOB_CONF,
+} BDLVMTech;
+
+typedef enum {
+    BD_LVM_TECH_MODE_CREATE = 1 << 0,
+    BD_LVM_TECH_MODE_REMOVE = 1 << 2,
+    BD_LVM_TECH_MODE_MODIFY = 1 << 3,
+    BD_LVM_TECH_MODE_QUERY  = 1 << 4,
+} BDLVMTechMode;
+
+
 /*
  * If using the plugin as a standalone library, the following functions should
  * be called to:
@@ -147,6 +167,8 @@ BDLVMCacheStats* bd_lvm_cache_stats_copy (BDLVMCacheStats *data);
 gboolean bd_lvm_check_deps ();
 gboolean bd_lvm_init ();
 void bd_lvm_close ();
+
+gboolean bd_lvm_is_tech_avail (BDLVMTech tech, guint64 mode, GError **error);
 
 gboolean bd_lvm_is_supported_pe_size (guint64 size, GError **error);
 guint64 *bd_lvm_get_supported_pe_sizes (GError **error);
@@ -192,6 +214,7 @@ gboolean bd_lvm_thpoolcreate (const gchar *vg_name, const gchar *lv_name, guint6
 gboolean bd_lvm_thlvcreate (const gchar *vg_name, const gchar *pool_name, const gchar *lv_name, guint64 size, const BDExtraArg **extra, GError **error);
 gchar* bd_lvm_thlvpoolname (const gchar *vg_name, const gchar *lv_name, GError **error);
 gboolean bd_lvm_thsnapshotcreate (const gchar *vg_name, const gchar *origin_name, const gchar *snapshot_name, const gchar *pool_name, const BDExtraArg **extra, GError **error);
+
 gboolean bd_lvm_set_global_config (const gchar *new_config, GError **error);
 gchar* bd_lvm_get_global_config (GError **error);
 

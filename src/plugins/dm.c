@@ -129,6 +129,26 @@ void bd_dm_close () {
     dm_log_init_verbose (0);
 }
 
+#define UNUSED __attribute__((unused))
+
+/**
+ * bd_dm_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation (#BDDMTechMode) for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is avaible -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_dm_is_tech_avail (BDDMTech tech, guint64 mode UNUSED, GError **error) {
+    /* all combinations are supported by this implementation of the plugin, but
+       BD_DM_TECH_MAP requires the 'dmsetup' utility */
+    if (tech == BD_DM_TECH_MAP)
+        return check_deps (&avail_deps, DEPS_DMSETUP_MASK, deps, DEPS_LAST, &deps_check_lock, error);
+    else
+        return TRUE;
+}
+
 /**
  * bd_dm_create_linear:
  * @map_name: name of the map

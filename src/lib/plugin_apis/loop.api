@@ -9,7 +9,30 @@ GQuark bd_loop_error_quark (void) {
 typedef enum {
     BD_LOOP_ERROR_DEVICE,
     BD_LOOP_ERROR_FAIL,
+    BD_LOOP_ERROR_TECH_UNAVAIL,
 } BDLoopError;
+
+typedef enum {
+    BD_LOOP_TECH_LOOP = 0,
+} BDLoopTech;
+
+typedef enum {
+    BD_LOOP_TECH_MODE_CREATE  = 1 << 0,
+    BD_LOOP_TECH_MODE_DESTROY = 1 << 1,
+    BD_LOOP_TECH_MODE_MODIFY  = 1 << 2,
+    BD_LOOP_TECH_MODE_QUERY   = 1 << 3,
+} BDLoopTechMode;
+
+/**
+ * bd_loop_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation (#BDLoopTechMode) for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is available -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_loop_is_tech_avail (BDLoopTech tech, guint64 mode, GError **error);
 
 /**
  * bd_loop_get_backing_file:

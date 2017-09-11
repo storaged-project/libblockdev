@@ -83,6 +83,22 @@ void bd_loop_close () {
     /* nothing to do here */
 }
 
+#define UNUSED __attribute__((unused))
+
+/**
+ * bd_loop_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation (#BDLoopTechMode) for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is available -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_loop_is_tech_avail (BDLoopTech tech UNUSED, guint64 mode UNUSED, GError **error UNUSED) {
+    /* all combinations are supported by this implementation of the plugin */
+    return TRUE;
+}
+
 /**
  * bd_loop_get_backing_file:
  * @dev_name: name of the loop device to get backing file for (e.g. "loop0")
