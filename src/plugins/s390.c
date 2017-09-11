@@ -24,7 +24,9 @@
 #include <string.h>
 #include <blockdev/utils.h>
 #include <asm/dasd.h>
-#include <s390utils/vtoc.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
 
 #include "s390.h"
 

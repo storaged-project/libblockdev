@@ -445,7 +445,6 @@ with the libblockdev-swap plugin/library.
 
 %ifarch s390 s390x
 %package s390
-BuildRequires: s390utils-devel
 Summary:    The s390 plugin for the libblockdev library
 Requires: s390utils
 
@@ -458,7 +457,6 @@ Summary:     Development files for the libblockdev-s390 plugin/library
 Requires: %{name}-s390%{?_isa} = %{version}-%{release}
 Requires: %{name}-utils-devel%{?_isa}
 Requires: glib2-devel
-Requires: s390utils-devel
 
 %description s390-devel
 This package contains header files and pkg-config files needed for development

@@ -65,7 +65,6 @@ if test "x$with_s390" != "xno"; then
           [test "x$on_s390" == "xyes" -a "x$with_s390" != "xno"],
            [AC_SUBST(WITH_S390, 1)
             AM_CONDITIONAL(WITH_S390, true)
-            LIBBLOCKDEV_CHECK_HEADER([s390utils/vtoc.h], [], [s390utils/vtoc.h not available])
            ],
           [AC_SUBST(WITH_S390, 0)
            AM_CONDITIONAL(WITH_S390, false)
