@@ -44,12 +44,34 @@ AS_IF([test "x$found_introspection" = xyes],
       [AC_SUBST(WITH_GI, 1)],
       [AC_SUBST(WITH_GI, 0)])
 
-uname -p|grep s390
-on_s390=$?
-
-AM_CONDITIONAL(ON_S390, test "$on_s390" = "0")
+AC_CANONICAL_HOST
+case $host_cpu in
+  s390|s390x) on_s390=yes ;;
+  *) on_s390=no ;;
+esac
 
 skip_patterns=""
+
+AC_ARG_WITH([s390],
+    AS_HELP_STRING([--with-s390], [support s390 @<:@default=check@:>@]),
+    [],
+    [with_s390=check])
+
+AC_SUBST(WITH_S390, 0)
+if test "x$with_s390" != "xno"; then
+    AS_IF([test "x$on_s390" = "xno" -a "x$with_s390" = "xyes"],
+           [LIBBLOCKDEV_SOFT_FAILURE([s390 support requested, but not on s390 arch])
+            AM_CONDITIONAL(WITH_S390, false)],
+          [test "x$on_s390" == "xyes" -a "x$with_s390" != "xno"],
+           [AC_SUBST(WITH_S390, 1)
+            AM_CONDITIONAL(WITH_S390, true)
+           ],
+          [AC_SUBST(WITH_S390, 0)
+           AM_CONDITIONAL(WITH_S390, false)
+          ])
+else
+  AM_CONDITIONAL(WITH_S390, false)
+fi
 
 AC_ARG_WITH([python3],
     AS_HELP_STRING([--with-python3], [support python3 @<:@default=check@:>@]),

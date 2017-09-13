@@ -24,7 +24,9 @@
 #include <string.h>
 #include <blockdev/utils.h>
 #include <asm/dasd.h>
-#include <s390utils/vtoc.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
 
 #include "s390.h"
 
@@ -127,7 +129,6 @@ gboolean bd_s390_dasd_needs_format (const gchar *dasd, GError **error) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "Error checking status of device %s; device may not exist,"
                      " or status can not be read.", dasd);
-        g_clear_error (error);
         return FALSE;
     }
 
@@ -139,7 +140,6 @@ gboolean bd_s390_dasd_needs_format (const gchar *dasd, GError **error) {
     if (!rc) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "Error checking status of device %s.", dasd);
-        g_clear_error (error);
         return FALSE;
     }
 
@@ -368,7 +368,6 @@ gchar* bd_s390_sanitize_dev_input (const gchar *dev, GError **error) {
     if ((dev == NULL) || (!*dev)) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "Device number not specified or invalid");
-        g_clear_error (error);
         return NULL;
     }
 
@@ -418,7 +417,6 @@ gchar* bd_s390_zfcp_sanitize_wwpn_input (const gchar *wwpn, GError **error) {
     if ((wwpn == NULL) || (!*wwpn) || (strlen(wwpn) < 2)) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "WWPN not specified or invalid");
-        g_clear_error (error);
         return NULL;
     }
 
@@ -451,10 +449,9 @@ gchar* bd_s390_zfcp_sanitize_lun_input (const gchar *lun, GError **error) {
     gchar *append = NULL;
 
     /* first make sure we're not being played */
-    if ((lun == NULL) || (!*lun) || (strlen(lun) > 16)) {
+    if ((lun == NULL) || (!*lun) || (strlen(lun) > 18)) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "LUN not specified or invalid");
-        g_clear_error (error);
         return NULL;
     }
 

@@ -53,7 +53,7 @@ lib_LTLIBRARIES += libbd_fs.la
 endif
 
 
-if ON_S390
+if WITH_S390
 lib_LTLIBRARIES += libbd_s390.la
 endif
 
@@ -139,7 +139,7 @@ libbd_kbd_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_kbd_la_SOURCES = kbd.c kbd.h
 endif
 
-if ON_S390
+if WITH_S390
 libbd_s390_la_CFLAGS = $(GLIB_CFLAGS) -Wall -Wextra -Werror
 libbd_s390_la_LIBADD = $(GLIB_LIBS) ${builddir}/../utils/libbd_utils.la
 libbd_s390_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
@@ -221,7 +221,7 @@ endif
 
 noinst_HEADERS = part_err.h
 
-if ON_S390
+if WITH_S390
 libinclude_HEADERS += s390.h
 endif
 

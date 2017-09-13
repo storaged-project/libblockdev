@@ -1,11 +1,5 @@
 #include <glib.h>
-#include <linux/fs.h>
-#include <stdio.h>
-#include <string.h>
 #include <blockdev/utils.h>
-#include <asm/dasd.h>
-#include <s390utils/vtoc.h>
-
 
 GQuark bd_s390_error_quark (void);
 #define BD_S390_ERROR bd_s390_error_quark ()
