@@ -113,6 +113,9 @@ rpmlog:
 	git log --no-merges --pretty="format:- %s (%ae)" "$(PACKAGE_NAME)-$$version_release.." |sed -e 's/@.*)/)/' ; \
 	echo
 
+shortlog:
+	git shortlog -r --no-merges --format="- %s" -w76,0,2 $$(git tag -l | tail -n 1)..HEAD | sed s/"):$"/"):\n"/g
+
 bumpver:
 	@VERSION=`echo $(PACKAGE_VERSION)|sed -r 's/(.*)\.([0-9]+)/\1/'` ; \
 	SUBVERSION=`echo $(PACKAGE_VERSION)|sed -r 's/.*\.([0-9]+)/\1/'` ; \
