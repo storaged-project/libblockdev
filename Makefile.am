@@ -100,9 +100,6 @@ coverage-all: all
 		$(COVERAGE) report --include="src/*" > coverage-report.log
 
 tag:
-	@TAG="$(PACKAGE_NAME)-$(PACKAGE_VERSION)-1" ; \
-	git tag -a -s -m "Tag as $$TAG" -f "$$TAG" ; \
-	echo "Tagged as $$TAG" ; \
 	TAG="$(PACKAGE_VERSION)-1" ; \
 	git tag -a -s -m "Tag as $$TAG" -f "$$TAG" ; \
 	echo "Tagged as $$TAG"
