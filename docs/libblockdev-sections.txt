@@ -46,6 +46,9 @@ bd_btrfs_resize
 bd_btrfs_check
 bd_btrfs_repair
 bd_btrfs_change_label
+BDBtrfsTech
+BDBtrfsTechMode
+bd_btrfs_is_tech_avail
 </SECTION>
 
 <SECTION>
@@ -80,6 +83,9 @@ bd_crypto_luks_resize
 bd_crypto_tc_open
 bd_crypto_tc_close
 bd_crypto_escrow_device
+BDCryptoTech
+BDCryptoTechMode
+bd_crypto_is_tech_avail
 </SECTION>
 
 <SECTION>
@@ -99,6 +105,9 @@ bd_dm_get_member_raid_sets
 bd_dm_activate_raid_set
 bd_dm_deactivate_raid_set
 bd_dm_get_raid_set_type
+BDDMTech
+BDDMTechMode
+bd_dm_is_tech_avail
 </SECTION>
 
 <SECTION>
@@ -110,6 +119,9 @@ BDUtilsLogFunc
 bd_utils_exec_error_quark
 BD_UTILS_EXEC_ERROR
 BDUtilsExecError
+BDUtilsDevUtilsError
+BD_UTILS_DEV_UTILS_ERROR
+bd_utils_dev_utils_error_quark
 bd_utils_exec_and_report_error
 bd_utils_exec_and_report_status_error
 bd_utils_exec_and_capture_output
@@ -163,6 +175,9 @@ bd_loop_setup_from_fd
 bd_loop_teardown
 bd_loop_get_autoclear
 bd_loop_set_autoclear
+BDLoopTech
+BDLoopTechMode
+bd_loop_is_tech_avail
 </SECTION>
 
 <SECTION>
@@ -184,6 +199,7 @@ BD_LVM_MAX_THPOOL_CHUNK_SIZE
 THPOOL_MD_FACTOR_NEW
 THPOOL_MD_FACTOR_EXISTS
 BD_LVM_MIN_CACHE_MD_SIZE
+BD_LVM_DEFAULT_CHUNK_SIZE
 bd_lvm_error_quark
 BD_LVM_ERROR
 BDLVMError
@@ -207,6 +223,7 @@ bd_lvm_get_max_lv_size
 bd_lvm_round_size_to_pe
 bd_lvm_get_lv_physical_size
 bd_lvm_get_thpool_padding
+bd_lvm_get_thpool_meta_size
 bd_lvm_is_valid_thpool_md_size
 bd_lvm_is_valid_thpool_chunk_size
 bd_lvm_pvcreate
@@ -255,6 +272,9 @@ bd_lvm_cache_pool_name
 bd_lvm_cache_stats
 bd_lvm_data_lv_name
 bd_lvm_metadata_lv_name
+BDLVMTech
+BDLVMTechMode
+bd_lvm_is_tech_avail
 </SECTION>
 
 <SECTION>
@@ -293,6 +313,9 @@ bd_md_get_status
 bd_md_set_bitmap_location
 bd_md_get_bitmap_location
 bd_md_request_sync_action
+BDMDTech
+BDMDTechMode
+bd_md_is_tech_avail
 </SECTION>
 
 <SECTION>
@@ -307,6 +330,9 @@ bd_mpath_flush_mpaths
 bd_mpath_is_mpath_member
 bd_mpath_get_mpath_members
 bd_mpath_set_friendly_names
+BDMpathTech
+BDMpathTechMode
+bd_mpath_is_tech_avail
 </SECTION>
 
 <SECTION>
@@ -337,6 +363,9 @@ bd_swap_swapon
 bd_swap_swapoff
 bd_swap_swapstatus
 bd_swap_set_label
+BDSwapTech
+BDSwapTechMode
+bd_swap_is_tech_avail
 </SECTION>
 
 <SECTION>
@@ -370,6 +399,9 @@ bd_kbd_zram_remove_device
 bd_kbd_zram_get_stats
 bd_kbd_zram_stats_copy
 bd_kbd_zram_stats_free
+BDKBDTech
+BDKBDTechMode
+bd_kbd_is_tech_avail
 </SECTION>
 
 <SECTION>
@@ -412,6 +444,11 @@ bd_part_set_part_type
 bd_part_set_part_id
 bd_part_get_part_id
 bd_part_error_quark
+BDPartTech
+BDPartTechMode
+bd_part_is_tech_avail
+bd_part_disk_spec_copy
+bd_part_disk_spec_free
 </SECTION>
 
 <SECTION>
@@ -423,6 +460,7 @@ BDFSExt2Info
 BDFSExt3Info
 BDFSExt4Info
 BDFsError
+BD_FS_ERROR
 bd_fs_error_quark
 bd_fs_wipe
 bd_fs_clean
@@ -485,6 +523,10 @@ bd_fs_vfat_repair
 bd_fs_vfat_resize
 bd_fs_vfat_set_label
 bd_fs_vfat_wipe
+BDFSTech
+BDFSTechMode
+BDFsResizeFlags
+bd_fs_is_tech_avail
 </SECTION>
 
 <SECTION>
@@ -494,6 +536,7 @@ bd_s390_init
 bd_s390_close
 bd_s390_error_quark
 BDS390Error
+BD_S390_ERROR
 bd_s390_dasd_format
 bd_s390_dasd_needs_format
 bd_s390_sanitize_dev_input
@@ -505,4 +548,7 @@ bd_s390_zfcp_sanitize_lun_input
 bd_s390_zfcp_online
 bd_s390_zfcp_scsi_offline
 bd_s390_zfcp_offline
+BDS390Tech
+BDS390TechMode
+bd_s390_is_tech_avail
 </SECTION>
