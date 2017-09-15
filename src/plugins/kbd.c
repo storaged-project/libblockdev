@@ -40,9 +40,7 @@
  * A plugin for operations with kernel block devices.
  */
 
-#ifdef WITH_BD_BCACHE
 static const gchar * const mode_str[BD_KBD_MODE_UNKNOWN+1] = {"writethrough", "writeback", "writearound", "none", "unknown"};
-#endif
 
 /* "C" locale to get the locale-agnostic error messages */
 static locale_t c_locale = (locale_t) 0;
@@ -50,7 +48,6 @@ static locale_t c_locale = (locale_t) 0;
 static gboolean have_kernel_module (const gchar *module_name, GError **error);
 
 
-#ifdef WITH_BD_BCACHE
 static volatile guint avail_deps = 0;
 static GMutex deps_check_lock;
 
@@ -61,7 +58,6 @@ static GMutex deps_check_lock;
 static UtilDep deps[DEPS_LAST] = {
     {"make-bcache", NULL, NULL, NULL},
 };
-#endif
 
 
 /**
@@ -75,10 +71,8 @@ static UtilDep deps[DEPS_LAST] = {
 gboolean bd_kbd_check_deps () {
     GError *error = NULL;
     gboolean ret = FALSE;
-#ifdef WITH_BD_BCACHE
     guint i = 0;
     gboolean status = FALSE;
-#endif
 
     ret = have_kernel_module ("zram", &error);
     if (!ret) {
@@ -92,9 +86,19 @@ gboolean bd_kbd_check_deps () {
     if (!ret)
         return FALSE;
 
-#ifdef WITH_BD_BCACHE
     ret = TRUE;
+#ifdef WITH_BD_BCACHE
     for (i=0; i < DEPS_LAST; i++) {
+#else
+    /* we need to disable the type-limits check because GCC is too clever and
+       complains that 0 is never < 0, but DEPS_LAST may be something larger in
+       the future */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
+    /* skip checking for 'make-bcache' (MUST BE LAST IN THE LIST OF DEPS!) */
+    for (i=0; i < DEPS_LAST-1; i++) {
+#pragma GCC diagnostic pop
+#endif
         status = bd_utils_check_util_version (deps[i].name, deps[i].version,
                                               deps[i].ver_arg, deps[i].ver_regexp, &error);
         if (!status)
@@ -107,7 +111,6 @@ gboolean bd_kbd_check_deps () {
 
     if (!ret)
         g_warning("Cannot load the kbd plugin");
-#endif
 
     return ret;
 }
@@ -144,19 +147,11 @@ void bd_kbd_close () {
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
  */
-#ifdef WITH_BD_BCACHE
-    /* XXXTODO: get rid of WITH_BD_BCACHE now that we have better ways */
 gboolean bd_kbd_is_tech_avail (BDKBDTech tech, guint64 mode, GError **error) {
     /* all combinations are supported by this implementation of the plugin, but
        bcache creation requires the 'make-bcache' utility */
     if (tech == BD_KBD_TECH_BCACHE && (mode & BD_KBD_TECH_MODE_CREATE))
         return check_deps (&avail_deps, DEPS_MAKEBCACHE_MASK, deps, DEPS_LAST, &deps_check_lock, error);
-#else
-#define UNUSED __attribute__((unused))
-gboolean bd_kbd_is_tech_avail (BDKBDTech tech, guint64 mode UNUSED, GError **error UNUSED) {
-    if (tech == BD_KBD_TECH_BCACHE)
-        return FALSE;
-#endif
     else
         return TRUE;
 }
@@ -190,7 +185,6 @@ void bd_kbd_zram_stats_free (BDKBDZramStats *data) {
     g_free (data);
 }
 
-#ifdef WITH_BD_BCACHE
 BDKBDBcacheStats* bd_kbd_bcache_stats_copy (BDKBDBcacheStats *data) {
     BDKBDBcacheStats *new = g_new0 (BDKBDBcacheStats, 1);
 
@@ -210,7 +204,6 @@ void bd_kbd_bcache_stats_free (BDKBDBcacheStats *data) {
     g_free (data->state);
     g_free (data);
 }
-#endif
 
 static gboolean have_kernel_module (const gchar *module_name, GError **error) {
     gint ret = 0;
@@ -802,8 +795,6 @@ BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error) {
     return ret;
 }
 
-
-#ifdef WITH_BD_BCACHE
 
 gboolean wait_for_file (const char *filename) {
     gint count = 500;
@@ -1619,4 +1610,3 @@ gchar* bd_kbd_bcache_get_cache_device (const gchar *bcache_device, GError **erro
 
     return ret;
 }
-#endif  /* WITH_BCACHE */
