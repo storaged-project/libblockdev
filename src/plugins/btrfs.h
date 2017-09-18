@@ -47,6 +47,7 @@ typedef struct BDBtrfsFilesystemInfo {
 void bd_btrfs_filesystem_info_free (BDBtrfsFilesystemInfo *info);
 BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info_copy (BDBtrfsFilesystemInfo *info);
 
+
 typedef enum {
     BD_BTRFS_TECH_FS = 0,
     BD_BTRFS_TECH_MULTI_DEV,

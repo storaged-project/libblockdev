@@ -146,6 +146,8 @@ GQuark bd_crypto_error_quark (void)
  * Returns: (transfer full): A newly generated %BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH-long passphrase.
  *
  * See %BD_CRYPTO_BACKUP_PASSPHRASE_CHARSET for the definition of the charset used for the passphrase.
+ *
+ * Tech category: always available
  */
 gchar* bd_crypto_generate_backup_passphrase(GError **error __attribute__((unused))) {
     guint8 i = 0;
@@ -175,6 +177,8 @@ gchar* bd_crypto_generate_backup_passphrase(GError **error __attribute__((unused
  * Returns: %TRUE if the given @device is a LUKS device or %FALSE if not or
  * failed to determine (the @error) is populated with the error in such
  * cases)
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
  */
 gboolean bd_crypto_device_is_luks (const gchar *device, GError **error) {
     struct crypt_device *cd = NULL;
@@ -199,6 +203,8 @@ gboolean bd_crypto_device_is_luks (const gchar *device, GError **error) {
  *
  * Returns: (transfer full): UUID of the @device or %NULL if failed to determine (@error)
  * is populated with the error in such cases)
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
  */
 gchar* bd_crypto_luks_uuid (const gchar *device, GError **error) {
     struct crypt_device *cd = NULL;
@@ -234,6 +240,8 @@ gchar* bd_crypto_luks_uuid (const gchar *device, GError **error) {
  * Returns: (transfer none): one of "invalid", "inactive", "active" or "busy" or
  * %NULL if failed to determine (@error is populated with the error in
  * such cases)
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
  */
 gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error) {
     struct crypt_device *cd = NULL;
@@ -400,6 +408,8 @@ static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 k
  *
  * Returns: whether the given @device was successfully formatted as LUKS or not
  * (the @error) contains the error in such cases)
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_CREATE
  */
 gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint64 key_size, const gchar *passphrase, const gchar *key_file, guint64 min_entropy, GError **error) {
     return luks_format (device, cipher, key_size, (const guint8*) passphrase, passphrase ? strlen(passphrase) : 0, key_file, min_entropy, error);
@@ -422,6 +432,8 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
  *
  * Returns: whether the given @device was successfully formatted as LUKS or not
  * (the @error) contains the error in such cases)
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_CREATE
  */
 gboolean bd_crypto_luks_format_blob (const gchar *device, const gchar *cipher, guint64 key_size, const guint8 *pass_data, gsize data_len, guint64 min_entropy, GError **error) {
     return luks_format (device, cipher, key_size, pass_data, data_len, NULL, min_entropy, error);
@@ -504,6 +516,8 @@ static gboolean luks_open (const gchar *device, const gchar *name, const guint8 
  * Returns: whether the @device was successfully opened or not
  *
  * One of @passphrase, @key_file has to be != %NULL.
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gchar *passphrase, const gchar *key_file, gboolean read_only, GError **error) {
     return luks_open (device, name, (const guint8*) passphrase, passphrase ? strlen (passphrase) : 0, key_file, read_only, error);
@@ -520,6 +534,7 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gcha
  *
  * Returns: whether the @device was successfully opened or not
  *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_luks_open_blob (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error) {
     return luks_open (device, name, (const guint8*) pass_data, data_len, NULL, read_only, error);
@@ -531,6 +546,8 @@ gboolean bd_crypto_luks_open_blob (const gchar *device, const gchar *name, const
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the given @luks_device was successfully closed or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_luks_close (const gchar *luks_device, GError **error) {
     struct crypt_device *cd = NULL;
@@ -575,6 +592,7 @@ gboolean bd_crypto_luks_close (const gchar *luks_device, GError **error) {
  *
  * Returns: whether the @npass_data was successfully added to @device or not
  *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_ADD_KEY
  */
 gboolean bd_crypto_luks_add_key_blob (const gchar *device, const guint8 *pass_data, gsize data_len, const guint8 *npass_data, gsize ndata_len, GError **error) {
     struct crypt_device *cd = NULL;
@@ -632,6 +650,8 @@ gboolean bd_crypto_luks_add_key_blob (const gchar *device, const guint8 *pass_da
  *
  * One of @pass, @key_file has to be != %NULL and the same applies to @npass,
  * @nkey_file.
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_ADD_KEY
  */
 gboolean bd_crypto_luks_add_key (const gchar *device, const gchar *pass, const gchar *key_file, const gchar *npass, const gchar *nkey_file, GError **error) {
     gboolean success = FALSE;
@@ -690,6 +710,8 @@ gboolean bd_crypto_luks_add_key (const gchar *device, const gchar *pass, const g
  * Returns: whether the key was successfully removed or not
  *
  * Either @pass or @key_file has to be != %NULL.
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_REMOVE_KEY
  */
 gboolean bd_crypto_luks_remove_key_blob (const gchar *device, const guint8 *pass_data, gsize data_len, GError **error) {
     struct crypt_device *cd = NULL;
@@ -751,6 +773,8 @@ gboolean bd_crypto_luks_remove_key_blob (const gchar *device, const guint8 *pass
  * Returns: whether the key was successfully removed or not
  *
  * Either @pass or @key_file has to be != %NULL.
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_REMOVE_KEY
  */
 gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, const gchar *key_file, GError **error) {
     gboolean success = FALSE;
@@ -789,6 +813,7 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, cons
  *
  * Returns: whether the key was successfully changed or not
  *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_ADD_KEY&%BD_CRYPTO_TECH_MODE_REMOVE_KEY
  */
 gboolean bd_crypto_luks_change_key_blob (const gchar *device, const guint8 *pass_data, gsize data_len, const guint8 *npass_data, gsize ndata_len, GError **error) {
     struct crypt_device *cd = NULL;
@@ -865,6 +890,8 @@ gboolean bd_crypto_luks_change_key_blob (const gchar *device, const guint8 *pass
  * Returns: whether the key was successfully changed or not
  *
  * No support for changing key files (yet).
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_ADD_KEY&%BD_CRYPTO_TECH_MODE_REMOVE_KEY
  */
 gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, const gchar *npass, GError **error) {
     return bd_crypto_luks_change_key_blob (device, (guint8*) pass, strlen (pass), (guint8*) npass, strlen (npass), error);
@@ -877,6 +904,8 @@ gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, cons
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @luks_device was successfully resized or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_RESIZE
  */
 gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError **error) {
     struct crypt_device *cd = NULL;
@@ -920,6 +949,8 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError *
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @device was successfully opened or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error) {
     struct crypt_device *cd = NULL;
@@ -980,6 +1011,8 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the given @tc_device was successfully closed or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_tc_close (const gchar *tc_device, GError **error) {
     struct crypt_device *cd = NULL;
@@ -1114,6 +1147,8 @@ static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libv
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the escrow data was successfully created for @device or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_ESCROW-%BD_CRYPTO_TECH_MODE_CREATE
  */
 gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, const gchar *cert_data, const gchar *directory, const gchar *backup_passphrase, GError **error) {
     struct libvk_volume *volume = NULL;

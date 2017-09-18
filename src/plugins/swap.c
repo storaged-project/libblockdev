@@ -143,6 +143,8 @@ gboolean bd_swap_is_tech_avail (BDSwapTech tech UNUSED, guint64 mode, GError **e
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the swap space was successfully created or not
+ *
+ * Tech category: %BD_SWAP_TECH_SWAP-%BD_SWAP_TECH_MODE_CREATE
  */
 gboolean bd_swap_mkswap (const gchar *device, const gchar *label, const BDExtraArg **extra, GError **error) {
     guint8 next_arg = 2;
@@ -173,6 +175,8 @@ gboolean bd_swap_mkswap (const gchar *device, const gchar *label, const BDExtraA
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the swap device was successfully activated or not
+ *
+ * Tech category: %BD_SWAP_TECH_SWAP-%BD_SWAP_TECH_MODE_ACTIVATE_DEACTIVATE
  */
 gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
     GIOChannel *dev_file = NULL;
@@ -267,6 +271,8 @@ gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the swap device was successfully deactivated or not
+ *
+ * Tech category: %BD_SWAP_TECH_SWAP-%BD_SWAP_TECH_MODE_ACTIVATE_DEACTIVATE
  */
 gboolean bd_swap_swapoff (const gchar *device, GError **error) {
     gint ret = 0;
@@ -295,6 +301,8 @@ gboolean bd_swap_swapoff (const gchar *device, GError **error) {
  *
  * Returns: %TRUE if the swap device is active, %FALSE if not active or failed
  * to determine (@error) is set not a non-NULL value in such case)
+ *
+ * Tech category: %BD_SWAP_TECH_SWAP-%BD_SWAP_TECH_MODE_QUERY
  */
 gboolean bd_swap_swapstatus (const gchar *device, GError **error) {
     gchar *file_content;
@@ -356,6 +364,8 @@ gboolean bd_swap_swapstatus (const gchar *device, GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the label was successfully set or not
+ *
+ * Tech category: %BD_SWAP_TECH_SWAP-%BD_SWAP_TECH_MODE_SET_LABEL
  */
 gboolean bd_swap_set_label (const gchar *device, const gchar *label, GError **error) {
     const gchar *argv[5] = {"swaplabel", "-L", label, device, NULL};
