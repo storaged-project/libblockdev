@@ -149,6 +149,8 @@ gboolean bd_s390_is_tech_avail (BDS390Tech tech, guint64 mode, GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: whether dasdfmt was successful or not
+ *
+ * Tech category: %BD_S390_TECH_DASD-%BD_S390_TECH_MODE_MODIFY
  */
 gboolean bd_s390_dasd_format (const gchar *dasd, const BDExtraArg **extra, GError **error) {
     gboolean rc = FALSE;
@@ -170,6 +172,8 @@ gboolean bd_s390_dasd_format (const gchar *dasd, const BDExtraArg **extra, GErro
  * @error: (out): place to store error (if any)
  *
  * Returns: whether a dasd needs dasdfmt run against it
+ *
+ * Tech category: %BD_S390_TECH_DASD-%BD_S390_TECH_MODE_QUERY
  */
 gboolean bd_s390_dasd_needs_format (const gchar *dasd, GError **error) {
     gchar status[12];
@@ -213,6 +217,8 @@ gboolean bd_s390_dasd_needs_format (const gchar *dasd, GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: whether a dasd was successfully switched online
+ *
+ * Tech category: %BD_S390_TECH_DASD-%BD_S390_TECH_MODE_MODIFY
  */
 gboolean bd_s390_dasd_online (const gchar *dasd, GError **error) {
     gboolean rc = FALSE;
@@ -299,6 +305,8 @@ gboolean bd_s390_dasd_online (const gchar *dasd, GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: whether a dasd is LDL formatted
+ *
+ * Tech category: %BD_S390_TECH_DASD-%BD_S390_TECH_MODE_QUERY
  */
 gboolean bd_s390_dasd_is_ldl (const gchar *dasd, GError **error) {
     gchar *devname = NULL;
@@ -360,6 +368,8 @@ gboolean bd_s390_dasd_is_ldl (const gchar *dasd, GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: whether a dasd is FBA
+ *
+ * Tech category: %BD_S390_TECH_DASD-%BD_S390_TECH_MODE_QUERY
  */
 gboolean bd_s390_dasd_is_fba (const gchar *dasd, GError **error) {
     gchar *devname = NULL;
@@ -411,6 +421,8 @@ gboolean bd_s390_dasd_is_fba (const gchar *dasd, GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): a synthesized dasd or zfcp device number
+ *
+ * Tech category: always available
  */
 gchar* bd_s390_sanitize_dev_input (const gchar *dev, GError **error) {
     gchar *tok = NULL;
@@ -463,6 +475,8 @@ gchar* bd_s390_sanitize_dev_input (const gchar *dev, GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): a synthesized zFCP WWPN
+ *
+ * Tech category: always available
  */
 gchar* bd_s390_zfcp_sanitize_wwpn_input (const gchar *wwpn, GError **error) {
     gchar *fullwwpn = NULL;
@@ -495,6 +509,8 @@ gchar* bd_s390_zfcp_sanitize_wwpn_input (const gchar *wwpn, GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): a synthesized zFCP LUN
+ *
+ * Tech category: always available
  */
 gchar* bd_s390_zfcp_sanitize_lun_input (const gchar *lun, GError **error) {
     gchar *lclun = NULL;
@@ -562,6 +578,8 @@ gchar* bd_s390_zfcp_sanitize_lun_input (const gchar *lun, GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: whether a zfcp device was successfully switched online
+ *
+ * Tech category: %BD_S390_TECH_ZFCP-%BD_S390_TECH_MODE_MODIFY
  */
 gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar *lun, GError **error) {
     gboolean boolrc = FALSE;
@@ -740,6 +758,8 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
  * this function becomes necessary when switching the device offline. This
  * particular sequence of actions is for some reason unnecessary when switching
  * the device offline. Chalk it up to s390x being s390x.
+ *
+ * Tech category: %BD_S390_TECH_ZFCP-%BD_S390_TECH_MODE_MODIFY
  */
 gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const gchar *lun, GError **error) {
     FILE *scsifd = NULL;
@@ -905,6 +925,8 @@ gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const 
  * @error: (out): place to store error (if any)
  *
  * Returns: whether a zfcp device was successfully switched offline
+ *
+ * Tech category: %BD_S390_TECH_ZFCP-%BD_S390_TECH_MODE_MODIFY
  */
 gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gchar *lun, GError **error) {
     gboolean success = FALSE;

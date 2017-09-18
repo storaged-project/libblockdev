@@ -159,6 +159,8 @@ gboolean bd_dm_is_tech_avail (BDDMTech tech, guint64 mode UNUSED, GError **error
  *
  * Returns: whether the new linear mapping @map_name was successfully created
  * for the @device or not
+ *
+ * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_CREATE_ACTIVATE
  */
 gboolean bd_dm_create_linear (const gchar *map_name, const gchar *device, guint64 length, const gchar *uuid, GError **error) {
     gboolean success = FALSE;
@@ -189,6 +191,8 @@ gboolean bd_dm_create_linear (const gchar *map_name, const gchar *device, guint6
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @map_name map was successfully removed or not
+ *
+ * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_REMOVE_DEACTIVATE
  */
 gboolean bd_dm_remove (const gchar *map_name, GError **error) {
     const gchar *argv[4] = {"dmsetup", "remove", map_name, NULL};
@@ -206,6 +210,8 @@ gboolean bd_dm_remove (const gchar *map_name, GError **error) {
  *
  * Returns: map name of the map providing the @dm_node device or %NULL
  * (@error) contains the error in such cases)
+ *
+ * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_QUERY
  */
 gchar* bd_dm_name_from_node (const gchar *dm_node, GError **error) {
     gchar *ret = NULL;
@@ -238,6 +244,8 @@ gchar* bd_dm_name_from_node (const gchar *dm_node, GError **error) {
  *
  * Returns: DM node name for the @map_name map or %NULL (@error) contains
  * the error in such cases)
+ *
+ * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_QUERY
  */
 gchar* bd_dm_node_from_name (const gchar *map_name, GError **error) {
     gchar *dev_path = NULL;
@@ -266,6 +274,8 @@ gchar* bd_dm_node_from_name (const gchar *map_name, GError **error) {
  * Returns: whether the given @map_name exists (and is live if @live_only is
  * %TRUE (and is active if @active_only is %TRUE)). If %FALSE is returned,
  * @error) indicates whether error appeared (non-%NULL) or not (%NULL).
+ *
+ * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_QUERY
  */
 gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean active_only, GError **error) {
     struct dm_task *task_list = NULL;
@@ -468,6 +478,8 @@ static void find_raid_sets_for_dev (const gchar *name, const gchar *uuid, gint m
  * the member or %NULL in case of error
  *
  * One of @name, @uuid or @major:@minor has to be given.
+ *
+ * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_MODE_QUERY
  */
 gchar** bd_dm_get_member_raid_sets (const gchar *name, const gchar *uuid, gint major, gint minor, GError **error) {
     guint64 i = 0;
@@ -574,6 +586,8 @@ static gboolean change_set_by_name (const gchar *name, enum activate_type action
  * @error: (out): variable to store error (if any)
  *
  * Returns: whether the RAID set @name was successfully activate or not
+ *
+ * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_CREATE_ACTIVATE
  */
 gboolean bd_dm_activate_raid_set (const gchar *name, GError **error) {
     guint64 progress_id = 0;
@@ -594,6 +608,8 @@ gboolean bd_dm_activate_raid_set (const gchar *name, GError **error) {
  * @error: (out): variable to store error (if any)
  *
  * Returns: whether the RAID set @name was successfully deactivate or not
+ *
+ * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_REMOVE_DEACTIVATE
  */
 gboolean bd_dm_deactivate_raid_set (const gchar *name, GError **error) {
     guint64 progress_id = 0;
@@ -614,6 +630,8 @@ gboolean bd_dm_deactivate_raid_set (const gchar *name, GError **error) {
  * @error: (out): variable to store error (if any)
  *
  * Returns: string representation of the @name RAID set's type
+ *
+ * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_QUERY
  */
 gchar* bd_dm_get_raid_set_type (const gchar *name, GError **error) {
     struct lib_context *lc;

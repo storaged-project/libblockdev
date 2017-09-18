@@ -152,6 +152,8 @@ gboolean bd_mpath_is_tech_avail (BDMpathTech tech, guint64 mode, GError **error)
  * Returns: whether multipath device maps were successfully flushed or not
  *
  * Flushes all unused multipath device maps.
+ *
+ * Tech category: %BD_MPATH_TECH_BASE-%BD_MPATH_TECH_MODE_MODIFY
  */
 gboolean bd_mpath_flush_mpaths (GError **error) {
     const gchar *argv[3] = {"multipath", "-F", NULL};
@@ -345,6 +347,8 @@ static gchar** get_map_deps (const gchar *map_name, guint64 *n_deps, GError **er
  *
  * Returns: %TRUE if the device is a multipath member, %FALSE if not or an error
  * appeared when queried (@error is set in those cases)
+ *
+ * Tech category: %BD_MPATH_TECH_BASE-%BD_MPATH_TECH_MODE_QUERY
  */
 gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error) {
     struct dm_task *task_names = NULL;
@@ -432,6 +436,8 @@ gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error) {
  * Returns: (transfer full) (array zero-terminated=1): list of names of all devices that are
  *                                                     members of the mpath mappings
  *                                                     (or %NULL in case of error)
+ *
+ * Tech category: %BD_MPATH_TECH_BASE-%BD_MPATH_TECH_MODE_QUERY
  */
 gchar** bd_mpath_get_mpath_members (GError **error) {
     struct dm_task *task_names = NULL;
@@ -515,6 +521,8 @@ gchar** bd_mpath_get_mpath_members (GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: if successfully set or not
+ *
+ * Tech category: %BD_MPATH_TECH_FRIENDLY_NAMES-%BD_MPATH_TECH_MODE_MODIFY
  */
 gboolean bd_mpath_set_friendly_names (gboolean enabled, GError **error) {
     const gchar *argv[8] = {"mpathconf", "--find_multipaths", "y", "--user_friendly_names", NULL, "--with_multipathd", "y", NULL};

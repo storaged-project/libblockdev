@@ -279,6 +279,8 @@ static gboolean disk_commit (PedDisk *disk, const gchar *path, GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the partition table was successfully created or not
+ *
+ * Tech category: %BD_PART_TECH_MODE_CREATE_TABLE + the tech according to @type
  */
 gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean ignore_existing, GError **error) {
     PedDevice *dev = NULL;
@@ -443,6 +445,8 @@ static BDPartSpec* get_part_spec (PedDevice *dev, PedDisk *disk, PedPartition *p
  * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): spec of the @part partition from @disk or %NULL in case of error
+ *
+ * Tech category: %BD_PART_TECH_MODE_QUERY_PART + the tech according to the partition table type
  */
 BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError **error) {
     PedDevice *dev = NULL;
@@ -514,6 +518,8 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
  *
  * Returns: (transfer full): spec of the partition from @disk spanning over the @position or %NULL if no such
  *          partition exists or in case of error (@error is set)
+ *
+ * Tech category: %BD_PART_TECH_MODE_QUERY_PART + the tech according to the partition table type
  */
 BDPartSpec* bd_part_get_part_by_pos (const gchar *disk, guint64 position, GError **error) {
     PedDevice *dev = NULL;
@@ -566,6 +572,8 @@ BDPartSpec* bd_part_get_part_by_pos (const gchar *disk, guint64 position, GError
  * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): information about the given @disk or %NULL (in case of error)
+ *
+ * Tech category: %BD_PART_TECH_MODE_QUERY_TABLE + the tech according to the partition table type
  */
 BDPartDiskSpec* bd_part_get_disk_spec (const gchar *disk, GError **error) {
     PedDevice *dev = NULL;
@@ -668,6 +676,8 @@ static BDPartSpec** get_disk_parts (const gchar *disk, guint64 incl, guint64 exc
  * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full) (array zero-terminated=1): specs of the partitions from @disk or %NULL in case of error
+ *
+ * Tech category: %BD_PART_TECH_MODE_QUERY_TABLE + the tech according to the partition table type
  */
 BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error) {
     return get_disk_parts (disk, BD_PART_TYPE_NORMAL|BD_PART_TYPE_LOGICAL|BD_PART_TYPE_EXTENDED,
@@ -680,6 +690,8 @@ BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full) (array zero-terminated=1): specs of the free regions from @disk or %NULL in case of error
+ *
+ * Tech category: %BD_PART_TECH_MODE_QUERY_TABLE + the tech according to the partition table type
  */
 BDPartSpec** bd_part_get_disk_free_regions (const gchar *disk, GError **error) {
     return get_disk_parts (disk, BD_PART_TYPE_FREESPACE, 0, FALSE, error);
@@ -700,6 +712,8 @@ BDPartSpec** bd_part_get_disk_free_regions (const gchar *disk, GError **error) {
  *       is found. For the @type %BD_PART_TYPE_LOGICAL, the smallest possible space that *is* in an extended
  *       partition is found. For %BD_PART_TYPE_EXTENDED, the biggest possible space is found as long as there
  *       is no other extended partition (there can only be one).
+ *
+ * Tech category: %BD_PART_TECH_MODE_QUERY_TABLE + the tech according to the partition table type
  */
 BDPartSpec* bd_part_get_best_free_region (const gchar *disk, BDPartType type, guint64 size, GError **error) {
     BDPartSpec **free_regs = NULL;
@@ -960,6 +974,8 @@ static PedPartition* add_part_to_disk (PedDevice *dev, PedDisk *disk, BDPartType
  *
  * NOTE: The resulting partition may start at a different position than given by
  *       @start and can have different size than @size due to alignment.
+ *
+ * Tech category: %BD_PART_TECH_MODE_MODIFY_TABLE + the tech according to the partition table type
  */
 BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 start, guint64 size, BDPartAlign align, GError **error) {
     PedDevice *dev = NULL;
@@ -1067,6 +1083,8 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @part partition was successfully deleted from @disk
+ *
+ * Tech category: %BD_PART_TECH_MODE_MODIFY_TABLE + the tech according to the partition table type
  */
 gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **error) {
     PedDevice *dev = NULL;
@@ -1164,6 +1182,8 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
  * Returns: whether the @part partition was successfully resized on @disk to @size
  *
  * NOTE: The resulting partition may be slightly bigger than requested due to alignment.
+ *
+ * Tech category: %BD_PART_TECH_MODE_MODIFY_TABLE + the tech according to the partition table type
  */
 gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size, BDPartAlign align, GError **error) {
     PedDevice *dev = NULL;
@@ -1335,6 +1355,8 @@ static gboolean set_gpt_flags (const gchar *device, int part_num, guint64 flags,
  *
  * Returns: whether the flag @flag was successfully set on the @part partition
  * or not.
+ *
+ * Tech category: %BD_PART_TECH_MODE_MODIFY_PART + the tech according to the partition table type
  */
 gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag flag, gboolean state, GError **error) {
     PedDevice *dev = NULL;
@@ -1442,6 +1464,8 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the flag @flag was successfully set on the @disk or not
+ *
+ * Tech category: %BD_PART_TECH_MODE_MODIFY_TABLE + the tech according to the partition table type
  */
 gboolean bd_part_set_disk_flag (const gchar *disk, BDPartDiskFlag flag, gboolean state, GError **error) {
     PedDevice *dev = NULL;
@@ -1511,6 +1535,7 @@ gboolean bd_part_set_disk_flag (const gchar *disk, BDPartDiskFlag flag, gboolean
  *
  * Note: Unsets all the other flags on the partition.
  *
+ * Tech category: %BD_PART_TECH_MODE_MODIFY_PART + the tech according to the partition table type
  */
 gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 flags, GError **error) {
     PedDevice *dev = NULL;
@@ -1618,6 +1643,8 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the name was successfully set or not
+ *
+ * Tech category: %BD_PART_TECH_MODE_MODIFY_PART + the tech according to the partition table type
  */
 gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gchar *name, GError **error) {
     PedDevice *dev = NULL;
@@ -1722,6 +1749,8 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @type_guid type was successfully set for @part or not
+ *
+ * Tech category: %BD_PART_TECH_GPT-%BD_PART_TECH_MODE_MODIFY_PART
  */
 gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gchar *type_guid, GError **error) {
     const gchar *args[5] = {"sgdisk", "--typecode", NULL, disk, NULL};
@@ -1775,6 +1804,8 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @part_id type was successfully set for @part or not
+ *
+ * Tech category: %BD_PART_TECH_MODE_MODIFY_PART + the tech according to the partition table type
  */
 gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar *part_id, GError **error) {
     const gchar *args[6] = {"sfdisk", "--id", disk, NULL, part_id, NULL};
@@ -1844,6 +1875,8 @@ gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar 
  * @error: (out): place to store error (if any)
  *
  * Returns (transfer full): partition id type or %NULL in case of error
+ *
+ * Tech category: %BD_PART_TECH_MODE_QUERY_PART + the tech according to the partition table type
  */
 gchar* bd_part_get_part_id (const gchar *disk, const gchar *part, GError **error) {
     const gchar *args[5] = {"sfdisk", "--id", disk, NULL, NULL};
@@ -1896,6 +1929,8 @@ gchar* bd_part_get_part_id (const gchar *disk, const gchar *part, GError **error
  * @error: (out): place to store error (if any)
  *
  * Returns: (transfer none): string representation of @table_type
+ *
+ * Tech category: the tech according to @type
  */
 const gchar* bd_part_get_part_table_type_str (BDPartTableType type, GError **error) {
     if (type >= BD_PART_TABLE_UNDEF) {
@@ -1913,6 +1948,8 @@ const gchar* bd_part_get_part_table_type_str (BDPartTableType type, GError **err
  * @error: (out): place to store error (if any)
  *
  * Returns: (transfer none): string representation of @flag
+ *
+ * Tech category: always available
  */
 const gchar* bd_part_get_flag_str (BDPartFlag flag, GError **error) {
     if (flag < BD_PART_FLAG_BASIC_LAST)
@@ -1937,6 +1974,8 @@ const gchar* bd_part_get_flag_str (BDPartFlag flag, GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: (transfer none): string representation of @type
+ *
+ * Tech category: always available
  */
 const gchar* bd_part_get_type_str (BDPartType type, GError **error) {
     if (type > BD_PART_TYPE_PROTECTED) {
