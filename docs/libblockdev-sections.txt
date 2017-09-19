@@ -8,6 +8,7 @@ bd_try_init
 bd_reinit
 bd_try_reinit
 bd_is_initialized
+bd_switch_init_checks
 bd_init_error_quark
 </SECTION>
 
