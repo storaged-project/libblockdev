@@ -51,3 +51,13 @@ gboolean bd_swap_swapoff (const gchar *device, GError **error);
  * to determine (@error) is set not a non-NULL value in such case)
  */
 gboolean bd_swap_swapstatus (const gchar *device, GError **error);
+
+/**
+ * bd_swap_set_label:
+ * @device: a device to set label on
+ * @label: label that will be set
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the label was successfully set or not
+ */
+gboolean bd_swap_set_label (const gchar *device, const gchar *label, GError **error);

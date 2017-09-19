@@ -343,7 +343,8 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         # try reinitializing with only some utilities being available and thus
         # only some plugins able to load
-        with fake_path("tests/lib_missing_utils", keep_utils=["swapon", "swapoff", "mkswap", "lvm", "btrfs", "thin_metadata_size"]):
+        with fake_path("tests/lib_missing_utils", keep_utils=["swapon", "swapoff", "mkswap", "lvm",
+                                                              "btrfs", "thin_metadata_size", "swaplabel"]):
             succ, loaded = BlockDev.try_reinit(self.requested_plugins, True, None)
             self.assertFalse(succ)
             for plug_name in ("swap", "lvm", "btrfs"):
@@ -354,7 +355,8 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         # now the same with a subset of plugins requested
         plugins = BlockDev.plugin_specs_from_names(["btrfs", "lvm", "swap"])
-        with fake_path("tests/lib_missing_utils", keep_utils=["swapon", "swapoff", "mkswap", "lvm", "btrfs", "thin_metadata_size"]):
+        with fake_path("tests/lib_missing_utils", keep_utils=["swapon", "swapoff", "mkswap", "lvm", "btrfs",
+                                                              "thin_metadata_size", "swaplabel"]):
             succ, loaded = BlockDev.try_reinit(plugins, True, None)
             self.assertTrue(succ)
             self.assertEqual(set(loaded), set(["swap", "lvm", "btrfs"]))

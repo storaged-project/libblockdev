@@ -51,12 +51,22 @@ GQuark bd_swap_error_quark (void)
  */
 gboolean bd_swap_check_deps () {
     GError *error = NULL;
-    gboolean ret = bd_utils_check_util_version ("mkswap", MKSWAP_MIN_VERSION, NULL, "mkswap from util-linux ([\\d\\.]+)", &error);
+    gboolean ret = FALSE;
+    gboolean success = FALSE;
 
-    if (!ret && error) {
+    success = bd_utils_check_util_version ("mkswap", MKSWAP_MIN_VERSION, NULL, "mkswap from util-linux ([\\d\\.]+)", &error);
+    if (!success && error) {
         g_warning("Cannot load the swap plugin: %s" , error->message);
         g_clear_error (&error);
     }
+    ret = success;
+
+    success = bd_utils_check_util_version ("swaplabel", NULL, NULL, NULL, &error);
+    if (!success && error) {
+        g_warning("Cannot load the swap plugin: %s" , error->message);
+        g_clear_error (&error);
+    }
+    ret = ret && success;
 
     return ret;
 }
@@ -294,4 +304,18 @@ gboolean bd_swap_swapstatus (const gchar *device, GError **error) {
     g_free (real_device);
     g_free (file_content);
     return FALSE;
+}
+
+/**
+ * bd_swap_set_label:
+ * @device: a device to set label on
+ * @label: label that will be set
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the label was successfully set or not
+ */
+gboolean bd_swap_set_label (const gchar *device, const gchar *label, GError **error) {
+    const gchar *argv[5] = {"swaplabel", "-L", label, device, NULL};
+
+    return bd_utils_exec_and_report_error (argv, NULL, error);
 }

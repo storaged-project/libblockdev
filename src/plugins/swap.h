@@ -30,5 +30,6 @@ gboolean bd_swap_mkswap (const gchar *device, const gchar *label, const BDExtraA
 gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error);
 gboolean bd_swap_swapoff (const gchar *device, GError **error);
 gboolean bd_swap_swapstatus (const gchar *device, GError **error);
+gboolean bd_swap_set_label (const gchar *device, const gchar *label, GError **error);
 
 #endif  /* BD_SWAP */

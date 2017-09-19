@@ -66,6 +66,12 @@ class SwapTestCase(SwapTest):
         succ = BlockDev.swap_mkswap(self.loop_dev, None, None)
         self.assertTrue(succ)
 
+        succ = BlockDev.swap_set_label(self.loop_dev, "BlockDevSwap")
+        self.assertTrue(succ)
+
+        _ret, out, _err = run_command("blkid -ovalue -sLABEL -p %s" % self.loop_dev)
+        self.assertEqual(out, "BlockDevSwap")
+
         succ = BlockDev.swap_swapon(self.loop_dev, -1)
         self.assertTrue(succ)
 
@@ -115,13 +121,22 @@ class SwapUnloadTest(SwapTest):
         self.assertIn("swap", BlockDev.get_available_plugin_names())
 
     def test_check_no_mkswap(self):
-        """Verify that checking mkswap tool availability works as expected"""
+        """Verify that checking mkswap and swaplabel tools availability
+           works as expected
+        """
 
         # unload all plugins first
         self.assertTrue(BlockDev.reinit([], True, None))
 
         with fake_path(all_but="mkswap"):
             # no mkswap available, the swap plugin should fail to load
+            with self.assertRaises(GLib.GError):
+                BlockDev.reinit(None, True, None)
+
+            self.assertNotIn("swap", BlockDev.get_available_plugin_names())
+
+        with fake_path(all_but="swaplabel"):
+            # no swaplabel available, the swap plugin should fail to load
             with self.assertRaises(GLib.GError):
                 BlockDev.reinit(None, True, None)
 
