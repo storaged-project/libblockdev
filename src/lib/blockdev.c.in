@@ -43,6 +43,7 @@
 
 static GMutex init_lock;
 static gboolean initialized = FALSE;
+static GMutex env_lock;
 
 typedef struct BDPluginStatus {
     BDPluginSpec spec;
@@ -744,4 +745,32 @@ gchar* bd_get_plugin_soname (BDPlugin plugin) {
  */
 gchar* bd_get_plugin_name (BDPlugin plugin) {
     return plugin_names[plugin];
+}
+
+/**
+ * bd_switch_init_checks:
+ * @enable: whether to enable init checks (%TRUE) or not (%FALSE)
+ * @error: (out): place to store error (if any)
+ *
+ * Enables or disables plugins' init checks based on @enable.
+ *
+ * Note: The current implementation (un)sets the LIBBLOCKDEV_SKIP_DEP_CHECKS
+ *       environment variable.
+ */
+gboolean bd_switch_init_checks (gboolean enable, GError **error) {
+    /* getenv/setenv/unsetenv are not thread-safe, better use a lock here */
+    g_autoptr(GMutexLocker) locker = g_mutex_locker_new (&env_lock);
+
+    if (!enable && !g_getenv ("LIBBLOCKDEV_SKIP_DEP_CHECKS")) {
+        if (!g_setenv ("LIBBLOCKDEV_SKIP_DEP_CHECKS", "", FALSE)) {
+            g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_FAILED,
+                         "Failed to set the LIBBLOCKDEV_SKIP_DEP_CHECKS environment variable");
+            return FALSE;
+        }
+        return TRUE;
+    } else if (enable && g_getenv ("LIBBLOCKDEV_SKIP_DEP_CHECKS")) {
+        g_unsetenv ("LIBBLOCKDEV_SKIP_DEP_CHECKS");
+        return TRUE;
+    } else
+        return TRUE;
 }

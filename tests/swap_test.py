@@ -153,7 +153,8 @@ class SwapUnloadTest(SwapTest):
         self.assertTrue(BlockDev.reinit([], True, None))
 
         # make sure the initial checks during plugin loading are skipped
-        os.environ["LIBBLOCKDEV_SKIP_DEP_CHECKS"] = ""
+        BlockDev.switch_init_checks(False)
+        self.addCleanup(BlockDev.switch_init_checks, True)
 
         with fake_path(all_but="mkswap"):
             # no mkswap available, but checks disabled, the swap plugin should load just fine
