@@ -2,6 +2,7 @@ import unittest
 import os
 import time
 from contextlib import contextmanager
+from distutils.version import LooseVersion
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, wipe_all, fake_path, read_file, skip_on
 import overrides_hack
 
@@ -158,10 +159,17 @@ class KbdZRAMDevicesTestCase(KbdZRAMTestCase):
 
 class KbdZRAMStatsTestCase(KbdZRAMTestCase):
     @unittest.skipUnless(_can_load_zram(), "cannot load the 'zram' module")
-    @skip_on(("centos", "enterprise_linux"), reason="needs newest kernel to run")
-    def test_zram_get_stats_fedora(self):
+    def test_zram_get_stats(self):
         """Verify that it is possible to get stats for a zram device"""
 
+        # location of some sysfs files we use is different since linux 4.11
+        kernel_version = os.uname()[2]
+        if LooseVersion(kernel_version) >= LooseVersion("4.11"):
+            self._zram_get_stats_new()
+        else:
+            self._zram_get_stats_old()
+
+    def _zram_get_stats_new(self):
         with _track_module_load(self, "zram", "_loaded_zram_module"):
             self.assertTrue(BlockDev.kbd_zram_create_devices(1, [10 * 1024**2], [2]))
             time.sleep(1)
@@ -210,8 +218,7 @@ class KbdZRAMStatsTestCase(KbdZRAMTestCase):
         with _track_module_load(self, "zram", "_loaded_zram_module"):
             self.assertTrue(BlockDev.kbd_zram_destroy_devices())
 
-    @skip_on(("fedora"), reason="needs old kernel to run")
-    def test_zram_get_stats_centos(self):
+    def _zram_get_stats_old(self):
         with _track_module_load(self, "zram", "_loaded_zram_module"):
             self.assertTrue(BlockDev.kbd_zram_create_devices(1, [10 * 1024**2], [2]))
             time.sleep(1)
