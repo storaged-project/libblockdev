@@ -14,6 +14,7 @@ TEST_MNT = "/tmp/libblockdev_test_mnt"
 def wipefs(device):
     os.system("wipefs -a %s > /dev/null" % device)
 
+@skip_on(("centos", "enterprise_linux"), skip_on_arch="aarch64", reason="no btrfs module on CentOS/RHEL 7 aarch64")
 class BtrfsTestCase(unittest.TestCase):
 
     requested_plugins = BlockDev.plugin_specs_from_names(("btrfs",))
