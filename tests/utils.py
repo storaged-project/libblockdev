@@ -25,7 +25,7 @@ def create_sparse_tempfile(name, size):
         :param size: the file size (in bytes)
         :returns: the path to the newly created file
     """
-    (fd, path) = tempfile.mkstemp(prefix="libblockdev.", suffix="-%s" % name)
+    (fd, path) = tempfile.mkstemp(prefix="bd.", suffix="-%s" % name)
     os.close(fd)
     create_sparse_file(path, size)
     return path
