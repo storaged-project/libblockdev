@@ -15,6 +15,7 @@ GQuark bd_btrfs_error_quark (void);
 typedef enum {
     BD_BTRFS_ERROR_DEVICE,
     BD_BTRFS_ERROR_PARSE,
+    BD_BTRFS_ERROR_TECH_UNAVAIL,
 } BDBtrfsError;
 
 typedef struct BDBtrfsDeviceInfo {
@@ -46,6 +47,21 @@ typedef struct BDBtrfsFilesystemInfo {
 void bd_btrfs_filesystem_info_free (BDBtrfsFilesystemInfo *info);
 BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info_copy (BDBtrfsFilesystemInfo *info);
 
+
+typedef enum {
+    BD_BTRFS_TECH_FS = 0,
+    BD_BTRFS_TECH_MULTI_DEV,
+    BD_BTRFS_TECH_SUBVOL,
+    BD_BTRFS_TECH_SNAPSHOT,
+} BDBtrfsTech;
+
+typedef enum {
+    BD_BTRFS_TECH_MODE_CREATE = 1 << 0,
+    BD_BTRFS_TECH_MODE_DELETE = 1 << 1,
+    BD_BTRFS_TECH_MODE_MODIFY = 1 << 2,
+    BD_BTRFS_TECH_MODE_QUERY  = 1 << 3,
+} BDBtrfsTechMode;
+
 /*
  * If using the plugin as a standalone library, the following functions should
  * be called to:
@@ -58,6 +74,8 @@ BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info_copy (BDBtrfsFilesystemInfo *inf
 gboolean bd_btrfs_check_deps ();
 gboolean bd_btrfs_init ();
 void bd_btrfs_close ();
+
+gboolean bd_btrfs_is_tech_avail (BDBtrfsTech tech, guint64 mode, GError **error);
 
 gboolean bd_btrfs_create_volume (const gchar **devices, const gchar *label, const gchar *data_level, const gchar *md_level, const BDExtraArg **extra, GError **error);
 gboolean bd_btrfs_add_device (const gchar *mountpoint, const gchar *device, const BDExtraArg **extra, GError **error);

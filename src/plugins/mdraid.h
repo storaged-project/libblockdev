@@ -19,6 +19,7 @@ typedef enum {
     BD_MD_ERROR_NO_MATCH,
     BD_MD_ERROR_INVAL,
     BD_MD_ERROR_FAIL,
+    BD_MD_ERROR_TECH_UNAVAIL,
 } BDMDError;
 
 typedef struct BDMDExamineData {
@@ -59,6 +60,18 @@ typedef struct BDMDDetailData {
 void bd_md_detail_data_free (BDMDDetailData *data);
 BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data);
 
+typedef enum {
+    BD_MD_TECH_MDRAID = 0,
+} BDMDTech;
+
+typedef enum {
+    BD_MD_TECH_MODE_CREATE = 1 << 0,
+    BD_MD_TECH_MODE_DELETE = 1 << 1,
+    BD_MD_TECH_MODE_MODIFY = 1 << 2,
+    BD_MD_TECH_MODE_QUERY  = 1 << 3,
+} BDMDTechMode;
+
+
 /*
  * If using the plugin as a standalone library, the following functions should
  * be called to:
@@ -71,6 +84,8 @@ BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data);
 gboolean bd_md_check_deps ();
 gboolean bd_md_init ();
 void bd_md_close ();
+
+gboolean bd_md_is_tech_avail (BDMDTech tech, guint64 mode, GError **error);
 
 guint64 bd_md_get_superblock_size (guint64 member_size, const gchar *version, GError **error);
 gboolean bd_md_create (const gchar *raid_spec, const gchar *level, const gchar **disks, guint64 spares, const gchar *version, gboolean bitmap, guint64 chunk_size, const BDExtraArg **extra, GError **error);

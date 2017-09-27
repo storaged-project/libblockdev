@@ -23,7 +23,9 @@
 #include <libdevmapper.h>
 #include <unistd.h>
 #include <blockdev/utils.h>
+
 #include "mpath.h"
+#include "check_deps.h"
 
 /**
  * SECTION: mpath
@@ -42,6 +44,21 @@ GQuark bd_mpath_error_quark (void)
     return g_quark_from_static_string ("g-bd-mpath-error-quark");
 }
 
+static volatile guint avail_deps = 0;
+static GMutex deps_check_lock;
+
+#define DEPS_MPATH 0
+#define DEPS_MPATH_MASK (1 << DEPS_MPATH)
+#define DEPS_MPATHCONF 1
+#define DEPS_MPATHCONF_MASK (1 << DEPS_MPATHCONF)
+#define DEPS_LAST 2
+
+static UtilDep deps[DEPS_LAST] = {
+    {"multipath", MULTIPATH_MIN_VERSION, NULL, "multipath-tools v([\\d\\.]+)"},
+    {"mpathconf", NULL, NULL, NULL},
+};
+
+
 /**
  * bd_mpath_check_deps:
  *
@@ -52,22 +69,24 @@ GQuark bd_mpath_error_quark (void)
  */
 gboolean bd_mpath_check_deps () {
     GError *error = NULL;
-    gboolean ret = bd_utils_check_util_version ("multipath", MULTIPATH_MIN_VERSION, NULL, "multipath-tools v([\\d\\.]+)", &error);
+    guint i = 0;
+    gboolean status = FALSE;
+    gboolean ret = TRUE;
 
-    if (!ret && error) {
-        g_warning("Cannot load the mpath plugin: %s" , error->message);
+    for (i=0; i < DEPS_LAST; i++) {
+        status = bd_utils_check_util_version (deps[i].name, deps[i].version,
+                                              deps[i].ver_arg, deps[i].ver_regexp, &error);
+        if (!status)
+            g_warning ("%s", error->message);
+        else
+            g_atomic_int_or (&avail_deps, 1 << i);
         g_clear_error (&error);
+        ret = ret && status;
     }
 
     if (!ret)
-        return FALSE;
+        g_warning("Cannot load the mpath plugin");
 
-    /* mpathconf doesn't report its version */
-    ret = bd_utils_check_util_version ("mpathconf", NULL, NULL, NULL, &error);
-    if (!ret && error) {
-        g_warning("Cannot load the mpath plugin: %s" , error->message);
-        g_clear_error (&error);
-    }
     return ret;
 }
 
@@ -95,17 +114,54 @@ void bd_mpath_close () {
 }
 
 /**
+ * bd_mpath_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is avaible -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_mpath_is_tech_avail (BDMpathTech tech, guint64 mode, GError **error) {
+    switch (tech) {
+    case BD_MPATH_TECH_BASE:
+        return check_deps (&avail_deps, DEPS_MPATH_MASK, deps, DEPS_LAST, &deps_check_lock, error);
+    case BD_MPATH_TECH_FRIENDLY_NAMES:
+        if (mode & ~BD_MPATH_TECH_MODE_MODIFY) {
+            g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_TECH_UNAVAIL,
+                         "Only 'modify' (setting) supported for friendly names");
+            return FALSE;
+        } else if (mode & BD_MPATH_TECH_MODE_MODIFY)
+            return check_deps (&avail_deps, DEPS_MPATHCONF_MASK, deps, DEPS_LAST, &deps_check_lock, error);
+        else {
+            g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_TECH_UNAVAIL,
+                         "Unknown mode");
+            return FALSE;
+        }
+    default:
+        g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_TECH_UNAVAIL, "Unknown technology");
+        return FALSE;
+    }
+}
+
+
+/**
  * bd_mpath_flush_mpaths:
  * @error: (out): place to store error (if any)
  *
  * Returns: whether multipath device maps were successfully flushed or not
  *
  * Flushes all unused multipath device maps.
+ *
+ * Tech category: %BD_MPATH_TECH_BASE-%BD_MPATH_TECH_MODE_MODIFY
  */
 gboolean bd_mpath_flush_mpaths (GError **error) {
     const gchar *argv[3] = {"multipath", "-F", NULL};
     gboolean success = FALSE;
     gchar *output = NULL;
+
+    if (!check_deps (&avail_deps, DEPS_MPATH_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     /* try to flush the device maps */
     success = bd_utils_exec_and_report_error (argv, NULL, error);
@@ -291,6 +347,8 @@ static gchar** get_map_deps (const gchar *map_name, guint64 *n_deps, GError **er
  *
  * Returns: %TRUE if the device is a multipath member, %FALSE if not or an error
  * appeared when queried (@error is set in those cases)
+ *
+ * Tech category: %BD_MPATH_TECH_BASE-%BD_MPATH_TECH_MODE_QUERY
  */
 gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error) {
     struct dm_task *task_names = NULL;
@@ -378,6 +436,8 @@ gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error) {
  * Returns: (transfer full) (array zero-terminated=1): list of names of all devices that are
  *                                                     members of the mpath mappings
  *                                                     (or %NULL in case of error)
+ *
+ * Tech category: %BD_MPATH_TECH_BASE-%BD_MPATH_TECH_MODE_QUERY
  */
 gchar** bd_mpath_get_mpath_members (GError **error) {
     struct dm_task *task_names = NULL;
@@ -461,10 +521,15 @@ gchar** bd_mpath_get_mpath_members (GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: if successfully set or not
+ *
+ * Tech category: %BD_MPATH_TECH_FRIENDLY_NAMES-%BD_MPATH_TECH_MODE_MODIFY
  */
 gboolean bd_mpath_set_friendly_names (gboolean enabled, GError **error) {
     const gchar *argv[8] = {"mpathconf", "--find_multipaths", "y", "--user_friendly_names", NULL, "--with_multipathd", "y", NULL};
     argv[4] = enabled ? "y" : "n";
+
+    if (!check_deps (&avail_deps, DEPS_MPATHCONF_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     return bd_utils_exec_and_report_error (argv, NULL, error);
 }

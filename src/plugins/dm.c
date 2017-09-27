@@ -25,6 +25,7 @@
 #include <libudev.h>
 
 #include "dm.h"
+#include "check_deps.h"
 
 /* macros taken from the pyblock/dmraid.h file plus one more*/
 #define for_each_raidset(_c, _n) list_for_each_entry(_n, LC_RS(_c), list)
@@ -50,6 +51,19 @@ GQuark bd_dm_error_quark (void)
 
 typedef struct raid_set* (*RSEvalFunc) (struct raid_set *rs, gpointer data);
 
+
+static volatile guint avail_deps = 0;
+static GMutex deps_check_lock;
+
+#define DEPS_DMSETUP 0
+#define DEPS_DMSETUP_MASK (1 << DEPS_DMSETUP)
+#define DEPS_LAST 1
+
+static UtilDep deps[DEPS_LAST] = {
+    {"dmsetup", DM_MIN_VERSION, NULL, "Library version:\\s+([\\d\\.]+)"},
+};
+
+
 /**
  * discard_dm_log: (skip)
  */
@@ -68,12 +82,24 @@ static void discard_dm_log (int level __attribute__((unused)), const char *file 
  */
 gboolean bd_dm_check_deps () {
     GError *error = NULL;
-    gboolean ret = bd_utils_check_util_version ("dmsetup", DM_MIN_VERSION, NULL, "Library version:\\s+([\\d\\.]+)", &error);
+    guint i = 0;
+    gboolean status = FALSE;
+    gboolean ret = TRUE;
 
-    if (!ret && error) {
-        g_warning("Cannot load the DM plugin: %s" , error->message);
+    for (i=0; i < DEPS_LAST; i++) {
+        status = bd_utils_check_util_version (deps[i].name, deps[i].version,
+                                              deps[i].ver_arg, deps[i].ver_regexp, &error);
+        if (!status)
+            g_warning ("%s", error->message);
+        else
+            g_atomic_int_or (&avail_deps, 1 << i);
         g_clear_error (&error);
+        ret = ret && status;
     }
+
+    if (!ret)
+        g_warning("Cannot load the DM plugin");
+
     return ret;
 }
 
@@ -103,6 +129,26 @@ void bd_dm_close () {
     dm_log_init_verbose (0);
 }
 
+#define UNUSED __attribute__((unused))
+
+/**
+ * bd_dm_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation (#BDDMTechMode) for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is avaible -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_dm_is_tech_avail (BDDMTech tech, guint64 mode UNUSED, GError **error) {
+    /* all combinations are supported by this implementation of the plugin, but
+       BD_DM_TECH_MAP requires the 'dmsetup' utility */
+    if (tech == BD_DM_TECH_MAP)
+        return check_deps (&avail_deps, DEPS_DMSETUP_MASK, deps, DEPS_LAST, &deps_check_lock, error);
+    else
+        return TRUE;
+}
+
 /**
  * bd_dm_create_linear:
  * @map_name: name of the map
@@ -113,10 +159,15 @@ void bd_dm_close () {
  *
  * Returns: whether the new linear mapping @map_name was successfully created
  * for the @device or not
+ *
+ * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_CREATE_ACTIVATE
  */
 gboolean bd_dm_create_linear (const gchar *map_name, const gchar *device, guint64 length, const gchar *uuid, GError **error) {
     gboolean success = FALSE;
     const gchar *argv[9] = {"dmsetup", "create", map_name, "--table", NULL, NULL, NULL, NULL, NULL};
+
+    if (!check_deps (&avail_deps, DEPS_DMSETUP_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     gchar *table = g_strdup_printf ("0 %"G_GUINT64_FORMAT" linear %s 0", length, device);
     argv[4] = table;
@@ -140,9 +191,14 @@ gboolean bd_dm_create_linear (const gchar *map_name, const gchar *device, guint6
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @map_name map was successfully removed or not
+ *
+ * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_REMOVE_DEACTIVATE
  */
 gboolean bd_dm_remove (const gchar *map_name, GError **error) {
     const gchar *argv[4] = {"dmsetup", "remove", map_name, NULL};
+
+    if (!check_deps (&avail_deps, DEPS_DMSETUP_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     return bd_utils_exec_and_report_error (argv, NULL, error);
 }
@@ -154,6 +210,8 @@ gboolean bd_dm_remove (const gchar *map_name, GError **error) {
  *
  * Returns: map name of the map providing the @dm_node device or %NULL
  * (@error) contains the error in such cases)
+ *
+ * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_QUERY
  */
 gchar* bd_dm_name_from_node (const gchar *dm_node, GError **error) {
     gchar *ret = NULL;
@@ -186,6 +244,8 @@ gchar* bd_dm_name_from_node (const gchar *dm_node, GError **error) {
  *
  * Returns: DM node name for the @map_name map or %NULL (@error) contains
  * the error in such cases)
+ *
+ * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_QUERY
  */
 gchar* bd_dm_node_from_name (const gchar *map_name, GError **error) {
     gchar *dev_path = NULL;
@@ -214,6 +274,8 @@ gchar* bd_dm_node_from_name (const gchar *map_name, GError **error) {
  * Returns: whether the given @map_name exists (and is live if @live_only is
  * %TRUE (and is active if @active_only is %TRUE)). If %FALSE is returned,
  * @error) indicates whether error appeared (non-%NULL) or not (%NULL).
+ *
+ * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_QUERY
  */
 gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean active_only, GError **error) {
     struct dm_task *task_list = NULL;
@@ -416,6 +478,8 @@ static void find_raid_sets_for_dev (const gchar *name, const gchar *uuid, gint m
  * the member or %NULL in case of error
  *
  * One of @name, @uuid or @major:@minor has to be given.
+ *
+ * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_MODE_QUERY
  */
 gchar** bd_dm_get_member_raid_sets (const gchar *name, const gchar *uuid, gint major, gint minor, GError **error) {
     guint64 i = 0;
@@ -522,6 +586,8 @@ static gboolean change_set_by_name (const gchar *name, enum activate_type action
  * @error: (out): variable to store error (if any)
  *
  * Returns: whether the RAID set @name was successfully activate or not
+ *
+ * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_CREATE_ACTIVATE
  */
 gboolean bd_dm_activate_raid_set (const gchar *name, GError **error) {
     guint64 progress_id = 0;
@@ -542,6 +608,8 @@ gboolean bd_dm_activate_raid_set (const gchar *name, GError **error) {
  * @error: (out): variable to store error (if any)
  *
  * Returns: whether the RAID set @name was successfully deactivate or not
+ *
+ * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_REMOVE_DEACTIVATE
  */
 gboolean bd_dm_deactivate_raid_set (const gchar *name, GError **error) {
     guint64 progress_id = 0;
@@ -562,6 +630,8 @@ gboolean bd_dm_deactivate_raid_set (const gchar *name, GError **error) {
  * @error: (out): variable to store error (if any)
  *
  * Returns: string representation of the @name RAID set's type
+ *
+ * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_QUERY
  */
 gchar* bd_dm_get_raid_set_type (const gchar *name, GError **error) {
     struct lib_context *lc;

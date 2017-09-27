@@ -12,7 +12,19 @@ typedef enum {
     BD_MPATH_ERROR_NOT_ROOT,
     BD_MPATH_ERROR_DM_ERROR,
     BD_MPATH_ERROR_INVAL,
+    BD_MPATH_ERROR_TECH_UNAVAIL,
 } BDMpathError;
+
+typedef enum {
+    BD_MPATH_TECH_BASE = 0,
+    BD_MPATH_TECH_FRIENDLY_NAMES,
+} BDMpathTech;
+
+typedef enum {
+    BD_MPATH_TECH_MODE_QUERY  = 1 << 0,
+    BD_MPATH_TECH_MODE_MODIFY = 1 << 1,
+} BDMpathTechMode;
+
 
 /*
  * If using the plugin as a standalone library, the following functions should
@@ -26,6 +38,8 @@ typedef enum {
 gboolean bd_mpath_check_deps ();
 gboolean bd_mpath_init ();
 void bd_mpath_close ();
+
+gboolean bd_mpath_is_tech_avail (BDMpathTech tech, guint64 mode, GError **error);
 
 gboolean bd_mpath_flush_mpaths (GError **error);
 gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error);

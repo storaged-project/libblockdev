@@ -15,7 +15,8 @@ typedef enum {
     BD_FS_ERROR_UNMOUNT_FAIL,
     BD_FS_ERROR_NOT_SUPPORTED,
     BD_FS_ERROR_NOT_MOUNTED,
-    BD_FS_ERROR_AUTH, // keep this entry last
+    BD_FS_ERROR_AUTH, // keep this entry last (XXX?)
+    BD_FS_ERROR_TECH_UNAVAIL,
 } BDFsError;
 
 typedef struct BDFSExtInfo {
@@ -61,6 +62,32 @@ typedef struct BDFSVfatInfo {
 BDFSVfatInfo* bd_fs_vfat_info_copy (BDFSVfatInfo *data);
 void bd_fs_vfat_info_free (BDFSVfatInfo *data);
 
+/* XXX: where the file systems start at the enum of technologies */
+#define FS_OFFSET 2
+#define LAST_FS 6
+typedef enum {
+    BD_FS_TECH_GENERIC = 0,
+    BD_FS_TECH_MOUNT   = 1,
+    BD_FS_TECH_EXT2    = 2,
+    BD_FS_TECH_EXT3    = 3,
+    BD_FS_TECH_EXT4    = 4,
+    BD_FS_TECH_XFS     = 5,
+    BD_FS_TECH_VFAT    = 6,
+} BDFSTech;
+
+/* XXX: number of the highest bit of all modes */
+#define FS_MODE_LAST 6
+typedef enum {
+    BD_FS_TECH_MODE_MKFS      = 1 << 0,
+    BD_FS_TECH_MODE_WIPE      = 1 << 1,
+    BD_FS_TECH_MODE_CHECK     = 1 << 2,
+    BD_FS_TECH_MODE_REPAIR    = 1 << 3,
+    BD_FS_TECH_MODE_SET_LABEL = 1 << 4,
+    BD_FS_TECH_MODE_QUERY     = 1 << 5,
+    BD_FS_TECH_MODE_RESIZE    = 1 << 6,
+} BDFSTechMode;
+
+
 /*
  * If using the plugin as a standalone library, the following functions should
  * be called to:
@@ -73,6 +100,8 @@ void bd_fs_vfat_info_free (BDFSVfatInfo *data);
 gboolean bd_fs_check_deps ();
 gboolean bd_fs_init ();
 void bd_fs_close ();
+
+gboolean bd_fs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
 
 gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error);
 gboolean bd_fs_clean (const gchar *device, GError **error);

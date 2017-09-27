@@ -8,7 +8,18 @@ typedef enum {
     BD_S390_ERROR_FORMAT_FAILED,
     BD_S390_ERROR_DASDFMT,
     BD_S390_ERROR_IO,
+    BD_S390_ERROR_TECH_UNAVAIL,
 } BDS390Error;
+
+typedef enum {
+    BD_S390_TECH_DASD = 0,
+    BD_S390_TECH_ZFCP,
+} BDS390Tech;
+
+typedef enum {
+    BD_S390_TECH_MODE_MODIFY  = 1 << 0,
+    BD_S390_TECH_MODE_QUERY   = 1 << 1,
+} BDS390TechMode;
 
 /*
  * If using the plugin as a standalone library, the following functions should
@@ -23,12 +34,16 @@ gboolean bd_s390_check_deps ();
 gboolean bd_s390_init ();
 void bd_s390_close ();
 
+gboolean bd_s390_is_tech_avail (BDS390Tech tech, guint64 mode, GError **error);
+
 gboolean bd_s390_dasd_format (const gchar *dasd, const BDExtraArg **extra, GError **error);
 gboolean bd_s390_dasd_needs_format (const gchar *dasd, GError **error);
 gboolean bd_s390_dasd_online (const gchar *dasd, GError **error);
 gboolean bd_s390_dasd_is_ldl (const gchar *dasd, GError **error);
 gboolean bd_s390_dasd_is_fba (const gchar *dasd, GError **error);
+
 gchar* bd_s390_sanitize_dev_input (const gchar *dev, GError **error);
+
 gchar* bd_s390_zfcp_sanitize_wwpn_input (const gchar *wwpn, GError **error);
 gchar* bd_s390_zfcp_sanitize_lun_input (const gchar *lun, GError **error);
 gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar *lun, GError **error);
