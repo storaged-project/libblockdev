@@ -966,6 +966,24 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError *
  * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error) {
+    return bd_crypto_tc_open_full (device, name, pass_data, data_len, FALSE, read_only, error);
+}
+
+/**
+ * bd_crypto_tc_open_full:
+ * @device: the device to open
+ * @name: name for the TrueCrypt/VeraCrypt device
+ * @pass_data: (array length=data_len): a passphrase for the TrueCrypt/VeraCrypt volume (may contain arbitrary binary data)
+ * @data_len: length of the @pass_data buffer
+ * @read_only: whether to open as read-only or not (meaning read-write)
+ * @veracrypt: whether to try VeraCrypt modes (TrueCrypt modes are tried anyway)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean veracrypt, gboolean read_only, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
     guint64 progress_id = 0;
@@ -993,6 +1011,10 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8
 
     params.passphrase = (const char*) pass_data;
     params.passphrase_size = data_len;
+
+    if (veracrypt)
+        params.flags |= CRYPT_TCRYPT_VERA_MODES;
+
     ret = crypt_load (cd, CRYPT_TCRYPT, &params);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
