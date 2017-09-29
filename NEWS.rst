@@ -1,3 +1,65 @@
+Libblockdev 2.13
+----------------
+
+New minor release of the libblockdev library. Most of the changes are bugfixes
+related to building and running tests on the s390 architecture and CentOS 7
+aarch64. Other than that a support for checking runtime dependencies (utilities)
+on demand and querying available technologies was implemented.
+
+
+**Notable changes**
+
+- builds
+
+  - various fixes for building on s390
+
+- tests
+
+  - various changes allowing running the test suite on s390
+
+  - various changes allowing running the test suite on CentOS7 aarch64
+
+- features
+
+  - checking for runtime dependencies on demand
+
+  - querying available technologies
+
+
+**Full list of changes**
+
+Vojtech Trefny (14):
+- Allow compiling libblockdev without s390 plugin
+- Do not run g_clear_error after setting it
+- Fix zFCP LUN max length
+- Bypass error proxy in s390 test
+- Use "AC_CANONICAL_BUILD" to check architecture instead of "uname"
+- Do not include s390utils/vtoc.h in s390 plugin
+- Add NEWS.rst file
+- Fix source URL in spec file
+- Use only one git tag for new releases
+- Add new function for setting swap label
+- Skip btrfs tests on CentOS 7 aarch64
+- Better handle old and new zram sysfs api in tests
+- Try harder when waiting for lio device to show up
+- Use shorter prefix for tempfiles
+
+Vratislav Podzimek (9):
+- Add a function for getting plugin name
+- Dynamically check for the required utilities
+- Add functions for querying available technologies
+- Simplify what WITH_BD_BCACHE changes in the KBD plugin
+- Add a basic test for the runtime dependency checking
+- Add missing items to particular sections in the documentation
+- Assign functions to tech-mode categories
+- Add a function for enabling/disabling plugins' init checks
+- Fix the rpmlog and shortlog targets
+
+Thanks to all our contributors.
+
+Vratislav Podzimek, 2017-09-29
+
+
 Libblockdev 2.12
 ----------------
 
