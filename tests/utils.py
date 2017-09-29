@@ -25,7 +25,7 @@ def create_sparse_tempfile(name, size):
         :param size: the file size (in bytes)
         :returns: the path to the newly created file
     """
-    (fd, path) = tempfile.mkstemp(prefix="libblockdev.", suffix="-%s" % name)
+    (fd, path) = tempfile.mkstemp(prefix="bd.", suffix="-%s" % name)
     os.close(fd)
     create_sparse_file(path, size)
     return path
@@ -119,6 +119,26 @@ def _delete_lun(wwn, delete_target=True, backstore=None):
     if delete_target:
         _delete_target(wwn, backstore)
 
+def _get_lio_dev_path(store_wwn, tgt_wwn, store_name, retry=True):
+    """Check if the lio device has been really created and is in /dev/disk/by-id"""
+
+    # the backstore's wwn contains '-'s we need to get rid of and then take just
+    # the fist 25 characters which participate in the device's ID
+    wwn = store_wwn.replace("-", "")
+    wwn = wwn[:25]
+
+    globs = glob.glob("/dev/disk/by-id/wwn-*%s" % wwn)
+    if len(globs) != 1:
+        if retry:
+            time.sleep(3)
+            os.system("udevadm settle")
+            return _get_lio_dev_path(store_wwn, tgt_wwn, store_wwn, False)
+        else:
+            _delete_target(tgt_wwn, store_name)
+            raise RuntimeError("Failed to identify the resulting device for '%s'" % store_name)
+    else:
+        return os.path.realpath(globs[0])
+
 def create_lio_device(fpath):
     """
     Creates a new LIO loopback device (using targetcli) on top of the
@@ -167,17 +187,8 @@ def create_lio_device(fpath):
         _delete_target(tgt_wwn, store_name)
         raise RuntimeError("Failed to create a new LUN for '%s' using '%s'" % (tgt_wwn, store_name))
 
-    # the backstore's wwn contains '-'s we need to get rid of and then take just
-    # the fist 25 characters which participate in the device's ID
-    store_wwn = store_wwn.replace("-", "")
-    store_wwn = store_wwn[:25]
+    dev_path = _get_lio_dev_path(store_wwn, tgt_wwn, store_name)
 
-    globs = glob.glob("/dev/disk/by-id/wwn-*%s" % store_wwn)
-    if len(globs) != 1:
-        _delete_target(tgt_wwn, store_name)
-        raise RuntimeError("Failed to identify the resulting device for '%s'" % store_name)
-
-    dev_path = os.path.realpath(globs[0])
     _lio_devs[dev_path] = (tgt_wwn, store_name)
     return dev_path
 
