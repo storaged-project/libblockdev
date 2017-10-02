@@ -39,6 +39,19 @@ class DevMapperTestCase(unittest.TestCase):
 
         os.unlink(self.dev_file)
 
+class DevMapperGetSubsystemFromName(DevMapperTestCase):
+    def test_get_susbsytem_from_name(self):
+        """Verify that it is possible to get device subsystem from its name"""
+
+        succ = BlockDev.dm_create_linear("testMap", self.loop_dev, 100, uuid='LVM-randomjunk')
+        self.assertTrue(succ)
+
+        subsystem = BlockDev.dm_get_subsystem_from_name("testMap")
+        self.assertEqual(subsystem, "LVM")
+
+        succ = BlockDev.dm_remove("testMap")
+        self.assertTrue(succ)
+
 class DevMapperCreateRemoveLinear(DevMapperTestCase):
     def test_create_remove_linear(self):
         """Verify that it is possible to create new linear mapping and remove it"""
