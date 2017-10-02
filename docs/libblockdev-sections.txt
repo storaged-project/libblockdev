@@ -102,6 +102,7 @@ bd_dm_remove
 bd_dm_name_from_node
 bd_dm_node_from_name
 bd_dm_map_exists
+bd_dm_get_subsystem_from_name
 bd_dm_get_member_raid_sets
 bd_dm_activate_raid_set
 bd_dm_deactivate_raid_set
