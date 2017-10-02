@@ -265,6 +265,27 @@ gchar* bd_dm_node_from_name (const gchar *map_name, GError **error) {
 }
 
 /**
+ * bd_dm_get_subsystem_from_name:
+ * @device_name: name of the device
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: subsystem of the given device
+ */
+gchar* bd_dm_get_subsystem_from_name (const gchar *device_name, GError **error) {
+    gchar *output = NULL;
+    gboolean success = FALSE;
+    const gchar *argv[] = {"dmsetup", "info", "-co", "subsystem", "--noheadings", device_name, NULL};
+
+    success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
+    if (!success)
+        /* error is already populated */
+        return NULL;
+
+    output = g_strstrip (output);
+    return output;
+}
+
+/**
  * bd_dm_map_exists:
  * @map_name: name of the queried map
  * @live_only: whether to go through the live maps only or not
