@@ -15,10 +15,8 @@
 %define with_fs @WITH_FS@
 %define with_gi @WITH_GI@
 
-%define is_rhel 0%{?rhel} != 0
-
-# python3 is not available on RHEL
-%if %{is_rhel}
+# python3 is not available on older RHEL
+%if ! 0%{?fedora} && 0%{?rhel} <= 7
 %define with_python3 0
 %define with_bcache 0
 %define with_lvm_dbus 0
@@ -68,7 +66,7 @@
 %define configure_opts %{?distro_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?gi_copts}
 
 Name:        libblockdev
-Version:     2.12
+Version:     2.13
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -797,6 +795,37 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Fri Sep 29 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.13-1
+- Fix the rpmlog and shortlog targets (vpodzime)
+- Add a function for enabling/disabling plugins' init checks (vpodzime)
+- Assign functions to tech-mode categories (vpodzime)
+- Add missing items to particular sections in the documentation (vpodzime)
+- Add a basic test for the runtime dependency checking (vpodzime)
+- Simplify what WITH_BD_BCACHE changes in the KBD plugin (vpodzime)
+- Add functions for querying available technologies (vpodzime)
+- Dynamically check for the required utilities (vpodzime)
+- Use shorter prefix for tempfiles (vtrefny)
+- Try harder when waiting for lio device to show up (vtrefny)
+- Better handle old and new zram sysfs api in tests (vtrefny)
+- Skip btrfs tests on CentOS 7 aarch64 (vtrefny)
+- Add new function for setting swap label (vtrefny)
+- Use only one git tag for new releases (vtrefny)
+- Fix source URL in spec file (vtrefny)
+- Add NEWS.rst file (vtrefny)
+- Do not include s390utils/vtoc.h in s390 plugin (vtrefny)
+- Use "AC_CANONICAL_BUILD" to check architecture instead of "uname" (vtrefny)
+- Bypass error proxy in s390 test (vtrefny)
+- Fix zFCP LUN max length (vtrefny)
+- Do not run g_clear_error after setting it (vtrefny)
+- Allow compiling libblockdev without s390 plugin (vtrefny)
+- Add a function for getting plugin name (vpodzime)
+
+* Thu Sep 28 2017 Troy Dawson <tdawson@redhat.com> - 2.12-3
+- Cleanup spec file conditionals correctly
+
+* Wed Sep 27 2017 Troy Dawson <tdawson@redhat.com> - 2.12-2
+- Cleanup spec file conditionals
+
 * Wed Aug 30 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.12-1
 - Own directories /etc/libblockdev and /etc/libblockdev/conf.d (vtrefny)
 - Wait for resized partition (kailueke)

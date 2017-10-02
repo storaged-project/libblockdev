@@ -47,6 +47,7 @@ typedef enum {
     BD_UTILS_EXEC_ERROR_UTIL_UNAVAILABLE,
     BD_UTILS_EXEC_ERROR_UTIL_UNKNOWN_VER,
     BD_UTILS_EXEC_ERROR_UTIL_LOW_VER,
+    BD_UTILS_EXEC_ERROR_UTIL_CHECK_ERROR,
 } BDUtilsExecError;
 
 gboolean bd_utils_exec_and_report_error (const gchar **argv, const BDExtraArg **extra, GError **error);

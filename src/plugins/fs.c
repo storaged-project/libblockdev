@@ -33,6 +33,7 @@
 #include <errno.h>
 
 #include "fs.h"
+#include "check_deps.h"
 
 #define EXT2 "ext2"
 #define EXT3 "ext3"
@@ -239,6 +240,67 @@ typedef gboolean (*MountFunc) (MountArgs *args, GError **error);
 
 static gboolean do_mount (MountArgs *args, GError **error);
 
+static volatile guint avail_deps = 0;
+static GMutex deps_check_lock;
+
+#define DEPS_MKE2FS 0
+#define DEPS_MKE2FS_MASK (1 << DEPS_MKE2FS)
+#define DEPS_E2FSCK 1
+#define DEPS_E2FSCK_MASK (1 << DEPS_E2FSCK)
+#define DEPS_TUNE2FS 2
+#define DEPS_TUNE2FS_MASK (1 << DEPS_TUNE2FS)
+#define DEPS_DUMPE2FS 3
+#define DEPS_DUMPE2FS_MASK (1 << DEPS_DUMPE2FS)
+#define DEPS_RESIZE2FS 4
+#define DEPS_RESIZE2FS_MASK (1 << DEPS_RESIZE2FS)
+
+#define DEPS_MKFSXFS 5
+#define DEPS_MKFSXFS_MASK (1 << DEPS_MKFSXFS)
+#define DEPS_XFS_DB 6
+#define DEPS_XFS_DB_MASK (1 << DEPS_XFS_DB)
+#define DEPS_XFS_REPAIR 7
+#define DEPS_XFS_REPAIR_MASK (1 << DEPS_XFS_REPAIR)
+#define DEPS_XFS_ADMIN 8
+#define DEPS_XFS_ADMIN_MASK (1 << DEPS_XFS_ADMIN)
+#define DEPS_XFS_GROWFS 9
+#define DEPS_XFS_GROWFS_MASK (1 << DEPS_XFS_GROWFS)
+
+#define DEPS_MKFSVFAT 10
+#define DEPS_MKFSVFAT_MASK (1 << DEPS_MKFSVFAT)
+#define DEPS_FATLABEL 11
+#define DEPS_FATLABEL_MASK (1 << DEPS_FATLABEL)
+#define DEPS_FSCKVFAT 12
+#define DEPS_FSCKVFAT_MASK (1 << DEPS_FSCKVFAT)
+
+#define DEPS_LAST 13
+
+static UtilDep deps[DEPS_LAST] = {
+    {"mke2fs", NULL, NULL, NULL},
+    {"e2fsck", NULL, NULL, NULL},
+    {"tune2fs", NULL, NULL, NULL},
+    {"dumpe2fs", NULL, NULL, NULL},
+    {"resize2fs", NULL, NULL, NULL},
+
+    {"mkfs.xfs", NULL, NULL, NULL},
+    {"xfs_db", NULL, NULL, NULL},
+    {"xfs_repair", NULL, NULL, NULL},
+    {"xfs_admin", NULL, NULL, NULL},
+    {"xfs_growfs", NULL, NULL, NULL},
+
+    {"mkfs.vfat", NULL, NULL, NULL},
+    {"fatlabel", NULL, NULL, NULL},
+    {"fsck.vfat", NULL, NULL, NULL},
+};
+
+static guint32 fs_mode_util[][FS_MODE_LAST+1] = {
+    /*           mkfs          wipe     check               repair                set-label            query                resize */
+/* ext2 */ {DEPS_MKE2FS_MASK,   0, DEPS_E2FSCK_MASK,   DEPS_E2FSCK_MASK,     DEPS_TUNE2FS_MASK,   DEPS_DUMPE2FS_MASK,  DEPS_RESIZE2FS_MASK},
+/* ext3 */ {DEPS_MKE2FS_MASK,   0, DEPS_E2FSCK_MASK,   DEPS_E2FSCK_MASK,     DEPS_TUNE2FS_MASK,   DEPS_DUMPE2FS_MASK,  DEPS_RESIZE2FS_MASK},
+/* ext4 */ {DEPS_MKE2FS_MASK,   0, DEPS_E2FSCK_MASK,   DEPS_E2FSCK_MASK,     DEPS_TUNE2FS_MASK,   DEPS_DUMPE2FS_MASK,  DEPS_RESIZE2FS_MASK},
+/* xfs  */ {DEPS_MKFSXFS_MASK,  0, DEPS_XFS_DB_MASK,   DEPS_XFS_REPAIR_MASK, DEPS_XFS_ADMIN_MASK, DEPS_XFS_ADMIN_MASK, DEPS_XFS_GROWFS_MASK},
+/* vfat */ {DEPS_MKFSVFAT_MASK, 0, DEPS_FSCKVFAT_MASK, DEPS_FSCKVFAT_MASK,   DEPS_FATLABEL_MASK,  DEPS_FSCKVFAT_MASK,  0}
+};
+
 /**
  * bd_fs_check_deps:
  *
@@ -273,6 +335,39 @@ gboolean bd_fs_init () {
 void bd_fs_close () {
     /* nothing to do here */
 }
+
+/**
+ * bd_fs_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation (#BDFSTechMode) for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is available -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_fs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error) {
+    guint32 required = 0;
+    gint fs = 0;
+    guint i = 0;
+
+    if (tech == BD_FS_TECH_GENERIC || tech == BD_FS_TECH_MOUNT)
+        /* @mode is ignored, there are no special modes for GENERIC and MOUNT technologies */
+        /* generic features and mounting are supported by this plugin without any dependencies */
+        return TRUE;
+
+    if (tech > LAST_FS) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL, "Unknown technology");
+        return FALSE;
+    }
+
+    fs = tech - FS_OFFSET;
+    for (i = 0; i <= FS_MODE_LAST; i++)
+        if (mode & (1 << i))
+            required |= fs_mode_util[fs][i];
+
+    return check_deps (&avail_deps, required, deps, DEPS_LAST, &deps_check_lock, error);
+}
+
 
 /**
  * set_parted_error: (skip)
@@ -812,6 +907,8 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
  * @error: (out): place to store error (if any)
  *
  * Returns: whether @spec was successfully unmounted or not
+ *
+ * Tech category: %BD_FS_TECH_GENERIC (no mode, ignored)
  */
 gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const BDExtraArg **extra, GError **error) {
     uid_t run_as_uid = -1;
@@ -883,6 +980,8 @@ gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const 
  * @error: (out): place to store error (if any)
  *
  * Returns: whether @device (or @mountpoint) was successfully mounted or not
+ *
+ * Tech category: %BD_FS_TECH_MOUNT (no mode, ignored)
  */
 gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar *fstype, const gchar *options, const BDExtraArg **extra, GError **error) {
     uid_t run_as_uid = -1;
@@ -950,6 +1049,8 @@ gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar 
  * Returns: (transfer full): mountpoint for @device, %NULL in case device is
  *                           not mounted or in case of an error (@error is set
  *                           in this case)
+ *
+ * Tech category: %BD_FS_TECH_MOUNT (no mode, ignored)
  */
 gchar* bd_fs_get_mountpoint (const gchar *device, GError **error) {
     struct libmnt_table *table = NULL;
@@ -1008,6 +1109,8 @@ gchar* bd_fs_get_mountpoint (const gchar *device, GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: whether signatures were successfully wiped on @device or not
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_WIPE
  */
 gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
     blkid_probe probe = NULL;
@@ -1129,6 +1232,8 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
  * all signatures from @device, not only the first one.
  *
  * Returns: whether @device was successfully cleaned or not
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_WIPE
  */
 gboolean bd_fs_clean (const gchar *device, GError **error) {
   gboolean ret = FALSE;
@@ -1158,6 +1263,8 @@ gboolean bd_fs_clean (const gchar *device, GError **error) {
  * Returns: (transfer full): type of filesystem found on @device, %NULL in case
  *                           no signature has been detected or in case of error
  *                           (@error is set in this case)
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
  */
 gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
     blkid_probe probe = NULL;
@@ -1444,6 +1551,9 @@ static gboolean wipe_fs (const gchar *device, const gchar *fs_type, gboolean wip
 static gboolean ext_mkfs (const gchar *device, const BDExtraArg **extra, const gchar *ext_version, GError **error) {
     const gchar *args[6] = {"mke2fs", "-t", ext_version, "-F", device, NULL};
 
+    if (!check_deps (&avail_deps, DEPS_MKE2FS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     return bd_utils_exec_and_report_error (args, extra, error);
 }
 
@@ -1607,6 +1717,8 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
  * function will return an error for unknown/unsupported filesystems.
  *
  * Returns: whether the file system on @device was successfully resized or not
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_RESIZE
  */
 gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error) {
     return device_operation (device, BD_FS_RESIZE, new_size, NULL, error);
@@ -1622,6 +1734,8 @@ gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error) {
  * function will return an error for unknown/unsupported filesystems.
  *
  * Returns: whether the file system on @device was successfully repaired or not
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_REPAIR
  */
 gboolean bd_fs_repair (const gchar *device, GError **error) {
     return device_operation (device, BD_FS_REPAIR, 0, NULL, error);
@@ -1637,6 +1751,8 @@ gboolean bd_fs_repair (const gchar *device, GError **error) {
  * function will return an error for unknown/unsupported filesystems.
  *
  * Returns: whether the file system on @device passed the consistency check or not
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_CHECK
  */
 gboolean bd_fs_check (const gchar *device, GError **error) {
     return device_operation (device, BD_FS_CHECK, 0, NULL, error);
@@ -1652,6 +1768,8 @@ gboolean bd_fs_check (const gchar *device, GError **error) {
  * function will return an error for unknown/unsupported filesystems.
  *
  * Returns: whether the file system on @device was successfully relabled or not
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_SET_LABEL
  */
 gboolean bd_fs_set_label (const gchar *device, const gchar *label, GError **error) {
     return device_operation (device, BD_FS_LABEL, 0, label, error);
@@ -1724,6 +1842,8 @@ static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar *
  * Unknown filesystems or filesystems which do not support resizing result in errors.
  *
  * Returns: whether filesystem resize is available
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
  */
 gboolean bd_fs_can_resize (const gchar *type, BDFsResizeFlags *mode, gchar **required_utility, GError **error) {
     return query_fs_operation (type, BD_FS_RESIZE, required_utility, mode, error);
@@ -1740,6 +1860,8 @@ gboolean bd_fs_can_resize (const gchar *type, BDFsResizeFlags *mode, gchar **req
  * Unknown filesystems or filesystems which do not support checking result in errors.
  *
  * Returns: whether filesystem check is available
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
  */
 gboolean bd_fs_can_check (const gchar *type, gchar **required_utility, GError **error) {
     return query_fs_operation (type, BD_FS_CHECK, required_utility, NULL, error);
@@ -1756,6 +1878,8 @@ gboolean bd_fs_can_check (const gchar *type, gchar **required_utility, GError **
  * Unknown filesystems or filesystems which do not support reparing result in errors.
  *
  * Returns: whether filesystem repair is available
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
  */
 gboolean bd_fs_can_repair (const gchar *type, gchar **required_utility, GError **error) {
     return query_fs_operation (type, BD_FS_REPAIR, required_utility, NULL, error);
@@ -1772,6 +1896,8 @@ gboolean bd_fs_can_repair (const gchar *type, gchar **required_utility, GError *
  * Unknown filesystems or filesystems which do not support setting the label result in errors.
  *
  * Returns: whether setting filesystem label is available
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
  */
 gboolean bd_fs_can_set_label (const gchar *type, gchar **required_utility, GError **error) {
     return query_fs_operation (type, BD_FS_LABEL, required_utility, NULL, error);
@@ -1785,6 +1911,8 @@ gboolean bd_fs_can_set_label (const gchar *type, gchar **required_utility, GErro
  * @error: (out): place to store error (if any)
  *
  * Returns: whether a new ext2 fs was successfully created on @device or not
+ *
+ * Tech category: %BD_FS_TECH_EXT2-%BD_FS_TECH_MODE_MKFS
  */
 gboolean bd_fs_ext2_mkfs (const gchar *device, const BDExtraArg **extra, GError **error) {
     return ext_mkfs (device, extra, EXT2, error);
@@ -1798,6 +1926,8 @@ gboolean bd_fs_ext2_mkfs (const gchar *device, const BDExtraArg **extra, GError 
  * @error: (out): place to store error (if any)
  *
  * Returns: whether a new ext3 fs was successfully created on @device or not
+ *
+ * Tech category: %BD_FS_TECH_EXT3-%BD_FS_TECH_MODE_MKFS
  */
 gboolean bd_fs_ext3_mkfs (const gchar *device, const BDExtraArg **extra, GError **error) {
     return ext_mkfs (device, extra, EXT3, error);
@@ -1811,6 +1941,8 @@ gboolean bd_fs_ext3_mkfs (const gchar *device, const BDExtraArg **extra, GError 
  * @error: (out): place to store error (if any)
  *
  * Returns: whether a new ext4 fs was successfully created on @device or not
+ *
+ * Tech category: %BD_FS_TECH_EXT4-%BD_FS_TECH_MODE_MKFS
  */
 gboolean bd_fs_ext4_mkfs (const gchar *device, const BDExtraArg **extra, GError **error) {
     return ext_mkfs (device, extra, EXT4, error);
@@ -1823,6 +1955,8 @@ gboolean bd_fs_ext4_mkfs (const gchar *device, const BDExtraArg **extra, GError 
  *
  * Returns: whether an ext2 signature was successfully wiped from the @device or
  *          not
+ *
+ * Tech category: %BD_FS_TECH_EXT2-%BD_FS_TECH_MODE_WIPE
  */
 gboolean bd_fs_ext2_wipe (const gchar *device, GError **error) {
     return wipe_fs (device, EXT2, FALSE, error);
@@ -1835,6 +1969,8 @@ gboolean bd_fs_ext2_wipe (const gchar *device, GError **error) {
  *
  * Returns: whether an ext3 signature was successfully wiped from the @device or
  *          not
+ *
+ * Tech category: %BD_FS_TECH_EXT3-%BD_FS_TECH_MODE_WIPE
  */
 gboolean bd_fs_ext3_wipe (const gchar *device, GError **error) {
     return wipe_fs (device, EXT3, FALSE, error);
@@ -1847,6 +1983,8 @@ gboolean bd_fs_ext3_wipe (const gchar *device, GError **error) {
  *
  * Returns: whether an ext4 signature was successfully wiped from the @device or
  *          not
+ *
+ * Tech category: %BD_FS_TECH_EXT4-%BD_FS_TECH_MODE_WIPE
  */
 gboolean bd_fs_ext4_wipe (const gchar *device, GError **error) {
     return wipe_fs (device, EXT4, FALSE, error);
@@ -1859,6 +1997,9 @@ static gboolean ext_check (const gchar *device, const BDExtraArg **extra, GError
     const gchar *args[5] = {"e2fsck", "-f", "-n", device, NULL};
     gint status = 0;
     gboolean ret = FALSE;
+
+    if (!check_deps (&avail_deps, DEPS_E2FSCK_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     ret = bd_utils_exec_and_report_status_error (args, extra, &status, error);
     if (!ret && (status == 4)) {
@@ -1876,6 +2017,8 @@ static gboolean ext_check (const gchar *device, const BDExtraArg **extra, GError
  * @error: (out): place to store error (if any)
  *
  * Returns: whether an ext2 file system on the @device is clean or not
+ *
+ * Tech category: %BD_FS_TECH_EXT2-%BD_FS_TECH_MODE_CHECK
  */
 gboolean bd_fs_ext2_check (const gchar *device, const BDExtraArg **extra, GError **error) {
     return ext_check (device, extra, error);
@@ -1889,6 +2032,8 @@ gboolean bd_fs_ext2_check (const gchar *device, const BDExtraArg **extra, GError
  * @error: (out): place to store error (if any)
  *
  * Returns: whether an ext3 file system on the @device is clean or not
+ *
+ * Tech category: %BD_FS_TECH_EXT3-%BD_FS_TECH_MODE_CHECK
  */
 gboolean bd_fs_ext3_check (const gchar *device, const BDExtraArg **extra, GError **error) {
     return ext_check (device, extra, error);
@@ -1902,6 +2047,8 @@ gboolean bd_fs_ext3_check (const gchar *device, const BDExtraArg **extra, GError
  * @error: (out): place to store error (if any)
  *
  * Returns: whether an ext4 file system on the @device is clean or not
+ *
+ * Tech category: %BD_FS_TECH_EXT4-%BD_FS_TECH_MODE_CHECK
  */
 gboolean bd_fs_ext4_check (const gchar *device, const BDExtraArg **extra, GError **error) {
     return ext_check (device, extra, error);
@@ -1912,6 +2059,9 @@ static gboolean ext_repair (const gchar *device, gboolean unsafe, const BDExtraA
      *     Automatically repair what can be safely repaired. OR
      *     Assume an answer of `yes' to all questions. */
     const gchar *args[5] = {"e2fsck", "-f", unsafe ? "-y" : "-p", device, NULL};
+
+    if (!check_deps (&avail_deps, DEPS_E2FSCK_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     return bd_utils_exec_and_report_error (args, extra, error);
 }
@@ -1926,6 +2076,8 @@ static gboolean ext_repair (const gchar *device, gboolean unsafe, const BDExtraA
  *
  * Returns: whether an ext2 file system on the @device was successfully repaired
  *          (if needed) or not (error is set in that case)
+ *
+ * Tech category: %BD_FS_TECH_EXT2-%BD_FS_TECH_MODE_REPAIR
  */
 gboolean bd_fs_ext2_repair (const gchar *device, gboolean unsafe, const BDExtraArg **extra, GError **error) {
     return ext_repair (device, unsafe, extra, error);
@@ -1941,6 +2093,8 @@ gboolean bd_fs_ext2_repair (const gchar *device, gboolean unsafe, const BDExtraA
  *
  * Returns: whether an ext3 file system on the @device was successfully repaired
  *          (if needed) or not (error is set in that case)
+ *
+ * Tech category: %BD_FS_TECH_EXT3-%BD_FS_TECH_MODE_REPAIR
  */
 gboolean bd_fs_ext3_repair (const gchar *device, gboolean unsafe, const BDExtraArg **extra, GError **error) {
     return ext_repair (device, unsafe, extra, error);
@@ -1956,6 +2110,8 @@ gboolean bd_fs_ext3_repair (const gchar *device, gboolean unsafe, const BDExtraA
  *
  * Returns: whether an ext4 file system on the @device was successfully repaired
  *          (if needed) or not (error is set in that case)
+ *
+ * Tech category: %BD_FS_TECH_EXT4-%BD_FS_TECH_MODE_REPAIR
  */
 gboolean bd_fs_ext4_repair (const gchar *device, gboolean unsafe, const BDExtraArg **extra, GError **error) {
     return ext_repair (device, unsafe, extra, error);
@@ -1963,6 +2119,9 @@ gboolean bd_fs_ext4_repair (const gchar *device, gboolean unsafe, const BDExtraA
 
 static gboolean ext_set_label (const gchar *device, const gchar *label, GError **error) {
     const gchar *args[5] = {"tune2fs", "-L", label, device, NULL};
+
+    if (!check_deps (&avail_deps, DEPS_TUNE2FS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     return bd_utils_exec_and_report_error (args, NULL, error);
 }
@@ -1975,6 +2134,8 @@ static gboolean ext_set_label (const gchar *device, const gchar *label, GError *
  *
  * Returns: whether the label of ext2 file system on the @device was
  *          successfully set or not
+ *
+ * Tech category: %BD_FS_TECH_EXT2-%BD_FS_TECH_MODE_SET_LABEL
  */
 gboolean bd_fs_ext2_set_label (const gchar *device, const gchar *label, GError **error) {
     return ext_set_label (device, label, error);
@@ -1988,6 +2149,8 @@ gboolean bd_fs_ext2_set_label (const gchar *device, const gchar *label, GError *
  *
  * Returns: whether the label of ext3 file system on the @device was
  *          successfully set or not
+ *
+ * Tech category: %BD_FS_TECH_EXT3-%BD_FS_TECH_MODE_SET_LABEL
  */
 gboolean bd_fs_ext3_set_label (const gchar *device, const gchar *label, GError **error) {
     return ext_set_label (device, label, error);
@@ -2001,6 +2164,8 @@ gboolean bd_fs_ext3_set_label (const gchar *device, const gchar *label, GError *
  *
  * Returns: whether the label of ext4 file system on the @device was
  *          successfully set or not
+ *
+ * Tech category: %BD_FS_TECH_EXT4-%BD_FS_TECH_MODE_SET_LABEL
  */
 gboolean bd_fs_ext4_set_label (const gchar *device, const gchar *label, GError **error) {
     return ext_set_label (device, label, error);
@@ -2081,6 +2246,9 @@ static BDFSExtInfo* ext_get_info (const gchar *device, GError **error) {
     guint num_items = 0;
     BDFSExtInfo *ret = NULL;
 
+    if (!check_deps (&avail_deps, DEPS_DUMPE2FS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
     if (!success) {
         /* error is already populated */
@@ -2113,6 +2281,8 @@ static BDFSExtInfo* ext_get_info (const gchar *device, GError **error) {
  *
  * Returns: (transfer full): information about the file system on @device or
  *                           %NULL in case of error
+ *
+ * Tech category: %BD_FS_TECH_EXT2-%BD_FS_TECH_MODE_QUERY
  */
 BDFSExt2Info* bd_fs_ext2_get_info (const gchar *device, GError **error) {
     return (BDFSExt2Info*) ext_get_info (device, error);
@@ -2125,6 +2295,8 @@ BDFSExt2Info* bd_fs_ext2_get_info (const gchar *device, GError **error) {
  *
  * Returns: (transfer full): information about the file system on @device or
  *                           %NULL in case of error
+ *
+ * Tech category: %BD_FS_TECH_EXT3-%BD_FS_TECH_MODE_QUERY
  */
 BDFSExt3Info* bd_fs_ext3_get_info (const gchar *device, GError **error) {
     return (BDFSExt3Info*) ext_get_info (device, error);
@@ -2137,6 +2309,8 @@ BDFSExt3Info* bd_fs_ext3_get_info (const gchar *device, GError **error) {
  *
  * Returns: (transfer full): information about the file system on @device or
  *                           %NULL in case of error
+ *
+ * Tech category: %BD_FS_TECH_EXT4-%BD_FS_TECH_MODE_QUERY
  */
 BDFSExt4Info* bd_fs_ext4_get_info (const gchar *device, GError **error) {
     return (BDFSExt4Info*) ext_get_info (device, error);
@@ -2145,6 +2319,9 @@ BDFSExt4Info* bd_fs_ext4_get_info (const gchar *device, GError **error) {
 static gboolean ext_resize (const gchar *device, guint64 new_size, const BDExtraArg **extra, GError **error) {
     const gchar *args[4] = {"resize2fs", device, NULL, NULL};
     gboolean ret = FALSE;
+
+    if (!check_deps (&avail_deps, DEPS_RESIZE2FS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     if (new_size != 0)
         /* resize2fs doesn't understand bytes, just 512B sectors */
@@ -2165,6 +2342,8 @@ static gboolean ext_resize (const gchar *device, guint64 new_size, const BDExtra
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the file system on @device was successfully resized or not
+ *
+ * Tech category: %BD_FS_TECH_EXT2-%BD_FS_TECH_MODE_RESIZE
  */
 gboolean bd_fs_ext2_resize (const gchar *device, guint64 new_size, const BDExtraArg **extra, GError **error) {
     return ext_resize (device, new_size, extra, error);
@@ -2180,6 +2359,8 @@ gboolean bd_fs_ext2_resize (const gchar *device, guint64 new_size, const BDExtra
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the file system on @device was successfully resized or not
+ *
+ * Tech category: %BD_FS_TECH_EXT3-%BD_FS_TECH_MODE_RESIZE
  */
 gboolean bd_fs_ext3_resize (const gchar *device, guint64 new_size, const BDExtraArg **extra, GError **error) {
     return ext_resize (device, new_size, extra, error);
@@ -2195,6 +2376,8 @@ gboolean bd_fs_ext3_resize (const gchar *device, guint64 new_size, const BDExtra
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the file system on @device was successfully resized or not
+ *
+ * Tech category: %BD_FS_TECH_EXT4-%BD_FS_TECH_MODE_RESIZE
  */
 gboolean bd_fs_ext4_resize (const gchar *device, guint64 new_size, const BDExtraArg **extra, GError **error) {
     return ext_resize (device, new_size, extra, error);
@@ -2208,9 +2391,14 @@ gboolean bd_fs_ext4_resize (const gchar *device, guint64 new_size, const BDExtra
  * @error: (out): place to store error (if any)
  *
  * Returns: whether a new xfs fs was successfully created on @device or not
+ *
+ * Tech category: %BD_FS_TECH_XFS-%BD_FS_TECH_MODE_MKFS
  */
 gboolean bd_fs_xfs_mkfs (const gchar *device, const BDExtraArg **extra, GError **error) {
     const gchar *args[3] = {"mkfs.xfs", device, NULL};
+
+    if (!check_deps (&avail_deps, DEPS_MKFSXFS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     return bd_utils_exec_and_report_error (args, extra, error);
 }
@@ -2222,6 +2410,8 @@ gboolean bd_fs_xfs_mkfs (const gchar *device, const BDExtraArg **extra, GError *
  *
  * Returns: whether an xfs signature was successfully wiped from the @device or
  *          not
+ *
+ * Tech category: %BD_FS_TECH_XFS-%BD_FS_TECH_MODE_WIPE
  */
 gboolean bd_fs_xfs_wipe (const gchar *device, GError **error) {
     return wipe_fs (device, "xfs", FALSE, error);
@@ -2236,10 +2426,15 @@ gboolean bd_fs_xfs_wipe (const gchar *device, GError **error) {
  *
  * Note: if the file system is mounted it may be reported as unclean even if
  *       everything is okay and there are just some pending/in-progress writes
+ *
+ * Tech category: %BD_FS_TECH_XFS-%BD_FS_TECH_MODE_CHECK
  */
 gboolean bd_fs_xfs_check (const gchar *device, GError **error) {
     const gchar *args[6] = {"xfs_db", "-r", "-c", "check", device, NULL};
     gboolean ret = FALSE;
+
+    if (!check_deps (&avail_deps, DEPS_XFS_DB_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     ret = bd_utils_exec_and_report_error (args, NULL, error);
     if (!ret && *error &&  g_error_matches ((*error), BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED))
@@ -2258,9 +2453,14 @@ gboolean bd_fs_xfs_check (const gchar *device, GError **error) {
  *
  * Returns: whether an xfs file system on the @device was successfully repaired
  *          (if needed) or not (error is set in that case)
+ *
+ * Tech category: %BD_FS_TECH_XFS-%BD_FS_TECH_MODE_REPAIR
  */
 gboolean bd_fs_xfs_repair (const gchar *device, const BDExtraArg **extra, GError **error) {
     const gchar *args[3] = {"xfs_repair", device, NULL};
+
+    if (!check_deps (&avail_deps, DEPS_XFS_REPAIR_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     return bd_utils_exec_and_report_error (args, extra, error);
 }
@@ -2273,11 +2473,16 @@ gboolean bd_fs_xfs_repair (const gchar *device, const BDExtraArg **extra, GError
  *
  * Returns: whether the label of xfs file system on the @device was
  *          successfully set or not
+ *
+ * Tech category: %BD_FS_TECH_XFS-%BD_FS_TECH_MODE_SET_LABEL
  */
 gboolean bd_fs_xfs_set_label (const gchar *device, const gchar *label, GError **error) {
     const gchar *args[5] = {"xfs_admin", "-L", label, device, NULL};
     if (!label || (strncmp (label, "", 1) == 0))
         args[2] = "--";
+
+    if (!check_deps (&avail_deps, DEPS_XFS_ADMIN_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     return bd_utils_exec_and_report_error (args, NULL, error);
 }
@@ -2291,6 +2496,8 @@ gboolean bd_fs_xfs_set_label (const gchar *device, const gchar *label, GError **
  *
  * Returns: (transfer full): information about the file system on @device or
  *                           %NULL in case of error
+ *
+ * Tech category: %BD_FS_TECH_XFS-%BD_FS_TECH_MODE_QUERY
  */
 BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
     const gchar *args[4] = {"xfs_admin", "-lu", device, NULL};
@@ -2304,6 +2511,9 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
     gchar *val_start = NULL;
     gchar *val_end = NULL;
     g_autofree gchar* mountpoint = NULL;
+
+    if (!check_deps (&avail_deps, DEPS_XFS_ADMIN_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     mountpoint = bd_fs_get_mountpoint (device, error);
     if (mountpoint == NULL) {
@@ -2412,11 +2622,16 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the file system mounted on @mpoint was successfully resized or not
+ *
+ * Tech category: %BD_FS_TECH_XFS-%BD_FS_TECH_MODE_RESIZE
  */
 gboolean bd_fs_xfs_resize (const gchar *mpoint, guint64 new_size, const BDExtraArg **extra, GError **error) {
     const gchar *args[5] = {"xfs_growfs", NULL, NULL, NULL, NULL};
     gchar *size_str = NULL;
     gboolean ret = FALSE;
+
+    if (!check_deps (&avail_deps, DEPS_XFS_GROWFS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     if (new_size != 0) {
         args[1] = "-D";
@@ -2441,9 +2656,14 @@ gboolean bd_fs_xfs_resize (const gchar *mpoint, guint64 new_size, const BDExtraA
  * @error: (out): place to store error (if any)
  *
  * Returns: whether a new vfat fs was successfully created on @device or not
+ *
+ * Tech category: %BD_FS_TECH_VFAT-%BD_FS_TECH_MODE_MKFS
  */
 gboolean bd_fs_vfat_mkfs (const gchar *device, const BDExtraArg **extra, GError **error) {
     const gchar *args[4] = {"mkfs.vfat", "-I", device, NULL};
+
+    if (!check_deps (&avail_deps, DEPS_MKFSVFAT_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     return bd_utils_exec_and_report_error (args, extra, error);
 }
@@ -2455,6 +2675,8 @@ gboolean bd_fs_vfat_mkfs (const gchar *device, const BDExtraArg **extra, GError 
  *
  * Returns: whether an vfat signature was successfully wiped from the @device or
  *          not
+ *
+ * Tech category: %BD_FS_TECH_VFAT-%BD_FS_TECH_MODE_WIPE
  */
 gboolean bd_fs_vfat_wipe (const gchar *device, GError **error) {
     return wipe_fs (device, "vfat", TRUE, error);
@@ -2468,11 +2690,16 @@ gboolean bd_fs_vfat_wipe (const gchar *device, GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: whether an vfat file system on the @device is clean or not
+ *
+ * Tech category: %BD_FS_TECH_VFAT-%BD_FS_TECH_MODE_CHECK
  */
 gboolean bd_fs_vfat_check (const gchar *device, const BDExtraArg **extra, GError **error) {
     const gchar *args[4] = {"fsck.vfat", "-n", device, NULL};
     gint status = 0;
     gboolean ret = FALSE;
+
+    if (!check_deps (&avail_deps, DEPS_FSCKVFAT_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     ret = bd_utils_exec_and_report_status_error (args, extra, &status, error);
     if (!ret && (status == 1)) {
@@ -2491,9 +2718,14 @@ gboolean bd_fs_vfat_check (const gchar *device, const BDExtraArg **extra, GError
  *
  * Returns: whether an vfat file system on the @device was successfully repaired
  *          (if needed) or not (error is set in that case)
+ *
+ * Tech category: %BD_FS_TECH_VFAT-%BD_FS_TECH_MODE_REPAIR
  */
 gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GError **error) {
     const gchar *args[4] = {"fsck.vfat", "-a", device, NULL};
+
+    if (!check_deps (&avail_deps, DEPS_FSCKVFAT_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     return bd_utils_exec_and_report_error (args, extra, error);
 }
@@ -2506,9 +2738,14 @@ gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GErro
  *
  * Returns: whether the label of vfat file system on the @device was
  *          successfully set or not
+ *
+ * Tech category: %BD_FS_TECH_VFAT-%BD_FS_TECH_MODE_SET_LABEL
  */
 gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError **error) {
     const gchar *args[4] = {"fatlabel", device, label, NULL};
+
+    if (!check_deps (&avail_deps, DEPS_FATLABEL_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     return bd_utils_exec_and_report_error (args, NULL, error);
 }
@@ -2520,6 +2757,8 @@ gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError *
  *
  * Returns: (transfer full): information about the file system on @device or
  *                           %NULL in case of error
+ *
+ * Tech category: %BD_FS_TECH_VFAT-%BD_FS_TECH_MODE_QUERY
  */
 BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
     const gchar *args[4] = {"fsck.vfat", "-nv", device, NULL};
@@ -2537,6 +2776,9 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
     guint64 full_cluster_count = 0;
     guint64 cluster_count = 0;
     gchar **key_val = NULL;
+
+    if (!check_deps (&avail_deps, DEPS_FSCKVFAT_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     probe = blkid_new_probe ();
     if (!probe) {
@@ -2640,6 +2882,8 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the file system on @device was successfully resized or not
+ *
+ * Tech category: %BD_FS_TECH_VFAT-%BD_FS_TECH_MODE_RESIZE
  */
 gboolean bd_fs_vfat_resize (const gchar *device, guint64 new_size, GError **error) {
     PedDevice *ped_dev = NULL;

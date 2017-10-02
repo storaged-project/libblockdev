@@ -1,6 +1,6 @@
 # configure.ac for libblockdev
 
-AC_INIT([libblockdev], [2.12], [vpodzime@redhat.com])
+AC_INIT([libblockdev], [2.13], [vpodzime@redhat.com])
 
 # Disable building static libraries.
 # This needs to be set before initializing automake
@@ -124,8 +124,8 @@ AC_ARG_WITH([bcache],
 AC_SUBST([WITH_BCACHE], [0])
 AM_CONDITIONAL(WITH_BCACHE, test "x$with_bcache" != "xno")
 AS_IF([test "x$with_bcache" != "xno"],
-      [AC_DEFINE([WITH_BD_BCACHE], [], [Define if bcache is supported]) AC_SUBST([WITH_BCACHE], [1]) AC_SUBST([WITH_BCACHE_CFLAGS], [-DWITH_BD_BCACHE])],
-      [skip_patterns="$skip_patterns bcache"])
+      [AC_DEFINE([WITH_BD_BCACHE], [], [Define if bcache is supported]) AC_SUBST([WITH_BCACHE], [1])],
+      [])
 
 LIBBLOCKDEV_PLUGIN([BTRFS], [btrfs])
 LIBBLOCKDEV_PLUGIN([CRYPTO], [crypto])

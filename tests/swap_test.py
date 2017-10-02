@@ -145,3 +145,23 @@ class SwapUnloadTest(SwapTest):
         # load the plugins back
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         self.assertIn("swap", BlockDev.get_available_plugin_names())
+
+    def test_check_no_mkswap_runtime(self):
+        """Verify that runtime checking mkswap tool availability works as expected"""
+
+        # unload all plugins first
+        self.assertTrue(BlockDev.reinit([], True, None))
+
+        # make sure the initial checks during plugin loading are skipped
+        BlockDev.switch_init_checks(False)
+        self.addCleanup(BlockDev.switch_init_checks, True)
+
+        with fake_path(all_but="mkswap"):
+            # no mkswap available, but checks disabled, the swap plugin should load just fine
+            self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
+            self.assertIn("swap", BlockDev.get_available_plugin_names())
+
+            with self.assertRaisesRegexp(GLib.GError, "The 'mkswap' utility is not available"):
+                # the device shouldn't matter, the function should return an
+                # error before any other checks or actions
+                BlockDev.swap_mkswap("/dev/device", "LABEL", None)
