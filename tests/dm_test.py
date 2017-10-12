@@ -2,7 +2,7 @@ import unittest
 import os
 import overrides_hack
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path
+from utils import run, create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path
 from gi.repository import BlockDev, GLib
 
 
@@ -38,6 +38,31 @@ class DevMapperTestCase(unittest.TestCase):
             pass
 
         os.unlink(self.dev_file)
+
+class DevMapperGetSubsystemFromName(DevMapperTestCase):
+    def _destroy_lvm(self):
+        run("vgremove --yes libbd_dm_tests >/dev/null 2>&1")
+        run("pvremove --yes %s >/dev/null 2>&1" % self.loop_dev)
+
+    def _destroy_crypt(self):
+        run("cryptsetup close libbd_dm_tests-subsystem_crypt >/dev/null 2>&1")
+
+    def test_get_subsystem_from_name_lvm(self):
+        """Verify that it is possible to get lvm device subsystem from its name"""
+        self.addCleanup(self._destroy_lvm)
+        run("vgcreate libbd_dm_tests %s >/dev/null 2>&1" % self.loop_dev)
+        run("lvcreate -n subsystem_lvm -L50M libbd_dm_tests >/dev/null 2>&1")
+
+        subsystem = BlockDev.dm_get_subsystem_from_name("libbd_dm_tests-subsystem_lvm")
+        self.assertEqual(subsystem, "LVM")
+
+    def test_get_subsystem_from_name_crypt(self):
+        """Verify that it is possible to get luks device subsystem from its name"""
+        self.addCleanup(self._destroy_crypt)
+        run("echo \"key\" | cryptsetup luksFormat %s -" %self.loop_dev)
+        run("echo \"key\" | cryptsetup open %s libbd_dm_tests-subsystem_crypt --key-file=-" %self.loop_dev)
+        subsystem = BlockDev.dm_get_subsystem_from_name("libbd_dm_tests-subsystem_crypt")
+        self.assertEqual(subsystem, "CRYPT")
 
 class DevMapperCreateRemoveLinear(DevMapperTestCase):
     def test_create_remove_linear(self):

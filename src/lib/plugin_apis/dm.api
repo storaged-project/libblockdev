@@ -88,6 +88,17 @@ gchar* bd_dm_name_from_node (const gchar *dm_node, GError **error);
 gchar* bd_dm_node_from_name (const gchar *map_name, GError **error);
 
 /**
+ * bd_dm_get_subsystem_from_name:
+ * @device_name: name of the device
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: subsystem of the given device
+ *
+ * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_QUERY
+ */
+gchar* bd_dm_get_subsystem_from_name (const gchar *device_name, GError **error);
+
+/**
  * bd_dm_map_exists:
  * @map_name: name of the queried map
  * @live_only: whether to go through the live maps only or not
