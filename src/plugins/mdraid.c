@@ -334,8 +334,10 @@ static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean
     value = (gchar*) g_hash_table_lookup (table, "Chunk Size");
     if (value) {
         size = bs_size_new_from_str (value, &bs_error);
-        if (size)
+        if (size) {
             data->chunk_size = bs_size_get_bytes (size, NULL, &bs_error);
+            bs_size_free (size);
+        }
 
         if (bs_error) {
             g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE,
