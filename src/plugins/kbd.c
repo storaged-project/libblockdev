@@ -25,6 +25,7 @@
 #include <locale.h>
 #include <blockdev/utils.h>
 #include <stdio.h>
+#include <bs_size.h>
 
 #include "kbd.h"
 #include "check_deps.h"
@@ -1367,6 +1368,39 @@ static gboolean get_cache_size_used (const gchar *cache_dev_sys, guint64 *size, 
     return TRUE;
 }
 
+static guint64 get_bcache_block_size (const gchar *bcache_device, GError **error) {
+    gchar *content = NULL;
+    gboolean success = FALSE;
+    guint64 ret = 0;
+    gchar *path = NULL;
+    BSError *bs_error = NULL;
+    BSSize size = NULL;
+
+    path = g_strdup_printf ("/sys/block/%s/bcache/cache/block_size", bcache_device);
+    success = g_file_get_contents (path, &content, NULL, error);
+    if (!success) {
+        /* error is already populated */
+        g_free (path);
+        return 0;
+    }
+
+    size = bs_size_new_from_str (content, &bs_error);
+    if (size)
+        ret = bs_size_get_bytes (size, NULL, &bs_error);
+
+    if (bs_error) {
+        g_set_error_literal (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_INVAL,
+                             bs_error->msg);
+        bs_clear_error (&bs_error);
+    }
+
+    if (size)
+        bs_size_free (size);
+    g_free (content);
+    g_free (path);
+    return ret;
+}
+
 /**
  * bd_kbd_bcache_status:
  * @bcache_device: bcache device to get status for
@@ -1385,6 +1419,7 @@ BDKBDBcacheStats* bd_kbd_bcache_status (const gchar *bcache_device, GError **err
     gchar **path_list;
     guint64 size = 0;
     guint64 used = 0;
+    GError *loc_error = NULL;
 
     if (g_str_has_prefix (bcache_device, "/dev/"))
         bcache_device += 5;
@@ -1415,13 +1450,11 @@ BDKBDBcacheStats* bd_kbd_bcache_status (const gchar *bcache_device, GError **err
         /* no cache, nothing more to get */
         return ret;
 
-    path = g_strdup_printf ("/sys/block/%s/bcache/cache/block_size", bcache_device);
-    ret->block_size = get_number_from_file (path, error);
-    g_free (path);
-    if (*error) {
-        g_clear_error (error);
-        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_INVAL,
-                     "Failed to get 'block_size' for '%s' Bcache device", bcache_device);
+    ret->block_size = get_bcache_block_size (bcache_device, &loc_error);
+    if (loc_error) {
+        g_propagate_prefixed_error (error, loc_error,
+                                    "Failed to get 'block_size' for '%s' Bcache device: ",
+                                    bcache_device);
         g_free (ret);
         return NULL;
     }

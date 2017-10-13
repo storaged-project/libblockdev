@@ -255,6 +255,7 @@ with the libblockdev-fs plugin/library.
 %if %{with_kbd}
 %package kbd
 BuildRequires: kmod-devel
+BuildRequires: libbytesize-devel
 Summary:     The KBD plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
 %if %{with_bcache}

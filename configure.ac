@@ -192,7 +192,7 @@ AS_IF([test "x$with_fs" != "xno"],
               AC_SUBST([PARTED_FS_CFLAGS], [])])],
       [])
 
-AS_IF([test "x$with_btrfs" != "xno" -o "x$with_mdraid" != "xno"],
+AS_IF([test "x$with_btrfs" != "xno" -o "x$with_mdraid" != "xno" -o "x$with_kbd" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([BYTESIZE], [bytesize >= 0.1])],
       [])
 

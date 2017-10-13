@@ -1,9 +1,11 @@
 import unittest
 import os
+import re
 import time
 from contextlib import contextmanager
 from distutils.version import LooseVersion
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, wipe_all, fake_path, read_file, skip_on
+from bytesize import bytesize
 import overrides_hack
 
 from gi.repository import BlockDev, GLib
@@ -487,6 +489,14 @@ class KbdTestBcacheGetSetMode(KbdBcacheTestCase):
         wipe_all(self.loop_dev, self.loop_dev2)
 
 class KbdTestBcacheStatusTest(KbdBcacheTestCase):
+
+    def _get_size(self, bcache_name):
+        cache_dir = '/sys/block/%s/bcache/cache' % bcache_name
+
+        # sum sizes from all caches
+        caches = ['%s/%s' % (cache_dir, d) for d in os.listdir(cache_dir) if re.match('cache[0-9]*$', d)]
+        return sum(int(read_file(os.path.realpath(c) + '/../size')) for c in caches)
+
     @skip_on(("centos", "enterprise_linux"))
     def test_bcache_status(self):
         succ, dev = BlockDev.kbd_bcache_create(self.loop_dev, self.loop_dev2, None)
@@ -502,11 +512,14 @@ class KbdTestBcacheStatusTest(KbdBcacheTestCase):
         status = BlockDev.kbd_bcache_status("/dev/" + self.bcache_dev)
         self.assertTrue(status)
 
-        # check some basic values (default block size is 512)
+        # check some basic values
         self.assertTrue(status.state)
-        self.assertEqual(status.state, "clean")
-        self.assertEqual(status.block_size, 512)
-        self.assertGreater(status.cache_size, 0)
+        sys_state = read_file("/sys/block/%s/bcache/state" % self.bcache_dev).strip()
+        self.assertEqual(status.state, sys_state)
+        sys_block = read_file("/sys/block/%s/bcache/cache/block_size" % self.bcache_dev).strip()
+        self.assertEqual(status.block_size, int(bytesize.Size(sys_block)))
+        sys_size = self._get_size(self.bcache_dev)
+        self.assertGreater(status.cache_size, sys_size)
 
         succ = BlockDev.kbd_bcache_destroy(self.bcache_dev)
         self.assertTrue(succ)
