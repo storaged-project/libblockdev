@@ -3,10 +3,13 @@ from __future__ import division
 import unittest
 import os
 import six
+import re
 import time
 
+from distutils.version import LooseVersion
+
 import overrides_hack
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, skip_on, mount, umount
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, skip_on, mount, umount, run_command
 from gi.repository import GLib, BlockDev
 
 TEST_MNT = "/tmp/libblockdev_test_mnt"
@@ -54,6 +57,13 @@ class BtrfsTestCase(unittest.TestCase):
             # just move on, we can do no better here
             pass
         os.unlink(self.dev_file2)
+
+    def _get_btrfs_version(self):
+        _ret, out, _err = run_command("btrfs --version")
+        m = re.search(r"[Bb]trfs.* v([\d\.]+)", out)
+        if not m or len(m.groups()) != 1:
+            raise RuntimeError("Failed to determine btrfs version from: %s" % out)
+        return LooseVersion(m.groups()[0])
 
 class BtrfsTestCreateQuerySimple(BtrfsTestCase):
     def test_create_and_query_volume(self):
@@ -164,6 +174,10 @@ class BtrfsTestAddRemoveDevice(BtrfsTestCase):
 class BtrfsTestCreateDeleteSubvolume(BtrfsTestCase):
     def test_create_delete_subvolume(self):
         """Verify that it is possible to create/delete subvolume"""
+
+        btrfs_version = self._get_btrfs_version()
+        if btrfs_version >= LooseVersion('4.13.2'):
+            self.skipTest('subvolumes list is broken with btrfs-progs v4.13.2')
 
         succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None, None)
         self.assertTrue(succ)
