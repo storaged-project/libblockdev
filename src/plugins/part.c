@@ -254,7 +254,8 @@ static gboolean disk_commit (PedDisk *disk, const gchar *path, GError **error) {
     if (ret == 0) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to commit changes to device '%s'", path);
-        close (dev_fd);
+        if (dev_fd >= 0)
+            close (dev_fd);
         return FALSE;
     }
 
@@ -262,11 +263,13 @@ static gboolean disk_commit (PedDisk *disk, const gchar *path, GError **error) {
     if (ret == 0) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to inform OS about changes on the '%s' device", path);
-        close (dev_fd);
+        if (dev_fd >= 0)
+            close (dev_fd);
         return FALSE;
     }
 
-    close (dev_fd);
+    if (dev_fd >= 0)
+        close (dev_fd);
     return TRUE;
 }
 
