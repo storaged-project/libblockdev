@@ -779,7 +779,6 @@ BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error) {
         g_clear_error (error);
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
                      "Failed to get 'comp_algorithm' for '%s' zRAM device", device);
-        g_free (path);
         g_free (ret);
         return NULL;
     }
