@@ -670,17 +670,19 @@ gboolean bd_utils_check_util_version (const gchar *util, const gchar *version, c
 
         version_str = g_match_info_fetch (match_info, 1);
         g_match_info_free (match_info);
-        g_free (output);
     }
     else
-        version_str = g_strstrip (output);
+        version_str = g_strstrip (g_strdup (output));
 
     if (!version_str || (g_strcmp0 (version_str, "") == 0)) {
         g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_UTIL_UNKNOWN_VER,
                      "Failed to determine %s's version from: %s", util, output);
         g_free (version_str);
+        g_free (output);
         return FALSE;
     }
+
+    g_free (output);
 
     if (bd_utils_version_cmp (version_str, version, error) < 0) {
         /* smaller version or error */
