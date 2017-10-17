@@ -87,7 +87,7 @@ static gint config_file_cmp (gconstpointer a, gconstpointer b, gpointer user_dat
     const gchar *name1 = (const gchar *) a;
     const gchar *name2 = (const gchar *) b;
 
-    return g_strcmp0 (a, b);
+    return g_strcmp0 (name1, name2);
 }
 
 static GSequence* get_config_files (GError **error) {
@@ -161,7 +161,6 @@ static gboolean process_config_file (const gchar *config_file, GSList **plugins_
 static gboolean load_config (GSequence *config_files, GSList **plugins_sonames, GError **error) {
     GSequenceIter *config_file_iter = NULL;
     gchar *config_file = NULL;
-    BDPlugin i = 0;
 
     /* process config files one after another in order */
     config_file_iter = g_sequence_get_begin_iter (config_files);
