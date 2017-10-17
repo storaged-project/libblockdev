@@ -381,7 +381,8 @@ static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_nu
     if (guid_line) {
         guid_start = guid_line + 21; /* strlen("Partition GUID...") */
         space = strchr (guid_start, ' '); /* find the first space after the GUID */
-        *space = '\0';
+        if (space)
+            *space = '\0';
         ret = g_strdup (guid_start);
     }
 
