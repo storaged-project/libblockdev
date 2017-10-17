@@ -682,13 +682,15 @@ guint64 bd_lvm_get_thpool_meta_size (guint64 size, guint64 chunk_size, guint64 n
     }
 
     ret = g_ascii_strtoull (output, NULL, 0);
-    g_free (output);
     if (ret == 0) {
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
                      "Failed to parse number from thin_metadata_size's output: '%s'",
                      output);
+        g_free (output);
         return 0;
     }
+
+    g_free (output);
 
     return MAX (ret, BD_LVM_MIN_THPOOL_MD_SIZE);
 }
