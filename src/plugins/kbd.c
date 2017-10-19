@@ -97,9 +97,11 @@ gboolean bd_kbd_check_deps () {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wtype-limits"
     /* skip checking for 'make-bcache' (MUST BE LAST IN THE LIST OF DEPS!) */
+    /* coverity[unsigned_compare] */
     for (i=0; i < DEPS_LAST-1; i++) {
 #pragma GCC diagnostic pop
 #endif
+        /* coverity[dead_error_begin] */
         status = bd_utils_check_util_version (deps[i].name, deps[i].version,
                                               deps[i].ver_arg, deps[i].ver_regexp, &error);
         if (!status)
