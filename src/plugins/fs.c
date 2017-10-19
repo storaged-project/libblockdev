@@ -560,7 +560,7 @@ static gboolean parse_mount_error_old (struct libmnt_context *cxt, int rc, Mount
                              "%s is not a directory.", args->mountpoint);
                 break;
             case ENODEV:
-                if (strlen (args->fstype) == 0)
+                if (args->fstype == NULL || strlen (args->fstype) == 0)
                     g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                                  "Filesystem type not specified");
                 else
@@ -2539,7 +2539,7 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
     ret = g_new0 (BDFSXfsInfo, 1);
     lines = g_strsplit (output, "\n", 0);
     g_free (output);
-    for (line_p=lines; *line_p && (!have_label || !have_uuid); line_p++) {
+    for (line_p=lines; line_p && *line_p && (!have_label || !have_uuid); line_p++) {
         if (!have_label && g_str_has_prefix (*line_p, "label")) {
             /* extract label from something like this: label = "TEST_LABEL" */
             val_start = strchr (*line_p, '"');
@@ -2572,9 +2572,9 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
     g_free (output);
     line_p = lines;
     /* find the beginning of the (data) section we are interested in */
-    while (*line_p && !g_str_has_prefix (*line_p, "data"))
+    while (line_p && *line_p && !g_str_has_prefix (*line_p, "data"))
         line_p++;
-    if (!line_p) {
+    if (!line_p || !(*line_p)) {
         /* error is already populated */
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
         g_strfreev (lines);
