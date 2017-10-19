@@ -470,6 +470,10 @@ gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg
             g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
                          "Process reported exit code %d: %s", *proc_status, stderr_data->str);
             bd_utils_report_finished (progress_id, (*error)->message);
+            g_io_channel_shutdown (out_pipe, FALSE, error);
+            g_io_channel_unref (out_pipe);
+            g_io_channel_shutdown (err_pipe, FALSE, error);
+            g_io_channel_unref (err_pipe);
             g_string_free (stdout_data, TRUE);
             g_string_free (stderr_data, TRUE);
             return FALSE;
@@ -478,6 +482,10 @@ gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg
             g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
                          "Process killed with a signal");
             bd_utils_report_finished (progress_id, (*error)->message);
+            g_io_channel_shutdown (out_pipe, FALSE, error);
+            g_io_channel_unref (out_pipe);
+            g_io_channel_shutdown (err_pipe, FALSE, error);
+            g_io_channel_unref (err_pipe);
             g_string_free (stdout_data, TRUE);
             g_string_free (stderr_data, TRUE);
             return FALSE;
@@ -488,6 +496,10 @@ gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg
             g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
                          "Failed to wait for the process");
             bd_utils_report_finished (progress_id, (*error)->message);
+            g_io_channel_shutdown (out_pipe, FALSE, error);
+            g_io_channel_unref (out_pipe);
+            g_io_channel_shutdown (err_pipe, FALSE, error);
+            g_io_channel_unref (err_pipe);
             g_string_free (stdout_data, TRUE);
             g_string_free (stderr_data, TRUE);
             return FALSE;
