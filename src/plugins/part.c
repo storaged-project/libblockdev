@@ -1047,6 +1047,15 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
                (ped_part->geom.start > (PedSector) (start / dev->sector_size)))
             ped_part = ped_part->prev;
 
+        if (!ped_part) {
+            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                         "Failed to find suitable free region for a new logical partition.");
+            ped_disk_destroy (ped_disk);
+            ped_device_destroy (dev);
+            bd_utils_report_finished (progress_id, (*error)->message);
+            return NULL;
+        }
+
         if (ped_part->type == PED_PARTITION_EXTENDED) {
             /* can at minimal start where the first logical partition can start - the start of the extended partition + 1 MiB aligned up */
             if (start < ((ped_part->geom.start * dev->sector_size) + 1 MiB + dev->sector_size - 1))
