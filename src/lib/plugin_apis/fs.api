@@ -268,6 +268,51 @@ GType bd_fs_vfat_info_get_type () {
     return type;
 }
 
+/**
+ * BDFSNtfsInfo:
+ * @size: size of the filesystem in bytes
+ * @free_space: number of free space in the filesystem in bytes
+ */
+typedef struct BDFSNtfsInfo {
+    guint64 size;
+    guint64 free_space;
+} BDFSNtfsInfo;
+
+/**
+ * bd_fs_ntfs_info_copy: (skip)
+ *
+ * Creates a new copy of @data.
+ */
+BDFSNtfsInfo* bd_fs_ntfs_info_copy (BDFSNtfsInfo *data) {
+    BDFSNtfsInfo *ret = g_new0 (BDFSNtfsInfo, 1);
+
+    ret->size = data->size;
+    ret->free_space = data->free_space;
+
+    return ret;
+}
+
+/**
+ * bd_fs_ntfs_info_free: (skip)
+ *
+ * Frees @data.
+ */
+void bd_fs_ntfs_info_free (BDFSNtfsInfo *data) {
+    g_free (data);
+}
+
+GType bd_fs_ntfs_info_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDFSNtfsInfo",
+                                            (GBoxedCopyFunc) bd_fs_ntfs_info_copy,
+                                            (GBoxedFreeFunc) bd_fs_ntfs_info_free);
+    }
+
+    return type;
+}
+
 typedef enum {
     BD_FS_TECH_GENERIC = 0,
     BD_FS_TECH_MOUNT,
@@ -276,6 +321,7 @@ typedef enum {
     BD_FS_TECH_EXT4,
     BD_FS_TECH_XFS,
     BD_FS_TECH_VFAT,
+    BD_FS_TECH_NTFS
 } BDFSTech;
 
 typedef enum {
@@ -996,5 +1042,92 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error);
  * Tech category: %BD_FS_TECH_VFAT-%BD_FS_TECH_MODE_RESIZE
  */
 gboolean bd_fs_vfat_resize (const gchar *device, guint64 new_size, GError **error);
+
+/**
+ * bd_fs_ntfs_mkfs:
+ * @device: the device to create a new ntfs fs on
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
+ *                                                 passed to the 'mkntfs' utility)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether a new NTFS fs was successfully created on @device or not
+ *
+ * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_MKFS
+ */
+gboolean bd_fs_ntfs_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_fs_ntfs_wipe:
+ * @device: the device to wipe an ntfs signature from
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether an ntfs signature was successfully wiped from the @device or not
+ *
+ * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_WIPE
+ */
+gboolean bd_fs_ntfs_wipe (const gchar *device, GError **error);
+
+/**
+ * bd_fs_ntfs_check:
+ * @device: the device containing the file system to check
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether an ntfs file system on the @device is clean or not
+ *
+ * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_CHECK
+ */
+gboolean bd_fs_ntfs_check (const gchar *device, GError **error);
+
+/**
+ * bd_fs_ntfs_repair:
+ * @device: the device containing the file system to repair
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether an NTFS file system on the @device was successfully repaired
+ *          (if needed) or not (error is set in that case)
+ *
+ * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_REPAIR
+ */
+gboolean bd_fs_ntfs_repair (const gchar *device, GError **error);
+
+/**
+ * bd_fs_ntfs_set_label:
+ * @device: the device containing the file system to set the label for
+ * @label: label to set
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the label of the NTFS file system on the @device was
+ *          successfully set or not
+ *
+ * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_SET_LABEL
+ */
+gboolean bd_fs_ntfs_set_label (const gchar *device, const gchar *label, GError **error);
+
+/**
+ * bd_fs_ntfs_resize:
+ * @device: the device the file system of which to resize
+ * @new_size: new requested size for the file system in bytes (if 0, the file system
+ *            is adapted to the underlying block device)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the file system on @device was successfully resized or not
+ *
+ * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_RESIZE
+ */
+gboolean bd_fs_ntfs_resize (const gchar *device, guint64 new_size, GError **error);
+
+/**
+ * bd_fs_ntfs_get_info:
+ * @device: the device containing the file system to get info for (device must
+            not be mounted, trying to get info for a mounted device will result
+            in an error)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): information about the file system on @device or
+ *                           %NULL in case of error
+ *
+ * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_QUERY
+ */
+BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error);
 
 #endif  /* BD_FS_API */
