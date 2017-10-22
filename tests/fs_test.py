@@ -40,6 +40,16 @@ class FSTestCase(unittest.TestCase):
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
 
+        try:
+            cls.ntfs_avail = BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS,
+                                                       BlockDev.FSTechMode.MKFS |
+                                                       BlockDev.FSTechMode.RESIZE |
+                                                       BlockDev.FSTechMode.REPAIR |
+                                                       BlockDev.FSTechMode.CHECK |
+                                                       BlockDev.FSTechMode.SET_LABEL)
+        except:
+            cls.ntfs_avail = False
+
     def setUp(self):
         self.addCleanup(self._clean_up)
         self.dev_file = utils.create_sparse_tempfile("fs_test", 100 * 1024**2)
@@ -1134,6 +1144,12 @@ class GenericCheck(FSTestCase):
         """Test generic check function with an ext4 file system"""
         self._test_generic_check(mkfs_function=BlockDev.fs_xfs_mkfs)
 
+    def test_ntfs_generic_check(self):
+        """Test generic check function with an ntfs file system"""
+        if not self.ntfs_avail:
+            self.skipTest("skipping NTFS: not available")
+        self._test_generic_check(mkfs_function=BlockDev.fs_ntfs_mkfs)
+
 class GenericRepair(FSTestCase):
     def _test_generic_repair(self, mkfs_function):
         # clean the device
@@ -1154,6 +1170,12 @@ class GenericRepair(FSTestCase):
         """Test generic repair function with an xfs file system"""
         self._test_generic_repair(mkfs_function=BlockDev.fs_xfs_mkfs)
 
+    def test_ntfs_generic_repair(self):
+        """Test generic repair function with an ntfs file system"""
+        if not self.ntfs_avail:
+            self.skipTest("skipping NTFS: not available")
+        self._test_generic_repair(mkfs_function=BlockDev.fs_ntfs_mkfs)
+
 class GenericSetLabel(FSTestCase):
     def _test_generic_set_label(self, mkfs_function):
         # clean the device
@@ -1173,6 +1195,12 @@ class GenericSetLabel(FSTestCase):
     def test_xfs_generic_set_label(self):
         """Test generic set_label function with a xfs file system"""
         self._test_generic_set_label(mkfs_function=BlockDev.fs_xfs_mkfs)
+
+    def test_ntfs_generic_set_label(self):
+        """Test generic set_label function with a ntfs file system"""
+        if not self.ntfs_avail:
+            self.skipTest("skipping NTFS: not available")
+        self._test_generic_set_label(mkfs_function=BlockDev.fs_ntfs_mkfs)
 
 class GenericResize(FSTestCase):
     def _test_generic_resize(self, mkfs_function, fs_info_func=None, info_size_func=None):
@@ -1218,6 +1246,23 @@ class GenericResize(FSTestCase):
         self._test_generic_resize(mkfs_function=BlockDev.fs_ext4_mkfs,
                                   fs_info_func=BlockDev.fs_ext4_get_info,
                                   info_size_func=lambda fi: fi.block_size * fi.block_count)
+
+    def test_ntfs_generic_resize(self):
+        """Test generic resize function with an ntfs file system"""
+        if not self.ntfs_avail:
+            self.skipTest("skipping NTFS: not available")
+        def mkfs_prepare(drive, l):
+            return BlockDev.fs_ntfs_mkfs(drive, l) and BlockDev.fs_repair(drive)
+        def info_prepare(drive):
+            return BlockDev.fs_repair(drive) and BlockDev.fs_ntfs_get_info(drive)
+        def expected_size(fi):
+            # man ntfsresize says "The filesystem size is set to be at least one
+            # sector smaller" (maybe depending on alignment as well?), thus on a
+            # loop device as in this test it is 4096 bytes smaller than requested
+            return fi.size + 4096
+        self._test_generic_resize(mkfs_function=mkfs_prepare,
+                                  fs_info_func=info_prepare,
+                                  info_size_func=expected_size)
 
     def test_vfat_generic_resize(self):
         """Test generic resize function with a vfat file system"""
