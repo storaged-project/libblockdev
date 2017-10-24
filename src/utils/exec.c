@@ -468,7 +468,7 @@ gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg
             else
                 msg = stdout_data->str;
             g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
-                         "Process reported exit code %d: %s", *proc_status, stderr_data->str);
+                         "Process reported exit code %d: %s", *proc_status, msg);
             bd_utils_report_finished (progress_id, (*error)->message);
             g_io_channel_shutdown (out_pipe, FALSE, NULL);
             g_io_channel_unref (out_pipe);
