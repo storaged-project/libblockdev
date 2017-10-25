@@ -529,6 +529,14 @@ BDFSTech
 BDFSTechMode
 BDFsResizeFlags
 bd_fs_is_tech_avail
+BDFSNtfsInfo
+bd_fs_ntfs_check
+bd_fs_ntfs_get_info
+bd_fs_ntfs_mkfs
+bd_fs_ntfs_repair
+bd_fs_ntfs_resize
+bd_fs_ntfs_set_label
+bd_fs_ntfs_wipe
 </SECTION>
 
 <SECTION>

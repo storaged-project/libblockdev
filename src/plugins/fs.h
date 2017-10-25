@@ -62,9 +62,17 @@ typedef struct BDFSVfatInfo {
 BDFSVfatInfo* bd_fs_vfat_info_copy (BDFSVfatInfo *data);
 void bd_fs_vfat_info_free (BDFSVfatInfo *data);
 
+typedef struct BDFSNtfsInfo {
+    guint64 size;
+    guint64 free_space;
+} BDFSNtfsInfo;
+
+BDFSNtfsInfo* bd_fs_ntfs_info_copy (BDFSNtfsInfo *data);
+void bd_fs_ntfs_info_free (BDFSNtfsInfo *data);
+
 /* XXX: where the file systems start at the enum of technologies */
 #define FS_OFFSET 2
-#define LAST_FS 6
+#define LAST_FS 7
 typedef enum {
     BD_FS_TECH_GENERIC = 0,
     BD_FS_TECH_MOUNT   = 1,
@@ -73,6 +81,7 @@ typedef enum {
     BD_FS_TECH_EXT4    = 4,
     BD_FS_TECH_XFS     = 5,
     BD_FS_TECH_VFAT    = 6,
+    BD_FS_TECH_NTFS    = 7,
 } BDFSTech;
 
 /* XXX: number of the highest bit of all modes */
@@ -167,5 +176,13 @@ gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GErro
 gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError **error);
 BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error);
 gboolean bd_fs_vfat_resize (const gchar *device, guint64 new_size, GError **error);
+
+gboolean bd_fs_ntfs_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
+gboolean bd_fs_ntfs_wipe (const gchar *device, GError **error);
+gboolean bd_fs_ntfs_check (const gchar *device, GError **error);
+gboolean bd_fs_ntfs_repair (const gchar *device, GError **error);
+gboolean bd_fs_ntfs_set_label (const gchar *device, const gchar *label, GError **error);
+BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error);
+gboolean bd_fs_ntfs_resize (const gchar *device, guint64 new_size, GError **error);
 
 #endif  /* BD_PART */
