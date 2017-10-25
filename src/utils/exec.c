@@ -423,9 +423,9 @@ gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg
                     out_done = TRUE;
                 } else if (error && (*error)) {
                     bd_utils_report_finished (progress_id, (*error)->message);
-                    g_io_channel_shutdown (out_pipe, FALSE, error);
+                    g_io_channel_shutdown (out_pipe, FALSE, NULL);
                     g_io_channel_unref (out_pipe);
-                    g_io_channel_shutdown (err_pipe, FALSE, error);
+                    g_io_channel_shutdown (err_pipe, FALSE, NULL);
                     g_io_channel_unref (err_pipe);
                     g_string_free (stdout_data, TRUE);
                     g_string_free (stderr_data, TRUE);
@@ -445,9 +445,9 @@ gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg
                     err_done = TRUE;
                 } else if (error && (*error)) {
                     bd_utils_report_finished (progress_id, (*error)->message);
-                    g_io_channel_shutdown (out_pipe, FALSE, error);
+                    g_io_channel_shutdown (out_pipe, FALSE, NULL);
                     g_io_channel_unref (out_pipe);
-                    g_io_channel_shutdown (err_pipe, FALSE, error);
+                    g_io_channel_shutdown (err_pipe, FALSE, NULL);
                     g_io_channel_unref (err_pipe);
                     g_string_free (stdout_data, TRUE);
                     g_string_free (stderr_data, TRUE);
@@ -468,8 +468,12 @@ gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg
             else
                 msg = stdout_data->str;
             g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
-                         "Process reported exit code %d: %s", *proc_status, stderr_data->str);
+                         "Process reported exit code %d: %s", *proc_status, msg);
             bd_utils_report_finished (progress_id, (*error)->message);
+            g_io_channel_shutdown (out_pipe, FALSE, NULL);
+            g_io_channel_unref (out_pipe);
+            g_io_channel_shutdown (err_pipe, FALSE, NULL);
+            g_io_channel_unref (err_pipe);
             g_string_free (stdout_data, TRUE);
             g_string_free (stderr_data, TRUE);
             return FALSE;
@@ -478,6 +482,10 @@ gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg
             g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
                          "Process killed with a signal");
             bd_utils_report_finished (progress_id, (*error)->message);
+            g_io_channel_shutdown (out_pipe, FALSE, NULL);
+            g_io_channel_unref (out_pipe);
+            g_io_channel_shutdown (err_pipe, FALSE, NULL);
+            g_io_channel_unref (err_pipe);
             g_string_free (stdout_data, TRUE);
             g_string_free (stderr_data, TRUE);
             return FALSE;
@@ -488,6 +496,10 @@ gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg
             g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
                          "Failed to wait for the process");
             bd_utils_report_finished (progress_id, (*error)->message);
+            g_io_channel_shutdown (out_pipe, FALSE, NULL);
+            g_io_channel_unref (out_pipe);
+            g_io_channel_shutdown (err_pipe, FALSE, NULL);
+            g_io_channel_unref (err_pipe);
             g_string_free (stdout_data, TRUE);
             g_string_free (stderr_data, TRUE);
             return FALSE;
@@ -670,17 +682,19 @@ gboolean bd_utils_check_util_version (const gchar *util, const gchar *version, c
 
         version_str = g_match_info_fetch (match_info, 1);
         g_match_info_free (match_info);
-        g_free (output);
     }
     else
-        version_str = g_strstrip (output);
+        version_str = g_strstrip (g_strdup (output));
 
     if (!version_str || (g_strcmp0 (version_str, "") == 0)) {
         g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_UTIL_UNKNOWN_VER,
                      "Failed to determine %s's version from: %s", util, output);
         g_free (version_str);
+        g_free (output);
         return FALSE;
     }
+
+    g_free (output);
 
     if (bd_utils_version_cmp (version_str, version, error) < 0) {
         /* smaller version or error */

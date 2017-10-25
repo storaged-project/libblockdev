@@ -97,9 +97,11 @@ gboolean bd_kbd_check_deps () {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wtype-limits"
     /* skip checking for 'make-bcache' (MUST BE LAST IN THE LIST OF DEPS!) */
+    /* coverity[unsigned_compare] */
     for (i=0; i < DEPS_LAST-1; i++) {
 #pragma GCC diagnostic pop
 #endif
+        /* coverity[dead_error_begin] */
         status = bd_utils_check_util_version (deps[i].name, deps[i].version,
                                               deps[i].ver_arg, deps[i].ver_regexp, &error);
         if (!status)
@@ -779,7 +781,6 @@ BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error) {
         g_clear_error (error);
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_INVAL,
                      "Failed to get 'comp_algorithm' for '%s' zRAM device", device);
-        g_free (path);
         g_free (ret);
         return NULL;
     }
@@ -882,7 +883,9 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
     for (i=0; lines[i] && n < 2; i++) {
         success = g_regex_match (regex, lines[i], 0, &match_info);
         if (success) {
-            strcpy (device_uuid[n++], g_match_info_fetch (match_info, 1));
+            strncpy (device_uuid[n], g_match_info_fetch (match_info, 1), 63);
+            device_uuid[n][63] = '\0';
+            n++;
             g_match_info_free (match_info);
         }
     }

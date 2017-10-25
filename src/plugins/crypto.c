@@ -328,13 +328,22 @@ static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 k
     /* wait for enough random data entropy (if requested) */
     if (min_entropy > 0) {
         dev_random_fd = open ("/dev/random", O_RDONLY);
-        ioctl (dev_random_fd, RNDGETENTCNT, &current_entropy);
-        while (current_entropy < min_entropy) {
-            bd_utils_report_progress (progress_id, 0, "Waiting for enough random data entropy");
-            sleep (1);
+        if (dev_random_fd >= 0) {
             ioctl (dev_random_fd, RNDGETENTCNT, &current_entropy);
+            while (current_entropy < min_entropy) {
+                bd_utils_report_progress (progress_id, 0, "Waiting for enough random data entropy");
+                sleep (1);
+                ioctl (dev_random_fd, RNDGETENTCNT, &current_entropy);
+            }
+            close (dev_random_fd);
+        } else {
+            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
+                         "Failed to check random data entropy level");
+            crypt_free (cd);
+            g_strfreev (cipher_specs);
+            bd_utils_report_finished (progress_id, (*error)->message);
+            return FALSE;
         }
-        close (dev_random_fd);
     }
 
     ret = crypt_format (cd, CRYPT_LUKS1, cipher_specs[0], cipher_specs[1],
@@ -682,7 +691,7 @@ gboolean bd_crypto_luks_add_key (const gchar *device, const gchar *pass, const g
         buf_len = strlen (pass);
 
     if (nkey_file) {
-        success = g_file_get_contents (nkey_file, &key_buf, &nbuf_len, error);
+        success = g_file_get_contents (nkey_file, &nkey_buf, &nbuf_len, error);
         if (!success) {
             g_prefix_error (error, "Failed to load key from file '%s': ", nkey_file);
             return FALSE;

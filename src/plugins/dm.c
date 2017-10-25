@@ -446,6 +446,9 @@ static gboolean raid_dev_matches_spec (struct raid_dev *raid_dev, const gchar *n
     /* if we don't have the name, we cannot check any match */
     g_return_val_if_fail (dev_name, FALSE);
 
+    /* g_return_val_if_fail above checks value of dev_name and returns FALSE if
+     * it is NULL so we don't need to check it here */
+    /* coverity[var_deref_model] */
     if (name && strcmp (dev_name, name) != 0) {
         return FALSE;
     }

@@ -254,7 +254,8 @@ static gboolean disk_commit (PedDisk *disk, const gchar *path, GError **error) {
     if (ret == 0) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to commit changes to device '%s'", path);
-        close (dev_fd);
+        if (dev_fd >= 0)
+            close (dev_fd);
         return FALSE;
     }
 
@@ -262,11 +263,13 @@ static gboolean disk_commit (PedDisk *disk, const gchar *path, GError **error) {
     if (ret == 0) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to inform OS about changes on the '%s' device", path);
-        close (dev_fd);
+        if (dev_fd >= 0)
+            close (dev_fd);
         return FALSE;
     }
 
-    close (dev_fd);
+    if (dev_fd >= 0)
+        close (dev_fd);
     return TRUE;
 }
 
@@ -378,7 +381,8 @@ static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_nu
     if (guid_line) {
         guid_start = guid_line + 21; /* strlen("Partition GUID...") */
         space = strchr (guid_start, ' '); /* find the first space after the GUID */
-        *space = '\0';
+        if (space)
+            *space = '\0';
         ret = g_strdup (guid_start);
     }
 
@@ -1042,6 +1046,15 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
         while (ped_part && (ped_part->type != PED_PARTITION_EXTENDED) &&
                (ped_part->geom.start > (PedSector) (start / dev->sector_size)))
             ped_part = ped_part->prev;
+
+        if (!ped_part) {
+            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                         "Failed to find suitable free region for a new logical partition.");
+            ped_disk_destroy (ped_disk);
+            ped_device_destroy (dev);
+            bd_utils_report_finished (progress_id, (*error)->message);
+            return NULL;
+        }
 
         if (ped_part->type == PED_PARTITION_EXTENDED) {
             /* can at minimal start where the first logical partition can start - the start of the extended partition + 1 MiB aligned up */

@@ -602,7 +602,7 @@ static gboolean parse_mount_error_old (struct libmnt_context *cxt, int rc, Mount
                              "%s is not a directory.", args->mountpoint);
                 break;
             case ENODEV:
-                if (strlen (args->fstype) == 0)
+                if (args->fstype == NULL || strlen (args->fstype) == 0)
                     g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                                  "Filesystem type not specified");
                 else
@@ -1355,7 +1355,7 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
 
     /* we may need to try mutliple times with some delays in case the device is
        busy at the very moment */
-    for (n_try=5, status=-1; (status != 0 || status != 1) && (n_try > 0); n_try--) {
+    for (n_try=5, status=-1; !(status == 0 || status == 1) && (n_try > 0); n_try--) {
         status = blkid_do_safeprobe (probe);
         if (status < 0)
             g_usleep (100 * 1000); /* microseconds */
@@ -1378,6 +1378,8 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
     if (status != 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to get usage for the device '%s'", device);
+        blkid_free_probe (probe);
+        synced_close (fd);
         return NULL;
     }
 
@@ -1393,6 +1395,8 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
     if (status != 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to get filesystem type for the device '%s'", device);
+        blkid_free_probe (probe);
+        synced_close (fd);
         return NULL;
     }
 
@@ -2587,7 +2591,7 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
     ret = g_new0 (BDFSXfsInfo, 1);
     lines = g_strsplit (output, "\n", 0);
     g_free (output);
-    for (line_p=lines; *line_p && (!have_label || !have_uuid); line_p++) {
+    for (line_p=lines; line_p && *line_p && (!have_label || !have_uuid); line_p++) {
         if (!have_label && g_str_has_prefix (*line_p, "label")) {
             /* extract label from something like this: label = "TEST_LABEL" */
             val_start = strchr (*line_p, '"');
@@ -2620,9 +2624,9 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
     g_free (output);
     line_p = lines;
     /* find the beginning of the (data) section we are interested in */
-    while (*line_p && !g_str_has_prefix (*line_p, "data"))
+    while (line_p && *line_p && !g_str_has_prefix (*line_p, "data"))
         line_p++;
-    if (!line_p) {
+    if (!line_p || !(*line_p)) {
         /* error is already populated */
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
         g_strfreev (lines);
@@ -2828,6 +2832,7 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
     guint64 full_cluster_count = 0;
     guint64 cluster_count = 0;
     gchar **key_val = NULL;
+    gint scanned = 0;
 
     if (!check_deps (&avail_deps, DEPS_FSCKVFAT_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
@@ -2913,8 +2918,13 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
             have_cluster_size = TRUE;
         } else if (!have_cluster_count && g_str_has_prefix (*line_p, device)) {
             key_val = g_strsplit (*line_p, ",", 2);
-            sscanf (key_val[1], " %" G_GUINT64_FORMAT "/" "%" G_GUINT64_FORMAT " clusters",
-                    &full_cluster_count, &cluster_count);
+            scanned = sscanf (key_val[1], " %" G_GUINT64_FORMAT "/" "%" G_GUINT64_FORMAT " clusters",
+                              &full_cluster_count, &cluster_count);
+            if (scanned != 2) {
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Failed to get number of FAT clusters for '%s'", device);
+                return FALSE;
+            }
             ret->cluster_count = cluster_count;
             ret->free_cluster_count = cluster_count - full_cluster_count;
             have_cluster_count = TRUE;

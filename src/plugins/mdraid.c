@@ -1124,14 +1124,17 @@ gchar* bd_md_canonicalize_uuid (const gchar *uuid, GError **error) {
     GRegex *regex = NULL;
 
     regex = g_regex_new ("[0-9a-f]{8}:[0-9a-f]{8}:[0-9a-f]{8}:[0-9a-f]{8}", 0, 0, error);
-    if (!regex)
+    if (!regex) {
         /* error is already populated */
+        g_free (ret);
         return NULL;
+    }
 
     if (!g_regex_match (regex, uuid, 0, NULL)) {
         g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_BAD_FORMAT,
                      "malformed or invalid UUID: %s", uuid);
         g_regex_unref (regex);
+        g_free (ret);
         return NULL;
     }
     g_regex_unref (regex);
@@ -1196,14 +1199,17 @@ gchar* bd_md_get_md_uuid (const gchar *uuid, GError **error) {
     GRegex *regex = NULL;
 
     regex = g_regex_new ("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", 0, 0, error);
-    if (!regex)
+    if (!regex) {
         /* error is already populated */
+        g_free (ret);
         return NULL;
+    }
 
     if (!g_regex_match (regex, uuid, 0, NULL)) {
         g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_BAD_FORMAT,
                      "malformed or invalid UUID: %s", uuid);
         g_regex_unref (regex);
+        g_free (ret);
         return NULL;
     }
     g_regex_unref (regex);
