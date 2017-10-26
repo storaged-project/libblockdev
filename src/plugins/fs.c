@@ -3204,9 +3204,9 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
     g_free (output);
     line_p = lines;
     /* find the beginning of the (data) section we are interested in */
-    while (*line_p && !g_str_has_prefix (*line_p, "bytes per volume"))
+    while (line_p && *line_p && !g_str_has_prefix (*line_p, "bytes per volume"))
         line_p++;
-    if (!line_p) {
+    if (!line_p || !(*line_p)) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NTFS file system information");
         g_strfreev (lines);
         bd_fs_ntfs_info_free (ret);
@@ -3218,9 +3218,9 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
     val_start++;
     ret->size = g_ascii_strtoull (val_start, NULL, 0);
 
-    while (*line_p && !g_str_has_prefix (*line_p, "bytes of free space"))
+    while (line_p && *line_p && !g_str_has_prefix (*line_p, "bytes of free space"))
         line_p++;
-    if (!line_p) {
+    if (!line_p || !(*line_p)) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NTFS file system information");
         g_strfreev (lines);
         bd_fs_ntfs_info_free (ret);
