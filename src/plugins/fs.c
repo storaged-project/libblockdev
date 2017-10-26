@@ -509,7 +509,13 @@ static void parse_unmount_error_new (struct libmnt_context *cxt, int rc, const g
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                              "%s", buf);
         }
-    }
+    } else
+        /* mnt_context_umount returned non-zero, but mnt_context_get_excode
+         * returned zero -- this should never happen, but just in case set error
+         * to something sane here
+         */
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Unknow error when unmounting %s", spec);
     return;
 }
 #endif
