@@ -1160,13 +1160,15 @@ guint64 bd_lvm_get_thpool_meta_size (guint64 size, guint64 chunk_size, guint64 n
     }
 
     ret = g_ascii_strtoull (output, NULL, 0);
-    g_free (output);
     if (ret == 0) {
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
                      "Failed to parse number from thin_metadata_size's output: '%s'",
                      output);
+        g_free (output);
         return 0;
     }
+
+    g_free (output);
 
     return MAX (ret, BD_LVM_MIN_THPOOL_MD_SIZE);
 }
@@ -2153,16 +2155,22 @@ static gboolean filter_lvs_by_vg (const gchar **lvs, const gchar *vg_name, GSLis
             if (!lv_vg_name) {
                 g_free ((gchar *) *lv_p);
                 success = FALSE;
+                continue;
             }
-        }
-        if (!vg_name || g_strcmp0 (lv_vg_name, vg_name) == 0) {
+
+            if (g_strcmp0 (lv_vg_name, vg_name) == 0) {
+                *out = g_slist_prepend (*out, (gchar *) *lv_p);
+                (*n_lvs)++;
+            } else {
+                g_free ((gchar *) *lv_p);
+                *lv_p = NULL;
+            }
+
+            g_free (lv_vg_name);
+        } else {
             *out = g_slist_prepend (*out, (gchar *) *lv_p);
             (*n_lvs)++;
-        } else {
-            g_free ((gchar *) *lv_p);
-            *lv_p = NULL;
         }
-        g_free (lv_vg_name);
     }
     return success;
 }
