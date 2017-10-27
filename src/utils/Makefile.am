@@ -7,4 +7,7 @@ libbd_utils_la_SOURCES = utils.h exec.c exec.h sizes.h extra_arg.c extra_arg.h d
 libincludedir = $(includedir)/blockdev
 libinclude_HEADERS = utils.h exec.h sizes.h extra_arg.h dev_utils.h
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = ${builddir}/blockdev-utils.pc
+
 MAINTAINERCLEANFILES = Makefile.in
