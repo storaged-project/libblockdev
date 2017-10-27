@@ -6,6 +6,6 @@ libdir=@libdir@
 Name: BlockDev
 Description: Library for doing low-level operations with block devices
 URL: https://github.com/rhinstaller/libblockdev
-Version: 2.0
+Version: @VERSION@
 Requires: glib-2.0
 Libs: -lblockdev
