@@ -31,6 +31,7 @@ missing
 src/lib/.deps/
 src/lib/blockdev.c
 src/lib/blockdev.pc
+src/utils/blockdev-utils.pc
 **/*.deps
 **/*.libs
 **/*.la
