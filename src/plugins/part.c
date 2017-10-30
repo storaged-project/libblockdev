@@ -392,6 +392,8 @@ static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_nu
 
         if (flags_mask & 1) /* 1 << 0 */
             *flags |= BD_PART_FLAG_GPT_SYSTEM_PART;
+        if (flags_mask & 4) /* 1 << 2 */
+            *flags |= BD_PART_FLAG_LEGACY_BOOT;
         if (flags_mask & 0x1000000000000000) /* 1 << 60 */
             *flags |= BD_PART_FLAG_GPT_READ_ONLY;
         if (flags_mask & 0x4000000000000000) /* 1 << 62 */
@@ -1317,6 +1319,8 @@ static gboolean set_gpt_flag (const gchar *device, int part_num, BDPartFlag flag
 
     if (flag == BD_PART_FLAG_GPT_SYSTEM_PART)
         bit_num = 0;
+    else if (flag == BD_PART_FLAG_LEGACY_BOOT)
+        bit_num = 2;
     else if (flag == BD_PART_FLAG_GPT_READ_ONLY)
         bit_num = 60;
     else if (flag == BD_PART_FLAG_GPT_HIDDEN)
@@ -1342,6 +1346,8 @@ static gboolean set_gpt_flags (const gchar *device, int part_num, guint64 flags,
 
     if (flags & BD_PART_FLAG_GPT_SYSTEM_PART)
         real_flags |=  1;       /* 1 << 0 */
+    if (flags & BD_PART_FLAG_LEGACY_BOOT)
+        real_flags |=  4;       /* 1 << 2 */
     if (flags & BD_PART_FLAG_GPT_READ_ONLY)
         real_flags |= 0x1000000000000000; /* 1 << 60 */
     if (flags & BD_PART_FLAG_GPT_HIDDEN)
