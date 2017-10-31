@@ -66,7 +66,7 @@
 %define configure_opts %{?distro_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?gi_copts}
 
 Name:        libblockdev
-Version:     2.13
+Version:     2.14
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -797,6 +797,44 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Tue Oct 31 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.14-1
+- Support the legacy boot GPT flag (intrigeri)
+- Respect the version in the blockdev.pc file (vpodzime)
+- Add pkgconfig definitions for the utils library (vpodzime)
+- fs.c: Fix potential NULL pointer dereference (vtrefny)
+- dm.c: Fix uninitialized values in various dm plugin functions (vtrefny)
+- dm.c: Check return values of dm_task_set_name/run/get_info functions (vtrefny)
+- fs.c: Fix multiple "forward NULL" warnings in 'bd_fs_ntfs_get_info' (vtrefny)
+- lvm-dbus.c: Fix multiple "use after free" coverity warnings (vtrefny)
+- Fix duplicate 'const' in generated functions (vtrefny)
+- Add some test cases for NTFS (kailueke)
+- Add function wrappers for NTFS tools (kailueke)
+- exec.c: Fix error message in 'bd_utils_exec_and_report_progress' (vtrefny)
+- crypto.c: Fix waiting for enough entropy (vtrefny)
+- Ignore some coverity false positive errors (vtrefny)
+- exec.c: Ignore errors from 'g_io_channel_shutdown' (vtrefny)
+- part.c: Check if we've found a place to put new logical partitions (vtrefny)
+- kbd.c: Fix potential string overflow in 'bd_kbd_bcache_create' (vtrefny)
+- exec.c: Fix resource leaks in 'bd_utils_exec_and_report_progress' (vtrefny)
+- fs.c: Fix "forward null" in 'do_mount' and 'bd_fs_xfs_get_info' (vtrefny)
+- part.c: Fix possible NULL pointer dereference (vtrefny)
+- crypto.c: Use right key buffer in 'bd_crypto_luks_add_key' (vtrefny)
+- exec.c: Fix "use after free" in 'bd_utils_check_util_version' (vtrefny)
+- kbd.c: Fix double free in 'bd_kbd_zram_get_stats' (vtrefny)
+- part.c: Check if file discriptor is >= 0 before closing it (vtrefny)
+- mdraid.c: Fix resource leaks (vtrefny)
+- lvm.c: Fix "use after free" in 'bd_lvm_get_thpool_meta_size' (vtrefny)
+- fs.c: Fix for loop condition in 'bd_fs_get_fstype' (vtrefny)
+- fs.c: Check sscanf return value in 'bd_fs_vfat_get_info' (vtrefny)
+- fs.c: Fix resource leaks in 'bd_fs_get_fstype' (vtrefny)
+- blockdev.c.in: Fix unused variables (vtrefny)
+- Use libbytesize to parse bcache block size (vtrefny)
+- Use system values in KbdTestBcacheStatusTest (vtrefny)
+- Fix BSSize memory leaks in btrfs and mdraid plugins (vtrefny)
+- Skip btrfs subvolume tests with btrfs-progs 4.13.2 (vtrefny)
+- Added function to get DM device subsystem (japokorn)
+- Sync spec with downstream (vpodzime)
+
 * Fri Sep 29 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.13-1
 - Fix the rpmlog and shortlog targets (vpodzime)
 - Add a function for enabling/disabling plugins' init checks (vpodzime)
