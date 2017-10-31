@@ -303,9 +303,9 @@ gchar* bd_dm_get_subsystem_from_name (const gchar *device_name, GError **error) 
 gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean active_only, GError **error) {
     struct dm_task *task_list = NULL;
     struct dm_task *task_info = NULL;
-	struct dm_names *names = NULL;
+    struct dm_names *names = NULL;
     struct dm_info info;
-	guint64 next = 0;
+    guint64 next = 0;
     gboolean ret = FALSE;
 
     if (geteuid () != 0) {
@@ -315,15 +315,14 @@ gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean a
     }
 
     task_list = dm_task_create(DM_DEVICE_LIST);
-	if (!task_list) {
-        g_warning ("Failed to create DM task");
+    if (!task_list) {
         g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
                      "Failed to create DM task");
         return FALSE;
     }
 
     dm_task_run(task_list);
-	names = dm_task_get_names(task_list);
+    names = dm_task_get_names(task_list);
 
     if (!names || !names->dev)
         return FALSE;
@@ -339,19 +338,30 @@ gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean a
         /* get device info */
         task_info = dm_task_create(DM_DEVICE_INFO);
         if (!task_info) {
-            g_warning ("Failed to create DM task");
             g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
                          "Failed to create DM task");
             break;
         }
 
-        dm_task_set_name(task_info, names->name);
-        dm_task_run(task_info);
-        dm_task_get_info(task_info, &info);
-
-        if (!info.exists)
-            /* doesn't exist, try next one */
+        /* something failed, try next one */
+        if (dm_task_set_name (task_info, names->name) == 0) {
+            dm_task_destroy (task_info);
             continue;
+        }
+        if (dm_task_run (task_info) == 0) {
+            dm_task_destroy (task_info);
+            continue;
+        }
+        if (dm_task_get_info (task_info, &info) == 0) {
+            dm_task_destroy (task_info);
+            continue;
+        }
+
+        if (!info.exists) {
+            /* doesn't exist, try next one */
+            dm_task_destroy (task_info);
+            continue;
+        }
 
         /* found existing name match, let's test the restrictions */
         ret = TRUE;
@@ -478,8 +488,8 @@ static gboolean raid_dev_matches_spec (struct raid_dev *raid_dev, const gchar *n
  * find_raid_sets_for_dev: (skip)
  */
 static void find_raid_sets_for_dev (const gchar *name, const gchar *uuid, gint major, gint minor, struct lib_context *lc, struct raid_set *rs, GPtrArray *ret_sets) {
-    struct raid_set *subset;
-    struct raid_dev *dev;
+    struct raid_set *subset = NULL;
+    struct raid_dev *dev = NULL;
 
     if (T_GROUP(rs) || !list_empty(&(rs->sets))) {
         for_each_subset (rs, subset)
@@ -572,8 +582,8 @@ static struct raid_set* rs_matches_name (struct raid_set *rs, gpointer *name_dat
 
 static gboolean change_set_by_name (const gchar *name, enum activate_type action, GError **error) {
     gint rc = 0;
-    struct lib_context *lc;
-    struct raid_set *iter_rs;
+    struct lib_context *lc = NULL;
+    struct raid_set *iter_rs = NULL;
     struct raid_set *match_rs = NULL;
 
     lc = init_dmraid_stack (error);
@@ -660,8 +670,8 @@ gboolean bd_dm_deactivate_raid_set (const gchar *name, GError **error) {
  * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_QUERY
  */
 gchar* bd_dm_get_raid_set_type (const gchar *name, GError **error) {
-    struct lib_context *lc;
-    struct raid_set *iter_rs;
+    struct lib_context *lc = NULL;
+    struct raid_set *iter_rs = NULL;
     struct raid_set *match_rs = NULL;
     const gchar *type = NULL;
 
