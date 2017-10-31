@@ -154,15 +154,15 @@ gboolean bd_s390_is_tech_avail (BDS390Tech tech, guint64 mode, GError **error) {
  */
 gboolean bd_s390_dasd_format (const gchar *dasd, const BDExtraArg **extra, GError **error) {
     gboolean rc = FALSE;
-    gchar *dev = NULL;
-    const gchar *argv[8] = {"/sbin/dasdfmt", "-y", "-d", "cdl", "-b", "4096", dev, NULL};
+    const gchar *argv[8] = {"/sbin/dasdfmt", "-y", "-d", "cdl", "-b", "4096", NULL, NULL};
 
     if (!check_deps (&avail_deps, DEPS_DASDFMT_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
 
-    dev = g_strdup_printf ("/dev/%s", dasd);
+    argv[6] = g_strdup_printf ("/dev/%s", dasd);
+
     rc = bd_utils_exec_and_report_error (argv, extra, error);
-    g_free (dev);
+    g_free ((gchar *) argv[6]);
     return rc;
 }
 
