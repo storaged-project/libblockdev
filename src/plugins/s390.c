@@ -353,13 +353,8 @@ gboolean bd_s390_dasd_is_ldl (const gchar *dasd, GError **error) {
         return FALSE;
     }
 
-    /* check dasd volume label; "VOL1" is a CDL formatted DASD, won't require formatting */
-    if (dasd_info.format == DASD_FORMAT_CDL) {
-        return FALSE;
-    }
-    else {
-        return TRUE;
-    }
+    /* check dasd format */
+    return dasd_info.format == DASD_FORMAT_LDL;
 }
 
 /**
