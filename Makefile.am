@@ -101,7 +101,7 @@ coverage-all: all
 
 tag:
 	TAG="$(PACKAGE_VERSION)-1" ; \
-	git tag -a -s -m "Tag as $$TAG" -f "$$TAG" ; \
+	git tag -a -s -m "Tag as $$TAG" -f "$$TAG" && \
 	echo "Tagged as $$TAG"
 
 rpmlog:
