@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import os
 import re
 import glob
@@ -6,6 +8,7 @@ import tempfile
 import dbus
 import unittest
 import time
+import sys
 from contextlib import contextmanager
 from itertools import chain
 
@@ -313,6 +316,30 @@ def requires_locales(locales):
         return decorated
 
     return decorator
+
+
+# taken from udisks2/src/tests/dbus-tests/udiskstestcase.py
+def unstable_test(test):
+    """Decorator for unstable tests
+
+    Failures of tests decorated with this decorator are silently ignored unless
+    the ``UNSTABLE_TESTS_FATAL`` environment variable is defined.
+    """
+
+    def decorated_test(*args):
+        try:
+            test(*args)
+        except unittest.SkipTest:
+            # make sure skipped tests are just skipped as usual
+            raise
+        except:
+            # and swallow everything else, just report a failure of an unstable
+            # test, unless told otherwise
+            if "UNSTABLE_TESTS_FATAL" in os.environ:
+                raise
+            print("unstable-fail...", end="", file=sys.stderr)
+
+    return decorated_test
 
 
 def run(cmd_string):

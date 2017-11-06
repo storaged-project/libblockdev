@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 from contextlib import contextmanager
 import utils
-from utils import run, create_sparse_tempfile, mount, umount
+from utils import run, create_sparse_tempfile, mount, umount, unstable_test
 import six
 import overrides_hack
 
@@ -1264,6 +1264,7 @@ class GenericResize(FSTestCase):
                                   fs_info_func=info_prepare,
                                   info_size_func=expected_size)
 
+    @unstable_test
     def test_vfat_generic_resize(self):
         """Test generic resize function with a vfat file system"""
         self._test_generic_resize(mkfs_function=BlockDev.fs_vfat_mkfs)
