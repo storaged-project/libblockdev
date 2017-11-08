@@ -1,3 +1,7 @@
+if WITH_FS
+SUBDIRS = . fs
+endif
+
 lib_LTLIBRARIES =
 
 if WITH_BTRFS
@@ -47,11 +51,6 @@ endif
 if WITH_PART
 lib_LTLIBRARIES += libbd_part.la
 endif
-
-if WITH_FS
-lib_LTLIBRARIES += libbd_fs.la
-endif
-
 
 if WITH_S390
 lib_LTLIBRARIES += libbd_s390.la
@@ -156,14 +155,6 @@ libbd_part_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_part_la_SOURCES = part.c part.h check_deps.c check_deps.h
 endif
 
-if WITH_FS
-libbd_fs_la_CFLAGS = $(GLIB_CFLAGS) $(BLKID_CFLAGS) $(PARTED_CFLAGS) $(PARTED_FS_CFLAGS) $(MOUNT_CFLAGS) -Wall -Wextra -Werror
-libbd_fs_la_LIBADD = $(GLIB_LIBS) $(BLKID_LIBS) $(PARTED_LIBS) $(PARTED_FS_LIBS) $(MOUNT_LIBS) ${builddir}/../utils/libbd_utils.la ${builddir}/libbd_part_err.la
-libbd_fs_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
-libbd_fs_la_CPPFLAGS = -I${builddir}/../../include/
-libbd_fs_la_SOURCES = fs.c fs.h check_deps.c check_deps.h
-endif
-
 if WITH_PART_O_WITH_FS
 libbd_part_err_la_CFLAGS = $(GLIB_CFLAGS) $(PARTED_CFLAGS) $(PARTED_FS_CFLAGS) -Wall -Wextra -Werror
 libbd_part_err_la_LIBADD = $(GLIB_LIBS) $(PARTED_LIBS) $(PARTED_FS_LIBS) ${builddir}/../utils/libbd_utils.la
@@ -213,10 +204,6 @@ endif
 
 if WITH_PART
 libinclude_HEADERS += part.h
-endif
-
-if WITH_FS
-libinclude_HEADERS += fs.h
 endif
 
 noinst_HEADERS = part_err.h

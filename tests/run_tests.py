@@ -10,7 +10,7 @@ import subprocess
 import sys
 import unittest
 
-LIBDIRS = 'src/utils/.libs:src/plugins/.libs:src/lib/.libs'
+LIBDIRS = 'src/utils/.libs:src/plugins/.libs:src/plugins/fs/.libs:src/lib/.libs'
 GIDIR = 'src/lib'
 
 
