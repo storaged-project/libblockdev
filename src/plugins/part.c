@@ -926,7 +926,7 @@ static PedPartition* add_part_to_disk (PedDevice *dev, PedDisk *disk, BDPartType
         return NULL;
     }
 
-    part = ped_partition_new (disk, type, NULL, geom->start, geom->end);
+    part = ped_partition_new (disk, (PedPartitionType)type, NULL, geom->start, geom->end);
     if (!part) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to create new partition on device '%s'", dev->path);
@@ -1562,7 +1562,7 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
     PedPartition *ped_part = NULL;
     const gchar *part_num_str = NULL;
     gint part_num = 0;
-    guint64 i = 0;
+    int i = 0;
     gint status = 0;
     gboolean ret = FALSE;
     guint64 progress_id = 0;
