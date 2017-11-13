@@ -50,6 +50,32 @@ static UtilDep deps[DEPS_LAST] = {
     {"xfs_growfs", NULL, NULL, NULL},
 };
 
+static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
+    /*   mkfs          wipe     check               repair                set-label            query                resize */
+    DEPS_MKFSXFS_MASK,  0, DEPS_XFS_DB_MASK,   DEPS_XFS_REPAIR_MASK, DEPS_XFS_ADMIN_MASK, DEPS_XFS_ADMIN_MASK, DEPS_XFS_GROWFS_MASK
+};
+
+#define UNUSED __attribute__((unused))
+
+/**
+ * bd_fs_xfs_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation (#BDFSTechMode) for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is available -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_fs_xfs_is_tech_avail (BDFSTech tech UNUSED, guint64 mode, GError **error) {
+    guint32 required = 0;
+    guint i = 0;
+    for (i = 0; i <= BD_FS_MODE_LAST; i++)
+        if (mode & (1 << i))
+            required |= fs_mode_util[i];
+
+    return check_deps (&avail_deps, required, deps, DEPS_LAST, &deps_check_lock, error);
+}
+
 /**
  * bd_fs_xfs_info_copy: (skip)
  *

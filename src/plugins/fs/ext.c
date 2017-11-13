@@ -52,6 +52,32 @@ static UtilDep deps[DEPS_LAST] = {
     {"resize2fs", NULL, NULL, NULL},
 };
 
+static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
+    /*   mkfs          wipe     check               repair                set-label            query                resize */
+    DEPS_MKE2FS_MASK,   0, DEPS_E2FSCK_MASK,   DEPS_E2FSCK_MASK,     DEPS_TUNE2FS_MASK,   DEPS_DUMPE2FS_MASK,  DEPS_RESIZE2FS_MASK
+};
+
+#define UNUSED __attribute__((unused))
+
+/**
+ * bd_fs_ext_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation (#BDFSTechMode) for @tech
+ * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is available -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_fs_ext_is_tech_avail (BDFSTech tech UNUSED, guint64 mode, GError **error) {
+    guint32 required = 0;
+    guint i = 0;
+    for (i = 0; i <= BD_FS_MODE_LAST; i++)
+        if (mode & (1 << i))
+            required |= fs_mode_util[i];
+
+    return check_deps (&avail_deps, required, deps, DEPS_LAST, &deps_check_lock, error);
+}
+
 /**
  * bd_fs_ext2_info_copy: (skip)
  *
