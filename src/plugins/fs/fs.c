@@ -34,6 +34,11 @@
  * A plugin for operations with file systems
  */
 
+extern gboolean bd_fs_ext_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
+extern gboolean bd_fs_xfs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
+extern gboolean bd_fs_vfat_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
+extern gboolean bd_fs_ntfs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
+
 /**
  * bd_fs_error_quark: (skip)
  */
@@ -51,7 +56,33 @@ GQuark bd_fs_error_quark (void)
  *
  */
 gboolean bd_fs_check_deps () {
-    return TRUE;
+    gboolean ret = TRUE;
+    guint i = 0;
+    GError *error = NULL;
+
+    for (i = BD_FS_TECH_EXT2; i <= BD_FS_TECH_EXT4; i++) {
+        ret = ret && bd_fs_ext_is_tech_avail (i, 0xffffffff, &error);
+        if (!ret && error) {
+            g_warning ("%s", error->message);
+            g_clear_error (&error);
+        }
+    }
+    ret = ret && bd_fs_xfs_is_tech_avail (BD_FS_TECH_XFS, 0xffffffff, &error);
+    if (!ret && error) {
+        g_warning ("%s", error->message);
+        g_clear_error (&error);
+    }
+    ret = ret && bd_fs_vfat_is_tech_avail (BD_FS_TECH_VFAT, 0xffffffff, &error);
+    if (!ret && error) {
+        g_warning ("%s", error->message);
+        g_clear_error (&error);
+    }
+    ret = ret && bd_fs_ntfs_is_tech_avail (BD_FS_TECH_NTFS, 0xffffffff, &error);
+    if (!ret && error) {
+        g_warning ("%s", error->message);
+        g_clear_error (&error);
+    }
+    return ret;
 }
 
 /**
@@ -76,11 +107,6 @@ gboolean bd_fs_init () {
 void bd_fs_close () {
     /* nothing to do here */
 }
-
-extern gboolean bd_fs_ext_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
-extern gboolean bd_fs_xfs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
-extern gboolean bd_fs_vfat_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
-extern gboolean bd_fs_ntfs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
 
 /**
  * bd_fs_is_tech_avail:
