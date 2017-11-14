@@ -255,13 +255,13 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
     gint scanned = 0;
 
     if (!check_deps (&avail_deps, DEPS_FSCKVFAT_MASK, deps, DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
+        return NULL;
 
     probe = blkid_new_probe ();
     if (!probe) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to create a probe for the device '%s'", device);
-        return FALSE;
+        return NULL;
     }
 
     fd = open (device, O_RDWR|O_CLOEXEC);
@@ -269,7 +269,7 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to create a probe for the device '%s'", device);
         blkid_free_probe (probe);
-        return FALSE;
+        return NULL;
     }
 
     status = blkid_probe_set_device (probe, fd, 0, 0);
@@ -278,7 +278,7 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
                      "Failed to create a probe for the device '%s'", device);
         blkid_free_probe (probe);
         synced_close (fd);
-        return FALSE;
+        return NULL;
     }
 
     blkid_probe_enable_partitions(probe, 1);
@@ -289,7 +289,7 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
                      "Failed to probe the device '%s'", device);
         blkid_free_probe (probe);
         synced_close (fd);
-        return FALSE;
+        return NULL;
     }
 
     ret = g_new0 (BDFSVfatInfo, 1);
@@ -305,7 +305,8 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
                          "Failed to get label for the device '%s'", device);
             blkid_free_probe (probe);
             synced_close (fd);
-            return FALSE;
+            bd_fs_vfat_info_free (ret);
+            return NULL;
         }
 
         ret->label = g_strdup (value);
@@ -317,7 +318,8 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
                      "Failed to get label for the device '%s'", device);
         blkid_free_probe (probe);
         synced_close (fd);
-        return FALSE;
+        bd_fs_vfat_info_free (ret);
+        return NULL;
     }
 
     ret->uuid = g_strdup (value);
@@ -326,9 +328,11 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
     synced_close (fd);
 
     success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
-    if (!success)
+    if (!success) {
         /* error is already populated */
-        return FALSE;
+        bd_fs_vfat_info_free (ret);
+        return NULL;
+    }
 
     lines = g_strsplit (output, "\n", 0);
     g_free (output);
@@ -343,7 +347,10 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
             if (scanned != 2) {
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                              "Failed to get number of FAT clusters for '%s'", device);
-                return FALSE;
+                bd_fs_vfat_info_free (ret);
+                g_strfreev (key_val);
+                g_strfreev (lines);
+                return NULL;
             }
             ret->cluster_count = cluster_count;
             ret->free_cluster_count = cluster_count - full_cluster_count;
