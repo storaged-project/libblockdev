@@ -263,6 +263,14 @@
 <a class="link" href="libblockdev-MD-RAID.html#bd-md-request-sync-action" title="bd_md_request_sync_action ()">bd_md_request_sync_action</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-is-tech-avail" title="bd_md_is_tech_avail ()">bd_md_is_tech_avail</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
 </tbody>
 </table></div>
 </div>
@@ -297,6 +305,14 @@
 <tr>
 <td class="datatype_keyword"> </td>
 <td class="function_name"><a class="link" href="libblockdev-MD-RAID.html#BDMDDetailData" title="BDMDDetailData">BDMDDetailData</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-MD-RAID.html#BDMDTech" title="enum BDMDTech">BDMDTech</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-MD-RAID.html#BDMDTechMode" title="enum BDMDTechMode">BDMDTechMode</a></td>
 </tr>
 </tbody>
 </table></div>
@@ -422,6 +438,7 @@ bd_md_get_superblock_size (<em class="parameter"><code><a href="../glib/glib-Bas
 and metadata <em class="parameter"><code>version</code></em>
 or default if unsupported <em class="parameter"><code>version</code></em>
 is used.</p>
+<p>Tech category: always available</p>
 </div>
 </div>
 <hr>
@@ -499,6 +516,7 @@ passed to the 'mdadm' utility). </p></td>
 <a name="bd-md-create.returns"></a><h4>Returns</h4>
 <p> whether the new MD RAID device <em class="parameter"><code>device_name</code></em>
 was successfully created or not</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-CREATE:CAPS"><code class="literal">BD_MD_TECH_MODE_CREATE</code></a></p>
 </div>
 </div>
 <hr>
@@ -533,6 +551,7 @@ bd_md_destroy (<em class="parameter"><code>const <a href="../glib/glib-Basic-Typ
 <a name="bd-md-destroy.returns"></a><h4>Returns</h4>
 <p> whether the MD RAID metadata was successfully destroyed on <em class="parameter"><code>device</code></em>
 or not</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-DELETE:CAPS"><code class="literal">BD_MD_TECH_MODE_DELETE</code></a></p>
 </div>
 </div>
 <hr>
@@ -567,6 +586,7 @@ bd_md_deactivate (<em class="parameter"><code>const <a href="../glib/glib-Basic-
 <a name="bd-md-deactivate.returns"></a><h4>Returns</h4>
 <p> whether the RAID device <em class="parameter"><code>raid_spec</code></em>
 was successfully deactivated or not</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_MD_TECH_MODE_MODIFY</code></a></p>
 </div>
 </div>
 <hr>
@@ -631,6 +651,7 @@ was successfully activated or not</p>
 <p>Note: either <em class="parameter"><code>members</code></em>
 or <em class="parameter"><code>uuid</code></em>
 (or both) have to be specified.</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_MD_TECH_MODE_MODIFY</code></a></p>
 </div>
 </div>
 <hr>
@@ -665,6 +686,7 @@ bd_md_run (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.h
 <a name="bd-md-run.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>raid_spec</code></em>
 was successfully started or not</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_MD_TECH_MODE_MODIFY</code></a></p>
 </div>
 </div>
 <hr>
@@ -702,6 +724,7 @@ was successfully nominated (added to its
 appropriate RAID) or not</p>
 <p>Note: may start the MD RAID if it becomes ready by adding <em class="parameter"><code>device</code></em>
 .</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_MD_TECH_MODE_MODIFY</code></a></p>
 </div>
 </div>
 <hr>
@@ -739,6 +762,7 @@ was successfully denominated (added to its
 appropriate RAID) or not</p>
 <p>Note: may start the MD RAID if it becomes ready by adding <em class="parameter"><code>device</code></em>
 .</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_MD_TECH_MODE_MODIFY</code></a></p>
 </div>
 </div>
 <hr>
@@ -804,6 +828,7 @@ no actual redundancy. In this case it is necessary to explicitly grow the
 array all at once rather than manage it in the sense of adding spares.</p>
 <p>Whether the new device will be added as a spare or an active member is
 decided by mdadm.</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_MD_TECH_MODE_MODIFY</code></a></p>
 </div>
 </div>
 <hr>
@@ -861,6 +886,7 @@ passed to the 'mdadm' utility). </p></td>
 <p> whether the <em class="parameter"><code>device</code></em>
 was successfully removed from the <em class="parameter"><code>raid_spec</code></em>
 RAID or not.</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_MD_TECH_MODE_MODIFY</code></a></p>
 </div>
 </div>
 <hr>
@@ -895,6 +921,7 @@ bd_md_examine (<em class="parameter"><code>const <a href="../glib/glib-Basic-Typ
 <a name="bd-md-examine.returns"></a><h4>Returns</h4>
 <p> information about the MD RAID extracted from the <em class="parameter"><code>device</code></em>
 </p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-QUERY:CAPS"><code class="literal">BD_MD_TECH_MODE_QUERY</code></a></p>
 </div>
 </div>
 <hr>
@@ -930,7 +957,8 @@ bd_md_canonicalize_uuid (<em class="parameter"><code>const <a href="../glib/glib
 <p> cannonicalized form of <em class="parameter"><code>uuid</code></em>
 </p>
 <p>This function expects a UUID in the form that mdadm returns. The change is as
-follows: 3386ff85:f5012621:4a435f06:1eb47236 -&gt; 3386ff85-f501-2621-4a43-5f061eb47236. </p>
+follows: 3386ff85:f5012621:4a435f06:1eb47236 -&gt; 3386ff85-f501-2621-4a43-5f061eb47236</p>
+<p>Tech category: always available. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
@@ -969,7 +997,8 @@ bd_md_get_md_uuid (<em class="parameter"><code>const <a href="../glib/glib-Basic
 <p>This function expects a UUID in the canonical (traditional format) and
 returns a UUID in the format used by MD RAID and is thus reverse to
 <a class="link" href="libblockdev-MD-RAID.html#bd-md-canonicalize-uuid" title="bd_md_canonicalize_uuid ()"><code class="function">bd_md_canonicalize_uuid()</code></a>. The change is as follows:
-3386ff85-f501-2621-4a43-5f061eb47236 -&gt; 3386ff85:f5012621:4a435f06:1eb47236. </p>
+3386ff85-f501-2621-4a43-5f061eb47236 -&gt; 3386ff85:f5012621:4a435f06:1eb47236</p>
+<p>Tech category: always available. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
@@ -1005,6 +1034,7 @@ bd_md_detail (<em class="parameter"><code>const <a href="../glib/glib-Basic-Type
 <a name="bd-md-detail.returns"></a><h4>Returns</h4>
 <p> information about the MD RAID <em class="parameter"><code>raid_spec</code></em>
 </p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-QUERY:CAPS"><code class="literal">BD_MD_TECH_MODE_QUERY</code></a></p>
 </div>
 </div>
 <hr>
@@ -1039,6 +1069,7 @@ bd_md_node_from_name (<em class="parameter"><code>const <a href="../glib/glib-Ba
 <a name="bd-md-node-from-name.returns"></a><h4>Returns</h4>
 <p> device node of the <em class="parameter"><code>name</code></em>
 MD RAID or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
+<p>Tech category: always available</p>
 </div>
 </div>
 <hr>
@@ -1073,6 +1104,7 @@ bd_md_name_from_node (<em class="parameter"><code>const <a href="../glib/glib-Ba
 <a name="bd-md-name-from-node.returns"></a><h4>Returns</h4>
 <p> <em class="parameter"><code>name</code></em>
 of the MD RAID the device node belongs to or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
+<p>Tech category: always available</p>
 </div>
 </div>
 <hr>
@@ -1106,7 +1138,8 @@ bd_md_get_status (<em class="parameter"><code>const <a href="../glib/glib-Basic-
 <div class="refsect3">
 <a name="bd-md-get-status.returns"></a><h4>Returns</h4>
 <p> status of the <em class="parameter"><code>raid_spec</code></em>
-RAID. </p>
+RAID.</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-QUERY:CAPS"><code class="literal">BD_MD_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
@@ -1149,6 +1182,7 @@ bd_md_set_bitmap_location (<em class="parameter"><code>const <a href="../glib/gl
 <p> whether <em class="parameter"><code>location</code></em>
 was successfully set for <em class="parameter"><code>raid_spec</code></em>
 </p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_MD_TECH_MODE_MODIFY</code></a></p>
 </div>
 </div>
 <hr>
@@ -1182,7 +1216,8 @@ bd_md_get_bitmap_location (<em class="parameter"><code>const <a href="../glib/gl
 <div class="refsect3">
 <a name="bd-md-get-bitmap-location.returns"></a><h4>Returns</h4>
 <p> bitmap location for <em class="parameter"><code>raid_spec</code></em>
-. </p>
+</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-QUERY:CAPS"><code class="literal">BD_MD_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
@@ -1225,6 +1260,52 @@ bd_md_request_sync_action (<em class="parameter"><code>const <a href="../glib/gl
 <p> whether the <em class="parameter"><code>action</code></em>
 was successfully requested for the <em class="parameter"><code>raid_spec</code></em>
 RAID or not.</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_MD_TECH_MODE_MODIFY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-is-tech-avail"></a><h3>bd_md_is_tech_avail ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_md_is_tech_avail (<em class="parameter"><code><a class="link" href="libblockdev-MD-RAID.html#BDMDTech" title="enum BDMDTech"><span class="type">BDMDTech</span></a> tech</code></em>,
+                     <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> mode</code></em>,
+                     <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-is-tech-avail.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>tech</p></td>
+<td class="parameter_description"><p>the queried tech</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>mode</p></td>
+<td class="parameter_description"><p>a bit mask of queried modes of operation for <em class="parameter"><code>tech</code></em>
+</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (details about why the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is not available). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-is-tech-avail.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is available -- supported by the
+plugin implementation and having all the runtime dependencies available</p>
 </div>
 </div>
 </div>
@@ -1278,6 +1359,11 @@ RAID or not.</p>
 </tr>
 <tr>
 <td class="enum_member_name"><p><a name="BD-MD-ERROR-FAIL:CAPS"></a>BD_MD_ERROR_FAIL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-MD-ERROR-TECH-UNAVAIL:CAPS"></a>BD_MD_ERROR_TECH_UNAVAIL</p></td>
 <td> </td>
 <td> </td>
 </tr>
@@ -1474,6 +1560,61 @@ RAID or not.</p>
 <td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDMDDetailData.uuid"></a>uuid</code></em>;</p></td>
 <td class="struct_member_description"><p>uuid of the MD array</p></td>
 <td class="struct_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDMDTech"></a><h3>enum BDMDTech</h3>
+<div class="refsect3">
+<a name="BDMDTech.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody><tr>
+<td class="enum_member_name"><p><a name="BD-MD-TECH-MDRAID:CAPS"></a>BD_MD_TECH_MDRAID</p></td>
+<td> </td>
+<td> </td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDMDTechMode"></a><h3>enum BDMDTechMode</h3>
+<div class="refsect3">
+<a name="BDMDTechMode.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-MD-TECH-MODE-CREATE:CAPS"></a>BD_MD_TECH_MODE_CREATE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-MD-TECH-MODE-DELETE:CAPS"></a>BD_MD_TECH_MODE_DELETE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-MD-TECH-MODE-MODIFY:CAPS"></a>BD_MD_TECH_MODE_MODIFY</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-MD-TECH-MODE-QUERY:CAPS"></a>BD_MD_TECH_MODE_QUERY</p></td>
+<td> </td>
+<td> </td>
 </tr>
 </tbody>
 </table></div>

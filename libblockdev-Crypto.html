@@ -223,6 +223,14 @@
 <a class="link" href="libblockdev-Crypto.html#bd-crypto-escrow-device" title="bd_crypto_escrow_device ()">bd_crypto_escrow_device</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-is-tech-avail" title="bd_crypto_is_tech_avail ()">bd_crypto_is_tech_avail</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
 </tbody>
 </table></div>
 </div>
@@ -261,6 +269,14 @@
 <tr>
 <td class="define_keyword">#define</td>
 <td class="function_name"><a class="link" href="libblockdev-Crypto.html#DEFAULT-LUKS-CIPHER:CAPS" title="DEFAULT_LUKS_CIPHER">DEFAULT_LUKS_CIPHER</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-Crypto.html#BDCryptoTech" title="enum BDCryptoTech">BDCryptoTech</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-Crypto.html#BDCryptoTechMode" title="enum BDCryptoTechMode">BDCryptoTechMode</a></td>
 </tr>
 </tbody>
 </table></div>
@@ -338,6 +354,7 @@ bd_crypto_generate_backup_passphrase (<em class="parameter"><code><a href="../gl
 <a name="bd-crypto-generate-backup-passphrase.returns"></a><h4>Returns</h4>
 <p> A newly generated <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-BACKUP-PASSPHRASE-LENGTH:CAPS" title="BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH"><code class="literal">BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH</code></a>-long passphrase.</p>
 <p>See <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-BACKUP-PASSPHRASE-CHARSET:CAPS" title="BD_CRYPTO_BACKUP_PASSPHRASE_CHARSET"><code class="literal">BD_CRYPTO_BACKUP_PASSPHRASE_CHARSET</code></a> for the definition of the charset used for the passphrase.</p>
+<p>Tech category: always available</p>
 </div>
 </div>
 <hr>
@@ -375,6 +392,7 @@ is a LUKS device or <a href="../glib/glib-Standard-Macros.html#FALSE:CAPS"><code
 failed to determine (the <em class="parameter"><code>error</code></em>
 ) is populated with the error in such
 cases)</p>
+<p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS:CAPS"><code class="literal">BD_CRYPTO_TECH_LUKS</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-QUERY:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_QUERY</code></a></p>
 </div>
 </div>
 <hr>
@@ -411,6 +429,7 @@ bd_crypto_luks_uuid (<em class="parameter"><code>const <a href="../glib/glib-Bas
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if failed to determine (<em class="parameter"><code>error</code></em>
 )
 is populated with the error in such cases)</p>
+<p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS:CAPS"><code class="literal">BD_CRYPTO_TECH_LUKS</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-QUERY:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_QUERY</code></a></p>
 </div>
 </div>
 <hr>
@@ -446,7 +465,8 @@ bd_crypto_luks_status (<em class="parameter"><code>const <a href="../glib/glib-B
 <p> one of "invalid", "inactive", "active" or "busy" or
 <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if failed to determine (<em class="parameter"><code>error</code></em>
 is populated with the error in
-such cases). </p>
+such cases)</p>
+<p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS:CAPS"><code class="literal">BD_CRYPTO_TECH_LUKS</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-QUERY:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
 </div>
 </div>
@@ -521,6 +541,7 @@ as LUKS</p></td>
 was successfully formatted as LUKS or not
 (the <em class="parameter"><code>error</code></em>
 ) contains the error in such cases)</p>
+<p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS:CAPS"><code class="literal">BD_CRYPTO_TECH_LUKS</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-CREATE:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_CREATE</code></a></p>
 </div>
 </div>
 <hr>
@@ -595,6 +616,7 @@ as LUKS</p></td>
 was successfully formatted as LUKS or not
 (the <em class="parameter"><code>error</code></em>
 ) contains the error in such cases)</p>
+<p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS:CAPS"><code class="literal">BD_CRYPTO_TECH_LUKS</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-CREATE:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_CREATE</code></a></p>
 </div>
 </div>
 <hr>
@@ -658,6 +680,7 @@ was successfully opened or not</p>
 <p>One of <em class="parameter"><code>passphrase</code></em>
 , <em class="parameter"><code>key_file</code></em>
 has to be != <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.</p>
+<p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS:CAPS"><code class="literal">BD_CRYPTO_TECH_LUKS</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-OPEN-CLOSE:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_OPEN_CLOSE</code></a></p>
 </div>
 </div>
 <hr>
@@ -717,6 +740,7 @@ buffer</p></td>
 <a name="bd-crypto-luks-open-blob.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>device</code></em>
 was successfully opened or not</p>
+<p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS:CAPS"><code class="literal">BD_CRYPTO_TECH_LUKS</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-OPEN-CLOSE:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_OPEN_CLOSE</code></a></p>
 </div>
 </div>
 <hr>
@@ -751,6 +775,7 @@ bd_crypto_luks_close (<em class="parameter"><code>const <a href="../glib/glib-Ba
 <a name="bd-crypto-luks-close.returns"></a><h4>Returns</h4>
 <p> whether the given <em class="parameter"><code>luks_device</code></em>
 was successfully closed or not</p>
+<p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS:CAPS"><code class="literal">BD_CRYPTO_TECH_LUKS</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-OPEN-CLOSE:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_OPEN_CLOSE</code></a></p>
 </div>
 </div>
 <hr>
@@ -821,6 +846,7 @@ has to be != <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="
 ,
 <em class="parameter"><code>nkey_file</code></em>
 .</p>
+<p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS:CAPS"><code class="literal">BD_CRYPTO_TECH_LUKS</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-ADD-KEY:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_ADD_KEY</code></a></p>
 </div>
 </div>
 <hr>
@@ -882,6 +908,7 @@ buffer</p></td>
 <p> whether the <em class="parameter"><code>npass_data</code></em>
 was successfully added to <em class="parameter"><code>device</code></em>
 or not</p>
+<p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS:CAPS"><code class="literal">BD_CRYPTO_TECH_LUKS</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-ADD-KEY:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_ADD_KEY</code></a></p>
 </div>
 </div>
 <hr>
@@ -932,6 +959,7 @@ or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">N
 <p>Either <em class="parameter"><code>pass</code></em>
 or <em class="parameter"><code>key_file</code></em>
 has to be != <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.</p>
+<p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS:CAPS"><code class="literal">BD_CRYPTO_TECH_LUKS</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-REMOVE-KEY:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_REMOVE_KEY</code></a></p>
 </div>
 </div>
 <hr>
@@ -981,6 +1009,7 @@ buffer</p></td>
 <p>Either <em class="parameter"><code>pass</code></em>
 or <em class="parameter"><code>key_file</code></em>
 has to be != <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.</p>
+<p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS:CAPS"><code class="literal">BD_CRYPTO_TECH_LUKS</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-REMOVE-KEY:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_REMOVE_KEY</code></a></p>
 </div>
 </div>
 <hr>
@@ -1027,6 +1056,7 @@ bd_crypto_luks_change_key (<em class="parameter"><code>const <a href="../glib/gl
 <a name="bd-crypto-luks-change-key.returns"></a><h4>Returns</h4>
 <p> whether the key was successfully changed or not</p>
 <p>No support for changing key files (yet).</p>
+<p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS:CAPS"><code class="literal">BD_CRYPTO_TECH_LUKS</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-ADD-KEY:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_ADD_KEY</code></a>&amp;<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-REMOVE-KEY:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_REMOVE_KEY</code></a></p>
 </div>
 </div>
 <hr>
@@ -1086,6 +1116,7 @@ buffer</p></td>
 <div class="refsect3">
 <a name="bd-crypto-luks-change-key-blob.returns"></a><h4>Returns</h4>
 <p> whether the key was successfully changed or not</p>
+<p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS:CAPS"><code class="literal">BD_CRYPTO_TECH_LUKS</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-ADD-KEY:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_ADD_KEY</code></a>&amp;<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-REMOVE-KEY:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_REMOVE_KEY</code></a></p>
 </div>
 </div>
 <hr>
@@ -1126,6 +1157,7 @@ bd_crypto_luks_resize (<em class="parameter"><code>const <a href="../glib/glib-B
 <a name="bd-crypto-luks-resize.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>luks_device</code></em>
 was successfully resized or not</p>
+<p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS:CAPS"><code class="literal">BD_CRYPTO_TECH_LUKS</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-RESIZE:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_RESIZE</code></a></p>
 </div>
 </div>
 <hr>
@@ -1185,6 +1217,7 @@ buffer</p></td>
 <a name="bd-crypto-tc-open.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>device</code></em>
 was successfully opened or not</p>
+<p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-TRUECRYPT:CAPS"><code class="literal">BD_CRYPTO_TECH_TRUECRYPT</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-OPEN-CLOSE:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_OPEN_CLOSE</code></a></p>
 </div>
 </div>
 <hr>
@@ -1219,6 +1252,7 @@ bd_crypto_tc_close (<em class="parameter"><code>const <a href="../glib/glib-Basi
 <a name="bd-crypto-tc-close.returns"></a><h4>Returns</h4>
 <p> whether the given <em class="parameter"><code>tc_device</code></em>
 was successfully closed or not</p>
+<p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-TRUECRYPT:CAPS"><code class="literal">BD_CRYPTO_TECH_TRUECRYPT</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-OPEN-CLOSE:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_OPEN_CLOSE</code></a></p>
 </div>
 </div>
 <hr>
@@ -1277,6 +1311,52 @@ bd_crypto_escrow_device (<em class="parameter"><code>const <a href="../glib/glib
 <a name="bd-crypto-escrow-device.returns"></a><h4>Returns</h4>
 <p> whether the ecrow data was successfully created for <em class="parameter"><code>device</code></em>
 or not</p>
+<p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-ESCROW:CAPS"><code class="literal">BD_CRYPTO_TECH_ESCROW</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-CREATE:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_CREATE</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-crypto-is-tech-avail"></a><h3>bd_crypto_is_tech_avail ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_crypto_is_tech_avail (<em class="parameter"><code><a class="link" href="libblockdev-Crypto.html#BDCryptoTech" title="enum BDCryptoTech"><span class="type">BDCryptoTech</span></a> tech</code></em>,
+                         <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> mode</code></em>,
+                         <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-crypto-is-tech-avail.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>tech</p></td>
+<td class="parameter_description"><p>the queried tech</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>mode</p></td>
+<td class="parameter_description"><p>a bit mask of queried modes of operation (<a class="link" href="libblockdev-Crypto.html#BDCryptoTechMode" title="enum BDCryptoTechMode"><span class="type">BDCryptoTechMode</span></a>) for <em class="parameter"><code>tech</code></em>
+</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (details about why the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is not available). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-crypto-is-tech-avail.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is available -- supported by the
+plugin implementation and having all the runtime dependencies available</p>
 </div>
 </div>
 </div>
@@ -1363,6 +1443,11 @@ or not</p>
 <td> </td>
 <td> </td>
 </tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-CRYPTO-ERROR-TECH-UNAVAIL:CAPS"></a>BD_CRYPTO_ERROR_TECH_UNAVAIL</p></td>
+<td> </td>
+<td> </td>
+</tr>
 </tbody>
 </table></div>
 </div>
@@ -1390,6 +1475,83 @@ or not</p>
 <a name="DEFAULT-LUKS-CIPHER:CAPS"></a><h3>DEFAULT_LUKS_CIPHER</h3>
 <pre class="programlisting">#define DEFAULT_LUKS_CIPHER "aes-xts-plain64"
 </pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDCryptoTech"></a><h3>enum BDCryptoTech</h3>
+<div class="refsect3">
+<a name="BDCryptoTech.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-CRYPTO-TECH-LUKS:CAPS"></a>BD_CRYPTO_TECH_LUKS</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-CRYPTO-TECH-TRUECRYPT:CAPS"></a>BD_CRYPTO_TECH_TRUECRYPT</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-CRYPTO-TECH-ESCROW:CAPS"></a>BD_CRYPTO_TECH_ESCROW</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDCryptoTechMode"></a><h3>enum BDCryptoTechMode</h3>
+<div class="refsect3">
+<a name="BDCryptoTechMode.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-CRYPTO-TECH-MODE-CREATE:CAPS"></a>BD_CRYPTO_TECH_MODE_CREATE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-CRYPTO-TECH-MODE-OPEN-CLOSE:CAPS"></a>BD_CRYPTO_TECH_MODE_OPEN_CLOSE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-CRYPTO-TECH-MODE-QUERY:CAPS"></a>BD_CRYPTO_TECH_MODE_QUERY</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-CRYPTO-TECH-MODE-ADD-KEY:CAPS"></a>BD_CRYPTO_TECH_MODE_ADD_KEY</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-CRYPTO-TECH-MODE-REMOVE-KEY:CAPS"></a>BD_CRYPTO_TECH_MODE_REMOVE_KEY</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-CRYPTO-TECH-MODE-RESIZE:CAPS"></a>BD_CRYPTO_TECH_MODE_RESIZE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
 </div>
 </div>
 </div>

@@ -127,6 +127,14 @@
 <a class="link" href="libblockdev-Loop.html#bd-loop-set-autoclear" title="bd_loop_set_autoclear ()">bd_loop_set_autoclear</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Loop.html#bd-loop-is-tech-avail" title="bd_loop_is_tech_avail ()">bd_loop_is_tech_avail</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
 </tbody>
 </table></div>
 </div>
@@ -145,6 +153,14 @@
 <tr>
 <td class="datatype_keyword">enum</td>
 <td class="function_name"><a class="link" href="libblockdev-Loop.html#BDLoopError" title="enum BDLoopError">BDLoopError</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-Loop.html#BDLoopTech" title="enum BDLoopTech">BDLoopTech</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-Loop.html#BDLoopTechMode" title="enum BDLoopTechMode">BDLoopTechMode</a></td>
 </tr>
 </tbody>
 </table></div>
@@ -225,7 +241,8 @@ bd_loop_get_backing_file (<em class="parameter"><code>const <a href="../glib/gli
 <div class="refsect3">
 <a name="bd-loop-get-backing-file.returns"></a><h4>Returns</h4>
 <p> path of the device's backing file or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if none
-is found. </p>
+is found</p>
+<p>Tech category: <a class="link" href="libblockdev-Loop.html#BD-LOOP-TECH-LOOP:CAPS"><code class="literal">BD_LOOP_TECH_LOOP</code></a>-<a class="link" href="libblockdev-Loop.html#BD-LOOP-TECH-MODE-QUERY:CAPS"><code class="literal">BD_LOOP_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
@@ -260,7 +277,8 @@ bd_loop_get_loop_name (<em class="parameter"><code>const <a href="../glib/glib-B
 <div class="refsect3">
 <a name="bd-loop-get-loop-name.returns"></a><h4>Returns</h4>
 <p> name of the loop device associated with the given <em class="parameter"><code>file</code></em>
-. </p>
+</p>
+<p>Tech category: <a class="link" href="libblockdev-Loop.html#BD-LOOP-TECH-LOOP:CAPS"><code class="literal">BD_LOOP_TECH_LOOP</code></a>-<a class="link" href="libblockdev-Loop.html#BD-LOOP-TECH-MODE-QUERY:CAPS"><code class="literal">BD_LOOP_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
@@ -327,6 +345,7 @@ bd_loop_setup (<em class="parameter"><code>const <a href="../glib/glib-Basic-Typ
 <a name="bd-loop-setup.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>file</code></em>
 was successfully setup as a loop device or not</p>
+<p>Tech category: <a class="link" href="libblockdev-Loop.html#BD-LOOP-TECH-LOOP:CAPS"><code class="literal">BD_LOOP_TECH_LOOP</code></a>-<a class="link" href="libblockdev-Loop.html#BD-LOOP-TECH-MODE-CREATE:CAPS"><code class="literal">BD_LOOP_TECH_MODE_CREATE</code></a></p>
 </div>
 </div>
 <hr>
@@ -392,6 +411,7 @@ bd_loop_setup_from_fd (<em class="parameter"><code><a href="../glib/glib-Basic-T
 <a name="bd-loop-setup-from-fd.returns"></a><h4>Returns</h4>
 <p> whether an new loop device was successfully setup for <em class="parameter"><code>fd</code></em>
 or not</p>
+<p>Tech category: <a class="link" href="libblockdev-Loop.html#BD-LOOP-TECH-LOOP:CAPS"><code class="literal">BD_LOOP_TECH_LOOP</code></a>-<a class="link" href="libblockdev-Loop.html#BD-LOOP-TECH-MODE-CREATE:CAPS"><code class="literal">BD_LOOP_TECH_MODE_CREATE</code></a></p>
 </div>
 </div>
 <hr>
@@ -426,6 +446,7 @@ bd_loop_teardown (<em class="parameter"><code>const <a href="../glib/glib-Basic-
 <a name="bd-loop-teardown.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>loop</code></em>
 device was successfully torn down or not</p>
+<p>Tech category: <a class="link" href="libblockdev-Loop.html#BD-LOOP-TECH-LOOP:CAPS"><code class="literal">BD_LOOP_TECH_LOOP</code></a>-<a class="link" href="libblockdev-Loop.html#BD-LOOP-TECH-MODE-DESTROY:CAPS"><code class="literal">BD_LOOP_TECH_MODE_DESTROY</code></a></p>
 </div>
 </div>
 <hr>
@@ -461,6 +482,7 @@ bd_loop_get_autoclear (<em class="parameter"><code>const <a href="../glib/glib-B
 <p> whether the autoclear flag is set on the <em class="parameter"><code>loop</code></em>
 device or not (if <a href="../glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>, <em class="parameter"><code>error</code></em>
 may be set)</p>
+<p>Tech category: <a class="link" href="libblockdev-Loop.html#BD-LOOP-TECH-LOOP:CAPS"><code class="literal">BD_LOOP_TECH_LOOP</code></a>-<a class="link" href="libblockdev-Loop.html#BD-LOOP-TECH-MODE-QUERY:CAPS"><code class="literal">BD_LOOP_TECH_MODE_QUERY</code></a></p>
 </div>
 </div>
 <hr>
@@ -501,6 +523,52 @@ bd_loop_set_autoclear (<em class="parameter"><code>const <a href="../glib/glib-B
 <a name="bd-loop-set-autoclear.returns"></a><h4>Returns</h4>
 <p> whether the autoclear flag was successfully set on the <em class="parameter"><code>loop</code></em>
 device or not</p>
+<p>Tech category: <a class="link" href="libblockdev-Loop.html#BD-LOOP-TECH-LOOP:CAPS"><code class="literal">BD_LOOP_TECH_LOOP</code></a>-<a class="link" href="libblockdev-Loop.html#BD-LOOP-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_LOOP_TECH_MODE_MODIFY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-loop-is-tech-avail"></a><h3>bd_loop_is_tech_avail ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_loop_is_tech_avail (<em class="parameter"><code><a class="link" href="libblockdev-Loop.html#BDLoopTech" title="enum BDLoopTech"><span class="type">BDLoopTech</span></a> tech</code></em>,
+                       <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> mode</code></em>,
+                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-loop-is-tech-avail.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>tech</p></td>
+<td class="parameter_description"><p>the queried tech</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>mode</p></td>
+<td class="parameter_description"><p>a bit mask of queried modes of operation (<a class="link" href="libblockdev-Loop.html#BDLoopTechMode" title="enum BDLoopTechMode"><span class="type">BDLoopTechMode</span></a>) for <em class="parameter"><code>tech</code></em>
+</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (details about why the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is not available). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-loop-is-tech-avail.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is available -- supported by the
+plugin implementation and having all the runtime dependencies available</p>
 </div>
 </div>
 </div>
@@ -529,6 +597,66 @@ device or not</p>
 </tr>
 <tr>
 <td class="enum_member_name"><p><a name="BD-LOOP-ERROR-FAIL:CAPS"></a>BD_LOOP_ERROR_FAIL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-LOOP-ERROR-TECH-UNAVAIL:CAPS"></a>BD_LOOP_ERROR_TECH_UNAVAIL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDLoopTech"></a><h3>enum BDLoopTech</h3>
+<div class="refsect3">
+<a name="BDLoopTech.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody><tr>
+<td class="enum_member_name"><p><a name="BD-LOOP-TECH-LOOP:CAPS"></a>BD_LOOP_TECH_LOOP</p></td>
+<td> </td>
+<td> </td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDLoopTechMode"></a><h3>enum BDLoopTechMode</h3>
+<div class="refsect3">
+<a name="BDLoopTechMode.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-LOOP-TECH-MODE-CREATE:CAPS"></a>BD_LOOP_TECH_MODE_CREATE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-LOOP-TECH-MODE-DESTROY:CAPS"></a>BD_LOOP_TECH_MODE_DESTROY</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-LOOP-TECH-MODE-MODIFY:CAPS"></a>BD_LOOP_TECH_MODE_MODIFY</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-LOOP-TECH-MODE-QUERY:CAPS"></a>BD_LOOP_TECH_MODE_QUERY</p></td>
 <td> </td>
 <td> </td>
 </tr>

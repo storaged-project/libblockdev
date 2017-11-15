@@ -247,6 +247,14 @@
 <a class="link" href="libblockdev-BTRFS.html#bd-btrfs-change-label" title="bd_btrfs_change_label ()">bd_btrfs_change_label</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-BTRFS.html#bd-btrfs-is-tech-avail" title="bd_btrfs_is_tech_avail ()">bd_btrfs_is_tech_avail</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
 </tbody>
 </table></div>
 </div>
@@ -285,6 +293,14 @@
 <tr>
 <td class="datatype_keyword"> </td>
 <td class="function_name"><a class="link" href="libblockdev-BTRFS.html#BDBtrfsFilesystemInfo" title="BDBtrfsFilesystemInfo">BDBtrfsFilesystemInfo</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-BTRFS.html#BDBtrfsTech" title="enum BDBtrfsTech">BDBtrfsTech</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-BTRFS.html#BDBtrfsTechMode" title="enum BDBtrfsTechMode">BDBtrfsTechMode</a></td>
 </tr>
 </tbody>
 </table></div>
@@ -447,6 +463,7 @@ or not</p>
 <p>See mkfs.btrfs(8) for details about <em class="parameter"><code>data_level</code></em>
 , <em class="parameter"><code>md_level</code></em>
 and btrfs in general.</p>
+<p>Tech category: <a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MULTI-DEV:CAPS"><code class="literal">BD_BTRFS_TECH_MULTI_DEV</code></a>-<a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-CREATE:CAPS"><code class="literal">BD_BTRFS_TECH_MODE_CREATE</code></a></p>
 </div>
 </div>
 <hr>
@@ -495,6 +512,7 @@ passed to the 'btrfs' utility). </p></td>
 <p> whether the <em class="parameter"><code>device</code></em>
 was successfully added to the <em class="parameter"><code>mountpoint</code></em>
 btrfs volume or not</p>
+<p>Tech category: <a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MULTI-DEV:CAPS"><code class="literal">BD_BTRFS_TECH_MULTI_DEV</code></a>-<a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_BTRFS_TECH_MODE_MODIFY</code></a></p>
 </div>
 </div>
 <hr>
@@ -543,6 +561,7 @@ passed to the 'btrfs' utility). </p></td>
 <p> whether the <em class="parameter"><code>device</code></em>
 was successfully removed from the <em class="parameter"><code>mountpoint</code></em>
 btrfs volume or not</p>
+<p>Tech category: <a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MULTI-DEV:CAPS"><code class="literal">BD_BTRFS_TECH_MULTI_DEV</code></a>-<a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_BTRFS_TECH_MODE_MODIFY</code></a></p>
 </div>
 </div>
 <hr>
@@ -591,6 +610,7 @@ passed to the 'btrfs' utility). </p></td>
 <p> whether the <em class="parameter"><code>mountpoint</code></em>
 /<em class="parameter"><code>name</code></em>
 subvolume was successfully created or not</p>
+<p>Tech category: <a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-SUBVOL:CAPS"><code class="literal">BD_BTRFS_TECH_SUBVOL</code></a>-<a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-CREATE:CAPS"><code class="literal">BD_BTRFS_TECH_MODE_CREATE</code></a></p>
 </div>
 </div>
 <hr>
@@ -639,6 +659,7 @@ passed to the 'btrfs' utility). </p></td>
 <p> whether the <em class="parameter"><code>mountpoint</code></em>
 /<em class="parameter"><code>name</code></em>
 subvolume was successfully deleted or not</p>
+<p>Tech category: <a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-SUBVOL:CAPS"><code class="literal">BD_BTRFS_TECH_SUBVOL</code></a>-<a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-DELETE:CAPS"><code class="literal">BD_BTRFS_TECH_MODE_DELETE</code></a></p>
 </div>
 </div>
 <hr>
@@ -675,6 +696,7 @@ bd_btrfs_get_default_subvolume_id (<em class="parameter"><code>const <a href="..
 volume's default subvolume. If 0,
 <em class="parameter"><code>error</code></em>
 ) may be set to indicate error</p>
+<p>Tech category: <a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-SUBVOL:CAPS"><code class="literal">BD_BTRFS_TECH_SUBVOL</code></a>-<a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_BTRFS_TECH_MODE_QUERY</code></a></p>
 </div>
 </div>
 <hr>
@@ -724,6 +746,7 @@ passed to the 'btrfs' utility). </p></td>
 volume's default subvolume was correctly set
 to <em class="parameter"><code>subvol_id</code></em>
 or not</p>
+<p>Tech category: <a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-SUBVOL:CAPS"><code class="literal">BD_BTRFS_TECH_SUBVOL</code></a>-<a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_BTRFS_TECH_MODE_MODIFY</code></a></p>
 </div>
 </div>
 <hr>
@@ -778,6 +801,7 @@ passed to the 'btrfs' utility). </p></td>
 <p> whether the <em class="parameter"><code>dest</code></em>
 snapshot of <em class="parameter"><code>source</code></em>
 was successfully created or not</p>
+<p>Tech category: <a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-SNAPSHOT:CAPS"><code class="literal">BD_BTRFS_TECH_SNAPSHOT</code></a>-<a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-CREATE:CAPS"><code class="literal">BD_BTRFS_TECH_MODE_CREATE</code></a></p>
 </div>
 </div>
 <hr>
@@ -812,7 +836,8 @@ bd_btrfs_list_devices (<em class="parameter"><code>const <a href="../glib/glib-B
 <a name="bd-btrfs-list-devices.returns"></a><h4>Returns</h4>
 <p> information about the devices that are part of the btrfs volume
 containing <em class="parameter"><code>device</code></em>
-or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error. </p>
+or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
+<p>Tech category: <a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MULTI-DEV:CAPS"><code class="literal">BD_BTRFS_TECH_MULTI_DEV</code></a>-<a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_BTRFS_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></p>
 </div>
 </div>
@@ -856,7 +881,8 @@ bd_btrfs_list_subvolumes (<em class="parameter"><code>const <a href="../glib/gli
 mounted at <em class="parameter"><code>mountpoint</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
 <p>The subvolumes are sorted in a way that no child subvolume appears in the
-list before its parent (sub)volume. </p>
+list before its parent (sub)volume.</p>
+<p>Tech category: <a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-SUBVOL:CAPS"><code class="literal">BD_BTRFS_TECH_SUBVOL</code></a>-<a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_BTRFS_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></p>
 </div>
 </div>
@@ -892,6 +918,7 @@ bd_btrfs_filesystem_info (<em class="parameter"><code>const <a href="../glib/gli
 <a name="bd-btrfs-filesystem-info.returns"></a><h4>Returns</h4>
 <p> information about the <em class="parameter"><code>device</code></em>
 's volume's filesystem or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
+<p>Tech category: <a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-FS:CAPS"><code class="literal">BD_BTRFS_TECH_FS</code></a>-<a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_BTRFS_TECH_MODE_QUERY</code></a></p>
 </div>
 </div>
 <hr>
@@ -954,6 +981,7 @@ or not</p>
 <p>See mkfs.btrfs(8) for details about <em class="parameter"><code>data_level</code></em>
 , <em class="parameter"><code>md_level</code></em>
 and btrfs in general.</p>
+<p>Tech category: <a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-FS:CAPS"><code class="literal">BD_BTRFS_TECH_FS</code></a>-<a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-CREATE:CAPS"><code class="literal">BD_BTRFS_TECH_MODE_CREATE</code></a></p>
 </div>
 </div>
 <hr>
@@ -1002,6 +1030,7 @@ passed to the 'btrfs' utility). </p></td>
 <p> whether the <em class="parameter"><code>mountpoint</code></em>
 filesystem was successfully resized to <em class="parameter"><code>size</code></em>
 or not</p>
+<p>Tech category: <a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-FS:CAPS"><code class="literal">BD_BTRFS_TECH_FS</code></a>-<a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_BTRFS_TECH_MODE_MODIFY</code></a></p>
 </div>
 </div>
 <hr>
@@ -1042,6 +1071,7 @@ passed to the 'btrfs' utility). </p></td>
 <div class="refsect3">
 <a name="bd-btrfs-check.returns"></a><h4>Returns</h4>
 <p> whether the filesystem was successfully checked or not</p>
+<p>Tech category: <a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-FS:CAPS"><code class="literal">BD_BTRFS_TECH_FS</code></a>-<a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_BTRFS_TECH_MODE_QUERY</code></a></p>
 </div>
 </div>
 <hr>
@@ -1082,6 +1112,7 @@ passed to the 'btrfs' utility). </p></td>
 <div class="refsect3">
 <a name="bd-btrfs-repair.returns"></a><h4>Returns</h4>
 <p> whether the filesystem was successfully checked and repaired or not</p>
+<p>Tech category: <a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-FS:CAPS"><code class="literal">BD_BTRFS_TECH_FS</code></a>-<a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_BTRFS_TECH_MODE_MODIFY</code></a></p>
 </div>
 </div>
 <hr>
@@ -1130,6 +1161,52 @@ passed to the 'btrfs' utility). </p></td>
 filesystem was successfully set
 to <em class="parameter"><code>label</code></em>
 or not</p>
+<p>Tech category: <a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-FS:CAPS"><code class="literal">BD_BTRFS_TECH_FS</code></a>-<a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_BTRFS_TECH_MODE_MODIFY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-btrfs-is-tech-avail"></a><h3>bd_btrfs_is_tech_avail ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_btrfs_is_tech_avail (<em class="parameter"><code><a class="link" href="libblockdev-BTRFS.html#BDBtrfsTech" title="enum BDBtrfsTech"><span class="type">BDBtrfsTech</span></a> tech</code></em>,
+                        <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> mode</code></em>,
+                        <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-btrfs-is-tech-avail.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>tech</p></td>
+<td class="parameter_description"><p>the queried tech</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>mode</p></td>
+<td class="parameter_description"><p>a bit mask of queried modes of operation (<a class="link" href="libblockdev-BTRFS.html#BDBtrfsTechMode" title="enum BDBtrfsTechMode"><span class="type">BDBtrfsTechMode</span></a>) for <em class="parameter"><code>tech</code></em>
+</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (details about why the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is not available). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-btrfs-is-tech-avail.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is avaible -- supported by the
+plugin implementation and having all the runtime dependencies available</p>
 </div>
 </div>
 </div>
@@ -1168,6 +1245,11 @@ or not</p>
 </tr>
 <tr>
 <td class="enum_member_name"><p><a name="BD-BTRFS-ERROR-PARSE:CAPS"></a>BD_BTRFS_ERROR_PARSE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-BTRFS-ERROR-TECH-UNAVAIL:CAPS"></a>BD_BTRFS_ERROR_TECH_UNAVAIL</p></td>
 <td> </td>
 <td> </td>
 </tr>
@@ -1293,6 +1375,78 @@ or not</p>
 <td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDBtrfsFilesystemInfo.used"></a>used</code></em>;</p></td>
 <td class="struct_member_description"><p>size of the used space</p></td>
 <td class="struct_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDBtrfsTech"></a><h3>enum BDBtrfsTech</h3>
+<div class="refsect3">
+<a name="BDBtrfsTech.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-BTRFS-TECH-FS:CAPS"></a>BD_BTRFS_TECH_FS</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-BTRFS-TECH-MULTI-DEV:CAPS"></a>BD_BTRFS_TECH_MULTI_DEV</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-BTRFS-TECH-SUBVOL:CAPS"></a>BD_BTRFS_TECH_SUBVOL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-BTRFS-TECH-SNAPSHOT:CAPS"></a>BD_BTRFS_TECH_SNAPSHOT</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDBtrfsTechMode"></a><h3>enum BDBtrfsTechMode</h3>
+<div class="refsect3">
+<a name="BDBtrfsTechMode.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-BTRFS-TECH-MODE-CREATE:CAPS"></a>BD_BTRFS_TECH_MODE_CREATE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-BTRFS-TECH-MODE-DELETE:CAPS"></a>BD_BTRFS_TECH_MODE_DELETE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-BTRFS-TECH-MODE-MODIFY:CAPS"></a>BD_BTRFS_TECH_MODE_MODIFY</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-BTRFS-TECH-MODE-QUERY:CAPS"></a>BD_BTRFS_TECH_MODE_QUERY</p></td>
+<td> </td>
+<td> </td>
 </tr>
 </tbody>
 </table></div>

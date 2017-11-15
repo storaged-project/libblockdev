@@ -543,6 +543,70 @@
 <a class="link" href="libblockdev-FS.html#bd-fs-vfat-wipe" title="bd_fs_vfat_wipe ()">bd_fs_vfat_wipe</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-FS.html#bd-fs-is-tech-avail" title="bd_fs_is_tech_avail ()">bd_fs_is_tech_avail</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-FS.html#bd-fs-ntfs-check" title="bd_fs_ntfs_check ()">bd_fs_ntfs_check</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-FS.html#BDFSNtfsInfo" title="BDFSNtfsInfo"><span class="returnvalue">BDFSNtfsInfo</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-FS.html#bd-fs-ntfs-get-info" title="bd_fs_ntfs_get_info ()">bd_fs_ntfs_get_info</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-FS.html#bd-fs-ntfs-mkfs" title="bd_fs_ntfs_mkfs ()">bd_fs_ntfs_mkfs</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-FS.html#bd-fs-ntfs-repair" title="bd_fs_ntfs_repair ()">bd_fs_ntfs_repair</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-FS.html#bd-fs-ntfs-resize" title="bd_fs_ntfs_resize ()">bd_fs_ntfs_resize</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-FS.html#bd-fs-ntfs-set-label" title="bd_fs_ntfs_set_label ()">bd_fs_ntfs_set_label</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-FS.html#bd-fs-ntfs-wipe" title="bd_fs_ntfs_wipe ()">bd_fs_ntfs_wipe</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
 </tbody>
 </table></div>
 </div>
@@ -571,12 +635,32 @@
 <td class="function_name"><a class="link" href="libblockdev-FS.html#BDFsError" title="enum BDFsError">BDFsError</a></td>
 </tr>
 <tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-FS.html#BD-FS-ERROR:CAPS" title="BD_FS_ERROR">BD_FS_ERROR</a></td>
+</tr>
+<tr>
 <td class="datatype_keyword"> </td>
 <td class="function_name"><a class="link" href="libblockdev-FS.html#BDFSXfsInfo" title="BDFSXfsInfo">BDFSXfsInfo</a></td>
 </tr>
 <tr>
 <td class="datatype_keyword"> </td>
 <td class="function_name"><a class="link" href="libblockdev-FS.html#BDFSVfatInfo" title="BDFSVfatInfo">BDFSVfatInfo</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-FS.html#BDFSTech" title="enum BDFSTech">BDFSTech</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-FS.html#BDFSTechMode" title="enum BDFSTechMode">BDFSTechMode</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-FS.html#BDFsResizeFlags" title="enum BDFsResizeFlags">BDFsResizeFlags</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword"> </td>
+<td class="function_name"><a class="link" href="libblockdev-FS.html#BDFSNtfsInfo" title="BDFSNtfsInfo">BDFSNtfsInfo</a></td>
 </tr>
 </tbody>
 </table></div>
@@ -663,6 +747,7 @@ bd_fs_wipe (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.
 <a name="bd-fs-wipe.returns"></a><h4>Returns</h4>
 <p> whether signatures were successfully wiped on <em class="parameter"><code>device</code></em>
 or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-GENERIC:CAPS"><code class="literal">BD_FS_TECH_GENERIC</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-WIPE:CAPS"><code class="literal">BD_FS_TECH_MODE_WIPE</code></a></p>
 </div>
 </div>
 <hr>
@@ -704,6 +789,7 @@ all signatures from <em class="parameter"><code>device</code></em>
 <a name="bd-fs-clean.returns"></a><h4>Returns</h4>
 <p> whether <em class="parameter"><code>device</code></em>
 was successfully cleaned or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-GENERIC:CAPS"><code class="literal">BD_FS_TECH_GENERIC</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-WIPE:CAPS"><code class="literal">BD_FS_TECH_MODE_WIPE</code></a></p>
 </div>
 </div>
 <hr>
@@ -742,7 +828,8 @@ bd_fs_get_fstype (<em class="parameter"><code>const <a href="../glib/glib-Basic-
 , <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case
 no signature has been detected or in case of error
 (<em class="parameter"><code>error</code></em>
-is set in this case). </p>
+is set in this case)</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-GENERIC:CAPS"><code class="literal">BD_FS_TECH_GENERIC</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_FS_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
@@ -811,6 +898,7 @@ uid (gid). </p></td>
 <p> whether <em class="parameter"><code>device</code></em>
 (or <em class="parameter"><code>mountpoint</code></em>
 ) was successfully mounted or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-MOUNT:CAPS"><code class="literal">BD_FS_TECH_MOUNT</code></a> (no mode, ignored)</p>
 </div>
 </div>
 <hr>
@@ -867,6 +955,7 @@ uid (gid). </p></td>
 <a name="bd-fs-unmount.returns"></a><h4>Returns</h4>
 <p> whether <em class="parameter"><code>spec</code></em>
 was successfully unmounted or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-MOUNT:CAPS"><code class="literal">BD_FS_TECH_MOUNT</code></a> (no mode, ignored)</p>
 </div>
 </div>
 <hr>
@@ -907,7 +996,8 @@ one mountpoint will be returned.</p>
 , <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case device is
 not mounted or in case of an error (<em class="parameter"><code>error</code></em>
 is set
-in this case). </p>
+in this case)</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-MOUNT:CAPS"><code class="literal">BD_FS_TECH_MOUNT</code></a> (no mode, ignored). </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
@@ -950,6 +1040,7 @@ adapted to the underlying block device)</p></td>
 <a name="bd-fs-resize.returns"></a><h4>Returns</h4>
 <p> whether the file system on <em class="parameter"><code>device</code></em>
 was successfully resized or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-GENERIC:CAPS"><code class="literal">BD_FS_TECH_GENERIC</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-RESIZE:CAPS"><code class="literal">BD_FS_TECH_MODE_RESIZE</code></a></p>
 </div>
 </div>
 <hr>
@@ -988,6 +1079,7 @@ function will return an error for unknown/unsupported filesystems.</p>
 <a name="bd-fs-repair.returns"></a><h4>Returns</h4>
 <p> whether the file system on <em class="parameter"><code>device</code></em>
 was successfully repaired or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-GENERIC:CAPS"><code class="literal">BD_FS_TECH_GENERIC</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-REPAIR:CAPS"><code class="literal">BD_FS_TECH_MODE_REPAIR</code></a></p>
 </div>
 </div>
 <hr>
@@ -1026,6 +1118,7 @@ function will return an error for unknown/unsupported filesystems.</p>
 <a name="bd-fs-check.returns"></a><h4>Returns</h4>
 <p> whether the file system on <em class="parameter"><code>device</code></em>
 passed the consistency check or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-GENERIC:CAPS"><code class="literal">BD_FS_TECH_GENERIC</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-CHECK:CAPS"><code class="literal">BD_FS_TECH_MODE_CHECK</code></a></p>
 </div>
 </div>
 <hr>
@@ -1065,6 +1158,7 @@ function will return an error for unknown/unsupported filesystems.</p>
 <a name="bd-fs-set-label.returns"></a><h4>Returns</h4>
 <p> whether the file system on <em class="parameter"><code>device</code></em>
 was successfully relabled or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-GENERIC:CAPS"><code class="literal">BD_FS_TECH_GENERIC</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-SET-LABEL:CAPS"><code class="literal">BD_FS_TECH_MODE_SET_LABEL</code></a></p>
 </div>
 </div>
 <hr>
@@ -1072,7 +1166,7 @@ was successfully relabled or not</p>
 <a name="bd-fs-can-resize"></a><h3>bd_fs_can_resize ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 bd_fs_can_resize (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *type</code></em>,
-                  <em class="parameter"><code><span class="type">BDFsResizeFlags</span> *mode</code></em>,
+                  <em class="parameter"><code><a class="link" href="libblockdev-FS.html#BDFsResizeFlags" title="enum BDFsResizeFlags"><span class="type">BDFsResizeFlags</span></a> *mode</code></em>,
                   <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **required_utility</code></em>,
                   <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <p>Searches for the required utility to resize the given filesystem and returns whether
@@ -1114,6 +1208,7 @@ Unknown filesystems or filesystems which do not support resizing result in error
 <div class="refsect3">
 <a name="bd-fs-can-resize.returns"></a><h4>Returns</h4>
 <p> whether filesystem resize is available</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-GENERIC:CAPS"><code class="literal">BD_FS_TECH_GENERIC</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_FS_TECH_MODE_QUERY</code></a></p>
 </div>
 </div>
 <hr>
@@ -1156,6 +1251,7 @@ Unknown filesystems or filesystems which do not support checking result in error
 <div class="refsect3">
 <a name="bd-fs-can-check.returns"></a><h4>Returns</h4>
 <p> whether filesystem check is available</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-GENERIC:CAPS"><code class="literal">BD_FS_TECH_GENERIC</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_FS_TECH_MODE_QUERY</code></a></p>
 </div>
 </div>
 <hr>
@@ -1198,6 +1294,7 @@ Unknown filesystems or filesystems which do not support reparing result in error
 <div class="refsect3">
 <a name="bd-fs-can-repair.returns"></a><h4>Returns</h4>
 <p> whether filesystem repair is available</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-GENERIC:CAPS"><code class="literal">BD_FS_TECH_GENERIC</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_FS_TECH_MODE_QUERY</code></a></p>
 </div>
 </div>
 <hr>
@@ -1240,6 +1337,7 @@ Unknown filesystems or filesystems which do not support setting the label result
 <div class="refsect3">
 <a name="bd-fs-can-set-label.returns"></a><h4>Returns</h4>
 <p> whether setting filesystem label is available</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-GENERIC:CAPS"><code class="literal">BD_FS_TECH_GENERIC</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_FS_TECH_MODE_QUERY</code></a></p>
 </div>
 </div>
 <hr>
@@ -1281,6 +1379,7 @@ passed to the 'e2fsck' utility). </p></td>
 <a name="bd-fs-ext2-check.returns"></a><h4>Returns</h4>
 <p> whether an ext2 file system on the <em class="parameter"><code>device</code></em>
 is clean or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT2:CAPS"><code class="literal">BD_FS_TECH_EXT2</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-CHECK:CAPS"><code class="literal">BD_FS_TECH_MODE_CHECK</code></a></p>
 </div>
 </div>
 <hr>
@@ -1315,7 +1414,8 @@ bd_fs_ext2_get_info (<em class="parameter"><code>const <a href="../glib/glib-Bas
 <a name="bd-fs-ext2-get-info.returns"></a><h4>Returns</h4>
 <p> information about the file system on <em class="parameter"><code>device</code></em>
 or
-<a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error. </p>
+<a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT2:CAPS"><code class="literal">BD_FS_TECH_EXT2</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_FS_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
@@ -1376,6 +1476,7 @@ passed to the 'mke2fs' utility). </p></td>
 <a name="bd-fs-ext2-mkfs.returns"></a><h4>Returns</h4>
 <p> whether a new ext2 fs was successfully created on <em class="parameter"><code>device</code></em>
 or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT2:CAPS"><code class="literal">BD_FS_TECH_EXT2</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-MKFS:CAPS"><code class="literal">BD_FS_TECH_MODE_MKFS</code></a></p>
 </div>
 </div>
 <hr>
@@ -1424,6 +1525,7 @@ passed to the 'e2fsck' utility). </p></td>
 <p> whether an ext2 file system on the <em class="parameter"><code>device</code></em>
 was successfully repaired
 (if needed) or not (error is set in that case)</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT2:CAPS"><code class="literal">BD_FS_TECH_EXT2</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-REPAIR:CAPS"><code class="literal">BD_FS_TECH_MODE_REPAIR</code></a></p>
 </div>
 </div>
 <hr>
@@ -1472,6 +1574,7 @@ passed to the 'resize2fs' utility). </p></td>
 <a name="bd-fs-ext2-resize.returns"></a><h4>Returns</h4>
 <p> whether the file system on <em class="parameter"><code>device</code></em>
 was successfully resized or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT2:CAPS"><code class="literal">BD_FS_TECH_EXT2</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-RESIZE:CAPS"><code class="literal">BD_FS_TECH_MODE_RESIZE</code></a></p>
 </div>
 </div>
 <hr>
@@ -1513,6 +1616,7 @@ bd_fs_ext2_set_label (<em class="parameter"><code>const <a href="../glib/glib-Ba
 <p> whether the label of ext2 file system on the <em class="parameter"><code>device</code></em>
 was
 successfully set or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT2:CAPS"><code class="literal">BD_FS_TECH_EXT2</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-SET-LABEL:CAPS"><code class="literal">BD_FS_TECH_MODE_SET_LABEL</code></a></p>
 </div>
 </div>
 <hr>
@@ -1548,6 +1652,7 @@ bd_fs_ext2_wipe (<em class="parameter"><code>const <a href="../glib/glib-Basic-T
 <p> whether an ext2 signature was successfully wiped from the <em class="parameter"><code>device</code></em>
 or
 not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT2:CAPS"><code class="literal">BD_FS_TECH_EXT2</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-WIPE:CAPS"><code class="literal">BD_FS_TECH_MODE_WIPE</code></a></p>
 </div>
 </div>
 <hr>
@@ -1589,6 +1694,7 @@ passed to the 'e2fsck' utility). </p></td>
 <a name="bd-fs-ext3-check.returns"></a><h4>Returns</h4>
 <p> whether an ext3 file system on the <em class="parameter"><code>device</code></em>
 is clean or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT3:CAPS"><code class="literal">BD_FS_TECH_EXT3</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-CHECK:CAPS"><code class="literal">BD_FS_TECH_MODE_CHECK</code></a></p>
 </div>
 </div>
 <hr>
@@ -1623,7 +1729,8 @@ bd_fs_ext3_get_info (<em class="parameter"><code>const <a href="../glib/glib-Bas
 <a name="bd-fs-ext3-get-info.returns"></a><h4>Returns</h4>
 <p> information about the file system on <em class="parameter"><code>device</code></em>
 or
-<a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error. </p>
+<a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT3:CAPS"><code class="literal">BD_FS_TECH_EXT3</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_FS_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
@@ -1684,6 +1791,7 @@ passed to the 'mke2fs' utility). </p></td>
 <a name="bd-fs-ext3-mkfs.returns"></a><h4>Returns</h4>
 <p> whether a new ext3 fs was successfully created on <em class="parameter"><code>device</code></em>
 or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT3:CAPS"><code class="literal">BD_FS_TECH_EXT3</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-MKFS:CAPS"><code class="literal">BD_FS_TECH_MODE_MKFS</code></a></p>
 </div>
 </div>
 <hr>
@@ -1732,6 +1840,7 @@ passed to the 'e2fsck' utility). </p></td>
 <p> whether an ext3 file system on the <em class="parameter"><code>device</code></em>
 was successfully repaired
 (if needed) or not (error is set in that case)</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT3:CAPS"><code class="literal">BD_FS_TECH_EXT3</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-REPAIR:CAPS"><code class="literal">BD_FS_TECH_MODE_REPAIR</code></a></p>
 </div>
 </div>
 <hr>
@@ -1780,6 +1889,7 @@ passed to the 'resize2fs' utility). </p></td>
 <a name="bd-fs-ext3-resize.returns"></a><h4>Returns</h4>
 <p> whether the file system on <em class="parameter"><code>device</code></em>
 was successfully resized or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT3:CAPS"><code class="literal">BD_FS_TECH_EXT3</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-RESIZE:CAPS"><code class="literal">BD_FS_TECH_MODE_RESIZE</code></a></p>
 </div>
 </div>
 <hr>
@@ -1821,6 +1931,7 @@ bd_fs_ext3_set_label (<em class="parameter"><code>const <a href="../glib/glib-Ba
 <p> whether the label of ext3 file system on the <em class="parameter"><code>device</code></em>
 was
 successfully set or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT3:CAPS"><code class="literal">BD_FS_TECH_EXT3</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-SET-LABEL:CAPS"><code class="literal">BD_FS_TECH_MODE_SET_LABEL</code></a></p>
 </div>
 </div>
 <hr>
@@ -1856,6 +1967,7 @@ bd_fs_ext3_wipe (<em class="parameter"><code>const <a href="../glib/glib-Basic-T
 <p> whether an ext3 signature was successfully wiped from the <em class="parameter"><code>device</code></em>
 or
 not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT3:CAPS"><code class="literal">BD_FS_TECH_EXT3</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-WIPE:CAPS"><code class="literal">BD_FS_TECH_MODE_WIPE</code></a></p>
 </div>
 </div>
 <hr>
@@ -1897,6 +2009,7 @@ passed to the 'e2fsck' utility). </p></td>
 <a name="bd-fs-ext4-check.returns"></a><h4>Returns</h4>
 <p> whether an ext4 file system on the <em class="parameter"><code>device</code></em>
 is clean or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT4:CAPS"><code class="literal">BD_FS_TECH_EXT4</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-CHECK:CAPS"><code class="literal">BD_FS_TECH_MODE_CHECK</code></a></p>
 </div>
 </div>
 <hr>
@@ -1931,7 +2044,8 @@ bd_fs_ext4_get_info (<em class="parameter"><code>const <a href="../glib/glib-Bas
 <a name="bd-fs-ext4-get-info.returns"></a><h4>Returns</h4>
 <p> information about the file system on <em class="parameter"><code>device</code></em>
 or
-<a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error. </p>
+<a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT3:CAPS"><code class="literal">BD_FS_TECH_EXT3</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_FS_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
@@ -1992,6 +2106,7 @@ passed to the 'mkfs.ext4' utility). </p></td>
 <a name="bd-fs-ext4-mkfs.returns"></a><h4>Returns</h4>
 <p> whether a new ext4 fs was successfully created on <em class="parameter"><code>device</code></em>
 or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT4:CAPS"><code class="literal">BD_FS_TECH_EXT4</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-MKFS:CAPS"><code class="literal">BD_FS_TECH_MODE_MKFS</code></a></p>
 </div>
 </div>
 <hr>
@@ -2040,6 +2155,7 @@ passed to the 'e2fsck' utility). </p></td>
 <p> whether an ext4 file system on the <em class="parameter"><code>device</code></em>
 was successfully repaired
 (if needed) or not (error is set in that case)</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT4:CAPS"><code class="literal">BD_FS_TECH_EXT4</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-REPAIR:CAPS"><code class="literal">BD_FS_TECH_MODE_REPAIR</code></a></p>
 </div>
 </div>
 <hr>
@@ -2088,6 +2204,7 @@ passed to the 'resize2fs' utility). </p></td>
 <a name="bd-fs-ext4-resize.returns"></a><h4>Returns</h4>
 <p> whether the file system on <em class="parameter"><code>device</code></em>
 was successfully resized or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT4:CAPS"><code class="literal">BD_FS_TECH_EXT4</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-RESIZE:CAPS"><code class="literal">BD_FS_TECH_MODE_RESIZE</code></a></p>
 </div>
 </div>
 <hr>
@@ -2129,6 +2246,7 @@ bd_fs_ext4_set_label (<em class="parameter"><code>const <a href="../glib/glib-Ba
 <p> whether the label of ext4 file system on the <em class="parameter"><code>device</code></em>
 was
 successfully set or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT3:CAPS"><code class="literal">BD_FS_TECH_EXT3</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-SET-LABEL:CAPS"><code class="literal">BD_FS_TECH_MODE_SET_LABEL</code></a></p>
 </div>
 </div>
 <hr>
@@ -2164,6 +2282,7 @@ bd_fs_ext4_wipe (<em class="parameter"><code>const <a href="../glib/glib-Basic-T
 <p> whether an ext4 signature was successfully wiped from the <em class="parameter"><code>device</code></em>
 or
 not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT4:CAPS"><code class="literal">BD_FS_TECH_EXT4</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-WIPE:CAPS"><code class="literal">BD_FS_TECH_MODE_WIPE</code></a></p>
 </div>
 </div>
 <hr>
@@ -2200,6 +2319,7 @@ bd_fs_xfs_check (<em class="parameter"><code>const <a href="../glib/glib-Basic-T
 is clean or not</p>
 <p>Note: if the file system is mounted it may be reported as unclean even if
 everything is okay and there are just some pending/in-progress writes</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-XFS:CAPS"><code class="literal">BD_FS_TECH_XFS</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-CHECK:CAPS"><code class="literal">BD_FS_TECH_MODE_CHECK</code></a></p>
 </div>
 </div>
 <hr>
@@ -2219,7 +2339,9 @@ bd_fs_xfs_get_info (<em class="parameter"><code>const <a href="../glib/glib-Basi
 <tbody>
 <tr>
 <td class="parameter_name"><p>device</p></td>
-<td class="parameter_description"><p>the device containing the file system to get info for</p></td>
+<td class="parameter_description"><p>the device containing the file system to get info for (device must
+be mounted, trying to get info for an unmounted device will result
+in an error)</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
@@ -2234,7 +2356,8 @@ bd_fs_xfs_get_info (<em class="parameter"><code>const <a href="../glib/glib-Basi
 <a name="bd-fs-xfs-get-info.returns"></a><h4>Returns</h4>
 <p> information about the file system on <em class="parameter"><code>device</code></em>
 or
-<a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error. </p>
+<a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-XFS:CAPS"><code class="literal">BD_FS_TECH_XFS</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_FS_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
@@ -2295,6 +2418,7 @@ passed to the 'mkfs.xfs' utility). </p></td>
 <a name="bd-fs-xfs-mkfs.returns"></a><h4>Returns</h4>
 <p> whether a new xfs fs was successfully created on <em class="parameter"><code>device</code></em>
 or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-XFS:CAPS"><code class="literal">BD_FS_TECH_XFS</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-MKFS:CAPS"><code class="literal">BD_FS_TECH_MODE_MKFS</code></a></p>
 </div>
 </div>
 <hr>
@@ -2337,6 +2461,7 @@ passed to the 'xfs_repair' utility). </p></td>
 <p> whether an xfs file system on the <em class="parameter"><code>device</code></em>
 was successfully repaired
 (if needed) or not (error is set in that case)</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-XFS:CAPS"><code class="literal">BD_FS_TECH_XFS</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-REPAIR:CAPS"><code class="literal">BD_FS_TECH_MODE_REPAIR</code></a></p>
 </div>
 </div>
 <hr>
@@ -2385,6 +2510,7 @@ passed to the 'xfs_growfs' utility). </p></td>
 <a name="bd-fs-xfs-resize.returns"></a><h4>Returns</h4>
 <p> whether the file system mounted on <em class="parameter"><code>mpoint</code></em>
 was successfully resized or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-XFS:CAPS"><code class="literal">BD_FS_TECH_XFS</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-RESIZE:CAPS"><code class="literal">BD_FS_TECH_MODE_RESIZE</code></a></p>
 </div>
 </div>
 <hr>
@@ -2426,6 +2552,7 @@ bd_fs_xfs_set_label (<em class="parameter"><code>const <a href="../glib/glib-Bas
 <p> whether the label of xfs file system on the <em class="parameter"><code>device</code></em>
 was
 successfully set or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-XFS:CAPS"><code class="literal">BD_FS_TECH_XFS</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-SET-LABEL:CAPS"><code class="literal">BD_FS_TECH_MODE_SET_LABEL</code></a></p>
 </div>
 </div>
 <hr>
@@ -2461,6 +2588,7 @@ bd_fs_xfs_wipe (<em class="parameter"><code>const <a href="../glib/glib-Basic-Ty
 <p> whether an xfs signature was successfully wiped from the <em class="parameter"><code>device</code></em>
 or
 not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-XFS:CAPS"><code class="literal">BD_FS_TECH_XFS</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-WIPE:CAPS"><code class="literal">BD_FS_TECH_MODE_WIPE</code></a></p>
 </div>
 </div>
 <hr>
@@ -2502,6 +2630,7 @@ passed to the 'fsck.vfat' utility). </p></td>
 <a name="bd-fs-vfat-check.returns"></a><h4>Returns</h4>
 <p> whether an vfat file system on the <em class="parameter"><code>device</code></em>
 is clean or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-VFAT:CAPS"><code class="literal">BD_FS_TECH_VFAT</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-CHECK:CAPS"><code class="literal">BD_FS_TECH_MODE_CHECK</code></a></p>
 </div>
 </div>
 <hr>
@@ -2536,7 +2665,8 @@ bd_fs_vfat_get_info (<em class="parameter"><code>const <a href="../glib/glib-Bas
 <a name="bd-fs-vfat-get-info.returns"></a><h4>Returns</h4>
 <p> information about the file system on <em class="parameter"><code>device</code></em>
 or
-<a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error. </p>
+<a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-VFAT:CAPS"><code class="literal">BD_FS_TECH_VFAT</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_FS_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
@@ -2597,6 +2727,7 @@ passed to the 'mkfs.vfat' utility). </p></td>
 <a name="bd-fs-vfat-mkfs.returns"></a><h4>Returns</h4>
 <p> whether a new vfat fs was successfully created on <em class="parameter"><code>device</code></em>
 or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-VFAT:CAPS"><code class="literal">BD_FS_TECH_VFAT</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-MKFS:CAPS"><code class="literal">BD_FS_TECH_MODE_MKFS</code></a></p>
 </div>
 </div>
 <hr>
@@ -2639,6 +2770,7 @@ passed to the 'fsck.vfat' utility). </p></td>
 <p> whether an vfat file system on the <em class="parameter"><code>device</code></em>
 was successfully repaired
 (if needed) or not (error is set in that case)</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-VFAT:CAPS"><code class="literal">BD_FS_TECH_VFAT</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-REPAIR:CAPS"><code class="literal">BD_FS_TECH_MODE_REPAIR</code></a></p>
 </div>
 </div>
 <hr>
@@ -2680,6 +2812,7 @@ adapted to the underlying block device)</p></td>
 <a name="bd-fs-vfat-resize.returns"></a><h4>Returns</h4>
 <p> whether the file system on <em class="parameter"><code>device</code></em>
 was successfully resized or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-VFAT:CAPS"><code class="literal">BD_FS_TECH_VFAT</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-RESIZE:CAPS"><code class="literal">BD_FS_TECH_MODE_RESIZE</code></a></p>
 </div>
 </div>
 <hr>
@@ -2721,6 +2854,7 @@ bd_fs_vfat_set_label (<em class="parameter"><code>const <a href="../glib/glib-Ba
 <p> whether the label of vfat file system on the <em class="parameter"><code>device</code></em>
 was
 successfully set or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-VFAT:CAPS"><code class="literal">BD_FS_TECH_VFAT</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-SET-LABEL:CAPS"><code class="literal">BD_FS_TECH_MODE_SET_LABEL</code></a></p>
 </div>
 </div>
 <hr>
@@ -2756,6 +2890,323 @@ bd_fs_vfat_wipe (<em class="parameter"><code>const <a href="../glib/glib-Basic-T
 <p> whether an vfat signature was successfully wiped from the <em class="parameter"><code>device</code></em>
 or
 not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-VFAT:CAPS"><code class="literal">BD_FS_TECH_VFAT</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-WIPE:CAPS"><code class="literal">BD_FS_TECH_MODE_WIPE</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-fs-is-tech-avail"></a><h3>bd_fs_is_tech_avail ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_fs_is_tech_avail (<em class="parameter"><code><a class="link" href="libblockdev-FS.html#BDFSTech" title="enum BDFSTech"><span class="type">BDFSTech</span></a> tech</code></em>,
+                     <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> mode</code></em>,
+                     <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-fs-is-tech-avail.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>tech</p></td>
+<td class="parameter_description"><p>the queried tech</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>mode</p></td>
+<td class="parameter_description"><p>a bit mask of queried modes of operation (<a class="link" href="libblockdev-FS.html#BDFSTechMode" title="enum BDFSTechMode"><span class="type">BDFSTechMode</span></a>) for <em class="parameter"><code>tech</code></em>
+</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (details about why the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is not available). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-fs-is-tech-avail.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is available -- supported by the
+plugin implementation and having all the runtime dependencies available</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-fs-ntfs-check"></a><h3>bd_fs_ntfs_check ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_fs_ntfs_check (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-fs-ntfs-check.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>the device containing the file system to check</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-fs-ntfs-check.returns"></a><h4>Returns</h4>
+<p> whether an ntfs file system on the <em class="parameter"><code>device</code></em>
+is clean or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-NTFS:CAPS"><code class="literal">BD_FS_TECH_NTFS</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-CHECK:CAPS"><code class="literal">BD_FS_TECH_MODE_CHECK</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-fs-ntfs-get-info"></a><h3>bd_fs_ntfs_get_info ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-FS.html#BDFSNtfsInfo" title="BDFSNtfsInfo"><span class="returnvalue">BDFSNtfsInfo</span></a> *
+bd_fs_ntfs_get_info (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                     <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-fs-ntfs-get-info.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>the device containing the file system to get info for (device must
+not be mounted, trying to get info for a mounted device will result
+in an error)</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-fs-ntfs-get-info.returns"></a><h4>Returns</h4>
+<p> information about the file system on <em class="parameter"><code>device</code></em>
+or
+<a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-NTFS:CAPS"><code class="literal">BD_FS_TECH_NTFS</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_FS_TECH_MODE_QUERY</code></a>. </p>
+<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-fs-ntfs-mkfs"></a><h3>bd_fs_ntfs_mkfs ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_fs_ntfs_mkfs (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                 <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                 <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-fs-ntfs-mkfs.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>the device to create a new ntfs fs on</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the creation (right now
+passed to the 'mkntfs' utility). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-fs-ntfs-mkfs.returns"></a><h4>Returns</h4>
+<p> whether a new NTFS fs was successfully created on <em class="parameter"><code>device</code></em>
+or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-NTFS:CAPS"><code class="literal">BD_FS_TECH_NTFS</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-MKFS:CAPS"><code class="literal">BD_FS_TECH_MODE_MKFS</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-fs-ntfs-repair"></a><h3>bd_fs_ntfs_repair ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_fs_ntfs_repair (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                   <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-fs-ntfs-repair.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>the device containing the file system to repair</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-fs-ntfs-repair.returns"></a><h4>Returns</h4>
+<p> whether an NTFS file system on the <em class="parameter"><code>device</code></em>
+was successfully repaired
+(if needed) or not (error is set in that case)</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-NTFS:CAPS"><code class="literal">BD_FS_TECH_NTFS</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-REPAIR:CAPS"><code class="literal">BD_FS_TECH_MODE_REPAIR</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-fs-ntfs-resize"></a><h3>bd_fs_ntfs_resize ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_fs_ntfs_resize (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                   <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> new_size</code></em>,
+                   <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-fs-ntfs-resize.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>the device the file system of which to resize</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>new_size</p></td>
+<td class="parameter_description"><p>new requested size for the file system in bytes (if 0, the file system
+is adapted to the underlying block device)</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-fs-ntfs-resize.returns"></a><h4>Returns</h4>
+<p> whether the file system on <em class="parameter"><code>device</code></em>
+was successfully resized or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-NTFS:CAPS"><code class="literal">BD_FS_TECH_NTFS</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-RESIZE:CAPS"><code class="literal">BD_FS_TECH_MODE_RESIZE</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-fs-ntfs-set-label"></a><h3>bd_fs_ntfs_set_label ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_fs_ntfs_set_label (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                      <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *label</code></em>,
+                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-fs-ntfs-set-label.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>the device containing the file system to set the label for</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>label</p></td>
+<td class="parameter_description"><p>label to set</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-fs-ntfs-set-label.returns"></a><h4>Returns</h4>
+<p> whether the label of the NTFS file system on the <em class="parameter"><code>device</code></em>
+was
+successfully set or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-NTFS:CAPS"><code class="literal">BD_FS_TECH_NTFS</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-SET-LABEL:CAPS"><code class="literal">BD_FS_TECH_MODE_SET_LABEL</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-fs-ntfs-wipe"></a><h3>bd_fs_ntfs_wipe ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_fs_ntfs_wipe (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                 <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-fs-ntfs-wipe.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>the device to wipe an ntfs signature from</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-fs-ntfs-wipe.returns"></a><h4>Returns</h4>
+<p> whether an ntfs signature was successfully wiped from the <em class="parameter"><code>device</code></em>
+or not</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-NTFS:CAPS"><code class="literal">BD_FS_TECH_NTFS</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-WIPE:CAPS"><code class="literal">BD_FS_TECH_MODE_WIPE</code></a></p>
 </div>
 </div>
 </div>
@@ -2820,13 +3271,28 @@ not</p>
 <td> </td>
 </tr>
 <tr>
+<td class="enum_member_name"><p><a name="BD-FS-ERROR-NOT-MOUNTED:CAPS"></a>BD_FS_ERROR_NOT_MOUNTED</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
 <td class="enum_member_name"><p><a name="BD-FS-ERROR-AUTH:CAPS"></a>BD_FS_ERROR_AUTH</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-ERROR-TECH-UNAVAIL:CAPS"></a>BD_FS_ERROR_TECH_UNAVAIL</p></td>
 <td> </td>
 <td> </td>
 </tr>
 </tbody>
 </table></div>
 </div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-FS-ERROR:CAPS"></a><h3>BD_FS_ERROR</h3>
+<pre class="programlisting">#define             BD_FS_ERROR</pre>
 </div>
 <hr>
 <div class="refsect2">
@@ -2914,6 +3380,180 @@ not</p>
 <tr>
 <td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDFSVfatInfo.free-cluster-count"></a>free_cluster_count</code></em>;</p></td>
 <td class="struct_member_description"><p>number of free clusters in the filesystem</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDFSTech"></a><h3>enum BDFSTech</h3>
+<div class="refsect3">
+<a name="BDFSTech.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-TECH-GENERIC:CAPS"></a>BD_FS_TECH_GENERIC</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-TECH-MOUNT:CAPS"></a>BD_FS_TECH_MOUNT</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-TECH-EXT2:CAPS"></a>BD_FS_TECH_EXT2</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-TECH-EXT3:CAPS"></a>BD_FS_TECH_EXT3</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-TECH-EXT4:CAPS"></a>BD_FS_TECH_EXT4</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-TECH-XFS:CAPS"></a>BD_FS_TECH_XFS</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-TECH-VFAT:CAPS"></a>BD_FS_TECH_VFAT</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-TECH-NTFS:CAPS"></a>BD_FS_TECH_NTFS</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDFSTechMode"></a><h3>enum BDFSTechMode</h3>
+<div class="refsect3">
+<a name="BDFSTechMode.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-TECH-MODE-MKFS:CAPS"></a>BD_FS_TECH_MODE_MKFS</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-TECH-MODE-WIPE:CAPS"></a>BD_FS_TECH_MODE_WIPE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-TECH-MODE-CHECK:CAPS"></a>BD_FS_TECH_MODE_CHECK</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-TECH-MODE-REPAIR:CAPS"></a>BD_FS_TECH_MODE_REPAIR</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-TECH-MODE-SET-LABEL:CAPS"></a>BD_FS_TECH_MODE_SET_LABEL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-TECH-MODE-QUERY:CAPS"></a>BD_FS_TECH_MODE_QUERY</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-TECH-MODE-RESIZE:CAPS"></a>BD_FS_TECH_MODE_RESIZE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDFsResizeFlags"></a><h3>enum BDFsResizeFlags</h3>
+<div class="refsect3">
+<a name="BDFsResizeFlags.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-OFFLINE-SHRINK:CAPS"></a>BD_FS_OFFLINE_SHRINK</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-OFFLINE-GROW:CAPS"></a>BD_FS_OFFLINE_GROW</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-ONLINE-SHRINK:CAPS"></a>BD_FS_ONLINE_SHRINK</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-FS-ONLINE-GROW:CAPS"></a>BD_FS_ONLINE_GROW</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDFSNtfsInfo"></a><h3>BDFSNtfsInfo</h3>
+<pre class="programlisting">typedef struct {
+    guint64 size;
+    guint64 free_space;
+} BDFSNtfsInfo;
+</pre>
+<div class="refsect3">
+<a name="BDFSNtfsInfo.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="struct_members_name">
+<col class="struct_members_description">
+<col width="200px" class="struct_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDFSNtfsInfo.size"></a>size</code></em>;</p></td>
+<td class="struct_member_description"><p>size of the filesystem in bytes</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDFSNtfsInfo.free-space"></a>free_space</code></em>;</p></td>
+<td class="struct_member_description"><p>number of free space in the filesystem in bytes</p></td>
 <td class="struct_member_annotations"> </td>
 </tr>
 </tbody>

@@ -73,6 +73,14 @@
 </tr>
 <tr>
 <td class="function_type">
+<a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-utils-dev-utils-error-quark" title="bd_utils_dev_utils_error_quark ()">bd_utils_dev_utils_error_quark</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
@@ -245,6 +253,14 @@
 <tr>
 <td class="datatype_keyword">enum</td>
 <td class="function_name"><a class="link" href="libblockdev-Utils.html#BDUtilsExecError" title="enum BDUtilsExecError">BDUtilsExecError</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#BDUtilsDevUtilsError" title="enum BDUtilsDevUtilsError">BDUtilsDevUtilsError</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#BD-UTILS-DEV-UTILS-ERROR:CAPS" title="BD_UTILS_DEV_UTILS_ERROR">BD_UTILS_DEV_UTILS_ERROR</a></td>
 </tr>
 <tr>
 <td class="datatype_keyword"> </td>
@@ -420,6 +436,13 @@ log the information about program executing.</p>
 <a name="bd-utils-exec-error-quark"></a><h3>bd_utils_exec_error_quark ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
 bd_utils_exec_error_quark (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-utils-dev-utils-error-quark"></a><h3>bd_utils_dev_utils_error_quark ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
+bd_utils_dev_utils_error_quark (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
 <p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
 <hr>
@@ -1185,9 +1208,39 @@ case of error. </p>
 <td> </td>
 <td> </td>
 </tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-UTILS-EXEC-ERROR-UTIL-CHECK-ERROR:CAPS"></a>BD_UTILS_EXEC_ERROR_UTIL_CHECK_ERROR</p></td>
+<td> </td>
+<td> </td>
+</tr>
 </tbody>
 </table></div>
 </div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDUtilsDevUtilsError"></a><h3>enum BDUtilsDevUtilsError</h3>
+<div class="refsect3">
+<a name="BDUtilsDevUtilsError.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody><tr>
+<td class="enum_member_name"><p><a name="BD-UTILS-DEV-UTILS-ERROR-FAILED:CAPS"></a>BD_UTILS_DEV_UTILS_ERROR_FAILED</p></td>
+<td> </td>
+<td> </td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-UTILS-DEV-UTILS-ERROR:CAPS"></a><h3>BD_UTILS_DEV_UTILS_ERROR</h3>
+<pre class="programlisting">#define BD_UTILS_DEV_UTILS_ERROR bd_utils_dev_utils_error_quark ()
+</pre>
 </div>
 <hr>
 <div class="refsect2">

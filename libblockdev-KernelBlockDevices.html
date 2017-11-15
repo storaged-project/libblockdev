@@ -230,6 +230,14 @@
 <a class="link" href="libblockdev-KernelBlockDevices.html#bd-kbd-zram-stats-free" title="bd_kbd_zram_stats_free ()">bd_kbd_zram_stats_free</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-KernelBlockDevices.html#bd-kbd-is-tech-avail" title="bd_kbd_is_tech_avail ()">bd_kbd_is_tech_avail</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
 </tbody>
 </table></div>
 </div>
@@ -260,6 +268,14 @@
 <tr>
 <td class="define_keyword">#define</td>
 <td class="function_name"><a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR:CAPS" title="BD_KBD_ERROR">BD_KBD_ERROR</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-KernelBlockDevices.html#BDKBDTech" title="enum BDKBDTech">BDKBDTech</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-KernelBlockDevices.html#BDKBDTechMode" title="enum BDKBDTechMode">BDKBDTechMode</a></td>
 </tr>
 </tbody>
 </table></div>
@@ -341,6 +357,7 @@ cache to</p></td>
 <p> whether the <em class="parameter"><code>c_set_uuid</code></em>
 cache was successfully attached to <em class="parameter"><code>bcache_device</code></em>
 or not</p>
+<p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-BCACHE:CAPS"><code class="literal">BD_KBD_TECH_BCACHE</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_KBD_TECH_MODE_MODIFY</code></a></p>
 </div>
 </div>
 <hr>
@@ -393,6 +410,7 @@ passed to the 'make-bcache' utility). </p></td>
 <div class="refsect3">
 <a name="bd-kbd-bcache-create.returns"></a><h4>Returns</h4>
 <p> whether the bcache device was successfully created or not</p>
+<p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-BCACHE:CAPS"><code class="literal">BD_KBD_TECH_BCACHE</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-CREATE:CAPS"><code class="literal">BD_KBD_TECH_MODE_CREATE</code></a></p>
 </div>
 </div>
 <hr>
@@ -427,6 +445,7 @@ bd_kbd_bcache_destroy (<em class="parameter"><code>const <a href="../glib/glib-B
 <a name="bd-kbd-bcache-destroy.returns"></a><h4>Returns</h4>
 <p> whether the bcache device <em class="parameter"><code>bcache_device</code></em>
 was successfully destroyed or not</p>
+<p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-BCACHE:CAPS"><code class="literal">BD_KBD_TECH_BCACHE</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-DESTROY:CAPS"><code class="literal">BD_KBD_TECH_MODE_DESTROY</code></a></p>
 </div>
 </div>
 <hr>
@@ -468,6 +487,7 @@ bd_kbd_bcache_detach (<em class="parameter"><code>const <a href="../glib/glib-Ba
 <p> whether the bcache device <em class="parameter"><code>bcache_device</code></em>
 was successfully destroyed or not</p>
 <p>Note: Flushes the cache first.</p>
+<p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-BCACHE:CAPS"><code class="literal">BD_KBD_TECH_BCACHE</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_KBD_TECH_MODE_MODIFY</code></a></p>
 </div>
 </div>
 <hr>
@@ -502,7 +522,8 @@ bd_kbd_bcache_get_backing_device (<em class="parameter"><code>const <a href="../
 <a name="bd-kbd-bcache-get-backing-device.returns"></a><h4>Returns</h4>
 <p> name of the backing device of the <em class="parameter"><code>bcache_device</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if failed to determine (<em class="parameter"><code>error</code></em>
-is populated). </p>
+is populated)</p>
+<p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-BCACHE:CAPS"><code class="literal">BD_KBD_TECH_BCACHE</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-QUERY:CAPS"><code class="literal">BD_KBD_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
@@ -541,7 +562,8 @@ or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">N
 is populated)</p>
 <p>Note: returns the name of the first cache device of <em class="parameter"><code>bcache_device</code></em>
 (in case
-there are more). </p>
+there are more)</p>
+<p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-BCACHE:CAPS"><code class="literal">BD_KBD_TECH_BCACHE</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-QUERY:CAPS"><code class="literal">BD_KBD_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
@@ -577,6 +599,7 @@ bd_kbd_bcache_get_mode (<em class="parameter"><code>const <a href="../glib/glib-
 <a name="bd-kbd-bcache-get-mode.returns"></a><h4>Returns</h4>
 <p> current mode of the <em class="parameter"><code>bcache_device</code></em>
 </p>
+<p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-BCACHE:CAPS"><code class="literal">BD_KBD_TECH_BCACHE</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-QUERY:CAPS"><code class="literal">BD_KBD_TECH_MODE_QUERY</code></a></p>
 </div>
 </div>
 <hr>
@@ -644,7 +667,8 @@ bd_kbd_bcache_get_mode_str (<em class="parameter"><code><a class="link" href="li
 <div class="refsect3">
 <a name="bd-kbd-bcache-get-mode-str.returns"></a><h4>Returns</h4>
 <p> string representation of <em class="parameter"><code>mode</code></em>
-or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error. </p>
+or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
+<p>Tech category: always available. </p>
 <p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
 </div>
 </div>
@@ -685,6 +709,7 @@ bd_kbd_bcache_set_mode (<em class="parameter"><code>const <a href="../glib/glib-
 <div class="refsect3">
 <a name="bd-kbd-bcache-set-mode.returns"></a><h4>Returns</h4>
 <p> whether the mode was successfully set or not</p>
+<p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-BCACHE:CAPS"><code class="literal">BD_KBD_TECH_BCACHE</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_KBD_TECH_MODE_MODIFY</code></a></p>
 </div>
 </div>
 <hr>
@@ -738,7 +763,8 @@ bd_kbd_bcache_status (<em class="parameter"><code>const <a href="../glib/glib-Ba
 <p> status of the <em class="parameter"><code>bcache_device</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of
 error (<em class="parameter"><code>error</code></em>
-is set). </p>
+is set)</p>
+<p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-BCACHE:CAPS"><code class="literal">BD_KBD_TECH_BCACHE</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-QUERY:CAPS"><code class="literal">BD_KBD_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
@@ -799,6 +825,7 @@ zRAM devices were successfully created or not</p>
 and <em class="parameter"><code>nstreams</code></em>
 (if given) have to be &gt;= <em class="parameter"><code>num_devices</code></em>
 !**</p>
+<p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-ZRAM:CAPS"><code class="literal">BD_KBD_TECH_ZRAM</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-CREATE:CAPS"><code class="literal">BD_KBD_TECH_MODE_CREATE</code></a></p>
 </div>
 </div>
 <hr>
@@ -827,6 +854,7 @@ bd_kbd_zram_destroy_devices (<em class="parameter"><code><a href="../glib/glib-E
 <p>The only way how to destroy zRAM device right now is to unload the 'zram'
 module and thus destroy all of them. That's why this function doesn't allow
 specification of which devices should be destroyed.</p>
+<p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-ZRAM:CAPS"><code class="literal">BD_KBD_TECH_ZRAM</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-DESTROY:CAPS"><code class="literal">BD_KBD_TECH_MODE_DESTROY</code></a></p>
 </div>
 </div>
 <hr>
@@ -872,6 +900,7 @@ bd_kbd_zram_add_device (<em class="parameter"><code><a href="../glib/glib-Basic-
 <div class="refsect3">
 <a name="bd-kbd-zram-add-device.returns"></a><h4>Returns</h4>
 <p> whether a new zRAM device was added or not</p>
+<p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-ZRAM:CAPS"><code class="literal">BD_KBD_TECH_ZRAM</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_KBD_TECH_MODE_MODIFY</code></a></p>
 </div>
 </div>
 <hr>
@@ -906,6 +935,7 @@ bd_kbd_zram_remove_device (<em class="parameter"><code>const <a href="../glib/gl
 <a name="bd-kbd-zram-remove-device.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>device</code></em>
 was successfully removed or not</p>
+<p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-ZRAM:CAPS"><code class="literal">BD_KBD_TECH_ZRAM</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_KBD_TECH_MODE_MODIFY</code></a></p>
 </div>
 </div>
 <hr>
@@ -938,7 +968,8 @@ bd_kbd_zram_get_stats (<em class="parameter"><code>const <a href="../glib/glib-B
 </div>
 <div class="refsect3">
 <a name="bd-kbd-zram-get-stats.returns"></a><h4>Returns</h4>
-<p> statistics for the zRAM device. </p>
+<p> statistics for the zRAM device</p>
+<p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-ZRAM:CAPS"><code class="literal">BD_KBD_TECH_ZRAM</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-QUERY:CAPS"><code class="literal">BD_KBD_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
@@ -959,6 +990,51 @@ bd_kbd_zram_stats_free (<em class="parameter"><code><a class="link" href="libblo
 <p>Frees <em class="parameter"><code>data</code></em>
 .</p>
 <p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-kbd-is-tech-avail"></a><h3>bd_kbd_is_tech_avail ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_kbd_is_tech_avail (<em class="parameter"><code><a class="link" href="libblockdev-KernelBlockDevices.html#BDKBDTech" title="enum BDKBDTech"><span class="type">BDKBDTech</span></a> tech</code></em>,
+                      <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> mode</code></em>,
+                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-kbd-is-tech-avail.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>tech</p></td>
+<td class="parameter_description"><p>the queried tech</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>mode</p></td>
+<td class="parameter_description"><p>a bit mask of queried modes of operation (<a class="link" href="libblockdev-KernelBlockDevices.html#BDKBDTechMode" title="enum BDKBDTechMode"><span class="type">BDKBDTechMode</span></a>) for <em class="parameter"><code>tech</code></em>
+</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (details about why the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is not available). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-kbd-is-tech-avail.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is available -- supported by the
+plugin implementation and having all the runtime dependencies available</p>
+</div>
 </div>
 </div>
 <div class="refsect1">
@@ -1157,6 +1233,11 @@ bd_kbd_zram_stats_free (<em class="parameter"><code><a class="link" href="libblo
 <td> </td>
 <td> </td>
 </tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-KBD-ERROR-TECH-UNAVAIL:CAPS"></a>BD_KBD_ERROR_TECH_UNAVAIL</p></td>
+<td> </td>
+<td> </td>
+</tr>
 </tbody>
 </table></div>
 </div>
@@ -1184,6 +1265,68 @@ bd_kbd_zram_stats_free (<em class="parameter"><code><a class="link" href="libblo
 <div class="refsect2">
 <a name="BD-KBD-ERROR:CAPS"></a><h3>BD_KBD_ERROR</h3>
 <pre class="programlisting">#define             BD_KBD_ERROR</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDKBDTech"></a><h3>enum BDKBDTech</h3>
+<div class="refsect3">
+<a name="BDKBDTech.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-KBD-TECH-ZRAM:CAPS"></a>BD_KBD_TECH_ZRAM</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-KBD-TECH-BCACHE:CAPS"></a>BD_KBD_TECH_BCACHE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDKBDTechMode"></a><h3>enum BDKBDTechMode</h3>
+<div class="refsect3">
+<a name="BDKBDTechMode.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-KBD-TECH-MODE-CREATE:CAPS"></a>BD_KBD_TECH_MODE_CREATE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-KBD-TECH-MODE-DESTROY:CAPS"></a>BD_KBD_TECH_MODE_DESTROY</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-KBD-TECH-MODE-MODIFY:CAPS"></a>BD_KBD_TECH_MODE_MODIFY</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-KBD-TECH-MODE-QUERY:CAPS"></a>BD_KBD_TECH_MODE_QUERY</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
 </div>
 </div>
 </div>
