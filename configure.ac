@@ -18,6 +18,7 @@ LT_INIT
 
 AC_CONFIG_FILES([Makefile src/Makefile \
                           src/plugins/Makefile \
+                          src/plugins/fs/Makefile \
                           src/utils/Makefile \
                           src/utils/blockdev-utils.pc \
                           src/lib/Makefile \

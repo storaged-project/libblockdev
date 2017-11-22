@@ -10,10 +10,10 @@ from gi.repository import GLib, BlockDev
 class LibraryOpsTestCase(unittest.TestCase):
     log = ""
 
-    # all plugins expcept mpath -- it doesn't have all the dependencies on Debian
-    # and we don't need it for this test
+    # all plugins except for 'fs' and 'mpath' -- these don't have all the
+    # dependencies on CentOS/Debian and we don't need them for this test
     requested_plugins = BlockDev.plugin_specs_from_names(("btrfs", "crypto", "dm",
-                                                          "fs", "kbd", "loop", "lvm",
+                                                          "kbd", "loop", "lvm",
                                                           "mdraid", "part", "swap"))
 
     @classmethod

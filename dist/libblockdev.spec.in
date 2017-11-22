@@ -691,7 +691,8 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files fs-devel
 %{_libdir}/libbd_fs.so
 %dir %{_includedir}/blockdev
-%{_includedir}/blockdev/fs.h
+%dir %{_includedir}/blockdev/fs
+%{_includedir}/blockdev/fs/*.h
 %endif
 
 

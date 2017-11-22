@@ -15,7 +15,7 @@ MAINTAINERCLEANFILES = Makefile.in aclocal.m4 config.guess config.sub \
     configure depcomp install-sh ltmain.sh missing py-compile compile ar-lib \
     m4/*.m4
 
-LIBDIRS = src/utils/.libs:src/plugins/.libs:src/lib/.libs
+LIBDIRS = src/utils/.libs:src/plugins/.libs:src/plugins/fs/.libs:src/lib/.libs
 GIDIR = src/lib
 
 if WITH_PYTHON3
