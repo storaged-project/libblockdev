@@ -1553,6 +1553,8 @@ gboolean bd_part_set_disk_flag (const gchar *disk, BDPartDiskFlag flag, gboolean
  *          not
  *
  * Note: Unsets all the other flags on the partition.
+ *       Only GPT-specific flags and the legacy boot flag are supported on GPT
+ *       partition tables.
  *
  * Tech category: %BD_PART_TECH_MODE_MODIFY_PART + the tech according to the partition table type
  */
@@ -1613,37 +1615,39 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
         return FALSE;
     }
 
-    ped_part = ped_disk_get_partition (ped_disk, part_num);
-    if (!ped_part) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
-        ped_disk_destroy (ped_disk);
-        ped_device_destroy (dev);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    /* our flags are 1s shifted to the bit determined by parted's flags
-     * (i.e. 1 << 3 instead of 3, etc.) */
-    for (i=1; i <= (int) log2 ((double)BD_PART_FLAG_BASIC_LAST); i++) {
-        if ((1 << i) & flags)
-            status = ped_partition_set_flag (ped_part, (PedPartitionFlag) i, (int) 1);
-        else if (ped_partition_is_flag_available (ped_part, (PedPartitionFlag) i))
-            status = ped_partition_set_flag (ped_part, (PedPartitionFlag) i, (int) 0);
-        if (status == 0) {
+    /* Do not let libparted touch gpt partition tables */
+    if (g_strcmp0 (ped_disk->type->name, "gpt") == 0) {
+        ret = set_gpt_flags (disk, part_num, flags, error);
+    } else {
+        ped_part = ped_disk_get_partition (ped_disk, part_num);
+        if (!ped_part) {
             set_parted_error (error, BD_PART_ERROR_FAIL);
-            g_prefix_error (error, "Failed to set flag on the partition '%d' on device '%s'", part_num, disk);
+            g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
             ped_disk_destroy (ped_disk);
             ped_device_destroy (dev);
             bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
+
+        /* our flags are 1s shifted to the bit determined by parted's flags
+         * (i.e. 1 << 3 instead of 3, etc.) */
+        for (i=1; i <= (int) log2 ((double)BD_PART_FLAG_BASIC_LAST); i++) {
+            if ((1 << i) & flags)
+                status = ped_partition_set_flag (ped_part, (PedPartitionFlag) i, (int) 1);
+            else if (ped_partition_is_flag_available (ped_part, (PedPartitionFlag) i))
+                status = ped_partition_set_flag (ped_part, (PedPartitionFlag) i, (int) 0);
+            if (status == 0) {
+                set_parted_error (error, BD_PART_ERROR_FAIL);
+                g_prefix_error (error, "Failed to set flag on the partition '%d' on device '%s'", part_num, disk);
+                ped_disk_destroy (ped_disk);
+                ped_device_destroy (dev);
+                bd_utils_report_finished (progress_id, (*error)->message);
+                return FALSE;
+            }
+        }
+
+        ret = disk_commit (ped_disk, disk, error);
     }
-
-    ret = disk_commit (ped_disk, disk, error);
-
-    if (ret && (g_strcmp0 (ped_disk->type->name, "gpt") == 0))
-        ret = set_gpt_flags (disk, part_num, flags, error);
 
     ped_disk_destroy (ped_disk);
     ped_device_destroy (dev);

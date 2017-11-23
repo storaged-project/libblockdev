@@ -27,6 +27,20 @@ typedef enum {
     BD_PART_DISK_FLAG_GPT_PMBR_BOOT = 1
 } BDPartDiskFlag;
 
+/* BpG-skip */
+/**
+ * BDPartFlag:
+ *
+ * Partition flags supported by libblockdev. First part of the flags (up to
+ * @BD_PART_FLAG_BASIC_LAST) corresponds to the flags supported by libparted
+ * (see https://www.gnu.org/software/parted/manual/parted.html#set). Second
+ * part corresponds to the flags supported by sgdisk (GPT, see `sgdisk -A=list`).
+ *
+ * The only exception from the above is @BD_PART_FLAG_LEGACY_BOOT which is
+ * supported by libparted too but is GPT specific.
+ *
+ */
+/* BpG-skip-end */
 typedef enum {
     BD_PART_FLAG_BOOT = 1 << 1,
     BD_PART_FLAG_ROOT = 1 << 2,
@@ -380,6 +394,8 @@ gboolean bd_part_set_disk_flag (const gchar *disk, BDPartDiskFlag flag, gboolean
  *          not
  *
  * Note: Unsets all the other flags on the partition.
+ *       Only GPT-specific flags and the legacy boot flag are supported on GPT
+ *       partition tables.
  *
  * Tech category: %BD_PART_TECH_MODE_MODIFY_PART + the tech according to the partition table type
  */
