@@ -62,9 +62,9 @@ gboolean bd_fs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
 
 #endif  /* BD_FS */
 
-#include "ext.h"
-#include "generic.h"
-#include "mount.h"
-#include "ntfs.h"
-#include "vfat.h"
-#include "xfs.h"
+#include "fs/ext.h"
+#include "fs/generic.h"
+#include "fs/mount.h"
+#include "fs/ntfs.h"
+#include "fs/vfat.h"
+#include "fs/xfs.h"
