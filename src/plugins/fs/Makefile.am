@@ -7,7 +7,7 @@ libbd_fs_la_LIBADD   = $(GLIB_LIBS) $(BLKID_LIBS) $(PARTED_LIBS) $(PARTED_FS_LIB
 libbd_fs_la_LDFLAGS	 = -L${srcdir}/../../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_fs_la_CPPFLAGS = -I${builddir}/../../../include/ -I${srcdir}/../
 libbd_fs_la_SOURCES  = ../check_deps.c ../check_deps.h \
-						fs.c      fs.h      \
+						../fs.c   ../fs.h   \
 						common.c  common.h  \
 						ext.c     ext.h     \
 						generic.c generic.h \
@@ -17,8 +17,7 @@ libbd_fs_la_SOURCES  = ../check_deps.c ../check_deps.h \
 						xfs.c     xfs.h
 
 libincludefsdir = $(includedir)/blockdev/fs/
-libincludefs_HEADERS = fs.h     \
-					ext.h     \
+libincludefs_HEADERS = ext.h     \
 					generic.h \
 					mount.h   \
 					ntfs.h    \

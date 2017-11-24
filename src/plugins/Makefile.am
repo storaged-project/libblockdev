@@ -206,6 +206,10 @@ if WITH_PART
 libinclude_HEADERS += part.h
 endif
 
+if WITH_FS
+libinclude_HEADERS += fs.h
+endif
+
 noinst_HEADERS = part_err.h
 
 if WITH_S390
