@@ -1370,3 +1370,31 @@ class PartSetIdCase(PartTestCase):
         # we can't change part id to extended partition id
         with self.assertRaises(GLib.GError):
             BlockDev.part_set_part_id (self.loop_dev, ps.path, "0x85")
+
+
+class PartSetGptFlagsCase(PartTestCase):
+    def test_set_part_type(self):
+        """Verify that it is possible to set and get partition flags on GPT"""
+
+        esp_guid = "C12A7328-F81F-11D2-BA4B-00A0C93EC93B"
+
+        # we first need a GPT partition table
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.GPT, True)
+        self.assertTrue(succ)
+
+        # for now, let's just create a typical primary partition starting at the
+        # sector 2048, 10 MiB big with optimal alignment
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+
+        # set GUID (part type) to check that changing flags doesn't change it
+        succ = BlockDev.part_set_part_type (self.loop_dev, ps.path, esp_guid)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertEqual(ps.type_guid, esp_guid)
+
+        # set LEGACY_BOOT flag and test it
+        succ = BlockDev.part_set_part_flags (self.loop_dev, ps.path, BlockDev.PartFlag.LEGACY_BOOT)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertTrue(ps.flags & BlockDev.PartFlag.LEGACY_BOOT)
+        self.assertEqual(ps.type_guid, esp_guid)
