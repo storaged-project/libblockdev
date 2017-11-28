@@ -138,7 +138,7 @@ gboolean bd_kbd_init () {
  *
  */
 void bd_kbd_close () {
-    c_locale = (locale_t) 0;
+    freelocale (c_locale);
 }
 
 /**
