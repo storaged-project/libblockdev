@@ -135,6 +135,7 @@ libblockdev in Python3.
 %endif
 
 %package utils
+BuildRequires: kmod-devel
 Summary:     A library with utility functions for the libblockdev library
 
 %description utils
@@ -254,7 +255,6 @@ with the libblockdev-fs plugin/library.
 
 %if %{with_kbd}
 %package kbd
-BuildRequires: kmod-devel
 BuildRequires: libbytesize-devel
 Summary:     The KBD plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
@@ -649,6 +649,7 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_includedir}/blockdev/exec.h
 %{_includedir}/blockdev/extra_arg.h
 %{_includedir}/blockdev/dev_utils.h
+%{_includedir}/blockdev/module.h
 
 
 %if %{with_btrfs}

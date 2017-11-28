@@ -8,9 +8,6 @@ GQuark bd_kbd_error_quark (void);
 #define BD_KBD_ERROR bd_kbd_error_quark ()
 typedef enum {
     BD_KBD_ERROR_INVAL,
-    BD_KBD_ERROR_KMOD_INIT_FAIL,
-    BD_KBD_ERROR_MODULE_FAIL,
-    BD_KBD_ERROR_MODULE_NOEXIST,
     BD_KBD_ERROR_ZRAM_NOEXIST,
     BD_KBD_ERROR_ZRAM_INVAL,
     BD_KBD_ERROR_BCACHE_PARSE,

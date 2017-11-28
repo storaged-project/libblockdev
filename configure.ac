@@ -149,6 +149,7 @@ LIBBLOCKDEV_PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.42.2])
 LIBBLOCKDEV_PKG_CHECK_MODULES([GOBJECT], [gobject-2.0 >= 2.42.2])
 LIBBLOCKDEV_PKG_CHECK_MODULES([GIO], [gio-2.0 >= 2.42.2])
 LIBBLOCKDEV_PKG_CHECK_MODULES([UDEV], [libudev >= 216])
+LIBBLOCKDEV_PKG_CHECK_MODULES([KMOD], [libkmod >= 19])
 
 AS_IF([test "x$with_crypto" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([CRYPTSETUP], [libcryptsetup >= 1.6.7])
@@ -164,11 +165,6 @@ AS_IF([test "x$with_dm" != "xno" -o "x$with_lvm" != "xno" -o "x$with_lvm_dbus" !
 AS_IF([test "x$with_dm" != "xno"],
       [LIBBLOCKDEV_CHECK_HEADER([dmraid/dmraid.h], [], [dmraid.h not available])],
       [])
-
-AS_IF([test "x$with_kbd" != "xno"],
-      [LIBBLOCKDEV_PKG_CHECK_MODULES([KMOD], [libkmod >= 19])],
-      [])
-
 
 AS_IF([test "x$with_part" != "xno" -o "x$with_fs" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED], [libparted >= 3.1])]

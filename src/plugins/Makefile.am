@@ -131,8 +131,8 @@ libbd_swap_la_SOURCES = swap.c swap.h check_deps.c check_deps.h
 endif
 
 if WITH_KBD
-libbd_kbd_la_CFLAGS = $(GLIB_CFLAGS) $(KMOD_CFLAGS) $(BYTESIZE_CFLAGS) -Wall -Wextra -Werror
-libbd_kbd_la_LIBADD = $(GLIB_LIBS) $(KMOD_LIBS) $(BYTESIZE_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_kbd_la_CFLAGS = $(GLIB_CFLAGS) $(BYTESIZE_CFLAGS) -Wall -Wextra -Werror
+libbd_kbd_la_LIBADD = $(GLIB_LIBS) $(BYTESIZE_LIBS) ${builddir}/../utils/libbd_utils.la
 libbd_kbd_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_kbd_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_kbd_la_SOURCES = kbd.c kbd.h check_deps.c check_deps.h
