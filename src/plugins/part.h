@@ -22,6 +22,19 @@ typedef enum {
     BD_PART_DISK_FLAG_GPT_PMBR_BOOT = 1
 } BDPartDiskFlag;
 
+
+/**
+ * BDPartFlag:
+ *
+ * Partition flags supported by libblockdev. First part of the flags (up to
+ * @BD_PART_FLAG_BASIC_LAST) corresponds to the flags supported by libparted
+ * (see https://www.gnu.org/software/parted/manual/parted.html#set). Second
+ * part corresponds to the flags supported by sgdisk (GPT, see `sgdisk -A=list`).
+ *
+ * The only exception from the above is @BD_PART_FLAG_LEGACY_BOOT which is
+ * supported by libparted too but is GPT specific.
+ *
+ */
 typedef enum {
     BD_PART_FLAG_BOOT = 1 << 1,
     BD_PART_FLAG_ROOT = 1 << 2,
