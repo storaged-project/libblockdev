@@ -9,6 +9,7 @@ typedef enum {
     BD_UTILS_MODULE_ERROR_KMOD_INIT_FAIL,
     BD_UTILS_MODULE_ERROR_FAIL,
     BD_UTILS_MODULE_ERROR_NOEXIST,
+    BD_UTILS_MODULE_ERROR_MODULE_CHECK_ERROR,
 } BDUtilsModuleError;
 
 gboolean bd_utils_have_kernel_module (const gchar *module_name, GError **error);

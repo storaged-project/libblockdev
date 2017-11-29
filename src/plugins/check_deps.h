@@ -27,3 +27,4 @@ typedef struct UtilDep {
 } UtilDep;
 
 gboolean check_deps (volatile guint *avail_deps, guint req_deps, UtilDep *deps_specs, guint l_deps, GMutex *deps_check_lock, GError **error);
+gboolean check_module_deps (volatile guint *avail_deps, guint req_deps, gchar **modules, guint l_modules, GMutex *deps_check_lock, GError **error);
