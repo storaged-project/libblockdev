@@ -1,3 +1,62 @@
+Libblockdev 2.15
+----------------
+
+New minor release of the libblockdev library with multiple fixes and quite big
+refactorization changes (in the file system plugin). See below for details.
+
+
+**Notable changes**
+
+- fixes
+
+  - Fix bd_s390_dasd_format() and bd_s390_dasd_is_ldl().
+
+  - Fix how GPT patition flags are set.
+
+  - Check the *btrfs* module availability as part of checking the *btrfs*
+    plugin's dependencies.
+
+  - Fix memory leaks in bd_fs_vfat_get_info()
+
+  - Fix the file system plugin's dependency checking mechanisms.
+
+
+- features
+
+  - Mark some of the tests as unstable so that their failures are reported, but
+    ignored in the overall test suite status.
+
+  - The file system plugin is now split into multiple source files making it
+    easier to add support for more file systems and technologies.
+
+
+**Full list of changes**
+
+Vendula Poncova (2):
+- bd_s390_dasd_is_ldl should be true only for LDL DADSs
+- Fix bd_s390_dasd_format
+
+Vojtech Trefny (5):
+- Use only sgdisk to set flags on GPT
+- Add test for setting partition flags on GPT
+- Free locale struct in kbd plugin
+- Move kernel modules (un)loading and checking into utils
+- Check for btrfs module availability in btrfs module
+
+Vratislav Podzimek (11):
+- Do not lie about tag creation
+- Mark unstable tests as such
+- Split the FS plugin source into multiple files
+- Split the bd_fs_is_tech_avail() implementation
+- Revert the behaviour of bd_fs_check_deps()
+- Fix memory leaks in bd_fs_vfat_get_info()
+- Mark bcache tests as unstable
+- Add a HACKING.rst file
+- Move the fs.h file to its original place
+- Do not use the btrfs plugin in library tests
+- Do not use the 'btrfs' plugin in overrides tests
+
+
 Libblockdev 2.14
 ----------------
 
