@@ -1133,7 +1133,9 @@ bd_part_set_part_flags (<em class="parameter"><code>const <a href="../glib/glib-
 were successfully set on the <em class="parameter"><code>part</code></em>
 partition or
 not</p>
-<p>Note: Unsets all the other flags on the partition.</p>
+<p>Note: Unsets all the other flags on the partition.
+Only GPT-specific flags and the legacy boot flag are supported on GPT
+partition tables.</p>
 <p>Tech category: <a class="link" href="libblockdev-Part.html#BD-PART-TECH-MODE-MODIFY-PART:CAPS"><code class="literal">BD_PART_TECH_MODE_MODIFY_PART</code></a> + the tech according to the partition table type</p>
 </div>
 </div>
@@ -1427,6 +1429,14 @@ bd_part_disk_spec_free (<em class="parameter"><code><a class="link" href="libblo
 <hr>
 <div class="refsect2">
 <a name="BDPartFlag"></a><h3>enum BDPartFlag</h3>
+<p>Partition flags supported by libblockdev. First part of the flags (up to
+<em class="parameter"><code>BD_PART_FLAG_BASIC_LAST</code></em>
+) corresponds to the flags supported by libparted
+(see https://www.gnu.org/software/parted/manual/parted.html<span class="type">set</span>). Second
+part corresponds to the flags supported by sgdisk (GPT, see <code class="literal">sgdisk -A=list</code>).</p>
+<p>The only exception from the above is <em class="parameter"><code>BD_PART_FLAG_LEGACY_BOOT</code></em>
+ which is
+supported by libparted too but is GPT specific.</p>
 <div class="refsect3">
 <a name="BDPartFlag.members"></a><h4>Members</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">

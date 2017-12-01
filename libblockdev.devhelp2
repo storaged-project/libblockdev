@@ -737,9 +737,6 @@
     <keyword type="constant" name="BD_KBD_MODE_NONE" link="libblockdev-KernelBlockDevices.html#BD-KBD-MODE-NONE:CAPS"/>
     <keyword type="constant" name="BD_KBD_MODE_UNKNOWN" link="libblockdev-KernelBlockDevices.html#BD-KBD-MODE-UNKNOWN:CAPS"/>
     <keyword type="constant" name="BD_KBD_ERROR_INVAL" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-INVAL:CAPS"/>
-    <keyword type="constant" name="BD_KBD_ERROR_KMOD_INIT_FAIL" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-KMOD-INIT-FAIL:CAPS"/>
-    <keyword type="constant" name="BD_KBD_ERROR_MODULE_FAIL" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-MODULE-FAIL:CAPS"/>
-    <keyword type="constant" name="BD_KBD_ERROR_MODULE_NOEXIST" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-MODULE-NOEXIST:CAPS"/>
     <keyword type="constant" name="BD_KBD_ERROR_ZRAM_NOEXIST" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-ZRAM-NOEXIST:CAPS"/>
     <keyword type="constant" name="BD_KBD_ERROR_ZRAM_INVAL" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-ZRAM-INVAL:CAPS"/>
     <keyword type="constant" name="BD_KBD_ERROR_BCACHE_PARSE" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-BCACHE-PARSE:CAPS"/>
