@@ -504,6 +504,9 @@
     <keyword type="function" name="bd_extra_arg_get_type ()" link="libblockdev-Utils.html#bd-extra-arg-get-type"/>
     <keyword type="function" name="bd_utils_resolve_device ()" link="libblockdev-Utils.html#bd-utils-resolve-device"/>
     <keyword type="function" name="bd_utils_get_device_symlinks ()" link="libblockdev-Utils.html#bd-utils-get-device-symlinks"/>
+    <keyword type="function" name="bd_utils_have_kernel_module ()" link="libblockdev-Utils.html#bd-utils-have-kernel-module"/>
+    <keyword type="function" name="bd_utils_load_kernel_module ()" link="libblockdev-Utils.html#bd-utils-load-kernel-module"/>
+    <keyword type="function" name="bd_utils_unload_kernel_module ()" link="libblockdev-Utils.html#bd-utils-unload-kernel-module"/>
     <keyword type="enum" name="enum BDUtilsProgStatus" link="libblockdev-Utils.html#BDUtilsProgStatus"/>
     <keyword type="macro" name="BD_UTILS_EXEC_ERROR" link="libblockdev-Utils.html#BD-UTILS-EXEC-ERROR:CAPS"/>
     <keyword type="enum" name="enum BDUtilsExecError" link="libblockdev-Utils.html#BDUtilsExecError"/>
