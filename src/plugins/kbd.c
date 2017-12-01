@@ -46,9 +46,6 @@ static const gchar * const mode_str[BD_KBD_MODE_UNKNOWN+1] = {"writethrough", "w
 /* "C" locale to get the locale-agnostic error messages */
 static locale_t c_locale = (locale_t) 0;
 
-static gboolean have_kernel_module (const gchar *module_name, GError **error);
-
-
 static volatile guint avail_deps = 0;
 static GMutex deps_check_lock;
 
@@ -75,7 +72,7 @@ gboolean bd_kbd_check_deps () {
     guint i = 0;
     gboolean status = FALSE;
 
-    ret = have_kernel_module ("zram", &error);
+    ret = bd_utils_have_kernel_module ("zram", &error);
     if (!ret) {
         if (error) {
             g_warning("Cannot load the kbd plugin: %s" , error->message);
@@ -138,7 +135,7 @@ gboolean bd_kbd_init () {
  *
  */
 void bd_kbd_close () {
-    c_locale = (locale_t) 0;
+    freelocale (c_locale);
 }
 
 /**
@@ -208,143 +205,6 @@ void bd_kbd_bcache_stats_free (BDKBDBcacheStats *data) {
     g_free (data);
 }
 
-static gboolean have_kernel_module (const gchar *module_name, GError **error) {
-    gint ret = 0;
-    struct kmod_ctx *ctx = NULL;
-    struct kmod_module *mod = NULL;
-    gchar *null_config = NULL;
-    const gchar *path = NULL;
-    gboolean have_path = FALSE;
-
-    ctx = kmod_new (NULL, (const gchar * const*) &null_config);
-    if (!ctx) {
-        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_KMOD_INIT_FAIL,
-                     "Failed to initialize kmod context");
-        return FALSE;
-    }
-    /* prevent libkmod from spamming our STDERR */
-    kmod_set_log_priority(ctx, LOG_CRIT);
-
-    ret = kmod_module_new_from_name (ctx, module_name, &mod);
-    if (ret < 0) {
-        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_MODULE_FAIL,
-                     "Failed to get the module: %s", strerror_l (-ret, c_locale));
-        kmod_unref (ctx);
-        return FALSE;
-    }
-
-    path = kmod_module_get_path (mod);
-    have_path = (path != NULL) && (g_strcmp0 (path, "") != 0);
-    kmod_module_unref (mod);
-    kmod_unref (ctx);
-
-    return have_path;
-}
-
-static gboolean load_kernel_module (const gchar *module_name, const gchar *options, GError **error) {
-    gint ret = 0;
-    struct kmod_ctx *ctx = NULL;
-    struct kmod_module *mod = NULL;
-    gchar *null_config = NULL;
-
-    ctx = kmod_new (NULL, (const gchar * const*) &null_config);
-    if (!ctx) {
-        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_KMOD_INIT_FAIL,
-                     "Failed to initialize kmod context");
-        return FALSE;
-    }
-    /* prevent libkmod from spamming our STDERR */
-    kmod_set_log_priority(ctx, LOG_CRIT);
-
-    ret = kmod_module_new_from_name (ctx, module_name, &mod);
-    if (ret < 0) {
-        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_MODULE_FAIL,
-                     "Failed to get the module: %s", strerror_l (-ret, c_locale));
-        kmod_unref (ctx);
-        return FALSE;
-    }
-
-    if (!kmod_module_get_path (mod)) {
-        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_MODULE_NOEXIST,
-                     "Module '%s' doesn't exist", module_name);
-        kmod_module_unref (mod);
-        kmod_unref (ctx);
-        return FALSE;
-    }
-
-    /* module, flags, options */
-    ret = kmod_module_insert_module (mod, 0, options);
-    if (ret < 0) {
-        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_MODULE_FAIL,
-                     "Failed to load the module '%s' with options '%s': %s",
-                     module_name, options, strerror_l (-ret, c_locale));
-        kmod_module_unref (mod);
-        kmod_unref (ctx);
-        return FALSE;
-    }
-
-    kmod_module_unref (mod);
-    kmod_unref (ctx);
-    return TRUE;
-}
-
-static gboolean unload_kernel_module (const gchar *module_name, GError **error) {
-    gint ret = 0;
-    struct kmod_ctx *ctx = NULL;
-    struct kmod_module *mod = NULL;
-    struct kmod_list *list = NULL;
-    struct kmod_list *cur = NULL;
-    gchar *null_config = NULL;
-    gboolean found = FALSE;
-
-    ctx = kmod_new (NULL, (const gchar * const*) &null_config);
-    if (!ctx) {
-        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_KMOD_INIT_FAIL,
-                     "Failed to initialize kmod context");
-        return FALSE;
-    }
-    /* prevent libkmod from spamming our STDERR */
-    kmod_set_log_priority(ctx, LOG_CRIT);
-
-    ret = kmod_module_new_from_loaded (ctx, &list);
-    if (ret < 0) {
-        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_MODULE_FAIL,
-                     "Failed to get the module: %s", strerror_l (-ret, c_locale));
-        kmod_unref (ctx);
-        return FALSE;
-    }
-
-    for (cur=list; !found && cur != NULL; cur = kmod_list_next(list, cur)) {
-        mod = kmod_module_get_module (cur);
-        if (g_strcmp0 (kmod_module_get_name (mod), module_name) == 0)
-            found = TRUE;
-        else
-            kmod_module_unref (mod);
-    }
-
-    if (!found) {
-        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_MODULE_NOEXIST,
-                     "Module '%s' is not loaded", module_name);
-        kmod_unref (ctx);
-        return FALSE;
-    }
-
-    /* module, flags */
-    ret = kmod_module_remove_module (mod, 0);
-    if (ret < 0) {
-        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_MODULE_FAIL,
-                     "Failed to unload the module '%s': %s",
-                     module_name, strerror_l (-ret, c_locale));
-        kmod_module_unref (mod);
-        kmod_unref (ctx);
-        return FALSE;
-    }
-
-    kmod_module_unref (mod);
-    kmod_unref (ctx);
-    return TRUE;
-}
-
 /**
  * bd_kbd_zram_create_devices:
  * @num_devices: number of devices to create
@@ -371,19 +231,19 @@ gboolean bd_kbd_zram_create_devices (guint64 num_devices, const guint64 *sizes, 
     progress_id = bd_utils_report_started ("Started creating zram devices");
 
     opts = g_strdup_printf ("num_devices=%"G_GUINT64_FORMAT, num_devices);
-    success = load_kernel_module ("zram", opts, error);
+    success = bd_utils_load_kernel_module ("zram", opts, error);
 
     /* maybe it's loaded? Try to unload it first */
-    if (!success && g_error_matches (*error, BD_KBD_ERROR, BD_KBD_ERROR_MODULE_FAIL)) {
+    if (!success && g_error_matches (*error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_FAIL)) {
         g_clear_error (error);
-        success = unload_kernel_module ("zram", error);
+        success = bd_utils_unload_kernel_module ("zram", error);
         if (!success) {
             g_prefix_error (error, "zram module already loaded: ");
             g_free (opts);
             bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
-        success = load_kernel_module ("zram", opts, error);
+        success = bd_utils_load_kernel_module ("zram", opts, error);
         if (!success) {
             g_free (opts);
             bd_utils_report_finished (progress_id, (*error)->message);
@@ -450,7 +310,7 @@ gboolean bd_kbd_zram_destroy_devices (GError **error) {
     guint64 progress_id = 0;
 
     progress_id = bd_utils_report_started ("Started destroying zram devices");
-    ret = unload_kernel_module ("zram", error);
+    ret = bd_utils_unload_kernel_module ("zram", error);
     if (!ret && (*error))
         bd_utils_report_finished (progress_id, (*error)->message);
     else
@@ -496,7 +356,7 @@ gboolean bd_kbd_zram_add_device (guint64 size, guint64 nstreams, gchar **device,
     progress_id = bd_utils_report_started ("Started adding new zram device");
 
     if (access ("/sys/class/zram-control/hot_add", R_OK) != 0) {
-        success = load_kernel_module ("zram", NULL, error);
+        success = bd_utils_load_kernel_module ("zram", NULL, error);
         if (!success) {
             g_prefix_error (error, "Failed to load the zram kernel module: ");
             return FALSE;
