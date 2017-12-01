@@ -10,9 +10,9 @@ from gi.repository import GLib, BlockDev
 class LibraryOpsTestCase(unittest.TestCase):
     log = ""
 
-    # all plugins except for 'fs' and 'mpath' -- these don't have all the
-    # dependencies on CentOS/Debian and we don't need them for this test
-    requested_plugins = BlockDev.plugin_specs_from_names(("btrfs", "crypto", "dm",
+    # all plugins except for 'btrfs', 'fs' and 'mpath' -- these don't have all
+    # the dependencies on CentOS/Debian and we don't need them for this test
+    requested_plugins = BlockDev.plugin_specs_from_names(("crypto", "dm",
                                                           "kbd", "loop", "lvm",
                                                           "mdraid", "part", "swap"))
 
@@ -281,10 +281,10 @@ class LibraryOpsTestCase(unittest.TestCase):
         """Verify that loading only required plugins works as expected"""
 
         ps = BlockDev.PluginSpec()
-        ps.name = BlockDev.Plugin.BTRFS
+        ps.name = BlockDev.Plugin.SWAP
         ps.so_name = ""
         self.assertTrue(BlockDev.reinit([ps], True, None))
-        self.assertEqual(BlockDev.get_available_plugin_names(), ["btrfs"])
+        self.assertEqual(BlockDev.get_available_plugin_names(), ["swap"])
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
 
     def test_not_implemented(self):
@@ -294,10 +294,10 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertTrue(BlockDev.lvm_get_max_lv_size() > 0)
 
         ps = BlockDev.PluginSpec()
-        ps.name = BlockDev.Plugin.BTRFS
+        ps.name = BlockDev.Plugin.SWAP
         ps.so_name = ""
         self.assertTrue(BlockDev.reinit([ps], True, None))
-        self.assertEqual(BlockDev.get_available_plugin_names(), ["btrfs"])
+        self.assertEqual(BlockDev.get_available_plugin_names(), ["swap"])
 
         # no longer loaded
         with self.assertRaises(GLib.GError):
@@ -317,18 +317,18 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertEqual(avail_plugs, BlockDev.get_available_plugin_names())
 
         # reinit with a subset of plugins
-        plugins = BlockDev.plugin_specs_from_names(["btrfs", "lvm"])
+        plugins = BlockDev.plugin_specs_from_names(["swap", "lvm"])
         self.assertTrue(BlockDev.reinit(plugins, True, None))
-        self.assertEqual(set(BlockDev.get_available_plugin_names()), set(["btrfs", "lvm"]))
+        self.assertEqual(set(BlockDev.get_available_plugin_names()), set(["swap", "lvm"]))
 
         # ensure_init with the same subset -> nothing should change
         self.assertTrue(BlockDev.ensure_init(plugins, None))
-        self.assertEqual(set(BlockDev.get_available_plugin_names()), set(["btrfs", "lvm"]))
+        self.assertEqual(set(BlockDev.get_available_plugin_names()), set(["swap", "lvm"]))
 
         # ensure_init with more plugins -> extra plugins should be loaded
-        plugins = BlockDev.plugin_specs_from_names(["btrfs", "lvm", "crypto"])
+        plugins = BlockDev.plugin_specs_from_names(["swap", "lvm", "crypto"])
         self.assertTrue(BlockDev.ensure_init(plugins, None))
-        self.assertEqual(set(BlockDev.get_available_plugin_names()), set(["btrfs", "lvm", "crypto"]))
+        self.assertEqual(set(BlockDev.get_available_plugin_names()), set(["swap", "lvm", "crypto"]))
 
         # reinit to unload all plugins
         self.assertTrue(BlockDev.reinit([], True, None))
@@ -336,7 +336,7 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         # ensure_init to load all plugins back
         self.assertTrue(BlockDev.ensure_init(self.requested_plugins, None))
-        self.assertGreaterEqual(len(BlockDev.get_available_plugin_names()), 9)
+        self.assertGreaterEqual(len(BlockDev.get_available_plugin_names()), 8)
 
     def test_try_reinit(self):
         """Verify that try_reinit() works as expected"""
@@ -344,22 +344,22 @@ class LibraryOpsTestCase(unittest.TestCase):
         # try reinitializing with only some utilities being available and thus
         # only some plugins able to load
         with fake_path("tests/lib_missing_utils", keep_utils=["swapon", "swapoff", "mkswap", "lvm",
-                                                              "btrfs", "thin_metadata_size", "swaplabel"]):
+                                                              "thin_metadata_size", "swaplabel"]):
             succ, loaded = BlockDev.try_reinit(self.requested_plugins, True, None)
             self.assertFalse(succ)
-            for plug_name in ("swap", "lvm", "btrfs"):
+            for plug_name in ("swap", "lvm", "crypto"):
                 self.assertIn(plug_name, loaded)
 
         # reset back to all plugins
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
 
         # now the same with a subset of plugins requested
-        plugins = BlockDev.plugin_specs_from_names(["btrfs", "lvm", "swap"])
-        with fake_path("tests/lib_missing_utils", keep_utils=["swapon", "swapoff", "mkswap", "lvm", "btrfs",
+        plugins = BlockDev.plugin_specs_from_names(["lvm", "swap", "crypto"])
+        with fake_path("tests/lib_missing_utils", keep_utils=["swapon", "swapoff", "mkswap", "lvm",
                                                               "thin_metadata_size", "swaplabel"]):
             succ, loaded = BlockDev.try_reinit(plugins, True, None)
             self.assertTrue(succ)
-            self.assertEqual(set(loaded), set(["swap", "lvm", "btrfs"]))
+            self.assertEqual(set(loaded), set(["swap", "lvm", "crypto"]))
 
     def test_non_en_init(self):
         """Verify that the library initializes with lang different from en_US"""
