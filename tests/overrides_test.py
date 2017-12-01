@@ -5,9 +5,9 @@ from gi.repository import BlockDev
 
 
 class OverridesTest(unittest.TestCase):
-    # all plugins except for 'fs' and 'mpath' -- these don't have all the
-    # dependencies on CentOS/Debian and we don't need them for this test
-    requested_plugins = BlockDev.plugin_specs_from_names(("btrfs", "crypto", "dm",
+    # all plugins except for 'btrfs', 'fs' and 'mpath' -- these don't have all
+    # the dependencies on CentOS/Debian and we don't need them for this test
+    requested_plugins = BlockDev.plugin_specs_from_names(("crypto", "dm",
                                                           "kbd", "loop", "lvm",
                                                           "mdraid", "part", "swap"))
 
