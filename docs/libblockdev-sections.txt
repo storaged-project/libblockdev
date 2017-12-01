@@ -148,9 +148,9 @@ bd_extra_arg_free
 bd_extra_arg_get_type
 bd_utils_resolve_device
 bd_utils_get_device_symlinks
-gboolean bd_utils_have_kernel_module
-gboolean bd_utils_load_kernel_module
-gboolean bd_utils_unload_kernel_module
+bd_utils_have_kernel_module
+bd_utils_load_kernel_module
+bd_utils_unload_kernel_module
 EXBIBYTE
 EiB
 GIBIBYTE
