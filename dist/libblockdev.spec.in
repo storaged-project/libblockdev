@@ -820,6 +820,9 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 - bd_s390_dasd_is_ldl should be true only for LDL DADSs (vponcova)
 - Do not lie about tag creation (vpodzime)
 
+* Wed Nov 08 2017 Zbigniew Jędrzejewski-Szmek <zbyszek@in.waw.pl> - 2.14-2
+- Rebuild for cryptsetup-2.0.0
+
 * Tue Oct 31 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.14-1
 - Support the legacy boot GPT flag (intrigeri)
 - Respect the version in the blockdev.pc file (vpodzime)
