@@ -108,7 +108,37 @@ cat dist/libblockdev.spec.in | grep BuildRequires: | cut -f2 -d: | cut -f2 -d' '
       <screen><userinput>make test-all</userinput></screen>
 
       executes all tests, including ones which may result in kernel panic or
-      take more time to complete.
+      take more time to complete or
+
+      <screen><userinput>make test-plugin-NAME</userinput></screen>
+
+      executes only tests for given plugin and similarly
+
+      <screen><userinput>make fast-test-plugin-NAME</userinput></screen>
+
+      executes only fast tests for given plugin.
+    </para>
+
+    <para>
+      It is also possible to run only subset of available tests or only one test
+      using the `run_tests.py` script:
+
+      <screen><userinput># python3 tests/run_tests.py fs_test.GenericResize</userinput></screen>
+
+      executes all tests from the <emphasis>GenericResize</emphasis> test class
+      from filesystem plugin test cases and
+
+      <screen><userinput># python3 tests/run_tests.py fs_test.GenericResize.test_ext2_generic_resize</userinput></screen>
+
+      executes only <emphasis>test_ext2_generic_resize</emphasis> from this class.
+
+      This script also allows skipping slow tests or running potentially dangerous
+      tests. Use:
+
+      <screen><userinput>$ python3 tests/run_tests.py --help</userinput></screen>
+
+      to see all available options.
+
     </para>
 
     <para>
@@ -122,15 +152,6 @@ cat dist/libblockdev.spec.in | grep BuildRequires: | cut -f2 -d: | cut -f2 -d' '
       <screen><userinput>make coverage-all</userinput></screen>
 
       is equivalent to `make test-all'.
-    </para>
-
-    <para>
-      libblockdev also supports running the test and coverage targets using Python3.
-      To do this define the PYTHON or COVERAGE variables respectively. For example:
-
-      <screen><userinput>make PYTHON=python3 test</userinput></screen>
-
-      <screen><userinput>make COVERAGE=coverage3 coverage</userinput></screen>
     </para>
   </chapter>
 

@@ -10,6 +10,8 @@ import subprocess
 import sys
 import unittest
 
+from distutils.spawn import find_executable
+
 LIBDIRS = 'src/utils/.libs:src/plugins/.libs:src/plugins/fs/.libs:src/lib/.libs'
 GIDIR = 'src/lib'
 
@@ -73,8 +75,9 @@ if __name__ == '__main__':
     result = unittest.TextTestRunner(verbosity=2, failfast=args.stop).run(suite)
 
     # dump cropped journal to log file
-    with open('journaldump.log', 'w') as outfile:
-        subprocess.call(['journalctl', '-S', start_time], stdout=outfile)
+    if find_executable('journalctl'):
+        with open('journaldump.log', 'w') as outfile:
+            subprocess.call(['journalctl', '-S', start_time], stdout=outfile)
 
     if result.wasSuccessful():
         sys.exit(0)
