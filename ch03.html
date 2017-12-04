@@ -79,7 +79,46 @@ cat dist/libblockdev.spec.in | grep BuildRequires: | cut -f2 -d: | cut -f2 -d' '
 <p>
 
       executes all tests, including ones which may result in kernel panic or
-      take more time to complete.
+      take more time to complete or
+
+      </p>
+<pre class="screen"><strong class="userinput"><code>make test-plugin-NAME</code></strong></pre>
+<p>
+
+      executes only tests for given plugin and similarly
+
+      </p>
+<pre class="screen"><strong class="userinput"><code>make fast-test-plugin-NAME</code></strong></pre>
+<p>
+
+      executes only fast tests for given plugin.
+    </p>
+<p>
+      It is also possible to run only subset of available tests or only one test
+      using the `run_tests.py` script:
+
+      </p>
+<pre class="screen"><strong class="userinput"><code># python3 tests/run_tests.py fs_test.GenericResize</code></strong></pre>
+<p>
+
+      executes all tests from the <span class="emphasis"><em>GenericResize</em></span> test class
+      from filesystem plugin test cases and
+
+      </p>
+<pre class="screen"><strong class="userinput"><code># python3 tests/run_tests.py fs_test.GenericResize.test_ext2_generic_resize</code></strong></pre>
+<p>
+
+      executes only <span class="emphasis"><em>test_ext2_generic_resize</em></span> from this class.
+
+      This script also allows skipping slow tests or running potentially dangerous
+      tests. Use:
+
+      </p>
+<pre class="screen"><strong class="userinput"><code>$ python3 tests/run_tests.py --help</code></strong></pre>
+<p>
+
+      to see all available options.
+
     </p>
 <p>
       It is also possible to generate test coverage reports using the Python coverage
@@ -96,18 +135,6 @@ cat dist/libblockdev.spec.in | grep BuildRequires: | cut -f2 -d: | cut -f2 -d' '
 <p>
 
       is equivalent to `make test-all'.
-    </p>
-<p>
-      libblockdev also supports running the test and coverage targets using Python3.
-      To do this define the PYTHON or COVERAGE variables respectively. For example:
-
-      </p>
-<pre class="screen"><strong class="userinput"><code>make PYTHON=python3 test</code></strong></pre>
-<p>
-
-      </p>
-<pre class="screen"><strong class="userinput"><code>make COVERAGE=coverage3 coverage</code></strong></pre>
-<p>
     </p>
 </div>
 <div class="footer">
