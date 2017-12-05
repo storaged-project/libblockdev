@@ -5,7 +5,7 @@ libdir=@libdir@
 
 Name: BlockDev-utils
 Description: A library with utility functions used by the libblockdev library
-URL: https://github.com/rhinstaller/libblockdev
+URL: https://github.com/storaged-project/libblockdev
 Version: @VERSION@
 Requires: glib-2.0
 Libs: -lbd_utils
