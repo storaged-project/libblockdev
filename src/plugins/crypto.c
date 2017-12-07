@@ -966,7 +966,7 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError *
  * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error) {
-    return bd_crypto_tc_open_full (device, name, pass_data, data_len, NULL, 0, FALSE, read_only, error);
+    return bd_crypto_tc_open_full (device, name, pass_data, data_len, NULL, 0, FALSE, FALSE, read_only, error);
 }
 
 /**
@@ -978,6 +978,7 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8
  * @read_only: whether to open as read-only or not (meaning read-write)
  * @keyfiles: (array length=keyfiles_count): paths to the keyfiles for the TrueCrypt/VeraCrypt volume
  * @keyfiles_count: length of the @keyfiles array
+ * @hidden: whether a hidden volume inside the volume should be opened
  * @veracrypt: whether to try VeraCrypt modes (TrueCrypt modes are tried anyway)
  * @error: (out): place to store error (if any)
  *
@@ -985,7 +986,7 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8
  *
  * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
-gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, const gchar **keyfiles, gsize keyfiles_count, gboolean veracrypt, gboolean read_only, GError **error) {
+gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, const gchar **keyfiles, gsize keyfiles_count, gboolean hidden, gboolean veracrypt, gboolean read_only, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
     guint64 progress_id = 0;
@@ -1018,6 +1019,8 @@ gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const g
 
     if (veracrypt)
         params.flags |= CRYPT_TCRYPT_VERA_MODES;
+    if (hidden)
+        params.flags |= CRYPT_TCRYPT_HIDDEN_HEADER;
 
     ret = crypt_load (cd, CRYPT_TCRYPT, &params);
     if (ret != 0) {
