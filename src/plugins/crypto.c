@@ -966,7 +966,7 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError *
  * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error) {
-    return bd_crypto_tc_open_full (device, name, pass_data, data_len, FALSE, read_only, error);
+    return bd_crypto_tc_open_full (device, name, pass_data, data_len, NULL, 0, FALSE, read_only, error);
 }
 
 /**
@@ -976,6 +976,8 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8
  * @pass_data: (array length=data_len): a passphrase for the TrueCrypt/VeraCrypt volume (may contain arbitrary binary data)
  * @data_len: length of the @pass_data buffer
  * @read_only: whether to open as read-only or not (meaning read-write)
+ * @keyfiles: (array length=keyfiles_count): paths to the keyfiles for the TrueCrypt/VeraCrypt volume
+ * @keyfiles_count: length of the @keyfiles array
  * @veracrypt: whether to try VeraCrypt modes (TrueCrypt modes are tried anyway)
  * @error: (out): place to store error (if any)
  *
@@ -983,7 +985,7 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8
  *
  * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
-gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean veracrypt, gboolean read_only, GError **error) {
+gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, const gchar **keyfiles, gsize keyfiles_count, gboolean veracrypt, gboolean read_only, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
     guint64 progress_id = 0;
@@ -994,7 +996,7 @@ gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const g
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    if (data_len == 0) {
+    if ((data_len == 0) && (keyfiles_count == 0)) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
                      "No passphrase nor key file specified, cannot open.");
         bd_utils_report_finished (progress_id, (*error)->message);
@@ -1011,6 +1013,8 @@ gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const g
 
     params.passphrase = (const char*) pass_data;
     params.passphrase_size = data_len;
+    params.keyfiles = keyfiles;
+    params.keyfiles_count = keyfiles_count;
 
     if (veracrypt)
         params.flags |= CRYPT_TCRYPT_VERA_MODES;

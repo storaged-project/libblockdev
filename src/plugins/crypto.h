@@ -81,7 +81,7 @@ gboolean bd_crypto_luks_change_key_blob (const gchar *device, const guint8 *pass
 gboolean bd_crypto_luks_resize (const gchar *device, guint64 size, GError **error);
 
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);
-gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean veracrypt, gboolean read_only, GError **error);
+gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, const gchar **keyfiles, gsize keyfiles_count, gboolean veracrypt, gboolean read_only, GError **error);
 gboolean bd_crypto_tc_close (const gchar *tc_device, GError **error);
 
 gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, const gchar *cert_data, const gchar *directory, const gchar *backup_passphrase, GError **error);
