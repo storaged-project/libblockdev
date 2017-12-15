@@ -314,6 +314,7 @@ static gboolean ext_check (const gchar *device, const BDExtraArg **extra, GError
     /* Force checking even if the file system seems clean. AND
      * Open the filesystem read-only, and assume an answer of no to all
      * questions. */
+    const gchar *args_progress[7] = {"e2fsck", "-f", "-n", "-C", "1", device, NULL};
     const gchar *args[5] = {"e2fsck", "-f", "-n", device, NULL};
     gint status = 0;
     gboolean ret = FALSE;
@@ -321,7 +322,12 @@ static gboolean ext_check (const gchar *device, const BDExtraArg **extra, GError
     if (!check_deps (&avail_deps, DEPS_E2FSCK_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
 
-    ret = bd_utils_exec_and_report_status_error (args, extra, &status, error);
+    if (bd_utils_prog_reporting_initialized ()) {
+        ret = bd_utils_exec_and_report_progress (args_progress, extra, extract_e2fsck_progress, &status, error);
+    } else {
+        ret = bd_utils_exec_and_report_status_error (args, extra, &status, error);
+    }
+
     if (!ret && (status == 4)) {
         /* no error should be reported for exit code 4 - File system errors left uncorrected */
         g_clear_error (error);
@@ -378,12 +384,18 @@ static gboolean ext_repair (const gchar *device, gboolean unsafe, const BDExtraA
     /* Force checking even if the file system seems clean. AND
      *     Automatically repair what can be safely repaired. OR
      *     Assume an answer of `yes' to all questions. */
+    const gchar *args_progress[7] = {"e2fsck", "-f", "-n", "-C", "1", device, NULL};
     const gchar *args[5] = {"e2fsck", "-f", unsafe ? "-y" : "-p", device, NULL};
+    gint status = 0;
 
     if (!check_deps (&avail_deps, DEPS_E2FSCK_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
 
-    return bd_utils_exec_and_report_error (args, extra, error);
+    if (bd_utils_prog_reporting_initialized ()) {
+        return bd_utils_exec_and_report_progress (args_progress, extra, extract_e2fsck_progress, &status, error);
+    } else {
+        return bd_utils_exec_and_report_status_error (args, extra, &status, error);
+    }
 }
 
 /**
