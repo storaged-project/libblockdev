@@ -59,6 +59,76 @@ static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
 
 #define UNUSED __attribute__((unused))
 
+static gint8 compute_percents (guint8 pass_cur, guint8 pass_total, gint val_cur, gint val_total) {
+    gint perc;
+    gint one_pass;
+    /* first get a percentage in the current pass/stage */
+    perc = (val_cur * 100) / val_total;
+
+    /* now map it to the total progress, splitting the stages equally */
+    one_pass = 100 / pass_total;
+    perc = ((pass_cur - 1) * one_pass) + (perc / pass_total);
+
+    return perc;
+}
+
+/**
+ * filter_line_fsck: (skip)
+ * Filter one line - decide what to do with it.
+ *
+ * Returns: Zero or positive number as a percentage, -1 if not a percentage, -2 on an error
+ */
+static gint8 filter_line_fsck (const gchar * line, guint8 total_stages, GError **error) {
+    static GRegex *output_regex = NULL;
+    GMatchInfo *match_info;
+    gint8 perc = -1;
+
+    if (output_regex == NULL) {
+        /* Compile regular expression that matches to e2fsck progress output */
+        output_regex = g_regex_new ("^([0-9][0-9]*) ([0-9][0-9]*) ([0-9][0-9]*) (/.*)", 0, 0, error);
+        if (output_regex == NULL) {
+            return -2;
+        }
+    }
+
+    /* Execute regular expression */
+    if (g_regex_match (output_regex, line, 0, &match_info)) {
+        guint8 stage;
+        gint64 val_cur;
+        gint64 val_total;
+
+        /* The output_regex ensures we have a number in these matches, so we can skip
+         * tests for conversion errors.
+         */
+        stage = (guint8) g_ascii_strtoull (g_match_info_fetch (match_info, 1), (char **)NULL, 10);
+        val_cur = g_ascii_strtoll (g_match_info_fetch (match_info, 2), (char **)NULL, 10);
+        val_total = g_ascii_strtoll (g_match_info_fetch (match_info, 3), (char **)NULL, 10);
+        perc = compute_percents (stage, total_stages, val_cur, val_total);
+    } else {
+        g_match_info_free (match_info);
+        return -1;
+    }
+    g_match_info_free (match_info);
+    return perc;
+}
+
+static gboolean extract_e2fsck_progress (const gchar *line, guint8 *completion) {
+    /* A magic number 5, e2fsck has 5 stages, but this can't be read from the output in advance. */
+    gint8 perc;
+    GError **error = NULL;
+
+    perc = filter_line_fsck (line, 5, error);
+    if (perc < 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                         "An error occured when trying to parse a line with progress");
+        return FALSE;
+    }
+
+    *completion = perc;
+    return TRUE;
+}
+
+
 /**
  * bd_fs_ext_is_tech_avail:
  * @tech: the queried tech
