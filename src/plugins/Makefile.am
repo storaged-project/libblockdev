@@ -115,9 +115,11 @@ libbd_mdraid_la_SOURCES = mdraid.c mdraid.h check_deps.c check_deps.h
 endif
 
 if WITH_MPATH
-libbd_mpath_la_CFLAGS = $(GLIB_CFLAGS) $(DEVMAPPER_CFLAGS) -Wall -Wextra -Werror
-libbd_mpath_la_LIBADD = $(GLIB_LIBS) $(DEVMAPPER_LIBS) ${builddir}/../utils/libbd_utils.la
-libbd_mpath_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
+libbd_mpath_la_CFLAGS = $(GLIB_CFLAGS) $(DEVMAPPER_CFLAGS) $(LIBDMMP_CFLAG) \
+			-Wall -Wextra -Werror
+libbd_mpath_la_LIBADD = $(GLIB_LIBS) $(DEVMAPPER_LIBS) $(LIBDMMP_LIBS)\
+			${builddir}/../utils/libbd_utils.la
+libbd_mpath_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:1:0 -Wl,--no-undefined
 libbd_mpath_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_mpath_la_SOURCES = mpath.c mpath.h check_deps.c check_deps.h
 endif

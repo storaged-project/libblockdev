@@ -194,6 +194,18 @@ AS_IF([test "x$with_btrfs" != "xno" -o "x$with_mdraid" != "xno" -o "x$with_kbd" 
       [LIBBLOCKDEV_PKG_CHECK_MODULES([BYTESIZE], [bytesize >= 0.1])],
       [])
 
+if test "x$with_mpath" != "xno"; then
+    LIBBLOCKDEV_PKG_CHECK_MODULES([LIBDMMP], [libdmmp])
+    # Upstream of libdmmp forgot to bump version for new below two functions
+    # We may remove it once libdmmp.pc has version bump to 0.2.0
+    AC_CHECK_LIB(dmmp, dmmp_flush_mpath, [],
+                 AC_MSG_ERROR([Please upgrade your \
+libdmmp/device-mapper-multipath/multipath-tools to 0.7.3 or later]))
+    AC_CHECK_LIB(dmmp, dmmp_reconfig, [],
+                 AC_MSG_ERROR([Please upgrade your \
+libdmmp/device-mapper-multipath/multipath-tools to 0.7.3 or later]))
+fi
+
 AC_SUBST([skip_patterns], [$skip_patterns])
 AC_SUBST([MAJOR_VER], [\"2\"])
 

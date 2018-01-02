@@ -12,6 +12,8 @@ typedef enum {
     BD_MPATH_ERROR_DM_ERROR,
     BD_MPATH_ERROR_INVAL,
     BD_MPATH_ERROR_TECH_UNAVAIL,
+    BD_MPATH_ERROR_NO_MEMORY,
+    BD_MPATH_ERROR_GET_MEMBERS,
 } BDMpathError;
 
 typedef enum {
@@ -81,3 +83,15 @@ gchar** bd_mpath_get_mpath_members (GError **error);
  * Tech category: %BD_MPATH_TECH_FRIENDLY_NAMES-%BD_MPATH_TECH_MODE_MODIFY
  */
 gboolean bd_mpath_set_friendly_names (gboolean enabled, GError **error);
+
+/**
+ * bd_mpath_reconfig:
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether multipath device maps were successfully reconfigured.
+ *
+ * Ask a multipathd to reload configure true and add missing mpath back.
+ *
+ * Tech category: %BD_MPATH_TECH_BASE-%BD_MPATH_TECH_MODE_MODIFY
+ */
+gboolean bd_mpath_reconfig (GError **error);
