@@ -7,12 +7,23 @@ import subprocess
 import six
 import locale
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on, get_avail_locales, requires_locales
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on, get_avail_locales, requires_locales, run_command
 from gi.repository import BlockDev, GLib
 
 PASSWD = "myshinylittlepassword"
 PASSWD2 = "myshinylittlepassword2"
 PASSWD3 = "myshinylittlepassword3"
+
+def have_luks2():
+    try:
+        succ = BlockDev.utils_check_util_version("cryptsetup", "2.0.0", "--version", r"cryptsetup ([0-9+\.]+)")
+    except GLib.GError:
+        return False
+    else:
+        return succ
+
+HAVE_LUKS2 = have_luks2()
+
 
 class CryptoTestCase(unittest.TestCase):
 
@@ -68,6 +79,27 @@ class CryptoTestCase(unittest.TestCase):
 
         os.unlink(self.keyfile)
 
+    def _luks_format(self, device, passphrase, keyfile):
+        return BlockDev.crypto_luks_format(device, None, 0, passphrase, keyfile, 0)
+
+    def _luks2_format(self, device, passphrase, keyfile):
+        # we currently don't support creating luks2 format using libblockdev
+        succ = True
+        if passphrase is not None:
+            ret, _out, _err = run_command("echo -n '%s' | cryptsetup luksFormat --type=luks2 %s -" % (PASSWD, device))
+            succ = ret == 0
+
+            if keyfile is not None:
+                ret, _out, _err = run_command("echo -n '%s' | cryptsetup luksAddKey %s %s -" % (PASSWD, device, keyfile))
+                succ = (succ and ret == 0)
+        else:
+            if keyfile is None:
+                raise RuntimeError("At least one of 'passphrase' and 'keyfile' must be specified.")
+            ret, _out, _err = run_command("cryptsetup luksFormat --type=luks2 --keyfile=%s %s -" % (keyfile, device))
+            succ = ret == 0
+
+        return succ
+
 class CryptoTestGenerateBackupPassphrase(CryptoTestCase):
     def setUp(self):
         # we don't need block devices for this test
@@ -103,12 +135,11 @@ class CryptoTestFormat(CryptoTestCase):
         self.assertTrue(succ)
 
 class CryptoTestResize(CryptoTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    def test_resize(self):
+    def _resize(self, create_fn):
         """Verify that resizing LUKS device works"""
 
         # the simple case with password
-        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, PASSWD, None, 0)
+        succ = create_fn(self.loop_dev, PASSWD, None)
         self.assertTrue(succ)
 
         succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
@@ -125,12 +156,15 @@ class CryptoTestResize(CryptoTestCase):
         succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
         self.assertTrue(succ)
 
-class CryptoTestOpenClose(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    def test_luks_open_close(self):
+    def test_luks_resize(self):
+        self._resize(self._luks_format)
+
+class CryptoTestOpenClose(CryptoTestCase):
+    def _luks_open_close(self, create_fn):
         """Verify that opening/closing LUKS device works"""
 
-        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, self.keyfile, 0)
+        succ = create_fn(self.loop_dev, PASSWD, self.keyfile)
         self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
@@ -159,12 +193,20 @@ class CryptoTestOpenClose(CryptoTestCase):
         succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
         self.assertTrue(succ)
 
-class CryptoTestAddKey(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    def test_add_key(self):
+    def test_luks_open_close(self):
+        self._luks_open_close(self._luks_format)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_open_close(self):
+        self._luks_open_close(self._luks2_format)
+
+class CryptoTestAddKey(CryptoTestCase):
+    def _add_key(self, create_fn):
         """Verify that adding key to LUKS device works"""
 
-        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None, 0)
+        succ = create_fn(self.loop_dev, PASSWD, None)
         self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
@@ -176,12 +218,20 @@ class CryptoTestAddKey(CryptoTestCase):
         succ = BlockDev.crypto_luks_add_key_blob(self.loop_dev, [ord(c) for c in PASSWD2], [ord(c) for c in PASSWD3])
         self.assertTrue(succ)
 
-class CryptoTestRemoveKey(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    def test_remove_key(self):
+    def test_luks_add_key(self):
+        self._add_key(self._luks_format)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_add_key(self):
+        self._add_key(self._luks2_format)
+
+class CryptoTestRemoveKey(CryptoTestCase):
+    def _remove_key(self, create_fn):
         """Verify that removing key from LUKS device works"""
 
-        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None, 0)
+        succ = create_fn(self.loop_dev, PASSWD, None)
         self.assertTrue(succ)
 
         succ = BlockDev.crypto_luks_add_key(self.loop_dev, PASSWD, None, PASSWD2, None)
@@ -198,6 +248,15 @@ class CryptoTestRemoveKey(CryptoTestCase):
 
         succ = BlockDev.crypto_luks_remove_key_blob(self.loop_dev, [ord(c) for c in PASSWD2])
         self.assertTrue(succ)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_luks_remove_key(self):
+        self._remove_key(self._luks_format)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_remove_key(self):
+        self._remove_key(self._luks2_format)
 
 class CryptoTestErrorLocale(CryptoTestCase):
     def setUp(self):
@@ -225,11 +284,10 @@ class CryptoTestErrorLocale(CryptoTestCase):
             self.assertIn("Operation not permitted", str(e))
 
 class CryptoTestChangeKey(CryptoTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    def test_change_key(self):
+    def _change_key(self, create_fn):
         """Verify that changing key in LUKS device works"""
 
-        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None, 0)
+        succ = create_fn(self.loop_dev, PASSWD, None)
         self.assertTrue(succ)
 
         succ = BlockDev.crypto_luks_change_key(self.loop_dev, PASSWD, PASSWD2)
@@ -238,15 +296,23 @@ class CryptoTestChangeKey(CryptoTestCase):
         succ = BlockDev.crypto_luks_change_key_blob(self.loop_dev, [ord(c) for c in PASSWD2], [ord(c) for c in PASSWD3])
         self.assertTrue(succ)
 
-class CryptoTestIsLuks(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    def test_is_luks(self):
+    def test_luks_change_key(self):
+        self._change_key(self._luks_format)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_change_key(self):
+        self._change_key(self._luks2_format)
+
+class CryptoTestIsLuks(CryptoTestCase):
+    def _is_luks(self, create_fn):
         """Verify that LUKS device recognition works"""
 
         with self.assertRaises(GLib.GError):
             BlockDev.crypto_device_is_luks("/non/existing/device")
 
-        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None, 0)
+        succ = create_fn(self.loop_dev, PASSWD, None)
         self.assertTrue(succ)
 
         is_luks = BlockDev.crypto_device_is_luks(self.loop_dev)
@@ -255,15 +321,23 @@ class CryptoTestIsLuks(CryptoTestCase):
         is_luks = BlockDev.crypto_device_is_luks(self.loop_dev2)
         self.assertFalse(is_luks)
 
-class CryptoTestLuksStatus(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    def test_luks_status(self):
+    def test_is_luks(self):
+        self._is_luks(self._luks_format)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_is_luks2(self):
+        self._is_luks(self._luks2_format)
+
+class CryptoTestLuksStatus(CryptoTestCase):
+    def _luks_status(self, create_fn):
         """Verify that LUKS device status reporting works"""
 
         with self.assertRaises(GLib.GError):
             BlockDev.crypto_luks_status("/non/existing/device")
 
-        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None, 0)
+        succ = create_fn(self.loop_dev, PASSWD, None)
         self.assertTrue(succ)
 
         succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
@@ -283,12 +357,20 @@ class CryptoTestLuksStatus(CryptoTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.crypto_luks_status("libblockdevTestLUKS")
 
-class CryptoTestGetUUID(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    def test_get_uuid(self):
+    def test_luks_status(self):
+        self._luks_status(self._luks_format)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_status(self):
+        self._luks_status(self._luks2_format)
+
+class CryptoTestGetUUID(CryptoTestCase):
+    def _get_uuid(self, create_fn):
         """Verify that getting LUKS device UUID works"""
 
-        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None, 0)
+        succ = create_fn(self.loop_dev, PASSWD, None)
         self.assertTrue(succ)
 
         uuid = BlockDev.crypto_luks_uuid(self.loop_dev)
@@ -297,12 +379,20 @@ class CryptoTestGetUUID(CryptoTestCase):
         with self.assertRaises(GLib.GError):
             uuid = BlockDev.crypto_luks_uuid(self.loop_dev2)
 
-class CryptoTestLuksOpenRW(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    def test_luks_open_rw(self):
+    def test_luks_get_uuid(self):
+        self._get_uuid(self._luks_format)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_get_uuid(self):
+        self._get_uuid(self._luks2_format)
+
+class CryptoTestLuksOpenRW(CryptoTestCase):
+    def _luks_open_rw(self, create_fn):
         """Verify that a LUKS device can be activated as RW as well as RO"""
 
-        succ = BlockDev.crypto_luks_format(self.loop_dev, None, 0, PASSWD, None, 0)
+        succ = create_fn(self.loop_dev, PASSWD, None)
         self.assertTrue(succ)
 
         succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
@@ -326,6 +416,14 @@ class CryptoTestLuksOpenRW(CryptoTestCase):
         succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
         self.assertTrue(succ)
 
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_luks_open_rw(self):
+        self._luks_open_rw(self._luks_format)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_open_rw(self):
+        self._luks_open_rw(self._luks2_format)
 
 class CryptoTestEscrow(CryptoTestCase):
     def setUp(self):
