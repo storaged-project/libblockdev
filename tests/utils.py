@@ -217,11 +217,11 @@ def write_file(filename, content):
     with open(filename, "w") as f:
         f.write(content)
 
-def run_command(command):
+def run_command(command, cmd_input=None):
     res = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE,
-                           stderr=subprocess.PIPE)
+                           stderr=subprocess.PIPE, stdin=subprocess.PIPE)
 
-    out, err = res.communicate()
+    out, err = res.communicate(input=cmd_input)
     return (res.returncode, out.decode().strip(), err.decode().strip())
 
 def get_version_from_pretty_name(pretty_name):

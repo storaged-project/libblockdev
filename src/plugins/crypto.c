@@ -31,6 +31,10 @@
 
 #include "crypto.h"
 
+#ifndef CRYPT_LUKS
+#define CRYPT_LUKS NULL
+#endif
+
 /**
  * SECTION: crypto
  * @short_description: plugin for operations with encrypted devices
@@ -191,7 +195,7 @@ gboolean bd_crypto_device_is_luks (const gchar *device, GError **error) {
         return FALSE;
     }
 
-    ret = crypt_load (cd, CRYPT_LUKS1, NULL);
+    ret = crypt_load (cd, CRYPT_LUKS, NULL);
     crypt_free (cd);
     return (ret == 0);
 }
@@ -218,7 +222,7 @@ gchar* bd_crypto_luks_uuid (const gchar *device, GError **error) {
         return NULL;
     }
 
-    ret_num = crypt_load (cd, CRYPT_LUKS1, NULL);
+    ret_num = crypt_load (cd, CRYPT_LUKS, NULL);
     if (ret_num != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to load device: %s", strerror_l(-ret_num, c_locale));
@@ -476,7 +480,7 @@ static gboolean luks_open (const gchar *device, const gchar *name, const guint8 
         return FALSE;
     }
 
-    ret = crypt_load (cd, CRYPT_LUKS1, NULL);
+    ret = crypt_load (cd, CRYPT_LUKS, NULL);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to load device's parameters: %s", strerror_l(-ret, c_locale));
@@ -621,7 +625,7 @@ gboolean bd_crypto_luks_add_key_blob (const gchar *device, const guint8 *pass_da
         return FALSE;
     }
 
-    ret = crypt_load (cd, CRYPT_LUKS1, NULL);
+    ret = crypt_load (cd, CRYPT_LUKS, NULL);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to load device's parameters: %s", strerror_l(-ret, c_locale));
@@ -740,7 +744,7 @@ gboolean bd_crypto_luks_remove_key_blob (const gchar *device, const guint8 *pass
         return FALSE;
     }
 
-    ret = crypt_load (cd, CRYPT_LUKS1, NULL);
+    ret = crypt_load (cd, CRYPT_LUKS, NULL);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to load device's parameters: %s", strerror_l(-ret, c_locale));
@@ -844,7 +848,7 @@ gboolean bd_crypto_luks_change_key_blob (const gchar *device, const guint8 *pass
         return FALSE;
     }
 
-    ret = crypt_load (cd, CRYPT_LUKS1, NULL);
+    ret = crypt_load (cd, CRYPT_LUKS, NULL);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to load device's parameters: %s", strerror_l(-ret, c_locale));
