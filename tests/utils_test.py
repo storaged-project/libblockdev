@@ -18,6 +18,32 @@ class UtilsTestCase(unittest.TestCase):
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
 
+class UtilsExecProgressTest(UtilsTestCase):
+    log = []
+
+    def my_progress_func(self, task, status, completion, msg):
+        self.assertTrue(isinstance(completion, int))
+        self.log.append(completion)
+
+    def test_initialization(self):
+        """ Verify that progress report can (de)initialized"""
+
+        succ = BlockDev.utils_prog_reporting_initialized()
+        self.assertFalse(succ)
+
+        succ = BlockDev.utils_init_prog_reporting(self.my_progress_func)
+        self.assertTrue(succ)
+
+        succ = BlockDev.utils_prog_reporting_initialized()
+        self.assertTrue(succ)
+
+        succ = BlockDev.utils_init_prog_reporting(None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.utils_prog_reporting_initialized()
+        self.assertFalse(succ)
+
+
 class UtilsExecLoggingTest(UtilsTestCase):
     log = ""
 
