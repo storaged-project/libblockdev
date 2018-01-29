@@ -728,6 +728,15 @@ gboolean bd_utils_init_prog_reporting (BDUtilsProgFunc new_prog_func, GError **e
 }
 
 /**
+ * bd_utils_prog_reporting_initialized:
+ *
+ * Returns: TRUE if progress reporting has been initialized.
+ */
+gboolean bd_utils_prog_reporting_initialized () {
+    return prog_func != NULL;
+}
+
+/**
  * bd_utils_report_started:
  * @msg: message describing the started task/action
  *

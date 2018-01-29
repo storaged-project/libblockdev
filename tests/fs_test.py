@@ -1126,6 +1126,8 @@ class MountTest(FSTestCase):
         self.assertTrue(os.path.ismount(tmp))
 
 class GenericCheck(FSTestCase):
+    log = []
+
     def _test_generic_check(self, mkfs_function):
         # clean the device
         succ = BlockDev.fs_clean(self.loop_dev)
@@ -1133,13 +1135,35 @@ class GenericCheck(FSTestCase):
         succ = mkfs_function(self.loop_dev, None)
         self.assertTrue(succ)
 
+        self.log = []
         # check for consistency (expected to be ok)
         succ = BlockDev.fs_check(self.loop_dev)
         self.assertTrue(succ)
 
+    def _my_progress_func(self, task, status, completion, msg):
+        self.assertTrue(isinstance(completion, int))
+        self.log.append(completion)
+
+    def _verify_progress(self, log):
+        # at least 2 members
+        self.assertLessEqual(2, len(log))
+        # non-decreasing members
+        self.assertTrue(all(x<=y for x, y in zip(log, log[1:])))
+
     def test_ext4_generic_check(self):
         """Test generic check function with an ext4 file system"""
         self._test_generic_check(mkfs_function=BlockDev.fs_ext4_mkfs)
+
+    def test_ext4_progress_check(self):
+        """Test check function with an ext4 file system and progress reporting"""
+
+        succ = BlockDev.utils_init_prog_reporting(self._my_progress_func)
+        self.assertTrue(succ)
+
+        self._test_generic_check(mkfs_function=BlockDev.fs_ext4_mkfs)
+        self._verify_progress(self.log)
+
+        succ = BlockDev.utils_init_prog_reporting(None)
 
     def test_xfs_generic_check(self):
         """Test generic check function with an ext4 file system"""
