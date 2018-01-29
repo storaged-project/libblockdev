@@ -41,6 +41,7 @@ PLUGINS = btrfs \
 	lvm \
 	mdraid \
 	mpath \
+	nvdimm \
 	part \
 	s390 \
 	swap

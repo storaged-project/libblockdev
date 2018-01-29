@@ -141,6 +141,7 @@ LIBBLOCKDEV_PLUGIN([SWAP], [swap])
 LIBBLOCKDEV_PLUGIN([KBD], [kbd])
 LIBBLOCKDEV_PLUGIN([PART], [part])
 LIBBLOCKDEV_PLUGIN([FS], [fs])
+LIBBLOCKDEV_PLUGIN([NVDIMM], [nvdimm])
 
 AM_CONDITIONAL(WITH_PART_O_WITH_FS, test "x$with_part" != "xno" -o "x$with_fs" != "xno")
 
@@ -192,6 +193,11 @@ AS_IF([test "x$with_fs" != "xno"],
 
 AS_IF([test "x$with_btrfs" != "xno" -o "x$with_mdraid" != "xno" -o "x$with_kbd" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([BYTESIZE], [bytesize >= 0.1])],
+      [])
+
+AS_IF([test "x$with_nvdimm" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([UUID], [uuid])
+       LIBBLOCKDEV_PKG_CHECK_MODULES([NDCTL], [libndctl])]
       [])
 
 AC_SUBST([skip_patterns], [$skip_patterns])

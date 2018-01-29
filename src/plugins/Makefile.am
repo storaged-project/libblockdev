@@ -36,6 +36,10 @@ if WITH_MPATH
 lib_LTLIBRARIES += libbd_mpath.la
 endif
 
+if WITH_NVDIMM
+lib_LTLIBRARIES += libbd_nvdimm.la
+endif
+
 if WITH_SWAP
 lib_LTLIBRARIES += libbd_swap.la
 endif
@@ -122,6 +126,14 @@ libbd_mpath_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_mpath_la_SOURCES = mpath.c mpath.h check_deps.c check_deps.h
 endif
 
+if WITH_NVDIMM
+libbd_nvdimm_la_CFLAGS = $(GLIB_CFLAGS) $(UUID_CFLAGS) $(NDCTL_CFLAGS) -Wall -Wextra -Werror
+libbd_nvdimm_la_LIBADD = $(GLIB_LIBS) $(UUID_LIBS) $(NDCTL_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_nvdimm_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
+libbd_nvdimm_la_CPPFLAGS = -I${builddir}/../../include/
+libbd_nvdimm_la_SOURCES = nvdimm.c nvdimm.h check_deps.c check_deps.h
+endif
+
 if WITH_SWAP
 libbd_swap_la_CFLAGS = $(GLIB_CFLAGS) -Wall -Wextra -Werror
 libbd_swap_la_LIBADD = $(GLIB_LIBS) ${builddir}/../utils/libbd_utils.la
@@ -192,6 +204,10 @@ endif
 
 if WITH_MPATH
 libinclude_HEADERS += mpath.h
+endif
+
+if WITH_NVDIMM
+libinclude_HEADERS += nvdimm.h
 endif
 
 if WITH_SWAP
