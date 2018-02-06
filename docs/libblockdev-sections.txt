@@ -578,6 +578,7 @@ BDNVDIMMNamespaceMode
 BDNVDIMMNamespaceInfo
 bd_nvdimm_namespace_get_mode_from_str
 bd_nvdimm_namespace_get_mode_str
+bd_nvdimm_namespace_get_devname
 bd_nvdimm_namespace_enable
 bd_nvdimm_namespace_disable
 bd_nvdimm_namespace_info

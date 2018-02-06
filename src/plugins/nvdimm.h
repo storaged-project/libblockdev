@@ -65,6 +65,8 @@ gboolean bd_nvdimm_is_tech_avail (BDNVDIMMTech tech, guint64 mode, GError **erro
 BDNVDIMMNamespaceMode bd_nvdimm_namespace_get_mode_from_str (const gchar *mode_str, GError **error);
 const gchar* bd_nvdimm_namespace_get_mode_str (BDNVDIMMNamespaceMode mode, GError **error);
 
+gchar* bd_nvdimm_namespace_get_devname (const gchar *device, GError **error);
+
 gboolean bd_nvdimm_namespace_enable (const gchar *namespace, const BDExtraArg **extra, GError **error);
 gboolean bd_nvdimm_namespace_disable (const gchar *namespace, const BDExtraArg **extra, GError **error);
 

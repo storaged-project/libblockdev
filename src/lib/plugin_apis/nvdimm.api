@@ -137,6 +137,19 @@ BDNVDIMMNamespaceMode bd_nvdimm_namespace_get_mode_from_str (const gchar *mode_s
 const gchar* bd_nvdimm_namespace_get_mode_str (BDNVDIMMNamespaceMode mode, GError **error);
 
 /**
+ * bd_nvdimm_namespace_get_devname:
+ * @device: name or path of a block device (e.g. "/dev/pmem0")
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): namespace device name (e.g. "namespaceX.Y") for @device
+ *                           or %NULL if @device is not a NVDIMM namespace
+ *                           (@error may be set to indicate error)
+ *
+ * Tech category: %BD_NVDIMM_TECH_NAMESPACE-%BD_NVDIMM_TECH_MODE_QUERY
+ */
+gchar* bd_nvdimm_namespace_get_devname (const gchar *device, GError **error);
+
+/**
  * bd_nvdimm_namespace_enable:
  * @namespace: name of the namespace to enable
  * @extra: (allow-none) (array zero-terminated=1): extra options (currently unused)

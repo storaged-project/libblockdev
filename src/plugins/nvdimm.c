@@ -222,6 +222,69 @@ static struct ndctl_namespace* get_namespace_by_name (const gchar *namespace, st
 }
 
 /**
+ * bd_nvdimm_namespace_get_devname:
+ * @device: name or path of a block device (e.g. "/dev/pmem0")
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): namespace device name (e.g. "namespaceX.Y") for @device
+ *                           or %NULL if @device is not a NVDIMM namespace
+ *                           (@error may be set to indicate error)
+ *
+ * Tech category: %BD_NVDIMM_TECH_NAMESPACE-%BD_NVDIMM_TECH_MODE_QUERY
+ */
+gchar* bd_nvdimm_namespace_get_devname (const gchar *device, GError **error) {
+    struct ndctl_ctx *ctx = NULL;
+    struct ndctl_namespace *ndns = NULL;
+    struct ndctl_region *region = NULL;
+    struct ndctl_bus *bus = NULL;
+    gint success = 0;
+    gchar *ret = NULL;
+
+    /* get rid of the "/dev/" prefix (if any) */
+    if (g_str_has_prefix (device, "/dev/"))
+        device = device + 5;
+
+    success = ndctl_new (&ctx);
+    if (success != 0) {
+        g_set_error (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_FAIL,
+                     "Failed to create ndctl context");
+        return FALSE;
+    }
+
+    ndctl_bus_foreach (ctx, bus) {
+        ndctl_region_foreach (bus, region) {
+            ndctl_namespace_foreach (region, ndns) {
+                if (!ndctl_namespace_is_active (ndns))
+                    continue;
+
+                struct ndctl_btt *btt = ndctl_namespace_get_btt (ndns);
+                struct ndctl_dax *dax = ndctl_namespace_get_dax (ndns);
+                struct ndctl_pfn *pfn = ndctl_namespace_get_pfn (ndns);
+                const gchar *blockdev = NULL;
+
+                if (dax)
+                    continue;
+                else if (btt)
+                    blockdev = ndctl_btt_get_block_device (btt);
+                else if (pfn)
+                    blockdev = ndctl_pfn_get_block_device (pfn);
+                else
+                    blockdev = ndctl_namespace_get_block_device (ndns);
+
+                if (g_strcmp0 (blockdev, device) == 0) {
+                    ret = g_strdup (ndctl_namespace_get_devname (ndns));
+                    ndctl_unref (ctx);
+                    return ret;
+                }
+            }
+        }
+    }
+
+    ndctl_unref (ctx);
+    return NULL;
+}
+
+/**
  * bd_nvdimm_namespace_enable:
  * @namespace: name of the namespace to enable
  * @extra: (allow-none) (array zero-terminated=1): extra options (currently unused)

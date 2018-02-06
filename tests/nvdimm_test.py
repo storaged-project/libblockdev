@@ -73,6 +73,14 @@ class NVDIMMNamespaceTestCase(NVDIMMTestCase):
         info = BlockDev.nvdimm_namespace_info(self.sys_info["dev"])
         self._check_namespace_info(info)
 
+        # test also that getting namespace devname from blockdev name works
+        namespace = BlockDev.nvdimm_namespace_get_devname(info.blockdev)
+        self.assertEqual(namespace, self.sys_info["dev"])
+
+        # should work even with path, e.g. /dev/pmem0
+        namespace = BlockDev.nvdimm_namespace_get_devname("/dev/" + info.blockdev)
+        self.assertEqual(namespace, self.sys_info["dev"])
+
         info = BlockDev.nvdimm_namespace_info("definitely-not-a-namespace")
         self.assertIsNone(info)
 
