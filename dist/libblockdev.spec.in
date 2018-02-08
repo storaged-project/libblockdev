@@ -66,7 +66,7 @@
 %define configure_opts %{?distro_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?gi_copts}
 
 Name:        libblockdev
-Version:     2.15
+Version:     2.16
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -800,6 +800,19 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Thu Feb 08 2018 Vojtech Trefny <vtrefny@redhat.com> - 2.16-1
+- Add tests for progress report (jtulak)
+- Add e2fsck progress (jtulak)
+- Add progress reporting infrastructure for Ext fsck (jtulak)
+- Add a function to test if prog. reporting was initialized (jtulak)
+- Add support for LUKS 2 opening and key management (vtrefny)
+- Fix few more links for project and documentation website (vtrefny)
+- Sync the spec file with downstream (vpodzime)
+- Check if 'journalctl' is available before trying to use it in tests (vtrefny)
+- Update 'Testing libblockdev' section in documentation (vtrefny)
+- Fix link to online documentation (vtrefny)
+- Fix how the new kernel module functions are added to docs (vpodzime)
+
 * Fri Dec 01 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.15-1
 - Do not use the 'btrfs' plugin in overrides tests (vpodzime)
 - Do not use the btrfs plugin in library tests (vpodzime)

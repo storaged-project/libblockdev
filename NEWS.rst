@@ -1,3 +1,38 @@
+Libblockdev 2.16
+----------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Notable changes**
+
+- features
+
+  - LUKS 2 support for luks_open/close and luks_add/remove/change_key
+
+  - Progress report support for ext filesystem checks
+
+
+**Full list of changes**
+
+Jan Tulak (4):
+- Add a function to test if prog. reporting was initialized
+- Add progress reporting infrastructure for Ext fsck
+- Add e2fsck progress
+- Add tests for progress report
+
+Vojtech Trefny (5):
+- Fix link to online documentation
+- Update 'Testing libblockdev' section in documentation
+- Check if 'journalctl' is available before trying to use it in tests
+- Fix few more links for project and documentation website
+- Add support for LUKS 2 opening and key management
+
+Vratislav Podzimek (2):
+- Fix how the new kernel module functions are added to docs
+- Sync the spec file with downstream
+
+
 Libblockdev 2.15
 ----------------
 
