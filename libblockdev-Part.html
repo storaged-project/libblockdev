@@ -3,12 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Part: libblockdev Reference Manual</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
 <link rel="home" href="index.html" title="libblockdev Reference Manual">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-Plugins.html" title="Plugins">
 <link rel="next" href="libblockdev-Swap.html" title="Swap">
-<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.27 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -425,7 +425,7 @@ bd_part_create_table (<em class="parameter"><code>const <a href="../glib/glib-Ba
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -486,7 +486,7 @@ partitions)</p></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -494,7 +494,7 @@ partitions)</p></td>
 </div>
 <div class="refsect3">
 <a name="bd-part-create-part.returns"></a><h4>Returns</h4>
-<p> specification of the created partition or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
+<p>specification of the created partition or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
 <p>NOTE: The resulting partition may start at a different position than given by
 <em class="parameter"><code>start</code></em>
 and can have different size than <em class="parameter"><code>size</code></em>
@@ -531,7 +531,7 @@ bd_part_delete_part (<em class="parameter"><code>const <a href="../glib/glib-Bas
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -585,7 +585,7 @@ bd_part_resize_part (<em class="parameter"><code>const <a href="../glib/glib-Bas
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -623,7 +623,7 @@ bd_part_get_disk_parts (<em class="parameter"><code>const <a href="../glib/glib-
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -631,7 +631,7 @@ bd_part_get_disk_parts (<em class="parameter"><code>const <a href="../glib/glib-
 </div>
 <div class="refsect3">
 <a name="bd-part-get-disk-parts.returns"></a><h4>Returns</h4>
-<p> specs of the partitions from <em class="parameter"><code>disk</code></em>
+<p>specs of the partitions from <em class="parameter"><code>disk</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
 <p>Tech category: <a class="link" href="libblockdev-Part.html#BD-PART-TECH-MODE-QUERY-TABLE:CAPS"><code class="literal">BD_PART_TECH_MODE_QUERY_TABLE</code></a> + the tech according to the partition table type. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></p>
@@ -665,7 +665,7 @@ bd_part_get_part_spec (<em class="parameter"><code>const <a href="../glib/glib-B
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -673,7 +673,7 @@ bd_part_get_part_spec (<em class="parameter"><code>const <a href="../glib/glib-B
 </div>
 <div class="refsect3">
 <a name="bd-part-get-part-spec.returns"></a><h4>Returns</h4>
-<p> spec of the <em class="parameter"><code>part</code></em>
+<p>spec of the <em class="parameter"><code>part</code></em>
 partition from <em class="parameter"><code>disk</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
 <p>Tech category: <a class="link" href="libblockdev-Part.html#BD-PART-TECH-MODE-QUERY-PART:CAPS"><code class="literal">BD_PART_TECH_MODE_QUERY_PART</code></a> + the tech according to the partition table type. </p>
@@ -721,7 +721,7 @@ bd_part_set_part_flag (<em class="parameter"><code>const <a href="../glib/glib-B
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -776,7 +776,7 @@ bd_part_get_flag_str (<em class="parameter"><code><a class="link" href="libblock
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -784,7 +784,7 @@ bd_part_get_flag_str (<em class="parameter"><code><a class="link" href="libblock
 </div>
 <div class="refsect3">
 <a name="bd-part-get-flag-str.returns"></a><h4>Returns</h4>
-<p> string representation of <em class="parameter"><code>flag</code></em>
+<p>string representation of <em class="parameter"><code>flag</code></em>
 </p>
 <p>Tech category: always available. </p>
 <p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
@@ -812,7 +812,7 @@ bd_part_get_part_table_type_str (<em class="parameter"><code><a class="link" hre
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -820,7 +820,7 @@ bd_part_get_part_table_type_str (<em class="parameter"><code><a class="link" hre
 </div>
 <div class="refsect3">
 <a name="bd-part-get-part-table-type-str.returns"></a><h4>Returns</h4>
-<p> string representation of <em class="parameter"><code>table_type</code></em>
+<p>string representation of <em class="parameter"><code>table_type</code></em>
 </p>
 <p>Tech category: the tech according to <em class="parameter"><code>type</code></em>
 . </p>
@@ -849,7 +849,7 @@ bd_part_get_type_str (<em class="parameter"><code><a class="link" href="libblock
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -857,7 +857,7 @@ bd_part_get_type_str (<em class="parameter"><code><a class="link" href="libblock
 </div>
 <div class="refsect3">
 <a name="bd-part-get-type-str.returns"></a><h4>Returns</h4>
-<p> string representation of <em class="parameter"><code>type</code></em>
+<p>string representation of <em class="parameter"><code>type</code></em>
 </p>
 <p>Tech category: always available. </p>
 <p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
@@ -897,7 +897,7 @@ bd_part_get_best_free_region (<em class="parameter"><code>const <a href="../glib
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -905,7 +905,7 @@ bd_part_get_best_free_region (<em class="parameter"><code>const <a href="../glib
 </div>
 <div class="refsect3">
 <a name="bd-part-get-best-free-region.returns"></a><h4>Returns</h4>
-<p> spec of the best free region on <em class="parameter"><code>disk</code></em>
+<p>spec of the best free region on <em class="parameter"><code>disk</code></em>
 for a new partition of type <em class="parameter"><code>type</code></em>
 with the size of <em class="parameter"><code>size</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if there is none such region or if
@@ -943,7 +943,7 @@ bd_part_get_disk_free_regions (<em class="parameter"><code>const <a href="../gli
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -951,7 +951,7 @@ bd_part_get_disk_free_regions (<em class="parameter"><code>const <a href="../gli
 </div>
 <div class="refsect3">
 <a name="bd-part-get-disk-free-regions.returns"></a><h4>Returns</h4>
-<p> specs of the free regions from <em class="parameter"><code>disk</code></em>
+<p>specs of the free regions from <em class="parameter"><code>disk</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
 <p>Tech category: <a class="link" href="libblockdev-Part.html#BD-PART-TECH-MODE-QUERY-TABLE:CAPS"><code class="literal">BD_PART_TECH_MODE_QUERY_TABLE</code></a> + the tech according to the partition table type. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></p>
@@ -979,7 +979,7 @@ bd_part_get_disk_spec (<em class="parameter"><code>const <a href="../glib/glib-B
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -987,7 +987,7 @@ bd_part_get_disk_spec (<em class="parameter"><code>const <a href="../glib/glib-B
 </div>
 <div class="refsect3">
 <a name="bd-part-get-disk-spec.returns"></a><h4>Returns</h4>
-<p> information about the given <em class="parameter"><code>disk</code></em>
+<p>information about the given <em class="parameter"><code>disk</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> (in case of error)</p>
 <p>Tech category: <a class="link" href="libblockdev-Part.html#BD-PART-TECH-MODE-QUERY-TABLE:CAPS"><code class="literal">BD_PART_TECH_MODE_QUERY_TABLE</code></a> + the tech according to the partition table type. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
@@ -1021,7 +1021,7 @@ bd_part_get_part_by_pos (<em class="parameter"><code>const <a href="../glib/glib
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -1029,7 +1029,7 @@ bd_part_get_part_by_pos (<em class="parameter"><code>const <a href="../glib/glib
 </div>
 <div class="refsect3">
 <a name="bd-part-get-part-by-pos.returns"></a><h4>Returns</h4>
-<p> spec of the partition from <em class="parameter"><code>disk</code></em>
+<p>spec of the partition from <em class="parameter"><code>disk</code></em>
 spanning over the <em class="parameter"><code>position</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if no such
 partition exists or in case of error (<em class="parameter"><code>error</code></em>
@@ -1073,7 +1073,7 @@ bd_part_set_disk_flag (<em class="parameter"><code>const <a href="../glib/glib-B
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -1121,7 +1121,7 @@ bd_part_set_part_flags (<em class="parameter"><code>const <a href="../glib/glib-
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -1173,7 +1173,7 @@ bd_part_set_part_name (<em class="parameter"><code>const <a href="../glib/glib-B
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -1219,7 +1219,7 @@ bd_part_set_part_type (<em class="parameter"><code>const <a href="../glib/glib-B
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -1267,7 +1267,7 @@ bd_part_set_part_id (<em class="parameter"><code>const <a href="../glib/glib-Bas
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -1311,7 +1311,7 @@ bd_part_get_part_id (<em class="parameter"><code>const <a href="../glib/glib-Bas
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -1354,7 +1354,7 @@ bd_part_is_tech_avail (<em class="parameter"><code><a class="link" href="libbloc
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (details about why the <em class="parameter"><code>tech</code></em>
+<td class="parameter_description"><p>place to store error (details about why the <em class="parameter"><code>tech</code></em>
 -<em class="parameter"><code>mode</code></em>
 combination is not available). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1913,6 +1913,6 @@ supported by libparted too but is GPT specific.</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.25</div>
+<hr>Generated by GTK-Doc V1.27</div>
 </body>
 </html>

@@ -3,12 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>blockdev library: libblockdev Reference Manual</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
 <link rel="home" href="index.html" title="libblockdev Reference Manual">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="next" href="libblockdev-BTRFS.html" title="BTRFS">
-<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.27 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -152,7 +152,7 @@ bd_init (<em class="parameter"><code><span class="type">BDPluginSpec</span> **re
 <tbody>
 <tr>
 <td class="parameter_name"><p>require_plugins</p></td>
-<td class="parameter_description"><p> <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated list
+<td class="parameter_description"><p><a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated list
 of plugins that should be loaded (if no so_name is specified
 for the plugin, the default is used) or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to load all
 plugins. </p></td>
@@ -160,12 +160,12 @@ plugins. </p></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>log_func</p></td>
-<td class="parameter_description"><p> logging function to use. </p></td>
+<td class="parameter_description"><p>logging function to use. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -241,7 +241,7 @@ between).</p>
 <tbody>
 <tr>
 <td class="parameter_name"><p>require_plugins</p></td>
-<td class="parameter_description"><p> <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated list
+<td class="parameter_description"><p><a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated list
 of plugins that should be loaded (if no so_name is specified
 for the plugin, the default is used) or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to load all
 plugins. </p></td>
@@ -249,12 +249,12 @@ plugins. </p></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>log_func</p></td>
-<td class="parameter_description"><p> logging function to use. </p></td>
+<td class="parameter_description"><p>logging function to use. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -287,7 +287,7 @@ bd_try_init (<em class="parameter"><code><span class="type">BDPluginSpec</span> 
 <tbody>
 <tr>
 <td class="parameter_name"><p>request_plugins</p></td>
-<td class="parameter_description"><p> <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated list
+<td class="parameter_description"><p><a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated list
 of plugins that should be loaded (if no so_name is specified
 for the plugin, the default is used) or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to load all
 plugins. </p></td>
@@ -295,18 +295,18 @@ plugins. </p></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>log_func</p></td>
-<td class="parameter_description"><p> logging function to use. </p></td>
+<td class="parameter_description"><p>logging function to use. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>loaded_plugin_names</p></td>
-<td class="parameter_description"><p> names
+<td class="parameter_description"><p>names
 of the successfully loaded plugins. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="Free data container after the code is done."><span class="acronym">transfer container</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -340,7 +340,7 @@ bd_reinit (<em class="parameter"><code><span class="type">BDPluginSpec</span> **
 <tbody>
 <tr>
 <td class="parameter_name"><p>require_plugins</p></td>
-<td class="parameter_description"><p> <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated list
+<td class="parameter_description"><p><a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated list
 of plugins that should be loaded (if no so_name is specified
 for the plugin, the default is used) or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to load all
 plugins. </p></td>
@@ -353,13 +353,13 @@ plugins. </p></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>log_func</p></td>
-<td class="parameter_description"><p> logging function to use or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+<td class="parameter_description"><p>logging function to use or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 to keep the old one. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -393,7 +393,7 @@ bd_try_reinit (<em class="parameter"><code><span class="type">BDPluginSpec</span
 <tbody>
 <tr>
 <td class="parameter_name"><p>require_plugins</p></td>
-<td class="parameter_description"><p> <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated list
+<td class="parameter_description"><p><a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated list
 of plugins that should be loaded (if no so_name is specified
 for the plugin, the default is used) or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to load all
 plugins. </p></td>
@@ -406,19 +406,19 @@ plugins. </p></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>log_func</p></td>
-<td class="parameter_description"><p> logging function to use or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+<td class="parameter_description"><p>logging function to use or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 to keep the old one. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>loaded_plugin_names</p></td>
-<td class="parameter_description"><p> names of the successfully
+<td class="parameter_description"><p>names of the successfully
 loaded plugins. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="Free data container after the code is done."><span class="acronym">transfer container</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -473,7 +473,7 @@ bd_switch_init_checks (<em class="parameter"><code><a href="../glib/glib-Basic-T
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -529,6 +529,6 @@ bd_init_error_quark ();</pre>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.25</div>
+<hr>Generated by GTK-Doc V1.27</div>
 </body>
 </html>

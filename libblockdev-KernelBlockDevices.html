@@ -3,12 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>KernelBlockDevices: libblockdev Reference Manual</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
 <link rel="home" href="index.html" title="libblockdev Reference Manual">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-Swap.html" title="Swap">
 <link rel="next" href="libblockdev-s390.html" title="s390">
-<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.27 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -346,7 +346,7 @@ cache to</p></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -390,18 +390,18 @@ bd_kbd_bcache_create (<em class="parameter"><code>const <a href="../glib/glib-Ba
 </tr>
 <tr>
 <td class="parameter_name"><p>extra</p></td>
-<td class="parameter_description"><p> extra options for the creation (right now
+<td class="parameter_description"><p>extra options for the creation (right now
 passed to the 'make-bcache' utility). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>bcache_device</p></td>
-<td class="parameter_description"><p> place to store the name of the new bcache device (if any). </p></td>
+<td class="parameter_description"><p>place to store the name of the new bcache device (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -435,7 +435,7 @@ bd_kbd_bcache_destroy (<em class="parameter"><code>const <a href="../glib/glib-B
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -471,12 +471,12 @@ bd_kbd_bcache_detach (<em class="parameter"><code>const <a href="../glib/glib-Ba
 </tr>
 <tr>
 <td class="parameter_name"><p>c_set_uuid</p></td>
-<td class="parameter_description"><p> cache set UUID of the detached cache. </p></td>
+<td class="parameter_description"><p>cache set UUID of the detached cache. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -512,7 +512,7 @@ bd_kbd_bcache_get_backing_device (<em class="parameter"><code>const <a href="../
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -520,7 +520,7 @@ bd_kbd_bcache_get_backing_device (<em class="parameter"><code>const <a href="../
 </div>
 <div class="refsect3">
 <a name="bd-kbd-bcache-get-backing-device.returns"></a><h4>Returns</h4>
-<p> name of the backing device of the <em class="parameter"><code>bcache_device</code></em>
+<p>name of the backing device of the <em class="parameter"><code>bcache_device</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if failed to determine (<em class="parameter"><code>error</code></em>
 is populated)</p>
 <p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-BCACHE:CAPS"><code class="literal">BD_KBD_TECH_BCACHE</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-QUERY:CAPS"><code class="literal">BD_KBD_TECH_MODE_QUERY</code></a>. </p>
@@ -549,7 +549,7 @@ bd_kbd_bcache_get_cache_device (<em class="parameter"><code>const <a href="../gl
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -557,7 +557,7 @@ bd_kbd_bcache_get_cache_device (<em class="parameter"><code>const <a href="../gl
 </div>
 <div class="refsect3">
 <a name="bd-kbd-bcache-get-cache-device.returns"></a><h4>Returns</h4>
-<p> name of the cache device of the <em class="parameter"><code>bcache_device</code></em>
+<p>name of the cache device of the <em class="parameter"><code>bcache_device</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if failed to determine (<em class="parameter"><code>error</code></em>
 is populated)</p>
 <p>Note: returns the name of the first cache device of <em class="parameter"><code>bcache_device</code></em>
@@ -589,7 +589,7 @@ bd_kbd_bcache_get_mode (<em class="parameter"><code>const <a href="../glib/glib-
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -624,7 +624,7 @@ bd_kbd_bcache_get_mode_from_str (<em class="parameter"><code>const <a href="../g
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -658,7 +658,7 @@ bd_kbd_bcache_get_mode_str (<em class="parameter"><code><a class="link" href="li
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -666,7 +666,7 @@ bd_kbd_bcache_get_mode_str (<em class="parameter"><code><a class="link" href="li
 </div>
 <div class="refsect3">
 <a name="bd-kbd-bcache-get-mode-str.returns"></a><h4>Returns</h4>
-<p> string representation of <em class="parameter"><code>mode</code></em>
+<p>string representation of <em class="parameter"><code>mode</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
 <p>Tech category: always available. </p>
 <p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
@@ -700,7 +700,7 @@ bd_kbd_bcache_set_mode (<em class="parameter"><code>const <a href="../glib/glib-
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -752,7 +752,7 @@ bd_kbd_bcache_status (<em class="parameter"><code>const <a href="../glib/glib-Ba
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -760,7 +760,7 @@ bd_kbd_bcache_status (<em class="parameter"><code>const <a href="../glib/glib-Ba
 </div>
 <div class="refsect3">
 <a name="bd-kbd-bcache-status.returns"></a><h4>Returns</h4>
-<p> status of the <em class="parameter"><code>bcache_device</code></em>
+<p>status of the <em class="parameter"><code>bcache_device</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of
 error (<em class="parameter"><code>error</code></em>
 is set)</p>
@@ -799,19 +799,19 @@ bd_kbd_zram_create_devices (<em class="parameter"><code><a href="../glib/glib-Ba
 </tr>
 <tr>
 <td class="parameter_name"><p>sizes</p></td>
-<td class="parameter_description"><p> requested sizes (in bytes) for created zRAM
+<td class="parameter_description"><p>requested sizes (in bytes) for created zRAM
 devices. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>nstreams</p></td>
-<td class="parameter_description"><p> numbers of streams for created
+<td class="parameter_description"><p>numbers of streams for created
 zRAM devices. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -843,7 +843,7 @@ bd_kbd_zram_destroy_devices (<em class="parameter"><code><a href="../glib/glib-E
 </colgroup>
 <tbody><tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr></tbody>
 </table></div>
@@ -886,12 +886,12 @@ bd_kbd_zram_add_device (<em class="parameter"><code><a href="../glib/glib-Basic-
 </tr>
 <tr>
 <td class="parameter_name"><p>device</p></td>
-<td class="parameter_description"><p> place to store the name of the newly added device. </p></td>
+<td class="parameter_description"><p>place to store the name of the newly added device. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -925,7 +925,7 @@ bd_kbd_zram_remove_device (<em class="parameter"><code>const <a href="../glib/gl
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -960,7 +960,7 @@ bd_kbd_zram_get_stats (<em class="parameter"><code>const <a href="../glib/glib-B
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -968,7 +968,7 @@ bd_kbd_zram_get_stats (<em class="parameter"><code>const <a href="../glib/glib-B
 </div>
 <div class="refsect3">
 <a name="bd-kbd-zram-get-stats.returns"></a><h4>Returns</h4>
-<p> statistics for the zRAM device</p>
+<p>statistics for the zRAM device</p>
 <p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-ZRAM:CAPS"><code class="literal">BD_KBD_TECH_ZRAM</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-QUERY:CAPS"><code class="literal">BD_KBD_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
@@ -1020,7 +1020,7 @@ bd_kbd_is_tech_avail (<em class="parameter"><code><a class="link" href="libblock
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (details about why the <em class="parameter"><code>tech</code></em>
+<td class="parameter_description"><p>place to store error (details about why the <em class="parameter"><code>tech</code></em>
 -<em class="parameter"><code>mode</code></em>
 combination is not available). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1316,6 +1316,6 @@ plugin implementation and having all the runtime dependencies available</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.25</div>
+<hr>Generated by GTK-Doc V1.27</div>
 </body>
 </html>

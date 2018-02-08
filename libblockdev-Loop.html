@@ -3,12 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Loop: libblockdev Reference Manual</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
 <link rel="home" href="index.html" title="libblockdev Reference Manual">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-FS.html" title="FS">
 <link rel="next" href="libblockdev-LVM.html" title="LVM">
-<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.27 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -232,7 +232,7 @@ bd_loop_get_backing_file (<em class="parameter"><code>const <a href="../glib/gli
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -240,7 +240,7 @@ bd_loop_get_backing_file (<em class="parameter"><code>const <a href="../glib/gli
 </div>
 <div class="refsect3">
 <a name="bd-loop-get-backing-file.returns"></a><h4>Returns</h4>
-<p> path of the device's backing file or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if none
+<p>path of the device's backing file or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if none
 is found</p>
 <p>Tech category: <a class="link" href="libblockdev-Loop.html#BD-LOOP-TECH-LOOP:CAPS"><code class="literal">BD_LOOP_TECH_LOOP</code></a>-<a class="link" href="libblockdev-Loop.html#BD-LOOP-TECH-MODE-QUERY:CAPS"><code class="literal">BD_LOOP_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
@@ -268,7 +268,7 @@ bd_loop_get_loop_name (<em class="parameter"><code>const <a href="../glib/glib-B
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -276,7 +276,7 @@ bd_loop_get_loop_name (<em class="parameter"><code>const <a href="../glib/glib-B
 </div>
 <div class="refsect3">
 <a name="bd-loop-get-loop-name.returns"></a><h4>Returns</h4>
-<p> name of the loop device associated with the given <em class="parameter"><code>file</code></em>
+<p>name of the loop device associated with the given <em class="parameter"><code>file</code></em>
 </p>
 <p>Tech category: <a class="link" href="libblockdev-Loop.html#BD-LOOP-TECH-LOOP:CAPS"><code class="literal">BD_LOOP_TECH_LOOP</code></a>-<a class="link" href="libblockdev-Loop.html#BD-LOOP-TECH-MODE-QUERY:CAPS"><code class="literal">BD_LOOP_TECH_MODE_QUERY</code></a>. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
@@ -330,12 +330,12 @@ bd_loop_setup (<em class="parameter"><code>const <a href="../glib/glib-Basic-Typ
 </tr>
 <tr>
 <td class="parameter_name"><p>loop_name</p></td>
-<td class="parameter_description"><p> if not <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, it is used to store the name of the loop device. </p></td>
+<td class="parameter_description"><p>if not <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, it is used to store the name of the loop device. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -396,12 +396,12 @@ bd_loop_setup_from_fd (<em class="parameter"><code><a href="../glib/glib-Basic-T
 </tr>
 <tr>
 <td class="parameter_name"><p>loop_name</p></td>
-<td class="parameter_description"><p> if not <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, it is used to store the name of the loop device. </p></td>
+<td class="parameter_description"><p>if not <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>, it is used to store the name of the loop device. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -436,7 +436,7 @@ bd_loop_teardown (<em class="parameter"><code>const <a href="../glib/glib-Basic-
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -471,7 +471,7 @@ bd_loop_get_autoclear (<em class="parameter"><code>const <a href="../glib/glib-B
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -513,7 +513,7 @@ bd_loop_set_autoclear (<em class="parameter"><code>const <a href="../glib/glib-B
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -555,7 +555,7 @@ bd_loop_is_tech_avail (<em class="parameter"><code><a class="link" href="libbloc
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (details about why the <em class="parameter"><code>tech</code></em>
+<td class="parameter_description"><p>place to store error (details about why the <em class="parameter"><code>tech</code></em>
 -<em class="parameter"><code>mode</code></em>
 combination is not available). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -667,6 +667,6 @@ plugin implementation and having all the runtime dependencies available</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.25</div>
+<hr>Generated by GTK-Doc V1.27</div>
 </body>
 </html>

@@ -3,12 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Crypto: libblockdev Reference Manual</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
 <link rel="home" href="index.html" title="libblockdev Reference Manual">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-BTRFS.html" title="BTRFS">
 <link rel="next" href="libblockdev-DeviceMapper.html" title="DeviceMapper">
-<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.27 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -345,7 +345,7 @@ bd_crypto_generate_backup_passphrase (<em class="parameter"><code><a href="../gl
 </colgroup>
 <tbody><tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr></tbody>
 </table></div>
@@ -379,7 +379,7 @@ bd_crypto_device_is_luks (<em class="parameter"><code>const <a href="../glib/gli
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -417,7 +417,7 @@ bd_crypto_luks_uuid (<em class="parameter"><code>const <a href="../glib/glib-Bas
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -454,7 +454,7 @@ bd_crypto_luks_status (<em class="parameter"><code>const <a href="../glib/glib-B
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -462,7 +462,7 @@ bd_crypto_luks_status (<em class="parameter"><code>const <a href="../glib/glib-B
 </div>
 <div class="refsect3">
 <a name="bd-crypto-luks-status.returns"></a><h4>Returns</h4>
-<p> one of "invalid", "inactive", "active" or "busy" or
+<p>one of "invalid", "inactive", "active" or "busy" or
 <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if failed to determine (<em class="parameter"><code>error</code></em>
 is populated with the error in
 such cases)</p>
@@ -503,7 +503,7 @@ FOREVER).</p>
 </tr>
 <tr>
 <td class="parameter_name"><p>cipher</p></td>
-<td class="parameter_description"><p> cipher specification (type-mode, e.g. "aes-xts-plain64") or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use the default. </p></td>
+<td class="parameter_description"><p>cipher specification (type-mode, e.g. "aes-xts-plain64") or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use the default. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
@@ -513,12 +513,12 @@ FOREVER).</p>
 </tr>
 <tr>
 <td class="parameter_name"><p>passphrase</p></td>
-<td class="parameter_description"><p> a passphrase for the new LUKS device or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if not requested. </p></td>
+<td class="parameter_description"><p>a passphrase for the new LUKS device or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if not requested. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>key_file</p></td>
-<td class="parameter_description"><p> a key file for the new LUKS device or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if not requested. </p></td>
+<td class="parameter_description"><p>a key file for the new LUKS device or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if not requested. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
@@ -529,7 +529,7 @@ as LUKS</p></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -577,7 +577,7 @@ FOREVER).</p>
 </tr>
 <tr>
 <td class="parameter_name"><p>cipher</p></td>
-<td class="parameter_description"><p> cipher specification (type-mode, e.g. "aes-xts-plain64") or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use the default. </p></td>
+<td class="parameter_description"><p>cipher specification (type-mode, e.g. "aes-xts-plain64") or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use the default. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
@@ -587,7 +587,7 @@ FOREVER).</p>
 </tr>
 <tr>
 <td class="parameter_name"><p>pass_data</p></td>
-<td class="parameter_description"><p> a passphrase for the new LUKS device (may contain arbitrary binary data). </p></td>
+<td class="parameter_description"><p>a passphrase for the new LUKS device (may contain arbitrary binary data). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=data_len]</span></td>
 </tr>
 <tr>
@@ -604,7 +604,7 @@ as LUKS</p></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -650,13 +650,13 @@ bd_crypto_luks_open (<em class="parameter"><code>const <a href="../glib/glib-Bas
 </tr>
 <tr>
 <td class="parameter_name"><p>passphrase</p></td>
-<td class="parameter_description"><p> passphrase to open the <em class="parameter"><code>device</code></em>
+<td class="parameter_description"><p>passphrase to open the <em class="parameter"><code>device</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>key_file</p></td>
-<td class="parameter_description"><p> key file path to use for opening the <em class="parameter"><code>device</code></em>
+<td class="parameter_description"><p>key file path to use for opening the <em class="parameter"><code>device</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
@@ -667,7 +667,7 @@ or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">N
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -714,7 +714,7 @@ bd_crypto_luks_open_blob (<em class="parameter"><code>const <a href="../glib/gli
 </tr>
 <tr>
 <td class="parameter_name"><p>pass_data</p></td>
-<td class="parameter_description"><p> a passphrase for the new LUKS device (may contain arbitrary binary data). </p></td>
+<td class="parameter_description"><p>a passphrase for the new LUKS device (may contain arbitrary binary data). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=data_len]</span></td>
 </tr>
 <tr>
@@ -730,7 +730,7 @@ buffer</p></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -765,7 +765,7 @@ bd_crypto_luks_close (<em class="parameter"><code>const <a href="../glib/glib-Ba
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -804,31 +804,31 @@ bd_crypto_luks_add_key (<em class="parameter"><code>const <a href="../glib/glib-
 </tr>
 <tr>
 <td class="parameter_name"><p>pass</p></td>
-<td class="parameter_description"><p> passphrase for the <em class="parameter"><code>device</code></em>
+<td class="parameter_description"><p>passphrase for the <em class="parameter"><code>device</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>key_file</p></td>
-<td class="parameter_description"><p> key file for the <em class="parameter"><code>device</code></em>
+<td class="parameter_description"><p>key file for the <em class="parameter"><code>device</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>npass</p></td>
-<td class="parameter_description"><p> passphrase to add to <em class="parameter"><code>device</code></em>
+<td class="parameter_description"><p>passphrase to add to <em class="parameter"><code>device</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>nkey_file</p></td>
-<td class="parameter_description"><p> key file to add to <em class="parameter"><code>device</code></em>
+<td class="parameter_description"><p>key file to add to <em class="parameter"><code>device</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -875,7 +875,7 @@ bd_crypto_luks_add_key_blob (<em class="parameter"><code>const <a href="../glib/
 </tr>
 <tr>
 <td class="parameter_name"><p>pass_data</p></td>
-<td class="parameter_description"><p> a passphrase for the new LUKS device (may contain arbitrary binary data). </p></td>
+<td class="parameter_description"><p>a passphrase for the new LUKS device (may contain arbitrary binary data). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=data_len]</span></td>
 </tr>
 <tr>
@@ -886,7 +886,7 @@ buffer</p></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>npass_data</p></td>
-<td class="parameter_description"><p> a new passphrase for the new LUKS device (may contain arbitrary binary data). </p></td>
+<td class="parameter_description"><p>a new passphrase for the new LUKS device (may contain arbitrary binary data). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=ndata_len]</span></td>
 </tr>
 <tr>
@@ -897,7 +897,7 @@ buffer</p></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -935,19 +935,19 @@ bd_crypto_luks_remove_key (<em class="parameter"><code>const <a href="../glib/gl
 </tr>
 <tr>
 <td class="parameter_name"><p>pass</p></td>
-<td class="parameter_description"><p> passphrase for the <em class="parameter"><code>device</code></em>
+<td class="parameter_description"><p>passphrase for the <em class="parameter"><code>device</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>key_file</p></td>
-<td class="parameter_description"><p> key file for the <em class="parameter"><code>device</code></em>
+<td class="parameter_description"><p>key file for the <em class="parameter"><code>device</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -986,7 +986,7 @@ bd_crypto_luks_remove_key_blob (<em class="parameter"><code>const <a href="../gl
 </tr>
 <tr>
 <td class="parameter_name"><p>pass_data</p></td>
-<td class="parameter_description"><p> a passphrase for the new LUKS device (may contain arbitrary binary data) to remove. </p></td>
+<td class="parameter_description"><p>a passphrase for the new LUKS device (may contain arbitrary binary data) to remove. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=data_len]</span></td>
 </tr>
 <tr>
@@ -997,7 +997,7 @@ buffer</p></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -1046,7 +1046,7 @@ bd_crypto_luks_change_key (<em class="parameter"><code>const <a href="../glib/gl
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -1085,7 +1085,7 @@ bd_crypto_luks_change_key_blob (<em class="parameter"><code>const <a href="../gl
 </tr>
 <tr>
 <td class="parameter_name"><p>pass_data</p></td>
-<td class="parameter_description"><p> a passphrase for the new LUKS device (may contain arbitrary binary data). </p></td>
+<td class="parameter_description"><p>a passphrase for the new LUKS device (may contain arbitrary binary data). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=data_len]</span></td>
 </tr>
 <tr>
@@ -1096,7 +1096,7 @@ buffer</p></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>npass_data</p></td>
-<td class="parameter_description"><p> a new passphrase for the new LUKS device (may contain arbitrary binary data). </p></td>
+<td class="parameter_description"><p>a new passphrase for the new LUKS device (may contain arbitrary binary data). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=ndata_len]</span></td>
 </tr>
 <tr>
@@ -1107,7 +1107,7 @@ buffer</p></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -1147,7 +1147,7 @@ bd_crypto_luks_resize (<em class="parameter"><code>const <a href="../glib/glib-B
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -1191,7 +1191,7 @@ bd_crypto_tc_open (<em class="parameter"><code>const <a href="../glib/glib-Basic
 </tr>
 <tr>
 <td class="parameter_name"><p>pass_data</p></td>
-<td class="parameter_description"><p> a passphrase for the TrueCrypt/VeraCrypt volume (may contain arbitrary binary data). </p></td>
+<td class="parameter_description"><p>a passphrase for the TrueCrypt/VeraCrypt volume (may contain arbitrary binary data). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=data_len]</span></td>
 </tr>
 <tr>
@@ -1207,7 +1207,7 @@ buffer</p></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -1242,7 +1242,7 @@ bd_crypto_tc_close (<em class="parameter"><code>const <a href="../glib/glib-Basi
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -1286,7 +1286,7 @@ bd_crypto_escrow_device (<em class="parameter"><code>const <a href="../glib/glib
 </tr>
 <tr>
 <td class="parameter_name"><p>cert_data</p></td>
-<td class="parameter_description"><p> certificate data to use for escrow. </p></td>
+<td class="parameter_description"><p>certificate data to use for escrow. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> gchar]</span></td>
 </tr>
 <tr>
@@ -1296,12 +1296,12 @@ bd_crypto_escrow_device (<em class="parameter"><code>const <a href="../glib/glib
 </tr>
 <tr>
 <td class="parameter_name"><p>backup_passphrase</p></td>
-<td class="parameter_description"><p> backup passphrase for the device or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
+<td class="parameter_description"><p>backup passphrase for the device or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -1343,7 +1343,7 @@ bd_crypto_is_tech_avail (<em class="parameter"><code><a class="link" href="libbl
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (details about why the <em class="parameter"><code>tech</code></em>
+<td class="parameter_description"><p>place to store error (details about why the <em class="parameter"><code>tech</code></em>
 -<em class="parameter"><code>mode</code></em>
 combination is not available). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1556,6 +1556,6 @@ plugin implementation and having all the runtime dependencies available</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.25</div>
+<hr>Generated by GTK-Doc V1.27</div>
 </body>
 </html>

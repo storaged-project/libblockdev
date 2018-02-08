@@ -3,12 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>BTRFS: libblockdev Reference Manual</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
 <link rel="home" href="index.html" title="libblockdev Reference Manual">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-blockdev-library.html" title="blockdev library">
 <link rel="next" href="libblockdev-Crypto.html" title="Crypto">
-<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.27 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -424,33 +424,33 @@ bd_btrfs_create_volume (<em class="parameter"><code>const <a href="../glib/glib-
 <tbody>
 <tr>
 <td class="parameter_name"><p>devices</p></td>
-<td class="parameter_description"><p> list of devices to create btrfs volume from. </p></td>
+<td class="parameter_description"><p>list of devices to create btrfs volume from. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>label</p></td>
-<td class="parameter_description"><p> label for the volume. </p></td>
+<td class="parameter_description"><p>label for the volume. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>data_level</p></td>
-<td class="parameter_description"><p> RAID level for the data or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use the default. </p></td>
+<td class="parameter_description"><p>RAID level for the data or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use the default. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>md_level</p></td>
-<td class="parameter_description"><p> RAID level for the metadata or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use the default. </p></td>
+<td class="parameter_description"><p>RAID level for the metadata or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use the default. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>extra</p></td>
-<td class="parameter_description"><p> extra options for the volume creation (right now
+<td class="parameter_description"><p>extra options for the volume creation (right now
 passed to the 'mkfs.btrfs' utility). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -495,13 +495,13 @@ bd_btrfs_add_device (<em class="parameter"><code>const <a href="../glib/glib-Bas
 </tr>
 <tr>
 <td class="parameter_name"><p>extra</p></td>
-<td class="parameter_description"><p> extra options for the addition (right now
+<td class="parameter_description"><p>extra options for the addition (right now
 passed to the 'btrfs' utility). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -544,13 +544,13 @@ bd_btrfs_remove_device (<em class="parameter"><code>const <a href="../glib/glib-
 </tr>
 <tr>
 <td class="parameter_name"><p>extra</p></td>
-<td class="parameter_description"><p> extra options for the removal (right now
+<td class="parameter_description"><p>extra options for the removal (right now
 passed to the 'btrfs' utility). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -593,13 +593,13 @@ bd_btrfs_create_subvolume (<em class="parameter"><code>const <a href="../glib/gl
 </tr>
 <tr>
 <td class="parameter_name"><p>extra</p></td>
-<td class="parameter_description"><p> extra options for the subvolume creation (right now
+<td class="parameter_description"><p>extra options for the subvolume creation (right now
 passed to the 'btrfs' utility). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -642,13 +642,13 @@ bd_btrfs_delete_subvolume (<em class="parameter"><code>const <a href="../glib/gl
 </tr>
 <tr>
 <td class="parameter_name"><p>extra</p></td>
-<td class="parameter_description"><p> extra options for the subvolume deletion (right now
+<td class="parameter_description"><p>extra options for the subvolume deletion (right now
 passed to the 'btrfs' utility). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -684,7 +684,7 @@ bd_btrfs_get_default_subvolume_id (<em class="parameter"><code>const <a href="..
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -728,13 +728,13 @@ bd_btrfs_set_default_subvolume (<em class="parameter"><code>const <a href="../gl
 </tr>
 <tr>
 <td class="parameter_name"><p>extra</p></td>
-<td class="parameter_description"><p> extra options for the setting (right now
+<td class="parameter_description"><p>extra options for the setting (right now
 passed to the 'btrfs' utility). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -784,13 +784,13 @@ bd_btrfs_create_snapshot (<em class="parameter"><code>const <a href="../glib/gli
 </tr>
 <tr>
 <td class="parameter_name"><p>extra</p></td>
-<td class="parameter_description"><p> extra options for the snapshot creation (right now
+<td class="parameter_description"><p>extra options for the snapshot creation (right now
 passed to the 'btrfs' utility). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -826,7 +826,7 @@ bd_btrfs_list_devices (<em class="parameter"><code>const <a href="../glib/glib-B
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -834,7 +834,7 @@ bd_btrfs_list_devices (<em class="parameter"><code>const <a href="../glib/glib-B
 </div>
 <div class="refsect3">
 <a name="bd-btrfs-list-devices.returns"></a><h4>Returns</h4>
-<p> information about the devices that are part of the btrfs volume
+<p>information about the devices that are part of the btrfs volume
 containing <em class="parameter"><code>device</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
 <p>Tech category: <a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MULTI-DEV:CAPS"><code class="literal">BD_BTRFS_TECH_MULTI_DEV</code></a>-<a class="link" href="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_BTRFS_TECH_MODE_QUERY</code></a>. </p>
@@ -869,7 +869,7 @@ bd_btrfs_list_subvolumes (<em class="parameter"><code>const <a href="../glib/gli
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -877,7 +877,7 @@ bd_btrfs_list_subvolumes (<em class="parameter"><code>const <a href="../glib/gli
 </div>
 <div class="refsect3">
 <a name="bd-btrfs-list-subvolumes.returns"></a><h4>Returns</h4>
-<p> information about the subvolumes that are part of the btrfs volume
+<p>information about the subvolumes that are part of the btrfs volume
 mounted at <em class="parameter"><code>mountpoint</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
 <p>The subvolumes are sorted in a way that no child subvolume appears in the
@@ -908,7 +908,7 @@ bd_btrfs_filesystem_info (<em class="parameter"><code>const <a href="../glib/gli
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -942,33 +942,33 @@ bd_btrfs_mkfs (<em class="parameter"><code>const <a href="../glib/glib-Basic-Typ
 <tbody>
 <tr>
 <td class="parameter_name"><p>devices</p></td>
-<td class="parameter_description"><p> list of devices to create btrfs volume from. </p></td>
+<td class="parameter_description"><p>list of devices to create btrfs volume from. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>label</p></td>
-<td class="parameter_description"><p> label for the volume. </p></td>
+<td class="parameter_description"><p>label for the volume. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>data_level</p></td>
-<td class="parameter_description"><p> RAID level for the data or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use the default. </p></td>
+<td class="parameter_description"><p>RAID level for the data or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use the default. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>md_level</p></td>
-<td class="parameter_description"><p> RAID level for the metadata or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use the default. </p></td>
+<td class="parameter_description"><p>RAID level for the metadata or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use the default. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>extra</p></td>
-<td class="parameter_description"><p> extra options for the volume creation (right now
+<td class="parameter_description"><p>extra options for the volume creation (right now
 passed to the 'btrfs' utility). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -1013,13 +1013,13 @@ bd_btrfs_resize (<em class="parameter"><code>const <a href="../glib/glib-Basic-T
 </tr>
 <tr>
 <td class="parameter_name"><p>extra</p></td>
-<td class="parameter_description"><p> extra options for the volume resize (right now
+<td class="parameter_description"><p>extra options for the volume resize (right now
 passed to the 'btrfs' utility). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -1056,13 +1056,13 @@ bd_btrfs_check (<em class="parameter"><code>const <a href="../glib/glib-Basic-Ty
 </tr>
 <tr>
 <td class="parameter_name"><p>extra</p></td>
-<td class="parameter_description"><p> extra options for the check (right now
+<td class="parameter_description"><p>extra options for the check (right now
 passed to the 'btrfs' utility). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -1097,13 +1097,13 @@ bd_btrfs_repair (<em class="parameter"><code>const <a href="../glib/glib-Basic-T
 </tr>
 <tr>
 <td class="parameter_name"><p>extra</p></td>
-<td class="parameter_description"><p> extra options for the repair (right now
+<td class="parameter_description"><p>extra options for the repair (right now
 passed to the 'btrfs' utility). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -1143,13 +1143,13 @@ bd_btrfs_change_label (<em class="parameter"><code>const <a href="../glib/glib-B
 </tr>
 <tr>
 <td class="parameter_name"><p>extra</p></td>
-<td class="parameter_description"><p> extra options for the volume creation (right now
+<td class="parameter_description"><p>extra options for the volume creation (right now
 passed to the 'btrfs' utility). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -1193,7 +1193,7 @@ bd_btrfs_is_tech_avail (<em class="parameter"><code><a class="link" href="libblo
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p> place to store error (details about why the <em class="parameter"><code>tech</code></em>
+<td class="parameter_description"><p>place to store error (details about why the <em class="parameter"><code>tech</code></em>
 -<em class="parameter"><code>mode</code></em>
 combination is not available). </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
@@ -1455,6 +1455,6 @@ plugin implementation and having all the runtime dependencies available</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.25</div>
+<hr>Generated by GTK-Doc V1.27</div>
 </body>
 </html>
