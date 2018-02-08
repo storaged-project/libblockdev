@@ -77,7 +77,7 @@ BuildRequires: glib2-devel
 %if %{with_gi}
 BuildRequires: gobject-introspection-devel
 %endif
-BuildRequires: python-devel
+BuildRequires: python2-devel
 %if %{with_python3}
 BuildRequires: python3-devel
 %endif
@@ -91,7 +91,7 @@ BuildRequires: glib2-doc
 # BuildRequires: nss-tools
 
 # Needed for python 2 vs. 3 compatibility in the tests, but not used to build
-# BuildRequires: python-six
+# BuildRequires: python2-six
 # BuildRequires: python3-six
 
 %description
@@ -115,7 +115,7 @@ with the libblockdev library.
 %package -n python2-blockdev
 Summary:     Python2 gobject-introspection bindings for libblockdev
 Requires: %{name}%{?_isa} = %{version}-%{release}
-Requires: pygobject3-base
+Requires: python2-gobject-base
 %{?python_provide:%python_provide python2-blockdev}
 
 %description -n python2-blockdev
@@ -530,74 +530,59 @@ A meta-package that pulls all the libblockdev plugins as dependencies.
 find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 
 
-%post -p /sbin/ldconfig
-%postun -p /sbin/ldconfig
-%post utils -p /sbin/ldconfig
-%postun utils -p /sbin/ldconfig
+%ldconfig_scriptlets
+%ldconfig_scriptlets utils
 
 %if %{with_btrfs}
-%post btrfs -p /sbin/ldconfig
-%postun btrfs -p /sbin/ldconfig
+%ldconfig_scriptlets btrfs
 %endif
 
 %if %{with_crypto}
-%post crypto -p /sbin/ldconfig
-%postun crypto -p /sbin/ldconfig
+%ldconfig_scriptlets crypto
 %endif
 
 %if %{with_dm}
-%post dm -p /sbin/ldconfig
-%postun dm -p /sbin/ldconfig
+%ldconfig_scriptlets dm
 %endif
 
 %if %{with_fs}
-%post fs -p /sbin/ldconfig
-%postun fs -p /sbin/ldconfig
+%ldconfig_scriptlets fs
 %endif
 
 %if %{with_loop}
-%post loop -p /sbin/ldconfig
-%postun loop -p /sbin/ldconfig
+%ldconfig_scriptlets loop
 %endif
 
 %if %{with_lvm}
-%post lvm -p /sbin/ldconfig
-%postun lvm -p /sbin/ldconfig
+%ldconfig_scriptlets lvm
 %endif
 
 %if %{with_lvm_dbus}
-%post lvm-dbus -p /sbin/ldconfig
-%postun lvm-dbus -p /sbin/ldconfig
+%ldconfig_scriptlets lvm-dbus
 %endif
 
 %if %{with_mdraid}
-%post mdraid -p /sbin/ldconfig
-%postun mdraid -p /sbin/ldconfig
+%ldconfig_scriptlets mdraid
 %endif
 
 %if %{with_mpath}
-%post mpath -p /sbin/ldconfig
-%postun mpath -p /sbin/ldconfig
+%ldconfig_scriptlets mpath
 %endif
 
 %if %{with_part}
-%post part -p /sbin/ldconfig
-%postun part -p /sbin/ldconfig
+%ldconfig_scriptlets part
 %endif
 
 %if %{with_swap}
-%post swap -p /sbin/ldconfig
-%postun swap -p /sbin/ldconfig
+%ldconfig_scriptlets swap
 %endif
 
 %ifarch s390 s390x
-%post s390 -p /sbin/ldconfig
-%postun s390 -p /sbin/ldconfig
+%ldconfig_scriptlets s390
 %endif
 
 %if %{with_kbd}
-%post kbd -p /sbin/ldconfig
-%postun kbd -p /sbin/ldconfig
+%ldconfig_scriptlets kbd
 %endif
 
 
@@ -812,6 +797,16 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 - Update 'Testing libblockdev' section in documentation (vtrefny)
 - Fix link to online documentation (vtrefny)
 - Fix how the new kernel module functions are added to docs (vpodzime)
+
+* Wed Feb 07 2018 Fedora Release Engineering <releng@fedoraproject.org> - 2.15-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
+
+* Wed Feb 07 2018 Iryna Shcherbina <ishcherb@redhat.com> - 2.15-3
+- Update Python 2 dependency declarations to new packaging standards
+  (See https://fedoraproject.org/wiki/FinalizingFedoraSwitchtoPython3)
+
+* Sat Feb 03 2018 Igor Gnatenko <ignatenkobrain@fedoraproject.org> - 2.15-2
+- Switch to %%ldconfig_scriptlets
 
 * Fri Dec 01 2017 Vratislav Podzimek <vpodzime@redhat.com> - 2.15-1
 - Do not use the 'btrfs' plugin in overrides tests (vpodzime)
