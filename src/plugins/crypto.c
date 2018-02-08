@@ -966,7 +966,7 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError *
  * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error) {
-    return bd_crypto_tc_open_full (device, name, pass_data, data_len, NULL, 0, FALSE, FALSE, read_only, error);
+    return bd_crypto_tc_open_full (device, name, pass_data, data_len, NULL, 0, FALSE, FALSE, FALSE, read_only, error);
 }
 
 /**
@@ -979,6 +979,7 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8
  * @keyfiles: (array length=keyfiles_count): paths to the keyfiles for the TrueCrypt/VeraCrypt volume
  * @keyfiles_count: length of the @keyfiles array
  * @hidden: whether a hidden volume inside the volume should be opened
+ * @system: whether to try opening as an encrypted system (with boot loader)
  * @veracrypt: whether to try VeraCrypt modes (TrueCrypt modes are tried anyway)
  * @error: (out): place to store error (if any)
  *
@@ -986,7 +987,7 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8
  *
  * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
-gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, const gchar **keyfiles, gsize keyfiles_count, gboolean hidden, gboolean veracrypt, gboolean read_only, GError **error) {
+gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, const gchar **keyfiles, gsize keyfiles_count, gboolean hidden, gboolean system, gboolean veracrypt, gboolean read_only, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
     guint64 progress_id = 0;
@@ -1021,6 +1022,8 @@ gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const g
         params.flags |= CRYPT_TCRYPT_VERA_MODES;
     if (hidden)
         params.flags |= CRYPT_TCRYPT_HIDDEN_HEADER;
+    if (system)
+        params.flags |= CRYPT_TCRYPT_SYSTEM_HEADER;
 
     ret = crypt_load (cd, CRYPT_TCRYPT, &params);
     if (ret != 0) {

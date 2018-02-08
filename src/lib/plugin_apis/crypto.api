@@ -319,6 +319,7 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8
  * @keyfiles: (array length=keyfiles_count): paths to the keyfiles for the TrueCrypt/VeraCrypt volume
  * @keyfiles_count: length of the @keyfiles array
  * @hidden: whether a hidden volume inside the volume should be opened
+ * @system: whether to try opening as an encrypted system (with boot loader)
  * @veracrypt: whether to try VeraCrypt modes (TrueCrypt modes are tried anyway)
  * @error: (out): place to store error (if any)
  *
@@ -326,7 +327,7 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8
  *
  * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
-gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, const gchar **keyfiles, gsize keyfiles_count, gboolean hidden, gboolean veracrypt, gboolean read_only, GError **error);
+gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, const gchar **keyfiles, gsize keyfiles_count, gboolean hidden, gboolean system, gboolean veracrypt, gboolean read_only, GError **error);
 
 /**
  * bd_crypto_tc_close:
