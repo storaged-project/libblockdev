@@ -614,3 +614,16 @@ BDNVDIMMTech
 BDNVDIMMTechMode
 bd_nvdimm_is_tech_avail
 </SECTION>
+
+<SECTION>
+<FILE>vdo</FILE>
+bd_vdo_check_deps
+bd_vdo_init
+bd_vdo_close
+bd_vdo_error_quark
+BDVDOError
+BD_VDO_ERROR
+BDVDOTech
+BDVDOTechMode
+bd_vdo_is_tech_avail
+</SECTION>

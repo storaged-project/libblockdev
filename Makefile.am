@@ -97,7 +97,8 @@ PLUGINS = btrfs \
 	nvdimm \
 	part \
 	s390 \
-	swap
+	swap \
+	vdo
 
 ALT_PLUGINS = lvm-dbus
 

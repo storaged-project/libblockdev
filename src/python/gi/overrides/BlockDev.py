@@ -51,6 +51,7 @@ bd_plugins = { "lvm": BlockDev.Plugin.LVM,
                "fs": BlockDev.Plugin.FS,
                "s390": BlockDev.Plugin.S390,
                "nvdimm": BlockDev.Plugin.NVDIMM,
+               "vdo": BlockDev.Plugin.VDO,
 }
 
 
@@ -935,6 +936,10 @@ class NVDIMMError(BlockDevError):
     pass
 __all__.append("NVDIMMError")
 
+class VDOError(BlockDevError):
+    pass
+__all__.append("VDOError")
+
 class BlockDevNotImplementedError(NotImplementedError, BlockDevError):
     pass
 __all__.append("BlockDevNotImplementedError")
@@ -984,3 +989,6 @@ __all__.append("s390")
 
 utils = ErrorProxy("utils", BlockDev, [(GLib.Error, UtilsError)])
 __all__.append("utils")
+
+vdo = ErrorProxy("vdo", BlockDev, [(GLib.Error, VDOError)])
+__all__.append("vdo")
