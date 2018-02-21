@@ -115,7 +115,12 @@ with the libblockdev library.
 %package -n python2-blockdev
 Summary:     Python2 gobject-introspection bindings for libblockdev
 Requires: %{name}%{?_isa} = %{version}-%{release}
+
+%if 0%{?fedora} <= 26 || 0%{?rhel} <= 7
+Requires: pygobject3-base
+%else
 Requires: python2-gobject-base
+%endif
 %{?python_provide:%python_provide python2-blockdev}
 
 %description -n python2-blockdev
