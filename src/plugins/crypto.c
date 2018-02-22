@@ -22,7 +22,7 @@
 #include <libcryptsetup.h>
 #include <nss.h>
 #include <volume_key/libvolume_key.h>
-#include <sys/fcntl.h>
+#include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/random.h>
 #include <locale.h>

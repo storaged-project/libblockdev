@@ -25,6 +25,7 @@
 #include <inttypes.h>
 #include <unistd.h>
 #include <sys/file.h>
+#include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/fs.h>
 #include <blockdev/utils.h>
@@ -1354,7 +1355,7 @@ static gboolean set_gpt_flags (const gchar *device, int part_num, guint64 flags,
         real_flags |= 0x4000000000000000; /* 1 << 62 */
     if (flags & BD_PART_FLAG_GPT_NO_AUTOMOUNT)
         real_flags |= 0x8000000000000000; /* 1 << 63 */
-    mask_str = g_strdup_printf ("%.16"__PRI64_PREFIX"x", real_flags);
+    mask_str = g_strdup_printf ("%.16"PRIx64, real_flags);
 
     args[2] = g_strdup_printf ("%d:=:%s", part_num, mask_str);
     g_free (mask_str);
