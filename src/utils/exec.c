@@ -26,6 +26,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#define ZERO_INIT {}
+
 extern char **environ;
 
 static GMutex id_counter_lock;
@@ -354,7 +356,7 @@ gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg
     GIOStatus io_status = G_IO_STATUS_NORMAL;
     guint i = 0;
     guint8 completion = 0;
-    GPollFD fds[2] = {{0}, {0}};
+    GPollFD fds[2] = {ZERO_INIT, ZERO_INIT};
     gboolean out_done = FALSE;
     gboolean err_done = FALSE;
     GString *stdout_data = g_string_new (NULL);

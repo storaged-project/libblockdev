@@ -52,6 +52,7 @@ static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
 };
 
 #define UNUSED __attribute__((unused))
+#define ZERO_INIT {}
 
 /**
  * bd_fs_vfat_is_tech_avail:
@@ -376,8 +377,8 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
  */
 gboolean bd_fs_vfat_resize (const gchar *device, guint64 new_size, GError **error) {
     PedDevice *ped_dev = NULL;
-    PedGeometry geom = {0};
-    PedGeometry new_geom = {0};
+    PedGeometry geom = ZERO_INIT;
+    PedGeometry new_geom = ZERO_INIT;
     PedFileSystem *fs = NULL;
     PedSector start = 0;
     PedSector length = 0;
