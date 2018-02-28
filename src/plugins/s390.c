@@ -154,7 +154,7 @@ gboolean bd_s390_is_tech_avail (BDS390Tech tech, guint64 mode, GError **error) {
  */
 gboolean bd_s390_dasd_format (const gchar *dasd, const BDExtraArg **extra, GError **error) {
     gboolean rc = FALSE;
-    const gchar *argv[8] = {"/sbin/dasdfmt", "-y", "-d", "cdl", "-b", "4096", NULL, NULL};
+    const gchar *argv[8] = {"dasdfmt", "-y", "-d", "cdl", "-b", "4096", NULL, NULL};
 
     if (!check_deps (&avail_deps, DEPS_DASDFMT_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
@@ -226,7 +226,7 @@ gboolean bd_s390_dasd_online (const gchar *dasd, GError **error) {
     gint online = 0;
     gchar *path = NULL;
     FILE *fd = NULL;
-    const gchar *argv[4] = {"/usr/sbin/dasd_cio_free", "-d", dasd, NULL};
+    const gchar *argv[4] = {"dasd_cio_free", "-d", dasd, NULL};
     guint64 progress_id = 0;
     gchar *msg = NULL;
 
@@ -581,8 +581,8 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
     gint rc = 0;
     FILE *fd = NULL;
     DIR *pdfd = NULL;
-    const gchar *zfcp_cio_free[4] = {"/usr/sbin/zfcp_cio_free", "-d", devno, NULL};
-    const gchar *chccwdev[4] = {"/usr/sbin/chccwdev", "-e", devno, NULL};
+    const gchar *zfcp_cio_free[4] = {"zfcp_cio_free", "-d", devno, NULL};
+    const gchar *chccwdev[4] = {"chccwdev", "-e", devno, NULL};
 
     gchar *zfcpsysfs = "/sys/bus/ccw/drivers/zfcp";
     gchar *online = g_strdup_printf ("%s/%s/online", zfcpsysfs, devno);
@@ -933,7 +933,7 @@ gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gcha
     gchar *offline = NULL;
     gchar *unitrm = NULL;
     gchar *pattern = NULL;
-    const gchar *chccwdev[4] = {"/usr/sbin/chccwdev", "-d", devno, NULL};
+    const gchar *chccwdev[4] = {"chccwdev", "-d", devno, NULL};
     guint64 progress_id = 0;
     gchar *msg = NULL;
 
