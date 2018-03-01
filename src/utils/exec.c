@@ -26,7 +26,11 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#ifdef __clang__
 #define ZERO_INIT {}
+#else
+#define ZERO_INIT {0}
+#endif
 
 extern char **environ;
 

@@ -52,7 +52,12 @@ static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
 };
 
 #define UNUSED __attribute__((unused))
+
+#ifdef __clang__
 #define ZERO_INIT {}
+#else
+#define ZERO_INIT {0}
+#endif
 
 /**
  * bd_fs_vfat_is_tech_avail:

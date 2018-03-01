@@ -35,7 +35,11 @@
 #define CRYPT_LUKS NULL
 #endif
 
+#ifdef __clang__
 #define ZERO_INIT {}
+#else
+#define ZERO_INIT {0}
+#endif
 
 /**
  * SECTION: crypto
