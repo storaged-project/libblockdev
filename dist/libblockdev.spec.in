@@ -510,6 +510,8 @@ with the libblockdev-swap plugin/library.
 
 %if %{with_vdo}
 %package vdo
+BuildRequires: libbytesize-devel
+BuildRequires: libyaml-devel
 Summary:     The vdo plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
 Requires: vdo

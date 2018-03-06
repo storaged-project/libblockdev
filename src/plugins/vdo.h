@@ -8,7 +8,9 @@ GQuark bd_vdo_error_quark (void);
 #define BD_VDO_ERROR bd_vdo_error_quark ()
 typedef enum {
     BD_VDO_ERROR_FAIL,
+    BD_VDO_ERROR_PARSE,
     BD_VDO_ERROR_TECH_UNAVAIL,
+    BD_VDO_ERROR_POLICY_INVAL,
 } BDVDOError;
 
 typedef enum {
@@ -18,9 +20,34 @@ typedef enum {
 typedef enum {
     BD_VDO_TECH_MODE_CREATE              = 1 << 0,
     BD_VDO_TECH_MODE_REMOVE              = 1 << 1,
-    BD_VDO_TECH_MODE_ACTIVATE_DEACTIVATE = 1 << 2,
-    BD_VDO_TECH_MODE_QUERY               = 1 << 3,
+    BD_VDO_TECH_MODE_MODIFY              = 1 << 2,
+    BD_VDO_TECH_MODE_ACTIVATE_DEACTIVATE = 1 << 3,
+    BD_VDO_TECH_MODE_START_STOP          = 1 << 4,
+    BD_VDO_TECH_MODE_QUERY               = 1 << 5,
+    BD_VDO_TECH_MODE_GROW                = 1 << 6,
 } BDVDOTechMode;
+
+typedef enum {
+    BD_VDO_WRITE_POLICY_SYNC,
+    BD_VDO_WRITE_POLICY_ASYNC,
+    BD_VDO_WRITE_POLICY_AUTO,
+    BD_VDO_WRITE_POLICY_UNKNOWN,
+} BDVDOWritePolicy;
+
+typedef struct BDVDOInfo {
+    gchar *name;
+    gchar *device;
+    gboolean active;
+    gboolean deduplication;
+    gboolean compression;
+    guint64 logical_size;
+    guint64 physical_size;
+    guint64 index_memory;
+    BDVDOWritePolicy write_policy;
+} BDVDOInfo;
+
+void bd_vdo_info_free (BDVDOInfo *info);
+BDVDOInfo* bd_vdo_info_copy (BDVDOInfo *info);
 
 /*
  * If using the plugin as a standalone library, the following functions should
@@ -36,5 +63,28 @@ gboolean bd_vdo_init ();
 void bd_vdo_close ();
 
 gboolean bd_vdo_is_tech_avail (BDVDOTech tech, guint64 mode, GError **error);
+
+const gchar* bd_vdo_get_write_policy_str (BDVDOWritePolicy policy, GError **error);
+BDVDOWritePolicy bd_vdo_get_write_policy_from_str (const gchar *policy_str, GError **error);
+
+BDVDOInfo* bd_vdo_info (const gchar *name, GError **error);
+
+gboolean bd_vdo_create (const gchar *name, const gchar *backing_device, guint64 logical_size, guint64 index_memory, gboolean compression, gboolean deduplication, BDVDOWritePolicy write_policy, const BDExtraArg **extra, GError **error);
+gboolean bd_vdo_remove (const gchar *name, gboolean force, const BDExtraArg **extra, GError **error);
+
+gboolean bd_vdo_change_write_policy (const gchar *name, BDVDOWritePolicy write_policy, const BDExtraArg **extra, GError **error);
+
+gboolean bd_vdo_enable_compression (const gchar *name, const BDExtraArg **extra, GError **error);
+gboolean bd_vdo_disable_compression (const gchar *name, const BDExtraArg **extra, GError **error);
+gboolean bd_vdo_enable_deduplication (const gchar *name, const BDExtraArg **extra, GError **error);
+gboolean bd_vdo_disable_deduplication (const gchar *name, const BDExtraArg **extra, GError **error);
+
+gboolean bd_vdo_activate (const gchar *name, const BDExtraArg **extra, GError **error);
+gboolean bd_vdo_deactivate (const gchar *name, const BDExtraArg **extra, GError **error);
+
+gboolean bd_vdo_start (const gchar *name, gboolean rebuild, const BDExtraArg **extra, GError **error);
+gboolean bd_vdo_stop (const gchar *name, gboolean force, const BDExtraArg **extra, GError **error);
+
+gboolean bd_vdo_grow_logical (const gchar *name, guint64 size, const BDExtraArg **extra, GError **error);
 
 #endif  /* BD_VDO */
