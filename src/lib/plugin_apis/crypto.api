@@ -295,6 +295,31 @@ gboolean bd_crypto_luks_change_key_blob (const gchar *device, const guint8 *pass
 gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError **error);
 
 /**
+ * bd_crypto_device_seems_encrypted:
+ * @device: the queried device
+ * @error: (out): place to store error (if any)
+ *
+ * Determines whether a block device seems to be encrypted.
+ *
+ * TCRYPT volumes are not easily identifiable, because they have no
+ * cleartext header, but are completely encrypted. This function is
+ * used to determine whether a block device is a candidate for being
+ * TCRYPT encrypted.
+ *
+ * To achieve this, we calculate the chi square value of the first
+ * 512 Bytes and treat devices with a chi square value between 136
+ * and 426 as candidates for being encrypted.
+ * For the reasoning, see: https://tails.boum.org/blueprint/veracrypt/
+ *
+ * Returns: %TRUE if the given @device seems to be encrypted or %FALSE if not or
+ * failed to determine (the @error) is populated with the error in such
+ * cases)
+ *
+ * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_QUERY
+ */
+gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error);
+
+/**
  * bd_crypto_tc_open:
  * @device: the device to open
  * @name: name for the TrueCrypt/VeraCrypt device

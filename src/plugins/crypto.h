@@ -6,6 +6,10 @@
 
 #define BD_CRYPTO_LUKS_METADATA_SIZE (2 MiB)
 
+#define BD_CRYPTO_CHI_SQUARE_LOWER_LIMIT 136
+#define BD_CRYPTO_CHI_SQUARE_UPPER_LIMIT 426
+#define BD_CRYPTO_CHI_SQUARE_BYTES_TO_CHECK 512
+
 GQuark bd_crypto_error_quark (void);
 #define BD_CRYPTO_ERROR bd_crypto_error_quark ()
 typedef enum {
@@ -80,6 +84,7 @@ gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, cons
 gboolean bd_crypto_luks_change_key_blob (const gchar *device, const guint8 *pass_data, gsize data_len, const guint8 *npass_data, gsize ndata_len, GError **error);
 gboolean bd_crypto_luks_resize (const gchar *device, guint64 size, GError **error);
 
+gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error);
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);
 gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, const gchar **keyfiles, gsize keyfiles_count, gboolean hidden, gboolean system, gboolean veracrypt, guint32 veracrypt_pim, gboolean read_only, GError **error);
 gboolean bd_crypto_tc_close (const gchar *tc_device, GError **error);

@@ -953,6 +953,71 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError *
 }
 
 /**
+ * bd_crypto_device_seems_encrypted:
+ * @device: the queried device
+ * @error: (out): place to store error (if any)
+ *
+ * Determines whether a block device seems to be encrypted.
+ *
+ * TCRYPT volumes are not easily identifiable, because they have no
+ * cleartext header, but are completely encrypted. This function is
+ * used to determine whether a block device is a candidate for being
+ * TCRYPT encrypted.
+ *
+ * To achieve this, we calculate the chi square value of the first
+ * 512 Bytes and treat devices with a chi square value between 136
+ * and 426 as candidates for being encrypted.
+ * For the reasoning, see: https://tails.boum.org/blueprint/veracrypt/
+ *
+ * Returns: %TRUE if the given @device seems to be encrypted or %FALSE if not or
+ * failed to determine (the @error) is populated with the error in such
+ * cases)
+ *
+ * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_QUERY
+ */
+gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error) {
+    gint fd = -1;
+    guchar buf[BD_CRYPTO_CHI_SQUARE_BYTES_TO_CHECK];
+    guint symbols[256] = {0};
+    gfloat chi_square = 0.0;
+    gfloat e = (gfloat) sizeof(buf) / (gfloat) 256.0;
+    guint i;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started determining if device '%s' seems to be encrypted", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    fd = open (device, O_RDONLY);
+    if (fd == -1) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE, "Failed to open device");
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    if (read (fd, buf, sizeof(buf)) != sizeof(buf)) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE, "Failed to read device");
+        bd_utils_report_finished (progress_id, (*error)->message);
+        close(fd);
+        return FALSE;
+    }
+
+    close(fd);
+
+    /* Calculate Chi Square */
+    for (i = 0; i < sizeof(buf); i++)
+        /* This is safe because the max value of buf[i] is < sizeof(symbols). */
+        symbols[buf[i]]++;
+    for (i = 0; i < 256; i++)
+        chi_square += (symbols[i] - e) * (symbols[i] - e);
+    chi_square /= e;
+
+    bd_utils_report_finished (progress_id, "Completed");
+    return BD_CRYPTO_CHI_SQUARE_LOWER_LIMIT < chi_square && chi_square < BD_CRYPTO_CHI_SQUARE_UPPER_LIMIT;
+}
+
+/**
  * bd_crypto_tc_open:
  * @device: the device to open
  * @name: name for the TrueCrypt/VeraCrypt device
