@@ -50,6 +50,7 @@ bd_plugins = { "lvm": BlockDev.Plugin.LVM,
                "part": BlockDev.Plugin.PART,
                "fs": BlockDev.Plugin.FS,
                "s390": BlockDev.Plugin.S390,
+               "nvdimm": BlockDev.Plugin.NVDIMM,
 }
 
 
@@ -692,6 +693,41 @@ def part_create_table(disk, type, ignore_existing=True):
 __all__.append("part_create_table")
 
 
+_nvdimm_namespace_reconfigure = BlockDev.nvdimm_namespace_reconfigure
+@override(BlockDev.nvdimm_namespace_reconfigure)
+def nvdimm_namespace_reconfigure(namespace, mode, force=False, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _nvdimm_namespace_reconfigure(namespace, mode, force, extra)
+__all__.append("nvdimm_namespace_reconfigure")
+
+_nvdimm_namespace_info = BlockDev.nvdimm_namespace_info
+@override(BlockDev.nvdimm_namespace_info)
+def nvdimm_namespace_info(namespace, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _nvdimm_namespace_info(namespace, extra)
+__all__.append("nvdimm_namespace_info")
+
+_nvdimm_list_namespaces = BlockDev.nvdimm_list_namespaces
+@override(BlockDev.nvdimm_list_namespaces)
+def nvdimm_list_namespaces(bus=None, region=None, idle=False, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _nvdimm_list_namespaces(bus, region, idle, extra)
+__all__.append("nvdimm_list_namespaces")
+
+_nvdimm_namespace_enable = BlockDev.nvdimm_namespace_enable
+@override(BlockDev.nvdimm_namespace_enable)
+def nvdimm_namespace_enable(namespace, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _nvdimm_namespace_enable(namespace, extra)
+__all__.append("nvdimm_namespace_enable")
+
+_nvdimm_namespace_disable = BlockDev.nvdimm_namespace_disable
+@override(BlockDev.nvdimm_namespace_disable)
+def nvdimm_namespace_disable(namespace, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _nvdimm_namespace_disable(namespace, extra)
+__all__.append("nvdimm_namespace_disable")
+
 ## defined in this overrides only!
 def plugin_specs_from_names(plugin_names):
     ret = []
@@ -886,6 +922,10 @@ class UtilsError(BlockDevError):
     pass
 __all__.append("UtilsError")
 
+class NVDIMMError(BlockDevError):
+    pass
+__all__.append("NVDIMMError")
+
 class BlockDevNotImplementedError(NotImplementedError, BlockDevError):
     pass
 __all__.append("BlockDevNotImplementedError")
@@ -926,6 +966,9 @@ __all__.append("part")
 
 fs = ErrorProxy("fs", BlockDev, [(GLib.Error, FSError)], [not_implemented_rule, fs_nofs_rule])
 __all__.append("fs")
+
+nvdimm = ErrorProxy("nvdimm", BlockDev, [(GLib.Error, NVDIMMError)], [not_implemented_rule])
+__all__.append("nvdimm")
 
 s390 = ErrorProxy("s390", BlockDev, [(GLib.Error, S390Error)], [not_implemented_rule])
 __all__.append("s390")

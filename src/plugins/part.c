@@ -25,6 +25,7 @@
 #include <inttypes.h>
 #include <unistd.h>
 #include <sys/file.h>
+#include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/fs.h>
 #include <blockdev/utils.h>
@@ -926,7 +927,7 @@ static PedPartition* add_part_to_disk (PedDevice *dev, PedDisk *disk, BDPartType
         return NULL;
     }
 
-    part = ped_partition_new (disk, type, NULL, geom->start, geom->end);
+    part = ped_partition_new (disk, (PedPartitionType)type, NULL, geom->start, geom->end);
     if (!part) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to create new partition on device '%s'", dev->path);
@@ -1354,7 +1355,7 @@ static gboolean set_gpt_flags (const gchar *device, int part_num, guint64 flags,
         real_flags |= 0x4000000000000000; /* 1 << 62 */
     if (flags & BD_PART_FLAG_GPT_NO_AUTOMOUNT)
         real_flags |= 0x8000000000000000; /* 1 << 63 */
-    mask_str = g_strdup_printf ("%.16"__PRI64_PREFIX"x", real_flags);
+    mask_str = g_strdup_printf ("%.16"PRIx64, real_flags);
 
     args[2] = g_strdup_printf ("%d:=:%s", part_num, mask_str);
     g_free (mask_str);
@@ -1564,7 +1565,7 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
     PedPartition *ped_part = NULL;
     const gchar *part_num_str = NULL;
     gint part_num = 0;
-    guint64 i = 0;
+    int i = 0;
     gint status = 0;
     gboolean ret = FALSE;
     guint64 progress_id = 0;

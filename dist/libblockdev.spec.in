@@ -13,6 +13,7 @@
 %define with_kbd @WITH_KBD@
 %define with_part @WITH_PART@
 %define with_fs @WITH_FS@
+%define with_nvdimm @WITH_NVDIMM@
 %define with_gi @WITH_GI@
 
 # python3 is not available on older RHEL
@@ -59,11 +60,14 @@
 %if %{with_fs} != 1
 %define fs_copts --without-fs
 %endif
+%if %{with_nvdimm} != 1
+%define nvdimm_copts --without-nvdimm
+%endif
 %if %{with_gi} != 1
 %define gi_copts --disable-introspection
 %endif
 
-%define configure_opts %{?distro_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?gi_copts}
+%define configure_opts %{?distro_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?gi_copts}
 
 Name:        libblockdev
 Version:     2.16
@@ -115,7 +119,12 @@ with the libblockdev library.
 %package -n python2-blockdev
 Summary:     Python2 gobject-introspection bindings for libblockdev
 Requires: %{name}%{?_isa} = %{version}-%{release}
+
+%if 0%{?fedora} <= 26 || 0%{?rhel} <= 7
+Requires: pygobject3-base
+%else
 Requires: python2-gobject-base
+%endif
 %{?python_provide:%python_provide python2-blockdev}
 
 %description -n python2-blockdev
@@ -394,6 +403,29 @@ This package contains header files and pkg-config files needed for development
 with the libblockdev-mpath plugin/library.
 %endif
 
+%if %{with_nvdimm}
+%package nvdimm
+BuildRequires: ndctl-devel
+BuildRequires: libuuid-devel
+Summary:     The NVDIMM plugin for the libblockdev library
+Requires: %{name}-utils%{?_isa} >= 0.11
+Requires: ndctl
+
+%description nvdimm
+The libblockdev library plugin (and in the same time a standalone library)
+providing the functionality related to operations with NVDIMM devices.
+
+%package nvdimm-devel
+Summary:     Development files for the libblockdev-nvdimm plugin/library
+Requires: %{name}-nvdimm%{?_isa} = %{version}-%{release}
+Requires: %{name}-utils-devel%{?_isa}
+Requires: glib2-devel
+
+%description nvdimm-devel
+This package contains header files and pkg-config files needed for development
+with the libblockdev-nvdimm plugin/library.
+%endif
+
 
 %if %{with_part}
 %package part
@@ -502,6 +534,10 @@ Requires: %{name}-mdraid%{?_isa} = %{version}-%{release}
 Requires: %{name}-mpath%{?_isa} = %{version}-%{release}
 %endif
 
+%if %{with_nvdimm}
+Requires: %{name}-nvdimm%{?_isa} = %{version}-%{release}
+%endif
+
 %if %{with_part}
 Requires: %{name}-part%{?_isa} = %{version}-%{release}
 %endif
@@ -567,6 +603,10 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 
 %if %{with_mpath}
 %ldconfig_scriptlets mpath
+%endif
+
+%if %{with_nvdimm}
+%ldconfig_scriptlets nvdimm
 %endif
 
 %if %{with_part}
@@ -747,6 +787,17 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_libdir}/libbd_mpath.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/mpath.h
+%endif
+
+
+%if %{with_nvdimm}
+%files nvdimm
+%{_libdir}/libbd_nvdimm.so.*
+
+%files nvdimm-devel
+%{_libdir}/libbd_nvdimm.so
+%dir %{_includedir}/blockdev
+%{_includedir}/blockdev/nvdimm.h
 %endif
 
 

@@ -22,7 +22,7 @@
 #include <libcryptsetup.h>
 #include <nss.h>
 #include <volume_key/libvolume_key.h>
-#include <sys/fcntl.h>
+#include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/random.h>
 #include <locale.h>
@@ -33,6 +33,12 @@
 
 #ifndef CRYPT_LUKS
 #define CRYPT_LUKS NULL
+#endif
+
+#ifdef __clang__
+#define ZERO_INIT {}
+#else
+#define ZERO_INIT {0}
 #endif
 
 /**
@@ -1057,7 +1063,7 @@ gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const g
     gint ret = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
-    struct crypt_params_tcrypt params = {0};
+    struct crypt_params_tcrypt params = ZERO_INIT;
     gsize keyfiles_count = 0;
     guint i;
 
@@ -1198,7 +1204,7 @@ static gchar *replace_char (gchar *str, gchar orig, gchar new) {
     return str;
 }
 
-static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libvk_ui *ui, enum libvk_packet_format format, const gchar *out_path,
+static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libvk_ui *ui, enum libvk_secret secret_type, const gchar *out_path,
                                         CERTCertificate *cert, GError **error) {
     gpointer packet_data = NULL;
     gsize packet_data_size = 0;
@@ -1207,7 +1213,7 @@ static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libv
     gsize bytes_written = 0;
     GError *tmp_error = NULL;
 
-    packet_data = libvk_volume_create_packet_asymmetric_with_format (volume, &packet_data_size, format, cert,
+    packet_data = libvk_volume_create_packet_asymmetric_with_format (volume, &packet_data_size, secret_type, cert,
                                                                      ui, LIBVK_PACKET_FORMAT_ASYMMETRIC_WRAP_SECRET_ONLY, error);
 
     if (!packet_data) {

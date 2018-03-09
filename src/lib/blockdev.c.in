@@ -25,6 +25,8 @@
 #include "plugin_apis/part.c"
 #include "plugin_apis/fs.h"
 #include "plugin_apis/fs.c"
+#include "plugin_apis/nvdimm.h"
+#include "plugin_apis/nvdimm.c"
 
 #if defined(__s390__) || defined(__s390x__)
 #include "plugin_apis/s390.h"
@@ -59,7 +61,8 @@ static gchar * default_plugin_so[BD_PLUGIN_UNDEF] = {
     "libbd_crypto.so."@MAJOR_VER@, "libbd_mpath.so."@MAJOR_VER@,
     "libbd_dm.so."@MAJOR_VER@, "libbd_mdraid.so."@MAJOR_VER@,
     "libbd_kbd.so."@MAJOR_VER@,"libbd_s390.so."@MAJOR_VER@,
-    "libbd_part.so."@MAJOR_VER@, "libbd_fs.so."@MAJOR_VER@
+    "libbd_part.so."@MAJOR_VER@, "libbd_fs.so."@MAJOR_VER@,
+    "libbd_nvdimm.so."@MAJOR_VER@
 };
 static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_LVM, NULL}, NULL},
@@ -74,9 +77,10 @@ static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_S390, NULL}, NULL},
     {{BD_PLUGIN_PART, NULL}, NULL},
     {{BD_PLUGIN_FS, NULL}, NULL},
+    {{BD_PLUGIN_NVDIMM, NULL}, NULL},
 };
 static gchar* plugin_names[BD_PLUGIN_UNDEF] = {
-    "lvm", "btrfs", "swap", "loop", "crypto", "mpath", "dm", "mdraid", "kbd", "s390", "part", "fs"
+    "lvm", "btrfs", "swap", "loop", "crypto", "mpath", "dm", "mdraid", "kbd", "s390", "part", "fs", "nvdimm"
 };
 
 static void set_plugin_so_name (BDPlugin name, const gchar *so_name) {
@@ -226,6 +230,10 @@ static void unload_plugins () {
     if (plugins[BD_PLUGIN_FS].handle && !unload_fs (plugins[BD_PLUGIN_FS].handle))
         g_warning ("Failed to close the fs plugin");
     plugins[BD_PLUGIN_FS].handle = NULL;
+
+    if (plugins[BD_PLUGIN_NVDIMM].handle && !unload_nvdimm (plugins[BD_PLUGIN_NVDIMM].handle))
+        g_warning ("Failed to close the nvdimm plugin");
+    plugins[BD_PLUGIN_NVDIMM].handle = NULL;
 }
 
 static void load_plugin_from_sonames (BDPlugin plugin, LoadFunc load_fn, void **handle, GSList *sonames) {
@@ -264,6 +272,8 @@ static void do_load (GSList **plugins_sonames) {
         load_plugin_from_sonames (BD_PLUGIN_PART, load_part_from_plugin, &(plugins[BD_PLUGIN_PART].handle), plugins_sonames[BD_PLUGIN_PART]);
     if (!plugins[BD_PLUGIN_FS].handle && plugins_sonames[BD_PLUGIN_FS])
         load_plugin_from_sonames (BD_PLUGIN_FS, load_fs_from_plugin, &(plugins[BD_PLUGIN_FS].handle), plugins_sonames[BD_PLUGIN_FS]);
+    if (!plugins[BD_PLUGIN_NVDIMM].handle && plugins_sonames[BD_PLUGIN_NVDIMM])
+        load_plugin_from_sonames (BD_PLUGIN_NVDIMM, load_nvdimm_from_plugin, &(plugins[BD_PLUGIN_NVDIMM].handle), plugins_sonames[BD_PLUGIN_NVDIMM]);
 }
 
 static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload, guint64 *num_loaded) {
