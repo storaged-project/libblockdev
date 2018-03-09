@@ -1031,7 +1031,7 @@ gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error) 
  * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error) {
-    return bd_crypto_tc_open_full (device, name, pass_data, data_len, NULL, 0, FALSE, FALSE, FALSE, 0, read_only, error);
+    return bd_crypto_tc_open_full (device, name, pass_data, data_len, NULL, FALSE, FALSE, FALSE, 0, read_only, error);
 }
 
 /**
@@ -1041,8 +1041,7 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8
  * @pass_data: (array length=data_len): a passphrase for the TrueCrypt/VeraCrypt volume (may contain arbitrary binary data)
  * @data_len: length of the @pass_data buffer
  * @read_only: whether to open as read-only or not (meaning read-write)
- * @keyfiles: (array length=keyfiles_count): paths to the keyfiles for the TrueCrypt/VeraCrypt volume
- * @keyfiles_count: length of the @keyfiles array
+ * @keyfiles: (allow-none) (array zero-terminated=1): paths to the keyfiles for the TrueCrypt/VeraCrypt volume
  * @hidden: whether a hidden volume inside the volume should be opened
  * @system: whether to try opening as an encrypted system (with boot loader)
  * @veracrypt: whether to try VeraCrypt modes (TrueCrypt modes are tried anyway)
@@ -1053,16 +1052,24 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8
  *
  * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
-gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, const gchar **keyfiles, gsize keyfiles_count, gboolean hidden, gboolean system, gboolean veracrypt, guint32 veracrypt_pim, gboolean read_only, GError **error) {
+gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, const gchar **keyfiles, gboolean hidden, gboolean system, gboolean veracrypt, guint32 veracrypt_pim, gboolean read_only, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
     struct crypt_params_tcrypt params = {0};
+    gsize keyfiles_count = 0;
+    guint i;
 
     msg = g_strdup_printf ("Started opening '%s' TrueCrypt/VeraCrypt device", device);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
+
+    if (keyfiles) {
+        for (i=0; *(keyfiles + i); i++) {
+            keyfiles_count = i;
+        }
+    }
 
     if ((data_len == 0) && (keyfiles_count == 0)) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
