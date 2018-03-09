@@ -1051,7 +1051,7 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8
  * @hidden: whether a hidden volume inside the volume should be opened
  * @system: whether to try opening as an encrypted system (with boot loader)
  * @veracrypt: whether to try VeraCrypt modes (TrueCrypt modes are tried anyway)
- * @veracrypt_pim: VeraCrypt PIM value
+ * @veracrypt_pim: VeraCrypt PIM value (only used if @veracrypt is %TRUE; only supported if compiled against libcryptsetup >= 2.0)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @device was successfully opened or not
@@ -1104,8 +1104,17 @@ gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const g
     if (system)
         params.flags |= CRYPT_TCRYPT_SYSTEM_HEADER;
 
+#ifndef LIBCRYPTSETUP_PIM_SUPPORT
+    if (veracrypt && veracrypt_pim != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                     "Compiled against a version of libcryptsetup that does not support the VeraCrypt PIM setting.");
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+#else
     if (veracrypt && veracrypt_pim != 0)
         params.veracrypt_pim = veracrypt_pim;
+#endif
 
     ret = crypt_load (cd, CRYPT_TCRYPT, &params);
     if (ret != 0) {
