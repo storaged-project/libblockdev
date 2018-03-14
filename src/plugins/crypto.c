@@ -973,7 +973,7 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError *
  * To achieve this, we calculate the chi square value of the first
  * 512 Bytes and treat devices with a chi square value between 136
  * and 426 as candidates for being encrypted.
- * For the reasoning, see: https://tails.boum.org/blueprint/veracrypt/
+ * For the reasoning, see: https://tails.boum.org/blueprint/veracrypt/#detection
  *
  * Returns: %TRUE if the given @device seems to be encrypted or %FALSE if not or
  * failed to determine (the @error) is populated with the error in such
