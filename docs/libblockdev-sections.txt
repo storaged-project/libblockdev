@@ -67,6 +67,7 @@ DEFAULT_LUKS_KEYSIZE_BITS
 DEFAULT_LUKS_CIPHER
 bd_crypto_generate_backup_passphrase
 bd_crypto_device_is_luks
+bd_crypto_device_seems_encrypted
 bd_crypto_luks_uuid
 bd_crypto_luks_status
 bd_crypto_luks_format
@@ -82,6 +83,7 @@ bd_crypto_luks_change_key
 bd_crypto_luks_change_key_blob
 bd_crypto_luks_resize
 bd_crypto_tc_open
+bd_crypto_tc_open_full
 bd_crypto_tc_close
 bd_crypto_escrow_device
 BDCryptoTech
