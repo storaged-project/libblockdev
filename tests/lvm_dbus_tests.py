@@ -638,7 +638,7 @@ class LvmTestLVcreateWithExtra(LvmPVVGLVTestCase):
         """Verify that it's possible to create an LV with extra arguments"""
 
         self.ignore_log = True
-        self.assertTrue(BlockDev.reinit(None, False, self.my_log_func))
+        self.assertTrue(BlockDev.reinit([self.ps, self.ps2], False, self.my_log_func))
 
         succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
         self.assertTrue(succ)
@@ -662,7 +662,7 @@ class LvmTestLVcreateWithExtra(LvmPVVGLVTestCase):
         match = re.search(r"'-Z': <'y'>", self.log)
         self.assertIsNot(match, None)
 
-        self.assertTrue(BlockDev.reinit(None, False, None))
+        self.assertTrue(BlockDev.reinit([self.ps, self.ps2], False, None))
 
         succ = BlockDev.lvm_lvremove("testVG", "testLV", True, None)
         self.assertTrue(succ)
