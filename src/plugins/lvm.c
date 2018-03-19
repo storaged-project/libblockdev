@@ -2334,6 +2334,7 @@ BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_l
                       status->feature_flags);
         dm_task_destroy (task);
         dm_pool_destroy (pool);
+        bd_lvm_cache_stats_free (ret);
         return NULL;
     }
 
