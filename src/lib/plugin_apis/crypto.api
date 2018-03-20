@@ -295,6 +295,31 @@ gboolean bd_crypto_luks_change_key_blob (const gchar *device, const guint8 *pass
 gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError **error);
 
 /**
+ * bd_crypto_device_seems_encrypted:
+ * @device: the queried device
+ * @error: (out): place to store error (if any)
+ *
+ * Determines whether a block device seems to be encrypted.
+ *
+ * TCRYPT volumes are not easily identifiable, because they have no
+ * cleartext header, but are completely encrypted. This function is
+ * used to determine whether a block device is a candidate for being
+ * TCRYPT encrypted.
+ *
+ * To achieve this, we calculate the chi square value of the first
+ * 512 Bytes and treat devices with a chi square value between 136
+ * and 426 as candidates for being encrypted.
+ * For the reasoning, see: https://tails.boum.org/blueprint/veracrypt/
+ *
+ * Returns: %TRUE if the given @device seems to be encrypted or %FALSE if not or
+ * failed to determine (the @error) is populated with the error in such
+ * cases)
+ *
+ * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_QUERY
+ */
+gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error);
+
+/**
  * bd_crypto_tc_open:
  * @device: the device to open
  * @name: name for the TrueCrypt/VeraCrypt device
@@ -308,6 +333,26 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError *
  * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);
+
+/**
+ * bd_crypto_tc_open_full:
+ * @device: the device to open
+ * @name: name for the TrueCrypt/VeraCrypt device
+ * @pass_data: (array length=data_len): a passphrase for the TrueCrypt/VeraCrypt volume (may contain arbitrary binary data)
+ * @data_len: length of the @pass_data buffer
+ * @read_only: whether to open as read-only or not (meaning read-write)
+ * @keyfiles: (allow-none) (array zero-terminated=1): paths to the keyfiles for the TrueCrypt/VeraCrypt volume
+ * @hidden: whether a hidden volume inside the volume should be opened
+ * @system: whether to try opening as an encrypted system (with boot loader)
+ * @veracrypt: whether to try VeraCrypt modes (TrueCrypt modes are tried anyway)
+ * @veracrypt_pim: VeraCrypt PIM value
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, const gchar **keyfiles, gboolean hidden, gboolean system, gboolean veracrypt, guint32 veracrypt_pim, gboolean read_only, GError **error);
 
 /**
  * bd_crypto_tc_close:

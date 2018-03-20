@@ -154,6 +154,8 @@ LIBBLOCKDEV_PKG_CHECK_MODULES([KMOD], [libkmod >= 19])
 
 AS_IF([test "x$with_crypto" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([CRYPTSETUP], [libcryptsetup >= 1.6.7])
+      AS_IF([$PKG_CONFIG --atleast-version=2.0 libcryptsetup],
+            [AC_DEFINE([LIBCRYPTSETUP_PIM_SUPPORT])], [])
        LIBBLOCKDEV_PKG_CHECK_MODULES([NSS], [nss >= 3.18.0])
        LIBBLOCKDEV_CHECK_HEADER([volume_key/libvolume_key.h], [$GLIB_CFLAGS $NSS_CFLAGS], [libvolume_key.h not available])
       ],

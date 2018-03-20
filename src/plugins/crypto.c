@@ -959,6 +959,71 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError *
 }
 
 /**
+ * bd_crypto_device_seems_encrypted:
+ * @device: the queried device
+ * @error: (out): place to store error (if any)
+ *
+ * Determines whether a block device seems to be encrypted.
+ *
+ * TCRYPT volumes are not easily identifiable, because they have no
+ * cleartext header, but are completely encrypted. This function is
+ * used to determine whether a block device is a candidate for being
+ * TCRYPT encrypted.
+ *
+ * To achieve this, we calculate the chi square value of the first
+ * 512 Bytes and treat devices with a chi square value between 136
+ * and 426 as candidates for being encrypted.
+ * For the reasoning, see: https://tails.boum.org/blueprint/veracrypt/#detection
+ *
+ * Returns: %TRUE if the given @device seems to be encrypted or %FALSE if not or
+ * failed to determine (the @error) is populated with the error in such
+ * cases)
+ *
+ * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_QUERY
+ */
+gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error) {
+    gint fd = -1;
+    guchar buf[BD_CRYPTO_CHI_SQUARE_BYTES_TO_CHECK];
+    guint symbols[256] = {0};
+    gfloat chi_square = 0.0;
+    gfloat e = (gfloat) sizeof(buf) / (gfloat) 256.0;
+    guint i;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started determining if device '%s' seems to be encrypted", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    fd = open (device, O_RDONLY);
+    if (fd == -1) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE, "Failed to open device");
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    if (read (fd, buf, sizeof(buf)) != sizeof(buf)) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE, "Failed to read device");
+        bd_utils_report_finished (progress_id, (*error)->message);
+        close(fd);
+        return FALSE;
+    }
+
+    close(fd);
+
+    /* Calculate Chi Square */
+    for (i = 0; i < sizeof(buf); i++)
+        /* This is safe because the max value of buf[i] is < sizeof(symbols). */
+        symbols[buf[i]]++;
+    for (i = 0; i < 256; i++)
+        chi_square += (symbols[i] - e) * (symbols[i] - e);
+    chi_square /= e;
+
+    bd_utils_report_finished (progress_id, "Completed");
+    return BD_CRYPTO_CHI_SQUARE_LOWER_LIMIT < chi_square && chi_square < BD_CRYPTO_CHI_SQUARE_UPPER_LIMIT;
+}
+
+/**
  * bd_crypto_tc_open:
  * @device: the device to open
  * @name: name for the TrueCrypt/VeraCrypt device
@@ -972,17 +1037,47 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError *
  * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error) {
+    return bd_crypto_tc_open_full (device, name, pass_data, data_len, NULL, FALSE, FALSE, FALSE, 0, read_only, error);
+}
+
+/**
+ * bd_crypto_tc_open_full:
+ * @device: the device to open
+ * @name: name for the TrueCrypt/VeraCrypt device
+ * @pass_data: (array length=data_len): a passphrase for the TrueCrypt/VeraCrypt volume (may contain arbitrary binary data)
+ * @data_len: length of the @pass_data buffer
+ * @read_only: whether to open as read-only or not (meaning read-write)
+ * @keyfiles: (allow-none) (array zero-terminated=1): paths to the keyfiles for the TrueCrypt/VeraCrypt volume
+ * @hidden: whether a hidden volume inside the volume should be opened
+ * @system: whether to try opening as an encrypted system (with boot loader)
+ * @veracrypt: whether to try VeraCrypt modes (TrueCrypt modes are tried anyway)
+ * @veracrypt_pim: VeraCrypt PIM value (only used if @veracrypt is %TRUE; only supported if compiled against libcryptsetup >= 2.0)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, const gchar **keyfiles, gboolean hidden, gboolean system, gboolean veracrypt, guint32 veracrypt_pim, gboolean read_only, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
     struct crypt_params_tcrypt params = ZERO_INIT;
+    gsize keyfiles_count = 0;
+    guint i;
 
     msg = g_strdup_printf ("Started opening '%s' TrueCrypt/VeraCrypt device", device);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    if (data_len == 0) {
+    if (keyfiles) {
+        for (i=0; *(keyfiles + i); i++) {
+            keyfiles_count = i;
+        }
+    }
+
+    if ((data_len == 0) && (keyfiles_count == 0)) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
                      "No passphrase nor key file specified, cannot open.");
         bd_utils_report_finished (progress_id, (*error)->message);
@@ -999,6 +1094,28 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8
 
     params.passphrase = (const char*) pass_data;
     params.passphrase_size = data_len;
+    params.keyfiles = keyfiles;
+    params.keyfiles_count = keyfiles_count;
+
+    if (veracrypt)
+        params.flags |= CRYPT_TCRYPT_VERA_MODES;
+    if (hidden)
+        params.flags |= CRYPT_TCRYPT_HIDDEN_HEADER;
+    if (system)
+        params.flags |= CRYPT_TCRYPT_SYSTEM_HEADER;
+
+#ifndef LIBCRYPTSETUP_PIM_SUPPORT
+    if (veracrypt && veracrypt_pim != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                     "Compiled against a version of libcryptsetup that does not support the VeraCrypt PIM setting.");
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+#else
+    if (veracrypt && veracrypt_pim != 0)
+        params.veracrypt_pim = veracrypt_pim;
+#endif
+
     ret = crypt_load (cd, CRYPT_TCRYPT, &params);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
