@@ -429,22 +429,19 @@ static BDNVDIMMNamespaceInfo* get_nvdimm_namespace_info (struct ndctl_namespace 
         uuid_unparse (uuid, uuid_buf);
         info->uuid = g_strdup (uuid_buf);
 
-        info->sector_size = ndctl_btt_get_sector_size (btt);
         info->blockdev = g_strdup (ndctl_btt_get_block_device (btt));
     } else if (pfn) {
         ndctl_pfn_get_uuid (pfn, uuid);
         uuid_unparse (uuid, uuid_buf);
         info->uuid = g_strdup (uuid_buf);
 
-        info->sector_size = 0; // no sector size for memory mode
         info->blockdev = g_strdup (ndctl_pfn_get_block_device (pfn));
     } else if (dax) {
         ndctl_dax_get_uuid (dax, uuid);
         uuid_unparse (uuid, uuid_buf);
         info->uuid = g_strdup (uuid_buf);
 
-        /* no sector size or blockdev for dax mode */
-        info->sector_size = 0;
+        /* no blockdev for dax mode */
         info->blockdev = NULL;
     } else {
         ndctl_namespace_get_uuid (ndns, uuid);
@@ -456,8 +453,24 @@ static BDNVDIMMNamespaceInfo* get_nvdimm_namespace_info (struct ndctl_namespace 
             info->uuid = g_strdup (uuid_buf);
         }
 
-        info->sector_size = 0; // no sector size for raw mode
         info->blockdev = g_strdup (ndctl_namespace_get_block_device (ndns));
+    }
+
+    if (btt)
+        info->sector_size = ndctl_btt_get_sector_size (btt);
+    else if (dax)
+        /* no sector size for dax mode */
+        info->sector_size = 0;
+    else {
+        info->sector_size = ndctl_namespace_get_sector_size (ndns);
+
+        /* apparently the default value for sector size is 512
+           on non DAX namespaces even if libndctl says it's 0
+           https://github.com/pmem/ndctl/commit/a7320456f1bca5edf15352ce977e757fdf78ed58
+         */
+
+        if (info->sector_size == 0)
+            info->sector_size = 512;
     }
 
     info->enabled = ndctl_namespace_is_active (ndns);
