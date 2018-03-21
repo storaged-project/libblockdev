@@ -871,6 +871,7 @@ gboolean bd_crypto_luks_change_key_blob (const gchar *device, const guint8 *pass
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to load device's volume key: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
+        g_free (volume_key);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
@@ -881,6 +882,7 @@ gboolean bd_crypto_luks_change_key_blob (const gchar *device, const guint8 *pass
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_REMOVE_KEY,
                      "Failed to remove the old passphrase: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
+        g_free (volume_key);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
@@ -890,10 +892,12 @@ gboolean bd_crypto_luks_change_key_blob (const gchar *device, const guint8 *pass
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_ADD_KEY,
                      "Failed to add the new passphrase: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
+        g_free (volume_key);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
+    g_free (volume_key);
     crypt_free (cd);
     bd_utils_report_finished (progress_id, "Completed");
     return TRUE;

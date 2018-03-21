@@ -978,9 +978,11 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
 
     argv[2] = "--export";
     success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
-    if (!success)
+    if (!success) {
         /* error is already populated */
+        bd_md_examine_data_free (ret);
         return FALSE;
+    }
 
     /* try to get a better information about RAID level because it may be
        misleading in the output without --export */
@@ -998,9 +1000,11 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
 
     argv[2] = "--brief";
     success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
-    if (!success)
+    if (!success) {
         /* error is already populated */
+        bd_md_examine_data_free (ret);
         return FALSE;
+    }
 
     /* try to find the "ARRAY /dev/md/something" pair in the output */
     output_fields = g_strsplit_set (output, " \n", 0);
@@ -1024,6 +1028,7 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
         g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE,
                      "Failed to parse mdexamine metadata");
         g_hash_table_destroy (table);
+        bd_md_examine_data_free (ret);
         return NULL;
     }
 

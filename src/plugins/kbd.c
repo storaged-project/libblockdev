@@ -608,6 +608,7 @@ BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error) {
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_ZRAM_NOEXIST,
                      "Device '%s' doesn't seem to exist", device);
         g_free (path);
+        g_free (ret);
         return NULL;
     }
     g_free (path);
@@ -1292,6 +1293,7 @@ BDKBDBcacheStats* bd_kbd_bcache_status (const gchar *bcache_device, GError **err
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_NOEXIST,
                      "Bcache device '%s' doesn't seem to exist", bcache_device);
         g_free (path);
+        g_free (ret);
         return NULL;
     }
     g_free (path);

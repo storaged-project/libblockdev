@@ -731,9 +731,11 @@ BDPartSpec* bd_part_get_best_free_region (const gchar *disk, BDPartType type, gu
     if (!free_regs)
         /* error should be populated */
         return NULL;
-    if (!(*free_regs))
+    if (!(*free_regs)) {
         /* no free regions */
+        g_free (free_regs);
         return NULL;
+    }
 
     if (type == BD_PART_TYPE_NORMAL) {
         for (free_reg_p=free_regs; *free_reg_p; free_reg_p++) {

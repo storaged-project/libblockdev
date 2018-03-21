@@ -494,6 +494,8 @@ gchar** bd_mpath_get_mpath_members (GError **error) {
                 g_prefix_error (error, "Failed to determine deps for '%s'", names->name);
                 dm_task_destroy (task_names);
                 bd_utils_report_finished (progress_id, (*error)->message);
+                g_free (deps);
+                g_free (ret);
                 return NULL;
             }
             if (deps) {
