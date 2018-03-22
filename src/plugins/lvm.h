@@ -43,6 +43,7 @@ typedef enum {
     BD_LVM_ERROR_CACHE_INVAL,
     BD_LVM_ERROR_CACHE_NOCACHE,
     BD_LVM_ERROR_TECH_UNAVAIL,
+    BD_LVM_ERROR_FAIL,
 } BDLVMError;
 
 typedef enum {

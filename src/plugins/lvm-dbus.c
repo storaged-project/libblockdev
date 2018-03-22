@@ -605,6 +605,8 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
     gdouble progress = 0.0;
     gchar *log_msg = NULL;
     gboolean completed = FALSE;
+    gint64 error_code = 0;
+    gchar *error_msg = NULL;
 
     ret = call_lvm_method (obj, intf, method, params, extra_params, extra_args, &log_task_id, &prog_id, error);
     log_task_status (log_task_id, "Done.");
@@ -706,18 +708,38 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
                 log_msg = g_strdup_printf ("Got result: %s", obj_path);
                 log_task_status (log_task_id, log_msg);
                 g_free (log_msg);
-            } else
-                log_task_status (log_task_id, "No result");
+            } else {
+                ret = get_object_property (task_path, JOB_INTF, "GetError", error);
+                g_variant_get (ret, "(is)", &error_code, &error_msg);
+                if (error_code != 0) {
+                    if (error_msg) {
+                        log_msg = g_strdup_printf ("Got error: %s", error_msg);
+                        log_task_status (log_task_id, log_msg);
+                        bd_utils_report_finished (prog_id, log_msg);
+                        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                                     "Running '%s' method on the '%s' object failed: %s",
+                                     method, obj, error_msg);
+                        g_free (log_msg);
+                        g_free (error_msg);
+                    } else {
+                        log_task_status (log_task_id, "Got unknown error");
+                        bd_utils_report_finished (prog_id, "Got unknown error");
+                        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                                     "Got unknown error when running '%s' method on the '%s' object.",
+                                     method, obj);
+                    }
+
+                } else
+                    log_task_status (log_task_id, "No result");
+            }
             bd_utils_report_finished (prog_id, "Completed");
             g_free (obj_path);
 
             /* remove the job object and clean after ourselves */
             ret = g_dbus_connection_call_sync (bus, LVM_BUS_NAME, task_path, JOB_INTF, "Remove", NULL,
-                                               NULL, G_DBUS_CALL_FLAGS_NONE, METHOD_CALL_TIMEOUT, NULL, error);
+                                               NULL, G_DBUS_CALL_FLAGS_NONE, METHOD_CALL_TIMEOUT, NULL, NULL);
             if (ret)
                 g_variant_unref (ret);
-            if (*error)
-                g_clear_error (error);
 
             g_free (task_path);
             return;
