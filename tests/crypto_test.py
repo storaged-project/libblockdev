@@ -529,3 +529,64 @@ class CryptoTestEscrow(CryptoTestCase):
         # Check that the backup passphrase works
         succ = BlockDev.crypto_luks_open(self.loop_dev, 'libblockdevTestLUKS', backup_passphrase, None)
         self.assertTrue(succ)
+
+class CryptoTestSuspendResume(CryptoTestCase):
+    def _luks_suspend_resume(self, create_fn):
+
+        succ = create_fn(self.loop_dev, PASSWD, self.keyfile)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None)
+        self.assertTrue(succ)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_suspend("/non/existing/device")
+
+        # use the full /dev/mapper/ path
+        succ = BlockDev.crypto_luks_suspend("/dev/mapper/libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+        _ret, state, _err = run_command("lsblk -oSTATE -n /dev/mapper/libblockdevTestLUKS")
+        self.assertEqual(state, "suspended")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_resume("libblockdevTestLUKS", None, None)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_resume("libblockdevTestLUKS", "wrong-passhprase", None)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_resume("libblockdevTestLUKS", None, "wrong-keyfile")
+
+        succ = BlockDev.crypto_luks_resume("libblockdevTestLUKS", PASSWD, None)
+        self.assertTrue(succ)
+
+        _ret, state, _err = run_command("lsblk -oSTATE -n /dev/mapper/libblockdevTestLUKS")
+        self.assertEqual(state, "running")
+
+        # use just the LUKS device name
+        succ = BlockDev.crypto_luks_suspend("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+        _ret, state, _err = run_command("lsblk -oSTATE -n /dev/mapper/libblockdevTestLUKS")
+        self.assertEqual(state, "suspended")
+
+        succ = BlockDev.crypto_luks_resume("libblockdevTestLUKS", None, self.keyfile)
+        self.assertTrue(succ)
+
+        _ret, state, _err = run_command("lsblk -oSTATE -n /dev/mapper/libblockdevTestLUKS")
+        self.assertEqual(state, "running")
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_luks_suspend_resume(self):
+        """Verify that suspending/resuming LUKS device works"""
+        self._luks_suspend_resume(self._luks_format)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_suspend_resume(self):
+        """Verify that suspending/resuming LUKS 2 device works"""
+        self._luks_suspend_resume(self._luks2_format)
