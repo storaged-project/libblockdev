@@ -1105,6 +1105,60 @@ gboolean bd_crypto_luks_resume (const gchar *luks_device, const gchar *passphras
 }
 
 /**
+ * bd_crypto_luks_kill_slot:
+ * @device: device to kill slot on
+ * @slot: keyslot to destroy
+ * @error: (out): place to store error (if any)
+ *
+ * Note: This can destroy last remaining keyslot without confirmation making
+ *       the LUKS device permanently inaccessible.
+ *
+ * Returns: whether the given @slot was successfully destroyed or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_REMOVE_KEY
+ */
+gboolean bd_crypto_luks_kill_slot (const gchar *device, gint slot, GError **error) {
+    struct crypt_device *cd = NULL;
+    gint ret = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started killing slot %d on LUKS device '%s'", slot, device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_load (cd, CRYPT_LUKS, NULL);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to load device's parameters: %s", strerror_l(-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_keyslot_destroy (cd, slot);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to destroy keyslot: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
+}
+
+/**
  * bd_crypto_device_seems_encrypted:
  * @device: the queried device
  * @error: (out): place to store error (if any)

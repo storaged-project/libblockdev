@@ -333,6 +333,21 @@ gboolean bd_crypto_luks_resume_blob (const gchar *luks_device, const guint8 *pas
 gboolean bd_crypto_luks_resume (const gchar *luks_device, const gchar *passphrase, const gchar *key_file, GError **error);
 
 /**
+ * bd_crypto_luks_kill_slot:
+ * @device: device to kill slot on
+ * @slot: keyslot to destroy
+ * @error: (out): place to store error (if any)
+ *
+ * Note: This can destroy last remaining keyslot without confirmation making
+ *       the LUKS device permanently inaccessible.
+ *
+ * Returns: whether the given @slot was successfully destroyed or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_REMOVE_KEY
+ */
+gboolean bd_crypto_luks_kill_slot (const gchar *device, gint slot, GError **error);
+
+/**
  * bd_crypto_device_seems_encrypted:
  * @device: the queried device
  * @error: (out): place to store error (if any)
