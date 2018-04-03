@@ -86,6 +86,8 @@ bd_crypto_luks_suspend
 bd_crypto_luks_resume_blob
 bd_crypto_luks_resume
 bd_crypto_luks_kill_slot
+bd_crypto_luks_header_backup
+bd_crypto_luks_header_restore
 bd_crypto_tc_open
 bd_crypto_tc_open_full
 bd_crypto_tc_close

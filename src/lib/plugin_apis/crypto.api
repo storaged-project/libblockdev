@@ -38,6 +38,7 @@ typedef enum {
     BD_CRYPTO_TECH_MODE_REMOVE_KEY     = 1 << 4,
     BD_CRYPTO_TECH_MODE_RESIZE         = 1 << 5,
     BD_CRYPTO_TECH_MODE_SUSPEND_RESUME = 1 << 6,
+    BD_CRYPTO_TECH_MODE_BACKUP_RESTORE = 1 << 7,
 } BDCryptoTechMode;
 
 /**
@@ -346,6 +347,33 @@ gboolean bd_crypto_luks_resume (const gchar *luks_device, const gchar *passphras
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_REMOVE_KEY
  */
 gboolean bd_crypto_luks_kill_slot (const gchar *device, gint slot, GError **error);
+
+/**
+ * bd_crypto_luks_header_backup:
+ * @device: device to backup the LUKS header
+ * @backup_file: file to save the header backup to
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the given backup of @device was successfully written to
+ *          @backup_file or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_BACKUP_RESTORE
+ */
+gboolean bd_crypto_luks_header_backup (const gchar *device, const gchar *backup_file, GError **error);
+
+/**
+ * bd_crypto_luks_header_restore:
+ * @device: device to restore the LUKS header to
+ * @backup_file: existing file with a LUKS header backup
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the given @device LUKS header was successfully restored
+ *          from @backup_file
+ *
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_BACKUP_RESTORE
+ */
+gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup_file, GError **error);
 
 /**
  * bd_crypto_device_seems_encrypted:
