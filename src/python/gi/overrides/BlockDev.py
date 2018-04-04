@@ -227,6 +227,12 @@ def crypto_escrow_device(device, passphrase, cert_data, directory, backup_passph
     return _crypto_escrow_device(device, passphrase, cert_data, directory, backup_passphrase)
 __all__.append("crypto_escrow_device")
 
+_crypto_luks_resume = BlockDev.crypto_luks_resume
+@override(BlockDev.crypto_luks_resume)
+def crypto_luks_resume(device, passphrase=None, key_file=None):
+    return _crypto_luks_resume(device, passphrase, key_file)
+__all__.append("crypto_luks_resume")
+
 
 _dm_create_linear = BlockDev.dm_create_linear
 @override(BlockDev.dm_create_linear)

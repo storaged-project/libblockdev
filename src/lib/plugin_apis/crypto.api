@@ -31,12 +31,13 @@ typedef enum {
 } BDCryptoTech;
 
 typedef enum {
-    BD_CRYPTO_TECH_MODE_CREATE     = 1 << 0,
-    BD_CRYPTO_TECH_MODE_OPEN_CLOSE = 1 << 1,
-    BD_CRYPTO_TECH_MODE_QUERY      = 1 << 2,
-    BD_CRYPTO_TECH_MODE_ADD_KEY    = 1 << 3,
-    BD_CRYPTO_TECH_MODE_REMOVE_KEY = 1 << 4,
-    BD_CRYPTO_TECH_MODE_RESIZE     = 1 << 5,
+    BD_CRYPTO_TECH_MODE_CREATE         = 1 << 0,
+    BD_CRYPTO_TECH_MODE_OPEN_CLOSE     = 1 << 1,
+    BD_CRYPTO_TECH_MODE_QUERY          = 1 << 2,
+    BD_CRYPTO_TECH_MODE_ADD_KEY        = 1 << 3,
+    BD_CRYPTO_TECH_MODE_REMOVE_KEY     = 1 << 4,
+    BD_CRYPTO_TECH_MODE_RESIZE         = 1 << 5,
+    BD_CRYPTO_TECH_MODE_SUSPEND_RESUME = 1 << 6,
 } BDCryptoTechMode;
 
 /**
@@ -293,6 +294,58 @@ gboolean bd_crypto_luks_change_key_blob (const gchar *device, const guint8 *pass
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_RESIZE
  */
 gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError **error);
+
+/**
+ * bd_crypto_luks_suspend:
+ * @luks_device: LUKS device to suspend
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the given @luks_device was successfully suspended or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_SUSPEND_RESUME
+ */
+gboolean bd_crypto_luks_suspend (const gchar *luks_device, GError **error);
+
+/**
+ * bd_crypto_luks_resume_blob:
+ * @luks_device: LUKS device to resume
+ * @pass_data: (array length=data_len): a passphrase for the LUKS device (may contain arbitrary binary data)
+ * @data_len: length of the @pass_data buffer
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the given @luks_device was successfully resumed or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_SUSPEND_RESUME
+ */
+gboolean bd_crypto_luks_resume_blob (const gchar *luks_device, const guint8 *pass_data, gsize data_len, GError **error);
+
+/**
+ * bd_crypto_luks_resume:
+ * @luks_device: LUKS device to resume
+ * @passphrase: (allow-none): passphrase to resume the @device or %NULL
+ * @key_file: (allow-none): key file path to use for resuming the @device or %NULL
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the given @luks_device was successfully resumed or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_SUSPEND_RESUME
+ */
+gboolean bd_crypto_luks_resume (const gchar *luks_device, const gchar *passphrase, const gchar *key_file, GError **error);
+
+/**
+ * bd_crypto_luks_kill_slot:
+ * @device: device to kill slot on
+ * @slot: keyslot to destroy
+ * @error: (out): place to store error (if any)
+ *
+ * Note: This can destroy last remaining keyslot without confirmation making
+ *       the LUKS device permanently inaccessible.
+ *
+ * Returns: whether the given @slot was successfully destroyed or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_REMOVE_KEY
+ */
+gboolean bd_crypto_luks_kill_slot (const gchar *device, gint slot, GError **error);
 
 /**
  * bd_crypto_device_seems_encrypted:

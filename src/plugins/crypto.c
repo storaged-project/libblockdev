@@ -110,10 +110,11 @@ gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **erro
     switch (tech) {
         case BD_CRYPTO_TECH_LUKS:
             ret = mode & (BD_CRYPTO_TECH_MODE_CREATE|BD_CRYPTO_TECH_MODE_OPEN_CLOSE|BD_CRYPTO_TECH_MODE_QUERY|
-                          BD_CRYPTO_TECH_MODE_ADD_KEY|BD_CRYPTO_TECH_MODE_REMOVE_KEY|BD_CRYPTO_TECH_MODE_RESIZE);
+                          BD_CRYPTO_TECH_MODE_ADD_KEY|BD_CRYPTO_TECH_MODE_REMOVE_KEY|BD_CRYPTO_TECH_MODE_RESIZE|
+                          BD_CRYPTO_TECH_MODE_SUSPEND_RESUME);
             if (ret != mode) {
                 g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                             "Only 'create', 'open', 'query', 'add-key', 'remove-key', 'resize' supported for LUKS");
+                             "Only 'create', 'open', 'query', 'add-key', 'remove-key', 'resize', 'suspend-resume' supported for LUKS");
                 return FALSE;
             } else
                 return TRUE;
@@ -952,6 +953,201 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError *
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_RESIZE_FAILED,
                      "Failed to resize device: %s", strerror_l(-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
+}
+
+/**
+ * bd_crypto_luks_suspend:
+ * @luks_device: LUKS device to suspend
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the given @luks_device was successfully suspended or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_SUSPEND_RESUME
+ */
+gboolean bd_crypto_luks_suspend (const gchar *luks_device, GError **error) {
+    struct crypt_device *cd = NULL;
+    gint ret = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started suspending LUKS device '%s'", luks_device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    ret = crypt_init_by_name (&cd, luks_device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_suspend (cd, luks_device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to suspend device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
+}
+
+static gboolean luks_resume (const gchar *luks_device, const guint8 *pass_data, gsize data_len, const gchar *key_file, GError **error) {
+    struct crypt_device *cd = NULL;
+    gboolean success = FALSE;
+    gchar *key_buffer = NULL;
+    gsize buf_len = 0;
+    gint ret = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started resuming '%s' LUKS device", luks_device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    if ((data_len == 0) && !key_file) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
+                     "No passphrase nor key file specified, cannot resume.");
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_init_by_name (&cd, luks_device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l(-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_load (cd, CRYPT_LUKS, NULL);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to load device's parameters: %s", strerror_l(-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    if (key_file) {
+        success = g_file_get_contents (key_file, &key_buffer, &buf_len, error);
+        if (!success) {
+            g_prefix_error (error, "Failed to add key file: %s", strerror_l(-ret, c_locale));
+            crypt_free (cd);
+            bd_utils_report_finished (progress_id, (*error)->message);
+            return FALSE;
+        }
+    } else
+        buf_len = data_len;
+
+    ret = crypt_resume_by_passphrase (cd, luks_device, CRYPT_ANY_SLOT,
+                                      key_buffer ? key_buffer : (char*) pass_data,
+                                      buf_len);
+
+    if (key_buffer) {
+      memset (key_buffer, 0, buf_len);
+      g_free (key_buffer);
+    }
+
+    if (ret < 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to resume device: %s", strerror_l(-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
+}
+
+/**
+ * bd_crypto_luks_resume_blob:
+ * @luks_device: LUKS device to resume
+ * @pass_data: (array length=data_len): a passphrase for the LUKS device (may contain arbitrary binary data)
+ * @data_len: length of the @pass_data buffer
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the given @luks_device was successfully resumed or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_SUSPEND_RESUME
+ */
+gboolean bd_crypto_luks_resume_blob (const gchar *luks_device, const guint8 *pass_data, gsize data_len, GError **error) {
+    return luks_resume (luks_device, pass_data, data_len, NULL, error);
+}
+
+/**
+ * bd_crypto_luks_resume:
+ * @luks_device: LUKS device to resume
+ * @passphrase: (allow-none): passphrase to resume the @device or %NULL
+ * @key_file: (allow-none): key file path to use for resuming the @device or %NULL
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the give @luks_device was successfully resumed or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_SUSPEND_RESUME
+ */
+gboolean bd_crypto_luks_resume (const gchar *luks_device, const gchar *passphrase, const gchar *key_file, GError **error) {
+    return luks_resume (luks_device, (guint8*) passphrase, passphrase ? strlen (passphrase) : 0, key_file, error);
+}
+
+/**
+ * bd_crypto_luks_kill_slot:
+ * @device: device to kill slot on
+ * @slot: keyslot to destroy
+ * @error: (out): place to store error (if any)
+ *
+ * Note: This can destroy last remaining keyslot without confirmation making
+ *       the LUKS device permanently inaccessible.
+ *
+ * Returns: whether the given @slot was successfully destroyed or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_REMOVE_KEY
+ */
+gboolean bd_crypto_luks_kill_slot (const gchar *device, gint slot, GError **error) {
+    struct crypt_device *cd = NULL;
+    gint ret = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started killing slot %d on LUKS device '%s'", slot, device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_load (cd, CRYPT_LUKS, NULL);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to load device's parameters: %s", strerror_l(-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_keyslot_destroy (cd, slot);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to destroy keyslot: %s", strerror_l (-ret, c_locale));
         crypt_free (cd);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;

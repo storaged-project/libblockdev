@@ -44,12 +44,13 @@ typedef enum {
 } BDCryptoTech;
 
 typedef enum {
-    BD_CRYPTO_TECH_MODE_CREATE     = 1 << 0,
-    BD_CRYPTO_TECH_MODE_OPEN_CLOSE = 1 << 1,
-    BD_CRYPTO_TECH_MODE_QUERY      = 1 << 2,
-    BD_CRYPTO_TECH_MODE_ADD_KEY    = 1 << 3,
-    BD_CRYPTO_TECH_MODE_REMOVE_KEY = 1 << 4,
-    BD_CRYPTO_TECH_MODE_RESIZE     = 1 << 5,
+    BD_CRYPTO_TECH_MODE_CREATE         = 1 << 0,
+    BD_CRYPTO_TECH_MODE_OPEN_CLOSE     = 1 << 1,
+    BD_CRYPTO_TECH_MODE_QUERY          = 1 << 2,
+    BD_CRYPTO_TECH_MODE_ADD_KEY        = 1 << 3,
+    BD_CRYPTO_TECH_MODE_REMOVE_KEY     = 1 << 4,
+    BD_CRYPTO_TECH_MODE_RESIZE         = 1 << 5,
+    BD_CRYPTO_TECH_MODE_SUSPEND_RESUME = 1 << 6,
 } BDCryptoTechMode;
 
 /*
@@ -83,6 +84,10 @@ gboolean bd_crypto_luks_remove_key_blob (const gchar *device, const guint8 *pass
 gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, const gchar *npass, GError **error);
 gboolean bd_crypto_luks_change_key_blob (const gchar *device, const guint8 *pass_data, gsize data_len, const guint8 *npass_data, gsize ndata_len, GError **error);
 gboolean bd_crypto_luks_resize (const gchar *device, guint64 size, GError **error);
+gboolean bd_crypto_luks_suspend (const gchar *luks_device, GError **error);
+gboolean bd_crypto_luks_resume_blob (const gchar *luks_device, const guint8 *pass_data, gsize data_len, GError **error);
+gboolean bd_crypto_luks_resume (const gchar *luks_device, const gchar *passphrase, const gchar *key_file, GError **error);
+gboolean bd_crypto_luks_kill_slot (const gchar *device, gint slot, GError **error);
 
 gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error);
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);
