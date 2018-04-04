@@ -21,11 +21,13 @@ typedef enum {
     BD_CRYPTO_ERROR_NSS_INIT_FAILED,
     BD_CRYPTO_ERROR_CERT_DECODE,
     BD_CRYPTO_ERROR_ESCROW_FAILED,
+    BD_CRYPTO_ERROR_INVALID_PARAMS,
     BD_CRYPTO_ERROR_TECH_UNAVAIL,
 } BDCryptoError;
 
 typedef enum {
     BD_CRYPTO_TECH_LUKS = 0,
+    BD_CRYPTO_TECH_LUKS2,
     BD_CRYPTO_TECH_TRUECRYPT,
     BD_CRYPTO_TECH_ESCROW,
 } BDCryptoTech;
@@ -40,6 +42,79 @@ typedef enum {
     BD_CRYPTO_TECH_MODE_SUSPEND_RESUME = 1 << 6,
     BD_CRYPTO_TECH_MODE_BACKUP_RESTORE = 1 << 7,
 } BDCryptoTechMode;
+
+typedef enum {
+    BD_CRYPTO_LUKS_VERSION_LUKS1 = 0,
+    BD_CRYPTO_LUKS_VERSION_LUKS2,
+} BDCryptoLUKSVersion;
+
+#define BD_CRYPTO_TYPE_LUKS_EXTRA (bd_crypto_luks_extra_get_type ())
+GType bd_crypto_luks_extra_get_type();
+
+/**
+ * BDCryptoLUKSExtra:
+ * @data_alignment: data alignment in sectors, 0 for default/auto detection
+ * @data_device: detached encrypted data device or NULL
+ * @integrity: integrity algorithm (e.g. "hmac-sha256") or NULL for no integrity support
+ *             Note: this field is valid only for LUKS 2
+ * @sector_size: encryption sector size, 0 for default (512)
+ *               Note: this field is valid only for LUKS 2
+ * @label: LUKS header label or NULL
+ *         Note: this field is valid only for LUKS 2
+ * @subsytem: LUKS header subsystem or NULL
+ *            Note: this field is valid only for LUKS 2
+ */
+typedef struct BDCryptoLUKSExtra {
+    guint64 data_alignment;
+    gchar *data_device;
+    gchar *integrity;
+    guint64 sector_size;
+    gchar *label;
+    gchar *subsystem;
+} BDCryptoLUKSExtra;
+
+/**
+ * bd_crypto_luks_extra_copy: (skip)
+ *
+ * Creates a new copy of @extra.
+ */
+BDCryptoLUKSExtra* bd_crypto_luks_extra_copy (BDCryptoLUKSExtra *extra) {
+   BDCryptoLUKSExtra *new_extra = g_new0 (BDCryptoLUKSExtra, 1);
+
+   new_extra->integrity = g_strdup (extra->integrity);
+   new_extra->data_alignment = extra->data_alignment;
+   new_extra->data_device = g_strdup (extra->data_device);
+   new_extra->sector_size = extra->sector_size;
+   new_extra->label = g_strdup (extra->label);
+   new_extra->subsystem = g_strdup (extra->subsystem);
+
+   return new_extra;
+}
+
+/**
+ * bd_crypto_luks_extra_free: (skip)
+ *
+ * Frees @extra.
+ */
+void bd_crypto_luks_extra_free (BDCryptoLUKSExtra *extra) {
+   g_free (extra->integrity);
+   g_free (extra->data_device);
+   g_free (extra->label);
+   g_free (extra->subsystem);
+   g_free (extra);
+}
+
+GType bd_crypto_luks_extra_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDCryptoLUKSExtra",
+                                            (GBoxedCopyFunc) bd_crypto_luks_extra_copy,
+                                            (GBoxedFreeFunc) bd_crypto_luks_extra_free);
+    }
+
+    return type;
+}
 
 /**
  * bd_crypto_is_tech_avail:
@@ -158,6 +233,62 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_CREATE
  */
 gboolean bd_crypto_luks_format_blob (const gchar *device, const gchar *cipher, guint64 key_size, const guint8 *pass_data, gsize data_len, guint64 min_entropy, GError **error);
+
+/**
+ * bd_crypto_luks_format_luks2:
+ * @device: a device to format as LUKS
+ * @cipher: (allow-none): cipher specification (type-mode, e.g. "aes-xts-plain64") or %NULL to use the default
+ * @key_size: size of the volume key in bits or 0 to use the default
+ * @passphrase: (allow-none): a passphrase for the new LUKS device or %NULL if not requested
+ * @key_file: (allow-none): a key file for the new LUKS device or %NULL if not requested
+ * @min_entropy: minimum random data entropy (in bits) required to format @device as LUKS
+ * @luks_version: whether to use LUKS v1 or LUKS v2
+ * @extra: (allow-none): extra arguments for LUKS format creation
+ * @error: (out): place to store error (if any)
+ *
+ * Formats the given @device as LUKS according to the other parameters given. If
+ * @min_entropy is specified (greater than 0), the function waits for enough
+ * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
+ * FOREVER).
+ *
+ * Either @passhphrase or @key_file has to be != %NULL.
+ *
+ * Using this function with @luks_version set to %BD_CRYPTO_LUKS_VERSION_1 and
+ * @extra to %NULL is the same as calling %bd_crypto_luks_format.
+ *
+ * Returns: whether the given @device was successfully formatted as LUKS or not
+ * (the @error) contains the error in such cases)
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS2-%BD_CRYPTO_TECH_MODE_CREATE
+ */
+gboolean bd_crypto_luks_format_luks2 (const gchar *device, const gchar *cipher, guint64 key_size, const gchar *passphrase, const gchar *key_file, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra,GError **error);
+
+/**
+ * bd_crypto_luks_format_luks2_blob:
+ * @device: a device to format as LUKS
+ * @cipher: (allow-none): cipher specification (type-mode, e.g. "aes-xts-plain64") or %NULL to use the default
+ * @key_size: size of the volume key in bits or 0 to use the default
+ * @pass_data: (array length=data_len): a passphrase for the new LUKS device (may contain arbitrary binary data)
+ * @data_len: length of the @pass_data buffer
+ * @min_entropy: minimum random data entropy (in bits) required to format @device as LUKS
+ * @luks_version: whether to use LUKS v1 or LUKS v2
+ * @extra: (allow-none): extra arguments for LUKS format creation
+ * @error: (out): place to store error (if any)
+ *
+ * Formats the given @device as LUKS according to the other parameters given. If
+ * @min_entropy is specified (greater than 0), the function waits for enough
+ * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
+ * FOREVER).
+ *
+ * Using this function with @luks_version set to %BD_CRYPTO_LUKS_VERSION_1 and
+ * @extra to %NULL is the same as calling %bd_crypto_luks_format_blob.
+ *
+ * Returns: whether the given @device was successfully formatted as LUKS or not
+ * (the @error) contains the error in such cases)
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS2-%BD_CRYPTO_TECH_MODE_CREATE
+ */
+gboolean bd_crypto_luks_format_luks2_blob (const gchar *device, const gchar *cipher, guint64 key_size, const guint8 *pass_data, gsize data_len, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra, GError **error);
 
 /**
  * bd_crypto_luks_open:
