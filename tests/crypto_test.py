@@ -101,7 +101,7 @@ class CryptoTestGenerateBackupPassphrase(CryptoTestCase):
 
 class CryptoTestFormat(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    def test_format(self):
+    def test_luks_format(self):
         """Verify that formating device as LUKS works"""
 
         # no passphrase nor keyfile
@@ -119,6 +119,34 @@ class CryptoTestFormat(CryptoTestCase):
         # the simple case with password blob
         succ = BlockDev.crypto_luks_format_blob(self.loop_dev, "aes-cbc-essiv:sha256", 0, [ord(c) for c in PASSWD], 0)
         self.assertTrue(succ)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_format(self):
+        """Verify that formating device as LUKS 2 works"""
+
+        # no passphrase nor keyfile
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_format(self.loop_dev, None, 0, None, None, 0)
+
+        # the simple case with password
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, PASSWD, None, 0)
+        self.assertTrue(succ)
+
+        # create with a keyfile
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0)
+        self.assertTrue(succ)
+
+        # the simple case with password blob
+        succ = BlockDev.crypto_luks_format_blob(self.loop_dev, "aes-cbc-essiv:sha256", 0, [ord(c) for c in PASSWD], 0)
+        self.assertTrue(succ)
+
+        # simple case with extra options
+        extra = BlockDev.CryptoLUKSExtra()
+        extra.integrity = None
+        extra.label = "blockdevLUKS"
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0,
+                                           BlockDev.CryptoLUKSVersion.LUKS2, extra)
 
 class CryptoTestResize(CryptoTestCase):
     def _resize(self, create_fn):
