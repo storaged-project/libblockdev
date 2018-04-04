@@ -84,22 +84,7 @@ class CryptoTestCase(unittest.TestCase):
         return BlockDev.crypto_luks_format(device, None, 0, passphrase, keyfile, 0)
 
     def _luks2_format(self, device, passphrase, keyfile):
-        # we currently don't support creating luks2 format using libblockdev
-        succ = True
-        if passphrase is not None:
-            ret, _out, _err = run_command("echo -n '%s' | cryptsetup luksFormat --type=luks2 %s -" % (PASSWD, device))
-            succ = ret == 0
-
-            if keyfile is not None:
-                ret, _out, _err = run_command("echo -n '%s' | cryptsetup luksAddKey %s %s -" % (PASSWD, device, keyfile))
-                succ = (succ and ret == 0)
-        else:
-            if keyfile is None:
-                raise RuntimeError("At least one of 'passphrase' and 'keyfile' must be specified.")
-            ret, _out, _err = run_command("cryptsetup luksFormat --type=luks2 --keyfile=%s %s -" % (keyfile, device))
-            succ = ret == 0
-
-        return succ
+        return BlockDev.crypto_luks_format(device, None, 0, passphrase, keyfile, 0, BlockDev.CryptoLUKSVersion.LUKS2, None)
 
 class CryptoTestGenerateBackupPassphrase(CryptoTestCase):
     def setUp(self):
