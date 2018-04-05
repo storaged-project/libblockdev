@@ -88,6 +88,28 @@ typedef struct BDCryptoLUKSExtra {
 void bd_crypto_luks_extra_free (BDCryptoLUKSExtra *extra);
 BDCryptoLUKSExtra* bd_crypto_luks_extra_copy (BDCryptoLUKSExtra *extra);
 
+/**
+ * BDCryptoLUKSInfo:
+ * @version: LUKS version
+ * @cipher: used cipher (e.g. "aes")
+ * @mode: used cipher mode (e.g. "xts-plain")
+ * @uuid: UUID of the LUKS device
+ * @backing_device: name of the underlying block device
+ * @sector_size: size (in bytes) of encryption sector
+ *               Note: sector size is valid only for LUKS 2
+ */
+typedef struct BDCryptoLUKSInfo {
+    BDCryptoLUKSVersion version;
+    gchar *cipher;
+    gchar *mode;
+    gchar *uuid;
+    gchar *backing_device;
+    gint64 sector_size;
+} BDCryptoLUKSInfo;
+
+void bd_crypto_luks_info_free (BDCryptoLUKSInfo *info);
+BDCryptoLUKSInfo* bd_crypto_luks_info_copy (BDCryptoLUKSInfo *info);
+
 /*
  * If using the plugin as a standalone library, the following functions should
  * be called to:
@@ -128,6 +150,8 @@ gboolean bd_crypto_luks_resume (const gchar *luks_device, const gchar *passphras
 gboolean bd_crypto_luks_kill_slot (const gchar *device, gint slot, GError **error);
 gboolean bd_crypto_luks_header_backup (const gchar *device, const gchar *backup_file, GError **error);
 gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup_file, GError **error);
+
+BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *luks_device, GError **error);
 
 gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error);
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);

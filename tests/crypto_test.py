@@ -748,3 +748,58 @@ class CryptoTestHeaderBackupRestore(CryptoTestCase):
     def test_luks2_header_backup_restore(self):
         """Verify that header backup/restore with LUKS2 works"""
         self._luks_header_backup_restore(self._luks2_format)
+
+class CryptoTestInfo(CryptoTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_luks_format(self):
+        """Verify that we can get information about a LUKS device"""
+
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, PASSWD, None, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
+        self.assertTrue(succ)
+
+        info = BlockDev.crypto_luks_info("libblockdevTestLUKS")
+        self.assertIsNotNone(info)
+
+        self.assertEqual(info.version, BlockDev.CryptoLUKSVersion.LUKS1)
+        self.assertEqual(info.cipher, "aes")
+        self.assertEqual(info.mode, "cbc-essiv:sha256")
+        self.assertEqual(info.backing_device, self.loop_dev)
+
+        _ret, uuid, _err = run_command("blkid -p -ovalue -sUUID %s" % self.loop_dev)
+        self.assertEqual(info.uuid, uuid)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_format(self):
+        """Verify that we can get information about a LUKS 2 device"""
+
+        extra = BlockDev.CryptoLUKSExtra()
+        extra.sector_size = 4096
+
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, PASSWD, None, 0,
+                                           BlockDev.CryptoLUKSVersion.LUKS2, extra)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
+        self.assertTrue(succ)
+
+        info = BlockDev.crypto_luks_info("libblockdevTestLUKS")
+        self.assertIsNotNone(info)
+
+        self.assertEqual(info.version, BlockDev.CryptoLUKSVersion.LUKS2)
+        self.assertEqual(info.cipher, "aes")
+        self.assertEqual(info.mode, "cbc-essiv:sha256")
+        self.assertEqual(info.backing_device, self.loop_dev)
+        self.assertEqual(info.sector_size, 4096)
+
+        _ret, uuid, _err = run_command("blkid -p -ovalue -sUUID %s" % self.loop_dev)
+        self.assertEqual(info.uuid, uuid)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)

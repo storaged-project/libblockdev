@@ -116,6 +116,71 @@ GType bd_crypto_luks_extra_get_type () {
     return type;
 }
 
+#define BD_CRYPTO_TYPE_LUKS_INFO (bd_crypto_luks_info_get_type ())
+GType bd_crypto_luks_info_get_type();
+
+/**
+ * BDCryptoLUKSInfo:
+ * @version: LUKS version
+ * @cipher: used cipher (e.g. "aes")
+ * @mode: used cipher mode (e.g. "xts-plain")
+ * @uuid: UUID of the LUKS device
+ * @backing_device: name of the underlying block device
+ * @sector_size: size (in bytes) of encryption sector
+ *               Note: sector size is valid only for LUKS 2
+ */
+typedef struct BDCryptoLUKSInfo {
+    BDCryptoLUKSVersion version;
+    gchar *cipher;
+    gchar *mode;
+    gchar *uuid;
+    gchar *backing_device;
+    gint64 sector_size;
+} BDCryptoLUKSInfo;
+
+/**
+ * bd_crypto_luks_info_free: (skip)
+ *
+ * Frees @info.
+ */
+void bd_crypto_luks_info_free (BDCryptoLUKSInfo *info) {
+    g_free (info->cipher);
+    g_free (info->mode);
+    g_free (info->uuid);
+    g_free (info->backing_device);
+    g_free (info);
+}
+
+/**
+ * bd_crypto_luks_info_copy: (skip)
+ *
+ * Creates a new copy of @info.
+ */
+BDCryptoLUKSInfo* bd_crypto_luks_info_copy (BDCryptoLUKSInfo *info) {
+    BDCryptoLUKSInfo *new_info = g_new0 (BDCryptoLUKSInfo, 1);
+
+    new_info->version = info->version;
+    new_info->cipher = g_strdup (info->cipher);
+    new_info->mode = g_strdup (info->mode);
+    new_info->uuid = g_strdup (info->uuid);
+    new_info->backing_device = g_strdup (info->backing_device);
+    new_info->sector_size = info->sector_size;
+
+    return new_info;
+}
+
+GType bd_crypto_luks_info_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDCryptoLUKSInfo",
+                                            (GBoxedCopyFunc) bd_crypto_luks_info_copy,
+                                            (GBoxedFreeFunc) bd_crypto_luks_info_free);
+    }
+
+    return type;
+}
+
 /**
  * bd_crypto_is_tech_avail:
  * @tech: the queried tech
@@ -518,6 +583,17 @@ gboolean bd_crypto_luks_header_backup (const gchar *device, const gchar *backup_
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_BACKUP_RESTORE
  */
 gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup_file, GError **error);
+
+/**
+ * bd_crypto_luks_info:
+ * @luks_device: a device to get information about
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: information about the @luks_device or %NULL in case of error
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
+ */
+BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *luks_device, GError **error);
 
 /**
  * bd_crypto_device_seems_encrypted:

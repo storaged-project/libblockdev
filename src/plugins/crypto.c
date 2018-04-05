@@ -85,6 +85,27 @@ void bd_crypto_luks_extra_free (BDCryptoLUKSExtra *extra) {
    g_free (extra);
 }
 
+void bd_crypto_luks_info_free (BDCryptoLUKSInfo *info) {
+    g_free (info->cipher);
+    g_free (info->mode);
+    g_free (info->uuid);
+    g_free (info->backing_device);
+    g_free (info);
+}
+
+BDCryptoLUKSInfo* bd_crypto_luks_info_copy (BDCryptoLUKSInfo *info) {
+    BDCryptoLUKSInfo *new_info = g_new0 (BDCryptoLUKSInfo, 1);
+
+    new_info->version = info->version;
+    new_info->cipher = g_strdup (info->cipher);
+    new_info->mode = g_strdup (info->mode);
+    new_info->uuid = g_strdup (info->uuid);
+    new_info->backing_device = g_strdup (info->backing_device);
+    new_info->sector_size = info->sector_size;
+
+    return new_info;
+}
+
 /* "C" locale to get the locale-agnostic error messages */
 static locale_t c_locale = (locale_t) 0;
 
@@ -1446,6 +1467,59 @@ gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup
     crypt_free (cd);
     bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
+}
+
+/**
+ * bd_crypto_luks_info:
+ * @luks_device: a device to get information about
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: information about the @luks_device or %NULL in case of error
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS%BD_CRYPTO_TECH_MODE_QUERY
+ */
+BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *luks_device, GError **error) {
+    struct crypt_device *cd = NULL;
+    BDCryptoLUKSInfo *info = NULL;
+    const gchar *version = NULL;
+    gint ret;
+
+    ret = crypt_init_by_name (&cd, luks_device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        return NULL;
+    }
+
+    info = g_new0 (BDCryptoLUKSInfo, 1);
+
+    version = crypt_get_type (cd);
+    if (g_strcmp0 (version, CRYPT_LUKS1) == 0)
+        info->version = BD_CRYPTO_LUKS_VERSION_LUKS1;
+#ifdef LIBCRYPTSETUP_2
+    else if (g_strcmp0 (version, CRYPT_LUKS2) == 0)
+        info->version = BD_CRYPTO_LUKS_VERSION_LUKS2;
+#endif
+    else {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                     "Unknown or unsupported LUKS version");
+        bd_crypto_luks_info_free (info);
+        return NULL;
+    }
+
+    info->cipher = g_strdup (crypt_get_cipher (cd));
+    info->mode = g_strdup (crypt_get_cipher_mode (cd));
+    info->uuid = g_strdup (crypt_get_uuid (cd));
+    info->backing_device = g_strdup (crypt_get_device_name (cd));
+
+#ifdef LIBCRYPTSETUP_2
+    info->sector_size = crypt_get_sector_size (cd);
+#else
+    info->sector_size = 0;
+#endif
+
+    crypt_free (cd);
+    return info;
 }
 
 /**
