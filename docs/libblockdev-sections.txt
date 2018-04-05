@@ -99,6 +99,10 @@ BDCryptoLUKSInfo
 bd_crypto_luks_info_free
 bd_crypto_luks_info_copy
 bd_crypto_luks_info
+BDCryptoIntegrityInfo
+bd_crypto_integrity_info_free
+bd_crypto_integrity_info_copy
+bd_crypto_integrity_info
 bd_crypto_tc_open
 bd_crypto_tc_open_full
 bd_crypto_tc_close

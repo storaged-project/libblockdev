@@ -44,6 +44,7 @@ typedef enum {
     BD_CRYPTO_TECH_LUKS2,
     BD_CRYPTO_TECH_TRUECRYPT,
     BD_CRYPTO_TECH_ESCROW,
+    BD_CRYPTO_TECH_INTEGRITY,
 } BDCryptoTech;
 
 typedef enum {
@@ -110,6 +111,31 @@ typedef struct BDCryptoLUKSInfo {
 void bd_crypto_luks_info_free (BDCryptoLUKSInfo *info);
 BDCryptoLUKSInfo* bd_crypto_luks_info_copy (BDCryptoLUKSInfo *info);
 
+/**
+ * BDCryptoIntegrityInfo:
+ * @algorithm: integrity algorithm
+ * @key_size: integrity key size in bytes
+ * @sector_size: sector size in bytes
+ * @tag_size: tag size per-sector in bytes
+ * @interleave_sectors: number of interleave sectors
+ * @journal_size: size of journal in bytes
+ * @journal_crypt: journal encryption algorithm
+ * @journal_integrity: journal integrity algorithm
+ */
+typedef struct BDCryptoIntegrityInfo {
+    gchar *algorithm;
+    guint32 key_size;
+    guint32 sector_size;
+    guint32 tag_size;
+    guint32 interleave_sectors;
+    guint64 journal_size;
+    gchar *journal_crypt;
+    gchar *journal_integrity;
+} BDCryptoIntegrityInfo;
+
+void bd_crypto_integrity_info_free (BDCryptoIntegrityInfo *info);
+BDCryptoIntegrityInfo* bd_crypto_integrity_info_copy (BDCryptoIntegrityInfo *info);
+
 /*
  * If using the plugin as a standalone library, the following functions should
  * be called to:
@@ -152,6 +178,7 @@ gboolean bd_crypto_luks_header_backup (const gchar *device, const gchar *backup_
 gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup_file, GError **error);
 
 BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *luks_device, GError **error);
+BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **error);
 
 gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error);
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);

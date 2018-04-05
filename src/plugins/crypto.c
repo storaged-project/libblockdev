@@ -106,6 +106,28 @@ BDCryptoLUKSInfo* bd_crypto_luks_info_copy (BDCryptoLUKSInfo *info) {
     return new_info;
 }
 
+void bd_crypto_integrity_info_free (BDCryptoIntegrityInfo *info) {
+    g_free (info->algorithm);
+    g_free (info->journal_crypt);
+    g_free (info->journal_integrity);
+    g_free (info);
+}
+
+BDCryptoIntegrityInfo* bd_crypto_integrity_info_copy (BDCryptoIntegrityInfo *info) {
+    BDCryptoIntegrityInfo *new_info = g_new0 (BDCryptoIntegrityInfo, 1);
+
+    new_info->algorithm = g_strdup (info->algorithm);
+    new_info->key_size = info->key_size;
+    new_info->sector_size = info->sector_size;
+    new_info->tag_size = info->tag_size;
+    new_info->interleave_sectors = info->interleave_sectors;
+    new_info->journal_size = info->journal_size;
+    new_info->journal_crypt = g_strdup (info->journal_crypt);
+    new_info->journal_integrity = g_strdup (info->journal_integrity);
+
+    return new_info;
+}
+
 /* "C" locale to get the locale-agnostic error messages */
 static locale_t c_locale = (locale_t) 0;
 
@@ -200,6 +222,19 @@ gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **erro
             if (ret != mode) {
                 g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
                              "Only 'create' supported for device escrow");
+                return FALSE;
+            } else
+                return TRUE;
+        case BD_CRYPTO_TECH_INTEGRITY:
+#ifndef LIBCRYPTSETUP_2
+            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                         "Integrity technology requires libcryptsetup >= 2.0");
+            return FALSE;
+#endif
+            ret = mode & (BD_CRYPTO_TECH_MODE_QUERY);
+            if (ret != mode) {
+                g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                             "Only 'query' supported for Integrity");
                 return FALSE;
             } else
                 return TRUE;
@@ -1521,6 +1556,59 @@ BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *luks_device, GError **error)
     crypt_free (cd);
     return info;
 }
+
+/**
+ * bd_crypto_integrity_info:
+ * @device: a device to get information about
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: information about the @device or %NULL in case of error
+ *
+ * Tech category: %BD_CRYPTO_TECH_INTEGRITY%BD_CRYPTO_TECH_MODE_QUERY
+ */
+#ifndef LIBCRYPTSETUP_2
+BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device __attribute__((unused)), GError **error) {
+    g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                 "Integrity technology requires libcryptsetup >= 2.0");
+    return NULL;
+}
+#else
+BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **error) {
+    struct crypt_device *cd = NULL;
+    struct crypt_params_integrity ip = ZERO_INIT;
+    BDCryptoIntegrityInfo *info = NULL;
+    gint ret;
+
+    ret = crypt_init_by_name (&cd, device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        return NULL;
+    }
+
+    ret = crypt_get_integrity_info (cd, &ip);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to get information about device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        return NULL;
+    }
+
+    info = g_new0 (BDCryptoIntegrityInfo, 1);
+
+    info->algorithm = g_strdup (ip.integrity);
+    info->key_size = ip.integrity_key_size;
+    info->sector_size = ip.sector_size;
+    info->tag_size = ip.tag_size;
+    info->interleave_sectors = ip.interleave_sectors;
+    info->journal_size = ip.journal_size;
+    info->journal_crypt = g_strdup (ip.journal_crypt);
+    info->journal_integrity = g_strdup (ip.journal_integrity);
+
+    crypt_free (cd);
+    return info;
+}
+#endif
 
 /**
  * bd_crypto_device_seems_encrypted:

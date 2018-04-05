@@ -30,6 +30,7 @@ typedef enum {
     BD_CRYPTO_TECH_LUKS2,
     BD_CRYPTO_TECH_TRUECRYPT,
     BD_CRYPTO_TECH_ESCROW,
+    BD_CRYPTO_TECH_INTEGRITY,
 } BDCryptoTech;
 
 typedef enum {
@@ -176,6 +177,75 @@ GType bd_crypto_luks_info_get_type () {
         type = g_boxed_type_register_static("BDCryptoLUKSInfo",
                                             (GBoxedCopyFunc) bd_crypto_luks_info_copy,
                                             (GBoxedFreeFunc) bd_crypto_luks_info_free);
+    }
+
+    return type;
+}
+
+#define BD_CRYPTO_TYPE_INTEGRITY_INFO (bd_crypto_integrity_info_get_type ())
+GType bd_crypto_integrity_info_get_type();
+
+/**
+ * BDCryptoIntegrityInfo:
+ * @algorithm: integrity algorithm
+ * @key_size: integrity key size in bytes
+ * @sector_size: sector size in bytes
+ * @tag_size: tag size per-sector in bytes
+ * @interleave_sectors: number of interleave sectors
+ * @journal_size: size of journal in bytes
+ * @journal_crypt: journal encryption algorithm
+ * @journal_integrity: journal integrity algorithm
+ */
+typedef struct BDCryptoIntegrityInfo {
+    gchar *algorithm;
+    guint32 key_size;
+    guint32 sector_size;
+    guint32 tag_size;
+    guint32 interleave_sectors;
+    guint64 journal_size;
+    gchar *journal_crypt;
+    gchar *journal_integrity;
+} BDCryptoIntegrityInfo;
+
+/**
+ * bd_crypto_integrity_info_free: (skip)
+ *
+ * Frees @info.
+ */
+void bd_crypto_integrity_info_free (BDCryptoIntegrityInfo *info) {
+    g_free (info->algorithm);
+    g_free (info->journal_crypt);
+    g_free (info->journal_integrity);
+    g_free (info);
+}
+
+/**
+ * bd_crypto_luks_integrity_copy: (skip)
+ *
+ * Creates a new copy of @info.
+ */
+BDCryptoIntegrityInfo* bd_crypto_integrity_info_copy (BDCryptoIntegrityInfo *info) {
+    BDCryptoIntegrityInfo *new_info = g_new0 (BDCryptoIntegrityInfo, 1);
+
+    new_info->algorithm = g_strdup (info->algorithm);
+    new_info->key_size = info->key_size;
+    new_info->sector_size = info->sector_size;
+    new_info->tag_size = info->tag_size;
+    new_info->interleave_sectors = info->interleave_sectors;
+    new_info->journal_size = info->journal_size;
+    new_info->journal_crypt = g_strdup (info->journal_crypt);
+    new_info->journal_integrity = g_strdup (info->journal_integrity);
+
+    return new_info;
+}
+
+GType bd_crypto_integrity_info_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDCryptoIntegrityInfo",
+                                            (GBoxedCopyFunc) bd_crypto_integrity_info_copy,
+                                            (GBoxedFreeFunc) bd_crypto_integrity_info_free);
     }
 
     return type;
@@ -594,6 +664,17 @@ gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
  */
 BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *luks_device, GError **error);
+
+/**
+ * bd_crypto_integrity_info:
+ * @device: a device to get information about
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: information about the @device or %NULL in case of error
+ *
+ * Tech category: %BD_CRYPTO_TECH_INTEGRITY-%BD_CRYPTO_TECH_MODE_QUERY
+ */
+BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **error);
 
 /**
  * bd_crypto_device_seems_encrypted:

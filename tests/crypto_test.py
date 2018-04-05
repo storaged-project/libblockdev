@@ -8,7 +8,7 @@ import six
 import locale
 import re
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on, get_avail_locales, requires_locales, run_command
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on, get_avail_locales, requires_locales, run_command, read_file
 from gi.repository import BlockDev, GLib
 
 PASSWD = "myshinylittlepassword"
@@ -800,6 +800,37 @@ class CryptoTestInfo(CryptoTestCase):
 
         _ret, uuid, _err = run_command("blkid -p -ovalue -sUUID %s" % self.loop_dev)
         self.assertEqual(info.uuid, uuid)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+class CryptoTestIntegrity(CryptoTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_integrity(self):
+        """Verify that we can get create a LUKS 2 device with integrity"""
+
+        extra = BlockDev.CryptoLUKSExtra()
+        extra.integrity = "hmac(sha256)"
+
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 512, PASSWD, None, 0,
+                                           BlockDev.CryptoLUKSVersion.LUKS2, extra)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
+        self.assertTrue(succ)
+
+        info = BlockDev.crypto_integrity_info("libblockdevTestLUKS")
+        self.assertIsNotNone(info)
+
+        self.assertEqual(info.algorithm, "hmac(sha256)")
+
+        # get integrity device dm name
+        _ret, int_name, _err = run_command('ls /sys/block/%s/holders/' % self.loop_dev.split("/")[-1])
+        self.assertTrue(int_name)  # true == not empty
+
+        tag_size = read_file("/sys/block/%s/integrity/tag_size" % int_name)
+        self.assertEqual(info.tag_size, int(tag_size))
 
         succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
         self.assertTrue(succ)
