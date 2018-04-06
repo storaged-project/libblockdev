@@ -636,3 +636,58 @@ class CryptoTestKillSlot(CryptoTestCase):
     def test_luks2_kill_slot(self):
         """Verify that killing a key slot on LUKS 2 device works"""
         self._luks_kill_slot(self._luks2_format)
+
+class CryptoTestHeaderBackupRestore(CryptoTestCase):
+
+    def setUp(self):
+        super(CryptoTestHeaderBackupRestore, self).setUp()
+
+        self.backup_dir = tempfile.mkdtemp(prefix='libblockdev_test_header')
+        self.addCleanup(shutil.rmtree, self.backup_dir)
+
+    def _luks_header_backup_restore(self, create_fn):
+        succ = create_fn(self.loop_dev, PASSWD, None)
+        self.assertTrue(succ)
+
+        backup_file = os.path.join(self.backup_dir, "luks-header.txt")
+
+        succ = BlockDev.crypto_luks_header_backup(self.loop_dev, backup_file)
+        self.assertTrue(succ)
+        self.assertTrue(os.path.isfile(backup_file))
+
+        # now completely destroy the luks header
+        ret, out, err = run_command("cryptsetup erase %s -q && wipefs -a %s" % (self.loop_dev, self.loop_dev))
+        if ret != 0:
+            self.fail("Failed to erase LUKS header from %s:\n%s %s" % (self.loop_dev, out, err))
+
+        _ret, fstype, _err = run_command("blkid -p -ovalue -sTYPE %s" % self.loop_dev)
+        self.assertFalse(fstype)  # false == empty
+
+        # header is destroyed, should not be possible to open
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None)
+
+        # and restore the header back
+        succ = BlockDev.crypto_luks_header_restore(self.loop_dev, backup_file)
+        self.assertTrue(succ)
+
+        _ret, fstype, _err = run_command("blkid -p -ovalue -sTYPE %s" % self.loop_dev)
+        self.assertEqual(fstype, "crypto_LUKS")
+
+        # opening should now work
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_luks_header_backup_restore(self):
+        """Verify that header backup/restore with LUKS works"""
+        self._luks_header_backup_restore(self._luks_format)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_header_backup_restore(self):
+        """Verify that header backup/restore with LUKS2 works"""
+        self._luks_header_backup_restore(self._luks2_format)

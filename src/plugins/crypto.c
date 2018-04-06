@@ -111,10 +111,10 @@ gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **erro
         case BD_CRYPTO_TECH_LUKS:
             ret = mode & (BD_CRYPTO_TECH_MODE_CREATE|BD_CRYPTO_TECH_MODE_OPEN_CLOSE|BD_CRYPTO_TECH_MODE_QUERY|
                           BD_CRYPTO_TECH_MODE_ADD_KEY|BD_CRYPTO_TECH_MODE_REMOVE_KEY|BD_CRYPTO_TECH_MODE_RESIZE|
-                          BD_CRYPTO_TECH_MODE_SUSPEND_RESUME);
+                          BD_CRYPTO_TECH_MODE_SUSPEND_RESUME|BD_CRYPTO_TECH_MODE_BACKUP_RESTORE);
             if (ret != mode) {
                 g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                             "Only 'create', 'open', 'query', 'add-key', 'remove-key', 'resize', 'suspend-resume' supported for LUKS");
+                             "Only 'create', 'open', 'query', 'add-key', 'remove-key', 'resize', 'suspend-resume', 'backup-restore' supported for LUKS");
                 return FALSE;
             } else
                 return TRUE;
@@ -1148,6 +1148,102 @@ gboolean bd_crypto_luks_kill_slot (const gchar *device, gint slot, GError **erro
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to destroy keyslot: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
+}
+
+/**
+ * bd_crypto_luks_header_backup:
+ * @device: device to backup the LUKS header
+ * @backup_file: file to save the header backup to
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the given backup of @device was successfully written to
+ *          @backup_file or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_BACKUP_RESTORE
+ */
+gboolean bd_crypto_luks_header_backup (const gchar *device, const gchar *backup_file, GError **error) {
+    struct crypt_device *cd = NULL;
+    gint ret = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started header backup of LUKS device '%s'", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_load (cd, CRYPT_LUKS, NULL);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to load device's parameters: %s", strerror_l(-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_header_backup (cd, NULL, backup_file);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to backup LUKS header: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
+}
+
+/**
+ * bd_crypto_luks_header_restore:
+ * @device: device to restore the LUKS header to
+ * @backup_file: existing file with a LUKS header backup
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the given @device LUKS header was successfully restored
+ *          from @backup_file
+ *
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_BACKUP_RESTORE
+ */
+gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup_file, GError **error) {
+    struct crypt_device *cd = NULL;
+    gint ret = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started LUKS header restore on device '%s'", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_header_restore (cd, NULL, backup_file);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to restore LUKS header: %s", strerror_l (-ret, c_locale));
         crypt_free (cd);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
