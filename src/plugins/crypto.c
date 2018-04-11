@@ -41,6 +41,8 @@
 #define ZERO_INIT {0}
 #endif
 
+#define SECTOR_SIZE 512
+
 /**
  * SECTION: crypto
  * @short_description: plugin for operations with encrypted devices
@@ -212,7 +214,7 @@ gboolean bd_crypto_device_is_luks (const gchar *device, GError **error) {
  * @device: the queried device
  * @error: (out): place to store error (if any)
  *
- * Returns: (transfer full): UUID of the @device or %NULL if failed to determine (@error)
+ * Returns: (transfer full): UUID of the @device or %NULL if failed to determine (@error
  * is populated with the error in such cases)
  *
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
@@ -238,6 +240,43 @@ gchar* bd_crypto_luks_uuid (const gchar *device, GError **error) {
     }
 
     ret = g_strdup (crypt_get_uuid (cd));
+    crypt_free (cd);
+
+    return ret;
+}
+
+/**
+ * bd_crypto_get_luks_metadata_size:
+ * @device: the queried device
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: luks device metadata size of the @device
+ *          or 0 if failed to determine (@error is populated
+ *          with the error in such cases)
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
+ */
+guint64 bd_crypto_luks_get_metadata_size (const gchar *device, GError **error) {
+    struct crypt_device *cd = NULL;
+    gint ret_num;
+    guint64 ret;
+
+    ret_num = crypt_init (&cd, device);
+    if (ret_num != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l(-ret_num, c_locale));
+        return 0;
+    }
+
+    ret_num = crypt_load (cd, CRYPT_LUKS, NULL);
+    if (ret_num != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to load device: %s", strerror_l(-ret_num, c_locale));
+        crypt_free (cd);
+        return 0;
+    }
+
+    ret = SECTOR_SIZE * crypt_get_data_offset (cd);
     crypt_free (cd);
 
     return ret;
