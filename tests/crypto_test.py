@@ -149,11 +149,12 @@ class CryptoTestFormat(CryptoTestCase):
                                            BlockDev.CryptoLUKSVersion.LUKS2, extra)
 
 class CryptoTestResize(CryptoTestCase):
-    def _resize(self, create_fn):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_luks_resize(self):
         """Verify that resizing LUKS device works"""
 
         # the simple case with password
-        succ = create_fn(self.loop_dev, PASSWD, None)
+        succ = self._luks_format(self.loop_dev, PASSWD, None)
         self.assertTrue(succ)
 
         succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
@@ -171,8 +172,31 @@ class CryptoTestResize(CryptoTestCase):
         self.assertTrue(succ)
 
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    def test_luks_resize(self):
-        self._resize(self._luks_format)
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_resize(self):
+        """Verify that resizing LUKS 2 device works"""
+
+        # the simple case with password
+        succ = self._luks2_format(self.loop_dev, PASSWD, self.keyfile)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
+        self.assertTrue(succ)
+
+        # resize without passphrase should fail
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_resize("libblockdevTestLUKS", 1024)
+
+        # resize to 512 KiB (1024 * 512B sectors)
+        succ = BlockDev.crypto_luks_resize("libblockdevTestLUKS", 1024, PASSWD)
+        self.assertTrue(succ)
+
+        # resize back to full size (using the keyfile)
+        succ = BlockDev.crypto_luks_resize("libblockdevTestLUKS", 0, None, self.keyfile)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
 
 class CryptoTestOpenClose(CryptoTestCase):
     def _luks_open_close(self, create_fn):

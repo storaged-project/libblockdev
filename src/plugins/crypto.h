@@ -18,6 +18,7 @@ typedef enum {
     BD_CRYPTO_ERROR_INVALID_SPEC,
     BD_CRYPTO_ERROR_FORMAT_FAILED,
     BD_CRYPTO_ERROR_RESIZE_FAILED,
+    BD_CRYPTO_ERROR_RESIZE_PERM,
     BD_CRYPTO_ERROR_ADD_KEY,
     BD_CRYPTO_ERROR_REMOVE_KEY,
     BD_CRYPTO_ERROR_NO_KEY,
@@ -170,6 +171,8 @@ gboolean bd_crypto_luks_remove_key_blob (const gchar *device, const guint8 *pass
 gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, const gchar *npass, GError **error);
 gboolean bd_crypto_luks_change_key_blob (const gchar *device, const guint8 *pass_data, gsize data_len, const guint8 *npass_data, gsize ndata_len, GError **error);
 gboolean bd_crypto_luks_resize (const gchar *device, guint64 size, GError **error);
+gboolean bd_crypto_luks_resize_luks2 (const gchar *luks_device, guint64 size, const gchar *passphrase, const gchar *key_file, GError **error);
+gboolean bd_crypto_luks_resize_luks2_blob (const gchar *luks_device, guint64 size, const guint8* pass_data, gsize data_len, GError **error);
 gboolean bd_crypto_luks_suspend (const gchar *luks_device, GError **error);
 gboolean bd_crypto_luks_resume_blob (const gchar *luks_device, const guint8 *pass_data, gsize data_len, GError **error);
 gboolean bd_crypto_luks_resume (const gchar *luks_device, const gchar *passphrase, const gchar *key_file, GError **error);

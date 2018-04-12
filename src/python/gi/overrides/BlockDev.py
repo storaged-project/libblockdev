@@ -206,10 +206,10 @@ def crypto_luks_open(device, name, passphrase=None, key_file=None, read_only=Fal
     return _crypto_luks_open(device, name, passphrase, key_file, read_only)
 __all__.append("crypto_luks_open")
 
-_crypto_luks_resize = BlockDev.crypto_luks_resize
+_crypto_luks_resize = BlockDev.crypto_luks_resize_luks2
 @override(BlockDev.crypto_luks_resize)
-def crypto_luks_resize(luks_device, size=0):
-    return _crypto_luks_resize(luks_device, size)
+def crypto_luks_resize(luks_device, size=0, passphrase=None, key_file=None):
+    return _crypto_luks_resize(luks_device, size, passphrase, key_file)
 __all__.append("crypto_luks_resize")
 
 _crypto_luks_add_key = BlockDev.crypto_luks_add_key

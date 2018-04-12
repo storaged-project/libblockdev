@@ -25,6 +25,7 @@
 #include <linux/random.h>
 #include <locale.h>
 #include <unistd.h>
+#include <errno.h>
 #include <blockdev/utils.h>
 
 #ifdef WITH_BD_ESCROW
@@ -1171,21 +1172,14 @@ gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, cons
     return bd_crypto_luks_change_key_blob (device, (guint8*) pass, strlen (pass), (guint8*) npass, strlen (npass), error);
 }
 
-/**
- * bd_crypto_luks_resize:
- * @luks_device: opened LUKS device to resize
- * @size: requested size in sectors or 0 to adapt to the backing device
- * @error: (out): place to store error (if any)
- *
- * Returns: whether the @luks_device was successfully resized or not
- *
- * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_RESIZE
- */
-gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError **error) {
+static gboolean luks_resize (const gchar *luks_device, guint64 size, const guint8 *pass_data, gsize data_len, const gchar *key_file, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
+    gboolean success = FALSE;
+    gchar *key_buffer = NULL;
+    gsize buf_len = 0;
 
     msg = g_strdup_printf ("Started resizing LUKS device '%s'", luks_device);
     progress_id = bd_utils_report_started (msg);
@@ -1199,8 +1193,52 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError *
         return FALSE;
     }
 
+    if (pass_data || key_file) {
+        if (key_file) {
+            success = g_file_get_contents (key_file, &key_buffer, &buf_len, error);
+            if (!success) {
+                g_prefix_error (error, "Failed to add key file: %s", strerror_l(-ret, c_locale));
+                crypt_free (cd);
+                bd_utils_report_finished (progress_id, (*error)->message);
+                return FALSE;
+            }
+        } else
+            buf_len = data_len;
+
+#ifdef LIBCRYPTSETUP_2
+        ret = crypt_activate_by_passphrase (cd, NULL, CRYPT_ANY_SLOT,
+                                            key_buffer ? key_buffer : (char*) pass_data,
+                                            buf_len, CRYPT_ACTIVATE_KEYRING_KEY);
+#else
+        ret = crypt_activate_by_passphrase (cd, NULL, CRYPT_ANY_SLOT,
+                                            key_buffer ? key_buffer : (char*) pass_data,
+                                            buf_len, 0);
+#endif
+        g_free (key_buffer);
+
+        if (ret < 0) {
+            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                         "Failed to activate device: %s", strerror_l(-ret, c_locale));
+            crypt_free (cd);
+            bd_utils_report_finished (progress_id, (*error)->message);
+            return FALSE;
+        }
+    }
+
     ret = crypt_resize (cd, luks_device, size);
     if (ret != 0) {
+#ifdef LIBCRYPTSETUP_2
+        if (ret == -EPERM && g_strcmp0 (crypt_get_type (cd), CRYPT_LUKS2) == 0) {
+            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_RESIZE_PERM,
+                         "Insufficient persmissions to resize device. You need to specify"
+                         " passphrase or keyfile to resize LUKS 2 devices that don't"
+                         " have verified key loaded in kernel.");
+            crypt_free (cd);
+            bd_utils_report_finished (progress_id, (*error)->message);
+            return FALSE;
+
+        }
+#endif
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_RESIZE_FAILED,
                      "Failed to resize device: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
@@ -1211,6 +1249,66 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError *
     crypt_free (cd);
     bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
+}
+
+
+/**
+ * bd_crypto_luks_resize:
+ * @luks_device: opened LUKS device to resize
+ * @size: requested size in sectors or 0 to adapt to the backing device
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @luks_device was successfully resized or not
+ *
+ * You need to specify passphrase when resizing LUKS 2 devices that don't have
+ * verified key loaded in kernel. If you don't specify a passphrase, resize
+ * will fail with %BD_CRYPTO_ERROR_RESIZE_PERM. Use %bd_crypto_luks_resize_luks2
+ * or %bd_crypto_luks_resize_luks2_blob for these devices.
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_RESIZE
+ */
+gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError **error) {
+    return luks_resize (luks_device, size, NULL, 0, NULL, error);
+}
+
+/**
+ * bd_crypto_luks_resize_luks2:
+ * @luks_device: opened LUKS device to resize
+ * @passphrase: (allow-none): passphrase to resize the @luks_device or %NULL
+ * @key_file: (allow-none): key file path to use for resizinh the @luks_device or %NULL
+ * @size: requested size in sectors or 0 to adapt to the backing device
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @luks_device was successfully resized or not
+ *
+ * You need to specify either @passphrase or @keyfile for LUKS 2 devices that
+ * don't have verified key loaded in kernel.
+ * For LUKS 1 devices you can set both @passphrase and @keyfile to %NULL to
+ * achieve the same as calling %bd_crypto_luks_resize.
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS2-%BD_CRYPTO_TECH_MODE_RESIZE
+ */
+gboolean bd_crypto_luks_resize_luks2 (const gchar *luks_device, guint64 size, const gchar *passphrase, const gchar *key_file, GError **error) {
+    return luks_resize (luks_device, size, (const guint8*) passphrase, passphrase ? strlen (passphrase) : 0, key_file, error);
+}
+
+/**
+ * bd_crypto_luks_resize_luks2_blob:
+ * @luks_device: opened LUKS device to resize
+ * @pass_data: (array length=data_len): a passphrase for the new LUKS device (may contain arbitrary binary data)
+ * @data_len: length of the @pass_data buffer
+ * @size: requested size in sectors or 0 to adapt to the backing device
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @luks_device was successfully resized or not
+ *
+ * You need to specify @pass_data for LUKS 2 devices that don't have
+ * verified key loaded in kernel.
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS2-%BD_CRYPTO_TECH_MODE_RESIZE
+ */
+gboolean bd_crypto_luks_resize_luks2_blob (const gchar *luks_device, guint64 size, const guint8* pass_data, gsize data_len, GError **error) {
+    return luks_resize (luks_device, size, pass_data, data_len, NULL, error);
 }
 
 /**
