@@ -26,6 +26,7 @@
 #include <locale.h>
 #include <unistd.h>
 #include <errno.h>
+#include <syslog.h>
 #include <blockdev/utils.h>
 
 #ifdef WITH_BD_ESCROW
@@ -145,6 +146,32 @@ gboolean bd_crypto_check_deps () {
     return TRUE;
 }
 
+static void crypto_log_redirect (gint level, const gchar *msg, void *usrptr __attribute__((unused))) {
+    gchar *message = NULL;
+
+    switch (level) {
+        case CRYPT_LOG_DEBUG:
+        case CRYPT_LOG_VERBOSE:
+            message = g_strdup_printf ("[cryptsetup] %s", msg);
+            bd_utils_log (LOG_DEBUG, message);
+            g_free (message);
+            break;
+        case CRYPT_LOG_NORMAL:
+        case CRYPT_LOG_ERROR:
+            message = g_strdup_printf ("[cryptsetup] %s", msg);
+            bd_utils_log (LOG_INFO, message);
+            g_free (message);
+            break;
+        default:
+            g_warning ("Unknown cryptsetup log level %d.", level);
+            message = g_strdup_printf ("[cryptsetup] %s", msg);
+            bd_utils_log (LOG_INFO, message);
+            g_free (message);
+            break;
+
+    }
+}
+
 /**
  * bd_crypto_init:
  *
@@ -154,6 +181,7 @@ gboolean bd_crypto_check_deps () {
  */
 gboolean bd_crypto_init () {
     c_locale = newlocale (LC_ALL_MASK, "C", c_locale);
+    crypt_set_log_callback (NULL, &crypto_log_redirect, NULL);
     return TRUE;
 }
 
@@ -166,6 +194,7 @@ gboolean bd_crypto_init () {
  */
 void bd_crypto_close () {
     c_locale = (locale_t) 0;
+    crypt_set_log_callback (NULL, NULL, NULL);
 }
 
 /**
