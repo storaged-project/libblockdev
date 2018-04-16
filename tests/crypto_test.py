@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import six
 import locale
+import re
 
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on, get_avail_locales, requires_locales, run_command
 from gi.repository import BlockDev, GLib
@@ -387,6 +388,49 @@ class CryptoTestGetUUID(CryptoTestCase):
     @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_get_uuid(self):
         self._get_uuid(self._luks2_format)
+
+class CryptoTestGetMetadataSize(CryptoTestCase):
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_get_metadata_size(self):
+        """Verify that getting LUKS 2 device metadata size works"""
+
+        succ = self._luks2_format(self.loop_dev, PASSWD, None)
+        self.assertTrue(succ)
+
+        meta_size = BlockDev.crypto_luks_get_metadata_size(self.loop_dev)
+
+        ret, out, err = run_command("cryptsetup luksDump %s" % self.loop_dev)
+        if ret != 0:
+            self.fail("Failed to get LUKS 2 header from %s:\n%s %s" % (self.loop_dev, out, err))
+
+        m = re.search(r"offset:\s*([0-9]+)\s*\[bytes\]", out)
+        if m is None:
+            self.fail("Failed to get LUKS 2 offset information from %s:\n%s %s" % (self.loop_dev, out, err))
+        offset = int(m.group(1))
+        self.assertEquals(meta_size, offset, "LUKS 2 metadata sizes differ")
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_luks_get_metadata_size(self):
+        """Verify that getting LUKS device metadata size works"""
+
+        succ = self._luks_format(self.loop_dev, PASSWD, None)
+        self.assertTrue(succ)
+
+        meta_size = BlockDev.crypto_luks_get_metadata_size(self.loop_dev)
+
+        ret, out, err = run_command("cryptsetup luksDump %s" % self.loop_dev)
+        if ret != 0:
+            self.fail("Failed to get LUKS header from %s:\n%s %s" % (self.loop_dev, out, err))
+
+        m = re.search(r"Payload offset:\s*([0-9]+)", out)
+        if m is None:
+            self.fail("Failed to get LUKS 2 offset information from %s:\n%s %s" % (self.loop_dev, out, err))
+        # offset value is in 512B blocks; we need to multiply to get the real metadata size
+        offset = int(m.group(1)) * 512
+
+        self.assertEquals(meta_size, offset, "LUKS metadata sizes differ")
 
 class CryptoTestLuksOpenRW(CryptoTestCase):
     def _luks_open_rw(self, create_fn):

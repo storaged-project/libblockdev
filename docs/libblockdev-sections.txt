@@ -69,6 +69,7 @@ bd_crypto_generate_backup_passphrase
 bd_crypto_device_is_luks
 bd_crypto_device_seems_encrypted
 bd_crypto_luks_uuid
+bd_crypto_luks_get_metadata_size
 bd_crypto_luks_status
 bd_crypto_luks_format
 bd_crypto_luks_format_blob
