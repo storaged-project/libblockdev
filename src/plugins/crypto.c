@@ -20,14 +20,17 @@
 #include <string.h>
 #include <glib.h>
 #include <libcryptsetup.h>
-#include <nss.h>
-#include <volume_key/libvolume_key.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/random.h>
 #include <locale.h>
 #include <unistd.h>
 #include <blockdev/utils.h>
+
+#ifdef WITH_BD_ESCROW
+#include <nss.h>
+#include <volume_key/libvolume_key.h>
+#endif
 
 #include "crypto.h"
 
@@ -42,6 +45,8 @@
 #endif
 
 #define SECTOR_SIZE 512
+
+#define UNUSED __attribute__((unused))
 
 /**
  * SECTION: crypto
@@ -129,6 +134,11 @@ gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **erro
             } else
                 return TRUE;
         case BD_CRYPTO_TECH_ESCROW:
+#ifndef WITH_BD_ESCROW
+            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                         "Escrow technology is not available, libblockdev has been compiled without escrow support.");
+            return FALSE;
+#endif
             ret = mode & BD_CRYPTO_TECH_MODE_CREATE;
             if (ret != mode) {
                 g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
@@ -1517,6 +1527,7 @@ gboolean bd_crypto_tc_close (const gchar *tc_device, GError **error) {
     return TRUE;
 }
 
+#ifdef WITH_BD_ESCROW
 static gchar *always_fail_cb (gpointer data __attribute__((unused)), const gchar *prompt __attribute__((unused)), int echo __attribute__((unused))) {
     return NULL;
 }
@@ -1607,6 +1618,7 @@ static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libv
 
     return TRUE;
 }
+#endif // WITH_BD_ESCROW
 
 /**
  * bd_crypto_escrow_device:
@@ -1621,6 +1633,12 @@ static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libv
  *
  * Tech category: %BD_CRYPTO_TECH_ESCROW-%BD_CRYPTO_TECH_MODE_CREATE
  */
+#ifndef WITH_BD_ESCROW
+gboolean bd_crypto_escrow_device (const gchar *device UNUSED, const gchar *passphrase UNUSED, const gchar *cert_data UNUSED, const gchar *directory UNUSED, const gchar *backup_passphrase UNUSED, GError **error) {
+    /* this will return FALSE and set error, because escrow technology is not available */
+    return bd_crypto_is_tech_avail (BD_CRYPTO_TECH_ESCROW, BD_CRYPTO_TECH_MODE_CREATE, error);
+}
+#else
 gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, const gchar *cert_data, const gchar *directory, const gchar *backup_passphrase, GError **error) {
     struct libvk_volume *volume = NULL;
     struct libvk_ui *ui = NULL;
@@ -1736,3 +1754,4 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
     bd_utils_report_finished (progress_id, "Completed");
     return ret;
 }
+#endif // WITH_BD_ESCROW

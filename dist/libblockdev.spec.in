@@ -15,6 +15,7 @@
 %define with_fs @WITH_FS@
 %define with_nvdimm @WITH_NVDIMM@
 %define with_gi @WITH_GI@
+%define with_escrow @WITH_ESCROW@
 
 # python3 is not available on older RHEL
 %if ! 0%{?fedora} && 0%{?rhel} <= 7
@@ -29,6 +30,10 @@
 %endif
 %if %{with_crypto} != 1
 %define crypto_copts --without-crypto
+%else
+%if %{with_escrow} != 1
+%define crypto_copts --without-escrow
+%endif
 %endif
 %if %{with_dm} != 1
 %define dm_copts --without-dm
@@ -187,8 +192,12 @@ with the libblockdev-btrfs plugin/library.
 %if %{with_crypto}
 %package crypto
 BuildRequires: cryptsetup-devel
+
+%if %{with_escrow}
 BuildRequires: volume_key-devel >= 0.3.9-7
 BuildRequires: nss-devel
+%endif
+
 Summary:     The crypto plugin for the libblockdev library
 
 %description crypto
