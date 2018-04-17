@@ -129,6 +129,17 @@ AS_IF([test "x$with_bcache" != "xno"],
       [AC_DEFINE([WITH_BD_BCACHE], [], [Define if bcache is supported]) AC_SUBST([WITH_BCACHE], [1])],
       [])
 
+AC_ARG_WITH([escrow],
+    AS_HELP_STRING([--with-escrow], [support escrow @<:@default=yes@:>@]),
+    [],
+    [with_escrow=yes])
+
+AC_SUBST([WITH_ESCROW], [0])
+AM_CONDITIONAL(WITH_ESCROW, test "x$with_escrow" != "xno")
+AS_IF([test "x$with_escrow" != "xno"],
+      [AC_DEFINE([WITH_BD_ESCROW], [], [Define if escrow is supported]) AC_SUBST([WITH_ESCROW], [1])],
+      [])
+
 LIBBLOCKDEV_PLUGIN([BTRFS], [btrfs])
 LIBBLOCKDEV_PLUGIN([CRYPTO], [crypto])
 LIBBLOCKDEV_PLUGIN([DM], [dm])
@@ -156,8 +167,10 @@ AS_IF([test "x$with_crypto" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([CRYPTSETUP], [libcryptsetup >= 1.6.7])
       AS_IF([$PKG_CONFIG --atleast-version=2.0 libcryptsetup],
             [AC_DEFINE([LIBCRYPTSETUP_PIM_SUPPORT])], [])
-       LIBBLOCKDEV_PKG_CHECK_MODULES([NSS], [nss >= 3.18.0])
-       LIBBLOCKDEV_CHECK_HEADER([volume_key/libvolume_key.h], [$GLIB_CFLAGS $NSS_CFLAGS], [libvolume_key.h not available])
+      AS_IF([test "x$with_escrow" != "xno"],
+            [LIBBLOCKDEV_PKG_CHECK_MODULES([NSS], [nss >= 3.18.0])
+             LIBBLOCKDEV_CHECK_HEADER([volume_key/libvolume_key.h], [$GLIB_CFLAGS $NSS_CFLAGS], [libvolume_key.h not available])],
+            [])
       ],
       [])
 
