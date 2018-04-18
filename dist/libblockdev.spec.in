@@ -1,3 +1,4 @@
+%define with_python2 @WITH_PYTHON2@
 %define with_python3 @WITH_PYTHON3@
 %define with_gtk_doc @WITH_GTK_DOC@
 %define with_bcache @WITH_BCACHE@
@@ -17,12 +18,28 @@
 %define with_gi @WITH_GI@
 %define with_escrow @WITH_ESCROW@
 
+# python2 is not available on RHEL > 7 and not needed on Fedora > 28
+%if 0%{?rhel} > 7 || 0%{?fedora} > 28 || %{with_python2} == 0
+%define with_python2 0
+%define python2_copts --without-python2
+%endif
+
 # python3 is not available on older RHEL
-%if ! 0%{?fedora} && 0%{?rhel} <= 7
+%if (! 0%{?fedora} && 0%{?rhel} <= 7) || %{with_python3} == 0
 %define with_python3 0
+%define python3_copts  --without-python3
+%endif
+
+# bcache is not available on older RHEL
+%if (! 0%{?fedora} && 0%{?rhel} <= 7) || %{with_bcache} == 0
 %define with_bcache 0
+%define bcache_copts --without-bcache
+%endif
+
+# lvm_dbus is not available on older RHEL
+%if (! 0%{?fedora} && 0%{?rhel} <= 7) || %{with_lvm_dbus} == 0
 %define with_lvm_dbus 0
-%define distro_copts --without-python3 --without-bcache --without-lvm-dbus
+%define lvm_dbus_copts --without-lvm-dbus
 %endif
 
 %if %{with_btrfs} != 1
@@ -72,7 +89,7 @@
 %define gi_copts --disable-introspection
 %endif
 
-%define configure_opts %{?distro_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?gi_copts}
+%define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?gi_copts}
 
 Name:        libblockdev
 Version:     2.16
@@ -86,7 +103,9 @@ BuildRequires: glib2-devel
 %if %{with_gi}
 BuildRequires: gobject-introspection-devel
 %endif
+%if %{with_python2}
 BuildRequires: python2-devel
+%endif
 %if %{with_python3}
 BuildRequires: python3-devel
 %endif
@@ -121,6 +140,7 @@ Requires: glib2-devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev library.
 
+%if %{with_python2}
 %package -n python2-blockdev
 Summary:     Python2 gobject-introspection bindings for libblockdev
 Requires: %{name}%{?_isa} = %{version}-%{release}
@@ -135,6 +155,7 @@ Requires: python2-gobject-base
 %description -n python2-blockdev
 This package contains enhancements to the gobject-introspection bindings for
 libblockdev in Python2.
+%endif
 
 %if %{with_python3}
 %package -n python3-blockdev
@@ -660,8 +681,10 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_datadir}/gir*/BlockDev*.gir
 %endif
 
+%if %{with_python2}
 %files -n python2-blockdev
 %{python2_sitearch}/gi/overrides/*
+%endif
 
 %if %{with_python3}
 %files -n python3-blockdev
