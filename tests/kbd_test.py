@@ -294,6 +294,7 @@ class KbdBcacheTestCase(unittest.TestCase):
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
 
+    @skip_on(("fedora", "29"), reason="running bcache tests causes system to run out of kernel memory on rawhide")
     def setUp(self):
         self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("lvm_test", 10 * 1024**3)
