@@ -25,7 +25,7 @@ filesystems
 ------------
 
 :supported technologies:
-   * DONE: ext2, ext3, ext4, xfs, vfat
+   * DONE: ext2, ext3, ext4, xfs, vfat, ntfs
 
 :functions:
    * make_FSTYPE
@@ -37,7 +37,7 @@ filesystems
    * wipefs
    * mount
    * unmount
-   * generic_resize [TODO]
+   * generic_resize
 
 
 LVM
@@ -177,7 +177,7 @@ CRYPTO/LUKS
 ------------
 
 :supported technologies:
-   only LUKS encrypted devices
+   LUKS1 and LUKS2 encrypted devices, TrueCrypt/VeraCrypt devices (open/close only)
 
 :functions:
    * generate_backup_passphrase
@@ -191,7 +191,16 @@ CRYPTO/LUKS
    * luks_remove_key
    * luks_change_key
    * luks_resize
+   * luks_suspend
+   * luks_resume
+   * luks_header_backup
+   * luks_header_restore
+   * luks_kill_slot
+   * luks_info
+   * integrity_info
    * escrow_device
+   * tc_open
+   * tc_close
 
 
 MULTIPATH
@@ -279,6 +288,18 @@ KBD (Kernel Block Devices)
    * zram_destroy_devices
    * zram_get_stats
 
+NVDIMM
+-------
+
+:supported technologies:
+   namespaces
+
+:functions:
+   * namespace_enable
+   * namespace_disable
+   * namespace_info
+   * namespace_reconfigure
+   * list_namespaces
 
 utils
 ------
