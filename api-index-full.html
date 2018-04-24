@@ -3,12 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>API Index: libblockdev Reference Manual</title>
-<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="libblockdev Reference Manual">
 <link rel="up" href="index.html" title="libblockdev Reference Manual">
 <link rel="prev" href="ch03.html" title="Testing libblockdev">
 <link rel="next" href="deprecated-api-index.html" title="Index of deprecated API">
-<meta name="generator" content="GTK-Doc V1.27 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -32,6 +32,8 @@
                   <a class="shortcut" href="#idxL">L</a>
                      <span class="dim">|</span> 
                   <a class="shortcut" href="#idxM">M</a>
+                     <span class="dim">|</span> 
+                  <a class="shortcut" href="#idxN">N</a>
                      <span class="dim">|</span> 
                   <a class="shortcut" href="#idxP">P</a>
                      <span class="dim">|</span> 
@@ -201,6 +203,22 @@
 </dt>
 <dd></dd>
 <dt>
+<a class="link" href="libblockdev-Crypto.html#BDCryptoIntegrityInfo" title="BDCryptoIntegrityInfo">BDCryptoIntegrityInfo</a>, struct in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#BDCryptoLUKSExtra" title="BDCryptoLUKSExtra">BDCryptoLUKSExtra</a>, struct in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#BDCryptoLUKSInfo" title="BDCryptoLUKSInfo">BDCryptoLUKSInfo</a>, struct in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#BDCryptoLUKSVersion" title="enum BDCryptoLUKSVersion">BDCryptoLUKSVersion</a>, enum in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
 <a class="link" href="libblockdev-Crypto.html#BDCryptoTech" title="enum BDCryptoTech">BDCryptoTech</a>, enum in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
 </dt>
 <dd></dd>
@@ -229,6 +247,10 @@
 </dt>
 <dd></dd>
 <dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-device-seems-encrypted" title="bd_crypto_device_seems_encrypted ()">bd_crypto_device_seems_encrypted</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
 <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-ERROR:CAPS" title="BD_CRYPTO_ERROR">BD_CRYPTO_ERROR</a>, macro in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
 </dt>
 <dd></dd>
@@ -246,6 +268,18 @@
 <dd></dd>
 <dt>
 <a class="link" href="libblockdev-Crypto.html#bd-crypto-init" title="bd_crypto_init ()">bd_crypto_init</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-integrity-info" title="bd_crypto_integrity_info ()">bd_crypto_integrity_info</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-integrity-info-copy" title="bd_crypto_integrity_info_copy ()">bd_crypto_integrity_info_copy</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-integrity-info-free" title="bd_crypto_integrity_info_free ()">bd_crypto_integrity_info_free</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
 </dt>
 <dd></dd>
 <dt>
@@ -273,11 +307,55 @@
 </dt>
 <dd></dd>
 <dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-extra-copy" title="bd_crypto_luks_extra_copy ()">bd_crypto_luks_extra_copy</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-extra-free" title="bd_crypto_luks_extra_free ()">bd_crypto_luks_extra_free</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
 <a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-format" title="bd_crypto_luks_format ()">bd_crypto_luks_format</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
 </dt>
 <dd></dd>
 <dt>
 <a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-format-blob" title="bd_crypto_luks_format_blob ()">bd_crypto_luks_format_blob</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-format-luks2" title="bd_crypto_luks_format_luks2 ()">bd_crypto_luks_format_luks2</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-format-luks2-blob" title="bd_crypto_luks_format_luks2_blob ()">bd_crypto_luks_format_luks2_blob</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-get-metadata-size" title="bd_crypto_luks_get_metadata_size ()">bd_crypto_luks_get_metadata_size</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-header-backup" title="bd_crypto_luks_header_backup ()">bd_crypto_luks_header_backup</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-header-restore" title="bd_crypto_luks_header_restore ()">bd_crypto_luks_header_restore</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-info" title="bd_crypto_luks_info ()">bd_crypto_luks_info</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-info-copy" title="bd_crypto_luks_info_copy ()">bd_crypto_luks_info_copy</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-info-free" title="bd_crypto_luks_info_free ()">bd_crypto_luks_info_free</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-kill-slot" title="bd_crypto_luks_kill_slot ()">bd_crypto_luks_kill_slot</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
 </dt>
 <dd></dd>
 <dt>
@@ -305,7 +383,27 @@
 </dt>
 <dd></dd>
 <dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-resize-luks2" title="bd_crypto_luks_resize_luks2 ()">bd_crypto_luks_resize_luks2</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-resize-luks2-blob" title="bd_crypto_luks_resize_luks2_blob ()">bd_crypto_luks_resize_luks2_blob</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-resume" title="bd_crypto_luks_resume ()">bd_crypto_luks_resume</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-resume-blob" title="bd_crypto_luks_resume_blob ()">bd_crypto_luks_resume_blob</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
 <a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-status" title="bd_crypto_luks_status ()">bd_crypto_luks_status</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-suspend" title="bd_crypto_luks_suspend ()">bd_crypto_luks_suspend</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
 </dt>
 <dd></dd>
 <dt>
@@ -318,6 +416,10 @@
 <dd></dd>
 <dt>
 <a class="link" href="libblockdev-Crypto.html#bd-crypto-tc-open" title="bd_crypto_tc_open ()">bd_crypto_tc_open</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-tc-open-full" title="bd_crypto_tc_open_full ()">bd_crypto_tc_open_full</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
 </dt>
 <dd></dd>
 <a name="idxD"></a><h3 class="title">D</h3>
@@ -1580,6 +1682,83 @@
 <a class="link" href="libblockdev-Mpath.html#bd-mpath-set-friendly-names" title="bd_mpath_set_friendly_names ()">bd_mpath_set_friendly_names</a>, function in <a class="link" href="libblockdev-Mpath.html" title="Mpath">Mpath</a>
 </dt>
 <dd></dd>
+<a name="idxN"></a><h3 class="title">N</h3>
+<dt>
+<a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMError" title="enum BDNVDIMMError">BDNVDIMMError</a>, enum in <a class="link" href="libblockdev-NVDIMM.html" title="NVDIMM">NVDIMM</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMNamespaceInfo" title="BDNVDIMMNamespaceInfo">BDNVDIMMNamespaceInfo</a>, struct in <a class="link" href="libblockdev-NVDIMM.html" title="NVDIMM">NVDIMM</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMNamespaceMode" title="enum BDNVDIMMNamespaceMode">BDNVDIMMNamespaceMode</a>, enum in <a class="link" href="libblockdev-NVDIMM.html" title="NVDIMM">NVDIMM</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMTech" title="enum BDNVDIMMTech">BDNVDIMMTech</a>, enum in <a class="link" href="libblockdev-NVDIMM.html" title="NVDIMM">NVDIMM</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMTechMode" title="enum BDNVDIMMTechMode">BDNVDIMMTechMode</a>, enum in <a class="link" href="libblockdev-NVDIMM.html" title="NVDIMM">NVDIMM</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-check-deps" title="bd_nvdimm_check_deps ()">bd_nvdimm_check_deps</a>, function in <a class="link" href="libblockdev-NVDIMM.html" title="NVDIMM">NVDIMM</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-close" title="bd_nvdimm_close ()">bd_nvdimm_close</a>, function in <a class="link" href="libblockdev-NVDIMM.html" title="NVDIMM">NVDIMM</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-NVDIMM.html#BD-NVDIMM-ERROR:CAPS" title="BD_NVDIMM_ERROR">BD_NVDIMM_ERROR</a>, macro in <a class="link" href="libblockdev-NVDIMM.html" title="NVDIMM">NVDIMM</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-error-quark" title="bd_nvdimm_error_quark ()">bd_nvdimm_error_quark</a>, function in <a class="link" href="libblockdev-NVDIMM.html" title="NVDIMM">NVDIMM</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-init" title="bd_nvdimm_init ()">bd_nvdimm_init</a>, function in <a class="link" href="libblockdev-NVDIMM.html" title="NVDIMM">NVDIMM</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-is-tech-avail" title="bd_nvdimm_is_tech_avail ()">bd_nvdimm_is_tech_avail</a>, function in <a class="link" href="libblockdev-NVDIMM.html" title="NVDIMM">NVDIMM</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-list-namespaces" title="bd_nvdimm_list_namespaces ()">bd_nvdimm_list_namespaces</a>, function in <a class="link" href="libblockdev-NVDIMM.html" title="NVDIMM">NVDIMM</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-namespace-disable" title="bd_nvdimm_namespace_disable ()">bd_nvdimm_namespace_disable</a>, function in <a class="link" href="libblockdev-NVDIMM.html" title="NVDIMM">NVDIMM</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-namespace-enable" title="bd_nvdimm_namespace_enable ()">bd_nvdimm_namespace_enable</a>, function in <a class="link" href="libblockdev-NVDIMM.html" title="NVDIMM">NVDIMM</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-namespace-get-devname" title="bd_nvdimm_namespace_get_devname ()">bd_nvdimm_namespace_get_devname</a>, function in <a class="link" href="libblockdev-NVDIMM.html" title="NVDIMM">NVDIMM</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-namespace-get-mode-from-str" title="bd_nvdimm_namespace_get_mode_from_str ()">bd_nvdimm_namespace_get_mode_from_str</a>, function in <a class="link" href="libblockdev-NVDIMM.html" title="NVDIMM">NVDIMM</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-namespace-get-mode-str" title="bd_nvdimm_namespace_get_mode_str ()">bd_nvdimm_namespace_get_mode_str</a>, function in <a class="link" href="libblockdev-NVDIMM.html" title="NVDIMM">NVDIMM</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-namespace-info" title="bd_nvdimm_namespace_info ()">bd_nvdimm_namespace_info</a>, function in <a class="link" href="libblockdev-NVDIMM.html" title="NVDIMM">NVDIMM</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-namespace-reconfigure" title="bd_nvdimm_namespace_reconfigure ()">bd_nvdimm_namespace_reconfigure</a>, function in <a class="link" href="libblockdev-NVDIMM.html" title="NVDIMM">NVDIMM</a>
+</dt>
+<dd></dd>
 <a name="idxP"></a><h3 class="title">P</h3>
 <dt>
 <a class="link" href="libblockdev-Part.html#BDPartAlign" title="enum BDPartAlign">BDPartAlign</a>, enum in <a class="link" href="libblockdev-Part.html" title="Part">Part</a>
@@ -2042,6 +2221,10 @@
 </dt>
 <dd></dd>
 <dt>
+<a class="link" href="libblockdev-Utils.html#bd-utils-log" title="bd_utils_log ()">bd_utils_log</a>, function in <a class="link" href="libblockdev-Utils.html" title="Utils">Utils</a>
+</dt>
+<dd></dd>
+<dt>
 <a class="link" href="libblockdev-Utils.html#bd-utils-report-finished" title="bd_utils_report_finished ()">bd_utils_report_finished</a>, function in <a class="link" href="libblockdev-Utils.html" title="Utils">Utils</a>
 </dt>
 <dd></dd>
@@ -2067,6 +2250,6 @@
 <dd></dd>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.27</div>
+<hr>Generated by GTK-Doc V1.25</div>
 </body>
 </html>

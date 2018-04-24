@@ -1,0 +1,830 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>NVDIMM: libblockdev Reference Manual</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
+<link rel="home" href="index.html" title="libblockdev Reference Manual">
+<link rel="up" href="ch01.html" title="libblockdev Reference Manual">
+<link rel="prev" href="libblockdev-Mpath.html" title="Mpath">
+<link rel="next" href="libblockdev-Plugins.html" title="Plugins">
+<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#libblockdev-NVDIMM.description" class="shortcut">Description</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="libblockdev-Mpath.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="libblockdev-Plugins.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="refentry">
+<a name="libblockdev-NVDIMM"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libblockdev-NVDIMM.top_of_page"></a>NVDIMM</span></h2>
+<p>NVDIMM — plugin for operations with nvdimm space</p>
+</td>
+<td class="gallery_image" valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1">
+<a name="libblockdev-NVDIMM.functions"></a><h2>Functions</h2>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="functions_return">
+<col class="functions_name">
+</colgroup>
+<tbody>
+<tr>
+<td class="function_type">
+<span class="returnvalue">gboolean</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-check-deps" title="bd_nvdimm_check_deps ()">bd_nvdimm_check_deps</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-close" title="bd_nvdimm_close ()">bd_nvdimm_close</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">gboolean</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-init" title="bd_nvdimm_init ()">bd_nvdimm_init</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">GQuark</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-error-quark" title="bd_nvdimm_error_quark ()">bd_nvdimm_error_quark</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMNamespaceMode" title="enum BDNVDIMMNamespaceMode"><span class="returnvalue">BDNVDIMMNamespaceMode</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-namespace-get-mode-from-str" title="bd_nvdimm_namespace_get_mode_from_str ()">bd_nvdimm_namespace_get_mode_from_str</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">const <span class="returnvalue">gchar</span> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-namespace-get-mode-str" title="bd_nvdimm_namespace_get_mode_str ()">bd_nvdimm_namespace_get_mode_str</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">gchar</span> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-namespace-get-devname" title="bd_nvdimm_namespace_get_devname ()">bd_nvdimm_namespace_get_devname</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">gboolean</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-namespace-enable" title="bd_nvdimm_namespace_enable ()">bd_nvdimm_namespace_enable</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">gboolean</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-namespace-disable" title="bd_nvdimm_namespace_disable ()">bd_nvdimm_namespace_disable</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMNamespaceInfo" title="BDNVDIMMNamespaceInfo"><span class="returnvalue">BDNVDIMMNamespaceInfo</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-namespace-info" title="bd_nvdimm_namespace_info ()">bd_nvdimm_namespace_info</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMNamespaceInfo" title="BDNVDIMMNamespaceInfo"><span class="returnvalue">BDNVDIMMNamespaceInfo</span></a> **
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-list-namespaces" title="bd_nvdimm_list_namespaces ()">bd_nvdimm_list_namespaces</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">gboolean</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-namespace-reconfigure" title="bd_nvdimm_namespace_reconfigure ()">bd_nvdimm_namespace_reconfigure</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">gboolean</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-NVDIMM.html#bd-nvdimm-is-tech-avail" title="bd_nvdimm_is_tech_avail ()">bd_nvdimm_is_tech_avail</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="libblockdev-NVDIMM.other"></a><h2>Types and Values</h2>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="name">
+<col class="description">
+</colgroup>
+<tbody>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-NVDIMM.html#BD-NVDIMM-ERROR:CAPS" title="BD_NVDIMM_ERROR">BD_NVDIMM_ERROR</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMError" title="enum BDNVDIMMError">BDNVDIMMError</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMNamespaceMode" title="enum BDNVDIMMNamespaceMode">BDNVDIMMNamespaceMode</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword"> </td>
+<td class="function_name"><a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMNamespaceInfo" title="BDNVDIMMNamespaceInfo">BDNVDIMMNamespaceInfo</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMTech" title="enum BDNVDIMMTech">BDNVDIMMTech</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMTechMode" title="enum BDNVDIMMTechMode">BDNVDIMMTechMode</a></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="libblockdev-NVDIMM.includes"></a><h2>Includes</h2>
+<pre class="synopsis">#include &lt;nvdimm.h&gt;
+</pre>
+</div>
+<div class="refsect1">
+<a name="libblockdev-NVDIMM.description"></a><h2>Description</h2>
+<p>A plugin for operations with NVDIMM devices.</p>
+</div>
+<div class="refsect1">
+<a name="libblockdev-NVDIMM.functions_details"></a><h2>Functions</h2>
+<div class="refsect2">
+<a name="bd-nvdimm-check-deps"></a><h3>bd_nvdimm_check_deps ()</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>
+bd_nvdimm_check_deps ();</pre>
+<div class="refsect3">
+<a name="bd-nvdimm-check-deps.returns"></a><h4>Returns</h4>
+<p> whether the plugin's runtime dependencies are satisfied or not</p>
+<p>Function checking plugin's runtime dependencies.</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-nvdimm-close"></a><h3>bd_nvdimm_close ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_nvdimm_close ();</pre>
+<p>Cleans up after the plugin. **This function is called automatically by the
+library's functions that unload it.**</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-nvdimm-init"></a><h3>bd_nvdimm_init ()</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>
+bd_nvdimm_init ();</pre>
+<p>Initializes the plugin. **This function is called automatically by the
+library's initialization functions.**</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-nvdimm-error-quark"></a><h3>bd_nvdimm_error_quark ()</h3>
+<pre class="programlisting"><span class="returnvalue">GQuark</span>
+bd_nvdimm_error_quark (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-nvdimm-namespace-get-mode-from-str"></a><h3>bd_nvdimm_namespace_get_mode_from_str ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMNamespaceMode" title="enum BDNVDIMMNamespaceMode"><span class="returnvalue">BDNVDIMMNamespaceMode</span></a>
+bd_nvdimm_namespace_get_mode_from_str (<em class="parameter"><code>const <span class="type">gchar</span> *mode_str</code></em>,
+                                       <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-nvdimm-namespace-get-mode-from-str.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>mode_str</p></td>
+<td class="parameter_description"><p>string representation of mode</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-nvdimm-namespace-get-mode-from-str.returns"></a><h4>Returns</h4>
+<p> mode matching the <em class="parameter"><code>mode_str</code></em>
+given or <a class="link" href="libblockdev-NVDIMM.html#BD-NVDIMM-NAMESPACE-MODE-UNKNOWN:CAPS"><code class="literal">BD_NVDIMM_NAMESPACE_MODE_UNKNOWN</code></a> in case of no match</p>
+<p>Tech category: always available</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-nvdimm-namespace-get-mode-str"></a><h3>bd_nvdimm_namespace_get_mode_str ()</h3>
+<pre class="programlisting">const <span class="returnvalue">gchar</span> *
+bd_nvdimm_namespace_get_mode_str (<em class="parameter"><code><a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMNamespaceMode" title="enum BDNVDIMMNamespaceMode"><span class="type">BDNVDIMMNamespaceMode</span></a> mode</code></em>,
+                                  <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-nvdimm-namespace-get-mode-str.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>mode</p></td>
+<td class="parameter_description"><p>mode to get string representation of</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-nvdimm-namespace-get-mode-str.returns"></a><h4>Returns</h4>
+<p> string representation of <em class="parameter"><code>mode</code></em>
+or <code class="literal">NULL</code> in case of error</p>
+<p>Tech category: always available. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-nvdimm-namespace-get-devname"></a><h3>bd_nvdimm_namespace_get_devname ()</h3>
+<pre class="programlisting"><span class="returnvalue">gchar</span> *
+bd_nvdimm_namespace_get_devname (<em class="parameter"><code>const <span class="type">gchar</span> *device</code></em>,
+                                 <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-nvdimm-namespace-get-devname.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>name or path of a block device (e.g. "/dev/pmem0")</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-nvdimm-namespace-get-devname.returns"></a><h4>Returns</h4>
+<p> namespace device name (e.g. "namespaceX.Y") for <em class="parameter"><code>device</code></em>
+or <code class="literal">NULL</code> if <em class="parameter"><code>device</code></em>
+is not a NVDIMM namespace
+(<em class="parameter"><code>error</code></em>
+may be set to indicate error)</p>
+<p>Tech category: <a class="link" href="libblockdev-NVDIMM.html#BD-NVDIMM-TECH-NAMESPACE:CAPS"><code class="literal">BD_NVDIMM_TECH_NAMESPACE</code></a>-<a class="link" href="libblockdev-NVDIMM.html#BD-NVDIMM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_NVDIMM_TECH_MODE_QUERY</code></a>. </p>
+<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-nvdimm-namespace-enable"></a><h3>bd_nvdimm_namespace_enable ()</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>
+bd_nvdimm_namespace_enable (<em class="parameter"><code>const <span class="type">gchar</span> *namespace</code></em>,
+                            <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                            <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-nvdimm-namespace-enable.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>namespace</p></td>
+<td class="parameter_description"><p>name of the namespace to enable</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options (currently unused). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-nvdimm-namespace-enable.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>namespace</code></em>
+was successfully enabled or not</p>
+<p>Tech category: <a class="link" href="libblockdev-NVDIMM.html#BD-NVDIMM-TECH-NAMESPACE:CAPS"><code class="literal">BD_NVDIMM_TECH_NAMESPACE</code></a>-<a class="link" href="libblockdev-NVDIMM.html#BD-NVDIMM-TECH-MODE-ACTIVATE-DEACTIVATE:CAPS"><code class="literal">BD_NVDIMM_TECH_MODE_ACTIVATE_DEACTIVATE</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-nvdimm-namespace-disable"></a><h3>bd_nvdimm_namespace_disable ()</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>
+bd_nvdimm_namespace_disable (<em class="parameter"><code>const <span class="type">gchar</span> *namespace</code></em>,
+                             <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                             <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-nvdimm-namespace-disable.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>namespace</p></td>
+<td class="parameter_description"><p>name of the namespace to disable</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options (currently unused). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-nvdimm-namespace-disable.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>namespace</code></em>
+was successfully disabled or not</p>
+<p>Tech category: <a class="link" href="libblockdev-NVDIMM.html#BD-NVDIMM-TECH-NAMESPACE:CAPS"><code class="literal">BD_NVDIMM_TECH_NAMESPACE</code></a>-<a class="link" href="libblockdev-NVDIMM.html#BD-NVDIMM-TECH-MODE-ACTIVATE-DEACTIVATE:CAPS"><code class="literal">BD_NVDIMM_TECH_MODE_ACTIVATE_DEACTIVATE</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-nvdimm-namespace-info"></a><h3>bd_nvdimm_namespace_info ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMNamespaceInfo" title="BDNVDIMMNamespaceInfo"><span class="returnvalue">BDNVDIMMNamespaceInfo</span></a> *
+bd_nvdimm_namespace_info (<em class="parameter"><code>const <span class="type">gchar</span> *namespace</code></em>,
+                          <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                          <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-nvdimm-namespace-info.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>namespace</p></td>
+<td class="parameter_description"><p>namespace to get information about</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options (currently unused). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-nvdimm-namespace-info.returns"></a><h4>Returns</h4>
+<p> information about given namespace or <code class="literal">NULL</code> if no such
+namespace was found (<em class="parameter"><code>error</code></em>
+may be set to indicate error)</p>
+<p>Tech category: <a class="link" href="libblockdev-NVDIMM.html#BD-NVDIMM-TECH-NAMESPACE:CAPS"><code class="literal">BD_NVDIMM_TECH_NAMESPACE</code></a>-<a class="link" href="libblockdev-NVDIMM.html#BD-NVDIMM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_NVDIMM_TECH_MODE_QUERY</code></a>. </p>
+<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-nvdimm-list-namespaces"></a><h3>bd_nvdimm_list_namespaces ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMNamespaceInfo" title="BDNVDIMMNamespaceInfo"><span class="returnvalue">BDNVDIMMNamespaceInfo</span></a> **
+bd_nvdimm_list_namespaces (<em class="parameter"><code>const <span class="type">gchar</span> *bus</code></em>,
+                           <em class="parameter"><code>const <span class="type">gchar</span> *region</code></em>,
+                           <em class="parameter"><code><span class="type">gboolean</span> idle</code></em>,
+                           <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                           <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-nvdimm-list-namespaces.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>bus</p></td>
+<td class="parameter_description"><p> return only namespaces on given bus (specified by name),
+<code class="literal">NULL</code> may be specified to return namespaces from all buses. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>region</p></td>
+<td class="parameter_description"><p> return only namespaces on given region (specified by regionX name or region id),
+<code class="literal">NULL</code> may be specified to return namespaces from all regions. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>idle</p></td>
+<td class="parameter_description"><p>whether to list idle (not enabled) namespaces too</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the creation (right now
+passed to the 'ndctl' utility). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-nvdimm-list-namespaces.returns"></a><h4>Returns</h4>
+<p> information about the namespaces on <em class="parameter"><code>bus</code></em>
+and <em class="parameter"><code>region</code></em>
+or
+<code class="literal">NULL</code> if no namespaces were found (<em class="parameter"><code>error</code></em>
+may be set to indicate error)</p>
+<p>Tech category: <a class="link" href="libblockdev-NVDIMM.html#BD-NVDIMM-TECH-NAMESPACE:CAPS"><code class="literal">BD_NVDIMM_TECH_NAMESPACE</code></a>-<a class="link" href="libblockdev-NVDIMM.html#BD-NVDIMM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_NVDIMM_TECH_MODE_QUERY</code></a>. </p>
+<p><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-nvdimm-namespace-reconfigure"></a><h3>bd_nvdimm_namespace_reconfigure ()</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>
+bd_nvdimm_namespace_reconfigure (<em class="parameter"><code>const <span class="type">gchar</span> *namespace</code></em>,
+                                 <em class="parameter"><code><a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMNamespaceMode" title="enum BDNVDIMMNamespaceMode"><span class="type">BDNVDIMMNamespaceMode</span></a> mode</code></em>,
+                                 <em class="parameter"><code><span class="type">gboolean</span> force</code></em>,
+                                 <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                                 <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-nvdimm-namespace-reconfigure.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>namespace</p></td>
+<td class="parameter_description"><p>name of the namespace to recofigure</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>mode</p></td>
+<td class="parameter_description"><p>mode type to set (memory/sector/raw/dax)</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error if any. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p> extra options for the creation (right now
+passed to the 'ndctl' utility). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-nvdimm-namespace-reconfigure.returns"></a><h4>Returns</h4>
+<p> whether <em class="parameter"><code>namespace</code></em>
+was successfully reconfigured or not</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-nvdimm-is-tech-avail"></a><h3>bd_nvdimm_is_tech_avail ()</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>
+bd_nvdimm_is_tech_avail (<em class="parameter"><code><a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMTech" title="enum BDNVDIMMTech"><span class="type">BDNVDIMMTech</span></a> tech</code></em>,
+                         <em class="parameter"><code><span class="type">guint64</span> mode</code></em>,
+                         <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-nvdimm-is-tech-avail.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>tech</p></td>
+<td class="parameter_description"><p>the queried tech</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>mode</p></td>
+<td class="parameter_description"><p>a bit mask of queried modes of operation (<a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMTechMode" title="enum BDNVDIMMTechMode"><span class="type">BDNVDIMMTechMode</span></a>) for <em class="parameter"><code>tech</code></em>
+</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p> place to store error (details about why the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is not available). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-nvdimm-is-tech-avail.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is available -- supported by the
+plugin implementation and having all the runtime dependencies available</p>
+</div>
+</div>
+</div>
+<div class="refsect1">
+<a name="libblockdev-NVDIMM.other_details"></a><h2>Types and Values</h2>
+<div class="refsect2">
+<a name="BD-NVDIMM-ERROR:CAPS"></a><h3>BD_NVDIMM_ERROR</h3>
+<pre class="programlisting">#define             BD_NVDIMM_ERROR</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDNVDIMMError"></a><h3>enum BDNVDIMMError</h3>
+<div class="refsect3">
+<a name="BDNVDIMMError.members"></a><h4>Members</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-NVDIMM-ERROR-NAMESPACE-PARSE:CAPS"></a>BD_NVDIMM_ERROR_NAMESPACE_PARSE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-NVDIMM-ERROR-NAMESPACE-FAIL:CAPS"></a>BD_NVDIMM_ERROR_NAMESPACE_FAIL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-NVDIMM-ERROR-NAMESPACE-NOEXIST:CAPS"></a>BD_NVDIMM_ERROR_NAMESPACE_NOEXIST</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-NVDIMM-ERROR-NAMESPACE-MODE-INVAL:CAPS"></a>BD_NVDIMM_ERROR_NAMESPACE_MODE_INVAL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-NVDIMM-ERROR-TECH-UNAVAIL:CAPS"></a>BD_NVDIMM_ERROR_TECH_UNAVAIL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDNVDIMMNamespaceMode"></a><h3>enum BDNVDIMMNamespaceMode</h3>
+<div class="refsect3">
+<a name="BDNVDIMMNamespaceMode.members"></a><h4>Members</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-NVDIMM-NAMESPACE-MODE-RAW:CAPS"></a>BD_NVDIMM_NAMESPACE_MODE_RAW</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-NVDIMM-NAMESPACE-MODE-SECTOR:CAPS"></a>BD_NVDIMM_NAMESPACE_MODE_SECTOR</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-NVDIMM-NAMESPACE-MODE-MEMORY:CAPS"></a>BD_NVDIMM_NAMESPACE_MODE_MEMORY</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-NVDIMM-NAMESPACE-MODE-DAX:CAPS"></a>BD_NVDIMM_NAMESPACE_MODE_DAX</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-NVDIMM-NAMESPACE-MODE-UNKNOWN:CAPS"></a>BD_NVDIMM_NAMESPACE_MODE_UNKNOWN</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDNVDIMMNamespaceInfo"></a><h3>BDNVDIMMNamespaceInfo</h3>
+<pre class="programlisting">typedef struct {
+    gchar *dev;
+    guint64 mode;
+    guint64 size;
+    gchar *uuid;
+    guint64 sector_size;
+    gchar *blockdev;
+    gboolean enabled;
+} BDNVDIMMNamespaceInfo;
+</pre>
+<div class="refsect3">
+<a name="BDNVDIMMNamespaceInfo.members"></a><h4>Members</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="300px" class="struct_members_name">
+<col class="struct_members_description">
+<col width="200px" class="struct_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="struct_member_name"><p><span class="type">gchar</span> *<em class="structfield"><code><a name="BDNVDIMMNamespaceInfo.dev"></a>dev</code></em>;</p></td>
+<td class="struct_member_description"><p>namespace device name ("namespaceX.Y")</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint64</span> <em class="structfield"><code><a name="BDNVDIMMNamespaceInfo.mode"></a>mode</code></em>;</p></td>
+<td class="struct_member_description"><p>mode of the namespace (BDNVDIMMNamespaceMode)</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint64</span> <em class="structfield"><code><a name="BDNVDIMMNamespaceInfo.size"></a>size</code></em>;</p></td>
+<td class="struct_member_description"><p>size of the namespace</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gchar</span> *<em class="structfield"><code><a name="BDNVDIMMNamespaceInfo.uuid"></a>uuid</code></em>;</p></td>
+<td class="struct_member_description"><p>UUID of the namespace</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint64</span> <em class="structfield"><code><a name="BDNVDIMMNamespaceInfo.sector-size"></a>sector_size</code></em>;</p></td>
+<td class="struct_member_description"><p>sector size of the namespace (0 for non-sector namespaces)</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gchar</span> *<em class="structfield"><code><a name="BDNVDIMMNamespaceInfo.blockdev"></a>blockdev</code></em>;</p></td>
+<td class="struct_member_description"><p>name of the block device for the namespace</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gboolean</span> <em class="structfield"><code><a name="BDNVDIMMNamespaceInfo.enabled"></a>enabled</code></em>;</p></td>
+<td class="struct_member_description"><p>whether the namespace is enabled or not</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDNVDIMMTech"></a><h3>enum BDNVDIMMTech</h3>
+<div class="refsect3">
+<a name="BDNVDIMMTech.members"></a><h4>Members</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody><tr>
+<td class="enum_member_name"><p><a name="BD-NVDIMM-TECH-NAMESPACE:CAPS"></a>BD_NVDIMM_TECH_NAMESPACE</p></td>
+<td> </td>
+<td> </td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDNVDIMMTechMode"></a><h3>enum BDNVDIMMTechMode</h3>
+<div class="refsect3">
+<a name="BDNVDIMMTechMode.members"></a><h4>Members</h4>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-NVDIMM-TECH-MODE-CREATE:CAPS"></a>BD_NVDIMM_TECH_MODE_CREATE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-NVDIMM-TECH-MODE-REMOVE:CAPS"></a>BD_NVDIMM_TECH_MODE_REMOVE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-NVDIMM-TECH-MODE-ACTIVATE-DEACTIVATE:CAPS"></a>BD_NVDIMM_TECH_MODE_ACTIVATE_DEACTIVATE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-NVDIMM-TECH-MODE-QUERY:CAPS"></a>BD_NVDIMM_TECH_MODE_QUERY</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-NVDIMM-TECH-MODE-RECONFIGURE:CAPS"></a>BD_NVDIMM_TECH_MODE_RECONFIGURE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.25</div>
+</body>
+</html>
