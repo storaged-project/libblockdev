@@ -1,4 +1,4 @@
-Libblockdev 2.16
+Libblockdev 2.17
 ----------------
 
 New minor release of the libblockdev library with multiple fixes. See below
