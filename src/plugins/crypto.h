@@ -18,6 +18,7 @@ typedef enum {
     BD_CRYPTO_ERROR_INVALID_SPEC,
     BD_CRYPTO_ERROR_FORMAT_FAILED,
     BD_CRYPTO_ERROR_RESIZE_FAILED,
+    BD_CRYPTO_ERROR_RESIZE_PERM,
     BD_CRYPTO_ERROR_ADD_KEY,
     BD_CRYPTO_ERROR_REMOVE_KEY,
     BD_CRYPTO_ERROR_NO_KEY,
@@ -25,6 +26,7 @@ typedef enum {
     BD_CRYPTO_ERROR_NSS_INIT_FAILED,
     BD_CRYPTO_ERROR_CERT_DECODE,
     BD_CRYPTO_ERROR_ESCROW_FAILED,
+    BD_CRYPTO_ERROR_INVALID_PARAMS,
     BD_CRYPTO_ERROR_TECH_UNAVAIL,
 } BDCryptoError;
 
@@ -36,11 +38,14 @@ typedef enum {
 
 #define DEFAULT_LUKS_KEYSIZE_BITS 256
 #define DEFAULT_LUKS_CIPHER "aes-xts-plain64"
+#define DEFAULT_LUKS2_SECTOR_SIZE 512
 
 typedef enum {
     BD_CRYPTO_TECH_LUKS = 0,
+    BD_CRYPTO_TECH_LUKS2,
     BD_CRYPTO_TECH_TRUECRYPT,
     BD_CRYPTO_TECH_ESCROW,
+    BD_CRYPTO_TECH_INTEGRITY,
 } BDCryptoTech;
 
 typedef enum {
@@ -53,6 +58,84 @@ typedef enum {
     BD_CRYPTO_TECH_MODE_SUSPEND_RESUME = 1 << 6,
     BD_CRYPTO_TECH_MODE_BACKUP_RESTORE = 1 << 7,
 } BDCryptoTechMode;
+
+typedef enum {
+    BD_CRYPTO_LUKS_VERSION_LUKS1 = 0,
+    BD_CRYPTO_LUKS_VERSION_LUKS2,
+} BDCryptoLUKSVersion;
+
+
+/**
+ * BDCryptoLUKSExtra:
+ * @data_alignment: data alignment in sectors, 0 for default/auto detection
+ * @data_device: detached encrypted data device or NULL
+ * @integrity: integrity algorithm (e.g. "hmac-sha256") or NULL for no integrity support
+ *             Note: this field is valid only for LUKS 2
+ * @sector_size: encryption sector size, 0 for default (512)
+ *               Note: this field is valid only for LUKS 2
+ * @label: LUKS header label or NULL
+ *         Note: this field is valid only for LUKS 2
+ * @subsytem: LUKS header subsystem or NULL
+ *            Note: this field is valid only for LUKS 2
+ */
+typedef struct BDCryptoLUKSExtra {
+    guint64 data_alignment;
+    gchar *data_device;
+    gchar *integrity;
+    guint64 sector_size;
+    gchar *label;
+    gchar *subsystem;
+} BDCryptoLUKSExtra;
+
+void bd_crypto_luks_extra_free (BDCryptoLUKSExtra *extra);
+BDCryptoLUKSExtra* bd_crypto_luks_extra_copy (BDCryptoLUKSExtra *extra);
+
+/**
+ * BDCryptoLUKSInfo:
+ * @version: LUKS version
+ * @cipher: used cipher (e.g. "aes")
+ * @mode: used cipher mode (e.g. "xts-plain")
+ * @uuid: UUID of the LUKS device
+ * @backing_device: name of the underlying block device
+ * @sector_size: size (in bytes) of encryption sector
+ *               Note: sector size is valid only for LUKS 2
+ */
+typedef struct BDCryptoLUKSInfo {
+    BDCryptoLUKSVersion version;
+    gchar *cipher;
+    gchar *mode;
+    gchar *uuid;
+    gchar *backing_device;
+    gint64 sector_size;
+} BDCryptoLUKSInfo;
+
+void bd_crypto_luks_info_free (BDCryptoLUKSInfo *info);
+BDCryptoLUKSInfo* bd_crypto_luks_info_copy (BDCryptoLUKSInfo *info);
+
+/**
+ * BDCryptoIntegrityInfo:
+ * @algorithm: integrity algorithm
+ * @key_size: integrity key size in bytes
+ * @sector_size: sector size in bytes
+ * @tag_size: tag size per-sector in bytes
+ * @interleave_sectors: number of interleave sectors
+ * @journal_size: size of journal in bytes
+ * @journal_crypt: journal encryption algorithm
+ * @journal_integrity: journal integrity algorithm
+ */
+typedef struct BDCryptoIntegrityInfo {
+    gchar *algorithm;
+    guint32 key_size;
+    guint32 sector_size;
+    guint32 tag_size;
+    guint32 interleave_sectors;
+    guint64 journal_size;
+    gchar *journal_crypt;
+    gchar *journal_integrity;
+} BDCryptoIntegrityInfo;
+
+void bd_crypto_integrity_info_free (BDCryptoIntegrityInfo *info);
+BDCryptoIntegrityInfo* bd_crypto_integrity_info_copy (BDCryptoIntegrityInfo *info);
 
 /*
  * If using the plugin as a standalone library, the following functions should
@@ -76,6 +159,8 @@ guint64 bd_crypto_luks_get_metadata_size (const gchar *device, GError **error);
 gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error);
 gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint64 key_size, const gchar *passphrase, const gchar *key_file, guint64 min_entropy, GError **error);
 gboolean bd_crypto_luks_format_blob (const gchar *device, const gchar *cipher, guint64 key_size, const guint8 *pass_data, gsize data_len, guint64 min_entropy, GError **error);
+gboolean bd_crypto_luks_format_luks2 (const gchar *device, const gchar *cipher, guint64 key_size, const gchar *passphrase, const gchar *key_file, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra,GError **error);
+gboolean bd_crypto_luks_format_luks2_blob (const gchar *device, const gchar *cipher, guint64 key_size, const guint8 *pass_data, gsize data_len, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra, GError **error);
 gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gchar *passphrase, const gchar *key_file, gboolean read_only, GError **error);
 gboolean bd_crypto_luks_open_blob (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);
 gboolean bd_crypto_luks_close (const gchar *luks_device, GError **error);
@@ -86,12 +171,17 @@ gboolean bd_crypto_luks_remove_key_blob (const gchar *device, const guint8 *pass
 gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, const gchar *npass, GError **error);
 gboolean bd_crypto_luks_change_key_blob (const gchar *device, const guint8 *pass_data, gsize data_len, const guint8 *npass_data, gsize ndata_len, GError **error);
 gboolean bd_crypto_luks_resize (const gchar *device, guint64 size, GError **error);
+gboolean bd_crypto_luks_resize_luks2 (const gchar *luks_device, guint64 size, const gchar *passphrase, const gchar *key_file, GError **error);
+gboolean bd_crypto_luks_resize_luks2_blob (const gchar *luks_device, guint64 size, const guint8* pass_data, gsize data_len, GError **error);
 gboolean bd_crypto_luks_suspend (const gchar *luks_device, GError **error);
 gboolean bd_crypto_luks_resume_blob (const gchar *luks_device, const guint8 *pass_data, gsize data_len, GError **error);
 gboolean bd_crypto_luks_resume (const gchar *luks_device, const gchar *passphrase, const gchar *key_file, GError **error);
 gboolean bd_crypto_luks_kill_slot (const gchar *device, gint slot, GError **error);
 gboolean bd_crypto_luks_header_backup (const gchar *device, const gchar *backup_file, GError **error);
 gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup_file, GError **error);
+
+BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *luks_device, GError **error);
+BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **error);
 
 gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error);
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);

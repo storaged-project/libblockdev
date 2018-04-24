@@ -8,7 +8,7 @@ import six
 import locale
 import re
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on, get_avail_locales, requires_locales, run_command
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on, get_avail_locales, requires_locales, run_command, read_file
 from gi.repository import BlockDev, GLib
 
 PASSWD = "myshinylittlepassword"
@@ -84,22 +84,7 @@ class CryptoTestCase(unittest.TestCase):
         return BlockDev.crypto_luks_format(device, None, 0, passphrase, keyfile, 0)
 
     def _luks2_format(self, device, passphrase, keyfile):
-        # we currently don't support creating luks2 format using libblockdev
-        succ = True
-        if passphrase is not None:
-            ret, _out, _err = run_command("echo -n '%s' | cryptsetup luksFormat --type=luks2 %s -" % (PASSWD, device))
-            succ = ret == 0
-
-            if keyfile is not None:
-                ret, _out, _err = run_command("echo -n '%s' | cryptsetup luksAddKey %s %s -" % (PASSWD, device, keyfile))
-                succ = (succ and ret == 0)
-        else:
-            if keyfile is None:
-                raise RuntimeError("At least one of 'passphrase' and 'keyfile' must be specified.")
-            ret, _out, _err = run_command("cryptsetup luksFormat --type=luks2 --keyfile=%s %s -" % (keyfile, device))
-            succ = ret == 0
-
-        return succ
+        return BlockDev.crypto_luks_format(device, None, 0, passphrase, keyfile, 0, BlockDev.CryptoLUKSVersion.LUKS2, None)
 
 class CryptoTestGenerateBackupPassphrase(CryptoTestCase):
     def setUp(self):
@@ -116,7 +101,7 @@ class CryptoTestGenerateBackupPassphrase(CryptoTestCase):
 
 class CryptoTestFormat(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    def test_format(self):
+    def test_luks_format(self):
         """Verify that formating device as LUKS works"""
 
         # no passphrase nor keyfile
@@ -135,12 +120,41 @@ class CryptoTestFormat(CryptoTestCase):
         succ = BlockDev.crypto_luks_format_blob(self.loop_dev, "aes-cbc-essiv:sha256", 0, [ord(c) for c in PASSWD], 0)
         self.assertTrue(succ)
 
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_format(self):
+        """Verify that formating device as LUKS 2 works"""
+
+        # no passphrase nor keyfile
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_format(self.loop_dev, None, 0, None, None, 0)
+
+        # the simple case with password
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, PASSWD, None, 0)
+        self.assertTrue(succ)
+
+        # create with a keyfile
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0)
+        self.assertTrue(succ)
+
+        # the simple case with password blob
+        succ = BlockDev.crypto_luks_format_blob(self.loop_dev, "aes-cbc-essiv:sha256", 0, [ord(c) for c in PASSWD], 0)
+        self.assertTrue(succ)
+
+        # simple case with extra options
+        extra = BlockDev.CryptoLUKSExtra()
+        extra.integrity = None
+        extra.label = "blockdevLUKS"
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0,
+                                           BlockDev.CryptoLUKSVersion.LUKS2, extra)
+
 class CryptoTestResize(CryptoTestCase):
-    def _resize(self, create_fn):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_luks_resize(self):
         """Verify that resizing LUKS device works"""
 
         # the simple case with password
-        succ = create_fn(self.loop_dev, PASSWD, None)
+        succ = self._luks_format(self.loop_dev, PASSWD, None)
         self.assertTrue(succ)
 
         succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
@@ -158,8 +172,31 @@ class CryptoTestResize(CryptoTestCase):
         self.assertTrue(succ)
 
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    def test_luks_resize(self):
-        self._resize(self._luks_format)
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_resize(self):
+        """Verify that resizing LUKS 2 device works"""
+
+        # the simple case with password
+        succ = self._luks2_format(self.loop_dev, PASSWD, self.keyfile)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
+        self.assertTrue(succ)
+
+        # resize without passphrase should fail
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_resize("libblockdevTestLUKS", 1024)
+
+        # resize to 512 KiB (1024 * 512B sectors)
+        succ = BlockDev.crypto_luks_resize("libblockdevTestLUKS", 1024, PASSWD)
+        self.assertTrue(succ)
+
+        # resize back to full size (using the keyfile)
+        succ = BlockDev.crypto_luks_resize("libblockdevTestLUKS", 0, None, self.keyfile)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
 
 class CryptoTestOpenClose(CryptoTestCase):
     def _luks_open_close(self, create_fn):
@@ -735,3 +772,89 @@ class CryptoTestHeaderBackupRestore(CryptoTestCase):
     def test_luks2_header_backup_restore(self):
         """Verify that header backup/restore with LUKS2 works"""
         self._luks_header_backup_restore(self._luks2_format)
+
+class CryptoTestInfo(CryptoTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_luks_format(self):
+        """Verify that we can get information about a LUKS device"""
+
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, PASSWD, None, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
+        self.assertTrue(succ)
+
+        info = BlockDev.crypto_luks_info("libblockdevTestLUKS")
+        self.assertIsNotNone(info)
+
+        self.assertEqual(info.version, BlockDev.CryptoLUKSVersion.LUKS1)
+        self.assertEqual(info.cipher, "aes")
+        self.assertEqual(info.mode, "cbc-essiv:sha256")
+        self.assertEqual(info.backing_device, self.loop_dev)
+
+        _ret, uuid, _err = run_command("blkid -p -ovalue -sUUID %s" % self.loop_dev)
+        self.assertEqual(info.uuid, uuid)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_format(self):
+        """Verify that we can get information about a LUKS 2 device"""
+
+        extra = BlockDev.CryptoLUKSExtra()
+        extra.sector_size = 4096
+
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, PASSWD, None, 0,
+                                           BlockDev.CryptoLUKSVersion.LUKS2, extra)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
+        self.assertTrue(succ)
+
+        info = BlockDev.crypto_luks_info("libblockdevTestLUKS")
+        self.assertIsNotNone(info)
+
+        self.assertEqual(info.version, BlockDev.CryptoLUKSVersion.LUKS2)
+        self.assertEqual(info.cipher, "aes")
+        self.assertEqual(info.mode, "cbc-essiv:sha256")
+        self.assertEqual(info.backing_device, self.loop_dev)
+        self.assertEqual(info.sector_size, 4096)
+
+        _ret, uuid, _err = run_command("blkid -p -ovalue -sUUID %s" % self.loop_dev)
+        self.assertEqual(info.uuid, uuid)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+class CryptoTestIntegrity(CryptoTestCase):
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_integrity(self):
+        """Verify that we can get create a LUKS 2 device with integrity"""
+
+        extra = BlockDev.CryptoLUKSExtra()
+        extra.integrity = "hmac(sha256)"
+
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 512, PASSWD, None, 0,
+                                           BlockDev.CryptoLUKSVersion.LUKS2, extra)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
+        self.assertTrue(succ)
+
+        info = BlockDev.crypto_integrity_info("libblockdevTestLUKS")
+        self.assertIsNotNone(info)
+
+        self.assertEqual(info.algorithm, "hmac(sha256)")
+
+        # get integrity device dm name
+        _ret, int_name, _err = run_command('ls /sys/block/%s/holders/' % self.loop_dev.split("/")[-1])
+        self.assertTrue(int_name)  # true == not empty
+
+        tag_size = read_file("/sys/block/%s/integrity/tag_size" % int_name)
+        self.assertEqual(info.tag_size, int(tag_size))
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)

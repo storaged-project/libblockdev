@@ -808,3 +808,13 @@ gboolean bd_utils_echo_str_to_file (const gchar *str, const gchar *file_path, GE
     g_io_channel_unref (out_file);
     return TRUE;
 }
+
+/**
+ * bd_utils_log:
+ * @level: log level
+ * @msg: log message
+ */
+void bd_utils_log (gint level, const gchar *msg) {
+    if (log_func)
+        log_func (level, msg);
+}
