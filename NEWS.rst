@@ -8,6 +8,94 @@ for details.
 
 - features
 
+  - New plugin: nvdimm
+
+    - support for NVDIMM namespaces management
+    - requires *libndctl* >= 58.4
+
+  - LUKS2 support
+
+    - support for creating LUKS2 format including authenticated disk encryption
+    - multiple new functions for working with LUKS devices (suspend/resume, header backup, metadata size...)
+
+  - Extended support for opening TrueCrypt/VeraCrypt volumes
+
+  - Support for building crypto plugin without escrow device support (removes
+    build dependency on *libvolume_key* and *libnss*) -- configure option ``--without-escrow``.
+
+  - Support for building libblockdev without Python 2 support -- configure option
+    ``--without-python2``.
+
+**Full list of changes**
+
+Bjorn Pagen (3):
+
+- Fix build against musl libc
+- Fix build with clang
+- Enforce ZERO_INIT gcc backwards compatibility
+
+Florian Klink (1):
+
+- s390: don't hardcode paths, search PATH
+
+Jan Pokorny (1):
+
+- New function for luks metadata size
+
+Vojtech Trefny (24):
+
+- Sync the spec file with downstream
+- Fix python2-gobject-base dependency on Fedora 26 and older
+- Add the NVDIMM plugin
+- Add tests for the NVDIMM plugin
+- Add --without-xyz to DISTCHECK_CONFIGURE_FLAGS for disabled plugins
+- Add function for getting NVDIMM namespace name from devname or path
+- Fix memory leaks discovered by clang
+- Get sector size for non-block NVDIMM namespaces too
+- lvm-dbus: Check returned job object for error
+- Add functions to suspend and resume a LUKS device
+- Add function for killing keyslot on a LUKS device
+- Add functions to backup and restore LUKS header
+- Require at least libndctl 58.4
+- Allow compiling libblockdev crypto plugin without escrow support
+- Allow building libblockdev without Python 2 support
+- Skip bcache tests on Rawhide
+- Add support for creating LUKS 2 format
+- Use libblockdev function to create LUKS 2 in tests
+- Add a basic test for creating LUKS 2 format
+- Add function to get information about a LUKS device
+- Add function to get information about LUKS 2 integrity devices
+- Add functions to resize LUKS 2
+- Add a generic logging function for libblockdev
+- Redirect cryptsetup log to libblockdev log
+
+Vratislav Podzimek (1):
+
+- Use '=' instead of '==' to compare using 'test'
+
+segfault (10):
+
+- Support unlocking VeraCrypt volumes
+- Support TCRYPT keyfiles
+- Support TCRYPT hidden containers
+- Support TCRYPT system volumes
+- Support VeraCrypt PIM
+- Add function bd_crypto_device_seems_encrypted
+- Make keyfiles parameter to bd_crypto_tc_open_full zero terminated
+- Don't use VeraCrypt PIM if compiled against libcryptsetup < 2.0
+- Make a link point to the relevant section
+- Add new functions to docs/libblockdev-sections.txt
+
+Libblockdev 2.16
+----------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Notable changes**
+
+- features
+
   - LUKS 2 support for luks_open/close and luks_add/remove/change_key
 
   - Progress report support for ext filesystem checks
@@ -16,12 +104,14 @@ for details.
 **Full list of changes**
 
 Jan Tulak (4):
+
 - Add a function to test if prog. reporting was initialized
 - Add progress reporting infrastructure for Ext fsck
 - Add e2fsck progress
 - Add tests for progress report
 
 Vojtech Trefny (5):
+
 - Fix link to online documentation
 - Update 'Testing libblockdev' section in documentation
 - Check if 'journalctl' is available before trying to use it in tests
@@ -29,6 +119,7 @@ Vojtech Trefny (5):
 - Add support for LUKS 2 opening and key management
 
 Vratislav Podzimek (2):
+
 - Fix how the new kernel module functions are added to docs
 - Sync the spec file with downstream
 
@@ -68,10 +159,12 @@ refactorization changes (in the file system plugin). See below for details.
 **Full list of changes**
 
 Vendula Poncova (2):
+
 - bd_s390_dasd_is_ldl should be true only for LDL DADSs
 - Fix bd_s390_dasd_format
 
 Vojtech Trefny (5):
+
 - Use only sgdisk to set flags on GPT
 - Add test for setting partition flags on GPT
 - Free locale struct in kbd plugin
@@ -79,6 +172,7 @@ Vojtech Trefny (5):
 - Check for btrfs module availability in btrfs module
 
 Vratislav Podzimek (11):
+
 - Do not lie about tag creation
 - Mark unstable tests as such
 - Split the FS plugin source into multiple files
@@ -121,13 +215,16 @@ features, in particular support for the NTFS file system. See below for details.
 **Full list of changes**
 
 Jan Pokorny (1):
+
 - Added function to get DM device subsystem
 
 Kai Lüke (2):
+
 - Add function wrappers for NTFS tools
 - Add some test cases for NTFS
 
 Vojtech Trefny (29):
+
 - Skip btrfs subvolume tests with btrfs-progs 4.13.2
 - Fix BSSize memory leaks in btrfs and mdraid plugins
 - Use system values in KbdTestBcacheStatusTest
@@ -159,11 +256,13 @@ Vojtech Trefny (29):
 - fs.c: Fix potential NULL pointer dereference
 
 Vratislav Podzimek (3):
+
 - Sync spec with downstream
 - Add pkgconfig definitions for the utils library
 - Respect the version in the blockdev.pc file
 
 intrigeri (1):
+
 - Support the legacy boot GPT flag
 
 
@@ -203,6 +302,7 @@ on demand and querying available technologies was implemented.
 **Full list of changes**
 
 Vojtech Trefny (14):
+
 - Allow compiling libblockdev without s390 plugin
 - Do not run g_clear_error after setting it
 - Fix zFCP LUN max length
@@ -219,6 +319,7 @@ Vojtech Trefny (14):
 - Use shorter prefix for tempfiles
 
 Vratislav Podzimek (9):
+
 - Add a function for getting plugin name
 - Dynamically check for the required utilities
 - Add functions for querying available technologies

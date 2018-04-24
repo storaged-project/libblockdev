@@ -1,6 +1,6 @@
 # configure.ac for libblockdev
 
-AC_INIT([libblockdev], [2.16], [vpodzime@redhat.com])
+AC_INIT([libblockdev], [2.17], [vpodzime@redhat.com])
 
 # Disable building static libraries.
 # This needs to be set before initializing automake

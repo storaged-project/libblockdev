@@ -92,7 +92,7 @@
 %define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?gi_copts}
 
 Name:        libblockdev
-Version:     2.16
+Version:     2.17
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -868,6 +868,48 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Tue Apr 24 2018 Vojtech Trefny <vtrefny@redhat.com> - 2.17-1
+- Redirect cryptsetup log to libblockdev log (vtrefny)
+- Add a generic logging function for libblockdev (vtrefny)
+- Add functions to resize LUKS 2 (vtrefny)
+- Add function to get information about LUKS 2 integrity devices (vtrefny)
+- Add function to get information about a LUKS device (vtrefny)
+- Add a basic test for creating LUKS 2 format (vtrefny)
+- Use libblockdev function to create LUKS 2 in tests (vtrefny)
+- Add support for creating LUKS 2 format (vtrefny)
+- Skip bcache tests on Rawhide (vtrefny)
+- Allow building libblockdev without Python 2 support (vtrefny)
+- Allow compiling libblockdev crypto plugin without escrow support (vtrefny)
+- Require at least libndctl 58.4 (vtrefny)
+- New function for luks metadata size (japokorn)
+- Add functions to backup and restore LUKS header (vtrefny)
+- Add function for killing keyslot on a LUKS device (vtrefny)
+- Add functions to suspend and resume a LUKS device (vtrefny)
+- Use '=' instead of '==' to compare using 'test' (v.podzimek)
+- lvm-dbus: Check returned job object for error (vtrefny)
+- Get sector size for non-block NVDIMM namespaces too (vtrefny)
+- Fix memory leaks discovered by clang (vtrefny)
+- Add new functions to docs/libblockdev-sections.txt (segfault)
+- Make a link point to the relevant section (segfault)
+- Don't use VeraCrypt PIM if compiled against libcryptsetup < 2.0 (segfault)
+- Make keyfiles parameter to bd_crypto_tc_open_full zero terminated (segfault)
+- Add function bd_crypto_device_seems_encrypted (segfault)
+- Support VeraCrypt PIM (segfault)
+- Support TCRYPT system volumes (segfault)
+- Support TCRYPT hidden containers (segfault)
+- Support TCRYPT keyfiles (segfault)
+- Support unlocking VeraCrypt volumes (segfault)
+- Enforce ZERO_INIT gcc backwards compatibility (bjornpagen)
+- Add function for getting NVDIMM namespace name from devname or path (vtrefny)
+- Add --without-xyz to DISTCHECK_CONFIGURE_FLAGS for disabled plugins (vtrefny)
+- Add tests for the NVDIMM plugin (vtrefny)
+- Add the NVDIMM plugin (vtrefny)
+- Fix build with clang (bjornpagen)
+- s390: don't hardcode paths, search PATH (flokli)
+- Fix build against musl libc (bjornpagen)
+- Fix python2-gobject-base dependency on Fedora 26 and older (vtrefny)
+- Sync the spec file with downstream (vtrefny)
+
 * Thu Feb 08 2018 Vojtech Trefny <vtrefny@redhat.com> - 2.16-1
 - Add tests for progress report (jtulak)
 - Add e2fsck progress (jtulak)
