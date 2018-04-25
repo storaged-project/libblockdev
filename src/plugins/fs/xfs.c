@@ -151,10 +151,10 @@ gboolean bd_fs_xfs_wipe (const gchar *device, GError **error) {
  * Tech category: %BD_FS_TECH_XFS-%BD_FS_TECH_MODE_CHECK
  */
 gboolean bd_fs_xfs_check (const gchar *device, GError **error) {
-    const gchar *args[6] = {"xfs_db", "-r", "-c", "check", device, NULL};
+    const gchar *args[4] = {"xfs_repair", "-n", device, NULL};
     gboolean ret = FALSE;
 
-    if (!check_deps (&avail_deps, DEPS_XFS_DB_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+    if (!check_deps (&avail_deps, DEPS_XFS_REPAIR_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
 
     ret = bd_utils_exec_and_report_error (args, NULL, error);
