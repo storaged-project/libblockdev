@@ -42,6 +42,8 @@ gboolean bd_dm_check_deps ();
 gboolean bd_dm_init ();
 void bd_dm_close ();
 
+gboolean bd_dm_is_tech_avail (BDDMTech tech, guint64 mode, GError **error);
+
 gboolean bd_dm_create_linear (const gchar *map_name, const gchar *device, guint64 length, const gchar *uuid, GError **error);
 gboolean bd_dm_remove (const gchar *map_name, GError **error);
 gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean active_only, GError **error);
