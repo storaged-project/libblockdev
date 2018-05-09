@@ -156,6 +156,17 @@ AS_IF([test "x$with_escrow" != "xno"],
       [AC_DEFINE([WITH_BD_ESCROW], [], [Define if escrow is supported]) AC_SUBST([WITH_ESCROW], [1])],
       [])
 
+AC_ARG_WITH([dmraid],
+    AS_HELP_STRING([--with-dmraid], [support dmraid @<:@default=yes@:>@]),
+    [],
+    [with_dmraid=yes])
+
+AC_SUBST([WITH_DMRAID], [0])
+AM_CONDITIONAL(WITH_DMRAID, test "x$with_dmraid" != "xno")
+AS_IF([test "x$with_dmraid" != "xno"],
+      [AC_DEFINE([WITH_BD_DMRAID], [], [Define if dmraid is supported]) AC_SUBST([WITH_DMRAID], [1])],
+      [])
+
 LIBBLOCKDEV_PLUGIN([BTRFS], [btrfs])
 LIBBLOCKDEV_PLUGIN([CRYPTO], [crypto])
 LIBBLOCKDEV_PLUGIN([DM], [dm])
@@ -194,7 +205,7 @@ AS_IF([test "x$with_dm" != "xno" -o "x$with_lvm" != "xno" -o "x$with_lvm_dbus" !
       [LIBBLOCKDEV_PKG_CHECK_MODULES([DEVMAPPER], [devmapper >= 1.02.93])],
       [])
 
-AS_IF([test "x$with_dm" != "xno"],
+AS_IF([test "x$with_dm" != "xno" -a "x$with_dmraid" != "xno"],
       [LIBBLOCKDEV_CHECK_HEADER([dmraid/dmraid.h], [], [dmraid.h not available])],
       [])
 

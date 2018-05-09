@@ -17,6 +17,7 @@
 %define with_nvdimm @WITH_NVDIMM@
 %define with_gi @WITH_GI@
 %define with_escrow @WITH_ESCROW@
+%define with_dmraid @WITH_DMRAID@
 
 # python2 is not available on RHEL > 7 and not needed on Fedora > 28
 %if 0%{?rhel} > 7 || 0%{?fedora} > 28 || %{with_python2} == 0
@@ -54,6 +55,10 @@
 %endif
 %if %{with_dm} != 1
 %define dm_copts --without-dm
+%else
+%if %{with_dmraid} != 1
+%define dm_copts --without-dmraid
+%endif
 %endif
 %if %{with_loop} != 1
 %define loop_copts --without-loop
@@ -239,7 +244,9 @@ with the libblockdev-crypto plugin/library.
 %if %{with_dm}
 %package dm
 BuildRequires: device-mapper-devel
+%if %{with_dmraid}
 BuildRequires: dmraid-devel
+%endif
 BuildRequires: systemd-devel
 Summary:     The Device Mapper plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
@@ -256,7 +263,9 @@ Requires: %{name}-dm%{?_isa} = %{version}-%{release}
 Requires: glib2-devel
 Requires: device-mapper-devel
 Requires: systemd-devel
+%if %{with_dmraid}
 Requires: dmraid-devel
+%endif
 Requires: %{name}-utils-devel%{?_isa}
 
 %description dm-devel
