@@ -1851,9 +1851,8 @@ gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const g
     g_free (msg);
 
     if (keyfiles) {
-        for (i=0; *(keyfiles + i); i++) {
-            keyfiles_count = i;
-        }
+        for (i=0; *(keyfiles + i); i++);
+        keyfiles_count = i;
     }
 
     if ((data_len == 0) && (keyfiles_count == 0)) {
