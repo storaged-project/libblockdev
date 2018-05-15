@@ -240,7 +240,10 @@ static BDVDOInfo* get_vdo_info_from_table (GHashTable *table, gboolean free_tabl
     gchar *size_str = NULL;
 
     ret->name = NULL;
-    ret->device = g_strdup ((gchar*) g_hash_table_lookup (table, "Storage device"));
+    ret->device = g_hash_table_lookup (table, "Storage device");
+    if (ret->device != NULL)
+        /* get the real device path */
+        ret->device = realpath (ret->device, NULL);
 
     value = (gchar*) g_hash_table_lookup (table, "Activate");
     if (value)
