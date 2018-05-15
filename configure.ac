@@ -239,7 +239,10 @@ AS_IF([test "x$with_btrfs" != "xno" -o "x$with_mdraid" != "xno" -o "x$with_kbd" 
 
 AS_IF([test "x$with_nvdimm" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([UUID], [uuid])
-       LIBBLOCKDEV_PKG_CHECK_MODULES([NDCTL], [libndctl >= 58.4])]
+       LIBBLOCKDEV_PKG_CHECK_MODULES([NDCTL], [libndctl >= 58.4])
+       # new versions of libndctl new modes
+       AS_IF([$PKG_CONFIG --atleast-version=60 libndctl],
+             [AC_DEFINE([LIBNDCTL_NEW_MODES])], [])]
       [])
 
 AC_SUBST([skip_patterns], [$skip_patterns])
