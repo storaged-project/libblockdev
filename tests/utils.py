@@ -350,11 +350,13 @@ def run(cmd_string):
     return subprocess.call(cmd_string, close_fds=True, shell=True)
 
 
-def mount(device, where):
+def mount(device, where, ro=False):
     if not os.path.isdir(where):
         os.makedirs(where)
-    os.system("mount %s %s" % (device, where))
-
+    if ro:
+        os.system("mount -oro %s %s" % (device, where))
+    else:
+        os.system("mount %s %s" % (device, where))
 
 def umount(what, retry=True):
     try:
