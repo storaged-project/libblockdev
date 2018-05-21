@@ -384,7 +384,7 @@ static gboolean ext_repair (const gchar *device, gboolean unsafe, const BDExtraA
     /* Force checking even if the file system seems clean. AND
      *     Automatically repair what can be safely repaired. OR
      *     Assume an answer of `yes' to all questions. */
-    const gchar *args_progress[7] = {"e2fsck", "-f", "-n", "-C", "1", device, NULL};
+    const gchar *args_progress[7] = {"e2fsck", "-f", unsafe ? "-y" : "-p", "-C", "1", device, NULL};
     const gchar *args[5] = {"e2fsck", "-f", unsafe ? "-y" : "-p", device, NULL};
     gint status = 0;
 
