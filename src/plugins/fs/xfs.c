@@ -145,16 +145,16 @@ gboolean bd_fs_xfs_wipe (const gchar *device, GError **error) {
  *
  * Returns: whether an xfs file system on the @device is clean or not
  *
- * Note: if the file system is mounted it may be reported as unclean even if
- *       everything is okay and there are just some pending/in-progress writes
+ * Note: If the file system is mounted RW, it will always be reported as not
+ *       clean!
  *
  * Tech category: %BD_FS_TECH_XFS-%BD_FS_TECH_MODE_CHECK
  */
 gboolean bd_fs_xfs_check (const gchar *device, GError **error) {
-    const gchar *args[6] = {"xfs_db", "-r", "-c", "check", device, NULL};
+    const gchar *args[4] = {"xfs_repair", "-n", device, NULL};
     gboolean ret = FALSE;
 
-    if (!check_deps (&avail_deps, DEPS_XFS_DB_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+    if (!check_deps (&avail_deps, DEPS_XFS_REPAIR_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
 
     ret = bd_utils_exec_and_report_error (args, NULL, error);

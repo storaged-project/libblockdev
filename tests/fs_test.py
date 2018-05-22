@@ -24,8 +24,8 @@ def check_output(args, ignore_retcode=True):
             raise
 
 @contextmanager
-def mounted(device, where):
-    mount(device, where)
+def mounted(device, where, ro=False):
+    mount(device, where, ro)
     yield
     umount(where)
 
@@ -560,9 +560,9 @@ class XfsTestCheck(FSTestCase):
         succ = BlockDev.fs_xfs_check(self.loop_dev)
         self.assertTrue(succ)
 
-        # mounted, but can be checked and nothing happened in/to the file
-        # system, so it should be just reported as clean
-        with mounted(self.loop_dev, self.mount_dir):
+        # mounted RO, can be checked and nothing happened in/to the file system,
+        # so it should be just reported as clean
+        with mounted(self.loop_dev, self.mount_dir, ro=True):
             succ = BlockDev.fs_xfs_check(self.loop_dev)
             self.assertTrue(succ)
 
