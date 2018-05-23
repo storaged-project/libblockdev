@@ -1,7 +1,10 @@
 import json
 import os
+import re
 import unittest
 import overrides_hack
+
+from distutils.version import LooseVersion
 
 from utils import run_command, read_file, skip_on, fake_path
 from gi.repository import BlockDev, GLib
@@ -31,6 +34,13 @@ class NVDIMMNamespaceTestCase(NVDIMMTestCase):
         decoder = json.JSONDecoder()
         decoded = decoder.decode(out)
         return decoded
+
+    def _get_ndctl_version(self):
+        _ret, out, _err = run_command("ndctl --version")
+        m = re.search(r"([\d\.]+)", out)
+        if not m or len(m.groups()) != 1:
+            raise RuntimeError("Failed to determine ndctl version from: %s" % out)
+        return LooseVersion(m.groups()[0])
 
     def setUp(self):
         self.sys_info = self._get_nvdimm_info()
@@ -66,7 +76,9 @@ class NVDIMMNamespaceTestCase(NVDIMMTestCase):
         if "sector_size" in self.sys_info.keys():
             self.assertEqual(bd_info.sector_size, self.sys_info["sector_size"])
         else:
-            self.assertEqual(bd_info.sector_size, 0)
+            # libndctl (and libblockdev too) returns 512 as default value
+            # even for modes where sector size doesn't make sense
+            self.assertEqual(bd_info.sector_size, 512)
 
     def test_namespace_info(self):
         # get info about our 'testing' namespace
@@ -91,6 +103,7 @@ class NVDIMMNamespaceTestCase(NVDIMMTestCase):
         self._check_namespace_info(bd_namespaces[0])
 
     @unittest.skipUnless("JENKINS_HOME" in os.environ, "skipping test that modifies system configuration")
+    @skip_on("fedora", "29", reason="Disabling is broken on rawhide and makes the 'fake' NVDIMM unusable.")
     def test_enable_disable(self):
         # non-existing/unknow namespace
         with self.assertRaises(GLib.GError):
@@ -118,6 +131,7 @@ class NVDIMMNamespaceTestCase(NVDIMMTestCase):
         self.assertTrue(info.enabled)
 
     @unittest.skipUnless("JENKINS_HOME" in os.environ, "skipping test that modifies system configuration")
+    @skip_on("fedora", "29", reason="Disabling is broken on rawhide and makes the 'fake' NVDIMM unusable.")
     def test_namespace_reconfigure(self):
         # active namespace -- reconfigure doesn't work without force
         with self.assertRaises(GLib.GError):
@@ -145,13 +159,19 @@ class NVDIMMNamespaceTestCase(NVDIMMTestCase):
         info = BlockDev.nvdimm_namespace_info(self.sys_info["dev"])
         self.assertEqual(info.mode, BlockDev.NVDIMMNamespaceMode.SECTOR)
 
-        # and now to memory mode
+        # ndctl renamed the modes from 'memory' and 'dax' to 'fsdax' and 'devdax'
+        # in version 60, so we need to choose different mode based on version
+        ndctl_version = self._get_ndctl_version()
+        if ndctl_version >= LooseVersion("60.0"):
+            mode = BlockDev.NVDIMMNamespaceMode.FSDAX
+        else:
+            mode = BlockDev.NVDIMMNamespaceMode.MEMORY
+
         ret = BlockDev.nvdimm_namespace_reconfigure(self.sys_info["dev"],
-                                                    BlockDev.NVDIMMNamespaceMode.MEMORY,
-                                                    True)
+                                                    mode, True)
         self.assertTrue(ret)
         info = BlockDev.nvdimm_namespace_info(self.sys_info["dev"])
-        self.assertEqual(info.mode, BlockDev.NVDIMMNamespaceMode.MEMORY)
+        self.assertEqual(info.mode, mode)
 
         # and back to sector
         ret = BlockDev.nvdimm_namespace_reconfigure(self.sys_info["dev"],

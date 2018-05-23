@@ -64,7 +64,7 @@ BDNVDIMMNamespaceInfo* bd_nvdimm_namespace_info_copy (BDNVDIMMNamespaceInfo *inf
 }
 
 
-static const gchar * const mode_str[BD_NVDIMM_NAMESPACE_MODE_UNKNOWN+1] = {"raw", "sector", "memory", "dax", "unknown"};
+static const gchar * const mode_str[BD_NVDIMM_NAMESPACE_MODE_UNKNOWN+1] = {"raw", "sector", "memory", "dax", "fsdax", "devdax", "unknown"};
 
 static volatile guint avail_deps = 0;
 static GMutex deps_check_lock;
@@ -178,6 +178,10 @@ BDNVDIMMNamespaceMode bd_nvdimm_namespace_get_mode_from_str (const gchar *mode_s
         return BD_NVDIMM_NAMESPACE_MODE_MEMORY;
     else if (g_strcmp0 (mode_str, "dax") == 0)
         return BD_NVDIMM_NAMESPACE_MODE_DAX;
+    else if (g_strcmp0 (mode_str, "fsdax") == 0)
+        return BD_NVDIMM_NAMESPACE_MODE_FSDAX;
+    else if (g_strcmp0 (mode_str, "devdax") == 0)
+        return BD_NVDIMM_NAMESPACE_MODE_DEVDAX;
     else {
         g_set_error (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_MODE_INVAL,
                      "Invalid mode given: '%s'", mode_str);
@@ -389,7 +393,11 @@ static BDNVDIMMNamespaceInfo* get_nvdimm_namespace_info (struct ndctl_namespace 
               info->size = ndctl_pfn_get_size (pfn);
             else
               info->size = ndctl_namespace_get_size (ndns);
+#ifndef LIBNDCTL_NEW_MODES
           info->mode = BD_NVDIMM_NAMESPACE_MODE_MEMORY;
+#else
+          info->mode = BD_NVDIMM_NAMESPACE_MODE_FSDAX;
+#endif
           break;
         case NDCTL_NS_MODE_DAX:
             if (!dax) {
@@ -400,7 +408,11 @@ static BDNVDIMMNamespaceInfo* get_nvdimm_namespace_info (struct ndctl_namespace 
                 return NULL;
             }
             info->size = ndctl_dax_get_size (dax);
+#ifndef LIBNDCTL_NEW_MODES
             info->mode = BD_NVDIMM_NAMESPACE_MODE_DAX;
+#else
+            info->mode = BD_NVDIMM_NAMESPACE_MODE_DEVDAX;
+#endif
             break;
         case NDCTL_NS_MODE_SAFE:
             if (!btt) {
