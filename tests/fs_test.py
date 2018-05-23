@@ -86,6 +86,16 @@ class FSTestCase(unittest.TestCase):
         except:
             pass
 
+    def setro(self, device):
+        ret, _out, _err = utils.run_command("blockdev --setro %s" % device)
+        if ret != 0:
+            self.fail("Failed to set %s read-only" % device)
+
+    def setrw(self, device):
+        ret, _out, _err = utils.run_command("blockdev --setrw %s" % device)
+        if ret != 0:
+            self.fail("Failed to set %s read-write" % device)
+
 class TestGenericWipe(FSTestCase):
     def test_generic_wipe(self):
         """Verify that generic signature wipe works as expected"""
@@ -1123,6 +1133,67 @@ class MountTest(FSTestCase):
 
         with self.assertRaises(GLib.GError):
             BlockDev.fs_unmount(self.loop_dev, run_as_uid=uid, run_as_gid=gid)
+        self.assertTrue(os.path.ismount(tmp))
+
+    def test_mount_ntfs(self):
+        """ Test basic mounting and unmounting with NTFS filesystem"""
+        # using NTFS because it uses a helper program (mount.ntfs) and libmount
+        # behaves differently because of that
+
+        if not self.ntfs_avail:
+            self.skipTest("skipping NTFS: not available")
+
+        succ = BlockDev.fs_ntfs_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        tmp = tempfile.mkdtemp(prefix="libblockdev.", suffix="mount_test")
+        self.addCleanup(os.rmdir, tmp)
+
+        self.addCleanup(umount, self.loop_dev)
+
+        succ = BlockDev.fs_mount(self.loop_dev, tmp, "ntfs", None)
+        self.assertTrue(succ)
+        self.assertTrue(os.path.ismount(tmp))
+
+        succ = BlockDev.fs_unmount(self.loop_dev, False, False, None)
+        self.assertTrue(succ)
+        self.assertFalse(os.path.ismount(tmp))
+
+        mnt = BlockDev.fs_get_mountpoint(self.loop_dev)
+        self.assertIsNone(mnt)
+
+        # mount again to test unmount using the mountpoint
+        succ = BlockDev.fs_mount(self.loop_dev, tmp, None, None)
+        self.assertTrue(succ)
+        self.assertTrue(os.path.ismount(tmp))
+
+        succ = BlockDev.fs_unmount(tmp, False, False, None)
+        self.assertTrue(succ)
+        self.assertFalse(os.path.ismount(tmp))
+
+        # mount with some options
+        succ = BlockDev.fs_mount(self.loop_dev, tmp, "ntfs", "ro")
+        self.assertTrue(succ)
+        self.assertTrue(os.path.ismount(tmp))
+        _ret, out, _err = utils.run_command("grep %s /proc/mounts" % tmp)
+        self.assertTrue(out)
+        self.assertIn("ro", out)
+
+        succ = BlockDev.fs_unmount(self.loop_dev, False, False, None)
+        self.assertTrue(succ)
+        self.assertFalse(os.path.ismount(tmp))
+
+        # set the device read-only
+        self.setro(self.loop_dev)
+        self.addCleanup(self.setrw, self.loop_dev)
+
+        # standard mount (rw) should fail
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_mount(self.loop_dev, tmp, "ntfs", None)
+
+        # read-only mount should work
+        succ = BlockDev.fs_mount(self.loop_dev, tmp, "ntfs", "ro")
+        self.assertTrue(succ)
         self.assertTrue(os.path.ismount(tmp))
 
 class GenericCheck(FSTestCase):

@@ -49,12 +49,15 @@ typedef gboolean (*MountFunc) (MountArgs *args, GError **error);
 static gboolean do_mount (MountArgs *args, GError **error);
 
 #ifndef LIBMOUNT_NEW_ERR_API
-static void parse_unmount_error_old (struct libmnt_context *cxt, int rc, const gchar *spec, GError **error) {
+static gboolean get_unmount_error_old (struct libmnt_context *cxt, int rc, const gchar *spec, GError **error) {
     int syscall_errno = 0;
+    int helper_status = 0;
 
-    if (mnt_context_syscall_called (cxt)) {
+    if (mnt_context_syscall_called (cxt) == 1) {
         syscall_errno = mnt_context_get_syscall_errno (cxt);
         switch (syscall_errno) {
+            case 0:
+                return TRUE;
             case EBUSY:
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                              "Target busy.");
@@ -72,8 +75,18 @@ static void parse_unmount_error_old (struct libmnt_context *cxt, int rc, const g
                              "Unmount syscall failed: %d.", syscall_errno);
                 break;
         }
+    } else if (mnt_context_helper_executed (cxt) == 1) {
+        helper_status = mnt_context_get_helper_status (cxt);
+        if (helper_status != 0) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                         "Unmount helper program failed: %d.", helper_status);
+            return FALSE;
+        } else
+            return TRUE;
     } else {
-        if (rc == -EPERM) {
+        if (rc == 0)
+            return TRUE;
+        else if (rc == -EPERM) {
             if (mnt_context_tab_applied (cxt))
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
                              "Operation not permitted.");
@@ -85,10 +98,10 @@ static void parse_unmount_error_old (struct libmnt_context *cxt, int rc, const g
                          "Failed to unmount %s.", spec);
         }
     }
-    return;
+    return FALSE;
 }
 #else
-static void parse_unmount_error_new (struct libmnt_context *cxt, int rc, const gchar *spec, GError **error) {
+static gboolean get_unmount_error_new (struct libmnt_context *cxt, int rc, const gchar *spec, GError **error) {
     int ret = 0;
     int syscall_errno = 0;
     char buf[MOUNT_ERR_BUF_SIZE] = {0};
@@ -114,20 +127,18 @@ static void parse_unmount_error_new (struct libmnt_context *cxt, int rc, const g
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                              "%s", buf);
         }
-    } else
-        /* mnt_context_umount returned non-zero, but mnt_context_get_excode
-         * returned zero -- this should never happen, but just in case set error
-         * to something sane here
-         */
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Unknow error when unmounting %s", spec);
-    return;
+
+        return FALSE;
+    }
+
+    return TRUE;
 }
 #endif
 
 static gboolean do_unmount (MountArgs *args, GError **error) {
     struct libmnt_context *cxt = NULL;
     int ret = 0;
+    gboolean success = FALSE;
 
     cxt = mnt_new_context ();
 
@@ -157,23 +168,20 @@ static gboolean do_unmount (MountArgs *args, GError **error) {
     }
 
     ret = mnt_context_umount (cxt);
-    if (ret != 0) {
 #ifdef LIBMOUNT_NEW_ERR_API
-        parse_unmount_error_new (cxt, ret, args->spec, error);
+    success = get_unmount_error_new (cxt, ret, args->spec, error);
 #else
-        parse_unmount_error_old (cxt, ret, args->spec, error);
+    success = get_unmount_error_old (cxt, ret, args->spec, error);
 #endif
-        mnt_free_context(cxt);
-        return FALSE;
-    }
 
     mnt_free_context(cxt);
-    return TRUE;
+    return success;
 }
 
 #ifndef LIBMOUNT_NEW_ERR_API
-static gboolean parse_mount_error_old (struct libmnt_context *cxt, int rc, MountArgs *args, GError **error) {
+static gboolean get_mount_error_old (struct libmnt_context *cxt, int rc, MountArgs *args, GError **error) {
     int syscall_errno = 0;
+    int helper_status = 0;
     unsigned long mflags = 0;
 
     if (mnt_context_get_mflags (cxt, &mflags) != 0) {
@@ -185,6 +193,8 @@ static gboolean parse_mount_error_old (struct libmnt_context *cxt, int rc, Mount
     if (mnt_context_syscall_called (cxt) == 1) {
         syscall_errno = mnt_context_get_syscall_errno (cxt);
         switch (syscall_errno) {
+            case 0:
+                return TRUE;
             case EBUSY:
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                              "Source is already mounted or target is busy.");
@@ -259,8 +269,18 @@ static gboolean parse_mount_error_old (struct libmnt_context *cxt, int rc, Mount
                              "Mount syscall failed: %d.", syscall_errno);
                 break;
         }
+    } else if (mnt_context_helper_executed (cxt) == 1) {
+        helper_status = mnt_context_get_helper_status (cxt);
+        if (helper_status != 0) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                         "Mount helper program failed: %d.", helper_status);
+            return FALSE;
+        } else
+            return TRUE;
     } else {
         switch (rc) {
+            case 0:
+                return TRUE;
             case -EPERM:
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
                              "Only root can mount %s.", args->device);
@@ -305,7 +325,7 @@ static gboolean parse_mount_error_old (struct libmnt_context *cxt, int rc, Mount
 }
 
 #else
-static void parse_mount_error_new (struct libmnt_context *cxt, int rc, MountArgs *args, GError **error) {
+static gboolean get_mount_error_new (struct libmnt_context *cxt, int rc, MountArgs *args, GError **error) {
     int ret = 0;
     int syscall_errno = 0;
     char buf[MOUNT_ERR_BUF_SIZE] = {0};
@@ -314,7 +334,7 @@ static void parse_mount_error_new (struct libmnt_context *cxt, int rc, MountArgs
     ret = mnt_context_get_excode (cxt, rc, buf, MOUNT_ERR_BUF_SIZE - 1);
     if (ret != 0) {
         /* check whether the call failed because of lack of permission */
-        if (mnt_context_syscall_called (cxt)) {
+        if (mnt_context_syscall_called (cxt) == 1) {
             syscall_errno = mnt_context_get_syscall_errno (cxt);
             permission = syscall_errno == EPERM;
         } else
@@ -331,9 +351,11 @@ static void parse_mount_error_new (struct libmnt_context *cxt, int rc, MountArgs
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                              "%s", buf);
         }
+
+        return FALSE;
     }
 
-    return;
+    return TRUE;
 }
 #endif
 
@@ -395,15 +417,15 @@ static gboolean do_mount (MountArgs *args, GError **error) {
 
     ret = mnt_context_mount (cxt);
 
-    if (ret != 0) {
+    /* we need to always do some libmount magic to check if the mount really
+       succeeded -- `mnt_context_mount` can return zero when helper program
+       (mount.type) fails
+     */
 #ifdef LIBMOUNT_NEW_ERR_API
-      parse_mount_error_new (cxt, ret, args, error);
-      success = FALSE;
+    success = get_mount_error_new (cxt, ret, args, error);
 #else
-      success = parse_mount_error_old (cxt, ret, args, error);
+    success = get_mount_error_old (cxt, ret, args, error);
 #endif
-    } else
-        success = TRUE;
 
     mnt_free_context(cxt);
     return success;
