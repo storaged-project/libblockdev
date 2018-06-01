@@ -639,6 +639,7 @@ bd_vdo_deactivate
 bd_vdo_start
 bd_vdo_stop
 bd_vdo_grow_logical
+bd_vdo_grow_physical
 BDVDOTech
 BDVDOTechMode
 bd_vdo_is_tech_avail

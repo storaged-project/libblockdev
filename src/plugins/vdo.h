@@ -86,5 +86,6 @@ gboolean bd_vdo_start (const gchar *name, gboolean rebuild, const BDExtraArg **e
 gboolean bd_vdo_stop (const gchar *name, gboolean force, const BDExtraArg **extra, GError **error);
 
 gboolean bd_vdo_grow_logical (const gchar *name, guint64 size, const BDExtraArg **extra, GError **error);
+gboolean bd_vdo_grow_physical (const gchar *name, const BDExtraArg **extra, GError **error);
 
 #endif  /* BD_VDO */

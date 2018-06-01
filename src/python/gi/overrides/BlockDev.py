@@ -823,6 +823,13 @@ def vdo_grow_logical(name, size, extra=None, **kwargs):
     return _vdo_grow_logical(name, size, extra)
 __all__.append("vdo_grow_logical")
 
+_vdo_grow_physical = BlockDev.vdo_grow_physical
+@override(BlockDev.vdo_grow_physical)
+def vdo_grow_physical(name, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _vdo_grow_physical(name, extra)
+__all__.append("vdo_grow_physical")
+
 
 ## defined in this overrides only!
 def plugin_specs_from_names(plugin_names):

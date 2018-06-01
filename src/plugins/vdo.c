@@ -832,3 +832,27 @@ gboolean bd_vdo_grow_logical (const gchar *name, guint64 size, const BDExtraArg 
     g_free ((gchar *) args[4]);
     return ret;
 }
+
+/**
+ * bd_vdo_grow_physical:
+ * @name: name of an existing VDO volume
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the VDO tool
+ *                                                 (just passed to VDO as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the VDO volume was successfully grown or not
+ *
+ * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_GROW
+ */
+gboolean bd_vdo_grow_physical (const gchar *name, const BDExtraArg **extra, GError **error) {
+    const gchar *args[5] = {"vdo", "growPhysical", "-n", name, NULL};
+    gboolean ret = FALSE;
+
+    if (!check_deps (&avail_deps, DEPS_VDO_MASK, deps, DEPS_LAST, &deps_check_lock, error) ||
+        !check_module_deps (&avail_module_deps, MODULE_DEPS_VDO_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
+    ret = bd_utils_exec_and_report_error (args, extra, error);
+
+    return ret;
+}
