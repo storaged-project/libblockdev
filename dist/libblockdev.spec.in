@@ -43,6 +43,12 @@
 %define lvm_dbus_copts --without-lvm-dbus
 %endif
 
+# vdo is not available on Fedora
+%if (0%{?fedora}) || %{with_vdo} == 0
+%define with_vdo 0
+%define vdo_copts --without-vdo
+%endif
+
 %if %{with_btrfs} != 1
 %define btrfs_copts --without-btrfs
 %endif
