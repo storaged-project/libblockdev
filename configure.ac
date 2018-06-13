@@ -180,6 +180,7 @@ LIBBLOCKDEV_PLUGIN([KBD], [kbd])
 LIBBLOCKDEV_PLUGIN([PART], [part])
 LIBBLOCKDEV_PLUGIN([FS], [fs])
 LIBBLOCKDEV_PLUGIN([NVDIMM], [nvdimm])
+LIBBLOCKDEV_PLUGIN([VDO], [vdo])
 
 AM_CONDITIONAL(WITH_PART_O_WITH_FS, test "x$with_part" != "xno" -o "x$with_fs" != "xno")
 
@@ -233,7 +234,7 @@ AS_IF([test "x$with_fs" != "xno"],
               AC_SUBST([PARTED_FS_CFLAGS], [])])],
       [])
 
-AS_IF([test "x$with_btrfs" != "xno" -o "x$with_mdraid" != "xno" -o "x$with_kbd" != "xno"],
+AS_IF([test "x$with_btrfs" != "xno" -o "x$with_mdraid" != "xno" -o "x$with_kbd" != "xno" -o "x$with_vdo" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([BYTESIZE], [bytesize >= 0.1])],
       [])
 
@@ -243,6 +244,10 @@ AS_IF([test "x$with_nvdimm" != "xno"],
        # new versions of libndctl new modes
        AS_IF([$PKG_CONFIG --atleast-version=60 libndctl],
              [AC_DEFINE([LIBNDCTL_NEW_MODES])], [])]
+      [])
+
+AS_IF([test "x$with_vdo" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([YAML], [yaml-0.1])]
       [])
 
 AC_SUBST([skip_patterns], [$skip_patterns])
