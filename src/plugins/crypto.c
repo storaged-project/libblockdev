@@ -20,6 +20,8 @@
 #include <string.h>
 #include <glib.h>
 #include <libcryptsetup.h>
+#include <luksmeta.h>
+#include <json.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/random.h>
@@ -412,6 +414,205 @@ guint64 bd_crypto_luks_get_metadata_size (const gchar *device, GError **error) {
     crypt_free (cd);
 
     return ret;
+}
+
+/**
+ * bd_crypto_luks_get_policies
+ * @device: the queried device
+ * @include_secrets: whether to include sensitive information
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: Array of policies
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
+ */
+
+static luksmeta_uuid_t luksmeta_clevis_uuid = { 0xcb, 0x6e, 0x89, 0x04, 0x81, 0xff, 0x40, 0xda,
+                                                0xa8, 0x4a, 0x07, 0xab, 0x9a, 0xb5, 0x71, 0x5e };
+
+static void add_error_policy (struct json_object *policies, int slot, int err) {
+  struct json_object *pol = json_object_new_object ();
+  json_object_object_add (pol, "slot", json_object_new_int (slot));
+  json_object_object_add (pol, "errno", json_object_new_int (err));
+  json_object_array_add (policies, pol);
+}
+
+static void decode_header_inplace (gchar *buf) {
+    gchar *ptr;
+    gsize len;
+    for (ptr = buf; *ptr; ptr++) {
+      if (*ptr == '-')
+        *ptr = '+';
+      else if (*ptr == '_')
+        *ptr = '/';
+      else if (*ptr == '.') {
+        *ptr = '\0';
+        break;
+      }
+    }
+    while ((ptr - buf) % 4 > 0)
+        *ptr++ = '=';
+    *ptr = '\0';
+    g_base64_decode_inplace (buf, &len);
+    buf[len] = '\0';
+}
+
+static struct json_object *get_clevis_config (struct json_object *header, gboolean include_secrets) {
+  struct json_object *clevis;
+  struct json_object *pin;
+  const gchar *pin_str;
+
+  // "include_secrets" is unused right now because we have no code
+  // that deals with configs that contain secrets.
+  //
+  (void)include_secrets;
+
+  clevis = json_object_object_get (header, "clevis");
+  if (clevis == NULL)
+      return NULL;
+
+  pin = json_object_object_get (clevis, "pin");
+  if (pin == NULL)
+      return json_object_new_object ();
+
+  pin_str = json_object_get_string (pin);
+  if (g_strcmp0 (pin_str, "tang") == 0) {
+      /* For "tang", the configuration is stored directly in the
+         header, and there is nothing sensitive in it.
+      */
+      return json_object_get (clevis);
+  } else if (g_strcmp0 (pin_str, "sss") == 0) {
+      /* A "sss" config needs to be decoded and cleaned recursively.
+       */
+      struct json_object *pin_header;
+      struct json_object *config;
+      struct json_object *sss_config;
+      struct json_object *pin_configs;
+      struct json_object *jwes;
+
+      pin_header = json_object_object_get (clevis, pin_str);
+      if (pin_header == NULL)
+        return NULL;
+
+      config = json_object_new_object ();
+      json_object_object_add (config, "pin", json_object_get (pin));
+
+      sss_config = json_object_new_object ();
+      json_object_object_add (sss_config, "t", json_object_get (json_object_object_get (pin_header, "t")));
+
+      pin_configs = json_object_new_object ();
+      jwes = json_object_object_get (pin_header, "jwe");
+      if (jwes) {
+          for (size_t i = 0; i < json_object_array_length (jwes); i++) {
+              const char *jwe;
+              gchar *buf;
+              struct json_object *header, *subpin_config, *subpin_pin, *subpin_data;
+              struct json_object *bucket;
+
+              jwe = json_object_get_string (json_object_array_get_idx (jwes, i));
+              buf = g_new0(gchar, strlen(jwe) + 3 + 1); // 3 characters extra base64 padding, 1 zero terminator
+              strcpy (buf, jwe);
+              decode_header_inplace (buf);
+              header = json_tokener_parse (buf);
+              g_free (buf);
+              if (header == NULL)
+                  continue; // XXX
+              subpin_config = get_clevis_config (header, include_secrets);
+
+              subpin_pin = json_object_object_get (subpin_config, "pin");
+              if (subpin_pin) {
+                  subpin_data = json_object_object_get (subpin_config, json_object_get_string (subpin_pin));
+                  if (subpin_data) {
+                      bucket = json_object_object_get (pin_configs, json_object_get_string (subpin_pin));
+                      if (bucket == NULL) {
+                          bucket = json_object_new_array ();
+                          json_object_object_add (pin_configs, json_object_get_string (subpin_pin), bucket);
+                      }
+                      json_object_array_add (bucket, subpin_data);
+                  }
+              }
+          }
+          json_object_object_add (sss_config, "pins", pin_configs);
+      }
+
+      json_object_object_add (config, "sss", sss_config);
+      return config;
+  } else {
+      /* For unknown pins, we only acknowlegde that they exist.
+       */
+      struct json_object *config = json_object_new_object ();
+      json_object_object_add (config, "pin", json_object_get (pin));
+      json_object_object_add (config, json_object_get_string (pin), json_object_new_object ());
+      return config;
+  }
+}
+
+gchar *bd_crypto_luks_get_policies (const gchar *device, gboolean include_secrets, GError **error) {
+    struct crypt_device *cd = NULL;
+    gint ret_num;
+    luksmeta_uuid_t uuid = { };
+    gchar *buf = NULL;
+    struct json_object *header;
+    struct json_object *policy, *policies;
+    gchar *data;
+
+    ret_num = crypt_init (&cd, device);
+    if (ret_num != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l(-ret_num, c_locale));
+        return NULL;
+    }
+
+    ret_num = crypt_load (cd, CRYPT_LUKS, NULL);
+    if (ret_num != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to load device: %s", strerror_l(-ret_num, c_locale));
+        crypt_free (cd);
+        return NULL;
+    }
+
+    policies = json_object_new_array ();
+
+    for (int slot = 0; slot < crypt_keyslot_max(CRYPT_LUKS1); slot++) {
+        ret_num = luksmeta_load (cd, slot, uuid, NULL, 0);
+        if (ret_num == -ENOENT || ret_num == -ENODATA || ret_num == -ENOTSUP)
+            continue;
+
+        if (ret_num < 0) {
+            add_error_policy (policies, slot, -ret_num);
+            continue;
+        }
+
+        if (memcmp (luksmeta_clevis_uuid, uuid, sizeof(luksmeta_uuid_t)) != 0)
+            continue;
+
+        buf = g_new0(gchar, ret_num + 3 + 1); // 3 characters extra base64 padding, 1 zero terminator
+        ret_num = luksmeta_load (cd, slot, uuid, buf, ret_num);
+        if (ret_num < 0) {
+            add_error_policy (policies, slot, -ret_num);
+            g_free (buf);
+            continue;
+        }
+
+        decode_header_inplace (buf);
+
+        header = json_tokener_parse (buf);
+        g_free (buf);
+        if (header == NULL) {
+            continue;
+        }
+
+        policy = json_object_new_object ();
+        json_object_object_add (policy, "slot", json_object_new_int (slot));
+        json_object_object_add (policy, "clevis", get_clevis_config (header, include_secrets));
+        json_object_array_add (policies, policy);
+        json_object_put (header);
+    }
+
+    data = g_strdup (json_object_to_json_string_ext (policies, JSON_C_TO_STRING_NOSLASHESCAPE));
+    json_object_put (policies);
+    crypt_free (cd);
+    return data;
 }
 
 /**

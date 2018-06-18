@@ -193,6 +193,8 @@ LIBBLOCKDEV_PKG_CHECK_MODULES([KMOD], [libkmod >= 19])
 
 AS_IF([test "x$with_crypto" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([CRYPTSETUP], [libcryptsetup >= 1.6.7])
+      LIBBLOCKDEV_PKG_CHECK_MODULES([LUKSMETA], [luksmeta])
+      LIBBLOCKDEV_PKG_CHECK_MODULES([JSON_C], [json-c])
       AS_IF([$PKG_CONFIG --atleast-version=2.0 libcryptsetup],
             [AC_DEFINE([LIBCRYPTSETUP_2])], [])
       AS_IF([test "x$with_escrow" != "xno"],
