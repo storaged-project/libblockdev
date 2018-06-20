@@ -1,3 +1,59 @@
+Libblockdev 2.18
+----------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Notable changes**
+
+- features
+
+  - New plugin: vdo
+
+      - support for creating and managing VDO volumes
+
+  - Support for building dm plugin without libdmraid support -- configure option ``--without-dmraid``.
+
+**Full list of changes**
+
+Kai Lüke (2):
+
+- Correct arguments for ext4 repair with progress
+- Introduce reporting function per thread
+
+Tomas Bzatek (3):
+
+- vdo: Resolve real device file path
+- vdo: Implement bd_vdo_grow_physical()
+- vdo: Add tests for bd_vdo_grow_physical()
+
+Vojtech Trefny (14):
+
+- Update specs.rst and features.rst
+- Fix release number in NEWS.rst
+- Add 'bd_dm_is_tech_avail' to header file
+- Always check for error when (un)mounting
+- Add the VDO plugin
+- Add basic VDO plugin functionality
+- Add decimal units definition to utils/sizes.h
+- Add tests for VDO plugin
+- Only require plugins we really need in LVM dbus tests
+- Allow compiling libblockdev without libdmraid
+- Adjust to new NVDIMM namespace modes
+- Do not try to build VDO plugin on Fedora
+- Remove roadmap.rst
+- Add VDO to features.rst
+
+Vratislav Podzimek (2):
+
+- Use xfs_repair instead of xfs_db in bd_fs_xfs_check()
+- Clarify that checking an RW-mounted XFS file system is impossible
+
+segfault (1):
+
+- Fix off-by-one error when counting TCRYPT keyfiles
+
+
 Libblockdev 2.17
 ----------------
 

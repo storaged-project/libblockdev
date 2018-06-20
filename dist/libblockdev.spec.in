@@ -107,7 +107,7 @@
 %define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{vdo_copts} %{?gi_copts}
 
 Name:        libblockdev
-Version:     2.17
+Version:     2.18
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -931,6 +931,30 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Jun 20 2018 Vojtech Trefny <vtrefny@redhat.com> - 2.18-1
+- Add VDO to features.rst (vtrefny)
+- Remove roadmap.rst (vtrefny)
+- vdo: Add tests for bd_vdo_grow_physical() (tbzatek)
+- Do not try to build VDO plugin on Fedora (vtrefny)
+- Introduce reporting function per thread (kailueke)
+- vdo: Implement bd_vdo_grow_physical() (tbzatek)
+- Correct arguments for ext4 repair with progress (kailueke)
+- Clarify that checking an RW-mounted XFS file system is impossible (v.podzimek)
+- vdo: Resolve real device file path (tbzatek)
+- Adjust to new NVDIMM namespace modes (vtrefny)
+- Use xfs_repair instead of xfs_db in bd_fs_xfs_check() (v.podzimek)
+- Allow compiling libblockdev without libdmraid (vtrefny)
+- Only require plugins we really need in LVM dbus tests (vtrefny)
+- Add tests for VDO plugin (vtrefny)
+- Add decimal units definition to utils/sizes.h (vtrefny)
+- Add basic VDO plugin functionality (vtrefny)
+- Add the VDO plugin (vtrefny)
+- Always check for error when (un)mounting (vtrefny)
+- Fix off-by-one error when counting TCRYPT keyfiles (segfault)
+- Add 'bd_dm_is_tech_avail' to header file (vtrefny)
+- Fix release number in NEWS.rst (vtrefny)
+- Update specs.rst and features.rst (vtrefny)
+
 * Tue Apr 24 2018 Vojtech Trefny <vtrefny@redhat.com> - 2.17-1
 - Redirect cryptsetup log to libblockdev log (vtrefny)
 - Add a generic logging function for libblockdev (vtrefny)
