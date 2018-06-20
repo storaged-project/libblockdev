@@ -14,8 +14,8 @@ from distutils.spawn import find_executable
 @unittest.skipUnless(find_executable("vdo"), reason="vdo executable not foundin $PATH")
 class VDOTestCase(unittest.TestCase):
 
-    requested_plugins = BlockDev.plugin_specs_from_names(("vdo",))
-    loop_size = 5 * 1024**3
+    requested_plugins = BlockDev.plugin_specs_from_names(("vdo","part",))
+    loop_size = 8 * 1024**3
 
     @classmethod
     def setUpClass(cls):
@@ -241,6 +241,41 @@ class VDOTest(VDOTestCase):
         self.assertIsNotNone(info)
 
         self.assertEqual(info.logical_size, new_size)
+
+    def test_grow_physical(self):
+        """Verify that it is possible to grow physical size of an existing VDO volume"""
+
+        # create a partition that we can grow later
+        succ = BlockDev.part_create_table(self.loop_dev, BlockDev.PartTableType.GPT, True)
+        self.assertTrue(succ)
+        part_spec = BlockDev.part_create_part(self.loop_dev,BlockDev.PartTypeReq.NORMAL, 2048, 5.1 * 1024**3, BlockDev.PartAlign.OPTIMAL)
+        self.assertIsNotNone(part_spec)
+
+        vdo_part_dev = self.loop_dev + '1'
+        self.assertTrue(os.path.exists(vdo_part_dev))
+
+        ret = BlockDev.vdo_create(self.vdo_name, vdo_part_dev)
+        self.addCleanup(self._remove_vdo, self.vdo_name)
+        self.assertTrue(ret)
+
+        info_before = BlockDev.vdo_info(self.vdo_name)
+        self.assertIsNotNone(info_before)
+
+        # grow the partition
+        succ = BlockDev.part_resize_part(self.loop_dev, vdo_part_dev, 0, BlockDev.PartAlign.OPTIMAL)
+        self.assertTrue(succ)
+        info_after = BlockDev.vdo_info(self.vdo_name)
+        self.assertIsNotNone(info_after)
+        self.assertEqual(info_before.logical_size, info_after.logical_size)
+        self.assertEqual(info_before.physical_size, info_after.physical_size)
+
+        # perform the real grow and get new sizes
+        succ = BlockDev.vdo_grow_physical(self.vdo_name)
+        self.assertTrue(succ)
+        info_after = BlockDev.vdo_info(self.vdo_name)
+        self.assertIsNotNone(info_after)
+        self.assertEqual(info_before.logical_size, info_after.logical_size)
+        self.assertGreater(info_after.physical_size, info_before.physical_size)
 
 
 class VDOUnloadTest(VDOTestCase):
