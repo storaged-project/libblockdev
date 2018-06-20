@@ -301,6 +301,25 @@ NVDIMM
    * namespace_reconfigure
    * list_namespaces
 
+VDO
+---
+
+:functions:
+   * info
+   * create
+   * remove
+   * change_write_policy
+   * enable_compression
+   * disable_compression
+   * enable_deduplication
+   * disable_deduplication
+   * activate
+   * deactivate
+   * start
+   * stop
+   * grow_logical
+   * grow_physical
+
 utils
 ------
 

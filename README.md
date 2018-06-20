@@ -12,8 +12,7 @@ with multiple implementations (e.g. using LVM CLI or the new LVM DBus API).
 
 For more information about the library's architecture see the specs.rst
 file. For more infomation about the expected functionality and features see the
-features.rst file. For more information about the schedule see the roadmap.rst
-file.
+features.rst file.
 
 For information about development and contributing guidelines see the
 README.DEVEL.rst file.
