@@ -62,7 +62,7 @@ if WITH_GTK_DOC
 SUBDIRS += docs
 endif
 
-dist_noinst_DATA = features.rst roadmap.rst specs.rst LICENSE tests
+dist_noinst_DATA = features.rst specs.rst LICENSE tests
 
 MAINTAINERCLEANFILES = Makefile.in aclocal.m4 config.guess config.sub \
     configure depcomp install-sh ltmain.sh missing py-compile compile ar-lib \
