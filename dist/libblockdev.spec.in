@@ -50,6 +50,12 @@
 %define vdo_copts --without-vdo
 %endif
 
+# vdo is available only on x86_64
+%ifnarch x86_64
+%define with_vdo 0
+%define vdo_copts --without-vdo
+%endif
+
 %if %{with_btrfs} != 1
 %define btrfs_copts --without-btrfs
 %endif
