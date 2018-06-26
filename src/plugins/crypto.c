@@ -67,6 +67,42 @@
  * Sizes are given in bytes unless stated otherwise.
  */
 
+BDCryptoLUKSPBKDF* bd_crypto_luks_pbkdf_copy (BDCryptoLUKSPBKDF *pbkdf) {
+    if (pbkdf == NULL)
+        return NULL;
+
+    BDCryptoLUKSPBKDF *new_pbkdf = g_new0 (BDCryptoLUKSPBKDF, 1);
+    new_pbkdf->type = g_strdup (pbkdf->type);
+    new_pbkdf->hash = g_strdup (pbkdf->hash);
+    new_pbkdf->max_memory_kb = pbkdf->max_memory_kb;
+    new_pbkdf->iterations = pbkdf->iterations;
+    new_pbkdf->time_ms = pbkdf->time_ms;
+    new_pbkdf->parallel_threads = pbkdf->parallel_threads;
+
+    return new_pbkdf;
+}
+
+void bd_crypto_luks_pbkdf_free (BDCryptoLUKSPBKDF *pbkdf) {
+    if (pbkdf == NULL)
+        return;
+
+    g_free (pbkdf->type);
+    g_free (pbkdf->hash);
+    g_free (pbkdf);
+}
+
+BDCryptoLUKSPBKDF* bd_crypto_luks_pbkdf_new (const gchar *type, const gchar *hash, guint32 max_memory_kb, guint32 iterations, guint32 time_ms, guint32 parallel_threads) {
+    BDCryptoLUKSPBKDF *ret = g_new0 (BDCryptoLUKSPBKDF, 1);
+    ret->type = g_strdup (type);
+    ret->hash = g_strdup (hash);
+    ret->max_memory_kb = max_memory_kb;
+    ret->iterations = iterations;
+    ret->time_ms = time_ms;
+    ret->parallel_threads = parallel_threads;
+
+    return ret;
+}
+
 BDCryptoLUKSExtra* bd_crypto_luks_extra_copy (BDCryptoLUKSExtra *extra) {
     if (extra == NULL)
         return NULL;
@@ -79,6 +115,7 @@ BDCryptoLUKSExtra* bd_crypto_luks_extra_copy (BDCryptoLUKSExtra *extra) {
     new_extra->sector_size = extra->sector_size;
     new_extra->label = g_strdup (extra->label);
     new_extra->subsystem = g_strdup (extra->subsystem);
+    new_extra->pbkdf = bd_crypto_luks_pbkdf_copy (extra->pbkdf);
 
     return new_extra;
 }
@@ -91,7 +128,21 @@ void bd_crypto_luks_extra_free (BDCryptoLUKSExtra *extra) {
     g_free (extra->data_device);
     g_free (extra->label);
     g_free (extra->subsystem);
+    bd_crypto_luks_pbkdf_free (extra->pbkdf);
     g_free (extra);
+}
+
+BDCryptoLUKSExtra* bd_crypto_luks_extra_new (guint64 data_alignment, const gchar *data_device, const gchar *integrity, guint64 sector_size, const gchar *label, const gchar *subsystem, BDCryptoLUKSPBKDF *pbkdf) {
+    BDCryptoLUKSExtra *ret = g_new0 (BDCryptoLUKSExtra, 1);
+    ret->integrity = g_strdup (integrity);
+    ret->data_alignment = data_alignment;
+    ret->data_device = g_strdup (data_device);
+    ret->sector_size = sector_size;
+    ret->label = g_strdup (label);
+    ret->subsystem = g_strdup (subsystem);
+    ret->pbkdf = bd_crypto_luks_pbkdf_copy (pbkdf);
+
+    return ret;
 }
 
 void bd_crypto_luks_info_free (BDCryptoLUKSInfo *info) {
@@ -565,6 +616,77 @@ gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error) {
     return ret;
 }
 
+#ifdef LIBCRYPTSETUP_2
+static struct crypt_pbkdf_type *get_pbkdf_params (BDCryptoLUKSPBKDF *user_pbkdf, GError **error) {
+    const struct crypt_pbkdf_type *default_pbkdf = NULL;
+    struct crypt_pbkdf_type *new_pbkdf = NULL;
+
+    if (user_pbkdf == NULL)
+        return NULL;
+
+    /* crypt_get_pbkdf_default returns default pbkdf parameters only based
+       on the luks version -- so for LUKS2 it returns default values for
+       argon2 but we also need to be able to provide default values if user
+       wants pbkdf2 and only specifies type -- we will use the defaults for
+       argon2 and ignore parameters specific to it
+       better API for this should be part of cryptsetup 2.0.4
+     */
+    default_pbkdf = crypt_get_pbkdf_default (CRYPT_LUKS2);
+    if (!default_pbkdf) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
+                     "Failed to get default values for pbkdf.");
+        return NULL;
+    }
+
+    new_pbkdf = g_new0 (struct crypt_pbkdf_type, 1);
+
+    new_pbkdf->flags = default_pbkdf->flags;
+
+    if (user_pbkdf->type)
+        new_pbkdf->type = user_pbkdf->type;
+    else
+        new_pbkdf->type = default_pbkdf->type;
+
+    if (user_pbkdf->hash)
+        new_pbkdf->hash = user_pbkdf->hash;
+    else
+        new_pbkdf->hash = default_pbkdf->hash;
+
+    if (user_pbkdf->time_ms)
+        new_pbkdf->time_ms = user_pbkdf->time_ms;
+    else
+        new_pbkdf->time_ms = default_pbkdf->time_ms;
+
+    if (user_pbkdf->iterations) {
+        new_pbkdf->iterations = user_pbkdf->iterations;
+        /* iterations set manually -> do not run benchmark */
+        new_pbkdf->flags = CRYPT_PBKDF_NO_BENCHMARK;
+    } else
+        new_pbkdf->iterations = default_pbkdf->iterations;
+
+    /* 'max_memory_kb' and 'parallel_threads' are not used in pbkdf2 */
+    if (g_strcmp0 (user_pbkdf->type, CRYPT_KDF_PBKDF2) == 0) {
+        if (user_pbkdf->max_memory_kb)
+            bd_utils_log (LOG_WARNING, "'max_memory_kb' is not valid option for 'pbkdf2', ignoring.");
+
+        new_pbkdf->max_memory_kb = 0;
+        new_pbkdf->parallel_threads = 0;
+    } else {
+        if (user_pbkdf->max_memory_kb)
+            new_pbkdf->max_memory_kb = user_pbkdf->max_memory_kb;
+        else
+            new_pbkdf->max_memory_kb = default_pbkdf->max_memory_kb;
+
+        if (user_pbkdf->parallel_threads)
+            new_pbkdf->parallel_threads = user_pbkdf->parallel_threads;
+        else
+            new_pbkdf->parallel_threads = default_pbkdf->parallel_threads;
+    }
+
+    return new_pbkdf;
+}
+#endif
+
 static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 key_size, const guint8 *pass_data, gsize data_size, const gchar *key_file, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret;
@@ -648,7 +770,7 @@ static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 k
     if (extra) {
         if (luks_version == BD_CRYPTO_LUKS_VERSION_LUKS1) {
 
-            if (extra->integrity || extra->sector_size || extra->label || extra->subsystem) {
+            if (extra->integrity || extra->sector_size || extra->label || extra->subsystem || extra->pbkdf) {
                 g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
                              "Invalid extra arguments specified. Only `data_alignment`"
                              "and `data_device` are valid for LUKS 1.");
@@ -666,8 +788,20 @@ static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 k
         }
 #ifdef LIBCRYPTSETUP_2
         else if (luks_version == BD_CRYPTO_LUKS_VERSION_LUKS2) {
+            GError *loc_error = NULL;
             struct crypt_params_luks2 params = ZERO_INIT;
-            params.pbkdf = NULL;
+            struct crypt_pbkdf_type *pbkdf = get_pbkdf_params (extra->pbkdf, &loc_error);
+
+            if (pbkdf == NULL && loc_error != NULL) {
+                crypt_free (cd);
+                g_strfreev (cipher_specs);
+                bd_utils_report_finished (progress_id, loc_error->message);
+                g_propagate_prefixed_error (error, loc_error,
+                                            "Failed to get PBKDF parameters for '%s'.", device);
+                return FALSE;
+            }
+
+            params.pbkdf = pbkdf;
             params.integrity = extra->integrity;
             params.integrity_params = NULL;
             params.data_alignment = extra->data_alignment;
@@ -677,6 +811,7 @@ static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 k
             params.subsystem = extra->subsystem;
             ret = crypt_format (cd, crypt_version, cipher_specs[0], cipher_specs[1],
                                 NULL, NULL, key_size, &params);
+            g_free (pbkdf);
         }
 #endif
     } else

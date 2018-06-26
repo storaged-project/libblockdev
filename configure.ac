@@ -193,7 +193,7 @@ LIBBLOCKDEV_PKG_CHECK_MODULES([KMOD], [libkmod >= 19])
 
 AS_IF([test "x$with_crypto" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([CRYPTSETUP], [libcryptsetup >= 1.6.7])
-      AS_IF([$PKG_CONFIG --atleast-version=2.0 libcryptsetup],
+      AS_IF([$PKG_CONFIG --atleast-version=2.0.3 libcryptsetup],
             [AC_DEFINE([LIBCRYPTSETUP_2])], [])
       AS_IF([test "x$with_escrow" != "xno"],
             [LIBBLOCKDEV_PKG_CHECK_MODULES([NSS], [nss >= 3.18.0])

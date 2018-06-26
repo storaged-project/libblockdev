@@ -64,6 +64,27 @@ typedef enum {
     BD_CRYPTO_LUKS_VERSION_LUKS2,
 } BDCryptoLUKSVersion;
 
+/**
+ * BDCryptoLUKSPBKDF
+ * @type: PBKDF algorithm
+ * @hash: hash for LUKS header or NULL
+ * @max_memory_kb: requested memory cost (in KiB) or 0 for default (benchmark)
+ * @iterations: requested iterations or 0 for default (benchmark)
+ * @time_ms: requested time cost or 0 for default (benchmark)
+ * @parallel_threads: requested parallel cost (threads) or 0 for default (benchmark)
+*/
+typedef struct BDCryptoLUKSPBKDF {
+    gchar *type;
+    gchar *hash;
+    guint32 max_memory_kb;
+    guint32 iterations;
+    guint32 time_ms;
+    guint32 parallel_threads;
+} BDCryptoLUKSPBKDF;
+
+void bd_crypto_luks_pbkdf_free (BDCryptoLUKSPBKDF *pbkdf);
+BDCryptoLUKSPBKDF* bd_crypto_luks_pbkdf_copy (BDCryptoLUKSPBKDF *pbkdf);
+BDCryptoLUKSPBKDF* bd_crypto_luks_pbkdf_new (const gchar *type, const gchar *hash, guint32 max_memory_kb, guint32 iterations, guint32 time_ms, guint32 parallel_threads);
 
 /**
  * BDCryptoLUKSExtra:
@@ -77,6 +98,8 @@ typedef enum {
  *         Note: this field is valid only for LUKS 2
  * @subsytem: LUKS header subsystem or NULL
  *            Note: this field is valid only for LUKS 2
+ * @pbkdf: key derivation function specification or NULL for default
+ *         Note: this field is valid only for LUKS 2
  */
 typedef struct BDCryptoLUKSExtra {
     guint64 data_alignment;
@@ -85,10 +108,12 @@ typedef struct BDCryptoLUKSExtra {
     guint64 sector_size;
     gchar *label;
     gchar *subsystem;
+    BDCryptoLUKSPBKDF *pbkdf;
 } BDCryptoLUKSExtra;
 
 void bd_crypto_luks_extra_free (BDCryptoLUKSExtra *extra);
 BDCryptoLUKSExtra* bd_crypto_luks_extra_copy (BDCryptoLUKSExtra *extra);
+BDCryptoLUKSExtra* bd_crypto_luks_extra_new (guint64 data_alignment, const gchar *data_device, const gchar *integrity, guint64 sector_size, const gchar *label, const gchar *subsystem, BDCryptoLUKSPBKDF *pbkdf);
 
 /**
  * BDCryptoLUKSInfo:

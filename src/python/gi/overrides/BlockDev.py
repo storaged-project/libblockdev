@@ -192,6 +192,28 @@ def btrfs_check(mountpoint, extra=None, **kwargs):
 __all__.append("btrfs_check")
 
 
+class CryptoLUKSPBKDF(BlockDev.CryptoLUKSPBKDF):
+    def __new__(cls, type=None, hash=None, max_memory_kb=0, iterations=0, time_ms=0, parallel_threads=0):  # pylint: disable=redefined-builtin
+        ret = BlockDev.CryptoLUKSPBKDF.new(type, hash, max_memory_kb, iterations, time_ms, parallel_threads)
+        ret.__class__ = cls
+        return ret
+    def __init__(self, *args, **kwargs):  # pylint: disable=unused-argument
+        super(CryptoLUKSPBKDF, self).__init__()
+CryptoLUKSPBKDF = override(CryptoLUKSPBKDF)
+__all__.append("CryptoLUKSPBKDF")
+
+class CryptoLUKSExtra(BlockDev.CryptoLUKSExtra):
+    def __new__(cls, data_alignment=0, data_device=None, integrity=None, sector_size=0, label=None, subsystem=None, pbkdf=None):
+        if pbkdf is None:
+            pbkdf = CryptoLUKSPBKDF()
+        ret = BlockDev.CryptoLUKSExtra.new(data_alignment, data_device, integrity, sector_size, label, subsystem, pbkdf)
+        ret.__class__ = cls
+        return ret
+    def __init__(self, *args, **kwargs):   # pylint: disable=unused-argument
+        super(CryptoLUKSExtra, self).__init__()
+CryptoLUKSExtra = override(CryptoLUKSExtra)
+__all__.append("CryptoLUKSExtra")
+
 # calling `crypto_luks_format_luks2` with `luks_version` set to
 # `BlockDev.CryptoLUKSVersion.LUKS1` and `extra` to `None` is the same
 # as using the "original" function `crypto_luks_format`

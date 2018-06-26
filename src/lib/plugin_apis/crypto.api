@@ -50,6 +50,96 @@ typedef enum {
     BD_CRYPTO_LUKS_VERSION_LUKS2,
 } BDCryptoLUKSVersion;
 
+#define BD_CRYPTO_TYPE_LUKS_PBKDF (bd_crypto_luks_pbkdf_get_type ())
+GType bd_crypto_luks_pbkdf_get_type();
+
+/**
+ * BDCryptoLUKSPBKDF
+ * @type: PBKDF algorithm
+ * @hash: hash for LUKS header or NULL
+ * @max_memory_kb: requested memory cost (in KiB) or 0 for default (benchmark)
+ * @iterations: requested iterations or 0 for default (benchmark)
+ * @time_ms: requested time cost or 0 for default (benchmark)
+ * @parallel_threads: requested parallel cost (threads) or 0 for default (benchmark)
+*/
+typedef struct BDCryptoLUKSPBKDF {
+    gchar *type;
+    gchar *hash;
+    guint32 max_memory_kb;
+    guint32 iterations;
+    guint32 time_ms;
+    guint32 parallel_threads;
+} BDCryptoLUKSPBKDF;
+
+/**
+ * bd_crypto_luks_pbkdf_copy: (skip)
+ *
+ * Creates a new copy of @pbkdf.
+ */
+BDCryptoLUKSPBKDF* bd_crypto_luks_pbkdf_copy (BDCryptoLUKSPBKDF *pbkdf) {
+    if (pbkdf == NULL)
+        return NULL;
+
+    BDCryptoLUKSPBKDF *new_pbkdf = g_new0 (BDCryptoLUKSPBKDF, 1);
+    new_pbkdf->type = g_strdup (pbkdf->type);
+    new_pbkdf->hash = g_strdup (pbkdf->hash);
+    new_pbkdf->max_memory_kb = pbkdf->max_memory_kb;
+    new_pbkdf->iterations = pbkdf->iterations;
+    new_pbkdf->time_ms = pbkdf->time_ms;
+    new_pbkdf->parallel_threads = pbkdf->parallel_threads;
+
+    return new_pbkdf;
+}
+
+/**
+ * bd_crypto_luks_pbkdf_free: (skip)
+ *
+ * Frees @pbkdf.
+ */
+void bd_crypto_luks_pbkdf_free (BDCryptoLUKSPBKDF *pbkdf) {
+    if (pbkdf == NULL)
+        return;
+
+    g_free (pbkdf->type);
+    g_free (pbkdf->hash);
+    g_free (pbkdf);
+}
+
+/**
+ * bd_crypto_luks_pbkdf_new: (constructor)
+ * @type: (allow-none): PBKDF algorithm
+ * @hash: (allow-none): hash for LUKS header or NULL for default
+ * @max_memory_kb: requested memory cost (in KiB) or 0 for default (benchmark)
+ * @iterations: requested iterations or 0 for default (benchmark)
+ * @time_ms: requested time cost or 0 for default (benchmark)
+ * @parallel_threads: requested parallel cost (threads) or 0 for default (benchmark)
+ *
+ * Returns: (transfer full): a new pbkdf argument
+ */
+BDCryptoLUKSPBKDF* bd_crypto_luks_pbkdf_new (const gchar *type, const gchar *hash, guint32 max_memory_kb, guint32 iterations, guint32 time_ms, guint32 parallel_threads) {
+    BDCryptoLUKSPBKDF *ret = g_new0 (BDCryptoLUKSPBKDF, 1);
+    ret->type = g_strdup (type);
+    ret->hash = g_strdup (hash);
+    ret->max_memory_kb = max_memory_kb;
+    ret->iterations = iterations;
+    ret->time_ms = time_ms;
+    ret->parallel_threads = parallel_threads;
+
+    return ret;
+}
+
+GType bd_crypto_luks_pbkdf_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDCryptoLUKSPBKDF",
+                                            (GBoxedCopyFunc) bd_crypto_luks_pbkdf_copy,
+                                            (GBoxedFreeFunc) bd_crypto_luks_pbkdf_free);
+    }
+
+    return type;
+}
+
 #define BD_CRYPTO_TYPE_LUKS_EXTRA (bd_crypto_luks_extra_get_type ())
 GType bd_crypto_luks_extra_get_type();
 
@@ -65,6 +155,8 @@ GType bd_crypto_luks_extra_get_type();
  *         Note: this field is valid only for LUKS 2
  * @subsytem: LUKS header subsystem or NULL
  *            Note: this field is valid only for LUKS 2
+ * @pbkdf: key derivation function specification or NULL for default
+ *         Note: this field is valid only for LUKS 2
  */
 typedef struct BDCryptoLUKSExtra {
     guint64 data_alignment;
@@ -73,6 +165,7 @@ typedef struct BDCryptoLUKSExtra {
     guint64 sector_size;
     gchar *label;
     gchar *subsystem;
+    BDCryptoLUKSPBKDF *pbkdf;
 } BDCryptoLUKSExtra;
 
 /**
@@ -92,6 +185,7 @@ BDCryptoLUKSExtra* bd_crypto_luks_extra_copy (BDCryptoLUKSExtra *extra) {
     new_extra->sector_size = extra->sector_size;
     new_extra->label = g_strdup (extra->label);
     new_extra->subsystem = g_strdup (extra->subsystem);
+    new_extra->pbkdf = bd_crypto_luks_pbkdf_copy (extra->pbkdf);
 
     return new_extra;
 }
@@ -109,7 +203,33 @@ void bd_crypto_luks_extra_free (BDCryptoLUKSExtra *extra) {
     g_free (extra->data_device);
     g_free (extra->label);
     g_free (extra->subsystem);
+    bd_crypto_luks_pbkdf_free (extra->pbkdf);
     g_free (extra);
+}
+
+/**
+ * bd_crypto_luks_extra_new: (constructor)
+ * @data_alignment: data alignment in sectors, 0 for default/auto detection
+ * @data_device: (allow-none): detached encrypted data device or NULL
+ * @integrity: (allow-none): integrity algorithm (e.g. "hmac-sha256") or NULL for no integrity support
+ * @sector_size: encryption sector size, 0 for default (512)
+ * @label: (allow-none): LUKS header label or NULL
+ * @subsystem: (allow-none): LUKS header subsystem or NULL
+ * @pbkdf: (allow-none): key derivation function specification or NULL for default
+ *
+ * Returns: (transfer full): a new LUKS extra argument
+ */
+BDCryptoLUKSExtra* bd_crypto_luks_extra_new (guint64 data_alignment, const gchar *data_device, const gchar *integrity, guint64 sector_size, const gchar *label, const gchar *subsystem, BDCryptoLUKSPBKDF *pbkdf) {
+    BDCryptoLUKSExtra *ret = g_new0 (BDCryptoLUKSExtra, 1);
+    ret->integrity = g_strdup (integrity);
+    ret->data_alignment = data_alignment;
+    ret->data_device = g_strdup (data_device);
+    ret->sector_size = sector_size;
+    ret->label = g_strdup (label);
+    ret->subsystem = g_strdup (subsystem);
+    ret->pbkdf = bd_crypto_luks_pbkdf_copy (pbkdf);
+
+    return ret;
 }
 
 GType bd_crypto_luks_extra_get_type () {
