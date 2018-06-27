@@ -7,6 +7,8 @@ import subprocess
 import six
 import locale
 import re
+import base64
+import json
 
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on, get_avail_locales, requires_locales, run_command, read_file
 from gi.repository import BlockDev, GLib
@@ -468,6 +470,74 @@ class CryptoTestGetMetadataSize(CryptoTestCase):
         offset = int(m.group(1)) * 512
 
         self.assertEquals(meta_size, offset, "LUKS metadata sizes differ")
+
+class CryptoTestGetPolicies(CryptoTestCase):
+
+    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    def test_luks_get_policies(self):
+        """Verify that getting Clevis metadata works"""
+
+        succ = self._luks_format(self.loop_dev, PASSWD, None)
+        self.assertTrue(succ)
+
+        def encode_clevis_config(pin, config):
+            # This replicates the interesting encoding bits of "clevis encrypt" without
+            # needing any actual encryption.
+            if pin == "sss":
+                jwes = [ ]
+                for key, val in config["pins"].items():
+                    if not isinstance(val, list):
+                        val = [ val ]
+                    for c in val:
+                        jwes.append(encode_clevis_config(key, c).decode("utf-8"))
+                config = { "jwe": jwes, "p": "SECRET", "t": config["t"] }
+            header = { "clevis": { "pin": pin, pin: config }, "x": "SECRET", "y": "SECRET" }
+            return base64.urlsafe_b64encode(json.dumps(header).encode("utf-8")).rstrip(b"=") + b".blah.blah"
+
+        def luksmeta_save(slot, pin, config):
+            subprocess.run([ "luksmeta", "save", "-d", self.loop_dev, "-s", str(slot),
+                             "-u", "cb6e8904-81ff-40da-a84a-07ab9ab5715e" ],
+                           check = True, input = encode_clevis_config(pin, config))
+
+        subprocess.run([ "luksmeta", "init", "-d", self.loop_dev, "-f" ], check = True)
+        luksmeta_save(1, "tang", { "url": "http://localhost/tang" })
+        luksmeta_save(2, "http", { "password": "SECRET" })
+        luksmeta_save(3, "sss", { "t": 2,
+                                  "pins": { "tang": [ { "url": "http://tang1" },
+                                                      { "url": "http://tang2" } ],
+                                            "http": { "password": "SECRET" },
+                                            "sss": {
+                                                "t": 3,
+                                                "pins": { "http": [ { "password": "SECRET" },
+                                                                    { "password": "SECRET" } ] } } } })
+
+        data = BlockDev.crypto_luks_get_policies(self.loop_dev, False)
+        self.assertNotIn("SECRET", data)
+        policies = json.loads(data)
+        print(policies)
+        self.assertEqual(len(policies), 3)
+        for p in policies:
+            if p["slot"] == 1:
+                self.assertEqual(p["clevis"]["pin"], "tang")
+                self.assertEqual(p["clevis"]["tang"]["url"], "http://localhost/tang")
+            if p["slot"] == 2:
+                self.assertEqual(p["clevis"]["pin"], "http")
+            if p["slot"] == 3:
+                self.assertEqual(p["clevis"]["pin"], "sss")
+                self.assertEqual(p["clevis"]["sss"]["t"], 2)
+                self.assertEqual(p["clevis"]["sss"]["pins"]["tang"][1]["url"], "http://tang2")
+                self.assertEqual(p["clevis"]["sss"]["pins"]["sss"][0]["t"], 3)
+                self.assertEqual(p["clevis"]["sss"]["pins"]["sss"][0]["pins"]["http"][1], { })
+
+    def test_luks2_get_policies(self):
+        """Verify that getting Clevis metadata stays silent for LUKS2"""
+
+        succ = self._luks2_format(self.loop_dev, PASSWD, None)
+        self.assertTrue(succ)
+
+        data = BlockDev.crypto_luks_get_policies(self.loop_dev)
+        policies = json.loads(data)
+        self.assertEqual(len(policies), 0)
 
 class CryptoTestLuksOpenRW(CryptoTestCase):
     def _luks_open_rw(self, create_fn):

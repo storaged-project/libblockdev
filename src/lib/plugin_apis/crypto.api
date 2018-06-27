@@ -314,6 +314,18 @@ gchar* bd_crypto_luks_uuid (const gchar *device, GError **error);
 guint64 bd_crypto_luks_get_metadata_size (const gchar *device, GError **error);
 
 /**
+ * bd_crypto_luks_get_policies
+ * @device: the queried device
+ * @include_secrets:
+ * @error: (out): place to store error (if any)
+ *
+ * Returns:
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
+ */
+gchar *bd_crypto_luks_get_policies (const gchar *device, gboolean include_secrets, GError **error);
+
+/**
  * bd_crypto_luks_status:
  * @luks_device: the queried LUKS device
  * @error: (out): place to store error (if any)
