@@ -257,3 +257,66 @@ CFLAGS="$CFLAGS -std=gnu99"
 
 AC_OUTPUT
 LIBBLOCKDEV_FAILURES
+
+
+if test "x$with_python2" != "xno" -a "x$python2" != "xno"; then
+  python2_info=yes
+else
+  python2_info=no
+fi
+
+if test "x$with_python3" != "xno" -a "x$python3" != "xno"; then
+  python3_info=yes
+else
+  python3_info=no
+fi
+
+if test "x$with_s390" != "xno" -a "x$on_s390" = "xyes"; then
+  s390_info=yes
+else
+  s390_info=no
+fi
+
+dnl ==========================================================================
+echo "
+               libblockdev $VERSION
+             ====================
+
+        prefix:                     ${prefix}
+        libdir:                     ${libdir}
+        libexecdir:                 ${libexecdir}
+        bindir:                     ${bindir}
+        sbindir:                    ${sbindir}
+        datadir:                    ${datadir}
+        sysconfdir:                 ${sysconfdir}
+        localstatedir:              ${localstatedir}
+        docdir:                     ${docdir}
+
+        compiler:                   ${CC}
+        cflags:                     ${CFLAGS}
+        cppflags:                   ${CPPFLAGS}
+        ldflags:                    ${LDFLAGS}
+
+        BTRFS plugin:               ${with_btrfs}
+        Crypto plugin:              ${with_crypto}
+            escrow support:         ${with_escrow}
+        DM plugin:                  ${with_dm}
+            dmraid support:         ${with_dmraid}
+        FS plugin:                  ${with_fs}
+        KBD plugin:                 ${with_kbd}
+            Bcache support:         ${with_bcache}
+        Loop plugin:                ${with_loop}
+        LVM plugin:                 ${with_lvm}
+        LVM DBus plugin:            ${with_lvm_dbus}
+        MDRAID plugin:              ${with_mdraid}
+        MPath plugin                ${with_mpath}
+        NVDIMM plugin:              ${with_nvdimm}
+        Part plugin:                ${with_part}
+        S390 plugin:                ${s390_info}
+        Swap plugin:                ${with_swap}
+        VDO plugin:                 ${with_vdo}
+
+        GObject introspection:      ${found_introspection}
+        Python 2 bindings:          ${python2_info}
+        Python 3 bindings:          ${python3_info}
+"
