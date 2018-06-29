@@ -228,6 +228,8 @@ static GHashTable* parse_yaml_output (const gchar *output, GError **error) {
               yaml_token_delete (&token);
     } while (token.type != YAML_STREAM_END_TOKEN);
 
+    yaml_parser_delete (&parser);
+
     return table;
 }
 
