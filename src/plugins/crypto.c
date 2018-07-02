@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <syslog.h>
+#include <blkid.h>
 #include <blockdev/utils.h>
 
 #ifdef WITH_BD_ESCROW
@@ -326,19 +327,103 @@ gchar* bd_crypto_generate_backup_passphrase(GError **error __attribute__((unused
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
  */
 gboolean bd_crypto_device_is_luks (const gchar *device, GError **error) {
-    struct crypt_device *cd = NULL;
-    gint ret;
+    blkid_probe probe = NULL;
+    gint fd = 0;
+    gint status = 0;
+    const gchar *value = NULL;
+    guint n_try = 0;
 
-    ret = crypt_init (&cd, device);
-    if (ret != 0) {
+    probe = blkid_new_probe ();
+    if (!probe) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to initialize device: %s", strerror_l(-ret, c_locale));
+                     "Failed to create a new probe");
         return FALSE;
     }
 
-    ret = crypt_load (cd, CRYPT_LUKS, NULL);
-    crypt_free (cd);
-    return (ret == 0);
+    fd = open (device, O_RDONLY|O_CLOEXEC);
+    if (fd == -1) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to open the device '%s'", device);
+        blkid_free_probe (probe);
+        return FALSE;
+    }
+
+    /* we may need to try mutliple times with some delays in case the device is
+       busy at the very moment */
+    for (n_try=5, status=-1; (status != 0) && (n_try > 0); n_try--) {
+        status = blkid_probe_set_device (probe, fd, 0, 0);
+        if (status != 0)
+            g_usleep (100 * 1000); /* microseconds */
+    }
+    if (status != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to create a probe for the device '%s'", device);
+        blkid_free_probe (probe);
+        close (fd);
+        return FALSE;
+    }
+
+    blkid_probe_enable_partitions (probe, 1);
+    blkid_probe_set_partitions_flags (probe, BLKID_PARTS_MAGIC);
+    blkid_probe_enable_superblocks (probe, 1);
+    blkid_probe_set_superblocks_flags (probe, BLKID_SUBLKS_USAGE | BLKID_SUBLKS_TYPE |
+                                              BLKID_SUBLKS_MAGIC | BLKID_SUBLKS_BADCSUM);
+
+    /* we may need to try mutliple times with some delays in case the device is
+       busy at the very moment */
+    for (n_try=5, status=-1; !(status == 0 || status == 1) && (n_try > 0); n_try--) {
+        status = blkid_do_safeprobe (probe);
+        if (status < 0)
+            g_usleep (100 * 1000); /* microseconds */
+    }
+    if (status < 0) {
+        /* -1 or -2 = error during probing*/
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to probe the device '%s'", device);
+        blkid_free_probe (probe);
+        close (fd);
+        return FALSE;
+    } else if (status == 1) {
+        /* 1 = nothing detected */
+        blkid_free_probe (probe);
+        close (fd);
+        return FALSE;
+    }
+
+    status = blkid_probe_lookup_value (probe, "USAGE", &value, NULL);
+    if (status != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to get usage for the device '%s'", device);
+        blkid_free_probe (probe);
+        close (fd);
+        return FALSE;
+    }
+
+    if (g_strcmp0 (value, "crypto") != 0) {
+        blkid_free_probe (probe);
+        close (fd);
+        return FALSE;
+    }
+
+    status = blkid_probe_lookup_value (probe, "TYPE", &value, NULL);
+    if (status != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to get filesystem type for the device '%s'", device);
+        blkid_free_probe (probe);
+        close (fd);
+        return FALSE;
+    }
+
+    if (g_strcmp0 (value, "crypto_LUKS") != 0) {
+        blkid_free_probe (probe);
+        close (fd);
+        return FALSE;
+    }
+
+    blkid_free_probe (probe);
+    close (fd);
+
+    return TRUE;
 }
 
 /**
