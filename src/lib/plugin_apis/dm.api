@@ -94,7 +94,7 @@ gchar* bd_dm_node_from_name (const gchar *map_name, GError **error);
  *
  * Returns: subsystem of the given device
  *
- * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_QUERY
+ * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_QUERY
  */
 gchar* bd_dm_get_subsystem_from_name (const gchar *device_name, GError **error);
 
@@ -136,7 +136,7 @@ gchar** bd_dm_get_member_raid_sets (const gchar *name, const gchar *uuid, gint m
  *
  * Returns: whether the RAID set @name was successfully activate or not
  *
- * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_CREATE_ACTIVATE
+ * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_MODE_CREATE_ACTIVATE
  */
 gboolean bd_dm_activate_raid_set (const gchar *name, GError **error);
 
@@ -147,7 +147,7 @@ gboolean bd_dm_activate_raid_set (const gchar *name, GError **error);
  *
  * Returns: whether the RAID set @name was successfully deactivate or not
  *
- * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_REMOVE_DEACTIVATE
+ * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_MODE_REMOVE_DEACTIVATE
  */
 gboolean bd_dm_deactivate_raid_set (const gchar *name, GError **error);
 
@@ -158,6 +158,6 @@ gboolean bd_dm_deactivate_raid_set (const gchar *name, GError **error);
  *
  * Returns: string representation of the @name RAID set's type
  *
- * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_QUERY
+ * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_MODE_QUERY
  */
 gchar* bd_dm_get_raid_set_type (const gchar *name, GError **error);

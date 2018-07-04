@@ -407,7 +407,7 @@ gboolean bd_crypto_luks_format_blob (const gchar *device, const gchar *cipher, g
  *
  * Either @passhphrase or @key_file has to be != %NULL.
  *
- * Using this function with @luks_version set to %BD_CRYPTO_LUKS_VERSION_1 and
+ * Using this function with @luks_version set to %BD_CRYPTO_LUKS_VERSION_LUKS1 and
  * @extra to %NULL is the same as calling %bd_crypto_luks_format.
  *
  * Returns: whether the given @device was successfully formatted as LUKS or not
@@ -434,7 +434,7 @@ gboolean bd_crypto_luks_format_luks2 (const gchar *device, const gchar *cipher, 
  * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
  * FOREVER).
  *
- * Using this function with @luks_version set to %BD_CRYPTO_LUKS_VERSION_1 and
+ * Using this function with @luks_version set to %BD_CRYPTO_LUKS_VERSION_LUKS1 and
  * @extra to %NULL is the same as calling %bd_crypto_luks_format_blob.
  *
  * Returns: whether the given @device was successfully formatted as LUKS or not
