@@ -67,27 +67,36 @@
  */
 
 BDCryptoLUKSExtra* bd_crypto_luks_extra_copy (BDCryptoLUKSExtra *extra) {
-   BDCryptoLUKSExtra *new_extra = g_new0 (BDCryptoLUKSExtra, 1);
+    if (extra == NULL)
+        return NULL;
 
-   new_extra->integrity = g_strdup (extra->integrity);
-   new_extra->data_alignment = extra->data_alignment;
-   new_extra->data_device = g_strdup (extra->data_device);
-   new_extra->sector_size = extra->sector_size;
-   new_extra->label = g_strdup (extra->label);
-   new_extra->subsystem = g_strdup (extra->subsystem);
+    BDCryptoLUKSExtra *new_extra = g_new0 (BDCryptoLUKSExtra, 1);
 
-   return new_extra;
+    new_extra->integrity = g_strdup (extra->integrity);
+    new_extra->data_alignment = extra->data_alignment;
+    new_extra->data_device = g_strdup (extra->data_device);
+    new_extra->sector_size = extra->sector_size;
+    new_extra->label = g_strdup (extra->label);
+    new_extra->subsystem = g_strdup (extra->subsystem);
+
+    return new_extra;
 }
 
 void bd_crypto_luks_extra_free (BDCryptoLUKSExtra *extra) {
-   g_free (extra->integrity);
-   g_free (extra->data_device);
-   g_free (extra->label);
-   g_free (extra->subsystem);
-   g_free (extra);
+    if (extra == NULL)
+        return;
+
+    g_free (extra->integrity);
+    g_free (extra->data_device);
+    g_free (extra->label);
+    g_free (extra->subsystem);
+    g_free (extra);
 }
 
 void bd_crypto_luks_info_free (BDCryptoLUKSInfo *info) {
+    if (info == NULL)
+        return;
+
     g_free (info->cipher);
     g_free (info->mode);
     g_free (info->uuid);
@@ -96,6 +105,9 @@ void bd_crypto_luks_info_free (BDCryptoLUKSInfo *info) {
 }
 
 BDCryptoLUKSInfo* bd_crypto_luks_info_copy (BDCryptoLUKSInfo *info) {
+    if (info == NULL)
+        return NULL;
+
     BDCryptoLUKSInfo *new_info = g_new0 (BDCryptoLUKSInfo, 1);
 
     new_info->version = info->version;
@@ -109,6 +121,9 @@ BDCryptoLUKSInfo* bd_crypto_luks_info_copy (BDCryptoLUKSInfo *info) {
 }
 
 void bd_crypto_integrity_info_free (BDCryptoIntegrityInfo *info) {
+    if (info == NULL)
+        return;
+
     g_free (info->algorithm);
     g_free (info->journal_crypt);
     g_free (info->journal_integrity);
@@ -116,6 +131,9 @@ void bd_crypto_integrity_info_free (BDCryptoIntegrityInfo *info) {
 }
 
 BDCryptoIntegrityInfo* bd_crypto_integrity_info_copy (BDCryptoIntegrityInfo *info) {
+    if (info == NULL)
+        return NULL;
+
     BDCryptoIntegrityInfo *new_info = g_new0 (BDCryptoIntegrityInfo, 1);
 
     new_info->algorithm = g_strdup (info->algorithm);

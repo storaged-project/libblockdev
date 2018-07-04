@@ -42,12 +42,18 @@ GQuark bd_vdo_error_quark (void) {
 }
 
 void bd_vdo_info_free (BDVDOInfo *info) {
+    if (info == NULL)
+        return;
+
     g_free (info->name);
     g_free (info->device);
     g_free (info);
 }
 
 BDVDOInfo* bd_vdo_info_copy (BDVDOInfo *info) {
+    if (info == NULL)
+        return NULL;
+
     BDVDOInfo *new_info = g_new0 (BDVDOInfo, 1);
 
     new_info->name = g_strdup (info->name);

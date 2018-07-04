@@ -43,6 +43,9 @@ GQuark bd_nvdimm_error_quark (void) {
 }
 
 void bd_nvdimm_namespace_info_free (BDNVDIMMNamespaceInfo *info) {
+    if (info == NULL)
+        return;
+
     g_free (info->dev);
     g_free (info->uuid);
     g_free (info->blockdev);
@@ -50,6 +53,9 @@ void bd_nvdimm_namespace_info_free (BDNVDIMMNamespaceInfo *info) {
 }
 
 BDNVDIMMNamespaceInfo* bd_nvdimm_namespace_info_copy (BDNVDIMMNamespaceInfo *info) {
+    if (info == NULL)
+        return NULL;
+
     BDNVDIMMNamespaceInfo *new_info = g_new0 (BDNVDIMMNamespaceInfo, 1);
 
     new_info->dev = g_strdup (info->dev);
