@@ -237,6 +237,14 @@ def crypto_luks_resume(device, passphrase=None, key_file=None):
     return _crypto_luks_resume(device, passphrase, key_file)
 __all__.append("crypto_luks_resume")
 
+_crypto_tc_open = BlockDev.crypto_tc_open_full
+@override(BlockDev.crypto_tc_open)
+def crypto_tc_open(device, name, passphrase, read_only=False, keyfiles=None, hidden=False, system=False, veracrypt=False, veracrypt_pim=0):
+    if isinstance(passphrase, str):
+        passphrase = [ord(c) for c in passphrase]
+    return _crypto_tc_open(device, name, passphrase, keyfiles, hidden, system, veracrypt, veracrypt_pim, read_only)
+__all__.append("crypto_tc_open")
+
 
 _dm_create_linear = BlockDev.dm_create_linear
 @override(BlockDev.dm_create_linear)

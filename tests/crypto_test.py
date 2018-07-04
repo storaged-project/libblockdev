@@ -7,6 +7,7 @@ import subprocess
 import six
 import locale
 import re
+import tarfile
 
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on, get_avail_locales, requires_locales, run_command, read_file
 from gi.repository import BlockDev, GLib
@@ -28,7 +29,7 @@ HAVE_LUKS2 = have_luks2()
 
 class CryptoTestCase(unittest.TestCase):
 
-    requested_plugins = BlockDev.plugin_specs_from_names(("crypto",))
+    requested_plugins = BlockDev.plugin_specs_from_names(("crypto", "loop"))
 
     @classmethod
     def setUpClass(cls):
@@ -858,3 +859,93 @@ class CryptoTestIntegrity(CryptoTestCase):
 
         succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
         self.assertTrue(succ)
+
+
+class CryptoTestTrueCrypt(CryptoTestCase):
+
+    # we can't create TrueCrypt/VeraCrypt formats using libblockdev
+    # so we are using these images from cryptsetup test suite
+    # https://gitlab.com/cryptsetup/cryptsetup/blob/master/tests/tcrypt-images.tar.bz2
+    tc_img = "tc-sha512-xts-aes"
+    vc_img = "vc-sha512-xts-aes"
+    passphrase = "aaaaaaaaaaaa"
+    tempdir = None
+
+    @classmethod
+    def setUpClass(cls):
+        super(CryptoTestTrueCrypt, cls).setUpClass()
+        cls.tempdir = tempfile.mkdtemp(prefix="bd_test_tcrypt")
+        images = os.path.join(os.path.dirname(__file__), "truecrypt-images.tar.gz")
+        with tarfile.open(images, "r") as tar:
+            tar.extractall(cls.tempdir)
+
+    @classmethod
+    def tearDownClass(cls):
+        super(CryptoTestTrueCrypt, cls).tearDownClass()
+        shutil.rmtree(cls.tempdir)
+
+    def setUp(self):
+        self.addCleanup(self._clean_up)
+
+        succ, loop = BlockDev.loop_setup(os.path.join(self.tempdir, self.tc_img))
+        if  not succ:
+            raise RuntimeError("Failed to setup loop device for testing")
+        self.tc_dev = "/dev/%s" % loop
+        succ, loop = BlockDev.loop_setup(os.path.join(self.tempdir, self.vc_img))
+        if  not succ:
+            raise RuntimeError("Failed to setup loop device for testing")
+        self.vc_dev = "/dev/%s" % loop
+
+    def _clean_up(self):
+        try:
+            BlockDev.crypto_tc_close("libblockdevTestTC")
+        except:
+            pass
+
+        succ = BlockDev.loop_teardown(self.tc_dev)
+        if not succ:
+            raise RuntimeError("Failed to tear down loop device used for testing")
+
+        succ = BlockDev.loop_teardown(self.vc_dev)
+        if not succ:
+            raise RuntimeError("Failed to tear down loop device used for testing")
+
+    def test_truecrypt_open_close(self):
+        """Verify that opening/closing TrueCrypt device works"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_open("/non/existing/device", "libblockdevTestTC", self.passphrase)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_open(self.tc_dev, "libblockdevTestTC", None)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_open(self.tc_dev, "libblockdevTestTC", "wrong-passhprase")
+
+        succ = BlockDev.crypto_tc_open(self.tc_dev, "libblockdevTestTC", self.passphrase)
+        self.assertTrue(succ)
+        self.assertTrue(os.path.exists("/dev/mapper/libblockdevTestTC"))
+
+        succ = BlockDev.crypto_tc_close("libblockdevTestTC")
+        self.assertTrue(succ)
+        self.assertFalse(os.path.exists("/dev/mapper/libblockdevTestTC"))
+
+    def test_veracrypt_open_close(self):
+        """Verify that opening/closing VeraCrypt device works"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_open("/non/existing/device", "libblockdevTestTC", self.passphrase)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_open(self.vc_dev, "libblockdevTestTC", None)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_open(self.vc_dev, "libblockdevTestTC", "wrong-passhprase")
+
+        succ = BlockDev.crypto_tc_open(self.vc_dev, "libblockdevTestTC", self.passphrase, veracrypt=True)
+        self.assertTrue(succ)
+        self.assertTrue(os.path.exists("/dev/mapper/libblockdevTestTC"))
+
+        succ = BlockDev.crypto_tc_close("libblockdevTestTC")
+        self.assertTrue(succ)
+        self.assertFalse(os.path.exists("/dev/mapper/libblockdevTestTC"))
