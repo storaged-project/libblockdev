@@ -18,6 +18,7 @@
       <sub name="KernelBlockDevices" link="libblockdev-KernelBlockDevices.html"/>
       <sub name="s390" link="libblockdev-s390.html"/>
       <sub name="Utils" link="libblockdev-Utils.html"/>
+      <sub name="VDO" link="libblockdev-VDO.html"/>
     </sub>
     <sub name="GI Overrides" link="ch02.html"/>
     <sub name="Testing libblockdev" link="ch03.html"/>
@@ -537,6 +538,8 @@
     <keyword type="function" name="bd_utils_exec_and_report_progress ()" link="libblockdev-Utils.html#bd-utils-exec-and-report-progress"/>
     <keyword type="function" name="bd_utils_init_logging ()" link="libblockdev-Utils.html#bd-utils-init-logging"/>
     <keyword type="function" name="bd_utils_init_prog_reporting ()" link="libblockdev-Utils.html#bd-utils-init-prog-reporting"/>
+    <keyword type="function" name="bd_utils_init_prog_reporting_thread ()" link="libblockdev-Utils.html#bd-utils-init-prog-reporting-thread"/>
+    <keyword type="function" name="bd_utils_mute_prog_reporting_thread ()" link="libblockdev-Utils.html#bd-utils-mute-prog-reporting-thread"/>
     <keyword type="function" name="bd_utils_report_finished ()" link="libblockdev-Utils.html#bd-utils-report-finished"/>
     <keyword type="function" name="bd_utils_report_progress ()" link="libblockdev-Utils.html#bd-utils-report-progress"/>
     <keyword type="function" name="bd_utils_report_started ()" link="libblockdev-Utils.html#bd-utils-report-started"/>
@@ -571,6 +574,32 @@
     <keyword type="macro" name="PiB" link="libblockdev-Utils.html#PiB"/>
     <keyword type="macro" name="TEBIBYTE" link="libblockdev-Utils.html#TEBIBYTE:CAPS"/>
     <keyword type="macro" name="TiB" link="libblockdev-Utils.html#TiB"/>
+    <keyword type="function" name="bd_vdo_check_deps ()" link="libblockdev-VDO.html#bd-vdo-check-deps"/>
+    <keyword type="function" name="bd_vdo_init ()" link="libblockdev-VDO.html#bd-vdo-init"/>
+    <keyword type="function" name="bd_vdo_close ()" link="libblockdev-VDO.html#bd-vdo-close"/>
+    <keyword type="function" name="bd_vdo_error_quark ()" link="libblockdev-VDO.html#bd-vdo-error-quark"/>
+    <keyword type="function" name="bd_vdo_get_write_policy_str ()" link="libblockdev-VDO.html#bd-vdo-get-write-policy-str"/>
+    <keyword type="function" name="bd_vdo_get_write_policy_from_str ()" link="libblockdev-VDO.html#bd-vdo-get-write-policy-from-str"/>
+    <keyword type="function" name="bd_vdo_info ()" link="libblockdev-VDO.html#bd-vdo-info"/>
+    <keyword type="function" name="bd_vdo_create ()" link="libblockdev-VDO.html#bd-vdo-create"/>
+    <keyword type="function" name="bd_vdo_remove ()" link="libblockdev-VDO.html#bd-vdo-remove"/>
+    <keyword type="function" name="bd_vdo_change_write_policy ()" link="libblockdev-VDO.html#bd-vdo-change-write-policy"/>
+    <keyword type="function" name="bd_vdo_enable_compression ()" link="libblockdev-VDO.html#bd-vdo-enable-compression"/>
+    <keyword type="function" name="bd_vdo_disable_compression ()" link="libblockdev-VDO.html#bd-vdo-disable-compression"/>
+    <keyword type="function" name="bd_vdo_enable_deduplication ()" link="libblockdev-VDO.html#bd-vdo-enable-deduplication"/>
+    <keyword type="function" name="bd_vdo_disable_deduplication ()" link="libblockdev-VDO.html#bd-vdo-disable-deduplication"/>
+    <keyword type="function" name="bd_vdo_activate ()" link="libblockdev-VDO.html#bd-vdo-activate"/>
+    <keyword type="function" name="bd_vdo_deactivate ()" link="libblockdev-VDO.html#bd-vdo-deactivate"/>
+    <keyword type="function" name="bd_vdo_start ()" link="libblockdev-VDO.html#bd-vdo-start"/>
+    <keyword type="function" name="bd_vdo_stop ()" link="libblockdev-VDO.html#bd-vdo-stop"/>
+    <keyword type="function" name="bd_vdo_grow_logical ()" link="libblockdev-VDO.html#bd-vdo-grow-logical"/>
+    <keyword type="function" name="bd_vdo_grow_physical ()" link="libblockdev-VDO.html#bd-vdo-grow-physical"/>
+    <keyword type="function" name="bd_vdo_is_tech_avail ()" link="libblockdev-VDO.html#bd-vdo-is-tech-avail"/>
+    <keyword type="enum" name="enum BDVDOError" link="libblockdev-VDO.html#BDVDOError"/>
+    <keyword type="macro" name="BD_VDO_ERROR" link="libblockdev-VDO.html#BD-VDO-ERROR:CAPS"/>
+    <keyword type="struct" name="BDVDOInfo" link="libblockdev-VDO.html#BDVDOInfo"/>
+    <keyword type="enum" name="enum BDVDOTech" link="libblockdev-VDO.html#BDVDOTech"/>
+    <keyword type="enum" name="enum BDVDOTechMode" link="libblockdev-VDO.html#BDVDOTechMode"/>
     <keyword type="constant" name="BD_INIT_ERROR_PLUGINS_FAILED" link="libblockdev-blockdev-library.html#BD-INIT-ERROR-PLUGINS-FAILED:CAPS"/>
     <keyword type="constant" name="BD_INIT_ERROR_NOT_IMPLEMENTED" link="libblockdev-blockdev-library.html#BD-INIT-ERROR-NOT-IMPLEMENTED:CAPS"/>
     <keyword type="constant" name="BD_INIT_ERROR_FAILED" link="libblockdev-blockdev-library.html#BD-INIT-ERROR-FAILED:CAPS"/>
@@ -726,6 +755,8 @@
     <keyword type="constant" name="BD_NVDIMM_NAMESPACE_MODE_SECTOR" link="libblockdev-NVDIMM.html#BD-NVDIMM-NAMESPACE-MODE-SECTOR:CAPS"/>
     <keyword type="constant" name="BD_NVDIMM_NAMESPACE_MODE_MEMORY" link="libblockdev-NVDIMM.html#BD-NVDIMM-NAMESPACE-MODE-MEMORY:CAPS"/>
     <keyword type="constant" name="BD_NVDIMM_NAMESPACE_MODE_DAX" link="libblockdev-NVDIMM.html#BD-NVDIMM-NAMESPACE-MODE-DAX:CAPS"/>
+    <keyword type="constant" name="BD_NVDIMM_NAMESPACE_MODE_FSDAX" link="libblockdev-NVDIMM.html#BD-NVDIMM-NAMESPACE-MODE-FSDAX:CAPS"/>
+    <keyword type="constant" name="BD_NVDIMM_NAMESPACE_MODE_DEVDAX" link="libblockdev-NVDIMM.html#BD-NVDIMM-NAMESPACE-MODE-DEVDAX:CAPS"/>
     <keyword type="constant" name="BD_NVDIMM_NAMESPACE_MODE_UNKNOWN" link="libblockdev-NVDIMM.html#BD-NVDIMM-NAMESPACE-MODE-UNKNOWN:CAPS"/>
     <keyword type="constant" name="BD_NVDIMM_TECH_NAMESPACE" link="libblockdev-NVDIMM.html#BD-NVDIMM-TECH-NAMESPACE:CAPS"/>
     <keyword type="constant" name="BD_NVDIMM_TECH_MODE_CREATE" link="libblockdev-NVDIMM.html#BD-NVDIMM-TECH-MODE-CREATE:CAPS"/>
@@ -746,6 +777,7 @@
     <keyword type="constant" name="BD_PLUGIN_PART" link="libblockdev-Plugins.html#BD-PLUGIN-PART:CAPS"/>
     <keyword type="constant" name="BD_PLUGIN_FS" link="libblockdev-Plugins.html#BD-PLUGIN-FS:CAPS"/>
     <keyword type="constant" name="BD_PLUGIN_NVDIMM" link="libblockdev-Plugins.html#BD-PLUGIN-NVDIMM:CAPS"/>
+    <keyword type="constant" name="BD_PLUGIN_VDO" link="libblockdev-Plugins.html#BD-PLUGIN-VDO:CAPS"/>
     <keyword type="constant" name="BD_PLUGIN_UNDEF" link="libblockdev-Plugins.html#BD-PLUGIN-UNDEF:CAPS"/>
     <keyword type="constant" name="BD_PART_ALIGN_MINIMAL" link="libblockdev-Part.html#BD-PART-ALIGN-MINIMAL:CAPS"/>
     <keyword type="constant" name="BD_PART_ALIGN_OPTIMAL" link="libblockdev-Part.html#BD-PART-ALIGN-OPTIMAL:CAPS"/>
@@ -850,6 +882,18 @@
     <keyword type="constant" name="BD_UTILS_EXEC_ERROR_UTIL_LOW_VER" link="libblockdev-Utils.html#BD-UTILS-EXEC-ERROR-UTIL-LOW-VER:CAPS"/>
     <keyword type="constant" name="BD_UTILS_EXEC_ERROR_UTIL_CHECK_ERROR" link="libblockdev-Utils.html#BD-UTILS-EXEC-ERROR-UTIL-CHECK-ERROR:CAPS"/>
     <keyword type="constant" name="BD_UTILS_DEV_UTILS_ERROR_FAILED" link="libblockdev-Utils.html#BD-UTILS-DEV-UTILS-ERROR-FAILED:CAPS"/>
+    <keyword type="constant" name="BD_VDO_ERROR_FAIL" link="libblockdev-VDO.html#BD-VDO-ERROR-FAIL:CAPS"/>
+    <keyword type="constant" name="BD_VDO_ERROR_PARSE" link="libblockdev-VDO.html#BD-VDO-ERROR-PARSE:CAPS"/>
+    <keyword type="constant" name="BD_VDO_ERROR_TECH_UNAVAIL" link="libblockdev-VDO.html#BD-VDO-ERROR-TECH-UNAVAIL:CAPS"/>
+    <keyword type="constant" name="BD_VDO_ERROR_POLICY_INVAL" link="libblockdev-VDO.html#BD-VDO-ERROR-POLICY-INVAL:CAPS"/>
+    <keyword type="constant" name="BD_VDO_TECH_VDO" link="libblockdev-VDO.html#BD-VDO-TECH-VDO:CAPS"/>
+    <keyword type="constant" name="BD_VDO_TECH_MODE_CREATE" link="libblockdev-VDO.html#BD-VDO-TECH-MODE-CREATE:CAPS"/>
+    <keyword type="constant" name="BD_VDO_TECH_MODE_REMOVE" link="libblockdev-VDO.html#BD-VDO-TECH-MODE-REMOVE:CAPS"/>
+    <keyword type="constant" name="BD_VDO_TECH_MODE_MODIFY" link="libblockdev-VDO.html#BD-VDO-TECH-MODE-MODIFY:CAPS"/>
+    <keyword type="constant" name="BD_VDO_TECH_MODE_ACTIVATE_DEACTIVATE" link="libblockdev-VDO.html#BD-VDO-TECH-MODE-ACTIVATE-DEACTIVATE:CAPS"/>
+    <keyword type="constant" name="BD_VDO_TECH_MODE_START_STOP" link="libblockdev-VDO.html#BD-VDO-TECH-MODE-START-STOP:CAPS"/>
+    <keyword type="constant" name="BD_VDO_TECH_MODE_QUERY" link="libblockdev-VDO.html#BD-VDO-TECH-MODE-QUERY:CAPS"/>
+    <keyword type="constant" name="BD_VDO_TECH_MODE_GROW" link="libblockdev-VDO.html#BD-VDO-TECH-MODE-GROW:CAPS"/>
     <keyword type="member" name="BDBtrfsDeviceInfo.id" link="libblockdev-BTRFS.html#BDBtrfsDeviceInfo.id"/>
     <keyword type="member" name="BDBtrfsDeviceInfo.path" link="libblockdev-BTRFS.html#BDBtrfsDeviceInfo.path"/>
     <keyword type="member" name="BDBtrfsDeviceInfo.size" link="libblockdev-BTRFS.html#BDBtrfsDeviceInfo.size"/>
@@ -992,5 +1036,14 @@
     <keyword type="member" name="BDKBDBcacheStats.misses" link="libblockdev-KernelBlockDevices.html#BDKBDBcacheStats.misses"/>
     <keyword type="member" name="BDKBDBcacheStats.bypass-hits" link="libblockdev-KernelBlockDevices.html#BDKBDBcacheStats.bypass-hits"/>
     <keyword type="member" name="BDKBDBcacheStats.bypass-misses" link="libblockdev-KernelBlockDevices.html#BDKBDBcacheStats.bypass-misses"/>
+    <keyword type="member" name="BDVDOInfo.name" link="libblockdev-VDO.html#BDVDOInfo.name"/>
+    <keyword type="member" name="BDVDOInfo.device" link="libblockdev-VDO.html#BDVDOInfo.device"/>
+    <keyword type="member" name="BDVDOInfo.active" link="libblockdev-VDO.html#BDVDOInfo.active"/>
+    <keyword type="member" name="BDVDOInfo.deduplication" link="libblockdev-VDO.html#BDVDOInfo.deduplication"/>
+    <keyword type="member" name="BDVDOInfo.compression" link="libblockdev-VDO.html#BDVDOInfo.compression"/>
+    <keyword type="member" name="BDVDOInfo.logical-size" link="libblockdev-VDO.html#BDVDOInfo.logical-size"/>
+    <keyword type="member" name="BDVDOInfo.physical-size" link="libblockdev-VDO.html#BDVDOInfo.physical-size"/>
+    <keyword type="member" name="BDVDOInfo.index-memory" link="libblockdev-VDO.html#BDVDOInfo.index-memory"/>
+    <keyword type="member" name="BDVDOInfo.write-policy" link="libblockdev-VDO.html#BDVDOInfo.write-policy"/>
   </functions>
 </book>
