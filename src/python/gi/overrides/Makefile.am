@@ -1,5 +1,5 @@
 if WITH_PYTHON2
-pylibdir = $(shell python -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_lib(1,0,prefix='${exec_prefix}'))")
+pylibdir = $(shell python2 -c "import distutils.sysconfig; print(distutils.sysconfig.get_python_lib(1,0,prefix='${exec_prefix}'))")
 
 overridesdir = $(pylibdir)/gi/overrides
 dist_overrides_DATA = BlockDev.py
