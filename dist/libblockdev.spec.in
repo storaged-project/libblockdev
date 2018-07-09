@@ -20,8 +20,8 @@
 %define with_escrow @WITH_ESCROW@
 %define with_dmraid @WITH_DMRAID@
 
-# python2 is not available on RHEL > 7 and not needed on Fedora > 28
-%if 0%{?rhel} > 7 || 0%{?fedora} > 28 || %{with_python2} == 0
+# python2 is not available on RHEL > 7 and not needed on Fedora > 29
+%if 0%{?rhel} > 7 || 0%{?fedora} > 29 || %{with_python2} == 0
 %define with_python2 0
 %define python2_copts --without-python2
 %endif
