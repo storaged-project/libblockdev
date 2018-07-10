@@ -84,6 +84,9 @@ gboolean bd_fs_vfat_is_tech_avail (BDFSTech tech UNUSED, guint64 mode, GError **
  * Creates a new copy of @data.
  */
 BDFSVfatInfo* bd_fs_vfat_info_copy (BDFSVfatInfo *data) {
+    if (data == NULL)
+        return NULL;
+
     BDFSVfatInfo *ret = g_new0 (BDFSVfatInfo, 1);
 
     ret->label = g_strdup (data->label);
@@ -101,6 +104,9 @@ BDFSVfatInfo* bd_fs_vfat_info_copy (BDFSVfatInfo *data) {
  * Frees @data.
  */
 void bd_fs_vfat_info_free (BDFSVfatInfo *data) {
+    if (data == NULL)
+        return;
+
     g_free (data->label);
     g_free (data->uuid);
     g_free (data);

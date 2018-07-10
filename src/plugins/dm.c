@@ -286,7 +286,7 @@ gchar* bd_dm_node_from_name (const gchar *map_name, GError **error) {
  *
  * Returns: subsystem of the given device
  *
- * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_QUERY
+ * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_QUERY
  */
 gchar* bd_dm_get_subsystem_from_name (const gchar *device_name, GError **error) {
     gchar *output = NULL;

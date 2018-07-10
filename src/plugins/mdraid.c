@@ -54,6 +54,9 @@ GQuark bd_md_error_quark (void)
  * Creates a new copy of @data.
  */
 BDMDExamineData* bd_md_examine_data_copy (BDMDExamineData *data) {
+    if (data == NULL)
+        return NULL;
+
     BDMDExamineData *new_data = g_new0 (BDMDExamineData, 1);
 
     new_data->device = g_strdup (data->device);
@@ -76,6 +79,9 @@ BDMDExamineData* bd_md_examine_data_copy (BDMDExamineData *data) {
  * Frees @data.
  */
 void bd_md_examine_data_free (BDMDExamineData *data) {
+    if (data == NULL)
+        return;
+
     g_free (data->device);
     g_free (data->level);
     g_free (data->name);
@@ -91,6 +97,9 @@ void bd_md_examine_data_free (BDMDExamineData *data) {
  * Creates a new copy of @data.
  */
 BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data) {
+    if (data == NULL)
+        return NULL;
+
     BDMDDetailData *new_data = g_new0 (BDMDDetailData, 1);
 
     new_data->device = g_strdup (data->device);
@@ -117,6 +126,9 @@ BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data) {
  * Frees @data.
  */
 void bd_md_detail_data_free (BDMDDetailData *data) {
+    if (data == NULL)
+        return;
+
     g_free (data->device);
     g_free (data->name);
     g_free (data->metadata);

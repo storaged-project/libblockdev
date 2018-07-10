@@ -86,6 +86,9 @@ GQuark bd_lvm_error_quark (void)
 }
 
 BDLVMPVdata* bd_lvm_pvdata_copy (BDLVMPVdata *data) {
+    if (data == NULL)
+        return NULL;
+
     BDLVMPVdata *new_data = g_new0 (BDLVMPVdata, 1);
 
     new_data->pv_name = g_strdup (data->pv_name);
@@ -104,6 +107,9 @@ BDLVMPVdata* bd_lvm_pvdata_copy (BDLVMPVdata *data) {
 }
 
 void bd_lvm_pvdata_free (BDLVMPVdata *data) {
+    if (data == NULL)
+        return;
+
     g_free (data->pv_name);
     g_free (data->pv_uuid);
     g_free (data->vg_name);
@@ -111,6 +117,9 @@ void bd_lvm_pvdata_free (BDLVMPVdata *data) {
 }
 
 BDLVMVGdata* bd_lvm_vgdata_copy (BDLVMVGdata *data) {
+    if (data == NULL)
+        return NULL;
+
     BDLVMVGdata *new_data = g_new0 (BDLVMVGdata, 1);
 
     new_data->name = g_strdup (data->name);
@@ -125,12 +134,18 @@ BDLVMVGdata* bd_lvm_vgdata_copy (BDLVMVGdata *data) {
 }
 
 void bd_lvm_vgdata_free (BDLVMVGdata *data) {
+    if (data == NULL)
+        return;
+
     g_free (data->name);
     g_free (data->uuid);
     g_free (data);
 }
 
 BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
+    if (data == NULL)
+        return NULL;
+
     BDLVMLVdata *new_data = g_new0 (BDLVMLVdata, 1);
 
     new_data->lv_name = g_strdup (data->lv_name);
@@ -152,6 +167,9 @@ BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
 }
 
 void bd_lvm_lvdata_free (BDLVMLVdata *data) {
+    if (data == NULL)
+        return;
+
     g_free (data->lv_name);
     g_free (data->vg_name);
     g_free (data->uuid);
@@ -167,6 +185,9 @@ void bd_lvm_lvdata_free (BDLVMLVdata *data) {
 }
 
 BDLVMCacheStats* bd_lvm_cache_stats_copy (BDLVMCacheStats *data) {
+    if (data == NULL)
+        return NULL;
+
     BDLVMCacheStats *new = g_new0 (BDLVMCacheStats, 1);
 
     new->block_size = data->block_size;

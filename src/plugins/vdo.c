@@ -42,12 +42,18 @@ GQuark bd_vdo_error_quark (void) {
 }
 
 void bd_vdo_info_free (BDVDOInfo *info) {
+    if (info == NULL)
+        return;
+
     g_free (info->name);
     g_free (info->device);
     g_free (info);
 }
 
 BDVDOInfo* bd_vdo_info_copy (BDVDOInfo *info) {
+    if (info == NULL)
+        return NULL;
+
     BDVDOInfo *new_info = g_new0 (BDVDOInfo, 1);
 
     new_info->name = g_strdup (info->name);
@@ -384,7 +390,7 @@ const gchar* bd_vdo_get_write_policy_str (BDVDOWritePolicy policy, GError **erro
 
 /**
  * bd_vdo_get_write_policy_from_str:
- * @mode_str: string representation of a write policy mode
+ * @policy_str: string representation of a write policy mode
  * @error: (out): place to store error (if any)
  *
  * Returns: write policy for the @mode_str or %BD_VDO_WRITE_POLICY_UNKNOWN if
@@ -499,7 +505,7 @@ static gchar* get_index_memory_str (guint64 index_memory, GError **error) {
  *
  * Returns: whether the VDO volume was successfully created or not
  *
- * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_MODE_CREATE
+ * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_CREATE
  */
 gboolean bd_vdo_create (const gchar *name, const gchar *backing_device, guint64 logical_size, guint64 index_memory, gboolean compression, gboolean deduplication, BDVDOWritePolicy write_policy, const BDExtraArg **extra, GError **error) {
     const gchar **args = g_new0 (const gchar*, 12);

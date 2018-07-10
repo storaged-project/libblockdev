@@ -44,6 +44,9 @@ GQuark bd_btrfs_error_quark (void)
 }
 
 BDBtrfsDeviceInfo* bd_btrfs_device_info_copy (BDBtrfsDeviceInfo *info) {
+    if (info == NULL)
+        return NULL;
+
     BDBtrfsDeviceInfo *new_info = g_new0 (BDBtrfsDeviceInfo, 1);
 
     new_info->id = info->id;
@@ -55,11 +58,17 @@ BDBtrfsDeviceInfo* bd_btrfs_device_info_copy (BDBtrfsDeviceInfo *info) {
 }
 
 void bd_btrfs_device_info_free (BDBtrfsDeviceInfo *info) {
+    if (info == NULL)
+        return;
+
     g_free (info->path);
     g_free (info);
 }
 
 BDBtrfsSubvolumeInfo* bd_btrfs_subvolume_info_copy (BDBtrfsSubvolumeInfo *info) {
+    if  (info == NULL)
+        return NULL;
+
     BDBtrfsSubvolumeInfo *new_info = g_new0 (BDBtrfsSubvolumeInfo, 1);
 
     new_info->id = info->id;
@@ -70,11 +79,17 @@ BDBtrfsSubvolumeInfo* bd_btrfs_subvolume_info_copy (BDBtrfsSubvolumeInfo *info) 
 }
 
 void bd_btrfs_subvolume_info_free (BDBtrfsSubvolumeInfo *info) {
+    if (info == NULL)
+        return;
+
     g_free (info->path);
     g_free (info);
 }
 
 BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info_copy (BDBtrfsFilesystemInfo *info) {
+    if (info == NULL)
+        return NULL;
+
     BDBtrfsFilesystemInfo *new_info = g_new0 (BDBtrfsFilesystemInfo, 1);
 
     new_info->label = g_strdup (info->label);
@@ -86,6 +101,9 @@ BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info_copy (BDBtrfsFilesystemInfo *inf
 }
 
 void bd_btrfs_filesystem_info_free (BDBtrfsFilesystemInfo *info) {
+    if (info == NULL)
+        return;
+
     g_free (info->label);
     g_free (info->uuid);
     g_free (info);

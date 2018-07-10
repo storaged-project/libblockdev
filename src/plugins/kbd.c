@@ -165,6 +165,9 @@ GQuark bd_kbd_error_quark (void)
 }
 
 BDKBDZramStats* bd_kbd_zram_stats_copy (BDKBDZramStats *data) {
+    if (data == NULL)
+        return NULL;
+
     BDKBDZramStats *new = g_new0 (BDKBDZramStats, 1);
     new->disksize = data->disksize;
     new->num_reads = data->num_reads;
@@ -181,11 +184,17 @@ BDKBDZramStats* bd_kbd_zram_stats_copy (BDKBDZramStats *data) {
 }
 
 void bd_kbd_zram_stats_free (BDKBDZramStats *data) {
+    if (data == NULL)
+        return;
+
     g_free (data->comp_algorithm);
     g_free (data);
 }
 
 BDKBDBcacheStats* bd_kbd_bcache_stats_copy (BDKBDBcacheStats *data) {
+    if (data == NULL)
+        return NULL;
+
     BDKBDBcacheStats *new = g_new0 (BDKBDBcacheStats, 1);
 
     new->state = g_strdup (data->state);
@@ -201,6 +210,9 @@ BDKBDBcacheStats* bd_kbd_bcache_stats_copy (BDKBDBcacheStats *data) {
 }
 
 void bd_kbd_bcache_stats_free (BDKBDBcacheStats *data) {
+    if (data == NULL)
+        return;
+
     g_free (data->state);
     g_free (data);
 }

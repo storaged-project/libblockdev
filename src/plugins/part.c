@@ -63,6 +63,9 @@ GQuark bd_part_error_quark (void)
 }
 
 BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
+    if (data == NULL)
+        return NULL;
+
     BDPartSpec *ret = g_new0 (BDPartSpec, 1);
 
     ret->path = g_strdup (data->path);
@@ -76,6 +79,9 @@ BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
 }
 
 void bd_part_spec_free (BDPartSpec *data) {
+    if (data == NULL)
+        return;
+
     g_free (data->path);
     g_free (data->name);
     g_free (data->type_guid);
@@ -83,6 +89,9 @@ void bd_part_spec_free (BDPartSpec *data) {
 }
 
 BDPartDiskSpec* bd_part_disk_spec_copy (BDPartDiskSpec *data) {
+    if (data == NULL)
+        return NULL;
+
     BDPartDiskSpec *ret = g_new0 (BDPartDiskSpec, 1);
 
     ret->path = g_strdup (data->path);
@@ -95,6 +104,9 @@ BDPartDiskSpec* bd_part_disk_spec_copy (BDPartDiskSpec *data) {
 }
 
 void bd_part_disk_spec_free (BDPartDiskSpec *data) {
+    if (data == NULL)
+        return;
+
     g_free (data->path);
     g_free (data);
 }

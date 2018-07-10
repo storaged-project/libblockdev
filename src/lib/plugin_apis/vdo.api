@@ -68,11 +68,14 @@ typedef struct BDVDOInfo {
  *
  * Frees @info.
  */
- void bd_vdo_info_free (BDVDOInfo *info) {
-     g_free (info->name);
-     g_free (info->device);
-     g_free (info);
- }
+void bd_vdo_info_free (BDVDOInfo *info) {
+   if (info == NULL)
+       return;
+
+   g_free (info->name);
+   g_free (info->device);
+   g_free (info);
+}
 
 /**
  * bd_vdo_info_copy: (skip)
@@ -80,6 +83,9 @@ typedef struct BDVDOInfo {
  * Creates a new copy of @info.
  */
 BDVDOInfo* bd_vdo_info_copy (BDVDOInfo *info) {
+    if (info == NULL)
+        return NULL;
+
     BDVDOInfo *new_info = g_new0 (BDVDOInfo, 1);
 
     new_info->name = g_strdup (info->name);
@@ -93,7 +99,7 @@ BDVDOInfo* bd_vdo_info_copy (BDVDOInfo *info) {
     new_info->write_policy = info->write_policy;
 
     return new_info;
- }
+}
 
 GType bd_vdo_info_get_type () {
     static GType type = 0;
@@ -171,7 +177,7 @@ BDVDOInfo* bd_vdo_info (const gchar *name, GError **error);
  *
  * Returns: whether the VDO volume was successfully created or not
  *
- * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_MODE_CREATE
+ * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_CREATE
  */
 gboolean bd_vdo_create (const gchar *name, const gchar *backing_device, guint64 logical_size, guint64 index_memory, gboolean compression, gboolean deduplication, BDVDOWritePolicy write_policy, const BDExtraArg **extra, GError **error);
 

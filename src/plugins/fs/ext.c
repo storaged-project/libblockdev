@@ -154,6 +154,9 @@ gboolean bd_fs_ext_is_tech_avail (BDFSTech tech UNUSED, guint64 mode, GError **e
  * Creates a new copy of @data.
  */
 BDFSExt2Info* bd_fs_ext2_info_copy (BDFSExt2Info *data) {
+    if (data == NULL)
+        return NULL;
+
     BDFSExt2Info *ret = g_new0 (BDFSExt2Info, 1);
 
     ret->label = g_strdup (data->label);
@@ -190,6 +193,9 @@ BDFSExt4Info* bd_fs_ext4_info_copy (BDFSExt4Info *data) {
  * Frees @data.
  */
 void bd_fs_ext2_info_free (BDFSExt2Info *data) {
+  if (data == NULL)
+      return;
+
     g_free (data->label);
     g_free (data->uuid);
     g_free (data->state);

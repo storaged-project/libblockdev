@@ -81,6 +81,9 @@ gboolean bd_fs_ntfs_is_tech_avail (BDFSTech tech UNUSED, guint64 mode, GError **
  * Creates a new copy of @data.
  */
 BDFSNtfsInfo* bd_fs_ntfs_info_copy (BDFSNtfsInfo *data) {
+    if (data == NULL)
+        return NULL;
+
     BDFSNtfsInfo *ret = g_new0 (BDFSNtfsInfo, 1);
 
     ret->size = data->size;

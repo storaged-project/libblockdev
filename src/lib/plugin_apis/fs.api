@@ -58,6 +58,9 @@ typedef struct BDFSExtInfo BDFSExt2Info;
  * Creates a new copy of @data.
  */
 BDFSExt2Info* bd_fs_ext2_info_copy (BDFSExt2Info *data) {
+    if (data == NULL)
+        return NULL;
+
     BDFSExt2Info *ret = g_new0 (BDFSExt2Info, 1);
 
     ret->label = g_strdup (data->label);
@@ -94,6 +97,9 @@ BDFSExt4Info* bd_fs_ext4_info_copy (BDFSExt4Info *data) {
  * Frees @data.
  */
 void bd_fs_ext2_info_free (BDFSExt2Info *data) {
+    if (data == NULL)
+        return;
+
     g_free (data->label);
     g_free (data->uuid);
     g_free (data->state);
@@ -177,6 +183,9 @@ typedef struct BDFSXfsInfo {
  * Creates a new copy of @data.
  */
 BDFSXfsInfo* bd_fs_xfs_info_copy (BDFSXfsInfo *data) {
+    if (data == NULL)
+        return NULL;
+
     BDFSXfsInfo *ret = g_new0 (BDFSXfsInfo, 1);
 
     ret->label = g_strdup (data->label);
@@ -193,6 +202,9 @@ BDFSXfsInfo* bd_fs_xfs_info_copy (BDFSXfsInfo *data) {
  * Frees @data.
  */
 void bd_fs_xfs_info_free (BDFSXfsInfo *data) {
+    if (data == NULL)
+        return;
+
     g_free (data->label);
     g_free (data->uuid);
     g_free (data);
@@ -235,6 +247,9 @@ typedef struct BDFSVfatInfo {
  * Creates a new copy of @data.
  */
 BDFSVfatInfo* bd_fs_vfat_info_copy (BDFSVfatInfo *data) {
+    if (data == NULL)
+        return NULL;
+
     BDFSVfatInfo *ret = g_new0 (BDFSVfatInfo, 1);
 
     ret->label = g_strdup (data->label);
@@ -251,6 +266,9 @@ BDFSVfatInfo* bd_fs_vfat_info_copy (BDFSVfatInfo *data) {
  * Frees @data.
  */
 void bd_fs_vfat_info_free (BDFSVfatInfo *data) {
+    if (data == NULL)
+        return;
+
     g_free (data->label);
     g_free (data->uuid);
     g_free (data);
@@ -284,6 +302,9 @@ typedef struct BDFSNtfsInfo {
  * Creates a new copy of @data.
  */
 BDFSNtfsInfo* bd_fs_ntfs_info_copy (BDFSNtfsInfo *data) {
+    if (data == NULL)
+        return NULL;
+
     BDFSNtfsInfo *ret = g_new0 (BDFSNtfsInfo, 1);
 
     ret->size = data->size;
