@@ -75,7 +75,12 @@ bd_crypto_luks_format
 bd_crypto_luks_format_blob
 bd_crypto_luks_extra_free
 bd_crypto_luks_extra_copy
+bd_crypto_luks_extra_new
 BDCryptoLUKSExtra
+bd_crypto_luks_pbkdf_free
+bd_crypto_luks_pbkdf_copy
+bd_crypto_luks_pbkdf_new
+BDCryptoLUKSPBKDF
 BDCryptoLUKSVersion
 bd_crypto_luks_format_luks2
 bd_crypto_luks_format_luks2_blob

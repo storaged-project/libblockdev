@@ -143,11 +143,83 @@ class CryptoTestFormat(CryptoTestCase):
         self.assertTrue(succ)
 
         # simple case with extra options
-        extra = BlockDev.CryptoLUKSExtra()
-        extra.integrity = None
-        extra.label = "blockdevLUKS"
+        extra = BlockDev.CryptoLUKSExtra(label="blockdevLUKS")
         succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0,
                                            BlockDev.CryptoLUKSVersion.LUKS2, extra)
+        self.assertTrue(succ)
+
+        _ret, label, _err = run_command("lsblk -oLABEL -n %s" % self.loop_dev)
+        self.assertEqual(label, "blockdevLUKS")
+
+        # different key derivation function
+        pbkdf = BlockDev.CryptoLUKSPBKDF(type="pbkdf2")
+        extra = BlockDev.CryptoLUKSExtra(pbkdf=pbkdf)
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0,
+                                           BlockDev.CryptoLUKSVersion.LUKS2, extra)
+        self.assertTrue(succ)
+
+        _ret, out, err = run_command("cryptsetup luksDump %s" % self.loop_dev)
+        m = re.search(r"PBKDF:\s*(\S+)\s*", out)
+        if not m or len(m.groups()) != 1:
+            self.fail("Failed to get pbkdf information from:\n%s %s" % (out, err))
+        self.assertEqual(m.group(1), "pbkdf2")
+
+        # different options for argon2 -- all parameters set
+        pbkdf = BlockDev.CryptoLUKSPBKDF(type="argon2id", max_memory_kb=100*1024, iterations=10, parallel_threads=1)
+        extra = BlockDev.CryptoLUKSExtra(pbkdf=pbkdf)
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0,
+                                           BlockDev.CryptoLUKSVersion.LUKS2, extra)
+        self.assertTrue(succ)
+
+        _ret, out, err = run_command("cryptsetup luksDump %s" % self.loop_dev)
+        m = re.search(r"PBKDF:\s*(\S+)\s*", out)
+        if not m or len(m.groups()) != 1:
+            self.fail("Failed to get pbkdf information from:\n%s %s" % (out, err))
+        self.assertEqual(m.group(1), "argon2id")
+
+        m = re.search(r"Memory:\s*(\d+)\s*", out)
+        if not m or len(m.groups()) != 1:
+            self.fail("Failed to get pbkdf information from:\n%s %s" % (out, err))
+        # both iterations and memory is set --> cryptsetup will use exactly max_memory_kb
+        self.assertEqual(int(m.group(1)), 100*1024)
+
+        m = re.search(r"Threads:\s*(\d+)\s*", out)
+        if not m or len(m.groups()) != 1:
+            self.fail("Failed to get pbkdf information from:\n%s %s" % (out, err))
+        self.assertEqual(int(m.group(1)), 1)
+
+        m = re.search(r"Time cost:\s*(\d+)\s*", out)
+        if not m or len(m.groups()) != 1:
+            self.fail("Failed to get pbkdf information from:\n%s %s" % (out, err))
+        self.assertEqual(int(m.group(1)), 10)
+
+        # different options for argon2 -- only memory set
+        pbkdf = BlockDev.CryptoLUKSPBKDF(max_memory_kb=100*1024)
+        extra = BlockDev.CryptoLUKSExtra(pbkdf=pbkdf)
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0,
+                                           BlockDev.CryptoLUKSVersion.LUKS2, extra)
+        self.assertTrue(succ)
+
+        _ret, out, err = run_command("cryptsetup luksDump %s" % self.loop_dev)
+        m = re.search(r"Memory:\s*(\d+)\s*", out)
+        if not m or len(m.groups()) != 1:
+            self.fail("Failed to get pbkdf information from:\n%s %s" % (out, err))
+        # only memory is set -> cryptsetup will run a benchmark and use
+        # at most max_memory_kb
+        self.assertLessEqual(int(m.group(1)), 100*1024)
+
+        # different options for argon2 -- only miterations set
+        pbkdf = BlockDev.CryptoLUKSPBKDF(iterations=5)
+        extra = BlockDev.CryptoLUKSExtra(pbkdf=pbkdf)
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0,
+                                           BlockDev.CryptoLUKSVersion.LUKS2, extra)
+        self.assertTrue(succ)
+
+        _ret, out, err = run_command("cryptsetup luksDump %s" % self.loop_dev)
+        m = re.search(r"Time cost:\s*(\d+)\s*", out)
+        if not m or len(m.groups()) != 1:
+            self.fail("Failed to get pbkdf information from:\n%s %s" % (out, err))
+        self.assertEqual(int(m.group(1)), 5)
 
 class CryptoTestResize(CryptoTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
