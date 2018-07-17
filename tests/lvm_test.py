@@ -641,6 +641,7 @@ class LvmTestLVcreateWithExtra(LvmPVVGLVTestCase):
 
 class LvmTestLVcreateType(LvmPVVGLVTestCase):
     @skip_on("fedora", "27", reason="LVM is broken in many ways on rawhide")
+    @skip_on(("centos", "enterprise_linux"), "7")
     def test_lvcreate_type(self):
         """Verify it's possible to create LVs with various types"""
 
@@ -1099,6 +1100,7 @@ class LvmPVVGLVcachePoolTestCase(LvmPVVGLVTestCase):
 class LvmPVVGLVcachePoolCreateRemoveTestCase(LvmPVVGLVcachePoolTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     @skip_on("fedora", "27", reason="LVM is broken in many ways on rawhide")
+    @skip_on(("centos", "enterprise_linux"), "7")
     def test_cache_pool_create_remove(self):
         """Verify that is it possible to create and remove a cache pool"""
 
