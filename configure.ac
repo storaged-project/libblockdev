@@ -228,12 +228,12 @@ AS_IF([test "x$with_fs" != "xno"],
       [])
 
 AS_IF([test "x$with_fs" != "xno" -o "x$with_crypto" != "xno"],
-      LIBBLOCKDEV_PKG_CHECK_MODULES([BLKID], [blkid >= 2.23.0])
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([BLKID], [blkid >= 2.23.0])
       # older versions of libblkid don't support BLKID_SUBLKS_BADCSUM so let's just
       # define it as 0 (neutral value for bit combinations of flags)
       AS_IF([$PKG_CONFIG --atleast-version=2.27.0 blkid], [],
             [AC_DEFINE([BLKID_SUBLKS_BADCSUM], [0],
-             [Define as neutral value if libblkid doesn't provide the definition])])
+             [Define as neutral value if libblkid doesn't provide the definition])])]
       [])
 
 AS_IF([test "x$with_btrfs" != "xno" -o "x$with_mdraid" != "xno" -o "x$with_kbd" != "xno" -o "x$with_vdo" != "xno"],
