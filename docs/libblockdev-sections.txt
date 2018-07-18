@@ -631,6 +631,7 @@ bd_vdo_error_quark
 BDVDOError
 BD_VDO_ERROR
 BDVDOInfo
+BDVDOStats
 bd_vdo_get_write_policy_str
 bd_vdo_get_write_policy_from_str
 bd_vdo_info
@@ -647,6 +648,8 @@ bd_vdo_start
 bd_vdo_stop
 bd_vdo_grow_logical
 bd_vdo_grow_physical
+bd_vdo_get_stats
+bd_vdo_get_stats_full
 BDVDOTech
 BDVDOTechMode
 bd_vdo_is_tech_avail

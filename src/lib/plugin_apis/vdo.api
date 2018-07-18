@@ -113,6 +113,66 @@ GType bd_vdo_info_get_type () {
     return type;
 }
 
+#define BD_VDO_TYPE_STATS (bd_vdo_stats_get_type ())
+GType bd_vdo_stats_get_type();
+
+/**
+ * BDVDOStats:
+ * @block_size: block size of a VDO volume, in bytes
+ * @logical_block_size: logical block size, in bytes
+ * @physical_blocks: total number of physical blocks allocated
+ * @data_blocks_used: number of physical blocks currently in use to store data
+ * @overhead_blocks_used: number of physical blocks currently in use to store VDO metadata
+ * @logical_blocks_used: number of logical blocks currently mapped
+ * @used_percent: percentage of physical blocks used
+ * @saving_percent: percentage of physical blocks saved
+ * @write_amplification_ratio: average number of block writes to the underlying storage per block written
+ */
+typedef struct BDVDOStats {
+    gint64 block_size;
+    gint64 logical_block_size;
+    gint64 physical_blocks;
+    gint64 data_blocks_used;
+    gint64 overhead_blocks_used;
+    gint64 logical_blocks_used;
+    gint64 used_percent;
+    gint64 saving_percent;
+    gdouble write_amplification_ratio;
+} BDVDOStats;
+
+/**
+ * bd_vdo_stats_free: (skip)
+ *
+ * Frees @stats.
+ */
+void bd_vdo_stats_free (BDVDOStats *stats) {
+    if (stats == NULL)
+        return;
+
+    g_free (stats);
+}
+
+/**
+ * bd_vdo_stats_copy: (skip)
+ *
+ * Creates a new copy of @stats.
+ */
+BDVDOStats* bd_vdo_stats_copy (BDVDOStats *stats) {
+    return g_memdup (stats, sizeof (BDVDOStats));
+}
+
+GType bd_vdo_stats_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDVDOStats",
+                                            (GBoxedCopyFunc) bd_vdo_stats_copy,
+                                            (GBoxedFreeFunc) bd_vdo_stats_free);
+    }
+
+    return type;
+}
+
 /**
  * bd_vdo_is_tech_avail:
  * @tech: the queried tech
@@ -341,5 +401,43 @@ gboolean bd_vdo_grow_logical (const gchar *name, guint64 size, const BDExtraArg 
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_GROW
  */
 gboolean bd_vdo_grow_physical (const gchar *name, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_vdo_get_stats:
+ * @name: name of an existing VDO volume
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): a structure containing selected statistics or %NULL in case of error (@error gets populated in those cases)
+ *
+ * In contrast to @bd_vdo_get_stats_full this function will only return selected statistics in a fixed structure. In case a value is not available, -1 would be returned.
+ *
+ * The following statistics are presented:
+ *   - `"block_size"`: The block size of a VDO volume, in bytes.
+ *   - `"logical_block_size"`: The logical block size, in bytes.
+ *   - `"physical_blocks"`: The total number of physical blocks allocated for a VDO volume.
+ *   - `"data_blocks_used"`: The number of physical blocks currently in use by a VDO volume to store data.
+ *   - `"overhead_blocks_used"`: The number of physical blocks currently in use by a VDO volume to store VDO metadata.
+ *   - `"logical_blocks_used"`: The number of logical blocks currently mapped.
+ *   - `"usedPercent"`: The percentage of physical blocks used on a VDO volume (= used blocks / allocated blocks * 100).
+ *   - `"savingPercent"`: The percentage of physical blocks saved on a VDO volume (= [logical blocks used - physical blocks used] / logical blocks used).
+ *   - `"writeAmplificationRatio"`: The average number of block writes to the underlying storage per block written to the VDO device.
+ *
+ * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_QUERY
+ */
+BDVDOStats* bd_vdo_get_stats (const gchar *name, GError **error);
+
+/**
+ * bd_vdo_get_stats_full:
+ * @name: name of an existing VDO volume
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full) (element-type utf8 utf8): hashtable of type string - string of available statistics or %NULL in case of error (@error gets populated in those cases)
+ *
+ * Statistics are collected from the values exposed by the kernel `kvdo` module at the `/sys/kvdo/<VDO_NAME>/statistics/` path. Some of the keys are computed to mimic the information produced by the vdo tools.
+ * Please note the contents of the hashtable may vary depending on the actual kvdo module version.
+ *
+ * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_QUERY
+ */
+GHashTable* bd_vdo_get_stats_full (const gchar *name, GError **error);
 
 #endif  /* BD_VDO_API */

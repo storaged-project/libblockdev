@@ -46,8 +46,23 @@ typedef struct BDVDOInfo {
     BDVDOWritePolicy write_policy;
 } BDVDOInfo;
 
+typedef struct BDVDOStats {
+    gint64 block_size;
+    gint64 logical_block_size;
+    gint64 physical_blocks;
+    gint64 data_blocks_used;
+    gint64 overhead_blocks_used;
+    gint64 logical_blocks_used;
+    gint64 used_percent;
+    gint64 saving_percent;
+    gdouble write_amplification_ratio;
+} BDVDOStats;
+
 void bd_vdo_info_free (BDVDOInfo *info);
 BDVDOInfo* bd_vdo_info_copy (BDVDOInfo *info);
+
+void bd_vdo_stats_free (BDVDOStats *stats);
+BDVDOStats* bd_vdo_stats_copy (BDVDOStats *stats);
 
 /*
  * If using the plugin as a standalone library, the following functions should
@@ -87,5 +102,8 @@ gboolean bd_vdo_stop (const gchar *name, gboolean force, const BDExtraArg **extr
 
 gboolean bd_vdo_grow_logical (const gchar *name, guint64 size, const BDExtraArg **extra, GError **error);
 gboolean bd_vdo_grow_physical (const gchar *name, const BDExtraArg **extra, GError **error);
+
+BDVDOStats* bd_vdo_get_stats (const gchar *name, GError **error);
+GHashTable* bd_vdo_get_stats_full (const gchar *name, GError **error);
 
 #endif  /* BD_VDO */
