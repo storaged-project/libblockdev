@@ -88,4 +88,6 @@ gboolean bd_vdo_stop (const gchar *name, gboolean force, const BDExtraArg **extr
 gboolean bd_vdo_grow_logical (const gchar *name, guint64 size, const BDExtraArg **extra, GError **error);
 gboolean bd_vdo_grow_physical (const gchar *name, const BDExtraArg **extra, GError **error);
 
+GHashTable* bd_vdo_get_statistics (const gchar *name, const BDExtraArg **extra, GError **error);
+
 #endif  /* BD_VDO */

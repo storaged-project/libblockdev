@@ -342,4 +342,18 @@ gboolean bd_vdo_grow_logical (const gchar *name, guint64 size, const BDExtraArg 
  */
 gboolean bd_vdo_grow_physical (const gchar *name, const BDExtraArg **extra, GError **error);
 
+/**
+ * bd_vdo_get_statistics:
+ * @name: name of an existing VDO volume
+ * @extra: (allow-none) (array zero-terminated=1): extra options, currently unused
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full) (element-type utf8 utf8): hashtable of type string - string of available statistics
+ *
+ * Statistics are collected from the values exposed by the kernel `kvdo` module at the `/sys/kvdo/<VDO_NAME>/statistics/` path. Some of the keys are computed to mimic the information produced by the vdo tools.
+ *
+ * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_QUERY
+ */
+GHashTable* bd_vdo_get_statistics (const gchar *name, const BDExtraArg **extra, GError **error);
+
 #endif  /* BD_VDO_API */
