@@ -76,10 +76,10 @@ endif
 if WITH_CRYPTO
 if WITH_ESCROW
 libbd_crypto_la_CFLAGS = $(GLIB_CFLAGS) $(CRYPTSETUP_CFLAGS) $(BLKID_CFLAGS) $(NSS_CFLAGS) -Wall -Wextra -Werror
-libbd_crypto_la_LIBADD = $(GLIB_LIBS) $(CRYPTSETUP_LIBS) $(NSS_LIBS) $(BLKID_LIBS) -lvolume_key ${builddir}/../utils/libbd_utils.la
+libbd_crypto_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(CRYPTSETUP_LIBS) $(NSS_LIBS) $(BLKID_LIBS) -lvolume_key
 else
 libbd_crypto_la_CFLAGS = $(GLIB_CFLAGS) $(CRYPTSETUP_CFLAGS) $(BLKID_CFLAGS) -Wall -Wextra -Werror
-libbd_crypto_la_LIBADD = $(GLIB_LIBS) $(CRYPTSETUP_LIBS) $(BLKID_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_crypto_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(CRYPTSETUP_LIBS) $(BLKID_LIBS)
 endif
 libbd_crypto_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_crypto_la_CPPFLAGS = -I${builddir}/../../include/
