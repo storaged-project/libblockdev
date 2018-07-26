@@ -6,6 +6,7 @@
 #include "extra_arg.h"
 #include "dev_utils.h"
 #include "module.h"
+#include "dbus.h"
 
 /**
  * SECTION: utils

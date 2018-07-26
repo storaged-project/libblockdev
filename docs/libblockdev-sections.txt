@@ -184,6 +184,7 @@ bd_utils_get_device_symlinks
 bd_utils_have_kernel_module
 bd_utils_load_kernel_module
 bd_utils_unload_kernel_module
+bd_utils_dbus_service_available
 EXBIBYTE
 EiB
 GIBIBYTE
