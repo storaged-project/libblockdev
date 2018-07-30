@@ -9,7 +9,7 @@
 /**
  * bd_init_error_quark: (skip)
  */
-GQuark bd_init_error_quark ();
+GQuark bd_init_error_quark (void);
 #define BD_INIT_ERROR bd_init_error_quark ()
 typedef enum {
     BD_INIT_ERROR_PLUGINS_FAILED,
@@ -24,7 +24,7 @@ gboolean bd_try_init(BDPluginSpec **request_plugins, BDUtilsLogFunc log_func,
                      gchar ***loaded_plugin_names, GError **error);
 gboolean bd_try_reinit (BDPluginSpec **require_plugins, gboolean reload, BDUtilsLogFunc log_func,
                         gchar ***loaded_plugin_names, GError **error);
-gboolean bd_is_initialized ();
+gboolean bd_is_initialized (void);
 gboolean bd_switch_init_checks (gboolean enable, GError **error);
 
 #endif  /* BD_LIB */

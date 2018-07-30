@@ -62,7 +62,7 @@ gboolean bd_utils_check_util_version (const gchar *util, const gchar *version, c
 gboolean bd_utils_init_prog_reporting (BDUtilsProgFunc new_prog_func, GError **error);
 gboolean bd_utils_init_prog_reporting_thread (BDUtilsProgFunc new_prog_func, GError **error);
 gboolean bd_utils_mute_prog_reporting_thread (GError **error);
-gboolean bd_utils_prog_reporting_initialized ();
+gboolean bd_utils_prog_reporting_initialized (void);
 guint64 bd_utils_report_started (gchar *msg);
 void bd_utils_report_progress (guint64 task_id, guint64 completion, gchar *msg);
 void bd_utils_report_finished (guint64 task_id, gchar *msg);

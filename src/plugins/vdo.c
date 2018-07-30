@@ -95,7 +95,7 @@ static gchar* module_deps[MODULE_DEPS_LAST] = { "kvdo" };
  * Function checking plugin's runtime dependencies.
  *
  */
-gboolean bd_vdo_check_deps () {
+gboolean bd_vdo_check_deps (void) {
     GError *error = NULL;
     guint i = 0;
     gboolean status = FALSE;
@@ -134,7 +134,7 @@ gboolean bd_vdo_check_deps () {
  * library's initialization functions.**
  *
  */
-gboolean bd_vdo_init () {
+gboolean bd_vdo_init (void) {
     /* nothing to do here */
     return TRUE;
 }
@@ -146,7 +146,7 @@ gboolean bd_vdo_init () {
  * library's functions that unload it.**
  *
  */
-void bd_vdo_close () {
+void bd_vdo_close (void) {
     /* nothing to do here */
     return;
 }

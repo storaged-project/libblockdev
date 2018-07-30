@@ -34,9 +34,9 @@ typedef enum {
  * close()      - clean after the plugin at the end or if no longer used
  *
  */
-gboolean bd_loop_check_deps ();
-gboolean bd_loop_init ();
-void bd_loop_close ();
+gboolean bd_loop_check_deps (void);
+gboolean bd_loop_init (void);
+void bd_loop_close (void);
 
 gboolean bd_loop_is_tech_avail (BDLoopTech tech, guint64 mode, GError **error);
 

@@ -33,6 +33,6 @@ PedExceptionOption bd_exc_handler (PedException *ex) {
     return PED_EXCEPTION_UNHANDLED;
 }
 
-gchar * bd_get_error_msg () {
+gchar * bd_get_error_msg (void) {
   return g_strdup (error_msg);
 }

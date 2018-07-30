@@ -33,7 +33,7 @@ void bd_plugin_spec_free (BDPluginSpec *spec) {
     g_free (spec);
 }
 
-GType bd_plugin_spec_get_type () {
+GType bd_plugin_spec_get_type (void) {
     static GType type = 0;
 
     if (G_UNLIKELY(type == 0)) {

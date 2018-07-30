@@ -66,7 +66,7 @@ static UtilDep deps[DEPS_LAST] = {
  * Function checking plugin's runtime dependencies.
  *
  */
-gboolean bd_kbd_check_deps () {
+gboolean bd_kbd_check_deps (void) {
     GError *error = NULL;
     gboolean ret = FALSE;
     guint i = 0;
@@ -122,7 +122,7 @@ gboolean bd_kbd_check_deps () {
  * library's initialization functions.**
  *
  */
-gboolean bd_kbd_init () {
+gboolean bd_kbd_init (void) {
     c_locale = newlocale (LC_ALL_MASK, "C", c_locale);
     return TRUE;
 }
@@ -134,7 +134,7 @@ gboolean bd_kbd_init () {
  * library's functions that unload it.**
  *
  */
-void bd_kbd_close () {
+void bd_kbd_close (void) {
     freelocale (c_locale);
 }
 

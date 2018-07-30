@@ -85,7 +85,7 @@ static void discard_dm_log (int level __attribute__((unused)), const char *file 
  * Function checking plugin's runtime dependencies.
  *
  */
-gboolean bd_dm_check_deps () {
+gboolean bd_dm_check_deps (void) {
     GError *error = NULL;
     guint i = 0;
     gboolean status = FALSE;
@@ -115,7 +115,7 @@ gboolean bd_dm_check_deps () {
  * library's initialization functions.**
  *
  */
-gboolean bd_dm_init () {
+gboolean bd_dm_init (void) {
     dm_log_with_errno_init ((dm_log_with_errno_fn) discard_dm_log);
     dm_log_init_verbose (0);
 
@@ -129,7 +129,7 @@ gboolean bd_dm_init () {
  * library's functions that unload it.**
  *
  */
-void bd_dm_close () {
+void bd_dm_close (void) {
     dm_log_with_errno_init (NULL);
     dm_log_init_verbose (0);
 }

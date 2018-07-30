@@ -71,9 +71,9 @@ typedef enum {
  * close()      - clean after the plugin at the end or if no longer used
  *
  */
-gboolean bd_btrfs_check_deps ();
-gboolean bd_btrfs_init ();
-void bd_btrfs_close ();
+gboolean bd_btrfs_check_deps (void);
+gboolean bd_btrfs_init (void);
+void bd_btrfs_close (void);
 
 gboolean bd_btrfs_is_tech_avail (BDBtrfsTech tech, guint64 mode, GError **error);
 

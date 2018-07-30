@@ -58,9 +58,9 @@ typedef enum {
  * close()      - clean after the plugin at the end or if no longer used
  *
  */
-gboolean bd_nvdimm_check_deps ();
-gboolean bd_nvdimm_init ();
-void bd_nvdimm_close ();
+gboolean bd_nvdimm_check_deps (void);
+gboolean bd_nvdimm_init (void);
+void bd_nvdimm_close (void);
 
 gboolean bd_nvdimm_is_tech_avail (BDNVDIMMTech tech, guint64 mode, GError **error);
 

@@ -211,7 +211,7 @@ static locale_t c_locale = (locale_t) 0;
  * Function checking plugin's runtime dependencies.
  *
  */
-gboolean bd_crypto_check_deps () {
+gboolean bd_crypto_check_deps (void) {
     /* nothing to do here */
     return TRUE;
 }
@@ -249,7 +249,7 @@ static void crypto_log_redirect (gint level, const gchar *msg, void *usrptr __at
  * library's initialization functions.**
  *
  */
-gboolean bd_crypto_init () {
+gboolean bd_crypto_init (void) {
     c_locale = newlocale (LC_ALL_MASK, "C", c_locale);
     crypt_set_log_callback (NULL, &crypto_log_redirect, NULL);
     return TRUE;
@@ -262,7 +262,7 @@ gboolean bd_crypto_init () {
  * library's functions that unload it.**
  *
  */
-void bd_crypto_close () {
+void bd_crypto_close (void) {
     c_locale = (locale_t) 0;
     crypt_set_log_callback (NULL, NULL, NULL);
 }

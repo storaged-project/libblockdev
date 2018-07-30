@@ -64,7 +64,7 @@ static gchar *global_config_str = NULL;
 static GDBusConnection *bus = NULL;
 
 /* "friend" functions from the utils library */
-guint64 get_next_task_id ();
+guint64 get_next_task_id (void);
 void log_task_status (guint64 task_id, const gchar *msg);
 
 /**
@@ -255,7 +255,7 @@ static UtilDep deps[DEPS_LAST] = {
  * Function checking plugin's runtime dependencies.
  *
  */
-gboolean bd_lvm_check_deps () {
+gboolean bd_lvm_check_deps (void) {
     GVariant *ret = NULL;
     GVariant *real_ret = NULL;
     GVariantIter iter;
@@ -346,7 +346,7 @@ gboolean bd_lvm_check_deps () {
  * library's initialization functions.**
  *
  */
-gboolean bd_lvm_init () {
+gboolean bd_lvm_init (void) {
     GError *error = NULL;
 
     /* the check() call should create the DBus connection for us, but let's not
@@ -366,7 +366,7 @@ gboolean bd_lvm_init () {
  * library's functions that unload it.**
  *
  */
-void bd_lvm_close () {
+void bd_lvm_close (void) {
     GError *error = NULL;
 
     /* the check() call should create the DBus connection for us, but let's not

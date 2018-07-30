@@ -23,7 +23,7 @@ typedef enum {
 } BDPlugin;
 
 #define BD_TYPE_PLUGIN_SPEC (bd_plugin_spec_get_type ())
-GType bd_plugin_spec_get_type();
+GType bd_plugin_spec_get_type(void);
 
 typedef struct BDPluginSpec {
     BDPlugin name;
@@ -34,7 +34,7 @@ BDPluginSpec* bd_plugin_spec_copy (BDPluginSpec *spec);
 void bd_plugin_spec_free (BDPluginSpec *spec);
 
 gboolean bd_is_plugin_available (BDPlugin plugin);
-gchar** bd_get_available_plugin_names ();
+gchar** bd_get_available_plugin_names (void);
 gchar* bd_get_plugin_soname (BDPlugin plugin);
 gchar* bd_get_plugin_name (BDPlugin plugin);
 

@@ -54,9 +54,9 @@ typedef enum {
  * close()      - clean after the plugin at the end or if no longer used
  *
  */
-gboolean bd_fs_check_deps ();
-gboolean bd_fs_init ();
-void bd_fs_close ();
+gboolean bd_fs_check_deps (void);
+gboolean bd_fs_init (void);
+void bd_fs_close (void);
 
 gboolean bd_fs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
 

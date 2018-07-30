@@ -54,7 +54,7 @@ GQuark bd_utils_exec_error_quark (void)
 /**
  * get_next_task_id: (skip)
  */
-guint64 get_next_task_id () {
+guint64 get_next_task_id (void) {
     guint64 task_id = 0;
 
     g_mutex_lock (&id_counter_lock);
@@ -784,7 +784,7 @@ gboolean bd_utils_mute_prog_reporting_thread (GError **error __attribute__((unus
  * bd_utils_init_prog_reporting_thread (takes precedence). FALSE if
  * bd_utils_mute_prog_reporting_thread was used to mute the thread.
  */
-gboolean bd_utils_prog_reporting_initialized () {
+gboolean bd_utils_prog_reporting_initialized (void) {
     return (thread_prog_func != NULL || prog_func != NULL) && thread_prog_func != thread_progress_muted;
 }
 
