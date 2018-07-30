@@ -582,7 +582,7 @@ guint64 bd_crypto_luks_get_metadata_size (const gchar *device, GError **error) {
 gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret_num;
-    gchar *ret = NULL;
+    const gchar *ret = NULL;
     crypt_status_info status;
 
     ret_num = crypt_init_by_name (&cd, luks_device);
@@ -613,7 +613,10 @@ gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error) {
     }
 
     crypt_free (cd);
-    return ret;
+    /* cast the "const" away because this API requires returning a
+       non-const string, though the caller isn't allowed to modify its
+       contents */
+    return (gchar *)ret;
 }
 
 #ifdef LIBCRYPTSETUP_2
