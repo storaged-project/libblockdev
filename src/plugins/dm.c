@@ -405,7 +405,7 @@ gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean a
  */
 static struct lib_context* init_dmraid_stack (GError **error) {
     gint rc = 0;
-    gchar *argv[] = {"blockdev.dmraid", NULL};
+    gchar *argv[] = {(gchar *)"blockdev.dmraid", NULL};
     struct lib_context *lc;
 
     /* the code for this function was cherry-picked from the pyblock code */
