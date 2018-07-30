@@ -64,7 +64,7 @@ static GMutex deps_check_lock;
 #define DEPS_DMSETUP_MASK (1 << DEPS_DMSETUP)
 #define DEPS_LAST 1
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"dmsetup", DM_MIN_VERSION, NULL, "Library version:\\s+([\\d\\.]+)"},
 };
 

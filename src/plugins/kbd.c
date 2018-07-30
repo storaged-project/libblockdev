@@ -53,7 +53,7 @@ static GMutex deps_check_lock;
 #define DEPS_MAKEBCACHE_MASK (1 << DEPS_MAKEBCACHE)
 #define DEPS_LAST 1
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"make-bcache", NULL, NULL, NULL},
 };
 

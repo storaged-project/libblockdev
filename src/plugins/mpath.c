@@ -53,7 +53,7 @@ static GMutex deps_check_lock;
 #define DEPS_MPATHCONF_MASK (1 << DEPS_MPATHCONF)
 #define DEPS_LAST 2
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"multipath", MULTIPATH_MIN_VERSION, NULL, "multipath-tools v([\\d\\.]+)"},
     {"mpathconf", NULL, NULL, NULL},
 };

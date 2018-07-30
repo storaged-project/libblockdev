@@ -42,7 +42,7 @@ static GMutex deps_check_lock;
 
 #define DEPS_LAST 5
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"mkfs.xfs", NULL, NULL, NULL},
     {"xfs_db", NULL, NULL, NULL},
     {"xfs_repair", NULL, NULL, NULL},

@@ -147,7 +147,7 @@ static GMutex deps_check_lock;
 #define DEPS_MDADM_MASK (1 << DEPS_MDADM)
 #define DEPS_LAST 1
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"mdadm", MDADM_MIN_VERSION, NULL, "mdadm - v([\\d\\.]+)"},
 };
 

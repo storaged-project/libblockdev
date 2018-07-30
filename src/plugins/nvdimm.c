@@ -79,7 +79,7 @@ static GMutex deps_check_lock;
 #define DEPS_NDCTL_MASK (1 << DEPS_NDCTL)
 #define DEPS_LAST 1
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"ndctl", NULL, NULL, NULL},
 };
 

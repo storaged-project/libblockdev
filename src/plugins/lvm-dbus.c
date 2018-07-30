@@ -242,7 +242,7 @@ static GMutex deps_check_lock;
 #define DEPS_THMS_MASK (1 << DEPS_THMS)
 #define DEPS_LAST 1
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"thin_metadata_size", NULL, NULL, NULL},
 };
 

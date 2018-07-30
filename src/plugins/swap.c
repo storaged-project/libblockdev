@@ -53,7 +53,7 @@ static GMutex deps_check_lock;
 #define DEPS_SWAPLABEL_MASK (1 << DEPS_SWAPLABEL)
 #define DEPS_LAST 2
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"mkswap", MKSWAP_MIN_VERSION, NULL, "mkswap from util-linux ([\\d\\.]+)"},
     {"swaplabel", NULL, NULL, NULL},
 };

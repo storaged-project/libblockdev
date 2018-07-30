@@ -145,7 +145,7 @@ static GMutex deps_check_lock;
 #define DEPS_SFDISK_MASK (1 << DEPS_SFDISK)
 #define DEPS_LAST 2
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"sgdisk", "0.8.6", NULL, "GPT fdisk \\(sgdisk\\) version ([\\d\\.]+)"},
     {"sfdisk", NULL, NULL, NULL},
 };

@@ -55,7 +55,7 @@ static GMutex deps_check_lock;
 #define DEPS_DASDFMT_MASK (1 << DEPS_DASDFMT)
 #define DEPS_LAST 1
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     /* dasdfmt doesn't return version info */
     {"dasdfmt", NULL, NULL, NULL},
 };

@@ -186,7 +186,7 @@ static GMutex deps_check_lock;
 #define DEPS_THMS_MASK (1 << DEPS_THMS)
 #define DEPS_LAST 2
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"lvm", LVM_MIN_VERSION, "version", "LVM version:\\s+([\\d\\.]+)"},
     {"thin_metadata_size", NULL, NULL, NULL},
 };
