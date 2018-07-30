@@ -2544,7 +2544,7 @@ guint64 bd_lvm_cache_get_default_md_size (guint64 cache_size, GError **error __a
  *
  * Get LV type string from flags.
  */
-static gchar* get_lv_type_from_flags (BDLVMCachePoolFlags flags, gboolean meta, GError **error __attribute__((unused))) {
+static const gchar* get_lv_type_from_flags (BDLVMCachePoolFlags flags, gboolean meta, GError **error __attribute__((unused))) {
     if (!meta) {
         if (flags & BD_LVM_CACHE_POOL_STRIPED)
             return "striped";
@@ -2640,7 +2640,7 @@ BDLVMCacheMode bd_lvm_cache_get_mode_from_str (const gchar *mode_str, GError **e
  */
 gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name, guint64 pool_size, guint64 md_size, BDLVMCacheMode mode, BDLVMCachePoolFlags flags, const gchar **fast_pvs, GError **error) {
     gboolean success = FALSE;
-    gchar *type = NULL;
+    const gchar *type = NULL;
     gchar *name = NULL;
     GVariantBuilder builder;
     GVariant *params = NULL;
