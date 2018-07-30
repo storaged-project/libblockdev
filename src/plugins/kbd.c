@@ -681,7 +681,7 @@ BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error) {
 }
 
 
-gboolean wait_for_file (const char *filename) {
+static gboolean wait_for_file (const char *filename) {
     gint count = 500;
     while (count > 0) {
         g_usleep (100000); /* microseconds */
