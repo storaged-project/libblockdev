@@ -942,7 +942,7 @@ class ErrorProxy(object):
         """Let's make TAB-TAB in ipython work!"""
 
         if self._use_local:
-            items = set(dir(self._mod) + locals().keys())
+            items = set(dir(self._mod)) | set(locals().keys())
         else:
             items = set(dir(self._mod))
 
