@@ -193,7 +193,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertNotEqual(orig_max_size, 1024)
 
         # change the sources and recompile
-        os.system("sed -ri 's?gboolean bd_lvm_check_deps \(\) \{?gboolean bd_lvm_check_deps () { return FALSE;//test-change?' src/plugins/lvm.c > /dev/null")
+        os.system("sed -ri 's?gboolean bd_lvm_check_deps \(void\) \{?gboolean bd_lvm_check_deps (void) { return FALSE;//test-change?' src/plugins/lvm.c > /dev/null")
         os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
 
         # proclaim the new build a different plugin
@@ -201,7 +201,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.addCleanup(os.system, "rm -f src/plugins/.libs/libbd_lvm2.so")
 
         # change the sources back and recompile
-        os.system("sed -ri 's?gboolean bd_lvm_check_deps \(\) \{ return FALSE;//test-change?gboolean bd_lvm_check_deps () {?' src/plugins/lvm.c > /dev/null")
+        os.system("sed -ri 's?gboolean bd_lvm_check_deps \(void\) \{ return FALSE;//test-change?gboolean bd_lvm_check_deps (void) {?' src/plugins/lvm.c > /dev/null")
         os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
 
         # now reinit the library with the config preferring the new build
