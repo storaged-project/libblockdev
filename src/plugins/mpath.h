@@ -35,9 +35,9 @@ typedef enum {
  * close()      - clean after the plugin at the end or if no longer used
  *
  */
-gboolean bd_mpath_check_deps ();
-gboolean bd_mpath_init ();
-void bd_mpath_close ();
+gboolean bd_mpath_check_deps (void);
+gboolean bd_mpath_init (void);
+void bd_mpath_close (void);
 
 gboolean bd_mpath_is_tech_avail (BDMpathTech tech, guint64 mode, GError **error);
 

@@ -37,9 +37,9 @@ typedef enum {
  * close()      - clean after the plugin at the end or if no longer used
  *
  */
-gboolean bd_dm_check_deps ();
-gboolean bd_dm_init ();
-void bd_dm_close ();
+gboolean bd_dm_check_deps (void);
+gboolean bd_dm_init (void);
+void bd_dm_close (void);
 
 gboolean bd_dm_is_tech_avail (BDDMTech tech, guint64 mode, GError **error);
 

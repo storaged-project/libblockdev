@@ -55,7 +55,7 @@ GQuark bd_fs_error_quark (void)
  * Function checking plugin's runtime dependencies.
  *
  */
-gboolean bd_fs_check_deps () {
+gboolean bd_fs_check_deps (void) {
     gboolean ret = TRUE;
     guint i = 0;
     GError *error = NULL;
@@ -92,7 +92,7 @@ gboolean bd_fs_check_deps () {
  * library's initialization functions.**
  *
  */
-gboolean bd_fs_init () {
+gboolean bd_fs_init (void) {
     ped_exception_set_handler ((PedExceptionHandler*) bd_exc_handler);
     return TRUE;
 }
@@ -104,7 +104,7 @@ gboolean bd_fs_init () {
  * library's functions that unload it.**
  *
  */
-void bd_fs_close () {
+void bd_fs_close (void) {
     /* nothing to do here */
 }
 

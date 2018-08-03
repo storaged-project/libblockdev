@@ -53,7 +53,7 @@ static GMutex deps_check_lock;
 #define DEPS_MAKEBCACHE_MASK (1 << DEPS_MAKEBCACHE)
 #define DEPS_LAST 1
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"make-bcache", NULL, NULL, NULL},
 };
 
@@ -66,7 +66,7 @@ static UtilDep deps[DEPS_LAST] = {
  * Function checking plugin's runtime dependencies.
  *
  */
-gboolean bd_kbd_check_deps () {
+gboolean bd_kbd_check_deps (void) {
     GError *error = NULL;
     gboolean ret = FALSE;
     guint i = 0;
@@ -122,7 +122,7 @@ gboolean bd_kbd_check_deps () {
  * library's initialization functions.**
  *
  */
-gboolean bd_kbd_init () {
+gboolean bd_kbd_init (void) {
     c_locale = newlocale (LC_ALL_MASK, "C", c_locale);
     return TRUE;
 }
@@ -134,7 +134,7 @@ gboolean bd_kbd_init () {
  * library's functions that unload it.**
  *
  */
-void bd_kbd_close () {
+void bd_kbd_close (void) {
     freelocale (c_locale);
 }
 
@@ -681,7 +681,7 @@ BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error) {
 }
 
 
-gboolean wait_for_file (const char *filename) {
+static gboolean wait_for_file (const char *filename) {
     gint count = 500;
     while (count > 0) {
         g_usleep (100000); /* microseconds */

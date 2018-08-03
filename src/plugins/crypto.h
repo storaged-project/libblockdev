@@ -171,9 +171,9 @@ BDCryptoIntegrityInfo* bd_crypto_integrity_info_copy (BDCryptoIntegrityInfo *inf
  * close()      - clean after the plugin at the end or if no longer used
  *
  */
-gboolean bd_crypto_check_deps ();
-gboolean bd_crypto_init ();
-void bd_crypto_close ();
+gboolean bd_crypto_check_deps (void);
+gboolean bd_crypto_init (void);
+void bd_crypto_close (void);
 
 gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **error);
 

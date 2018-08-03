@@ -64,7 +64,7 @@ static GMutex deps_check_lock;
 #define DEPS_DMSETUP_MASK (1 << DEPS_DMSETUP)
 #define DEPS_LAST 1
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"dmsetup", DM_MIN_VERSION, NULL, "Library version:\\s+([\\d\\.]+)"},
 };
 
@@ -85,7 +85,7 @@ static void discard_dm_log (int level __attribute__((unused)), const char *file 
  * Function checking plugin's runtime dependencies.
  *
  */
-gboolean bd_dm_check_deps () {
+gboolean bd_dm_check_deps (void) {
     GError *error = NULL;
     guint i = 0;
     gboolean status = FALSE;
@@ -115,7 +115,7 @@ gboolean bd_dm_check_deps () {
  * library's initialization functions.**
  *
  */
-gboolean bd_dm_init () {
+gboolean bd_dm_init (void) {
     dm_log_with_errno_init ((dm_log_with_errno_fn) discard_dm_log);
     dm_log_init_verbose (0);
 
@@ -129,7 +129,7 @@ gboolean bd_dm_init () {
  * library's functions that unload it.**
  *
  */
-void bd_dm_close () {
+void bd_dm_close (void) {
     dm_log_with_errno_init (NULL);
     dm_log_init_verbose (0);
 }
@@ -405,7 +405,7 @@ gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean a
  */
 static struct lib_context* init_dmraid_stack (GError **error) {
     gint rc = 0;
-    gchar *argv[] = {"blockdev.dmraid", NULL};
+    gchar *argv[] = {(gchar *)"blockdev.dmraid", NULL};
     struct lib_context *lc;
 
     /* the code for this function was cherry-picked from the pyblock code */

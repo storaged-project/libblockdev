@@ -58,9 +58,9 @@ BDVDOInfo* bd_vdo_info_copy (BDVDOInfo *info);
  * close()      - clean after the plugin at the end or if no longer used
  *
  */
-gboolean bd_vdo_check_deps ();
-gboolean bd_vdo_init ();
-void bd_vdo_close ();
+gboolean bd_vdo_check_deps (void);
+gboolean bd_vdo_init (void);
+void bd_vdo_close (void);
 
 gboolean bd_vdo_is_tech_avail (BDVDOTech tech, guint64 mode, GError **error);
 

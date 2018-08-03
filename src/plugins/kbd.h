@@ -83,9 +83,9 @@ typedef enum {
  * close()      - clean after the plugin at the end or if no longer used
  *
  */
-gboolean bd_kbd_check_deps ();
-gboolean bd_kbd_init ();
-void bd_kbd_close ();
+gboolean bd_kbd_check_deps (void);
+gboolean bd_kbd_init (void);
+void bd_kbd_close (void);
 
 gboolean bd_kbd_is_tech_avail (BDKBDTech tech, guint64 mode, GError **error);
 

@@ -40,7 +40,7 @@ static GMutex deps_check_lock;
 
 #define DEPS_LAST 3
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"mkfs.vfat", NULL, NULL, NULL},
     {"fatlabel", NULL, NULL, NULL},
     {"fsck.vfat", NULL, NULL, NULL},

@@ -129,9 +129,9 @@ typedef enum {
  * close()      - clean after the plugin at the end or if no longer used
  *
  */
-gboolean bd_part_check_deps ();
-gboolean bd_part_init ();
-void bd_part_close ();
+gboolean bd_part_check_deps (void);
+gboolean bd_part_init (void);
+void bd_part_close (void);
 
 gboolean bd_part_is_tech_avail (BDPartTech tech, guint64 mode, GError **error);
 

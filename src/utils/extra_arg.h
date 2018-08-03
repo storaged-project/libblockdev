@@ -5,7 +5,7 @@
 #define BD_UTILS_EXTRA_ARG
 
 #define BD_UTIL_TYPE_EXTRA_ARG (bd_extra_arg_get_type ())
-GType bd_extra_arg_get_type ();
+GType bd_extra_arg_get_type (void);
 
 /**
  * BDExtraArg:

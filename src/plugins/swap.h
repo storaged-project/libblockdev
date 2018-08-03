@@ -34,9 +34,9 @@ typedef enum {
  * close()      - clean after the plugin at the end or if no longer used
  *
  */
-gboolean bd_swap_check_deps ();
-gboolean bd_swap_init ();
-void bd_swap_close ();
+gboolean bd_swap_check_deps (void);
+gboolean bd_swap_init (void);
+void bd_swap_close (void);
 
 gboolean bd_swap_is_tech_avail (BDSwapTech tech, guint64 mode, GError **error);
 

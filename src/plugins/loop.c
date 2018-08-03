@@ -55,7 +55,7 @@ GQuark bd_loop_error_quark (void)
  * Function checking plugin's runtime dependencies.
  *
  */
-gboolean bd_loop_check_deps () {
+gboolean bd_loop_check_deps (void) {
     /* nothing to check here */
     return TRUE;
 }
@@ -67,7 +67,7 @@ gboolean bd_loop_check_deps () {
  * library's initialization functions.**
  *
  */
-gboolean bd_loop_init () {
+gboolean bd_loop_init (void) {
     /* nothing to do here */
     return TRUE;
 };
@@ -79,7 +79,7 @@ gboolean bd_loop_init () {
  * library's functions that unload it.**
  *
  */
-void bd_loop_close () {
+void bd_loop_close (void) {
     /* nothing to do here */
 }
 

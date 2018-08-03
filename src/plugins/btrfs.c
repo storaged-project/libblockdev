@@ -117,7 +117,7 @@ static GMutex deps_check_lock;
 #define DEPS_BTRFS_MASK (1 << DEPS_BTRFS)
 #define DEPS_LAST 1
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"btrfs", BTRFS_MIN_VERSION, NULL, "[Bb]trfs.* v([\\d\\.]+)"},
 };
 
@@ -125,7 +125,7 @@ static UtilDep deps[DEPS_LAST] = {
 #define MODULE_DEPS_BTRFS_MASK (1 << MODULE_DEPS_BTRFS)
 #define MODULE_DEPS_LAST 1
 
-static gchar* module_deps[MODULE_DEPS_LAST] = { "btrfs" };
+static const gchar*const module_deps[MODULE_DEPS_LAST] = { "btrfs" };
 
 
 /**
@@ -136,7 +136,7 @@ static gchar* module_deps[MODULE_DEPS_LAST] = { "btrfs" };
  * Function checking plugin's runtime dependencies.
  *
  */
-gboolean bd_btrfs_check_deps () {
+gboolean bd_btrfs_check_deps (void) {
     GError *error = NULL;
     guint i = 0;
     gboolean status = FALSE;
@@ -175,7 +175,7 @@ gboolean bd_btrfs_check_deps () {
  * library's initialization functions.**
  *
  */
-gboolean bd_btrfs_init () {
+gboolean bd_btrfs_init (void) {
     /* nothing to do here */
     return TRUE;
 };
@@ -187,7 +187,7 @@ gboolean bd_btrfs_init () {
  * library's functions that unload it.**
  *
  */
-void bd_btrfs_close () {
+void bd_btrfs_close (void) {
     /* nothing to do here */
 }
 

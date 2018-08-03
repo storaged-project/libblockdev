@@ -145,7 +145,7 @@ static GMutex deps_check_lock;
 #define DEPS_SFDISK_MASK (1 << DEPS_SFDISK)
 #define DEPS_LAST 2
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"sgdisk", "0.8.6", NULL, "GPT fdisk \\(sgdisk\\) version ([\\d\\.]+)"},
     {"sfdisk", NULL, NULL, NULL},
 };
@@ -159,7 +159,7 @@ static UtilDep deps[DEPS_LAST] = {
  * Function checking plugin's runtime dependencies.
  *
  */
-gboolean bd_part_check_deps () {
+gboolean bd_part_check_deps (void) {
     GError *error = NULL;
     guint i = 0;
     gboolean status = FALSE;
@@ -189,7 +189,7 @@ gboolean bd_part_check_deps () {
  * library's initialization functions.**
  *
  */
-gboolean bd_part_init () {
+gboolean bd_part_init (void) {
     ped_exception_set_handler ((PedExceptionHandler*) bd_exc_handler);
     return TRUE;
 }
@@ -201,7 +201,7 @@ gboolean bd_part_init () {
  * library's functions that unload it.**
  *
  */
-void bd_part_close () {
+void bd_part_close (void) {
     ped_exception_set_handler (NULL);
 }
 

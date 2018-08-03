@@ -79,7 +79,7 @@ static GMutex deps_check_lock;
 #define DEPS_NDCTL_MASK (1 << DEPS_NDCTL)
 #define DEPS_LAST 1
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"ndctl", NULL, NULL, NULL},
 };
 
@@ -91,7 +91,7 @@ static UtilDep deps[DEPS_LAST] = {
  * Function checking plugin's runtime dependencies.
  *
  */
-gboolean bd_nvdimm_check_deps () {
+gboolean bd_nvdimm_check_deps (void) {
     GError *error = NULL;
     guint i = 0;
     gboolean status = FALSE;
@@ -121,7 +121,7 @@ gboolean bd_nvdimm_check_deps () {
  * library's initialization functions.**
  *
  */
-gboolean bd_nvdimm_init () {
+gboolean bd_nvdimm_init (void) {
     /* nothing to do here */
     return TRUE;
 }
@@ -133,7 +133,7 @@ gboolean bd_nvdimm_init () {
  * library's functions that unload it.**
  *
  */
-void bd_nvdimm_close () {
+void bd_nvdimm_close (void) {
     /* nothing to do here */
     return;
 }

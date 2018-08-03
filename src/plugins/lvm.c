@@ -186,7 +186,7 @@ static GMutex deps_check_lock;
 #define DEPS_THMS_MASK (1 << DEPS_THMS)
 #define DEPS_LAST 2
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"lvm", LVM_MIN_VERSION, "version", "LVM version:\\s+([\\d\\.]+)"},
     {"thin_metadata_size", NULL, NULL, NULL},
 };
@@ -200,7 +200,7 @@ static UtilDep deps[DEPS_LAST] = {
  * Function checking plugin's runtime dependencies.
  *
  */
-gboolean bd_lvm_check_deps () {
+gboolean bd_lvm_check_deps (void) {
     GError *error = NULL;
     guint i = 0;
     gboolean status = FALSE;
@@ -230,7 +230,7 @@ gboolean bd_lvm_check_deps () {
  * library's initialization functions.**
  *
  */
-gboolean bd_lvm_init () {
+gboolean bd_lvm_init (void) {
     /* nothing to do here */
     return TRUE;
 };
@@ -242,7 +242,7 @@ gboolean bd_lvm_init () {
  * library's functions that unload it.**
  *
  */
-void bd_lvm_close () {
+void bd_lvm_close (void) {
     /* nothing to do here */
 }
 
@@ -1922,7 +1922,7 @@ guint64 bd_lvm_cache_get_default_md_size (guint64 cache_size, GError **error __a
  *
  * Get LV type string from flags.
  */
-static gchar* get_lv_type_from_flags (BDLVMCachePoolFlags flags, gboolean meta, GError **error __attribute__((unused))) {
+static const gchar* get_lv_type_from_flags (BDLVMCachePoolFlags flags, gboolean meta, GError **error __attribute__((unused))) {
     if (!meta) {
         if (flags & BD_LVM_CACHE_POOL_STRIPED)
             return "striped";
@@ -2018,7 +2018,7 @@ BDLVMCacheMode bd_lvm_cache_get_mode_from_str (const gchar *mode_str, GError **e
  */
 gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name, guint64 pool_size, guint64 md_size, BDLVMCacheMode mode, BDLVMCachePoolFlags flags, const gchar **fast_pvs, GError **error) {
     gboolean success = FALSE;
-    gchar *type = NULL;
+    const gchar *type = NULL;
     gchar *name = NULL;
     gchar *msg = NULL;
     guint64 progress_id = 0;

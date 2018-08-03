@@ -183,7 +183,7 @@ static gboolean load_config (GSequence *config_files, GSList **plugins_sonames, 
     return TRUE;
 }
 
-static void unload_plugins () {
+static void unload_plugins (void) {
     if (plugins[BD_PLUGIN_LVM].handle && !unload_lvm (plugins[BD_PLUGIN_LVM].handle))
         g_warning ("Failed to close the lvm plugin");
     plugins[BD_PLUGIN_LVM].handle = NULL;
@@ -378,7 +378,7 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload, g
     return requested_loaded;
 }
 
-GQuark bd_init_error_quark ()
+GQuark bd_init_error_quark (void)
 {
     return g_quark_from_static_string ("g-bd-init-error-quark");
 }
@@ -694,7 +694,7 @@ gboolean bd_try_reinit (BDPluginSpec **require_plugins, gboolean reload, BDUtils
  * was/were called and either at least one plugin is loaded or 0 plugins are
  * loaded after an explicit call that requested 0 plugins to be loaded.
  */
-gboolean bd_is_initialized () {
+gboolean bd_is_initialized (void) {
     gboolean is = FALSE;
     g_mutex_lock (&init_lock);
     is = initialized;
@@ -708,7 +708,7 @@ gboolean bd_is_initialized () {
  * Returns: (transfer container) (array zero-terminated=1): an array of string
  * names of plugins that are available
  */
-gchar** bd_get_available_plugin_names () {
+gchar** bd_get_available_plugin_names (void) {
     guint8 i = 0;
     guint8 num_loaded = 0;
     guint8 next = 0;

@@ -64,7 +64,7 @@ static gchar *global_config_str = NULL;
 static GDBusConnection *bus = NULL;
 
 /* "friend" functions from the utils library */
-guint64 get_next_task_id ();
+guint64 get_next_task_id (void);
 void log_task_status (guint64 task_id, const gchar *msg);
 
 /**
@@ -242,7 +242,7 @@ static GMutex deps_check_lock;
 #define DEPS_THMS_MASK (1 << DEPS_THMS)
 #define DEPS_LAST 1
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"thin_metadata_size", NULL, NULL, NULL},
 };
 
@@ -255,7 +255,7 @@ static UtilDep deps[DEPS_LAST] = {
  * Function checking plugin's runtime dependencies.
  *
  */
-gboolean bd_lvm_check_deps () {
+gboolean bd_lvm_check_deps (void) {
     GVariant *ret = NULL;
     GVariant *real_ret = NULL;
     GVariantIter iter;
@@ -346,7 +346,7 @@ gboolean bd_lvm_check_deps () {
  * library's initialization functions.**
  *
  */
-gboolean bd_lvm_init () {
+gboolean bd_lvm_init (void) {
     GError *error = NULL;
 
     /* the check() call should create the DBus connection for us, but let's not
@@ -366,7 +366,7 @@ gboolean bd_lvm_init () {
  * library's functions that unload it.**
  *
  */
-void bd_lvm_close () {
+void bd_lvm_close (void) {
     GError *error = NULL;
 
     /* the check() call should create the DBus connection for us, but let's not
@@ -2544,7 +2544,7 @@ guint64 bd_lvm_cache_get_default_md_size (guint64 cache_size, GError **error __a
  *
  * Get LV type string from flags.
  */
-static gchar* get_lv_type_from_flags (BDLVMCachePoolFlags flags, gboolean meta, GError **error __attribute__((unused))) {
+static const gchar* get_lv_type_from_flags (BDLVMCachePoolFlags flags, gboolean meta, GError **error __attribute__((unused))) {
     if (!meta) {
         if (flags & BD_LVM_CACHE_POOL_STRIPED)
             return "striped";
@@ -2640,7 +2640,7 @@ BDLVMCacheMode bd_lvm_cache_get_mode_from_str (const gchar *mode_str, GError **e
  */
 gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name, guint64 pool_size, guint64 md_size, BDLVMCacheMode mode, BDLVMCachePoolFlags flags, const gchar **fast_pvs, GError **error) {
     gboolean success = FALSE;
-    gchar *type = NULL;
+    const gchar *type = NULL;
     gchar *name = NULL;
     GVariantBuilder builder;
     GVariant *params = NULL;

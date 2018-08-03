@@ -41,7 +41,7 @@ static GMutex deps_check_lock;
 
 #define DEPS_LAST 5
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"mkntfs", NULL, NULL, NULL},
     {"ntfsfix", NULL, NULL, NULL},
     {"ntfsresize", NULL, NULL, NULL},

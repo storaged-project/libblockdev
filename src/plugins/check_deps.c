@@ -23,7 +23,7 @@
 #include "check_deps.h"
 
 gboolean __attribute__ ((visibility ("hidden")))
-check_deps (volatile guint *avail_deps, guint req_deps, UtilDep *deps_specs, guint l_deps, GMutex *deps_check_lock, GError **error) {
+check_deps (volatile guint *avail_deps, guint req_deps, const UtilDep *deps_specs, guint l_deps, GMutex *deps_check_lock, GError **error) {
     guint i = 0;
     gboolean ret = FALSE;
     GError *l_error = NULL;
@@ -68,7 +68,7 @@ check_deps (volatile guint *avail_deps, guint req_deps, UtilDep *deps_specs, gui
 }
 
 gboolean __attribute__ ((visibility ("hidden")))
-check_module_deps (volatile guint *avail_deps, guint req_deps, gchar **modules, guint l_modules, GMutex *deps_check_lock, GError **error) {
+check_module_deps (volatile guint *avail_deps, guint req_deps, const gchar *const*modules, guint l_modules, GMutex *deps_check_lock, GError **error) {
     guint i = 0;
     gboolean ret = FALSE;
     GError *l_error = NULL;

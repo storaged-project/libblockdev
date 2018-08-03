@@ -77,7 +77,7 @@ static GMutex deps_check_lock;
 #define DEPS_VDO_MASK (1 << DEPS_VDO)
 #define DEPS_LAST 1
 
-static UtilDep deps[DEPS_LAST] = {
+static const UtilDep deps[DEPS_LAST] = {
     {"vdo", NULL, NULL, NULL},
 };
 
@@ -85,7 +85,7 @@ static UtilDep deps[DEPS_LAST] = {
 #define MODULE_DEPS_VDO_MASK (1 << MODULE_DEPS_VDO)
 #define MODULE_DEPS_LAST 1
 
-static gchar* module_deps[MODULE_DEPS_LAST] = { "kvdo" };
+static const gchar*const module_deps[MODULE_DEPS_LAST] = { "kvdo" };
 
 /**
  * bd_vdo_check_deps:
@@ -95,7 +95,7 @@ static gchar* module_deps[MODULE_DEPS_LAST] = { "kvdo" };
  * Function checking plugin's runtime dependencies.
  *
  */
-gboolean bd_vdo_check_deps () {
+gboolean bd_vdo_check_deps (void) {
     GError *error = NULL;
     guint i = 0;
     gboolean status = FALSE;
@@ -134,7 +134,7 @@ gboolean bd_vdo_check_deps () {
  * library's initialization functions.**
  *
  */
-gboolean bd_vdo_init () {
+gboolean bd_vdo_init (void) {
     /* nothing to do here */
     return TRUE;
 }
@@ -146,7 +146,7 @@ gboolean bd_vdo_init () {
  * library's functions that unload it.**
  *
  */
-void bd_vdo_close () {
+void bd_vdo_close (void) {
     /* nothing to do here */
     return;
 }

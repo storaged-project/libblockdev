@@ -30,9 +30,9 @@ typedef enum {
  * close()      - clean after the plugin at the end or if no longer used
  *
  */
-gboolean bd_s390_check_deps ();
-gboolean bd_s390_init ();
-void bd_s390_close ();
+gboolean bd_s390_check_deps (void);
+gboolean bd_s390_init (void);
+void bd_s390_close (void);
 
 gboolean bd_s390_is_tech_avail (BDS390Tech tech, guint64 mode, GError **error);
 

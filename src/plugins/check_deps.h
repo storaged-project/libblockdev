@@ -20,11 +20,11 @@
 #include <glib.h>
 
 typedef struct UtilDep {
-    gchar *name;
-    gchar *version;
-    gchar *ver_arg;
-    gchar *ver_regexp;
+    const gchar *name;
+    const gchar *version;
+    const gchar *ver_arg;
+    const gchar *ver_regexp;
 } UtilDep;
 
-gboolean check_deps (volatile guint *avail_deps, guint req_deps, UtilDep *deps_specs, guint l_deps, GMutex *deps_check_lock, GError **error);
-gboolean check_module_deps (volatile guint *avail_deps, guint req_deps, gchar **modules, guint l_modules, GMutex *deps_check_lock, GError **error);
+gboolean check_deps (volatile guint *avail_deps, guint req_deps, const UtilDep *deps_specs, guint l_deps, GMutex *deps_check_lock, GError **error);
+gboolean check_module_deps (volatile guint *avail_deps, guint req_deps, const gchar *const*modules, guint l_modules, GMutex *deps_check_lock, GError **error);

@@ -16,6 +16,8 @@ class LibraryOpsTestCase(unittest.TestCase):
                                                           "kbd", "loop", "lvm",
                                                           "mdraid", "part", "swap"))
 
+    orig_config_dir = ""
+
     @classmethod
     def setUpClass(cls):
         if not BlockDev.is_initialized():
@@ -24,12 +26,15 @@ class LibraryOpsTestCase(unittest.TestCase):
             BlockDev.reinit(cls.requested_plugins, True, None)
 
     def setUp(self):
+        self.orig_config_dir = os.environ.get("LIBBLOCKDEV_CONFIG_DIR", "")
         self.addCleanup(self._clean_up)
 
     def _clean_up(self):
         # change the sources back and recompile
         os.system("sed -ri 's?1024;//test-change?BD_LVM_MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
         os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
+
+        os.environ["LIBBLOCKDEV_CONFIG_DIR"] = self.orig_config_dir
 
         # try to get everything back to normal by (re)loading all plugins
         BlockDev.reinit(self.requested_plugins, True, None)
@@ -188,14 +193,15 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertNotEqual(orig_max_size, 1024)
 
         # change the sources and recompile
-        os.system("sed -ri 's?gboolean bd_lvm_check_deps \(\) \{?gboolean bd_lvm_check_deps () { return FALSE;//test-change?' src/plugins/lvm.c > /dev/null")
+        os.system("sed -ri 's?gboolean bd_lvm_check_deps \(void\) \{?gboolean bd_lvm_check_deps (void) { return FALSE;//test-change?' src/plugins/lvm.c > /dev/null")
         os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
 
         # proclaim the new build a different plugin
         os.system("cp src/plugins/.libs/libbd_lvm.so src/plugins/.libs/libbd_lvm2.so.2")
+        self.addCleanup(os.system, "rm -f src/plugins/.libs/libbd_lvm2.so")
 
         # change the sources back and recompile
-        os.system("sed -ri 's?gboolean bd_lvm_check_deps \(\) \{ return FALSE;//test-change?gboolean bd_lvm_check_deps () {?' src/plugins/lvm.c > /dev/null")
+        os.system("sed -ri 's?gboolean bd_lvm_check_deps \(void\) \{ return FALSE;//test-change?gboolean bd_lvm_check_deps (void) {?' src/plugins/lvm.c > /dev/null")
         os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
 
         # now reinit the library with the config preferring the new build
@@ -236,9 +242,6 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
 
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
-
-        # clean after ourselves
-        os.system ("rm -f src/plugins/.libs/libbd_lvm2.so")
 
     def my_log_func(self, level, msg):
         # not much to verify here
