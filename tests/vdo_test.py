@@ -11,7 +11,6 @@ from bytesize import bytesize
 from distutils.spawn import find_executable
 
 
-@unittest.skipUnless(find_executable("vdo"), reason="vdo executable not foundin $PATH")
 class VDOTestCase(unittest.TestCase):
 
     requested_plugins = BlockDev.plugin_specs_from_names(("vdo","part",))
@@ -19,6 +18,13 @@ class VDOTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+
+        if not BlockDev.utils_have_kernel_module("kvdo"):
+            raise unittest.SkipTest("VDO kernel module not available, skipping.")
+
+        if not find_executable("vdo"):
+            raise unittest.SkipTest("vdo executable not foundin $PATH, skipping.")
+
         if not BlockDev.is_initialized():
             BlockDev.init(cls.requested_plugins, None)
         else:
