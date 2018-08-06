@@ -56,6 +56,12 @@
 %define vdo_copts --without-vdo
 %endif
 
+# btrfs is not available on RHEL > 7
+%if 0%{?rhel} > 7 || %{with_btrfs} == 0
+%define with_btrfs 0
+%define btrfs_copts --without-btrfs
+%endif
+
 %if %{with_btrfs} != 1
 %define btrfs_copts --without-btrfs
 %endif
