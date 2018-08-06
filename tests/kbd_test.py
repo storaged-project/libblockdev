@@ -201,7 +201,7 @@ class KbdZRAMStatsTestCase(KbdZRAMTestCase):
         # read 'orig_data_size', 'compr_data_size', 'mem_used_total' and
         # 'zero_pages' from '/sys/block/zram0/mm_stat'
         sys_stats = read_file("/sys/block/zram0/mm_stat").strip().split()
-        self.assertEqual(len(sys_stats), 7)
+        self.assertGreaterEqual(len(sys_stats), 7)  # since 4.18 we have 8 stats
         orig_data_size = int(sys_stats[0])
         compr_data_size = int(sys_stats[1])
         mem_used_total = int(sys_stats[2])
