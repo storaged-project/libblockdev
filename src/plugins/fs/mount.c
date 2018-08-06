@@ -516,6 +516,7 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
             if (wpid == -1) {
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                              "Error while waiting for process.");
+                close (pipefd[0]);
                 return FALSE;
             }
 
@@ -524,6 +525,7 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
                   if (WEXITSTATUS (status) == BD_FS_ERROR_PIPE) {
                       g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                                    "Error while reading error.");
+                      close (pipefd[0]);
                       return FALSE;
                   }
 
@@ -534,6 +536,7 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
                                    local_error->message, local_error->code);
                       g_clear_error (&local_error);
                       g_io_channel_unref (channel);
+                      close (pipefd[0]);
                       return FALSE;
                   }
 
@@ -543,6 +546,7 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
                                    local_error->message, local_error->code);
                       g_clear_error (&local_error);
                       g_io_channel_unref (channel);
+                      close (pipefd[0]);
                       return FALSE;
                   }
 
@@ -554,16 +558,21 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
                                            error_msg);
 
                   g_io_channel_unref (channel);
+                  close (pipefd[0]);
                   return FALSE;
-              } else
+              } else {
+                  close (pipefd[0]);
                   return TRUE;
+              }
             } else if (WIFSIGNALED (status)) {
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                              "Killed by signal %d.", WTERMSIG(status));
+                close (pipefd[0]);
                 return FALSE;
             }
 
         } while (!WIFEXITED (status) && !WIFSIGNALED (status));
+        close (pipefd[0]);
     }
 
     return FALSE;
