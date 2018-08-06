@@ -32,8 +32,8 @@
 %define python3_copts  --without-python3
 %endif
 
-# bcache is not available on older RHEL
-%if (! 0%{?fedora} && 0%{?rhel} <= 7) || %{with_bcache} == 0
+# bcache is not available on RHEL
+%if (0%{?rhel}) || %{with_bcache} == 0
 %define with_bcache 0
 %define bcache_copts --without-bcache
 %endif
