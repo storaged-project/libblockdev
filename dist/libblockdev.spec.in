@@ -32,8 +32,8 @@
 %define python3_copts  --without-python3
 %endif
 
-# bcache is not available on older RHEL
-%if (! 0%{?fedora} && 0%{?rhel} <= 7) || %{with_bcache} == 0
+# bcache is not available on RHEL
+%if (0%{?rhel}) || %{with_bcache} == 0
 %define with_bcache 0
 %define bcache_copts --without-bcache
 %endif
@@ -54,6 +54,12 @@
 %ifnarch x86_64
 %define with_vdo 0
 %define vdo_copts --without-vdo
+%endif
+
+# btrfs is not available on RHEL > 7
+%if 0%{?rhel} > 7 || %{with_btrfs} == 0
+%define with_btrfs 0
+%define btrfs_copts --without-btrfs
 %endif
 
 %if %{with_btrfs} != 1
@@ -110,7 +116,7 @@
 %define gi_copts --disable-introspection
 %endif
 
-%define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{vdo_copts} %{?gi_copts}
+%define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?vdo_copts} %{?gi_copts}
 
 Name:        libblockdev
 Version:     2.18

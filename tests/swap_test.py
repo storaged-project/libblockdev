@@ -131,14 +131,14 @@ class SwapUnloadTest(SwapTest):
         with fake_path(all_but="mkswap"):
             # no mkswap available, the swap plugin should fail to load
             with self.assertRaises(GLib.GError):
-                BlockDev.reinit(None, True, None)
+                BlockDev.reinit(self.requested_plugins, True, None)
 
             self.assertNotIn("swap", BlockDev.get_available_plugin_names())
 
         with fake_path(all_but="swaplabel"):
             # no swaplabel available, the swap plugin should fail to load
             with self.assertRaises(GLib.GError):
-                BlockDev.reinit(None, True, None)
+                BlockDev.reinit(self.requested_plugins, True, None)
 
             self.assertNotIn("swap", BlockDev.get_available_plugin_names())
 
