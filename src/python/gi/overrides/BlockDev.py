@@ -198,7 +198,7 @@ class CryptoLUKSPBKDF(BlockDev.CryptoLUKSPBKDF):
         ret.__class__ = cls
         return ret
     def __init__(self, *args, **kwargs):  # pylint: disable=unused-argument
-        super(CryptoLUKSPBKDF, self).__init__()
+        super(CryptoLUKSPBKDF, self).__init__()  #pylint: disable=bad-super-call
 CryptoLUKSPBKDF = override(CryptoLUKSPBKDF)
 __all__.append("CryptoLUKSPBKDF")
 
@@ -210,7 +210,7 @@ class CryptoLUKSExtra(BlockDev.CryptoLUKSExtra):
         ret.__class__ = cls
         return ret
     def __init__(self, *args, **kwargs):   # pylint: disable=unused-argument
-        super(CryptoLUKSExtra, self).__init__()
+        super(CryptoLUKSExtra, self).__init__()  #pylint: disable=bad-super-call
 CryptoLUKSExtra = override(CryptoLUKSExtra)
 __all__.append("CryptoLUKSExtra")
 

@@ -2302,6 +2302,9 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
         ret[j] = get_lv_data_from_props (props, error);
         if (!(ret[j])) {
             g_slist_free (matched_lvs);
+            for (guint64 i = 0; i < j; i++)
+                bd_lvm_lvdata_free (ret[i]);
+            g_free (ret);
             return NULL;
         } else if ((g_strcmp0 (ret[j]->segtype, "thin-pool") == 0) ||
                    (g_strcmp0 (ret[j]->segtype, "cache-pool") == 0)) {
@@ -2310,6 +2313,9 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
         }
         if (error && *error) {
             g_slist_free (matched_lvs);
+            for (guint64 i = 0; i <= j; i++)
+                bd_lvm_lvdata_free (ret[i]);
+            g_free (ret);
             return NULL;
         }
         j++;
@@ -3030,6 +3036,7 @@ BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_l
                       status->feature_flags);
         dm_task_destroy (task);
         dm_pool_destroy (pool);
+        bd_lvm_cache_stats_free (ret);
         return NULL;
     }
 
