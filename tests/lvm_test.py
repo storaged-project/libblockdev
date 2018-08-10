@@ -1304,3 +1304,31 @@ class LVMUnloadTest(LVMTestCase):
         # load the plugins back
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         self.assertIn("lvm", BlockDev.get_available_plugin_names())
+
+class LVMTechTest(LVMTestCase):
+
+    def setUp(self):
+        # set init checks to false -- we want runtime checks for this
+        BlockDev.switch_init_checks(False)
+
+        # set everything back and reinit just to be sure
+        self.addCleanup(BlockDev.switch_init_checks, True)
+        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
+
+    def test_tech_available(self):
+        """Verify that checking lvm tool availability by technology works as expected"""
+
+        with fake_path(all_but="lvm"):
+            self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
+
+            # no lvm tool available, should fail
+            with self.assertRaises(GLib.GError):
+                BlockDev.lvm_is_tech_avail(BlockDev.LVMTech.BASIC, BlockDev.LVMTechMode.CREATE)
+
+        # only query is support with calcs
+        with six.assertRaisesRegex(self, GLib.GError, "Only 'query' supported for thin calculations"):
+            BlockDev.lvm_is_tech_avail(BlockDev.LVMTech.THIN_CALCS, BlockDev.LVMTechMode.CREATE)
+
+        # lvm is available, should pass
+        avail = BlockDev.lvm_is_tech_avail(BlockDev.LVMTech.BASIC, BlockDev.LVMTechMode.CREATE)
+        self.assertTrue(avail)

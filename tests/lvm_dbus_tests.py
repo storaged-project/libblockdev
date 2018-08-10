@@ -8,7 +8,7 @@ import re
 import subprocess
 from itertools import chain
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on, run_command
 from gi.repository import BlockDev, GLib
 
 import dbus
@@ -1311,3 +1311,36 @@ class LvmPVVGcachedLVstatsTestCase(LvmPVVGLVTestCase):
         self.assertEqual(stats.cache_size, 512 * 1024**2)
         self.assertEqual(stats.md_size, 8 * 1024**2)
         self.assertEqual(stats.mode, BlockDev.LVMCacheMode.WRITETHROUGH)
+
+@unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
+class LVMTechTest(LVMTestCase):
+
+    def setUp(self):
+        # set init checks to false -- we want runtime checks for this
+        BlockDev.switch_init_checks(False)
+
+        # set everything back and reinit just to be sure
+        self.addCleanup(BlockDev.switch_init_checks, True)
+        self.addCleanup(BlockDev.reinit, [self.ps, self.ps2], True, None)
+
+    def test_tech_available(self):
+        """Verify that checking lvm dbus availability by technology works as expected"""
+
+        # stop the lvmdbusd service
+        _ret, _out, _err = run_command("systemctl stop lvm2-lvmdbusd")
+
+        # reinit libblockdev -- init checks are switched off so nothing should start the service
+        self.assertTrue(BlockDev.reinit([self.ps, self.ps2], True, None))
+        ret, _out, _err = run_command("systemctl status lvm2-lvmdbusd")
+        self.assertNotEqual(ret, 0)
+
+        # check tech availability -- service should be started
+        succ = BlockDev.lvm_is_tech_avail(BlockDev.LVMTech.BASIC, BlockDev.LVMTechMode.CREATE)
+        self.assertTrue(succ)
+
+        ret, _out, _err = run_command("systemctl status lvm2-lvmdbusd")
+        self.assertEqual(ret, 0)
+
+        # only query is supported with calcs
+        with six.assertRaisesRegex(self, GLib.GError, "Only 'query' supported for thin calculations"):
+            BlockDev.lvm_is_tech_avail(BlockDev.LVMTech.THIN_CALCS, BlockDev.LVMTechMode.CREATE)

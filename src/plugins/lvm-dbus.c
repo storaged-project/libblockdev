@@ -54,8 +54,6 @@ static gchar *global_config_str = NULL;
 #define SNAP_INTF LVM_BUS_NAME".Snapshot"
 #define THPOOL_INTF LVM_BUS_NAME".ThinPool"
 #define CACHE_POOL_INTF LVM_BUS_NAME".CachePool"
-#define DBUS_TOP_IFACE "org.freedesktop.DBus"
-#define DBUS_TOP_OBJ "/org/freedesktop/DBus"
 #define DBUS_PROPS_IFACE "org.freedesktop.DBus.Properties"
 #define DBUS_INTRO_IFACE "org.freedesktop.DBus.Introspectable"
 #define METHOD_CALL_TIMEOUT 5000
@@ -236,6 +234,7 @@ static gboolean setup_dbus_connection (GError **error) {
 }
 
 static volatile guint avail_deps = 0;
+static volatile guint avail_dbus_deps = 0;
 static GMutex deps_check_lock;
 
 #define DEPS_THMS 0
@@ -246,6 +245,13 @@ static const UtilDep deps[DEPS_LAST] = {
     {"thin_metadata_size", NULL, NULL, NULL},
 };
 
+#define DBUS_DEPS_LVMDBUSD 0
+#define DBUS_DEPS_LVMDBUSD_MASK (1 << DBUS_DEPS_LVMDBUSD)
+#define DBUS_DEPS_LAST 1
+
+static const DBusDep dbus_deps[DBUS_DEPS_LAST] = {
+    {LVM_BUS_NAME, LVM_OBJ_PREFIX, G_BUS_TYPE_SYSTEM},
+};
 
 /**
  * bd_lvm_check_deps:
@@ -256,71 +262,19 @@ static const UtilDep deps[DEPS_LAST] = {
  *
  */
 gboolean bd_lvm_check_deps (void) {
-    GVariant *ret = NULL;
-    GVariant *real_ret = NULL;
-    GVariantIter iter;
-    GVariant *service = NULL;
-    gboolean found = FALSE;
     GError *error = NULL;
     guint i = 0;
     gboolean success = FALSE;
-    gboolean check_ret = FALSE;
+    gboolean check_ret = TRUE;
 
-    if (!bus && !setup_dbus_connection (&error)) {
-        g_critical ("Failed to setup DBus connection: %s", error->message);
-        return FALSE;
+    for (i=0; i < DBUS_DEPS_LAST; i++) {
+        success = check_dbus_deps (&avail_dbus_deps, DBUS_DEPS_LVMDBUSD_MASK, dbus_deps, DBUS_DEPS_LAST, &deps_check_lock, &error);
+        if (!success) {
+            g_warning ("%s", error->message);
+            g_clear_error (&error);
+        }
+        check_ret = check_ret && success;
     }
-
-    ret = g_dbus_connection_call_sync (bus, DBUS_TOP_IFACE, DBUS_TOP_OBJ, DBUS_TOP_IFACE,
-                                       "ListNames", NULL, NULL, G_DBUS_CALL_FLAGS_NONE,
-                                       -1, NULL, &error);
-    if (!ret) {
-        g_critical ("Failed to get available DBus services: %s", error->message);
-        return FALSE;
-    }
-
-    real_ret = g_variant_get_child_value (ret, 0);
-    g_variant_unref (ret);
-
-    g_variant_iter_init (&iter, real_ret);
-    while (!found && (service = g_variant_iter_next_value (&iter))) {
-        found = (g_strcmp0 (g_variant_get_string (service, NULL), LVM_BUS_NAME) == 0);
-        g_variant_unref (service);
-    }
-    g_variant_unref (real_ret);
-
-    ret = g_dbus_connection_call_sync (bus, DBUS_TOP_IFACE, DBUS_TOP_OBJ, DBUS_TOP_IFACE,
-                                       "ListActivatableNames", NULL, NULL, G_DBUS_CALL_FLAGS_NONE,
-                                       -1, NULL, &error);
-    if (!ret) {
-        g_critical ("Failed to get available DBus services: %s", error->message);
-        return FALSE;
-    }
-
-    real_ret = g_variant_get_child_value (ret, 0);
-    g_variant_unref (ret);
-
-    g_variant_iter_init (&iter, real_ret);
-    while (!found && (service = g_variant_iter_next_value (&iter))) {
-        found = (g_strcmp0 (g_variant_get_string (service, NULL), LVM_BUS_NAME) == 0);
-        g_variant_unref (service);
-    }
-    g_variant_unref (real_ret);
-
-    if (!found)
-        return FALSE;
-
-    /* try to introspect the root node - i.e. check we can access it and possibly
-       autostart the service */
-    ret = g_dbus_connection_call_sync (bus, LVM_BUS_NAME, LVM_OBJ_PREFIX, DBUS_INTRO_IFACE,
-                                       "Introspect", NULL, NULL, G_DBUS_CALL_FLAGS_NONE,
-                                       -1, NULL, &error);
-    if (ret)
-        g_variant_unref (ret);
-
-    /* there has to be no error reported */
-    check_ret = (error == NULL);
-    g_clear_error (&error);
 
     for (i=0; i < DEPS_LAST; i++) {
         success = bd_utils_check_util_version (deps[i].name, deps[i].version,
@@ -407,7 +361,7 @@ gboolean bd_lvm_is_tech_avail (BDLVMTech tech, guint64 mode, GError **error) {
             return TRUE;
     default:
         /* everything is supported by this implementation of the plugin */
-        return TRUE;
+        return check_dbus_deps (&avail_dbus_deps, DBUS_DEPS_LVMDBUSD_MASK, dbus_deps, DBUS_DEPS_LAST, &deps_check_lock, error);
     }
 }
 
@@ -525,6 +479,9 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
     gchar *prog_msg = NULL;
     const BDExtraArg **extra_p = NULL;
     gboolean added_extra = FALSE;
+
+    if (!check_dbus_deps (&avail_dbus_deps, DBUS_DEPS_LVMDBUSD_MASK, dbus_deps, DBUS_DEPS_LAST, &deps_check_lock, error))
+        return NULL;
 
     /* don't allow global config string changes during the run */
     g_mutex_lock (&global_config_lock);

@@ -276,7 +276,7 @@ gboolean bd_lvm_is_tech_avail (BDLVMTech tech, guint64 mode, GError **error) {
             return TRUE;
     default:
         /* everything is supported by this implementation of the plugin */
-        return TRUE;
+        return check_deps (&avail_deps, DEPS_LVM_MASK, deps, DEPS_LAST, &deps_check_lock, error);
     }
 }
 

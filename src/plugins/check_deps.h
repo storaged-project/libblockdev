@@ -26,5 +26,12 @@ typedef struct UtilDep {
     const gchar *ver_regexp;
 } UtilDep;
 
+typedef struct DBusDep {
+    const gchar *bus_name;
+    const gchar *obj_prefix;
+    GBusType bus_type;
+} DBusDep;
+
 gboolean check_deps (volatile guint *avail_deps, guint req_deps, const UtilDep *deps_specs, guint l_deps, GMutex *deps_check_lock, GError **error);
 gboolean check_module_deps (volatile guint *avail_deps, guint req_deps, const gchar *const*modules, guint l_modules, GMutex *deps_check_lock, GError **error);
+gboolean check_dbus_deps (volatile guint *avail_deps, guint req_deps, const DBusDep *buses, guint l_buses, GMutex *deps_check_lock, GError **error);
