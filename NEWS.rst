@@ -1,3 +1,70 @@
+Libblockdev 2.19
+----------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Notable changes**
+
+- features
+
+  - vdo: new functions to get statistical data for existing VDO volumes (`bd_vdo_get_stats`)
+  - crypto: support for passing extra arguments for key derivation function when creating LUKS2 format
+
+**Full list of changes**
+
+Max Kellermann (8):
+- fix -Wstrict-prototypes
+- exec: make `msg` parameters const
+- plugins/check_deps: make all strings and `UtilDep` instances `const`
+- plugins/crypto: work around -Wdiscarded-qualifiers
+- plugins/dm: add explicit cast to work around -Wdiscarded-qualifiers
+- plugins/lvm{,-dbus}: get_lv_type_from_flags() returns const string
+- plugins/kbd: make wait_for_file() static
+- pkg-config: add -L${libdir} and -I${includedir}
+
+Tom Briden (1):
+- Re-order libbd_crypto_la_LIBADD to fix libtool issue
+
+Tomas Bzatek (2):
+- vdo: Properly destroy the yaml parser
+- fs: Properly close both ends of the pipe
+
+Vojtech Trefny (33):
+- Sync spec with downstream
+- Do not build VDO plugin on non-x86_64 architectures
+- Show simple summary after configure
+- Add Python override for bd_crypto_tc_open_full
+- Add a simple test case for bd_crypto_tc_open
+- Use libblkid in bd_crypto_is_luks
+- Make sure all our free and copy functions work with NULL
+- Fix few wrong names in doc strings
+- Use versioned command for Python 2
+- Reintroduce python2 support for Fedora 29
+- Allow specifying extra options for PBKDF when creating LUKS2
+- configure.ac: Fix missing parenthesis in blkid version check
+- acinclude.m4: Use AS_EXIT to fail in LIBBLOCKDEV_FAILURES
+- Skip 'test_cache_pool_create_remove' on CentOS 7
+- BlockDev.py Convert dictionary keys to set before using them
+- Make sure library tests properly clean after themselves
+- Make sure library_test works after fixing -Wstrict-prototypes
+- Do not build btrfs plugin on newer RHEL
+- Do not build KBD plugin with bcache support on RHEL
+- Skip btrfs tests if btrfs module is not available
+- Add version to tests that should be skipped on CentOS/RHEL 7
+- Skip VDO tests also when the 'kvdo' module is not available
+- Fix how we check zram stats from /sys/block/zram0/mm_stat
+- Fix calling BlockDev.reinit in swap tests
+- Fix vdo configuration options definition in spec file
+- Fix running pylint in tests
+- Ignore "bad-super-call" pylint warning in BlockDev.py
+- Fix three memory leaks in lvm-dbus.c
+- Fix licence headers in sources
+- lvm.c: Check for 'lvm' dependency in 'bd_lvm_is_tech_avail'
+- lvm-dbus.c: Check for 'lvmdbus' dependency in 'bd_lvm_is_tech_avail'
+- Add test for is_tech_available with multiple dependencies
+- Use python interpreter explicitly when running boilerplate_generator.py
+
 Libblockdev 2.18
 ----------------
 

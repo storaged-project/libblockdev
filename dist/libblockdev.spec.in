@@ -119,7 +119,7 @@
 %define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?vdo_copts} %{?gi_copts}
 
 Name:        libblockdev
-Version:     2.18
+Version:     2.19
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -945,6 +945,54 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Fri Aug 10 2018 Vojtech Trefny <vtrefny@redhat.com> - 2.19-1
+- Use python interpreter explicitly when running boilerplate_generator.py (vtrefny)
+- vdo: Implement bd_vdo_get_stats() (tbzatek)
+- Add test for is_tech_available with multiple dependencies (vtrefny)
+- lvm-dbus.c: Check for 'lvmdbus' dependency in 'bd_lvm_is_tech_avail' (vtrefny)
+- lvm.c: Check for 'lvm' dependency in 'bd_lvm_is_tech_avail' (vtrefny)
+- Fix licence headers in sources (vtrefny)
+- Fix three memory leaks in lvm-dbus.c (vtrefny)
+- Ignore "bad-super-call" pylint warning in BlockDev.py (vtrefny)
+- Fix running pylint in tests (vtrefny)
+- Fix vdo configuration options definition in spec file (vtrefny)
+- Fix calling BlockDev.reinit in swap tests (vtrefny)
+- Fix how we check zram stats from /sys/block/zram0/mm_stat (vtrefny)
+- Skip VDO tests also when the 'kvdo' module is not available (vtrefny)
+- Add version to tests that should be skipped on CentOS/RHEL 7 (vtrefny)
+- Skip btrfs tests if btrfs module is not available (vtrefny)
+- Do not build KBD plugin with bcache support on RHEL (vtrefny)
+- Do not build btrfs plugin on newer RHEL (vtrefny)
+- fs: Properly close both ends of the pipe (tbzatek)
+- Make sure library_test works after fixing -Wstrict-prototypes (vtrefny)
+- Make sure library tests properly clean after themselves (vtrefny)
+- pkg-config: add -L${libdir} and -I${includedir} (max.kellermann)
+- plugins/kbd: make wait_for_file() static (max.kellermann)
+- plugins/lvm{,-dbus}: get_lv_type_from_flags() returns const string (max.kellermann)
+- plugins/dm: add explicit cast to work around -Wdiscarded-qualifiers (max.kellermann)
+- plugins/crypto: work around -Wdiscarded-qualifiers (max.kellermann)
+- plugins/check_deps: make all strings and `UtilDep` instances `const` (max.kellermann)
+- exec: make `msg` parameters const (max.kellermann)
+- fix -Wstrict-prototypes (max.kellermann)
+- module.c: Accept kernel modules if they are built-in (marco.guerri.dev)
+- BlockDev.py Convert dictionary keys to set before using them (vtrefny)
+- Skip 'test_cache_pool_create_remove' on CentOS 7 (vtrefny)
+- Re-order libbd_crypto_la_LIBADD to fix libtool issue (tom)
+- acinclude.m4: Use AS_EXIT to fail in LIBBLOCKDEV_FAILURES (vtrefny)
+- configure.ac: Fix missing parenthesis in blkid version check (vtrefny)
+- Allow specifying extra options for PBKDF when creating LUKS2 (vtrefny)
+- Reintroduce python2 support for Fedora 29 (vtrefny)
+- Use versioned command for Python 2 (vtrefny)
+- Fix few wrong names in doc strings (vtrefny)
+- Make sure all our free and copy functions work with NULL (vtrefny)
+- Use libblkid in bd_crypto_is_luks (vtrefny)
+- vdo: Properly destroy the yaml parser (tbzatek)
+- Add a simple test case for bd_crypto_tc_open (vtrefny)
+- Add Python override for bd_crypto_tc_open_full (vtrefny)
+- Show simple summary after configure (vtrefny)
+- Do not build VDO plugin on non-x86_64 architectures (vtrefny)
+- Sync spec with downstream (vtrefny)
+
 * Wed Jun 20 2018 Vojtech Trefny <vtrefny@redhat.com> - 2.18-1
 - Add VDO to features.rst (vtrefny)
 - Remove roadmap.rst (vtrefny)
