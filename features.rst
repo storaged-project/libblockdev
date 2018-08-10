@@ -319,6 +319,7 @@ VDO
    * stop
    * grow_logical
    * grow_physical
+   * get_statistics
 
 utils
 ------

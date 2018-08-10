@@ -4,6 +4,7 @@ import os
 import yaml
 import unittest
 import overrides_hack
+import six
 
 from utils import run_command, read_file, skip_on, fake_path, create_sparse_tempfile, create_lio_device, delete_lio_device
 from gi.repository import BlockDev, GLib
@@ -282,6 +283,26 @@ class VDOTest(VDOTestCase):
         self.assertIsNotNone(info_after)
         self.assertEqual(info_before.logical_size, info_after.logical_size)
         self.assertGreater(info_after.physical_size, info_before.physical_size)
+
+    def test_statistics(self):
+        """Verify that it is possible to retrieve statistics of an existing VDO volume"""
+
+        ret = BlockDev.vdo_create(self.vdo_name, self.loop_dev)
+        self.addCleanup(self._remove_vdo, self.vdo_name)
+        self.assertTrue(ret)
+
+        with six.assertRaisesRegex(self, GLib.GError, "No such file or directory"):
+            stats = BlockDev.vdo_get_stats("nonexistingxxx")
+
+        stats = BlockDev.vdo_get_stats(self.vdo_name)
+        self.assertIsNotNone(stats)
+        # assuming block_size is always greater than zero
+        self.assertGreater(stats.block_size, 0)
+
+        stats = BlockDev.vdo_get_stats_full(self.vdo_name)
+        self.assertIsNotNone(stats)
+        self.assertGreater(len(stats), 0)
+        self.assertIn("block_size", stats)
 
 
 class VDOUnloadTest(VDOTestCase):
