@@ -203,7 +203,7 @@
 <div class="refsect2">
 <a name="bd-dm-check-deps"></a><h3>bd_dm_check_deps ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_dm_check_deps ();</pre>
+bd_dm_check_deps (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
 <div class="refsect3">
 <a name="bd-dm-check-deps.returns"></a><h4>Returns</h4>
 <p> whether the plugin's runtime dependencies are satisfied or not</p>
@@ -214,7 +214,7 @@ bd_dm_check_deps ();</pre>
 <div class="refsect2">
 <a name="bd-dm-close"></a><h3>bd_dm_close ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
-bd_dm_close ();</pre>
+bd_dm_close (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
 <p>Cleans up after the plugin. **This function is called automatically by the
 library's functions that unload it.**</p>
 </div>
@@ -222,7 +222,7 @@ library's functions that unload it.**</p>
 <div class="refsect2">
 <a name="bd-dm-init"></a><h3>bd_dm_init ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_dm_init ();</pre>
+bd_dm_init (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
 <p>Initializes the plugin. **This function is called automatically by the
 library's initialization functions.**</p>
 </div>
@@ -478,7 +478,7 @@ bd_dm_get_subsystem_from_name (<em class="parameter"><code>const <a href="../gli
 <div class="refsect3">
 <a name="bd-dm-get-subsystem-from-name.returns"></a><h4>Returns</h4>
 <p> subsystem of the given device</p>
-<p>Tech category: <a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-MAP:CAPS"><code class="literal">BD_DM_TECH_MAP</code></a>-<code class="literal">BD_DM_TECH_QUERY</code></p>
+<p>Tech category: <a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-MAP:CAPS"><code class="literal">BD_DM_TECH_MAP</code></a>-<a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_DM_TECH_MODE_QUERY</code></a></p>
 </div>
 </div>
 <hr>
@@ -572,7 +572,7 @@ bd_dm_activate_raid_set (<em class="parameter"><code>const <a href="../glib/glib
 <a name="bd-dm-activate-raid-set.returns"></a><h4>Returns</h4>
 <p> whether the RAID set <em class="parameter"><code>name</code></em>
 was successfully activate or not</p>
-<p>Tech category: <a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-RAID:CAPS"><code class="literal">BD_DM_TECH_RAID</code></a>-<code class="literal">BD_DM_TECH_CREATE_ACTIVATE</code></p>
+<p>Tech category: <a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-RAID:CAPS"><code class="literal">BD_DM_TECH_RAID</code></a>-<a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-MODE-CREATE-ACTIVATE:CAPS"><code class="literal">BD_DM_TECH_MODE_CREATE_ACTIVATE</code></a></p>
 </div>
 </div>
 <hr>
@@ -607,7 +607,7 @@ bd_dm_deactivate_raid_set (<em class="parameter"><code>const <a href="../glib/gl
 <a name="bd-dm-deactivate-raid-set.returns"></a><h4>Returns</h4>
 <p> whether the RAID set <em class="parameter"><code>name</code></em>
 was successfully deactivate or not</p>
-<p>Tech category: <a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-RAID:CAPS"><code class="literal">BD_DM_TECH_RAID</code></a>-<code class="literal">BD_DM_TECH_REMOVE_DEACTIVATE</code></p>
+<p>Tech category: <a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-RAID:CAPS"><code class="literal">BD_DM_TECH_RAID</code></a>-<a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-MODE-REMOVE-DEACTIVATE:CAPS"><code class="literal">BD_DM_TECH_MODE_REMOVE_DEACTIVATE</code></a></p>
 </div>
 </div>
 <hr>
@@ -642,7 +642,7 @@ bd_dm_get_raid_set_type (<em class="parameter"><code>const <a href="../glib/glib
 <a name="bd-dm-get-raid-set-type.returns"></a><h4>Returns</h4>
 <p> string representation of the <em class="parameter"><code>name</code></em>
 RAID set's type</p>
-<p>Tech category: <a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-RAID:CAPS"><code class="literal">BD_DM_TECH_RAID</code></a>-<code class="literal">BD_DM_TECH_QUERY</code></p>
+<p>Tech category: <a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-RAID:CAPS"><code class="literal">BD_DM_TECH_RAID</code></a>-<a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_DM_TECH_MODE_QUERY</code></a></p>
 </div>
 </div>
 <hr>

@@ -200,6 +200,22 @@
 </tr>
 <tr>
 <td class="function_type">
+<a class="link" href="libblockdev-VDO.html#BDVDOStats" title="BDVDOStats"><span class="returnvalue">BDVDOStats</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-VDO.html#bd-vdo-get-stats" title="bd_vdo_get_stats ()">bd_vdo_get_stats</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-VDO.html#bd-vdo-get-stats-full" title="bd_vdo_get_stats_full ()">bd_vdo_get_stats_full</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
@@ -230,6 +246,10 @@
 <td class="function_name"><a class="link" href="libblockdev-VDO.html#BDVDOInfo" title="BDVDOInfo">BDVDOInfo</a></td>
 </tr>
 <tr>
+<td class="datatype_keyword"> </td>
+<td class="function_name"><a class="link" href="libblockdev-VDO.html#BDVDOStats" title="BDVDOStats">BDVDOStats</a></td>
+</tr>
+<tr>
 <td class="datatype_keyword">enum</td>
 <td class="function_name"><a class="link" href="libblockdev-VDO.html#BDVDOTech" title="enum BDVDOTech">BDVDOTech</a></td>
 </tr>
@@ -254,7 +274,7 @@
 <div class="refsect2">
 <a name="bd-vdo-check-deps"></a><h3>bd_vdo_check_deps ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_vdo_check_deps ();</pre>
+bd_vdo_check_deps (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
 <div class="refsect3">
 <a name="bd-vdo-check-deps.returns"></a><h4>Returns</h4>
 <p> whether the plugin's runtime dependencies are satisfied or not</p>
@@ -265,7 +285,7 @@ bd_vdo_check_deps ();</pre>
 <div class="refsect2">
 <a name="bd-vdo-init"></a><h3>bd_vdo_init ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_vdo_init ();</pre>
+bd_vdo_init (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
 <p>Initializes the plugin. **This function is called automatically by the
 library's initialization functions.**</p>
 </div>
@@ -273,7 +293,7 @@ library's initialization functions.**</p>
 <div class="refsect2">
 <a name="bd-vdo-close"></a><h3>bd_vdo_close ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
-bd_vdo_close ();</pre>
+bd_vdo_close (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
 <p>Cleans up after the plugin. **This function is called automatically by the
 library's functions that unload it.**</p>
 </div>
@@ -470,7 +490,7 @@ decimal values)</p></td>
 <div class="refsect3">
 <a name="bd-vdo-create.returns"></a><h4>Returns</h4>
 <p> whether the VDO volume was successfully created or not</p>
-<p>Tech category: <a class="link" href="libblockdev-VDO.html#BD-VDO-TECH-VDO:CAPS"><code class="literal">BD_VDO_TECH_VDO</code></a>-<code class="literal">BD_VDO_MODE_CREATE</code></p>
+<p>Tech category: <a class="link" href="libblockdev-VDO.html#BD-VDO-TECH-VDO:CAPS"><code class="literal">BD_VDO_TECH_VDO</code></a>-<a class="link" href="libblockdev-VDO.html#BD-VDO-TECH-MODE-CREATE:CAPS"><code class="literal">BD_VDO_TECH_MODE_CREATE</code></a></p>
 </div>
 </div>
 <hr>
@@ -997,6 +1017,94 @@ bd_vdo_grow_physical (<em class="parameter"><code>const <a href="../glib/glib-Ba
 </div>
 <hr>
 <div class="refsect2">
+<a name="bd-vdo-get-stats"></a><h3>bd_vdo_get_stats ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-VDO.html#BDVDOStats" title="BDVDOStats"><span class="returnvalue">BDVDOStats</span></a> *
+bd_vdo_get_stats (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
+                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-vdo-get-stats.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>name</p></td>
+<td class="parameter_description"><p>name of an existing VDO volume</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-vdo-get-stats.returns"></a><h4>Returns</h4>
+<p>a structure containing selected statistics or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error (<em class="parameter"><code>error</code></em>
+gets populated in those cases)</p>
+<p>In contrast to <em class="parameter"><code>bd_vdo_get_stats_full</code></em>
+this function will only return selected statistics in a fixed structure. In case a value is not available, -1 would be returned.</p>
+<p>The following statistics are presented:</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p><code class="literal">"block_size"</code>: The block size of a VDO volume, in bytes.</p></li>
+<li class="listitem"><p><code class="literal">"logical_block_size"</code>: The logical block size, in bytes.</p></li>
+<li class="listitem"><p><code class="literal">"physical_blocks"</code>: The total number of physical blocks allocated for a VDO volume.</p></li>
+<li class="listitem"><p><code class="literal">"data_blocks_used"</code>: The number of physical blocks currently in use by a VDO volume to store data.</p></li>
+<li class="listitem"><p><code class="literal">"overhead_blocks_used"</code>: The number of physical blocks currently in use by a VDO volume to store VDO metadata.</p></li>
+<li class="listitem"><p><code class="literal">"logical_blocks_used"</code>: The number of logical blocks currently mapped.</p></li>
+<li class="listitem"><p><code class="literal">"usedPercent"</code>: The percentage of physical blocks used on a VDO volume (= used blocks / allocated blocks * 100).</p></li>
+<li class="listitem"><p><code class="literal">"savingPercent"</code>: The percentage of physical blocks saved on a VDO volume (= [logical blocks used - physical blocks used] / logical blocks used).</p></li>
+<li class="listitem"><p><code class="literal">"writeAmplificationRatio"</code>: The average number of block writes to the underlying storage per block written to the VDO device.</p></li>
+</ul></div>
+<p>Tech category: <a class="link" href="libblockdev-VDO.html#BD-VDO-TECH-VDO:CAPS"><code class="literal">BD_VDO_TECH_VDO</code></a>-<a class="link" href="libblockdev-VDO.html#BD-VDO-TECH-MODE-QUERY:CAPS"><code class="literal">BD_VDO_TECH_MODE_QUERY</code></a>. </p>
+<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-vdo-get-stats-full"></a><h3>bd_vdo_get_stats_full ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *
+bd_vdo_get_stats_full (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
+                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-vdo-get-stats-full.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>name</p></td>
+<td class="parameter_description"><p>name of an existing VDO volume</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-vdo-get-stats-full.returns"></a><h4>Returns</h4>
+<p>hashtable of type string - string of available statistics or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error (<em class="parameter"><code>error</code></em>
+gets populated in those cases)</p>
+<p>Statistics are collected from the values exposed by the kernel <code class="literal">kvdo</code> module at the <code class="literal">/sys/kvdo/&amp;lt;VDO_NAME&gt;/statistics/</code> path. Some of the keys are computed to mimic the information produced by the vdo tools.
+Please note the contents of the hashtable may vary depending on the actual kvdo module version.</p>
+<p>Tech category: <a class="link" href="libblockdev-VDO.html#BD-VDO-TECH-VDO:CAPS"><code class="literal">BD_VDO_TECH_VDO</code></a>-<a class="link" href="libblockdev-VDO.html#BD-VDO-TECH-MODE-QUERY:CAPS"><code class="literal">BD_VDO_TECH_MODE_QUERY</code></a>. </p>
+<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> utf8 utf8]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="bd-vdo-is-tech-avail"></a><h3>bd_vdo_is_tech_avail ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 bd_vdo_is_tech_avail (<em class="parameter"><code><a class="link" href="libblockdev-VDO.html#BDVDOTech" title="enum BDVDOTech"><span class="type">BDVDOTech</span></a> tech</code></em>,
@@ -1150,6 +1258,79 @@ plugin implementation and having all the runtime dependencies available</p>
 <tr>
 <td class="struct_member_name"><p><span class="type">BDVDOWritePolicy</span> <em class="structfield"><code><a name="BDVDOInfo.write-policy"></a>write_policy</code></em>;</p></td>
 <td class="struct_member_description"><p>write policy of the volume</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDVDOStats"></a><h3>BDVDOStats</h3>
+<pre class="programlisting">typedef struct {
+    gint64 block_size;
+    gint64 logical_block_size;
+    gint64 physical_blocks;
+    gint64 data_blocks_used;
+    gint64 overhead_blocks_used;
+    gint64 logical_blocks_used;
+    gint64 used_percent;
+    gint64 saving_percent;
+    gdouble write_amplification_ratio;
+} BDVDOStats;
+</pre>
+<div class="refsect3">
+<a name="BDVDOStats.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="struct_members_name">
+<col class="struct_members_description">
+<col width="200px" class="struct_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> <em class="structfield"><code><a name="BDVDOStats.block-size"></a>block_size</code></em>;</p></td>
+<td class="struct_member_description"><p>block size of a VDO volume, in bytes</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> <em class="structfield"><code><a name="BDVDOStats.logical-block-size"></a>logical_block_size</code></em>;</p></td>
+<td class="struct_member_description"><p>logical block size, in bytes</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> <em class="structfield"><code><a name="BDVDOStats.physical-blocks"></a>physical_blocks</code></em>;</p></td>
+<td class="struct_member_description"><p>total number of physical blocks allocated</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> <em class="structfield"><code><a name="BDVDOStats.data-blocks-used"></a>data_blocks_used</code></em>;</p></td>
+<td class="struct_member_description"><p>number of physical blocks currently in use to store data</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> <em class="structfield"><code><a name="BDVDOStats.overhead-blocks-used"></a>overhead_blocks_used</code></em>;</p></td>
+<td class="struct_member_description"><p>number of physical blocks currently in use to store VDO metadata</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> <em class="structfield"><code><a name="BDVDOStats.logical-blocks-used"></a>logical_blocks_used</code></em>;</p></td>
+<td class="struct_member_description"><p>number of logical blocks currently mapped</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> <em class="structfield"><code><a name="BDVDOStats.used-percent"></a>used_percent</code></em>;</p></td>
+<td class="struct_member_description"><p>percentage of physical blocks used</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> <em class="structfield"><code><a name="BDVDOStats.saving-percent"></a>saving_percent</code></em>;</p></td>
+<td class="struct_member_description"><p>percentage of physical blocks saved</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> <em class="structfield"><code><a name="BDVDOStats.write-amplification-ratio"></a>write_amplification_ratio</code></em>;</p></td>
+<td class="struct_member_description"><p>average number of block writes to the underlying storage per block written</p></td>
 <td class="struct_member_annotations"> </td>
 </tr>
 </tbody>

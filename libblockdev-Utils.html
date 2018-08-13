@@ -279,6 +279,14 @@
 <a class="link" href="libblockdev-Utils.html#bd-utils-unload-kernel-module" title="bd_utils_unload_kernel_module ()">bd_utils_unload_kernel_module</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-utils-dbus-service-available" title="bd_utils_dbus_service_available ()">bd_utils_dbus_service_available</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
 </tbody>
 </table></div>
 </div>
@@ -852,7 +860,7 @@ muted (deinitialized even in presence of a global reporting function) or not</p>
 <a name="bd-utils-report-finished"></a><h3>bd_utils_report_finished ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 bd_utils_report_finished (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> task_id</code></em>,
-                          <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *msg</code></em>);</pre>
+                          <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *msg</code></em>);</pre>
 <div class="refsect3">
 <a name="bd-utils-report-finished.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -882,7 +890,7 @@ bd_utils_report_finished (<em class="parameter"><code><a href="../glib/glib-Basi
 <pre class="programlisting"><span class="returnvalue">void</span>
 bd_utils_report_progress (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> task_id</code></em>,
                           <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> completion</code></em>,
-                          <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *msg</code></em>);</pre>
+                          <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *msg</code></em>);</pre>
 <div class="refsect3">
 <a name="bd-utils-report-progress.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -915,7 +923,7 @@ bd_utils_report_progress (<em class="parameter"><code><a href="../glib/glib-Basi
 <div class="refsect2">
 <a name="bd-utils-report-started"></a><h3>bd_utils_report_started ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
-bd_utils_report_started (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *msg</code></em>);</pre>
+bd_utils_report_started (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *msg</code></em>);</pre>
 <div class="refsect3">
 <a name="bd-utils-report-started.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -1189,7 +1197,7 @@ bd_extra_arg_free (<em class="parameter"><code><a class="link" href="libblockdev
 <div class="refsect2">
 <a name="bd-extra-arg-get-type"></a><h3>bd_extra_arg_get_type ()</h3>
 <pre class="programlisting"><a href="../gobject/gobject-Type-Information.html#GType"><span class="returnvalue">GType</span></a>
-bd_extra_arg_get_type ();</pre>
+bd_extra_arg_get_type (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
 </div>
 <hr>
 <div class="refsect2">
@@ -1296,7 +1304,8 @@ bd_utils_have_kernel_module (<em class="parameter"><code>const <a href="../glib/
 <div class="refsect3">
 <a name="bd-utils-have-kernel-module.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>module_name</code></em>
-was found in the system</p>
+was found in the system, either as a module
+or built-in in the kernel</p>
 </div>
 </div>
 <hr>
@@ -1371,6 +1380,58 @@ bd_utils_unload_kernel_module (<em class="parameter"><code>const <a href="../gli
 <a name="bd-utils-unload-kernel-module.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>module_name</code></em>
 was successfully unloaded or not</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-utils-dbus-service-available"></a><h3>bd_utils_dbus_service_available ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_utils_dbus_service_available (<em class="parameter"><code><a href="../gio/GDBusConnection.html#GDBusConnection-struct"><span class="type">GDBusConnection</span></a> *connection</code></em>,
+                                 <em class="parameter"><code><a href="../gio/GDBusConnection.html#GBusType"><span class="type">GBusType</span></a> bus_type</code></em>,
+                                 <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *bus_name</code></em>,
+                                 <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *obj_prefix</code></em>,
+                                 <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-utils-dbus-service-available.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>connection</p></td>
+<td class="parameter_description"><p>existing GDBusConnection or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>bus_type</p></td>
+<td class="parameter_description"><p>bus type (system or session), ignored if <em class="parameter"><code>connection</code></em>
+is specified</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>bus_name</p></td>
+<td class="parameter_description"><p>name of the service to check (e.g. "com.redhat.lvmdbus1")</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>obj_prefix</p></td>
+<td class="parameter_description"><p>object path prefix for the service (e.g. "/com/redhat/lvmdbus1")</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-utils-dbus-service-available.returns"></a><h4>Returns</h4>
+<p> whether the service was found in the system</p>
 </div>
 </div>
 </div>

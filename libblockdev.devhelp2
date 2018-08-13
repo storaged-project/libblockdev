@@ -87,6 +87,10 @@
     <keyword type="function" name="bd_crypto_luks_format_blob ()" link="libblockdev-Crypto.html#bd-crypto-luks-format-blob"/>
     <keyword type="function" name="bd_crypto_luks_extra_free ()" link="libblockdev-Crypto.html#bd-crypto-luks-extra-free"/>
     <keyword type="function" name="bd_crypto_luks_extra_copy ()" link="libblockdev-Crypto.html#bd-crypto-luks-extra-copy"/>
+    <keyword type="function" name="bd_crypto_luks_extra_new ()" link="libblockdev-Crypto.html#bd-crypto-luks-extra-new"/>
+    <keyword type="function" name="bd_crypto_luks_pbkdf_free ()" link="libblockdev-Crypto.html#bd-crypto-luks-pbkdf-free"/>
+    <keyword type="function" name="bd_crypto_luks_pbkdf_copy ()" link="libblockdev-Crypto.html#bd-crypto-luks-pbkdf-copy"/>
+    <keyword type="function" name="bd_crypto_luks_pbkdf_new ()" link="libblockdev-Crypto.html#bd-crypto-luks-pbkdf-new"/>
     <keyword type="function" name="bd_crypto_luks_format_luks2 ()" link="libblockdev-Crypto.html#bd-crypto-luks-format-luks2"/>
     <keyword type="function" name="bd_crypto_luks_format_luks2_blob ()" link="libblockdev-Crypto.html#bd-crypto-luks-format-luks2-blob"/>
     <keyword type="function" name="bd_crypto_luks_open ()" link="libblockdev-Crypto.html#bd-crypto-luks-open"/>
@@ -126,6 +130,7 @@
     <keyword type="macro" name="DEFAULT_LUKS_KEYSIZE_BITS" link="libblockdev-Crypto.html#DEFAULT-LUKS-KEYSIZE-BITS:CAPS"/>
     <keyword type="macro" name="DEFAULT_LUKS_CIPHER" link="libblockdev-Crypto.html#DEFAULT-LUKS-CIPHER:CAPS"/>
     <keyword type="struct" name="BDCryptoLUKSExtra" link="libblockdev-Crypto.html#BDCryptoLUKSExtra"/>
+    <keyword type="struct" name="BDCryptoLUKSPBKDF" link="libblockdev-Crypto.html#BDCryptoLUKSPBKDF"/>
     <keyword type="enum" name="enum BDCryptoLUKSVersion" link="libblockdev-Crypto.html#BDCryptoLUKSVersion"/>
     <keyword type="struct" name="BDCryptoLUKSInfo" link="libblockdev-Crypto.html#BDCryptoLUKSInfo"/>
     <keyword type="struct" name="BDCryptoIntegrityInfo" link="libblockdev-Crypto.html#BDCryptoIntegrityInfo"/>
@@ -556,6 +561,7 @@
     <keyword type="function" name="bd_utils_have_kernel_module ()" link="libblockdev-Utils.html#bd-utils-have-kernel-module"/>
     <keyword type="function" name="bd_utils_load_kernel_module ()" link="libblockdev-Utils.html#bd-utils-load-kernel-module"/>
     <keyword type="function" name="bd_utils_unload_kernel_module ()" link="libblockdev-Utils.html#bd-utils-unload-kernel-module"/>
+    <keyword type="function" name="bd_utils_dbus_service_available ()" link="libblockdev-Utils.html#bd-utils-dbus-service-available"/>
     <keyword type="enum" name="enum BDUtilsProgStatus" link="libblockdev-Utils.html#BDUtilsProgStatus"/>
     <keyword type="macro" name="BD_UTILS_EXEC_ERROR" link="libblockdev-Utils.html#BD-UTILS-EXEC-ERROR:CAPS"/>
     <keyword type="enum" name="enum BDUtilsExecError" link="libblockdev-Utils.html#BDUtilsExecError"/>
@@ -594,10 +600,13 @@
     <keyword type="function" name="bd_vdo_stop ()" link="libblockdev-VDO.html#bd-vdo-stop"/>
     <keyword type="function" name="bd_vdo_grow_logical ()" link="libblockdev-VDO.html#bd-vdo-grow-logical"/>
     <keyword type="function" name="bd_vdo_grow_physical ()" link="libblockdev-VDO.html#bd-vdo-grow-physical"/>
+    <keyword type="function" name="bd_vdo_get_stats ()" link="libblockdev-VDO.html#bd-vdo-get-stats"/>
+    <keyword type="function" name="bd_vdo_get_stats_full ()" link="libblockdev-VDO.html#bd-vdo-get-stats-full"/>
     <keyword type="function" name="bd_vdo_is_tech_avail ()" link="libblockdev-VDO.html#bd-vdo-is-tech-avail"/>
     <keyword type="enum" name="enum BDVDOError" link="libblockdev-VDO.html#BDVDOError"/>
     <keyword type="macro" name="BD_VDO_ERROR" link="libblockdev-VDO.html#BD-VDO-ERROR:CAPS"/>
     <keyword type="struct" name="BDVDOInfo" link="libblockdev-VDO.html#BDVDOInfo"/>
+    <keyword type="struct" name="BDVDOStats" link="libblockdev-VDO.html#BDVDOStats"/>
     <keyword type="enum" name="enum BDVDOTech" link="libblockdev-VDO.html#BDVDOTech"/>
     <keyword type="enum" name="enum BDVDOTechMode" link="libblockdev-VDO.html#BDVDOTechMode"/>
     <keyword type="constant" name="BD_INIT_ERROR_PLUGINS_FAILED" link="libblockdev-blockdev-library.html#BD-INIT-ERROR-PLUGINS-FAILED:CAPS"/>
@@ -911,6 +920,13 @@
     <keyword type="member" name="BDCryptoLUKSExtra.sector-size" link="libblockdev-Crypto.html#BDCryptoLUKSExtra.sector-size"/>
     <keyword type="member" name="BDCryptoLUKSExtra.label" link="libblockdev-Crypto.html#BDCryptoLUKSExtra.label"/>
     <keyword type="member" name="BDCryptoLUKSExtra.subsystem" link="libblockdev-Crypto.html#BDCryptoLUKSExtra.subsystem"/>
+    <keyword type="member" name="BDCryptoLUKSExtra.pbkdf" link="libblockdev-Crypto.html#BDCryptoLUKSExtra.pbkdf"/>
+    <keyword type="member" name="BDCryptoLUKSPBKDF.type" link="libblockdev-Crypto.html#BDCryptoLUKSPBKDF.type"/>
+    <keyword type="member" name="BDCryptoLUKSPBKDF.hash" link="libblockdev-Crypto.html#BDCryptoLUKSPBKDF.hash"/>
+    <keyword type="member" name="BDCryptoLUKSPBKDF.max-memory-kb" link="libblockdev-Crypto.html#BDCryptoLUKSPBKDF.max-memory-kb"/>
+    <keyword type="member" name="BDCryptoLUKSPBKDF.iterations" link="libblockdev-Crypto.html#BDCryptoLUKSPBKDF.iterations"/>
+    <keyword type="member" name="BDCryptoLUKSPBKDF.time-ms" link="libblockdev-Crypto.html#BDCryptoLUKSPBKDF.time-ms"/>
+    <keyword type="member" name="BDCryptoLUKSPBKDF.parallel-threads" link="libblockdev-Crypto.html#BDCryptoLUKSPBKDF.parallel-threads"/>
     <keyword type="member" name="BDCryptoLUKSInfo.version" link="libblockdev-Crypto.html#BDCryptoLUKSInfo.version"/>
     <keyword type="member" name="BDCryptoLUKSInfo.cipher" link="libblockdev-Crypto.html#BDCryptoLUKSInfo.cipher"/>
     <keyword type="member" name="BDCryptoLUKSInfo.mode" link="libblockdev-Crypto.html#BDCryptoLUKSInfo.mode"/>
@@ -1045,5 +1061,14 @@
     <keyword type="member" name="BDVDOInfo.physical-size" link="libblockdev-VDO.html#BDVDOInfo.physical-size"/>
     <keyword type="member" name="BDVDOInfo.index-memory" link="libblockdev-VDO.html#BDVDOInfo.index-memory"/>
     <keyword type="member" name="BDVDOInfo.write-policy" link="libblockdev-VDO.html#BDVDOInfo.write-policy"/>
+    <keyword type="member" name="BDVDOStats.block-size" link="libblockdev-VDO.html#BDVDOStats.block-size"/>
+    <keyword type="member" name="BDVDOStats.logical-block-size" link="libblockdev-VDO.html#BDVDOStats.logical-block-size"/>
+    <keyword type="member" name="BDVDOStats.physical-blocks" link="libblockdev-VDO.html#BDVDOStats.physical-blocks"/>
+    <keyword type="member" name="BDVDOStats.data-blocks-used" link="libblockdev-VDO.html#BDVDOStats.data-blocks-used"/>
+    <keyword type="member" name="BDVDOStats.overhead-blocks-used" link="libblockdev-VDO.html#BDVDOStats.overhead-blocks-used"/>
+    <keyword type="member" name="BDVDOStats.logical-blocks-used" link="libblockdev-VDO.html#BDVDOStats.logical-blocks-used"/>
+    <keyword type="member" name="BDVDOStats.used-percent" link="libblockdev-VDO.html#BDVDOStats.used-percent"/>
+    <keyword type="member" name="BDVDOStats.saving-percent" link="libblockdev-VDO.html#BDVDOStats.saving-percent"/>
+    <keyword type="member" name="BDVDOStats.write-amplification-ratio" link="libblockdev-VDO.html#BDVDOStats.write-amplification-ratio"/>
   </functions>
 </book>
