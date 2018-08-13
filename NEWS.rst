@@ -14,6 +14,7 @@ for details.
 **Full list of changes**
 
 Max Kellermann (8):
+
 - fix -Wstrict-prototypes
 - exec: make `msg` parameters const
 - plugins/check_deps: make all strings and `UtilDep` instances `const`
@@ -24,13 +25,16 @@ Max Kellermann (8):
 - pkg-config: add -L${libdir} and -I${includedir}
 
 Tom Briden (1):
+
 - Re-order libbd_crypto_la_LIBADD to fix libtool issue
 
 Tomas Bzatek (2):
+
 - vdo: Properly destroy the yaml parser
 - fs: Properly close both ends of the pipe
 
 Vojtech Trefny (33):
+
 - Sync spec with downstream
 - Do not build VDO plugin on non-x86_64 architectures
 - Show simple summary after configure
