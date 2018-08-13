@@ -44,16 +44,12 @@
 %define lvm_dbus_copts --without-lvm-dbus
 %endif
 
-# vdo is not available on Fedora
-%if (0%{?fedora}) || %{with_vdo} == 0
-%define with_vdo 0
-%define vdo_copts --without-vdo
-%endif
-
-# vdo is available only on x86_64
+# vdo is not available on non-x86_64 on older RHEL
+%if (0%{?rhel} && 0%{?rhel} <= 7)
 %ifnarch x86_64
 %define with_vdo 0
 %define vdo_copts --without-vdo
+%endif
 %endif
 
 # btrfs is not available on RHEL > 7
@@ -544,8 +540,17 @@ BuildRequires: libbytesize-devel
 BuildRequires: libyaml-devel
 Summary:     The vdo plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
+
+# weak dependencies doesn't work on older RHEL
+%if (0%{?rhel} && 0%{?rhel} <= 7)
 Requires: vdo
 Requires: kmod-kvdo
+%else
+# we want to build the plugin everywhere but the dependencies might not be
+# available so just use weak dependency
+Recommends: vdo
+Recommends: kmod-kvdo
+%endif
 
 %description vdo
 The libblockdev library plugin (and in the same time a standalone library)
