@@ -189,7 +189,11 @@ LIBBLOCKDEV_PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.42.2])
 LIBBLOCKDEV_PKG_CHECK_MODULES([GOBJECT], [gobject-2.0 >= 2.42.2])
 LIBBLOCKDEV_PKG_CHECK_MODULES([GIO], [gio-2.0 >= 2.42.2])
 LIBBLOCKDEV_PKG_CHECK_MODULES([UDEV], [libudev >= 216])
-LIBBLOCKDEV_PKG_CHECK_MODULES([KMOD], [libkmod >= 19])
+
+AS_IF([test "x$with_btrfs" != "xno" -o "x$with_kbd" != "xno" -o "x$with_vdo" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([KMOD], [libkmod >= 19])
+       AC_DEFINE([WITH_LIBKMOD], [1], [Define if libkmod is used])],
+      [])
 
 AS_IF([test "x$with_crypto" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([CRYPTSETUP], [libcryptsetup >= 1.6.7])

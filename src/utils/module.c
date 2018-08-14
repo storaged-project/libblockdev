@@ -18,7 +18,9 @@
  */
 
 #include <glib.h>
+#ifdef WITH_LIBKMOD
 #include <libkmod.h>
+#endif
 #include <string.h>
 #include <syslog.h>
 #include <locale.h>
@@ -33,6 +35,8 @@ GQuark bd_utils_module_error_quark (void)
 {
     return g_quark_from_static_string ("g-bd-utils-module-error-quark");
 }
+
+#ifdef WITH_LIBKMOD
 
 /**
  * bd_utils_have_kernel_module:
@@ -213,3 +217,5 @@ gboolean bd_utils_unload_kernel_module (const gchar *module_name, GError **error
     freelocale (c_locale);
     return TRUE;
 }
+
+#endif /* WITH_LIBKMOD */

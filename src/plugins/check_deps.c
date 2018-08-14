@@ -67,6 +67,8 @@ check_deps (volatile guint *avail_deps, guint req_deps, const UtilDep *deps_spec
     return (val & req_deps) == req_deps;
 }
 
+#ifdef WITH_LIBKMOD
+
 gboolean __attribute__ ((visibility ("hidden")))
 check_module_deps (volatile guint *avail_deps, guint req_deps, const gchar *const*modules, guint l_modules, GMutex *deps_check_lock, GError **error) {
     guint i = 0;
@@ -120,6 +122,8 @@ check_module_deps (volatile guint *avail_deps, guint req_deps, const gchar *cons
     val = (guint) g_atomic_int_get (avail_deps);
     return (val & req_deps) == req_deps;
 }
+
+#endif /* WITH_LIBKMOD */
 
 gboolean __attribute__ ((visibility ("hidden")))
 check_dbus_deps (volatile guint *avail_deps, guint req_deps, const DBusDep *buses, guint l_buses, GMutex *deps_check_lock, GError **error) {
