@@ -17,9 +17,7 @@
  * Author: Vratislav Podzimek <vpodzime@redhat.com>
  */
 
-#include <libkmod.h>
 #include <string.h>
-#include <syslog.h>
 #include <glob.h>
 #include <unistd.h>
 #include <locale.h>
