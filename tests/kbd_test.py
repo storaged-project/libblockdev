@@ -53,7 +53,7 @@ class KbdZRAMTestCase(unittest.TestCase):
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
 
-    @skip_on(("fedora", "27"), reason="zram module (un)loading is broken on ")
+    @skip_on("fedora", "27", reason="zram module (un)loading is broken on Fedora 27")
     @skip_on("debian", reason="loading zram module is broken on Debian")
     def setUp(self):
         self.addCleanup(self._clean_up)
