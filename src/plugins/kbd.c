@@ -47,6 +47,7 @@ static const gchar * const mode_str[BD_KBD_MODE_UNKNOWN+1] = {"writethrough", "w
 static locale_t c_locale = (locale_t) 0;
 
 static volatile guint avail_deps = 0;
+static volatile guint avail_module_deps = 0;
 static GMutex deps_check_lock;
 
 #define DEPS_MAKEBCACHE 0
@@ -56,6 +57,12 @@ static GMutex deps_check_lock;
 static const UtilDep deps[DEPS_LAST] = {
     {"make-bcache", NULL, NULL, NULL},
 };
+
+#define MODULE_DEPS_ZRAM 0
+#define MODULE_DEPS_ZRAM_MASK (1 << MODULE_DEPS_ZRAM)
+#define MODULE_DEPS_LAST 1
+
+static const gchar *const module_deps[MODULE_DEPS_LAST] = { "zram" };
 
 
 /**
@@ -72,7 +79,7 @@ gboolean bd_kbd_check_deps (void) {
     guint i = 0;
     gboolean status = FALSE;
 
-    ret = bd_utils_have_kernel_module ("zram", &error);
+    ret = check_module_deps (&avail_module_deps, MODULE_DEPS_ZRAM_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, &error);
     if (!ret) {
         if (error) {
             g_warning("Cannot load the kbd plugin: %s" , error->message);
@@ -152,6 +159,8 @@ gboolean bd_kbd_is_tech_avail (BDKBDTech tech, guint64 mode, GError **error) {
        bcache creation requires the 'make-bcache' utility */
     if (tech == BD_KBD_TECH_BCACHE && (mode & BD_KBD_TECH_MODE_CREATE))
         return check_deps (&avail_deps, DEPS_MAKEBCACHE_MASK, deps, DEPS_LAST, &deps_check_lock, error);
+    else if (tech == BD_KBD_TECH_ZRAM)
+        return check_module_deps (&avail_module_deps, MODULE_DEPS_ZRAM_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error);
     else
         return TRUE;
 }
@@ -240,6 +249,9 @@ gboolean bd_kbd_zram_create_devices (guint64 num_devices, const guint64 *sizes, 
     gchar *file_name = NULL;
     guint64 progress_id = 0;
 
+    if (!check_module_deps (&avail_module_deps, MODULE_DEPS_ZRAM_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     progress_id = bd_utils_report_started ("Started creating zram devices");
 
     opts = g_strdup_printf ("num_devices=%"G_GUINT64_FORMAT, num_devices);
@@ -321,6 +333,9 @@ gboolean bd_kbd_zram_destroy_devices (GError **error) {
     gboolean ret = FALSE;
     guint64 progress_id = 0;
 
+    if (!check_module_deps (&avail_module_deps, MODULE_DEPS_ZRAM_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
     progress_id = bd_utils_report_started ("Started destroying zram devices");
     ret = bd_utils_unload_kernel_module ("zram", error);
     if (!ret && (*error))
@@ -364,6 +379,9 @@ gboolean bd_kbd_zram_add_device (guint64 size, guint64 nstreams, gchar **device,
     guint64 dev_num = 0;
     gchar *num_str = NULL;
     guint64 progress_id = 0;
+
+    if (!check_module_deps (&avail_module_deps, MODULE_DEPS_ZRAM_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     progress_id = bd_utils_report_started ("Started adding new zram device");
 
@@ -427,6 +445,9 @@ gboolean bd_kbd_zram_remove_device (const gchar *device, GError **error) {
     gboolean success = FALSE;
     guint64 progress_id = 0;
     gchar *msg = NULL;
+
+    if (!check_module_deps (&avail_module_deps, MODULE_DEPS_ZRAM_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
 
     msg = g_strdup_printf ("Started removing zram device '%s'", device);
     progress_id = bd_utils_report_started (msg);
@@ -610,7 +631,12 @@ static gboolean get_zram_stats_new (const gchar *device, BDKBDZramStats* stats, 
 BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error) {
     gchar *path = NULL;
     gboolean success = FALSE;
-    BDKBDZramStats *ret = g_new0 (BDKBDZramStats, 1);
+    BDKBDZramStats *ret = NULL;
+
+    if (!check_module_deps (&avail_module_deps, MODULE_DEPS_ZRAM_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
+    ret = g_new0 (BDKBDZramStats, 1);
 
     if (g_str_has_prefix (device, "/dev/"))
         device += 5;
