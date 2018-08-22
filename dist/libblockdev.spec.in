@@ -58,6 +58,11 @@
 %define btrfs_copts --without-btrfs
 %endif
 
+# dmraid is not available on RHEL > 7
+%if 0%{?rhel} > 7
+%define with_dmraid 0
+%endif
+
 %if %{with_btrfs} != 1
 %define btrfs_copts --without-btrfs
 %endif
