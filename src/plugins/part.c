@@ -630,6 +630,31 @@ BDPartSpec* bd_part_get_part_by_pos (const gchar *disk, guint64 position, GError
     return ret;
 }
 
+static gboolean get_pmbr_boot_flag (struct fdisk_context *cxt) {
+    struct fdisk_context *mbr = NULL;
+    struct fdisk_partition *pa = NULL;
+    gint status = 0;
+
+    /* try to get the pmbr record */
+    mbr = fdisk_new_nested_context (cxt, "dos");
+    if (!mbr)
+        return FALSE;
+
+    /* try to get first partition -- first partition on pmbr is the "gpt partition" */
+    status = fdisk_get_partition (mbr, 0, &pa);
+    if (status != 0) {
+        fdisk_unref_context (mbr);
+        return FALSE;
+    }
+
+    status = fdisk_partition_is_bootable (pa);
+
+    fdisk_unref_context (mbr);
+    fdisk_unref_partition (pa);
+
+    return status == 1;
+}
+
 /**
  * bd_part_get_disk_spec:
  * @disk: disk to get information about
@@ -640,47 +665,43 @@ BDPartSpec* bd_part_get_part_by_pos (const gchar *disk, guint64 position, GError
  * Tech category: %BD_PART_TECH_MODE_QUERY_TABLE + the tech according to the partition table type
  */
 BDPartDiskSpec* bd_part_get_disk_spec (const gchar *disk, GError **error) {
-    PedDevice *dev = NULL;
+    struct fdisk_context *cxt = NULL;
+    struct fdisk_label *lb = NULL;
     BDPartDiskSpec *ret = NULL;
-    PedConstraint *constr = NULL;
-    PedDisk *ped_disk = NULL;
+    const gchar *label_name = NULL;
     BDPartTableType type = BD_PART_TABLE_UNDEF;
     gboolean found = FALSE;
 
-    dev = ped_device_get (disk);
-    if (!dev) {
-        set_parted_error (error, BD_PART_ERROR_INVAL);
-        g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+    cxt = get_device_context (disk, error);
+    if (!cxt) {
+        /* error is already populated */
         return NULL;
     }
 
     ret = g_new0 (BDPartDiskSpec, 1);
-    ret->path = g_strdup (dev->path);
-    ret->sector_size = (guint64) dev->sector_size;
-    constr = ped_device_get_constraint (dev);
-    ret->size = (constr->max_size - 1) * dev->sector_size;
-    ped_constraint_destroy (constr);
+    ret->path = g_strdup (fdisk_get_devname (cxt));
+    ret->sector_size = (guint64) fdisk_get_sector_size (cxt);
+    ret->size = fdisk_get_nsectors (cxt) * ret->sector_size;
 
-    ped_disk = ped_disk_new (dev);
-    if (ped_disk) {
+    lb = fdisk_get_label (cxt, NULL);
+    if (lb) {
+        label_name = fdisk_label_get_name (lb);
         for (type=BD_PART_TABLE_MSDOS; !found && type < BD_PART_TABLE_UNDEF; type++) {
-            if (g_strcmp0 (ped_disk->type->name, table_type_str_parted[type]) == 0) {
+            if (g_strcmp0 (label_name, table_type_str_fdisk[type]) == 0) {
                 ret->table_type = type;
                 found = TRUE;
             }
         }
         if (!found)
             ret->table_type = BD_PART_TABLE_UNDEF;
-        if (ped_disk_is_flag_available (ped_disk, PED_DISK_GPT_PMBR_BOOT) &&
-            ped_disk_get_flag (ped_disk, PED_DISK_GPT_PMBR_BOOT))
+        if (ret->table_type == BD_PART_TABLE_GPT && get_pmbr_boot_flag (cxt))
             ret->flags = BD_PART_DISK_FLAG_GPT_PMBR_BOOT;
-        ped_disk_destroy (ped_disk);
     } else {
         ret->table_type = BD_PART_TABLE_UNDEF;
         ret->flags = 0;
     }
 
-    ped_device_destroy (dev);
+    close_context (cxt);
 
     return ret;
 }
@@ -1513,6 +1534,59 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
     return ret;
 }
 
+static gboolean set_pmbr_boot_flag (struct fdisk_context *cxt, gboolean state, GError **error) {
+    struct fdisk_context *mbr = NULL;
+    struct fdisk_partition *pa = NULL;
+    gint ret = 0;
+
+    /* try to get the pmbr record */
+    mbr = fdisk_new_nested_context (cxt, "dos");
+    if (!mbr) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "No PMBR label found.");
+        return FALSE;
+    }
+
+    /* try to get first partition -- first partition on pmbr is the "gpt partition" */
+    ret = fdisk_get_partition (mbr, 0, &pa);
+    if (ret != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to get the GPT partition.");
+        fdisk_unref_context (mbr);
+        return FALSE;
+    }
+
+    ret = fdisk_partition_is_bootable (pa);
+    if ((ret == 1 && state) || (ret != 1 && !state)) {
+        /* boot flag is already set as desired, no change needed */
+        fdisk_unref_partition (pa);
+        fdisk_unref_context (mbr);
+        return TRUE;
+    }
+
+    ret = fdisk_toggle_partition_flag (mbr, 0, DOS_FLAG_ACTIVE);
+    if (ret != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "%s", strerror_l (-ret, c_locale));
+        fdisk_unref_partition (pa);
+        fdisk_unref_context (mbr);
+        return FALSE;
+    }
+
+    ret = fdisk_write_disklabel (mbr);
+    if (ret != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to write the new PMBR disklabel: %s", strerror_l (-ret, c_locale));
+        fdisk_unref_partition (pa);
+        fdisk_unref_context (mbr);
+        return FALSE;
+    }
+
+    fdisk_unref_partition (pa);
+    fdisk_unref_context (mbr);
+    return TRUE;
+}
+
 /**
  * bd_part_set_disk_flag:
  * @disk: disk the partition belongs to
@@ -1525,10 +1599,8 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
  * Tech category: %BD_PART_TECH_MODE_MODIFY_TABLE + the tech according to the partition table type
  */
 gboolean bd_part_set_disk_flag (const gchar *disk, BDPartDiskFlag flag, gboolean state, GError **error) {
-    PedDevice *dev = NULL;
-    PedDisk *ped_disk = NULL;
-    gint status = 0;
-    gboolean ret = FALSE;
+    struct fdisk_context *cxt = NULL;
+    struct fdisk_label *lb = NULL;
     guint64 progress_id = 0;
     gchar *msg = NULL;
 
@@ -1536,48 +1608,41 @@ gboolean bd_part_set_disk_flag (const gchar *disk, BDPartDiskFlag flag, gboolean
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    dev = ped_device_get (disk);
-    if (!dev) {
-        set_parted_error (error, BD_PART_ERROR_INVAL);
-        g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+    cxt = get_device_context (disk, error);
+    if (!cxt) {
+        /* error is already populated */
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
-    ped_disk = ped_disk_new (dev);
-    if (!ped_disk) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
-        ped_device_destroy (dev);
+    lb = fdisk_get_label (cxt, NULL);
+    if (!lb) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to read partition table on device '%s'", disk);
+        close_context (cxt);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
     /* right now we only support this one flag */
     if (flag == BD_PART_DISK_FLAG_GPT_PMBR_BOOT) {
-        status = ped_disk_set_flag (ped_disk, PED_DISK_GPT_PMBR_BOOT, (int) state);
-        if (status == 0) {
-            set_parted_error (error, BD_PART_ERROR_FAIL);
-            g_prefix_error (error, "Failed to set flag on disk '%s'", disk);
-            ped_disk_destroy (ped_disk);
-            ped_device_destroy (dev);
+        if (!set_pmbr_boot_flag (cxt, state, error)) {
+            g_prefix_error (error, "Failed to set flag on disk '%s': ", disk);
+            close_context (cxt);
             bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
-
-        ret = disk_commit (ped_disk, disk, error);
     } else {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Invalid or unsupported flag given: %d", flag);
-        ret = FALSE;
+        close_context (cxt);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
     }
 
-    ped_disk_destroy (ped_disk);
-    ped_device_destroy (dev);
-
+    close_context (cxt);
     bd_utils_report_finished (progress_id, "Completed");
-
-    return ret;
+    return TRUE;
 }
 
 /**

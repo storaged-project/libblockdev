@@ -1189,6 +1189,12 @@ class PartSetDiskFlagCase(PartTestCase):
         self.assertTrue(ps)
         self.assertEqual(ps.flags, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT)
 
+        # try to set the flag again, just to make sure it doesn't change
+        succ = BlockDev.part_set_disk_flag (self.loop_dev, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT, True)
+        ps = BlockDev.part_get_disk_spec (self.loop_dev)
+        self.assertTrue(ps)
+        self.assertEqual(ps.flags, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT)
+
         succ = BlockDev.part_set_disk_flag (self.loop_dev, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT, False)
         ps = BlockDev.part_get_disk_spec (self.loop_dev)
         self.assertTrue(ps)
