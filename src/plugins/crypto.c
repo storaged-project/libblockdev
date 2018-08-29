@@ -29,6 +29,7 @@
 #include <syslog.h>
 #include <blkid.h>
 #include <blockdev/utils.h>
+#include <luksmeta.h>
 
 #ifdef WITH_BD_ESCROW
 #include <nss.h>
@@ -858,6 +859,38 @@ static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 k
         if (ret < 0) {
             g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_ADD_KEY,
                          "Failed to add key file: %s", strerror_l(-ret, c_locale));
+            crypt_free (cd);
+            bd_utils_report_finished (progress_id, (*error)->message);
+            return FALSE;
+        }
+    }
+
+    /* Initialize the gap between the LUKSv1 header and the encrypted
+       data for luksmeta.  This is a common use for it and
+       initializing it now let's people use this device with clevis
+       right away without having first to decide whether it is safe to
+       overwrite data in the gap.  This might be a difficult decision
+       if you don't already understand the realtionships between
+       cryptsetup, luksmeta, and clevis.
+
+       Maybe even more importantly, if we don't nuke the gap here,
+       whatever was on the disk before formatting it as luks will
+       remain in the gap (because libcrypto itself doesn't clear it
+       right now).  If the disk used to be a luks volume with luksmeta
+       in its previous life, the old luksmeta slots will come back and
+       might confuse clevis to the point of breaking it.
+
+       See https://bugzilla.redhat.com/show_bug.cgi?id=1594217
+    */
+
+    if (luks_version == BD_CRYPTO_LUKS_VERSION_LUKS1) {
+        ret = luksmeta_nuke (cd);
+        if (ret >= 0)
+            ret = luksmeta_init (cd);
+
+        if (ret < 0) {
+            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
+                         "Failed to initialize disk for luksmeta: %s", strerror_l(-ret, c_locale));
             crypt_free (cd);
             bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
