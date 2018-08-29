@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 from contextlib import contextmanager
 import utils
-from utils import run, create_sparse_tempfile, mount, umount, unstable_test
+from utils import run, create_sparse_tempfile, mount, umount, unstable_test, skip_on
 import six
 import overrides_hack
 
@@ -1135,6 +1135,7 @@ class MountTest(FSTestCase):
             BlockDev.fs_unmount(self.loop_dev, run_as_uid=uid, run_as_gid=gid)
         self.assertTrue(os.path.ismount(tmp))
 
+    @skip_on("debian", "testing", reason="NTFS mounting is broken on Debian testing")
     def test_mount_ntfs(self):
         """ Test basic mounting and unmounting with NTFS filesystem"""
         # using NTFS because it uses a helper program (mount.ntfs) and libmount

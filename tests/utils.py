@@ -224,6 +224,13 @@ def run_command(command, cmd_input=None):
     out, err = res.communicate(input=cmd_input)
     return (res.returncode, out.decode().strip(), err.decode().strip())
 
+def get_version_from_lsb():
+    ret, out, err = run_command("lsb_release -rs")
+    if ret != 0:
+        raise RuntimeError("Cannot get distro version from lsb_release output: '%s %s'" % (out, err))
+
+    return out.split(".")[0]
+
 def get_version_from_pretty_name(pretty_name):
     """ Try to get distro and version from 'OperatingSystemPrettyName'
         hostname property.
@@ -240,7 +247,7 @@ def get_version_from_pretty_name(pretty_name):
     if match is not None:
         version = match.group(0)
     else:
-        raise RuntimeError("Cannot get distro name and version from '%s'" % pretty_name)
+        version = get_version_from_lsb()
 
     return (distro, version)
 
