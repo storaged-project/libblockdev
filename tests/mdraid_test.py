@@ -6,7 +6,7 @@ from contextlib import contextmanager
 import overrides_hack
 import six
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, skip_on
 from gi.repository import BlockDev, GLib
 
 
@@ -372,6 +372,7 @@ class MDTestNominateDenominateActive(MDTestCase):
 
 class MDTestAddRemove(MDTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @skip_on("debian", reason="Removing spare disks from an array is broken on Debian")
     def test_add_remove(self):
         """Verify that it is possible to add a device to and remove from an MD RAID"""
 
