@@ -1344,3 +1344,30 @@ class LVMTechTest(LVMTestCase):
         # only query is supported with calcs
         with six.assertRaisesRegex(self, GLib.GError, "Only 'query' supported for thin calculations"):
             BlockDev.lvm_is_tech_avail(BlockDev.LVMTech.THIN_CALCS, BlockDev.LVMTechMode.CREATE)
+
+@unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
+class LvmTestPVremoveConfig(LvmPVonlyTestCase):
+    def test_pvremove_with_config(self):
+        """Verify that we correctly pass extra arguments when calling PvRemove"""
+
+        # we add some extra arguments to PvRemove (like '-ff') and we want
+        # to be sure that adding these works together with '--config'
+
+        BlockDev.lvm_set_global_config("backup {backup=0 archive=0}")
+        self.addCleanup(BlockDev.lvm_set_global_config, None)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0, None)
+        self.assertTrue(succ)
+
+        # we are removing pv that is part of vg -- '-ff' option must be included
+        succ = BlockDev.lvm_pvremove(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvremove(self.loop_dev2, None)
+        self.assertTrue(succ)

@@ -464,6 +464,35 @@ static GVariant* get_lvm_object_property (const gchar *obj_id, const gchar *ifac
     }
 }
 
+static gboolean unbox_params_and_add (GVariant *params, GVariantBuilder *builder) {
+    GVariantIter iter;
+    GVariant *param = NULL;
+    gboolean ret = FALSE;
+
+    if (g_variant_is_of_type (params, G_VARIANT_TYPE_DICTIONARY)) {
+        g_variant_iter_init (&iter, params);
+        while ((param = g_variant_iter_next_value (&iter))) {
+            g_variant_builder_add_value (builder, param);
+            ret = TRUE;
+        }
+        return ret;
+    }
+
+    if (g_variant_is_of_type (params, G_VARIANT_TYPE_VARIANT)) {
+        param = g_variant_get_variant (params);
+        return unbox_params_and_add (param, builder);
+    }
+
+    if (g_variant_is_container (params)) {
+        g_variant_iter_init (&iter, params);
+        while ((param = g_variant_iter_next_value (&iter)))
+            ret = unbox_params_and_add (param, builder);
+        return ret;
+    }
+
+    return FALSE;
+}
+
 static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, guint64 *task_id, guint64 *progress_id, GError **error) {
     GVariant *config = NULL;
     GVariant *param = NULL;
@@ -491,13 +520,8 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
             /* add the global config to the extra_params */
             g_variant_builder_init (&extra_builder, G_VARIANT_TYPE_DICTIONARY);
 
-            if (extra_params) {
-                g_variant_iter_init (&iter, extra_params);
-                while ((param = g_variant_iter_next_value (&iter))) {
-                    g_variant_builder_add_value (&extra_builder, param);
-                    added_extra = TRUE;
-                }
-            }
+            if (extra_params)
+                added_extra = unbox_params_and_add (extra_params, &extra_builder);
 
             if (extra_args) {
                 for (extra_p=extra_args; *extra_p; extra_p++) {
