@@ -192,7 +192,7 @@ class KbdZRAMStatsTestCase(KbdZRAMTestCase):
 
         # read 'num_reads' and 'num_writes' from '/sys/block/zram0/stat'
         sys_stats = read_file("/sys/block/zram0/stat").strip().split()
-        self.assertEqual(len(sys_stats), 11)
+        self.assertGreaterEqual(len(sys_stats), 11)  # 15 stats since 4.19
         num_reads = int(sys_stats[0])
         num_writes = int(sys_stats[4])
         self.assertEqual(stats.num_reads, num_reads)
