@@ -1708,15 +1708,15 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
  * Tech category: %BD_PART_TECH_MODE_MODIFY_PART + the tech according to the partition table type
  */
 gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gchar *name, GError **error) {
-    PedDevice *dev = NULL;
-    PedDisk *ped_disk = NULL;
-    PedPartition *ped_part = NULL;
-    const gchar *part_num_str = NULL;
+    struct fdisk_context *cxt = NULL;
+    struct fdisk_label *lb = NULL;
+    struct fdisk_partition *pa = NULL;
+    const gchar *label_name = NULL;
     gint part_num = 0;
     gint status = 0;
-    gboolean ret = FALSE;
     guint64 progress_id = 0;
     gchar *msg = NULL;
+    const gchar *part_num_str = NULL;
 
     msg = g_strdup_printf ("Started setting name on the partition '%s'", part);
     progress_id = bd_utils_report_started (msg);
@@ -1730,28 +1730,26 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
         return FALSE;
     }
 
-    dev = ped_device_get (disk);
-    if (!dev) {
-        set_parted_error (error, BD_PART_ERROR_INVAL);
-        g_prefix_error (error, "Device '%s' invalid or not existing", disk);
-        bd_utils_report_finished (progress_id, (*error)->message);
+    cxt = get_device_context (disk, error);
+    if (!cxt) {
+        /* error is already populated */
         return FALSE;
     }
 
-    ped_disk = ped_disk_new (dev);
-    if (!ped_disk) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
-        ped_device_destroy (dev);
-        bd_utils_report_finished (progress_id, (*error)->message);
+    lb = fdisk_get_label (cxt, NULL);
+    if (!lb) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to read partition table on device '%s'", disk);
+        close_context (cxt);
         return FALSE;
     }
-    if (!(ped_disk->type->features & PED_DISK_TYPE_PARTITION_NAME)) {
+
+    label_name = fdisk_label_get_name (lb);
+    if (g_strcmp0 (label_name, table_type_str_fdisk[BD_PART_TABLE_GPT]) != 0) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Partition names unsupported on the device '%s' ('%s')", disk,
-                     ped_disk->type->name);
-        ped_disk_destroy (ped_disk);
-        ped_device_destroy (dev);
+                     label_name);
+        close_context (cxt);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
@@ -1766,40 +1764,55 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
     if (part_num == 0) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Invalid partition path given: '%s'. Cannot extract partition number", part);
-        ped_disk_destroy (ped_disk);
-        ped_device_destroy (dev);
+        close_context (cxt);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
-    ped_part = ped_disk_get_partition (ped_disk, part_num);
-    if (!ped_part) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
-        ped_disk_destroy (ped_disk);
-        ped_device_destroy (dev);
+    /* /dev/sda1 is the partition number 0 in libfdisk */
+    part_num--;
+
+    status = fdisk_get_partition (cxt, part_num, &pa);
+    if (status != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to get partition '%s' on device '%s': %s",
+                     part, disk, strerror_l (-status, c_locale));
+        close_context (cxt);
+        return FALSE;
+    }
+
+    status = fdisk_partition_set_name (pa, name);
+    if (status != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to set name on the partition '%s' on device '%s': %s",
+                     part, disk, strerror_l (-status, c_locale));
+        close_context (cxt);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
-    status = ped_partition_set_name (ped_part, name);
-    if (status == 0) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to set name on the partition '%d' on device '%s'", part_num, disk);
-        ped_disk_destroy (ped_disk);
-        ped_device_destroy (dev);
+    status = fdisk_set_partition (cxt, part_num, pa);
+    if (status != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to set name on the partition '%s' on device '%s': %s",
+                     part, disk, strerror_l (-status, c_locale));
+        fdisk_unref_partition (pa);
+        close_context (cxt);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
-    ret = disk_commit (ped_disk, disk, error);
+    fdisk_unref_partition (pa);
 
-    ped_disk_destroy (ped_disk);
-    ped_device_destroy (dev);
+    if (!write_label (cxt, disk, error)) {
+        bd_utils_report_finished (progress_id, (*error)->message);
+        close_context (cxt);
+        return FALSE;
+    }
 
+    close_context (cxt);
     bd_utils_report_finished (progress_id, "Completed");
-
-    return ret;
+    return TRUE;
 }
 
 /**
