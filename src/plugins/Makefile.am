@@ -67,7 +67,7 @@ endif
 
 if WITH_BTRFS
 libbd_btrfs_la_CFLAGS = $(GLIB_CFLAGS) $(BYTESIZE_CFLAGS) -Wall -Wextra -Werror
-libbd_btrfs_la_LIBADD = $(GLIB_LIBS) $(BYTESIZE_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_btrfs_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(BYTESIZE_LIBS)
 libbd_btrfs_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_btrfs_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_btrfs_la_SOURCES = btrfs.c btrfs.h check_deps.c check_deps.h
@@ -88,7 +88,7 @@ endif
 
 if WITH_DM
 libbd_dm_la_CFLAGS = $(GLIB_CFLAGS) $(DEVMAPPER_CFLAGS) -Wall -Wextra -Werror
-libbd_dm_la_LIBADD = $(GLIB_LIBS) $(DEVMAPPER_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_dm_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(DEVMAPPER_LIBS)
 libbd_dm_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_dm_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_dm_la_SOURCES = dm.c dm.h check_deps.c check_deps.h
@@ -102,7 +102,7 @@ endif
 
 if WITH_LOOP
 libbd_loop_la_CFLAGS = $(GLIB_CFLAGS) -Wall -Wextra -Werror
-libbd_loop_la_LIBADD = $(GLIB_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_loop_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS)
 libbd_loop_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_loop_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_loop_la_SOURCES = loop.c loop.h
@@ -110,7 +110,7 @@ endif
 
 if WITH_LVM
 libbd_lvm_la_CFLAGS = $(GLIB_CFLAGS) $(DEVMAPPER_CFLAGS) -Wall -Wextra -Werror
-libbd_lvm_la_LIBADD = -lm $(GLIB_LIBS) $(DEVMAPPER_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_lvm_la_LIBADD = ${builddir}/../utils/libbd_utils.la -lm $(GLIB_LIBS) $(DEVMAPPER_LIBS)
 libbd_lvm_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_lvm_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_lvm_la_SOURCES = lvm.c lvm.h check_deps.c check_deps.h
@@ -118,7 +118,7 @@ endif
 
 if WITH_LVM_DBUS
 libbd_lvm_dbus_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(DEVMAPPER_CFLAGS) -Wall -Wextra -Werror
-libbd_lvm_dbus_la_LIBADD = -lm $(GLIB_LIBS) $(GIO_LIBS) $(DEVMAPPER_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_lvm_dbus_la_LIBADD = ${builddir}/../utils/libbd_utils.la -lm $(GLIB_LIBS) $(GIO_LIBS) $(DEVMAPPER_LIBS)
 libbd_lvm_dbus_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_lvm_dbus_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_lvm_dbus_la_SOURCES = lvm-dbus.c lvm.h check_deps.c check_deps.h
@@ -126,7 +126,7 @@ endif
 
 if WITH_MDRAID
 libbd_mdraid_la_CFLAGS = $(GLIB_CFLAGS) $(BYTESIZE_CFLAGS) -Wall -Wextra -Werror
-libbd_mdraid_la_LIBADD = $(GLIB_LIBS) $(BYTESIZE_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_mdraid_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(BYTESIZE_LIBS)
 libbd_mdraid_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_mdraid_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_mdraid_la_SOURCES = mdraid.c mdraid.h check_deps.c check_deps.h
@@ -134,7 +134,7 @@ endif
 
 if WITH_MPATH
 libbd_mpath_la_CFLAGS = $(GLIB_CFLAGS) $(DEVMAPPER_CFLAGS) -Wall -Wextra -Werror
-libbd_mpath_la_LIBADD = $(GLIB_LIBS) $(DEVMAPPER_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_mpath_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(DEVMAPPER_LIBS)
 libbd_mpath_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_mpath_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_mpath_la_SOURCES = mpath.c mpath.h check_deps.c check_deps.h
@@ -142,7 +142,7 @@ endif
 
 if WITH_NVDIMM
 libbd_nvdimm_la_CFLAGS = $(GLIB_CFLAGS) $(UUID_CFLAGS) $(NDCTL_CFLAGS) -Wall -Wextra -Werror
-libbd_nvdimm_la_LIBADD = $(GLIB_LIBS) $(UUID_LIBS) $(NDCTL_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_nvdimm_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(UUID_LIBS) $(NDCTL_LIBS)
 libbd_nvdimm_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_nvdimm_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_nvdimm_la_SOURCES = nvdimm.c nvdimm.h check_deps.c check_deps.h
@@ -150,7 +150,7 @@ endif
 
 if WITH_SWAP
 libbd_swap_la_CFLAGS = $(GLIB_CFLAGS) -Wall -Wextra -Werror
-libbd_swap_la_LIBADD = $(GLIB_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_swap_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS)
 libbd_swap_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_swap_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_swap_la_SOURCES = swap.c swap.h check_deps.c check_deps.h
@@ -158,7 +158,7 @@ endif
 
 if WITH_KBD
 libbd_kbd_la_CFLAGS = $(GLIB_CFLAGS) $(BYTESIZE_CFLAGS) -Wall -Wextra -Werror
-libbd_kbd_la_LIBADD = $(GLIB_LIBS) $(BYTESIZE_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_kbd_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(BYTESIZE_LIBS)
 libbd_kbd_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_kbd_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_kbd_la_SOURCES = kbd.c kbd.h check_deps.c check_deps.h
@@ -166,7 +166,7 @@ endif
 
 if WITH_S390
 libbd_s390_la_CFLAGS = $(GLIB_CFLAGS) -Wall -Wextra -Werror
-libbd_s390_la_LIBADD = $(GLIB_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_s390_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS)
 libbd_s390_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_s390_la_CPPFLAGS = -I${srcdir}/../utils/
 libbd_s390_la_CPPFLAGS = -I${builddir}/../../include/
@@ -175,7 +175,7 @@ endif
 
 if WITH_PART
 libbd_part_la_CFLAGS = $(GLIB_CFLAGS) $(PARTED_CFLAGS) -Wall -Wextra -Werror
-libbd_part_la_LIBADD = -lm $(GLIB_LIBS) $(PARTED_LIBS) ${builddir}/../utils/libbd_utils.la ${builddir}/libbd_part_err.la
+libbd_part_la_LIBADD = ${builddir}/../utils/libbd_utils.la ${builddir}/libbd_part_err.la -lm $(GLIB_LIBS) $(PARTED_LIBS)
 libbd_part_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_part_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_part_la_SOURCES = part.c part.h check_deps.c check_deps.h
@@ -183,7 +183,7 @@ endif
 
 if WITH_PART_O_WITH_FS
 libbd_part_err_la_CFLAGS = $(GLIB_CFLAGS) $(PARTED_CFLAGS) $(PARTED_FS_CFLAGS) -Wall -Wextra -Werror
-libbd_part_err_la_LIBADD = $(GLIB_LIBS) $(PARTED_LIBS) $(PARTED_FS_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_part_err_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(PARTED_LIBS) $(PARTED_FS_LIBS)
 libbd_part_err_la_LDFLAGS = -L${srcdir}/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_part_err_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_part_err_la_SOURCES = part_err.c part_err.h
@@ -191,7 +191,7 @@ endif
 
 if WITH_VDO
 libbd_vdo_la_CFLAGS = $(GLIB_CFLAGS) $(BYTESIZE_CFLAGS) $(YAML_CFLAGS) -Wall -Wextra -Werror
-libbd_vdo_la_LIBADD = -lm $(GLIB_LIBS) $(BYTESIZE_LIBS) $(YAML_LIBS) ${builddir}/../utils/libbd_utils.la
+libbd_vdo_la_LIBADD = ${builddir}/../utils/libbd_utils.la -lm $(GLIB_LIBS) $(BYTESIZE_LIBS) $(YAML_LIBS)
 libbd_vdo_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_vdo_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_vdo_la_SOURCES = vdo.c vdo.h check_deps.c check_deps.h
