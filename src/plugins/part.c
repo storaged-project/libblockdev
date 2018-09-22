@@ -30,6 +30,8 @@
 #include <linux/fs.h>
 #include <blockdev/utils.h>
 #include <part_err.h>
+#include <libfdisk.h>
+#include <locale.h>
 
 #include "part.h"
 #include "check_deps.h"
@@ -109,6 +111,56 @@ void bd_part_disk_spec_free (BDPartDiskSpec *data) {
 
     g_free (data->path);
     g_free (data);
+}
+
+/* "C" locale to get the locale-agnostic error messages */
+static locale_t c_locale = (locale_t) 0;
+
+static struct fdisk_context* get_device_context (const gchar *disk, GError **error) {
+    struct fdisk_context *cxt = fdisk_new_context ();
+    gint ret = 0;
+
+    if (!cxt) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to create a new context");
+        return NULL;
+    }
+
+    ret = fdisk_assign_device (cxt, disk, FALSE);
+    if (ret != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to assign the new context to disk '%s': %s", disk, strerror_l (-ret, c_locale));
+        fdisk_unref_context (cxt);
+        return NULL;
+    }
+
+    fdisk_disable_dialogs(cxt, 1);
+    return cxt;
+}
+
+static void close_context (struct fdisk_context *cxt) {
+    gint ret = 0;
+
+    ret = fdisk_deassign_device (cxt, 0); /* context, nosync */
+
+    if (ret != 0)
+        /* XXX: should report error here? */
+        g_warning ("Failed to close and sync the device: %s", strerror_l (-ret, c_locale));
+
+    fdisk_unref_context (cxt);
+}
+
+static gboolean write_label (struct fdisk_context *cxt, const gchar *disk, GError **error) {
+    gint ret = 0;
+    ret = fdisk_write_disklabel (cxt);
+
+    if (ret != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to write the new disklabel to disk '%s': %s", disk, strerror_l (-ret, c_locale));
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 /**
@@ -191,6 +243,8 @@ gboolean bd_part_check_deps (void) {
  */
 gboolean bd_part_init (void) {
     ped_exception_set_handler ((PedExceptionHandler*) bd_exc_handler);
+    c_locale = newlocale (LC_ALL_MASK, "C", c_locale);
+    fdisk_init_debug (0);
     return TRUE;
 }
 
@@ -203,6 +257,7 @@ gboolean bd_part_init (void) {
  */
 void bd_part_close (void) {
     ped_exception_set_handler (NULL);
+    c_locale = (locale_t) 0;
 }
 
 /**
@@ -232,7 +287,8 @@ gboolean bd_part_is_tech_avail (BDPartTech tech, guint64 mode, GError **error) {
     }
 }
 
-static const gchar *table_type_str[BD_PART_TABLE_UNDEF] = {"msdos", "gpt"};
+static const gchar *table_type_str_parted[BD_PART_TABLE_UNDEF] = {"msdos", "gpt"};
+static const gchar *table_type_str_fdisk[BD_PART_TABLE_UNDEF] = {"dos", "gpt"};
 
 static gboolean disk_commit (PedDisk *disk, const gchar *path, GError **error) {
     gint ret = 0;
@@ -299,10 +355,8 @@ static gboolean disk_commit (PedDisk *disk, const gchar *path, GError **error) {
  * Tech category: %BD_PART_TECH_MODE_CREATE_TABLE + the tech according to @type
  */
 gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean ignore_existing, GError **error) {
-    PedDevice *dev = NULL;
-    PedDisk *ped_disk = NULL;
-    PedDiskType *disk_type = NULL;
-    gboolean ret = FALSE;
+    struct fdisk_context *cxt = NULL;
+    gint ret = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
 
@@ -310,48 +364,39 @@ gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    dev = ped_device_get (disk);
-    if (!dev) {
-        set_parted_error (error, BD_PART_ERROR_INVAL);
-        g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+    cxt = get_device_context (disk, error);
+    if (!cxt) {
+        /* error is already populated */
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
-    if (!ignore_existing) {
-        ped_disk = ped_disk_new (dev);
-        if (ped_disk) {
-            /* no parted error */
-            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_EXISTS,
-                         "Device '%s' already contains a partition table", disk);
-            ped_disk_destroy (ped_disk);
-            ped_device_destroy (dev);
-            bd_utils_report_finished (progress_id, (*error)->message);
-            return FALSE;
-        }
-    }
-
-    disk_type = ped_disk_type_get (table_type_str[type]);
-    ped_disk = ped_disk_new_fresh (dev, disk_type);
-    if (!ped_disk) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to create a new partition table of type '%s' on device '%s'",
-                        table_type_str[type], disk);
-        ped_device_destroy (dev);
+    if (!ignore_existing && fdisk_has_label (cxt)) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_EXISTS,
+                     "Device '%s' already contains a partition table", disk);
         bd_utils_report_finished (progress_id, (*error)->message);
+        close_context (cxt);
         return FALSE;
     }
 
-    /* commit changes to disk */
-    ret = disk_commit (ped_disk, disk, error);
+    ret = fdisk_create_disklabel (cxt, table_type_str_fdisk[type]);
+    if (ret != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to create a new disklabel for disk '%s': %s", disk, strerror_l (-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
+        close_context (cxt);
+        return FALSE;
+    }
 
-    ped_disk_destroy (ped_disk);
-    ped_device_destroy (dev);
+    if (!write_label (cxt, disk, error)) {
+        bd_utils_report_finished (progress_id, (*error)->message);
+        close_context (cxt);
+        return FALSE;
+    }
 
+    close_context (cxt);
     bd_utils_report_finished (progress_id, "Completed");
-
-    /* just return what we got (error may be set) */
-    return ret;
+    return TRUE;
 }
 
 static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_num, guint64 *flags, GError **error) {
@@ -618,7 +663,7 @@ BDPartDiskSpec* bd_part_get_disk_spec (const gchar *disk, GError **error) {
     ped_disk = ped_disk_new (dev);
     if (ped_disk) {
         for (type=BD_PART_TABLE_MSDOS; !found && type < BD_PART_TABLE_UNDEF; type++) {
-            if (g_strcmp0 (ped_disk->type->name, table_type_str[type]) == 0) {
+            if (g_strcmp0 (ped_disk->type->name, table_type_str_parted[type]) == 0) {
                 ret->table_type = type;
                 found = TRUE;
             }
@@ -1118,13 +1163,10 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
  * Tech category: %BD_PART_TECH_MODE_MODIFY_TABLE + the tech according to the partition table type
  */
 gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **error) {
-    PedDevice *dev = NULL;
-    PedDisk *ped_disk = NULL;
-    PedPartition *ped_part = NULL;
     const gchar *part_num_str = NULL;
     gint part_num = 0;
-    gint status = 0;
-    gboolean ret = FALSE;
+    struct fdisk_context *cxt = NULL;
+    gint ret = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
 
@@ -1139,67 +1181,48 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
         return FALSE;
     }
 
-    dev = ped_device_get (disk);
-    if (!dev) {
-        set_parted_error (error, BD_PART_ERROR_INVAL);
-        g_prefix_error (error, "Device '%s' invalid or not existing", disk);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    ped_disk = ped_disk_new (dev);
-    if (!ped_disk) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
-        ped_device_destroy (dev);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
     part_num_str = part + (strlen (part) - 1);
     while (isdigit (*part_num_str) || (*part_num_str == '-')) {
         part_num_str--;
     }
     part_num_str++;
-
     part_num = atoi (part_num_str);
     if (part_num == 0) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Invalid partition path given: '%s'. Cannot extract partition number", part);
-        ped_disk_destroy (ped_disk);
-        ped_device_destroy (dev);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
-    ped_part = ped_disk_get_partition (ped_disk, part_num);
-    if (!ped_part) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
-        ped_disk_destroy (ped_disk);
-        ped_device_destroy (dev);
+    /* /dev/sda1 is the partition number 0 in libfdisk */
+    part_num--;
+    cxt = get_device_context (disk, error);
+    if (!cxt) {
+        /* error is already populated */
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
-    status = ped_disk_delete_partition (ped_disk, ped_part);
-    if (status == 0) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to delete partition '%d' on device '%s'", part_num, disk);
-        ped_disk_destroy (ped_disk);
-        ped_device_destroy (dev);
+    ret = fdisk_delete_partition (cxt, (size_t) part_num);
+    if (ret != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to delete partition '%d' on device '%s': %s", part_num+1, disk, strerror_l (-ret, c_locale));
+        close_context (cxt);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
-    ret = disk_commit (ped_disk, disk, error);
+    if (!write_label (cxt, disk, error)) {
+        bd_utils_report_finished (progress_id, (*error)->message);
+        close_context (cxt);
+        return FALSE;
+    }
 
-    ped_disk_destroy (ped_disk);
-    ped_device_destroy (dev);
+    close_context (cxt);
 
     bd_utils_report_finished (progress_id, "Completed");
 
-    return ret;
+    return TRUE;
 }
 
 /**
@@ -1978,7 +2001,7 @@ const gchar* bd_part_get_part_table_type_str (BDPartTableType type, GError **err
         return NULL;
     }
 
-    return table_type_str[type];
+    return table_type_str_parted[type];
 }
 
 /**
