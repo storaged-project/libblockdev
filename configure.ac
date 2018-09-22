@@ -223,7 +223,8 @@ AS_IF([test "x$with_dm" != "xno" -a "x$with_dmraid" != "xno"],
       [])
 
 AS_IF([test "x$with_part" != "xno" -o "x$with_fs" != "xno"],
-      [LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED], [libparted >= 3.1])]
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED], [libparted >= 3.1])
+      LIBBLOCKDEV_PKG_CHECK_MODULES([FDISK], [fdisk >= 2.31.0])]
       [])
 
 AS_IF([test "x$with_fs" != "xno"],
