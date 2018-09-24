@@ -35,6 +35,7 @@ AC_CONFIG_FILES([Makefile src/Makefile \
                           dist/Makefile \
                           dist/libblockdev.spec \
                           scripts/Makefile \
+                          tools/Makefile \
                           data/Makefile \
                           data/conf.d/Makefile])
 
