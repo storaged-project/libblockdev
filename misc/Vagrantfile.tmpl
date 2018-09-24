@@ -1,0 +1,64 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+#
+# A Vagrantfile template that can be used for creating machines for libblockdev
+# development/testing.
+#
+# Use 'vagrant up && vagrant ssh' to spawn the default machine (most recent
+# Fedora) and ssh into it or e.g. 'vagrant up bd-f27 && vagrant ssh bd-f27' to
+# use a Fedora 27 based machine.
+#
+
+Vagrant.configure("2") do |config|
+  # common configuration
+
+  # USE YOUR PATH TO THE SOURCES BELOW
+  config.vm.synced_folder "~/sources/libblockdev", "/home/vagrant/libblockdev",
+                          type: "rsync", rsync__args: ["-a", "-l"]  # override the default args
+
+  # CHECK THAT THE BELOW OPTIONS ARE OKAY FOR YOUR HW
+  config.vm.provider :libvirt do |v|
+    v.memory = "1024"
+    v.cpus = 4
+  end
+
+  # just some handy stuff to have in shell OOTB
+  config.vm.provision :shell, inline: <<-SHELL
+    echo 'MAKEFLAGS="-j -l4"' >> /home/vagrant/.bashrc
+    echo 'cd libblockdev' >> /home/vagrant/.bash_history
+    echo './autogen.sh && ./configure --without-vdo --without-nvdimm' >> /home/vagrant/.bash_history
+  SHELL
+
+  config.vm.define "bd-f28", primary: true, autostart: true do |f28|
+    # F28-specific configuration
+    f28.vm.box = "fedora/28-cloud-base"
+    f28.vm.provision :shell, inline: <<-SHELL
+      dnf -y install libblockdev libblockdev-plugins-all
+      dnf -y builddep libblockdev
+      dnf -y install libfdisk-devel
+      dnf -y install '@Development Tools' '@C Development Tools and Libraries' targetcli python3-ipython git python3-bytesize volume_key
+    SHELL
+  end
+
+  config.vm.define "bd-f27", primary: false, autostart: false do |f27|
+    # F27-specific configuration
+    f27.vm.box = "fedora/27-cloud-base"
+    f27.vm.provision :shell, inline: <<-SHELL
+      dnf -y install libblockdev libblockdev-plugins-all
+      dnf -y builddep libblockdev
+      dnf -y install libfdisk-devel
+      dnf -y install '@Development Tools' '@C Development Tools and Libraries' targetcli python3-ipython git python3-bytesize volume_key
+    SHELL
+  end
+
+  config.vm.define "bd-c7", primary: false, autostart: false do |c7|
+    # CentOS7-specific configuration
+    c7.vm.box = "centos/7"
+    c7.vm.provision :shell, inline: <<-SHELL
+      yum -y install libblockdev libblockdev-plugins-all
+      yum-builddep -y libblockdev
+      yum -y install '@Development Tools' targetcli python-ipython git python-bytesize volume_key
+    SHELL
+  end
+end

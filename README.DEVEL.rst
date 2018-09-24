@@ -82,6 +82,7 @@ The directory structure is as follows::
   │   └── conf.d               -- configuration files
   ├── dist                     -- packaging files
   ├── docs                     -- files used to generate documentation
+  ├── misc                     -- miscellaneous files easing development
   ├── scripts                  -- helper scripts
   ├── src                      -- source files
   │   ├── lib                  -- library sources
