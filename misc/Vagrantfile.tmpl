@@ -38,6 +38,7 @@ Vagrant.configure("2") do |config|
       dnf -y builddep libblockdev
       dnf -y install libfdisk-devel
       dnf -y install '@Development Tools' '@C Development Tools and Libraries' targetcli python3-ipython git python3-bytesize volume_key
+      dnf -y install xfsprogs dosfstools e2fsprogs cryptsetup python3-pylint glibc-all-langpacks python3-six python3-dbus python3-yaml
     SHELL
   end
 
@@ -49,6 +50,7 @@ Vagrant.configure("2") do |config|
       dnf -y builddep libblockdev
       dnf -y install libfdisk-devel
       dnf -y install '@Development Tools' '@C Development Tools and Libraries' targetcli python3-ipython git python3-bytesize volume_key
+      dnf -y install xfsprogs dosfstools e2fsprogs cryptsetup python3-pylint glibc-all-langpacks python3-six python3-dbus python3-yaml
     SHELL
   end
 
@@ -59,6 +61,7 @@ Vagrant.configure("2") do |config|
       yum -y install libblockdev libblockdev-plugins-all
       yum-builddep -y libblockdev
       yum -y install '@Development Tools' targetcli python-ipython git python-bytesize volume_key
+      yum -y install pylint python-six dbus-python python-yaml
     SHELL
   end
 end
