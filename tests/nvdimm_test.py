@@ -8,15 +8,18 @@ from distutils.version import LooseVersion
 
 from utils import run_command, read_file, skip_on, fake_path
 from gi.repository import BlockDev, GLib
+from distutils.spawn import find_executable
 
 
-@skip_on("debian", reason="NVDIMM plugin doesn't work on Debian (missing ndctl)")
 class NVDIMMTestCase(unittest.TestCase):
 
     requested_plugins = BlockDev.plugin_specs_from_names(("nvdimm",))
 
     @classmethod
     def setUpClass(cls):
+        if not find_executable("ndctl"):
+            raise unittest.SkipTest("ndctl executable not foundin $PATH, skipping.")
+
         if not BlockDev.is_initialized():
             BlockDev.init(cls.requested_plugins, None)
         else:
