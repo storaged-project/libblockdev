@@ -18,7 +18,7 @@ PASSWD3 = "myshinylittlepassword3"
 
 def have_luks2():
     try:
-        succ = BlockDev.utils_check_util_version("cryptsetup", "2.0.0", "--version", r"cryptsetup ([0-9+\.]+)")
+        succ = BlockDev.utils_check_util_version("cryptsetup", "2.0.3", "--version", r"cryptsetup ([0-9+\.]+)")
     except GLib.GError:
         return False
     else:
