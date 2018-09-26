@@ -21,6 +21,7 @@ Vagrant.configure("2") do |config|
   config.vm.provider :libvirt do |v|
     v.memory = "1024"
     v.cpus = 4
+    v.volume_cache = :unsafe
   end
 
   # just some handy stuff to have in shell OOTB
