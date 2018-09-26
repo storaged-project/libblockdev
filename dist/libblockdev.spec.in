@@ -120,7 +120,7 @@
 %define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?vdo_copts} %{?gi_copts}
 
 Name:        libblockdev
-Version:     2.19
+Version:     2.20
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -957,6 +957,32 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Sep 26 2018 Vojtech Trefny <vtrefny@redhat.com> - 2.20-1
+- Use unsafe caching for storage for devel/testing VMs (v.podzimek)
+- Require newer version of cryptsetup for LUKS2 tests (vtrefny)
+- Skip nvdimm tests on systems without ndctl (vtrefny)
+- Add Ubuntu 18.04 VM configuration to the vagrant template (vtrefny)
+- Add some missing test dependencies to the vagrant template (vtrefny)
+- Fix how/where the bcache tests are skipped (v.podzimek)
+- Document what the 'misc' directory contains (v.podzimek)
+- Add a Vagrantfile template (v.podzimek)
+- Fix the error message when deleting partition fails (vpodzime)
+- Fix build of plugins by changing linking order (devurandom)
+- Fix how we check zram stats from /sys/block/zram0/stat (vtrefny)
+- lvm-dbus: Fix parsing extra arguments for LVM methods calls (vtrefny)
+- Skip MDTestAddRemove on Debian (vtrefny)
+- Skip NTFS mount test on Debian testing (vtrefny)
+- Skip bcache tests on Debian testing (vtrefny)
+- tests: Try harder to get distribution version (vtrefny)
+- Mark the function stubs as static (v.podzimek)
+- Build the dm plugin without dmraid support on newer RHEL (vtrefny)
+- Fix skipping zram tests on Fedora 27 (vtrefny)
+- kbd: Check for zram module availability in 'bd_kbd_is_tech_avail' (vtrefny)
+- Always build the VDO plugin (vtrefny)
+- Do not require 'dmraid' package if built without dmraid support (vtrefny)
+- Fix licence header in dbus.c (vtrefny)
+- Fix spacing in NEWS.rst (vtrefny)
+
 * Fri Aug 10 2018 Vojtech Trefny <vtrefny@redhat.com> - 2.19-1
 - Use python interpreter explicitly when running boilerplate_generator.py (vtrefny)
 - vdo: Implement bd_vdo_get_stats() (tbzatek)

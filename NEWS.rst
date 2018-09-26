@@ -1,3 +1,56 @@
+Libblockdev 2.20
+----------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Notable changes**
+
+- fixes
+
+  - Fix parsing extra arguments for LVM methods calls in the LVM DBus plugin.
+  - Multiple fixes for running tests on Debian testing.
+
+- development
+
+  - Vagrantfile template was added for easy development machine setup.
+
+**Full list of changes**
+
+Dennis Schridde (1):
+
+- Fix build of plugins by changing linking order
+
+Vojtech Trefny (17):
+
+- Fix spacing in NEWS.rst
+- Fix licence header in dbus.c
+- Do not require 'dmraid' package if built without dmraid support
+- Always build the VDO plugin
+- kbd: Check for zram module availability in 'bd_kbd_is_tech_avail'
+- Fix skipping zram tests on Fedora 27
+- Build the dm plugin without dmraid support on newer RHEL
+- tests: Try harder to get distribution version
+- Skip bcache tests on Debian testing
+- Skip NTFS mount test on Debian testing
+- Skip MDTestAddRemove on Debian
+- lvm-dbus: Fix parsing extra arguments for LVM methods calls
+- Fix how we check zram stats from /sys/block/zram0/stat
+- Add some missing test dependencies to the vagrant template
+- Add Ubuntu 18.04 VM configuration to the vagrant template
+- Skip nvdimm tests on systems without ndctl
+- Require newer version of cryptsetup for LUKS2 tests
+
+Vratislav Podzimek (6):
+
+- Mark the function stubs as static
+- Fix the error message when deleting partition fails
+- Add a Vagrantfile template
+- Document what the 'misc' directory contains
+- Fix how/where the bcache tests are skipped
+- Use unsafe caching for storage for devel/testing VMs
+
+
 Libblockdev 2.19
 ----------------
 
