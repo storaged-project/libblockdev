@@ -149,8 +149,8 @@ libbd_nvdimm_la_SOURCES = nvdimm.c nvdimm.h check_deps.c check_deps.h
 endif
 
 if WITH_SWAP
-libbd_swap_la_CFLAGS = $(GLIB_CFLAGS) -Wall -Wextra -Werror
-libbd_swap_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS)
+libbd_swap_la_CFLAGS = $(GLIB_CFLAGS) $(BLKID_CFLAGS) -Wall -Wextra -Werror
+libbd_swap_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(BLKID_LIBS)
 libbd_swap_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_swap_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_swap_la_SOURCES = swap.c swap.h check_deps.c check_deps.h

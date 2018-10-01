@@ -21,6 +21,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/swap.h>
+#include <fcntl.h>
+#include <blkid.h>
 #include <blockdev/utils.h>
 
 #include "swap.h"
@@ -179,13 +181,14 @@ gboolean bd_swap_mkswap (const gchar *device, const gchar *label, const BDExtraA
  * Tech category: %BD_SWAP_TECH_SWAP-%BD_SWAP_TECH_MODE_ACTIVATE_DEACTIVATE
  */
 gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
-    GIOChannel *dev_file = NULL;
-    GIOStatus io_status = G_IO_STATUS_ERROR;
-    GError *tmp_error = NULL;
-    gsize num_read = 0;
-    gchar dev_status[11];
-    dev_status[10] = '\0';
-    gint page_size;
+    blkid_probe probe = NULL;
+    gint fd = 0;
+    gint status = 0;
+    guint n_try = 0;
+    const gchar *value = NULL;
+    gint64 status_len = 0;
+    gint64 swap_pagesize = 0;
+    gint64 sys_pagesize = 0;
     gint flags = 0;
     gint ret = 0;
     guint64 progress_id = 0;
@@ -198,52 +201,142 @@ gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
 
     bd_utils_report_progress (progress_id, 0, "Analysing the swap device");
     /* check the device if it is an activatable swap */
-    dev_file = g_io_channel_new_file (device, "r", error);
-    if (!dev_file) {
-        /* error is already populated */
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    page_size = getpagesize ();
-    page_size = MAX (2048, page_size);
-    io_status = g_io_channel_seek_position (dev_file, page_size - 10, G_SEEK_SET, &tmp_error);
-    if (io_status != G_IO_STATUS_NORMAL) {
+    probe = blkid_new_probe ();
+    if (!probe) {
         g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UNKNOWN_STATE,
-                     "Failed to determine device's state: %s", tmp_error->message);
-        g_clear_error (&tmp_error);
-        g_io_channel_shutdown (dev_file, FALSE, &tmp_error);
+                     "Failed to create a new probe");
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
-    io_status = g_io_channel_read_chars (dev_file, dev_status, 10, &num_read, &tmp_error);
-    if ((io_status != G_IO_STATUS_NORMAL) || (num_read != 10)) {
+    fd = open (device, O_RDONLY|O_CLOEXEC);
+    if (fd == -1) {
         g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UNKNOWN_STATE,
-                     "Failed to determine device's state: %s", tmp_error->message);
-        g_clear_error (&tmp_error);
-        g_io_channel_shutdown (dev_file, FALSE, &tmp_error);
-        g_clear_error (&tmp_error);
+                     "Failed to open the device '%s'", device);
         bd_utils_report_finished (progress_id, (*error)->message);
+        blkid_free_probe (probe);
         return FALSE;
     }
 
-    g_io_channel_shutdown (dev_file, FALSE, &tmp_error);
-    g_clear_error (&tmp_error);
+    /* we may need to try mutliple times with some delays in case the device is
+       busy at the very moment */
+    for (n_try=5, status=-1; (status != 0) && (n_try > 0); n_try--) {
+        status = blkid_probe_set_device (probe, fd, 0, 0);
+        if (status != 0)
+            g_usleep (100 * 1000); /* microseconds */
+    }
+    if (status != 0) {
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UNKNOWN_STATE,
+                     "Failed to create a probe for the device '%s'", device);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        blkid_free_probe (probe);
+        close (fd);
+        return FALSE;
+    }
 
-    if (g_str_has_prefix (dev_status, "SWAP-SPACE")) {
+    blkid_probe_enable_superblocks (probe, 1);
+    blkid_probe_set_superblocks_flags (probe, BLKID_SUBLKS_TYPE | BLKID_SUBLKS_MAGIC);
+
+    /* we may need to try mutliple times with some delays in case the device is
+       busy at the very moment */
+    for (n_try=5, status=-1; !(status == 0 || status == 1) && (n_try > 0); n_try--) {
+        status = blkid_do_safeprobe (probe);
+        if (status < 0)
+            g_usleep (100 * 1000); /* microseconds */
+    }
+    if (status < 0) {
+        /* -1 or -2 = error during probing*/
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UNKNOWN_STATE,
+                     "Failed to probe the device '%s'", device);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        blkid_free_probe (probe);
+        close (fd);
+        return FALSE;
+    } else if (status == 1) {
+        /* 1 = nothing detected */
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UNKNOWN_STATE,
+                     "No superblock detected on the device '%s'", device);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        blkid_free_probe (probe);
+        close (fd);
+        return FALSE;
+    }
+
+    status = blkid_probe_lookup_value (probe, "TYPE", &value, NULL);
+    if (status != 0) {
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UNKNOWN_STATE,
+                     "Failed to get format type for the device '%s'", device);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        blkid_free_probe (probe);
+        close (fd);
+        return FALSE;
+    }
+
+    if (g_strcmp0 (value, "swap") != 0) {
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UNKNOWN_STATE,
+                     "Device '%s' is not formatted as swap", device);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        blkid_free_probe (probe);
+        close (fd);
+        return FALSE;
+    }
+
+    status = blkid_probe_lookup_value (probe, "SBMAGIC", &value, NULL);
+    if (status != 0) {
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UNKNOWN_STATE,
+                     "Failed to get swap status on the device '%s'", device);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        blkid_free_probe (probe);
+        close (fd);
+        return FALSE;
+    }
+
+    if (g_strcmp0 (value, "SWAP-SPACE") == 0) {
         g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE,
                      "Old swap format, cannot activate.");
         bd_utils_report_finished (progress_id, (*error)->message);
+        blkid_free_probe (probe);
+        close (fd);
         return FALSE;
-    } else if (g_str_has_prefix (dev_status, "S1SUSPEND") || g_str_has_prefix (dev_status, "S2SUSPEND")) {
+    } else if (g_strcmp0 (value, "S1SUSPEND") == 0 || g_strcmp0 (value, "S2SUSPEND") == 0) {
         g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE,
                      "Suspended system on the swap device, cannot activate.");
         bd_utils_report_finished (progress_id, (*error)->message);
+        blkid_free_probe (probe);
+        close (fd);
         return FALSE;
-    } else if (!g_str_has_prefix (dev_status, "SWAPSPACE2")) {
+    } else if (g_strcmp0 (value, "SWAPSPACE2") != 0) {
         g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE,
                      "Unknown swap space format, cannot activate.");
+        bd_utils_report_finished (progress_id, (*error)->message);
+        blkid_free_probe (probe);
+        close (fd);
+        return FALSE;
+    }
+
+    status_len = (gint64) strlen (value);
+
+    status = blkid_probe_lookup_value (probe, "SBMAGIC_OFFSET", &value, NULL);
+    if (status != 0 || !value) {
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UNKNOWN_STATE,
+                     "Failed to get swap status on the device '%s'", device);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        blkid_free_probe (probe);
+        close (fd);
+        return FALSE;
+    }
+
+    swap_pagesize = status_len + g_ascii_strtoll (value, (char **)NULL, 10);
+
+    blkid_free_probe (probe);
+    close (fd);
+
+    sys_pagesize = getpagesize ();
+
+    if (swap_pagesize != sys_pagesize) {
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UNKNOWN_STATE,
+                     "Swap format pagesize (%"G_GINT64_FORMAT") and system pagesize (%"G_GINT64_FORMAT") don't match",
+                     swap_pagesize, sys_pagesize);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
