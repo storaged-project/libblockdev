@@ -1370,12 +1370,45 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
 
 
 static gboolean set_gpt_flag (const gchar *device, int part_num, BDPartFlag flag, gboolean state, GError **error) {
-    const gchar *args[5] = {"sgdisk", "--attributes", NULL, device, NULL};
+    struct fdisk_context *cxt = NULL;
+    struct fdisk_label *lb = NULL;
+    const gchar *label_name = NULL;
     int bit_num = 0;
-    gboolean success = FALSE;
+    guint64 gpt_flags = 0;
+    gint status = 0;
 
-    if (!check_deps (&avail_deps, DEPS_SGDISK_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+    /* first partition in fdisk is 0 */
+    part_num--;
+
+    cxt = get_device_context (device, error);
+    if (!cxt) {
+        /* error is already populated */
         return FALSE;
+    }
+
+    lb = fdisk_get_label (cxt, NULL);
+    if (!lb) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to read partition table on device '%s'", device);
+        close_context (cxt);
+        return FALSE;
+    }
+
+    label_name = fdisk_label_get_name (lb);
+    if (g_strcmp0 (label_name, table_type_str_fdisk[BD_PART_TABLE_GPT]) != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Setting GPT flags is not supported on '%s' partition table", label_name);
+        close_context (cxt);
+        return FALSE;
+    }
+
+    status = fdisk_gpt_get_partition_attrs (cxt, part_num, &gpt_flags);
+    if (status < 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to read GPT flags");
+        close_context (cxt);
+        return FALSE;
+    }
 
     if (flag == BD_PART_FLAG_GPT_SYSTEM_PART)
         bit_num = 0;
@@ -1388,40 +1421,86 @@ static gboolean set_gpt_flag (const gchar *device, int part_num, BDPartFlag flag
     else if (flag == BD_PART_FLAG_GPT_NO_AUTOMOUNT)
         bit_num = 63;
 
-    args[2] = g_strdup_printf ("%d:%s:%d", part_num, state ? "set" : "clear", bit_num);
+    if (state)
+        gpt_flags |= (guint64) 1 << bit_num;
+    else
+        gpt_flags &= ~((guint64) 1 << bit_num);
 
-    success = bd_utils_exec_and_report_error (args, NULL, error);
-    g_free ((gchar *) args[2]);
-    return success;
+    status = fdisk_gpt_set_partition_attrs (cxt, part_num, gpt_flags);
+    if (status < 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to set new GPT flags");
+        close_context (cxt);
+        return FALSE;
+    }
+
+    if (!write_label (cxt, device, error)) {
+        close_context (cxt);
+        return FALSE;
+    }
+
+    close_context (cxt);
+    return TRUE;
 }
 
 static gboolean set_gpt_flags (const gchar *device, int part_num, guint64 flags, GError **error) {
-    const gchar *args[5] = {"sgdisk", "--attributes", NULL, device, NULL};
-    guint64 real_flags = 0;
-    gchar *mask_str = NULL;
-    gboolean success = FALSE;
+    struct fdisk_context *cxt = NULL;
+    struct fdisk_label *lb = NULL;
+    const gchar *label_name = NULL;
+    guint64 gpt_flags = 0;
+    gint status = 0;
 
-    if (!check_deps (&avail_deps, DEPS_SGDISK_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+    /* first partition in fdisk is 0 */
+    part_num--;
+
+    cxt = get_device_context (device, error);
+    if (!cxt) {
+        /* error is already populated */
         return FALSE;
+    }
+
+    lb = fdisk_get_label (cxt, NULL);
+    if (!lb) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to read partition table on device '%s'", device);
+        close_context (cxt);
+        return FALSE;
+    }
+
+    label_name = fdisk_label_get_name (lb);
+    if (g_strcmp0 (label_name, table_type_str_fdisk[BD_PART_TABLE_GPT]) != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Setting GPT flags is not supported on '%s' partition table", label_name);
+        close_context (cxt);
+        return FALSE;
+    }
 
     if (flags & BD_PART_FLAG_GPT_SYSTEM_PART)
-        real_flags |=  1;       /* 1 << 0 */
+        gpt_flags |=  1;       /* 1 << 0 */
     if (flags & BD_PART_FLAG_LEGACY_BOOT)
-        real_flags |=  4;       /* 1 << 2 */
+        gpt_flags |=  4;       /* 1 << 2 */
     if (flags & BD_PART_FLAG_GPT_READ_ONLY)
-        real_flags |= 0x1000000000000000; /* 1 << 60 */
+        gpt_flags |= 0x1000000000000000; /* 1 << 60 */
     if (flags & BD_PART_FLAG_GPT_HIDDEN)
-        real_flags |= 0x4000000000000000; /* 1 << 62 */
+        gpt_flags |= 0x4000000000000000; /* 1 << 62 */
     if (flags & BD_PART_FLAG_GPT_NO_AUTOMOUNT)
-        real_flags |= 0x8000000000000000; /* 1 << 63 */
-    mask_str = g_strdup_printf ("%.16"PRIx64, real_flags);
+        gpt_flags |= 0x8000000000000000; /* 1 << 63 */
 
-    args[2] = g_strdup_printf ("%d:=:%s", part_num, mask_str);
-    g_free (mask_str);
+    status = fdisk_gpt_set_partition_attrs (cxt, part_num, gpt_flags);
+    if (status < 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to set new GPT flags");
+        close_context (cxt);
+        return FALSE;
+    }
 
-    success = bd_utils_exec_and_report_error (args, NULL, error);
-    g_free ((gchar *) args[2]);
-    return success;
+    if (!write_label (cxt, device, error)) {
+        close_context (cxt);
+        return FALSE;
+    }
+
+    close_context (cxt);
+    return TRUE;
 }
 
 /**
