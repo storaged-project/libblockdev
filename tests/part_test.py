@@ -1135,10 +1135,23 @@ class PartSetFlagCase(PartTestCase):
         self.assertTrue(ps)
         self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
 
+        # remove a flag that is not set
+        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_READ_ONLY, False)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertEqual(ps.flags, 0)
+
+        # set read-only flag (twice to be sure that second set doesn't change it)
         succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_READ_ONLY, True)
         self.assertTrue(succ)
         ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
         self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_READ_ONLY)
+        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_READ_ONLY, True)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_READ_ONLY)
+
+        # set hidden and remove read-only flag
         succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_HIDDEN, True)
         self.assertTrue(succ)
         ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
@@ -1148,6 +1161,14 @@ class PartSetFlagCase(PartTestCase):
         ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
         self.assertFalse(ps.flags & BlockDev.PartFlag.GPT_READ_ONLY)
         self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_HIDDEN)
+
+        # set no-automount flag
+        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_NO_AUTOMOUNT, True)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertFalse(ps.flags & BlockDev.PartFlag.GPT_READ_ONLY)
+        self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_HIDDEN)
+        self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_NO_AUTOMOUNT)
 
 class PartSetDiskFlagCase(PartTestCase):
     def test_set_disk_flag(self):
