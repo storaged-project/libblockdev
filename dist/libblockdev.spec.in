@@ -19,6 +19,7 @@
 %define with_gi @WITH_GI@
 %define with_escrow @WITH_ESCROW@
 %define with_dmraid @WITH_DMRAID@
+%define with_tools @WITH_TOOLS@
 
 # python2 is not available on RHEL > 7 and not needed on Fedora > 29
 %if 0%{?rhel} > 7 || 0%{?fedora} > 29 || %{with_python2} == 0
@@ -113,11 +114,14 @@
 %if %{with_vdo} != 1
 %define vdo_copts --without-vdo
 %endif
+%if %{with_tools} != 1
+%define tools_copts --without-tools
+%endif
 %if %{with_gi} != 1
 %define gi_copts --disable-introspection
 %endif
 
-%define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?vdo_copts} %{?gi_copts}
+%define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?vdo_copts} %{?tools_copts} %{?gi_copts}
 
 Name:        libblockdev
 Version:     2.20
@@ -572,6 +576,20 @@ This package contains header files and pkg-config files needed for development
 with the libblockdev-vdo plugin/library.
 %endif
 
+%if %{with_tools}
+%package tools
+Summary:    Various nice tools based on libblockdev
+Requires:   %{name}
+Requires:   %{name}-lvm
+BuildRequires: libbytesize-devel
+%if %{with_lvm_dbus} == 1
+Recommends: %{name}-lvm-dbus
+%endif
+
+%description tools
+Various nice storage-related tools based on libblockdev.
+
+%endif
 
 %ifarch s390 s390x
 %package s390
@@ -943,6 +961,10 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_includedir}/blockdev/vdo.h
 %endif
 
+%if %{with_tools}
+%files tools
+%{_bindir}/lvm-cache-stats
+%endif
 
 %ifarch s390 s390x
 %files s390

@@ -35,6 +35,7 @@ src/utils/blockdev-utils.pc
 **/*.libs
 **/*.la
 **/*.lo
+**/*.o
 **/Makefile
 **/Makefile.in
 **/*.stamp
@@ -52,3 +53,4 @@ docs/xml/
 docs/html/
 docs/libblockdev-docs.xml
 dist/libblockdev.spec
+tools/lvm-cache-stats

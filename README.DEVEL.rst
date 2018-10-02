@@ -92,4 +92,5 @@ The directory structure is as follows::
   │   │   └── gi               -- just needed for GI overrides to work
   │   │       └── overrides    -- ditto, actual sources of the GI overrides
   │   └── utils                -- sources of the utility library
-  └── tests                    -- tests
+  ├── tests                    -- tests
+  └── tools                    -- sources of various nice tools

@@ -35,6 +35,7 @@ AC_CONFIG_FILES([Makefile src/Makefile \
                           dist/Makefile \
                           dist/libblockdev.spec \
                           scripts/Makefile \
+                          tools/Makefile \
                           data/Makefile \
                           data/conf.d/Makefile])
 
@@ -167,6 +168,17 @@ AS_IF([test "x$with_dmraid" != "xno"],
       [AC_DEFINE([WITH_BD_DMRAID], [], [Define if dmraid is supported]) AC_SUBST([WITH_DMRAID], [1])],
       [])
 
+AC_ARG_WITH([tools],
+    AS_HELP_STRING([--with-tools], [build tools @<:@default=yes@:>@]),
+    [],
+    [with_tools=yes])
+
+AC_SUBST([WITH_TOOLS], [0])
+AM_CONDITIONAL(WITH_TOOLS, test "x$with_tools" != "xno")
+AS_IF([test "x$with_tools" != "xno"],
+      [AC_SUBST([WITH_TOOLS], [1])],
+      [])
+
 LIBBLOCKDEV_PLUGIN([BTRFS], [btrfs])
 LIBBLOCKDEV_PLUGIN([CRYPTO], [crypto])
 LIBBLOCKDEV_PLUGIN([DM], [dm])
@@ -236,7 +248,7 @@ AS_IF([test "x$with_fs" != "xno" -o "x$with_crypto" != "xno"],
              [Define as neutral value if libblkid doesn't provide the definition])])]
       [])
 
-AS_IF([test "x$with_btrfs" != "xno" -o "x$with_mdraid" != "xno" -o "x$with_kbd" != "xno" -o "x$with_vdo" != "xno"],
+AS_IF([test "x$with_btrfs" != "xno" -o "x$with_mdraid" != "xno" -o "x$with_kbd" != "xno" -o "x$with_vdo" != "xno" -o "x$with_tools" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([BYTESIZE], [bytesize >= 0.1])],
       [])
 
@@ -321,4 +333,5 @@ echo "
         GObject introspection:      ${found_introspection}
         Python 2 bindings:          ${python2_info}
         Python 3 bindings:          ${python3_info}
+        tools:                      ${with_tools}
 "
