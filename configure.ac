@@ -239,7 +239,7 @@ AS_IF([test "x$with_fs" != "xno"],
               AC_SUBST([PARTED_FS_CFLAGS], [])])],
       [])
 
-AS_IF([test "x$with_fs" != "xno" -o "x$with_crypto" != "xno"],
+AS_IF([test "x$with_fs" != "xno" -o "x$with_crypto" != "xno" -o "x$with_swap" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([BLKID], [blkid >= 2.23.0])
       # older versions of libblkid don't support BLKID_SUBLKS_BADCSUM so let's just
       # define it as 0 (neutral value for bit combinations of flags)
