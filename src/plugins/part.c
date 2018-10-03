@@ -400,66 +400,93 @@ gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean
 }
 
 static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_num, guint64 *flags, GError **error) {
-    const gchar *args[4] = {"sgdisk", NULL, device, NULL};
-    gchar *output = NULL;
-    gchar **lines = NULL;
-    gchar **line_p = NULL;
-    gchar *guid_line = NULL;
-    gchar *attrs_line = NULL;
-    gchar *guid_start = NULL;
-    gchar *attrs_start = NULL;
-    guint64 flags_mask = 0;
-    gboolean success = FALSE;
-    gchar *space = NULL;
+    struct fdisk_context *cxt = NULL;
+    struct fdisk_label *lb = NULL;
+    struct fdisk_partition *pa = NULL;
+    struct fdisk_parttype *ptype = NULL;
+    const gchar *label_name = NULL;
+    const gchar *ptype_string = NULL;
     gchar *ret = NULL;
+    guint64 gpt_flags = 0;
+    gint status = 0;
 
-    if (!check_deps (&avail_deps, DEPS_SGDISK_MASK, deps, DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
+    /* first partition in fdisk is 0 */
+    part_num--;
 
-    args[1] = g_strdup_printf ("-i%d", part_num);
-    success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
-    g_free ((gchar *) args[1]);
-    if (!success)
-        return FALSE;
-
-    lines = g_strsplit (output, "\n", 0);
-    g_free (output);
-    for (line_p=lines; *line_p && (!guid_line || !attrs_line); line_p++) {
-        if (g_str_has_prefix (*line_p, "Partition GUID code: "))
-            guid_line = *line_p;
-        else if (g_str_has_prefix (*line_p, "Attribute flags: "))
-            attrs_line = *line_p;
-    }
-    if (!guid_line && !attrs_line) {
-        g_strfreev (lines);
+    cxt = get_device_context (device, error);
+    if (!cxt) {
+        /* error is already populated */
         return NULL;
     }
 
-    if (guid_line) {
-        guid_start = guid_line + 21; /* strlen("Partition GUID...") */
-        space = strchr (guid_start, ' '); /* find the first space after the GUID */
-        if (space)
-            *space = '\0';
-        ret = g_strdup (guid_start);
+    lb = fdisk_get_label (cxt, NULL);
+    if (!lb) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to read partition table on device '%s'", device);
+        close_context (cxt);
+        return NULL;
     }
 
-    if (attrs_line) {
-        attrs_start = attrs_line + 17; /* strlen("Attribute flags: ") */
-        flags_mask = strtoull (attrs_start, NULL, 16);
-
-        if (flags_mask & 1) /* 1 << 0 */
-            *flags |= BD_PART_FLAG_GPT_SYSTEM_PART;
-        if (flags_mask & 4) /* 1 << 2 */
-            *flags |= BD_PART_FLAG_LEGACY_BOOT;
-        if (flags_mask & 0x1000000000000000) /* 1 << 60 */
-            *flags |= BD_PART_FLAG_GPT_READ_ONLY;
-        if (flags_mask & 0x4000000000000000) /* 1 << 62 */
-            *flags |= BD_PART_FLAG_GPT_HIDDEN;
-        if (flags_mask & 0x8000000000000000) /* 1 << 63 */
-            *flags |= BD_PART_FLAG_GPT_NO_AUTOMOUNT;
+    label_name = fdisk_label_get_name (lb);
+    if (g_strcmp0 (label_name, table_type_str_fdisk[BD_PART_TABLE_GPT]) != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Setting GPT flags is not supported on '%s' partition table", label_name);
+        close_context (cxt);
+        return NULL;
     }
 
-    g_strfreev (lines);
+    status = fdisk_gpt_get_partition_attrs (cxt, part_num, &gpt_flags);
+    if (status < 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to read GPT flags");
+        close_context (cxt);
+        return NULL;
+    }
+
+    if (gpt_flags & 1) /* 1 << 0 */
+        *flags |= BD_PART_FLAG_GPT_SYSTEM_PART;
+    if (gpt_flags & 4) /* 1 << 2 */
+        *flags |= BD_PART_FLAG_LEGACY_BOOT;
+    if (gpt_flags & 0x1000000000000000) /* 1 << 60 */
+        *flags |= BD_PART_FLAG_GPT_READ_ONLY;
+    if (gpt_flags & 0x4000000000000000) /* 1 << 62 */
+        *flags |= BD_PART_FLAG_GPT_HIDDEN;
+    if (gpt_flags & 0x8000000000000000) /* 1 << 63 */
+        *flags |= BD_PART_FLAG_GPT_NO_AUTOMOUNT;
+
+
+    status = fdisk_get_partition (cxt, part_num, &pa);
+    if (status != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to get partition %d on device '%s'", part_num, device);
+        close_context (cxt);
+        return NULL;
+    }
+
+    ptype = fdisk_partition_get_type (pa);
+    if (!ptype) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to get partition type for partition %d on device '%s'", part_num, device);
+        fdisk_unref_partition (pa);
+        close_context (cxt);
+        return NULL;
+    }
+
+    ptype_string = fdisk_parttype_get_string (ptype);
+    if (!ptype_string) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to get partition type for partition %d on device '%s'", part_num, device);
+        fdisk_unref_parttype (ptype);
+        fdisk_unref_partition (pa);
+        close_context (cxt);
+        return NULL;
+    }
+
+    ret = g_strdup (ptype_string);
+
+    fdisk_unref_parttype (ptype);
+    fdisk_unref_partition (pa);
+    close_context (cxt);
     return ret;
 }
 
