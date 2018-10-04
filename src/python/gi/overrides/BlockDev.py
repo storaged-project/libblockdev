@@ -1031,7 +1031,17 @@ __all__.append("MpathError")
 
 class SwapError(BlockDevError):
     pass
-__all__.append("SwapError")
+class SwapActivateError(SwapError):
+    pass
+class SwapOldError(SwapActivateError):
+    pass
+class SwapSuspendError(SwapActivateError):
+    pass
+class SwapUnknownError(SwapActivateError):
+    pass
+class SwapPagesizeError(SwapActivateError):
+    pass
+__all__.extend(("SwapError", "SwapActivateError", "SwapOldError", "SwapSuspendError", "SwapUnknownError", "SwapPagesizeError"))
 
 class KbdError(BlockDevError):
     pass
@@ -1070,6 +1080,11 @@ __all__.append("BlockDevNotImplementedError")
 not_implemented_rule = XRule(GLib.Error, re.compile(r".*The function '.*' called, but not implemented!"), None, BlockDevNotImplementedError)
 
 fs_nofs_rule = XRule(GLib.Error, None, 3, FSNoFSError)
+swap_activate_rule = XRule(GLib.Error, None, 1, SwapActivateError)
+swap_old_rule = XRule(GLib.Error, None, 3, SwapOldError)
+swap_suspend_rule = XRule(GLib.Error, None, 4, SwapSuspendError)
+swap_unknown_rule = XRule(GLib.Error, None, 5, SwapUnknownError)
+swap_pagesize_rule = XRule(GLib.Error, None, 6, SwapPagesizeError)
 
 btrfs = ErrorProxy("btrfs", BlockDev, [(GLib.Error, BtrfsError)], [not_implemented_rule])
 __all__.append("btrfs")
@@ -1092,7 +1107,7 @@ __all__.append("md")
 mpath = ErrorProxy("mpath", BlockDev, [(GLib.Error, MpathError)], [not_implemented_rule])
 __all__.append("mpath")
 
-swap = ErrorProxy("swap", BlockDev, [(GLib.Error, SwapError)], [not_implemented_rule])
+swap = ErrorProxy("swap", BlockDev, [(GLib.Error, SwapError)], [not_implemented_rule, swap_activate_rule, swap_old_rule, swap_suspend_rule, swap_unknown_rule, swap_pagesize_rule])
 __all__.append("swap")
 
 kbd = ErrorProxy("kbd", BlockDev, [(GLib.Error, KbdError)], [not_implemented_rule])

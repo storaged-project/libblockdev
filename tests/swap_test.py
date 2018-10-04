@@ -97,6 +97,19 @@ class SwapTestCase(SwapTest):
         _ret, out, _err = run_command("blkid -ovalue -sLABEL -p %s" % self.loop_dev)
         self.assertEqual(out, "BlockDevSwap")
 
+    def test_swapon_pagesize(self):
+        """Verify that activating swap with different pagesize fails"""
+
+        # create swap with 64k pagesize
+        ret, out, err = run_command("mkswap --pagesize 65536 %s" % self.loop_dev)
+        if ret != 0:
+            self.fail("Failed to prepare swap for pagesize test: %s %s" % (out, err))
+
+        # activation should fail because swap has different pagesize
+        with self.assertRaises(BlockDev.SwapPagesizeError):
+            BlockDev.swap.swapon(self.loop_dev)
+
+
 class SwapUnloadTest(SwapTest):
     def setUp(self):
         # make sure the library is initialized with all plugins loaded for other
