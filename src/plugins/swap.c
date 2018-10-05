@@ -292,21 +292,21 @@ gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
     }
 
     if (g_strcmp0 (value, "SWAP-SPACE") == 0) {
-        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE,
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE_OLD,
                      "Old swap format, cannot activate.");
         bd_utils_report_finished (progress_id, (*error)->message);
         blkid_free_probe (probe);
         close (fd);
         return FALSE;
     } else if (g_strcmp0 (value, "S1SUSPEND") == 0 || g_strcmp0 (value, "S2SUSPEND") == 0) {
-        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE,
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE_SUSPEND,
                      "Suspended system on the swap device, cannot activate.");
         bd_utils_report_finished (progress_id, (*error)->message);
         blkid_free_probe (probe);
         close (fd);
         return FALSE;
     } else if (g_strcmp0 (value, "SWAPSPACE2") != 0) {
-        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE,
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE_UNKNOWN,
                      "Unknown swap space format, cannot activate.");
         bd_utils_report_finished (progress_id, (*error)->message);
         blkid_free_probe (probe);
@@ -318,7 +318,7 @@ gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
 
     status = blkid_probe_lookup_value (probe, "SBMAGIC_OFFSET", &value, NULL);
     if (status != 0 || !value) {
-        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UNKNOWN_STATE,
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE_PAGESIZE,
                      "Failed to get swap status on the device '%s'", device);
         bd_utils_report_finished (progress_id, (*error)->message);
         blkid_free_probe (probe);
@@ -334,7 +334,7 @@ gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
     sys_pagesize = getpagesize ();
 
     if (swap_pagesize != sys_pagesize) {
-        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UNKNOWN_STATE,
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_ACTIVATE_PAGESIZE,
                      "Swap format pagesize (%"G_GINT64_FORMAT") and system pagesize (%"G_GINT64_FORMAT") don't match",
                      swap_pagesize, sys_pagesize);
         bd_utils_report_finished (progress_id, (*error)->message);
