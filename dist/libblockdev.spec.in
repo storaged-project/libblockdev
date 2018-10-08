@@ -523,6 +523,7 @@ with the libblockdev-part plugin/library.
 
 %if %{with_swap}
 %package swap
+BuildRequires: libblkid-devel
 Summary:     The swap plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
 Requires: util-linux
