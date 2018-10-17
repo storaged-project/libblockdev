@@ -116,6 +116,39 @@ void bd_part_disk_spec_free (BDPartDiskSpec *data) {
 /* "C" locale to get the locale-agnostic error messages */
 static locale_t c_locale = (locale_t) 0;
 
+/**
+ * get_part_num: (skip)
+ *
+ * Extract partition number from it's name (e.g. sda1).
+ *
+ * Returns: partition number or -1 in case of an error
+ */
+static gint get_part_num (const gchar *part, GError **error) {
+    const gchar *part_num_str = NULL;
+    gint part_num = -1;
+
+    if (!part || *part == '\0') {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Invalid partition path given: '%s'", part);
+        return -1;
+    }
+
+    part_num_str = part + (strlen (part) - 1);
+    while (isdigit (*part_num_str) || (*part_num_str == '-')) {
+        part_num_str--;
+    }
+    part_num_str++;
+
+    part_num = atoi (part_num_str);
+    if (part_num == 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Invalid partition path given: '%s'. Cannot extract partition number", part);
+        return -1;
+    }
+
+    return part_num;
+}
+
 static struct fdisk_context* get_device_context (const gchar *disk, GError **error) {
     struct fdisk_context *cxt = fdisk_new_context ();
     gint ret = 0;
@@ -536,15 +569,8 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
     PedDevice *dev = NULL;
     PedDisk *ped_disk = NULL;
     PedPartition *ped_part = NULL;
-    const gchar *part_num_str = NULL;
     gint part_num = 0;
     BDPartSpec *ret = NULL;
-
-    if (!part || (part && (*part == '\0'))) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'", part);
-        return NULL;
-    }
 
     dev = ped_device_get (disk);
     if (!dev) {
@@ -561,16 +587,8 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
         return NULL;
     }
 
-    part_num_str = part + (strlen (part) - 1);
-    while (isdigit (*part_num_str) || (*part_num_str == '-')) {
-        part_num_str--;
-    }
-    part_num_str++;
-
-    part_num = atoi (part_num_str);
-    if (part_num == 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'. Cannot extract partition number", part);
+    part_num = get_part_num (part, error);
+    if (part_num == -1) {
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
         return NULL;
@@ -1203,7 +1221,6 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
  * Tech category: %BD_PART_TECH_MODE_MODIFY_TABLE + the tech according to the partition table type
  */
 gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **error) {
-    const gchar *part_num_str = NULL;
     gint part_num = 0;
     struct fdisk_context *cxt = NULL;
     gint ret = 0;
@@ -1214,22 +1231,8 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    if (!part || (part && (*part == '\0'))) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'", part);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    part_num_str = part + (strlen (part) - 1);
-    while (isdigit (*part_num_str) || (*part_num_str == '-')) {
-        part_num_str--;
-    }
-    part_num_str++;
-    part_num = atoi (part_num_str);
-    if (part_num == 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'. Cannot extract partition number", part);
+    part_num = get_part_num (part, error);
+    if (part_num == -1) {
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
@@ -1608,7 +1611,6 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
     PedDisk *ped_disk = NULL;
     PedPartition *ped_part = NULL;
     PedPartitionFlag ped_flag = PED_PARTITION_FIRST_FLAG;
-    const gchar *part_num_str = NULL;
     gint part_num = 0;
     gint status = 0;
     gboolean ret = FALSE;
@@ -1618,14 +1620,6 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
     msg = g_strdup_printf ("Started setting flag on the partition '%s'", part);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
-
-    /* TODO: share this code with the other functions modifying a partition */
-    if (!part || (part && (*part == '\0'))) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'", part);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
 
     dev = ped_device_get (disk);
     if (!dev) {
@@ -1644,16 +1638,8 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
         return FALSE;
     }
 
-    part_num_str = part + (strlen (part) - 1);
-    while (isdigit (*part_num_str) || (*part_num_str == '-')) {
-        part_num_str--;
-    }
-    part_num_str++;
-
-    part_num = atoi (part_num_str);
-    if (part_num == 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'. Cannot extract partition number", part);
+    part_num = get_part_num (part, error);
+    if (part_num == -1) {
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
         bd_utils_report_finished (progress_id, (*error)->message);
@@ -1832,7 +1818,6 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
     PedDevice *dev = NULL;
     PedDisk *ped_disk = NULL;
     PedPartition *ped_part = NULL;
-    const gchar *part_num_str = NULL;
     gint part_num = 0;
     int i = 0;
     gint status = 0;
@@ -1843,14 +1828,6 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
     msg = g_strdup_printf ("Started setting flags on the partition '%s'", part);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
-
-    /* TODO: share this code with the other functions modifying a partition */
-    if (!part || (part && (*part == '\0'))) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'", part);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
 
     dev = ped_device_get (disk);
     if (!dev) {
@@ -1869,16 +1846,8 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
         return FALSE;
     }
 
-    part_num_str = part + (strlen (part) - 1);
-    while (isdigit (*part_num_str) || (*part_num_str == '-')) {
-        part_num_str--;
-    }
-    part_num_str++;
-
-    part_num = atoi (part_num_str);
-    if (part_num == 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'. Cannot extract partition number", part);
+    part_num = get_part_num (part, error);
+    if (part_num == -1) {
         ped_disk_destroy (ped_disk);
         ped_device_destroy (dev);
         bd_utils_report_finished (progress_id, (*error)->message);
@@ -1948,19 +1917,10 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
     gint status = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
-    const gchar *part_num_str = NULL;
 
     msg = g_strdup_printf ("Started setting name on the partition '%s'", part);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
-
-    /* TODO: share this code with the other functions modifying a partition */
-    if (!part || (part && (*part == '\0'))) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'", part);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
 
     cxt = get_device_context (disk, error);
     if (!cxt) {
@@ -1986,16 +1946,8 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
         return FALSE;
     }
 
-    part_num_str = part + (strlen (part) - 1);
-    while (isdigit (*part_num_str) || (*part_num_str == '-')) {
-        part_num_str--;
-    }
-    part_num_str++;
-
-    part_num = atoi (part_num_str);
-    if (part_num == 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'. Cannot extract partition number", part);
+    part_num = get_part_num (part, error);
+    if (part_num == -1) {
         close_context (cxt);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
@@ -2063,34 +2015,13 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
     gchar *msg = NULL;
     struct fdisk_context *cxt = NULL;
     gint part_num = 0;
-    const gchar *part_num_str = NULL;
 
     msg = g_strdup_printf ("Started setting type on the partition '%s'", part);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    if (!part || (part && (*part == '\0'))) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'", part);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    part_num_str = part + (strlen (part) - 1);
-    while (isdigit (*part_num_str) || (*part_num_str == '-')) {
-        part_num_str--;
-    }
-    part_num_str++;
-
-    if ((g_strcmp0 (part_num_str, "0") != 0) && (atoi (part_num_str) == 0)) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'. Cannot extract partition number", part);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    part_num = atoi (part_num_str);
-    if (part_num == 0) {
+    part_num = get_part_num (part, error);
+    if (part_num == -1) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Invalid partition path given: '%s'. Cannot extract partition number", part);
         return FALSE;
@@ -2139,34 +2070,13 @@ gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar 
     gchar *msg = NULL;
     struct fdisk_context *cxt = NULL;
     gint part_num = 0;
-    const gchar *part_num_str = NULL;
 
     msg = g_strdup_printf ("Started setting id on the partition '%s'", part);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    if (!part || (part && (*part == '\0'))) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'", part);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    part_num_str = part + (strlen (part) - 1);
-    while (isdigit (*part_num_str) || (*part_num_str == '-')) {
-        part_num_str--;
-    }
-    part_num_str++;
-
-    if ((g_strcmp0 (part_num_str, "0") != 0) && (atoi (part_num_str) == 0)) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'. Cannot extract partition number", part);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    part_num = atoi (part_num_str);
-    if (part_num == 0) {
+    part_num = get_part_num (part, error);
+    if (part_num == -1) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Invalid partition path given: '%s'. Cannot extract partition number", part);
         bd_utils_report_finished (progress_id, (*error)->message);
