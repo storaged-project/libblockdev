@@ -249,6 +249,7 @@ class VDOTest(VDOTestCase):
 
         self.assertEqual(info.logical_size, new_size)
 
+    @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
     def test_grow_physical(self):
         """Verify that it is possible to grow physical size of an existing VDO volume"""
 
