@@ -34,7 +34,6 @@
 #include <locale.h>
 
 #include "part.h"
-#include "check_deps.h"
 
 /**
  * SECTION: part
@@ -221,18 +220,6 @@ static gboolean set_parted_error (GError **error, BDPartError type) {
 }
 
 
-static volatile guint avail_deps = 0;
-static GMutex deps_check_lock;
-
-#define DEPS_SFDISK 0
-#define DEPS_SFDISK_MASK (1 << DEPS_SFDISK)
-#define DEPS_LAST 1
-
-static const UtilDep deps[DEPS_LAST] = {
-    {"sfdisk", NULL, NULL, NULL},
-};
-
-
 /**
  * bd_part_check_deps:
  *
@@ -242,26 +229,8 @@ static const UtilDep deps[DEPS_LAST] = {
  *
  */
 gboolean bd_part_check_deps (void) {
-    GError *error = NULL;
-    guint i = 0;
-    gboolean status = FALSE;
-    gboolean ret = TRUE;
-
-    for (i=0; i < DEPS_LAST; i++) {
-        status = bd_utils_check_util_version (deps[i].name, deps[i].version,
-                                              deps[i].ver_arg, deps[i].ver_regexp, &error);
-        if (!status)
-            g_warning ("%s", error->message);
-        else
-            g_atomic_int_or (&avail_deps, 1 << i);
-        g_clear_error (&error);
-        ret = ret && status;
-    }
-
-    if (!ret)
-        g_warning("Cannot load the part plugin");
-
-    return ret;
+    /* no runtime dependencies */
+    return TRUE;
 }
 
 /**
@@ -2121,46 +2090,84 @@ gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar 
  * Tech category: %BD_PART_TECH_MODE_QUERY_PART + the tech according to the partition table type
  */
 gchar* bd_part_get_part_id (const gchar *disk, const gchar *part, GError **error) {
-    const gchar *args[5] = {"sfdisk", "--id", disk, NULL, NULL};
-    const gchar *part_num_str = NULL;
-    gchar *output = NULL;
+    struct fdisk_context *cxt = NULL;
+    struct fdisk_label *lb = NULL;
+    struct fdisk_partition *pa = NULL;
+    struct fdisk_parttype *ptype = NULL;
+    const gchar *label_name = NULL;
+    guint part_id = 0;
     gchar *ret = NULL;
-    gboolean success = FALSE;
+    gint status = 0;
+    gint part_num = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
 
-    if (!check_deps (&avail_deps, DEPS_SFDISK_MASK, deps, DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
+    msg = g_strdup_printf ("Started getting id on the partition '%s'", part);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
-    if (!part || (part && (*part == '\0'))) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'", part);
-        return NULL;
-    }
-
-    part_num_str = part + (strlen (part) - 1);
-    while (isdigit (*part_num_str) || (*part_num_str == '-')) {
-        part_num_str--;
-    }
-    part_num_str++;
-
-    if ((g_strcmp0 (part_num_str, "0") != 0) && (atoi (part_num_str) == 0)) {
+    part_num = get_part_num (part, error);
+    if (part_num == -1) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Invalid partition path given: '%s'. Cannot extract partition number", part);
+        bd_utils_report_finished (progress_id, (*error)->message);
         return NULL;
     }
 
-    args[3] = g_strdup (part_num_str);
+    /* first partition in fdisk is 0 */
+    part_num--;
 
-    success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
-    if (!success) {
-        g_free ((gchar *) args[3]);
+    cxt = get_device_context (disk, error);
+    if (!cxt) {
+        /* error is already populated */
         return NULL;
     }
 
-    output =  g_strstrip (output);
-    ret = g_strdup_printf ("0x%s", output);
+    lb = fdisk_get_label (cxt, NULL);
+    if (!lb) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to read partition table on device '%s'", disk);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        close_context (cxt);
+        return NULL;
+    }
 
-    g_free (output);
-    g_free ((gchar*) args[3]);
+    label_name = fdisk_label_get_name (lb);
+    if (g_strcmp0 (label_name, table_type_str_fdisk[BD_PART_TABLE_MSDOS]) != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Partition ID is not supported on '%s' partition table", label_name);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        close_context (cxt);
+        return NULL;
+    }
+
+    status = fdisk_get_partition (cxt, part_num, &pa);
+    if (status != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to get partition %d on device '%s'", part_num, disk);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        close_context (cxt);
+        return NULL;
+    }
+
+    ptype = fdisk_partition_get_type (pa);
+    if (!ptype) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to get partition type for partition %d on device '%s'", part_num, disk);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        fdisk_unref_partition (pa);
+        close_context (cxt);
+        return NULL;
+    }
+
+    part_id = fdisk_parttype_get_code (ptype);
+    ret = g_strdup_printf ("0x%.2x", part_id);
+
+    fdisk_unref_parttype (ptype);
+    fdisk_unref_partition (pa);
+    close_context (cxt);
+
+    bd_utils_report_finished (progress_id, "Completed");
 
     return ret;
 }
