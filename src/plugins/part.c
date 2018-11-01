@@ -115,6 +115,19 @@ void bd_part_disk_spec_free (BDPartDiskSpec *data) {
 /* "C" locale to get the locale-agnostic error messages */
 static locale_t c_locale = (locale_t) 0;
 
+/* base 2 logarithm of x */
+static gint log2i (guint x) {
+    gint ret = 0;
+
+    if (x == 0)
+        return -1;
+
+    while (x >>= 1)
+        ret++;
+
+    return ret;
+}
+
 /**
  * get_part_num: (skip)
  *
@@ -2219,6 +2232,9 @@ const gchar* bd_part_get_flag_str (BDPartFlag flag, GError **error) {
     return NULL;
 }
 
+/* string for BD_PART_TYPE_PROTECTED is "primary", that's what parted returns... */
+static const gchar*const part_types[6] = { "primary", "logical", "extended", "free", "metadata", "primary" };
+
 /**
  * bd_part_get_type_str:
  * @type: type to get string representation for
@@ -2234,5 +2250,5 @@ const gchar* bd_part_get_type_str (BDPartType type, GError **error) {
         return NULL;
     }
 
-    return ped_partition_type_get_name ((PedPartitionType) type);
+    return part_types[log2i (type) + 1];
 }
