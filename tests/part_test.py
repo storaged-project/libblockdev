@@ -1427,3 +1427,17 @@ class PartSetGptFlagsCase(PartTestCase):
         ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
         self.assertTrue(ps.flags & BlockDev.PartFlag.LEGACY_BOOT)
         self.assertEqual(ps.type_guid, esp_guid)
+
+class PartNoDevCase(PartTestCase):
+
+    def setUp(self):
+        # no devices needed for this test case
+        pass
+
+    def test_part_type_str(self):
+        types = {BlockDev.PartType.NORMAL: 'primary', BlockDev.PartType.LOGICAL: 'logical',
+                 BlockDev.PartType.EXTENDED: 'extended', BlockDev.PartType.FREESPACE: 'free',
+                 BlockDev.PartType.METADATA: 'metadata', BlockDev.PartType.PROTECTED: 'primary'}
+
+        for key, value in types.items():
+            self.assertEqual(BlockDev.part_get_type_str(key), value)
