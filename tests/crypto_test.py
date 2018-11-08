@@ -148,7 +148,7 @@ class CryptoTestFormat(CryptoTestCase):
                                            BlockDev.CryptoLUKSVersion.LUKS2, extra)
         self.assertTrue(succ)
 
-        _ret, label, _err = run_command("lsblk -oLABEL -n %s" % self.loop_dev)
+        _ret, label, _err = run_command("blkid -p -ovalue -sLABEL %s" % self.loop_dev)
         self.assertEqual(label, "blockdevLUKS")
 
         # different key derivation function
