@@ -1,6 +1,6 @@
 import unittest
 import os
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, TestTags, tag_test
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, TestTags, tag_test, run_command
 import overrides_hack
 
 from gi.repository import BlockDev, GLib
@@ -1117,12 +1117,7 @@ class PartSetFlagCase(PartTestCase):
         self.assertTrue(ps.flags & BlockDev.PartFlag.BOOT)
         self.assertTrue(ps.flags & BlockDev.PartFlag.LVM)
 
-        # SWAP label not supported on the MSDOS table
-        with self.assertRaises(GLib.GError):
-            BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.SWAP, True)
-        with self.assertRaises(GLib.GError):
-            BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.SWAP, False)
-        # so isn't GPT_HIDDEN
+        # GPT_HIDDEN is not supported on the MSDOS table
         with self.assertRaises(GLib.GError):
             BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_HIDDEN, True)
         with self.assertRaises(GLib.GError):
@@ -1174,6 +1169,74 @@ class PartSetFlagCase(PartTestCase):
         self.assertFalse(ps.flags & BlockDev.PartFlag.GPT_READ_ONLY)
         self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_HIDDEN)
         self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_NO_AUTOMOUNT)
+
+    def test_set_part_flag_hidden(self):
+        """Verify that it is possible to set the hidden partition flag"""
+
+        # hidden (and lba) flag is special, because the way it is set depends on
+        # the filesystem (different part ID for FAT12/16/32 and NTFS) so better
+        # start with a clean test environment
+
+        # we first need a partition table
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
+        self.assertTrue(succ)
+
+        # for now, let's just create a typical primary partition starting at the
+        # sector 2048, 100 MiB big with optimal alignment
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 100 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+        # we should get proper data back
+        self.assertTrue(ps)
+        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
+
+        # no filesystem -> hidden shouldn't be set
+        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.HIDDEN, True)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertEqual(ps.flags, 0)
+
+        # now format the partition to FAT12
+        ret, out, err = run_command("mkfs.fat -F 12 %s" % ps.path)
+        if ret != 0:
+            self.fail("Failed to format partition to fat12 for flag test case:\n%s\n%s" % (out, err))
+        self.addCleanup(run_command, "wipefs -a %s" % ps.path)
+
+        # hidden is supported on FAT12
+        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.HIDDEN, True)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertTrue(ps.flags & BlockDev.PartFlag.HIDDEN)
+
+        # remove the flag
+        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.HIDDEN, False)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertFalse(ps.flags & BlockDev.PartFlag.HIDDEN)
+
+        # now format the partition to FAT32
+        ret, out, err = run_command("mkfs.fat -F 32 %s" % ps.path)
+        if ret != 0:
+            self.fail("Failed to format partition to fat32 for flag test case:\n%s\n%s" % (out, err))
+
+        # hidden is supported on FAT32
+        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.HIDDEN, True)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertTrue(ps.flags & BlockDev.PartFlag.HIDDEN)
+
+        # lba is also supported on FAT32
+        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.LBA, True)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertTrue(ps.flags & BlockDev.PartFlag.LBA)
+        self.assertTrue(ps.flags & BlockDev.PartFlag.HIDDEN)
+
+        # unset the lba flag
+        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.LBA, False)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertFalse(ps.flags & BlockDev.PartFlag.LBA)
+        self.assertTrue(ps.flags & BlockDev.PartFlag.HIDDEN)
+
 
 class PartSetDiskFlagCase(PartTestCase):
     def test_set_disk_flag(self):
@@ -1427,7 +1490,7 @@ class PartSetGptFlagsCase(PartTestCase):
         self.assertEqual(ps.type_guid, esp_guid)
 
         # set LEGACY_BOOT flag and test it
-        succ = BlockDev.part_set_part_flags (self.loop_dev, ps.path, BlockDev.PartFlag.LEGACY_BOOT)
+        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.LEGACY_BOOT, True)
         self.assertTrue(succ)
         ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
         self.assertTrue(ps.flags & BlockDev.PartFlag.LEGACY_BOOT)
