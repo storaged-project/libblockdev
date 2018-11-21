@@ -1325,9 +1325,9 @@ class PartSetFlagsCase(PartTestCase):
         self.assertTrue(ps.flags & BlockDev.PartFlag.BOOT)
         self.assertTrue(ps.flags & BlockDev.PartFlag.LVM)
 
-        # SWAP label not supported on the MSDOS table
+        # HPSERVICE flag not supported on the MSDOS table
         with self.assertRaises(GLib.GError):
-            BlockDev.part_set_part_flags (self.loop_dev, ps.path, BlockDev.PartFlag.SWAP)
+            BlockDev.part_set_part_flags (self.loop_dev, ps.path, BlockDev.PartFlag.HPSERVICE)
 
         # also try some GPT-only flags
         succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.GPT, True)
