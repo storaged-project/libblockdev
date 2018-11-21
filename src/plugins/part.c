@@ -1472,37 +1472,9 @@ static gboolean set_gpt_flag (struct fdisk_context *cxt, int part_num, BDPartFla
     return TRUE;
 }
 
-static gboolean set_gpt_flags (const gchar *device, int part_num, guint64 flags, GError **error) {
-    struct fdisk_context *cxt = NULL;
-    struct fdisk_label *lb = NULL;
-    const gchar *label_name = NULL;
+static gboolean set_gpt_flags (struct fdisk_context *cxt, int part_num, guint64 flags, GError **error) {
     guint64 gpt_flags = 0;
     gint status = 0;
-
-    /* first partition in fdisk is 0 */
-    part_num--;
-
-    cxt = get_device_context (device, error);
-    if (!cxt) {
-        /* error is already populated */
-        return FALSE;
-    }
-
-    lb = fdisk_get_label (cxt, NULL);
-    if (!lb) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                     "Failed to read partition table on device '%s'", device);
-        close_context (cxt);
-        return FALSE;
-    }
-
-    label_name = fdisk_label_get_name (lb);
-    if (g_strcmp0 (label_name, table_type_str_fdisk[BD_PART_TABLE_GPT]) != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Setting GPT flags is not supported on '%s' partition table", label_name);
-        close_context (cxt);
-        return FALSE;
-    }
 
     if (flags & BD_PART_FLAG_GPT_SYSTEM_PART)
         gpt_flags |=  1;       /* 1 << 0 */
@@ -1519,16 +1491,9 @@ static gboolean set_gpt_flags (const gchar *device, int part_num, guint64 flags,
     if (status < 0) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to set new GPT flags");
-        close_context (cxt);
         return FALSE;
     }
 
-    if (!write_label (cxt, device, error)) {
-        close_context (cxt);
-        return FALSE;
-    }
-
-    close_context (cxt);
     return TRUE;
 }
 
@@ -2098,85 +2063,153 @@ gboolean bd_part_set_disk_flag (const gchar *disk, BDPartDiskFlag flag, gboolean
  * Tech category: %BD_PART_TECH_MODE_MODIFY_PART + the tech according to the partition table type
  */
 gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 flags, GError **error) {
-    PedDevice *dev = NULL;
-    PedDisk *ped_disk = NULL;
-    PedPartition *ped_part = NULL;
+    struct fdisk_context *cxt = NULL;
+    struct fdisk_label *lb = NULL;
+    const gchar *label_name = NULL;
     gint part_num = 0;
-    int i = 0;
-    gint status = 0;
-    gboolean ret = FALSE;
+    gint last_flag = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
+    gchar *part_id = NULL;
+    BDPartTableType table_type;
 
     msg = g_strdup_printf ("Started setting flags on the partition '%s'", part);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    dev = ped_device_get (disk);
-    if (!dev) {
-        set_parted_error (error, BD_PART_ERROR_INVAL);
-        g_prefix_error (error, "Device '%s' invalid or not existing", disk);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    ped_disk = ped_disk_new (dev);
-    if (!ped_disk) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
-        ped_device_destroy (dev);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
     part_num = get_part_num (part, error);
     if (part_num == -1) {
-        ped_disk_destroy (ped_disk);
-        ped_device_destroy (dev);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
-    /* Do not let libparted touch gpt partition tables */
-    if (g_strcmp0 (ped_disk->type->name, "gpt") == 0) {
-        ret = set_gpt_flags (disk, part_num, flags, error);
-    } else {
-        ped_part = ped_disk_get_partition (ped_disk, part_num);
-        if (!ped_part) {
-            set_parted_error (error, BD_PART_ERROR_FAIL);
-            g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
-            ped_disk_destroy (ped_disk);
-            ped_device_destroy (dev);
+    /* first partition in fdisk is 0 */
+    part_num--;
+
+    cxt = get_device_context (disk, error);
+    if (!cxt) {
+        /* error is already populated */
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    lb = fdisk_get_label (cxt, NULL);
+    if (!lb) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to read partition table.");
+        bd_utils_report_finished (progress_id, (*error)->message);
+        close_context (cxt);
+        return FALSE;
+    }
+
+    label_name = fdisk_label_get_name (lb);
+    if (g_strcmp0 (label_name, table_type_str_fdisk[BD_PART_TABLE_MSDOS]) == 0)
+        table_type = BD_PART_TABLE_MSDOS;
+    else if (g_strcmp0 (label_name, table_type_str_fdisk[BD_PART_TABLE_GPT]) == 0)
+        table_type = BD_PART_TABLE_GPT;
+    else {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Setting partition flags is not supported on '%s' partition table", label_name);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        close_context (cxt);
+        return FALSE;
+    }
+
+    /* first unset all the flags */
+    if (table_type == BD_PART_TABLE_MSDOS) {
+        if (!set_boot_flag (cxt, part_num, FALSE, error)) {
+            close_context (cxt);
+            g_prefix_error (error, "Failed to unset boot flag on partition '%s': ", part);
             bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
 
-        /* our flags are 1s shifted to the bit determined by parted's flags
-         * (i.e. 1 << 3 instead of 3, etc.) */
-        for (i=1; i <= (int) log2 ((double)BD_PART_FLAG_BASIC_LAST); i++) {
-            if ((1 << i) & flags)
-                status = ped_partition_set_flag (ped_part, (PedPartitionFlag) i, (int) 1);
-            else if (ped_partition_is_flag_available (ped_part, (PedPartitionFlag) i))
-                status = ped_partition_set_flag (ped_part, (PedPartitionFlag) i, (int) 0);
-            if (status == 0) {
-                set_parted_error (error, BD_PART_ERROR_FAIL);
-                g_prefix_error (error, "Failed to set flag on the partition '%d' on device '%s'", part_num, disk);
-                ped_disk_destroy (ped_disk);
-                ped_device_destroy (dev);
-                bd_utils_report_finished (progress_id, (*error)->message);
-                return FALSE;
+        if (!set_part_type (cxt, part_num, DEFAULT_PART_ID, BD_PART_TABLE_MSDOS, error)) {
+            g_prefix_error (error, "Failed to reset partition ID on partition '%s': ", part);
+            bd_utils_report_finished (progress_id, (*error)->message);
+            close_context (cxt);
+            return FALSE;
+        }
+    } else if (table_type == BD_PART_TABLE_GPT) {
+        if (!set_part_type (cxt, part_num, DEFAULT_PART_GUID, BD_PART_TABLE_GPT, error)) {
+            g_prefix_error (error, "Failed to reset partition type on partition '%s': ", part);
+            bd_utils_report_finished (progress_id, (*error)->message);
+            close_context (cxt);
+            return FALSE;
+        }
+    }
+
+    /* and now go through all the flags and set the required ones */
+    if (table_type == BD_PART_TABLE_MSDOS) {
+        /* special cases first */
+        if (flags & BD_PART_FLAG_BOOT && !set_boot_flag (cxt, part_num, TRUE, error)) {
+            close_context (cxt);
+            g_prefix_error (error, "Failed to set boot flag on partition '%s': ", part);
+            bd_utils_report_finished (progress_id, (*error)->message);
+            return FALSE;
+        }
+
+        if (flags & BD_PART_FLAG_HIDDEN || flags & BD_PART_FLAG_LBA) {
+            part_id = get_lba_hidden_id (part, flags & BD_PART_FLAG_HIDDEN, flags & BD_PART_FLAG_LBA, TRUE, error);
+            if (part_id) {
+                if (!set_part_type (cxt, part_num, part_id, BD_PART_TABLE_MSDOS, error)) {
+                    bd_utils_report_finished (progress_id, (*error)->message);
+                    g_free (part_id);
+                    close_context (cxt);
+                    return FALSE;
+                }
+            } else {
+                if (*error) {
+                    g_prefix_error (error, "Failed to calculate partition ID to set: ");
+                    bd_utils_report_finished (progress_id, (*error)->message);
+                    close_context (cxt);
+                    return FALSE;
+                }
             }
         }
 
-        ret = disk_commit (ped_disk, disk, error);
+        last_flag = log2i (BD_PART_FLAG_BASIC_LAST);
+
+        /* flags that are actually partition IDs */
+        for (gint i = 1; i < last_flag; i++) {
+            if (i == 1 || i == 4 || i == 7)
+                /* skip flags we handled above -- boot, hidden and lba */
+                continue;
+            if ((1 << i) & flags) {
+                if (!part_flags[i - 1].id) {
+                    g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                                 "Setting flag '%s' is not supported on '%s' partition table", part_flags[i - 1].name, label_name);
+                    bd_utils_report_finished (progress_id, (*error)->message);
+                    close_context (cxt);
+                    return FALSE;
+                }
+
+                if (!set_part_type (cxt, part_num, part_flags[i - 1].id, BD_PART_TABLE_MSDOS, error)) {
+                    g_prefix_error (error, "Failed to set partition ID on partition '%s': ", part);
+                    bd_utils_report_finished (progress_id, (*error)->message);
+                    close_context (cxt);
+                    return FALSE;
+                }
+            }
+        }
+    } else if (table_type == BD_PART_TABLE_GPT) {
+        if (!set_gpt_flags (cxt, part_num, flags, error)) {
+            g_prefix_error (error, "Failed to set partition type on partition '%s': ", part);
+            bd_utils_report_finished (progress_id, (*error)->message);
+            close_context (cxt);
+            return FALSE;
+        }
     }
 
-    ped_disk_destroy (ped_disk);
-    ped_device_destroy (dev);
+    if (!write_label (cxt, disk, error)) {
+        bd_utils_report_finished (progress_id, (*error)->message);
+        close_context (cxt);
+        return FALSE;
+    }
 
     bd_utils_report_finished (progress_id, "Completed");
-
-    return ret;
+    close_context (cxt);
+    return TRUE;
 }
 
 
