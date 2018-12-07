@@ -94,6 +94,7 @@ BDLVMPVdata* bd_lvm_pvdata_copy (BDLVMPVdata *data) {
     new_data->pv_free = data->pv_free;
     new_data->pe_start = data->pe_start;
     new_data->vg_name = g_strdup (data->vg_name);
+    new_data->vg_uuid = g_strdup (data->vg_uuid);
     new_data->vg_size = data->vg_size;
     new_data->vg_free = data->vg_free;
     new_data->vg_extent_size = data->vg_extent_size;
@@ -111,6 +112,7 @@ void bd_lvm_pvdata_free (BDLVMPVdata *data) {
     g_free (data->pv_name);
     g_free (data->pv_uuid);
     g_free (data->vg_name);
+    g_free (data->vg_uuid);
     g_free (data);
 }
 
@@ -379,11 +381,11 @@ gboolean bd_lvm_is_tech_avail (BDLVMTech tech, guint64 mode, GError **error) {
     }
 }
 
-static const gchar** get_existing_objects (const gchar *obj_prefix, GError **error) {
+static gchar** get_existing_objects (const gchar *obj_prefix, GError **error) {
     GVariant *intro_v = NULL;
     gchar *intro_data = NULL;
     GDBusNodeInfo *info = NULL;
-    const gchar **ret = NULL;
+    gchar **ret = NULL;
     GDBusNodeInfo **nodes;
     guint64 n_nodes = 0;
     guint64 i = 0;
@@ -396,13 +398,14 @@ static const gchar** get_existing_objects (const gchar *obj_prefix, GError **err
         return NULL;
 
     g_variant_get (intro_v, "(s)", &intro_data);
+    g_variant_unref (intro_v);
     info = g_dbus_node_info_new_for_xml (intro_data, error);
     g_free (intro_data);
 
     for (nodes = info->nodes; (*nodes); nodes++)
         n_nodes++;
 
-    ret = g_new0 (const gchar*, n_nodes + 1);
+    ret = g_new0 (gchar*, n_nodes + 1);
     for (nodes = info->nodes, i=0; (*nodes); nodes++, i++) {
         ret[i] = g_strdup_printf ("%s/%s", obj_prefix, ((*nodes)->path));
     }
@@ -573,6 +576,7 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
         g_variant_iter_init (&iter, params);
         while ((param = g_variant_iter_next_value (&iter))) {
             g_variant_builder_add_value (&builder, param);
+            g_variant_unref (param);
         }
     }
 
@@ -601,6 +605,7 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
     g_mutex_unlock (&global_config_lock);
     prog_msg = g_strdup_printf ("Started the '%s.%s' method on the '%s' object with the following parameters: '%s'",
                                intf, method, obj, params_str);
+    g_free (params_str);
     *progress_id = bd_utils_report_started (prog_msg);
     g_free (prog_msg);
 
@@ -662,6 +667,7 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
             log_task_status (log_task_id, "No result, no job started");
             g_free (task_path);
             bd_utils_report_finished (prog_id, "Completed");
+            g_variant_unref (ret);
             return;
         }
     } else {
@@ -901,7 +907,7 @@ static BDLVMPVdata* get_pv_data_from_props (GVariant *props, GError **error) {
     g_variant_dict_lookup (&dict, "PeStart", "t", &(data->pe_start));
 
     /* returns an object path for the VG */
-    g_variant_dict_lookup (&dict, "Vg", "o", &value);
+    g_variant_dict_lookup (&dict, "Vg", "&o", &value);
     if (g_strcmp0 (value, "/") == 0) {
         /* no VG, the PV is not part of any VG */
         g_variant_dict_clear (&dict);
@@ -1154,8 +1160,8 @@ guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean inclu
     else
         raw_md_size = (guint64) ceil (size * THPOOL_MD_FACTOR_NEW);
 
-    return MIN (bd_lvm_round_size_to_pe(raw_md_size, pe_size, TRUE, error),
-                bd_lvm_round_size_to_pe(BD_LVM_MAX_THPOOL_MD_SIZE, pe_size, TRUE, error));
+    return MIN (bd_lvm_round_size_to_pe (raw_md_size, pe_size, TRUE, error),
+                bd_lvm_round_size_to_pe (BD_LVM_MAX_THPOOL_MD_SIZE, pe_size, TRUE, error));
 }
 
 /**
@@ -1505,7 +1511,7 @@ BDLVMPVdata* bd_lvm_pvinfo (const gchar *device, GError **error) {
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
  */
 BDLVMPVdata** bd_lvm_pvs (GError **error) {
-    const gchar **objects = NULL;
+    gchar **objects = NULL;
     guint64 n_pvs = 0;
     GVariant *props = NULL;
     BDLVMPVdata **ret = NULL;
@@ -1530,20 +1536,21 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
     for (i=0; i < n_pvs; i++) {
         props = get_object_properties (objects[i], PV_INTF, error);
         if (!props) {
-            g_strfreev ((gchar **) objects);
+            g_strfreev (objects);
             g_free (ret);
             return NULL;
         }
         ret[i] = get_pv_data_from_props (props, error);
+        g_variant_unref (props);
         if (!(ret[i])) {
-            g_strfreev ((gchar **) objects);
+            g_strfreev (objects);
             g_free (ret);
             return NULL;
         }
     }
     ret[i] = NULL;
 
-    g_strfreev ((gchar **) objects);
+    g_strfreev (objects);
     return ret;
 }
 
@@ -1789,7 +1796,7 @@ BDLVMVGdata* bd_lvm_vginfo (const gchar *vg_name, GError **error) {
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
  */
 BDLVMVGdata** bd_lvm_vgs (GError **error) {
-    const gchar **objects = NULL;
+    gchar **objects = NULL;
     guint64 n_vgs = 0;
     GVariant *props = NULL;
     BDLVMVGdata **ret = NULL;
@@ -1814,20 +1821,21 @@ BDLVMVGdata** bd_lvm_vgs (GError **error) {
     for (i=0; i < n_vgs; i++) {
         props = get_object_properties (objects[i], VG_INTF, error);
         if (!props) {
-            g_strfreev ((gchar **) objects);
+            g_strfreev (objects);
             g_free (ret);
             return NULL;
         }
         ret[i] = get_vg_data_from_props (props, error);
+        g_variant_unref (props);
         if (!(ret[i])) {
-            g_strfreev ((gchar **) objects);
+            g_strfreev (objects);
             g_free (ret);
             return NULL;
         }
     }
     ret[i] = NULL;
 
-    g_strfreev ((gchar **) objects);
+    g_strfreev (objects);
     return ret;
 }
 
@@ -1934,6 +1942,7 @@ gboolean bd_lvm_lvcreate (const gchar *vg_name, const gchar *lv_name, guint64 si
     }
 
     call_lvm_obj_method_sync (vg_name, VG_INTF, "LvCreate", params, extra_params, extra, error);
+
     return ((*error) == NULL);
 }
 
@@ -2176,8 +2185,8 @@ static gchar* get_lv_vg_name (const gchar *lv_obj_path, GError **error) {
  *
  * Filter LVs by VG name and prepend the matching ones to the @out list.
  */
-static gboolean filter_lvs_by_vg (const gchar **lvs, const gchar *vg_name, GSList **out, guint64 *n_lvs, GError **error) {
-    const gchar **lv_p = NULL;
+static gboolean filter_lvs_by_vg (gchar **lvs, const gchar *vg_name, GSList **out, guint64 *n_lvs, GError **error) {
+    gchar **lv_p = NULL;
     gchar *lv_vg_name = NULL;
     gboolean success = TRUE;
 
@@ -2189,22 +2198,21 @@ static gboolean filter_lvs_by_vg (const gchar **lvs, const gchar *vg_name, GSLis
         if (vg_name) {
             lv_vg_name = get_lv_vg_name (*lv_p, error);
             if (!lv_vg_name) {
-                g_free ((gchar *) *lv_p);
+                g_free (*lv_p);
                 success = FALSE;
                 continue;
             }
 
             if (g_strcmp0 (lv_vg_name, vg_name) == 0) {
-                *out = g_slist_prepend (*out, (gchar *) *lv_p);
+                *out = g_slist_prepend (*out, *lv_p);
                 (*n_lvs)++;
             } else {
-                g_free ((gchar *) *lv_p);
-                *lv_p = NULL;
+                g_free (*lv_p);
             }
 
             g_free (lv_vg_name);
         } else {
-            *out = g_slist_prepend (*out, (gchar *) *lv_p);
+            *out = g_slist_prepend (*out, *lv_p);
             (*n_lvs)++;
         }
     }
@@ -2222,7 +2230,7 @@ static gboolean filter_lvs_by_vg (const gchar **lvs, const gchar *vg_name, GSLis
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
  */
 BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
-    const gchar **lvs = NULL;
+    gchar **lvs = NULL;
     guint64 n_lvs = 0;
     GVariant *props = NULL;
     BDLVMLVdata **ret = NULL;
@@ -2238,43 +2246,55 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
     }
     success = filter_lvs_by_vg (lvs, vg_name, &matched_lvs, &n_lvs, error);
     g_free (lvs);
-    if (!success)
+    if (!success) {
+        g_slist_free_full (matched_lvs, g_free);
         return NULL;
+    }
 
     lvs = get_existing_objects (THIN_POOL_OBJ_PREFIX, error);
     if (!lvs && (*error)) {
         /* error is already populated */
+        g_slist_free_full (matched_lvs, g_free);
         return NULL;
     }
     success = filter_lvs_by_vg (lvs, vg_name, &matched_lvs, &n_lvs, error);
     g_free (lvs);
-    if (!success)
+    if (!success) {
+        g_slist_free_full (matched_lvs, g_free);
         return NULL;
+    }
 
     lvs = get_existing_objects (CACHE_POOL_OBJ_PREFIX, error);
     if (!lvs && (*error)) {
         /* error is already populated */
+        g_slist_free_full (matched_lvs, g_free);
         return NULL;
     }
     success = filter_lvs_by_vg (lvs, vg_name, &matched_lvs, &n_lvs, error);
     g_free (lvs);
-    if (!success)
+    if (!success) {
+        g_slist_free_full (matched_lvs, g_free);
         return NULL;
+    }
 
     lvs = get_existing_objects (HIDDEN_LV_OBJ_PREFIX, error);
     if (!lvs && (*error)) {
         /* error is already populated */
+        g_slist_free_full (matched_lvs, g_free);
         return NULL;
     }
     success = filter_lvs_by_vg (lvs, vg_name, &matched_lvs, &n_lvs, error);
     g_free (lvs);
-    if (!success)
+    if (!success) {
+        g_slist_free_full (matched_lvs, g_free);
         return NULL;
+    }
 
     if (n_lvs == 0) {
         /* no LVs */
         ret = g_new0 (BDLVMLVdata*, 1);
         ret[0] = NULL;
+        g_slist_free_full (matched_lvs, g_free);
         return ret;
     }
 
@@ -2289,12 +2309,12 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
     while (lv) {
         props = get_object_properties (lv->data, LV_CMN_INTF, error);
         if (!props) {
-            g_slist_free (matched_lvs);
+            g_slist_free_full (matched_lvs, g_free);
             return NULL;
         }
         ret[j] = get_lv_data_from_props (props, error);
         if (!(ret[j])) {
-            g_slist_free (matched_lvs);
+            g_slist_free_full (matched_lvs, g_free);
             for (guint64 i = 0; i < j; i++)
                 bd_lvm_lvdata_free (ret[i]);
             g_free (ret);
@@ -2305,7 +2325,7 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
             ret[j]->metadata_lv = bd_lvm_metadata_lv_name (ret[j]->vg_name, ret[j]->lv_name, error);
         }
         if (error && *error) {
-            g_slist_free (matched_lvs);
+            g_slist_free_full (matched_lvs, g_free);
             for (guint64 i = 0; i <= j; i++)
                 bd_lvm_lvdata_free (ret[i]);
             g_free (ret);
@@ -2314,7 +2334,7 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
         j++;
         lv = g_slist_next (lv);
     }
-    g_slist_free (matched_lvs);
+    g_slist_free_full (matched_lvs, g_free);
 
     ret[j] = NULL;
     return ret;
@@ -2950,7 +2970,7 @@ BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_l
         return NULL;
     }
 
-    pool = dm_pool_create("bd-pool", 20);
+    pool = dm_pool_create ("bd-pool", 20);
 
     /* translate the VG+LV name into the DM map name */
     map_name = dm_build_dm_name (pool, vg_name, cached_lv, NULL);
@@ -2971,7 +2991,7 @@ BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_l
         return NULL;
     }
 
-    if (dm_task_run(task) == 0) {
+    if (dm_task_run (task) == 0) {
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
                      "Failed to run the DM task for the cache map '%s': ", map_name);
         dm_task_destroy (task);
@@ -2995,7 +3015,7 @@ BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_l
         return NULL;
     }
 
-    dm_get_next_target(task, NULL, &start, &length, &type, &params);
+    dm_get_next_target (task, NULL, &start, &length, &type, &params);
 
     if (dm_get_status_cache (pool, params, &status) == 0) {
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
