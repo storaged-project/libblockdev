@@ -18,8 +18,8 @@
  */
 
 #include <glib.h>
-/* provides MAJOR, MINOR macros */
-#include <linux/kdev_t.h>
+/* provides major and minor macros */
+#include <sys/sysmacros.h>
 #include <libdevmapper.h>
 #include <unistd.h>
 #include <blockdev/utils.h>
@@ -273,8 +273,8 @@ static gboolean map_is_multipath (const gchar *map_name, GError **error) {
 static gchar** get_map_deps (const gchar *map_name, guint64 *n_deps, GError **error) {
     struct dm_task *task;
     struct dm_deps *deps;
-    guint64 major = 0;
-    guint64 minor = 0;
+    guint64 dev_major = 0;
+    guint64 dev_minor = 0;
     guint64 i = 0;
     gchar **dep_devs = NULL;
     gchar *major_minor = NULL;
@@ -319,9 +319,9 @@ static gchar** get_map_deps (const gchar *map_name, guint64 *n_deps, GError **er
     dep_devs = g_new0 (gchar*, deps->count + 1);
 
     for (i = 0; i < deps->count; i++) {
-        major = (guint64) MAJOR(deps->device[i]);
-        minor = (guint64) MINOR(deps->device[i]);
-        major_minor = g_strdup_printf ("%"G_GUINT64_FORMAT":%"G_GUINT64_FORMAT, major, minor);
+        dev_major = (guint64) major (deps->device[i]);
+        dev_minor = (guint64) minor (deps->device[i]);
+        major_minor = g_strdup_printf ("%"G_GUINT64_FORMAT":%"G_GUINT64_FORMAT, dev_major, dev_minor);
         dep_devs[i] = get_device_name (major_minor, error);
         if (*error) {
             g_prefix_error (error, "Failed to resolve '%s' to device name",
