@@ -148,8 +148,11 @@ class CryptoTestFormat(CryptoTestCase):
                                            BlockDev.CryptoLUKSVersion.LUKS2, extra)
         self.assertTrue(succ)
 
-        _ret, label, _err = run_command("blkid -p -ovalue -sLABEL %s" % self.loop_dev)
-        self.assertEqual(label, "blockdevLUKS")
+        _ret, out, err = run_command("cryptsetup luksDump %s" % self.loop_dev)
+        m = re.search(r"Label:\s*(\S+)\s*", out)
+        if not m or len(m.groups()) != 1:
+            self.fail("Failed to get label information from:\n%s %s" % (out, err))
+        self.assertEqual(m.group(1), "blockdevLUKS")
 
         # different key derivation function
         pbkdf = BlockDev.CryptoLUKSPBKDF(type="pbkdf2")
