@@ -908,6 +908,9 @@ class CryptoTestIntegrity(CryptoTestCase):
     def test_luks2_integrity(self):
         """Verify that we can get create a LUKS 2 device with integrity"""
 
+        if not BlockDev.utils_have_kernel_module("dm-integrity"):
+            self.skipTest('dm-integrity kernel module not available, skipping.')
+
         extra = BlockDev.CryptoLUKSExtra()
         extra.integrity = "hmac(sha256)"
 
