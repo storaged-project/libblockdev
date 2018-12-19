@@ -1444,6 +1444,7 @@ gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, cons
 
 static gboolean luks_resize (const gchar *luks_device, guint64 size, const guint8 *pass_data, gsize data_len, const gchar *key_file, GError **error) {
     struct crypt_device *cd = NULL;
+    struct crypt_active_device cad;
     gint ret = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
@@ -1463,6 +1464,16 @@ static gboolean luks_resize (const gchar *luks_device, guint64 size, const guint
         return FALSE;
     }
 
+    ret = crypt_get_active_device (cd, luks_device, &cad);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to get information about '%s': %s",
+                     luks_device, strerror_l(-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
     if (pass_data || key_file) {
         if (key_file) {
             success = g_file_get_contents (key_file, &key_buffer, &buf_len, error);
@@ -1478,7 +1489,7 @@ static gboolean luks_resize (const gchar *luks_device, guint64 size, const guint
 #ifdef LIBCRYPTSETUP_2
         ret = crypt_activate_by_passphrase (cd, NULL, CRYPT_ANY_SLOT,
                                             key_buffer ? key_buffer : (char*) pass_data,
-                                            buf_len, CRYPT_ACTIVATE_KEYRING_KEY);
+                                            buf_len, cad.flags & CRYPT_ACTIVATE_KEYRING_KEY);
 #else
         ret = crypt_activate_by_passphrase (cd, NULL, CRYPT_ANY_SLOT,
                                             key_buffer ? key_buffer : (char*) pass_data,
