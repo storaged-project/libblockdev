@@ -148,8 +148,11 @@ class CryptoTestFormat(CryptoTestCase):
                                            BlockDev.CryptoLUKSVersion.LUKS2, extra)
         self.assertTrue(succ)
 
-        _ret, label, _err = run_command("blkid -p -ovalue -sLABEL %s" % self.loop_dev)
-        self.assertEqual(label, "blockdevLUKS")
+        _ret, out, err = run_command("cryptsetup luksDump %s" % self.loop_dev)
+        m = re.search(r"Label:\s*(\S+)\s*", out)
+        if not m or len(m.groups()) != 1:
+            self.fail("Failed to get label information from:\n%s %s" % (out, err))
+        self.assertEqual(m.group(1), "blockdevLUKS")
 
         # different key derivation function
         pbkdf = BlockDev.CryptoLUKSPBKDF(type="pbkdf2")
@@ -222,6 +225,15 @@ class CryptoTestFormat(CryptoTestCase):
         self.assertEqual(int(m.group(1)), 5)
 
 class CryptoTestResize(CryptoTestCase):
+
+    def _get_key_location(self, device):
+        _ret, out, err = run_command("cryptsetup status %s" % device)
+        m = re.search(r"\s*key location:\s*(\S+)\s*", out)
+        if not m or len(m.groups()) != 1:
+            self.fail("Failed to get key locaton from:\n%s %s" % (out, err))
+
+        return m.group(1)
+
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
     def test_luks_resize(self):
         """Verify that resizing LUKS device works"""
@@ -256,9 +268,10 @@ class CryptoTestResize(CryptoTestCase):
         succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
         self.assertTrue(succ)
 
-        # resize without passphrase should fail
-        with self.assertRaises(GLib.GError):
-            BlockDev.crypto_luks_resize("libblockdevTestLUKS", 1024)
+        # resize without passphrase should fail if key is saved in keyring
+        if self._get_key_location("libblockdevTestLUKS") == "keyring":
+            with self.assertRaises(GLib.GError):
+                BlockDev.crypto_luks_resize("libblockdevTestLUKS", 1024)
 
         # resize to 512 KiB (1024 * 512B sectors)
         succ = BlockDev.crypto_luks_resize("libblockdevTestLUKS", 1024, PASSWD)
@@ -907,6 +920,9 @@ class CryptoTestIntegrity(CryptoTestCase):
     @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_integrity(self):
         """Verify that we can get create a LUKS 2 device with integrity"""
+
+        if not BlockDev.utils_have_kernel_module("dm-integrity"):
+            self.skipTest('dm-integrity kernel module not available, skipping.')
 
         extra = BlockDev.CryptoLUKSExtra()
         extra.integrity = "hmac(sha256)"
