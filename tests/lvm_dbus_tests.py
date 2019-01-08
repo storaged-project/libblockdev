@@ -619,6 +619,43 @@ class LvmTestLVcreateRemove(LvmPVVGLVTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.lvm_lvremove("testVG", "testLV", True, None)
 
+@unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
+class LvmTestLVRemoveExtraArgs(LvmPVVGLVTestCase):
+    def test_lvremove_extra_args(self):
+        """Verify that specifying extra arguments for lvremove works as expected"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [self.loop_dev], None)
+        self.assertTrue(succ)
+
+        # try multiple options together with --test, the LV should not be removed
+        succ = BlockDev.lvm_lvremove("testVG", "testLV", False, [BlockDev.ExtraArg.new("--test", "")])
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
+        self.assertTrue(info)
+        self.assertEqual(info.lv_name, "testLV")
+
+        succ = BlockDev.lvm_lvremove("testVG", "testLV", True, [BlockDev.ExtraArg.new("--test", "")])
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
+        self.assertTrue(info)
+        self.assertEqual(info.lv_name, "testLV")
+
+        # try to remove without --force
+        succ = BlockDev.lvm_lvremove("testVG", "testLV", False, None)
+        self.assertTrue(succ)
+
+        # already removed
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_lvremove("testVG", "testLV", True, None)
+
 class LvmTestLVcreateWithExtra(LvmPVVGLVTestCase):
     def __init__(self, *args, **kwargs):
         LvmPVVGLVTestCase.__init__(self, *args, **kwargs)

@@ -1346,7 +1346,6 @@ gboolean bd_lvm_pvremove (const gchar *device, const BDExtraArg **extra, GError 
 
     params = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
-    params = g_variant_new ("(v)", params);
     call_lvm_obj_method_sync (device, PV_INTF, "Remove", NULL, params, extra, error);
     if (*error && g_error_matches (*error, BD_LVM_ERROR, BD_LVM_ERROR_NOEXIST))
         /* if the object doesn't exist, the given device is not a PV and thus
@@ -1963,7 +1962,6 @@ gboolean bd_lvm_lvremove (const gchar *vg_name, const gchar *lv_name, gboolean f
     }
     extra_params = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
-    extra_params = g_variant_new ("(v)", extra_params);
 
     call_lv_method_sync (vg_name, lv_name, "Remove", NULL, extra_params, extra, error);
 
