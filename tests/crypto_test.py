@@ -297,7 +297,7 @@ class CryptoTestOpenClose(CryptoTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", None, None, False)
 
-        with self.assertRaises(GLib.GError):
+        with six.assertRaisesRegex(self, GLib.GError, r"Incorrect passphrase"):
             BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", "wrong-passhprase", None, False)
 
         with self.assertRaises(GLib.GError):

@@ -1033,8 +1033,13 @@ static gboolean luks_open (const gchar *device, const gchar *name, const guint8 
     g_free (key_buffer);
 
     if (ret < 0) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to activate device: %s", strerror_l(-ret, c_locale));
+        if (ret == -EPERM)
+          g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                       "Failed to activate device: Incorrect passphrase.");
+        else
+          g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                       "Failed to activate device: %s", strerror_l(-ret, c_locale));
+
         crypt_free (cd);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
@@ -1498,8 +1503,12 @@ static gboolean luks_resize (const gchar *luks_device, guint64 size, const guint
         g_free (key_buffer);
 
         if (ret < 0) {
-            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                         "Failed to activate device: %s", strerror_l(-ret, c_locale));
+            if (ret == -EPERM)
+              g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                           "Failed to activate device: Incorrect passphrase.");
+            else
+              g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                           "Failed to activate device: %s", strerror_l(-ret, c_locale));
             crypt_free (cd);
             bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
