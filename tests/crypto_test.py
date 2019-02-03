@@ -110,15 +110,15 @@ class CryptoTestFormat(CryptoTestCase):
             BlockDev.crypto_luks_format(self.loop_dev, None, 0, None, None, 0)
 
         # the simple case with password
-        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, PASSWD, None, 0)
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-xts-plain64", 0, PASSWD, None, 0)
         self.assertTrue(succ)
 
         # create with a keyfile
-        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0)
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-xts-plain64", 0, None, self.keyfile, 0)
         self.assertTrue(succ)
 
         # the simple case with password blob
-        succ = BlockDev.crypto_luks_format_blob(self.loop_dev, "aes-cbc-essiv:sha256", 0, [ord(c) for c in PASSWD], 0)
+        succ = BlockDev.crypto_luks_format_blob(self.loop_dev, "aes-xts-plain64", 0, [ord(c) for c in PASSWD], 0)
         self.assertTrue(succ)
 
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
@@ -131,20 +131,20 @@ class CryptoTestFormat(CryptoTestCase):
             BlockDev.crypto_luks_format(self.loop_dev, None, 0, None, None, 0)
 
         # the simple case with password
-        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, PASSWD, None, 0)
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-xts-plain64", 0, PASSWD, None, 0)
         self.assertTrue(succ)
 
         # create with a keyfile
-        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0)
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-xts-plain64", 0, None, self.keyfile, 0)
         self.assertTrue(succ)
 
         # the simple case with password blob
-        succ = BlockDev.crypto_luks_format_blob(self.loop_dev, "aes-cbc-essiv:sha256", 0, [ord(c) for c in PASSWD], 0)
+        succ = BlockDev.crypto_luks_format_blob(self.loop_dev, "aes-xts-plain64", 0, [ord(c) for c in PASSWD], 0)
         self.assertTrue(succ)
 
         # simple case with extra options
         extra = BlockDev.CryptoLUKSExtra(label="blockdevLUKS")
-        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0,
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-xts-plain64", 0, None, self.keyfile, 0,
                                            BlockDev.CryptoLUKSVersion.LUKS2, extra)
         self.assertTrue(succ)
 
@@ -157,7 +157,7 @@ class CryptoTestFormat(CryptoTestCase):
         # different key derivation function
         pbkdf = BlockDev.CryptoLUKSPBKDF(type="pbkdf2")
         extra = BlockDev.CryptoLUKSExtra(pbkdf=pbkdf)
-        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0,
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-xts-plain64", 0, None, self.keyfile, 0,
                                            BlockDev.CryptoLUKSVersion.LUKS2, extra)
         self.assertTrue(succ)
 
@@ -170,7 +170,7 @@ class CryptoTestFormat(CryptoTestCase):
         # different options for argon2 -- all parameters set
         pbkdf = BlockDev.CryptoLUKSPBKDF(type="argon2id", max_memory_kb=100*1024, iterations=10, parallel_threads=1)
         extra = BlockDev.CryptoLUKSExtra(pbkdf=pbkdf)
-        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0,
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-xts-plain64", 0, None, self.keyfile, 0,
                                            BlockDev.CryptoLUKSVersion.LUKS2, extra)
         self.assertTrue(succ)
 
@@ -199,7 +199,7 @@ class CryptoTestFormat(CryptoTestCase):
         # different options for argon2 -- only memory set
         pbkdf = BlockDev.CryptoLUKSPBKDF(max_memory_kb=100*1024)
         extra = BlockDev.CryptoLUKSExtra(pbkdf=pbkdf)
-        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0,
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-xts-plain64", 0, None, self.keyfile, 0,
                                            BlockDev.CryptoLUKSVersion.LUKS2, extra)
         self.assertTrue(succ)
 
@@ -214,7 +214,7 @@ class CryptoTestFormat(CryptoTestCase):
         # different options for argon2 -- only miterations set
         pbkdf = BlockDev.CryptoLUKSPBKDF(iterations=5)
         extra = BlockDev.CryptoLUKSExtra(pbkdf=pbkdf)
-        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, None, self.keyfile, 0,
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-xts-plain64", 0, None, self.keyfile, 0,
                                            BlockDev.CryptoLUKSVersion.LUKS2, extra)
         self.assertTrue(succ)
 
@@ -865,7 +865,7 @@ class CryptoTestInfo(CryptoTestCase):
     def test_luks_format(self):
         """Verify that we can get information about a LUKS device"""
 
-        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, PASSWD, None, 0)
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 256, PASSWD, None, 0)
         self.assertTrue(succ)
 
         succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
@@ -893,7 +893,7 @@ class CryptoTestInfo(CryptoTestCase):
         extra = BlockDev.CryptoLUKSExtra()
         extra.sector_size = 4096
 
-        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, PASSWD, None, 0,
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 256, PASSWD, None, 0,
                                            BlockDev.CryptoLUKSVersion.LUKS2, extra)
         self.assertTrue(succ)
 
