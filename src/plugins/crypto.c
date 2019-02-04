@@ -250,6 +250,9 @@ static void crypto_log_redirect (gint level, const gchar *msg, void *usrptr __at
  *
  */
 gboolean bd_crypto_init (void) {
+#ifdef DEBUG
+    crypt_set_debug_level (CRYPT_DEBUG_ALL);
+#endif
     c_locale = newlocale (LC_ALL_MASK, "C", c_locale);
     crypt_set_log_callback (NULL, &crypto_log_redirect, NULL);
     return TRUE;
@@ -265,6 +268,7 @@ gboolean bd_crypto_init (void) {
 void bd_crypto_close (void) {
     c_locale = (locale_t) 0;
     crypt_set_log_callback (NULL, NULL, NULL);
+    crypt_set_debug_level (CRYPT_DEBUG_NONE);
 }
 
 /**
