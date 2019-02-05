@@ -497,6 +497,12 @@ static BDLVMVGdata* get_vg_data_from_table (GHashTable *table, gboolean free_tab
     else
         data->pv_count = 0;
 
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_EXPORTED");
+    if (value && g_strcmp0 (value, "exported") == 0)
+        data->exported = TRUE;
+    else
+        data->exported = FALSE;
+
     if (free_table)
         g_hash_table_destroy (table);
 
@@ -1220,7 +1226,7 @@ gboolean bd_lvm_vgreduce (const gchar *vg_name, const gchar *device, const BDExt
 BDLVMVGdata* bd_lvm_vginfo (const gchar *vg_name, GError **error) {
     const gchar *args[10] = {"vgs", "--noheadings", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--units=b",
-                       "-o", "name,uuid,size,free,extent_size,extent_count,free_count,pv_count",
+                       "-o", "name,uuid,size,free,extent_size,extent_count,free_count,pv_count,vg_exported",
                        vg_name, NULL};
 
     GHashTable *table = NULL;
@@ -1240,7 +1246,7 @@ BDLVMVGdata* bd_lvm_vginfo (const gchar *vg_name, GError **error) {
 
     for (lines_p = lines; *lines_p; lines_p++) {
         table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 8)) {
+        if (table && (num_items == 9)) {
             g_strfreev (lines);
             return get_vg_data_from_table (table, TRUE);
         } else

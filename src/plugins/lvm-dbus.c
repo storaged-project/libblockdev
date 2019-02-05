@@ -944,6 +944,7 @@ static BDLVMVGdata* get_vg_data_from_props (GVariant *props, GError **error __at
     g_variant_dict_lookup (&dict, "ExtentCount", "t", &(data->extent_count));
     g_variant_dict_lookup (&dict, "FreeCount", "t", &(data->free_count));
     g_variant_dict_lookup (&dict, "PvCount", "t", &(data->pv_count));
+    g_variant_dict_lookup (&dict, "Exportable", "b", &(data->exported));
 
     g_variant_dict_clear (&dict);
 

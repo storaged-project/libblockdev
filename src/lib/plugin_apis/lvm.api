@@ -168,6 +168,7 @@ GType bd_lvm_vgdata_get_type();
  * @extent_count: number of extents in the VG
  * @free_count: number of free extents in the VG
  * @pv_count: number of PVs that belong to the VG
+ * @exported: whether the VG is exported or not
  */
 typedef struct BDLVMVGdata {
     gchar *name;
@@ -178,6 +179,7 @@ typedef struct BDLVMVGdata {
     guint64 extent_count;
     guint64 free_count;
     guint64 pv_count;
+    gboolean exported;
 } BDLVMVGdata;
 
 /**
@@ -199,6 +201,7 @@ BDLVMVGdata* bd_lvm_vgdata_copy (BDLVMVGdata *data) {
     new_data->extent_count = data->extent_count;
     new_data->free_count = data->free_count;
     new_data->pv_count = data->pv_count;
+    new_data->exported = data->exported;
 
     return new_data;
 }
