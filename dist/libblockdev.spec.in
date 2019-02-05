@@ -145,6 +145,7 @@ BuildRequires: python3-devel
 BuildRequires: gtk-doc
 %endif
 BuildRequires: glib2-doc
+BuildRequires: autoconf-archive
 
 # Needed for the escrow tests in tests/crypto_test.py, but not used to build
 # BuildRequires: volume_key
