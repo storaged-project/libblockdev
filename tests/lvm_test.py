@@ -357,7 +357,7 @@ class LvmPVVGTestCase(LvmPVonlyTestCase):
         LvmPVonlyTestCase._clean_up(self)
 
 class LvmTestVGcreateRemove(LvmPVVGTestCase):
-    @skip_on("debian", skip_on_arch="i686", reason="vgremove is broken on 32bit Debian")
+    @skip_on("debian", skip_on_version="9", skip_on_arch="i686", reason="vgremove is broken on 32bit Debian stable")
     def test_vgcreate_vgremove(self):
         """Verify that it is possible to create and destroy a VG"""
 
@@ -498,7 +498,7 @@ class LvmTestVGinfo(LvmPVVGTestCase):
         self.assertEqual(info.extent_size, 4 * 1024**2)
 
 class LvmTestVGs(LvmPVVGTestCase):
-    @skip_on("debian", skip_on_arch="i686", reason="vgremove is broken on 32bit Debian")
+    @skip_on("debian", skip_on_version="9", skip_on_arch="i686", reason="vgremove is broken on 32bit Debian stable")
     def test_vgs(self):
         """Verify that it's possible to gather info about VGs"""
 
