@@ -10,7 +10,7 @@ from distutils.version import LooseVersion
 from distutils.spawn import find_executable
 
 import overrides_hack
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, skip_on, mount, umount, run_command
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, mount, umount, run_command
 from gi.repository import GLib, BlockDev
 
 TEST_MNT = "/tmp/libblockdev_test_mnt"
@@ -489,7 +489,6 @@ class BtrfsTooSmallTestCase (BtrfsTestCase):
             pass
         os.unlink(self.dev_file2)
 
-    @skip_on("fedora", "25", reason="Min sizes for Btrfs are different on F25")
     def test_create_too_small(self):
         """Verify that an attempt to create BTRFS on a too small device fails"""
 
@@ -527,7 +526,6 @@ class BtrfsJustBigEnoughTestCase (BtrfsTestCase):
             pass
         os.unlink(self.dev_file2)
 
-    @skip_on("fedora", "25", reason="Min sizes for Btrfs are different on F25")
     def test_create_just_enough(self):
         """Verify that creating BTRFS on a just big enough devices works"""
 

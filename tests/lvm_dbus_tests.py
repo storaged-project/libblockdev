@@ -8,7 +8,7 @@ import re
 import subprocess
 from itertools import chain
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on, run_command
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, run_command
 from gi.repository import BlockDev, GLib
 
 import dbus
@@ -465,7 +465,6 @@ class LvmTestVGactivateDeactivate(LvmPVVGTestCase):
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmTestVGextendReduce(LvmPVVGTestCase):
-    @skip_on("fedora", "27", reason="LVM is broken in many ways on rawhide")
     def test_vgextend_vgreduce(self):
         """Verify that it is possible to extend/reduce a VG"""
 
@@ -706,7 +705,6 @@ class LvmTestLVcreateWithExtra(LvmPVVGLVTestCase):
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmTestLVcreateType(LvmPVVGLVTestCase):
-    @skip_on("fedora", "27", reason="LVM is broken in many ways on rawhide")
     def test_lvcreate_type(self):
         """Verify it's possible to create LVs with various types"""
 
@@ -1180,7 +1178,6 @@ class LvmPVVGLVcachePoolTestCase(LvmPVVGLVTestCase):
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmPVVGLVcachePoolCreateRemoveTestCase(LvmPVVGLVcachePoolTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    @skip_on("fedora", "27", reason="LVM is broken in many ways on rawhide")
     def test_cache_pool_create_remove(self):
         """Verify that is it possible to create and remove a cache pool"""
 
@@ -1207,7 +1204,6 @@ class LvmPVVGLVcachePoolCreateRemoveTestCase(LvmPVVGLVcachePoolTestCase):
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmTestCachePoolConvert(LvmPVVGLVcachePoolTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    @skip_on("fedora", "27", reason="LVM is broken in many ways on rawhide")
     def test_cache_pool_convert(self):
         """Verify that it is possible to create a cache pool by conversion"""
 
@@ -1231,7 +1227,6 @@ class LvmTestCachePoolConvert(LvmPVVGLVcachePoolTestCase):
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmPVVGLVcachePoolAttachDetachTestCase(LvmPVVGLVcachePoolTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    @skip_on("fedora", "27", reason="LVM is broken in many ways on rawhide")
     def test_cache_pool_attach_detach(self):
         """Verify that is it possible to attach and detach a cache pool"""
 
@@ -1273,7 +1268,6 @@ class LvmPVVGLVcachePoolAttachDetachTestCase(LvmPVVGLVcachePoolTestCase):
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmPVVGcachedLVTestCase(LvmPVVGLVTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    @skip_on("fedora", "27", reason="LVM is broken in many ways on rawhide")
     def test_create_cached_lv(self):
         """Verify that it is possible to create a cached LV in a single step"""
 
@@ -1294,7 +1288,6 @@ class LvmPVVGcachedLVTestCase(LvmPVVGLVTestCase):
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmPVVGcachedLVpoolTestCase(LvmPVVGLVTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    @skip_on("fedora", "27", reason="LVM is broken in many ways on rawhide")
     def test_cache_get_pool_name(self):
         """Verify that it is possible to get the name of the cache pool"""
 
@@ -1321,7 +1314,6 @@ class LvmPVVGcachedLVpoolTestCase(LvmPVVGLVTestCase):
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmPVVGcachedLVstatsTestCase(LvmPVVGLVTestCase):
     @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    @skip_on("fedora", "27", reason="LVM is broken in many ways on rawhide")
     def test_cache_get_stats(self):
         """Verify that it is possible to get stats for a cached LV"""
 
