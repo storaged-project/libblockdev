@@ -124,7 +124,7 @@
 %define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?vdo_copts} %{?tools_copts} %{?gi_copts}
 
 Name:        libblockdev
-Version:     2.20
+Version:     2.21
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -981,6 +981,33 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Thu Feb 21 2019 Vojtech Trefny <vtrefny@redhat.com> - 2.21-1
+- Fix checking swap status on lvm/md (vtrefny)
+- tests: Stop skipping some tests on Debian testing (vtrefny)
+- tests: Remove some old/irrelevant skips (vtrefny)
+- Use 512bit keys in LUKS by default (vratislav.podzimek)
+- Add 'autoconf-archive' to build requires (vtrefny)
+- vagrant: remove F27 and add F29 (vtrefny)
+- vagrant: install 'autoconf-archive' on Ubuntu (vtrefny)
+- Enable cryptsetup debug messages when compiled using --enable-debug (vtrefny)
+- lvm-dbus: Do not pass extra arguments enclosed in a tuple (vtrefny)
+- crypto: Do not try to use keyring on systems without keyring support (vtrefny)
+- Fix LUKS2 resize password test (vtrefny)
+- Use cryptsetup to check LUKS2 label (vtrefny)
+- Skip LUKS2+integrity test on systems without dm-integrity module (vtrefny)
+- Add custom error message for wrong passphrase for open (vtrefny)
+- Use major/minor macros from sys/sysmacros.h instead of linux/kdev_t.h (vtrefny)
+- crypto_test.py: Use blkid instead of lsblk to check luks label (vtrefny)
+- Skip VDO grow physical test (vtrefny)
+- Add libblkid-devel as a build dependency for the swap plugin (vtrefny)
+- Add error codes and Python exceptions for swapon fails (vtrefny)
+- Use libblkid to check swap status before swapon (vtrefny)
+- Add a new subpackage with the tool(s) (v.podzimek)
+- Document what the 'tools' directory contains (v.podzimek)
+- Make building tools optional (v.podzimek)
+- Add a tool for getting cached LVM statistics (v.podzimek)
+- Discard messages from libdevmapper in the LVM plugins (v.podzimek)
+
 * Wed Sep 26 2018 Vojtech Trefny <vtrefny@redhat.com> - 2.20-1
 - Use unsafe caching for storage for devel/testing VMs (v.podzimek)
 - Require newer version of cryptsetup for LUKS2 tests (vtrefny)

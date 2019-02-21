@@ -1,3 +1,55 @@
+Libblockdev 2.21
+----------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Notable changes**
+
+- crypto
+
+  - default key size for LUKS was changed to 512bit
+
+- tools
+
+  - new simple cli tools that use libblockdev
+  - first tool is ``lvm-cache-stats`` for displaying stats for LVM cache devices
+  - use configure option ``--without-tools`` to disable building these
+
+
+**Full list of changes**
+
+Vojtech Trefny (19):
+
+- Use libblkid to check swap status before swapon
+- Add error codes and Python exceptions for swapon fails
+- Add libblkid-devel as a build dependency for the swap plugin
+- Skip VDO grow physical test
+- crypto_test.py: Use blkid instead of lsblk to check luks label
+- Use major/minor macros from sys/sysmacros.h instead of linux/kdev_t.h
+- Add custom error message for wrong passphrase for open
+- Skip LUKS2+integrity test on systems without dm-integrity module
+- Use cryptsetup to check LUKS2 label
+- Fix LUKS2 resize password test
+- crypto: Do not try to use keyring on systems without keyring support
+- lvm-dbus: Do not pass extra arguments enclosed in a tuple
+- Enable cryptsetup debug messages when compiled using --enable-debug
+- vagrant: install 'autoconf-archive' on Ubuntu
+- vagrant: remove F27 and add F29
+- Add 'autoconf-archive' to build requires
+- tests: Remove some old/irrelevant skips
+- tests: Stop skipping some tests on Debian testing
+- Fix checking swap status on lvm/md
+
+Vratislav Podzimek (6):
+
+- Discard messages from libdevmapper in the LVM plugins
+- Add a tool for getting cached LVM statistics
+- Make building tools optional
+- Document what the 'tools' directory contains
+- Add a new subpackage with the tool(s)
+- Use 512bit keys in LUKS by default
+
 Libblockdev 2.20
 ----------------
 
