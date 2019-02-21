@@ -1008,6 +1008,13 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 - Add a tool for getting cached LVM statistics (v.podzimek)
 - Discard messages from libdevmapper in the LVM plugins (v.podzimek)
 
+* Fri Feb 01 2019 Fedora Release Engineering <releng@fedoraproject.org> - 2.20-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
+
+* Mon Oct 08 2018 Vojtech Trefny <vtrefny@redhat.com> - 2.20-2
+- Use libblkid to check swap status before swapon (vtrefny)
+- Add error codes and Python exceptions for swapon fails (vtrefny)
+
 * Wed Sep 26 2018 Vojtech Trefny <vtrefny@redhat.com> - 2.20-1
 - Use unsafe caching for storage for devel/testing VMs (v.podzimek)
 - Require newer version of cryptsetup for LUKS2 tests (vtrefny)
@@ -1081,6 +1088,15 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 - Show simple summary after configure (vtrefny)
 - Do not build VDO plugin on non-x86_64 architectures (vtrefny)
 - Sync spec with downstream (vtrefny)
+
+* Fri Jul 13 2018 Fedora Release Engineering <releng@fedoraproject.org> - 2.18-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
+
+* Mon Jul 09 2018 Vojtech Trefny <vtrefny@redhat.com> - 2.18-3
+- Reitroduce python2 support for Fedora 29
+
+* Mon Jul 02 2018 Miro Hrončok <mhroncok@redhat.com> - 2.18-2
+- Rebuilt for Python 3.7
 
 * Wed Jun 20 2018 Vojtech Trefny <vtrefny@redhat.com> - 2.18-1
 - Add VDO to features.rst (vtrefny)
