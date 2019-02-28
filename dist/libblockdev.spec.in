@@ -125,7 +125,7 @@
 
 Name:        libblockdev
 Version:     2.21
-Release:     1%{?dist}
+Release:     2%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
 URL:         https://github.com/storaged-project/libblockdev
@@ -137,6 +137,9 @@ BuildRequires: gobject-introspection-devel
 %endif
 %if %{with_python2}
 BuildRequires: python2-devel
+%else
+# Obsolete the python2 subpackage to avoid errors on upgrade
+Obsoletes:     python2-blockdev < %{version}-%{release}
 %endif
 %if %{with_python3}
 BuildRequires: python3-devel
@@ -981,6 +984,9 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Thu Feb 28 2019 Adam Williamson <awilliam@redhat.com> - 2.21-2
+- Obsolete the python2 subpackage if we're not building it
+
 * Thu Feb 21 2019 Vojtech Trefny <vtrefny@redhat.com> - 2.21-1
 - Fix checking swap status on lvm/md (vtrefny)
 - tests: Stop skipping some tests on Debian testing (vtrefny)
