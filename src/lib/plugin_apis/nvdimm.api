@@ -224,4 +224,15 @@ BDNVDIMMNamespaceInfo** bd_nvdimm_list_namespaces (const gchar *bus, const gchar
  */
 gboolean bd_nvdimm_namespace_reconfigure (const gchar* namespace, BDNVDIMMNamespaceMode mode, gboolean force, const BDExtraArg **extra, GError** error);
 
+/**
+ * bd_nvdimm_namepace_get_supported_sector_sizes:
+ * @mode: namespace mode
+ * @error: (out): place to store error if any
+ *
+ * Returns: (transfer none) (array zero-terminated=1): list of supported sector sizes for @mode
+ *
+ * Tech category: %BD_NVDIMM_TECH_NAMESPACE-%BD_NVDIMM_TECH_MODE_QUERY
+ */
+const guint64 *bd_nvdimm_namepace_get_supported_sector_sizes (BDNVDIMMNamespaceMode mode, GError **error);
+
 #endif  /* BD_NVDIMM_API */

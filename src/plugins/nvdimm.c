@@ -636,3 +636,38 @@ gboolean bd_nvdimm_namespace_reconfigure (const gchar* namespace, BDNVDIMMNamesp
     g_free ((gchar *) args[5]);
     return ret;
 }
+
+
+static guint64 blk_sector_sizes[] = { 512, 520, 528, 4096, 4104, 4160, 4224, 0 };
+static guint64 pmem_sector_sizes[] = { 512, 4096, 0 };
+static guint64 io_sector_sizes[] = { 0 };
+
+/**
+ * bd_nvdimm_namepace_get_supported_sector_sizes:
+ * @mode: namespace mode
+ * @error: (out): place to store error if any
+ *
+ * Returns: (transfer none) (array zero-terminated=1): list of supported sector sizes for @mode
+ *
+ * Tech category: %BD_NVDIMM_TECH_NAMESPACE-%BD_NVDIMM_TECH_MODE_QUERY
+ */
+const guint64 *bd_nvdimm_namepace_get_supported_sector_sizes (BDNVDIMMNamespaceMode mode, GError **error) {
+    switch (mode) {
+        case BD_NVDIMM_NAMESPACE_MODE_RAW:
+        case BD_NVDIMM_NAMESPACE_MODE_MEMORY:
+        case BD_NVDIMM_NAMESPACE_MODE_FSDAX:
+            return pmem_sector_sizes;
+
+        case BD_NVDIMM_NAMESPACE_MODE_DAX:
+        case BD_NVDIMM_NAMESPACE_MODE_DEVDAX:
+            return io_sector_sizes;
+
+        case BD_NVDIMM_NAMESPACE_MODE_SECTOR:
+            return blk_sector_sizes;
+
+        default:
+            g_set_error (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_MODE_INVAL,
+                         "Invalid/unknown mode specified.");
+            return NULL;
+    }
+}
