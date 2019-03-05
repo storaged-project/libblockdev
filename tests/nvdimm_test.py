@@ -207,3 +207,19 @@ class NVDIMMUnloadTest(NVDIMMTestCase):
         # load the plugins back
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         self.assertIn("nvdimm", BlockDev.get_available_plugin_names())
+
+
+class NVDIMMNoDevTest(NVDIMMTestCase):
+
+    @skip_on(skip_on_arch="i686", reason="Lists of 64bit integers are broken on i686 with GI")
+    def test_supported_sector_sizes(self):
+        """Verify that getting supported sector sizes works as expected"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.nvdimm_namepace_get_supported_sector_sizes(BlockDev.NVDIMMNamespaceMode.UNKNOWN)
+
+        sizes = BlockDev.nvdimm_namepace_get_supported_sector_sizes(BlockDev.NVDIMMNamespaceMode.SECTOR)
+        self.assertListEqual(sizes, [512, 520, 528, 4096, 4104, 4160, 4224])
+
+        sizes = BlockDev.nvdimm_namepace_get_supported_sector_sizes(BlockDev.NVDIMMNamespaceMode.FSDAX)
+        self.assertListEqual(sizes, [512, 4096])
