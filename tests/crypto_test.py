@@ -414,6 +414,9 @@ class CryptoTestChangeKey(CryptoTestCase):
         succ = create_fn(self.loop_dev, PASSWD, None)
         self.assertTrue(succ)
 
+        with six.assertRaisesRegex(self, GLib.GError, r"No keyslot with given passphrase found."):
+            BlockDev.crypto_luks_change_key(self.loop_dev, "wrong-passphrase", PASSWD2)
+
         succ = BlockDev.crypto_luks_change_key(self.loop_dev, PASSWD, PASSWD2)
         self.assertTrue(succ)
 
