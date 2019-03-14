@@ -16,6 +16,82 @@ LIBDIRS = 'src/utils/.libs:src/plugins/.libs:src/plugins/fs/.libs:src/lib/.libs'
 GIDIR = 'src/lib'
 
 
+def _get_tests_from_suite(suite, tests):
+    """ Extract tests from the test suite """
+    # 'tests' we get from 'unittest.defaultTestLoader.discover' are "wrapped"
+    # in multiple 'unittest.suite.TestSuite' classes/lists so we need to "unpack"
+    # the indivudual test cases
+    for test in suite:
+        if isinstance(test, unittest.suite.TestSuite):
+            _get_tests_from_suite(test, tests)
+
+        if isinstance(test, unittest.TestCase):
+            tests.append(test)
+
+    return tests
+
+
+def _get_test_tags(test):
+    """ Get test tags for single test case """
+
+    tags = []
+
+    # test failed to load, usually some ImportError or something really broken
+    # in the test file, just return empty list and let it fail
+    # with python2 the loader will raise an exception directly without returning
+    # a "fake" FailedTest test case
+    if six.PY3 and isinstance(test, unittest.loader._FailedTest):
+        return tags
+
+    test_fn = getattr(test, test._testMethodName)
+
+    # it is possible to either tag a test funcion or the class so we need to
+    # check both for the tag
+    if getattr(test_fn, "slow", False) or getattr(test_fn.__self__, "slow", False):
+        tags.append(TestTags.SLOW)
+    if getattr(test_fn, "unstable", False) or getattr(test_fn.__self__, "unstable", False):
+        tags.append(TestTags.UNSTABLE)
+    if getattr(test_fn, "unsafe", False) or getattr(test_fn.__self__, "unsafe", False):
+        tags.append(TestTags.UNSAFE)
+    if getattr(test_fn, "core", False) or getattr(test_fn.__self__, "core", False):
+        tags.append(TestTags.CORE)
+    if getattr(test_fn, "nostorage", False) or getattr(test_fn.__self__, "nostorage", False):
+        tags.append(TestTags.NOSTORAGE)
+    if getattr(test_fn, "extradeps", False) or getattr(test_fn.__self__, "extradeps", False):
+        tags.append(TestTags.EXTRADEPS)
+    if getattr(test_fn, "regression", False) or getattr(test_fn.__self__, "regression", False):
+        tags.append(TestTags.REGRESSION)
+
+    return tags
+
+
+def _print_skip_message(test, skip_tag):
+
+    # test.id() looks like 'crypto_test.CryptoTestResize.test_luks2_resize'
+    # and we want to print 'test_luks2_resize (crypto_test.CryptoTestResize)'
+    test_desc = test.id().split(".")
+    test_name = test_desc[-1]
+    test_module = ".".join(test_desc[:-1])
+
+    if skip_tag == TestTags.SLOW:
+        reason = "skipping slow tests"
+    elif skip_tag == TestTags.UNSTABLE:
+        reason = "skipping unstable tests"
+    elif skip_tag == TestTags.UNSAFE:
+        reason = "skipping test that modifies system configuration"
+    elif skip_tag == TestTags.EXTRADEPS:
+        reason = "skipping test that requires special configuration"
+    elif skip_tag == TestTags.CORE:
+        reason = "skipping non-core test"
+    else:
+        reason = "unknown reason"  # just to be sure there is some default value
+
+    if test._testMethodDoc:
+        print("%s (%s)\n%s ... skipped '%s'" % (test_name, test_module, test._testMethodDoc, reason))
+    else:
+        print("%s (%s) ... skipped '%s'" % (test_name, test_module, reason))
+
+
 if __name__ == '__main__':
 
     testdir = os.path.abspath(os.path.dirname(__file__))
@@ -45,6 +121,9 @@ if __name__ == '__main__':
     argparser.add_argument('-j', '--jenkins', dest='jenkins',
                            help='run also tests that should run only in a CI environment',
                            action='store_true')
+    argparser.add_argument('-c', '--core', dest='core',
+                           help='run tests that cover basic functionality of the library and regression tests',
+                           action='store_true')
     argparser.add_argument('-s', '--stop', dest='stop',
                            help='stop executing after first failed test',
                            action='store_true')
@@ -57,21 +136,60 @@ if __name__ == '__main__':
     if args.jenkins:
         os.environ['JENKINS_HOME'] = ''
 
+    # read the environmental variables for backwards compatibility
+    if 'JENKINS_HOME' in os.environ:
+        args.jenkins = True
+    if 'SKIP_SLOW' in os.environ:
+        args.fast = True
+    if 'FEELINGLUCKY' in os.environ:
+        args.lucky = True
+
     sys.path.append(testdir)
     sys.path.append(projdir)
     sys.path.append(os.path.join(projdir, 'src/python'))
 
     start_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    loader = unittest.defaultTestLoader
     suite = unittest.TestSuite()
+
     if args.testname:
-        loader = unittest.TestLoader()
-        tests = loader.loadTestsFromNames(args.testname)
-        suite.addTests(tests)
+        test_cases = loader.loadTestsFromNames(args.testname)
     else:
-        loader = unittest.TestLoader()
-        tests = loader.discover(start_dir=testdir, pattern='*_test*.py')
-        suite.addTests(tests)
+        test_cases = loader.discover(start_dir=testdir, pattern='*_test*.py')
+
+    # extract list of test classes so we can check/run them manually one by one
+    tests = []
+    tests = _get_tests_from_suite(test_cases, tests)
+
+    # for some reason overrides_hack will fail if we import this at the start
+    # of the file
+    from utils import TestTags
+
+    for test in tests:
+        # get tags and (possibly) skip the test
+        tags = _get_test_tags(test)
+
+        if TestTags.SLOW in tags and args.fast:
+            _print_skip_message(test, TestTags.SLOW)
+            continue
+        if TestTags.UNSTABLE in tags and not args.lucky:
+            _print_skip_message(test, TestTags.UNSTABLE)
+            continue
+        if TestTags.UNSAFE in tags or TestTags.EXTRADEPS in tags and not args.jenkins:
+            _print_skip_message(test, TestTags.UNSAFE)
+            continue
+        if TestTags.EXTRADEPS in tags and not args.jenkins:
+            _print_skip_message(test, TestTags.EXTRADEPS)
+            continue
+
+        if args.core and TestTags.CORE not in tags and TestTags.REGRESSION not in tags:
+            _print_skip_message(test, TestTags.CORE)
+            continue
+
+        # finally add the test to the suite
+        suite.addTest(test)
+
     result = unittest.TextTestRunner(verbosity=2, failfast=args.stop).run(suite)
 
     # dump cropped journal to log file
