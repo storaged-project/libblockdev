@@ -10,6 +10,7 @@ import unittest
 import time
 import sys
 from contextlib import contextmanager
+from enum import Enum
 from itertools import chain
 
 from gi.repository import GLib
@@ -347,6 +348,31 @@ def unstable_test(test):
             print("unstable-fail...", end="", file=sys.stderr)
 
     return decorated_test
+
+
+class TestTags(Enum):
+    SLOW = 1        # slow tests
+    UNSTABLE = 2    # randomly failing tests
+    UNSAFE = 3      # tests that change system configuration
+    CORE = 4        # tests covering core functionality
+    NOSTORAGE = 5   # tests that don't work with storage
+    EXTRADEPS = 6   # tests that require special configuration and/or device to run
+    REGRESSION = 7  # regression tests
+
+
+def tag_test(*tags):
+    def decorator(func):
+        func.slow = TestTags.SLOW in tags
+        func.unstable = TestTags.UNSTABLE in tags
+        func.unsafe = TestTags.UNSAFE in tags
+        func.core = TestTags.CORE in tags
+        func.nostorage = TestTags.NOSTORAGE in tags
+        func.extradeps = TestTags.EXTRADEPS in tags
+        func.regression = TestTags.REGRESSION in tags
+
+        return func
+
+    return decorator
 
 
 def run(cmd_string):
