@@ -3,7 +3,7 @@ import unittest
 import time
 import overrides_hack
 
-from utils import create_sparse_tempfile
+from utils import create_sparse_tempfile, TestTags, tag_test
 from gi.repository import BlockDev, GLib
 
 
@@ -31,6 +31,7 @@ class LoopTestCase(unittest.TestCase):
         os.unlink(self.dev_file)
 
 class LoopTestSetupBasic(LoopTestCase):
+    @tag_test(TestTags.CORE)
     def testLoop_setup_teardown_basic(self):
         """Verify that basic loop_setup and loop_teardown work as expected"""
 
@@ -97,6 +98,7 @@ class LoopTestSetupReadOnly(LoopTestCase):
 # XXX: any sane way how to test part_probe=True/False?
 
 class LoopTestGetLoopName(LoopTestCase):
+    @tag_test(TestTags.CORE)
     def testLoop_get_loop_name(self):
         """Verify that loop_get_loop_name works as expected"""
 
@@ -107,6 +109,7 @@ class LoopTestGetLoopName(LoopTestCase):
         self.assertEqual(ret_loop, self.loop)
 
 class LoopTestGetBackingFile(LoopTestCase):
+    @tag_test(TestTags.CORE)
     def testLoop_get_backing_file(self):
         """Verify that loop_get_backing_file works as expected"""
 

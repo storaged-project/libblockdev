@@ -7,7 +7,7 @@ import six
 import re
 import subprocess
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, skip_on
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, skip_on, TestTags, tag_test
 from gi.repository import BlockDev, GLib
 
 
@@ -27,6 +27,7 @@ class LvmNoDevTestCase(LVMTestCase):
         super(LvmNoDevTestCase, self).__init__(*args, **kwargs)
         self._log = ""
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_is_supported_pe_size(self):
         """Verify that lvm_is_supported_pe_size works as expected"""
 
@@ -42,12 +43,14 @@ class LvmNoDevTestCase(LVMTestCase):
         self.assertFalse(BlockDev.lvm_is_supported_pe_size(65535))
         self.assertFalse(BlockDev.lvm_is_supported_pe_size(32 * 1024**3))
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_get_supported_pe_sizes(self):
         """Verify that supported PE sizes are really supported"""
 
         for size in BlockDev.lvm_get_supported_pe_sizes():
             self.assertTrue(BlockDev.lvm_is_supported_pe_size(size))
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_get_max_lv_size(self):
         """Verify that max LV size is correctly determined"""
 
@@ -60,6 +63,7 @@ class LvmNoDevTestCase(LVMTestCase):
 
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), expected)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_round_size_to_pe(self):
         """Verify that round_size_to_pe works as expected"""
 
@@ -84,6 +88,7 @@ class LvmNoDevTestCase(LVMTestCase):
         self.assertEqual(BlockDev.lvm_round_size_to_pe(biggest_multiple - (2 * 4 * 1024**2) + 1, 4 * 1024**2, False),
                          biggest_multiple - (2 * 4 * 1024**2))
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_get_lv_physical_size(self):
         """Verify that get_lv_physical_size works as expected"""
 
@@ -97,6 +102,7 @@ class LvmNoDevTestCase(LVMTestCase):
         self.assertEqual(BlockDev.lvm_get_lv_physical_size(11 * 1024**2, 4 * 1024**2),
                          12 * 1024**2)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_get_thpool_padding(self):
         """Verify that get_thpool_padding works as expected"""
 
@@ -110,6 +116,7 @@ class LvmNoDevTestCase(LVMTestCase):
         self.assertEqual(BlockDev.lvm_get_thpool_padding(11 * 1024**2, 4 * 1024**2, True),
                          expected_padding)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_get_thpool_meta_size(self):
         """Verify that getting recommended thin pool metadata size works as expected"""
 
@@ -128,6 +135,7 @@ class LvmNoDevTestCase(LVMTestCase):
         self.assertEqual(BlockDev.lvm_get_thpool_meta_size (100 * 1024**2, 128 * 1024, 100),
                          BlockDev.LVM_MIN_THPOOL_MD_SIZE)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_is_valid_thpool_md_size(self):
         """Verify that is_valid_thpool_md_size works as expected"""
 
@@ -138,6 +146,7 @@ class LvmNoDevTestCase(LVMTestCase):
         self.assertFalse(BlockDev.lvm_is_valid_thpool_md_size(1 * 1024**2))
         self.assertFalse(BlockDev.lvm_is_valid_thpool_md_size(17 * 1024**3))
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_is_valid_thpool_chunk_size(self):
         """Verify that is_valid_thpool_chunk_size works as expected"""
 
@@ -156,6 +165,7 @@ class LvmNoDevTestCase(LVMTestCase):
     def _store_log(self, lvl, msg):
         self._log += str((lvl, msg))
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_get_set_global_config(self):
         """Verify that getting and setting global config works as expected"""
 
@@ -192,6 +202,7 @@ class LvmNoDevTestCase(LVMTestCase):
         succ = BlockDev.lvm_set_global_config(None)
         self.assertTrue(succ)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_cache_get_default_md_size(self):
         """Verify that default cache metadata size is calculated properly"""
 
@@ -200,6 +211,7 @@ class LvmNoDevTestCase(LVMTestCase):
         self.assertEqual(BlockDev.lvm_cache_get_default_md_size(80 * 1024**3), (80 * 1024**3) // 1000)
         self.assertEqual(BlockDev.lvm_cache_get_default_md_size(6 * 1024**3), 8 * 1024**2)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_cache_mode_bijection(self):
         """Verify that cache modes and their string representations map to each other"""
 
@@ -258,6 +270,7 @@ class LvmPVonlyTestCase(LVMTestCase):
         os.unlink(self.dev_file2)
 
 class LvmTestPVcreateRemove(LvmPVonlyTestCase):
+    @tag_test(TestTags.CORE)
     def test_pvcreate_and_pvremove(self):
         """Verify that it's possible to create and destroy a PV"""
 
@@ -358,6 +371,7 @@ class LvmPVVGTestCase(LvmPVonlyTestCase):
 
 class LvmTestVGcreateRemove(LvmPVVGTestCase):
     @skip_on("debian", skip_on_version="9", skip_on_arch="i686", reason="vgremove is broken on 32bit Debian stable")
+    @tag_test(TestTags.CORE)
     def test_vgcreate_vgremove(self):
         """Verify that it is possible to create and destroy a VG"""
 
@@ -543,6 +557,7 @@ class LvmPVVGLVTestCase(LvmPVVGTestCase):
         LvmPVVGTestCase._clean_up(self)
 
 class LvmTestLVcreateRemove(LvmPVVGLVTestCase):
+    @tag_test(TestTags.CORE)
     def test_lvcreate_lvremove(self):
         """Verify that it's possible to create/destroy an LV"""
 
@@ -809,7 +824,7 @@ class LvmTestLVrename(LvmPVVGLVTestCase):
             BlockDev.lvm_lvrename("testVG", "testLV", "testLV", None)
 
 class LvmTestLVsnapshots(LvmPVVGLVTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW)
     def test_snapshotcreate_lvorigin_snapshotmerge(self):
         """Verify that LV snapshot support works"""
 
@@ -919,6 +934,7 @@ class LvmTestLVsAll(LvmPVVGthpoolTestCase):
         self.assertGreater(len(lvs), 3)
 
 class LvmTestThpoolCreate(LvmPVVGthpoolTestCase):
+    @tag_test(TestTags.CORE)
     def test_thpoolcreate(self):
         """Verify that it is possible to create a thin pool"""
 
@@ -1015,6 +1031,7 @@ class LvmPVVGLVthLVTestCase(LvmPVVGthpoolTestCase):
         LvmPVVGthpoolTestCase._clean_up(self)
 
 class LvmTestThLVcreate(LvmPVVGLVthLVTestCase):
+    @tag_test(TestTags.CORE)
     def test_thlvcreate_thpoolname(self):
         """Verify that it is possible to create a thin LV and get its pool name"""
 
@@ -1097,7 +1114,7 @@ class LvmPVVGLVcachePoolTestCase(LvmPVVGLVTestCase):
         LvmPVVGLVTestCase._clean_up(self)
 
 class LvmPVVGLVcachePoolCreateRemoveTestCase(LvmPVVGLVcachePoolTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW)
     @skip_on(("centos", "enterprise_linux"), "7")
     def test_cache_pool_create_remove(self):
         """Verify that is it possible to create and remove a cache pool"""
@@ -1123,7 +1140,7 @@ class LvmPVVGLVcachePoolCreateRemoveTestCase(LvmPVVGLVcachePoolTestCase):
         self.assertTrue(succ)
 
 class LvmTestCachePoolConvert(LvmPVVGLVcachePoolTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW)
     def test_cache_pool_convert(self):
         """Verify that it is possible to create a cache pool by conversion"""
 
@@ -1146,7 +1163,7 @@ class LvmTestCachePoolConvert(LvmPVVGLVcachePoolTestCase):
 
 
 class LvmPVVGLVcachePoolAttachDetachTestCase(LvmPVVGLVcachePoolTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW)
     def test_cache_pool_attach_detach(self):
         """Verify that is it possible to attach and detach a cache pool"""
 
@@ -1186,7 +1203,7 @@ class LvmPVVGLVcachePoolAttachDetachTestCase(LvmPVVGLVcachePoolTestCase):
         self.assertTrue(any(info.lv_name == "testCache" for info in lvs))
 
 class LvmPVVGcachedLVTestCase(LvmPVVGLVTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW)
     def test_create_cached_lv(self):
         """Verify that it is possible to create a cached LV in a single step"""
 
@@ -1205,7 +1222,7 @@ class LvmPVVGcachedLVTestCase(LvmPVVGLVTestCase):
         self.assertTrue(succ)
 
 class LvmPVVGcachedLVpoolTestCase(LvmPVVGLVTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW)
     def test_cache_get_pool_name(self):
         """Verify that it is possible to get the name of the cache pool"""
 
@@ -1230,7 +1247,7 @@ class LvmPVVGcachedLVpoolTestCase(LvmPVVGLVTestCase):
         self.assertEqual(BlockDev.lvm_cache_pool_name("testVG", "testLV"), "testCache")
 
 class LvmPVVGcachedLVstatsTestCase(LvmPVVGLVTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW)
     def test_cache_get_stats(self):
         """Verify that it is possible to get stats for a cached LV"""
 
@@ -1264,6 +1281,7 @@ class LVMUnloadTest(LVMTestCase):
         # tests
         self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_check_low_version(self):
         """Verify that checking the minimum LVM version works as expected"""
 
@@ -1281,6 +1299,7 @@ class LVMUnloadTest(LVMTestCase):
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         self.assertIn("lvm", BlockDev.get_available_plugin_names())
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_check_no_lvm(self):
         """Verify that checking lvm tool availability works as expected"""
 
@@ -1308,6 +1327,7 @@ class LVMTechTest(LVMTestCase):
         self.addCleanup(BlockDev.switch_init_checks, True)
         self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_tech_available(self):
         """Verify that checking lvm tool availability by technology works as expected"""
 

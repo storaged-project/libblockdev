@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 from contextlib import contextmanager
 import utils
-from utils import run, create_sparse_tempfile, mount, umount, unstable_test, skip_on
+from utils import run, create_sparse_tempfile, mount, umount, skip_on, TestTags, tag_test
 import six
 import overrides_hack
 
@@ -97,6 +97,7 @@ class FSTestCase(unittest.TestCase):
             self.fail("Failed to set %s read-write" % device)
 
 class TestGenericWipe(FSTestCase):
+    @tag_test(TestTags.CORE)
     def test_generic_wipe(self):
         """Verify that generic signature wipe works as expected"""
 
@@ -210,16 +211,19 @@ class ExtTestMkfs(FSTestCase):
 
         BlockDev.fs_wipe(self.loop_dev, True)
 
+    @tag_test(TestTags.CORE)
     def test_ext2_mkfs(self):
         """Verify that it is possible to create a new ext2 file system"""
         self._test_ext_mkfs(mkfs_function=BlockDev.fs_ext2_mkfs,
                             ext_version="ext2")
 
+    @tag_test(TestTags.CORE)
     def test_ext3_mkfs(self):
         """Verify that it is possible to create a new ext3 file system"""
         self._test_ext_mkfs(mkfs_function=BlockDev.fs_ext3_mkfs,
                             ext_version="ext3")
 
+    @tag_test(TestTags.CORE)
     def test_ext4_mkfs(self):
         """Verify that it is possible to create a new ext4 file system"""
         self._test_ext_mkfs(mkfs_function=BlockDev.fs_ext4_mkfs,
@@ -385,16 +389,19 @@ class ExtGetInfo(FSTestCase):
             self.assertTrue(fi.uuid)
             self.assertTrue(fi.state, "clean")
 
+    @tag_test(TestTags.CORE)
     def test_ext2_get_info(self):
         """Verify that it is possible to get info about an ext2 file system"""
         self._test_ext_get_info(mkfs_function=BlockDev.fs_ext2_mkfs,
                                 info_function=BlockDev.fs_ext2_get_info)
 
+    @tag_test(TestTags.CORE)
     def test_ext3_get_info(self):
         """Verify that it is possible to get info about an ext3 file system"""
         self._test_ext_get_info(mkfs_function=BlockDev.fs_ext3_mkfs,
                                 info_function=BlockDev.fs_ext3_get_info)
 
+    @tag_test(TestTags.CORE)
     def test_ext4_get_info(self):
         """Verify that it is possible to get info about an ext4 file system"""
         self._test_ext_get_info(mkfs_function=BlockDev.fs_ext4_mkfs,
@@ -511,6 +518,7 @@ class ExtResize(FSTestCase):
                               resize_function=BlockDev.fs_ext4_resize)
 
 class XfsTestMkfs(FSTestCase):
+    @tag_test(TestTags.CORE)
     def test_xfs_mkfs(self):
         """Verify that it is possible to create a new xfs file system"""
 
@@ -597,6 +605,7 @@ class XfsTestRepair(FSTestCase):
         self.assertTrue(succ)
 
 class XfsGetInfo(FSTestCase):
+    @tag_test(TestTags.CORE)
     def test_xfs_get_info(self):
         """Verify that it is possible to get info about an xfs file system"""
 
@@ -970,6 +979,7 @@ class MountTest(FSTestCase):
         if ret != 0:
             self.fail("Failed to remove user user '%s': %s" % (self.username, err))
 
+    @tag_test(TestTags.CORE)
     def test_mount(self):
         """ Test basic mounting and unmounting """
 
@@ -1053,7 +1063,7 @@ class MountTest(FSTestCase):
             BlockDev.fs_mount(loop_dev, tmp_dir, None, "rw", None)
         self.assertFalse(os.path.ismount(tmp_dir))
 
-    @unittest.skipUnless("JENKINS_HOME" in os.environ, "skipping test that modifies system configuration")
+    @tag_test(TestTags.UNSAFE)
     def test_mount_fstab(self):
         """ Test mounting and unmounting devices in /etc/fstab """
         # this test will change /etc/fstab, we want to revert the changes when it finishes
@@ -1088,7 +1098,7 @@ class MountTest(FSTestCase):
         self.assertTrue(succ)
         self.assertFalse(os.path.ismount(tmp))
 
-    @unittest.skipUnless("JENKINS_HOME" in os.environ, "skipping test that modifies system configuration")
+    @tag_test(TestTags.UNSAFE)
     def test_mount_fstab_user(self):
         """ Test mounting and unmounting devices in /etc/fstab as non-root user """
         # this test will change /etc/fstab, we want to revert the changes when it finishes
@@ -1361,7 +1371,7 @@ class GenericResize(FSTestCase):
                                   fs_info_func=info_prepare,
                                   info_size_func=expected_size)
 
-    @unstable_test
+    @tag_test(TestTags.UNSTABLE)
     def test_vfat_generic_resize(self):
         """Test generic resize function with a vfat file system"""
         self._test_generic_resize(mkfs_function=BlockDev.fs_vfat_mkfs)

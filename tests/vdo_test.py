@@ -6,7 +6,7 @@ import unittest
 import overrides_hack
 import six
 
-from utils import run_command, read_file, skip_on, fake_path, create_sparse_tempfile, create_lio_device, delete_lio_device
+from utils import run_command, read_file, skip_on, fake_path, create_sparse_tempfile, create_lio_device, delete_lio_device, TestTags, tag_test
 from gi.repository import BlockDev, GLib
 from bytesize import bytesize
 from distutils.spawn import find_executable
@@ -48,7 +48,6 @@ class VDOTestCase(unittest.TestCase):
         os.unlink(self.dev_file)
 
 
-@unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
 class VDOTest(VDOTestCase):
 
     vdo_name = "bd-test-vdo"
@@ -56,6 +55,7 @@ class VDOTest(VDOTestCase):
     def _remove_vdo(self, name):
         run_command("vdo remove --force -n %s" % name)
 
+    @tag_test(TestTags.SLOW, TestTags.CORE)
     def test_create_remove(self):
         """Verify that it is possible to create and remove a VDO volume"""
 
@@ -85,6 +85,7 @@ class VDOTest(VDOTestCase):
 
         self.assertFalse(os.path.exists("/dev/mapper/%s" % self.vdo_name))
 
+    @tag_test(TestTags.SLOW)
     def test_enable_disable_compression(self):
         """Verify that it is possible to enable/disable compression on an existing VDO volume"""
 
@@ -110,6 +111,7 @@ class VDOTest(VDOTestCase):
         info = BlockDev.vdo_info(self.vdo_name)
         self.assertTrue(info.compression)
 
+    @tag_test(TestTags.SLOW)
     def test_enable_disable_deduplication(self):
         """Verify that it is possible to enable/disable deduplication on an existing VDO volume"""
 
@@ -135,6 +137,7 @@ class VDOTest(VDOTestCase):
         info = BlockDev.vdo_info(self.vdo_name)
         self.assertTrue(info.deduplication)
 
+    @tag_test(TestTags.SLOW)
     def test_activate_deactivate(self):
         """Verify that it is possible to activate/deactivate an existing VDO volume"""
 
@@ -172,6 +175,7 @@ class VDOTest(VDOTestCase):
 
         self.assertTrue(os.path.exists("/dev/mapper/%s" % self.vdo_name))
 
+    @tag_test(TestTags.SLOW)
     def test_change_write_policy(self):
 
         ret = BlockDev.vdo_create(self.vdo_name, self.loop_dev, 3 * self.loop_size, 0,
@@ -203,6 +207,7 @@ class VDOTest(VDOTestCase):
 
         return info["VDOs"][name]
 
+    @tag_test(TestTags.SLOW, TestTags.CORE)
     def test_get_info(self):
         """Verify that it is possible to get information about an existing VDO volume"""
 
@@ -229,6 +234,7 @@ class VDOTest(VDOTestCase):
         self.assertEqual(bd_info.physical_size, bytesize.Size(sys_info["Physical size"]))
         self.assertEqual(bd_info.logical_size, bytesize.Size(sys_info["Logical size"]))
 
+    @tag_test(TestTags.SLOW)
     def test_grow_logical(self):
         """Verify that it is possible to grow logical size of an existing VDO volume"""
 
@@ -249,7 +255,7 @@ class VDOTest(VDOTestCase):
 
         self.assertEqual(info.logical_size, new_size)
 
-    @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
+    @tag_test(TestTags.SLOW, TestTags.UNSTABLE)
     def test_grow_physical(self):
         """Verify that it is possible to grow physical size of an existing VDO volume"""
 
@@ -285,6 +291,7 @@ class VDOTest(VDOTestCase):
         self.assertEqual(info_before.logical_size, info_after.logical_size)
         self.assertGreater(info_after.physical_size, info_before.physical_size)
 
+    @tag_test(TestTags.SLOW)
     def test_statistics(self):
         """Verify that it is possible to retrieve statistics of an existing VDO volume"""
 
@@ -312,6 +319,7 @@ class VDOUnloadTest(VDOTestCase):
         # tests
         self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_check_no_vdo(self):
         """Verify that checking vdo tool availability works as expected"""
 

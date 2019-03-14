@@ -6,7 +6,7 @@ from contextlib import contextmanager
 import overrides_hack
 import six
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, skip_on
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, skip_on, TestTags, tag_test
 from gi.repository import BlockDev, GLib
 
 
@@ -46,6 +46,7 @@ class MDNoDevTestCase(MDTest):
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_get_superblock_size(self):
         """Verify that superblock size si calculated properly"""
 
@@ -67,6 +68,7 @@ class MDNoDevTestCase(MDTest):
         self.assertEqual(BlockDev.md_get_superblock_size(257 * 1024**2, version="unknown version"),
                          2 * 1024**2)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_canonicalize_uuid(self):
         """Verify that UUID canonicalization works as expected"""
 
@@ -76,6 +78,7 @@ class MDNoDevTestCase(MDTest):
         with six.assertRaisesRegex(self, GLib.GError, r'malformed or invalid'):
             BlockDev.md_canonicalize_uuid("malformed-uuid-example")
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_get_md_uuid(self):
         """Verify that getting UUID in MD RAID format works as expected"""
 
@@ -162,7 +165,7 @@ class MDTestCase(MDTest):
 
 
 class MDTestCreateDeactivateDestroy(MDTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW, TestTags.CORE)
     def test_create_deactivate_destroy(self):
         """Verify that it is possible to create, deactivate and destroy an MD RAID"""
 
@@ -192,7 +195,7 @@ class MDTestCreateDeactivateDestroy(MDTestCase):
         self.assertTrue(succ)
 
 class MDTestCreateWithChunkSize(MDTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW)
     def test_create_with_chunk_size(self):
         """Verify that it is possible to create and MD RAID with specific chunk size """
 
@@ -216,7 +219,7 @@ class MDTestCreateWithChunkSize(MDTestCase):
         self.assertTrue(succ)
 
 class MDTestActivateDeactivate(MDTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW, TestTags.CORE)
     def test_activate_deactivate(self):
         """Verify that it is possible to activate and deactivate an MD RAID"""
 
@@ -255,7 +258,7 @@ class MDTestActivateDeactivate(MDTestCase):
             self.assertTrue(succ)
 
 class MDTestActivateWithUUID(MDTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW)
     def test_activate_with_uuid(self):
         """Verify that it is possible to activate an MD RAID with UUID"""
 
@@ -277,7 +280,7 @@ class MDTestActivateWithUUID(MDTestCase):
             succ = BlockDev.md_activate("bd_test_md", [self.loop_dev, self.loop_dev2, self.loop_dev3], md_info.uuid)
 
 class MDTestActivateByUUID(MDTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW)
     def test_activate_by_uuid(self):
         """Verify that it is possible to activate an MD RAID by UUID"""
 
@@ -309,7 +312,7 @@ class MDTestActivateByUUID(MDTestCase):
 
 
 class MDTestNominateDenominate(MDTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW)
     def test_nominate_denominate(self):
         """Verify that it is possible to nominate and denominate an MD RAID device"""
 
@@ -342,9 +345,7 @@ class MDTestNominateDenominate(MDTestCase):
 class MDTestNominateDenominateActive(MDTestCase):
     # slow and leaking an MD array because with a nominated spare device, it
     # cannot be deactivated in the end (don't ask me why)
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
-    @unittest.skipIf("JENKINS_HOME" in os.environ, "skipping leaky test in jenkins")
-    @unittest.skipUnless("FEELINGLUCKY" in os.environ, "skipping, not feeling lucky")
+    @tag_test(TestTags.SLOW, TestTags.UNSAFE, TestTags.UNSTABLE)
     def test_nominate_denominate_active(self):
         """Verify that nominate and denominate deivice works as expected on (de)activated MD RAID"""
 
@@ -371,7 +372,7 @@ class MDTestNominateDenominateActive(MDTestCase):
             self.assertTrue(succ)
 
 class MDTestAddRemove(MDTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW)
     @skip_on("debian", reason="Removing spare disks from an array is broken on Debian")
     def test_add_remove(self):
         """Verify that it is possible to add a device to and remove from an MD RAID"""
@@ -432,7 +433,7 @@ class MDTestAddRemove(MDTestCase):
 
 class MDTestExamineDetail(MDTestCase):
     # sleeps to let MD RAID sync things
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW)
     def test_examine_detail(self):
         """Verify that it is possible to get info about an MD RAID"""
 
@@ -488,7 +489,7 @@ class MDTestExamineDetail(MDTestCase):
         self.assertTrue(de_data)
 
 class MDTestNameNodeBijection(MDTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW)
     def test_name_node_bijection(self):
         """Verify that MD RAID node and name match each other"""
 
@@ -519,7 +520,7 @@ class MDTestNameNodeBijection(MDTestCase):
         self.assertTrue(succ)
 
 class MDTestSetBitmapLocation(MDTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW)
     def test_set_bitmap_location(self):
         """Verify we can change bitmap location for an existing MD array"""
 
@@ -568,7 +569,7 @@ class MDTestSetBitmapLocation(MDTestCase):
 
 
 class MDTestRequestSyncAction(MDTestCase):
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW)
     def test_request_sync_action(self):
         """Verify we can request sync action on an existing MD array"""
 
@@ -588,6 +589,7 @@ class MDTestRequestSyncAction(MDTestCase):
 
 class FakeMDADMutilTest(MDTest):
     # no setUp nor tearDown needed, we are gonna use fake utils
+    @tag_test(TestTags.NOSTORAGE)
     def test_fw_raid_uppercase_examine(self):
         """Verify that md_examine works with output using "RAID" instead of "Raid" and other quirks """
 
@@ -599,6 +601,7 @@ class FakeMDADMutilTest(MDTest):
         self.assertEqual(ex_data.uuid, "b42756a2-37e4-3e47-674b-d1dd6e822145")
         self.assertEqual(ex_data.device, None)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_no_metadata_examine(self):
         """Verify that md_examine works as expected with no metadata spec"""
 
@@ -608,6 +611,7 @@ class FakeMDADMutilTest(MDTest):
 
         self.assertIs(ex_data.metadata, None)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_fw_raid_migrating(self):
         """Verify that md_examine works when array is migrating ("foo <-- bar" values in output) """
 
@@ -616,6 +620,7 @@ class FakeMDADMutilTest(MDTest):
 
         self.assertEqual(ex_data.chunk_size, 128 * 1024)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_mdadm_name_extra_info(self):
         """Verify that md_examine and md_detail work with extra MD RAID name info"""
 
@@ -633,6 +638,7 @@ class MDUnloadTest(MDTestCase):
         # tests
         self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_check_low_version(self):
         """Verify that checking the minimum mdsetup version works as expected"""
 
@@ -650,6 +656,7 @@ class MDUnloadTest(MDTestCase):
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         self.assertIn("mdraid", BlockDev.get_available_plugin_names())
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_check_no_md(self):
         """Verify that checking mdsetup tool availability works as expected"""
 

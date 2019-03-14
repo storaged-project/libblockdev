@@ -2,7 +2,7 @@ import unittest
 import os
 import overrides_hack
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, run_command, run
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, run_command, run, TestTags, tag_test
 from gi.repository import BlockDev, GLib
 
 
@@ -38,6 +38,7 @@ class SwapTestCase(SwapTest):
             pass
         os.unlink(self.dev_file)
 
+    @tag_test(TestTags.CORE)
     def test_all(self):
         """Verify that swap_* functions work as expected"""
 
@@ -112,6 +113,7 @@ class SwapTestCase(SwapTest):
     def _remove_map(self, map_name):
         run("dmsetup remove -f %s" % map_name)
 
+    @tag_test(TestTags.REGRESSION)
     def test_swapstatus_dm(self):
         """Verify that swapstatus works correctly with DM devices"""
 
@@ -145,6 +147,7 @@ class SwapUnloadTest(SwapTest):
         # tests
         self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_check_low_version(self):
         """Verify that checking the minimum swap utils versions works as expected"""
 
@@ -162,6 +165,7 @@ class SwapUnloadTest(SwapTest):
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         self.assertIn("swap", BlockDev.get_available_plugin_names())
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_check_no_mkswap(self):
         """Verify that checking mkswap and swaplabel tools availability
            works as expected
@@ -188,6 +192,7 @@ class SwapUnloadTest(SwapTest):
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         self.assertIn("swap", BlockDev.get_available_plugin_names())
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_check_no_mkswap_runtime(self):
         """Verify that runtime checking mkswap tool availability works as expected"""
 
@@ -214,6 +219,7 @@ class SwapTechAvailable(SwapTest):
         self.addCleanup(BlockDev.switch_init_checks, True)
         self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_check_tech_available(self):
         """Verify that runtime checking mkswap and swaplabel tools availability
            works as expected

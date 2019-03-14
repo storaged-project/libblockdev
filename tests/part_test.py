@@ -1,6 +1,6 @@
 import unittest
 import os
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on, TestTags, tag_test
 import overrides_hack
 
 from gi.repository import BlockDev, GLib
@@ -46,6 +46,7 @@ class PartTestCase(unittest.TestCase):
         os.unlink(self.dev_file2)
 
 class PartCreateTableCase(PartTestCase):
+    @tag_test(TestTags.CORE)
     def test_create_table(self):
         """Verify that it is possible to create a new partition table"""
 
@@ -78,6 +79,7 @@ class PartCreateTableCase(PartTestCase):
 
 
 class PartGetDiskSpecCase(PartTestCase):
+    @tag_test(TestTags.CORE)
     def test_get_disk_spec(self):
         """Verify that it is possible to get information about disk"""
 
@@ -115,6 +117,7 @@ class PartGetDiskSpecCase(PartTestCase):
         self.assertEqual(ps.flags, 0)
 
 class PartCreatePartCase(PartTestCase):
+    @tag_test(TestTags.CORE)
     def test_create_part_simple(self):
         """Verify that it is possible to create a parition"""
 
@@ -221,6 +224,7 @@ class PartCreatePartCase(PartTestCase):
         self.assertEqual(ps.flags, ps3.flags)
 
 class PartCreatePartFullCase(PartTestCase):
+    @tag_test(TestTags.CORE)
     def test_full_device_partition(self):
         # we first need a partition table
         succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.GPT, True)
@@ -362,6 +366,7 @@ class PartCreatePartFullCase(PartTestCase):
             BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.EXTENDED, ps4.start + ps4.size + 1,
                                        10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
 
+    @tag_test(TestTags.CORE)
     def test_create_part_with_extended_logical(self):
         """Verify that partition creation works as expected with primary, extended and logical parts"""
 
@@ -502,6 +507,7 @@ class PartCreatePartFullCase(PartTestCase):
             BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps3.start + ps3.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
 
+    @tag_test(TestTags.CORE)
     def test_create_part_next(self):
         """Verify that partition creation works as expected with the NEXT (auto) type"""
 
@@ -589,6 +595,7 @@ class PartCreatePartFullCase(PartTestCase):
             BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.EXTENDED, ps4.start + ps4.size + 1,
                                        10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
 
+    @tag_test(TestTags.CORE)
     def test_create_part_next_gpt(self):
         """Verify that partition creation works as expected with the NEXT (auto) type on GPT"""
 
@@ -664,6 +671,7 @@ class PartGetDiskPartsCase(PartTestCase):
 class PartGetDiskFreeRegions(PartTestCase):
     @skip_on(("centos", "enterprise_linux"), "7", reason="libparted provides weird values here")
     @skip_on("debian", reason="libparted provides weird values here")
+    @tag_test(TestTags.CORE)
     def test_get_disk_free_regions(self):
         """Verify that it is possible to get info about free regions on a disk"""
 
@@ -1057,6 +1065,7 @@ class PartCreateResizePartCase(PartTestCase):
         self.assertGreaterEqual(ps.size, initial_size) # at least the requested size
 
 class PartCreateDeletePartCase(PartTestCase):
+    @tag_test(TestTags.CORE)
     def test_create_delete_part_simple(self):
         """Verify that it is possible to create and delete a parition"""
 

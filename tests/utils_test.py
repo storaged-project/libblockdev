@@ -2,7 +2,7 @@ import unittest
 import re
 import os
 import overrides_hack
-from utils import fake_utils, create_sparse_tempfile, create_lio_device, delete_lio_device, run_command
+from utils import fake_utils, create_sparse_tempfile, create_lio_device, delete_lio_device, run_command, TestTags, tag_test
 
 from gi.repository import BlockDev, GLib
 
@@ -25,6 +25,7 @@ class UtilsExecProgressTest(UtilsTestCase):
         self.assertTrue(isinstance(completion, int))
         self.log.append(completion)
 
+    @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
     def test_initialization(self):
         """ Verify that progress report can (de)initialized"""
 
@@ -54,6 +55,7 @@ class UtilsExecLoggingTest(UtilsTestCase):
 
         self.log += msg + "\n"
 
+    @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
     def test_logging(self):
         """Verify that setting up and using exec logging works as expected"""
 
@@ -91,6 +93,7 @@ class UtilsExecLoggingTest(UtilsTestCase):
         self.assertTrue(succ)
         self.assertEqual(old_log, self.log)
 
+    @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
     def test_version_cmp(self):
         """Verify that version comparison works as expected"""
 
@@ -124,6 +127,7 @@ class UtilsExecLoggingTest(UtilsTestCase):
         self.assertEqual(BlockDev.utils_version_cmp("1.1.1", "1.1.1-1"), -1)
         self.assertEqual(BlockDev.utils_version_cmp("1.1.2", "1.2"), -1)
 
+    @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
     def test_util_version(self):
         """Verify that checking utility availability works as expected"""
 
@@ -167,6 +171,7 @@ class UtilsExecLoggingTest(UtilsTestCase):
             self.assertTrue(BlockDev.utils_check_util_version("libblockdev-fake-util-fail", "1.1", "version", "Version:\\s(.*)"))
 
 class UtilsDevUtilsTestCase(UtilsTestCase):
+    @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
     def test_resolve_device(self):
         """Verify that resolving device spec works as expected"""
 
@@ -199,6 +204,7 @@ class UtilsDevUtilsTestCase(UtilsTestCase):
         self.assertEqual(BlockDev.utils_resolve_device(dev_link[5:]), dev)
 
 class UtilsDevUtilsTestCase(UtilsTestCase):
+    @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
     def test_resolve_device(self):
         """Verify that resolving device spec works as expected"""
 
@@ -248,7 +254,7 @@ class UtilsDevUtilsSymlinksTestCase(UtilsTestCase):
             pass
         os.unlink(self.dev_file)
 
-
+    @tag_test(TestTags.CORE)
     def test_get_device_symlinks(self):
         """Verify that getting device symlinks works as expected"""
 

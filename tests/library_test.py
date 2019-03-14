@@ -2,7 +2,7 @@ import os
 import unittest
 import re
 import overrides_hack
-from utils import fake_path
+from utils import fake_path, TestTags, tag_test
 
 from gi.repository import GLib, BlockDev
 
@@ -40,7 +40,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         BlockDev.reinit(self.requested_plugins, True, None)
 
     # recompiles the LVM plugin
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW, TestTags.CORE)
     def test_reload(self):
         """Verify that reloading plugins works as expected"""
 
@@ -72,7 +72,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
 
     # recompiles the LVM plugin
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW)
     def test_force_plugin(self):
         """Verify that forcing plugin to be used works as expected"""
 
@@ -118,7 +118,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
 
     # recompiles the LVM plugin
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW)
     def test_plugin_priority(self):
         """Verify that preferring plugin to be used works as expected"""
 
@@ -181,7 +181,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         os.system ("rm -f src/plugins/.libs/libbd_lvm2.so")
 
     # recompiles the LVM plugin
-    @unittest.skipIf("SKIP_SLOW" in os.environ, "skipping slow tests")
+    @tag_test(TestTags.SLOW)
     def test_plugin_fallback(self):
         """Verify that fallback when loading plugins works as expected"""
 
@@ -250,6 +250,7 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         self.log += msg + "\n"
 
+    @tag_test(TestTags.CORE)
     def test_logging_setup(self):
         """Verify that setting up logging works as expected"""
 
@@ -280,6 +281,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertIn("stderr[%s]:" % task_id2, self.log)
         self.assertIn("...done [%s] (exit code: 0)" % task_id2, self.log)
 
+    @tag_test(TestTags.CORE)
     def test_require_plugins(self):
         """Verify that loading only required plugins works as expected"""
 
@@ -290,6 +292,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertEqual(BlockDev.get_available_plugin_names(), ["swap"])
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
 
+    @tag_test(TestTags.CORE)
     def test_not_implemented(self):
         """Verify that unloaded/unimplemented functions report errors"""
 

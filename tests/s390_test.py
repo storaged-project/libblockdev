@@ -2,7 +2,7 @@ import unittest
 import os
 import overrides_hack
 
-from utils import fake_path
+from utils import fake_path, TestTags, tag_test
 from gi.repository import BlockDev, GLib
 
 @unittest.skipUnless(os.uname()[4].startswith('s390'), "s390x architecture required")
@@ -18,6 +18,7 @@ class S390TestCase(unittest.TestCase):
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
 
+    @tag_test(TestTags.EXTRADEPS, TestTags.NOSTORAGE)
     def test_device_input(self):
         """Verify that s390_sanitize_dev_input works as expected"""
         dev = "1234"
@@ -42,6 +43,7 @@ class S390TestCase(unittest.TestCase):
         dev = "0.0.abcdefgh"
         self.assertEqual(BlockDev.s390_sanitize_dev_input(dev), dev)
 
+    @tag_test(TestTags.EXTRADEPS, TestTags.NOSTORAGE)
     def test_wwpn_input(self):
         """Verify that s390_zfcp_sanitize_wwpn_input works as expected"""
         # missing "0x" from beginning of wwpn; this should be added by fx
@@ -56,6 +58,7 @@ class S390TestCase(unittest.TestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.s390_zfcp_sanitize_wwpn_input(wwpn)
 
+    @tag_test(TestTags.EXTRADEPS, TestTags.NOSTORAGE)
     def test_lun_input(self):
         """Verify that s390_zfcp_sanitize_lun_input works as expected"""
         # user does not prepend lun with "0x"; this should get added
@@ -91,6 +94,7 @@ class S390UnloadTest(unittest.TestCase):
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
 
+    @tag_test(TestTags.EXTRADEPS, TestTags.NOSTORAGE)
     def test_check_no_dasdfmt(self):
         """Verify that checking dasdfmt tool availability works as expected"""
 
