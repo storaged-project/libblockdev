@@ -116,7 +116,7 @@ def _delete_target(wwn, backstore=None):
         _delete_backstore(backstore)
 
 def _delete_lun(wwn, delete_target=True, backstore=None):
-    status = subprocess.call(["targetcli", "/loopback/%s/luns/lun0 delete"], stdout=DEVNULL)
+    status = subprocess.call(["targetcli", "/loopback/%s/luns delete lun0" % wwn], stdout=DEVNULL)
     if status != 0:
         raise RuntimeError("Failed to delete the '%s' loopback device's lun0" % wwn)
     if delete_target:
