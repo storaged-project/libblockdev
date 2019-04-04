@@ -170,38 +170,6 @@ class UtilsExecLoggingTest(UtilsTestCase):
             # exit code != 0
             self.assertTrue(BlockDev.utils_check_util_version("libblockdev-fake-util-fail", "1.1", "version", "Version:\\s(.*)"))
 
-class UtilsDevUtilsTestCase(UtilsTestCase):
-    @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
-    def test_resolve_device(self):
-        """Verify that resolving device spec works as expected"""
-
-        with self.assertRaises(GLib.GError):
-            BlockDev.utils_resolve_device("no_such_device")
-
-        dev = "/dev/libblockdev-test-dev"
-        with open(dev, "w"):
-            pass
-        self.addCleanup(os.unlink, dev)
-
-        # full path, no symlink, should just return the same
-        self.assertEqual(BlockDev.utils_resolve_device(dev), dev)
-
-        # just the name of the device, should return the full path
-        self.assertEqual(BlockDev.utils_resolve_device(dev[5:]), dev)
-
-        dev_dir = "/dev/libblockdev-test-dir"
-        os.mkdir(dev_dir)
-        self.addCleanup(os.rmdir, dev_dir)
-
-        dev_link = dev_dir + "/test-dev-link"
-        os.symlink("../" + dev[5:], dev_link)
-        self.addCleanup(os.unlink, dev_link)
-
-        # should resolve the symlink
-        self.assertEqual(BlockDev.utils_resolve_device(dev_link), dev)
-
-        # should resolve the symlink even without the "/dev" prefix
-        self.assertEqual(BlockDev.utils_resolve_device(dev_link[5:]), dev)
 
 class UtilsDevUtilsTestCase(UtilsTestCase):
     @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
