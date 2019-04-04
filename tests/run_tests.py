@@ -65,6 +65,50 @@ def _get_test_tags(test):
     return tags
 
 
+def parse_args():
+    """ Parse cmdline arguments """
+
+    argparser = argparse.ArgumentParser(description='libblockdev test suite')
+    argparser.add_argument('testname', nargs='*', help='name of test class or '
+                           'method (e. g. "CryptoTestFormat", '
+                           '"GenericResize.test_ext2_generic_resize")')
+    argparser.add_argument('-f', '--fast', dest='fast', help='skip slow tests',
+                           action='store_true')
+    argparser.add_argument('-l', '--lucky', dest='lucky',
+                           help='run also potentially dangerous/failing tests',
+                           action='store_true')
+    argparser.add_argument('-j', '--jenkins', dest='jenkins',
+                           help='run also tests that should run only in a CI environment',
+                           action='store_true')
+    argparser.add_argument('-c', '--core', dest='core',
+                           help='run tests that cover basic functionality of the library and regression tests',
+                           action='store_true')
+    argparser.add_argument('-s', '--stop', dest='stop',
+                           help='stop executing after first failed test',
+                           action='store_true')
+    argparser.add_argument('-i', '--installed', dest='installed',
+                           help='run tests against installed version of libblockdev',
+                           action='store_true')
+    args = argparser.parse_args()
+
+    if args.fast:
+        os.environ['SKIP_SLOW'] = ''
+    if args.lucky:
+        os.environ['FEELINGLUCKY'] = ''
+    if args.jenkins:
+        os.environ['JENKINS_HOME'] = ''
+
+    # read the environmental variables for backwards compatibility
+    if 'JENKINS_HOME' in os.environ:
+        args.jenkins = True
+    if 'SKIP_SLOW' in os.environ:
+        args.fast = True
+    if 'FEELINGLUCKY' in os.environ:
+        args.lucky = True
+
+    return args
+
+
 def _print_skip_message(test, skip_tag):
 
     # test.id() looks like 'crypto_test.CryptoTestResize.test_luks2_resize'
@@ -97,56 +141,26 @@ if __name__ == '__main__':
     testdir = os.path.abspath(os.path.dirname(__file__))
     projdir = os.path.abspath(os.path.normpath(os.path.join(testdir, '..')))
 
-    if 'LD_LIBRARY_PATH' not in os.environ and 'GI_TYPELIB_PATH' not in os.environ:
-        os.environ['LD_LIBRARY_PATH'] = LIBDIRS
-        os.environ['GI_TYPELIB_PATH'] = GIDIR
-        os.environ['LIBBLOCKDEV_CONFIG_DIR'] = os.path.join(testdir, 'default_config')
+    args = parse_args()
+    if args.installed:
+        os.environ['LIBBLOCKDEV_TESTS_SKIP_OVERRIDE'] = ''
+        os.environ['LIBBLOCKDEV_CONFIG_DIR'] = '/etc/libblockdev/conf.d/'
+    else:
+        if 'LD_LIBRARY_PATH' not in os.environ and 'GI_TYPELIB_PATH' not in os.environ:
+            os.environ['LD_LIBRARY_PATH'] = LIBDIRS
+            os.environ['GI_TYPELIB_PATH'] = GIDIR
+            os.environ['LIBBLOCKDEV_CONFIG_DIR'] = os.path.join(testdir, 'default_config')
 
-        try:
-            pyver = 'python3' if six.PY3 else 'python'
-            os.execv(sys.executable, [pyver] + sys.argv)
-        except OSError as e:
-            print('Failed re-exec with a new LD_LIBRARY_PATH and GI_TYPELIB_PATH: %s' % str(e))
-            sys.exit(1)
+            try:
+                pyver = 'python3' if six.PY3 else 'python'
+                os.execv(sys.executable, [pyver] + sys.argv)
+            except OSError as e:
+                print('Failed re-exec with a new LD_LIBRARY_PATH and GI_TYPELIB_PATH: %s' % str(e))
+                sys.exit(1)
 
-    argparser = argparse.ArgumentParser(description='libblockdev test suite')
-    argparser.add_argument('testname', nargs='*', help='name of test class or '
-                           'method (e. g. "CryptoTestFormat", '
-                           '"GenericResize.test_ext2_generic_resize")')
-    argparser.add_argument('-f', '--fast', dest='fast', help='skip slow tests',
-                           action='store_true')
-    argparser.add_argument('-l', '--lucky', dest='lucky',
-                           help='run also potentially dangerous/failing tests',
-                           action='store_true')
-    argparser.add_argument('-j', '--jenkins', dest='jenkins',
-                           help='run also tests that should run only in a CI environment',
-                           action='store_true')
-    argparser.add_argument('-c', '--core', dest='core',
-                           help='run tests that cover basic functionality of the library and regression tests',
-                           action='store_true')
-    argparser.add_argument('-s', '--stop', dest='stop',
-                           help='stop executing after first failed test',
-                           action='store_true')
-    args = argparser.parse_args()
-
-    if args.fast:
-        os.environ['SKIP_SLOW'] = ''
-    if args.lucky:
-        os.environ['FEELINGLUCKY'] = ''
-    if args.jenkins:
-        os.environ['JENKINS_HOME'] = ''
-
-    # read the environmental variables for backwards compatibility
-    if 'JENKINS_HOME' in os.environ:
-        args.jenkins = True
-    if 'SKIP_SLOW' in os.environ:
-        args.fast = True
-    if 'FEELINGLUCKY' in os.environ:
-        args.lucky = True
-
-    sys.path.append(testdir)
-    sys.path.append(projdir)
-    sys.path.append(os.path.join(projdir, 'src/python'))
+        sys.path.append(testdir)
+        sys.path.append(projdir)
+        sys.path.append(os.path.join(projdir, 'src/python'))
 
     start_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
