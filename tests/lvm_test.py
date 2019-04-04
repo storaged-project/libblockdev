@@ -12,10 +12,14 @@ from gi.repository import BlockDev, GLib
 
 
 class LVMTestCase(unittest.TestCase):
-    requested_plugins = BlockDev.plugin_specs_from_names(("lvm",))
 
     @classmethod
     def setUpClass(cls):
+        ps = BlockDev.PluginSpec()
+        ps.name = BlockDev.Plugin.LVM
+        ps.so_name = "libbd_lvm.so"
+        cls.requested_plugins = [ps]
+
         if not BlockDev.is_initialized():
             BlockDev.init(cls.requested_plugins, None)
         else:
