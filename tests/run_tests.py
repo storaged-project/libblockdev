@@ -61,6 +61,8 @@ def _get_test_tags(test):
         tags.append(TestTags.EXTRADEPS)
     if getattr(test_fn, "regression", False) or getattr(test_fn.__self__, "regression", False):
         tags.append(TestTags.REGRESSION)
+    if getattr(test_fn, "sourceonly", False) or getattr(test_fn.__self__, "sourceonly", False):
+        tags.append(TestTags.SOURCEONLY)
 
     return tags
 
@@ -127,6 +129,8 @@ def _print_skip_message(test, skip_tag):
         reason = "skipping test that requires special configuration"
     elif skip_tag == TestTags.CORE:
         reason = "skipping non-core test"
+    elif skip_tag == TestTags.SOURCEONLY:
+        reason = "skipping test that can run only against library compiled from source"
     else:
         reason = "unknown reason"  # just to be sure there is some default value
 
@@ -195,6 +199,9 @@ if __name__ == '__main__':
             continue
         if TestTags.EXTRADEPS in tags and not args.jenkins:
             _print_skip_message(test, TestTags.EXTRADEPS)
+            continue
+        if TestTags.SOURCEONLY in tags and args.installed:
+            _print_skip_message(test, TestTags.SOURCEONLY)
             continue
 
         if args.core and TestTags.CORE not in tags and TestTags.REGRESSION not in tags:

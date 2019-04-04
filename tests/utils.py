@@ -358,6 +358,7 @@ class TestTags(Enum):
     NOSTORAGE = 5   # tests that don't work with storage
     EXTRADEPS = 6   # tests that require special configuration and/or device to run
     REGRESSION = 7  # regression tests
+    SOURCEONLY = 8  # tests that can't run against installed library
 
 
 def tag_test(*tags):
@@ -369,6 +370,7 @@ def tag_test(*tags):
         func.nostorage = TestTags.NOSTORAGE in tags
         func.extradeps = TestTags.EXTRADEPS in tags
         func.regression = TestTags.REGRESSION in tags
+        func.sourceonly = TestTags.SOURCEONLY in tags
 
         return func
 

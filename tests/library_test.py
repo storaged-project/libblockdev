@@ -40,7 +40,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         BlockDev.reinit(self.requested_plugins, True, None)
 
     # recompiles the LVM plugin
-    @tag_test(TestTags.SLOW, TestTags.CORE)
+    @tag_test(TestTags.SLOW, TestTags.CORE, TestTags.SOURCEONLY)
     def test_reload(self):
         """Verify that reloading plugins works as expected"""
 
@@ -72,7 +72,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
 
     # recompiles the LVM plugin
-    @tag_test(TestTags.SLOW)
+    @tag_test(TestTags.SLOW, TestTags.SOURCEONLY)
     def test_force_plugin(self):
         """Verify that forcing plugin to be used works as expected"""
 
@@ -118,7 +118,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
 
     # recompiles the LVM plugin
-    @tag_test(TestTags.SLOW)
+    @tag_test(TestTags.SLOW, TestTags.SOURCEONLY)
     def test_plugin_priority(self):
         """Verify that preferring plugin to be used works as expected"""
 
@@ -181,7 +181,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         os.system ("rm -f src/plugins/.libs/libbd_lvm2.so")
 
     # recompiles the LVM plugin
-    @tag_test(TestTags.SLOW)
+    @tag_test(TestTags.SLOW, TestTags.SOURCEONLY)
     def test_plugin_fallback(self):
         """Verify that fallback when loading plugins works as expected"""
 
