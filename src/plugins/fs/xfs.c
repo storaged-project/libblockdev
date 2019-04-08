@@ -244,7 +244,7 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
 
     mountpoint = bd_fs_get_mountpoint (device, error);
     if (mountpoint == NULL) {
-        if (*error == NULL) {
+        if (error != NULL && *error == NULL) {
             g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_MOUNTED,
                          "Can't get xfs file system information for '%s': Device is not mounted.", device);
             return NULL;
