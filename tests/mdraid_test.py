@@ -520,7 +520,7 @@ class MDTestNameNodeBijection(MDTestCase):
         self.assertTrue(succ)
 
 class MDTestSetBitmapLocation(MDTestCase):
-    @tag_test(TestTags.SLOW)
+    @tag_test(TestTags.SLOW, TestTags.UNSTABLE)
     def test_set_bitmap_location(self):
         """Verify we can change bitmap location for an existing MD array"""
 
