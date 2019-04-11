@@ -22,6 +22,7 @@
 #include <string.h>
 #include <libdevmapper.h>
 #include <unistd.h>
+#include <sys/file.h>
 #include <blockdev/utils.h>
 
 #include "lvm.h"
@@ -2033,6 +2034,11 @@ gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name,
     gchar *name = NULL;
     gchar *msg = NULL;
     guint64 progress_id = 0;
+    gint ret = 0;
+    gint ddev_fd = 0;
+    gint mdev_fd = 0;
+    guint num_tries = 1;
+    gchar *dev_path = NULL;
     const gchar *args[10] = {"lvconvert", "-y", "--type", "cache-pool", "--poolmetadata", NULL, "--cachemode", NULL, NULL, NULL};
 
     msg = g_strdup_printf ("Started 'create cache pool %s/%s'", vg_name, pool_name);
@@ -2048,6 +2054,21 @@ gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name,
         return FALSE;
     }
 
+    /* XXX: try to grab a lock for the device so that udev doesn't step in
+       before the lvconvert */
+    dev_path = g_strdup_printf ("/dev/%s/%s", vg_name, pool_name);
+    ddev_fd = open (dev_path, O_RDONLY|O_CLOEXEC);
+    if (ddev_fd >= 0) {
+        ret = flock (ddev_fd, LOCK_SH|LOCK_NB);
+        while ((ret != 0) && (num_tries <= 5)) {
+            g_usleep (100 * 1000); /* microseconds */
+            ret = flock (ddev_fd, LOCK_SH|LOCK_NB);
+            num_tries++;
+        }
+    }
+    g_free (dev_path);
+    num_tries = 0;
+
     /* 1/3 steps done */
     bd_utils_report_progress (progress_id, 33, "Created the data LV");
 
@@ -2058,6 +2079,8 @@ gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name,
     if (*error) {
         g_prefix_error (error, "Failed to determine size for the pool metadata LV: ");
         bd_utils_report_finished (progress_id, (*error)->message);
+        if (ddev_fd >= 0)
+            close (ddev_fd);
         return FALSE;
     }
     name = g_strdup_printf ("%s_meta", pool_name);
@@ -2068,8 +2091,25 @@ gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name,
         g_free (name);
         g_prefix_error (error, "Failed to create the pool metadata LV: ");
         bd_utils_report_finished (progress_id, (*error)->message);
+        if (ddev_fd >= 0)
+            close (ddev_fd);
         return FALSE;
     }
+
+    /* XXX: try to grab a lock for the device so that udev doesn't step in
+       before the lvconvert  */
+    dev_path = g_strdup_printf ("/dev/%s/%s", vg_name, name);
+    mdev_fd = open (dev_path, O_RDONLY|O_CLOEXEC);
+    if (mdev_fd >= 0) {
+        ret = flock (mdev_fd, LOCK_SH|LOCK_NB);
+        while ((ret != 0) && (num_tries <= 5)) {
+            g_usleep (100 * 1000); /* microseconds */
+            ret = flock (mdev_fd, LOCK_SH|LOCK_NB);
+            num_tries++;
+        }
+    }
+    g_free (dev_path);
+    num_tries = 0;
 
     /* 2/3 steps done */
     bd_utils_report_progress (progress_id, 66, "Created the metadata LV");
@@ -2080,6 +2120,10 @@ gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name,
     if (!args[7]) {
         g_free ((gchar *) args[5]);
         bd_utils_report_finished (progress_id, (*error)->message);
+        if (ddev_fd >= 0)
+            close (ddev_fd);
+        if (mdev_fd >= 0)
+            close (mdev_fd);
         return FALSE;
     }
     name = g_strdup_printf ("%s/%s", vg_name, pool_name);
@@ -2092,6 +2136,11 @@ gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name,
         bd_utils_report_finished (progress_id, (*error)->message);
     else
         bd_utils_report_finished (progress_id, "Completed");
+
+    if (ddev_fd >= 0)
+        close (ddev_fd);
+    if (mdev_fd >= 0)
+        close (mdev_fd);
 
     /* just return the result of the last step (it sets error on fail) */
     return success;
