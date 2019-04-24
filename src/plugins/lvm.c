@@ -371,6 +371,7 @@ static GHashTable* parse_lvm_vars (const gchar *str, guint *num_items) {
         if (g_strv_length (key_val) == 2) {
             /* we only want to process valid lines (with the '=' character) */
             g_hash_table_insert (table, key_val[0], key_val[1]);
+            g_free (key_val);
             (*num_items)++;
         } else
             /* invalid line, just free key_val */
@@ -972,6 +973,7 @@ BDLVMPVdata* bd_lvm_pvinfo (const gchar *device, GError **error) {
             if (table)
                 g_hash_table_destroy (table);
     }
+    g_strfreev (lines);
 
     /* getting here means no usable info was found */
     g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
@@ -1039,6 +1041,7 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
     if (pvs->len == 0) {
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
                      "Failed to parse information about PVs");
+        g_ptr_array_free (pvs, TRUE);
         return NULL;
     }
 
@@ -1247,6 +1250,7 @@ BDLVMVGdata* bd_lvm_vginfo (const gchar *vg_name, GError **error) {
             if (table)
                 g_hash_table_destroy (table);
     }
+    g_strfreev (lines);
 
     /* getting here means no usable info was found */
     g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
@@ -1312,6 +1316,7 @@ BDLVMVGdata** bd_lvm_vgs (GError **error) {
     if (vgs->len == 0) {
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
                      "Failed to parse information about VGs");
+        g_ptr_array_free (vgs, TRUE);
         return NULL;
     }
 
@@ -1641,6 +1646,7 @@ BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError *
             if (table)
                 g_hash_table_destroy (table);
     }
+    g_strfreev (lines);
 
     /* getting here means no usable info was found */
     g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
@@ -1713,6 +1719,7 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
     if (lvs->len == 0) {
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
                      "Failed to parse information about LVs");
+        g_ptr_array_free (lvs, FALSE);
         return NULL;
     }
 
