@@ -63,6 +63,7 @@ BDLVMPVdata* bd_lvm_pvdata_copy (BDLVMPVdata *data) {
     new_data->pv_size = data->pv_size;
     new_data->pe_start = data->pe_start;
     new_data->vg_name = g_strdup (data->vg_name);
+    new_data->vg_uuid = g_strdup (data->vg_uuid);
     new_data->vg_size = data->vg_size;
     new_data->vg_free = data->vg_free;
     new_data->vg_extent_size = data->vg_extent_size;
@@ -80,6 +81,7 @@ void bd_lvm_pvdata_free (BDLVMPVdata *data) {
     g_free (data->pv_name);
     g_free (data->pv_uuid);
     g_free (data->vg_name);
+    g_free (data->vg_uuid);
     g_free (data);
 }
 
