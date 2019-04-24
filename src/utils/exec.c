@@ -228,8 +228,12 @@ gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtr
     log_out (task_id, stdout_data, stderr_data);
     log_done (task_id, *status);
 
+    g_free (args);
+
     if (!success) {
         /* error is already populated from the call */
+        g_free (stdout_data);
+        g_free (stderr_data);
         return FALSE;
     }
 
@@ -247,7 +251,6 @@ gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtr
         return FALSE;
     }
 
-    g_free (args);
     g_free (stdout_data);
     g_free (stderr_data);
     return TRUE;
@@ -398,14 +401,17 @@ gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg
                                     G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH|G_SPAWN_DO_NOT_REAP_CHILD,
                                     NULL, NULL, &pid, NULL, &out_fd, &err_fd, error);
 
-    if (!ret)
+    if (!ret) {
         /* error is already populated */
+        g_free (args);
         return FALSE;
+    }
 
     args_str = g_strjoinv (" ", args ? (gchar **) args : (gchar **) argv);
     msg = g_strdup_printf ("Started '%s'", args_str);
     progress_id = bd_utils_report_started (msg);
     g_free (args_str);
+    g_free (args);
     g_free (msg);
 
     out_pipe = g_io_channel_unix_new (out_fd);
