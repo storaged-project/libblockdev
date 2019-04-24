@@ -1001,24 +1001,25 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
     gchar **lines = NULL;
     gchar **lines_p = NULL;
     guint num_items;
-    GPtrArray *pvs = g_ptr_array_new ();
+    GPtrArray *pvs;
     BDLVMPVdata *pvdata = NULL;
-    BDLVMPVdata **ret = NULL;
-    guint64 i = 0;
+
+    pvs = g_ptr_array_new ();
 
     success = call_lvm_and_capture_output (args, NULL, &output, error);
-
     if (!success) {
         if (g_error_matches (*error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
             /* no output => no VGs, not an error */
             g_clear_error (error);
-            ret = g_new0 (BDLVMPVdata*, 1);
-            ret[0] = NULL;
-            return ret;
+            /* return an empty list */
+            g_ptr_array_add (pvs, NULL);
+            return (BDLVMPVdata **) g_ptr_array_free (pvs, FALSE);
         }
-        else
+        else {
             /* the error is already populated from the call */
+            g_ptr_array_free (pvs, TRUE);
             return NULL;
+        }
     }
 
     lines = g_strsplit (output, "\n", 0);
@@ -1045,15 +1046,9 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
         return NULL;
     }
 
-    /* now create the return value -- NULL-terminated array of BDLVMPVdata */
-    ret = g_new0 (BDLVMPVdata*, pvs->len + 1);
-    for (i=0; i < pvs->len; i++)
-        ret[i] = (BDLVMPVdata*) g_ptr_array_index (pvs, i);
-    ret[i] = NULL;
-
-    g_ptr_array_free (pvs, FALSE);
-
-    return ret;
+    /* returning NULL-terminated array of BDLVMPVdata */
+    g_ptr_array_add (pvs, NULL);
+    return (BDLVMPVdata **) g_ptr_array_free (pvs, FALSE);
 }
 
 /**
@@ -1277,23 +1272,25 @@ BDLVMVGdata** bd_lvm_vgs (GError **error) {
     gchar **lines = NULL;
     gchar **lines_p = NULL;
     guint num_items;
-    GPtrArray *vgs = g_ptr_array_new ();
+    GPtrArray *vgs;
     BDLVMVGdata *vgdata = NULL;
-    BDLVMVGdata **ret = NULL;
-    guint64 i = 0;
+
+    vgs = g_ptr_array_new ();
 
     success = call_lvm_and_capture_output (args, NULL, &output, error);
     if (!success) {
         if (g_error_matches (*error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
             /* no output => no VGs, not an error */
             g_clear_error (error);
-            ret = g_new0 (BDLVMVGdata*, 1);
-            ret[0] = NULL;
-            return ret;
+            /* return an empty list */
+            g_ptr_array_add (vgs, NULL);
+            return (BDLVMVGdata **) g_ptr_array_free (vgs, FALSE);
         }
-        else
+        else {
             /* the error is already populated from the call */
+            g_ptr_array_free (vgs, TRUE);
             return NULL;
+       }
     }
 
     lines = g_strsplit (output, "\n", 0);
@@ -1320,15 +1317,9 @@ BDLVMVGdata** bd_lvm_vgs (GError **error) {
         return NULL;
     }
 
-    /* now create the return value -- NULL-terminated array of BDLVMVGdata */
-    ret = g_new0 (BDLVMVGdata*, vgs->len + 1);
-    for (i=0; i < vgs->len; i++)
-        ret[i] = (BDLVMVGdata*) g_ptr_array_index (vgs, i);
-    ret[i] = NULL;
-
-    g_ptr_array_free (vgs, FALSE);
-
-    return ret;
+    /* returning NULL-terminated array of BDLVMVGdata */
+    g_ptr_array_add (vgs, NULL);
+    return (BDLVMVGdata **) g_ptr_array_free (vgs, FALSE);
 }
 
 /**
@@ -1676,27 +1667,28 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
     gchar **lines = NULL;
     gchar **lines_p = NULL;
     guint num_items;
-    GPtrArray *lvs = g_ptr_array_new ();
+    GPtrArray *lvs;
     BDLVMLVdata *lvdata = NULL;
-    BDLVMLVdata **ret = NULL;
-    guint64 i = 0;
+
+    lvs = g_ptr_array_new ();
 
     if (vg_name)
         args[9] = vg_name;
 
     success = call_lvm_and_capture_output (args, NULL, &output, error);
-
     if (!success) {
         if (g_error_matches (*error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
             /* no output => no LVs, not an error */
             g_clear_error (error);
-            ret = g_new0 (BDLVMLVdata*, 1);
-            ret[0] = NULL;
-            return ret;
+            /* return an empty list */
+            g_ptr_array_add (lvs, NULL);
+            return (BDLVMLVdata **) g_ptr_array_free (lvs, FALSE);
         }
-        else
+        else {
             /* the error is already populated from the call */
+            g_ptr_array_free (lvs, TRUE);
             return NULL;
+        }
     }
 
     lines = g_strsplit (output, "\n", 0);
@@ -1719,19 +1711,13 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
     if (lvs->len == 0) {
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
                      "Failed to parse information about LVs");
-        g_ptr_array_free (lvs, FALSE);
+        g_ptr_array_free (lvs, TRUE);
         return NULL;
     }
 
-    /* now create the return value -- NULL-terminated array of BDLVMLVdata */
-    ret = g_new0 (BDLVMLVdata*, lvs->len + 1);
-    for (i=0; i < lvs->len; i++)
-        ret[i] = (BDLVMLVdata*) g_ptr_array_index (lvs, i);
-    ret[i] = NULL;
-
-    g_ptr_array_free (lvs, FALSE);
-
-    return ret;
+    /* returning NULL-terminated array of BDLVMLVdata */
+    g_ptr_array_add (lvs, NULL);
+    return (BDLVMLVdata **) g_ptr_array_free (lvs, FALSE);
 }
 
 /**
