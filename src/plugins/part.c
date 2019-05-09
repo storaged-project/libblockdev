@@ -913,6 +913,8 @@ static gboolean resize_part (PedPartition *part, PedDevice *dev, PedDisk *disk, 
         return FALSE;
     }
 
+    ped_geometry_destroy (geom);
+    ped_constraint_destroy (constr);
     finish_alignment_constraint (disk, orig_flag_state);
     return TRUE;
 }
