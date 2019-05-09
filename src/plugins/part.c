@@ -373,10 +373,9 @@ static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_nu
 
     args[1] = g_strdup_printf ("-i%d", part_num);
     success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
-    if (!success) {
-        g_free ((gchar *) args[1]);
+    g_free ((gchar *) args[1]);
+    if (!success)
         return FALSE;
-    }
 
     lines = g_strsplit (output, "\n", 0);
     g_free (output);
