@@ -534,6 +534,7 @@ static GHashTable* parse_output_vars (const gchar *str, const gchar *item_sep, c
         if (g_strv_length (key_val) == 2) {
             /* we only want to process valid lines (with the separator) */
             g_hash_table_insert (table, g_strstrip (key_val[0]), g_strstrip (key_val[1]));
+            g_free (key_val);
             (*num_items)++;
         } else
             /* invalid line, just free key_val */
