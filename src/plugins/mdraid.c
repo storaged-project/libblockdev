@@ -255,10 +255,15 @@ static GHashTable* parse_mdadm_vars (const gchar *str, const gchar *item_sep, co
                     /* mdadm --examine output for a set being migrated */
                     vals = g_strsplit (key_val[1], "<--", 2);
                     g_hash_table_insert (table, g_strstrip (key_val[0]), g_strstrip (vals[0]));
+                    g_free (key_val[1]);
                     g_free (vals[1]);
+                    g_free (vals);
                 } else {
                     g_hash_table_insert (table, g_strstrip (key_val[0]), g_strstrip (key_val[1]));
                 }
+                g_free (key_val);
+            } else {
+                g_strfreev (key_val);
             }
             (*num_items)++;
         } else
