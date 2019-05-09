@@ -96,13 +96,23 @@ static gint8 filter_line_fsck (const gchar * line, guint8 total_stages, GError *
         guint8 stage;
         gint64 val_cur;
         gint64 val_total;
+        gchar *s;
 
         /* The output_regex ensures we have a number in these matches, so we can skip
          * tests for conversion errors.
          */
-        stage = (guint8) g_ascii_strtoull (g_match_info_fetch (match_info, 1), (char **)NULL, 10);
-        val_cur = g_ascii_strtoll (g_match_info_fetch (match_info, 2), (char **)NULL, 10);
-        val_total = g_ascii_strtoll (g_match_info_fetch (match_info, 3), (char **)NULL, 10);
+        s = g_match_info_fetch (match_info, 1);
+        stage = (guint8) g_ascii_strtoull (s, (char **)NULL, 10);
+        g_free (s);
+
+        s = g_match_info_fetch (match_info, 2);
+        val_cur = g_ascii_strtoll (s, (char **)NULL, 10);
+        g_free (s);
+
+        s = g_match_info_fetch (match_info, 3);
+        val_total = g_ascii_strtoll (s, (char **)NULL, 10);
+        g_free (s);
+
         perc = compute_percents (stage, total_stages, val_cur, val_total);
     } else {
         g_match_info_free (match_info);
