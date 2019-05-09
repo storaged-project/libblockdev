@@ -560,8 +560,10 @@ static BDFSExtInfo* get_ext_info_from_table (GHashTable *table, gboolean free_ta
     gchar *value = NULL;
 
     ret->label = g_strdup ((gchar*) g_hash_table_lookup (table, "Filesystem volume name"));
-    if ((!ret->label) || (g_strcmp0 (ret->label, "<none>") == 0))
+    if (!ret->label || g_strcmp0 (ret->label, "<none>") == 0) {
+        g_free (ret->label);
         ret->label = g_strdup ("");
+    }
     ret->uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "Filesystem UUID"));
     ret->state = g_strdup ((gchar*) g_hash_table_lookup (table, "Filesystem state"));
 
