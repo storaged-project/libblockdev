@@ -1049,6 +1049,7 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
     }
 
     /* try to get metadata version from the output (may be missing) */
+    g_free (ret->metadata);
     value = (gchar*) g_hash_table_lookup (table, "metadata");
     if (value)
         ret->metadata = g_strdup (value);
