@@ -178,7 +178,7 @@ gboolean bd_md_check_deps (void) {
     }
 
     if (!ret)
-        g_warning("Cannot load the MDRAID plugin");
+        g_warning ("Cannot load the MDRAID plugin");
 
     return ret;
 }
@@ -275,7 +275,7 @@ static GHashTable* parse_mdadm_vars (const gchar *str, const gchar *item_sep, co
     return table;
 }
 
-static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean free_table, GError **error) {
+static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean free_table, G_GNUC_UNUSED GError **error) {
     BDMDExamineData *data = g_new0 (BDMDExamineData, 1);
     gchar *value = NULL;
     gchar *first_space = NULL;
@@ -357,8 +357,7 @@ static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean
         }
 
         if (bs_error) {
-            g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE,
-                         "Failed to parse chunk size from mdexamine data: %s", bs_error->msg);
+            g_warning ("get_examine_data_from_table(): Failed to parse chunk size from mdexamine data: %s", bs_error->msg);
             bs_clear_error (&bs_error);
         }
     } else
