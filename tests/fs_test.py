@@ -1135,7 +1135,7 @@ class MountTest(FSTestCase):
             BlockDev.fs_unmount(self.loop_dev, run_as_uid=uid, run_as_gid=gid)
         self.assertTrue(os.path.ismount(tmp))
 
-    @skip_on("debian", "testing", reason="NTFS mounting is broken on Debian testing")
+    @skip_on("debian", "10", reason="NTFS mounting is broken on Debian testing")
     def test_mount_ntfs(self):
         """ Test basic mounting and unmounting with NTFS filesystem"""
         # using NTFS because it uses a helper program (mount.ntfs) and libmount
