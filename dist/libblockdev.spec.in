@@ -124,8 +124,8 @@
 %define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?vdo_copts} %{?tools_copts} %{?gi_copts}
 
 Name:        libblockdev
-Version:     2.21
-Release:     2%{?dist}
+Version:     2.22
+Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
 URL:         https://github.com/storaged-project/libblockdev
@@ -982,6 +982,33 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Jun 12 2019 Vojtech Trefny <vtrefny@redhat.com> - 2.22-1
+- tests: Fix Debian testing "version" for skipping (vtrefny)
+- module: Fix libkmod related leak (tbzatek)
+- btrfs: Fix number of memory leaks (tbzatek)
+- mdraid: Fix leaking BDMDExamineData.metadata (tbzatek)
+- mdraid: Fix leaking error (tbzatek)
+- part: Fix leaking string in args (tbzatek)
+- ext: Fix leaking string (tbzatek)
+- part: Fix leaking objects (tbzatek)
+- kbd: Fix g_match_info_fetch() leaks (tbzatek)
+- ext: Fix g_match_info_fetch() leaks (tbzatek)
+- ext: Fix g_strsplit() leaks (tbzatek)
+- s390: Fix g_strsplit() leaks (tbzatek)
+- mdraid: Fix g_strsplit() leaks (tbzatek)
+- exec: Fix some memory leaks (tbzatek)
+- lvm: Fix leaking BDLVMPVdata.vg_uuid (tbzatek)
+- lvm: Use g_ptr_array_free() for creating lists (tbzatek)
+- lvm: Fix some obvious memory leaks (tbzatek)
+- Remove device-mapper-multipath dependency from fs and part plugins (vtrefny)
+- bd_fs_xfs_get_info: Allow passing error == NULL (tbzatek)
+- tests: Fix removing targetcli lun (vtrefny)
+- Use existing cryptsetup API for changing keyslot passphrase (vtrefny)
+- New function to get supported sector sizes for NVDIMM namespaces (vtrefny)
+- Allow skiping tests only based on architecture (vtrefny)
+- Sync spec file with python2 obsoletion added downstream (awilliam)
+- Sync spec with downstream (vtrefny)
+
 * Thu Feb 28 2019 Adam Williamson <awilliam@redhat.com> - 2.21-2
 - Obsolete the python2 subpackage if we're not building it
 

@@ -1,3 +1,57 @@
+Libblockdev 2.22
+----------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Notable changes**
+
+- nvdimm
+
+  - new function for getting list of supported sector sizes for namespaces
+
+- fixes
+
+  - multiple memory leaks fixed
+
+
+**Full list of changes**
+
+Adam Williamson (1):
+
+- Sync spec file with python2 obsoletion added downstream
+
+Tomas Bzatek (17):
+
+- bd_fs_xfs_get_info: Allow passing error == NULL
+- lvm: Fix some obvious memory leaks
+- lvm: Use g_ptr_array_free() for creating lists
+- lvm: Fix leaking BDLVMPVdata.vg_uuid
+- exec: Fix some memory leaks
+- mdraid: Fix g_strsplit() leaks
+- s390: Fix g_strsplit() leaks
+- ext: Fix g_strsplit() leaks
+- ext: Fix g_match_info_fetch() leaks
+- kbd: Fix g_match_info_fetch() leaks
+- part: Fix leaking objects
+- ext: Fix leaking string
+- part: Fix leaking string in args
+- mdraid: Fix leaking error
+- mdraid: Fix leaking BDMDExamineData.metadata
+- btrfs: Fix number of memory leaks
+- module: Fix libkmod related leak
+
+Vojtech Trefny (7):
+
+- Sync spec with downstream
+- Allow skiping tests only based on architecture
+- New function to get supported sector sizes for NVDIMM namespaces
+- Use existing cryptsetup API for changing keyslot passphrase
+- tests: Fix removing targetcli lun
+- Remove device-mapper-multipath dependency from fs and part plugins
+- tests: Fix Debian testing "version" for skipping
+
+
 Libblockdev 2.21
 ----------------
 
