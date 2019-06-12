@@ -408,6 +408,7 @@
     <keyword type="function" name="bd_nvdimm_namespace_info ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-info"/>
     <keyword type="function" name="bd_nvdimm_list_namespaces ()" link="libblockdev-NVDIMM.html#bd-nvdimm-list-namespaces"/>
     <keyword type="function" name="bd_nvdimm_namespace_reconfigure ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-reconfigure"/>
+    <keyword type="function" name="bd_nvdimm_namepace_get_supported_sector_sizes ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namepace-get-supported-sector-sizes"/>
     <keyword type="function" name="bd_nvdimm_is_tech_avail ()" link="libblockdev-NVDIMM.html#bd-nvdimm-is-tech-avail"/>
     <keyword type="macro" name="BD_NVDIMM_ERROR" link="libblockdev-NVDIMM.html#BD-NVDIMM-ERROR:CAPS"/>
     <keyword type="enum" name="enum BDNVDIMMError" link="libblockdev-NVDIMM.html#BDNVDIMMError"/>
@@ -842,6 +843,10 @@
     <keyword type="constant" name="BD_SWAP_ERROR_UNKNOWN_STATE" link="libblockdev-Swap.html#BD-SWAP-ERROR-UNKNOWN-STATE:CAPS"/>
     <keyword type="constant" name="BD_SWAP_ERROR_ACTIVATE" link="libblockdev-Swap.html#BD-SWAP-ERROR-ACTIVATE:CAPS"/>
     <keyword type="constant" name="BD_SWAP_ERROR_TECH_UNAVAIL" link="libblockdev-Swap.html#BD-SWAP-ERROR-TECH-UNAVAIL:CAPS"/>
+    <keyword type="constant" name="BD_SWAP_ERROR_ACTIVATE_OLD" link="libblockdev-Swap.html#BD-SWAP-ERROR-ACTIVATE-OLD:CAPS"/>
+    <keyword type="constant" name="BD_SWAP_ERROR_ACTIVATE_SUSPEND" link="libblockdev-Swap.html#BD-SWAP-ERROR-ACTIVATE-SUSPEND:CAPS"/>
+    <keyword type="constant" name="BD_SWAP_ERROR_ACTIVATE_UNKNOWN" link="libblockdev-Swap.html#BD-SWAP-ERROR-ACTIVATE-UNKNOWN:CAPS"/>
+    <keyword type="constant" name="BD_SWAP_ERROR_ACTIVATE_PAGESIZE" link="libblockdev-Swap.html#BD-SWAP-ERROR-ACTIVATE-PAGESIZE:CAPS"/>
     <keyword type="constant" name="BD_SWAP_TECH_SWAP" link="libblockdev-Swap.html#BD-SWAP-TECH-SWAP:CAPS"/>
     <keyword type="constant" name="BD_SWAP_TECH_MODE_CREATE" link="libblockdev-Swap.html#BD-SWAP-TECH-MODE-CREATE:CAPS"/>
     <keyword type="constant" name="BD_SWAP_TECH_MODE_ACTIVATE_DEACTIVATE" link="libblockdev-Swap.html#BD-SWAP-TECH-MODE-ACTIVATE-DEACTIVATE:CAPS"/>
