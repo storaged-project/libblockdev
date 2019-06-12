@@ -775,8 +775,6 @@ gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const 
     gchar *hba_path = NULL;
     gchar *wwpn_path = NULL;
     gchar *lun_path = NULL;
-    gchar *host = NULL;
-    gchar *fcplun = NULL;
     gchar *scsidev = NULL;
     gchar *fcpsysfs = NULL;
     gchar *scsidel = NULL;
@@ -804,13 +802,11 @@ gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const 
         /* tokenize line and assign certain values we'll need later */
         tokens = g_strsplit (line, delim, 8);
 
-        host = tokens[1];
-        fcplun = tokens[7];
-
-        scsidev = g_strdup_printf ("%s:%s:%s:%s", host + 4, channel, devid, fcplun);
+        scsidev = g_strdup_printf ("%s:%s:%s:%s", tokens[1] /* host */ + 4, channel, devid, tokens[7] /* fcplun */);
         scsidev = g_strchomp (scsidev);
         fcpsysfs = g_strdup_printf ("%s/%s", scsidevsysfs, scsidev);
         fcpsysfs = g_strchomp (fcpsysfs);
+        g_strfreev (tokens);
 
         /* get HBA path value (same as device number) */
         hba_path = g_strdup_printf ("%s/hba_id", fcpsysfs);

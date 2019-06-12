@@ -782,7 +782,11 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
     for (i=0; lines[i] && n < 2; i++) {
         success = g_regex_match (regex, lines[i], 0, &match_info);
         if (success) {
-            strncpy (device_uuid[n], g_match_info_fetch (match_info, 1), 63);
+            gchar *s;
+
+            s = g_match_info_fetch (match_info, 1);
+            strncpy (device_uuid[n], s, 63);
+            g_free (s);
             device_uuid[n][63] = '\0';
             n++;
             g_match_info_free (match_info);

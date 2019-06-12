@@ -96,13 +96,23 @@ static gint8 filter_line_fsck (const gchar * line, guint8 total_stages, GError *
         guint8 stage;
         gint64 val_cur;
         gint64 val_total;
+        gchar *s;
 
         /* The output_regex ensures we have a number in these matches, so we can skip
          * tests for conversion errors.
          */
-        stage = (guint8) g_ascii_strtoull (g_match_info_fetch (match_info, 1), (char **)NULL, 10);
-        val_cur = g_ascii_strtoll (g_match_info_fetch (match_info, 2), (char **)NULL, 10);
-        val_total = g_ascii_strtoll (g_match_info_fetch (match_info, 3), (char **)NULL, 10);
+        s = g_match_info_fetch (match_info, 1);
+        stage = (guint8) g_ascii_strtoull (s, (char **)NULL, 10);
+        g_free (s);
+
+        s = g_match_info_fetch (match_info, 2);
+        val_cur = g_ascii_strtoll (s, (char **)NULL, 10);
+        g_free (s);
+
+        s = g_match_info_fetch (match_info, 3);
+        val_total = g_ascii_strtoll (s, (char **)NULL, 10);
+        g_free (s);
+
         perc = compute_percents (stage, total_stages, val_cur, val_total);
     } else {
         g_match_info_free (match_info);
@@ -534,6 +544,7 @@ static GHashTable* parse_output_vars (const gchar *str, const gchar *item_sep, c
         if (g_strv_length (key_val) == 2) {
             /* we only want to process valid lines (with the separator) */
             g_hash_table_insert (table, g_strstrip (key_val[0]), g_strstrip (key_val[1]));
+            g_free (key_val);
             (*num_items)++;
         } else
             /* invalid line, just free key_val */
@@ -549,8 +560,10 @@ static BDFSExtInfo* get_ext_info_from_table (GHashTable *table, gboolean free_ta
     gchar *value = NULL;
 
     ret->label = g_strdup ((gchar*) g_hash_table_lookup (table, "Filesystem volume name"));
-    if ((!ret->label) || (g_strcmp0 (ret->label, "<none>") == 0))
+    if (!ret->label || g_strcmp0 (ret->label, "<none>") == 0) {
+        g_free (ret->label);
         ret->label = g_strdup ("");
+    }
     ret->uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "Filesystem UUID"));
     ret->state = g_strdup ((gchar*) g_hash_table_lookup (table, "Filesystem state"));
 

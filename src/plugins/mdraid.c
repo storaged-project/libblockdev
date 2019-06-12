@@ -178,7 +178,7 @@ gboolean bd_md_check_deps (void) {
     }
 
     if (!ret)
-        g_warning("Cannot load the MDRAID plugin");
+        g_warning ("Cannot load the MDRAID plugin");
 
     return ret;
 }
@@ -255,10 +255,15 @@ static GHashTable* parse_mdadm_vars (const gchar *str, const gchar *item_sep, co
                     /* mdadm --examine output for a set being migrated */
                     vals = g_strsplit (key_val[1], "<--", 2);
                     g_hash_table_insert (table, g_strstrip (key_val[0]), g_strstrip (vals[0]));
+                    g_free (key_val[1]);
                     g_free (vals[1]);
+                    g_free (vals);
                 } else {
                     g_hash_table_insert (table, g_strstrip (key_val[0]), g_strstrip (key_val[1]));
                 }
+                g_free (key_val);
+            } else {
+                g_strfreev (key_val);
             }
             (*num_items)++;
         } else
@@ -270,7 +275,7 @@ static GHashTable* parse_mdadm_vars (const gchar *str, const gchar *item_sep, co
     return table;
 }
 
-static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean free_table, GError **error) {
+static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean free_table, G_GNUC_UNUSED GError **error) {
     BDMDExamineData *data = g_new0 (BDMDExamineData, 1);
     gchar *value = NULL;
     gchar *first_space = NULL;
@@ -352,8 +357,7 @@ static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean
         }
 
         if (bs_error) {
-            g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE,
-                         "Failed to parse chunk size from mdexamine data: %s", bs_error->msg);
+            g_warning ("get_examine_data_from_table(): Failed to parse chunk size from mdexamine data: %s", bs_error->msg);
             bs_clear_error (&bs_error);
         }
     } else
@@ -1045,6 +1049,7 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
     }
 
     /* try to get metadata version from the output (may be missing) */
+    g_free (ret->metadata);
     value = (gchar*) g_hash_table_lookup (table, "metadata");
     if (value)
         ret->metadata = g_strdup (value);

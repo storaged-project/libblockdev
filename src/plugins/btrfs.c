@@ -619,9 +619,7 @@ BDBtrfsDeviceInfo** bd_btrfs_list_devices (const gchar *device, GError **error) 
                                   "path[ \\t]+(?P<path>\\S+)\n";
     GRegex *regex = NULL;
     GMatchInfo *match_info = NULL;
-    guint8 i = 0;
-    GPtrArray *dev_infos = g_ptr_array_new ();
-    BDBtrfsDeviceInfo** ret = NULL;
+    GPtrArray *dev_infos;
 
     if (!check_deps (&avail_deps, DEPS_BTRFS_MASK, deps, DEPS_LAST, &deps_check_lock, error) ||
         !check_module_deps (&avail_module_deps, MODULE_DEPS_BTRFS_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
@@ -635,13 +633,16 @@ BDBtrfsDeviceInfo** bd_btrfs_list_devices (const gchar *device, GError **error) 
     }
 
     success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
-    if (!success)
+    if (!success) {
+        g_regex_unref (regex);
         /* error is already populated from the previous call */
         return NULL;
+    }
 
     lines = g_strsplit (output, "\n", 0);
     g_free (output);
 
+    dev_infos = g_ptr_array_new ();
     for (line_p = lines; *line_p; line_p++) {
         success = g_regex_match (regex, *line_p, 0, &match_info);
         if (!success) {
@@ -654,21 +655,16 @@ BDBtrfsDeviceInfo** bd_btrfs_list_devices (const gchar *device, GError **error) 
     }
 
     g_strfreev (lines);
+    g_regex_unref (regex);
 
     if (dev_infos->len == 0) {
         g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_PARSE, "Failed to parse information about devices");
+        g_ptr_array_free (dev_infos, TRUE);
         return NULL;
     }
 
-    /* now create the return value -- NULL-terminated array of BDBtrfsDeviceInfo */
-    ret = g_new0 (BDBtrfsDeviceInfo*, dev_infos->len + 1);
-    for (i=0; i < dev_infos->len; i++)
-        ret[i] = (BDBtrfsDeviceInfo*) g_ptr_array_index (dev_infos, i);
-    ret[i] = NULL;
-
-    g_ptr_array_free (dev_infos, FALSE);
-
-    return ret;
+    g_ptr_array_add (dev_infos, NULL);
+    return (BDBtrfsDeviceInfo **) g_ptr_array_free (dev_infos, FALSE);
 }
 
 /**
@@ -700,7 +696,7 @@ BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (const gchar *mountpoint, gboole
     guint64 i = 0;
     guint64 y = 0;
     guint64 next_sorted_idx = 0;
-    GPtrArray *subvol_infos = g_ptr_array_new ();
+    GPtrArray *subvol_infos;
     BDBtrfsSubvolumeInfo* item = NULL;
     BDBtrfsSubvolumeInfo* swap_item = NULL;
     BDBtrfsSubvolumeInfo** ret = NULL;
@@ -724,11 +720,11 @@ BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (const gchar *mountpoint, gboole
 
     success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
     if (!success) {
+        g_regex_unref (regex);
         if (g_error_matches (*error,  BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
             /* no output -> no subvolumes */
-            ret = g_new0 (BDBtrfsSubvolumeInfo*, 1);
             g_clear_error (error);
-            return ret;
+            return g_new0 (BDBtrfsSubvolumeInfo*, 1);
         } else {
             /* error is already populated from the call above or simply no output*/
             return NULL;
@@ -738,6 +734,7 @@ BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (const gchar *mountpoint, gboole
     lines = g_strsplit (output, "\n", 0);
     g_free (output);
 
+    subvol_infos = g_ptr_array_new ();
     for (line_p = lines; *line_p; line_p++) {
         success = g_regex_match (regex, *line_p, 0, &match_info);
         if (!success) {
@@ -750,9 +747,11 @@ BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (const gchar *mountpoint, gboole
     }
 
     g_strfreev (lines);
+    g_regex_unref (regex);
 
     if (subvol_infos->len == 0) {
         g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_PARSE, "Failed to parse information about subvolumes");
+        g_ptr_array_free (subvol_infos, TRUE);
         return NULL;
     }
 
@@ -828,21 +827,26 @@ BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info (const gchar *device, GError **e
     }
 
     success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
-    if (!success)
+    if (!success) {
         /* error is already populated from the call above or just empty
            output */
+        g_regex_unref (regex);
         return NULL;
+    }
 
     success = g_regex_match (regex, output, 0, &match_info);
     if (!success) {
         g_regex_unref (regex);
         g_match_info_free (match_info);
+        g_free (output);
         return NULL;
     }
 
-    g_regex_unref (regex);
     ret = get_filesystem_info_from_match (match_info);
     g_match_info_free (match_info);
+    g_regex_unref (regex);
+
+    g_free (output);
 
     return ret;
 }

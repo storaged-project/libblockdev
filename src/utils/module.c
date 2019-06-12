@@ -60,7 +60,7 @@ gboolean bd_utils_have_kernel_module (const gchar *module_name, GError **error) 
         return FALSE;
     }
     /* prevent libkmod from spamming our STDERR */
-    kmod_set_log_priority(ctx, LOG_CRIT);
+    kmod_set_log_priority (ctx, LOG_CRIT);
 
     ret = kmod_module_new_from_name (ctx, module_name, &mod);
     if (ret < 0) {
@@ -106,7 +106,7 @@ gboolean bd_utils_load_kernel_module (const gchar *module_name, const gchar *opt
         return FALSE;
     }
     /* prevent libkmod from spamming our STDERR */
-    kmod_set_log_priority(ctx, LOG_CRIT);
+    kmod_set_log_priority (ctx, LOG_CRIT);
 
     ret = kmod_module_new_from_name (ctx, module_name, &mod);
     if (ret < 0) {
@@ -169,7 +169,7 @@ gboolean bd_utils_unload_kernel_module (const gchar *module_name, GError **error
         return FALSE;
     }
     /* prevent libkmod from spamming our STDERR */
-    kmod_set_log_priority(ctx, LOG_CRIT);
+    kmod_set_log_priority (ctx, LOG_CRIT);
 
     ret = kmod_module_new_from_loaded (ctx, &list);
     if (ret < 0) {
@@ -187,6 +187,7 @@ gboolean bd_utils_unload_kernel_module (const gchar *module_name, GError **error
         else
             kmod_module_unref (mod);
     }
+    kmod_module_unref_list (list);
 
     if (!found) {
         g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_NOEXIST,
