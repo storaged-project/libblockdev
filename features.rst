@@ -38,6 +38,8 @@ filesystems
    * mount
    * unmount
    * generic_resize
+   * freeze
+   * unfreeze
 
 
 LVM

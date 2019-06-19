@@ -22,6 +22,8 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
+#include <linux/fs.h>
 #include <fcntl.h>
 
 #include <blockdev/utils.h>
@@ -700,4 +702,74 @@ gboolean bd_fs_can_repair (const gchar *type, gchar **required_utility, GError *
  */
 gboolean bd_fs_can_set_label (const gchar *type, gchar **required_utility, GError **error) {
     return query_fs_operation (type, BD_FS_LABEL, required_utility, NULL, error);
+}
+
+
+static gboolean fs_freeze (const char *mountpoint, gboolean freeze, GError **error) {
+    gint fd = -1;
+    gint status = 0;
+
+    if (!bd_fs_is_mountpoint (mountpoint, error)) {
+        if (*error != NULL) {
+            g_prefix_error (error, "Failed to check mountpoint '%s': ", mountpoint);
+            return FALSE;
+        } else {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_MOUNTED,
+                         "'%s' doesn't appear to be a mountpoint.", mountpoint);
+            return FALSE;
+        }
+    }
+
+    fd = open (mountpoint, O_RDONLY);
+    if (fd == -1) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to open the mountpoint '%s'", mountpoint);
+        return FALSE;
+    }
+
+    if (freeze)
+        status = ioctl (fd, FIFREEZE, 0);
+    else
+        status = ioctl (fd, FITHAW, 0);
+
+    if (status != 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to %s '%s': %m.", freeze ? "freeze" : "unfreeze", mountpoint);
+        close (fd);
+        return FALSE;
+    }
+
+    close (fd);
+
+    return TRUE;
+}
+
+/**
+ * bd_fs_freeze:
+ * @mountpoint: mountpoint of the device (filesystem) to freeze
+ * @error: (out): place to store error (if any)
+ *
+ * Freezes filesystem mounted on @mountpoint. The filesystem must
+ * support freezing.
+ *
+ * Returns: whether @mountpoint was successfully freezed or not
+ *
+ */
+gboolean bd_fs_freeze (const gchar *mountpoint, GError **error) {
+    return fs_freeze (mountpoint, TRUE, error);
+}
+
+/**
+ * bd_fs_unfreeze:
+ * @mountpoint: mountpoint of the device (filesystem) to un-freeze
+ * @error: (out): place to store error (if any)
+ *
+ * Un-freezes filesystem mounted on @mountpoint. The filesystem must
+ * support freezing.
+ *
+ * Returns: whether @mountpoint was successfully unfreezed or not
+ *
+ */
+gboolean bd_fs_unfreeze (const gchar *mountpoint, GError **error) {
+    return fs_freeze (mountpoint, FALSE, error);
 }
