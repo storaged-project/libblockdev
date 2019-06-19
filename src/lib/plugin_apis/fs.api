@@ -465,6 +465,17 @@ gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar 
 gchar* bd_fs_get_mountpoint (const gchar *device, GError **error);
 
 /**
+ * bd_fs_is_mountpoint:
+ * @path: path (folder) to check
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether @path is a mountpoint or not
+ *
+ * Tech category: %BD_FS_TECH_MOUNT (no mode, ignored)
+ */
+gboolean bd_fs_is_mountpoint (const gchar *path, GError **error);
+
+/**
  * bd_fs_resize:
  * @device: the device the file system of which to resize
  * @new_size: new requested size for the file system (if 0, the file system is
