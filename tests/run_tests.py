@@ -5,15 +5,19 @@ from __future__ import print_function
 import argparse
 import datetime
 import os
+import re
 import six
 import subprocess
 import sys
 import unittest
+import yaml
 
 from distutils.spawn import find_executable
 
 LIBDIRS = 'src/utils/.libs:src/plugins/.libs:src/plugins/fs/.libs:src/lib/.libs'
 GIDIR = 'src/lib'
+
+SKIP_CONFIG = 'skip.yml'
 
 
 def _get_tests_from_suite(suite, tests):
@@ -110,14 +114,19 @@ def parse_args():
 
     return args
 
-
-def _print_skip_message(test, skip_tag):
-
+def _split_test_id(test_id):
     # test.id() looks like 'crypto_test.CryptoTestResize.test_luks2_resize'
     # and we want to print 'test_luks2_resize (crypto_test.CryptoTestResize)'
     test_desc = test.id().split(".")
     test_name = test_desc[-1]
     test_module = ".".join(test_desc[:-1])
+
+    return test_name, test_module
+
+
+def _print_skip_message(test, skip_tag):
+    test_id = test.id()
+    test_module, test_name = _split_test_id(test_id)
 
     if skip_tag == TestTags.SLOW:
         reason = "skipping slow tests"
@@ -138,6 +147,39 @@ def _print_skip_message(test, skip_tag):
         print("%s (%s)\n%s ... skipped '%s'" % (test_name, test_module, test._testMethodDoc, reason))
     else:
         print("%s (%s) ... skipped '%s'" % (test_name, test_module, reason))
+
+
+def _should_skip(distro=None, version=None, arch=None, reason=None):
+    # all these can be lists or a single value, so covert everything to list
+    if distro is not None and type(distro) is not list:
+        distro = [distro]
+    if version is not None and type(version) is not list:
+        version = [version]
+    if arch is not None and type(arch) is not list:
+        arch = [arch]
+
+    # DISTRO, VERSION and ARCH variables are set in main, we don't need to
+    # call hostnamectl etc. for every test run
+    if (distro is None or DISTRO in distro) and (version is None or VERSION in version) and \
+       (arch is None or ARCH in arch):
+        return True
+
+    return False
+
+
+def _parse_skip_config(config):
+    with open(config) as f:
+        data = f.read()
+    parsed = yaml.load(data, Loader=yaml.SafeLoader)
+
+    skipped_tests = dict()
+
+    for entry in parsed:
+        for skip in entry["skip_on"]:
+            if _should_skip(**skip):
+                skipped_tests[entry["test"]] = skip["reason"]
+
+    return skipped_tests
 
 
 if __name__ == '__main__':
@@ -180,11 +222,21 @@ if __name__ == '__main__':
     tests = []
     tests = _get_tests_from_suite(test_cases, tests)
 
+    # get distro and arch here so we don't have to do this for every test
+    from utils import get_version
+    DISTRO, VERSION = get_version()
+    ARCH = os.uname()[-1]
+
+    # get list of tests to skip from the config file
+    skipping = _parse_skip_config(os.path.join(testdir, SKIP_CONFIG))
+
     # for some reason overrides_hack will fail if we import this at the start
     # of the file
     from utils import TestTags
 
     for test in tests:
+        test_id = test.id()
+
         # get tags and (possibly) skip the test
         tags = _get_test_tags(test)
 
@@ -206,6 +258,15 @@ if __name__ == '__main__':
 
         if args.core and TestTags.CORE not in tags and TestTags.REGRESSION not in tags:
             _print_skip_message(test, TestTags.CORE)
+            continue
+
+        # check if the test is in the list of tests to skip
+        skip_id = next((test_pattern for test_pattern in skipping.keys() if re.search(test_pattern, test_id)), None)
+        if skip_id:
+            test_name, test_module = _split_test_id(test_id)
+            reason = "not supported on this distribution in this version and arch: %s" % skipping[skip_id]
+            print("%s (%s)\n%s ... skipped '%s'" % (test_name, test_module,
+                                                    test._testMethodDoc, reason))
             continue
 
         # finally add the test to the suite
