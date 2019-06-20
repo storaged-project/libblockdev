@@ -1,6 +1,6 @@
 import unittest
 import os
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on, TestTags, tag_test
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, TestTags, tag_test
 import overrides_hack
 
 from gi.repository import BlockDev, GLib
@@ -669,8 +669,6 @@ class PartGetDiskPartsCase(PartTestCase):
             BlockDev.part_get_disk_parts (self.loop_dev)
 
 class PartGetDiskFreeRegions(PartTestCase):
-    @skip_on(("centos", "enterprise_linux"), "7", reason="libparted provides weird values here")
-    @skip_on("debian", reason="libparted provides weird values here")
     @tag_test(TestTags.CORE)
     def test_get_disk_free_regions(self):
         """Verify that it is possible to get info about free regions on a disk"""
@@ -760,8 +758,6 @@ class PartGetDiskFreeRegions(PartTestCase):
         self.assertGreater(fi.size, 89 * 1024**2)
 
 class PartGetBestFreeRegion(PartTestCase):
-    @skip_on(("centos", "enterprise_linux"), "7", reason="libparted provides weird values here")
-    @skip_on("debian", reason="libparted provides weird values here")
     def test_get_best_free_region(self):
         """Verify that it is possible to get info about the best free region on a disk"""
 

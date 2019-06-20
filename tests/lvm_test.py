@@ -7,7 +7,7 @@ import six
 import re
 import subprocess
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, skip_on, TestTags, tag_test
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test
 from gi.repository import BlockDev, GLib
 
 
@@ -374,7 +374,6 @@ class LvmPVVGTestCase(LvmPVonlyTestCase):
         LvmPVonlyTestCase._clean_up(self)
 
 class LvmTestVGcreateRemove(LvmPVVGTestCase):
-    @skip_on("debian", skip_on_version="9", skip_on_arch="i686", reason="vgremove is broken on 32bit Debian stable")
     @tag_test(TestTags.CORE)
     def test_vgcreate_vgremove(self):
         """Verify that it is possible to create and destroy a VG"""
@@ -516,7 +515,6 @@ class LvmTestVGinfo(LvmPVVGTestCase):
         self.assertEqual(info.extent_size, 4 * 1024**2)
 
 class LvmTestVGs(LvmPVVGTestCase):
-    @skip_on("debian", skip_on_version="9", skip_on_arch="i686", reason="vgremove is broken on 32bit Debian stable")
     def test_vgs(self):
         """Verify that it's possible to gather info about VGs"""
 
@@ -659,7 +657,6 @@ class LvmTestLVcreateWithExtra(LvmPVVGLVTestCase):
         self.assertTrue(succ)
 
 class LvmTestLVcreateType(LvmPVVGLVTestCase):
-    @skip_on(("centos", "enterprise_linux"), "7")
     def test_lvcreate_type(self):
         """Verify it's possible to create LVs with various types"""
 
@@ -1119,7 +1116,6 @@ class LvmPVVGLVcachePoolTestCase(LvmPVVGLVTestCase):
 
 class LvmPVVGLVcachePoolCreateRemoveTestCase(LvmPVVGLVcachePoolTestCase):
     @tag_test(TestTags.SLOW)
-    @skip_on(("centos", "enterprise_linux"), "7")
     def test_cache_pool_create_remove(self):
         """Verify that is it possible to create and remove a cache pool"""
 

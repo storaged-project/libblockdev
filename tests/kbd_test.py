@@ -5,7 +5,7 @@ import time
 from contextlib import contextmanager
 from distutils.version import LooseVersion
 from distutils.spawn import find_executable
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, wipe_all, fake_path, read_file, skip_on, TestTags, tag_test
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, wipe_all, fake_path, read_file, TestTags, tag_test
 from bytesize import bytesize
 import overrides_hack
 
@@ -54,8 +54,6 @@ class KbdZRAMTestCase(unittest.TestCase):
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
 
-    @skip_on("fedora", "27", reason="zram module (un)loading is broken on Fedora 27")
-    @skip_on("debian", reason="loading zram module is broken on Debian")
     def setUp(self):
         self.addCleanup(self._clean_up)
         self._loaded_zram_module = False
@@ -301,8 +299,6 @@ class KbdBcacheTestCase(unittest.TestCase):
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
 
-    @skip_on("fedora", "29", reason="running bcache tests causes system to run out of kernel memory on rawhide")
-    @skip_on("debian", reason="running bcache tests causes system to run out of kernel memory on Debian")
     def setUp(self):
         self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("lvm_test", 10 * 1024**3)

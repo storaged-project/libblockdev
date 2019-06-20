@@ -2,7 +2,7 @@ import unittest
 import os
 import overrides_hack
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, skip_on, get_version, TestTags, tag_test
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, get_version, TestTags, tag_test
 from gi.repository import BlockDev, GLib
 
 class MpathTest(unittest.TestCase):
@@ -49,7 +49,6 @@ class MpathTestCase(MpathTest):
         # device and no error is reported
         self.assertFalse(BlockDev.mpath_is_mpath_member("/dev/loop0"))
 
-@skip_on("debian", reason="dependency checks are skipped on Debian")
 class MpathUnloadTest(MpathTest):
     def setUp(self):
         # make sure the library is initialized with all plugins loaded for other

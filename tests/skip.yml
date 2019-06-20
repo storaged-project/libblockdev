@@ -1,0 +1,133 @@
+# List of tests to be skipped
+#
+# Example:
+# This will skip the 'test_mount_ntfs' test case on Debian 10
+# and on all 32bit machines
+#
+###################################
+# - test: fs_test.MountTest.test_mount_ntfs
+#   skip_on:
+#     - distro: "debian"
+#       version: "10"
+#       reason: "NTFS mounting is broken on Debian testing"
+#
+#     - arch: "i686"
+#       reason: "testing skipping from config file"
+###################################
+#
+# Notes:
+# - multiple combinations of reasons are supported.
+# - 'reason' and at least one of 'distro', 'version' and 'arch' is required
+# - 'test' (ID of the test case) can be specified as a regular expression
+#   for example 'kbd_test.KbdBcacheTestCase.*' to skip all kbd tests
+# - all "skips" can specified as a list, for example 'version: [10, 11]'
+
+---
+
+- test: crypto_test.CryptoTestEscrow.test_escrow_packet
+  skip_on:
+    - distro: ["centos", "enterprise_linux"]
+      version: "7"
+      reason: "volume_key asks for password in non-interactive mode on this release"
+
+    - distro: "debian"
+      version: "9"
+      reason: "volume_key asks for password in non-interactive mode on this release"
+
+- test: fs_test.MountTest.test_mount_ntfs
+  skip_on:
+    - distro: "debian"
+      version: "10"
+      reason: "NTFS mounting is broken on Debian testing"
+
+- test: kbd_test.KbdZRAM*
+  skip_on:
+    - distro: "debian"
+      version: ["9", "10"]
+      reason: "loading zram module is broken on Debian"
+
+- test: kbd_test.KbdBcache*
+  skip_on:
+    - distro: "debian"
+      reason: "running bcache tests causes system to run out of kernel memory on Debian"
+
+- test: kbd_test.KbdBcache*
+  skip_on:
+    - distro: fedora
+      version: "29"
+      reason: "running bcache tests causes system to run out of kernel memory on f29"
+
+- test: lvm_test.LvmTestVGcreateRemove.test_vgcreate_vgremove
+  skip_on:
+    - distro: "debian"
+      version: "9"
+      arch: "i686"
+      reason: "vgremove is broken on 32bit Debian stable"
+
+- test: lvm_test.LvmTestVGs.test_vgs
+  skip_on:
+    - distro: "debian"
+      version: "9"
+      arch: "i686"
+      reason: "vgremove is broken on 32bit Debian stable"
+
+- test: lvm_test.LvmTestLVcreateType.test_lvcreate_type
+  skip_on:
+    - distro: ["centos", "enterprise_linux"]
+      version: "7"
+      reason: "creating raid1 LV is broken on CentOS 7"
+
+- test: lvm_test.LvmPVVGLVcachePoolCreateRemoveTestCase.test_cache_pool_create_remove
+  skip_on:
+    - distro: ["centos", "enterprise_linux"]
+      version: "7"
+      reason: "creating raid1 LV is broken on CentOS 7"
+
+- test: mdraid_test.MDTestAddRemove.test_add_remove
+  skip_on:
+    - distro: "debian"
+      reason: "Removing spare disks from an array is broken on Debian"
+
+- test: mpath_test.MpathUnloadTest.*
+  skip_on:
+    - distro: "debian"
+      reason: "dependency checks are skipped on Debian"
+
+- test: nvdimm_test.NVDIMMNamespaceTestCase.test_enable_disable
+  skip_on:
+    - distro: fedora
+      version: "29"
+      reason: "Disabling is broken on rawhide and makes the 'fake' NVDIMM unusable."
+
+- test: NVDIMMNamespaceTestCase.test_namespace_reconfigure
+  skip_on:
+    - distro: fedora
+      version: "29"
+      reason: "Disabling is broken on rawhide and makes the 'fake' NVDIMM unusable."
+
+- test: nvdimm_test.NVDIMMNoDevTest.test_supported_sector_sizes
+  skip_on:
+    - arch: "i686"
+      reason: "Lists of 64bit integers are broken on i686 with GI"
+
+- test: part_test.PartGetDiskFreeRegions.test_get_disk_free_regions
+  skip_on:
+    - distro: ["centos", "enterprise_linux"]
+      version: "7"
+      reason: "libparted provides weird values here"
+
+- test: part_test.PartGetDiskFreeRegions.test_get_disk_free_regions
+  skip_on:
+    - distro: "debian"
+      reason: "libparted provides weird values here"
+
+- test: part_test.PartGetBestFreeRegion.test_get_best_free_region
+  skip_on:
+    - distro: ["centos", "enterprise_linux"]
+      version: "7"
+      reason: "libparted provides weird values here"
+
+- test: part_test.PartGetBestFreeRegion.test_get_best_free_region
+  skip_on:
+    - distro: "debian"
+      reason: "libparted provides weird values here"

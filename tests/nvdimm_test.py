@@ -6,7 +6,7 @@ import overrides_hack
 
 from distutils.version import LooseVersion
 
-from utils import run_command, read_file, skip_on, fake_path, TestTags, tag_test
+from utils import run_command, read_file, fake_path, TestTags, tag_test
 from gi.repository import BlockDev, GLib
 from distutils.spawn import find_executable
 
@@ -107,7 +107,6 @@ class NVDIMMNamespaceTestCase(NVDIMMTestCase):
 
         self._check_namespace_info(bd_namespaces[0])
 
-    @skip_on("fedora", "29", reason="Disabling is broken on rawhide and makes the 'fake' NVDIMM unusable.")
     @tag_test(TestTags.EXTRADEPS, TestTags.UNSAFE)
     def test_enable_disable(self):
         # non-existing/unknow namespace
@@ -135,7 +134,6 @@ class NVDIMMNamespaceTestCase(NVDIMMTestCase):
         info = BlockDev.nvdimm_namespace_info(self.sys_info["dev"])
         self.assertTrue(info.enabled)
 
-    @skip_on("fedora", "29", reason="Disabling is broken on rawhide and makes the 'fake' NVDIMM unusable.")
     @tag_test(TestTags.EXTRADEPS, TestTags.UNSAFE)
     def test_namespace_reconfigure(self):
         # active namespace -- reconfigure doesn't work without force
@@ -214,7 +212,6 @@ class NVDIMMUnloadTest(NVDIMMTestCase):
 
 class NVDIMMNoDevTest(NVDIMMTestCase):
 
-    @skip_on(skip_on_arch="i686", reason="Lists of 64bit integers are broken on i686 with GI")
     @tag_test(TestTags.NOSTORAGE)
     def test_supported_sector_sizes(self):
         """Verify that getting supported sector sizes works as expected"""

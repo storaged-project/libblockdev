@@ -9,7 +9,7 @@ import locale
 import re
 import tarfile
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, skip_on, get_avail_locales, requires_locales, run_command, read_file, TestTags, tag_test
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, get_avail_locales, requires_locales, run_command, read_file, TestTags, tag_test
 from gi.repository import BlockDev, GLib
 
 PASSWD = "myshinylittlepassword"
@@ -627,8 +627,6 @@ class CryptoTestEscrow(CryptoTestCase):
         self.addCleanup(os.unlink, self.public_cert)
 
     @tag_test(TestTags.SLOW)
-    @skip_on(("centos", "enterprise_linux"), "7", reason="volume_key asks for password in non-interactive mode on this release")
-    @skip_on("debian", skip_on_version="9", reason="volume_key asks for password in non-interactive mode on this release")
     def test_escrow_packet(self):
         """Verify that an escrow packet can be created for a device"""
 

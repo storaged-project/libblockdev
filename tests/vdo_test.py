@@ -6,7 +6,7 @@ import unittest
 import overrides_hack
 import six
 
-from utils import run_command, read_file, skip_on, fake_path, create_sparse_tempfile, create_lio_device, delete_lio_device, TestTags, tag_test
+from utils import run_command, read_file, fake_path, create_sparse_tempfile, create_lio_device, delete_lio_device, TestTags, tag_test
 from gi.repository import BlockDev, GLib
 from bytesize import bytesize
 from distutils.spawn import find_executable
