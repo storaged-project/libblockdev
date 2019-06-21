@@ -902,51 +902,85 @@ BDPartDiskSpec* bd_part_get_disk_spec (const gchar *disk, GError **error) {
     return ret;
 }
 
-static BDPartSpec** get_disk_parts (const gchar *disk, guint64 incl, guint64 excl, gboolean incl_normal, GError **error) {
-    PedDevice *dev = NULL;
-    PedDisk *ped_disk = NULL;
-    PedPartition *ped_part = NULL;
-    guint num_parts = 0;
+static BDPartSpec** get_disk_parts (const gchar *disk, gboolean parts, gboolean freespaces, GError **error) {
+    struct fdisk_context *cxt = NULL;
+    struct fdisk_table *table = NULL;
+    struct fdisk_partition *pa = NULL;
+    struct fdisk_iter *itr = NULL;
     BDPartSpec **ret = NULL;
+    BDPartSpec *spec = NULL;
     guint i = 0;
+    gint status = 0;
+    size_t num_parts = 0;
 
-    dev = ped_device_get (disk);
-    if (!dev) {
-        set_parted_error (error, BD_PART_ERROR_INVAL);
-        g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+    cxt = get_device_context (disk, error);
+    if (!cxt) {
+        /* error is already populated */
         return NULL;
     }
 
-    ped_disk = ped_disk_new (dev);
-    if (!ped_disk) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
-        ped_device_destroy (dev);
+    table = fdisk_new_table ();
+    if (!table) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to create a new table");
+        close_context (cxt);
         return NULL;
     }
 
-    /* count the partitions we care about */
-    ped_part = ped_disk_next_partition (ped_disk, NULL);
-    while (ped_part) {
-        if (((ped_part->type & incl) && !(ped_part->type & excl)) ||
-            ((ped_part->type == 0) && incl_normal))
-            num_parts++;
-        ped_part = ped_disk_next_partition (ped_disk, ped_part);
+    itr = fdisk_new_iter (FDISK_ITER_FORWARD);
+    if (!itr) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to create a new iterator");
+        close_context (cxt);
+        return NULL;
+    }
+
+    if (parts) {
+        status = fdisk_get_partitions (cxt, &table);
+        if (status != 0) {
+            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                         "Failed to get partitions: %s", strerror_l (-status, c_locale));
+            fdisk_free_iter (itr);
+            fdisk_unref_table (table);
+            close_context (cxt);
+            return NULL;
+        }
+    }
+
+    if (freespaces) {
+        status = fdisk_get_freespaces (cxt, &table);
+        if (status != 0) {
+            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                         "Failed to get free spaces: %s", strerror_l (-status, c_locale));
+            fdisk_free_iter (itr);
+            fdisk_unref_table (table);
+            close_context (cxt);
+            return NULL;
+        }
     }
 
     ret = g_new0 (BDPartSpec*, num_parts + 1);
     i = 0;
-    ped_part = ped_disk_next_partition (ped_disk, NULL);
-    while (ped_part) {
-        if (((ped_part->type & incl) && !(ped_part->type & excl)) ||
-            ((ped_part->type == 0) && incl_normal))
-            ret[i++] = get_part_spec (dev, ped_disk, ped_part, error);
-        ped_part = ped_disk_next_partition (ped_disk, ped_part);
+
+    while (fdisk_table_next_partition (table, itr, &pa) == 0) {
+        spec = get_part_spec_fdisk (cxt, pa, error);
+        if (!spec) {
+            for (BDPartSpec **part_list_p = ret; *part_list_p; part_list_p++)
+                bd_part_spec_free (*part_list_p);
+            g_free (ret);
+            fdisk_free_iter (itr);
+            fdisk_unref_table (table);
+            close_context (cxt);
+            return NULL;
+        }
+
+        ret[i++] = spec;
     }
     ret[i] = NULL;
 
-    ped_disk_destroy (ped_disk);
-    ped_device_destroy (dev);
+    fdisk_free_iter (itr);
+    fdisk_unref_table (table);
+    close_context (cxt);
 
     return ret;
 }
@@ -961,8 +995,7 @@ static BDPartSpec** get_disk_parts (const gchar *disk, guint64 incl, guint64 exc
  * Tech category: %BD_PART_TECH_MODE_QUERY_TABLE + the tech according to the partition table type
  */
 BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error) {
-    return get_disk_parts (disk, BD_PART_TYPE_NORMAL|BD_PART_TYPE_LOGICAL|BD_PART_TYPE_EXTENDED,
-                           BD_PART_TYPE_FREESPACE|BD_PART_TYPE_METADATA|BD_PART_TYPE_PROTECTED, TRUE, error);
+    return get_disk_parts (disk, TRUE, FALSE, error);
 }
 
 /**
@@ -975,7 +1008,7 @@ BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error) {
  * Tech category: %BD_PART_TECH_MODE_QUERY_TABLE + the tech according to the partition table type
  */
 BDPartSpec** bd_part_get_disk_free_regions (const gchar *disk, GError **error) {
-    return get_disk_parts (disk, BD_PART_TYPE_FREESPACE, 0, FALSE, error);
+    return get_disk_parts (disk, FALSE, TRUE, error);
 }
 
 /**
