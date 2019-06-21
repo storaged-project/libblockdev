@@ -4,6 +4,7 @@ from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, 
 import overrides_hack
 
 from gi.repository import BlockDev, GLib
+from bytesize.bytesize import Size, ROUND_UP, B
 
 
 class PartTestCase(unittest.TestCase):
@@ -661,6 +662,13 @@ class PartGetDiskPartsCase(PartTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.part_get_disk_parts (self.loop_dev)
 
+
+def _round_up_mib(size):
+    # convert size to nearest MiB (up)
+    rounded = Size(size).round_to_nearest(Size(1024**2), rounding=ROUND_UP)
+    return rounded.get_bytes()
+
+
 class PartGetDiskFreeRegions(PartTestCase):
     @skip_on(("centos", "enterprise_linux"), "7", reason="libparted provides weird values here")
     @skip_on("debian", reason="libparted provides weird values here")
@@ -681,51 +689,36 @@ class PartGetDiskFreeRegions(PartTestCase):
         self.assertEqual(ps.size, 10 * 1024**2)
 
         fis = BlockDev.part_get_disk_free_regions (self.loop_dev)
-        self.assertEqual(len(fis), 2)  # 0-512, (512+10MiB)-EOD
+        self.assertEqual(len(fis), 1)
         fi = fis[0]
-        self.assertEqual(fi.start, 0)
-        self.assertEqual(fi.size, 512)
-        fi = fis[1]
-        self.assertEqual(fi.start, ps.start + ps.size)
-        self.assertGreater(fi.size, 89 * 1024**2)
+        self.assertEqual(fi.start, _round_up_mib(ps.start + ps.size))
+        self.assertGreaterEqual(fi.size, 89 * 1024**2)
 
         ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps.start + ps.size + 10 * 1024**2,
                                         10 * 1024**2, BlockDev.PartAlign.NONE)
         fis = BlockDev.part_get_disk_free_regions (self.loop_dev)
-        self.assertEqual(len(fis), 3)  # 0-512, first part, gap, second part, free
+        self.assertEqual(len(fis), 2)  # first part, gap, second part, free
         fi = fis[0]
-        self.assertEqual(fi.start, 0)
-        self.assertEqual(fi.size, 512)
+        self.assertEqual(fi.start, _round_up_mib(512 + 10 * 1024**2))
+        self.assertGreaterEqual(fi.size, 9 * 1024**2)
         fi = fis[1]
-        self.assertEqual(fi.start, 512 + 10 * 1024**2)
-        self.assertGreater(fi.size, 9 * 1024**2)
-        fi = fis[2]
-        self.assertEqual(fi.start, 512 + 30 * 1024**2)
-        self.assertGreater(fi.size, 69 * 1024**2)
+        self.assertEqual(fi.start, _round_up_mib(512 + 30 * 1024**2))
+        self.assertGreaterEqual(fi.size, 69 * 1024**2)
 
         ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.EXTENDED, ps.start + ps.size + 1,
                                         50 * 1024**2, BlockDev.PartAlign.NONE)
         ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps.start + 1024**2,
                                         10 * 1024**2, BlockDev.PartAlign.NONE)
         fis = BlockDev.part_get_disk_free_regions (self.loop_dev)
-        self.assertEqual(len(fis), 6)  # 0-512[0], first part, gap[1], second part, gap[2], extended, gap[3], logical, free extended[4], free[5]
+        self.assertEqual(len(fis), 3)  # first part, gap[0], second part, extended, logical, free extended[1], free[2]
 
         fi = fis[0]
-        self.assertEqual(fi.start, 0)
-        self.assertEqual(fi.size, 512)
-        fi = fis[1]
-        self.assertEqual(fi.start, 512 + 10 * 1024**2)
+        self.assertEqual(fi.start, _round_up_mib(512 + 10 * 1024**2))
         self.assertGreater(fi.size, 9 * 1024**2)
+        fi = fis[1]
+        self.assertGreaterEqual(fi.start, _round_up_mib(ps.start + ps.size))
+        self.assertGreaterEqual(fi.size, 37 * 1024**2)
         fi = fis[2]
-        self.assertGreater(fi.start, 30 * 1024**2)
-        self.assertLessEqual(fi.size, 512)
-        fi = fis[3]
-        self.assertGreater(fi.start, 30 * 1024**2)
-        self.assertLessEqual(fi.size, 1024**2)
-        fi = fis[4]
-        self.assertGreaterEqual(fi.start, ps.start + ps.size)
-        self.assertGreaterEqual(fi.size, 38 * 1024**2)
-        fi = fis[5]
         self.assertGreaterEqual(fi.start, 80 * 1024**2)
         self.assertGreaterEqual(fi.size, 19 * 1024**2)
 
@@ -743,13 +736,10 @@ class PartGetDiskFreeRegions(PartTestCase):
         self.assertEqual(ps.size, 10 * 1024**2)
 
         fis = BlockDev.part_get_disk_free_regions (self.loop_dev)
-        self.assertEqual(len(fis), 2)  # 0-512, (512+10MiB)-EOD
+        self.assertEqual(len(fis), 1)
         fi = fis[0]
-        self.assertEqual(fi.start, 0)
-        self.assertEqual(fi.size, 512)
-        fi = fis[1]
-        self.assertEqual(fi.start, ps.start + ps.size)
-        self.assertGreater(fi.size, 89 * 1024**2)
+        self.assertEqual(fi.start, _round_up_mib(ps.start + ps.size))
+        self.assertGreaterEqual(fi.size, 89 * 1024**2)
 
 class PartGetBestFreeRegion(PartTestCase):
     @skip_on(("centos", "enterprise_linux"), "7", reason="libparted provides weird values here")
