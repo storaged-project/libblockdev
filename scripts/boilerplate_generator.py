@@ -191,16 +191,16 @@ def get_includes_str(includes):
     return ret
 
 def get_funcs_info(fn_infos, module_name):
-    ret = "static const gchar* const {0}_functions[] = {{\n".format(module_name)
+    ret = "const gchar* const {0}_functions[] = {{\n".format(module_name)
     for info in fn_infos:
         ret += '    "{0.name}",\n'.format(info)
     ret += "    NULL};\n\n"
 
-    ret += ("const gchar* const* get_{0}_functions (void) {{\n".format(module_name) +
+    ret += ("static const gchar* const* get_{0}_functions (void) {{\n".format(module_name) +
             "    return {0}_functions;\n".format(module_name) +
             "}\n\n")
 
-    ret += "static const guint8 {0}_num_functions = {1};\n\n".format(module_name, len(fn_infos))
+    ret += "const guint8 {0}_num_functions = {1};\n\n".format(module_name, len(fn_infos))
     ret += ("guint8 get_{0}_num_functions (void) {{\n".format(module_name) +
             "    return {0}_num_functions;\n".format(module_name) +
             "}\n\n")
@@ -210,7 +210,7 @@ def get_funcs_info(fn_infos, module_name):
 def get_loading_func(fn_infos, module_name):
     # TODO: only error on functions provided by the plugin that fail to load
     # TODO: implement the 'gchar **errors' argument
-    ret =  'gpointer load_{0}_from_plugin(const gchar *so_name) {{\n'.format(module_name)
+    ret =  'static gpointer load_{0}_from_plugin(const gchar *so_name) {{\n'.format(module_name)
     ret += '    void *handle = NULL;\n'
     ret += '    char *error = NULL;\n'
     ret += '    gboolean (*check_fn) (void) = NULL;\n'
@@ -255,7 +255,7 @@ def get_loading_func(fn_infos, module_name):
     return ret
 
 def get_unloading_func(fn_infos, module_name):
-    ret =  'gboolean unload_{0} (gpointer handle) {{\n'.format(module_name)
+    ret =  'static gboolean unload_{0} (gpointer handle) {{\n'.format(module_name)
     ret += '    char *error = NULL;\n'
     ret += '    gboolean (*close_fn) (void) = NULL;\n\n'
 
