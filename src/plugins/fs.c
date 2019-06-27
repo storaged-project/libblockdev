@@ -139,6 +139,7 @@ gboolean bd_fs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error) {
             return bd_fs_vfat_is_tech_avail (tech, mode, error);
         case BD_FS_TECH_NTFS:
             return bd_fs_ntfs_is_tech_avail (tech, mode, error);
+        /* coverity[dead_error_begin] */
         default:
             /* this should never be reached (see the comparison with LAST_FS
                above), but better safe than sorry */
