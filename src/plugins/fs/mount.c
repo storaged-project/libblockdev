@@ -785,3 +785,60 @@ gchar* bd_fs_get_mountpoint (const gchar *device, GError **error) {
     mnt_free_cache (cache);
     return mountpoint;
 }
+
+/**
+ * bd_fs_is_mountpoint:
+ * @path: path (folder) to check
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether @path is a mountpoint or not
+ *
+ * Tech category: %BD_FS_TECH_MOUNT (no mode, ignored)
+ */
+gboolean bd_fs_is_mountpoint (const gchar *path, GError **error) {
+    struct libmnt_table *table = NULL;
+    struct libmnt_fs *fs = NULL;
+    struct libmnt_cache *cache = NULL;
+    const gchar *target = NULL;
+    gint ret = 0;
+
+    table = mnt_new_table ();
+    cache = mnt_new_cache ();
+
+    ret = mnt_table_set_cache (table, cache);
+    if (ret != 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to set cache for mount info table.");
+        mnt_free_table (table);
+        return FALSE;
+    }
+
+    ret = mnt_table_parse_mtab (table, NULL);
+    if (ret != 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to parse mount info.");
+        mnt_free_table (table);
+        mnt_free_cache (cache);
+        return FALSE;
+    }
+
+    fs = mnt_table_find_target (table, path, MNT_ITER_BACKWARD);
+    if (!fs) {
+        mnt_free_table (table);
+        mnt_free_cache (cache);
+        return FALSE;
+    }
+
+    target = mnt_fs_get_target (fs);
+    if (!target) {
+        mnt_free_fs (fs);
+        mnt_free_table (table);
+        mnt_free_cache (cache);
+        return FALSE;
+    }
+
+    mnt_free_fs (fs);
+    mnt_free_table (table);
+    mnt_free_cache (cache);
+    return TRUE;
+}

@@ -410,6 +410,32 @@ gboolean bd_fs_clean (const gchar *device, GError **error);
 gchar* bd_fs_get_fstype (const gchar *device,  GError **error);
 
 /**
+ * bd_fs_freeze:
+ * @mountpoint: mountpoint of the device (filesystem) to freeze
+ * @error: (out): place to store error (if any)
+ *
+ * Freezes filesystem mounted on @mountpoint. The filesystem must
+ * support freezing.
+ *
+ * Returns: whether @mountpoint was successfully freezed or not
+ *
+ */
+gboolean bd_fs_freeze (const gchar *mountpoint, GError **error);
+
+/**
+ * bd_fs_unfreeze:
+ * @mountpoint: mountpoint of the device (filesystem) to un-freeze
+ * @error: (out): place to store error (if any)
+ *
+ * Un-freezes filesystem mounted on @mountpoint. The filesystem must
+ * support freezing.
+ *
+ * Returns: whether @mountpoint was successfully unfreezed or not
+ *
+ */
+gboolean bd_fs_unfreeze (const gchar *mountpoint, GError **error);
+
+/**
  * bd_fs_unmount:
  * @spec: mount point or device to unmount
  * @lazy: enable/disable lazy unmount
@@ -463,6 +489,17 @@ gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar 
  * Tech category: %BD_FS_TECH_MOUNT (no mode, ignored)
  */
 gchar* bd_fs_get_mountpoint (const gchar *device, GError **error);
+
+/**
+ * bd_fs_is_mountpoint:
+ * @path: path (folder) to check
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether @path is a mountpoint or not
+ *
+ * Tech category: %BD_FS_TECH_MOUNT (no mode, ignored)
+ */
+gboolean bd_fs_is_mountpoint (const gchar *path, GError **error);
 
 /**
  * bd_fs_resize:

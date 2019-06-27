@@ -7,6 +7,9 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error);
 gboolean bd_fs_clean (const gchar *device, GError **error);
 gchar* bd_fs_get_fstype (const gchar *device,  GError **error);
 
+gboolean bd_fs_freeze (const gchar *mountpoint, GError **error);
+gboolean bd_fs_unfreeze (const gchar *mountpoint, GError **error);
+
 gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error);
 gboolean bd_fs_repair (const gchar *device, GError **error);
 gboolean bd_fs_check (const gchar *device, GError **error);

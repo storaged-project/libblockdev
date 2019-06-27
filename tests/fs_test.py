@@ -985,12 +985,18 @@ class MountTest(FSTestCase):
         self.assertTrue(succ)
         self.assertTrue(os.path.ismount(tmp))
 
+        succ = BlockDev.fs_is_mountpoint(tmp)
+        self.assertTrue(tmp)
+
         mnt = BlockDev.fs_get_mountpoint(self.loop_dev)
         self.assertEqual(mnt, tmp)
 
         succ = BlockDev.fs_unmount(self.loop_dev, False, False, None)
         self.assertTrue(succ)
         self.assertFalse(os.path.ismount(tmp))
+
+        succ = BlockDev.fs_is_mountpoint(tmp)
+        self.assertFalse(succ)
 
         mnt = BlockDev.fs_get_mountpoint(self.loop_dev)
         self.assertIsNone(mnt)
@@ -1434,3 +1440,63 @@ class GenericResize(FSTestCase):
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 90 * 1024**2)
+
+
+class FSFreezeTest(FSTestCase):
+
+    def _clean_up(self):
+        try:
+            BlockDev.fs_unfreeze(self.loop_dev)
+        except:
+            pass
+
+        BlockDev.fs_wipe(self.loop_dev, True)
+
+        super(FSFreezeTest, self)._clean_up()
+
+    def test_freeze_xfs(self):
+        """ Test basic freezing and un-freezing with XFS """
+
+        succ = BlockDev.fs_xfs_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        # try to freeze with non-existing mountpoint
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_freeze("/not/a/mountpoint")
+
+        tmp = tempfile.mkdtemp(prefix="libblockdev.", suffix="freeze_test")
+        self.addCleanup(os.rmdir, tmp)
+
+        self.addCleanup(umount, self.loop_dev)
+        succ = BlockDev.fs_mount(self.loop_dev, tmp, "xfs", None)
+        self.assertTrue(succ)
+        self.assertTrue(os.path.ismount(tmp))
+
+        succ = BlockDev.fs_freeze(tmp)
+        self.assertTrue(succ)
+
+        # try to freeze again (should fail)
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_freeze(tmp)
+
+        # and unfreeze
+        succ = BlockDev.fs_unfreeze(tmp)
+        self.assertTrue(succ)
+
+    def test_freeze_vfat(self):
+        """ Test basic freezing and un-freezing with FAT """
+
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        tmp = tempfile.mkdtemp(prefix="libblockdev.", suffix="freeze_test")
+        self.addCleanup(os.rmdir, tmp)
+
+        self.addCleanup(umount, self.loop_dev)
+        succ = BlockDev.fs_mount(self.loop_dev, tmp, "vfat", None)
+        self.assertTrue(succ)
+        self.assertTrue(os.path.ismount(tmp))
+
+        # FAT doesn't support freezing
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_freeze(tmp)

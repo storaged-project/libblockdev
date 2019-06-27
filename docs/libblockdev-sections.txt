@@ -504,9 +504,12 @@ bd_fs_error_quark
 bd_fs_wipe
 bd_fs_clean
 bd_fs_get_fstype
+bd_fs_freeze
+bd_fs_unfreeze
 bd_fs_mount
 bd_fs_unmount
 bd_fs_get_mountpoint
+bd_fs_is_mountpoint
 bd_fs_resize
 bd_fs_repair
 bd_fs_check
