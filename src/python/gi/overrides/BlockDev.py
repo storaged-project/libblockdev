@@ -428,6 +428,27 @@ def fs_vfat_repair(device, extra=None, **kwargs):
     return _fs_vfat_repair(device, extra)
 __all__.append("fs_vfat_repair")
 
+_fs_f2fs_mkfs = BlockDev.fs_f2fs_mkfs
+@override(BlockDev.fs_f2fs_mkfs)
+def fs_f2fs_mkfs(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_f2fs_mkfs(device, extra)
+__all__.append("fs_f2fs_mkfs")
+
+_fs_f2fs_check = BlockDev.fs_f2fs_check
+@override(BlockDev.fs_f2fs_check)
+def fs_f2fs_check(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_f2fs_check(device, extra)
+__all__.append("fs_f2fs_check")
+
+_fs_f2fs_repair = BlockDev.fs_f2fs_repair
+@override(BlockDev.fs_f2fs_repair)
+def fs_f2fs_repair(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_f2fs_repair(device, extra)
+__all__.append("fs_f2fs_repair")
+
 
 try:
     _kbd_bcache_create = BlockDev.kbd_bcache_create

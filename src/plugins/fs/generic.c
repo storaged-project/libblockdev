@@ -36,6 +36,7 @@
 #include "xfs.h"
 #include "vfat.h"
 #include "ntfs.h"
+#include "f2fs.h"
 
 typedef enum {
     BD_FS_RESIZE,
@@ -69,6 +70,7 @@ const BDFSInfo fs_info[] = {
     {"ext4", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs"},
     {"vfat", "fsck.vfat", "fsck.vfat", "", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "fatlabel"},
     {"ntfs", "ntfsfix", "ntfsfix", "ntfsresize", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "ntfslabel"},
+    {"f2fs", "fsck.f2fs", "fsck.f2fs", "resize.f2fs", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, NULL},
     {NULL, NULL, NULL, NULL, 0, NULL}
 };
 
@@ -424,6 +426,26 @@ static gboolean xfs_resize_device (const gchar *device, guint64 new_size, const 
     return success;
 }
 
+static gboolean f2fs_resize_device (const gchar *device, guint64 new_size, GError **error) {
+    BDFSF2FSInfo *info = NULL;
+    gboolean safe = FALSE;
+
+    info = bd_fs_f2fs_get_info (device, error);
+    if (!info) {
+        /* error is already populated */
+        return FALSE;
+    }
+
+    /* round to nearest sector_size multiple */
+    new_size = (new_size + info->sector_size - 1) / info->sector_size;
+
+    /* safe must be specified for shrining */
+    safe = new_size < info->sector_count && new_size != 0;
+    bd_fs_f2fs_info_free (info);
+
+    return bd_fs_f2fs_resize (device, new_size, safe, NULL, error);
+}
+
 
 static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 new_size, const gchar *label, GError **error) {
     const gchar* op_name = NULL;
@@ -486,7 +508,18 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
             case BD_FS_LABEL:
                 return bd_fs_ntfs_set_label (device, label, error);
         }
-    }
+    } else if (g_strcmp0 (fstype, "f2fs") == 0) {
+        switch (op) {
+            case BD_FS_RESIZE:
+                return f2fs_resize_device (device, new_size, error);
+            case BD_FS_REPAIR:
+                return bd_fs_f2fs_repair (device, NULL, error);
+            case BD_FS_CHECK:
+                return bd_fs_f2fs_check (device, NULL, error);
+            case BD_FS_LABEL:
+                break;
+        }
+      }
     switch (op) {
         case BD_FS_RESIZE:
             op_name = "Resizing";
