@@ -251,11 +251,7 @@ gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError *
  */
 BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
     const gchar *args[4] = {"fsck.vfat", "-nv", device, NULL};
-    blkid_probe probe = NULL;
-    gint fd = 0;
-    gint status = 0;
     gboolean success = FALSE;
-    const gchar *value = NULL;
     BDFSVfatInfo *ret = NULL;
     gchar *output = NULL;
     gchar **lines = NULL;
@@ -270,75 +266,14 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
     if (!check_deps (&avail_deps, DEPS_FSCKVFAT_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return NULL;
 
-    probe = blkid_new_probe ();
-    if (!probe) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to create a probe for the device '%s'", device);
-        return NULL;
-    }
-
-    fd = open (device, O_RDWR|O_CLOEXEC);
-    if (fd == -1) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to create a probe for the device '%s'", device);
-        blkid_free_probe (probe);
-        return NULL;
-    }
-
-    status = blkid_probe_set_device (probe, fd, 0, 0);
-    if (status != 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to create a probe for the device '%s'", device);
-        blkid_free_probe (probe);
-        synced_close (fd);
-        return NULL;
-    }
-
-    blkid_probe_enable_partitions(probe, 1);
-
-    status = blkid_do_probe (probe);
-    if (status != 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to probe the device '%s'", device);
-        blkid_free_probe (probe);
-        synced_close (fd);
-        return NULL;
-    }
-
     ret = g_new0 (BDFSVfatInfo, 1);
 
-    status = blkid_probe_has_value (probe, "LABEL");
-
-    if (status == 0)
-        ret->label = g_strdup ("");
-    else {
-        status = blkid_probe_lookup_value (probe, "LABEL", &value, NULL);
-        if (status != 0) {
-            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                         "Failed to get label for the device '%s'", device);
-            blkid_free_probe (probe);
-            synced_close (fd);
-            bd_fs_vfat_info_free (ret);
-            return NULL;
-        }
-
-        ret->label = g_strdup (value);
-    }
-
-    status = blkid_probe_lookup_value (probe, "UUID", &value, NULL);
-    if (status != 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to get label for the device '%s'", device);
-        blkid_free_probe (probe);
-        synced_close (fd);
+    success = get_uuid_label (device, &(ret->uuid), &(ret->label), error);
+    if (!success) {
+        /* error is already populated */
         bd_fs_vfat_info_free (ret);
         return NULL;
     }
-
-    ret->uuid = g_strdup (value);
-
-    blkid_free_probe (probe);
-    synced_close (fd);
 
     success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
     if (!success) {

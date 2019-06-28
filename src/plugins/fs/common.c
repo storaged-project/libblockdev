@@ -227,3 +227,92 @@ wipe_fs (const gchar *device, const gchar *fs_type, gboolean wipe_all, GError **
 
     return TRUE;
 }
+
+
+gboolean __attribute__ ((visibility ("hidden")))
+get_uuid_label (const gchar *device, gchar **uuid, gchar **label, GError **error) {
+    blkid_probe probe = NULL;
+    gint fd = 0;
+    gint status = 0;
+    const gchar *value = NULL;
+
+    probe = blkid_new_probe ();
+    if (!probe) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to create a probe for the device '%s'", device);
+        return FALSE;
+    }
+
+    fd = open (device, O_RDWR|O_CLOEXEC);
+    if (fd == -1) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to create a probe for the device '%s'", device);
+        blkid_free_probe (probe);
+        return FALSE;
+    }
+
+    status = blkid_probe_set_device (probe, fd, 0, 0);
+    if (status != 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to create a probe for the device '%s'", device);
+        blkid_free_probe (probe);
+        synced_close (fd);
+        return FALSE;
+    }
+
+    blkid_probe_enable_partitions (probe, 1);
+
+    status = blkid_do_probe (probe);
+    if (status != 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to probe the device '%s'", device);
+        blkid_free_probe (probe);
+        synced_close (fd);
+        return FALSE;
+    }
+
+    status = blkid_probe_has_value (probe, "LABEL");
+
+    if (status == 0)
+        *label = g_strdup ("");
+    else {
+        status = blkid_probe_lookup_value (probe, "LABEL", &value, NULL);
+        if (status != 0) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                         "Failed to get label for the device '%s'", device);
+            blkid_free_probe (probe);
+            synced_close (fd);
+            return FALSE;
+        }
+
+        if (value)
+            *label = g_strdup (value);
+        else
+            *label = g_strdup ("");
+    }
+
+    status = blkid_probe_has_value (probe, "UUID");
+    if (status == 0)
+        *uuid = g_strdup ("");
+    else {
+        status = blkid_probe_lookup_value (probe, "UUID", &value, NULL);
+        if (status != 0) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                        "Failed to get UUID for the device '%s'", device);
+            blkid_free_probe (probe);
+            synced_close (fd);
+            g_free (label);
+            return FALSE;
+        }
+
+        if (value)
+            *uuid = g_strdup (value);
+        else
+            *uuid = g_strdup ("");
+    }
+
+    blkid_free_probe (probe);
+    synced_close (fd);
+
+    return TRUE;
+}
