@@ -190,23 +190,6 @@ def get_includes_str(includes):
 
     return ret
 
-def get_funcs_info(fn_infos, module_name):
-    ret = "const gchar* const {0}_functions[] = {{\n".format(module_name)
-    for info in fn_infos:
-        ret += '    "{0.name}",\n'.format(info)
-    ret += "    NULL};\n\n"
-
-    ret += ("static const gchar* const* get_{0}_functions (void) {{\n".format(module_name) +
-            "    return {0}_functions;\n".format(module_name) +
-            "}\n\n")
-
-    ret += "const guint8 {0}_num_functions = {1};\n\n".format(module_name, len(fn_infos))
-    ret += ("guint8 get_{0}_num_functions (void) {{\n".format(module_name) +
-            "    return {0}_num_functions;\n".format(module_name) +
-            "}\n\n")
-
-    return ret
-
 def get_loading_func(fn_infos, module_name):
     # TODO: only error on functions provided by the plugin that fail to load
     # TODO: implement the 'gchar **errors' argument
@@ -309,7 +292,6 @@ def generate_source_header(api_file, out_dir, skip_patterns=None):
     with open(os.path.join(out_dir, mod_name + ".c"), "w") as src_f:
         for info in nonapi_fn_infos:
             src_f.write(get_fn_code(info))
-        src_f.write(get_funcs_info(api_fn_infos, mod_name))
         for info in api_fn_infos:
             src_f.write(get_func_boilerplate(info))
         src_f.write(get_loading_func(api_fn_infos, mod_name))
