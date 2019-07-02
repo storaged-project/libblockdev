@@ -173,6 +173,15 @@ static const PartFlag part_flags[18] = {
 #define DEFAULT_PART_ID "0x83"
 #define DEFAULT_PART_GUID "0FC63DAF-8483-4772-8E79-3D69D8477DE4"
 
+/* helper "flags" for calculating parted flags for hidden and lba partitions */
+#define _PART_FAT12       0x01
+#define _PART_FAT16       0x06
+#define _PART_FAT16_LBA   0x0e
+#define _PART_FAT32       0x0b
+#define _PART_FAT32_LBA   0x0c
+#define _PART_NTFS        0x07
+#define _PART_FLAG_HIDDEN 0x10
+
 /**
  * get_part_num: (skip)
  *
@@ -582,6 +591,139 @@ static BDPartSpec* get_part_spec (PedDevice *dev, PedDisk *disk, PedPartition *p
     return ret;
 }
 
+static BDPartFlag get_flag_from_guid (const gchar *guid) {
+    guint last_flag = 0;
+
+    if (!guid)
+        return BD_PART_FLAG_BASIC_LAST;
+
+    last_flag = log2i (BD_PART_FLAG_BASIC_LAST);
+
+    for (guint i = 1; i < last_flag; i++) {
+      if (!part_flags[i - 1].guid)
+          continue;
+
+      if (g_ascii_strcasecmp (part_flags[i - 1].guid, guid) == 0)
+          return 1 << i;
+    }
+
+    return BD_PART_FLAG_BASIC_LAST;
+}
+
+static BDPartFlag get_flag_from_id (guint id) {
+    gchar *id_str = NULL;
+    guint last_flag = 0;
+
+    id_str = g_strdup_printf ("0x%.2x", id);
+    last_flag = log2i (BD_PART_FLAG_BASIC_LAST);
+
+    for (guint i = 1; i < last_flag; i++) {
+        if (!part_flags[i - 1].id)
+            continue;
+
+        if (g_strcmp0 (part_flags[i - 1].id, id_str) == 0) {
+            g_free (id_str);
+            return 1 << i;
+        }
+    }
+
+    g_free (id_str);
+    return BD_PART_FLAG_BASIC_LAST;
+}
+
+static BDPartSpec* get_part_spec_fdisk (struct fdisk_context *cxt, struct fdisk_partition *pa, GError **error) {
+    struct fdisk_label *lb = NULL;
+    struct fdisk_parttype *ptype = NULL;
+    guint part_id = 0;
+    BDPartSpec *ret = NULL;
+    const gchar *devname = NULL;
+    const gchar *partname = NULL;
+    BDPartFlag bd_flag;
+
+    ret = g_new0 (BDPartSpec, 1);
+
+    devname = fdisk_get_devname (cxt);
+
+    if (fdisk_partition_has_partno (pa)) {
+        if (isdigit (devname[strlen(devname) - 1]))
+            ret->path = g_strdup_printf ("%sp%zu", devname, fdisk_partition_get_partno (pa) + 1);
+        else
+            ret->path = g_strdup_printf ("%s%zu", devname, fdisk_partition_get_partno (pa) + 1);
+    }
+
+    partname = fdisk_partition_get_name (pa);
+    if (partname)
+        ret->name = g_strdup (partname);
+
+    if (fdisk_partition_is_container (pa))
+        ret->type = BD_PART_TYPE_EXTENDED;
+    else if (fdisk_partition_is_nested (pa))
+        ret->type = BD_PART_TYPE_LOGICAL;
+    else
+        ret->type = BD_PART_TYPE_NORMAL;
+
+    if (fdisk_partition_is_freespace (pa))
+        ret->type |= BD_PART_TYPE_FREESPACE;
+
+    if (fdisk_partition_has_start (pa))
+        ret->start = (guint64) fdisk_partition_get_start (pa) * fdisk_get_sector_size (cxt);
+
+    if (fdisk_partition_has_size (pa))
+        ret->size = (guint64) fdisk_partition_get_size (pa) * fdisk_get_sector_size (cxt);
+
+    lb = fdisk_get_label (cxt, NULL);
+    if (!lb) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to read partition table.");
+        bd_part_spec_free (ret);
+        return NULL;
+    }
+
+    if (g_strcmp0 (fdisk_label_get_name (lb), "gpt") == 0) {
+        if (ret->type == BD_PART_TYPE_NORMAL) {
+          /* only 'normal' partitions have GUIDs */
+          ret->type_guid = get_part_type_guid_and_gpt_flags (devname, fdisk_partition_get_partno (pa) + 1, &(ret->flags), error);
+          if (!ret->type_guid && *error) {
+              bd_part_spec_free (ret);
+              return NULL;
+          }
+
+          bd_flag = get_flag_from_guid (ret->type_guid);
+          if (bd_flag != BD_PART_FLAG_BASIC_LAST)
+              ret->flags |= bd_flag;
+        }
+    } else if (g_strcmp0 (fdisk_label_get_name (lb), "dos") == 0) {
+        if (fdisk_partition_is_bootable (pa) == 1)
+            ret->flags |= BD_PART_FLAG_BOOT;
+
+        /* freespace and extended have no type/ids */
+        if (ret->type == BD_PART_TYPE_NORMAL || ret->type == BD_PART_TYPE_LOGICAL) {
+            ptype = fdisk_partition_get_type (pa);
+            if (!ptype) {
+                g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                             "Failed to get partition type.");
+                bd_part_spec_free (ret);
+                return NULL;
+            }
+
+            part_id = fdisk_parttype_get_code (ptype);
+            if (part_id & _PART_FLAG_HIDDEN)
+                ret->flags = ret->flags | BD_PART_FLAG_HIDDEN;
+            if (part_id == _PART_FAT16_LBA || part_id == (_PART_FAT16_LBA | _PART_FLAG_HIDDEN) ||
+                part_id == _PART_FAT32_LBA || part_id == (_PART_FAT32_LBA | _PART_FLAG_HIDDEN))
+                ret->flags = ret->flags | BD_PART_FLAG_LBA;
+
+            bd_flag = get_flag_from_id (part_id);
+            if (bd_flag != BD_PART_FLAG_BASIC_LAST)
+                ret->flags = ret->flags | bd_flag;
+
+            fdisk_unref_parttype (ptype);
+        }
+    }
+
+    return ret;
+}
+
 /**
  * bd_part_get_part_spec:
  * @disk: disk to remove the partition from
@@ -593,48 +735,37 @@ static BDPartSpec* get_part_spec (PedDevice *dev, PedDisk *disk, PedPartition *p
  * Tech category: %BD_PART_TECH_MODE_QUERY_PART + the tech according to the partition table type
  */
 BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError **error) {
-    PedDevice *dev = NULL;
-    PedDisk *ped_disk = NULL;
-    PedPartition *ped_part = NULL;
+    struct fdisk_context *cxt = NULL;
+    struct fdisk_partition *pa = NULL;
+    gint status = 0;
     gint part_num = 0;
     BDPartSpec *ret = NULL;
 
-    dev = ped_device_get (disk);
-    if (!dev) {
-        set_parted_error (error, BD_PART_ERROR_INVAL);
-        g_prefix_error (error, "Device '%s' invalid or not existing", disk);
-        return NULL;
-    }
-
-    ped_disk = ped_disk_new (dev);
-    if (!ped_disk) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
-        ped_device_destroy (dev);
-        return NULL;
-    }
-
     part_num = get_part_num (part, error);
-    if (part_num == -1) {
-        ped_disk_destroy (ped_disk);
-        ped_device_destroy (dev);
+    if (part_num == -1)
+        return NULL;
+
+    /* first partition in fdisk is 0 */
+    part_num--;
+
+    cxt = get_device_context (disk, error);
+    if (!cxt) {
+        /* error is already populated */
         return NULL;
     }
 
-    ped_part = ped_disk_get_partition (ped_disk, part_num);
-    if (!ped_part) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
-        ped_disk_destroy (ped_disk);
-        ped_device_destroy (dev);
+    status = fdisk_get_partition (cxt, part_num, &pa);
+    if (status != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to get partition %d on device '%s'", part_num, disk);
+        close_context (cxt);
         return NULL;
     }
 
-    ret = get_part_spec (dev, ped_disk, ped_part, error);
+    ret = get_part_spec_fdisk (cxt, pa, error);
 
-    /* the partition gets destroyed together with the disk */
-    ped_disk_destroy (ped_disk);
-    ped_device_destroy (dev);
+    fdisk_unref_partition (pa);
+    close_context (cxt);
 
     return ret;
 }
@@ -1567,14 +1698,6 @@ static gboolean set_part_type (struct fdisk_context *cxt, gint part_num, const g
     return TRUE;
 }
 
-#define _PART_FAT12       0x01
-#define _PART_FAT16       0x06
-#define _PART_FAT16_LBA   0x0e
-#define _PART_FAT32       0x0b
-#define _PART_FAT32_LBA   0x0c
-#define _PART_NTFS        0x07
-#define _PART_FLAG_HIDDEN 0x10
-
 static gint synced_close (gint fd) {
     gint ret = 0;
     ret = fsync (fd);
@@ -2339,11 +2462,8 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
     g_free (msg);
 
     part_num = get_part_num (part, error);
-    if (part_num == -1) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'. Cannot extract partition number", part);
+    if (part_num == -1)
         return FALSE;
-    }
 
     /* /dev/sda1 is the partition number 0 in libfdisk */
     part_num--;
@@ -2395,8 +2515,6 @@ gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar 
 
     part_num = get_part_num (part, error);
     if (part_num == -1) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'. Cannot extract partition number", part);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
@@ -2457,8 +2575,6 @@ gchar* bd_part_get_part_id (const gchar *disk, const gchar *part, GError **error
 
     part_num = get_part_num (part, error);
     if (part_num == -1) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'. Cannot extract partition number", part);
         bd_utils_report_finished (progress_id, (*error)->message);
         return NULL;
     }
