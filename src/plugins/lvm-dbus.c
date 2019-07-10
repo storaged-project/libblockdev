@@ -31,7 +31,7 @@
 #define INT_FLOAT_EPS 1e-5
 #define SECTOR_SIZE 512
 
-GMutex global_config_lock;
+static GMutex global_config_lock;
 static gchar *global_config_str = NULL;
 
 #define LVM_BUS_NAME "com.redhat.lvmdbus1"

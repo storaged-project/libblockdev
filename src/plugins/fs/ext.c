@@ -148,7 +148,8 @@ static gboolean extract_e2fsck_progress (const gchar *line, guint8 *completion) 
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
  */
-gboolean bd_fs_ext_is_tech_avail (BDFSTech tech UNUSED, guint64 mode, GError **error) {
+gboolean __attribute__ ((visibility ("hidden")))
+bd_fs_ext_is_tech_avail (BDFSTech tech UNUSED, guint64 mode, GError **error) {
     guint32 required = 0;
     guint i = 0;
     for (i = 0; i <= BD_FS_MODE_LAST; i++)
