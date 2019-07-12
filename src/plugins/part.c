@@ -33,7 +33,6 @@
 #include <libfdisk.h>
 #include <locale.h>
 #include <blkid.h>
-#include <syslog.h>
 
 #include "part.h"
 
@@ -182,6 +181,8 @@ static const PartFlag part_flags[18] = {
 #define _PART_NTFS        0x07
 #define _PART_FLAG_HIDDEN 0x10
 
+#define UNUSED __attribute__((unused))
+
 /**
  * get_part_num: (skip)
  *
@@ -215,6 +216,33 @@ static gint get_part_num (const gchar *part, GError **error) {
     return part_num;
 }
 
+static int fdisk_ask_callback (struct fdisk_context *cxt UNUSED, struct fdisk_ask *ask, void *data UNUSED) {
+    gint type = 0;
+    const gchar *fdisk_msg = NULL;
+    gchar *message = NULL;
+
+    type = fdisk_ask_get_type (ask);
+    fdisk_msg = fdisk_ask_print_get_mesg (ask);
+
+    switch (type) {
+        case FDISK_ASKTYPE_INFO:
+            message = g_strdup_printf ("[fdisk] %s", fdisk_msg);
+            bd_utils_log (BD_UTILS_LOG_INFO, message);
+            g_free (message);
+            break;
+        case FDISK_ASKTYPE_WARNX:
+        case FDISK_ASKTYPE_WARN:
+            message = g_strdup_printf ("[fdisk] %s", fdisk_msg);
+            bd_utils_log (BD_UTILS_LOG_WARNING, message);
+            g_free (message);
+            break;
+        default:
+            break;
+    }
+
+    return 0;
+}
+
 static struct fdisk_context* get_device_context (const gchar *disk, GError **error) {
     struct fdisk_context *cxt = fdisk_new_context ();
     gint ret = 0;
@@ -234,6 +262,7 @@ static struct fdisk_context* get_device_context (const gchar *disk, GError **err
     }
 
     fdisk_disable_dialogs(cxt, 1);
+    fdisk_set_ask (cxt, fdisk_ask_callback, NULL);
     return cxt;
 }
 
@@ -1919,7 +1948,7 @@ static gchar* get_lba_hidden_id (const gchar *part, gboolean hidden, gboolean lb
          */
         message = g_strdup_printf ("Ignoring requested flag: setting hidden/lba flag is supported only "\
                                    "on partitions with FAT, NTFS or HPFS filesystem.");
-        bd_utils_log (LOG_INFO, message);
+        bd_utils_log (BD_UTILS_LOG_INFO, message);
         g_free (message);
         return NULL;
     }
