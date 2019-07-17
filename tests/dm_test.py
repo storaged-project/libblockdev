@@ -2,7 +2,7 @@ import unittest
 import os
 import overrides_hack
 
-from utils import run, create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path
+from utils import run, create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test
 from gi.repository import BlockDev, GLib
 
 
@@ -65,6 +65,7 @@ class DevMapperGetSubsystemFromName(DevMapperTestCase):
         self.assertEqual(subsystem, "CRYPT")
 
 class DevMapperCreateRemoveLinear(DevMapperTestCase):
+    @tag_test(TestTags.CORE)
     def test_create_remove_linear(self):
         """Verify that it is possible to create new linear mapping and remove it"""
 
@@ -120,6 +121,7 @@ class DMUnloadTest(DevMapperTestCase):
         # tests
         self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_check_low_version(self):
         """Verify that checking the minimum dmsetup version works as expected"""
 
@@ -137,6 +139,7 @@ class DMUnloadTest(DevMapperTestCase):
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         self.assertIn("dm", BlockDev.get_available_plugin_names())
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_check_no_dm(self):
         """Verify that checking dmsetup tool availability works as expected"""
 

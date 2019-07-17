@@ -1,5 +1,8 @@
+import os
 import gi.overrides
-if not gi.overrides.__path__[0].endswith("src/python/gi/overrides"):
+
+if 'LIBBLOCKDEV_TESTS_SKIP_OVERRIDE' not in os.environ and \
+   not gi.overrides.__path__[0].endswith("src/python/gi/overrides"):
     local_overrides = None
     # our overrides don't take precedence, let's fix it
     for i, path in enumerate(gi.overrides.__path__):

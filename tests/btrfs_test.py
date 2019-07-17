@@ -10,7 +10,7 @@ from distutils.version import LooseVersion
 from distutils.spawn import find_executable
 
 import overrides_hack
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, mount, umount, run_command
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, mount, umount, run_command, TestTags, tag_test
 from gi.repository import GLib, BlockDev
 
 TEST_MNT = "/tmp/libblockdev_test_mnt"
@@ -74,6 +74,7 @@ class BtrfsTestCase(unittest.TestCase):
         return LooseVersion(m.groups()[0])
 
 class BtrfsTestCreateQuerySimple(BtrfsTestCase):
+    @tag_test(TestTags.CORE)
     def test_create_and_query_volume(self):
         """Verify that btrfs volume creation and querying works"""
 
@@ -180,6 +181,7 @@ class BtrfsTestAddRemoveDevice(BtrfsTestCase):
         self.assertEqual(len(devs), 1)
 
 class BtrfsTestCreateDeleteSubvolume(BtrfsTestCase):
+    @tag_test(TestTags.CORE)
     def test_create_delete_subvolume(self):
         """Verify that it is possible to create/delete subvolume"""
 
@@ -306,6 +308,7 @@ class BtrfsTestSetDefaultSubvolumeID(BtrfsTestCase):
         self.assertEqual(ret, 5)
 
 class BtrfsTestListDevices(BtrfsTestCase):
+    @tag_test(TestTags.CORE)
     def test_list_devices(self):
         """Verify that it is possible to get info about devices"""
 
@@ -324,6 +327,7 @@ class BtrfsTestListDevices(BtrfsTestCase):
         self.assertTrue(devs[1].used >= 0)
 
 class BtrfsTestListSubvolumes(BtrfsTestCase):
+    @tag_test(TestTags.CORE)
     def test_list_subvolumes(self):
         """Verify that it is possible to get info about subvolumes"""
 
@@ -344,6 +348,7 @@ class BtrfsTestListSubvolumes(BtrfsTestCase):
         self.assertEqual(subvols[0].path, "subvol1")
 
 class BtrfsTestFilesystemInfo(BtrfsTestCase):
+    @tag_test(TestTags.CORE)
     def test_filesystem_info(self):
         """Verify that it is possible to get filesystem info"""
 
@@ -376,6 +381,7 @@ class BtrfsTestFilesystemInfoNoLabel(BtrfsTestCase):
         self.assertTrue(info.used >= 0)
 
 class BtrfsTestMkfs(BtrfsTestCase):
+    @tag_test(TestTags.CORE)
     def test_mkfs(self):
         """Verify that it is possible to create a btrfs filesystem"""
 
@@ -539,6 +545,7 @@ class FakeBtrfsUtilsTestCase(BtrfsTestCase):
     def setUp(self):
         pass
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_list_subvols_weird_docker_data(self):
         """Verify that list_subvolumes works as expected on weird data from one Docker use case"""
 
@@ -560,6 +567,7 @@ class BTRFSUnloadTest(BtrfsTestCase):
         # tests
         self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_check_low_version(self):
         """Verify that checking the minimum BTRFS version works as expected"""
 
@@ -577,6 +585,7 @@ class BTRFSUnloadTest(BtrfsTestCase):
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         self.assertIn("btrfs", BlockDev.get_available_plugin_names())
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_check_new_version_format(self):
         """Verify that checking the minimum BTRFS version works as expected with the new format"""
 
@@ -592,6 +601,7 @@ class BTRFSUnloadTest(BtrfsTestCase):
         BlockDev.reinit(self.requested_plugins, True, None)
         self.assertIn("btrfs", BlockDev.get_available_plugin_names())
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_check_no_btrfs(self):
         """Verify that checking btrfs tool availability works as expected"""
 

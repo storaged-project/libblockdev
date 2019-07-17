@@ -2,7 +2,7 @@ import unittest
 import os
 import overrides_hack
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, skip_on, get_version
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, get_version, TestTags, tag_test
 from gi.repository import BlockDev, GLib
 
 class MpathTest(unittest.TestCase):
@@ -49,13 +49,13 @@ class MpathTestCase(MpathTest):
         # device and no error is reported
         self.assertFalse(BlockDev.mpath_is_mpath_member("/dev/loop0"))
 
-@skip_on("debian", reason="dependency checks are skipped on Debian")
 class MpathUnloadTest(MpathTest):
     def setUp(self):
         # make sure the library is initialized with all plugins loaded for other
         # tests
         self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_check_low_version(self):
         """Verify that checking the minimum dmsetup version works as expected"""
 
@@ -74,6 +74,7 @@ class MpathUnloadTest(MpathTest):
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         self.assertIn("mpath", BlockDev.get_available_plugin_names())
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_check_no_multipath(self):
         """Verify that checking multipath tool availability works as expected"""
 
@@ -91,6 +92,7 @@ class MpathUnloadTest(MpathTest):
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         self.assertIn("mpath", BlockDev.get_available_plugin_names())
 
+    @tag_test(TestTags.NOSTORAGE)
     def test_check_no_mpathconf(self):
         """Verify that checking mpathconf tool availability works as expected"""
 

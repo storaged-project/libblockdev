@@ -3,6 +3,8 @@ import math
 import overrides_hack
 from gi.repository import BlockDev
 
+from utils import TestTags, tag_test
+
 
 class OverridesTest(unittest.TestCase):
     # all plugins except for 'btrfs', 'fs' and 'mpath' -- these don't have all
@@ -19,6 +21,7 @@ class OverridesTest(unittest.TestCase):
             BlockDev.reinit(cls.requested_plugins, True, None)
 
 class OverridesTestCase(OverridesTest):
+    @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
     def test_error_proxy(self):
         """Verify that the error proxy works as expected"""
 
@@ -68,6 +71,7 @@ class OverridesUnloadTestCase(OverridesTest):
         # tests
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
 
+    @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
     def test_xrules(self):
         """Verify that regexp-based transformation rules work as expected"""
 
@@ -81,6 +85,7 @@ class OverridesUnloadTestCase(OverridesTest):
         # load the plugins back
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
 
+    @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
     def test_exception_inheritance(self):
         # unload all plugins first
         self.assertTrue(BlockDev.reinit([], True, None))
