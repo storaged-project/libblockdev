@@ -278,15 +278,51 @@ static void close_context (struct fdisk_context *cxt) {
     fdisk_unref_context (cxt);
 }
 
-static gboolean write_label (struct fdisk_context *cxt, const gchar *disk, GError **error) {
+static gboolean write_label (struct fdisk_context *cxt, struct fdisk_table *orig, const gchar *disk, GError **error) {
     gint ret = 0;
-    ret = fdisk_write_disklabel (cxt);
+    gint dev_fd = 0;
+    guint num_tries = 1;
 
+    /* XXX: try to grab a lock for the device so that udev doesn't step in
+       between the two operations we need to perform (see below) with its
+       BLKRRPART ioctl() call which makes the device busy */
+    dev_fd = open (disk, O_RDONLY|O_CLOEXEC);
+    if (dev_fd >= 0) {
+        ret = flock (dev_fd, LOCK_SH|LOCK_NB);
+        while ((ret != 0) && (num_tries <= 5)) {
+            g_usleep (100 * 1000); /* microseconds */
+            ret = flock (dev_fd, LOCK_SH|LOCK_NB);
+            num_tries++;
+        }
+    }
+
+    /* Just continue even in case we don't get the lock, there's still a
+       chance things will just work. If not, an error will be reported
+       anyway with no harm. */
+
+    ret = fdisk_write_disklabel (cxt);
     if (ret != 0) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to write the new disklabel to disk '%s': %s", disk, strerror_l (-ret, c_locale));
+        if (dev_fd >= 0)
+            close (dev_fd);
         return FALSE;
     }
+
+    /* We have original table layout -- reread changed partitions */
+    if (orig) {
+        ret = fdisk_reread_changes (cxt, orig);
+        if (ret != 0) {
+            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                         "Failed to inform kernel about changes on the '%s' device: %s", disk, strerror_l (-ret, c_locale));
+            if (dev_fd >= 0)
+                close (dev_fd);
+            return FALSE;
+        }
+    }
+
+    if (dev_fd >= 0)
+        close (dev_fd);
 
     return TRUE;
 }
@@ -480,7 +516,7 @@ gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean
         return FALSE;
     }
 
-    if (!write_label (cxt, disk, error)) {
+    if (!write_label (cxt, NULL, disk, error)) {
         bd_utils_report_finished (progress_id, (*error)->message);
         close_context (cxt);
         return FALSE;
@@ -1317,10 +1353,21 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
         return NULL;
     }
 
+    status = fdisk_get_partitions (cxt, &table);
+    if (status != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to get existing partitions on the device: %s", strerror_l (-status, c_locale));
+        fdisk_unref_partition (npa);
+        close_context (cxt);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return NULL;
+   }
+
     npa = fdisk_new_partition ();
     if (!npa) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                          "Failed to create new partition object");
+        fdisk_unref_table (table);
         close_context (cxt);
         bd_utils_report_finished (progress_id, (*error)->message);
         return NULL;
@@ -1339,6 +1386,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
     if (status != 0) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to setup alignment");
+        fdisk_unref_table (table);
         close_context (cxt);
         bd_utils_report_finished (progress_id, (*error)->message);
         return NULL;
@@ -1350,6 +1398,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
     if (status != 0) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to setup alignment");
+        fdisk_unref_table (table);
         close_context (cxt);
         bd_utils_report_finished (progress_id, (*error)->message);
         return NULL;
@@ -1389,6 +1438,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
         if (fdisk_partition_set_size (npa, size) != 0) {
             g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                          "Failed to set partition size");
+            fdisk_unref_table (table);
             fdisk_unref_partition (npa);
             close_context (cxt);
             bd_utils_report_finished (progress_id, (*error)->message);
@@ -1407,6 +1457,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
     if (on_gpt && type != BD_PART_TYPE_REQ_NORMAL) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Only normal partitions are supported on GPT.");
+        fdisk_unref_table (table);
         fdisk_unref_partition (npa);
         close_context (cxt);
         bd_utils_report_finished (progress_id, (*error)->message);
@@ -1415,18 +1466,8 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
 
     /* on DOS we may have to decide if requested */
     if (type == BD_PART_TYPE_REQ_NEXT) {
-        status = fdisk_get_partitions (cxt, &table);
-        if (status != 0) {
-            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                         "Failed to get existing partitions on the device: %s", strerror_l (-status, c_locale));
-            fdisk_unref_partition (npa);
-            close_context (cxt);
-            bd_utils_report_finished (progress_id, (*error)->message);
-            return NULL;
-       }
-
-       iter = fdisk_new_iter (FDISK_ITER_FORWARD);
-       while (fdisk_table_next_partition (table, iter, &pa) == 0) {
+        iter = fdisk_new_iter (FDISK_ITER_FORWARD);
+        while (fdisk_table_next_partition (table, iter, &pa) == 0) {
             if (fdisk_partition_is_freespace (pa))
                 continue;
             if (!epa && fdisk_partition_is_container (pa))
@@ -1544,7 +1585,6 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
             type = BD_PART_TYPE_NORMAL;
 
         fdisk_free_iter (iter);
-        fdisk_unref_table (table);
     }
 
     if (type == BD_PART_TYPE_REQ_EXTENDED) {
@@ -1553,6 +1593,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
         if (fdisk_partition_set_type (npa, ptype) != 0) {
             g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                          "Failed to set partition type");
+            fdisk_unref_table (table);
             fdisk_unref_partition (npa);
             close_context (cxt);
             bd_utils_report_finished (progress_id, (*error)->message);
@@ -1565,6 +1606,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
     if (fdisk_partition_set_start (npa, start) != 0) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to set partition start");
+        fdisk_unref_table (table);
         fdisk_unref_partition (npa);
         close_context (cxt);
         bd_utils_report_finished (progress_id, (*error)->message);
@@ -1582,6 +1624,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
         if (status != 0) {
             g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                          "Failed to get new partition number");
+            fdisk_unref_table (table);
             fdisk_unref_partition (npa);
             close_context (cxt);
             bd_utils_report_finished (progress_id, (*error)->message);
@@ -1593,6 +1636,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
     if (status != 0) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to set new partition number");
+        fdisk_unref_table (table);
         fdisk_unref_partition (npa);
         close_context (cxt);
         bd_utils_report_finished (progress_id, (*error)->message);
@@ -1603,14 +1647,16 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
     if (status != 0) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to add new partition to the table: %s", strerror_l (-status, c_locale));
+        fdisk_unref_table (table);
         fdisk_unref_partition (npa);
         close_context (cxt);
         bd_utils_report_finished (progress_id, (*error)->message);
         return NULL;
     }
 
-    if (!write_label (cxt, disk, error)) {
+    if (!write_label (cxt, table, disk, error)) {
         bd_utils_report_finished (progress_id, (*error)->message);
+        fdisk_unref_table (table);
         fdisk_unref_partition (npa);
         close_context (cxt);
         return NULL;
@@ -1624,6 +1670,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
     }
 
     /* close the context now, we no longer need it */
+    fdisk_unref_table (table);
     fdisk_unref_partition (npa);
     close_context (cxt);
 
@@ -1651,6 +1698,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
 gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **error) {
     gint part_num = 0;
     struct fdisk_context *cxt = NULL;
+    struct fdisk_table *table = NULL;
     gint ret = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
@@ -1674,21 +1722,33 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
         return FALSE;
     }
 
+    ret = fdisk_get_partitions (cxt, &table);
+    if (ret != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to get existing partitions on the device: %s", strerror_l (-ret, c_locale));
+        close_context (cxt);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+   }
+
     ret = fdisk_delete_partition (cxt, (size_t) part_num);
     if (ret != 0) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to delete partition '%d' on device '%s': %s", part_num+1, disk, strerror_l (-ret, c_locale));
+        fdisk_unref_table (table);
         close_context (cxt);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
-    if (!write_label (cxt, disk, error)) {
+    if (!write_label (cxt, table, disk, error)) {
         bd_utils_report_finished (progress_id, (*error)->message);
+        fdisk_unref_table (table);
         close_context (cxt);
         return FALSE;
     }
 
+    fdisk_unref_table (table);
     close_context (cxt);
 
     bd_utils_report_finished (progress_id, "Completed");
@@ -2240,7 +2300,7 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
             return FALSE;
         }
 
-        if (!write_label (cxt, disk, error)) {
+        if (!write_label (cxt, NULL, disk, error)) {
             bd_utils_report_finished (progress_id, (*error)->message);
             close_context (cxt);
             return FALSE;
@@ -2317,7 +2377,7 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
         }
     }
 
-    if (!write_label (cxt, disk, error)) {
+    if (!write_label (cxt, NULL, disk, error)) {
         bd_utils_report_finished (progress_id, (*error)->message);
         close_context (cxt);
         return FALSE;
@@ -2587,7 +2647,7 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
         }
     }
 
-    if (!write_label (cxt, disk, error)) {
+    if (!write_label (cxt, NULL, disk, error)) {
         bd_utils_report_finished (progress_id, (*error)->message);
         close_context (cxt);
         return FALSE;
@@ -2690,7 +2750,7 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
 
     fdisk_unref_partition (pa);
 
-    if (!write_label (cxt, disk, error)) {
+    if (!write_label (cxt, NULL, disk, error)) {
         bd_utils_report_finished (progress_id, (*error)->message);
         close_context (cxt);
         return FALSE;
@@ -2742,7 +2802,7 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
         return FALSE;
     }
 
-    if (!write_label (cxt, disk, error)) {
+    if (!write_label (cxt, NULL, disk, error)) {
         bd_utils_report_finished (progress_id, (*error)->message);
         close_context (cxt);
         return FALSE;
@@ -2796,7 +2856,7 @@ gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar 
         return FALSE;
     }
 
-    if (!write_label (cxt, disk, error)) {
+    if (!write_label (cxt, NULL, disk, error)) {
         bd_utils_report_finished (progress_id, (*error)->message);
         close_context (cxt);
         return FALSE;
