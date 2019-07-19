@@ -1481,7 +1481,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
           if (in_pa) {
             if (epa == in_pa)
                 /* creating a parititon inside an extended partition -> LOGICAL */
-                type = BD_PART_TYPE_LOGICAL;
+                type = BD_PART_TYPE_REQ_LOGICAL;
             else {
                 /* trying to create a partition inside an existing one, but not
                    an extended one -> error */
@@ -1497,7 +1497,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
         } else if (epa)
             /* there's an extended partition already and we are creating a new
                one outside of it */
-            type = BD_PART_TYPE_NORMAL;
+            type = BD_PART_TYPE_REQ_NORMAL;
         else if (n_parts == 3) {
             /* already 3 primary partitions -> create an extended partition of
                the biggest possible size and a logical partition as requested in
@@ -1578,11 +1578,11 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
             /* shift the start 2 MiB further as that's where the first logical
                partition inside an extended partition can start */
             start += (2 MiB / sector_size);
-            type = BD_PART_TYPE_LOGICAL;
+            type = BD_PART_TYPE_REQ_LOGICAL;
         } else
             /* no extended partition and not 3 primary partitions -> just create
                another primary (NORMAL) partition*/
-            type = BD_PART_TYPE_NORMAL;
+            type = BD_PART_TYPE_REQ_NORMAL;
 
         fdisk_free_iter (iter);
     }
@@ -1756,6 +1756,75 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
     return TRUE;
 }
 
+/* get maximal size for partition when resizing
+ * this is a simplified copy of 'resize_get_last_possible' function from
+ * libfdisk which is unfortunately not public
+ */
+static gboolean get_max_part_size (struct fdisk_table *tb, guint partno, guint64 *max_size, GError **error) {
+    struct fdisk_partition *pa = NULL;
+    struct fdisk_partition *cur = NULL;
+    struct fdisk_iter *itr = NULL;
+    guint64 start = 0;
+    gboolean found = FALSE;
+
+    itr = fdisk_new_iter (FDISK_ITER_FORWARD);
+    if (!itr) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to create a new iterator");
+        return FALSE;
+    }
+
+    cur = fdisk_table_get_partition_by_partno (tb, partno);
+    if (!cur) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to locate partition '%d' in table.", partno);
+        fdisk_free_iter (itr);
+        return FALSE;
+    }
+
+    start = fdisk_partition_get_start (cur);
+
+    while (!found && fdisk_table_next_partition (tb, itr, &pa) == 0) {
+        if (!fdisk_partition_has_start (pa) || !fdisk_partition_has_size (pa) ||
+            (fdisk_partition_is_container (pa) && pa != cur)) {
+            /* partition has no size/start or is an extended partition */
+            continue;
+        }
+
+        if (fdisk_partition_is_nested (pa) && fdisk_partition_is_container (cur)) {
+            /* ignore logical partitions inside if we are checking an extended partition */
+            continue;
+        }
+
+        if (fdisk_partition_is_nested (cur) && !fdisk_partition_is_nested (pa)) {
+            /* current partition is nested, we are looking for a nested free space */
+            continue;
+        }
+
+        if (pa == cur) {
+            /* found our current partition */
+            found = TRUE;
+        }
+    }
+
+    if (found && fdisk_table_next_partition (tb, itr, &pa) == 0) {
+        /* check next partition after our current we found */
+        if (fdisk_partition_is_freespace (pa)) {
+            /* we found a free space after current partition */
+            if (LIBFDISK_MINOR_VERSION <= 32)
+                /* XXX: older versions of libfdisk doesn't count free space between
+                    partitions as usable so we need to do the same here, see
+                    https://github.com/karelzak/util-linux/commit/2f35c1ead621f42f32f7777232568cb03185b473 */
+                *max_size  = fdisk_partition_get_size (cur) + fdisk_partition_get_size (pa);
+            else
+                *max_size = fdisk_partition_get_size (pa) - (start - fdisk_partition_get_start (pa));
+        }
+    }
+
+    fdisk_free_iter (itr);
+    return TRUE;
+}
+
 /**
  * bd_part_resize_part:
  * @disk: disk containing the paritition
@@ -1771,111 +1840,171 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
  * Tech category: %BD_PART_TECH_MODE_MODIFY_TABLE + the tech according to the partition table type
  */
 gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size, BDPartAlign align, GError **error) {
-    PedDevice *dev = NULL;
-    PedDisk *ped_disk = NULL;
-    PedPartition *ped_part = NULL;
-    const gchar *part_num_str = NULL;
     gint part_num = 0;
-    gboolean ret = FALSE;
+    struct fdisk_context *cxt = NULL;
+    struct fdisk_table *table = NULL;
+    struct fdisk_partition *pa = NULL;
+    gint ret = 0;
+    guint64 old_size = 0;
+    guint64 sector_size = 0;
+    guint64 grain_size = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
-    guint64 old_size = 0;
-    guint64 new_size = 0;
 
     msg = g_strdup_printf ("Started resizing partition '%s'", part);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    if (!part || (part && (*part == '\0'))) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'", part);
+    part_num = get_part_num (part, error);
+    if (part_num == -1) {
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
-    dev = ped_device_get (disk);
-    if (!dev) {
-        set_parted_error (error, BD_PART_ERROR_INVAL);
-        g_prefix_error (error, "Device '%s' invalid or not existing", disk);
+    /* /dev/sda1 is the partition number 0 in libfdisk */
+    part_num--;
+    cxt = get_device_context (disk, error);
+    if (!cxt) {
+        /* error is already populated */
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
-    ped_disk = ped_disk_new (dev);
-    if (!ped_disk) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to read partition table on device '%s'", disk);
-        ped_device_destroy (dev);
+    /* get existing partitions and free spaces and sort the table */
+    ret = fdisk_get_partitions (cxt, &table);
+    if (ret != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to get existing partitions on the device: %s", strerror_l (-ret, c_locale));
+        fdisk_unref_table (table);
+        close_context (cxt);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
 
-    part_num_str = part + (strlen (part) - 1);
-    while (isdigit (*part_num_str) || (*part_num_str == '-')) {
-        part_num_str--;
-    }
-    part_num_str++;
-
-    part_num = atoi (part_num_str);
-    if (part_num == 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Invalid partition path given: '%s'. Cannot extract partition number", part);
-        ped_disk_destroy (ped_disk);
-        ped_device_destroy (dev);
-        bd_utils_report_finished (progress_id, (*error)->message);
+    ret = fdisk_get_freespaces (cxt, &table);
+    if (ret != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to get free spaces on the device: %s", strerror_l (-ret, c_locale));
+        fdisk_unref_table (table);
+        close_context (cxt);
         return FALSE;
     }
 
-    ped_part = ped_disk_get_partition (ped_disk, part_num);
-    if (!ped_part) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to get partition '%d' on device '%s'", part_num, disk);
-        ped_disk_destroy (ped_disk);
-        ped_device_destroy (dev);
-        bd_utils_report_finished (progress_id, (*error)->message);
+    fdisk_table_sort_partitions (table, fdisk_partition_cmp_start);
+
+    ret = fdisk_get_partition (cxt, part_num, &pa);
+    if (ret != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to get partition %d on device '%s'", part_num, disk);
+        fdisk_unref_table (table);
+        close_context (cxt);
         return FALSE;
     }
 
-    old_size = ped_part->geom.length * dev->sector_size;
-    if (!resize_part (ped_part, dev, ped_disk, size, align, error)) {
-        ped_disk_destroy (ped_disk);
-        ped_device_destroy (dev);
-        bd_utils_report_finished (progress_id, (*error)->message);
+    if (fdisk_partition_has_size (pa))
+        old_size = (guint64) fdisk_partition_get_size (pa) * fdisk_get_sector_size (cxt);
+    else {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to get size for partition %d on device '%s'", part_num, disk);
+        fdisk_unref_partition (pa);
+        fdisk_unref_table (table);
+        close_context (cxt);
         return FALSE;
     }
 
-    new_size = ped_part->geom.length * dev->sector_size;
-    if (old_size != new_size) {
-        gint fd = 0;
-        gint wait_us = 10 * 1000 * 1000; /* 10 seconds */
-        gint step_us = 100 * 1000; /* 100 microseconds */
-        guint64 block_size = 0;
+    /* set grain_size based on user alignment preferences */
+    sector_size = (guint64) fdisk_get_sector_size (cxt);
+    grain_size = (guint64) fdisk_get_grain_size (cxt);
 
-        ret = disk_commit (ped_disk, disk, error);
-        /* wait for partition to appear with new size */
-        while (wait_us > 0) {
-            fd = open (part, O_RDONLY);
-            if (fd != -1) {
-                if (ioctl (fd, BLKGETSIZE64, &block_size) != -1 && block_size == new_size) {
-                    close (fd);
-                    break;
-                }
+    if (align == BD_PART_ALIGN_NONE)
+        grain_size = sector_size;
+    else if (align == BD_PART_ALIGN_MINIMAL)
+        grain_size = (guint64) fdisk_get_minimal_iosize (cxt);
+    /* else OPTIMAL or unknown -> nothing to do */
 
-                close (fd);
-            }
+    if (size == 0) {
+        /* no size specified, set the end to default (maximum) */
+        if (!get_max_part_size (table, part_num, &size, error)) {
+            g_prefix_error (error, "Failed to get maximal size for '%s': ", part);
+            fdisk_unref_table (table);
+            fdisk_unref_partition (pa);
+            close_context (cxt);
+            bd_utils_report_finished (progress_id, (*error)->message);
+            return FALSE;
+        }
 
-            g_usleep (step_us);
-            wait_us -= step_us;
+        if (size == 0) {
+            bd_utils_log_format (BD_UTILS_LOG_INFO, "Not resizing, partition '%s' is already at its maximum size.", part);
+            fdisk_unref_table (table);
+            fdisk_unref_partition (pa);
+            close_context (cxt);
+            bd_utils_report_finished (progress_id, "Completed");
+            return TRUE;
+        }
+
+        if (fdisk_partition_set_size (pa, size) != 0) {
+            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                         "Failed to set size for partition %d on device '%s'", part_num, disk);
+            fdisk_unref_table (table);
+            fdisk_unref_partition (pa);
+            close_context (cxt);
+            bd_utils_report_finished (progress_id, (*error)->message);
+            return FALSE;
         }
     } else {
-        ret = TRUE; /* not committing to disk */
+        /* align size up */
+        if (size % grain_size != 0)
+            size = ((size + grain_size) / grain_size) * grain_size;
+        size = size / sector_size;
+
+        if (size == old_size) {
+            bd_utils_log_format (BD_UTILS_LOG_INFO, "Not resizing, new size after alignment is the same as the old size.");
+            fdisk_unref_table (table);
+            fdisk_unref_partition (pa);
+            close_context (cxt);
+            bd_utils_report_finished (progress_id, "Completed");
+            return TRUE;
+        }
+
+        if (fdisk_partition_set_size (pa, size) != 0) {
+            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                         "Failed to set partition size");
+            fdisk_unref_table (table);
+            fdisk_unref_partition (pa);
+            close_context (cxt);
+            bd_utils_report_finished (progress_id, (*error)->message);
+            return FALSE;
+        }
     }
 
-    ped_disk_destroy (ped_disk);
-    ped_device_destroy (dev);
+    ret = fdisk_set_partition (cxt, part_num, pa);
+    if (ret != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to resize partition '%s': %s", part, strerror_l (-ret, c_locale));
+        fdisk_unref_table (table);
+        fdisk_unref_partition (pa);
+        close_context (cxt);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    if (!write_label (cxt, table, disk, error)) {
+        bd_utils_report_finished (progress_id, (*error)->message);
+        fdisk_unref_table (table);
+        fdisk_unref_partition (pa);
+        close_context (cxt);
+        return FALSE;
+    }
+
+    fdisk_unref_table (table);
+
+    /* XXX: double free in libfdisk, see https://github.com/karelzak/util-linux/pull/822
+    fdisk_unref_partition (pa); */
+    close_context (cxt);
+
     bd_utils_report_finished (progress_id, "Completed");
 
-    return ret;
+    return TRUE;
 }
 
 
