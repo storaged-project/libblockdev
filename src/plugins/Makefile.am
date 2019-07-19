@@ -175,7 +175,7 @@ endif
 
 if WITH_PART
 libbd_part_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(FDISK_CFLAGS) $(BLKID_CFLAGS) -Wall -Wextra -Werror
-libbd_part_la_LIBADD = ${builddir}/../utils/libbd_utils.la ${builddir}/libbd_part_err.la -lm $(GLIB_LIBS) $(GIO_LIBS) $(FDISK_LIBS) $(BLKID_LIBS)
+libbd_part_la_LIBADD = ${builddir}/../utils/libbd_utils.la -lm $(GLIB_LIBS) $(GIO_LIBS) $(FDISK_LIBS) $(BLKID_LIBS)
 libbd_part_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_part_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_part_la_SOURCES = part.c part.h check_deps.c check_deps.h
