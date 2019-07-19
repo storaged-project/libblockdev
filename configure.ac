@@ -226,9 +226,8 @@ AS_IF([test "x$with_dm" != "xno" -a "x$with_dmraid" != "xno"],
       [LIBBLOCKDEV_CHECK_HEADER([dmraid/dmraid.h], [], [dmraid.h not available])],
       [])
 
-AS_IF([test "x$with_part" != "xno" -o "x$with_fs" != "xno"],
-      [LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED], [libparted >= 3.1])
-      LIBBLOCKDEV_PKG_CHECK_MODULES([FDISK], [fdisk >= 2.31.0])]
+AS_IF([test "x$with_part" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([FDISK], [fdisk >= 2.31.0])],
       [])
 
 AS_IF([test "x$with_fs" != "xno"],
@@ -237,6 +236,8 @@ AS_IF([test "x$with_fs" != "xno"],
        # new versions of libmount has some new functions we can use
        AS_IF([$PKG_CONFIG --atleast-version=2.30.0 mount],
              [AC_DEFINE([LIBMOUNT_NEW_ERR_API])], [])
+
+       LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED], [libparted >= 3.1])
 
        # older versions of parted don't provide the libparted-fs-resize.pc file
        AS_IF([$PKG_CONFIG libparted-fs-resize],

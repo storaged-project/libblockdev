@@ -18,7 +18,6 @@
  */
 
 #include <string.h>
-#include <parted/parted.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <math.h>
@@ -29,7 +28,6 @@
 #include <sys/ioctl.h>
 #include <linux/fs.h>
 #include <blockdev/utils.h>
-#include <part_err.h>
 #include <libfdisk.h>
 #include <locale.h>
 #include <blkid.h>
@@ -328,31 +326,6 @@ static gboolean write_label (struct fdisk_context *cxt, struct fdisk_table *orig
 }
 
 /**
- * set_parted_error: (skip)
- *
- * Set error from the parted error stored in 'error_msg'. In case there is none,
- * the error is set up with an empty string. Otherwise it is set up with the
- * parted's error message and is a subject to later g_prefix_error() call.
- *
- * Returns: whether there was some message from parted or not
- */
-static gboolean set_parted_error (GError **error, BDPartError type) {
-    gchar *error_msg = NULL;
-    error_msg = bd_get_error_msg ();
-    if (error_msg) {
-        g_set_error (error, BD_PART_ERROR, type,
-                     " (%s)", error_msg);
-        g_free (error_msg);
-        error_msg = NULL;
-        return TRUE;
-    } else {
-        g_set_error_literal (error, BD_PART_ERROR, type, "");
-        return FALSE;
-    }
-}
-
-
-/**
  * bd_part_check_deps:
  *
  * Returns: whether the plugin's runtime dependencies are satisfied or not
@@ -373,7 +346,6 @@ gboolean bd_part_check_deps (void) {
  *
  */
 gboolean bd_part_init (void) {
-    ped_exception_set_handler ((PedExceptionHandler*) bd_exc_handler);
     c_locale = newlocale (LC_ALL_MASK, "C", c_locale);
     fdisk_init_debug (0);
     return TRUE;
@@ -387,7 +359,6 @@ gboolean bd_part_init (void) {
  *
  */
 void bd_part_close (void) {
-    ped_exception_set_handler (NULL);
     c_locale = (locale_t) 0;
 }
 
@@ -415,60 +386,7 @@ gboolean bd_part_is_tech_avail (BDPartTech tech, guint64 mode UNUSED, GError **e
     }
 }
 
-static const gchar *table_type_str_parted[BD_PART_TABLE_UNDEF] = {"msdos", "gpt"};
-static const gchar *table_type_str_fdisk[BD_PART_TABLE_UNDEF] = {"dos", "gpt"};
-
-static gboolean disk_commit (PedDisk *disk, const gchar *path, GError **error) {
-    gint ret = 0;
-    gint dev_fd = 0;
-    guint num_tries = 1;
-
-    /* XXX: try to grab a lock for the device so that udev doesn't step in
-       between the two operations we need to perform (see below) with its
-       BLKRRPART ioctl() call which makes the device busy */
-    dev_fd = open (disk->dev->path, O_RDONLY|O_CLOEXEC);
-    if (dev_fd >= 0) {
-        ret = flock (dev_fd, LOCK_SH|LOCK_NB);
-        while ((ret != 0) && (num_tries <= 5)) {
-            g_usleep (100 * 1000); /* microseconds */
-            ret = flock (dev_fd, LOCK_SH|LOCK_NB);
-            num_tries++;
-        }
-    }
-    /* Just continue even in case we don't get the lock, there's still a
-       chance things will just work. If not, an error will be reported
-       anyway with no harm. */
-
-    /* XXX: Sometimes it happens that when we try to commit the partition table
-       to disk below, libparted kills the process due to the
-       assert(disk->dev->open_count > 0). This looks like a bug to me, but we
-       have no reproducer for it. Let's just try to (re)open the device in such
-       cases. It is later closed by the ped_device_destroy() call. */
-    if (disk->dev->open_count <= 0)
-        ped_device_open (disk->dev);
-
-    ret = ped_disk_commit_to_dev (disk);
-    if (ret == 0) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to commit changes to device '%s'", path);
-        if (dev_fd >= 0)
-            close (dev_fd);
-        return FALSE;
-    }
-
-    ret = ped_disk_commit_to_os (disk);
-    if (ret == 0) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to inform OS about changes on the '%s' device", path);
-        if (dev_fd >= 0)
-            close (dev_fd);
-        return FALSE;
-    }
-
-    if (dev_fd >= 0)
-        close (dev_fd);
-    return TRUE;
-}
+static const gchar *table_type_str[BD_PART_TABLE_UNDEF] = {"dos", "gpt"};
 
 /**
  * bd_part_create_table:
@@ -507,7 +425,7 @@ gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean
         return FALSE;
     }
 
-    ret = fdisk_create_disklabel (cxt, table_type_str_fdisk[type]);
+    ret = fdisk_create_disklabel (cxt, table_type_str[type]);
     if (ret != 0) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to create a new disklabel for disk '%s': %s", disk, strerror_l (-ret, c_locale));
@@ -556,7 +474,7 @@ static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_nu
     }
 
     label_name = fdisk_label_get_name (lb);
-    if (g_strcmp0 (label_name, table_type_str_fdisk[BD_PART_TABLE_GPT]) != 0) {
+    if (g_strcmp0 (label_name, table_type_str[BD_PART_TABLE_GPT]) != 0) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Setting GPT flags is not supported on '%s' partition table", label_name);
         close_context (cxt);
@@ -615,44 +533,6 @@ static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_nu
     fdisk_unref_parttype (ptype);
     fdisk_unref_partition (pa);
     close_context (cxt);
-    return ret;
-}
-
-static BDPartSpec* get_part_spec (PedDevice *dev, PedDisk *disk, PedPartition *part, GError **error) {
-    BDPartSpec *ret = NULL;
-    PedPartitionFlag flag = PED_PARTITION_FIRST_FLAG;
-
-    ret = g_new0 (BDPartSpec, 1);
-    /* the no-partition "partitions" have num equal to -1 which never really
-       creates a valid block device path, so let's just not set path to
-       nonsense */
-    if (part->num != -1) {
-        if (isdigit (dev->path[strlen(dev->path) - 1]))
-            ret->path = g_strdup_printf ("%sp%d", dev->path, part->num);
-        else
-            ret->path = g_strdup_printf ("%s%d", dev->path, part->num);
-    }
-    if (ped_partition_is_active (part) && disk->type->features & PED_DISK_TYPE_PARTITION_NAME)
-        ret->name = g_strdup (ped_partition_get_name (part));
-    if (g_strcmp0 (disk->type->name, "gpt") == 0) {
-        ret->type_guid = get_part_type_guid_and_gpt_flags (dev->path, part->num, &(ret->flags), error);
-        if (!ret->type_guid && *error) {
-            bd_part_spec_free (ret);
-            return NULL;
-        }
-    }
-    ret->type = (BDPartType) part->type;
-    ret->start = part->geom.start * dev->sector_size;
-    ret->size = part->geom.length * dev->sector_size;
-    for (flag=PED_PARTITION_FIRST_FLAG; flag<PED_PARTITION_LAST_FLAG; flag=ped_partition_flag_next (flag)) {
-        /* beware of partition types that segfault when asked for flags */
-        if ((part->type <= PED_PARTITION_EXTENDED) &&
-            ped_partition_is_flag_available (part, flag) && ped_partition_get_flag (part, flag))
-            /* our flags are 1s shifted to the bit determined by parted's flags
-             * (i.e. 1 << 3 instead of 3, etc.) */
-            ret->flags = ret->flags | (1 << flag);
-    }
-
     return ret;
 }
 
@@ -1053,7 +933,7 @@ BDPartDiskSpec* bd_part_get_disk_spec (const gchar *disk, GError **error) {
     if (lb) {
         label_name = fdisk_label_get_name (lb);
         for (type=BD_PART_TABLE_MSDOS; !found && type < BD_PART_TABLE_UNDEF; type++) {
-            if (g_strcmp0 (label_name, table_type_str_fdisk[type]) == 0) {
+            if (g_strcmp0 (label_name, table_type_str[type]) == 0) {
                 ret->table_type = type;
                 found = TRUE;
             }
@@ -1174,131 +1054,6 @@ BDPartSpec* bd_part_get_best_free_region (const gchar *disk, BDPartType type, gu
     g_free (free_regs);
 
     return ret;
-}
-
-static PedConstraint* prepare_alignment_constraint (PedDevice *dev, PedDisk *disk, BDPartAlign align, gint *orig_flag_state) {
-    if (align == BD_PART_ALIGN_OPTIMAL) {
-        /* cylinder alignment does really weird things when turned on, let's not
-           deal with it in 21st century (the flag is reset back in the end) */
-        if (ped_disk_is_flag_available (disk, PED_DISK_CYLINDER_ALIGNMENT)) {
-            *orig_flag_state = ped_disk_get_flag (disk, PED_DISK_CYLINDER_ALIGNMENT);
-            ped_disk_set_flag (disk, PED_DISK_CYLINDER_ALIGNMENT, 0);
-        }
-        return ped_device_get_optimal_aligned_constraint (dev);
-    } else if (align == BD_PART_ALIGN_MINIMAL)
-        return ped_device_get_minimal_aligned_constraint (dev);
-    else
-        return NULL;
-}
-
-static void finish_alignment_constraint (PedDisk *disk, gint orig_flag_state) {
-    if (ped_disk_is_flag_available (disk, PED_DISK_CYLINDER_ALIGNMENT)) {
-        ped_disk_set_flag (disk, PED_DISK_CYLINDER_ALIGNMENT, orig_flag_state);
-    }
-}
-
-static gboolean resize_part (PedPartition *part, PedDevice *dev, PedDisk *disk, guint64 size, BDPartAlign align, GError **error) {
-    PedConstraint *constr = NULL;
-    PedGeometry *geom;
-    gint orig_flag_state = 0;
-    PedSector start;
-    PedSector end;
-    PedSector max_end;
-    PedSector new_size = 0;
-    gint status = 0;
-    PedSector tolerance = 0;
-
-    /* It should be possible to pass the whole drive size a partition size,
-     * so -1 MiB for the first partition alignment,
-     * -1 MiB for creating this here as a logial partition
-     * and -1 MiB for end alingment.
-     * But only if the caller doesn't request no alignment which also means
-     * they strictly care about precise numbers. */
-    if (align != BD_PART_ALIGN_NONE)
-        tolerance = (PedSector) (4 MiB /  dev->sector_size);
-
-    constr = prepare_alignment_constraint (dev, disk, align, &orig_flag_state);
-    start = part->geom.start;
-
-    if (!constr)
-        constr = ped_constraint_any (dev);
-
-    geom = ped_disk_get_max_partition_geometry (disk, part, constr);
-    if (!ped_geometry_set_start (geom, start)) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to set partition start on device '%s'", dev->path);
-        ped_constraint_destroy (constr);
-        ped_geometry_destroy (geom);
-        finish_alignment_constraint (disk, orig_flag_state);
-        return FALSE;
-    }
-    if (size == 0) {
-        new_size = geom->length;
-    } else {
-        new_size = (size + dev->sector_size - 1) / dev->sector_size;
-    }
-
-    /* If the maximum partition geometry is smaller than the requested size, but
-       the difference is acceptable, just adapt the size. */
-    if (new_size > geom->length && (new_size - geom->length) < tolerance)
-        new_size = geom->length;
-
-    max_end = geom->end;
-    ped_geometry_destroy (geom);
-    geom = ped_geometry_new (dev, start, new_size);
-    if (!geom) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to create geometry for partition on device '%s'", dev->path);
-        ped_constraint_destroy (constr);
-        finish_alignment_constraint (disk, orig_flag_state);
-        return FALSE;
-    }
-
-    if (size != 0) {
-        end = ped_alignment_align_up (constr->end_align, constr->end_range, geom->end);
-        if (end > max_end && end < max_end + tolerance) {
-            end = max_end;
-        }
-    } else {
-        end = geom->end;
-    }
-    ped_constraint_destroy (constr);
-    if (!ped_geometry_set_end (geom, end)) {
-       set_parted_error (error, BD_PART_ERROR_FAIL);
-       g_prefix_error (error, "Failed to change geometry for partition on device '%s'", dev->path);
-       ped_constraint_destroy (constr);
-       ped_geometry_destroy (geom);
-       finish_alignment_constraint (disk, orig_flag_state);
-       return FALSE;
-    }
-    constr = ped_constraint_exact (geom);
-    status = ped_disk_set_partition_geom (disk, part, constr, start, end);
-
-    if (status == 0) {
-        set_parted_error (error, BD_PART_ERROR_FAIL);
-        g_prefix_error (error, "Failed to set partition size on device '%s'", dev->path);
-        ped_geometry_destroy (geom);
-        ped_constraint_destroy (constr);
-        finish_alignment_constraint (disk, orig_flag_state);
-        return FALSE;
-    } else if (part->geom.start != start) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL, "Failed to meet partition start on device '%s'", dev->path);
-        ped_geometry_destroy (geom);
-        ped_constraint_destroy (constr);
-        finish_alignment_constraint (disk, orig_flag_state);
-        return FALSE;
-    } else if (part->geom.length < new_size - tolerance) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL, "Failed to meet partition size on device '%s'", dev->path);
-        ped_geometry_destroy (geom);
-        ped_constraint_destroy (constr);
-        finish_alignment_constraint (disk, orig_flag_state);
-        return FALSE;
-    }
-
-    ped_geometry_destroy (geom);
-    ped_constraint_destroy (constr);
-    finish_alignment_constraint (disk, orig_flag_state);
-    return TRUE;
 }
 
 /**
@@ -2023,7 +1778,7 @@ static gboolean set_gpt_flag (struct fdisk_context *cxt, int part_num, BDPartFla
     }
 
     label_name = fdisk_label_get_name (lb);
-    if (g_strcmp0 (label_name, table_type_str_fdisk[BD_PART_TABLE_GPT]) != 0) {
+    if (g_strcmp0 (label_name, table_type_str[BD_PART_TABLE_GPT]) != 0) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Setting GPT flags is not supported on '%s' partition table", label_name);
         return FALSE;
@@ -2120,7 +1875,7 @@ static gboolean set_part_type (struct fdisk_context *cxt, gint part_num, const g
     }
 
     label_name = fdisk_label_get_name (lb);
-    if (g_strcmp0 (label_name, table_type_str_fdisk[table_type]) != 0) {
+    if (g_strcmp0 (label_name, table_type_str[table_type]) != 0) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Setting partition type is not supported on '%s' partition table", label_name);
         return FALSE;
@@ -2485,13 +2240,13 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
     /* parition types/GUIDs (GPT) or IDs (MSDOS) */
     } else {
         flag_info = part_flags[log2i (flag) - 1];
-        if (g_strcmp0 (label_name, table_type_str_fdisk[BD_PART_TABLE_MSDOS]) == 0 && flag_info.id) {
+        if (g_strcmp0 (label_name, table_type_str[BD_PART_TABLE_MSDOS]) == 0 && flag_info.id) {
             if (!set_part_type (cxt, part_num, state ? flag_info.id : DEFAULT_PART_ID, BD_PART_TABLE_MSDOS, error)) {
                 bd_utils_report_finished (progress_id, (*error)->message);
                 close_context (cxt);
                 return FALSE;
             }
-        } else if (g_strcmp0 (label_name, table_type_str_fdisk[BD_PART_TABLE_GPT]) == 0 && flag_info.guid) {
+        } else if (g_strcmp0 (label_name, table_type_str[BD_PART_TABLE_GPT]) == 0 && flag_info.guid) {
             if (!set_part_type (cxt, part_num, state ? flag_info.id : DEFAULT_PART_GUID, BD_PART_TABLE_GPT, error)) {
                 bd_utils_report_finished (progress_id, (*error)->message);
                 close_context (cxt);
@@ -2685,9 +2440,9 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
     }
 
     label_name = fdisk_label_get_name (lb);
-    if (g_strcmp0 (label_name, table_type_str_fdisk[BD_PART_TABLE_MSDOS]) == 0)
+    if (g_strcmp0 (label_name, table_type_str[BD_PART_TABLE_MSDOS]) == 0)
         table_type = BD_PART_TABLE_MSDOS;
-    else if (g_strcmp0 (label_name, table_type_str_fdisk[BD_PART_TABLE_GPT]) == 0)
+    else if (g_strcmp0 (label_name, table_type_str[BD_PART_TABLE_GPT]) == 0)
         table_type = BD_PART_TABLE_GPT;
     else {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
@@ -2828,7 +2583,7 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
     }
 
     label_name = fdisk_label_get_name (lb);
-    if (g_strcmp0 (label_name, table_type_str_fdisk[BD_PART_TABLE_GPT]) != 0) {
+    if (g_strcmp0 (label_name, table_type_str[BD_PART_TABLE_GPT]) != 0) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Partition names unsupported on the device '%s' ('%s')", disk,
                      label_name);
@@ -3048,7 +2803,7 @@ gchar* bd_part_get_part_id (const gchar *disk, const gchar *part, GError **error
     }
 
     label_name = fdisk_label_get_name (lb);
-    if (g_strcmp0 (label_name, table_type_str_fdisk[BD_PART_TABLE_MSDOS]) != 0) {
+    if (g_strcmp0 (label_name, table_type_str[BD_PART_TABLE_MSDOS]) != 0) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Partition ID is not supported on '%s' partition table", label_name);
         bd_utils_report_finished (progress_id, (*error)->message);
@@ -3103,7 +2858,7 @@ const gchar* bd_part_get_part_table_type_str (BDPartTableType type, GError **err
         return NULL;
     }
 
-    return table_type_str_parted[type];
+    return table_type_str[type];
 }
 
 /**
