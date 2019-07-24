@@ -126,8 +126,10 @@ gboolean bd_utils_load_kernel_module (const gchar *module_name, const gchar *opt
         return FALSE;
     }
 
-    /* module, flags, options */
-    ret = kmod_module_insert_module (mod, 0, options);
+    /* module, flags, options, run_install, data, print_action
+       flag KMOD_PROBE_FAIL_ON_LOADED is used for backwards compatibility */
+    ret = kmod_module_probe_insert_module (mod, KMOD_PROBE_FAIL_ON_LOADED,
+                                           options, NULL, NULL, NULL);
     if (ret < 0) {
         g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_FAIL,
                      "Failed to load the module '%s' with options '%s': %s",
