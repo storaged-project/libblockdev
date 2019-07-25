@@ -266,6 +266,8 @@ def get_version():
     if cpe:
         # 2nd to 4th fields from e.g. "cpe:/o:fedoraproject:fedora:25" or "cpe:/o:redhat:enterprise_linux:7.3:GA:server"
         _project, distro, version = tuple(cpe.split(":")[2:5])
+        # we want just the major version, so remove all decimal places (if any)
+        version = str(int(float(version)))
     else:
         pretty_name = str(sys_info.Get("org.freedesktop.hostname1", "OperatingSystemPrettyName", dbus_interface=dbus.PROPERTIES_IFACE))
         distro, version = get_version_from_pretty_name(pretty_name)
