@@ -144,9 +144,11 @@ def _print_skip_message(test, skip_tag):
         reason = "unknown reason"  # just to be sure there is some default value
 
     if test._testMethodDoc:
-        print("%s (%s)\n%s ... skipped '%s'" % (test_name, test_module, test._testMethodDoc, reason))
+        print("%s (%s)\n%s ... skipped '%s'" % (test_name, test_module, test._testMethodDoc, reason),
+              file=sys.stderr)
     else:
-        print("%s (%s) ... skipped '%s'" % (test_name, test_module, reason))
+        print("%s (%s) ... skipped '%s'" % (test_name, test_module, reason),
+              file=sys.stderr)
 
 
 def _should_skip(distro=None, version=None, arch=None, reason=None):
@@ -266,7 +268,8 @@ if __name__ == '__main__':
             test_name, test_module = _split_test_id(test_id)
             reason = "not supported on this distribution in this version and arch: %s" % skipping[skip_id]
             print("%s (%s)\n%s ... skipped '%s'" % (test_name, test_module,
-                                                    test._testMethodDoc, reason))
+                                                    test._testMethodDoc, reason),
+                  file=sys.stderr)
             continue
 
         # finally add the test to the suite
