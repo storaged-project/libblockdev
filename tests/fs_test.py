@@ -1202,14 +1202,14 @@ class MountTest(FSTestCase):
     def test_mount_ntfs_ro(self):
         """ Test mounting and unmounting read-only device with NTFS filesystem"""
 
+        if not self.ntfs_avail:
+            self.skipTest("skipping NTFS: not available")
+
         succ = BlockDev.fs_ntfs_mkfs(self.loop_dev, None)
         self.assertTrue(succ)
 
         tmp = tempfile.mkdtemp(prefix="libblockdev.", suffix="mount_test")
         self.addCleanup(os.rmdir, tmp)
-
-        if not self.ntfs_avail:
-            self.skipTest("skipping NTFS: not available")
 
         # set the device read-only
         self.setro(self.loop_dev)
