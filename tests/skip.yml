@@ -131,3 +131,9 @@
   skip_on:
     - distro: "debian"
       reason: "libparted provides weird values here"
+
+- test: (lvm_test|lvm_dbus_tests).LvmTestLVsnapshots.test_snapshotcreate_lvorigin_snapshotmerge
+  skip_on:
+    - distro: "fedora"
+      version: ["31", "32"]
+      reason: "working with old-style LVM snapshots leads to deadlock in LVM tools"
