@@ -162,9 +162,12 @@
     <keyword type="function" name="bd_fs_wipe ()" link="libblockdev-FS.html#bd-fs-wipe"/>
     <keyword type="function" name="bd_fs_clean ()" link="libblockdev-FS.html#bd-fs-clean"/>
     <keyword type="function" name="bd_fs_get_fstype ()" link="libblockdev-FS.html#bd-fs-get-fstype"/>
+    <keyword type="function" name="bd_fs_freeze ()" link="libblockdev-FS.html#bd-fs-freeze"/>
+    <keyword type="function" name="bd_fs_unfreeze ()" link="libblockdev-FS.html#bd-fs-unfreeze"/>
     <keyword type="function" name="bd_fs_mount ()" link="libblockdev-FS.html#bd-fs-mount"/>
     <keyword type="function" name="bd_fs_unmount ()" link="libblockdev-FS.html#bd-fs-unmount"/>
     <keyword type="function" name="bd_fs_get_mountpoint ()" link="libblockdev-FS.html#bd-fs-get-mountpoint"/>
+    <keyword type="function" name="bd_fs_is_mountpoint ()" link="libblockdev-FS.html#bd-fs-is-mountpoint"/>
     <keyword type="function" name="bd_fs_resize ()" link="libblockdev-FS.html#bd-fs-resize"/>
     <keyword type="function" name="bd_fs_repair ()" link="libblockdev-FS.html#bd-fs-repair"/>
     <keyword type="function" name="bd_fs_check ()" link="libblockdev-FS.html#bd-fs-check"/>
@@ -322,7 +325,7 @@
     <keyword type="function" name="bd_lvm_data_lv_name ()" link="libblockdev-LVM.html#bd-lvm-data-lv-name"/>
     <keyword type="function" name="bd_lvm_metadata_lv_name ()" link="libblockdev-LVM.html#bd-lvm-metadata-lv-name"/>
     <keyword type="function" name="bd_lvm_is_tech_avail ()" link="libblockdev-LVM.html#bd-lvm-is-tech-avail"/>
-    <keyword type="macro" name="BD_LVM_MAX_LV_SIZE" link="libblockdev-LVM.html#BD-LVM-MAX-LV-SIZE:CAPS"/>
+    <keyword type="macro" name="BD_LVM_MAX_LV_SIZE" link="libblockdev-LVM.html#BD-LVM-MAX-LV-SIZE:CAPS" deprecated="2.23: Use bd_lvm_get_max_lv_size() function instead."/>
     <keyword type="macro" name="BD_LVM_DEFAULT_PE_SIZE" link="libblockdev-LVM.html#BD-LVM-DEFAULT-PE-SIZE:CAPS"/>
     <keyword type="macro" name="BD_LVM_DEFAULT_PE_START" link="libblockdev-LVM.html#BD-LVM-DEFAULT-PE-START:CAPS"/>
     <keyword type="macro" name="BD_LVM_MIN_PE_SIZE" link="libblockdev-LVM.html#BD-LVM-MIN-PE-SIZE:CAPS"/>
