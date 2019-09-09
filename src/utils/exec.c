@@ -191,6 +191,7 @@ gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtr
     guint args_len = 0;
     const gchar **arg_p = NULL;
     const BDExtraArg **extra_p = NULL;
+    gint exit_status = 0;
     guint i = 0;
 
     if (extra) {
@@ -220,11 +221,30 @@ gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtr
     task_id = log_running (args ? args : argv);
     success = g_spawn_sync (NULL, args ? (gchar **) args : (gchar **) argv, NULL, G_SPAWN_SEARCH_PATH,
                             (GSpawnChildSetupFunc) set_c_locale, NULL,
-                            &stdout_data, &stderr_data, status, error);
+                            &stdout_data, &stderr_data, &exit_status, error);
+    if (!success) {
+        /* error is already populated from the call */
+        g_free (stdout_data);
+        g_free (stderr_data);
+        return FALSE;
+    }
 
-    /* return codes shouldn't be higher than 255, kernel should do this
-       automatically, but it doesn't */
-    *status = *status % 255;
+    /* g_spawn_sync set the status in the same way waitpid() does, we need
+       to get the process exit code manually (this is similar to calling
+       WEXITSTATUS but also sets the error for terminated processes */
+    if (!g_spawn_check_exit_status (exit_status, error)) {
+        if (g_error_matches (*error, G_SPAWN_ERROR, G_SPAWN_ERROR_FAILED)) {
+            /* process was terminated abnormally (e.g. using a signal) */
+            g_free (stdout_data);
+            g_free (stderr_data);
+            return FALSE;
+        }
+
+        *status = (*error)->code;
+        g_clear_error (error);
+    } else
+        *status = 0;
+
     log_out (task_id, stdout_data, stderr_data);
     log_done (task_id, *status);
 
@@ -269,6 +289,7 @@ gboolean bd_utils_exec_and_capture_output (const gchar **argv, const BDExtraArg 
     gchar *stdout_data = NULL;
     gchar *stderr_data = NULL;
     gint status = 0;
+    gint exit_status = 0;
     gboolean success = FALSE;
     guint64 task_id = 0;
     const gchar **args = NULL;
@@ -304,14 +325,34 @@ gboolean bd_utils_exec_and_capture_output (const gchar **argv, const BDExtraArg 
     task_id = log_running (argv);
     success = g_spawn_sync (NULL, (gchar **) argv, NULL, G_SPAWN_SEARCH_PATH,
                             (GSpawnChildSetupFunc) set_c_locale, NULL,
-                            &stdout_data, &stderr_data, &status, error);
-    log_out (task_id, stdout_data, stderr_data);
-    log_done (task_id, status);
+                            &stdout_data, &stderr_data, &exit_status, error);
 
     if (!success) {
         /* error is already populated */
+        g_free (stdout_data);
+        g_free (stderr_data);
         return FALSE;
     }
+
+    /* g_spawn_sync set the status in the same way waitpid() does, we need
+       to get the process exit code manually (this is similar to calling
+       WEXITSTATUS but also sets the error for terminated processes */
+    if (!g_spawn_check_exit_status (exit_status, error)) {
+        if (g_error_matches (*error, G_SPAWN_ERROR, G_SPAWN_ERROR_FAILED)) {
+            /* process was terminated abnormally (e.g. using a signal) */
+            g_free (stdout_data);
+            g_free (stderr_data);
+            return FALSE;
+        }
+
+        status = (*error)->code;
+        g_clear_error (error);
+    } else
+        status = 0;
+
+
+    log_out (task_id, stdout_data, stderr_data);
+    log_done (task_id, status);
 
     if ((status != 0) || (g_strcmp0 ("", stdout_data) == 0)) {
         if (status != 0)
