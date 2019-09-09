@@ -682,6 +682,7 @@ A meta-package that pulls all the libblockdev plugins as dependencies.
 %setup -q -n %{name}-%{version}
 
 %build
+autoreconf -ivf
 %configure %{?configure_opts}
 %{__make} %{?_smp_mflags}
 
@@ -1012,6 +1013,12 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 - Add a function to check whether a path is a mounpoint or not (vtrefny)
 - Skip bcache tests on all Debian versions (vtrefny)
 
+* Fri Aug 16 2019 Miro Hrončok <mhroncok@redhat.com> - 2.22-3
+- Rebuilt for Python 3.8
+
+* Thu Jul 25 2019 Fedora Release Engineering <releng@fedoraproject.org> - 2.22-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
+
 * Wed Jun 12 2019 Vojtech Trefny <vtrefny@redhat.com> - 2.22-1
 - tests: Fix Debian testing "version" for skipping (vtrefny)
 - module: Fix libkmod related leak (tbzatek)
@@ -1038,6 +1045,9 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 - Allow skiping tests only based on architecture (vtrefny)
 - Sync spec file with python2 obsoletion added downstream (awilliam)
 - Sync spec with downstream (vtrefny)
+
+* Tue Apr 16 2019 Vojtech Trefny <vtrefny@redhat.com> - 2.21-3
+- Remove device-mapper-multipath dependency from fs and part plugins
 
 * Thu Feb 28 2019 Adam Williamson <awilliam@redhat.com> - 2.21-2
 - Obsolete the python2 subpackage if we're not building it
