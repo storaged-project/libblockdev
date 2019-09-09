@@ -1,3 +1,53 @@
+Libblockdev 2.23
+----------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Notable changes**
+
+- fs
+
+  - new functions for (un)freezing filesystems added
+
+- tests
+
+  - test suite can now be run against installed version of libblockdev
+
+
+**Full list of changes**
+
+Vojtech Trefny (28):
+
+- Skip bcache tests on all Debian versions
+- Add a function to check whether a path is a mounpoint or not
+- Add function for (un)freezing filesystems
+- Add a decorator for "tagging" tests
+- Use test tags for skipping tests
+- Use the new test tags in tests
+- Remove duplicate test case
+- Allow running tests against installed libblockdev
+- Add a special test tag for library tests that recompile plugins
+- Force LVM cli plugin in lvm_test
+- Mark 'test_set_bitmap_location' as unstable
+- Add ability to read tests to skip from a config file
+- Skip bcache tests if make-bcache is not installed
+- Use the new config file for skipping tests
+- Ignore coverity deadcode warnings in the generated code
+- Ignore coverity deadcode warning in 'bd_fs_is_tech_avail'
+- Mark 'private' plugin management functions as static
+- Remove unused 'get_PLUGIN_num_functions' and 'get_PLUGIN_functions' functions
+- Mark LVM global config locks as static
+- Hide filesystem-specific is_tech_available functions
+- Use 'kmod_module_probe_insert_module' function for loading modules
+- Fix parsing distro version from CPE name
+- Move the NTFS read-only device test to a separate test case
+- Print skipped test "results" to stderr instead of stdout
+- Fix LVM_MAX_LV_SIZE in the GIR file
+- Fix skipping NTFS read-only test case on systems without NTFS
+- Skip tests for old-style LVM snapshots on recent Fedora
+- Fix how we get process exit code from g_spawn_sync
+
 Libblockdev 2.22
 ----------------
 
