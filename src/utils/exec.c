@@ -20,6 +20,7 @@
 #include <glib.h>
 #include "exec.h"
 #include "extra_arg.h"
+#include "logging.h"
 #include <syslog.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -37,7 +38,6 @@ extern char **environ;
 
 static GMutex id_counter_lock;
 static guint64 id_counter = 0;
-static BDUtilsLogFunc log_func = NULL;
 
 static GMutex task_id_counter_lock;
 static guint64 task_id_counter = 0;
@@ -74,11 +74,9 @@ guint64 get_next_task_id (void) {
 void log_task_status (guint64 task_id, const gchar *msg) {
     gchar *log_msg = NULL;
 
-    if (log_func) {
-        log_msg = g_strdup_printf ("[%"G_GUINT64_FORMAT"] %s", task_id, msg);
-        log_func (LOG_INFO, log_msg);
-        g_free (log_msg);
-    }
+    log_msg = g_strdup_printf ("[%"G_GUINT64_FORMAT"] %s", task_id, msg);
+    bd_utils_log (LOG_INFO, log_msg);
+    g_free (log_msg);
 }
 
 /**
@@ -93,13 +91,11 @@ static guint64 log_running (const gchar **argv) {
 
     task_id = get_next_task_id ();
 
-    if (log_func) {
-        str_argv = g_strjoinv (" ", (gchar **) argv);
-        log_msg = g_strdup_printf ("Running [%"G_GUINT64_FORMAT"] %s ...", task_id, str_argv);
-        log_func (LOG_INFO, log_msg);
-        g_free (str_argv);
-        g_free (log_msg);
-    }
+    str_argv = g_strjoinv (" ", (gchar **) argv);
+    log_msg = g_strdup_printf ("Running [%"G_GUINT64_FORMAT"] %s ...", task_id, str_argv);
+    bd_utils_log (LOG_INFO, log_msg);
+    g_free (str_argv);
+    g_free (log_msg);
 
     return task_id;
 }
@@ -111,15 +107,13 @@ static guint64 log_running (const gchar **argv) {
 static void log_out (guint64 task_id, const gchar *stdout, const gchar *stderr) {
     gchar *log_msg = NULL;
 
-    if (log_func) {
-        log_msg = g_strdup_printf ("stdout[%"G_GUINT64_FORMAT"]: %s", task_id, stdout);
-        log_func (LOG_INFO, log_msg);
-        g_free (log_msg);
+    log_msg = g_strdup_printf ("stdout[%"G_GUINT64_FORMAT"]: %s", task_id, stdout);
+    bd_utils_log (LOG_INFO, log_msg);
+    g_free (log_msg);
 
-        log_msg = g_strdup_printf ("stderr[%"G_GUINT64_FORMAT"]: %s", task_id, stderr);
-        log_func (LOG_INFO, log_msg);
-        g_free (log_msg);
-    }
+    log_msg = g_strdup_printf ("stderr[%"G_GUINT64_FORMAT"]: %s", task_id, stderr);
+    bd_utils_log (LOG_INFO, log_msg);
+    g_free (log_msg);
 
     return;
 }
@@ -131,11 +125,10 @@ static void log_out (guint64 task_id, const gchar *stdout, const gchar *stderr) 
 static void log_done (guint64 task_id, gint exit_code) {
     gchar *log_msg = NULL;
 
-    if (log_func) {
-        log_msg = g_strdup_printf ("...done [%"G_GUINT64_FORMAT"] (exit code: %d)", task_id, exit_code);
-        log_func (LOG_INFO, log_msg);
-        g_free (log_msg);
-    }
+    log_msg = g_strdup_printf ("...done [%"G_GUINT64_FORMAT"] (exit code: %d)", task_id, exit_code);
+    bd_utils_log (LOG_INFO, log_msg);
+    g_free (log_msg);
+
 
     return;
 }
@@ -543,23 +536,6 @@ gboolean bd_utils_exec_and_capture_output (const gchar **argv, const BDExtraArg 
 }
 
 /**
- * bd_utils_init_logging:
- * @new_log_func: (allow-none) (scope notified): logging function to use or
- *                                               %NULL to reset to default
- * @error: (out): place to store error (if any)
- *
- * Returns: whether logging was successfully initialized or not
- */
-gboolean bd_utils_init_logging (BDUtilsLogFunc new_log_func, GError **error __attribute__((unused))) {
-    /* XXX: the error attribute will likely be used in the future when this
-       function gets more complicated */
-
-    log_func = new_log_func;
-
-    return TRUE;
-}
-
-/**
  * bd_utils_version_cmp:
  * @ver_string1: first version string
  * @ver_string2: second version string
@@ -874,14 +850,4 @@ gboolean bd_utils_echo_str_to_file (const gchar *str, const gchar *file_path, GE
     }
     g_io_channel_unref (out_file);
     return TRUE;
-}
-
-/**
- * bd_utils_log:
- * @level: log level
- * @msg: log message
- */
-void bd_utils_log (gint level, const gchar *msg) {
-    if (log_func)
-        log_func (level, msg);
 }

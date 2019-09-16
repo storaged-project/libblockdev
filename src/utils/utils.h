@@ -7,6 +7,7 @@
 #include "dev_utils.h"
 #include "module.h"
 #include "dbus.h"
+#include "logging.h"
 
 /**
  * SECTION: utils

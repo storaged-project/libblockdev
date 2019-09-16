@@ -4,16 +4,6 @@
 #ifndef BD_UTILS_EXEC
 #define BD_UTILS_EXEC
 
-/**
- * BDUtilsLogFunc:
- * @level: log level (as understood by syslog(3))
- * @msg: log message
- *
- * Function type for logging function used by the libblockdev's exec utils to
- * log the information about program executing.
- */
-typedef void (*BDUtilsLogFunc) (gint level, const gchar *msg);
-
 typedef enum {
     BD_UTILS_PROG_STARTED,
     BD_UTILS_PROG_PROGRESS,
@@ -55,7 +45,6 @@ gboolean bd_utils_exec_and_report_error_no_progress (const gchar **argv, const B
 gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtraArg **extra, gint *status, GError **error);
 gboolean bd_utils_exec_and_capture_output (const gchar **argv, const BDExtraArg **extra, gchar **output, GError **error);
 gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg **extra, BDUtilsProgExtract prog_extract, gint *proc_status, GError **error);
-gboolean bd_utils_init_logging (BDUtilsLogFunc new_log_func, GError **error);
 gint bd_utils_version_cmp (const gchar *ver_string1, const gchar *ver_string2, GError **error);
 gboolean bd_utils_check_util_version (const gchar *util, const gchar *version, const gchar *version_arg, const gchar *version_regexp, GError **error);
 
@@ -66,8 +55,6 @@ gboolean bd_utils_prog_reporting_initialized (void);
 guint64 bd_utils_report_started (const gchar *msg);
 void bd_utils_report_progress (guint64 task_id, guint64 completion, const gchar *msg);
 void bd_utils_report_finished (guint64 task_id, const gchar *msg);
-
-void bd_utils_log (gint level, const gchar *msg);
 
 gboolean bd_utils_echo_str_to_file (const gchar *str, const gchar *file_path, GError **error);
 
