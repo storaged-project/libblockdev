@@ -21,7 +21,6 @@
 #include "exec.h"
 #include "extra_arg.h"
 #include "logging.h"
-#include <syslog.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -75,7 +74,7 @@ void log_task_status (guint64 task_id, const gchar *msg) {
     gchar *log_msg = NULL;
 
     log_msg = g_strdup_printf ("[%"G_GUINT64_FORMAT"] %s", task_id, msg);
-    bd_utils_log (LOG_INFO, log_msg);
+    bd_utils_log (BD_UTILS_LOG_INFO, log_msg);
     g_free (log_msg);
 }
 
@@ -93,7 +92,7 @@ static guint64 log_running (const gchar **argv) {
 
     str_argv = g_strjoinv (" ", (gchar **) argv);
     log_msg = g_strdup_printf ("Running [%"G_GUINT64_FORMAT"] %s ...", task_id, str_argv);
-    bd_utils_log (LOG_INFO, log_msg);
+    bd_utils_log (BD_UTILS_LOG_INFO, log_msg);
     g_free (str_argv);
     g_free (log_msg);
 
@@ -108,11 +107,11 @@ static void log_out (guint64 task_id, const gchar *stdout, const gchar *stderr) 
     gchar *log_msg = NULL;
 
     log_msg = g_strdup_printf ("stdout[%"G_GUINT64_FORMAT"]: %s", task_id, stdout);
-    bd_utils_log (LOG_INFO, log_msg);
+    bd_utils_log (BD_UTILS_LOG_INFO, log_msg);
     g_free (log_msg);
 
     log_msg = g_strdup_printf ("stderr[%"G_GUINT64_FORMAT"]: %s", task_id, stderr);
-    bd_utils_log (LOG_INFO, log_msg);
+    bd_utils_log (BD_UTILS_LOG_INFO, log_msg);
     g_free (log_msg);
 
     return;
@@ -126,7 +125,7 @@ static void log_done (guint64 task_id, gint exit_code) {
     gchar *log_msg = NULL;
 
     log_msg = g_strdup_printf ("...done [%"G_GUINT64_FORMAT"] (exit code: %d)", task_id, exit_code);
-    bd_utils_log (LOG_INFO, log_msg);
+    bd_utils_log (BD_UTILS_LOG_INFO, log_msg);
     g_free (log_msg);
 
 

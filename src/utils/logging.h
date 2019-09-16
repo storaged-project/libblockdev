@@ -1,7 +1,21 @@
 #include <glib.h>
+#include <syslog.h>
 
 #ifndef BD_UTILS_LOGGING
 #define BD_UTILS_LOGGING
+
+/* These are same as syslog levels, unfortunately GObject Introspection
+ * doesn't work with "redefined" constants so we can't use syslog
+ * constants here.
+ */
+#define BD_UTILS_LOG_EMERG   0
+#define BD_UTILS_LOG_ALERT   1
+#define BD_UTILS_LOG_CRIT    2
+#define BD_UTILS_LOG_ERR     3
+#define BD_UTILS_LOG_WARNING 4
+#define BD_UTILS_LOG_NOTICE  5
+#define BD_UTILS_LOG_INFO    6
+#define BD_UTILS_LOG_DEBUG   7
 
 /**
  * BDUtilsLogFunc:

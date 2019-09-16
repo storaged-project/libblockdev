@@ -26,7 +26,6 @@
 #include <locale.h>
 #include <unistd.h>
 #include <errno.h>
-#include <syslog.h>
 #include <blkid.h>
 #include <blockdev/utils.h>
 
@@ -223,19 +222,19 @@ static void crypto_log_redirect (gint level, const gchar *msg, void *usrptr __at
         case CRYPT_LOG_DEBUG:
         case CRYPT_LOG_VERBOSE:
             message = g_strdup_printf ("[cryptsetup] %s", msg);
-            bd_utils_log (LOG_DEBUG, message);
+            bd_utils_log (BD_UTILS_LOG_DEBUG, message);
             g_free (message);
             break;
         case CRYPT_LOG_NORMAL:
         case CRYPT_LOG_ERROR:
             message = g_strdup_printf ("[cryptsetup] %s", msg);
-            bd_utils_log (LOG_INFO, message);
+            bd_utils_log (BD_UTILS_LOG_INFO, message);
             g_free (message);
             break;
         default:
             g_warning ("Unknown cryptsetup log level %d.", level);
             message = g_strdup_printf ("[cryptsetup] %s", msg);
-            bd_utils_log (LOG_INFO, message);
+            bd_utils_log (BD_UTILS_LOG_INFO, message);
             g_free (message);
             break;
 
