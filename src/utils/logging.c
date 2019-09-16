@@ -18,6 +18,8 @@
  */
 
 #include <glib.h>
+#include <glib/gprintf.h>
+#include <stdarg.h>
 
 #include "logging.h"
 
@@ -48,4 +50,28 @@ gboolean bd_utils_init_logging (BDUtilsLogFunc new_log_func, GError **error __at
 void bd_utils_log (gint level, const gchar *msg) {
     if (log_func)
         log_func (level, msg);
+}
+
+/**
+ * bd_utils_log_format:
+ * @level: log level
+ * @format: printf-style format for the log message
+ */
+void bd_utils_log_format (gint level, const gchar *format, ...) {
+    gchar *msg = NULL;
+    va_list args;
+    gint ret = 0;
+
+    if (log_func) {
+        va_start (args, format);
+        ret = g_vasprintf (&msg, format, args);
+        va_end (args);
+
+        if (ret < 0)
+            return;
+
+        log_func (level, msg);
+    }
+
+    g_free (msg);
 }

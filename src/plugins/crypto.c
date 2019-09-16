@@ -232,7 +232,7 @@ static void crypto_log_redirect (gint level, const gchar *msg, void *usrptr __at
             g_free (message);
             break;
         default:
-            g_warning ("Unknown cryptsetup log level %d.", level);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "Unknown cryptsetup log level %d.", level);
             message = g_strdup_printf ("[cryptsetup] %s", msg);
             bd_utils_log (BD_UTILS_LOG_INFO, message);
             g_free (message);
@@ -673,7 +673,7 @@ static struct crypt_pbkdf_type *get_pbkdf_params (BDCryptoLUKSPBKDF *user_pbkdf,
     /* 'max_memory_kb' and 'parallel_threads' are not used in pbkdf2 */
     if (g_strcmp0 (user_pbkdf->type, CRYPT_KDF_PBKDF2) == 0) {
         if (user_pbkdf->max_memory_kb)
-            bd_utils_log (LOG_WARNING, "'max_memory_kb' is not valid option for 'pbkdf2', ignoring.");
+            bd_utils_log_format (LOG_WARNING, "'max_memory_kb' is not valid option for 'pbkdf2', ignoring.");
 
         new_pbkdf->max_memory_kb = 0;
         new_pbkdf->parallel_threads = 0;

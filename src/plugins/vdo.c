@@ -120,7 +120,7 @@ gboolean bd_vdo_check_deps (void) {
         status = bd_utils_check_util_version (deps[i].name, deps[i].version,
                                               deps[i].ver_arg, deps[i].ver_regexp, &error);
         if (!status)
-            g_warning ("%s", error->message);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
         else
             g_atomic_int_or (&avail_deps, 1 << i);
         g_clear_error (&error);
@@ -130,14 +130,14 @@ gboolean bd_vdo_check_deps (void) {
     for (i=0; i < MODULE_DEPS_LAST; i++) {
         status = check_module_deps (&avail_module_deps, MODULE_DEPS_VDO_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, &error);
         if (!status) {
-            g_warning ("%s", error->message);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
             g_clear_error (&error);
         }
         ret = ret && status;
     }
 
     if (!ret)
-        g_warning("Cannot load the VDO plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Cannot load the VDO plugin");
 
     return ret;
 }
@@ -290,7 +290,7 @@ static BDVDOInfo* get_vdo_info_from_table (GHashTable *table, gboolean free_tabl
     if (value) {
         ret->write_policy = bd_vdo_get_write_policy_from_str (value, &error);
         if (error) {
-            g_warning ("%s", error->message);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
             g_clear_error (&error);
         }
     } else
@@ -306,7 +306,7 @@ static BDVDOInfo* get_vdo_info_from_table (GHashTable *table, gboolean free_tabl
         }
         g_free (size_str);
         if (bs_error) {
-            g_warning ("%s", bs_error->msg);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", bs_error->msg);
             bs_clear_error (&bs_error);
         }
     }
@@ -321,7 +321,7 @@ static BDVDOInfo* get_vdo_info_from_table (GHashTable *table, gboolean free_tabl
             bs_size_free (size);
         }
         if (bs_error) {
-            g_warning ("%s", bs_error->msg);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", bs_error->msg);
             bs_clear_error (&bs_error);
         }
     } else
@@ -335,7 +335,7 @@ static BDVDOInfo* get_vdo_info_from_table (GHashTable *table, gboolean free_tabl
             bs_size_free (size);
         }
         if (error) {
-            g_warning ("%s", bs_error->msg);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", bs_error->msg);
             bs_clear_error (&bs_error);
         }
     } else
@@ -481,8 +481,8 @@ static gchar* get_index_memory_str (guint64 index_memory, GError **error) {
                 bs_clear_error (&bs_error);
                 return NULL;
             }
-            g_warning ("%"G_GUINT64_FORMAT" is not valid size for index memory, rounding to %s",
-                       index_memory, bs_size_get_bytes_str (rounded));
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%"G_GUINT64_FORMAT" is not valid size for index memory, rounding to %s",
+                          index_memory, bs_size_get_bytes_str (rounded));
             bs_size_free (mem_size);
             mem_size = rounded;
         }

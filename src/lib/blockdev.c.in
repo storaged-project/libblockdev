@@ -174,7 +174,8 @@ static gboolean load_config (GSequence *config_files, GSList **plugins_sonames, 
     while (!g_sequence_iter_is_end (config_file_iter)) {
         config_file = (gchar *) g_sequence_get (config_file_iter);
         if (!process_config_file (config_file, plugins_sonames, error)) {
-            g_warning ("Cannot process the config file '%s': %s. Skipping.", config_file, (*error)->message);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "Cannot process the config file '%s': %s. Skipping.",
+                                 config_file, (*error)->message);
             g_clear_error (error);
         }
         config_file_iter = g_sequence_iter_next (config_file_iter);
@@ -185,61 +186,61 @@ static gboolean load_config (GSequence *config_files, GSList **plugins_sonames, 
 
 static void unload_plugins (void) {
     if (plugins[BD_PLUGIN_LVM].handle && !unload_lvm (plugins[BD_PLUGIN_LVM].handle))
-        g_warning ("Failed to close the lvm plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to close the lvm plugin");
     plugins[BD_PLUGIN_LVM].handle = NULL;
 
     if (plugins[BD_PLUGIN_BTRFS].handle && !unload_btrfs (plugins[BD_PLUGIN_BTRFS].handle))
-        g_warning ("Failed to close the btrfs plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to close the btrfs plugin");
     plugins[BD_PLUGIN_BTRFS].handle = NULL;
 
     if (plugins[BD_PLUGIN_SWAP].handle && !unload_swap (plugins[BD_PLUGIN_SWAP].handle))
-        g_warning ("Failed to close the swap plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to close the swap plugin");
     plugins[BD_PLUGIN_SWAP].handle = NULL;
 
     if (plugins[BD_PLUGIN_LOOP].handle && !unload_loop (plugins[BD_PLUGIN_LOOP].handle))
-        g_warning ("Failed to close the loop plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to close the loop plugin");
     plugins[BD_PLUGIN_LOOP].handle = NULL;
 
     if (plugins[BD_PLUGIN_CRYPTO].handle && !unload_crypto (plugins[BD_PLUGIN_CRYPTO].handle))
-        g_warning ("Failed to close the crypto plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to close the crypto plugin");
     plugins[BD_PLUGIN_CRYPTO].handle = NULL;
 
     if (plugins[BD_PLUGIN_MPATH].handle && !unload_mpath (plugins[BD_PLUGIN_MPATH].handle))
-        g_warning ("Failed to close the mpath plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to close the mpath plugin");
     plugins[BD_PLUGIN_MPATH].handle = NULL;
 
     if (plugins[BD_PLUGIN_DM].handle && !unload_dm (plugins[BD_PLUGIN_DM].handle))
-        g_warning ("Failed to close the dm plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to close the dm plugin");
     plugins[BD_PLUGIN_DM].handle = NULL;
 
     if (plugins[BD_PLUGIN_MDRAID].handle && !unload_mdraid (plugins[BD_PLUGIN_MDRAID].handle))
-        g_warning ("Failed to close the mdraid plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to close the mdraid plugin");
     plugins[BD_PLUGIN_MDRAID].handle = NULL;
 
     if (plugins[BD_PLUGIN_KBD].handle && !unload_kbd (plugins[BD_PLUGIN_KBD].handle))
-        g_warning ("Failed to close the kbd plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to close the kbd plugin");
     plugins[BD_PLUGIN_KBD].handle = NULL;
 
 #if defined(__s390__) || defined(__s390x__)
     if (plugins[BD_PLUGIN_S390].handle && !unload_s390 (plugins[BD_PLUGIN_S390].handle))
-        g_warning ("Failed to close the s390 plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to close the s390 plugin");
     plugins[BD_PLUGIN_S390].handle = NULL;
 #endif
 
     if (plugins[BD_PLUGIN_PART].handle && !unload_part (plugins[BD_PLUGIN_PART].handle))
-        g_warning ("Failed to close the part plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to close the part plugin");
     plugins[BD_PLUGIN_PART].handle = NULL;
 
     if (plugins[BD_PLUGIN_FS].handle && !unload_fs (plugins[BD_PLUGIN_FS].handle))
-        g_warning ("Failed to close the fs plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to close the fs plugin");
     plugins[BD_PLUGIN_FS].handle = NULL;
 
     if (plugins[BD_PLUGIN_NVDIMM].handle && !unload_nvdimm (plugins[BD_PLUGIN_NVDIMM].handle))
-        g_warning ("Failed to close the nvdimm plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to close the nvdimm plugin");
     plugins[BD_PLUGIN_NVDIMM].handle = NULL;
 
     if (plugins[BD_PLUGIN_VDO].handle && !unload_vdo (plugins[BD_PLUGIN_VDO].handle))
-        g_warning ("Failed to close the VDO plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to close the VDO plugin");
     plugins[BD_PLUGIN_VDO].handle = NULL;
 }
 
@@ -299,11 +300,13 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload, g
     config_files = get_config_files (&error);
     if (config_files) {
         if (!load_config (config_files, plugins_sonames, &error))
-            g_warning ("Failed to load config files: %s. Using the built-in config", error->message);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to load config files: %s. Using the built-in config",
+                                 error->message);
 
         g_sequence_free (config_files);
     } else
-        g_warning ("Failed to load config files: %s. Using the built-in config", error->message);
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to load config files: %s. Using the built-in config",
+                             error->message);
     g_clear_error (&error);
 
     /* populate missing items with the built-in defaults */
@@ -415,8 +418,8 @@ gboolean bd_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GErro
 
     g_mutex_lock (&init_lock);
     if (initialized) {
-        g_warning ("bd_init() called more than once! Use bd_reinit() to reinitialize "
-                   "or bd_is_initialized() to get the current state.");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "bd_init() called more than once! Use bd_reinit() to reinitialize "
+                             "or bd_is_initialized() to get the current state.");
         g_mutex_unlock (&init_lock);
         return FALSE;
     }
@@ -548,8 +551,8 @@ gboolean bd_try_init(BDPluginSpec **request_plugins, BDUtilsLogFunc log_func,
 
     g_mutex_lock (&init_lock);
     if (initialized) {
-        g_warning ("bd_try_init() called more than once! Use bd_reinit() to reinitialize "
-                   "or bd_is_initialized() to get the current state.");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "bd_try_init() called more than once! Use bd_reinit() "
+                             "to reinitialize or bd_is_initialized() to get the current state.");
         g_mutex_unlock (&init_lock);
         return FALSE;
     }

@@ -201,7 +201,7 @@ def get_loading_func(fn_infos, module_name):
 
     ret += '    handle = dlopen(so_name, RTLD_LAZY);\n'
     ret += '    if (!handle) {\n'
-    ret += '        g_warning("failed to load module {0}: %s", dlerror());\n'.format(module_name)
+    ret += '        bd_utils_log_format (BD_UTILS_LOG_WARNING, "failed to load module {0}: %s", dlerror());\n'.format(module_name)
     ret += '        return NULL;\n'
     ret += '    }\n\n'
 
@@ -232,7 +232,7 @@ def get_loading_func(fn_infos, module_name):
         ret += '    dlerror();\n'
         ret += '    * (void**) (&_{0.name}) = dlsym(handle, "{0.name}");\n'.format(info)
         ret += '    if ((error = dlerror()) != NULL)\n'
-        ret += '        g_warning("failed to load {0.name}: %s", error);\n\n'.format(info)
+        ret += '        bd_utils_log_format (BD_UTILS_LOG_WARNING, "failed to load {0.name}: %s", error);\n\n'.format(info)
 
     ret += '    return handle;\n'
     ret += '}\n\n'

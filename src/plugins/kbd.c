@@ -82,10 +82,10 @@ gboolean bd_kbd_check_deps (void) {
     ret = check_module_deps (&avail_module_deps, MODULE_DEPS_ZRAM_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, &error);
     if (!ret) {
         if (error) {
-            g_warning("Cannot load the kbd plugin: %s" , error->message);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "Cannot load the kbd plugin: %s" , error->message);
             g_clear_error (&error);
         } else
-            g_warning("Cannot load the kbd plugin: the 'zram' kernel module is not available");
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "Cannot load the kbd plugin: the 'zram' kernel module is not available");
     }
 
     if (!ret)
@@ -109,7 +109,7 @@ gboolean bd_kbd_check_deps (void) {
         status = bd_utils_check_util_version (deps[i].name, deps[i].version,
                                               deps[i].ver_arg, deps[i].ver_regexp, &error);
         if (!status)
-            g_warning ("%s", error->message);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
         else
             g_atomic_int_or (&avail_deps, 1 << i);
         g_clear_error (&error);
@@ -117,7 +117,7 @@ gboolean bd_kbd_check_deps (void) {
     }
 
     if (!ret)
-        g_warning("Cannot load the kbd plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Cannot load the kbd plugin");
 
     return ret;
 }

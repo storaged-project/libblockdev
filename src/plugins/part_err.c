@@ -19,6 +19,7 @@
 
 #include <glib.h>
 #include <parted/parted.h>
+#include <blockdev/utils.h>
 
 #include "part_err.h"
 
@@ -26,7 +27,7 @@ static __thread gchar *error_msg = NULL;
 
 PedExceptionOption bd_exc_handler (PedException *ex) {
     if (ex->type <= PED_EXCEPTION_WARNING && (ex->options & PED_EXCEPTION_IGNORE) != 0) {
-      g_warning ("[parted] %s", ex->message);
+      bd_utils_log_format (BD_UTILS_LOG_WARNING, "[parted] %s", ex->message);
       return PED_EXCEPTION_IGNORE;
     }
     error_msg = g_strdup (ex->message);

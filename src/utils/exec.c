@@ -134,7 +134,7 @@ static void log_done (guint64 task_id, gint exit_code) {
 
 static void set_c_locale(gpointer user_data __attribute__((unused))) {
     if (setenv ("LC_ALL", "C", 1) != 0)
-        g_warning ("Failed to set LC_ALL=C for a child process!");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to set LC_ALL=C for a child process!");
 }
 
 /**

@@ -63,23 +63,23 @@ gboolean bd_fs_check_deps (void) {
     for (i = BD_FS_TECH_EXT2; i <= BD_FS_TECH_EXT4; i++) {
         ret = ret && bd_fs_ext_is_tech_avail (i, 0xffffffff, &error);
         if (!ret && error) {
-            g_warning ("%s", error->message);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
             g_clear_error (&error);
         }
     }
     ret = ret && bd_fs_xfs_is_tech_avail (BD_FS_TECH_XFS, 0xffffffff, &error);
     if (!ret && error) {
-        g_warning ("%s", error->message);
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
         g_clear_error (&error);
     }
     ret = ret && bd_fs_vfat_is_tech_avail (BD_FS_TECH_VFAT, 0xffffffff, &error);
     if (!ret && error) {
-        g_warning ("%s", error->message);
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
         g_clear_error (&error);
     }
     ret = ret && bd_fs_ntfs_is_tech_avail (BD_FS_TECH_NTFS, 0xffffffff, &error);
     if (!ret && error) {
-        g_warning ("%s", error->message);
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
         g_clear_error (&error);
     }
     return ret;

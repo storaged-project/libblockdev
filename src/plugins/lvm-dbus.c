@@ -271,7 +271,7 @@ gboolean bd_lvm_check_deps (void) {
     for (i=0; i < DBUS_DEPS_LAST; i++) {
         success = check_dbus_deps (&avail_dbus_deps, DBUS_DEPS_LVMDBUSD_MASK, dbus_deps, DBUS_DEPS_LAST, &deps_check_lock, &error);
         if (!success) {
-            g_warning ("%s", error->message);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
             g_clear_error (&error);
         }
         check_ret = check_ret && success;
@@ -281,7 +281,7 @@ gboolean bd_lvm_check_deps (void) {
         success = bd_utils_check_util_version (deps[i].name, deps[i].version,
                                                deps[i].ver_arg, deps[i].ver_regexp, &error);
         if (!success)
-            g_warning ("%s", error->message);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
         else
             g_atomic_int_or (&avail_deps, 1 << i);
         g_clear_error (&error);
@@ -289,7 +289,7 @@ gboolean bd_lvm_check_deps (void) {
     }
 
     if (!check_ret)
-        g_warning("Cannot load the LVM plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Cannot load the LVM plugin");
 
     return check_ret;
 }
