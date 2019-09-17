@@ -4,7 +4,7 @@ SUBDIRS = plugin_apis
 
 lib_LTLIBRARIES = libblockdev.la
 libblockdev_la_CFLAGS = $(GLIB_CFLAGS) $(GOBJECT_CFLAGS)
-libblockdev_la_LIBADD = $(GLIB_LIBS) $(GOBJECT_LIBS) ${builddir}/../utils/libbd_utils.la -ldl
+libblockdev_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(GOBJECT_LIBS) -ldl
 
 if WITH_BTRFS
 libblockdev_la_CFLAGS += $(GOBJECT_CFLAGS)
