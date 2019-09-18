@@ -7,7 +7,7 @@ import six
 import re
 import subprocess
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test, run_command
 from gi.repository import BlockDev, GLib
 
 
@@ -1274,6 +1274,41 @@ class LvmPVVGcachedLVstatsTestCase(LvmPVVGLVTestCase):
         self.assertEqual(stats.cache_size, 512 * 1024**2)
         self.assertEqual(stats.md_size, 8 * 1024**2)
         self.assertEqual(stats.mode, BlockDev.LVMCacheMode.WRITETHROUGH)
+
+class LvmVGExportedTestCase(LvmPVVGLVTestCase):
+
+    def _clean_up(self):
+        run_command("vgimport testVG")
+
+        LvmPVVGLVTestCase._clean_up(self)
+
+    @tag_test(TestTags.SLOW)
+    def test_exported_vg(self):
+        """Verify that info has correct information about exported VGs"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0, None)
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_vginfo("testVG")
+        self.assertTrue(info)
+        self.assertFalse(info.exported)
+
+        ret, out, err = run_command("vgexport testVG")
+        if ret != 0:
+            self.fail("Failed to export VG:\n%s %s" % (out, err))
+
+        info = BlockDev.lvm_vginfo("testVG")
+        self.assertTrue(info)
+        self.assertTrue(info.exported)
+
+
+        self.assertTrue(succ)
 
 class LVMUnloadTest(LVMTestCase):
     def setUp(self):

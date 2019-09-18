@@ -94,6 +94,7 @@ typedef struct BDLVMVGdata {
     guint64 extent_count;
     guint64 free_count;
     guint64 pv_count;
+    gboolean exported;
 } BDLVMVGdata;
 
 void bd_lvm_vgdata_free (BDLVMVGdata *data);
