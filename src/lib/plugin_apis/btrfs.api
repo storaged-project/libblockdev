@@ -3,7 +3,7 @@
 #include <blockdev/utils.h>
 
 #define BD_BTRFS_MAIN_VOLUME_ID 5
-#define BD_BTRFS_MIN_MEMBER_SIZE (128 MiB)
+#define BD_BTRFS_MIN_MEMBER_SIZE G_GUINT64_CONSTANT (134217728ULL) // 128 MiB
 
 GQuark bd_btrfs_error_quark (void) {
     return g_quark_from_static_string ("g-bd-btrfs-error-quark");
