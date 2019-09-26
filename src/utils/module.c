@@ -18,13 +18,16 @@
  */
 
 #include <glib.h>
+#include <glib/gprintf.h>
 #include <libkmod.h>
 #include <string.h>
 #include <syslog.h>
 #include <locale.h>
 
 #include "module.h"
+#include "exec.h"
 
+#define UNUSED __attribute__((unused))
 
 /**
  * bd_utils_module_error_quark: (skip)
@@ -32,6 +35,39 @@
 GQuark bd_utils_module_error_quark (void)
 {
     return g_quark_from_static_string ("g-bd-utils-module-error-quark");
+}
+
+static void utils_kmod_log_redirect (void *log_data UNUSED, int priority,
+                                     const char *file UNUSED, int line UNUSED,
+                                     const char *fn UNUSED, const char *format,
+                                     va_list args) {
+    gchar *kmod_msg = NULL;
+    gchar *message = NULL;
+    gint ret = 0;
+
+    ret = g_vasprintf (&kmod_msg, format, args);
+    if (ret < 0)
+        return;
+
+#ifdef DEBUG
+    message = g_strdup_printf ("[libmkod] %s:%d %s() %s", file, line, fn, kmod_msg);
+#else
+    message = g_strdup_printf ("[libmkod] %s", kmod_msg);
+#endif
+    bd_utils_log (priority, message);
+
+    g_free (kmod_msg);
+    g_free (message);
+
+}
+
+static void set_kmod_logging (struct kmod_ctx *ctx) {
+#ifdef DEBUG
+    kmod_set_log_priority (ctx, LOG_DEBUG);
+#else
+    kmod_set_log_priority (ctx, LOG_INFO);
+#endif
+    kmod_set_log_fn (ctx, utils_kmod_log_redirect, NULL);
 }
 
 /**
@@ -59,8 +95,7 @@ gboolean bd_utils_have_kernel_module (const gchar *module_name, GError **error) 
         freelocale (c_locale);
         return FALSE;
     }
-    /* prevent libkmod from spamming our STDERR */
-    kmod_set_log_priority (ctx, LOG_CRIT);
+    set_kmod_logging (ctx);
 
     ret = kmod_module_new_from_name (ctx, module_name, &mod);
     if (ret < 0) {
@@ -105,8 +140,7 @@ gboolean bd_utils_load_kernel_module (const gchar *module_name, const gchar *opt
         freelocale (c_locale);
         return FALSE;
     }
-    /* prevent libkmod from spamming our STDERR */
-    kmod_set_log_priority (ctx, LOG_CRIT);
+    set_kmod_logging (ctx);
 
     ret = kmod_module_new_from_name (ctx, module_name, &mod);
     if (ret < 0) {
@@ -170,8 +204,7 @@ gboolean bd_utils_unload_kernel_module (const gchar *module_name, GError **error
         freelocale (c_locale);
         return FALSE;
     }
-    /* prevent libkmod from spamming our STDERR */
-    kmod_set_log_priority (ctx, LOG_CRIT);
+    set_kmod_logging (ctx);
 
     ret = kmod_module_new_from_loaded (ctx, &list);
     if (ret < 0) {
