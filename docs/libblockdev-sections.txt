@@ -168,6 +168,7 @@ bd_utils_report_progress
 bd_utils_report_started
 bd_utils_log
 bd_utils_log_format
+bd_utils_log_stdout
 bd_utils_echo_str_to_file
 BD_UTILS_SIZE_ERROR
 BDUtilsSizeError

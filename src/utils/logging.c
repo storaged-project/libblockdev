@@ -23,12 +23,14 @@
 
 #include "logging.h"
 
-static BDUtilsLogFunc log_func = NULL;
+static BDUtilsLogFunc log_func = &bd_utils_log_stdout;
 
 /**
  * bd_utils_init_logging:
  * @new_log_func: (allow-none) (scope notified): logging function to use or
- *                                               %NULL to reset to default
+ *                                               %NULL to disable logging; use
+ *                                               #bd_utils_log_stdout to reset to
+ *                                               the default behaviour
  * @error: (out): place to store error (if any)
  *
  * Returns: whether logging was successfully initialized or not
@@ -74,4 +76,35 @@ void bd_utils_log_format (gint level, const gchar *format, ...) {
     }
 
     g_free (msg);
+}
+
+/**
+ * bd_utils_log_stdout:
+ * @level: log level
+ * @msg: log message
+ *
+ * Covenient function for logging to stdout. Can be used as #BDUtilsLogFunc.
+ *
+ */
+void bd_utils_log_stdout (gint level, const gchar *msg) {
+    switch (level) {
+        case BD_UTILS_LOG_DEBUG:
+#ifdef DEBUG
+            g_debug ("%s", msg);
+#endif
+            break;
+        case BD_UTILS_LOG_INFO:
+        case BD_UTILS_LOG_NOTICE:
+            g_info ("%s", msg);
+            break;
+        case BD_UTILS_LOG_WARNING:
+        case BD_UTILS_LOG_ERR:
+            g_warning ("%s", msg);
+            break;
+        case BD_UTILS_LOG_EMERG:
+        case BD_UTILS_LOG_ALERT:
+        case BD_UTILS_LOG_CRIT:
+            g_critical ("%s", msg);
+            break;
+    }
 }
