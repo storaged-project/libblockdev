@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <syslog.h>
 #include <blkid.h>
+#include <strings.h>
 #include <blockdev/utils.h>
 
 #ifdef WITH_BD_ESCROW
@@ -240,6 +241,16 @@ static void crypto_log_redirect (gint level, const gchar *msg, void *usrptr __at
             break;
 
     }
+}
+
+static void safe_zero (void *data, size_t len) {
+#ifdef HAVE_EXPLICIT_BZERO
+    explicit_bzero (data, len);
+#else
+    /* taken from glibc string/explicit_bzero.c */
+    memset (data, '\0', len);
+    asm volatile ("" ::: "memory");
+#endif
 }
 
 /**
@@ -858,6 +869,7 @@ static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 k
         }
         ret = crypt_keyslot_add_by_volume_key (cd, CRYPT_ANY_SLOT, NULL, 0,
                                                (const char*) key_buffer, buf_len);
+        safe_zero (key_buffer, buf_len);
         g_free (key_buffer);
         if (ret < 0) {
             g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_ADD_KEY,
@@ -1034,7 +1046,11 @@ static gboolean luks_open (const gchar *device, const gchar *name, const guint8 
 
     ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, key_buffer ? key_buffer : (char*) pass_data,
                                         buf_len, read_only ? CRYPT_ACTIVATE_READONLY : 0);
-    g_free (key_buffer);
+
+    if (key_buffer) {
+        safe_zero (key_buffer, buf_len);
+        g_free (key_buffer);
+    }
 
     if (ret < 0) {
         if (ret == -EPERM)
@@ -1244,8 +1260,15 @@ gboolean bd_crypto_luks_add_key (const gchar *device, const gchar *pass, const g
                                            key_buf ? (const guint8*) key_buf : (const guint8*) pass, buf_len,
                                            nkey_buf ? (const guint8*) nkey_buf : (const guint8*) npass, nbuf_len,
                                            error);
-    g_free (key_buf);
-    g_free (nkey_buf);
+    if (key_buf) {
+        safe_zero (key_buf, buf_len);
+        g_free (key_buf);
+    }
+
+    if (nkey_buf) {
+        safe_zero (nkey_buf, nbuf_len);
+        g_free (nkey_buf);
+    }
 
     return success;
 }
@@ -1347,7 +1370,11 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, cons
         buf_len = strlen (pass);
 
     success = bd_crypto_luks_remove_key_blob (device, key_buf ? (const guint8*) key_buf : (const guint8*) pass, buf_len, error);
-    g_free (key_buf);
+
+    if (key_buf) {
+        safe_zero (key_buf, buf_len);
+        g_free (key_buf);
+    }
 
     return success;
 }
@@ -1482,7 +1509,10 @@ static gboolean luks_resize (const gchar *luks_device, guint64 size, const guint
                                             key_buffer ? key_buffer : (char*) pass_data,
                                             buf_len, 0);
 #endif
-        g_free (key_buffer);
+        if (key_buffer) {
+            safe_zero (key_buffer, buf_len);
+            g_free (key_buffer);
+        }
 
         if (ret < 0) {
             if (ret == -EPERM)
@@ -1677,8 +1707,8 @@ static gboolean luks_resume (const gchar *luks_device, const guint8 *pass_data, 
                                       buf_len);
 
     if (key_buffer) {
-      memset (key_buffer, 0, buf_len);
-      g_free (key_buffer);
+        safe_zero (key_buffer, buf_len);
+        g_free (key_buffer);
     }
 
     if (ret < 0) {

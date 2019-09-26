@@ -213,6 +213,7 @@ AS_IF([test "x$with_crypto" != "xno"],
             [LIBBLOCKDEV_PKG_CHECK_MODULES([NSS], [nss >= 3.18.0])
              LIBBLOCKDEV_CHECK_HEADER([volume_key/libvolume_key.h], [$GLIB_CFLAGS $NSS_CFLAGS], [libvolume_key.h not available])],
             [])
+      AC_CHECK_FUNCS([explicit_bzero])
       ],
       [])
 
