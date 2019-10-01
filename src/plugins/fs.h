@@ -20,7 +20,7 @@ typedef enum {
 
 /* XXX: where the file systems start at the enum of technologies */
 #define BD_FS_OFFSET 2
-#define BD_FS_LAST_FS 7
+#define BD_FS_LAST_FS 8
 typedef enum {
     BD_FS_TECH_GENERIC = 0,
     BD_FS_TECH_MOUNT   = 1,
@@ -30,6 +30,7 @@ typedef enum {
     BD_FS_TECH_XFS     = 5,
     BD_FS_TECH_VFAT    = 6,
     BD_FS_TECH_NTFS    = 7,
+    BD_FS_TECH_F2FS    = 8,
 } BDFSTech;
 
 /* XXX: number of the highest bit of all modes */
@@ -63,6 +64,7 @@ gboolean bd_fs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
 #endif  /* BD_FS */
 
 #include "fs/ext.h"
+#include "fs/f2fs.h"
 #include "fs/generic.h"
 #include "fs/mount.h"
 #include "fs/ntfs.h"

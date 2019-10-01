@@ -577,6 +577,13 @@ bd_fs_ntfs_repair
 bd_fs_ntfs_resize
 bd_fs_ntfs_set_label
 bd_fs_ntfs_wipe
+BDFSF2FSInfo
+bd_fs_f2fs_mkfs
+bd_fs_f2fs_wipe
+bd_fs_f2fs_check
+bd_fs_f2fs_repair
+bd_fs_f2fs_get_info
+bd_fs_f2fs_resize
 </SECTION>
 
 <SECTION>

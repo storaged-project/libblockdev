@@ -334,6 +334,86 @@ GType bd_fs_ntfs_info_get_type () {
     return type;
 }
 
+#define BD_FS_TYPE_F2FS_INFO (bd_fs_f2fs_info_get_type ())
+GType bd_fs_f2fs_info_get_type();
+
+/**
+ * BDFSF2FSInfo:
+ * @label: label of the filesystem
+ * @uuid: uuid of the filesystem
+ * @sector_size: sector size used by the filesystem
+ * @sector_count: number of sectors in the filesystem
+ * @features: features enabled for this filesystem, see #BDFSF2FSFeature
+ */
+typedef struct BDFSF2FSInfo {
+    gchar *label;
+    gchar *uuid;
+    guint64 sector_size;
+    guint64 sector_count;
+    guint64 features;
+} BDFSF2FSInfo;
+
+/**
+ * bd_fs_f2fs_info_copy: (skip)
+ *
+ * Creates a new copy of @data.
+ */
+BDFSF2FSInfo* bd_fs_f2fs_info_copy (BDFSF2FSInfo *data) {
+    if (data == NULL)
+        return NULL;
+
+    BDFSF2FSInfo *ret = g_new0 (BDFSF2FSInfo, 1);
+
+    ret->label = g_strdup (data->label);
+    ret->uuid = g_strdup (data->uuid);
+    ret->sector_size = data->sector_size;
+    ret->sector_count = data->sector_count;
+    ret->features = data->features;
+
+    return ret;
+}
+
+/**
+ * bd_fs_f2fs_info_free: (skip)
+ *
+ * Frees @data.
+ */
+void bd_fs_f2fs_info_free (BDFSF2FSInfo *data) {
+    if (data == NULL)
+        return;
+
+    g_free (data->label);
+    g_free (data->uuid);
+    g_free (data);
+}
+
+GType bd_fs_f2fs_info_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDFSF2FSInfo",
+                                            (GBoxedCopyFunc) bd_fs_f2fs_info_copy,
+                                            (GBoxedFreeFunc) bd_fs_f2fs_info_free);
+    }
+
+    return type;
+}
+
+typedef enum {
+    BD_FS_F2FS_FEATURE_ENCRYPT =                1 << 0,
+    BD_FS_F2FS_FEATURE_BLKZONED =               1 << 1,
+    BD_FS_F2FS_FEATURE_ATOMIC_WRITE =           1 << 2,
+    BD_FS_F2FS_FEATURE_EXTRA_ATTR =             1 << 3,
+    BD_FS_F2FS_FEATURE_PRJQUOTA =               1 << 4,
+    BD_FS_F2FS_FEATURE_INODE_CHKSUM =           1 << 5,
+    BD_FS_F2FS_FEATURE_FLEXIBLE_INLINE_XATTR =  1 << 6,
+    BD_FS_F2FS_FEATURE_QUOTA_INO =              1 << 7,
+    BD_FS_F2FS_FEATURE_INODE_CRTIME =           1 << 8,
+    BD_FS_F2FS_FEATURE_LOST_FOUND =             1 << 9,
+    BD_FS_F2FS_FEATURE_VERITY =                 1 << 10,
+    BD_FS_F2FS_FEATURE_SB_CHKSUM =              1 << 11,
+} BDFSF2FSFeature;
+
 typedef enum {
     BD_FS_TECH_GENERIC = 0,
     BD_FS_TECH_MOUNT,
@@ -342,7 +422,8 @@ typedef enum {
     BD_FS_TECH_EXT4,
     BD_FS_TECH_XFS,
     BD_FS_TECH_VFAT,
-    BD_FS_TECH_NTFS
+    BD_FS_TECH_NTFS,
+    BD_FS_TECH_F2FS,
 } BDFSTech;
 
 typedef enum {
@@ -1187,5 +1268,85 @@ gboolean bd_fs_ntfs_resize (const gchar *device, guint64 new_size, GError **erro
  * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_QUERY
  */
 BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error);
+
+/**
+ * bd_fs_f2fs_mkfs:
+ * @device: the device to create a new f2fs fs on
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
+ *                                                 passed to the 'mkfs.f2fs' utility)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether a new f2fs fs was successfully created on @device or not
+ *
+ * Tech category: %BD_FS_TECH_F2FS-%BD_FS_TECH_MODE_MKFS
+ */
+gboolean bd_fs_f2fs_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_fs_f2fs_wipe:
+ * @device: the device to wipe an f2fs signature from
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether an f2fs signature was successfully wiped from the @device or
+ *          not
+ *
+ * Tech category: %BD_FS_TECH_F2FS-%BD_FS_TECH_MODE_WIPE
+ */
+gboolean bd_fs_f2fs_wipe (const gchar *device, GError **error);
+
+/**
+ * bd_fs_f2fs_check:
+ * @device: the device containing the file system to check
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the repair (right now
+ *                                                 passed to the 'fsck.f2fs' utility)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether an f2fs file system on the @device is clean or not
+ *
+ * Tech category: %BD_FS_TECH_F2FS-%BD_FS_TECH_MODE_CHECK
+ */
+gboolean bd_fs_f2fs_check (const gchar *device, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_fs_f2fs_repair:
+ * @device: the device containing the file system to repair
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the repair (right now
+ *                                                 passed to the 'fsck.f2fs' utility)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether an f2fs file system on the @device was successfully repaired
+ *          (if needed) or not (error is set in that case)
+ *
+ * Tech category: %BD_FS_TECH_F2FS-%BD_FS_TECH_MODE_REPAIR
+ */
+gboolean bd_fs_f2fs_repair (const gchar *device, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_fs_f2fs_get_info:
+ * @device: the device containing the file system to get info for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): information about the file system on @device or
+ *                           %NULL in case of error
+ *
+ * Tech category: %BD_FS_TECH_F2FS-%BD_FS_TECH_MODE_QUERY
+ */
+BDFSF2FSInfo* bd_fs_f2fs_get_info (const gchar *device, GError **error);
+
+/**
+ * bd_fs_f2fs_resize:
+ * @device: the device containing the file system to resize
+ * @new_size: new requested size for the file system *in file system sectors* (see bd_fs_f2fs_get_info())
+ *            (if 0, the file system is adapted to the underlying block device)
+ * @safe: whether to perform safe resize or not (does not resize metadata)
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the resize (right now
+ *                                                 passed to the 'resize.f2fs' utility)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the file system on @device was successfully resized or not
+ *
+ * Tech category: %BD_FS_TECH_F2FS-%BD_FS_TECH_MODE_RESIZE
+ */
+gboolean bd_fs_f2fs_resize (const gchar *device, guint64 new_size, gboolean safe, const BDExtraArg **extra, GError **error);
 
 #endif  /* BD_FS_API */
