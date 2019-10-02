@@ -55,12 +55,22 @@ class UtilsExecLoggingTest(UtilsTestCase):
 
         self.log += msg + "\n"
 
+    def setUp(self):
+        self.addCleanup(self._clean_up)
+
+    def _clean_up(self):
+        self.log = ""
+        BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_WARNING)
+
     @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
     def test_logging(self):
         """Verify that setting up and using exec logging works as expected"""
 
         succ = BlockDev.utils_init_logging(self.my_log_func)
         self.assertTrue(succ)
+
+        # set default log level to info which is used for exec calls
+        BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_INFO)
 
         succ = BlockDev.utils_exec_and_report_error(["true"])
         self.assertTrue(succ)
@@ -92,6 +102,23 @@ class UtilsExecLoggingTest(UtilsTestCase):
         succ = BlockDev.utils_exec_and_report_error(["true"])
         self.assertTrue(succ)
         self.assertEqual(old_log, self.log)
+
+    @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
+    def test_logging_level(self):
+        succ = BlockDev.utils_init_logging(self.my_log_func)
+        self.assertTrue(succ)
+
+        # default log level should be warning, info should be ignored
+        BlockDev.utils_log(BlockDev.UTILS_LOG_INFO, "info message")
+        self.assertFalse(self.log)
+
+        BlockDev.utils_log(BlockDev.UTILS_LOG_WARNING, "warning message")
+        self.assertIn("warning message", self.log)
+
+        # switch default to info
+        BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_INFO)
+        BlockDev.utils_log(BlockDev.UTILS_LOG_INFO, "info message")
+        self.assertIn("info message", self.log)
 
     @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
     def test_version_cmp(self):

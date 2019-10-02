@@ -256,6 +256,9 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         self.assertTrue(BlockDev.reinit(self.requested_plugins, False, self.my_log_func))
 
+        # we are cheking for info log messages and default level is warning
+        BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_INFO)
+
         succ = BlockDev.utils_exec_and_report_error(["true"])
         self.assertTrue(succ)
 

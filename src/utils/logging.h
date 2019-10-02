@@ -29,6 +29,8 @@ typedef void (*BDUtilsLogFunc) (gint level, const gchar *msg);
 
 gboolean bd_utils_init_logging (BDUtilsLogFunc new_log_func, GError **error);
 
+void bd_utils_set_log_level (gint level);
+
 void bd_utils_log (gint level, const gchar *msg);
 void bd_utils_log_format (gint level, const gchar *format, ...);
 void bd_utils_log_stdout (gint level, const gchar *msg);

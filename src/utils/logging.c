@@ -24,6 +24,7 @@
 #include "logging.h"
 
 static BDUtilsLogFunc log_func = &bd_utils_log_stdout;
+static int log_level = BD_UTILS_LOG_WARNING;
 
 /**
  * bd_utils_init_logging:
@@ -45,12 +46,28 @@ gboolean bd_utils_init_logging (BDUtilsLogFunc new_log_func, GError **error __at
 }
 
 /**
+ * bd_utils_set_log_level:
+ * @level: log level
+ *
+ * Level of messages to log. Only messages with level <= @level will be logged.
+ * For example using with #BD_UTILS_LOG_WARNING (default value) only messages
+ * with log levels #BD_UTILS_LOG_WARNING, #BD_UTILS_LOG_ERR, ..., #BD_UTILS_LOG_EMERG
+ * will be logged.
+ *
+ * Note: #BD_UTILS_LOG_DEBUG level messages are always skipped unless compiled
+ *       with `--enable-debug` configure option.
+ */
+void bd_utils_set_log_level (gint level) {
+    log_level = level;
+}
+
+/**
  * bd_utils_log:
  * @level: log level
  * @msg: log message
  */
 void bd_utils_log (gint level, const gchar *msg) {
-    if (log_func)
+    if (log_func && level <= log_level)
         log_func (level, msg);
 }
 
@@ -64,7 +81,7 @@ void bd_utils_log_format (gint level, const gchar *format, ...) {
     va_list args;
     gint ret = 0;
 
-    if (log_func) {
+    if (log_func && level <= log_level) {
         va_start (args, format);
         ret = g_vasprintf (&msg, format, args);
         va_end (args);
@@ -87,6 +104,9 @@ void bd_utils_log_format (gint level, const gchar *format, ...) {
  *
  */
 void bd_utils_log_stdout (gint level, const gchar *msg) {
+    if (level > log_level)
+        return;
+
     switch (level) {
         case BD_UTILS_LOG_DEBUG:
 #ifdef DEBUG
