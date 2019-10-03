@@ -54,6 +54,12 @@ class FSTestCase(unittest.TestCase):
         except:
             cls.ntfs_avail = False
 
+        try:
+            # check only for mkfs, we have special checks for resize and check
+            cls.f2fs_avail = BlockDev.fs_is_tech_avail(BlockDev.FSTech.F2FS, BlockDev.FSTechMode.MKFS)
+        except:
+            cls.f2fs_avail = False
+
     def setUp(self):
         self.addCleanup(self._clean_up)
         self.dev_file = utils.create_sparse_tempfile("fs_test", 100 * 1024**2)
@@ -877,7 +883,14 @@ class VfatResize(FSTestCase):
         succ = BlockDev.fs_vfat_resize(self.loop_dev, 0)
         self.assertTrue(succ)
 
-class F2FSTestMkfs(FSTestCase):
+class F2FSTestCase(FSTestCase):
+    def setUp(self):
+        if not self.f2fs_avail:
+            self.skipTest("skipping F2FS: not available")
+
+        super(F2FSTestCase, self).setUp()
+
+class F2FSTestMkfs(F2FSTestCase):
     def test_f2fs_mkfs(self):
         """Verify that it is possible to create a new f2fs file system"""
 
@@ -897,7 +910,7 @@ class F2FSTestMkfs(FSTestCase):
 
         BlockDev.fs_wipe(self.loop_dev, True)
 
-class F2FSMkfsWithLabel(FSTestCase):
+class F2FSMkfsWithLabel(F2FSTestCase):
     def test_f2fs_mkfs_with_label(self):
         """Verify that it is possible to create an f2fs file system with label"""
 
@@ -909,7 +922,7 @@ class F2FSMkfsWithLabel(FSTestCase):
         self.assertTrue(fi)
         self.assertEqual(fi.label, "TEST_LABEL")
 
-class F2FSMkfsWithFeatures(FSTestCase):
+class F2FSMkfsWithFeatures(F2FSTestCase):
     def test_f2fs_mkfs_with_label(self):
         """Verify that it is possible to create an f2fs file system with extra features enabled"""
 
@@ -921,7 +934,7 @@ class F2FSMkfsWithFeatures(FSTestCase):
         self.assertTrue(fi)
         self.assertTrue(fi.features & BlockDev.FSF2FSFeature.ENCRYPT)
 
-class F2FSTestWipe(FSTestCase):
+class F2FSTestWipe(F2FSTestCase):
     def test_f2fs_wipe(self):
         """Verify that it is possible to wipe an f2fs file system"""
 
@@ -951,7 +964,7 @@ class F2FSTestWipe(FSTestCase):
 
         BlockDev.fs_wipe(self.loop_dev, True)
 
-class F2FSTestCheck(FSTestCase):
+class F2FSTestCheck(F2FSTestCase):
     def _check_fsck_f2fs_version(self):
         # if it can run -V to get version it can do the check
         ret, _out, _err = utils.run_command("fsck.f2fs -V")
@@ -970,7 +983,7 @@ class F2FSTestCheck(FSTestCase):
             succ = BlockDev.fs_f2fs_check(self.loop_dev, None)
             self.assertTrue(succ)
 
-class F2FSTestRepair(FSTestCase):
+class F2FSTestRepair(F2FSTestCase):
     def test_f2fs_repair(self):
         """Verify that it is possible to repair an f2fs file system"""
 
@@ -980,7 +993,7 @@ class F2FSTestRepair(FSTestCase):
         succ = BlockDev.fs_f2fs_repair(self.loop_dev, None)
         self.assertTrue(succ)
 
-class F2FSGetInfo(FSTestCase):
+class F2FSGetInfo(F2FSTestCase):
     def test_f2fs_get_info(self):
         """Verify that it is possible to get info about an f2fs file system"""
 
@@ -993,7 +1006,7 @@ class F2FSGetInfo(FSTestCase):
         # should be an non-empty string
         self.assertTrue(fi.uuid)
 
-class F2FSResize(FSTestCase):
+class F2FSResize(F2FSTestCase):
     def _check_resize_f2fs_version(self):
         ret, out, _err = utils.run_command("resize.f2fs -V")
         if ret != 0:
@@ -1459,6 +1472,8 @@ class GenericCheck(FSTestCase):
 
     def test_f2fs_generic_check(self):
         """Test generic check function with an f2fs file system"""
+        if not self.f2fs_avail:
+            self.skipTest("skipping F2FS: not available")
         if not self._check_fsck_f2fs_version():
             with six.assertRaisesRegex(self, GLib.GError, "Too low version of fsck.f2fs. At least 1.11.0 required."):
                 self._test_generic_check(mkfs_function=BlockDev.fs_f2fs_mkfs)
@@ -1493,6 +1508,8 @@ class GenericRepair(FSTestCase):
 
     def test_f2fs_generic_repair(self):
         """Test generic repair function with an f2fs file system"""
+        if not self.f2fs_avail:
+            self.skipTest("skipping F2FS: not available")
         self._test_generic_repair(mkfs_function=BlockDev.fs_f2fs_mkfs)
 
 class GenericSetLabel(FSTestCase):
@@ -1523,6 +1540,8 @@ class GenericSetLabel(FSTestCase):
 
     def test_f2fs_generic_set_label(self):
         """Test generic set_label function with a f2fs file system"""
+        if not self.f2fs_avail:
+            self.skipTest("skipping F2FS: not available")
         with self.assertRaises(GLib.GError):
             # f2fs doesn't support relabeling
             self._test_generic_set_label(mkfs_function=BlockDev.fs_f2fs_mkfs)
@@ -1676,6 +1695,8 @@ class GenericResize(FSTestCase):
 
     def test_f2fs_generic_resize(self):
         """Verify that it is possible to resize an f2fs file system"""
+        if not self.f2fs_avail:
+            self.skipTest("skipping F2FS: not available")
         if not self._check_resize_f2fs_version():
             with six.assertRaisesRegex(self, GLib.GError, "Too low version of resize.f2fs. At least 1.12.0 required."):
                 self._test_generic_resize(mkfs_function=BlockDev.fs_f2fs_mkfs,
