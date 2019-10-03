@@ -26,6 +26,7 @@
 
 #include "module.h"
 #include "exec.h"
+#include "logging.h"
 
 #define UNUSED __attribute__((unused))
 

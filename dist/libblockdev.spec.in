@@ -807,6 +807,7 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_includedir}/blockdev/dev_utils.h
 %{_includedir}/blockdev/module.h
 %{_includedir}/blockdev/dbus.h
+%{_includedir}/blockdev/logging.h
 
 
 %if %{with_btrfs}

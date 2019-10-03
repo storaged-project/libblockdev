@@ -21,6 +21,8 @@
 #include <unistd.h>
 #include <blockdev/utils.h>
 #include <libdevmapper.h>
+#include <stdarg.h>
+#include <syslog.h>
 
 #ifdef WITH_BD_DMRAID
 #include <dmraid/dmraid.h>
@@ -29,6 +31,7 @@
 
 #include "dm.h"
 #include "check_deps.h"
+#include "dm_logging.h"
 
 #define UNUSED __attribute__((unused))
 
@@ -70,14 +73,6 @@ static const UtilDep deps[DEPS_LAST] = {
 
 
 /**
- * discard_dm_log: (skip)
- */
-static void discard_dm_log (int level __attribute__((unused)), const char *file __attribute__((unused)), int line __attribute__((unused)),
-                            int dm_errno_or_class __attribute__((unused)), const char *f __attribute__((unused)), ...) {
-    return;
-}
-
-/**
  * bd_dm_check_deps:
  *
  * Returns: whether the plugin's runtime dependencies are satisfied or not
@@ -95,7 +90,7 @@ gboolean bd_dm_check_deps (void) {
         status = bd_utils_check_util_version (deps[i].name, deps[i].version,
                                               deps[i].ver_arg, deps[i].ver_regexp, &error);
         if (!status)
-            g_warning ("%s", error->message);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
         else
             g_atomic_int_or (&avail_deps, 1 << i);
         g_clear_error (&error);
@@ -103,7 +98,7 @@ gboolean bd_dm_check_deps (void) {
     }
 
     if (!ret)
-        g_warning("Cannot load the DM plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Cannot load the DM plugin");
 
     return ret;
 }
@@ -116,8 +111,12 @@ gboolean bd_dm_check_deps (void) {
  *
  */
 gboolean bd_dm_init (void) {
-    dm_log_with_errno_init ((dm_log_with_errno_fn) discard_dm_log);
-    dm_log_init_verbose (0);
+    dm_log_with_errno_init ((dm_log_with_errno_fn) redirect_dm_log);
+#ifdef DEBUG
+    dm_log_init_verbose (LOG_DEBUG);
+#else
+    dm_log_init_verbose (LOG_INFO);
+#endif
 
     return TRUE;
 }

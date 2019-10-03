@@ -167,7 +167,10 @@ bd_utils_report_finished
 bd_utils_report_progress
 bd_utils_report_started
 bd_utils_log
+bd_utils_log_format
+bd_utils_log_stdout
 bd_utils_echo_str_to_file
+bd_utils_set_log_level
 BD_UTILS_SIZE_ERROR
 BDUtilsSizeError
 bd_utils_size_human_readable
@@ -197,6 +200,14 @@ PEBIBYTE
 PiB
 TEBIBYTE
 TiB
+BD_UTILS_LOG_EMERG
+BD_UTILS_LOG_ALERT
+BD_UTILS_LOG_CRIT
+BD_UTILS_LOG_ERR
+BD_UTILS_LOG_WARNING
+BD_UTILS_LOG_NOTICE
+BD_UTILS_LOG_INFO
+BD_UTILS_LOG_DEBUG
 </SECTION>
 
 <SECTION>

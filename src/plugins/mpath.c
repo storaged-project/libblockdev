@@ -77,7 +77,7 @@ gboolean bd_mpath_check_deps (void) {
         status = bd_utils_check_util_version (deps[i].name, deps[i].version,
                                               deps[i].ver_arg, deps[i].ver_regexp, &error);
         if (!status)
-            g_warning ("%s", error->message);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
         else
             g_atomic_int_or (&avail_deps, 1 << i);
         g_clear_error (&error);
@@ -85,7 +85,7 @@ gboolean bd_mpath_check_deps (void) {
     }
 
     if (!ret)
-        g_warning("Cannot load the mpath plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Cannot load the mpath plugin");
 
     return ret;
 }
@@ -233,7 +233,7 @@ static gboolean map_is_multipath (const gchar *map_name, GError **error) {
 
     task = dm_task_create (DM_DEVICE_STATUS);
     if (!task) {
-        g_warning ("Failed to create DM task");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to create DM task");
         g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
                      "Failed to create DM task");
         return FALSE;
@@ -287,7 +287,7 @@ static gchar** get_map_deps (const gchar *map_name, guint64 *n_deps, GError **er
 
     task = dm_task_create (DM_DEVICE_DEPS);
     if (!task) {
-        g_warning ("Failed to create DM task");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to create DM task");
         g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
                      "Failed to create DM task");
         return NULL;
@@ -369,7 +369,7 @@ gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error) {
     /* get maps */
     task_names = dm_task_create(DM_DEVICE_LIST);
     if (!task_names) {
-        g_warning ("Failed to create DM task");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to create DM task");
         g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
                      "Failed to create DM task");
         return FALSE;
@@ -464,7 +464,7 @@ gchar** bd_mpath_get_mpath_members (GError **error) {
     /* get maps */
     task_names = dm_task_create(DM_DEVICE_LIST);
 	if (!task_names) {
-        g_warning ("Failed to create DM task");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to create DM task");
         g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
                      "Failed to create DM task");
         bd_utils_report_finished (progress_id, (*error)->message);

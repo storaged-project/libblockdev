@@ -91,7 +91,7 @@ libbd_dm_la_CFLAGS = $(GLIB_CFLAGS) $(DEVMAPPER_CFLAGS) -Wall -Wextra -Werror
 libbd_dm_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(DEVMAPPER_LIBS)
 libbd_dm_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_dm_la_CPPFLAGS = -I${builddir}/../../include/
-libbd_dm_la_SOURCES = dm.c dm.h check_deps.c check_deps.h
+libbd_dm_la_SOURCES = dm.c dm.h check_deps.c check_deps.h dm_logging.c dm_logging.h
 if WITH_DMRAID
 libbd_dm_la_CFLAGS += $(UDEV_CFLAGS)
 libbd_dm_la_LIBADD += $(UDEV_LIBS) -ldmraid
@@ -113,7 +113,7 @@ libbd_lvm_la_CFLAGS = $(GLIB_CFLAGS) $(DEVMAPPER_CFLAGS) -Wall -Wextra -Werror
 libbd_lvm_la_LIBADD = ${builddir}/../utils/libbd_utils.la -lm $(GLIB_LIBS) $(DEVMAPPER_LIBS)
 libbd_lvm_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_lvm_la_CPPFLAGS = -I${builddir}/../../include/
-libbd_lvm_la_SOURCES = lvm.c lvm.h check_deps.c check_deps.h
+libbd_lvm_la_SOURCES = lvm.c lvm.h check_deps.c check_deps.h dm_logging.c dm_logging.h
 endif
 
 if WITH_LVM_DBUS
@@ -121,7 +121,7 @@ libbd_lvm_dbus_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(DEVMAPPER_CFLAGS) -Wal
 libbd_lvm_dbus_la_LIBADD = ${builddir}/../utils/libbd_utils.la -lm $(GLIB_LIBS) $(GIO_LIBS) $(DEVMAPPER_LIBS)
 libbd_lvm_dbus_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_lvm_dbus_la_CPPFLAGS = -I${builddir}/../../include/
-libbd_lvm_dbus_la_SOURCES = lvm-dbus.c lvm.h check_deps.c check_deps.h
+libbd_lvm_dbus_la_SOURCES = lvm-dbus.c lvm.h check_deps.c check_deps.h dm_logging.c dm_logging.h
 endif
 
 if WITH_MDRAID

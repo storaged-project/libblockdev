@@ -169,7 +169,7 @@ gboolean bd_part_check_deps (void) {
         status = bd_utils_check_util_version (deps[i].name, deps[i].version,
                                               deps[i].ver_arg, deps[i].ver_regexp, &error);
         if (!status)
-            g_warning ("%s", error->message);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
         else
             g_atomic_int_or (&avail_deps, 1 << i);
         g_clear_error (&error);
@@ -177,7 +177,7 @@ gboolean bd_part_check_deps (void) {
     }
 
     if (!ret)
-        g_warning("Cannot load the part plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Cannot load the part plugin");
 
     return ret;
 }

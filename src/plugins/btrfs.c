@@ -146,7 +146,7 @@ gboolean bd_btrfs_check_deps (void) {
         status = bd_utils_check_util_version (deps[i].name, deps[i].version,
                                               deps[i].ver_arg, deps[i].ver_regexp, &error);
         if (!status)
-            g_warning ("%s", error->message);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
         else
             g_atomic_int_or (&avail_deps, 1 << i);
         g_clear_error (&error);
@@ -156,14 +156,14 @@ gboolean bd_btrfs_check_deps (void) {
     for (i=0; i < MODULE_DEPS_LAST; i++) {
         status = check_module_deps (&avail_module_deps, MODULE_DEPS_BTRFS_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, &error);
         if (!status) {
-            g_warning ("%s", error->message);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
             g_clear_error (&error);
         }
         ret = ret && status;
     }
 
     if (!ret)
-        g_warning("Cannot load the BTRFS plugin");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Cannot load the BTRFS plugin");
 
     return ret;
 }
@@ -229,7 +229,7 @@ static BDBtrfsDeviceInfo* get_device_info_from_match (GMatchInfo *match_info) {
             bs_size_free (size);
         }
         if (error)
-            g_warning ("%s", error->msg);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->msg);
         bs_clear_error (&error);
         g_free (item);
     }
@@ -242,7 +242,7 @@ static BDBtrfsDeviceInfo* get_device_info_from_match (GMatchInfo *match_info) {
             bs_size_free (size);
         }
         if (error)
-            g_warning ("%s", error->msg);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->msg);
         bs_clear_error (&error);
         g_free (item);
     }
@@ -288,7 +288,7 @@ static BDBtrfsFilesystemInfo* get_filesystem_info_from_match (GMatchInfo *match_
             bs_size_free (size);
         }
         if (error)
-            g_warning ("%s", error->msg);
+            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->msg);
         bs_clear_error (&error);
         g_free (item);
     }
@@ -506,7 +506,7 @@ guint64 bd_btrfs_get_default_subvolume_id (const gchar *mountpoint, GError **err
 
     regex = g_regex_new ("ID (\\d+) .*", 0, 0, error);
     if (!regex) {
-        g_warning ("Failed to create new GRegex");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to create new GRegex");
         /* error is already populated */
         return 0;
     }
@@ -627,7 +627,7 @@ BDBtrfsDeviceInfo** bd_btrfs_list_devices (const gchar *device, GError **error) 
 
     regex = g_regex_new (pattern, G_REGEX_EXTENDED, 0, error);
     if (!regex) {
-        g_warning ("Failed to create new GRegex");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to create new GRegex");
         /* error is already populated */
         return NULL;
     }
@@ -713,7 +713,7 @@ BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (const gchar *mountpoint, gboole
 
     regex = g_regex_new (pattern, G_REGEX_EXTENDED, 0, error);
     if (!regex) {
-        g_warning ("Failed to create new GRegex");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to create new GRegex");
         /* error is already populated */
         return NULL;
     }
@@ -821,7 +821,7 @@ BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info (const gchar *device, GError **e
 
     regex = g_regex_new (pattern, G_REGEX_EXTENDED, 0, error);
     if (!regex) {
-        g_warning ("Failed to create new GRegex");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to create new GRegex");
         /* error is already populated */
         return NULL;
     }
