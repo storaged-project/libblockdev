@@ -54,3 +54,4 @@ docs/html/
 docs/libblockdev-docs.xml
 dist/libblockdev.spec
 tools/lvm-cache-stats
+misc/.vagrant
