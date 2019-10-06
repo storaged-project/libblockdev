@@ -13,9 +13,8 @@
 Vagrant.configure("2") do |config|
   # common configuration
 
-  # USE YOUR PATH TO THE SOURCES BELOW
-  config.vm.synced_folder "~/sources/libblockdev", "/home/vagrant/libblockdev",
-                          type: "rsync", rsync__args: ["-a", "-l"]  # override the default args
+  config.vm.synced_folder "../", "/home/vagrant/libblockdev/",
+                          type: "rsync", rsync__args: ["-a", "-l", "--exclude=misc"]  # override the default args
 
   # CHECK THAT THE BELOW OPTIONS ARE OKAY FOR YOUR HW
   config.vm.provider :libvirt do |v|
