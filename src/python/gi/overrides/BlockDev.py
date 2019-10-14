@@ -27,13 +27,17 @@ no code duplication and it propagates non-callable objects directly.
 
 """
 
-import re
+import inspect
 import os
+import re
+import sys
 from collections import namedtuple
 
+from bytesize import Size
 from gi.importer import modules
 from gi.overrides import override
 from gi.repository import GLib
+from gi.repository import GObject
 
 BlockDev = modules['BlockDev']._introspection_module
 __all__ = []
@@ -53,6 +57,32 @@ bd_plugins = { "lvm": BlockDev.Plugin.LVM,
                "nvdimm": BlockDev.Plugin.NVDIMM,
                "vdo": BlockDev.Plugin.VDO,
 }
+
+def _default_str(self):
+    s = "BlockDev.{clname} ({giname}) instance ({id})".format(clname=self.__class__.__name__,
+                                                              giname=self.__gtype__.name,
+                                                              id="%#x" % id(self))
+    return s
+
+
+def _default_repr(self):
+    s = "{str}\n".format(str=str(self))
+    for member in dir(self):
+        if not member.startswith("_") and member not in ("copy", "free"):
+            value = getattr(self, member)
+            if "size" in member and isinstance(value, int):
+                s += " {member}: {value} ({hvalue})\n".format(member=member, value=value, hvalue=Size(value).human_readable())
+            else:
+                s += " {member}: {value}\n".format(member=member, value=value)
+    return s
+
+
+# get all subclasses of GBoxed in this module
+all_boxed = inspect.getmembers(BlockDev,
+                               lambda member: inspect.isclass(member) and issubclass(member, GObject.GBoxed))
+for _cname, cls in all_boxed:
+    cls.__str__ = _default_str
+    cls.__repr__ = _default_repr
 
 
 class ExtraArg(BlockDev.ExtraArg):

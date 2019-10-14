@@ -183,8 +183,10 @@ Requires: %{name}%{?_isa} = %{version}-%{release}
 
 %if 0%{?fedora} <= 26 || 0%{?rhel} <= 7
 Requires: pygobject3-base
+Requires: python-bytesize
 %else
 Requires: python2-gobject-base
+Requires: python2-bytesize
 %endif
 %{?python_provide:%python_provide python2-blockdev}
 
@@ -198,6 +200,7 @@ libblockdev in Python2.
 Summary:     Python3 gobject-introspection bindings for libblockdev
 Requires: %{name}%{?_isa} = %{version}-%{release}
 Requires: python3-gobject-base
+Requires: python3-bytesize
 %{?python_provide:%python_provide python3-blockdev}
 
 %description -n python3-blockdev
