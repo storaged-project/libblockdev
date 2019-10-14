@@ -1142,6 +1142,23 @@ class CanResizeRepairCheckLabel(FSTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_can_set_label("nilfs2")
 
+    def test_can_get_size(self):
+        """Verify that tooling query works for getting size"""
+
+        avail, util = BlockDev.fs_can_get_size("xfs")
+        self.assertTrue(avail)
+        self.assertEqual(util, None)
+
+        old_path = os.environ.get("PATH", "")
+        os.environ["PATH"] = ""
+        avail, util = BlockDev.fs_can_get_size("xfs")
+        os.environ["PATH"] = old_path
+        self.assertFalse(avail)
+        self.assertEqual(util, "xfs_admin")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_get_size("nilfs2")
+
 class MountTest(FSTestCase):
 
     username = "bd_mount_test"
@@ -1547,66 +1564,73 @@ class GenericSetLabel(FSTestCase):
             self._test_generic_set_label(mkfs_function=BlockDev.fs_f2fs_mkfs)
 
 class GenericResize(FSTestCase):
-    def _test_generic_resize(self, mkfs_function, fs_info_func=None, info_size_func=None):
+    def _test_generic_resize(self, mkfs_function):
         # clean the device
         succ = BlockDev.fs_clean(self.loop_dev)
 
         succ = mkfs_function(self.loop_dev, None)
         self.assertTrue(succ)
-
-        if info_size_func is not None and fs_info_func is not None:
-            size = info_size_func(fs_info_func(self.loop_dev))
+        size = BlockDev.fs_get_size(self.loop_dev)
 
         # shrink
         succ = BlockDev.fs_resize(self.loop_dev, 80 * 1024**2)
         self.assertTrue(succ)
-        if info_size_func is not None and fs_info_func is not None:
-            new_size = info_size_func(fs_info_func(self.loop_dev))
-            # do not check the size 100% precisely there may differences due to FS block size, etc.
-            self.assertEqual(new_size, 80 * 1024**2)
+        new_size = BlockDev.fs_get_size(self.loop_dev)
+        self.assertEqual(new_size, 80 * 1024**2)
 
         # resize to maximum size
         succ = BlockDev.fs_resize(self.loop_dev, 0)
         self.assertTrue(succ)
-        if info_size_func is not None and fs_info_func is not None:
-            new_size = info_size_func(fs_info_func(self.loop_dev))
-            # should be back to original size
-            self.assertEqual(new_size, size)
+        new_size = BlockDev.fs_get_size(self.loop_dev)
+        # should be back to original size
+        self.assertEqual(new_size, size)
 
     def test_ext2_generic_resize(self):
         """Test generic resize function with an ext2 file system"""
-        self._test_generic_resize(mkfs_function=BlockDev.fs_ext2_mkfs,
-                                  fs_info_func=BlockDev.fs_ext2_get_info,
-                                  info_size_func=lambda fi: fi.block_size * fi.block_count)
+        self._test_generic_resize(mkfs_function=BlockDev.fs_ext2_mkfs)
 
     def test_ext3_check_generic_resize(self):
         """Test generic resize function with an ext3 file system"""
-        self._test_generic_resize(mkfs_function=BlockDev.fs_ext3_mkfs,
-                                  fs_info_func=BlockDev.fs_ext3_get_info,
-                                  info_size_func=lambda fi: fi.block_size * fi.block_count)
+        self._test_generic_resize(mkfs_function=BlockDev.fs_ext3_mkfs)
 
     def test_ext4_generic_resize(self):
         """Test generic resize function with an ext4 file system"""
-        self._test_generic_resize(mkfs_function=BlockDev.fs_ext4_mkfs,
-                                  fs_info_func=BlockDev.fs_ext4_get_info,
-                                  info_size_func=lambda fi: fi.block_size * fi.block_count)
+        self._test_generic_resize(mkfs_function=BlockDev.fs_ext4_mkfs)
 
     def test_ntfs_generic_resize(self):
         """Test generic resize function with an ntfs file system"""
         if not self.ntfs_avail:
             self.skipTest("skipping NTFS: not available")
-        def mkfs_prepare(drive, l):
-            return BlockDev.fs_ntfs_mkfs(drive, l) and BlockDev.fs_repair(drive)
-        def info_prepare(drive):
-            return BlockDev.fs_repair(drive) and BlockDev.fs_ntfs_get_info(drive)
-        def expected_size(fi):
+        def mkfs_prepare(drive):
+            return BlockDev.fs_ntfs_mkfs(drive, None) and BlockDev.fs_repair(drive)
+        def ntfs_size(drive):
             # man ntfsresize says "The filesystem size is set to be at least one
             # sector smaller" (maybe depending on alignment as well?), thus on a
             # loop device as in this test it is 4096 bytes smaller than requested
+            BlockDev.fs_repair(drive)
+            fi = BlockDev.fs_ntfs_get_info(drive)
             return fi.size + 4096
-        self._test_generic_resize(mkfs_function=mkfs_prepare,
-                                  fs_info_func=info_prepare,
-                                  info_size_func=expected_size)
+
+        # clean the device
+        succ = BlockDev.fs_clean(self.loop_dev)
+
+        succ = mkfs_prepare(self.loop_dev)
+        self.assertTrue(succ)
+
+        size = ntfs_size(self.loop_dev)
+
+        # shrink
+        succ = BlockDev.fs_resize(self.loop_dev, 80 * 1024**2)
+        self.assertTrue(succ)
+        new_size = ntfs_size(self.loop_dev)
+        self.assertEqual(new_size, 80 * 1024**2)
+
+        # resize to maximum size
+        succ = BlockDev.fs_resize(self.loop_dev, 0)
+        self.assertTrue(succ)
+        new_size = ntfs_size(self.loop_dev)
+        # should be back to original size
+        self.assertEqual(new_size, size)
 
     @tag_test(TestTags.UNSTABLE)
     def test_vfat_generic_resize(self):
