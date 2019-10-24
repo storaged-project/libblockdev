@@ -18,6 +18,7 @@
  */
 
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <blkid.h>
 #include <string.h>
 #include <sys/types.h>
@@ -42,7 +43,8 @@ typedef enum {
     BD_FS_RESIZE,
     BD_FS_REPAIR,
     BD_FS_CHECK,
-    BD_FS_LABEL
+    BD_FS_LABEL,
+    BD_FS_GET_SIZE,
 } BDFsOpType;
 
 /**
@@ -52,26 +54,28 @@ typedef enum {
  * @repair_util: required utility for repair, "" if not needed and NULL for no support
  * @resize_util: required utility for resize, "" if not needed and NULL for no support
  * @resize_mode: resize availability flags, 0 if no support
+ * @label_util: required utility for labelling, "" if not needed and NULL for no support
+ * @info_util: required utility for getting information about the filesystem, "" if not needed and NULL for no support
  */
-typedef struct BDFSInfo
-{
+typedef struct BDFSInfo {
     const gchar *type;
     const gchar *check_util;
     const gchar *repair_util;
     const gchar *resize_util;
     BDFsResizeFlags resize_mode;
     const gchar *label_util;
+    const gchar *info_util;
 } BDFSInfo;
 
 const BDFSInfo fs_info[] = {
-    {"xfs", "xfs_db", "xfs_repair", "xfs_growfs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW, "xfs_admin"},
-    {"ext2", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs"},
-    {"ext3", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs"},
-    {"ext4", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs"},
-    {"vfat", "fsck.vfat", "fsck.vfat", "", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "fatlabel"},
-    {"ntfs", "ntfsfix", "ntfsfix", "ntfsresize", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "ntfslabel"},
-    {"f2fs", "fsck.f2fs", "fsck.f2fs", "resize.f2fs", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, NULL},
-    {NULL, NULL, NULL, NULL, 0, NULL}
+    {"xfs", "xfs_db", "xfs_repair", "xfs_growfs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW, "xfs_admin", "xfs_admin"},
+    {"ext2", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs", "dumpe2fs"},
+    {"ext3", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs", "dumpe2fs"},
+    {"ext4", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs", "dumpe2fs"},
+    {"vfat", "fsck.vfat", "fsck.vfat", "", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "fatlabel", "fsck.vfat"},
+    {"ntfs", "ntfsfix", "ntfsfix", "ntfsresize", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "ntfslabel", "ntfscluster"},
+    {"f2fs", "fsck.f2fs", "fsck.f2fs", "resize.f2fs", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, NULL, "dump.f2fs"},
+    {NULL, NULL, NULL, NULL, 0, NULL, NULL}
 };
 
 static const BDFSInfo *
@@ -351,6 +355,52 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
 }
 
 /**
+ * xfs_mount:
+ * @device: the device to mount for an XFS operation
+ * @unmount: (out): whether caller should unmount the device (was mounted by us) or
+ *                  not (was already mounted before)
+ * @error: (out): place to store error (if any)
+ *
+ * This is just a helper function for XFS operations that need @device to be mounted.
+ * If the device is already mounted, this will just return the existing mountpoint.
+ * If the device is not mounted, we will mount it to a temporary directory and set
+ * @unmount to %TRUE.
+ *
+ * Returns: (transfer full): mountpoint @device is mounted at (or %NULL in case of error)
+ */
+static gchar* xfs_mount (const gchar *device, gboolean *unmount, GError **error) {
+    gchar *mountpoint = NULL;
+    gboolean ret = FALSE;
+
+    mountpoint = bd_fs_get_mountpoint (device, error);
+    if (!mountpoint) {
+        if (*error == NULL) {
+            /* device is not mounted -- we need to mount it */
+            mountpoint = g_build_path (G_DIR_SEPARATOR_S, g_get_tmp_dir (), "blockdev.XXXXXX", NULL);
+            mountpoint = g_mkdtemp (mountpoint);
+            if (!mountpoint) {
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Failed to create temporary directory for mounting '%s' "
+                             "before resizing it.", device);
+                return NULL;
+            }
+            ret = bd_fs_mount (device, mountpoint, "xfs", NULL, NULL, error);
+            if (!ret) {
+                g_prefix_error (error, "Failed to mount '%s' before resizing it: ", device);
+                return NULL;
+            } else
+                *unmount = TRUE;
+        } else {
+            g_prefix_error (error, "Error when trying to get mountpoint for '%s': ", device);
+            return NULL;
+        }
+    } else
+        *unmount = FALSE;
+
+    return mountpoint;
+}
+
+/**
  * xfs_resize_device:
  * @device: the device the file system of which to resize
  * @new_size: new requested size for the file system *in bytes*
@@ -371,29 +421,9 @@ static gboolean xfs_resize_device (const gchar *device, guint64 new_size, const 
     GError *local_error = NULL;
     BDFSXfsInfo* xfs_info = NULL;
 
-    mountpoint = bd_fs_get_mountpoint (device, error);
-    if (!mountpoint) {
-        if (*error == NULL) {
-            /* device is not mounted -- we need to mount it */
-            mountpoint = g_build_path (G_DIR_SEPARATOR_S, g_get_tmp_dir (), "blockdev.XXXXXX", NULL);
-            mountpoint = g_mkdtemp (mountpoint);
-            if (!mountpoint) {
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                             "Failed to create temporary directory for mounting '%s' "
-                             "before resizing it.", device);
-                return FALSE;
-            }
-            ret = bd_fs_mount (device, mountpoint, "xfs", NULL, NULL, error);
-            if (!ret) {
-                g_prefix_error (error, "Failed to mount '%s' before resizing it: ", device);
-                return FALSE;
-            } else
-                unmount = TRUE;
-        } else {
-            g_prefix_error (error, "Error when trying to get mountpoint for '%s': ", device);
-            return FALSE;
-        }
-    }
+    mountpoint = xfs_mount (device, &unmount, error);
+    if (!mountpoint)
+        return FALSE;
 
     xfs_info = bd_fs_xfs_get_info (device, error);
     if (!xfs_info) {
@@ -446,10 +476,12 @@ static gboolean f2fs_resize_device (const gchar *device, guint64 new_size, GErro
     return bd_fs_f2fs_resize (device, new_size, safe, NULL, error);
 }
 
-
 static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 new_size, const gchar *label, GError **error) {
     const gchar* op_name = NULL;
     g_autofree gchar* fstype = NULL;
+
+    /* GET_SIZE is covered as a special case, it's a bug to use this function for this case */
+    g_assert_true (op != BD_FS_GET_SIZE);
 
     fstype = bd_fs_get_fstype (device, error);
     if (!fstype) {
@@ -474,6 +506,8 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
                 return bd_fs_ext4_check (device, NULL, error);
             case BD_FS_LABEL:
                 return bd_fs_ext4_set_label (device, label, error);
+            default:
+                g_assert_not_reached ();
         }
     } else if (g_strcmp0 (fstype, "xfs") == 0) {
         switch (op) {
@@ -485,6 +519,8 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
                 return bd_fs_xfs_check (device, error);
             case BD_FS_LABEL:
                 return bd_fs_xfs_set_label (device, label, error);
+            default:
+                g_assert_not_reached ();
         }
     } else if (g_strcmp0 (fstype, "vfat") == 0) {
         switch (op) {
@@ -496,6 +532,8 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
                 return bd_fs_vfat_check (device, NULL, error);
             case BD_FS_LABEL:
                 return bd_fs_vfat_set_label (device, label, error);
+            default:
+                g_assert_not_reached ();
         }
     } else if (g_strcmp0 (fstype, "ntfs") == 0) {
         switch (op) {
@@ -507,6 +545,8 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
                 return bd_fs_ntfs_check (device, error);
             case BD_FS_LABEL:
                 return bd_fs_ntfs_set_label (device, label, error);
+            default:
+                g_assert_not_reached ();
         }
     } else if (g_strcmp0 (fstype, "f2fs") == 0) {
         switch (op) {
@@ -518,6 +558,8 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
                 return bd_fs_f2fs_check (device, NULL, error);
             case BD_FS_LABEL:
                 break;
+            default:
+                g_assert_not_reached ();
         }
       }
     switch (op) {
@@ -533,6 +575,8 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
         case BD_FS_LABEL:
             op_name = "Setting the label of";
             break;
+        default:
+            g_assert_not_reached ();
     }
     g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
                  "%s filesystem '%s' is not supported.", op_name, fstype);
@@ -609,6 +653,104 @@ gboolean bd_fs_set_label (const gchar *device, const gchar *label, GError **erro
     return device_operation (device, BD_FS_LABEL, 0, label, error);
 }
 
+static BDFSXfsInfo* xfs_get_info (const gchar *device, GError **error) {
+    g_autofree gchar* mountpoint = NULL;
+    gboolean unmount = FALSE;
+    gboolean ret = FALSE;
+    GError *local_error = NULL;
+    BDFSXfsInfo* xfs_info = NULL;
+
+    mountpoint = xfs_mount (device, &unmount, error);
+    if (!mountpoint)
+        return NULL;
+
+    xfs_info = bd_fs_xfs_get_info (device, error);
+
+    if (unmount) {
+        ret = bd_fs_unmount (mountpoint, FALSE, FALSE, NULL, &local_error);
+        if (!ret) {
+            bd_utils_log_format (BD_UTILS_LOG_INFO, "Failed to unmount %s after getting information about it: %s", device, local_error->message);
+            g_clear_error (&local_error);
+        } else
+            g_rmdir (mountpoint);
+    }
+
+    return xfs_info;
+}
+
+/**
+ * bd_fs_get_size:
+ * @device: the device with file system to get size for
+ * @error: (out): place to store error (if any)
+ *
+ * Get size for filesystem on @device. This calls other fs info functions from this
+ * plugin based on detected filesystem (e.g. bd_fs_xfs_get_info for XFS). This
+ * function will return an error for unknown/unsupported filesystems.
+ *
+ * Returns: size of filesystem on @device, 0 in case of error.
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
+ */
+guint64 bd_fs_get_size (const gchar *device, GError **error) {
+    g_autofree gchar* fstype = NULL;
+    guint64 size = 0;
+
+    fstype = bd_fs_get_fstype (device, error);
+    if (!fstype) {
+        if (*error == NULL) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
+                         "No filesystem detected on the device '%s'", device);
+            return 0;
+        } else {
+            g_prefix_error (error, "Error when trying to detect filesystem on '%s': ", device);
+            return 0;
+        }
+    }
+
+    if (g_strcmp0 (fstype, "ext2") == 0 || g_strcmp0 (fstype, "ext3") == 0
+                                        || g_strcmp0 (fstype, "ext4") == 0) {
+        BDFSExt4Info* info = bd_fs_ext4_get_info (device, error);
+        if (info) {
+            size = info->block_size * info->block_count;
+            bd_fs_ext4_info_free (info);
+        }
+        return size;
+
+    } else if (g_strcmp0 (fstype, "xfs") == 0) {
+        BDFSXfsInfo *info = xfs_get_info (device, error);
+        if (info) {
+            size = info->block_size * info->block_count;
+            bd_fs_xfs_info_free (info);
+        }
+        return size;
+    } else if (g_strcmp0 (fstype, "vfat") == 0) {
+        BDFSVfatInfo *info = bd_fs_vfat_get_info (device, error);
+        if (info) {
+            size = info->cluster_size * info->cluster_count;
+            bd_fs_vfat_info_free (info);
+        }
+        return size;
+    } else if (g_strcmp0 (fstype, "ntfs") == 0) {
+        BDFSNtfsInfo *info = bd_fs_ntfs_get_info (device, error);
+        if (info) {
+            size = info->size;
+            bd_fs_ntfs_info_free (info);
+        }
+        return size;
+    } else if (g_strcmp0 (fstype, "f2fs") == 0) {
+        BDFSF2FSInfo *info = bd_fs_f2fs_get_info (device, error);
+        if (info) {
+            size = info->sector_size * info->sector_count;
+            bd_fs_f2fs_info_free (info);
+        }
+        return size;
+    } else {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
+                    "Getting size of filesystem '%s' is not supported.", fstype);
+        return 0;
+    }
+}
+
 static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar **required_utility, BDFsResizeFlags *mode, GError **error) {
     gboolean ret;
     const BDFSInfo *fsinfo = NULL;
@@ -640,6 +782,9 @@ static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar *
                 op_name = "Setting the label of";
                 exec_util = fsinfo->label_util;
                 break;
+            default:
+                op_name = "Getting size of";
+                exec_util = fsinfo->info_util;
         }
     }
 
@@ -737,6 +882,24 @@ gboolean bd_fs_can_set_label (const gchar *type, gchar **required_utility, GErro
     return query_fs_operation (type, BD_FS_LABEL, required_utility, NULL, error);
 }
 
+/**
+ * bd_fs_can_get_size:
+ * @type: the filesystem type to be tested for installed size querying support
+ * @required_utility: (out) (transfer full): the utility binary which is required
+ *                                           for size querying (if missing i.e. return FALSE but no error)
+ * @error: (out): place to store error (if any)
+ *
+ * Searches for the required utility to get size of the given filesystem and
+ * returns whether it is installed.
+ * Unknown filesystems or filesystems which do not support size querying result in errors.
+ *
+ * Returns: whether getting filesystem size is available
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
+ */
+gboolean bd_fs_can_get_size (const gchar *type, gchar **required_utility, GError **error) {
+    return query_fs_operation (type, BD_FS_GET_SIZE, required_utility, NULL, error);
+}
 
 static gboolean fs_freeze (const char *mountpoint, gboolean freeze, GError **error) {
     gint fd = -1;

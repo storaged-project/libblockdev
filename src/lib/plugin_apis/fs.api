@@ -641,6 +641,21 @@ gboolean bd_fs_check (const gchar *device, GError **error);
 gboolean bd_fs_set_label (const gchar *device, const gchar *label, GError **error);
 
 /**
+ * bd_fs_get_size:
+ * @device: the device with file system to get size for
+ * @error: (out): place to store error (if any)
+ *
+ * Get size for filesystem on @device. This calls other fs info functions from this
+ * plugin based on detected filesystem (e.g. bd_fs_xfs_get_info for XFS). This
+ * function will return an error for unknown/unsupported filesystems.
+ *
+ * Returns: size of filesystem on @device, 0 in case of error.
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
+ */
+guint64 bd_fs_get_size (const gchar *device, GError **error);
+
+/**
  * BDFsResizeFlags:
  * Flags indicating whether a filesystem resize action supports growing and/or
  * shrinking if mounted or unmounted.
@@ -717,6 +732,23 @@ gboolean bd_fs_can_repair (const gchar *type, gchar **required_utility, GError *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
  */
 gboolean bd_fs_can_set_label (const gchar *type, gchar **required_utility, GError **error);
+
+/**
+ * bd_fs_can_get_size:
+ * @type: the filesystem type to be tested for installed size querying support
+ * @required_utility: (out) (transfer full): the utility binary which is required
+ *                                           for size querying (if missing i.e. return FALSE but no error)
+ * @error: (out): place to store error (if any)
+ *
+ * Searches for the required utility to get size of the given filesystem and
+ * returns whether it is installed.
+ * Unknown filesystems or filesystems which do not support size querying result in errors.
+ *
+ * Returns: whether getting filesystem size is available
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
+ */
+gboolean bd_fs_can_get_size (const gchar *type, gchar **required_utility, GError **error);
 
 /**
  * bd_fs_ext2_mkfs:
