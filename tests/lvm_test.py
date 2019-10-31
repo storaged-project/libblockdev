@@ -6,8 +6,9 @@ import overrides_hack
 import six
 import re
 import subprocess
+from distutils.version import LooseVersion
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test, run_command
 from gi.repository import BlockDev, GLib
 
 
@@ -24,6 +25,13 @@ class LVMTestCase(unittest.TestCase):
             BlockDev.init(cls.requested_plugins, None)
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
+
+    def _get_lvm_version(self):
+        _ret, out, _err = run_command("lvm version")
+        m = re.search(r"LVM version:\s+([\d\.]+)", out)
+        if not m or len(m.groups()) != 1:
+            raise RuntimeError("Failed to determine LVM version from: %s" % out)
+        return LooseVersion(m.groups()[0])
 
 
 class LvmNoDevTestCase(LVMTestCase):
@@ -1244,7 +1252,14 @@ class LvmPVVGcachedLVpoolTestCase(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_cache_attach("testVG", "testLV", "testCache", None)
         self.assertTrue(succ)
 
-        self.assertEqual(BlockDev.lvm_cache_pool_name("testVG", "testLV"), "testCache")
+        lvm_version = self._get_lvm_version()
+        if lvm_version < LooseVersion("2.03.06"):
+            cpool_name = "testCache"
+        else:
+            # since 2.03.06 LVM adds _cpool suffix to the cache pool after attaching it
+            cpool_name = "testCache_cpool"
+
+        self.assertEqual(BlockDev.lvm_cache_pool_name("testVG", "testLV"), cpool_name)
 
 class LvmPVVGcachedLVstatsTestCase(LvmPVVGLVTestCase):
     @tag_test(TestTags.SLOW)
