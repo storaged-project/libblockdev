@@ -372,11 +372,28 @@ gboolean bd_fs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
  * @all: whether to wipe all (%TRUE) signatures or just the first (%FALSE) one
  * @error: (out): place to store error (if any)
  *
+ * Note: This function will wipe signatures on a mounted @device without
+ *       asking. Use %bd_fs_wipe_force if you want to control this
+ *       behaviour manually.
+ *
  * Returns: whether signatures were successfully wiped on @device or not
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_WIPE
  */
 gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error);
+
+/**
+ * bd_fs_wipe_force:
+ * @device: the device to wipe signatures from
+ * @all: whether to wipe all (%TRUE) signatures or just the first (%FALSE) one
+ * @force: whether to force wipe even if the filesystem is mounted
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether signatures were successfully wiped on @device or not
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_WIPE
+ */
+gboolean bd_fs_wipe_force (const gchar *device, gboolean all, gboolean force, GError **error);
 
 /**
  * bd_fs_clean:

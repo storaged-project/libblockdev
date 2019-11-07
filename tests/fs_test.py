@@ -156,6 +156,22 @@ class TestGenericWipe(FSTestCase):
         with six.assertRaisesRegex(self, GLib.GError, "No signature detected on the device"):
             BlockDev.fs_wipe(self.loop_dev, True)
 
+    def test_generic_wipe_force(self):
+        """Verify that generic signature wipe works as expected with the force option"""
+
+        succ = BlockDev.fs_ext4_mkfs(self.loop_dev)
+        self.assertTrue(succ)
+
+        with mounted(self.loop_dev, self.mount_dir):
+            with self.assertRaises(GLib.GError):
+                # force wipe with force=False should fail
+                BlockDev.fs_wipe_force(self.loop_dev, True, False)
+
+            succ = BlockDev.fs_wipe_force(self.loop_dev, True, True)
+            self.assertTrue(succ)
+
+        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_dev]).strip()
+        self.assertEqual(fs_type, b"")
 
 class TestClean(FSTestCase):
     def test_clean(self):
