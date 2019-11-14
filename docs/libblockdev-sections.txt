@@ -502,6 +502,7 @@ BDFsError
 BD_FS_ERROR
 bd_fs_error_quark
 bd_fs_wipe
+bd_fs_wipe_force
 bd_fs_clean
 bd_fs_get_fstype
 bd_fs_freeze

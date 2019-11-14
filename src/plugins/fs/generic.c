@@ -85,23 +85,14 @@ get_fs_info (const gchar *type)
     return NULL;
 }
 
-/**
- * bd_fs_wipe:
- * @device: the device to wipe signatures from
- * @all: whether to wipe all (%TRUE) signatures or just the first (%FALSE) one
- * @error: (out): place to store error (if any)
- *
- * Returns: whether signatures were successfully wiped on @device or not
- *
- * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
+static gboolean _fs_wipe(const gchar *device, gboolean all, gboolean force, GError **error) {
     blkid_probe probe = NULL;
     gint fd = 0;
     gint status = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
     guint n_try = 0;
+    gint mode = 0;
 
     msg = g_strdup_printf ("Started wiping signatures from the device '%s'", device);
     progress_id = bd_utils_report_started (msg);
@@ -115,7 +106,11 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
         return FALSE;
     }
 
-    fd = open (device, O_RDWR|O_CLOEXEC);
+    mode = O_RDWR | O_CLOEXEC;
+    if (!force)
+        mode |= O_EXCL;
+
+    fd = open (device, mode);
     if (fd == -1) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to open the device '%s'", device);
@@ -202,6 +197,39 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
     bd_utils_report_finished (progress_id, "Completed");
 
     return TRUE;
+}
+
+/**
+ * bd_fs_wipe:
+ * @device: the device to wipe signatures from
+ * @all: whether to wipe all (%TRUE) signatures or just the first (%FALSE) one
+ * @error: (out): place to store error (if any)
+ *
+ * Note: This function will wipe signatures on a mounted @device without
+ *       asking. Use %bd_fs_wipe_force if you want to control this
+ *       behaviour manually.
+ *
+ * Returns: whether signatures were successfully wiped on @device or not
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_WIPE
+ */
+gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
+    return _fs_wipe (device, all, TRUE, error);
+}
+
+/**
+ * bd_fs_wipe_force:
+ * @device: the device to wipe signatures from
+ * @all: whether to wipe all (%TRUE) signatures or just the first (%FALSE) one
+ * @force: whether to force wipe even if the filesystem is mounted
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether signatures were successfully wiped on @device or not
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_WIPE
+ */
+gboolean bd_fs_wipe_force (const gchar *device, gboolean all, gboolean force, GError **error) {
+    return _fs_wipe (device, all, force, error);
 }
 
 /**
