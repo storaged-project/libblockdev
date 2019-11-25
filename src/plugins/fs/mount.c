@@ -600,6 +600,7 @@ gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const 
     uid_t current_uid = -1;
     gid_t current_gid = -1;
     const BDExtraArg **extra_p = NULL;
+    gchar *endptr = NULL;
     MountArgs args;
 
     args.spec = spec;
@@ -615,19 +616,19 @@ gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const 
     if (extra) {
         for (extra_p=extra; *extra_p; extra_p++) {
             if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "run_as_uid") == 0)) {
-                run_as_uid = g_ascii_strtoull ((*extra_p)->val, NULL, 0);
+                run_as_uid = g_ascii_strtoull ((*extra_p)->val, &endptr, 0);
 
                 /* g_ascii_strtoull returns 0 in case of error */
-                if (run_as_uid == 0 && (g_strcmp0 ((*extra_p)->opt, "0") != 0)) {
+                if (run_as_uid == 0 && endptr == (*extra_p)->val) {
                     g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                                  "Invalid specification of UID: '%s'", (*extra_p)->val);
                     return FALSE;
                 }
             } else if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "run_as_gid") == 0)) {
-                run_as_gid = g_ascii_strtoull ((*extra_p)->val, NULL, 0);
+                run_as_gid = g_ascii_strtoull ((*extra_p)->val, &endptr, 0);
 
                 /* g_ascii_strtoull returns 0 in case of error */
-                if (run_as_gid == 0 && (g_strcmp0 ((*extra_p)->opt, "0") != 0)) {
+                if (run_as_gid == 0 && endptr == (*extra_p)->val) {
                     g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                                  "Invalid specification of GID: '%s'", (*extra_p)->val);
                     return FALSE;
@@ -673,6 +674,7 @@ gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar 
     uid_t current_uid = -1;
     gid_t current_gid = -1;
     const BDExtraArg **extra_p = NULL;
+    gchar *endptr = NULL;
     MountArgs args;
 
     args.device = device;
@@ -689,19 +691,19 @@ gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar 
     if (extra) {
         for (extra_p=extra; *extra_p; extra_p++) {
             if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "run_as_uid") == 0)) {
-                run_as_uid = g_ascii_strtoull ((*extra_p)->val, NULL, 0);
+                run_as_uid = g_ascii_strtoull ((*extra_p)->val, &endptr, 0);
 
                 /* g_ascii_strtoull returns 0 in case of error */
-                if (run_as_uid == 0 && (g_strcmp0 ((*extra_p)->opt, "0") != 0)) {
+                if (run_as_uid == 0 && endptr == (*extra_p)->val) {
                     g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                                  "Invalid specification of UID: '%s'", (*extra_p)->val);
                     return FALSE;
                 }
             } else if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "run_as_gid") == 0)) {
-                run_as_gid = g_ascii_strtoull ((*extra_p)->val, NULL, 0);
+                run_as_gid = g_ascii_strtoull ((*extra_p)->val, &endptr, 0);
 
                 /* g_ascii_strtoull returns 0 in case of error */
-                if (run_as_gid == 0 && (g_strcmp0 ((*extra_p)->opt, "0") != 0)) {
+                if (run_as_gid == 0 && endptr == (*extra_p)->val) {
                     g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                                  "Invalid specification of GID: '%s'", (*extra_p)->val);
                     return FALSE;
