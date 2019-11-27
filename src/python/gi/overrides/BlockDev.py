@@ -705,6 +705,61 @@ def lvm_cache_pool_convert(vg_name, data_lv, metadata_lv, name=None, extra=None,
     return _lvm_cache_pool_convert(vg_name, data_lv, metadata_lv, name, extra)
 __all__.append("lvm_cache_pool_convert")
 
+_lvm_vdo_pool_create = BlockDev.lvm_vdo_pool_create
+@override(BlockDev.lvm_vdo_pool_create)
+def lvm_vdo_pool_create(vg_name, lv_name, pool_name, data_size, virtual_size, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_vdo_pool_create(vg_name, lv_name, pool_name, data_size,virtual_size, extra)
+__all__.append("lvm_vdo_pool_create")
+
+_lvm_vdo_resize = BlockDev.lvm_vdo_resize
+@override(BlockDev.lvm_vdo_resize)
+def lvm_vdo_resize(vg_name, lv_name, size, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_vdo_resize(vg_name, lv_name, size, extra)
+__all__.append("lvm_vdo_resize")
+
+_lvm_vdo_pool_resize = BlockDev.lvm_vdo_pool_resize
+@override(BlockDev.lvm_vdo_pool_resize)
+def lvm_vdo_pool_resize(vg_name, lv_name, size, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_vdo_pool_resize(vg_name, lv_name, size, extra)
+__all__.append("lvm_vdo_pool_resize")
+
+_lvm_vdo_enable_compression = BlockDev.lvm_vdo_enable_compression
+@override(BlockDev.lvm_vdo_enable_compression)
+def lvm_vdo_enable_compression(vg_name, pool_name, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_vdo_enable_compression(vg_name, pool_name, extra)
+__all__.append("lvm_vdo_enable_compression")
+
+_lvm_vdo_disable_compression = BlockDev.lvm_vdo_disable_compression
+@override(BlockDev.lvm_vdo_disable_compression)
+def lvm_vdo_disable_compression(vg_name, pool_name, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_vdo_disable_compression(vg_name, pool_name, extra)
+__all__.append("lvm_vdo_disable_compression")
+
+_lvm_vdo_enable_deduplication = BlockDev.lvm_vdo_enable_deduplication
+@override(BlockDev.lvm_vdo_enable_deduplication)
+def lvm_vdo_enable_deduplication(vg_name, pool_name, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_vdo_enable_deduplication(vg_name, pool_name, extra)
+__all__.append("lvm_vdo_enable_deduplication")
+
+_lvm_vdo_disable_deduplication = BlockDev.lvm_vdo_disable_deduplication
+@override(BlockDev.lvm_vdo_disable_deduplication)
+def lvm_vdo_disable_deduplication(vg_name, pool_name, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_vdo_disable_deduplication(vg_name, pool_name, extra)
+__all__.append("lvm_vdo_disable_deduplication")
+
+_lvm_vdo_pool_convert = BlockDev.lvm_vdo_pool_convert
+@override(BlockDev.lvm_vdo_pool_convert)
+def lvm_vdo_pool_convert(vg_name, lv_name, pool_name, virtual_size, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_vdo_pool_convert(vg_name, lv_name, pool_name, virtual_size, extra)
+__all__.append("lvm_vdo_pool_convert")
 
 _md_get_superblock_size = BlockDev.md_get_superblock_size
 @override(BlockDev.md_get_superblock_size)

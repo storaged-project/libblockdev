@@ -44,6 +44,7 @@ typedef enum {
     BD_LVM_ERROR_CACHE_NOCACHE,
     BD_LVM_ERROR_TECH_UNAVAIL,
     BD_LVM_ERROR_FAIL,
+    BD_LVM_ERROR_NOT_SUPPORTED,
 } BDLVMError;
 
 typedef enum {
@@ -65,6 +66,29 @@ typedef enum {
     BD_LVM_CACHE_MODE_WRITEBACK,
     BD_LVM_CACHE_MODE_UNKNOWN,
 } BDLVMCacheMode;
+
+typedef enum {
+    BD_LVM_VDO_MODE_RECOVERING = 0,
+    BD_LVM_VDO_MODE_READ_ONLY,
+    BD_LVM_VDO_MODE_NORMAL,
+    BD_LVM_VDO_MODE_UNKNOWN = 255,
+} BDLVMVDOOperatingMode;
+
+typedef enum {
+    BD_LVM_VDO_COMPRESSION_ONLINE = 0,
+    BD_LVM_VDO_COMPRESSION_OFFLINE,
+    BD_LVM_VDO_COMPRESSION_UNKNOWN = 255,
+} BDLVMVDOCompressionState;
+
+typedef enum {
+    BD_LVM_VDO_INDEX_ERROR = 0,
+    BD_LVM_VDO_INDEX_CLOSED,
+    BD_LVM_VDO_INDEX_OPENING,
+    BD_LVM_VDO_INDEX_CLOSING,
+    BD_LVM_VDO_INDEX_OFFLINE,
+    BD_LVM_VDO_INDEX_ONLINE,
+    BD_LVM_VDO_INDEX_UNKNOWN = 255,
+} BDLVMVDOIndexState;
 
 typedef struct BDLVMPVdata {
     gchar *pv_name;
@@ -121,6 +145,19 @@ typedef struct BDLVMLVdata {
 void bd_lvm_lvdata_free (BDLVMLVdata *data);
 BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data);
 
+typedef struct BDLVMVDOPooldata {
+    BDLVMVDOOperatingMode operating_mode;
+    BDLVMVDOCompressionState compression_state;
+    BDLVMVDOIndexState index_state;
+    guint64 used_size;
+    gint32 saving_percent;
+    gboolean deduplication;
+    gboolean compression;
+} BDLVMVDOPooldata;
+
+void bd_lvm_vdopooldata_free (BDLVMVDOPooldata *data);
+BDLVMVDOPooldata* bd_lvm_vdopooldata_copy (BDLVMVDOPooldata *data);
+
 typedef struct BDLVMCacheStats {
     guint64 block_size;
     guint64 cache_size;
@@ -147,6 +184,7 @@ typedef enum {
     BD_LVM_TECH_THIN_CALCS,
     BD_LVM_TECH_CACHE_CALCS,
     BD_LVM_TECH_GLOB_CONF,
+    BD_LVM_TECH_VDO,
 } BDLVMTech;
 
 typedef enum {
@@ -231,10 +269,22 @@ gboolean bd_lvm_cache_create_cached_lv (const gchar *vg_name, const gchar *lv_na
 gchar* bd_lvm_cache_pool_name (const gchar *vg_name, const gchar *cached_lv, GError **error);
 BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_lv, GError **error);
 
+gboolean bd_lvm_vdo_pool_create (const gchar *vg_name, const gchar *lv_name, const gchar *pool_name, guint64 data_size, guint64 virtual_size, const BDExtraArg **extra, GError **error);
+BDLVMVDOPooldata *bd_lvm_vdo_info (const gchar *vg_name, const gchar *pool_name, GError **error);
+
+gboolean bd_lvm_vdo_resize (const gchar *vg_name, const gchar *lv_name, guint64 size, const BDExtraArg **extra, GError **error);
+gboolean bd_lvm_vdo_pool_resize (const gchar *vg_name, const gchar *pool_name, guint64 size, const BDExtraArg **extra, GError **error);
+
+gboolean bd_lvm_vdo_enable_compression (const gchar *vg_name, const gchar *pool_name, const BDExtraArg **extra, GError **error);
+gboolean bd_lvm_vdo_disable_compression (const gchar *vg_name, const gchar *pool_name, const BDExtraArg **extra, GError **error);
+gboolean bd_lvm_vdo_enable_deduplication (const gchar *vg_name, const gchar *pool_name, const BDExtraArg **extra, GError **error);
+gboolean bd_lvm_vdo_disable_deduplication (const gchar *vg_name, const gchar *pool_name, const BDExtraArg **extra, GError **error);
+
 gchar* bd_lvm_data_lv_name (const gchar *vg_name, const gchar *lv_name, GError **error);
 gchar* bd_lvm_metadata_lv_name (const gchar *vg_name, const gchar *lv_name, GError **error);
 
 gboolean bd_lvm_thpool_convert (const gchar *vg_name, const gchar *data_lv, const gchar *metadata_lv, const gchar *name, const BDExtraArg **extra, GError **error);
 gboolean bd_lvm_cache_pool_convert (const gchar *vg_name, const gchar *data_lv, const gchar *metadata_lv, const gchar *name, const BDExtraArg **extra, GError **error);
+gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name, const gchar *pool_lv, const gchar *name, guint64 virtual_size, const BDExtraArg **extra, GError **error);
 
 #endif /* BD_LVM */
