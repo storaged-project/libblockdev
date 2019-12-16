@@ -42,6 +42,7 @@ typedef enum {
     BD_LVM_ERROR_CACHE_NOCACHE,
     BD_LVM_ERROR_TECH_UNAVAIL,
     BD_LVM_ERROR_FAIL,
+    BD_LVM_ERROR_NOT_SUPPORTED,
 } BDLVMError;
 
 typedef enum {
@@ -63,6 +64,29 @@ typedef enum {
     BD_LVM_CACHE_MODE_WRITEBACK,
     BD_LVM_CACHE_MODE_UNKNOWN,
 } BDLVMCacheMode;
+
+typedef enum {
+    BD_LVM_VDO_MODE_RECOVERING = 0,
+    BD_LVM_VDO_MODE_READ_ONLY,
+    BD_LVM_VDO_MODE_NORMAL,
+    BD_LVM_VDO_MODE_UNKNOWN = 255,
+} BDLVMVDOOperatingMode;
+
+typedef enum {
+    BD_LVM_VDO_COMPRESSION_ONLINE = 0,
+    BD_LVM_VDO_COMPRESSION_OFFLINE,
+    BD_LVM_VDO_COMPRESSION_UNKNOWN = 255,
+} BDLVMVDOCompressionState;
+
+typedef enum {
+    BD_LVM_VDO_INDEX_ERROR = 0,
+    BD_LVM_VDO_INDEX_CLOSED,
+    BD_LVM_VDO_INDEX_OPENING,
+    BD_LVM_VDO_INDEX_CLOSING,
+    BD_LVM_VDO_INDEX_OFFLINE,
+    BD_LVM_VDO_INDEX_ONLINE,
+    BD_LVM_VDO_INDEX_UNKNOWN = 255,
+} BDLVMVDOIndexState;
 
 #define BD_LVM_TYPE_PVDATA (bd_lvm_pvdata_get_type ())
 GType bd_lvm_pvdata_get_type();
@@ -330,6 +354,74 @@ GType bd_lvm_lvdata_get_type () {
     return type;
 }
 
+#define BD_LVM_TYPE_VDODATA (bd_lvm_lvdata_get_type ())
+GType bd_lvm_vdodata_get_type();
+
+/**
+ * BDLVMVDOPooldata:
+ * @operating_mode: operating mode of the VDO pool (e.g. %BD_LVM_VDO_MODE_NORMAL)
+ * @compression_state: state of the compression
+ * @index_state: state of the VDO index
+ * @saving_percent: percentage of physical blocks saved
+ * @deduplication: whether deduplication is enabled
+ * @compression: whether compression is enabled
+ */
+
+typedef struct BDLVMVDOPooldata {
+    BDLVMVDOOperatingMode operating_mode;
+    BDLVMVDOCompressionState compression_state;
+    BDLVMVDOIndexState index_state;
+    guint64 used_size;
+    gint32 saving_percent;
+    gboolean deduplication;
+    gboolean compression;
+} BDLVMVDOPooldata;
+
+/**
+ * bd_lvm_vdodata_copy: (skip)
+ *
+ * Creates a new copy of @data.
+ */
+BDLVMVDOPooldata* bd_lvm_vdodata_copy (BDLVMVDOPooldata *data) {
+    if (data == NULL)
+        return NULL;
+
+    BDLVMVDOPooldata *new_data = g_new0 (BDLVMVDOPooldata, 1);
+
+    new_data->operating_mode = data->operating_mode;
+    new_data->compression_state = data->compression_state;
+    new_data->index_state = data->index_state;
+    new_data->used_size = data->used_size;
+    new_data->saving_percent = data->saving_percent;
+    new_data->deduplication = data->deduplication;
+    new_data->compression = data->compression;
+    return new_data;
+}
+
+/**
+ * bd_lvm_vdodata_free: (skip)
+ *
+ * Frees @data.
+ */
+void bd_lvm_vdodata_free (BDLVMVDOPooldata *data) {
+    if (data == NULL)
+        return;
+
+    g_free (data);
+}
+
+GType bd_lvm_vdodata_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDLVMVDOPooldata",
+                                            (GBoxedCopyFunc) bd_lvm_vdodata_copy,
+                                            (GBoxedFreeFunc) bd_lvm_vdodata_free);
+    }
+
+    return type;
+}
+
 #define BD_LVM_TYPE_CACHE_STATS (bd_lvm_cache_stats_get_type ())
 GType bd_lvm_cache_stats_get_type();
 
@@ -417,6 +509,7 @@ typedef enum {
     BD_LVM_TECH_THIN_CALCS,
     BD_LVM_TECH_CACHE_CALCS,
     BD_LVM_TECH_GLOB_CONF,
+    BD_LVM_TECH_VDO,
 } BDLVMTech;
 
 typedef enum {
@@ -1221,5 +1314,147 @@ gboolean bd_lvm_thpool_convert (const gchar *vg_name, const gchar *data_lv, cons
  * Tech category: %BD_LVM_TECH_CACHE-%BD_LVM_TECH_MODE_CREATE
  */
 gboolean bd_lvm_cache_pool_convert (const gchar *vg_name, const gchar *data_lv, const gchar *metadata_lv, const gchar *name, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_lvm_vdo_pool_create:
+ * @vg_name: name of the VG to create a new LV in
+ * @lv_name: name of the to-be-created VDO LV
+ * @pool_name: name of the to-be-created VDO pool LV
+ * @data_size: requested size of the data VDO LV (physical size of the @pool_name VDO pool LV)
+ * @virtual_size: requested virtual_size of the @lv_name VDO LV
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the VDO LV creation
+ *                                                 (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the given @vg_name/@lv_name VDO LV was successfully created or not
+ *
+ * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_CREATE
+ */
+gboolean bd_lvm_vdo_pool_create (const gchar *vg_name, const gchar *lv_name, const gchar *pool_name, guint64 data_size, guint64 virtual_size, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_lvm_vdo_enable_compression:
+ * @vg_name: name of the VG containing the to-be-changed VDO pool LV
+ * @pool_name: name of the VDO pool LV to enable compression on
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the VDO change
+ *                                                 (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether compression was successfully enabled on @vg_name/@pool_name LV or not
+ *
+ * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_vdo_enable_compression (const gchar *vg_name, const gchar *pool_name, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_lvm_vdo_disable_compression:
+ * @vg_name: name of the VG containing the to-be-changed VDO pool LV
+ * @pool_name: name of the VDO pool LV to disable compression on
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the VDO change
+ *                                                 (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether compression was successfully disabled on @vg_name/@pool_name LV or not
+ *
+ * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_vdo_disable_compression (const gchar *vg_name, const gchar *pool_name, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_lvm_vdo_enable_deduplication:
+ * @vg_name: name of the VG containing the to-be-changed VDO pool LV
+ * @pool_name: name of the VDO pool LV to enable deduplication on
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the VDO change
+ *                                                 (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether deduplication was successfully enabled on @vg_name/@pool_name LV or not
+ *
+ * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_vdo_enable_deduplication (const gchar *vg_name, const gchar *pool_name, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_lvm_vdo_disable_deduplication:
+ * @vg_name: name of the VG containing the to-be-changed VDO pool LV
+ * @pool_name: name of the VDO pool LV to disable deduplication on
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the VDO change
+ *                                                 (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether deduplication was successfully disabled on @vg_name/@pool_name LV or not
+ *
+ * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_vdo_disable_deduplication (const gchar *vg_name, const gchar *pool_name, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_lvm_vdo_info:
+ * @vg_name: name of the VG that contains the LV to get information about
+ * @lv_name: name of the LV to get information about
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): information about the @vg_name/@lv_name LV or %NULL in case
+ * of error (the @error) gets populated in those cases)
+ *
+ * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_QUERY
+ */
+BDLVMVDOPooldata* bd_lvm_vdo_info (const gchar *vg_name, const gchar *lv_name, GError **error);
+
+/**
+ * bd_lvm_vdo_resize:
+ * @vg_name: name of the VG containing the to-be-resized VDO LV
+ * @lv_name: name of the to-be-resized VDO LV
+ * @size: the requested new size of the VDO LV
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the VDO LV resize
+ *                                                 (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @vg_name/@lv_name VDO LV was successfully resized or not
+ *
+ * Note: Reduction needs to process TRIM for reduced disk area to unmap used data blocks
+ *       from the VDO pool LV and it may take a long time.
+ *
+ * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_vdo_resize (const gchar *vg_name, const gchar *lv_name, guint64 size, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_lvm_vdo_pool_resize:
+ * @vg_name: name of the VG containing the to-be-resized VDO pool LV
+ * @pool_name: name of the to-be-resized VDO pool LV
+ * @size: the requested new size of the VDO pool LV
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the VDO pool LV resize
+ *                                                 (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @vg_name/@pool_name VDO pool LV was successfully resized or not
+ *
+ * Note: Size of the VDO pool LV can be only extended, not reduced.
+ *
+ * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_vdo_pool_resize (const gchar *vg_name, const gchar *pool_name, guint64 size, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_lvm_vdo_pool_convert:
+ * @vg_name: name of the VG that contains @pool_lv
+ * @pool_lv: name of the LV that should become the new VDO pool LV
+ * @name: (allow-none): name for the VDO LV or %NULL for default name
+ * @virtual_size: virtual size for the new VDO LV
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the VDO pool creation
+ *                                                 (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Converts the @pool_lv into a new VDO pool LV in the @vg_name VG and creates a new
+ * @name VDO LV with size @virtual_size.
+ *
+ * Note: All data on @pool_lv will be irreversibly destroyed.
+ *
+ * Returns: whether the new VDO pool LV was successfully created from @pool_lv and or not
+ *
+ * Tech category: %BD_LVM_TECH_POOL-%BD_LVM_TECH_MODE_CREATE
+ */
+gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name, const gchar *pool_lv, const gchar *name, guint64 virtual_size, const BDExtraArg **extra, GError **error);
 
 #endif  /* BD_LVM_API */

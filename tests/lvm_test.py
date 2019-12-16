@@ -26,7 +26,8 @@ class LVMTestCase(unittest.TestCase):
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
 
-    def _get_lvm_version(self):
+    @classmethod
+    def _get_lvm_version(cls):
         _ret, out, _err = run_command("lvm version")
         m = re.search(r"LVM version:\s+([\d\.]+)", out)
         if not m or len(m.groups()) != 1:
@@ -1395,3 +1396,153 @@ class LVMTechTest(LVMTestCase):
         # lvm is available, should pass
         avail = BlockDev.lvm_is_tech_avail(BlockDev.LVMTech.BASIC, BlockDev.LVMTechMode.CREATE)
         self.assertTrue(avail)
+
+class LVMVDOTest(LVMTestCase):
+
+    loop_size = 8 * 1024**3
+
+    @classmethod
+    def setUpClass(cls):
+        if not BlockDev.utils_have_kernel_module("kvdo"):
+            raise unittest.SkipTest("VDO kernel module not available, skipping.")
+
+        lvm_version = cls._get_lvm_version()
+        if lvm_version < LooseVersion("2.3.07"):
+            raise unittest.SkipTest("LVM version 2.3.07 or newer needed for LVM VDO.")
+
+        super().setUpClass()
+
+    def setUp(self):
+        self.addCleanup(self._clean_up)
+        self.dev_file = create_sparse_tempfile("vdo_test", self.loop_size)
+        try:
+            self.loop_dev = create_lio_device(self.dev_file)
+        except RuntimeError as e:
+            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVDOVG", [self.loop_dev], 0, None)
+        self.assertTrue(succ)
+
+    def _clean_up(self):
+        BlockDev.lvm_vgremove("testVDOVG")
+        BlockDev.lvm_pvremove(self.loop_dev)
+
+        try:
+            BlockDev.lvm_lvremove("testVDOVG", "vdoPool", True, None)
+        except:
+            pass
+
+        try:
+            delete_lio_device(self.loop_dev)
+        except RuntimeError:
+            # just move on, we can do no better here
+            pass
+        os.unlink(self.dev_file)
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_vdo_pool_create(self):
+        succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", "vdoPool", 7 * 1024**3, 35 * 1024**3)
+        self.assertTrue(succ)
+
+        lv_info = BlockDev.lvm_lvinfo("testVDOVG", "vdoLV")
+        self.assertIsNotNone(lv_info)
+        self.assertEqual(lv_info.segtype, "vdo")
+        self.assertEqual(lv_info.pool_lv, "vdoPool")
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertEqual(vdo_info.operating_mode, BlockDev.LVMVDOOperatingMode.NORMAL)
+        self.assertEqual(vdo_info.compression_state, BlockDev.LVMVDOCompressionState.ONLINE)
+        self.assertTrue(vdo_info.compression)
+        self.assertTrue(vdo_info.deduplication)
+
+    @tag_test(TestTags.SLOW)
+    def test_resize(self):
+        succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", "vdoPool", 5 * 1024**3, 10 * 1024**3)
+        self.assertTrue(succ)
+
+        # "physical" resize first (pool), shrinking not allowed
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_vdo_pool_resize("testVDOVG", "vdoPool", 4 * 1024**3)
+
+        succ = BlockDev.lvm_vdo_pool_resize("testVDOVG", "vdoPool", 7 * 1024**3)
+        self.assertTrue(succ)
+        lv_info = BlockDev.lvm_lvinfo("testVDOVG", "vdoPool")
+        self.assertEqual(lv_info.size, 7 * 1024**3)
+
+        # "logical" resize (LV)
+        succ = BlockDev.lvm_vdo_resize("testVDOVG", "vdoLV", 35 * 1024**3)
+        self.assertTrue(succ)
+        lv_info = BlockDev.lvm_lvinfo("testVDOVG", "vdoLV")
+        self.assertEqual(lv_info.size, 35 * 1024**3)
+
+    @tag_test(TestTags.SLOW)
+    def test_enabla_disable_compression(self):
+        succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", "vdoPool", 7 * 1024**3, 35 * 1024**3)
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertTrue(vdo_info.compression)
+
+        # disable
+        succ = BlockDev.lvm_vdo_disable_compression("testVDOVG", "vdoPool")
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertFalse(vdo_info.compression)
+
+        # enable
+        succ = BlockDev.lvm_vdo_enable_compression("testVDOVG", "vdoPool")
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertTrue(vdo_info.compression)
+
+    @tag_test(TestTags.SLOW)
+    def test_enable_disable_deduplication(self):
+        succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", "vdoPool", 7 * 1024**3, 35 * 1024**3)
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertTrue(vdo_info.deduplication)
+
+        # disable
+        succ = BlockDev.lvm_vdo_disable_deduplication("testVDOVG", "vdoPool")
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertFalse(vdo_info.deduplication)
+
+        # enable
+        succ = BlockDev.lvm_vdo_enable_deduplication("testVDOVG", "vdoPool")
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertTrue(vdo_info.deduplication)
+
+    @tag_test(TestTags.SLOW)
+    def test_vdo_pool_convert(self):
+        succ = BlockDev.lvm_lvcreate("testVDOVG", "testLV", 7 * 1024**3)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vdo_pool_convert("testVDOVG", "testLV", "vdoLV", 35 * 1024**3)
+        self.assertTrue(succ)
+
+        lv_info = BlockDev.lvm_lvinfo("testVDOVG", "vdoLV")
+        self.assertIsNotNone(lv_info)
+        self.assertEqual(lv_info.size, 35 * 1024**3)
+        self.assertEqual(lv_info.segtype, "vdo")
+        self.assertEqual(lv_info.pool_lv, "testLV")
+
+        pool_info = BlockDev.lvm_lvinfo("testVDOVG", "testLV")
+        self.assertIsNotNone(pool_info)
+        self.assertEqual(pool_info.segtype, "vdo-pool")
