@@ -315,6 +315,9 @@ bd_lvm_cache_pool_name
 bd_lvm_cache_stats
 bd_lvm_data_lv_name
 bd_lvm_metadata_lv_name
+bd_lvm_get_vdo_operating_mode_str
+bd_lvm_get_vdo_compression_state_str
+bd_lvm_get_vdo_index_state_str
 BDLVMTech
 BDLVMTechMode
 bd_lvm_is_tech_avail

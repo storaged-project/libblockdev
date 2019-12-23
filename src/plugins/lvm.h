@@ -286,4 +286,8 @@ gboolean bd_lvm_thpool_convert (const gchar *vg_name, const gchar *data_lv, cons
 gboolean bd_lvm_cache_pool_convert (const gchar *vg_name, const gchar *data_lv, const gchar *metadata_lv, const gchar *name, const BDExtraArg **extra, GError **error);
 gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name, const gchar *pool_lv, const gchar *name, guint64 virtual_size, const BDExtraArg **extra, GError **error);
 
+const gchar* bd_lvm_get_vdo_operating_mode_str (BDLVMVDOOperatingMode mode, GError **error);
+const gchar* bd_lvm_get_vdo_compression_state_str (BDLVMVDOCompressionState state, GError **error);
+const gchar* bd_lvm_get_vdo_index_state_str (BDLVMVDOIndexState state, GError **error);
+
 #endif /* BD_LVM */

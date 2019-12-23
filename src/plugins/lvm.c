@@ -2859,3 +2859,83 @@ gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name, const gchar *pool_lv, co
 
     return success;
 }
+
+/**
+ * bd_lvm_get_vdo_operating_mode_str:
+ * @mode: mode to get the string representation for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: string representation of @mode or %NULL in case of error
+ *
+ * Tech category: always provided/supported
+ */
+const gchar* bd_lvm_get_vdo_operating_mode_str (BDLVMVDOOperatingMode mode, GError **error) {
+    switch (mode) {
+    case BD_LVM_VDO_MODE_RECOVERING:
+        return "recovering";
+    case BD_LVM_VDO_MODE_READ_ONLY:
+        return "read-only";
+    case BD_LVM_VDO_MODE_NORMAL:
+        return "normal";
+    case BD_LVM_VDO_MODE_UNKNOWN:
+        return "unknown";
+    default:
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                     "Invalid LVM VDO operating mode.");
+        return NULL;
+    }
+}
+
+/**
+ * bd_lvm_get_vdo_compression_state_str:
+ * @state: state to get the string representation for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: string representation of @state or %NULL in case of error
+ *
+ * Tech category: always provided/supported
+ */
+const gchar* bd_lvm_get_vdo_compression_state_str (BDLVMVDOCompressionState state, GError **error) {
+    switch (state) {
+    case BD_LVM_VDO_COMPRESSION_ONLINE:
+        return "online";
+    case BD_LVM_VDO_COMPRESSION_OFFLINE:
+        return "offline";
+    case BD_LVM_VDO_COMPRESSION_UNKNOWN:
+        return "unknown";
+    default:
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                     "Invalid LVM VDO compression state.");
+        return NULL;
+    }
+}
+
+/**
+ * bd_lvm_get_vdo_index_state_str:
+ * @state: state to get the string representation for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: string representation of @state or %NULL in case of error
+ *
+ * Tech category: always provided/supported
+ */
+const gchar* bd_lvm_get_vdo_index_state_str (BDLVMVDOIndexState state, GError **error) {
+    switch (state) {
+    case BD_LVM_VDO_INDEX_ERROR:
+        return "error";
+    case BD_LVM_VDO_INDEX_CLOSED:
+        return "closed";
+    case BD_LVM_VDO_INDEX_OPENING:
+        return "opening";
+    case BD_LVM_VDO_INDEX_CLOSING:
+        return "closing";
+    case BD_LVM_VDO_INDEX_OFFLINE:
+        return "offline";
+    case BD_LVM_VDO_INDEX_ONLINE:
+        return "online";
+    default:
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                     "Invalid LVM VDO index state.");
+        return NULL;
+    }
+}

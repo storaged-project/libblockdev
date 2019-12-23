@@ -1454,4 +1454,37 @@ gboolean bd_lvm_vdo_pool_resize (const gchar *vg_name, const gchar *pool_name, g
  */
 gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name, const gchar *pool_lv, const gchar *name, guint64 virtual_size, const BDExtraArg **extra, GError **error);
 
+/**
+ * bd_lvm_get_vdo_operating_mode_str:
+ * @mode: mode to get the string representation for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: string representation of @mode or %NULL in case of error
+ *
+ * Tech category: always provided/supported
+ */
+const gchar* bd_lvm_get_vdo_operating_mode_str (BDLVMVDOOperatingMode mode, GError **error);
+
+/**
+ * bd_lvm_get_vdo_compression_state_str:
+ * @state: state to get the string representation for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: string representation of @state or %NULL in case of error
+ *
+ * Tech category: always provided/supported
+ */
+const gchar* bd_lvm_get_vdo_compression_state_str (BDLVMVDOCompressionState state, GError **error);
+
+/**
+ * bd_lvm_get_vdo_index_state_str:
+ * @state: state to get the string representation for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: string representation of @state or %NULL in case of error
+ *
+ * Tech category: always provided/supported
+ */
+const gchar* bd_lvm_get_vdo_index_state_str (BDLVMVDOIndexState state, GError **error);
+
 #endif  /* BD_LVM_API */
