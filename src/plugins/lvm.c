@@ -2847,15 +2847,26 @@ gboolean bd_lvm_vdo_pool_resize (const gchar *vg_name, const gchar *pool_name, g
  * Tech category: %BD_LVM_TECH_POOL-%BD_LVM_TECH_MODE_CREATE
  */
 gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name, const gchar *pool_lv, const gchar *name, guint64 virtual_size, const BDExtraArg **extra, GError **error) {
-    const gchar *args[10] = {"lvconvert", "--yes", "--type", "vdo-pool", "-n", name, "-V", NULL, NULL, NULL};
+    const gchar *args[10] = {"lvconvert", "--yes", "--type", "vdo-pool", NULL, NULL, NULL, NULL, NULL, NULL};
     gboolean success = FALSE;
+    guint next_arg = 4;
+    gchar *size_str = NULL;
+    gchar *lv_spec = NULL;
 
-    args[7] = g_strdup_printf ("%"G_GUINT64_FORMAT"K", virtual_size / 1024);
-    args[8] = g_strdup_printf ("%s/%s", vg_name, pool_lv);
+    if (name) {
+        args[next_arg++] = "-n";
+        args[next_arg++] = name;
+    }
+
+    args[next_arg++] = "-V";
+    size_str = g_strdup_printf ("%"G_GUINT64_FORMAT"K", virtual_size / 1024);
+    args[next_arg++] = size_str;
+    lv_spec = g_strdup_printf ("%s/%s", vg_name, pool_lv);
+    args[next_arg++] = lv_spec;
 
     success = call_lvm_and_report_error (args, extra, error);
-    g_free ((gchar *) args[7]);
-    g_free ((gchar *) args[8]);
+    g_free (size_str);
+    g_free (lv_spec);
 
     return success;
 }
