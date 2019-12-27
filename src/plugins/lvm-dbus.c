@@ -3562,7 +3562,7 @@ gboolean bd_lvm_vdo_pool_resize (const gchar *vg_name, const gchar *pool_name, g
  *
  * Returns: whether the new VDO pool LV was successfully created from @pool_lv and or not
  *
- * Tech category: %BD_LVM_TECH_POOL-%BD_LVM_TECH_MODE_CREATE&%BD_LVM_TECH_MODE_MODIFY
+ * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_CREATE&%BD_LVM_TECH_MODE_MODIFY
  */
 gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name UNUSED, const gchar *pool_lv UNUSED, const gchar *name UNUSED, guint64 virtual_size UNUSED, const BDExtraArg **extra UNUSED, GError **error) {
     return bd_lvm_is_tech_avail (BD_LVM_TECH_VDO, BD_LVM_TECH_MODE_CREATE | BD_LVM_TECH_MODE_MODIFY, error);
