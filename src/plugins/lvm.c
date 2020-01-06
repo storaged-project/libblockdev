@@ -2954,6 +2954,8 @@ const gchar* bd_lvm_get_vdo_index_state_str (BDLVMVDOIndexState state, GError **
         return "offline";
     case BD_LVM_VDO_INDEX_ONLINE:
         return "online";
+    case BD_LVM_VDO_INDEX_UNKNOWN:
+        return "unknown";
     default:
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
                      "Invalid LVM VDO index state.");
