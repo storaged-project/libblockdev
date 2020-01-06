@@ -1460,6 +1460,7 @@ class LVMVDOTest(LVMTestCase):
         self.assertTrue(vdo_info.deduplication)
         self.assertGreater(vdo_info.index_memory_size, 0)
         self.assertGreater(vdo_info.used_size, 0)
+        self.assertTrue(0 <= vdo_info.saving_percent <= 100)
 
         mode_str = BlockDev.lvm_get_vdo_operating_mode_str(vdo_info.operating_mode)
         self.assertEqual(mode_str, "normal")

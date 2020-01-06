@@ -1140,6 +1140,9 @@ static BDLVMVDOPooldata* get_vdo_data_from_props (GVariant *props, GError **erro
     }
     g_free (value);
 
+    g_variant_dict_lookup (&dict, "UsedSize", "t", &(data->used_size));
+    g_variant_dict_lookup (&dict, "SavingPercent", "d", &(data->saving_percent));
+
     g_variant_dict_lookup (&dict, "IndexMemorySize", "t", &(data->index_memory_size));
 
     g_variant_dict_lookup (&dict, "Compression", "s", &value);
