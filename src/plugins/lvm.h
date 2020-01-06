@@ -90,6 +90,13 @@ typedef enum {
     BD_LVM_VDO_INDEX_UNKNOWN = 255,
 } BDLVMVDOIndexState;
 
+typedef enum {
+    BD_LVM_VDO_WRITE_POLICY_AUTO = 0,
+    BD_LVM_VDO_WRITE_POLICY_SYNC,
+    BD_LVM_VDO_WRITE_POLICY_ASYNC,
+    BD_LVM_VDO_WRITE_POLICY_UNKNOWN = 255
+} BDLVMVDOWritePolicy;
+
 typedef struct BDLVMPVdata {
     gchar *pv_name;
     gchar *pv_uuid;
@@ -148,8 +155,10 @@ typedef struct BDLVMVDOPooldata {
     BDLVMVDOOperatingMode operating_mode;
     BDLVMVDOCompressionState compression_state;
     BDLVMVDOIndexState index_state;
+    BDLVMVDOWritePolicy write_policy;
     guint64 used_size;
     gint32 saving_percent;
+    guint64 index_memory_size;
     gboolean deduplication;
     gboolean compression;
 } BDLVMVDOPooldata;
@@ -289,5 +298,6 @@ gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name, const gchar *pool_lv, co
 const gchar* bd_lvm_get_vdo_operating_mode_str (BDLVMVDOOperatingMode mode, GError **error);
 const gchar* bd_lvm_get_vdo_compression_state_str (BDLVMVDOCompressionState state, GError **error);
 const gchar* bd_lvm_get_vdo_index_state_str (BDLVMVDOIndexState state, GError **error);
+const gchar* bd_lvm_get_vdo_write_policy_str (BDLVMVDOWritePolicy policy, GError **error);
 
 #endif /* BD_LVM */

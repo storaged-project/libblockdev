@@ -1129,6 +1129,21 @@ static BDLVMVDOPooldata* get_vdo_data_from_props (GVariant *props, GError **erro
     }
     g_free (value);
 
+    g_variant_dict_lookup (&dict, "WritePolicy", "s", &value);
+    if (g_strcmp0 (value, "auto") == 0)
+        data->write_policy = BD_LVM_VDO_WRITE_POLICY_AUTO;
+    else if (g_strcmp0 (value, "sync") == 0)
+        data->write_policy = BD_LVM_VDO_WRITE_POLICY_SYNC;
+    else if (g_strcmp0 (value, "async") == 0)
+        data->write_policy = BD_LVM_VDO_WRITE_POLICY_ASYNC;
+    else {
+        g_debug ("Unknown VDO write policy: %s", value);
+        data->write_policy = BD_LVM_VDO_WRITE_POLICY_UNKNOWN;
+    }
+    g_free (value);
+
+    g_variant_dict_lookup (&dict, "IndexMemorySize", "t", &(data->index_memory_size));
+
     g_variant_dict_lookup (&dict, "Compression", "s", &value);
     if (value && g_strcmp0 (value, "enabled") == 0)
         data->compression = TRUE;
@@ -3648,6 +3663,32 @@ const gchar* bd_lvm_get_vdo_index_state_str (BDLVMVDOIndexState state, GError **
     default:
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
                      "Invalid LVM VDO index state.");
+        return NULL;
+    }
+}
+
+/**
+ * bd_lvm_get_vdo_write_policy_str:
+ * @policy: policy to get the string representation for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: string representation of @policy or %NULL in case of error
+ *
+ * Tech category: always provided/supported
+ */
+const gchar* bd_lvm_get_vdo_write_policy_str (BDLVMVDOWritePolicy policy, GError **error) {
+    switch (policy) {
+    case BD_LVM_VDO_WRITE_POLICY_AUTO:
+        return "auto";
+    case BD_LVM_VDO_WRITE_POLICY_SYNC:
+        return "sync";
+    case BD_LVM_VDO_WRITE_POLICY_ASYNC:
+        return "async";
+    case BD_LVM_VDO_WRITE_POLICY_UNKNOWN:
+        return "unknown";
+    default:
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                     "Invalid LVM VDO write policy.");
         return NULL;
     }
 }

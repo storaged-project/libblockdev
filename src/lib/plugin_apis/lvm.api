@@ -88,6 +88,14 @@ typedef enum {
     BD_LVM_VDO_INDEX_UNKNOWN = 255,
 } BDLVMVDOIndexState;
 
+typedef enum {
+    BD_LVM_VDO_WRITE_POLICY_AUTO = 0,
+    BD_LVM_VDO_WRITE_POLICY_SYNC,
+    BD_LVM_VDO_WRITE_POLICY_ASYNC,
+    BD_LVM_VDO_WRITE_POLICY_UNKNOWN = 255
+} BDLVMVDOWritePolicy;
+
+
 #define BD_LVM_TYPE_PVDATA (bd_lvm_pvdata_get_type ())
 GType bd_lvm_pvdata_get_type();
 
@@ -359,7 +367,9 @@ GType bd_lvm_vdodata_get_type();
  * @operating_mode: operating mode of the VDO pool (e.g. %BD_LVM_VDO_MODE_NORMAL)
  * @compression_state: state of the compression
  * @index_state: state of the VDO index
+ * @write_policy: write policy of the VDO LV
  * @saving_percent: percentage of physical blocks saved
+ * @index_memory_size: index memory size of the VDO volume
  * @deduplication: whether deduplication is enabled
  * @compression: whether compression is enabled
  */
@@ -368,8 +378,10 @@ typedef struct BDLVMVDOPooldata {
     BDLVMVDOOperatingMode operating_mode;
     BDLVMVDOCompressionState compression_state;
     BDLVMVDOIndexState index_state;
+    BDLVMVDOWritePolicy write_policy;
     guint64 used_size;
     gint32 saving_percent;
+    guint64 index_memory_size;
     gboolean deduplication;
     gboolean compression;
 } BDLVMVDOPooldata;
@@ -388,8 +400,10 @@ BDLVMVDOPooldata* bd_lvm_vdodata_copy (BDLVMVDOPooldata *data) {
     new_data->operating_mode = data->operating_mode;
     new_data->compression_state = data->compression_state;
     new_data->index_state = data->index_state;
+    new_data->write_policy = data->write_policy;
     new_data->used_size = data->used_size;
     new_data->saving_percent = data->saving_percent;
+    new_data->index_memory_size = data->index_memory_size;
     new_data->deduplication = data->deduplication;
     new_data->compression = data->compression;
     return new_data;
@@ -1486,5 +1500,16 @@ const gchar* bd_lvm_get_vdo_compression_state_str (BDLVMVDOCompressionState stat
  * Tech category: always provided/supported
  */
 const gchar* bd_lvm_get_vdo_index_state_str (BDLVMVDOIndexState state, GError **error);
+
+/**
+ * bd_lvm_get_vdo_write_policy_str:
+ * @policy: policy to get the string representation for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: string representation of @policy or %NULL in case of error
+ *
+ * Tech category: always provided/supported
+ */
+const gchar* bd_lvm_get_vdo_write_policy_str (BDLVMVDOWritePolicy policy, GError **error);
 
 #endif  /* BD_LVM_API */
