@@ -1458,12 +1458,17 @@ class LVMVDOTest(LVMTestCase):
         self.assertEqual(vdo_info.compression_state, BlockDev.LVMVDOCompressionState.ONLINE)
         self.assertTrue(vdo_info.compression)
         self.assertTrue(vdo_info.deduplication)
+        self.assertGreater(vdo_info.index_memory_size, 0)
+        self.assertGreater(vdo_info.used_size, 0)
 
         mode_str = BlockDev.lvm_get_vdo_operating_mode_str(vdo_info.operating_mode)
         self.assertEqual(mode_str, "normal")
 
         state_str = BlockDev.lvm_get_vdo_compression_state_str(vdo_info.compression_state)
         self.assertEqual(state_str, "online")
+
+        policy_str = BlockDev.lvm_get_vdo_write_policy_str(vdo_info.write_policy)
+        self.assertIn(policy_str, ["sync", "async", "auto"])
 
     @tag_test(TestTags.SLOW)
     def test_resize(self):

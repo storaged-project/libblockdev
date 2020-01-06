@@ -645,6 +645,24 @@ static BDLVMVDOPooldata* get_vdo_data_from_table (GHashTable *table, gboolean fr
         data->index_state = BD_LVM_VDO_MODE_UNKNOWN;
     }
 
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_VDO_WRITE_POLICY");
+    if (g_strcmp0 (value, "auto") == 0)
+        data->write_policy = BD_LVM_VDO_WRITE_POLICY_AUTO;
+    else if (g_strcmp0 (value, "sync") == 0)
+        data->write_policy = BD_LVM_VDO_WRITE_POLICY_SYNC;
+    else if (g_strcmp0 (value, "async") == 0)
+        data->write_policy = BD_LVM_VDO_WRITE_POLICY_ASYNC;
+    else {
+        bd_utils_log_format (BD_UTILS_LOG_DEBUG, "Unknown VDO write policy: %s", value);
+        data->write_policy = BD_LVM_VDO_WRITE_POLICY_UNKNOWN;
+    }
+
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_VDO_INDEX_MEMORY_SIZE");
+    if (value)
+        data->index_memory_size = g_ascii_strtoull (value, NULL, 0);
+    else
+        data->index_memory_size = 0;
+
     value = (gchar*) g_hash_table_lookup (table, "LVM2_VDO_USED_SIZE");
     if (value)
         data->used_size = g_ascii_strtoull (value, NULL, 0);
@@ -2738,7 +2756,7 @@ gboolean bd_lvm_vdo_disable_deduplication (const gchar *vg_name, const gchar *po
 BDLVMVDOPooldata* bd_lvm_vdo_info (const gchar *vg_name, const gchar *lv_name, GError **error) {
     const gchar *args[11] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--units=b", "-a",
-                       "-o", "vdo_operating_mode,vdo_compression_state,vdo_index_state,vdo_used_size,vdo_saving_percent,vdo_compression,vdo_deduplication",
+                       "-o", "vdo_operating_mode,vdo_compression_state,vdo_index_state,vdo_write_policy,vdo_index_memory_size,vdo_used_size,vdo_saving_percent,vdo_compression,vdo_deduplication",
                        NULL, NULL};
 
     GHashTable *table = NULL;
@@ -2762,7 +2780,7 @@ BDLVMVDOPooldata* bd_lvm_vdo_info (const gchar *vg_name, const gchar *lv_name, G
 
     for (lines_p = lines; *lines_p; lines_p++) {
         table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 7)) {
+        if (table && (num_items == 9)) {
             g_strfreev (lines);
             return get_vdo_data_from_table (table, TRUE);
         } else if (table)
@@ -2939,6 +2957,32 @@ const gchar* bd_lvm_get_vdo_index_state_str (BDLVMVDOIndexState state, GError **
     default:
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
                      "Invalid LVM VDO index state.");
+        return NULL;
+    }
+}
+
+/**
+ * bd_lvm_get_vdo_write_policy_str:
+ * @policy: policy to get the string representation for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: string representation of @policy or %NULL in case of error
+ *
+ * Tech category: always provided/supported
+ */
+const gchar* bd_lvm_get_vdo_write_policy_str (BDLVMVDOWritePolicy policy, GError **error) {
+    switch (policy) {
+    case BD_LVM_VDO_WRITE_POLICY_AUTO:
+        return "auto";
+    case BD_LVM_VDO_WRITE_POLICY_SYNC:
+        return "sync";
+    case BD_LVM_VDO_WRITE_POLICY_ASYNC:
+        return "async";
+    case BD_LVM_VDO_WRITE_POLICY_UNKNOWN:
+        return "unknown";
+    default:
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                     "Invalid LVM VDO write policy.");
         return NULL;
     }
 }
