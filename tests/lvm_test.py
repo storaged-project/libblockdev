@@ -1459,6 +1459,12 @@ class LVMVDOTest(LVMTestCase):
         self.assertTrue(vdo_info.compression)
         self.assertTrue(vdo_info.deduplication)
 
+        mode_str = BlockDev.lvm_get_vdo_operating_mode_str(vdo_info.operating_mode)
+        self.assertEqual(mode_str, "normal")
+
+        state_str = BlockDev.lvm_get_vdo_compression_state_str(vdo_info.compression_state)
+        self.assertEqual(state_str, "online")
+
     @tag_test(TestTags.SLOW)
     def test_resize(self):
         succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", "vdoPool", 5 * 1024**3, 10 * 1024**3)
