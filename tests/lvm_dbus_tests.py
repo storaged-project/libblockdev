@@ -25,7 +25,7 @@ class LVMTestCase(unittest.TestCase):
             # force the new plugin to be used
             cls.ps = BlockDev.PluginSpec()
             cls.ps.name = BlockDev.Plugin.LVM
-            cls.ps.so_name = "libbd_lvm-dbus.so"
+            cls.ps.so_name = "libbd_lvm-dbus.so.2"
             cls.ps2 = BlockDev.PluginSpec()
             cls.ps2.name = BlockDev.Plugin.LOOP
             if not BlockDev.is_initialized():
