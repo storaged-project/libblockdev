@@ -1453,7 +1453,7 @@ gboolean bd_lvm_vdo_pool_resize (const gchar *vg_name, const gchar *pool_name, g
  *
  * Returns: whether the new VDO pool LV was successfully created from @pool_lv and or not
  *
- * Tech category: %BD_LVM_TECH_POOL-%BD_LVM_TECH_MODE_CREATE
+ * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_CREATE&%BD_LVM_TECH_MODE_MODIFY
  */
 gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name, const gchar *pool_lv, const gchar *name, guint64 virtual_size, const BDExtraArg **extra, GError **error);
 
