@@ -642,7 +642,7 @@ static BDLVMVDOPooldata* get_vdo_data_from_table (GHashTable *table, gboolean fr
         data->index_state = BD_LVM_VDO_INDEX_ONLINE;
     else {
         bd_utils_log_format (BD_UTILS_LOG_DEBUG, "Unknown VDO index state: %s", value);
-        data->index_state = BD_LVM_VDO_MODE_UNKNOWN;
+        data->index_state = BD_LVM_VDO_INDEX_UNKNOWN;
     }
 
     value = (gchar*) g_hash_table_lookup (table, "LVM2_VDO_WRITE_POLICY");
