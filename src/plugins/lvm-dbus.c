@@ -3403,6 +3403,10 @@ gboolean bd_lvm_cache_pool_convert (const gchar *vg_name, const gchar *data_lv, 
  * @pool_name: name of the to-be-created VDO pool LV
  * @data_size: requested size of the data VDO LV (physical size of the @pool_name VDO pool LV)
  * @virtual_size: requested virtual_size of the @lv_name VDO LV
+ * @index_memory: amount of index memory (in bytes) or 0 for default
+ * @compression: whether to enable compression or not
+ * @deduplication: whether to enable deduplication or not
+ * @write_policy: write policy for the volume
  * @extra: (allow-none) (array zero-terminated=1): extra options for the VDO LV creation
  *                                                 (just passed to LVM as is)
  * @error: (out): place to store error (if any)
@@ -3411,9 +3415,16 @@ gboolean bd_lvm_cache_pool_convert (const gchar *vg_name, const gchar *data_lv, 
  *
  * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_CREATE
  */
-gboolean bd_lvm_vdo_pool_create (const gchar *vg_name, const gchar *lv_name, const gchar *pool_name, guint64 data_size, guint64 virtual_size, const BDExtraArg **extra, GError **error) {
+gboolean bd_lvm_vdo_pool_create (const gchar *vg_name, const gchar *lv_name, const gchar *pool_name, guint64 data_size, guint64 virtual_size, guint64 index_memory, gboolean compression, gboolean deduplication, BDLVMVDOWritePolicy write_policy, const BDExtraArg **extra, GError **error) {
     GVariantBuilder builder;
     GVariant *params = NULL;
+    GVariant *extra_params = NULL;
+    gchar *old_config = NULL;
+    const gchar *write_policy_str = NULL;
+
+    write_policy_str = bd_lvm_get_vdo_write_policy_str (write_policy, error);
+    if (*error)
+        return FALSE;
 
     /* build the params tuple */
     g_variant_builder_init (&builder, G_VARIANT_TYPE_TUPLE);
@@ -3424,7 +3435,29 @@ gboolean bd_lvm_vdo_pool_create (const gchar *vg_name, const gchar *lv_name, con
     params = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
 
-    call_lvm_obj_method_sync (vg_name, VG_VDO_INTF, "CreateVdoPoolandLv", params, NULL, extra, error);
+    /* and now the extra_params params */
+    g_variant_builder_init (&builder, G_VARIANT_TYPE_DICTIONARY);
+    g_variant_builder_add_value (&builder, g_variant_new ("{sv}", "--compression", g_variant_new ("s", compression ? "y" : "n")));
+    g_variant_builder_add_value (&builder, g_variant_new ("{sv}", "--deduplication", g_variant_new ("s", deduplication ? "y" : "n")));
+    extra_params = g_variant_builder_end (&builder);
+    g_variant_builder_clear (&builder);
+
+    /* index_memory and write_policy can be specified only using the config */
+    g_mutex_lock (&global_config_lock);
+    old_config = global_config_str;
+    if (index_memory != 0)
+        global_config_str = g_strdup_printf ("%s allocation {vdo_index_memory_size_mb=%"G_GUINT64_FORMAT" vdo_write_policy=\"%s\"}", old_config ? old_config : "",
+                                                                                                                                     index_memory / (1024 * 1024),
+                                                                                                                                     write_policy_str);
+    else
+        global_config_str = g_strdup_printf ("%s allocation {vdo_write_policy=\"%s\"}", old_config ? old_config : "",
+                                                                                        write_policy_str);
+
+    call_lvm_obj_method_sync (vg_name, VG_VDO_INTF, "CreateVdoPoolandLv", params, extra_params, extra, FALSE, error);
+
+    g_free (global_config_str);
+    global_config_str = old_config;
+    g_mutex_unlock (&global_config_lock);
 
     return ((*error) == NULL);
 }
@@ -3588,7 +3621,7 @@ gboolean bd_lvm_vdo_pool_resize (const gchar *vg_name, const gchar *pool_name, g
  *
  * Tech category: %BD_LVM_TECH_POOL-%BD_LVM_TECH_MODE_CREATE&%BD_LVM_TECH_MODE_MODIFY
  */
-gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name UNUSED, const gchar *pool_lv UNUSED, const gchar *name UNUSED, guint64 virtual_size UNUSED, const BDExtraArg **extra UNUSED, GError **error) {
+gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name UNUSED, const gchar *pool_lv UNUSED, const gchar *name UNUSED, guint64 virtual_size UNUSED, guint64 index_memory UNUSED, gboolean compression UNUSED, gboolean deduplication UNUSED, BDLVMVDOWritePolicy write_policy UNUSED, const BDExtraArg **extra UNUSED, GError **error) {
     return bd_lvm_is_tech_avail (BD_LVM_TECH_VDO, BD_LVM_TECH_MODE_CREATE | BD_LVM_TECH_MODE_MODIFY, error);
 }
 

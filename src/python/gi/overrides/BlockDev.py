@@ -664,9 +664,9 @@ __all__.append("lvm_cache_pool_convert")
 
 _lvm_vdo_pool_create = BlockDev.lvm_vdo_pool_create
 @override(BlockDev.lvm_vdo_pool_create)
-def lvm_vdo_pool_create(vg_name, lv_name, pool_name, data_size, virtual_size, extra=None, **kwargs):
+def lvm_vdo_pool_create(vg_name, lv_name, pool_name, data_size, virtual_size, index_memory=0, compression=True, deduplication=True, write_policy=BlockDev.LVMVDOWritePolicy.AUTO, extra=None, **kwargs):
     extra = _get_extra(extra, kwargs)
-    return _lvm_vdo_pool_create(vg_name, lv_name, pool_name, data_size,virtual_size, extra)
+    return _lvm_vdo_pool_create(vg_name, lv_name, pool_name, data_size,virtual_size, index_memory, compression, deduplication, write_policy, extra)
 __all__.append("lvm_vdo_pool_create")
 
 _lvm_vdo_resize = BlockDev.lvm_vdo_resize
@@ -713,9 +713,9 @@ __all__.append("lvm_vdo_disable_deduplication")
 
 _lvm_vdo_pool_convert = BlockDev.lvm_vdo_pool_convert
 @override(BlockDev.lvm_vdo_pool_convert)
-def lvm_vdo_pool_convert(vg_name, lv_name, pool_name, virtual_size, extra=None, **kwargs):
+def lvm_vdo_pool_convert(vg_name, lv_name, pool_name, virtual_size, index_memory=0, compression=True, deduplication=True, write_policy=BlockDev.LVMVDOWritePolicy.AUTO, extra=None, **kwargs):
     extra = _get_extra(extra, kwargs)
-    return _lvm_vdo_pool_convert(vg_name, lv_name, pool_name, virtual_size, extra)
+    return _lvm_vdo_pool_convert(vg_name, lv_name, pool_name, virtual_size, index_memory, compression, deduplication, write_policy, extra)
 __all__.append("lvm_vdo_pool_convert")
 
 _md_get_superblock_size = BlockDev.md_get_superblock_size
