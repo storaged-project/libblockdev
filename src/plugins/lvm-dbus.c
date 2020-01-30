@@ -540,7 +540,7 @@ static gboolean unbox_params_and_add (GVariant *params, GVariantBuilder *builder
     return FALSE;
 }
 
-static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, guint64 *task_id, guint64 *progress_id, GError **error) {
+static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, guint64 *task_id, guint64 *progress_id, gboolean lock_config, GError **error) {
     GVariant *config = NULL;
     GVariant *param = NULL;
     GVariantIter iter;
@@ -560,7 +560,8 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
         return NULL;
 
     /* don't allow global config string changes during the run */
-    g_mutex_lock (&global_config_lock);
+    if (lock_config)
+        g_mutex_lock (&global_config_lock);
 
     if (global_config_str || extra_params || extra_args) {
         if (global_config_str || extra_args) {
@@ -632,7 +633,8 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
     ret = g_dbus_connection_call_sync (bus, LVM_BUS_NAME, obj, intf, method, all_params,
                                        NULL, G_DBUS_CALL_FLAGS_NONE, METHOD_CALL_TIMEOUT, NULL, error);
 
-    g_mutex_unlock (&global_config_lock);
+    if (lock_config)
+         g_mutex_unlock (&global_config_lock);
     prog_msg = g_strdup_printf ("Started the '%s.%s' method on the '%s' object with the following parameters: '%s'",
                                intf, method, obj, params_str);
     g_free (params_str);
@@ -647,7 +649,7 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
     return ret;
 }
 
-static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, GError **error) {
+static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, gboolean lock_config, GError **error) {
     GVariant *ret = NULL;
     gchar *obj_path = NULL;
     gchar *task_path = NULL;
@@ -659,7 +661,7 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
     gint64 error_code = 0;
     gchar *error_msg = NULL;
 
-    ret = call_lvm_method (obj, intf, method, params, extra_params, extra_args, &log_task_id, &prog_id, error);
+    ret = call_lvm_method (obj, intf, method, params, extra_params, extra_args, &log_task_id, &prog_id, lock_config, error);
     log_task_status (log_task_id, "Done.");
     if (!ret) {
         if (*error) {
@@ -805,26 +807,26 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
     g_free (task_path);
 }
 
-static void call_lvm_obj_method_sync (const gchar *obj_id, const gchar *intf, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, GError **error) {
+static void call_lvm_obj_method_sync (const gchar *obj_id, const gchar *intf, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, gboolean lock_config, GError **error) {
     gchar *obj_path = get_object_path (obj_id, error);
     if (!obj_path)
         return;
 
-    call_lvm_method_sync (obj_path, intf, method, params, extra_params, extra_args, error);
+    call_lvm_method_sync (obj_path, intf, method, params, extra_params, extra_args, lock_config, error);
     g_free (obj_path);
 }
 
-static void call_lv_method_sync (const gchar *vg_name, const gchar *lv_name, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, GError **error) {
+static void call_lv_method_sync (const gchar *vg_name, const gchar *lv_name, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, gboolean lock_config, GError **error) {
     gchar *obj_id = g_strdup_printf ("%s/%s", vg_name, lv_name);
 
-    call_lvm_obj_method_sync (obj_id, LV_INTF, method, params, extra_params, extra_args, error);
+    call_lvm_obj_method_sync (obj_id, LV_INTF, method, params, extra_params, extra_args, lock_config, error);
     g_free (obj_id);
 }
 
-static void call_thpool_method_sync (const gchar *vg_name, const gchar *pool_name, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, GError **error) {
+static void call_thpool_method_sync (const gchar *vg_name, const gchar *pool_name, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, gboolean lock_config, GError **error) {
     gchar *obj_id = g_strdup_printf ("%s/%s", vg_name, pool_name);
 
-    call_lvm_obj_method_sync (obj_id, THPOOL_INTF, method, params, extra_params, extra_args, error);
+    call_lvm_obj_method_sync (obj_id, THPOOL_INTF, method, params, extra_params, extra_args, lock_config, error);
     g_free (obj_id);
 }
 
@@ -1421,7 +1423,7 @@ gboolean bd_lvm_pvcreate (const gchar *device, guint64 data_alignment, guint64 m
 
     params = g_variant_new ("(s)", device);
 
-    call_lvm_method_sync (MANAGER_OBJ, MANAGER_INTF, "PvCreate", params, extra_params, extra, error);
+    call_lvm_method_sync (MANAGER_OBJ, MANAGER_INTF, "PvCreate", params, extra_params, extra, TRUE, error);
     return ((*error) == NULL);
 }
 
@@ -1448,7 +1450,7 @@ gboolean bd_lvm_pvresize (const gchar *device, guint64 size, const BDExtraArg **
         return FALSE;
 
     params = g_variant_new ("(u)", size);
-    call_lvm_method_sync (obj_path, PV_INTF, "ReSize", params, NULL, extra, error);
+    call_lvm_method_sync (obj_path, PV_INTF, "ReSize", params, NULL, extra, TRUE, error);
 
     return (*error == NULL);
 }
@@ -1482,7 +1484,7 @@ gboolean bd_lvm_pvremove (const gchar *device, const BDExtraArg **extra, GError 
 
     params = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
-    call_lvm_obj_method_sync (device, PV_INTF, "Remove", NULL, params, extra, error);
+    call_lvm_obj_method_sync (device, PV_INTF, "Remove", NULL, params, extra, TRUE, error);
     if (*error && g_error_matches (*error, BD_LVM_ERROR, BD_LVM_ERROR_NOEXIST))
         /* if the object doesn't exist, the given device is not a PV and thus
            this function should be a noop */
@@ -1553,7 +1555,7 @@ gboolean bd_lvm_pvmove (const gchar *src, const gchar *dest, const BDExtraArg **
     params = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
 
-    call_lvm_method_sync (vg_obj_path, VG_INTF, "Move", params, NULL, extra, error);
+    call_lvm_method_sync (vg_obj_path, VG_INTF, "Move", params, NULL, extra, TRUE, error);
 
     g_free (src_path);
     g_free (dest_path);
@@ -1602,7 +1604,7 @@ gboolean bd_lvm_pvscan (const gchar *device, gboolean update_cache, const BDExtr
     params = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
 
-    call_lvm_method_sync (MANAGER_OBJ, MANAGER_INTF, "PvScan", params, NULL, extra, error);
+    call_lvm_method_sync (MANAGER_OBJ, MANAGER_INTF, "PvScan", params, NULL, extra, TRUE, error);
     return ((*error) == NULL);
 }
 
@@ -1731,7 +1733,7 @@ gboolean bd_lvm_vgcreate (const gchar *name, const gchar **pv_list, guint64 pe_s
     extra_params = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
 
-    call_lvm_method_sync (MANAGER_OBJ, MANAGER_INTF, "VgCreate", params, extra_params, extra, error);
+    call_lvm_method_sync (MANAGER_OBJ, MANAGER_INTF, "VgCreate", params, extra_params, extra, TRUE, error);
     return ((*error) == NULL);
 }
 
@@ -1747,7 +1749,7 @@ gboolean bd_lvm_vgcreate (const gchar *name, const gchar **pv_list, guint64 pe_s
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_REMOVE
  */
 gboolean bd_lvm_vgremove (const gchar *vg_name, const BDExtraArg **extra, GError **error) {
-    call_lvm_obj_method_sync (vg_name, VG_INTF, "Remove", NULL, NULL, extra, error);
+    call_lvm_obj_method_sync (vg_name, VG_INTF, "Remove", NULL, NULL, extra, TRUE, error);
     return ((*error) == NULL);
 }
 
@@ -1765,7 +1767,7 @@ gboolean bd_lvm_vgremove (const gchar *vg_name, const BDExtraArg **extra, GError
  */
 gboolean bd_lvm_vgrename (const gchar *old_vg_name, const gchar *new_vg_name, const BDExtraArg **extra, GError **error) {
     GVariant *params = g_variant_new ("(s)", new_vg_name);
-    call_lvm_obj_method_sync (old_vg_name, VG_INTF, "Rename", params, NULL, extra, error);
+    call_lvm_obj_method_sync (old_vg_name, VG_INTF, "Rename", params, NULL, extra, TRUE, error);
     return ((*error) == NULL);
 }
 
@@ -1782,7 +1784,7 @@ gboolean bd_lvm_vgrename (const gchar *old_vg_name, const gchar *new_vg_name, co
  */
 gboolean bd_lvm_vgactivate (const gchar *vg_name, const BDExtraArg **extra, GError **error) {
     GVariant *params = g_variant_new ("(t)", (guint64) 0);
-    call_lvm_obj_method_sync (vg_name, VG_INTF, "Activate", params, NULL, extra, error);
+    call_lvm_obj_method_sync (vg_name, VG_INTF, "Activate", params, NULL, extra, TRUE, error);
     return ((*error) == NULL);
 }
 
@@ -1799,7 +1801,7 @@ gboolean bd_lvm_vgactivate (const gchar *vg_name, const BDExtraArg **extra, GErr
  */
 gboolean bd_lvm_vgdeactivate (const gchar *vg_name, const BDExtraArg **extra, GError **error) {
     GVariant *params = g_variant_new ("(t)", (guint64) 0);
-    call_lvm_obj_method_sync (vg_name, VG_INTF, "Deactivate", params, NULL, extra, error);
+    call_lvm_obj_method_sync (vg_name, VG_INTF, "Deactivate", params, NULL, extra, TRUE, error);
     return ((*error) == NULL);
 }
 
@@ -1828,7 +1830,7 @@ gboolean bd_lvm_vgextend (const gchar *vg_name, const gchar *device, const BDExt
     pv_var = g_variant_new ("o", pv);
     pvs = g_variant_new_array (NULL, &pv_var, 1);
     params = g_variant_new_tuple (&pvs, 1);
-    call_lvm_obj_method_sync (vg_name, VG_INTF, "Extend", params, NULL, extra, error);
+    call_lvm_obj_method_sync (vg_name, VG_INTF, "Extend", params, NULL, extra, TRUE, error);
     g_free (pv);
     return ((*error) == NULL);
 }
@@ -1886,7 +1888,7 @@ gboolean bd_lvm_vgreduce (const gchar *vg_name, const gchar *device, const BDExt
         g_variant_builder_clear (&builder);
     }
 
-    call_lvm_obj_method_sync (vg_name, VG_INTF, "Reduce", params, extra_params, extra, error);
+    call_lvm_obj_method_sync (vg_name, VG_INTF, "Reduce", params, extra_params, extra, TRUE, error);
     g_free (pv);
     return ((*error) == NULL);
 }
@@ -2070,7 +2072,7 @@ gboolean bd_lvm_lvcreate (const gchar *vg_name, const gchar *lv_name, guint64 si
         g_variant_builder_clear (&builder);
     }
 
-    call_lvm_obj_method_sync (vg_name, VG_INTF, "LvCreate", params, extra_params, extra, error);
+    call_lvm_obj_method_sync (vg_name, VG_INTF, "LvCreate", params, extra_params, extra, TRUE, error);
 
     return ((*error) == NULL);
 }
@@ -2101,7 +2103,7 @@ gboolean bd_lvm_lvremove (const gchar *vg_name, const gchar *lv_name, gboolean f
     extra_params = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
 
-    call_lv_method_sync (vg_name, lv_name, "Remove", NULL, extra_params, extra, error);
+    call_lv_method_sync (vg_name, lv_name, "Remove", NULL, extra_params, extra, TRUE, error);
 
     return (*error == NULL);
 }
@@ -2124,7 +2126,7 @@ gboolean bd_lvm_lvrename (const gchar *vg_name, const gchar *lv_name, const gcha
     GVariant *params = NULL;
 
     params = g_variant_new ("(s)", new_name);
-    call_lv_method_sync (vg_name, lv_name, "Rename", params, NULL, extra, error);
+    call_lv_method_sync (vg_name, lv_name, "Rename", params, NULL, extra, TRUE, error);
     return (*error == NULL);
 }
 
@@ -2154,7 +2156,7 @@ gboolean bd_lvm_lvresize (const gchar *vg_name, const gchar *lv_name, guint64 si
     params = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
 
-    call_lv_method_sync (vg_name, lv_name, "Resize", params, NULL, extra, error);
+    call_lv_method_sync (vg_name, lv_name, "Resize", params, NULL, extra, TRUE, error);
     return (*error == NULL);
 }
 
@@ -2182,7 +2184,7 @@ gboolean bd_lvm_lvactivate (const gchar *vg_name, const gchar *lv_name, gboolean
         extra_params = g_variant_builder_end (&builder);
         g_variant_builder_clear (&builder);
     }
-    call_lv_method_sync (vg_name, lv_name, "Activate", params, extra_params, extra, error);
+    call_lv_method_sync (vg_name, lv_name, "Activate", params, extra_params, extra, TRUE, error);
 
     return (*error == NULL);
 }
@@ -2201,7 +2203,7 @@ gboolean bd_lvm_lvactivate (const gchar *vg_name, const gchar *lv_name, gboolean
  */
 gboolean bd_lvm_lvdeactivate (const gchar *vg_name, const gchar *lv_name, const BDExtraArg **extra, GError **error) {
     GVariant *params = g_variant_new ("(t)", (guint64) 0);
-    call_lv_method_sync (vg_name, lv_name, "Deactivate", params, NULL, extra, error);
+    call_lv_method_sync (vg_name, lv_name, "Deactivate", params, NULL, extra, TRUE, error);
     return (*error == NULL);
 }
 
@@ -2230,7 +2232,7 @@ gboolean bd_lvm_lvsnapshotcreate (const gchar *vg_name, const gchar *origin_name
     params = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
 
-    call_lv_method_sync (vg_name, origin_name, "Snapshot", params, NULL, extra, error);
+    call_lv_method_sync (vg_name, origin_name, "Snapshot", params, NULL, extra, TRUE, error);
 
     return (*error == NULL);
 }
@@ -2258,7 +2260,7 @@ gboolean bd_lvm_lvsnapshotmerge (const gchar *vg_name, const gchar *snapshot_nam
     if (!obj_path)
         return FALSE;
 
-    call_lvm_method_sync (obj_path, SNAP_INTF, "Merge", NULL, NULL, extra, error);
+    call_lvm_method_sync (obj_path, SNAP_INTF, "Merge", NULL, NULL, extra, TRUE, error);
     return (*error == NULL);
 }
 
@@ -2515,7 +2517,7 @@ gboolean bd_lvm_thpoolcreate (const gchar *vg_name, const gchar *lv_name, guint6
     extra_params = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
 
-    call_lvm_obj_method_sync (vg_name, VG_INTF, "LvCreateLinear", params, extra_params, extra, error);
+    call_lvm_obj_method_sync (vg_name, VG_INTF, "LvCreateLinear", params, extra_params, extra, TRUE, error);
     return ((*error) == NULL);
 }
 
@@ -2543,7 +2545,7 @@ gboolean bd_lvm_thlvcreate (const gchar *vg_name, const gchar *pool_name, const 
     params = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
 
-    call_thpool_method_sync (vg_name, pool_name, "LvCreate", params, NULL, extra, error);
+    call_thpool_method_sync (vg_name, pool_name, "LvCreate", params, NULL, extra, TRUE, error);
 
     return (*error == NULL);
 }
@@ -2625,7 +2627,7 @@ gboolean bd_lvm_thsnapshotcreate (const gchar *vg_name, const gchar *origin_name
         g_variant_builder_clear (&builder);
     }
 
-    call_lv_method_sync (vg_name, origin_name, "Snapshot", params, extra_params, extra, error);
+    call_lv_method_sync (vg_name, origin_name, "Snapshot", params, extra_params, extra, TRUE, error);
 
     return (*error == NULL);
 }
@@ -2876,7 +2878,7 @@ gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name,
     extra = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
 
-    call_lvm_obj_method_sync (vg_name, VG_INTF, "CreateCachePool", params, extra, NULL, error);
+    call_lvm_obj_method_sync (vg_name, VG_INTF, "CreateCachePool", params, extra, NULL, TRUE, error);
     if (*error)
         bd_utils_report_finished (progress_id, (*error)->message);
     else
@@ -2916,7 +2918,7 @@ gboolean bd_lvm_cache_attach (const gchar *vg_name, const gchar *data_lv, const 
 
     lv_id = g_strdup_printf ("%s/%s", vg_name, cache_pool_lv);
 
-    call_lvm_obj_method_sync (lv_id, CACHE_POOL_INTF, "CacheLv", params, NULL, extra, error);
+    call_lvm_obj_method_sync (lv_id, CACHE_POOL_INTF, "CacheLv", params, NULL, extra, TRUE, error);
     return ((*error) == NULL);
 }
 
@@ -2950,7 +2952,7 @@ gboolean bd_lvm_cache_detach (const gchar *vg_name, const gchar *cached_lv, gboo
     if (!cache_pool_name)
         return FALSE;
     lv_id = g_strdup_printf ("%s/%s", vg_name, cached_lv);
-    call_lvm_obj_method_sync (lv_id, CACHED_LV_INTF, "DetachCachePool", params, NULL, extra, error);
+    call_lvm_obj_method_sync (lv_id, CACHED_LV_INTF, "DetachCachePool", params, NULL, extra, TRUE, error);
     g_free (lv_id);
     return ((*error) == NULL);
 }
@@ -3336,7 +3338,7 @@ gboolean bd_lvm_thpool_convert (const gchar *vg_name, const gchar *data_lv, cons
     params = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
 
-    call_lvm_obj_method_sync (vg_name, VG_INTF, "CreateThinPool", params, NULL, extra, error);
+    call_lvm_obj_method_sync (vg_name, VG_INTF, "CreateThinPool", params, NULL, extra, TRUE, error);
 
     if (((*error) == NULL) && name)
         bd_lvm_lvrename (vg_name, data_lv, name, NULL, error);
@@ -3386,7 +3388,7 @@ gboolean bd_lvm_cache_pool_convert (const gchar *vg_name, const gchar *data_lv, 
     params = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
 
-    call_lvm_obj_method_sync (vg_name, VG_INTF, "CreateCachePool", params, NULL, extra, error);
+    call_lvm_obj_method_sync (vg_name, VG_INTF, "CreateCachePool", params, NULL, extra, TRUE, error);
 
     if (((*error) == NULL) && name)
         bd_lvm_lvrename (vg_name, data_lv, name, NULL, error);
