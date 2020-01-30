@@ -2643,6 +2643,10 @@ gboolean bd_lvm_cache_pool_convert (const gchar *vg_name, const gchar *data_lv, 
  * @pool_name: name of the to-be-created VDO pool LV
  * @data_size: requested size of the data VDO LV (physical size of the @pool_name VDO pool LV)
  * @virtual_size: requested virtual_size of the @lv_name VDO LV
+ * @index_memory: amount of index memory (in bytes) or 0 for default
+ * @compression: whether to enable compression or not
+ * @deduplication: whether to enable deduplication or not
+ * @write_policy: write policy for the volume
  * @extra: (allow-none) (array zero-terminated=1): extra options for the VDO LV creation
  *                                                 (just passed to LVM as is)
  * @error: (out): place to store error (if any)
@@ -2651,19 +2655,43 @@ gboolean bd_lvm_cache_pool_convert (const gchar *vg_name, const gchar *data_lv, 
  *
  * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_CREATE
  */
-gboolean bd_lvm_vdo_pool_create (const gchar *vg_name, const gchar *lv_name, const gchar *pool_name, guint64 data_size, guint64 virtual_size, const BDExtraArg **extra, GError **error) {
-    const gchar *args[12] = {"lvcreate", "--type", "vdo", "-n", lv_name, "-L", NULL, "-V", NULL, "-y", NULL, NULL};
+gboolean bd_lvm_vdo_pool_create (const gchar *vg_name, const gchar *lv_name, const gchar *pool_name, guint64 data_size, guint64 virtual_size, guint64 index_memory, gboolean compression, gboolean deduplication, BDLVMVDOWritePolicy write_policy, const BDExtraArg **extra, GError **error) {
+    const gchar *args[16] = {"lvcreate", "--type", "vdo", "-n", lv_name, "-L", NULL, "-V", NULL,
+                             "--compression", compression ? "y" : "n",
+                             "--deduplication", deduplication ? "y" : "n",
+                             "-y", NULL, NULL};
     gboolean success = FALSE;
+    gchar *old_config = NULL;
+    const gchar *write_policy_str = NULL;
+
+    write_policy_str = bd_lvm_get_vdo_write_policy_str (write_policy, error);
+    if (*error)
+        return FALSE;
 
     args[6] = g_strdup_printf ("%"G_GUINT64_FORMAT"K", data_size / 1024);
     args[8] = g_strdup_printf ("%"G_GUINT64_FORMAT"K", virtual_size / 1024);
-    args[10] = g_strdup_printf ("%s/%s", vg_name, pool_name);
+    args[14] = g_strdup_printf ("%s/%s", vg_name, pool_name);
 
-    success = call_lvm_and_report_error (args, extra, error);
+    /* index_memory and write_policy can be specified only using the config */
+    g_mutex_lock (&global_config_lock);
+    old_config = global_config_str;
+    if (index_memory != 0)
+        global_config_str = g_strdup_printf ("%s allocation {vdo_index_memory_size_mb=%"G_GUINT64_FORMAT" vdo_write_policy=\"%s\"}", old_config ? old_config : "",
+                                                                                                                                     index_memory / (1024 * 1024),
+                                                                                                                                     write_policy_str);
+    else
+        global_config_str = g_strdup_printf ("%s allocation {vdo_write_policy=\"%s\"}", old_config ? old_config : "",
+                                                                                        write_policy_str);
+
+    success = call_lvm_and_report_error (args, extra, FALSE, error);
+
+    g_free (global_config_str);
+    global_config_str = old_config;
+    g_mutex_unlock (&global_config_lock);
 
     g_free ((gchar *) args[6]);
     g_free ((gchar *) args[8]);
-    g_free ((gchar *) args[10]);
+    g_free ((gchar *) args[14]);
 
     return success;
 }
@@ -2856,6 +2884,10 @@ gboolean bd_lvm_vdo_pool_resize (const gchar *vg_name, const gchar *pool_name, g
  * @pool_lv: name of the LV that should become the new VDO pool LV
  * @name: (allow-none): name for the VDO LV or %NULL for default name
  * @virtual_size: virtual size for the new VDO LV
+ * @index_memory: amount of index memory (in bytes) or 0 for default
+ * @compression: whether to enable compression or not
+ * @deduplication: whether to enable deduplication or not
+ * @write_policy: write policy for the volume
  * @extra: (allow-none) (array zero-terminated=1): extra options for the VDO pool creation
  *                                                 (just passed to LVM as is)
  * @error: (out): place to store error (if any)
@@ -2869,12 +2901,21 @@ gboolean bd_lvm_vdo_pool_resize (const gchar *vg_name, const gchar *pool_name, g
  *
  * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_CREATE&%BD_LVM_TECH_MODE_MODIFY
  */
-gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name, const gchar *pool_lv, const gchar *name, guint64 virtual_size, const BDExtraArg **extra, GError **error) {
-    const gchar *args[10] = {"lvconvert", "--yes", "--type", "vdo-pool", NULL, NULL, NULL, NULL, NULL, NULL};
+gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name, const gchar *pool_lv, const gchar *name, guint64 virtual_size, guint64 index_memory, gboolean compression, gboolean deduplication, BDLVMVDOWritePolicy write_policy, const BDExtraArg **extra, GError **error) {
+    const gchar *args[14] = {"lvconvert", "--yes", "--type", "vdo-pool",
+                             "--compression", compression ? "y" : "n",
+                             "--deduplication", deduplication ? "y" : "n",
+                             NULL, NULL, NULL, NULL, NULL, NULL};
     gboolean success = FALSE;
     guint next_arg = 4;
     gchar *size_str = NULL;
     gchar *lv_spec = NULL;
+    gchar *old_config = NULL;
+    const gchar *write_policy_str = NULL;
+
+    write_policy_str = bd_lvm_get_vdo_write_policy_str (write_policy, error);
+    if (*error)
+        return FALSE;
 
     if (name) {
         args[next_arg++] = "-n";
@@ -2887,7 +2928,23 @@ gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name, const gchar *pool_lv, co
     lv_spec = g_strdup_printf ("%s/%s", vg_name, pool_lv);
     args[next_arg++] = lv_spec;
 
-    success = call_lvm_and_report_error (args, extra, error);
+    /* index_memory and write_policy can be specified only using the config */
+    g_mutex_lock (&global_config_lock);
+    old_config = global_config_str;
+    if (index_memory != 0)
+        global_config_str = g_strdup_printf ("%s allocation {vdo_index_memory_size_mb=%"G_GUINT64_FORMAT" vdo_write_policy=\"%s\"}", old_config ? old_config : "",
+                                                                                                                                     index_memory / (1024 * 1024),
+                                                                                                                                     write_policy_str);
+    else
+        global_config_str = g_strdup_printf ("%s allocation {vdo_write_policy=\"%s\"}", old_config ? old_config : "",
+                                                                                        write_policy_str);
+
+    success = call_lvm_and_report_error (args, extra, FALSE, error);
+
+    g_free (global_config_str);
+    global_config_str = old_config;
+    g_mutex_unlock (&global_config_lock);
+
     g_free (size_str);
     g_free (lv_spec);
 
