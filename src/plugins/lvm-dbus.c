@@ -3732,3 +3732,27 @@ const gchar* bd_lvm_get_vdo_write_policy_str (BDLVMVDOWritePolicy policy, GError
         return NULL;
     }
 }
+
+/**
+ * bd_lvm_get_vdo_write_policy_from_str:
+ * @policy_str: string representation of a policy
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: write policy for the @policy_str or %BD_LVM_VDO_WRITE_POLICY_UNKNOWN if
+ *          failed to determine
+ *
+ * Tech category: always provided/supported
+ */
+BDLVMVDOWritePolicy bd_lvm_get_vdo_write_policy_from_str (const gchar *policy_str, GError **error) {
+    if (g_strcmp0 (policy_str, "auto") == 0)
+        return BD_LVM_VDO_WRITE_POLICY_AUTO;
+    else if (g_strcmp0 (policy_str, "sync") == 0)
+        return BD_LVM_VDO_WRITE_POLICY_SYNC;
+    else if (g_strcmp0 (policy_str, "async") == 0)
+        return BD_LVM_VDO_WRITE_POLICY_ASYNC;
+    else {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_VDO_POLICY_INVAL,
+                     "Invalid policy given: %s", policy_str);
+        return BD_LVM_VDO_WRITE_POLICY_UNKNOWN;
+    }
+}
