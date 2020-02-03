@@ -1472,6 +1472,20 @@ class LVMVDOTest(LVMTestCase):
         self.assertIn(policy_str, ["sync", "async", "auto"])
 
     @tag_test(TestTags.SLOW)
+    def test_vdo_pool_create_options(self):
+        # set index size to 300 MiB, disable compression and write policy to sync
+        succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", "vdoPool", 7 * 1024**3, 35 * 1024**3,
+                                            300 * 1024**2, False, True, BlockDev.LVMVDOWritePolicy.SYNC)
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertEqual(vdo_info.index_memory_size, 300 * 1024**2)
+        self.assertFalse(vdo_info.compression)
+        self.assertTrue(vdo_info.deduplication)
+        self.assertEqual(BlockDev.lvm_get_vdo_write_policy_str(vdo_info.write_policy), "sync")
+
+    @tag_test(TestTags.SLOW)
     def test_resize(self):
         succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", "vdoPool", 5 * 1024**3, 10 * 1024**3)
         self.assertTrue(succ)
@@ -1558,3 +1572,9 @@ class LVMVDOTest(LVMTestCase):
         pool_info = BlockDev.lvm_lvinfo("testVDOVG", "testLV")
         self.assertIsNotNone(pool_info)
         self.assertEqual(pool_info.segtype, "vdo-pool")
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "testLV")
+        self.assertIsNotNone(vdo_info)
+        self.assertTrue(vdo_info.compression)
+        self.assertTrue(vdo_info.deduplication)
+        self.assertEqual(BlockDev.lvm_get_vdo_write_policy_str(vdo_info.write_policy), "auto")
