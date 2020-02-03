@@ -43,6 +43,7 @@ typedef enum {
     BD_LVM_ERROR_TECH_UNAVAIL,
     BD_LVM_ERROR_FAIL,
     BD_LVM_ERROR_NOT_SUPPORTED,
+    BD_LVM_ERROR_VDO_POLICY_INVAL,
 } BDLVMError;
 
 typedef enum {
@@ -1522,5 +1523,17 @@ const gchar* bd_lvm_get_vdo_index_state_str (BDLVMVDOIndexState state, GError **
  * Tech category: always provided/supported
  */
 const gchar* bd_lvm_get_vdo_write_policy_str (BDLVMVDOWritePolicy policy, GError **error);
+
+/**
+ * bd_lvm_get_vdo_write_policy_from_str:
+ * @policy_str: string representation of a policy
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: write policy for the @policy_str or %BD_LVM_VDO_WRITE_POLICY_UNKNOWN if
+ *          failed to determine
+ *
+ * Tech category: always provided/supported
+ */
+BDLVMVDOWritePolicy bd_lvm_get_vdo_write_policy_from_str (const gchar *policy_str, GError **error);
 
 #endif  /* BD_LVM_API */

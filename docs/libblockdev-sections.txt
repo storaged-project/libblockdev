@@ -325,6 +325,7 @@ bd_lvm_metadata_lv_name
 bd_lvm_get_vdo_operating_mode_str
 bd_lvm_get_vdo_compression_state_str
 bd_lvm_get_vdo_index_state_str
+bd_lvm_get_vdo_write_policy_from_str
 BDLVMTech
 BDLVMTechMode
 bd_lvm_is_tech_avail
