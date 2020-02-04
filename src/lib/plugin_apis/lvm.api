@@ -363,7 +363,7 @@ GType bd_lvm_lvdata_get_type () {
     return type;
 }
 
-#define BD_LVM_TYPE_VDODATA (bd_lvm_lvdata_get_type ())
+#define BD_LVM_TYPE_VDODATA (bd_lvm_vdodata_get_type ())
 GType bd_lvm_vdodata_get_type();
 
 /**
