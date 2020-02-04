@@ -24,6 +24,7 @@
 
 #include "vdo.h"
 #include "check_deps.h"
+#include "vdo_stats.h"
 
 /**
  * SECTION: vdo
@@ -33,9 +34,6 @@
  *
  * A plugin for operations with VDO devices.
  */
-
-#define VDO_SYS_PATH "/sys/kvdo"
-
 
 /**
  * bd_vdo_error_quark: (skip)
@@ -881,108 +879,6 @@ gboolean bd_vdo_grow_physical (const gchar *name, const BDExtraArg **extra, GErr
 }
 
 
-static gboolean get_stat_val64 (GHashTable *stats, const gchar *key, gint64 *val) {
-    const gchar *s;
-    gchar *endptr = NULL;
-
-    s = g_hash_table_lookup (stats, key);
-    if (s == NULL)
-        return FALSE;
-
-    *val = g_ascii_strtoll (s, &endptr, 0);
-    if (endptr == NULL || *endptr != '\0')
-        return FALSE;
-
-    return TRUE;
-}
-
-static gboolean get_stat_val_double (GHashTable *stats, const gchar *key, gdouble *val) {
-    const gchar *s;
-    gchar *endptr = NULL;
-
-    s = g_hash_table_lookup (stats, key);
-    if (s == NULL)
-        return FALSE;
-
-    *val = g_ascii_strtod (s, &endptr);
-    if (endptr == NULL || *endptr != '\0')
-        return FALSE;
-
-    return TRUE;
-}
-
-#define GET_STAT_VAL64_DEFAULT(stats,key,val,def) \
-    if (! get_stat_val64 (stats,key,val)) \
-        *val = def;
-
-static void add_write_ampl_r_stats (GHashTable *stats) {
-    gint64 bios_meta_write, bios_out_write, bios_in_write;
-
-    if (! get_stat_val64 (stats, "bios_meta_write", &bios_meta_write) ||
-        ! get_stat_val64 (stats, "bios_out_write", &bios_out_write) ||
-        ! get_stat_val64 (stats, "bios_in_write", &bios_in_write))
-        return;
-
-    if (bios_in_write <= 0)
-        g_hash_table_replace (stats, g_strdup ("writeAmplificationRatio"), g_strdup ("0.00"));
-    else
-        g_hash_table_replace (stats,
-                              g_strdup ("writeAmplificationRatio"),
-                              g_strdup_printf ("%.2f", (gfloat) (bios_meta_write + bios_out_write) / (gfloat) bios_in_write));
-}
-
-static void add_block_stats (GHashTable *stats) {
-    gint64 physical_blocks, block_size, data_blocks_used, overhead_blocks_used, logical_blocks_used;
-    gint64 savings;
-
-    if (! get_stat_val64 (stats, "physical_blocks", &physical_blocks) ||
-        ! get_stat_val64 (stats, "block_size", &block_size) ||
-        ! get_stat_val64 (stats, "data_blocks_used", &data_blocks_used) ||
-        ! get_stat_val64 (stats, "overhead_blocks_used", &overhead_blocks_used) ||
-        ! get_stat_val64 (stats, "logical_blocks_used", &logical_blocks_used))
-        return;
-
-    g_hash_table_replace (stats, g_strdup ("oneKBlocks"), g_strdup_printf ("%"G_GINT64_FORMAT, physical_blocks * block_size / 1024));
-    g_hash_table_replace (stats, g_strdup ("oneKBlocksUsed"), g_strdup_printf ("%"G_GINT64_FORMAT, (data_blocks_used + overhead_blocks_used) * block_size / 1024));
-    g_hash_table_replace (stats, g_strdup ("oneKBlocksAvailable"), g_strdup_printf ("%"G_GINT64_FORMAT, (physical_blocks - data_blocks_used - overhead_blocks_used) * block_size / 1024));
-    g_hash_table_replace (stats, g_strdup ("usedPercent"), g_strdup_printf ("%.0f", 100.0 * (gfloat) (data_blocks_used + overhead_blocks_used) / (gfloat) physical_blocks + 0.5));
-    savings = (logical_blocks_used > 0) ? (gint64) (100.0 * (gfloat) (logical_blocks_used - data_blocks_used) / (gfloat) logical_blocks_used) : -1;
-    g_hash_table_replace (stats, g_strdup ("savings"), g_strdup_printf ("%"G_GINT64_FORMAT, savings));
-    if (savings >= 0)
-        g_hash_table_replace (stats, g_strdup ("savingPercent"), g_strdup_printf ("%"G_GINT64_FORMAT, savings));
-}
-
-static void add_journal_stats (GHashTable *stats) {
-    gint64 journal_entries_committed, journal_entries_started, journal_entries_written;
-    gint64 journal_blocks_committed, journal_blocks_started, journal_blocks_written;
-
-    if (! get_stat_val64 (stats, "journal_entries_committed", &journal_entries_committed) ||
-        ! get_stat_val64 (stats, "journal_entries_started", &journal_entries_started) ||
-        ! get_stat_val64 (stats, "journal_entries_written", &journal_entries_written) ||
-        ! get_stat_val64 (stats, "journal_blocks_committed", &journal_blocks_committed) ||
-        ! get_stat_val64 (stats, "journal_blocks_started", &journal_blocks_started) ||
-        ! get_stat_val64 (stats, "journal_blocks_written", &journal_blocks_written))
-        return;
-
-    g_hash_table_replace (stats, g_strdup ("journal_entries_batching"), g_strdup_printf ("%"G_GINT64_FORMAT, journal_entries_started - journal_entries_written));
-    g_hash_table_replace (stats, g_strdup ("journal_entries_writing"), g_strdup_printf ("%"G_GINT64_FORMAT, journal_entries_written - journal_entries_committed));
-    g_hash_table_replace (stats, g_strdup ("journal_blocks_batching"), g_strdup_printf ("%"G_GINT64_FORMAT, journal_blocks_started - journal_blocks_written));
-    g_hash_table_replace (stats, g_strdup ("journal_blocks_writing"), g_strdup_printf ("%"G_GINT64_FORMAT, journal_blocks_written - journal_blocks_committed));
-}
-
-static void add_computed_stats (GHashTable *stats) {
-    const gchar *s;
-
-    s = g_hash_table_lookup (stats, "logical_block_size");
-    g_hash_table_replace (stats,
-                          g_strdup ("fiveTwelveByteEmulation"),
-                          g_strdup ((g_strcmp0 (s, "512") == 0) ? "true" : "false"));
-
-    add_write_ampl_r_stats (stats);
-    add_block_stats (stats);
-    add_journal_stats (stats);
-}
-
 /**
  * bd_vdo_get_stats_full:
  * @name: name of an existing VDO volume
@@ -996,46 +892,10 @@ static void add_computed_stats (GHashTable *stats) {
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_QUERY
  */
 GHashTable* bd_vdo_get_stats_full (const gchar *name, GError **error) {
-    GHashTable *stats;
-    GDir *dir;
-    gchar *stats_dir;
-    const gchar *direntry;
-    gchar *s;
-    gchar *val;
-
     if (!check_module_deps (&avail_module_deps, MODULE_DEPS_VDO_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
         return FALSE;
 
-    /* TODO: does the `name` need to be escaped? */
-    stats_dir = g_build_path (G_DIR_SEPARATOR_S, VDO_SYS_PATH, name, "statistics", NULL);
-    dir = g_dir_open (stats_dir, 0, error);
-    if (dir == NULL) {
-        g_prefix_error (error, "Error reading statistics from %s: ", stats_dir);
-        g_free (stats_dir);
-        return NULL;
-    }
-
-    stats = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-    while ((direntry = g_dir_read_name (dir))) {
-        s = g_build_filename (stats_dir, direntry, NULL);
-        if (! g_file_get_contents (s, &val, NULL, error)) {
-            g_prefix_error (error, "Error reading statistics from %s: ", s);
-            g_free (s);
-            g_hash_table_destroy (stats);
-            stats = NULL;
-            break;
-        }
-        g_hash_table_replace (stats, g_strdup (direntry), g_strdup (g_strstrip (val)));
-        g_free (val);
-        g_free (s);
-    }
-    g_dir_close (dir);
-    g_free (stats_dir);
-
-    if (stats != NULL)
-        add_computed_stats (stats);
-
-    return stats;
+    return vdo_get_stats_full(name, error);
 }
 
 /**
@@ -1069,14 +929,14 @@ BDVDOStats* bd_vdo_get_stats (const gchar *name, GError **error) {
         return NULL;
 
     stats = g_new0 (BDVDOStats, 1);
-    GET_STAT_VAL64_DEFAULT (full_stats, "block_size", &stats->block_size, -1);
-    GET_STAT_VAL64_DEFAULT (full_stats, "logical_block_size", &stats->logical_block_size, -1);
-    GET_STAT_VAL64_DEFAULT (full_stats, "physical_blocks", &stats->physical_blocks, -1);
-    GET_STAT_VAL64_DEFAULT (full_stats, "data_blocks_used", &stats->data_blocks_used, -1);
-    GET_STAT_VAL64_DEFAULT (full_stats, "overhead_blocks_used", &stats->overhead_blocks_used, -1);
-    GET_STAT_VAL64_DEFAULT (full_stats, "logical_blocks_used", &stats->logical_blocks_used, -1);
-    GET_STAT_VAL64_DEFAULT (full_stats, "usedPercent", &stats->used_percent, -1);
-    GET_STAT_VAL64_DEFAULT (full_stats, "savingPercent", &stats->saving_percent, -1);
+    get_stat_val64_default (full_stats, "block_size", &stats->block_size, -1);
+    get_stat_val64_default (full_stats, "logical_block_size", &stats->logical_block_size, -1);
+    get_stat_val64_default (full_stats, "physical_blocks", &stats->physical_blocks, -1);
+    get_stat_val64_default (full_stats, "data_blocks_used", &stats->data_blocks_used, -1);
+    get_stat_val64_default (full_stats, "overhead_blocks_used", &stats->overhead_blocks_used, -1);
+    get_stat_val64_default (full_stats, "logical_blocks_used", &stats->logical_blocks_used, -1);
+    get_stat_val64_default (full_stats, "usedPercent", &stats->used_percent, -1);
+    get_stat_val64_default (full_stats, "savingPercent", &stats->saving_percent, -1);
     if (! get_stat_val_double (full_stats, "writeAmplificationRatio", &stats->write_amplification_ratio))
         stats->write_amplification_ratio = -1;
 
