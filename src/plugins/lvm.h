@@ -168,6 +168,21 @@ typedef struct BDLVMVDOPooldata {
 void bd_lvm_vdopooldata_free (BDLVMVDOPooldata *data);
 BDLVMVDOPooldata* bd_lvm_vdopooldata_copy (BDLVMVDOPooldata *data);
 
+typedef struct BDLVMVDOStats {
+    gint64 block_size;
+    gint64 logical_block_size;
+    gint64 physical_blocks;
+    gint64 data_blocks_used;
+    gint64 overhead_blocks_used;
+    gint64 logical_blocks_used;
+    gint64 used_percent;
+    gint64 saving_percent;
+    gdouble write_amplification_ratio;
+} BDLVMVDOStats;
+
+void bd_lvm_vdo_stats_free (BDLVMVDOStats *stats);
+BDLVMVDOStats* bd_lvm_vdo_stats_copy (BDLVMVDOStats *stats);
+
 typedef struct BDLVMCacheStats {
     guint64 block_size;
     guint64 cache_size;
@@ -303,5 +318,8 @@ const gchar* bd_lvm_get_vdo_index_state_str (BDLVMVDOIndexState state, GError **
 const gchar* bd_lvm_get_vdo_write_policy_str (BDLVMVDOWritePolicy policy, GError **error);
 
 BDLVMVDOWritePolicy bd_lvm_get_vdo_write_policy_from_str (const gchar *policy_str, GError **error);
+
+BDLVMVDOStats* bd_lvm_vdo_get_stats (const gchar *vg_name, const gchar *pool_name, GError **error);
+GHashTable* bd_lvm_vdo_get_stats_full (const gchar *vg_name, const gchar *pool_name, GError **error);
 
 #endif /* BD_LVM */
