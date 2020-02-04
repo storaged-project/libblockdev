@@ -434,6 +434,85 @@ GType bd_lvm_vdodata_get_type () {
     return type;
 }
 
+#define BD_LVM_TYPE_VDO_STATS (bd_lvm_vdo_stats_get_type ())
+GType bd_lvm_vdo_stats_get_type();
+
+/**
+ * BDLVMVDOStats:
+ * @block_size: The block size of a VDO volume, in bytes.
+ * @logical_block_size: The logical block size, in bytes.
+ * @physical_blocks: The total number of physical blocks allocated for a VDO volume.
+ * @data_blocks_used: The number of physical blocks currently in use by a VDO volume
+ *                    to store data.
+ * @overhead_blocks_used: The number of physical blocks currently in use by a VDO volume
+ *                        to store VDO metadata.
+ * @logical_blocks_used: The number of logical blocks currently mapped.
+ * @used_percent: The percentage of physical blocks used on a VDO volume
+ *                (= used blocks / allocated blocks * 100).
+ * @saving_percent: The percentage of physical blocks saved on a VDO volume
+ *                  (= [logical blocks used - physical blocks used] / logical blocks used).
+ * @write_amplification_ratio: The average number of block writes to the underlying storage
+ *                             per block written to the VDO device.
+ */
+typedef struct BDLVMVDOStats {
+    gint64 block_size;
+    gint64 logical_block_size;
+    gint64 physical_blocks;
+    gint64 data_blocks_used;
+    gint64 overhead_blocks_used;
+    gint64 logical_blocks_used;
+    gint64 used_percent;
+    gint64 saving_percent;
+    gdouble write_amplification_ratio;
+} BDLVMVDOStats;
+
+/**
+ * bd_lvm_vdo_stats_copy: (skip)
+ *
+ * Creates a new copy of @data.
+ */
+BDLVMVDOStats* bd_lvm_vdo_stats_copy (BDLVMVDOStats *data) {
+    if (data == NULL)
+        return NULL;
+
+    BDLVMVDOStats *new_data = g_new0 (BDLVMVDOStats, 1);
+
+    new_data->block_size = data->block_size;
+    new_data->logical_block_size = data->logical_block_size;
+    new_data->physical_blocks = data->physical_blocks;
+    new_data->data_blocks_used = data->data_blocks_used;
+    new_data->overhead_blocks_used = data->overhead_blocks_used;
+    new_data->logical_blocks_used = data->logical_blocks_used;
+    new_data->used_percent = data->used_percent;
+    new_data->saving_percent = data->saving_percent;
+    new_data->write_amplification_ratio = data->write_amplification_ratio;
+    return new_data;
+}
+
+/**
+ * bd_lvm_vdo_stats_free: (skip)
+ *
+ * Frees @data.
+ */
+void bd_lvm_vdo_stats_free (BDLVMVDOStats *data) {
+    if (data == NULL)
+        return;
+
+    g_free (data);
+}
+
+GType bd_lvm_vdo_stats_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDLVMVDOStats",
+                                            (GBoxedCopyFunc) bd_lvm_vdo_stats_copy,
+                                            (GBoxedFreeFunc) bd_lvm_vdo_stats_free);
+    }
+
+    return type;
+}
+
 #define BD_LVM_TYPE_CACHE_STATS (bd_lvm_cache_stats_get_type ())
 GType bd_lvm_cache_stats_get_type();
 
@@ -1532,5 +1611,40 @@ const gchar* bd_lvm_get_vdo_write_policy_str (BDLVMVDOWritePolicy policy, GError
  * Tech category: always provided/supported
  */
 BDLVMVDOWritePolicy bd_lvm_get_vdo_write_policy_from_str (const gchar *policy_str, GError **error);
+
+/**
+ * bd_lvm_vdo_get_stats_full:
+ * @vg_name: name of the VG that contains @pool_name VDO pool
+ * @pool_name: name of the VDO pool to get statistics for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full) (element-type utf8 utf8): hashtable of type string - string of available
+ *                                                    statistics or %NULL in case of error
+ *                                                    (@error gets populated in those cases)
+ *
+ * Statistics are collected from the values exposed by the kernel `kvdo` module
+ * at the `/sys/kvdo/<VDO_NAME>/statistics/` path.
+ * Some of the keys are computed to mimic the information produced by the vdo tools.
+ * Please note the contents of the hashtable may vary depending on the actual kvdo module version.
+ *
+ * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_QUERY
+ */
+GHashTable* bd_lvm_vdo_get_stats_full (const gchar *vg_name, const gchar *pool_name, GError **error);
+
+/**
+ * bd_lvm_vdo_get_stats:
+ * @vg_name: name of the VG that contains @pool_name VDO pool
+ * @pool_name: name of the VDO pool to get statistics for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): a structure containing selected statistics or %NULL in case of error
+ *                           (@error gets populated in those cases)
+ *
+ * In contrast to @bd_lvm_vdo_get_stats_full this function will only return selected statistics
+ * in a fixed structure. In case a value is not available, -1 would be returned.
+ *
+ * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_QUERY
+ */
+BDLVMVDOStats* bd_lvm_vdo_get_stats (const gchar *vg_name, const gchar *pool_name, GError **error);
 
 #endif  /* BD_LVM_API */

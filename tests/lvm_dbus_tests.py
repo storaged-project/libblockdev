@@ -1567,3 +1567,28 @@ class LVMVDOTest(LVMTestCase):
     @tag_test(TestTags.SLOW)
     def test_vdo_pool_convert(self):
         self.skipTest("LVM VDO pool convert not implemented in LVM DBus API.")
+
+    @tag_test(TestTags.SLOW)
+    def test_stats(self):
+        succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", "vdoPool", 7 * 1024**3, 35 * 1024**3)
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertTrue(vdo_info.deduplication)
+
+        vdo_stats = BlockDev.lvm_vdo_get_stats("testVDOVG", "vdoPool")
+        self.assertEqual(vdo_info.saving_percent, vdo_stats.saving_percent)
+
+        # just sanity check
+        self.assertNotEqual(vdo_stats.used_percent, -1)
+        self.assertNotEqual(vdo_stats.block_size, -1)
+        self.assertNotEqual(vdo_stats.logical_block_size, -1)
+        self.assertNotEqual(vdo_stats.physical_blocks, -1)
+        self.assertNotEqual(vdo_stats.data_blocks_used, -1)
+        self.assertNotEqual(vdo_stats.overhead_blocks_used, -1)
+        self.assertNotEqual(vdo_stats.logical_blocks_used, -1)
+        self.assertNotEqual(vdo_stats.write_amplification_ratio, -1)
+
+        full_stats = BlockDev.lvm_vdo_get_stats_full("testVDOVG", "vdoPool")
+        self.assertIn("writeAmplificationRatio", full_stats.keys())

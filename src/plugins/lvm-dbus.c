@@ -27,9 +27,11 @@
 
 #include "lvm.h"
 #include "check_deps.h"
+#include "vdo_stats.h"
 
 #define INT_FLOAT_EPS 1e-5
 #define SECTOR_SIZE 512
+#define VDO_POOL_SUFFIX "vpool"
 
 static GMutex global_config_lock;
 static gchar *global_config_str = NULL;
@@ -3755,4 +3757,65 @@ BDLVMVDOWritePolicy bd_lvm_get_vdo_write_policy_from_str (const gchar *policy_st
                      "Invalid policy given: %s", policy_str);
         return BD_LVM_VDO_WRITE_POLICY_UNKNOWN;
     }
+}
+
+/**
+ * bd_lvm_vdo_get_stats_full:
+ * @vg_name: name of the VG that contains @pool_name VDO pool
+ * @pool_name: name of the VDO pool to get statistics for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full) (element-type utf8 utf8): hashtable of type string - string of available
+ *                                                    statistics or %NULL in case of error
+ *                                                    (@error gets populated in those cases)
+ *
+ * Statistics are collected from the values exposed by the kernel `kvdo` module
+ * at the `/sys/kvdo/<VDO_NAME>/statistics/` path.
+ * Some of the keys are computed to mimic the information produced by the vdo tools.
+ * Please note the contents of the hashtable may vary depending on the actual kvdo module version.
+ *
+ * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_QUERY
+ */
+GHashTable* bd_lvm_vdo_get_stats_full (const gchar *vg_name, const gchar *pool_name, GError **error) {
+    g_autofree gchar *kvdo_name = g_strdup_printf ("%s-%s-%s", vg_name, pool_name, VDO_POOL_SUFFIX);
+    return vdo_get_stats_full(kvdo_name, error);
+}
+
+/**
+ * bd_lvm_vdo_get_stats:
+ * @vg_name: name of the VG that contains @pool_name VDO pool
+ * @pool_name: name of the VDO pool to get statistics for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): a structure containing selected statistics or %NULL in case of error
+ *                           (@error gets populated in those cases)
+ *
+ * In contrast to @bd_lvm_vdo_get_stats_full this function will only return selected statistics
+ * in a fixed structure. In case a value is not available, -1 would be returned.
+ *
+ * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_QUERY
+ */
+BDLVMVDOStats* bd_lvm_vdo_get_stats (const gchar *vg_name, const gchar *pool_name, GError **error) {
+    GHashTable *full_stats = NULL;
+    BDLVMVDOStats *stats = NULL;
+
+    full_stats = bd_lvm_vdo_get_stats_full (vg_name, pool_name, error);
+    if (!full_stats)
+        return NULL;
+
+    stats = g_new0 (BDLVMVDOStats, 1);
+    get_stat_val64_default (full_stats, "block_size", &stats->block_size, -1);
+    get_stat_val64_default (full_stats, "logical_block_size", &stats->logical_block_size, -1);
+    get_stat_val64_default (full_stats, "physical_blocks", &stats->physical_blocks, -1);
+    get_stat_val64_default (full_stats, "data_blocks_used", &stats->data_blocks_used, -1);
+    get_stat_val64_default (full_stats, "overhead_blocks_used", &stats->overhead_blocks_used, -1);
+    get_stat_val64_default (full_stats, "logical_blocks_used", &stats->logical_blocks_used, -1);
+    get_stat_val64_default (full_stats, "usedPercent", &stats->used_percent, -1);
+    get_stat_val64_default (full_stats, "savingPercent", &stats->saving_percent, -1);
+    if (!get_stat_val_double (full_stats, "writeAmplificationRatio", &stats->write_amplification_ratio))
+        stats->write_amplification_ratio = -1;
+
+    g_hash_table_destroy (full_stats);
+
+    return stats;
 }
