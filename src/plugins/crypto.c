@@ -341,6 +341,19 @@ gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **erro
                 return FALSE;
             } else
                 return TRUE;
+        case BD_CRYPTO_TECH_BITLK:
+#ifndef LIBCRYPTSETUP_BITLK
+            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                         "BITLK technology requires libcryptsetup >= 2.3.0");
+            return FALSE;
+#endif
+            ret = mode & BD_CRYPTO_TECH_MODE_OPEN_CLOSE;
+            if (ret != mode) {
+                g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                             "Only 'open' supported for BITLK");
+                return FALSE;
+            } else
+                return TRUE;
         default:
             g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL, "Unknown technology");
             return FALSE;
@@ -2406,3 +2419,97 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
     return ret;
 }
 #endif // WITH_BD_ESCROW
+
+/**
+ * bd_crypto_bitlk_open:
+ * @device: the device to open
+ * @name: name for the BITLK device
+ * @pass_data: (array length=data_len): a passphrase for the BITLK volume (may contain arbitrary binary data)
+ * @data_len: length of the @pass_data buffer
+ * @read_only: whether to open as read-only or not (meaning read-write)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_BITLK-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+#ifndef LIBCRYPTSETUP_BITLK
+gboolean bd_crypto_bitlk_open (const gchar *device UNUSED, const gchar *name UNUSED, const guint8* pass_data UNUSED, gsize data_len UNUSED, gboolean read_only UNUSED, GError **error) {
+    /* this will return FALSE and set error, because BITLK technology is not available */
+    return bd_crypto_is_tech_avail (BD_CRYPTO_TECH_BITLK, BD_CRYPTO_TECH_MODE_OPEN_CLOSE, error);
+#else
+gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error) {
+    struct crypt_device *cd = NULL;
+    gint ret = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started opening '%s' BITLK device", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    if (data_len == 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
+                     "No passphrase specified, cannot open.");
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_load (cd, CRYPT_BITLK, NULL);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to load device's parameters: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, (char*) pass_data,
+                                        data_len, read_only ? CRYPT_ACTIVATE_READONLY : 0);
+
+    if (ret < 0) {
+        if (ret == -EPERM)
+          g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                       "Failed to activate device: Incorrect passphrase.");
+        else
+          g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                       "Failed to activate device: %s", strerror_l (-ret, c_locale));
+
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
+#endif
+}
+
+/**
+ * bd_crypto_bitlk_close:
+ * @bitlk_device: BITLK device to close
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the given @bitlk_device was successfully closed or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_BITLK-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+#ifndef LIBCRYPTSETUP_BITLK
+gboolean bd_crypto_bitlk_close (const gchar *bitlk_device UNUSED, GError **error) {
+    /* this will return FALSE and set error, because BITLK technology is not available */
+    return bd_crypto_is_tech_avail (BD_CRYPTO_TECH_BITLK, BD_CRYPTO_TECH_MODE_OPEN_CLOSE, error);
+#else
+gboolean bd_crypto_bitlk_close (const gchar *bitlk_device, GError **error) {
+    return _crypto_close (bitlk_device, "BITLK", error);
+#endif
+}
+
