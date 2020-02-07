@@ -1089,6 +1089,38 @@ gboolean bd_crypto_luks_open_blob (const gchar *device, const gchar *name, const
     return luks_open (device, name, (const guint8*) pass_data, data_len, NULL, read_only, error);
 }
 
+static gboolean _crypto_close (const gchar *device, const gchar *tech_name, GError **error) {
+    struct crypt_device *cd = NULL;
+    gint ret = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started closing %s device '%s'", tech_name, device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    ret = crypt_init_by_name (&cd, device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_deactivate (cd, device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to deactivate device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
+}
+
 /**
  * bd_crypto_luks_close:
  * @luks_device: LUKS device to close
@@ -1099,35 +1131,7 @@ gboolean bd_crypto_luks_open_blob (const gchar *device, const gchar *name, const
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_luks_close (const gchar *luks_device, GError **error) {
-    struct crypt_device *cd = NULL;
-    gint ret = 0;
-    guint64 progress_id = 0;
-    gchar *msg = NULL;
-
-    msg = g_strdup_printf ("Started closing LUKS device '%s'", luks_device);
-    progress_id = bd_utils_report_started (msg);
-    g_free (msg);
-
-    ret = crypt_init_by_name (&cd, luks_device);
-    if (ret != 0) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to initialize device: %s", strerror_l(-ret, c_locale));
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    ret = crypt_deactivate (cd, luks_device);
-    if (ret != 0) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to deactivate device: %s", strerror_l(-ret, c_locale));
-        crypt_free (cd);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    crypt_free (cd);
-    bd_utils_report_finished (progress_id, "Completed");
-    return TRUE;
+    return _crypto_close (luks_device, "LUKS", error);
 }
 
 /**
@@ -2171,35 +2175,7 @@ gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const g
  * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_tc_close (const gchar *tc_device, GError **error) {
-    struct crypt_device *cd = NULL;
-    gint ret = 0;
-    guint64 progress_id = 0;
-    gchar *msg = NULL;
-
-    msg = g_strdup_printf ("Started closing TrueCrypt/VeraCrypt device '%s'", tc_device);
-    progress_id = bd_utils_report_started (msg);
-    g_free (msg);
-
-    ret = crypt_init_by_name (&cd, tc_device);
-    if (ret != 0) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to initialize device: %s", strerror_l(-ret, c_locale));
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    ret = crypt_deactivate (cd, tc_device);
-    if (ret != 0) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to deactivate device: %s", strerror_l(-ret, c_locale));
-        crypt_free (cd);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    crypt_free (cd);
-    bd_utils_report_finished (progress_id, "Completed");
-    return TRUE;
+    return _crypto_close (tc_device, "TrueCrypt/VeraCrypt", error);
 }
 
 #ifdef WITH_BD_ESCROW
