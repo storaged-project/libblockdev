@@ -267,6 +267,14 @@ def crypto_tc_open(device, name, passphrase, read_only=False, keyfiles=None, hid
     return _crypto_tc_open(device, name, passphrase, keyfiles, hidden, system, veracrypt, veracrypt_pim, read_only)
 __all__.append("crypto_tc_open")
 
+_crypto_bitlk_open = BlockDev.crypto_bitlk_open
+@override(BlockDev.crypto_bitlk_open)
+def crypto_bitlk_open(device, name, passphrase, read_only=False):
+    if isinstance(passphrase, str):
+        passphrase = [ord(c) for c in passphrase]
+    return _crypto_bitlk_open(device, name, passphrase, read_only)
+__all__.append("crypto_bitlk_open")
+
 
 _dm_create_linear = BlockDev.dm_create_linear
 @override(BlockDev.dm_create_linear)
