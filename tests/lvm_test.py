@@ -5,6 +5,7 @@ import math
 import overrides_hack
 import six
 import re
+import shutil
 import subprocess
 from distutils.version import LooseVersion
 
@@ -1119,6 +1120,10 @@ class LvmPVVGLVcachePoolTestCase(LvmPVVGLVTestCase):
             BlockDev.lvm_lvremove("testVG", "testCache", True, None)
         except:
             pass
+
+        # lets help udev with removing stale symlinks
+        if not BlockDev.lvm_lvs("testVG") and os.path.exists("/dev/testVG/testCache_meta"):
+            shutil.rmtree("/dev/testVG", ignore_errors=True)
 
         LvmPVVGLVTestCase._clean_up(self)
 
