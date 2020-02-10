@@ -2440,6 +2440,7 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
         props = get_object_properties (lv->data, LV_CMN_INTF, error);
         if (!props) {
             g_slist_free_full (matched_lvs, g_free);
+            g_free (ret);
             return NULL;
         }
         ret[j] = get_lv_data_from_props (props, error);
