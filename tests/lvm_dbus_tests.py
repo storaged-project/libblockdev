@@ -1555,8 +1555,9 @@ class LVMVDOTest(LVMTestCase):
     @tag_test(TestTags.SLOW)
     def test_vdo_pool_create_options(self):
         # set index size to 300 MiB, disable compression and write policy to sync
+        policy = BlockDev.lvm_get_vdo_write_policy_from_str("sync")
         succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", "vdoPool", 7 * 1024**3, 35 * 1024**3,
-                                            300 * 1024**2, False, True, BlockDev.LVMVDOWritePolicy.SYNC)
+                                            300 * 1024**2, False, True, policy)
         self.assertTrue(succ)
 
         vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")

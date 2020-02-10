@@ -45,6 +45,7 @@ typedef enum {
     BD_LVM_ERROR_TECH_UNAVAIL,
     BD_LVM_ERROR_FAIL,
     BD_LVM_ERROR_NOT_SUPPORTED,
+    BD_LVM_ERROR_VDO_POLICY_INVAL,
 } BDLVMError;
 
 typedef enum {
@@ -300,5 +301,7 @@ const gchar* bd_lvm_get_vdo_operating_mode_str (BDLVMVDOOperatingMode mode, GErr
 const gchar* bd_lvm_get_vdo_compression_state_str (BDLVMVDOCompressionState state, GError **error);
 const gchar* bd_lvm_get_vdo_index_state_str (BDLVMVDOIndexState state, GError **error);
 const gchar* bd_lvm_get_vdo_write_policy_str (BDLVMVDOWritePolicy policy, GError **error);
+
+BDLVMVDOWritePolicy bd_lvm_get_vdo_write_policy_from_str (const gchar *policy_str, GError **error);
 
 #endif /* BD_LVM */
