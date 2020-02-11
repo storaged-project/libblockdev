@@ -114,6 +114,8 @@ bd_crypto_tc_open
 bd_crypto_tc_open_full
 bd_crypto_tc_close
 bd_crypto_escrow_device
+bd_crypto_bitlk_open
+bd_crypto_bitlk_close
 BDCryptoTech
 BDCryptoTechMode
 bd_crypto_is_tech_avail
