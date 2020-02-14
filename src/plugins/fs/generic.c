@@ -271,7 +271,7 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
         return FALSE;
     }
 
-    fd = open (device, O_RDWR|O_CLOEXEC);
+    fd = open (device, O_RDONLY|O_CLOEXEC);
     if (fd == -1) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to open the device '%s'", device);
