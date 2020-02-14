@@ -8,7 +8,12 @@
 #include <bytesize/bs_size.h>
 
 void print_usage (const char *cmd) {
-    fprintf (stderr, "Usage: %s CACHED_LV [CACHED_LV2...]\n", cmd);
+    fprintf (stderr,
+             "Usage: %s CACHED_LV [CACHED_LV2...]\n"
+             "-h    --help   Print this usage info\n"
+             "-j    --json   Print stats as JSON\n"
+             "Options need to be specified before LVs.\n",
+             cmd);
 }
 
 void print_size (guint64 bytes, gboolean newline) {
@@ -48,17 +53,55 @@ gboolean print_lv_stats (const char *vg_name, const char *lv_name, GError **erro
     return TRUE;
 }
 
+gboolean print_lv_stats_json(const char *vg_name, const char *lv_name, GError **error) {
+    BDLVMLVdata *lv_data = bd_lvm_lvinfo (vg_name, lv_name, error);
+    if (!lv_data)
+        return FALSE;
+    BDLVMCacheStats *stats = bd_lvm_cache_stats (vg_name, lv_name, error);
+    if (!stats)
+        return FALSE;
+
+    printf ("{\n");
+    printf ("  \"lv\": \"%s/%s\",\n", vg_name, lv_name);
+    printf ("  \"mode\": \"%s\",\n", bd_lvm_cache_get_mode_str (stats->mode, error)); /* ignoring 'error', must be a valid mode */
+    printf ("  \"lv-size\": %"G_GUINT64_FORMAT",\n", lv_data->size);
+    printf ("  \"cache-size\": %"G_GUINT64_FORMAT",\n", stats->cache_size);
+    printf ("  \"cache-used\": %"G_GUINT64_FORMAT",\n", stats->cache_size);
+    printf ("  \"cache-used-pct\": %0.2f,\n", (double) stats->cache_used / stats->cache_size);
+    printf ("  \"read-misses\": %"G_GUINT64_FORMAT",\n", stats->read_misses);
+    printf ("  \"read-hits\": %"G_GUINT64_FORMAT",\n", stats->read_hits);
+    printf ("  \"read-hit-ratio\": %0.2f,\n", (double)stats->read_hits / (stats->read_hits + stats->read_misses));
+    printf ("  \"write-misses\": %"G_GUINT64_FORMAT",\n", stats->write_misses);
+    printf ("  \"write-hits\": %"G_GUINT64_FORMAT",\n", stats->write_hits);
+    printf ("  \"write-hit-ratio\": %0.2f\n", (double)stats->write_hits / (stats->write_hits + stats->write_misses));
+    printf ("}\n");
+
+    bd_lvm_lvdata_free (lv_data);
+    bd_lvm_cache_stats_free (stats);
+
+    return TRUE;
+}
+
 int main (int argc, char *argv[]) {
     gboolean ret = FALSE;
     GError *error = NULL;
 
-    if (argc < 2) {
-        fprintf (stderr, "No cached LV to get the stats for specified!\n");
+    if ((g_strcmp0 (argv[1], "-h") == 0) || g_strcmp0 (argv[1], "--help") == 0) {
         print_usage (argv[0]);
         return 1;
     }
 
-    if ((g_strcmp0(argv[1], "-h") == 0) || g_strcmp0(argv[1], "--help") == 0) {
+    gboolean json = FALSE;
+    int first_lv_arg = 1;
+    for (int i=0; i < argc; i++) {
+        if ((g_strcmp0 (argv[i], "-j") == 0) || g_strcmp0 (argv[i], "--json") == 0) {
+            json = TRUE;
+            first_lv_arg++;
+        }
+    }
+
+    if (first_lv_arg >= argc) {
+        fprintf (stderr, "No cached LV to get the stats for specified!\n");
         print_usage (argv[0]);
         return 1;
     }
@@ -81,7 +124,7 @@ int main (int argc, char *argv[]) {
     }
 
     gboolean ok = TRUE;
-    for (int i = 1; i < argc; i++) {
+    for (int i = first_lv_arg; i < argc; i++) {
         char *slash = strchr (argv[i], '/');
         if (!slash) {
             fprintf (stderr, "Invalid LV specified: '%s'. Has to be in the VG/LV format.\n", argv[i]);
@@ -92,7 +135,11 @@ int main (int argc, char *argv[]) {
         const char *vg_name = argv[i];
         const char *lv_name = slash + 1;
 
-        ret = print_lv_stats (vg_name, lv_name, &error);
+        if (json)
+            ret = print_lv_stats_json (vg_name, lv_name, &error);
+        else
+            ret = print_lv_stats (vg_name, lv_name, &error);
+
         if (!ret) {
             fprintf (stderr, "Failed to get stats for '%s/%s': %s\n",
                      vg_name, lv_name, error->message);
