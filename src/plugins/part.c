@@ -2264,7 +2264,7 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
         return FALSE;
     }
 
-    /* first unset all the flags */
+    /* first unset all the flags on MSDOS */
     if (table_type == BD_PART_TABLE_MSDOS) {
         if (!set_boot_flag (cxt, part_num, FALSE, error)) {
             close_context (cxt);
@@ -2275,13 +2275,6 @@ gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 f
 
         if (!set_part_type (cxt, part_num, DEFAULT_PART_ID, BD_PART_TABLE_MSDOS, error)) {
             g_prefix_error (error, "Failed to reset partition ID on partition '%s': ", part);
-            bd_utils_report_finished (progress_id, (*error)->message);
-            close_context (cxt);
-            return FALSE;
-        }
-    } else if (table_type == BD_PART_TABLE_GPT) {
-        if (!set_part_type (cxt, part_num, DEFAULT_PART_GUID, BD_PART_TABLE_GPT, error)) {
-            g_prefix_error (error, "Failed to reset partition type on partition '%s': ", part);
             bd_utils_report_finished (progress_id, (*error)->message);
             close_context (cxt);
             return FALSE;
