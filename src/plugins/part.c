@@ -770,16 +770,15 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
     return ret;
 }
 
-static BDPartSpec** get_disk_parts (const gchar *disk, gboolean parts, gboolean freespaces, GError **error) {
+static BDPartSpec** get_disk_parts (const gchar *disk, gboolean parts, gboolean freespaces, gboolean metadata, GError **error) {
     struct fdisk_context *cxt = NULL;
     struct fdisk_table *table = NULL;
     struct fdisk_partition *pa = NULL;
     struct fdisk_iter *itr = NULL;
-    BDPartSpec **ret = NULL;
     BDPartSpec *spec = NULL;
-    guint i = 0;
+    BDPartSpec *prev_spec = NULL;
+    GPtrArray *array = NULL;
     gint status = 0;
-    size_t num_parts = 0;
 
     cxt = get_device_context (disk, error);
     if (!cxt) {
@@ -827,38 +826,70 @@ static BDPartSpec** get_disk_parts (const gchar *disk, gboolean parts, gboolean 
         }
     }
 
-    num_parts = fdisk_table_get_nents (table);
-    if (num_parts == 0) {
+    /* sort partitions by start */
+    status = fdisk_table_sort_partitions (table, fdisk_partition_cmp_start);
+    if (status != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to sort partitions");
         fdisk_free_iter (itr);
         fdisk_unref_table (table);
         close_context (cxt);
         return NULL;
     }
 
-    ret = g_new0 (BDPartSpec*, num_parts + 1);
-    i = 0;
+    array = g_ptr_array_new_with_free_func ((GDestroyNotify) (void *) bd_part_spec_free);
 
     while (fdisk_table_next_partition(table, itr, &pa) == 0) {
         spec = get_part_spec_fdisk (cxt, pa, error);
         if (!spec) {
-            for (BDPartSpec **part_list_p = ret; *part_list_p; part_list_p++)
-                bd_part_spec_free (*part_list_p);
-            g_free (ret);
+            g_ptr_array_free (array, TRUE);
             fdisk_free_iter (itr);
             fdisk_unref_table (table);
             close_context (cxt);
             return NULL;
         }
 
-        ret[i++] = spec;
+        /* libfdisk doesn't have a special partition for metadata so we need to add
+           a special metadata partition to the "empty" spaces between partitions
+           and free spaces to mimic behaviour of parted
+           metadata partitions should be present in the extended partition in front
+           of every logical partition */
+        if (prev_spec && metadata) {
+            if ((spec->start > prev_spec->start + prev_spec->size) ||
+                (prev_spec->type == BD_PART_TYPE_EXTENDED && spec->start > prev_spec->start) ) {
+                BDPartSpec *ext_meta = g_new0 (BDPartSpec, 1);
+                ext_meta->flags = 0;
+                ext_meta->name = NULL;
+                ext_meta->path = NULL;
+
+                if (prev_spec->type == BD_PART_TYPE_EXTENDED) {
+                    ext_meta->start = prev_spec->start;
+                    ext_meta->size = spec->start - ext_meta->start;
+                    ext_meta->type = BD_PART_TYPE_METADATA | BD_PART_TYPE_LOGICAL;
+                } else {
+                    ext_meta->start = prev_spec->start + prev_spec->size;
+                    ext_meta->size = spec->start - ext_meta->start;
+                    if (spec->type & BD_PART_TYPE_LOGICAL)
+                        ext_meta->type = BD_PART_TYPE_METADATA | BD_PART_TYPE_LOGICAL;
+                    else
+                        ext_meta->type = BD_PART_TYPE_METADATA;
+                }
+                ext_meta->type_guid = NULL;
+
+                g_ptr_array_add (array, ext_meta);
+            }
+        }
+
+        prev_spec = spec;
+        g_ptr_array_add (array, spec);
     }
-    ret[i] = NULL;
 
     fdisk_free_iter (itr);
     fdisk_unref_table (table);
     close_context (cxt);
 
-    return ret;
+    g_ptr_array_add (array, NULL);
+    return (BDPartSpec **) g_ptr_array_free (array, FALSE);
 }
 
 /**
@@ -876,7 +907,7 @@ BDPartSpec* bd_part_get_part_by_pos (const gchar *disk, guint64 position, GError
     BDPartSpec **parts = NULL;
     BDPartSpec *ret = NULL;
 
-    parts = get_disk_parts (disk, TRUE, TRUE, error);
+    parts = get_disk_parts (disk, TRUE, TRUE, TRUE, error);
     if (!parts)
         return NULL;
 
@@ -986,7 +1017,7 @@ BDPartDiskSpec* bd_part_get_disk_spec (const gchar *disk, GError **error) {
  * Tech category: %BD_PART_TECH_MODE_QUERY_TABLE + the tech according to the partition table type
  */
 BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error) {
-    return get_disk_parts (disk, TRUE, FALSE, error);
+    return get_disk_parts (disk, TRUE, FALSE, FALSE, error);
 }
 
 /**
@@ -999,7 +1030,7 @@ BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error) {
  * Tech category: %BD_PART_TECH_MODE_QUERY_TABLE + the tech according to the partition table type
  */
 BDPartSpec** bd_part_get_disk_free_regions (const gchar *disk, GError **error) {
-    return get_disk_parts (disk, FALSE, TRUE, error);
+    return get_disk_parts (disk, FALSE, TRUE, FALSE, error);
 }
 
 /**

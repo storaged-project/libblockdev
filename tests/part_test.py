@@ -942,6 +942,25 @@ class PartGetPartByPos(PartTestCase):
         self.assertEqual(ret.start, ps4.start + ps4.size)
         self.assertLessEqual(ret.size, (100 * 1024**2) - (ps4.start + ps4.size))
 
+        # metadata at the start of the extendeded partition
+        ret = BlockDev.part_get_part_by_pos(self.loop_dev, ps3.start)
+        self.assertIsNotNone(ret)
+        self.assertIsNone(ret.path)
+        self.assertTrue(ret.type & BlockDev.PartType.LOGICAL)
+        self.assertTrue(ret.type & BlockDev.PartType.METADATA)
+        self.assertEqual(ret.start, ps3.start)
+        self.assertEqual(ret.size, ps5.start - ps3.start)
+
+        # metadata after a logical partition
+        for ps in (ps5, ps6, ps7):
+            ret = BlockDev.part_get_part_by_pos(self.loop_dev, ps.start + ps.size)
+            self.assertIsNotNone(ret)
+            self.assertIsNone(ret.path)
+            self.assertTrue(ret.type & BlockDev.PartType.LOGICAL)
+            self.assertTrue(ret.type & BlockDev.PartType.METADATA)
+            self.assertEqual(ret.start, ps.start + ps.size)
+            self.assertEqual(ret.size, 1024**2)
+
 class PartCreateResizePartCase(PartTestCase):
     def test_create_resize_part_two(self):
         """Verify that it is possible to create and resize two paritions"""
