@@ -1486,6 +1486,13 @@ class PartSetGptFlagsCase(PartTestCase):
         self.assertTrue(ps.flags & BlockDev.PartFlag.LEGACY_BOOT)
         self.assertEqual(ps.type_guid, esp_guid)
 
+        # same but set_part_flags
+        succ = BlockDev.part_set_part_flags (self.loop_dev, ps.path, BlockDev.PartFlag.LEGACY_BOOT)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertTrue(ps.flags & BlockDev.PartFlag.LEGACY_BOOT)
+        self.assertEqual(ps.type_guid, esp_guid)
+
 class PartNoDevCase(PartTestCase):
 
     def setUp(self):
