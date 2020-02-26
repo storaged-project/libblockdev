@@ -283,13 +283,14 @@ static gboolean write_label (struct fdisk_context *cxt, struct fdisk_table *orig
 
     /* XXX: try to grab a lock for the device so that udev doesn't step in
        between the two operations we need to perform (see below) with its
-       BLKRRPART ioctl() call which makes the device busy */
+       BLKRRPART ioctl() call which makes the device busy
+       see https://systemd.io/BLOCK_DEVICE_LOCKING */
     dev_fd = open (disk, O_RDONLY|O_CLOEXEC);
     if (dev_fd >= 0) {
-        ret = flock (dev_fd, LOCK_SH|LOCK_NB);
+        ret = flock (dev_fd, LOCK_EX|LOCK_NB);
         while ((ret != 0) && (num_tries <= 5)) {
             g_usleep (100 * 1000); /* microseconds */
-            ret = flock (dev_fd, LOCK_SH|LOCK_NB);
+            ret = flock (dev_fd, LOCK_EX|LOCK_NB);
             num_tries++;
         }
     }
