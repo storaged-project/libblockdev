@@ -18,10 +18,12 @@
  */
 
 #include <glib.h>
+#include <glib/gprintf.h>
 #include <libkmod.h>
 #include <string.h>
 #include <syslog.h>
 #include <locale.h>
+#include <sys/utsname.h>
 
 #include "module.h"
 
@@ -215,4 +217,88 @@ gboolean bd_utils_unload_kernel_module (const gchar *module_name, GError **error
     kmod_unref (ctx);
     freelocale (c_locale);
     return TRUE;
+}
+
+
+static BDUtilsLinuxVersion detected_linux_ver;
+static gboolean have_linux_ver = FALSE;
+
+G_LOCK_DEFINE_STATIC (detected_linux_ver);
+
+/**
+ * bd_utils_get_linux_version:
+ * @error: (out): place to store error (if any)
+ *
+ * Retrieves version of currently running Linux kernel. Acts also as an initializer for statically cached data.
+ *
+ * Returns: (transfer none): Detected Linux kernel version or %NULL in case of an error. The returned value belongs to the library, do not free.
+ */
+BDUtilsLinuxVersion * bd_utils_get_linux_version (GError **error) {
+    struct utsname buf;
+
+    /* return cached value if available */
+    if (have_linux_ver)
+        return &detected_linux_ver;
+
+    G_LOCK (detected_linux_ver);
+
+    memset (&detected_linux_ver, 0, sizeof (BDUtilsLinuxVersion));
+
+    if (uname (&buf)) {
+        g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_FAIL,
+                     "Failed to get linux kernel version: %m");
+        G_UNLOCK (detected_linux_ver);
+        return NULL;
+      }
+
+    if (g_ascii_strncasecmp (buf.sysname, "Linux", sizeof buf.sysname) != 0) {
+        g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_INVALID_PLATFORM,
+                     "Failed to get kernel version: spurious sysname '%s' detected", buf.sysname);
+        G_UNLOCK (detected_linux_ver);
+        return NULL;
+      }
+
+    if (sscanf (buf.release, "%d.%d.%d",
+                &detected_linux_ver.major,
+                &detected_linux_ver.minor,
+                &detected_linux_ver.micro) < 1) {
+        g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_FAIL,
+                     "Failed to parse kernel version: malformed release string '%s'", buf.release);
+        G_UNLOCK (detected_linux_ver);
+        return NULL;
+    }
+
+    have_linux_ver = TRUE;
+    G_UNLOCK (detected_linux_ver);
+
+    return &detected_linux_ver;
+}
+
+/**
+ * bd_utils_check_linux_version:
+ * @major: Minimal major linux kernel version.
+ * @minor: Minimal minor linux kernel version.
+ * @micro: Minimal micro linux kernel version.
+ *
+ * Checks whether the currently running linux kernel version is equal or higher
+ * than the specified required @major.@minor.@micro version.
+ *
+ * Returns: an integer less than, equal to, or greater than zero, if detected version is <, == or > than the specified @major.@minor.@micro version.
+ */
+gint bd_utils_check_linux_version (guint major, guint minor, guint micro) {
+    gint ret;
+
+    g_warn_if_fail (have_linux_ver == TRUE);
+
+    G_LOCK (detected_linux_ver);
+
+    ret = detected_linux_ver.major - major;
+    if (ret == 0)
+        ret = detected_linux_ver.minor - minor;
+    if (ret == 0)
+        ret = detected_linux_ver.micro - micro;
+
+    G_UNLOCK (detected_linux_ver);
+
+    return ret;
 }
