@@ -279,3 +279,26 @@ class UtilsDevUtilsSymlinksTestCase(UtilsTestCase):
         symlinks = BlockDev.utils_get_device_symlinks("utilsTestVG/utilsTestLV")
         # there should be at least 4 symlinks for an LV
         self.assertGreaterEqual(len(symlinks), 4)
+
+
+class UtilsLinuxKernelVersionTest(UtilsTestCase):
+    @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
+    def test_initialization(self):
+        """ Test Linux kernel version detection"""
+
+        ver = BlockDev.utils_get_linux_version()
+        self.assertGreater(ver.major, 0)
+
+        ret = BlockDev.utils_check_linux_version(ver.major, ver.minor, ver.micro)
+        self.assertEqual(ret, 0)
+
+        ret = BlockDev.utils_check_linux_version(ver.major - 1, ver.minor, ver.micro)
+        self.assertGreater(ret, 0)
+
+        ret = BlockDev.utils_check_linux_version(ver.major + 1, ver.minor, ver.micro)
+        self.assertLess(ret, 0)
+
+        ver2 = BlockDev.utils_get_linux_version()
+        self.assertEqual(ver.major, ver2.major)
+        self.assertEqual(ver.minor, ver2.minor)
+        self.assertEqual(ver.micro, ver2.micro)
