@@ -655,6 +655,7 @@ gboolean bd_fs_check (const gchar *device, GError **error) {
 /**
  * bd_fs_set_label:
  * @device: the device with file system to set the label for
+ * @label: label to set
  * @error: (out): place to store error (if any)
  *
  * Set label for filesystem on @device. This calls other fs label functions from this
