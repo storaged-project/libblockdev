@@ -565,7 +565,13 @@ static BDFSExtInfo* get_ext_info_from_table (GHashTable *table, gboolean free_ta
         g_free (ret->label);
         ret->label = g_strdup ("");
     }
+
     ret->uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "Filesystem UUID"));
+    if (!ret->uuid || g_strcmp0 (ret->uuid, "<none>") == 0) {
+        g_free (ret->uuid);
+        ret->uuid = g_strdup ("");
+    }
+
     ret->state = g_strdup ((gchar*) g_hash_table_lookup (table, "Filesystem state"));
 
     value = (gchar*) g_hash_table_lookup (table, "Block size");
