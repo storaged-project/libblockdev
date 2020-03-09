@@ -34,7 +34,7 @@ typedef enum {
 } BDFSTech;
 
 /* XXX: number of the highest bit of all modes */
-#define BD_FS_MODE_LAST 6
+#define BD_FS_MODE_LAST 7
 typedef enum {
     BD_FS_TECH_MODE_MKFS      = 1 << 0,
     BD_FS_TECH_MODE_WIPE      = 1 << 1,
@@ -43,6 +43,7 @@ typedef enum {
     BD_FS_TECH_MODE_SET_LABEL = 1 << 4,
     BD_FS_TECH_MODE_QUERY     = 1 << 5,
     BD_FS_TECH_MODE_RESIZE    = 1 << 6,
+    BD_FS_TECH_MODE_SET_UUID  = 1 << 7,
 } BDFSTechMode;
 
 

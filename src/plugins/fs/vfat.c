@@ -47,8 +47,14 @@ static const UtilDep deps[DEPS_LAST] = {
 };
 
 static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
-    /*   mkfs          wipe     check               repair                set-label            query          resize */
-    DEPS_MKFSVFAT_MASK, 0, DEPS_FSCKVFAT_MASK, DEPS_FSCKVFAT_MASK,   DEPS_FATLABEL_MASK,  DEPS_FSCKVFAT_MASK,  0
+    DEPS_MKFSVFAT_MASK, /* mkfs */
+    0,                  /* wipe */
+    DEPS_FSCKVFAT_MASK, /* check */
+    DEPS_FSCKVFAT_MASK, /* repair */
+    DEPS_FATLABEL_MASK, /* set-label */
+    DEPS_FSCKVFAT_MASK, /* query */
+    0,                  /* resize */
+    0                   /* set-uuid */
 };
 
 #define UNUSED __attribute__((unused))

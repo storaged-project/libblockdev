@@ -17,6 +17,7 @@ gboolean bd_fs_ntfs_wipe (const gchar *device, GError **error);
 gboolean bd_fs_ntfs_check (const gchar *device, GError **error);
 gboolean bd_fs_ntfs_repair (const gchar *device, GError **error);
 gboolean bd_fs_ntfs_set_label (const gchar *device, const gchar *label, GError **error);
+gboolean bd_fs_ntfs_set_uuid (const gchar *device, const gchar *uuid, GError **error);
 BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error);
 gboolean bd_fs_ntfs_resize (const gchar *device, guint64 new_size, GError **error);
 

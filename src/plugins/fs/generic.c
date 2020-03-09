@@ -45,6 +45,7 @@ typedef enum {
     BD_FS_CHECK,
     BD_FS_LABEL,
     BD_FS_GET_SIZE,
+    BD_FS_UUID,
 } BDFsOpType;
 
 /**
@@ -56,6 +57,7 @@ typedef enum {
  * @resize_mode: resize availability flags, 0 if no support
  * @label_util: required utility for labelling, "" if not needed and NULL for no support
  * @info_util: required utility for getting information about the filesystem, "" if not needed and NULL for no support
+ * @uuid_util: required utility for setting UUID, "" if not needed and NULL for no support
  */
 typedef struct BDFSInfo {
     const gchar *type;
@@ -65,17 +67,18 @@ typedef struct BDFSInfo {
     BDFsResizeFlags resize_mode;
     const gchar *label_util;
     const gchar *info_util;
+    const gchar *uuid_util;
 } BDFSInfo;
 
 const BDFSInfo fs_info[] = {
-    {"xfs", "xfs_db", "xfs_repair", "xfs_growfs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW, "xfs_admin", "xfs_admin"},
-    {"ext2", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs", "dumpe2fs"},
-    {"ext3", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs", "dumpe2fs"},
-    {"ext4", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs", "dumpe2fs"},
-    {"vfat", "fsck.vfat", "fsck.vfat", "", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "fatlabel", "fsck.vfat"},
-    {"ntfs", "ntfsfix", "ntfsfix", "ntfsresize", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "ntfslabel", "ntfscluster"},
-    {"f2fs", "fsck.f2fs", "fsck.f2fs", "resize.f2fs", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, NULL, "dump.f2fs"},
-    {NULL, NULL, NULL, NULL, 0, NULL, NULL}
+    {"xfs", "xfs_db", "xfs_repair", "xfs_growfs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW, "xfs_admin", "xfs_admin", "xfs_admin"},
+    {"ext2", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs", "dumpe2fs", "tune2fs"},
+    {"ext3", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs", "dumpe2fs", "tune2fs"},
+    {"ext4", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs", "dumpe2fs", "tune2fs"},
+    {"vfat", "fsck.vfat", "fsck.vfat", "", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "fatlabel", "fsck.vfat", NULL},
+    {"ntfs", "ntfsfix", "ntfsfix", "ntfsresize", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "ntfslabel", "ntfscluster", "ntfslabel"},
+    {"f2fs", "fsck.f2fs", "fsck.f2fs", "resize.f2fs", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, NULL, "dump.f2fs", NULL},
+    {NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL}
 };
 
 static const BDFSInfo *
@@ -476,7 +479,7 @@ static gboolean f2fs_resize_device (const gchar *device, guint64 new_size, GErro
     return bd_fs_f2fs_resize (device, new_size, safe, NULL, error);
 }
 
-static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 new_size, const gchar *label, GError **error) {
+static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 new_size, const gchar *label, const gchar *uuid, GError **error) {
     const gchar* op_name = NULL;
     g_autofree gchar* fstype = NULL;
 
@@ -506,6 +509,8 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
                 return bd_fs_ext4_check (device, NULL, error);
             case BD_FS_LABEL:
                 return bd_fs_ext4_set_label (device, label, error);
+            case BD_FS_UUID:
+                return bd_fs_ext4_set_uuid (device, uuid, error);
             default:
                 g_assert_not_reached ();
         }
@@ -519,6 +524,8 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
                 return bd_fs_xfs_check (device, error);
             case BD_FS_LABEL:
                 return bd_fs_xfs_set_label (device, label, error);
+            case BD_FS_UUID:
+                return bd_fs_xfs_set_uuid (device, uuid, error);
             default:
                 g_assert_not_reached ();
         }
@@ -532,6 +539,8 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
                 return bd_fs_vfat_check (device, NULL, error);
             case BD_FS_LABEL:
                 return bd_fs_vfat_set_label (device, label, error);
+            case BD_FS_UUID:
+                break;
             default:
                 g_assert_not_reached ();
         }
@@ -545,6 +554,8 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
                 return bd_fs_ntfs_check (device, error);
             case BD_FS_LABEL:
                 return bd_fs_ntfs_set_label (device, label, error);
+            case BD_FS_UUID:
+                return bd_fs_ntfs_set_uuid (device, uuid, error);
             default:
                 g_assert_not_reached ();
         }
@@ -557,6 +568,8 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
             case BD_FS_CHECK:
                 return bd_fs_f2fs_check (device, NULL, error);
             case BD_FS_LABEL:
+                break;
+            case BD_FS_UUID:
                 break;
             default:
                 g_assert_not_reached ();
@@ -574,6 +587,9 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
             break;
         case BD_FS_LABEL:
             op_name = "Setting the label of";
+            break;
+        case BD_FS_UUID:
+            op_name = "Setting UUID of";
             break;
         default:
             g_assert_not_reached ();
@@ -599,7 +615,7 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_RESIZE
  */
 gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error) {
-    return device_operation (device, BD_FS_RESIZE, new_size, NULL, error);
+    return device_operation (device, BD_FS_RESIZE, new_size, NULL, NULL, error);
 }
 
 /**
@@ -616,7 +632,7 @@ gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error) {
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_REPAIR
  */
 gboolean bd_fs_repair (const gchar *device, GError **error) {
-    return device_operation (device, BD_FS_REPAIR, 0, NULL, error);
+    return device_operation (device, BD_FS_REPAIR, 0, NULL, NULL, error);
  }
 
 /**
@@ -633,7 +649,7 @@ gboolean bd_fs_repair (const gchar *device, GError **error) {
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_CHECK
  */
 gboolean bd_fs_check (const gchar *device, GError **error) {
-    return device_operation (device, BD_FS_CHECK, 0, NULL, error);
+    return device_operation (device, BD_FS_CHECK, 0, NULL, NULL, error);
 }
 
 /**
@@ -650,7 +666,25 @@ gboolean bd_fs_check (const gchar *device, GError **error) {
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_SET_LABEL
  */
 gboolean bd_fs_set_label (const gchar *device, const gchar *label, GError **error) {
-    return device_operation (device, BD_FS_LABEL, 0, label, error);
+    return device_operation (device, BD_FS_LABEL, 0, label, NULL, error);
+}
+
+/**
+ * bd_fs_set_uuid:
+ * @device: the device with file system to set the UUID for
+ * @uuid: (allow-none): UUID to set or %NULL to generate a new one
+ * @error: (out): place to store error (if any)
+ *
+ * Set UUID for filesystem on @device. This calls other fs UUID functions from this
+ * plugin based on detected filesystem (e.g. bd_fs_xfs_set_uuid for XFS). This
+ * function will return an error for unknown/unsupported filesystems.
+ *
+ * Returns: whether the file system on @device was successfully relabled or not
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_SET_UUID
+ */
+gboolean bd_fs_set_uuid (const gchar *device, const gchar *uuid, GError **error) {
+    return device_operation (device, BD_FS_UUID, 0, NULL, uuid, error);
 }
 
 static BDFSXfsInfo* xfs_get_info (const gchar *device, GError **error) {
@@ -782,6 +816,10 @@ static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar *
                 op_name = "Setting the label of";
                 exec_util = fsinfo->label_util;
                 break;
+            case BD_FS_UUID:
+                op_name = "Setting UUID of";
+                exec_util = fs_info->uuid_util;
+                break;
             default:
                 op_name = "Getting size of";
                 exec_util = fsinfo->info_util;
@@ -880,6 +918,24 @@ gboolean bd_fs_can_repair (const gchar *type, gchar **required_utility, GError *
  */
 gboolean bd_fs_can_set_label (const gchar *type, gchar **required_utility, GError **error) {
     return query_fs_operation (type, BD_FS_LABEL, required_utility, NULL, error);
+}
+
+/**
+ * bd_fs_can_set_uuid:
+ * @type: the filesystem type to be tested for installed UUID support
+ * @required_utility: (out) (transfer full): the utility binary which is required for setting UUID (if missing i.e. return FALSE but no error)
+ * @error: (out): place to store error (if any)
+ *
+ * Searches for the required utility to set the UUID of the given filesystem and returns whether
+ * it is installed.
+ * Unknown filesystems or filesystems which do not support setting the UUID result in errors.
+ *
+ * Returns: whether setting filesystem UUID is available
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
+ */
+gboolean bd_fs_can_set_uuid (const gchar *type, gchar **required_utility, GError **error) {
+    return query_fs_operation (type, BD_FS_UUID, required_utility, NULL, error);
 }
 
 /**
