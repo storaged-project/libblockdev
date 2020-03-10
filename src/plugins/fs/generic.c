@@ -38,6 +38,7 @@
 #include "vfat.h"
 #include "ntfs.h"
 #include "f2fs.h"
+#include "reiserfs.h"
 
 typedef enum {
     BD_FS_RESIZE,
@@ -78,6 +79,7 @@ const BDFSInfo fs_info[] = {
     {"vfat", "fsck.vfat", "fsck.vfat", "", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "fatlabel", "fsck.vfat", NULL},
     {"ntfs", "ntfsfix", "ntfsfix", "ntfsresize", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "ntfslabel", "ntfscluster", "ntfslabel"},
     {"f2fs", "fsck.f2fs", "fsck.f2fs", "resize.f2fs", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, NULL, "dump.f2fs", NULL},
+    {"reiserfs", "reiserfsck", "reiserfsck", "resize_reiserfs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "reiserfstune", "debugreiserfs", "reiserfstune"},
     {NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL}
 };
 
@@ -574,7 +576,22 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
             default:
                 g_assert_not_reached ();
         }
-      }
+    } else if (g_strcmp0 (fstype, "reiserfs") == 0) {
+        switch (op) {
+            case BD_FS_RESIZE:
+                return bd_fs_reiserfs_resize (device, new_size, error);
+            case BD_FS_REPAIR:
+                return bd_fs_reiserfs_repair (device, NULL, error);
+            case BD_FS_CHECK:
+                return bd_fs_reiserfs_check (device, NULL, error);
+            case BD_FS_LABEL:
+                return bd_fs_reiserfs_set_label (device, label, error);
+            case BD_FS_UUID:
+                return bd_fs_reiserfs_set_uuid (device, uuid, error);
+            default:
+                g_assert_not_reached ();
+        }
+    }
     switch (op) {
         case BD_FS_RESIZE:
             op_name = "Resizing";
@@ -777,6 +794,13 @@ guint64 bd_fs_get_size (const gchar *device, GError **error) {
         if (info) {
             size = info->sector_size * info->sector_count;
             bd_fs_f2fs_info_free (info);
+        }
+        return size;
+    } else if (g_strcmp0 (fstype, "reiserfs") == 0) {
+        BDFSReiserFSInfo *info = bd_fs_reiserfs_get_info (device, error);
+        if (info) {
+            size = info->block_size * info->block_count;
+            bd_fs_reiserfs_info_free (info);
         }
         return size;
     } else {

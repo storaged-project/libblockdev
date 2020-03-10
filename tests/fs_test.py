@@ -60,6 +60,16 @@ class FSTestCase(unittest.TestCase):
         except:
             cls.f2fs_avail = False
 
+        try:
+            cls.reiserfs_avail = BlockDev.fs_is_tech_avail(BlockDev.FSTech.REISERFS,
+                                                           BlockDev.FSTechMode.MKFS |
+                                                           BlockDev.FSTechMode.RESIZE |
+                                                           BlockDev.FSTechMode.REPAIR |
+                                                           BlockDev.FSTechMode.CHECK |
+                                                           BlockDev.FSTechMode.SET_LABEL)
+        except:
+            cls.reiserfs_avail = False
+
     def setUp(self):
         self.addCleanup(self._clean_up)
         self.dev_file = utils.create_sparse_tempfile("fs_test", 100 * 1024**2)
@@ -988,6 +998,196 @@ class VfatResize(FSTestCase):
         succ = BlockDev.fs_vfat_resize(self.loop_dev, 0)
         self.assertTrue(succ)
 
+class ReiserFSTestCase(FSTestCase):
+    def setUp(self):
+        if not self.reiserfs_avail:
+            self.skipTest("skipping ReiserFS: not available")
+
+        super(ReiserFSTestCase, self).setUp()
+
+class ReiserFSTestMkfs(ReiserFSTestCase):
+    def test_reiserfs_mkfs(self):
+        """Verify that it is possible to create a new reiserfs file system"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_reiserfs_mkfs("/non/existing/device", None)
+
+        succ = BlockDev.fs_reiserfs_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        # just try if we can mount the file system
+        with mounted(self.loop_dev, self.mount_dir):
+            pass
+
+        # check the fstype
+        fstype = BlockDev.fs_get_fstype(self.loop_dev)
+        self.assertEqual(fstype, "reiserfs")
+
+        BlockDev.fs_wipe(self.loop_dev, True)
+
+class ReiserFSMkfsWithLabel(ReiserFSTestCase):
+    def test_reiserfs_mkfs_with_label(self):
+        """Verify that it is possible to create an reiserfs file system with label"""
+
+        ea = BlockDev.ExtraArg.new("-l", "test_label")
+        succ = BlockDev.fs_reiserfs_mkfs(self.loop_dev, [ea])
+        self.assertTrue(succ)
+
+        fi = BlockDev.fs_reiserfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "test_label")
+
+class ReiserFSTestWipe(ReiserFSTestCase):
+    def test_reiserfs_wipe(self):
+        """Verify that it is possible to wipe an reiserfs file system"""
+
+        succ = BlockDev.fs_reiserfs_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_reiserfs_wipe(self.loop_dev)
+        self.assertTrue(succ)
+
+        # already wiped, should fail this time
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_reiserfs_wipe(self.loop_dev)
+
+        run("pvcreate -ff -y %s >/dev/null" % self.loop_dev)
+
+        # LVM PV signature, not an reiserfs file system
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_reiserfs_wipe(self.loop_dev)
+
+        BlockDev.fs_wipe(self.loop_dev, True)
+
+        run("mkfs.ext2 -F %s >/dev/null 2>&1" % self.loop_dev)
+
+        # ext2, not an reiserfs file system
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_reiserfs_wipe(self.loop_dev)
+
+        BlockDev.fs_wipe(self.loop_dev, True)
+
+class ReiserFSTestCheck(ReiserFSTestCase):
+    def test_reiserfs_check(self):
+        """Verify that it is possible to check an reiserfs file system"""
+
+        succ = BlockDev.fs_reiserfs_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_reiserfs_check(self.loop_dev, None)
+        self.assertTrue(succ)
+
+class ReiserFSTestRepair(ReiserFSTestCase):
+    def test_reiserfs_repair(self):
+        """Verify that it is possible to repair an reiserfs file system"""
+
+        succ = BlockDev.fs_reiserfs_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_reiserfs_repair(self.loop_dev, None)
+        self.assertTrue(succ)
+
+class ReiserFSGetInfo(ReiserFSTestCase):
+    def test_reiserfs_get_info(self):
+        """Verify that it is possible to get info about an reiserfs file system"""
+
+        succ = BlockDev.fs_reiserfs_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        fi = BlockDev.fs_reiserfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "")
+        # should be an non-empty string
+        self.assertTrue(fi.uuid)
+        self.assertGreater(fi.block_size, 0)
+        self.assertGreater(fi.block_count, 0)
+        self.assertLess(fi.free_blocks, fi.block_count)
+
+class ReiserFSSetLabel(ReiserFSTestCase):
+    def test_reiserfs_set_label(self):
+        """Verify that it is possible to set label of an reiserfs file system"""
+
+        succ = BlockDev.fs_reiserfs_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        fi = BlockDev.fs_reiserfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "")
+
+        succ = BlockDev.fs_reiserfs_set_label(self.loop_dev, "test_label")
+        self.assertTrue(succ)
+        fi = BlockDev.fs_reiserfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "test_label")
+
+        succ = BlockDev.fs_reiserfs_set_label(self.loop_dev, "test_label2")
+        self.assertTrue(succ)
+        fi = BlockDev.fs_reiserfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "test_label2")
+
+        succ = BlockDev.fs_reiserfs_set_label(self.loop_dev, "")
+        self.assertTrue(succ)
+        fi = BlockDev.fs_reiserfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "")
+
+class ReiserFSResize(ReiserFSTestCase):
+    def test_reiserfs_resize(self):
+        """Verify that it is possible to resize an reiserfs file system"""
+
+        succ = BlockDev.fs_reiserfs_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        # shrink
+        succ = BlockDev.fs_reiserfs_resize(self.loop_dev, 80 * 1024**2)
+        self.assertTrue(succ)
+
+        # grow
+        succ = BlockDev.fs_reiserfs_resize(self.loop_dev, 100 * 1024**2)
+        self.assertTrue(succ)
+
+        # shrink again
+        succ = BlockDev.fs_reiserfs_resize(self.loop_dev, 80 * 1024**2)
+        self.assertTrue(succ)
+
+
+        # resize to maximum size
+        succ = BlockDev.fs_reiserfs_resize(self.loop_dev, 0)
+        self.assertTrue(succ)
+
+class ReiserFSSetUUID(ReiserFSTestCase):
+
+    test_uuid = "4d7086c4-a4d3-432f-819e-73da03870df9"
+
+    def test_reiserfs_set_uuid(self):
+        """Verify that it is possible to set UUID of an reiserfs file system"""
+
+        succ = BlockDev.fs_reiserfs_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_reiserfs_set_uuid(self.loop_dev, self.test_uuid)
+        self.assertTrue(succ)
+        fi = BlockDev.fs_reiserfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.uuid, self.test_uuid)
+
+        succ = BlockDev.fs_reiserfs_set_uuid(self.loop_dev, "random")
+        self.assertTrue(succ)
+        fi = BlockDev.fs_reiserfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertNotEqual(fi.uuid, "")
+        self.assertNotEqual(fi.uuid, self.test_uuid)
+        random_uuid = fi.uuid
+
+        # no uuid -> random
+        succ = BlockDev.fs_reiserfs_set_uuid(self.loop_dev, None)
+        self.assertTrue(succ)
+        fi = BlockDev.fs_reiserfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertNotEqual(fi.uuid, "")
+        self.assertNotEqual(fi.uuid, random_uuid)
+
 class F2FSTestCase(FSTestCase):
     def setUp(self):
         if not self.f2fs_avail:
@@ -1614,6 +1814,12 @@ class GenericCheck(FSTestCase):
         else:
             self._test_generic_check(mkfs_function=BlockDev.fs_f2fs_mkfs)
 
+    def test_reiserfs_generic_check(self):
+        """Test generic check function with an reiserfs file system"""
+        if not self.reiserfs_avail:
+            self.skipTest("skipping ReiserFS: not available")
+        self._test_generic_check(mkfs_function=BlockDev.fs_reiserfs_mkfs)
+
 class GenericRepair(FSTestCase):
     def _test_generic_repair(self, mkfs_function):
         # clean the device
@@ -1645,6 +1851,12 @@ class GenericRepair(FSTestCase):
         if not self.f2fs_avail:
             self.skipTest("skipping F2FS: not available")
         self._test_generic_repair(mkfs_function=BlockDev.fs_f2fs_mkfs)
+
+    def test_reiserfs_generic_repair(self):
+        """Test generic repair function with an reiserfs file system"""
+        if not self.reiserfs_avail:
+            self.skipTest("skipping ReiserFS: not available")
+        self._test_generic_repair(mkfs_function=BlockDev.fs_reiserfs_mkfs)
 
 class GenericSetLabel(FSTestCase):
     def _test_generic_set_label(self, mkfs_function):
@@ -1679,6 +1891,12 @@ class GenericSetLabel(FSTestCase):
         with self.assertRaises(GLib.GError):
             # f2fs doesn't support relabeling
             self._test_generic_set_label(mkfs_function=BlockDev.fs_f2fs_mkfs)
+
+    def test_reiserfs_generic_set_label(self):
+        """Test generic set_label function with a reiserfs file system"""
+        if not self.reiserfs_avail:
+            self.skipTest("skipping ReiserFS: not available")
+        self._test_generic_set_label(mkfs_function=BlockDev.fs_reiserfs_mkfs)
 
 class GenericSetUUID(FSTestCase):
     def _test_generic_set_uuid(self, mkfs_function, test_uuid="4d7086c4-a4d3-432f-819e-73da03870df9"):
@@ -1722,6 +1940,12 @@ class GenericSetUUID(FSTestCase):
         with self.assertRaises(GLib.GError):
             # f2fs doesn't support setting UUID
             self._test_generic_set_uuid(mkfs_function=BlockDev.fs_f2fs_mkfs)
+
+    def test_reiserfs_generic_set_uuid(self):
+        """Test generic set_uuid function with a reiserfs file system"""
+        if not self.reiserfs_avail:
+            self.skipTest("skipping ReiserFS: not available")
+        self._test_generic_set_uuid(mkfs_function=BlockDev.fs_reiserfs_mkfs)
 
 class GenericResize(FSTestCase):
     def _test_generic_resize(self, mkfs_function):
@@ -1886,6 +2110,12 @@ class GenericResize(FSTestCase):
                 self._test_generic_resize(mkfs_function=BlockDev.fs_f2fs_mkfs)
         else:
             self._test_generic_resize(mkfs_function=BlockDev.fs_f2fs_mkfs)
+
+    def test_reiserfs_generic_resize(self):
+        """Test generic resize function with an reiserfs file system"""
+        if not self.reiserfs_avail:
+            self.skipTest("skipping ReiserFS: not available")
+        self._test_generic_resize(mkfs_function=BlockDev.fs_reiserfs_mkfs)
 
 
 class FSFreezeTest(FSTestCase):

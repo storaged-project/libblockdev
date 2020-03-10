@@ -487,6 +487,27 @@ def fs_f2fs_repair(device, extra=None, **kwargs):
     return _fs_f2fs_repair(device, extra)
 __all__.append("fs_f2fs_repair")
 
+_fs_reiserfs_mkfs = BlockDev.fs_reiserfs_mkfs
+@override(BlockDev.fs_reiserfs_mkfs)
+def fs_reiserfs_mkfs(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_reiserfs_mkfs(device, extra)
+__all__.append("fs_reiserfs_mkfs")
+
+_fs_reiserfs_check = BlockDev.fs_reiserfs_check
+@override(BlockDev.fs_reiserfs_check)
+def fs_reiserfs_check(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_reiserfs_check(device, extra)
+__all__.append("fs_reiserfs_check")
+
+_fs_reiserfs_repair = BlockDev.fs_reiserfs_repair
+@override(BlockDev.fs_reiserfs_repair)
+def fs_reiserfs_repair(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_reiserfs_repair(device, extra)
+__all__.append("fs_reiserfs_repair")
+
 
 try:
     _kbd_bcache_create = BlockDev.kbd_bcache_create
