@@ -1883,13 +1883,9 @@ class GenericResize(FSTestCase):
             self.skipTest("skipping F2FS: not available")
         if not self._can_resize_f2fs():
             with six.assertRaisesRegex(self, GLib.GError, "Too low version of resize.f2fs. At least 1.12.0 required."):
-                self._test_generic_resize(mkfs_function=BlockDev.fs_f2fs_mkfs,
-                                          fs_info_func=BlockDev.fs_f2fs_get_info,
-                                          info_size_func=lambda fi: fi.sector_size * fi.sector_count)
+                self._test_generic_resize(mkfs_function=BlockDev.fs_f2fs_mkfs)
         else:
-            self._test_generic_resize(mkfs_function=BlockDev.fs_f2fs_mkfs,
-                                      fs_info_func=BlockDev.fs_f2fs_get_info,
-                                      info_size_func=lambda fi: fi.sector_size * fi.sector_count)
+            self._test_generic_resize(mkfs_function=BlockDev.fs_f2fs_mkfs)
 
 
 class FSFreezeTest(FSTestCase):
