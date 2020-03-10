@@ -1112,7 +1112,7 @@ class F2FSGetInfo(F2FSTestCase):
         self.assertTrue(fi.uuid)
 
 class F2FSResize(F2FSTestCase):
-    def _check_resize_f2fs_version(self):
+    def _can_resize_f2fs(self):
         ret, out, _err = utils.run_command("resize.f2fs -V")
         if ret != 0:
             # we can't even check the version
@@ -1121,7 +1121,7 @@ class F2FSResize(F2FSTestCase):
         m = re.search(r"resize.f2fs ([\d\.]+)", out)
         if not m or len(m.groups()) != 1:
             raise RuntimeError("Failed to determine f2fs version from: %s" % out)
-        return LooseVersion(m.groups()[0]) <= LooseVersion("1.12.0")
+        return LooseVersion(m.groups()[0]) >= LooseVersion("1.12.0")
 
     def test_f2fs_resize(self):
         """Verify that it is possible to resize an f2fs file system"""
@@ -1134,7 +1134,7 @@ class F2FSResize(F2FSTestCase):
             BlockDev.fs_f2fs_resize(self.loop_dev, 80 * 1024**2 / 512, False)
 
         # if we can't shrink we'll just check it returns some sane error
-        if not self._check_resize_f2fs_version():
+        if not self._can_resize_f2fs():
             with six.assertRaisesRegex(self, GLib.GError, "Too low version of resize.f2fs. At least 1.12.0 required."):
                 BlockDev.fs_f2fs_resize(self.loop_dev, 80 * 1024**2 / 512, True)
             return
@@ -1866,7 +1866,7 @@ class GenericResize(FSTestCase):
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 90 * 1024**2)
 
-    def _check_resize_f2fs_version(self):
+    def _can_resize_f2fs(self):
         ret, out, _err = utils.run_command("resize.f2fs -V")
         if ret != 0:
             # we can't even check the version
@@ -1875,13 +1875,13 @@ class GenericResize(FSTestCase):
         m = re.search(r"resize.f2fs ([\d\.]+)", out)
         if not m or len(m.groups()) != 1:
             raise RuntimeError("Failed to determine f2fs version from: %s" % out)
-        return LooseVersion(m.groups()[0]) <= LooseVersion("1.12.0")
+        return LooseVersion(m.groups()[0]) >= LooseVersion("1.12.0")
 
     def test_f2fs_generic_resize(self):
         """Verify that it is possible to resize an f2fs file system"""
         if not self.f2fs_avail:
             self.skipTest("skipping F2FS: not available")
-        if not self._check_resize_f2fs_version():
+        if not self._can_resize_f2fs():
             with six.assertRaisesRegex(self, GLib.GError, "Too low version of resize.f2fs. At least 1.12.0 required."):
                 self._test_generic_resize(mkfs_function=BlockDev.fs_f2fs_mkfs,
                                           fs_info_func=BlockDev.fs_f2fs_get_info,
