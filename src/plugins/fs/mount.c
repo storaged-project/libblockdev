@@ -122,7 +122,7 @@ static gboolean get_unmount_error_new (struct libmnt_context *cxt, int rc, const
         else {
             if (*buf == '\0')
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                             "Unknow error when unmounting %s", spec);
+                             "Unknown error when unmounting %s", spec);
             else
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                              "%s", buf);
@@ -346,7 +346,7 @@ static gboolean get_mount_error_new (struct libmnt_context *cxt, int rc, MountAr
         else {
             if (*buf == '\0')
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                             "Unknow error when mounting %s", args->device ? args->device : args->mountpoint);
+                             "Unknown error when mounting %s", args->device ? args->device : args->mountpoint);
             else
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                              "%s", buf);
