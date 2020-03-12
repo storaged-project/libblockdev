@@ -51,8 +51,14 @@ static const UtilDep deps[DEPS_LAST] = {
 };
 
 static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
-    /*   mkfs          wipe     check               repair                set-label            query                resize */
-    DEPS_MKFSXFS_MASK,  0, DEPS_XFS_DB_MASK,   DEPS_XFS_REPAIR_MASK, DEPS_XFS_ADMIN_MASK, DEPS_XFS_ADMIN_MASK, DEPS_XFS_GROWFS_MASK
+    DEPS_MKFSXFS_MASK,      /* mkfs */
+    0,                      /* wipe */
+    DEPS_XFS_DB_MASK,       /* check */
+    DEPS_XFS_REPAIR_MASK,   /* repair */
+    DEPS_XFS_ADMIN_MASK,    /* set-label */
+    DEPS_XFS_ADMIN_MASK,    /* query */
+    DEPS_XFS_GROWFS_MASK,   /* resize */
+    DEPS_XFS_ADMIN_MASK     /* set-uuid */
 };
 
 #define UNUSED __attribute__((unused))
@@ -214,6 +220,30 @@ gboolean bd_fs_xfs_set_label (const gchar *device, const gchar *label, GError **
     const gchar *args[5] = {"xfs_admin", "-L", label, device, NULL};
     if (!label || (strncmp (label, "", 1) == 0))
         args[2] = "--";
+
+    if (!check_deps (&avail_deps, DEPS_XFS_ADMIN_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
+    return bd_utils_exec_and_report_error (args, NULL, error);
+}
+
+/**
+ * bd_fs_xfs_set_uuid:
+ * @device: the device containing the file system to set uuid for
+ * @uuid: (allow-none): UUID to set %NULL to generate a new one
+ *                      UUID can also be one of "nil" and "generate" to clear or
+ *                      generate a new UUID
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the UUID of xfs file system on the @device was
+ *          successfully set or not
+ *
+ * Tech category: %BD_FS_TECH_XFS-%BD_FS_TECH_MODE_SET_UUID
+ */
+gboolean bd_fs_xfs_set_uuid (const gchar *device, const gchar *uuid, GError **error) {
+    const gchar *args[5] = {"xfs_admin", "-U", uuid, device, NULL};
+    if (!uuid)
+        args[2] = "generate";
 
     if (!check_deps (&avail_deps, DEPS_XFS_ADMIN_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;

@@ -50,8 +50,14 @@ static const UtilDep deps[DEPS_LAST] = {
 };
 
 static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
-    /*   mkfs          wipe     check               repair                set-label            query                resize */
-    DEPS_MKNTFS_MASK,   0, DEPS_NTFSFIX_MASK,  DEPS_NTFSFIX_MASK,    DEPS_NTFSLABEL_MASK, DEPS_NTFSCLUSTER_MASK, DEPS_NTFSRESIZE_MASK
+    DEPS_MKNTFS_MASK,       /* mkfs */
+    0,                      /* wipe */
+    DEPS_NTFSFIX_MASK,      /* check */
+    DEPS_NTFSFIX_MASK,      /* repair */
+    DEPS_NTFSLABEL_MASK,    /* set-label */
+    DEPS_NTFSCLUSTER_MASK,  /* query */
+    DEPS_NTFSRESIZE_MASK,   /* resize */
+    DEPS_NTFSLABEL_MASK     /* set-uuid */
 };
 
 #define UNUSED __attribute__((unused))
@@ -197,6 +203,42 @@ gboolean bd_fs_ntfs_set_label (const gchar *device, const gchar *label, GError *
         return FALSE;
 
     return bd_utils_exec_and_report_error (args, NULL, error);
+}
+
+/**
+ * bd_fs_ntfs_set_uuid:
+ * @device: the device containing the file system to set the UUID (serial number) for
+ * @uuid: (allow-none): UUID to set or %NULL to generate a new one
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the UUID of the NTFS file system on the @device was
+ *          successfully set or not
+ *
+ * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_SET_UUID
+ */
+gboolean bd_fs_ntfs_set_uuid (const gchar *device, const gchar *uuid, GError **error) {
+    gboolean ret = FALSE;
+    const gchar *args[4] = {"ntfslabel", device, NULL, NULL};
+
+    if (!check_deps (&avail_deps, DEPS_NTFSLABEL_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
+    if (!uuid)
+        args[2] = g_strdup ("--new-serial");
+    else if (strlen (uuid) == 16)
+        args[2] = g_strdup_printf ("--new-serial=%s", uuid);
+    else if (strlen (uuid) == 8)
+        args[2] = g_strdup_printf ("--new-half-serial=%s", uuid);
+    else {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Invalid format of UUID/serial number for NTFS filesystem.");
+        return FALSE;
+    }
+
+    ret = bd_utils_exec_and_report_error (args, NULL, error);
+
+    g_free ((gchar *) args[2]);
+    return ret;
 }
 
 /**

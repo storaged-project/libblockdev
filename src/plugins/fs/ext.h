@@ -31,6 +31,7 @@ gboolean bd_fs_ext2_wipe (const gchar *device, GError **error);
 gboolean bd_fs_ext2_check (const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_fs_ext2_repair (const gchar *device, gboolean unsafe, const BDExtraArg **extra, GError **error);
 gboolean bd_fs_ext2_set_label (const gchar *device, const gchar *label, GError **error);
+gboolean bd_fs_ext2_set_uuid (const gchar *device, const gchar *uuid, GError **error);
 BDFSExt2Info* bd_fs_ext2_get_info (const gchar *device, GError **error);
 gboolean bd_fs_ext2_resize (const gchar *device, guint64 new_size, const BDExtraArg **extra, GError **error);
 
@@ -38,6 +39,7 @@ gboolean bd_fs_ext3_mkfs (const gchar *device, const BDExtraArg **extra, GError 
 gboolean bd_fs_ext3_wipe (const gchar *device, GError **error);
 gboolean bd_fs_ext3_check (const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_fs_ext3_repair (const gchar *device, gboolean unsafe, const BDExtraArg **extra, GError **error);
+gboolean bd_fs_ext3_set_uuid (const gchar *device, const gchar *uuid, GError **error);
 gboolean bd_fs_ext3_set_label (const gchar *device, const gchar *label, GError **error);
 BDFSExt3Info* bd_fs_ext3_get_info (const gchar *device, GError **error);
 gboolean bd_fs_ext3_resize (const gchar *device, guint64 new_size, const BDExtraArg **extra, GError **error);
@@ -47,6 +49,7 @@ gboolean bd_fs_ext4_wipe (const gchar *device, GError **error);
 gboolean bd_fs_ext4_check (const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_fs_ext4_repair (const gchar *device, gboolean unsafe, const BDExtraArg **extra, GError **error);
 gboolean bd_fs_ext4_set_label (const gchar *device, const gchar *label, GError **error);
+gboolean bd_fs_ext4_set_uuid (const gchar *device, const gchar *uuid, GError **error);
 BDFSExt4Info* bd_fs_ext4_get_info (const gchar *device, GError **error);
 gboolean bd_fs_ext4_resize (const gchar *device, guint64 new_size, const BDExtraArg **extra, GError **error);
 

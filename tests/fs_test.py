@@ -526,6 +526,70 @@ class ExtResize(FSTestCase):
                               info_function=BlockDev.fs_ext4_get_info,
                               resize_function=BlockDev.fs_ext4_resize)
 
+class ExtSetUUID(FSTestCase):
+
+    test_uuid = "4d7086c4-a4d3-432f-819e-73da03870df9"
+
+    def _test_ext_set_uuid(self, mkfs_function, info_function, label_function):
+        succ = mkfs_function(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        fi = info_function(self.loop_dev)
+        self.assertTrue(fi)
+
+        succ = label_function(self.loop_dev, self.test_uuid)
+        self.assertTrue(succ)
+        fi = info_function(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.uuid, self.test_uuid)
+
+        succ = label_function(self.loop_dev, "clear")
+        self.assertTrue(succ)
+        fi = info_function(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.uuid, "")
+
+        succ = label_function(self.loop_dev, "random")
+        self.assertTrue(succ)
+        fi = info_function(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertNotEqual(fi.uuid, "")
+        random_uuid = fi.uuid
+
+        succ = label_function(self.loop_dev, "time")
+        self.assertTrue(succ)
+        fi = info_function(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertNotEqual(fi.uuid, "")
+        self.assertNotEqual(fi.uuid, random_uuid)
+        time_uuid = fi.uuid
+
+        # no UUID -> random
+        succ = label_function(self.loop_dev, None)
+        self.assertTrue(succ)
+        fi = info_function(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertNotEqual(fi.uuid, "")
+        self.assertNotEqual(fi.uuid, time_uuid)
+
+    def test_ext2_set_uuid(self):
+        """Verify that it is possible to set UUID of an ext2 file system"""
+        self._test_ext_set_uuid(mkfs_function=BlockDev.fs_ext2_mkfs,
+                                 info_function=BlockDev.fs_ext2_get_info,
+                                 label_function=BlockDev.fs_ext2_set_uuid)
+
+    def test_ext3_set_uuid(self):
+        """Verify that it is possible to set UUID of an ext3 file system"""
+        self._test_ext_set_uuid(mkfs_function=BlockDev.fs_ext3_mkfs,
+                                 info_function=BlockDev.fs_ext3_get_info,
+                                 label_function=BlockDev.fs_ext3_set_uuid)
+
+    def test_ext4_set_uuid(self):
+        """Verify that it is possible to set UUID of an ext4 file system"""
+        self._test_ext_set_uuid(mkfs_function=BlockDev.fs_ext4_mkfs,
+                                 info_function=BlockDev.fs_ext4_get_info,
+                                 label_function=BlockDev.fs_ext4_set_uuid)
+
 class XfsTestMkfs(FSTestCase):
     @tag_test(TestTags.CORE)
     def test_xfs_mkfs(self):
@@ -731,6 +795,47 @@ class XfsResize(FSTestCase):
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 90 * 1024**2)
+
+class XfsSetUUID(FSTestCase):
+
+    test_uuid = "4d7086c4-a4d3-432f-819e-73da03870df9"
+
+    def test_xfs_set_uuid(self):
+        """Verify that it is possible to set UUID of an xfs file system"""
+
+        succ = BlockDev.fs_xfs_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_xfs_set_uuid(self.loop_dev, self.test_uuid)
+        self.assertTrue(succ)
+        with mounted(self.loop_dev, self.mount_dir):
+            fi = BlockDev.fs_xfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.uuid, self.test_uuid)
+
+        succ = BlockDev.fs_xfs_set_uuid(self.loop_dev, "nil")
+        self.assertTrue(succ)
+
+        # can't use libblockdev because XFS without UUID can't be mounted
+        fs_type = check_output(["blkid", "-ovalue", "-sUUID", "-p", self.loop_dev]).strip()
+        self.assertEqual(fs_type, b"")
+
+        succ = BlockDev.fs_xfs_set_uuid(self.loop_dev, "generate")
+        self.assertTrue(succ)
+        with mounted(self.loop_dev, self.mount_dir):
+            fi = BlockDev.fs_xfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertNotEqual(fi.uuid, "")
+        random_uuid = fi.uuid
+
+        # no uuid -> random
+        succ = BlockDev.fs_xfs_set_uuid(self.loop_dev, None)
+        self.assertTrue(succ)
+        with mounted(self.loop_dev, self.mount_dir):
+            fi = BlockDev.fs_xfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertNotEqual(fi.uuid, "")
+        self.assertNotEqual(fi.uuid, random_uuid)
 
 class VfatTestMkfs(FSTestCase):
     def test_vfat_mkfs(self):
@@ -1574,6 +1679,49 @@ class GenericSetLabel(FSTestCase):
         with self.assertRaises(GLib.GError):
             # f2fs doesn't support relabeling
             self._test_generic_set_label(mkfs_function=BlockDev.fs_f2fs_mkfs)
+
+class GenericSetUUID(FSTestCase):
+    def _test_generic_set_uuid(self, mkfs_function, test_uuid="4d7086c4-a4d3-432f-819e-73da03870df9"):
+        # clean the device
+        succ = BlockDev.fs_clean(self.loop_dev)
+
+        succ = mkfs_function(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        # set uuid (expected to succeed)
+        succ = BlockDev.fs_set_uuid(self.loop_dev, test_uuid)
+        self.assertTrue(succ)
+
+        fs_uuid = check_output(["blkid", "-ovalue", "-sUUID", "-p", self.loop_dev]).decode().strip()
+        self.assertEqual(fs_uuid, test_uuid)
+
+    def test_ext4_generic_set_uuid(self):
+        """Test generic set_uuid function with an ext4 file system"""
+        self._test_generic_set_uuid(mkfs_function=BlockDev.fs_ext4_mkfs)
+
+    def test_xfs_generic_set_uuid(self):
+        """Test generic set_uuid function with a xfs file system"""
+        self._test_generic_set_uuid(mkfs_function=BlockDev.fs_xfs_mkfs)
+
+    def test_ntfs_generic_set_uuid(self):
+        """Test generic set_uuid function with a ntfs file system"""
+        if not self.ntfs_avail:
+            self.skipTest("skipping NTFS: not available")
+        self._test_generic_set_uuid(mkfs_function=BlockDev.fs_ntfs_mkfs, test_uuid="1C2716ED53F63962")
+
+    def test_vfat_generic_set_uuid(self):
+        """Test generic set_uuid function with a vfat file system"""
+        with self.assertRaises(GLib.GError):
+            # vfat doesn't support setting UUID
+            self._test_generic_set_uuid(mkfs_function=BlockDev.fs_vfat_mkfs)
+
+    def test_f2fs_generic_set_uuid(self):
+        """Test generic set_uuid function with a f2fs file system"""
+        if not self.f2fs_avail:
+            self.skipTest("skipping F2FS: not available")
+        with self.assertRaises(GLib.GError):
+            # f2fs doesn't support setting UUID
+            self._test_generic_set_uuid(mkfs_function=BlockDev.fs_f2fs_mkfs)
 
 class GenericResize(FSTestCase):
     def _test_generic_resize(self, mkfs_function):

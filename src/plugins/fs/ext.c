@@ -53,8 +53,14 @@ static const UtilDep deps[DEPS_LAST] = {
 };
 
 static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
-    /*   mkfs          wipe     check               repair                set-label            query                resize */
-    DEPS_MKE2FS_MASK,   0, DEPS_E2FSCK_MASK,   DEPS_E2FSCK_MASK,     DEPS_TUNE2FS_MASK,   DEPS_DUMPE2FS_MASK,  DEPS_RESIZE2FS_MASK
+    DEPS_MKE2FS_MASK,       /* mkfs */
+    0,                      /* wipe */
+    DEPS_E2FSCK_MASK,       /* check */
+    DEPS_E2FSCK_MASK,       /* repair */
+    DEPS_TUNE2FS_MASK,      /* set-label */
+    DEPS_DUMPE2FS_MASK,     /* query */
+    DEPS_RESIZE2FS_MASK,    /* resize */
+    DEPS_TUNE2FS_MASK       /* set-uuid */
 };
 
 #define UNUSED __attribute__((unused))
@@ -520,6 +526,71 @@ gboolean bd_fs_ext4_set_label (const gchar *device, const gchar *label, GError *
     return ext_set_label (device, label, error);
 }
 
+static gboolean ext_set_uuid (const gchar *device, const gchar *uuid, GError **error) {
+    const gchar *args[5] = {"tune2fs", "-U", NULL, device, NULL};
+
+    if (!check_deps (&avail_deps, DEPS_TUNE2FS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
+    if (!uuid)
+        args[2] = "random";
+    else
+        args[2] = uuid;
+
+    return bd_utils_exec_and_report_error (args, NULL, error);
+}
+
+/**
+ * bd_fs_ext2_set_uuid:
+ * @device: the device the file system on which to set UUID for
+ * @uuid: (allow-none): UUID to set %NULL to generate a new one
+ *                      UUID can also be one of "clear", "random" and "time" to clear,
+ *                      generate a new random/time-based UUID
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the UUID of ext2 file system on the @device was
+ *          successfully set or not
+ *
+ * Tech category: %BD_FS_TECH_EXT2-%BD_FS_TECH_MODE_SET_UUID
+ */
+gboolean bd_fs_ext2_set_uuid (const gchar *device, const gchar *uuid, GError **error) {
+    return ext_set_uuid (device, uuid, error);
+}
+
+/**
+ * bd_fs_ext3_set_uuid:
+ * @device: the device the file system on which to set UUID for
+ * @uuid: (allow-none): UUID to set %NULL to generate a new one
+ *                      UUID can also be one of "clear", "random" and "time" to clear,
+ *                      generate a new random/time-based UUID
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the UUID of ext3 file system on the @device was
+ *          successfully set or not
+ *
+ * Tech category: %BD_FS_TECH_EXT3-%BD_FS_TECH_MODE_SET_UUID
+ */
+gboolean bd_fs_ext3_set_uuid (const gchar *device, const gchar *uuid, GError **error) {
+    return ext_set_uuid (device, uuid, error);
+}
+
+/**
+ * bd_fs_ext4_set_uuid:
+ * @device: the device the file system on which to set UUID for
+ * @uuid: (allow-none): UUID to set %NULL to generate a new one
+ *                      UUID can also be one of "clear", "random" and "time" to clear,
+ *                      generate a new random/time-based UUID
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the UUID of ext4 file system on the @device was
+ *          successfully set or not
+ *
+ * Tech category: %BD_FS_TECH_EXT4-%BD_FS_TECH_MODE_SET_UUID
+ */
+gboolean bd_fs_ext4_set_uuid (const gchar *device, const gchar *uuid, GError **error) {
+    return ext_set_uuid (device, uuid, error);
+}
+
 /**
  * parse_output_vars: (skip)
  * @str: string to parse
@@ -565,7 +636,13 @@ static BDFSExtInfo* get_ext_info_from_table (GHashTable *table, gboolean free_ta
         g_free (ret->label);
         ret->label = g_strdup ("");
     }
+
     ret->uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "Filesystem UUID"));
+    if (!ret->uuid || g_strcmp0 (ret->uuid, "<none>") == 0) {
+        g_free (ret->uuid);
+        ret->uuid = g_strdup ("");
+    }
+
     ret->state = g_strdup ((gchar*) g_hash_table_lookup (table, "Filesystem state"));
 
     value = (gchar*) g_hash_table_lookup (table, "Block size");
