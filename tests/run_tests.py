@@ -5,10 +5,12 @@ from __future__ import print_function
 import argparse
 import datetime
 import os
+import pdb
 import re
 import six
 import subprocess
 import sys
+import traceback
 import unittest
 import yaml
 
@@ -92,6 +94,9 @@ def parse_args():
     argparser.add_argument('-s', '--stop', dest='stop',
                            help='stop executing after first failed test',
                            action='store_true')
+    argparser.add_argument('-p', '--pdb', dest='pdb',
+                           help='run pdb after a failed test',
+                           action='store_true')
     argparser.add_argument('-i', '--installed', dest='installed',
                            help='run tests against installed version of libblockdev',
                            action='store_true')
@@ -149,6 +154,19 @@ def _print_skip_message(test, skip_tag):
     else:
         print("%s (%s) ... skipped '%s'" % (test_name, test_module, reason),
               file=sys.stderr)
+
+
+class DebugTestResult(unittest.TextTestResult):
+
+    def addError(self, test, err):
+        traceback.print_exception(*err)
+        pdb.post_mortem(err[2])
+        super(DebugTestResult, self).addError(test, err)
+
+    def addFailure(self, test, err):
+        traceback.print_exception(*err)
+        pdb.post_mortem(err[2])
+        super(DebugTestResult, self).addFailure(test, err)
 
 
 def _should_skip(distro=None, version=None, arch=None, reason=None):
@@ -275,7 +293,12 @@ if __name__ == '__main__':
         # finally add the test to the suite
         suite.addTest(test)
 
-    result = unittest.TextTestRunner(verbosity=2, failfast=args.stop).run(suite)
+    if args.pdb:
+        runner = unittest.TextTestRunner(verbosity=2, failfast=args.stop, resultclass=DebugTestResult)
+    else:
+        runner = unittest.TextTestRunner(verbosity=2, failfast=args.stop)
+
+    result = runner.run(suite)
 
     # dump cropped journal to log file
     if find_executable('journalctl'):
