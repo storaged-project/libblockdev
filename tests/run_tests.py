@@ -16,6 +16,8 @@ import yaml
 
 from distutils.spawn import find_executable
 
+from utils import TestTags, get_version
+
 LIBDIRS = 'src/utils/.libs:src/plugins/.libs:src/plugins/fs/.libs:src/lib/.libs'
 GIDIR = 'src/lib'
 
@@ -227,6 +229,10 @@ if __name__ == '__main__':
         sys.path.append(testdir)
         sys.path.append(projdir)
         sys.path.append(os.path.join(projdir, 'src/python'))
+
+    if not args.installed:
+        import gi.overrides
+        gi.overrides.__path__.insert(0, os.path.join(projdir, 'src/python/gi/overrides'))
 
     start_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
