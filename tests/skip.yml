@@ -51,12 +51,6 @@
     - distro: "debian"
       reason: "running bcache tests causes system to run out of kernel memory on Debian"
 
-- test: kbd_test.KbdBcache*
-  skip_on:
-    - distro: fedora
-      version: "29"
-      reason: "running bcache tests causes system to run out of kernel memory on f29"
-
 - test: lvm_test.LvmTestVGcreateRemove.test_vgcreate_vgremove
   skip_on:
     - distro: "debian"
@@ -92,18 +86,6 @@
   skip_on:
     - distro: "debian"
       reason: "dependency checks are skipped on Debian"
-
-- test: nvdimm_test.NVDIMMNamespaceTestCase.test_enable_disable
-  skip_on:
-    - distro: fedora
-      version: "29"
-      reason: "Disabling is broken on rawhide and makes the 'fake' NVDIMM unusable."
-
-- test: NVDIMMNamespaceTestCase.test_namespace_reconfigure
-  skip_on:
-    - distro: fedora
-      version: "29"
-      reason: "Disabling is broken on rawhide and makes the 'fake' NVDIMM unusable."
 
 - test: nvdimm_test.NVDIMMNoDevTest.test_supported_sector_sizes
   skip_on:
