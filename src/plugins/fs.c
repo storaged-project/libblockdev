@@ -38,6 +38,8 @@ extern gboolean bd_fs_ext_is_tech_avail (BDFSTech tech, guint64 mode, GError **e
 extern gboolean bd_fs_xfs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
 extern gboolean bd_fs_vfat_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
 extern gboolean bd_fs_ntfs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
+extern gboolean bd_fs_f2fs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
+extern gboolean bd_fs_reiserfs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
 
 /**
  * bd_fs_error_quark: (skip)
@@ -139,6 +141,10 @@ gboolean bd_fs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error) {
             return bd_fs_vfat_is_tech_avail (tech, mode, error);
         case BD_FS_TECH_NTFS:
             return bd_fs_ntfs_is_tech_avail (tech, mode, error);
+        case BD_FS_TECH_F2FS:
+            return bd_fs_f2fs_is_tech_avail (tech, mode, error);
+        case BD_FS_TECH_REISERFS:
+            return bd_fs_reiserfs_is_tech_avail (tech, mode, error);
         /* coverity[dead_error_begin] */
         default:
             /* this should never be reached (see the comparison with LAST_FS

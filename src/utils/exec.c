@@ -269,7 +269,7 @@ gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtr
     return TRUE;
 }
 
-static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExtraArg **extra, BDUtilsProgExtract prog_extract, gint *proc_status, gchar **stdout, gchar **stderr, GError **error) {
+static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExtraArg **extra, BDUtilsProgExtract prog_extract, const gchar *input, gint *proc_status, gchar **stdout, gchar **stderr, GError **error) {
     const gchar **args = NULL;
     guint args_len = 0;
     const gchar **arg_p = NULL;
@@ -283,6 +283,9 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
     GIOChannel *out_pipe = NULL;
     gint err_fd = 0;
     GIOChannel *err_pipe = NULL;
+    gint in_fd = 0;
+    GIOChannel *in_pipe = NULL;
+    gsize bytes_written;
     gchar *line = NULL;
     gint child_ret = -1;
     gint status = 0;
@@ -326,7 +329,7 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
 
     ret = g_spawn_async_with_pipes (NULL, args ? (gchar**) args : (gchar**) argv, NULL,
                                     G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH|G_SPAWN_DO_NOT_REAP_CHILD,
-                                    NULL, NULL, &pid, NULL, &out_fd, &err_fd, error);
+                                    NULL, NULL, &pid, input ? &in_fd : NULL, &out_fd, &err_fd, error);
 
     if (!ret) {
         /* error is already populated */
@@ -343,6 +346,36 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
 
     out_pipe = g_io_channel_unix_new (out_fd);
     err_pipe = g_io_channel_unix_new (err_fd);
+
+    if (input) {
+        in_pipe = g_io_channel_unix_new (in_fd);
+        io_status = g_io_channel_write_chars (in_pipe,
+                                              input,
+                                              -1,
+                                              &bytes_written,
+                                              error);
+        if (io_status != G_IO_STATUS_NORMAL) {
+            if (error && (*error))
+                g_prefix_error (error, "Failed to write to stdin of the process: ");
+            else
+                g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
+                             "Failed to write to stdin of the process.");
+
+            bd_utils_report_finished (progress_id, (*error)->message);
+            g_io_channel_shutdown (in_pipe, FALSE, NULL);
+            g_io_channel_unref (in_pipe);
+            g_io_channel_shutdown (out_pipe, FALSE, NULL);
+            g_io_channel_unref (out_pipe);
+            g_io_channel_shutdown (err_pipe, FALSE, NULL);
+            g_io_channel_unref (err_pipe);
+            g_string_free (stdout_data, TRUE);
+            g_string_free (stderr_data, TRUE);
+            return FALSE;
+        } else {
+            g_io_channel_shutdown (in_pipe, TRUE, NULL);
+            g_io_channel_unref (in_pipe);
+        }
+    }
 
     fds[0].fd = out_fd;
     fds[1].fd = err_fd;
@@ -491,7 +524,23 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
  * Returns: whether the @argv was successfully executed (no error and exit code 0) or not
  */
 gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg **extra, BDUtilsProgExtract prog_extract, gint *proc_status, GError **error) {
-    return _utils_exec_and_report_progress (argv, extra, prog_extract, proc_status, NULL, NULL, error);
+    return _utils_exec_and_report_progress (argv, extra, prog_extract, NULL, proc_status, NULL, NULL, error);
+}
+
+/**
+ * bd_utils_exec_with_input:
+ * @argv: (array zero-terminated=1): the argv array for the call
+ * @input: (allow-none): input for the executed program
+ * @extra: (allow-none) (array zero-terminated=1): extra arguments
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @argv was successfully executed (no error and exit code 0) or not
+ */
+gboolean bd_utils_exec_with_input (const gchar **argv, const gchar *input, const BDExtraArg **extra, GError **error) {
+    gint status = 0;
+    /* just use the "stronger" function providing dumb progress reporting (just
+       'started' and 'finished') and throw away the returned status */
+    return _utils_exec_and_report_progress (argv, extra, NULL, input, &status, NULL, NULL, error);
 }
 
 /**
@@ -509,7 +558,7 @@ gboolean bd_utils_exec_and_capture_output (const gchar **argv, const BDExtraArg 
     gchar *stderr = NULL;
     gboolean ret = FALSE;
 
-    ret = _utils_exec_and_report_progress (argv, extra, NULL, &status, &stdout, &stderr, error);
+    ret = _utils_exec_and_report_progress (argv, extra, NULL, NULL, &status, &stdout, &stderr, error);
     if (!ret)
         return ret;
 
