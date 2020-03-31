@@ -354,6 +354,9 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
     out_pipe = g_io_channel_unix_new (out_fd);
     err_pipe = g_io_channel_unix_new (err_fd);
 
+    g_io_channel_set_encoding (out_pipe, NULL, NULL);
+    g_io_channel_set_encoding (err_pipe, NULL, NULL);
+
     fds[0].fd = out_fd;
     fds[1].fd = err_fd;
     fds[0].events = G_IO_IN | G_IO_HUP | G_IO_ERR;
