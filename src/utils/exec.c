@@ -347,6 +347,10 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
     out_pipe = g_io_channel_unix_new (out_fd);
     err_pipe = g_io_channel_unix_new (err_fd);
 
+    /* set encoding to NULL so we can read binary */
+    g_io_channel_set_encoding (out_pipe, NULL, NULL);
+    g_io_channel_set_encoding (err_pipe, NULL, NULL);
+
     if (input) {
         in_pipe = g_io_channel_unix_new (in_fd);
         io_status = g_io_channel_write_chars (in_pipe,
