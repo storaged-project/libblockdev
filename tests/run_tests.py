@@ -16,6 +16,8 @@ import yaml
 
 from distutils.spawn import find_executable
 
+from utils import TestTags, get_version
+
 LIBDIRS = 'src/utils/.libs:src/plugins/.libs:src/plugins/fs/.libs:src/lib/.libs'
 GIDIR = 'src/lib'
 
@@ -40,7 +42,7 @@ def _get_tests_from_suite(suite, tests):
 def _get_test_tags(test):
     """ Get test tags for single test case """
 
-    tags = []
+    tags = set()
 
     # test failed to load, usually some ImportError or something really broken
     # in the test file, just return empty list and let it fail
@@ -54,23 +56,51 @@ def _get_test_tags(test):
     # it is possible to either tag a test funcion or the class so we need to
     # check both for the tag
     if getattr(test_fn, "slow", False) or getattr(test_fn.__self__, "slow", False):
-        tags.append(TestTags.SLOW)
+        tags.add(TestTags.SLOW)
     if getattr(test_fn, "unstable", False) or getattr(test_fn.__self__, "unstable", False):
-        tags.append(TestTags.UNSTABLE)
+        tags.add(TestTags.UNSTABLE)
     if getattr(test_fn, "unsafe", False) or getattr(test_fn.__self__, "unsafe", False):
-        tags.append(TestTags.UNSAFE)
+        tags.add(TestTags.UNSAFE)
     if getattr(test_fn, "core", False) or getattr(test_fn.__self__, "core", False):
-        tags.append(TestTags.CORE)
+        tags.add(TestTags.CORE)
     if getattr(test_fn, "nostorage", False) or getattr(test_fn.__self__, "nostorage", False):
-        tags.append(TestTags.NOSTORAGE)
+        tags.add(TestTags.NOSTORAGE)
     if getattr(test_fn, "extradeps", False) or getattr(test_fn.__self__, "extradeps", False):
-        tags.append(TestTags.EXTRADEPS)
+        tags.add(TestTags.EXTRADEPS)
     if getattr(test_fn, "regression", False) or getattr(test_fn.__self__, "regression", False):
-        tags.append(TestTags.REGRESSION)
+        tags.add(TestTags.REGRESSION)
     if getattr(test_fn, "sourceonly", False) or getattr(test_fn.__self__, "sourceonly", False):
-        tags.append(TestTags.SOURCEONLY)
+        tags.add(TestTags.SOURCEONLY)
 
     return tags
+
+
+def _check_arguments_compatibility(args):
+    if args.include_tags & args.exclude_tags:
+        print('Providing same tag in both "--include-tags" and "--exclude-tags" does not make sense.', file=sys.stderr)
+        return False
+
+    if args.fast and TestTags.SLOW.value in args.include_tags:
+        print('Incompatible arguments: "--fast" and "--include-tags slow".', file=sys.stderr)
+        return False
+
+    if args.lucky and TestTags.UNSTABLE.value in args.exclude_tags:
+        print('Incompatible arguments: "--lucky" and "--exclude-tags unstable".', file=sys.stderr)
+        return False
+
+    if args.jenkins and TestTags.UNSAFE.value in args.exclude_tags:
+        print('Incompatible arguments: "--jenkins" and "--exclude-tags unsafe".', file=sys.stderr)
+        return False
+
+    if args.core and TestTags.CORE.value in args.exclude_tags:
+        print('Incompatible arguments: "--core" and "--exclude-tags core".', file=sys.stderr)
+        return False
+
+    if args.installed and TestTags.SOURCEONLY.value in args.include_tags:
+        print('Incompatible arguments: "--installed" and "--include-tags sourceonly".', file=sys.stderr)
+        return False
+
+    return True
 
 
 def parse_args():
@@ -100,7 +130,34 @@ def parse_args():
     argparser.add_argument('-i', '--installed', dest='installed',
                            help='run tests against installed version of libblockdev',
                            action='store_true')
+    argparser.add_argument('--exclude-tags', nargs='+', dest='exclude_tags',
+                           help='skip tests tagged with (at least one of) the provided tags')
+    argparser.add_argument('--include-tags', nargs='+', dest='include_tags',
+                           help='run only tests tagged with (at least one of) the provided tags')
+    argparser.add_argument('--list-tags', dest='list_tags', help='print available tags and exit',
+                           action='store_true')
     args = argparser.parse_args()
+
+    all_tags = set(TestTags.get_tags())
+
+    if args.list_tags:
+        print('Available tags:', ', '.join(all_tags))
+        sys.exit(0)
+
+    # lets convert these to sets now to make argument checks easier
+    args.include_tags = set(args.include_tags) if args.include_tags else set()
+    args.exclude_tags = set(args.exclude_tags) if args.exclude_tags else set()
+
+    # make sure user provided only valid tags
+    if not all_tags.issuperset(args.include_tags):
+        print('Unknown tag(s) specified:', ', '.join(args.include_tags - all_tags), file=sys.stderr)
+        sys.exit(1)
+    if not all_tags.issuperset(args.exclude_tags):
+        print('Unknown tag(s) specified:', ', '.join(args.exclude_tags - all_tags), file=sys.stderr)
+        sys.exit(1)
+
+    if not _check_arguments_compatibility(args):
+        sys.exit(1)
 
     if args.fast:
         os.environ['SKIP_SLOW'] = ''
@@ -117,6 +174,21 @@ def parse_args():
     if 'FEELINGLUCKY' in os.environ:
         args.lucky = True
 
+    # we want to use only the include/exclude sets, not other properties
+    if args.fast:
+        args.exclude_tags.add(TestTags.SLOW.value)
+    if args.installed:
+        args.exclude_tags.add(TestTags.SOURCEONLY.value)
+    if args.core:
+        args.include_tags.add(TestTags.CORE.value)
+        args.include_tags.add(TestTags.REGRESSION.value)
+
+    # for backwards compatibility we want to exclude unsafe and unstable by default
+    if not args.jenkins and TestTags.UNSAFE.value not in args.include_tags:
+        args.exclude_tags.add(TestTags.UNSAFE.value)
+    if not args.lucky and TestTags.UNSTABLE.value not in args.include_tags:
+        args.exclude_tags.add(TestTags.UNSTABLE.value)
+
     return args
 
 def _split_test_id(test_id):
@@ -129,24 +201,14 @@ def _split_test_id(test_id):
     return test_name, test_module
 
 
-def _print_skip_message(test, skip_tag):
+def _print_skip_message(test, skip_tags, missing):
     test_id = test.id()
     test_module, test_name = _split_test_id(test_id)
 
-    if skip_tag == TestTags.SLOW:
-        reason = "skipping slow tests"
-    elif skip_tag == TestTags.UNSTABLE:
-        reason = "skipping unstable tests"
-    elif skip_tag == TestTags.UNSAFE:
-        reason = "skipping test that modifies system configuration"
-    elif skip_tag == TestTags.EXTRADEPS:
-        reason = "skipping test that requires special configuration"
-    elif skip_tag == TestTags.CORE:
-        reason = "skipping non-core test"
-    elif skip_tag == TestTags.SOURCEONLY:
-        reason = "skipping test that can run only against library compiled from source"
+    if missing:
+        reason = 'skipping test because it is not tagged as one of: ' + ', '.join((t.value for t in skip_tags))
     else:
-        reason = "unknown reason"  # just to be sure there is some default value
+        reason = 'skipping test because it is tagged as: ' + ', '.join((t.value for t in skip_tags))
 
     if test._testMethodDoc:
         print("%s (%s)\n%s ... skipped '%s'" % (test_name, test_module, test._testMethodDoc, reason),
@@ -228,6 +290,10 @@ if __name__ == '__main__':
         sys.path.append(projdir)
         sys.path.append(os.path.join(projdir, 'src/python'))
 
+    if not args.installed:
+        import gi.overrides
+        gi.overrides.__path__.insert(0, os.path.join(projdir, 'src/python/gi/overrides'))
+
     start_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     loader = unittest.defaultTestLoader
@@ -243,16 +309,15 @@ if __name__ == '__main__':
     tests = _get_tests_from_suite(test_cases, tests)
 
     # get distro and arch here so we don't have to do this for every test
-    from utils import get_version
     DISTRO, VERSION = get_version()
     ARCH = os.uname()[-1]
 
     # get list of tests to skip from the config file
     skipping = _parse_skip_config(os.path.join(testdir, SKIP_CONFIG))
 
-    # for some reason overrides_hack will fail if we import this at the start
-    # of the file
-    from utils import TestTags
+    # get sets of include/exclude tags as tags not strings from arguments
+    include_tags = set(TestTags.get_tag_by_value(t) for t in args.include_tags)
+    exclude_tags = set(TestTags.get_tag_by_value(t) for t in args.exclude_tags)
 
     for test in tests:
         test_id = test.id()
@@ -260,24 +325,14 @@ if __name__ == '__main__':
         # get tags and (possibly) skip the test
         tags = _get_test_tags(test)
 
-        if TestTags.SLOW in tags and args.fast:
-            _print_skip_message(test, TestTags.SLOW)
-            continue
-        if TestTags.UNSTABLE in tags and not args.lucky:
-            _print_skip_message(test, TestTags.UNSTABLE)
-            continue
-        if TestTags.UNSAFE in tags or TestTags.EXTRADEPS in tags and not args.jenkins:
-            _print_skip_message(test, TestTags.UNSAFE)
-            continue
-        if TestTags.EXTRADEPS in tags and not args.jenkins:
-            _print_skip_message(test, TestTags.EXTRADEPS)
-            continue
-        if TestTags.SOURCEONLY in tags and args.installed:
-            _print_skip_message(test, TestTags.SOURCEONLY)
+        # if user specified include_tags, test must have at least one of these to run
+        if include_tags and not (include_tags & tags):
+            _print_skip_message(test, include_tags - tags, missing=True)
             continue
 
-        if args.core and TestTags.CORE not in tags and TestTags.REGRESSION not in tags:
-            _print_skip_message(test, TestTags.CORE)
+        # if user specified exclude_tags, test can't have any of these
+        if exclude_tags and (exclude_tags & tags):
+            _print_skip_message(test, exclude_tags & tags, missing=False)
             continue
 
         # check if the test is in the list of tests to skip

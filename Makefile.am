@@ -119,7 +119,7 @@ pylint:
 
 if TESTS_ENABLED
 test: all pylint
-	sudo $(TEST_PYTHON) tests/run_tests.py
+	sudo $(TEST_PYTHON) tests/run_tests.py $(TEST_ARGS)
 
 fast-test: all pylint
 	sudo $(TEST_PYTHON) tests/run_tests.py --fast

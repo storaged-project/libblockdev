@@ -353,14 +353,27 @@ def unstable_test(test):
 
 
 class TestTags(Enum):
-    SLOW = 1        # slow tests
-    UNSTABLE = 2    # randomly failing tests
-    UNSAFE = 3      # tests that change system configuration
-    CORE = 4        # tests covering core functionality
-    NOSTORAGE = 5   # tests that don't work with storage
-    EXTRADEPS = 6   # tests that require special configuration and/or device to run
-    REGRESSION = 7  # regression tests
-    SOURCEONLY = 8  # tests that can't run against installed library
+    SLOW = "slow"             # slow tests
+    UNSTABLE = "unstable"     # randomly failing tests
+    UNSAFE = "unsafe"         # tests that change system configuration
+    CORE = "core"             # tests covering core functionality
+    NOSTORAGE = "nostorage"   # tests that don't work with storage
+    EXTRADEPS = "extradeps"   # tests that require special configuration and/or device to run
+    REGRESSION = "regression" # regression tests
+    SOURCEONLY = "sourceonly" # tests that can't run against installed library
+
+    @classmethod
+    def get_tags(cls):
+        return [t.value for t in cls.__members__.values()]
+
+    @classmethod
+    def get_tag_by_value(cls, value):
+        tag = next((t for t in cls.__members__.values() if t.value == value), None)
+
+        if not tag:
+            raise ValueError('Unknown value "%s"' % value)
+
+        return tag
 
 
 def tag_test(*tags):
