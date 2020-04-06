@@ -1948,7 +1948,7 @@ class GenericSetUUID(FSTestCase):
         self._test_generic_set_uuid(mkfs_function=BlockDev.fs_reiserfs_mkfs)
 
 class GenericResize(FSTestCase):
-    def _test_generic_resize(self, mkfs_function):
+    def _test_generic_resize(self, mkfs_function, size_delta=0):
         # clean the device
         succ = BlockDev.fs_clean(self.loop_dev)
 
@@ -1960,14 +1960,14 @@ class GenericResize(FSTestCase):
         succ = BlockDev.fs_resize(self.loop_dev, 80 * 1024**2)
         self.assertTrue(succ)
         new_size = BlockDev.fs_get_size(self.loop_dev)
-        self.assertEqual(new_size, 80 * 1024**2)
+        self.assertAlmostEqual(new_size, 80 * 1024**2, delta=size_delta)
 
         # resize to maximum size
         succ = BlockDev.fs_resize(self.loop_dev, 0)
         self.assertTrue(succ)
         new_size = BlockDev.fs_get_size(self.loop_dev)
         # should be back to original size
-        self.assertEqual(new_size, size)
+        self.assertAlmostEqual(new_size, size, delta=size_delta)
 
     def test_ext2_generic_resize(self):
         """Test generic resize function with an ext2 file system"""
@@ -2019,7 +2019,7 @@ class GenericResize(FSTestCase):
     @tag_test(TestTags.UNSTABLE)
     def test_vfat_generic_resize(self):
         """Test generic resize function with a vfat file system"""
-        self._test_generic_resize(mkfs_function=BlockDev.fs_vfat_mkfs)
+        self._test_generic_resize(mkfs_function=BlockDev.fs_vfat_mkfs, size_delta=1024**2)
 
     def _destroy_lvm(self):
         run("vgremove --yes libbd_fs_tests >/dev/null 2>&1")

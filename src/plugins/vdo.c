@@ -521,7 +521,7 @@ static gchar* get_index_memory_str (guint64 index_memory, GError **error) {
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_CREATE
  */
 gboolean bd_vdo_create (const gchar *name, const gchar *backing_device, guint64 logical_size, guint64 index_memory, gboolean compression, gboolean deduplication, BDVDOWritePolicy write_policy, const BDExtraArg **extra, GError **error) {
-    const gchar **args = g_new0 (const gchar*, 12);
+    const gchar **args = g_new0 (const gchar*, 13);
     guint next_arg = 0;
     gboolean ret = FALSE;
     gchar *size_str = NULL;
@@ -536,6 +536,7 @@ gboolean bd_vdo_create (const gchar *name, const gchar *backing_device, guint64 
     args[next_arg++] = name;
     args[next_arg++] = "--device";
     args[next_arg++] = backing_device;
+    args[next_arg++] = "--force";
 
 
     if (logical_size != 0) {
