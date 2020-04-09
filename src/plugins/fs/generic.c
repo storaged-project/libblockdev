@@ -82,6 +82,7 @@ static const BDFSInfo fs_info[] = {
     {"f2fs", "fsck.f2fs", "fsck.f2fs", "resize.f2fs", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, NULL, "dump.f2fs", NULL},
     {"reiserfs", "reiserfsck", "reiserfsck", "resize_reiserfs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "reiserfstune", "debugreiserfs", "reiserfstune"},
     {"nilfs2", NULL, NULL, "nilfs-resize", BD_FS_ONLINE_GROW | BD_FS_ONLINE_GROW, "tune-nilfs", "tune-nilfs", "tune-nilfs"},
+    {"exfat", "fsck.exfat", "fsck.exfat", NULL, 0, "exfatlabel", "dumpexfat", NULL},
     {NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL}
 };
 
@@ -643,6 +644,21 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
             default:
                 g_assert_not_reached ();
         }
+    } else if (g_strcmp0 (fstype, "exfat") == 0) {
+        switch (op) {
+            case BD_FS_RESIZE:
+                break;
+            case BD_FS_REPAIR:
+                return bd_fs_exfat_repair (device, NULL, error);
+            case BD_FS_CHECK:
+                return bd_fs_exfat_check (device, NULL, error);
+            case BD_FS_LABEL:
+                return bd_fs_exfat_set_label (device, label, error);
+            case BD_FS_UUID:
+                break;
+            default:
+                g_assert_not_reached ();
+        }
     }
     switch (op) {
         case BD_FS_RESIZE:
@@ -860,6 +876,13 @@ guint64 bd_fs_get_size (const gchar *device, GError **error) {
         if (info) {
             size = info->size;
             bd_fs_nilfs2_info_free (info);
+        }
+        return size;
+    } else if (g_strcmp0 (fstype, "exfat") == 0) {
+        BDFSExfatInfo *info = bd_fs_exfat_get_info (device, error);
+        if (info) {
+            size = info->sector_size * info->sector_count;
+            bd_fs_exfat_info_free (info);
         }
         return size;
     } else {

@@ -452,6 +452,7 @@ typedef enum {
     BD_FS_TECH_F2FS,
     BD_FS_TECH_REISERFS,
     BD_FS_TECH_NILFS2,
+    BD_FS_TECH_EXFAT,
 } BDFSTech;
 
 typedef enum {
@@ -593,6 +594,76 @@ GType bd_fs_nilfs2_info_get_type () {
         type = g_boxed_type_register_static("BDFSNILFS2Info",
                                             (GBoxedCopyFunc) bd_fs_nilfs2_info_copy,
                                             (GBoxedFreeFunc) bd_fs_nilfs2_info_free);
+    }
+
+    return type;
+}
+
+#define BD_FS_TYPE_EXFAT_INFO (bd_fs_exfat_info_get_type ())
+GType bd_fs_exfat_info_get_type();
+
+/**
+ * BDFSExfatInfo:
+ * @label: label of the filesystem
+ * @uuid: uuid of the filesystem
+ * @sector_size: sector size used by the filesystem
+ * @cluster_size: cluster size used by the filesystem
+ * @sector_count: number of sectors in the filesystem
+ * @free_sectors: number of free sectors in the filesystem
+ * @cluster_count: number of clusters in the filesystem
+ * @free_clusters: number of free clusters in the filesystem
+ */
+typedef struct BDFSExfatInfo {
+    gchar *label;
+    gchar *uuid;
+    guint64 sector_size;
+    guint64 sector_count;
+    guint64 cluster_count;
+} BDFSExfatInfo;
+
+/**
+ * bd_fs_exfat_info_free: (skip)
+ * @data: (allow-none): %BDFSExfatInfo to free
+ *
+ * Frees @data.
+ */
+void bd_fs_exfat_info_free (BDFSExfatInfo *data) {
+    if (data == NULL)
+        return;
+
+    g_free (data->label);
+    g_free (data->uuid);
+    g_free (data);
+}
+
+/**
+ * bd_fs_exfat_info_copy: (skip)
+ * @data: (allow-none): %BDFSExfatInfo to copy
+ *
+ * Creates a new copy of @data.
+ */
+BDFSExfatInfo* bd_fs_exfat_info_copy (BDFSExfatInfo *data) {
+    if (data == NULL)
+        return NULL;
+
+    BDFSExfatInfo *ret = g_new0 (BDFSExfatInfo, 1);
+
+    ret->label = g_strdup (data->label);
+    ret->uuid = g_strdup (data->uuid);
+    ret->sector_size = data->sector_size;
+    ret->sector_count = data->sector_count;
+    ret->cluster_count = data->cluster_count;
+
+    return ret;
+}
+
+GType bd_fs_exfat_info_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDFSExfatInfo",
+                                            (GBoxedCopyFunc) bd_fs_exfat_info_copy,
+                                            (GBoxedFreeFunc) bd_fs_exfat_info_free);
     }
 
     return type;
@@ -2039,5 +2110,81 @@ BDFSNILFS2Info* bd_fs_nilfs2_get_info (const gchar *device, GError **error);
  * Tech category: %BD_FS_TECH_NILFS2-%BD_FS_TECH_MODE_RESIZE
  */
 gboolean bd_fs_nilfs2_resize (const gchar *device, guint64 new_size, GError **error);
+
+/**
+ * bd_fs_exfat_mkfs:
+ * @device: the device to create a new exfat fs on
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
+ *                                                 passed to the 'mkexfatfs' utility)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether a new exfat fs was successfully created on @device or not
+ *
+ * Tech category: %BD_FS_TECH_EXFAT-%BD_FS_TECH_MODE_MKFS
+ */
+gboolean bd_fs_exfat_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_fs_exfat_wipe:
+ * @device: the device to wipe a exfat signature from
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the exfat signature was successfully wiped from the @device or
+ *          not
+ *
+ * Tech category: %BD_FS_TECH_EXFAT-%BD_FS_TECH_MODE_WIPE
+ */
+gboolean bd_fs_exfat_wipe (const gchar *device, GError **error);
+
+/**
+ * bd_fs_exfat_check:
+ * @device: the device containing the file system to check
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the repair (right now
+ *                                                 passed to the 'exfatfsck' utility)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the exfat file system on the @device is clean or not
+ *
+ * Tech category: %BD_FS_TECH_EXFAT-%BD_FS_TECH_MODE_CHECK
+ */
+gboolean bd_fs_exfat_check (const gchar *device, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_fs_exfat_repair:
+ * @device: the device containing the file system to repair
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the repair (right now
+ *                                                 passed to the 'exfatfsck' utility)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the exfat file system on the @device was successfully repaired
+ *          (if needed) or not (error is set in that case)
+ *
+ * Tech category: %BD_FS_TECH_EXFAT-%BD_FS_TECH_MODE_REPAIR
+ */
+gboolean bd_fs_exfat_repair (const gchar *device, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_fs_exfat_set_label:
+ * @device: the device containing the file system to set label for
+ * @label: label to set
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the label of exfat file system on the @device was
+ *          successfully set or not
+ *
+ * Tech category: %BD_FS_TECH_EXFAT-%BD_FS_TECH_MODE_SET_LABEL
+ */
+gboolean bd_fs_exfat_set_label (const gchar *device, const gchar *label, GError **error);
+
+/**
+ * bd_fs_exfat_get_info:
+ * @device: the device containing the file system to get info for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): information about the file system on @device or
+ *                           %NULL in case of error
+ * Tech category: %BD_FS_TECH_EXFAT-%BD_FS_TECH_MODE_QUERY
+ */
+BDFSExfatInfo* bd_fs_exfat_get_info (const gchar *device, GError **error);
 
 #endif  /* BD_FS_API */

@@ -80,6 +80,15 @@ class FSTestCase(unittest.TestCase):
             print(e)
             cls.nilfs2_avail = False
 
+        try:
+            cls.exfat_avail = BlockDev.fs_is_tech_avail(BlockDev.FSTech.EXFAT,
+                                                        BlockDev.FSTechMode.MKFS |
+                                                        BlockDev.FSTechMode.REPAIR |
+                                                        BlockDev.FSTechMode.CHECK |
+                                                        BlockDev.FSTechMode.SET_LABEL)
+        except Exception :
+            cls.exfat_avail = False
+
     def setUp(self):
         self.addCleanup(self._clean_up)
         self.dev_file = utils.create_sparse_tempfile("fs_test", self.loop_size)
@@ -1505,6 +1514,141 @@ class NTFSSetUUID(ReiserFSTestCase):
             BlockDev.fs_ntfs_check_uuid(16 * "z")
 
 
+
+class ExfatTestCase(FSTestCase):
+    def setUp(self):
+        if not self.exfat_avail:
+            self.skipTest("skipping exFAT: not available")
+
+        super(ExfatTestCase, self).setUp()
+
+class ExfatTestMkfs(ExfatTestCase):
+    def test_exfat_mkfs(self):
+        """Verify that it is possible to create a new exfat file system"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_exfat_mkfs("/non/existing/device", None)
+
+        succ = BlockDev.fs_exfat_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        # just try if we can mount the file system
+        with mounted(self.loop_dev, self.mount_dir):
+            pass
+
+        # check the fstype
+        fstype = BlockDev.fs_get_fstype(self.loop_dev)
+        self.assertEqual(fstype, "exfat")
+
+        BlockDev.fs_wipe(self.loop_dev, True)
+
+class ExfatMkfsWithLabel(ExfatTestCase):
+    def test_exfat_mkfs_with_label(self):
+        """Verify that it is possible to create an exfat file system with label"""
+
+        ea = BlockDev.ExtraArg.new("-n", "test_label")
+        succ = BlockDev.fs_exfat_mkfs(self.loop_dev, [ea])
+        self.assertTrue(succ)
+
+        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "test_label")
+
+class ExfatTestWipe(ExfatTestCase):
+    def test_exfat_wipe(self):
+        """Verify that it is possible to wipe an exfat file system"""
+
+        succ = BlockDev.fs_exfat_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_exfat_wipe(self.loop_dev)
+        self.assertTrue(succ)
+
+        # already wiped, should fail this time
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_exfat_wipe(self.loop_dev)
+
+        run("pvcreate -ff -y %s >/dev/null" % self.loop_dev)
+
+        # LVM PV signature, not an exfat file system
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_exfat_wipe(self.loop_dev)
+
+        BlockDev.fs_wipe(self.loop_dev, True)
+
+        run("mkfs.ext2 -F %s >/dev/null 2>&1" % self.loop_dev)
+
+        # ext2, not an exfat file system
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_exfat_wipe(self.loop_dev)
+
+        BlockDev.fs_wipe(self.loop_dev, True)
+
+class ExfatTestCheck(ExfatTestCase):
+    def test_exfat_check(self):
+        """Verify that it is possible to check an exfat file system"""
+
+        succ = BlockDev.fs_exfat_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_exfat_check(self.loop_dev, None)
+        self.assertTrue(succ)
+
+class ExfatTestRepair(ExfatTestCase):
+    def test_exfat_repair(self):
+        """Verify that it is possible to repair an exfat file system"""
+
+        succ = BlockDev.fs_exfat_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_exfat_repair(self.loop_dev, None)
+        self.assertTrue(succ)
+
+class ExfatGetInfo(ExfatTestCase):
+    def test_exfat_get_info(self):
+        """Verify that it is possible to get info about an exfat file system"""
+
+        succ = BlockDev.fs_exfat_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "")
+        # should be an non-empty string
+        self.assertTrue(fi.uuid)
+        self.assertGreater(fi.sector_size, 0)
+        self.assertGreater(fi.sector_count, 0)
+        self.assertGreater(fi.cluster_count, 0)
+
+class ExfatSetLabel(ExfatTestCase):
+    def test_exfat_set_label(self):
+        """Verify that it is possible to set label of an exfat file system"""
+
+        succ = BlockDev.fs_exfat_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "")
+
+        succ = BlockDev.fs_exfat_set_label(self.loop_dev, "test_label")
+        self.assertTrue(succ)
+        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "test_label")
+
+        succ = BlockDev.fs_exfat_set_label(self.loop_dev, "test_label2")
+        self.assertTrue(succ)
+        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "test_label2")
+
+        succ = BlockDev.fs_exfat_set_label(self.loop_dev, "")
+        self.assertTrue(succ)
+        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "")
+
 class CanResizeRepairCheckLabel(FSTestCase):
     def test_can_resize(self):
         """Verify that tooling query works for resize"""
@@ -1987,6 +2131,12 @@ class GenericCheck(FSTestCase):
             # nilfs2 doesn't support check
             self._test_generic_check(mkfs_function=BlockDev.fs_nilfs2_mkfs)
 
+    def test_exfat_generic_check(self):
+        """Test generic check function with an exfat file system"""
+        if not self.exfat_avail:
+            self.skipTest("skipping exFAT: not available")
+        self._test_generic_check(mkfs_function=BlockDev.fs_exfat_mkfs)
+
 class GenericRepair(FSTestCase):
     def _test_generic_repair(self, mkfs_function):
         # clean the device
@@ -2033,6 +2183,11 @@ class GenericRepair(FSTestCase):
             # nilfs2 doesn't support repair
             self._test_generic_repair(mkfs_function=BlockDev.fs_nilfs2_mkfs)
 
+    def test_exfat_generic_repair(self):
+        """Test generic repair function with an exfat file system"""
+        if not self.exfat_avail:
+            self.skipTest("skipping exFAT: not available")
+        self._test_generic_repair(mkfs_function=BlockDev.fs_exfat_mkfs)
 
 class GenericSetLabel(FSTestCase):
     def _test_generic_set_label(self, mkfs_function):
@@ -2080,6 +2235,11 @@ class GenericSetLabel(FSTestCase):
             self.skipTest("skipping NILFS2: not available")
         self._test_generic_set_label(mkfs_function=BlockDev.fs_nilfs2_mkfs)
 
+    def test_exfat_generic_set_label(self):
+        """Test generic set_label function with a exfat file system"""
+        if not self.exfat_avail:
+            self.skipTest("skipping exFAT: not available")
+        self._test_generic_set_label(mkfs_function=BlockDev.fs_exfat_mkfs)
 
 class GenericSetUUID(FSTestCase):
     def _test_generic_set_uuid(self, mkfs_function, test_uuid="4d7086c4-a4d3-432f-819e-73da03870df9"):
@@ -2135,6 +2295,14 @@ class GenericSetUUID(FSTestCase):
         if not self.nilfs2_avail:
             self.skipTest("skipping NILFS2: not available")
         self._test_generic_set_uuid(mkfs_function=BlockDev.fs_nilfs2_mkfs)
+
+    def test_exfat_generic_set_uuid(self):
+        """Test generic set_uuid function with a exfat file system"""
+        if not self.exfat_avail:
+            self.skipTest("skipping exFAT: not available")
+        with six.assertRaisesRegex(self, GLib.GError, "Setting UUID of filesystem 'exfat' is not supported."):
+            # exfat doesn't support setting UUID
+            self._test_generic_set_uuid(mkfs_function=BlockDev.fs_exfat_mkfs)
 
 class GenericResize(FSTestCase):
     def _test_generic_resize(self, mkfs_function, size_delta=0):
@@ -2312,6 +2480,20 @@ class GenericResize(FSTestCase):
             self.skipTest("skipping NILFS2: not available")
         self._test_generic_resize(mkfs_function=BlockDev.fs_nilfs2_mkfs)
 
+    def test_exfat_generic_resize(self):
+        """Test generic resize function with an exfat file system"""
+        if not self.exfat_avail:
+            self.skipTest("skipping exFAT: not available")
+
+        # clean the device
+        succ = BlockDev.fs_clean(self.loop_dev)
+
+        succ = BlockDev.fs_exfat_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        # no resize support for exFAT
+        with six.assertRaisesRegex(self, GLib.GError, "Resizing filesystem 'exfat' is not supported."):
+            BlockDev.fs_resize(self.loop_dev, 80 * 1024**2)
 
 class GenericGetFreeSpace(FSTestCase):
     def _test_get_free_space(self, mkfs_function, size_delta=0):
