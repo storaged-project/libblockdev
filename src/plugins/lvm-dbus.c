@@ -1585,9 +1585,8 @@ gboolean bd_lvm_pvscan (const gchar *device, gboolean update_cache, const BDExtr
     GVariant *device_var = NULL;
 
     g_variant_builder_init (&builder, G_VARIANT_TYPE_TUPLE);
-    /* activate LVs if updating the cache, update the cache and specify the
-       device (if any) */
-    g_variant_builder_add_value (&builder, g_variant_new_boolean (update_cache));
+    /* update the cache and specify the device (if any) */
+    g_variant_builder_add_value (&builder, g_variant_new_boolean (FALSE));
     g_variant_builder_add_value (&builder, g_variant_new_boolean (update_cache));
     if (update_cache && device) {
         device_var = g_variant_new ("s", device);
