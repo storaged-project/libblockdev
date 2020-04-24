@@ -1464,6 +1464,26 @@ class CanResizeRepairCheckLabel(FSTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_can_get_size("nilfs2")
 
+    def test_can_get_free_space(self):
+        """Verify that tooling query works for getting free space"""
+
+        avail, util = BlockDev.fs_can_get_free_space("ext4")
+        self.assertTrue(avail)
+        self.assertEqual(util, None)
+
+        old_path = os.environ.get("PATH", "")
+        os.environ["PATH"] = ""
+        avail, util = BlockDev.fs_can_get_free_space("ext4")
+        os.environ["PATH"] = old_path
+        self.assertFalse(avail)
+        self.assertEqual(util, "dumpe2fs")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_get_free_space("xfs")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_get_free_space("nilfs2")
+
 class MountTest(FSTestCase):
 
     username = "bd_mount_test"
@@ -2116,6 +2136,45 @@ class GenericResize(FSTestCase):
         if not self.reiserfs_avail:
             self.skipTest("skipping ReiserFS: not available")
         self._test_generic_resize(mkfs_function=BlockDev.fs_reiserfs_mkfs)
+
+
+class GenericGetFreeSpace(FSTestCase):
+    def _test_get_free_space(self, mkfs_function, size_delta=0):
+        # clean the device
+        succ = BlockDev.fs_clean(self.loop_dev)
+
+        succ = mkfs_function(self.loop_dev, None)
+        self.assertTrue(succ)
+        size = BlockDev.fs_get_size(self.loop_dev)
+        free = BlockDev.fs_get_free_space(self.loop_dev)
+        self.assertNotEqual(free, 0)
+        self.assertLessEqual(free, size)
+
+    def test_ext2_get_free_space(self):
+        """Test generic resize function with an ext2 file system"""
+        self._test_get_free_space(mkfs_function=BlockDev.fs_ext2_mkfs)
+
+    def test_ext3_check_get_free_space(self):
+        """Test generic resize function with an ext3 file system"""
+        self._test_get_free_space(mkfs_function=BlockDev.fs_ext3_mkfs)
+
+    def test_ext4_get_free_space(self):
+        """Test generic resize function with an ext4 file system"""
+        self._test_get_free_space(mkfs_function=BlockDev.fs_ext4_mkfs)
+
+    def test_ntfs_get_free_space(self):
+        """Test generic resize function with an ntfs file system"""
+        self._test_get_free_space(mkfs_function=BlockDev.fs_ntfs_mkfs)
+
+    def test_vfat_get_free_space(self):
+        """Test generic resize function with a vfat file system"""
+        self._test_get_free_space(mkfs_function=BlockDev.fs_vfat_mkfs)
+
+    def test_reiserfs_get_free_space(self):
+        """Test generic resize function with an reiserfs file system"""
+        if not self.reiserfs_avail:
+            self.skipTest("skipping ReiserFS: not available")
+        self._test_get_free_space(mkfs_function=BlockDev.fs_reiserfs_mkfs)
 
 
 class FSFreezeTest(FSTestCase):

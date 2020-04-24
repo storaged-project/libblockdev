@@ -47,6 +47,7 @@ typedef enum {
     BD_FS_LABEL,
     BD_FS_GET_SIZE,
     BD_FS_UUID,
+    BD_FS_GET_FREE_SPACE,
 } BDFsOpType;
 
 /**
@@ -810,6 +811,72 @@ guint64 bd_fs_get_size (const gchar *device, GError **error) {
     }
 }
 
+/**
+ * bd_fs_get_free_space:
+ * @device: the device with file system to get free space for
+ * @error: (out): place to store error (if any)
+ *
+ * Get free space for filesystem on @device. This calls other fs info functions from this
+ * plugin based on detected filesystem (e.g. bd_fs_ext4_get_info for ext4). This
+ * function will return an error for unknown/unsupported filesystems.
+ *
+ * Returns: free space of filesystem on @device, 0 in case of error.
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
+ */
+guint64 bd_fs_get_free_space (const gchar *device, GError **error) {
+    g_autofree gchar* fstype = NULL;
+    guint64 size = 0;
+
+    fstype = bd_fs_get_fstype (device, error);
+    if (!fstype) {
+        if (*error == NULL) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
+                         "No filesystem detected on the device '%s'", device);
+            return 0;
+        } else {
+            g_prefix_error (error, "Error when trying to detect filesystem on '%s': ", device);
+            return 0;
+        }
+    }
+
+    if (g_strcmp0 (fstype, "ext2") == 0 || g_strcmp0 (fstype, "ext3") == 0
+                                        || g_strcmp0 (fstype, "ext4") == 0) {
+        BDFSExt4Info* info = bd_fs_ext4_get_info (device, error);
+        if (info) {
+            size = info->block_size * info->free_blocks;
+            bd_fs_ext4_info_free (info);
+        }
+        return size;
+
+    } else if (g_strcmp0 (fstype, "vfat") == 0) {
+        BDFSVfatInfo *info = bd_fs_vfat_get_info (device, error);
+        if (info) {
+            size = info->cluster_size * info->free_cluster_count;
+            bd_fs_vfat_info_free (info);
+        }
+        return size;
+    } else if (g_strcmp0 (fstype, "ntfs") == 0) {
+        BDFSNtfsInfo *info = bd_fs_ntfs_get_info (device, error);
+        if (info) {
+            size = info->free_space;
+            bd_fs_ntfs_info_free (info);
+        }
+        return size;
+    } else if (g_strcmp0 (fstype, "reiserfs") == 0) {
+        BDFSReiserFSInfo *info = bd_fs_reiserfs_get_info (device, error);
+        if (info) {
+            size = info->block_size * info->free_blocks;
+            bd_fs_reiserfs_info_free (info);
+        }
+        return size;
+    } else {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
+                    "Getting free space on filesystem '%s' is not supported.", fstype);
+        return 0;
+    }
+}
+
 static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar **required_utility, BDFsResizeFlags *mode, GError **error) {
     gboolean ret;
     const BDFSInfo *fsinfo = NULL;
@@ -845,9 +912,16 @@ static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar *
                 op_name = "Setting UUID of";
                 exec_util = fs_info->uuid_util;
                 break;
-            default:
+            case BD_FS_GET_SIZE:
                 op_name = "Getting size of";
                 exec_util = fsinfo->info_util;
+                break;
+            case BD_FS_GET_FREE_SPACE:
+                op_name = "Getting free space on";
+                exec_util = fsinfo->info_util;
+                break;
+            default:
+                g_assert_not_reached ();
         }
     }
 
@@ -980,6 +1054,32 @@ gboolean bd_fs_can_set_uuid (const gchar *type, gchar **required_utility, GError
  */
 gboolean bd_fs_can_get_size (const gchar *type, gchar **required_utility, GError **error) {
     return query_fs_operation (type, BD_FS_GET_SIZE, required_utility, NULL, error);
+}
+
+/**
+ * bd_fs_can_get_free_space:
+ * @type: the filesystem type to be tested for installed free space querying support
+ * @required_utility: (out) (transfer full): the utility binary which is required
+ *                                           for free space querying (if missing i.e. return FALSE but no error)
+ * @error: (out): place to store error (if any)
+ *
+ * Searches for the required utility to get free space of the given filesystem and
+ * returns whether it is installed.
+ * Unknown filesystems or filesystems which do not support free space querying result in errors.
+ *
+ * Returns: whether getting filesystem free space is available
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
+ */
+gboolean bd_fs_can_get_free_space (const gchar *type, gchar **required_utility, GError **error) {
+    /* some filesystems can't tell us free space even if we have the tools */
+    if (g_strcmp0 (type, "xfs") == 0 || g_strcmp0 (type, "f2fs") == 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
+                     "Getting free space on filesystem '%s' is not supported.", type);
+        return FALSE;
+    }
+
+    return query_fs_operation (type, BD_FS_GET_FREE_SPACE, required_utility, NULL, error);
 }
 
 static gboolean fs_freeze (const char *mountpoint, gboolean freeze, GError **error) {
