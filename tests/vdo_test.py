@@ -25,8 +25,9 @@ class VDOTestCase(unittest.TestCase):
 
         try:
             BlockDev.utils_load_kernel_module("kvdo")
-        except GLib.GError:
-            raise unittest.SkipTest("cannot load VDO kernel module, skipping.")
+        except GLib.GError as e:
+            if "File exists" not in e.message:
+                raise unittest.SkipTest("cannot load VDO kernel module, skipping.")
 
         if not find_executable("vdo"):
             raise unittest.SkipTest("vdo executable not foundin $PATH, skipping.")

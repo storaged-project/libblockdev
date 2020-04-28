@@ -1491,8 +1491,9 @@ class LVMVDOTest(LVMTestCase):
 
         try:
             BlockDev.utils_load_kernel_module("kvdo")
-        except GLib.GError:
-            raise unittest.SkipTest("cannot load VDO kernel module, skipping.")
+        except GLib.GError as e:
+            if "File exists" not in e.message:
+                raise unittest.SkipTest("cannot load VDO kernel module, skipping.")
 
         lvm_version = cls._get_lvm_version()
         if lvm_version < LooseVersion("2.3.07"):
