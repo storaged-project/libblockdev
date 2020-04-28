@@ -1560,6 +1560,19 @@ gboolean bd_lvm_vdo_pool_resize (const gchar *vg_name, const gchar *pool_name, g
 gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name, const gchar *pool_lv, const gchar *name, guint64 virtual_size, guint64 index_memory, gboolean compression, gboolean deduplication, BDLVMVDOWritePolicy write_policy, const BDExtraArg **extra, GError **error);
 
 /**
+ * bd_lvm_vdolvpoolname:
+ * @vg_name: name of the VG containing the queried VDO LV
+ * @lv_name: name of the queried VDO LV
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): the name of the pool volume for the @vg_name/@lv_name
+ * VDO LV or %NULL if failed to determine (@error) is set in those cases)
+ *
+ * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_QUERY
+ */
+gchar* bd_lvm_vdolvpoolname (const gchar *vg_name, const gchar *lv_name, GError **error);
+
+/**
  * bd_lvm_get_vdo_operating_mode_str:
  * @mode: mode to get the string representation for
  * @error: (out): place to store error (if any)
