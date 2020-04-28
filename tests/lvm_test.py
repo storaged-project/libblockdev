@@ -1440,6 +1440,10 @@ class LVMVDOTest(LVMTestCase):
         self.assertGreater(vdo_info.used_size, 0)
         self.assertTrue(0 <= vdo_info.saving_percent <= 100)
 
+        lvs = BlockDev.lvm_lvs("testVDOVG")
+        self.assertIn("vdoPool", [l.lv_name for l in lvs])
+        self.assertIn("vdoLV", [l.lv_name for l in lvs])
+
         mode_str = BlockDev.lvm_get_vdo_operating_mode_str(vdo_info.operating_mode)
         self.assertEqual(mode_str, "normal")
 

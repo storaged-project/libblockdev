@@ -48,6 +48,7 @@ static gchar *global_config_str = NULL;
 #define HIDDEN_LV_OBJ_PREFIX LVM_OBJ_PREFIX"/HiddenLv"
 #define THIN_POOL_OBJ_PREFIX LVM_OBJ_PREFIX"/ThinPool"
 #define CACHE_POOL_OBJ_PREFIX LVM_OBJ_PREFIX"/CachePool"
+#define VDO_POOL_OBJ_PREFIX LVM_OBJ_PREFIX"/VdoPool"
 #define PV_INTF LVM_BUS_NAME".Pv"
 #define VG_INTF LVM_BUS_NAME".Vg"
 #define VG_VDO_INTF LVM_BUS_NAME".VgVdo"
@@ -2401,6 +2402,19 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
     }
 
     lvs = get_existing_objects (CACHE_POOL_OBJ_PREFIX, error);
+    if (!lvs && (*error)) {
+        /* error is already populated */
+        g_slist_free_full (matched_lvs, g_free);
+        return NULL;
+    }
+    success = filter_lvs_by_vg (lvs, vg_name, &matched_lvs, &n_lvs, error);
+    g_free (lvs);
+    if (!success) {
+        g_slist_free_full (matched_lvs, g_free);
+        return NULL;
+    }
+
+    lvs = get_existing_objects (VDO_POOL_OBJ_PREFIX, error);
     if (!lvs && (*error)) {
         /* error is already populated */
         g_slist_free_full (matched_lvs, g_free);
