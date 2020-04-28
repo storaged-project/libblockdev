@@ -2951,6 +2951,33 @@ gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name, const gchar *pool_lv, co
 }
 
 /**
+ * bd_lvm_vdolvpoolname:
+ * @vg_name: name of the VG containing the queried VDO LV
+ * @lv_name: name of the queried VDO LV
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): the name of the pool volume for the @vg_name/@lv_name
+ * VDO LV or %NULL if failed to determine (@error) is set in those cases)
+ *
+ * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_QUERY
+ */
+gchar* bd_lvm_vdolvpoolname (const gchar *vg_name, const gchar *lv_name, GError **error) {
+    gboolean success = FALSE;
+    gchar *output = NULL;
+    const gchar *args[6] = {"lvs", "--noheadings", "-o", "pool_lv", NULL, NULL};
+    args[4] = g_strdup_printf ("%s/%s", vg_name, lv_name);
+
+    success = call_lvm_and_capture_output (args, NULL, &output, error);
+    g_free ((gchar *) args[4]);
+
+    if (!success)
+        /* the error is already populated from the call */
+        return NULL;
+
+    return g_strstrip (output);
+}
+
+/**
  * bd_lvm_get_vdo_operating_mode_str:
  * @mode: mode to get the string representation for
  * @error: (out): place to store error (if any)
