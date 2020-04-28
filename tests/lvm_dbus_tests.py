@@ -1499,6 +1499,11 @@ class LVMVDOTest(LVMTestCase):
         self.assertEqual(lv_info.segtype, "vdo")
         self.assertEqual(lv_info.pool_lv, "vdoPool")
 
+        pool_info = BlockDev.lvm_lvinfo("testVDOVG", "vdoPool")
+        self.assertEqual(pool_info.segtype, "vdo-pool")
+        self.assertEqual(pool_info.data_lv, "vdoPool_vdata")
+        self.assertGreater(pool_info.data_percent, 0)
+
         vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
         self.assertIsNotNone(vdo_info)
         self.assertEqual(vdo_info.operating_mode, BlockDev.LVMVDOOperatingMode.NORMAL)
