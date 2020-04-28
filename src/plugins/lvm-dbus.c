@@ -2291,6 +2291,9 @@ BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError *
         ret->data_lv = bd_lvm_data_lv_name (vg_name, lv_name, error);
         ret->metadata_lv = bd_lvm_metadata_lv_name (vg_name, lv_name, error);
     }
+    if (ret && g_strcmp0 (ret->segtype, "vdo-pool") == 0) {
+        ret->data_lv = bd_lvm_data_lv_name (vg_name, lv_name, error);
+    }
 
     return ret;
 }
@@ -2469,6 +2472,8 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
                    (g_strcmp0 (ret[j]->segtype, "cache-pool") == 0)) {
             ret[j]->data_lv = bd_lvm_data_lv_name (ret[j]->vg_name, ret[j]->lv_name, error);
             ret[j]->metadata_lv = bd_lvm_metadata_lv_name (ret[j]->vg_name, ret[j]->lv_name, error);
+        } else if (g_strcmp0 (ret[j]->segtype, "vdo-pool") == 0) {
+            ret[j]->data_lv = bd_lvm_data_lv_name (ret[j]->vg_name, ret[j]->lv_name, error);
         }
         if (error && *error) {
             g_slist_free_full (matched_lvs, g_free);
@@ -3221,6 +3226,7 @@ gchar* bd_lvm_data_lv_name (const gchar *vg_name, const gchar *lv_name, GError *
     gchar *obj_id = NULL;
     gchar *obj_path = NULL;
     gchar *ret = NULL;
+    gchar *segtype = NULL;
 
     obj_id = g_strdup_printf ("%s/%s", vg_name, lv_name);
     obj_path = get_object_path (obj_id, error);
@@ -3228,9 +3234,20 @@ gchar* bd_lvm_data_lv_name (const gchar *vg_name, const gchar *lv_name, GError *
     if (!obj_path)
         return NULL;
 
-    prop = get_object_property (obj_path, THPOOL_INTF, "DataLv", error);
+    prop = get_lv_property (vg_name, lv_name, "SegType", error);
     if (!prop)
+        return NULL;
+    g_variant_get_child (prop, 0, "s", &segtype);
+    g_variant_unref (prop);
+
+    if (g_strcmp0 (segtype, "thin-pool") == 0)
+        prop = get_object_property (obj_path, THPOOL_INTF, "DataLv", error);
+    else if (g_strcmp0 (segtype, "cache-pool") == 0)
         prop = get_object_property (obj_path, CACHE_POOL_INTF, "DataLv", error);
+    else if (g_strcmp0 (segtype, "vdo-pool") == 0)
+        prop = get_object_property (obj_path, VDO_POOL_INTF, "DataLv", error);
+
+    g_free (segtype);
     g_free (obj_path);
     if (!prop) {
         g_clear_error (error);
