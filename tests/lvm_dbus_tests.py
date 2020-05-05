@@ -1491,8 +1491,9 @@ class LVMVDOTest(LVMTestCase):
 
         try:
             BlockDev.utils_load_kernel_module("kvdo")
-        except GLib.GError:
-            raise unittest.SkipTest("cannot load VDO kernel module, skipping.")
+        except GLib.GError as e:
+            if "File exists" not in e.message:
+                raise unittest.SkipTest("cannot load VDO kernel module, skipping.")
 
         lvm_version = cls._get_lvm_version()
         if lvm_version < LooseVersion("2.3.07"):
@@ -1540,6 +1541,11 @@ class LVMVDOTest(LVMTestCase):
         self.assertEqual(lv_info.segtype, "vdo")
         self.assertEqual(lv_info.pool_lv, "vdoPool")
 
+        pool_info = BlockDev.lvm_lvinfo("testVDOVG", "vdoPool")
+        self.assertEqual(pool_info.segtype, "vdo-pool")
+        self.assertEqual(pool_info.data_lv, "vdoPool_vdata")
+        self.assertGreater(pool_info.data_percent, 0)
+
         vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
         self.assertIsNotNone(vdo_info)
         self.assertEqual(vdo_info.operating_mode, BlockDev.LVMVDOOperatingMode.NORMAL)
@@ -1549,6 +1555,10 @@ class LVMVDOTest(LVMTestCase):
         self.assertGreater(vdo_info.index_memory_size, 0)
         self.assertGreater(vdo_info.used_size, 0)
         self.assertTrue(0 <= vdo_info.saving_percent <= 100)
+
+        lvs = BlockDev.lvm_lvs("testVDOVG")
+        self.assertIn("vdoPool", [l.lv_name for l in lvs])
+        self.assertIn("vdoLV", [l.lv_name for l in lvs])
 
         mode_str = BlockDev.lvm_get_vdo_operating_mode_str(vdo_info.operating_mode)
         self.assertEqual(mode_str, "normal")
