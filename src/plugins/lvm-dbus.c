@@ -2601,6 +2601,8 @@ gchar* bd_lvm_thlvpoolname (const gchar *vg_name, const gchar *lv_name, GError *
     if (!prop)
         return NULL;
     g_variant_get (prop, "o", &pool_obj_path);
+    g_variant_unref (prop);
+
     prop = get_object_property (pool_obj_path, LV_CMN_INTF, "Name", error);
     g_free (pool_obj_path);
     if (!prop)
@@ -3652,6 +3654,52 @@ gboolean bd_lvm_vdo_pool_resize (const gchar *vg_name, const gchar *pool_name, g
  */
 gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name UNUSED, const gchar *pool_lv UNUSED, const gchar *name UNUSED, guint64 virtual_size UNUSED, guint64 index_memory UNUSED, gboolean compression UNUSED, gboolean deduplication UNUSED, BDLVMVDOWritePolicy write_policy UNUSED, const BDExtraArg **extra UNUSED, GError **error) {
     return bd_lvm_is_tech_avail (BD_LVM_TECH_VDO, BD_LVM_TECH_MODE_CREATE | BD_LVM_TECH_MODE_MODIFY, error);
+}
+
+/**
+ * bd_lvm_vdolvpoolname:
+ * @vg_name: name of the VG containing the queried VDO LV
+ * @lv_name: name of the queried VDO LV
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): the name of the pool volume for the @vg_name/@lv_name
+ * VDO LV or %NULL if failed to determine (@error) is set in those cases
+ *
+ * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_QUERY
+ */
+gchar* bd_lvm_vdolvpoolname (const gchar *vg_name, const gchar *lv_name, GError **error) {
+    GVariant *prop = NULL;
+    const gchar *segtype = NULL;
+    gchar *pool_obj_path = NULL;
+    gchar *ret = NULL;
+
+    prop = get_lv_property (vg_name, lv_name, "SegType", error);
+    if (!prop)
+        return NULL;
+
+    g_variant_get_child (prop, 0, "&s", &segtype);
+    if (g_strcmp0 (segtype, "vdo") != 0) {
+        g_variant_unref (prop);
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_NOEXIST,
+                     "The LV '%s' is not a VDO LV and thus have no VDO pool", lv_name);
+        return NULL;
+    }
+    g_variant_unref (prop);
+
+    prop = get_lv_property (vg_name, lv_name, "PoolLv", error);
+    if (!prop)
+        return NULL;
+    g_variant_get (prop, "o", &pool_obj_path);
+    g_variant_unref (prop);
+
+    prop = get_object_property (pool_obj_path, LV_CMN_INTF, "Name", error);
+    g_free (pool_obj_path);
+    if (!prop)
+        return NULL;
+    g_variant_get (prop, "s", &ret);
+    g_variant_unref (prop);
+
+    return ret;
 }
 
 /**
