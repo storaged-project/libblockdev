@@ -2450,6 +2450,8 @@ gchar* bd_lvm_thlvpoolname (const gchar *vg_name, const gchar *lv_name, GError *
     if (!prop)
         return NULL;
     g_variant_get (prop, "o", &pool_obj_path);
+    g_variant_unref (prop);
+
     prop = get_object_property (pool_obj_path, LV_CMN_INTF, "Name", error);
     g_free (pool_obj_path);
     if (!prop)
