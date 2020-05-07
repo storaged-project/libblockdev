@@ -200,7 +200,7 @@ class VDOTest(VDOTestCase):
         if ret != 0 or not out:
             return None
 
-        info = yaml.load(out)
+        info = yaml.load(out, Loader=yaml.SafeLoader)
         if "VDOs" not in info.keys() or name not in info["VDOs"].keys():
             print("Failed to parse output of 'vdo status'")
             return None
