@@ -1296,6 +1296,43 @@ class LvmPVVGcachedLVstatsTestCase(LvmPVVGLVTestCase):
         self.assertEqual(stats.md_size, 8 * 1024**2)
         self.assertEqual(stats.mode, BlockDev.LVMCacheMode.WRITETHROUGH)
 
+class LvmPVVGcachedThpoolstatsTestCase(LvmPVVGLVTestCase):
+    @tag_test(TestTags.SLOW)
+    def test_cache_get_stats(self):
+        """Verify that it is possible to get stats for a cached thinpool"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_cache_create_pool("testVG", "testCache", 512 * 1024**2, 0, BlockDev.LVMCacheMode.WRITETHROUGH, 0, [self.loop_dev2])
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_thpoolcreate("testVG", "testPool", 512 * 1024**2, 4 * 1024**2, 512 * 1024, "thin-performance", None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_cache_attach("testVG", "testPool", "testCache", None)
+        self.assertTrue(succ)
+
+        # just ask for the pool itself even if it's not technically cached
+        stats = BlockDev.lvm_cache_stats("testVG", "testPool")
+        self.assertTrue(stats)
+        self.assertEqual(stats.cache_size, 512 * 1024**2)
+        self.assertEqual(stats.md_size, 8 * 1024**2)
+        self.assertEqual(stats.mode, BlockDev.LVMCacheMode.WRITETHROUGH)
+
+        # same should work when explicitly asking for the data LV
+        stats = BlockDev.lvm_cache_stats("testVG", "testPool_tdata")
+        self.assertTrue(stats)
+        self.assertEqual(stats.cache_size, 512 * 1024**2)
+        self.assertEqual(stats.md_size, 8 * 1024**2)
+        self.assertEqual(stats.mode, BlockDev.LVMCacheMode.WRITETHROUGH)
+
 class LVMUnloadTest(LVMTestCase):
     def setUp(self):
         # make sure the library is initialized with all plugins loaded for other
