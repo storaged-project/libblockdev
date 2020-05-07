@@ -2164,6 +2164,8 @@ class GenericGetFreeSpace(FSTestCase):
 
     def test_ntfs_get_free_space(self):
         """Test generic resize function with an ntfs file system"""
+        if not self.ntfs_avail:
+            self.skipTest("skipping NTFS: not available")
         self._test_get_free_space(mkfs_function=BlockDev.fs_ntfs_mkfs)
 
     def test_vfat_get_free_space(self):
