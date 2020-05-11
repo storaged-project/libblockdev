@@ -119,6 +119,12 @@ gboolean bd_fs_f2fs_is_tech_avail (BDFSTech tech UNUSED, guint64 mode, GError **
         return FALSE;
     }
 
+    if (mode & BD_FS_TECH_MODE_SET_UUID) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL,
+                     "F2FS doesn't support setting UUID for an existing device.");
+        return FALSE;
+    }
+
     if (mode & BD_FS_TECH_MODE_CHECK) {
         if (!can_check_f2fs_version (deps[DEPS_CHECKF2FS], error))
             return FALSE;

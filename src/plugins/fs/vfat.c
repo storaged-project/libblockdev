@@ -78,6 +78,13 @@ gboolean __attribute__ ((visibility ("hidden")))
 bd_fs_vfat_is_tech_avail (BDFSTech tech UNUSED, guint64 mode, GError **error) {
     guint32 required = 0;
     guint i = 0;
+
+    if (mode & BD_FS_TECH_MODE_SET_UUID) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL,
+                     "FAT doesn't support setting UUID for an existing device.");
+        return FALSE;
+    }
+
     for (i = 0; i <= BD_FS_MODE_LAST; i++)
         if (mode & (1 << i))
             required |= fs_mode_util[i];

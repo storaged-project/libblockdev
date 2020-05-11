@@ -63,23 +63,62 @@ gboolean bd_fs_check_deps (void) {
     GError *error = NULL;
 
     for (i = BD_FS_TECH_EXT2; i <= BD_FS_TECH_EXT4; i++) {
-        ret = ret && bd_fs_ext_is_tech_avail (i, 0xffffffff, &error);
+        ret = ret && bd_fs_ext_is_tech_avail (i,
+                                              BD_FS_TECH_MODE_MKFS | BD_FS_TECH_MODE_WIPE |
+                                              BD_FS_TECH_MODE_CHECK | BD_FS_TECH_MODE_REPAIR |
+                                              BD_FS_TECH_MODE_SET_LABEL | BD_FS_TECH_MODE_QUERY |
+                                              BD_FS_TECH_MODE_RESIZE | BD_FS_TECH_MODE_SET_UUID,
+                                              &error);
         if (!ret && error) {
             bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
             g_clear_error (&error);
         }
     }
-    ret = ret && bd_fs_xfs_is_tech_avail (BD_FS_TECH_XFS, 0xffffffff, &error);
+    ret = ret && bd_fs_xfs_is_tech_avail (BD_FS_TECH_XFS,
+                                          BD_FS_TECH_MODE_MKFS | BD_FS_TECH_MODE_WIPE |
+                                          BD_FS_TECH_MODE_CHECK | BD_FS_TECH_MODE_REPAIR |
+                                          BD_FS_TECH_MODE_SET_LABEL | BD_FS_TECH_MODE_QUERY |
+                                          BD_FS_TECH_MODE_RESIZE | BD_FS_TECH_MODE_SET_UUID,
+                                          &error);
     if (!ret && error) {
         bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
         g_clear_error (&error);
     }
-    ret = ret && bd_fs_vfat_is_tech_avail (BD_FS_TECH_VFAT, 0xffffffff, &error);
+    ret = ret && bd_fs_vfat_is_tech_avail (BD_FS_TECH_VFAT,
+                                           BD_FS_TECH_MODE_MKFS | BD_FS_TECH_MODE_WIPE |
+                                           BD_FS_TECH_MODE_CHECK | BD_FS_TECH_MODE_REPAIR |
+                                           BD_FS_TECH_MODE_SET_LABEL | BD_FS_TECH_MODE_QUERY |
+                                           BD_FS_TECH_MODE_RESIZE,
+                                           &error);
     if (!ret && error) {
         bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
         g_clear_error (&error);
     }
-    ret = ret && bd_fs_ntfs_is_tech_avail (BD_FS_TECH_NTFS, 0xffffffff, &error);
+    ret = ret && bd_fs_ntfs_is_tech_avail (BD_FS_TECH_NTFS,
+                                           BD_FS_TECH_MODE_MKFS | BD_FS_TECH_MODE_WIPE |
+                                           BD_FS_TECH_MODE_CHECK | BD_FS_TECH_MODE_REPAIR |
+                                           BD_FS_TECH_MODE_SET_LABEL | BD_FS_TECH_MODE_QUERY |
+                                           BD_FS_TECH_MODE_RESIZE | BD_FS_TECH_MODE_SET_UUID,
+                                           &error);
+    if (!ret && error) {
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
+        g_clear_error (&error);
+    }
+    ret = ret && bd_fs_f2fs_is_tech_avail (BD_FS_TECH_F2FS,
+                                           BD_FS_TECH_MODE_MKFS | BD_FS_TECH_MODE_WIPE |
+                                           BD_FS_TECH_MODE_CHECK | BD_FS_TECH_MODE_REPAIR |
+                                           BD_FS_TECH_MODE_QUERY | BD_FS_TECH_MODE_RESIZE,
+                                           &error);
+    if (!ret && error) {
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
+        g_clear_error (&error);
+    }
+    ret = ret && bd_fs_reiserfs_is_tech_avail (BD_FS_TECH_REISERFS,
+                                               BD_FS_TECH_MODE_MKFS | BD_FS_TECH_MODE_WIPE |
+                                               BD_FS_TECH_MODE_CHECK | BD_FS_TECH_MODE_REPAIR |
+                                               BD_FS_TECH_MODE_SET_LABEL | BD_FS_TECH_MODE_QUERY |
+                                               BD_FS_TECH_MODE_RESIZE | BD_FS_TECH_MODE_SET_UUID,
+                                               &error);
     if (!ret && error) {
         bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
         g_clear_error (&error);
