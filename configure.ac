@@ -60,7 +60,7 @@ AC_ARG_WITH([python3],
 AC_SUBST(WITH_PYTHON3, 0)
 if test "x$with_python3" != "xno"; then
     AC_PATH_PROG([python3], [python3], [no])
-    AS_IF([test "x$python3" == "xno"],
+    AS_IF([test "x$python3" = "xno"],
     [if test "x$with_python3" = "xyes"; then
       LIBBLOCKDEV_SOFT_FAILURE([Python3 support requested, but python3 is not available])
       fi],
@@ -77,7 +77,7 @@ AC_ARG_WITH([gtk-doc],
 AC_SUBST(WITH_GTK_DOC, 0)
 if test "x$with_gtk_doc" != "xno"; then
     AC_PATH_PROG([gtkdoc_scan], [gtkdoc-scan], [no])
-    AS_IF([test "x$gtkdoc_scan" == "xno"],
+    AS_IF([test "x$gtkdoc_scan" = "xno"],
     [if test "x$with_gtk_doc" = "xyes"; then
       LIBBLOCKDEV_SOFT_FAILURE([Building documentation with gtk-doc requested, but not available])
       fi],
