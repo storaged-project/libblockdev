@@ -3116,6 +3116,8 @@ BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_l
     gchar *type = NULL;
     gchar *params = NULL;
     BDLVMCacheStats *ret = NULL;
+    BDLVMLVdata *lvdata = NULL;
+    gchar *data_lv_name = NULL;
 
     if (geteuid () != 0) {
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_NOT_ROOT,
@@ -3123,10 +3125,27 @@ BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_l
         return NULL;
     }
 
+    lvdata = bd_lvm_lvinfo (vg_name, cached_lv, error);
+    if (!lvdata)
+        return NULL;
+
     pool = dm_pool_create ("bd-pool", 20);
 
-    /* translate the VG+LV name into the DM map name */
-    map_name = dm_build_dm_name (pool, vg_name, cached_lv, NULL);
+    if (g_strcmp0 (lvdata->segtype, "thin-pool") == 0) {
+        data_lv_name = bd_lvm_data_lv_name (vg_name, cached_lv, error);
+        if (!data_lv_name) {
+            dm_pool_destroy (pool);
+            bd_lvm_lvdata_free (lvdata);
+            return NULL;
+        }
+
+        map_name = dm_build_dm_name (pool, vg_name, data_lv_name, NULL);
+        g_free (data_lv_name);
+    } else
+        /* translate the VG+LV name into the DM map name */
+        map_name = dm_build_dm_name (pool, vg_name, cached_lv, NULL);
+
+    bd_lvm_lvdata_free (lvdata);
 
     task = dm_task_create (DM_DEVICE_STATUS);
     if (!task) {
