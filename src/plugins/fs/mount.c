@@ -547,6 +547,7 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
                       g_clear_error (&local_error);
                       g_io_channel_unref (channel);
                       close (pipefd[0]);
+                      g_free (error_msg);
                       return FALSE;
                   }
 
@@ -559,6 +560,7 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
 
                   g_io_channel_unref (channel);
                   close (pipefd[0]);
+                  g_free (error_msg);
                   return FALSE;
               } else {
                   close (pipefd[0]);
