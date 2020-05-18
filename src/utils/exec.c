@@ -333,6 +333,8 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
 
     if (!ret) {
         /* error is already populated */
+        g_string_free (stdout_data, TRUE);
+        g_string_free (stderr_data, TRUE);
         g_free (args);
         return FALSE;
     }
