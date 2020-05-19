@@ -368,9 +368,11 @@ BDVDOInfo* bd_vdo_info (const gchar *name, GError **error) {
         return NULL;
 
     table = parse_yaml_output (output, error);
-    if (!table)
+    g_free (output);
+    if (!table) {
         /* the error is already populated */
         return NULL;
+    }
 
     ret = get_vdo_info_from_table (table, TRUE);
     ret->name = g_strdup (name);
