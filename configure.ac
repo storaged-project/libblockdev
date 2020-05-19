@@ -67,7 +67,7 @@ if test "x$with_s390" != "xno"; then
     AS_IF([test "x$on_s390" = "xno" -a "x$with_s390" = "xyes"],
            [LIBBLOCKDEV_SOFT_FAILURE([s390 support requested, but not on s390 arch])
             AM_CONDITIONAL(WITH_S390, false)],
-          [test "x$on_s390" == "xyes" -a "x$with_s390" != "xno"],
+          [test "x$on_s390" = "xyes" -a "x$with_s390" != "xno"],
            [AC_SUBST(WITH_S390, 1)
             AM_CONDITIONAL(WITH_S390, true)
            ],
@@ -86,7 +86,7 @@ AC_ARG_WITH([python2],
 AC_SUBST(WITH_PYTHON2, 0)
 if test "x$with_python2" != "xno"; then
     AC_PATH_PROG([python2], [python2], [no])
-    AS_IF([test "x$python2" == "xno"],
+    AS_IF([test "x$python2" = "xno"],
     [if test "x$with_python2" = "xyes"; then
       LIBBLOCKDEV_SOFT_FAILURE([Python2 support requested, but python2 is not available])
       fi],
