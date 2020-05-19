@@ -1633,9 +1633,9 @@ class LVMVDOTest(LVMTestCase):
         self.assertTrue(vdo_info.deduplication)
 
         vdo_stats = BlockDev.lvm_vdo_get_stats("testVDOVG", "vdoPool")
-        self.assertEqual(vdo_info.saving_percent, vdo_stats.saving_percent)
 
         # just sanity check
+        self.assertNotEqual(vdo_stats.saving_percent, -1)
         self.assertNotEqual(vdo_stats.used_percent, -1)
         self.assertNotEqual(vdo_stats.block_size, -1)
         self.assertNotEqual(vdo_stats.logical_block_size, -1)
