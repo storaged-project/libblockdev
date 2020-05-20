@@ -140,7 +140,7 @@ GHashTable __attribute__ ((visibility ("hidden")))
     gchar *stats_dir;
     const gchar *direntry;
     gchar *s;
-    gchar *val;
+    gchar *val = NULL;
 
     /* TODO: does the `name` need to be escaped? */
     stats_dir = g_build_path (G_DIR_SEPARATOR_S, VDO_SYS_PATH, name, "statistics", NULL);
