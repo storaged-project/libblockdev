@@ -251,13 +251,6 @@ gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtr
 
     g_free (args);
 
-    if (!success) {
-        /* error is already populated from the call */
-        g_free (stdout_data);
-        g_free (stderr_data);
-        return FALSE;
-    }
-
     if (*status != 0) {
         if (stderr_data && (g_strcmp0 ("", stderr_data) != 0)) {
             g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
