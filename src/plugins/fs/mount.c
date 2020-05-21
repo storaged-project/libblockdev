@@ -531,10 +531,14 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
 
                   channel = g_io_channel_unix_new (pipefd[0]);
                   if (g_io_channel_read_to_end (channel, &error_msg, &msglen, &local_error) != G_IO_STATUS_NORMAL) {
-                      g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                   "Error while reading error: %s (%d)",
-                                   local_error->message, local_error->code);
-                      g_clear_error (&local_error);
+                      if (local_error) {
+                          g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                       "Error while reading error: %s (%d)",
+                                       local_error->message, local_error->code);
+                          g_clear_error (&local_error);
+                      } else
+                          g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                                       "Unknoen error while reading error.");
                       g_io_channel_unref (channel);
                       close (pipefd[0]);
                       return FALSE;

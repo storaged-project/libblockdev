@@ -398,7 +398,7 @@ gboolean bd_swap_swapoff (const gchar *device, GError **error) {
  * Tech category: %BD_SWAP_TECH_SWAP-%BD_SWAP_TECH_MODE_QUERY
  */
 gboolean bd_swap_swapstatus (const gchar *device, GError **error) {
-    gchar *file_content;
+    gchar *file_content = NULL;
     gchar *real_device = NULL;
     gsize length;
     gchar *next_line;

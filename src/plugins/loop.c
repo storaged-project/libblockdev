@@ -145,7 +145,7 @@ gchar* bd_loop_get_loop_name (const gchar *file, GError **error __attribute__((u
     gchar **path_p;
     gboolean success = FALSE;
     GError *tmp_error = NULL;
-    gchar *content;
+    gchar *content = NULL;
     gboolean found = FALSE;
     gchar **parts;
     gchar *ret;
