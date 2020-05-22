@@ -57,6 +57,12 @@ static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
 
 #define UNUSED __attribute__((unused))
 
+#ifdef __clang__
+#define ZERO_INIT {}
+#else
+#define ZERO_INIT {0}
+#endif
+
 /**
  * bd_fs_xfs_is_tech_avail:
  * @tech: the queried tech
@@ -228,16 +234,13 @@ gboolean bd_fs_xfs_set_label (const gchar *device, const gchar *label, GError **
  * Tech category: %BD_FS_TECH_XFS-%BD_FS_TECH_MODE_QUERY
  */
 BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
-    const gchar *args[4] = {"xfs_admin", "-lu", device, NULL};
+    const gchar *args[3] = ZERO_INIT;
     gboolean success = FALSE;
     gchar *output = NULL;
     BDFSXfsInfo *ret = NULL;
     gchar **lines = NULL;
     gchar **line_p = NULL;
-    gboolean have_label = FALSE;
-    gboolean have_uuid = FALSE;
     gchar *val_start = NULL;
-    gchar *val_end = NULL;
     g_autofree gchar* mountpoint = NULL;
 
     if (!check_deps (&avail_deps, DEPS_XFS_ADMIN_MASK, deps, DEPS_LAST, &deps_check_lock, error))
@@ -255,32 +258,14 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
         }
     }
 
-    success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
-    if (!success)
-        /* error is already populated */
-        return FALSE;
-
     ret = g_new0 (BDFSXfsInfo, 1);
-    lines = g_strsplit (output, "\n", 0);
-    g_free (output);
-    for (line_p=lines; line_p && *line_p && (!have_label || !have_uuid); line_p++) {
-        if (!have_label && g_str_has_prefix (*line_p, "label")) {
-            /* extract label from something like this: label = "TEST_LABEL" */
-            val_start = strchr (*line_p, '"');
-            if (val_start)
-                val_end = strchr(val_start + 1, '"');
-            if (val_start && val_end) {
-                ret->label = g_strndup (val_start + 1, val_end - val_start - 1);
-                have_label = TRUE;
-            }
-        } else if (!have_uuid && g_str_has_prefix (*line_p, "UUID")) {
-            /* get right after the "UUID = " prefix */
-            val_start = *line_p + 7;
-            ret->uuid = g_strdup (val_start);
-            have_uuid = TRUE;
-        }
+
+    success = get_uuid_label (device, &(ret->uuid), &(ret->label), error);
+    if (!success) {
+        /* error is already populated */
+        bd_fs_xfs_info_free (ret);
+        return NULL;
     }
-    g_strfreev (lines);
 
     args[0] = "xfs_info";
     args[1] = mountpoint;

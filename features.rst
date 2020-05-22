@@ -306,6 +306,10 @@ NVDIMM
 VDO
 ---
 
+Standalone VDO plugin is deprecated since 2.24 and will be removed in upcoming 3.0.
+Deduplication and compression support is now provided by LVM VDO volumes and pools with
+support for these added in 2.23.
+
 :functions:
    * info
    * create

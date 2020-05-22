@@ -24,7 +24,18 @@ def have_luks2():
     else:
         return succ
 
+
+def have_bitlk():
+    try:
+        succ = BlockDev.utils_check_util_version("cryptsetup", "2.3.0", "--version", r"cryptsetup ([0-9+\.]+)")
+    except GLib.GError:
+        return False
+    else:
+        return succ
+
+
 HAVE_LUKS2 = have_luks2()
+HAVE_BITLK = have_bitlk()
 
 
 class CryptoTestCase(unittest.TestCase):
@@ -1042,3 +1053,65 @@ class CryptoTestTrueCrypt(CryptoTestCase):
         succ = BlockDev.crypto_tc_close("libblockdevTestTC")
         self.assertTrue(succ)
         self.assertFalse(os.path.exists("/dev/mapper/libblockdevTestTC"))
+
+
+class CryptoTestBitlk(CryptoTestCase):
+
+    # we can't create BitLocker formats using libblockdev
+    # so we are using these images from cryptsetup test suite
+    # https://gitlab.com/cryptsetup/cryptsetup/blob/master/tests/bitlk-images.tar.xz
+    bitlk_img = "bitlk-aes-xts-128.img"
+    passphrase = "anaconda"
+    tempdir = None
+
+    @classmethod
+    def setUpClass(cls):
+        super(CryptoTestBitlk, cls).setUpClass()
+        cls.tempdir = tempfile.mkdtemp(prefix="bd_test_bitlk")
+        images = os.path.join(os.path.dirname(__file__), "bitlk-images.tar.gz")
+        with tarfile.open(images, "r") as tar:
+            tar.extractall(cls.tempdir)
+
+    @classmethod
+    def tearDownClass(cls):
+        super(CryptoTestBitlk, cls).tearDownClass()
+        shutil.rmtree(cls.tempdir)
+
+    def setUp(self):
+        self.addCleanup(self._clean_up)
+
+        succ, loop = BlockDev.loop_setup(os.path.join(self.tempdir, self.bitlk_img))
+        if  not succ:
+            raise RuntimeError("Failed to setup loop device for testing")
+        self.bitlk_dev = "/dev/%s" % loop
+
+    def _clean_up(self):
+        try:
+            BlockDev.crypto_bitlk_close("libblockdevTestBitlk")
+        except:
+            pass
+
+        succ = BlockDev.loop_teardown(self.bitlk_dev)
+        if not succ:
+            raise RuntimeError("Failed to tear down loop device used for testing")
+
+    @unittest.skipUnless(HAVE_BITLK, "BITLK not supported")
+    def test_bitlk_open_close(self):
+        """Verify that opening/closing a BitLocker device works"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_open("/non/existing/device", "libblockdevTestBitlk", self.passphrase)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_open(self.bitlk_dev, "libblockdevTestBitlk", None)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_open(self.bitlk_dev, "libblockdevTestBitlk", "wrong-passhprase")
+
+        succ = BlockDev.crypto_bitlk_open(self.bitlk_dev, "libblockdevTestBitlk", self.passphrase)
+        self.assertTrue(succ)
+        self.assertTrue(os.path.exists("/dev/mapper/libblockdevTestBitlk"))
+
+        succ = BlockDev.crypto_bitlk_close("libblockdevTestBitlk")
+        self.assertTrue(succ)
+        self.assertFalse(os.path.exists("/dev/mapper/libblockdevTestBitlk"))

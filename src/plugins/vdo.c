@@ -24,18 +24,19 @@
 
 #include "vdo.h"
 #include "check_deps.h"
+#include "vdo_stats.h"
 
 /**
  * SECTION: vdo
- * @short_description: plugin for operations with VDO devices
+ * @short_description: DEPRECATED plugin for operations with VDO devices
  * @title: VDO
  * @include: vdo.h
  *
  * A plugin for operations with VDO devices.
+ *
+ * This plugin has been deprecated since version 2.24 and should not be used in newly-written code.
+ * Use LVM-VDO integration instead.
  */
-
-#define VDO_SYS_PATH "/sys/kvdo"
-
 
 /**
  * bd_vdo_error_quark: (skip)
@@ -109,6 +110,7 @@ static const gchar*const module_deps[MODULE_DEPS_LAST] = { "kvdo" };
  *
  * Function checking plugin's runtime dependencies.
  *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_check_deps (void) {
     GError *error = NULL;
@@ -148,6 +150,7 @@ gboolean bd_vdo_check_deps (void) {
  * Initializes the plugin. **This function is called automatically by the
  * library's initialization functions.**
  *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_init (void) {
     /* nothing to do here */
@@ -160,6 +163,7 @@ gboolean bd_vdo_init (void) {
  * Cleans up after the plugin. **This function is called automatically by the
  * library's functions that unload it.**
  *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 void bd_vdo_close (void) {
     /* nothing to do here */
@@ -176,6 +180,8 @@ void bd_vdo_close (void) {
  *
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_is_tech_avail (BDVDOTech tech UNUSED, guint64 mode UNUSED, GError **error) {
   /* all tech-mode combinations are supported by this implementation of the
@@ -356,6 +362,8 @@ static BDVDOInfo* get_vdo_info_from_table (GHashTable *table, gboolean free_tabl
  * in case of error (@error gets populated in those cases)
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_QUERY
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 BDVDOInfo* bd_vdo_info (const gchar *name, GError **error) {
     const gchar *args[6] = {"vdo", "status", "-n", name, NULL};
@@ -370,9 +378,11 @@ BDVDOInfo* bd_vdo_info (const gchar *name, GError **error) {
         return NULL;
 
     table = parse_yaml_output (output, error);
-    if (!table)
+    g_free (output);
+    if (!table) {
         /* the error is already populated */
         return NULL;
+    }
 
     ret = get_vdo_info_from_table (table, TRUE);
     ret->name = g_strdup (name);
@@ -388,6 +398,8 @@ BDVDOInfo* bd_vdo_info (const gchar *name, GError **error) {
  * Returns: string representation of @policy or %NULL in case of error
  *
  * Tech category: always provided/supported
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 const gchar* bd_vdo_get_write_policy_str (BDVDOWritePolicy policy, GError **error) {
     if (policy == BD_VDO_WRITE_POLICY_SYNC)
@@ -412,6 +424,8 @@ const gchar* bd_vdo_get_write_policy_str (BDVDOWritePolicy policy, GError **erro
  *          failed to determine
  *
  * Tech category: always provided/supported
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 BDVDOWritePolicy bd_vdo_get_write_policy_from_str (const gchar *policy_str, GError **error) {
     if (g_strcmp0 (policy_str, "sync") == 0)
@@ -521,9 +535,11 @@ static gchar* get_index_memory_str (guint64 index_memory, GError **error) {
  * Returns: whether the VDO volume was successfully created or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_CREATE
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_create (const gchar *name, const gchar *backing_device, guint64 logical_size, guint64 index_memory, gboolean compression, gboolean deduplication, BDVDOWritePolicy write_policy, const BDExtraArg **extra, GError **error) {
-    const gchar **args = g_new0 (const gchar*, 12);
+    const gchar **args = g_new0 (const gchar*, 13);
     guint next_arg = 0;
     gboolean ret = FALSE;
     gchar *size_str = NULL;
@@ -538,6 +554,7 @@ gboolean bd_vdo_create (const gchar *name, const gchar *backing_device, guint64 
     args[next_arg++] = name;
     args[next_arg++] = "--device";
     args[next_arg++] = backing_device;
+    args[next_arg++] = "--force";
 
 
     if (logical_size != 0) {
@@ -604,6 +621,8 @@ gboolean bd_vdo_create (const gchar *name, const gchar *backing_device, guint64 
  * Returns: whether the VDO volume was successfully removed or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_MODIFY
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_remove (const gchar *name, gboolean force, const BDExtraArg **extra, GError **error) {
     const gchar *args[6] = {"vdo", "remove", "-n", name, NULL, NULL};
@@ -629,6 +648,8 @@ gboolean bd_vdo_remove (const gchar *name, gboolean force, const BDExtraArg **ex
  * Returns: whether the policy was successfully changed or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_MODIFY
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_change_write_policy (const gchar *name, BDVDOWritePolicy write_policy, const BDExtraArg **extra, GError **error) {
     const gchar *args[6] = {"vdo", "changeWritePolicy", "-n", name, NULL, NULL};
@@ -662,6 +683,8 @@ gboolean bd_vdo_change_write_policy (const gchar *name, BDVDOWritePolicy write_p
  * Returns: whether the compression was successfully enabled or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_MODIFY
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_enable_compression (const gchar *name, const BDExtraArg **extra, GError **error) {
     const gchar *args[5] = {"vdo", "enableCompression", "-n", name, NULL};
@@ -683,6 +706,8 @@ gboolean bd_vdo_enable_compression (const gchar *name, const BDExtraArg **extra,
  * Returns: whether the compression was successfully disabled or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_MODIFY
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_disable_compression (const gchar *name, const BDExtraArg **extra, GError **error) {
     const gchar *args[5] = {"vdo", "disableCompression", "-n", name, NULL};
@@ -704,6 +729,8 @@ gboolean bd_vdo_disable_compression (const gchar *name, const BDExtraArg **extra
  * Returns: whether the deduplication was successfully enabled or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_MODIFY
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_enable_deduplication (const gchar *name, const BDExtraArg **extra, GError **error) {
     const gchar *args[5] = {"vdo", "enableDeduplication", "-n", name, NULL};
@@ -725,6 +752,8 @@ gboolean bd_vdo_enable_deduplication (const gchar *name, const BDExtraArg **extr
  * Returns: whether the deduplication was successfully disabled or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_MODIFY
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_disable_deduplication (const gchar *name, const BDExtraArg **extra, GError **error) {
     const gchar *args[5] = {"vdo", "disableDeduplication", "-n", name, NULL};
@@ -746,6 +775,8 @@ gboolean bd_vdo_disable_deduplication (const gchar *name, const BDExtraArg **ext
  * Returns: whether the VDO volume was successfully activated or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_ACTIVATE_DEACTIVATE
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_activate (const gchar *name, const BDExtraArg **extra, GError **error) {
     const gchar *args[5] = {"vdo", "activate", "-n", name, NULL};
@@ -767,6 +798,8 @@ gboolean bd_vdo_activate (const gchar *name, const BDExtraArg **extra, GError **
  * Returns: whether the VDO volume was successfully deactivated or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_ACTIVATE_DEACTIVATE
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_deactivate (const gchar *name, const BDExtraArg **extra, GError **error) {
     const gchar *args[5] = {"vdo", "deactivate", "-n", name, NULL};
@@ -789,6 +822,8 @@ gboolean bd_vdo_deactivate (const gchar *name, const BDExtraArg **extra, GError 
  * Returns: whether the VDO volume was successfully started or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_START_STOP
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_start (const gchar *name, gboolean rebuild, const BDExtraArg **extra, GError **error) {
     const gchar *args[6] = {"vdo", "start", "-n", name, NULL, NULL};
@@ -814,6 +849,8 @@ gboolean bd_vdo_start (const gchar *name, gboolean rebuild, const BDExtraArg **e
  * Returns: whether the VDO volume was successfully stopped or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_START_STOP
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_stop (const gchar *name, gboolean force, const BDExtraArg **extra, GError **error) {
     const gchar *args[6] = {"vdo", "stop", "-n", name, NULL, NULL};
@@ -839,6 +876,8 @@ gboolean bd_vdo_stop (const gchar *name, gboolean force, const BDExtraArg **extr
  * Returns: whether the VDO volume was successfully resized or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_GROW
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_grow_logical (const gchar *name, guint64 size, const BDExtraArg **extra, GError **error) {
     const gchar *args[6] = {"vdo", "growLogical", "-n", name, NULL, NULL};
@@ -866,6 +905,8 @@ gboolean bd_vdo_grow_logical (const gchar *name, guint64 size, const BDExtraArg 
  * Returns: whether the VDO volume was successfully grown or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_GROW
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_grow_physical (const gchar *name, const BDExtraArg **extra, GError **error) {
     const gchar *args[5] = {"vdo", "growPhysical", "-n", name, NULL};
@@ -881,108 +922,6 @@ gboolean bd_vdo_grow_physical (const gchar *name, const BDExtraArg **extra, GErr
 }
 
 
-static gboolean get_stat_val64 (GHashTable *stats, const gchar *key, gint64 *val) {
-    const gchar *s;
-    gchar *endptr = NULL;
-
-    s = g_hash_table_lookup (stats, key);
-    if (s == NULL)
-        return FALSE;
-
-    *val = g_ascii_strtoll (s, &endptr, 0);
-    if (endptr == NULL || *endptr != '\0')
-        return FALSE;
-
-    return TRUE;
-}
-
-static gboolean get_stat_val_double (GHashTable *stats, const gchar *key, gdouble *val) {
-    const gchar *s;
-    gchar *endptr = NULL;
-
-    s = g_hash_table_lookup (stats, key);
-    if (s == NULL)
-        return FALSE;
-
-    *val = g_ascii_strtod (s, &endptr);
-    if (endptr == NULL || *endptr != '\0')
-        return FALSE;
-
-    return TRUE;
-}
-
-#define GET_STAT_VAL64_DEFAULT(stats,key,val,def) \
-    if (! get_stat_val64 (stats,key,val)) \
-        *val = def;
-
-static void add_write_ampl_r_stats (GHashTable *stats) {
-    gint64 bios_meta_write, bios_out_write, bios_in_write;
-
-    if (! get_stat_val64 (stats, "bios_meta_write", &bios_meta_write) ||
-        ! get_stat_val64 (stats, "bios_out_write", &bios_out_write) ||
-        ! get_stat_val64 (stats, "bios_in_write", &bios_in_write))
-        return;
-
-    if (bios_in_write <= 0)
-        g_hash_table_replace (stats, g_strdup ("writeAmplificationRatio"), g_strdup ("0.00"));
-    else
-        g_hash_table_replace (stats,
-                              g_strdup ("writeAmplificationRatio"),
-                              g_strdup_printf ("%.2f", (gfloat) (bios_meta_write + bios_out_write) / (gfloat) bios_in_write));
-}
-
-static void add_block_stats (GHashTable *stats) {
-    gint64 physical_blocks, block_size, data_blocks_used, overhead_blocks_used, logical_blocks_used;
-    gint64 savings;
-
-    if (! get_stat_val64 (stats, "physical_blocks", &physical_blocks) ||
-        ! get_stat_val64 (stats, "block_size", &block_size) ||
-        ! get_stat_val64 (stats, "data_blocks_used", &data_blocks_used) ||
-        ! get_stat_val64 (stats, "overhead_blocks_used", &overhead_blocks_used) ||
-        ! get_stat_val64 (stats, "logical_blocks_used", &logical_blocks_used))
-        return;
-
-    g_hash_table_replace (stats, g_strdup ("oneKBlocks"), g_strdup_printf ("%"G_GINT64_FORMAT, physical_blocks * block_size / 1024));
-    g_hash_table_replace (stats, g_strdup ("oneKBlocksUsed"), g_strdup_printf ("%"G_GINT64_FORMAT, (data_blocks_used + overhead_blocks_used) * block_size / 1024));
-    g_hash_table_replace (stats, g_strdup ("oneKBlocksAvailable"), g_strdup_printf ("%"G_GINT64_FORMAT, (physical_blocks - data_blocks_used - overhead_blocks_used) * block_size / 1024));
-    g_hash_table_replace (stats, g_strdup ("usedPercent"), g_strdup_printf ("%.0f", 100.0 * (gfloat) (data_blocks_used + overhead_blocks_used) / (gfloat) physical_blocks + 0.5));
-    savings = (logical_blocks_used > 0) ? (gint64) (100.0 * (gfloat) (logical_blocks_used - data_blocks_used) / (gfloat) logical_blocks_used) : -1;
-    g_hash_table_replace (stats, g_strdup ("savings"), g_strdup_printf ("%"G_GINT64_FORMAT, savings));
-    if (savings >= 0)
-        g_hash_table_replace (stats, g_strdup ("savingPercent"), g_strdup_printf ("%"G_GINT64_FORMAT, savings));
-}
-
-static void add_journal_stats (GHashTable *stats) {
-    gint64 journal_entries_committed, journal_entries_started, journal_entries_written;
-    gint64 journal_blocks_committed, journal_blocks_started, journal_blocks_written;
-
-    if (! get_stat_val64 (stats, "journal_entries_committed", &journal_entries_committed) ||
-        ! get_stat_val64 (stats, "journal_entries_started", &journal_entries_started) ||
-        ! get_stat_val64 (stats, "journal_entries_written", &journal_entries_written) ||
-        ! get_stat_val64 (stats, "journal_blocks_committed", &journal_blocks_committed) ||
-        ! get_stat_val64 (stats, "journal_blocks_started", &journal_blocks_started) ||
-        ! get_stat_val64 (stats, "journal_blocks_written", &journal_blocks_written))
-        return;
-
-    g_hash_table_replace (stats, g_strdup ("journal_entries_batching"), g_strdup_printf ("%"G_GINT64_FORMAT, journal_entries_started - journal_entries_written));
-    g_hash_table_replace (stats, g_strdup ("journal_entries_writing"), g_strdup_printf ("%"G_GINT64_FORMAT, journal_entries_written - journal_entries_committed));
-    g_hash_table_replace (stats, g_strdup ("journal_blocks_batching"), g_strdup_printf ("%"G_GINT64_FORMAT, journal_blocks_started - journal_blocks_written));
-    g_hash_table_replace (stats, g_strdup ("journal_blocks_writing"), g_strdup_printf ("%"G_GINT64_FORMAT, journal_blocks_written - journal_blocks_committed));
-}
-
-static void add_computed_stats (GHashTable *stats) {
-    const gchar *s;
-
-    s = g_hash_table_lookup (stats, "logical_block_size");
-    g_hash_table_replace (stats,
-                          g_strdup ("fiveTwelveByteEmulation"),
-                          g_strdup ((g_strcmp0 (s, "512") == 0) ? "true" : "false"));
-
-    add_write_ampl_r_stats (stats);
-    add_block_stats (stats);
-    add_journal_stats (stats);
-}
-
 /**
  * bd_vdo_get_stats_full:
  * @name: name of an existing VDO volume
@@ -994,48 +933,14 @@ static void add_computed_stats (GHashTable *stats) {
  * Please note the contents of the hashtable may vary depending on the actual kvdo module version.
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_QUERY
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 GHashTable* bd_vdo_get_stats_full (const gchar *name, GError **error) {
-    GHashTable *stats;
-    GDir *dir;
-    gchar *stats_dir;
-    const gchar *direntry;
-    gchar *s;
-    gchar *val;
-
     if (!check_module_deps (&avail_module_deps, MODULE_DEPS_VDO_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
         return FALSE;
 
-    /* TODO: does the `name` need to be escaped? */
-    stats_dir = g_build_path (G_DIR_SEPARATOR_S, VDO_SYS_PATH, name, "statistics", NULL);
-    dir = g_dir_open (stats_dir, 0, error);
-    if (dir == NULL) {
-        g_prefix_error (error, "Error reading statistics from %s: ", stats_dir);
-        g_free (stats_dir);
-        return NULL;
-    }
-
-    stats = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-    while ((direntry = g_dir_read_name (dir))) {
-        s = g_build_filename (stats_dir, direntry, NULL);
-        if (! g_file_get_contents (s, &val, NULL, error)) {
-            g_prefix_error (error, "Error reading statistics from %s: ", s);
-            g_free (s);
-            g_hash_table_destroy (stats);
-            stats = NULL;
-            break;
-        }
-        g_hash_table_replace (stats, g_strdup (direntry), g_strdup (g_strstrip (val)));
-        g_free (val);
-        g_free (s);
-    }
-    g_dir_close (dir);
-    g_free (stats_dir);
-
-    if (stats != NULL)
-        add_computed_stats (stats);
-
-    return stats;
+    return vdo_get_stats_full(name, error);
 }
 
 /**
@@ -1059,6 +964,8 @@ GHashTable* bd_vdo_get_stats_full (const gchar *name, GError **error) {
  *   - `"writeAmplificationRatio"`: The average number of block writes to the underlying storage per block written to the VDO device.
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_QUERY
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 BDVDOStats* bd_vdo_get_stats (const gchar *name, GError **error) {
     GHashTable *full_stats;
@@ -1069,14 +976,14 @@ BDVDOStats* bd_vdo_get_stats (const gchar *name, GError **error) {
         return NULL;
 
     stats = g_new0 (BDVDOStats, 1);
-    GET_STAT_VAL64_DEFAULT (full_stats, "block_size", &stats->block_size, -1);
-    GET_STAT_VAL64_DEFAULT (full_stats, "logical_block_size", &stats->logical_block_size, -1);
-    GET_STAT_VAL64_DEFAULT (full_stats, "physical_blocks", &stats->physical_blocks, -1);
-    GET_STAT_VAL64_DEFAULT (full_stats, "data_blocks_used", &stats->data_blocks_used, -1);
-    GET_STAT_VAL64_DEFAULT (full_stats, "overhead_blocks_used", &stats->overhead_blocks_used, -1);
-    GET_STAT_VAL64_DEFAULT (full_stats, "logical_blocks_used", &stats->logical_blocks_used, -1);
-    GET_STAT_VAL64_DEFAULT (full_stats, "usedPercent", &stats->used_percent, -1);
-    GET_STAT_VAL64_DEFAULT (full_stats, "savingPercent", &stats->saving_percent, -1);
+    get_stat_val64_default (full_stats, "block_size", &stats->block_size, -1);
+    get_stat_val64_default (full_stats, "logical_block_size", &stats->logical_block_size, -1);
+    get_stat_val64_default (full_stats, "physical_blocks", &stats->physical_blocks, -1);
+    get_stat_val64_default (full_stats, "data_blocks_used", &stats->data_blocks_used, -1);
+    get_stat_val64_default (full_stats, "overhead_blocks_used", &stats->overhead_blocks_used, -1);
+    get_stat_val64_default (full_stats, "logical_blocks_used", &stats->logical_blocks_used, -1);
+    get_stat_val64_default (full_stats, "usedPercent", &stats->used_percent, -1);
+    get_stat_val64_default (full_stats, "savingPercent", &stats->saving_percent, -1);
     if (! get_stat_val_double (full_stats, "writeAmplificationRatio", &stats->write_amplification_ratio))
         stats->write_amplification_ratio = -1;
 

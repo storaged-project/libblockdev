@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 #ifdef __clang__
 #define ZERO_INIT {}
@@ -250,13 +251,6 @@ gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtr
 
     g_free (args);
 
-    if (!success) {
-        /* error is already populated from the call */
-        g_free (stdout_data);
-        g_free (stderr_data);
-        return FALSE;
-    }
-
     if (*status != 0) {
         if (stderr_data && (g_strcmp0 ("", stderr_data) != 0)) {
             g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
@@ -276,115 +270,7 @@ gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtr
     return TRUE;
 }
 
-/**
- * bd_utils_exec_and_capture_output:
- * @argv: (array zero-terminated=1): the argv array for the call
- * @extra: (allow-none) (array zero-terminated=1): extra arguments
- * @output: (out): variable to store output to
- * @error: (out): place to store error (if any)
- *
- * Returns: whether the @argv was successfully executed capturing the output or not
- */
-gboolean bd_utils_exec_and_capture_output (const gchar **argv, const BDExtraArg **extra, gchar **output, GError **error) {
-    gchar *stdout_data = NULL;
-    gchar *stderr_data = NULL;
-    gint status = 0;
-    gint exit_status = 0;
-    gboolean success = FALSE;
-    guint64 task_id = 0;
-    const gchar **args = NULL;
-    guint args_len = 0;
-    const gchar **arg_p = NULL;
-    const BDExtraArg **extra_p = NULL;
-    guint i = 0;
-
-    if (extra) {
-        args_len = g_strv_length ((gchar **) argv);
-        for (extra_p=extra; *extra_p; extra_p++) {
-            if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "") != 0))
-                args_len++;
-            if ((*extra_p)->val && (g_strcmp0 ((*extra_p)->val, "") != 0))
-                args_len++;
-        }
-        args = g_new0 (const gchar*, args_len + 1);
-        for (arg_p=argv; *arg_p; arg_p++, i++)
-            args[i] = *arg_p;
-        for (extra_p=extra; *extra_p; extra_p++) {
-            if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "") != 0)) {
-                args[i] = (*extra_p)->opt;
-                i++;
-            }
-            if ((*extra_p)->val && (g_strcmp0 ((*extra_p)->val, "") != 0)) {
-                args[i] = (*extra_p)->val;
-                i++;
-            }
-        }
-        args[i] = NULL;
-    }
-
-    task_id = log_running (argv);
-    success = g_spawn_sync (NULL, (gchar **) argv, NULL, G_SPAWN_SEARCH_PATH,
-                            (GSpawnChildSetupFunc) set_c_locale, NULL,
-                            &stdout_data, &stderr_data, &exit_status, error);
-
-    if (!success) {
-        /* error is already populated */
-        g_free (stdout_data);
-        g_free (stderr_data);
-        return FALSE;
-    }
-
-    /* g_spawn_sync set the status in the same way waitpid() does, we need
-       to get the process exit code manually (this is similar to calling
-       WEXITSTATUS but also sets the error for terminated processes */
-    if (!g_spawn_check_exit_status (exit_status, error)) {
-        if (g_error_matches (*error, G_SPAWN_ERROR, G_SPAWN_ERROR_FAILED)) {
-            /* process was terminated abnormally (e.g. using a signal) */
-            g_free (stdout_data);
-            g_free (stderr_data);
-            return FALSE;
-        }
-
-        status = (*error)->code;
-        g_clear_error (error);
-    } else
-        status = 0;
-
-
-    log_out (task_id, stdout_data, stderr_data);
-    log_done (task_id, status);
-
-    if ((status != 0) || (g_strcmp0 ("", stdout_data) == 0)) {
-        if (status != 0)
-            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
-                         "Process reported exit code %d: %s%s", status,
-                         stdout_data ? stdout_data : "",
-                         stderr_data ? stderr_data : "");
-        else
-            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT,
-                         "Process didn't provide any data on standard output. "
-                         "Error output: %s", stderr_data ? stderr_data : "");
-        g_free (stderr_data);
-        g_free (stdout_data);
-        return FALSE;
-    } else {
-        *output = stdout_data;
-        g_free (stderr_data);
-        return TRUE;
-    }
-}
-
-/**
- * bd_utils_exec_and_report_progress:
- * @argv: (array zero-terminated=1): the argv array for the call
- * @extra: (allow-none) (array zero-terminated=1): extra arguments
- * @prog_extract: (scope notified): function for extracting progress information
- * @proc_status: (out): place to store the process exit status
- * @error: (out): place to store error (if any)
- *
- * Returns: whether the @argv was successfully executed (no error and exit code 0) or not
- */
-gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg **extra, BDUtilsProgExtract prog_extract, gint *proc_status, GError **error) {
+static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExtraArg **extra, BDUtilsProgExtract prog_extract, gint *proc_status, gchar **stdout, gchar **stderr, GError **error) {
     const gchar **args = NULL;
     guint args_len = 0;
     const gchar **arg_p = NULL;
@@ -403,6 +289,7 @@ gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg
     gint status = 0;
     gboolean ret = FALSE;
     GIOStatus io_status = G_IO_STATUS_NORMAL;
+    gint poll_status = 0;
     guint i = 0;
     guint8 completion = 0;
     GPollFD fds[2] = {ZERO_INIT, ZERO_INIT};
@@ -444,6 +331,8 @@ gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg
 
     if (!ret) {
         /* error is already populated */
+        g_string_free (stdout_data, TRUE);
+        g_string_free (stderr_data, TRUE);
         g_free (args);
         return FALSE;
     }
@@ -458,58 +347,71 @@ gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg
     out_pipe = g_io_channel_unix_new (out_fd);
     err_pipe = g_io_channel_unix_new (err_fd);
 
+    g_io_channel_set_encoding (out_pipe, NULL, NULL);
+    g_io_channel_set_encoding (err_pipe, NULL, NULL);
+
     fds[0].fd = out_fd;
     fds[1].fd = err_fd;
     fds[0].events = G_IO_IN | G_IO_HUP | G_IO_ERR;
     fds[1].events = G_IO_IN | G_IO_HUP | G_IO_ERR;
     while (!out_done || !err_done) {
-        g_poll (fds, 2, -1);
-        if (!out_done && (fds[0].revents & (G_IO_IN | G_IO_HUP | G_IO_ERR))) {
-            if (fds[0].revents & G_IO_IN) {
-                io_status = g_io_channel_read_line (out_pipe, &line, NULL, NULL, error);
-                if (io_status == G_IO_STATUS_NORMAL) {
-                    if (prog_extract && prog_extract (line, &completion))
-                        bd_utils_report_progress (progress_id, completion, NULL);
-                    else
-                        g_string_append (stdout_data, line);
-                    g_free (line);
-                } else if (io_status == G_IO_STATUS_EOF) {
-                    out_done = TRUE;
-                } else if (error && (*error)) {
-                    bd_utils_report_finished (progress_id, (*error)->message);
-                    g_io_channel_shutdown (out_pipe, FALSE, NULL);
-                    g_io_channel_unref (out_pipe);
-                    g_io_channel_shutdown (err_pipe, FALSE, NULL);
-                    g_io_channel_unref (err_pipe);
-                    g_string_free (stdout_data, TRUE);
-                    g_string_free (stderr_data, TRUE);
-                    return FALSE;
-                }
-            } else
-                /* ERR or HUP, nothing more to do here */
+        poll_status = g_poll (fds, 2, -1);
+        if (poll_status < 0) {
+            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
+                         "Failed to poll output FDs.");
+            bd_utils_report_finished (progress_id, (*error)->message);
+            g_io_channel_shutdown (out_pipe, FALSE, NULL);
+            g_io_channel_unref (out_pipe);
+            g_io_channel_shutdown (err_pipe, FALSE, NULL);
+            g_io_channel_unref (err_pipe);
+            g_string_free (stdout_data, TRUE);
+            g_string_free (stderr_data, TRUE);
+            return FALSE;
+        } else if (poll_status != 2)
+            /* both revents fields were not filled yet */
+            continue;
+        if (!(fds[0].revents & G_IO_IN))
+            out_done = TRUE;
+        while (!out_done) {
+            io_status = g_io_channel_read_line (out_pipe, &line, NULL, NULL, error);
+            if (io_status == G_IO_STATUS_NORMAL) {
+                if (prog_extract && prog_extract (line, &completion))
+                    bd_utils_report_progress (progress_id, completion, NULL);
+                else
+                    g_string_append (stdout_data, line);
+                g_free (line);
+            } else if (io_status == G_IO_STATUS_EOF) {
                 out_done = TRUE;
+            } else if (error && (*error)) {
+                bd_utils_report_finished (progress_id, (*error)->message);
+                g_io_channel_shutdown (out_pipe, FALSE, NULL);
+                g_io_channel_unref (out_pipe);
+                g_io_channel_shutdown (err_pipe, FALSE, NULL);
+                g_io_channel_unref (err_pipe);
+                g_string_free (stdout_data, TRUE);
+                g_string_free (stderr_data, TRUE);
+                return FALSE;
+            }
         }
-        if (!err_done && (fds[1].revents & (G_IO_IN | G_IO_HUP | G_IO_ERR))) {
-            if (fds[1].revents & G_IO_IN) {
-                io_status = g_io_channel_read_line (err_pipe, &line, NULL, NULL, error);
-                if (io_status == G_IO_STATUS_NORMAL) {
-                    g_string_append (stderr_data, line);
-                    g_free (line);
-                } else if (io_status == G_IO_STATUS_EOF) {
-                    err_done = TRUE;
-                } else if (error && (*error)) {
-                    bd_utils_report_finished (progress_id, (*error)->message);
-                    g_io_channel_shutdown (out_pipe, FALSE, NULL);
-                    g_io_channel_unref (out_pipe);
-                    g_io_channel_shutdown (err_pipe, FALSE, NULL);
-                    g_io_channel_unref (err_pipe);
-                    g_string_free (stdout_data, TRUE);
-                    g_string_free (stderr_data, TRUE);
-                    return FALSE;
-                }
-            } else
-                /* ERR or HUP, nothing more to do here */
+        if (!(fds[1].revents & G_IO_IN))
+            err_done = TRUE;
+        while (!err_done) {
+            io_status = g_io_channel_read_line (err_pipe, &line, NULL, NULL, error);
+            if (io_status == G_IO_STATUS_NORMAL) {
+                g_string_append (stderr_data, line);
+                g_free (line);
+            } else if (io_status == G_IO_STATUS_EOF) {
                 err_done = TRUE;
+            } else if (error && (*error)) {
+                bd_utils_report_finished (progress_id, (*error)->message);
+                g_io_channel_shutdown (out_pipe, FALSE, NULL);
+                g_io_channel_unref (out_pipe);
+                g_io_channel_shutdown (err_pipe, FALSE, NULL);
+                g_io_channel_unref (err_pipe);
+                g_string_free (stdout_data, TRUE);
+                g_string_free (stderr_data, TRUE);
+                return FALSE;
+            }
         }
     }
 
@@ -571,10 +473,71 @@ gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg
     g_io_channel_unref (out_pipe);
     g_io_channel_shutdown (err_pipe, FALSE, error);
     g_io_channel_unref (err_pipe);
-    g_string_free (stdout_data, TRUE);
-    g_string_free (stderr_data, TRUE);
+
+    if (stdout)
+        *stdout = g_string_free (stdout_data, FALSE);
+    else
+        g_string_free (stdout_data, TRUE);
+    if (stderr)
+        *stderr = g_string_free (stderr_data, FALSE);
+    else
+        g_string_free (stderr_data, TRUE);
 
     return TRUE;
+}
+
+/**
+ * bd_utils_exec_and_report_progress:
+ * @argv: (array zero-terminated=1): the argv array for the call
+ * @extra: (allow-none) (array zero-terminated=1): extra arguments
+ * @prog_extract: (scope notified): function for extracting progress information
+ * @proc_status: (out): place to store the process exit status
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @argv was successfully executed (no error and exit code 0) or not
+ */
+gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg **extra, BDUtilsProgExtract prog_extract, gint *proc_status, GError **error) {
+    return _utils_exec_and_report_progress (argv, extra, prog_extract, proc_status, NULL, NULL, error);
+}
+
+/**
+ * bd_utils_exec_and_capture_output:
+ * @argv: (array zero-terminated=1): the argv array for the call
+ * @extra: (allow-none) (array zero-terminated=1): extra arguments
+ * @output: (out): variable to store output to
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @argv was successfully executed capturing the output or not
+ */
+gboolean bd_utils_exec_and_capture_output (const gchar **argv, const BDExtraArg **extra, gchar **output, GError **error) {
+    gint status = 0;
+    gchar *stdout = NULL;
+    gchar *stderr = NULL;
+    gboolean ret = FALSE;
+
+    ret = _utils_exec_and_report_progress (argv, extra, NULL, &status, &stdout, &stderr, error);
+    if (!ret)
+        return ret;
+
+    if ((status != 0) || (g_strcmp0 ("", stdout) == 0)) {
+        if (status != 0)
+            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
+                         "Process reported exit code %d: %s%s", status,
+                         stdout ? stdout : "",
+                         stderr ? stderr : "");
+        else
+            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT,
+                         "Process didn't provide any data on standard output. "
+                         "Error output: %s", stderr ? stderr : "");
+        g_free (stderr);
+        g_free (stdout);
+        return FALSE;
+    } else {
+        *output = stdout;
+        g_free (stderr);
+        return TRUE;
+    }
+
 }
 
 /**

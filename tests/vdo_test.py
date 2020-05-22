@@ -23,6 +23,12 @@ class VDOTestCase(unittest.TestCase):
         if not BlockDev.utils_have_kernel_module("kvdo"):
             raise unittest.SkipTest("VDO kernel module not available, skipping.")
 
+        try:
+            BlockDev.utils_load_kernel_module("kvdo")
+        except GLib.GError as e:
+            if "File exists" not in e.message:
+                raise unittest.SkipTest("cannot load VDO kernel module, skipping.")
+
         if not find_executable("vdo"):
             raise unittest.SkipTest("vdo executable not foundin $PATH, skipping.")
 
@@ -200,7 +206,7 @@ class VDOTest(VDOTestCase):
         if ret != 0 or not out:
             return None
 
-        info = yaml.load(out)
+        info = yaml.load(out, Loader=yaml.SafeLoader)
         if "VDOs" not in info.keys() or name not in info["VDOs"].keys():
             print("Failed to parse output of 'vdo status'")
             return None

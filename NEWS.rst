@@ -1,3 +1,94 @@
+Libblockdev 2.24
+----------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Notable changes**
+
+- vdo
+
+  - VDO plugin has been deprecated in this release (functionality replaced by LVM VDO)
+
+- lvm
+
+  - support for creating and managing LVM VDO volumes added
+
+- crypto
+
+  - support for unlocking of BitLocker-compatible format BITLK added (requires cryptsetup 2.3.0)
+
+**Full list of changes**
+
+Lars Wendler (1):
+
+- configure.ac: Avoid bashisms
+
+Matt Thompson (1):
+
+- Fixed a number of memory leaks in lvm-dbus plugin
+
+Matt Whitlock (1):
+
+- configure.ac: Avoid more bashisms
+
+Tomas Bzatek (4):
+
+- utils: Add functions to get and check current linux kernel version
+- vdo: Fix a memleak
+- exec: Fix a memleak
+- mount: Fix a memleak
+
+Vojtech Trefny (47):
+
+- Sync spec with downstream
+- Use 'explicit_bzero' to erase passphrases from key files
+- Add new function 'bd_fs_wipe_force' to control force wipe
+- Fix linking against utils on Debian
+- exec.c: Fix reading outputs with null bytes
+- fs: Fix checking for UID/GID == 0
+- Fix expected cache pool name with newest LVM
+- Fix memory leak in LVM DBus plugin
+- Manually remove symlinks not removed by udev in tests
+- Add a helper function for closing an active crypto device
+- Add support for BitLocker encrypted devices using cryptsetup
+- ext: Return empty string instead of "<none>" for empty UUID
+- Fix typo in (un)mount error messages
+- vdo: Run "vdo create" with "--force"
+- lvm-dbus: Do not activate LVs during pvscan --cache
+- lvm-dbus: Fix memory leak in bd_lvm_thlvpoolname
+- tests: Specify loader for yaml.load in VDO tests
+- Add a function to check if a tool supports given feature
+- Do not hardcode pylint executable name in Makefile
+- Fix LVM plugin so names in tests
+- Add support for creating and managing VDO LVs with LVM
+- Add some helper functions to get LVM VDO mode and state strings
+- Fix converting to VDO pool without name for the VDO LV
+- Add write policy and index size to LVM VDO data
+- Fix getting string representation of unknown VDO state index
+- Fix getting VDO data in the LVM DBus plugin
+- Allow calling LVM functions without locking global_config_lock
+- Add extra parameters for creating LVM VDO volumes
+- Add function to get LVM VDO write policy from a string
+- exec: Disable encoding when reading data from stdout/stderr
+- Fix copy-paste bug in lvm.api
+- Move VDO statistics code to a separate file
+- Add functions to get VDO stats for LVM VDO volumes
+- lvm-dbus: Get data LV name for LVM VDO pools too
+- lvm: Add a function to get VDO pool name for a VDO LV
+- lvm-dbus: Add LVM VDO pools to bd_lvm_lvs
+- tests: Skip LVM VDO tests if kvdo module cannot be loaded
+- Do not skip LVM VDO tests when the kvdo module is already loaded
+- lvm: Fix getting cache stats for cache thinpools
+- Create a common function to get label and uuid of a filesystem
+- Do not open devices as read-write for read-only fs operations
+- Use libblkid to get label and UUID for XFS filesystems
+- Do not check VDO saving percent value in LVM DBus tests
+- utils: Remove deadcode in exec.c
+- fs: Fix potential NULL pointer dereference in mount.c
+- Fix multiple uninitialized values discovered by coverity
+- Mark VDO plugin as deprecated since 2.24
+
 Libblockdev 2.23
 ----------------
 

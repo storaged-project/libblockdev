@@ -124,7 +124,7 @@
 %define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?vdo_copts} %{?tools_copts} %{?gi_copts}
 
 Name:        libblockdev
-Version:     2.23
+Version:     2.24
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -983,6 +983,62 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Fri May 22 2020 Vojtech Trefny <vtrefny@redhat.com> - 2.24-1
+- Mark VDO plugin as deprecated since 2.24 (vtrefny)
+- Fix multiple uninitialized values discovered by coverity (vtrefny)
+- fs: Fix potential NULL pointer dereference in mount.c (vtrefny)
+- utils: Remove deadcode in exec.c (vtrefny)
+- Do not check VDO saving percent value in LVM DBus tests (vtrefny)
+- Use libblkid to get label and UUID for XFS filesystems (vtrefny)
+- Do not open devices as read-write for read-only fs operations (vtrefny)
+- Create a common function to get label and uuid of a filesystem (vtrefny)
+- lvm: Fix getting cache stats for cache thinpools (vtrefny)
+- Do not skip LVM VDO tests when the kvdo module is already loaded (vtrefny)
+- tests: Skip LVM VDO tests if kvdo module cannot be loaded (vtrefny)
+- lvm-dbus: Add LVM VDO pools to bd_lvm_lvs (vtrefny)
+- lvm: Add a function to get VDO pool name for a VDO LV (vtrefny)
+- lvm-dbus: Get data LV name for LVM VDO pools too (vtrefny)
+- Add functions to get VDO stats for LVM VDO volumes (vtrefny)
+- Move VDO statistics code to a separate file (vtrefny)
+- Fix copy-paste bug in lvm.api (vtrefny)
+- exec: Disable encoding when reading data from stdout/stderr (vtrefny)
+- Add function to get LVM VDO write policy from a string (vtrefny)
+- Add extra parameters for creating LVM VDO volumes (vtrefny)
+- Allow calling LVM functions without locking global_config_lock (vtrefny)
+- Fix getting VDO data in the LVM DBus plugin (vtrefny)
+- Fix getting string representation of unknown VDO state index (vtrefny)
+- Add write policy and index size to LVM VDO data (vtrefny)
+- Fix converting to VDO pool without name for the VDO LV (vtrefny)
+- Add some helper functions to get LVM VDO mode and state strings (vtrefny)
+- Add support for creating and managing VDO LVs with LVM (vtrefny)
+- Fix LVM plugin so names in tests (vtrefny)
+- Do not hardcode pylint executable name in Makefile (vtrefny)
+- Add a function to check if a tool supports given feature (vtrefny)
+- configure.ac: Avoid more bashisms (gentoo)
+- mount: Fix a memleak (tbzatek)
+- exec: Fix a memleak (tbzatek)
+- vdo: Fix a memleak (tbzatek)
+- configure.ac: Avoid bashisms (polynomial-c)
+- tests: Specify loader for yaml.load in VDO tests (vtrefny)
+- lvm-dbus: Fix memory leak in bd_lvm_thlvpoolname (vtrefny)
+- lvm-dbus: Do not activate LVs during pvscan --cache (vtrefny)
+- vdo: Run "vdo create" with "--force" (vtrefny)
+- Fix typo in (un)mount error messages (vtrefny)
+- utils: Add functions to get and check current linux kernel version (tbzatek)
+- ext: Return empty string instead of "<none>" for empty UUID (vtrefny)
+- Add support for BitLocker encrypted devices using cryptsetup (vtrefny)
+- Add a helper function for closing an active crypto device (vtrefny)
+- Manually remove symlinks not removed by udev in tests (vtrefny)
+- Fix memory leak in LVM DBus plugin (vtrefny)
+- Fix expected cache pool name with newest LVM (vtrefny)
+- fs: Fix checking for UID/GID == 0 (vtrefny)
+- Fixed a number of memory leaks in lvm-dbus plugin (mthompson)
+- exec.c: Fix reading outputs with null bytes (vtrefny)
+- Fix linking against utils on Debian (vtrefny)
+- Add new function 'bd_fs_wipe_force' to control force wipe (vtrefny)
+- Use 'explicit_bzero' to erase passphrases from key files (vtrefny)
+- Sync spec with downstream (vtrefny)
+
 * Mon Sep 09 2019 Vojtech Trefny <vtrefny@redhat.com> - 2.23-1
 - Fix how we get process exit code from g_spawn_sync (vtrefny)
 - Skip tests for old-style LVM snapshots on recent Fedora (vtrefny)

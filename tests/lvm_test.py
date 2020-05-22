@@ -5,9 +5,11 @@ import math
 import overrides_hack
 import six
 import re
+import shutil
 import subprocess
+from distutils.version import LooseVersion
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test, run_command
 from gi.repository import BlockDev, GLib
 
 
@@ -17,13 +19,21 @@ class LVMTestCase(unittest.TestCase):
     def setUpClass(cls):
         ps = BlockDev.PluginSpec()
         ps.name = BlockDev.Plugin.LVM
-        ps.so_name = "libbd_lvm.so"
+        ps.so_name = "libbd_lvm.so.2"
         cls.requested_plugins = [ps]
 
         if not BlockDev.is_initialized():
             BlockDev.init(cls.requested_plugins, None)
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
+
+    @classmethod
+    def _get_lvm_version(cls):
+        _ret, out, _err = run_command("lvm version")
+        m = re.search(r"LVM version:\s+([\d\.]+)", out)
+        if not m or len(m.groups()) != 1:
+            raise RuntimeError("Failed to determine LVM version from: %s" % out)
+        return LooseVersion(m.groups()[0])
 
 
 class LvmNoDevTestCase(LVMTestCase):
@@ -1112,6 +1122,10 @@ class LvmPVVGLVcachePoolTestCase(LvmPVVGLVTestCase):
         except:
             pass
 
+        # lets help udev with removing stale symlinks
+        if not BlockDev.lvm_lvs("testVG") and os.path.exists("/dev/testVG/testCache_meta"):
+            shutil.rmtree("/dev/testVG", ignore_errors=True)
+
         LvmPVVGLVTestCase._clean_up(self)
 
 class LvmPVVGLVcachePoolCreateRemoveTestCase(LvmPVVGLVcachePoolTestCase):
@@ -1244,7 +1258,14 @@ class LvmPVVGcachedLVpoolTestCase(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_cache_attach("testVG", "testLV", "testCache", None)
         self.assertTrue(succ)
 
-        self.assertEqual(BlockDev.lvm_cache_pool_name("testVG", "testLV"), "testCache")
+        lvm_version = self._get_lvm_version()
+        if lvm_version < LooseVersion("2.03.06"):
+            cpool_name = "testCache"
+        else:
+            # since 2.03.06 LVM adds _cpool suffix to the cache pool after attaching it
+            cpool_name = "testCache_cpool"
+
+        self.assertEqual(BlockDev.lvm_cache_pool_name("testVG", "testLV"), cpool_name)
 
 class LvmPVVGcachedLVstatsTestCase(LvmPVVGLVTestCase):
     @tag_test(TestTags.SLOW)
@@ -1270,6 +1291,43 @@ class LvmPVVGcachedLVstatsTestCase(LvmPVVGLVTestCase):
         self.assertTrue(succ)
 
         stats = BlockDev.lvm_cache_stats("testVG", "testLV")
+        self.assertTrue(stats)
+        self.assertEqual(stats.cache_size, 512 * 1024**2)
+        self.assertEqual(stats.md_size, 8 * 1024**2)
+        self.assertEqual(stats.mode, BlockDev.LVMCacheMode.WRITETHROUGH)
+
+class LvmPVVGcachedThpoolstatsTestCase(LvmPVVGLVTestCase):
+    @tag_test(TestTags.SLOW)
+    def test_cache_get_stats(self):
+        """Verify that it is possible to get stats for a cached thinpool"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_cache_create_pool("testVG", "testCache", 512 * 1024**2, 0, BlockDev.LVMCacheMode.WRITETHROUGH, 0, [self.loop_dev2])
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_thpoolcreate("testVG", "testPool", 512 * 1024**2, 4 * 1024**2, 512 * 1024, "thin-performance", None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_cache_attach("testVG", "testPool", "testCache", None)
+        self.assertTrue(succ)
+
+        # just ask for the pool itself even if it's not technically cached
+        stats = BlockDev.lvm_cache_stats("testVG", "testPool")
+        self.assertTrue(stats)
+        self.assertEqual(stats.cache_size, 512 * 1024**2)
+        self.assertEqual(stats.md_size, 8 * 1024**2)
+        self.assertEqual(stats.mode, BlockDev.LVMCacheMode.WRITETHROUGH)
+
+        # same should work when explicitly asking for the data LV
+        stats = BlockDev.lvm_cache_stats("testVG", "testPool_tdata")
         self.assertTrue(stats)
         self.assertEqual(stats.cache_size, 512 * 1024**2)
         self.assertEqual(stats.md_size, 8 * 1024**2)
@@ -1345,3 +1403,229 @@ class LVMTechTest(LVMTestCase):
         # lvm is available, should pass
         avail = BlockDev.lvm_is_tech_avail(BlockDev.LVMTech.BASIC, BlockDev.LVMTechMode.CREATE)
         self.assertTrue(avail)
+
+class LVMVDOTest(LVMTestCase):
+
+    loop_size = 8 * 1024**3
+
+    @classmethod
+    def setUpClass(cls):
+        if not BlockDev.utils_have_kernel_module("kvdo"):
+            raise unittest.SkipTest("VDO kernel module not available, skipping.")
+
+        try:
+            BlockDev.utils_load_kernel_module("kvdo")
+        except GLib.GError as e:
+            if "File exists" not in e.message:
+                raise unittest.SkipTest("cannot load VDO kernel module, skipping.")
+
+        lvm_version = cls._get_lvm_version()
+        if lvm_version < LooseVersion("2.3.07"):
+            raise unittest.SkipTest("LVM version 2.3.07 or newer needed for LVM VDO.")
+
+        super().setUpClass()
+
+    def setUp(self):
+        self.addCleanup(self._clean_up)
+        self.dev_file = create_sparse_tempfile("vdo_test", self.loop_size)
+        try:
+            self.loop_dev = create_lio_device(self.dev_file)
+        except RuntimeError as e:
+            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVDOVG", [self.loop_dev], 0, None)
+        self.assertTrue(succ)
+
+    def _clean_up(self):
+        BlockDev.lvm_vgremove("testVDOVG")
+        BlockDev.lvm_pvremove(self.loop_dev)
+
+        try:
+            BlockDev.lvm_lvremove("testVDOVG", "vdoPool", True, None)
+        except:
+            pass
+
+        try:
+            delete_lio_device(self.loop_dev)
+        except RuntimeError:
+            # just move on, we can do no better here
+            pass
+        os.unlink(self.dev_file)
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_vdo_pool_create(self):
+        succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", "vdoPool", 7 * 1024**3, 35 * 1024**3)
+        self.assertTrue(succ)
+
+        lv_info = BlockDev.lvm_lvinfo("testVDOVG", "vdoLV")
+        self.assertIsNotNone(lv_info)
+        self.assertEqual(lv_info.segtype, "vdo")
+        self.assertEqual(lv_info.pool_lv, "vdoPool")
+
+        pool_info = BlockDev.lvm_lvinfo("testVDOVG", "vdoPool")
+        self.assertEqual(pool_info.segtype, "vdo-pool")
+        self.assertEqual(pool_info.data_lv, "vdoPool_vdata")
+        self.assertGreater(pool_info.data_percent, 0)
+
+        pool = BlockDev.lvm_vdolvpoolname("testVDOVG", "vdoLV")
+        self.assertEqual(pool, lv_info.pool_lv)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertEqual(vdo_info.operating_mode, BlockDev.LVMVDOOperatingMode.NORMAL)
+        self.assertEqual(vdo_info.compression_state, BlockDev.LVMVDOCompressionState.ONLINE)
+        self.assertTrue(vdo_info.compression)
+        self.assertTrue(vdo_info.deduplication)
+        self.assertGreater(vdo_info.index_memory_size, 0)
+        self.assertGreater(vdo_info.used_size, 0)
+        self.assertTrue(0 <= vdo_info.saving_percent <= 100)
+
+        lvs = BlockDev.lvm_lvs("testVDOVG")
+        self.assertIn("vdoPool", [l.lv_name for l in lvs])
+        self.assertIn("vdoLV", [l.lv_name for l in lvs])
+
+        mode_str = BlockDev.lvm_get_vdo_operating_mode_str(vdo_info.operating_mode)
+        self.assertEqual(mode_str, "normal")
+
+        state_str = BlockDev.lvm_get_vdo_compression_state_str(vdo_info.compression_state)
+        self.assertEqual(state_str, "online")
+
+        policy_str = BlockDev.lvm_get_vdo_write_policy_str(vdo_info.write_policy)
+        self.assertIn(policy_str, ["sync", "async", "auto"])
+
+    @tag_test(TestTags.SLOW)
+    def test_vdo_pool_create_options(self):
+        # set index size to 300 MiB, disable compression and write policy to sync
+        policy = BlockDev.lvm_get_vdo_write_policy_from_str("sync")
+        succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", "vdoPool", 7 * 1024**3, 35 * 1024**3,
+                                            300 * 1024**2, False, True, policy)
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertEqual(vdo_info.index_memory_size, 300 * 1024**2)
+        self.assertFalse(vdo_info.compression)
+        self.assertTrue(vdo_info.deduplication)
+        self.assertEqual(BlockDev.lvm_get_vdo_write_policy_str(vdo_info.write_policy), "sync")
+
+    @tag_test(TestTags.SLOW)
+    def test_resize(self):
+        succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", "vdoPool", 5 * 1024**3, 10 * 1024**3)
+        self.assertTrue(succ)
+
+        # "physical" resize first (pool), shrinking not allowed
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_vdo_pool_resize("testVDOVG", "vdoPool", 4 * 1024**3)
+
+        succ = BlockDev.lvm_vdo_pool_resize("testVDOVG", "vdoPool", 7 * 1024**3)
+        self.assertTrue(succ)
+        lv_info = BlockDev.lvm_lvinfo("testVDOVG", "vdoPool")
+        self.assertEqual(lv_info.size, 7 * 1024**3)
+
+        # "logical" resize (LV)
+        succ = BlockDev.lvm_vdo_resize("testVDOVG", "vdoLV", 35 * 1024**3)
+        self.assertTrue(succ)
+        lv_info = BlockDev.lvm_lvinfo("testVDOVG", "vdoLV")
+        self.assertEqual(lv_info.size, 35 * 1024**3)
+
+    @tag_test(TestTags.SLOW)
+    def test_enabla_disable_compression(self):
+        succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", "vdoPool", 7 * 1024**3, 35 * 1024**3)
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertTrue(vdo_info.compression)
+
+        # disable
+        succ = BlockDev.lvm_vdo_disable_compression("testVDOVG", "vdoPool")
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertFalse(vdo_info.compression)
+
+        # enable
+        succ = BlockDev.lvm_vdo_enable_compression("testVDOVG", "vdoPool")
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertTrue(vdo_info.compression)
+
+    @tag_test(TestTags.SLOW)
+    def test_enable_disable_deduplication(self):
+        succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", "vdoPool", 7 * 1024**3, 35 * 1024**3)
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertTrue(vdo_info.deduplication)
+
+        # disable
+        succ = BlockDev.lvm_vdo_disable_deduplication("testVDOVG", "vdoPool")
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertFalse(vdo_info.deduplication)
+
+        # enable
+        succ = BlockDev.lvm_vdo_enable_deduplication("testVDOVG", "vdoPool")
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertTrue(vdo_info.deduplication)
+
+    @tag_test(TestTags.SLOW)
+    def test_vdo_pool_convert(self):
+        succ = BlockDev.lvm_lvcreate("testVDOVG", "testLV", 7 * 1024**3)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vdo_pool_convert("testVDOVG", "testLV", "vdoLV", 35 * 1024**3)
+        self.assertTrue(succ)
+
+        lv_info = BlockDev.lvm_lvinfo("testVDOVG", "vdoLV")
+        self.assertIsNotNone(lv_info)
+        self.assertEqual(lv_info.size, 35 * 1024**3)
+        self.assertEqual(lv_info.segtype, "vdo")
+        self.assertEqual(lv_info.pool_lv, "testLV")
+
+        pool_info = BlockDev.lvm_lvinfo("testVDOVG", "testLV")
+        self.assertIsNotNone(pool_info)
+        self.assertEqual(pool_info.segtype, "vdo-pool")
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "testLV")
+        self.assertIsNotNone(vdo_info)
+        self.assertTrue(vdo_info.compression)
+        self.assertTrue(vdo_info.deduplication)
+        self.assertEqual(BlockDev.lvm_get_vdo_write_policy_str(vdo_info.write_policy), "auto")
+
+    @tag_test(TestTags.SLOW)
+    def test_stats(self):
+        succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", "vdoPool", 7 * 1024**3, 35 * 1024**3)
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertTrue(vdo_info.deduplication)
+
+        vdo_stats = BlockDev.lvm_vdo_get_stats("testVDOVG", "vdoPool")
+        self.assertEqual(vdo_info.saving_percent, vdo_stats.saving_percent)
+
+        # just sanity check
+        self.assertNotEqual(vdo_stats.used_percent, -1)
+        self.assertNotEqual(vdo_stats.block_size, -1)
+        self.assertNotEqual(vdo_stats.logical_block_size, -1)
+        self.assertNotEqual(vdo_stats.physical_blocks, -1)
+        self.assertNotEqual(vdo_stats.data_blocks_used, -1)
+        self.assertNotEqual(vdo_stats.overhead_blocks_used, -1)
+        self.assertNotEqual(vdo_stats.logical_blocks_used, -1)
+        self.assertNotEqual(vdo_stats.write_amplification_ratio, -1)
+
+        full_stats = BlockDev.lvm_vdo_get_stats_full("testVDOVG", "vdoPool")
+        self.assertIn("writeAmplificationRatio", full_stats.keys())

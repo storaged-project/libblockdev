@@ -1,6 +1,6 @@
 # configure.ac for libblockdev
 
-AC_INIT([libblockdev], [2.23], [vpodzime@redhat.com])
+AC_INIT([libblockdev], [2.24], [vpodzime@redhat.com])
 
 # Disable building static libraries.
 # This needs to be set before initializing automake
@@ -67,7 +67,7 @@ if test "x$with_s390" != "xno"; then
     AS_IF([test "x$on_s390" = "xno" -a "x$with_s390" = "xyes"],
            [LIBBLOCKDEV_SOFT_FAILURE([s390 support requested, but not on s390 arch])
             AM_CONDITIONAL(WITH_S390, false)],
-          [test "x$on_s390" == "xyes" -a "x$with_s390" != "xno"],
+          [test "x$on_s390" = "xyes" -a "x$with_s390" != "xno"],
            [AC_SUBST(WITH_S390, 1)
             AM_CONDITIONAL(WITH_S390, true)
            ],
@@ -86,7 +86,7 @@ AC_ARG_WITH([python2],
 AC_SUBST(WITH_PYTHON2, 0)
 if test "x$with_python2" != "xno"; then
     AC_PATH_PROG([python2], [python2], [no])
-    AS_IF([test "x$python2" == "xno"],
+    AS_IF([test "x$python2" = "xno"],
     [if test "x$with_python2" = "xyes"; then
       LIBBLOCKDEV_SOFT_FAILURE([Python2 support requested, but python2 is not available])
       fi],
@@ -102,7 +102,7 @@ AC_ARG_WITH([python3],
 AC_SUBST(WITH_PYTHON3, 0)
 if test "x$with_python3" != "xno"; then
     AC_PATH_PROG([python3], [python3], [no])
-    AS_IF([test "x$python3" == "xno"],
+    AS_IF([test "x$python3" = "xno"],
     [if test "x$with_python3" = "xyes"; then
       LIBBLOCKDEV_SOFT_FAILURE([Python3 support requested, but python3 is not available])
       fi],
@@ -119,7 +119,7 @@ AC_ARG_WITH([gtk-doc],
 AC_SUBST(WITH_GTK_DOC, 0)
 if test "x$with_gtk_doc" != "xno"; then
     AC_PATH_PROG([gtkdoc_scan], [gtkdoc-scan], [no])
-    AS_IF([test "x$gtkdoc_scan" == "xno"],
+    AS_IF([test "x$gtkdoc_scan" = "xno"],
     [if test "x$with_gtk_doc" = "xyes"; then
       LIBBLOCKDEV_SOFT_FAILURE([Building documentation with gtk-doc requested, but not available])
       fi],
@@ -209,6 +209,8 @@ AS_IF([test "x$with_crypto" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([CRYPTSETUP], [libcryptsetup >= 1.6.7])
       AS_IF([$PKG_CONFIG --atleast-version=2.0.3 libcryptsetup],
             [AC_DEFINE([LIBCRYPTSETUP_2])], [])
+      AS_IF([$PKG_CONFIG --atleast-version=2.3.0 libcryptsetup],
+            [AC_DEFINE([LIBCRYPTSETUP_BITLK])], [])
       AS_IF([test "x$with_escrow" != "xno"],
             [LIBBLOCKDEV_PKG_CHECK_MODULES([NSS], [nss >= 3.18.0])
              LIBBLOCKDEV_CHECK_HEADER([volume_key/libvolume_key.h], [$GLIB_CFLAGS $NSS_CFLAGS], [libvolume_key.h not available])],
@@ -331,7 +333,7 @@ echo "
         Part plugin:                ${with_part}
         S390 plugin:                ${s390_info}
         Swap plugin:                ${with_swap}
-        VDO plugin:                 ${with_vdo}
+        VDO plugin (deprecated):    ${with_vdo}
 
         GObject introspection:      ${found_introspection}
         Python 2 bindings:          ${python2_info}

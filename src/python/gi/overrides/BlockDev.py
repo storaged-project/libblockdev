@@ -267,6 +267,14 @@ def crypto_tc_open(device, name, passphrase, read_only=False, keyfiles=None, hid
     return _crypto_tc_open(device, name, passphrase, keyfiles, hidden, system, veracrypt, veracrypt_pim, read_only)
 __all__.append("crypto_tc_open")
 
+_crypto_bitlk_open = BlockDev.crypto_bitlk_open
+@override(BlockDev.crypto_bitlk_open)
+def crypto_bitlk_open(device, name, passphrase, read_only=False):
+    if isinstance(passphrase, str):
+        passphrase = [ord(c) for c in passphrase]
+    return _crypto_bitlk_open(device, name, passphrase, read_only)
+__all__.append("crypto_bitlk_open")
+
 
 _dm_create_linear = BlockDev.dm_create_linear
 @override(BlockDev.dm_create_linear)
@@ -654,6 +662,61 @@ def lvm_cache_pool_convert(vg_name, data_lv, metadata_lv, name=None, extra=None,
     return _lvm_cache_pool_convert(vg_name, data_lv, metadata_lv, name, extra)
 __all__.append("lvm_cache_pool_convert")
 
+_lvm_vdo_pool_create = BlockDev.lvm_vdo_pool_create
+@override(BlockDev.lvm_vdo_pool_create)
+def lvm_vdo_pool_create(vg_name, lv_name, pool_name, data_size, virtual_size, index_memory=0, compression=True, deduplication=True, write_policy=BlockDev.LVMVDOWritePolicy.AUTO, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_vdo_pool_create(vg_name, lv_name, pool_name, data_size,virtual_size, index_memory, compression, deduplication, write_policy, extra)
+__all__.append("lvm_vdo_pool_create")
+
+_lvm_vdo_resize = BlockDev.lvm_vdo_resize
+@override(BlockDev.lvm_vdo_resize)
+def lvm_vdo_resize(vg_name, lv_name, size, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_vdo_resize(vg_name, lv_name, size, extra)
+__all__.append("lvm_vdo_resize")
+
+_lvm_vdo_pool_resize = BlockDev.lvm_vdo_pool_resize
+@override(BlockDev.lvm_vdo_pool_resize)
+def lvm_vdo_pool_resize(vg_name, lv_name, size, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_vdo_pool_resize(vg_name, lv_name, size, extra)
+__all__.append("lvm_vdo_pool_resize")
+
+_lvm_vdo_enable_compression = BlockDev.lvm_vdo_enable_compression
+@override(BlockDev.lvm_vdo_enable_compression)
+def lvm_vdo_enable_compression(vg_name, pool_name, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_vdo_enable_compression(vg_name, pool_name, extra)
+__all__.append("lvm_vdo_enable_compression")
+
+_lvm_vdo_disable_compression = BlockDev.lvm_vdo_disable_compression
+@override(BlockDev.lvm_vdo_disable_compression)
+def lvm_vdo_disable_compression(vg_name, pool_name, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_vdo_disable_compression(vg_name, pool_name, extra)
+__all__.append("lvm_vdo_disable_compression")
+
+_lvm_vdo_enable_deduplication = BlockDev.lvm_vdo_enable_deduplication
+@override(BlockDev.lvm_vdo_enable_deduplication)
+def lvm_vdo_enable_deduplication(vg_name, pool_name, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_vdo_enable_deduplication(vg_name, pool_name, extra)
+__all__.append("lvm_vdo_enable_deduplication")
+
+_lvm_vdo_disable_deduplication = BlockDev.lvm_vdo_disable_deduplication
+@override(BlockDev.lvm_vdo_disable_deduplication)
+def lvm_vdo_disable_deduplication(vg_name, pool_name, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_vdo_disable_deduplication(vg_name, pool_name, extra)
+__all__.append("lvm_vdo_disable_deduplication")
+
+_lvm_vdo_pool_convert = BlockDev.lvm_vdo_pool_convert
+@override(BlockDev.lvm_vdo_pool_convert)
+def lvm_vdo_pool_convert(vg_name, lv_name, pool_name, virtual_size, index_memory=0, compression=True, deduplication=True, write_policy=BlockDev.LVMVDOWritePolicy.AUTO, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_vdo_pool_convert(vg_name, lv_name, pool_name, virtual_size, index_memory, compression, deduplication, write_policy, extra)
+__all__.append("lvm_vdo_pool_convert")
 
 _md_get_superblock_size = BlockDev.md_get_superblock_size
 @override(BlockDev.md_get_superblock_size)

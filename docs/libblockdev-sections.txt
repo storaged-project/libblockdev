@@ -114,6 +114,8 @@ bd_crypto_tc_open
 bd_crypto_tc_open_full
 bd_crypto_tc_close
 bd_crypto_escrow_device
+bd_crypto_bitlk_open
+bd_crypto_bitlk_close
 BDCryptoTech
 BDCryptoTechMode
 bd_crypto_is_tech_avail
@@ -184,6 +186,8 @@ bd_utils_get_device_symlinks
 bd_utils_have_kernel_module
 bd_utils_load_kernel_module
 bd_utils_unload_kernel_module
+bd_utils_get_linux_version
+bd_utils_check_linux_version
 bd_utils_dbus_service_available
 EXBIBYTE
 EiB
@@ -256,6 +260,9 @@ BDLVMCachePoolFlags
 BDLVMCacheStats
 bd_lvm_cache_stats_copy
 bd_lvm_cache_stats_free
+BDLVMVDOStats
+bd_lvm_vdo_stats_free
+bd_lvm_vdo_stats_copy
 bd_lvm_is_supported_pe_size
 bd_lvm_get_supported_pe_sizes
 bd_lvm_get_max_lv_size
@@ -311,6 +318,13 @@ bd_lvm_cache_pool_name
 bd_lvm_cache_stats
 bd_lvm_data_lv_name
 bd_lvm_metadata_lv_name
+bd_lvm_vdolvpoolname
+bd_lvm_get_vdo_operating_mode_str
+bd_lvm_get_vdo_compression_state_str
+bd_lvm_get_vdo_index_state_str
+bd_lvm_get_vdo_write_policy_from_str
+bd_lvm_vdo_get_stats
+bd_lvm_vdo_get_stats_full
 BDLVMTech
 BDLVMTechMode
 bd_lvm_is_tech_avail

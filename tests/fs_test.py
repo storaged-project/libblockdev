@@ -1048,6 +1048,18 @@ class MountTest(FSTestCase):
         self.assertTrue(succ)
         self.assertFalse(os.path.ismount(tmp))
 
+        # mount with UID=0 and GUID=0
+        succ = BlockDev.fs_mount(self.loop_dev, tmp, run_as_uid="0", run_as_gid="0")
+        self.assertTrue(succ)
+        self.assertTrue(os.path.ismount(tmp))
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_mount(self.loop_dev, tmp, run_as_uid="a", run_as_gid="a")
+
+        succ = BlockDev.fs_unmount(self.loop_dev, False, False, None)
+        self.assertTrue(succ)
+        self.assertFalse(os.path.ismount(tmp))
+
     def test_mount_ro_device(self):
         """ Test mounting an FS on a RO device """
 
