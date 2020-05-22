@@ -333,7 +333,7 @@ echo "
         Part plugin:                ${with_part}
         S390 plugin:                ${s390_info}
         Swap plugin:                ${with_swap}
-        VDO plugin:                 ${with_vdo}
+        VDO plugin (deprecated):    ${with_vdo}
 
         GObject introspection:      ${found_introspection}
         Python 2 bindings:          ${python2_info}
