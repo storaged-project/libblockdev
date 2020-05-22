@@ -50,6 +50,8 @@ GType bd_vdo_info_get_type();
  * @physical_size: sphysical size of the volume
  * @index_memory: index memory size
  * @write_policy: write policy of the volume
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 typedef struct BDVDOInfo {
     gchar *name;
@@ -67,6 +69,8 @@ typedef struct BDVDOInfo {
  * bd_vdo_info_free: (skip)
  *
  * Frees @info.
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 void bd_vdo_info_free (BDVDOInfo *info) {
    if (info == NULL)
@@ -81,6 +85,8 @@ void bd_vdo_info_free (BDVDOInfo *info) {
  * bd_vdo_info_copy: (skip)
  *
  * Creates a new copy of @info.
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 BDVDOInfo* bd_vdo_info_copy (BDVDOInfo *info) {
     if (info == NULL)
@@ -127,6 +133,8 @@ GType bd_vdo_stats_get_type();
  * @used_percent: percentage of physical blocks used
  * @saving_percent: percentage of physical blocks saved
  * @write_amplification_ratio: average number of block writes to the underlying storage per block written
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 typedef struct BDVDOStats {
     gint64 block_size;
@@ -144,6 +152,8 @@ typedef struct BDVDOStats {
  * bd_vdo_stats_free: (skip)
  *
  * Frees @stats.
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 void bd_vdo_stats_free (BDVDOStats *stats) {
     if (stats == NULL)
@@ -156,6 +166,8 @@ void bd_vdo_stats_free (BDVDOStats *stats) {
  * bd_vdo_stats_copy: (skip)
  *
  * Creates a new copy of @stats.
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 BDVDOStats* bd_vdo_stats_copy (BDVDOStats *stats) {
     return g_memdup (stats, sizeof (BDVDOStats));
@@ -181,6 +193,8 @@ GType bd_vdo_stats_get_type () {
  *
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_is_tech_avail (BDVDOTech tech, guint64 mode, GError **error);
 
@@ -192,6 +206,8 @@ gboolean bd_vdo_is_tech_avail (BDVDOTech tech, guint64 mode, GError **error);
  * Returns: string representation of @policy or %NULL in case of error
  *
  * Tech category: always provided/supported
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 const gchar* bd_vdo_get_write_policy_str (BDVDOWritePolicy policy, GError **error);
 
@@ -204,6 +220,8 @@ const gchar* bd_vdo_get_write_policy_str (BDVDOWritePolicy policy, GError **erro
  *          failed to determine
  *
  * Tech category: always provided/supported
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 BDVDOWritePolicy bd_vdo_get_write_policy_from_str (const gchar *policy_str, GError **error);
 
@@ -216,6 +234,8 @@ BDVDOWritePolicy bd_vdo_get_write_policy_from_str (const gchar *policy_str, GErr
  * in case of error (@error gets populated in those cases)
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_QUERY
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 BDVDOInfo* bd_vdo_info (const gchar *name, GError **error);
 
@@ -238,6 +258,8 @@ BDVDOInfo* bd_vdo_info (const gchar *name, GError **error);
  * Returns: whether the VDO volume was successfully created or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_CREATE
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_create (const gchar *name, const gchar *backing_device, guint64 logical_size, guint64 index_memory, gboolean compression, gboolean deduplication, BDVDOWritePolicy write_policy, const BDExtraArg **extra, GError **error);
 
@@ -252,6 +274,8 @@ gboolean bd_vdo_create (const gchar *name, const gchar *backing_device, guint64 
  * Returns: whether the VDO volume was successfully removed or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_MODIFY
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_remove (const gchar *name, gboolean force, const BDExtraArg **extra, GError **error);
 
@@ -266,6 +290,8 @@ gboolean bd_vdo_remove (const gchar *name, gboolean force, const BDExtraArg **ex
  * Returns: whether the policy was successfully changed or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_MODIFY
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_change_write_policy (const gchar *name, BDVDOWritePolicy write_policy, const BDExtraArg **extra, GError **error);
 
@@ -279,6 +305,8 @@ gboolean bd_vdo_change_write_policy (const gchar *name, BDVDOWritePolicy write_p
  * Returns: whether the compression was successfully enabled or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_MODIFY
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_enable_compression (const gchar *name, const BDExtraArg **extra, GError **error);
 
@@ -292,6 +320,8 @@ gboolean bd_vdo_enable_compression (const gchar *name, const BDExtraArg **extra,
  * Returns: whether the compression was successfully disabled or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_MODIFY
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_disable_compression (const gchar *name, const BDExtraArg **extra, GError **error);
 
@@ -305,6 +335,8 @@ gboolean bd_vdo_disable_compression (const gchar *name, const BDExtraArg **extra
  * Returns: whether the deduplication was successfully enabled or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_MODIFY
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_enable_deduplication (const gchar *name, const BDExtraArg **extra, GError **error);
 
@@ -318,6 +350,8 @@ gboolean bd_vdo_enable_deduplication (const gchar *name, const BDExtraArg **extr
  * Returns: whether the deduplication was successfully disabled or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_MODIFY
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_disable_deduplication (const gchar *name, const BDExtraArg **extra, GError **error);
 
@@ -331,6 +365,8 @@ gboolean bd_vdo_disable_deduplication (const gchar *name, const BDExtraArg **ext
  * Returns: whether the VDO volume was successfully activated or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_ACTIVATE_DEACTIVATE
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_activate (const gchar *name, const BDExtraArg **extra, GError **error);
 
@@ -344,6 +380,8 @@ gboolean bd_vdo_activate (const gchar *name, const BDExtraArg **extra, GError **
  * Returns: whether the VDO volume was successfully deactivated or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_ACTIVATE_DEACTIVATE
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_deactivate (const gchar *name, const BDExtraArg **extra, GError **error);
 
@@ -358,6 +396,8 @@ gboolean bd_vdo_deactivate (const gchar *name, const BDExtraArg **extra, GError 
  * Returns: whether the VDO volume was successfully started or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_START_STOP
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_start (const gchar *name, gboolean rebuild, const BDExtraArg **extra, GError **error);
 
@@ -372,6 +412,8 @@ gboolean bd_vdo_start (const gchar *name, gboolean rebuild, const BDExtraArg **e
  * Returns: whether the VDO volume was successfully stopped or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_START_STOP
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_stop (const gchar *name, gboolean force, const BDExtraArg **extra, GError **error);
 
@@ -386,6 +428,8 @@ gboolean bd_vdo_stop (const gchar *name, gboolean force, const BDExtraArg **extr
  * Returns: whether the VDO volume was successfully resized or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_GROW
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_grow_logical (const gchar *name, guint64 size, const BDExtraArg **extra, GError **error);
 
@@ -399,6 +443,8 @@ gboolean bd_vdo_grow_logical (const gchar *name, guint64 size, const BDExtraArg 
  * Returns: whether the VDO volume was successfully grown or not
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_GROW
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 gboolean bd_vdo_grow_physical (const gchar *name, const BDExtraArg **extra, GError **error);
 
@@ -423,6 +469,8 @@ gboolean bd_vdo_grow_physical (const gchar *name, const BDExtraArg **extra, GErr
  *   - `"writeAmplificationRatio"`: The average number of block writes to the underlying storage per block written to the VDO device.
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_QUERY
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 BDVDOStats* bd_vdo_get_stats (const gchar *name, GError **error);
 
@@ -437,6 +485,8 @@ BDVDOStats* bd_vdo_get_stats (const gchar *name, GError **error);
  * Please note the contents of the hashtable may vary depending on the actual kvdo module version.
  *
  * Tech category: %BD_VDO_TECH_VDO-%BD_VDO_TECH_MODE_QUERY
+ *
+ * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 GHashTable* bd_vdo_get_stats_full (const gchar *name, GError **error);
 
