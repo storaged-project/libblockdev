@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-Loop.html" title="Loop">
 <link rel="next" href="libblockdev-MD-RAID.html" title="MD RAID">
-<meta name="generator" content="GTK-Doc V1.29 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.32 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -35,8 +35,8 @@
 <a name="libblockdev-LVM.functions"></a><h2>Functions</h2>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
-<col width="150px" class="functions_return">
-<col class="functions_name">
+<col width="150px" class="functions_proto_type">
+<col class="functions_proto_name">
 </colgroup>
 <tbody>
 <tr>
@@ -139,6 +139,22 @@
 </td>
 <td class="function_name">
 <a class="link" href="libblockdev-LVM.html#bd-lvm-cache-stats-free" title="bd_lvm_cache_stats_free ()">bd_lvm_cache_stats_free</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-LVM.html#bd-lvm-vdo-stats-free" title="bd_lvm_vdo_stats_free ()">bd_lvm_vdo_stats_free</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-LVM.html#BDLVMVDOStats" title="BDLVMVDOStats"><span class="returnvalue">BDLVMVDOStats</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-LVM.html#bd-lvm-vdo-stats-copy" title="bd_lvm_vdo_stats_copy ()">bd_lvm_vdo_stats_copy</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -582,6 +598,59 @@
 </tr>
 <tr>
 <td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-LVM.html#bd-lvm-vdolvpoolname" title="bd_lvm_vdolvpoolname ()">bd_lvm_vdolvpoolname</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-LVM.html#bd-lvm-get-vdo-operating-mode-str" title="bd_lvm_get_vdo_operating_mode_str ()">bd_lvm_get_vdo_operating_mode_str</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-LVM.html#bd-lvm-get-vdo-compression-state-str" title="bd_lvm_get_vdo_compression_state_str ()">bd_lvm_get_vdo_compression_state_str</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-LVM.html#bd-lvm-get-vdo-index-state-str" title="bd_lvm_get_vdo_index_state_str ()">bd_lvm_get_vdo_index_state_str</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">BDLVMVDOWritePolicy</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-LVM.html#bd-lvm-get-vdo-write-policy-from-str" title="bd_lvm_get_vdo_write_policy_from_str ()">bd_lvm_get_vdo_write_policy_from_str</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-LVM.html#BDLVMVDOStats" title="BDLVMVDOStats"><span class="returnvalue">BDLVMVDOStats</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-LVM.html#bd-lvm-vdo-get-stats" title="bd_lvm_vdo_get_stats ()">bd_lvm_vdo_get_stats</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-LVM.html#bd-lvm-vdo-get-stats-full" title="bd_lvm_vdo_get_stats_full ()">bd_lvm_vdo_get_stats_full</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
@@ -595,8 +664,8 @@
 <a name="libblockdev-LVM.other"></a><h2>Types and Values</h2>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
-<col width="150px" class="name">
-<col class="description">
+<col width="150px" class="other_proto_type">
+<col class="other_proto_name">
 </colgroup>
 <tbody>
 <tr>
@@ -686,6 +755,10 @@
 <tr>
 <td class="datatype_keyword"> </td>
 <td class="function_name"><a class="link" href="libblockdev-LVM.html#BDLVMCacheStats" title="BDLVMCacheStats">BDLVMCacheStats</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword"> </td>
+<td class="function_name"><a class="link" href="libblockdev-LVM.html#BDLVMVDOStats" title="BDLVMVDOStats">BDLVMVDOStats</a></td>
 </tr>
 <tr>
 <td class="datatype_keyword">enum</td>
@@ -818,6 +891,24 @@ bd_lvm_cache_stats_copy (<em class="parameter"><code><a class="link" href="libbl
 <pre class="programlisting"><span class="returnvalue">void</span>
 bd_lvm_cache_stats_free (<em class="parameter"><code><a class="link" href="libblockdev-LVM.html#BDLVMCacheStats" title="BDLVMCacheStats"><span class="type">BDLVMCacheStats</span></a> *data</code></em>);</pre>
 <p>Frees <em class="parameter"><code>data</code></em>
+.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-lvm-vdo-stats-free"></a><h3>bd_lvm_vdo_stats_free ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_lvm_vdo_stats_free (<em class="parameter"><code><a class="link" href="libblockdev-LVM.html#BDLVMVDOStats" title="BDLVMVDOStats"><span class="type">BDLVMVDOStats</span></a> *stats</code></em>);</pre>
+<p>Frees <em class="parameter"><code>data</code></em>
+.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-lvm-vdo-stats-copy"></a><h3>bd_lvm_vdo_stats_copy ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-LVM.html#BDLVMVDOStats" title="BDLVMVDOStats"><span class="returnvalue">BDLVMVDOStats</span></a> *
+bd_lvm_vdo_stats_copy (<em class="parameter"><code><a class="link" href="libblockdev-LVM.html#BDLVMVDOStats" title="BDLVMVDOStats"><span class="type">BDLVMVDOStats</span></a> *stats</code></em>);</pre>
+<p>Creates a new copy of <em class="parameter"><code>data</code></em>
 .</p>
 <p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
@@ -3464,6 +3555,287 @@ LV</p>
 </div>
 <hr>
 <div class="refsect2">
+<a name="bd-lvm-vdolvpoolname"></a><h3>bd_lvm_vdolvpoolname ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+bd_lvm_vdolvpoolname (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                      <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lv_name</code></em>,
+                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-lvm-vdolvpoolname.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>vg_name</p></td>
+<td class="parameter_description"><p>name of the VG containing the queried VDO LV</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>lv_name</p></td>
+<td class="parameter_description"><p>name of the queried VDO LV</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-lvm-vdolvpoolname.returns"></a><h4>Returns</h4>
+<p>the name of the pool volume for the <em class="parameter"><code>vg_name</code></em>
+/<em class="parameter"><code>lv_name</code></em>
+VDO LV or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if failed to determine (<em class="parameter"><code>error</code></em>
+) is set in those cases)</p>
+<p>Tech category: <a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-VDO:CAPS"><code class="literal">BD_LVM_TECH_VDO</code></a>-<a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_LVM_TECH_MODE_QUERY</code></a>. </p>
+<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-lvm-get-vdo-operating-mode-str"></a><h3>bd_lvm_get_vdo_operating_mode_str ()</h3>
+<pre class="programlisting">const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+bd_lvm_get_vdo_operating_mode_str (<em class="parameter"><code><span class="type">BDLVMVDOOperatingMode</span> mode</code></em>,
+                                   <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-lvm-get-vdo-operating-mode-str.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>mode</p></td>
+<td class="parameter_description"><p>mode to get the string representation for</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-lvm-get-vdo-operating-mode-str.returns"></a><h4>Returns</h4>
+<p> string representation of <em class="parameter"><code>mode</code></em>
+or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
+<p>Tech category: always provided/supported</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-lvm-get-vdo-compression-state-str"></a><h3>bd_lvm_get_vdo_compression_state_str ()</h3>
+<pre class="programlisting">const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+bd_lvm_get_vdo_compression_state_str (<em class="parameter"><code><span class="type">BDLVMVDOCompressionState</span> state</code></em>,
+                                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-lvm-get-vdo-compression-state-str.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>state</p></td>
+<td class="parameter_description"><p>state to get the string representation for</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-lvm-get-vdo-compression-state-str.returns"></a><h4>Returns</h4>
+<p> string representation of <em class="parameter"><code>state</code></em>
+or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
+<p>Tech category: always provided/supported</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-lvm-get-vdo-index-state-str"></a><h3>bd_lvm_get_vdo_index_state_str ()</h3>
+<pre class="programlisting">const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+bd_lvm_get_vdo_index_state_str (<em class="parameter"><code><span class="type">BDLVMVDOIndexState</span> state</code></em>,
+                                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-lvm-get-vdo-index-state-str.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>state</p></td>
+<td class="parameter_description"><p>state to get the string representation for</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-lvm-get-vdo-index-state-str.returns"></a><h4>Returns</h4>
+<p> string representation of <em class="parameter"><code>state</code></em>
+or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
+<p>Tech category: always provided/supported</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-lvm-get-vdo-write-policy-from-str"></a><h3>bd_lvm_get_vdo_write_policy_from_str ()</h3>
+<pre class="programlisting"><span class="returnvalue">BDLVMVDOWritePolicy</span>
+bd_lvm_get_vdo_write_policy_from_str (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *policy_str</code></em>,
+                                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-lvm-get-vdo-write-policy-from-str.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>policy_str</p></td>
+<td class="parameter_description"><p>string representation of a policy</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-lvm-get-vdo-write-policy-from-str.returns"></a><h4>Returns</h4>
+<p> write policy for the <em class="parameter"><code>policy_str</code></em>
+or <code class="literal">BD_LVM_VDO_WRITE_POLICY_UNKNOWN</code> if
+failed to determine</p>
+<p>Tech category: always provided/supported</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-lvm-vdo-get-stats"></a><h3>bd_lvm_vdo_get_stats ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-LVM.html#BDLVMVDOStats" title="BDLVMVDOStats"><span class="returnvalue">BDLVMVDOStats</span></a> *
+bd_lvm_vdo_get_stats (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                      <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *pool_name</code></em>,
+                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-lvm-vdo-get-stats.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>vg_name</p></td>
+<td class="parameter_description"><p>name of the VG that contains <em class="parameter"><code>pool_name</code></em>
+VDO pool</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>pool_name</p></td>
+<td class="parameter_description"><p>name of the VDO pool to get statistics for</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-lvm-vdo-get-stats.returns"></a><h4>Returns</h4>
+<p>a structure containing selected statistics or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error
+(<em class="parameter"><code>error</code></em>
+gets populated in those cases)</p>
+<p>In contrast to <em class="parameter"><code>bd_lvm_vdo_get_stats_full</code></em>
+this function will only return selected statistics
+in a fixed structure. In case a value is not available, -1 would be returned.</p>
+<p>Tech category: <a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-VDO:CAPS"><code class="literal">BD_LVM_TECH_VDO</code></a>-<a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_LVM_TECH_MODE_QUERY</code></a>. </p>
+<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-lvm-vdo-get-stats-full"></a><h3>bd_lvm_vdo_get_stats_full ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *
+bd_lvm_vdo_get_stats_full (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *vg_name</code></em>,
+                           <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *pool_name</code></em>,
+                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-lvm-vdo-get-stats-full.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>vg_name</p></td>
+<td class="parameter_description"><p>name of the VG that contains <em class="parameter"><code>pool_name</code></em>
+VDO pool</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>pool_name</p></td>
+<td class="parameter_description"><p>name of the VDO pool to get statistics for</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-lvm-vdo-get-stats-full.returns"></a><h4>Returns</h4>
+<p>hashtable of type string - string of available
+statistics or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error
+(<em class="parameter"><code>error</code></em>
+gets populated in those cases)</p>
+<p>Statistics are collected from the values exposed by the kernel <code class="literal">kvdo</code> module
+at the <code class="literal">/sys/kvdo/&amp;lt;VDO_NAME&gt;/statistics/</code> path.
+Some of the keys are computed to mimic the information produced by the vdo tools.
+Please note the contents of the hashtable may vary depending on the actual kvdo module version.</p>
+<p>Tech category: <a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-VDO:CAPS"><code class="literal">BD_LVM_TECH_VDO</code></a>-<a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_LVM_TECH_MODE_QUERY</code></a>. </p>
+<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> utf8 utf8]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="bd-lvm-is-tech-avail"></a><h3>bd_lvm_is_tech_avail ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 bd_lvm_is_tech_avail (<em class="parameter"><code><a class="link" href="libblockdev-LVM.html#BDLVMTech" title="enum BDLVMTech"><span class="type">BDLVMTech</span></a> tech</code></em>,
@@ -3640,6 +4012,16 @@ plugin implementation and having all the runtime dependencies available</p>
 </tr>
 <tr>
 <td class="enum_member_name"><p><a name="BD-LVM-ERROR-FAIL:CAPS"></a>BD_LVM_ERROR_FAIL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-LVM-ERROR-NOT-SUPPORTED:CAPS"></a>BD_LVM_ERROR_NOT_SUPPORTED</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-LVM-ERROR-VDO-POLICY-INVAL:CAPS"></a>BD_LVM_ERROR_VDO_POLICY_INVAL</p></td>
 <td> </td>
 <td> </td>
 </tr>
@@ -4104,6 +4486,84 @@ plugin implementation and having all the runtime dependencies available</p>
 </div>
 <hr>
 <div class="refsect2">
+<a name="BDLVMVDOStats"></a><h3>BDLVMVDOStats</h3>
+<pre class="programlisting">typedef struct {
+    gint64 block_size;
+    gint64 logical_block_size;
+    gint64 physical_blocks;
+    gint64 data_blocks_used;
+    gint64 overhead_blocks_used;
+    gint64 logical_blocks_used;
+    gint64 used_percent;
+    gint64 saving_percent;
+    gdouble write_amplification_ratio;
+} BDLVMVDOStats;
+</pre>
+<div class="refsect3">
+<a name="BDLVMVDOStats.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="struct_members_name">
+<col class="struct_members_description">
+<col width="200px" class="struct_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> <em class="structfield"><code><a name="BDLVMVDOStats.block-size"></a>block_size</code></em>;</p></td>
+<td class="struct_member_description"><p>The block size of a VDO volume, in bytes.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> <em class="structfield"><code><a name="BDLVMVDOStats.logical-block-size"></a>logical_block_size</code></em>;</p></td>
+<td class="struct_member_description"><p>The logical block size, in bytes.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> <em class="structfield"><code><a name="BDLVMVDOStats.physical-blocks"></a>physical_blocks</code></em>;</p></td>
+<td class="struct_member_description"><p>The total number of physical blocks allocated for a VDO volume.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> <em class="structfield"><code><a name="BDLVMVDOStats.data-blocks-used"></a>data_blocks_used</code></em>;</p></td>
+<td class="struct_member_description"><p>The number of physical blocks currently in use by a VDO volume
+to store data.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> <em class="structfield"><code><a name="BDLVMVDOStats.overhead-blocks-used"></a>overhead_blocks_used</code></em>;</p></td>
+<td class="struct_member_description"><p>The number of physical blocks currently in use by a VDO volume
+to store VDO metadata.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> <em class="structfield"><code><a name="BDLVMVDOStats.logical-blocks-used"></a>logical_blocks_used</code></em>;</p></td>
+<td class="struct_member_description"><p>The number of logical blocks currently mapped.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> <em class="structfield"><code><a name="BDLVMVDOStats.used-percent"></a>used_percent</code></em>;</p></td>
+<td class="struct_member_description"><p>The percentage of physical blocks used on a VDO volume
+(= used blocks / allocated blocks * 100).</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gint64"><span class="type">gint64</span></a> <em class="structfield"><code><a name="BDLVMVDOStats.saving-percent"></a>saving_percent</code></em>;</p></td>
+<td class="struct_member_description"><p>The percentage of physical blocks saved on a VDO volume
+(= [logical blocks used - physical blocks used] / logical blocks used).</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gdouble"><span class="type">gdouble</span></a> <em class="structfield"><code><a name="BDLVMVDOStats.write-amplification-ratio"></a>write_amplification_ratio</code></em>;</p></td>
+<td class="struct_member_description"><p>The average number of block writes to the underlying storage
+per block written to the VDO device.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="BDLVMTech"></a><h3>enum BDLVMTech</h3>
 <div class="refsect3">
 <a name="BDLVMTech.members"></a><h4>Members</h4>
@@ -4154,6 +4614,11 @@ plugin implementation and having all the runtime dependencies available</p>
 <td> </td>
 <td> </td>
 </tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-LVM-TECH-VDO:CAPS"></a>BD_LVM_TECH_VDO</p></td>
+<td> </td>
+<td> </td>
+</tr>
 </tbody>
 </table></div>
 </div>
@@ -4197,6 +4662,6 @@ plugin implementation and having all the runtime dependencies available</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.29</div>
+<hr>Generated by GTK-Doc V1.32</div>
 </body>
 </html>

@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="next" href="libblockdev-BTRFS.html" title="BTRFS">
-<meta name="generator" content="GTK-Doc V1.29 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.32 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -35,8 +35,8 @@
 <a name="libblockdev-blockdev-library.functions"></a><h2>Functions</h2>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
-<col width="150px" class="functions_return">
-<col class="functions_name">
+<col width="150px" class="functions_proto_type">
+<col class="functions_proto_name">
 </colgroup>
 <tbody>
 <tr>
@@ -110,8 +110,8 @@
 <a name="libblockdev-blockdev-library.other"></a><h2>Types and Values</h2>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
-<col width="150px" class="name">
-<col class="description">
+<col width="150px" class="other_proto_type">
+<col class="other_proto_name">
 </colgroup>
 <tbody>
 <tr>
@@ -188,12 +188,12 @@ version of the lvm plugin is required:</p>
 4
 5
 6</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="usertype">GError</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">error </span><span class="symbol">=</span><span class="normal"> <a href="../glib/glib-Standard-Macros.html#NULL:CAPS">NULL</a></span><span class="symbol">;</span>
-<span class="usertype">gboolean</span><span class="normal"> ret </span><span class="symbol">=</span><span class="normal"> <a href="../glib/glib-Standard-Macros.html#FALSE:CAPS">FALSE</a></span><span class="symbol">;</span>
-<span class="usertype">BDPluginSpec</span><span class="normal"> fs_plugin </span><span class="symbol">=</span><span class="normal"> </span><span class="cbracket">{</span><span class="normal"><a href="libblockdev-Plugins.html#BD-PLUGIN-FS:CAPS">BD_PLUGIN_FS</a></span><span class="symbol">,</span><span class="normal"> <a href="../glib/glib-Standard-Macros.html#NULL:CAPS">NULL</a></span><span class="cbracket">}</span><span class="symbol">;</span>
-<span class="usertype">BDPluginSpec</span><span class="normal"> lvm_plugin </span><span class="symbol">=</span><span class="normal"> </span><span class="cbracket">{</span><span class="normal"><a href="libblockdev-Plugins.html#BD-PLUGIN-LVM:CAPS">BD_PLUGIN_LVM</a></span><span class="symbol">,</span><span class="normal"> </span><span class="string">"libbd_lvm.so.2"</span><span class="cbracket">}</span><span class="symbol">;</span>
-<span class="usertype">BDPluginSpec</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">plugins</span><span class="symbol">[]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> </span><span class="cbracket">{</span><span class="symbol">&amp;</span><span class="normal">fs_plugin</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal">lvm_plugin</span><span class="symbol">,</span><span class="normal"> <a href="../glib/glib-Standard-Macros.html#NULL:CAPS">NULL</a></span><span class="cbracket">}</span><span class="symbol">;</span>
-<span class="normal">ret </span><span class="symbol">=</span><span class="normal"> </span><span class="function"><a href="libblockdev-blockdev-library.html#bd-init">bd_init</a></span><span class="normal"> </span><span class="symbol">(</span><span class="normal">plugins</span><span class="symbol">,</span><span class="normal"> <a href="../glib/glib-Standard-Macros.html#NULL:CAPS">NULL</a></span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal">error</span><span class="symbol">);</span></pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="n">GError</span> <span class="o">*</span><span class="n">error</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+<span class="n">gboolean</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">FALSE</span><span class="p">;</span>
+<span class="n">BDPluginSpec</span> <span class="n">fs_plugin</span> <span class="o">=</span> <span class="p">{</span><span class="n">BD_PLUGIN_FS</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">};</span>
+<span class="n">BDPluginSpec</span> <span class="n">lvm_plugin</span> <span class="o">=</span> <span class="p">{</span><span class="n">BD_PLUGIN_LVM</span><span class="p">,</span> <span class="s">&quot;libbd_lvm.so.2&quot;</span><span class="p">};</span>
+<span class="n">BDPluginSpec</span> <span class="o">*</span><span class="n">plugins</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="o">&amp;</span><span class="n">fs_plugin</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lvm_plugin</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">};</span>
+<span class="n">ret</span> <span class="o">=</span> <span class="n">bd_init</span> <span class="p">(</span><span class="n">plugins</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">error</span><span class="p">);</span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -219,8 +219,8 @@ just returns early. The difference between:</p>
       <tr>
         <td class="listing_lines" align="right"><pre>1
 2</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="keyword">if</span><span class="normal"> </span><span class="symbol">(!</span><span class="function"><a href="libblockdev-blockdev-library.html#bd-is-initialized">bd_is_initialized</a></span><span class="symbol">())</span>
-<span class="normal">    </span><span class="function"><a href="libblockdev-blockdev-library.html#bd-init">bd_init</a></span><span class="symbol">(</span><span class="normal">None</span><span class="symbol">,</span><span class="normal"> None</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">&amp;</span><span class="normal">error</span><span class="symbol">);</span></pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">bd_is_initialized</span><span class="p">())</span>
+    <span class="n">bd_init</span><span class="p">(</span><span class="n">None</span><span class="p">,</span> <span class="n">None</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">error</span><span class="p">);</span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -529,6 +529,6 @@ bd_init_error_quark (<em class="parameter"><code><span class="type">void</span><
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.29</div>
+<hr>Generated by GTK-Doc V1.32</div>
 </body>
 </html>

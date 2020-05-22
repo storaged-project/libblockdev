@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-Utils.html" title="Utils">
 <link rel="next" href="ch02.html" title="GI Overrides">
-<meta name="generator" content="GTK-Doc V1.29 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.32 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -27,7 +27,7 @@
 <div class="refnamediv"><table width="100%"><tr>
 <td valign="top">
 <h2><span class="refentrytitle"><a name="libblockdev-VDO.top_of_page"></a>VDO</span></h2>
-<p>VDO — plugin for operations with VDO devices</p>
+<p>VDO — DEPRECATED plugin for operations with VDO devices</p>
 </td>
 <td class="gallery_image" valign="top" align="right"></td>
 </tr></table></div>
@@ -35,8 +35,8 @@
 <a name="libblockdev-VDO.functions"></a><h2>Functions</h2>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
-<col width="150px" class="functions_return">
-<col class="functions_name">
+<col width="150px" class="functions_proto_type">
+<col class="functions_proto_name">
 </colgroup>
 <tbody>
 <tr>
@@ -229,8 +229,8 @@
 <a name="libblockdev-VDO.other"></a><h2>Types and Values</h2>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
-<col width="150px" class="name">
-<col class="description">
+<col width="150px" class="other_proto_type">
+<col class="other_proto_name">
 </colgroup>
 <tbody>
 <tr>
@@ -268,6 +268,8 @@
 <div class="refsect1">
 <a name="libblockdev-VDO.description"></a><h2>Description</h2>
 <p>A plugin for operations with VDO devices.</p>
+<p>This plugin has been deprecated since version 2.24 and should not be used in newly-written code.
+Use LVM-VDO integration instead.</p>
 </div>
 <div class="refsect1">
 <a name="libblockdev-VDO.functions_details"></a><h2>Functions</h2>
@@ -275,6 +277,10 @@
 <a name="bd-vdo-check-deps"></a><h3>bd_vdo_check_deps ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 bd_vdo_check_deps (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_check_deps</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-check-deps.returns"></a><h4>Returns</h4>
 <p> whether the plugin's runtime dependencies are satisfied or not</p>
@@ -286,6 +292,10 @@ bd_vdo_check_deps (<em class="parameter"><code><span class="type">void</span></c
 <a name="bd-vdo-init"></a><h3>bd_vdo_init ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 bd_vdo_init (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_init</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <p>Initializes the plugin. **This function is called automatically by the
 library's initialization functions.**</p>
 </div>
@@ -294,6 +304,10 @@ library's initialization functions.**</p>
 <a name="bd-vdo-close"></a><h3>bd_vdo_close ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 bd_vdo_close (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_close</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <p>Cleans up after the plugin. **This function is called automatically by the
 library's functions that unload it.**</p>
 </div>
@@ -310,6 +324,10 @@ bd_vdo_error_quark (<em class="parameter"><code><span class="type">void</span></
 <pre class="programlisting">const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
 bd_vdo_get_write_policy_str (<em class="parameter"><code><span class="type">BDVDOWritePolicy</span> policy</code></em>,
                              <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_get_write_policy_str</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-get-write-policy-str.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -345,6 +363,10 @@ or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">N
 <pre class="programlisting"><span class="returnvalue">BDVDOWritePolicy</span>
 bd_vdo_get_write_policy_from_str (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *policy_str</code></em>,
                                   <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_get_write_policy_from_str</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-get-write-policy-from-str.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -381,6 +403,10 @@ failed to determine</p>
 <pre class="programlisting"><a class="link" href="libblockdev-VDO.html#BDVDOInfo" title="BDVDOInfo"><span class="returnvalue">BDVDOInfo</span></a> *
 bd_vdo_info (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
              <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_info</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-info.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -425,6 +451,10 @@ bd_vdo_create (<em class="parameter"><code>const <a href="../glib/glib-Basic-Typ
                <em class="parameter"><code><span class="type">BDVDOWritePolicy</span> write_policy</code></em>,
                <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_create</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-create.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -501,6 +531,10 @@ bd_vdo_remove (<em class="parameter"><code>const <a href="../glib/glib-Basic-Typ
                <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> force</code></em>,
                <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_remove</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-remove.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -548,6 +582,10 @@ bd_vdo_change_write_policy (<em class="parameter"><code>const <a href="../glib/g
                             <em class="parameter"><code><span class="type">BDVDOWritePolicy</span> write_policy</code></em>,
                             <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                             <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_change_write_policy</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-change-write-policy.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -594,6 +632,10 @@ bd_vdo_change_write_policy (<em class="parameter"><code>const <a href="../glib/g
 bd_vdo_enable_compression (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
                            <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                            <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_enable_compression</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-enable-compression.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -635,6 +677,10 @@ bd_vdo_enable_compression (<em class="parameter"><code>const <a href="../glib/gl
 bd_vdo_disable_compression (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
                             <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                             <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_disable_compression</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-disable-compression.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -676,6 +722,10 @@ bd_vdo_disable_compression (<em class="parameter"><code>const <a href="../glib/g
 bd_vdo_enable_deduplication (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
                              <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                              <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_enable_deduplication</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-enable-deduplication.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -717,6 +767,10 @@ bd_vdo_enable_deduplication (<em class="parameter"><code>const <a href="../glib/
 bd_vdo_disable_deduplication (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
                               <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                               <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_disable_deduplication</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-disable-deduplication.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -758,6 +812,10 @@ bd_vdo_disable_deduplication (<em class="parameter"><code>const <a href="../glib
 bd_vdo_activate (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
                  <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_activate</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-activate.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -799,6 +857,10 @@ bd_vdo_activate (<em class="parameter"><code>const <a href="../glib/glib-Basic-T
 bd_vdo_deactivate (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
                    <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                    <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_deactivate</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-deactivate.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -841,6 +903,10 @@ bd_vdo_start (<em class="parameter"><code>const <a href="../glib/glib-Basic-Type
               <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> rebuild</code></em>,
               <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
               <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_start</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-start.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -888,6 +954,10 @@ bd_vdo_stop (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types
              <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> force</code></em>,
              <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
              <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_stop</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-stop.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -935,6 +1005,10 @@ bd_vdo_grow_logical (<em class="parameter"><code>const <a href="../glib/glib-Bas
                      <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> size</code></em>,
                      <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_grow_logical</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-grow-logical.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -981,6 +1055,10 @@ bd_vdo_grow_logical (<em class="parameter"><code>const <a href="../glib/glib-Bas
 bd_vdo_grow_physical (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
                       <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_grow_physical</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-grow-physical.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -1021,6 +1099,10 @@ bd_vdo_grow_physical (<em class="parameter"><code>const <a href="../glib/glib-Ba
 <pre class="programlisting"><a class="link" href="libblockdev-VDO.html#BDVDOStats" title="BDVDOStats"><span class="returnvalue">BDVDOStats</span></a> *
 bd_vdo_get_stats (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
                   <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_get_stats</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-get-stats.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -1071,6 +1153,10 @@ this function will only return selected statistics in a fixed structure. In case
 <pre class="programlisting"><a href="../glib/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *
 bd_vdo_get_stats_full (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
                        <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_get_stats_full</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-get-stats-full.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -1110,6 +1196,10 @@ Please note the contents of the hashtable may vary depending on the actual kvdo 
 bd_vdo_is_tech_avail (<em class="parameter"><code><a class="link" href="libblockdev-VDO.html#BDVDOTech" title="enum BDVDOTech"><span class="type">BDVDOTech</span></a> tech</code></em>,
                       <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> mode</code></em>,
                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_vdo_is_tech_avail</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="bd-vdo-is-tech-avail.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -1206,6 +1296,10 @@ plugin implementation and having all the runtime dependencies available</p>
     BDVDOWritePolicy write_policy;
 } BDVDOInfo;
 </pre>
+<div class="warning">
+<p><code class="literal">BDVDOInfo</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="BDVDOInfo.members"></a><h4>Members</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -1279,6 +1373,10 @@ plugin implementation and having all the runtime dependencies available</p>
     gdouble write_amplification_ratio;
 } BDVDOStats;
 </pre>
+<div class="warning">
+<p><code class="literal">BDVDOStats</code> has been deprecated since version 2.24 and should not be used in newly-written code.</p>
+<p>Use LVM-VDO integration instead.</p>
+</div>
 <div class="refsect3">
 <a name="BDVDOStats.members"></a><h4>Members</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -1410,6 +1508,6 @@ plugin implementation and having all the runtime dependencies available</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.29</div>
+<hr>Generated by GTK-Doc V1.32</div>
 </body>
 </html>

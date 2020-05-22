@@ -121,6 +121,8 @@
     <keyword type="function" name="bd_crypto_tc_open_full ()" link="libblockdev-Crypto.html#bd-crypto-tc-open-full"/>
     <keyword type="function" name="bd_crypto_tc_close ()" link="libblockdev-Crypto.html#bd-crypto-tc-close"/>
     <keyword type="function" name="bd_crypto_escrow_device ()" link="libblockdev-Crypto.html#bd-crypto-escrow-device"/>
+    <keyword type="function" name="bd_crypto_bitlk_open ()" link="libblockdev-Crypto.html#bd-crypto-bitlk-open"/>
+    <keyword type="function" name="bd_crypto_bitlk_close ()" link="libblockdev-Crypto.html#bd-crypto-bitlk-close"/>
     <keyword type="function" name="bd_crypto_is_tech_avail ()" link="libblockdev-Crypto.html#bd-crypto-is-tech-avail"/>
     <keyword type="macro" name="BD_CRYPTO_LUKS_METADATA_SIZE" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-METADATA-SIZE:CAPS"/>
     <keyword type="macro" name="BD_CRYPTO_ERROR" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR:CAPS"/>
@@ -160,6 +162,7 @@
     <keyword type="function" name="bd_fs_close ()" link="libblockdev-FS.html#bd-fs-close"/>
     <keyword type="function" name="bd_fs_error_quark ()" link="libblockdev-FS.html#bd-fs-error-quark"/>
     <keyword type="function" name="bd_fs_wipe ()" link="libblockdev-FS.html#bd-fs-wipe"/>
+    <keyword type="function" name="bd_fs_wipe_force ()" link="libblockdev-FS.html#bd-fs-wipe-force"/>
     <keyword type="function" name="bd_fs_clean ()" link="libblockdev-FS.html#bd-fs-clean"/>
     <keyword type="function" name="bd_fs_get_fstype ()" link="libblockdev-FS.html#bd-fs-get-fstype"/>
     <keyword type="function" name="bd_fs_freeze ()" link="libblockdev-FS.html#bd-fs-freeze"/>
@@ -269,6 +272,8 @@
     <keyword type="function" name="bd_lvm_lvdata_copy ()" link="libblockdev-LVM.html#bd-lvm-lvdata-copy"/>
     <keyword type="function" name="bd_lvm_cache_stats_copy ()" link="libblockdev-LVM.html#bd-lvm-cache-stats-copy"/>
     <keyword type="function" name="bd_lvm_cache_stats_free ()" link="libblockdev-LVM.html#bd-lvm-cache-stats-free"/>
+    <keyword type="function" name="bd_lvm_vdo_stats_free ()" link="libblockdev-LVM.html#bd-lvm-vdo-stats-free"/>
+    <keyword type="function" name="bd_lvm_vdo_stats_copy ()" link="libblockdev-LVM.html#bd-lvm-vdo-stats-copy"/>
     <keyword type="function" name="bd_lvm_is_supported_pe_size ()" link="libblockdev-LVM.html#bd-lvm-is-supported-pe-size"/>
     <keyword type="function" name="bd_lvm_get_supported_pe_sizes ()" link="libblockdev-LVM.html#bd-lvm-get-supported-pe-sizes"/>
     <keyword type="function" name="bd_lvm_get_max_lv_size ()" link="libblockdev-LVM.html#bd-lvm-get-max-lv-size"/>
@@ -324,6 +329,13 @@
     <keyword type="function" name="bd_lvm_cache_stats ()" link="libblockdev-LVM.html#bd-lvm-cache-stats"/>
     <keyword type="function" name="bd_lvm_data_lv_name ()" link="libblockdev-LVM.html#bd-lvm-data-lv-name"/>
     <keyword type="function" name="bd_lvm_metadata_lv_name ()" link="libblockdev-LVM.html#bd-lvm-metadata-lv-name"/>
+    <keyword type="function" name="bd_lvm_vdolvpoolname ()" link="libblockdev-LVM.html#bd-lvm-vdolvpoolname"/>
+    <keyword type="function" name="bd_lvm_get_vdo_operating_mode_str ()" link="libblockdev-LVM.html#bd-lvm-get-vdo-operating-mode-str"/>
+    <keyword type="function" name="bd_lvm_get_vdo_compression_state_str ()" link="libblockdev-LVM.html#bd-lvm-get-vdo-compression-state-str"/>
+    <keyword type="function" name="bd_lvm_get_vdo_index_state_str ()" link="libblockdev-LVM.html#bd-lvm-get-vdo-index-state-str"/>
+    <keyword type="function" name="bd_lvm_get_vdo_write_policy_from_str ()" link="libblockdev-LVM.html#bd-lvm-get-vdo-write-policy-from-str"/>
+    <keyword type="function" name="bd_lvm_vdo_get_stats ()" link="libblockdev-LVM.html#bd-lvm-vdo-get-stats"/>
+    <keyword type="function" name="bd_lvm_vdo_get_stats_full ()" link="libblockdev-LVM.html#bd-lvm-vdo-get-stats-full"/>
     <keyword type="function" name="bd_lvm_is_tech_avail ()" link="libblockdev-LVM.html#bd-lvm-is-tech-avail"/>
     <keyword type="macro" name="BD_LVM_MAX_LV_SIZE" link="libblockdev-LVM.html#BD-LVM-MAX-LV-SIZE:CAPS" deprecated="2.23: Use bd_lvm_get_max_lv_size() function instead."/>
     <keyword type="macro" name="BD_LVM_DEFAULT_PE_SIZE" link="libblockdev-LVM.html#BD-LVM-DEFAULT-PE-SIZE:CAPS"/>
@@ -347,6 +359,7 @@
     <keyword type="enum" name="enum BDLVMCacheMode" link="libblockdev-LVM.html#BDLVMCacheMode"/>
     <keyword type="enum" name="enum BDLVMCachePoolFlags" link="libblockdev-LVM.html#BDLVMCachePoolFlags"/>
     <keyword type="struct" name="BDLVMCacheStats" link="libblockdev-LVM.html#BDLVMCacheStats"/>
+    <keyword type="struct" name="BDLVMVDOStats" link="libblockdev-LVM.html#BDLVMVDOStats"/>
     <keyword type="enum" name="enum BDLVMTech" link="libblockdev-LVM.html#BDLVMTech"/>
     <keyword type="enum" name="enum BDLVMTechMode" link="libblockdev-LVM.html#BDLVMTechMode"/>
     <keyword type="function" name="bd_md_check_deps ()" link="libblockdev-MD-RAID.html#bd-md-check-deps"/>
@@ -565,6 +578,8 @@
     <keyword type="function" name="bd_utils_have_kernel_module ()" link="libblockdev-Utils.html#bd-utils-have-kernel-module"/>
     <keyword type="function" name="bd_utils_load_kernel_module ()" link="libblockdev-Utils.html#bd-utils-load-kernel-module"/>
     <keyword type="function" name="bd_utils_unload_kernel_module ()" link="libblockdev-Utils.html#bd-utils-unload-kernel-module"/>
+    <keyword type="function" name="bd_utils_get_linux_version ()" link="libblockdev-Utils.html#bd-utils-get-linux-version"/>
+    <keyword type="function" name="bd_utils_check_linux_version ()" link="libblockdev-Utils.html#bd-utils-check-linux-version"/>
     <keyword type="function" name="bd_utils_dbus_service_available ()" link="libblockdev-Utils.html#bd-utils-dbus-service-available"/>
     <keyword type="enum" name="enum BDUtilsProgStatus" link="libblockdev-Utils.html#BDUtilsProgStatus"/>
     <keyword type="macro" name="BD_UTILS_EXEC_ERROR" link="libblockdev-Utils.html#BD-UTILS-EXEC-ERROR:CAPS"/>
@@ -584,33 +599,33 @@
     <keyword type="macro" name="PiB" link="libblockdev-Utils.html#PiB"/>
     <keyword type="macro" name="TEBIBYTE" link="libblockdev-Utils.html#TEBIBYTE:CAPS"/>
     <keyword type="macro" name="TiB" link="libblockdev-Utils.html#TiB"/>
-    <keyword type="function" name="bd_vdo_check_deps ()" link="libblockdev-VDO.html#bd-vdo-check-deps"/>
-    <keyword type="function" name="bd_vdo_init ()" link="libblockdev-VDO.html#bd-vdo-init"/>
-    <keyword type="function" name="bd_vdo_close ()" link="libblockdev-VDO.html#bd-vdo-close"/>
+    <keyword type="function" name="bd_vdo_check_deps ()" link="libblockdev-VDO.html#bd-vdo-check-deps" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_init ()" link="libblockdev-VDO.html#bd-vdo-init" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_close ()" link="libblockdev-VDO.html#bd-vdo-close" deprecated="2.24: Use LVM-VDO integration instead."/>
     <keyword type="function" name="bd_vdo_error_quark ()" link="libblockdev-VDO.html#bd-vdo-error-quark"/>
-    <keyword type="function" name="bd_vdo_get_write_policy_str ()" link="libblockdev-VDO.html#bd-vdo-get-write-policy-str"/>
-    <keyword type="function" name="bd_vdo_get_write_policy_from_str ()" link="libblockdev-VDO.html#bd-vdo-get-write-policy-from-str"/>
-    <keyword type="function" name="bd_vdo_info ()" link="libblockdev-VDO.html#bd-vdo-info"/>
-    <keyword type="function" name="bd_vdo_create ()" link="libblockdev-VDO.html#bd-vdo-create"/>
-    <keyword type="function" name="bd_vdo_remove ()" link="libblockdev-VDO.html#bd-vdo-remove"/>
-    <keyword type="function" name="bd_vdo_change_write_policy ()" link="libblockdev-VDO.html#bd-vdo-change-write-policy"/>
-    <keyword type="function" name="bd_vdo_enable_compression ()" link="libblockdev-VDO.html#bd-vdo-enable-compression"/>
-    <keyword type="function" name="bd_vdo_disable_compression ()" link="libblockdev-VDO.html#bd-vdo-disable-compression"/>
-    <keyword type="function" name="bd_vdo_enable_deduplication ()" link="libblockdev-VDO.html#bd-vdo-enable-deduplication"/>
-    <keyword type="function" name="bd_vdo_disable_deduplication ()" link="libblockdev-VDO.html#bd-vdo-disable-deduplication"/>
-    <keyword type="function" name="bd_vdo_activate ()" link="libblockdev-VDO.html#bd-vdo-activate"/>
-    <keyword type="function" name="bd_vdo_deactivate ()" link="libblockdev-VDO.html#bd-vdo-deactivate"/>
-    <keyword type="function" name="bd_vdo_start ()" link="libblockdev-VDO.html#bd-vdo-start"/>
-    <keyword type="function" name="bd_vdo_stop ()" link="libblockdev-VDO.html#bd-vdo-stop"/>
-    <keyword type="function" name="bd_vdo_grow_logical ()" link="libblockdev-VDO.html#bd-vdo-grow-logical"/>
-    <keyword type="function" name="bd_vdo_grow_physical ()" link="libblockdev-VDO.html#bd-vdo-grow-physical"/>
-    <keyword type="function" name="bd_vdo_get_stats ()" link="libblockdev-VDO.html#bd-vdo-get-stats"/>
-    <keyword type="function" name="bd_vdo_get_stats_full ()" link="libblockdev-VDO.html#bd-vdo-get-stats-full"/>
-    <keyword type="function" name="bd_vdo_is_tech_avail ()" link="libblockdev-VDO.html#bd-vdo-is-tech-avail"/>
+    <keyword type="function" name="bd_vdo_get_write_policy_str ()" link="libblockdev-VDO.html#bd-vdo-get-write-policy-str" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_get_write_policy_from_str ()" link="libblockdev-VDO.html#bd-vdo-get-write-policy-from-str" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_info ()" link="libblockdev-VDO.html#bd-vdo-info" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_create ()" link="libblockdev-VDO.html#bd-vdo-create" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_remove ()" link="libblockdev-VDO.html#bd-vdo-remove" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_change_write_policy ()" link="libblockdev-VDO.html#bd-vdo-change-write-policy" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_enable_compression ()" link="libblockdev-VDO.html#bd-vdo-enable-compression" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_disable_compression ()" link="libblockdev-VDO.html#bd-vdo-disable-compression" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_enable_deduplication ()" link="libblockdev-VDO.html#bd-vdo-enable-deduplication" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_disable_deduplication ()" link="libblockdev-VDO.html#bd-vdo-disable-deduplication" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_activate ()" link="libblockdev-VDO.html#bd-vdo-activate" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_deactivate ()" link="libblockdev-VDO.html#bd-vdo-deactivate" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_start ()" link="libblockdev-VDO.html#bd-vdo-start" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_stop ()" link="libblockdev-VDO.html#bd-vdo-stop" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_grow_logical ()" link="libblockdev-VDO.html#bd-vdo-grow-logical" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_grow_physical ()" link="libblockdev-VDO.html#bd-vdo-grow-physical" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_get_stats ()" link="libblockdev-VDO.html#bd-vdo-get-stats" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_get_stats_full ()" link="libblockdev-VDO.html#bd-vdo-get-stats-full" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="function" name="bd_vdo_is_tech_avail ()" link="libblockdev-VDO.html#bd-vdo-is-tech-avail" deprecated="2.24: Use LVM-VDO integration instead."/>
     <keyword type="enum" name="enum BDVDOError" link="libblockdev-VDO.html#BDVDOError"/>
     <keyword type="macro" name="BD_VDO_ERROR" link="libblockdev-VDO.html#BD-VDO-ERROR:CAPS"/>
-    <keyword type="struct" name="BDVDOInfo" link="libblockdev-VDO.html#BDVDOInfo"/>
-    <keyword type="struct" name="BDVDOStats" link="libblockdev-VDO.html#BDVDOStats"/>
+    <keyword type="struct" name="BDVDOInfo" link="libblockdev-VDO.html#BDVDOInfo" deprecated="2.24: Use LVM-VDO integration instead."/>
+    <keyword type="struct" name="BDVDOStats" link="libblockdev-VDO.html#BDVDOStats" deprecated="2.24: Use LVM-VDO integration instead."/>
     <keyword type="enum" name="enum BDVDOTech" link="libblockdev-VDO.html#BDVDOTech"/>
     <keyword type="enum" name="enum BDVDOTechMode" link="libblockdev-VDO.html#BDVDOTechMode"/>
     <keyword type="constant" name="BD_INIT_ERROR_PLUGINS_FAILED" link="libblockdev-blockdev-library.html#BD-INIT-ERROR-PLUGINS-FAILED:CAPS"/>
@@ -649,6 +664,7 @@
     <keyword type="constant" name="BD_CRYPTO_TECH_TRUECRYPT" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-TRUECRYPT:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_ESCROW" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-ESCROW:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_INTEGRITY" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-INTEGRITY:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_TECH_BITLK" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-BITLK:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_MODE_CREATE" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-CREATE:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_MODE_OPEN_CLOSE" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-OPEN-CLOSE:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_MODE_QUERY" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-QUERY:CAPS"/>
@@ -714,6 +730,8 @@
     <keyword type="constant" name="BD_LVM_ERROR_CACHE_NOCACHE" link="libblockdev-LVM.html#BD-LVM-ERROR-CACHE-NOCACHE:CAPS"/>
     <keyword type="constant" name="BD_LVM_ERROR_TECH_UNAVAIL" link="libblockdev-LVM.html#BD-LVM-ERROR-TECH-UNAVAIL:CAPS"/>
     <keyword type="constant" name="BD_LVM_ERROR_FAIL" link="libblockdev-LVM.html#BD-LVM-ERROR-FAIL:CAPS"/>
+    <keyword type="constant" name="BD_LVM_ERROR_NOT_SUPPORTED" link="libblockdev-LVM.html#BD-LVM-ERROR-NOT-SUPPORTED:CAPS"/>
+    <keyword type="constant" name="BD_LVM_ERROR_VDO_POLICY_INVAL" link="libblockdev-LVM.html#BD-LVM-ERROR-VDO-POLICY-INVAL:CAPS"/>
     <keyword type="constant" name="BD_LVM_CACHE_MODE_WRITETHROUGH" link="libblockdev-LVM.html#BD-LVM-CACHE-MODE-WRITETHROUGH:CAPS"/>
     <keyword type="constant" name="BD_LVM_CACHE_MODE_WRITEBACK" link="libblockdev-LVM.html#BD-LVM-CACHE-MODE-WRITEBACK:CAPS"/>
     <keyword type="constant" name="BD_LVM_CACHE_MODE_UNKNOWN" link="libblockdev-LVM.html#BD-LVM-CACHE-MODE-UNKNOWN:CAPS"/>
@@ -735,6 +753,7 @@
     <keyword type="constant" name="BD_LVM_TECH_THIN_CALCS" link="libblockdev-LVM.html#BD-LVM-TECH-THIN-CALCS:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_CACHE_CALCS" link="libblockdev-LVM.html#BD-LVM-TECH-CACHE-CALCS:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_GLOB_CONF" link="libblockdev-LVM.html#BD-LVM-TECH-GLOB-CONF:CAPS"/>
+    <keyword type="constant" name="BD_LVM_TECH_VDO" link="libblockdev-LVM.html#BD-LVM-TECH-VDO:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_MODE_CREATE" link="libblockdev-LVM.html#BD-LVM-TECH-MODE-CREATE:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_MODE_REMOVE" link="libblockdev-LVM.html#BD-LVM-TECH-MODE-REMOVE:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_MODE_MODIFY" link="libblockdev-LVM.html#BD-LVM-TECH-MODE-MODIFY:CAPS"/>
@@ -898,6 +917,8 @@
     <keyword type="constant" name="BD_UTILS_EXEC_ERROR_UTIL_UNKNOWN_VER" link="libblockdev-Utils.html#BD-UTILS-EXEC-ERROR-UTIL-UNKNOWN-VER:CAPS"/>
     <keyword type="constant" name="BD_UTILS_EXEC_ERROR_UTIL_LOW_VER" link="libblockdev-Utils.html#BD-UTILS-EXEC-ERROR-UTIL-LOW-VER:CAPS"/>
     <keyword type="constant" name="BD_UTILS_EXEC_ERROR_UTIL_CHECK_ERROR" link="libblockdev-Utils.html#BD-UTILS-EXEC-ERROR-UTIL-CHECK-ERROR:CAPS"/>
+    <keyword type="constant" name="BD_UTILS_EXEC_ERROR_UTIL_FEATURE_CHECK_ERROR" link="libblockdev-Utils.html#BD-UTILS-EXEC-ERROR-UTIL-FEATURE-CHECK-ERROR:CAPS"/>
+    <keyword type="constant" name="BD_UTILS_EXEC_ERROR_UTIL_FEATURE_UNAVAILABLE" link="libblockdev-Utils.html#BD-UTILS-EXEC-ERROR-UTIL-FEATURE-UNAVAILABLE:CAPS"/>
     <keyword type="constant" name="BD_UTILS_DEV_UTILS_ERROR_FAILED" link="libblockdev-Utils.html#BD-UTILS-DEV-UTILS-ERROR-FAILED:CAPS"/>
     <keyword type="constant" name="BD_VDO_ERROR_FAIL" link="libblockdev-VDO.html#BD-VDO-ERROR-FAIL:CAPS"/>
     <keyword type="constant" name="BD_VDO_ERROR_PARSE" link="libblockdev-VDO.html#BD-VDO-ERROR-PARSE:CAPS"/>
@@ -1007,6 +1028,15 @@
     <keyword type="member" name="BDLVMCacheStats.write-hits" link="libblockdev-LVM.html#BDLVMCacheStats.write-hits"/>
     <keyword type="member" name="BDLVMCacheStats.write-misses" link="libblockdev-LVM.html#BDLVMCacheStats.write-misses"/>
     <keyword type="member" name="BDLVMCacheStats.mode" link="libblockdev-LVM.html#BDLVMCacheStats.mode"/>
+    <keyword type="member" name="BDLVMVDOStats.block-size" link="libblockdev-LVM.html#BDLVMVDOStats.block-size"/>
+    <keyword type="member" name="BDLVMVDOStats.logical-block-size" link="libblockdev-LVM.html#BDLVMVDOStats.logical-block-size"/>
+    <keyword type="member" name="BDLVMVDOStats.physical-blocks" link="libblockdev-LVM.html#BDLVMVDOStats.physical-blocks"/>
+    <keyword type="member" name="BDLVMVDOStats.data-blocks-used" link="libblockdev-LVM.html#BDLVMVDOStats.data-blocks-used"/>
+    <keyword type="member" name="BDLVMVDOStats.overhead-blocks-used" link="libblockdev-LVM.html#BDLVMVDOStats.overhead-blocks-used"/>
+    <keyword type="member" name="BDLVMVDOStats.logical-blocks-used" link="libblockdev-LVM.html#BDLVMVDOStats.logical-blocks-used"/>
+    <keyword type="member" name="BDLVMVDOStats.used-percent" link="libblockdev-LVM.html#BDLVMVDOStats.used-percent"/>
+    <keyword type="member" name="BDLVMVDOStats.saving-percent" link="libblockdev-LVM.html#BDLVMVDOStats.saving-percent"/>
+    <keyword type="member" name="BDLVMVDOStats.write-amplification-ratio" link="libblockdev-LVM.html#BDLVMVDOStats.write-amplification-ratio"/>
     <keyword type="member" name="BDMDExamineData.device" link="libblockdev-MD-RAID.html#BDMDExamineData.device"/>
     <keyword type="member" name="BDMDExamineData.level" link="libblockdev-MD-RAID.html#BDMDExamineData.level"/>
     <keyword type="member" name="BDMDExamineData.num-devices" link="libblockdev-MD-RAID.html#BDMDExamineData.num-devices"/>

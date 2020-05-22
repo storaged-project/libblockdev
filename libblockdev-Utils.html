@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-s390.html" title="s390">
 <link rel="next" href="libblockdev-VDO.html" title="VDO">
-<meta name="generator" content="GTK-Doc V1.29 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.32 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -35,8 +35,8 @@
 <a name="libblockdev-Utils.functions"></a><h2>Functions</h2>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
-<col width="150px" class="functions_return">
-<col class="functions_name">
+<col width="150px" class="functions_proto_type">
+<col class="functions_proto_name">
 </colgroup>
 <tbody>
 <tr>
@@ -281,6 +281,22 @@
 </tr>
 <tr>
 <td class="function_type">
+<span class="returnvalue">BDUtilsLinuxVersion</span> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-utils-get-linux-version" title="bd_utils_get_linux_version ()">bd_utils_get_linux_version</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gint"><span class="returnvalue">gint</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-utils-check-linux-version" title="bd_utils_check_linux_version ()">bd_utils_check_linux_version</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
@@ -294,8 +310,8 @@
 <a name="libblockdev-Utils.other"></a><h2>Types and Values</h2>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
-<col width="150px" class="name">
-<col class="description">
+<col width="150px" class="other_proto_type">
+<col class="other_proto_name">
 </colgroup>
 <tbody>
 <tr>
@@ -1137,10 +1153,10 @@ This will result in calling <code class="literal">mkfs.xfs</code> with <code cla
 2
 3
 4</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="usertype">BDExtraArg</span><span class="normal"> label_arg </span><span class="symbol">=</span><span class="normal"> </span><span class="cbracket">{</span><span class="string">"-L"</span><span class="symbol">,</span><span class="normal"> </span><span class="string">"label"</span><span class="cbracket">}</span><span class="symbol">;</span>
-<span class="keyword">const</span><span class="normal"> </span><span class="usertype">BDExtraArg</span><span class="normal"> </span><span class="symbol">*</span><span class="normal">extra_args</span><span class="symbol">[</span><span class="number">2</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> </span><span class="cbracket">{</span><span class="symbol">&amp;</span><span class="normal">label_arg</span><span class="symbol">,</span><span class="normal"> <a href="../glib/glib-Standard-Macros.html#NULL:CAPS">NULL</a></span><span class="cbracket">}</span><span class="symbol">;</span>
+        <td class="listing_code"><pre class="programlisting"><span class="n">BDExtraArg</span> <span class="n">label_arg</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;-L&quot;</span><span class="p">,</span> <span class="s">&quot;label&quot;</span><span class="p">};</span>
+<span class="k">const</span> <span class="n">BDExtraArg</span> <span class="o">*</span><span class="n">extra_args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="o">&amp;</span><span class="n">label_arg</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">};</span>
 
-<span class="normal">ret </span><span class="symbol">=</span><span class="normal"> </span><span class="function"><a href="libblockdev-FS.html#bd-fs-xfs-mkfs">bd_fs_xfs_mkfs</a></span><span class="normal"> </span><span class="symbol">(</span><span class="string">"/dev/sda"</span><span class="symbol">,</span><span class="normal"> extra_args</span><span class="symbol">,</span><span class="normal"> error</span><span class="symbol">);</span></pre></td>
+<span class="n">ret</span> <span class="o">=</span> <span class="n">bd_fs_xfs_mkfs</span> <span class="p">(</span><span class="s">&quot;/dev/sda&quot;</span><span class="p">,</span> <span class="n">extra_args</span><span class="p">,</span> <span class="n">error</span><span class="p">);</span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -1384,6 +1400,80 @@ was successfully unloaded or not</p>
 </div>
 <hr>
 <div class="refsect2">
+<a name="bd-utils-get-linux-version"></a><h3>bd_utils_get_linux_version ()</h3>
+<pre class="programlisting"><span class="returnvalue">BDUtilsLinuxVersion</span> *
+bd_utils_get_linux_version (<em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Retrieves version of currently running Linux kernel. Acts also as an initializer for statically cached data.</p>
+<div class="refsect3">
+<a name="bd-utils-get-linux-version.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr></tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-utils-get-linux-version.returns"></a><h4>Returns</h4>
+<p>Detected Linux kernel version or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of an error. The returned value belongs to the library, do not free. </p>
+<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-utils-check-linux-version"></a><h3>bd_utils_check_linux_version ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gint"><span class="returnvalue">gint</span></a>
+bd_utils_check_linux_version (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> major</code></em>,
+                              <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> minor</code></em>,
+                              <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint"><span class="type">guint</span></a> micro</code></em>);</pre>
+<p>Checks whether the currently running linux kernel version is equal or higher
+than the specified required <em class="parameter"><code>major</code></em>
+.<em class="parameter"><code>minor</code></em>
+.<em class="parameter"><code>micro</code></em>
+ version.</p>
+<div class="refsect3">
+<a name="bd-utils-check-linux-version.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>major</p></td>
+<td class="parameter_description"><p>Minimal major linux kernel version.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>minor</p></td>
+<td class="parameter_description"><p>Minimal minor linux kernel version.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>micro</p></td>
+<td class="parameter_description"><p>Minimal micro linux kernel version.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-utils-check-linux-version.returns"></a><h4>Returns</h4>
+<p> an integer less than, equal to, or greater than zero, if detected version is &lt;, == or &gt; than the specified <em class="parameter"><code>major</code></em>
+.<em class="parameter"><code>minor</code></em>
+.<em class="parameter"><code>micro</code></em>
+version.</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="bd-utils-dbus-service-available"></a><h3>bd_utils_dbus_service_available ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 bd_utils_dbus_service_available (<em class="parameter"><code><a href="../gio/GDBusConnection.html#GDBusConnection-struct"><span class="type">GDBusConnection</span></a> *connection</code></em>,
@@ -1520,6 +1610,16 @@ is specified</p></td>
 <td> </td>
 <td> </td>
 </tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-UTILS-EXEC-ERROR-UTIL-FEATURE-CHECK-ERROR:CAPS"></a>BD_UTILS_EXEC_ERROR_UTIL_FEATURE_CHECK_ERROR</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-UTILS-EXEC-ERROR-UTIL-FEATURE-UNAVAILABLE:CAPS"></a>BD_UTILS_EXEC_ERROR_UTIL_FEATURE_UNAVAILABLE</p></td>
+<td> </td>
+<td> </td>
+</tr>
 </tbody>
 </table></div>
 </div>
@@ -1634,6 +1734,6 @@ is specified</p></td>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.29</div>
+<hr>Generated by GTK-Doc V1.32</div>
 </body>
 </html>
