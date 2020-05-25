@@ -658,6 +658,7 @@ bd_nvdimm_namespace_info
 bd_nvdimm_list_namespaces
 bd_nvdimm_namespace_reconfigure
 bd_nvdimm_namepace_get_supported_sector_sizes
+bd_nvdimm_namespace_get_supported_sector_sizes
 BDNVDIMMTech
 BDNVDIMMTechMode
 bd_nvdimm_is_tech_avail
