@@ -643,7 +643,7 @@ static guint64 pmem_sector_sizes[] = { 512, 4096, 0 };
 static guint64 io_sector_sizes[] = { 0 };
 
 /**
- * bd_nvdimm_namepace_get_supported_sector_sizes:
+ * bd_nvdimm_namespace_get_supported_sector_sizes:
  * @mode: namespace mode
  * @error: (out): place to store error if any
  *
@@ -651,7 +651,7 @@ static guint64 io_sector_sizes[] = { 0 };
  *
  * Tech category: %BD_NVDIMM_TECH_NAMESPACE-%BD_NVDIMM_TECH_MODE_QUERY
  */
-const guint64 *bd_nvdimm_namepace_get_supported_sector_sizes (BDNVDIMMNamespaceMode mode, GError **error) {
+const guint64 *bd_nvdimm_namespace_get_supported_sector_sizes (BDNVDIMMNamespaceMode mode, GError **error) {
     switch (mode) {
         case BD_NVDIMM_NAMESPACE_MODE_RAW:
         case BD_NVDIMM_NAMESPACE_MODE_MEMORY:
@@ -670,4 +670,19 @@ const guint64 *bd_nvdimm_namepace_get_supported_sector_sizes (BDNVDIMMNamespaceM
                          "Invalid/unknown mode specified.");
             return NULL;
     }
+}
+
+/**
+ * bd_nvdimm_namepace_get_supported_sector_sizes:
+ * @mode: namespace mode
+ * @error: (out): place to store error if any
+ *
+ * Returns: (transfer none) (array zero-terminated=1): list of supported sector sizes for @mode
+ *
+ * Tech category: %BD_NVDIMM_TECH_NAMESPACE-%BD_NVDIMM_TECH_MODE_QUERY
+ *
+ * Deprecated: 2.25: Use %bd_nvdimm_namespace_get_supported_sector_sizes integration instead.
+ */
+const guint64 *bd_nvdimm_namepace_get_supported_sector_sizes (BDNVDIMMNamespaceMode mode, GError **error) {
+    return bd_nvdimm_namespace_get_supported_sector_sizes (mode, error);
 }

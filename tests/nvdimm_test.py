@@ -224,3 +224,12 @@ class NVDIMMNoDevTest(NVDIMMTestCase):
 
         sizes = BlockDev.nvdimm_namepace_get_supported_sector_sizes(BlockDev.NVDIMMNamespaceMode.FSDAX)
         self.assertListEqual(sizes, [512, 4096])
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.nvdimm_namespace_get_supported_sector_sizes(BlockDev.NVDIMMNamespaceMode.UNKNOWN)
+
+        sizes = BlockDev.nvdimm_namespace_get_supported_sector_sizes(BlockDev.NVDIMMNamespaceMode.SECTOR)
+        self.assertListEqual(sizes, [512, 520, 528, 4096, 4104, 4160, 4224])
+
+        sizes = BlockDev.nvdimm_namespace_get_supported_sector_sizes(BlockDev.NVDIMMNamespaceMode.FSDAX)
+        self.assertListEqual(sizes, [512, 4096])
