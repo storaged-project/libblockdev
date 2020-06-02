@@ -245,6 +245,11 @@ class MDTestActivateDeactivate(MDTestCase):
                                         [self.loop_dev, self.loop_dev2, self.loop_dev3], None)
             self.assertTrue(succ)
 
+        # try to activate again, should not fail, just no-op
+        succ = BlockDev.md_activate("bd_test_md",
+                                    [self.loop_dev, self.loop_dev2, self.loop_dev3], None)
+        self.assertTrue(succ)
+
         # try to deactivate using the node instead of name
         with wait_for_action("resync"):
             succ = BlockDev.md_deactivate(BlockDev.md_node_from_name("bd_test_md"))
