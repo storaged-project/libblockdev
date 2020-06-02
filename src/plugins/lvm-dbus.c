@@ -109,6 +109,7 @@ BDLVMPVdata* bd_lvm_pvdata_copy (BDLVMPVdata *data) {
     new_data->vg_extent_count = data->vg_extent_count;
     new_data->vg_free_count = data->vg_free_count;
     new_data->vg_pv_count = data->vg_pv_count;
+    new_data->pv_tags = g_strdupv (data->pv_tags);
 
     return new_data;
 }
@@ -121,6 +122,7 @@ void bd_lvm_pvdata_free (BDLVMPVdata *data) {
     g_free (data->pv_uuid);
     g_free (data->vg_name);
     g_free (data->vg_uuid);
+    g_strfreev (data->pv_tags);
     g_free (data);
 }
 
@@ -138,6 +140,7 @@ BDLVMVGdata* bd_lvm_vgdata_copy (BDLVMVGdata *data) {
     new_data->extent_count = data->extent_count;
     new_data->free_count = data->free_count;
     new_data->pv_count = data->pv_count;
+    new_data->vg_tags = g_strdupv (data->vg_tags);
     return new_data;
 }
 
@@ -147,6 +150,7 @@ void bd_lvm_vgdata_free (BDLVMVGdata *data) {
 
     g_free (data->name);
     g_free (data->uuid);
+    g_strfreev (data->vg_tags);
     g_free (data);
 }
 
@@ -171,6 +175,7 @@ BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
     new_data->data_percent = data->data_percent;
     new_data->metadata_percent = data->metadata_percent;
     new_data->copy_percent = data->copy_percent;
+    new_data->lv_tags = g_strdupv (data->lv_tags);
     return new_data;
 }
 
@@ -189,6 +194,7 @@ void bd_lvm_lvdata_free (BDLVMLVdata *data) {
     g_free (data->metadata_lv);
     g_free (data->roles);
     g_free (data->move_pv);
+    g_strfreev (data->lv_tags);
     g_free (data);
 }
 
@@ -939,8 +945,12 @@ static GVariant* get_vdo_properties (const gchar *vg_name, const gchar *pool_nam
 static BDLVMPVdata* get_pv_data_from_props (GVariant *props, GError **error) {
     BDLVMPVdata *data = g_new0 (BDLVMPVdata, 1);
     GVariantDict dict;
-    gchar *value = NULL;
+    gchar *path = NULL;
     GVariant *vg_props = NULL;
+    GVariant *value = NULL;
+    gsize n_children = 0;
+    gsize i = 0;
+    gchar **tags = NULL;
 
     g_variant_dict_init (&dict, props);
 
@@ -950,15 +960,26 @@ static BDLVMPVdata* get_pv_data_from_props (GVariant *props, GError **error) {
     g_variant_dict_lookup (&dict, "SizeBytes", "t", &(data->pv_size));
     g_variant_dict_lookup (&dict, "PeStart", "t", &(data->pe_start));
 
+    value = g_variant_dict_lookup_value (&dict, "Tags", (GVariantType*) "as");
+    if (value) {
+        n_children = g_variant_n_children (value);
+        tags = g_new0 (gchar*, n_children + 1);
+        for (i=0; i < n_children; i++) {
+            g_variant_get_child (value, i, "s", tags+i);
+        }
+        data->pv_tags = tags;
+        g_variant_unref (value);
+    }
+
     /* returns an object path for the VG */
-    g_variant_dict_lookup (&dict, "Vg", "&o", &value);
-    if (g_strcmp0 (value, "/") == 0) {
+    g_variant_dict_lookup (&dict, "Vg", "&o", &path);
+    if (g_strcmp0 (path, "/") == 0) {
         /* no VG, the PV is not part of any VG */
         g_variant_dict_clear (&dict);
         return data;
     }
 
-    vg_props = get_object_properties (value, VG_INTF, error);
+    vg_props = get_object_properties (path, VG_INTF, error);
     g_variant_dict_clear (&dict);
     if (!vg_props)
         return data;
@@ -982,6 +1003,10 @@ static BDLVMPVdata* get_pv_data_from_props (GVariant *props, GError **error) {
 static BDLVMVGdata* get_vg_data_from_props (GVariant *props, GError **error __attribute__((unused))) {
     BDLVMVGdata *data = g_new0 (BDLVMVGdata, 1);
     GVariantDict dict;
+    GVariant *value = NULL;
+    gsize n_children = 0;
+    gsize i = 0;
+    gchar **tags = NULL;
 
     g_variant_dict_init (&dict, props);
 
@@ -995,6 +1020,17 @@ static BDLVMVGdata* get_vg_data_from_props (GVariant *props, GError **error __at
     g_variant_dict_lookup (&dict, "FreeCount", "t", &(data->free_count));
     g_variant_dict_lookup (&dict, "PvCount", "t", &(data->pv_count));
     g_variant_dict_lookup (&dict, "Exportable", "b", &(data->exported));
+
+    value = g_variant_dict_lookup_value (&dict, "Tags", (GVariantType*) "as");
+    if (value) {
+        n_children = g_variant_n_children (value);
+        tags = g_new0 (gchar*, n_children + 1);
+        for (i=0; i < n_children; i++) {
+            g_variant_get_child (value, i, "s", tags+i);
+        }
+        data->vg_tags = tags;
+        g_variant_unref (value);
+    }
 
     g_variant_dict_clear (&dict);
 
@@ -1010,6 +1046,7 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error) {
     gsize n_children = 0;
     gsize i = 0;
     gchar **roles = NULL;
+    gchar **tags = NULL;
 
     g_variant_dict_init (&dict, props);
 
@@ -1075,6 +1112,17 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error) {
     }
     g_free (path);
     path = NULL;
+
+    value = g_variant_dict_lookup_value (&dict, "Tags", (GVariantType*) "as");
+    if (value) {
+        n_children = g_variant_n_children (value);
+        tags = g_new0 (gchar*, n_children + 1);
+        for (i=0; i < n_children; i++) {
+            g_variant_get_child (value, i, "s", tags+i);
+        }
+        data->lv_tags = tags;
+        g_variant_unref (value);
+    }
 
     g_variant_dict_clear (&dict);
     g_variant_unref (props);

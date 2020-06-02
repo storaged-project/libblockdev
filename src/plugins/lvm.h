@@ -112,6 +112,7 @@ typedef struct BDLVMPVdata {
     guint64 vg_extent_count;
     guint64 vg_free_count;
     guint64 vg_pv_count;
+    gchar **pv_tags;
 } BDLVMPVdata;
 
 void bd_lvm_pvdata_free (BDLVMPVdata *data);
@@ -127,6 +128,7 @@ typedef struct BDLVMVGdata {
     guint64 free_count;
     guint64 pv_count;
     gboolean exported;
+    gchar **vg_tags;
 } BDLVMVGdata;
 
 void bd_lvm_vgdata_free (BDLVMVGdata *data);
@@ -148,6 +150,7 @@ typedef struct BDLVMLVdata {
     guint64 data_percent;
     guint64 metadata_percent;
     guint64 copy_percent;
+    gchar **lv_tags;
 } BDLVMLVdata;
 
 void bd_lvm_lvdata_free (BDLVMLVdata *data);

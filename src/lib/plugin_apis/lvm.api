@@ -115,6 +115,7 @@ GType bd_lvm_pvdata_get_type();
  * @vg_extent_count: number of extents in the PV's VG
  * @vg_free_count: number of free extents in the PV's VG
  * @vg_pv_count: number of PVs that belong to this PV's VG
+ * @pv_tags: (array zero-terminated=1): list of LVM tags for this PV
  */
 typedef struct BDLVMPVdata {
     gchar *pv_name;
@@ -130,6 +131,7 @@ typedef struct BDLVMPVdata {
     guint64 vg_extent_count;
     guint64 vg_free_count;
     guint64 vg_pv_count;
+    gchar **pv_tags;
 } BDLVMPVdata;
 
 /**
@@ -156,6 +158,7 @@ BDLVMPVdata* bd_lvm_pvdata_copy (BDLVMPVdata *data) {
     new_data->vg_extent_count = data->vg_extent_count;
     new_data->vg_free_count = data->vg_free_count;
     new_data->vg_pv_count = data->vg_pv_count;
+    new_data->pv_tags = g_strdupv (data->pv_tags);
 
     return new_data;
 }
@@ -173,6 +176,7 @@ void bd_lvm_pvdata_free (BDLVMPVdata *data) {
     g_free (data->pv_uuid);
     g_free (data->vg_name);
     g_free (data->vg_uuid);
+    g_strfreev (data->pv_tags);
     g_free (data);
 }
 
@@ -202,6 +206,7 @@ GType bd_lvm_vgdata_get_type();
  * @free_count: number of free extents in the VG
  * @pv_count: number of PVs that belong to the VG
  * @exported: whether the VG is exported or not
+ * @vg_tags: (array zero-terminated=1): list of LVM tags for this VG
  */
 typedef struct BDLVMVGdata {
     gchar *name;
@@ -213,6 +218,7 @@ typedef struct BDLVMVGdata {
     guint64 free_count;
     guint64 pv_count;
     gboolean exported;
+    gchar **vg_tags;
 } BDLVMVGdata;
 
 /**
@@ -235,6 +241,7 @@ BDLVMVGdata* bd_lvm_vgdata_copy (BDLVMVGdata *data) {
     new_data->free_count = data->free_count;
     new_data->pv_count = data->pv_count;
     new_data->exported = data->exported;
+    new_data->vg_tags = g_strdupv (data->vg_tags);
 
     return new_data;
 }
@@ -250,6 +257,7 @@ void bd_lvm_vgdata_free (BDLVMVGdata *data) {
 
     g_free (data->name);
     g_free (data->uuid);
+    g_strfreev (data->vg_tags);
     g_free (data);
 }
 
@@ -280,6 +288,7 @@ GType bd_lvm_lvdata_get_type();
  * @pool_lv: pool LV of the LV (for thin and cached LVs)
  * @data_lv: data LV of the LV (for thin and cache pools)
  * @metadata_lv: metadata LV of the LV (for thin and cache pools)
+ * @lv_tags: (array zero-terminated=1): list of LVM tags for this LV
  */
 typedef struct BDLVMLVdata {
     gchar *lv_name;
@@ -297,6 +306,7 @@ typedef struct BDLVMLVdata {
     guint64 data_percent;
     guint64 metadata_percent;
     guint64 copy_percent;
+    gchar **lv_tags;
 } BDLVMLVdata;
 
 /**
@@ -325,6 +335,7 @@ BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
     new_data->data_percent = data->data_percent;
     new_data->metadata_percent = data->metadata_percent;
     new_data->copy_percent = data->copy_percent;
+    new_data->lv_tags = g_strdupv (data->lv_tags);
     return new_data;
 }
 
@@ -348,6 +359,7 @@ void bd_lvm_lvdata_free (BDLVMLVdata *data) {
     g_free (data->metadata_lv);
     g_free (data->roles);
     g_free (data->move_pv);
+    g_strfreev (data->lv_tags);
     g_free (data);
 }
 
