@@ -288,6 +288,8 @@ bd_lvm_pvresize
 bd_lvm_pvremove
 bd_lvm_pvmove
 bd_lvm_pvscan
+bd_lvm_add_pv_tags
+bd_lvm_delete_pv_tags
 bd_lvm_pvinfo
 bd_lvm_pvs
 bd_lvm_vgcreate
@@ -297,6 +299,8 @@ bd_lvm_vgactivate
 bd_lvm_vgdeactivate
 bd_lvm_vgextend
 bd_lvm_vgreduce
+bd_lvm_add_vg_tags
+bd_lvm_delete_vg_tags
 bd_lvm_vginfo
 bd_lvm_vgs
 bd_lvm_lvorigin
@@ -308,6 +312,8 @@ bd_lvm_lvactivate
 bd_lvm_lvdeactivate
 bd_lvm_lvsnapshotcreate
 bd_lvm_lvsnapshotmerge
+bd_lvm_add_lv_tags
+bd_lvm_delete_lv_tags
 bd_lvm_lvinfo
 bd_lvm_lvs
 bd_lvm_thpoolcreate

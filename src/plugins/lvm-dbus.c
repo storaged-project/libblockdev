@@ -1658,6 +1658,111 @@ gboolean bd_lvm_pvscan (const gchar *device, gboolean update_cache, const BDExtr
     return ((*error) == NULL);
 }
 
+
+static gboolean _manage_lvm_tags (const gchar *objpath, const gchar *pv_path, const gchar *intf, const gchar **tags, const gchar *func, GError **error) {
+    guint num_tags = g_strv_length ((gchar **) tags);
+    GVariant *params = NULL;
+    GVariant **tags_array = NULL;
+    GVariantBuilder builder;
+    GVariant *pv_var = NULL;
+
+    g_variant_builder_init (&builder, G_VARIANT_TYPE_TUPLE);
+
+    if (pv_path) {
+        /* PV tags are set from the VG interface so we need to add the PV as an argument here */
+        pv_var = g_variant_new ("o", pv_path);
+        g_variant_builder_add_value (&builder, g_variant_new_array (G_VARIANT_TYPE_OBJECT_PATH, &pv_var, 1));
+    }
+
+    tags_array = g_new0 (GVariant *, num_tags + 1);
+    for (guint i = 0; i < num_tags; i++)
+        tags_array[i] = g_variant_new_string (tags[i]);
+
+    g_variant_builder_add_value (&builder, g_variant_new_array (G_VARIANT_TYPE_STRING, tags_array, num_tags));
+
+    params = g_variant_builder_end (&builder);
+    g_variant_builder_clear (&builder);
+
+    call_lvm_method_sync (objpath, intf, func, params, NULL, NULL, TRUE, error);
+    g_free (tags_array);
+    return ((*error) == NULL);
+}
+
+/**
+ * bd_lvm_add_pv_tags:
+ * @device: the device to set PV tags for
+ * @tags: (array zero-terminated=1): list of tags to add
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the tags were successfully added to @device or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+gboolean bd_lvm_add_pv_tags (const gchar *device, const gchar **tags, GError **error){
+    BDLVMPVdata *pvinfo = NULL;
+    g_autofree gchar *vg_path = NULL;
+    g_autofree gchar *pv_path = NULL;
+
+    pv_path = get_object_path (device, error);
+    if (!pv_path)
+        return FALSE;
+
+    pvinfo = bd_lvm_pvinfo (device, error);
+    if (!pvinfo)
+        return FALSE;
+
+    if (!pvinfo->vg_name) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                     "Tags can't be added to PVs without a VG");
+        bd_lvm_pvdata_free (pvinfo);
+        return FALSE;
+    }
+
+    vg_path = get_object_path (pvinfo->vg_name, error);
+    bd_lvm_pvdata_free (pvinfo);
+    if (!vg_path)
+        return FALSE;
+
+    return _manage_lvm_tags (vg_path, pv_path, VG_INTF, tags, "PvTagsAdd", error);
+}
+
+/**
+ * bd_lvm_delete_pv_tags:
+ * @device: the device to set PV tags for
+ * @tags: (array zero-terminated=1): list of tags to remove
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the tags were successfully removed from @device or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+gboolean bd_lvm_delete_pv_tags (const gchar *device, const gchar **tags, GError **error)  {
+    BDLVMPVdata *pvinfo = NULL;
+    g_autofree gchar *vg_path = NULL;
+    g_autofree gchar *pv_path = NULL;
+
+    pv_path = get_object_path (device, error);
+    if (!pv_path)
+        return FALSE;
+
+    pvinfo = bd_lvm_pvinfo (device, error);
+    if (!pvinfo)
+        return FALSE;
+
+    if (!pvinfo->vg_name) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                     "Tags can't be removed from PVs without a VG");
+        bd_lvm_pvdata_free (pvinfo);
+        return FALSE;
+    }
+
+    vg_path = get_object_path (pvinfo->vg_name, error);
+    bd_lvm_pvdata_free (pvinfo);
+    if (!vg_path)
+        return FALSE;
+
+    return _manage_lvm_tags (vg_path, pv_path, VG_INTF, tags, "PvTagsDel", error);
+}
 /**
  * bd_lvm_pvinfo:
  * @device: a PV to get information about or %NULL
@@ -1941,6 +2046,42 @@ gboolean bd_lvm_vgreduce (const gchar *vg_name, const gchar *device, const BDExt
     call_lvm_obj_method_sync (vg_name, VG_INTF, "Reduce", params, extra_params, extra, TRUE, error);
     g_free (pv);
     return ((*error) == NULL);
+}
+
+/**
+ * bd_lvm_add_vg_tags:
+ * @vg_name: the VG to set tags on
+ * @tags: (array zero-terminated=1): list of tags to add
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the tags were successfully added to @vg_name or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+gboolean bd_lvm_add_vg_tags (const gchar *vg_name, const gchar **tags, GError **error) {
+    g_autofree gchar *obj_path = get_object_path (vg_name, error);
+    if (!obj_path)
+        return FALSE;
+
+    return _manage_lvm_tags (obj_path, NULL, VG_INTF, tags, "TagsAdd", error);
+}
+
+/**
+ * bd_lvm_delete_vg_tags:
+ * @vg_name: the VG to set tags on
+ * @tags: (array zero-terminated=1): list of tags to remove
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the tags were successfully removed from @vg_name or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+gboolean bd_lvm_delete_vg_tags (const gchar *vg_name, const gchar **tags, GError **error) {
+    g_autofree gchar *obj_path = get_object_path (vg_name, error);
+    if (!obj_path)
+        return FALSE;
+
+    return _manage_lvm_tags (obj_path, NULL, VG_INTF, tags, "TagsDel", error);
 }
 
 /**
@@ -2312,6 +2453,54 @@ gboolean bd_lvm_lvsnapshotmerge (const gchar *vg_name, const gchar *snapshot_nam
 
     call_lvm_method_sync (obj_path, SNAP_INTF, "Merge", NULL, NULL, extra, TRUE, error);
     return (*error == NULL);
+}
+
+/**
+ * bd_lvm_add_lv_tags:
+ * @vg_name: name of the VG that contains the LV to set tags on
+ * @lv_name: name of the LV to set tags on
+ * @tags: (array zero-terminated=1): list of tags to add
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the tags were successfully added to @device or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+gboolean bd_lvm_add_lv_tags (const gchar *vg_name, const gchar *lv_name, const gchar **tags, GError **error) {
+    g_autofree gchar *obj_id = NULL;
+    g_autofree gchar *obj_path = NULL;
+
+    /* get object path for vg_name/lv_name */
+    obj_id = g_strdup_printf ("%s/%s", vg_name, lv_name);
+    obj_path = get_object_path (obj_id, error);
+    if (!obj_path)
+        return FALSE;
+
+    return _manage_lvm_tags (obj_path, NULL, LV_INTF, tags, "TagsAdd", error);
+}
+
+/**
+ * bd_lvm_delete_lv_tags:
+ * @vg_name: name of the VG that contains the LV to set tags on
+ * @lv_name: name of the LV to set tags on
+ * @tags: (array zero-terminated=1): list of tags to remove
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the tags were successfully removed from @device or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+gboolean bd_lvm_delete_lv_tags (const gchar *vg_name, const gchar *lv_name, const gchar **tags, GError **error) {
+    g_autofree gchar *obj_id = NULL;
+    g_autofree gchar *obj_path = NULL;
+
+    /* get object path for vg_name/lv_name */
+    obj_id = g_strdup_printf ("%s/%s", vg_name, lv_name);
+    obj_path = get_object_path (obj_id, error);
+    if (!obj_path)
+        return FALSE;
+
+    return _manage_lvm_tags (obj_path, NULL, LV_INTF, tags, "TagsDel", error);
 }
 
 /**

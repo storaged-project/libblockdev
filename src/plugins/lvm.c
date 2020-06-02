@@ -1098,6 +1098,53 @@ gboolean bd_lvm_pvscan (const gchar *device, gboolean update_cache, const BDExtr
     return call_lvm_and_report_error (args, extra, TRUE, error);
 }
 
+static gboolean _manage_lvm_tags (const gchar *devspec, const gchar **tags, const gchar *action, const gchar *cmd, GError **error) {
+    guint tags_len = g_strv_length ((gchar **) tags);
+    const gchar **argv = g_new0 (const gchar*, 2 * tags_len + 3);
+    guint next_arg = 0;
+    gboolean success = FALSE;
+
+    argv[next_arg++] = cmd;
+    for (guint i = 0; i < tags_len; i++) {
+        argv[next_arg++] = action;
+        argv[next_arg++] = tags[i];
+    }
+    argv[next_arg++] = devspec;
+    argv[next_arg] = NULL;
+
+    success = call_lvm_and_report_error (argv, NULL, TRUE, error);
+    g_free (argv);
+    return success;
+}
+
+/**
+ * bd_lvm_add_pv_tags:
+ * @device: the device to set PV tags for
+ * @tags: (array zero-terminated=1): list of tags to add
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the tags were successfully added to @device or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+gboolean bd_lvm_add_pv_tags (const gchar *device, const gchar **tags, GError **error) {
+    return _manage_lvm_tags (device, tags, "--addtag", "pvchange", error);
+}
+
+/**
+ * bd_lvm_delete_pv_tags:
+ * @device: the device to set PV tags for
+ * @tags: (array zero-terminated=1): list of tags to remove
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the tags were successfully removed from @device or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+gboolean bd_lvm_delete_pv_tags (const gchar *device, const gchar **tags, GError **error) {
+    return _manage_lvm_tags (device, tags, "--deltag", "pvchange", error);
+}
+
 /**
  * bd_lvm_pvinfo:
  * @device: a PV to get information about or %NULL
@@ -1369,6 +1416,34 @@ gboolean bd_lvm_vgreduce (const gchar *vg_name, const gchar *device, const BDExt
     }
 
     return call_lvm_and_report_error (args, extra, TRUE, error);
+}
+
+/**
+ * bd_lvm_add_vg_tags:
+ * @vg_name: the VG to set tags on
+ * @tags: (array zero-terminated=1): list of tags to add
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the tags were successfully added to @vg_name or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+gboolean bd_lvm_add_vg_tags (const gchar *vg_name, const gchar **tags, GError **error) {
+    return _manage_lvm_tags (vg_name, tags, "--addtag", "vgchange", error);
+}
+
+/**
+ * bd_lvm_delete_vg_tags:
+ * @vg_name: the VG to set tags on
+ * @tags: (array zero-terminated=1): list of tags to remove
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the tags were successfully removed from @vg_name or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+gboolean bd_lvm_delete_vg_tags (const gchar *vg_name, const gchar **tags, GError **error) {
+    return _manage_lvm_tags (vg_name, tags, "--deltag", "vgchange", error);
 }
 
 /**
@@ -1756,6 +1831,38 @@ gboolean bd_lvm_lvsnapshotmerge (const gchar *vg_name, const gchar *snapshot_nam
     g_free ((gchar *) args[2]);
 
     return success;
+}
+
+/**
+ * bd_lvm_add_lv_tags:
+ * @vg_name: name of the VG that contains the LV to set tags on
+ * @lv_name: name of the LV to set tags on
+ * @tags: (array zero-terminated=1): list of tags to add
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the tags were successfully added to @device or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+gboolean bd_lvm_add_lv_tags (const gchar *vg_name, const gchar *lv_name, const gchar **tags, GError **error) {
+    g_autofree gchar *lvspec = g_strdup_printf ("%s/%s", vg_name, lv_name);
+    return _manage_lvm_tags (lvspec, tags, "--addtag", "lvchange", error);
+}
+
+/**
+ * bd_lvm_delete_lv_tags:
+ * @vg_name: name of the VG that contains the LV to set tags on
+ * @lv_name: name of the LV to set tags on
+ * @tags: (array zero-terminated=1): list of tags to remove
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the tags were successfully removed from @device or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+gboolean bd_lvm_delete_lv_tags (const gchar *vg_name, const gchar *lv_name, const gchar **tags, GError **error) {
+    g_autofree gchar *lvspec = g_strdup_printf ("%s/%s", vg_name, lv_name);
+    return _manage_lvm_tags (lvspec, tags, "--deltag", "lvchange", error);
 }
 
 /**
