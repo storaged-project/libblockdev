@@ -157,6 +157,8 @@ cat dist/libblockdev.spec.in | grep BuildRequires: | cut -f2 -d: | cut -f2 -d' '
     </para>
   </chapter>
 
+  <xi:include href="3.0-api-changes.xml"><xi:fallback /></xi:include>
+
   <index id="api-index-full">
     <title>API Index</title>
     <xi:include href="xml/api-index-full.xml"><xi:fallback /></xi:include>

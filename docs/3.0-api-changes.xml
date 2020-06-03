@@ -1,0 +1,19 @@
+<chapter id="30-api-changes">
+  <title>API changes in libblockdev 3.0</title>
+
+  <para>
+  This is a list of API changes in libblockdev 3.0 with suggested replacements.
+  </para>
+
+  <simplesect><title>LVM plugin</title>
+
+  <para>
+    <literal>bd_lvm_data_lv_name()</literal> has been removed, use <literal>data_lv</literal> from <link linkend="BDLVMLVdata">BDLVMLVdata</link> instead.
+  </para>
+
+  <para>
+    <literal>bd_lvm_metadadata_lv_name()</literal> has been removed, use <literal>metadata_lv</literal> from <link linkend="BDLVMLVdata">BDLVMLVdata</link> instead.
+  </para>
+
+  </simplesect>
+</chapter>
