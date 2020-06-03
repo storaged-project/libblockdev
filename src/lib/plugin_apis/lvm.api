@@ -1344,32 +1344,6 @@ gchar* bd_lvm_cache_pool_name (const gchar *vg_name, const gchar *cached_lv, GEr
 BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_lv, GError **error);
 
 /**
- * bd_lvm_data_lv_name:
- * @vg_name: name of the VG containing the queried LV
- * @lv_name: name of the queried LV
- * @error: (out): place to store error (if any)
- *
- * Returns: (transfer full): the name of the (internal) data LV of the
- * @vg_name/@lv_name LV
- *
- * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
- */
-gchar* bd_lvm_data_lv_name (const gchar *vg_name, const gchar *lv_name, GError **error);
-
-/**
- * bd_lvm_metadata_lv_name:
- * @vg_name: name of the VG containing the queried LV
- * @lv_name: name of the queried LV
- * @error: (out): place to store error (if any)
- *
- * Returns: (transfer full): the name of the (internal) metadata LV of the
- * @vg_name/@lv_name LV
- *
- * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
- */
-gchar* bd_lvm_metadata_lv_name (const gchar *vg_name, const gchar *lv_name, GError **error);
-
-/**
  * bd_lvm_thpool_convert:
  * @vg_name: name of the VG to create the new thin pool in
  * @data_lv: name of the LV that should become the data part of the new pool

@@ -2416,7 +2416,6 @@ BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_l
     gchar *params = NULL;
     BDLVMCacheStats *ret = NULL;
     BDLVMLVdata *lvdata = NULL;
-    gchar *data_lv_name = NULL;
 
     if (geteuid () != 0) {
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_NOT_ROOT,
@@ -2430,17 +2429,9 @@ BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_l
 
     pool = dm_pool_create ("bd-pool", 20);
 
-    if (g_strcmp0 (lvdata->segtype, "thin-pool") == 0) {
-        data_lv_name = bd_lvm_data_lv_name (vg_name, cached_lv, error);
-        if (!data_lv_name) {
-            dm_pool_destroy (pool);
-            bd_lvm_lvdata_free (lvdata);
-            return NULL;
-        }
-
-        map_name = dm_build_dm_name (pool, vg_name, data_lv_name, NULL);
-        g_free (data_lv_name);
-    } else
+    if (g_strcmp0 (lvdata->segtype, "thin-pool") == 0)
+        map_name = dm_build_dm_name (pool, vg_name, lvdata->data_lv, NULL);
+    else
         /* translate the VG+LV name into the DM map name */
         map_name = dm_build_dm_name (pool, vg_name, cached_lv, NULL);
 
@@ -2529,67 +2520,6 @@ BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_l
 
     return ret;
 }
-
-/**
- * bd_lvm_data_lv_name:
- * @vg_name: name of the VG containing the queried LV
- * @lv_name: name of the queried LV
- * @error: (out): place to store error (if any)
- *
- * Returns: (transfer full): the name of the (internal) data LV of the
- * @vg_name/@lv_name LV
- *
- * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
- */
-gchar* bd_lvm_data_lv_name (const gchar *vg_name, const gchar *lv_name, GError **error) {
-    gboolean success = FALSE;
-    gchar *output = NULL;
-    const gchar *args[6] = {"lvs", "--noheadings", "-o", "data_lv", NULL, NULL};
-
-    args[4] = g_strdup_printf ("%s/%s", vg_name, lv_name);
-
-    success = call_lvm_and_capture_output (args, NULL, &output, error);
-    g_free ((gchar *) args[4]);
-
-    if (!success)
-        /* the error is already populated from the call */
-        return NULL;
-
-    /* replace the '[' and ']' (marking the LV as internal) with spaces and then
-       remove all the leading and trailing whitespace */
-    return g_strstrip (g_strdelimit (output, "[]", ' '));
-}
-
-/**
- * bd_lvm_metadata_lv_name:
- * @vg_name: name of the VG containing the queried LV
- * @lv_name: name of the queried LV
- * @error: (out): place to store error (if any)
- *
- * Returns: (transfer full): the name of the (internal) metadata LV of the
- * @vg_name/@lv_name LV
- *
- * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
- */
-gchar* bd_lvm_metadata_lv_name (const gchar *vg_name, const gchar *lv_name, GError **error) {
-    gboolean success = FALSE;
-    gchar *output = NULL;
-    const gchar *args[6] = {"lvs", "--noheadings", "-o", "metadata_lv", NULL, NULL};
-
-    args[4] = g_strdup_printf ("%s/%s", vg_name, lv_name);
-
-    success = call_lvm_and_capture_output (args, NULL, &output, error);
-    g_free ((gchar *) args[4]);
-
-    if (!success)
-        /* the error is already populated from the call */
-        return NULL;
-
-    /* replace the '[' and ']' (marking the LV as internal) with spaces and then
-       remove all the leading and trailing whitespace */
-    return g_strstrip (g_strdelimit (output, "[]", ' '));
-}
-
 
 /**
  * bd_lvm_thpool_convert:

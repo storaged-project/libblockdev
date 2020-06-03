@@ -327,8 +327,6 @@ bd_lvm_cache_get_mode_from_str
 bd_lvm_cache_get_mode_str
 bd_lvm_cache_pool_name
 bd_lvm_cache_stats
-bd_lvm_data_lv_name
-bd_lvm_metadata_lv_name
 bd_lvm_vdolvpoolname
 bd_lvm_get_vdo_operating_mode_str
 bd_lvm_get_vdo_compression_state_str
