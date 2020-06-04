@@ -168,6 +168,8 @@ bd_utils_mute_prog_reporting_thread
 bd_utils_report_finished
 bd_utils_report_progress
 bd_utils_report_started
+bd_utils_get_next_task_id
+bd_utils_log_task_status
 bd_utils_log
 bd_utils_log_format
 bd_utils_log_stdout
