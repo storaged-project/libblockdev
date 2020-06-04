@@ -109,7 +109,8 @@ static gboolean can_check_f2fs_version (UtilDep dep, GError **error) {
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
  */
-gboolean bd_fs_f2fs_is_tech_avail (BDFSTech tech UNUSED, guint64 mode, GError **error) {
+gboolean __attribute__ ((visibility ("hidden")))
+bd_fs_f2fs_is_tech_avail (BDFSTech tech UNUSED, guint64 mode, GError **error) {
     guint32 required = 0;
     guint i = 0;
 
