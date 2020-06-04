@@ -437,7 +437,7 @@ gboolean bd_crypto_device_is_luks (const gchar *device, GError **error) {
         return FALSE;
     }
 
-    /* we may need to try mutliple times with some delays in case the device is
+    /* we may need to try multiple times with some delays in case the device is
        busy at the very moment */
     for (n_try=5, status=-1; (status != 0) && (n_try > 0); n_try--) {
         status = blkid_probe_set_device (probe, fd, 0, 0);
@@ -458,7 +458,7 @@ gboolean bd_crypto_device_is_luks (const gchar *device, GError **error) {
     blkid_probe_set_superblocks_flags (probe, BLKID_SUBLKS_USAGE | BLKID_SUBLKS_TYPE |
                                               BLKID_SUBLKS_MAGIC | BLKID_SUBLKS_BADCSUM);
 
-    /* we may need to try mutliple times with some delays in case the device is
+    /* we may need to try multiple times with some delays in case the device is
        busy at the very moment */
     for (n_try=5, status=-1; !(status == 0 || status == 1) && (n_try > 0); n_try--) {
         status = blkid_do_safeprobe (probe);
@@ -905,7 +905,7 @@ static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 k
  * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
  * FOREVER).
  *
- * Either @passhphrase or @key_file has to be != %NULL.
+ * Either @passphrase or @key_file has to be != %NULL.
  *
  * Returns: whether the given @device was successfully formatted as LUKS or not
  * (the @error) contains the error in such cases)
@@ -957,7 +957,7 @@ gboolean bd_crypto_luks_format_blob (const gchar *device, const gchar *cipher, g
  * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
  * FOREVER).
  *
- * Either @passhphrase or @key_file has to be != %NULL.
+ * Either @passphrase or @key_file has to be != %NULL.
  *
  * Using this function with @luks_version set to %BD_CRYPTO_LUKS_VERSION_LUKS1 and
  * @extra to %NULL is the same as calling %bd_crypto_luks_format.
@@ -1522,7 +1522,7 @@ static gboolean luks_resize (const gchar *luks_device, guint64 size, const guint
 #ifdef LIBCRYPTSETUP_2
         if (ret == -EPERM && g_strcmp0 (crypt_get_type (cd), CRYPT_LUKS2) == 0) {
             g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_RESIZE_PERM,
-                         "Insufficient persmissions to resize device. You need to specify"
+                         "Insufficient permissions to resize device. You need to specify"
                          " passphrase or keyfile to resize LUKS 2 devices that don't"
                          " have verified key loaded in kernel.");
             crypt_free (cd);
@@ -1567,7 +1567,7 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError *
  * bd_crypto_luks_resize_luks2:
  * @luks_device: opened LUKS device to resize
  * @passphrase: (allow-none): passphrase to resize the @luks_device or %NULL
- * @key_file: (allow-none): key file path to use for resizinh the @luks_device or %NULL
+ * @key_file: (allow-none): key file path to use for resizing the @luks_device or %NULL
  * @size: requested size in sectors or 0 to adapt to the backing device
  * @error: (out): place to store error (if any)
  *
