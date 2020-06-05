@@ -6,15 +6,21 @@
 ]>
 <book id="index">
   <bookinfo>
-    <title>libblockdev Reference Manual</title>
+    <title>libblockdev Reference Manual for libblockdev @VERSION@.</title>
     <releaseinfo>
-      for libblockdev @VERSION@.
+      <para>
       The latest version of this documentation can be found on-line at
       <ulink role="online-location"
              url="http://storaged.org/libblockdev/">http://storaged.org/libblockdev/</ulink>.
+      </para>
+      <para>
       The latest version of the code can be found at
       <ulink role="online-location"
              url="https://github.com/storaged-project/libblockdev">https://github.com/storaged-project/libblockdev</ulink>
+      </para>
+      <para>
+      Documentation for Python bindings is available <ulink type="http" url="BlockDev-2.0/index.html">here</ulink>
+      </para>
     </releaseinfo>
   </bookinfo>
 
