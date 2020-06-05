@@ -3,7 +3,7 @@ all-local: html-doc.stamp
 html-doc.stamp: ${srcdir}/libblockdev-docs.xml ${srcdir}/libblockdev-sections.txt ${srcdir}/3.0-api-changes.xml $(wildcard ${srcdir}/../src/plugins/*.[ch]) $(wildcard ${srcdir}/../src/lib/*.[ch]) $(wildcard ${srcdir}/../src/utils/*.[ch])
 	touch ${builddir}/html-doc.stamp
 	test ${builddir} = ${srcdir} || cp ${srcdir}/libblockdev-sections.txt ${srcdir}/libblockdev-docs.xml ${builddir}
-	gtkdoc-scan --rebuild-types --module=libblockdev --source-dir=${srcdir}/../src/plugins/ --source-dir=${srcdir}/../src/lib/ --source-dir=${srcdir}/../src/utils/
+	gtkdoc-scan --rebuild-types --module=libblockdev --source-dir=${srcdir}/../src/plugins/ --source-dir=${srcdir}/../src/lib/ --source-dir=${srcdir}/../src/utils/ --ignore-headers="${srcdir}/../src/plugins/check_deps.h ${srcdir}/../src/plugins/dm_logging.h ${srcdir}/../src/plugins/vdo_stats.h ${srcdir}/../src/plugins/fs/common.h"
 	gtkdoc-mkdb --module=libblockdev --output-format=xml --source-dir=${srcdir}/../src/plugins/ --source-dir=${srcdir}/../src/lib/ --source-dir=${srcdir}/../src/utils/ --source-suffixes=c,h
 	test -d ${builddir}/html || mkdir ${builddir}/html
 	(cd ${builddir}/html; gtkdoc-mkhtml libblockdev ${builddir}/../libblockdev-docs.xml)
