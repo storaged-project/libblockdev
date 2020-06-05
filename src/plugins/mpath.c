@@ -27,6 +27,8 @@
 #include "mpath.h"
 #include "check_deps.h"
 
+#define MULTIPATH_MIN_VERSION "0.4.9"
+
 /**
  * SECTION: mpath
  * @short_description: plugin for basic operations with multipath devices

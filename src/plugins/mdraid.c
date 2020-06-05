@@ -30,6 +30,8 @@
 #include "mdraid.h"
 #include "check_deps.h"
 
+#define MDADM_MIN_VERSION "3.3.2"
+
 /**
  * SECTION: mdraid
  * @short_description: plugin for basic operations with MD RAID

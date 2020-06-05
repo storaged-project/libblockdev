@@ -48,6 +48,10 @@
 
 #define SECTOR_SIZE 512
 
+#define DEFAULT_LUKS_KEYSIZE_BITS 512
+#define DEFAULT_LUKS_CIPHER "aes-xts-plain64"
+#define DEFAULT_LUKS2_SECTOR_SIZE 512
+
 #define UNUSED __attribute__((unused))
 
 /**

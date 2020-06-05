@@ -4,8 +4,6 @@
 #ifndef BD_LVM
 #define BD_LVM
 
-#define LVM_MIN_VERSION "2.02.116"
-
 #ifdef __LP64__
 // 64bit system
 #define BD_LVM_MAX_LV_SIZE (8 EiB)
@@ -18,17 +16,12 @@
 #define BD_LVM_DEFAULT_PE_SIZE (4 MiB)
 #define BD_LVM_MIN_PE_SIZE (1 KiB)
 #define BD_LVM_MAX_PE_SIZE (16 GiB)
-#define USE_DEFAULT_PE_SIZE 0
-#define RESOLVE_PE_SIZE(size) ((size) == USE_DEFAULT_PE_SIZE ? BD_LVM_DEFAULT_PE_SIZE : (size))
 
 #define BD_LVM_MIN_THPOOL_MD_SIZE (2 MiB)
 #define BD_LVM_MAX_THPOOL_MD_SIZE (16 GiB)
 #define BD_LVM_MIN_THPOOL_CHUNK_SIZE (64 KiB)
 #define BD_LVM_MAX_THPOOL_CHUNK_SIZE (1 GiB)
 #define BD_LVM_DEFAULT_CHUNK_SIZE (64 KiB)
-
-#define THPOOL_MD_FACTOR_NEW (0.2)
-#define THPOOL_MD_FACTOR_EXISTS (1 / 6.0)
 
 /* according to lvmcache (7) */
 #define BD_LVM_MIN_CACHE_MD_SIZE (8 MiB)

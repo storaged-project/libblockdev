@@ -26,6 +26,8 @@
 #include "btrfs.h"
 #include "check_deps.h"
 
+#define BTRFS_MIN_VERSION "3.18.2"
+
 /**
  * SECTION: btrfs
  * @short_description: plugin for operations with BTRFS devices
@@ -945,6 +947,8 @@ gboolean bd_btrfs_repair (const gchar *device, const BDExtraArg **extra, GError 
  * bd_btrfs_change_label:
  * @mountpoint: a mountpoint of the btrfs filesystem to change label of
  * @label: new label for the filesystem
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the volume creation (right now
+ *                                                 passed to the 'btrfs' utility)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the label of the @mountpoint filesystem was successfully set

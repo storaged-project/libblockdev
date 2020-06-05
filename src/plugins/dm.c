@@ -33,6 +33,8 @@
 #include "check_deps.h"
 #include "dm_logging.h"
 
+#define DM_MIN_VERSION "1.02.93"
+
 #define UNUSED __attribute__((unused))
 
 /* macros taken from the pyblock/dmraid.h file plus one more*/

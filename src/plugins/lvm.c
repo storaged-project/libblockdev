@@ -32,6 +32,12 @@
 #define INT_FLOAT_EPS 1e-5
 #define SECTOR_SIZE 512
 #define VDO_POOL_SUFFIX "vpool"
+#define USE_DEFAULT_PE_SIZE 0
+#define RESOLVE_PE_SIZE(size) ((size) == USE_DEFAULT_PE_SIZE ? BD_LVM_DEFAULT_PE_SIZE : (size))
+#define THPOOL_MD_FACTOR_NEW (0.2)
+#define THPOOL_MD_FACTOR_EXISTS (1 / 6.0)
+
+#define LVM_MIN_VERSION "2.02.116"
 
 static GMutex global_config_lock;
 static gchar *global_config_str = NULL;

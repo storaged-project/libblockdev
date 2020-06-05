@@ -28,6 +28,8 @@
 #include "swap.h"
 #include "check_deps.h"
 
+#define MKSWAP_MIN_VERSION "2.23.2"
+
 /**
  * SECTION: swap
  * @short_description: plugin for operations with swap space

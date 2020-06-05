@@ -4,8 +4,6 @@
 #ifndef BD_MD
 #define BD_MD
 
-#define MDADM_MIN_VERSION "3.3.2"
-
 /* taken from blivet */
 // these defaults were determined empirically
 #define BD_MD_SUPERBLOCK_SIZE (2 MiB)
