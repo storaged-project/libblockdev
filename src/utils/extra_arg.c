@@ -5,6 +5,7 @@
 
 /**
  * bd_extra_arg_copy:
+ * @arg: (allow-none): %BDExtraArg to copy
  *
  * Creates a new copy of @arg.
  */
@@ -18,6 +19,7 @@ BDExtraArg* bd_extra_arg_copy (BDExtraArg *arg) {
 
 /**
  * bd_extra_arg_free:
+ * @arg: (allow-none): %BDExtraArg to free
  *
  * Frees @arg.
  */

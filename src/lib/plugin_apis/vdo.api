@@ -47,7 +47,7 @@ GType bd_vdo_info_get_type();
  * @deduplication: whether deduplication is enabled
  * @compression: whether compression is enabled
  * @logical_size: logical size of the volume
- * @physical_size: sphysical size of the volume
+ * @physical_size: physical size of the volume
  * @index_memory: index memory size
  * @write_policy: write policy of the volume
  *
@@ -67,6 +67,7 @@ typedef struct BDVDOInfo {
 
 /**
  * bd_vdo_info_free: (skip)
+ * @info: (allow-none): %BDVDOInfo to free
  *
  * Frees @info.
  *
@@ -83,6 +84,7 @@ void bd_vdo_info_free (BDVDOInfo *info) {
 
 /**
  * bd_vdo_info_copy: (skip)
+ * @info: (allow-none): %BDVDOInfo to copy
  *
  * Creates a new copy of @info.
  *
@@ -150,6 +152,7 @@ typedef struct BDVDOStats {
 
 /**
  * bd_vdo_stats_free: (skip)
+ * @stats: (allow-none): %BDVDOStats to free
  *
  * Frees @stats.
  *
@@ -164,6 +167,7 @@ void bd_vdo_stats_free (BDVDOStats *stats) {
 
 /**
  * bd_vdo_stats_copy: (skip)
+ * @stats: (allow-none): %BDVDOStats to copy
  *
  * Creates a new copy of @stats.
  *

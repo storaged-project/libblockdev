@@ -74,6 +74,7 @@ typedef struct BDCryptoLUKSPBKDF {
 
 /**
  * bd_crypto_luks_pbkdf_copy: (skip)
+ * @pbkdf: (allow-none): %BDCryptoLUKSPBKDF to copy
  *
  * Creates a new copy of @pbkdf.
  */
@@ -94,6 +95,7 @@ BDCryptoLUKSPBKDF* bd_crypto_luks_pbkdf_copy (BDCryptoLUKSPBKDF *pbkdf) {
 
 /**
  * bd_crypto_luks_pbkdf_free: (skip)
+ * @pbkdf: (allow-none): %BDCryptoLUKSPBKDF to free
  *
  * Frees @pbkdf.
  */
@@ -171,6 +173,7 @@ typedef struct BDCryptoLUKSExtra {
 
 /**
  * bd_crypto_luks_extra_copy: (skip)
+ * @extra: (allow-none): %BDCryptoLUKSExtra to copy
  *
  * Creates a new copy of @extra.
  */
@@ -193,6 +196,7 @@ BDCryptoLUKSExtra* bd_crypto_luks_extra_copy (BDCryptoLUKSExtra *extra) {
 
 /**
  * bd_crypto_luks_extra_free: (skip)
+ * @extra: (allow-none): %BDCryptoLUKSExtra to free
  *
  * Frees @extra.
  */
@@ -269,6 +273,7 @@ typedef struct BDCryptoLUKSInfo {
 
 /**
  * bd_crypto_luks_info_free: (skip)
+ * @info: (allow-none): %BDCryptoLUKSInfo to free
  *
  * Frees @info.
  */
@@ -285,6 +290,7 @@ void bd_crypto_luks_info_free (BDCryptoLUKSInfo *info) {
 
 /**
  * bd_crypto_luks_info_copy: (skip)
+ * @info: (allow-none): %BDCryptoLUKSInfo to copy
  *
  * Creates a new copy of @info.
  */
@@ -343,6 +349,7 @@ typedef struct BDCryptoIntegrityInfo {
 
 /**
  * bd_crypto_integrity_info_free: (skip)
+ * @info: (allow-none): %BDCryptoIntegrityInfo to free
  *
  * Frees @info.
  */
@@ -358,6 +365,7 @@ void bd_crypto_integrity_info_free (BDCryptoIntegrityInfo *info) {
 
 /**
  * bd_crypto_integrity_info_copy: (skip)
+ * @info: (allow-none): %BDCryptoIntegrityInfo to copy
  *
  * Creates a new copy of @info.
  */

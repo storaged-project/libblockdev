@@ -54,6 +54,7 @@ typedef struct BDFSExtInfo BDFSExt2Info;
 
 /**
  * bd_fs_ext2_info_copy: (skip)
+ * @data: (allow-none): %BDFSExt2Info to copy
  *
  * Creates a new copy of @data.
  */
@@ -75,6 +76,7 @@ BDFSExt2Info* bd_fs_ext2_info_copy (BDFSExt2Info *data) {
 
 /**
  * bd_fs_ext3_info_copy: (skip)
+ * @data: (allow-none): %BDFSExt3Info to copy
  *
  * Creates a new copy of @data.
  */
@@ -84,6 +86,7 @@ BDFSExt3Info* bd_fs_ext3_info_copy (BDFSExt3Info *data) {
 
 /**
  * bd_fs_ext4_info_copy: (skip)
+ * @data: (allow-none): %BDFSExt4Info to copy
  *
  * Creates a new copy of @data.
  */
@@ -93,6 +96,7 @@ BDFSExt4Info* bd_fs_ext4_info_copy (BDFSExt4Info *data) {
 
 /**
  * bd_fs_ext2_info_free: (skip)
+ * @data: (allow-none): %BDFSExt2Info to free
  *
  * Frees @data.
  */
@@ -108,6 +112,7 @@ void bd_fs_ext2_info_free (BDFSExt2Info *data) {
 
 /**
  * bd_fs_ext3_info_free: (skip)
+ * @data: (allow-none): %BDFSExt3Info to free
  *
  * Frees @data.
  */
@@ -117,6 +122,7 @@ void bd_fs_ext3_info_free (BDFSExt3Info *data) {
 
 /**
  * bd_fs_ext4_info_free: (skip)
+ * @data: (allow-none): %BDFSExt4Info to free
  *
  * Frees @data.
  */
@@ -179,6 +185,7 @@ typedef struct BDFSXfsInfo {
 
 /**
  * bd_fs_xfs_info_copy: (skip)
+ * @data: (allow-none): %BDFSXfsInfo to copy
  *
  * Creates a new copy of @data.
  */
@@ -198,6 +205,7 @@ BDFSXfsInfo* bd_fs_xfs_info_copy (BDFSXfsInfo *data) {
 
 /**
  * bd_fs_xfs_info_free: (skip)
+ * @data: (allow-none): %BDFSXfsInfo to free
  *
  * Frees @data.
  */
@@ -243,6 +251,7 @@ typedef struct BDFSVfatInfo {
 
 /**
  * bd_fs_vfat_info_copy: (skip)
+ * @data: (allow-none): %BDFSVfatInfo to copy
  *
  * Creates a new copy of @data.
  */
@@ -262,6 +271,7 @@ BDFSVfatInfo* bd_fs_vfat_info_copy (BDFSVfatInfo *data) {
 
 /**
  * bd_fs_vfat_info_free: (skip)
+ * @data: (allow-none): %BDFSVfatInfo to free
  *
  * Frees @data.
  */
@@ -298,6 +308,7 @@ typedef struct BDFSNtfsInfo {
 
 /**
  * bd_fs_ntfs_info_copy: (skip)
+ * @data: (allow-none): %BDFSNtfsInfo to copy
  *
  * Creates a new copy of @data.
  */
@@ -315,6 +326,7 @@ BDFSNtfsInfo* bd_fs_ntfs_info_copy (BDFSNtfsInfo *data) {
 
 /**
  * bd_fs_ntfs_info_free: (skip)
+ * @data: (allow-none): %BDFSNtfsInfo to free
  *
  * Frees @data.
  */
@@ -355,6 +367,7 @@ typedef struct BDFSF2FSInfo {
 
 /**
  * bd_fs_f2fs_info_copy: (skip)
+ * @data: (allow-none): %BDFSF2FSInfo to copy
  *
  * Creates a new copy of @data.
  */
@@ -375,6 +388,7 @@ BDFSF2FSInfo* bd_fs_f2fs_info_copy (BDFSF2FSInfo *data) {
 
 /**
  * bd_fs_f2fs_info_free: (skip)
+ * @data: (allow-none): %BDFSF2FSInfo to free
  *
  * Frees @data.
  */
@@ -458,6 +472,7 @@ typedef struct BDFSReiserFSInfo {
 
 /**
  * bd_fs_reiserfs_info_copy: (skip)
+ * @data: (allow-none): %BDFSReiserFSInfo to copy
  *
  * Creates a new copy of @data.
  */
@@ -478,6 +493,7 @@ BDFSReiserFSInfo* bd_fs_reiserfs_info_copy (BDFSReiserFSInfo *data) {
 
 /**
  * bd_fs_reiserfs_info_free: (skip)
+ * @data: (allow-none): %BDFSReiserFSInfo to free
  *
  * Frees @data.
  */

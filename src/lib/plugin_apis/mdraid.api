@@ -57,6 +57,7 @@ typedef struct BDMDExamineData {
 
 /**
  * bd_md_examine_data_copy: (skip)
+ * @data: (allow-none): %BDMDExamineData to copy
  *
  * Creates a new copy of @data.
  */
@@ -82,6 +83,7 @@ BDMDExamineData* bd_md_examine_data_copy (BDMDExamineData *data) {
 
 /**
  * bd_md_examine_data_free: (skip)
+ * @data: (allow-none): %BDMDExamineData to free
  *
  * Frees @data.
  */
@@ -151,6 +153,7 @@ typedef struct BDMDDetailData {
 
 /**
  * bd_md_detail_data_copy: (skip)
+ * @data: (allow-none): %BDMDDetailData to copy
  *
  * Creates a new copy of @data.
  */
@@ -180,6 +183,7 @@ BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data) {
 
 /**
  * bd_md_detail_data_free: (skip)
+ * @data: (allow-none): %BDMDDetailData to free
  *
  * Frees @data.
  */

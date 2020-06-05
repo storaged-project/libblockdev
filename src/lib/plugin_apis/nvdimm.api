@@ -52,6 +52,7 @@ typedef struct BDNVDIMMNamespaceInfo {
 
 /**
  * bd_nvdimm_namespace_info_free: (skip)
+ * @info: (allow-none): %BDNVDIMMNamespaceInfo to free
  *
  * Frees @info.
  */
@@ -67,6 +68,7 @@ void bd_nvdimm_namespace_info_free (BDNVDIMMNamespaceInfo *info) {
 
 /**
  * bd_nvdimm_namespace_info_copy: (skip)
+ * @info: (allow-none): %BDNVDIMMNamespaceInfo to copy
  *
  * Creates a new copy of @info.
  */
@@ -214,8 +216,9 @@ BDNVDIMMNamespaceInfo** bd_nvdimm_list_namespaces (const gchar *bus, const gchar
 
 /**
  * bd_nvdimm_namespace_reconfigure:
- * @namespace: name of the namespace to recofigure
+ * @namespace: name of the namespace to reconfigure
  * @mode: mode type to set (memory/sector/raw/dax)
+ * @force: whether to use force to reconfigure an active namespace
  * @error: (out): place to store error if any
  * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
  *                                                 passed to the 'ndctl' utility)

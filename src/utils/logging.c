@@ -75,6 +75,7 @@ void bd_utils_log (gint level, const gchar *msg) {
  * bd_utils_log_format:
  * @level: log level
  * @format: printf-style format for the log message
+ * @...: arguments for @format
  */
 void bd_utils_log_format (gint level, const gchar *format, ...) {
     gchar *msg = NULL;
