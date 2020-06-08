@@ -52,9 +52,9 @@ GQuark bd_utils_exec_error_quark (void)
 }
 
 /**
- * get_next_task_id: (skip)
+ * bd_utils_get_next_task_id:
  */
-guint64 get_next_task_id (void) {
+guint64 bd_utils_get_next_task_id (void) {
     guint64 task_id = 0;
 
     g_mutex_lock (&id_counter_lock);
@@ -66,11 +66,11 @@ guint64 get_next_task_id (void) {
 }
 
 /**
- * log_task_status: (skip)
+ * bd_utils_log_task_status:
  * @task_id: ID of the task the status of which is being logged
  * @msg: log message
  */
-void log_task_status (guint64 task_id, const gchar *msg) {
+void bd_utils_log_task_status (guint64 task_id, const gchar *msg) {
     gchar *log_msg = NULL;
 
     log_msg = g_strdup_printf ("[%"G_GUINT64_FORMAT"] %s", task_id, msg);
@@ -88,7 +88,7 @@ static guint64 log_running (const gchar **argv) {
     gchar *str_argv = NULL;
     gchar *log_msg = NULL;
 
-    task_id = get_next_task_id ();
+    task_id = bd_utils_get_next_task_id ();
 
     str_argv = g_strjoinv (" ", (gchar **) argv);
     log_msg = g_strdup_printf ("Running [%"G_GUINT64_FORMAT"] %s ...", task_id, str_argv);

@@ -69,10 +69,6 @@ static gchar *global_config_str = NULL;
 
 static GDBusConnection *bus = NULL;
 
-/* "friend" functions from the utils library */
-guint64 get_next_task_id (void);
-void log_task_status (guint64 task_id, const gchar *msg);
-
 /**
  * SECTION: lvm
  * @short_description: plugin for operations with LVM
@@ -630,10 +626,10 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
 
     params_str = g_variant_print (all_params, FALSE);
 
-    *task_id = get_next_task_id ();
+    *task_id = bd_utils_get_next_task_id ();
     log_msg = g_strdup_printf ("Calling the '%s.%s' method on the '%s' object with the following parameters: '%s'",
                                intf, method, obj, params_str);
-    log_task_status (*task_id, log_msg);
+    bd_utils_log_task_status (*task_id, log_msg);
     g_free (log_msg);
 
     /* now do the call with all the parameters */
@@ -669,15 +665,15 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
     gchar *error_msg = NULL;
 
     ret = call_lvm_method (obj, intf, method, params, extra_params, extra_args, &log_task_id, &prog_id, lock_config, error);
-    log_task_status (log_task_id, "Done.");
+    bd_utils_log_task_status (log_task_id, "Done.");
     if (!ret) {
         if (*error) {
             log_msg = g_strdup_printf ("Got error: %s", (*error)->message);
-            log_task_status (log_task_id, log_msg);
+            bd_utils_log_task_status (log_task_id, log_msg);
             bd_utils_report_finished (prog_id, log_msg);
             g_free (log_msg);
         } else {
-            log_task_status (log_task_id, "Got unknown error");
+            bd_utils_log_task_status (log_task_id, "Got unknown error");
             bd_utils_report_finished (prog_id, "Got unknown error");
         }
         return;
@@ -686,7 +682,7 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
         g_variant_get (ret, "((oo))", &obj_path, &task_path);
         if (g_strcmp0 (obj_path, "/") != 0) {
             log_msg = g_strdup_printf ("Got result: %s", obj_path);
-            log_task_status (log_task_id, log_msg);
+            bd_utils_log_task_status (log_task_id, log_msg);
             g_free (log_msg);
             /* got a valid result, just return */
             g_variant_unref (ret);
@@ -703,7 +699,7 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
         if (g_strcmp0 (task_path, "/") != 0) {
             g_variant_unref (ret);
         } else {
-            log_task_status (log_task_id, "No result, no job started");
+            bd_utils_log_task_status (log_task_id, "No result, no job started");
             g_free (task_path);
             bd_utils_report_finished (prog_id, "Completed");
             g_variant_unref (ret);
@@ -711,7 +707,7 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
         }
     } else {
         g_variant_unref (ret);
-        log_task_status (log_task_id, "Failed to parse the returned value!");
+        bd_utils_log_task_status (log_task_id, "Failed to parse the returned value!");
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
                      "Failed to parse the returned value!");
         bd_utils_report_finished (prog_id, (*error)->message);
@@ -719,7 +715,7 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
     }
 
     log_msg = g_strdup_printf ("Waiting for job '%s' to finish", task_path);
-    log_task_status (log_task_id, log_msg);
+    bd_utils_log_task_status (log_task_id, log_msg);
     g_free (log_msg);
 
     ret = NULL;
@@ -744,13 +740,13 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
                 g_clear_error (error);
             }
             log_msg = g_strdup_printf ("Still waiting for job '%s' to finish", task_path);
-            log_task_status (log_task_id, log_msg);
+            bd_utils_log_task_status (log_task_id, log_msg);
             g_free (log_msg);
         }
 
     }
     log_msg = g_strdup_printf ("Job '%s' finished", task_path);
-    log_task_status (log_task_id, log_msg);
+    bd_utils_log_task_status (log_task_id, log_msg);
     g_free (log_msg);
 
     obj_path = NULL;
@@ -767,7 +763,7 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
             g_variant_unref (ret);
             if (g_strcmp0 (obj_path, "/") != 0) {
                 log_msg = g_strdup_printf ("Got result: %s", obj_path);
-                log_task_status (log_task_id, log_msg);
+                bd_utils_log_task_status (log_task_id, log_msg);
                 g_free (log_msg);
             } else {
                 ret = get_object_property (task_path, JOB_INTF, "GetError", error);
@@ -775,7 +771,7 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
                 if (error_code != 0) {
                     if (error_msg) {
                         log_msg = g_strdup_printf ("Got error: %s", error_msg);
-                        log_task_status (log_task_id, log_msg);
+                        bd_utils_log_task_status (log_task_id, log_msg);
                         bd_utils_report_finished (prog_id, log_msg);
                         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
                                      "Running '%s' method on the '%s' object failed: %s",
@@ -783,7 +779,7 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
                         g_free (log_msg);
                         g_free (error_msg);
                     } else {
-                        log_task_status (log_task_id, "Got unknown error");
+                        bd_utils_log_task_status (log_task_id, "Got unknown error");
                         bd_utils_report_finished (prog_id, "Got unknown error");
                         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
                                      "Got unknown error when running '%s' method on the '%s' object.",
@@ -791,7 +787,7 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
                     }
 
                 } else
-                    log_task_status (log_task_id, "No result");
+                    bd_utils_log_task_status (log_task_id, "No result");
             }
             bd_utils_report_finished (prog_id, "Completed");
             g_free (obj_path);

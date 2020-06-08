@@ -59,6 +59,9 @@ guint64 bd_utils_report_started (const gchar *msg);
 void bd_utils_report_progress (guint64 task_id, guint64 completion, const gchar *msg);
 void bd_utils_report_finished (guint64 task_id, const gchar *msg);
 
+guint64 bd_utils_get_next_task_id (void);
+void bd_utils_log_task_status (guint64 task_id, const gchar *msg);
+
 gboolean bd_utils_echo_str_to_file (const gchar *str, const gchar *file_path, GError **error);
 
 #endif  /* BD_UTILS_EXEC */
