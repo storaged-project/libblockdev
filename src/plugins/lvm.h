@@ -112,6 +112,7 @@ typedef struct BDLVMPVdata {
     guint64 vg_extent_count;
     guint64 vg_free_count;
     guint64 vg_pv_count;
+    gchar **pv_tags;
 } BDLVMPVdata;
 
 void bd_lvm_pvdata_free (BDLVMPVdata *data);
@@ -127,6 +128,7 @@ typedef struct BDLVMVGdata {
     guint64 free_count;
     guint64 pv_count;
     gboolean exported;
+    gchar **vg_tags;
 } BDLVMVGdata;
 
 void bd_lvm_vgdata_free (BDLVMVGdata *data);
@@ -148,6 +150,7 @@ typedef struct BDLVMLVdata {
     guint64 data_percent;
     guint64 metadata_percent;
     guint64 copy_percent;
+    gchar **lv_tags;
 } BDLVMLVdata;
 
 void bd_lvm_lvdata_free (BDLVMLVdata *data);
@@ -250,6 +253,8 @@ gboolean bd_lvm_pvresize (const gchar *device, guint64 size, const BDExtraArg **
 gboolean bd_lvm_pvremove (const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_lvm_pvmove (const gchar *src, const gchar *dest, const BDExtraArg **extra, GError **error);
 gboolean bd_lvm_pvscan (const gchar *device, gboolean update_cache, const BDExtraArg **extra, GError **error);
+gboolean bd_lvm_add_pv_tags (const gchar *device, const gchar **tags, GError **error);
+gboolean bd_lvm_delete_pv_tags (const gchar *device, const gchar **tags, GError **error);
 BDLVMPVdata* bd_lvm_pvinfo (const gchar *device, GError **error);
 BDLVMPVdata** bd_lvm_pvs (GError **error);
 
@@ -260,6 +265,8 @@ gboolean bd_lvm_vgactivate (const gchar *vg_name, const BDExtraArg **extra, GErr
 gboolean bd_lvm_vgdeactivate (const gchar *vg_name, const BDExtraArg **extra, GError **error);
 gboolean bd_lvm_vgextend (const gchar *vg_name, const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_lvm_vgreduce (const gchar *vg_name, const gchar *device, const BDExtraArg **extra, GError **error);
+gboolean bd_lvm_add_vg_tags (const gchar *vg_name, const gchar **tags, GError **error);
+gboolean bd_lvm_delete_vg_tags (const gchar *vg_name, const gchar **tags, GError **error);
 BDLVMVGdata* bd_lvm_vginfo (const gchar *vg_name, GError **error);
 BDLVMVGdata** bd_lvm_vgs (GError **error);
 
@@ -272,6 +279,8 @@ gboolean bd_lvm_lvactivate (const gchar *vg_name, const gchar *lv_name, gboolean
 gboolean bd_lvm_lvdeactivate (const gchar *vg_name, const gchar *lv_name, const BDExtraArg **extra, GError **error);
 gboolean bd_lvm_lvsnapshotcreate (const gchar *vg_name, const gchar *origin_name, const gchar *snapshot_name, guint64 size, const BDExtraArg **extra, GError **error);
 gboolean bd_lvm_lvsnapshotmerge (const gchar *vg_name, const gchar *snapshot_name, const BDExtraArg **extra, GError **error);
+gboolean bd_lvm_add_lv_tags (const gchar *vg_name, const gchar *lv_name, const gchar **tags, GError **error);
+gboolean bd_lvm_delete_lv_tags (const gchar *vg_name, const gchar *lv_name, const gchar **tags, GError **error);
 BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError **error);
 BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error);
 

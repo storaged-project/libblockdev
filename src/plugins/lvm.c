@@ -73,6 +73,7 @@ BDLVMPVdata* bd_lvm_pvdata_copy (BDLVMPVdata *data) {
     new_data->vg_extent_count = data->vg_extent_count;
     new_data->vg_free_count = data->vg_free_count;
     new_data->vg_pv_count = data->vg_pv_count;
+    new_data->pv_tags = g_strdupv (data->pv_tags);
 
     return new_data;
 }
@@ -85,6 +86,7 @@ void bd_lvm_pvdata_free (BDLVMPVdata *data) {
     g_free (data->pv_uuid);
     g_free (data->vg_name);
     g_free (data->vg_uuid);
+    g_strfreev (data->pv_tags);
     g_free (data);
 }
 
@@ -102,6 +104,7 @@ BDLVMVGdata* bd_lvm_vgdata_copy (BDLVMVGdata *data) {
     new_data->extent_count = data->extent_count;
     new_data->free_count = data->free_count;
     new_data->pv_count = data->pv_count;
+    new_data->vg_tags = g_strdupv (data->vg_tags);
     return new_data;
 }
 
@@ -111,6 +114,7 @@ void bd_lvm_vgdata_free (BDLVMVGdata *data) {
 
     g_free (data->name);
     g_free (data->uuid);
+    g_strfreev (data->vg_tags);
     g_free (data);
 }
 
@@ -135,6 +139,7 @@ BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
     new_data->data_percent = data->data_percent;
     new_data->metadata_percent = data->metadata_percent;
     new_data->copy_percent = data->copy_percent;
+    new_data->lv_tags = g_strdupv (data->lv_tags);
     return new_data;
 }
 
@@ -153,6 +158,7 @@ void bd_lvm_lvdata_free (BDLVMLVdata *data) {
     g_free (data->metadata_lv);
     g_free (data->roles);
     g_free (data->move_pv);
+    g_strfreev (data->lv_tags);
     g_free (data);
 }
 
@@ -490,6 +496,12 @@ static BDLVMPVdata* get_pv_data_from_table (GHashTable *table, gboolean free_tab
     else
         data->vg_pv_count = 0;
 
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_PV_TAGS");
+    if (value)
+        data->pv_tags = g_strsplit (value, ",", -1);
+    else
+        data->pv_tags = NULL;
+
     if (free_table)
         g_hash_table_destroy (table);
 
@@ -545,6 +557,12 @@ static BDLVMVGdata* get_vg_data_from_table (GHashTable *table, gboolean free_tab
     else
         data->exported = FALSE;
 
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_VG_TAGS");
+    if (value)
+        data->vg_tags = g_strsplit (value, ",", -1);
+    else
+        data->vg_tags = NULL;
+
     if (free_table)
         g_hash_table_destroy (table);
 
@@ -592,6 +610,12 @@ static BDLVMLVdata* get_lv_data_from_table (GHashTable *table, gboolean free_tab
         data->copy_percent = g_ascii_strtoull (value, NULL, 0);
     else
         data->copy_percent = 0;
+
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_LV_TAGS");
+    if (value)
+        data->lv_tags = g_strsplit (value, ",", -1);
+    else
+        data->lv_tags = NULL;
 
     /* replace '[' and ']' (marking LVs as internal) with spaces and then
        remove all the leading and trailing whitespace */
@@ -1074,6 +1098,53 @@ gboolean bd_lvm_pvscan (const gchar *device, gboolean update_cache, const BDExtr
     return call_lvm_and_report_error (args, extra, TRUE, error);
 }
 
+static gboolean _manage_lvm_tags (const gchar *devspec, const gchar **tags, const gchar *action, const gchar *cmd, GError **error) {
+    guint tags_len = g_strv_length ((gchar **) tags);
+    const gchar **argv = g_new0 (const gchar*, 2 * tags_len + 3);
+    guint next_arg = 0;
+    gboolean success = FALSE;
+
+    argv[next_arg++] = cmd;
+    for (guint i = 0; i < tags_len; i++) {
+        argv[next_arg++] = action;
+        argv[next_arg++] = tags[i];
+    }
+    argv[next_arg++] = devspec;
+    argv[next_arg] = NULL;
+
+    success = call_lvm_and_report_error (argv, NULL, TRUE, error);
+    g_free (argv);
+    return success;
+}
+
+/**
+ * bd_lvm_add_pv_tags:
+ * @device: the device to set PV tags for
+ * @tags: (array zero-terminated=1): list of tags to add
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the tags were successfully added to @device or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+gboolean bd_lvm_add_pv_tags (const gchar *device, const gchar **tags, GError **error) {
+    return _manage_lvm_tags (device, tags, "--addtag", "pvchange", error);
+}
+
+/**
+ * bd_lvm_delete_pv_tags:
+ * @device: the device to set PV tags for
+ * @tags: (array zero-terminated=1): list of tags to remove
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the tags were successfully removed from @device or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+gboolean bd_lvm_delete_pv_tags (const gchar *device, const gchar **tags, GError **error) {
+    return _manage_lvm_tags (device, tags, "--deltag", "pvchange", error);
+}
+
 /**
  * bd_lvm_pvinfo:
  * @device: a PV to get information about or %NULL
@@ -1088,7 +1159,7 @@ BDLVMPVdata* bd_lvm_pvinfo (const gchar *device, GError **error) {
     const gchar *args[10] = {"pvs", "--unit=b", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--noheadings",
                        "-o", "pv_name,pv_uuid,pv_free,pv_size,pe_start,vg_name,vg_uuid,vg_size," \
-                       "vg_free,vg_extent_size,vg_extent_count,vg_free_count,pv_count",
+                       "vg_free,vg_extent_size,vg_extent_count,vg_free_count,pv_count,pv_tags",
                        device, NULL};
     GHashTable *table = NULL;
     gboolean success = FALSE;
@@ -1107,7 +1178,7 @@ BDLVMPVdata* bd_lvm_pvinfo (const gchar *device, GError **error) {
 
     for (lines_p = lines; *lines_p; lines_p++) {
         table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 13)) {
+        if (table && (num_items == 14)) {
             g_clear_error (error);
             g_strfreev (lines);
             return get_pv_data_from_table (table, TRUE);
@@ -1135,7 +1206,7 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
     const gchar *args[9] = {"pvs", "--unit=b", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--noheadings",
                        "-o", "pv_name,pv_uuid,pv_free,pv_size,pe_start,vg_name,vg_uuid,vg_size," \
-                       "vg_free,vg_extent_size,vg_extent_count,vg_free_count,pv_count",
+                       "vg_free,vg_extent_size,vg_extent_count,vg_free_count,pv_count,pv_tags",
                        NULL};
     GHashTable *table = NULL;
     gboolean success = FALSE;
@@ -1169,7 +1240,7 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
 
     for (lines_p = lines; *lines_p; lines_p++) {
         table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 13)) {
+        if (table && (num_items == 14)) {
             /* valid line, try to parse and record it */
             pvdata = get_pv_data_from_table (table, TRUE);
             if (pvdata)
@@ -1348,6 +1419,34 @@ gboolean bd_lvm_vgreduce (const gchar *vg_name, const gchar *device, const BDExt
 }
 
 /**
+ * bd_lvm_add_vg_tags:
+ * @vg_name: the VG to set tags on
+ * @tags: (array zero-terminated=1): list of tags to add
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the tags were successfully added to @vg_name or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+gboolean bd_lvm_add_vg_tags (const gchar *vg_name, const gchar **tags, GError **error) {
+    return _manage_lvm_tags (vg_name, tags, "--addtag", "vgchange", error);
+}
+
+/**
+ * bd_lvm_delete_vg_tags:
+ * @vg_name: the VG to set tags on
+ * @tags: (array zero-terminated=1): list of tags to remove
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the tags were successfully removed from @vg_name or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+gboolean bd_lvm_delete_vg_tags (const gchar *vg_name, const gchar **tags, GError **error) {
+    return _manage_lvm_tags (vg_name, tags, "--deltag", "vgchange", error);
+}
+
+/**
  * bd_lvm_vginfo:
  * @vg_name: a VG to get information about
  * @error: (out): place to store error (if any)
@@ -1360,7 +1459,7 @@ gboolean bd_lvm_vgreduce (const gchar *vg_name, const gchar *device, const BDExt
 BDLVMVGdata* bd_lvm_vginfo (const gchar *vg_name, GError **error) {
     const gchar *args[10] = {"vgs", "--noheadings", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--units=b",
-                       "-o", "name,uuid,size,free,extent_size,extent_count,free_count,pv_count,vg_exported",
+                       "-o", "name,uuid,size,free,extent_size,extent_count,free_count,pv_count,vg_exported,vg_tags",
                        vg_name, NULL};
 
     GHashTable *table = NULL;
@@ -1380,7 +1479,7 @@ BDLVMVGdata* bd_lvm_vginfo (const gchar *vg_name, GError **error) {
 
     for (lines_p = lines; *lines_p; lines_p++) {
         table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 9)) {
+        if (table && (num_items == 10)) {
             g_strfreev (lines);
             return get_vg_data_from_table (table, TRUE);
         } else
@@ -1406,7 +1505,7 @@ BDLVMVGdata* bd_lvm_vginfo (const gchar *vg_name, GError **error) {
 BDLVMVGdata** bd_lvm_vgs (GError **error) {
     const gchar *args[9] = {"vgs", "--noheadings", "--nosuffix", "--nameprefixes",
                       "--unquoted", "--units=b",
-                      "-o", "name,uuid,size,free,extent_size,extent_count,free_count,pv_count",
+                      "-o", "name,uuid,size,free,extent_size,extent_count,free_count,pv_count,vg_tags",
                       NULL};
     GHashTable *table = NULL;
     gboolean success = FALSE;
@@ -1440,7 +1539,7 @@ BDLVMVGdata** bd_lvm_vgs (GError **error) {
 
     for (lines_p = lines; *lines_p; lines_p++) {
         table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 8)) {
+        if (table && (num_items == 9)) {
             /* valid line, try to parse and record it */
             vgdata = get_vg_data_from_table (table, TRUE);
             if (vgdata)
@@ -1735,6 +1834,38 @@ gboolean bd_lvm_lvsnapshotmerge (const gchar *vg_name, const gchar *snapshot_nam
 }
 
 /**
+ * bd_lvm_add_lv_tags:
+ * @vg_name: name of the VG that contains the LV to set tags on
+ * @lv_name: name of the LV to set tags on
+ * @tags: (array zero-terminated=1): list of tags to add
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the tags were successfully added to @device or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+gboolean bd_lvm_add_lv_tags (const gchar *vg_name, const gchar *lv_name, const gchar **tags, GError **error) {
+    g_autofree gchar *lvspec = g_strdup_printf ("%s/%s", vg_name, lv_name);
+    return _manage_lvm_tags (lvspec, tags, "--addtag", "lvchange", error);
+}
+
+/**
+ * bd_lvm_delete_lv_tags:
+ * @vg_name: name of the VG that contains the LV to set tags on
+ * @lv_name: name of the LV to set tags on
+ * @tags: (array zero-terminated=1): list of tags to remove
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the tags were successfully removed from @device or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+gboolean bd_lvm_delete_lv_tags (const gchar *vg_name, const gchar *lv_name, const gchar **tags, GError **error) {
+    g_autofree gchar *lvspec = g_strdup_printf ("%s/%s", vg_name, lv_name);
+    return _manage_lvm_tags (lvspec, tags, "--deltag", "lvchange", error);
+}
+
+/**
  * bd_lvm_lvinfo:
  * @vg_name: name of the VG that contains the LV to get information about
  * @lv_name: name of the LV to get information about
@@ -1748,7 +1879,7 @@ gboolean bd_lvm_lvsnapshotmerge (const gchar *vg_name, const gchar *snapshot_nam
 BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError **error) {
     const gchar *args[11] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--units=b", "-a",
-                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv,role,move_pv,data_percent,metadata_percent,copy_percent",
+                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv,role,move_pv,data_percent,metadata_percent,copy_percent,lv_tags",
                        NULL, NULL};
 
     GHashTable *table = NULL;
@@ -1772,7 +1903,7 @@ BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError *
 
     for (lines_p = lines; *lines_p; lines_p++) {
         table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 15)) {
+        if (table && (num_items == 16)) {
             g_strfreev (lines);
             return get_lv_data_from_table (table, TRUE);
         } else
@@ -1800,7 +1931,7 @@ BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError *
 BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
     const gchar *args[11] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--units=b", "-a",
-                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv,role,move_pv,data_percent,metadata_percent,copy_percent",
+                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv,role,move_pv,data_percent,metadata_percent,copy_percent,lv_tags",
                        NULL, NULL};
 
     GHashTable *table = NULL;
@@ -1838,7 +1969,7 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
 
     for (lines_p = lines; *lines_p; lines_p++) {
         table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 15)) {
+        if (table && (num_items == 16)) {
             /* valid line, try to parse and record it */
             lvdata = get_lv_data_from_table (table, TRUE);
             if (lvdata)

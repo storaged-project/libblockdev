@@ -559,6 +559,77 @@ class LvmTestVGs(LvmPVVGTestCase):
         succ = BlockDev.lvm_pvremove(self.loop_dev, None)
         self.assertTrue(succ)
 
+class LvmTestPVTags(LvmPVVGTestCase):
+    def test_pvtags(self):
+        """Verify that it's possible to set and get info about PV tags"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        # only pvs in a vg can be tagged so we need a vg here
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0, None)
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_pvinfo(self.loop_dev)
+        self.assertTrue(info)
+        self.assertFalse(info.pv_tags)
+
+        succ = BlockDev.lvm_add_pv_tags(self.loop_dev, ["a", "b", "c"])
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_pvinfo(self.loop_dev)
+        self.assertTrue(info)
+        self.assertEqual(info.pv_tags, ["a", "b", "c"])
+
+        succ = BlockDev.lvm_delete_pv_tags(self.loop_dev, ["a", "b"])
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_pvinfo(self.loop_dev)
+        self.assertTrue(info)
+        self.assertEqual(info.pv_tags, ["c"])
+
+        succ = BlockDev.lvm_add_pv_tags(self.loop_dev, ["e"])
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_pvinfo(self.loop_dev)
+        self.assertTrue(info)
+        self.assertEqual(info.pv_tags, ["c", "e"])
+
+class LvmTestVGTags(LvmPVVGTestCase):
+    def test_vgtags(self):
+        """Verify that it's possible to set and get info about VG tags"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0, None)
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_vginfo("testVG")
+        self.assertTrue(info)
+        self.assertFalse(info.vg_tags)
+
+        succ = BlockDev.lvm_add_vg_tags("testVG", ["a", "b", "c"])
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_vginfo("testVG")
+        self.assertTrue(info)
+        self.assertEqual(info.vg_tags, ["a", "b", "c"])
+
+        succ = BlockDev.lvm_delete_vg_tags("testVG", ["a", "b"])
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_vginfo("testVG")
+        self.assertTrue(info)
+        self.assertEqual(info.vg_tags, ["c"])
+
+        succ = BlockDev.lvm_add_vg_tags("testVG", ["e"])
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_vginfo("testVG")
+        self.assertTrue(info)
+        self.assertEqual(info.vg_tags, ["c", "e"])
+
 class LvmPVVGLVTestCase(LvmPVVGTestCase):
     def _clean_up(self):
         try:
@@ -1367,6 +1438,44 @@ class LvmVGExportedTestCase(LvmPVVGLVTestCase):
 
 
         self.assertTrue(succ)
+
+class LvmTestLVTags(LvmPVVGLVTestCase):
+    def test_vgtags(self):
+        """Verify that it's possible to set and get info about LV tags"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [self.loop_dev], None)
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
+        self.assertTrue(info)
+        self.assertFalse(info.lv_tags)
+
+        succ = BlockDev.lvm_add_lv_tags("testVG", "testLV", ["a", "b", "c"])
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
+        self.assertTrue(info)
+        self.assertEqual(info.lv_tags, ["a", "b", "c"])
+
+        succ = BlockDev.lvm_delete_lv_tags("testVG", "testLV", ["a", "b"])
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
+        self.assertTrue(info)
+        self.assertEqual(info.lv_tags, ["c"])
+
+        succ = BlockDev.lvm_add_lv_tags("testVG", "testLV", ["e"])
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
+        self.assertTrue(info)
+        self.assertEqual(info.lv_tags, ["c", "e"])
 
 class LVMUnloadTest(LVMTestCase):
     def setUp(self):
