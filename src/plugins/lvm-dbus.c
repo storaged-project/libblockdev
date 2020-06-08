@@ -1038,6 +1038,98 @@ static BDLVMVGdata* get_vg_data_from_props (GVariant *props, GError **error __at
     return data;
 }
 
+static gchar* _lvm_data_lv_name (const gchar *vg_name, const gchar *lv_name, GError **error) {
+    GVariant *prop = NULL;
+    gchar *obj_id = NULL;
+    gchar *obj_path = NULL;
+    gchar *ret = NULL;
+    gchar *segtype = NULL;
+
+    obj_id = g_strdup_printf ("%s/%s", vg_name, lv_name);
+    obj_path = get_object_path (obj_id, error);
+    g_free (obj_id);
+    if (!obj_path)
+        return NULL;
+
+    prop = get_lv_property (vg_name, lv_name, "SegType", error);
+    if (!prop)
+        return NULL;
+    g_variant_get_child (prop, 0, "s", &segtype);
+    g_variant_unref (prop);
+
+    if (g_strcmp0 (segtype, "thin-pool") == 0)
+        prop = get_object_property (obj_path, THPOOL_INTF, "DataLv", error);
+    else if (g_strcmp0 (segtype, "cache-pool") == 0)
+        prop = get_object_property (obj_path, CACHE_POOL_INTF, "DataLv", error);
+    else if (g_strcmp0 (segtype, "vdo-pool") == 0)
+        prop = get_object_property (obj_path, VDO_POOL_INTF, "DataLv", error);
+
+    g_free (segtype);
+    g_free (obj_path);
+    if (!prop) {
+        g_clear_error (error);
+        return NULL;
+    }
+    g_variant_get (prop, "o", &obj_path);
+    g_variant_unref (prop);
+
+    if (g_strcmp0 (obj_path, "/") == 0) {
+        /* no origin LV */
+        g_free (obj_path);
+        return NULL;
+    }
+    prop = get_object_property (obj_path, LV_CMN_INTF, "Name", error);
+    if (!prop) {
+        g_free (obj_path);
+        return NULL;
+    }
+
+    g_variant_get (prop, "s", &ret);
+    g_variant_unref (prop);
+
+    return g_strstrip (g_strdelimit (ret, "[]", ' '));
+}
+
+static gchar* _lvm_metadata_lv_name (const gchar *vg_name, const gchar *lv_name, GError **error) {
+    GVariant *prop = NULL;
+    gchar *obj_id = NULL;
+    gchar *obj_path = NULL;
+    gchar *ret = NULL;
+
+    obj_id = g_strdup_printf ("%s/%s", vg_name, lv_name);
+    obj_path = get_object_path (obj_id, error);
+    g_free (obj_id);
+    if (!obj_path)
+        return NULL;
+
+    prop = get_object_property (obj_path, THPOOL_INTF, "MetaDataLv", error);
+    if (!prop)
+        prop = get_object_property (obj_path, CACHE_POOL_INTF, "MetaDataLv", error);
+    g_free (obj_path);
+    if (!prop) {
+        g_clear_error (error);
+        return NULL;
+    }
+    g_variant_get (prop, "o", &obj_path);
+    g_variant_unref (prop);
+
+    if (g_strcmp0 (obj_path, "/") == 0) {
+        /* no origin LV */
+        g_free (obj_path);
+        return NULL;
+    }
+    prop = get_object_property (obj_path, LV_CMN_INTF, "Name", error);
+    if (!prop) {
+        g_free (obj_path);
+        return NULL;
+    }
+
+    g_variant_get (prop, "s", &ret);
+    g_variant_unref (prop);
+
+    return g_strstrip (g_strdelimit (ret, "[]", ' '));
+}
+
 static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error) {
     BDLVMLVdata *data = g_new0 (BDLVMLVdata, 1);
     GVariantDict dict;
@@ -2526,11 +2618,11 @@ BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError *
     ret = get_lv_data_from_props (props, error);
     if (ret && ((g_strcmp0 (ret->segtype, "thin-pool") == 0) ||
                 (g_strcmp0 (ret->segtype, "cache-pool") == 0))) {
-        ret->data_lv = bd_lvm_data_lv_name (vg_name, lv_name, error);
-        ret->metadata_lv = bd_lvm_metadata_lv_name (vg_name, lv_name, error);
+        ret->data_lv = _lvm_data_lv_name (vg_name, lv_name, error);
+        ret->metadata_lv = _lvm_metadata_lv_name (vg_name, lv_name, error);
     }
     if (ret && g_strcmp0 (ret->segtype, "vdo-pool") == 0) {
-        ret->data_lv = bd_lvm_data_lv_name (vg_name, lv_name, error);
+        ret->data_lv = _lvm_data_lv_name (vg_name, lv_name, error);
     }
 
     return ret;
@@ -2708,10 +2800,10 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
             return NULL;
         } else if ((g_strcmp0 (ret[j]->segtype, "thin-pool") == 0) ||
                    (g_strcmp0 (ret[j]->segtype, "cache-pool") == 0)) {
-            ret[j]->data_lv = bd_lvm_data_lv_name (ret[j]->vg_name, ret[j]->lv_name, error);
-            ret[j]->metadata_lv = bd_lvm_metadata_lv_name (ret[j]->vg_name, ret[j]->lv_name, error);
+            ret[j]->data_lv = _lvm_data_lv_name (ret[j]->vg_name, ret[j]->lv_name, error);
+            ret[j]->metadata_lv = _lvm_metadata_lv_name (ret[j]->vg_name, ret[j]->lv_name, error);
         } else if (g_strcmp0 (ret[j]->segtype, "vdo-pool") == 0) {
-            ret[j]->data_lv = bd_lvm_data_lv_name (ret[j]->vg_name, ret[j]->lv_name, error);
+            ret[j]->data_lv = _lvm_data_lv_name (ret[j]->vg_name, ret[j]->lv_name, error);
         }
         if (error && *error) {
             g_slist_free_full (matched_lvs, g_free);
@@ -3355,7 +3447,6 @@ BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_l
     gchar *params = NULL;
     BDLVMCacheStats *ret = NULL;
     BDLVMLVdata *lvdata = NULL;
-    gchar *data_lv_name = NULL;
 
     if (geteuid () != 0) {
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_NOT_ROOT,
@@ -3369,17 +3460,9 @@ BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_l
 
     pool = dm_pool_create ("bd-pool", 20);
 
-    if (g_strcmp0 (lvdata->segtype, "thin-pool") == 0) {
-        data_lv_name = bd_lvm_data_lv_name (vg_name, cached_lv, error);
-        if (!data_lv_name) {
-            dm_pool_destroy (pool);
-            bd_lvm_lvdata_free (lvdata);
-            return NULL;
-        }
-
-        map_name = dm_build_dm_name (pool, vg_name, data_lv_name, NULL);
-        g_free (data_lv_name);
-    } else
+    if (g_strcmp0 (lvdata->segtype, "thin-pool") == 0)
+        map_name = dm_build_dm_name (pool, vg_name, lvdata->data_lv, NULL);
+    else
         /* translate the VG+LV name into the DM map name */
         map_name = dm_build_dm_name (pool, vg_name, cached_lv, NULL);
 
@@ -3467,120 +3550,6 @@ BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_l
     dm_pool_destroy (pool);
 
     return ret;
-}
-
-/**
- * bd_lvm_data_lv_name:
- * @vg_name: name of the VG containing the queried LV
- * @lv_name: name of the queried LV
- * @error: (out): place to store error (if any)
- *
- * Returns: (transfer full): the name of the (internal) data LV of the
- * @vg_name/@lv_name LV
- *
- * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
- */
-gchar* bd_lvm_data_lv_name (const gchar *vg_name, const gchar *lv_name, GError **error) {
-    GVariant *prop = NULL;
-    gchar *obj_id = NULL;
-    gchar *obj_path = NULL;
-    gchar *ret = NULL;
-    gchar *segtype = NULL;
-
-    obj_id = g_strdup_printf ("%s/%s", vg_name, lv_name);
-    obj_path = get_object_path (obj_id, error);
-    g_free (obj_id);
-    if (!obj_path)
-        return NULL;
-
-    prop = get_lv_property (vg_name, lv_name, "SegType", error);
-    if (!prop)
-        return NULL;
-    g_variant_get_child (prop, 0, "s", &segtype);
-    g_variant_unref (prop);
-
-    if (g_strcmp0 (segtype, "thin-pool") == 0)
-        prop = get_object_property (obj_path, THPOOL_INTF, "DataLv", error);
-    else if (g_strcmp0 (segtype, "cache-pool") == 0)
-        prop = get_object_property (obj_path, CACHE_POOL_INTF, "DataLv", error);
-    else if (g_strcmp0 (segtype, "vdo-pool") == 0)
-        prop = get_object_property (obj_path, VDO_POOL_INTF, "DataLv", error);
-
-    g_free (segtype);
-    g_free (obj_path);
-    if (!prop) {
-        g_clear_error (error);
-        return NULL;
-    }
-    g_variant_get (prop, "o", &obj_path);
-    g_variant_unref (prop);
-
-    if (g_strcmp0 (obj_path, "/") == 0) {
-        /* no origin LV */
-        g_free (obj_path);
-        return NULL;
-    }
-    prop = get_object_property (obj_path, LV_CMN_INTF, "Name", error);
-    if (!prop) {
-        g_free (obj_path);
-        return NULL;
-    }
-
-    g_variant_get (prop, "s", &ret);
-    g_variant_unref (prop);
-
-    return g_strstrip (g_strdelimit (ret, "[]", ' '));
-}
-
-/**
- * bd_lvm_metadata_lv_name:
- * @vg_name: name of the VG containing the queried LV
- * @lv_name: name of the queried LV
- * @error: (out): place to store error (if any)
- *
- * Returns: (transfer full): the name of the (internal) metadata LV of the
- * @vg_name/@lv_name LV
- *
- * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
- */
-gchar* bd_lvm_metadata_lv_name (const gchar *vg_name, const gchar *lv_name, GError **error) {
-    GVariant *prop = NULL;
-    gchar *obj_id = NULL;
-    gchar *obj_path = NULL;
-    gchar *ret = NULL;
-
-    obj_id = g_strdup_printf ("%s/%s", vg_name, lv_name);
-    obj_path = get_object_path (obj_id, error);
-    g_free (obj_id);
-    if (!obj_path)
-        return NULL;
-
-    prop = get_object_property (obj_path, THPOOL_INTF, "MetaDataLv", error);
-    if (!prop)
-        prop = get_object_property (obj_path, CACHE_POOL_INTF, "MetaDataLv", error);
-    g_free (obj_path);
-    if (!prop) {
-        g_clear_error (error);
-        return NULL;
-    }
-    g_variant_get (prop, "o", &obj_path);
-    g_variant_unref (prop);
-
-    if (g_strcmp0 (obj_path, "/") == 0) {
-        /* no origin LV */
-        g_free (obj_path);
-        return NULL;
-    }
-    prop = get_object_property (obj_path, LV_CMN_INTF, "Name", error);
-    if (!prop) {
-        g_free (obj_path);
-        return NULL;
-    }
-
-    g_variant_get (prop, "s", &ret);
-    g_variant_unref (prop);
-
-    return g_strstrip (g_strdelimit (ret, "[]", ' '));
 }
 
 /**
