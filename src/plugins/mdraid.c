@@ -720,9 +720,25 @@ gboolean bd_md_activate (const gchar *raid_spec, const gchar **members, const gc
     guint argv_top = 0;
     guint i = 0;
     gboolean ret = FALSE;
+    BDMDDetailData *data = NULL;
 
     if (!check_deps (&avail_deps, DEPS_MDADM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
+
+    if (raid_spec) {
+        data = bd_md_detail (raid_spec, error);
+        if (!data)
+            g_clear_error (error);
+        else {
+            bd_utils_log_format (BD_UTILS_LOG_INFO,
+                                "RAID array '%s' is already active with %"G_GUINT64_FORMAT" devices"
+                                " (%"G_GUINT64_FORMAT" active, %"G_GUINT64_FORMAT" spare)",
+                                raid_spec, data->total_devices,
+                                data->active_devices, data->spare_devices);
+            bd_md_detail_data_free (data);
+            return TRUE;
+        }
+    }
 
     /* mdadm, --assemble, raid_spec/--scan, --run, --uuid=uuid, member1, member2,..., NULL*/
     argv = g_new0 (const gchar*, num_members + 6);

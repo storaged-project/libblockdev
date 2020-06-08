@@ -516,6 +516,29 @@ static void find_raid_sets_for_dev (const gchar *name, const gchar *uuid, gint m
         }
     }
 }
+
+static gboolean get_raid_set_status (struct raid_set *rs, GError **error) {
+    struct dm_task *dmt = NULL;
+    struct dm_info info;
+    gboolean ret;
+
+    dmt = dm_task_create (DM_DEVICE_STATUS);
+    if (!dmt) {
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
+                     "Failed to create DM task");
+        return FALSE;
+    }
+
+    if (!dm_task_set_name (dmt, rs->name) || !dm_task_run (dmt) || !dm_task_get_info (dmt, &info)) {
+        /* the DM device doesn't exist or some weird error appeared, just assume the RAID set is not active */
+        dm_task_destroy (dmt);
+        return FALSE;
+    }
+
+    ret = info.exists;
+    dm_task_destroy (dmt);
+    return ret;
+}
 #endif // WITH_BD_DMRAID
 
 /**
@@ -610,6 +633,7 @@ static gboolean change_set_by_name (const gchar *name, enum activate_type action
     struct lib_context *lc = NULL;
     struct raid_set *iter_rs = NULL;
     struct raid_set *match_rs = NULL;
+    gboolean status = FALSE;
 
     lc = init_dmraid_stack (error);
     if (!lc)
@@ -627,6 +651,19 @@ static gboolean change_set_by_name (const gchar *name, enum activate_type action
                      "RAID set %s doesn't exist", name);
         libdmraid_exit (lc);
         return FALSE;
+    }
+
+    status = get_raid_set_status (match_rs, error);
+    if (!status && error) {
+        g_prefix_error (error, "Failed to get status for the RAID set '%s'", name);
+        libdmraid_exit (lc);
+        return FALSE;
+    }
+
+    if (action == A_ACTIVATE && status) {
+        /* nothing to do here the set is already in the desired state */
+        libdmraid_exit (lc);
+        return TRUE;
     }
 
     rc = change_set (lc, action, match_rs);
@@ -647,7 +684,9 @@ static gboolean change_set_by_name (const gchar *name, enum activate_type action
  * @name: name of the DM RAID set to activate
  * @error: (out): variable to store error (if any)
  *
- * Returns: whether the RAID set @name was successfully activate or not
+ * Returns: whether the RAID set @name was successfully activated or not
+ *
+ * Note: This is a no-op for already active RAID sets.
  *
  * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_MODE_CREATE_ACTIVATE
  */
@@ -676,7 +715,9 @@ gboolean bd_dm_activate_raid_set (const gchar *name, GError **error) {
  * @name: name of the DM RAID set to deactivate
  * @error: (out): variable to store error (if any)
  *
- * Returns: whether the RAID set @name was successfully deactivate or not
+ * Returns: whether the RAID set @name was successfully deactivated or not
+ *
+ * Note: This function will return an error for non-existing (or deactivated) RAID sets.
  *
  * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_MODE_REMOVE_DEACTIVATE
  */
