@@ -121,7 +121,7 @@ gchar* bd_loop_get_backing_file (const gchar *dev_name, GError **error) {
 
     success = g_file_get_contents (sys_path, &ret, NULL, error);
     if (!success) {
-        /* error is alraedy populated */
+        /* error is already populated */
         g_free (sys_path);
         return NULL;
     }

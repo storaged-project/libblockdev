@@ -101,7 +101,7 @@ void bd_utils_log_format (gint level, const gchar *format, ...) {
  * @level: log level
  * @msg: log message
  *
- * Covenient function for logging to stdout. Can be used as #BDUtilsLogFunc.
+ * Convenient function for logging to stdout. Can be used as #BDUtilsLogFunc.
  *
  */
 void bd_utils_log_stdout (gint level, const gchar *msg) {
