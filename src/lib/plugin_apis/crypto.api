@@ -357,7 +357,7 @@ void bd_crypto_integrity_info_free (BDCryptoIntegrityInfo *info) {
 }
 
 /**
- * bd_crypto_luks_integrity_copy: (skip)
+ * bd_crypto_integrity_info_copy: (skip)
  *
  * Creates a new copy of @info.
  */
