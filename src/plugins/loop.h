@@ -3,8 +3,6 @@
 #ifndef BD_LOOP
 #define BD_LOOP
 
-#define LOSETUP_MIN_VERSION "2.23.2"
-
 GQuark bd_loop_error_quark (void);
 #define BD_LOOP_ERROR bd_loop_error_quark ()
 typedef enum {

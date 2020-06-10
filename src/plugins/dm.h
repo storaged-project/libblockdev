@@ -3,8 +3,6 @@
 #ifndef BD_DM
 #define BD_DM
 
-#define DM_MIN_VERSION "1.02.93"
-
 GQuark bd_dm_error_quark (void);
 #define BD_DM_ERROR bd_dm_error_quark ()
 typedef enum {

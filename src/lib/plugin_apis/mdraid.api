@@ -57,6 +57,7 @@ typedef struct BDMDExamineData {
 
 /**
  * bd_md_examine_data_copy: (skip)
+ * @data: (allow-none): %BDMDExamineData to copy
  *
  * Creates a new copy of @data.
  */
@@ -82,6 +83,7 @@ BDMDExamineData* bd_md_examine_data_copy (BDMDExamineData *data) {
 
 /**
  * bd_md_examine_data_free: (skip)
+ * @data: (allow-none): %BDMDExamineData to free
  *
  * Frees @data.
  */
@@ -151,6 +153,7 @@ typedef struct BDMDDetailData {
 
 /**
  * bd_md_detail_data_copy: (skip)
+ * @data: (allow-none): %BDMDDetailData to copy
  *
  * Creates a new copy of @data.
  */
@@ -180,6 +183,7 @@ BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data) {
 
 /**
  * bd_md_detail_data_free: (skip)
+ * @data: (allow-none): %BDMDDetailData to free
  *
  * Frees @data.
  */
@@ -409,7 +413,7 @@ BDMDDetailData* bd_md_detail (const gchar *raid_spec, GError **error);
  * @uuid: UUID to canonicalize
  * @error: (out): place to store error (if any)
  *
- * Returns: (transfer full): cannonicalized form of @uuid
+ * Returns: (transfer full): canonicalized form of @uuid
  *
  * This function expects a UUID in the form that mdadm returns. The change is as
  * follows: 3386ff85:f5012621:4a435f06:1eb47236 -> 3386ff85-f501-2621-4a43-5f061eb47236

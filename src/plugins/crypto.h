@@ -36,10 +36,6 @@ typedef enum {
 /* 20 chars * 6 bits per char (64-item charset) = 120 "bits of security" */
 #define BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH 20
 
-#define DEFAULT_LUKS_KEYSIZE_BITS 512
-#define DEFAULT_LUKS_CIPHER "aes-xts-plain64"
-#define DEFAULT_LUKS2_SECTOR_SIZE 512
-
 typedef enum {
     BD_CRYPTO_TECH_LUKS = 0,
     BD_CRYPTO_TECH_LUKS2,
@@ -196,7 +192,7 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, cons
 gboolean bd_crypto_luks_remove_key_blob (const gchar *device, const guint8 *pass_data, gsize data_len, GError **error);
 gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, const gchar *npass, GError **error);
 gboolean bd_crypto_luks_change_key_blob (const gchar *device, const guint8 *pass_data, gsize data_len, const guint8 *npass_data, gsize ndata_len, GError **error);
-gboolean bd_crypto_luks_resize (const gchar *device, guint64 size, GError **error);
+gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError **error);
 gboolean bd_crypto_luks_resize_luks2 (const gchar *luks_device, guint64 size, const gchar *passphrase, const gchar *key_file, GError **error);
 gboolean bd_crypto_luks_resize_luks2_blob (const gchar *luks_device, guint64 size, const guint8* pass_data, gsize data_len, GError **error);
 gboolean bd_crypto_luks_suspend (const gchar *luks_device, GError **error);

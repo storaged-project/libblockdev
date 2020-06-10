@@ -27,6 +27,8 @@
 #include "mpath.h"
 #include "check_deps.h"
 
+#define MULTIPATH_MIN_VERSION "0.4.9"
+
 /**
  * SECTION: mpath
  * @short_description: plugin for basic operations with multipath devices
@@ -119,7 +121,7 @@ void bd_mpath_close (void) {
  * @mode: a bit mask of queried modes of operation for @tech
  * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
  *
- * Returns: whether the @tech-@mode combination is avaible -- supported by the
+ * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
  */
 gboolean bd_mpath_is_tech_avail (BDMpathTech tech, guint64 mode, GError **error) {

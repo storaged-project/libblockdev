@@ -412,7 +412,7 @@ gboolean bd_s390_dasd_is_fba (const gchar *dasd, GError **error) {
 
 /**
  * bd_s390_sanitize_dev_input:
- * @dev a DASD or zFCP device number
+ * @dev: a DASD or zFCP device number
  * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): a synthesized dasd or zfcp device number
@@ -466,7 +466,7 @@ gchar* bd_s390_sanitize_dev_input (const gchar *dev, GError **error) {
 
 /**
  * bd_s390_zfcp_sanitize_wwpn_input:
- * @dev a zFCP WWPN identifier
+ * @wwpn: a zFCP WWPN identifier
  * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): a synthesized zFCP WWPN
@@ -500,7 +500,7 @@ gchar* bd_s390_zfcp_sanitize_wwpn_input (const gchar *wwpn, GError **error) {
 
 /**
  * bd_s390_zfcp_sanitize_lun_input:
- * @dev a zFCP LUN identifier
+ * @lun: a zFCP LUN identifier
  * @error: (out): place to store error (if any)
  *
  * Returns: (transfer full): a synthesized zFCP LUN

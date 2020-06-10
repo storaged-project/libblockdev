@@ -136,7 +136,7 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
         return FALSE;
     }
 
-    /* we may need to try mutliple times with some delays in case the device is
+    /* we may need to try multiple times with some delays in case the device is
        busy at the very moment */
     for (n_try=5, status=-1; (status != 0) && (n_try > 0); n_try--) {
         status = blkid_probe_set_device (probe, fd, 0, 0);
@@ -157,7 +157,7 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error) {
     blkid_probe_enable_superblocks(probe, 1);
     blkid_probe_set_superblocks_flags(probe, BLKID_SUBLKS_MAGIC | BLKID_SUBLKS_BADCSUM);
 
-    /* we may need to try mutliple times with some delays in case the device is
+    /* we may need to try multiple times with some delays in case the device is
        busy at the very moment */
     for (n_try=5, status=-1; (status != 0) && (n_try > 0); n_try--) {
         status = blkid_do_safeprobe (probe);
@@ -285,7 +285,7 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
         return FALSE;
     }
 
-    /* we may need to try mutliple times with some delays in case the device is
+    /* we may need to try multiple times with some delays in case the device is
        busy at the very moment */
     for (n_try=5, status=-1; (status != 0) && (n_try > 0); n_try--) {
         status = blkid_probe_set_device (probe, fd, 0, 0);
@@ -306,7 +306,7 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
     blkid_probe_set_superblocks_flags (probe, BLKID_SUBLKS_USAGE | BLKID_SUBLKS_TYPE |
                                               BLKID_SUBLKS_MAGIC | BLKID_SUBLKS_BADCSUM);
 
-    /* we may need to try mutliple times with some delays in case the device is
+    /* we may need to try multiple times with some delays in case the device is
        busy at the very moment */
     for (n_try=5, status=-1; !(status == 0 || status == 1) && (n_try > 0); n_try--) {
         status = blkid_do_safeprobe (probe);
@@ -680,7 +680,7 @@ gboolean bd_fs_check (const gchar *device, GError **error) {
  * plugin based on detected filesystem (e.g. bd_fs_xfs_set_label for XFS). This
  * function will return an error for unknown/unsupported filesystems.
  *
- * Returns: whether the file system on @device was successfully relabled or not
+ * Returns: whether the file system on @device was successfully relabeled or not
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_SET_LABEL
  */
@@ -698,7 +698,7 @@ gboolean bd_fs_set_label (const gchar *device, const gchar *label, GError **erro
  * plugin based on detected filesystem (e.g. bd_fs_xfs_set_uuid for XFS). This
  * function will return an error for unknown/unsupported filesystems.
  *
- * Returns: whether the file system on @device was successfully relabled or not
+ * Returns: whether the UUID on the file system on @device was successfully changed or not
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_SET_UUID
  */

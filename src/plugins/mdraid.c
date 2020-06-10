@@ -30,6 +30,8 @@
 #include "mdraid.h"
 #include "check_deps.h"
 
+#define MDADM_MIN_VERSION "3.3.2"
+
 /**
  * SECTION: mdraid
  * @short_description: plugin for basic operations with MD RAID
@@ -1149,7 +1151,7 @@ BDMDDetailData* bd_md_detail (const gchar *raid_spec, GError **error) {
  * @uuid: UUID to canonicalize
  * @error: (out): place to store error (if any)
  *
- * Returns: (transfer full): cannonicalized form of @uuid or %NULL in case of error
+ * Returns: (transfer full): canonicalized form of @uuid or %NULL in case of error
  *
  * This function expects a UUID in the form that mdadm returns. The change is as
  * follows: 3386ff85:f5012621:4a435f06:1eb47236 -> 3386ff85-f501-2621-4a43-5f061eb47236
@@ -1388,7 +1390,7 @@ gchar* bd_md_get_status (const gchar *raid_spec, GError **error) {
 
     success = g_file_get_contents (sys_path, &ret, NULL, error);
     if (!success) {
-        /* error is alraedy populated */
+        /* error is already populated */
         g_free (sys_path);
         return NULL;
     }
@@ -1464,7 +1466,7 @@ gchar* bd_md_get_bitmap_location (const gchar *raid_spec, GError **error) {
 
     success = g_file_get_contents (sys_path, &ret, NULL, error);
     if (!success) {
-        /* error is alraedy populated */
+        /* error is already populated */
         g_free (sys_path);
         return NULL;
     }

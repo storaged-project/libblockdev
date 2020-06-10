@@ -28,6 +28,8 @@
 #include "swap.h"
 #include "check_deps.h"
 
+#define MKSWAP_MIN_VERSION "2.23.2"
+
 /**
  * SECTION: swap
  * @short_description: plugin for operations with swap space
@@ -218,7 +220,7 @@ gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
         return FALSE;
     }
 
-    /* we may need to try mutliple times with some delays in case the device is
+    /* we may need to try multiple times with some delays in case the device is
        busy at the very moment */
     for (n_try=5, status=-1; (status != 0) && (n_try > 0); n_try--) {
         status = blkid_probe_set_device (probe, fd, 0, 0);
@@ -237,7 +239,7 @@ gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
     blkid_probe_enable_superblocks (probe, 1);
     blkid_probe_set_superblocks_flags (probe, BLKID_SUBLKS_TYPE | BLKID_SUBLKS_MAGIC);
 
-    /* we may need to try mutliple times with some delays in case the device is
+    /* we may need to try multiple times with some delays in case the device is
        busy at the very moment */
     for (n_try=5, status=-1; !(status == 0 || status == 1) && (n_try > 0); n_try--) {
         status = blkid_do_safeprobe (probe);

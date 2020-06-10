@@ -136,6 +136,7 @@ typedef struct BDLVMPVdata {
 
 /**
  * bd_lvm_pvdata_copy: (skip)
+ * @data: (allow-none): %BDLVMPVdata to copy
  *
  * Creates a new copy of @data.
  */
@@ -165,6 +166,7 @@ BDLVMPVdata* bd_lvm_pvdata_copy (BDLVMPVdata *data) {
 
 /**
  * bd_lvm_pvdata_free: (skip)
+ * @data: (allow-none): %BDLVMPVdata to free
  *
  * Frees @data.
  */
@@ -223,6 +225,7 @@ typedef struct BDLVMVGdata {
 
 /**
  * bd_lvm_vgdata_copy: (skip)
+ * @data: (allow-none): %BDLVMVGdata to copy
  *
  * Creates a new copy of @data.
  */
@@ -248,6 +251,7 @@ BDLVMVGdata* bd_lvm_vgdata_copy (BDLVMVGdata *data) {
 
 /**
  * bd_lvm_vgdata_free: (skip)
+ * @data: (allow-none): %BDLVMVGdata to free
  *
  * Frees @data.
  */
@@ -288,6 +292,11 @@ GType bd_lvm_lvdata_get_type();
  * @pool_lv: pool LV of the LV (for thin and cached LVs)
  * @data_lv: data LV of the LV (for thin and cache pools)
  * @metadata_lv: metadata LV of the LV (for thin and cache pools)
+ * @roles: comma separated list of this LV's roles
+ * @move_pv: source physical volume of a temporary logical volume created with the pvmove command
+ * @data_percent: available data space in a thin pool
+ * @metadata_percent: available metadata space in a thin pool
+ * @copy_percent: synchronization percentage of a mirrored logical volume
  * @lv_tags: (array zero-terminated=1): list of LVM tags for this LV
  */
 typedef struct BDLVMLVdata {
@@ -311,6 +320,7 @@ typedef struct BDLVMLVdata {
 
 /**
  * bd_lvm_lvdata_copy: (skip)
+ * @data: (allow-none): %BDLVMLVdata to copy
  *
  * Creates a new copy of @data.
  */
@@ -341,6 +351,7 @@ BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
 
 /**
  * bd_lvm_lvdata_free: (skip)
+ * @data: (allow-none): %BDLVMLVdata to free
  *
  * Frees @data.
  */
@@ -384,6 +395,7 @@ GType bd_lvm_vdodata_get_type();
  * @compression_state: state of the compression
  * @index_state: state of the VDO index
  * @write_policy: write policy of the VDO LV
+ * @used_size: currently used space
  * @saving_percent: percentage of physical blocks saved
  * @index_memory_size: index memory size of the VDO volume
  * @deduplication: whether deduplication is enabled
@@ -404,6 +416,7 @@ typedef struct BDLVMVDOPooldata {
 
 /**
  * bd_lvm_vdodata_copy: (skip)
+ * @data: (allow-none): %BDLVMVDOPooldata to copy
  *
  * Creates a new copy of @data.
  */
@@ -427,6 +440,7 @@ BDLVMVDOPooldata* bd_lvm_vdodata_copy (BDLVMVDOPooldata *data) {
 
 /**
  * bd_lvm_vdodata_free: (skip)
+ * @data: (allow-none): %BDLVMVDOPooldata to free
  *
  * Frees @data.
  */
@@ -483,37 +497,39 @@ typedef struct BDLVMVDOStats {
 
 /**
  * bd_lvm_vdo_stats_copy: (skip)
+ * @stats: (allow-none): %BDLVMVDOStats to copy
  *
- * Creates a new copy of @data.
+ * Creates a new copy of @stats.
  */
-BDLVMVDOStats* bd_lvm_vdo_stats_copy (BDLVMVDOStats *data) {
-    if (data == NULL)
+BDLVMVDOStats* bd_lvm_vdo_stats_copy (BDLVMVDOStats *stats) {
+    if (stats == NULL)
         return NULL;
 
-    BDLVMVDOStats *new_data = g_new0 (BDLVMVDOStats, 1);
+    BDLVMVDOStats *new_stats = g_new0 (BDLVMVDOStats, 1);
 
-    new_data->block_size = data->block_size;
-    new_data->logical_block_size = data->logical_block_size;
-    new_data->physical_blocks = data->physical_blocks;
-    new_data->data_blocks_used = data->data_blocks_used;
-    new_data->overhead_blocks_used = data->overhead_blocks_used;
-    new_data->logical_blocks_used = data->logical_blocks_used;
-    new_data->used_percent = data->used_percent;
-    new_data->saving_percent = data->saving_percent;
-    new_data->write_amplification_ratio = data->write_amplification_ratio;
-    return new_data;
+    new_stats->block_size = stats->block_size;
+    new_stats->logical_block_size = stats->logical_block_size;
+    new_stats->physical_blocks = stats->physical_blocks;
+    new_stats->data_blocks_used = stats->data_blocks_used;
+    new_stats->overhead_blocks_used = stats->overhead_blocks_used;
+    new_stats->logical_blocks_used = stats->logical_blocks_used;
+    new_stats->used_percent = stats->used_percent;
+    new_stats->saving_percent = stats->saving_percent;
+    new_stats->write_amplification_ratio = stats->write_amplification_ratio;
+    return new_stats;
 }
 
 /**
  * bd_lvm_vdo_stats_free: (skip)
+ * @stats: (allow-none): %BDLVMVDOStats to free
  *
- * Frees @data.
+ * Frees @stats.
  */
-void bd_lvm_vdo_stats_free (BDLVMVDOStats *data) {
-    if (data == NULL)
+void bd_lvm_vdo_stats_free (BDLVMVDOStats *stats) {
+    if (stats == NULL)
         return;
 
-    g_free (data);
+    g_free (stats);
 }
 
 GType bd_lvm_vdo_stats_get_type () {
@@ -561,6 +577,7 @@ typedef struct BDLVMCacheStats {
 
 /**
  * bd_lvm_cache_stats_copy: (skip)
+ * @data: (allow-none): %BDLVMCacheStats to copy
  *
  * Creates a new copy of @data.
  */
@@ -587,6 +604,7 @@ BDLVMCacheStats* bd_lvm_cache_stats_copy (BDLVMCacheStats *data) {
 
 /**
  * bd_lvm_cache_stats_free: (skip)
+ * @data: (allow-none): %BDLVMCacheStats to free
  *
  * Frees @data.
  */
@@ -632,7 +650,7 @@ typedef enum {
  * @mode: a bit mask of queried modes of operation (#BDLVMTechMode) for @tech
  * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
  *
- * Returns: whether the @tech-@mode combination is avaible -- supported by the
+ * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
  */
 gboolean bd_lvm_is_tech_avail (BDLVMTech tech, guint64 mode, GError **error);
@@ -778,7 +796,7 @@ gboolean bd_lvm_pvcreate (const gchar *device, guint64 data_alignment, guint64 m
  * Returns: whether the PV's size was successfully changed or not
  *
  * If given @size different from 0, sets the PV's size to the given value (see
- * pvresize(8)). If given @size 0, adjusts the PV's size to the underlaying
+ * pvresize(8)). If given @size 0, adjusts the PV's size to the underlying
  * block device's size.
  *
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_MODIFY

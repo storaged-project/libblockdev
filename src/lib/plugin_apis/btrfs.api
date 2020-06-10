@@ -35,6 +35,7 @@ typedef struct BDBtrfsDeviceInfo {
 
 /**
  * bd_btrfs_device_info_copy: (skip)
+ * @info: (allow-none): %BDBtrfsDeviceInfo to copy
  *
  * Creates a new copy of @info.
  */
@@ -54,6 +55,7 @@ BDBtrfsDeviceInfo* bd_btrfs_device_info_copy (BDBtrfsDeviceInfo *info) {
 
 /**
  * bd_btrfs_device_info_free: (skip)
+ * @info: (allow-none): %BDBtrfsDeviceInfo to free
  *
  * Frees @info.
  */
@@ -95,6 +97,7 @@ typedef struct BDBtrfsSubvolumeInfo {
 
 /**
  * bd_btrfs_subvolume_info_copy: (skip)
+ * @info: (allow-none): %BDBtrfsSubvolumeInfo to copy
  *
  * Creates a new copy of @info.
  */
@@ -113,6 +116,7 @@ BDBtrfsSubvolumeInfo* bd_btrfs_subvolume_info_copy (BDBtrfsSubvolumeInfo *info) 
 
 /**
  * bd_btrfs_subvolume_info_free: (skip)
+ * @info: (allow-none): %BDBtrfsSubvolumeInfo to free
  *
  * Frees @info.
  */
@@ -156,6 +160,7 @@ typedef struct BDBtrfsFilesystemInfo {
 
 /**
  * bd_btrfs_filesystem_info_copy: (skip)
+ * @info: (allow-none): %BDBtrfsFilesystemInfo to copy
  *
  * Creates a new copy of @info.
  */
@@ -175,6 +180,7 @@ BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info_copy (BDBtrfsFilesystemInfo *inf
 
 /**
  * bd_btrfs_filesystem_info_free: (skip)
+ * @info: (allow-none): %BDBtrfsFilesystemInfo to free
  *
  * Frees @info.
  */
@@ -219,7 +225,7 @@ typedef enum {
  * @mode: a bit mask of queried modes of operation (#BDBtrfsTechMode) for @tech
  * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
  *
- * Returns: whether the @tech-@mode combination is avaible -- supported by the
+ * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
  */
 gboolean bd_btrfs_is_tech_avail (BDBtrfsTech tech, guint64 mode, GError **error);
@@ -443,8 +449,6 @@ gboolean bd_btrfs_repair (const gchar *device, const BDExtraArg **extra, GError 
  * bd_btrfs_change_label:
  * @mountpoint: a mountpoint of the btrfs filesystem to change label of
  * @label: new label for the filesystem
- * @extra: (allow-none) (array zero-terminated=1): extra options for the volume creation (right now
- *                                                 passed to the 'btrfs' utility)
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the label of the @mountpoint filesystem was successfully set
@@ -452,4 +456,4 @@ gboolean bd_btrfs_repair (const gchar *device, const BDExtraArg **extra, GError 
  *
  * Tech category: %BD_BTRFS_TECH_FS-%BD_BTRFS_TECH_MODE_MODIFY
  */
-gboolean bd_btrfs_change_label (const gchar *mountpoint, const gchar *label, const BDExtraArg **extra, GError **error);
+gboolean bd_btrfs_change_label (const gchar *mountpoint, const gchar *label, GError **error);

@@ -4,8 +4,6 @@
 #ifndef BD_MD
 #define BD_MD
 
-#define MDADM_MIN_VERSION "3.3.2"
-
 /* taken from blivet */
 // these defaults were determined empirically
 #define BD_MD_SUPERBLOCK_SIZE (2 MiB)
@@ -88,7 +86,7 @@ void bd_md_close (void);
 gboolean bd_md_is_tech_avail (BDMDTech tech, guint64 mode, GError **error);
 
 guint64 bd_md_get_superblock_size (guint64 member_size, const gchar *version, GError **error);
-gboolean bd_md_create (const gchar *raid_spec, const gchar *level, const gchar **disks, guint64 spares, const gchar *version, gboolean bitmap, guint64 chunk_size, const BDExtraArg **extra, GError **error);
+gboolean bd_md_create (const gchar *device_name, const gchar *level, const gchar **disks, guint64 spares, const gchar *version, gboolean bitmap, guint64 chunk_size, const BDExtraArg **extra, GError **error);
 gboolean bd_md_destroy (const gchar *device, GError **error);
 gboolean bd_md_deactivate (const gchar *raid_spec, GError **error);
 gboolean bd_md_activate (const gchar *raid_spec, const gchar **members, const gchar *uuid, gboolean start_degraded, const BDExtraArg **extra, GError **error);

@@ -33,6 +33,8 @@
 #include "check_deps.h"
 #include "dm_logging.h"
 
+#define DM_MIN_VERSION "1.02.93"
+
 #define UNUSED __attribute__((unused))
 
 /* macros taken from the pyblock/dmraid.h file plus one more*/
@@ -141,7 +143,7 @@ void bd_dm_close (void) {
  * @mode: a bit mask of queried modes of operation (#BDDMTechMode) for @tech
  * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
  *
- * Returns: whether the @tech-@mode combination is avaible -- supported by the
+ * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
  */
 gboolean bd_dm_is_tech_avail (BDDMTech tech, guint64 mode UNUSED, GError **error) {
@@ -244,7 +246,7 @@ gchar* bd_dm_name_from_node (const gchar *dm_node, GError **error) {
     g_free (sys_path);
 
     if (!success) {
-        /* errror is already populated */
+        /* error is already populated */
         return NULL;
     }
 

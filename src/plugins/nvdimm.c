@@ -603,8 +603,9 @@ BDNVDIMMNamespaceInfo** bd_nvdimm_list_namespaces (const gchar *bus_name, const 
 
 /**
  * bd_nvdimm_namespace_reconfigure:
- * @namespace: name of the namespace to recofigure
+ * @namespace: name of the namespace to reconfigure
  * @mode: mode type to set
+ * @force: whether to use force to reconfigure an active namespace
  * @error: (out): place to store error if any
  * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
  *                                                 passed to the 'ndctl' utility)

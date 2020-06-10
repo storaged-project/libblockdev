@@ -74,6 +74,7 @@ typedef struct BDCryptoLUKSPBKDF {
 
 /**
  * bd_crypto_luks_pbkdf_copy: (skip)
+ * @pbkdf: (allow-none): %BDCryptoLUKSPBKDF to copy
  *
  * Creates a new copy of @pbkdf.
  */
@@ -94,6 +95,7 @@ BDCryptoLUKSPBKDF* bd_crypto_luks_pbkdf_copy (BDCryptoLUKSPBKDF *pbkdf) {
 
 /**
  * bd_crypto_luks_pbkdf_free: (skip)
+ * @pbkdf: (allow-none): %BDCryptoLUKSPBKDF to free
  *
  * Frees @pbkdf.
  */
@@ -154,8 +156,8 @@ GType bd_crypto_luks_extra_get_type();
  *               Note: this field is valid only for LUKS 2
  * @label: LUKS header label or NULL
  *         Note: this field is valid only for LUKS 2
- * @subsytem: LUKS header subsystem or NULL
- *            Note: this field is valid only for LUKS 2
+ * @subsystem: LUKS header subsystem or NULL
+ *             Note: this field is valid only for LUKS 2
  * @pbkdf: key derivation function specification or NULL for default
  *         Note: this field is valid only for LUKS 2
  */
@@ -171,6 +173,7 @@ typedef struct BDCryptoLUKSExtra {
 
 /**
  * bd_crypto_luks_extra_copy: (skip)
+ * @extra: (allow-none): %BDCryptoLUKSExtra to copy
  *
  * Creates a new copy of @extra.
  */
@@ -193,6 +196,7 @@ BDCryptoLUKSExtra* bd_crypto_luks_extra_copy (BDCryptoLUKSExtra *extra) {
 
 /**
  * bd_crypto_luks_extra_free: (skip)
+ * @extra: (allow-none): %BDCryptoLUKSExtra to free
  *
  * Frees @extra.
  */
@@ -269,6 +273,7 @@ typedef struct BDCryptoLUKSInfo {
 
 /**
  * bd_crypto_luks_info_free: (skip)
+ * @info: (allow-none): %BDCryptoLUKSInfo to free
  *
  * Frees @info.
  */
@@ -285,6 +290,7 @@ void bd_crypto_luks_info_free (BDCryptoLUKSInfo *info) {
 
 /**
  * bd_crypto_luks_info_copy: (skip)
+ * @info: (allow-none): %BDCryptoLUKSInfo to copy
  *
  * Creates a new copy of @info.
  */
@@ -343,6 +349,7 @@ typedef struct BDCryptoIntegrityInfo {
 
 /**
  * bd_crypto_integrity_info_free: (skip)
+ * @info: (allow-none): %BDCryptoIntegrityInfo to free
  *
  * Frees @info.
  */
@@ -358,6 +365,7 @@ void bd_crypto_integrity_info_free (BDCryptoIntegrityInfo *info) {
 
 /**
  * bd_crypto_integrity_info_copy: (skip)
+ * @info: (allow-none): %BDCryptoIntegrityInfo to copy
  *
  * Creates a new copy of @info.
  */
@@ -526,7 +534,7 @@ gboolean bd_crypto_luks_format_blob (const gchar *device, const gchar *cipher, g
  * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
  * FOREVER).
  *
- * Either @passhphrase or @key_file has to be != %NULL.
+ * Either @passphrase or @key_file has to be != %NULL.
  *
  * Using this function with @luks_version set to %BD_CRYPTO_LUKS_VERSION_LUKS1 and
  * @extra to %NULL is the same as calling %bd_crypto_luks_format.
@@ -724,7 +732,7 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError *
  * bd_crypto_luks_resize_luks2:
  * @luks_device: opened LUKS device to resize
  * @passphrase: (allow-none): passphrase to resize the @luks_device or %NULL
- * @key_file: (allow-none): key file path to use for resizinh the @luks_device or %NULL
+ * @key_file: (allow-none): key file path to use for resizing the @luks_device or %NULL
  * @size: requested size in sectors or 0 to adapt to the backing device
  * @error: (out): place to store error (if any)
  *
@@ -937,7 +945,7 @@ gboolean bd_crypto_tc_close (const gchar *tc_device, GError **error);
  * @backup_passphrase: (allow-none): backup passphrase for the device or %NULL
  * @error: (out): place to store error (if any)
  *
- * Returns: whether the ecrow data was successfully created for @device or not
+ * Returns: whether the escrow data was successfully created for @device or not
  *
  * Tech category: %BD_CRYPTO_TECH_ESCROW-%BD_CRYPTO_TECH_MODE_CREATE
  */

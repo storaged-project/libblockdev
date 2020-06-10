@@ -4,8 +4,6 @@
 #ifndef BD_LVM
 #define BD_LVM
 
-#define LVM_MIN_VERSION "2.02.116"
-
 #ifdef __LP64__
 // 64bit system
 #define BD_LVM_MAX_LV_SIZE (8 EiB)
@@ -18,17 +16,12 @@
 #define BD_LVM_DEFAULT_PE_SIZE (4 MiB)
 #define BD_LVM_MIN_PE_SIZE (1 KiB)
 #define BD_LVM_MAX_PE_SIZE (16 GiB)
-#define USE_DEFAULT_PE_SIZE 0
-#define RESOLVE_PE_SIZE(size) ((size) == USE_DEFAULT_PE_SIZE ? BD_LVM_DEFAULT_PE_SIZE : (size))
 
 #define BD_LVM_MIN_THPOOL_MD_SIZE (2 MiB)
 #define BD_LVM_MAX_THPOOL_MD_SIZE (16 GiB)
 #define BD_LVM_MIN_THPOOL_CHUNK_SIZE (64 KiB)
 #define BD_LVM_MAX_THPOOL_CHUNK_SIZE (1 GiB)
 #define BD_LVM_DEFAULT_CHUNK_SIZE (64 KiB)
-
-#define THPOOL_MD_FACTOR_NEW (0.2)
-#define THPOOL_MD_FACTOR_EXISTS (1 / 6.0)
 
 /* according to lvmcache (7) */
 #define BD_LVM_MIN_CACHE_MD_SIZE (8 MiB)
@@ -304,7 +297,7 @@ gchar* bd_lvm_cache_pool_name (const gchar *vg_name, const gchar *cached_lv, GEr
 BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_lv, GError **error);
 
 gboolean bd_lvm_vdo_pool_create (const gchar *vg_name, const gchar *lv_name, const gchar *pool_name, guint64 data_size, guint64 virtual_size, guint64 index_memory, gboolean compression, gboolean deduplication, BDLVMVDOWritePolicy write_policy, const BDExtraArg **extra, GError **error);
-BDLVMVDOPooldata *bd_lvm_vdo_info (const gchar *vg_name, const gchar *pool_name, GError **error);
+BDLVMVDOPooldata *bd_lvm_vdo_info (const gchar *vg_name, const gchar *lv_name, GError **error);
 
 gboolean bd_lvm_vdo_resize (const gchar *vg_name, const gchar *lv_name, guint64 size, const BDExtraArg **extra, GError **error);
 gboolean bd_lvm_vdo_pool_resize (const gchar *vg_name, const gchar *pool_name, guint64 size, const BDExtraArg **extra, GError **error);
