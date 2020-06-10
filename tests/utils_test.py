@@ -197,6 +197,13 @@ class UtilsExecLoggingTest(UtilsTestCase):
             # exit code != 0
             self.assertTrue(BlockDev.utils_check_util_version("libblockdev-fake-util-fail", "1.1", "version", "Version:\\s(.*)"))
 
+    @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
+    def test_exec_locale(self):
+        """Verify that setting locale for exec functions works as expected"""
+
+        succ, out = BlockDev.utils_exec_and_capture_output(["locale"])
+        self.assertTrue(succ)
+        self.assertIn("LC_ALL=C", out)
 
 class UtilsDevUtilsTestCase(UtilsTestCase):
     @tag_test(TestTags.NOSTORAGE, TestTags.CORE)

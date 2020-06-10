@@ -132,11 +132,6 @@ static void log_done (guint64 task_id, gint exit_code) {
     return;
 }
 
-static void set_c_locale(gpointer user_data __attribute__((unused))) {
-    if (setenv ("LC_ALL", "C", 1) != 0)
-        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to set LC_ALL=C for a child process!");
-}
-
 /**
  * bd_utils_exec_and_report_error:
  * @argv: (array zero-terminated=1): the argv array for the call
@@ -186,6 +181,8 @@ gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtr
     const BDExtraArg **extra_p = NULL;
     gint exit_status = 0;
     guint i = 0;
+    gchar **old_env = NULL;
+    gchar **new_env = NULL;
 
     if (extra) {
         args_len = g_strv_length ((gchar **) argv);
@@ -211,16 +208,20 @@ gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtr
         args[i] = NULL;
     }
 
+    old_env = g_get_environ ();
+    new_env = g_environ_setenv (old_env, "LC_ALL", "C", TRUE);
+
     task_id = log_running (args ? args : argv);
-    success = g_spawn_sync (NULL, args ? (gchar **) args : (gchar **) argv, NULL, G_SPAWN_SEARCH_PATH,
-                            (GSpawnChildSetupFunc) set_c_locale, NULL,
-                            &stdout_data, &stderr_data, &exit_status, error);
+    success = g_spawn_sync (NULL, args ? (gchar **) args : (gchar **) argv, new_env, G_SPAWN_SEARCH_PATH,
+                            NULL, NULL, &stdout_data, &stderr_data, &exit_status, error);
     if (!success) {
         /* error is already populated from the call */
+        g_strfreev (new_env);
         g_free (stdout_data);
         g_free (stderr_data);
         return FALSE;
     }
+    g_strfreev (new_env);
 
     /* g_spawn_sync set the status in the same way waitpid() does, we need
        to get the process exit code manually (this is similar to calling
@@ -292,6 +293,8 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
     gboolean err_done = FALSE;
     GString *stdout_data = g_string_new (NULL);
     GString *stderr_data = g_string_new (NULL);
+    gchar **old_env = NULL;
+    gchar **new_env = NULL;
 
     /* TODO: share this code between functions */
     if (extra) {
@@ -320,7 +323,10 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
 
     task_id = log_running (args ? args : argv);
 
-    ret = g_spawn_async_with_pipes (NULL, args ? (gchar**) args : (gchar**) argv, NULL,
+    old_env = g_get_environ ();
+    new_env = g_environ_setenv (old_env, "LC_ALL", "C", TRUE);
+
+    ret = g_spawn_async_with_pipes (NULL, args ? (gchar**) args : (gchar**) argv, new_env,
                                     G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH|G_SPAWN_DO_NOT_REAP_CHILD,
                                     NULL, NULL, &pid, input ? &in_fd : NULL, &out_fd, &err_fd, error);
 
@@ -328,9 +334,11 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
         /* error is already populated */
         g_string_free (stdout_data, TRUE);
         g_string_free (stderr_data, TRUE);
+        g_strfreev (new_env);
         g_free (args);
         return FALSE;
     }
+    g_strfreev (new_env);
 
     args_str = g_strjoinv (" ", args ? (gchar **) args : (gchar **) argv);
     msg = g_strdup_printf ("Started '%s'", args_str);
