@@ -167,9 +167,14 @@ gboolean bd_utils_load_kernel_module (const gchar *module_name, const gchar *opt
     ret = kmod_module_probe_insert_module (mod, KMOD_PROBE_FAIL_ON_LOADED,
                                            options, NULL, NULL, NULL);
     if (ret < 0) {
-        g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_FAIL,
-                     "Failed to load the module '%s' with options '%s': %s",
-                     module_name, options, strerror_l (-ret, c_locale));
+        if (options)
+            g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_FAIL,
+                         "Failed to load the module '%s' with options '%s': %s",
+                         module_name, options, strerror_l (-ret, c_locale));
+        else
+            g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_FAIL,
+                         "Failed to load the module '%s': %s",
+                         module_name, strerror_l (-ret, c_locale));
         kmod_module_unref (mod);
         kmod_unref (ctx);
         freelocale (c_locale);
