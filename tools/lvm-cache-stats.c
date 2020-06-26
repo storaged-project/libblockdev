@@ -125,6 +125,10 @@ int main (int argc, char *argv[]) {
 
     gboolean ok = TRUE;
     for (int i = first_lv_arg; i < argc; i++) {
+        /* Add one blank line between stats for the individual LVs */
+        if (i > first_lv_arg)
+            printf("\n");
+
         char *slash = strchr (argv[i], '/');
         if (!slash) {
             fprintf (stderr, "Invalid LV specified: '%s'. Has to be in the VG/LV format.\n", argv[i]);
