@@ -2475,6 +2475,7 @@ gboolean bd_lvm_cache_create_cached_lv (const gchar *vg_name, const gchar *lv_na
 
     success = bd_lvm_lvcreate (vg_name, lv_name, data_size, NULL, slow_pvs, NULL, error);
     if (!success) {
+        g_free (name);
         g_prefix_error (error, "Failed to create the data LV: ");
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
