@@ -3274,6 +3274,8 @@ gboolean bd_lvm_cache_attach (const gchar *vg_name, const gchar *data_lv, const 
     lv_id = g_strdup_printf ("%s/%s", vg_name, cache_pool_lv);
 
     call_lvm_obj_method_sync (lv_id, CACHE_POOL_INTF, "CacheLv", params, NULL, extra, TRUE, error);
+    g_free (lv_id);
+    g_free (lv_obj_path);
     return ((*error) == NULL);
 }
 
