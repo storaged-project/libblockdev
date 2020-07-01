@@ -266,10 +266,13 @@ static const UtilDep deps[DEPS_LAST] = {
 
 #define DBUS_DEPS_LVMDBUSD 0
 #define DBUS_DEPS_LVMDBUSD_MASK (1 << DBUS_DEPS_LVMDBUSD)
-#define DBUS_DEPS_LAST 1
+#define DBUS_DEPS_LVMDBUSD_WRITECACHE 1
+#define DBUS_DEPS_LVMDBUSD_WRITECACHE_MASK (1 << DBUS_DEPS_LVMDBUSD_WRITECACHE)
+#define DBUS_DEPS_LAST 2
 
 static const DBusDep dbus_deps[DBUS_DEPS_LAST] = {
-    {LVM_BUS_NAME, LVM_OBJ_PREFIX, G_BUS_TYPE_SYSTEM},
+    {LVM_BUS_NAME, LVM_OBJ_PREFIX, G_BUS_TYPE_SYSTEM, NULL, NULL, NULL, NULL},
+    {LVM_BUS_NAME, LVM_OBJ_PREFIX, G_BUS_TYPE_SYSTEM, "1.1.0", "Version", MANAGER_INTF, MANAGER_OBJ},
 };
 
 #define FEATURES_VDO 0
@@ -416,7 +419,7 @@ gboolean bd_lvm_is_tech_avail (BDLVMTech tech, guint64 mode, GError **error) {
                    check_features (&avail_features, FEATURES_VDO_MASK, features, FEATURES_LAST, &deps_check_lock, error) &&
                    check_module_deps (&avail_module_deps, MODULE_DEPS_VDO_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error);
     case BD_LVM_TECH_WRITECACHE:
-        return check_dbus_deps (&avail_dbus_deps, DBUS_DEPS_LVMDBUSD_MASK, dbus_deps, DBUS_DEPS_LAST, &deps_check_lock, error) &&
+        return check_dbus_deps (&avail_dbus_deps, DBUS_DEPS_LVMDBUSD_MASK|DBUS_DEPS_LVMDBUSD_WRITECACHE_MASK, dbus_deps, DBUS_DEPS_LAST, &deps_check_lock, error) &&
                check_features (&avail_features, FEATURES_WRITECACHE_MASK, features, FEATURES_LAST, &deps_check_lock, error);
     default:
         /* everything is supported by this implementation of the plugin */
