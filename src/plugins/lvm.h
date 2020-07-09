@@ -206,6 +206,7 @@ typedef enum {
     BD_LVM_TECH_CACHE_CALCS,
     BD_LVM_TECH_GLOB_CONF,
     BD_LVM_TECH_VDO,
+    BD_LVM_TECH_WRITECACHE,
 } BDLVMTech;
 
 typedef enum {
@@ -295,6 +296,10 @@ gboolean bd_lvm_cache_create_cached_lv (const gchar *vg_name, const gchar *lv_na
                                         const gchar **slow_pvs, const gchar **fast_pvs, GError **error);
 gchar* bd_lvm_cache_pool_name (const gchar *vg_name, const gchar *cached_lv, GError **error);
 BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_lv, GError **error);
+
+gboolean bd_lvm_writecache_attach (const gchar *vg_name, const gchar *data_lv, const gchar *cache_lv, const BDExtraArg **extra, GError **error);
+gboolean bd_lvm_writecache_detach (const gchar *vg_name, const gchar *cached_lv, gboolean destroy, const BDExtraArg **extra, GError **error);
+gboolean bd_lvm_writecache_create_cached_lv (const gchar *vg_name, const gchar *lv_name, guint64 data_size, guint64 cache_size, const gchar **slow_pvs, const gchar **fast_pvs, GError **error);
 
 gboolean bd_lvm_vdo_pool_create (const gchar *vg_name, const gchar *lv_name, const gchar *pool_name, guint64 data_size, guint64 virtual_size, guint64 index_memory, gboolean compression, gboolean deduplication, BDLVMVDOWritePolicy write_policy, const BDExtraArg **extra, GError **error);
 BDLVMVDOPooldata *bd_lvm_vdo_info (const gchar *vg_name, const gchar *lv_name, GError **error);

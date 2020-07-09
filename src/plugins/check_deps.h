@@ -30,6 +30,10 @@ typedef struct DBusDep {
     const gchar *bus_name;
     const gchar *obj_prefix;
     GBusType bus_type;
+    const gchar *version;
+    const gchar *ver_prop;
+    const gchar *ver_intf;
+    const gchar *ver_path;
 } DBusDep;
 
 typedef struct UtilFeatureDep {

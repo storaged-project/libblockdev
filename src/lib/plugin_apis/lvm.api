@@ -634,6 +634,7 @@ typedef enum {
     BD_LVM_TECH_CACHE_CALCS,
     BD_LVM_TECH_GLOB_CONF,
     BD_LVM_TECH_VDO,
+    BD_LVM_TECH_WRITECACHE,
 } BDLVMTech;
 
 typedef enum {
@@ -1383,6 +1384,8 @@ gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name,
  *
  * Returns: whether the @cache_pool_lv was successfully attached to the @data_lv or not
  *
+ * Note: Both @data_lv and @cache_lv will be deactivated before the operation.
+ *
  * Tech category: %BD_LVM_TECH_CACHE-%BD_LVM_TECH_MODE_MODIFY
  */
 gboolean bd_lvm_cache_attach (const gchar *vg_name, const gchar *data_lv, const gchar *cache_pool_lv, const BDExtraArg **extra, GError **error);
@@ -1446,6 +1449,54 @@ gchar* bd_lvm_cache_pool_name (const gchar *vg_name, const gchar *cached_lv, GEr
  * Tech category: %BD_LVM_TECH_CACHE-%BD_LVM_TECH_MODE_QUERY
  */
 BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_lv, GError **error);
+
+/**
+ * bd_lvm_writecache_attach:
+ * @vg_name: name of the VG containing the @data_lv and the @cache_pool_lv LVs
+ * @data_lv: data LV to attach the @cache_lv to
+ * @cache_lv: cache (fast) LV to attach to the @data_lv
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the cache attachment
+ *                                                 (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @cache_lv was successfully attached to the @data_lv or not
+ *
+ * Tech category: %BD_LVM_TECH_WRITECACHE-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_writecache_attach (const gchar *vg_name, const gchar *data_lv, const gchar *cache_lv, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_lvm_writecache_detach:
+ * @vg_name: name of the VG containing the @cached_lv
+ * @cached_lv: name of the cached LV to detach its cache from
+ * @destroy: whether to destroy the cache after detach or not
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the cache detachment
+ *                                                 (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the cache was successfully detached from the @cached_lv or not
+ *
+ * Note: synces the cache first
+ *
+ * Tech category: %BD_LVM_TECH_WRITECACHE-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_writecache_detach (const gchar *vg_name, const gchar *cached_lv, gboolean destroy, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_lvm_writecache_create_cached_lv:
+ * @vg_name: name of the VG to create a cached LV in
+ * @lv_name: name of the cached LV to create
+ * @data_size: size of the data LV
+ * @cache_size: size of the cache (or cached LV more precisely)
+ * @slow_pvs: (array zero-terminated=1): list of slow PVs (used for the data LV)
+ * @fast_pvs: (array zero-terminated=1): list of fast PVs (used for the cache LV)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the cached LV @lv_name was successfully created or not
+ *
+ * Tech category: %BD_LVM_TECH_WRITECACHE-%BD_LVM_TECH_MODE_CREATE
+ */
+gboolean bd_lvm_writecache_create_cached_lv (const gchar *vg_name, const gchar *lv_name, guint64 data_size, guint64 cache_size, const gchar **slow_pvs, const gchar **fast_pvs, GError **error);
 
 /**
  * bd_lvm_thpool_convert:

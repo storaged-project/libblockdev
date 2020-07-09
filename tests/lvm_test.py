@@ -35,6 +35,11 @@ class LVMTestCase(unittest.TestCase):
             raise RuntimeError("Failed to determine LVM version from: %s" % out)
         return LooseVersion(m.groups()[0])
 
+    @classmethod
+    def _get_lvm_segtypes(cls):
+        _ret, out, _err = run_command("lvm segtypes")
+        return out
+
 
 class LvmNoDevTestCase(LVMTestCase):
     def __init__(self, *args, **kwargs):
@@ -1190,8 +1195,11 @@ class LvmPVVGLVcachePoolTestCase(LvmPVVGLVTestCase):
             pass
 
         # lets help udev with removing stale symlinks
-        if not BlockDev.lvm_lvs("testVG") and os.path.exists("/dev/testVG/testCache_meta"):
-            shutil.rmtree("/dev/testVG", ignore_errors=True)
+        try:
+            if not BlockDev.lvm_lvs("testVG") and os.path.exists("/dev/testVG/testCache_meta"):
+                shutil.rmtree("/dev/testVG", ignore_errors=True)
+        except:
+            pass
 
         LvmPVVGLVTestCase._clean_up(self)
 
@@ -1399,6 +1407,89 @@ class LvmPVVGcachedThpoolstatsTestCase(LvmPVVGLVTestCase):
         self.assertEqual(stats.cache_size, 512 * 1024**2)
         self.assertEqual(stats.md_size, 8 * 1024**2)
         self.assertEqual(stats.mode, BlockDev.LVMCacheMode.WRITETHROUGH)
+
+
+class LvmPVVGLVWritecacheAttachDetachTestCase(LvmPVVGLVcachePoolTestCase):
+    @tag_test(TestTags.SLOW)
+    def test_writecache_attach_detach(self):
+        """Verify that is it possible to attach and detach a writecache LV"""
+
+        lvm_version = self._get_lvm_version()
+        if lvm_version < LooseVersion("2.03.02"):
+            self.skipTest("LVM writecache support not available")
+
+        lvm_segtypes = self._get_lvm_segtypes()
+        if "writecache" not in lvm_segtypes:
+            self.skipTest("LVM writecache support not available")
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvcreate("testVG", "testCache", 512 * 1024**2, None, [self.loop_dev2], None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [self.loop_dev], None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_writecache_attach("testVG", "testLV", "testCache", None)
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
+        self.assertIsNotNone(info)
+        self.assertEqual(info.segtype, "writecache")
+
+        # detach and destroy (the last arg)
+        succ = BlockDev.lvm_writecache_detach("testVG", "testLV", True, None)
+        self.assertTrue(succ)
+
+        # once more and do not destroy this time
+        succ = BlockDev.lvm_lvcreate("testVG", "testCache", 512 * 1024**2, None, [self.loop_dev2], None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_writecache_attach("testVG", "testLV", "testCache", None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_writecache_detach("testVG", "testLV", False, None)
+        self.assertTrue(succ)
+
+        lvs = BlockDev.lvm_lvs("testVG")
+        self.assertTrue(any(info.lv_name == "testCache" for info in lvs))
+
+class LvmPVVGWritecachedLVTestCase(LvmPVVGLVTestCase):
+    @tag_test(TestTags.SLOW)
+    def test_create_cached_lv(self):
+        """Verify that it is possible to create a writecached LV in a single step"""
+
+        lvm_version = self._get_lvm_version()
+        if lvm_version < LooseVersion("2.03.02"):
+            self.skipTest("LVM writecache support not available")
+
+        lvm_segtypes = self._get_lvm_segtypes()
+        if "writecache" not in lvm_segtypes:
+            self.skipTest("LVM writecache support not available")
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_writecache_create_cached_lv("testVG", "testLV", 512 * 1024**2, 256 * 1024**2,
+                                                        [self.loop_dev], [self.loop_dev2])
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
+        self.assertIsNotNone(info)
+        self.assertEqual(info.segtype, "writecache")
 
 class LvmVGExportedTestCase(LvmPVVGLVTestCase):
 

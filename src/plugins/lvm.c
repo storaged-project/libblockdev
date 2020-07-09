@@ -235,10 +235,13 @@ static const UtilDep deps[DEPS_LAST] = {
 
 #define FEATURES_VDO 0
 #define FEATURES_VDO_MASK (1 << FEATURES_VDO)
-#define FEATURES_LAST 1
+#define FEATURES_WRITECACHE 0
+#define FEATURES_WRITECACHE_MASK (1 << FEATURES_WRITECACHE)
+#define FEATURES_LAST 2
 
 static const UtilFeatureDep features[FEATURES_LAST] = {
     {"lvm", "vdo", "segtypes", NULL},
+    {"lvm", "writecache", "segtypes", NULL},
 };
 
 #define MODULE_DEPS_VDO 0
@@ -338,7 +341,11 @@ gboolean bd_lvm_is_tech_avail (BDLVMTech tech, guint64 mode, GError **error) {
             return TRUE;
     case BD_LVM_TECH_VDO:
             return check_features (&avail_features, FEATURES_VDO_MASK, features, FEATURES_LAST, &deps_check_lock, error) &&
-                   check_module_deps (&avail_module_deps, MODULE_DEPS_VDO_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error);
+                   check_module_deps (&avail_module_deps, MODULE_DEPS_VDO_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error) &&
+                   check_deps (&avail_deps, DEPS_LVM_MASK, deps, DEPS_LAST, &deps_check_lock, error);
+    case BD_LVM_TECH_WRITECACHE:
+            return check_features (&avail_features, FEATURES_WRITECACHE_MASK, features, FEATURES_LAST, &deps_check_lock, error) &&
+                   check_deps (&avail_deps, DEPS_LVM_MASK, deps, DEPS_LAST, &deps_check_lock, error);
     default:
         /* everything is supported by this implementation of the plugin */
         return check_deps (&avail_deps, DEPS_LVM_MASK, deps, DEPS_LAST, &deps_check_lock, error);
@@ -2380,6 +2387,8 @@ gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name,
  *
  * Returns: whether the @cache_pool_lv was successfully attached to the @data_lv or not
  *
+ * Note: Both @data_lv and @cache_lv will be deactivated before the operation.
+ *
  * Tech category: %BD_LVM_TECH_CACHE-%BD_LVM_TECH_MODE_MODIFY
  */
 gboolean bd_lvm_cache_attach (const gchar *vg_name, const gchar *data_lv, const gchar *cache_pool_lv, const BDExtraArg **extra, GError **error) {
@@ -2466,6 +2475,7 @@ gboolean bd_lvm_cache_create_cached_lv (const gchar *vg_name, const gchar *lv_na
 
     success = bd_lvm_lvcreate (vg_name, lv_name, data_size, NULL, slow_pvs, NULL, error);
     if (!success) {
+        g_free (name);
         g_prefix_error (error, "Failed to create the data LV: ");
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
@@ -2477,6 +2487,121 @@ gboolean bd_lvm_cache_create_cached_lv (const gchar *vg_name, const gchar *lv_na
     success = bd_lvm_cache_attach (vg_name, lv_name, name, NULL, error);
     if (!success) {
         g_prefix_error (error, "Failed to attach the cache pool '%s' to the data LV: ", name);
+        g_free (name);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    bd_utils_report_finished (progress_id, "Completed");
+    g_free (name);
+    return TRUE;
+}
+
+/**
+ * bd_lvm_writecache_attach:
+ * @vg_name: name of the VG containing the @data_lv and the @cache_pool_lv LVs
+ * @data_lv: data LV to attach the @cache_lv to
+ * @cache_lv: cache (fast) LV to attach to the @data_lv
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the cache attachment
+ *                                                 (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @cache_lv was successfully attached to the @data_lv or not
+ *
+ * Tech category: %BD_LVM_TECH_WRITECACHE-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_writecache_attach (const gchar *vg_name, const gchar *data_lv, const gchar *cache_lv, const BDExtraArg **extra, GError **error) {
+    const gchar *args[8] = {"lvconvert", "-y", "--type", "writecache", "--cachevol", NULL, NULL, NULL};
+    gboolean success = FALSE;
+
+    /* both LVs need to be inactive for the writecache convert to work */
+    success = bd_lvm_lvdeactivate (vg_name, data_lv, NULL, error);
+    if (!success)
+        return FALSE;
+
+    success = bd_lvm_lvdeactivate (vg_name, cache_lv, NULL, error);
+    if (!success)
+        return FALSE;
+
+    args[5] = g_strdup_printf ("%s/%s", vg_name, cache_lv);
+    args[6] = g_strdup_printf ("%s/%s", vg_name, data_lv);
+    success = call_lvm_and_report_error (args, extra, TRUE, error);
+
+    g_free ((gchar *) args[5]);
+    g_free ((gchar *) args[6]);
+    return success;
+}
+
+/**
+ * bd_lvm_writecache_detach:
+ * @vg_name: name of the VG containing the @cached_lv
+ * @cached_lv: name of the cached LV to detach its cache from
+ * @destroy: whether to destroy the cache after detach or not
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the cache detachment
+ *                                                 (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the cache was successfully detached from the @cached_lv or not
+ *
+ * Note: synces the cache first
+ *
+ * Tech category: %BD_LVM_TECH_WRITECACHE-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_writecache_detach (const gchar *vg_name, const gchar *cached_lv, gboolean destroy, const BDExtraArg **extra, GError **error) {
+    return bd_lvm_cache_detach (vg_name, cached_lv, destroy, extra, error);
+}
+
+/**
+ * bd_lvm_writecache_create_cached_lv:
+ * @vg_name: name of the VG to create a cached LV in
+ * @lv_name: name of the cached LV to create
+ * @data_size: size of the data LV
+ * @cache_size: size of the cache (or cached LV more precisely)
+ * @slow_pvs: (array zero-terminated=1): list of slow PVs (used for the data LV)
+ * @fast_pvs: (array zero-terminated=1): list of fast PVs (used for the cache LV)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the cached LV @lv_name was successfully created or not
+ *
+ * Tech category: %BD_LVM_TECH_WRITECACHE-%BD_LVM_TECH_MODE_CREATE
+ */
+gboolean bd_lvm_writecache_create_cached_lv (const gchar *vg_name, const gchar *lv_name, guint64 data_size, guint64 cache_size,
+                                             const gchar **slow_pvs, const gchar **fast_pvs, GError **error) {
+    gboolean success = FALSE;
+    gchar *name = NULL;
+    gchar *msg = NULL;
+    guint64 progress_id = 0;
+
+    msg = g_strdup_printf ("Started 'create cached LV %s/%s'", vg_name, lv_name);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    name = g_strdup_printf ("%s_writecache", lv_name);
+    success = bd_lvm_lvcreate (vg_name, name, cache_size, NULL, fast_pvs, NULL, error);
+    if (!success) {
+        g_prefix_error (error, "Failed to create the cache LV '%s': ", name);
+        g_free (name);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    /* 1/3 steps done */
+    bd_utils_report_progress (progress_id, 33, "Cache LV created");
+
+    success = bd_lvm_lvcreate (vg_name, lv_name, data_size, NULL, slow_pvs, NULL, error);
+    if (!success) {
+        g_free (name);
+        g_prefix_error (error, "Failed to create the data LV: ");
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    /* 2/3 steps done */
+    bd_utils_report_progress (progress_id, 66, "Data LV created");
+
+    success = bd_lvm_writecache_attach (vg_name, lv_name, name, NULL, error);
+    if (!success) {
+        g_prefix_error (error, "Failed to attach the cache LV '%s' to the data LV: ", name);
         g_free (name);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
