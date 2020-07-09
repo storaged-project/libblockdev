@@ -44,6 +44,20 @@ class LVMTestCase(unittest.TestCase):
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmNoDevTestCase(LVMTestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        # we are cheking for info log messages and default level is warning
+        BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_INFO)
+
+        super().setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        # reset back to default
+        BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_WARNING)
+
+        super().tearDownClass()
+
     def __init__(self, *args, **kwargs):
         super(LvmNoDevTestCase, self).__init__(*args, **kwargs)
         self._log = ""
@@ -760,6 +774,20 @@ class LvmTestLVcreateWithExtra(LvmPVVGLVTestCase):
         LvmPVVGLVTestCase.__init__(self, *args, **kwargs)
         self.log = ""
         self.ignore_log = True
+
+    @classmethod
+    def setUpClass(cls):
+        # we are cheking for info log messages and default level is warning
+        BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_INFO)
+
+        super().setUpClass()
+
+    @classmethod
+    def tearDownClass(cls):
+        # reset back to default
+        BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_WARNING)
+
+        super().tearDownClass()
 
     def my_log_func(self, level, msg):
         if self.ignore_log:
