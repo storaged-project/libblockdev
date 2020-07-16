@@ -49,14 +49,14 @@ class LvmNoDevTestCase(LVMTestCase):
         # we are cheking for info log messages and default level is warning
         BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_INFO)
 
-        super().setUpClass()
+        super(LvmNoDevTestCase, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
         # reset back to default
         BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_WARNING)
 
-        super().tearDownClass()
+        super(LvmNoDevTestCase, cls).tearDownClass()
 
     def __init__(self, *args, **kwargs):
         super(LvmNoDevTestCase, self).__init__(*args, **kwargs)
@@ -780,14 +780,14 @@ class LvmTestLVcreateWithExtra(LvmPVVGLVTestCase):
         # we are cheking for info log messages and default level is warning
         BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_INFO)
 
-        super().setUpClass()
+        super(LvmPVVGLVTestCase, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
         # reset back to default
         BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_WARNING)
 
-        super().tearDownClass()
+        super(LvmPVVGLVTestCase, cls).tearDownClass()
 
     def my_log_func(self, level, msg):
         if self.ignore_log:

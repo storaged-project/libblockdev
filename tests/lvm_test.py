@@ -51,14 +51,14 @@ class LvmNoDevTestCase(LVMTestCase):
         # we are cheking for info log messages and default level is warning
         BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_INFO)
 
-        super().setUpClass()
+        super(LvmNoDevTestCase, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
         # reset back to default
         BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_WARNING)
 
-        super().tearDownClass()
+        super(LvmNoDevTestCase, cls).tearDownClass()
 
     @tag_test(TestTags.NOSTORAGE)
     def test_is_supported_pe_size(self):
@@ -719,14 +719,14 @@ class LvmTestLVcreateWithExtra(LvmPVVGLVTestCase):
         # we are cheking for info log messages and default level is warning
         BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_INFO)
 
-        super().setUpClass()
+        super(LvmTestLVcreateWithExtra, cls).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
         # reset back to default
         BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_WARNING)
 
-        super().tearDownClass()
+        super(LvmTestLVcreateWithExtra, cls).tearDownClass()
 
     def my_log_func(self, level, msg):
         if self.ignore_log:
