@@ -225,11 +225,25 @@ gboolean bd_fs_vfat_check (const gchar *device, const BDExtraArg **extra, GError
  */
 gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GError **error) {
     const gchar *args[4] = {"fsck.vfat", "-a", device, NULL};
+    gint status = 0;
+    gboolean ret = FALSE;
 
     if (!check_deps (&avail_deps, DEPS_FSCKVFAT_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
 
-    return bd_utils_exec_and_report_error (args, extra, error);
+    ret = bd_utils_exec_and_report_status_error (args, extra, &status, error);
+    if (!ret) {
+        if (status == 1) {
+            /* exit code 1 can also mean "errors have been detected and corrected" so we need
+               to run fsck again to make sure the filesystem is now clean */
+            g_clear_error (error);
+            ret = bd_utils_exec_and_report_status_error (args, extra, &status, error);
+        } else
+            /* FALSE and exit code other than 1 always means error  */
+            ret = FALSE;
+    }
+
+    return ret;
 }
 
 /**
