@@ -427,7 +427,7 @@ class ExtGetInfo(FSTestCase):
                                 info_function=BlockDev.fs_ext4_get_info)
 
 class ExtSetLabel(FSTestCase):
-    def _test_ext_set_label(self, mkfs_function, info_function, label_function):
+    def _test_ext_set_label(self, mkfs_function, info_function, label_function, check_function):
         succ = mkfs_function(self.loop_dev, None)
         self.assertTrue(succ)
 
@@ -453,23 +453,32 @@ class ExtSetLabel(FSTestCase):
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
 
+        succ = check_function("TEST_LABEL")
+        self.assertTrue(succ)
+
+        with six.assertRaisesRegex(self, GLib.GError, "at most 16 characters long."):
+            check_function(20 * "a")
+
     def test_ext2_set_label(self):
         """Verify that it is possible to set label of an ext2 file system"""
         self._test_ext_set_label(mkfs_function=BlockDev.fs_ext2_mkfs,
                                  info_function=BlockDev.fs_ext2_get_info,
-                                 label_function=BlockDev.fs_ext2_set_label)
+                                 label_function=BlockDev.fs_ext2_set_label,
+                                 check_function=BlockDev.fs_ext2_check_label)
 
     def test_ext3_set_label(self):
         """Verify that it is possible to set label of an ext3 file system"""
         self._test_ext_set_label(mkfs_function=BlockDev.fs_ext3_mkfs,
                                  info_function=BlockDev.fs_ext3_get_info,
-                                 label_function=BlockDev.fs_ext3_set_label)
+                                 label_function=BlockDev.fs_ext3_set_label,
+                                 check_function=BlockDev.fs_ext3_check_label)
 
     def test_ext4_set_label(self):
         """Verify that it is possible to set label of an ext4 file system"""
         self._test_ext_set_label(mkfs_function=BlockDev.fs_ext4_mkfs,
                                  info_function=BlockDev.fs_ext4_get_info,
-                                 label_function=BlockDev.fs_ext4_set_label)
+                                 label_function=BlockDev.fs_ext4_set_label,
+                                 check_function=BlockDev.fs_ext4_check_label)
 
 class ExtResize(FSTestCase):
     def _test_ext_resize(self, mkfs_function, info_function, resize_function):
@@ -740,6 +749,15 @@ class XfsSetLabel(FSTestCase):
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
 
+        succ = BlockDev.fs_xfs_check_label("TEST_LABEL")
+        self.assertTrue(succ)
+
+        with six.assertRaisesRegex(self, GLib.GError, "at most 12 characters long."):
+            BlockDev.fs_xfs_check_label(13 * "a")
+
+        with six.assertRaisesRegex(self, GLib.GError, "cannot contain spaces"):
+            BlockDev.fs_xfs_check_label("TEST LABEL")
+
 class XfsResize(FSTestCase):
     def _destroy_lvm(self):
         run("vgremove --yes libbd_fs_tests >/dev/null 2>&1")
@@ -974,6 +992,12 @@ class VfatSetLabel(FSTestCase):
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
 
+        succ = BlockDev.fs_vfat_check_label("TEST_LABEL")
+        self.assertTrue(succ)
+
+        with six.assertRaisesRegex(self, GLib.GError, "at most 11 characters long."):
+            BlockDev.fs_vfat_check_label(12 * "a")
+
 class VfatResize(FSTestCase):
     def test_vfat_resize(self):
         """Verify that it is possible to resize an vfat file system"""
@@ -1131,6 +1155,12 @@ class ReiserFSSetLabel(ReiserFSTestCase):
         fi = BlockDev.fs_reiserfs_get_info(self.loop_dev)
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
+
+        succ = BlockDev.fs_reiserfs_check_label("test_label")
+        self.assertTrue(succ)
+
+        with six.assertRaisesRegex(self, GLib.GError, "at most 16 characters long."):
+            BlockDev.fs_reiserfs_check_label(17 * "a")
 
 class ReiserFSResize(ReiserFSTestCase):
     def test_reiserfs_resize(self):
@@ -1365,6 +1395,44 @@ class F2FSResize(F2FSTestCase):
 
         fi = BlockDev.fs_f2fs_get_info(self.loop_dev)
         self.assertEqual(fi.sector_count * fi.sector_size, 100 * 1024**2)
+
+
+class NTFSSetLabel(FSTestCase):
+    def test_ntfs_set_label(self):
+        if not self.ntfs_avail:
+            self.skipTest("skipping NTFS: not available")
+
+        succ = BlockDev.fs_ntfs_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        fi = BlockDev.fs_ntfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "")
+
+        succ = BlockDev.fs_ntfs_set_label(self.loop_dev, "TEST_LABEL")
+        self.assertTrue(succ)
+        fi = BlockDev.fs_ntfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "TEST_LABEL")
+
+        succ = BlockDev.fs_ntfs_set_label(self.loop_dev, "TEST_LABEL2")
+        self.assertTrue(succ)
+        fi = BlockDev.fs_ntfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "TEST_LABEL2")
+
+        succ = BlockDev.fs_ntfs_set_label(self.loop_dev, "")
+        self.assertTrue(succ)
+        fi = BlockDev.fs_ntfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "")
+
+        succ = BlockDev.fs_ntfs_check_label("TEST_LABEL")
+        self.assertTrue(succ)
+
+        with six.assertRaisesRegex(self, GLib.GError, "at most 128 characters long."):
+            BlockDev.fs_ntfs_check_label(129 * "a")
+
 
 class CanResizeRepairCheckLabel(FSTestCase):
     def test_can_resize(self):

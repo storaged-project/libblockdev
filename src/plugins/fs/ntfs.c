@@ -213,6 +213,26 @@ gboolean bd_fs_ntfs_set_label (const gchar *device, const gchar *label, GError *
 }
 
 /**
+ * bd_fs_ntfs_check_label:
+ * @label: label to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @label is a valid label for the ntfs file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_ntfs_check_label (const gchar *label, GError **error) {
+    if (strlen (label) > 128) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                     "Label for NTFS filesystem must be at most 128 characters long.");
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+/**
  * bd_fs_ntfs_set_uuid:
  * @device: the device containing the file system to set the UUID (serial number) for
  * @uuid: (allow-none): UUID to set or %NULL to generate a new one

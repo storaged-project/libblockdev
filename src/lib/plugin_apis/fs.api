@@ -1107,6 +1107,42 @@ gboolean bd_fs_ext3_set_label (const gchar *device, const gchar *label, GError *
 gboolean bd_fs_ext4_set_label (const gchar *device, const gchar *label, GError **error);
 
 /**
+ * bd_fs_ext2_check_label:
+ * @label: label to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @label is a valid label for the ext2 file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_ext2_check_label (const gchar *label, GError **error);
+
+/**
+ * bd_fs_ext3_check_label:
+ * @label: label to check
+ * @error: (out) (allow-none): place to store error (if any)
+ *
+ * Returns: whether @label is a valid label for the ext3 file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_ext3_check_label (const gchar *label, GError **error);
+
+/**
+ * bd_fs_ext4_check_label:
+ * @label: label to check
+ * @error: (out) (allow-none): place to store error (if any)
+ *
+ * Returns: whether @label is a valid label for the ext4 file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_ext4_check_label (const gchar *label, GError **error);
+
+/**
  * bd_fs_ext2_set_uuid:
  * @device: the device the file system on which to set UUID for
  * @uuid: (allow-none): UUID to set %NULL to generate a new one
@@ -1300,6 +1336,18 @@ gboolean bd_fs_xfs_repair (const gchar *device, const BDExtraArg **extra, GError
 gboolean bd_fs_xfs_set_label (const gchar *device, const gchar *label, GError **error);
 
 /**
+ * bd_fs_xfs_check_label:
+ * @label: label to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @label is a valid label for the xfs file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_xfs_check_label (const gchar *label, GError **error);
+
+/**
  * bd_fs_xfs_set_uuid:
  * @device: the device containing the file system to set uuid for
  * @uuid: (allow-none): UUID to set %NULL to generate a new one
@@ -1409,6 +1457,18 @@ gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GErro
 gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError **error);
 
 /**
+ * bd_fs_vfat_check_label:
+ * @label: label to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @label is a valid label for the vfat file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_vfat_check_label (const gchar *label, GError **error);
+
+/**
  * bd_fs_vfat_get_info:
  * @device: the device containing the file system to get info for
  * @error: (out): place to store error (if any)
@@ -1492,6 +1552,18 @@ gboolean bd_fs_ntfs_repair (const gchar *device, GError **error);
  * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_SET_LABEL
  */
 gboolean bd_fs_ntfs_set_label (const gchar *device, const gchar *label, GError **error);
+
+/**
+ * bd_fs_ntfs_check_label:
+ * @label: label to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @label is a valid label for the ntfs file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_ntfs_check_label (const gchar *label, GError **error);
 
 /**
  * bd_fs_ntfs_set_uuid:
@@ -1677,6 +1749,18 @@ gboolean bd_fs_reiserfs_repair (const gchar *device, const BDExtraArg **extra, G
  * Tech category: %BD_FS_TECH_REISERFS-%BD_FS_TECH_MODE_SET_LABEL
  */
 gboolean bd_fs_reiserfs_set_label (const gchar *device, const gchar *label, GError **error);
+
+/**
+ * bd_fs_reiserfs_check_label:
+ * @label: label to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @label is a valid label for the reiserfs file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_reiserfs_check_label (const gchar *label, GError **error);
 
 /**
  * bd_fs_reiserfs_set_uuid:
