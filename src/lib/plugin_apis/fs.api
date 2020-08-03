@@ -298,10 +298,14 @@ GType bd_fs_vfat_info_get_type () {
 
 /**
  * BDFSNtfsInfo:
+ * @label: label of the filesystem
+ * @uuid: uuid of the filesystem
  * @size: size of the filesystem in bytes
  * @free_space: number of free space in the filesystem in bytes
  */
 typedef struct BDFSNtfsInfo {
+    gchar *label;
+    gchar *uuid;
     guint64 size;
     guint64 free_space;
 } BDFSNtfsInfo;
@@ -318,6 +322,8 @@ BDFSNtfsInfo* bd_fs_ntfs_info_copy (BDFSNtfsInfo *data) {
 
     BDFSNtfsInfo *ret = g_new0 (BDFSNtfsInfo, 1);
 
+    ret->label = g_strdup (data->label);
+    ret->uuid = g_strdup (data->uuid);
     ret->size = data->size;
     ret->free_space = data->free_space;
 
@@ -331,6 +337,11 @@ BDFSNtfsInfo* bd_fs_ntfs_info_copy (BDFSNtfsInfo *data) {
  * Frees @data.
  */
 void bd_fs_ntfs_info_free (BDFSNtfsInfo *data) {
+    if (data == NULL)
+        return;
+
+    g_free (data->label);
+    g_free (data->uuid);
     g_free (data);
 }
 

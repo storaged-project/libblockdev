@@ -93,6 +93,8 @@ BDFSNtfsInfo* bd_fs_ntfs_info_copy (BDFSNtfsInfo *data) {
 
     BDFSNtfsInfo *ret = g_new0 (BDFSNtfsInfo, 1);
 
+    ret->label = g_strdup (data->label);
+    ret->uuid = g_strdup (data->uuid);
     ret->size = data->size;
     ret->free_space = data->free_space;
 
@@ -105,6 +107,11 @@ BDFSNtfsInfo* bd_fs_ntfs_info_copy (BDFSNtfsInfo *data) {
  * Frees @data.
  */
 void bd_fs_ntfs_info_free (BDFSNtfsInfo *data) {
+    if (data == NULL)
+        return;
+
+    g_free (data->label);
+    g_free (data->uuid);
     g_free (data);
 }
 
@@ -309,12 +316,20 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
         }
     }
 
+    ret = g_new0 (BDFSNtfsInfo, 1);
+
+    success = get_uuid_label (device, &(ret->uuid), &(ret->label), error);
+    if (!success) {
+        /* error is already populated */
+        bd_fs_ntfs_info_free (ret);
+        return NULL;
+    }
+
     success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
     if (!success)
         /* error is already populated */
         return FALSE;
 
-    ret = g_new0 (BDFSNtfsInfo, 1);
     lines = g_strsplit (output, "\n", 0);
     g_free (output);
     line_p = lines;

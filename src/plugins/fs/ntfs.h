@@ -5,6 +5,8 @@
 #define BD_FS_NTFS
 
 typedef struct BDFSNtfsInfo {
+    gchar *label;
+    gchar *uuid;
     guint64 size;
     guint64 free_space;
 } BDFSNtfsInfo;
