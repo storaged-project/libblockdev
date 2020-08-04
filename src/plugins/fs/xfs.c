@@ -281,6 +281,20 @@ gboolean bd_fs_xfs_set_uuid (const gchar *device, const gchar *uuid, GError **er
 }
 
 /**
+ * bd_fs_xfs_check_uuid:
+ * @uuid: UUID to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @uuid is a valid UUID for the xfs file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_xfs_check_uuid (const gchar *uuid, GError **error) {
+    return check_uuid (uuid, error);
+}
+
+/**
  * bd_fs_xfs_get_info:
  * @device: the device containing the file system to get info for (device must
             be mounted, trying to get info for an unmounted device will result

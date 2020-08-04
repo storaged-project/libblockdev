@@ -22,6 +22,7 @@ gboolean bd_fs_reiserfs_repair (const gchar *device, const BDExtraArg **extra, G
 gboolean bd_fs_reiserfs_set_label (const gchar *device, const gchar *label, GError **error);
 gboolean bd_fs_reiserfs_check_label (const gchar *label, GError **error);
 gboolean bd_fs_reiserfs_set_uuid (const gchar *device, const gchar *uuid, GError **error);
+gboolean bd_fs_reiserfs_check_uuid (const gchar *uuid, GError **error);
 BDFSReiserFSInfo* bd_fs_reiserfs_get_info (const gchar *device, GError **error);
 gboolean bd_fs_reiserfs_resize (const gchar *device, guint64 new_size, GError **error);
 

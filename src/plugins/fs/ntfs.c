@@ -269,6 +269,38 @@ gboolean bd_fs_ntfs_set_uuid (const gchar *device, const gchar *uuid, GError **e
 }
 
 /**
+ * bd_fs_ntfs_check_uuid:
+ * @uuid: UUID to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @uuid is a valid UUID for the ntfs file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_ntfs_check_uuid (const gchar *uuid, GError **error) {
+    size_t len = 0;
+
+    len = strlen (uuid);
+    if (len != 8 && len != 16) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
+                     "UUID for NTFS filesystem must be either 8 or 16 characters long.");
+        return FALSE;
+    }
+
+    for (size_t i = 0; i < len; i++) {
+        if (!g_ascii_isxdigit (uuid[i])) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
+                         "UUID for NTFS filesystem must be a hexadecimal number.");
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
+
+/**
  * bd_fs_ntfs_resize:
  * @device: the device the file system of which to resize
  * @new_size: new requested size for the file system in bytes (if 0, the file system

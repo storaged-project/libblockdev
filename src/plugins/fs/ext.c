@@ -640,6 +640,48 @@ gboolean bd_fs_ext4_set_uuid (const gchar *device, const gchar *uuid, GError **e
 }
 
 /**
+ * bd_fs_ext2_check_uuid:
+ * @uuid: UUID to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @uuid is a valid UUID for the ext2 file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_ext2_check_uuid (const gchar *uuid, GError **error) {
+    return check_uuid (uuid, error);
+}
+
+/**
+ * bd_fs_ext3_check_uuid:
+ * @uuid: UUID to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @uuid is a valid UUID for the ext3 file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_ext3_check_uuid (const gchar *uuid, GError **error) {
+    return check_uuid (uuid, error);
+}
+
+/**
+ * bd_fs_ext4_check_uuid:
+ * @uuid: UUID to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @uuid is a valid UUID for the ext4 file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_ext4_check_uuid (const gchar *uuid, GError **error) {
+    return check_uuid (uuid, error);
+}
+
+/**
  * parse_output_vars: (skip)
  * @str: string to parse
  * @item_sep: item separator(s) (key-value pairs separator)

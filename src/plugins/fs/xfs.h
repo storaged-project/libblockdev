@@ -21,6 +21,7 @@ gboolean bd_fs_xfs_repair (const gchar *device, const BDExtraArg **extra, GError
 gboolean bd_fs_xfs_set_label (const gchar *device, const gchar *label, GError **error);
 gboolean bd_fs_xfs_check_label (const gchar *label, GError **error);
 gboolean bd_fs_xfs_set_uuid (const gchar *device, const gchar *uuid, GError **error);
+gboolean bd_fs_xfs_check_uuid (const gchar *uuid, GError **error);
 BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error);
 gboolean bd_fs_xfs_resize (const gchar *mpoint, guint64 new_size, const BDExtraArg **extra, GError **error);
 

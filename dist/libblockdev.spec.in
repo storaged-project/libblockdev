@@ -316,6 +316,7 @@ with the libblockdev-dm plugin/library.
 BuildRequires: parted-devel
 BuildRequires: libblkid-devel
 BuildRequires: libmount-devel
+BuildRequires: libuuid-devel
 Summary:     The FS plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
 
