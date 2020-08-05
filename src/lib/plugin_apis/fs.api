@@ -451,6 +451,7 @@ typedef enum {
     BD_FS_TECH_NTFS,
     BD_FS_TECH_F2FS,
     BD_FS_TECH_REISERFS,
+    BD_FS_TECH_NILFS2,
 } BDFSTech;
 
 typedef enum {
@@ -525,6 +526,73 @@ GType bd_fs_reiserfs_info_get_type () {
         type = g_boxed_type_register_static("BDFSReiserFSInfo",
                                             (GBoxedCopyFunc) bd_fs_reiserfs_info_copy,
                                             (GBoxedFreeFunc) bd_fs_reiserfs_info_free);
+    }
+
+    return type;
+}
+
+#define BD_FS_TYPE_NILFS_INFO (bd_fs_nilfs2_info_get_type ())
+GType bd_fs_nilfs2_info_get_type();
+
+/**
+ * BDFSNILFS2Info:
+ * @label: label of the filesystem
+ * @uuid: uuid of the filesystem
+ * @block_size: block size used by the filesystem
+ * @size: size of the filesystem
+ * @free_blocks: number of free blocks in the filesystem
+ */
+typedef struct BDFSNILFS2Info {
+    gchar *label;
+    gchar *uuid;
+    guint64 size;
+    guint64 block_size;
+    guint64 free_blocks;
+} BDFSNILFS2Info;
+
+/**
+ * bd_fs_nilfs2_info_copy: (skip)
+ * @data: (allow-none): %BDFSNILFS2Info to copy
+ *
+ * Creates a new copy of @data.
+ */
+BDFSNILFS2Info* bd_fs_nilfs2_info_copy (BDFSNILFS2Info *data) {
+    if (data == NULL)
+        return NULL;
+
+    BDFSNILFS2Info *ret = g_new0 (BDFSNILFS2Info, 1);
+
+    ret->label = g_strdup (data->label);
+    ret->uuid = g_strdup (data->uuid);
+    ret->size = data->size;
+    ret->block_size = data->block_size;
+    ret->free_blocks = data->free_blocks;
+
+    return ret;
+}
+
+/**
+ * bd_fs_nilfs2_info_free: (skip)
+ * @data: (allow-none): %BDFSNILFS2Info to free
+ *
+ * Frees @data.
+ */
+void bd_fs_nilfs2_info_free (BDFSNILFS2Info *data) {
+    if (data == NULL)
+        return;
+
+    g_free (data->label);
+    g_free (data->uuid);
+    g_free (data);
+}
+
+GType bd_fs_nilfs2_info_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDFSNILFS2Info",
+                                            (GBoxedCopyFunc) bd_fs_nilfs2_info_copy,
+                                            (GBoxedFreeFunc) bd_fs_nilfs2_info_free);
     }
 
     return type;
@@ -1871,5 +1939,105 @@ BDFSReiserFSInfo* bd_fs_reiserfs_get_info (const gchar *device, GError **error);
  * Tech category: %BD_FS_TECH_REISERFS-%BD_FS_TECH_MODE_RESIZE
  */
 gboolean bd_fs_reiserfs_resize (const gchar *device, guint64 new_size, GError **error);
+
+/**
+ * bd_fs_nilfs2_mkfs:
+ * @device: the device to create a new nilfs fs on
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
+ *                                                 passed to the 'mkfs.nilfs2' utility)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether a new nilfs fs was successfully created on @device or not
+ *
+ * Tech category: %BD_FS_TECH_NILFS2-%BD_FS_TECH_MODE_MKFS
+ */
+gboolean bd_fs_nilfs2_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_fs_nilfs2_wipe:
+ * @device: the device to wipe a nilfs signature from
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the nilfs signature was successfully wiped from the @device or
+ *          not
+ *
+ * Tech category: %BD_FS_TECH_NILFS2-%BD_FS_TECH_MODE_WIPE
+ */
+gboolean bd_fs_nilfs2_wipe (const gchar *device, GError **error);
+
+/**
+ * bd_fs_nilfs2_set_label:
+ * @device: the device containing the file system to set label for
+ * @label: label to set
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the label of nilfs file system on the @device was
+ *          successfully set or not
+ *
+ * Tech category: %BD_FS_TECH_NILFS2-%BD_FS_TECH_MODE_SET_LABEL
+ */
+gboolean bd_fs_nilfs2_set_label (const gchar *device, const gchar *label, GError **error);
+
+/**
+ * bd_fs_nilfs2_check_label:
+ * @label: label to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @label is a valid label for the nilfs2 file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_nilfs2_check_label (const gchar *label, GError **error);
+
+/**
+ * bd_fs_nilfs2_set_uuid:
+ * @device: the device containing the file system to set UUID for
+ * @uuid: (allow-none): UUID to set or %NULL to generate a new one
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the uuid of nilfs file system on the @device was
+ *          successfully set or not
+ *
+ * Tech category: %BD_FS_TECH_NILFS2-%BD_FS_TECH_MODE_SET_UUID
+ */
+gboolean bd_fs_nilfs2_set_uuid (const gchar *device, const gchar *uuid, GError **error);
+
+/**
+ * bd_fs_nilfs2_check_uuid:
+ * @uuid: UUID to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @uuid is a valid UUID for the nilfs file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_nilfs2_check_uuid (const gchar *uuid, GError **error);
+
+/**
+ * bd_fs_nilfs2_get_info:
+ * @device: the device containing the file system to get info for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): information about the file system on @device or
+ *                           %NULL in case of error
+ *
+ * Tech category: %BD_FS_TECH_NILFS2-%BD_FS_TECH_MODE_QUERY
+ */
+BDFSNILFS2Info* bd_fs_nilfs2_get_info (const gchar *device, GError **error);
+
+/**
+ * bd_fs_nilfs2_resize:
+ * @device: the device the file system of which to resize
+ * @new_size: new requested size for the file system (if 0, the file system is
+ *            adapted to the underlying block device)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the file system on @device was successfully resized or not
+ *
+ * Tech category: %BD_FS_TECH_NILFS2-%BD_FS_TECH_MODE_RESIZE
+ */
+gboolean bd_fs_nilfs2_resize (const gchar *device, guint64 new_size, GError **error);
 
 #endif  /* BD_FS_API */

@@ -81,6 +81,7 @@ static const BDFSInfo fs_info[] = {
     {"ntfs", "ntfsfix", "ntfsfix", "ntfsresize", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "ntfslabel", "ntfscluster", "ntfslabel"},
     {"f2fs", "fsck.f2fs", "fsck.f2fs", "resize.f2fs", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, NULL, "dump.f2fs", NULL},
     {"reiserfs", "reiserfsck", "reiserfsck", "resize_reiserfs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "reiserfstune", "debugreiserfs", "reiserfstune"},
+    {"nilfs2", NULL, NULL, "nilfs-resize", BD_FS_ONLINE_GROW | BD_FS_ONLINE_GROW, "tune-nilfs", "tune-nilfs", "tune-nilfs"},
     {NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL}
 };
 
@@ -361,20 +362,21 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
 }
 
 /**
- * xfs_mount:
- * @device: the device to mount for an XFS operation
+ * fs_mount:
+ * @device: the device to mount for an FS operation
+ * @fstype: (allow-none): filesystem type on @device
  * @unmount: (out): whether caller should unmount the device (was mounted by us) or
  *                  not (was already mounted before)
  * @error: (out): place to store error (if any)
  *
- * This is just a helper function for XFS operations that need @device to be mounted.
+ * This is just a helper function for FS operations that need @device to be mounted.
  * If the device is already mounted, this will just return the existing mountpoint.
  * If the device is not mounted, we will mount it to a temporary directory and set
  * @unmount to %TRUE.
  *
  * Returns: (transfer full): mountpoint @device is mounted at (or %NULL in case of error)
  */
-static gchar* xfs_mount (const gchar *device, gboolean *unmount, GError **error) {
+static gchar* fs_mount (const gchar *device, gchar *fstype, gboolean *unmount, GError **error) {
     gchar *mountpoint = NULL;
     gboolean ret = FALSE;
 
@@ -390,7 +392,7 @@ static gchar* xfs_mount (const gchar *device, gboolean *unmount, GError **error)
                              "before resizing it.", device);
                 return NULL;
             }
-            ret = bd_fs_mount (device, mountpoint, "xfs", NULL, NULL, error);
+            ret = bd_fs_mount (device, mountpoint, fstype, NULL, NULL, error);
             if (!ret) {
                 g_prefix_error (error, "Failed to mount '%s' before resizing it: ", device);
                 return NULL;
@@ -427,7 +429,7 @@ static gboolean xfs_resize_device (const gchar *device, guint64 new_size, const 
     GError *local_error = NULL;
     BDFSXfsInfo* xfs_info = NULL;
 
-    mountpoint = xfs_mount (device, &unmount, error);
+    mountpoint = fs_mount (device, "xfs", &unmount, error);
     if (!mountpoint)
         return FALSE;
 
@@ -480,6 +482,40 @@ static gboolean f2fs_resize_device (const gchar *device, guint64 new_size, GErro
     bd_fs_f2fs_info_free (info);
 
     return bd_fs_f2fs_resize (device, new_size, safe, NULL, error);
+}
+
+static gboolean nilfs2_resize_device (const gchar *device, guint64 new_size, GError **error) {
+    g_autofree gchar* mountpoint = NULL;
+    gboolean ret = FALSE;
+    gboolean success = FALSE;
+    gboolean unmount = FALSE;
+    GError *local_error = NULL;
+
+    mountpoint = fs_mount (device, "nilfs2", &unmount, error);
+    if (!mountpoint)
+        return FALSE;
+
+    success = bd_fs_nilfs2_resize (device, new_size, error);
+
+    if (unmount) {
+        ret = bd_fs_unmount (mountpoint, FALSE, FALSE, NULL, &local_error);
+        if (!ret) {
+            if (success) {
+                /* resize was successful but unmount failed */
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UNMOUNT_FAIL,
+                             "Failed to unmount '%s' after resizing it: %s",
+                             device, local_error->message);
+                g_clear_error (&local_error);
+                return FALSE;
+            } else
+                /* both resize and unmount were unsuccessful but the error
+                   from the resize is more important so just ignore the
+                   unmount error */
+                g_clear_error (&local_error);
+        }
+    }
+
+    return success;
 }
 
 static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 new_size, const gchar *label, const gchar *uuid, GError **error) {
@@ -589,6 +625,21 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
                 return bd_fs_reiserfs_set_label (device, label, error);
             case BD_FS_UUID:
                 return bd_fs_reiserfs_set_uuid (device, uuid, error);
+            default:
+                g_assert_not_reached ();
+        }
+    } else if (g_strcmp0 (fstype, "nilfs2") == 0) {
+        switch (op) {
+            case BD_FS_RESIZE:
+                return nilfs2_resize_device (device, new_size, error);
+            case BD_FS_REPAIR:
+                break;
+            case BD_FS_CHECK:
+                break;
+            case BD_FS_LABEL:
+                return bd_fs_nilfs2_set_label (device, label, error);
+            case BD_FS_UUID:
+                return bd_fs_nilfs2_set_uuid (device, uuid, error);
             default:
                 g_assert_not_reached ();
         }
@@ -713,7 +764,7 @@ static BDFSXfsInfo* xfs_get_info (const gchar *device, GError **error) {
     GError *local_error = NULL;
     BDFSXfsInfo* xfs_info = NULL;
 
-    mountpoint = xfs_mount (device, &unmount, error);
+    mountpoint = fs_mount (device, "xfs", &unmount, error);
     if (!mountpoint)
         return NULL;
 
@@ -804,6 +855,13 @@ guint64 bd_fs_get_size (const gchar *device, GError **error) {
             bd_fs_reiserfs_info_free (info);
         }
         return size;
+    } else if (g_strcmp0 (fstype, "nilfs2") == 0) {
+        BDFSNILFS2Info *info = bd_fs_nilfs2_get_info (device, error);
+        if (info) {
+            size = info->size;
+            bd_fs_nilfs2_info_free (info);
+        }
+        return size;
     } else {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
                     "Getting size of filesystem '%s' is not supported.", fstype);
@@ -868,6 +926,13 @@ guint64 bd_fs_get_free_space (const gchar *device, GError **error) {
         if (info) {
             size = info->block_size * info->free_blocks;
             bd_fs_reiserfs_info_free (info);
+        }
+        return size;
+    } else if (g_strcmp0 (fstype, "nilfs2") == 0) {
+        BDFSNILFS2Info *info = bd_fs_nilfs2_get_info (device, error);
+        if (info) {
+            size = info->block_size * info->free_blocks;
+            bd_fs_nilfs2_info_free (info);
         }
         return size;
     } else {

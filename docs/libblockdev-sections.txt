@@ -686,6 +686,17 @@ bd_fs_reiserfs_check_label
 bd_fs_reiserfs_set_uuid
 bd_fs_reiserfs_check_uuid
 bd_fs_reiserfs_wipe
+BDFSNILFS2Info
+bd_fs_nilfs2_get_info
+bd_fs_nilfs2_info_copy
+bd_fs_nilfs2_info_free
+bd_fs_nilfs2_mkfs
+bd_fs_nilfs2_resize
+bd_fs_nilfs2_set_label
+bd_fs_nilfs2_check_label
+bd_fs_nilfs2_set_uuid
+bd_fs_nilfs2_check_uuid
+bd_fs_nilfs2_wipe
 </SECTION>
 
 <SECTION>
