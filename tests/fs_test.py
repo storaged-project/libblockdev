@@ -1025,17 +1025,16 @@ class VfatResize(FSTestCase):
         self.assertTrue(succ)
 
         # shrink
-        succ = BlockDev.fs_vfat_resize(self.loop_dev, 80 * 1024**2)
+        succ = BlockDev.fs_vfat_resize(self.loop_dev, 130 * 1024**2)
         self.assertTrue(succ)
 
         # grow
-        succ = BlockDev.fs_vfat_resize(self.loop_dev, 100 * 1024**2)
+        succ = BlockDev.fs_vfat_resize(self.loop_dev, 140 * 1024**2)
         self.assertTrue(succ)
 
         # shrink again
-        succ = BlockDev.fs_vfat_resize(self.loop_dev, 80 * 1024**2)
+        succ = BlockDev.fs_vfat_resize(self.loop_dev, 130 * 1024**2)
         self.assertTrue(succ)
-
 
         # resize to maximum size
         succ = BlockDev.fs_vfat_resize(self.loop_dev, 0)
