@@ -1517,7 +1517,7 @@ class CanResizeRepairCheckLabel(FSTestCase):
         self.assertTrue(avail)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_can_resize("nilfs2")
+            BlockDev.fs_can_resize("non-existing-fs")
 
     def test_can_repair(self):
         """Verify that tooling query works for repair"""
@@ -1574,7 +1574,7 @@ class CanResizeRepairCheckLabel(FSTestCase):
         self.assertEqual(util, "xfs_admin")
 
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_can_set_label("nilfs2")
+            BlockDev.fs_can_set_label("non-existing-fs")
 
     def test_can_get_size(self):
         """Verify that tooling query works for getting size"""
@@ -1591,7 +1591,7 @@ class CanResizeRepairCheckLabel(FSTestCase):
         self.assertEqual(util, "xfs_admin")
 
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_can_get_size("nilfs2")
+            BlockDev.fs_can_get_size("non-existing-fs")
 
     def test_can_get_free_space(self):
         """Verify that tooling query works for getting free space"""
@@ -1611,7 +1611,7 @@ class CanResizeRepairCheckLabel(FSTestCase):
             BlockDev.fs_can_get_free_space("xfs")
 
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_can_get_free_space("nilfs2")
+            BlockDev.fs_can_get_free_space("non-existing-fs")
 
 class MountTest(FSTestCase):
 
