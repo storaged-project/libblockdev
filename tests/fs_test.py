@@ -71,6 +71,15 @@ class FSTestCase(unittest.TestCase):
         except:
             cls.reiserfs_avail = False
 
+        try:
+            cls.nilfs2_avail = BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2,
+                                                         BlockDev.FSTechMode.MKFS |
+                                                         BlockDev.FSTechMode.RESIZE |
+                                                         BlockDev.FSTechMode.SET_LABEL)
+        except Exception as e:
+            print(e)
+            cls.nilfs2_avail = False
+
     def setUp(self):
         self.addCleanup(self._clean_up)
         self.dev_file = utils.create_sparse_tempfile("fs_test", self.loop_size)
@@ -1969,6 +1978,14 @@ class GenericCheck(FSTestCase):
             self.skipTest("skipping ReiserFS: not available")
         self._test_generic_check(mkfs_function=BlockDev.fs_reiserfs_mkfs)
 
+    def test_nilfs2_generic_check(self):
+        """Test generic check function with an nilfs2 file system"""
+        if not self.nilfs2_avail:
+            self.skipTest("skipping NILFS2: not available")
+        with self.assertRaises(GLib.GError):
+            # nilfs2 doesn't support check
+            self._test_generic_check(mkfs_function=BlockDev.fs_nilfs2_mkfs)
+
 class GenericRepair(FSTestCase):
     def _test_generic_repair(self, mkfs_function):
         # clean the device
@@ -2006,6 +2023,15 @@ class GenericRepair(FSTestCase):
         if not self.reiserfs_avail:
             self.skipTest("skipping ReiserFS: not available")
         self._test_generic_repair(mkfs_function=BlockDev.fs_reiserfs_mkfs)
+
+    def test_nilfs2_generic_repair(self):
+        """Test generic repair function with an nilfs2 file system"""
+        if not self.nilfs2_avail:
+            self.skipTest("skipping NILFS2: not available")
+        with self.assertRaises(GLib.GError):
+            # nilfs2 doesn't support repair
+            self._test_generic_repair(mkfs_function=BlockDev.fs_nilfs2_mkfs)
+
 
 class GenericSetLabel(FSTestCase):
     def _test_generic_set_label(self, mkfs_function):
@@ -2046,6 +2072,13 @@ class GenericSetLabel(FSTestCase):
         if not self.reiserfs_avail:
             self.skipTest("skipping ReiserFS: not available")
         self._test_generic_set_label(mkfs_function=BlockDev.fs_reiserfs_mkfs)
+
+    def test_nilfs2_generic_set_label(self):
+        """Test generic set_label function with a nilfs2 file system"""
+        if not self.nilfs2_avail:
+            self.skipTest("skipping NILFS2: not available")
+        self._test_generic_set_label(mkfs_function=BlockDev.fs_nilfs2_mkfs)
+
 
 class GenericSetUUID(FSTestCase):
     def _test_generic_set_uuid(self, mkfs_function, test_uuid="4d7086c4-a4d3-432f-819e-73da03870df9"):
@@ -2095,6 +2128,12 @@ class GenericSetUUID(FSTestCase):
         if not self.reiserfs_avail:
             self.skipTest("skipping ReiserFS: not available")
         self._test_generic_set_uuid(mkfs_function=BlockDev.fs_reiserfs_mkfs)
+
+    def test_nilfs2_generic_set_uuid(self):
+        """Test generic set_uuid function with a nilfs2 file system"""
+        if not self.nilfs2_avail:
+            self.skipTest("skipping NILFS2: not available")
+        self._test_generic_set_uuid(mkfs_function=BlockDev.fs_nilfs2_mkfs)
 
 class GenericResize(FSTestCase):
     def _test_generic_resize(self, mkfs_function, size_delta=0):
@@ -2266,6 +2305,12 @@ class GenericResize(FSTestCase):
             self.skipTest("skipping ReiserFS: not available")
         self._test_generic_resize(mkfs_function=BlockDev.fs_reiserfs_mkfs)
 
+    def test_nilfs2_generic_resize(self):
+        """Test generic resize function with an nilfs2 file system"""
+        if not self.nilfs2_avail:
+            self.skipTest("skipping NILFS2: not available")
+        self._test_generic_resize(mkfs_function=BlockDev.fs_nilfs2_mkfs)
+
 
 class GenericGetFreeSpace(FSTestCase):
     def _test_get_free_space(self, mkfs_function, size_delta=0):
@@ -2306,6 +2351,12 @@ class GenericGetFreeSpace(FSTestCase):
         if not self.reiserfs_avail:
             self.skipTest("skipping ReiserFS: not available")
         self._test_get_free_space(mkfs_function=BlockDev.fs_reiserfs_mkfs)
+
+    def test_nilfs2_get_free_space(self):
+        """Test generic resize function with an nilfs2 file system"""
+        if not self.nilfs2_avail:
+            self.skipTest("skipping NILFS2: not available")
+        self._test_get_free_space(mkfs_function=BlockDev.fs_nilfs2_mkfs)
 
 
 class FSFreezeTest(FSTestCase):
