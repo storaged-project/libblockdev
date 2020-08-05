@@ -35,6 +35,7 @@ def mounted(device, where, ro=False):
 class FSTestCase(unittest.TestCase):
 
     requested_plugins = BlockDev.plugin_specs_from_names(("fs", "loop"))
+    loop_size = 150 * 1024**2
 
     @classmethod
     def setUpClass(cls):
@@ -72,8 +73,8 @@ class FSTestCase(unittest.TestCase):
 
     def setUp(self):
         self.addCleanup(self._clean_up)
-        self.dev_file = utils.create_sparse_tempfile("fs_test", 100 * 1024**2)
-        self.dev_file2 = utils.create_sparse_tempfile("fs_test", 100 * 1024**2)
+        self.dev_file = utils.create_sparse_tempfile("fs_test", self.loop_size)
+        self.dev_file2 = utils.create_sparse_tempfile("fs_test", self.loop_size)
         try:
             self.loop_dev = utils.create_lio_device(self.dev_file)
         except RuntimeError as e:
@@ -389,9 +390,9 @@ class ExtGetInfo(FSTestCase):
         fi = BlockDev.fs_ext4_get_info(self.loop_dev)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
-        self.assertEqual(fi.block_count, 100 * 1024**2 / 1024)
+        self.assertEqual(fi.block_count, self.loop_size / 1024)
         # at least 90 % should be available, so it should be reported
-        self.assertGreater(fi.free_blocks, 0.90 * 100 * 1024**2 / 1024)
+        self.assertGreater(fi.free_blocks, 0.90 * self.loop_size / 1024)
         self.assertEqual(fi.label, "")
         # should be an non-empty string
         self.assertTrue(fi.uuid)
@@ -400,9 +401,9 @@ class ExtGetInfo(FSTestCase):
         with mounted(self.loop_dev, self.mount_dir):
             fi = BlockDev.fs_ext4_get_info(self.loop_dev)
             self.assertEqual(fi.block_size, 1024)
-            self.assertEqual(fi.block_count, 100 * 1024**2 / 1024)
+            self.assertEqual(fi.block_count, self.loop_size / 1024)
             # at least 90 % should be available, so it should be reported
-            self.assertGreater(fi.free_blocks, 0.90 * 100 * 1024**2 / 1024)
+            self.assertGreater(fi.free_blocks, 0.90 * self.loop_size / 1024)
             self.assertEqual(fi.label, "")
             # should be an non-empty string
             self.assertTrue(fi.uuid)
@@ -488,9 +489,9 @@ class ExtResize(FSTestCase):
         fi = info_function(self.loop_dev)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
-        self.assertEqual(fi.block_count, 100 * 1024**2 / 1024)
+        self.assertEqual(fi.block_count, self.loop_size / 1024)
         # at least 90 % should be available, so it should be reported
-        self.assertGreater(fi.free_blocks, 0.90 * 100 * 1024**2 / 1024)
+        self.assertGreater(fi.free_blocks, 0.90 * self.loop_size / 1024)
 
         succ = resize_function(self.loop_dev, 50 * 1024**2, None)
         self.assertTrue(succ)
@@ -500,14 +501,14 @@ class ExtResize(FSTestCase):
         self.assertEqual(fi.block_count, 50 * 1024**2 / 1024)
 
         # resize back
-        succ = resize_function(self.loop_dev, 100 * 1024**2, None)
+        succ = resize_function(self.loop_dev, self.loop_size, None)
         self.assertTrue(succ)
         fi = info_function(self.loop_dev)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
-        self.assertEqual(fi.block_count, 100 * 1024**2 / 1024)
+        self.assertEqual(fi.block_count, self.loop_size / 1024)
         # at least 90 % should be available, so it should be reported
-        self.assertGreater(fi.free_blocks, 0.90 * 100 * 1024**2 / 1024)
+        self.assertGreater(fi.free_blocks, 0.90 * self.loop_size / 1024)
 
         # resize again
         succ = resize_function(self.loop_dev, 50 * 1024**2, None)
@@ -523,9 +524,9 @@ class ExtResize(FSTestCase):
         fi = info_function(self.loop_dev)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
-        self.assertEqual(fi.block_count, 100 * 1024**2 / 1024)
+        self.assertEqual(fi.block_count, self.loop_size / 1024)
         # at least 90 % should be available, so it should be reported
-        self.assertGreater(fi.free_blocks, 0.90 * 100 * 1024**2 / 1024)
+        self.assertGreater(fi.free_blocks, 0.90 * self.loop_size / 1024)
 
     def test_ext2_resize(self):
         """Verify that it is possible to resize an ext2 file system"""
@@ -720,7 +721,7 @@ class XfsGetInfo(FSTestCase):
             fi = BlockDev.fs_xfs_get_info(self.loop_dev)
 
         self.assertEqual(fi.block_size, 4096)
-        self.assertEqual(fi.block_count, 100 * 1024**2 / 4096)
+        self.assertEqual(fi.block_count, self.loop_size / 4096)
         self.assertEqual(fi.label, "")
         # should be an non-empty string
         self.assertTrue(fi.uuid)
@@ -1418,7 +1419,7 @@ class F2FSResize(F2FSTestCase):
         self.assertTrue(succ)
 
         fi = BlockDev.fs_f2fs_get_info(self.loop_dev)
-        self.assertEqual(fi.sector_count * fi.sector_size, 100 * 1024**2)
+        self.assertEqual(fi.sector_count * fi.sector_size, self.loop_size)
 
 
 class NTFSSetLabel(FSTestCase):
@@ -2106,10 +2107,10 @@ class GenericResize(FSTestCase):
         size = BlockDev.fs_get_size(self.loop_dev)
 
         # shrink
-        succ = BlockDev.fs_resize(self.loop_dev, 80 * 1024**2)
+        succ = BlockDev.fs_resize(self.loop_dev, 100 * 1024**2)
         self.assertTrue(succ)
         new_size = BlockDev.fs_get_size(self.loop_dev)
-        self.assertAlmostEqual(new_size, 80 * 1024**2, delta=size_delta)
+        self.assertAlmostEqual(new_size, 100 * 1024**2, delta=size_delta)
 
         # resize to maximum size
         succ = BlockDev.fs_resize(self.loop_dev, 0)
