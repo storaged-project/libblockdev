@@ -142,7 +142,7 @@ BuildRequires: python2-devel
 Obsoletes:     python2-blockdev < %{version}-%{release}
 %endif
 %if %{with_python3}
-BuildRequires: python3-devel
+BuildRequires: python%{python3_pkgversion}-devel
 %endif
 %if %{with_gtk_doc}
 BuildRequires: gtk-doc
@@ -156,7 +156,7 @@ BuildRequires: autoconf-archive
 
 # Needed for python 2 vs. 3 compatibility in the tests, but not used to build
 # BuildRequires: python2-six
-# BuildRequires: python3-six
+# BuildRequires: python%{python3_pkgversion}-six
 
 %description
 The libblockdev is a C library with GObject introspection support that can be
@@ -196,14 +196,14 @@ libblockdev in Python2.
 %endif
 
 %if %{with_python3}
-%package -n python3-blockdev
+%package -n python%{python3_pkgversion}-blockdev
 Summary:     Python3 gobject-introspection bindings for libblockdev
 Requires: %{name}%{?_isa} = %{version}-%{release}
-Requires: python3-gobject-base
-Requires: python3-bytesize
-%{?python_provide:%python_provide python3-blockdev}
+Requires: python%{python3_pkgversion}-gobject-base
+Requires: python%{python3_pkgversion}-bytesize
+%{?python_provide:%python_provide python%{python3_pkgversion}-blockdev}
 
-%description -n python3-blockdev
+%description -n python%{python3_pkgversion}-blockdev
 This package contains enhancements to the gobject-introspection bindings for
 libblockdev in Python3.
 %endif
@@ -789,7 +789,7 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %endif
 
 %if %{with_python3}
-%files -n python3-blockdev
+%files -n python%{python3_pkgversion}-blockdev
 %{python3_sitearch}/gi/overrides/BlockDev*
 %{python3_sitearch}/gi/overrides/__pycache__/BlockDev*
 %endif
