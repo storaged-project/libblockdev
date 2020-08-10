@@ -526,6 +526,54 @@ gboolean bd_fs_ext4_set_label (const gchar *device, const gchar *label, GError *
     return ext_set_label (device, label, error);
 }
 
+/**
+ * bd_fs_ext2_check_label:
+ * @label: label to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @label is a valid label for the ext2 file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_ext2_check_label (const gchar *label, GError **error) {
+    if (strlen (label) > 16) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                     "Label for ext filesystem must be at most 16 characters long.");
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+/**
+ * bd_fs_ext3_check_label:
+ * @label: label to check
+ * @error: (out) (allow-none): place to store error (if any)
+ *
+ * Returns: whether @label is a valid label for the ext3 file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_ext3_check_label (const gchar *label, GError **error) {
+    return bd_fs_ext2_check_label (label, error);
+}
+
+/**
+ * bd_fs_ext4_check_label:
+ * @label: label to check
+ * @error: (out) (allow-none): place to store error (if any)
+ *
+ * Returns: whether @label is a valid label for the ext4 file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_ext4_check_label (const gchar *label, GError **error) {
+    return bd_fs_ext2_check_label (label, error);
+}
+
 static gboolean ext_set_uuid (const gchar *device, const gchar *uuid, GError **error) {
     const gchar *args[5] = {"tune2fs", "-U", NULL, device, NULL};
 

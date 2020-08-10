@@ -228,6 +228,35 @@ gboolean bd_fs_xfs_set_label (const gchar *device, const gchar *label, GError **
 }
 
 /**
+ * bd_fs_xfs_check_label:
+ * @label: label to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @label is a valid label for the xfs file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_xfs_check_label (const gchar *label, GError **error) {
+    size_t len = 0;
+
+    len = strlen (label);
+    if (len > 12) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                     "Label for XFS filesystem must be at most 12 characters long.");
+        return FALSE;
+    }
+
+    if (strchr (label, ' ') != NULL) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                     "Label for XFS filesystem cannot contain spaces.");
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+/**
  * bd_fs_xfs_set_uuid:
  * @device: the device containing the file system to set uuid for
  * @uuid: (allow-none): UUID to set %NULL to generate a new one
