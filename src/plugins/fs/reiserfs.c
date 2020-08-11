@@ -325,9 +325,11 @@ BDFSReiserFSInfo* bd_fs_reiserfs_get_info (const gchar *device, GError **error) 
     }
 
     success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
-    if (!success)
+    if (!success) {
         /* error is already populated */
+        bd_fs_reiserfs_info_free (ret);
         return FALSE;
+    }
 
     lines = g_strsplit (output, "\n", 0);
     g_free (output);
@@ -374,6 +376,8 @@ BDFSReiserFSInfo* bd_fs_reiserfs_get_info (const gchar *device, GError **error) 
     val_start = strchr (*line_p, ':');
     val_start++;
     ret->free_blocks = g_ascii_strtoull (val_start, NULL, 0);
+
+    g_strfreev (lines);
 
     return ret;
 }
