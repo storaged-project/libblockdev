@@ -17,6 +17,7 @@ typedef enum {
     BD_FS_ERROR_AUTH, // keep this entry last (XXX?)
     BD_FS_ERROR_TECH_UNAVAIL,
     BD_FS_ERROR_LABEL_INVALID,
+    BD_FS_ERROR_UUID_INVALID,
 } BDFsError;
 
 /* XXX: where the file systems start at the enum of technologies */

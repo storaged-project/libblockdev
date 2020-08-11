@@ -280,6 +280,20 @@ gboolean bd_fs_reiserfs_set_uuid (const gchar *device, const gchar *uuid, GError
 }
 
 /**
+ * bd_fs_reiserfs_check_uuid:
+ * @uuid: UUID to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @uuid is a valid UUID for the ReiserFS file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_reiserfs_check_uuid (const gchar *uuid, GError **error) {
+    return check_uuid (uuid, error);
+}
+
+/**
  * bd_fs_reiserfs_get_info:
  * @device: the device containing the file system to get info for
  * @error: (out): place to store error (if any)

@@ -549,7 +549,7 @@ class ExtSetUUID(FSTestCase):
 
     test_uuid = "4d7086c4-a4d3-432f-819e-73da03870df9"
 
-    def _test_ext_set_uuid(self, mkfs_function, info_function, label_function):
+    def _test_ext_set_uuid(self, mkfs_function, info_function, label_function, check_function):
         succ = mkfs_function(self.loop_dev, None)
         self.assertTrue(succ)
 
@@ -591,23 +591,32 @@ class ExtSetUUID(FSTestCase):
         self.assertNotEqual(fi.uuid, "")
         self.assertNotEqual(fi.uuid, time_uuid)
 
+        succ = check_function(self.test_uuid)
+        self.assertTrue(succ)
+
+        with six.assertRaisesRegex(self, GLib.GError, "not a valid RFC-4122 UUID"):
+            check_function("aaaaaaa")
+
     def test_ext2_set_uuid(self):
         """Verify that it is possible to set UUID of an ext2 file system"""
         self._test_ext_set_uuid(mkfs_function=BlockDev.fs_ext2_mkfs,
                                  info_function=BlockDev.fs_ext2_get_info,
-                                 label_function=BlockDev.fs_ext2_set_uuid)
+                                 label_function=BlockDev.fs_ext2_set_uuid,
+                                 check_function=BlockDev.fs_ext2_check_uuid)
 
     def test_ext3_set_uuid(self):
         """Verify that it is possible to set UUID of an ext3 file system"""
         self._test_ext_set_uuid(mkfs_function=BlockDev.fs_ext3_mkfs,
                                  info_function=BlockDev.fs_ext3_get_info,
-                                 label_function=BlockDev.fs_ext3_set_uuid)
+                                 label_function=BlockDev.fs_ext3_set_uuid,
+                                 check_function=BlockDev.fs_ext3_check_uuid)
 
     def test_ext4_set_uuid(self):
         """Verify that it is possible to set UUID of an ext4 file system"""
         self._test_ext_set_uuid(mkfs_function=BlockDev.fs_ext4_mkfs,
                                  info_function=BlockDev.fs_ext4_get_info,
-                                 label_function=BlockDev.fs_ext4_set_uuid)
+                                 label_function=BlockDev.fs_ext4_set_uuid,
+                                 check_function=BlockDev.fs_ext4_check_uuid)
 
 class XfsTestMkfs(FSTestCase):
     @tag_test(TestTags.CORE)
@@ -864,6 +873,15 @@ class XfsSetUUID(FSTestCase):
         self.assertTrue(fi)
         self.assertNotEqual(fi.uuid, "")
         self.assertNotEqual(fi.uuid, random_uuid)
+
+        succ = BlockDev.fs_xfs_check_uuid(self.test_uuid)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_xfs_check_uuid(self.test_uuid.upper())
+        self.assertTrue(succ)
+
+        with six.assertRaisesRegex(self, GLib.GError, "not a valid RFC-4122 UUID"):
+            BlockDev.fs_xfs_check_uuid("aaaaaaa")
 
 class VfatTestMkfs(FSTestCase):
     def test_vfat_mkfs(self):
@@ -1218,6 +1236,12 @@ class ReiserFSSetUUID(ReiserFSTestCase):
         self.assertNotEqual(fi.uuid, "")
         self.assertNotEqual(fi.uuid, random_uuid)
 
+        succ = BlockDev.fs_reiserfs_check_uuid(self.test_uuid)
+        self.assertTrue(succ)
+
+        with six.assertRaisesRegex(self, GLib.GError, "not a valid RFC-4122 UUID"):
+            BlockDev.fs_reiserfs_check_uuid("aaaaaaa")
+
 class F2FSTestCase(FSTestCase):
     def setUp(self):
         if not self.f2fs_avail:
@@ -1432,6 +1456,43 @@ class NTFSSetLabel(FSTestCase):
 
         with six.assertRaisesRegex(self, GLib.GError, "at most 128 characters long."):
             BlockDev.fs_ntfs_check_label(129 * "a")
+
+
+class NTFSSetUUID(ReiserFSTestCase):
+
+    test_uuid = "54E1629A44FD724B"
+
+    def test_ntfs_set_uuid(self):
+        """Verify that it is possible to set UUID of an ntfs file system"""
+
+        if not self.ntfs_avail:
+            self.skipTest("skipping NTFS: not available")
+
+        succ = BlockDev.fs_ntfs_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_ntfs_set_uuid(self.loop_dev, self.test_uuid)
+        self.assertTrue(succ)
+        fi = BlockDev.fs_ntfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.uuid, self.test_uuid)
+
+        # no uuid -> random
+        succ = BlockDev.fs_ntfs_set_uuid(self.loop_dev, None)
+        self.assertTrue(succ)
+        fi = BlockDev.fs_ntfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertNotEqual(fi.uuid, "")
+        self.assertNotEqual(fi.uuid, self.test_uuid)
+
+        succ = BlockDev.fs_ntfs_check_uuid(self.test_uuid)
+        self.assertTrue(succ)
+
+        with six.assertRaisesRegex(self, GLib.GError, "8 or 16 characters long"):
+            BlockDev.fs_ntfs_check_uuid(9 * "a")
+
+        with six.assertRaisesRegex(self, GLib.GError, "must be a hexadecimal number"):
+            BlockDev.fs_ntfs_check_uuid(16 * "z")
 
 
 class CanResizeRepairCheckLabel(FSTestCase):

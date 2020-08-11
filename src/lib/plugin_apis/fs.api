@@ -21,6 +21,7 @@ typedef enum {
     BD_FS_ERROR_NOT_MOUNTED,
     BD_FS_ERROR_AUTH,
     BD_FS_ERROR_TECH_UNAVAIL,
+    BD_FS_ERROR_UUID_INVALID,
 } BDFsError;
 
 #define BD_FS_TYPE_EXT2_INFO (bd_fs_ext2_info_get_type ())
@@ -751,6 +752,18 @@ gboolean bd_fs_set_label (const gchar *device, const gchar *label, GError **erro
 gboolean bd_fs_set_uuid (const gchar *device, const gchar *uuid, GError **error);
 
 /**
+ * bd_fs_xfs_check_uuid:
+ * @uuid: UUID to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @uuid is a valid UUID for the xfs file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_xfs_check_uuid (const gchar *uuid, GError **error);
+
+/**
  * bd_fs_get_size:
  * @device: the device with file system to get size for
  * @error: (out): place to store error (if any)
@@ -1187,6 +1200,41 @@ gboolean bd_fs_ext3_set_uuid (const gchar *device, const gchar *uuid, GError **e
  */
 gboolean bd_fs_ext4_set_uuid (const gchar *device, const gchar *uuid, GError **error);
 
+/**
+ * bd_fs_ext2_check_uuid:
+ * @uuid: UUID to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @uuid is a valid UUID for the ext2 file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_ext2_check_uuid (const gchar *uuid, GError **error);
+
+/**
+ * bd_fs_ext3_check_uuid:
+ * @uuid: UUID to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @uuid is a valid UUID for the ext3 file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_ext3_check_uuid (const gchar *uuid, GError **error);
+
+/**
+ * bd_fs_ext4_check_uuid:
+ * @uuid: UUID to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @uuid is a valid UUID for the ext4 file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_ext4_check_uuid (const gchar *uuid, GError **error);
 
 /**
  * bd_fs_ext2_get_info:
@@ -1579,6 +1627,18 @@ gboolean bd_fs_ntfs_check_label (const gchar *label, GError **error);
 gboolean bd_fs_ntfs_set_uuid (const gchar *device, const gchar *uuid, GError **error);
 
 /**
+ * bd_fs_ntfs_check_uuid:
+ * @uuid: UUID to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @uuid is a valid UUID for the ntfs file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_ntfs_check_uuid (const gchar *uuid, GError **error);
+
+/**
  * bd_fs_ntfs_resize:
  * @device: the device the file system of which to resize
  * @new_size: new requested size for the file system in bytes (if 0, the file system
@@ -1774,6 +1834,18 @@ gboolean bd_fs_reiserfs_check_label (const gchar *label, GError **error);
  * Tech category: %BD_FS_TECH_REISERFS-%BD_FS_TECH_MODE_SET_UUID
  */
 gboolean bd_fs_reiserfs_set_uuid (const gchar *device, const gchar *uuid, GError **error);
+
+/**
+ * bd_fs_reiserfs_check_uuid:
+ * @uuid: UUID to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @uuid is a valid UUID for the ReiserFS file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_reiserfs_check_uuid (const gchar *uuid, GError **error);
 
 /**
  * bd_fs_reiserfs_get_info:

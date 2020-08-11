@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
+#include <uuid.h>
 
 #include <blockdev/utils.h>
 
@@ -313,6 +314,29 @@ get_uuid_label (const gchar *device, gchar **uuid, gchar **label, GError **error
 
     blkid_free_probe (probe);
     synced_close (fd);
+
+    return TRUE;
+}
+
+gboolean __attribute__ ((visibility ("hidden")))
+check_uuid (const gchar *uuid, GError **error) {
+    g_autofree gchar *lowercase = NULL;
+    gint ret = 0;
+    uuid_t uu;
+
+    if (!g_str_is_ascii (uuid)) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
+                     "Provided UUID is not a valid RFC-4122 UUID.");
+        return FALSE;
+    }
+
+    lowercase = g_ascii_strdown (uuid, -1);
+    ret = uuid_parse (lowercase, uu);
+    if (ret < 0){
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
+                     "Provided UUID is not a valid RFC-4122 UUID.");
+        return FALSE;
+    }
 
     return TRUE;
 }
