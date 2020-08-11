@@ -313,7 +313,7 @@ BDFSReiserFSInfo* bd_fs_reiserfs_get_info (const gchar *device, GError **error) 
     gchar *val_start = NULL;
 
     if (!check_deps (&avail_deps, DEPS_DEBUGREISERFS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
+        return NULL;
 
     ret = g_new0 (BDFSReiserFSInfo, 1);
 
@@ -328,7 +328,7 @@ BDFSReiserFSInfo* bd_fs_reiserfs_get_info (const gchar *device, GError **error) 
     if (!success) {
         /* error is already populated */
         bd_fs_reiserfs_info_free (ret);
-        return FALSE;
+        return NULL;
     }
 
     lines = g_strsplit (output, "\n", 0);
@@ -341,7 +341,7 @@ BDFSReiserFSInfo* bd_fs_reiserfs_get_info (const gchar *device, GError **error) 
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse ReiserFS file system information");
         g_strfreev (lines);
         bd_fs_reiserfs_info_free (ret);
-        return FALSE;
+        return NULL;
     }
 
     /* extract data from something like this: "Count of blocks on the device: 127744" */
@@ -355,7 +355,7 @@ BDFSReiserFSInfo* bd_fs_reiserfs_get_info (const gchar *device, GError **error) 
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse ReiserFS file system information");
         g_strfreev (lines);
         bd_fs_reiserfs_info_free (ret);
-        return FALSE;
+        return NULL;
     }
 
     /* extract data from something like this: "Blocksize: 4096" */
@@ -369,7 +369,7 @@ BDFSReiserFSInfo* bd_fs_reiserfs_get_info (const gchar *device, GError **error) 
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse ReiserFS file system information");
         g_strfreev (lines);
         bd_fs_reiserfs_info_free (ret);
-        return FALSE;
+        return NULL;
     }
 
     /* extract data from something like this: "Free blocks (count of blocks - used [journal, bitmaps, data, reserved] blocks): 119529" */
