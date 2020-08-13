@@ -1250,7 +1250,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
         }
           if (in_pa) {
             if (epa == in_pa)
-                /* creating a parititon inside an extended partition -> LOGICAL */
+                /* creating a partititon inside an extended partition -> LOGICAL */
                 type = BD_PART_TYPE_REQ_LOGICAL;
             else {
                 /* trying to create a partition inside an existing one, but not
@@ -1387,7 +1387,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
 
     if (type == BD_PART_TYPE_REQ_LOGICAL) {
         /* next_partno doesn't work for logical partitions, for these the
-           current maxal number of partitions suppported by the label
+           current maximal number of partitions suppported by the label
            is the next (logical) partition number */
         partno = fdisk_get_npartitions (cxt);
 
@@ -1601,7 +1601,7 @@ static gboolean get_max_part_size (struct fdisk_table *tb, guint partno, guint64
 
 /**
  * bd_part_resize_part:
- * @disk: disk containing the paritition
+ * @disk: disk containing the partition
  * @part: partition to resize
  * @size: new partition size, 0 for maximal size
  * @align: alignment to use for the partition end
@@ -1956,7 +1956,7 @@ static gchar* get_lba_hidden_id (const gchar *part, gboolean hidden, gboolean lb
         return NULL;
     }
 
-    /* we may need to try mutliple times with some delays in case the device is
+    /* we may need to try multiple times with some delays in case the device is
        busy at the very moment */
     for (n_try=5, fd=-1; (fd < 0) && (n_try > 0); n_try--) {
         fd = open (part, O_RDONLY|O_CLOEXEC);
@@ -1970,7 +1970,7 @@ static gchar* get_lba_hidden_id (const gchar *part, gboolean hidden, gboolean lb
         return NULL;
     }
 
-    /* we may need to try mutliple times with some delays in case the device is
+    /* we may need to try multiple times with some delays in case the device is
        busy at the very moment */
     for (n_try=5, status=-1; (status != 0) && (n_try > 0); n_try--) {
         status = blkid_probe_set_device (probe, fd, 0, 0);
@@ -1990,7 +1990,7 @@ static gchar* get_lba_hidden_id (const gchar *part, gboolean hidden, gboolean lb
     blkid_probe_enable_partitions (probe, 1);
     blkid_probe_set_partitions_flags (probe, BLKID_PARTS_ENTRY_DETAILS);
 
-    /* we may need to try mutliple times with some delays in case the device is
+    /* we may need to try multiple times with some delays in case the device is
        busy at the very moment */
     for (n_try=5, status=-1; !(status == 0 || status == 1) && (n_try > 0); n_try--) {
         status = blkid_do_safeprobe (probe);
@@ -2256,7 +2256,7 @@ gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag
                 return FALSE;
             }
         }
-    /* parition types/GUIDs (GPT) or IDs (MSDOS) */
+    /* partition types/GUIDs (GPT) or IDs (MSDOS) */
     } else {
         flag_info = part_flags[log2i (flag) - 1];
         if (g_strcmp0 (label_name, table_type_str[BD_PART_TABLE_MSDOS]) == 0 && flag_info.id) {
