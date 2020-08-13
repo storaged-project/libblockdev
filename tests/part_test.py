@@ -1032,8 +1032,8 @@ class PartCreateResizePartCase(PartTestCase):
         self.assertEqual(initial_start, ps.start)
         self.assertEqual(initial_size, ps.size)  # should grow to the same size again
 
-        # resize to maximum explicitly
-        succ = BlockDev.part_resize_part (self.loop_dev, ps.path, initial_size, BlockDev.PartAlign.OPTIMAL)
+        # resize to maximum explicitly with no alignment (we know exact size)
+        succ = BlockDev.part_resize_part (self.loop_dev, ps.path, initial_size, BlockDev.PartAlign.NONE)
         self.assertTrue(succ)
         ps = BlockDev.part_get_part_spec(self.loop_dev, ps.path)
         self.assertEqual(initial_start, ps.start)
