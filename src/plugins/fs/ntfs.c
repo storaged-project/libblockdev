@@ -380,7 +380,7 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
     success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
     if (!success)
         /* error is already populated */
-        return FALSE;
+        return NULL;
 
     lines = g_strsplit (output, "\n", 0);
     g_free (output);
@@ -392,7 +392,7 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NTFS file system information");
         g_strfreev (lines);
         bd_fs_ntfs_info_free (ret);
-        return FALSE;
+        return NULL;
     }
 
     /* extract data from something like this: "bytes per volume        : 998240256" */
@@ -406,7 +406,7 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NTFS file system information");
         g_strfreev (lines);
         bd_fs_ntfs_info_free (ret);
-        return FALSE;
+        return NULL;
     }
 
     /* extract data from something like this: "bytes of free space     : 992759808" */

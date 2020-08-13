@@ -313,7 +313,7 @@ BDFSReiserFSInfo* bd_fs_reiserfs_get_info (const gchar *device, GError **error) 
     gchar *val_start = NULL;
 
     if (!check_deps (&avail_deps, DEPS_DEBUGREISERFS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
+        return NULL;
 
     ret = g_new0 (BDFSReiserFSInfo, 1);
 
@@ -325,9 +325,11 @@ BDFSReiserFSInfo* bd_fs_reiserfs_get_info (const gchar *device, GError **error) 
     }
 
     success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
-    if (!success)
+    if (!success) {
         /* error is already populated */
-        return FALSE;
+        bd_fs_reiserfs_info_free (ret);
+        return NULL;
+    }
 
     lines = g_strsplit (output, "\n", 0);
     g_free (output);
@@ -339,7 +341,7 @@ BDFSReiserFSInfo* bd_fs_reiserfs_get_info (const gchar *device, GError **error) 
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse ReiserFS file system information");
         g_strfreev (lines);
         bd_fs_reiserfs_info_free (ret);
-        return FALSE;
+        return NULL;
     }
 
     /* extract data from something like this: "Count of blocks on the device: 127744" */
@@ -353,7 +355,7 @@ BDFSReiserFSInfo* bd_fs_reiserfs_get_info (const gchar *device, GError **error) 
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse ReiserFS file system information");
         g_strfreev (lines);
         bd_fs_reiserfs_info_free (ret);
-        return FALSE;
+        return NULL;
     }
 
     /* extract data from something like this: "Blocksize: 4096" */
@@ -367,13 +369,15 @@ BDFSReiserFSInfo* bd_fs_reiserfs_get_info (const gchar *device, GError **error) 
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse ReiserFS file system information");
         g_strfreev (lines);
         bd_fs_reiserfs_info_free (ret);
-        return FALSE;
+        return NULL;
     }
 
     /* extract data from something like this: "Free blocks (count of blocks - used [journal, bitmaps, data, reserved] blocks): 119529" */
     val_start = strchr (*line_p, ':');
     val_start++;
     ret->free_blocks = g_ascii_strtoull (val_start, NULL, 0);
+
+    g_strfreev (lines);
 
     return ret;
 }

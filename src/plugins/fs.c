@@ -40,6 +40,7 @@ extern gboolean bd_fs_vfat_is_tech_avail (BDFSTech tech, guint64 mode, GError **
 extern gboolean bd_fs_ntfs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
 extern gboolean bd_fs_f2fs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
 extern gboolean bd_fs_reiserfs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
+extern gboolean bd_fs_nilfs2_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
 
 /**
  * bd_fs_error_quark: (skip)
@@ -123,6 +124,15 @@ gboolean bd_fs_check_deps (void) {
         bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
         g_clear_error (&error);
     }
+    ret = ret && bd_fs_nilfs2_is_tech_avail (BD_FS_TECH_NILFS2,
+                                             BD_FS_TECH_MODE_MKFS | BD_FS_TECH_MODE_WIPE |
+                                             BD_FS_TECH_MODE_SET_LABEL | BD_FS_TECH_MODE_QUERY |
+                                             BD_FS_TECH_MODE_RESIZE | BD_FS_TECH_MODE_SET_UUID,
+                                             &error);
+    if (!ret && error) {
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
+        g_clear_error (&error);
+    }
     return ret;
 }
 
@@ -184,6 +194,8 @@ gboolean bd_fs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error) {
             return bd_fs_f2fs_is_tech_avail (tech, mode, error);
         case BD_FS_TECH_REISERFS:
             return bd_fs_reiserfs_is_tech_avail (tech, mode, error);
+        case BD_FS_TECH_NILFS2:
+            return bd_fs_nilfs2_is_tech_avail (tech, mode, error);
         /* coverity[dead_error_begin] */
         default:
             /* this should never be reached (see the comparison with LAST_FS

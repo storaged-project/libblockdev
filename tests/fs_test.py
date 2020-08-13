@@ -35,6 +35,7 @@ def mounted(device, where, ro=False):
 class FSTestCase(unittest.TestCase):
 
     requested_plugins = BlockDev.plugin_specs_from_names(("fs", "loop"))
+    loop_size = 150 * 1024**2
 
     @classmethod
     def setUpClass(cls):
@@ -70,10 +71,19 @@ class FSTestCase(unittest.TestCase):
         except:
             cls.reiserfs_avail = False
 
+        try:
+            cls.nilfs2_avail = BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2,
+                                                         BlockDev.FSTechMode.MKFS |
+                                                         BlockDev.FSTechMode.RESIZE |
+                                                         BlockDev.FSTechMode.SET_LABEL)
+        except Exception as e:
+            print(e)
+            cls.nilfs2_avail = False
+
     def setUp(self):
         self.addCleanup(self._clean_up)
-        self.dev_file = utils.create_sparse_tempfile("fs_test", 100 * 1024**2)
-        self.dev_file2 = utils.create_sparse_tempfile("fs_test", 100 * 1024**2)
+        self.dev_file = utils.create_sparse_tempfile("fs_test", self.loop_size)
+        self.dev_file2 = utils.create_sparse_tempfile("fs_test", self.loop_size)
         try:
             self.loop_dev = utils.create_lio_device(self.dev_file)
         except RuntimeError as e:
@@ -389,9 +399,9 @@ class ExtGetInfo(FSTestCase):
         fi = BlockDev.fs_ext4_get_info(self.loop_dev)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
-        self.assertEqual(fi.block_count, 100 * 1024**2 / 1024)
+        self.assertEqual(fi.block_count, self.loop_size / 1024)
         # at least 90 % should be available, so it should be reported
-        self.assertGreater(fi.free_blocks, 0.90 * 100 * 1024**2 / 1024)
+        self.assertGreater(fi.free_blocks, 0.90 * self.loop_size / 1024)
         self.assertEqual(fi.label, "")
         # should be an non-empty string
         self.assertTrue(fi.uuid)
@@ -400,9 +410,9 @@ class ExtGetInfo(FSTestCase):
         with mounted(self.loop_dev, self.mount_dir):
             fi = BlockDev.fs_ext4_get_info(self.loop_dev)
             self.assertEqual(fi.block_size, 1024)
-            self.assertEqual(fi.block_count, 100 * 1024**2 / 1024)
+            self.assertEqual(fi.block_count, self.loop_size / 1024)
             # at least 90 % should be available, so it should be reported
-            self.assertGreater(fi.free_blocks, 0.90 * 100 * 1024**2 / 1024)
+            self.assertGreater(fi.free_blocks, 0.90 * self.loop_size / 1024)
             self.assertEqual(fi.label, "")
             # should be an non-empty string
             self.assertTrue(fi.uuid)
@@ -488,9 +498,9 @@ class ExtResize(FSTestCase):
         fi = info_function(self.loop_dev)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
-        self.assertEqual(fi.block_count, 100 * 1024**2 / 1024)
+        self.assertEqual(fi.block_count, self.loop_size / 1024)
         # at least 90 % should be available, so it should be reported
-        self.assertGreater(fi.free_blocks, 0.90 * 100 * 1024**2 / 1024)
+        self.assertGreater(fi.free_blocks, 0.90 * self.loop_size / 1024)
 
         succ = resize_function(self.loop_dev, 50 * 1024**2, None)
         self.assertTrue(succ)
@@ -500,14 +510,14 @@ class ExtResize(FSTestCase):
         self.assertEqual(fi.block_count, 50 * 1024**2 / 1024)
 
         # resize back
-        succ = resize_function(self.loop_dev, 100 * 1024**2, None)
+        succ = resize_function(self.loop_dev, self.loop_size, None)
         self.assertTrue(succ)
         fi = info_function(self.loop_dev)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
-        self.assertEqual(fi.block_count, 100 * 1024**2 / 1024)
+        self.assertEqual(fi.block_count, self.loop_size / 1024)
         # at least 90 % should be available, so it should be reported
-        self.assertGreater(fi.free_blocks, 0.90 * 100 * 1024**2 / 1024)
+        self.assertGreater(fi.free_blocks, 0.90 * self.loop_size / 1024)
 
         # resize again
         succ = resize_function(self.loop_dev, 50 * 1024**2, None)
@@ -523,9 +533,9 @@ class ExtResize(FSTestCase):
         fi = info_function(self.loop_dev)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
-        self.assertEqual(fi.block_count, 100 * 1024**2 / 1024)
+        self.assertEqual(fi.block_count, self.loop_size / 1024)
         # at least 90 % should be available, so it should be reported
-        self.assertGreater(fi.free_blocks, 0.90 * 100 * 1024**2 / 1024)
+        self.assertGreater(fi.free_blocks, 0.90 * self.loop_size / 1024)
 
     def test_ext2_resize(self):
         """Verify that it is possible to resize an ext2 file system"""
@@ -720,7 +730,7 @@ class XfsGetInfo(FSTestCase):
             fi = BlockDev.fs_xfs_get_info(self.loop_dev)
 
         self.assertEqual(fi.block_size, 4096)
-        self.assertEqual(fi.block_count, 100 * 1024**2 / 4096)
+        self.assertEqual(fi.block_count, self.loop_size / 4096)
         self.assertEqual(fi.label, "")
         # should be an non-empty string
         self.assertTrue(fi.uuid)
@@ -1024,17 +1034,16 @@ class VfatResize(FSTestCase):
         self.assertTrue(succ)
 
         # shrink
-        succ = BlockDev.fs_vfat_resize(self.loop_dev, 80 * 1024**2)
+        succ = BlockDev.fs_vfat_resize(self.loop_dev, 130 * 1024**2)
         self.assertTrue(succ)
 
         # grow
-        succ = BlockDev.fs_vfat_resize(self.loop_dev, 100 * 1024**2)
+        succ = BlockDev.fs_vfat_resize(self.loop_dev, 140 * 1024**2)
         self.assertTrue(succ)
 
         # shrink again
-        succ = BlockDev.fs_vfat_resize(self.loop_dev, 80 * 1024**2)
+        succ = BlockDev.fs_vfat_resize(self.loop_dev, 130 * 1024**2)
         self.assertTrue(succ)
-
 
         # resize to maximum size
         succ = BlockDev.fs_vfat_resize(self.loop_dev, 0)
@@ -1418,7 +1427,7 @@ class F2FSResize(F2FSTestCase):
         self.assertTrue(succ)
 
         fi = BlockDev.fs_f2fs_get_info(self.loop_dev)
-        self.assertEqual(fi.sector_count * fi.sector_size, 100 * 1024**2)
+        self.assertEqual(fi.sector_count * fi.sector_size, self.loop_size)
 
 
 class NTFSSetLabel(FSTestCase):
@@ -1517,7 +1526,7 @@ class CanResizeRepairCheckLabel(FSTestCase):
         self.assertTrue(avail)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_can_resize("nilfs2")
+            BlockDev.fs_can_resize("non-existing-fs")
 
     def test_can_repair(self):
         """Verify that tooling query works for repair"""
@@ -1574,7 +1583,7 @@ class CanResizeRepairCheckLabel(FSTestCase):
         self.assertEqual(util, "xfs_admin")
 
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_can_set_label("nilfs2")
+            BlockDev.fs_can_set_label("non-existing-fs")
 
     def test_can_get_size(self):
         """Verify that tooling query works for getting size"""
@@ -1591,7 +1600,7 @@ class CanResizeRepairCheckLabel(FSTestCase):
         self.assertEqual(util, "xfs_admin")
 
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_can_get_size("nilfs2")
+            BlockDev.fs_can_get_size("non-existing-fs")
 
     def test_can_get_free_space(self):
         """Verify that tooling query works for getting free space"""
@@ -1611,7 +1620,7 @@ class CanResizeRepairCheckLabel(FSTestCase):
             BlockDev.fs_can_get_free_space("xfs")
 
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_can_get_free_space("nilfs2")
+            BlockDev.fs_can_get_free_space("non-existing-fs")
 
 class MountTest(FSTestCase):
 
@@ -1969,6 +1978,14 @@ class GenericCheck(FSTestCase):
             self.skipTest("skipping ReiserFS: not available")
         self._test_generic_check(mkfs_function=BlockDev.fs_reiserfs_mkfs)
 
+    def test_nilfs2_generic_check(self):
+        """Test generic check function with an nilfs2 file system"""
+        if not self.nilfs2_avail:
+            self.skipTest("skipping NILFS2: not available")
+        with self.assertRaises(GLib.GError):
+            # nilfs2 doesn't support check
+            self._test_generic_check(mkfs_function=BlockDev.fs_nilfs2_mkfs)
+
 class GenericRepair(FSTestCase):
     def _test_generic_repair(self, mkfs_function):
         # clean the device
@@ -2006,6 +2023,15 @@ class GenericRepair(FSTestCase):
         if not self.reiserfs_avail:
             self.skipTest("skipping ReiserFS: not available")
         self._test_generic_repair(mkfs_function=BlockDev.fs_reiserfs_mkfs)
+
+    def test_nilfs2_generic_repair(self):
+        """Test generic repair function with an nilfs2 file system"""
+        if not self.nilfs2_avail:
+            self.skipTest("skipping NILFS2: not available")
+        with self.assertRaises(GLib.GError):
+            # nilfs2 doesn't support repair
+            self._test_generic_repair(mkfs_function=BlockDev.fs_nilfs2_mkfs)
+
 
 class GenericSetLabel(FSTestCase):
     def _test_generic_set_label(self, mkfs_function):
@@ -2046,6 +2072,13 @@ class GenericSetLabel(FSTestCase):
         if not self.reiserfs_avail:
             self.skipTest("skipping ReiserFS: not available")
         self._test_generic_set_label(mkfs_function=BlockDev.fs_reiserfs_mkfs)
+
+    def test_nilfs2_generic_set_label(self):
+        """Test generic set_label function with a nilfs2 file system"""
+        if not self.nilfs2_avail:
+            self.skipTest("skipping NILFS2: not available")
+        self._test_generic_set_label(mkfs_function=BlockDev.fs_nilfs2_mkfs)
+
 
 class GenericSetUUID(FSTestCase):
     def _test_generic_set_uuid(self, mkfs_function, test_uuid="4d7086c4-a4d3-432f-819e-73da03870df9"):
@@ -2096,6 +2129,12 @@ class GenericSetUUID(FSTestCase):
             self.skipTest("skipping ReiserFS: not available")
         self._test_generic_set_uuid(mkfs_function=BlockDev.fs_reiserfs_mkfs)
 
+    def test_nilfs2_generic_set_uuid(self):
+        """Test generic set_uuid function with a nilfs2 file system"""
+        if not self.nilfs2_avail:
+            self.skipTest("skipping NILFS2: not available")
+        self._test_generic_set_uuid(mkfs_function=BlockDev.fs_nilfs2_mkfs)
+
 class GenericResize(FSTestCase):
     def _test_generic_resize(self, mkfs_function, size_delta=0):
         # clean the device
@@ -2106,10 +2145,10 @@ class GenericResize(FSTestCase):
         size = BlockDev.fs_get_size(self.loop_dev)
 
         # shrink
-        succ = BlockDev.fs_resize(self.loop_dev, 80 * 1024**2)
+        succ = BlockDev.fs_resize(self.loop_dev, 100 * 1024**2)
         self.assertTrue(succ)
         new_size = BlockDev.fs_get_size(self.loop_dev)
-        self.assertAlmostEqual(new_size, 80 * 1024**2, delta=size_delta)
+        self.assertAlmostEqual(new_size, 100 * 1024**2, delta=size_delta)
 
         # resize to maximum size
         succ = BlockDev.fs_resize(self.loop_dev, 0)
@@ -2266,6 +2305,12 @@ class GenericResize(FSTestCase):
             self.skipTest("skipping ReiserFS: not available")
         self._test_generic_resize(mkfs_function=BlockDev.fs_reiserfs_mkfs)
 
+    def test_nilfs2_generic_resize(self):
+        """Test generic resize function with an nilfs2 file system"""
+        if not self.nilfs2_avail:
+            self.skipTest("skipping NILFS2: not available")
+        self._test_generic_resize(mkfs_function=BlockDev.fs_nilfs2_mkfs)
+
 
 class GenericGetFreeSpace(FSTestCase):
     def _test_get_free_space(self, mkfs_function, size_delta=0):
@@ -2306,6 +2351,12 @@ class GenericGetFreeSpace(FSTestCase):
         if not self.reiserfs_avail:
             self.skipTest("skipping ReiserFS: not available")
         self._test_get_free_space(mkfs_function=BlockDev.fs_reiserfs_mkfs)
+
+    def test_nilfs2_get_free_space(self):
+        """Test generic resize function with an nilfs2 file system"""
+        if not self.nilfs2_avail:
+            self.skipTest("skipping NILFS2: not available")
+        self._test_get_free_space(mkfs_function=BlockDev.fs_nilfs2_mkfs)
 
 
 class FSFreezeTest(FSTestCase):
