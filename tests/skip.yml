@@ -119,3 +119,9 @@
     - distro: "fedora"
       version: ["31", "32"]
       reason: "working with old-style LVM snapshots leads to deadlock in LVM tools"
+
+- test: fs_test.MountTest.test_mount_ntfs
+  skip_on:
+    - distro: "debian"
+      version: "testing"
+      reason: "mount.ntfs-3g randomly hangs on Debian testing"
