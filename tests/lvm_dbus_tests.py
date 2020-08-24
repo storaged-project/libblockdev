@@ -41,6 +41,11 @@ class LVMTestCase(unittest.TestCase):
             raise RuntimeError("Failed to determine LVM version from: %s" % out)
         return LooseVersion(m.groups()[0])
 
+    @classmethod
+    def _get_lvm_segtypes(cls):
+        _ret, out, _err = run_command("lvm segtypes")
+        return out
+
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmNoDevTestCase(LVMTestCase):
 
