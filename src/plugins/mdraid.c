@@ -1002,12 +1002,24 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
     orig_data = ret->uuid;
     if (orig_data) {
         ret->uuid = bd_md_canonicalize_uuid (orig_data, error);
+        if (!ret->uuid) {
+            g_prefix_error (error, "Failed to canonicalize MD UUID '%s': ", orig_data);
+            g_free (orig_data);
+            bd_md_examine_data_free (ret);
+            return NULL;
+        }
         g_free (orig_data);
     }
 
     orig_data = ret->dev_uuid;
     if (orig_data) {
         ret->dev_uuid = bd_md_canonicalize_uuid (orig_data, error);
+        if (!ret->uuid) {
+            g_prefix_error (error, "Failed to canonicalize MD UUID '%s': ", orig_data);
+            g_free (orig_data);
+            bd_md_examine_data_free (ret);
+            return NULL;
+        }
         g_free (orig_data);
     }
 
