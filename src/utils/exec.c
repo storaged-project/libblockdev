@@ -22,6 +22,7 @@
 #include "extra_arg.h"
 #include "logging.h"
 #include <stdlib.h>
+#include <poll.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -288,7 +289,7 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
     gint poll_status = 0;
     guint i = 0;
     guint8 completion = 0;
-    GPollFD fds[2] = {ZERO_INIT, ZERO_INIT};
+    struct pollfd fds[2] = { ZERO_INIT, ZERO_INIT };
     gboolean out_done = FALSE;
     gboolean err_done = FALSE;
     GString *stdout_data = g_string_new (NULL);
@@ -386,13 +387,16 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
 
     fds[0].fd = out_fd;
     fds[1].fd = err_fd;
-    fds[0].events = G_IO_IN | G_IO_HUP | G_IO_ERR;
-    fds[1].events = G_IO_IN | G_IO_HUP | G_IO_ERR;
+    fds[0].events = POLLIN | POLLHUP | POLLERR;
+    fds[1].events = POLLIN | POLLHUP | POLLERR;
     while (!out_done || !err_done) {
-        poll_status = g_poll (fds, 2, -1);
+        poll_status = poll (fds, 2, -1);
+        g_warn_if_fail (poll_status != 0);  /* no timeout specified, zero should never be returned */
         if (poll_status < 0) {
+            if (errno == EAGAIN || errno == EINTR)
+                continue;
             g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
-                         "Failed to poll output FDs.");
+                         "Failed to poll output FDs: %m");
             bd_utils_report_finished (progress_id, (*error)->message);
             g_io_channel_shutdown (out_pipe, FALSE, NULL);
             g_io_channel_unref (out_pipe);
@@ -401,12 +405,9 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
             g_string_free (stdout_data, TRUE);
             g_string_free (stderr_data, TRUE);
             return FALSE;
-        } else if (poll_status != 2)
-            /* both revents fields were not filled yet */
-            continue;
-        if (!(fds[0].revents & G_IO_IN))
-            out_done = TRUE;
-        while (!out_done) {
+        }
+
+        while (!out_done && (fds[0].revents & POLLIN)) {
             io_status = g_io_channel_read_line (out_pipe, &line, NULL, NULL, error);
             if (io_status == G_IO_STATUS_NORMAL) {
                 if (prog_extract && prog_extract (line, &completion))
@@ -427,9 +428,10 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
                 return FALSE;
             }
         }
-        if (!(fds[1].revents & G_IO_IN))
-            err_done = TRUE;
-        while (!err_done) {
+        if (fds[0].revents & POLLHUP || fds[0].revents & POLLERR || fds[0].revents & POLLNVAL)
+            out_done = TRUE;
+
+        while (!err_done && (fds[1].revents & POLLIN)) {
             io_status = g_io_channel_read_line (err_pipe, &line, NULL, NULL, error);
             if (io_status == G_IO_STATUS_NORMAL) {
                 g_string_append (stderr_data, line);
@@ -447,6 +449,8 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
                 return FALSE;
             }
         }
+        if (fds[1].revents & POLLHUP || fds[1].revents & POLLERR || fds[1].revents & POLLNVAL)
+            err_done = TRUE;
     }
 
     child_ret = waitpid (pid, &status, 0);
