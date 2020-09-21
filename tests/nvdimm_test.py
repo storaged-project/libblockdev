@@ -53,8 +53,11 @@ class NVDIMMNamespaceTestCase(NVDIMMTestCase):
         # skip the test if there is more than one device
         # these tests change nvdimm mode a we need to be sure that we are really
         # working with the 'fake' device created by the memmap kernel cmdline option
-        if type(self.sys_info) is not dict:
+        if len(self.sys_info) > 1:
             self.skipTest("Multiple NVDIMM devices found.")
+
+        # get the dict for the first nvdimm device
+        self.sys_info = self.sys_info[0]
 
         # skip the tests if the nvdimm is a 'fake' one
         cmdline = read_file("/proc/cmdline")
