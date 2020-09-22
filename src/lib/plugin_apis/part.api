@@ -353,7 +353,7 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
 
 /**
  * bd_part_resize_part:
- * @disk: disk containing the paritition
+ * @disk: disk containing the partition
  * @part: partition to resize
  * @size: new partition size, 0 for maximal size
  * @align: alignment to use for the partition end

@@ -226,8 +226,8 @@ AS_IF([test "x$with_dm" != "xno" -a "x$with_dmraid" != "xno"],
       [LIBBLOCKDEV_CHECK_HEADER([dmraid/dmraid.h], [], [dmraid.h not available])],
       [])
 
-AS_IF([test "x$with_part" != "xno" -o "x$with_fs" != "xno"],
-      [LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED], [libparted >= 3.1])]
+AS_IF([test "x$with_part" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([FDISK], [fdisk >= 2.31.0])],
       [])
 
 AS_IF([test "x$with_fs" != "xno"],
@@ -237,6 +237,8 @@ AS_IF([test "x$with_fs" != "xno"],
        AS_IF([$PKG_CONFIG --atleast-version=2.30.0 mount],
              [AC_DEFINE([LIBMOUNT_NEW_ERR_API])], [])
 
+       LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED], [libparted >= 3.1])
+
        # older versions of parted don't provide the libparted-fs-resize.pc file
        AS_IF([$PKG_CONFIG libparted-fs-resize],
              [LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED_FS], [libparted-fs-resize >= 3.2])],
@@ -244,7 +246,7 @@ AS_IF([test "x$with_fs" != "xno"],
               AC_SUBST([PARTED_FS_CFLAGS], [])])],
       [])
 
-AS_IF([test "x$with_fs" != "xno" -o "x$with_crypto" != "xno" -o "x$with_swap" != "xno"],
+AS_IF([test "x$with_fs" != "xno" -o "x$with_crypto" != "xno" -o "x$with_swap" != "xno" -o "x$with_part" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([BLKID], [blkid >= 2.23.0])
       # older versions of libblkid don't support BLKID_SUBLKS_BADCSUM so let's just
       # define it as 0 (neutral value for bit combinations of flags)
