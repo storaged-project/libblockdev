@@ -509,7 +509,6 @@ BuildRequires: parted-devel
 BuildRequires: libfdisk-devel
 Summary:     The partitioning plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
-Requires: gdisk
 Requires: util-linux
 
 %description part
