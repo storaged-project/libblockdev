@@ -245,7 +245,8 @@ gchar* bd_dm_name_from_node (const gchar *dm_node, GError **error) {
     g_free (sys_path);
 
     if (!success) {
-        /* errror is already populated */
+        /* error is already populated */
+        g_free (ret);
         return NULL;
     }
 
