@@ -1275,6 +1275,7 @@ gboolean bd_crypto_luks_add_key (const gchar *device, const gchar *pass, const g
         success = g_file_get_contents (nkey_file, &nkey_buf, &nbuf_len, error);
         if (!success) {
             g_prefix_error (error, "Failed to load key from file '%s': ", nkey_file);
+            g_free (key_buf);
             return FALSE;
         }
     } else
