@@ -1623,6 +1623,7 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
     guint64 sector_size = 0;
     guint64 grain_size = 0;
     guint64 progress_id = 0;
+    guint64 max_size = 0;
     gchar *msg = NULL;
 
     msg = g_strdup_printf ("Started resizing partition '%s'", part);
@@ -1676,7 +1677,7 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
     }
 
     if (fdisk_partition_has_size (pa))
-        old_size = (guint64) fdisk_partition_get_size (pa) * fdisk_get_sector_size (cxt);
+        old_size = (guint64) fdisk_partition_get_size (pa);
     else {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to get size for partition %d on device '%s'", part_num, disk);
@@ -1696,18 +1697,17 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
         grain_size = (guint64) fdisk_get_minimal_iosize (cxt);
     /* else OPTIMAL or unknown -> nothing to do */
 
-    if (size == 0) {
-        /* no size specified, set the end to default (maximum) */
-        if (!get_max_part_size (table, part_num, &size, error)) {
-            g_prefix_error (error, "Failed to get maximal size for '%s': ", part);
-            fdisk_unref_table (table);
-            fdisk_unref_partition (pa);
-            close_context (cxt);
-            bd_utils_report_finished (progress_id, (*error)->message);
-            return FALSE;
-        }
+    if (!get_max_part_size (table, part_num, &max_size, error)) {
+        g_prefix_error (error, "Failed to get maximal size for '%s': ", part);
+        fdisk_unref_table (table);
+        fdisk_unref_partition (pa);
+        close_context (cxt);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
 
-        if (size == 0) {
+    if (size == 0) {
+        if (max_size == old_size) {
             bd_utils_log_format (BD_UTILS_LOG_INFO, "Not resizing, partition '%s' is already at its maximum size.", part);
             fdisk_unref_table (table);
             fdisk_unref_partition (pa);
@@ -1716,7 +1716,7 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
             return TRUE;
         }
 
-        if (fdisk_partition_set_size (pa, size) != 0) {
+        if (fdisk_partition_set_size (pa, max_size) != 0) {
             g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                          "Failed to set size for partition %d on device '%s'", part_num, disk);
             fdisk_unref_table (table);
@@ -1738,6 +1738,24 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
             close_context (cxt);
             bd_utils_report_finished (progress_id, "Completed");
             return TRUE;
+        }
+
+        if (size > old_size && size > max_size) {
+            if (size - max_size <= 4 MiB / sector_size) {
+                bd_utils_log_format (BD_UTILS_LOG_INFO,
+                                     "Requested size %"G_GUINT64_FORMAT" is bigger than max size for partition '%s', adjusting to %"G_GUINT64_FORMAT".",
+                                     size * sector_size, part, max_size * sector_size);
+                size = max_size;
+            } else {
+                g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                             "Requested size %"G_GUINT64_FORMAT" is bigger than max size (%"G_GUINT64_FORMAT") for partition '%s'",
+                             size * sector_size, max_size * sector_size, part);
+                fdisk_unref_table (table);
+                fdisk_unref_partition (pa);
+                close_context (cxt);
+                bd_utils_report_finished (progress_id, (*error)->message);
+                return FALSE;
+            }
         }
 
         if (fdisk_partition_set_size (pa, size) != 0) {
