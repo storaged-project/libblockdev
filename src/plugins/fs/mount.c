@@ -538,7 +538,7 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
                           g_clear_error (&local_error);
                       } else
                           g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                                       "Unknoen error while reading error.");
+                                       "Unknown error while reading error.");
                       g_io_channel_unref (channel);
                       close (pipefd[0]);
                       return FALSE;
