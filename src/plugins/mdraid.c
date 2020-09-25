@@ -1374,6 +1374,7 @@ gchar* bd_md_name_from_node (const gchar *node, GError **error) {
             continue;
         }
         node_name = g_path_get_basename (dev_path);
+        g_free (dev_path);
         if (g_strcmp0 (node_name, node) == 0) {
             found = TRUE;
             name = g_path_get_basename (*path_p);
