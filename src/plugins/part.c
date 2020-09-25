@@ -1591,6 +1591,10 @@ static gboolean get_max_part_size (struct fdisk_table *tb, guint partno, guint64
         }
     }
 
+    /* no free space found: set max_size to current size */
+    if (*max_size == 0)
+        *max_size = fdisk_partition_get_size (cur);
+
     fdisk_free_iter (itr);
     return TRUE;
 }
