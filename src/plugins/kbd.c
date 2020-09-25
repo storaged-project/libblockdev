@@ -1255,6 +1255,7 @@ static gboolean get_cache_size_used (const gchar *cache_dev_sys, guint64 *size, 
     g_io_channel_unref (file);
 
     if (!found) {
+        g_free (line);
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_INVAL,
                      "Failed to get cache usage data");
         return FALSE;
