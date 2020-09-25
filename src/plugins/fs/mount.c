@@ -541,6 +541,7 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
                                        "Unknown error while reading error.");
                       g_io_channel_unref (channel);
                       close (pipefd[0]);
+                      g_free (error_msg);
                       return FALSE;
                   }
 
