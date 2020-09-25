@@ -1047,8 +1047,7 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
             value++;
             ret->uuid = bd_md_canonicalize_uuid (value, error);
             if (!ret->uuid) {
-                g_prefix_error (error, "Failed to canonicalize MD UUID '%s': ", orig_data);
-                g_free (orig_data);
+                g_prefix_error (error, "Failed to canonicalize MD UUID '%s': ", value);
                 bd_md_examine_data_free (ret);
                 g_strfreev (output_fields);
                 return NULL;
