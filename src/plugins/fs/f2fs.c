@@ -302,7 +302,7 @@ BDFSF2FSInfo* bd_fs_f2fs_get_info (const gchar *device, GError **error) {
     success = g_regex_match (regex, output, 0, &match_info);
     if (!success) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to to parse f2fs info.");
+                     "Failed to parse f2fs info.");
         g_regex_unref (regex);
         g_match_info_free (match_info);
         g_free (output);
