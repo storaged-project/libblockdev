@@ -307,6 +307,54 @@ class UtilsExecLoggingTest(UtilsTestCase):
         status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo \"%s\"; echo \"%s\" >&2; done" % (cnt, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG)], None, None)
         self.assertTrue(status)
 
+    def test_exec_null_bytes(self):
+        """Verify that null bytes in the output are processed properly"""
+
+        TEST_DATA = ["First line", "Second line", "Third line"]
+
+        status, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", "echo -e \"%s\\0%s\\n%s\"" % (TEST_DATA[0], TEST_DATA[1], TEST_DATA[2])])
+        self.assertTrue(status)
+        self.assertTrue(TEST_DATA[0] in out)
+        self.assertTrue(TEST_DATA[1] in out)
+        self.assertTrue(TEST_DATA[2] in out)
+        self.assertFalse("kuku!" in out)
+
+        # ten matches
+        cnt = 10
+        self.num_matches = 0
+        status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo -e \"%s\\0%s\"; done" % (cnt, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG)], None, self.my_exec_progress_func)
+        self.assertTrue(status)
+        self.assertEqual(self.num_matches, cnt * 2)
+
+        # 100k matches
+        cnt = 100000
+        self.num_matches = 0
+        status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo -e \"%s\\0%s\"; done" % (cnt, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG)], None, self.my_exec_progress_func)
+        self.assertTrue(status)
+        self.assertEqual(self.num_matches, cnt * 2)
+
+        # 100k matches on stderr
+        self.num_matches = 0
+        status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo -e \"%s\\0%s\" >&2; done" % (cnt, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG)], None, self.my_exec_progress_func)
+        self.assertTrue(status)
+        self.assertEqual(self.num_matches, cnt * 2)
+
+        # 100k matches on stderr and stdout
+        self.num_matches = 0
+        status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo -e \"%s\\0%s\"; echo -e \"%s\\0%s\" >&2; done" % (cnt, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG)], None, self.my_exec_progress_func)
+        self.assertTrue(status)
+        self.assertEqual(self.num_matches, cnt * 4)
+
+        # stdout and stderr output, non-zero return from the command and very long exception message
+        self.num_matches = 0
+        with six.assertRaisesRegex(self, GLib.GError, r"Process reported exit code 66"):
+            status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo -e \"%s\\0%s\"; echo -e \"%s\\0%s\" >&2; done; exit 66" % (cnt, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG)], None, self.my_exec_progress_func)
+        self.assertEqual(self.num_matches, cnt * 4)
+
+        # no progress reporting callback given, tests slightly different code path
+        status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo -e \"%s\\0%s\"; echo -e \"%s\\0%s\" >&2; done" % (cnt, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG)], None, None)
+        self.assertTrue(status)
+
 
 class UtilsDevUtilsTestCase(UtilsTestCase):
     @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
