@@ -48,8 +48,10 @@ static void utils_kmod_log_redirect (void *log_data UNUSED, int priority,
     gint ret = 0;
 
     ret = g_vasprintf (&kmod_msg, format, args);
-    if (ret < 0)
+    if (ret < 0) {
+        g_free (kmod_msg);
         return;
+    }
 
 #ifdef DEBUG
     message = g_strdup_printf ("[libmkod] %s:%d %s() %s", file, line, fn, kmod_msg);

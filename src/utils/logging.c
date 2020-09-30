@@ -87,8 +87,10 @@ void bd_utils_log_format (gint level, const gchar *format, ...) {
         ret = g_vasprintf (&msg, format, args);
         va_end (args);
 
-        if (ret < 0)
+        if (ret < 0) {
+            g_free (msg);
             return;
+        }
 
         log_func (level, msg);
     }

@@ -1014,7 +1014,7 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
     orig_data = ret->dev_uuid;
     if (orig_data) {
         ret->dev_uuid = bd_md_canonicalize_uuid (orig_data, error);
-        if (!ret->uuid) {
+        if (!ret->dev_uuid) {
             g_prefix_error (error, "Failed to canonicalize MD UUID '%s': ", orig_data);
             g_free (orig_data);
             bd_md_examine_data_free (ret);
@@ -1047,8 +1047,7 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
             value++;
             ret->uuid = bd_md_canonicalize_uuid (value, error);
             if (!ret->uuid) {
-                g_prefix_error (error, "Failed to canonicalize MD UUID '%s': ", orig_data);
-                g_free (orig_data);
+                g_prefix_error (error, "Failed to canonicalize MD UUID '%s': ", value);
                 bd_md_examine_data_free (ret);
                 g_strfreev (output_fields);
                 return NULL;
@@ -1374,6 +1373,7 @@ gchar* bd_md_name_from_node (const gchar *node, GError **error) {
             continue;
         }
         node_name = g_path_get_basename (dev_path);
+        g_free (dev_path);
         if (g_strcmp0 (node_name, node) == 0) {
             found = TRUE;
             name = g_path_get_basename (*path_p);

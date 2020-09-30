@@ -37,8 +37,11 @@ redirect_dm_log (int level, const char *file __attribute__((unused)), int line _
     ret = g_vasprintf (&dm_msg, f, args);
     va_end (args);
 
-    if (ret < 0)
+    if (ret < 0) {
+        g_free (dm_msg);
         return;
+    }
+
 
 #ifdef DEBUG
     message = g_strdup_printf ("[libdevmapper] %s:%d %s", file, line, dm_msg);

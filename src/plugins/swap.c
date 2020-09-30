@@ -419,6 +419,7 @@ gboolean bd_swap_swapstatus (const gchar *device, GError **error) {
         if (!real_device) {
             /* the device doesn't exist and thus is not an active swap */
             g_clear_error (error);
+            g_free (file_content);
             return FALSE;
         }
     }
