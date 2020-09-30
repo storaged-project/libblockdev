@@ -1,15 +1,26 @@
 import unittest
 import os
+import re
+import six
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, TestTags, tag_test, run_command
 import overrides_hack
 
 from gi.repository import BlockDev, GLib
 from bytesize.bytesize import Size, ROUND_UP, B
+from distutils.version import LooseVersion
 
 
 class PartTestCase(unittest.TestCase):
 
     requested_plugins = BlockDev.plugin_specs_from_names(("part",))
+
+    @classmethod
+    def _get_fdisk_version(cls):
+        _ret, out, _err = run_command("fdisk --version")
+        m = re.search(r"fdisk from util-linux\s+([\d\.]+)", out)
+        if not m or len(m.groups()) != 1:
+            raise RuntimeError("Failed to determine fdisk version from: %s" % out)
+        return LooseVersion(m.groups()[0])
 
     @classmethod
     def setUpClass(cls):
@@ -1008,6 +1019,20 @@ class PartCreateResizePartCase(PartTestCase):
     def test_create_resize_part_single(self):
         """Verify that it is possible to create and resize a parition"""
 
+        try:
+            fdisk_version = self._get_fdisk_version()
+        except Exception as e:
+            resize_tolerance = 0
+        else:
+            if fdisk_version < LooseVersion("2.33"):
+                # older versions of libfdisk don't count free space between partitions as a usable
+                # free space which also means max size for resize is about 1 MiB smaller because
+                # the free space between the partition being resized and the "free space" partition
+                # after it is not counted as usable free space
+                resize_tolerance = 1 * 1024**2
+            else:
+               resize_tolerance = 0
+
         # we first need a partition table
         succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.GPT, True)
         self.assertTrue(succ)
@@ -1052,7 +1077,7 @@ class PartCreateResizePartCase(PartTestCase):
         self.assertTrue(succ)
         ps = BlockDev.part_get_part_spec(self.loop_dev, ps.path)
         self.assertEqual(initial_start, ps.start)
-        self.assertGreaterEqual(ps.size, initial_size - 1 * 1024**2)  # libparted sometimes creates smaller partitions for no alignment
+        self.assertGreaterEqual(ps.size, initial_size - resize_tolerance)
         new_size = ps.size
 
         # resize to maximum with no alignment explicitly
@@ -1067,7 +1092,27 @@ class PartCreateResizePartCase(PartTestCase):
         self.assertTrue(succ)
         ps = BlockDev.part_get_part_spec(self.loop_dev, ps.path)
         self.assertEqual(initial_start, ps.start)
-        self.assertGreaterEqual(ps.size, initial_size) # at least the requested size
+        self.assertGreaterEqual(ps.size, initial_size - resize_tolerance)
+        max_size = ps.size
+
+        # resize back to 20 MB (not MiB) with no alignment
+        new_size = 20 * 1000**2
+        succ = BlockDev.part_resize_part (self.loop_dev, ps.path, new_size, BlockDev.PartAlign.NONE)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec(self.loop_dev, ps.path)
+        self.assertEqual(initial_start, ps.start)  # offset must not be moved
+        self.assertGreaterEqual(ps.size, new_size)  # at least the requested size
+        self.assertLess(ps.size, new_size + 4 * 1024)  # but also not too big (assuming max. 4 KiB blocks)
+
+        # resize should allow up to 4 MiB over max size
+        with six.assertRaisesRegex(self, GLib.GError, "is bigger than max size"):
+            BlockDev.part_resize_part (self.loop_dev, ps.path, max_size + 4 * 1024**2 + 1, BlockDev.PartAlign.NONE)
+
+        succ = BlockDev.part_resize_part (self.loop_dev, ps.path, max_size + 4 * 1024**2, BlockDev.PartAlign.NONE)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec(self.loop_dev, ps.path)
+        self.assertEqual(initial_start, ps.start)
+        self.assertGreaterEqual(ps.size, max_size) # at least the requested size
 
 class PartCreateDeletePartCase(PartTestCase):
     @tag_test(TestTags.CORE)
