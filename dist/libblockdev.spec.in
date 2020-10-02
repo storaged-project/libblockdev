@@ -301,7 +301,6 @@ with the libblockdev-dm plugin/library.
 
 %if %{with_fs}
 %package fs
-BuildRequires: parted-devel
 BuildRequires: libblkid-devel
 BuildRequires: libmount-devel
 BuildRequires: libuuid-devel
@@ -493,7 +492,6 @@ with the libblockdev-nvdimm plugin/library.
 
 %if %{with_part}
 %package part
-BuildRequires: parted-devel
 BuildRequires: libfdisk-devel
 Summary:     The partitioning plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
@@ -543,6 +541,7 @@ Summary:    Various nice tools based on libblockdev
 Requires:   %{name}
 Requires:   %{name}-lvm
 BuildRequires: libbytesize-devel
+BuildRequires: parted-devel
 %if %{with_lvm_dbus} == 1
 Recommends: %{name}-lvm-dbus
 %endif
@@ -743,11 +742,9 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 
 %files utils
 %{_libdir}/libbd_utils.so.*
-%{_libdir}/libbd_part_err.so.*
 
 %files utils-devel
 %{_libdir}/libbd_utils.so
-%{_libdir}/libbd_part_err.so
 %{_libdir}/pkgconfig/blockdev-utils.pc
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/utils.h
@@ -909,6 +906,7 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %if %{with_tools}
 %files tools
 %{_bindir}/lvm-cache-stats
+%{_bindir}/vfat-resize
 %endif
 
 %ifarch s390 s390x

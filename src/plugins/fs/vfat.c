@@ -18,11 +18,11 @@
  */
 
 #include <blockdev/utils.h>
-#include <blockdev/part_err.h>
 #include <check_deps.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <stdio.h>
 
 #include "vfat.h"
 #include "fs.h"
@@ -37,24 +37,27 @@ static GMutex deps_check_lock;
 #define DEPS_FATLABEL_MASK (1 << DEPS_FATLABEL)
 #define DEPS_FSCKVFAT 2
 #define DEPS_FSCKVFAT_MASK (1 << DEPS_FSCKVFAT)
+#define DEPS_RESIZEVFAT 3
+#define DEPS_RESIZEVFAT_MASK (1 << DEPS_RESIZEVFAT)
 
-#define DEPS_LAST 3
+#define DEPS_LAST 4
 
 static const UtilDep deps[DEPS_LAST] = {
     {"mkfs.vfat", NULL, NULL, NULL},
     {"fatlabel", NULL, NULL, NULL},
     {"fsck.vfat", NULL, NULL, NULL},
+    {"vfat-resize", NULL, NULL, NULL},
 };
 
 static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
-    DEPS_MKFSVFAT_MASK, /* mkfs */
-    0,                  /* wipe */
-    DEPS_FSCKVFAT_MASK, /* check */
-    DEPS_FSCKVFAT_MASK, /* repair */
-    DEPS_FATLABEL_MASK, /* set-label */
-    DEPS_FSCKVFAT_MASK, /* query */
-    0,                  /* resize */
-    0                   /* set-uuid */
+    DEPS_MKFSVFAT_MASK,   /* mkfs */
+    0,                    /* wipe */
+    DEPS_FSCKVFAT_MASK,   /* check */
+    DEPS_FSCKVFAT_MASK,   /* repair */
+    DEPS_FATLABEL_MASK,   /* set-label */
+    DEPS_FSCKVFAT_MASK,   /* query */
+    DEPS_RESIZEVFAT_MASK, /* resize */
+    0                     /* set-uuid */
 };
 
 #define UNUSED __attribute__((unused))
@@ -124,30 +127,6 @@ void bd_fs_vfat_info_free (BDFSVfatInfo *data) {
     g_free (data->label);
     g_free (data->uuid);
     g_free (data);
-}
-
-/**
- * set_parted_error: (skip)
- *
- * Set error from the parted error stored in 'error_msg'. In case there is none,
- * the error is set up with an empty string. Otherwise it is set up with the
- * parted's error message and is a subject to later g_prefix_error() call.
- *
- * Returns: whether there was some message from parted or not
- */
-static gboolean set_parted_error (GError **error, BDFsError type) {
-    gchar *error_msg = NULL;
-    error_msg = bd_get_error_msg ();
-    if (error_msg) {
-        g_set_error (error, BD_FS_ERROR, type,
-                     " (%s)", error_msg);
-        g_free (error_msg);
-        error_msg = NULL;
-        return TRUE;
-    } else {
-        g_set_error_literal (error, BD_FS_ERROR, type, "");
-        return FALSE;
-    }
 }
 
 /**
@@ -370,83 +349,16 @@ BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
  * Tech category: %BD_FS_TECH_VFAT-%BD_FS_TECH_MODE_RESIZE
  */
 gboolean bd_fs_vfat_resize (const gchar *device, guint64 new_size, GError **error) {
-    PedDevice *ped_dev = NULL;
-    PedGeometry geom = ZERO_INIT;
-    PedGeometry new_geom = ZERO_INIT;
-    PedFileSystem *fs = NULL;
-    PedSector start = 0;
-    PedSector length = 0;
-    gint status = 0;
-    guint64 progress_id = 0;
-    gchar *msg = NULL;
+    g_autofree gchar *size_str = NULL;
+    const gchar *args[4] = {"vfat-resize", device, NULL, NULL};
 
-    msg = g_strdup_printf ("Started resizing vfat filesystem on the device '%s'", device);
-    progress_id = bd_utils_report_started (msg);
-    g_free (msg);
-
-    ped_dev = ped_device_get (device);
-    if (!ped_dev) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to get ped device for the device '%s'", device);
-        bd_utils_report_finished (progress_id, (*error)->message);
+    if (!check_deps (&avail_deps, DEPS_RESIZEVFAT_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
+
+    if (new_size != 0) {
+        size_str = g_strdup_printf ("%"G_GUINT64_FORMAT, new_size);
+        args[2] = size_str;
     }
 
-    status = ped_device_open (ped_dev);
-    if (status == 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to get open the device '%s'", device);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    status = ped_geometry_init (&geom, ped_dev, start, ped_dev->length);
-    if (status == 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to initialize geometry for the device '%s'", device);
-        ped_device_close (ped_dev);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    fs = ped_file_system_open(&geom);
-    if (!fs) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to read the filesystem on the device '%s'", device);
-        ped_device_close (ped_dev);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    if (new_size == 0)
-        length = ped_dev->length;
-    else
-        length = (PedSector) ((PedSector) new_size / ped_dev->sector_size);
-
-    status = ped_geometry_init(&new_geom, ped_dev, start, length);
-    if (status == 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to initialize new geometry for the filesystem on '%s'", device);
-        ped_file_system_close (fs);
-        ped_device_close (ped_dev);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    status = ped_file_system_resize(fs, &new_geom, NULL);
-    if (status == 0) {
-        set_parted_error (error, BD_FS_ERROR_FAIL);
-        g_prefix_error (error, "Failed to resize the filesystem on '%s'", device);
-        ped_file_system_close (fs);
-        ped_device_close (ped_dev);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    ped_file_system_close (fs);
-    ped_device_close (ped_dev);
-    bd_utils_report_finished (progress_id, "Completed");
-
-    return TRUE;
-
+    return bd_utils_exec_and_report_error (args, NULL, error);
 }

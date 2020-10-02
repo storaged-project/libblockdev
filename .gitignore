@@ -54,4 +54,5 @@ docs/html/
 docs/libblockdev-docs.xml
 dist/libblockdev.spec
 tools/lvm-cache-stats
+tools/vfat-resize
 misc/.vagrant

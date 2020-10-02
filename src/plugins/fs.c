@@ -18,9 +18,6 @@
  */
 
 #include <blockdev/utils.h>
-#include <blockdev/part_err.h>
-
-#include <parted/parted.h>
 
 #include <check_deps.h>
 #include "fs.h"
@@ -144,7 +141,6 @@ gboolean bd_fs_check_deps (void) {
  *
  */
 gboolean bd_fs_init (void) {
-    ped_exception_set_handler ((PedExceptionHandler*) bd_exc_handler);
     return TRUE;
 }
 
