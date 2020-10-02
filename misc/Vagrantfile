@@ -38,7 +38,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, inline: <<-SHELL
     echo 'alias make="make -j -l4"' >> /home/vagrant/.bashrc
     echo 'cd libblockdev' >> /home/vagrant/.bash_history
-    echo './autogen.sh && ./configure --without-vdo --without-nvdimm' >> /home/vagrant/.bash_history
+    echo './autogen.sh && ./configure --without-nvdimm' >> /home/vagrant/.bash_history
   SHELL
 
   config.vm.define "bd-f30", primary: true, autostart: true do |f30|

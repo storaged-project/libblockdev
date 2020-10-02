@@ -15,7 +15,6 @@
 %define with_part @WITH_PART@
 %define with_fs @WITH_FS@
 %define with_nvdimm @WITH_NVDIMM@
-%define with_vdo @WITH_VDO@
 %define with_gi @WITH_GI@
 %define with_escrow @WITH_ESCROW@
 %define with_dmraid @WITH_DMRAID@
@@ -43,14 +42,6 @@
 %if (! 0%{?fedora} && 0%{?rhel} <= 7) || %{with_lvm_dbus} == 0
 %define with_lvm_dbus 0
 %define lvm_dbus_copts --without-lvm-dbus
-%endif
-
-# vdo is not available on non-x86_64 on older RHEL
-%if (0%{?rhel} && 0%{?rhel} <= 7)
-%ifnarch x86_64
-%define with_vdo 0
-%define vdo_copts --without-vdo
-%endif
 %endif
 
 # btrfs is not available on RHEL > 7
@@ -111,9 +102,6 @@
 %if %{with_nvdimm} != 1
 %define nvdimm_copts --without-nvdimm
 %endif
-%if %{with_vdo} != 1
-%define vdo_copts --without-vdo
-%endif
 %if %{with_tools} != 1
 %define tools_copts --without-tools
 %endif
@@ -121,7 +109,7 @@
 %define gi_copts --disable-introspection
 %endif
 
-%define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?vdo_copts} %{?tools_copts} %{?gi_copts}
+%define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?tools_copts} %{?gi_copts}
 
 Name:        libblockdev
 Version:     2.99
@@ -549,40 +537,6 @@ This package contains header files and pkg-config files needed for development
 with the libblockdev-swap plugin/library.
 %endif
 
-
-%if %{with_vdo}
-%package vdo
-BuildRequires: libbytesize-devel
-BuildRequires: libyaml-devel
-Summary:     The vdo plugin for the libblockdev library
-Requires: %{name}-utils%{?_isa} >= 0.11
-
-# weak dependencies doesn't work on older RHEL
-%if (0%{?rhel} && 0%{?rhel} <= 7)
-Requires: vdo
-Requires: kmod-kvdo
-%else
-# we want to build the plugin everywhere but the dependencies might not be
-# available so just use weak dependency
-Recommends: vdo
-Recommends: kmod-kvdo
-%endif
-
-%description vdo
-The libblockdev library plugin (and in the same time a standalone library)
-providing the functionality related to VDO devices.
-
-%package vdo-devel
-Summary:     Development files for the libblockdev-vdo plugin/library
-Requires: %{name}-vdo%{?_isa} = %{version}-%{release}
-Requires: %{name}-utils-devel%{?_isa}
-Requires: glib2-devel
-
-%description vdo-devel
-This package contains header files and pkg-config files needed for development
-with the libblockdev-vdo plugin/library.
-%endif
-
 %if %{with_tools}
 %package tools
 Summary:    Various nice tools based on libblockdev
@@ -670,10 +624,6 @@ Requires: %{name}-part%{?_isa} = %{version}-%{release}
 Requires: %{name}-swap%{?_isa} = %{version}-%{release}
 %endif
 
-%if %{with_vdo}
-Requires: %{name}-vdo%{?_isa} = %{version}-%{release}
-%endif
-
 %ifarch s390 s390x
 Requires: %{name}-s390%{?_isa} = %{version}-%{release}
 %endif
@@ -744,10 +694,6 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 
 %if %{with_swap}
 %ldconfig_scriptlets swap
-%endif
-
-%if %{with_vdo}
-%ldconfig_scriptlets vdo
 %endif
 
 %ifarch s390 s390x
@@ -959,16 +905,6 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_includedir}/blockdev/swap.h
 %endif
 
-
-%if %{with_vdo}
-%files vdo
-%{_libdir}/libbd_vdo.so.*
-
-%files vdo-devel
-%{_libdir}/libbd_vdo.so
-%dir %{_includedir}/blockdev
-%{_includedir}/blockdev/vdo.h
-%endif
 
 %if %{with_tools}
 %files tools

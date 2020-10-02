@@ -60,10 +60,6 @@ if WITH_S390
 lib_LTLIBRARIES += libbd_s390.la
 endif
 
-if WITH_VDO
-lib_LTLIBRARIES += libbd_vdo.la
-endif
-
 
 if WITH_BTRFS
 libbd_btrfs_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(BYTESIZE_CFLAGS) -Wall -Wextra -Werror
@@ -189,14 +185,6 @@ libbd_part_err_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_part_err_la_SOURCES = part_err.c part_err.h
 endif
 
-if WITH_VDO
-libbd_vdo_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(BYTESIZE_CFLAGS) $(YAML_CFLAGS) -Wall -Wextra -Werror
-libbd_vdo_la_LIBADD = ${builddir}/../utils/libbd_utils.la -lm $(GLIB_LIBS) $(GIO_LIBS) $(BYTESIZE_LIBS) $(YAML_LIBS)
-libbd_vdo_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
-libbd_vdo_la_CPPFLAGS = -I${builddir}/../../include/
-libbd_vdo_la_SOURCES = vdo.c vdo.h check_deps.c check_deps.h vdo_stats.c vdo_stats.h
-endif
-
 libincludedir = $(includedir)/blockdev
 libinclude_HEADERS =
 
@@ -252,10 +240,6 @@ noinst_HEADERS = part_err.h
 
 if WITH_S390
 libinclude_HEADERS += s390.h
-endif
-
-if WITH_VDO
-libinclude_HEADERS += vdo.h
 endif
 
 MAINTAINERCLEANFILES = Makefile.in

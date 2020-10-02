@@ -55,7 +55,6 @@ bd_plugins = { "lvm": BlockDev.Plugin.LVM,
                "fs": BlockDev.Plugin.FS,
                "s390": BlockDev.Plugin.S390,
                "nvdimm": BlockDev.Plugin.NVDIMM,
-               "vdo": BlockDev.Plugin.VDO,
 }
 
 def _default_str(self):
@@ -904,98 +903,6 @@ def nvdimm_namespace_disable(namespace, extra=None, **kwargs):
 __all__.append("nvdimm_namespace_disable")
 
 
-_vdo_create = BlockDev.vdo_create
-@override(BlockDev.vdo_create)
-def vdo_create(name, backing_device, logical_size=0, index_memory=0, compression=True, deduplication=True, write_policy=BlockDev.VDOWritePolicy.AUTO, extra=None, **kwargs):
-    extra = _get_extra(extra, kwargs)
-    return _vdo_create(name, backing_device, logical_size, index_memory, compression, deduplication, write_policy, extra)
-__all__.append("vdo_create")
-
-_vdo_remove = BlockDev.vdo_remove
-@override(BlockDev.vdo_remove)
-def vdo_remove(name, force=False, extra=None, **kwargs):
-    extra = _get_extra(extra, kwargs)
-    return _vdo_remove(name, force, extra)
-__all__.append("vdo_remove")
-
-_vdo_change_write_policy = BlockDev.vdo_change_write_policy
-@override(BlockDev.vdo_change_write_policy)
-def vdo_change_write_policy(name, write_policy, extra=None, **kwargs):
-    extra = _get_extra(extra, kwargs)
-    return _vdo_change_write_policy(name, write_policy, extra)
-__all__.append("vdo_change_write_policy")
-
-_vdo_enable_compression = BlockDev.vdo_enable_compression
-@override(BlockDev.vdo_enable_compression)
-def vdo_enable_compression(name, extra=None, **kwargs):
-    extra = _get_extra(extra, kwargs)
-    return _vdo_enable_compression(name, extra)
-__all__.append("vdo_enable_compression")
-
-_vdo_disable_compression = BlockDev.vdo_disable_compression
-@override(BlockDev.vdo_disable_compression)
-def vdo_disable_compression(name, extra=None, **kwargs):
-    extra = _get_extra(extra, kwargs)
-    return _vdo_disable_compression(name, extra)
-__all__.append("vdo_disable_compression")
-
-_vdo_enable_deduplication = BlockDev.vdo_enable_deduplication
-@override(BlockDev.vdo_enable_deduplication)
-def vdo_enable_deduplication(name, extra=None, **kwargs):
-    extra = _get_extra(extra, kwargs)
-    return _vdo_enable_deduplication(name, extra)
-__all__.append("vdo_enable_deduplication")
-
-_vdo_disable_deduplication = BlockDev.vdo_disable_deduplication
-@override(BlockDev.vdo_disable_deduplication)
-def vdo_disable_deduplication(name, extra=None, **kwargs):
-    extra = _get_extra(extra, kwargs)
-    return _vdo_disable_deduplication(name, extra)
-__all__.append("vdo_disable_deduplication")
-
-_vdo_activate = BlockDev.vdo_activate
-@override(BlockDev.vdo_activate)
-def vdo_activate(name, extra=None, **kwargs):
-    extra = _get_extra(extra, kwargs)
-    return _vdo_activate(name, extra)
-__all__.append("vdo_activate")
-
-_vdo_deactivate = BlockDev.vdo_deactivate
-@override(BlockDev.vdo_deactivate)
-def vdo_deactivate(name, extra=None, **kwargs):
-    extra = _get_extra(extra, kwargs)
-    return _vdo_deactivate(name, extra)
-__all__.append("vdo_deactivate")
-
-_vdo_start = BlockDev.vdo_start
-@override(BlockDev.vdo_start)
-def vdo_start(name, rebuild=False, extra=None, **kwargs):
-    extra = _get_extra(extra, kwargs)
-    return _vdo_start(name, rebuild, extra)
-__all__.append("vdo_start")
-
-_vdo_stop = BlockDev.vdo_stop
-@override(BlockDev.vdo_stop)
-def vdo_stop(name, force=False, extra=None, **kwargs):
-    extra = _get_extra(extra, kwargs)
-    return _vdo_stop(name, force, extra)
-__all__.append("vdo_stop")
-
-_vdo_grow_logical = BlockDev.vdo_grow_logical
-@override(BlockDev.vdo_grow_logical)
-def vdo_grow_logical(name, size, extra=None, **kwargs):
-    extra = _get_extra(extra, kwargs)
-    return _vdo_grow_logical(name, size, extra)
-__all__.append("vdo_grow_logical")
-
-_vdo_grow_physical = BlockDev.vdo_grow_physical
-@override(BlockDev.vdo_grow_physical)
-def vdo_grow_physical(name, extra=None, **kwargs):
-    extra = _get_extra(extra, kwargs)
-    return _vdo_grow_physical(name, extra)
-__all__.append("vdo_grow_physical")
-
-
 ## defined in this overrides only!
 def plugin_specs_from_names(plugin_names):
     ret = []
@@ -1204,10 +1111,6 @@ class NVDIMMError(BlockDevError):
     pass
 __all__.append("NVDIMMError")
 
-class VDOError(BlockDevError):
-    pass
-__all__.append("VDOError")
-
 class BlockDevNotImplementedError(NotImplementedError, BlockDevError):
     pass
 __all__.append("BlockDevNotImplementedError")
@@ -1262,6 +1165,3 @@ __all__.append("s390")
 
 utils = ErrorProxy("utils", BlockDev, [(GLib.Error, UtilsError)])
 __all__.append("utils")
-
-vdo = ErrorProxy("vdo", BlockDev, [(GLib.Error, VDOError)])
-__all__.append("vdo")

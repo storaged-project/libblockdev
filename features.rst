@@ -303,30 +303,6 @@ NVDIMM
    * namespace_reconfigure
    * list_namespaces
 
-VDO
----
-
-Standalone VDO plugin is deprecated since 2.24 and will be removed in upcoming 3.0.
-Deduplication and compression support is now provided by LVM VDO volumes and pools with
-support for these added in 2.23.
-
-:functions:
-   * info
-   * create
-   * remove
-   * change_write_policy
-   * enable_compression
-   * disable_compression
-   * enable_deduplication
-   * disable_deduplication
-   * activate
-   * deactivate
-   * start
-   * stop
-   * grow_logical
-   * grow_physical
-   * get_statistics
-
 utils
 ------
 
