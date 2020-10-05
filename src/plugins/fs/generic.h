@@ -31,6 +31,6 @@ gboolean bd_fs_can_repair (const gchar *type, gchar **required_utility, GError *
 gboolean bd_fs_can_set_label (const gchar *type, gchar **required_utility, GError **error);
 gboolean bd_fs_can_set_uuid (const gchar *type, gchar **required_utility, GError **error);
 gboolean bd_fs_can_get_size (const gchar *type, gchar **required_utility, GError **error);
-gboolean bd_fs_can_free_space (const gchar *type, gchar **required_utility, GError **error);
+gboolean bd_fs_can_get_free_space (const gchar *type, gchar **required_utility, GError **error);
 
 #endif  /* BD_FS_GENERIC */
