@@ -2145,10 +2145,10 @@ class GenericResize(FSTestCase):
         size = BlockDev.fs_get_size(self.loop_dev)
 
         # shrink
-        succ = BlockDev.fs_resize(self.loop_dev, 100 * 1024**2)
+        succ = BlockDev.fs_resize(self.loop_dev, 130 * 1024**2)
         self.assertTrue(succ)
         new_size = BlockDev.fs_get_size(self.loop_dev)
-        self.assertAlmostEqual(new_size, 100 * 1024**2, delta=size_delta)
+        self.assertAlmostEqual(new_size, 130 * 1024**2, delta=size_delta)
 
         # resize to maximum size
         succ = BlockDev.fs_resize(self.loop_dev, 0)
