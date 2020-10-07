@@ -18,7 +18,6 @@ typedef enum {
     BD_PLUGIN_PART,
     BD_PLUGIN_FS,
     BD_PLUGIN_NVDIMM,
-    BD_PLUGIN_VDO,
     BD_PLUGIN_UNDEF
 } BDPlugin;
 

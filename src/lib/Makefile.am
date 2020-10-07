@@ -31,8 +31,7 @@ GIHEADERS = ${builddir}/plugin_apis/kbd.h \
 	${builddir}/plugin_apis/mpath.h \
 	${builddir}/plugin_apis/part.h \
 	${builddir}/plugin_apis/fs.h \
-	${builddir}/plugin_apis/nvdimm.h \
-	${builddir}/plugin_apis/vdo.h
+	${builddir}/plugin_apis/nvdimm.h
 
 GIHEADERS += $(wildcard ${srcdir}/../utils/*.[ch])
 GIHEADERS += blockdev.c blockdev.h plugins.c plugins.h
