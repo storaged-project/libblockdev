@@ -10,6 +10,22 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error);
 gboolean bd_fs_freeze (const gchar *mountpoint, GError **error);
 gboolean bd_fs_unfreeze (const gchar *mountpoint, GError **error);
 
+typedef enum {
+    BD_FS_MKFS_LABEL     = 1 << 0,
+    BD_FS_MKFS_UUID      = 1 << 1,
+    BD_FS_MKFS_DRY_RUN   = 1 << 2,
+    BD_FS_MKFS_NODISCARD = 1 << 3,
+} BDFsMkfsOptionsFlags;
+
+typedef struct BDFsMkfsOptions {
+    gchar *label;
+    gchar *uuid;
+    gboolean dry_run;
+    gboolean no_discard;
+} BDFsMkfsOptions;
+
+gboolean bd_fs_mkfs (const gchar *device, const gchar *fsname, BDFsMkfsOptions *options, GError **error);
+
 gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error);
 gboolean bd_fs_repair (const gchar *device, GError **error);
 gboolean bd_fs_check (const gchar *device, GError **error);
@@ -25,6 +41,7 @@ typedef enum {
     BD_FS_ONLINE_GROW = 1 << 4
 } BDFsResizeFlags;
 
+gboolean bd_fs_can_mkfs (const gchar *type, BDFsMkfsOptionsFlags *options, gchar **required_utility, GError **error);
 gboolean bd_fs_can_resize (const gchar *type, BDFsResizeFlags *mode, gchar **required_utility, GError **error);
 gboolean bd_fs_can_check (const gchar *type, gchar **required_utility, GError **error);
 gboolean bd_fs_can_repair (const gchar *type, gchar **required_utility, GError **error);

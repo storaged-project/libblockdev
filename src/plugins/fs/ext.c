@@ -237,6 +237,26 @@ void bd_fs_ext4_info_free (BDFSExt4Info *data) {
     bd_fs_ext2_info_free ((BDFSExt2Info*) data);
 }
 
+BDExtraArg __attribute__ ((visibility ("hidden")))
+**bd_fs_ext2_mkfs_options (BDFsMkfsOptions *options) {
+    BDExtraArg **ret = g_new0 (BDExtraArg*, 5);
+    guint next_arg = 0;
+
+    if (options->label)
+        ret[next_arg++] = bd_extra_arg_new ("-L", options->label);
+
+    if (options->uuid)
+        ret[next_arg++] = bd_extra_arg_new ("-U", options->uuid);
+
+    if (options->dry_run)
+        ret[next_arg++] = bd_extra_arg_new ("-n", "");
+
+    if (options->no_discard)
+        ret[next_arg++] = bd_extra_arg_new ("-E", "nodiscard");
+
+    return ret;
+}
+
 static gboolean ext_mkfs (const gchar *device, const BDExtraArg **extra, const gchar *ext_version, GError **error) {
     const gchar *args[6] = {"mke2fs", "-t", ext_version, "-F", device, NULL};
 
