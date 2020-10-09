@@ -48,10 +48,6 @@ if WITH_KBD
 lib_LTLIBRARIES += libbd_kbd.la
 endif
 
-if WITH_PART_O_WITH_FS
-lib_LTLIBRARIES += libbd_part_err.la
-endif
-
 if WITH_PART
 lib_LTLIBRARIES += libbd_part.la
 endif
@@ -177,14 +173,6 @@ libbd_part_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_part_la_SOURCES = part.c part.h check_deps.c check_deps.h
 endif
 
-if WITH_PART_O_WITH_FS
-libbd_part_err_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(PARTED_CFLAGS) $(PARTED_FS_CFLAGS) -Wall -Wextra -Werror
-libbd_part_err_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(GIO_LIBS) $(PARTED_LIBS) $(PARTED_FS_LIBS)
-libbd_part_err_la_LDFLAGS = -L${srcdir}/ -version-info 2:0:0 -Wl,--no-undefined
-libbd_part_err_la_CPPFLAGS = -I${builddir}/../../include/
-libbd_part_err_la_SOURCES = part_err.c part_err.h
-endif
-
 libincludedir = $(includedir)/blockdev
 libinclude_HEADERS =
 
@@ -235,8 +223,6 @@ endif
 if WITH_FS
 libinclude_HEADERS += fs.h
 endif
-
-noinst_HEADERS = part_err.h
 
 if WITH_S390
 libinclude_HEADERS += s390.h

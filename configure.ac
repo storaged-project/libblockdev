@@ -195,8 +195,6 @@ LIBBLOCKDEV_PLUGIN([PART], [part])
 LIBBLOCKDEV_PLUGIN([FS], [fs])
 LIBBLOCKDEV_PLUGIN([NVDIMM], [nvdimm])
 
-AM_CONDITIONAL(WITH_PART_O_WITH_FS, test "x$with_part" != "xno" -o "x$with_fs" != "xno")
-
 dnl these two modules are always needed
 LIBBLOCKDEV_PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.42.2])
 LIBBLOCKDEV_PKG_CHECK_MODULES([GOBJECT], [gobject-2.0 >= 2.42.2])
@@ -234,9 +232,11 @@ AS_IF([test "x$with_fs" != "xno"],
        LIBBLOCKDEV_PKG_CHECK_MODULES([MOUNT], [mount >= 2.23.0])
        # new versions of libmount has some new functions we can use
        AS_IF([$PKG_CONFIG --atleast-version=2.30.0 mount],
-             [AC_DEFINE([LIBMOUNT_NEW_ERR_API])], [])
+             [AC_DEFINE([LIBMOUNT_NEW_ERR_API])], [])]
+      [])
 
-       LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED], [libparted >= 3.1])
+AS_IF([test "x$with_tools" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([PARTED], [libparted >= 3.1])
 
        # older versions of parted don't provide the libparted-fs-resize.pc file
        AS_IF([$PKG_CONFIG libparted-fs-resize],

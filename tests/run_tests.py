@@ -278,6 +278,7 @@ if __name__ == '__main__':
             os.environ['LD_LIBRARY_PATH'] = LIBDIRS
             os.environ['GI_TYPELIB_PATH'] = GIDIR
             os.environ['LIBBLOCKDEV_CONFIG_DIR'] = os.path.join(testdir, 'default_config')
+            os.environ['PATH'] += ':' + os.path.join(projdir, 'tools')
 
             try:
                 pyver = 'python3' if six.PY3 else 'python'
