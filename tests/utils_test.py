@@ -355,6 +355,28 @@ class UtilsExecLoggingTest(UtilsTestCase):
         status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo -e \"%s\\0%s\"; echo -e \"%s\\0%s\" >&2; done" % (cnt, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG)], None, None)
         self.assertTrue(status)
 
+    def test_exec_large_input(self):
+        """Verify that large input is passed to the process properly"""
+
+        DATA_MATCH = "==END=="
+
+        data = "Begin data =="
+        for i in range(6666666):
+            data += "bloat"
+        data += DATA_MATCH
+
+        # command is not accepting stdin, write() will return an error
+        with six.assertRaisesRegex(self, GLib.GError, r"Failed to write to stdin of the process: Broken pipe"):
+            BlockDev.utils_exec_with_input(["false"], data, None)
+
+        # test that `grep` returns error on non-match
+        with six.assertRaisesRegex(self, GLib.GError, r"Process reported exit code 1"):
+            BlockDev.utils_exec_with_input(["grep", "unmatched"], data, None)
+
+        # expecting that `grep` will find the string at the end
+        status = BlockDev.utils_exec_with_input(["grep", DATA_MATCH], data, None)
+        self.assertTrue(status)
+
 
 class UtilsDevUtilsTestCase(UtilsTestCase):
     @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
