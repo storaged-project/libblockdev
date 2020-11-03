@@ -41,10 +41,10 @@ Vagrant.configure("2") do |config|
     echo './autogen.sh && ./configure --without-nvdimm' >> /home/vagrant/.bash_history
   SHELL
 
-  config.vm.define "bd-f30", primary: true, autostart: true do |f30|
-    # F30-specific configuration
-    f30.vm.box = "fedora/30-cloud-base"
-    f30.vm.provision :shell, inline: <<-SHELL
+  config.vm.define "bd-f33", primary: true, autostart: true do |f33|
+    # F33-specific configuration
+    f33.vm.box = "fedora/33-cloud-base"
+    f33.vm.provision :shell, inline: <<-SHELL
       dnf -y install libblockdev libblockdev-plugins-all
       dnf -y builddep libblockdev
       dnf -y install libfdisk-devel
@@ -53,10 +53,10 @@ Vagrant.configure("2") do |config|
     SHELL
   end
 
-  config.vm.define "bd-f29", primary: false, autostart: false do |f29|
-    # F29-specific configuration
-    f29.vm.box = "fedora/29-cloud-base"
-    f29.vm.provision :shell, inline: <<-SHELL
+  config.vm.define "bd-f32", primary: false, autostart: false do |f32|
+    # F32-specific configuration
+    f32.vm.box = "fedora/32-cloud-base"
+    f32.vm.provision :shell, inline: <<-SHELL
       dnf -y install libblockdev libblockdev-plugins-all
       dnf -y builddep libblockdev
       dnf -y install libfdisk-devel
@@ -65,21 +65,24 @@ Vagrant.configure("2") do |config|
     SHELL
   end
 
-  config.vm.define "bd-c7", primary: false, autostart: false do |c7|
-    # CentOS7-specific configuration
-    c7.vm.box = "centos/7"
-    c7.vm.provision :shell, inline: <<-SHELL
+  config.vm.define "bd-c8", primary: false, autostart: false do |c8|
+    # CentOS8-specific configuration
+    c8.vm.box = "centos/8"
+    c8.vm.provision :shell, inline: <<-SHELL
+      yum config-manager --set-enabled PowerTools
+      yum -y install epel-release
       yum -y install libblockdev libblockdev-plugins-all
       yum-builddep -y libblockdev
-      yum -y install '@Development Tools' targetcli python-ipython git python-bytesize volume_key nss-tools
-      yum -y install pylint python-six dbus-python python-yaml
+      yum -y install libfdisk-devel
+      yum -y install '@Development Tools' targetcli python3-ipython git python3-bytesize volume_key nss-tools
+      yum -y install python3-pylint python3-six python3-dbus python3-yaml
     SHELL
   end
 
-  config.vm.define "bd-ubuntu1804", primary: false, autostart: false do |ubuntu1804|
+  config.vm.define "bd-ubuntu2004", primary: false, autostart: false do |ubuntu2004|
     # Ubuntu 18.04-specific configuration
-    ubuntu1804.vm.box = "generic/ubuntu1804"
-    ubuntu1804.vm.provision :shell, inline: <<-SHELL
+    ubuntu2004.vm.box = "generic/ubuntu2004"
+    ubuntu2004.vm.provision :shell, inline: <<-SHELL
       sed -i '/deb-src/s/^# //' /etc/apt/sources.list
       apt-get update
       apt-get -y install libblockdev2 libblockdev-* python3-blockdev
