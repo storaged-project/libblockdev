@@ -1386,6 +1386,7 @@ class F2FSResize(F2FSTestCase):
             raise RuntimeError("Failed to determine f2fs version from: %s" % out)
         return LooseVersion(m.groups()[0]) >= LooseVersion("1.12.0")
 
+    @tag_test(TestTags.UNSTABLE)
     def test_f2fs_resize(self):
         """Verify that it is possible to resize an f2fs file system"""
 
