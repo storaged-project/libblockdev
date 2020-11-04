@@ -1386,6 +1386,7 @@ class F2FSResize(F2FSTestCase):
             raise RuntimeError("Failed to determine f2fs version from: %s" % out)
         return LooseVersion(m.groups()[0]) >= LooseVersion("1.12.0")
 
+    @tag_test(TestTags.UNSTABLE)
     def test_f2fs_resize(self):
         """Verify that it is possible to resize an f2fs file system"""
 
@@ -1394,33 +1395,33 @@ class F2FSResize(F2FSTestCase):
 
         # shrink without the safe option -- should fail
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_f2fs_resize(self.loop_dev, 80 * 1024**2 / 512, False)
+            BlockDev.fs_f2fs_resize(self.loop_dev, 100 * 1024**2 / 512, False)
 
         # if we can't shrink we'll just check it returns some sane error
         if not self._can_resize_f2fs():
             with six.assertRaisesRegex(self, GLib.GError, "Too low version of resize.f2fs. At least 1.12.0 required."):
-                BlockDev.fs_f2fs_resize(self.loop_dev, 80 * 1024**2 / 512, True)
+                BlockDev.fs_f2fs_resize(self.loop_dev, 100 * 1024**2 / 512, True)
             return
 
-        succ = BlockDev.fs_f2fs_resize(self.loop_dev, 80 * 1024**2 / 512, True)
-        self.assertTrue(succ)
-
-        fi = BlockDev.fs_f2fs_get_info(self.loop_dev)
-        self.assertEqual(fi.sector_count * fi.sector_size, 80 * 1024**2)
-
-        # grow
         succ = BlockDev.fs_f2fs_resize(self.loop_dev, 100 * 1024**2 / 512, True)
         self.assertTrue(succ)
 
         fi = BlockDev.fs_f2fs_get_info(self.loop_dev)
         self.assertEqual(fi.sector_count * fi.sector_size, 100 * 1024**2)
 
-        # shrink again
-        succ = BlockDev.fs_f2fs_resize(self.loop_dev, 80 * 1024**2 / 512, True)
+        # grow
+        succ = BlockDev.fs_f2fs_resize(self.loop_dev, 120 * 1024**2 / 512, True)
         self.assertTrue(succ)
 
         fi = BlockDev.fs_f2fs_get_info(self.loop_dev)
-        self.assertEqual(fi.sector_count * fi.sector_size, 80 * 1024**2)
+        self.assertEqual(fi.sector_count * fi.sector_size, 120 * 1024**2)
+
+        # shrink again
+        succ = BlockDev.fs_f2fs_resize(self.loop_dev, 100 * 1024**2 / 512, True)
+        self.assertTrue(succ)
+
+        fi = BlockDev.fs_f2fs_get_info(self.loop_dev)
+        self.assertEqual(fi.sector_count * fi.sector_size, 100 * 1024**2)
 
         # resize to maximum size
         succ = BlockDev.fs_f2fs_resize(self.loop_dev, 0, False)
