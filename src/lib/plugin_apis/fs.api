@@ -607,11 +607,8 @@ GType bd_fs_exfat_info_get_type();
  * @label: label of the filesystem
  * @uuid: uuid of the filesystem
  * @sector_size: sector size used by the filesystem
- * @cluster_size: cluster size used by the filesystem
  * @sector_count: number of sectors in the filesystem
- * @free_sectors: number of free sectors in the filesystem
  * @cluster_count: number of clusters in the filesystem
- * @free_clusters: number of free clusters in the filesystem
  */
 typedef struct BDFSExfatInfo {
     gchar *label;

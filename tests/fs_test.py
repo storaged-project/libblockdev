@@ -76,8 +76,7 @@ class FSTestCase(unittest.TestCase):
                                                          BlockDev.FSTechMode.MKFS |
                                                          BlockDev.FSTechMode.RESIZE |
                                                          BlockDev.FSTechMode.SET_LABEL)
-        except Exception as e:
-            print(e)
+        except Exception:
             cls.nilfs2_avail = False
 
         try:

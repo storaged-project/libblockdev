@@ -82,7 +82,7 @@ static const BDFSInfo fs_info[] = {
     {"f2fs", "fsck.f2fs", "fsck.f2fs", "resize.f2fs", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, NULL, "dump.f2fs", NULL},
     {"reiserfs", "reiserfsck", "reiserfsck", "resize_reiserfs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "reiserfstune", "debugreiserfs", "reiserfstune"},
     {"nilfs2", NULL, NULL, "nilfs-resize", BD_FS_ONLINE_GROW | BD_FS_ONLINE_GROW, "tune-nilfs", "tune-nilfs", "tune-nilfs"},
-    {"exfat", "fsck.exfat", "fsck.exfat", NULL, 0, "exfatlabel", "dumpexfat", NULL},
+    {"exfat", "fsck.exfat", "fsck.exfat", NULL, 0, "tune.exfat", "tune.exfat", NULL},
     {NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL}
 };
 
