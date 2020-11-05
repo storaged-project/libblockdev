@@ -347,34 +347,6 @@ class MDTestNominateDenominate(MDTestCase):
             succ = BlockDev.md_deactivate(BlockDev.md_node_from_name("bd_test_md"))
             self.assertTrue(succ)
 
-class MDTestNominateDenominateActive(MDTestCase):
-    # slow and leaking an MD array because with a nominated spare device, it
-    # cannot be deactivated in the end (don't ask me why)
-    @tag_test(TestTags.SLOW, TestTags.UNSAFE, TestTags.UNSTABLE)
-    def test_nominate_denominate_active(self):
-        """Verify that nominate and denominate deivice works as expected on (de)activated MD RAID"""
-
-        with wait_for_action("resync"):
-            succ = BlockDev.md_create("bd_test_md", "raid1",
-                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, False)
-            self.assertTrue(succ)
-
-        # can not re-add in incremental mode because the array is active
-        with self.assertRaises(GLib.GError):
-            BlockDev.md_nominate(self.loop_dev3)
-
-        succ = BlockDev.md_deactivate("bd_test_md");
-        self.assertTrue(succ)
-
-        # once the array is deactivated, can add in incremental mode
-        succ = BlockDev.md_nominate(self.loop_dev3)
-        self.assertTrue(succ)
-
-        # cannot re-add twice
-        with self.assertRaises(GLib.GError):
-            succ = BlockDev.md_nominate(self.loop_dev3)
-            self.assertTrue(succ)
 
 class MDTestAddRemove(MDTestCase):
     @tag_test(TestTags.SLOW)
