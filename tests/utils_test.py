@@ -1,8 +1,9 @@
 import unittest
 import re
 import os
+import six
 import overrides_hack
-from utils import fake_utils, create_sparse_tempfile, create_lio_device, delete_lio_device, run_command, TestTags, tag_test
+from utils import fake_utils, create_sparse_tempfile, create_lio_device, delete_lio_device, run_command, TestTags, tag_test, read_file
 
 from gi.repository import BlockDev, GLib
 
@@ -74,6 +75,9 @@ class UtilsExecLoggingTest(UtilsTestCase):
 
         succ = BlockDev.utils_exec_and_report_error(["true"])
         self.assertTrue(succ)
+
+        with six.assertRaisesRegex(self, GLib.GError, r"Process reported exit code 1"):
+            succ = BlockDev.utils_exec_and_report_error(["/bin/false"])
 
         succ, out = BlockDev.utils_exec_and_capture_output(["echo", "hi"])
         self.assertTrue(succ)
@@ -204,6 +208,175 @@ class UtilsExecLoggingTest(UtilsTestCase):
         succ, out = BlockDev.utils_exec_and_capture_output(["locale"])
         self.assertTrue(succ)
         self.assertIn("LC_ALL=C", out)
+
+    @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
+    def test_exec_buffer_bloat(self):
+        """Verify that very large output from a command is handled properly"""
+
+        # easy 64kB of data
+        cnt = 65536
+        succ, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", "for i in {1..%d}; do echo -n .; done" % cnt])
+        self.assertTrue(succ)
+        self.assertEquals(len(out), cnt)
+
+        succ, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", "for i in {1..%d}; do echo -n .; echo -n \# >&2; done" % cnt])
+        self.assertTrue(succ)
+        self.assertEquals(len(out), cnt)
+
+        # now exceed the system pipe buffer size
+        # pipe(7): The maximum size (in bytes) of individual pipes that can be set by users without the CAP_SYS_RESOURCE capability.
+        cnt = int(read_file("/proc/sys/fs/pipe-max-size")) + 100
+        self.assertGreater(cnt, 0)
+
+        succ, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", "for i in {1..%d}; do echo -n .; done" % cnt])
+        self.assertTrue(succ)
+        self.assertEquals(len(out), cnt)
+
+        succ, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", "for i in {1..%d}; do echo -n .; echo -n \# >&2; done" % cnt])
+        self.assertTrue(succ)
+        self.assertEquals(len(out), cnt)
+
+        # make use of some newlines
+        succ, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", "for i in {1..%d}; do echo -n .; if [ $(($i%%500)) -eq 0 ]; then echo ''; fi; done" % cnt])
+        self.assertTrue(succ)
+        self.assertGreater(len(out), cnt)
+
+        succ, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", "for i in {1..%d}; do echo -n .; echo -n \# >&2; if [ $(($i%%500)) -eq 0 ]; then echo ''; echo '' >&2; fi; done" % cnt])
+        self.assertTrue(succ)
+        self.assertGreater(len(out), cnt)
+
+
+    EXEC_PROGRESS_MSG = "Aloha, I'm the progress line you should match."
+
+    def my_exec_progress_func_concat(self, line):
+        """Expect an concatenated string"""
+        s = ""
+        for i in range(10):
+            s += self.EXEC_PROGRESS_MSG
+        self.assertEqual(line, s)
+        self.num_matches += 1
+        return 0
+
+    def my_exec_progress_func(self, line):
+        self.assertTrue(re.match(r".*%s.*" % self.EXEC_PROGRESS_MSG, line))
+        self.num_matches += 1
+        return 0
+
+    def test_exec_buffer_bloat_progress(self):
+        """Verify that progress reporting can handle large output"""
+
+        # no newlines, should match just a single occurrence on EOF
+        cnt = 10
+        self.num_matches = 0
+        status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..10}; do echo -n \"%s\"; done" % self.EXEC_PROGRESS_MSG], None, self.my_exec_progress_func_concat)
+        self.assertTrue(status)
+        self.assertEqual(self.num_matches, 1)
+
+        # ten matches
+        self.num_matches = 0
+        status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo \"%s\"; done" % (cnt, self.EXEC_PROGRESS_MSG)], None, self.my_exec_progress_func)
+        self.assertTrue(status)
+        self.assertEqual(self.num_matches, cnt)
+
+        # 100k matches
+        cnt = 100000
+        self.num_matches = 0
+        status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo \"%s\"; done" % (cnt, self.EXEC_PROGRESS_MSG)], None, self.my_exec_progress_func)
+        self.assertTrue(status)
+        self.assertEqual(self.num_matches, cnt)
+
+        # 100k matches on stderr
+        self.num_matches = 0
+        status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo \"%s\" >&2; done" % (cnt, self.EXEC_PROGRESS_MSG)], None, self.my_exec_progress_func)
+        self.assertTrue(status)
+        self.assertEqual(self.num_matches, cnt)
+
+        # 100k matches on stderr and stdout
+        self.num_matches = 0
+        status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo \"%s\"; echo \"%s\" >&2; done" % (cnt, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG)], None, self.my_exec_progress_func)
+        self.assertTrue(status)
+        self.assertEqual(self.num_matches, cnt * 2)
+
+        # stdout and stderr output, non-zero return from the command and very long exception message
+        self.num_matches = 0
+        with six.assertRaisesRegex(self, GLib.GError, r"Process reported exit code 66"):
+            status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo \"%s\"; echo \"%s\" >&2; done; exit 66" % (cnt, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG)], None, self.my_exec_progress_func)
+        self.assertEqual(self.num_matches, cnt * 2)
+
+        # no progress reporting callback given, tests slightly different code path
+        status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo \"%s\"; echo \"%s\" >&2; done" % (cnt, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG)], None, None)
+        self.assertTrue(status)
+
+    def test_exec_null_bytes(self):
+        """Verify that null bytes in the output are processed properly"""
+
+        TEST_DATA = ["First line", "Second line", "Third line"]
+
+        status, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", "echo -e \"%s\\0%s\\n%s\"" % (TEST_DATA[0], TEST_DATA[1], TEST_DATA[2])])
+        self.assertTrue(status)
+        self.assertTrue(TEST_DATA[0] in out)
+        self.assertTrue(TEST_DATA[1] in out)
+        self.assertTrue(TEST_DATA[2] in out)
+        self.assertFalse("kuku!" in out)
+
+        # ten matches
+        cnt = 10
+        self.num_matches = 0
+        status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo -e \"%s\\0%s\"; done" % (cnt, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG)], None, self.my_exec_progress_func)
+        self.assertTrue(status)
+        self.assertEqual(self.num_matches, cnt * 2)
+
+        # 100k matches
+        cnt = 100000
+        self.num_matches = 0
+        status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo -e \"%s\\0%s\"; done" % (cnt, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG)], None, self.my_exec_progress_func)
+        self.assertTrue(status)
+        self.assertEqual(self.num_matches, cnt * 2)
+
+        # 100k matches on stderr
+        self.num_matches = 0
+        status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo -e \"%s\\0%s\" >&2; done" % (cnt, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG)], None, self.my_exec_progress_func)
+        self.assertTrue(status)
+        self.assertEqual(self.num_matches, cnt * 2)
+
+        # 100k matches on stderr and stdout
+        self.num_matches = 0
+        status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo -e \"%s\\0%s\"; echo -e \"%s\\0%s\" >&2; done" % (cnt, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG)], None, self.my_exec_progress_func)
+        self.assertTrue(status)
+        self.assertEqual(self.num_matches, cnt * 4)
+
+        # stdout and stderr output, non-zero return from the command and very long exception message
+        self.num_matches = 0
+        with six.assertRaisesRegex(self, GLib.GError, r"Process reported exit code 66"):
+            status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo -e \"%s\\0%s\"; echo -e \"%s\\0%s\" >&2; done; exit 66" % (cnt, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG)], None, self.my_exec_progress_func)
+        self.assertEqual(self.num_matches, cnt * 4)
+
+        # no progress reporting callback given, tests slightly different code path
+        status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo -e \"%s\\0%s\"; echo -e \"%s\\0%s\" >&2; done" % (cnt, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG)], None, None)
+        self.assertTrue(status)
+
+    def test_exec_large_input(self):
+        """Verify that large input is passed to the process properly"""
+
+        DATA_MATCH = "==END=="
+
+        data = "Begin data =="
+        for i in range(6666666):
+            data += "bloat"
+        data += DATA_MATCH
+
+        # command is not accepting stdin, write() will return an error
+        with six.assertRaisesRegex(self, GLib.GError, r"Failed to write to stdin of the process: Broken pipe"):
+            BlockDev.utils_exec_with_input(["false"], data, None)
+
+        # test that `grep` returns error on non-match
+        with six.assertRaisesRegex(self, GLib.GError, r"Process reported exit code 1"):
+            BlockDev.utils_exec_with_input(["grep", "unmatched"], data, None)
+
+        # expecting that `grep` will find the string at the end
+        status = BlockDev.utils_exec_with_input(["grep", DATA_MATCH], data, None)
+        self.assertTrue(status)
+
 
 class UtilsDevUtilsTestCase(UtilsTestCase):
     @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
