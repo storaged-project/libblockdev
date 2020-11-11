@@ -696,6 +696,15 @@ bd_fs_nilfs2_check_label
 bd_fs_nilfs2_set_uuid
 bd_fs_nilfs2_check_uuid
 bd_fs_nilfs2_wipe
+BDFSExfatInfo
+bd_fs_exfat_check
+bd_fs_exfat_get_info
+bd_fs_exfat_info_copy
+bd_fs_exfat_info_free
+bd_fs_exfat_mkfs
+bd_fs_exfat_repair
+bd_fs_exfat_set_label
+bd_fs_exfat_wipe
 </SECTION>
 
 <SECTION>

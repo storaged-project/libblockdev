@@ -17,7 +17,8 @@ libbd_fs_la_SOURCES  = ../check_deps.c ../check_deps.h \
 						xfs.c      xfs.h      \
 						f2fs.c     f2fs.h     \
 						reiserfs.c reiserfs.h \
-						nilfs.c    nilfs.h
+						nilfs.c    nilfs.h    \
+						exfat.c    exfat.h
 
 libincludefsdir = $(includedir)/blockdev/fs/
 libincludefs_HEADERS = ext.h     \
@@ -28,4 +29,5 @@ libincludefs_HEADERS = ext.h     \
 					xfs.h      \
 					f2fs.h	   \
 					reiserfs.h \
-					nilfs.h
+					nilfs.h    \
+					exfat.h
