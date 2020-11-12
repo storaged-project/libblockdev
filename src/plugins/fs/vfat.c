@@ -129,6 +129,27 @@ void bd_fs_vfat_info_free (BDFSVfatInfo *data) {
     g_free (data);
 }
 
+BDExtraArg __attribute__ ((visibility ("hidden")))
+**bd_fs_vfat_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
+    GPtrArray *options_array = g_ptr_array_new ();
+    const BDExtraArg **extra_p = NULL;
+
+    if (options->label)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-n", options->label));
+
+    if (options->uuid)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-i", options->uuid));
+
+    if (extra) {
+        for (extra_p = extra; *extra_p; extra_p++)
+            g_ptr_array_add (options_array, bd_extra_arg_copy ((BDExtraArg *) *extra_p));
+    }
+
+    g_ptr_array_add (options_array, NULL);
+
+    return (BDExtraArg **) g_ptr_array_free (options_array, FALSE);
+}
+
 /**
  * bd_fs_vfat_mkfs:
  * @device: the device to create a new vfat fs on

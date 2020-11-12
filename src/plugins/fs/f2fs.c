@@ -172,6 +172,27 @@ void bd_fs_f2fs_info_free (BDFSF2FSInfo *data) {
     g_free (data);
 }
 
+BDExtraArg __attribute__ ((visibility ("hidden")))
+**bd_fs_f2fs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
+    GPtrArray *options_array = g_ptr_array_new ();
+    const BDExtraArg **extra_p = NULL;
+
+    if (options->label)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-l", options->label));
+
+    if (options->no_discard)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-t", "nodiscard"));
+
+    if (extra) {
+        for (extra_p = extra; *extra_p; extra_p++)
+            g_ptr_array_add (options_array, bd_extra_arg_copy ((BDExtraArg *) *extra_p));
+    }
+
+    g_ptr_array_add (options_array, NULL);
+
+    return (BDExtraArg **) g_ptr_array_free (options_array, FALSE);
+}
+
 
 /**
  * bd_fs_f2fs_mkfs:

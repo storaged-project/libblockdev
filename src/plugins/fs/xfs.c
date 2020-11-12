@@ -122,6 +122,37 @@ void bd_fs_xfs_info_free (BDFSXfsInfo *data) {
     g_free (data);
 }
 
+BDExtraArg __attribute__ ((visibility ("hidden")))
+**bd_fs_xfs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
+    GPtrArray *options_array = g_ptr_array_new ();
+    const BDExtraArg **extra_p = NULL;
+    gchar *uuid_option = NULL;
+
+    if (options->label)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-L", options->label));
+
+    if (options->uuid) {
+        uuid_option = g_strdup_printf ("uuid=%s", options->uuid);
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-m", uuid_option));
+        g_free (uuid_option);
+    }
+
+    if (options->dry_run)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-N", ""));
+
+    if (options->no_discard)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-K", ""));
+
+    if (extra) {
+        for (extra_p = extra; *extra_p; extra_p++)
+            g_ptr_array_add (options_array, bd_extra_arg_copy ((BDExtraArg *) *extra_p));
+    }
+
+    g_ptr_array_add (options_array, NULL);
+
+    return (BDExtraArg **) g_ptr_array_free (options_array, FALSE);
+}
+
 
 /**
  * bd_fs_xfs_mkfs:

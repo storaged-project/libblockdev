@@ -24,6 +24,69 @@ typedef enum {
     BD_FS_ERROR_UUID_INVALID,
 } BDFsError;
 
+/**
+ * BDFSMkfsOptions:
+ * @label: label of the filesystem
+ * @uuid: uuid of the filesystem
+ * @dry_run: whether to run mkfs in dry run mode (no changes written to the device)
+ * @no_discard: whether to avoid discarding blocks at mkfs time
+ * @reserve: reserve for future expansion
+ */
+typedef struct BDFSMkfsOptions {
+    const gchar *label;
+    const gchar *uuid;
+    gboolean dry_run;
+    gboolean no_discard;
+    guint8 reserve[32];
+} BDFSMkfsOptions;
+
+/**
+ * bd_fs_mkfs_options_copy: (skip)
+ * @data: (allow-none): %BDFSMkfsOptions to copy
+ *
+ * Creates a new copy of @data.
+ */
+BDFSMkfsOptions* bd_fs_mkfs_options_copy (BDFSMkfsOptions *data) {
+    if (data == NULL)
+        return NULL;
+
+    BDFSMkfsOptions *ret = g_new0 (BDFSMkfsOptions, 1);
+
+    ret->label = data->label;
+    ret->uuid = data->uuid;
+    ret->dry_run = data->dry_run;
+    ret->no_discard = data->no_discard;
+
+    return ret;
+}
+
+/**
+ * bd_fs_mkfs_options_free: (skip)
+ * @data: (allow-none): %BDFSMkfsOptions to free
+ *
+ * Frees @data.
+ */
+void bd_fs_mkfs_options_free (BDFSMkfsOptions *data) {
+    if (data == NULL)
+        return;
+
+    g_free (data);
+}
+
+#define BD_FS_MKFS_OPTIONS (bd_fs_mkfs_options_get_type ())
+
+GType bd_fs_mkfs_options_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDFSMkfsOptions",
+                                            (GBoxedCopyFunc) bd_fs_mkfs_options_copy,
+                                            (GBoxedFreeFunc) bd_fs_mkfs_options_free);
+    }
+
+    return type;
+}
+
 #define BD_FS_TYPE_EXT2_INFO (bd_fs_ext2_info_get_type ())
 GType bd_fs_ext2_info_get_type();
 #define BD_FS_TYPE_EXT3_INFO (bd_fs_ext3_info_get_type ())
@@ -930,6 +993,34 @@ guint64 bd_fs_get_size (const gchar *device, GError **error);
 guint64 bd_fs_get_free_space (const gchar *device, GError **error);
 
 /**
+ * BDFSMkfsOptionsFlags:
+ * Flags indicating mkfs options are available for given filesystem type.
+ */
+typedef enum {
+    BD_FS_MKFS_LABEL     = 1 << 0,
+    BD_FS_MKFS_UUID      = 1 << 1,
+    BD_FS_MKFS_DRY_RUN   = 1 << 2,
+    BD_FS_MKFS_NODISCARD = 1 << 3,
+} BDFSMkfsOptionsFlags;
+
+/**
+ * bd_fs_can_mkfs:
+ * @type: the filesystem type to be tested for installed mkfs support
+ * @options: (out): flags for allowed mkfs options (i.e. support for setting label or UUID when creating the filesystem)
+ * @required_utility: (out) (transfer full): the utility binary which is required for creating (if missing returns %FALSE but no @error)
+ * @error: (out): place to store error (if any)
+ *
+ * Searches for the required utility to create the given filesystem and returns whether
+ * it is installed. The options flags indicate what additional options can be specified for @type.
+ * Unknown filesystems result in errors.
+ *
+ * Returns: whether filesystem mkfs tool is available
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
+ */
+gboolean bd_fs_can_mkfs (const gchar *type, BDFSMkfsOptionsFlags *options, gchar **required_utility, GError **error);
+
+/**
  * BDFsResizeFlags:
  * Flags indicating whether a filesystem resize action supports growing and/or
  * shrinking if mounted or unmounted.
@@ -1056,6 +1147,33 @@ gboolean bd_fs_can_get_size (const gchar *type, gchar **required_utility, GError
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
  */
 gboolean bd_fs_can_get_free_space (const gchar *type, gchar **required_utility, GError **error);
+
+/**
+ * bd_fs_mkfs:
+ * @device: the device to create the new filesystem on
+ * @fstype: name of the filesystem to create (e.g. "ext4")
+ * @options: additional options like label or UUID for the filesystem
+ * @extra: (allow-none) (array zero-terminated=1): extra mkfs options not provided in @options
+ * @error: (out): place to store error (if any)
+ *
+ * This is a helper function for creating filesystems with extra options.
+ * This is the same as running a filesystem-specific function like %bd_fs_ext4_mkfs
+ * and manually specifying the extra command line options. %BDFsMkfsOptions
+ * removes the need to specify supported options for selected filesystems,
+ * make sure to check whether @fstype supports these options (see %bd_fs_can_mkfs)
+ * for details.
+ *
+ * When specifying additional mkfs options using @extra, it's caller's
+ * responsibility to make sure these options do not conflict with options
+ * specified using @options. Extra options are added after the @options and
+ * there are no additional checks for duplicate and/or conflicting options.
+ *
+ * Returns: whether @fstype was successfully created on @device or not.
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_CREATE
+ *
+ */
+gboolean bd_fs_mkfs (const gchar *device, const gchar *fstype, BDFSMkfsOptions *options, const BDExtraArg **extra, GError **error);
 
 /**
  * bd_fs_ext2_mkfs:
