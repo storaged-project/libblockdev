@@ -242,6 +242,26 @@ gboolean bd_fs_exfat_set_label (const gchar *device, const gchar *label, GError 
 }
 
 /**
+ * bd_fs_exfat_check_label:
+ * @label: label to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @label is a valid label for the exfat file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_exfat_check_label (const gchar *label, GError **error) {
+    if (strlen (label) > 11) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                     "Label for exFAT filesystem must be at most 11 characters long.");
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+/**
  * bd_fs_exfat_get_info:
  * @device: the device containing the file system to get info for
  * @error: (out): place to store error (if any)
