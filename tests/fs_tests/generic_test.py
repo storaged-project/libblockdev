@@ -147,6 +147,9 @@ class CanResizeRepairCheckLabel(GenericTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_can_resize("non-existing-fs")
 
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_resize("udf")
+
     def test_can_repair(self):
         """Verify that tooling query works for repair"""
 
@@ -167,6 +170,9 @@ class CanResizeRepairCheckLabel(GenericTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_can_repair("nilfs2")
 
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_repair("udf")
+
     def test_can_check(self):
         """Verify that tooling query works for consistency check"""
 
@@ -186,6 +192,9 @@ class CanResizeRepairCheckLabel(GenericTestCase):
 
         with self.assertRaises(GLib.GError):
             BlockDev.fs_can_check("nilfs2")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_check("udf")
 
     def test_can_set_label(self):
         """Verify that tooling query works for setting the label"""
@@ -243,6 +252,9 @@ class CanResizeRepairCheckLabel(GenericTestCase):
 
         with self.assertRaises(GLib.GError):
             BlockDev.fs_can_get_free_space("exfat")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_get_free_space("udf")
 
 
 class GenericMkfs(GenericTestCase):
@@ -382,6 +394,13 @@ class GenericMkfs(GenericTestCase):
             return info
 
         self._test_ext_generic_mkfs("btrfs", _btrfs_info, label, uuid)
+
+    def test_udf_generic_mkfs(self):
+        """ Test generic mkfs with udf """
+        if not self.udf_avail:
+            self.skipTest("skipping UDF: not available")
+        label = "LABEL"
+        self._test_ext_generic_mkfs("udf", BlockDev.fs_udf_get_info, label, None)
 
     def test_can_mkfs(self):
         """ Test checking whether mkfs is supported """
@@ -604,6 +623,12 @@ class GenericSetLabel(GenericTestCase):
             self.skipTest("skipping btrfs: not available")
         self._test_generic_set_label(mkfs_function=BlockDev.fs_btrfs_mkfs)
 
+    def test_udf_generic_set_label(self):
+        """Test generic set_label function with a udf file system"""
+        if not self.udf_avail:
+            self.skipTest("skipping udf: not available")
+        self._test_generic_set_label(mkfs_function=BlockDev.fs_udf_mkfs)
+
 
 class GenericSetUUID(GenericTestCase):
     def _test_generic_set_uuid(self, mkfs_function, test_uuid="4d7086c4-a4d3-432f-819e-73da03870df9"):
@@ -673,6 +698,12 @@ class GenericSetUUID(GenericTestCase):
         if not self.btrfs_avail:
             self.skipTest("skipping Btrfs: not available")
         self._test_generic_set_uuid(mkfs_function=BlockDev.fs_btrfs_mkfs)
+
+    def test_udf_generic_set_uuid(self):
+        """Test generic set_uuid function with a udf file system"""
+        if not self.udf_avail:
+            self.skipTest("skipping UDF: not available")
+        self._test_generic_set_uuid(mkfs_function=BlockDev.fs_udf_mkfs, test_uuid="5fae9ade7938dfc8")
 
 
 class GenericResize(GenericTestCase):
@@ -872,6 +903,21 @@ class GenericResize(GenericTestCase):
             self.skipTest("skipping Btrfs: not available")
         self._test_generic_resize(mkfs_function=BlockDev.fs_btrfs_mkfs, min_size=300*1024**2)
 
+    def test_udf_generic_resize(self):
+        """Test generic resize function with an udf file system"""
+        if not self.udf_avail:
+            self.skipTest("skipping UDF: not available")
+
+        # clean the device
+        succ = BlockDev.fs_clean(self.loop_dev)
+
+        succ = BlockDev.fs_udf_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        # no resize support for UDF
+        with six.assertRaisesRegex(self, GLib.GError, "Resizing filesystem 'udf' is not supported."):
+            BlockDev.fs_resize(self.loop_dev, 80 * 1024**2)
+
 
 class GenericGetFreeSpace(GenericTestCase):
     def _test_get_free_space(self, mkfs_function, size_delta=0):
@@ -924,6 +970,21 @@ class GenericGetFreeSpace(GenericTestCase):
         if not self.btrfs_avail:
             self.skipTest("skipping Btrfs: not available")
         self._test_get_free_space(mkfs_function=BlockDev.fs_btrfs_mkfs)
+
+    def test_udf_get_free_space(self):
+        """Test generic resize function with an udf file system"""
+        if not self.udf_avail:
+            self.skipTest("skipping UDF: not available")
+
+        # clean the device
+        succ = BlockDev.fs_clean(self.loop_dev)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_udf_mkfs(self.loop_dev)
+        self.assertTrue(succ)
+
+        with six.assertRaisesRegex(self, GLib.GError, "Getting free space on filesystem 'udf' is not supported."):
+            BlockDev.fs_get_free_space(self.loop_dev)
 
 
 class FSFreezeTest(GenericTestCase):

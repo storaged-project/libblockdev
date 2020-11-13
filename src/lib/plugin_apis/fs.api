@@ -517,6 +517,7 @@ typedef enum {
     BD_FS_TECH_NILFS2,
     BD_FS_TECH_EXFAT,
     BD_FS_TECH_BTRFS,
+    BD_FS_TECH_UDF,
 } BDFSTech;
 
 typedef enum {
@@ -787,6 +788,82 @@ GType bd_fs_btrfs_info_get_type () {
         type = g_boxed_type_register_static("BDFSBtrfsInfo",
                                             (GBoxedCopyFunc) bd_fs_btrfs_info_copy,
                                             (GBoxedFreeFunc) bd_fs_btrfs_info_free);
+    }
+
+    return type;
+}
+
+/**
+ * BDFSUdfInfo:
+ * @label: label of the filesystem
+ * @uuid: uuid of the filesystem
+ * @revision: UDF revision
+ * @lvid: Logical Volume Identifier (most UDF implementations use this identifier as a disk label)
+ * @vid: Volume Identifier
+ * @block_size: block size used by the filesystem
+ * @block_count: number of blocks in the filesystem
+ * @free_blocks: number of free blocks in the filesystem
+ */
+typedef struct BDFSUdfInfo {
+    gchar *label;
+    gchar *uuid;
+    gchar *revision;
+    gchar *lvid;
+    gchar *vid;
+    guint64 block_size;
+    guint64 block_count;
+    guint64 free_blocks;
+} BDFSUdfInfo;
+
+/**
+ * bd_fs_udf_info_free: (skip)
+ * @data: (allow-none): %BDFSUdfInfo to free
+ *
+ * Frees @data.
+ */
+void bd_fs_udf_info_free (BDFSUdfInfo *data) {
+    if (data == NULL)
+        return;
+
+    g_free (data->label);
+    g_free (data->uuid);
+    g_free (data->revision);
+    g_free (data->lvid);
+    g_free (data->vid);
+    g_free (data);
+}
+
+/**
+ * bd_fs_udf_info_copy: (skip)
+ * @data: (allow-none): %BDFSUdfInfo to copy
+ *
+ * Creates a new copy of @data.
+ */
+BDFSUdfInfo* bd_fs_udf_info_copy (BDFSUdfInfo *data) {
+    if (data == NULL)
+        return NULL;
+
+    BDFSUdfInfo *ret = g_new0 (BDFSUdfInfo, 1);
+
+    ret->label = g_strdup (data->label);
+    ret->uuid = g_strdup (data->uuid);
+    ret->revision = g_strdup (data->revision);
+    ret->lvid = g_strdup (data->lvid);
+    ret->vid = g_strdup (data->vid);
+    ret->block_size = data->block_size;
+    ret->block_count = data->block_count;
+    ret->free_blocks = data->free_blocks;
+
+    return ret;
+}
+
+GType bd_fs_udf_info_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDFSUdfInfo",
+                                            (GBoxedCopyFunc) bd_fs_udf_info_copy,
+                                            (GBoxedFreeFunc) bd_fs_udf_info_free);
     }
 
     return type;
@@ -2523,5 +2600,102 @@ BDFSBtrfsInfo* bd_fs_btrfs_get_info (const gchar *mpoint, GError **error);
  * Tech category: %BD_BTRFS_TECH_FS-%BD_BTRFS_TECH_MODE_MODIFY
  */
 gboolean bd_fs_btrfs_resize (const gchar *mpoint, guint64 new_size, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_fs_udf_mkfs:
+ * @device: the device to create a new UDF fs on
+ * @media_type: (allow-none): specify the media type or %NULL for default ('hd')
+ * @revision: (allow-none): UDF revision to use or %NULL for default ('2.01')
+ * @block_size: block size in bytes or 0 for auto detection (device logical block size)
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
+ *                                                 passed to the 'mkudffs' utility)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether a new UDF fs was successfully created on @device or not
+ *
+ * Tech category: %BD_FS_TECH_UDF-%BD_FS_TECH_MODE_MKFS
+ */
+gboolean bd_fs_udf_mkfs (const gchar *device, const gchar *media_type, gchar *revision, guint64 block_size, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_fs_udf_wipe:
+ * @device: the device to wipe a UDF signature from
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the UDF signature was successfully wiped from the @device or
+ *          not
+ *
+ * Tech category: %BD_FS_TECH_UDF-%BD_FS_TECH_MODE_WIPE
+ */
+gboolean bd_fs_udf_wipe (const gchar *device, GError **error);
+
+/**
+ * bd_fs_udf_set_label:
+ * @device: the device containing the file system to set label for
+ * @label: label to set
+ * @error: (out): place to store error (if any)
+ *
+ * Note: This sets both Volume Identifier and Logical Volume Identifier. Volume Identifier
+ *       is truncated to 30 or 15 characters to accommodate to the different length limits
+ *       of these labels.
+ *
+ * Returns: whether the label of UDF file system on the @device was
+ *          successfully set or not
+ *
+ * Tech category: %BD_FS_TECH_UDF-%BD_FS_TECH_MODE_SET_LABEL
+ */
+gboolean bd_fs_udf_set_label (const gchar *device, const gchar *label, GError **error);
+
+/**
+ * bd_fs_udf_check_label:
+ * @label: label to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Note: This checks only whether @label adheres the length limits for Logical Volume Identifier,
+ *       not the stricter limits for Volume Identifier.
+ *
+ * Returns: whether @label is a valid label for the UDF file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_udf_check_label (const gchar *label, GError **error);
+
+/**
+ * bd_fs_udf_set_uuid:
+ * @device: the device containing the file system to set the UUID (serial number) for
+ * @uuid: (allow-none): UUID to set or %NULL to generate a new one
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the UUID of the UDF file system on the @device was
+ *          successfully set or not
+ *
+ * Tech category: %BD_FS_TECH_UDF-%BD_FS_TECH_MODE_SET_UUID
+ */
+gboolean bd_fs_udf_set_uuid (const gchar *device, const gchar *uuid, GError **error);
+
+/**
+ * bd_fs_udf_check_uuid:
+ * @uuid: UUID to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @uuid is a valid UUID for the UDF file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_udf_check_uuid (const gchar *uuid, GError **error);
+
+/**
+ * bd_fs_udf_get_info:
+ * @device: the device containing the file system to get info for
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full): information about the file system on @device or
+ *                           %NULL in case of error
+ *
+ * Tech category: %BD_FS_TECH_UDF-%BD_FS_TECH_MODE_QUERY
+ */
+BDFSUdfInfo* bd_fs_udf_get_info (const gchar *device, GError **error);
 
 #endif  /* BD_FS_API */

@@ -87,6 +87,7 @@ static const BDFSInfo fs_info[] = {
     {"nilfs2", "mkfs.nilfs", BD_FS_MKFS_LABEL | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD, NULL, NULL, "nilfs-resize", BD_FS_ONLINE_GROW | BD_FS_ONLINE_SHRINK, "tune-nilfs", "tune-nilfs", "tune-nilfs"},
     {"exfat", "mkfs.exfat", BD_FS_MKFS_LABEL, "fsck.exfat", "fsck.exfat", NULL, 0, "tune.exfat", "tune.exfat", NULL},
     {"btrfs", "mkfs.btrfs", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_NODISCARD, "btrfsck", "btrfsck", "btrfs", BD_FS_ONLINE_GROW | BD_FS_ONLINE_SHRINK, "btrfs", "btrfs", "btrfstune"},
+    {"udf", "mkudffs", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID, NULL, NULL, NULL, 0, "udflabel", "udfinfo", "udflabel"},
     {NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, NULL}
 };
 
@@ -784,6 +785,21 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
             default:
                 g_assert_not_reached ();
         }
+    } else if (g_strcmp0 (fstype, "udf") == 0) {
+        switch (op) {
+            case BD_FS_RESIZE:
+                break;
+            case BD_FS_REPAIR:
+                break;
+            case BD_FS_CHECK:
+                break;
+            case BD_FS_LABEL:
+                return bd_fs_udf_set_label (device, label, error);
+            case BD_FS_UUID:
+                return bd_fs_udf_set_uuid (device, uuid, error);
+            default:
+                g_assert_not_reached ();
+        }
     }
     switch (op) {
         case BD_FS_RESIZE:
@@ -1015,6 +1031,13 @@ guint64 bd_fs_get_size (const gchar *device, GError **error) {
         if (info) {
             size = info->size;
             bd_fs_btrfs_info_free (info);
+        }
+        return size;
+    } else if (g_strcmp0 (fstype, "udf") == 0) {
+        BDFSUdfInfo *info = bd_fs_udf_get_info (device, error);
+        if (info) {
+            size = info->block_size * info->block_count;
+            bd_fs_udf_info_free (info);
         }
         return size;
     } else {
@@ -1329,7 +1352,7 @@ gboolean bd_fs_can_get_size (const gchar *type, gchar **required_utility, GError
  */
 gboolean bd_fs_can_get_free_space (const gchar *type, gchar **required_utility, GError **error) {
     /* some filesystems can't tell us free space even if we have the tools */
-    if (g_strcmp0 (type, "xfs") == 0 || g_strcmp0 (type, "f2fs") == 0 || g_strcmp0 (type, "exfat") == 0) {
+    if (g_strcmp0 (type, "xfs") == 0 || g_strcmp0 (type, "f2fs") == 0 || g_strcmp0 (type, "exfat") == 0 || g_strcmp0 (type, "udf") == 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
                      "Getting free space on filesystem '%s' is not supported.", type);
         return FALSE;
@@ -1418,6 +1441,7 @@ extern BDExtraArg** bd_fs_reiserfs_mkfs_options (BDFSMkfsOptions *options, const
 extern BDExtraArg** bd_fs_vfat_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
 extern BDExtraArg** bd_fs_xfs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
 extern BDExtraArg** bd_fs_btrfs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
+extern BDExtraArg** bd_fs_udf_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
 
 /**
  * bd_fs_mkfs:
@@ -1481,6 +1505,9 @@ gboolean bd_fs_mkfs (const gchar *device, const gchar *fstype, BDFSMkfsOptions *
     } else if (g_strcmp0 (fstype, "btrfs") == 0) {
         extra_args = bd_fs_btrfs_mkfs_options (options, extra);
         ret = bd_fs_btrfs_mkfs (device, (const BDExtraArg **) extra_args, error);
+    } else if (g_strcmp0 (fstype, "udf") == 0) {
+        extra_args = bd_fs_udf_mkfs_options (options, extra);
+        ret = bd_fs_udf_mkfs (device, NULL, NULL, 0, (const BDExtraArg **) extra_args, error);
     } else {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
                      "Filesystem '%s' is not supported.", fstype);
