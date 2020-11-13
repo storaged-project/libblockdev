@@ -1766,6 +1766,9 @@ class CanResizeRepairCheckLabel(FSTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_can_get_free_space("non-existing-fs")
 
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_get_free_space("exfat")
+
 class MountTest(FSTestCase):
 
     username = "bd_mount_test"
