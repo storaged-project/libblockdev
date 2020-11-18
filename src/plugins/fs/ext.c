@@ -404,15 +404,32 @@ static gboolean ext_repair (const gchar *device, gboolean unsafe, const BDExtraA
     const gchar *args_progress[7] = {"e2fsck", "-f", unsafe ? "-y" : "-p", "-C", "1", device, NULL};
     const gchar *args[5] = {"e2fsck", "-f", unsafe ? "-y" : "-p", device, NULL};
     gint status = 0;
+    gboolean ret = FALSE;
 
     if (!check_deps (&avail_deps, DEPS_E2FSCK_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
 
     if (bd_utils_prog_reporting_initialized ()) {
-        return bd_utils_exec_and_report_progress (args_progress, extra, extract_e2fsck_progress, &status, error);
+        ret = bd_utils_exec_and_report_progress (args_progress, extra, extract_e2fsck_progress, &status, error);
     } else {
-        return bd_utils_exec_and_report_status_error (args, extra, &status, error);
+        ret = bd_utils_exec_and_report_status_error (args, extra, &status, error);
     }
+
+    if (!ret) {
+        if (status == 1) {
+            /* no error should be reported for exit code 1 - File system errors corrected */
+            g_clear_error (error);
+            ret = TRUE;
+        } else if (status == 2) {
+            /* no error should be reported for exit code 2 - File system errors corrected, system should be rebooted */
+            bd_utils_log_format (BD_UTILS_LOG_WARNING,
+                                 "File system errors on %s were successfully corrected, but system reboot is advised.",
+                                 device);
+            g_clear_error (error);
+            ret = TRUE;
+        }
+    }
+    return ret;
 }
 
 /**
