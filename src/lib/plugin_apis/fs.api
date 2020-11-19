@@ -2174,6 +2174,18 @@ gboolean bd_fs_exfat_repair (const gchar *device, const BDExtraArg **extra, GErr
 gboolean bd_fs_exfat_set_label (const gchar *device, const gchar *label, GError **error);
 
 /**
+ * bd_fs_exfat_check_label:
+ * @label: label to check
+ * @error: (out) (allow-none): place to store error
+ *
+ * Returns: whether @label is a valid label for the exfat file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_exfat_check_label (const gchar *label, GError **error);
+
+/**
  * bd_fs_exfat_get_info:
  * @device: the device containing the file system to get info for
  * @error: (out): place to store error (if any)

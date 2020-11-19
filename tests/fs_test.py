@@ -1648,6 +1648,12 @@ class ExfatSetLabel(ExfatTestCase):
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
 
+        succ = BlockDev.fs_exfat_check_label("TEST_LABEL")
+        self.assertTrue(succ)
+
+        with six.assertRaisesRegex(self, GLib.GError, "at most 11 characters long."):
+            BlockDev.fs_exfat_check_label(12 * "a")
+
 class CanResizeRepairCheckLabel(FSTestCase):
     def test_can_resize(self):
         """Verify that tooling query works for resize"""

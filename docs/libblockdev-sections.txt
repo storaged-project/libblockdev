@@ -704,6 +704,7 @@ bd_fs_exfat_info_free
 bd_fs_exfat_mkfs
 bd_fs_exfat_repair
 bd_fs_exfat_set_label
+bd_fs_exfat_check_label
 bd_fs_exfat_wipe
 </SECTION>
 
