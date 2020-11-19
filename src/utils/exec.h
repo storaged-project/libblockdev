@@ -31,10 +31,30 @@ typedef void (*BDUtilsProgFunc) (guint64 task_id, BDUtilsProgStatus status, guin
 
 /**
  * BDUtilsProgExtract:
- * @line: line from extract progress from
+ * @line: line to extract progress from
  * @completion: (out): percentage of completion
  *
- * Returns: whether the line was a progress reporting line or not
+ * Callback function used to process a line captured from spawned command's standard
+ * output and standard error output. Typically used to extract completion percentage
+ * of a long-running job.
+ *
+ * Note that both outputs are read simultaneously with no guarantees of message order
+ * this function is called with.
+ *
+ * The value the @completion points to may contain value previously returned from
+ * this callback or zero when called for the first time. This is useful for extractors
+ * where only some kind of a tick mark is printed out as a progress and previous value
+ * is needed to compute an incremented value. It's important to keep in mind that this
+ * function is only called over lines, i.e. progress reporting printing out tick marks
+ * (e.g. dots) without a newline character might not work properly.
+ *
+ * The @line string usually contains trailing newline character, which may be absent
+ * however in case the spawned command exits without printing one. It's guaranteed
+ * this function is called over remaining buffer no matter what the trailing
+ * character is.
+ *
+ * Returns: whether the line was a progress reporting line and should be excluded
+ *          from the collected standard output string or not.
  */
 typedef gboolean (*BDUtilsProgExtract) (const gchar *line, guint8 *completion);
 
