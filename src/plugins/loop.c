@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/loop.h>
+#include <errno.h>
 #include <blockdev/utils.h>
 #include "loop.h"
 
@@ -232,6 +233,8 @@ gboolean bd_loop_setup_from_fd (gint fd, guint64 offset, guint64 size, gboolean 
     gint loop_fd = -1;
     struct loop_info64 li64;
     guint64 progress_id = 0;
+    gint status = 0;
+    guint n_try = 0;
 
     progress_id = bd_utils_report_started ("Started setting up loop device");
 
@@ -288,7 +291,17 @@ gboolean bd_loop_setup_from_fd (gint fd, guint64 offset, guint64 size, gboolean 
 
     bd_utils_report_progress (progress_id, 66, "Associated the loop device");
 
-    if (ioctl (loop_fd, LOOP_SET_STATUS64, &li64) < 0) {
+    /* we may need to try multiple times with some delays in case the device is
+       busy at the very moment */
+    for (n_try=10, status=-1; (status != 0) && (n_try > 0); n_try--) {
+        status = ioctl (loop_fd, LOOP_SET_STATUS64, &li64);
+        if (status < 0 && errno == EAGAIN)
+            g_usleep (100 * 1000); /* microseconds */
+        else
+            break;
+    }
+
+    if (status != 0) {
         g_set_error (error, BD_LOOP_ERROR, BD_LOOP_ERROR_FAIL,
                      "Failed to set status for the %s device: %m", loop_device);
         g_free (loop_device);
