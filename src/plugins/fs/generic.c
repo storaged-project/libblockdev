@@ -1161,7 +1161,7 @@ gboolean bd_fs_can_get_size (const gchar *type, gchar **required_utility, GError
  */
 gboolean bd_fs_can_get_free_space (const gchar *type, gchar **required_utility, GError **error) {
     /* some filesystems can't tell us free space even if we have the tools */
-    if (g_strcmp0 (type, "xfs") == 0 || g_strcmp0 (type, "f2fs") == 0) {
+    if (g_strcmp0 (type, "xfs") == 0 || g_strcmp0 (type, "f2fs") == 0 || g_strcmp0 (type, "exfat") == 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
                      "Getting free space on filesystem '%s' is not supported.", type);
         return FALSE;

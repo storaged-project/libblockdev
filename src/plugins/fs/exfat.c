@@ -34,7 +34,7 @@ static GMutex deps_check_lock;
 #define DEPS_TUNEEXFAT 2
 #define DEPS_TUNEEXFAT_MASK (1 <<  DEPS_TUNEEXFAT)
 
-#define DEPS_LAST 5
+#define DEPS_LAST 4
 
 static const UtilDep deps[DEPS_LAST] = {
     {"mkfs.exfat", NULL, NULL, NULL},
