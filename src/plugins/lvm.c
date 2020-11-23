@@ -155,7 +155,7 @@ void bd_lvm_lvdata_free (BDLVMLVdata *data) {
     g_free (data);
 }
 
-BDLVMVDOPooldata* bd_lvm_vdodata_copy (BDLVMVDOPooldata *data) {
+BDLVMVDOPooldata* bd_lvm_vdopooldata_copy (BDLVMVDOPooldata *data) {
     if (data == NULL)
         return NULL;
 
@@ -164,14 +164,16 @@ BDLVMVDOPooldata* bd_lvm_vdodata_copy (BDLVMVDOPooldata *data) {
     new_data->operating_mode = data->operating_mode;
     new_data->compression_state = data->compression_state;
     new_data->index_state = data->index_state;
+    new_data->write_policy = data->write_policy;
     new_data->used_size = data->used_size;
     new_data->saving_percent = data->saving_percent;
+    new_data->index_memory_size = data->index_memory_size;
     new_data->deduplication = data->deduplication;
     new_data->compression = data->compression;
     return new_data;
 }
 
-void bd_lvm_vdodata_free (BDLVMVDOPooldata *data) {
+void bd_lvm_vdopooldata_free (BDLVMVDOPooldata *data) {
     if (data == NULL)
         return;
 
