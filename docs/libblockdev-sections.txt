@@ -368,8 +368,6 @@ bd_lvm_vdo_pool_convert
 bd_lvm_vdo_pool_create
 bd_lvm_vdo_pool_resize
 bd_lvm_vdo_resize
-bd_lvm_vdodata_copy
-bd_lvm_vdodata_free
 bd_lvm_vdopooldata_copy
 bd_lvm_vdopooldata_free
 BDLVMTech
