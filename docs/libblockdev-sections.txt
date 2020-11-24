@@ -704,6 +704,19 @@ bd_fs_exfat_repair
 bd_fs_exfat_set_label
 bd_fs_exfat_check_label
 bd_fs_exfat_wipe
+BDFSBtrfsInfo
+bd_fs_btrfs_get_info
+bd_fs_btrfs_info_copy
+bd_fs_btrfs_info_free
+bd_fs_btrfs_mkfs
+bd_fs_btrfs_wipe
+bd_fs_btrfs_check
+bd_fs_btrfs_repair
+bd_fs_btrfs_set_label
+bd_fs_btrfs_check_label
+bd_fs_btrfs_set_uuid
+bd_fs_btrfs_check_uuid
+bd_fs_btrfs_resize
 </SECTION>
 
 <SECTION>

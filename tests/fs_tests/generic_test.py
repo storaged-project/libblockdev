@@ -366,6 +366,20 @@ class GenericMkfs(GenericTestCase):
 
         self._test_ext_generic_mkfs("xfs", _xfs_info, label, uuid)
 
+    def test_btrfs_generic_mkfs(self):
+        """ Test generic mkfs with Btrfs """
+        if not self.btrfs_avail:
+            self.skipTest("skipping Btrfs: not available")
+        label = "label"
+        uuid = "8802574c-587b-43b9-a6be-9de77759d2c5"
+
+        def _btrfs_info(device):
+            with mounted(device, self.mount_dir):
+                info = BlockDev.fs_btrfs_get_info(self.mount_dir)
+            return info
+
+        self._test_ext_generic_mkfs("btrfs", _btrfs_info, label, uuid)
+
     def test_can_mkfs(self):
         """ Test checking whether mkfs is supported """
         # lets pick a filesystem that supports everything and is always available
@@ -463,6 +477,12 @@ class GenericCheck(GenericTestCase):
             self.skipTest("skipping exFAT: not available")
         self._test_generic_check(mkfs_function=BlockDev.fs_exfat_mkfs)
 
+    def test_btrfs_generic_check(self):
+        """Test generic check function with an btrfs file system"""
+        if not self.btrfs_avail:
+            self.skipTest("skipping Btrfs: not available")
+        self._test_generic_check(mkfs_function=BlockDev.fs_btrfs_mkfs)
+
 
 class GenericRepair(GenericTestCase):
     def _test_generic_repair(self, mkfs_function):
@@ -516,6 +536,12 @@ class GenericRepair(GenericTestCase):
             self.skipTest("skipping exFAT: not available")
         self._test_generic_repair(mkfs_function=BlockDev.fs_exfat_mkfs)
 
+    def test_btrfs_generic_repair(self):
+        """Test generic repair function with an btrfs file system"""
+        if not self.btrfs_avail:
+            self.skipTest("skipping Btrfs: not available")
+        self._test_generic_repair(mkfs_function=BlockDev.fs_btrfs_mkfs)
+
 
 class GenericSetLabel(GenericTestCase):
     def _test_generic_set_label(self, mkfs_function):
@@ -568,6 +594,12 @@ class GenericSetLabel(GenericTestCase):
         if not self.exfat_avail:
             self.skipTest("skipping exFAT: not available")
         self._test_generic_set_label(mkfs_function=BlockDev.fs_exfat_mkfs)
+
+    def test_btrfs_generic_set_label(self):
+        """Test generic set_label function with a btrfs file system"""
+        if not self.btrfs_avail:
+            self.skipTest("skipping btrfs: not available")
+        self._test_generic_set_label(mkfs_function=BlockDev.fs_btrfs_mkfs)
 
 
 class GenericSetUUID(GenericTestCase):
@@ -633,9 +665,15 @@ class GenericSetUUID(GenericTestCase):
             # exfat doesn't support setting UUID
             self._test_generic_set_uuid(mkfs_function=BlockDev.fs_exfat_mkfs)
 
+    def test_btrfs_generic_set_uuid(self):
+        """Test generic set_uuid function with a btrfs file system"""
+        if not self.btrfs_avail:
+            self.skipTest("skipping Btrfs: not available")
+        self._test_generic_set_uuid(mkfs_function=BlockDev.fs_btrfs_mkfs)
+
 
 class GenericResize(GenericTestCase):
-    def _test_generic_resize(self, mkfs_function, size_delta=0):
+    def _test_generic_resize(self, mkfs_function, size_delta=0, min_size=130*1024**2):
         # clean the device
         succ = BlockDev.fs_clean(self.loop_dev)
 
@@ -644,10 +682,10 @@ class GenericResize(GenericTestCase):
         size = BlockDev.fs_get_size(self.loop_dev)
 
         # shrink
-        succ = BlockDev.fs_resize(self.loop_dev, 130 * 1024**2)
+        succ = BlockDev.fs_resize(self.loop_dev, min_size)
         self.assertTrue(succ)
         new_size = BlockDev.fs_get_size(self.loop_dev)
-        self.assertAlmostEqual(new_size, 130 * 1024**2, delta=size_delta)
+        self.assertAlmostEqual(new_size, min_size, delta=size_delta)
 
         # resize to maximum size
         succ = BlockDev.fs_resize(self.loop_dev, 0)
@@ -825,6 +863,12 @@ class GenericResize(GenericTestCase):
         with six.assertRaisesRegex(self, GLib.GError, "Resizing filesystem 'exfat' is not supported."):
             BlockDev.fs_resize(self.loop_dev, 80 * 1024**2)
 
+    def test_btrfs_generic_resize(self):
+        """Test generic resize function with an btrfs file system"""
+        if not self.btrfs_avail:
+            self.skipTest("skipping Btrfs: not available")
+        self._test_generic_resize(mkfs_function=BlockDev.fs_btrfs_mkfs, min_size=300*1024**2)
+
 
 class GenericGetFreeSpace(GenericTestCase):
     def _test_get_free_space(self, mkfs_function, size_delta=0):
@@ -871,6 +915,12 @@ class GenericGetFreeSpace(GenericTestCase):
         if not self.nilfs2_avail:
             self.skipTest("skipping NILFS2: not available")
         self._test_get_free_space(mkfs_function=BlockDev.fs_nilfs2_mkfs)
+
+    def test_btrfs_get_free_space(self):
+        """Test generic resize function with an btrfs file system"""
+        if not self.btrfs_avail:
+            self.skipTest("skipping Btrfs: not available")
+        self._test_get_free_space(mkfs_function=BlockDev.fs_btrfs_mkfs)
 
 
 class FSFreezeTest(GenericTestCase):

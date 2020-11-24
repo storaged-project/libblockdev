@@ -557,6 +557,35 @@ def fs_exfat_repair(device, extra=None, **kwargs):
     return _fs_exfat_repair(device, extra)
 __all__.append("fs_exfat_repair")
 
+_fs_btrfs_mkfs = BlockDev.fs_btrfs_mkfs
+@override(BlockDev.fs_btrfs_mkfs)
+def fs_btrfs_mkfs(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_btrfs_mkfs(device, extra)
+__all__.append("fs_btrfs_mkfs")
+
+_fs_btrfs_check = BlockDev.fs_btrfs_check
+@override(BlockDev.fs_btrfs_check)
+def fs_btrfs_check(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_btrfs_check(device, extra)
+__all__.append("fs_btrfs_check")
+
+_fs_btrfs_repair = BlockDev.fs_btrfs_repair
+@override(BlockDev.fs_btrfs_repair)
+def fs_btrfs_repair(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_btrfs_repair(device, extra)
+__all__.append("fs_btrfs_repair")
+
+_fs_btrfs_resize = BlockDev.fs_btrfs_resize
+@override(BlockDev.fs_btrfs_resize)
+def fs_btrfs_resize(mpoint, new_size, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_btrfs_resize(mpoint, new_size, extra)
+__all__.append("fs_btrfs_resize")
+
+
 try:
     _kbd_bcache_create = BlockDev.kbd_bcache_create
     @override(BlockDev.kbd_bcache_create)

@@ -86,6 +86,7 @@ static const BDFSInfo fs_info[] = {
     {"reiserfs", "mkfs.reiserfs", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID, "reiserfsck", "reiserfsck", "resize_reiserfs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "reiserfstune", "debugreiserfs", "reiserfstune"},
     {"nilfs2", "mkfs.nilfs", BD_FS_MKFS_LABEL | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD, NULL, NULL, "nilfs-resize", BD_FS_ONLINE_GROW | BD_FS_ONLINE_SHRINK, "tune-nilfs", "tune-nilfs", "tune-nilfs"},
     {"exfat", "mkfs.exfat", BD_FS_MKFS_LABEL, "fsck.exfat", "fsck.exfat", NULL, 0, "tune.exfat", "tune.exfat", NULL},
+    {"btrfs", "mkfs.btrfs", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_NODISCARD, "btrfsck", "btrfsck", "btrfs", BD_FS_ONLINE_GROW | BD_FS_ONLINE_SHRINK, "btrfs", "btrfs", "btrfstune"},
     {NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, NULL}
 };
 
@@ -522,6 +523,109 @@ static gboolean nilfs2_resize_device (const gchar *device, guint64 new_size, GEr
     return success;
 }
 
+static BDFSBtrfsInfo* btrfs_get_info (const gchar *device, GError **error) {
+    g_autofree gchar* mountpoint = NULL;
+    gboolean unmount = FALSE;
+    gboolean ret = FALSE;
+    GError *local_error = NULL;
+    BDFSBtrfsInfo* btrfs_info = NULL;
+
+    mountpoint = fs_mount (device, "btrfs", &unmount, error);
+    if (!mountpoint)
+        return NULL;
+
+    btrfs_info = bd_fs_btrfs_get_info (mountpoint, error);
+
+    if (unmount) {
+        ret = bd_fs_unmount (mountpoint, FALSE, FALSE, NULL, &local_error);
+        if (!ret) {
+            if (btrfs_info) {
+                /* info was successful but unmount failed */
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UNMOUNT_FAIL,
+                             "Failed to unmount '%s' after getting info: %s",
+                             device, local_error->message);
+                g_clear_error (&local_error);
+                bd_fs_btrfs_info_free (btrfs_info);
+                return FALSE;
+            } else
+                /* both info and unmount were unsuccessful but the error
+                   from the info is more important so just ignore the
+                   unmount error */
+                g_clear_error (&local_error);
+        }
+    }
+
+    return btrfs_info;
+}
+
+static gboolean btrfs_resize_device (const gchar *device, guint64 new_size, GError **error) {
+    g_autofree gchar* mountpoint = NULL;
+    gboolean ret = FALSE;
+    gboolean success = FALSE;
+    gboolean unmount = FALSE;
+    GError *local_error = NULL;
+
+    mountpoint = fs_mount (device, "btrfs", &unmount, error);
+    if (!mountpoint)
+        return FALSE;
+
+    success = bd_fs_btrfs_resize (mountpoint, new_size, NULL, error);
+
+    if (unmount) {
+        ret = bd_fs_unmount (mountpoint, FALSE, FALSE, NULL, &local_error);
+        if (!ret) {
+            if (success) {
+                /* resize was successful but unmount failed */
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UNMOUNT_FAIL,
+                             "Failed to unmount '%s' after resizing it: %s",
+                             device, local_error->message);
+                g_clear_error (&local_error);
+                return FALSE;
+            } else
+                /* both resize and unmount were unsuccessful but the error
+                   from the resize is more important so just ignore the
+                   unmount error */
+                g_clear_error (&local_error);
+        }
+    }
+
+    return success;
+}
+
+static gboolean btrfs_set_label (const gchar *device, const gchar *label, GError **error) {
+    g_autofree gchar* mountpoint = NULL;
+    gboolean ret = FALSE;
+    gboolean success = FALSE;
+    gboolean unmount = FALSE;
+    GError *local_error = NULL;
+
+    mountpoint = fs_mount (device, "btrfs", &unmount, error);
+    if (!mountpoint)
+        return FALSE;
+
+    success = bd_fs_btrfs_set_label (mountpoint, label, error);
+
+    if (unmount) {
+        ret = bd_fs_unmount (mountpoint, FALSE, FALSE, NULL, &local_error);
+        if (!ret) {
+            if (success) {
+                /* resize was successful but unmount failed */
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UNMOUNT_FAIL,
+                             "Failed to unmount '%s' after setting label: %s",
+                             device, local_error->message);
+                g_clear_error (&local_error);
+                return FALSE;
+            } else
+                /* both set label and unmount were unsuccessful but the error
+                   from the set label is more important so just ignore the
+                   unmount error */
+                g_clear_error (&local_error);
+        }
+    }
+
+    return success;
+}
+
 static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 new_size, const gchar *label, const gchar *uuid, GError **error) {
     const gchar* op_name = NULL;
     g_autofree gchar* fstype = NULL;
@@ -662,6 +766,21 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
                 return bd_fs_exfat_set_label (device, label, error);
             case BD_FS_UUID:
                 break;
+            default:
+                g_assert_not_reached ();
+        }
+    } else if (g_strcmp0 (fstype, "btrfs") == 0) {
+        switch (op) {
+            case BD_FS_RESIZE:
+                return btrfs_resize_device (device, new_size, error);
+            case BD_FS_REPAIR:
+                return bd_fs_btrfs_repair (device, NULL, error);
+            case BD_FS_CHECK:
+                return bd_fs_btrfs_check (device, NULL, error);
+            case BD_FS_LABEL:
+                return btrfs_set_label (device, label, error);
+            case BD_FS_UUID:
+                return bd_fs_btrfs_set_uuid (device, uuid, error);
             default:
                 g_assert_not_reached ();
         }
@@ -891,6 +1010,13 @@ guint64 bd_fs_get_size (const gchar *device, GError **error) {
             bd_fs_exfat_info_free (info);
         }
         return size;
+    } else if (g_strcmp0 (fstype, "btrfs") == 0) {
+        BDFSBtrfsInfo *info = btrfs_get_info (device, error);
+        if (info) {
+            size = info->size;
+            bd_fs_btrfs_info_free (info);
+        }
+        return size;
     } else {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
                     "Getting size of filesystem '%s' is not supported.", fstype);
@@ -962,6 +1088,13 @@ guint64 bd_fs_get_free_space (const gchar *device, GError **error) {
         if (info) {
             size = info->block_size * info->free_blocks;
             bd_fs_nilfs2_info_free (info);
+        }
+        return size;
+    } else if (g_strcmp0 (fstype, "btrfs") == 0) {
+        BDFSBtrfsInfo *info = btrfs_get_info (device, error);
+        if (info) {
+            size = info->free_space;
+            bd_fs_btrfs_info_free (info);
         }
         return size;
     } else {
@@ -1284,6 +1417,7 @@ extern BDExtraArg** bd_fs_ntfs_mkfs_options (BDFSMkfsOptions *options, const BDE
 extern BDExtraArg** bd_fs_reiserfs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
 extern BDExtraArg** bd_fs_vfat_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
 extern BDExtraArg** bd_fs_xfs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
+extern BDExtraArg** bd_fs_btrfs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
 
 /**
  * bd_fs_mkfs:
@@ -1344,6 +1478,9 @@ gboolean bd_fs_mkfs (const gchar *device, const gchar *fstype, BDFSMkfsOptions *
     } else if (g_strcmp0 (fstype, "xfs") == 0) {
         extra_args = bd_fs_xfs_mkfs_options (options, extra);
         ret = bd_fs_xfs_mkfs (device, (const BDExtraArg **) extra_args, error);
+    } else if (g_strcmp0 (fstype, "btrfs") == 0) {
+        extra_args = bd_fs_btrfs_mkfs_options (options, extra);
+        ret = bd_fs_btrfs_mkfs (device, (const BDExtraArg **) extra_args, error);
     } else {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
                      "Filesystem '%s' is not supported.", fstype);

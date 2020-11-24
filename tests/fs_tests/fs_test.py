@@ -86,6 +86,16 @@ class FSTestCase(unittest.TestCase):
         except:
             cls.exfat_avail = False
 
+        try:
+            cls.btrfs_avail = BlockDev.fs_is_tech_avail(BlockDev.FSTech.BTRFS,
+                                                        BlockDev.FSTechMode.MKFS |
+                                                        BlockDev.FSTechMode.RESIZE |
+                                                        BlockDev.FSTechMode.REPAIR |
+                                                        BlockDev.FSTechMode.CHECK |
+                                                        BlockDev.FSTechMode.SET_LABEL)
+        except:
+            cls.btrfs_avail = False
+
     def setUp(self):
         self.addCleanup(self._clean_up)
         self.dev_file = utils.create_sparse_tempfile("fs_test", self.loop_size)
