@@ -422,9 +422,7 @@ static gboolean ext_repair (const gchar *device, gboolean unsafe, const BDExtraA
             ret = TRUE;
         } else if (status == 2) {
             /* no error should be reported for exit code 2 - File system errors corrected, system should be rebooted */
-            bd_utils_log_format (BD_UTILS_LOG_WARNING,
-                                 "File system errors on %s were successfully corrected, but system reboot is advised.",
-                                 device);
+            g_warning ("File system errors on %s were successfully corrected, but system reboot is advised.", device);
             g_clear_error (error);
             ret = TRUE;
         }
