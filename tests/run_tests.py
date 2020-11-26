@@ -277,7 +277,7 @@ if __name__ == '__main__':
         if 'LD_LIBRARY_PATH' not in os.environ and 'GI_TYPELIB_PATH' not in os.environ:
             os.environ['LD_LIBRARY_PATH'] = LIBDIRS
             os.environ['GI_TYPELIB_PATH'] = GIDIR
-            os.environ['LIBBLOCKDEV_CONFIG_DIR'] = os.path.join(testdir, 'default_config')
+            os.environ['LIBBLOCKDEV_CONFIG_DIR'] = os.path.join(testdir, 'test_configs/default_config')
             os.environ['PATH'] += ':' + os.path.join(projdir, 'tools')
 
             try:

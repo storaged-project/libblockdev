@@ -549,7 +549,7 @@ class FakeBtrfsUtilsTestCase(BtrfsTestCase):
     def test_list_subvols_weird_docker_data(self):
         """Verify that list_subvolumes works as expected on weird data from one Docker use case"""
 
-        with fake_utils("tests/btrfs_subvols_docker"):
+        with fake_utils("tests/fake_utils/btrfs_subvols_docker"):
             subvols = BlockDev.btrfs_list_subvolumes("fake_dev", False)
 
         # make sure subvolumes are sorted properly (parents before children)
@@ -574,7 +574,7 @@ class BTRFSUnloadTest(BtrfsTestCase):
         # unload all plugins first
         self.assertTrue(BlockDev.reinit([], True, None))
 
-        with fake_utils("tests/btrfs_low_version/"):
+        with fake_utils("tests/fake_utils/btrfs_low_version/"):
             # too low version of BTRFS available, the BTRFS plugin should fail to load
             with self.assertRaises(GLib.GError):
                 BlockDev.reinit(self.requested_plugins, True, None)
@@ -593,7 +593,7 @@ class BTRFSUnloadTest(BtrfsTestCase):
         self.assertTrue(BlockDev.reinit([], True, None))
 
         # check that new version format is correctly parsed
-        with fake_utils("tests/btrfs_new_version_format/"):
+        with fake_utils("tests/fake_utils/btrfs_new_version_format/"):
             BlockDev.reinit(self.requested_plugins, True, None)
 
         self.assertIn("btrfs", BlockDev.get_available_plugin_names())

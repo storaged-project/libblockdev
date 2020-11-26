@@ -62,7 +62,7 @@ class MpathUnloadTest(MpathTest):
         # unload all plugins first
         self.assertTrue(BlockDev.reinit([], True, None))
 
-        with fake_utils("tests/mpath_low_version/"):
+        with fake_utils("tests/fake_utils/mpath_low_version/"):
             # too low version of the multipath tool available, the mpath plugin
             # should fail to load
             with self.assertRaises(GLib.GError):

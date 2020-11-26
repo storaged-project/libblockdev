@@ -165,7 +165,7 @@ class UtilsExecLoggingTest(UtilsTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.utils_check_util_version("libblockdev-fake-util", None, None, None)
 
-        with fake_utils("tests/utils_fake_util/"):
+        with fake_utils("tests/fake_utils/utils_fake_util/"):
             with self.assertRaises(GLib.GError):
                 # with no argument, the output is "Version: 1.2" which is not a
                 # valid version without regexp
