@@ -529,6 +529,12 @@ def fs_reiserfs_repair(device, extra=None, **kwargs):
     return _fs_reiserfs_repair(device, extra)
 __all__.append("fs_reiserfs_repair")
 
+_fs_nilfs2_mkfs = BlockDev.fs_nilfs2_mkfs
+@override(BlockDev.fs_nilfs2_mkfs)
+def fs_nilfs2_mkfs(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_nilfs2_mkfs(device, extra)
+__all__.append("fs_nilfs2_mkfs")
 
 try:
     _kbd_bcache_create = BlockDev.kbd_bcache_create
