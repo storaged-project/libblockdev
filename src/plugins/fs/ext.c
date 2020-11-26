@@ -237,6 +237,47 @@ void bd_fs_ext4_info_free (BDFSExt4Info *data) {
     bd_fs_ext2_info_free ((BDFSExt2Info*) data);
 }
 
+static BDExtraArg **ext_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
+    GPtrArray *options_array = g_ptr_array_new ();
+    const BDExtraArg **extra_p = NULL;
+
+    if (options->label)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-L", options->label));
+
+    if (options->uuid)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-U", options->uuid));
+
+    if (options->dry_run)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-n", ""));
+
+    if (options->no_discard)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-E", "nodiscard"));
+
+    if (extra) {
+        for (extra_p = extra; *extra_p; extra_p++)
+            g_ptr_array_add (options_array, bd_extra_arg_copy ((BDExtraArg *) *extra_p));
+    }
+
+    g_ptr_array_add (options_array, NULL);
+
+    return (BDExtraArg **) g_ptr_array_free (options_array, FALSE);
+}
+
+BDExtraArg __attribute__ ((visibility ("hidden")))
+**bd_fs_ext2_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
+    return ext_mkfs_options (options, extra);
+}
+
+BDExtraArg __attribute__ ((visibility ("hidden")))
+**bd_fs_ext3_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
+    return ext_mkfs_options (options, extra);
+}
+
+BDExtraArg __attribute__ ((visibility ("hidden")))
+**bd_fs_ext4_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
+    return ext_mkfs_options (options, extra);
+}
+
 static gboolean ext_mkfs (const gchar *device, const BDExtraArg **extra, const gchar *ext_version, GError **error) {
     const gchar *args[6] = {"mke2fs", "-t", ext_version, "-F", device, NULL};
 

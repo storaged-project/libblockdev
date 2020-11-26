@@ -115,6 +115,27 @@ void bd_fs_ntfs_info_free (BDFSNtfsInfo *data) {
     g_free (data);
 }
 
+BDExtraArg __attribute__ ((visibility ("hidden")))
+**bd_fs_ntfs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
+    GPtrArray *options_array = g_ptr_array_new ();
+    const BDExtraArg **extra_p = NULL;
+
+    if (options->label)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-L", options->label));
+
+    if (options->dry_run)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-n", ""));
+
+    if (extra) {
+        for (extra_p = extra; *extra_p; extra_p++)
+            g_ptr_array_add (options_array, bd_extra_arg_copy ((BDExtraArg *) *extra_p));
+    }
+
+    g_ptr_array_add (options_array, NULL);
+
+    return (BDExtraArg **) g_ptr_array_free (options_array, FALSE);
+}
+
 /**
  * bd_fs_ntfs_mkfs:
  * @device: the device to create a new ntfs fs on

@@ -41,6 +41,7 @@
 #include "reiserfs.h"
 
 typedef enum {
+    BD_FS_MKFS,
     BD_FS_RESIZE,
     BD_FS_REPAIR,
     BD_FS_CHECK,
@@ -63,6 +64,8 @@ typedef enum {
  */
 typedef struct BDFSInfo {
     const gchar *type;
+    const gchar *mkfs_util;
+    BDFSMkfsOptionsFlags mkfs_options;
     const gchar *check_util;
     const gchar *repair_util;
     const gchar *resize_util;
@@ -73,17 +76,17 @@ typedef struct BDFSInfo {
 } BDFSInfo;
 
 static const BDFSInfo fs_info[] = {
-    {"xfs", "xfs_db", "xfs_repair", "xfs_growfs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW, "xfs_admin", "xfs_admin", "xfs_admin"},
-    {"ext2", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs", "dumpe2fs", "tune2fs"},
-    {"ext3", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs", "dumpe2fs", "tune2fs"},
-    {"ext4", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs", "dumpe2fs", "tune2fs"},
-    {"vfat", "fsck.vfat", "fsck.vfat", "vfat-resize", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "fatlabel", "fsck.vfat", NULL},
-    {"ntfs", "ntfsfix", "ntfsfix", "ntfsresize", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "ntfslabel", "ntfscluster", "ntfslabel"},
-    {"f2fs", "fsck.f2fs", "fsck.f2fs", "resize.f2fs", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, NULL, "dump.f2fs", NULL},
-    {"reiserfs", "reiserfsck", "reiserfsck", "resize_reiserfs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "reiserfstune", "debugreiserfs", "reiserfstune"},
-    {"nilfs2", NULL, NULL, "nilfs-resize", BD_FS_ONLINE_GROW | BD_FS_ONLINE_SHRINK, "tune-nilfs", "tune-nilfs", "tune-nilfs"},
-    {"exfat", "fsck.exfat", "fsck.exfat", NULL, 0, "tune.exfat", "tune.exfat", NULL},
-    {NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL}
+    {"xfs", "mkfs.xfs", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD, "xfs_db", "xfs_repair", "xfs_growfs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW, "xfs_admin", "xfs_admin", "xfs_admin"},
+    {"ext2", "mkfs.ext2", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD, "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs", "dumpe2fs", "tune2fs"},
+    {"ext3", "mkfs.ext3", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD, "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs", "dumpe2fs", "tune2fs"},
+    {"ext4", "mkfs.ext4", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD, "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs", "dumpe2fs", "tune2fs"},
+    {"vfat", "mkfs.vfat", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID, "fsck.vfat", "fsck.vfat", "vfat-resize", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "fatlabel", "fsck.vfat", NULL},
+    {"ntfs", "mkfs.ntfs", BD_FS_MKFS_LABEL | BD_FS_MKFS_DRY_RUN, "ntfsfix", "ntfsfix", "ntfsresize", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "ntfslabel", "ntfscluster", "ntfslabel"},
+    {"f2fs", "mkfs.f2fs", BD_FS_MKFS_LABEL | BD_FS_MKFS_NODISCARD, "fsck.f2fs", "fsck.f2fs", "resize.f2fs", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, NULL, "dump.f2fs", NULL},
+    {"reiserfs", "mkfs.reiserfs", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID, "reiserfsck", "reiserfsck", "resize_reiserfs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "reiserfstune", "debugreiserfs", "reiserfstune"},
+    {"nilfs2", "mkfs.nilfs", BD_FS_MKFS_LABEL | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD, NULL, NULL, "nilfs-resize", BD_FS_ONLINE_GROW | BD_FS_ONLINE_SHRINK, "tune-nilfs", "tune-nilfs", "tune-nilfs"},
+    {"exfat", "mkfs.exfat", BD_FS_MKFS_LABEL, "fsck.exfat", "fsck.exfat", NULL, 0, "tune.exfat", "tune.exfat", NULL},
+    {NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, NULL}
 };
 
 static const BDFSInfo *
@@ -522,6 +525,9 @@ static gboolean nilfs2_resize_device (const gchar *device, guint64 new_size, GEr
 static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 new_size, const gchar *label, const gchar *uuid, GError **error) {
     const gchar* op_name = NULL;
     g_autofree gchar* fstype = NULL;
+
+    /* MKFS is covered as a special case, it's a bug to use this function for this case */
+    g_assert_true (op != BD_FS_MKFS);
 
     /* GET_SIZE is covered as a special case, it's a bug to use this function for this case */
     g_assert_true (op != BD_FS_GET_SIZE);
@@ -965,7 +971,7 @@ guint64 bd_fs_get_free_space (const gchar *device, GError **error) {
     }
 }
 
-static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar **required_utility, BDFsResizeFlags *mode, GError **error) {
+static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar **required_utility, BDFsResizeFlags *mode, BDFSMkfsOptionsFlags *options, GError **error) {
     gboolean ret;
     const BDFSInfo *fsinfo = NULL;
     const gchar* op_name = NULL;
@@ -977,9 +983,16 @@ static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar *
     if (mode != NULL)
         *mode = 0;
 
+    if (options != NULL)
+        *options = 0;
+
     fsinfo = get_fs_info (fs_type);
     if (fsinfo != NULL) {
         switch (op) {
+            case BD_FS_MKFS:
+                op_name = "Creating";
+                exec_util = fsinfo->mkfs_util;
+                break;
             case BD_FS_RESIZE:
                 op_name = "Resizing";
                 exec_util = fsinfo->resize_util;
@@ -1022,6 +1035,9 @@ static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar *
     if (mode != NULL)
         *mode = fsinfo->resize_mode;
 
+    if (options != NULL)
+        *options = fsinfo->mkfs_options;
+
     if (strlen(exec_util) == 0) { /* empty string if no util needed */
         return TRUE;
     }
@@ -1031,6 +1047,25 @@ static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar *
         *required_utility = g_strdup (exec_util);
 
     return ret;
+}
+
+/**
+ * bd_fs_can_mkfs:
+ * @type: the filesystem type to be tested for installed mkfs support
+ * @options: (out): flags for allowed mkfs options (i.e. support for setting label or UUID when creating the filesystem)
+ * @required_utility: (out) (transfer full): the utility binary which is required for creating (if missing returns %FALSE but no @error)
+ * @error: (out): place to store error (if any)
+ *
+ * Searches for the required utility to create the given filesystem and returns whether
+ * it is installed. The options flags indicate what additional options can be specified for @type.
+ * Unknown filesystems result in errors.
+ *
+ * Returns: whether filesystem mkfs tool is available
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
+ */
+gboolean bd_fs_can_mkfs (const gchar *type, BDFSMkfsOptionsFlags *options, gchar **required_utility, GError **error) {
+    return query_fs_operation (type, BD_FS_MKFS, required_utility, NULL, options, error);
 }
 
 /**
@@ -1050,7 +1085,7 @@ static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
  */
 gboolean bd_fs_can_resize (const gchar *type, BDFsResizeFlags *mode, gchar **required_utility, GError **error) {
-    return query_fs_operation (type, BD_FS_RESIZE, required_utility, mode, error);
+    return query_fs_operation (type, BD_FS_RESIZE, required_utility, mode, NULL, error);
 }
 
 /**
@@ -1068,7 +1103,7 @@ gboolean bd_fs_can_resize (const gchar *type, BDFsResizeFlags *mode, gchar **req
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
  */
 gboolean bd_fs_can_check (const gchar *type, gchar **required_utility, GError **error) {
-    return query_fs_operation (type, BD_FS_CHECK, required_utility, NULL, error);
+    return query_fs_operation (type, BD_FS_CHECK, required_utility, NULL, NULL, error);
 }
 
 /**
@@ -1086,7 +1121,7 @@ gboolean bd_fs_can_check (const gchar *type, gchar **required_utility, GError **
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
  */
 gboolean bd_fs_can_repair (const gchar *type, gchar **required_utility, GError **error) {
-    return query_fs_operation (type, BD_FS_REPAIR, required_utility, NULL, error);
+    return query_fs_operation (type, BD_FS_REPAIR, required_utility, NULL, NULL, error);
 }
 
 /**
@@ -1104,7 +1139,7 @@ gboolean bd_fs_can_repair (const gchar *type, gchar **required_utility, GError *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
  */
 gboolean bd_fs_can_set_label (const gchar *type, gchar **required_utility, GError **error) {
-    return query_fs_operation (type, BD_FS_LABEL, required_utility, NULL, error);
+    return query_fs_operation (type, BD_FS_LABEL, required_utility, NULL, NULL, error);
 }
 
 /**
@@ -1122,7 +1157,7 @@ gboolean bd_fs_can_set_label (const gchar *type, gchar **required_utility, GErro
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
  */
 gboolean bd_fs_can_set_uuid (const gchar *type, gchar **required_utility, GError **error) {
-    return query_fs_operation (type, BD_FS_UUID, required_utility, NULL, error);
+    return query_fs_operation (type, BD_FS_UUID, required_utility, NULL, NULL, error);
 }
 
 /**
@@ -1141,7 +1176,7 @@ gboolean bd_fs_can_set_uuid (const gchar *type, gchar **required_utility, GError
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
  */
 gboolean bd_fs_can_get_size (const gchar *type, gchar **required_utility, GError **error) {
-    return query_fs_operation (type, BD_FS_GET_SIZE, required_utility, NULL, error);
+    return query_fs_operation (type, BD_FS_GET_SIZE, required_utility, NULL, NULL, error);
 }
 
 /**
@@ -1167,7 +1202,7 @@ gboolean bd_fs_can_get_free_space (const gchar *type, gchar **required_utility, 
         return FALSE;
     }
 
-    return query_fs_operation (type, BD_FS_GET_FREE_SPACE, required_utility, NULL, error);
+    return query_fs_operation (type, BD_FS_GET_FREE_SPACE, required_utility, NULL, NULL, error);
 }
 
 static gboolean fs_freeze (const char *mountpoint, gboolean freeze, GError **error) {
@@ -1237,4 +1272,87 @@ gboolean bd_fs_freeze (const gchar *mountpoint, GError **error) {
  */
 gboolean bd_fs_unfreeze (const gchar *mountpoint, GError **error) {
     return fs_freeze (mountpoint, FALSE, error);
+}
+
+extern BDExtraArg** bd_fs_exfat_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
+extern BDExtraArg** bd_fs_ext2_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
+extern BDExtraArg** bd_fs_ext3_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
+extern BDExtraArg** bd_fs_ext4_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
+extern BDExtraArg** bd_fs_f2fs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
+extern BDExtraArg** bd_fs_nilfs2_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
+extern BDExtraArg** bd_fs_ntfs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
+extern BDExtraArg** bd_fs_reiserfs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
+extern BDExtraArg** bd_fs_vfat_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
+extern BDExtraArg** bd_fs_xfs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
+
+/**
+ * bd_fs_mkfs:
+ * @device: the device to create the new filesystem on
+ * @fstype: name of the filesystem to create (e.g. "ext4")
+ * @options: additional options like label or UUID for the filesystem
+ * @extra: (allow-none) (array zero-terminated=1): extra mkfs options not provided in @options
+ * @error: (out): place to store error (if any)
+ *
+ * This is a helper function for creating filesystems with extra options.
+ * This is the same as running a filesystem-specific function like %bd_fs_ext4_mkfs
+ * and manually specifying the extra command line options. %BDFsMkfsOptions
+ * removes the need to specify supported options for selected filesystems,
+ * make sure to check whether @fstype supports these options (see %bd_fs_can_mkfs)
+ * for details.
+ *
+ * When specifying additional mkfs options using @extra, it's caller's
+ * responsibility to make sure these options do not conflict with options
+ * specified using @options. Extra options are added after the @options and
+ * there are no additional checks for duplicate and/or conflicting options.
+ *
+ * Returns: whether @fstype was successfully created on @device or not.
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_CREATE
+ *
+ */
+gboolean bd_fs_mkfs (const gchar *device, const gchar *fstype, BDFSMkfsOptions *options, const BDExtraArg **extra, GError **error) {
+    BDExtraArg **extra_args = NULL;
+    gboolean ret = FALSE;
+
+    if (g_strcmp0 (fstype, "exfat") == 0) {
+        extra_args = bd_fs_exfat_mkfs_options (options, extra);
+        ret = bd_fs_exfat_mkfs (device, (const BDExtraArg **) extra_args, error);
+    } else if (g_strcmp0 (fstype, "ext2") == 0) {
+        extra_args = bd_fs_ext2_mkfs_options (options, extra);
+        ret = bd_fs_ext2_mkfs (device, (const BDExtraArg **) extra_args, error);
+    } else if (g_strcmp0 (fstype, "ext3") == 0) {
+        extra_args = bd_fs_ext3_mkfs_options (options, extra);
+        ret = bd_fs_ext3_mkfs (device, (const BDExtraArg **) extra_args, error);
+    } else if (g_strcmp0 (fstype, "ext4") == 0) {
+        extra_args = bd_fs_ext4_mkfs_options (options, extra);
+        ret = bd_fs_ext4_mkfs (device, (const BDExtraArg **) extra_args, error);
+    } else if (g_strcmp0 (fstype, "f2fs") == 0) {
+        extra_args = bd_fs_f2fs_mkfs_options (options, extra);
+        ret = bd_fs_f2fs_mkfs (device, (const BDExtraArg **) extra_args, error);
+    } else if (g_strcmp0 (fstype, "nilfs2") == 0) {
+        extra_args = bd_fs_nilfs2_mkfs_options (options, extra);
+        ret = bd_fs_nilfs2_mkfs (device, (const BDExtraArg **) extra_args, error);
+    } else if (g_strcmp0 (fstype, "ntfs") == 0) {
+        extra_args = bd_fs_ntfs_mkfs_options (options, extra);
+        ret = bd_fs_ntfs_mkfs (device, (const BDExtraArg **) extra_args, error);
+    } else if (g_strcmp0 (fstype, "reiserfs") == 0) {
+        extra_args = bd_fs_reiserfs_mkfs_options (options, extra);
+        ret = bd_fs_reiserfs_mkfs (device, (const BDExtraArg **) extra_args, error);
+    } else if (g_strcmp0 (fstype, "vfat") == 0) {
+        extra_args = bd_fs_vfat_mkfs_options (options, extra);
+        ret = bd_fs_vfat_mkfs (device, (const BDExtraArg **) extra_args, error);
+    } else if (g_strcmp0 (fstype, "xfs") == 0) {
+        extra_args = bd_fs_xfs_mkfs_options (options, extra);
+        ret = bd_fs_xfs_mkfs (device, (const BDExtraArg **) extra_args, error);
+    } else {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
+                     "Filesystem '%s' is not supported.", fstype);
+        return FALSE;
+    }
+
+    for (BDExtraArg **arg_p = extra_args; *arg_p; arg_p++)
+        bd_extra_arg_free (*arg_p);
+    g_free (extra_args);
+
+    return ret;
 }

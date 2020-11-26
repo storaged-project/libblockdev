@@ -2060,6 +2060,141 @@ class MountTest(FSTestCase):
         self.assertTrue(succ)
         self.assertFalse(os.path.ismount(tmp))
 
+class GenericMkfs(FSTestCase):
+
+    def _test_ext_generic_mkfs(self, fsname, info_fn, label=None, uuid=None):
+        # clean the device
+        succ = BlockDev.fs_clean(self.loop_dev)
+        self.assertTrue(succ)
+
+        supported, flags, _util = BlockDev.fs_can_mkfs(fsname)
+        if not supported:
+            self.skipTest("skipping %s: not available" % fsname)
+
+        if flags & BlockDev.FSMkfsOptionsFlags.DRY_RUN:
+            # try dry run first
+            options = BlockDev.FSMkfsOptions(None, None, True, False)
+            succ = BlockDev.fs_mkfs(self.loop_dev, fsname, options)
+            self.assertTrue(succ)
+
+            fstype = BlockDev.fs_get_fstype (self.loop_dev)
+            self.assertIsNone(fstype)
+
+        options = BlockDev.FSMkfsOptions(label, uuid, False, False)
+
+        succ = BlockDev.fs_mkfs(self.loop_dev, fsname, options)
+        self.assertTrue(succ)
+
+        fstype = BlockDev.fs_get_fstype (self.loop_dev)
+        self.assertEqual(fstype, fsname)
+
+        info = info_fn(self.loop_dev)
+        self.assertIsNotNone(info)
+        if label:
+            self.assertEqual(info.label, label)
+        if uuid:
+            self.assertEqual(info.uuid, uuid)
+
+    def test_exfat_generic_mkfs(self):
+        """ Test generic mkfs with exFAT """
+        if not self.exfat_avail:
+            self.skipTest("skipping exFAT: not available")
+        label = "label"
+        self._test_ext_generic_mkfs("exfat", BlockDev.fs_exfat_get_info, label, None)
+
+    def test_ext2_generic_mkfs(self):
+        """ Test generic mkfs with ext2 """
+        label = "label"
+        uuid = "8802574c-587b-43b9-a6be-9de77759d2c5"
+        self._test_ext_generic_mkfs("ext2", BlockDev.fs_ext2_get_info, label, uuid)
+
+        # clean the device
+        succ = BlockDev.fs_clean(self.loop_dev)
+        self.assertTrue(succ)
+
+        options = BlockDev.FSMkfsOptions(label, uuid, False, False)
+
+        # and try with a custom extra arg (we can get block size from the info)
+        extra = BlockDev.ExtraArg("-b", "4096")
+
+        succ = BlockDev.fs_mkfs(self.loop_dev, "ext2", options, [extra])
+        self.assertTrue(succ)
+
+        fstype = BlockDev.fs_get_fstype (self.loop_dev)
+        self.assertEqual(fstype, "ext2")
+
+        info = BlockDev.fs_ext2_get_info(self.loop_dev)
+        self.assertEqual(info.label, label)
+        self.assertEqual(info.uuid, uuid)
+        self.assertEqual(info.block_size, 4096)
+
+    def test_ext3_generic_mkfs(self):
+        """ Test generic mkfs with ext3 """
+        label = "label"
+        uuid = "8802574c-587b-43b9-a6be-9de77759d2c5"
+        self._test_ext_generic_mkfs("ext3", BlockDev.fs_ext3_get_info, label, uuid)
+
+    def test_ext4_generic_mkfs(self):
+        """ Test generic mkfs with ext4 """
+        label = "label"
+        uuid = "8802574c-587b-43b9-a6be-9de77759d2c5"
+        self._test_ext_generic_mkfs("ext4", BlockDev.fs_ext4_get_info, label, uuid)
+
+    def test_f2fs_generic_mkfs(self):
+        """ Test generic mkfs with F2FS """
+        label = "label"
+        self._test_ext_generic_mkfs("f2fs", BlockDev.fs_f2fs_get_info, label, None)
+
+    def test_nilfs2_generic_mkfs(self):
+        """ Test generic mkfs with nilfs2 """
+        if not self.nilfs2_avail:
+            self.skipTest("skipping NILFS2: not available")
+        label = "label"
+        self._test_ext_generic_mkfs("nilfs2", BlockDev.fs_nilfs2_get_info, label, None)
+
+    def test_ntfs_generic_mkfs(self):
+        """ Test generic mkfs with NTFS """
+        if not self.ntfs_avail:
+            self.skipTest("skipping NTFS: not available")
+        label = "label"
+        self._test_ext_generic_mkfs("ntfs", BlockDev.fs_ntfs_get_info, label, None)
+
+    def test_reiserfs_generic_mkfs(self):
+        """ Test generic mkfs with ReiserFS """
+        if not self.reiserfs_avail:
+            self.skipTest("skipping ReiserFS: not available")
+        label = "label"
+        uuid = "8802574c-587b-43b9-a6be-9de77759d2c5"
+        self._test_ext_generic_mkfs("reiserfs", BlockDev.fs_reiserfs_get_info, label, uuid)
+
+    def test_vfat_generic_mkfs(self):
+        """ Test generic mkfs with vfat """
+        label = "LABEL"
+        self._test_ext_generic_mkfs("vfat", BlockDev.fs_vfat_get_info, label, None)
+
+    def test_xfs_generic_mkfs(self):
+        """ Test generic mkfs with XFS """
+        label = "label"
+        uuid = "8802574c-587b-43b9-a6be-9de77759d2c5"
+
+        def _xfs_info(device):
+            with mounted(device, self.mount_dir):
+                info = BlockDev.fs_xfs_get_info(device)
+            return info
+
+        self._test_ext_generic_mkfs("xfs", _xfs_info, label, uuid)
+
+    def test_can_mkfs(self):
+        """ Test checking whether mkfs is supported """
+        # lets pick a filesystem that supports everything and is always available
+        # in the CI
+        supported, flags, _util = BlockDev.fs_can_mkfs("ext2")
+        self.assertTrue(supported)
+        self.assertTrue(flags & BlockDev.FSMkfsOptionsFlags.DRY_RUN)
+        self.assertTrue(flags & BlockDev.FSMkfsOptionsFlags.LABEL)
+        self.assertTrue(flags & BlockDev.FSMkfsOptionsFlags.UUID)
+        self.assertTrue(flags & BlockDev.FSMkfsOptionsFlags.NODISCARD)
+
 class GenericCheck(FSTestCase):
     log = []
 
