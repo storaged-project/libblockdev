@@ -536,6 +536,27 @@ def fs_nilfs2_mkfs(device, extra=None, **kwargs):
     return _fs_nilfs2_mkfs(device, extra)
 __all__.append("fs_nilfs2_mkfs")
 
+_fs_exfat_mkfs = BlockDev.fs_exfat_mkfs
+@override(BlockDev.fs_exfat_mkfs)
+def fs_exfat_mkfs(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_exfat_mkfs(device, extra)
+__all__.append("fs_exfat_mkfs")
+
+_fs_exfat_check = BlockDev.fs_exfat_check
+@override(BlockDev.fs_exfat_check)
+def fs_exfat_check(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_exfat_check(device, extra)
+__all__.append("fs_exfat_check")
+
+_fs_exfat_repair = BlockDev.fs_exfat_repair
+@override(BlockDev.fs_exfat_repair)
+def fs_exfat_repair(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_exfat_repair(device, extra)
+__all__.append("fs_exfat_repair")
+
 try:
     _kbd_bcache_create = BlockDev.kbd_bcache_create
     @override(BlockDev.kbd_bcache_create)

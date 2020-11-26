@@ -1705,7 +1705,7 @@ class ExfatTestMkfs(ExfatTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_exfat_mkfs("/non/existing/device", None)
 
-        succ = BlockDev.fs_exfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_exfat_mkfs(self.loop_dev)
         self.assertTrue(succ)
 
         # just try if we can mount the file system
@@ -1764,20 +1764,20 @@ class ExfatTestCheck(ExfatTestCase):
     def test_exfat_check(self):
         """Verify that it is possible to check an exfat file system"""
 
-        succ = BlockDev.fs_exfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_exfat_mkfs(self.loop_dev)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_exfat_check(self.loop_dev, None)
+        succ = BlockDev.fs_exfat_check(self.loop_dev)
         self.assertTrue(succ)
 
 class ExfatTestRepair(ExfatTestCase):
     def test_exfat_repair(self):
         """Verify that it is possible to repair an exfat file system"""
 
-        succ = BlockDev.fs_exfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_exfat_mkfs(self.loop_dev)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_exfat_repair(self.loop_dev, None)
+        succ = BlockDev.fs_exfat_repair(self.loop_dev)
         self.assertTrue(succ)
 
 class ExfatGetInfo(ExfatTestCase):
