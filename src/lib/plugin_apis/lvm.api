@@ -360,8 +360,8 @@ GType bd_lvm_lvdata_get_type () {
     return type;
 }
 
-#define BD_LVM_TYPE_VDODATA (bd_lvm_vdodata_get_type ())
-GType bd_lvm_vdodata_get_type();
+#define BD_LVM_TYPE_VDOPOOLDATA (bd_lvm_vdopooldata_get_type ())
+GType bd_lvm_vdopooldata_get_type();
 
 /**
  * BDLVMVDOPooldata:
@@ -388,11 +388,11 @@ typedef struct BDLVMVDOPooldata {
 } BDLVMVDOPooldata;
 
 /**
- * bd_lvm_vdodata_copy: (skip)
+ * bd_lvm_vdopooldata_copy: (skip)
  *
  * Creates a new copy of @data.
  */
-BDLVMVDOPooldata* bd_lvm_vdodata_copy (BDLVMVDOPooldata *data) {
+BDLVMVDOPooldata* bd_lvm_vdopooldata_copy (BDLVMVDOPooldata *data) {
     if (data == NULL)
         return NULL;
 
@@ -411,24 +411,24 @@ BDLVMVDOPooldata* bd_lvm_vdodata_copy (BDLVMVDOPooldata *data) {
 }
 
 /**
- * bd_lvm_vdodata_free: (skip)
+ * bd_lvm_vdopooldata_free: (skip)
  *
  * Frees @data.
  */
-void bd_lvm_vdodata_free (BDLVMVDOPooldata *data) {
+void bd_lvm_vdopooldata_free (BDLVMVDOPooldata *data) {
     if (data == NULL)
         return;
 
     g_free (data);
 }
 
-GType bd_lvm_vdodata_get_type () {
+GType bd_lvm_vdopooldata_get_type () {
     static GType type = 0;
 
     if (G_UNLIKELY(type == 0)) {
         type = g_boxed_type_register_static("BDLVMVDOPooldata",
-                                            (GBoxedCopyFunc) bd_lvm_vdodata_copy,
-                                            (GBoxedFreeFunc) bd_lvm_vdodata_free);
+                                            (GBoxedCopyFunc) bd_lvm_vdopooldata_copy,
+                                            (GBoxedFreeFunc) bd_lvm_vdopooldata_free);
     }
 
     return type;
