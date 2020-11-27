@@ -2,7 +2,7 @@ import tempfile
 import six
 import overrides_hack
 
-from .fs_test import FSTestCase
+from .fs_test import FSTestCase, mounted
 
 import overrides_hack
 import utils
@@ -19,6 +19,109 @@ class NTFSTestCase(FSTestCase):
         super(NTFSTestCase, self).setUp()
 
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="ntfs_test")
+
+
+class NTFSTestMkfs(NTFSTestCase):
+    def test_ntfs_mkfs(self):
+        """Verify that it is possible to create a new NTFS file system"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_ntfs_mkfs("/non/existing/device", None)
+
+        succ = BlockDev.fs_ntfs_mkfs(self.loop_dev)
+        self.assertTrue(succ)
+
+        # just try if we can mount the file system
+        with mounted(self.loop_dev, self.mount_dir):
+            pass
+
+        # check the fstype
+        fstype = BlockDev.fs_get_fstype(self.loop_dev)
+        self.assertEqual(fstype, "ntfs")
+
+        BlockDev.fs_wipe(self.loop_dev, True)
+
+
+class NTFSMkfsWithLabel(NTFSTestCase):
+    def test_ntfs_mkfs_with_label(self):
+        """Verify that it is possible to create an NTFS file system with label"""
+
+        ea = BlockDev.ExtraArg.new("-L", "test_label")
+        succ = BlockDev.fs_ntfs_mkfs(self.loop_dev, [ea])
+        self.assertTrue(succ)
+
+        fi = BlockDev.fs_ntfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "test_label")
+
+
+class NTFSTestWipe(NTFSTestCase):
+    def test_ntfs_wipe(self):
+        """Verify that it is possible to wipe an NTFS file system"""
+
+        succ = BlockDev.fs_ntfs_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_ntfs_wipe(self.loop_dev)
+        self.assertTrue(succ)
+
+        # already wiped, should fail this time
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_ntfs_wipe(self.loop_dev)
+
+        utils.run("pvcreate -ff -y %s >/dev/null" % self.loop_dev)
+
+        # LVM PV signature, not an ntfs file system
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_ntfs_wipe(self.loop_dev)
+
+        BlockDev.fs_wipe(self.loop_dev, True)
+
+        utils.run("mkfs.ext2 -F %s >/dev/null 2>&1" % self.loop_dev)
+
+        # ext2, not an ntfs file system
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_ntfs_wipe(self.loop_dev)
+
+        BlockDev.fs_wipe(self.loop_dev, True)
+
+
+class NTFSGetInfo(NTFSTestCase):
+    def test_ntfs_get_info(self):
+        """Verify that it is possible to get info about an NTFS file system"""
+
+        succ = BlockDev.fs_ntfs_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        fi = BlockDev.fs_ntfs_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.label, "")
+        # should be an non-empty string
+        self.assertTrue(fi.uuid)
+        self.assertGreater(fi.size, 0)
+        self.assertLess(fi.free_space, fi.size)
+
+
+class NTFSResize(NTFSTestCase):
+    def test_ntfs_resize(self):
+        """Verify that it is possible to resize an NTFS file system"""
+
+        succ = BlockDev.fs_ntfs_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_ntfs_repair(self.loop_dev)
+        self.assertTrue(succ)
+
+        # shrink
+        succ = BlockDev.fs_ntfs_resize(self.loop_dev, 80 * 1024**2)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_ntfs_repair(self.loop_dev)
+        self.assertTrue(succ)
+
+        # resize to maximum size
+        succ = BlockDev.fs_ntfs_resize(self.loop_dev, 0)
+        self.assertTrue(succ)
 
 
 class NTFSSetLabel(NTFSTestCase):
