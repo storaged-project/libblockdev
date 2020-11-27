@@ -71,6 +71,18 @@ has_fs (blkid_probe probe, const gchar *device, const gchar *fs_type, GError **e
     return TRUE;
 }
 
+/**
+ * wipe_fs: (skip)
+ * @device: the device to wipe signature(s) from
+ * @fs_type: (allow-none): filesystem type to wipe from the device or %NULL for any
+ * @wipe_all: whether to wipe all signatures from the device or not: some filesystems might have
+ *            multiple nested signatures, this will make sure to wipe all of them including
+ *            those that are different from @fs_type -- e.g. for NTFS we will wipe both the
+ *            NTFS signature and the nested DOS partition table created by mkfs.ntfs
+ * @error: (out): place to store error
+ *
+ * Returns: whether the wipe was successful or not
+ */
 gboolean __attribute__ ((visibility ("hidden")))
 wipe_fs (const gchar *device, const gchar *fs_type, gboolean wipe_all, GError **error) {
     blkid_probe probe = NULL;
@@ -80,7 +92,6 @@ wipe_fs (const gchar *device, const gchar *fs_type, gboolean wipe_all, GError **
     size_t len = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
-    gboolean has_fs_type = TRUE;
     guint n_try = 0;
 
     msg = g_strdup_printf ("Started wiping '%s' signatures from the device '%s'", fs_type, device);
@@ -192,19 +203,7 @@ wipe_fs (const gchar *device, const gchar *fs_type, gboolean wipe_all, GError **
     blkid_reset_probe (probe);
 
     if (wipe_all) {
-        has_fs_type = has_fs (probe, device, fs_type, error);
-
-        while (has_fs_type) {
-            status = blkid_do_probe (probe);
-            if (status != 0) {
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                             "Failed to probe the device '%s'", device);
-                blkid_free_probe (probe);
-                synced_close (fd);
-                bd_utils_report_finished (progress_id, (*error)->message);
-                return FALSE;
-            }
-
+        while (blkid_do_probe (probe) == 0) {
             status = blkid_do_wipe (probe, FALSE);
             if (status != 0) {
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
@@ -216,8 +215,6 @@ wipe_fs (const gchar *device, const gchar *fs_type, gboolean wipe_all, GError **
             }
 
             blkid_reset_probe (probe);
-            has_fs_type = has_fs (probe, device, fs_type, error);
-
         }
     }
 
