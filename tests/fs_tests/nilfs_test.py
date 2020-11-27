@@ -20,6 +20,53 @@ class NILFS2TestCase(FSTestCase):
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="nilfs2_test")
 
 
+class NILFS2TestAvailability(NILFS2TestCase):
+
+    def setUp(self):
+        super(NILFS2TestAvailability, self).setUp()
+
+        # set everything back and reinit just to be sure
+        self.addCleanup(BlockDev.switch_init_checks, True)
+        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
+
+    def test_nilfs2_available(self):
+        """Verify that it is possible to check nilfs2 tech availability"""
+        available = BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2,
+                                              BlockDev.FSTechMode.MKFS |
+                                              BlockDev.FSTechMode.SET_LABEL |
+                                              BlockDev.FSTechMode.QUERY |
+                                              BlockDev.FSTechMode.RESIZE |
+                                              BlockDev.FSTechMode.SET_UUID)
+        self.assertTrue(available)
+
+        with six.assertRaisesRegex(self, GLib.GError, "doesn't support filesystem check"):
+            BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2, BlockDev.FSTechMode.CHECK)
+
+        with six.assertRaisesRegex(self, GLib.GError, "doesn't support filesystem repair"):
+            BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2, BlockDev.FSTechMode.REPAIR)
+
+        BlockDev.switch_init_checks(False)
+        BlockDev.reinit(self.requested_plugins, True, None)
+
+        # now try without mkfs.nilfs2
+        with utils.fake_path(all_but="mkfs.nilfs2"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'mkfs.nilfs2' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2, BlockDev.FSTechMode.MKFS)
+
+        # now try without nilfs-tune
+        with utils.fake_path(all_but="nilfs-tune"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'nilfs-tune' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2, BlockDev.FSTechMode.QUERY)
+
+            with six.assertRaisesRegex(self, GLib.GError, "The 'nilfs-tune' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2, BlockDev.FSTechMode.SET_LABEL)
+
+        # now try without nilfs-resize
+        with utils.fake_path(all_but="nilfs-resize"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'nilfs-resize' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2, BlockDev.FSTechMode.RESIZE)
+
+
 class NILFS2TestMkfs(NILFS2TestCase):
     def test_nilfs2_mkfs(self):
         """Verify that it is possible to create a new nilfs2 file system"""

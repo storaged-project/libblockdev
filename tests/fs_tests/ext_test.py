@@ -17,6 +17,76 @@ class ExtTestCase(FSTestCase):
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="ext_test")
 
 
+class ExtTestAvailability(ExtTestCase):
+
+    def setUp(self):
+        super(ExtTestAvailability, self).setUp()
+
+        # set everything back and reinit just to be sure
+        self.addCleanup(BlockDev.switch_init_checks, True)
+        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
+
+    def _test_ext_available(self, tech):
+        available = BlockDev.fs_is_tech_avail(tech,
+                                              BlockDev.FSTechMode.MKFS |
+                                              BlockDev.FSTechMode.QUERY |
+                                              BlockDev.FSTechMode.REPAIR |
+                                              BlockDev.FSTechMode.CHECK |
+                                              BlockDev.FSTechMode.SET_LABEL |
+                                              BlockDev.FSTechMode.RESIZE |
+                                              BlockDev.FSTechMode.SET_UUID)
+        self.assertTrue(available)
+
+        BlockDev.switch_init_checks(False)
+        BlockDev.reinit(self.requested_plugins, True, None)
+
+        # now try without mke2fs
+        with utils.fake_path(all_but="mke2fs"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'mke2fs' utility is not available"):
+                BlockDev.fs_is_tech_avail(tech, BlockDev.FSTechMode.MKFS)
+
+        # now try without e2fsck
+        with utils.fake_path(all_but="e2fsck"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'e2fsck' utility is not available"):
+                BlockDev.fs_is_tech_avail(tech, BlockDev.FSTechMode.CHECK)
+
+            with six.assertRaisesRegex(self, GLib.GError, "The 'e2fsck' utility is not available"):
+                BlockDev.fs_is_tech_avail(tech, BlockDev.FSTechMode.REPAIR)
+
+        # now try without dumpe2fs
+        with utils.fake_path(all_but="dumpe2fs"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'dumpe2fs' utility is not available"):
+                BlockDev.fs_is_tech_avail(tech, BlockDev.FSTechMode.QUERY)
+
+        # now try without tune2fs
+        with utils.fake_path(all_but="tune2fs"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'tune2fs' utility is not available"):
+                BlockDev.fs_is_tech_avail(tech, BlockDev.FSTechMode.SET_LABEL)
+
+            with six.assertRaisesRegex(self, GLib.GError, "The 'tune2fs' utility is not available"):
+                BlockDev.fs_is_tech_avail(tech, BlockDev.FSTechMode.SET_UUID)
+
+        # now try without resize2fs
+        with utils.fake_path(all_but="resize2fs"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'resize2fs' utility is not available"):
+                BlockDev.fs_is_tech_avail(tech, BlockDev.FSTechMode.RESIZE)
+
+    @tag_test(TestTags.CORE)
+    def test_ext2_available(self):
+        """Verify that it is possible to check ext2 tech availability"""
+        self._test_ext_available(tech=BlockDev.FSTech.EXT2)
+
+    @tag_test(TestTags.CORE)
+    def test_ext3_available(self):
+        """Verify that it is possible to check ext3 tech availability"""
+        self._test_ext_available(tech=BlockDev.FSTech.EXT3)
+
+    @tag_test(TestTags.CORE)
+    def test_ext4_available(self):
+        """Verify that it is possible to check ext4 tech availability"""
+        self._test_ext_available(tech=BlockDev.FSTech.EXT4)
+
+
 class ExtTestMkfs(ExtTestCase):
     def _test_ext_mkfs(self, mkfs_function, ext_version):
         with self.assertRaises(GLib.GError):

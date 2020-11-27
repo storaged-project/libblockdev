@@ -17,6 +17,59 @@ class VfatTestCase(FSTestCase):
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="vfat_test")
 
 
+class VfatTestAvailability(VfatTestCase):
+
+    def setUp(self):
+        super(VfatTestAvailability, self).setUp()
+
+        # set everything back and reinit just to be sure
+        self.addCleanup(BlockDev.switch_init_checks, True)
+        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
+
+    def test_vfat_available(self):
+        """Verify that it is possible to check vfat tech availability"""
+        available = BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT,
+                                              BlockDev.FSTechMode.MKFS |
+                                              BlockDev.FSTechMode.QUERY |
+                                              BlockDev.FSTechMode.REPAIR |
+                                              BlockDev.FSTechMode.CHECK |
+                                              BlockDev.FSTechMode.SET_LABEL |
+                                              BlockDev.FSTechMode.RESIZE)
+        self.assertTrue(available)
+
+        with six.assertRaisesRegex(self, GLib.GError, "doesn't support setting UUID"):
+            BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.SET_UUID)
+
+        BlockDev.switch_init_checks(False)
+        BlockDev.reinit(self.requested_plugins, True, None)
+
+        # now try without mkfs.vfat
+        with utils.fake_path(all_but="mkfs.vfat"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'mkfs.vfat' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.MKFS)
+
+        # now try without fsck.vfat
+        with utils.fake_path(all_but="fsck.vfat"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'fsck.vfat' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.CHECK)
+
+            with six.assertRaisesRegex(self, GLib.GError, "The 'fsck.vfat' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.REPAIR)
+
+            with six.assertRaisesRegex(self, GLib.GError, "The 'fsck.vfat' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.QUERY)
+
+        # now try without fatlabel
+        with utils.fake_path(all_but="fatlabel"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'fatlabel' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.SET_LABEL)
+
+        # now try without vfat-resize
+        with utils.fake_path(all_but="vfat-resize"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'vfat-resize' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.RESIZE)
+
+
 class VfatTestMkfs(VfatTestCase):
     def test_vfat_mkfs(self):
         """Verify that it is possible to create a new vfat file system"""

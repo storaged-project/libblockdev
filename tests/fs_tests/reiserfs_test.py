@@ -20,6 +20,62 @@ class ReiserFSTestCase(FSTestCase):
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="reiserfs_test")
 
 
+class ResiserFSTestAvailability(ReiserFSTestCase):
+
+    def setUp(self):
+        super(ResiserFSTestAvailability, self).setUp()
+
+        # set everything back and reinit just to be sure
+        self.addCleanup(BlockDev.switch_init_checks, True)
+        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
+
+    def test_resiserfs_available(self):
+        """Verify that it is possible to check resiserfs tech availability"""
+        available = BlockDev.fs_is_tech_avail(BlockDev.FSTech.REISERFS,
+                                              BlockDev.FSTechMode.MKFS |
+                                              BlockDev.FSTechMode.QUERY |
+                                              BlockDev.FSTechMode.REPAIR |
+                                              BlockDev.FSTechMode.CHECK |
+                                              BlockDev.FSTechMode.SET_LABEL |
+                                              BlockDev.FSTechMode.RESIZE |
+                                              BlockDev.FSTechMode.SET_UUID)
+        self.assertTrue(available)
+
+        BlockDev.switch_init_checks(False)
+        BlockDev.reinit(self.requested_plugins, True, None)
+
+        # now try without mkreiserfs
+        with utils.fake_path(all_but="mkreiserfs"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'mkreiserfs' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.REISERFS, BlockDev.FSTechMode.MKFS)
+
+        # now try without reiserfsck
+        with utils.fake_path(all_but="reiserfsck"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'reiserfsck' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.REISERFS, BlockDev.FSTechMode.CHECK)
+
+            with six.assertRaisesRegex(self, GLib.GError, "The 'reiserfsck' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.REISERFS, BlockDev.FSTechMode.REPAIR)
+
+        # now try without debugreiserfs
+        with utils.fake_path(all_but="debugreiserfs"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'debugreiserfs' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.REISERFS, BlockDev.FSTechMode.QUERY)
+
+        # now try without resize_reiserfs
+        with utils.fake_path(all_but="resize_reiserfs"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'resize_reiserfs' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.REISERFS, BlockDev.FSTechMode.RESIZE)
+
+        # now try without reiserfstune
+        with utils.fake_path(all_but="reiserfstune"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'reiserfstune' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.REISERFS, BlockDev.FSTechMode.SET_LABEL)
+
+            with six.assertRaisesRegex(self, GLib.GError, "The 'reiserfstune' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.REISERFS, BlockDev.FSTechMode.SET_UUID)
+
+
 class ReiserFSTestMkfs(ReiserFSTestCase):
     def test_reiserfs_mkfs(self):
         """Verify that it is possible to create a new reiserfs file system"""

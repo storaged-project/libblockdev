@@ -22,6 +22,91 @@ class F2FSTestCase(FSTestCase):
 
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="f2fs_test")
 
+    def _can_resize_f2fs(self):
+        ret, out, _err = utils.run_command("resize.f2fs -V")
+        if ret != 0:
+            # we can't even check the version
+            return False
+
+        m = re.search(r"resize.f2fs ([\d\.]+)", out)
+        if not m or len(m.groups()) != 1:
+            raise RuntimeError("Failed to determine f2fs version from: %s" % out)
+        return LooseVersion(m.groups()[0]) >= LooseVersion("1.12.0")
+
+    def _check_fsck_f2fs_version(self):
+        # if it can run -V to get version it can do the check
+        ret, _out, _err = utils.run_command("fsck.f2fs -V")
+        return ret == 0
+
+
+class F2FSTestAvailability(F2FSTestCase):
+
+    def setUp(self):
+        super(F2FSTestAvailability, self).setUp()
+
+        # set everything back and reinit just to be sure
+        self.addCleanup(BlockDev.switch_init_checks, True)
+        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
+
+    def test_f2fs_available(self):
+        """Verify that it is possible to check f2fs tech availability"""
+        available = BlockDev.fs_is_tech_avail(BlockDev.FSTech.F2FS,
+                                              BlockDev.FSTechMode.MKFS |
+                                              BlockDev.FSTechMode.QUERY)
+        self.assertTrue(available)
+
+        with six.assertRaisesRegex(self, GLib.GError, "doesn't support setting UUID"):
+            BlockDev.fs_is_tech_avail(BlockDev.FSTech.F2FS, BlockDev.FSTechMode.SET_UUID)
+
+        with six.assertRaisesRegex(self, GLib.GError, "doesn't support setting label"):
+            BlockDev.fs_is_tech_avail(BlockDev.FSTech.F2FS, BlockDev.FSTechMode.SET_LABEL)
+
+        if self._check_fsck_f2fs_version():
+            available = BlockDev.fs_is_tech_avail(BlockDev.FSTech.F2FS,
+                                                  BlockDev.FSTechMode.CHECK |
+                                                  BlockDev.FSTechMode.REPAIR)
+            self.assertTrue(available)
+
+        if self._can_resize_f2fs():
+            available = BlockDev.fs_is_tech_avail(BlockDev.FSTech.F2FS,
+                                                  BlockDev.FSTechMode.RESIZE)
+            self.assertTrue(available)
+
+
+        BlockDev.switch_init_checks(False)
+        BlockDev.reinit(self.requested_plugins, True, None)
+
+        # now try without mkfs.f2fs
+        with utils.fake_path(all_but="mkfs.f2fs"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'mkfs.f2fs' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.F2FS, BlockDev.FSTechMode.MKFS)
+
+        # now try without fsck.f2fs
+        with utils.fake_path(all_but="fsck.f2fs"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'fsck.f2fs' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.F2FS, BlockDev.FSTechMode.CHECK)
+
+            with six.assertRaisesRegex(self, GLib.GError, "The 'fsck.f2fs' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.F2FS, BlockDev.FSTechMode.REPAIR)
+
+        # now try without dump.f2fs
+        with utils.fake_path(all_but="dump.f2fs"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'dump.f2fs' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.F2FS, BlockDev.FSTechMode.QUERY)
+
+        # now try without resize.f2fs
+        with utils.fake_path(all_but="resize.f2fs"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'resize.f2fs' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.F2FS, BlockDev.FSTechMode.RESIZE)
+
+    def test_f2fs_fsck_too_low(self):
+        BlockDev.switch_init_checks(False)
+        BlockDev.reinit(self.requested_plugins, True, None)
+
+        # now try fake "low version of f2fs
+        with utils.fake_utils("tests/fake_utils/fsck_f2fs_low_version/"):
+            with six.assertRaisesRegex(self, GLib.GError, "Too low version of fsck.f2fs. At least 1.11.0 required."):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.F2FS, BlockDev.FSTechMode.CHECK)
 
 class F2FSTestMkfs(F2FSTestCase):
     def test_f2fs_mkfs(self):
@@ -102,11 +187,6 @@ class F2FSTestWipe(F2FSTestCase):
 
 
 class F2FSTestCheck(F2FSTestCase):
-    def _check_fsck_f2fs_version(self):
-        # if it can run -V to get version it can do the check
-        ret, _out, _err = utils.run_command("fsck.f2fs -V")
-        return ret == 0
-
     def test_f2fs_check(self):
         """Verify that it is possible to check an f2fs file system"""
 
@@ -147,17 +227,6 @@ class F2FSGetInfo(F2FSTestCase):
 
 
 class F2FSResize(F2FSTestCase):
-    def _can_resize_f2fs(self):
-        ret, out, _err = utils.run_command("resize.f2fs -V")
-        if ret != 0:
-            # we can't even check the version
-            return False
-
-        m = re.search(r"resize.f2fs ([\d\.]+)", out)
-        if not m or len(m.groups()) != 1:
-            raise RuntimeError("Failed to determine f2fs version from: %s" % out)
-        return LooseVersion(m.groups()[0]) >= LooseVersion("1.12.0")
-
     @tag_test(TestTags.UNSTABLE)
     def test_f2fs_resize(self):
         """Verify that it is possible to resize an f2fs file system"""

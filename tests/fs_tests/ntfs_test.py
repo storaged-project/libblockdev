@@ -21,6 +21,62 @@ class NTFSTestCase(FSTestCase):
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="ntfs_test")
 
 
+class NTFSTestAvailability(NTFSTestCase):
+
+    def setUp(self):
+        super(NTFSTestAvailability, self).setUp()
+
+        # set everything back and reinit just to be sure
+        self.addCleanup(BlockDev.switch_init_checks, True)
+        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
+
+    def test_ntfs_available(self):
+        """Verify that it is possible to check ntfs tech availability"""
+        available = BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS,
+                                              BlockDev.FSTechMode.MKFS |
+                                              BlockDev.FSTechMode.QUERY |
+                                              BlockDev.FSTechMode.REPAIR |
+                                              BlockDev.FSTechMode.CHECK |
+                                              BlockDev.FSTechMode.SET_LABEL |
+                                              BlockDev.FSTechMode.RESIZE |
+                                              BlockDev.FSTechMode.SET_UUID)
+        self.assertTrue(available)
+
+        BlockDev.switch_init_checks(False)
+        BlockDev.reinit(self.requested_plugins, True, None)
+
+        # now try without mkntfs
+        with utils.fake_path(all_but="mkntfs"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'mkntfs' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS, BlockDev.FSTechMode.MKFS)
+
+        # now try without ntfsfix
+        with utils.fake_path(all_but="ntfsfix"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'ntfsfix' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS, BlockDev.FSTechMode.CHECK)
+
+            with six.assertRaisesRegex(self, GLib.GError, "The 'ntfsfix' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS, BlockDev.FSTechMode.REPAIR)
+
+        # now try without ntfscluster
+        with utils.fake_path(all_but="ntfscluster"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'ntfscluster' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS, BlockDev.FSTechMode.QUERY)
+
+        # now try without ntfsresize
+        with utils.fake_path(all_but="ntfsresize"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'ntfsresize' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS, BlockDev.FSTechMode.RESIZE)
+
+        # now try without ntfslabel
+        with utils.fake_path(all_but="ntfslabel"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'ntfslabel' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS, BlockDev.FSTechMode.SET_LABEL)
+
+            with six.assertRaisesRegex(self, GLib.GError, "The 'ntfslabel' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS, BlockDev.FSTechMode.SET_UUID)
+
+
 class NTFSTestMkfs(NTFSTestCase):
     def test_ntfs_mkfs(self):
         """Verify that it is possible to create a new NTFS file system"""

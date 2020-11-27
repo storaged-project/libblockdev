@@ -17,6 +17,62 @@ class XfsTestCase(FSTestCase):
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="xfs_test")
 
 
+class XfsTestAvailability(XfsTestCase):
+
+    def setUp(self):
+        super(XfsTestAvailability, self).setUp()
+
+        # set everything back and reinit just to be sure
+        self.addCleanup(BlockDev.switch_init_checks, True)
+        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
+
+    def test_xfs_available(self):
+        """Verify that it is possible to check xfs tech availability"""
+        available = BlockDev.fs_is_tech_avail(BlockDev.FSTech.XFS,
+                                              BlockDev.FSTechMode.MKFS |
+                                              BlockDev.FSTechMode.QUERY |
+                                              BlockDev.FSTechMode.REPAIR |
+                                              BlockDev.FSTechMode.CHECK |
+                                              BlockDev.FSTechMode.SET_LABEL |
+                                              BlockDev.FSTechMode.RESIZE |
+                                              BlockDev.FSTechMode.SET_UUID)
+        self.assertTrue(available)
+
+        BlockDev.switch_init_checks(False)
+        BlockDev.reinit(self.requested_plugins, True, None)
+
+        # now try without mkfs.xfs
+        with utils.fake_path(all_but="mkfs.xfs"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'mkfs.xfs' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.XFS, BlockDev.FSTechMode.MKFS)
+
+        # now try without xfs_db
+        with utils.fake_path(all_but="xfs_db"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'xfs_db' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.XFS, BlockDev.FSTechMode.CHECK)
+
+        # now try without xfs_repair
+        with utils.fake_path(all_but="xfs_repair"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'xfs_repair' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.XFS, BlockDev.FSTechMode.REPAIR)
+
+        # now try without xfs_admin
+        with utils.fake_path(all_but="xfs_admin"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'xfs_admin' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.XFS, BlockDev.FSTechMode.QUERY)
+
+            with six.assertRaisesRegex(self, GLib.GError, "The 'xfs_admin' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.XFS, BlockDev.FSTechMode.SET_LABEL)
+
+            with six.assertRaisesRegex(self, GLib.GError, "The 'xfs_admin' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.XFS, BlockDev.FSTechMode.SET_UUID)
+
+        # now try without xfs_growfs
+        with utils.fake_path(all_but="xfs_growfs"):
+            with six.assertRaisesRegex(self, GLib.GError, "The 'xfs_growfs' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.XFS, BlockDev.FSTechMode.RESIZE)
+
+
 class XfsTestMkfs(XfsTestCase):
     @tag_test(TestTags.CORE)
     def test_xfs_mkfs(self):
