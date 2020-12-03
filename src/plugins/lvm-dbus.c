@@ -20,7 +20,6 @@
 #include <glib.h>
 #include <math.h>
 #include <string.h>
-#include <libdevmapper.h>
 #include <unistd.h>
 #include <blockdev/utils.h>
 #include <gio/gio.h>
@@ -256,14 +255,6 @@ static volatile guint avail_features = 0;
 static volatile guint avail_module_deps = 0;
 static GMutex deps_check_lock;
 
-#define DEPS_THMS 0
-#define DEPS_THMS_MASK (1 << DEPS_THMS)
-#define DEPS_LAST 1
-
-static const UtilDep deps[DEPS_LAST] = {
-    {"thin_metadata_size", NULL, NULL, NULL},
-};
-
 #define DBUS_DEPS_LVMDBUSD 0
 #define DBUS_DEPS_LVMDBUSD_MASK (1 << DBUS_DEPS_LVMDBUSD)
 #define DBUS_DEPS_LVMDBUSD_WRITECACHE 1
@@ -312,17 +303,6 @@ gboolean bd_lvm_check_deps (void) {
             bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
             g_clear_error (&error);
         }
-        check_ret = check_ret && success;
-    }
-
-    for (i=0; i < DEPS_LAST; i++) {
-        success = bd_utils_check_util_version (deps[i].name, deps[i].version,
-                                               deps[i].ver_arg, deps[i].ver_regexp, &error);
-        if (!success)
-            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
-        else
-            g_atomic_int_or (&avail_deps, 1 << i);
-        g_clear_error (&error);
         check_ret = check_ret && success;
     }
 
@@ -396,10 +376,7 @@ gboolean bd_lvm_is_tech_avail (BDLVMTech tech, guint64 mode, GError **error) {
             g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_TECH_UNAVAIL,
                          "Only 'query' supported for thin calculations");
             return FALSE;
-        } else if ((mode & BD_LVM_TECH_MODE_QUERY) &&
-            !check_deps (&avail_deps, DEPS_THMS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
-            return FALSE;
-        else
+        } else
             return TRUE;
     case BD_LVM_TECH_CALCS:
         if (mode & ~BD_LVM_TECH_MODE_QUERY) {
@@ -1451,53 +1428,28 @@ guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean inclu
  * bd_lvm_get_thpool_meta_size:
  * @size: size of the thin pool
  * @chunk_size: chunk size of the thin pool or 0 to use the default (%BD_LVM_DEFAULT_CHUNK_SIZE)
- * @n_snapshots: number of snapshots that will be created in the pool
+ * @n_snapshots: ignored
  * @error: (out): place to store error (if any)
  *
- * Returns: recommended size of the metadata space for the specified pool or 0
- *          in case of error
+ * Note: This function will be changed in 3.0: the @n_snapshots parameter
+ *       is currently not used and will be removed.
+ *
+ * Returns: recommended size of the metadata space for the specified pool
  *
  * Tech category: %BD_LVM_TECH_THIN_CALCS no mode (it is ignored)
  */
-guint64 bd_lvm_get_thpool_meta_size (guint64 size, guint64 chunk_size, guint64 n_snapshots, GError **error) {
-    /* ub - output in bytes, n - output just the number */
-    const gchar* args[7] = {"thin_metadata_size", "-ub", "-n", NULL, NULL, NULL, NULL};
-    gchar *output = NULL;
-    gboolean success = FALSE;
-    guint64 ret = 0;
+guint64 bd_lvm_get_thpool_meta_size (guint64 size, guint64 chunk_size, guint64 n_snapshots UNUSED, GError **error UNUSED) {
+    guint64 md_size = 0;
 
-    if (!check_deps (&avail_deps, DEPS_THMS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
-        return 0;
+    /* based on lvcreate metadata size calculation */
+    md_size = UINT64_C(64) * size / (chunk_size ? chunk_size : BD_LVM_DEFAULT_CHUNK_SIZE);
 
-    /* s - total size, b - chunk size, m - number of snapshots */
-    args[3] = g_strdup_printf ("-s%"G_GUINT64_FORMAT, size);
-    args[4] = g_strdup_printf ("-b%"G_GUINT64_FORMAT,
-                               chunk_size != 0 ? chunk_size : (guint64) BD_LVM_DEFAULT_CHUNK_SIZE);
-    args[5] = g_strdup_printf ("-m%"G_GUINT64_FORMAT, n_snapshots);
+    if (md_size > BD_LVM_MAX_THPOOL_MD_SIZE)
+        md_size = BD_LVM_MAX_THPOOL_MD_SIZE;
+    else if (md_size < BD_LVM_MIN_THPOOL_MD_SIZE)
+        md_size = BD_LVM_MIN_THPOOL_MD_SIZE;
 
-    success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
-    g_free ((gchar*) args[3]);
-    g_free ((gchar*) args[4]);
-    g_free ((gchar*) args[5]);
-
-    if (!success) {
-        /* error is already set */
-        g_free (output);
-        return 0;
-    }
-
-    ret = g_ascii_strtoull (output, NULL, 0);
-    if (ret == 0) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                     "Failed to parse number from thin_metadata_size's output: '%s'",
-                     output);
-        g_free (output);
-        return 0;
-    }
-
-    g_free (output);
-
-    return MAX (ret, BD_LVM_MIN_THPOOL_MD_SIZE);
+    return md_size;
 }
 
 /**

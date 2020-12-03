@@ -582,6 +582,12 @@ def lvm_get_thpool_padding(size, pe_size=0, included=False):
     return _lvm_get_thpool_padding(size, pe_size, included)
 __all__.append("lvm_get_thpool_padding")
 
+_lvm_get_thpool_meta_size = BlockDev.lvm_get_thpool_meta_size
+@override(BlockDev.lvm_get_thpool_meta_size)
+def lvm_get_thpool_meta_size(size, chunk_size=0, n_snapshots=0):
+    return _lvm_get_thpool_meta_size(size, chunk_size, n_snapshots)
+__all__.append("lvm_get_thpool_meta_size")
+
 _lvm_pvcreate = BlockDev.lvm_pvcreate
 @override(BlockDev.lvm_pvcreate)
 def lvm_pvcreate(device, data_alignment=0, metadata_size=0, extra=None, **kwargs):
