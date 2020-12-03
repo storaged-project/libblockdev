@@ -154,7 +154,7 @@ class SwapUnloadTest(SwapTest):
         # unload all plugins first
         self.assertTrue(BlockDev.reinit([], True, None))
 
-        with fake_utils("tests/swap_low_version/"):
+        with fake_utils("tests/fake_utils/swap_low_version/"):
             # too low version of mkswap available, the swap plugin should fail to load
             with self.assertRaises(GLib.GError):
                 BlockDev.reinit(self.requested_plugins, True, None)

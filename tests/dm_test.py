@@ -128,7 +128,7 @@ class DMUnloadTest(DevMapperTestCase):
         # unload all plugins first
         self.assertTrue(BlockDev.reinit([], True, None))
 
-        with fake_utils("tests/dm_low_version/"):
+        with fake_utils("tests/fake_utils/dm_low_version/"):
             # too low version of dmsetup available, the DM plugin should fail to load
             with self.assertRaises(GLib.GError):
                 BlockDev.reinit(self.requested_plugins, True, None)

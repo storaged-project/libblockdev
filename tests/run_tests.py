@@ -34,7 +34,7 @@ def _get_tests_from_suite(suite, tests):
             _get_tests_from_suite(test, tests)
 
         if isinstance(test, unittest.TestCase):
-            tests.append(test)
+            tests.add(test)
 
     return tests
 
@@ -277,7 +277,7 @@ if __name__ == '__main__':
         if 'LD_LIBRARY_PATH' not in os.environ and 'GI_TYPELIB_PATH' not in os.environ:
             os.environ['LD_LIBRARY_PATH'] = LIBDIRS
             os.environ['GI_TYPELIB_PATH'] = GIDIR
-            os.environ['LIBBLOCKDEV_CONFIG_DIR'] = os.path.join(testdir, 'default_config')
+            os.environ['LIBBLOCKDEV_CONFIG_DIR'] = os.path.join(testdir, 'test_configs/default_config')
             os.environ['PATH'] += ':' + os.path.join(projdir, 'tools')
 
             try:
@@ -306,8 +306,9 @@ if __name__ == '__main__':
         test_cases = loader.discover(start_dir=testdir, pattern='*_test*.py')
 
     # extract list of test classes so we can check/run them manually one by one
-    tests = []
+    tests = set()
     tests = _get_tests_from_suite(test_cases, tests)
+    tests = sorted(tests, key=lambda test: test.id())
 
     # get distro and arch here so we don't have to do this for every test
     DISTRO, VERSION = get_version()

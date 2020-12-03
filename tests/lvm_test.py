@@ -1605,7 +1605,7 @@ class LVMUnloadTest(LVMTestCase):
         # unload all plugins first
         self.assertTrue(BlockDev.reinit([], True, None))
 
-        with fake_utils("tests/lvm_low_version/"):
+        with fake_utils("tests/fake_utils/lvm_low_version/"):
             # too low version of LVM available, the LVM plugin should fail to load
             with self.assertRaises(GLib.GError):
                 BlockDev.reinit(self.requested_plugins, True, None)

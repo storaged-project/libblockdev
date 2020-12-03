@@ -70,7 +70,15 @@ def fake_utils(path="."):
     finally:
         os.environ["PATH"] = old_path
 
-ALL_UTILS = {"lvm", "thin_metadata_size", "btrfs", "mkswap", "swaplabel", "multipath", "mpathconf", "dmsetup", "mdadm", "make-bcache"}
+ALL_UTILS = {"lvm", "thin_metadata_size", "btrfs", "mkswap", "swaplabel", "multipath", "mpathconf", "dmsetup", "mdadm", "make-bcache",
+             "mkfs.exfat", "fsck.exfat", "tune.exfat",
+             "mke2fs", "e2fsck", "tune2fs", "dumpe2fs", "resize2fs",
+             "mkfs.f2fs", "fsck.f2fs", "fsck.f2fs", "dump.f2fs", "resize.f2fs",
+             "mkfs.nilfs2", "nilfs-tune", "nilfs-resize",
+             "mkntfs", "ntfsfix", "ntfsresize", "ntfslabel", "ntfscluster",
+             "mkreiserfs", "reiserfsck", "reiserfstune", "debugreiserfs", "resize_reiserfs",
+             "mkfs.vfat", "fatlabel", "fsck.vfat", "vfat-resize",
+             "mkfs.xfs", "xfs_db", "xfs_repair", "xfs_admin", "xfs_growfs"}
 
 @contextmanager
 def fake_path(path=None, keep_utils=None, all_but=None):

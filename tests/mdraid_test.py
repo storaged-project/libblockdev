@@ -569,7 +569,7 @@ class FakeMDADMutilTest(MDTest):
     def test_fw_raid_uppercase_examine(self):
         """Verify that md_examine works with output using "RAID" instead of "Raid" and other quirks """
 
-        with fake_utils("tests/mdadm_fw_RAID_examine"):
+        with fake_utils("tests/fake_utils/mdadm_fw_RAID_examine"):
             ex_data = BlockDev.md_examine("fake_dev")
 
         self.assertEqual(ex_data.level, "container")
@@ -582,7 +582,7 @@ class FakeMDADMutilTest(MDTest):
         """Verify that md_examine works as expected with no metadata spec"""
 
         # shouldn't raise any exception
-        with fake_utils("tests/mdadm_no_metadata_examine"):
+        with fake_utils("tests/fake_utils/mdadm_no_metadata_examine"):
             ex_data = BlockDev.md_examine("fake_dev")
 
         self.assertIs(ex_data.metadata, None)
@@ -591,7 +591,7 @@ class FakeMDADMutilTest(MDTest):
     def test_fw_raid_migrating(self):
         """Verify that md_examine works when array is migrating ("foo <-- bar" values in output) """
 
-        with fake_utils("tests/mdadm_fw_RAID_examine_migrate"):
+        with fake_utils("tests/fake_utils/mdadm_fw_RAID_examine_migrate"):
             ex_data = BlockDev.md_examine("fake_dev")
 
         self.assertEqual(ex_data.chunk_size, 128 * 1024)
@@ -600,7 +600,7 @@ class FakeMDADMutilTest(MDTest):
     def test_mdadm_name_extra_info(self):
         """Verify that md_examine and md_detail work with extra MD RAID name info"""
 
-        with fake_utils("tests/mdadm_extra_name_stuff"):
+        with fake_utils("tests/fake_utils/mdadm_extra_name_stuff"):
             ex_data = BlockDev.md_examine("fake_dev")
             detail_data = BlockDev.md_detail("fake_dev")
 
@@ -621,7 +621,7 @@ class MDUnloadTest(MDTestCase):
         # unload all plugins first
         self.assertTrue(BlockDev.reinit([], True, None))
 
-        with fake_utils("tests/mdraid_low_version/"):
+        with fake_utils("tests/fake_utils/mdraid_low_version/"):
             # too low version of mdsetup available, the MD plugin should fail to load
             with self.assertRaises(GLib.GError):
                 BlockDev.reinit(self.requested_plugins, True, None)

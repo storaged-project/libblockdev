@@ -142,7 +142,7 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         # now reinit the library with the config preferring the new build
         orig_conf_dir = os.environ.get("LIBBLOCKDEV_CONFIG_DIR")
-        os.environ["LIBBLOCKDEV_CONFIG_DIR"] = "tests/plugin_prio_conf.d"
+        os.environ["LIBBLOCKDEV_CONFIG_DIR"] = "tests/test_configs/plugin_prio_conf.d"
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
 
         # new LVM plugin loaded, max LV size should be 1024 bytes
@@ -161,7 +161,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         # now reinit the library with the another config preferring the new
         # build
         orig_conf_dir = os.environ.get("LIBBLOCKDEV_CONFIG_DIR")
-        os.environ["LIBBLOCKDEV_CONFIG_DIR"] = "tests/plugin_multi_conf.d"
+        os.environ["LIBBLOCKDEV_CONFIG_DIR"] = "tests/test_configs/plugin_multi_conf.d"
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
 
         # new LVM plugin loaded, max LV size should be 1024 bytes
@@ -226,7 +226,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         # now reinit the library with the another config preferring the new
         # build
         orig_conf_dir = os.environ.get("LIBBLOCKDEV_CONFIG_DIR")
-        os.environ["LIBBLOCKDEV_CONFIG_DIR"] = "tests/plugin_multi_conf.d"
+        os.environ["LIBBLOCKDEV_CONFIG_DIR"] = "tests/test_configs/plugin_multi_conf.d"
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
 
         # the original plugin should be loaded because the new one should fail
@@ -352,8 +352,8 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         # try reinitializing with only some utilities being available and thus
         # only some plugins able to load
-        with fake_path("tests/lib_missing_utils", keep_utils=["swapon", "swapoff", "mkswap", "lvm",
-                                                              "thin_metadata_size", "swaplabel"]):
+        with fake_path("tests/fake_utils/lib_missing_utils", keep_utils=["swapon", "swapoff", "mkswap", "lvm",
+                                                                         "thin_metadata_size", "swaplabel"]):
             succ, loaded = BlockDev.try_reinit(self.requested_plugins, True, None)
             self.assertFalse(succ)
             for plug_name in ("swap", "lvm", "crypto"):
@@ -364,8 +364,8 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         # now the same with a subset of plugins requested
         plugins = BlockDev.plugin_specs_from_names(["lvm", "swap", "crypto"])
-        with fake_path("tests/lib_missing_utils", keep_utils=["swapon", "swapoff", "mkswap", "lvm",
-                                                              "thin_metadata_size", "swaplabel"]):
+        with fake_path("tests/fake_utils/lib_missing_utils", keep_utils=["swapon", "swapoff", "mkswap", "lvm",
+                                                                         "thin_metadata_size", "swaplabel"]):
             succ, loaded = BlockDev.try_reinit(plugins, True, None)
             self.assertTrue(succ)
             self.assertEqual(set(loaded), set(["swap", "lvm", "crypto"]))
