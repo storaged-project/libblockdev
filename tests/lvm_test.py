@@ -134,19 +134,14 @@ class LvmNoDevTestCase(LVMTestCase):
     def test_get_thpool_meta_size(self):
         """Verify that getting recommended thin pool metadata size works as expected"""
 
-        # no idea how thin_metadata_size works, but let's at least check that
-        # the function works and returns what thin_metadata_size says
-        out1 = subprocess.check_output(["thin_metadata_size", "-ub", "-n", "-b64k", "-s1t", "-m100"])
-        self.assertEqual(int(out1), BlockDev.lvm_get_thpool_meta_size (1 * 1024**4, 64 * 1024, 100))
 
-        out2 = subprocess.check_output(["thin_metadata_size", "-ub", "-n", "-b128k", "-s1t", "-m100"])
-        self.assertEqual(int(out2), BlockDev.lvm_get_thpool_meta_size (1 * 1024**4, 128 * 1024, 100))
+        self.assertEqual(BlockDev.lvm_get_thpool_meta_size(1 * 1024**4, 64 * 1024),
+                         1 * 1024**3)
 
-        # twice the chunk_size -> roughly half the metadata needed
-        self.assertAlmostEqual(float(out1) / float(out2), 2, places=2)
+        self.assertEqual(BlockDev.lvm_get_thpool_meta_size(1 * 1024**4, 128 * 1024),
+                         512 * 1024**2)
 
-        # unless thin_metadata_size gives a value that is not valid (too small)
-        self.assertEqual(BlockDev.lvm_get_thpool_meta_size (100 * 1024**2, 128 * 1024, 100),
+        self.assertEqual(BlockDev.lvm_get_thpool_meta_size(100 * 1024**2, 128 * 1024),
                          BlockDev.LVM_MIN_THPOOL_MD_SIZE)
 
     @tag_test(TestTags.NOSTORAGE)

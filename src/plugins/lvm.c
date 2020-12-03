@@ -20,7 +20,6 @@
 #include <glib.h>
 #include <math.h>
 #include <string.h>
-#include <libdevmapper.h>
 #include <unistd.h>
 #include <blockdev/utils.h>
 
@@ -211,13 +210,10 @@ static GMutex deps_check_lock;
 
 #define DEPS_LVM 0
 #define DEPS_LVM_MASK (1 << DEPS_LVM)
-#define DEPS_THMS 1
-#define DEPS_THMS_MASK (1 << DEPS_THMS)
-#define DEPS_LAST 2
+#define DEPS_LAST 1
 
 static const UtilDep deps[DEPS_LAST] = {
     {"lvm", LVM_MIN_VERSION, "version", "LVM version:\\s+([\\d\\.]+)"},
-    {"thin_metadata_size", NULL, NULL, NULL},
 };
 
 #define FEATURES_VDO 0
@@ -233,6 +229,8 @@ static const UtilFeatureDep features[FEATURES_LAST] = {
 #define MODULE_DEPS_LAST 1
 
 static const gchar*const module_deps[MODULE_DEPS_LAST] = { "kvdo" };
+
+#define UNUSED __attribute__((unused))
 
 /**
  * bd_lvm_check_deps:
@@ -315,10 +313,7 @@ gboolean bd_lvm_is_tech_avail (BDLVMTech tech, guint64 mode, GError **error) {
             g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_TECH_UNAVAIL,
                          "Only 'query' supported for thin calculations");
             return FALSE;
-        } else if ((mode & BD_LVM_TECH_MODE_QUERY) &&
-            !check_deps (&avail_deps, DEPS_THMS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
-            return FALSE;
-        else
+        } else
             return TRUE;
     case BD_LVM_TECH_CALCS:
         if (mode & ~BD_LVM_TECH_MODE_QUERY) {
@@ -818,53 +813,28 @@ guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean inclu
  * bd_lvm_get_thpool_meta_size:
  * @size: size of the thin pool
  * @chunk_size: chunk size of the thin pool or 0 to use the default (%BD_LVM_DEFAULT_CHUNK_SIZE)
- * @n_snapshots: number of snapshots that will be created in the pool
+ * @n_snapshots: ignored
  * @error: (out): place to store error (if any)
  *
- * Returns: recommended size of the metadata space for the specified pool or 0
- *          in case of error
+ * Note: This function will be changed in 3.0: the @n_snapshots parameter
+ *       is currently not used and will be removed.
+ *
+ * Returns: recommended size of the metadata space for the specified pool
  *
  * Tech category: %BD_LVM_TECH_THIN_CALCS no mode (it is ignored)
  */
-guint64 bd_lvm_get_thpool_meta_size (guint64 size, guint64 chunk_size, guint64 n_snapshots, GError **error) {
-    /* ub - output in bytes, n - output just the number */
-    const gchar* args[7] = {"thin_metadata_size", "-ub", "-n", NULL, NULL, NULL, NULL};
-    gchar *output = NULL;
-    gboolean success = FALSE;
-    guint64 ret = 0;
+guint64 bd_lvm_get_thpool_meta_size (guint64 size, guint64 chunk_size, guint64 n_snapshots UNUSED, GError **error UNUSED) {
+    guint64 md_size = 0;
 
-    if (!check_deps (&avail_deps, DEPS_THMS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
-        return 0;
+    /* based on lvcreate metadata size calculation */
+    md_size = UINT64_C(64) * size / (chunk_size ? chunk_size : BD_LVM_DEFAULT_CHUNK_SIZE);
 
-    /* s - total size, b - chunk size, m - number of snapshots */
-    args[3] = g_strdup_printf ("-s%"G_GUINT64_FORMAT, size);
-    args[4] = g_strdup_printf ("-b%"G_GUINT64_FORMAT,
-                               chunk_size != 0 ? chunk_size : (guint64) BD_LVM_DEFAULT_CHUNK_SIZE);
-    args[5] = g_strdup_printf ("-m%"G_GUINT64_FORMAT, n_snapshots);
+    if (md_size > BD_LVM_MAX_THPOOL_MD_SIZE)
+        md_size = BD_LVM_MAX_THPOOL_MD_SIZE;
+    else if (md_size < BD_LVM_MIN_THPOOL_MD_SIZE)
+        md_size = BD_LVM_MIN_THPOOL_MD_SIZE;
 
-    success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
-    g_free ((gchar*) args[3]);
-    g_free ((gchar*) args[4]);
-    g_free ((gchar*) args[5]);
-
-    if (!success) {
-        /* error is already set */
-        g_free (output);
-        return 0;
-    }
-
-    ret = g_ascii_strtoull (output, NULL, 0);
-    if (ret == 0) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
-                     "Failed to parse number from thin_metadata_size's output: '%s'",
-                     output);
-        g_free (output);
-        return 0;
-    }
-
-    g_free (output);
-
-    return MAX (ret, BD_LVM_MIN_THPOOL_MD_SIZE);
+    return md_size;
 }
 
 /**
