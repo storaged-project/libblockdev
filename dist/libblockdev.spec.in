@@ -387,8 +387,6 @@ BuildRequires: device-mapper-devel
 Summary:     The LVM plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 0.11
 Requires: lvm2
-# for thin_metadata_size
-Requires: device-mapper-persistent-data
 
 %description lvm
 The libblockdev library plugin (and in the same time a standalone library)
@@ -411,8 +409,6 @@ BuildRequires: device-mapper-devel
 Summary:     The LVM plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} >= 1.4
 Requires: lvm2-dbusd >= 2.02.156
-# for thin_metadata_size
-Requires: device-mapper-persistent-data
 
 %description lvm-dbus
 The libblockdev library plugin (and in the same time a standalone library)
