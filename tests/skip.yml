@@ -24,7 +24,7 @@
 
 ---
 
-- test: fs_test.MountTest.test_mount_ntfs_ro
+- test: fs_tests.mount_test.MountTestCase.test_mount_ntfs_ro
   skip_on:
     - distro: "debian"
       version: ["10", "testing"]
@@ -62,7 +62,7 @@
       version: "32"
       reason: "working with old-style LVM snapshots leads to deadlock in LVM tools"
 
-- test: fs_test.MountTest.test_mount_ntfs
+- test: fs_tests.mount_test.MountTestCase.test_mount_ntfs
   skip_on:
     - distro: "debian"
       version: "testing"
