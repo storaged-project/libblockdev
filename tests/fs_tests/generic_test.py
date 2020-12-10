@@ -17,6 +17,9 @@ from gi.repository import BlockDev, GLib
 
 
 class GenericTestCase(FSTestCase):
+
+    loop_size = 500 * 1024**2
+
     def setUp(self):
         super(GenericTestCase, self).setUp()
 
