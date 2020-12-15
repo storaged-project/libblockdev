@@ -18,11 +18,13 @@
 #define BD_LVM_MIN_PE_SIZE (1 KiB)
 #define BD_LVM_MAX_PE_SIZE (16 GiB)
 
-/* lvm constants for thin pool metadata size are actually half of these
-   but when they calculate the actual metadata size they double the limits
-   so lets just double the limits here too */
+/* lvm constant for thin pool metadata size is actually half of this
+   but when they calculate the actual metadata size they double the limit
+   so lets just double the limit here too */
 #define BD_LVM_MIN_THPOOL_MD_SIZE (4 MiB)
-#define BD_LVM_MAX_THPOOL_MD_SIZE (DM_THIN_MAX_METADATA_SIZE KiB)
+
+/* DM_THIN_MAX_METADATA_SIZE is in 512 sectors */
+#define BD_LVM_MAX_THPOOL_MD_SIZE (DM_THIN_MAX_METADATA_SIZE * 512)
 
 #define BD_LVM_MIN_THPOOL_CHUNK_SIZE (64 KiB)
 #define BD_LVM_MAX_THPOOL_CHUNK_SIZE (1 GiB)
