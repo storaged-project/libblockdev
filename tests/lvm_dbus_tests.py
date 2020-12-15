@@ -160,10 +160,11 @@ class LvmNoDevTestCase(LVMTestCase):
 
         self.assertTrue(BlockDev.lvm_is_valid_thpool_md_size(4 * 1024**2))
         self.assertTrue(BlockDev.lvm_is_valid_thpool_md_size(5 * 1024**2))
-        self.assertTrue(BlockDev.lvm_is_valid_thpool_md_size(16 * 1024**3))
+        self.assertTrue(BlockDev.lvm_is_valid_thpool_md_size(15 * 1024**3))
 
         self.assertFalse(BlockDev.lvm_is_valid_thpool_md_size(1 * 1024**2))
         self.assertFalse(BlockDev.lvm_is_valid_thpool_md_size(3 * 1024**2))
+        self.assertFalse(BlockDev.lvm_is_valid_thpool_md_size(16 * 1024**3))
         self.assertFalse(BlockDev.lvm_is_valid_thpool_md_size(32 * 1024**3))
 
     @tag_test(TestTags.NOSTORAGE)
