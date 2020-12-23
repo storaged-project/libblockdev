@@ -320,6 +320,15 @@ def crypto_bitlk_open(device, name, passphrase, read_only=False):
 __all__.append("crypto_bitlk_open")
 
 
+_crypto_keyring_add_key = BlockDev.crypto_keyring_add_key
+@override(BlockDev.crypto_keyring_add_key)
+def crypto_keyring_add_key(key_desc, key):
+    if isinstance(key, str):
+        key = [ord(c) for c in key]
+    return _crypto_keyring_add_key(key_desc, key)
+__all__.append("crypto_keyring_add_key")
+
+
 _dm_create_linear = BlockDev.dm_create_linear
 @override(BlockDev.dm_create_linear)
 def dm_create_linear(map_name, device, length, uuid=None):

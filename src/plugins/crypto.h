@@ -28,6 +28,7 @@ typedef enum {
     BD_CRYPTO_ERROR_ESCROW_FAILED,
     BD_CRYPTO_ERROR_INVALID_PARAMS,
     BD_CRYPTO_ERROR_TECH_UNAVAIL,
+    BD_CRYPTO_ERROR_KEYRING,
 } BDCryptoError;
 
 #define BD_CRYPTO_BACKUP_PASSPHRASE_CHARSET "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz./"
@@ -43,6 +44,7 @@ typedef enum {
     BD_CRYPTO_TECH_ESCROW,
     BD_CRYPTO_TECH_INTEGRITY,
     BD_CRYPTO_TECH_BITLK,
+    BD_CRYPTO_TECH_KEYRING,
 } BDCryptoTech;
 
 typedef enum {
@@ -220,6 +222,8 @@ gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup
 BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *luks_device, GError **error);
 BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **error);
 BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError **error);
+
+gboolean bd_crypto_keyring_add_key (const gchar *key_desc, const guint8 *pass_data, gsize data_len, GError **error);
 
 gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error);
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);

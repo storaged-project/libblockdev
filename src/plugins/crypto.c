@@ -27,6 +27,8 @@
 #include <unistd.h>
 #include <errno.h>
 #include <blkid.h>
+#include <sys/types.h>
+#include <keyutils.h>
 #include <blockdev/utils.h>
 
 #ifdef WITH_BD_ESCROW
@@ -376,6 +378,14 @@ gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **erro
             if (ret != mode) {
                 g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
                              "Only 'open' supported for BITLK");
+                return FALSE;
+            } else
+                return TRUE;
+        case BD_CRYPTO_TECH_KEYRING:
+            ret = mode & BD_CRYPTO_TECH_MODE_ADD_KEY;
+            if (ret != mode) {
+                g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                             "Only 'add key' supported for kernel keyring");
                 return FALSE;
             } else
                 return TRUE;
@@ -2103,6 +2113,30 @@ BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError *
     return (BDCryptoLUKSTokenInfo **) g_ptr_array_free (tokens, FALSE);
 }
 #endif
+
+/**
+ * bd_crypto_keyring_add_key:
+ * @key_desc: kernel keyring key description
+ * @key_data: (array length=data_len): a key to add to kernel keyring (may contain arbitrary binary data)
+ * @data_len: length of the @pass_data buffer
+ * @error: (out): place to store error (if any)
+ * *
+ * Returns: whether the given key was successfully saved to kernel keyring or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_KEYRING-%BD_CRYPTO_TECH_MODE_ADD_KEY
+ */
+gboolean bd_crypto_keyring_add_key (const gchar *key_desc, const guint8 *key_data, gsize data_len, GError **error) {
+    key_serial_t ret;
+
+    ret = add_key ("user", key_desc, key_data, data_len, KEY_SPEC_SESSION_KEYRING);
+    if (ret < 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYRING,
+                     "Failed to add key to kernel keyring: %s", strerror_l (errno, c_locale));
+        return FALSE;
+    }
+
+    return TRUE;
+}
 
 /**
  * bd_crypto_device_seems_encrypted:
