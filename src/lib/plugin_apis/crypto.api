@@ -668,6 +668,23 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gcha
 gboolean bd_crypto_luks_open_blob (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);
 
 /**
+ * bd_crypto_luks_open_keyring:
+ * @device: the device to open
+ * @name: name for the LUKS device
+ * @key_desc: kernel keyring key description
+ * @read_only: whether to open as read-only or not (meaning read-write)
+ * @error: (out): place to store error (if any)
+ *
+ * Note: Keyslot passphrase must be stored in 'user' key type and the key has to be reachable
+ *       by process context on behalf of which this function is called.
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+gboolean bd_crypto_luks_open_keyring (const gchar *device, const gchar *name, const gchar *key_desc, gboolean read_only, GError **error);
+
+/**
  * bd_crypto_luks_close:
  * @luks_device: LUKS device to close
  * @error: (out): place to store error (if any)

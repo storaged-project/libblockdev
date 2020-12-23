@@ -1137,6 +1137,69 @@ gboolean bd_crypto_luks_open_blob (const gchar *device, const gchar *name, const
     return luks_open (device, name, (const guint8*) pass_data, data_len, NULL, read_only, error);
 }
 
+/**
+ * bd_crypto_luks_open_keyring:
+ * @device: the device to open
+ * @name: name for the LUKS device
+ * @key_desc: kernel keyring key description
+ * @read_only: whether to open as read-only or not (meaning read-write)
+ * @error: (out): place to store error (if any)
+ *
+ * Note: Keyslot passphrase must be stored in 'user' key type and the key has to be reachable
+ *       by process context on behalf of which this function is called.
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+gboolean bd_crypto_luks_open_keyring (const gchar *device, const gchar *name, const gchar *key_desc, gboolean read_only, GError **error) {
+    struct crypt_device *cd = NULL;
+    guint64 progress_id = 0;
+    gint ret = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started opening '%s' LUKS device", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_load (cd, CRYPT_LUKS, NULL);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to load device's parameters: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_activate_by_keyring (cd, name, key_desc, CRYPT_ANY_SLOT,
+                                     read_only ? CRYPT_ACTIVATE_READONLY : 0);
+    if (ret < 0) {
+        if (ret == -EPERM)
+            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                         "Failed to activate device: Incorrect passphrase.");
+        else
+            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                         "Failed to activate device: %s", strerror_l (-ret, c_locale));
+
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
+}
+
+
 static gboolean _crypto_close (const gchar *device, const gchar *tech_name, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
