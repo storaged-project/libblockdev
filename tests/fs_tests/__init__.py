@@ -13,3 +13,4 @@ from .ntfs_test import *
 from .reiserfs_test import *
 from .vfat_test import *
 from .xfs_test import *
+from .btrfs_test import *
