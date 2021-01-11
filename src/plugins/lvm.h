@@ -1,5 +1,6 @@
 #include <glib.h>
 #include <blockdev/utils.h>
+#include <libdevmapper.h>
 
 #ifndef BD_LVM
 #define BD_LVM
@@ -21,8 +22,14 @@
 #define USE_DEFAULT_PE_SIZE 0
 #define RESOLVE_PE_SIZE(size) ((size) == USE_DEFAULT_PE_SIZE ? BD_LVM_DEFAULT_PE_SIZE : (size))
 
-#define BD_LVM_MIN_THPOOL_MD_SIZE (2 MiB)
-#define BD_LVM_MAX_THPOOL_MD_SIZE (16 GiB)
+/* lvm constant for thin pool metadata size is actually half of this
+   but when they calculate the actual metadata size they double the limit
+   so lets just double the limit here too */
+#define BD_LVM_MIN_THPOOL_MD_SIZE (4 MiB)
+
+/* DM_THIN_MAX_METADATA_SIZE is in 512 sectors */
+#define BD_LVM_MAX_THPOOL_MD_SIZE (DM_THIN_MAX_METADATA_SIZE * 512)
+
 #define BD_LVM_MIN_THPOOL_CHUNK_SIZE (64 KiB)
 #define BD_LVM_MAX_THPOOL_CHUNK_SIZE (1 GiB)
 #define BD_LVM_DEFAULT_CHUNK_SIZE (64 KiB)
