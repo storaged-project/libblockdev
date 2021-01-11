@@ -96,6 +96,13 @@ class FSTestCase(unittest.TestCase):
         except:
             cls.btrfs_avail = False
 
+        try:
+            cls.udf_avail = BlockDev.fs_is_tech_avail(BlockDev.FSTech.UDF,
+                                                      BlockDev.FSTechMode.MKFS |
+                                                      BlockDev.FSTechMode.SET_LABEL)
+        except Exception :
+            cls.udf_avail = False
+
     def setUp(self):
         self.addCleanup(self._clean_up)
         self.dev_file = utils.create_sparse_tempfile("fs_test", self.loop_size)

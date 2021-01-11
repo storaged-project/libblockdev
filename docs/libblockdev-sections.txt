@@ -717,6 +717,16 @@ bd_fs_btrfs_check_label
 bd_fs_btrfs_set_uuid
 bd_fs_btrfs_check_uuid
 bd_fs_btrfs_resize
+BDFSUdfInfo
+bd_fs_udf_get_info
+bd_fs_udf_info_copy
+bd_fs_udf_info_free
+bd_fs_udf_mkfs
+bd_fs_udf_set_label
+bd_fs_udf_check_label
+bd_fs_udf_set_uuid
+bd_fs_udf_check_uuid
+bd_fs_udf_wipe
 </SECTION>
 
 <SECTION>

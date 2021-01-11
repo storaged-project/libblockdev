@@ -584,6 +584,13 @@ def fs_btrfs_resize(mpoint, new_size, extra=None, **kwargs):
     extra = _get_extra(extra, kwargs)
     return _fs_btrfs_resize(mpoint, new_size, extra)
 __all__.append("fs_btrfs_resize")
+_fs_udf_mkfs = BlockDev.fs_udf_mkfs
+
+@override(BlockDev.fs_udf_mkfs)
+def fs_udf_mkfs(device, media_type=None, revision=None, block_size=0, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_udf_mkfs(device, media_type, revision, block_size, extra)
+__all__.append("fs_udf_mkfs")
 
 
 try:
