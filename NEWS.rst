@@ -7,6 +7,7 @@ for details.
 **Full list of changes**
 
 Tomas Bzatek (6):
+
 - exec: Fix polling for stdout and stderr
 - exec: Use non-blocking read and process the buffer manually
 - exec: Clarify the BDUtilsProgExtract callback documentation
@@ -15,6 +16,7 @@ Tomas Bzatek (6):
 - lvm: Fix bd_lvm_vdopooldata_* symbols
 
 Vojtech Trefny (10):
+
 - exec: Fix setting locale for util calls
 - fs: Do not report error when errors were fixed by e2fsck
 - README: Use CI status image for 2.x-branch on 2.x
