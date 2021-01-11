@@ -124,7 +124,7 @@
 %define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?vdo_copts} %{?tools_copts} %{?gi_copts}
 
 Name:        libblockdev
-Version:     2.24
+Version:     2.25
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -979,6 +979,24 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Mon Jan 11 2021 Vojtech Trefny <vtrefny@redhat.com> - 2.25-1
+- loop: Retry LOOP_SET_STATUS64 on EAGAIN (vtrefny)
+- Fix max size limit for LVM thinpool metadata (vtrefny)
+- lvm: Use the UNUSED macro instead of __attribute__((unused)) (vtrefny)
+- lvm: Do not use thin_metadata_size to recommend thin metadata size (vtrefny)
+- lvm: Set thin metadata limits to match limits LVM uses in lvcreate (vtrefny)
+- Mark all GIR file constants as guint64 (vtrefny)
+- lvm: Fix bd_lvm_vdopooldata_* symbols (tbzatek)
+- fs: Fix compile error in ext_repair caused by cherry pick from master (vtrefny)
+- README: Use CI status image for 2.x-branch on 2.x (vtrefny)
+- fs: Do not report error when errors were fixed by e2fsck (vtrefny)
+- tests: Add null-byte exec tests (tbzatek)
+- tests: Add bufferbloat exec tests (tbzatek)
+- exec: Clarify the BDUtilsProgExtract callback documentation (tbzatek)
+- exec: Use non-blocking read and process the buffer manually (tbzatek)
+- exec: Fix polling for stdout and stderr (tbzatek)
+- exec: Fix setting locale for util calls (vtrefny)
+
 * Fri May 22 2020 Vojtech Trefny <vtrefny@redhat.com> - 2.24-1
 - Mark VDO plugin as deprecated since 2.24 (vtrefny)
 - Fix multiple uninitialized values discovered by coverity (vtrefny)

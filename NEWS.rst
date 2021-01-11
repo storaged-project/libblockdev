@@ -1,3 +1,32 @@
+Libblockdev 2.25
+----------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Full list of changes**
+
+Tomas Bzatek (6):
+- exec: Fix polling for stdout and stderr
+- exec: Use non-blocking read and process the buffer manually
+- exec: Clarify the BDUtilsProgExtract callback documentation
+- tests: Add bufferbloat exec tests
+- tests: Add null-byte exec tests
+- lvm: Fix bd_lvm_vdopooldata_* symbols
+
+Vojtech Trefny (10):
+- exec: Fix setting locale for util calls
+- fs: Do not report error when errors were fixed by e2fsck
+- README: Use CI status image for 2.x-branch on 2.x
+- fs: Fix compile error in ext_repair caused by cherry pick from master
+- Mark all GIR file constants as guint64
+- lvm: Set thin metadata limits to match limits LVM uses in lvcreate
+- lvm: Do not use thin_metadata_size to recommend thin metadata size
+- lvm: Use the UNUSED macro instead of __attribute__((unused))
+- Fix max size limit for LVM thinpool metadata
+- loop: Retry LOOP_SET_STATUS64 on EAGAIN
+
+
 Libblockdev 2.24
 ----------------
 
