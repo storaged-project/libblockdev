@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-s390.html" title="s390">
 <link rel="next" href="libblockdev-VDO.html" title="VDO">
-<meta name="generator" content="GTK-Doc V1.32 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.33.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -404,6 +404,23 @@
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 <span class="c_punctuation">(</span>*BDUtilsProgExtract<span class="c_punctuation">)</span> (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *line</code></em>,
                        <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint8"><span class="type">guint8</span></a> *completion</code></em>);</pre>
+<p>Callback function used to process a line captured from spawned command's standard
+output and standard error output. Typically used to extract completion percentage
+of a long-running job.</p>
+<p>Note that both outputs are read simultaneously with no guarantees of message order
+this function is called with.</p>
+<p>The value the <em class="parameter"><code>completion</code></em>
+ points to may contain value previously returned from
+this callback or zero when called for the first time. This is useful for extractors
+where only some kind of a tick mark is printed out as a progress and previous value
+is needed to compute an incremented value. It's important to keep in mind that this
+function is only called over lines, i.e. progress reporting printing out tick marks
+(e.g. dots) without a newline character might not work properly.</p>
+<p>The <em class="parameter"><code>line</code></em>
+ string usually contains trailing newline character, which may be absent
+however in case the spawned command exits without printing one. It's guaranteed
+this function is called over remaining buffer no matter what the trailing
+character is.</p>
 <div class="refsect3">
 <a name="BDUtilsProgExtract.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -415,7 +432,7 @@
 <tbody>
 <tr>
 <td class="parameter_name"><p>line</p></td>
-<td class="parameter_description"><p>line from extract progress from</p></td>
+<td class="parameter_description"><p>line to extract progress from</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
@@ -428,7 +445,8 @@
 </div>
 <div class="refsect3">
 <a name="BDUtilsProgExtract.returns"></a><h4>Returns</h4>
-<p> whether the line was a progress reporting line or not</p>
+<p> whether the line was a progress reporting line and should be excluded
+from the collected standard output string or not.</p>
 </div>
 </div>
 <hr>
@@ -611,6 +629,8 @@ bd_utils_exec_and_capture_output (<em class="parameter"><code>const <a href="../
                                   <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                                   <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **output</code></em>,
                                   <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Note that any NULL bytes read from standard output and standard error
+output will be discarded.</p>
 <div class="refsect3">
 <a name="bd-utils-exec-and-capture-output.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -699,6 +719,10 @@ bd_utils_exec_and_report_progress (<em class="parameter"><code>const <a href="..
                                    <em class="parameter"><code><a class="link" href="libblockdev-Utils.html#BDUtilsProgExtract" title="BDUtilsProgExtract ()"><span class="type">BDUtilsProgExtract</span></a> prog_extract</code></em>,
                                    <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> *proc_status</code></em>,
                                    <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Note that any NULL bytes read from standard output and standard error
+output are treated as separators similar to newlines and <em class="parameter"><code>prog_extract</code></em>
+
+will be called with the respective chunk.</p>
 <div class="refsect3">
 <a name="bd-utils-exec-and-report-progress.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -721,7 +745,7 @@ bd_utils_exec_and_report_progress (<em class="parameter"><code>const <a href="..
 <tr>
 <td class="parameter_name"><p>prog_extract</p></td>
 <td class="parameter_description"><p>function for extracting progress information. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>][<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>proc_status</p></td>
@@ -1190,7 +1214,7 @@ This will result in calling <code class="literal">mkfs.xfs</code> with <code cla
 <div class="refsect3">
 <a name="bd-extra-arg-new.returns"></a><h4>Returns</h4>
 <p>a new extra argument. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -1248,7 +1272,7 @@ under "/dev")</p></td>
 <a name="bd-utils-resolve-device.returns"></a><h4>Returns</h4>
 <p>the full real path of the device (e.g. "/dev/md126"
 for "/dev/md/my_raid") or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -1286,7 +1310,7 @@ under "/dev")</p></td>
 device specified with <em class="parameter"><code>dev_spec</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in
 case of error. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></p>
 </div>
 </div>
 <hr>
@@ -1422,7 +1446,7 @@ bd_utils_get_linux_version (<em class="parameter"><code><a href="../glib/glib-Er
 <div class="refsect3">
 <a name="bd-utils-get-linux-version.returns"></a><h4>Returns</h4>
 <p>Detected Linux kernel version or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of an error. The returned value belongs to the library, do not free. </p>
-<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The data is owned by the callee, which is responsible of freeing it."><span class="acronym">transfer none</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -1734,6 +1758,6 @@ is specified</p></td>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.32</div>
+<hr>Generated by GTK-Doc V1.33.1</div>
 </body>
 </html>

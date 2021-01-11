@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-Swap.html" title="Swap">
 <link rel="next" href="libblockdev-s390.html" title="s390">
-<meta name="generator" content="GTK-Doc V1.32 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.33.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -397,7 +397,7 @@ passed to the 'make-bcache' utility). </p></td>
 <tr>
 <td class="parameter_name"><p>bcache_device</p></td>
 <td class="parameter_description"><p>place to store the name of the new bcache device (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
@@ -472,7 +472,7 @@ bd_kbd_bcache_detach (<em class="parameter"><code>const <a href="../glib/glib-Ba
 <tr>
 <td class="parameter_name"><p>c_set_uuid</p></td>
 <td class="parameter_description"><p>cache set UUID of the detached cache. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
@@ -524,7 +524,7 @@ bd_kbd_bcache_get_backing_device (<em class="parameter"><code>const <a href="../
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if failed to determine (<em class="parameter"><code>error</code></em>
 is populated)</p>
 <p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-BCACHE:CAPS"><code class="literal">BD_KBD_TECH_BCACHE</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-QUERY:CAPS"><code class="literal">BD_KBD_TECH_MODE_QUERY</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -564,7 +564,7 @@ is populated)</p>
 (in case
 there are more)</p>
 <p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-BCACHE:CAPS"><code class="literal">BD_KBD_TECH_BCACHE</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-QUERY:CAPS"><code class="literal">BD_KBD_TECH_MODE_QUERY</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -669,7 +669,7 @@ bd_kbd_bcache_get_mode_str (<em class="parameter"><code><a class="link" href="li
 <p>string representation of <em class="parameter"><code>mode</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
 <p>Tech category: always available. </p>
-<p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The data is owned by the callee, which is responsible of freeing it."><span class="acronym">transfer none</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -765,7 +765,7 @@ or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">N
 error (<em class="parameter"><code>error</code></em>
 is set)</p>
 <p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-BCACHE:CAPS"><code class="literal">BD_KBD_TECH_BCACHE</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-QUERY:CAPS"><code class="literal">BD_KBD_TECH_MODE_QUERY</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -970,7 +970,7 @@ bd_kbd_zram_get_stats (<em class="parameter"><code>const <a href="../glib/glib-B
 <a name="bd-kbd-zram-get-stats.returns"></a><h4>Returns</h4>
 <p>statistics for the zRAM device</p>
 <p>Tech category: <a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-ZRAM:CAPS"><code class="literal">BD_KBD_TECH_ZRAM</code></a>-<a class="link" href="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-QUERY:CAPS"><code class="literal">BD_KBD_TECH_MODE_QUERY</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -1316,6 +1316,6 @@ plugin implementation and having all the runtime dependencies available</p>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.32</div>
+<hr>Generated by GTK-Doc V1.33.1</div>
 </body>
 </html>

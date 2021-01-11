@@ -8,7 +8,7 @@
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-Loop.html" title="Loop">
 <link rel="next" href="libblockdev-MD-RAID.html" title="MD RAID">
-<meta name="generator" content="GTK-Doc V1.32 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.33.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -970,7 +970,7 @@ bd_lvm_get_supported_pe_sizes (<em class="parameter"><code><a href="../glib/glib
 <a name="bd-lvm-get-supported-pe-sizes.returns"></a><h4>Returns</h4>
 <p>list of supported PE sizes</p>
 <p>Tech category: <a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-CALCS:CAPS"><code class="literal">BD_LVM_TECH_CALCS</code></a> no mode (it is ignored). </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></p>
 </div>
 </div>
 <hr>
@@ -1157,6 +1157,9 @@ bd_lvm_get_thpool_meta_size (<em class="parameter"><code><a href="../glib/glib-B
                              <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> chunk_size</code></em>,
                              <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> n_snapshots</code></em>,
                              <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Note: This function will be changed in 3.0: the <em class="parameter"><code>n_snapshots</code></em>
+ parameter
+      is currently not used and will be removed.</p>
 <div class="refsect3">
 <a name="bd-lvm-get-thpool-meta-size.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -1178,7 +1181,7 @@ bd_lvm_get_thpool_meta_size (<em class="parameter"><code><a href="../glib/glib-B
 </tr>
 <tr>
 <td class="parameter_name"><p>n_snapshots</p></td>
-<td class="parameter_description"><p>number of snapshots that will be created in the pool</p></td>
+<td class="parameter_description"><p>ignored</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
@@ -1191,8 +1194,7 @@ bd_lvm_get_thpool_meta_size (<em class="parameter"><code><a href="../glib/glib-B
 </div>
 <div class="refsect3">
 <a name="bd-lvm-get-thpool-meta-size.returns"></a><h4>Returns</h4>
-<p> recommended size of the metadata space for the specified pool or 0
-in case of error</p>
+<p> recommended size of the metadata space for the specified pool</p>
 <p>Tech category: <a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-THIN-CALCS:CAPS"><code class="literal">BD_LVM_TECH_THIN_CALCS</code></a> no mode (it is ignored)</p>
 </div>
 </div>
@@ -1554,7 +1556,7 @@ or
 <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error (the <em class="parameter"><code>error</code></em>
 ) gets populated in those cases)</p>
 <p>Tech category: <a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-BASIC:CAPS"><code class="literal">BD_LVM_TECH_BASIC</code></a>-<a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_LVM_TECH_MODE_QUERY</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -1947,7 +1949,7 @@ VG or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal
 of error (the <em class="parameter"><code>error</code></em>
 ) gets populated in those cases)</p>
 <p>Tech category: <a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-BASIC:CAPS"><code class="literal">BD_LVM_TECH_BASIC</code></a>-<a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_LVM_TECH_MODE_QUERY</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -2019,7 +2021,7 @@ LV or
 <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if failed to determine (<em class="parameter"><code>error</code></em>
 ) is set in those cases)</p>
 <p>Tech category: <a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-BASIC:CAPS"><code class="literal">BD_LVM_TECH_BASIC</code></a>-<a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_LVM_TECH_MODE_QUERY</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -2518,7 +2520,7 @@ LV or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal
 of error (the <em class="parameter"><code>error</code></em>
 ) gets populated in those cases)</p>
 <p>Tech category: <a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-BASIC:CAPS"><code class="literal">BD_LVM_TECH_BASIC</code></a>-<a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_LVM_TECH_MODE_QUERY</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -2803,7 +2805,7 @@ bd_lvm_thlvpoolname (<em class="parameter"><code>const <a href="../glib/glib-Bas
 thin LV or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if failed to determine (<em class="parameter"><code>error</code></em>
 ) is set in those cases)</p>
 <p>Tech category: <a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-THIN:CAPS"><code class="literal">BD_LVM_TECH_THIN</code></a>-<a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_LVM_TECH_MODE_QUERY</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -3506,7 +3508,7 @@ bd_lvm_data_lv_name (<em class="parameter"><code>const <a href="../glib/glib-Bas
 /<em class="parameter"><code>lv_name</code></em>
 LV</p>
 <p>Tech category: <a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-BASIC:CAPS"><code class="literal">BD_LVM_TECH_BASIC</code></a>-<a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_LVM_TECH_MODE_QUERY</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -3550,7 +3552,7 @@ bd_lvm_metadata_lv_name (<em class="parameter"><code>const <a href="../glib/glib
 /<em class="parameter"><code>lv_name</code></em>
 LV</p>
 <p>Tech category: <a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-BASIC:CAPS"><code class="literal">BD_LVM_TECH_BASIC</code></a>-<a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_LVM_TECH_MODE_QUERY</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -3594,7 +3596,7 @@ bd_lvm_vdolvpoolname (<em class="parameter"><code>const <a href="../glib/glib-Ba
 VDO LV or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if failed to determine (<em class="parameter"><code>error</code></em>
 ) is set in those cases)</p>
 <p>Tech category: <a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-VDO:CAPS"><code class="literal">BD_LVM_TECH_VDO</code></a>-<a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_LVM_TECH_MODE_QUERY</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -3782,7 +3784,7 @@ gets populated in those cases)</p>
 this function will only return selected statistics
 in a fixed structure. In case a value is not available, -1 would be returned.</p>
 <p>Tech category: <a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-VDO:CAPS"><code class="literal">BD_LVM_TECH_VDO</code></a>-<a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_LVM_TECH_MODE_QUERY</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
@@ -3831,7 +3833,7 @@ at the <code class="literal">/sys/kvdo/&amp;lt;VDO_NAME&gt;/statistics/</code> p
 Some of the keys are computed to mimic the information produced by the vdo tools.
 Please note the contents of the hashtable may vary depending on the actual kvdo module version.</p>
 <p>Tech category: <a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-VDO:CAPS"><code class="literal">BD_LVM_TECH_VDO</code></a>-<a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_LVM_TECH_MODE_QUERY</code></a>. </p>
-<p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> utf8 utf8]</span></p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>][<acronym title="Generics and defining elements of containers and arrays."><span class="acronym">element-type</span></acronym> utf8 utf8]</span></p>
 </div>
 </div>
 <hr>
@@ -4662,6 +4664,6 @@ per block written to the VDO device.</p></td>
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.32</div>
+<hr>Generated by GTK-Doc V1.33.1</div>
 </body>
 </html>
