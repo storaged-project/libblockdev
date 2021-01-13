@@ -29,7 +29,7 @@ Vagrant.configure("2") do |config|
 
   # CHECK THAT THE BELOW OPTIONS ARE OKAY FOR YOUR HW
   config.vm.provider :libvirt do |v|
-    v.memory = "1024"
+    v.memory = "2048"
     v.cpus = os_cpu_cores
     v.volume_cache = :unsafe
   end
@@ -38,58 +38,32 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, inline: <<-SHELL
     echo 'alias make="make -j -l4"' >> /home/vagrant/.bashrc
     echo 'cd libblockdev' >> /home/vagrant/.bash_history
-    echo './autogen.sh && ./configure --without-nvdimm' >> /home/vagrant/.bash_history
+    echo './autogen.sh && ./configure' >> /home/vagrant/.bash_history
   SHELL
 
+  # install all test dependencies using ansible
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "install-test-dependencies.yml"
+    ansible.extra_vars = { ansible_python_interpreter:"/usr/bin/python3" }
+  end
+
   config.vm.define "bd-f33", primary: true, autostart: true do |f33|
-    # F33-specific configuration
     f33.vm.box = "fedora/33-cloud-base"
-    f33.vm.provision :shell, inline: <<-SHELL
-      dnf -y install libblockdev libblockdev-plugins-all
-      dnf -y builddep libblockdev
-      dnf -y install libfdisk-devel
-      dnf -y install '@Development Tools' '@C Development Tools and Libraries' targetcli python3-ipython git python3-bytesize volume_key nss-tools
-      dnf -y install xfsprogs dosfstools e2fsprogs cryptsetup lvm2-dbusd python3-pylint glibc-all-langpacks python3-six python3-dbus python3-yaml
-    SHELL
   end
 
   config.vm.define "bd-f32", primary: false, autostart: false do |f32|
-    # F32-specific configuration
     f32.vm.box = "fedora/32-cloud-base"
-    f32.vm.provision :shell, inline: <<-SHELL
-      dnf -y install libblockdev libblockdev-plugins-all
-      dnf -y builddep libblockdev
-      dnf -y install libfdisk-devel
-      dnf -y install '@Development Tools' '@C Development Tools and Libraries' targetcli python3-ipython git python3-bytesize volume_key nss-tools
-      dnf -y install xfsprogs dosfstools e2fsprogs cryptsetup lvm2-dbusd python3-pylint glibc-all-langpacks python3-six python3-dbus python3-yaml
-    SHELL
   end
 
   config.vm.define "bd-c8", primary: false, autostart: false do |c8|
-    # CentOS8-specific configuration
     c8.vm.box = "centos/8"
-    c8.vm.provision :shell, inline: <<-SHELL
-      yum config-manager --set-enabled PowerTools
-      yum -y install epel-release
-      yum -y install libblockdev libblockdev-plugins-all
-      yum-builddep -y libblockdev
-      yum -y install libfdisk-devel
-      yum -y install '@Development Tools' targetcli python3-ipython git python3-bytesize volume_key nss-tools
-      yum -y install python3-pylint python3-six python3-dbus python3-yaml
-    SHELL
   end
 
-  config.vm.define "bd-ubuntu2004", primary: false, autostart: false do |ubuntu2004|
-    # Ubuntu 18.04-specific configuration
-    ubuntu2004.vm.box = "generic/ubuntu2004"
-    ubuntu2004.vm.provision :shell, inline: <<-SHELL
-      sed -i '/deb-src/s/^# //' /etc/apt/sources.list
-      apt-get update
-      apt-get -y install libblockdev2 libblockdev-* python3-blockdev
-      apt-get -y build-dep libblockdev
-      apt-get -y install libfdisk-dev
-      apt-get -y install build-essential libtool m4 automake pkgconf targetcli-fb git volume-key pylint3 ipython3 autoconf-archive
-      apt-get -y install xfsprogs dosfstools e2fsprogs libnss3-tools pylint3 python3-pydbus locales-all cryptsetup python3-yaml
-    SHELL
+  config.vm.define "bd-u2004", primary: false, autostart: false do |u2004|
+    u2004.vm.box = "generic/ubuntu2004"
+  end
+
+  config.vm.define "bd-debiant", primary: false, autostart: false do |debiant|
+    debiant.vm.box = "debian/testing64"
   end
 end
