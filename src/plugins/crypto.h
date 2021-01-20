@@ -159,6 +159,21 @@ typedef struct BDCryptoIntegrityInfo {
 void bd_crypto_integrity_info_free (BDCryptoIntegrityInfo *info);
 BDCryptoIntegrityInfo* bd_crypto_integrity_info_copy (BDCryptoIntegrityInfo *info);
 
+/**
+ * BDCryptoLUKSTokenInfo:
+ * @id: ID of the token
+ * @type: type of the token
+ * @keyslot: keyslot this token is assigned to or -1 for inactive/unassigned tokens
+ */
+typedef struct BDCryptoLUKSTokenInfo {
+    guint id;
+    gchar *type;
+    gint keyslot;
+} BDCryptoLUKSTokenInfo;
+
+void bd_crypto_luks_token_info_free (BDCryptoLUKSTokenInfo *info);
+BDCryptoLUKSTokenInfo* bd_crypto_luks_token_info_copy (BDCryptoLUKSTokenInfo *info);
+
 /*
  * If using the plugin as a standalone library, the following functions should
  * be called to:
@@ -204,6 +219,7 @@ gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup
 
 BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *luks_device, GError **error);
 BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **error);
+BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError **error);
 
 gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error);
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);

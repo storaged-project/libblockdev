@@ -203,6 +203,27 @@ BDCryptoIntegrityInfo* bd_crypto_integrity_info_copy (BDCryptoIntegrityInfo *inf
     return new_info;
 }
 
+void bd_crypto_luks_token_info_free (BDCryptoLUKSTokenInfo *info) {
+    if (info == NULL)
+        return;
+
+    g_free (info->type);
+    g_free (info);
+}
+
+BDCryptoLUKSTokenInfo* bd_crypto_luks_token_info_copy (BDCryptoLUKSTokenInfo *info) {
+    if (info == NULL)
+        return NULL;
+
+    BDCryptoLUKSTokenInfo *new_info = g_new0 (BDCryptoLUKSTokenInfo, 1);
+
+    new_info->id = info->id;
+    new_info->type = g_strdup (info->type);
+    new_info->keyslot = info->keyslot;
+
+    return new_info;
+}
+
 /* "C" locale to get the locale-agnostic error messages */
 static locale_t c_locale = (locale_t) 0;
 
@@ -1998,6 +2019,88 @@ BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **e
 
     crypt_free (cd);
     return info;
+}
+#endif
+
+/* added in cryptsetup 2.4.0 */
+#ifndef crypt_token_max
+static int crypt_token_max (const char *type __attribute__((unused))) {
+    return 32;
+}
+#endif
+
+
+/**
+ * bd_crypto_luks_token_info:
+ * @device: a device to get LUKS2 token information about
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (array zero-terminated=1): information about tokens on @device
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
+ */
+#ifndef LIBCRYPTSETUP_2
+BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device __attribute__((unused)), GError **error) {
+    return NULL;
+}
+#else
+BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError **error) {
+    struct crypt_device *cd = NULL;
+    GPtrArray *tokens = NULL;
+    BDCryptoLUKSTokenInfo *info = NULL;
+    crypt_token_info token_info;
+    const gchar *type = NULL;
+    gint ret;
+    gint token_it, keyslot_it;
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        return NULL;
+    }
+
+    ret = crypt_load (cd, CRYPT_LUKS, NULL);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to load device's parameters: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        return NULL;
+    }
+
+    if (g_strcmp0 (crypt_get_type (cd), CRYPT_LUKS2) != 0) {
+        crypt_free (cd);
+        return NULL;
+    }
+
+    tokens = g_ptr_array_new ();
+
+    for (token_it = 0; token_it < crypt_token_max (CRYPT_LUKS2); token_it++) {
+        token_info = crypt_token_status (cd, token_it, &type);
+        if (token_info == CRYPT_TOKEN_INVALID || token_info == CRYPT_TOKEN_INACTIVE)
+            continue;
+
+        info = g_new0 (BDCryptoLUKSTokenInfo, 1);
+        info->id = token_it;
+        info->type = g_strdup (type);
+        info->keyslot = -1;
+
+        for (keyslot_it = 0; keyslot_it < crypt_keyslot_max (CRYPT_LUKS2); keyslot_it++) {
+            ret = crypt_token_is_assigned (cd, token_it, keyslot_it);
+            if (ret == 0) {
+                info->keyslot = keyslot_it;
+                break;
+            }
+        }
+
+        g_ptr_array_add (tokens, info);
+    }
+
+    crypt_free (cd);
+
+    /* returning NULL-terminated array of BDCryptoLUKSTokenInfo */
+    g_ptr_array_add (tokens, NULL);
+    return (BDCryptoLUKSTokenInfo **) g_ptr_array_free (tokens, FALSE);
 }
 #endif
 

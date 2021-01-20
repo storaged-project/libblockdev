@@ -111,6 +111,10 @@ BDCryptoIntegrityInfo
 bd_crypto_integrity_info_free
 bd_crypto_integrity_info_copy
 bd_crypto_integrity_info
+BDCryptoLUKSTokenInfo
+bd_crypto_luks_token_info_free
+bd_crypto_luks_token_info_copy
+bd_crypto_luks_token_info
 bd_crypto_tc_open
 bd_crypto_tc_open_full
 bd_crypto_tc_close
