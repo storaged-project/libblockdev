@@ -963,6 +963,30 @@ class CryptoTestIntegrity(CryptoTestCase):
         self.assertTrue(succ)
 
 
+class CryptoTestLUKSToken(CryptoTestCase):
+    @tag_test(TestTags.SLOW)
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_integrity(self):
+        """Verify that we can get information about LUKS2 tokens"""
+
+        # the simple case with password
+        succ = self._luks2_format(self.loop_dev, PASSWD, None)
+        self.assertTrue(succ)
+
+        info = BlockDev.crypto_luks_token_info(self.loop_dev)
+        self.assertListEqual(info, [])
+
+        # add kernel keyring token using cryptsetup
+        ret, _out, err = run_command("cryptsetup token add --key-description aaaa %s" % self.loop_dev)
+        self.assertEqual(ret, 0, msg="Failed to add token to %s: %s" % (self.loop_dev, err))
+
+        info = BlockDev.crypto_luks_token_info(self.loop_dev)
+        self.assertEqual(len(info), 1)
+        self.assertEqual(info[0].id, 0)
+        self.assertEqual(info[0].type, "luks2-keyring")
+        self.assertEqual(info[0].keyslot, 0)
+
+
 class CryptoTestTrueCrypt(CryptoTestCase):
 
     # we can't create TrueCrypt/VeraCrypt formats using libblockdev

@@ -399,6 +399,66 @@ GType bd_crypto_integrity_info_get_type () {
     return type;
 }
 
+#define BD_CRYPTO_TYPE_LUKS_TOKEN_INFO (bd_crypto_luks_token_info_get_type ())
+GType bd_crypto_luks_token_info_get_type();
+
+/**
+ * BDCryptoLUKSTokenInfo:
+ * @id: ID of the token
+ * @type: type of the token
+ * @keyslot: keyslot this token is assigned to or -1 for inactive/unassigned tokens
+ */
+typedef struct BDCryptoLUKSTokenInfo {
+    guint id;
+    gchar *type;
+    gint keyslot;
+} BDCryptoLUKSTokenInfo;
+
+/**
+ * bd_crypto_luks_token_info_free: (skip)
+ * @info: (allow-none): %BDCryptoLUKSTokenInfo to free
+ *
+ * Frees @info.
+ */
+void bd_crypto_luks_token_info_free (BDCryptoLUKSTokenInfo *info) {
+    if (info == NULL)
+        return;
+
+    g_free (info->type);
+    g_free (info);
+}
+
+/**
+ * bd_crypto_luks_token_info_copy: (skip)
+ * @info: (allow-none): %BDCryptoLUKSTokenInfo to copy
+ *
+ * Creates a new copy of @info.
+ */
+BDCryptoLUKSTokenInfo* bd_crypto_luks_token_info_copy (BDCryptoLUKSTokenInfo *info) {
+    if (info == NULL)
+        return NULL;
+
+    BDCryptoLUKSTokenInfo *new_info = g_new0 (BDCryptoLUKSTokenInfo, 1);
+
+    new_info->id = info->id;
+    new_info->type = g_strdup (info->type);
+    new_info->keyslot = info->keyslot;
+
+    return new_info;
+}
+
+GType bd_crypto_luks_token_info_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDCryptoLUKSTokenInfo",
+                                            (GBoxedCopyFunc) bd_crypto_luks_token_info_copy,
+                                            (GBoxedFreeFunc) bd_crypto_luks_token_info_free);
+    }
+
+    return type;
+}
+
 /**
  * bd_crypto_is_tech_avail:
  * @tech: the queried tech
@@ -864,6 +924,17 @@ BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *luks_device, GError **error)
  * Tech category: %BD_CRYPTO_TECH_INTEGRITY-%BD_CRYPTO_TECH_MODE_QUERY
  */
 BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **error);
+
+/**
+ * bd_crypto_luks_token_info:
+ * @device: a device to get LUKS2 token information about
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (array zero-terminated=1): information about tokens on @device
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
+ */
+BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError **error);
 
 /**
  * bd_crypto_device_seems_encrypted:
