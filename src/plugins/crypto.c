@@ -27,6 +27,8 @@
 #include <unistd.h>
 #include <errno.h>
 #include <blkid.h>
+#include <sys/types.h>
+#include <keyutils.h>
 #include <blockdev/utils.h>
 
 #ifdef WITH_BD_ESCROW
@@ -376,6 +378,14 @@ gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **erro
             if (ret != mode) {
                 g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
                              "Only 'open' supported for BITLK");
+                return FALSE;
+            } else
+                return TRUE;
+        case BD_CRYPTO_TECH_KEYRING:
+            ret = mode & BD_CRYPTO_TECH_MODE_ADD_KEY;
+            if (ret != mode) {
+                g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                             "Only 'add key' supported for kernel keyring");
                 return FALSE;
             } else
                 return TRUE;
@@ -1126,6 +1136,69 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gcha
 gboolean bd_crypto_luks_open_blob (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error) {
     return luks_open (device, name, (const guint8*) pass_data, data_len, NULL, read_only, error);
 }
+
+/**
+ * bd_crypto_luks_open_keyring:
+ * @device: the device to open
+ * @name: name for the LUKS device
+ * @key_desc: kernel keyring key description
+ * @read_only: whether to open as read-only or not (meaning read-write)
+ * @error: (out): place to store error (if any)
+ *
+ * Note: Keyslot passphrase must be stored in 'user' key type and the key has to be reachable
+ *       by process context on behalf of which this function is called.
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+gboolean bd_crypto_luks_open_keyring (const gchar *device, const gchar *name, const gchar *key_desc, gboolean read_only, GError **error) {
+    struct crypt_device *cd = NULL;
+    guint64 progress_id = 0;
+    gint ret = 0;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started opening '%s' LUKS device", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_load (cd, CRYPT_LUKS, NULL);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to load device's parameters: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_activate_by_keyring (cd, name, key_desc, CRYPT_ANY_SLOT,
+                                     read_only ? CRYPT_ACTIVATE_READONLY : 0);
+    if (ret < 0) {
+        if (ret == -EPERM)
+            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                         "Failed to activate device: Incorrect passphrase.");
+        else
+            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                         "Failed to activate device: %s", strerror_l (-ret, c_locale));
+
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
+}
+
 
 static gboolean _crypto_close (const gchar *device, const gchar *tech_name, GError **error) {
     struct crypt_device *cd = NULL;
@@ -2103,6 +2176,30 @@ BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError *
     return (BDCryptoLUKSTokenInfo **) g_ptr_array_free (tokens, FALSE);
 }
 #endif
+
+/**
+ * bd_crypto_keyring_add_key:
+ * @key_desc: kernel keyring key description
+ * @key_data: (array length=data_len): a key to add to kernel keyring (may contain arbitrary binary data)
+ * @data_len: length of the @pass_data buffer
+ * @error: (out): place to store error (if any)
+ * *
+ * Returns: whether the given key was successfully saved to kernel keyring or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_KEYRING-%BD_CRYPTO_TECH_MODE_ADD_KEY
+ */
+gboolean bd_crypto_keyring_add_key (const gchar *key_desc, const guint8 *key_data, gsize data_len, GError **error) {
+    key_serial_t ret;
+
+    ret = add_key ("user", key_desc, key_data, data_len, KEY_SPEC_SESSION_KEYRING);
+    if (ret < 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYRING,
+                     "Failed to add key to kernel keyring: %s", strerror_l (errno, c_locale));
+        return FALSE;
+    }
+
+    return TRUE;
+}
 
 /**
  * bd_crypto_device_seems_encrypted:

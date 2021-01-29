@@ -24,6 +24,7 @@ typedef enum {
     BD_CRYPTO_ERROR_ESCROW_FAILED,
     BD_CRYPTO_ERROR_INVALID_PARAMS,
     BD_CRYPTO_ERROR_TECH_UNAVAIL,
+    BD_CRYPTO_ERROR_KEYRING,
 } BDCryptoError;
 
 typedef enum {
@@ -33,6 +34,7 @@ typedef enum {
     BD_CRYPTO_TECH_ESCROW,
     BD_CRYPTO_TECH_INTEGRITY,
     BD_CRYPTO_TECH_BITLK,
+    BD_CRYPTO_TECH_KEYRING,
 } BDCryptoTech;
 
 typedef enum {
@@ -666,6 +668,23 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gcha
 gboolean bd_crypto_luks_open_blob (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);
 
 /**
+ * bd_crypto_luks_open_keyring:
+ * @device: the device to open
+ * @name: name for the LUKS device
+ * @key_desc: kernel keyring key description
+ * @read_only: whether to open as read-only or not (meaning read-write)
+ * @error: (out): place to store error (if any)
+ *
+ * Note: Keyslot passphrase must be stored in 'user' key type and the key has to be reachable
+ *       by process context on behalf of which this function is called.
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+gboolean bd_crypto_luks_open_keyring (const gchar *device, const gchar *name, const gchar *key_desc, gboolean read_only, GError **error);
+
+/**
  * bd_crypto_luks_close:
  * @luks_device: LUKS device to close
  * @error: (out): place to store error (if any)
@@ -935,6 +954,19 @@ BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **e
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
  */
 BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError **error);
+
+/**
+ * bd_crypto_keyring_add_key:
+ * @key_desc: kernel keyring key description
+ * @key_data: (array length=data_len): a key to add to kernel keyring (may contain arbitrary binary data)
+ * @data_len: length of the @pass_data buffer
+ * @error: (out): place to store error (if any)
+ * *
+ * Returns: whether the given key was successfully saved to kernel keyring or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_KEYRING-%BD_CRYPTO_TECH_MODE_ADD_KEY
+ */
+gboolean bd_crypto_keyring_add_key (const gchar *key_desc, const guint8 *key_data, gsize data_len, GError **error);
 
 /**
  * bd_crypto_device_seems_encrypted:

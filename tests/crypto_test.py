@@ -338,6 +338,31 @@ class CryptoTestOpenClose(CryptoTestCase):
     def test_luks2_open_close(self):
         self._luks_open_close(self._luks2_format)
 
+class CryptoTestOpenCloseKeyring(CryptoTestCase):
+    def _luks_open_close_keyring(self, create_fn):
+        """Verify that opening/closing LUKS device works"""
+
+        succ = create_fn(self.loop_dev, PASSWD, self.keyfile)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_keyring_add_key("myshinylittlekey", [ord(c) for c in PASSWD])
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_open_keyring(self.loop_dev, "libblockdevTestLUKS", "myshinylittlekey", False)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+    @tag_test(TestTags.SLOW)
+    def test_luks_open_close_keyring(self):
+        self._luks_open_close_keyring(self._luks_format)
+
+    @tag_test(TestTags.SLOW)
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_open_close_keyring(self):
+        self._luks_open_close_keyring(self._luks2_format)
+
 class CryptoTestAddKey(CryptoTestCase):
     def _add_key(self, create_fn):
         """Verify that adding key to LUKS device works"""

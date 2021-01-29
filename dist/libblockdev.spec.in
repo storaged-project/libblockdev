@@ -241,6 +241,7 @@ with the libblockdev-btrfs plugin/library.
 %package crypto
 BuildRequires: cryptsetup-devel
 BuildRequires: libblkid-devel
+BuildRequires: keyutils-libs-devel
 
 %if %{with_escrow}
 BuildRequires: volume_key-devel >= 0.3.9-7
