@@ -920,7 +920,23 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
     return TRUE;
 }
 
-static gboolean luks_open (const gchar *device, const gchar *name, const guint8 *pass_data, gsize data_len, const gchar *key_file, gboolean read_only, GError **error) {
+/**
+ * bd_crypto_luks_open:
+ * @device: the device to open
+ * @name: name for the LUKS device
+ * @pass_data: (allow-none): a passphrase for the new LUKS device (may contain arbitrary binary data) or %NULL
+ * @data_len: (array length=data_len) (allow-none): length of the @pass_data buffer
+ * @key_file: (allow-none): key file path to use for opening the @device or %NULL
+ * @read_only: whether to open as read-only or not (meaning read-write)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * One of @pass_data, @key_file has to be != %NULL.
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const guint8 *pass_data, gsize data_len, const gchar *key_file, gboolean read_only, GError **error) {
     struct crypt_device *cd = NULL;
     gboolean success = FALSE;
     gchar *key_buffer = NULL;
@@ -988,42 +1004,6 @@ static gboolean luks_open (const gchar *device, const gchar *name, const guint8 
     crypt_free (cd);
     bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
-}
-
-/**
- * bd_crypto_luks_open:
- * @device: the device to open
- * @name: name for the LUKS device
- * @passphrase: (allow-none): passphrase to open the @device or %NULL
- * @key_file: (allow-none): key file path to use for opening the @device or %NULL
- * @read_only: whether to open as read-only or not (meaning read-write)
- * @error: (out): place to store error (if any)
- *
- * Returns: whether the @device was successfully opened or not
- *
- * One of @passphrase, @key_file has to be != %NULL.
- *
- * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
- */
-gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, const gchar *passphrase, const gchar *key_file, gboolean read_only, GError **error) {
-    return luks_open (device, name, (const guint8*) passphrase, passphrase ? strlen (passphrase) : 0, key_file, read_only, error);
-}
-
-/**
- * bd_crypto_luks_open_blob:
- * @device: the device to open
- * @name: name for the LUKS device
- * @pass_data: (array length=data_len): a passphrase for the new LUKS device (may contain arbitrary binary data)
- * @data_len: length of the @pass_data buffer
- * @read_only: whether to open as read-only or not (meaning read-write)
- * @error: (out): place to store error (if any)
- *
- * Returns: whether the @device was successfully opened or not
- *
- * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
- */
-gboolean bd_crypto_luks_open_blob (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error) {
-    return luks_open (device, name, (const guint8*) pass_data, data_len, NULL, read_only, error);
 }
 
 /**

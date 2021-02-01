@@ -47,5 +47,10 @@
     and now have new parameters to match functionality of the removed <literal>_luks2</literal> functions.
   </para>
 
+  <para>
+    <literal>bd_crypto_luks_open_blob</literal> has been removed, use <literal>bd_crypto_luks_open</literal> instead. This functions has
+    been changed to match functionality of the removed <literal>_blob</literal> function.
+  </para>
+
   </simplesect>
 </chapter>
