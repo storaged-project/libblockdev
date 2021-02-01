@@ -65,9 +65,13 @@ class CryptoTestCase(unittest.TestCase):
         except RuntimeError as e:
             raise RuntimeError("Failed to setup loop device for testing: %s" % e)
 
-        # make a key file
+        # make key files
         handle, self.keyfile = tempfile.mkstemp(prefix="libblockdev_test_keyfile", text=False)
         os.write(handle, b"nobodyknows")
+        os.close(handle)
+
+        handle, self.keyfile2 = tempfile.mkstemp(prefix="libblockdev_test_keyfile2", text=False)
+        os.write(handle, b"nobodyknows2")
         os.close(handle)
 
     def _clean_up(self):
@@ -371,16 +375,43 @@ class CryptoTestAddKey(CryptoTestCase):
     def _add_key(self, create_fn):
         """Verify that adding key to LUKS device works"""
 
-        succ = create_fn(self.loop_dev, PASSWD, None)
+        succ = create_fn(self.loop_dev, PASSWD, self.keyfile)
         self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
             BlockDev.crypto_luks_add_key(self.loop_dev, "wrong-passphrase", None, PASSWD2, None)
 
+        # add new passphrase
         succ = BlockDev.crypto_luks_add_key(self.loop_dev, PASSWD, None, PASSWD2, None)
         self.assertTrue(succ)
 
-        succ = BlockDev.crypto_luks_add_key_blob(self.loop_dev, [ord(c) for c in PASSWD2], [ord(c) for c in PASSWD3])
+        # try to open using the new passphrase
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD2, None, False)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+        # re-create the format
+        succ = create_fn(self.loop_dev, PASSWD, self.keyfile)
+        self.assertTrue(succ)
+
+        # add both passphrase and keyfile
+        succ = BlockDev.crypto_luks_add_key(self.loop_dev, None, self.keyfile, PASSWD2, self.keyfile2)
+        self.assertTrue(succ)
+
+        # try to open using the new passphrase
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD2, None, False)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+        # try to open using the new keyfilee
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", None, self.keyfile2, False)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
         self.assertTrue(succ)
 
     @tag_test(TestTags.SLOW)

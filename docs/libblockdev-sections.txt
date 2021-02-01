@@ -85,7 +85,6 @@ BDCryptoLUKSVersion
 bd_crypto_luks_open
 bd_crypto_luks_close
 bd_crypto_luks_add_key
-bd_crypto_luks_add_key_blob
 bd_crypto_luks_remove_key
 bd_crypto_luks_remove_key_blob
 bd_crypto_luks_change_key

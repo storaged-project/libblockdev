@@ -287,7 +287,15 @@ __all__.append("crypto_luks_resize")
 _crypto_luks_add_key = BlockDev.crypto_luks_add_key
 @override(BlockDev.crypto_luks_add_key)
 def crypto_luks_add_key(device, pass_=None, key_file=None, npass=None, nkey_file=None):
-    return _crypto_luks_add_key(device, pass_, key_file, npass, nkey_file)
+    if pass_:
+        pw = [ord(c) for c in pass_]
+    else:
+        pw = None
+    if npass:
+        npw = [ord(c) for c in npass]
+    else:
+        npw = None
+    return _crypto_luks_add_key(device, pw, key_file, npw, nkey_file)
 __all__.append("crypto_luks_add_key")
 
 _crypto_luks_remove_key = BlockDev.crypto_luks_remove_key

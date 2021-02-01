@@ -611,36 +611,23 @@ gboolean bd_crypto_luks_close (const gchar *luks_device, GError **error);
 /**
  * bd_crypto_luks_add_key:
  * @device: device to add new key to
- * @pass: (allow-none): passphrase for the @device or %NULL
+ * @pass_data: (allow-none) (array length=data_len): a passphrase for the new LUKS device (may contain arbitrary binary data) or %NULL
+ * @data_len: length of the @pass_data buffer
  * @key_file: (allow-none): key file for the @device or %NULL
- * @npass: (allow-none): passphrase to add to @device or %NULL
+ * @npass_data: (array length=ndata_len): a new passphrase for the new LUKS device (may contain arbitrary binary data)
+ * @ndata_len: length of the @npass_data buffer
  * @nkey_file: (allow-none): key file to add to @device or %NULL
  * @error: (out): place to store error (if any)
  *
- * Returns: whether the @npass or @nkey_file was successfully added to @device
- * or not
+ * At least one of @pass_data and @key_file must be specified.
+ * At least one of @npass_data and @nkey_file must be specified. If you specify both,
+ * two keyslots will be added.
  *
- * One of @pass, @key_file has to be != %NULL and the same applies to @npass,
- * @nkey_file.
- *
- * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_ADD_KEY
- */
-gboolean bd_crypto_luks_add_key (const gchar *device, const gchar *pass, const gchar *key_file, const gchar *npass, const gchar *nkey_file, GError **error);
-
-/**
- * bd_crypto_luks_add_key_blob:
- * @device: device to add new key to
- * @pass_data: (array length=data_len): a passphrase for the new LUKS device (may contain arbitrary binary data)
- * @data_len: length of the @pass_data buffer
- * @npass_data: (array length=ndata_len): a new passphrase for the new LUKS device (may contain arbitrary binary data)
- * @ndata_len: length of the @npass_data buffer
- * @error: (out): place to store error (if any)
- *
- * Returns: whether the @npass_data was successfully added to @device or not
+ * Returns: whether the @npass_data and/or @nkey_filedata was successfully added to @device or not
  *
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_ADD_KEY
  */
-gboolean bd_crypto_luks_add_key_blob (const gchar *device, const guint8 *pass_data, gsize data_len, const guint8 *npass_data, gsize ndata_len, GError **error);
+gboolean bd_crypto_luks_add_key (const gchar *device, const guint8 *pass_data, gsize data_len, const gchar *key_file, const guint8 *npass_data, gsize ndata_len, const gchar *nkey_file, GError **error);
 
 /**
  * bd_crypto_luks_remove_key:
