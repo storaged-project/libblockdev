@@ -719,7 +719,33 @@ static struct crypt_pbkdf_type *get_pbkdf_params (BDCryptoLUKSPBKDF *user_pbkdf,
     return new_pbkdf;
 }
 
-static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 key_size, const guint8 *pass_data, gsize data_size, const gchar *key_file, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra, GError **error) {
+/**
+ * bd_crypto_luks_format:
+ * @device: a device to format as LUKS
+ * @cipher: (allow-none): cipher specification (type-mode, e.g. "aes-xts-plain64") or %NULL to use the default
+ * @key_size: size of the volume key in bits or 0 to use the default
+ * @pass_data: (array length=data_len) (allow-none): a passphrase for the new LUKS device (may contain arbitrary binary data)
+ * @data_len: length of the @pass_data buffer
+ * @key_file: (allow-none): a key file for the new LUKS device or `NULL`.
+ * @min_entropy: minimum random data entropy (in bits) required to format @device as LUKS
+ * @luks_version: whether to use LUKS v1 or LUKS v2
+ * @extra: (allow-none): extra arguments for LUKS format creation
+ * @error: (out): place to store error (if any)
+ *
+ * Formats the given @device as LUKS according to the other parameters given. If
+ * @min_entropy is specified (greater than 0), the function waits for enough
+ * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
+ * FOREVER).
+ *
+ * Note: At least one of @pass_data and @key_file must be specified. If you specify both,
+ * two keyslots will be added.
+ *
+ * Returns: whether the given @device was successfully formatted as LUKS or not
+ * (the @error) contains the error in such cases)
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_CREATE
+ */
+gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint64 key_size, const guint8 *pass_data, gsize data_len, const gchar *key_file, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret;
     gchar **cipher_specs = NULL;
@@ -747,7 +773,7 @@ static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 k
         return FALSE;
     }
 
-    if ((data_size == 0) && !key_file) {
+    if ((data_len == 0) && !key_file) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
                      "At least one of passphrase and key file have to be specified!");
         bd_utils_report_finished (progress_id, (*error)->message);
@@ -854,10 +880,10 @@ static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 k
         return FALSE;
     }
 
-    bd_utils_report_progress (progress_id, ((data_size != 0) && key_file) ? 40 : 50, "Format created");
-    if (data_size != 0) {
+    bd_utils_report_progress (progress_id, ((data_len != 0) && key_file) ? 40 : 50, "Format created");
+    if (data_len != 0) {
         ret = crypt_keyslot_add_by_volume_key (cd, CRYPT_ANY_SLOT, NULL, 0,
-                                               (const char*) pass_data, data_size);
+                                               (const char*) pass_data, data_len);
         if (ret < 0) {
             g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_ADD_KEY,
                          "Failed to add passphrase: %s", strerror_l(-ret, c_locale));
@@ -865,7 +891,7 @@ static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 k
             bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
-        bd_utils_report_progress (progress_id, ((data_size != 0) && key_file) ? 70 : 100, "Added key");
+        bd_utils_report_progress (progress_id, ((data_len != 0) && key_file) ? 70 : 100, "Added key");
     }
 
     if (key_file) {
@@ -892,66 +918,6 @@ static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 k
 
     bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
-}
-
-/**
- * bd_crypto_luks_format:
- * @device: a device to format as LUKS
- * @cipher: (allow-none): cipher specification (type-mode, e.g. "aes-xts-plain64") or %NULL to use the default
- * @key_size: size of the volume key in bits or 0 to use the default
- * @passphrase: (allow-none): a passphrase for the new LUKS device or %NULL if not requested
- * @key_file: (allow-none): a key file for the new LUKS device or %NULL if not requested
- * @min_entropy: minimum random data entropy (in bits) required to format @device as LUKS
- * @luks_version: whether to use LUKS v1 or LUKS v2
- * @extra: (allow-none): extra arguments for LUKS format creation
- * @error: (out): place to store error (if any)
- *
- * Formats the given @device as LUKS according to the other parameters given. If
- * @min_entropy is specified (greater than 0), the function waits for enough
- * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
- * FOREVER).
- *
- * Either @passphrase or @key_file has to be != %NULL.
- *
- * Using this function with @luks_version set to %BD_CRYPTO_LUKS_VERSION_LUKS1 and
- * @extra to %NULL is the same as calling %bd_crypto_luks_format.
- *
- * Returns: whether the given @device was successfully formatted as LUKS or not
- * (the @error) contains the error in such cases)
- *
- * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_CREATE
- */
-gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint64 key_size, const gchar *passphrase, const gchar *key_file, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra,GError **error) {
-    return luks_format (device, cipher, key_size, (const guint8*) passphrase, passphrase ? strlen(passphrase) : 0, key_file, min_entropy, luks_version, extra, error);
-}
-
-/**
- * bd_crypto_luks_format_blob:
- * @device: a device to format as LUKS
- * @cipher: (allow-none): cipher specification (type-mode, e.g. "aes-xts-plain64") or %NULL to use the default
- * @key_size: size of the volume key in bits or 0 to use the default
- * @pass_data: (array length=data_len): a passphrase for the new LUKS device (may contain arbitrary binary data)
- * @data_len: length of the @pass_data buffer
- * @min_entropy: minimum random data entropy (in bits) required to format @device as LUKS
- * @luks_version: whether to use LUKS v1 or LUKS v2
- * @extra: (allow-none): extra arguments for LUKS format creation
- * @error: (out): place to store error (if any)
- *
- * Formats the given @device as LUKS according to the other parameters given. If
- * @min_entropy is specified (greater than 0), the function waits for enough
- * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
- * FOREVER).
- *
- * Using this function with @luks_version set to %BD_CRYPTO_LUKS_VERSION_LUKS1 and
- * @extra to %NULL is the same as calling %bd_crypto_luks_format_blob.
- *
- * Returns: whether the given @device was successfully formatted as LUKS or not
- * (the @error) contains the error in such cases)
- *
- * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_CREATE
- */
-gboolean bd_crypto_luks_format_blob (const gchar *device, const gchar *cipher, guint64 key_size, const guint8 *pass_data, gsize data_len, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra, GError **error) {
-    return luks_format (device, cipher, key_size, pass_data, data_len, NULL, min_entropy, luks_version, extra, error);
 }
 
 static gboolean luks_open (const gchar *device, const gchar *name, const guint8 *pass_data, gsize data_len, const gchar *key_file, gboolean read_only, GError **error) {

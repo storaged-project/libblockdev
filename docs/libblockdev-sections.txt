@@ -73,7 +73,6 @@ bd_crypto_luks_uuid
 bd_crypto_luks_get_metadata_size
 bd_crypto_luks_status
 bd_crypto_luks_format
-bd_crypto_luks_format_blob
 bd_crypto_luks_extra_free
 bd_crypto_luks_extra_copy
 bd_crypto_luks_extra_new

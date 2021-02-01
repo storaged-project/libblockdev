@@ -36,10 +36,9 @@
   </para>
 
   <para>
-    <literal>bd_crypto_luks_format_luks2</literal> and <literal>bd_crypto_luks_format_luks2_blob</literal> have been removed, use
-    <literal>bd_crypto_luks_format</literal> and <literal>bd_crypto_luks_format_blob</literal> instead. These functions have been changed
-    and now have two new parameters <literal>BDCryptoLUKSVersion luks_version</literal> and <literal>BDCryptoLUKSExtra *extra</literal>
-    to match functionality of the removed <literal>_luks2</literal> functions.
+    <literal>bd_crypto_luks_format_luks2</literal>, <literal>bd_crypto_luks_format_luks2_blob</literal> and <litera>bd_crypto_luks_format</litera>
+     have been removed, use <literal>bd_crypto_luks_format</literal> instead. This functions has been changed to match functionality of the
+     removed <literal>_luks2</literal> and <literal>_blob</literal> functions.
   </para>
 
   <para>

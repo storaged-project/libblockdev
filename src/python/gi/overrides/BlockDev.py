@@ -261,7 +261,11 @@ __all__.append("CryptoLUKSExtra")
 _crypto_luks_format = BlockDev.crypto_luks_format
 @override(BlockDev.crypto_luks_format)
 def crypto_luks_format(device, cipher=None, key_size=0, passphrase=None, key_file=None, min_entropy=0, luks_version=BlockDev.CryptoLUKSVersion.LUKS1, extra=None):
-    return _crypto_luks_format(device, cipher, key_size, passphrase, key_file, min_entropy, luks_version, extra)
+    if passphrase:
+        pw = [ord(c) for c in passphrase]
+    else:
+        pw = None
+    return _crypto_luks_format(device, cipher, key_size, pw, key_file, min_entropy, luks_version, extra)
 __all__.append("crypto_luks_format")
 
 _crypto_luks_open = BlockDev.crypto_luks_open
