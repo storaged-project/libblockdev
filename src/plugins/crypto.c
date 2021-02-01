@@ -1237,10 +1237,11 @@ gboolean bd_crypto_luks_add_key (const gchar *device, const guint8 *pass_data, g
 }
 
 /**
- * bd_crypto_luks_remove_key_blob:
+ * bd_crypto_luks_remove_key:
  * @device: device to add new key to
- * @pass_data: (array length=data_len): a passphrase for the new LUKS device (may contain arbitrary binary data) to remove
+ * @pass_data: (array length=data_len) (allow-none): a passphrase for the new LUKS device (may contain arbitrary binary data) to remove
  * @data_len: length of the @pass_data buffer
+ * @key_file: (allow-none): key file for the @device to remove or %NULL
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the key was successfully removed or not
@@ -1249,75 +1250,20 @@ gboolean bd_crypto_luks_add_key (const gchar *device, const guint8 *pass_data, g
  *
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_REMOVE_KEY
  */
-gboolean bd_crypto_luks_remove_key_blob (const gchar *device, const guint8 *pass_data, gsize data_len, GError **error) {
+gboolean bd_crypto_luks_remove_key (const gchar *device, const guint8 *pass_data, gsize data_len, const gchar *key_file, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
+    gboolean success = FALSE;
+    gchar *key_buf = NULL;
+    gsize buf_len = 0;
 
     msg = g_strdup_printf ("Started removing key from the LUKS device '%s'", device);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    ret = crypt_init (&cd, device);
-    if (ret != 0) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to initialize device: %s", strerror_l(-ret, c_locale));
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    ret = crypt_load (cd, CRYPT_LUKS, NULL);
-    if (ret != 0) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to load device's parameters: %s", strerror_l(-ret, c_locale));
-        crypt_free (cd);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    ret = crypt_activate_by_passphrase (cd, NULL, CRYPT_ANY_SLOT, (char*) pass_data, data_len, 0);
-    if (ret < 0) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEY_SLOT,
-                     "Failed to determine key slot: %s", strerror_l(-ret, c_locale));
-        crypt_free (cd);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    ret = crypt_keyslot_destroy (cd, ret);
-    if (ret != 0) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_REMOVE_KEY,
-                     "Failed to remove key: %s", strerror_l(-ret, c_locale));
-        crypt_free (cd);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    crypt_free (cd);
-    bd_utils_report_finished (progress_id, "Completed");
-    return TRUE;
-}
-
-/**
- * bd_crypto_luks_remove_key:
- * @device: device to add new key to
- * @pass: (allow-none): passphrase for the @device or %NULL
- * @key_file: (allow-none): key file for the @device or %NULL
- * @error: (out): place to store error (if any)
- *
- * Returns: whether the key was successfully removed or not
- *
- * Either @pass or @key_file has to be != %NULL.
- *
- * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_REMOVE_KEY
- */
-gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, const gchar *key_file, GError **error) {
-    gboolean success = FALSE;
-    gchar *key_buf = NULL;
-    gsize buf_len = 0;
-
-    if (!pass && !key_file) {
+    if ((data_len == 0) && !key_file) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_REMOVE_KEY,
                      "No passphrase nor key file given, cannot remove key.");
         return FALSE;
@@ -1330,12 +1276,50 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, cons
             return FALSE;
         }
     } else
-        buf_len = strlen (pass);
+        buf_len = data_len;
 
-    success = bd_crypto_luks_remove_key_blob (device, key_buf ? (const guint8*) key_buf : (const guint8*) pass, buf_len, error);
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_load (cd, CRYPT_LUKS, NULL);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to load device's parameters: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_activate_by_passphrase (cd, NULL, CRYPT_ANY_SLOT,
+                                        key_buf ? key_buf : (char*) pass_data, buf_len, 0);
+    if (ret < 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEY_SLOT,
+                     "Failed to determine key slot: %s", strerror_l (-ret, c_locale));
+        g_free (key_buf);
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
     g_free (key_buf);
 
-    return success;
+    ret = crypt_keyslot_destroy (cd, ret);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_REMOVE_KEY,
+                     "Failed to remove key: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
 }
 
 /**

@@ -433,17 +433,14 @@ class CryptoTestRemoveKey(CryptoTestCase):
         succ = BlockDev.crypto_luks_add_key(self.loop_dev, PASSWD, None, PASSWD2, None)
         self.assertTrue(succ)
 
-        succ = BlockDev.crypto_luks_add_key(self.loop_dev, PASSWD, None, PASSWD3, None)
-        self.assertTrue(succ)
-
         with self.assertRaises(GLib.GError):
             BlockDev.crypto_luks_remove_key(self.loop_dev, "wrong-passphrase", None)
 
         succ = BlockDev.crypto_luks_remove_key(self.loop_dev, PASSWD, None)
         self.assertTrue(succ)
 
-        succ = BlockDev.crypto_luks_remove_key_blob(self.loop_dev, [ord(c) for c in PASSWD2])
-        self.assertTrue(succ)
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
 
     @tag_test(TestTags.SLOW)
     def test_luks_remove_key(self):

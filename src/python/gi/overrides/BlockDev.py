@@ -301,7 +301,11 @@ __all__.append("crypto_luks_add_key")
 _crypto_luks_remove_key = BlockDev.crypto_luks_remove_key
 @override(BlockDev.crypto_luks_remove_key)
 def crypto_luks_remove_key(device, pass_=None, key_file=None):
-    return _crypto_luks_remove_key(device, pass_, key_file)
+    if pass_:
+        pw = [ord(c) for c in pass_]
+    else:
+        pw = None
+    return _crypto_luks_remove_key(device, pw, key_file)
 __all__.append("crypto_luks_remove_key")
 
 _crypto_escrow_device = BlockDev.crypto_escrow_device

@@ -57,5 +57,10 @@
     been changed to match functionality of the removed <literal>_blob</literal> function.
   </para>
 
+  <para>
+    <literal>bd_crypto_remove_key_blob</literal> has been removed, use <literal>bd_crypto_remove_key</literal> instead. This functions has
+    been changed to match functionality of the removed <literal>_blob</literal> function.
+  </para>
+
   </simplesect>
 </chapter>
