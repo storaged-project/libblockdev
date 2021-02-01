@@ -23,4 +23,17 @@
   </para>
 
   </simplesect>
+
+  <simplesect><title>Crypto plugin</title>
+
+  <para>
+    Crypto plugin API has been significantly changed. Most changes were introduced to simplify the API by removing various
+    "redundant" functions that added new or optional parameters to the existing functions.
+  </para>
+
+  <para>
+    `BD_CRYPTO_TECH_LUKS2` has been removed. We no longer distinguish between LUKS v1 and LUKS v2 support and libcryptsetup >= 2 is now required.
+  </para>
+
+  </simplesect>
 </chapter>
