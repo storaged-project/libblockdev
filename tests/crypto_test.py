@@ -130,7 +130,8 @@ class CryptoTestFormat(CryptoTestCase):
         self.assertTrue(succ)
 
         # the simple case with password blob
-        succ = BlockDev.crypto_luks_format_blob(self.loop_dev, "aes-xts-plain64", 0, [ord(c) for c in PASSWD], 0)
+        succ = BlockDev.crypto_luks_format_blob(self.loop_dev, "aes-xts-plain64", 0, [ord(c) for c in PASSWD], 0,
+                                                BlockDev.CryptoLUKSVersion.LUKS1, None)
         self.assertTrue(succ)
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
@@ -140,18 +141,22 @@ class CryptoTestFormat(CryptoTestCase):
 
         # no passphrase nor keyfile
         with self.assertRaises(GLib.GError):
-            BlockDev.crypto_luks_format(self.loop_dev, None, 0, None, None, 0)
+            BlockDev.crypto_luks_format(self.loop_dev, None, 0, None, None, 0,
+                                        BlockDev.CryptoLUKSVersion.LUKS2, None)
 
         # the simple case with password
-        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-xts-plain64", 0, PASSWD, None, 0)
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-xts-plain64", 0, PASSWD, None, 0,
+                                           BlockDev.CryptoLUKSVersion.LUKS2, None)
         self.assertTrue(succ)
 
         # create with a keyfile
-        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-xts-plain64", 0, None, self.keyfile, 0)
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-xts-plain64", 0, None, self.keyfile, 0,
+                                           BlockDev.CryptoLUKSVersion.LUKS2, None)
         self.assertTrue(succ)
 
         # the simple case with password blob
-        succ = BlockDev.crypto_luks_format_blob(self.loop_dev, "aes-xts-plain64", 0, [ord(c) for c in PASSWD], 0)
+        succ = BlockDev.crypto_luks_format_blob(self.loop_dev, "aes-xts-plain64", 0, [ord(c) for c in PASSWD], 0,
+                                                BlockDev.CryptoLUKSVersion.LUKS2, None)
         self.assertTrue(succ)
 
         # simple case with extra options

@@ -902,56 +902,6 @@ static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 k
  * @passphrase: (allow-none): a passphrase for the new LUKS device or %NULL if not requested
  * @key_file: (allow-none): a key file for the new LUKS device or %NULL if not requested
  * @min_entropy: minimum random data entropy (in bits) required to format @device as LUKS
- * @error: (out): place to store error (if any)
- *
- * Formats the given @device as LUKS according to the other parameters given. If
- * @min_entropy is specified (greater than 0), the function waits for enough
- * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
- * FOREVER).
- *
- * Either @passphrase or @key_file has to be != %NULL.
- *
- * Returns: whether the given @device was successfully formatted as LUKS or not
- * (the @error) contains the error in such cases)
- *
- * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_CREATE
- */
-gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint64 key_size, const gchar *passphrase, const gchar *key_file, guint64 min_entropy, GError **error) {
-    return luks_format (device, cipher, key_size, (const guint8*) passphrase, passphrase ? strlen(passphrase) : 0, key_file, min_entropy, BD_CRYPTO_LUKS_VERSION_LUKS1, NULL, error);
-}
-
-/**
- * bd_crypto_luks_format_blob:
- * @device: a device to format as LUKS
- * @cipher: (allow-none): cipher specification (type-mode, e.g. "aes-xts-plain64") or %NULL to use the default
- * @key_size: size of the volume key in bits or 0 to use the default
- * @pass_data: (array length=data_len): a passphrase for the new LUKS device (may contain arbitrary binary data)
- * @data_len: (allow-none): length of the @pass_data buffer
- * @min_entropy: minimum random data entropy (in bits) required to format @device as LUKS
- * @error: (out): place to store error (if any)
- *
- * Formats the given @device as LUKS according to the other parameters given. If
- * @min_entropy is specified (greater than 0), the function waits for enough
- * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
- * FOREVER).
- *
- * Returns: whether the given @device was successfully formatted as LUKS or not
- * (the @error) contains the error in such cases)
- *
- * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_CREATE
- */
-gboolean bd_crypto_luks_format_blob (const gchar *device, const gchar *cipher, guint64 key_size, const guint8 *pass_data, gsize data_len, guint64 min_entropy, GError **error) {
-    return luks_format (device, cipher, key_size, pass_data, data_len, NULL, min_entropy, BD_CRYPTO_LUKS_VERSION_LUKS1, NULL, error);
-}
-
-/**
- * bd_crypto_luks_format_luks2:
- * @device: a device to format as LUKS
- * @cipher: (allow-none): cipher specification (type-mode, e.g. "aes-xts-plain64") or %NULL to use the default
- * @key_size: size of the volume key in bits or 0 to use the default
- * @passphrase: (allow-none): a passphrase for the new LUKS device or %NULL if not requested
- * @key_file: (allow-none): a key file for the new LUKS device or %NULL if not requested
- * @min_entropy: minimum random data entropy (in bits) required to format @device as LUKS
  * @luks_version: whether to use LUKS v1 or LUKS v2
  * @extra: (allow-none): extra arguments for LUKS format creation
  * @error: (out): place to store error (if any)
@@ -969,14 +919,14 @@ gboolean bd_crypto_luks_format_blob (const gchar *device, const gchar *cipher, g
  * Returns: whether the given @device was successfully formatted as LUKS or not
  * (the @error) contains the error in such cases)
  *
- * Tech category: %BD_CRYPTO_TECH_LUKS2-%BD_CRYPTO_TECH_MODE_CREATE
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_CREATE
  */
-gboolean bd_crypto_luks_format_luks2 (const gchar *device, const gchar *cipher, guint64 key_size, const gchar *passphrase, const gchar *key_file, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra,GError **error) {
+gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint64 key_size, const gchar *passphrase, const gchar *key_file, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra,GError **error) {
     return luks_format (device, cipher, key_size, (const guint8*) passphrase, passphrase ? strlen(passphrase) : 0, key_file, min_entropy, luks_version, extra, error);
 }
 
 /**
- * bd_crypto_luks_format_luks2_blob:
+ * bd_crypto_luks_format_blob:
  * @device: a device to format as LUKS
  * @cipher: (allow-none): cipher specification (type-mode, e.g. "aes-xts-plain64") or %NULL to use the default
  * @key_size: size of the volume key in bits or 0 to use the default
@@ -998,9 +948,9 @@ gboolean bd_crypto_luks_format_luks2 (const gchar *device, const gchar *cipher, 
  * Returns: whether the given @device was successfully formatted as LUKS or not
  * (the @error) contains the error in such cases)
  *
- * Tech category: %BD_CRYPTO_TECH_LUKS2-%BD_CRYPTO_TECH_MODE_CREATE
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_CREATE
  */
-gboolean bd_crypto_luks_format_luks2_blob (const gchar *device, const gchar *cipher, guint64 key_size, const guint8 *pass_data, gsize data_len, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra, GError **error) {
+gboolean bd_crypto_luks_format_blob (const gchar *device, const gchar *cipher, guint64 key_size, const guint8 *pass_data, gsize data_len, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra, GError **error) {
     return luks_format (device, cipher, key_size, pass_data, data_len, NULL, min_entropy, luks_version, extra, error);
 }
 
@@ -1607,25 +1557,6 @@ static gboolean luks_resize (const gchar *luks_device, guint64 size, const guint
 /**
  * bd_crypto_luks_resize:
  * @luks_device: opened LUKS device to resize
- * @size: requested size in sectors or 0 to adapt to the backing device
- * @error: (out): place to store error (if any)
- *
- * Returns: whether the @luks_device was successfully resized or not
- *
- * You need to specify passphrase when resizing LUKS 2 devices that don't have
- * verified key loaded in kernel. If you don't specify a passphrase, resize
- * will fail with %BD_CRYPTO_ERROR_RESIZE_PERM. Use %bd_crypto_luks_resize_luks2
- * or %bd_crypto_luks_resize_luks2_blob for these devices.
- *
- * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_RESIZE
- */
-gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError **error) {
-    return luks_resize (luks_device, size, NULL, 0, NULL, error);
-}
-
-/**
- * bd_crypto_luks_resize_luks2:
- * @luks_device: opened LUKS device to resize
  * @passphrase: (allow-none): passphrase to resize the @luks_device or %NULL
  * @key_file: (allow-none): key file path to use for resizing the @luks_device or %NULL
  * @size: requested size in sectors or 0 to adapt to the backing device
@@ -1638,14 +1569,14 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, GError *
  * For LUKS 1 devices you can set both @passphrase and @keyfile to %NULL to
  * achieve the same as calling %bd_crypto_luks_resize.
  *
- * Tech category: %BD_CRYPTO_TECH_LUKS2-%BD_CRYPTO_TECH_MODE_RESIZE
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_RESIZE
  */
-gboolean bd_crypto_luks_resize_luks2 (const gchar *luks_device, guint64 size, const gchar *passphrase, const gchar *key_file, GError **error) {
+gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, const gchar *passphrase, const gchar *key_file, GError **error) {
     return luks_resize (luks_device, size, (const guint8*) passphrase, passphrase ? strlen (passphrase) : 0, key_file, error);
 }
 
 /**
- * bd_crypto_luks_resize_luks2_blob:
+ * bd_crypto_luks_resize_blob:
  * @luks_device: opened LUKS device to resize
  * @pass_data: (array length=data_len): a passphrase for the new LUKS device (may contain arbitrary binary data)
  * @data_len: length of the @pass_data buffer
@@ -1657,9 +1588,9 @@ gboolean bd_crypto_luks_resize_luks2 (const gchar *luks_device, guint64 size, co
  * You need to specify @pass_data for LUKS 2 devices that don't have
  * verified key loaded in kernel.
  *
- * Tech category: %BD_CRYPTO_TECH_LUKS2-%BD_CRYPTO_TECH_MODE_RESIZE
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_RESIZE
  */
-gboolean bd_crypto_luks_resize_luks2_blob (const gchar *luks_device, guint64 size, const guint8* pass_data, gsize data_len, GError **error) {
+gboolean bd_crypto_luks_resize_blob (const gchar *luks_device, guint64 size, const guint8* pass_data, gsize data_len, GError **error) {
     return luks_resize (luks_device, size, pass_data, data_len, NULL, error);
 }
 

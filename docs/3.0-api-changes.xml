@@ -35,5 +35,18 @@
     `BD_CRYPTO_TECH_LUKS2` has been removed. We no longer distinguish between LUKS v1 and LUKS v2 support and libcryptsetup >= 2 is now required.
   </para>
 
+  <para>
+    <literal>bd_crypto_luks_format_luks2</literal> and <literal>bd_crypto_luks_format_luks2_blob</literal> have been removed, use
+    <literal>bd_crypto_luks_format</literal> and <literal>bd_crypto_luks_format_blob</literal> instead. These functions have been changed
+    and now have two new parameters <literal>BDCryptoLUKSVersion luks_version</literal> and <literal>BDCryptoLUKSExtra *extra</literal>
+    to match functionality of the removed <literal>_luks2</literal> functions.
+  </para>
+
+  <para>
+    <literal>bd_crypto_luks_resize_luks2</literal> and <literal>bd_crypto_luks_resize_luks2_blob</literal> have been removed, use
+    <literal>bd_crypto_luks_resize</literal> and <literal>bd_crypto_luks_resize_blob</literal> instead. These functions have been changed
+    and now have new parameters to match functionality of the removed <literal>_luks2</literal> functions.
+  </para>
+
   </simplesect>
 </chapter>

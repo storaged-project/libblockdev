@@ -258,10 +258,7 @@ class CryptoLUKSExtra(BlockDev.CryptoLUKSExtra):
 CryptoLUKSExtra = override(CryptoLUKSExtra)
 __all__.append("CryptoLUKSExtra")
 
-# calling `crypto_luks_format_luks2` with `luks_version` set to
-# `BlockDev.CryptoLUKSVersion.LUKS1` and `extra` to `None` is the same
-# as using the "original" function `crypto_luks_format`
-_crypto_luks_format = BlockDev.crypto_luks_format_luks2
+_crypto_luks_format = BlockDev.crypto_luks_format
 @override(BlockDev.crypto_luks_format)
 def crypto_luks_format(device, cipher=None, key_size=0, passphrase=None, key_file=None, min_entropy=0, luks_version=BlockDev.CryptoLUKSVersion.LUKS1, extra=None):
     return _crypto_luks_format(device, cipher, key_size, passphrase, key_file, min_entropy, luks_version, extra)
@@ -273,7 +270,7 @@ def crypto_luks_open(device, name, passphrase=None, key_file=None, read_only=Fal
     return _crypto_luks_open(device, name, passphrase, key_file, read_only)
 __all__.append("crypto_luks_open")
 
-_crypto_luks_resize = BlockDev.crypto_luks_resize_luks2
+_crypto_luks_resize = BlockDev.crypto_luks_resize
 @override(BlockDev.crypto_luks_resize)
 def crypto_luks_resize(luks_device, size=0, passphrase=None, key_file=None):
     return _crypto_luks_resize(luks_device, size, passphrase, key_file)
