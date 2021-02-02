@@ -138,7 +138,7 @@ static void log_done (guint64 task_id, gint exit_code) {
  * bd_utils_exec_and_report_error:
  * @argv: (array zero-terminated=1): the argv array for the call
  * @extra: (allow-none) (array zero-terminated=1): extra arguments
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the @argv was successfully executed (no error and exit code 0) or not
  */
@@ -153,7 +153,7 @@ gboolean bd_utils_exec_and_report_error (const gchar **argv, const BDExtraArg **
  * bd_utils_exec_and_report_error_no_progress:
  * @argv: (array zero-terminated=1): the argv array for the call
  * @extra: (allow-none) (array zero-terminated=1): extra arguments
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the @argv was successfully executed (no error and exit code 0) or not
  */
@@ -168,7 +168,7 @@ gboolean bd_utils_exec_and_report_error_no_progress (const gchar **argv, const B
  * @argv: (array zero-terminated=1): the argv array for the call
  * @extra: (allow-none) (array zero-terminated=1): extra arguments
  * @status: (out): place to store the status
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the @argv was successfully executed (no error and exit code 0) or not
  */
@@ -185,6 +185,7 @@ gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtr
     guint i = 0;
     gchar **old_env = NULL;
     gchar **new_env = NULL;
+    GError *l_error = NULL;
 
     if (extra) {
         args_len = g_strv_length ((gchar **) argv);
@@ -228,16 +229,17 @@ gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtr
     /* g_spawn_sync set the status in the same way waitpid() does, we need
        to get the process exit code manually (this is similar to calling
        WEXITSTATUS but also sets the error for terminated processes */
-    if (!g_spawn_check_exit_status (exit_status, error)) {
-        if (g_error_matches (*error, G_SPAWN_ERROR, G_SPAWN_ERROR_FAILED)) {
+    if (!g_spawn_check_exit_status (exit_status, &l_error)) {
+        if (g_error_matches (l_error, G_SPAWN_ERROR, G_SPAWN_ERROR_FAILED)) {
             /* process was terminated abnormally (e.g. using a signal) */
             g_free (stdout_data);
             g_free (stderr_data);
+            g_propagate_error (error, l_error);
             return FALSE;
         }
 
-        *status = (*error)->code;
-        g_clear_error (error);
+        *status = l_error->code;
+        g_clear_error (&l_error);
     } else
         *status = 0;
 
@@ -379,6 +381,7 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
     gchar **old_env = NULL;
     gchar **new_env = NULL;
     gboolean success = TRUE;
+    GError *l_error = NULL;
 
     /* TODO: share this code between functions */
     if (extra) {
@@ -446,9 +449,10 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
             num_written_total += num_written;
 
         if (num_written < 0) {
-            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
+            g_set_error (&l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
                          "Failed to write to stdin of the process: %m");
-            bd_utils_report_finished (progress_id, (*error)->message);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
             /* would overwrite errno, need to close as a last step */
             close (in_fd);
             return FALSE;
@@ -472,24 +476,27 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
         if (poll_status < 0) {
             if (errno == EAGAIN || errno == EINTR)
                 continue;
-            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
+            g_set_error (&l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
                          "Failed to poll output FDs: %m");
-            bd_utils_report_finished (progress_id, (*error)->message);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
             success = FALSE;
             break;
         }
 
         if (!out_done) {
-            if (! _process_fd_event (out_fd, &fds[0], stdout_buffer, stdout_data, &stdout_buffer_pos, &out_done, progress_id, &completion, prog_extract, error)) {
-                bd_utils_report_finished (progress_id, (*error)->message);
+            if (! _process_fd_event (out_fd, &fds[0], stdout_buffer, stdout_data, &stdout_buffer_pos, &out_done, progress_id, &completion, prog_extract, &l_error)) {
+                bd_utils_report_finished (progress_id, l_error->message);
+                g_propagate_error (error, l_error);
                 success = FALSE;
                 break;
             }
         }
 
         if (!err_done) {
-            if (! _process_fd_event (err_fd, &fds[1], stderr_buffer, stderr_data, &stderr_buffer_pos, &err_done, progress_id, &completion, prog_extract, error)) {
-                bd_utils_report_finished (progress_id, (*error)->message);
+            if (! _process_fd_event (err_fd, &fds[1], stderr_buffer, stderr_data, &stderr_buffer_pos, &err_done, progress_id, &completion, prog_extract, &l_error)) {
+                bd_utils_report_finished (progress_id, l_error->message);
+                g_propagate_error (error, l_error);
                 success = FALSE;
                 break;
             }
@@ -507,14 +514,16 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
         if (child_ret > 0) {
             if (*proc_status != 0) {
                 msg = stderr_data->len > 0 ? stderr_data->str : stdout_data->str;
-                g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
+                g_set_error (&l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
                              "Process reported exit code %d: %s", *proc_status, msg);
-                bd_utils_report_finished (progress_id, (*error)->message);
+                bd_utils_report_finished (progress_id, l_error->message);
+                g_propagate_error (error, l_error);
                 success = FALSE;
             } else if (WIFSIGNALED (status)) {
                 g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
                              "Process killed with a signal");
-                bd_utils_report_finished (progress_id, (*error)->message);
+                bd_utils_report_finished (progress_id, l_error->message);
+                g_propagate_error (error, l_error);
                 success = FALSE;
             }
         } else if (child_ret == -1) {
@@ -522,7 +531,8 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
                 errno = 0;
                 g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
                              "Failed to wait for the process");
-                bd_utils_report_finished (progress_id, (*error)->message);
+                bd_utils_report_finished (progress_id, l_error->message);
+                g_propagate_error (error, l_error);
                 success = FALSE;
             } else {
                 /* no such process (the child exited before we tried to wait for it) */
@@ -553,7 +563,7 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
  * @extra: (allow-none) (array zero-terminated=1): extra arguments
  * @prog_extract: (scope notified) (nullable): function for extracting progress information
  * @proc_status: (out): place to store the process exit status
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Note that any NULL bytes read from standard output and standard error
  * output are treated as separators similar to newlines and @prog_extract
@@ -570,7 +580,7 @@ gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg
  * @argv: (array zero-terminated=1): the argv array for the call
  * @input: (allow-none): input for the executed program
  * @extra: (allow-none) (array zero-terminated=1): extra arguments
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the @argv was successfully executed (no error and exit code 0) or not
  */
@@ -586,7 +596,7 @@ gboolean bd_utils_exec_with_input (const gchar **argv, const gchar *input, const
  * @argv: (array zero-terminated=1): the argv array for the call
  * @extra: (allow-none) (array zero-terminated=1): extra arguments
  * @output: (out): variable to store output to
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Note that any NULL bytes read from standard output and standard error
  * output will be discarded.
@@ -627,7 +637,7 @@ gboolean bd_utils_exec_and_capture_output (const gchar **argv, const BDExtraArg 
  * bd_utils_version_cmp:
  * @ver_string1: first version string
  * @ver_string2: second version string
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: -1, 0 or 1 if @ver_string1 is lower, the same or higher version as
  *          @ver_string2 respectively. If an error occurs, returns -2 and @error
@@ -705,7 +715,7 @@ gint bd_utils_version_cmp (const gchar *ver_string1, const gchar *ver_string2, G
  *               info or %NULL to use "--version"
  * @version_regexp: (allow-none): regexp to extract version from the version
  *                  info or %NULL if only version is printed by "$ @util @version_arg"
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the @util is available in a version >= @version or not
  *          (@error is set in such case).
@@ -718,6 +728,7 @@ gboolean bd_utils_check_util_version (const gchar *util, const gchar *version, c
     GRegex *regex = NULL;
     GMatchInfo *match_info = NULL;
     gchar *version_str = NULL;
+    GError *l_error = NULL;
 
     util_path = g_find_program_in_path (util);
     if (!util_path) {
@@ -731,16 +742,16 @@ gboolean bd_utils_check_util_version (const gchar *util, const gchar *version, c
         /* nothing more to do here */
         return TRUE;
 
-    succ = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
+    succ = bd_utils_exec_and_capture_output (argv, NULL, &output, &l_error);
     if (!succ) {
         /* if we got nothing on STDOUT, try using STDERR data from error message */
-        if (g_error_matches ((*error), BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
-            output = g_strdup ((*error)->message);
-            g_clear_error (error);
-        } else if (g_error_matches ((*error), BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED)) {
+        if (g_error_matches (l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
+            output = g_strdup (l_error->message);
+            g_clear_error (&l_error);
+        } else if (g_error_matches (l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED)) {
             /* exit status != 0, try using the output anyway */
-            output = g_strdup ((*error)->message);
-            g_clear_error (error);
+            output = g_strdup (l_error->message);
+            g_clear_error (&l_error);
         }
     }
 
@@ -779,12 +790,14 @@ gboolean bd_utils_check_util_version (const gchar *util, const gchar *version, c
 
     g_free (output);
 
-    if (bd_utils_version_cmp (version_str, version, error) < 0) {
+    if (bd_utils_version_cmp (version_str, version, &l_error) < 0) {
         /* smaller version or error */
-        if (!(*error))
+        if (!l_error)
             g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_UTIL_LOW_VER,
                          "Too low version of %s: %s. At least %s required.",
                          util, version_str, version);
+        else
+            g_propagate_error (error, l_error);
         g_free (version_str);
         return FALSE;
     }
@@ -797,7 +810,7 @@ gboolean bd_utils_check_util_version (const gchar *util, const gchar *version, c
  * bd_utils_init_prog_reporting:
  * @new_prog_func: (allow-none) (scope notified): progress reporting function to
  *                                                use or %NULL to reset to default
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether progress reporting was successfully initialized or not
  */
@@ -815,7 +828,7 @@ gboolean bd_utils_init_prog_reporting (BDUtilsProgFunc new_prog_func, GError **e
  * @new_prog_func: (allow-none) (scope notified): progress reporting function to
  *                                                use on current thread or %NULL
  *                                                to reset to default or global
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether progress reporting was successfully initialized or not
  */
@@ -838,7 +851,7 @@ static void thread_progress_muted (guint64 task_id __attribute__((unused)), BDUt
 
 /**
  * bd_utils_mute_prog_reporting_thread:
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether progress reporting for the current thread was successfully
  * muted (deinitialized even in presence of a global reporting function) or not
@@ -917,7 +930,7 @@ void bd_utils_report_finished (guint64 task_id, const gchar *msg) {
  * bd_utils_echo_str_to_file:
  * @str: string to write to @file_path
  * @file_path: path to file
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the @str was successfully written to @file_path
  * or not.

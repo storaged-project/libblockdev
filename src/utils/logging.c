@@ -32,7 +32,7 @@ static int log_level = BD_UTILS_LOG_WARNING;
  *                                               %NULL to disable logging; use
  *                                               #bd_utils_log_stdout to reset to
  *                                               the default behaviour
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether logging was successfully initialized or not
  */
