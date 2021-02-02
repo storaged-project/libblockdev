@@ -435,10 +435,12 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
     /* set both fds for non-blocking read */
     flags = fcntl (out_fd, F_GETFL, 0);
     if (fcntl (out_fd, F_SETFL, flags | O_NONBLOCK))
-        g_warning ("_utils_exec_and_report_progress: Failed to set out_fd non-blocking: %m");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING,
+                             "_utils_exec_and_report_progress: Failed to set out_fd non-blocking: %m");
     flags = fcntl (err_fd, F_GETFL, 0);
     if (fcntl (err_fd, F_SETFL, flags | O_NONBLOCK))
-        g_warning ("_utils_exec_and_report_progress: Failed to set err_fd non-blocking: %m");
+        bd_utils_log_format (BD_UTILS_LOG_WARNING,
+                             "_utils_exec_and_report_progress: Failed to set err_fd non-blocking: %m");
 
     if (input) {
         ssize_t num_written = 0;
