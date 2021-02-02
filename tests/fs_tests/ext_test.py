@@ -1,5 +1,4 @@
 import tempfile
-import six
 
 from .fs_test import FSTestCase, mounted
 
@@ -42,33 +41,33 @@ class ExtTestAvailability(ExtTestCase):
 
         # now try without mke2fs
         with utils.fake_path(all_but="mke2fs"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'mke2fs' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'mke2fs' utility is not available"):
                 BlockDev.fs_is_tech_avail(tech, BlockDev.FSTechMode.MKFS)
 
         # now try without e2fsck
         with utils.fake_path(all_but="e2fsck"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'e2fsck' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'e2fsck' utility is not available"):
                 BlockDev.fs_is_tech_avail(tech, BlockDev.FSTechMode.CHECK)
 
-            with six.assertRaisesRegex(self, GLib.GError, "The 'e2fsck' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'e2fsck' utility is not available"):
                 BlockDev.fs_is_tech_avail(tech, BlockDev.FSTechMode.REPAIR)
 
         # now try without dumpe2fs
         with utils.fake_path(all_but="dumpe2fs"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'dumpe2fs' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'dumpe2fs' utility is not available"):
                 BlockDev.fs_is_tech_avail(tech, BlockDev.FSTechMode.QUERY)
 
         # now try without tune2fs
         with utils.fake_path(all_but="tune2fs"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'tune2fs' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'tune2fs' utility is not available"):
                 BlockDev.fs_is_tech_avail(tech, BlockDev.FSTechMode.SET_LABEL)
 
-            with six.assertRaisesRegex(self, GLib.GError, "The 'tune2fs' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'tune2fs' utility is not available"):
                 BlockDev.fs_is_tech_avail(tech, BlockDev.FSTechMode.SET_UUID)
 
         # now try without resize2fs
         with utils.fake_path(all_but="resize2fs"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'resize2fs' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'resize2fs' utility is not available"):
                 BlockDev.fs_is_tech_avail(tech, BlockDev.FSTechMode.RESIZE)
 
     @tag_test(TestTags.CORE)
@@ -337,7 +336,7 @@ class ExtSetLabel(ExtTestCase):
         succ = check_function("TEST_LABEL")
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, "at most 16 characters long."):
+        with self.assertRaisesRegex(GLib.GError, "at most 16 characters long."):
             check_function(20 * "a")
 
     def test_ext2_set_label(self):
@@ -477,7 +476,7 @@ class ExtSetUUID(ExtTestCase):
         succ = check_function(self.test_uuid)
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, "not a valid RFC-4122 UUID"):
+        with self.assertRaisesRegex(GLib.GError, "not a valid RFC-4122 UUID"):
             check_function("aaaaaaa")
 
     def test_ext2_set_uuid(self):

@@ -1,7 +1,6 @@
 import unittest
 import re
 import os
-import six
 import overrides_hack
 from utils import fake_utils, create_sparse_tempfile, create_lio_device, delete_lio_device, run_command, TestTags, tag_test, read_file
 
@@ -76,7 +75,7 @@ class UtilsExecLoggingTest(UtilsTestCase):
         succ = BlockDev.utils_exec_and_report_error(["true"])
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, r"Process reported exit code 1"):
+        with self.assertRaisesRegex(GLib.GError, r"Process reported exit code 1"):
             succ = BlockDev.utils_exec_and_report_error(["/bin/false"])
 
         succ, out = BlockDev.utils_exec_and_capture_output(["echo", "hi"])
@@ -299,7 +298,7 @@ class UtilsExecLoggingTest(UtilsTestCase):
 
         # stdout and stderr output, non-zero return from the command and very long exception message
         self.num_matches = 0
-        with six.assertRaisesRegex(self, GLib.GError, r"Process reported exit code 66"):
+        with self.assertRaisesRegex(GLib.GError, r"Process reported exit code 66"):
             status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo \"%s\"; echo \"%s\" >&2; done; exit 66" % (cnt, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG)], None, self.my_exec_progress_func)
         self.assertEqual(self.num_matches, cnt * 2)
 
@@ -347,7 +346,7 @@ class UtilsExecLoggingTest(UtilsTestCase):
 
         # stdout and stderr output, non-zero return from the command and very long exception message
         self.num_matches = 0
-        with six.assertRaisesRegex(self, GLib.GError, r"Process reported exit code 66"):
+        with self.assertRaisesRegex(GLib.GError, r"Process reported exit code 66"):
             status = BlockDev.utils_exec_and_report_progress(["bash", "-c", "for i in {1..%d}; do echo -e \"%s\\0%s\"; echo -e \"%s\\0%s\" >&2; done; exit 66" % (cnt, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG, self.EXEC_PROGRESS_MSG)], None, self.my_exec_progress_func)
         self.assertEqual(self.num_matches, cnt * 4)
 
@@ -366,11 +365,11 @@ class UtilsExecLoggingTest(UtilsTestCase):
         data += DATA_MATCH
 
         # command is not accepting stdin, write() will return an error
-        with six.assertRaisesRegex(self, GLib.GError, r"Failed to write to stdin of the process: Broken pipe"):
+        with self.assertRaisesRegex(GLib.GError, r"Failed to write to stdin of the process: Broken pipe"):
             BlockDev.utils_exec_with_input(["false"], data, None)
 
         # test that `grep` returns error on non-match
-        with six.assertRaisesRegex(self, GLib.GError, r"Process reported exit code 1"):
+        with self.assertRaisesRegex(GLib.GError, r"Process reported exit code 1"):
             BlockDev.utils_exec_with_input(["grep", "unmatched"], data, None)
 
         # expecting that `grep` will find the string at the end

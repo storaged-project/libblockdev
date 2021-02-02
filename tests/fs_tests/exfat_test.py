@@ -1,5 +1,4 @@
 import tempfile
-import six
 
 from .fs_test import FSTestCase, mounted
 
@@ -38,10 +37,10 @@ class ExfatTestAvailability(ExfatTestCase):
                                               BlockDev.FSTechMode.SET_LABEL)
         self.assertTrue(available)
 
-        with six.assertRaisesRegex(self, GLib.GError, "doesn't support setting UUID"):
+        with self.assertRaisesRegex(GLib.GError, "doesn't support setting UUID"):
             BlockDev.fs_is_tech_avail(BlockDev.FSTech.EXFAT, BlockDev.FSTechMode.SET_UUID)
 
-        with six.assertRaisesRegex(self, GLib.GError, "doesn't support resizing"):
+        with self.assertRaisesRegex(GLib.GError, "doesn't support resizing"):
             BlockDev.fs_is_tech_avail(BlockDev.FSTech.EXFAT, BlockDev.FSTechMode.RESIZE)
 
 
@@ -50,23 +49,23 @@ class ExfatTestAvailability(ExfatTestCase):
 
         # now try without mkfs.exfat
         with utils.fake_path(all_but="mkfs.exfat"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'mkfs.exfat' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'mkfs.exfat' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.EXFAT, BlockDev.FSTechMode.MKFS)
 
         # now try without fsck.exfat
         with utils.fake_path(all_but="fsck.exfat"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'fsck.exfat' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'fsck.exfat' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.EXFAT, BlockDev.FSTechMode.CHECK)
 
-            with six.assertRaisesRegex(self, GLib.GError, "The 'fsck.exfat' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'fsck.exfat' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.EXFAT, BlockDev.FSTechMode.REPAIR)
 
         # now try without tune.exfat
         with utils.fake_path(all_but="tune.exfat"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'tune.exfat' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'tune.exfat' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.EXFAT, BlockDev.FSTechMode.QUERY)
 
-            with six.assertRaisesRegex(self, GLib.GError, "The 'tune.exfat' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'tune.exfat' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.EXFAT, BlockDev.FSTechMode.SET_LABEL)
 
 
@@ -206,5 +205,5 @@ class ExfatSetLabel(ExfatTestCase):
         succ = BlockDev.fs_exfat_check_label("TEST_LABEL")
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, "at most 11 characters long."):
+        with self.assertRaisesRegex(GLib.GError, "at most 11 characters long."):
             BlockDev.fs_exfat_check_label(12 * "a")

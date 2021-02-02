@@ -1,7 +1,6 @@
 import unittest
 import os
 import re
-import six
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, TestTags, tag_test, run_command
 import overrides_hack
 
@@ -1105,7 +1104,7 @@ class PartCreateResizePartCase(PartTestCase):
         self.assertLess(ps.size, new_size + 4 * 1024)  # but also not too big (assuming max. 4 KiB blocks)
 
         # resize should allow up to 4 MiB over max size
-        with six.assertRaisesRegex(self, GLib.GError, "is bigger than max size"):
+        with self.assertRaisesRegex(GLib.GError, "is bigger than max size"):
             BlockDev.part_resize_part (self.loop_dev, ps.path, max_size + 4 * 1024**2 + 1, BlockDev.PartAlign.NONE)
 
         succ = BlockDev.part_resize_part (self.loop_dev, ps.path, max_size + 4 * 1024**2, BlockDev.PartAlign.NONE)

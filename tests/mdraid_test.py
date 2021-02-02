@@ -4,7 +4,6 @@ import re
 import time
 from contextlib import contextmanager
 import overrides_hack
-import six
 
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test
 from gi.repository import BlockDev, GLib
@@ -75,7 +74,7 @@ class MDNoDevTestCase(MDTest):
         self.assertEqual(BlockDev.md_canonicalize_uuid("3386ff85:f5012621:4a435f06:1eb47236"),
                          "3386ff85-f501-2621-4a43-5f061eb47236")
 
-        with six.assertRaisesRegex(self, GLib.GError, r'malformed or invalid'):
+        with self.assertRaisesRegex(GLib.GError, r'malformed or invalid'):
             BlockDev.md_canonicalize_uuid("malformed-uuid-example")
 
     @tag_test(TestTags.NOSTORAGE)
@@ -85,7 +84,7 @@ class MDNoDevTestCase(MDTest):
         self.assertEqual(BlockDev.md_get_md_uuid("3386ff85-f501-2621-4a43-5f061eb47236"),
                          "3386ff85:f5012621:4a435f06:1eb47236")
 
-        with six.assertRaisesRegex(self, GLib.GError, r'malformed or invalid'):
+        with self.assertRaisesRegex(GLib.GError, r'malformed or invalid'):
             BlockDev.md_get_md_uuid("malformed-uuid-example")
 
 class MDTestCase(MDTest):
@@ -482,7 +481,7 @@ class MDTestNameNodeBijection(MDTestCase):
         with self.assertRaises(GLib.GError):
             node = BlockDev.md_node_from_name("made_up_md")
 
-        with six.assertRaisesRegex(self, GLib.GError, r'No name'):
+        with self.assertRaisesRegex(GLib.GError, r'No name'):
             BlockDev.md_name_from_node("no_such_node")
 
         succ = BlockDev.md_deactivate("bd_test_md");

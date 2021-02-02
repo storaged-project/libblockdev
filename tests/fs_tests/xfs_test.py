@@ -1,5 +1,4 @@
 import tempfile
-import six
 
 from .fs_test import FSTestCase, mounted, check_output
 
@@ -43,33 +42,33 @@ class XfsTestAvailability(XfsTestCase):
 
         # now try without mkfs.xfs
         with utils.fake_path(all_but="mkfs.xfs"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'mkfs.xfs' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'mkfs.xfs' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.XFS, BlockDev.FSTechMode.MKFS)
 
         # now try without xfs_db
         with utils.fake_path(all_but="xfs_db"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'xfs_db' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'xfs_db' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.XFS, BlockDev.FSTechMode.CHECK)
 
         # now try without xfs_repair
         with utils.fake_path(all_but="xfs_repair"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'xfs_repair' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'xfs_repair' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.XFS, BlockDev.FSTechMode.REPAIR)
 
         # now try without xfs_admin
         with utils.fake_path(all_but="xfs_admin"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'xfs_admin' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'xfs_admin' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.XFS, BlockDev.FSTechMode.QUERY)
 
-            with six.assertRaisesRegex(self, GLib.GError, "The 'xfs_admin' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'xfs_admin' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.XFS, BlockDev.FSTechMode.SET_LABEL)
 
-            with six.assertRaisesRegex(self, GLib.GError, "The 'xfs_admin' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'xfs_admin' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.XFS, BlockDev.FSTechMode.SET_UUID)
 
         # now try without xfs_growfs
         with utils.fake_path(all_but="xfs_growfs"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'xfs_growfs' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'xfs_growfs' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.XFS, BlockDev.FSTechMode.RESIZE)
 
 
@@ -172,7 +171,7 @@ class XfsGetInfo(XfsTestCase):
         succ = BlockDev.fs_xfs_mkfs(self.loop_dev, None)
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, "not mounted"):
+        with self.assertRaisesRegex(GLib.GError, "not mounted"):
             fi = BlockDev.fs_xfs_get_info(self.loop_dev)
 
         with mounted(self.loop_dev, self.mount_dir):
@@ -221,10 +220,10 @@ class XfsSetLabel(XfsTestCase):
         succ = BlockDev.fs_xfs_check_label("TEST_LABEL")
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, "at most 12 characters long."):
+        with self.assertRaisesRegex(GLib.GError, "at most 12 characters long."):
             BlockDev.fs_xfs_check_label(13 * "a")
 
-        with six.assertRaisesRegex(self, GLib.GError, "cannot contain spaces"):
+        with self.assertRaisesRegex(GLib.GError, "cannot contain spaces"):
             BlockDev.fs_xfs_check_label("TEST LABEL")
 
 
@@ -342,5 +341,5 @@ class XfsSetUUID(XfsTestCase):
         succ = BlockDev.fs_xfs_check_uuid(self.test_uuid.upper())
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, "not a valid RFC-4122 UUID"):
+        with self.assertRaisesRegex(GLib.GError, "not a valid RFC-4122 UUID"):
             BlockDev.fs_xfs_check_uuid("aaaaaaa")

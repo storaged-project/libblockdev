@@ -1,5 +1,4 @@
 import tempfile
-import six
 
 from .fs_test import FSTestCase, mounted
 
@@ -37,7 +36,7 @@ class VfatTestAvailability(VfatTestCase):
                                               BlockDev.FSTechMode.RESIZE)
         self.assertTrue(available)
 
-        with six.assertRaisesRegex(self, GLib.GError, "doesn't support setting UUID"):
+        with self.assertRaisesRegex(GLib.GError, "doesn't support setting UUID"):
             BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.SET_UUID)
 
         BlockDev.switch_init_checks(False)
@@ -45,28 +44,28 @@ class VfatTestAvailability(VfatTestCase):
 
         # now try without mkfs.vfat
         with utils.fake_path(all_but="mkfs.vfat"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'mkfs.vfat' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'mkfs.vfat' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.MKFS)
 
         # now try without fsck.vfat
         with utils.fake_path(all_but="fsck.vfat"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'fsck.vfat' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'fsck.vfat' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.CHECK)
 
-            with six.assertRaisesRegex(self, GLib.GError, "The 'fsck.vfat' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'fsck.vfat' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.REPAIR)
 
-            with six.assertRaisesRegex(self, GLib.GError, "The 'fsck.vfat' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'fsck.vfat' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.QUERY)
 
         # now try without fatlabel
         with utils.fake_path(all_but="fatlabel"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'fatlabel' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'fatlabel' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.SET_LABEL)
 
         # now try without vfat-resize
         with utils.fake_path(all_but="vfat-resize"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'vfat-resize' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'vfat-resize' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.RESIZE)
 
 
@@ -206,7 +205,7 @@ class VfatSetLabel(VfatTestCase):
         succ = BlockDev.fs_vfat_check_label("TEST_LABEL")
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, "at most 11 characters long."):
+        with self.assertRaisesRegex(GLib.GError, "at most 11 characters long."):
             BlockDev.fs_vfat_check_label(12 * "a")
 
 

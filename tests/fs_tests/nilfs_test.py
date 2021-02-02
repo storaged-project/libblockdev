@@ -1,5 +1,4 @@
 import tempfile
-import six
 
 from .fs_test import FSTestCase, mounted
 
@@ -39,10 +38,10 @@ class NILFS2TestAvailability(NILFS2TestCase):
                                               BlockDev.FSTechMode.SET_UUID)
         self.assertTrue(available)
 
-        with six.assertRaisesRegex(self, GLib.GError, "doesn't support filesystem check"):
+        with self.assertRaisesRegex(GLib.GError, "doesn't support filesystem check"):
             BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2, BlockDev.FSTechMode.CHECK)
 
-        with six.assertRaisesRegex(self, GLib.GError, "doesn't support filesystem repair"):
+        with self.assertRaisesRegex(GLib.GError, "doesn't support filesystem repair"):
             BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2, BlockDev.FSTechMode.REPAIR)
 
         BlockDev.switch_init_checks(False)
@@ -50,20 +49,20 @@ class NILFS2TestAvailability(NILFS2TestCase):
 
         # now try without mkfs.nilfs2
         with utils.fake_path(all_but="mkfs.nilfs2"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'mkfs.nilfs2' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'mkfs.nilfs2' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2, BlockDev.FSTechMode.MKFS)
 
         # now try without nilfs-tune
         with utils.fake_path(all_but="nilfs-tune"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'nilfs-tune' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'nilfs-tune' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2, BlockDev.FSTechMode.QUERY)
 
-            with six.assertRaisesRegex(self, GLib.GError, "The 'nilfs-tune' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'nilfs-tune' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2, BlockDev.FSTechMode.SET_LABEL)
 
         # now try without nilfs-resize
         with utils.fake_path(all_but="nilfs-resize"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'nilfs-resize' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'nilfs-resize' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2, BlockDev.FSTechMode.RESIZE)
 
 
@@ -181,7 +180,7 @@ class NILFS2SetLabel(NILFS2TestCase):
         succ = BlockDev.fs_nilfs2_check_label("test_label")
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, "at most 80 characters long."):
+        with self.assertRaisesRegex(GLib.GError, "at most 80 characters long."):
             BlockDev.fs_nilfs2_check_label(81 * "a")
 
 
@@ -192,7 +191,7 @@ class NILFS2Resize(NILFS2TestCase):
         succ = BlockDev.fs_nilfs2_mkfs(self.loop_dev, None)
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, "is not currently mounted"):
+        with self.assertRaisesRegex(GLib.GError, "is not currently mounted"):
             BlockDev.fs_nilfs2_resize(self.loop_dev, 100 * 1024**2)
 
         with mounted(self.loop_dev, self.mount_dir):
@@ -240,5 +239,5 @@ class NILFS2SetUUID(NILFS2TestCase):
         succ = BlockDev.fs_nilfs2_check_uuid(self.test_uuid)
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, "not a valid RFC-4122 UUID"):
+        with self.assertRaisesRegex(GLib.GError, "not a valid RFC-4122 UUID"):
             BlockDev.fs_nilfs2_check_uuid("aaaaaaa")

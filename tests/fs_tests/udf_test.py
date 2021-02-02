@@ -1,5 +1,4 @@
 import tempfile
-import six
 
 from .fs_test import FSTestCase, mounted
 
@@ -220,11 +219,11 @@ class UdfSetUUID(UdfTestCase):
         succ = BlockDev.fs_udf_check_uuid(self.test_uuid)
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, "16 characters long"):
+        with self.assertRaisesRegex(GLib.GError, "16 characters long"):
             BlockDev.fs_udf_check_uuid(9 * "a")
 
-        with six.assertRaisesRegex(self, GLib.GError, "must be a lowercase hexadecimal number"):
+        with self.assertRaisesRegex(GLib.GError, "must be a lowercase hexadecimal number"):
             BlockDev.fs_udf_check_uuid(16 * "z")
 
-        with six.assertRaisesRegex(self, GLib.GError, "must be a lowercase hexadecimal number"):
+        with self.assertRaisesRegex(GLib.GError, "must be a lowercase hexadecimal number"):
             BlockDev.fs_udf_check_uuid(self.test_uuid.upper())

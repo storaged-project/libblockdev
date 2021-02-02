@@ -2,7 +2,6 @@ from __future__ import division
 
 import unittest
 import os
-import six
 import re
 import time
 
@@ -269,7 +268,7 @@ class BtrfsTestGetDefaultSubvolumeID(BtrfsTestCase):
         self.assertTrue(succ)
 
         # not mounted yet, should fail
-        with six.assertRaisesRegex(self, GLib.GError, r".*(can't|cannot) access.*"):
+        with self.assertRaisesRegex(GLib.GError, r".*(can't|cannot) access.*"):
             ret = BlockDev.btrfs_get_default_subvolume_id(TEST_MNT)
 
         mount(self.loop_dev, TEST_MNT)
