@@ -42,9 +42,9 @@
   </para>
 
   <para>
-    <literal>bd_crypto_luks_resize_luks2</literal> and <literal>bd_crypto_luks_resize_luks2_blob</literal> have been removed, use
-    <literal>bd_crypto_luks_resize</literal> and <literal>bd_crypto_luks_resize_blob</literal> instead. These functions have been changed
-    and now have new parameters to match functionality of the removed <literal>_luks2</literal> functions.
+    <literal>bd_crypto_luks_resize_luks2</literal>, <literal>bd_crypto_luks_resize_luks2_blob</literal> and  <literal>bd_crypto_luks_resize_blob</literal>
+    have been removed, use <literal>bd_crypto_luks_resize</literal> instead. This functions has been changed to match functionality of the
+     removed <literal>_luks2</literal> and <literal>_blob</literal> functions.
   </para>
 
   <para>

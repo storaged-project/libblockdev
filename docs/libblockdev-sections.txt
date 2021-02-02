@@ -88,8 +88,6 @@ bd_crypto_luks_add_key
 bd_crypto_luks_remove_key
 bd_crypto_luks_change_key
 bd_crypto_luks_resize
-bd_crypto_luks_resize_luks2
-bd_crypto_luks_resize_luks2_blob
 bd_crypto_luks_suspend
 bd_crypto_luks_resume_blob
 bd_crypto_luks_resume
