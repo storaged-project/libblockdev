@@ -308,6 +308,20 @@ def crypto_luks_remove_key(device, pass_=None, key_file=None):
     return _crypto_luks_remove_key(device, pw, key_file)
 __all__.append("crypto_luks_remove_key")
 
+_crypto_luks_change_key = BlockDev.crypto_luks_change_key
+@override(BlockDev.crypto_luks_change_key)
+def crypto_luks_change_key(device, pass_, npass):
+    if pass_:
+        pw = [ord(c) for c in pass_]
+    else:
+        pw = None
+    if npass:
+        npw = [ord(c) for c in npass]
+    else:
+        npw = None
+    return _crypto_luks_change_key(device, pw, npw)
+__all__.append("crypto_luks_change_key")
+
 _crypto_escrow_device = BlockDev.crypto_escrow_device
 @override(BlockDev.crypto_escrow_device)
 def crypto_escrow_device(device, passphrase, cert_data, directory, backup_passphrase=None):

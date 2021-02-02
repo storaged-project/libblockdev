@@ -489,9 +489,6 @@ class CryptoTestChangeKey(CryptoTestCase):
         succ = BlockDev.crypto_luks_change_key(self.loop_dev, PASSWD, PASSWD2)
         self.assertTrue(succ)
 
-        succ = BlockDev.crypto_luks_change_key_blob(self.loop_dev, [ord(c) for c in PASSWD2], [ord(c) for c in PASSWD3])
-        self.assertTrue(succ)
-
     @tag_test(TestTags.SLOW)
     def test_luks_change_key(self):
         self._change_key(self._luks_format)

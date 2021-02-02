@@ -1323,7 +1323,7 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, const guint8 *pass_data
 }
 
 /**
- * bd_crypto_luks_change_key_blob:
+ * bd_crypto_luks_change_key:
  * @device: device to change key of
  * @pass_data: (array length=data_len): a passphrase for the new LUKS device (may contain arbitrary binary data)
  * @data_len: length of the @pass_data buffer
@@ -1335,7 +1335,7 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, const guint8 *pass_data
  *
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_ADD_KEY&%BD_CRYPTO_TECH_MODE_REMOVE_KEY
  */
-gboolean bd_crypto_luks_change_key_blob (const gchar *device, const guint8 *pass_data, gsize data_len, const guint8 *npass_data, gsize ndata_len, GError **error) {
+gboolean bd_crypto_luks_change_key (const gchar *device, const guint8 *pass_data, gsize data_len, const guint8 *npass_data, gsize ndata_len, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
     guint64 progress_id = 0;
@@ -1380,23 +1380,6 @@ gboolean bd_crypto_luks_change_key_blob (const gchar *device, const guint8 *pass
     crypt_free (cd);
     bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
-}
-
-/**
- * bd_crypto_luks_change_key:
- * @device: device to change key of
- * @pass: old passphrase
- * @npass: new passphrase
- * @error: (out): place to store error (if any)
- *
- * Returns: whether the key was successfully changed or not
- *
- * No support for changing key files (yet).
- *
- * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_ADD_KEY&%BD_CRYPTO_TECH_MODE_REMOVE_KEY
- */
-gboolean bd_crypto_luks_change_key (const gchar *device, const gchar *pass, const gchar *npass, GError **error) {
-    return bd_crypto_luks_change_key_blob (device, (guint8*) pass, strlen (pass), (guint8*) npass, strlen (npass), error);
 }
 
 static gboolean luks_resize (const gchar *luks_device, guint64 size, const guint8 *pass_data, gsize data_len, const gchar *key_file, GError **error) {
