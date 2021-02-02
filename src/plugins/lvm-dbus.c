@@ -37,6 +37,14 @@
 #define THPOOL_MD_FACTOR_NEW (0.2)
 #define THPOOL_MD_FACTOR_EXISTS (1 / 6.0)
 
+#ifdef __LP64__
+/* 64bit system */
+#define MAX_LV_SIZE (8 EiB)
+#else
+/* 32bit system */
+#define MAX_LV_SIZE (16 TiB)
+#endif
+
 static GMutex global_config_lock;
 static gchar *global_config_str = NULL;
 
@@ -1348,7 +1356,7 @@ guint64 *bd_lvm_get_supported_pe_sizes (GError **error UNUSED) {
  * Tech category: %BD_LVM_TECH_CALCS no mode (it is ignored)
  */
 guint64 bd_lvm_get_max_lv_size (GError **error UNUSED) {
-    return BD_LVM_MAX_LV_SIZE;
+    return MAX_LV_SIZE;
 }
 
 /**

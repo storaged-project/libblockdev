@@ -5,16 +5,6 @@
 #ifndef BD_LVM_API
 #define BD_LVM_API
 
-/**
- * BD_LVM_MAX_LV_SIZE:
- *
- * Deprecated: 2.23: Use bd_lvm_get_max_lv_size() function instead.
- */
-/* 8 EiB (valid only for 64bit devices but we can't have architecture
-   specific constant here) */
-#define BD_LVM_MAX_LV_SIZE G_GUINT64_CONSTANT (9223372036854775808ULL)
-
-
 #define BD_LVM_DEFAULT_PE_START G_GUINT64_CONSTANT (1048576ULL) // 1 MiB
 #define BD_LVM_DEFAULT_PE_SIZE G_GUINT64_CONSTANT (4194304ULL) // 4 MiB
 #define BD_LVM_MIN_PE_SIZE G_GUINT64_CONSTANT (1024ULL) // 1 KiB

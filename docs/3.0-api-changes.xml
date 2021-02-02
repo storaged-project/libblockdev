@@ -15,6 +15,10 @@
     <literal>bd_lvm_metadadata_lv_name()</literal> has been removed, use <literal>metadata_lv</literal> from <link linkend="BDLVMLVdata">BDLVMLVdata</link> instead.
   </para>
 
+  <para>
+    <literal>BD_LVM_MAX_LV_SIZE</literal> constant has been removed, use <literal>bd_lvm_get_max_lv_size()</literal> instead.
+  </para>
+
   </simplesect>
 
   <simplesect><title>VDO plugin</title>
