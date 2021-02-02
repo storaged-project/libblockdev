@@ -67,5 +67,10 @@
     been changed to match functionality of the removed <literal>_blob</literal> function.
   </para>
 
+  <para>
+    <literal>bd_crypto_resume_blob</literal> has been removed, use <literal>bd_crypto_resume</literal> instead. This functions has
+    been changed to match functionality of the removed <literal>_blob</literal> function.
+  </para>
+
   </simplesect>
 </chapter>

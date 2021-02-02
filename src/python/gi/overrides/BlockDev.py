@@ -335,7 +335,11 @@ __all__.append("crypto_escrow_device")
 _crypto_luks_resume = BlockDev.crypto_luks_resume
 @override(BlockDev.crypto_luks_resume)
 def crypto_luks_resume(device, passphrase=None, key_file=None):
-    return _crypto_luks_resume(device, passphrase, key_file)
+    if passphrase:
+        pw = [ord(c) for c in passphrase]
+    else:
+        pw = None
+    return _crypto_luks_resume(device, pw, key_file)
 __all__.append("crypto_luks_resume")
 
 _crypto_tc_open = BlockDev.crypto_tc_open_full

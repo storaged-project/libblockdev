@@ -89,7 +89,6 @@ bd_crypto_luks_remove_key
 bd_crypto_luks_change_key
 bd_crypto_luks_resize
 bd_crypto_luks_suspend
-bd_crypto_luks_resume_blob
 bd_crypto_luks_resume
 bd_crypto_luks_kill_slot
 bd_crypto_luks_header_backup

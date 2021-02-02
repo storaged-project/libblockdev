@@ -690,22 +690,10 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, const gu
 gboolean bd_crypto_luks_suspend (const gchar *luks_device, GError **error);
 
 /**
- * bd_crypto_luks_resume_blob:
- * @luks_device: LUKS device to resume
- * @pass_data: (array length=data_len): a passphrase for the LUKS device (may contain arbitrary binary data)
- * @data_len: length of the @pass_data buffer
- * @error: (out): place to store error (if any)
- *
- * Returns: whether the given @luks_device was successfully resumed or not
- *
- * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_SUSPEND_RESUME
- */
-gboolean bd_crypto_luks_resume_blob (const gchar *luks_device, const guint8 *pass_data, gsize data_len, GError **error);
-
-/**
  * bd_crypto_luks_resume:
  * @luks_device: LUKS device to resume
- * @passphrase: (allow-none): passphrase to resume the @device or %NULL
+ * @pass_data: (array length=data_len) (allow-none): a passphrase for the LUKS device (may contain arbitrary binary data)
+ * @data_len: length of the @pass_data buffer
  * @key_file: (allow-none): key file path to use for resuming the @device or %NULL
  * @error: (out): place to store error (if any)
  *
@@ -713,7 +701,7 @@ gboolean bd_crypto_luks_resume_blob (const gchar *luks_device, const guint8 *pas
  *
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_SUSPEND_RESUME
  */
-gboolean bd_crypto_luks_resume (const gchar *luks_device, const gchar *passphrase, const gchar *key_file, GError **error);
+gboolean bd_crypto_luks_resume (const gchar *luks_device, const guint8 *pass_data, gsize data_len, const gchar *key_file, GError **error);
 
 /**
  * bd_crypto_luks_kill_slot:

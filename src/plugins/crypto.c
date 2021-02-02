@@ -1525,7 +1525,19 @@ gboolean bd_crypto_luks_suspend (const gchar *luks_device, GError **error) {
     return TRUE;
 }
 
-static gboolean luks_resume (const gchar *luks_device, const guint8 *pass_data, gsize data_len, const gchar *key_file, GError **error) {
+/**
+ * bd_crypto_luks_resume:
+ * @luks_device: LUKS device to resume
+ * @pass_data: (array length=data_len) (allow-none): a passphrase for the LUKS device (may contain arbitrary binary data)
+ * @data_len: length of the @pass_data buffer
+ * @key_file: (allow-none): key file path to use for resuming the @device or %NULL
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the given @luks_device was successfully resumed or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_SUSPEND_RESUME
+ */
+gboolean bd_crypto_luks_resume (const gchar *luks_device, const guint8 *pass_data, gsize data_len, const gchar *key_file, GError **error) {
     struct crypt_device *cd = NULL;
     gboolean success = FALSE;
     gchar *key_buffer = NULL;
@@ -1593,36 +1605,6 @@ static gboolean luks_resume (const gchar *luks_device, const guint8 *pass_data, 
     crypt_free (cd);
     bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
-}
-
-/**
- * bd_crypto_luks_resume_blob:
- * @luks_device: LUKS device to resume
- * @pass_data: (array length=data_len): a passphrase for the LUKS device (may contain arbitrary binary data)
- * @data_len: length of the @pass_data buffer
- * @error: (out): place to store error (if any)
- *
- * Returns: whether the given @luks_device was successfully resumed or not
- *
- * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_SUSPEND_RESUME
- */
-gboolean bd_crypto_luks_resume_blob (const gchar *luks_device, const guint8 *pass_data, gsize data_len, GError **error) {
-    return luks_resume (luks_device, pass_data, data_len, NULL, error);
-}
-
-/**
- * bd_crypto_luks_resume:
- * @luks_device: LUKS device to resume
- * @passphrase: (allow-none): passphrase to resume the @device or %NULL
- * @key_file: (allow-none): key file path to use for resuming the @device or %NULL
- * @error: (out): place to store error (if any)
- *
- * Returns: whether the give @luks_device was successfully resumed or not
- *
- * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_SUSPEND_RESUME
- */
-gboolean bd_crypto_luks_resume (const gchar *luks_device, const gchar *passphrase, const gchar *key_file, GError **error) {
-    return luks_resume (luks_device, (guint8*) passphrase, passphrase ? strlen (passphrase) : 0, key_file, error);
 }
 
 /**
