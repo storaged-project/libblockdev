@@ -672,18 +672,3 @@ const guint64 *bd_nvdimm_namespace_get_supported_sector_sizes (BDNVDIMMNamespace
             return NULL;
     }
 }
-
-/**
- * bd_nvdimm_namepace_get_supported_sector_sizes:
- * @mode: namespace mode
- * @error: (out): place to store error if any
- *
- * Returns: (transfer none) (array zero-terminated=1): list of supported sector sizes for @mode
- *
- * Tech category: %BD_NVDIMM_TECH_NAMESPACE-%BD_NVDIMM_TECH_MODE_QUERY
- *
- * Deprecated: 2.25: Use %bd_nvdimm_namespace_get_supported_sector_sizes integration instead.
- */
-const guint64 *bd_nvdimm_namepace_get_supported_sector_sizes (BDNVDIMMNamespaceMode mode, GError **error) {
-    return bd_nvdimm_namespace_get_supported_sector_sizes (mode, error);
-}

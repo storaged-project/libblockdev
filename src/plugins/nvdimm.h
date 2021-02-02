@@ -77,7 +77,6 @@ BDNVDIMMNamespaceInfo** bd_nvdimm_list_namespaces (const gchar *bus, const gchar
 
 gboolean bd_nvdimm_namespace_reconfigure (const gchar* namespace, BDNVDIMMNamespaceMode mode, gboolean force, const BDExtraArg **extra, GError** error);
 
-const guint64 *bd_nvdimm_namepace_get_supported_sector_sizes (BDNVDIMMNamespaceMode mode, GError **error);
 const guint64 *bd_nvdimm_namespace_get_supported_sector_sizes (BDNVDIMMNamespaceMode mode, GError **error);
 
 #endif  /* BD_CRYPTO */
