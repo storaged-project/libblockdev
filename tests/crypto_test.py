@@ -570,28 +570,6 @@ class CryptoTestLuksStatus(CryptoTestCase):
     def test_luks2_status(self):
         self._luks_status(self._luks2_format)
 
-class CryptoTestGetUUID(CryptoTestCase):
-    def _get_uuid(self, create_fn):
-        """Verify that getting LUKS device UUID works"""
-
-        succ = create_fn(self.loop_dev, PASSWD, None)
-        self.assertTrue(succ)
-
-        uuid = BlockDev.crypto_luks_uuid(self.loop_dev)
-        self.assertTrue(uuid)
-
-        with self.assertRaises(GLib.GError):
-            uuid = BlockDev.crypto_luks_uuid(self.loop_dev2)
-
-    @tag_test(TestTags.SLOW)
-    def test_luks_get_uuid(self):
-        self._get_uuid(self._luks_format)
-
-    @tag_test(TestTags.SLOW)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
-    def test_luks2_get_uuid(self):
-        self._get_uuid(self._luks2_format)
-
 class CryptoTestGetMetadataSize(CryptoTestCase):
 
     @tag_test(TestTags.SLOW)
@@ -717,7 +695,8 @@ class CryptoTestEscrow(CryptoTestCase):
         self.assertTrue(succ)
 
         # Find the escrow packet
-        escrow_packet_file = '%s/%s-escrow' % (escrow_dir, BlockDev.crypto_luks_uuid(self.loop_dev))
+        info = BlockDev.crypto_luks_info(self.loop_dev)
+        escrow_packet_file = '%s/%s-escrow' % (escrow_dir, info.uuid)
         self.assertTrue(os.path.isfile(escrow_packet_file))
 
         # Use the volume_key utility (see note in setUp about why not python)
@@ -760,7 +739,8 @@ class CryptoTestEscrow(CryptoTestCase):
         self.assertTrue(succ)
 
         # Find the backup passphrase
-        escrow_backup_passphrase = "%s/%s-escrow-backup-passphrase" % (escrow_dir, BlockDev.crypto_luks_uuid(self.loop_dev))
+        info = BlockDev.crypto_luks_info(self.loop_dev)
+        escrow_backup_passphrase = "%s/%s-escrow-backup-passphrase" % (escrow_dir, info.uuid)
         self.assertTrue(os.path.isfile(escrow_backup_passphrase))
 
         # Check that the encrypted file contains what we put in
