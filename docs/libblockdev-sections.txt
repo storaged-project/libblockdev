@@ -261,7 +261,6 @@ bd_loop_is_tech_avail
 bd_lvm_check_deps
 bd_lvm_close
 bd_lvm_init
-BD_LVM_MAX_LV_SIZE
 BD_LVM_DEFAULT_PE_SIZE
 BD_LVM_DEFAULT_PE_START
 BD_LVM_MIN_PE_SIZE
@@ -775,7 +774,6 @@ bd_nvdimm_namespace_disable
 bd_nvdimm_namespace_info
 bd_nvdimm_list_namespaces
 bd_nvdimm_namespace_reconfigure
-bd_nvdimm_namepace_get_supported_sector_sizes
 bd_nvdimm_namespace_get_supported_sector_sizes
 bd_nvdimm_namespace_info_copy
 bd_nvdimm_namespace_info_free
