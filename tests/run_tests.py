@@ -7,7 +7,6 @@ import datetime
 import os
 import pdb
 import re
-import six
 import subprocess
 import sys
 import traceback
@@ -46,9 +45,7 @@ def _get_test_tags(test):
 
     # test failed to load, usually some ImportError or something really broken
     # in the test file, just return empty list and let it fail
-    # with python2 the loader will raise an exception directly without returning
-    # a "fake" FailedTest test case
-    if six.PY3 and isinstance(test, unittest.loader._FailedTest):
+    if isinstance(test, unittest.loader._FailedTest):
         return tags
 
     test_fn = getattr(test, test._testMethodName)
@@ -281,8 +278,7 @@ if __name__ == '__main__':
             os.environ['PATH'] += ':' + os.path.join(projdir, 'tools')
 
             try:
-                pyver = 'python3' if six.PY3 else 'python'
-                os.execv(sys.executable, [pyver] + sys.argv)
+                os.execv(sys.executable, ['python3'] + sys.argv)
             except OSError as e:
                 print('Failed re-exec with a new LD_LIBRARY_PATH and GI_TYPELIB_PATH: %s' % str(e))
                 sys.exit(1)

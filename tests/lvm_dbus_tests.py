@@ -3,7 +3,6 @@ import unittest
 import os
 import math
 import overrides_hack
-import six
 import re
 import shutil
 import subprocess
@@ -713,7 +712,7 @@ class LvmTestLVcreateRemove(LvmPVVGLVTestCase):
         self.assertTrue(succ)
 
         # not enough space (only one PV)
-        with six.assertRaisesRegex(self, GLib.GError, "Insufficient free space"):
+        with self.assertRaisesRegex(GLib.GError, "Insufficient free space"):
             succ = BlockDev.lvm_lvcreate("testVG", "testLV", 1048 * 1024**2, None, [self.loop_dev], None)
 
         # enough space (two PVs)
@@ -1638,7 +1637,7 @@ class LVMTechTest(LVMTestCase):
         self.assertEqual(ret, 0)
 
         # only query is supported with calcs
-        with six.assertRaisesRegex(self, GLib.GError, "Only 'query' supported for thin calculations"):
+        with self.assertRaisesRegex(GLib.GError, "Only 'query' supported for thin calculations"):
             BlockDev.lvm_is_tech_avail(BlockDev.LVMTech.THIN_CALCS, BlockDev.LVMTechMode.CREATE)
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")

@@ -1,5 +1,4 @@
 import tempfile
-import six
 
 from .fs_test import FSTestCase, mounted
 
@@ -163,10 +162,10 @@ class BtrfsSetLabel(BtrfsTestCase):
         succ = BlockDev.fs_btrfs_check_label("test_label")
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, "at most 256 characters long."):
+        with self.assertRaisesRegex(GLib.GError, "at most 256 characters long."):
             BlockDev.fs_btrfs_check_label(257 * "a")
 
-        with six.assertRaisesRegex(self, GLib.GError, "cannot contain new lines."):
+        with self.assertRaisesRegex(GLib.GError, "cannot contain new lines."):
             BlockDev.fs_btrfs_check_label("a\nb")
 
 
@@ -199,7 +198,7 @@ class BtrfsSetUUID(BtrfsTestCase):
         succ = BlockDev.fs_btrfs_check_uuid(self.test_uuid)
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, "not a valid RFC-4122 UUID"):
+        with self.assertRaisesRegex(GLib.GError, "not a valid RFC-4122 UUID"):
             BlockDev.fs_btrfs_check_uuid("aaaaaaa")
 
 
@@ -254,9 +253,9 @@ class BtrfsMultiDevice(BtrfsTestCase):
         self.assertEqual(ret, 0)
 
         with mounted(self.loop_dev, self.mount_dir):
-            with six.assertRaisesRegex(self, GLib.GError, "Filesystem plugin is not suitable for multidevice Btrfs volumes"):
+            with self.assertRaisesRegex(GLib.GError, "Filesystem plugin is not suitable for multidevice Btrfs volumes"):
                     BlockDev.fs_btrfs_get_info(self.mount_dir)
 
         with mounted(self.loop_dev, self.mount_dir):
-            with six.assertRaisesRegex(self, GLib.GError, "Filesystem plugin is not suitable for multidevice Btrfs volumes"):
+            with self.assertRaisesRegex(GLib.GError, "Filesystem plugin is not suitable for multidevice Btrfs volumes"):
                 BlockDev.fs_btrfs_resize(self.mount_dir, 0)

@@ -1,4 +1,3 @@
-%define with_python2 @WITH_PYTHON2@
 %define with_python3 @WITH_PYTHON3@
 %define with_gtk_doc @WITH_GTK_DOC@
 %define with_bcache @WITH_BCACHE@
@@ -19,12 +18,6 @@
 %define with_escrow @WITH_ESCROW@
 %define with_dmraid @WITH_DMRAID@
 %define with_tools @WITH_TOOLS@
-
-# python2 is not available on RHEL > 7 and not needed on Fedora > 29
-%if 0%{?rhel} > 7 || 0%{?fedora} > 29 || %{with_python2} == 0
-%define with_python2 0
-%define python2_copts --without-python2
-%endif
 
 # python3 is not available on older RHEL
 %if (! 0%{?fedora} && 0%{?rhel} <= 7) || %{with_python3} == 0
@@ -109,7 +102,7 @@
 %define gi_copts --disable-introspection
 %endif
 
-%define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?tools_copts} %{?gi_copts}
+%define configure_opts %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?tools_copts} %{?gi_copts}
 
 Name:        libblockdev
 Version:     2.99
@@ -123,12 +116,8 @@ BuildRequires: glib2-devel
 %if %{with_gi}
 BuildRequires: gobject-introspection-devel
 %endif
-%if %{with_python2}
-BuildRequires: python2-devel
-%else
 # Obsolete the python2 subpackage to avoid errors on upgrade
 Obsoletes:     python2-blockdev < %{version}-%{release}
-%endif
 %if %{with_python3}
 BuildRequires: python3-devel
 %endif
@@ -141,10 +130,6 @@ BuildRequires: autoconf-archive
 # Needed for the escrow tests in tests/crypto_test.py, but not used to build
 # BuildRequires: volume_key
 # BuildRequires: nss-tools
-
-# Needed for python 2 vs. 3 compatibility in the tests, but not used to build
-# BuildRequires: python2-six
-# BuildRequires: python3-six
 
 %description
 The libblockdev is a C library with GObject introspection support that can be
@@ -163,25 +148,6 @@ Requires: glib2-devel
 %description devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev library.
-
-%if %{with_python2}
-%package -n python2-blockdev
-Summary:     Python2 gobject-introspection bindings for libblockdev
-Requires: %{name}%{?_isa} = %{version}-%{release}
-
-%if 0%{?fedora} <= 26 || 0%{?rhel} <= 7
-Requires: pygobject3-base
-Requires: python-bytesize
-%else
-Requires: python2-gobject-base
-Requires: python2-bytesize
-%endif
-%{?python_provide:%python_provide python2-blockdev}
-
-%description -n python2-blockdev
-This package contains enhancements to the gobject-introspection bindings for
-libblockdev in Python2.
-%endif
 
 %if %{with_python3}
 %package -n python3-blockdev
@@ -724,11 +690,6 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %endif
 %if %{with_gi}
 %{_datadir}/gir*/BlockDev*.gir
-%endif
-
-%if %{with_python2}
-%files -n python2-blockdev
-%{python2_sitearch}/gi/overrides/*
 %endif
 
 %if %{with_python3}

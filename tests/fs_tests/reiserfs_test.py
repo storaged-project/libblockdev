@@ -1,5 +1,4 @@
 import tempfile
-import six
 
 from .fs_test import FSTestCase, mounted
 
@@ -46,33 +45,33 @@ class ResiserFSTestAvailability(ReiserFSTestCase):
 
         # now try without mkreiserfs
         with utils.fake_path(all_but="mkreiserfs"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'mkreiserfs' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'mkreiserfs' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.REISERFS, BlockDev.FSTechMode.MKFS)
 
         # now try without reiserfsck
         with utils.fake_path(all_but="reiserfsck"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'reiserfsck' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'reiserfsck' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.REISERFS, BlockDev.FSTechMode.CHECK)
 
-            with six.assertRaisesRegex(self, GLib.GError, "The 'reiserfsck' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'reiserfsck' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.REISERFS, BlockDev.FSTechMode.REPAIR)
 
         # now try without debugreiserfs
         with utils.fake_path(all_but="debugreiserfs"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'debugreiserfs' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'debugreiserfs' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.REISERFS, BlockDev.FSTechMode.QUERY)
 
         # now try without resize_reiserfs
         with utils.fake_path(all_but="resize_reiserfs"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'resize_reiserfs' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'resize_reiserfs' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.REISERFS, BlockDev.FSTechMode.RESIZE)
 
         # now try without reiserfstune
         with utils.fake_path(all_but="reiserfstune"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'reiserfstune' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'reiserfstune' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.REISERFS, BlockDev.FSTechMode.SET_LABEL)
 
-            with six.assertRaisesRegex(self, GLib.GError, "The 'reiserfstune' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'reiserfstune' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.REISERFS, BlockDev.FSTechMode.SET_UUID)
 
 
@@ -212,7 +211,7 @@ class ReiserFSSetLabel(ReiserFSTestCase):
         succ = BlockDev.fs_reiserfs_check_label("test_label")
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, "at most 16 characters long."):
+        with self.assertRaisesRegex(GLib.GError, "at most 16 characters long."):
             BlockDev.fs_reiserfs_check_label(17 * "a")
 
 
@@ -276,5 +275,5 @@ class ReiserFSSetUUID(ReiserFSTestCase):
         succ = BlockDev.fs_reiserfs_check_uuid(self.test_uuid)
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, "not a valid RFC-4122 UUID"):
+        with self.assertRaisesRegex(GLib.GError, "not a valid RFC-4122 UUID"):
             BlockDev.fs_reiserfs_check_uuid("aaaaaaa")

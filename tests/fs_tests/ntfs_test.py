@@ -1,5 +1,4 @@
 import tempfile
-import six
 import overrides_hack
 
 from .fs_test import FSTestCase, mounted
@@ -47,33 +46,33 @@ class NTFSTestAvailability(NTFSTestCase):
 
         # now try without mkntfs
         with utils.fake_path(all_but="mkntfs"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'mkntfs' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'mkntfs' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS, BlockDev.FSTechMode.MKFS)
 
         # now try without ntfsfix
         with utils.fake_path(all_but="ntfsfix"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'ntfsfix' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'ntfsfix' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS, BlockDev.FSTechMode.CHECK)
 
-            with six.assertRaisesRegex(self, GLib.GError, "The 'ntfsfix' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'ntfsfix' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS, BlockDev.FSTechMode.REPAIR)
 
         # now try without ntfscluster
         with utils.fake_path(all_but="ntfscluster"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'ntfscluster' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'ntfscluster' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS, BlockDev.FSTechMode.QUERY)
 
         # now try without ntfsresize
         with utils.fake_path(all_but="ntfsresize"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'ntfsresize' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'ntfsresize' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS, BlockDev.FSTechMode.RESIZE)
 
         # now try without ntfslabel
         with utils.fake_path(all_but="ntfslabel"):
-            with six.assertRaisesRegex(self, GLib.GError, "The 'ntfslabel' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'ntfslabel' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS, BlockDev.FSTechMode.SET_LABEL)
 
-            with six.assertRaisesRegex(self, GLib.GError, "The 'ntfslabel' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'ntfslabel' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS, BlockDev.FSTechMode.SET_UUID)
 
 
@@ -210,7 +209,7 @@ class NTFSSetLabel(NTFSTestCase):
         succ = BlockDev.fs_ntfs_check_label("TEST_LABEL")
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, "at most 128 characters long."):
+        with self.assertRaisesRegex(GLib.GError, "at most 128 characters long."):
             BlockDev.fs_ntfs_check_label(129 * "a")
 
 
@@ -240,8 +239,8 @@ class NTFSSetUUID(NTFSTestCase):
         succ = BlockDev.fs_ntfs_check_uuid(self.test_uuid)
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, "8 or 16 characters long"):
+        with self.assertRaisesRegex(GLib.GError, "8 or 16 characters long"):
             BlockDev.fs_ntfs_check_uuid(9 * "a")
 
-        with six.assertRaisesRegex(self, GLib.GError, "must be a hexadecimal number"):
+        with self.assertRaisesRegex(GLib.GError, "must be a hexadecimal number"):
             BlockDev.fs_ntfs_check_uuid(16 * "z")

@@ -4,7 +4,6 @@ import tempfile
 import overrides_hack
 import shutil
 import subprocess
-import six
 import locale
 import re
 import tarfile
@@ -110,7 +109,7 @@ class CryptoTestGenerateBackupPassphrase(CryptoTestCase):
         exp = r"^([0-9A-Za-z./]{5}-){3}[0-9A-Za-z./]{5}$"
         for _i in range(100):
             bp = BlockDev.crypto_generate_backup_passphrase()
-            six.assertRegex(self, bp, exp)
+            self.assertRegex(bp, exp)
 
 class CryptoTestFormat(CryptoTestCase):
     @tag_test(TestTags.SLOW, TestTags.CORE)
@@ -309,7 +308,7 @@ class CryptoTestOpenClose(CryptoTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", None, None, False)
 
-        with six.assertRaisesRegex(self, GLib.GError, r"Incorrect passphrase"):
+        with self.assertRaisesRegex(GLib.GError, r"Incorrect passphrase"):
             BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", "wrong-passhprase", None, False)
 
         with self.assertRaises(GLib.GError):
@@ -451,7 +450,7 @@ class CryptoTestChangeKey(CryptoTestCase):
         succ = create_fn(self.loop_dev, PASSWD, None)
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, r"No keyslot with given passphrase found."):
+        with self.assertRaisesRegex(GLib.GError, r"No keyslot with given passphrase found."):
             BlockDev.crypto_luks_change_key(self.loop_dev, "wrong-passphrase", PASSWD2)
 
         succ = BlockDev.crypto_luks_change_key(self.loop_dev, PASSWD, PASSWD2)

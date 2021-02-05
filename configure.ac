@@ -78,22 +78,6 @@ else
   AM_CONDITIONAL(WITH_S390, false)
 fi
 
-AC_ARG_WITH([python2],
-    AS_HELP_STRING([--with-python2], [support python2 @<:@default=check@:>@]),
-    [],
-    [with_python2=check])
-
-AC_SUBST(WITH_PYTHON2, 0)
-if test "x$with_python2" != "xno"; then
-    AC_PATH_PROG([python2], [python2], [no])
-    AS_IF([test "x$python2" = "xno"],
-    [if test "x$with_python2" = "xyes"; then
-      LIBBLOCKDEV_SOFT_FAILURE([Python2 support requested, but python2 is not available])
-      fi],
-    [AC_SUBST(WITH_PYTHON2, 1)])
-fi
-AM_CONDITIONAL(WITH_PYTHON2, test "x$with_python2" != "xno" -a "x$python2" != "xno")
-
 AC_ARG_WITH([python3],
     AS_HELP_STRING([--with-python3], [support python3 @<:@default=check@:>@]),
     [],
@@ -277,12 +261,6 @@ AC_OUTPUT
 LIBBLOCKDEV_FAILURES
 
 
-if test "x$with_python2" != "xno" -a "x$python2" != "xno"; then
-  python2_info=yes
-else
-  python2_info=no
-fi
-
 if test "x$with_python3" != "xno" -a "x$python3" != "xno"; then
   python3_info=yes
 else
@@ -334,7 +312,6 @@ echo "
         Swap plugin:                ${with_swap}
 
         GObject introspection:      ${found_introspection}
-        Python 2 bindings:          ${python2_info}
         Python 3 bindings:          ${python3_info}
         tools:                      ${with_tools}
 "

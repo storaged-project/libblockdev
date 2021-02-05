@@ -2,7 +2,6 @@ import os
 import time
 import tempfile
 import re
-import six
 
 from distutils.version import LooseVersion
 
@@ -83,7 +82,7 @@ class TestGenericWipe(GenericTestCase):
         self.assertEqual(fs_type, b"")
 
         # try to wipe empty device
-        with six.assertRaisesRegex(self, GLib.GError, "No signature detected on the device"):
+        with self.assertRaisesRegex(GLib.GError, "No signature detected on the device"):
             BlockDev.fs_wipe(self.loop_dev, True)
 
 
@@ -474,7 +473,7 @@ class GenericCheck(GenericTestCase):
         if not self.f2fs_avail:
             self.skipTest("skipping F2FS: not available")
         if not self._check_fsck_f2fs_version():
-            with six.assertRaisesRegex(self, GLib.GError, "Too low version of fsck.f2fs. At least 1.11.0 required."):
+            with self.assertRaisesRegex(GLib.GError, "Too low version of fsck.f2fs. At least 1.11.0 required."):
                 self._test_generic_check(mkfs_function=BlockDev.fs_f2fs_mkfs)
         else:
             self._test_generic_check(mkfs_function=BlockDev.fs_f2fs_mkfs)
@@ -689,7 +688,7 @@ class GenericSetUUID(GenericTestCase):
         """Test generic set_uuid function with a exfat file system"""
         if not self.exfat_avail:
             self.skipTest("skipping exFAT: not available")
-        with six.assertRaisesRegex(self, GLib.GError, "Setting UUID of filesystem 'exfat' is not supported."):
+        with self.assertRaisesRegex(GLib.GError, "Setting UUID of filesystem 'exfat' is not supported."):
             # exfat doesn't support setting UUID
             self._test_generic_set_uuid(mkfs_function=BlockDev.fs_exfat_mkfs)
 
@@ -865,7 +864,7 @@ class GenericResize(GenericTestCase):
         if not self.f2fs_avail:
             self.skipTest("skipping F2FS: not available")
         if not self._can_resize_f2fs():
-            with six.assertRaisesRegex(self, GLib.GError, "Too low version of resize.f2fs. At least 1.12.0 required."):
+            with self.assertRaisesRegex(GLib.GError, "Too low version of resize.f2fs. At least 1.12.0 required."):
                 self._test_generic_resize(mkfs_function=BlockDev.fs_f2fs_mkfs)
         else:
             self._test_generic_resize(mkfs_function=BlockDev.fs_f2fs_mkfs)
@@ -894,7 +893,7 @@ class GenericResize(GenericTestCase):
         self.assertTrue(succ)
 
         # no resize support for exFAT
-        with six.assertRaisesRegex(self, GLib.GError, "Resizing filesystem 'exfat' is not supported."):
+        with self.assertRaisesRegex(GLib.GError, "Resizing filesystem 'exfat' is not supported."):
             BlockDev.fs_resize(self.loop_dev, 80 * 1024**2)
 
     def test_btrfs_generic_resize(self):
@@ -915,7 +914,7 @@ class GenericResize(GenericTestCase):
         self.assertTrue(succ)
 
         # no resize support for UDF
-        with six.assertRaisesRegex(self, GLib.GError, "Resizing filesystem 'udf' is not supported."):
+        with self.assertRaisesRegex(GLib.GError, "Resizing filesystem 'udf' is not supported."):
             BlockDev.fs_resize(self.loop_dev, 80 * 1024**2)
 
 
@@ -983,7 +982,7 @@ class GenericGetFreeSpace(GenericTestCase):
         succ = BlockDev.fs_udf_mkfs(self.loop_dev)
         self.assertTrue(succ)
 
-        with six.assertRaisesRegex(self, GLib.GError, "Getting free space on filesystem 'udf' is not supported."):
+        with self.assertRaisesRegex(GLib.GError, "Getting free space on filesystem 'udf' is not supported."):
             BlockDev.fs_get_free_space(self.loop_dev)
 
 
