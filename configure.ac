@@ -197,7 +197,7 @@ AS_IF([test "x$with_crypto" != "xno"],
              LIBBLOCKDEV_CHECK_HEADER([volume_key/libvolume_key.h], [$GLIB_CFLAGS $NSS_CFLAGS], [libvolume_key.h not available])],
             [])
       dnl pkg-config support was added in keyutils 1.6 but CentOS/RHEL 8 has only 1.5
-      LIBBLOCKDEV_CHECK_HEADER([keyutils.h], [], [keyutils.h not available]),
+      LIBBLOCKDEV_CHECK_HEADER([keyutils.h], [], [keyutils.h not available])
       ],
       [])
 
