@@ -77,7 +77,7 @@ static void set_kmod_logging (struct kmod_ctx *ctx) {
 /**
  * bd_utils_have_kernel_module:
  * @module_name: name of the kernel module to check
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the @module_name was found in the system, either as a module
  * or built-in in the kernel
@@ -126,7 +126,7 @@ gboolean bd_utils_have_kernel_module (const gchar *module_name, GError **error) 
  * bd_utils_load_kernel_module:
  * @module_name: name of the kernel module to load
  * @options: (allow-none): module options
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the @module_name was successfully loaded or not
  */
@@ -192,7 +192,7 @@ gboolean bd_utils_load_kernel_module (const gchar *module_name, const gchar *opt
 /**
  * bd_utils_unload_kernel_module:
  * @module_name: name of the kernel module to unload
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the @module_name was successfully unloaded or not
  */
@@ -267,7 +267,7 @@ G_LOCK_DEFINE_STATIC (detected_linux_ver);
 
 /**
  * bd_utils_get_linux_version:
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Retrieves version of currently running Linux kernel. Acts also as an initializer for statically cached data.
  *

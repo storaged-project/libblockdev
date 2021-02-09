@@ -42,7 +42,7 @@ GQuark bd_utils_dbus_error_quark (void)
  * @bus_type: bus type (system or session), ignored if @connection is specified
  * @bus_name: name of the service to check (e.g. "com.redhat.lvmdbus1")
  * @obj_prefix: object path prefix for the service (e.g. "/com/redhat/lvmdbus1")
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the service was found in the system
  */
@@ -59,7 +59,7 @@ gboolean bd_utils_dbus_service_available (GDBusConnection *connection, GBusType 
     else {
         bus = g_bus_get_sync (bus_type, NULL, error);
         if (!bus) {
-            g_critical ("Failed to get system bus: %s\n", (*error)->message);
+            g_prefix_error (error, "Failed to get system bus: ");
             return FALSE;
         }
 
@@ -111,16 +111,11 @@ gboolean bd_utils_dbus_service_available (GDBusConnection *connection, GBusType 
                                        "Introspect", NULL, NULL, G_DBUS_CALL_FLAGS_NONE,
                                        -1, NULL, error);
     if (!ret) {
-        if (*error) {
-            g_object_unref (bus);
-            return FALSE;
-        } else {
-            g_object_unref (bus);
-            return TRUE;
-        }
-    } else
-        g_variant_unref (ret);
+        g_object_unref (bus);
+        return FALSE;
+    }
 
+    g_variant_unref (ret);
     g_object_unref (bus);
     return TRUE;
 }

@@ -34,7 +34,7 @@ GQuark bd_utils_dev_utils_error_quark (void)
  * bd_utils_resolve_device:
  * @dev_spec: specification of the device (e.g. "/dev/sda", any symlink, or the name of a file
  *            under "/dev")
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: (transfer full): the full real path of the device (e.g. "/dev/md126"
  *                           for "/dev/md/my_raid") or %NULL in case of error
@@ -42,6 +42,7 @@ GQuark bd_utils_dev_utils_error_quark (void)
 gchar* bd_utils_resolve_device (const gchar *dev_spec, GError **error) {
     gchar *path = NULL;
     gchar *symlink = NULL;
+    GError *l_error = NULL;
 
     /* TODO: check that the resulting path is a block device? */
 
@@ -50,14 +51,15 @@ gchar* bd_utils_resolve_device (const gchar *dev_spec, GError **error) {
     else
         path = g_strdup (dev_spec);
 
-    symlink = g_file_read_link (path, error);
+    symlink = g_file_read_link (path, &l_error);
     if (!symlink) {
-        if (g_error_matches (*error, G_FILE_ERROR, G_FILE_ERROR_INVAL)) {
+        if (g_error_matches (l_error, G_FILE_ERROR, G_FILE_ERROR_INVAL)) {
             /* invalid argument -> not a symlink -> nothing to resolve */
-            g_clear_error (error);
+            g_clear_error (&l_error);
             return path;
         } else {
             /* some other error, just report it */
+            g_propagate_error (error, l_error);
             g_free (path);
             return NULL;
         }
@@ -77,7 +79,7 @@ gchar* bd_utils_resolve_device (const gchar *dev_spec, GError **error) {
  * bd_utils_get_device_symlinks:
  * @dev_spec: specification of the device (e.g. "/dev/sda", any symlink, or the name of a file
  *            under "/dev")
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: (transfer full) (array zero-terminated=1): a list of all symlinks (known to udev) for the
  *                                                     device specified with @dev_spec or %NULL in
