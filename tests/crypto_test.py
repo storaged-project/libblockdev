@@ -235,6 +235,42 @@ class CryptoTestFormat(CryptoTestCase):
             self.fail("Failed to get pbkdf information from:\n%s %s" % (out, err))
         self.assertEqual(int(m.group(1)), 5)
 
+    def _get_luks1_key_size(self, device):
+        _ret, out, err = run_command("cryptsetup luksDump %s" % device)
+        m = re.search(r"MK bits:\s*(\S+)\s*", out)
+        if not m or len(m.groups()) != 1:
+            self.fail("Failed to get key size information from:\n%s %s" % (out, err))
+        key_size = m.group(1)
+        if not key_size.isnumeric():
+            self.fail("Failed to get key size information from: %s" % key_size)
+        return int(key_size)
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_luks_format_key_size(self):
+        """Verify that formating device as LUKS works"""
+
+        # aes-xts: key size should default to 512
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-xts-plain64", 0, PASSWD, None, 0)
+        self.assertTrue(succ)
+
+        key_size = self._get_luks1_key_size(self.loop_dev)
+        self.assertEqual(key_size, 512)
+
+        # aes-cbc: key size should default to 256
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 0, PASSWD, None, 0)
+        self.assertTrue(succ)
+
+        key_size = self._get_luks1_key_size(self.loop_dev)
+        self.assertEqual(key_size, 256)
+
+        # try specifying key size for aes-xts
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-xts-plain64", 256, PASSWD, None, 0)
+        self.assertTrue(succ)
+
+        key_size = self._get_luks1_key_size(self.loop_dev)
+        self.assertEqual(key_size, 256)
+
+
 class CryptoTestResize(CryptoTestCase):
 
     def _get_key_location(self, device):
