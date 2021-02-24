@@ -36,7 +36,7 @@ typedef enum {
 /* 20 chars * 6 bits per char (64-item charset) = 120 "bits of security" */
 #define BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH 20
 
-#define DEFAULT_LUKS_KEYSIZE_BITS 512
+#define DEFAULT_LUKS_KEYSIZE_BITS 256
 #define DEFAULT_LUKS_CIPHER "aes-xts-plain64"
 #define DEFAULT_LUKS2_SECTOR_SIZE 512
 
