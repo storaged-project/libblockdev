@@ -1998,20 +1998,33 @@ gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup
 
 /**
  * bd_crypto_luks_info:
- * @luks_device: a device to get information about
+ * @device: a device to get information about
  * @error: (out): place to store error (if any)
  *
- * Returns: information about the @luks_device or %NULL in case of error
+ * Returns: information about the @device or %NULL in case of error
  *
- * Tech category: %BD_CRYPTO_TECH_LUKS%BD_CRYPTO_TECH_MODE_QUERY
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
  */
-BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *luks_device, GError **error) {
+BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *device, GError **error) {
     struct crypt_device *cd = NULL;
     BDCryptoLUKSInfo *info = NULL;
     const gchar *version = NULL;
     gint ret;
 
-    ret = crypt_init_by_name (&cd, luks_device);
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        /* not a block device, try init_by_name */
+        crypt_free (cd);
+        ret = crypt_init_by_name (&cd, device);
+    } else {
+        ret = crypt_load (cd, CRYPT_LUKS, NULL);
+        if (ret != 0) {
+            /* not a LUKS device, try init_by_name */
+            crypt_free (cd);
+            ret = crypt_init_by_name (&cd, device);
+        }
+    }
+
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l (-ret, c_locale));
@@ -2071,7 +2084,23 @@ BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **e
     BDCryptoIntegrityInfo *info = NULL;
     gint ret;
 
-    ret = crypt_init_by_name (&cd, device);
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        /* not a block device, try init_by_name */
+        crypt_free (cd);
+        ret = crypt_init_by_name (&cd, device);
+    } else {
+        ret = crypt_load (cd, CRYPT_LUKS, NULL);
+        if (ret != 0) {
+            /* not a LUKS device, try integrity */
+            ret = crypt_load (cd, CRYPT_INTEGRITY, NULL);
+            if (ret != 0) {
+                crypt_free (cd);
+                ret = crypt_init_by_name (&cd, device);
+            }
+        }
+    }
+
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to initialize device: %s", strerror_l (-ret, c_locale));
@@ -2135,16 +2164,21 @@ BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError *
 
     ret = crypt_init (&cd, device);
     if (ret != 0) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
-        return NULL;
+        /* not a block device, try init_by_name */
+        crypt_free (cd);
+        ret = crypt_init_by_name (&cd, device);
+    } else {
+        ret = crypt_load (cd, CRYPT_LUKS, NULL);
+        if (ret != 0) {
+            /* not a LUKS device, try init_by_name */
+            crypt_free (cd);
+            ret = crypt_init_by_name (&cd, device);
+        }
     }
 
-    ret = crypt_load (cd, CRYPT_LUKS, NULL);
     if (ret != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to load device's parameters: %s", strerror_l (-ret, c_locale));
-        crypt_free (cd);
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
         return NULL;
     }
 

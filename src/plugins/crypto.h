@@ -220,7 +220,7 @@ gboolean bd_crypto_luks_kill_slot (const gchar *device, gint slot, GError **erro
 gboolean bd_crypto_luks_header_backup (const gchar *device, const gchar *backup_file, GError **error);
 gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup_file, GError **error);
 
-BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *luks_device, GError **error);
+BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *device, GError **error);
 BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **error);
 BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError **error);
 

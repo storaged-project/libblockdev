@@ -934,6 +934,17 @@ class CryptoTestHeaderBackupRestore(CryptoTestCase):
         self._luks_header_backup_restore(self._luks2_format)
 
 class CryptoTestInfo(CryptoTestCase):
+
+    def _verify_luks_info(self, info, version):
+        self.assertIsNotNone(info)
+        self.assertEqual(info.version, version)
+        self.assertEqual(info.cipher, "aes")
+        self.assertEqual(info.mode, "cbc-essiv:sha256")
+        self.assertEqual(info.backing_device, self.loop_dev)
+
+        _ret, uuid, _err = run_command("blkid -p -ovalue -sUUID %s" % self.loop_dev)
+        self.assertEqual(info.uuid, uuid)
+
     @tag_test(TestTags.SLOW, TestTags.CORE)
     def test_luks_format(self):
         """Verify that we can get information about a LUKS device"""
@@ -941,19 +952,17 @@ class CryptoTestInfo(CryptoTestCase):
         succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 256, PASSWD, None, 0)
         self.assertTrue(succ)
 
+        info = BlockDev.crypto_luks_info(self.loop_dev)
+        self._verify_luks_info(info, BlockDev.CryptoLUKSVersion.LUKS1)
+
         succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
         self.assertTrue(succ)
 
         info = BlockDev.crypto_luks_info("libblockdevTestLUKS")
-        self.assertIsNotNone(info)
+        self._verify_luks_info(info, BlockDev.CryptoLUKSVersion.LUKS1)
 
-        self.assertEqual(info.version, BlockDev.CryptoLUKSVersion.LUKS1)
-        self.assertEqual(info.cipher, "aes")
-        self.assertEqual(info.mode, "cbc-essiv:sha256")
-        self.assertEqual(info.backing_device, self.loop_dev)
-
-        _ret, uuid, _err = run_command("blkid -p -ovalue -sUUID %s" % self.loop_dev)
-        self.assertEqual(info.uuid, uuid)
+        info = BlockDev.crypto_luks_info("/dev/mapper/libblockdevTestLUKS")
+        self._verify_luks_info(info, BlockDev.CryptoLUKSVersion.LUKS1)
 
         succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
         self.assertTrue(succ)
@@ -970,20 +979,17 @@ class CryptoTestInfo(CryptoTestCase):
                                            BlockDev.CryptoLUKSVersion.LUKS2, extra)
         self.assertTrue(succ)
 
+        info = BlockDev.crypto_luks_info(self.loop_dev)
+        self._verify_luks_info(info, BlockDev.CryptoLUKSVersion.LUKS2)
+
         succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
         self.assertTrue(succ)
 
         info = BlockDev.crypto_luks_info("libblockdevTestLUKS")
-        self.assertIsNotNone(info)
+        self._verify_luks_info(info, BlockDev.CryptoLUKSVersion.LUKS2)
 
-        self.assertEqual(info.version, BlockDev.CryptoLUKSVersion.LUKS2)
-        self.assertEqual(info.cipher, "aes")
-        self.assertEqual(info.mode, "cbc-essiv:sha256")
-        self.assertEqual(info.backing_device, self.loop_dev)
-        self.assertEqual(info.sector_size, 4096)
-
-        _ret, uuid, _err = run_command("blkid -p -ovalue -sUUID %s" % self.loop_dev)
-        self.assertEqual(info.uuid, uuid)
+        info = BlockDev.crypto_luks_info("/dev/mapper/libblockdevTestLUKS")
+        self._verify_luks_info(info, BlockDev.CryptoLUKSVersion.LUKS2)
 
         succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
         self.assertTrue(succ)
@@ -1004,12 +1010,19 @@ class CryptoTestIntegrity(CryptoTestCase):
                                            BlockDev.CryptoLUKSVersion.LUKS2, extra)
         self.assertTrue(succ)
 
+        info = BlockDev.crypto_integrity_info(self.loop_dev)
+        self.assertIsNotNone(info)
+        self.assertEqual(info.algorithm, "hmac(sha256)")
+
         succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
         self.assertTrue(succ)
 
         info = BlockDev.crypto_integrity_info("libblockdevTestLUKS")
         self.assertIsNotNone(info)
+        self.assertEqual(info.algorithm, "hmac(sha256)")
 
+        info = BlockDev.crypto_integrity_info("/dev/mapper/libblockdevTestLUKS")
+        self.assertIsNotNone(info)
         self.assertEqual(info.algorithm, "hmac(sha256)")
 
         # get integrity device dm name
@@ -1024,6 +1037,13 @@ class CryptoTestIntegrity(CryptoTestCase):
 
 
 class CryptoTestLUKSToken(CryptoTestCase):
+
+    def _verify_token_info (self, info):
+        self.assertEqual(len(info), 1)
+        self.assertEqual(info[0].id, 0)
+        self.assertEqual(info[0].type, "luks2-keyring")
+        self.assertEqual(info[0].keyslot, 0)
+
     @tag_test(TestTags.SLOW)
     @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_integrity(self):
@@ -1041,11 +1061,19 @@ class CryptoTestLUKSToken(CryptoTestCase):
         self.assertEqual(ret, 0, msg="Failed to add token to %s: %s" % (self.loop_dev, err))
 
         info = BlockDev.crypto_luks_token_info(self.loop_dev)
-        self.assertEqual(len(info), 1)
-        self.assertEqual(info[0].id, 0)
-        self.assertEqual(info[0].type, "luks2-keyring")
-        self.assertEqual(info[0].keyslot, 0)
+        self._verify_token_info(info)
 
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
+        self.assertTrue(succ)
+
+        info = BlockDev.crypto_luks_token_info("libblockdevTestLUKS")
+        self._verify_token_info(info)
+
+        info = BlockDev.crypto_luks_token_info("/dev/mapper/libblockdevTestLUKS")
+        self._verify_token_info(info)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
 
 class CryptoTestTrueCrypt(CryptoTestCase):
 
