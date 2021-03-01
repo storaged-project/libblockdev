@@ -259,9 +259,20 @@ gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GErro
  */
 gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError **error) {
     const gchar *args[4] = {"fatlabel", device, label, NULL};
+    UtilDep dep = {"fatlabel", "4.2", "--version", "fatlabel\\s+([\\d\\.]+).+"};
+    gboolean new_vfat = FALSE;
 
     if (!check_deps (&avail_deps, DEPS_FATLABEL_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
+
+    if (!label || g_strcmp0 (label, "") == 0) {
+        /* fatlabel >= 4.2 refuses to set empty label */
+        new_vfat = bd_utils_check_util_version (dep.name, dep.version,
+                                                dep.ver_arg, dep.ver_regexp,
+                                                NULL);
+        if (new_vfat)
+            args[2] = "--reset";
+    }
 
     return bd_utils_exec_and_report_error (args, NULL, error);
 }

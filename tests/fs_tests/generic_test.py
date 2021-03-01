@@ -24,6 +24,16 @@ class GenericTestCase(FSTestCase):
 
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="generic_test")
 
+        self._vfat_version = self._get_dosfstools_version()
+
+    def _get_dosfstools_version(self):
+        _ret, out, _err = utils.run_command("mkfs.vfat --help")
+        # mkfs.fat 4.1 (2017-01-24)
+        m = re.search(r"mkfs\.fat ([\d\.]+)", out)
+        if not m or len(m.groups()) != 1:
+            raise RuntimeError("Failed to determine dosfstools version from: %s" % out)
+        return LooseVersion(m.groups()[0])
+
 
 class TestGenericWipe(GenericTestCase):
     @tag_test(TestTags.CORE)
@@ -49,7 +59,10 @@ class TestGenericWipe(GenericTestCase):
 
         # vfat has multiple signatures on the device so it allows us to test the
         # 'all' argument of fs_wipe()
-        ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
+        if self._vfat_version >= LooseVersion("4.2"):
+            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1 --mbr=n" % self.loop_dev)
+        else:
+            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
         self.assertEqual(ret, 0)
 
         time.sleep(0.5)
@@ -71,7 +84,10 @@ class TestGenericWipe(GenericTestCase):
         self.assertEqual(fs_type, b"")
 
         # now do the wipe all in a one step
-        ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
+        if self._vfat_version >= LooseVersion("4.2"):
+            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1 --mbr=n" % self.loop_dev)
+        else:
+            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
         self.assertEqual(ret, 0)
 
         succ = BlockDev.fs_wipe(self.loop_dev, True)
@@ -110,7 +126,10 @@ class TestClean(GenericTestCase):
 
         # vfat has multiple signatures on the device so it allows us to test
         # that clean removes all signatures
-        ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
+        if self._vfat_version >= LooseVersion("4.2"):
+            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1 --mbr=n" % self.loop_dev)
+        else:
+            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
         self.assertEqual(ret, 0)
 
         time.sleep(0.5)
@@ -258,7 +277,7 @@ class CanResizeRepairCheckLabel(GenericTestCase):
 
 class GenericMkfs(GenericTestCase):
 
-    def _test_ext_generic_mkfs(self, fsname, info_fn, label=None, uuid=None):
+    def _test_ext_generic_mkfs(self, fsname, info_fn, label=None, uuid=None, extra=None):
         # clean the device
         succ = BlockDev.fs_clean(self.loop_dev)
         self.assertTrue(succ)
@@ -278,7 +297,7 @@ class GenericMkfs(GenericTestCase):
 
         options = BlockDev.FSMkfsOptions(label, uuid, False, False)
 
-        succ = BlockDev.fs_mkfs(self.loop_dev, fsname, options)
+        succ = BlockDev.fs_mkfs(self.loop_dev, fsname, options, extra)
         self.assertTrue(succ)
 
         fstype = BlockDev.fs_get_fstype (self.loop_dev)
@@ -366,7 +385,11 @@ class GenericMkfs(GenericTestCase):
     def test_vfat_generic_mkfs(self):
         """ Test generic mkfs with vfat """
         label = "LABEL"
-        self._test_ext_generic_mkfs("vfat", BlockDev.fs_vfat_get_info, label, None)
+        if self._vfat_version >= LooseVersion("4.2"):
+            extra = [BlockDev.ExtraArg.new("--mbr=n", "")]
+        else:
+            extra = None
+        self._test_ext_generic_mkfs("vfat", BlockDev.fs_vfat_get_info, label, None, extra)
 
     def test_xfs_generic_mkfs(self):
         """ Test generic mkfs with XFS """
@@ -777,7 +800,16 @@ class GenericResize(GenericTestCase):
     @tag_test(TestTags.UNSTABLE)
     def test_vfat_generic_resize(self):
         """Test generic resize function with a vfat file system"""
-        self._test_generic_resize(mkfs_function=BlockDev.fs_vfat_mkfs, size_delta=1024**2)
+        def mkfs_vfat(device, options=None):
+            if self._vfat_version >= LooseVersion("4.2"):
+                if options:
+                    return BlockDev.fs_vfat_mkfs(device, options + [BlockDev.ExtraArg.new("--mbr=n", "")])
+                else:
+                    return BlockDev.fs_vfat_mkfs(device, [BlockDev.ExtraArg.new("--mbr=n", "")])
+            else:
+                return BlockDev.fs_vfat_mkfs(device, options)
+
+        self._test_generic_resize(mkfs_function=mkfs_vfat, size_delta=1024**2)
 
     def _destroy_lvm(self):
         utils.run("vgremove --yes libbd_fs_tests >/dev/null 2>&1")
@@ -950,7 +982,16 @@ class GenericGetFreeSpace(GenericTestCase):
 
     def test_vfat_get_free_space(self):
         """Test generic resize function with a vfat file system"""
-        self._test_get_free_space(mkfs_function=BlockDev.fs_vfat_mkfs)
+        def mkfs_vfat(device, options=None):
+            if self._vfat_version >= LooseVersion("4.2"):
+                if options:
+                    return BlockDev.fs_vfat_mkfs(device, options + [BlockDev.ExtraArg.new("--mbr=n", "")])
+                else:
+                    return BlockDev.fs_vfat_mkfs(device, [BlockDev.ExtraArg.new("--mbr=n", "")])
+            else:
+                return BlockDev.fs_vfat_mkfs(device, options)
+
+        self._test_get_free_space(mkfs_function=mkfs_vfat)
 
     def test_reiserfs_get_free_space(self):
         """Test generic resize function with an reiserfs file system"""

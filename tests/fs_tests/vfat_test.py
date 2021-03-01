@@ -1,4 +1,7 @@
+import re
 import tempfile
+
+from distutils.version import LooseVersion
 
 from .fs_test import FSTestCase, mounted
 
@@ -14,6 +17,19 @@ class VfatTestCase(FSTestCase):
         super(VfatTestCase, self).setUp()
 
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="vfat_test")
+
+        if self._get_dosfstools_version() <= LooseVersion("4.1"):
+            self._mkfs_options = None
+        else:
+            self._mkfs_options = [BlockDev.ExtraArg.new("--mbr=n", "")]
+
+    def _get_dosfstools_version(self):
+        _ret, out, _err = utils.run_command("mkfs.vfat --help")
+        # mkfs.fat 4.1 (2017-01-24)
+        m = re.search(r"mkfs\.fat ([\d\.]+)", out)
+        if not m or len(m.groups()) != 1:
+            raise RuntimeError("Failed to determine dosfstools version from: %s" % out)
+        return LooseVersion(m.groups()[0])
 
 
 class VfatTestAvailability(VfatTestCase):
@@ -74,9 +90,9 @@ class VfatTestMkfs(VfatTestCase):
         """Verify that it is possible to create a new vfat file system"""
 
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_vfat_mkfs("/non/existing/device", None)
+            BlockDev.fs_vfat_mkfs("/non/existing/device", self._mkfs_options)
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
         self.assertTrue(succ)
 
         # just try if we can mount the file system
@@ -95,7 +111,10 @@ class VfatMkfsWithLabel(VfatTestCase):
         """Verify that it is possible to create an vfat file system with label"""
 
         ea = BlockDev.ExtraArg.new("-n", "TEST_LABEL")
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, [ea])
+        if self._mkfs_options:
+            succ = BlockDev.fs_vfat_mkfs(self.loop_dev, [ea] + self._mkfs_options)
+        else:
+            succ = BlockDev.fs_vfat_mkfs(self.loop_dev, [ea])
         self.assertTrue(succ)
 
         fi = BlockDev.fs_vfat_get_info(self.loop_dev)
@@ -107,7 +126,7 @@ class VfatTestWipe(VfatTestCase):
     def test_vfat_wipe(self):
         """Verify that it is possible to wipe an vfat file system"""
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
         self.assertTrue(succ)
 
         succ = BlockDev.fs_vfat_wipe(self.loop_dev)
@@ -138,7 +157,7 @@ class VfatTestCheck(VfatTestCase):
     def test_vfat_check(self):
         """Verify that it is possible to check an vfat file system"""
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
         self.assertTrue(succ)
 
         succ = BlockDev.fs_vfat_check(self.loop_dev, None)
@@ -152,7 +171,7 @@ class VfatTestRepair(VfatTestCase):
     def test_vfat_repair(self):
         """Verify that it is possible to repair an vfat file system"""
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
         self.assertTrue(succ)
 
         succ = BlockDev.fs_vfat_repair(self.loop_dev, None)
@@ -163,7 +182,7 @@ class VfatGetInfo(VfatTestCase):
     def test_vfat_get_info(self):
         """Verify that it is possible to get info about an vfat file system"""
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
         self.assertTrue(succ)
 
         fi = BlockDev.fs_vfat_get_info(self.loop_dev)
@@ -177,7 +196,7 @@ class VfatSetLabel(VfatTestCase):
     def test_vfat_set_label(self):
         """Verify that it is possible to set label of an vfat file system"""
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
         self.assertTrue(succ)
 
         fi = BlockDev.fs_vfat_get_info(self.loop_dev)
@@ -213,7 +232,7 @@ class VfatResize(VfatTestCase):
     def test_vfat_resize(self):
         """Verify that it is possible to resize an vfat file system"""
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
         self.assertTrue(succ)
 
         # shrink
