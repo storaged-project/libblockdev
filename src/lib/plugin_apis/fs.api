@@ -2508,4 +2508,92 @@ gboolean bd_fs_udf_check_uuid (const gchar *uuid, GError **error);
  */
 BDFSUdfInfo* bd_fs_udf_get_info (const gchar *device, GError **error);
 
+typedef enum {
+    BD_FS_SUPPORT_SET_LABEL = 1 << 1,
+    BD_FS_SUPPORT_SET_UUID = 1 << 2
+} BDFSConfigureFlags;
+
+typedef enum {
+    BD_FS_FSCK_CHECK = 1 << 1,
+    BD_FS_FSCK_REPAIR = 1 << 2
+} BDFSFsckFlags;
+
+typedef enum {
+    BD_FS_FEATURE_OWNERS  = 1 << 1
+} BDFSFeatureFlags;
+
+/**
+ * BDFSFeatures:
+ * @resize: supported resizes modes
+ * @mkfs: supported options for mkfs
+ * @fsck: support for fsck operations (check and repair)
+ * @configure: support for changing properties of an existing filesystem
+ * @features: other supported features
+ */
+typedef struct BDFSFeatures {
+    BDFsResizeFlags resize;
+    BDFSMkfsOptionsFlags mkfs;
+    BDFSFsckFlags fsck;
+    BDFSConfigureFlags configure;
+    BDFSFeatureFlags features;
+} BDFSFeatures;
+
+/**
+ * bd_fs_features_copy: (skip)
+ * @data: (allow-none): %BDFSFeatures to copy
+ *
+ * Creates a new copy of @data.
+ */
+BDFSFeatures* bd_fs_features_copy (BDFSFeatures *data) {
+    if (data == NULL)
+        return NULL;
+
+    BDFSFeatures *ret = g_new0 (BDFSFeatures, 1);
+
+    ret->resize = data->resize;
+    ret->mkfs = data->mkfs;
+    ret->fsck = data->fsck;
+    ret->configure = data->configure;
+    ret->features = data->features;
+
+    return ret;
+}
+
+/**
+ * bd_fs_features_free: (skip)
+ * @data: (allow-none): %BDFSFeatures to free
+ *
+ * Frees @data.
+ */
+void bd_fs_features_free (BDFSFeatures *data) {
+    if (data == NULL)
+        return;
+
+    g_free (data);
+}
+
+GType bd_fs_features_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDFSFeatures",
+                                            (GBoxedCopyFunc) bd_fs_features_copy,
+                                            (GBoxedFreeFunc) bd_fs_features_free);
+    }
+
+    return type;
+}
+
+/**
+ * bd_fs_features:
+ * @fstype: name of the filesystem to get features for (e.g. "ext4")
+ * @error (allow-none): (out): place to store error (if any)
+ *
+ * Returns (transfer-none): features supported by @fstype, see %BDFSFeatures for more information.
+ *
+ * Tech category: always available
+ *
+ */
+const BDFSFeatures* bd_fs_features (const gchar *fstype, GError **error);
+
 #endif  /* BD_FS_API */

@@ -66,6 +66,28 @@ class NILFS2TestAvailability(NILFS2TestCase):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2, BlockDev.FSTechMode.RESIZE)
 
 
+class NILFS2TestFeatures(NILFS2TestCase):
+
+    def test_vfat_features(self):
+        features = BlockDev.fs_features("nilfs2")
+        self.assertIsNotNone(features)
+
+        self.assertTrue(features.resize & BlockDev.FsResizeFlags.ONLINE_GROW)
+        self.assertTrue(features.resize & BlockDev.FsResizeFlags.ONLINE_SHRINK)
+
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.LABEL)
+        self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.UUID)
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.DRY_RUN)
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.NODISCARD)
+
+        self.assertEqual(features.fsck, 0)
+
+        self.assertTrue(features.configure & BlockDev.FSConfigureFlags.LABEL)
+        self.assertTrue(features.configure & BlockDev.FSConfigureFlags.UUID)
+
+        self.assertTrue(features.features & BlockDev.FSFeatureFlags.OWNERS)
+
+
 class NILFS2TestMkfs(NILFS2TestCase):
     def test_nilfs2_mkfs(self):
         """Verify that it is possible to create a new nilfs2 file system"""

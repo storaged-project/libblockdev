@@ -1316,3 +1316,7 @@ __all__.append("s390")
 
 utils = ErrorProxy("utils", BlockDev, [(GLib.Error, UtilsError)])
 __all__.append("utils")
+
+
+# for enums with only single member GIO doesn't create the "short" name, so lets add it here
+BlockDev.FSFeatureFlags.OWNERS = BlockDev.FSFeatureFlags.FS_FEATURE_OWNERS

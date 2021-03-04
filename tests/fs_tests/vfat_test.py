@@ -85,6 +85,29 @@ class VfatTestAvailability(VfatTestCase):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.RESIZE)
 
 
+class VfatTestFeatures(VfatTestCase):
+
+    def test_vfat_features(self):
+        features = BlockDev.fs_features("vfat")
+        self.assertIsNotNone(features)
+
+        self.assertTrue(features.resize & BlockDev.FsResizeFlags.OFFLINE_GROW)
+        self.assertTrue(features.resize & BlockDev.FsResizeFlags.OFFLINE_SHRINK)
+
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.LABEL)
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.UUID)
+        self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.DRY_RUN)
+        self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.NODISCARD)
+
+        self.assertTrue(features.fsck & BlockDev.FSFsckFlags.CHECK)
+        self.assertTrue(features.fsck & BlockDev.FSFsckFlags.REPAIR)
+
+        self.assertTrue(features.configure & BlockDev.FSConfigureFlags.LABEL)
+        self.assertFalse(features.configure & BlockDev.FSConfigureFlags.UUID)
+
+        self.assertEqual(features.features, 0)
+
+
 class VfatTestMkfs(VfatTestCase):
     def test_vfat_mkfs(self):
         """Verify that it is possible to create a new vfat file system"""

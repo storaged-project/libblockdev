@@ -86,6 +86,39 @@ class ExtTestAvailability(ExtTestCase):
         self._test_ext_available(tech=BlockDev.FSTech.EXT4)
 
 
+class ExtTestFeatures(ExtTestCase):
+
+    def _test_ext_features(self, ext_version):
+        features = BlockDev.fs_features(ext_version)
+        self.assertIsNotNone(features)
+
+        self.assertTrue(features.resize & BlockDev.FsResizeFlags.OFFLINE_GROW)
+        self.assertTrue(features.resize & BlockDev.FsResizeFlags.ONLINE_GROW)
+        self.assertTrue(features.resize & BlockDev.FsResizeFlags.OFFLINE_SHRINK)
+
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.LABEL)
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.UUID)
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.DRY_RUN)
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.NODISCARD)
+
+        self.assertTrue(features.fsck & BlockDev.FSFsckFlags.CHECK)
+        self.assertTrue(features.fsck & BlockDev.FSFsckFlags.REPAIR)
+
+        self.assertTrue(features.configure & BlockDev.FSConfigureFlags.LABEL)
+        self.assertTrue(features.configure & BlockDev.FSConfigureFlags.UUID)
+
+        self.assertTrue(features.features & BlockDev.FSFeatureFlags.OWNERS)
+
+    def test_ext2_features(self):
+        self._test_ext_features("ext2")
+
+    def test_ext3_features(self):
+        self._test_ext_features("ext3")
+
+    def test_ext4_features(self):
+        self._test_ext_features("ext4")
+
+
 class ExtTestMkfs(ExtTestCase):
     def _test_ext_mkfs(self, mkfs_function, ext_version):
         with self.assertRaises(GLib.GError):
