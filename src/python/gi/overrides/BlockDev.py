@@ -55,6 +55,7 @@ bd_plugins = { "lvm": BlockDev.Plugin.LVM,
                "fs": BlockDev.Plugin.FS,
                "s390": BlockDev.Plugin.S390,
                "nvdimm": BlockDev.Plugin.NVDIMM,
+               "nvme": BlockDev.Plugin.NVME,
 }
 
 def _default_str(self):
@@ -1260,6 +1261,10 @@ class NVDIMMError(BlockDevError):
     pass
 __all__.append("NVDIMMError")
 
+class NVMEError(BlockDevError):
+    pass
+__all__.append("NVMEError")
+
 class BlockDevNotImplementedError(NotImplementedError, BlockDevError):
     pass
 __all__.append("BlockDevNotImplementedError")
@@ -1308,6 +1313,9 @@ __all__.append("fs")
 
 nvdimm = ErrorProxy("nvdimm", BlockDev, [(GLib.Error, NVDIMMError)], [not_implemented_rule])
 __all__.append("nvdimm")
+
+nvme = ErrorProxy("nvme", BlockDev, [(GLib.Error, NVMEError)], [not_implemented_rule])
+__all__.append("nvme")
 
 s390 = ErrorProxy("s390", BlockDev, [(GLib.Error, S390Error)], [not_implemented_rule])
 __all__.append("s390")
