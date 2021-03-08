@@ -53,6 +53,8 @@
       - nilfs-utils
       - nss-tools
       - ntfsprogs
+      - nvme-cli
+      - nvmetcli
       - python3-bytesize
       - python3-dbus
       - python3-pylint
@@ -113,6 +115,8 @@
       - ndctl
       - nss-tools
       - ntfsprogs
+      - nvme-cli
+      - nvmetcli
       - python3-bytesize
       - python3-dbus
       - python3-pylint
