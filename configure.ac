@@ -21,6 +21,7 @@ LT_INIT
 AC_CONFIG_FILES([Makefile src/Makefile \
                           src/plugins/Makefile \
                           src/plugins/fs/Makefile \
+                          src/plugins/nvme/Makefile \
                           src/utils/Makefile \
                           src/utils/blockdev-utils.pc \
                           src/lib/Makefile \
@@ -165,6 +166,17 @@ AS_IF([test "x$with_tools" != "xno"],
       [AC_SUBST([WITH_TOOLS], [1])],
       [])
 
+AC_ARG_WITH([nvme],
+    AS_HELP_STRING([--with-nvme], [support nvme @<:@default=yes@:>@]),
+    [],
+    [with_nvme=yes])
+
+AC_SUBST([WITH_NVME], [0])
+AM_CONDITIONAL(WITH_NVME, test "x$with_nvme" != "xno")
+AS_IF([test "x$with_nvme" != "xno"],
+      [AC_DEFINE([WITH_BD_NVME], [], [Define if nvme is supported]) AC_SUBST([WITH_NVME], [1])],
+      [])
+
 LIBBLOCKDEV_PLUGIN([BTRFS], [btrfs])
 LIBBLOCKDEV_PLUGIN([CRYPTO], [crypto])
 LIBBLOCKDEV_PLUGIN([DM], [dm])
@@ -178,6 +190,7 @@ LIBBLOCKDEV_PLUGIN([KBD], [kbd])
 LIBBLOCKDEV_PLUGIN([PART], [part])
 LIBBLOCKDEV_PLUGIN([FS], [fs])
 LIBBLOCKDEV_PLUGIN([NVDIMM], [nvdimm])
+LIBBLOCKDEV_PLUGIN([NVME], [nvme])
 
 dnl these two modules are always needed
 LIBBLOCKDEV_PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.42.2])
@@ -254,6 +267,10 @@ AS_IF([test "x$with_nvdimm" != "xno"],
              [AC_DEFINE([LIBNDCTL_NEW_MODES])], [])]
       [])
 
+AS_IF([test "x$with_nvme" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([NVME], [libnvme])],
+      [])
+
 AC_SUBST([skip_patterns], [$skip_patterns])
 AC_SUBST([MAJOR_VER], [\"2\"])
 
@@ -309,6 +326,7 @@ echo "
         MDRAID plugin:              ${with_mdraid}
         MPath plugin                ${with_mpath}
         NVDIMM plugin:              ${with_nvdimm}
+        NVME plugin:                ${with_nvme}
         Part plugin:                ${with_part}
         S390 plugin:                ${s390_info}
         Swap plugin:                ${with_swap}
