@@ -288,11 +288,25 @@ gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError *
  * Tech category: always available
  */
 gboolean bd_fs_vfat_check_label (const gchar *label, GError **error) {
+    const gchar *forbidden = "\"*/:<>?\\|";
+    guint n;
+
     if (strlen (label) > 11) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
                      "Label for VFAT filesystem must be at most 11 characters long.");
         return FALSE;
     }
+
+    /* VFAT does not allow some characters; as dosfslabel does not enforce this,
+     * check in advance; also, VFAT only knows upper-case characters, dosfslabel
+     * enforces this */
+    for (n = 0; forbidden[n] != 0; n++)
+        if (strchr (label, forbidden[n]) != NULL) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                         "Invalid label: character '%c' not supported in VFAT labels.",
+                         forbidden[n]);
+            return FALSE;
+        }
 
     return TRUE;
 }
