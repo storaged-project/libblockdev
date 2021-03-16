@@ -170,7 +170,22 @@ void bd_vdo_stats_free (BDVDOStats *stats) {
  * Deprecated: 2.24: Use LVM-VDO integration instead.
  */
 BDVDOStats* bd_vdo_stats_copy (BDVDOStats *stats) {
-    return g_memdup (stats, sizeof (BDVDOStats));
+    if (stats == NULL)
+        return NULL;
+
+    BDVDOStats *new_stats = g_new0 (BDVDOStats, 1);
+
+    new_stats->block_size = stats->block_size;
+    new_stats->logical_block_size = stats->logical_block_size;
+    new_stats->physical_blocks = stats->physical_blocks;
+    new_stats->data_blocks_used = stats->data_blocks_used;
+    new_stats->overhead_blocks_used = stats->overhead_blocks_used;
+    new_stats->logical_blocks_used = stats->logical_blocks_used;
+    new_stats->used_percent = stats->used_percent;
+    new_stats->saving_percent = stats->saving_percent;
+    new_stats->write_amplification_ratio = stats->write_amplification_ratio;
+
+    return new_stats;
 }
 
 GType bd_vdo_stats_get_type () {
