@@ -417,6 +417,9 @@ class LvmPVVGTestCase(LvmPVonlyTestCase):
         except:
             pass
 
+        # XXX remove lingering /dev entries
+        shutil.rmtree("/dev/testVG", ignore_errors=True)
+
         LvmPVonlyTestCase._clean_up(self)
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
@@ -1787,6 +1790,9 @@ class LVMVDOTest(LVMTestCase):
 
         BlockDev.lvm_vgremove("testVDOVG")
         BlockDev.lvm_pvremove(self.loop_dev)
+
+        # XXX remove lingering /dev entries
+        shutil.rmtree("/dev/testVDOVG", ignore_errors=True)
 
         try:
             delete_lio_device(self.loop_dev)
