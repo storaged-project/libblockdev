@@ -871,16 +871,18 @@ BDPartSpec* bd_part_get_part_by_pos (const gchar *disk, guint64 position, GError
             if ((*parts_p)->type == BD_PART_TYPE_EXTENDED) {
                 /* we don't want to return extended partition here -- there
                    is either another logical or free space at this position */
-                bd_part_spec_free (*parts_p);
                 continue;
             }
 
             ret = *parts_p;
             break;
-        } else
-            bd_part_spec_free (*parts_p);
+        }
     }
 
+    /* free the array except the selected element */
+    for (BDPartSpec **parts_p = parts; *parts_p; parts_p++)
+        if (*parts_p != ret)
+            bd_part_spec_free (*parts_p);
     g_free (parts);
 
     return ret;
