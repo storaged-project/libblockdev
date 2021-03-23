@@ -1129,7 +1129,7 @@ class LvmPVVGLVcachePoolTestCase(LvmPVVGLVTestCase):
         LvmPVVGLVTestCase._clean_up(self)
 
 class LvmPVVGLVcachePoolCreateRemoveTestCase(LvmPVVGLVcachePoolTestCase):
-    @tag_test(TestTags.SLOW)
+    @tag_test(TestTags.SLOW, TestTags.UNSTABLE)
     def test_cache_pool_create_remove(self):
         """Verify that is it possible to create and remove a cache pool"""
 
