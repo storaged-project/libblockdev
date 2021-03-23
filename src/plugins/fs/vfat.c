@@ -133,9 +133,14 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
 **bd_fs_vfat_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
     GPtrArray *options_array = g_ptr_array_new ();
     const BDExtraArg **extra_p = NULL;
+    gchar *label;
 
-    if (options->label)
-        g_ptr_array_add (options_array, bd_extra_arg_new ("-n", options->label));
+    if (options->label) {
+        /* convert the label uppercase */
+        label = g_ascii_strup (options->label, -1);
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-n", label));
+        g_free (label);
+    }
 
     if (options->uuid)
         g_ptr_array_add (options_array, bd_extra_arg_new ("-i", options->uuid));
@@ -156,6 +161,8 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
  * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
  *                                                 passed to the 'mkfs.vfat' utility)
  * @error: (out): place to store error (if any)
+ *
+ * Please remember that FAT labels should always be uppercase.
  *
  * Returns: whether a new vfat fs was successfully created on @device or not
  *
@@ -258,9 +265,11 @@ gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GErro
  * Tech category: %BD_FS_TECH_VFAT-%BD_FS_TECH_MODE_SET_LABEL
  */
 gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError **error) {
-    const gchar *args[4] = {"fatlabel", device, label, NULL};
+    const gchar *args[4] = {"fatlabel", device, NULL, NULL};
     UtilDep dep = {"fatlabel", "4.2", "--version", "fatlabel\\s+([\\d\\.]+).+"};
+    gchar *label_up = NULL;
     gboolean new_vfat = FALSE;
+    gboolean ret;
 
     if (!check_deps (&avail_deps, DEPS_FATLABEL_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
@@ -274,7 +283,15 @@ gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError *
             args[2] = "--reset";
     }
 
-    return bd_utils_exec_and_report_error (args, NULL, error);
+    /* forcefully convert the label uppercase in case no reset was requested */
+    if (label && args[2] == NULL) {
+        label_up = g_ascii_strup (label, -1);
+        args[2] = label_up;
+    }
+    ret = bd_utils_exec_and_report_error (args, NULL, error);
+    g_free (label_up);
+
+    return ret;
 }
 
 /**
