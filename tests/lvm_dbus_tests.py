@@ -1780,13 +1780,13 @@ class LVMVDOTest(LVMTestCase):
         self.assertTrue(succ)
 
     def _clean_up(self):
-        BlockDev.lvm_vgremove("testVDOVG")
-        BlockDev.lvm_pvremove(self.loop_dev)
-
         try:
             BlockDev.lvm_lvremove("testVDOVG", "vdoPool", True, None)
         except:
             pass
+
+        BlockDev.lvm_vgremove("testVDOVG")
+        BlockDev.lvm_pvremove(self.loop_dev)
 
         try:
             delete_lio_device(self.loop_dev)
