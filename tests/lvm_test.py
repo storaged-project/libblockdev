@@ -396,6 +396,9 @@ class LvmPVVGTestCase(LvmPVonlyTestCase):
         except:
             pass
 
+        # XXX remove lingering /dev entries
+        shutil.rmtree("/dev/testVG", ignore_errors=True)
+
         LvmPVonlyTestCase._clean_up(self)
 
 class LvmTestVGcreateRemove(LvmPVVGTestCase):
@@ -1228,7 +1231,7 @@ class LvmPVVGLVcachePoolTestCase(LvmPVVGLVTestCase):
         LvmPVVGLVTestCase._clean_up(self)
 
 class LvmPVVGLVcachePoolCreateRemoveTestCase(LvmPVVGLVcachePoolTestCase):
-    @tag_test(TestTags.SLOW)
+    @tag_test(TestTags.SLOW, TestTags.UNSTABLE)
     def test_cache_pool_create_remove(self):
         """Verify that is it possible to create and remove a cache pool"""
 
@@ -1695,13 +1698,16 @@ class LVMVDOTest(LVMTestCase):
         self.assertTrue(succ)
 
     def _clean_up(self):
-        BlockDev.lvm_vgremove("testVDOVG")
-        BlockDev.lvm_pvremove(self.loop_dev)
-
         try:
             BlockDev.lvm_lvremove("testVDOVG", "vdoPool", True, None)
         except:
             pass
+
+        BlockDev.lvm_vgremove("testVDOVG")
+        BlockDev.lvm_pvremove(self.loop_dev)
+
+        # XXX remove lingering /dev entries
+        shutil.rmtree("/dev/testVDOVG", ignore_errors=True)
 
         try:
             delete_lio_device(self.loop_dev)
