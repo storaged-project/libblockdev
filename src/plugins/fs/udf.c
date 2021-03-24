@@ -537,7 +537,7 @@ BDFSUdfInfo* bd_fs_udf_get_info (const gchar *device, GError **error) {
     success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
     if (!success) {
         /* error is already populated */
-        return FALSE;
+        return NULL;
     }
 
     table = parse_udf_vars (output, &num_items);
