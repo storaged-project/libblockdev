@@ -375,7 +375,7 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
     g_autofree gchar* mountpoint = NULL;
 
     if (!check_deps (&avail_deps, DEPS_NTFSCLUSTER_MASK, deps, DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
+        return NULL;
 
     mountpoint = bd_fs_get_mountpoint (device, error);
     if (mountpoint != NULL) {

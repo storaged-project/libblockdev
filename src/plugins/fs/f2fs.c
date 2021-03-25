@@ -303,7 +303,7 @@ BDFSF2FSInfo* bd_fs_f2fs_get_info (const gchar *device, GError **error) {
     gchar *item = NULL;
 
     if (!check_deps (&avail_deps, DEPS_DUMPF2FS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
+        return NULL;
 
     regex = g_regex_new (pattern, G_REGEX_EXTENDED, 0, error);
     if (!regex) {

@@ -547,7 +547,7 @@ static BDFSBtrfsInfo* btrfs_get_info (const gchar *device, GError **error) {
                              device, local_error->message);
                 g_clear_error (&local_error);
                 bd_fs_btrfs_info_free (btrfs_info);
-                return FALSE;
+                return NULL;
             } else
                 /* both info and unmount were unsuccessful but the error
                    from the info is more important so just ignore the

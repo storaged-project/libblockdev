@@ -824,12 +824,12 @@ static BDFSExtInfo* ext_get_info (const gchar *device, GError **error) {
     BDFSExtInfo *ret = NULL;
 
     if (!check_deps (&avail_deps, DEPS_DUMPE2FS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
+        return NULL;
 
     success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
     if (!success) {
         /* error is already populated */
-        return FALSE;
+        return NULL;
     }
 
     table = parse_output_vars (output, "\n", ":", &num_items);
