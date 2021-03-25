@@ -1840,6 +1840,8 @@ gboolean bd_fs_xfs_resize (const gchar *mpoint, guint64 new_size, const BDExtraA
  *                                                 passed to the 'mkfs.vfat' utility)
  * @error: (out): place to store error (if any)
  *
+ * Please remember that FAT labels should always be uppercase.
+ *
  * Returns: whether a new vfat fs was successfully created on @device or not
  *
  * Tech category: %BD_FS_TECH_VFAT-%BD_FS_TECH_MODE_MKFS
