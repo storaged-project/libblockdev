@@ -136,7 +136,7 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
     const BDExtraArg **extra_p = NULL;
 
     if (options->label)
-        g_ptr_array_add (options_array, bd_extra_arg_new ("-L", options->label));
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-n", options->label));
 
     if (extra) {
         for (extra_p = extra; *extra_p; extra_p++)
