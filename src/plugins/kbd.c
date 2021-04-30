@@ -1035,6 +1035,7 @@ gboolean bd_kbd_bcache_destroy (const gchar *bcache_device, GError **error) {
 
     if (c_set_uuid) {
         path = g_strdup_printf ("/sys/fs/bcache/%s/stop", c_set_uuid);
+        g_free (c_set_uuid);
         success = bd_utils_echo_str_to_file ("1", path, error);
         g_free (path);
         if (!success) {
