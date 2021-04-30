@@ -5,9 +5,12 @@ import subprocess
 import tempfile
 from contextlib import contextmanager
 import utils
-from utils import run, create_sparse_tempfile, mount, umount, TestTags, tag_test
+from utils import run, create_sparse_tempfile, mount, umount, TestTags, tag_test, run_command
+import re
 import six
 import overrides_hack
+
+from distutils.version import LooseVersion
 
 from gi.repository import BlockDev, GLib
 
@@ -29,9 +32,20 @@ def mounted(device, where, ro=False):
     yield
     umount(where)
 
+
+def _get_dosfstools_version():
+    _ret, out, _err = run_command("mkfs.vfat --help")
+    # mkfs.fat 4.1 (2017-01-24)
+    m = re.search(r"mkfs\.fat ([\d\.]+)", out)
+    if not m or len(m.groups()) != 1:
+        raise RuntimeError("Failed to determine dosfstools version from: %s" % out)
+    return LooseVersion(m.groups()[0])
+
+
 class FSTestCase(unittest.TestCase):
 
     requested_plugins = BlockDev.plugin_specs_from_names(("fs", "loop"))
+    _vfat_version = _get_dosfstools_version()
 
     @classmethod
     def setUpClass(cls):
@@ -65,6 +79,11 @@ class FSTestCase(unittest.TestCase):
             raise RuntimeError("Failed to setup loop device for testing: %s" % e)
 
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="ext4_test")
+
+        if self._vfat_version <= LooseVersion("4.1"):
+            self._mkfs_options = None
+        else:
+            self._mkfs_options = [BlockDev.ExtraArg.new("--mbr=n", "")]
 
     def _clean_up(self):
         try:
@@ -120,7 +139,10 @@ class TestGenericWipe(FSTestCase):
 
         # vfat has multiple signatures on the device so it allows us to test the
         # 'all' argument of fs_wipe()
-        ret = run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
+        if self._vfat_version >= LooseVersion("4.2"):
+            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1 --mbr=n" % self.loop_dev)
+        else:
+            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
         self.assertEqual(ret, 0)
 
         time.sleep(0.5)
@@ -142,7 +164,10 @@ class TestGenericWipe(FSTestCase):
         self.assertEqual(fs_type, b"")
 
         # now do the wipe all in a one step
-        ret = run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
+        if self._vfat_version >= LooseVersion("4.2"):
+            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1 --mbr=n" % self.loop_dev)
+        else:
+            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
         self.assertEqual(ret, 0)
 
         succ = BlockDev.fs_wipe(self.loop_dev, True)
@@ -197,7 +222,10 @@ class TestClean(FSTestCase):
 
         # vfat has multiple signatures on the device so it allows us to test
         # that clean removes all signatures
-        ret = run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
+        if self._vfat_version >= LooseVersion("4.2"):
+            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1 --mbr=n" % self.loop_dev)
+        else:
+            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
         self.assertEqual(ret, 0)
 
         time.sleep(0.5)
@@ -744,9 +772,9 @@ class VfatTestMkfs(FSTestCase):
         """Verify that it is possible to create a new vfat file system"""
 
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_vfat_mkfs("/non/existing/device", None)
+            BlockDev.fs_vfat_mkfs("/non/existing/device", self._mkfs_options)
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
         self.assertTrue(succ)
 
         # just try if we can mount the file system
@@ -764,7 +792,10 @@ class VfatMkfsWithLabel(FSTestCase):
         """Verify that it is possible to create an vfat file system with label"""
 
         ea = BlockDev.ExtraArg.new("-n", "TEST_LABEL")
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, [ea])
+        if self._mkfs_options:
+            succ = BlockDev.fs_vfat_mkfs(self.loop_dev, [ea] + self._mkfs_options)
+        else:
+            succ = BlockDev.fs_vfat_mkfs(self.loop_dev, [ea])
         self.assertTrue(succ)
 
         fi = BlockDev.fs_vfat_get_info(self.loop_dev)
@@ -775,7 +806,7 @@ class VfatTestWipe(FSTestCase):
     def test_vfat_wipe(self):
         """Verify that it is possible to wipe an vfat file system"""
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
         self.assertTrue(succ)
 
         succ = BlockDev.fs_vfat_wipe(self.loop_dev)
@@ -805,7 +836,7 @@ class VfatTestCheck(FSTestCase):
     def test_vfat_check(self):
         """Verify that it is possible to check an vfat file system"""
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
         self.assertTrue(succ)
 
         succ = BlockDev.fs_vfat_check(self.loop_dev, None)
@@ -818,7 +849,7 @@ class VfatTestRepair(FSTestCase):
     def test_vfat_repair(self):
         """Verify that it is possible to repair an vfat file system"""
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
         self.assertTrue(succ)
 
         succ = BlockDev.fs_vfat_repair(self.loop_dev, None)
@@ -828,7 +859,7 @@ class VfatGetInfo(FSTestCase):
     def test_vfat_get_info(self):
         """Verify that it is possible to get info about an vfat file system"""
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
         self.assertTrue(succ)
 
         fi = BlockDev.fs_vfat_get_info(self.loop_dev)
@@ -841,7 +872,7 @@ class VfatSetLabel(FSTestCase):
     def test_vfat_set_label(self):
         """Verify that it is possible to set label of an vfat file system"""
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
         self.assertTrue(succ)
 
         fi = BlockDev.fs_vfat_get_info(self.loop_dev)
@@ -870,7 +901,7 @@ class VfatResize(FSTestCase):
     def test_vfat_resize(self):
         """Verify that it is possible to resize an vfat file system"""
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
         self.assertTrue(succ)
 
         # shrink
@@ -999,7 +1030,7 @@ class MountTest(FSTestCase):
     def test_mount(self):
         """ Test basic mounting and unmounting """
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
         self.assertTrue(succ)
 
         tmp = tempfile.mkdtemp(prefix="libblockdev.", suffix="mount_test")
@@ -1104,7 +1135,7 @@ class MountTest(FSTestCase):
         fstab = utils.read_file("/etc/fstab")
         self.addCleanup(utils.write_file, "/etc/fstab", fstab)
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
         self.assertTrue(succ)
 
         tmp = tempfile.mkdtemp(prefix="libblockdev.", suffix="mount_fstab_test")
@@ -1139,7 +1170,7 @@ class MountTest(FSTestCase):
         fstab = utils.read_file("/etc/fstab")
         self.addCleanup(utils.write_file, "/etc/fstab", fstab)
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
         self.assertTrue(succ)
 
         tmp = tempfile.mkdtemp(prefix="libblockdev.", suffix="mount_fstab_user_test")
@@ -1423,7 +1454,16 @@ class GenericResize(FSTestCase):
     @tag_test(TestTags.UNSTABLE)
     def test_vfat_generic_resize(self):
         """Test generic resize function with a vfat file system"""
-        self._test_generic_resize(mkfs_function=BlockDev.fs_vfat_mkfs)
+        def mkfs_vfat(device, options=None):
+            if self._vfat_version >= LooseVersion("4.2"):
+                if options:
+                    return BlockDev.fs_vfat_mkfs(device, options + [BlockDev.ExtraArg.new("--mbr=n", "")])
+                else:
+                    return BlockDev.fs_vfat_mkfs(device, [BlockDev.ExtraArg.new("--mbr=n", "")])
+            else:
+                return BlockDev.fs_vfat_mkfs(device, options)
+
+        self._test_generic_resize(mkfs_function=mkfs_vfat)
 
     def _destroy_lvm(self):
         run("vgremove --yes libbd_fs_tests >/dev/null 2>&1")
@@ -1539,7 +1579,7 @@ class FSFreezeTest(FSTestCase):
     def test_freeze_vfat(self):
         """ Test basic freezing and un-freezing with FAT """
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
         self.assertTrue(succ)
 
         tmp = tempfile.mkdtemp(prefix="libblockdev.", suffix="freeze_test")
