@@ -1035,6 +1035,7 @@ gboolean bd_kbd_bcache_destroy (const gchar *bcache_device, GError **error) {
 
     if (c_set_uuid) {
         path = g_strdup_printf ("/sys/fs/bcache/%s/stop", c_set_uuid);
+        g_free (c_set_uuid);
         success = bd_utils_echo_str_to_file ("1", path, error);
         g_free (path);
         if (!success) {
@@ -1254,6 +1255,7 @@ static gboolean get_cache_size_used (const gchar *cache_dev_sys, guint64 *size, 
     g_io_channel_unref (file);
 
     if (!found) {
+        g_free (line);
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_INVAL,
                      "Failed to get cache usage data");
         return FALSE;
