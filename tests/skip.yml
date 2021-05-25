@@ -27,7 +27,7 @@
 - test: fs_tests.mount_test.MountTestCase.test_mount_ntfs_ro
   skip_on:
     - distro: "debian"
-      version: ["10", "testing"]
+      version: ["10", "11", "testing"]
       reason: "NTFS mounting of read-only devices doesn't work as expected on Debian"
 
 - test: kbd_test.KbdZRAM*
@@ -65,5 +65,5 @@
 - test: fs_tests.mount_test.MountTestCase.test_mount_ntfs
   skip_on:
     - distro: "debian"
-      version: "testing"
+      version: ["11", "testing"]
       reason: "mount.ntfs-3g randomly hangs on Debian testing"
