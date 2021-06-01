@@ -690,6 +690,17 @@ static void call_lvm_method_sync (const gchar *obj, const gchar *intf, const gch
         } else {
             g_variant_unref (ret);
             g_free (obj_path);
+            if (g_strcmp0 (task_path, "/") == 0) {
+                log_msg = g_strdup_printf ("Task finished without result and without job started");
+                g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                             "Running '%s' method on the '%s' object failed: %s",
+                             method, obj, log_msg);
+                bd_utils_log_task_status (log_task_id, log_msg);
+                bd_utils_report_finished (prog_id, log_msg);
+                g_free (task_path);
+                g_free (log_msg);
+                return;
+            }
         }
     } else if (g_variant_check_format_string (ret, "(o)", TRUE)) {
         g_variant_get (ret, "(o)", &task_path);
