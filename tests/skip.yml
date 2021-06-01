@@ -67,3 +67,9 @@
     - distro: "debian"
       version: "testing"
       reason: "mount.ntfs-3g randomly hangs on Debian testing"
+
+- test: lvm_dbus_tests.LvmTestLVsnapshots.test_snapshotcreate_lvorigin_snapshotmerge
+  skip_on:
+    - distro: "centos"
+      version: "9"
+      reason: "snapshot merge doesn't work on CentOS 9 Stream with LVM DBus API"
