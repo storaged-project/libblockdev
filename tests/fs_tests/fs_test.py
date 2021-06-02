@@ -1,8 +1,10 @@
 import os
+import re
 import subprocess
 import unittest
 
 from contextlib import contextmanager
+from distutils.version import LooseVersion
 
 import utils
 import overrides_hack
@@ -148,3 +150,10 @@ class FSTestCase(unittest.TestCase):
         ret, _out, _err = utils.run_command("blockdev --setrw %s" % device)
         if ret != 0:
             self.fail("Failed to set %s read-write" % device)
+
+    def _get_xfs_version(self):
+        _ret, out, _err = utils.run_command("mkfs.xfs -V")
+        m = re.search(r"mkfs\.xfs version ([\d\.]+)", out)
+        if not m or len(m.groups()) != 1:
+            raise RuntimeError("Failed to determine xfsprogs version from: %s" % out)
+        return LooseVersion(m.groups()[0])

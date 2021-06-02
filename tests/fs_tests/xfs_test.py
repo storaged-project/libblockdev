@@ -1,5 +1,7 @@
 import tempfile
 
+from distutils.version import LooseVersion
+
 from .fs_test import FSTestCase, mounted, check_output
 
 import overrides_hack
@@ -260,9 +262,11 @@ class XfsResize(XfsTestCase):
         self.assertEqual(fi.block_size * fi.block_count, 50 * 1024**2)
 
         # (still) impossible to shrink an XFS file system
-        with mounted(lv, self.mount_dir):
-            with self.assertRaises(GLib.GError):
-                succ = BlockDev.fs_xfs_resize(self.mount_dir, 40 * 1024**2 / fi.block_size, None)
+        xfs_version = self._get_xfs_version()
+        if xfs_version < LooseVersion("5.1.12"):
+            with mounted(lv, self.mount_dir):
+                with self.assertRaises(GLib.GError):
+                    succ = BlockDev.fs_xfs_resize(self.mount_dir, 40 * 1024**2 / fi.block_size, None)
 
         utils.run("lvresize -L70M libbd_fs_tests/xfs_test >/dev/null 2>&1")
         # should grow
