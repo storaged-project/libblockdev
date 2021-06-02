@@ -13,8 +13,11 @@ from gi.repository import BlockDev
 @contextmanager
 def mounted(device, where, ro=False):
     utils.mount(device, where, ro)
-    yield
-    utils.umount(where)
+
+    try:
+        yield
+    finally:
+        utils.umount(where)
 
 
 def check_output(args, ignore_retcode=True):
