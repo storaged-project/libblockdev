@@ -29,8 +29,10 @@ def check_output(args, ignore_retcode=True):
 @contextmanager
 def mounted(device, where, ro=False):
     mount(device, where, ro)
-    yield
-    umount(where)
+    try:
+        yield
+    finally:
+        utils.umount(where)
 
 
 def _get_dosfstools_version():
