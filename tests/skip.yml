@@ -37,7 +37,7 @@
 - test: fs_test.MountTest.test_mount_ntfs_ro
   skip_on:
     - distro: "debian"
-      version: ["9", "10", "testing"]
+      version: ["9", "10", "11", "testing"]
       reason: "NTFS mounting of read-only devices doesn't work as expected on Debian"
 
 - test: kbd_test.KbdZRAM*
@@ -137,3 +137,9 @@
     - distro: "fedora"
       version: ["31", "32"]
       reason: "working with old-style LVM snapshots leads to deadlock in LVM tools"
+
+- test: lvm_dbus_tests.LvmTestLVsnapshots.test_snapshotcreate_lvorigin_snapshotmerge
+  skip_on:
+    - distro: "centos"
+      version: "9"
+      reason: "snapshot merge doesn't work on CentOS 9 Stream with LVM DBus API"

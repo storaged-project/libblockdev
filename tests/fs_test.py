@@ -29,8 +29,10 @@ def check_output(args, ignore_retcode=True):
 @contextmanager
 def mounted(device, where, ro=False):
     mount(device, where, ro)
-    yield
-    umount(where)
+    try:
+        yield
+    finally:
+        utils.umount(where)
 
 
 def _get_dosfstools_version():
@@ -39,6 +41,14 @@ def _get_dosfstools_version():
     m = re.search(r"mkfs\.fat ([\d\.]+)", out)
     if not m or len(m.groups()) != 1:
         raise RuntimeError("Failed to determine dosfstools version from: %s" % out)
+    return LooseVersion(m.groups()[0])
+
+
+def _get_xfs_version():
+    _ret, out, _err = utils.run_command("mkfs.xfs -V")
+    m = re.search(r"mkfs\.xfs version ([\d\.]+)", out)
+    if not m or len(m.groups()) != 1:
+        raise RuntimeError("Failed to determine xfsprogs version from: %s" % out)
     return LooseVersion(m.groups()[0])
 
 
@@ -734,9 +744,11 @@ class XfsResize(FSTestCase):
         self.assertEqual(fi.block_size * fi.block_count, 50 * 1024**2)
 
         # (still) impossible to shrink an XFS file system
-        with mounted(lv, self.mount_dir):
-            with self.assertRaises(GLib.GError):
-                succ = BlockDev.fs_xfs_resize(self.mount_dir, 40 * 1024**2 / fi.block_size, None)
+        xfs_version = _get_xfs_version()
+        if xfs_version < LooseVersion("5.1.12"):
+            with mounted(lv, self.mount_dir):
+                with self.assertRaises(GLib.GError):
+                    succ = BlockDev.fs_resize(lv, 40 * 1024**2)
 
         run("lvresize -L70M libbd_fs_tests/xfs_test >/dev/null 2>&1")
         # should grow
@@ -1501,9 +1513,11 @@ class GenericResize(FSTestCase):
         self.assertEqual(fi.block_size * fi.block_count, 50 * 1024**2)
 
         # (still) impossible to shrink an XFS file system
-        with mounted(lv, self.mount_dir):
-            with self.assertRaises(GLib.GError):
-                succ = BlockDev.fs_resize(lv, 40 * 1024**2)
+        xfs_version = _get_xfs_version()
+        if xfs_version < LooseVersion("5.1.12"):
+            with mounted(lv, self.mount_dir):
+                with self.assertRaises(GLib.GError):
+                    succ = BlockDev.fs_resize(lv, 40 * 1024**2)
 
         run("lvresize -L70M libbd_fs_tests/xfs_test >/dev/null 2>&1")
         # should grow
