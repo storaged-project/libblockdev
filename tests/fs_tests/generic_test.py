@@ -847,9 +847,11 @@ class GenericResize(GenericTestCase):
         self.assertEqual(fi.block_size * fi.block_count, 50 * 1024**2)
 
         # (still) impossible to shrink an XFS file system
-        with mounted(lv, self.mount_dir):
-            with self.assertRaises(GLib.GError):
-                succ = BlockDev.fs_resize(lv, 40 * 1024**2)
+        xfs_version = self._get_xfs_version()
+        if xfs_version < LooseVersion("5.1.12"):
+            with mounted(lv, self.mount_dir):
+                with self.assertRaises(GLib.GError):
+                    succ = BlockDev.fs_resize(lv, 40 * 1024**2)
 
         utils.run("lvresize -L70M libbd_fs_tests/xfs_test >/dev/null 2>&1")
         # should grow
