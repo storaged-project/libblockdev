@@ -38,7 +38,13 @@ typedef enum {
 
 #define DEFAULT_LUKS_KEYSIZE_BITS 256
 #define DEFAULT_LUKS_CIPHER "aes-xts-plain64"
+
+#ifdef LIBCRYPTSETUP_24
+/* 0 for autodetect since 2.4.0 */
+#define DEFAULT_LUKS2_SECTOR_SIZE 0
+#else
 #define DEFAULT_LUKS2_SECTOR_SIZE 512
+#endif
 
 typedef enum {
     BD_CRYPTO_TECH_LUKS = 0,

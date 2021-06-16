@@ -16,26 +16,18 @@ PASSWD = "myshinylittlepassword"
 PASSWD2 = "myshinylittlepassword2"
 PASSWD3 = "myshinylittlepassword3"
 
-def have_luks2():
+
+def check_cryptsetup_version(version):
     try:
-        succ = BlockDev.utils_check_util_version("cryptsetup", "2.0.3", "--version", r"cryptsetup ([0-9+\.]+)")
+        succ = BlockDev.utils_check_util_version("cryptsetup", version, "--version", r"cryptsetup ([0-9+\.]+)")
     except GLib.GError:
         return False
     else:
         return succ
 
 
-def have_bitlk():
-    try:
-        succ = BlockDev.utils_check_util_version("cryptsetup", "2.3.0", "--version", r"cryptsetup ([0-9+\.]+)")
-    except GLib.GError:
-        return False
-    else:
-        return succ
-
-
-HAVE_LUKS2 = have_luks2()
-HAVE_BITLK = have_bitlk()
+HAVE_LUKS2 = check_cryptsetup_version("2.0.3")
+HAVE_BITLK = check_cryptsetup_version("2.3.0")
 
 
 class CryptoTestCase(unittest.TestCase):
@@ -963,6 +955,83 @@ class CryptoTestInfo(CryptoTestCase):
 
         succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
         self.assertTrue(succ)
+
+
+class CryptoTestLuksSectorSize(CryptoTestCase):
+    def setUp(self):
+        if not check_cryptsetup_version("2.4.0"):
+            self.skipTest("cryptsetup encryption sector size not available, skipping.")
+
+        # we need a loop devices for this test case
+        self.addCleanup(self._clean_up)
+        self.dev_file = create_sparse_tempfile("crypto_test", 1024**3)
+        self.dev_file2 = create_sparse_tempfile("crypto_test", 1024**3)
+
+        succ, loop = BlockDev.loop_setup(self.dev_file)
+        if not succ:
+            raise RuntimeError("Failed to setup loop device for testing")
+        self.loop_dev = "/dev/%s" % loop
+
+        succ, loop = BlockDev.loop_setup(self.dev_file)
+        if not succ:
+            raise RuntimeError("Failed to setup loop device for testing")
+        self.loop_dev2 = "/dev/%s" % loop
+
+        # set sector size of the loop device to 4k
+        ret, _out, _err = run_command("losetup --sector-size 4096 %s" % self.loop_dev)
+        self.assertEqual(ret, 0)
+
+    def _clean_up(self):
+        try:
+            BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        except:
+            pass
+
+        BlockDev.loop_teardown(self.loop_dev)
+        os.unlink(self.dev_file)
+
+        BlockDev.loop_teardown(self.loop_dev2)
+        os.unlink(self.dev_file2)
+
+    @tag_test(TestTags.SLOW)
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_sector_size_autodetect(self):
+        """Verify that we can autodetect 4k drives and set 4k sector size for them"""
+
+        # format the 4k loop device, encryption sector size should default to 4096
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 256, PASSWD, None, 0,
+                                           BlockDev.CryptoLUKSVersion.LUKS2)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", PASSWD, None, False)
+        self.assertTrue(succ)
+
+        info = BlockDev.crypto_luks_info("libblockdevTestLUKS")
+        self.assertIsNotNone(info)
+
+        self.assertEqual(info.version, BlockDev.CryptoLUKSVersion.LUKS2)
+        self.assertEqual(info.sector_size, 4096)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+        # with the 512 loop device, we should still get 512
+        succ = BlockDev.crypto_luks_format(self.loop_dev2, "aes-cbc-essiv:sha256", 256, PASSWD, None, 0,
+                                           BlockDev.CryptoLUKSVersion.LUKS2)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_open(self.loop_dev2, "libblockdevTestLUKS", PASSWD, None, False)
+        self.assertTrue(succ)
+
+        info = BlockDev.crypto_luks_info("libblockdevTestLUKS")
+        self.assertIsNotNone(info)
+
+        self.assertEqual(info.version, BlockDev.CryptoLUKSVersion.LUKS2)
+        self.assertEqual(info.sector_size, 512)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
 
 class CryptoTestIntegrity(CryptoTestCase):
     @tag_test(TestTags.SLOW)
