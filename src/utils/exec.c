@@ -231,7 +231,7 @@ gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtr
        WEXITSTATUS but also sets the error for terminated processes */
 
     #if !GLIB_CHECK_VERSION(2, 69, 0)
-    #define g_spawn_check_wait_status(x) (g_spawn_check_exit_status (x))
+    #define g_spawn_check_wait_status(x,y) (g_spawn_check_exit_status (x,y))
     #endif
 
     if (!g_spawn_check_wait_status (exit_status, &l_error)) {
