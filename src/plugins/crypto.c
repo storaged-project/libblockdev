@@ -52,7 +52,13 @@
 
 #define DEFAULT_LUKS_KEYSIZE_BITS 256
 #define DEFAULT_LUKS_CIPHER "aes-xts-plain64"
+
+#ifdef LIBCRYPTSETUP_24
+/* 0 for autodetect since 2.4.0 */
+#define DEFAULT_LUKS2_SECTOR_SIZE 0
+#else
 #define DEFAULT_LUKS2_SECTOR_SIZE 512
+#endif
 
 #define UNUSED __attribute__((unused))
 
@@ -2132,7 +2138,7 @@ BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **e
 #endif
 
 /* added in cryptsetup 2.4.0 */
-#ifndef crypt_token_max
+#ifndef LIBCRYPTSETUP_24
 static int crypt_token_max (const char *type __attribute__((unused))) {
     return 32;
 }
