@@ -230,18 +230,10 @@ class XfsSetLabel(XfsTestCase):
 
 
 class XfsResize(XfsTestCase):
-    def _destroy_lvm(self):
-        utils.run("vgremove --yes libbd_fs_tests >/dev/null 2>&1")
-        utils.run("pvremove --yes %s >/dev/null 2>&1" % self.loop_dev)
-
     def test_xfs_resize(self):
         """Verify that it is possible to resize an xfs file system"""
 
-        utils.run("pvcreate -ff -y %s >/dev/null 2>&1" % self.loop_dev)
-        utils.run("vgcreate -s10M libbd_fs_tests %s >/dev/null 2>&1" % self.loop_dev)
-        utils.run("lvcreate -n xfs_test -L50M libbd_fs_tests >/dev/null 2>&1")
-        self.addCleanup(self._destroy_lvm)
-        lv = "/dev/libbd_fs_tests/xfs_test"
+        lv = self._setup_lvm(vgname="libbd_fs_tests", lvname="xfs_test")
 
         succ = BlockDev.fs_xfs_mkfs(lv, None)
         self.assertTrue(succ)
@@ -268,7 +260,7 @@ class XfsResize(XfsTestCase):
                 with self.assertRaises(GLib.GError):
                     succ = BlockDev.fs_xfs_resize(self.mount_dir, 40 * 1024**2 / fi.block_size, None)
 
-        utils.run("lvresize -L70M libbd_fs_tests/xfs_test >/dev/null 2>&1")
+        self._lvresize("libbd_fs_tests", "xfs_test", "70M")
         # should grow
         with mounted(lv, self.mount_dir):
             succ = BlockDev.fs_xfs_resize(self.mount_dir, 0, None)
@@ -278,7 +270,7 @@ class XfsResize(XfsTestCase):
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 70 * 1024**2)
 
-        utils.run("lvresize -L90M libbd_fs_tests/xfs_test >/dev/null 2>&1")
+        self._lvresize("libbd_fs_tests", "xfs_test", "90M")
         # should grow just to 80 MiB
         with mounted(lv, self.mount_dir):
             succ = BlockDev.fs_xfs_resize(self.mount_dir, 80 * 1024**2 / fi.block_size, None)
