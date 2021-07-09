@@ -884,17 +884,19 @@ gboolean bd_fs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
  * bd_fs_wipe:
  * @device: the device to wipe signatures from
  * @all: whether to wipe all (%TRUE) signatures or just the first (%FALSE) one
+ * @force: whether to wipe signatures on a mounted @device
  * @error: (out): place to store error (if any)
  *
  * Returns: whether signatures were successfully wiped on @device or not
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_WIPE
  */
-gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error);
+gboolean bd_fs_wipe (const gchar *device, gboolean all, gboolean force, GError **error);
 
 /**
  * bd_fs_clean:
  * @device: the device to clean
+ * @force: whether to wipe signatures on a mounted @device
  * @error: (out): place to store error (if any)
  *
  * Clean all signatures from @device.
@@ -906,7 +908,7 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error);
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_WIPE
  */
-gboolean bd_fs_clean (const gchar *device, GError **error);
+gboolean bd_fs_clean (const gchar *device, gboolean force, GError **error);
 
 /**
  * bd_fs_get_fstype:

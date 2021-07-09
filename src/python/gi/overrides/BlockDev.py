@@ -349,6 +349,18 @@ def loop_setup(file, offset=0, size=0, read_only=False, part_scan=True):
 __all__.append("loop_setup")
 
 
+_fs_wipe = BlockDev.fs_wipe
+@override(BlockDev.fs_wipe)
+def fs_wipe(spec, all=False, force=False):
+    return _fs_wipe(spec, all, force)
+__all__.append("fs_wipe")
+
+_fs_clean = BlockDev.fs_clean
+@override(BlockDev.fs_clean)
+def fs_clean(spec, force=False):
+    return _fs_clean(spec, force)
+__all__.append("fs_clean")
+
 _fs_unmount = BlockDev.fs_unmount
 @override(BlockDev.fs_unmount)
 def fs_unmount(spec, lazy=False, force=False, extra=None, **kwargs):
