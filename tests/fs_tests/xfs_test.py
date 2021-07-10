@@ -263,7 +263,7 @@ class XfsResize(XfsTestCase):
 
         # (still) impossible to shrink an XFS file system
         xfs_version = self._get_xfs_version()
-        if xfs_version < LooseVersion("5.1.12"):
+        if xfs_version < LooseVersion("5.12"):
             with mounted(lv, self.mount_dir):
                 with self.assertRaises(GLib.GError):
                     succ = BlockDev.fs_xfs_resize(self.mount_dir, 40 * 1024**2 / fi.block_size, None)
