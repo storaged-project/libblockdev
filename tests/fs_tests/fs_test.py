@@ -157,3 +157,28 @@ class FSTestCase(unittest.TestCase):
         if not m or len(m.groups()) != 1:
             raise RuntimeError("Failed to determine xfsprogs version from: %s" % out)
         return LooseVersion(m.groups()[0])
+
+    def _destroy_lvm(self, vgname):
+        utils.run("vgremove --yes %s >/dev/null 2>&1" % vgname)
+        utils.run("pvremove --yes %s >/dev/null 2>&1" % self.loop_dev)
+
+    def _setup_lvm(self, vgname, lvname):
+        ret, _out, err = utils.run_command("pvcreate -ff -y %s" % self.loop_dev)
+        if ret != 0:
+            raise RuntimeError("Failed to create PV for fs tests: %s" % err)
+
+        ret, _out, err = utils.run_command("vgcreate -s10M %s %s" % (vgname, self.loop_dev))
+        if ret != 0:
+            raise RuntimeError("Failed to create VG for fs tests: %s" % err)
+        self.addCleanup(self._destroy_lvm, vgname)
+
+        ret, _out, err = utils.run_command("lvcreate -n %s -L50M %s" % (lvname, vgname))
+        if ret != 0:
+            raise RuntimeError("Failed to create LV for fs tests: %s" % err)
+
+        return "/dev/%s/%s" % (vgname, lvname)
+
+    def _lvresize(self, vgname, lvname, size):
+        ret, _out, err = utils.run_command("lvresize -L%s %s/%s" % (size, vgname, lvname))
+        if ret != 0:
+            raise RuntimeError("Failed to resize LV for fs tests: %s" % err)

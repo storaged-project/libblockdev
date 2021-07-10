@@ -811,19 +811,10 @@ class GenericResize(GenericTestCase):
 
         self._test_generic_resize(mkfs_function=mkfs_vfat, size_delta=1024**2)
 
-    def _destroy_lvm(self):
-        utils.run("vgremove --yes libbd_fs_tests >/dev/null 2>&1")
-        utils.run("pvremove --yes %s >/dev/null 2>&1" % self.loop_dev)
-
     def test_xfs_generic_resize(self):
         """Test generic resize function with an xfs file system"""
 
-        utils.run("pvcreate -ff -y %s >/dev/null 2>&1" % self.loop_dev)
-        utils.run("vgcreate -s10M libbd_fs_tests %s >/dev/null 2>&1" % self.loop_dev)
-        utils.run("lvcreate -n xfs_test -L50M libbd_fs_tests >/dev/null 2>&1")
-        self.addCleanup(self._destroy_lvm)
-
-        lv = "/dev/libbd_fs_tests/xfs_test"
+        lv = self._setup_lvm(vgname="libbd_fs_tests", lvname="generic_test")
 
         # clean the device
         succ = BlockDev.fs_clean(lv)
@@ -853,7 +844,7 @@ class GenericResize(GenericTestCase):
                 with self.assertRaises(GLib.GError):
                     succ = BlockDev.fs_resize(lv, 40 * 1024**2)
 
-        utils.run("lvresize -L70M libbd_fs_tests/xfs_test >/dev/null 2>&1")
+        self._lvresize("libbd_fs_tests", "generic_test", "70M")
         # should grow
         with mounted(lv, self.mount_dir):
             succ = BlockDev.fs_resize(lv, 0)
@@ -863,7 +854,7 @@ class GenericResize(GenericTestCase):
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 70 * 1024**2)
 
-        utils.run("lvresize -L90M libbd_fs_tests/xfs_test >/dev/null 2>&1")
+        self._lvresize("libbd_fs_tests", "generic_test", "90M")
         # should grow just to 80 MiB
         with mounted(lv, self.mount_dir):
             succ = BlockDev.fs_resize(lv, 80 * 1024**2)
