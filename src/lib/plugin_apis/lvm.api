@@ -1685,4 +1685,30 @@ GHashTable* bd_lvm_vdo_get_stats_full (const gchar *vg_name, const gchar *pool_n
  */
 BDLVMVDOStats* bd_lvm_vdo_get_stats (const gchar *vg_name, const gchar *pool_name, GError **error);
 
+/**
+ * bd_lvm_devices_add:
+ * @device: device (PV) to add to the devices file
+ * @devices_file: (allow-none): LVM devices file or %NULL for default
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the lvmdevices command
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully added to @devices_file or not
+ *
+ * Tech category: %BD_LVM_TECH_DEVICES no mode (it is ignored)
+ */
+gboolean bd_lvm_devices_add (const gchar *device, const gchar *devices_file, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_lvm_devices_delete:
+ * @device: device (PV) to delete from the devices file
+ * @devices_file: (allow-none): LVM devices file or %NULL for default
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the lvmdevices command
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully removed from @devices_file or not
+ *
+ * Tech category: %BD_LVM_TECH_DEVICES no mode (it is ignored)
+ */
+gboolean bd_lvm_devices_delete (const gchar *device, const gchar *devices_file, const BDExtraArg **extra, GError **error);
+
 #endif  /* BD_LVM_API */
