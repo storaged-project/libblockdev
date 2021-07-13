@@ -9,7 +9,7 @@ import subprocess
 from distutils.version import LooseVersion
 from itertools import chain
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, run_command, TestTags, tag_test
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, run_command, TestTags, tag_test, read_file
 from gi.repository import BlockDev, GLib
 
 import dbus
@@ -1959,3 +1959,38 @@ class LVMVDOTest(LVMTestCase):
 
         full_stats = BlockDev.lvm_vdo_get_stats_full("testVDOVG", "vdoPool")
         self.assertIn("writeAmplificationRatio", full_stats.keys())
+
+
+class LvmTestDevicesFile(LvmPVonlyTestCase):
+    devicefile = "bd_lvm_dbus_tests.devices"
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree("/etc/lvm/devices/" + cls.devicefile, ignore_errors=True)
+
+        super(LvmTestDevicesFile, cls).tearDownClass()
+
+    def test_devices_add_delete(self):
+        if not self.devices_avail:
+            self.skipTest("skipping LVM devices file test: not supported")
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
+        self.assertTrue(succ)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_devices_add("/non/existing/device", self.devicefile)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_devices_delete(self.loop_dev, self.devicefile)
+
+        succ = BlockDev.lvm_devices_add(self.loop_dev, self.devicefile)
+        self.assertTrue(succ)
+
+        dfile = read_file("/etc/lvm/devices/" + self.devicefile)
+        self.assertIn(self.loop_dev, dfile)
+
+        succ = BlockDev.lvm_devices_delete(self.loop_dev, self.devicefile)
+        self.assertTrue(succ)
+
+        dfile = read_file("/etc/lvm/devices/" + self.devicefile)
+        self.assertNotIn(self.loop_dev, dfile)

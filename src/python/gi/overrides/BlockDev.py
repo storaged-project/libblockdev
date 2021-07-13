@@ -889,6 +889,21 @@ def lvm_vdo_pool_convert(vg_name, lv_name, pool_name, virtual_size, index_memory
     return _lvm_vdo_pool_convert(vg_name, lv_name, pool_name, virtual_size, index_memory, compression, deduplication, write_policy, extra)
 __all__.append("lvm_vdo_pool_convert")
 
+_lvm_devices_add = BlockDev.lvm_devices_add
+@override(BlockDev.lvm_devices_add)
+def lvm_devices_add(device, devices_file=None, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_devices_add(device, devices_file, extra)
+__all__.append("lvm_devices_add")
+
+_lvm_devices_delete = BlockDev.lvm_devices_delete
+@override(BlockDev.lvm_devices_delete)
+def lvm_devices_delete(device, devices_file=None, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_devices_delete(device, devices_file, extra)
+__all__.append("lvm_devices_delete")
+
+
 _md_get_superblock_size = BlockDev.md_get_superblock_size
 @override(BlockDev.md_get_superblock_size)
 def md_get_superblock_size(size, version=None):

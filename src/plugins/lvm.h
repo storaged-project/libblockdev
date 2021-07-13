@@ -330,4 +330,7 @@ BDLVMVDOWritePolicy bd_lvm_get_vdo_write_policy_from_str (const gchar *policy_st
 BDLVMVDOStats* bd_lvm_vdo_get_stats (const gchar *vg_name, const gchar *pool_name, GError **error);
 GHashTable* bd_lvm_vdo_get_stats_full (const gchar *vg_name, const gchar *pool_name, GError **error);
 
+gboolean bd_lvm_devices_add (const gchar *device, const gchar *devices_file, const BDExtraArg **extra, GError **error);
+gboolean bd_lvm_devices_delete (const gchar *device, const gchar *devices_file, const BDExtraArg **extra, GError **error);
+
 #endif /* BD_LVM */
