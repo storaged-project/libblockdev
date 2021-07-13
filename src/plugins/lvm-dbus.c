@@ -48,6 +48,8 @@
 static GMutex global_config_lock;
 static gchar *global_config_str = NULL;
 
+static gchar *global_devices_str = NULL;
+
 #define LVM_BUS_NAME "com.redhat.lvmdbus1"
 #define LVM_OBJ_PREFIX "/com/redhat/lvmdbus1"
 #define MANAGER_OBJ "/com/redhat/lvmdbus1/Manager"
@@ -257,10 +259,19 @@ static gboolean setup_dbus_connection (GError **error) {
     return TRUE;
 }
 
+static volatile guint avail_deps = 0;
 static volatile guint avail_dbus_deps = 0;
 static volatile guint avail_features = 0;
 static volatile guint avail_module_deps = 0;
 static GMutex deps_check_lock;
+
+#define DEPS_LVMDEVICES 0
+#define DEPS_LVMDEVICES_MASK (1 << DEPS_LVMDEVICES)
+#define DEPS_LAST 1
+
+static const UtilDep deps[DEPS_LAST] = {
+    {"lvmdevices", NULL, NULL, NULL},
+};
 
 #define DBUS_DEPS_LVMDBUSD 0
 #define DBUS_DEPS_LVMDBUSD_MASK (1 << DBUS_DEPS_LVMDBUSD)
@@ -405,6 +416,8 @@ gboolean bd_lvm_is_tech_avail (BDLVMTech tech, guint64 mode, GError **error) {
     case BD_LVM_TECH_WRITECACHE:
         return check_dbus_deps (&avail_dbus_deps, DBUS_DEPS_LVMDBUSD_MASK|DBUS_DEPS_LVMDBUSD_WRITECACHE_MASK, dbus_deps, DBUS_DEPS_LAST, &deps_check_lock, error) &&
                check_features (&avail_features, FEATURES_WRITECACHE_MASK, features, FEATURES_LAST, &deps_check_lock, error);
+    case BD_LVM_TECH_DEVICES:
+        return check_deps (&avail_deps, DEPS_LVMDEVICES_MASK, deps, DEPS_LAST, &deps_check_lock, error);
     default:
         /* everything is supported by this implementation of the plugin */
         return check_dbus_deps (&avail_dbus_deps, DBUS_DEPS_LVMDBUSD_MASK, dbus_deps, DBUS_DEPS_LAST, &deps_check_lock, error);
@@ -542,6 +555,7 @@ static gboolean unbox_params_and_add (GVariant *params, GVariantBuilder *builder
 
 static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, guint64 *task_id, guint64 *progress_id, gboolean lock_config, GError **error) {
     GVariant *config = NULL;
+    GVariant *devices = NULL;
     GVariant *param = NULL;
     GVariantIter iter;
     GVariantBuilder builder;
@@ -563,8 +577,8 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
     if (lock_config)
         g_mutex_lock (&global_config_lock);
 
-    if (global_config_str || extra_params || extra_args) {
-        if (global_config_str || extra_args) {
+    if (global_config_str || global_devices_str || extra_params || extra_args) {
+        if (global_config_str || global_devices_str || extra_args) {
             /* add the global config to the extra_params */
             g_variant_builder_init (&extra_builder, G_VARIANT_TYPE_DICTIONARY);
 
@@ -583,6 +597,11 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
             if (global_config_str) {
                 config = g_variant_new ("s", global_config_str);
                 g_variant_builder_add (&extra_builder, "{sv}", "--config", config);
+                added_extra = TRUE;
+            }
+            if (global_devices_str) {
+                devices = g_variant_new ("s", global_devices_str);
+                g_variant_builder_add (&extra_builder, "{sv}", "--devices", devices);
                 added_extra = TRUE;
             }
 
@@ -3001,6 +3020,58 @@ gchar* bd_lvm_get_global_config (GError **error UNUSED) {
 
     g_mutex_lock (&global_config_lock);
     ret = g_strdup (global_config_str ? global_config_str : "");
+    g_mutex_unlock (&global_config_lock);
+
+    return ret;
+}
+
+/**
+ * bd_lvm_set_devices_filter:
+ * @devices: (allow-none) (array zero-terminated=1): list of devices for lvm commands to work on
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the devices filter was successfully set or not
+ *
+ * Tech category: %BD_LVM_TECH_DEVICES no mode (it is ignored)
+ */
+gboolean bd_lvm_set_devices_filter (const gchar **devices, GError **error) {
+    if (!bd_lvm_is_tech_avail (BD_LVM_TECH_DEVICES, 0, error))
+        return FALSE;
+
+    g_mutex_lock (&global_config_lock);
+
+    /* first free the old value */
+    g_free (global_devices_str);
+
+    /* now store the new one */
+    if (!devices || !(*devices))
+        global_devices_str = NULL;
+    else
+        global_devices_str = g_strjoinv (",", (gchar **) devices);
+
+    g_mutex_unlock (&global_config_lock);
+    return TRUE;
+}
+
+/**
+ * bd_lvm_get_devices_filter:
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full) (array zero-terminated=1): a copy of a string representation of
+ *                                                     the currently set LVM devices filter
+ *
+ * Tech category: %BD_LVM_TECH_DEVICES no mode (it is ignored)
+ */
+gchar** bd_lvm_get_devices_filter (GError **error UNUSED) {
+    gchar **ret = NULL;
+
+    g_mutex_lock (&global_config_lock);
+
+    if (global_devices_str)
+        ret = g_strsplit (global_devices_str, ",", -1);
+    else
+        ret = NULL;
+
     g_mutex_unlock (&global_config_lock);
 
     return ret;

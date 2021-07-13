@@ -206,6 +206,7 @@ typedef enum {
     BD_LVM_TECH_GLOB_CONF,
     BD_LVM_TECH_VDO,
     BD_LVM_TECH_WRITECACHE,
+    BD_LVM_TECH_DEVICES,
 } BDLVMTech;
 
 typedef enum {
@@ -284,6 +285,9 @@ gboolean bd_lvm_thsnapshotcreate (const gchar *vg_name, const gchar *origin_name
 
 gboolean bd_lvm_set_global_config (const gchar *new_config, GError **error);
 gchar* bd_lvm_get_global_config (GError **error);
+
+gboolean bd_lvm_set_devices_filter (const gchar **devices, GError **error);
+gchar** bd_lvm_get_devices_filter (GError **error);
 
 guint64 bd_lvm_cache_get_default_md_size (guint64 cache_size, GError **error);
 const gchar* bd_lvm_cache_get_mode_str (BDLVMCacheMode mode, GError **error);

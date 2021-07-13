@@ -32,6 +32,11 @@ class LVMTestCase(unittest.TestCase):
             else:
                 BlockDev.reinit([cls.ps, cls.ps2], True, None)
 
+        try:
+            cls.devices_avail = BlockDev.lvm_is_tech_avail(BlockDev.LVMTech.DEVICES, 0)
+        except:
+            cls.devices_avail = False
+
     @classmethod
     def _get_lvm_version(cls):
         _ret, out, _err = run_command("lvm version")
@@ -62,8 +67,7 @@ class LvmNoDevTestCase(LVMTestCase):
 
         super(LvmNoDevTestCase, cls).tearDownClass()
 
-    def __init__(self, *args, **kwargs):
-        super(LvmNoDevTestCase, self).__init__(*args, **kwargs)
+    def setUp(self):
         self._log = ""
 
     @tag_test(TestTags.NOSTORAGE)
@@ -243,6 +247,45 @@ class LvmNoDevTestCase(LVMTestCase):
 
         # reset back to default
         succ = BlockDev.lvm_set_global_config(None)
+        self.assertTrue(succ)
+
+    @tag_test(TestTags.NOSTORAGE)
+    def test_get_set_global_devices_filter(self):
+        """Verify that getting and setting LVM devices filter works as expected"""
+        if not self.devices_avail:
+            self.skipTest("skipping LVM devices filter test: not supported")
+
+        # setup logging
+        self.assertTrue(BlockDev.reinit([self.ps], False, self._store_log))
+
+        # no global config set initially
+        self.assertListEqual(BlockDev.lvm_get_devices_filter(), [])
+
+        # set and try to get back
+        succ = BlockDev.lvm_set_devices_filter(["/dev/sda"])
+        self.assertTrue(succ)
+        self.assertListEqual(BlockDev.lvm_get_devices_filter(), ["/dev/sda"])
+
+        # reset and try to get back
+        succ = BlockDev.lvm_set_devices_filter(None)
+        self.assertTrue(succ)
+        self.assertListEqual(BlockDev.lvm_get_devices_filter(), [])
+
+        # set twice and try to get back twice
+        succ = BlockDev.lvm_set_devices_filter(["/dev/sda"])
+        self.assertTrue(succ)
+        succ = BlockDev.lvm_set_devices_filter(["/dev/sdb"])
+        self.assertTrue(succ)
+        self.assertEqual(BlockDev.lvm_get_devices_filter(), ["/dev/sdb"])
+
+        # set something sane and check it's really used
+        succ = BlockDev.lvm_set_devices_filter(["/dev/sdb", "/dev/sdc"])
+        BlockDev.lvm_pvscan()
+        self.assertIn("'--devices'", self._log)
+        self.assertIn("'/dev/sdb,/dev/sdc'", self._log)
+
+        # reset back to default
+        succ = BlockDev.lvm_set_devices_filter(None)
         self.assertTrue(succ)
 
     @tag_test(TestTags.NOSTORAGE)
