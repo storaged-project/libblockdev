@@ -33,6 +33,8 @@
     <literal>bd_nvdimm_namepace_get_supported_sector_sizes</literal> has been removed, use <literal>bd_nvdimm_namespace_get_supported_sector_sizes</literal> instead.
   </para>
 
+  </simplesect>
+
   <simplesect><title>FS plugin</title>
   <para>
     <literal>bd_fs_clean</literal> and <literal>bd_fs_wipe</literal> have new parameter <literal>force</literal>
