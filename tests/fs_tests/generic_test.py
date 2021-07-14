@@ -101,6 +101,22 @@ class TestGenericWipe(GenericTestCase):
         with self.assertRaisesRegex(GLib.GError, "No signature detected on the device"):
             BlockDev.fs_wipe(self.loop_dev, True)
 
+    @tag_test(TestTags.CORE)
+    def test_generic_wipe_force(self):
+        ret = utils.run("mkfs.ext2 %s >/dev/null 2>&1" % self.loop_dev)
+        self.assertEqual(ret, 0)
+
+        with mounted(self.loop_dev, self.mount_dir):
+            # default should be force=False
+            with self.assertRaisesRegex(GLib.GError, "Failed to open the device"):
+                BlockDev.fs_wipe(self.loop_dev)
+
+            succ = BlockDev.fs_wipe(self.loop_dev, force=True)
+            self.assertTrue(succ)
+
+        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_dev]).strip()
+        self.assertEqual(fs_type, b"")
+
 
 class TestClean(GenericTestCase):
     def test_clean(self):
@@ -137,6 +153,22 @@ class TestClean(GenericTestCase):
         self.assertTrue(succ)
 
         utils.run("udevadm settle")
+        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_dev]).strip()
+        self.assertEqual(fs_type, b"")
+
+    @tag_test(TestTags.CORE)
+    def test_generic_clean_force(self):
+        ret = utils.run("mkfs.ext2 %s >/dev/null 2>&1" % self.loop_dev)
+        self.assertEqual(ret, 0)
+
+        with mounted(self.loop_dev, self.mount_dir):
+            # default should be force=False
+            with self.assertRaisesRegex(GLib.GError, "Failed to open the device"):
+                BlockDev.fs_clean(self.loop_dev)
+
+            succ = BlockDev.fs_clean(self.loop_dev, force=True)
+            self.assertTrue(succ)
+
         fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_dev]).strip()
         self.assertEqual(fs_type, b"")
 

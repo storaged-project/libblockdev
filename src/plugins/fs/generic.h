@@ -3,8 +3,8 @@
 #ifndef BD_FS_GENERIC
 #define BD_FS_GENERIC
 
-gboolean bd_fs_wipe (const gchar *device, gboolean all, GError **error);
-gboolean bd_fs_clean (const gchar *device, GError **error);
+gboolean bd_fs_wipe (const gchar *device, gboolean all, gboolean force, GError **error) ;
+gboolean bd_fs_clean (const gchar *device, gboolean force, GError **error);
 gchar* bd_fs_get_fstype (const gchar *device,  GError **error);
 
 gboolean bd_fs_freeze (const gchar *mountpoint, GError **error);
