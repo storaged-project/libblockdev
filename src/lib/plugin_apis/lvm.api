@@ -625,6 +625,7 @@ typedef enum {
     BD_LVM_TECH_GLOB_CONF,
     BD_LVM_TECH_VDO,
     BD_LVM_TECH_WRITECACHE,
+    BD_LVM_TECH_DEVICES,
 } BDLVMTech;
 
 typedef enum {
@@ -1313,6 +1314,28 @@ gboolean bd_lvm_set_global_config (const gchar *new_config, GError **error);
 gchar* bd_lvm_get_global_config (GError **error);
 
 /**
+ * bd_lvm_set_devices_filter:
+ * @devices: (allow-none) (array zero-terminated=1): list of devices for lvm commands to work on
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the devices filter was successfully set or not
+ *
+ * Tech category: %BD_LVM_TECH_DEVICES no mode (it is ignored)
+ */
+gboolean bd_lvm_set_devices_filter (const gchar **devices, GError **error);
+
+/**
+ * bd_lvm_get_devices_filter:
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full) (array zero-terminated=1): a copy of a string representation of
+ *                                                     the currently set LVM devices filter
+ *
+ * Tech category: %BD_LVM_TECH_DEVICES no mode (it is ignored)
+ */
+gchar** bd_lvm_get_devices_filter (GError **error);
+
+/**
  * bd_lvm_cache_get_default_md_size:
  * @cache_size: size of the cache to determine MD size for
  * @error: (out): place to store error (if any)
@@ -1783,5 +1806,31 @@ GHashTable* bd_lvm_vdo_get_stats_full (const gchar *vg_name, const gchar *pool_n
  * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_QUERY
  */
 BDLVMVDOStats* bd_lvm_vdo_get_stats (const gchar *vg_name, const gchar *pool_name, GError **error);
+
+/**
+ * bd_lvm_devices_add:
+ * @device: device (PV) to add to the devices file
+ * @devices_file: (allow-none): LVM devices file or %NULL for default
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the lvmdevices command
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully added to @devices_file or not
+ *
+ * Tech category: %BD_LVM_TECH_DEVICES no mode (it is ignored)
+ */
+gboolean bd_lvm_devices_add (const gchar *device, const gchar *devices_file, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_lvm_devices_delete:
+ * @device: device (PV) to delete from the devices file
+ * @devices_file: (allow-none): LVM devices file or %NULL for default
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the lvmdevices command
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully removed from @devices_file or not
+ *
+ * Tech category: %BD_LVM_TECH_DEVICES no mode (it is ignored)
+ */
+gboolean bd_lvm_devices_delete (const gchar *device, const gchar *devices_file, const BDExtraArg **extra, GError **error);
 
 #endif  /* BD_LVM_API */
