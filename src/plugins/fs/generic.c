@@ -123,6 +123,7 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, gboolean force, GError *
     gchar *msg = NULL;
     guint n_try = 0;
     gint mode = 0;
+    gboolean reprobed = FALSE;
 
     msg = g_strdup_printf ("Started wiping signatures from the device '%s'", device);
     progress_id = bd_utils_report_started (msg);
@@ -189,29 +190,8 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, gboolean force, GError *
     }
 
     blkid_reset_probe (probe);
-    status = blkid_do_probe (probe);
-
-    if (status < 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to probe the device '%s'", device);
-        blkid_free_probe (probe);
-        synced_close (fd);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-
-    status = blkid_do_wipe (probe, FALSE);
-    if (status != 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to wipe signatures on the device '%s'", device);
-        blkid_free_probe (probe);
-        synced_close (fd);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return FALSE;
-    }
-    while (all && (blkid_do_probe (probe) == 0)) {
-        status = blkid_do_wipe (probe, FALSE);
-        if (status != 0) {
+    while ((status = blkid_do_probe (probe)) >= 0) {
+        if (status == 0 && blkid_do_wipe (probe, FALSE) != 0) {
             g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                          "Failed to wipe signatures on the device '%s'", device);
             blkid_free_probe (probe);
@@ -219,6 +199,23 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, gboolean force, GError *
             bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
+        if (!all)
+            break;
+        if (status == 1) {
+            if (!reprobed) {
+                blkid_reset_probe (probe);
+                reprobed = TRUE;
+            } else
+                break;
+        }
+    }
+    if (status < 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to probe the device '%s'", device);
+        blkid_free_probe (probe);
+        synced_close (fd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
     }
 
     blkid_free_probe (probe);
