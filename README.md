@@ -19,3 +19,12 @@ README.DEVEL.rst file.
 
 For more information about the API see the generated documentation at
 http://storaged.org/libblockdev/.
+
+
+### Branches and API stability
+
+We are currently working on a new major release 3.0 which will also include major API
+overhaul, some backward-incompatible changes are already present on the *master* branch
+and we do not recommend using it right now if you are not interested in libblockdev
+development. Stable *2.x-branch* is still supported and we will continue to backport
+bugfixes and selected new features to it from *master*.
