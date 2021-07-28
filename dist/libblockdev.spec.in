@@ -124,7 +124,7 @@
 %define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?vdo_copts} %{?tools_copts} %{?gi_copts}
 
 Name:        libblockdev
-Version:     2.25
+Version:     2.26
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -979,6 +979,32 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Jul 28 2021 Vojtech Trefny <vtrefny@redhat.com> - 2.26-1
+- Add missing plugins to the default config (vtrefny)
+- remove unused variable and fix build with LLVM/clang (tpgxyz)
+- exec: Fix deprecated glib function call Glib will rename "g_spawn_check_exit_status()" to "g_spawn_check_wait_status()" in version 2.69. (manuel.wassermann97)
+- tests: Tag LvmPVVGLVcachePoolCreateRemoveTestCase as unstable (vtrefny)
+- tests: Force remove LVM VG /dev/ entry not removed by vgremove (vtrefny)
+- tests: Do not try to remove VG before removing the VDO pool (vtrefny)
+- crypto: Let cryptsetup autodect encryption sector size when not specified (vtrefny)
+- Fix skipping tests on Debian testing (vtrefny)
+- tests: Temporarily skip test_snapshotcreate_lvorigin_snapshotmerge (vtrefny)
+- tests: Do not check that XFS shrink fails with xfsprogs >= 5.12 (vtrefny)
+- tests: Make sure the test temp mount is always unmounted (vtrefny)
+- swap: Fix memory leak (vtrefny)
+- mdraid: Fix memory leak (vtrefny)
+- lvm-dbus: Fix memory leak (vtrefny)
+- kbd: Fix memory leak (vtrefny)
+- fs: Fix memory leak (vtrefny)
+- dm: Fix memory leak in the DM plugin and DM logging redirect function (vtrefny)
+- crypto: Fix memory leak (vtrefny)
+- kbd: Fix memory leak (vtrefny)
+- tests: Call fs_vfat_mkfs with "--mbr=n" extra option in tests (vtrefny)
+- fs: Allow using empty label for vfat with newest dosfstools (vtrefny)
+- vdo: Do not use g_memdup in bd_vdo_stats_copy (vtrefny)
+- crypto: Fix default key size for non XTS ciphers (vtrefny)
+- NEWS.rts: Fix markup (vtrefny)
+
 * Mon Jan 11 2021 Vojtech Trefny <vtrefny@redhat.com> - 2.25-1
 - loop: Retry LOOP_SET_STATUS64 on EAGAIN (vtrefny)
 - Fix max size limit for LVM thinpool metadata (vtrefny)
