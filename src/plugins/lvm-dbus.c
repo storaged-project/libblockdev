@@ -241,7 +241,6 @@ static gboolean setup_dbus_connection (GError **error) {
     return TRUE;
 }
 
-static volatile guint avail_deps = 0;
 static volatile guint avail_dbus_deps = 0;
 static volatile guint avail_features = 0;
 static volatile guint avail_module_deps = 0;
