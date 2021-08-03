@@ -159,3 +159,51 @@ class NVMeTestCase(NVMeTest):
         self.assertIsNotNone(log)
         self.assertEqual(len(log), 1)
         # TODO: find a way to spoof drive errors
+
+
+    @tag_test(TestTags.CORE)
+    def test_self_test_log(self):
+        """Test self-test log retrieval"""
+
+        with self.assertRaisesRegexp(GLib.GError, r".*Failed to open device .*': No such file or directory"):
+            BlockDev.nvme_get_self_test_log("/dev/nonexistent")
+
+        message = r"NVMe Get Log Page - Device Self-test Log command error: Invalid Field in Command: A reserved coded value or an unsupported value in a defined field"
+        with self.assertRaisesRegexp(GLib.GError, message):
+            # Cannot retrieve self-test log on a nvme target loop devices
+            BlockDev.nvme_get_self_test_log(self.nvme_dev)
+
+
+    @tag_test(TestTags.CORE)
+    def test_self_test(self):
+        """Test issuing the self-test command"""
+
+        with self.assertRaisesRegexp(GLib.GError, r".*Failed to open device .*': No such file or directory"):
+            BlockDev.nvme_device_self_test("/dev/nonexistent", BlockDev.NVMESelfTestAction.SHORT)
+
+        message = r"Invalid value specified for the self-test action"
+        with self.assertRaisesRegexp(GLib.GError, message):
+            BlockDev.nvme_device_self_test(self.nvme_dev, BlockDev.NVMESelfTestAction.NOT_RUNNING)
+        with self.assertRaisesRegexp(GLib.GError, message):
+            BlockDev.nvme_device_self_test(self.nvme_ns_dev, BlockDev.NVMESelfTestAction.NOT_RUNNING)
+
+        message = r"NVMe Device Self-test command error: Invalid Command Opcode: A reserved coded value or an unsupported value in the command opcode field"
+        with self.assertRaisesRegexp(GLib.GError, message):
+            BlockDev.nvme_device_self_test(self.nvme_dev, BlockDev.NVMESelfTestAction.SHORT)
+        with self.assertRaisesRegexp(GLib.GError, message):
+            BlockDev.nvme_device_self_test(self.nvme_ns_dev, BlockDev.NVMESelfTestAction.SHORT)
+
+        with self.assertRaisesRegexp(GLib.GError, message):
+            BlockDev.nvme_device_self_test(self.nvme_dev, BlockDev.NVMESelfTestAction.EXTENDED)
+        with self.assertRaisesRegexp(GLib.GError, message):
+            BlockDev.nvme_device_self_test(self.nvme_ns_dev, BlockDev.NVMESelfTestAction.EXTENDED)
+
+        with self.assertRaisesRegexp(GLib.GError, message):
+            BlockDev.nvme_device_self_test(self.nvme_dev, BlockDev.NVMESelfTestAction.VENDOR_SPECIFIC)
+        with self.assertRaisesRegexp(GLib.GError, message):
+            BlockDev.nvme_device_self_test(self.nvme_ns_dev, BlockDev.NVMESelfTestAction.VENDOR_SPECIFIC)
+
+        with self.assertRaisesRegexp(GLib.GError, message):
+            BlockDev.nvme_device_self_test(self.nvme_dev, BlockDev.NVMESelfTestAction.ABORT)
+        with self.assertRaisesRegexp(GLib.GError, message):
+            BlockDev.nvme_device_self_test(self.nvme_ns_dev, BlockDev.NVMESelfTestAction.ABORT)
