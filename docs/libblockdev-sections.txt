@@ -827,4 +827,6 @@ bd_nvme_self_test_log_copy
 bd_nvme_self_test_log_entry_free
 bd_nvme_self_test_log_entry_copy
 bd_nvme_device_self_test
+BDNVMEFormatSecureErase
+bd_nvme_format
 </SECTION>

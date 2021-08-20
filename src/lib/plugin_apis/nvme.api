@@ -17,6 +17,7 @@ GQuark bd_nvme_error_quark (void) {
  * @BD_NVME_ERROR_TECH_UNAVAIL: NVMe support not available.
  * @BD_NVME_ERROR_FAILED: General error.
  * @BD_NVME_ERROR_INVALID_ARGUMENT: Invalid argument.
+ * @BD_NVME_ERROR_WOULD_FORMAT_ALL_NS: The NVMe controller indicates that it would format all namespaces in the NVM subsystem.
  * @BD_NVME_ERROR_SC_GENERIC: Generic NVMe Command Status Code.
  * @BD_NVME_ERROR_SC_CMD_SPECIFIC: NVMe Command Specific error.
  * @BD_NVME_ERROR_SC_MEDIA: Media and Data Integrity Errors: media specific errors that occur in the NVM or data integrity type errors.
@@ -28,6 +29,7 @@ typedef enum {
     BD_NVME_ERROR_TECH_UNAVAIL,
     BD_NVME_ERROR_FAILED,
     BD_NVME_ERROR_INVALID_ARGUMENT,
+    BD_NVME_ERROR_WOULD_FORMAT_ALL_NS,
     BD_NVME_ERROR_SC_GENERIC,
     BD_NVME_ERROR_SC_CMD_SPECIFIC,
     BD_NVME_ERROR_SC_MEDIA,
@@ -773,6 +775,24 @@ GType bd_nvme_self_test_log_get_type () {
 }
 
 
+/* BpG-skip */
+/**
+ * BDNVMEFormatSecureErase:
+ * Optional Format NVM secure erase action.
+ * @BD_NVME_FORMAT_SECURE_ERASE_NONE: No secure erase operation requested.
+ * @BD_NVME_FORMAT_SECURE_ERASE_USER_DATA: User Data Erase: All user data shall be erased, contents of the user data after the erase is indeterminate
+ *                                         (e.g., the user data may be zero filled, one filled, etc.). If a User Data Erase is requested and all affected
+ *                                         user data is encrypted, then the controller is allowed to use a cryptographic erase to perform the requested User Data Erase.
+ * @BD_NVME_FORMAT_SECURE_ERASE_CRYPTO: Cryptographic Erase: All user data shall be erased cryptographically. This is accomplished by deleting the encryption key.
+ */
+/* BpG-skip-end */
+typedef enum {
+    BD_NVME_FORMAT_SECURE_ERASE_NONE      = 0,
+    BD_NVME_FORMAT_SECURE_ERASE_USER_DATA = 1,
+    BD_NVME_FORMAT_SECURE_ERASE_CRYPTO    = 2,
+} BDNVMEFormatSecureErase;
+
+
 /**
  * bd_nvme_get_controller_info:
  * @device: a NVMe controller device (e.g. /dev/nvme0)
@@ -870,6 +890,37 @@ BDNVMESelfTestLog * bd_nvme_get_self_test_log (const gchar *device, GError **err
  * Tech category: %BD_NVME_TECH_NVME-%BD_NVME_TECH_MODE_MANAGE
  */
 gboolean bd_nvme_device_self_test (const gchar *device, BDNVMESelfTestAction action, GError **error);
+
+/**
+ * bd_nvme_format:
+ * @device: NVMe namespace or controller device to format (e.g. /dev/nvme0n1)
+ * @lba_data_size: desired LBA data size (i.e. a sector size) in bytes or %0 to keep current. See #BDNVMELBAFormat and bd_nvme_get_namespace_info().
+ * @secure_erase: optional secure erase action to take.
+ * @error: (out) (nullable): place to store error (if any)
+ *
+ * Performs low level format of the NVM media, destroying all data and metadata for either
+ * a specific namespace or all attached namespaces to the controller. Use this command
+ * to change LBA sector size. Optional secure erase method can be specified as well.
+ *
+ * Supported LBA data sizes for a given namespace can be listed using the bd_nvme_get_namespace_info()
+ * call. In case of a special value %0 the current LBA format for a given namespace will be
+ * retained. When called on a controller device the first namespace is used as a reference.
+ *
+ * Note that the NVMe controller may define a Format NVM attribute indicating that the format
+ * operation would apply to all namespaces and a format (excluding secure erase) of any
+ * namespace results in a format of all namespaces in the NVM subsystem. In such case and
+ * when @device is a namespace block device the #BD_NVME_ERROR_WOULD_FORMAT_ALL_NS error
+ * is returned to prevent further damage. This is then supposed to be handled by the caller
+ * and bd_nvme_format() is supposed to be called on a controller device instead.
+ *
+ * This call blocks until the format operation has finished. To retrieve progress
+ * of a current running operation, check the namespace info using bd_nvme_get_namespace_info().
+ *
+ * Returns: %TRUE if the format command finished successfully, %FALSE otherwise with @error set.
+ *
+ * Tech category: %BD_NVME_TECH_NVME-%BD_NVME_TECH_MODE_MANAGE
+ */
+gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, BDNVMEFormatSecureErase secure_erase, GError **error);
 
 
 #endif  /* BD_NVME_API */

@@ -13,6 +13,7 @@ GQuark bd_nvme_error_quark (void);
  * @BD_NVME_ERROR_TECH_UNAVAIL: NVMe support not available.
  * @BD_NVME_ERROR_FAILED: General error.
  * @BD_NVME_ERROR_INVALID_ARGUMENT: Invalid argument.
+ * @BD_NVME_ERROR_WOULD_FORMAT_ALL_NS: The NVMe controller indicates that it would format all namespaces in the NVM subsystem.
  * @BD_NVME_ERROR_SC_GENERIC: Generic NVMe Command Status Code.
  * @BD_NVME_ERROR_SC_CMD_SPECIFIC: NVMe Command Specific error.
  * @BD_NVME_ERROR_SC_MEDIA: Media and Data Integrity Errors: media specific errors that occur in the NVM or data integrity type errors.
@@ -23,6 +24,7 @@ typedef enum {
     BD_NVME_ERROR_TECH_UNAVAIL,
     BD_NVME_ERROR_FAILED,
     BD_NVME_ERROR_INVALID_ARGUMENT,
+    BD_NVME_ERROR_WOULD_FORMAT_ALL_NS,
     BD_NVME_ERROR_SC_GENERIC,
     BD_NVME_ERROR_SC_CMD_SPECIFIC,
     BD_NVME_ERROR_SC_MEDIA,
@@ -390,6 +392,21 @@ typedef struct BDNVMESelfTestLog {
     BDNVMESelfTestLogEntry **entries;
 } BDNVMESelfTestLog;
 
+/**
+ * BDNVMEFormatSecureErase:
+ * Optional Format NVM secure erase action.
+ * @BD_NVME_FORMAT_SECURE_ERASE_NONE: No secure erase operation requested.
+ * @BD_NVME_FORMAT_SECURE_ERASE_USER_DATA: User Data Erase: All user data shall be erased, contents of the user data after the erase is indeterminate
+ *                                         (e.g., the user data may be zero filled, one filled, etc.). If a User Data Erase is requested and all affected
+ *                                         user data is encrypted, then the controller is allowed to use a cryptographic erase to perform the requested User Data Erase.
+ * @BD_NVME_FORMAT_SECURE_ERASE_CRYPTO: Cryptographic Erase: All user data shall be erased cryptographically. This is accomplished by deleting the encryption key.
+ */
+typedef enum {
+    BD_NVME_FORMAT_SECURE_ERASE_NONE      = 0,
+    BD_NVME_FORMAT_SECURE_ERASE_USER_DATA = 1,
+    BD_NVME_FORMAT_SECURE_ERASE_CRYPTO    = 2,
+} BDNVMEFormatSecureErase;
+
 
 void bd_nvme_controller_info_free (BDNVMEControllerInfo *info);
 BDNVMEControllerInfo * bd_nvme_controller_info_copy (BDNVMEControllerInfo *info);
@@ -437,6 +454,11 @@ BDNVMESelfTestLog *    bd_nvme_get_self_test_log     (const gchar *device, GErro
 
 gboolean               bd_nvme_device_self_test      (const gchar                  *device,
                                                       BDNVMESelfTestAction          action,
+                                                      GError                      **error);
+
+gboolean               bd_nvme_format                (const gchar                  *device,
+                                                      guint16                       lba_data_size,
+                                                      BDNVMEFormatSecureErase       secure_erase,
                                                       GError                      **error);
 
 
