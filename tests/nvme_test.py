@@ -207,3 +207,24 @@ class NVMeTestCase(NVMeTest):
             BlockDev.nvme_device_self_test(self.nvme_dev, BlockDev.NVMESelfTestAction.ABORT)
         with self.assertRaisesRegexp(GLib.GError, message):
             BlockDev.nvme_device_self_test(self.nvme_ns_dev, BlockDev.NVMESelfTestAction.ABORT)
+
+
+    @tag_test(TestTags.CORE)
+    def test_format(self):
+        """Test issuing the format command"""
+
+        with self.assertRaisesRegexp(GLib.GError, r".*Failed to open device .*': No such file or directory"):
+            BlockDev.nvme_format("/dev/nonexistent", 0, BlockDev.NVMEFormatSecureErase.NONE)
+
+        message = r"Couldn't match desired LBA data block size in a device supported LBA format data sizes"
+        with self.assertRaisesRegexp(GLib.GError, message):
+            BlockDev.nvme_format(self.nvme_ns_dev, 123, BlockDev.NVMEFormatSecureErase.NONE)
+        with self.assertRaisesRegexp(GLib.GError, message):
+            BlockDev.nvme_format(self.nvme_dev, 123, BlockDev.NVMEFormatSecureErase.NONE)
+
+        # format doesn't really work on the kernel loop target
+        message = r"Format NVM command error: Invalid Command Opcode: A reserved coded value or an unsupported value in the command opcode field"
+        with self.assertRaisesRegexp(GLib.GError, message):
+            BlockDev.nvme_format(self.nvme_ns_dev, 0, BlockDev.NVMEFormatSecureErase.NONE)
+        with self.assertRaisesRegexp(GLib.GError, message):
+            BlockDev.nvme_format(self.nvme_dev, 0, BlockDev.NVMEFormatSecureErase.NONE)
