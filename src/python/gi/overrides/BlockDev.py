@@ -29,7 +29,7 @@ no code duplication and it propagates non-callable objects directly.
 
 import re
 import os
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 
 from gi.importer import modules
 from gi.overrides import override
@@ -1000,10 +1000,12 @@ class ErrorProxy(object):
         self._prefix = prefix
         self._mod = mod
         self._tr_excs = tr_excs
+
+        self._xrules = defaultdict()
         if xrules:
-            self._xrules = {xrule.orig_exc: xrule for xrule in xrules}
-        else:
-            self._xrules = dict()
+            for xrule in xrules:
+                self._xrules.setdefault(xrule.orig_exc, []).append(xrule)
+
         self._use_local = use_local
         self._wrapped_cache = dict()
 
@@ -1045,13 +1047,9 @@ class ErrorProxy(object):
 
                 e_type = type(e)
                 if e_type in self._xrules:
-                    matches = True
-                    if self._xrules[e_type].code and self._xrules[e_type].code != getattr(e, "code"):
-                        matches = False
-                    if matches and self._xrules[e_type].regexp and not self._xrules[e_type].regexp.match(msg):
-                        matches = False
-                    if matches:
-                        raise self._xrules[e_type].new_exc(msg)
+                    for xrule in self._xrules[e_type]:
+                        if xrule.code == getattr(e, "code") or (xrule.regexp and xrule.regexp.match(msg)):
+                            raise xrule.new_exc(msg)
 
                 # try to find exact type match
                 transform = next((tr_t for tr_t in self._tr_excs if self._tr_excs == e_type), None)
