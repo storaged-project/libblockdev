@@ -7,12 +7,12 @@ import datetime
 import os
 import re
 import six
+import shutil
 import subprocess
 import sys
 import unittest
 import yaml
 
-from distutils.spawn import find_executable
 
 LIBDIRS = 'src/utils/.libs:src/plugins/.libs:src/plugins/fs/.libs:src/lib/.libs'
 GIDIR = 'src/lib'
@@ -278,7 +278,7 @@ if __name__ == '__main__':
     result = unittest.TextTestRunner(verbosity=2, failfast=args.stop).run(suite)
 
     # dump cropped journal to log file
-    if find_executable('journalctl'):
+    if shutil.which('journalctl'):
         with open('journaldump.log', 'w') as outfile:
             subprocess.call(['journalctl', '-S', start_time], stdout=outfile)
 

@@ -5,11 +5,11 @@ import yaml
 import unittest
 import overrides_hack
 import six
+import shutil
 
 from utils import run_command, read_file, fake_path, create_sparse_tempfile, create_lio_device, delete_lio_device, TestTags, tag_test
 from gi.repository import BlockDev, GLib
 from bytesize import bytesize
-from distutils.spawn import find_executable
 
 
 class VDOTestCase(unittest.TestCase):
@@ -29,7 +29,7 @@ class VDOTestCase(unittest.TestCase):
             if "File exists" not in e.message:
                 raise unittest.SkipTest("cannot load VDO kernel module, skipping.")
 
-        if not find_executable("vdo"):
+        if not shutil.which("vdo"):
             raise unittest.SkipTest("vdo executable not foundin $PATH, skipping.")
 
         if not BlockDev.is_initialized():

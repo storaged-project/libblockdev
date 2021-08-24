@@ -4,10 +4,10 @@ import unittest
 import os
 import six
 import re
+import shutil
 import time
 
 from distutils.version import LooseVersion
-from distutils.spawn import find_executable
 
 import overrides_hack
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, mount, umount, run_command, TestTags, tag_test
@@ -29,7 +29,7 @@ class BtrfsTestCase(unittest.TestCase):
         if not BlockDev.utils_have_kernel_module("btrfs"):
             raise unittest.SkipTest('Btrfs kernel module not available, skipping.')
 
-        if not find_executable("btrfs"):
+        if not shutil.which("btrfs"):
             raise unittest.SkipTest("btrfs executable not foundin $PATH, skipping.")
 
         if not BlockDev.is_initialized():
