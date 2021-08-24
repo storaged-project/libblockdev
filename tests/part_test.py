@@ -1117,11 +1117,6 @@ class PartSetFlagCase(PartTestCase):
         self.assertTrue(ps.flags & BlockDev.PartFlag.BOOT)
         self.assertTrue(ps.flags & BlockDev.PartFlag.LVM)
 
-        # SWAP label not supported on the MSDOS table
-        with self.assertRaises(GLib.GError):
-            BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.SWAP, True)
-        with self.assertRaises(GLib.GError):
-            BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.SWAP, False)
         # so isn't GPT_HIDDEN
         with self.assertRaises(GLib.GError):
             BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_HIDDEN, True)
@@ -1234,10 +1229,6 @@ class PartSetFlagsCase(PartTestCase):
         ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
         self.assertTrue(ps.flags & BlockDev.PartFlag.BOOT)
         self.assertTrue(ps.flags & BlockDev.PartFlag.LVM)
-
-        # SWAP label not supported on the MSDOS table
-        with self.assertRaises(GLib.GError):
-            BlockDev.part_set_part_flags (self.loop_dev, ps.path, BlockDev.PartFlag.SWAP)
 
         # also try some GPT-only flags
         succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.GPT, True)
