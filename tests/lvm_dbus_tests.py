@@ -9,7 +9,7 @@ import shutil
 import subprocess
 import time
 from contextlib import contextmanager
-from distutils.version import LooseVersion
+from packaging.version import Version
 from itertools import chain
 
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, run_command, TestTags, tag_test
@@ -56,7 +56,7 @@ class LVMTestCase(unittest.TestCase):
         m = re.search(r"LVM version:\s+([\d\.]+)", out)
         if not m or len(m.groups()) != 1:
             raise RuntimeError("Failed to determine LVM version from: %s" % out)
-        return LooseVersion(m.groups()[0])
+        return Version(m.groups()[0])
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmNoDevTestCase(LVMTestCase):
@@ -1377,7 +1377,7 @@ class LvmPVVGcachedLVpoolTestCase(LvmPVVGLVTestCase):
         self.assertTrue(succ)
 
         lvm_version = self._get_lvm_version()
-        if lvm_version < LooseVersion("2.03.06"):
+        if lvm_version < Version("2.03.06"):
             cpool_name = "testCache"
         else:
             # since 2.03.06 LVM adds _cpool suffix to the cache pool after attaching it
@@ -1531,7 +1531,7 @@ class LVMVDOTest(LVMTestCase):
                 raise unittest.SkipTest("cannot load VDO kernel module, skipping.")
 
         lvm_version = cls._get_lvm_version()
-        if lvm_version < LooseVersion("2.3.07"):
+        if lvm_version < Version("2.3.07"):
             raise unittest.SkipTest("LVM version 2.3.07 or newer needed for LVM VDO.")
 
         super().setUpClass()

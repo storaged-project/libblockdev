@@ -5,7 +5,7 @@ import shutil
 import unittest
 import overrides_hack
 
-from distutils.version import LooseVersion
+from packaging.version import Version
 
 from utils import run_command, read_file, fake_path, TestTags, tag_test
 from gi.repository import BlockDev, GLib
@@ -43,7 +43,7 @@ class NVDIMMNamespaceTestCase(NVDIMMTestCase):
         m = re.search(r"([\d\.]+)", out)
         if not m or len(m.groups()) != 1:
             raise RuntimeError("Failed to determine ndctl version from: %s" % out)
-        return LooseVersion(m.groups()[0])
+        return Version(m.groups()[0])
 
     def setUp(self):
         self.sys_info = self._get_nvdimm_info()
@@ -165,7 +165,7 @@ class NVDIMMNamespaceTestCase(NVDIMMTestCase):
         # ndctl renamed the modes from 'memory' and 'dax' to 'fsdax' and 'devdax'
         # in version 60, so we need to choose different mode based on version
         ndctl_version = self._get_ndctl_version()
-        if ndctl_version >= LooseVersion("60.0"):
+        if ndctl_version >= Version("60.0"):
             mode = BlockDev.NVDIMMNamespaceMode.FSDAX
         else:
             mode = BlockDev.NVDIMMNamespaceMode.MEMORY
