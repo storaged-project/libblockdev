@@ -8,6 +8,7 @@ from gi.repository import BlockDev, GLib
 
 class SwapTest(unittest.TestCase):
     requested_plugins = BlockDev.plugin_specs_from_names(("swap",))
+    dev_size = 1024**3
 
     @classmethod
     def setUpClass(cls):
@@ -19,7 +20,7 @@ class SwapTest(unittest.TestCase):
 class SwapTestCase(SwapTest):
     def setUp(self):
         self.addCleanup(self._clean_up)
-        self.dev_file = create_sparse_tempfile("swap_test", 1024**3)
+        self.dev_file = create_sparse_tempfile("swap_test", self.dev_size)
         try:
             self.loop_dev = create_lio_device(self.dev_file)
         except RuntimeError as e:
@@ -108,6 +109,18 @@ class SwapTestCase(SwapTest):
 
         # activation should fail because swap has different pagesize
         with self.assertRaises(BlockDev.SwapPagesizeError):
+            BlockDev.swap.swapon(self.loop_dev)
+
+    def test_swapon_wrong_size(self):
+        """Verify that activating swap with a wrong size fails with expected exception"""
+
+        # create swap bigger than the device (twice as big in 1024 sectors)
+        ret, out, err = run_command("mkswap -f %s %d" % (self.loop_dev, (self.dev_size * 2) / 1024))
+        if ret != 0:
+            self.fail("Failed to prepare swap for wrong size test: %s %s" % (out, err))
+
+        # activation should fail because swap is bigger than the underlying device
+        with self.assertRaises(BlockDev.SwapActivateError):
             BlockDev.swap.swapon(self.loop_dev)
 
     def _remove_map(self, map_name):
