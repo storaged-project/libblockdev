@@ -55,6 +55,7 @@
       - ntfsprogs
       - python3-bytesize
       - python3-dbus
+      - python3-packaging
       - python3-pylint
       - python3-yaml
       - reiserfs-utils
@@ -115,6 +116,7 @@
       - ntfsprogs
       - python3-bytesize
       - python3-dbus
+      - python3-packaging
       - python3-pylint
       - python3-yaml
       - targetcli
@@ -175,6 +177,7 @@
       - ntfs-3g
       - pylint3
       - python3-bytesize
+      - python3-packaging
       - python3-pydbus
       - python3-yaml
       - reiserfsprogs

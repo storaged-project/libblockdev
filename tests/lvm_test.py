@@ -6,7 +6,7 @@ import overrides_hack
 import re
 import shutil
 import subprocess
-from distutils.version import LooseVersion
+from packaging.version import Version
 
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test, run_command
 from gi.repository import BlockDev, GLib
@@ -32,7 +32,7 @@ class LVMTestCase(unittest.TestCase):
         m = re.search(r"LVM version:\s+([\d\.]+)", out)
         if not m or len(m.groups()) != 1:
             raise RuntimeError("Failed to determine LVM version from: %s" % out)
-        return LooseVersion(m.groups()[0])
+        return Version(m.groups()[0])
 
     @classmethod
     def _get_lvm_segtypes(cls):
@@ -1361,7 +1361,7 @@ class LvmPVVGcachedLVpoolTestCase(LvmPVVGLVTestCase):
         self.assertTrue(succ)
 
         lvm_version = self._get_lvm_version()
-        if lvm_version < LooseVersion("2.03.06"):
+        if lvm_version < Version("2.03.06"):
             cpool_name = "testCache"
         else:
             # since 2.03.06 LVM adds _cpool suffix to the cache pool after attaching it
@@ -1442,7 +1442,7 @@ class LvmPVVGLVWritecacheAttachDetachTestCase(LvmPVVGLVcachePoolTestCase):
         """Verify that is it possible to attach and detach a writecache LV"""
 
         lvm_version = self._get_lvm_version()
-        if lvm_version < LooseVersion("2.03.02"):
+        if lvm_version < Version("2.03.02"):
             self.skipTest("LVM writecache support not available")
 
         lvm_segtypes = self._get_lvm_segtypes()
@@ -1494,7 +1494,7 @@ class LvmPVVGWritecachedLVTestCase(LvmPVVGLVTestCase):
         """Verify that it is possible to create a writecached LV in a single step"""
 
         lvm_version = self._get_lvm_version()
-        if lvm_version < LooseVersion("2.03.02"):
+        if lvm_version < Version("2.03.02"):
             self.skipTest("LVM writecache support not available")
 
         lvm_segtypes = self._get_lvm_segtypes()
@@ -1678,7 +1678,7 @@ class LVMVDOTest(LVMTestCase):
                 raise unittest.SkipTest("cannot load VDO kernel module, skipping.")
 
         lvm_version = cls._get_lvm_version()
-        if lvm_version < LooseVersion("2.3.07"):
+        if lvm_version < Version("2.3.07"):
             raise unittest.SkipTest("LVM version 2.3.07 or newer needed for LVM VDO.")
 
         super().setUpClass()

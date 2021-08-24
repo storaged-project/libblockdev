@@ -4,7 +4,7 @@ import re
 import shutil
 import time
 from contextlib import contextmanager
-from distutils.version import LooseVersion
+from packaging.version import Version
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, wipe_all, fake_path, read_file, TestTags, tag_test
 from bytesize import bytesize
 import overrides_hack
@@ -165,7 +165,7 @@ class KbdZRAMStatsTestCase(KbdZRAMTestCase):
 
         # location of some sysfs files we use is different since linux 4.11
         kernel_version = os.uname()[2]
-        if LooseVersion(kernel_version) >= LooseVersion("4.11"):
+        if Version(kernel_version) >= Version("4.11"):
             self._zram_get_stats_new()
         else:
             self._zram_get_stats_old()

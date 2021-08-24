@@ -1,6 +1,6 @@
 import tempfile
 
-from distutils.version import LooseVersion
+from packaging.version import Version
 
 from .fs_test import FSTestCase, mounted, check_output
 
@@ -255,7 +255,7 @@ class XfsResize(XfsTestCase):
 
         # (still) impossible to shrink an XFS file system
         xfs_version = self._get_xfs_version()
-        if xfs_version < LooseVersion("5.12"):
+        if xfs_version < Version("5.12"):
             with mounted(lv, self.mount_dir):
                 with self.assertRaises(GLib.GError):
                     succ = BlockDev.fs_xfs_resize(self.mount_dir, 40 * 1024**2 / fi.block_size, None)
