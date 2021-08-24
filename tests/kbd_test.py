@@ -1,10 +1,10 @@
 import unittest
 import os
 import re
+import shutil
 import time
 from contextlib import contextmanager
 from distutils.version import LooseVersion
-from distutils.spawn import find_executable
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, wipe_all, fake_path, read_file, TestTags, tag_test
 from bytesize import bytesize
 import overrides_hack
@@ -261,7 +261,7 @@ class KbdBcacheNodevTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if not find_executable("make-bcache"):
+        if not shutil.which("make-bcache"):
             raise unittest.SkipTest("make-bcache executable not found in $PATH, skipping.")
 
         if not BlockDev.is_initialized():
@@ -291,7 +291,7 @@ class KbdBcacheTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if not find_executable("make-bcache"):
+        if not shutil.which("make-bcache"):
             raise unittest.SkipTest("make-bcache executable not found in $PATH, skipping.")
 
         if not BlockDev.is_initialized():

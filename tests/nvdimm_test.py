@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import shutil
 import unittest
 import overrides_hack
 
@@ -8,7 +9,6 @@ from distutils.version import LooseVersion
 
 from utils import run_command, read_file, fake_path, TestTags, tag_test
 from gi.repository import BlockDev, GLib
-from distutils.spawn import find_executable
 
 
 class NVDIMMTestCase(unittest.TestCase):
@@ -17,7 +17,7 @@ class NVDIMMTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if not find_executable("ndctl"):
+        if not shutil.which("ndctl"):
             raise unittest.SkipTest("ndctl executable not foundin $PATH, skipping.")
 
         if not BlockDev.is_initialized():
