@@ -164,8 +164,8 @@ class KbdZRAMStatsTestCase(KbdZRAMTestCase):
         """Verify that it is possible to get stats for a zram device"""
 
         # location of some sysfs files we use is different since linux 4.11
-        kernel_version = os.uname()[2]
-        if Version(kernel_version) >= Version("4.11"):
+        ver = BlockDev.utils_get_linux_version()
+        if Version("%d.%d.%d" % (ver.major, ver.minor, ver.micro)) >= Version("4.11"):
             self._zram_get_stats_new()
         else:
             self._zram_get_stats_old()
