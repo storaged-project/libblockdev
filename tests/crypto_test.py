@@ -1197,13 +1197,10 @@ class CryptoTestTrueCrypt(CryptoTestCase):
         """Verify that opening/closing TrueCrypt device works"""
 
         with self.assertRaises(GLib.GError):
-            BlockDev.crypto_luks_open("/non/existing/device", "libblockdevTestTC", self.passphrase)
+            BlockDev.crypto_tc_open("/non/existing/device", "libblockdevTestTC", self.passphrase)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.crypto_luks_open(self.tc_dev, "libblockdevTestTC", None)
-
-        with self.assertRaises(GLib.GError):
-            BlockDev.crypto_luks_open(self.tc_dev, "libblockdevTestTC", "wrong-passhprase")
+            BlockDev.crypto_tc_open(self.tc_dev, "libblockdevTestTC", "wrong-passhprase")
 
         succ = BlockDev.crypto_tc_open(self.tc_dev, "libblockdevTestTC", self.passphrase)
         self.assertTrue(succ)
@@ -1218,13 +1215,10 @@ class CryptoTestTrueCrypt(CryptoTestCase):
         """Verify that opening/closing VeraCrypt device works"""
 
         with self.assertRaises(GLib.GError):
-            BlockDev.crypto_luks_open("/non/existing/device", "libblockdevTestTC", self.passphrase)
+            BlockDev.crypto_tc_open("/non/existing/device", "libblockdevTestTC", self.passphrase)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.crypto_luks_open(self.vc_dev, "libblockdevTestTC", None)
-
-        with self.assertRaises(GLib.GError):
-            BlockDev.crypto_luks_open(self.vc_dev, "libblockdevTestTC", "wrong-passhprase")
+            BlockDev.crypto_tc_open(self.vc_dev, "libblockdevTestTC", "wrong-passhprase")
 
         succ = BlockDev.crypto_tc_open(self.vc_dev, "libblockdevTestTC", self.passphrase, veracrypt=True)
         self.assertTrue(succ)
@@ -1280,13 +1274,10 @@ class CryptoTestBitlk(CryptoTestCase):
         """Verify that opening/closing a BitLocker device works"""
 
         with self.assertRaises(GLib.GError):
-            BlockDev.crypto_luks_open("/non/existing/device", "libblockdevTestBitlk", self.passphrase)
+            BlockDev.crypto_bitlk_open("/non/existing/device", "libblockdevTestBitlk", self.passphrase)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.crypto_luks_open(self.bitlk_dev, "libblockdevTestBitlk", None)
-
-        with self.assertRaises(GLib.GError):
-            BlockDev.crypto_luks_open(self.bitlk_dev, "libblockdevTestBitlk", "wrong-passhprase")
+            BlockDev.crypto_bitlk_open(self.bitlk_dev, "libblockdevTestBitlk", "wrong-passhprase")
 
         succ = BlockDev.crypto_bitlk_open(self.bitlk_dev, "libblockdevTestBitlk", self.passphrase)
         self.assertTrue(succ)
