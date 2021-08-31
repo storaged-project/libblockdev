@@ -1,7 +1,7 @@
 import re
 import tempfile
 
-from distutils.version import LooseVersion
+from packaging.version import Version
 
 from .fs_test import FSTestCase, mounted
 
@@ -18,7 +18,7 @@ class VfatTestCase(FSTestCase):
 
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="vfat_test")
 
-        if self._get_dosfstools_version() <= LooseVersion("4.1"):
+        if self._get_dosfstools_version() <= Version("4.1"):
             self._mkfs_options = None
         else:
             self._mkfs_options = [BlockDev.ExtraArg.new("--mbr=n", "")]
@@ -29,7 +29,7 @@ class VfatTestCase(FSTestCase):
         m = re.search(r"mkfs\.fat ([\d\.]+)", out)
         if not m or len(m.groups()) != 1:
             raise RuntimeError("Failed to determine dosfstools version from: %s" % out)
-        return LooseVersion(m.groups()[0])
+        return Version(m.groups()[0])
 
 
 class VfatTestAvailability(VfatTestCase):

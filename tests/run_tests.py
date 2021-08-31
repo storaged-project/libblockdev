@@ -7,13 +7,13 @@ import datetime
 import os
 import pdb
 import re
+import shutil
 import subprocess
 import sys
 import traceback
 import unittest
 import yaml
 
-from distutils.spawn import find_executable
 
 from utils import TestTags, get_version
 
@@ -354,7 +354,7 @@ if __name__ == '__main__':
     result = runner.run(suite)
 
     # dump cropped journal to log file
-    if find_executable('journalctl'):
+    if shutil.which('journalctl'):
         with open('journaldump.log', 'w') as outfile:
             subprocess.call(['journalctl', '-S', start_time], stdout=outfile)
 

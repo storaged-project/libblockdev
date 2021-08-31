@@ -3,7 +3,7 @@ import time
 import tempfile
 import re
 
-from distutils.version import LooseVersion
+from packaging.version import Version
 
 
 from .fs_test import FSTestCase, mounted, check_output
@@ -32,7 +32,7 @@ class GenericTestCase(FSTestCase):
         m = re.search(r"mkfs\.fat ([\d\.]+)", out)
         if not m or len(m.groups()) != 1:
             raise RuntimeError("Failed to determine dosfstools version from: %s" % out)
-        return LooseVersion(m.groups()[0])
+        return Version(m.groups()[0])
 
 
 class TestGenericWipe(GenericTestCase):
@@ -59,7 +59,7 @@ class TestGenericWipe(GenericTestCase):
 
         # vfat has multiple signatures on the device so it allows us to test the
         # 'all' argument of fs_wipe()
-        if self._vfat_version >= LooseVersion("4.2"):
+        if self._vfat_version >= Version("4.2"):
             ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1 --mbr=n" % self.loop_dev)
         else:
             ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
@@ -84,7 +84,7 @@ class TestGenericWipe(GenericTestCase):
         self.assertEqual(fs_type, b"")
 
         # now do the wipe all in a one step
-        if self._vfat_version >= LooseVersion("4.2"):
+        if self._vfat_version >= Version("4.2"):
             ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1 --mbr=n" % self.loop_dev)
         else:
             ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
@@ -142,7 +142,7 @@ class TestClean(GenericTestCase):
 
         # vfat has multiple signatures on the device so it allows us to test
         # that clean removes all signatures
-        if self._vfat_version >= LooseVersion("4.2"):
+        if self._vfat_version >= Version("4.2"):
             ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1 --mbr=n" % self.loop_dev)
         else:
             ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
@@ -417,7 +417,7 @@ class GenericMkfs(GenericTestCase):
     def test_vfat_generic_mkfs(self):
         """ Test generic mkfs with vfat """
         label = "LABEL"
-        if self._vfat_version >= LooseVersion("4.2"):
+        if self._vfat_version >= Version("4.2"):
             extra = [BlockDev.ExtraArg.new("--mbr=n", "")]
         else:
             extra = None
@@ -833,7 +833,7 @@ class GenericResize(GenericTestCase):
     def test_vfat_generic_resize(self):
         """Test generic resize function with a vfat file system"""
         def mkfs_vfat(device, options=None):
-            if self._vfat_version >= LooseVersion("4.2"):
+            if self._vfat_version >= Version("4.2"):
                 if options:
                     return BlockDev.fs_vfat_mkfs(device, options + [BlockDev.ExtraArg.new("--mbr=n", "")])
                 else:
@@ -871,7 +871,7 @@ class GenericResize(GenericTestCase):
 
         # (still) impossible to shrink an XFS file system
         xfs_version = self._get_xfs_version()
-        if xfs_version < LooseVersion("5.12"):
+        if xfs_version < Version("5.12"):
             with mounted(lv, self.mount_dir):
                 with self.assertRaises(GLib.GError):
                     succ = BlockDev.fs_resize(lv, 40 * 1024**2)
@@ -914,7 +914,7 @@ class GenericResize(GenericTestCase):
         m = re.search(r"resize.f2fs ([\d\.]+)", out)
         if not m or len(m.groups()) != 1:
             raise RuntimeError("Failed to determine f2fs version from: %s" % out)
-        return LooseVersion(m.groups()[0]) >= LooseVersion("1.12.0")
+        return Version(m.groups()[0]) >= Version("1.12.0")
 
     def test_f2fs_generic_resize(self):
         """Verify that it is possible to resize an f2fs file system"""
@@ -1008,7 +1008,7 @@ class GenericGetFreeSpace(GenericTestCase):
     def test_vfat_get_free_space(self):
         """Test generic resize function with a vfat file system"""
         def mkfs_vfat(device, options=None):
-            if self._vfat_version >= LooseVersion("4.2"):
+            if self._vfat_version >= Version("4.2"):
                 if options:
                     return BlockDev.fs_vfat_mkfs(device, options + [BlockDev.ExtraArg.new("--mbr=n", "")])
                 else:

@@ -6,7 +6,7 @@ import overrides_hack
 
 from gi.repository import BlockDev, GLib
 from bytesize.bytesize import Size, ROUND_UP, B
-from distutils.version import LooseVersion
+from packaging.version import Version
 
 
 class PartTestCase(unittest.TestCase):
@@ -19,7 +19,7 @@ class PartTestCase(unittest.TestCase):
         m = re.search(r"fdisk from util-linux\s+([\d\.]+)", out)
         if not m or len(m.groups()) != 1:
             raise RuntimeError("Failed to determine fdisk version from: %s" % out)
-        return LooseVersion(m.groups()[0])
+        return Version(m.groups()[0])
 
     @classmethod
     def setUpClass(cls):
@@ -1023,7 +1023,7 @@ class PartCreateResizePartCase(PartTestCase):
         except Exception as e:
             resize_tolerance = 0
         else:
-            if fdisk_version < LooseVersion("2.33"):
+            if fdisk_version < Version("2.33"):
                 # older versions of libfdisk don't count free space between partitions as a usable
                 # free space which also means max size for resize is about 1 MiB smaller because
                 # the free space between the partition being resized and the "free space" partition

@@ -1,7 +1,7 @@
 import tempfile
 import re
 
-from distutils.version import LooseVersion
+from packaging.version import Version
 
 from .fs_test import FSTestCase, mounted
 
@@ -30,7 +30,7 @@ class F2FSTestCase(FSTestCase):
         m = re.search(r"resize.f2fs ([\d\.]+)", out)
         if not m or len(m.groups()) != 1:
             raise RuntimeError("Failed to determine f2fs version from: %s" % out)
-        return LooseVersion(m.groups()[0]) >= LooseVersion("1.12.0")
+        return Version(m.groups()[0]) >= Version("1.12.0")
 
     def _check_fsck_f2fs_version(self):
         # if it can run -V to get version it can do the check

@@ -4,7 +4,7 @@ import subprocess
 import unittest
 
 from contextlib import contextmanager
-from distutils.version import LooseVersion
+from packaging.version import Version
 
 import utils
 import overrides_hack
@@ -156,7 +156,7 @@ class FSTestCase(unittest.TestCase):
         m = re.search(r"mkfs\.xfs version ([\d\.]+)", out)
         if not m or len(m.groups()) != 1:
             raise RuntimeError("Failed to determine xfsprogs version from: %s" % out)
-        return LooseVersion(m.groups()[0])
+        return Version(m.groups()[0])
 
     def _destroy_lvm(self, vgname):
         utils.run("vgremove --yes %s >/dev/null 2>&1" % vgname)
