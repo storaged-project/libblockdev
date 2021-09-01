@@ -425,8 +425,8 @@ class ExtGetInfo(FSTestCase):
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
         self.assertEqual(fi.block_count, 100 * 1024**2 / 1024)
-        # at least 90 % should be available, so it should be reported
-        self.assertGreater(fi.free_blocks, 0.90 * 100 * 1024**2 / 1024)
+        # at least 80 % should be available, so it should be reported
+        self.assertGreater(fi.free_blocks, 0.80 * 100 * 1024**2 / 1024)
         self.assertEqual(fi.label, "")
         # should be an non-empty string
         self.assertTrue(fi.uuid)
@@ -436,8 +436,8 @@ class ExtGetInfo(FSTestCase):
             fi = BlockDev.fs_ext4_get_info(self.loop_dev)
             self.assertEqual(fi.block_size, 1024)
             self.assertEqual(fi.block_count, 100 * 1024**2 / 1024)
-            # at least 90 % should be available, so it should be reported
-            self.assertGreater(fi.free_blocks, 0.90 * 100 * 1024**2 / 1024)
+            # at least 80 % should be available, so it should be reported
+            self.assertGreater(fi.free_blocks, 0.80 * 100 * 1024**2 / 1024)
             self.assertEqual(fi.label, "")
             # should be an non-empty string
             self.assertTrue(fi.uuid)
@@ -515,8 +515,8 @@ class ExtResize(FSTestCase):
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
         self.assertEqual(fi.block_count, 100 * 1024**2 / 1024)
-        # at least 90 % should be available, so it should be reported
-        self.assertGreater(fi.free_blocks, 0.90 * 100 * 1024**2 / 1024)
+        # at least 80 % should be available, so it should be reported
+        self.assertGreater(fi.free_blocks, 0.80 * 100 * 1024**2 / 1024)
 
         succ = resize_function(self.loop_dev, 50 * 1024**2, None)
         self.assertTrue(succ)
@@ -532,8 +532,8 @@ class ExtResize(FSTestCase):
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
         self.assertEqual(fi.block_count, 100 * 1024**2 / 1024)
-        # at least 90 % should be available, so it should be reported
-        self.assertGreater(fi.free_blocks, 0.90 * 100 * 1024**2 / 1024)
+        # at least 80 % should be available, so it should be reported
+        self.assertGreater(fi.free_blocks, 0.80 * 100 * 1024**2 / 1024)
 
         # resize again
         succ = resize_function(self.loop_dev, 50 * 1024**2, None)
@@ -550,8 +550,8 @@ class ExtResize(FSTestCase):
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
         self.assertEqual(fi.block_count, 100 * 1024**2 / 1024)
-        # at least 90 % should be available, so it should be reported
-        self.assertGreater(fi.free_blocks, 0.90 * 100 * 1024**2 / 1024)
+        # at least 80 % should be available, so it should be reported
+        self.assertGreater(fi.free_blocks, 0.80 * 100 * 1024**2 / 1024)
 
     def test_ext2_resize(self):
         """Verify that it is possible to resize an ext2 file system"""
