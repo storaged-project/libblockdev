@@ -1270,34 +1270,6 @@ class MountTest(FSTestCase):
         self.assertTrue(succ)
         self.assertFalse(os.path.ismount(tmp))
 
-    def test_mount_ntfs_ro(self):
-        """ Test mounting and unmounting read-only device with NTFS filesystem"""
-
-        if not self.ntfs_avail:
-            self.skipTest("skipping NTFS: not available")
-
-        succ = BlockDev.fs_ntfs_mkfs(self.loop_dev, None)
-        self.assertTrue(succ)
-
-        tmp = tempfile.mkdtemp(prefix="libblockdev.", suffix="mount_test")
-        self.addCleanup(os.rmdir, tmp)
-
-        # set the device read-only
-        self.setro(self.loop_dev)
-        self.addCleanup(self.setrw, self.loop_dev)
-
-        # forced rw mount should fail
-        with self.assertRaises(GLib.GError):
-            BlockDev.fs_mount(self.loop_dev, tmp, "ntfs", "rw")
-
-        # read-only mount should work
-        succ = BlockDev.fs_mount(self.loop_dev, tmp, "ntfs", "ro")
-        self.assertTrue(succ)
-        self.assertTrue(os.path.ismount(tmp))
-
-        succ = BlockDev.fs_unmount(self.loop_dev, False, False, None)
-        self.assertTrue(succ)
-        self.assertFalse(os.path.ismount(tmp))
 
 class GenericCheck(FSTestCase):
     log = []
