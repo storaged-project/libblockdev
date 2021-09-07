@@ -24,12 +24,6 @@
 
 ---
 
-- test: fs_tests.mount_test.MountTestCase.test_mount_ntfs_ro
-  skip_on:
-    - distro: "debian"
-      version: ["10", "11", "testing"]
-      reason: "NTFS mounting of read-only devices doesn't work as expected on Debian"
-
 - test: kbd_test.KbdZRAM*
   skip_on:
     - distro: "debian"
