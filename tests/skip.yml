@@ -34,12 +34,6 @@
       version: "9"
       reason: "volume_key asks for password in non-interactive mode on this release"
 
-- test: fs_test.MountTest.test_mount_ntfs_ro
-  skip_on:
-    - distro: "debian"
-      version: ["9", "10", "11", "testing"]
-      reason: "NTFS mounting of read-only devices doesn't work as expected on Debian"
-
 - test: kbd_test.KbdZRAM*
   skip_on:
     - distro: "debian"
