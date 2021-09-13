@@ -133,6 +133,23 @@ static void add_computed_stats (GHashTable *stats) {
     add_journal_stats (stats);
 }
 
+static gchar* _dm_node_from_name (const gchar *map_name, GError **error) {
+    gchar *dev_path = NULL;
+    gchar *ret = NULL;
+    gchar *dev_mapper_path = g_strdup_printf ("/dev/mapper/%s", map_name);
+
+    dev_path = bd_utils_resolve_device (dev_mapper_path, error);
+    g_free (dev_mapper_path);
+    if (!dev_path)
+        /* error is already populated */
+        return NULL;
+
+    ret = g_path_get_basename (dev_path);
+    g_free (dev_path);
+
+    return ret;
+}
+
 GHashTable __attribute__ ((visibility ("hidden")))
 *vdo_get_stats_full (const gchar *name, GError **error) {
     GHashTable *stats;
@@ -141,14 +158,32 @@ GHashTable __attribute__ ((visibility ("hidden")))
     const gchar *direntry;
     gchar *s;
     gchar *val = NULL;
+    g_autofree gchar *dm_node = NULL;
 
-    /* TODO: does the `name` need to be escaped? */
-    stats_dir = g_build_path (G_DIR_SEPARATOR_S, VDO_SYS_PATH, name, "statistics", NULL);
+    /* try "new" (kvdo >= 8) path first -- /sys/block/dm-X/vdo/statistics */
+    dm_node = _dm_node_from_name (name, error);
+    if (dm_node == NULL) {
+        g_prefix_error (error, "Failed to get DM node for %s: ", name);
+        return NULL;
+    }
+
+    stats_dir = g_build_path (G_DIR_SEPARATOR_S, "/sys/block", dm_node, "vdo/statistics", NULL);
     dir = g_dir_open (stats_dir, 0, error);
     if (dir == NULL) {
-        g_prefix_error (error, "Error reading statistics from %s: ", stats_dir);
+        bd_utils_log_format (BD_UTILS_LOG_INFO,
+                             "Failed to read VDO stats using the new API, falling back to %s: %s",
+                             VDO_SYS_PATH, (*error)->message);
         g_free (stats_dir);
-        return NULL;
+        g_clear_error (error);
+
+        /* lets try /sys/kvdo */
+        stats_dir = g_build_path (G_DIR_SEPARATOR_S, VDO_SYS_PATH, name, "statistics", NULL);
+        dir = g_dir_open (stats_dir, 0, error);
+        if (dir == NULL) {
+            g_prefix_error (error, "Error reading statistics from %s: ", stats_dir);
+            g_free (stats_dir);
+            return NULL;
+        }
     }
 
     stats = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
