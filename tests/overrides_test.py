@@ -15,10 +15,12 @@ class OverridesTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        BlockDev.switch_init_checks(False)
         if not BlockDev.is_initialized():
             BlockDev.init(cls.requested_plugins, None)
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
+        BlockDev.switch_init_checks(True)
 
 class OverridesTestCase(OverridesTest):
     @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
@@ -65,7 +67,20 @@ class OverridesTestCase(OverridesTest):
         self.assertEqual(BlockDev.lvm_get_thpool_padding(11 * 1024**2),
                          expected_padding)
 
-class OverridesUnloadTestCase(OverridesTest):
+class OverridesUnloadTestCase(unittest.TestCase):
+    # all plugins except for 'btrfs', 'fs' and 'mpath' -- these don't have all
+    # the dependencies on CentOS/Debian and we don't need them for this test
+    requested_plugins = BlockDev.plugin_specs_from_names(("crypto", "dm",
+                                                          "kbd", "loop",
+                                                          "mdraid", "part", "swap"))
+
+    @classmethod
+    def setUpClass(cls):
+        if not BlockDev.is_initialized():
+            BlockDev.init(cls.requested_plugins, None)
+        else:
+            BlockDev.reinit(cls.requested_plugins, True, None)
+
     def tearDown(self):
         # make sure the library is initialized with all plugins loaded for other
         # tests
@@ -80,7 +95,7 @@ class OverridesUnloadTestCase(OverridesTest):
 
         # no longer loaded
         with self.assertRaises(BlockDev.BlockDevNotImplementedError):
-            BlockDev.lvm.get_max_lv_size()
+            BlockDev.md.canonicalize_uuid("3386ff85:f5012621:4a435f06:1eb47236")
 
         # load the plugins back
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
@@ -92,9 +107,9 @@ class OverridesUnloadTestCase(OverridesTest):
 
         # the exception should be properly inherited from two classes
         with self.assertRaises(NotImplementedError):
-            BlockDev.lvm.get_max_lv_size()
+            BlockDev.md.canonicalize_uuid("3386ff85:f5012621:4a435f06:1eb47236")
         with self.assertRaises(BlockDev.BlockDevError):
-            BlockDev.lvm.get_max_lv_size()
+            BlockDev.md.canonicalize_uuid("3386ff85:f5012621:4a435f06:1eb47236")
 
         # load the plugins back
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))

@@ -49,6 +49,8 @@
 static GMutex global_config_lock;
 static gchar *global_config_str = NULL;
 
+static gchar *global_devices_str = NULL;
+
 /**
  * SECTION: lvm
  * @short_description: plugin for operations with LVM
@@ -233,10 +235,13 @@ static GMutex deps_check_lock;
 
 #define DEPS_LVM 0
 #define DEPS_LVM_MASK (1 << DEPS_LVM)
-#define DEPS_LAST 1
+#define DEPS_LVMDEVICES 1
+#define DEPS_LVMDEVICES_MASK (1 << DEPS_LVMDEVICES)
+#define DEPS_LAST 2
 
 static const UtilDep deps[DEPS_LAST] = {
     {"lvm", LVM_MIN_VERSION, "version", "LVM version:\\s+([\\d\\.]+)"},
+    {"lvmdevices", NULL, NULL, NULL},
 };
 
 #define FEATURES_VDO 0
@@ -351,6 +356,8 @@ gboolean bd_lvm_is_tech_avail (BDLVMTech tech, guint64 mode, GError **error) {
     case BD_LVM_TECH_WRITECACHE:
             return check_features (&avail_features, FEATURES_WRITECACHE_MASK, features, FEATURES_LAST, &deps_check_lock, error) &&
                    check_deps (&avail_deps, DEPS_LVM_MASK, deps, DEPS_LAST, &deps_check_lock, error);
+    case BD_LVM_TECH_DEVICES:
+            return check_deps (&avail_deps, DEPS_LVMDEVICES_MASK, deps, DEPS_LAST, &deps_check_lock, error);
     default:
         /* everything is supported by this implementation of the plugin */
         return check_deps (&avail_deps, DEPS_LVM_MASK, deps, DEPS_LAST, &deps_check_lock, error);
@@ -361,6 +368,8 @@ static gboolean call_lvm_and_report_error (const gchar **args, const BDExtraArg 
     gboolean success = FALSE;
     guint i = 0;
     guint args_length = g_strv_length ((gchar **) args);
+    g_autofree gchar *config_arg = NULL;
+    g_autofree gchar *devices_arg = NULL;
 
     if (!check_deps (&avail_deps, DEPS_LVM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
@@ -369,20 +378,26 @@ static gboolean call_lvm_and_report_error (const gchar **args, const BDExtraArg 
     if (lock_config)
         g_mutex_lock (&global_config_lock);
 
-    /* allocate enough space for the args plus "lvm", "--config" and NULL */
-    const gchar **argv = g_new0 (const gchar*, args_length + 3);
+    /* allocate enough space for the args plus "lvm", "--config", "--devices" and NULL */
+    const gchar **argv = g_new0 (const gchar*, args_length + 4);
 
     /* construct argv from args with "lvm" prepended */
     argv[0] = "lvm";
     for (i=0; i < args_length; i++)
         argv[i+1] = args[i];
-    argv[args_length + 1] = global_config_str ? g_strdup_printf("--config=%s", global_config_str) : NULL;
-    argv[args_length + 2] = NULL;
+    if (global_config_str) {
+        config_arg = g_strdup_printf("--config=%s", global_config_str);
+        argv[++args_length] = config_arg;
+    }
+    if (global_devices_str) {
+        devices_arg = g_strdup_printf("--devices=%s", global_devices_str);
+        argv[++args_length] = devices_arg;
+    }
+    argv[++args_length] = NULL;
 
     success = bd_utils_exec_and_report_error (argv, extra, error);
     if (lock_config)
         g_mutex_unlock (&global_config_lock);
-    g_free ((gchar *) argv[args_length + 1]);
     g_free (argv);
 
     return success;
@@ -392,6 +407,8 @@ static gboolean call_lvm_and_capture_output (const gchar **args, const BDExtraAr
     gboolean success = FALSE;
     guint i = 0;
     guint args_length = g_strv_length ((gchar **) args);
+    g_autofree gchar *config_arg = NULL;
+    g_autofree gchar *devices_arg = NULL;
 
     if (!check_deps (&avail_deps, DEPS_LVM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
@@ -399,19 +416,25 @@ static gboolean call_lvm_and_capture_output (const gchar **args, const BDExtraAr
     /* don't allow global config string changes during the run */
     g_mutex_lock (&global_config_lock);
 
-    /* allocate enough space for the args plus "lvm", "--config" and NULL */
-    const gchar **argv = g_new0 (const gchar*, args_length + 3);
+    /* allocate enough space for the args plus "lvm", "--config", "--devices" and NULL */
+    const gchar **argv = g_new0 (const gchar*, args_length + 4);
 
     /* construct argv from args with "lvm" prepended */
     argv[0] = "lvm";
     for (i=0; i < args_length; i++)
         argv[i+1] = args[i];
-    argv[args_length + 1] = global_config_str ? g_strdup_printf("--config=%s", global_config_str) : NULL;
-    argv[args_length + 2] = NULL;
+    if (global_config_str) {
+        config_arg = g_strdup_printf("--config=%s", global_config_str);
+        argv[++args_length] = config_arg;
+    }
+    if (global_devices_str) {
+        devices_arg = g_strdup_printf("--devices=%s", global_devices_str);
+        argv[++args_length] = devices_arg;
+    }
+    argv[++args_length] = NULL;
 
     success = bd_utils_exec_and_capture_output (argv, extra, output, error);
     g_mutex_unlock (&global_config_lock);
-    g_free ((gchar *) argv[args_length + 1]);
     g_free (argv);
 
     return success;
@@ -2174,6 +2197,58 @@ gchar* bd_lvm_get_global_config (GError **error UNUSED) {
 }
 
 /**
+ * bd_lvm_set_devices_filter:
+ * @devices: (allow-none) (array zero-terminated=1): list of devices for lvm commands to work on
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the devices filter was successfully set or not
+ *
+ * Tech category: %BD_LVM_TECH_DEVICES no mode (it is ignored)
+ */
+gboolean bd_lvm_set_devices_filter (const gchar **devices, GError **error) {
+    if (!bd_lvm_is_tech_avail (BD_LVM_TECH_DEVICES, 0, error))
+        return FALSE;
+
+    g_mutex_lock (&global_config_lock);
+
+    /* first free the old value */
+    g_free (global_devices_str);
+
+    /* now store the new one */
+    if (!devices || !(*devices))
+        global_devices_str = NULL;
+    else
+        global_devices_str = g_strjoinv (",", (gchar **) devices);
+
+    g_mutex_unlock (&global_config_lock);
+    return TRUE;
+}
+
+/**
+ * bd_lvm_get_devices_filter:
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: (transfer full) (array zero-terminated=1): a copy of a string representation of
+ *                                                     the currently set LVM devices filter
+ *
+ * Tech category: %BD_LVM_TECH_DEVICES no mode (it is ignored)
+ */
+gchar** bd_lvm_get_devices_filter (GError **error UNUSED) {
+    gchar **ret = NULL;
+
+    g_mutex_lock (&global_config_lock);
+
+    if (global_devices_str)
+        ret = g_strsplit (global_devices_str, ",", -1);
+    else
+        ret = NULL;
+
+    g_mutex_unlock (&global_config_lock);
+
+    return ret;
+}
+
+/**
  * bd_lvm_cache_get_default_md_size:
  * @cache_size: size of the cache to determine MD size for
  * @error: (out): place to store error (if any)
@@ -3362,4 +3437,56 @@ BDLVMVDOStats* bd_lvm_vdo_get_stats (const gchar *vg_name, const gchar *pool_nam
     g_hash_table_destroy (full_stats);
 
     return stats;
+}
+
+/**
+ * bd_lvm_devices_add:
+ * @device: device (PV) to add to the devices file
+ * @devices_file: (allow-none): LVM devices file or %NULL for default
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the lvmdevices command
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully added to @devices_file or not
+ *
+ * Tech category: %BD_LVM_TECH_DEVICES no mode (it is ignored)
+ */
+gboolean bd_lvm_devices_add (const gchar *device, const gchar *devices_file, const BDExtraArg **extra, GError **error) {
+    const gchar *args[5] = {"lvmdevices", "--adddev", device, NULL, NULL};
+    g_autofree gchar *devfile = NULL;
+
+    if (!bd_lvm_is_tech_avail (BD_LVM_TECH_DEVICES, 0, error))
+        return FALSE;
+
+    if (devices_file) {
+        devfile = g_strdup_printf ("--devicesfile=%s", devices_file);
+        args[3] = devfile;
+    }
+
+    return bd_utils_exec_and_report_error (args, extra, error);
+}
+
+/**
+ * bd_lvm_devices_delete:
+ * @device: device (PV) to delete from the devices file
+ * @devices_file: (allow-none): LVM devices file or %NULL for default
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the lvmdevices command
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully removed from @devices_file or not
+ *
+ * Tech category: %BD_LVM_TECH_DEVICES no mode (it is ignored)
+ */
+gboolean bd_lvm_devices_delete (const gchar *device, const gchar *devices_file, const BDExtraArg **extra, GError **error) {
+    const gchar *args[5] = {"lvmdevices", "--deldev", device, NULL, NULL};
+    g_autofree gchar *devfile = NULL;
+
+    if (!bd_lvm_is_tech_avail (BD_LVM_TECH_DEVICES, 0, error))
+        return FALSE;
+
+    if (devices_file) {
+        devfile = g_strdup_printf ("--devicesfile=%s", devices_file);
+        args[3] = devfile;
+    }
+
+    return bd_utils_exec_and_report_error (args, extra, error);
 }

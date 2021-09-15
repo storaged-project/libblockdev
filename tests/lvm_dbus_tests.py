@@ -9,7 +9,7 @@ import subprocess
 from packaging.version import Version
 from itertools import chain
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, run_command, TestTags, tag_test
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, run_command, TestTags, tag_test, read_file
 from gi.repository import BlockDev, GLib
 
 import dbus
@@ -31,6 +31,11 @@ class LVMTestCase(unittest.TestCase):
                 BlockDev.init([cls.ps, cls.ps2], None)
             else:
                 BlockDev.reinit([cls.ps, cls.ps2], True, None)
+
+        try:
+            cls.devices_avail = BlockDev.lvm_is_tech_avail(BlockDev.LVMTech.DEVICES, 0)
+        except:
+            cls.devices_avail = False
 
     @classmethod
     def _get_lvm_version(cls):
@@ -62,8 +67,7 @@ class LvmNoDevTestCase(LVMTestCase):
 
         super(LvmNoDevTestCase, cls).tearDownClass()
 
-    def __init__(self, *args, **kwargs):
-        super(LvmNoDevTestCase, self).__init__(*args, **kwargs)
+    def setUp(self):
         self._log = ""
 
     @tag_test(TestTags.NOSTORAGE)
@@ -243,6 +247,45 @@ class LvmNoDevTestCase(LVMTestCase):
 
         # reset back to default
         succ = BlockDev.lvm_set_global_config(None)
+        self.assertTrue(succ)
+
+    @tag_test(TestTags.NOSTORAGE)
+    def test_get_set_global_devices_filter(self):
+        """Verify that getting and setting LVM devices filter works as expected"""
+        if not self.devices_avail:
+            self.skipTest("skipping LVM devices filter test: not supported")
+
+        # setup logging
+        self.assertTrue(BlockDev.reinit([self.ps], False, self._store_log))
+
+        # no global config set initially
+        self.assertListEqual(BlockDev.lvm_get_devices_filter(), [])
+
+        # set and try to get back
+        succ = BlockDev.lvm_set_devices_filter(["/dev/sda"])
+        self.assertTrue(succ)
+        self.assertListEqual(BlockDev.lvm_get_devices_filter(), ["/dev/sda"])
+
+        # reset and try to get back
+        succ = BlockDev.lvm_set_devices_filter(None)
+        self.assertTrue(succ)
+        self.assertListEqual(BlockDev.lvm_get_devices_filter(), [])
+
+        # set twice and try to get back twice
+        succ = BlockDev.lvm_set_devices_filter(["/dev/sda"])
+        self.assertTrue(succ)
+        succ = BlockDev.lvm_set_devices_filter(["/dev/sdb"])
+        self.assertTrue(succ)
+        self.assertEqual(BlockDev.lvm_get_devices_filter(), ["/dev/sdb"])
+
+        # set something sane and check it's really used
+        succ = BlockDev.lvm_set_devices_filter(["/dev/sdb", "/dev/sdc"])
+        BlockDev.lvm_pvscan()
+        self.assertIn("'--devices'", self._log)
+        self.assertIn("'/dev/sdb,/dev/sdc'", self._log)
+
+        # reset back to default
+        succ = BlockDev.lvm_set_devices_filter(None)
         self.assertTrue(succ)
 
     @tag_test(TestTags.NOSTORAGE)
@@ -1916,3 +1959,38 @@ class LVMVDOTest(LVMTestCase):
 
         full_stats = BlockDev.lvm_vdo_get_stats_full("testVDOVG", "vdoPool")
         self.assertIn("writeAmplificationRatio", full_stats.keys())
+
+
+class LvmTestDevicesFile(LvmPVonlyTestCase):
+    devicefile = "bd_lvm_dbus_tests.devices"
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree("/etc/lvm/devices/" + cls.devicefile, ignore_errors=True)
+
+        super(LvmTestDevicesFile, cls).tearDownClass()
+
+    def test_devices_add_delete(self):
+        if not self.devices_avail:
+            self.skipTest("skipping LVM devices file test: not supported")
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
+        self.assertTrue(succ)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_devices_add("/non/existing/device", self.devicefile)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_devices_delete(self.loop_dev, self.devicefile)
+
+        succ = BlockDev.lvm_devices_add(self.loop_dev, self.devicefile)
+        self.assertTrue(succ)
+
+        dfile = read_file("/etc/lvm/devices/" + self.devicefile)
+        self.assertIn(self.loop_dev, dfile)
+
+        succ = BlockDev.lvm_devices_delete(self.loop_dev, self.devicefile)
+        self.assertTrue(succ)
+
+        dfile = read_file("/etc/lvm/devices/" + self.devicefile)
+        self.assertNotIn(self.loop_dev, dfile)
