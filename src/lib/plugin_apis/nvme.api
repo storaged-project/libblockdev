@@ -793,6 +793,110 @@ typedef enum {
 } BDNVMEFormatSecureErase;
 
 
+/* BpG-skip */
+/**
+ * BDNVMESanitizeStatus:
+ * @BD_NVME_SANITIZE_STATUS_NEVER_SANITIZED: The NVM subsystem has never been sanitized.
+ * @BD_NVME_SANITIZE_STATUS_IN_PROGESS: A sanitize operation is currently in progress.
+ * @BD_NVME_SANITIZE_STATUS_SUCCESS: The most recent sanitize operation completed successfully including any additional media modification.
+ * @BD_NVME_SANITIZE_STATUS_SUCCESS_NO_DEALLOC: The most recent sanitize operation for which No-Deallocate After Sanitize was requested has completed successfully with deallocation of all user data.
+ * @BD_NVME_SANITIZE_STATUS_FAILED: The most recent sanitize operation failed.
+ */
+/* BpG-skip-end */
+typedef enum {
+    BD_NVME_SANITIZE_STATUS_NEVER_SANITIZED = 0,
+    BD_NVME_SANITIZE_STATUS_IN_PROGESS = 1,
+    BD_NVME_SANITIZE_STATUS_SUCCESS = 2,
+    BD_NVME_SANITIZE_STATUS_SUCCESS_NO_DEALLOC = 3,
+    BD_NVME_SANITIZE_STATUS_FAILED = 4,
+} BDNVMESanitizeStatus;
+
+
+#define BD_NVME_TYPE_SANITIZE_LOG (bd_nvme_sanitize_log_get_type ())
+GType bd_nvme_sanitize_log_get_type ();
+
+/**
+ * BDNVMESanitizeLog:
+ * @sanitize_progress: The percentage complete of the sanitize operation.
+ * @sanitize_status: The status of the most recent sanitize operation.
+ * @global_data_erased: Indicates that no user data has been written either since the drive was manufactured and
+ *                      has never been sanitized or since the most recent successful sanitize operation.
+ * @overwrite_passes: Number of completed passes if the most recent sanitize operation was an Overwrite.
+ * @time_for_overwrite: Estimated time in seconds needed to complete an Overwrite sanitize operation with 16 passes in the background.
+ *                      A value of -1 means that no time estimate is reported. A value of 0 means that the operation is expected
+ *                      to be completed in the background when the Sanitize command is completed.
+ * @time_for_block_erase: Estimated time in seconds needed to complete a Block Erase sanitize operation in the background.
+ *                        A value of -1 means that no time estimate is reported. A value of 0 means that the operation is expected
+ *                        to be completed in the background when the Sanitize command is completed.
+ * @time_for_crypto_erase: Estimated time in seconds needed to complete a Crypto Erase sanitize operation in the background.
+ *                         A value of -1 means that no time estimate is reported. A value of 0 means that the operation is expected
+ *                         to be completed in the background when the Sanitize command is completed.
+ * @time_for_overwrite_nd: Estimated time in seconds needed to complete an Overwrite sanitize operation and the associated
+ *                         additional media modification in the background when the No-Deallocate After Sanitize or
+ *                         the No-Deallocate Modifies Media After Sanitize features have been requested.
+ * @time_for_block_erase_nd: Estimated time in seconds needed to complete a Block Erase sanitize operation and the associated
+ *                           additional media modification in the background when the No-Deallocate After Sanitize or
+ *                           the No-Deallocate Modifies Media After Sanitize features have been requested.
+ * @time_for_crypto_erase_nd: Estimated time in seconds needed to complete a Crypto Erase sanitize operation and the associated
+ *                            additional media modification in the background when the No-Deallocate After Sanitize or
+ *                            the No-Deallocate Modifies Media After Sanitize features have been requested.
+ */
+typedef struct BDNVMESanitizeLog {
+    gdouble sanitize_progress;
+    BDNVMESanitizeStatus sanitize_status;
+    gboolean global_data_erased;
+    guint8 overwrite_passes;
+    gint64 time_for_overwrite;
+    gint64 time_for_block_erase;
+    gint64 time_for_crypto_erase;
+    gint64 time_for_overwrite_nd;
+    gint64 time_for_block_erase_nd;
+    gint64 time_for_crypto_erase_nd;
+} BDNVMESanitizeLog;
+
+/**
+ * bd_nvme_sanitize_log_free: (skip)
+ * @log: (nullable): %BDNVMESanitizeLog to free
+ *
+ * Frees @log.
+ */
+void bd_nvme_sanitize_log_free (BDNVMESanitizeLog *log) {
+    if (log == NULL)
+        return;
+
+    g_free (log);
+}
+
+/**
+ * bd_nvme_sanitize_log_copy: (skip)
+ * @log: (nullable): %BDNVMESanitizeLog to copy
+ *
+ * Creates a new copy of @log.
+ */
+BDNVMESanitizeLog * bd_nvme_sanitize_log_copy (BDNVMESanitizeLog *log) {
+    BDNVMESanitizeLog *new_log;
+
+    if (log == NULL)
+        return NULL;
+
+    new_log = g_new0 (BDNVMESanitizeLog, 1);
+    memcpy (new_log, log, sizeof (BDNVMESanitizeLog));
+
+    return new_log;
+}
+
+GType bd_nvme_sanitize_log_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY (type == 0)) {
+        type = g_boxed_type_register_static ("BDNVMESanitizeLog",
+                                             (GBoxedCopyFunc) bd_nvme_sanitize_log_copy,
+                                             (GBoxedFreeFunc) bd_nvme_sanitize_log_free);
+    }
+    return type;
+}
+
+
 /**
  * bd_nvme_get_controller_info:
  * @device: a NVMe controller device (e.g. /dev/nvme0)
@@ -869,6 +973,24 @@ BDNVMEErrorLogEntry ** bd_nvme_get_error_log_entries (const gchar *device, GErro
  * Tech category: %BD_NVME_TECH_NVME-%BD_NVME_TECH_MODE_INFO
  */
 BDNVMESelfTestLog * bd_nvme_get_self_test_log (const gchar *device, GError **error);
+
+/**
+ * bd_nvme_get_sanitize_log:
+ * @device: a NVMe controller device (e.g. /dev/nvme0)
+ * @error: (out) (nullable): place to store error (if any)
+ *
+ * Retrieves the drive sanitize status log (Log Identifier %81h) that includes information
+ * about the most recent sanitize operation and the sanitize operation time estimates.
+ *
+ * As advised in the NVMe specification whitepaper the host should limit polling
+ * to retrieve progress of a running sanitize operations (e.g. to at most once every
+ * several minutes) to avoid interfering with the progress of the sanitize operation itself.
+ *
+ * Returns: (transfer full): sanitize log data or %NULL in case of an error (with @error set).
+ *
+ * Tech category: %BD_NVME_TECH_NVME-%BD_NVME_TECH_MODE_INFO
+ */
+BDNVMESanitizeLog * bd_nvme_get_sanitize_log (const gchar *device, GError **error);
 
 /**
  * bd_nvme_device_self_test:

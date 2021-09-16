@@ -407,6 +407,61 @@ typedef enum {
     BD_NVME_FORMAT_SECURE_ERASE_CRYPTO    = 2,
 } BDNVMEFormatSecureErase;
 
+/**
+ * BDNVMESanitizeStatus:
+ * @BD_NVME_SANITIZE_STATUS_NEVER_SANITIZED: The NVM subsystem has never been sanitized.
+ * @BD_NVME_SANITIZE_STATUS_IN_PROGESS: A sanitize operation is currently in progress.
+ * @BD_NVME_SANITIZE_STATUS_SUCCESS: The most recent sanitize operation completed successfully including any additional media modification.
+ * @BD_NVME_SANITIZE_STATUS_SUCCESS_NO_DEALLOC: The most recent sanitize operation for which No-Deallocate After Sanitize was requested has completed successfully with deallocation of all user data.
+ * @BD_NVME_SANITIZE_STATUS_FAILED: The most recent sanitize operation failed.
+ */
+typedef enum {
+    BD_NVME_SANITIZE_STATUS_NEVER_SANITIZED = 0,
+    BD_NVME_SANITIZE_STATUS_IN_PROGESS = 1,
+    BD_NVME_SANITIZE_STATUS_SUCCESS = 2,
+    BD_NVME_SANITIZE_STATUS_SUCCESS_NO_DEALLOC = 3,
+    BD_NVME_SANITIZE_STATUS_FAILED = 4,
+} BDNVMESanitizeStatus;
+
+/**
+ * BDNVMESanitizeLog:
+ * @sanitize_progress: The percentage complete of the sanitize operation.
+ * @sanitize_status: The status of the most recent sanitize operation.
+ * @global_data_erased: Indicates that no user data has been written either since the drive was manufactured and
+ *                      has never been sanitized or since the most recent successful sanitize operation.
+ * @overwrite_passes: Number of completed passes if the most recent sanitize operation was an Overwrite.
+ * @time_for_overwrite: Estimated time in seconds needed to complete an Overwrite sanitize operation with 16 passes in the background.
+ *                      A value of -1 means that no time estimate is reported. A value of 0 means that the operation is expected
+ *                      to be completed in the background when the Sanitize command is completed.
+ * @time_for_block_erase: Estimated time in seconds needed to complete a Block Erase sanitize operation in the background.
+ *                        A value of -1 means that no time estimate is reported. A value of 0 means that the operation is expected
+ *                        to be completed in the background when the Sanitize command is completed.
+ * @time_for_crypto_erase: Estimated time in seconds needed to complete a Crypto Erase sanitize operation in the background.
+ *                         A value of -1 means that no time estimate is reported. A value of 0 means that the operation is expected
+ *                         to be completed in the background when the Sanitize command is completed.
+ * @time_for_overwrite_nd: Estimated time in seconds needed to complete an Overwrite sanitize operation and the associated
+ *                         additional media modification in the background when the No-Deallocate After Sanitize or
+ *                         the No-Deallocate Modifies Media After Sanitize features have been requested.
+ * @time_for_block_erase_nd: Estimated time in seconds needed to complete a Block Erase sanitize operation and the associated
+ *                           additional media modification in the background when the No-Deallocate After Sanitize or
+ *                           the No-Deallocate Modifies Media After Sanitize features have been requested.
+ * @time_for_crypto_erase_nd: Estimated time in seconds needed to complete a Crypto Erase sanitize operation and the associated
+ *                            additional media modification in the background when the No-Deallocate After Sanitize or
+ *                            the No-Deallocate Modifies Media After Sanitize features have been requested.
+ */
+typedef struct BDNVMESanitizeLog {
+    gdouble sanitize_progress;
+    BDNVMESanitizeStatus sanitize_status;
+    gboolean global_data_erased;
+    guint8 overwrite_passes;
+    gint64 time_for_overwrite;
+    gint64 time_for_block_erase;
+    gint64 time_for_crypto_erase;
+    gint64 time_for_overwrite_nd;
+    gint64 time_for_block_erase_nd;
+    gint64 time_for_crypto_erase_nd;
+} BDNVMESanitizeLog;
+
 
 void bd_nvme_controller_info_free (BDNVMEControllerInfo *info);
 BDNVMEControllerInfo * bd_nvme_controller_info_copy (BDNVMEControllerInfo *info);
@@ -428,6 +483,9 @@ BDNVMESelfTestLogEntry * bd_nvme_self_test_log_entry_copy (BDNVMESelfTestLogEntr
 
 void bd_nvme_self_test_log_free (BDNVMESelfTestLog *log);
 BDNVMESelfTestLog * bd_nvme_self_test_log_copy (BDNVMESelfTestLog *log);
+
+void bd_nvme_sanitize_log_free (BDNVMESanitizeLog *log);
+BDNVMESanitizeLog * bd_nvme_sanitize_log_copy (BDNVMESanitizeLog *log);
 
 
 /*
@@ -451,6 +509,7 @@ BDNVMENamespaceInfo *  bd_nvme_get_namespace_info    (const gchar *device, GErro
 BDNVMESmartLog *       bd_nvme_get_smart_log         (const gchar *device, GError **error);
 BDNVMEErrorLogEntry ** bd_nvme_get_error_log_entries (const gchar *device, GError **error);
 BDNVMESelfTestLog *    bd_nvme_get_self_test_log     (const gchar *device, GError **error);
+BDNVMESanitizeLog *    bd_nvme_get_sanitize_log      (const gchar *device, GError **error);
 
 gboolean               bd_nvme_device_self_test      (const gchar                  *device,
                                                       BDNVMESelfTestAction          action,

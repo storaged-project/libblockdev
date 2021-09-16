@@ -829,4 +829,9 @@ bd_nvme_self_test_log_entry_copy
 bd_nvme_device_self_test
 BDNVMEFormatSecureErase
 bd_nvme_format
+BDNVMESanitizeStatus
+BDNVMESanitizeLog
+bd_nvme_get_sanitize_log
+bd_nvme_sanitize_log_free
+bd_nvme_sanitize_log_copy
 </SECTION>

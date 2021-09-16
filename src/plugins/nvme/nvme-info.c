@@ -294,6 +294,37 @@ BDNVMESelfTestLog * bd_nvme_self_test_log_copy (BDNVMESelfTestLog *log) {
 }
 
 
+/**
+ * bd_nvme_sanitize_log_free: (skip)
+ * @log: (nullable): %BDNVMESanitizeLog to free
+ *
+ * Frees @log.
+ */
+void bd_nvme_sanitize_log_free (BDNVMESanitizeLog *log) {
+    if (log == NULL)
+        return;
+
+    g_free (log);
+}
+
+/**
+ * bd_nvme_sanitize_log_copy: (skip)
+ * @log: (nullable): %BDNVMESanitizeLog to copy
+ *
+ * Creates a new copy of @log.
+ */
+BDNVMESanitizeLog * bd_nvme_sanitize_log_copy (BDNVMESanitizeLog *log) {
+    BDNVMESanitizeLog *new_log;
+
+    if (log == NULL)
+        return NULL;
+
+    new_log = g_new0 (BDNVMESanitizeLog, 1);
+    memcpy (new_log, log, sizeof (BDNVMESanitizeLog));
+
+    return new_log;
+}
+
 
 static guint64 int128_to_guint64 (__u8 *data)
 {
@@ -884,6 +915,88 @@ BDNVMESelfTestLog * bd_nvme_get_self_test_log (const gchar *device, GError **err
     }
     g_ptr_array_add (ptr_array, NULL);
     log->entries = (BDNVMESelfTestLogEntry **) g_ptr_array_free (ptr_array, FALSE);
+
+    return log;
+}
+
+
+/**
+ * bd_nvme_get_sanitize_log:
+ * @device: a NVMe controller device (e.g. /dev/nvme0)
+ * @error: (out) (nullable): place to store error (if any)
+ *
+ * Retrieves the drive sanitize status log (Log Identifier %81h) that includes information
+ * about the most recent sanitize operation and the sanitize operation time estimates.
+ *
+ * As advised in the NVMe specification whitepaper the host should limit polling
+ * to retrieve progress of a running sanitize operations (e.g. to at most once every
+ * several minutes) to avoid interfering with the progress of the sanitize operation itself.
+ *
+ * Returns: (transfer full): sanitize log data or %NULL in case of an error (with @error set).
+ *
+ * Tech category: %BD_NVME_TECH_NVME-%BD_NVME_TECH_MODE_INFO
+ */
+BDNVMESanitizeLog * bd_nvme_get_sanitize_log (const gchar *device, GError **error) {
+    int ret;
+    int fd;
+    struct nvme_sanitize_log_page sanitize_log = ZERO_INIT;
+    BDNVMESanitizeLog *log;
+    __u16 sstat;
+
+    /* open the block device */
+    fd = _open_dev (device, error);
+    if (fd < 0)
+        return NULL;
+
+    /* send the NVME_LOG_LID_SANITIZE ioctl */
+    ret = nvme_get_log_sanitize (fd, FALSE /* rae */, &sanitize_log);
+    if (ret < 0) {
+        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
+                     "NVMe Get Log Page - Sanitize Status Log command error: %s", strerror_l (errno, _C_LOCALE));
+        close (fd);
+        return NULL;
+    }
+    close (fd);
+    if (ret > 0) {
+        _nvme_status_to_error (ret, FALSE, error);
+        g_prefix_error (error, "NVMe Get Log Page - Sanitize Status Log command error: ");
+        return NULL;
+    }
+
+    sstat = GUINT16_FROM_LE (sanitize_log.sstat);
+
+    log = g_new0 (BDNVMESanitizeLog, 1);
+    log->sanitize_progress = 0;
+    if ((sstat & NVME_SANITIZE_SSTAT_STATUS_MASK) == NVME_SANITIZE_SSTAT_STATUS_IN_PROGESS)
+        log->sanitize_progress = ((gdouble) GUINT16_FROM_LE (sanitize_log.sprog) * 100) / 0x10000;
+    log->global_data_erased = sstat & NVME_SANITIZE_SSTAT_GLOBAL_DATA_ERASED;
+    log->overwrite_passes = (sstat >> NVME_SANITIZE_SSTAT_COMPLETED_PASSES_SHIFT) & NVME_SANITIZE_SSTAT_COMPLETED_PASSES_MASK;
+
+    switch (sstat & NVME_SANITIZE_SSTAT_STATUS_MASK) {
+        case NVME_SANITIZE_SSTAT_STATUS_COMPLETE_SUCCESS:
+            log->sanitize_status = BD_NVME_SANITIZE_STATUS_SUCCESS;
+            break;
+        case NVME_SANITIZE_SSTAT_STATUS_IN_PROGESS:
+            log->sanitize_status = BD_NVME_SANITIZE_STATUS_IN_PROGESS;
+            break;
+        case NVME_SANITIZE_SSTAT_STATUS_COMPLETED_FAILED:
+            log->sanitize_status = BD_NVME_SANITIZE_STATUS_FAILED;
+            break;
+        case NVME_SANITIZE_SSTAT_STATUS_ND_COMPLETE_SUCCESS:
+            log->sanitize_status = BD_NVME_SANITIZE_STATUS_SUCCESS_NO_DEALLOC;
+            break;
+        case NVME_SANITIZE_SSTAT_STATUS_NEVER_SANITIZED:
+        default:
+            log->sanitize_status = BD_NVME_SANITIZE_STATUS_NEVER_SANITIZED;
+            break;
+    }
+
+    log->time_for_overwrite = (GUINT32_FROM_LE (sanitize_log.eto) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log.eto);
+    log->time_for_block_erase = (GUINT32_FROM_LE (sanitize_log.etbe) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log.etbe);
+    log->time_for_crypto_erase = (GUINT32_FROM_LE (sanitize_log.etce) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log.etce);
+    log->time_for_overwrite_nd = (GUINT32_FROM_LE (sanitize_log.etond) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log.etond);
+    log->time_for_block_erase_nd = (GUINT32_FROM_LE (sanitize_log.etbend) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log.etbend);
+    log->time_for_crypto_erase_nd = (GUINT32_FROM_LE (sanitize_log.etcend) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log.etcend);
 
     return log;
 }
