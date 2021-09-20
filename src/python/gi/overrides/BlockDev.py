@@ -276,6 +276,30 @@ def crypto_bitlk_open(device, name, passphrase, read_only=False):
 __all__.append("crypto_bitlk_open")
 
 
+class CryptoIntegrityExtra(BlockDev.CryptoIntegrityExtra):
+    def __new__(cls, sector_size=0, journal_size=0, journal_watermark=0, journal_commit_time=0, interleave_sectors=0, tag_size=0, buffer_sectors=0):
+        ret = BlockDev.CryptoIntegrityExtra.new(sector_size, journal_size, journal_watermark, journal_commit_time, interleave_sectors, tag_size, buffer_sectors)
+        ret.__class__ = cls
+        return ret
+    def __init__(self, *args, **kwargs):   # pylint: disable=unused-argument
+        super(CryptoIntegrityExtra, self).__init__()  #pylint: disable=bad-super-call
+CryptoIntegrityExtra = override(CryptoIntegrityExtra)
+__all__.append("CryptoIntegrityExtra")
+
+
+_crypto_integrity_format = BlockDev.crypto_integrity_format
+@override(BlockDev.crypto_integrity_format)
+def crypto_integrity_format(device, algorithm=None, wipe=True, key_data=None, extra=None):
+    return _crypto_integrity_format(device, algorithm, wipe, key_data, extra)
+__all__.append("crypto_integrity_format")
+
+_crypto_integrity_open = BlockDev.crypto_integrity_open
+@override(BlockDev.crypto_integrity_open)
+def crypto_integrity_open(device, name, algorithm, key_data=None, flags=0, extra=None):
+    return _crypto_integrity_open(device, name, algorithm, key_data, flags, extra)
+__all__.append("crypto_integrity_open")
+
+
 _dm_create_linear = BlockDev.dm_create_linear
 @override(BlockDev.dm_create_linear)
 def dm_create_linear(map_name, device, length, uuid=None):

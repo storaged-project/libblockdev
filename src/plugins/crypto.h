@@ -123,6 +123,43 @@ BDCryptoLUKSExtra* bd_crypto_luks_extra_copy (BDCryptoLUKSExtra *extra);
 BDCryptoLUKSExtra* bd_crypto_luks_extra_new (guint64 data_alignment, const gchar *data_device, const gchar *integrity, guint64 sector_size, const gchar *label, const gchar *subsystem, BDCryptoLUKSPBKDF *pbkdf);
 
 /**
+ * BDCryptoIntegrityExtra:
+ * @sector_size: integrity sector size
+ * @journal_size: size of journal in bytes
+ * @journal_watermark: journal flush watermark in percents; in bitmap mode sectors-per-bit
+ * @journal_commit_time: journal commit time (or bitmap flush time) in ms
+ * @interleave_sectors: number of interleave sectors (power of two)
+ * @tag_size: tag size per-sector in bytes
+ * @buffer_sectors: number of sectors in one buffer
+ */
+typedef struct BDCryptoIntegrityExtra {
+    guint32 sector_size;
+    guint64 journal_size;
+    guint journal_watermark;
+    guint journal_commit_time;
+    guint32 interleave_sectors;
+    guint32 tag_size;
+    guint32 buffer_sectors;
+} BDCryptoIntegrityExtra;
+
+void bd_crypto_integrity_extra_free (BDCryptoIntegrityExtra *extra);
+BDCryptoIntegrityExtra* bd_crypto_integrity_extra_copy (BDCryptoIntegrityExtra *extra);
+BDCryptoIntegrityExtra* bd_crypto_integrity_extra_new (guint64 sector_size, guint64 journal_size, guint journal_watermark, guint journal_commit_time, guint64 interleave_sectors, guint64 tag_size, guint64 buffer_sectors);
+
+typedef enum {
+    BD_CRYPTO_INTEGRITY_OPEN_NO_JOURNAL         = CRYPT_ACTIVATE_NO_JOURNAL,
+    BD_CRYPTO_INTEGRITY_OPEN_RECOVERY           = CRYPT_ACTIVATE_RECOVERY,
+#ifdef CRYPT_ACTIVATE_NO_JOURNAL_BITMAP
+    BD_CRYPTO_INTEGRITY_OPEN_NO_JOURNAL_BITMAP  = CRYPT_ACTIVATE_NO_JOURNAL_BITMAP,
+#endif
+    BD_CRYPTO_INTEGRITY_OPEN_RECALCULATE        = CRYPT_ACTIVATE_RECALCULATE,
+#ifdef CRYPT_ACTIVATE_RECALCULATE_RESET
+    BD_CRYPTO_INTEGRITY_OPEN_RECALCULATE_RESET  = CRYPT_ACTIVATE_RECALCULATE_RESET,
+#endif
+    BD_CRYPTO_INTEGRITY_OPEN_ALLOW_DISCARDS     = CRYPT_ACTIVATE_ALLOW_DISCARDS,
+} BDCryptoIntegrityOpenFlags;
+
+/**
  * BDCryptoLUKSInfo:
  * @version: LUKS version
  * @cipher: used cipher (e.g. "aes")
@@ -214,6 +251,10 @@ gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup
 
 BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *luks_device, GError **error);
 BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **error);
+
+gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm, gboolean wipe, const guint8* key_data, gsize key_size, BDCryptoIntegrityExtra *extra, GError **error);
+gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const gchar *algorithm, const guint8* key_data, gsize key_size, BDCryptoIntegrityOpenFlags flags, BDCryptoIntegrityExtra *extra, GError **error);
+gboolean bd_crypto_integrity_close (const gchar *integrity_device, GError **error);
 
 gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error);
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);

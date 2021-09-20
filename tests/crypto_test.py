@@ -2,6 +2,7 @@ import unittest
 import os
 import tempfile
 import overrides_hack
+import secrets
 import shutil
 import subprocess
 import six
@@ -34,6 +35,8 @@ class CryptoTestCase(unittest.TestCase):
 
     requested_plugins = BlockDev.plugin_specs_from_names(("crypto", "loop"))
 
+    _dm_name = "libblockdevTestLUKS"
+
     @classmethod
     def setUpClass(cls):
         unittest.TestCase.setUpClass()
@@ -64,7 +67,7 @@ class CryptoTestCase(unittest.TestCase):
 
     def _clean_up(self):
         try:
-            BlockDev.crypto_luks_close("libblockdevTestLUKS")
+            BlockDev.crypto_luks_close(self._dm_name)
         except:
             pass
 
@@ -1029,7 +1032,7 @@ class CryptoTestLuksSectorSize(CryptoTestCase):
         self.assertTrue(succ)
 
 
-class CryptoTestIntegrity(CryptoTestCase):
+class CryptoTestLUKS2Integrity(CryptoTestCase):
     @tag_test(TestTags.SLOW)
     @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_integrity(self):
@@ -1216,3 +1219,92 @@ class CryptoTestBitlk(CryptoTestCase):
         succ = BlockDev.crypto_bitlk_close("libblockdevTestBitlk")
         self.assertTrue(succ)
         self.assertFalse(os.path.exists("/dev/mapper/libblockdevTestBitlk"))
+
+
+class CryptoTestIntegrity(CryptoTestCase):
+
+    _dm_name = "libblockdevTestIntegrity"
+
+    @unittest.skipUnless(HAVE_LUKS2, "Integrity not supported")
+    def test_integrity(self):
+        # basic format+open+close test
+        succ = BlockDev.crypto_integrity_format(self.loop_dev, "sha256", False)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_integrity_open(self.loop_dev, self._dm_name, "sha256")
+        self.assertTrue(succ)
+        self.assertTrue(os.path.exists("/dev/mapper/%s" % self._dm_name))
+
+        info = BlockDev.crypto_integrity_info(self._dm_name)
+        self.assertEqual(info.algorithm, "sha256")
+
+        succ = BlockDev.crypto_integrity_close(self._dm_name)
+        self.assertTrue(succ)
+        self.assertFalse(os.path.exists("/dev/mapper/%s" % self._dm_name))
+
+        # same now with a keyed algorithm
+        key = list(secrets.token_bytes(64))
+
+        succ = BlockDev.crypto_integrity_format(self.loop_dev, "hmac(sha256)", False, key)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_integrity_open(self.loop_dev, self._dm_name, "hmac(sha256)", key)
+        self.assertTrue(succ)
+        self.assertTrue(os.path.exists("/dev/mapper/%s" % self._dm_name))
+
+        info = BlockDev.crypto_integrity_info(self._dm_name)
+        self.assertEqual(info.algorithm, "hmac(sha256)")
+
+        succ = BlockDev.crypto_integrity_close(self._dm_name)
+        self.assertTrue(succ)
+        self.assertFalse(os.path.exists("/dev/mapper/%s" % self._dm_name))
+
+        # same with some custom parameters
+        extra = BlockDev.CryptoIntegrityExtra(sector_size=4096, interleave_sectors=65536)
+        succ = BlockDev.crypto_integrity_format(self.loop_dev, "crc32c", wipe=False, extra=extra)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_integrity_open(self.loop_dev, self._dm_name, "crc32c")
+        self.assertTrue(succ)
+        self.assertTrue(os.path.exists("/dev/mapper/%s" % self._dm_name))
+
+        info = BlockDev.crypto_integrity_info(self._dm_name)
+        self.assertEqual(info.algorithm, "crc32c")
+        self.assertEqual(info.sector_size, 4096)
+        self.assertEqual(info.interleave_sectors, 65536)
+
+        succ = BlockDev.crypto_integrity_close(self._dm_name)
+        self.assertTrue(succ)
+        self.assertFalse(os.path.exists("/dev/mapper/%s" % self._dm_name))
+
+    @tag_test(TestTags.SLOW)
+    @unittest.skipUnless(HAVE_LUKS2, "Integrity not supported")
+    def test_integrity_wipe(self):
+        # also check that wipe progress reporting works
+        progress_log = []
+
+        def _my_progress_func(_task, _status, completion, msg):
+            progress_log.append((completion, msg))
+
+        succ = BlockDev.utils_init_prog_reporting(_my_progress_func)
+        self.assertTrue(succ)
+        self.addCleanup(BlockDev.utils_init_prog_reporting, None)
+
+        succ = BlockDev.crypto_integrity_format(self.loop_dev, "sha256", True)
+        self.assertTrue(succ)
+
+        # at least one message "Integrity device wipe in progress" should be logged
+        self.assertTrue(any(prog[1] == "Integrity device wipe in progress" for prog in progress_log))
+
+        succ = BlockDev.crypto_integrity_open(self.loop_dev, self._dm_name, "sha256")
+        self.assertTrue(succ)
+        self.assertTrue(os.path.exists("/dev/mapper/%s" % self._dm_name))
+
+        # check the devices was wiped and the checksums recalculated
+        # (mkfs reads some blocks first so without checksums it would fail)
+        ret, _out, err = run_command("mkfs.ext2 /dev/mapper/%s " % self._dm_name)
+        self.assertEqual(ret, 0, msg="Failed to create ext2 filesystem on integrity: %s" % err)
+
+        succ = BlockDev.crypto_integrity_close(self._dm_name)
+        self.assertTrue(succ)
+        self.assertFalse(os.path.exists("/dev/mapper/%s" % self._dm_name))
