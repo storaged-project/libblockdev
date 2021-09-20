@@ -53,6 +53,15 @@
 #define DEFAULT_LUKS_KEYSIZE_BITS 256
 #define DEFAULT_LUKS_CIPHER "aes-xts-plain64"
 
+#ifdef LIBCRYPTSETUP_23
+/* 0 for autodetect since 2.3.0 */
+#define DEFAULT_INTEGRITY_TAG_SIZE 0
+#else
+/* we need some sane default for older versions, users should specify tag size when using
+   other algorithms than the default crc32c */
+#define DEFAULT_INTEGRITY_TAG_SIZE 4
+#endif
+
 #ifdef LIBCRYPTSETUP_24
 /* 0 for autodetect since 2.4.0 */
 #define DEFAULT_LUKS2_SECTOR_SIZE 0
@@ -154,6 +163,43 @@ BDCryptoLUKSExtra* bd_crypto_luks_extra_new (guint64 data_alignment, const gchar
     ret->pbkdf = bd_crypto_luks_pbkdf_copy (pbkdf);
 
     return ret;
+}
+
+BDCryptoIntegrityExtra* bd_crypto_integrity_extra_new (guint64 sector_size, guint64 journal_size, guint journal_watermark, guint journal_commit_time, guint64 interleave_sectors, guint64 tag_size, guint64 buffer_sectors) {
+    BDCryptoIntegrityExtra *ret = g_new0 (BDCryptoIntegrityExtra, 1);
+    ret->sector_size = sector_size;
+    ret->journal_size = journal_size;
+    ret->journal_watermark = journal_watermark;
+    ret->journal_commit_time = journal_commit_time;
+    ret->interleave_sectors = interleave_sectors;
+    ret->tag_size = tag_size;
+    ret->buffer_sectors = buffer_sectors;
+
+    return ret;
+}
+
+BDCryptoIntegrityExtra* bd_crypto_integrity_extra_copy (BDCryptoIntegrityExtra *extra) {
+    if (extra == NULL)
+        return NULL;
+
+    BDCryptoIntegrityExtra *new_extra = g_new0 (BDCryptoIntegrityExtra, 1);
+
+    new_extra->sector_size = extra->sector_size;
+    new_extra->journal_size = extra->journal_size;
+    new_extra->journal_watermark = extra->journal_watermark;
+    new_extra->journal_commit_time = extra->journal_commit_time;
+    new_extra->interleave_sectors = extra->interleave_sectors;
+    new_extra->tag_size = extra->tag_size;
+    new_extra->buffer_sectors = extra->buffer_sectors;
+
+    return new_extra;
+}
+
+void bd_crypto_integrity_extra_free (BDCryptoIntegrityExtra *extra) {
+    if (extra == NULL)
+        return;
+
+    g_free (extra);
 }
 
 void bd_crypto_luks_info_free (BDCryptoLUKSInfo *info) {
@@ -367,15 +413,15 @@ gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **erro
                          "Integrity technology requires libcryptsetup >= 2.0");
             return FALSE;
 #endif
-            ret = mode & (BD_CRYPTO_TECH_MODE_QUERY);
+            ret = mode & (BD_CRYPTO_TECH_MODE_CREATE|BD_CRYPTO_TECH_MODE_OPEN_CLOSE|BD_CRYPTO_TECH_MODE_QUERY);
             if (ret != mode) {
                 g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                             "Only 'query' supported for Integrity");
+                             "Only 'create', 'open' and 'query' supported for Integrity");
                 return FALSE;
             } else
                 return TRUE;
         case BD_CRYPTO_TECH_BITLK:
-#ifndef LIBCRYPTSETUP_BITLK
+#ifndef LIBCRYPTSETUP_23
             g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
                          "BITLK technology requires libcryptsetup >= 2.3.0");
             return FALSE;
@@ -2224,6 +2270,208 @@ BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError *
 }
 #endif
 
+static int _wipe_progress (guint64 size, guint64 offset, void *usrptr) {
+    /* "convert" the progress from 0-100 to 50-100 because wipe starts at 50 in bd_crypto_integrity_format */
+    gdouble progress = 50 + (((gdouble) offset / size) * 100) / 2;
+    bd_utils_report_progress (*(guint64 *) usrptr, progress, "Integrity device wipe in progress");
+
+    return 0;
+}
+
+/**
+ * bd_crypto_integrity_format:
+ * @device: a device to format as integrity
+ * @algorithm: integrity algorithm specification (e.g. "crc32c" or "sha256")
+ * @wipe: whether to wipe the device after format; a device that is not initially wiped will contain invalid checksums
+ * @key_data: (allow-none) (array length=key_size): integrity key or %NULL if not needed
+ * @key_size: size the integrity key and @key_data
+ * @extra: (allow-none): extra arguments for integrity format creation
+ * @error: (out): place to store error (if any)
+ *
+ * Formats the given @device as integrity according to the other parameters given.
+ *
+ * Returns: whether the given @device was successfully formatted as integrity or not
+ * (the @error) contains the error in such cases)
+ *
+ * Tech category: %BD_CRYPTO_TECH_INTEGRITY-%BD_CRYPTO_TECH_MODE_CREATE
+ */
+gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm, gboolean wipe, const guint8* key_data, gsize key_size, BDCryptoIntegrityExtra *extra, GError **error) {
+    struct crypt_device *cd = NULL;
+    gint ret;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+    struct crypt_params_integrity params = ZERO_INIT;
+    g_autofree gchar *tmp_name = NULL;
+    g_autofree gchar *tmp_path = NULL;
+    g_autofree gchar *dev_name = NULL;
+
+    msg = g_strdup_printf ("Started formatting '%s' as integrity device", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    if (extra) {
+        params.sector_size = extra->sector_size;
+        params.journal_size = extra->journal_size;
+        params.journal_watermark = extra->journal_watermark;
+        params.journal_commit_time = extra->journal_commit_time;
+        params.interleave_sectors = extra->interleave_sectors;
+        params.tag_size = extra->tag_size;
+        params.buffer_sectors = extra->buffer_sectors;
+    }
+
+    params.integrity_key_size = key_size;
+    params.integrity = algorithm;
+    params.tag_size = params.tag_size ? params.tag_size : DEFAULT_INTEGRITY_TAG_SIZE;
+
+    ret = crypt_format (cd, CRYPT_INTEGRITY, NULL, NULL, NULL, NULL, 0, &params);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
+                     "Failed to format device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    if (wipe) {
+        bd_utils_report_progress (progress_id, 50, "Format created");
+
+        dev_name = g_path_get_basename (device);
+        tmp_name = g_strdup_printf ("bd-temp-integrity-%s-%d", dev_name, g_random_int ());
+        tmp_path = g_strdup_printf ("%s/%s", crypt_get_dir (), tmp_name);
+
+        ret = crypt_activate_by_volume_key (cd, tmp_name, (const char *) key_data, key_size,
+                                            CRYPT_ACTIVATE_PRIVATE | CRYPT_ACTIVATE_NO_JOURNAL);
+        if (ret != 0) {
+            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                         "Failed to activate the newly created integrity device for wiping: %s",
+                         strerror_l (-ret, c_locale));
+            crypt_free (cd);
+            bd_utils_report_finished (progress_id, (*error)->message);
+            return FALSE;
+        }
+
+        bd_utils_report_progress (progress_id, 50, "Starting to wipe the newly created integrity device");
+        ret = crypt_wipe (cd, tmp_path, CRYPT_WIPE_ZERO, 0, 0, 1048576,
+                          0, &_wipe_progress, &progress_id);
+        bd_utils_report_progress (progress_id, 100, "Wipe finished");
+        if (ret != 0) {
+            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                         "Failed to wipe the newly created integrity device: %s",
+                         strerror_l (-ret, c_locale));
+
+            ret = crypt_deactivate (cd, tmp_name);
+            if (ret != 0)
+                bd_utils_log_format (BD_UTILS_LOG_ERR, "Failed to deactivate temporary device %s", tmp_name);
+
+            crypt_free (cd);
+            bd_utils_report_finished (progress_id, (*error)->message);
+            return FALSE;
+        }
+
+        ret = crypt_deactivate (cd, tmp_name);
+        if (ret != 0)
+            bd_utils_log_format (BD_UTILS_LOG_ERR, "Failed to deactivate temporary device %s", tmp_name);
+
+    } else
+        bd_utils_report_finished (progress_id, "Completed");
+
+    crypt_free (cd);
+
+    return TRUE;
+}
+
+/**
+ * bd_crypto_integrity_open:
+ * @device: integrity device to open
+ * @name: name for the opened @device
+ * @algorithm: (allow-none): integrity algorithm specification (e.g. "crc32c" or "sha256") or %NULL to use the default
+ * @key_data: (allow-none) (array length=key_size): integrity key or %NULL if not needed
+ * @key_size: size the integrity key and @key_data
+ * @flags: flags for the integrity device activation
+ * @extra: (allow-none): extra arguments for integrity open
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_INTEGRITY-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const gchar *algorithm, const guint8* key_data, gsize key_size, BDCryptoIntegrityOpenFlags flags, BDCryptoIntegrityExtra *extra, GError **error) {
+    struct crypt_device *cd = NULL;
+    gint ret = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+    struct crypt_params_integrity params = ZERO_INIT;
+
+    params.integrity = algorithm;
+    params.integrity_key_size = key_size;
+
+    if (extra) {
+        params.sector_size = extra->sector_size;
+        params.journal_size = extra->journal_size;
+        params.journal_watermark = extra->journal_watermark;
+        params.journal_commit_time = extra->journal_commit_time;
+        params.interleave_sectors = extra->interleave_sectors;
+        params.tag_size = extra->tag_size;
+        params.buffer_sectors = extra->buffer_sectors;
+    }
+
+    msg = g_strdup_printf ("Started opening '%s' integrity device", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_load (cd, CRYPT_INTEGRITY, &params);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to load device's parameters: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    ret = crypt_activate_by_volume_key (cd, name, (const char *) key_data, key_size, flags);
+    if (ret < 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to activate device: %s", strerror_l (-ret, c_locale));
+
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
+}
+
+/**
+ * bd_crypto_integrity_close:
+ * @integrity_device: integrity device to close
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the given @integrity_device was successfully closed or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_INTEGRITY-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+gboolean bd_crypto_integrity_close (const gchar *integrity_device, GError **error) {
+    return _crypto_close (integrity_device, "integrity", error);
+}
+
 /**
  * bd_crypto_keyring_add_key:
  * @key_desc: kernel keyring key description
@@ -2685,7 +2933,7 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
  *
  * Tech category: %BD_CRYPTO_TECH_BITLK-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
-#ifndef LIBCRYPTSETUP_BITLK
+#ifndef LIBCRYPTSETUP_23
 gboolean bd_crypto_bitlk_open (const gchar *device UNUSED, const gchar *name UNUSED, const guint8* pass_data UNUSED, gsize data_len UNUSED, gboolean read_only UNUSED, GError **error) {
     /* this will return FALSE and set error, because BITLK technology is not available */
     return bd_crypto_is_tech_avail (BD_CRYPTO_TECH_BITLK, BD_CRYPTO_TECH_MODE_OPEN_CLOSE, error);
@@ -2755,7 +3003,7 @@ gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, const gui
  *
  * Tech category: %BD_CRYPTO_TECH_BITLK-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
-#ifndef LIBCRYPTSETUP_BITLK
+#ifndef LIBCRYPTSETUP_23
 gboolean bd_crypto_bitlk_close (const gchar *bitlk_device UNUSED, GError **error) {
     /* this will return FALSE and set error, because BITLK technology is not available */
     return bd_crypto_is_tech_avail (BD_CRYPTO_TECH_BITLK, BD_CRYPTO_TECH_MODE_OPEN_CLOSE, error);
