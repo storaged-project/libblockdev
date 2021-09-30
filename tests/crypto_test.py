@@ -36,6 +36,7 @@ class CryptoTestCase(unittest.TestCase):
     requested_plugins = BlockDev.plugin_specs_from_names(("crypto", "loop"))
 
     _dm_name = "libblockdevTestLUKS"
+    _sparse_size = 1024**3
 
     @classmethod
     def setUpClass(cls):
@@ -49,8 +50,8 @@ class CryptoTestCase(unittest.TestCase):
 
     def setUp(self):
         self.addCleanup(self._clean_up)
-        self.dev_file = create_sparse_tempfile("crypto_test", 1024**3)
-        self.dev_file2 = create_sparse_tempfile("crypto_test2", 1024**3)
+        self.dev_file = create_sparse_tempfile("crypto_test", self._sparse_size)
+        self.dev_file2 = create_sparse_tempfile("crypto_test2", self._sparse_size)
         try:
             self.loop_dev = create_lio_device(self.dev_file)
         except RuntimeError as e:
@@ -1224,6 +1225,7 @@ class CryptoTestBitlk(CryptoTestCase):
 class CryptoTestIntegrity(CryptoTestCase):
 
     _dm_name = "libblockdevTestIntegrity"
+    _sparse_size = 100 * 1024**2
 
     @unittest.skipUnless(HAVE_LUKS2, "Integrity not supported")
     def test_integrity(self):
