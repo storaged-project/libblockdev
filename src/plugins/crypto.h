@@ -1,5 +1,6 @@
 #include <glib.h>
 #include <blockdev/utils.h>
+#include <libcryptsetup.h>
 
 #ifndef BD_CRYPTO
 #define BD_CRYPTO
