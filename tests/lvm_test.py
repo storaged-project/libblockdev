@@ -1780,6 +1780,12 @@ class LvmTestDevicesFile(LvmPVonlyTestCase):
         if not self.devices_avail:
             self.skipTest("skipping LVM devices file test: not supported")
 
+        self.addCleanup(BlockDev.lvm_set_global_config, "")
+
+        # force-enable the feature, it might be disabled by default
+        succ = BlockDev.lvm_set_global_config("devices { use_devicesfile=1 }")
+        self.assertTrue(succ)
+
         succ = BlockDev.lvm_pvcreate(self.loop_dev)
         self.assertTrue(succ)
 
@@ -1800,6 +1806,8 @@ class LvmTestDevicesFile(LvmPVonlyTestCase):
 
         dfile = read_file("/etc/lvm/devices/" + self.devicefile)
         self.assertNotIn(self.loop_dev, dfile)
+
+        BlockDev.lvm_set_global_config("")
 
     def test_devices_enabled(self):
         if not self.devices_avail:
