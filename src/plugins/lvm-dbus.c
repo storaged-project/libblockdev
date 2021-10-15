@@ -3951,6 +3951,64 @@ BDLVMVDOStats* bd_lvm_vdo_get_stats (const gchar *vg_name, const gchar *pool_nam
     return stats;
 }
 
+/* check whether the LVM devices file is enabled by LVM
+ * we use the existence of the "lvmdevices" command to check whether the feature is available
+ * or not, but this can still be disabled either in LVM or in lvm.conf
+ */
+static gboolean _lvm_devices_enabled () {
+    const gchar *args[6] = {"lvmconfig", "--typeconfig", NULL, "devices/use_devicesfile", NULL, NULL};
+    gboolean ret = FALSE;
+    GError *loc_error = NULL;
+    gchar *output = NULL;
+    gboolean enabled = FALSE;
+    gint scanned = 0;
+    g_autofree gchar *config_arg = NULL;
+
+    /* try current config first -- if we get something from this it means the feature is
+       explicitly enabled or disabled by system lvm.conf or using the --config option */
+    args[2] = "current";
+
+    /* make sure to include the global config from us when getting the current config value */
+    g_mutex_lock (&global_config_lock);
+    if (global_config_str) {
+        config_arg = g_strdup_printf ("--config=%s", global_config_str);
+        args[4] = config_arg;
+    }
+
+    ret = bd_utils_exec_and_capture_output (args, NULL, &output, &loc_error);
+    g_mutex_unlock (&global_config_lock);
+    if (ret) {
+        scanned = sscanf (output, "use_devicesfile=%u", &enabled);
+        g_free (output);
+        if (scanned != 1)
+            return FALSE;
+
+        return enabled;
+    } else {
+        g_clear_error (&loc_error);
+        g_free (output);
+    }
+
+    output = NULL;
+
+    /* now try default */
+    args[2] = "default";
+    ret = bd_utils_exec_and_capture_output (args, NULL, &output, &loc_error);
+    if (ret) {
+        scanned = sscanf (output, "# use_devicesfile=%u", &enabled);
+        g_free (output);
+        if (scanned != 1)
+            return FALSE;
+
+        return enabled;
+    } else {
+        g_clear_error (&loc_error);
+        g_free (output);
+    }
+
+    return FALSE;
+}
+
 /**
  * bd_lvm_devices_add:
  * @device: device (PV) to add to the devices file
@@ -3968,6 +4026,12 @@ gboolean bd_lvm_devices_add (const gchar *device, const gchar *devices_file, con
 
     if (!bd_lvm_is_tech_avail (BD_LVM_TECH_DEVICES, 0, error))
         return FALSE;
+
+    if (!_lvm_devices_enabled ()) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DEVICES_DISABLED,
+                     "LVM devices file not enabled.");
+        return FALSE;
+    }
 
     if (devices_file) {
         devfile = g_strdup_printf ("--devicesfile=%s", devices_file);
@@ -3994,6 +4058,12 @@ gboolean bd_lvm_devices_delete (const gchar *device, const gchar *devices_file, 
 
     if (!bd_lvm_is_tech_avail (BD_LVM_TECH_DEVICES, 0, error))
         return FALSE;
+
+    if (!_lvm_devices_enabled ()) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DEVICES_DISABLED,
+                     "LVM devices file not enabled.");
+        return FALSE;
+    }
 
     if (devices_file) {
         devfile = g_strdup_printf ("--devicesfile=%s", devices_file);
