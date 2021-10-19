@@ -338,3 +338,103 @@ gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, BDNVMEForma
     close (args.fd);
     return TRUE;
 }
+
+/**
+ * bd_nvme_sanitize:
+ * @device: NVMe namespace or controller device to format (e.g. /dev/nvme0n1)
+ * @action: the sanitize action to perform.
+ * @no_dealloc: instruct the controller to not deallocate the affected media area.
+ * @overwrite_pass_count: number of overwrite passes [1-15] or 0 for the default (16 passes).
+ * @overwrite_pattern: a 32-bit pattern used for the Overwrite sanitize operation.
+ * @overwrite_invert_pattern: invert the overwrite pattern between passes.
+ * @error: (out) (nullable): place to store error (if any)
+ *
+ * Starts a sanitize operation or recovers from a previously failed sanitize operation.
+ * By definition, a sanitize operation alters all user data in the NVM subsystem such
+ * that recovery of any previous user data from any cache, the non-volatile media,
+ * or any Controller Memory Buffer is not possible. The scope of a sanitize operation
+ * is all locations in the NVM subsystem that are able to contain user data, including
+ * caches, Persistent Memory Regions, and unallocated or deallocated areas of the media.
+ *
+ * Once started, a sanitize operation is not able to be aborted and continues after
+ * a Controller Level Reset including across power cycles. Once the sanitize operation
+ * has run the media affected may not be immediately ready for use unless additional
+ * media modification mechanism is run. This is often vendor specific and also depends
+ * on the sanitize method (@action) used. Callers to this sanitize operation should
+ * set @no_dealloc to %TRUE for the added convenience.
+ *
+ * The controller also ignores Critical Warning(s) in the SMART / Health Information
+ * log page (e.g., read only mode) and attempts to complete the sanitize operation requested.
+ *
+ * This call returns immediately and the actual sanitize operation is performed
+ * in the background. Use bd_nvme_get_sanitize_log() to retrieve status and progress
+ * of a running sanitize operation. In case a sanitize operation fails the controller
+ * may restrict its operation until a subsequent sanitize operation is started
+ * (i.e. retried) or an #BD_NVME_SANITIZE_ACTION_EXIT_FAILURE action is used
+ * to acknowledge the failure explicitly.
+ *
+ * The @overwrite_pass_count, @overwrite_pattern and @overwrite_invert_pattern
+ * arguments are only valid when @action is #BD_NVME_SANITIZE_ACTION_OVERWRITE.
+ *
+ * The sanitize operation is set to run under the Allow Unrestricted Sanitize Exit
+ * mode.
+ *
+ * Returns: %TRUE if the format command finished successfully, %FALSE otherwise with @error set.
+ *
+ * Tech category: %BD_NVME_TECH_NVME-%BD_NVME_TECH_MODE_MANAGE
+ */
+gboolean bd_nvme_sanitize (const gchar *device, BDNVMESanitizeAction action, gboolean no_dealloc, gint overwrite_pass_count, guint32 overwrite_pattern, gboolean overwrite_invert_pattern, GError **error) {
+    int ret;
+    struct nvme_sanitize_nvm_args args = {
+        .args_size = sizeof(args),
+        .result = NULL,
+        .timeout = NVME_DEFAULT_IOCTL_TIMEOUT,
+        .ause = TRUE,
+        .owpass = overwrite_pass_count,
+        .oipbp = overwrite_invert_pattern,
+        .nodas = no_dealloc,
+        .ovrpat = GUINT32_TO_LE (overwrite_pattern),
+    };
+
+    switch (action) {
+        case BD_NVME_SANITIZE_ACTION_EXIT_FAILURE:
+            args.sanact = NVME_SANITIZE_SANACT_EXIT_FAILURE;
+            break;
+        case BD_NVME_SANITIZE_ACTION_BLOCK_ERASE:
+            args.sanact = NVME_SANITIZE_SANACT_START_BLOCK_ERASE;
+            break;
+        case BD_NVME_SANITIZE_ACTION_OVERWRITE:
+            args.sanact = NVME_SANITIZE_SANACT_START_OVERWRITE;
+            break;
+        case BD_NVME_SANITIZE_ACTION_CRYPTO_ERASE:
+            args.sanact = NVME_SANITIZE_SANACT_START_CRYPTO_ERASE;
+            break;
+        default:
+            g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_INVALID_ARGUMENT,
+                         "Invalid value specified for the sanitize action: %d", action);
+            return FALSE;
+    }
+
+    /* open the block device */
+    args.fd = _open_dev (device, error);
+    if (args.fd < 0)
+        return FALSE;
+
+    ret = nvme_sanitize_nvm (&args);
+    if (ret < 0) {
+        /* generic errno errors */
+        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
+                     "Sanitize command error: %s", strerror_l (errno, _C_LOCALE));
+        close (args.fd);
+        return FALSE;
+    }
+    if (ret > 0) {
+        /* NVMe status codes */
+        _nvme_status_to_error (ret, FALSE, error);
+        g_prefix_error (error, "Sanitize command error: ");
+        close (args.fd);
+        return FALSE;
+    }
+
+    return TRUE;
+}

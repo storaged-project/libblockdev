@@ -834,4 +834,6 @@ BDNVMESanitizeLog
 bd_nvme_get_sanitize_log
 bd_nvme_sanitize_log_free
 bd_nvme_sanitize_log_copy
+BDNVMESanitizeAction
+bd_nvme_sanitize
 </SECTION>

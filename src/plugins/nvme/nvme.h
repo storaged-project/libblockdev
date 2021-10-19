@@ -462,6 +462,20 @@ typedef struct BDNVMESanitizeLog {
     gint64 time_for_crypto_erase_nd;
 } BDNVMESanitizeLog;
 
+/**
+ * BDNVMESanitizeAction:
+ * @BD_NVME_SANITIZE_ACTION_EXIT_FAILURE: Exit Failure Mode.
+ * @BD_NVME_SANITIZE_ACTION_BLOCK_ERASE: Start a Block Erase sanitize operation - a low-level block erase method that is specific to the media.
+ * @BD_NVME_SANITIZE_ACTION_OVERWRITE: Start an Overwrite sanitize operation - writing a fixed data pattern or related patterns in multiple passes.
+ * @BD_NVME_SANITIZE_ACTION_CRYPTO_ERASE: Start a Crypto Erase sanitize operation - changing the media encryption keys for all locations on the media.
+ */
+typedef enum {
+    BD_NVME_SANITIZE_ACTION_EXIT_FAILURE = 0,
+    BD_NVME_SANITIZE_ACTION_BLOCK_ERASE = 1,
+    BD_NVME_SANITIZE_ACTION_OVERWRITE = 2,
+    BD_NVME_SANITIZE_ACTION_CRYPTO_ERASE = 3,
+} BDNVMESanitizeAction;
+
 
 void bd_nvme_controller_info_free (BDNVMEControllerInfo *info);
 BDNVMEControllerInfo * bd_nvme_controller_info_copy (BDNVMEControllerInfo *info);
@@ -518,6 +532,13 @@ gboolean               bd_nvme_device_self_test      (const gchar               
 gboolean               bd_nvme_format                (const gchar                  *device,
                                                       guint16                       lba_data_size,
                                                       BDNVMEFormatSecureErase       secure_erase,
+                                                      GError                      **error);
+gboolean               bd_nvme_sanitize              (const gchar                  *device,
+                                                      BDNVMESanitizeAction          action,
+                                                      gboolean                      no_dealloc,
+                                                      gint                          overwrite_pass_count,
+                                                      guint32                       overwrite_pattern,
+                                                      gboolean                      overwrite_invert_pattern,
                                                       GError                      **error);
 
 

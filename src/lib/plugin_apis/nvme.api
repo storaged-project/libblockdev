@@ -897,6 +897,23 @@ GType bd_nvme_sanitize_log_get_type () {
 }
 
 
+/* BpG-skip */
+/**
+ * BDNVMESanitizeAction:
+ * @BD_NVME_SANITIZE_ACTION_EXIT_FAILURE: Exit Failure Mode.
+ * @BD_NVME_SANITIZE_ACTION_BLOCK_ERASE: Start a Block Erase sanitize operation - a low-level block erase method that is specific to the media.
+ * @BD_NVME_SANITIZE_ACTION_OVERWRITE: Start an Overwrite sanitize operation - writing a fixed data pattern or related patterns in multiple passes.
+ * @BD_NVME_SANITIZE_ACTION_CRYPTO_ERASE: Start a Crypto Erase sanitize operation - changing the media encryption keys for all locations on the media.
+ */
+/* BpG-skip-end */
+typedef enum {
+    BD_NVME_SANITIZE_ACTION_EXIT_FAILURE = 0,
+    BD_NVME_SANITIZE_ACTION_BLOCK_ERASE = 1,
+    BD_NVME_SANITIZE_ACTION_OVERWRITE = 2,
+    BD_NVME_SANITIZE_ACTION_CRYPTO_ERASE = 3,
+} BDNVMESanitizeAction;
+
+
 /**
  * bd_nvme_get_controller_info:
  * @device: a NVMe controller device (e.g. /dev/nvme0)
@@ -1043,6 +1060,52 @@ gboolean bd_nvme_device_self_test (const gchar *device, BDNVMESelfTestAction act
  * Tech category: %BD_NVME_TECH_NVME-%BD_NVME_TECH_MODE_MANAGE
  */
 gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, BDNVMEFormatSecureErase secure_erase, GError **error);
+
+/**
+ * bd_nvme_sanitize:
+ * @device: NVMe namespace or controller device to format (e.g. /dev/nvme0n1)
+ * @action: the sanitize action to perform.
+ * @no_dealloc: instruct the controller to not deallocate the affected media area.
+ * @overwrite_pass_count: number of overwrite passes [1-15] or 0 for the default (16 passes).
+ * @overwrite_pattern: a 32-bit pattern used for the Overwrite sanitize operation.
+ * @overwrite_invert_pattern: invert the overwrite pattern between passes.
+ * @error: (out) (nullable): place to store error (if any)
+ *
+ * Starts a sanitize operation or recovers from a previously failed sanitize operation.
+ * By definition, a sanitize operation alters all user data in the NVM subsystem such
+ * that recovery of any previous user data from any cache, the non-volatile media,
+ * or any Controller Memory Buffer is not possible. The scope of a sanitize operation
+ * is all locations in the NVM subsystem that are able to contain user data, including
+ * caches, Persistent Memory Regions, and unallocated or deallocated areas of the media.
+ *
+ * Once started, a sanitize operation is not able to be aborted and continues after
+ * a Controller Level Reset including across power cycles. Once the sanitize operation
+ * has run the media affected may not be immediately ready for use unless additional
+ * media modification mechanism is run. This is often vendor specific and also depends
+ * on the sanitize method (@action) used. Callers to this sanitize operation should
+ * set @no_dealloc to %TRUE for the added convenience.
+ *
+ * The controller also ignores Critical Warning(s) in the SMART / Health Information
+ * log page (e.g., read only mode) and attempts to complete the sanitize operation requested.
+ *
+ * This call returns immediately and the actual sanitize operation is performed
+ * in the background. Use bd_nvme_get_sanitize_log() to retrieve status and progress
+ * of a running sanitize operation. In case a sanitize operation fails the controller
+ * may restrict its operation until a subsequent sanitize operation is started
+ * (i.e. retried) or an #BD_NVME_SANITIZE_ACTION_EXIT_FAILURE action is used
+ * to acknowledge the failure explicitly.
+ *
+ * The @overwrite_pass_count, @overwrite_pattern and @overwrite_invert_pattern
+ * arguments are only valid when @action is #BD_NVME_SANITIZE_ACTION_OVERWRITE.
+ *
+ * The sanitize operation is set to run under the Allow Unrestricted Sanitize Exit
+ * mode.
+ *
+ * Returns: %TRUE if the format command finished successfully, %FALSE otherwise with @error set.
+ *
+ * Tech category: %BD_NVME_TECH_NVME-%BD_NVME_TECH_MODE_MANAGE
+ */
+gboolean bd_nvme_sanitize (const gchar *device, BDNVMESanitizeAction action, gboolean no_dealloc, gint overwrite_pass_count, guint32 overwrite_pattern, gboolean overwrite_invert_pattern, GError **error);
 
 
 #endif  /* BD_NVME_API */
