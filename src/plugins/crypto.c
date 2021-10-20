@@ -2223,6 +2223,7 @@ gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const
     guint64 progress_id = 0;
     gchar *msg = NULL;
     struct crypt_params_integrity params = ZERO_INIT;
+    guint32 activate_flags = 0;
 
     params.integrity = algorithm;
     params.integrity_key_size = key_size;
@@ -2235,6 +2236,37 @@ gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const
         params.interleave_sectors = extra->interleave_sectors;
         params.tag_size = extra->tag_size;
         params.buffer_sectors = extra->buffer_sectors;
+    }
+
+
+    if (flags & BD_CRYPTO_INTEGRITY_OPEN_NO_JOURNAL)
+        activate_flags |= CRYPT_ACTIVATE_NO_JOURNAL;
+    if (flags & BD_CRYPTO_INTEGRITY_OPEN_RECOVERY)
+        activate_flags |= CRYPT_ACTIVATE_RECOVERY;
+    if (flags & BD_CRYPTO_INTEGRITY_OPEN_RECALCULATE)
+        activate_flags |= CRYPT_ACTIVATE_RECALCULATE;
+    if (flags & BD_CRYPTO_INTEGRITY_OPEN_ALLOW_DISCARDS)
+        activate_flags |= CRYPT_ACTIVATE_ALLOW_DISCARDS;
+    if (flags & BD_CRYPTO_INTEGRITY_OPEN_NO_JOURNAL_BITMAP) {
+#ifndef CRYPT_ACTIVATE_NO_JOURNAL_BITMAP
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                     "Cannot activate %s with bitmap, installed version of cryptsetup doesn't support this option.", device);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+#else
+        activate_flags |= CRYPT_ACTIVATE_NO_JOURNAL_BITMAP;
+#endif
+    }
+
+    if (flags & BD_CRYPTO_INTEGRITY_OPEN_RECALCULATE_RESET) {
+#ifndef CRYPT_ACTIVATE_RECALCULATE_RESET
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                     "Cannot reset integrity recalculation while activating %s, installed version of cryptsetup doesn't support this option.", device);
+        bd_utils_report_finished (progress_id, (*error)->message);
+        return FALSE;
+#else
+        activate_flags |= CRYPT_ACTIVATE_RECALCULATE_RESET;
+#endif
     }
 
     msg = g_strdup_printf ("Started opening '%s' integrity device", device);
@@ -2258,7 +2290,7 @@ gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const
         return FALSE;
     }
 
-    ret = crypt_activate_by_volume_key (cd, name, (const char *) key_data, key_size, flags);
+    ret = crypt_activate_by_volume_key (cd, name, (const char *) key_data, key_size, activate_flags);
     if (ret < 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to activate device: %s", strerror_l (-ret, c_locale));

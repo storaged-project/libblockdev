@@ -1279,6 +1279,20 @@ class CryptoTestIntegrity(CryptoTestCase):
         self.assertTrue(succ)
         self.assertFalse(os.path.exists("/dev/mapper/%s" % self._dm_name))
 
+        # open with flags
+        succ = BlockDev.crypto_integrity_open(self.loop_dev, self._dm_name, "crc32c",
+                                              flags=BlockDev.CryptoIntegrityOpenFlags.ALLOW_DISCARDS)
+        self.assertTrue(succ)
+        self.assertTrue(os.path.exists("/dev/mapper/%s" % self._dm_name))
+
+        # check that discard is enabled for the mapped device
+        _ret, out, _err = run_command("dmsetup table %s" % self._dm_name)
+        self.assertIn("allow_discards", out)
+
+        succ = BlockDev.crypto_integrity_close(self._dm_name)
+        self.assertTrue(succ)
+        self.assertFalse(os.path.exists("/dev/mapper/%s" % self._dm_name))
+
     @tag_test(TestTags.SLOW)
     @unittest.skipUnless(HAVE_LUKS2, "Integrity not supported")
     def test_integrity_wipe(self):
