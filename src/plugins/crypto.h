@@ -139,16 +139,12 @@ BDCryptoIntegrityExtra* bd_crypto_integrity_extra_copy (BDCryptoIntegrityExtra *
 BDCryptoIntegrityExtra* bd_crypto_integrity_extra_new (guint64 sector_size, guint64 journal_size, guint journal_watermark, guint journal_commit_time, guint64 interleave_sectors, guint64 tag_size, guint64 buffer_sectors);
 
 typedef enum {
-    BD_CRYPTO_INTEGRITY_OPEN_NO_JOURNAL         = CRYPT_ACTIVATE_NO_JOURNAL,
-    BD_CRYPTO_INTEGRITY_OPEN_RECOVERY           = CRYPT_ACTIVATE_RECOVERY,
-#ifdef CRYPT_ACTIVATE_NO_JOURNAL_BITMAP
-    BD_CRYPTO_INTEGRITY_OPEN_NO_JOURNAL_BITMAP  = CRYPT_ACTIVATE_NO_JOURNAL_BITMAP,
-#endif
-    BD_CRYPTO_INTEGRITY_OPEN_RECALCULATE        = CRYPT_ACTIVATE_RECALCULATE,
-#ifdef CRYPT_ACTIVATE_RECALCULATE_RESET
-    BD_CRYPTO_INTEGRITY_OPEN_RECALCULATE_RESET  = CRYPT_ACTIVATE_RECALCULATE_RESET,
-#endif
-    BD_CRYPTO_INTEGRITY_OPEN_ALLOW_DISCARDS     = CRYPT_ACTIVATE_ALLOW_DISCARDS,
+    BD_CRYPTO_INTEGRITY_OPEN_NO_JOURNAL         = 1 << 0,
+    BD_CRYPTO_INTEGRITY_OPEN_RECOVERY           = 1 << 1,
+    BD_CRYPTO_INTEGRITY_OPEN_NO_JOURNAL_BITMAP  = 1 << 2,
+    BD_CRYPTO_INTEGRITY_OPEN_RECALCULATE        = 1 << 3,
+    BD_CRYPTO_INTEGRITY_OPEN_RECALCULATE_RESET  = 1 << 4,
+    BD_CRYPTO_INTEGRITY_OPEN_ALLOW_DISCARDS     = 1 << 5,
 } BDCryptoIntegrityOpenFlags;
 
 /**
