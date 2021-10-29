@@ -228,3 +228,34 @@ class NVMeTestCase(NVMeTest):
             BlockDev.nvme_format(self.nvme_ns_dev, 0, BlockDev.NVMEFormatSecureErase.NONE)
         with self.assertRaisesRegexp(GLib.GError, message):
             BlockDev.nvme_format(self.nvme_dev, 0, BlockDev.NVMEFormatSecureErase.NONE)
+
+
+    @tag_test(TestTags.CORE)
+    def test_sanitize_log(self):
+        """Test sanitize log retrieval"""
+
+        with self.assertRaisesRegexp(GLib.GError, r".*Failed to open device .*': No such file or directory"):
+            BlockDev.nvme_get_sanitize_log("/dev/nonexistent")
+
+        message = r"NVMe Get Log Page - Sanitize Status Log command error: Invalid Field in Command: A reserved coded value or an unsupported value in a defined field"
+        with self.assertRaisesRegexp(GLib.GError, message):
+            # Cannot retrieve sanitize log on a nvme target loop devices
+            BlockDev.nvme_get_sanitize_log(self.nvme_dev)
+        with self.assertRaisesRegexp(GLib.GError, message):
+            BlockDev.nvme_get_sanitize_log(self.nvme_ns_dev)
+
+
+    @tag_test(TestTags.CORE)
+    def test_sanitize(self):
+        """Test issuing the sanitize command"""
+
+        message = r".*Failed to open device .*': No such file or directory"
+        with self.assertRaisesRegexp(GLib.GError, message):
+            BlockDev.nvme_sanitize("/dev/nonexistent", BlockDev.NVMESanitizeAction.BLOCK_ERASE, False, 0, 0, False)
+
+        message = r"Sanitize command error: Invalid Command Opcode: A reserved coded value or an unsupported value in the command opcode field"
+        for i in [BlockDev.NVMESanitizeAction.BLOCK_ERASE, BlockDev.NVMESanitizeAction.CRYPTO_ERASE, BlockDev.NVMESanitizeAction.OVERWRITE, BlockDev.NVMESanitizeAction.EXIT_FAILURE]:
+            with self.assertRaisesRegexp(GLib.GError, message):
+                BlockDev.nvme_sanitize(self.nvme_dev, i, False, 0, 0, False)
+            with self.assertRaisesRegexp(GLib.GError, message):
+                BlockDev.nvme_sanitize(self.nvme_ns_dev, i, False, 0, 0, False)
