@@ -68,7 +68,7 @@
       version: "9"
       reason: "snapshot merge doesn't work on CentOS 9 Stream with LVM DBus API"
 
-- test: nvdimm_test.NVDIMMNoDevTest.(test_enable_disable|test_namespace_reconfigure)
+- test: nvdimm_test.NVDIMMNamespaceTestCase.(test_enable_disable|test_namespace_reconfigure)
   skip_on:
     - distro: "fedora"
       version: "36"
