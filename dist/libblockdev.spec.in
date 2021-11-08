@@ -18,6 +18,7 @@
 %define with_escrow @WITH_ESCROW@
 %define with_dmraid @WITH_DMRAID@
 %define with_tools @WITH_TOOLS@
+%define with_nvme @WITH_NVME@
 
 # python3 is not available on older RHEL
 %if (! 0%{?fedora} && 0%{?rhel} <= 7) || %{with_python3} == 0
@@ -101,8 +102,11 @@
 %if %{with_gi} != 1
 %define gi_copts --disable-introspection
 %endif
+%if %{with_nvme} != 1
+%define nvme_copts --without-nvme
+%endif
 
-%define configure_opts %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?tools_copts} %{?gi_copts}
+%define configure_opts %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?tools_copts} %{?gi_copts} %{?nvme_copts}
 
 Name:        libblockdev
 Version:     2.99
@@ -453,6 +457,29 @@ with the libblockdev-nvdimm plugin/library.
 %endif
 
 
+%if %{with_nvme}
+%package nvme
+BuildRequires: libnvme-devel
+BuildRequires: libuuid-devel
+Summary:     The NVMe plugin for the libblockdev library
+Requires: %{name}-utils%{?_isa} >= 0.11
+
+%description nvme
+The libblockdev library plugin (and in the same time a standalone library)
+providing the functionality related to operations with NVMe devices.
+
+%package nvme-devel
+Summary:     Development files for the libblockdev-nvme plugin/library
+Requires: %{name}-nvme%{?_isa} = %{version}-%{release}
+Requires: %{name}-utils-devel%{?_isa}
+Requires: glib2-devel
+
+%description nvme-devel
+This package contains header files and pkg-config files needed for development
+with the libblockdev-nvme plugin/library.
+%endif
+
+
 %if %{with_part}
 %package part
 BuildRequires: libfdisk-devel
@@ -578,6 +605,10 @@ Requires: %{name}-mpath%{?_isa} = %{version}-%{release}
 Requires: %{name}-nvdimm%{?_isa} = %{version}-%{release}
 %endif
 
+%if %{with_nvme}
+Requires: %{name}-nvme%{?_isa} = %{version}-%{release}
+%endif
+
 %if %{with_part}
 Requires: %{name}-part%{?_isa} = %{version}-%{release}
 %endif
@@ -648,6 +679,10 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 
 %if %{with_nvdimm}
 %ldconfig_scriptlets nvdimm
+%endif
+
+%if %{with_nvme}
+%ldconfig_scriptlets nvme
 %endif
 
 %if %{with_part}
@@ -836,6 +871,17 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_libdir}/libbd_nvdimm.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/nvdimm.h
+%endif
+
+
+%if %{with_nvme}
+%files nvme
+%{_libdir}/libbd_nvme.so.*
+
+%files nvme-devel
+%{_libdir}/libbd_nvme.so
+%dir %{_includedir}/blockdev
+%{_includedir}/blockdev/nvme.h
 %endif
 
 
