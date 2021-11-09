@@ -38,6 +38,7 @@ typedef enum {
     BD_LVM_ERROR_FAIL,
     BD_LVM_ERROR_NOT_SUPPORTED,
     BD_LVM_ERROR_VDO_POLICY_INVAL,
+    BD_LVM_ERROR_DEVICES_DISABLED,
 } BDLVMError;
 
 typedef enum {
