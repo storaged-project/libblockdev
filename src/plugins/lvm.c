@@ -1988,8 +1988,22 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
         if (table && (num_items == 16)) {
             /* valid line, try to parse and record it */
             lvdata = get_lv_data_from_table (table, TRUE);
-            if (lvdata)
-                g_ptr_array_add (lvs, lvdata);
+            if (lvdata) {
+                /* ignore duplicate entries in lvs output, these are caused by multi segments LVs */
+                for (gsize i = 0; i < lvs->len; i++) {
+                    if (g_strcmp0 (((BDLVMLVdata *) g_ptr_array_index (lvs, i))->lv_name, lvdata->lv_name) == 0) {
+                        bd_utils_log_format (BD_UTILS_LOG_DEBUG,
+                                             "Duplicate LV entry for '%s' found in lvs output",
+                                             lvdata->lv_name);
+                        bd_lvm_lvdata_free (lvdata);
+                        lvdata = NULL;
+                        break;
+                    }
+                }
+
+                if (lvdata)
+                    g_ptr_array_add (lvs, lvdata);
+            }
         } else
             if (table)
                 g_hash_table_destroy (table);

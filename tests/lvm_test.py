@@ -1065,6 +1065,47 @@ class LvmTestLVs(LvmPVVGLVTestCase):
         lvs = BlockDev.lvm_lvs("testVG")
         self.assertEqual(len(lvs), 1)
 
+class LvmTestLVsMultiSegment(LvmPVVGLVTestCase):
+    def _clean_up(self):
+        try:
+            BlockDev.lvm_lvremove("testVG", "testLV2", True, None)
+        except:
+            pass
+
+        LvmPVVGLVTestCase._clean_up(self)
+
+    def test_lvs(self):
+        """Verify that it's possible to gather info about LVs"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 10 * 1024**2)
+        self.assertTrue(succ)
+
+        lvs = BlockDev.lvm_lvs("testVG")
+        self.assertEqual(len(lvs), 1)
+        self.assertListEqual([lv.lv_name for lv in lvs], ["testLV"])
+
+        # add second LV
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV2", 10 * 1024**2)
+        self.assertTrue(succ)
+
+        lvs = BlockDev.lvm_lvs("testVG")
+        self.assertEqual(len(lvs), 2)
+        self.assertListEqual([lv.lv_name for lv in lvs], ["testLV", "testLV2"])
+
+        # by resizing the first LV we will create two segments
+        succ = BlockDev.lvm_lvresize("testVG", "testLV", 20 * 1024**2, None)
+        self.assertTrue(succ)
+
+        lvs = BlockDev.lvm_lvs("testVG")
+        self.assertEqual(len(lvs), 2)
+        self.assertListEqual([lv.lv_name for lv in lvs], ["testLV", "testLV2"])
+
 class LvmPVVGthpoolTestCase(LvmPVVGTestCase):
     def _clean_up(self):
         try:
