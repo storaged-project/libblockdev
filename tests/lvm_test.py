@@ -1632,3 +1632,15 @@ class LVMVDOTest(LVMTestCase):
 
         full_stats = BlockDev.lvm_vdo_get_stats_full("testVDOVG", "vdoPool")
         self.assertIn("writeAmplificationRatio", full_stats.keys())
+
+
+class LvmConfigTestPvremove(LvmPVonlyTestCase):
+
+    @tag_test(TestTags.REGRESSION)
+    def test_set_empty_config(self):
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
+        self.assertTrue(succ)
+
+        BlockDev.lvm_set_global_config("")
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
+        self.assertTrue(succ)
