@@ -2171,7 +2171,10 @@ gboolean bd_lvm_set_global_config (const gchar *new_config, GError **error UNUSE
     g_free (global_config_str);
 
     /* now store the new one */
-    global_config_str = g_strdup (new_config);
+    if (!new_config || g_strcmp0 (new_config, "") == 0)
+         global_config_str = NULL;
+    else
+        global_config_str = g_strdup (new_config);
 
     g_mutex_unlock (&global_config_lock);
     return TRUE;

@@ -2017,3 +2017,15 @@ class LvmTestDevicesFile(LvmPVonlyTestCase):
 
         with self.assertRaisesRegex(GLib.GError, "LVM devices file not enabled."):
             BlockDev.lvm_devices_add("", self.devicefile)
+
+
+class LvmConfigTestPvremove(LvmPVonlyTestCase):
+
+    @tag_test(TestTags.REGRESSION)
+    def test_set_empty_config(self):
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
+        self.assertTrue(succ)
+
+        BlockDev.lvm_set_global_config("")
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
+        self.assertTrue(succ)
