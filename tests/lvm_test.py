@@ -1823,6 +1823,20 @@ class LVMVDOTest(LVMTestCase):
         self.assertEqual(BlockDev.lvm_get_vdo_write_policy_str(vdo_info.write_policy), "sync")
 
     @tag_test(TestTags.SLOW)
+    def test_vdo_pool_create_noname(self):
+        succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", None, 7 * 1024**3, 35 * 1024**3)
+        self.assertTrue(succ)
+
+        lv_info = BlockDev.lvm_lvinfo("testVDOVG", "vdoLV")
+        self.assertIsNotNone(lv_info)
+        self.assertEqual(lv_info.segtype, "vdo")
+
+        pool_name = BlockDev.lvm_vdolvpoolname("testVDOVG", "vdoLV")
+        self.assertEqual(lv_info.pool_lv, pool_name)
+        pool_info = BlockDev.lvm_lvinfo("testVDOVG", pool_name)
+        self.assertEqual(pool_info.segtype, "vdo-pool")
+
+    @tag_test(TestTags.SLOW)
     def test_resize(self):
         succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", "vdoPool", 5 * 1024**3, 10 * 1024**3)
         self.assertTrue(succ)

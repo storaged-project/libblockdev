@@ -3839,7 +3839,7 @@ gboolean bd_lvm_cache_pool_convert (const gchar *vg_name, const gchar *data_lv, 
  * bd_lvm_vdo_pool_create:
  * @vg_name: name of the VG to create a new LV in
  * @lv_name: name of the to-be-created VDO LV
- * @pool_name: name of the to-be-created VDO pool LV
+ * @pool_name: (allow-none): name of the to-be-created VDO pool LV or %NULL for default name
  * @data_size: requested size of the data VDO LV (physical size of the @pool_name VDO pool LV)
  * @virtual_size: requested virtual_size of the @lv_name VDO LV
  * @index_memory: amount of index memory (in bytes) or 0 for default
@@ -3860,6 +3860,7 @@ gboolean bd_lvm_vdo_pool_create (const gchar *vg_name, const gchar *lv_name, con
     GVariant *extra_params = NULL;
     gchar *old_config = NULL;
     const gchar *write_policy_str = NULL;
+    g_autofree gchar *name = NULL;
 
     write_policy_str = bd_lvm_get_vdo_write_policy_str (write_policy, error);
     if (*error)
@@ -3867,7 +3868,13 @@ gboolean bd_lvm_vdo_pool_create (const gchar *vg_name, const gchar *lv_name, con
 
     /* build the params tuple */
     g_variant_builder_init (&builder, G_VARIANT_TYPE_TUPLE);
-    g_variant_builder_add_value (&builder, g_variant_new ("s", pool_name));
+
+    if (!pool_name) {
+        name = g_strdup_printf ("%s_vpool", lv_name);
+        g_variant_builder_add_value (&builder, g_variant_new ("s", name));
+    } else
+        g_variant_builder_add_value (&builder, g_variant_new ("s", pool_name));
+
     g_variant_builder_add_value (&builder, g_variant_new ("s", lv_name));
     g_variant_builder_add_value (&builder, g_variant_new ("t", data_size));
     g_variant_builder_add_value (&builder, g_variant_new ("t", virtual_size));
