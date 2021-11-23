@@ -1,8 +1,9 @@
 import unittest
 import os
+import re
 import overrides_hack
 
-from utils import create_sparse_tempfile, create_nvmet_device, delete_nvmet_device, fake_utils, fake_path, run_command, run, TestTags, tag_test
+from utils import create_sparse_tempfile, create_nvmet_device, delete_nvmet_device, setup_nvme_target, teardown_nvme_target, find_nvme_ctrl_devs_for_subnqn, find_nvme_ns_devs_for_subnqn, fake_utils, fake_path, run_command, run, TestTags, tag_test
 from gi.repository import BlockDev, GLib
 from distutils.spawn import find_executable
 
@@ -12,6 +13,11 @@ class NVMeTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        if not find_executable("nvme"):
+            raise unittest.SkipTest("nvme executable (nvme-cli package) not found in $PATH, skipping.")
+        if not find_executable("nvmetcli"):
+            raise unittest.SkipTest("nvmetcli executable not found in $PATH, skipping.")
+
         if not BlockDev.is_initialized():
             BlockDev.init(cls.requested_plugins, None)
         else:
@@ -20,11 +26,6 @@ class NVMeTest(unittest.TestCase):
 
 class NVMeTestCase(NVMeTest):
     def setUp(self):
-        if not find_executable("nvme"):
-            raise unittest.SkipTest("nvme executable (nvme-cli package) not found in $PATH, skipping.")
-        if not find_executable("nvmetcli"):
-            raise unittest.SkipTest("nvmetcli executable not found in $PATH, skipping.")
-
         self.dev_file = None
         self.loop_dev = None
         self.nvme_dev = None
@@ -259,3 +260,124 @@ class NVMeTestCase(NVMeTest):
                 BlockDev.nvme_sanitize(self.nvme_dev, i, False, 0, 0, False)
             with self.assertRaisesRegexp(GLib.GError, message):
                 BlockDev.nvme_sanitize(self.nvme_ns_dev, i, False, 0, 0, False)
+
+
+class NVMeFabricsTestCase(NVMeTest):
+    HOSTNQN = 'libblockdev_nvmeof_hostnqn'
+    SUBNQN = 'libblockdev_nvmeof_subnqn'
+
+    def setUp(self):
+        self.loop_devs = []
+        self.dev_files = []
+
+    def _setup_target(self, num_devices):
+        self.addCleanup(self._clean_up)
+        for i in range(num_devices):
+            self.dev_files += [create_sparse_tempfile("nvmeof_test%d" % i, 1024**3)]
+            ret, out, err = run_command("losetup --find --show %s" % self.dev_files[i])
+            if ret != 0:
+                raise RuntimeError("Cannot attach loop device: '%s %s'" % (out, err))
+            self.loop_devs += [out]
+        setup_nvme_target(self.loop_devs, self.SUBNQN, self.HOSTNQN)
+
+    def _clean_up(self):
+        teardown_nvme_target()
+
+        # detach loop devices
+        for i in self.loop_devs:
+            run_command("losetup --detach %s" % i)
+        for i in self.dev_files:
+            os.unlink(i)
+
+    def _nvme_disconnect(self, subnqn, ignore_errors=False):
+        ret, out, err = run_command("nvme disconnect --nqn=%s" % subnqn)
+        if not ignore_errors and (ret != 0 or 'disconnected 0 ' in out):
+            raise RuntimeError("Error disconnecting the '%s' subsystem NQN: '%s %s'" % (subnqn, out, err))
+
+    @tag_test(TestTags.CORE)
+    def test_connect_single_ns(self):
+        """Test simple connect and disconnect"""
+
+        # test that no device node exists for given subsystem nqn
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(ctrls), 0)
+
+        # nothing to disconnect
+        with self.assertRaisesRegexp(GLib.GError, r"No subsystems matching '.*' NQN found."):
+            BlockDev.nvme_disconnect(self.SUBNQN)
+
+        # nothing to connect to
+        with self.assertRaisesRegexp(GLib.GError, r"Error connecting the controller: "):
+            # FIXME: libnvme itself spits an error on stdout
+            BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, self.HOSTNQN, None)
+
+        self._setup_target(1)
+
+        # make a connection
+        ret = BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, self.HOSTNQN, None)
+        self.addCleanup(self._nvme_disconnect, self.SUBNQN, ignore_errors=True)
+        self.assertTrue(ret)
+
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(ctrls), 1)
+        for c in ctrls:
+            self.assertTrue(re.match(r'/dev/nvme[0-9]+', c))
+            self.assertTrue(os.path.exists(c))
+        namespaces = find_nvme_ns_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(namespaces), 1)
+        for ns in namespaces:
+            self.assertTrue(re.match(r'/dev/nvme[0-9]+n[0-9]+', ns))
+            self.assertTrue(os.path.exists(ns))
+
+        # disconnect
+        with self.assertRaisesRegexp(GLib.GError, r"No subsystems matching '.*' NQN found."):
+            BlockDev.nvme_disconnect(self.SUBNQN + "xx")
+        BlockDev.nvme_disconnect(self.SUBNQN)
+        for c in ctrls:
+            self.assertFalse(os.path.exists(c))
+        for ns in namespaces:
+            self.assertFalse(os.path.exists(ns))
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(ctrls), 0)
+        namespaces = find_nvme_ns_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(namespaces), 0)
+
+
+    @tag_test(TestTags.CORE)
+    def test_connect_multiple_ns(self):
+        """Test connect and disconnect multiple namespaces"""
+
+        NUM_NS = 3
+
+        # test that no device node exists for given subsystem nqn
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(ctrls), 0)
+
+        self._setup_target(NUM_NS)
+
+        # make a connection
+        ret = BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, self.HOSTNQN, None)
+        self.addCleanup(self._nvme_disconnect, self.SUBNQN, ignore_errors=True)
+        self.assertTrue(ret)
+
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(ctrls), 1)
+        for c in ctrls:
+            self.assertTrue(re.match(r'/dev/nvme[0-9]+', c))
+            self.assertTrue(os.path.exists(c))
+        namespaces = find_nvme_ns_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(namespaces), NUM_NS)
+        for ns in namespaces:
+            self.assertTrue(re.match(r'/dev/nvme[0-9]+n[0-9]+', ns))
+            self.assertTrue(os.path.exists(ns))
+
+        # disconnect
+        BlockDev.nvme_disconnect(self.SUBNQN)
+        for c in ctrls:
+            self.assertFalse(os.path.exists(c))
+        for ns in namespaces:
+            self.assertFalse(os.path.exists(ns))
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(ctrls), 0)
+        namespaces = find_nvme_ns_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(namespaces), 0)
