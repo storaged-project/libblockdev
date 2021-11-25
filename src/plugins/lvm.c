@@ -2911,7 +2911,7 @@ gboolean bd_lvm_cache_pool_convert (const gchar *vg_name, const gchar *data_lv, 
  * bd_lvm_vdo_pool_create:
  * @vg_name: name of the VG to create a new LV in
  * @lv_name: name of the to-be-created VDO LV
- * @pool_name: name of the to-be-created VDO pool LV
+ * @pool_name: (allow-none): name of the to-be-created VDO pool LV or %NULL for default name
  * @data_size: requested size of the data VDO LV (physical size of the @pool_name VDO pool LV)
  * @virtual_size: requested virtual_size of the @lv_name VDO LV
  * @index_memory: amount of index memory (in bytes) or 0 for default
@@ -2941,7 +2941,11 @@ gboolean bd_lvm_vdo_pool_create (const gchar *vg_name, const gchar *lv_name, con
 
     args[6] = g_strdup_printf ("%"G_GUINT64_FORMAT"K", data_size / 1024);
     args[8] = g_strdup_printf ("%"G_GUINT64_FORMAT"K", virtual_size / 1024);
-    args[14] = g_strdup_printf ("%s/%s", vg_name, pool_name);
+
+    if (pool_name) {
+        args[14] = g_strdup_printf ("%s/%s", vg_name, pool_name);
+    } else
+        args[14] = vg_name;
 
     /* index_memory and write_policy can be specified only using the config */
     g_mutex_lock (&global_config_lock);
@@ -2962,7 +2966,9 @@ gboolean bd_lvm_vdo_pool_create (const gchar *vg_name, const gchar *lv_name, con
 
     g_free ((gchar *) args[6]);
     g_free ((gchar *) args[8]);
-    g_free ((gchar *) args[14]);
+
+    if (pool_name)
+        g_free ((gchar *) args[14]);
 
     return success;
 }

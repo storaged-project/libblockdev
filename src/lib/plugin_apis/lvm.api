@@ -1558,7 +1558,7 @@ gboolean bd_lvm_cache_pool_convert (const gchar *vg_name, const gchar *data_lv, 
  * bd_lvm_vdo_pool_create:
  * @vg_name: name of the VG to create a new LV in
  * @lv_name: name of the to-be-created VDO LV
- * @pool_name: name of the to-be-created VDO pool LV
+ * @pool_name: (allow-none): name of the to-be-created VDO pool LV or %NULL for default name
  * @data_size: requested size of the data VDO LV (physical size of the @pool_name VDO pool LV)
  * @virtual_size: requested virtual_size of the @lv_name VDO LV
  * @index_memory: amount of index memory (in bytes) or 0 for default
