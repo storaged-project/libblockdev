@@ -1974,7 +1974,7 @@ class LvmTestDevicesFile(LvmPVonlyTestCase):
         if not self.devices_avail:
             self.skipTest("skipping LVM devices file test: not supported")
 
-        self.addCleanup(BlockDev.lvm_set_global_config, "")
+        self.addCleanup(BlockDev.lvm_set_global_config, None)
 
         # force-enable the feature, it might be disabled by default
         succ = BlockDev.lvm_set_global_config("devices { use_devicesfile=1 }")
@@ -2001,13 +2001,13 @@ class LvmTestDevicesFile(LvmPVonlyTestCase):
         dfile = read_file("/etc/lvm/devices/" + self.devicefile)
         self.assertNotIn(self.loop_dev, dfile)
 
-        BlockDev.lvm_set_global_config("")
+        BlockDev.lvm_set_global_config(None)
 
     def test_devices_enabled(self):
         if not self.devices_avail:
             self.skipTest("skipping LVM devices file test: not supported")
 
-        self.addCleanup(BlockDev.lvm_set_global_config, "")
+        self.addCleanup(BlockDev.lvm_set_global_config, None)
 
         # checking if the feature is enabled or disabled is hard so lets just disable
         # the devices file using the global config and check lvm_devices_add fails
@@ -2017,3 +2017,15 @@ class LvmTestDevicesFile(LvmPVonlyTestCase):
 
         with self.assertRaisesRegex(GLib.GError, "LVM devices file not enabled."):
             BlockDev.lvm_devices_add("", self.devicefile)
+
+
+class LvmConfigTestPvremove(LvmPVonlyTestCase):
+
+    @tag_test(TestTags.REGRESSION)
+    def test_set_empty_config(self):
+        succ = BlockDev.lvm_pvcreate(self.loop_dev)
+        self.assertTrue(succ)
+
+        BlockDev.lvm_set_global_config("")
+        succ = BlockDev.lvm_pvremove(self.loop_dev)
+        self.assertTrue(succ)
