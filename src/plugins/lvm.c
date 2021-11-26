@@ -3263,9 +3263,9 @@ static gboolean _lvm_devices_enabled () {
     gboolean enabled = FALSE;
     gint scanned = 0;
 
-    /* try current config first -- if we get something from this it means the feature is
+    /* try full config first -- if we get something from this it means the feature is
        explicitly enabled or disabled by system lvm.conf or using the --config option */
-    args[2] = "current";
+    args[2] = "full";
     ret = call_lvm_and_capture_output (args, NULL, &output, &loc_error);
     if (ret) {
         scanned = sscanf (output, "use_devicesfile=%u", &enabled);
