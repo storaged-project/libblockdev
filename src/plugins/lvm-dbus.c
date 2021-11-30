@@ -4326,9 +4326,9 @@ static gboolean _lvm_devices_enabled () {
     gint scanned = 0;
     g_autofree gchar *config_arg = NULL;
 
-    /* try current config first -- if we get something from this it means the feature is
+    /* try full config first -- if we get something from this it means the feature is
        explicitly enabled or disabled by system lvm.conf or using the --config option */
-    args[2] = "current";
+    args[2] = "full";
 
     /* make sure to include the global config from us when getting the current config value */
     g_mutex_lock (&global_config_lock);
