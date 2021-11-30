@@ -381,3 +381,52 @@ class NVMeFabricsTestCase(NVMeTest):
         self.assertEqual(len(ctrls), 0)
         namespaces = find_nvme_ns_devs_for_subnqn(self.SUBNQN)
         self.assertEqual(len(namespaces), 0)
+
+
+    @tag_test(TestTags.CORE)
+    def test_discovery(self):
+        """Test discovery"""
+
+        DISCOVERY_NQN = 'nqn.2014-08.org.nvmexpress.discovery'
+
+        # nvme target unavailable
+        ctrls = find_nvme_ctrl_devs_for_subnqn(DISCOVERY_NQN)
+        self.assertEqual(len(ctrls), 0)
+        with self.assertRaisesRegexp(GLib.GError, r"Invalid discovery controller device specified"):
+            BlockDev.nvme_discover('nonsense', True, 'loop', None, None, None, None, self.HOSTNQN, None)
+        with self.assertRaisesRegexp(GLib.GError, r"Couldn't access the discovery controller device specified"):
+            BlockDev.nvme_discover('/dev/nvmenonsense', True, 'loop', None, None, None, None, self.HOSTNQN, None)
+        with self.assertRaisesRegexp(GLib.GError, r"Error connecting the controller: (Input/output error|No such file or directory|failed to write to nvme-fabrics device)"):
+            BlockDev.nvme_discover(None, False, 'loop', None, None, None, None, self.HOSTNQN, None)
+
+        self._setup_target(1)
+
+        # non-persistent discovery connection
+        entries = BlockDev.nvme_discover(None, False, 'loop', None, None, None, None, self.HOSTNQN, None)
+        self.assertGreater(len(entries), 0)
+        self.assertEqual(entries[0].transport_type, BlockDev.NVMETransportType.LOOP)
+        self.assertEqual(entries[0].address_family, BlockDev.NVMEAddressFamily.PCI)
+        self.assertEqual(entries[0].port_id, 1)
+        self.assertEqual(entries[0].ctrl_id, 65535)
+        self.assertIn(self.SUBNQN, [entry.subsys_nqn for entry in entries])
+        self.assertEqual(entries[0].tcp_security, BlockDev.NVMETCPSecurity.NONE)
+        ctrls = find_nvme_ctrl_devs_for_subnqn(DISCOVERY_NQN)
+        self.assertEqual(len(ctrls), 0)
+
+        # persistent discovery connection
+        entries = BlockDev.nvme_discover(None, True, 'loop', None, None, None, None, self.HOSTNQN, None)
+        self.addCleanup(self._nvme_disconnect, DISCOVERY_NQN, ignore_errors=True)
+        self.assertGreater(len(entries), 0)
+        self.assertIn(self.SUBNQN, [entry.subsys_nqn for entry in entries])
+        ctrls = find_nvme_ctrl_devs_for_subnqn(DISCOVERY_NQN)
+        self.assertEqual(len(ctrls), 1)
+
+        # reuse the persistent connection
+        entries = BlockDev.nvme_discover(ctrls[0], False, 'loop', None, None, None, None, self.HOSTNQN, None)
+        self.assertGreater(len(entries), 0)
+        self.assertIn(self.SUBNQN, [entry.subsys_nqn for entry in entries])
+        ctrls = find_nvme_ctrl_devs_for_subnqn(DISCOVERY_NQN)
+        self.assertEqual(len(ctrls), 1)
+
+        # close the persistent connection
+        BlockDev.nvme_disconnect(DISCOVERY_NQN)
