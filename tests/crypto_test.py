@@ -1006,7 +1006,7 @@ class CryptoTestLuksSectorSize(CryptoTestCase):
             raise RuntimeError("Failed to setup loop device for testing")
         self.loop_dev = "/dev/%s" % loop
 
-        succ, loop = BlockDev.loop_setup(self.dev_file)
+        succ, loop = BlockDev.loop_setup(self.dev_file2)
         if not succ:
             raise RuntimeError("Failed to setup loop device for testing")
         self.loop_dev2 = "/dev/%s" % loop
