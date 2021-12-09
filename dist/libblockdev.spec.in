@@ -353,7 +353,7 @@ providing the LVM-related functionality.
 %package lvm-devel
 Summary:     Development files for the libblockdev-lvm plugin/library
 Requires: %{name}-lvm%{?_isa} = %{version}-%{release}
-Requires: %{name}-utils-devel%{?_isa}
+Requires: %{name}-utils-devel%{?_isa} = %{version}-%{release}
 Requires: glib2-devel
 
 %description lvm-devel
@@ -375,7 +375,7 @@ providing the LVM-related functionality utilizing the LVM DBus API.
 %package lvm-dbus-devel
 Summary:     Development files for the libblockdev-lvm-dbus plugin/library
 Requires: %{name}-lvm-dbus%{?_isa} = %{version}-%{release}
-Requires: %{name}-utils-devel%{?_isa} >= 1.4
+Requires: %{name}-utils-devel%{?_isa} = %{version}-%{release}
 Requires: glib2-devel
 
 %description lvm-dbus-devel
