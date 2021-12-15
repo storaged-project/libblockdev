@@ -7,6 +7,8 @@ import six
 import re
 import shutil
 import subprocess
+import time
+from contextlib import contextmanager
 from distutils.version import LooseVersion
 from itertools import chain
 
@@ -16,6 +18,21 @@ from gi.repository import BlockDev, GLib
 import dbus
 sb = dbus.SystemBus()
 lvm_dbus_running = any("lvmdbus" in name for name in chain(sb.list_names(), sb.list_activatable_names()))
+
+
+@contextmanager
+def wait_for_sync(vg_name, lv_name):
+    try:
+        yield
+    finally:
+        time.sleep(2)
+        while True:
+            ret, out, _err = run_command("LC_ALL=C lvs -o copy_percent --noheadings %s/%s" % (vg_name, lv_name))
+            if ret != 0:
+                break
+            if int(float(out)) == 100:
+                break
+            time.sleep(1)
 
 
 class LVMTestCase(unittest.TestCase):
@@ -764,9 +781,10 @@ class LvmTestLVcreateType(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_lvremove("testVG", "testLV", True, None)
         self.assertTrue(succ)
 
-        # try to create a mirrored LV
-        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "mirror", [self.loop_dev, self.loop_dev2], None)
-        self.assertTrue(succ)
+        with wait_for_sync("testVG", "testLV"):
+            # try to create a mirrored LV
+            succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "mirror", [self.loop_dev, self.loop_dev2], None)
+            self.assertTrue(succ)
 
         # verify that the LV has the requested segtype
         info = BlockDev.lvm_lvinfo("testVG", "testLV")
@@ -775,9 +793,10 @@ class LvmTestLVcreateType(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_lvremove("testVG", "testLV", True, None)
         self.assertTrue(succ)
 
-        # try to create a raid1 LV
-        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "raid1", [self.loop_dev, self.loop_dev2], None)
-        self.assertTrue(succ)
+        with wait_for_sync("testVG", "testLV"):
+            # try to create a raid1 LV
+            succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "raid1", [self.loop_dev, self.loop_dev2], None)
+            self.assertTrue(succ)
 
         # verify that the LV has the requested segtype
         info = BlockDev.lvm_lvinfo("testVG", "testLV")

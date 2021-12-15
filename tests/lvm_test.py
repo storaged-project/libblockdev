@@ -7,10 +7,27 @@ import six
 import re
 import shutil
 import subprocess
+import time
+from contextlib import contextmanager
 from distutils.version import LooseVersion
 
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test, run_command
 from gi.repository import BlockDev, GLib
+
+
+@contextmanager
+def wait_for_sync(vg_name, lv_name):
+    try:
+        yield
+    finally:
+        time.sleep(2)
+        while True:
+            info = BlockDev.lvm_lvinfo(vg_name, lv_name)
+            if not info:
+                break
+            if info.copy_percent == 100:
+                break
+            time.sleep(1)
 
 
 class LVMTestCase(unittest.TestCase):
@@ -696,9 +713,10 @@ class LvmTestLVcreateType(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_lvremove("testVG", "testLV", True, None)
         self.assertTrue(succ)
 
-        # try to create a mirrored LV
-        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "mirror", [self.loop_dev, self.loop_dev2], None)
-        self.assertTrue(succ)
+        with wait_for_sync("testVG", "testLV"):
+            # try to create a mirrored LV
+            succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "mirror", [self.loop_dev, self.loop_dev2], None)
+            self.assertTrue(succ)
 
         # verify that the LV has the requested segtype
         info = BlockDev.lvm_lvinfo("testVG", "testLV")
@@ -707,9 +725,10 @@ class LvmTestLVcreateType(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_lvremove("testVG", "testLV", True, None)
         self.assertTrue(succ)
 
-        # try to create a raid1 LV
-        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "raid1", [self.loop_dev, self.loop_dev2], None)
-        self.assertTrue(succ)
+        with wait_for_sync("testVG", "testLV"):
+            # try to create a raid1 LV
+            succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "raid1", [self.loop_dev, self.loop_dev2], None)
+            self.assertTrue(succ)
 
         # verify that the LV has the requested segtype
         info = BlockDev.lvm_lvinfo("testVG", "testLV")
