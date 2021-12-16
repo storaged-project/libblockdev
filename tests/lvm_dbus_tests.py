@@ -331,14 +331,17 @@ class LvmNoDevTestCase(LVMTestCase):
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmPVonlyTestCase(LVMTestCase):
+
+    _sparse_size = 1024**3
+
     # :TODO:
     #     * test pvmove (must create two PVs, a VG, a VG and some data in it
     #       first)
     #     * some complex test for pvs, vgs, lvs, pvinfo, vginfo and lvinfo
     def setUp(self):
         self.addCleanup(self._clean_up)
-        self.dev_file = create_sparse_tempfile("lvm_test", 1024**3)
-        self.dev_file2 = create_sparse_tempfile("lvm_test", 1024**3)
+        self.dev_file = create_sparse_tempfile("lvm_test", self._sparse_size)
+        self.dev_file2 = create_sparse_tempfile("lvm_test", self._sparse_size)
         try:
             self.loop_dev = create_lio_device(self.dev_file)
         except RuntimeError as e:
@@ -900,6 +903,9 @@ class LvmTestLVcreateWithExtra(LvmPVVGLVTestCase):
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmTestLVcreateType(LvmPVVGLVTestCase):
+
+    _sparse_size = 200 * 1024**2
+
     def test_lvcreate_type(self):
         """Verify it's possible to create LVs with various types"""
 
@@ -913,7 +919,7 @@ class LvmTestLVcreateType(LvmPVVGLVTestCase):
         self.assertTrue(succ)
 
         # try to create a striped LV
-        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "striped", [self.loop_dev, self.loop_dev2], None)
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 100 * 1024**2, "striped", [self.loop_dev, self.loop_dev2], None)
         self.assertTrue(succ)
 
         # verify that the LV has the requested segtype
@@ -925,7 +931,7 @@ class LvmTestLVcreateType(LvmPVVGLVTestCase):
 
         with wait_for_sync("testVG", "testLV"):
             # try to create a mirrored LV
-            succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "mirror", [self.loop_dev, self.loop_dev2], None)
+            succ = BlockDev.lvm_lvcreate("testVG", "testLV", 100 * 1024**2, "mirror", [self.loop_dev, self.loop_dev2], None)
             self.assertTrue(succ)
 
         # verify that the LV has the requested segtype
@@ -937,7 +943,7 @@ class LvmTestLVcreateType(LvmPVVGLVTestCase):
 
         with wait_for_sync("testVG", "testLV"):
             # try to create a raid1 LV
-            succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, "raid1", [self.loop_dev, self.loop_dev2], None)
+            succ = BlockDev.lvm_lvcreate("testVG", "testLV", 100 * 1024**2, "raid1", [self.loop_dev, self.loop_dev2], None)
             self.assertTrue(succ)
 
         # verify that the LV has the requested segtype
