@@ -1001,19 +1001,15 @@ class CryptoTestLuksSectorSize(CryptoTestCase):
         self.dev_file = create_sparse_tempfile("crypto_test", 1024**3)
         self.dev_file2 = create_sparse_tempfile("crypto_test", 1024**3)
 
-        succ, loop = BlockDev.loop_setup(self.dev_file)
-        if not succ:
-            raise RuntimeError("Failed to setup loop device for testing")
-        self.loop_dev = "/dev/%s" % loop
+        # create a 4k sector loop device
+        ret, out, err = run_command("losetup -f %s --show --sector-size 4096" % self.dev_file)
+        self.assertEqual(ret, 0, "Failed to setup loop device for testing: %s" % err)
+        self.loop_dev = out.strip()
 
         succ, loop = BlockDev.loop_setup(self.dev_file2)
         if not succ:
             raise RuntimeError("Failed to setup loop device for testing")
         self.loop_dev2 = "/dev/%s" % loop
-
-        # set sector size of the loop device to 4k
-        ret, _out, _err = run_command("losetup --sector-size 4096 %s" % self.loop_dev)
-        self.assertEqual(ret, 0)
 
     def _clean_up(self):
         try:
