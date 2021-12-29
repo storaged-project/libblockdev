@@ -1050,6 +1050,10 @@ class MountTest(FSTestCase):
 
         self.addCleanup(umount, self.loop_dev)
 
+        # try mounting unknown filesystem type
+        with self.assertRaisesRegex(GLib.GError, r"Filesystem type .* not configured in kernel."):
+            BlockDev.fs_mount(self.loop_dev, tmp, "nonexisting", None)
+
         succ = BlockDev.fs_mount(self.loop_dev, tmp, "vfat", None)
         self.assertTrue(succ)
         self.assertTrue(os.path.ismount(tmp))
