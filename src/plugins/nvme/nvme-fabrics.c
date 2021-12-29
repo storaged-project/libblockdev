@@ -231,6 +231,7 @@ gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const 
 
     root = nvme_scan (config_file);
     g_assert (root != NULL);
+    nvme_init_logging (root, -1, false, false);
     host = nvme_lookup_host (root, host_nqn_val, host_id_val);
     if (host == NULL) {
         g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
@@ -294,6 +295,7 @@ gboolean bd_nvme_disconnect (const gchar *subsysnqn, GError **error) {
     gboolean found = FALSE;
 
     root = nvme_scan (NULL);
+    nvme_init_logging (root, -1, false, false);
     nvme_for_each_host (root, host)
         nvme_for_each_subsystem (host, subsys)
             if (g_strcmp0 (nvme_subsystem_get_nqn (subsys), subsysnqn) == 0)
@@ -339,6 +341,7 @@ gboolean bd_nvme_disconnect_by_path (const gchar *path, GError **error) {
     int ret;
 
     root = nvme_scan (NULL);
+    nvme_init_logging (root, -1, false, false);
     ctrl = nvme_scan_ctrl (root, path);
     if (!ctrl) {
         g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_NO_MATCH,
@@ -509,6 +512,7 @@ BDNVMEDiscoveryLogEntry ** bd_nvme_discover (const gchar *discovery_ctrl, gboole
 
     root = nvme_scan (config_file);
     g_assert (root != NULL);
+    nvme_init_logging (root, -1, false, false);
     host = nvme_lookup_host (root, host_nqn_val, host_id_val);
     if (host == NULL) {
         g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,

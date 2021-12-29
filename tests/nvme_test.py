@@ -308,7 +308,6 @@ class NVMeFabricsTestCase(NVMeTest):
 
         # nothing to connect to
         with self.assertRaisesRegexp(GLib.GError, r"Error connecting the controller: "):
-            # FIXME: libnvme itself spits an error on stdout
             BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, self.HOSTNQN, None)
 
         self._setup_target(1)
