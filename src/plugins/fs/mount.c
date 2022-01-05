@@ -227,7 +227,7 @@ static gboolean get_mount_error_old (struct libmnt_context *cxt, int rc, MountAr
                     g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                                  "Filesystem type not specified");
                 else
-                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UNKNOWN_FS,
                                  "Filesystem type %s not configured in kernel.", args->fstype);
                 break;
             case EROFS:
@@ -343,6 +343,9 @@ static gboolean get_mount_error_new (struct libmnt_context *cxt, int rc, MountAr
         if (permission)
             g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_AUTH,
                          "Operation not permitted.");
+        else if (syscall_errno == ENODEV)
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UNKNOWN_FS,
+                         "Filesystem type %s not configured in kernel.", args->fstype);
         else {
             if (*buf == '\0')
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
