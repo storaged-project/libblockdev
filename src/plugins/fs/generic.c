@@ -109,7 +109,7 @@ get_fs_info (const gchar *type)
  * @device: the device to wipe signatures from
  * @all: whether to wipe all (%TRUE) signatures or just the first (%FALSE) one
  * @force: whether to wipe signatures on a mounted @device
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether signatures were successfully wiped on @device or not
  *
@@ -123,6 +123,7 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, gboolean force, GError *
     gchar *msg = NULL;
     guint n_try = 0;
     gint mode = 0;
+    GError *l_error = NULL;
 
     msg = g_strdup_printf ("Started wiping signatures from the device '%s'", device);
     progress_id = bd_utils_report_started (msg);
@@ -130,9 +131,10 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, gboolean force, GError *
 
     probe = blkid_new_probe ();
     if (!probe) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+        g_set_error (&l_error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to create a new probe");
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
@@ -142,10 +144,11 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, gboolean force, GError *
 
     fd = open (device, mode);
     if (fd == -1) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+        g_set_error (&l_error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to open the device '%s'", device);
         blkid_free_probe (probe);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
@@ -157,11 +160,12 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, gboolean force, GError *
             g_usleep (100 * 1000); /* microseconds */
     }
     if (status != 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+        g_set_error (&l_error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to create a probe for the device '%s'", device);
         blkid_free_probe (probe);
         synced_close (fd);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
@@ -180,11 +184,12 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, gboolean force, GError *
             g_usleep (100 * 1000); /* microseconds */
     }
     if (status == 1) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
+        g_set_error (&l_error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
                      "No signature detected on the device '%s'", device);
         blkid_free_probe (probe);
         synced_close (fd);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
@@ -192,31 +197,34 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, gboolean force, GError *
     status = blkid_do_probe (probe);
 
     if (status < 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+        g_set_error (&l_error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to probe the device '%s'", device);
         blkid_free_probe (probe);
         synced_close (fd);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
     status = blkid_do_wipe (probe, FALSE);
     if (status != 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+        g_set_error (&l_error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to wipe signatures on the device '%s'", device);
         blkid_free_probe (probe);
         synced_close (fd);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
     while (all && (blkid_do_probe (probe) == 0)) {
         status = blkid_do_wipe (probe, FALSE);
         if (status != 0) {
-            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+            g_set_error (&l_error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                          "Failed to wipe signatures on the device '%s'", device);
             blkid_free_probe (probe);
             synced_close (fd);
-            bd_utils_report_finished (progress_id, (*error)->message);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
             return FALSE;
         }
     }
@@ -233,7 +241,7 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, gboolean force, GError *
  * bd_fs_clean:
  * @device: the device to clean
  * @force: whether to wipe signatures on a mounted @device
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Clean all signatures from @device.
  * Difference between this and bd_fs_wipe() is that this function doesn't
@@ -246,16 +254,17 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, gboolean force, GError *
  */
 gboolean bd_fs_clean (const gchar *device, gboolean force, GError **error) {
   gboolean ret = FALSE;
+  GError *l_error = NULL;
 
-  ret = bd_fs_wipe (device, TRUE, force, error);
+  ret = bd_fs_wipe (device, TRUE, force, &l_error);
 
   if (!ret) {
-    if (g_error_matches (*error, BD_FS_ERROR, BD_FS_ERROR_NOFS)) {
+    if (g_error_matches (l_error, BD_FS_ERROR, BD_FS_ERROR_NOFS)) {
         /* ignore 'empty device' error */
-        g_clear_error (error);
+        g_clear_error (&l_error);
         return TRUE;
     } else {
-        g_prefix_error (error, "Failed to clean %s:", device);
+        g_propagate_prefixed_error (error, l_error, "Failed to clean %s:", device);
         return FALSE;
     }
   } else
@@ -265,7 +274,7 @@ gboolean bd_fs_clean (const gchar *device, gboolean force, GError **error) {
 /**
  * bd_fs_get_fstype:
  * @device: the device to probe
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Get first signature on @device as a string.
  *
@@ -380,7 +389,7 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
  * @fstype: (allow-none): filesystem type on @device
  * @unmount: (out): whether caller should unmount the device (was mounted by us) or
  *                  not (was already mounted before)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * This is just a helper function for FS operations that need @device to be mounted.
  * If the device is already mounted, this will just return the existing mountpoint.
@@ -428,7 +437,7 @@ static gchar* fs_mount (const gchar *device, gchar *fstype, gboolean *unmount, G
  *            (if 0, the file system is adapted to the underlying block device)
  * @extra: (allow-none) (array zero-terminated=1): extra options for the resize (right now
  *                                                 passed to the 'xfs_growfs' utility)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * This is just a helper function for bd_fs_resize.
  *
@@ -646,14 +655,17 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
 
     fstype = bd_fs_get_fstype (device, error);
     if (!fstype) {
-        if (*error == NULL) {
-            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
-                         "No filesystem detected on the device '%s'", device);
+        if (error) {
+            if (*error == NULL) {
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
+                            "No filesystem detected on the device '%s'", device);
+                return FALSE;
+            } else {
+                g_prefix_error (error, "Error when trying to detect filesystem on '%s': ", device);
+                return FALSE;
+            }
+        } else
             return FALSE;
-        } else {
-            g_prefix_error (error, "Error when trying to detect filesystem on '%s': ", device);
-            return FALSE;
-        }
     }
 
     if (g_strcmp0 (fstype, "ext2") == 0 || g_strcmp0 (fstype, "ext3") == 0
@@ -837,7 +849,7 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
  * @device: the device the file system of which to resize
  * @new_size: new requested size for the file system (if 0, the file system is
  *            adapted to the underlying block device)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Resize filesystem on @device. This calls other fs resize functions from this
  * plugin based on detected filesystem (e.g. bd_fs_xfs_resize for XFS). This
@@ -854,7 +866,7 @@ gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error) {
 /**
  * bd_fs_repair:
  * @device: the device the file system of which to repair
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Repair filesystem on @device. This calls other fs repair functions from this
  * plugin based on detected filesystem (e.g. bd_fs_xfs_repair for XFS). This
@@ -871,7 +883,7 @@ gboolean bd_fs_repair (const gchar *device, GError **error) {
 /**
  * bd_fs_check:
  * @device: the device the file system of which to check
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Check filesystem on @device. This calls other fs check functions from this
  * plugin based on detected filesystem (e.g. bd_fs_xfs_check for XFS). This
@@ -889,7 +901,7 @@ gboolean bd_fs_check (const gchar *device, GError **error) {
  * bd_fs_set_label:
  * @device: the device with file system to set the label for
  * @label: label to set
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Set label for filesystem on @device. This calls other fs label functions from this
  * plugin based on detected filesystem (e.g. bd_fs_xfs_set_label for XFS). This
@@ -907,7 +919,7 @@ gboolean bd_fs_set_label (const gchar *device, const gchar *label, GError **erro
  * bd_fs_set_uuid:
  * @device: the device with file system to set the UUID for
  * @uuid: (allow-none): UUID to set or %NULL to generate a new one
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Set UUID for filesystem on @device. This calls other fs UUID functions from this
  * plugin based on detected filesystem (e.g. bd_fs_xfs_set_uuid for XFS). This
@@ -949,7 +961,7 @@ static BDFSXfsInfo* xfs_get_info (const gchar *device, GError **error) {
 /**
  * bd_fs_get_size:
  * @device: the device with file system to get size for
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Get size for filesystem on @device. This calls other fs info functions from this
  * plugin based on detected filesystem (e.g. bd_fs_xfs_get_info for XFS). This
@@ -965,14 +977,17 @@ guint64 bd_fs_get_size (const gchar *device, GError **error) {
 
     fstype = bd_fs_get_fstype (device, error);
     if (!fstype) {
-        if (*error == NULL) {
-            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
-                         "No filesystem detected on the device '%s'", device);
+        if (error) {
+            if (*error == NULL) {
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
+                             "No filesystem detected on the device '%s'", device);
+                return 0;
+            } else {
+                g_prefix_error (error, "Error when trying to detect filesystem on '%s': ", device);
+                return 0;
+            }
+        } else
             return 0;
-        } else {
-            g_prefix_error (error, "Error when trying to detect filesystem on '%s': ", device);
-            return 0;
-        }
     }
 
     if (g_strcmp0 (fstype, "ext2") == 0 || g_strcmp0 (fstype, "ext3") == 0
@@ -1057,7 +1072,7 @@ guint64 bd_fs_get_size (const gchar *device, GError **error) {
 /**
  * bd_fs_get_free_space:
  * @device: the device with file system to get free space for
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Get free space for filesystem on @device. This calls other fs info functions from this
  * plugin based on detected filesystem (e.g. bd_fs_ext4_get_info for ext4). This
@@ -1073,14 +1088,17 @@ guint64 bd_fs_get_free_space (const gchar *device, GError **error) {
 
     fstype = bd_fs_get_fstype (device, error);
     if (!fstype) {
-        if (*error == NULL) {
-            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
-                         "No filesystem detected on the device '%s'", device);
+        if (error) {
+            if (*error == NULL) {
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
+                            "No filesystem detected on the device '%s'", device);
+                return 0;
+            } else {
+                g_prefix_error (error, "Error when trying to detect filesystem on '%s': ", device);
+                return 0;
+            }
+        } else
             return 0;
-        } else {
-            g_prefix_error (error, "Error when trying to detect filesystem on '%s': ", device);
-            return 0;
-        }
     }
 
     if (g_strcmp0 (fstype, "ext2") == 0 || g_strcmp0 (fstype, "ext3") == 0
@@ -1217,7 +1235,7 @@ static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar *
  * @type: the filesystem type to be tested for installed mkfs support
  * @options: (out): flags for allowed mkfs options (i.e. support for setting label or UUID when creating the filesystem)
  * @required_utility: (out) (transfer full): the utility binary which is required for creating (if missing returns %FALSE but no @error)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Searches for the required utility to create the given filesystem and returns whether
  * it is installed. The options flags indicate what additional options can be specified for @type.
@@ -1236,7 +1254,7 @@ gboolean bd_fs_can_mkfs (const gchar *type, BDFSMkfsOptionsFlags *options, gchar
  * @type: the filesystem type to be tested for installed resize support
  * @mode: (out): flags for allowed resizing (i.e. growing/shrinking support for online/offline)
  * @required_utility: (out) (transfer full): the utility binary which is required for resizing (if missing i.e. returns FALSE but no error)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Searches for the required utility to resize the given filesystem and returns whether
  * it is installed. The mode flags indicate if growing and/or shrinking resize is available if
@@ -1255,7 +1273,7 @@ gboolean bd_fs_can_resize (const gchar *type, BDFsResizeFlags *mode, gchar **req
  * bd_fs_can_check:
  * @type: the filesystem type to be tested for installed consistency check support
  * @required_utility: (out) (transfer full): the utility binary which is required for checking (if missing i.e. returns FALSE but no error)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Searches for the required utility to check the given filesystem and returns whether
  * it is installed.
@@ -1273,7 +1291,7 @@ gboolean bd_fs_can_check (const gchar *type, gchar **required_utility, GError **
  * bd_fs_can_repair:
  * @type: the filesystem type to be tested for installed repair support
  * @required_utility: (out) (transfer full): the utility binary which is required for repairing (if missing i.e. return FALSE but no error)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Searches for the required utility to repair the given filesystem and returns whether
  * it is installed.
@@ -1291,7 +1309,7 @@ gboolean bd_fs_can_repair (const gchar *type, gchar **required_utility, GError *
  * bd_fs_can_set_label:
  * @type: the filesystem type to be tested for installed label support
  * @required_utility: (out) (transfer full): the utility binary which is required for relabeling (if missing i.e. return FALSE but no error)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Searches for the required utility to set the label of the given filesystem and returns whether
  * it is installed.
@@ -1309,7 +1327,7 @@ gboolean bd_fs_can_set_label (const gchar *type, gchar **required_utility, GErro
  * bd_fs_can_set_uuid:
  * @type: the filesystem type to be tested for installed UUID support
  * @required_utility: (out) (transfer full): the utility binary which is required for setting UUID (if missing i.e. return FALSE but no error)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Searches for the required utility to set the UUID of the given filesystem and returns whether
  * it is installed.
@@ -1328,7 +1346,7 @@ gboolean bd_fs_can_set_uuid (const gchar *type, gchar **required_utility, GError
  * @type: the filesystem type to be tested for installed size querying support
  * @required_utility: (out) (transfer full): the utility binary which is required
  *                                           for size querying (if missing i.e. return FALSE but no error)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Searches for the required utility to get size of the given filesystem and
  * returns whether it is installed.
@@ -1347,7 +1365,7 @@ gboolean bd_fs_can_get_size (const gchar *type, gchar **required_utility, GError
  * @type: the filesystem type to be tested for installed free space querying support
  * @required_utility: (out) (transfer full): the utility binary which is required
  *                                           for free space querying (if missing i.e. return FALSE but no error)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Searches for the required utility to get free space of the given filesystem and
  * returns whether it is installed.
@@ -1373,14 +1391,17 @@ static gboolean fs_freeze (const char *mountpoint, gboolean freeze, GError **err
     gint status = 0;
 
     if (!bd_fs_is_mountpoint (mountpoint, error)) {
-        if (*error != NULL) {
-            g_prefix_error (error, "Failed to check mountpoint '%s': ", mountpoint);
+        if (error) {
+            if (*error != NULL) {
+                g_prefix_error (error, "Failed to check mountpoint '%s': ", mountpoint);
+                return FALSE;
+            } else {
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_MOUNTED,
+                            "'%s' doesn't appear to be a mountpoint.", mountpoint);
+                return FALSE;
+            }
+        } else
             return FALSE;
-        } else {
-            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_MOUNTED,
-                         "'%s' doesn't appear to be a mountpoint.", mountpoint);
-            return FALSE;
-        }
     }
 
     fd = open (mountpoint, O_RDONLY);
@@ -1410,7 +1431,7 @@ static gboolean fs_freeze (const char *mountpoint, gboolean freeze, GError **err
 /**
  * bd_fs_freeze:
  * @mountpoint: mountpoint of the device (filesystem) to freeze
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Freezes filesystem mounted on @mountpoint. The filesystem must
  * support freezing.
@@ -1425,7 +1446,7 @@ gboolean bd_fs_freeze (const gchar *mountpoint, GError **error) {
 /**
  * bd_fs_unfreeze:
  * @mountpoint: mountpoint of the device (filesystem) to un-freeze
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Un-freezes filesystem mounted on @mountpoint. The filesystem must
  * support freezing.
@@ -1456,7 +1477,7 @@ extern BDExtraArg** bd_fs_udf_mkfs_options (BDFSMkfsOptions *options, const BDEx
  * @fstype: name of the filesystem to create (e.g. "ext4")
  * @options: additional options like label or UUID for the filesystem
  * @extra: (allow-none) (array zero-terminated=1): extra mkfs options not provided in @options
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * This is a helper function for creating filesystems with extra options.
  * This is the same as running a filesystem-specific function like %bd_fs_ext4_mkfs
