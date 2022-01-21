@@ -844,6 +844,8 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
     }
     if (!dev_name) {
         globfree (&globbuf);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_SETUP_FAIL,
+                     "Failed to determine bcache device name");
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
