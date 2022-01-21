@@ -962,6 +962,7 @@ gboolean bd_kbd_bcache_detach (const gchar *bcache_device, gchar **c_set_uuid, G
     path = g_strdup_printf ("/sys/block/%s/bcache/detach", bcache_device);
     success = bd_utils_echo_str_to_file (uuid, path, error);
     if (!success) {
+        g_clear_error (error);
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_DETACH_FAIL,
                      "Failed to detach '%s' from '%s'", uuid, bcache_device);
         g_free (link);
