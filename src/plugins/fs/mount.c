@@ -598,7 +598,7 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
  *                                                 and 'run_as_gid' are supported
  *                                                 value must be a valid non zero
  *                                                 uid (gid)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether @spec was successfully unmounted or not
  *
@@ -612,6 +612,8 @@ gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const 
     const BDExtraArg **extra_p = NULL;
     gchar *endptr = NULL;
     MountArgs args;
+    GError *l_error = NULL;
+    gboolean ret = FALSE;
 
     args.spec = spec;
     args.lazy = lazy;
@@ -652,7 +654,9 @@ gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const 
     }
 
     if (run_as_uid != current_uid || run_as_gid != current_gid) {
-        return run_as_user ((MountFunc) do_unmount, &args, run_as_uid, run_as_gid, error);
+        ret = run_as_user ((MountFunc) do_unmount, &args, run_as_uid, run_as_gid, &l_error);
+        g_propagate_error (error, l_error);
+        return ret;
     } else
         return do_unmount (&args, error);
 
@@ -672,7 +676,7 @@ gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const 
  *                                                 and 'run_as_gid' are supported
  *                                                 value must be a valid non zero
  *                                                 uid (gid)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether @device (or @mountpoint) was successfully mounted or not
  *
@@ -686,6 +690,8 @@ gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar 
     const BDExtraArg **extra_p = NULL;
     gchar *endptr = NULL;
     MountArgs args;
+    GError *l_error = NULL;
+    gboolean ret = FALSE;
 
     args.device = device;
     args.mountpoint = mountpoint;
@@ -727,7 +733,9 @@ gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar 
     }
 
     if (run_as_uid != current_uid || run_as_gid != current_gid) {
-        return run_as_user ((MountFunc) do_mount, &args, run_as_uid, run_as_gid, error);
+        ret = run_as_user ((MountFunc) do_mount, &args, run_as_uid, run_as_gid, &l_error);
+        g_propagate_error (error, l_error);
+        return ret;
     } else
        return do_mount (&args, error);
 
@@ -737,7 +745,7 @@ gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar 
 /**
  * bd_fs_get_mountpoint:
  * @device: device to find mountpoint for
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Get mountpoint for @device. If @device is mounted multiple times only
  * one mountpoint will be returned.
@@ -801,7 +809,7 @@ gchar* bd_fs_get_mountpoint (const gchar *device, GError **error) {
 /**
  * bd_fs_is_mountpoint:
  * @path: path (folder) to check
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether @path is a mountpoint or not
  *

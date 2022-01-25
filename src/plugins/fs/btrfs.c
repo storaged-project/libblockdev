@@ -63,7 +63,7 @@ static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
  * bd_fs_btrfs_is_tech_avail:
  * @tech: the queried tech
  * @mode: a bit mask of queried modes of operation (#BDFSTechMode) for @tech
- * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ * @error: (out) (allow-none): place to store error (details about why the @tech-@mode combination is not available)
  *
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
@@ -142,7 +142,7 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
  * @device: the device to create a new btrfs fs on
  * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
  *                                                 passed to the 'mkfs.btrfs' utility)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether a new btrfs fs was successfully created on @device or not
  *
@@ -161,7 +161,7 @@ gboolean bd_fs_btrfs_mkfs (const gchar *device, const BDExtraArg **extra, GError
 /**
  * bd_fs_btrfs_wipe:
  * @device: the device to wipe a Btrfs signature from
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the Btrfs signature was successfully wiped from the @device or
  *          not
@@ -177,7 +177,7 @@ gboolean bd_fs_btrfs_wipe (const gchar *device, GError **error) {
  * @device: the device containing the file system to check
  * @extra: (allow-none) (array zero-terminated=1): extra options for the check (right now
  *                                                 passed to the 'btrfsck' utility)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the filesystem was successfully checked or not
  *
@@ -197,7 +197,7 @@ gboolean bd_fs_btrfs_check (const gchar *device, const BDExtraArg **extra, GErro
  * @device: the device containing the file system to repair
  * @extra: (allow-none) (array zero-terminated=1): extra options for the repair (right now
  *                                                 passed to the 'btrfsck' utility)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the filesystem was successfully checked and repaired or not
  *
@@ -216,7 +216,7 @@ gboolean bd_fs_btrfs_repair (const gchar *device, const BDExtraArg **extra, GErr
  * bd_fs_btrfs_set_label:
  * @mpoint: the mount point of the file system to resize
  * @label: label to set
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the label of btrfs file system on the @mpoint was
  *          successfully set or not
@@ -268,7 +268,7 @@ gboolean bd_fs_btrfs_check_label (const gchar *label, GError **error) {
  * bd_fs_btrfs_set_uuid:
  * @device: the device containing the file system to set the UUID (serial number) for
  * @uuid: (allow-none): UUID to set or %NULL to generate a new one
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the UUID of the btrfs file system on the @device was
  *          successfully set or not
@@ -316,7 +316,7 @@ gboolean bd_fs_btrfs_check_uuid (const gchar *uuid, GError **error) {
 /**
  * bd_fs_btrfs_get_info:
  * @mpoint: a mountpoint of the btrfs filesystem to get information about
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: (transfer full): information about the file system on @device or
  *                           %NULL in case of error
@@ -432,7 +432,7 @@ BDFSBtrfsInfo* bd_fs_btrfs_get_info (const gchar *mpoint, GError **error) {
  * @new_size: requested new size
  * @extra: (allow-none) (array zero-terminated=1): extra options for the volume resize (right now
  *                                                 passed to the 'btrfs' utility)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the @mpoint filesystem was successfully resized to @new_size
  * or not

@@ -93,6 +93,7 @@ wipe_fs (const gchar *device, const gchar *fs_type, gboolean wipe_all, GError **
     guint64 progress_id = 0;
     gchar *msg = NULL;
     guint n_try = 0;
+    GError *l_error = NULL;
 
     msg = g_strdup_printf ("Started wiping '%s' signatures from the device '%s'", fs_type, device);
     progress_id = bd_utils_report_started (msg);
@@ -100,18 +101,20 @@ wipe_fs (const gchar *device, const gchar *fs_type, gboolean wipe_all, GError **
 
     probe = blkid_new_probe ();
     if (!probe) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+        g_set_error (&l_error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to create a probe for the device '%s'", device);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
     fd = open (device, O_RDWR|O_CLOEXEC);
     if (fd == -1) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+        g_set_error (&l_error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to create a probe for the device '%s'", device);
         blkid_free_probe (probe);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
@@ -122,11 +125,12 @@ wipe_fs (const gchar *device, const gchar *fs_type, gboolean wipe_all, GError **
     }
     status = blkid_probe_set_device (probe, fd, 0, 0);
     if (status != 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+        g_set_error (&l_error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to create a probe for the device '%s'", device);
         blkid_free_probe (probe);
         synced_close (fd);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
@@ -142,61 +146,67 @@ wipe_fs (const gchar *device, const gchar *fs_type, gboolean wipe_all, GError **
             g_usleep (100 * 1000); /* microseconds */
     }
     if (status != 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+        g_set_error (&l_error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to probe the device '%s'", device);
         blkid_free_probe (probe);
         synced_close (fd);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
     status = blkid_probe_lookup_value (probe, "USAGE", &value, NULL);
     if (status != 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+        g_set_error (&l_error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to get signature type for the device '%s'", device);
         blkid_free_probe (probe);
         synced_close (fd);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
     if (strncmp (value, "filesystem", 10) != 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_INVAL,
+        g_set_error (&l_error, BD_FS_ERROR, BD_FS_ERROR_INVAL,
                      "The signature on the device '%s' is of type '%s', not 'filesystem'", device, value);
         blkid_free_probe (probe);
         synced_close (fd);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
     if (fs_type) {
         status = blkid_probe_lookup_value (probe, "TYPE", &value, &len);
         if (status != 0) {
-            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+            g_set_error (&l_error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                          "Failed to get filesystem type for the device '%s'", device);
             blkid_free_probe (probe);
             synced_close (fd);
-            bd_utils_report_finished (progress_id, (*error)->message);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
             return FALSE;
         }
 
         if (strncmp (value, fs_type, len-1) != 0) {
-            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_INVAL,
+            g_set_error (&l_error, BD_FS_ERROR, BD_FS_ERROR_INVAL,
                          "The file system type on the device '%s' is '%s', not '%s'", device, value, fs_type);
             blkid_free_probe (probe);
             synced_close (fd);
-            bd_utils_report_finished (progress_id, (*error)->message);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
             return FALSE;
         }
     }
 
     status = blkid_do_wipe (probe, FALSE);
     if (status != 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+        g_set_error (&l_error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to wipe the filesystem signature on the device '%s'", device);
         blkid_free_probe (probe);
         synced_close (fd);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
@@ -206,11 +216,12 @@ wipe_fs (const gchar *device, const gchar *fs_type, gboolean wipe_all, GError **
         while (blkid_do_probe (probe) == 0) {
             status = blkid_do_wipe (probe, FALSE);
             if (status != 0) {
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                g_set_error (&l_error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                              "Failed to wipe the filesystem signature on the device '%s'", device);
                 blkid_free_probe (probe);
                 synced_close (fd);
-                bd_utils_report_finished (progress_id, (*error)->message);
+                bd_utils_report_finished (progress_id, l_error->message);
+                g_propagate_error (error, l_error);
                 return FALSE;
             }
 

@@ -55,11 +55,13 @@ check_deps (volatile guint *avail_deps, guint req_deps, const UtilDep *deps_spec
                                                deps_specs[i].ver_arg, deps_specs[i].ver_regexp, &l_error);
             /* if not ret and l_error -> set/prepend error */
             if (!ret) {
-                if (*error)
-                    g_prefix_error (error, "%s\n", l_error->message);
-                else
-                    g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_UTIL_CHECK_ERROR,
-                                 "%s", l_error->message);
+                if (error) {
+                    if (*error)
+                        g_prefix_error (error, "%s\n", l_error->message);
+                    else
+                        g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_UTIL_CHECK_ERROR,
+                                     "%s", l_error->message);
+                }
                 g_clear_error (&l_error);
             } else
                 g_atomic_int_or (avail_deps, 1 << i);
@@ -100,19 +102,23 @@ check_module_deps (volatile guint *avail_deps, guint req_deps, const gchar *cons
             /* if not ret and l_error -> set/prepend error */
             if (!ret) {
                 if (l_error) {
-                    if (*error)
-                        g_prefix_error (error, "%s\n", l_error->message);
-                    else
-                        g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_MODULE_CHECK_ERROR,
-                                     "%s", l_error->message);
+                    if (error) {
+                        if (*error)
+                            g_prefix_error (error, "%s\n", l_error->message);
+                        else
+                            g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_MODULE_CHECK_ERROR,
+                                         "%s", l_error->message);
+                    }
                     g_clear_error (&l_error);
                 } else {
                     /* no error from have_kernel_module means we don't have it */
-                    if (*error)
-                        g_prefix_error (error, "Kernel module '%s' not available\n", modules[i]);
-                    else
-                        g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_MODULE_CHECK_ERROR,
-                                     "Kernel module '%s' not available", modules[i]);
+                    if (error) {
+                        if (*error)
+                            g_prefix_error (error, "Kernel module '%s' not available\n", modules[i]);
+                        else
+                            g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_MODULE_CHECK_ERROR,
+                                         "Kernel module '%s' not available", modules[i]);
+                    }
                 }
 
             } else
@@ -188,18 +194,22 @@ check_dbus_deps (volatile guint *avail_deps, guint req_deps, const DBusDep *buse
             /* if not ret and l_error -> set/prepend error */
             if (!ret) {
                 if (l_error) {
-                    if (*error)
-                        g_prefix_error (error, "%s\n", l_error->message);
-                    else
-                        g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_MODULE_CHECK_ERROR,
-                                     "%s", l_error->message);
+                    if (error) {
+                        if (*error)
+                            g_prefix_error (error, "%s\n", l_error->message);
+                        else
+                            g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_MODULE_CHECK_ERROR,
+                                         "%s", l_error->message);
+                    }
                     g_clear_error (&l_error);
                 } else {
-                    if (*error)
-                        g_prefix_error (error, "DBus service '%s' not available\n", buses[i].bus_name);
-                    else
-                        g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_MODULE_CHECK_ERROR,
-                                     "DBus service '%s' not available", buses[i].bus_name);
+                    if (error) {
+                        if (*error)
+                            g_prefix_error (error, "DBus service '%s' not available\n", buses[i].bus_name);
+                        else
+                            g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_MODULE_CHECK_ERROR,
+                                         "DBus service '%s' not available", buses[i].bus_name);
+                    }
                 }
             } else {
                 /* check version of the DBus API if specified */
@@ -209,18 +219,22 @@ check_dbus_deps (volatile guint *avail_deps, guint req_deps, const DBusDep *buse
                     /* if not ret and l_error -> set/prepend error */
                     if (!ret) {
                         if (l_error) {
-                            if (*error)
-                                g_prefix_error (error, "%s\n", l_error->message);
-                            else
-                                g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_MODULE_CHECK_ERROR,
-                                            "%s", l_error->message);
+                            if (error) {
+                                if (*error)
+                                    g_prefix_error (error, "%s\n", l_error->message);
+                                else
+                                    g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_MODULE_CHECK_ERROR,
+                                                 "%s", l_error->message);
+                            }
                             g_clear_error (&l_error);
                         } else {
-                            if (*error)
-                                g_prefix_error (error, "DBus service '%s' not available in version '%s'\n", buses[i].bus_name, buses[i].version);
-                            else
-                                g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_MODULE_CHECK_ERROR,
-                                            "DBus service '%s' not available in version '%s'", buses[i].bus_name, buses[i].version);
+                            if (error) {
+                                if (*error)
+                                    g_prefix_error (error, "DBus service '%s' not available in version '%s'\n", buses[i].bus_name, buses[i].version);
+                                else
+                                    g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_MODULE_CHECK_ERROR,
+                                                 "DBus service '%s' not available in version '%s'", buses[i].bus_name, buses[i].version);
+                            }
                         }
                     } else
                        g_atomic_int_or (avail_deps, 1 << i);
@@ -243,6 +257,7 @@ static gboolean _check_util_feature (const gchar *util, const gchar *feature, co
     GRegex *regex = NULL;
     GMatchInfo *match_info = NULL;
     gchar *features_str = NULL;
+    GError *l_error = NULL;
 
     util_path = g_find_program_in_path (util);
     if (!util_path) {
@@ -252,16 +267,16 @@ static gboolean _check_util_feature (const gchar *util, const gchar *feature, co
     }
     g_free (util_path);
 
-    succ = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
+    succ = bd_utils_exec_and_capture_output (argv, NULL, &output, &l_error);
     if (!succ) {
         /* if we got nothing on STDOUT, try using STDERR data from error message */
-        if (g_error_matches ((*error), BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
-            output = g_strdup ((*error)->message);
-            g_clear_error (error);
-        } else if (g_error_matches ((*error), BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED)) {
+        if (g_error_matches (l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
+            output = g_strdup (l_error->message);
+            g_clear_error (&l_error);
+        } else if (g_error_matches (l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED)) {
             /* exit status != 0, try using the output anyway */
-            output = g_strdup ((*error)->message);
-            g_clear_error (error);
+            output = g_strdup (l_error->message);
+            g_clear_error (&l_error);
         } else
             return FALSE;
     }
@@ -342,12 +357,16 @@ check_features (volatile guint *avail_deps, guint req_deps, const UtilFeatureDep
                                        deps_specs[i].feature_arg, deps_specs[i].feature_regexp, &l_error);
             /* if not ret and l_error -> set/prepend error */
             if (!ret) {
-                if (*error)
-                    g_prefix_error (error, "%s\n", l_error->message);
-                else
-                    g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_UTIL_FEATURE_CHECK_ERROR,
-                                 "%s", l_error->message);
-                g_clear_error (&l_error);
+                if (l_error) {
+                    if (error) {
+                        if (*error)
+                            g_prefix_error (error, "%s\n", l_error->message);
+                        else
+                            g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_UTIL_FEATURE_CHECK_ERROR,
+                                        "%s", l_error->message);
+                    }
+                    g_clear_error (&l_error);
+                }
             } else
                 g_atomic_int_or (avail_deps, 1 << i);
         }

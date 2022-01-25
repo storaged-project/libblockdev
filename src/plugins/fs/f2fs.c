@@ -104,7 +104,7 @@ static gboolean can_check_f2fs_version (UtilDep dep, GError **error) {
  * bd_fs_f2fs_is_tech_avail:
  * @tech: the queried tech
  * @mode: a bit mask of queried modes of operation (#BDFSTechMode) for @tech
- * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ * @error: (out) (allow-none): place to store error (details about why the @tech-@mode combination is not available)
  *
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
@@ -199,7 +199,7 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
  * @device: the device to create a new f2fs fs on
  * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
  *                                                 passed to the 'mkfs.f2fs' utility)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether a new f2fs fs was successfully created on @device or not
  *
@@ -217,7 +217,7 @@ gboolean bd_fs_f2fs_mkfs (const gchar *device, const BDExtraArg **extra, GError 
 /**
  * bd_fs_f2fs_wipe:
  * @device: the device to wipe an f2fs signature from
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether an f2fs signature was successfully wiped from the @device or
  *          not
@@ -233,7 +233,7 @@ gboolean bd_fs_f2fs_wipe (const gchar *device, GError **error) {
  * @device: the device containing the file system to check
  * @extra: (allow-none) (array zero-terminated=1): extra options for the repair (right now
  *                                                 passed to the 'fsck.f2fs' utility)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether an f2fs file system on the @device is clean or not
  *
@@ -260,7 +260,7 @@ gboolean bd_fs_f2fs_check (const gchar *device, const BDExtraArg **extra, GError
  * @device: the device containing the file system to repair
  * @extra: (allow-none) (array zero-terminated=1): extra options for the repair (right now
  *                                                 passed to the 'fsck.f2fs' utility)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether an f2fs file system on the @device was successfully repaired
  *          (if needed) or not (error is set in that case)
@@ -279,7 +279,7 @@ gboolean bd_fs_f2fs_repair (const gchar *device, const BDExtraArg **extra, GErro
 /**
  * bd_fs_f2fs_get_info:
  * @device: the device containing the file system to get info for
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: (transfer full): information about the file system on @device or
  *                           %NULL in case of error
@@ -369,7 +369,7 @@ BDFSF2FSInfo* bd_fs_f2fs_get_info (const gchar *device, GError **error) {
  * @safe: whether to perform safe resize or not (does not resize metadata)
  * @extra: (allow-none) (array zero-terminated=1): extra options for the resize (right now
  *                                                 passed to the 'resize.f2fs' utility)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the file system on @device was successfully resized or not
  *

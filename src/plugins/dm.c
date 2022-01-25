@@ -141,7 +141,7 @@ void bd_dm_close (void) {
  * bd_dm_is_tech_avail:
  * @tech: the queried tech
  * @mode: a bit mask of queried modes of operation (#BDDMTechMode) for @tech
- * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ * @error: (out) (allow-none): place to store error (details about why the @tech-@mode combination is not available)
  *
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
@@ -171,7 +171,7 @@ gboolean bd_dm_is_tech_avail (BDDMTech tech, guint64 mode UNUSED, GError **error
  * @device: device to create map for
  * @length: length of the mapping in sectors
  * @uuid: (allow-none): UUID for the new dev mapper device or %NULL if not specified
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the new linear mapping @map_name was successfully created
  * for the @device or not
@@ -204,7 +204,7 @@ gboolean bd_dm_create_linear (const gchar *map_name, const gchar *device, guint6
 /**
  * bd_dm_remove:
  * @map_name: name of the map to remove
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the @map_name map was successfully removed or not
  *
@@ -222,7 +222,7 @@ gboolean bd_dm_remove (const gchar *map_name, GError **error) {
 /**
  * bd_dm_name_from_node:
  * @dm_node: name of the DM node (e.g. "dm-0")
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: map name of the map providing the @dm_node device or %NULL
  * (@error) contains the error in such cases)
@@ -257,7 +257,7 @@ gchar* bd_dm_name_from_node (const gchar *dm_node, GError **error) {
 /**
  * bd_dm_node_from_name:
  * @map_name: name of the queried DM map
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: DM node name for the @map_name map or %NULL (@error) contains
  * the error in such cases)
@@ -284,7 +284,7 @@ gchar* bd_dm_node_from_name (const gchar *map_name, GError **error) {
 /**
  * bd_dm_get_subsystem_from_name:
  * @device_name: name of the device
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: subsystem of the given device
  *
@@ -309,7 +309,7 @@ gchar* bd_dm_get_subsystem_from_name (const gchar *device_name, GError **error) 
  * @map_name: name of the queried map
  * @live_only: whether to go through the live maps only or not
  * @active_only: whether to ignore suspended maps or not
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the given @map_name exists (and is live if @live_only is
  * %TRUE (and is active if @active_only is %TRUE)). If %FALSE is returned,
@@ -550,7 +550,7 @@ static gboolean get_raid_set_status (struct raid_set *rs, GError **error) {
  * @uuid: (allow-none): uuid of the member
  * @major: major number of the device or -1 if not specified
  * @minor: minor number of the device or -1 if not specified
- * @error: (out): variable to store error (if any)
+ * @error: (out) (allow-none): variable to store error (if any)
  *
  * Returns: (transfer full) (array zero-terminated=1): list of names of the RAID sets related to
  * the member or %NULL in case of error
@@ -685,7 +685,7 @@ static gboolean change_set_by_name (const gchar *name, enum activate_type action
 /**
  * bd_dm_activate_raid_set:
  * @name: name of the DM RAID set to activate
- * @error: (out): variable to store error (if any)
+ * @error: (out) (allow-none): variable to store error (if any)
  *
  * Returns: whether the RAID set @name was successfully activated or not
  *
@@ -716,7 +716,7 @@ gboolean bd_dm_activate_raid_set (const gchar *name, GError **error) {
 /**
  * bd_dm_deactivate_raid_set:
  * @name: name of the DM RAID set to deactivate
- * @error: (out): variable to store error (if any)
+ * @error: (out) (allow-none): variable to store error (if any)
  *
  * Returns: whether the RAID set @name was successfully deactivated or not
  *
@@ -747,7 +747,7 @@ gboolean bd_dm_deactivate_raid_set (const gchar *name, GError **error) {
 /**
  * bd_dm_get_raid_set_type:
  * @name: name of the DM RAID set to get the type of
- * @error: (out): variable to store error (if any)
+ * @error: (out) (allow-none): variable to store error (if any)
  *
  * Returns: string representation of the @name RAID set's type
  *

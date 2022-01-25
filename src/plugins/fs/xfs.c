@@ -73,7 +73,7 @@ static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
  * bd_fs_xfs_is_tech_avail:
  * @tech: the queried tech
  * @mode: a bit mask of queried modes of operation (#BDFSTechMode) for @tech
- * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ * @error: (out) (allow-none): place to store error (details about why the @tech-@mode combination is not available)
  *
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
@@ -159,7 +159,7 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
  * @device: the device to create a new xfs fs on
  * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
  *                                                 passed to the 'mkfs.xfs' utility)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether a new xfs fs was successfully created on @device or not
  *
@@ -177,7 +177,7 @@ gboolean bd_fs_xfs_mkfs (const gchar *device, const BDExtraArg **extra, GError *
 /**
  * bd_fs_xfs_wipe:
  * @device: the device to wipe an xfs signature from
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether an xfs signature was successfully wiped from the @device or
  *          not
@@ -191,7 +191,7 @@ gboolean bd_fs_xfs_wipe (const gchar *device, GError **error) {
 /**
  * bd_fs_xfs_check:
  * @device: the device containing the file system to check
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether an xfs file system on the @device is clean or not
  *
@@ -203,15 +203,20 @@ gboolean bd_fs_xfs_wipe (const gchar *device, GError **error) {
 gboolean bd_fs_xfs_check (const gchar *device, GError **error) {
     const gchar *args[4] = {"xfs_repair", "-n", device, NULL};
     gboolean ret = FALSE;
+    GError *l_error = NULL;
 
     if (!check_deps (&avail_deps, DEPS_XFS_REPAIR_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
 
-    ret = bd_utils_exec_and_report_error (args, NULL, error);
-    if (!ret && *error &&  g_error_matches ((*error), BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED))
-        /* non-zero exit status -> the fs is not clean, but not an error */
-        /* TODO: should we check that the device exists and contains an XFS FS beforehand? */
-        g_clear_error (error);
+    ret = bd_utils_exec_and_report_error (args, NULL, &l_error);
+    if (!ret) {
+        if (l_error && g_error_matches (l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED)) {
+            /* non-zero exit status -> the fs is not clean, but not an error */
+            /* TODO: should we check that the device exists and contains an XFS FS beforehand? */
+            g_clear_error (&l_error);
+        } else
+            g_propagate_error (error, l_error);
+    }
     return ret;
 }
 
@@ -220,7 +225,7 @@ gboolean bd_fs_xfs_check (const gchar *device, GError **error) {
  * @device: the device containing the file system to repair
  * @extra: (allow-none) (array zero-terminated=1): extra options for the repair (right now
  *                                                 passed to the 'xfs_repair' utility)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether an xfs file system on the @device was successfully repaired
  *          (if needed) or not (error is set in that case)
@@ -240,7 +245,7 @@ gboolean bd_fs_xfs_repair (const gchar *device, const BDExtraArg **extra, GError
  * bd_fs_xfs_set_label:
  * @device: the device containing the file system to set label for
  * @label: label to set
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the label of xfs file system on the @device was
  *          successfully set or not
@@ -293,7 +298,7 @@ gboolean bd_fs_xfs_check_label (const gchar *label, GError **error) {
  * @uuid: (allow-none): UUID to set %NULL to generate a new one
  *                      UUID can also be one of "nil" and "generate" to clear or
  *                      generate a new UUID
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the UUID of xfs file system on the @device was
  *          successfully set or not
@@ -330,7 +335,7 @@ gboolean bd_fs_xfs_check_uuid (const gchar *uuid, GError **error) {
  * @device: the device containing the file system to get info for (device must
             be mounted, trying to get info for an unmounted device will result
             in an error)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: (transfer full): information about the file system on @device or
  *                           %NULL in case of error
@@ -346,18 +351,19 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
     gchar **line_p = NULL;
     gchar *val_start = NULL;
     g_autofree gchar* mountpoint = NULL;
+    GError *l_error = NULL;
 
     if (!check_deps (&avail_deps, DEPS_XFS_ADMIN_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return NULL;
 
-    mountpoint = bd_fs_get_mountpoint (device, error);
+    mountpoint = bd_fs_get_mountpoint (device, &l_error);
     if (mountpoint == NULL) {
-        if (error != NULL && *error == NULL) {
+        if (l_error == NULL) {
             g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_MOUNTED,
                          "Can't get xfs file system information for '%s': Device is not mounted.", device);
             return NULL;
         } else {
-            g_prefix_error (error, "Error when trying to get mountpoint for '%s': ", device);
+            g_propagate_prefixed_error (error, l_error, "Error when trying to get mountpoint for '%s': ", device);
             return NULL;
         }
     }
@@ -388,7 +394,6 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
     while (line_p && *line_p && !g_str_has_prefix (*line_p, "data"))
         line_p++;
     if (!line_p || !(*line_p)) {
-        /* error is already populated */
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
         g_strfreev (lines);
         bd_fs_xfs_info_free (ret);
@@ -405,7 +410,6 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
         val_start++;
         ret->block_size = g_ascii_strtoull (val_start, NULL, 0);
     } else {
-        /* error is already populated */
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
         g_strfreev (lines);
         bd_fs_xfs_info_free (ret);
@@ -418,7 +422,6 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
         val_start++;
         ret->block_count = g_ascii_strtoull (val_start, NULL, 0);
     } else {
-        /* error is already populated */
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
         g_strfreev (lines);
         bd_fs_xfs_info_free (ret);
@@ -436,7 +439,7 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
  *            (if 0, the file system is adapted to the underlying block device)
  * @extra: (allow-none) (array zero-terminated=1): extra options for the resize (right now
  *                                                 passed to the 'xfs_growfs' utility)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the file system mounted on @mpoint was successfully resized or not
  *

@@ -71,7 +71,7 @@ static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
  * bd_fs_reiserfs_is_tech_avail:
  * @tech: the queried tech
  * @mode: a bit mask of queried modes of operation (#BDFSTechMode) for @tech
- * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ * @error: (out) (allow-none): place to store error (details about why the @tech-@mode combination is not available)
  *
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
@@ -147,7 +147,7 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
  * @device: the device to create a new reiserfs fs on
  * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
  *                                                 passed to the 'mkreiserfs' utility)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether a new reiserfs fs was successfully created on @device or not
  *
@@ -165,7 +165,7 @@ gboolean bd_fs_reiserfs_mkfs (const gchar *device, const BDExtraArg **extra, GEr
 /**
  * bd_fs_reiserfs_wipe:
  * @device: the device to wipe a reiserfs signature from
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the reiserfs signature was successfully wiped from the @device or
  *          not
@@ -181,7 +181,7 @@ gboolean bd_fs_reiserfs_wipe (const gchar *device, GError **error) {
  * @device: the device containing the file system to check
  * @extra: (allow-none) (array zero-terminated=1): extra options for the repair (right now
  *                                                 passed to the 'reiserfsck' utility)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the reiserfs file system on the @device is clean or not
  *
@@ -208,7 +208,7 @@ gboolean bd_fs_reiserfs_check (const gchar *device, const BDExtraArg **extra, GE
  * @device: the device containing the file system to repair
  * @extra: (allow-none) (array zero-terminated=1): extra options for the repair (right now
  *                                                 passed to the 'reiserfsck' utility)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the reiserfs file system on the @device was successfully repaired
  *          (if needed) or not (error is set in that case)
@@ -237,7 +237,7 @@ gboolean bd_fs_reiserfs_repair (const gchar *device, const BDExtraArg **extra, G
  * bd_fs_reiserfs_set_label:
  * @device: the device containing the file system to set label for
  * @label: label to set
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the label of reiserfs file system on the @device was
  *          successfully set or not
@@ -281,7 +281,7 @@ gboolean bd_fs_reiserfs_check_label (const gchar *label, GError **error) {
  * bd_fs_reiserfs_set_uuid:
  * @device: the device containing the file system to set UUID for
  * @uuid: (allow-none): UUID to set or %NULL to generate a new one
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the uuid of reiserfs file system on the @device was
  *          successfully set or not
@@ -317,7 +317,7 @@ gboolean bd_fs_reiserfs_check_uuid (const gchar *uuid, GError **error) {
 /**
  * bd_fs_reiserfs_get_info:
  * @device: the device containing the file system to get info for
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: (transfer full): information about the file system on @device or
  *                           %NULL in case of error
@@ -408,7 +408,7 @@ BDFSReiserFSInfo* bd_fs_reiserfs_get_info (const gchar *device, GError **error) 
  * @device: the device the file system of which to resize
  * @new_size: new requested size for the file system (if 0, the file system is
  *            adapted to the underlying block device)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the file system on @device was successfully resized or not
  *
