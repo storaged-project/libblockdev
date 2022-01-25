@@ -812,6 +812,7 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
         if (!present) {
             g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_NOEXIST,
                          "Failed to locate uuid symlink '%s'", device_uuid[i]);
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
      }
@@ -843,6 +844,8 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
     }
     if (!dev_name) {
         globfree (&globbuf);
+        g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_SETUP_FAIL,
+                     "Failed to determine bcache device name");
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
@@ -959,6 +962,7 @@ gboolean bd_kbd_bcache_detach (const gchar *bcache_device, gchar **c_set_uuid, G
     path = g_strdup_printf ("/sys/block/%s/bcache/detach", bcache_device);
     success = bd_utils_echo_str_to_file (uuid, path, error);
     if (!success) {
+        g_clear_error (error);
         g_set_error (error, BD_KBD_ERROR, BD_KBD_ERROR_BCACHE_DETACH_FAIL,
                      "Failed to detach '%s' from '%s'", uuid, bcache_device);
         g_free (link);
