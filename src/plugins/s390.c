@@ -290,7 +290,6 @@ gboolean bd_s390_dasd_online (const gchar *dasd, GError **error) {
     if (wrc == EOF) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "Could not set DASD device %s online", dasd);
-        fclose(fd);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
     }
