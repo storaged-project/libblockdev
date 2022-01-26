@@ -14,7 +14,8 @@ class LibraryOpsTestCase(unittest.TestCase):
     # the dependencies on CentOS/Debian and we don't need them for this test
     requested_plugins = BlockDev.plugin_specs_from_names(("crypto", "dm",
                                                           "kbd", "loop",
-                                                          "mdraid", "part", "swap"))
+                                                          "mdraid", "part", "swap",
+                                                          "nvme"))
 
     @classmethod
     def setUpClass(cls):
