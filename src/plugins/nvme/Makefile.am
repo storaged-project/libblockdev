@@ -14,6 +14,7 @@ libbd_nvme_la_SOURCES = \
 	nvme-info.c \
 	nvme-error.c \
 	nvme-op.c \
+	nvme-fabrics.c \
 	../check_deps.c \
 	../check_deps.h
 

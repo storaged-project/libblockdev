@@ -19,6 +19,7 @@ GQuark bd_nvme_error_quark (void);
  * @BD_NVME_ERROR_SC_MEDIA: Media and Data Integrity Errors: media specific errors that occur in the NVM or data integrity type errors.
  * @BD_NVME_ERROR_SC_PATH: Path related error.
  * @BD_NVME_ERROR_SC_VENDOR_SPECIFIC: NVMe Vendor specific error.
+ * @BD_NVME_ERROR_NO_MATCH: No matching resource found (e.g. a Fabrics Controller).
  */
 typedef enum {
     BD_NVME_ERROR_TECH_UNAVAIL,
@@ -30,6 +31,7 @@ typedef enum {
     BD_NVME_ERROR_SC_MEDIA,
     BD_NVME_ERROR_SC_PATH,
     BD_NVME_ERROR_SC_VENDOR_SPECIFIC,
+    BD_NVME_ERROR_NO_MATCH,
 } BDNVMEError;
 
 typedef enum {
@@ -501,7 +503,6 @@ BDNVMESelfTestLog * bd_nvme_self_test_log_copy (BDNVMESelfTestLog *log);
 void bd_nvme_sanitize_log_free (BDNVMESanitizeLog *log);
 BDNVMESanitizeLog * bd_nvme_sanitize_log_copy (BDNVMESanitizeLog *log);
 
-
 /*
  * If using the plugin as a standalone library, the following functions should
  * be called to:
@@ -540,6 +541,21 @@ gboolean               bd_nvme_sanitize              (const gchar               
                                                       guint32                       overwrite_pattern,
                                                       gboolean                      overwrite_invert_pattern,
                                                       GError                      **error);
+
+
+gboolean               bd_nvme_connect               (const gchar  *subsysnqn,
+                                                      const gchar  *transport,
+                                                      const gchar  *transport_addr,
+                                                      const gchar  *transport_svcid,
+                                                      const gchar  *host_traddr,
+                                                      const gchar  *host_iface,
+                                                      const gchar  *host_nqn,
+                                                      const gchar  *host_id,
+                                                      GError      **error);
+gboolean               bd_nvme_disconnect            (const gchar  *subsysnqn,
+                                                      GError      **error);
+gboolean               bd_nvme_disconnect_by_path    (const gchar  *path,
+                                                      GError      **error);
 
 
 #endif  /* BD_NVME */

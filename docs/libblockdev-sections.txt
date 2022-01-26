@@ -836,4 +836,7 @@ bd_nvme_sanitize_log_free
 bd_nvme_sanitize_log_copy
 BDNVMESanitizeAction
 bd_nvme_sanitize
+bd_nvme_connect
+bd_nvme_disconnect
+bd_nvme_disconnect_by_path
 </SECTION>
