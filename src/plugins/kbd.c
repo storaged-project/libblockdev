@@ -389,6 +389,7 @@ gboolean bd_kbd_zram_add_device (guint64 size, guint64 nstreams, gchar **device,
         success = bd_utils_load_kernel_module ("zram", NULL, error);
         if (!success) {
             g_prefix_error (error, "Failed to load the zram kernel module: ");
+            bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
     }
