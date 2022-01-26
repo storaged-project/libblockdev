@@ -12,6 +12,7 @@ GQuark bd_nvme_error_quark (void);
  * BDNVMEError:
  * @BD_NVME_ERROR_TECH_UNAVAIL: NVMe support not available.
  * @BD_NVME_ERROR_FAILED: General error.
+ * @BD_NVME_ERROR_INVALID_ARGUMENT: Invalid argument.
  * @BD_NVME_ERROR_SC_GENERIC: Generic NVMe Command Status Code.
  * @BD_NVME_ERROR_SC_CMD_SPECIFIC: NVMe Command Specific error.
  * @BD_NVME_ERROR_SC_MEDIA: Media and Data Integrity Errors: media specific errors that occur in the NVM or data integrity type errors.
@@ -21,6 +22,7 @@ GQuark bd_nvme_error_quark (void);
 typedef enum {
     BD_NVME_ERROR_TECH_UNAVAIL,
     BD_NVME_ERROR_FAILED,
+    BD_NVME_ERROR_INVALID_ARGUMENT,
     BD_NVME_ERROR_SC_GENERIC,
     BD_NVME_ERROR_SC_CMD_SPECIFIC,
     BD_NVME_ERROR_SC_MEDIA,
@@ -313,6 +315,81 @@ typedef struct BDNVMEErrorLogEntry {
     BDNVMETransportType transport_type;
 } BDNVMEErrorLogEntry;
 
+/**
+ * BDNVMESelfTestAction:
+ * Action taken by the Device Self-test command.
+ * @BD_NVME_SELF_TEST_ACTION_NOT_RUNNING: No device self-test operation in progress. Not a valid argument for bd_nvme_device_self_test().
+ * @BD_NVME_SELF_TEST_ACTION_SHORT: Start a short device self-test operation.
+ * @BD_NVME_SELF_TEST_ACTION_EXTENDED: Start an extended device self-test operation.
+ * @BD_NVME_SELF_TEST_ACTION_VENDOR_SPECIFIC: Start a vendor specific device self-test operation.
+ * @BD_NVME_SELF_TEST_ACTION_ABORT: Abort the device self-test operation. Only valid for bd_nvme_device_self_test().
+ */
+typedef enum {
+    BD_NVME_SELF_TEST_ACTION_NOT_RUNNING     = 0,
+    BD_NVME_SELF_TEST_ACTION_SHORT           = 1,
+    BD_NVME_SELF_TEST_ACTION_EXTENDED        = 2,
+    BD_NVME_SELF_TEST_ACTION_VENDOR_SPECIFIC = 3,
+    BD_NVME_SELF_TEST_ACTION_ABORT           = 4,
+} BDNVMESelfTestAction;
+
+/**
+ * BDNVMESelfTestResult:
+ * @BD_NVME_SELF_TEST_RESULT_NO_ERROR: Operation completed without error.
+ * @BD_NVME_SELF_TEST_RESULT_ABORTED: Operation was aborted by a Device Self-test command.
+ * @BD_NVME_SELF_TEST_RESULT_CTRL_RESET: Operation was aborted by a Controller Level Reset.
+ * @BD_NVME_SELF_TEST_RESULT_NS_REMOVED: Operation was aborted due to a removal of a namespace from the namespace inventory.
+ * @BD_NVME_SELF_TEST_RESULT_ABORTED_FORMAT: Operation was aborted due to the processing of a Format NVM command.
+ * @BD_NVME_SELF_TEST_RESULT_FATAL_ERROR: A fatal error or unknown test error occurred while the controller was executing the device self-test operation and the operation did not complete.
+ * @BD_NVME_SELF_TEST_RESULT_UNKNOWN_SEG_FAIL: Operation completed with a segment that failed and the segment that failed is not known.
+ * @BD_NVME_SELF_TEST_RESULT_KNOWN_SEG_FAIL: Operation completed with one or more failed segments and the first segment that failed is indicated in the Segment Number field.
+ * @BD_NVME_SELF_TEST_RESULT_ABORTED_UNKNOWN: Operation was aborted for unknown reason.
+ * @BD_NVME_SELF_TEST_RESULT_ABORTED_SANITIZE: Operation was aborted due to a sanitize operation.
+ */
+typedef enum {
+    BD_NVME_SELF_TEST_RESULT_NO_ERROR         = 0,
+    BD_NVME_SELF_TEST_RESULT_ABORTED          = 1,
+    BD_NVME_SELF_TEST_RESULT_CTRL_RESET       = 2,
+    BD_NVME_SELF_TEST_RESULT_NS_REMOVED       = 3,
+    BD_NVME_SELF_TEST_RESULT_ABORTED_FORMAT   = 4,
+    BD_NVME_SELF_TEST_RESULT_FATAL_ERROR      = 5,
+    BD_NVME_SELF_TEST_RESULT_UNKNOWN_SEG_FAIL = 6,
+    BD_NVME_SELF_TEST_RESULT_KNOWN_SEG_FAIL   = 7,
+    BD_NVME_SELF_TEST_RESULT_ABORTED_UNKNOWN  = 8,
+    BD_NVME_SELF_TEST_RESULT_ABORTED_SANITIZE = 9,
+} BDNVMESelfTestResult;
+
+/**
+ * BDNVMESelfTestLogEntry:
+ * @result: Result of the device self-test operation.
+ * @action: The Self-test Code value (action) that was specified in the Device Self-test command that started this device self-test operation.
+ * @segment: Segment number where the first self-test failure occurred. Valid only when @result is set to #BD_NVME_SELF_TEST_RESULT_KNOWN_SEG_FAIL.
+ * @power_on_hours: Number of power-on hours at the time the device self-test operation was completed or aborted. Does not include time that the controller was powered and in a low power state condition.
+ * @nsid: Namespace ID that the Failing LBA occurred on.
+ * @failing_lba: LBA of the logical block that caused the test to fail. If the device encountered more than one failed logical block during the test, then this field only indicates one of those failed logical blocks.
+ * @status_code_error: Translated NVMe Command Status Code representing additional information related to errors or conditions.
+ */
+typedef struct BDNVMESelfTestLogEntry {
+    BDNVMESelfTestResult result;
+    BDNVMESelfTestAction action;
+    guint8 segment;
+    guint64 power_on_hours;
+    guint32 nsid;
+    guint64 failing_lba;
+    GError *status_code_error;
+} BDNVMESelfTestLogEntry;
+
+/**
+ * BDNVMESelfTestLog:
+ * @current_operation: Current running device self-test operation. There's no corresponding record in @entries for a device self-test operation that is in progress.
+ * @current_operation_completion: Percentage of the currently running device self-test operation.
+ * @entries: (array zero-terminated=1) (element-type BDNVMESelfTestLogEntry): Self-test log entries for the last 20 operations, sorted from newest (first element) to oldest.
+ */
+typedef struct BDNVMESelfTestLog {
+    BDNVMESelfTestAction current_operation;
+    guint8 current_operation_completion;
+    BDNVMESelfTestLogEntry **entries;
+} BDNVMESelfTestLog;
+
 
 void bd_nvme_controller_info_free (BDNVMEControllerInfo *info);
 BDNVMEControllerInfo * bd_nvme_controller_info_copy (BDNVMEControllerInfo *info);
@@ -328,6 +405,12 @@ BDNVMESmartLog * bd_nvme_smart_log_copy (BDNVMESmartLog *log);
 
 void bd_nvme_error_log_entry_free (BDNVMEErrorLogEntry *entry);
 BDNVMEErrorLogEntry * bd_nvme_error_log_entry_copy (BDNVMEErrorLogEntry *entry);
+
+void bd_nvme_self_test_log_entry_free (BDNVMESelfTestLogEntry *entry);
+BDNVMESelfTestLogEntry * bd_nvme_self_test_log_entry_copy (BDNVMESelfTestLogEntry *entry);
+
+void bd_nvme_self_test_log_free (BDNVMESelfTestLog *log);
+BDNVMESelfTestLog * bd_nvme_self_test_log_copy (BDNVMESelfTestLog *log);
 
 
 /*
@@ -350,6 +433,11 @@ BDNVMEControllerInfo * bd_nvme_get_controller_info   (const gchar *device, GErro
 BDNVMENamespaceInfo *  bd_nvme_get_namespace_info    (const gchar *device, GError **error);
 BDNVMESmartLog *       bd_nvme_get_smart_log         (const gchar *device, GError **error);
 BDNVMEErrorLogEntry ** bd_nvme_get_error_log_entries (const gchar *device, GError **error);
+BDNVMESelfTestLog *    bd_nvme_get_self_test_log     (const gchar *device, GError **error);
+
+gboolean               bd_nvme_device_self_test      (const gchar                  *device,
+                                                      BDNVMESelfTestAction          action,
+                                                      GError                      **error);
 
 
 #endif  /* BD_NVME */

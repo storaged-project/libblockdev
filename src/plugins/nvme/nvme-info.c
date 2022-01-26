@@ -36,10 +36,6 @@
 #include "nvme-private.h"
 
 
-/* "C" locale to get the locale-agnostic error messages */
-static locale_t c_locale = (locale_t) 0;
-
-
 /**
  * bd_nvme_controller_info_free: (skip)
  * @info: (nullable): %BDNVMEControllerInfo to free
@@ -218,6 +214,85 @@ BDNVMEErrorLogEntry * bd_nvme_error_log_entry_copy (BDNVMEErrorLogEntry *entry) 
     return new_entry;
 }
 
+/**
+ * bd_nvme_self_test_log_entry_free: (skip)
+ * @entry: (nullable): %BDNVMESelfTestLogEntry to free
+ *
+ * Frees @entry.
+ */
+void bd_nvme_self_test_log_entry_free (BDNVMESelfTestLogEntry *entry) {
+    if (entry == NULL)
+        return;
+
+    if (entry->status_code_error)
+        g_error_free (entry->status_code_error);
+    g_free (entry);
+}
+
+/**
+ * bd_nvme_self_test_log_entry_copy: (skip)
+ * @entry: (nullable): %BDNVMESelfTestLogEntry to copy
+ *
+ * Creates a new copy of @entry.
+ */
+BDNVMESelfTestLogEntry * bd_nvme_self_test_log_entry_copy (BDNVMESelfTestLogEntry *entry) {
+    BDNVMESelfTestLogEntry *new_entry;
+
+    if (entry == NULL)
+        return NULL;
+
+    new_entry = g_new0 (BDNVMESelfTestLogEntry, 1);
+    memcpy (new_entry, entry, sizeof (BDNVMESelfTestLogEntry));
+    if (entry->status_code_error)
+        new_entry->status_code_error = g_error_copy (entry->status_code_error);
+
+    return new_entry;
+}
+
+/**
+ * bd_nvme_self_test_log_free: (skip)
+ * @log: (nullable): %BDNVMESelfTestLog to free
+ *
+ * Frees @log.
+ */
+void bd_nvme_self_test_log_free (BDNVMESelfTestLog *log) {
+    BDNVMESelfTestLogEntry **entries;
+
+    if (log == NULL)
+        return;
+
+    for (entries = log->entries; entries && *entries; entries++)
+        bd_nvme_self_test_log_entry_free (*entries);
+    g_free (log->entries);
+    g_free (log);
+}
+
+/**
+ * bd_nvme_self_test_log_copy: (skip)
+ * @log: (nullable): %BDNVMESelfTestLog to copy
+ *
+ * Creates a new copy of @log.
+ */
+BDNVMESelfTestLog * bd_nvme_self_test_log_copy (BDNVMESelfTestLog *log) {
+    BDNVMESelfTestLog *new_log;
+    BDNVMESelfTestLogEntry **entries;
+    GPtrArray *ptr_array;
+
+    if (log == NULL)
+        return NULL;
+
+    new_log = g_new0 (BDNVMESelfTestLog, 1);
+    memcpy (new_log, log, sizeof (BDNVMESelfTestLog));
+
+    ptr_array = g_ptr_array_new ();
+    for (entries = log->entries; entries && *entries; entries++)
+        g_ptr_array_add (ptr_array, bd_nvme_self_test_log_entry_copy (*entries));
+    g_ptr_array_add (ptr_array, NULL);
+    new_log->entries = (BDNVMESelfTestLogEntry **) g_ptr_array_free (ptr_array, FALSE);
+
+    return new_log;
+}
+
 
 
 static guint64 int128_to_guint64 (__u8 *data)
@@ -233,7 +308,7 @@ static guint64 int128_to_guint64 (__u8 *data)
     return result;
 }
 
-static gint open_dev (const gchar *device, GError **error) {
+gint _open_dev (const gchar *device, GError **error) {
     int fd;
 
     /* TODO: nvme-cli is checking for file type, if it's a block or char device.
@@ -268,7 +343,7 @@ BDNVMEControllerInfo * bd_nvme_get_controller_info (const gchar *device, GError 
     BDNVMEControllerInfo *info;
 
     /* open the block device */
-    fd = open_dev (device, error);
+    fd = _open_dev (device, error);
     if (fd < 0)
         return NULL;
 
@@ -277,7 +352,7 @@ BDNVMEControllerInfo * bd_nvme_get_controller_info (const gchar *device, GError 
     if (ret < 0) {
         /* generic errno errors */
         g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "NVMe Identify Controller command error: %s", strerror_l (errno, c_locale));
+                     "NVMe Identify Controller command error: %s", strerror_l (errno, _C_LOCALE));
         close (fd);
         return NULL;
     }
@@ -366,7 +441,7 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
     GPtrArray *ptr_array;
 
     /* open the block device */
-    fd = open_dev (device, error);
+    fd = _open_dev (device, error);
     if (fd < 0)
         return NULL;
 
@@ -375,7 +450,7 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
     if (ret < 0) {
         /* generic errno errors */
         g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "Error getting Namespace Identifier (NSID): %s", strerror_l (errno, c_locale));
+                     "Error getting Namespace Identifier (NSID): %s", strerror_l (errno, _C_LOCALE));
         close (fd);
         return NULL;
     }
@@ -393,7 +468,7 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
     if (ret < 0) {
         /* generic errno errors */
         g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "NVMe Identify Namespace command error: %s", strerror_l (errno, c_locale));
+                     "NVMe Identify Namespace command error: %s", strerror_l (errno, _C_LOCALE));
         close (fd);
         return NULL;
     }
@@ -494,7 +569,7 @@ BDNVMESmartLog * bd_nvme_get_smart_log (const gchar *device, GError **error) {
     guint i;
 
     /* open the block device */
-    fd = open_dev (device, error);
+    fd = _open_dev (device, error);
     if (fd < 0)
         return NULL;
 
@@ -503,7 +578,7 @@ BDNVMESmartLog * bd_nvme_get_smart_log (const gchar *device, GError **error) {
     if (ret_identify < 0) {
         /* generic errno errors */
         g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "NVMe Identify Controller command error: %s", strerror_l (errno, c_locale));
+                     "NVMe Identify Controller command error: %s", strerror_l (errno, _C_LOCALE));
         close (fd);
         return NULL;
     }
@@ -520,7 +595,7 @@ BDNVMESmartLog * bd_nvme_get_smart_log (const gchar *device, GError **error) {
     if (ret < 0) {
         /* generic errno errors */
         g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "NVMe Get Log Page - SMART / Health Information Log command error: %s", strerror_l (errno, c_locale));
+                     "NVMe Get Log Page - SMART / Health Information Log command error: %s", strerror_l (errno, _C_LOCALE));
         close (fd);
         return NULL;
     }
@@ -605,7 +680,7 @@ BDNVMEErrorLogEntry ** bd_nvme_get_error_log_entries (const gchar *device, GErro
     guint i;
 
     /* open the block device */
-    fd = open_dev (device, error);
+    fd = _open_dev (device, error);
     if (fd < 0)
         return NULL;
 
@@ -613,7 +688,7 @@ BDNVMEErrorLogEntry ** bd_nvme_get_error_log_entries (const gchar *device, GErro
     ret = nvme_identify_ctrl (fd, &ctrl_id);
     if (ret < 0) {
         g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "NVMe Identify Controller command error: %s", strerror_l (errno, c_locale));
+                     "NVMe Identify Controller command error: %s", strerror_l (errno, _C_LOCALE));
         close (fd);
         return NULL;
     }
@@ -630,7 +705,7 @@ BDNVMEErrorLogEntry ** bd_nvme_get_error_log_entries (const gchar *device, GErro
     ret = nvme_get_log_error (fd, elpe, FALSE /* rae */, err_log);
     if (ret < 0) {
         g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "NVMe Get Log Page - Error Information Log Entry command error: %s", strerror_l (errno, c_locale));
+                     "NVMe Get Log Page - Error Information Log Entry command error: %s", strerror_l (errno, _C_LOCALE));
         close (fd);
         g_free (err_log);
         return NULL;
@@ -667,4 +742,148 @@ BDNVMEErrorLogEntry ** bd_nvme_get_error_log_entries (const gchar *device, GErro
     g_free (err_log);
 
     return (BDNVMEErrorLogEntry **) g_ptr_array_free (ptr_array, FALSE);
+}
+
+
+/**
+ * bd_nvme_get_self_test_log:
+ * @device: a NVMe controller device (e.g. /dev/nvme0)
+ * @error: (out) (nullable): place to store error (if any)
+ *
+ * Retrieves drive self-test log (Log Identifier %06h). Provides the status of a self-test operation
+ * in progress and the percentage complete of that operation, along with the results of the last
+ * 20 device self-test operations.
+ *
+ * Returns: (transfer full): self-test log data or %NULL in case of an error (with @error set).
+ *
+ * Tech category: %BD_NVME_TECH_NVME-%BD_NVME_TECH_MODE_INFO
+ */
+BDNVMESelfTestLog * bd_nvme_get_self_test_log (const gchar *device, GError **error) {
+    int ret;
+    int fd;
+    struct nvme_self_test_log self_test_log = ZERO_INIT;
+    BDNVMESelfTestLog *log;
+    GPtrArray *ptr_array;
+    guint i;
+
+    /* open the block device */
+    fd = _open_dev (device, error);
+    if (fd < 0)
+        return NULL;
+
+    /* send the NVME_LOG_LID_DEVICE_SELF_TEST ioctl */
+    ret = nvme_get_log_device_self_test (fd, &self_test_log);
+    if (ret < 0) {
+        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
+                     "NVMe Get Log Page - Device Self-test Log command error: %s", strerror_l (errno, _C_LOCALE));
+        close (fd);
+        return NULL;
+    }
+    close (fd);
+    if (ret > 0) {
+        _nvme_status_to_error (ret, FALSE, error);
+        g_prefix_error (error, "NVMe Get Log Page - Device Self-test Log command error: ");
+        return NULL;
+    }
+
+    log = g_new0 (BDNVMESelfTestLog, 1);
+    switch (self_test_log.current_operation & NVME_ST_CURR_OP_MASK) {
+        case NVME_ST_CURR_OP_NOT_RUNNING:
+            log->current_operation = BD_NVME_SELF_TEST_ACTION_NOT_RUNNING;
+            break;
+        case NVME_ST_CURR_OP_SHORT:
+            log->current_operation = BD_NVME_SELF_TEST_ACTION_SHORT;
+            break;
+        case NVME_ST_CURR_OP_EXTENDED:
+            log->current_operation = BD_NVME_SELF_TEST_ACTION_EXTENDED;
+            break;
+        case NVME_ST_CURR_OP_VS:
+        case NVME_ST_CURR_OP_RESERVED:
+        default:
+            log->current_operation = BD_NVME_SELF_TEST_ACTION_VENDOR_SPECIFIC;
+    }
+    if (log->current_operation == BD_NVME_SELF_TEST_ACTION_SHORT ||
+        log->current_operation == BD_NVME_SELF_TEST_ACTION_EXTENDED)
+        log->current_operation_completion = self_test_log.completion & NVME_ST_CURR_OP_CMPL_MASK;
+
+    ptr_array = g_ptr_array_new ();
+    for (i = 0; i < NVME_LOG_ST_MAX_RESULTS; i++) {
+        BDNVMESelfTestLogEntry *entry;
+        guint8 dsts;
+        guint8 code;
+
+        dsts = self_test_log.result[i].dsts & NVME_ST_RESULT_MASK;
+        code = self_test_log.result[i].dsts >> NVME_ST_CODE_SHIFT;
+        if (dsts == NVME_ST_RESULT_NOT_USED)
+            continue;
+
+        entry = g_new0 (BDNVMESelfTestLogEntry, 1);
+        switch (dsts) {
+            case NVME_ST_RESULT_NO_ERR:
+                entry->result = BD_NVME_SELF_TEST_RESULT_NO_ERROR;
+                break;
+            case NVME_ST_RESULT_ABORTED:
+                entry->result = BD_NVME_SELF_TEST_RESULT_ABORTED;
+                break;
+            case NVME_ST_RESULT_CLR:
+                entry->result = BD_NVME_SELF_TEST_RESULT_CTRL_RESET;
+                break;
+            case NVME_ST_RESULT_NS_REMOVED:
+                entry->result = BD_NVME_SELF_TEST_RESULT_NS_REMOVED;
+                break;
+            case NVME_ST_RESULT_ABORTED_FORMAT:
+                entry->result = BD_NVME_SELF_TEST_RESULT_ABORTED_FORMAT;
+                break;
+            case NVME_ST_RESULT_FATAL_ERR:
+                entry->result = BD_NVME_SELF_TEST_RESULT_FATAL_ERROR;
+                break;
+            case NVME_ST_RESULT_UNKNOWN_SEG_FAIL:
+                entry->result = BD_NVME_SELF_TEST_RESULT_UNKNOWN_SEG_FAIL;
+                break;
+            case NVME_ST_RESULT_KNOWN_SEG_FAIL:
+                entry->result = BD_NVME_SELF_TEST_RESULT_KNOWN_SEG_FAIL;
+                break;
+            case NVME_ST_RESULT_ABORTED_UNKNOWN:
+                entry->result = BD_NVME_SELF_TEST_RESULT_ABORTED_UNKNOWN;
+                break;
+            case NVME_ST_RESULT_ABORTED_SANITIZE:
+                entry->result = BD_NVME_SELF_TEST_RESULT_ABORTED_SANITIZE;
+                break;
+            default:
+                bd_utils_log_format (BD_UTILS_LOG_WARNING, "Unhandled self-test log entry result code: %d", dsts);
+                g_free (entry);
+                continue;
+        }
+        switch (code) {
+            case NVME_ST_CODE_SHORT:
+                entry->action = BD_NVME_SELF_TEST_ACTION_SHORT;
+                break;
+            case NVME_ST_CODE_EXTENDED:
+                entry->action = BD_NVME_SELF_TEST_ACTION_EXTENDED;
+                break;
+            case NVME_ST_CODE_VS:
+            case NVME_ST_CODE_RESERVED:
+                entry->action = BD_NVME_SELF_TEST_ACTION_VENDOR_SPECIFIC;
+                break;
+            default:
+                bd_utils_log_format (BD_UTILS_LOG_WARNING, "Unhandled self-test log entry action code: %d", code);
+                entry->action = BD_NVME_SELF_TEST_ACTION_VENDOR_SPECIFIC;
+        }
+        entry->segment = self_test_log.result[i].seg;
+        entry->power_on_hours = GUINT64_FROM_LE (self_test_log.result[i].poh);
+        if (self_test_log.result[i].vdi & NVME_ST_VALID_DIAG_INFO_NSID)
+            entry->nsid = GUINT32_FROM_LE (self_test_log.result[i].nsid);
+        if (self_test_log.result[i].vdi & NVME_ST_VALID_DIAG_INFO_FLBA)
+            entry->failing_lba = GUINT64_FROM_LE (self_test_log.result[i].flba);
+        if ((self_test_log.result[i].vdi & NVME_ST_VALID_DIAG_INFO_SC) &&
+            (self_test_log.result[i].vdi & NVME_ST_VALID_DIAG_INFO_SCT))
+            _nvme_status_to_error ((self_test_log.result[i].sct & 7) << 8 | self_test_log.result[i].sc,
+                                   FALSE, &entry->status_code_error);
+
+        g_ptr_array_add (ptr_array, entry);
+    }
+    g_ptr_array_add (ptr_array, NULL);
+    log->entries = (BDNVMESelfTestLogEntry **) g_ptr_array_free (ptr_array, FALSE);
+
+    return log;
 }

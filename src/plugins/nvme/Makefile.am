@@ -13,6 +13,7 @@ libbd_nvme_la_SOURCES = \
 	nvme-private.h \
 	nvme-info.c \
 	nvme-error.c \
+	nvme-op.c \
 	../check_deps.c \
 	../check_deps.h
 

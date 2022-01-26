@@ -817,4 +817,14 @@ BDNVMEErrorLogEntry
 bd_nvme_get_error_log_entries
 bd_nvme_error_log_entry_free
 bd_nvme_error_log_entry_copy
+BDNVMESelfTestLog
+BDNVMESelfTestLogEntry
+BDNVMESelfTestAction
+BDNVMESelfTestResult
+bd_nvme_get_self_test_log
+bd_nvme_self_test_log_free
+bd_nvme_self_test_log_copy
+bd_nvme_self_test_log_entry_free
+bd_nvme_self_test_log_entry_copy
+bd_nvme_device_self_test
 </SECTION>
