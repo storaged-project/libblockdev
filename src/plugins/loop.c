@@ -145,7 +145,6 @@ gchar* bd_loop_get_loop_name (const gchar *file, GError **error __attribute__((u
     glob_t globbuf;
     gchar **path_p;
     gboolean success = FALSE;
-    GError *tmp_error = NULL;
     gchar *content = NULL;
     gboolean found = FALSE;
     gchar **parts;
@@ -156,11 +155,9 @@ gchar* bd_loop_get_loop_name (const gchar *file, GError **error __attribute__((u
     }
 
     for (path_p = globbuf.gl_pathv; *path_p && !found; path_p++) {
-        success = g_file_get_contents (*path_p, &content, NULL, &tmp_error);
-        if (!success) {
-            g_clear_error (&tmp_error);
+        success = g_file_get_contents (*path_p, &content, NULL, NULL);
+        if (!success)
             continue;
-        }
 
         g_strstrip (content);
         found = (g_strcmp0 (content, file) == 0);
