@@ -1055,6 +1055,14 @@ def nvdimm_namespace_disable(namespace, extra=None, **kwargs):
 __all__.append("nvdimm_namespace_disable")
 
 
+_nvme_connect = BlockDev.nvme_connect
+@override(BlockDev.nvme_connect)
+def nvme_connect(subsysnqn, transport, transport_addr, transport_svcid, host_traddr, host_iface, host_nqn, host_id, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _nvme_connect(subsysnqn, transport, transport_addr, transport_svcid, host_traddr, host_iface, host_nqn, host_id, extra)
+__all__.append("nvme_connect")
+
+
 ## defined in this overrides only!
 def plugin_specs_from_names(plugin_names):
     ret = []

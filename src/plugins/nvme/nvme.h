@@ -543,19 +543,20 @@ gboolean               bd_nvme_sanitize              (const gchar               
                                                       GError                      **error);
 
 
-gboolean               bd_nvme_connect               (const gchar  *subsysnqn,
-                                                      const gchar  *transport,
-                                                      const gchar  *transport_addr,
-                                                      const gchar  *transport_svcid,
-                                                      const gchar  *host_traddr,
-                                                      const gchar  *host_iface,
-                                                      const gchar  *host_nqn,
-                                                      const gchar  *host_id,
-                                                      GError      **error);
-gboolean               bd_nvme_disconnect            (const gchar  *subsysnqn,
-                                                      GError      **error);
-gboolean               bd_nvme_disconnect_by_path    (const gchar  *path,
-                                                      GError      **error);
+gboolean               bd_nvme_connect               (const gchar       *subsysnqn,
+                                                      const gchar       *transport,
+                                                      const gchar       *transport_addr,
+                                                      const gchar       *transport_svcid,
+                                                      const gchar       *host_traddr,
+                                                      const gchar       *host_iface,
+                                                      const gchar       *host_nqn,
+                                                      const gchar       *host_id,
+                                                      const BDExtraArg **extra,
+                                                      GError           **error);
+gboolean               bd_nvme_disconnect            (const gchar       *subsysnqn,
+                                                      GError           **error);
+gboolean               bd_nvme_disconnect_by_path    (const gchar       *path,
+                                                      GError           **error);
 
 
 #endif  /* BD_NVME */
