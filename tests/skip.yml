@@ -73,3 +73,14 @@
     - distro: "fedora"
       version: "36"
       reason: "Namespace disabling and reconfiguration hangs in kernel on rawhide"
+
+- test: nvme_test
+  skip_on:
+    - distro: "debian"
+      reason: "latest libnvme is not yet available on Debian"
+
+- test: nvme_test
+  skip_on:
+    - distro: "centos"
+      version: "9"
+      reason: "latest libnvme is not yet available on CentOS 9"
