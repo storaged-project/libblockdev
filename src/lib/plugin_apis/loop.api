@@ -27,7 +27,7 @@ typedef enum {
  * bd_loop_is_tech_avail:
  * @tech: the queried tech
  * @mode: a bit mask of queried modes of operation (#BDLoopTechMode) for @tech
- * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ * @error: (out) (allow-none): place to store error (details about why the @tech-@mode combination is not available)
  *
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
@@ -37,7 +37,7 @@ gboolean bd_loop_is_tech_avail (BDLoopTech tech, guint64 mode, GError **error);
 /**
  * bd_loop_get_backing_file:
  * @dev_name: name of the loop device to get backing file for (e.g. "loop0")
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: (transfer full): path of the device's backing file or %NULL if none
  *                           is found
@@ -49,7 +49,7 @@ gchar* bd_loop_get_backing_file (const gchar *dev_name, GError **error);
 /**
  * bd_loop_get_loop_name:
  * @file: path of the backing file to get loop name for
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: (transfer full): name of the loop device associated with the given @file
  *
@@ -65,7 +65,7 @@ gchar* bd_loop_get_loop_name (const gchar *file, GError **error);
  * @read_only: whether to setup as read-only (%TRUE) or read-write (%FALSE)
  * @part_scan: whether to enforce partition scan on the newly created device or not
  * @loop_name: (allow-none) (out): if not %NULL, it is used to store the name of the loop device
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the @file was successfully setup as a loop device or not
  *
@@ -81,7 +81,7 @@ gboolean bd_loop_setup (const gchar *file, guint64 offset, guint64 size, gboolea
  * @read_only: whether to setup as read-only (%TRUE) or read-write (%FALSE)
  * @part_scan: whether to enforce partition scan on the newly created device or not
  * @loop_name: (allow-none) (out): if not %NULL, it is used to store the name of the loop device
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether an new loop device was successfully setup for @fd or not
  *
@@ -92,7 +92,7 @@ gboolean bd_loop_setup_from_fd (gint fd, guint64 offset, guint64 size, gboolean 
 /**
  * bd_loop_teardown:
  * @loop: path or name of the loop device to tear down
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the @loop device was successfully torn down or not
  *
@@ -103,7 +103,7 @@ gboolean bd_loop_teardown (const gchar *loop, GError **error);
 /**
  * bd_loop_get_autoclear:
  * @loop: path or name of the loop device
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the autoclear flag is set on the @loop device or not (if %FALSE, @error may be set)
  *
@@ -115,7 +115,7 @@ gboolean bd_loop_get_autoclear (const gchar *loop, GError **error);
  * bd_loop_set_autoclear:
  * @loop: path or name of the loop device
  * @autoclear: whether to set or unset the autoclear flag
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the autoclear flag was successfully set on the @loop device or not
  *
