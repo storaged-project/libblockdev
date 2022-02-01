@@ -159,6 +159,7 @@ GHashTable __attribute__ ((visibility ("hidden")))
     gchar *s;
     gchar *val = NULL;
     g_autofree gchar *dm_node = NULL;
+    GError *l_error = NULL;
 
     /* try "new" (kvdo >= 8) path first -- /sys/block/dm-X/vdo/statistics */
     dm_node = _dm_node_from_name (name, error);
@@ -168,13 +169,13 @@ GHashTable __attribute__ ((visibility ("hidden")))
     }
 
     stats_dir = g_build_path (G_DIR_SEPARATOR_S, "/sys/block", dm_node, "vdo/statistics", NULL);
-    dir = g_dir_open (stats_dir, 0, error);
+    dir = g_dir_open (stats_dir, 0, &l_error);
     if (dir == NULL) {
         bd_utils_log_format (BD_UTILS_LOG_INFO,
                              "Failed to read VDO stats using the new API, falling back to %s: %s",
-                             VDO_SYS_PATH, (*error)->message);
+                             VDO_SYS_PATH, l_error->message);
         g_free (stats_dir);
-        g_clear_error (error);
+        g_clear_error (&l_error);
 
         /* lets try /sys/kvdo */
         stats_dir = g_build_path (G_DIR_SEPARATOR_S, VDO_SYS_PATH, name, "statistics", NULL);
