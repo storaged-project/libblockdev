@@ -1062,6 +1062,13 @@ def nvme_connect(subsysnqn, transport, transport_addr, transport_svcid, host_tra
     return _nvme_connect(subsysnqn, transport, transport_addr, transport_svcid, host_traddr, host_iface, host_nqn, host_id, extra)
 __all__.append("nvme_connect")
 
+_nvme_discover = BlockDev.nvme_discover
+@override(BlockDev.nvme_discover)
+def nvme_discover(discovery_ctrl, persistent, transport, transport_addr, transport_svcid, host_traddr, host_iface, host_nqn, host_id, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _nvme_discover(discovery_ctrl, persistent, transport, transport_addr, transport_svcid, host_traddr, host_iface, host_nqn, host_id, extra)
+__all__.append("nvme_discover")
+
 
 ## defined in this overrides only!
 def plugin_specs_from_names(plugin_names):
