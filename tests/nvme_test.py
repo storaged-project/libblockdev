@@ -9,7 +9,7 @@ from distutils.spawn import find_executable
 
 
 class NVMeTest(unittest.TestCase):
-    requested_plugins = BlockDev.plugin_specs_from_names(("nvme",))
+    requested_plugins = BlockDev.plugin_specs_from_names(("nvme", "loop"))
 
     @classmethod
     def setUpClass(cls):
@@ -34,9 +34,10 @@ class NVMeTestCase(NVMeTest):
         self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("nvme_test", 1024**3)
 
-        ret, self.loop_dev, err = run_command("losetup --find --show %s" % self.dev_file)
-        if ret != 0:
-            raise RuntimeError("Cannot attach loop device: '%s %s'" % (self.dev_file, err))
+        ret, loop = BlockDev.loop_setup(self.dev_file)
+        if not ret:
+            raise RuntimeError("Failed to setup loop device %s for testing" % self.dev_file)
+        self.loop_dev = "/dev/%s" % loop
 
         self.nvme_dev = create_nvmet_device(self.loop_dev)
         self.nvme_ns_dev = self.nvme_dev + "n1"
@@ -50,7 +51,7 @@ class NVMeTestCase(NVMeTest):
                 pass
 
         # detach the loop device
-        run_command("losetup --detach %s" % self.loop_dev)
+        BlockDev.loop_teardown(self.loop_dev)
         if self.dev_file:
             os.unlink(self.dev_file)
 
@@ -274,10 +275,11 @@ class NVMeFabricsTestCase(NVMeTest):
         self.addCleanup(self._clean_up)
         for i in range(num_devices):
             self.dev_files += [create_sparse_tempfile("nvmeof_test%d" % i, 1024**3)]
-            ret, out, err = run_command("losetup --find --show %s" % self.dev_files[i])
-            if ret != 0:
-                raise RuntimeError("Cannot attach loop device: '%s %s'" % (out, err))
-            self.loop_devs += [out]
+
+            ret, loop = BlockDev.loop_setup(self.dev_files[i])
+            if not ret:
+                raise RuntimeError("Failed to setup loop device %s for testing" % self.dev_files[i])
+            self.loop_devs += ["/dev/%s" % loop]
         setup_nvme_target(self.loop_devs, self.SUBNQN, self.HOSTNQN)
 
     def _clean_up(self):
@@ -285,7 +287,7 @@ class NVMeFabricsTestCase(NVMeTest):
 
         # detach loop devices
         for i in self.loop_devs:
-            run_command("losetup --detach %s" % i)
+            BlockDev.loop_teardown(i)
         for i in self.dev_files:
             os.unlink(i)
 
