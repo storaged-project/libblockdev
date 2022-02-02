@@ -348,7 +348,8 @@ gint _open_dev (const gchar *device, GError **error) {
     fd = open (device, O_RDONLY);
     if (fd < 0) {
         g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "Failed to open device '%s': %m", device);
+                     "Failed to open device '%s': %s",
+                     device, strerror_l (errno, _C_LOCALE));
         return -1;
     }
 
