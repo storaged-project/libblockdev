@@ -122,6 +122,8 @@ AC_CHECK_HEADERS([dlfcn.h string.h unistd.h sys/fcntl.h sys/ioctl.h linux/random
                  [LIBBLOCKDEV_SOFT_FAILURE([Header file $ac_header not found.])],
                  [])
 
+AC_CHECK_FUNCS([strerror_l])
+
 AC_ARG_WITH([bcache],
     AS_HELP_STRING([--with-bcache], [support bcache @<:@default=yes@:>@]),
     [],

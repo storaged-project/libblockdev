@@ -259,6 +259,14 @@ gboolean bd_utils_unload_kernel_module (const gchar *module_name, GError **error
     return TRUE;
 }
 
+#define UNUSED __attribute__((unused))
+
+#if !defined(HAVE_STRERROR_L)
+static char *strerror_l(int errnum, locale_t locale UNUSED)
+{
+	return strerror(errnum);
+}
+#endif
 
 static BDUtilsLinuxVersion detected_linux_ver;
 static gboolean have_linux_ver = FALSE;
