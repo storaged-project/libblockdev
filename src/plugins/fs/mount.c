@@ -655,7 +655,8 @@ gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const 
 
     if (run_as_uid != current_uid || run_as_gid != current_gid) {
         ret = run_as_user ((MountFunc) do_unmount, &args, run_as_uid, run_as_gid, &l_error);
-        g_propagate_error (error, l_error);
+        if (!ret)
+            g_propagate_error (error, l_error);
         return ret;
     } else
         return do_unmount (&args, error);
@@ -734,7 +735,8 @@ gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar 
 
     if (run_as_uid != current_uid || run_as_gid != current_gid) {
         ret = run_as_user ((MountFunc) do_mount, &args, run_as_uid, run_as_gid, &l_error);
-        g_propagate_error (error, l_error);
+        if (!ret)
+            g_propagate_error (error, l_error);
         return ret;
     } else
        return do_mount (&args, error);
