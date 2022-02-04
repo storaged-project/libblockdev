@@ -330,9 +330,21 @@ class NVMeFabricsTestCase(NVMeTest):
             self.assertTrue(re.match(r'/dev/nvme[0-9]+n[0-9]+', ns))
             self.assertTrue(os.path.exists(ns))
 
+        # make a duplicate connection
+        ret = BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, self.HOSTNQN, None)
+        self.assertTrue(ret)
+
+        # should see two controllers now
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(ctrls), 2)
+        for c in ctrls:
+            self.assertTrue(re.match(r'/dev/nvme[0-9]+', c))
+            self.assertTrue(os.path.exists(c))
+
         # disconnect
         with self.assertRaisesRegexp(GLib.GError, r"No subsystems matching '.*' NQN found."):
             BlockDev.nvme_disconnect(self.SUBNQN + "xx")
+        # should disconnect both connections as long the SUBNQN matches
         BlockDev.nvme_disconnect(self.SUBNQN)
         for c in ctrls:
             self.assertFalse(os.path.exists(c))
