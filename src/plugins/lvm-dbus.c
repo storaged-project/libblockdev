@@ -375,15 +375,9 @@ gboolean bd_lvm_is_tech_avail (BDLVMTech tech, guint64 mode, GError **error) {
         } else
             return TRUE;
     case BD_LVM_TECH_VDO:
-        if (mode & BD_LVM_TECH_MODE_MODIFY) {
-            g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_TECH_UNAVAIL,
-                         "Modifying existing LVM VDO devices is not supported by this plugin implementation.");
-            return FALSE;
-
-        } else
-            return check_dbus_deps (&avail_dbus_deps, DBUS_DEPS_LVMDBUSD_MASK, dbus_deps, DBUS_DEPS_LAST, &deps_check_lock, error) &&
-                   check_features (&avail_features, FEATURES_VDO_MASK, features, FEATURES_LAST, &deps_check_lock, error) &&
-                   check_module_deps (&avail_module_deps, MODULE_DEPS_VDO_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error);
+        return check_dbus_deps (&avail_dbus_deps, DBUS_DEPS_LVMDBUSD_MASK, dbus_deps, DBUS_DEPS_LAST, &deps_check_lock, error) &&
+               check_features (&avail_features, FEATURES_VDO_MASK, features, FEATURES_LAST, &deps_check_lock, error) &&
+               check_module_deps (&avail_module_deps, MODULE_DEPS_VDO_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error);
     default:
         /* everything is supported by this implementation of the plugin */
         return check_dbus_deps (&avail_dbus_deps, DBUS_DEPS_LVMDBUSD_MASK, dbus_deps, DBUS_DEPS_LAST, &deps_check_lock, error);
@@ -806,6 +800,13 @@ static void call_thpool_method_sync (const gchar *vg_name, const gchar *pool_nam
     gchar *obj_id = g_strdup_printf ("%s/%s", vg_name, pool_name);
 
     call_lvm_obj_method_sync (obj_id, THPOOL_INTF, method, params, extra_params, extra_args, lock_config, error);
+    g_free (obj_id);
+}
+
+static void call_vdopool_method_sync (const gchar *vg_name, const gchar *pool_name, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, gboolean lock_config, GError **error) {
+    gchar *obj_id = g_strdup_printf ("%s/%s", vg_name, pool_name);
+
+    call_lvm_obj_method_sync (obj_id, VDO_POOL_INTF, method, params, extra_params, extra_args, lock_config, error);
     g_free (obj_id);
 }
 
@@ -3478,8 +3479,10 @@ gboolean bd_lvm_vdo_pool_create (const gchar *vg_name, const gchar *lv_name, con
  *
  * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_MODIFY
  */
-gboolean bd_lvm_vdo_enable_compression (const gchar *vg_name UNUSED, const gchar *pool_name UNUSED, const BDExtraArg **extra UNUSED, GError **error) {
-    return bd_lvm_is_tech_avail (BD_LVM_TECH_VDO, BD_LVM_TECH_MODE_MODIFY, error);
+gboolean bd_lvm_vdo_enable_compression (const gchar *vg_name, const gchar *pool_name, const BDExtraArg **extra, GError **error) {
+    call_vdopool_method_sync (vg_name, pool_name, "EnableCompression", NULL, NULL, extra, TRUE, error);
+
+    return (*error == NULL);
 }
 
 /**
@@ -3494,8 +3497,10 @@ gboolean bd_lvm_vdo_enable_compression (const gchar *vg_name UNUSED, const gchar
  *
  * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_MODIFY
  */
-gboolean bd_lvm_vdo_disable_compression (const gchar *vg_name UNUSED, const gchar *pool_name UNUSED, const BDExtraArg **extra UNUSED, GError **error) {
-    return bd_lvm_is_tech_avail (BD_LVM_TECH_VDO, BD_LVM_TECH_MODE_MODIFY, error);
+gboolean bd_lvm_vdo_disable_compression (const gchar *vg_name, const gchar *pool_name, const BDExtraArg **extra, GError **error) {
+    call_vdopool_method_sync (vg_name, pool_name, "DisableCompression", NULL, NULL, extra, TRUE, error);
+
+    return (*error == NULL);
 }
 
 /**
@@ -3510,8 +3515,10 @@ gboolean bd_lvm_vdo_disable_compression (const gchar *vg_name UNUSED, const gcha
  *
  * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_MODIFY
  */
-gboolean bd_lvm_vdo_enable_deduplication (const gchar *vg_name UNUSED, const gchar *pool_name UNUSED, const BDExtraArg **extra UNUSED, GError **error) {
-    return bd_lvm_is_tech_avail (BD_LVM_TECH_VDO, BD_LVM_TECH_MODE_MODIFY, error);
+gboolean bd_lvm_vdo_enable_deduplication (const gchar *vg_name, const gchar *pool_name, const BDExtraArg **extra, GError **error) {
+    call_vdopool_method_sync (vg_name, pool_name, "EnableDeduplication", NULL, NULL, extra, TRUE, error);
+
+    return (*error == NULL);
 }
 
 /**
@@ -3526,8 +3533,10 @@ gboolean bd_lvm_vdo_enable_deduplication (const gchar *vg_name UNUSED, const gch
  *
  * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_MODIFY
  */
-gboolean bd_lvm_vdo_disable_deduplication (const gchar *vg_name UNUSED, const gchar *pool_name UNUSED, const BDExtraArg **extra UNUSED, GError **error) {
-    return bd_lvm_is_tech_avail (BD_LVM_TECH_VDO, BD_LVM_TECH_MODE_MODIFY, error);
+gboolean bd_lvm_vdo_disable_deduplication (const gchar *vg_name, const gchar *pool_name, const BDExtraArg **extra, GError **error) {
+    call_vdopool_method_sync (vg_name, pool_name, "DisableDeduplication", NULL, NULL, extra, TRUE, error);
+
+    return (*error == NULL);
 }
 
 /**

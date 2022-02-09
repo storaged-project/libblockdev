@@ -1619,11 +1619,57 @@ class LVMVDOTest(LVMTestCase):
 
     @tag_test(TestTags.SLOW)
     def test_enabla_disable_compression(self):
-        self.skipTest("Enabling/disabling compression on LVM VDO not implemented in LVM DBus API.")
+        succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", "vdoPool", 7 * 1024**3, 35 * 1024**3,
+                                            300 * 1024**2)
+        self.assertTrue(succ)
+
+        # enabled by default
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertTrue(vdo_info.compression)
+
+        # disable compression
+        succ = BlockDev.lvm_vdo_disable_compression("testVDOVG", "vdoPool")
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertFalse(vdo_info.compression)
+
+        # and enable compression back
+        succ = BlockDev.lvm_vdo_enable_compression("testVDOVG", "vdoPool")
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertTrue(vdo_info.compression)
 
     @tag_test(TestTags.SLOW)
     def test_enable_disable_deduplication(self):
-        self.skipTest("Enabling/disabling deduplication on LVM VDO not implemented in LVM DBus API.")
+        succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", "vdoPool", 7 * 1024**3, 35 * 1024**3,
+                                            300 * 1024**2)
+        self.assertTrue(succ)
+
+        # enabled by default
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertTrue(vdo_info.deduplication)
+
+        # disable compression
+        succ = BlockDev.lvm_vdo_disable_deduplication("testVDOVG", "vdoPool")
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertFalse(vdo_info.deduplication)
+
+        # and enable compression back
+        succ = BlockDev.lvm_vdo_enable_deduplication("testVDOVG", "vdoPool")
+        self.assertTrue(succ)
+
+        vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "vdoPool")
+        self.assertIsNotNone(vdo_info)
+        self.assertTrue(vdo_info.deduplication)
 
     @tag_test(TestTags.SLOW)
     def test_vdo_pool_convert(self):
