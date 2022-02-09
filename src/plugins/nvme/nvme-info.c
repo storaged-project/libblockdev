@@ -48,6 +48,10 @@ void bd_nvme_controller_info_free (BDNVMEControllerInfo *info) {
 
     g_free (info->fguid);
     g_free (info->subsysnqn);
+    g_free (info->model_number);
+    g_free (info->serial_number);
+    g_free (info->firmware_ver);
+    g_free (info->nvme_ver);
     g_free (info);
 }
 
@@ -67,6 +71,10 @@ BDNVMEControllerInfo * bd_nvme_controller_info_copy (BDNVMEControllerInfo *info)
     memcpy (new_info, info, sizeof (BDNVMEControllerInfo));
     new_info->fguid = g_strdup (info->fguid);
     new_info->subsysnqn = g_strdup (info->subsysnqn);
+    new_info->model_number = g_strdup (info->model_number);
+    new_info->serial_number = g_strdup (info->serial_number);
+    new_info->firmware_ver = g_strdup (info->firmware_ver);
+    new_info->nvme_ver = g_strdup (info->nvme_ver);
 
     return new_info;
 }
@@ -355,6 +363,22 @@ gint _open_dev (const gchar *device, GError **error) {
     return fd;
 }
 
+static gchar *decode_nvme_rev (guint32 ver) {
+    guint16 mjr;
+    guint8 mnr, ter = 0;
+
+    mjr = ver >> 16;
+    mnr = (ver >> 8) & 0xFF;
+    /* 'ter' is only valid for >= 1.2.1 */
+    if (mjr >= 2 || mnr >= 2)
+        ter = ver & 0xFF;
+
+    if (ter == 0)
+        return g_strdup_printf ("%u.%u", mjr, mnr);
+    else
+        return g_strdup_printf ("%u.%u.%u", mjr, mnr, ter);
+}
+
 /**
  * bd_nvme_get_controller_info:
  * @device: a NVMe controller device (e.g. /dev/nvme0)
@@ -404,8 +428,27 @@ BDNVMEControllerInfo * bd_nvme_get_controller_info (const gchar *device, GError 
         info->features |= BD_NVME_CTRL_FEAT_SRIOV;
     if ((ctrl_id.cmic & NVME_CTRL_CMIC_MULTI_ANA_REPORTING) == NVME_CTRL_CMIC_MULTI_ANA_REPORTING)
         info->features |= BD_NVME_CTRL_FEAT_ANA_REPORTING;
+    if ((ctrl_id.nvmsr & NVME_CTRL_NVMSR_NVMESD) == NVME_CTRL_NVMSR_NVMESD)
+        info->features |= BD_NVME_CTRL_FEAT_STORAGE_DEVICE;
+    if ((ctrl_id.nvmsr & NVME_CTRL_NVMSR_NVMEE) == NVME_CTRL_NVMSR_NVMEE)
+        info->features |= BD_NVME_CTRL_FEAT_ENCLOSURE;
+    if ((ctrl_id.mec & NVME_CTRL_MEC_PCIEME) == NVME_CTRL_MEC_PCIEME)
+        info->features |= BD_NVME_CTRL_FEAT_MGMT_PCIE;
+    if ((ctrl_id.mec & NVME_CTRL_MEC_SMBUSME) == NVME_CTRL_MEC_SMBUSME)
+        info->features |= BD_NVME_CTRL_FEAT_MGMT_SMBUS;
+    info->pci_vendor_id = GUINT16_FROM_LE (ctrl_id.vid);
+    info->pci_subsys_vendor_id = GUINT16_FROM_LE (ctrl_id.ssvid);
     info->ctrl_id = GUINT16_FROM_LE (ctrl_id.cntlid);
+    /* TODO: decode fguid as 128-bit hex string? */
     info->fguid = g_strdup_printf ("%-.*s", (int) sizeof (ctrl_id.fguid), ctrl_id.fguid);
+    g_strstrip (info->fguid);
+    info->model_number = g_strndup (ctrl_id.mn, sizeof (ctrl_id.mn));
+    g_strstrip (info->model_number);
+    info->serial_number = g_strndup (ctrl_id.sn, sizeof (ctrl_id.sn));
+    g_strstrip (info->serial_number);
+    info->firmware_ver = g_strndup (ctrl_id.fr, sizeof (ctrl_id.fr));
+    g_strstrip (info->firmware_ver);
+    info->nvme_ver = decode_nvme_rev (GUINT32_FROM_LE (ctrl_id.ver));
     /* TODO: vwci: VPD Write Cycle Information */
     if ((ctrl_id.oacs & NVME_CTRL_OACS_FORMAT) == NVME_CTRL_OACS_FORMAT)
         info->features |= BD_NVME_CTRL_FEAT_FORMAT;
@@ -413,6 +456,19 @@ BDNVMEControllerInfo * bd_nvme_get_controller_info (const gchar *device, GError 
         info->features |= BD_NVME_CTRL_FEAT_NS_MGMT;
     if ((ctrl_id.oacs & NVME_CTRL_OACS_SELF_TEST) == NVME_CTRL_OACS_SELF_TEST)
         info->features |= BD_NVME_CTRL_FEAT_SELFTEST;
+    switch (ctrl_id.cntrltype) {
+        case NVME_CTRL_CNTRLTYPE_IO:
+            info->controller_type = BD_NVME_CTRL_TYPE_IO;
+            break;
+        case NVME_CTRL_CNTRLTYPE_DISCOVERY:
+            info->controller_type = BD_NVME_CTRL_TYPE_DISCOVERY;
+            break;
+        case NVME_CTRL_CNTRLTYPE_ADMIN:
+            info->controller_type = BD_NVME_CTRL_TYPE_ADMIN;
+            break;
+        default:
+            info->controller_type = BD_NVME_CTRL_TYPE_UNKNOWN;
+    }
     info->hmb_pref_size = GUINT32_FROM_LE (ctrl_id.hmpre) * 4096LL;
     info->hmb_min_size = GUINT32_FROM_LE (ctrl_id.hmmin) * 4096LL;
     info->size_total = int128_to_guint64 (ctrl_id.tnvmcap);
@@ -440,7 +496,8 @@ BDNVMEControllerInfo * bd_nvme_get_controller_info (const gchar *device, GError 
         info->features |= BD_NVME_CTRL_FEAT_SECURE_ERASE_CRYPTO;
     /* TODO: enum nvme_id_ctrl_oncs: NVME_CTRL_ONCS_WRITE_UNCORRECTABLE, NVME_CTRL_ONCS_WRITE_ZEROES... */
     /* TODO: nwpc: Namespace Write Protection Capabilities */
-    info->subsysnqn = g_strdup_printf ("%-.*s", (int) sizeof (ctrl_id.subnqn), ctrl_id.subnqn);
+    info->subsysnqn = g_strndup (ctrl_id.subnqn, sizeof (ctrl_id.subnqn));
+    g_strstrip (info->subsysnqn);
 
     return info;
 }

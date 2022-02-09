@@ -64,6 +64,10 @@ typedef enum {
  *                                         then any secure erase performed as part of a format results in a secure erase
  *                                         of the particular namespace specified.
  * @BD_NVME_CTRL_FEAT_SECURE_ERASE_CRYPTO: indicates that the cryptographic erase is supported.
+ * @BD_NVME_CTRL_FEAT_STORAGE_DEVICE: indicates that the NVM subsystem is part of an NVMe Storage Device.
+ * @BD_NVME_CTRL_FEAT_ENCLOSURE: indicates that the NVM subsystem is part of an NVMe Enclosure.
+ * @BD_NVME_CTRL_FEAT_MGMT_PCIE: indicates that the NVM subsystem contains a Management Endpoint on a PCIe port.
+ * @BD_NVME_CTRL_FEAT_MGMT_SMBUS: indicates that the NVM subsystem contains a Management Endpoint on an SMBus/I2C port.
  */
 typedef enum {
     BD_NVME_CTRL_FEAT_MULTIPORT           = 1 << 0,
@@ -80,13 +84,38 @@ typedef enum {
     BD_NVME_CTRL_FEAT_SANITIZE_OVERWRITE  = 1 << 11,
     BD_NVME_CTRL_FEAT_SECURE_ERASE_ALL_NS = 1 << 12,
     BD_NVME_CTRL_FEAT_SECURE_ERASE_CRYPTO = 1 << 13,
+    BD_NVME_CTRL_FEAT_STORAGE_DEVICE      = 1 << 14,
+    BD_NVME_CTRL_FEAT_ENCLOSURE           = 1 << 15,
+    BD_NVME_CTRL_FEAT_MGMT_PCIE           = 1 << 16,
+    BD_NVME_CTRL_FEAT_MGMT_SMBUS          = 1 << 17,
 } BDNVMEControllerFeature;
 
 /**
+ * BDNVMEControllerType:
+ * @BD_NVME_CTRL_TYPE_UNKNOWN: Controller type not reported (as reported by older NVMe-compliant devices).
+ * @BD_NVME_CTRL_TYPE_IO: I/O controller.
+ * @BD_NVME_CTRL_TYPE_DISCOVERY: Discovery controller.
+ * @BD_NVME_CTRL_TYPE_ADMIN: Administrative controller.
+ */
+typedef enum {
+    BD_NVME_CTRL_TYPE_UNKNOWN = 0,
+    BD_NVME_CTRL_TYPE_IO,
+    BD_NVME_CTRL_TYPE_DISCOVERY,
+    BD_NVME_CTRL_TYPE_ADMIN,
+} BDNVMEControllerType;
+
+/**
  * BDNVMEControllerInfo:
+ * @pci_vendor_id: The PCI Vendor ID.
+ * @pci_subsys_vendor_id: The PCI Subsystem Vendor ID.
  * @ctrl_id: Controller ID, the NVM subsystem unique controller identifier associated with the controller.
  * @fguid: FRU GUID, a 128-bit value that is globally unique for a given Field Replaceable Unit.
+ * @model_number: The model number.
+ * @serial_number: The serial number.
+ * @firmware_ver: The currently active firmware revision.
+ * @nvme_ver: The NVM Express base specification that the controller implementation supports.
  * @features: features and capabilities present for this controller, see #BDNVMEControllerFeature.
+ * @controller_type: The controller type.
  * @selftest_ext_time: Extended Device Self-test Time, if #BD_NVME_CTRL_FEAT_SELFTEST is supported then this field
  *                     indicates the nominal amount of time in one minute units that the controller takes
  *                     to complete an extended device self-test operation when in power state 0.
@@ -100,9 +129,16 @@ typedef enum {
  * @subsysnqn: NVM Subsystem NVMe Qualified Name, UTF-8 null terminated string.
  */
 typedef struct BDNVMEControllerInfo {
+    guint16 pci_vendor_id;
+    guint16 pci_subsys_vendor_id;
     guint16 ctrl_id;
     gchar *fguid;
+    gchar *model_number;
+    gchar *serial_number;
+    gchar *firmware_ver;
+    gchar *nvme_ver;
     guint64 features;
+    BDNVMEControllerType controller_type;
     gint selftest_ext_time;
     guint64 hmb_pref_size;
     guint64 hmb_min_size;
