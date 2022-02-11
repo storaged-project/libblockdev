@@ -24,12 +24,6 @@
 
 ---
 
-- test: kbd_test.KbdZRAM*
-  skip_on:
-    - distro: "debian"
-      version: "10"
-      reason: "loading zram module is broken on Debian"
-
 - test: kbd_test.KbdBcache*
   skip_on:
     - distro: "debian"
@@ -50,16 +44,9 @@
     - arch: "i686"
       reason: "Lists of 64bit integers are broken on i686 with GI"
 
-- test: (lvm_test|lvm_dbus_tests).LvmTestLVsnapshots.test_snapshotcreate_lvorigin_snapshotmerge
-  skip_on:
-    - distro: "fedora"
-      version: "32"
-      reason: "working with old-style LVM snapshots leads to deadlock in LVM tools"
-
 - test: fs_tests.mount_test.MountTestCase.test_mount_ntfs
   skip_on:
     - distro: "debian"
-      version: ["11", "testing"]
       reason: "mount.ntfs-3g randomly hangs on Debian testing"
 
 - test: lvm_dbus_tests.LvmTestLVsnapshots.test_snapshotcreate_lvorigin_snapshotmerge
@@ -71,7 +58,7 @@
 - test: nvdimm_test.NVDIMMNamespaceTestCase.(test_enable_disable|test_namespace_reconfigure)
   skip_on:
     - distro: "fedora"
-      version: "36"
+      version: ["36", "37"]
       reason: "Namespace disabling and reconfiguration hangs in kernel on rawhide"
 
 - test: nvme_test
