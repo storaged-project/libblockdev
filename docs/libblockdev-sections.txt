@@ -794,6 +794,7 @@ BDNVMETech
 BDNVMETechMode
 bd_nvme_is_tech_avail
 BDNVMEControllerFeature
+BDNVMEControllerType
 BDNVMEControllerInfo
 bd_nvme_get_controller_info
 bd_nvme_controller_info_free
