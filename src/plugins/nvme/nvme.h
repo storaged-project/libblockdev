@@ -19,6 +19,7 @@ GQuark bd_nvme_error_quark (void);
  * @BD_NVME_ERROR_SC_MEDIA: Media and Data Integrity Errors: media specific errors that occur in the NVM or data integrity type errors.
  * @BD_NVME_ERROR_SC_PATH: Path related error.
  * @BD_NVME_ERROR_SC_VENDOR_SPECIFIC: NVMe Vendor specific error.
+ * @BD_NVME_ERROR_NO_MATCH: No matching resource found (e.g. a Fabrics Controller).
  */
 typedef enum {
     BD_NVME_ERROR_TECH_UNAVAIL,
@@ -30,6 +31,7 @@ typedef enum {
     BD_NVME_ERROR_SC_MEDIA,
     BD_NVME_ERROR_SC_PATH,
     BD_NVME_ERROR_SC_VENDOR_SPECIFIC,
+    BD_NVME_ERROR_NO_MATCH,
 } BDNVMEError;
 
 typedef enum {
@@ -296,6 +298,25 @@ typedef enum {
 } BDNVMETransportType;
 
 /**
+ * BDNVMEAddressFamily:
+ * Address Family.
+ * @BD_NVME_ADDRESS_FAMILY_PCI: PCI Express.
+ * @BD_NVME_ADDRESS_FAMILY_INET: AF_INET: IPv4 address family.
+ * @BD_NVME_ADDRESS_FAMILY_INET6: AF_INET6: IPv6 address family.
+ * @BD_NVME_ADDRESS_FAMILY_IB: AF_IB: InfiniBand address family.
+ * @BD_NVME_ADDRESS_FAMILY_FC: Fibre Channel address family.
+ * @BD_NVME_ADDRESS_FAMILY_LOOP: Intra-host Transport (loopback).
+ */
+typedef enum {
+    BD_NVME_ADDRESS_FAMILY_PCI   = 0,
+    BD_NVME_ADDRESS_FAMILY_INET  = 1,
+    BD_NVME_ADDRESS_FAMILY_INET6 = 2,
+    BD_NVME_ADDRESS_FAMILY_IB    = 3,
+    BD_NVME_ADDRESS_FAMILY_FC    = 4,
+    BD_NVME_ADDRESS_FAMILY_LOOP  = 254
+} BDNVMEAddressFamily;
+
+/**
  * BDNVMEErrorLogEntry:
  * @error_count: internal error counter, a unique identifier for the error.
  * @command_id: the Command Identifier of the command that the error is associated with or %0xffff if the error is not specific to a particular command.
@@ -476,6 +497,44 @@ typedef enum {
     BD_NVME_SANITIZE_ACTION_CRYPTO_ERASE = 3,
 } BDNVMESanitizeAction;
 
+/**
+ * BDNVMETCPSecurity:
+ * @BD_NVME_TCP_SECURITY_NONE: No Security, the host shall set up a normal TCP connection.
+ * @BD_NVME_TCP_SECURITY_TLS12: Transport Layer Security (TLS) version 1.2 (NVMe-oF 1.1).
+ * @BD_NVME_TCP_SECURITY_TLS13: Transport Layer Security (TLS) version 1.3+. The TLS version and cipher is negotiated on every connection.
+ */
+typedef enum {
+    BD_NVME_TCP_SECURITY_NONE  = 0,
+    BD_NVME_TCP_SECURITY_TLS12 = 1,
+    BD_NVME_TCP_SECURITY_TLS13 = 2
+} BDNVMETCPSecurity;
+
+/**
+ * BDNVMEDiscoveryLogEntry:
+ * @transport_type: The NVMe Transport type.
+ * @address_family: The address family.
+ * @sq_flow_control_disable: Indicates that the controller is capable of disabling SQ flow control.
+ * @sq_flow_control_required: Indicates that the controller requires use of SQ flow control.
+ * @port_id: A NVM subsystem port. Different NVMe Transports or address families may utilize the same Port ID value (eg. a Port ID may support both iWARP and RoCE).
+ * @ctrl_id: A Controller ID. Special value of %0xFFFF indicates a dynamic controller model and a value of %0xFFFE indicates a temporary ID in a static controller model that should be replaced by a real ID after a connection is established.
+ * @transport_addr: Transport Address.
+ * @transport_svcid: Transport Service Identifier.
+ * @subsys_nqn: Subsystem Qualified Name. For a Discovery Service the value should be the well-known Discovery Service NQN (`nqn.2014-08.org.nvmexpress.discovery`).
+ * @tcp_security: NVMe/TCP transport port security.
+ */
+typedef struct BDNVMEDiscoveryLogEntry {
+    BDNVMETransportType transport_type;
+    BDNVMEAddressFamily address_family;
+    gboolean sq_flow_control_disable;
+    gboolean sq_flow_control_required;
+    guint16 port_id;
+    guint16 ctrl_id;
+    gchar *transport_addr;
+    gchar *transport_svcid;
+    gchar *subsys_nqn;
+    BDNVMETCPSecurity tcp_security;
+} BDNVMEDiscoveryLogEntry;
+
 
 void bd_nvme_controller_info_free (BDNVMEControllerInfo *info);
 BDNVMEControllerInfo * bd_nvme_controller_info_copy (BDNVMEControllerInfo *info);
@@ -501,6 +560,8 @@ BDNVMESelfTestLog * bd_nvme_self_test_log_copy (BDNVMESelfTestLog *log);
 void bd_nvme_sanitize_log_free (BDNVMESanitizeLog *log);
 BDNVMESanitizeLog * bd_nvme_sanitize_log_copy (BDNVMESanitizeLog *log);
 
+void bd_nvme_discovery_log_entry_free (BDNVMEDiscoveryLogEntry *entry);
+BDNVMEDiscoveryLogEntry * bd_nvme_discovery_log_entry_copy (BDNVMEDiscoveryLogEntry *entry);
 
 /*
  * If using the plugin as a standalone library, the following functions should
@@ -540,6 +601,33 @@ gboolean               bd_nvme_sanitize              (const gchar               
                                                       guint32                       overwrite_pattern,
                                                       gboolean                      overwrite_invert_pattern,
                                                       GError                      **error);
+
+
+gboolean               bd_nvme_connect               (const gchar       *subsysnqn,
+                                                      const gchar       *transport,
+                                                      const gchar       *transport_addr,
+                                                      const gchar       *transport_svcid,
+                                                      const gchar       *host_traddr,
+                                                      const gchar       *host_iface,
+                                                      const gchar       *host_nqn,
+                                                      const gchar       *host_id,
+                                                      const BDExtraArg **extra,
+                                                      GError           **error);
+gboolean               bd_nvme_disconnect            (const gchar       *subsysnqn,
+                                                      GError           **error);
+gboolean               bd_nvme_disconnect_by_path    (const gchar       *path,
+                                                      GError           **error);
+BDNVMEDiscoveryLogEntry ** bd_nvme_discover          (const gchar       *discovery_ctrl,
+                                                      gboolean           persistent,
+                                                      const gchar       *transport,
+                                                      const gchar       *transport_addr,
+                                                      const gchar       *transport_svcid,
+                                                      const gchar       *host_traddr,
+                                                      const gchar       *host_iface,
+                                                      const gchar       *host_nqn,
+                                                      const gchar       *host_id,
+                                                      const BDExtraArg **extra,
+                                                      GError           **error);
 
 
 #endif  /* BD_NVME */

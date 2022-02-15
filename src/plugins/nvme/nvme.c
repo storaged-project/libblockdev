@@ -95,8 +95,7 @@ gboolean bd_nvme_is_tech_avail (BDNVMETech tech, G_GNUC_UNUSED guint64 mode, GEr
         case BD_NVME_TECH_NVME:
             return TRUE;
         case BD_NVME_TECH_FABRICS:
-            g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_TECH_UNAVAIL, "Not implemented");
-            return FALSE;
+            return TRUE;
         default:
             g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_TECH_UNAVAIL, "Unknown technology");
             return FALSE;
