@@ -144,7 +144,7 @@ void bd_nvdimm_close (void) {
  * bd_nvdimm_is_tech_avail:
  * @tech: the queried tech
  * @mode: a bit mask of queried modes of operation (#BDNVDIMMTechMode) for @tech
- * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ * @error: (out) (allow-none): place to store error (details about why the @tech-@mode combination is not available)
  *
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
@@ -169,7 +169,7 @@ gboolean bd_nvdimm_is_tech_avail (BDNVDIMMTech tech, guint64 mode, GError **erro
 /**
  * bd_nvdimm_namespace_get_mode_from_str:
  * @mode_str: string representation of mode
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: mode matching the @mode_str given or %BD_NVDIMM_NAMESPACE_MODE_UNKNOWN in case of no match
  *
@@ -198,7 +198,7 @@ BDNVDIMMNamespaceMode bd_nvdimm_namespace_get_mode_from_str (const gchar *mode_s
 /**
  * bd_nvdimm_namespace_get_mode_str:
  * @mode: mode to get string representation of
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: (transfer none): string representation of @mode or %NULL in case of error
  *
@@ -234,7 +234,7 @@ static struct ndctl_namespace* get_namespace_by_name (const gchar *namespace, st
 /**
  * bd_nvdimm_namespace_get_devname:
  * @device: name or path of a block device (e.g. "/dev/pmem0")
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: (transfer full): namespace device name (e.g. "namespaceX.Y") for @device
  *                           or %NULL if @device is not a NVDIMM namespace
@@ -298,7 +298,7 @@ gchar* bd_nvdimm_namespace_get_devname (const gchar *device, GError **error) {
  * bd_nvdimm_namespace_enable:
  * @namespace: name of the namespace to enable
  * @extra: (allow-none) (array zero-terminated=1): extra options (currently unused)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the @namespace was successfully enabled or not
  *
@@ -339,7 +339,7 @@ gboolean bd_nvdimm_namespace_enable (const gchar *namespace, const BDExtraArg **
  * bd_nvdimm_namespace_disable:
  * @namespace: name of the namespace to disable
  * @extra: (allow-none) (array zero-terminated=1): extra options (currently unused)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: whether the @namespace was successfully disabled or not
  *
@@ -500,7 +500,7 @@ static BDNVDIMMNamespaceInfo* get_nvdimm_namespace_info (struct ndctl_namespace 
  * bd_nvdimm_namespace_info:
  * @namespace: namespace to get information about
  * @extra: (allow-none) (array zero-terminated=1): extra options (currently unused)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: (transfer full): information about given namespace or %NULL if no such
  *                           namespace was found (@error may be set to indicate error)
@@ -539,7 +539,7 @@ BDNVDIMMNamespaceInfo* bd_nvdimm_namespace_info (const gchar *namespace, const B
  *                             %NULL may be specified to return namespaces from all regions
  * @idle: whether to list idle (not enabled) namespaces too
  * @extra: (allow-none) (array zero-terminated=1): extra options (currently unused)
- * @error: (out): place to store error (if any)
+ * @error: (out) (allow-none): place to store error (if any)
  *
  * Returns: (array zero-terminated=1): information about the namespaces on @bus and @region or
  *                                     %NULL if no namespaces were found (@error may be set to indicate error)
@@ -606,7 +606,7 @@ BDNVDIMMNamespaceInfo** bd_nvdimm_list_namespaces (const gchar *bus_name, const 
  * @namespace: name of the namespace to reconfigure
  * @mode: mode type to set
  * @force: whether to use force to reconfigure an active namespace
- * @error: (out): place to store error if any
+ * @error: (out) (allow-none): place to store error if any
  * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
  *                                                 passed to the 'ndctl' utility)
  *
@@ -646,7 +646,7 @@ static guint64 io_sector_sizes[] = { 0 };
 /**
  * bd_nvdimm_namespace_get_supported_sector_sizes:
  * @mode: namespace mode
- * @error: (out): place to store error if any
+ * @error: (out) (allow-none): place to store error if any
  *
  * Returns: (transfer none) (array zero-terminated=1): list of supported sector sizes for @mode
  *
