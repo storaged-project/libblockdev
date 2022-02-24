@@ -876,7 +876,7 @@ static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 k
             bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
-        bd_utils_report_progress (progress_id, ((data_size != 0) && key_file) ? 70 : 100, "Added key");
+        bd_utils_report_progress (progress_id, key_file ? 70 : 100, "Added key");
     }
 
     if (key_file) {
