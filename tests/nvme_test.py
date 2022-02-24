@@ -3,7 +3,7 @@ import os
 import re
 import overrides_hack
 
-from utils import create_sparse_tempfile, create_nvmet_device, delete_nvmet_device, setup_nvme_target, teardown_nvme_target, find_nvme_ctrl_devs_for_subnqn, find_nvme_ns_devs_for_subnqn, fake_utils, fake_path, run_command, run, TestTags, tag_test
+from utils import create_sparse_tempfile, create_nvmet_device, delete_nvmet_device, setup_nvme_target, teardown_nvme_target, find_nvme_ctrl_devs_for_subnqn, find_nvme_ns_devs_for_subnqn, run_command, TestTags, tag_test
 from gi.repository import BlockDev, GLib
 from distutils.spawn import find_executable
 

@@ -5,7 +5,7 @@ from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, 
 import overrides_hack
 
 from gi.repository import BlockDev, GLib
-from bytesize.bytesize import Size, ROUND_UP, B
+from bytesize.bytesize import Size, ROUND_UP
 from packaging.version import Version
 
 
@@ -285,7 +285,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps2.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
-        self.assertTrue(abs(ps2.start - (ps.start + ps.size + 1)) < ps.start)
+        self.assertLess(abs(ps2.start - (ps.start + ps.size + 1)), ps.start)
         self.assertEqual(ps2.size, 10 * 1024**2)
         self.assertEqual(ps2.flags, 0)  # no flags (combination of bit flags)
 
@@ -296,7 +296,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps3.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
-        self.assertTrue(abs(ps3.start - (ps2.start + ps2.size + 1)) < ps.start)
+        self.assertLess(abs(ps3.start - (ps2.start + ps2.size + 1)), ps.start)
         self.assertEqual(ps3.size, 10 * 1024**2)
         self.assertEqual(ps3.flags, 0)  # no flags (combination of bit flags)
 
@@ -307,7 +307,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps4.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
-        self.assertTrue(abs(ps4.start - (ps3.start + ps3.size + 1)) < ps.start)
+        self.assertLess(abs(ps4.start - (ps3.start + ps3.size + 1)), ps.start)
         self.assertEqual(ps4.size, 10 * 1024**2)
         self.assertEqual(ps4.flags, 0)  # no flags (combination of bit flags)
 
@@ -343,7 +343,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps2.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
-        self.assertTrue(abs(ps2.start - (ps.start + ps.size + 1)) < ps.start)
+        self.assertLess(abs(ps2.start - (ps.start + ps.size + 1)), ps.start)
         self.assertEqual(ps2.size, 10 * 1024**2)
         self.assertEqual(ps2.flags, 0)  # no flags (combination of bit flags)
 
@@ -354,7 +354,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps3.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
-        self.assertTrue(abs(ps3.start - (ps2.start + ps2.size + 1)) < ps.start)
+        self.assertLess(abs(ps3.start - (ps2.start + ps2.size + 1)), ps.start)
         self.assertEqual(ps3.size, 10 * 1024**2)
         self.assertEqual(ps3.flags, 0)  # no flags (combination of bit flags)
 
@@ -365,7 +365,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps4.type, BlockDev.PartType.EXTENDED)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
-        self.assertTrue(abs(ps4.start - (ps3.start + ps3.size + 1)) < ps.start)
+        self.assertLess(abs(ps4.start - (ps3.start + ps3.size + 1)), ps.start)
         self.assertEqual(ps4.size, 10 * 1024**2)
         self.assertEqual(ps4.flags, 0)  # no flags (combination of bit flags)
 
@@ -402,7 +402,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps2.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
-        self.assertTrue(abs(ps2.start - (ps.start + ps.size + 1)) < ps.start)
+        self.assertLess(abs(ps2.start - (ps.start + ps.size + 1)), ps.start)
         self.assertEqual(ps2.size, 10 * 1024**2)
         self.assertEqual(ps2.flags, 0)  # no flags (combination of bit flags)
 
@@ -413,7 +413,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps3.type, BlockDev.PartType.EXTENDED)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
-        self.assertTrue(abs(ps3.start - (ps2.start + ps2.size + 1)) < ps.start)
+        self.assertLess(abs(ps3.start - (ps2.start + ps2.size + 1)), ps.start)
         self.assertEqual(ps3.size, 30 * 1024**2)
         self.assertEqual(ps3.flags, 0)  # no flags (combination of bit flags)
 
@@ -427,7 +427,7 @@ class PartCreatePartFullCase(PartTestCase):
         # the start has to be somewhere in the extended partition p3 which
         # should need at most 2 MiB extra space
         self.assertTrue(ps3.start < ps5.start < ps3.start + ps3.size)
-        self.assertTrue(abs(ps5.size - 10 * 1024**2) < 2 * 1024**2)
+        self.assertLess(abs(ps5.size - 10 * 1024**2), 2 * 1024**2)
         self.assertEqual(ps5.flags, 0)  # no flags (combination of bit flags)
 
         ps6 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps5.start + ps5.size + 1,
@@ -461,7 +461,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps4.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
-        self.assertTrue(abs(ps4.start - (ps3.start + ps3.size + 1)) < ps.start)
+        self.assertLess(abs(ps4.start - (ps3.start + ps3.size + 1)), ps.start)
         self.assertEqual(ps4.size, 10 * 1024**2)
         self.assertEqual(ps4.flags, 0)  # no flags (combination of bit flags)
 
@@ -494,7 +494,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps2.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
-        self.assertTrue(abs(ps2.start - (ps.start + ps.size + 1)) < ps.start)
+        self.assertLess(abs(ps2.start - (ps.start + ps.size + 1)), ps.start)
         self.assertEqual(ps2.size, 10 * 1024**2)
         self.assertEqual(ps2.flags, 0)  # no flags (combination of bit flags)
 
@@ -505,7 +505,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps3.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
-        self.assertTrue(abs(ps3.start - (ps2.start + ps2.size + 1)) < ps.start)
+        self.assertLess(abs(ps3.start - (ps2.start + ps2.size + 1)), ps.start)
         self.assertEqual(ps3.size, 10 * 1024**2)
         self.assertEqual(ps3.flags, 0)  # no flags (combination of bit flags)
 
@@ -543,7 +543,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps2.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
-        self.assertTrue(abs(ps2.start - (ps.start + ps.size + 1)) < ps.start)
+        self.assertLess(abs(ps2.start - (ps.start + ps.size + 1)), ps.start)
         self.assertEqual(ps2.size, 10 * 1024**2)
         self.assertEqual(ps2.flags, 0)  # no flags (combination of bit flags)
 
@@ -554,7 +554,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps3.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
-        self.assertTrue(abs(ps3.start - (ps2.start + ps2.size + 1)) < ps.start)
+        self.assertLess(abs(ps3.start - (ps2.start + ps2.size + 1)), ps.start)
         self.assertEqual(ps3.size, 10 * 1024**2)
         self.assertEqual(ps3.flags, 0)  # no flags (combination of bit flags)
 
@@ -565,7 +565,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertTrue(ps4)
         self.assertEqual(ps4.path, self.loop_dev + "4")
         self.assertEqual(ps4.type, BlockDev.PartType.EXTENDED)
-        self.assertTrue(abs(ps4.start - (ps3.start + ps3.size + 1)) < ps.start)
+        self.assertLess(abs(ps4.start - (ps3.start + ps3.size + 1)), ps.start)
         self.assertGreater(ps4.size, 65 * 1024**2)
 
         self.assertTrue(ps5)
@@ -631,7 +631,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps2.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
-        self.assertTrue(abs(ps2.start - (ps.start + ps.size + 1)) < ps.start)
+        self.assertLess(abs(ps2.start - (ps.start + ps.size + 1)), ps.start)
         self.assertEqual(ps2.size, 10 * 1024**2)
         self.assertEqual(ps2.flags, 0)  # no flags (combination of bit flags)
 
@@ -642,7 +642,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps3.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
-        self.assertTrue(abs(ps3.start - (ps2.start + ps2.size + 1)) < ps.start)
+        self.assertLess(abs(ps3.start - (ps2.start + ps2.size + 1)), ps.start)
         self.assertEqual(ps3.size, 10 * 1024**2)
         self.assertEqual(ps3.flags, 0)  # no flags (combination of bit flags)
 
@@ -652,7 +652,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertTrue(ps4)
         self.assertEqual(ps4.path, self.loop_dev + "4")
         self.assertEqual(ps4.type, BlockDev.PartType.NORMAL)
-        self.assertTrue(abs(ps4.start - (ps3.start + ps3.size + 1)) < ps.start)
+        self.assertLess(abs(ps4.start - (ps3.start + ps3.size + 1)), ps.start)
         self.assertEqual(ps4.size, 10 * 1024**2)
 
         # we should get just next primary partition (GPT)
@@ -661,7 +661,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertTrue(ps5)
         self.assertEqual(ps5.path, self.loop_dev + "5")
         self.assertEqual(ps5.type, BlockDev.PartType.NORMAL)
-        self.assertTrue(abs(ps5.start - (ps4.start + ps4.size + 1)) < ps.start)
+        self.assertLess(abs(ps5.start - (ps4.start + ps4.size + 1)), ps.start)
         self.assertEqual(ps5.size, 10 * 1024**2)
 
         # we should get just next primary partition (GPT)
@@ -670,7 +670,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertTrue(ps6)
         self.assertEqual(ps6.path, self.loop_dev + "6")
         self.assertEqual(ps6.type, BlockDev.PartType.NORMAL)
-        self.assertTrue(abs(ps6.start - (ps5.start + ps5.size + 1)) < ps.start)
+        self.assertLess(abs(ps6.start - (ps5.start + ps5.size + 1)), ps.start)
         self.assertEqual(ps6.size, 10 * 1024**2)
 
 class PartGetDiskPartsCase(PartTestCase):
@@ -858,7 +858,7 @@ class PartGetPartByPos(PartTestCase):
         self.assertEqual(ps2.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
-        self.assertTrue(abs(ps2.start - (ps.start + ps.size + 1)) < ps.start)
+        self.assertLess(abs(ps2.start - (ps.start + ps.size + 1)), ps.start)
         self.assertEqual(ps2.size, 10 * 1024**2)
         self.assertEqual(ps2.flags, 0)  # no flags (combination of bit flags)
 
@@ -869,7 +869,7 @@ class PartGetPartByPos(PartTestCase):
         self.assertEqual(ps3.type, BlockDev.PartType.EXTENDED)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
-        self.assertTrue(abs(ps3.start - (ps2.start + ps2.size + 1)) < ps.start)
+        self.assertLess(abs(ps3.start - (ps2.start + ps2.size + 1)), ps.start)
         self.assertEqual(ps3.size, 35 * 1024**2)
         self.assertEqual(ps3.flags, 0)  # no flags (combination of bit flags)
 
@@ -883,7 +883,7 @@ class PartGetPartByPos(PartTestCase):
         # the start has to be somewhere in the extended partition p3 which
         # should need at most 2 MiB extra space
         self.assertTrue(ps3.start < ps5.start < ps3.start + ps3.size)
-        self.assertTrue(abs(ps5.size - 10 * 1024**2) < 2 * 1024**2)
+        self.assertLess(abs(ps5.size - 10 * 1024**2), 2 * 1024**2)
         self.assertEqual(ps5.flags, 0)  # no flags (combination of bit flags)
 
         ps6 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps5.start + ps5.size + 1,
@@ -917,7 +917,7 @@ class PartGetPartByPos(PartTestCase):
         self.assertEqual(ps4.type, BlockDev.PartType.NORMAL)
         # the start has to be at most as far from the end of the previous part
         # as is the start of the first part from the start of the disk
-        self.assertTrue(abs(ps4.start - (ps3.start + ps3.size + 1)) < ps.start)
+        self.assertLess(abs(ps4.start - (ps3.start + ps3.size + 1)), ps.start)
         self.assertEqual(ps4.size, 10 * 1024**2)
         self.assertEqual(ps4.flags, 0)  # no flags (combination of bit flags)
 
@@ -1326,17 +1326,20 @@ class PartSetDiskFlagCase(PartTestCase):
         self.assertEqual(ps.flags, 0)
 
         succ = BlockDev.part_set_disk_flag (self.loop_dev, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT, True)
+        self.assertTrue(succ)
         ps = BlockDev.part_get_disk_spec (self.loop_dev)
         self.assertTrue(ps)
         self.assertEqual(ps.flags, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT)
 
         # try to set the flag again, just to make sure it doesn't change
         succ = BlockDev.part_set_disk_flag (self.loop_dev, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT, True)
+        self.assertTrue(succ)
         ps = BlockDev.part_get_disk_spec (self.loop_dev)
         self.assertTrue(ps)
         self.assertEqual(ps.flags, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT)
 
         succ = BlockDev.part_set_disk_flag (self.loop_dev, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT, False)
+        self.assertTrue(succ)
         ps = BlockDev.part_get_disk_spec (self.loop_dev)
         self.assertTrue(ps)
         self.assertEqual(ps.flags, 0)

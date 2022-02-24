@@ -3,7 +3,6 @@ import overrides_hack
 
 from .fs_test import FSTestCase, mounted
 
-import overrides_hack
 import utils
 from utils import TestTags, tag_test
 

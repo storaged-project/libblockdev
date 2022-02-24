@@ -428,7 +428,7 @@ class MDTestExamineDetail(MDTestCase):
         self.assertEqual(ex_data.num_devices, 2)
         self.assertTrue(ex_data.name.endswith("bd_test_md"))
         self.assertEqual(len(ex_data.metadata), 3)
-        self.assertTrue(ex_data.size < (10 * 1024**2))
+        self.assertLess(ex_data.size, (10 * 1024**2))
         self.assertTrue(re.match(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', ex_data.uuid))
 
         de_data = BlockDev.md_detail("bd_test_md")
@@ -443,8 +443,8 @@ class MDTestExamineDetail(MDTestCase):
         self.assertEqual(de_data.raid_devices, 2)
         self.assertEqual(de_data.total_devices, 3)
         self.assertEqual(de_data.spare_devices, 1)
-        self.assertTrue(de_data.array_size < (10 * 1024**2))
-        self.assertTrue(de_data.use_dev_size < (10 * 1024**2))
+        self.assertLess(de_data.array_size, (10 * 1024**2))
+        self.assertLess(de_data.use_dev_size, (10 * 1024**2))
         if "JENKINS_HOME" not in os.environ:
             # XXX: for some reason the RAID is in "active sync" when tests run in
             # Jenkins
