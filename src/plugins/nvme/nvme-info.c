@@ -350,14 +350,10 @@ static guint64 int128_to_guint64 (__u8 *data)
 gint _open_dev (const gchar *device, GError **error) {
     int fd;
 
-    /* TODO: nvme-cli is checking for file type, if it's a block or char device.
-     *       See also nvme_open().
-     */
     fd = open (device, O_RDONLY);
     if (fd < 0) {
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "Failed to open device '%s': %s",
-                     device, strerror_l (errno, _C_LOCALE));
+        _nvme_status_to_error (-1, FALSE, error);
+        g_prefix_error (error, "Failed to open device '%s': ", device);
         return -1;
     }
 

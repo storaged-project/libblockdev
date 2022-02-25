@@ -55,7 +55,14 @@ void _nvme_status_to_error (gint status, gboolean fabrics, GError **error)
         g_clear_error (error);
     } else if (status < 0) {
         /* generic errno errors */
-        g_set_error_literal (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
+        switch (errno) {
+            case EWOULDBLOCK:
+                code = BD_NVME_ERROR_BUSY;
+                break;
+            default:
+                code = BD_NVME_ERROR_FAILED;
+        }
+        g_set_error_literal (error, BD_NVME_ERROR, code,
                              strerror_l (errno, _C_LOCALE));
     } else {
         /* NVMe status codes */
