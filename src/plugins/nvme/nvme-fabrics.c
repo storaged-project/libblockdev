@@ -588,7 +588,7 @@ BDNVMEDiscoveryLogEntry ** bd_nvme_discover (const gchar *discovery_ctrl, gboole
         return NULL;
     }
     if (ret > 0) {
-        _nvme_status_to_error (ret, FALSE, error);
+        _nvme_status_to_error (ret, TRUE, error);
         g_prefix_error (error, "NVMe Get Log Page - Discovery Log Page command error: ");
         if (!persistent)
             nvme_disconnect_ctrl (ctrl);
