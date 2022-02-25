@@ -94,15 +94,7 @@ gboolean bd_nvme_device_self_test (const gchar *device, BDNVMESelfTestAction act
     if (ret < 0 && errno == ENOTTY)
         /* not a block device, assuming controller character device */
         args.nsid = 0xffffffff;
-    else if (ret < 0) {
-        /* generic errno errors */
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "Error getting Namespace Identifier (NSID): %s", strerror_l (-ret, _C_LOCALE));
-        close (args.fd);
-        return FALSE;
-    }
-    if (ret > 0) {
-        /* NVMe status codes */
+    else if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
         g_prefix_error (error, "Error getting Namespace Identifier (NSID): ");
         close (args.fd);
@@ -110,20 +102,13 @@ gboolean bd_nvme_device_self_test (const gchar *device, BDNVMESelfTestAction act
     }
 
     ret = nvme_dev_self_test (&args);
-    if (ret < 0) {
-        /* generic errno errors */
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "NVMe Device Self-test command error: %s", strerror_l (errno, _C_LOCALE));
+    if (ret != 0) {
+        _nvme_status_to_error (ret, FALSE, error);
+        g_prefix_error (error, "NVMe Device Self-test command error: ");
         close (args.fd);
         return FALSE;
     }
     close (args.fd);
-    if (ret > 0) {
-        /* NVMe status codes */
-        _nvme_status_to_error (ret, FALSE, error);
-        g_prefix_error (error, "NVMe Device Self-test command error: ");
-        return FALSE;
-    }
 
     return TRUE;
 }
@@ -138,14 +123,7 @@ static __u8 find_lbaf_for_size (int fd, __u32 nsid, guint16 lba_data_size, GErro
 
     /* TODO: find first attached namespace instead of hardcoding NSID = 1 */
     ret = nvme_identify_ns (fd, nsid == 0xffffffff ? 1 : nsid, &ns_info);
-    if (ret < 0) {
-        /* generic errno errors */
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "NVMe Identify Namespace command error: %s", strerror_l (errno, _C_LOCALE));
-        return 0xff;
-    }
-    if (ret > 0) {
-        /* NVMe status codes */
+    if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
         g_prefix_error (error, "NVMe Identify Namespace command error: ");
         return 0xff;
@@ -220,15 +198,7 @@ gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, BDNVMEForma
         /* not a block device, assuming controller character device */
         args.nsid = 0xffffffff;
         ctrl_device = TRUE;
-    } else if (ret < 0) {
-        /* generic errno errors */
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "Error getting Namespace Identifier (NSID): %s", strerror_l (-ret, _C_LOCALE));
-        close (args.fd);
-        return FALSE;
-    }
-    if (ret > 0) {
-        /* NVMe status codes */
+    } else if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
         g_prefix_error (error, "Error getting Namespace Identifier (NSID): ");
         close (args.fd);
@@ -238,15 +208,7 @@ gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, BDNVMEForma
     /* check the FNA controller bit when formatting a single namespace */
     if (! ctrl_device) {
         ret = nvme_identify_ctrl (args.fd, &ctrl_id);
-        if (ret < 0) {
-            /* generic errno errors */
-            g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                         "NVMe Identify Controller command error: %s", strerror_l (-ret, _C_LOCALE));
-            close (args.fd);
-            return FALSE;
-        }
-        if (ret > 0) {
-            /* NVMe status codes */
+        if (ret != 0) {
             _nvme_status_to_error (ret, FALSE, error);
             g_prefix_error (error, "NVMe Identify Controller command error: ");
             close (args.fd);
@@ -287,15 +249,7 @@ gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, BDNVMEForma
     }
 
     ret = nvme_format_nvm (&args);
-    if (ret < 0) {
-        /* generic errno errors */
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "Format NVM command error: %s", strerror_l (errno, _C_LOCALE));
-        close (args.fd);
-        return FALSE;
-    }
-    if (ret > 0) {
-        /* NVMe status codes */
+    if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
         g_prefix_error (error, "Format NVM command error: ");
         close (args.fd);
@@ -421,15 +375,7 @@ gboolean bd_nvme_sanitize (const gchar *device, BDNVMESanitizeAction action, gbo
         return FALSE;
 
     ret = nvme_sanitize_nvm (&args);
-    if (ret < 0) {
-        /* generic errno errors */
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "Sanitize command error: %s", strerror_l (errno, _C_LOCALE));
-        close (args.fd);
-        return FALSE;
-    }
-    if (ret > 0) {
-        /* NVMe status codes */
+    if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
         g_prefix_error (error, "Sanitize command error: ");
         close (args.fd);

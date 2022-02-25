@@ -51,24 +51,33 @@ void _nvme_status_to_error (gint status, gboolean fabrics, GError **error)
     if (error == NULL)
         return;
 
-    switch (nvme_status_code_type (status)) {
-        case NVME_SCT_GENERIC:
-            code = BD_NVME_ERROR_SC_GENERIC;
-            break;
-        case NVME_SCT_CMD_SPECIFIC:
-            code = BD_NVME_ERROR_SC_CMD_SPECIFIC;
-            break;
-        case NVME_SCT_MEDIA:
-            code = BD_NVME_ERROR_SC_MEDIA;
-            break;
-        case NVME_SCT_PATH:
-            code = BD_NVME_ERROR_SC_PATH;
-            break;
-        case NVME_SCT_VS:
-            code = BD_NVME_ERROR_SC_VENDOR_SPECIFIC;
-            break;
-        default:
-            code = BD_NVME_ERROR_SC_GENERIC;
+    if (status == 0) {
+        g_clear_error (error);
+    } else if (status < 0) {
+        /* generic errno errors */
+        g_set_error_literal (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
+                             strerror_l (errno, _C_LOCALE));
+    } else {
+        /* NVMe status codes */
+        switch (nvme_status_code_type (status)) {
+            case NVME_SCT_GENERIC:
+                code = BD_NVME_ERROR_SC_GENERIC;
+                break;
+            case NVME_SCT_CMD_SPECIFIC:
+                code = BD_NVME_ERROR_SC_CMD_SPECIFIC;
+                break;
+            case NVME_SCT_MEDIA:
+                code = BD_NVME_ERROR_SC_MEDIA;
+                break;
+            case NVME_SCT_PATH:
+                code = BD_NVME_ERROR_SC_PATH;
+                break;
+            case NVME_SCT_VS:
+                code = BD_NVME_ERROR_SC_VENDOR_SPECIFIC;
+                break;
+            default:
+                code = BD_NVME_ERROR_SC_GENERIC;
+        }
+        g_set_error_literal (error, BD_NVME_ERROR, code, nvme_status_to_string (status, fabrics));
     }
-    g_set_error_literal (error, BD_NVME_ERROR, code, nvme_status_to_string (status, fabrics));
 }
