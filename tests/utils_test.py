@@ -313,10 +313,10 @@ class UtilsExecLoggingTest(UtilsTestCase):
 
         status, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", "echo -e \"%s\\0%s\\n%s\"" % (TEST_DATA[0], TEST_DATA[1], TEST_DATA[2])])
         self.assertTrue(status)
-        self.assertTrue(TEST_DATA[0] in out)
-        self.assertTrue(TEST_DATA[1] in out)
-        self.assertTrue(TEST_DATA[2] in out)
-        self.assertFalse("kuku!" in out)
+        self.assertIn(TEST_DATA[0], out)
+        self.assertIn(TEST_DATA[1], out)
+        self.assertIn(TEST_DATA[2], out)
+        self.assertNotIn("kuku!", out)
 
         # ten matches
         cnt = 10

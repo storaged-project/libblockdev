@@ -1294,8 +1294,8 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_CREATE
  */
 gboolean bd_lvm_vgcreate (const gchar *name, const gchar **pv_list, guint64 pe_size, const BDExtraArg **extra, GError **error) {
-    guint8 i = 0;
-    guint8 pv_list_len = pv_list ? g_strv_length ((gchar **) pv_list) : 0;
+    guint i = 0;
+    guint pv_list_len = pv_list ? g_strv_length ((gchar **) pv_list) : 0;
     const gchar **argv = g_new0 (const gchar*, pv_list_len + 5);
     pe_size = RESOLVE_PE_SIZE (pe_size);
     gboolean success = FALSE;

@@ -320,10 +320,10 @@ class BtrfsTestListDevices(BtrfsTestCase):
         self.assertEqual(devs[1].id, 2)
         self.assertEqual(devs[0].path, self.loop_dev)
         self.assertEqual(devs[1].path, self.loop_dev2)
-        self.assertTrue(devs[0].size >= 0)
-        self.assertTrue(devs[1].size >= 0)
-        self.assertTrue(devs[0].used >= 0)
-        self.assertTrue(devs[1].used >= 0)
+        self.assertGreaterEqual(devs[0].size, 0)
+        self.assertGreaterEqual(devs[1].size, 0)
+        self.assertGreaterEqual(devs[0].used, 0)
+        self.assertGreaterEqual(devs[1].used, 0)
 
 class BtrfsTestListSubvolumes(BtrfsTestCase):
     @tag_test(TestTags.CORE)
@@ -362,7 +362,7 @@ class BtrfsTestFilesystemInfo(BtrfsTestCase):
         self.assertEqual(info.label, label)
         self.assertTrue(info.uuid)
         self.assertEqual(info.num_devices, 1)
-        self.assertTrue(info.used >= 0)
+        self.assertGreaterEqual(info.used, 0)
 
 class BtrfsTestFilesystemInfoNoLabel(BtrfsTestCase):
     def test_filesystem_info(self):
@@ -377,7 +377,7 @@ class BtrfsTestFilesystemInfoNoLabel(BtrfsTestCase):
         self.assertEqual(info.label, str())
         self.assertTrue(info.uuid)
         self.assertEqual(info.num_devices, 1)
-        self.assertTrue(info.used >= 0)
+        self.assertGreaterEqual(info.used, 0)
 
 class BtrfsTestMkfs(BtrfsTestCase):
     @tag_test(TestTags.CORE)

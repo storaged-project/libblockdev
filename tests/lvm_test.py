@@ -5,7 +5,6 @@ import math
 import overrides_hack
 import re
 import shutil
-import subprocess
 import time
 from contextlib import contextmanager
 from packaging.version import Version
@@ -250,6 +249,7 @@ class LvmNoDevTestCase(LVMTestCase):
 
         # set something sane and check it's really used
         succ = BlockDev.lvm_set_global_config("backup {backup=0 archive=0}")
+        self.assertTrue(succ)
         BlockDev.lvm_lvs(None)
         self.assertIn("--config=backup {backup=0 archive=0}", self._log)
 
@@ -288,6 +288,7 @@ class LvmNoDevTestCase(LVMTestCase):
 
         # set something sane and check it's really used
         succ = BlockDev.lvm_set_devices_filter(["/dev/sdb", "/dev/sdc"])
+        self.assertTrue(succ)
         BlockDev.lvm_lvs(None)
         self.assertIn("--devices=/dev/sdb,/dev/sdc", self._log)
 
@@ -448,7 +449,7 @@ class LvmTestPVs(LvmPVonlyTestCase):
         self.assertTrue(succ)
 
         pvs = BlockDev.lvm_pvs()
-        self.assertTrue(len(pvs) > orig_len)
+        self.assertGreater(len(pvs), orig_len)
         self.assertTrue(any(info.pv_name == self.loop_dev for info in pvs))
 
         info = BlockDev.lvm_pvinfo(self.loop_dev)
@@ -605,7 +606,7 @@ class LvmTestVGinfo(LvmPVVGTestCase):
         self.assertEqual(info.name, "testVG")
         self.assertTrue(info.uuid)
         self.assertEqual(info.pv_count, 2)
-        self.assertTrue(info.size < 2 * 1024**3)
+        self.assertLess(info.size, 2 * 1024**3)
         self.assertEqual(info.free, info.size)
         self.assertEqual(info.extent_size, 4 * 1024**2)
 
@@ -623,7 +624,7 @@ class LvmTestVGs(LvmPVVGTestCase):
         self.assertTrue(succ)
 
         vgs = BlockDev.lvm_vgs()
-        self.assertTrue(len(vgs) > orig_len)
+        self.assertGreater(len(vgs), orig_len)
         self.assertTrue(any(info.name == "testVG" for info in vgs))
 
         info = BlockDev.lvm_vginfo("testVG")
@@ -1078,7 +1079,7 @@ class LvmTestLVs(LvmPVVGLVTestCase):
         self.assertTrue(succ)
 
         lvs = BlockDev.lvm_lvs(None)
-        self.assertTrue(len(lvs) > orig_len)
+        self.assertGreater(len(lvs), orig_len)
         self.assertTrue(any(info.lv_name == "testLV" and info.vg_name == "testVG" for info in lvs))
 
         info = BlockDev.lvm_lvinfo("testVG", "testLV")

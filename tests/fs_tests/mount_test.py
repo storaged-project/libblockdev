@@ -55,7 +55,7 @@ class MountTestCase(FSTestCase):
         self.assertTrue(os.path.ismount(tmp))
 
         succ = BlockDev.fs_is_mountpoint(tmp)
-        self.assertTrue(tmp)
+        self.assertTrue(succ)
 
         mnt = BlockDev.fs_get_mountpoint(self.loop_dev)
         self.assertEqual(mnt, tmp)
