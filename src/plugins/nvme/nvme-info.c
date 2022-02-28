@@ -350,14 +350,10 @@ static guint64 int128_to_guint64 (__u8 *data)
 gint _open_dev (const gchar *device, GError **error) {
     int fd;
 
-    /* TODO: nvme-cli is checking for file type, if it's a block or char device.
-     *       See also nvme_open().
-     */
     fd = open (device, O_RDONLY);
     if (fd < 0) {
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "Failed to open device '%s': %s",
-                     device, strerror_l (errno, _C_LOCALE));
+        _nvme_status_to_error (-1, FALSE, error);
+        g_prefix_error (error, "Failed to open device '%s': ", device);
         return -1;
     }
 
@@ -405,20 +401,13 @@ BDNVMEControllerInfo * bd_nvme_get_controller_info (const gchar *device, GError 
 
     /* send the NVME_IDENTIFY_CNS_NS + NVME_IDENTIFY_CNS_CTRL ioctl */
     ret = nvme_identify_ctrl (fd, &ctrl_id);
-    if (ret < 0) {
-        /* generic errno errors */
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "NVMe Identify Controller command error: %s", strerror_l (errno, _C_LOCALE));
+    if (ret != 0) {
+        _nvme_status_to_error (ret, FALSE, error);
+        g_prefix_error (error, "NVMe Identify Controller command error: ");
         close (fd);
         return NULL;
     }
     close (fd);
-    if (ret > 0) {
-        /* NVMe status codes */
-        _nvme_status_to_error (ret, FALSE, error);
-        g_prefix_error (error, "NVMe Identify Controller command error: ");
-        return NULL;
-    }
 
     info = g_new0 (BDNVMEControllerInfo, 1);
     if ((ctrl_id.cmic & NVME_CTRL_CMIC_MULTI_PORT) == NVME_CTRL_CMIC_MULTI_PORT)
@@ -536,15 +525,7 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
 
     /* get Namespace Identifier (NSID) for the @device (NVME_IOCTL_ID) */
     ret = nvme_get_nsid (fd, &nsid);
-    if (ret < 0) {
-        /* generic errno errors */
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "Error getting Namespace Identifier (NSID): %s", strerror_l (errno, _C_LOCALE));
-        close (fd);
-        return NULL;
-    }
-    if (ret > 0) {
-        /* NVMe status codes */
+    if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
         g_prefix_error (error, "Error getting Namespace Identifier (NSID): ");
         close (fd);
@@ -554,20 +535,13 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
     /* send the NVME_IDENTIFY_CNS_NS ioctl */
     ret_desc = nvme_identify_ns_descs (fd, nsid, (struct nvme_ns_id_desc *) &desc);
     ret = nvme_identify_ns (fd, nsid, &ns_info);
-    if (ret < 0) {
-        /* generic errno errors */
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "NVMe Identify Namespace command error: %s", strerror_l (errno, _C_LOCALE));
+    if (ret != 0) {
+        _nvme_status_to_error (ret, FALSE, error);
+        g_prefix_error (error, "NVMe Identify Namespace command error: ");
         close (fd);
         return NULL;
     }
     close (fd);
-    if (ret > 0) {
-        /* NVMe status codes */
-        _nvme_status_to_error (ret, FALSE, error);
-        g_prefix_error (error, "NVMe Identify Namespace command error: ");
-        return NULL;
-    }
 
     info = g_new0 (BDNVMENamespaceInfo, 1);
     info->nsize = GUINT64_FROM_LE (ns_info.nsze);
@@ -664,15 +638,7 @@ BDNVMESmartLog * bd_nvme_get_smart_log (const gchar *device, GError **error) {
 
     /* send the NVME_IDENTIFY_CNS_NS + NVME_IDENTIFY_CNS_CTRL ioctl */
     ret_identify = nvme_identify_ctrl (fd, &ctrl_id);
-    if (ret_identify < 0) {
-        /* generic errno errors */
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "NVMe Identify Controller command error: %s", strerror_l (errno, _C_LOCALE));
-        close (fd);
-        return NULL;
-    }
-    if (ret_identify > 0) {
-        /* NVMe status codes */
+    if (ret_identify != 0) {
         _nvme_status_to_error (ret_identify, FALSE, error);
         g_prefix_error (error, "NVMe Identify Controller command error: ");
         close (fd);
@@ -681,20 +647,13 @@ BDNVMESmartLog * bd_nvme_get_smart_log (const gchar *device, GError **error) {
 
     /* send the NVME_LOG_LID_SMART ioctl */
     ret = nvme_get_log_smart (fd, NVME_NSID_ALL, FALSE /* rae */, &smart_log);
-    if (ret < 0) {
-        /* generic errno errors */
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "NVMe Get Log Page - SMART / Health Information Log command error: %s", strerror_l (errno, _C_LOCALE));
+    if (ret != 0) {
+        _nvme_status_to_error (ret, FALSE, error);
+        g_prefix_error (error, "NVMe Get Log Page - SMART / Health Information Log command error: ");
         close (fd);
         return NULL;
     }
     close (fd);
-    if (ret > 0) {
-        /* NVMe status codes */
-        _nvme_status_to_error (ret, FALSE, error);
-        g_prefix_error (error, "NVMe Get Log Page - SMART / Health Information Log command error: ");
-        return NULL;
-    }
 
     log = g_new0 (BDNVMESmartLog, 1);
     if ((smart_log.critical_warning & NVME_SMART_CRIT_SPARE) == NVME_SMART_CRIT_SPARE)
@@ -775,13 +734,7 @@ BDNVMEErrorLogEntry ** bd_nvme_get_error_log_entries (const gchar *device, GErro
 
     /* find out the maximum number of error log entries as reported by the controller */
     ret = nvme_identify_ctrl (fd, &ctrl_id);
-    if (ret < 0) {
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "NVMe Identify Controller command error: %s", strerror_l (errno, _C_LOCALE));
-        close (fd);
-        return NULL;
-    }
-    if (ret > 0) {
+    if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
         g_prefix_error (error, "NVMe Identify Controller command error: ");
         close (fd);
@@ -792,20 +745,14 @@ BDNVMEErrorLogEntry ** bd_nvme_get_error_log_entries (const gchar *device, GErro
     elpe = ctrl_id.elpe + 1;
     err_log = g_new0 (struct nvme_error_log_page, elpe);
     ret = nvme_get_log_error (fd, elpe, FALSE /* rae */, err_log);
-    if (ret < 0) {
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "NVMe Get Log Page - Error Information Log Entry command error: %s", strerror_l (errno, _C_LOCALE));
-        close (fd);
-        g_free (err_log);
-        return NULL;
-    }
-    close (fd);
-    if (ret > 0) {
+    if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
         g_prefix_error (error, "NVMe Get Log Page - Error Information Log Entry command error: ");
         g_free (err_log);
+        close (fd);
         return NULL;
     }
+    close (fd);
 
     /* parse the log */
     ptr_array = g_ptr_array_new ();
@@ -862,18 +809,13 @@ BDNVMESelfTestLog * bd_nvme_get_self_test_log (const gchar *device, GError **err
 
     /* send the NVME_LOG_LID_DEVICE_SELF_TEST ioctl */
     ret = nvme_get_log_device_self_test (fd, &self_test_log);
-    if (ret < 0) {
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "NVMe Get Log Page - Device Self-test Log command error: %s", strerror_l (errno, _C_LOCALE));
+    if (ret != 0) {
+        _nvme_status_to_error (ret, FALSE, error);
+        g_prefix_error (error, "NVMe Get Log Page - Device Self-test Log command error: ");
         close (fd);
         return NULL;
     }
     close (fd);
-    if (ret > 0) {
-        _nvme_status_to_error (ret, FALSE, error);
-        g_prefix_error (error, "NVMe Get Log Page - Device Self-test Log command error: ");
-        return NULL;
-    }
 
     log = g_new0 (BDNVMESelfTestLog, 1);
     switch (self_test_log.current_operation & NVME_ST_CURR_OP_MASK) {
@@ -1008,18 +950,13 @@ BDNVMESanitizeLog * bd_nvme_get_sanitize_log (const gchar *device, GError **erro
 
     /* send the NVME_LOG_LID_SANITIZE ioctl */
     ret = nvme_get_log_sanitize (fd, FALSE /* rae */, &sanitize_log);
-    if (ret < 0) {
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "NVMe Get Log Page - Sanitize Status Log command error: %s", strerror_l (errno, _C_LOCALE));
+    if (ret != 0) {
+        _nvme_status_to_error (ret, FALSE, error);
+        g_prefix_error (error, "NVMe Get Log Page - Sanitize Status Log command error: ");
         close (fd);
         return NULL;
     }
     close (fd);
-    if (ret > 0) {
-        _nvme_status_to_error (ret, FALSE, error);
-        g_prefix_error (error, "NVMe Get Log Page - Sanitize Status Log command error: ");
-        return NULL;
-    }
 
     sstat = GUINT16_FROM_LE (sanitize_log.sstat);
 

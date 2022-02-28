@@ -578,17 +578,8 @@ BDNVMEDiscoveryLogEntry ** bd_nvme_discover (const gchar *discovery_ctrl, gboole
 
     /* connected, perform actual discovery */
     ret = nvmf_get_discovery_log (ctrl, &log, MAX_DISC_RETRIES);
-    if (ret < 0) {
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "NVMe Get Log Page - Discovery Log Page command error: %s", strerror_l (errno, _C_LOCALE));
-        if (!persistent)
-            nvme_disconnect_ctrl (ctrl);
-        nvme_free_ctrl (ctrl);
-        nvme_free_tree (root);
-        return NULL;
-    }
-    if (ret > 0) {
-        _nvme_status_to_error (ret, FALSE, error);
+    if (ret != 0) {
+        _nvme_status_to_error (ret, TRUE, error);
         g_prefix_error (error, "NVMe Get Log Page - Discovery Log Page command error: ");
         if (!persistent)
             nvme_disconnect_ctrl (ctrl);
