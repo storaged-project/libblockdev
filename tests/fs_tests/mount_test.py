@@ -222,15 +222,15 @@ class MountTestCase(FSTestCase):
             BlockDev.fs_unmount(self.loop_dev, run_as_uid=uid, run_as_gid=gid)
         self.assertTrue(os.path.ismount(tmp))
 
-    def test_mount_ntfs(self):
-        """ Test basic mounting and unmounting with NTFS filesystem"""
-        # using NTFS because it uses a helper program (mount.ntfs) and libmount
+    def test_mount_nilfs(self):
+        """ Test basic mounting and unmounting with NILFS2 filesystem"""
+        # using NILFS2 because it uses a helper program (mount.nilfs2) and libmount
         # behaves differently because of that
 
-        if not self.ntfs_avail:
-            self.skipTest("skipping NTFS: not available")
+        if not self.nilfs2_avail:
+            self.skipTest("skipping NILFS mount test: not available")
 
-        succ = BlockDev.fs_ntfs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_nilfs2_mkfs(self.loop_dev, None)
         self.assertTrue(succ)
 
         tmp = tempfile.mkdtemp(prefix="libblockdev.", suffix="mount_test")
@@ -238,7 +238,7 @@ class MountTestCase(FSTestCase):
 
         self.addCleanup(utils.umount, self.loop_dev)
 
-        succ = BlockDev.fs_mount(self.loop_dev, tmp, "ntfs", None)
+        succ = BlockDev.fs_mount(self.loop_dev, tmp, "nilfs2", None)
         self.assertTrue(succ)
         self.assertTrue(os.path.ismount(tmp))
 
@@ -259,7 +259,7 @@ class MountTestCase(FSTestCase):
         self.assertFalse(os.path.ismount(tmp))
 
         # mount with some options
-        succ = BlockDev.fs_mount(self.loop_dev, tmp, "ntfs", "ro")
+        succ = BlockDev.fs_mount(self.loop_dev, tmp, "nilfs2", "ro")
         self.assertTrue(succ)
         self.assertTrue(os.path.ismount(tmp))
         _ret, out, _err = utils.run_command("grep %s /proc/mounts" % tmp)
