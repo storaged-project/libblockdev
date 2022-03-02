@@ -42,7 +42,7 @@
 #define MAX_DISC_RETRIES  10
 
 
-static void parse_extra_args (const BDExtraArg **extra, struct nvme_fabrics_config *cfg, const gchar **config_file, const gchar **hostkey, const gchar **ctrlkey) {
+static void parse_extra_args (const BDExtraArg **extra, struct nvme_fabrics_config *cfg, const gchar **config_file, const gchar **hostkey, const gchar **ctrlkey, const gchar **hostsymname) {
     const BDExtraArg **extra_i;
 
     if (!extra)
@@ -80,6 +80,9 @@ static void parse_extra_args (const BDExtraArg **extra, struct nvme_fabrics_conf
         else
         if (g_strcmp0 ((*extra_i)->opt, "dhchap_ctrl_key") == 0 && ctrlkey)
             *ctrlkey = (*extra_i)->val;
+        else
+        if (g_strcmp0 ((*extra_i)->opt, "hostsymname") == 0 && hostsymname)
+            *hostsymname = (*extra_i)->val;
         else
         if (g_strcmp0 ((*extra_i)->opt, "nr_io_queues") == 0)
             SAFE_INT_CONV (cfg->nr_io_queues)
@@ -175,6 +178,7 @@ static void parse_extra_args (const BDExtraArg **extra, struct nvme_fabrics_conf
  * - `"hdr_digest"`: Generates/verifies header digest (TCP). Boolean value.
  * - `"data_digest"`: Generates/verifies data digest (TCP). Boolean value.
  * - `"tls"`: Enable TLS encryption (TCP). Boolean value.
+ * - `"hostsymname"`: TP8010: NVMe host symbolic name.
  *
  * Boolean values can be expressed by "0"/"1", "on"/"off" or "True"/"False" case-insensitive
  * strings. Failed numerical or boolean string conversions will result in the option being ignored.
@@ -197,6 +201,7 @@ gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const 
     gchar *host_id_val;
     const gchar *hostkey = NULL;
     const gchar *ctrlkey = NULL;
+    const gchar *hostsymname = NULL;
     nvme_root_t root;
     nvme_host_t host;
     nvme_ctrl_t ctrl;
@@ -220,7 +225,7 @@ gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const 
 
     /* parse extra arguments */
     nvmf_default_config (&cfg);
-    parse_extra_args (extra, &cfg, &config_file, &hostkey, &ctrlkey);
+    parse_extra_args (extra, &cfg, &config_file, &hostkey, &ctrlkey, &hostsymname);
 
     host_nqn_val = g_strdup (host_nqn);
     if (host_nqn_val == NULL)
@@ -246,6 +251,8 @@ gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const 
     g_free (host_id_val);
     if (hostkey)
         nvme_host_set_dhchap_key (host, hostkey);
+    if (hostsymname)
+        nvme_host_set_hostsymname (host, hostsymname);
 
     ctrl = nvme_create_ctrl (root, subsysnqn, transport, transport_addr, host_traddr, host_iface, transport_svcid);
     if (ctrl == NULL) {
@@ -452,6 +459,7 @@ BDNVMEDiscoveryLogEntry * bd_nvme_discovery_log_entry_copy (BDNVMEDiscoveryLogEn
  * - `"hdr_digest"`: Generates/verifies header digest (TCP). Boolean value.
  * - `"data_digest"`: Generates/verifies data digest (TCP). Boolean value.
  * - `"tls"`: Enable TLS encryption (TCP). Boolean value.
+ * - `"hostsymname"`: TP8010: NVMe host symbolic name.
  *
  * Boolean values can be expressed by "0"/"1", "on"/"off" or "True"/"False" case-insensitive
  * strings. Failed numerical or boolean string conversions will result in the option being ignored.
@@ -474,6 +482,7 @@ BDNVMEDiscoveryLogEntry ** bd_nvme_discover (const gchar *discovery_ctrl, gboole
     gchar *host_nqn_val;
     gchar *host_id_val;
     const gchar *hostkey = NULL;
+    const gchar *hostsymname = NULL;
     nvme_root_t root;
     nvme_host_t host;
     nvme_ctrl_t ctrl = NULL;
@@ -501,7 +510,7 @@ BDNVMEDiscoveryLogEntry ** bd_nvme_discover (const gchar *discovery_ctrl, gboole
 
     /* parse extra arguments */
     nvmf_default_config (&cfg);
-    parse_extra_args (extra, &cfg, &config_file, &hostkey, NULL);
+    parse_extra_args (extra, &cfg, &config_file, &hostkey, NULL, &hostsymname);
 
     host_nqn_val = g_strdup (host_nqn);
     if (host_nqn_val == NULL)
@@ -527,6 +536,8 @@ BDNVMEDiscoveryLogEntry ** bd_nvme_discover (const gchar *discovery_ctrl, gboole
     g_free (host_id_val);
     if (hostkey)
         nvme_host_set_dhchap_key (host, hostkey);
+    if (hostsymname)
+        nvme_host_set_hostsymname (host, hostsymname);
 
     if (persistent && !cfg.keep_alive_tmo)
         cfg.keep_alive_tmo = 30;

@@ -180,7 +180,7 @@ class NVMeTestCase(NVMeTest):
         with self.assertRaisesRegexp(GLib.GError, r".*Failed to open device .*': No such file or directory"):
             BlockDev.nvme_get_self_test_log("/dev/nonexistent")
 
-        message = r"NVMe Get Log Page - Device Self-test Log command error: Invalid Field in Command: A reserved coded value or an unsupported value in a defined field"
+        message = r"NVMe Get Log Page - Device Self-test Log command error: Invalid Field in Command: A reserved coded value or an unsupported value in a defined field|NVMe Get Log Page - Device Self-test Log command error: unrecognized"
         with self.assertRaisesRegexp(GLib.GError, message):
             # Cannot retrieve self-test log on a nvme target loop devices
             BlockDev.nvme_get_self_test_log(self.nvme_dev)
@@ -199,7 +199,7 @@ class NVMeTestCase(NVMeTest):
         with self.assertRaisesRegexp(GLib.GError, message):
             BlockDev.nvme_device_self_test(self.nvme_ns_dev, BlockDev.NVMESelfTestAction.NOT_RUNNING)
 
-        message = r"NVMe Device Self-test command error: Invalid Command Opcode: A reserved coded value or an unsupported value in the command opcode field"
+        message = r"NVMe Device Self-test command error: Invalid Command Opcode: A reserved coded value or an unsupported value in the command opcode field|NVMe Device Self-test command error: Invalid Queue Identifier: The creation of the I/O Completion Queue failed due to an invalid queue identifier specified as part of the command"
         with self.assertRaisesRegexp(GLib.GError, message):
             BlockDev.nvme_device_self_test(self.nvme_dev, BlockDev.NVMESelfTestAction.SHORT)
         with self.assertRaisesRegexp(GLib.GError, message):
@@ -235,7 +235,7 @@ class NVMeTestCase(NVMeTest):
             BlockDev.nvme_format(self.nvme_dev, 123, BlockDev.NVMEFormatSecureErase.NONE)
 
         # format doesn't really work on the kernel loop target
-        message = r"Format NVM command error: Invalid Command Opcode: A reserved coded value or an unsupported value in the command opcode field"
+        message = r"Format NVM command error: Invalid Command Opcode: A reserved coded value or an unsupported value in the command opcode field|Format NVM command error: Invalid Queue Identifier: The creation of the I/O Completion Queue failed due to an invalid queue identifier specified as part of the command"
         with self.assertRaisesRegexp(GLib.GError, message):
             BlockDev.nvme_format(self.nvme_ns_dev, 0, BlockDev.NVMEFormatSecureErase.NONE)
         with self.assertRaisesRegexp(GLib.GError, message):
@@ -249,7 +249,7 @@ class NVMeTestCase(NVMeTest):
         with self.assertRaisesRegexp(GLib.GError, r".*Failed to open device .*': No such file or directory"):
             BlockDev.nvme_get_sanitize_log("/dev/nonexistent")
 
-        message = r"NVMe Get Log Page - Sanitize Status Log command error: Invalid Field in Command: A reserved coded value or an unsupported value in a defined field"
+        message = r"NVMe Get Log Page - Sanitize Status Log command error: Invalid Field in Command: A reserved coded value or an unsupported value in a defined field|NVMe Get Log Page - Sanitize Status Log command error: unrecognized"
         with self.assertRaisesRegexp(GLib.GError, message):
             # Cannot retrieve sanitize log on a nvme target loop devices
             BlockDev.nvme_get_sanitize_log(self.nvme_dev)
@@ -265,7 +265,7 @@ class NVMeTestCase(NVMeTest):
         with self.assertRaisesRegexp(GLib.GError, message):
             BlockDev.nvme_sanitize("/dev/nonexistent", BlockDev.NVMESanitizeAction.BLOCK_ERASE, False, 0, 0, False)
 
-        message = r"Sanitize command error: Invalid Command Opcode: A reserved coded value or an unsupported value in the command opcode field"
+        message = r"Sanitize command error: Invalid Command Opcode: A reserved coded value or an unsupported value in the command opcode field|Sanitize command error: Invalid Queue Identifier: The creation of the I/O Completion Queue failed due to an invalid queue identifier specified as part of the command"
         for i in [BlockDev.NVMESanitizeAction.BLOCK_ERASE, BlockDev.NVMESanitizeAction.CRYPTO_ERASE, BlockDev.NVMESanitizeAction.OVERWRITE, BlockDev.NVMESanitizeAction.EXIT_FAILURE]:
             with self.assertRaisesRegexp(GLib.GError, message):
                 BlockDev.nvme_sanitize(self.nvme_dev, i, False, 0, 0, False)

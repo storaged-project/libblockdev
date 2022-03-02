@@ -1317,6 +1317,7 @@ gboolean bd_nvme_sanitize (const gchar *device, BDNVMESanitizeAction action, gbo
  * - `"hdr_digest"`: Generates/verifies header digest (TCP). Boolean value.
  * - `"data_digest"`: Generates/verifies data digest (TCP). Boolean value.
  * - `"tls"`: Enable TLS encryption (TCP). Boolean value.
+ * - `"hostsymname"`: TP8010: NVMe host symbolic name.
  *
  * Boolean values can be expressed by "0"/"1", "on"/"off" or "True"/"False" case-insensitive
  * strings. Failed numerical or boolean string conversions will result in the option being ignored.
@@ -1415,6 +1416,7 @@ gboolean bd_nvme_disconnect_by_path (const gchar *path, GError **error);
  * - `"hdr_digest"`: Generates/verifies header digest (TCP). Boolean value.
  * - `"data_digest"`: Generates/verifies data digest (TCP). Boolean value.
  * - `"tls"`: Enable TLS encryption (TCP). Boolean value.
+ * - `"hostsymname"`: TP8010: NVMe host symbolic name.
  *
  * Boolean values can be expressed by "0"/"1", "on"/"off" or "True"/"False" case-insensitive
  * strings. Failed numerical or boolean string conversions will result in the option being ignored.
