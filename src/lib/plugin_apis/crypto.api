@@ -1111,7 +1111,7 @@ gboolean bd_crypto_integrity_close (const gchar *integrity_device, GError **erro
  * bd_crypto_keyring_add_key:
  * @key_desc: kernel keyring key description
  * @key_data: (array length=data_len): a key to add to kernel keyring (may contain arbitrary binary data)
- * @data_len: length of the @pass_data buffer
+ * @data_len: length of the @key_data buffer
  * @error: (out) (allow-none): place to store error (if any)
  * *
  * Returns: whether the given key was successfully saved to kernel keyring or not
