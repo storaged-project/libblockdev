@@ -64,7 +64,7 @@ static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
  * bd_fs_udf_is_tech_avail:
  * @tech: the queried tech
  * @mode: a bit mask of queried modes of operation (#BDFSTechMode) for @tech
- * @error: (out) (allow-none): place to store error (details about why the @tech-@mode combination is not available)
+ * @error: (out) (optional): place to store error (details about why the @tech-@mode combination is not available)
  *
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
@@ -225,12 +225,12 @@ static gint get_blocksize (const gchar *device, GError **error) {
 /**
  * bd_fs_udf_mkfs:
  * @device: the device to create a new UDF fs on
- * @media_type: (allow-none): specify the media type or %NULL for default ('hd')
- * @revision: (allow-none): UDF revision to use or %NULL for default ('2.01')
+ * @media_type: (nullable): specify the media type or %NULL for default ('hd')
+ * @revision: (nullable): UDF revision to use or %NULL for default ('2.01')
  * @block_size: block size in bytes or 0 for auto detection (device logical block size)
- * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
+ * @extra: (nullable) (array zero-terminated=1): extra options for the creation (right now
  *                                                 passed to the 'mkudffs' utility)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether a new UDF fs was successfully created on @device or not
  *
@@ -276,7 +276,7 @@ gboolean bd_fs_udf_mkfs (const gchar *device, const gchar *media_type, gchar *re
 /**
  * bd_fs_udf_wipe:
  * @device: the device to wipe a UDF signature from
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the UDF signature was successfully wiped from the @device or
  *          not
@@ -291,7 +291,7 @@ gboolean bd_fs_udf_wipe (const gchar *device, GError **error) {
  * bd_fs_udf_set_label:
  * @device: the device containing the file system to set label for
  * @label: label to set
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Note: This sets both Volume Identifier and Logical Volume Identifier. Volume Identifier
  *       is truncated to 30 or 15 characters to accommodate to the different length limits
@@ -329,7 +329,7 @@ gboolean bd_fs_udf_set_label (const gchar *device, const gchar *label, GError **
 /**
  * bd_fs_udf_check_label:
  * @label: label to check
- * @error: (out) (allow-none): place to store error
+ * @error: (out) (optional): place to store error
  *
  * Note: This checks only whether @label adheres the length limits for Logical Volume Identifier,
  *       not the stricter limits for Volume Identifier.
@@ -390,8 +390,8 @@ gboolean bd_fs_udf_check_label (const gchar *label, GError **error) {
 /**
  * bd_fs_udf_set_uuid:
  * @device: the device containing the file system to set the UUID (serial number) for
- * @uuid: (allow-none): UUID to set or %NULL to generate a new one
- * @error: (out) (allow-none): place to store error (if any)
+ * @uuid: (nullable): UUID to set or %NULL to generate a new one
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the UUID of the UDF file system on the @device was
  *          successfully set or not
@@ -419,7 +419,7 @@ gboolean bd_fs_udf_set_uuid (const gchar *device, const gchar *uuid, GError **er
 /**
  * bd_fs_udf_check_uuid:
  * @uuid: UUID to check
- * @error: (out) (allow-none): place to store error
+ * @error: (out) (optional): place to store error
  *
  * Returns: whether @uuid is a valid UUID for the UDF file system or not
  *          (reason is provided in @error)
@@ -516,7 +516,7 @@ static BDFSUdfInfo* get_udf_data_from_table (GHashTable *table) {
 /**
  * bd_fs_udf_get_info:
  * @device: the device containing the file system to get info for
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): information about the file system on @device or
  *                           %NULL in case of error

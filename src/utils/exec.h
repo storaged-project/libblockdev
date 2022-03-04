@@ -15,7 +15,7 @@ typedef enum {
  * @task_id: ID of the task/action the progress is reported for
  * @status: progress status
  * @completion: percentage of completion
- * @msg: (allow-none): arbitrary progress message (for the user)
+ * @msg: (nullable): arbitrary progress message (for the user)
  */
 typedef void (*BDUtilsProgFunc) (guint64 task_id, BDUtilsProgStatus status, guint8 completion, gchar *msg);
 

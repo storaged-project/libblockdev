@@ -28,11 +28,11 @@ static int log_level = BD_UTILS_LOG_WARNING;
 
 /**
  * bd_utils_init_logging:
- * @new_log_func: (allow-none) (scope notified): logging function to use or
+ * @new_log_func: (nullable) (scope notified): logging function to use or
  *                                               %NULL to disable logging; use
  *                                               #bd_utils_log_stdout to reset to
  *                                               the default behaviour
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether logging was successfully initialized or not
  */

@@ -66,7 +66,7 @@ static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
  * bd_fs_ntfs_is_tech_avail:
  * @tech: the queried tech
  * @mode: a bit mask of queried modes of operation (#BDFSTechMode) for @tech
- * @error: (out) (allow-none): place to store error (details about why the @tech-@mode combination is not available)
+ * @error: (out) (optional): place to store error (details about why the @tech-@mode combination is not available)
  *
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
@@ -139,9 +139,9 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
 /**
  * bd_fs_ntfs_mkfs:
  * @device: the device to create a new ntfs fs on
- * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
+ * @extra: (nullable) (array zero-terminated=1): extra options for the creation (right now
  *                                                 passed to the 'mkntfs' utility)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether a new NTFS fs was successfully created on @device or not
  *
@@ -159,7 +159,7 @@ gboolean bd_fs_ntfs_mkfs (const gchar *device, const BDExtraArg **extra, GError 
 /**
  * bd_fs_ntfs_wipe:
  * @device: the device to wipe an ntfs signature from
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether an ntfs signature was successfully wiped from the @device or not
  *
@@ -172,7 +172,7 @@ gboolean bd_fs_ntfs_wipe (const gchar *device, GError **error) {
 /**
  * bd_fs_ntfs_check:
  * @device: the device containing the file system to check
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether an ntfs file system on the @device is clean or not
  *
@@ -197,7 +197,7 @@ gboolean bd_fs_ntfs_check (const gchar *device, GError **error) {
 /**
  * bd_fs_ntfs_repair:
  * @device: the device containing the file system to repair
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether an NTFS file system on the @device was successfully repaired
  *          (if needed) or not (error is set in that case)
@@ -217,7 +217,7 @@ gboolean bd_fs_ntfs_repair (const gchar *device, GError **error) {
  * bd_fs_ntfs_set_label:
  * @device: the device containing the file system to set the label for
  * @label: label to set
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the label of the NTFS file system on the @device was
  *          successfully set or not
@@ -236,7 +236,7 @@ gboolean bd_fs_ntfs_set_label (const gchar *device, const gchar *label, GError *
 /**
  * bd_fs_ntfs_check_label:
  * @label: label to check
- * @error: (out) (allow-none): place to store error
+ * @error: (out) (optional): place to store error
  *
  * Returns: whether @label is a valid label for the ntfs file system or not
  *          (reason is provided in @error)
@@ -256,8 +256,8 @@ gboolean bd_fs_ntfs_check_label (const gchar *label, GError **error) {
 /**
  * bd_fs_ntfs_set_uuid:
  * @device: the device containing the file system to set the UUID (serial number) for
- * @uuid: (allow-none): UUID to set or %NULL to generate a new one
- * @error: (out) (allow-none): place to store error (if any)
+ * @uuid: (nullable): UUID to set or %NULL to generate a new one
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the UUID of the NTFS file system on the @device was
  *          successfully set or not
@@ -292,7 +292,7 @@ gboolean bd_fs_ntfs_set_uuid (const gchar *device, const gchar *uuid, GError **e
 /**
  * bd_fs_ntfs_check_uuid:
  * @uuid: UUID to check
- * @error: (out) (allow-none): place to store error
+ * @error: (out) (optional): place to store error
  *
  * Returns: whether @uuid is a valid UUID for the ntfs file system or not
  *          (reason is provided in @error)
@@ -326,7 +326,7 @@ gboolean bd_fs_ntfs_check_uuid (const gchar *uuid, GError **error) {
  * @device: the device the file system of which to resize
  * @new_size: new requested size for the file system in bytes (if 0, the file system
  *            is adapted to the underlying block device)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the file system on @device was successfully resized or not
  *
@@ -357,7 +357,7 @@ gboolean bd_fs_ntfs_resize (const gchar *device, guint64 new_size, GError **erro
  * @device: the device containing the file system to get info for (device must
             not be mounted, trying to get info for a mounted device will result
             in an error)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): information about the file system on @device or
  *                           %NULL in case of error

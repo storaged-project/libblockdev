@@ -34,7 +34,7 @@ GQuark bd_utils_dev_utils_error_quark (void)
  * bd_utils_resolve_device:
  * @dev_spec: specification of the device (e.g. "/dev/sda", any symlink, or the name of a file
  *            under "/dev")
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): the full real path of the device (e.g. "/dev/md126"
  *                           for "/dev/md/my_raid") or %NULL in case of error
@@ -79,7 +79,7 @@ gchar* bd_utils_resolve_device (const gchar *dev_spec, GError **error) {
  * bd_utils_get_device_symlinks:
  * @dev_spec: specification of the device (e.g. "/dev/sda", any symlink, or the name of a file
  *            under "/dev")
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full) (array zero-terminated=1): a list of all symlinks (known to udev) for the
  *                                                     device specified with @dev_spec or %NULL in

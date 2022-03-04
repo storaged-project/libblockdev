@@ -38,11 +38,11 @@ GQuark bd_utils_dbus_error_quark (void)
 
 /**
  * bd_utils_dbus_service_available:
- * @connection: (allow-none): existing GDBusConnection or %NULL
+ * @connection: (nullable): existing GDBusConnection or %NULL
  * @bus_type: bus type (system or session), ignored if @connection is specified
  * @bus_name: name of the service to check (e.g. "com.redhat.lvmdbus1")
  * @obj_prefix: object path prefix for the service (e.g. "/com/redhat/lvmdbus1")
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the service was found in the system
  */

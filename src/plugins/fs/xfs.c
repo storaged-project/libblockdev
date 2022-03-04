@@ -73,7 +73,7 @@ static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
  * bd_fs_xfs_is_tech_avail:
  * @tech: the queried tech
  * @mode: a bit mask of queried modes of operation (#BDFSTechMode) for @tech
- * @error: (out) (allow-none): place to store error (details about why the @tech-@mode combination is not available)
+ * @error: (out) (optional): place to store error (details about why the @tech-@mode combination is not available)
  *
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
@@ -157,9 +157,9 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
 /**
  * bd_fs_xfs_mkfs:
  * @device: the device to create a new xfs fs on
- * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
+ * @extra: (nullable) (array zero-terminated=1): extra options for the creation (right now
  *                                                 passed to the 'mkfs.xfs' utility)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether a new xfs fs was successfully created on @device or not
  *
@@ -177,7 +177,7 @@ gboolean bd_fs_xfs_mkfs (const gchar *device, const BDExtraArg **extra, GError *
 /**
  * bd_fs_xfs_wipe:
  * @device: the device to wipe an xfs signature from
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether an xfs signature was successfully wiped from the @device or
  *          not
@@ -191,7 +191,7 @@ gboolean bd_fs_xfs_wipe (const gchar *device, GError **error) {
 /**
  * bd_fs_xfs_check:
  * @device: the device containing the file system to check
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether an xfs file system on the @device is clean or not
  *
@@ -223,9 +223,9 @@ gboolean bd_fs_xfs_check (const gchar *device, GError **error) {
 /**
  * bd_fs_xfs_repair:
  * @device: the device containing the file system to repair
- * @extra: (allow-none) (array zero-terminated=1): extra options for the repair (right now
+ * @extra: (nullable) (array zero-terminated=1): extra options for the repair (right now
  *                                                 passed to the 'xfs_repair' utility)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether an xfs file system on the @device was successfully repaired
  *          (if needed) or not (error is set in that case)
@@ -245,7 +245,7 @@ gboolean bd_fs_xfs_repair (const gchar *device, const BDExtraArg **extra, GError
  * bd_fs_xfs_set_label:
  * @device: the device containing the file system to set label for
  * @label: label to set
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the label of xfs file system on the @device was
  *          successfully set or not
@@ -266,7 +266,7 @@ gboolean bd_fs_xfs_set_label (const gchar *device, const gchar *label, GError **
 /**
  * bd_fs_xfs_check_label:
  * @label: label to check
- * @error: (out) (allow-none): place to store error
+ * @error: (out) (optional): place to store error
  *
  * Returns: whether @label is a valid label for the xfs file system or not
  *          (reason is provided in @error)
@@ -295,10 +295,10 @@ gboolean bd_fs_xfs_check_label (const gchar *label, GError **error) {
 /**
  * bd_fs_xfs_set_uuid:
  * @device: the device containing the file system to set uuid for
- * @uuid: (allow-none): UUID to set %NULL to generate a new one
+ * @uuid: (nullable): UUID to set %NULL to generate a new one
  *                      UUID can also be one of "nil" and "generate" to clear or
  *                      generate a new UUID
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the UUID of xfs file system on the @device was
  *          successfully set or not
@@ -319,7 +319,7 @@ gboolean bd_fs_xfs_set_uuid (const gchar *device, const gchar *uuid, GError **er
 /**
  * bd_fs_xfs_check_uuid:
  * @uuid: UUID to check
- * @error: (out) (allow-none): place to store error
+ * @error: (out) (optional): place to store error
  *
  * Returns: whether @uuid is a valid UUID for the xfs file system or not
  *          (reason is provided in @error)
@@ -335,7 +335,7 @@ gboolean bd_fs_xfs_check_uuid (const gchar *uuid, GError **error) {
  * @device: the device containing the file system to get info for (device must
             be mounted, trying to get info for an unmounted device will result
             in an error)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): information about the file system on @device or
  *                           %NULL in case of error
@@ -437,9 +437,9 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
  * @mpoint: the mount point of the file system to resize
  * @new_size: new requested size for the file system *in file system blocks* (see bd_fs_xfs_get_info())
  *            (if 0, the file system is adapted to the underlying block device)
- * @extra: (allow-none) (array zero-terminated=1): extra options for the resize (right now
+ * @extra: (nullable) (array zero-terminated=1): extra options for the resize (right now
  *                                                 passed to the 'xfs_growfs' utility)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the file system mounted on @mpoint was successfully resized or not
  *

@@ -149,7 +149,7 @@ void bd_kbd_close (void) {
  * bd_kbd_is_tech_avail:
  * @tech: the queried tech
  * @mode: a bit mask of queried modes of operation (#BDKBDTechMode) for @tech
- * @error: (out) (allow-none): place to store error (details about why the @tech-@mode combination is not available)
+ * @error: (out) (optional): place to store error (details about why the @tech-@mode combination is not available)
  *
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
@@ -231,9 +231,9 @@ void bd_kbd_bcache_stats_free (BDKBDBcacheStats *data) {
  * @num_devices: number of devices to create
  * @sizes: (array zero-terminated=1): requested sizes (in bytes) for created zRAM
  *                                    devices
- * @nstreams: (allow-none) (array zero-terminated=1): numbers of streams for created
+ * @nstreams: (nullable) (array zero-terminated=1): numbers of streams for created
  *                                                    zRAM devices
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether @num_devices zRAM devices were successfully created or not
  *
@@ -325,7 +325,7 @@ gboolean bd_kbd_zram_create_devices (guint64 num_devices, const guint64 *sizes, 
 
 /**
  * bd_kbd_zram_destroy_devices:
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether zRAM devices were successfully destroyed or not
  *
@@ -374,8 +374,8 @@ static guint64 get_number_from_file (const gchar *path, GError **error) {
  * bd_kbd_zram_add_device:
  * @size: size of the zRAM device to add
  * @nstreams: number of streams to use for the new device (or 0 to use the defaults)
- * @device: (allow-none) (out): place to store the name of the newly added device
- * @error: (out) (allow-none): place to store error (if any)
+ * @device: (optional) (out): place to store the name of the newly added device
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether a new zRAM device was added or not
  *
@@ -448,7 +448,7 @@ gboolean bd_kbd_zram_add_device (guint64 size, guint64 nstreams, gchar **device,
 /**
  * bd_kbd_zram_remove_device:
  * @device: zRAM device to remove
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the @device was successfully removed or not
  *
@@ -639,7 +639,7 @@ static gboolean get_zram_stats_new (const gchar *device, BDKBDZramStats* stats, 
 /**
  * bd_kbd_zram_get_stats:
  * @device: zRAM device to get stats for
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): statistics for the zRAM device
  *
@@ -740,10 +740,10 @@ static gboolean wait_for_file (const char *filename) {
  * bd_kbd_bcache_create:
  * @backing_device: backing (slow) device of the cache
  * @cache_device: cache (fast) device of the cache
- * @extra: (allow-none) (array zero-terminated=1): extra options for the creation (right now
+ * @extra: (nullable) (array zero-terminated=1): extra options for the creation (right now
  *                                                 passed to the 'make-bcache' utility)
- * @bcache_device: (out) (allow-none) (transfer full): place to store the name of the new bcache device (if any)
- * @error: (out) (allow-none): place to store error (if any)
+ * @bcache_device: (out) (optional) (transfer full): place to store the name of the new bcache device (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the bcache device was successfully created or not
  *
@@ -893,7 +893,7 @@ gboolean bd_kbd_bcache_create (const gchar *backing_device, const gchar *cache_d
  * bd_kbd_bcache_attach:
  * @c_set_uuid: cache set UUID of the cache to attach
  * @bcache_device: bcache device to attach @c_set_uuid cache to
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the @c_set_uuid cache was successfully attached to @bcache_device or not
  *
@@ -930,8 +930,8 @@ gboolean bd_kbd_bcache_attach (const gchar *c_set_uuid, const gchar *bcache_devi
 /**
  * bd_kbd_bcache_detach:
  * @bcache_device: bcache device to detach the cache from
- * @c_set_uuid: (out) (allow-none) (transfer full): cache set UUID of the detached cache
- * @error: (out) (allow-none): place to store error (if any)
+ * @c_set_uuid: (out) (optional) (transfer full): cache set UUID of the detached cache
+ * @error: (out) (optional): place to store error (if any)
  * Returns: whether the bcache device @bcache_device was successfully destroyed or not
  *
  * Note: Flushes the cache first.
@@ -1029,7 +1029,7 @@ gboolean bd_kbd_bcache_detach (const gchar *bcache_device, gchar **c_set_uuid, G
 /**
  * bd_kbd_bcache_destroy:
  * @bcache_device: bcache device to destroy
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the bcache device @bcache_device was successfully destroyed or not
  *
@@ -1101,7 +1101,7 @@ gboolean bd_kbd_bcache_destroy (const gchar *bcache_device, GError **error) {
 /**
  * bd_kbd_bcache_get_mode:
  * @bcache_device: device to get mode of
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: current mode of the @bcache_device
  *
@@ -1157,7 +1157,7 @@ BDKBDBcacheMode bd_kbd_bcache_get_mode (const gchar *bcache_device, GError **err
 /**
  * bd_kbd_bcache_get_mode_str:
  * @mode: mode to get string representation of
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer none): string representation of @mode or %NULL in case of error
  *
@@ -1176,7 +1176,7 @@ const gchar* bd_kbd_bcache_get_mode_str (BDKBDBcacheMode mode, GError **error) {
 /**
  * bd_kbd_bcache_get_mode_from_str:
  * @mode_str: string representation of mode
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: mode matching the @mode_str given or %BD_KBD_MODE_UNKNOWN in case of no match
  *
@@ -1205,7 +1205,7 @@ BDKBDBcacheMode bd_kbd_bcache_get_mode_from_str (const gchar *mode_str, GError *
  * bd_kbd_bcache_set_mode:
  * @bcache_device: bcache device to set mode of
  * @mode: mode to set
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the mode was successfully set or not
  *
@@ -1357,7 +1357,7 @@ static guint64 get_bcache_block_size (const gchar *bcache_device, GError **error
 /**
  * bd_kbd_bcache_status:
  * @bcache_device: bcache device to get status for
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): status of the @bcache_device or %NULL in case of
  *                           error (@error is set)
@@ -1524,7 +1524,7 @@ static gchar* get_device_name (const gchar *major_minor, GError **error) {
 /**
  * bd_kbd_bcache_get_backing_device:
  * @bcache_device: Bcache device to get the backing device for
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): name of the backing device of the @bcache_device
  *                           or %NULL if failed to determine (@error is populated)
@@ -1578,7 +1578,7 @@ gchar* bd_kbd_bcache_get_backing_device (const gchar *bcache_device, GError **er
 /**
  * bd_kbd_bcache_get_cache_device:
  * @bcache_device: Bcache device to get the cache device for
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): name of the cache device of the @bcache_device
  *                           or %NULL if failed to determine (@error is populated)
