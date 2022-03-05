@@ -261,7 +261,7 @@ gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm
 gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const gchar *algorithm, const guint8* key_data, gsize key_size, BDCryptoIntegrityOpenFlags flags, BDCryptoIntegrityExtra *extra, GError **error);
 gboolean bd_crypto_integrity_close (const gchar *integrity_device, GError **error);
 
-gboolean bd_crypto_keyring_add_key (const gchar *key_desc, const guint8 *pass_data, gsize data_len, GError **error);
+gboolean bd_crypto_keyring_add_key (const gchar *key_desc, const guint8 *key_data, gsize data_len, GError **error);
 
 gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error);
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);
