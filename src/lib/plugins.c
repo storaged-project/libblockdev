@@ -11,7 +11,7 @@
 
 /**
  * bd_plugin_spec_copy: (skip)
- * @spec: (allow-none): %BDPluginSpec to copy
+ * @spec: (nullable): %BDPluginSpec to copy
  *
  * Creates a new copy of @spec.
  */
@@ -26,7 +26,7 @@ BDPluginSpec* bd_plugin_spec_copy (BDPluginSpec *spec) {
 
 /**
  * bd_plugin_spec_free: (skip)
- * @spec: (allow-none): %BDPluginSpec to free
+ * @spec: (nullable): %BDPluginSpec to free
  *
  * Frees @spec.
  */

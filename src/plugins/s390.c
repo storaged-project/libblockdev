@@ -119,7 +119,7 @@ void bd_s390_close (void) {
  * bd_s390_is_tech_avail:
  * @tech: the queried tech
  * @mode: a bit mask of queried modes of operation (#BDS390TechMode) for @tech
- * @error: (out) (allow-none): place to store error (details about why the @tech-@mode combination is not available)
+ * @error: (out) (optional): place to store error (details about why the @tech-@mode combination is not available)
  *
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
@@ -144,9 +144,9 @@ gboolean bd_s390_is_tech_avail (BDS390Tech tech, guint64 mode, GError **error) {
 /**
  * bd_s390_dasd_format:
  * @dasd: dasd to format
- * @extra: (allow-none) (array zero-terminated=1): extra options for the formatting (right now
+ * @extra: (nullable) (array zero-terminated=1): extra options for the formatting (right now
  *                                                 passed to the 'dasdfmt' utility)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether dasdfmt was successful or not
  *
@@ -169,7 +169,7 @@ gboolean bd_s390_dasd_format (const gchar *dasd, const BDExtraArg **extra, GErro
 /**
  * bd_s390_dasd_needs_format:
  * @dasd: dasd to check, given as device number
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether a dasd needs dasdfmt run against it
  *
@@ -213,7 +213,7 @@ gboolean bd_s390_dasd_needs_format (const gchar *dasd, GError **error) {
 /**
  * bd_s390_dasd_online:
  * @dasd: dasd to switch online, given as device number
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether a dasd was successfully switched online
  *
@@ -305,7 +305,7 @@ gboolean bd_s390_dasd_online (const gchar *dasd, GError **error) {
 /**
  * bd_s390_dasd_is_ldl:
  * @dasd: dasd to check, whether it is LDL formatted
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether a dasd is LDL formatted
  *
@@ -363,7 +363,7 @@ gboolean bd_s390_dasd_is_ldl (const gchar *dasd, GError **error) {
 /**
  * bd_s390_dasd_is_fba:
  * @dasd: dasd to check, whether it is FBA
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether a dasd is FBA
  *
@@ -416,7 +416,7 @@ gboolean bd_s390_dasd_is_fba (const gchar *dasd, GError **error) {
 /**
  * bd_s390_sanitize_dev_input:
  * @dev: a DASD or zFCP device number
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): a synthesized dasd or zfcp device number
  *
@@ -470,7 +470,7 @@ gchar* bd_s390_sanitize_dev_input (const gchar *dev, GError **error) {
 /**
  * bd_s390_zfcp_sanitize_wwpn_input:
  * @wwpn: a zFCP WWPN identifier
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): a synthesized zFCP WWPN
  *
@@ -504,7 +504,7 @@ gchar* bd_s390_zfcp_sanitize_wwpn_input (const gchar *wwpn, GError **error) {
 /**
  * bd_s390_zfcp_sanitize_lun_input:
  * @lun: a zFCP LUN identifier
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): a synthesized zFCP LUN
  *
@@ -573,7 +573,7 @@ gchar* bd_s390_zfcp_sanitize_lun_input (const gchar *lun, GError **error) {
  * @devno: zfcp device number
  * @wwpn: zfcp WWPN (World Wide Port Number)
  * @lun: zfcp LUN (Logical Unit Number)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether a zfcp device was successfully switched online
  *
@@ -754,7 +754,7 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
  * @devno: zfcp device number
  * @wwpn: zfcp WWPN (World Wide Port Number)
  * @lun: zfcp LUN (Logical Unit Number)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether a LUN was successfully removed from its associated WWPN
  *
@@ -932,7 +932,7 @@ gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const 
  * @devno: zfcp device number
  * @wwpn: zfcp WWPN (World Wide Port Number)
  * @lun: zfcp LUN (Logical Unit Number)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether a zfcp device was successfully switched offline
  *

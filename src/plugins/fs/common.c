@@ -74,7 +74,7 @@ has_fs (blkid_probe probe, const gchar *device, const gchar *fs_type, GError **e
 /**
  * wipe_fs: (skip)
  * @device: the device to wipe signature(s) from
- * @fs_type: (allow-none): filesystem type to wipe from the device or %NULL for any
+ * @fs_type: (nullable): filesystem type to wipe from the device or %NULL for any
  * @wipe_all: whether to wipe all signatures from the device or not: some filesystems might have
  *            multiple nested signatures, this will make sure to wipe all of them including
  *            those that are different from @fs_type -- e.g. for NTFS we will wipe both the

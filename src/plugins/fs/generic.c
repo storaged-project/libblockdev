@@ -109,7 +109,7 @@ get_fs_info (const gchar *type)
  * @device: the device to wipe signatures from
  * @all: whether to wipe all (%TRUE) signatures or just the first (%FALSE) one
  * @force: whether to wipe signatures on a mounted @device
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether signatures were successfully wiped on @device or not
  *
@@ -241,7 +241,7 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, gboolean force, GError *
  * bd_fs_clean:
  * @device: the device to clean
  * @force: whether to wipe signatures on a mounted @device
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Clean all signatures from @device.
  * Difference between this and bd_fs_wipe() is that this function doesn't
@@ -274,7 +274,7 @@ gboolean bd_fs_clean (const gchar *device, gboolean force, GError **error) {
 /**
  * bd_fs_get_fstype:
  * @device: the device to probe
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Get first signature on @device as a string.
  *
@@ -386,10 +386,10 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
 /**
  * fs_mount:
  * @device: the device to mount for an FS operation
- * @fstype: (allow-none): filesystem type on @device
+ * @fstype: (nullable): filesystem type on @device
  * @unmount: (out): whether caller should unmount the device (was mounted by us) or
  *                  not (was already mounted before)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * This is just a helper function for FS operations that need @device to be mounted.
  * If the device is already mounted, this will just return the existing mountpoint.
@@ -435,9 +435,9 @@ static gchar* fs_mount (const gchar *device, gchar *fstype, gboolean *unmount, G
  * @device: the device the file system of which to resize
  * @new_size: new requested size for the file system *in bytes*
  *            (if 0, the file system is adapted to the underlying block device)
- * @extra: (allow-none) (array zero-terminated=1): extra options for the resize (right now
+ * @extra: (nullable) (array zero-terminated=1): extra options for the resize (right now
  *                                                 passed to the 'xfs_growfs' utility)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * This is just a helper function for bd_fs_resize.
  *
@@ -849,7 +849,7 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
  * @device: the device the file system of which to resize
  * @new_size: new requested size for the file system (if 0, the file system is
  *            adapted to the underlying block device)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Resize filesystem on @device. This calls other fs resize functions from this
  * plugin based on detected filesystem (e.g. bd_fs_xfs_resize for XFS). This
@@ -866,7 +866,7 @@ gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error) {
 /**
  * bd_fs_repair:
  * @device: the device the file system of which to repair
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Repair filesystem on @device. This calls other fs repair functions from this
  * plugin based on detected filesystem (e.g. bd_fs_xfs_repair for XFS). This
@@ -883,7 +883,7 @@ gboolean bd_fs_repair (const gchar *device, GError **error) {
 /**
  * bd_fs_check:
  * @device: the device the file system of which to check
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Check filesystem on @device. This calls other fs check functions from this
  * plugin based on detected filesystem (e.g. bd_fs_xfs_check for XFS). This
@@ -901,7 +901,7 @@ gboolean bd_fs_check (const gchar *device, GError **error) {
  * bd_fs_set_label:
  * @device: the device with file system to set the label for
  * @label: label to set
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Set label for filesystem on @device. This calls other fs label functions from this
  * plugin based on detected filesystem (e.g. bd_fs_xfs_set_label for XFS). This
@@ -918,8 +918,8 @@ gboolean bd_fs_set_label (const gchar *device, const gchar *label, GError **erro
 /**
  * bd_fs_set_uuid:
  * @device: the device with file system to set the UUID for
- * @uuid: (allow-none): UUID to set or %NULL to generate a new one
- * @error: (out) (allow-none): place to store error (if any)
+ * @uuid: (nullable): UUID to set or %NULL to generate a new one
+ * @error: (out) (optional): place to store error (if any)
  *
  * Set UUID for filesystem on @device. This calls other fs UUID functions from this
  * plugin based on detected filesystem (e.g. bd_fs_xfs_set_uuid for XFS). This
@@ -961,7 +961,7 @@ static BDFSXfsInfo* xfs_get_info (const gchar *device, GError **error) {
 /**
  * bd_fs_get_size:
  * @device: the device with file system to get size for
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Get size for filesystem on @device. This calls other fs info functions from this
  * plugin based on detected filesystem (e.g. bd_fs_xfs_get_info for XFS). This
@@ -1072,7 +1072,7 @@ guint64 bd_fs_get_size (const gchar *device, GError **error) {
 /**
  * bd_fs_get_free_space:
  * @device: the device with file system to get free space for
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Get free space for filesystem on @device. This calls other fs info functions from this
  * plugin based on detected filesystem (e.g. bd_fs_ext4_get_info for ext4). This
@@ -1235,7 +1235,7 @@ static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar *
  * @type: the filesystem type to be tested for installed mkfs support
  * @options: (out): flags for allowed mkfs options (i.e. support for setting label or UUID when creating the filesystem)
  * @required_utility: (out) (transfer full): the utility binary which is required for creating (if missing returns %FALSE but no @error)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Searches for the required utility to create the given filesystem and returns whether
  * it is installed. The options flags indicate what additional options can be specified for @type.
@@ -1254,7 +1254,7 @@ gboolean bd_fs_can_mkfs (const gchar *type, BDFSMkfsOptionsFlags *options, gchar
  * @type: the filesystem type to be tested for installed resize support
  * @mode: (out): flags for allowed resizing (i.e. growing/shrinking support for online/offline)
  * @required_utility: (out) (transfer full): the utility binary which is required for resizing (if missing i.e. returns FALSE but no error)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Searches for the required utility to resize the given filesystem and returns whether
  * it is installed. The mode flags indicate if growing and/or shrinking resize is available if
@@ -1273,7 +1273,7 @@ gboolean bd_fs_can_resize (const gchar *type, BDFsResizeFlags *mode, gchar **req
  * bd_fs_can_check:
  * @type: the filesystem type to be tested for installed consistency check support
  * @required_utility: (out) (transfer full): the utility binary which is required for checking (if missing i.e. returns FALSE but no error)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Searches for the required utility to check the given filesystem and returns whether
  * it is installed.
@@ -1291,7 +1291,7 @@ gboolean bd_fs_can_check (const gchar *type, gchar **required_utility, GError **
  * bd_fs_can_repair:
  * @type: the filesystem type to be tested for installed repair support
  * @required_utility: (out) (transfer full): the utility binary which is required for repairing (if missing i.e. return FALSE but no error)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Searches for the required utility to repair the given filesystem and returns whether
  * it is installed.
@@ -1309,7 +1309,7 @@ gboolean bd_fs_can_repair (const gchar *type, gchar **required_utility, GError *
  * bd_fs_can_set_label:
  * @type: the filesystem type to be tested for installed label support
  * @required_utility: (out) (transfer full): the utility binary which is required for relabeling (if missing i.e. return FALSE but no error)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Searches for the required utility to set the label of the given filesystem and returns whether
  * it is installed.
@@ -1327,7 +1327,7 @@ gboolean bd_fs_can_set_label (const gchar *type, gchar **required_utility, GErro
  * bd_fs_can_set_uuid:
  * @type: the filesystem type to be tested for installed UUID support
  * @required_utility: (out) (transfer full): the utility binary which is required for setting UUID (if missing i.e. return FALSE but no error)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Searches for the required utility to set the UUID of the given filesystem and returns whether
  * it is installed.
@@ -1346,7 +1346,7 @@ gboolean bd_fs_can_set_uuid (const gchar *type, gchar **required_utility, GError
  * @type: the filesystem type to be tested for installed size querying support
  * @required_utility: (out) (transfer full): the utility binary which is required
  *                                           for size querying (if missing i.e. return FALSE but no error)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Searches for the required utility to get size of the given filesystem and
  * returns whether it is installed.
@@ -1365,7 +1365,7 @@ gboolean bd_fs_can_get_size (const gchar *type, gchar **required_utility, GError
  * @type: the filesystem type to be tested for installed free space querying support
  * @required_utility: (out) (transfer full): the utility binary which is required
  *                                           for free space querying (if missing i.e. return FALSE but no error)
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Searches for the required utility to get free space of the given filesystem and
  * returns whether it is installed.
@@ -1431,7 +1431,7 @@ static gboolean fs_freeze (const char *mountpoint, gboolean freeze, GError **err
 /**
  * bd_fs_freeze:
  * @mountpoint: mountpoint of the device (filesystem) to freeze
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Freezes filesystem mounted on @mountpoint. The filesystem must
  * support freezing.
@@ -1446,7 +1446,7 @@ gboolean bd_fs_freeze (const gchar *mountpoint, GError **error) {
 /**
  * bd_fs_unfreeze:
  * @mountpoint: mountpoint of the device (filesystem) to un-freeze
- * @error: (out) (allow-none): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Un-freezes filesystem mounted on @mountpoint. The filesystem must
  * support freezing.
@@ -1476,8 +1476,8 @@ extern BDExtraArg** bd_fs_udf_mkfs_options (BDFSMkfsOptions *options, const BDEx
  * @device: the device to create the new filesystem on
  * @fstype: name of the filesystem to create (e.g. "ext4")
  * @options: additional options like label or UUID for the filesystem
- * @extra: (allow-none) (array zero-terminated=1): extra mkfs options not provided in @options
- * @error: (out) (allow-none): place to store error (if any)
+ * @extra: (nullable) (array zero-terminated=1): extra mkfs options not provided in @options
+ * @error: (out) (optional): place to store error (if any)
  *
  * This is a helper function for creating filesystems with extra options.
  * This is the same as running a filesystem-specific function like %bd_fs_ext4_mkfs
