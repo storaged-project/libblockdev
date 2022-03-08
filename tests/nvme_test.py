@@ -17,6 +17,9 @@ class NVMeTest(unittest.TestCase):
             raise unittest.SkipTest("nvme executable (nvme-cli package) not found in $PATH, skipping.")
         if not find_executable("nvmetcli"):
             raise unittest.SkipTest("nvmetcli executable not found in $PATH, skipping.")
+        ret, out, err = run_command("modprobe nvme-fabrics")
+        if ret != 0:
+            raise unittest.SkipTest("nvme-fabrics kernel module unavailable, skipping.")
 
         if not BlockDev.is_initialized():
             BlockDev.init(cls.requested_plugins, None)

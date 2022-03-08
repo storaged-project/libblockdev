@@ -293,9 +293,10 @@ def setup_nvme_target(dev_paths, subnqn, hostnqn):
     """
 
     # modprobe required nvme target modules
-    ret, out, err = run_command("modprobe nvmet nvme_loop")
-    if ret != 0:
-        raise RuntimeError("Cannot load required NVMe target modules: '%s %s'" % (out, err))
+    for module in ['nvmet', 'nvme-loop']:
+        ret, out, err = run_command("modprobe %s" % module)
+        if ret != 0:
+            raise RuntimeError("Cannot load required module %s: '%s %s'" % (module, out, err))
 
     # create a JSON file for nvmetcli
     with tempfile.NamedTemporaryFile(mode='wt',delete=False) as tmp:
