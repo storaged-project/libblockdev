@@ -1481,7 +1481,7 @@ extern BDExtraArg** bd_fs_udf_mkfs_options (BDFSMkfsOptions *options, const BDEx
  *
  * This is a helper function for creating filesystems with extra options.
  * This is the same as running a filesystem-specific function like %bd_fs_ext4_mkfs
- * and manually specifying the extra command line options. %BDFsMkfsOptions
+ * and manually specifying the extra command line options. %BDFSMkfsOptions
  * removes the need to specify supported options for selected filesystems,
  * make sure to check whether @fstype supports these options (see %bd_fs_can_mkfs)
  * for details.
