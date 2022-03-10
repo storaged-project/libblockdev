@@ -10,6 +10,9 @@
  * Creates a new copy of @arg.
  */
 BDExtraArg* bd_extra_arg_copy (BDExtraArg *arg) {
+    if (arg == NULL)
+        return NULL;
+
     BDExtraArg *ret = g_new0 (BDExtraArg, 1);
     ret->opt = g_strdup (arg->opt);
     ret->val = g_strdup (arg->val);
@@ -24,6 +27,9 @@ BDExtraArg* bd_extra_arg_copy (BDExtraArg *arg) {
  * Frees @arg.
  */
 void bd_extra_arg_free (BDExtraArg *arg) {
+    if (arg == NULL)
+        return;
+
     g_free (arg->opt);
     g_free (arg->val);
     g_free (arg);
