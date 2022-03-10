@@ -1493,7 +1493,7 @@ extern BDExtraArg** bd_fs_udf_mkfs_options (BDFSMkfsOptions *options, const BDEx
  *
  * Returns: whether @fstype was successfully created on @device or not.
  *
- * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_CREATE
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_MKFS
  *
  */
 gboolean bd_fs_mkfs (const gchar *device, const gchar *fstype, BDFSMkfsOptions *options, const BDExtraArg **extra, GError **error) {
