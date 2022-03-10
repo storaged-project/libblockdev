@@ -9,6 +9,9 @@ GType bd_extra_arg_get_type (void);
 
 /**
  * BDExtraArg:
+ * @opt: extra option (command line option for most functions that allow extra options
+ *       to be passed, e.g. "-L" to call `mkfs.xfs -L`)
+ * @val: value for @opt, can be an empty string or %NULL for options without parameter
  *
  * See bd_extra_arg_new() for an example on how to construct the extra args.
  */
