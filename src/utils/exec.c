@@ -650,7 +650,7 @@ gboolean bd_utils_exec_and_capture_output (const gchar **argv, const BDExtraArg 
  *          @ver_string2 respectively. If an error occurs, returns -2 and @error
  *          is set.
  *
- * **ONLY SUPPORTS VERSION STRINGS OF FORMAT X[.Y[.Z[.Z2[.Z3...[-R]]]]] where all components
+ * **ONLY SUPPORTS VERSION STRINGS OF FORMAT `X[.Y[.Z[.Z2[.Z3...[-R]]]]]` where all components
  *   are natural numbers!**
  */
 gint bd_utils_version_cmp (const gchar *ver_string1, const gchar *ver_string2, GError **error) {
