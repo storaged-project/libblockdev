@@ -1481,7 +1481,7 @@ extern BDExtraArg** bd_fs_udf_mkfs_options (BDFSMkfsOptions *options, const BDEx
  *
  * This is a helper function for creating filesystems with extra options.
  * This is the same as running a filesystem-specific function like %bd_fs_ext4_mkfs
- * and manually specifying the extra command line options. %BDFsMkfsOptions
+ * and manually specifying the extra command line options. %BDFSMkfsOptions
  * removes the need to specify supported options for selected filesystems,
  * make sure to check whether @fstype supports these options (see %bd_fs_can_mkfs)
  * for details.
@@ -1493,7 +1493,7 @@ extern BDExtraArg** bd_fs_udf_mkfs_options (BDFSMkfsOptions *options, const BDEx
  *
  * Returns: whether @fstype was successfully created on @device or not.
  *
- * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_CREATE
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_MKFS
  *
  */
 gboolean bd_fs_mkfs (const gchar *device, const gchar *fstype, BDFSMkfsOptions *options, const BDExtraArg **extra, GError **error) {

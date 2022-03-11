@@ -640,12 +640,10 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
         return FALSE;
     }
     if (rc == 1) {
-        /**
-         * otherwise device's status indicates that it's already online, so
-         * just close the fd and proceed; we don't return because although 'online'
-         * status may be correct, the device may not be completely online and ready
-         * to use just yet, so just throw a warning.
-         */
+        /* otherwise device's status indicates that it's already online, so
+           just close the fd and proceed; we don't return because although 'online'
+           status may be correct, the device may not be completely online and ready
+           to use just yet, so just throw a warning. */
         fclose (fd);
         bd_utils_log_format (BD_UTILS_LOG_WARNING, "Device %s is already online", devno);
     }
@@ -725,10 +723,8 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
         g_propagate_error (error, l_error);
         return FALSE;
     }
-    /**
-     * read value here is either 0 or 1; fgetc casts this from char->int, so
-     * subtract '0' here to get the literal read value
-     */
+    /* read value here is either 0 or 1; fgetc casts this from char->int, so
+       subtract '0' here to get the literal read value */
     rc -= '0';
     if (rc != 0) {
         g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
