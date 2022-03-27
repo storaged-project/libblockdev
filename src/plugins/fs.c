@@ -36,7 +36,6 @@ extern gboolean bd_fs_xfs_is_tech_avail (BDFSTech tech, guint64 mode, GError **e
 extern gboolean bd_fs_vfat_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
 extern gboolean bd_fs_ntfs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
 extern gboolean bd_fs_f2fs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
-extern gboolean bd_fs_reiserfs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
 extern gboolean bd_fs_nilfs2_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
 extern gboolean bd_fs_exfat_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
 extern gboolean bd_fs_btrfs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
@@ -110,16 +109,7 @@ gboolean bd_fs_check_deps (void) {
                                            BD_FS_TECH_MODE_CHECK | BD_FS_TECH_MODE_REPAIR |
                                            BD_FS_TECH_MODE_QUERY | BD_FS_TECH_MODE_RESIZE,
                                            &error);
-    if (!ret && error) {
-        bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
-        g_clear_error (&error);
-    }
-    ret = ret && bd_fs_reiserfs_is_tech_avail (BD_FS_TECH_REISERFS,
-                                               BD_FS_TECH_MODE_MKFS | BD_FS_TECH_MODE_WIPE |
-                                               BD_FS_TECH_MODE_CHECK | BD_FS_TECH_MODE_REPAIR |
-                                               BD_FS_TECH_MODE_SET_LABEL | BD_FS_TECH_MODE_QUERY |
-                                               BD_FS_TECH_MODE_RESIZE | BD_FS_TECH_MODE_SET_UUID,
-                                               &error);
+
     if (!ret && error) {
         bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
         g_clear_error (&error);
@@ -222,8 +212,6 @@ gboolean bd_fs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error) {
             return bd_fs_ntfs_is_tech_avail (tech, mode, error);
         case BD_FS_TECH_F2FS:
             return bd_fs_f2fs_is_tech_avail (tech, mode, error);
-        case BD_FS_TECH_REISERFS:
-            return bd_fs_reiserfs_is_tech_avail (tech, mode, error);
         case BD_FS_TECH_NILFS2:
             return bd_fs_nilfs2_is_tech_avail (tech, mode, error);
         case BD_FS_TECH_EXFAT:

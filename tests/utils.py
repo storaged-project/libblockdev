@@ -80,7 +80,6 @@ ALL_UTILS = {"lvm", "btrfs", "mkswap", "swaplabel", "multipath", "mpathconf", "d
              "mkfs.f2fs", "fsck.f2fs", "fsck.f2fs", "dump.f2fs", "resize.f2fs",
              "mkfs.nilfs2", "nilfs-tune", "nilfs-resize",
              "mkntfs", "ntfsfix", "ntfsresize", "ntfslabel", "ntfscluster",
-             "mkreiserfs", "reiserfsck", "reiserfstune", "debugreiserfs", "resize_reiserfs",
              "mkfs.vfat", "fatlabel", "fsck.vfat", "vfat-resize",
              "mkfs.xfs", "xfs_db", "xfs_repair", "xfs_admin", "xfs_growfs"}
 

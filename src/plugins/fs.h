@@ -34,11 +34,10 @@ typedef enum {
     BD_FS_TECH_VFAT     = 6,
     BD_FS_TECH_NTFS     = 7,
     BD_FS_TECH_F2FS     = 8,
-    BD_FS_TECH_REISERFS = 9,
-    BD_FS_TECH_NILFS2   = 10,
-    BD_FS_TECH_EXFAT    = 11,
-    BD_FS_TECH_BTRFS    = 12,
-    BD_FS_TECH_UDF      = 13,
+    BD_FS_TECH_NILFS2   = 9,
+    BD_FS_TECH_EXFAT    = 10,
+    BD_FS_TECH_BTRFS    = 11,
+    BD_FS_TECH_UDF      = 12,
 } BDFSTech;
 
 /* XXX: number of the highest bit of all modes */
@@ -79,7 +78,6 @@ gboolean bd_fs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
 #include "fs/ntfs.h"
 #include "fs/vfat.h"
 #include "fs/xfs.h"
-#include "fs/reiserfs.h"
 #include "fs/nilfs.h"
 #include "fs/exfat.h"
 #include "fs/btrfs.h"

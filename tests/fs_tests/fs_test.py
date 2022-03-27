@@ -65,16 +65,6 @@ class FSTestCase(unittest.TestCase):
             cls.f2fs_avail = False
 
         try:
-            cls.reiserfs_avail = BlockDev.fs_is_tech_avail(BlockDev.FSTech.REISERFS,
-                                                           BlockDev.FSTechMode.MKFS |
-                                                           BlockDev.FSTechMode.RESIZE |
-                                                           BlockDev.FSTechMode.REPAIR |
-                                                           BlockDev.FSTechMode.CHECK |
-                                                           BlockDev.FSTechMode.SET_LABEL)
-        except:
-            cls.reiserfs_avail = False
-
-        try:
             cls.nilfs2_avail = BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2,
                                                          BlockDev.FSTechMode.MKFS |
                                                          BlockDev.FSTechMode.RESIZE |
