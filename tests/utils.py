@@ -227,6 +227,19 @@ def find_nvme_ctrl_devs_for_subnqn(subnqn):
 
     :param str subnqn: subsystem nqn
     """
+
+    def _check_subsys(subsys, dev_paths):
+        if subsys['SubsystemNQN'] == subnqn:
+            for ctrl in subsys['Controllers']:
+                path = os.path.join('/dev/', ctrl['Controller'])
+                try:
+                    st = os.lstat(path)
+                    # nvme controller node is a character device
+                    if stat.S_ISCHR(st.st_mode):
+                        dev_paths += [path]
+                except:
+                    pass
+
     ret, out, err = run_command("nvme list --output-format=json --verbose")
     if ret != 0:
         raise RuntimeError("Error getting NVMe list: '%s %s'" % (out, err))
@@ -238,16 +251,13 @@ def find_nvme_ctrl_devs_for_subnqn(subnqn):
 
     dev_paths = []
     for dev in decoded['Devices']:
-        if dev['SubsystemNQN'] == subnqn:
-            for ctrl in dev['Controllers']:
-                path = os.path.join('/dev/', ctrl['Controller'])
-                try:
-                    st = os.lstat(path)
-                    # nvme controller node is a character device
-                    if stat.S_ISCHR(st.st_mode):
-                        dev_paths += [path]
-                except:
-                    pass
+        # nvme-cli 2.x
+        if 'Subsystems' in dev:
+            for subsys in dev['Subsystems']:
+                _check_subsys(subsys, dev_paths)
+        # nvme-cli 1.x
+        if 'SubsystemNQN' in dev:
+            _check_subsys(dev, dev_paths)
 
     return dev_paths
 
@@ -258,6 +268,18 @@ def find_nvme_ns_devs_for_subnqn(subnqn):
 
     :param str subnqn: subsystem nqn
     """
+
+    def _check_subsys(subsys, ns_dev_paths):
+        if subsys['SubsystemNQN'] == subnqn:
+            for ns in subsys['Namespaces']:
+                path = os.path.join('/dev/', ns['NameSpace'])
+                try:
+                    st = os.lstat(path)
+                    if stat.S_ISBLK(st.st_mode):
+                        ns_dev_paths += [path]
+                except:
+                    pass
+
     ret, out, err = run_command("nvme list --output-format=json --verbose")
     if ret != 0:
         raise RuntimeError("Error getting NVMe list: '%s %s'" % (out, err))
@@ -269,15 +291,13 @@ def find_nvme_ns_devs_for_subnqn(subnqn):
 
     ns_dev_paths = []
     for dev in decoded['Devices']:
-        if dev['SubsystemNQN'] == subnqn:
-            for ns in dev['Namespaces']:
-                path = os.path.join('/dev/', ns['NameSpace'])
-                try:
-                    st = os.lstat(path)
-                    if stat.S_ISBLK(st.st_mode):
-                        ns_dev_paths += [path]
-                except:
-                    pass
+        # nvme-cli 2.x
+        if 'Subsystems' in dev:
+            for subsys in dev['Subsystems']:
+                _check_subsys(subsys, ns_dev_paths)
+        # nvme-cli 1.x
+        if 'SubsystemNQN' in dev:
+            _check_subsys(dev, ns_dev_paths)
 
     return ns_dev_paths
 
