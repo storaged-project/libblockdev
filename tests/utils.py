@@ -282,6 +282,26 @@ def find_nvme_ns_devs_for_subnqn(subnqn):
     return ns_dev_paths
 
 
+def get_nvme_hostnqn():
+    """
+    Retrieves NVMe host NQN string from /etc/nvme/hostnqn or uses nvme-cli to generate
+    new one (stable, typically generated from machine DMI data) when not available.
+    """
+
+    hostnqn = None
+    try:
+        hostnqn = read_file('/etc/nvme/hostnqn')
+    except:
+        pass
+
+    if (hostnqn is None or hostnqn.strip().len < 1):
+        ret, hostnqn, err = run_command('nvme gen-hostnqn')
+        if ret != 0:
+            raise RuntimeError("Cannot get host NQN: '%s %s'" % (hostnqn, err))
+
+    return hostnqn.strip()
+
+
 def setup_nvme_target(dev_paths, subnqn, hostnqn):
     """
     Sets up a new NVMe target loop device (using nvmetcli) on top of the
@@ -379,14 +399,13 @@ def create_nvmet_device(dev_path):
     :rtype: str
     """
 
-    # TODO: there can be only one.
-    HOSTNQN = 'libblockdev_hostnqn'
     SUBNQN = 'libblockdev_subnqn'
+    hostnqn = get_nvme_hostnqn()
 
-    setup_nvme_target([dev_path], SUBNQN, HOSTNQN)
+    setup_nvme_target([dev_path], SUBNQN, hostnqn)
 
     # connect initiator to the newly created target
-    ret, out, err = run_command("nvme connect --transport=loop --hostnqn=%s --nqn=%s" % (HOSTNQN, SUBNQN))
+    (ret, out, err) = run_command("nvme connect --transport=loop --hostnqn=%s --nqn=%s" % (hostnqn, SUBNQN))
     if ret != 0:
         raise RuntimeError("Error connecting to the NVMe target: '%s %s'" % (out, err))
 
