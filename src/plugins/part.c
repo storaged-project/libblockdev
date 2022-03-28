@@ -1626,6 +1626,9 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
     guint64 grain_size = 0;
     guint64 progress_id = 0;
     guint64 max_size = 0;
+    guint64 start = 0;
+    guint64 end = 0;
+    gint version = 0;
     gchar *msg = NULL;
 
     msg = g_strdup_printf ("Started resizing partition '%s'", part);
@@ -1716,6 +1719,16 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
             close_context (cxt);
             bd_utils_report_finished (progress_id, "Completed");
             return TRUE;
+        }
+
+        /* latest libfdisk introduces default end alignment for new partitions, we should
+           do the same for resizes where we calculate the size ourselves */
+        version = fdisk_get_library_version (NULL);
+        if (version >= 2380 && align != BD_PART_ALIGN_NONE) {
+            start = fdisk_partition_get_start (pa);
+            end = start + max_size;
+            end = fdisk_align_lba_in_range (cxt, end, start, end);
+            max_size = end - start;
         }
 
         if (fdisk_partition_set_size (pa, max_size) != 0) {
