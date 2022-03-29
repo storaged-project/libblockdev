@@ -1078,6 +1078,7 @@ class PartCreateResizePartCase(PartTestCase):
         self.assertEqual(initial_start, ps.start)
         self.assertGreaterEqual(ps.size, initial_size - resize_tolerance)
         new_size = ps.size
+        unaligned_max = new_size
 
         # resize to maximum with no alignment explicitly
         succ = BlockDev.part_resize_part (self.loop_dev, ps.path, new_size, BlockDev.PartAlign.NONE)
@@ -1092,7 +1093,6 @@ class PartCreateResizePartCase(PartTestCase):
         ps = BlockDev.part_get_part_spec(self.loop_dev, ps.path)
         self.assertEqual(initial_start, ps.start)
         self.assertGreaterEqual(ps.size, initial_size - resize_tolerance)
-        max_size = ps.size
 
         # resize back to 20 MB (not MiB) with no alignment
         new_size = 20 * 1000**2
@@ -1103,15 +1103,15 @@ class PartCreateResizePartCase(PartTestCase):
         self.assertGreaterEqual(ps.size, new_size)  # at least the requested size
         self.assertLess(ps.size, new_size + 4 * 1024)  # but also not too big (assuming max. 4 KiB blocks)
 
-        # resize should allow up to 4 MiB over max size
+        # resize should allow up to 4 MiB over unaligned max size
         with self.assertRaisesRegex(GLib.GError, "is bigger than max size"):
-            BlockDev.part_resize_part (self.loop_dev, ps.path, max_size + 4 * 1024**2 + 1, BlockDev.PartAlign.NONE)
+            BlockDev.part_resize_part (self.loop_dev, ps.path, unaligned_max + 4 * 1024**2 + 1, BlockDev.PartAlign.NONE)
 
-        succ = BlockDev.part_resize_part (self.loop_dev, ps.path, max_size + 4 * 1024**2, BlockDev.PartAlign.NONE)
+        succ = BlockDev.part_resize_part (self.loop_dev, ps.path, unaligned_max + 4 * 1024**2, BlockDev.PartAlign.NONE)
         self.assertTrue(succ)
         ps = BlockDev.part_get_part_spec(self.loop_dev, ps.path)
         self.assertEqual(initial_start, ps.start)
-        self.assertGreaterEqual(ps.size, max_size) # at least the requested size
+        self.assertGreaterEqual(ps.size, unaligned_max) # at least the requested size
 
 class PartCreateDeletePartCase(PartTestCase):
     @tag_test(TestTags.CORE)
