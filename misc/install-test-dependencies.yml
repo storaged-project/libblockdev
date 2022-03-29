@@ -186,7 +186,6 @@
       - python3-packaging
       - python3-pydbus
       - python3-yaml
-      - reiserfsprogs
       - targetcli-fb
       - udftools
       - volume-key

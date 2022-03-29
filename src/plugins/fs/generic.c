@@ -38,7 +38,6 @@
 #include "vfat.h"
 #include "ntfs.h"
 #include "f2fs.h"
-#include "reiserfs.h"
 
 typedef enum {
     BD_FS_MKFS,
@@ -83,7 +82,6 @@ static const BDFSInfo fs_info[] = {
     {"vfat", "mkfs.vfat", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID, "fsck.vfat", "fsck.vfat", "vfat-resize", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "fatlabel", "fsck.vfat", NULL},
     {"ntfs", "mkfs.ntfs", BD_FS_MKFS_LABEL | BD_FS_MKFS_DRY_RUN, "ntfsfix", "ntfsfix", "ntfsresize", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "ntfslabel", "ntfscluster", "ntfslabel"},
     {"f2fs", "mkfs.f2fs", BD_FS_MKFS_LABEL | BD_FS_MKFS_NODISCARD, "fsck.f2fs", "fsck.f2fs", "resize.f2fs", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, NULL, "dump.f2fs", NULL},
-    {"reiserfs", "mkfs.reiserfs", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID, "reiserfsck", "reiserfsck", "resize_reiserfs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "reiserfstune", "debugreiserfs", "reiserfstune"},
     {"nilfs2", "mkfs.nilfs", BD_FS_MKFS_LABEL | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD, NULL, NULL, "nilfs-resize", BD_FS_ONLINE_GROW | BD_FS_ONLINE_SHRINK, "tune-nilfs", "tune-nilfs", "tune-nilfs"},
     {"exfat", "mkfs.exfat", BD_FS_MKFS_LABEL, "fsck.exfat", "fsck.exfat", NULL, 0, "tune.exfat", "tune.exfat", NULL},
     {"btrfs", "mkfs.btrfs", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_NODISCARD, "btrfsck", "btrfsck", "btrfs", BD_FS_ONLINE_GROW | BD_FS_ONLINE_SHRINK, "btrfs", "btrfs", "btrfstune"},
@@ -744,21 +742,6 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
             default:
                 g_assert_not_reached ();
         }
-    } else if (g_strcmp0 (fstype, "reiserfs") == 0) {
-        switch (op) {
-            case BD_FS_RESIZE:
-                return bd_fs_reiserfs_resize (device, new_size, error);
-            case BD_FS_REPAIR:
-                return bd_fs_reiserfs_repair (device, NULL, error);
-            case BD_FS_CHECK:
-                return bd_fs_reiserfs_check (device, NULL, error);
-            case BD_FS_LABEL:
-                return bd_fs_reiserfs_set_label (device, label, error);
-            case BD_FS_UUID:
-                return bd_fs_reiserfs_set_uuid (device, uuid, error);
-            default:
-                g_assert_not_reached ();
-        }
     } else if (g_strcmp0 (fstype, "nilfs2") == 0) {
         switch (op) {
             case BD_FS_RESIZE:
@@ -1027,13 +1010,6 @@ guint64 bd_fs_get_size (const gchar *device, GError **error) {
             bd_fs_f2fs_info_free (info);
         }
         return size;
-    } else if (g_strcmp0 (fstype, "reiserfs") == 0) {
-        BDFSReiserFSInfo *info = bd_fs_reiserfs_get_info (device, error);
-        if (info) {
-            size = info->block_size * info->block_count;
-            bd_fs_reiserfs_info_free (info);
-        }
-        return size;
     } else if (g_strcmp0 (fstype, "nilfs2") == 0) {
         BDFSNILFS2Info *info = bd_fs_nilfs2_get_info (device, error);
         if (info) {
@@ -1122,13 +1098,6 @@ guint64 bd_fs_get_free_space (const gchar *device, GError **error) {
         if (info) {
             size = info->free_space;
             bd_fs_ntfs_info_free (info);
-        }
-        return size;
-    } else if (g_strcmp0 (fstype, "reiserfs") == 0) {
-        BDFSReiserFSInfo *info = bd_fs_reiserfs_get_info (device, error);
-        if (info) {
-            size = info->block_size * info->free_blocks;
-            bd_fs_reiserfs_info_free (info);
         }
         return size;
     } else if (g_strcmp0 (fstype, "nilfs2") == 0) {
@@ -1465,7 +1434,6 @@ extern BDExtraArg** bd_fs_ext4_mkfs_options (BDFSMkfsOptions *options, const BDE
 extern BDExtraArg** bd_fs_f2fs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
 extern BDExtraArg** bd_fs_nilfs2_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
 extern BDExtraArg** bd_fs_ntfs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
-extern BDExtraArg** bd_fs_reiserfs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
 extern BDExtraArg** bd_fs_vfat_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
 extern BDExtraArg** bd_fs_xfs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
 extern BDExtraArg** bd_fs_btrfs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
@@ -1521,9 +1489,6 @@ gboolean bd_fs_mkfs (const gchar *device, const gchar *fstype, BDFSMkfsOptions *
     } else if (g_strcmp0 (fstype, "ntfs") == 0) {
         extra_args = bd_fs_ntfs_mkfs_options (options, extra);
         ret = bd_fs_ntfs_mkfs (device, (const BDExtraArg **) extra_args, error);
-    } else if (g_strcmp0 (fstype, "reiserfs") == 0) {
-        extra_args = bd_fs_reiserfs_mkfs_options (options, extra);
-        ret = bd_fs_reiserfs_mkfs (device, (const BDExtraArg **) extra_args, error);
     } else if (g_strcmp0 (fstype, "vfat") == 0) {
         extra_args = bd_fs_vfat_mkfs_options (options, extra);
         ret = bd_fs_vfat_mkfs (device, (const BDExtraArg **) extra_args, error);

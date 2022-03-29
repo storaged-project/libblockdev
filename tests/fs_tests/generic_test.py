@@ -406,14 +406,6 @@ class GenericMkfs(GenericTestCase):
         label = "label"
         self._test_ext_generic_mkfs("ntfs", BlockDev.fs_ntfs_get_info, label, None)
 
-    def test_reiserfs_generic_mkfs(self):
-        """ Test generic mkfs with ReiserFS """
-        if not self.reiserfs_avail:
-            self.skipTest("skipping ReiserFS: not available")
-        label = "label"
-        uuid = "8802574c-587b-43b9-a6be-9de77759d2c5"
-        self._test_ext_generic_mkfs("reiserfs", BlockDev.fs_reiserfs_get_info, label, uuid)
-
     def test_vfat_generic_mkfs(self):
         """ Test generic mkfs with vfat """
         label = "LABEL"
@@ -533,12 +525,6 @@ class GenericCheck(GenericTestCase):
         else:
             self._test_generic_check(mkfs_function=BlockDev.fs_f2fs_mkfs)
 
-    def test_reiserfs_generic_check(self):
-        """Test generic check function with an reiserfs file system"""
-        if not self.reiserfs_avail:
-            self.skipTest("skipping ReiserFS: not available")
-        self._test_generic_check(mkfs_function=BlockDev.fs_reiserfs_mkfs)
-
     def test_nilfs2_generic_check(self):
         """Test generic check function with an nilfs2 file system"""
         if not self.nilfs2_avail:
@@ -591,12 +577,6 @@ class GenericRepair(GenericTestCase):
         if not self.f2fs_avail:
             self.skipTest("skipping F2FS: not available")
         self._test_generic_repair(mkfs_function=BlockDev.fs_f2fs_mkfs)
-
-    def test_reiserfs_generic_repair(self):
-        """Test generic repair function with an reiserfs file system"""
-        if not self.reiserfs_avail:
-            self.skipTest("skipping ReiserFS: not available")
-        self._test_generic_repair(mkfs_function=BlockDev.fs_reiserfs_mkfs)
 
     def test_nilfs2_generic_repair(self):
         """Test generic repair function with an nilfs2 file system"""
@@ -652,12 +632,6 @@ class GenericSetLabel(GenericTestCase):
         with self.assertRaises(GLib.GError):
             # f2fs doesn't support relabeling
             self._test_generic_set_label(mkfs_function=BlockDev.fs_f2fs_mkfs)
-
-    def test_reiserfs_generic_set_label(self):
-        """Test generic set_label function with a reiserfs file system"""
-        if not self.reiserfs_avail:
-            self.skipTest("skipping ReiserFS: not available")
-        self._test_generic_set_label(mkfs_function=BlockDev.fs_reiserfs_mkfs)
 
     def test_nilfs2_generic_set_label(self):
         """Test generic set_label function with a nilfs2 file system"""
@@ -726,12 +700,6 @@ class GenericSetUUID(GenericTestCase):
         with self.assertRaises(GLib.GError):
             # f2fs doesn't support setting UUID
             self._test_generic_set_uuid(mkfs_function=BlockDev.fs_f2fs_mkfs)
-
-    def test_reiserfs_generic_set_uuid(self):
-        """Test generic set_uuid function with a reiserfs file system"""
-        if not self.reiserfs_avail:
-            self.skipTest("skipping ReiserFS: not available")
-        self._test_generic_set_uuid(mkfs_function=BlockDev.fs_reiserfs_mkfs)
 
     def test_nilfs2_generic_set_uuid(self):
         """Test generic set_uuid function with a nilfs2 file system"""
@@ -926,12 +894,6 @@ class GenericResize(GenericTestCase):
         else:
             self._test_generic_resize(mkfs_function=BlockDev.fs_f2fs_mkfs)
 
-    def test_reiserfs_generic_resize(self):
-        """Test generic resize function with an reiserfs file system"""
-        if not self.reiserfs_avail:
-            self.skipTest("skipping ReiserFS: not available")
-        self._test_generic_resize(mkfs_function=BlockDev.fs_reiserfs_mkfs)
-
     def test_nilfs2_generic_resize(self):
         """Test generic resize function with an nilfs2 file system"""
         if not self.nilfs2_avail:
@@ -1017,12 +979,6 @@ class GenericGetFreeSpace(GenericTestCase):
                 return BlockDev.fs_vfat_mkfs(device, options)
 
         self._test_get_free_space(mkfs_function=mkfs_vfat)
-
-    def test_reiserfs_get_free_space(self):
-        """Test generic resize function with an reiserfs file system"""
-        if not self.reiserfs_avail:
-            self.skipTest("skipping ReiserFS: not available")
-        self._test_get_free_space(mkfs_function=BlockDev.fs_reiserfs_mkfs)
 
     def test_nilfs2_get_free_space(self):
         """Test generic resize function with an nilfs2 file system"""
