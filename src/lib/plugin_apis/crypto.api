@@ -46,6 +46,7 @@ typedef enum {
     BD_CRYPTO_TECH_MODE_RESIZE         = 1 << 5,
     BD_CRYPTO_TECH_MODE_SUSPEND_RESUME = 1 << 6,
     BD_CRYPTO_TECH_MODE_BACKUP_RESTORE = 1 << 7,
+    BD_CRYPTO_TECH_MODE_MODIFY         = 1 << 8,
 } BDCryptoTechMode;
 
 typedef enum {
@@ -1026,6 +1027,31 @@ gboolean bd_crypto_luks_header_backup (const gchar *device, const gchar *backup_
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_BACKUP_RESTORE
  */
 gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup_file, GError **error);
+
+/**
+ * bd_crypto_luks_set_label:
+ * @device: device to set label on
+ * @label: (nullable): label to set
+ * @subsystem: (nullable): subsystem to set
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the given @label and @subsystem were successfully set or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_MODIFY
+ */
+gboolean bd_crypto_luks_set_label (const gchar *device, const gchar *label, const gchar *subsystem, GError **error);
+
+/**
+ * bd_crypto_luks_set_uuid:
+ * @device: device to set UUID on
+ * @uuid: (nullable): UUID to set or %NULL to generate a new one
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the given @uuid was successfully set or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_MODIFY
+ */
+gboolean bd_crypto_luks_set_uuid (const gchar *device, const gchar *uuid, GError **error);
 
 /**
  * bd_crypto_luks_info:

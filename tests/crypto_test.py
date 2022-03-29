@@ -991,6 +991,96 @@ class CryptoTestInfo(CryptoTestCase):
         self.assertTrue(succ)
 
 
+class CryptoTestSetLabel(CryptoTestCase):
+
+    label = "aaaaaa"
+    subsystem = "bbbbbb"
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_luks_format(self):
+        """Verify that we can set label on a LUKS device"""
+
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 256, PASSWD, None, 0)
+        self.assertTrue(succ)
+
+        with self.assertRaisesRegex(GLib.GError, r"Label can be set only on LUKS 2"):
+            BlockDev.crypto_luks_set_label(self.loop_dev, self.label, self.subsystem)
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_format(self):
+        """Verify that we can set label on a LUKS 2 device"""
+
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 256, PASSWD, None, 0,
+                                           BlockDev.CryptoLUKSVersion.LUKS2, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_set_label(self.loop_dev, self.label, self.subsystem)
+        self.assertTrue(succ)
+
+        _ret, label, _err = run_command("blkid -p -ovalue -sLABEL %s" % self.loop_dev)
+        self.assertEqual(label, self.label)
+        _ret, subsystem, _err = run_command("blkid -p -ovalue -sSUBSYSTEM %s" % self.loop_dev)
+        self.assertEqual(subsystem, self.subsystem)
+
+        succ = BlockDev.crypto_luks_set_label(self.loop_dev, None, None)
+        self.assertTrue(succ)
+
+        _ret, label, _err = run_command("blkid -p -ovalue -sLABEL %s" % self.loop_dev)
+        self.assertEqual(label, "")
+        _ret, subsystem, _err = run_command("blkid -p -ovalue -sSUBSYSTEM %s" % self.loop_dev)
+        self.assertEqual(subsystem, "")
+
+
+class CryptoTestSetUuid(CryptoTestCase):
+
+    test_uuid = "4d7086c4-a4d3-432f-819e-73da03870df9"
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_luks_format(self):
+        """Verify that we can set label on a LUKS device"""
+
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 256, PASSWD, None, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_set_uuid(self.loop_dev, self.test_uuid)
+        self.assertTrue(succ)
+
+        info = BlockDev.crypto_luks_info(self.loop_dev)
+        self.assertIsNotNone(info)
+        self.assertEqual(info.uuid, self.test_uuid)
+
+        succ = BlockDev.crypto_luks_set_uuid(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        info = BlockDev.crypto_luks_info(self.loop_dev)
+        self.assertIsNotNone(info)
+        self.assertNotEqual(info.uuid, self.test_uuid)
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_format(self):
+        """Verify that we can set label on a LUKS 2 device"""
+
+        succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 256, PASSWD, None, 0,
+                                           BlockDev.CryptoLUKSVersion.LUKS2, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_set_uuid(self.loop_dev, self.test_uuid)
+        self.assertTrue(succ)
+
+        info = BlockDev.crypto_luks_info(self.loop_dev)
+        self.assertIsNotNone(info)
+        self.assertEqual(info.uuid, self.test_uuid)
+
+        succ = BlockDev.crypto_luks_set_uuid(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        info = BlockDev.crypto_luks_info(self.loop_dev)
+        self.assertIsNotNone(info)
+        self.assertNotEqual(info.uuid, self.test_uuid)
+
+
 class CryptoTestLuksSectorSize(CryptoTestCase):
     def setUp(self):
         if not check_cryptsetup_version("2.4.0"):

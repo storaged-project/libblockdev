@@ -2112,6 +2112,106 @@ gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup
 }
 
 /**
+ * bd_crypto_luks_set_label:
+ * @device: device to set label on
+ * @label: (nullable): label to set
+ * @subsystem: (nullable): subsystem to set
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the given @label and @subsystem were successfully set or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_MODIFY
+ */
+#ifndef LIBCRYPTSETUP_2
+gboolean bd_crypto_luks_set_label (const gchar *device, const gchar *label, const gchar *subsystem, GError **error) {
+    g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                 "Label can be set only on LUKS 2 devices and requires libcryptsetup >= 2.0");
+    return NULL;
+}
+#else
+gboolean bd_crypto_luks_set_label (const gchar *device, const gchar *label, const gchar *subsystem, GError **error) {
+    struct crypt_device *cd = NULL;
+    gint ret = 0;
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        return FALSE;
+    }
+
+    ret = crypt_load (cd, CRYPT_LUKS, NULL);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to load device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        return FALSE;
+    }
+
+    if (g_strcmp0 (crypt_get_type (cd), CRYPT_LUKS2) != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                     "Label can be set only on LUKS 2 devices: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        return FALSE;
+    }
+
+    ret = crypt_set_label (cd, label, subsystem);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to set label: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+
+    return TRUE;
+}
+#endif
+
+/**
+ * bd_crypto_luks_set_uuid:
+ * @device: device to set UUID on
+ * @uuid: (nullable): UUID to set or %NULL to generate a new one
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the given @uuid was successfully set or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_MODIFY
+ */
+gboolean bd_crypto_luks_set_uuid (const gchar *device, const gchar *uuid, GError **error) {
+    struct crypt_device *cd = NULL;
+    gint ret = 0;
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        return FALSE;
+    }
+
+    ret = crypt_load (cd, CRYPT_LUKS, NULL);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to load device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        return FALSE;
+    }
+
+    ret = crypt_set_uuid (cd, uuid);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to set UUID: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+
+    return TRUE;
+}
+
+/**
  * bd_crypto_luks_info:
  * @device: a device to get information about
  * @error: (out) (optional): place to store error (if any)
