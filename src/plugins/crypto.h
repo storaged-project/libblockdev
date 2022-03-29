@@ -165,6 +165,8 @@ typedef struct BDCryptoLUKSInfo {
     gchar *uuid;
     gchar *backing_device;
     gint64 sector_size;
+    gchar *label;
+    gchar *subsystem;
 } BDCryptoLUKSInfo;
 
 void bd_crypto_luks_info_free (BDCryptoLUKSInfo *info);

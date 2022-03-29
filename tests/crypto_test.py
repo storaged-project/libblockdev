@@ -1006,6 +1006,11 @@ class CryptoTestSetLabel(CryptoTestCase):
         with self.assertRaisesRegex(GLib.GError, r"Label can be set only on LUKS 2"):
             BlockDev.crypto_luks_set_label(self.loop_dev, self.label, self.subsystem)
 
+        info = BlockDev.crypto_luks_info(self.loop_dev)
+        self.assertIsNotNone(info)
+        self.assertEqual(info.label, "")
+        self.assertEqual(info.subsystem, "")
+
     @tag_test(TestTags.SLOW, TestTags.CORE)
     @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_format(self):
@@ -1018,13 +1023,24 @@ class CryptoTestSetLabel(CryptoTestCase):
         succ = BlockDev.crypto_luks_set_label(self.loop_dev, self.label, self.subsystem)
         self.assertTrue(succ)
 
+        info = BlockDev.crypto_luks_info(self.loop_dev)
+        self.assertIsNotNone(info)
+        self.assertEqual(info.label, self.label)
+        self.assertEqual(info.subsystem, self.subsystem)
+
         _ret, label, _err = run_command("blkid -p -ovalue -sLABEL %s" % self.loop_dev)
         self.assertEqual(label, self.label)
+
         _ret, subsystem, _err = run_command("blkid -p -ovalue -sSUBSYSTEM %s" % self.loop_dev)
         self.assertEqual(subsystem, self.subsystem)
 
         succ = BlockDev.crypto_luks_set_label(self.loop_dev, None, None)
         self.assertTrue(succ)
+
+        info = BlockDev.crypto_luks_info(self.loop_dev)
+        self.assertIsNotNone(info)
+        self.assertEqual(info.label, "")
+        self.assertEqual(info.subsystem, "")
 
         _ret, label, _err = run_command("blkid -p -ovalue -sLABEL %s" % self.loop_dev)
         self.assertEqual(label, "")

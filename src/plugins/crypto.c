@@ -210,6 +210,8 @@ void bd_crypto_luks_info_free (BDCryptoLUKSInfo *info) {
     g_free (info->mode);
     g_free (info->uuid);
     g_free (info->backing_device);
+    g_free (info->label);
+    g_free (info->subsystem);
     g_free (info);
 }
 
@@ -225,6 +227,8 @@ BDCryptoLUKSInfo* bd_crypto_luks_info_copy (BDCryptoLUKSInfo *info) {
     new_info->uuid = g_strdup (info->uuid);
     new_info->backing_device = g_strdup (info->backing_device);
     new_info->sector_size = info->sector_size;
+    new_info->label = g_strdup (info->label);
+    new_info->subsystem = g_strdup (info->subsystem);
 
     return new_info;
 }
@@ -2211,6 +2215,100 @@ gboolean bd_crypto_luks_set_uuid (const gchar *device, const gchar *uuid, GError
     return TRUE;
 }
 
+static gint synced_close (gint fd) {
+    gint ret = 0;
+    ret = fsync (fd);
+    if (close (fd) != 0)
+        ret = 1;
+    return ret;
+}
+
+static gboolean get_subsystem_label (const gchar *device, gchar **subsystem, gchar **label, GError **error) {
+    blkid_probe probe = NULL;
+    gint fd = 0;
+    gint status = 0;
+    const gchar *value = NULL;
+
+    probe = blkid_new_probe ();
+    if (!probe) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to create a probe for the device '%s'", device);
+        return FALSE;
+    }
+
+    fd = open (device, O_RDONLY|O_CLOEXEC);
+    if (fd == -1) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to create a probe for the device '%s'", device);
+        blkid_free_probe (probe);
+        return FALSE;
+    }
+
+    status = blkid_probe_set_device (probe, fd, 0, 0);
+    if (status != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to create a probe for the device '%s'", device);
+        blkid_free_probe (probe);
+        synced_close (fd);
+        return FALSE;
+    }
+
+    blkid_probe_enable_partitions (probe, 1);
+
+    status = blkid_do_probe (probe);
+    if (status != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to probe the device '%s'", device);
+        blkid_free_probe (probe);
+        synced_close (fd);
+        return FALSE;
+    }
+
+    status = blkid_probe_has_value (probe, "LABEL");
+
+    if (status == 0)
+        *label = g_strdup ("");
+    else {
+        status = blkid_probe_lookup_value (probe, "LABEL", &value, NULL);
+        if (status != 0) {
+            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                         "Failed to get label for the device '%s'", device);
+            blkid_free_probe (probe);
+            synced_close (fd);
+            return FALSE;
+        }
+
+        if (value)
+            *label = g_strdup (value);
+        else
+            *label = g_strdup ("");
+    }
+
+    status = blkid_probe_has_value (probe, "SUBSYSTEM");
+    if (status == 0)
+        *subsystem = g_strdup ("");
+    else {
+        status = blkid_probe_lookup_value (probe, "SUBSYSTEM", &value, NULL);
+        if (status != 0) {
+            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                         "Failed to get subsystem for the device '%s'", device);
+            blkid_free_probe (probe);
+            synced_close (fd);
+            return FALSE;
+        }
+
+        if (value)
+            *subsystem = g_strdup (value);
+        else
+            *subsystem = g_strdup ("");
+    }
+
+    blkid_free_probe (probe);
+    synced_close (fd);
+
+    return TRUE;
+}
+
 /**
  * bd_crypto_luks_info:
  * @device: a device to get information about
@@ -2225,6 +2323,7 @@ BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *device, GError **error) {
     BDCryptoLUKSInfo *info = NULL;
     const gchar *version = NULL;
     gint ret;
+    gboolean success = FALSE;
 
     ret = crypt_init (&cd, device);
     if (ret != 0) {
@@ -2273,7 +2372,20 @@ BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *device, GError **error) {
     info->sector_size = 0;
 #endif
 
+    if (info->version == BD_CRYPTO_LUKS_VERSION_LUKS2) {
+        success = get_subsystem_label (crypt_get_device_name (cd) , &(info->subsystem), &(info->label), error);
+        if (!success) {
+            crypt_free (cd);
+            bd_crypto_luks_info_free (info);
+            return NULL;
+        }
+    } else {
+        info->label = g_strdup ("");
+        info->subsystem = g_strdup ("");
+    }
+
     crypt_free (cd);
+
     return info;
 }
 

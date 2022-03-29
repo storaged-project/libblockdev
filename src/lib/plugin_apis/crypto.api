@@ -367,8 +367,9 @@ GType bd_crypto_luks_info_get_type();
  * @mode: used cipher mode (e.g. "xts-plain")
  * @uuid: UUID of the LUKS device
  * @backing_device: name of the underlying block device
- * @sector_size: size (in bytes) of encryption sector
- *               Note: sector size is valid only for LUKS 2
+ * @sector_size: size (in bytes) of encryption sector (valid only for LUKS 2)
+ * @label: label of the LUKS device (valid only for LUKS 2)
+ * @subsystem: subsystem of the LUKS device (valid only for LUKS 2)
  */
 typedef struct BDCryptoLUKSInfo {
     BDCryptoLUKSVersion version;
@@ -377,6 +378,8 @@ typedef struct BDCryptoLUKSInfo {
     gchar *uuid;
     gchar *backing_device;
     gint64 sector_size;
+    gchar *label;
+    gchar *subsystem;
 } BDCryptoLUKSInfo;
 
 /**
@@ -393,6 +396,8 @@ void bd_crypto_luks_info_free (BDCryptoLUKSInfo *info) {
     g_free (info->mode);
     g_free (info->uuid);
     g_free (info->backing_device);
+    g_free (info->label);
+    g_free (info->subsystem);
     g_free (info);
 }
 
@@ -414,6 +419,8 @@ BDCryptoLUKSInfo* bd_crypto_luks_info_copy (BDCryptoLUKSInfo *info) {
     new_info->uuid = g_strdup (info->uuid);
     new_info->backing_device = g_strdup (info->backing_device);
     new_info->sector_size = info->sector_size;
+    new_info->label = g_strdup (info->label);
+    new_info->subsystem = g_strdup (info->subsystem);
 
     return new_info;
 }
