@@ -293,7 +293,7 @@ class NVMeFabricsTestCase(NVMeTest):
             if not ret:
                 raise RuntimeError("Failed to setup loop device %s for testing" % self.dev_files[i])
             self.loop_devs += ["/dev/%s" % loop]
-        setup_nvme_target(self.loop_devs, self.SUBNQN, self.hostnqn)
+        setup_nvme_target(self.loop_devs, self.SUBNQN)
 
     def _clean_up(self):
         teardown_nvme_target()
