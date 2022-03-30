@@ -685,3 +685,79 @@ BDNVMEDiscoveryLogEntry ** bd_nvme_discover (const gchar *discovery_ctrl, gboole
 
     return (BDNVMEDiscoveryLogEntry **) g_ptr_array_free (ptr_array, FALSE);
 }
+
+
+/**
+ * bd_nvme_find_ctrls_for_ns:
+ * @ns_sysfs_path: NVMe namespace device file.
+ * @subsysnqn: (nullable): Limit matching to the specified subsystem NQN.
+ * @host_nqn: (nullable): Limit matching to the specified host NQN.
+ * @host_id: (nullable): Limit matching to the specified host ID.
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * A convenient utility function to look up all controllers associated
+ *  with a NVMe subsystem the specified namespace is part of.
+ *
+ * Returns: (transfer full) (array zero-terminated=1): list of controller sysfs paths
+ *          or %NULL in case of an error (with @error set).
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gchar ** bd_nvme_find_ctrls_for_ns (const gchar *ns_sysfs_path, const gchar *subsysnqn, const gchar *host_nqn, const gchar *host_id, GError **error G_GNUC_UNUSED) {
+    GPtrArray *ptr_array;
+    nvme_root_t root;
+    nvme_host_t h;
+    nvme_subsystem_t s;
+    nvme_ctrl_t c;
+    nvme_ns_t n;
+    char realp[PATH_MAX];
+
+    ptr_array = g_ptr_array_new ();
+
+    root = nvme_scan (NULL);
+    g_warn_if_fail (root != NULL);
+
+    nvme_for_each_host (root, h) {
+        if (host_nqn && g_strcmp0 (nvme_host_get_hostnqn (h), host_nqn) != 0)
+            continue;
+        if (host_id && g_strcmp0 (nvme_host_get_hostid (h), host_id) != 0)
+            continue;
+
+        nvme_for_each_subsystem (h, s) {
+            gboolean found = FALSE;
+
+            if (subsysnqn && g_strcmp0 (nvme_subsystem_get_nqn (s), subsysnqn) != 0)
+                continue;
+
+            nvme_subsystem_for_each_ctrl (s, c)
+                nvme_ctrl_for_each_ns (c, n)
+                    if (realpath (nvme_ns_get_sysfs_dir (n), realp) &&
+                        g_strcmp0 (realp, ns_sysfs_path) == 0) {
+                        if (realpath (nvme_ctrl_get_sysfs_dir (c), realp)) {
+                            g_ptr_array_add (ptr_array, g_strdup (realp));
+                            break;
+                        }
+                    }
+
+            nvme_subsystem_for_each_ns (s, n)
+                if (realpath (nvme_ns_get_sysfs_dir (n), realp) &&
+                    g_strcmp0 (realp, ns_sysfs_path) == 0) {
+                    found = TRUE;
+                    /* at least one of the namespaces match, don't care about the rest */
+                    break;
+                }
+
+            if (found)
+                /* add all controllers in the subsystem */
+                nvme_subsystem_for_each_ctrl (s, c) {
+                    if (realpath (nvme_ctrl_get_sysfs_dir (c), realp)) {
+                        g_ptr_array_add (ptr_array, g_strdup (realp));
+                    }
+                }
+        }
+    }
+    nvme_free_tree (root);
+
+    g_ptr_array_add (ptr_array, NULL);  /* trailing NULL element */
+    return (gchar **) g_ptr_array_free (ptr_array, FALSE);
+}

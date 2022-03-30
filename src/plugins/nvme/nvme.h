@@ -667,5 +667,11 @@ BDNVMEDiscoveryLogEntry ** bd_nvme_discover          (const gchar       *discove
                                                       const BDExtraArg **extra,
                                                       GError           **error);
 
+gchar **               bd_nvme_find_ctrls_for_ns     (const gchar       *ns_sysfs_path,
+                                                      const gchar       *subsysnqn,
+                                                      const gchar       *host_nqn,
+                                                      const gchar       *host_id,
+                                                      GError           **error);
+
 
 #endif  /* BD_NVME */
