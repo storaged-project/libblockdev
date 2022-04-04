@@ -46,6 +46,7 @@ typedef enum {
     BD_CRYPTO_TECH_MODE_RESIZE         = 1 << 5,
     BD_CRYPTO_TECH_MODE_SUSPEND_RESUME = 1 << 6,
     BD_CRYPTO_TECH_MODE_BACKUP_RESTORE = 1 << 7,
+    BD_CRYPTO_TECH_MODE_MODIFY         = 1 << 8,
 } BDCryptoTechMode;
 
 typedef enum {
@@ -366,8 +367,9 @@ GType bd_crypto_luks_info_get_type();
  * @mode: used cipher mode (e.g. "xts-plain")
  * @uuid: UUID of the LUKS device
  * @backing_device: name of the underlying block device
- * @sector_size: size (in bytes) of encryption sector
- *               Note: sector size is valid only for LUKS 2
+ * @sector_size: size (in bytes) of encryption sector (valid only for LUKS 2)
+ * @label: label of the LUKS device (valid only for LUKS 2)
+ * @subsystem: subsystem of the LUKS device (valid only for LUKS 2)
  */
 typedef struct BDCryptoLUKSInfo {
     BDCryptoLUKSVersion version;
@@ -376,6 +378,8 @@ typedef struct BDCryptoLUKSInfo {
     gchar *uuid;
     gchar *backing_device;
     gint64 sector_size;
+    gchar *label;
+    gchar *subsystem;
 } BDCryptoLUKSInfo;
 
 /**
@@ -392,6 +396,8 @@ void bd_crypto_luks_info_free (BDCryptoLUKSInfo *info) {
     g_free (info->mode);
     g_free (info->uuid);
     g_free (info->backing_device);
+    g_free (info->label);
+    g_free (info->subsystem);
     g_free (info);
 }
 
@@ -413,6 +419,8 @@ BDCryptoLUKSInfo* bd_crypto_luks_info_copy (BDCryptoLUKSInfo *info) {
     new_info->uuid = g_strdup (info->uuid);
     new_info->backing_device = g_strdup (info->backing_device);
     new_info->sector_size = info->sector_size;
+    new_info->label = g_strdup (info->label);
+    new_info->subsystem = g_strdup (info->subsystem);
 
     return new_info;
 }
@@ -1026,6 +1034,31 @@ gboolean bd_crypto_luks_header_backup (const gchar *device, const gchar *backup_
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_BACKUP_RESTORE
  */
 gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup_file, GError **error);
+
+/**
+ * bd_crypto_luks_set_label:
+ * @device: device to set label on
+ * @label: (nullable): label to set
+ * @subsystem: (nullable): subsystem to set
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the given @label and @subsystem were successfully set or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_MODIFY
+ */
+gboolean bd_crypto_luks_set_label (const gchar *device, const gchar *label, const gchar *subsystem, GError **error);
+
+/**
+ * bd_crypto_luks_set_uuid:
+ * @device: device to set UUID on
+ * @uuid: (nullable): UUID to set or %NULL to generate a new one
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the given @uuid was successfully set or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_MODIFY
+ */
+gboolean bd_crypto_luks_set_uuid (const gchar *device, const gchar *uuid, GError **error);
 
 /**
  * bd_crypto_luks_info:

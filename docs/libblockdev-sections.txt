@@ -103,6 +103,8 @@ bd_crypto_luks_resume
 bd_crypto_luks_kill_slot
 bd_crypto_luks_header_backup
 bd_crypto_luks_header_restore
+bd_crypto_luks_set_label
+bd_crypto_luks_set_uuid
 BDCryptoLUKSInfo
 bd_crypto_luks_info_free
 bd_crypto_luks_info_copy
