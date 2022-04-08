@@ -1173,6 +1173,75 @@ class LvmPVVGthpoolTestCase(LvmPVVGTestCase):
         LvmPVVGTestCase._clean_up(self)
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
+class LvmTestPartialLVs(LvmPVVGLVTestCase):
+    # the mirror halves are actually written to during sync-up and the
+    # default sparse_size of 1Gig is too much for a regular /tmp, so
+    # let's use smaller ones here.
+    #
+    _sparse_size = 20*1024**2
+
+    @tag_test(TestTags.CORE)
+    def test_lvpartial(self):
+        """Verify that missing PVs are detected and can be dealt with"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0, None)
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_pvinfo(self.loop_dev2)
+        self.assertTrue(info)
+        self.assertFalse(info.missing)
+        self.assertEqual(info.vg_name, "testVG")
+        loop_dev2_pv_uuid = info.pv_uuid
+
+        # Create a mirrored LV on the first two PVs
+        with wait_for_sync("testVG", "testLV"):
+            succ = BlockDev.lvm_lvcreate("testVG", "testLV", 5 * 1024**2, "raid1",
+                                         [self.loop_dev, self.loop_dev2], None)
+            self.assertTrue(succ)
+
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
+        self.assertTrue(info)
+        self.assertEqual(info.attr[8], "-")
+
+        # Disconnect the second PV, this should cause it to be flagged
+        # as missing, and testLV to be reported as "partial".
+        delete_lio_device(self.loop_dev2)
+
+        # Kick lvmdbusd so that it notices the missing PV.
+        dbus.SystemBus().call_blocking('com.redhat.lvmdbus1', '/com/redhat/lvmdbus1/Manager',
+                                       'com.redhat.lvmdbus1.Manager', 'Refresh', '', [])
+
+        pvs = BlockDev.lvm_pvs()
+        found = False
+        for pv in pvs:
+            if pv.pv_uuid == loop_dev2_pv_uuid:
+                found = True
+                self.assertTrue(pv.missing)
+                self.assertEqual(pv.vg_name, "testVG")
+        self.assertTrue(found)
+
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
+        self.assertTrue(info)
+        self.assertEqual(info.attr[8], "p")
+
+        # remove records of missing PVs
+        succ = BlockDev.lvm_vgreduce("testVG", None, None)
+        self.assertTrue(succ)
+
+        pvs = BlockDev.lvm_pvs()
+        found = False
+        for pv in pvs:
+            if pv.pv_uuid == loop_dev2_pv_uuid:
+                found = True
+        self.assertFalse(found)
+
+@unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmTestLVsAll(LvmPVVGthpoolTestCase):
     def test_lvs_all(self):
         """Verify that info is gathered for all LVs"""

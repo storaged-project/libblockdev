@@ -344,6 +344,7 @@ bd_lvm_lvcreate
 bd_lvm_lvremove
 bd_lvm_lvrename
 bd_lvm_lvresize
+bd_lvm_lvrepair
 bd_lvm_lvactivate
 bd_lvm_lvdeactivate
 bd_lvm_lvsnapshotcreate

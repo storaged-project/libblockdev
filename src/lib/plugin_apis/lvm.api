@@ -123,6 +123,7 @@ typedef struct BDLVMPVdata {
     guint64 vg_free_count;
     guint64 vg_pv_count;
     gchar **pv_tags;
+    gboolean missing;
 } BDLVMPVdata;
 
 /**
@@ -151,6 +152,7 @@ BDLVMPVdata* bd_lvm_pvdata_copy (BDLVMPVdata *data) {
     new_data->vg_free_count = data->vg_free_count;
     new_data->vg_pv_count = data->vg_pv_count;
     new_data->pv_tags = g_strdupv (data->pv_tags);
+    new_data->missing = data->missing;
 
     return new_data;
 }
@@ -1113,6 +1115,21 @@ gboolean bd_lvm_lvrename (const gchar *vg_name, const gchar *lv_name, const gcha
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_MODIFY
  */
 gboolean bd_lvm_lvresize (const gchar *vg_name, const gchar *lv_name, guint64 size, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_lvm_lvrepair:
+ * @vg_name: name of the VG containing the to-be-repaired LV
+ * @lv_name: name of the to-be-repaired LV
+ * @pv_list: (array zero-terminated=1): list of PVs to be used for the repair
+ * @extra: (nullable) (array zero-terminated=1): extra options for the LV repair
+ *                                                 (just passed to LVM as is)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the @vg_name/@lv_name LV was successfully repaired or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_lvrepair (const gchar *vg_name, const gchar *lv_name, const gchar **pv_list, const BDExtraArg **extra, GError **error);
 
 /**
  * bd_lvm_lvactivate:

@@ -989,6 +989,7 @@ static BDLVMPVdata* get_pv_data_from_props (GVariant *props, GError **error) {
     g_variant_dict_lookup (&dict, "FreeBytes", "t", &(data->pv_free));
     g_variant_dict_lookup (&dict, "SizeBytes", "t", &(data->pv_size));
     g_variant_dict_lookup (&dict, "PeStart", "t", &(data->pe_start));
+    g_variant_dict_lookup (&dict, "Missing", "b", &(data->missing));
 
     value = g_variant_dict_lookup_value (&dict, "Tags", (GVariantType*) "as");
     if (value) {
@@ -2443,6 +2444,25 @@ gboolean bd_lvm_lvresize (const gchar *vg_name, const gchar *lv_name, guint64 si
     g_variant_builder_clear (&builder);
 
     return call_lv_method_sync (vg_name, lv_name, "Resize", params, NULL, extra, TRUE, error);
+}
+
+/**
+ * bd_lvm_lvrepair:
+ * @vg_name: name of the VG containing the to-be-repaired LV
+ * @lv_name: name of the to-be-repaired LV
+ * @pv_list: (array zero-terminated=1): list of PVs to be used for the repair
+ * @extra: (nullable) (array zero-terminated=1): extra options for the LV repair
+ *                                                 (just passed to LVM as is)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the @vg_name/@lv_name LV was successfully repaired or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_lvrepair (const gchar *vg_name UNUSED, const gchar *lv_name UNUSED, const gchar **pv_list UNUSED, const BDExtraArg **extra UNUSED, GError **error) {
+  g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_TECH_UNAVAIL,
+               "lvrepair is not supported by this plugin implementation.");
+  return FALSE;
 }
 
 /**

@@ -332,12 +332,17 @@ class LvmPVonlyTestCase(LVMTestCase):
         self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("lvm_test", self._sparse_size)
         self.dev_file2 = create_sparse_tempfile("lvm_test", self._sparse_size)
+        self.dev_file3 = create_sparse_tempfile("lvm_test", self._sparse_size)
         try:
             self.loop_dev = create_lio_device(self.dev_file)
         except RuntimeError as e:
             raise RuntimeError("Failed to setup loop device for testing: %s" % e)
         try:
             self.loop_dev2 = create_lio_device(self.dev_file2)
+        except RuntimeError as e:
+            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
+        try:
+            self.loop_dev3 = create_lio_device(self.dev_file3)
         except RuntimeError as e:
             raise RuntimeError("Failed to setup loop device for testing: %s" % e)
 
@@ -349,6 +354,11 @@ class LvmPVonlyTestCase(LVMTestCase):
 
         try:
             BlockDev.lvm_pvremove(self.loop_dev2, None)
+        except:
+            pass
+
+        try:
+            BlockDev.lvm_pvremove(self.loop_dev3, None)
         except:
             pass
 
@@ -365,6 +375,13 @@ class LvmPVonlyTestCase(LVMTestCase):
             # just move on, we can do no better here
             pass
         os.unlink(self.dev_file2)
+
+        try:
+            delete_lio_device(self.loop_dev3)
+        except RuntimeError:
+            # just move on, we can do no better here
+            pass
+        os.unlink(self.dev_file3)
 
 class LvmTestPVcreateRemove(LvmPVonlyTestCase):
     @tag_test(TestTags.CORE)
@@ -774,6 +791,81 @@ class LvmTestLVcreateRemove(LvmPVVGLVTestCase):
         # already removed
         with self.assertRaises(GLib.GError):
             BlockDev.lvm_lvremove("testVG", "testLV", True, None)
+
+class LvmTestPartialLVs(LvmPVVGLVTestCase):
+    # the mirror halves are actually written to during sync-up and the
+    # default sparse_size of 1Gig is too much for a regular /tmp, so
+    # let's use smaller ones here.
+    #
+    _sparse_size = 20*1024**2
+
+    @tag_test(TestTags.CORE)
+    def test_lvpartial(self):
+        """Verify that missing PVs are detected and can be dealt with"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev3, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2, self.loop_dev3], 0, None)
+        self.assertTrue(succ)
+
+        info = BlockDev.lvm_pvinfo(self.loop_dev2)
+        self.assertTrue(info)
+        self.assertFalse(info.missing)
+        self.assertEqual(info.vg_name, "testVG")
+        loop_dev2_pv_uuid = info.pv_uuid
+
+        # Create a mirrored LV on the first two PVs
+        with wait_for_sync("testVG", "testLV"):
+            succ = BlockDev.lvm_lvcreate("testVG", "testLV", 5 * 1024**2, "raid1",
+                                         [self.loop_dev, self.loop_dev2], None)
+            self.assertTrue(succ)
+
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
+        self.assertTrue(info)
+        self.assertEqual(info.attr[8], "-")
+
+        # Disconnect the second PV, this should cause it to be flagged
+        # as missing, and testLV to be reported as "partial".
+        delete_lio_device(self.loop_dev2)
+
+        pvs = BlockDev.lvm_pvs()
+        found = False
+        for pv in pvs:
+            if pv.pv_uuid == loop_dev2_pv_uuid:
+                found = True
+                self.assertTrue(pv.missing)
+                self.assertEqual(pv.vg_name, "testVG")
+        self.assertTrue(found)
+
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
+        self.assertTrue(info)
+        self.assertEqual(info.attr[8], "p")
+
+        # repair testLV with the third PV
+        with wait_for_sync("testVG", "testLV"):
+            succ = BlockDev.lvm_lvrepair("testVG", "testLV", [self.loop_dev3])
+            self.assertTrue(succ)
+
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
+        self.assertEqual(info.attr[8], "-")
+
+        # remove records of missing PVs
+        succ = BlockDev.lvm_vgreduce("testVG", None, None)
+        self.assertTrue(succ)
+
+        pvs = BlockDev.lvm_pvs()
+        found = False
+        for pv in pvs:
+            if pv.pv_uuid == loop_dev2_pv_uuid:
+                found = True
+        self.assertFalse(found)
 
 class LvmTestLVcreateWithExtra(LvmPVVGLVTestCase):
     def __init__(self, *args, **kwargs):
