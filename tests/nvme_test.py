@@ -72,7 +72,7 @@ class NVMeTestCase(NVMeTest):
         self.assertFalse(info.features & BlockDev.NVMENamespaceFeature.FORMAT_PROGRESS)
         self.assertEqual(info.eui64, "0000000000000000")
         self.assertEqual(info.format_progress_remaining, 0)
-        self.assertEqual(len(info.lba_formats), 0)
+        self.assertEqual(len(info.lba_formats), 1)
         self.assertGreater(len(info.nguid), 0)
         self.assertEqual(info.nsid, 1)
         self.assertEqual(info.ncap, 2097152)
@@ -80,8 +80,8 @@ class NVMeTestCase(NVMeTest):
         self.assertEqual(info.nuse, 2097152)
         self.assertGreater(len(info.uuid), 0)
         self.assertFalse(info.write_protected)
-        self.assertEqual(info.current_lba_format.data_size, 0)
-        self.assertEqual(info.current_lba_format.relative_performance, 0)
+        self.assertEqual(info.current_lba_format.data_size, 512)
+        self.assertEqual(info.current_lba_format.relative_performance, BlockDev.NVMELBAFormatRelativePerformance.BEST)
 
     @tag_test(TestTags.CORE)
     def test_ctrl_info(self):
