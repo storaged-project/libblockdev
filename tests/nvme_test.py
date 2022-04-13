@@ -74,7 +74,7 @@ class NVMeTestCase(NVMeTest):
         self.assertEqual(info.format_progress_remaining, 0)
         self.assertEqual(len(info.lba_formats), 0)
         self.assertGreater(len(info.nguid), 0)
-        self.assertEqual(info.nsid, 0)
+        self.assertEqual(info.nsid, 1)
         self.assertEqual(info.ncap, 2097152)
         self.assertEqual(info.nsize, 2097152)
         self.assertEqual(info.nuse, 2097152)

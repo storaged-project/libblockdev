@@ -544,6 +544,7 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
     close (fd);
 
     info = g_new0 (BDNVMENamespaceInfo, 1);
+    info->nsid = nsid;
     info->nsize = GUINT64_FROM_LE (ns_info.nsze);
     info->ncap = GUINT64_FROM_LE (ns_info.ncap);
     info->nuse = GUINT64_FROM_LE (ns_info.nuse);
