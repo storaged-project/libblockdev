@@ -226,6 +226,19 @@ def find_nvme_ctrl_devs_for_subnqn(subnqn):
 
     :param str subnqn: subsystem nqn
     """
+
+    def _check_subsys(subsys, dev_paths):
+        if subsys['SubsystemNQN'] == subnqn:
+            for ctrl in subsys['Controllers']:
+                path = os.path.join('/dev/', ctrl['Controller'])
+                try:
+                    st = os.lstat(path)
+                    # nvme controller node is a character device
+                    if stat.S_ISCHR(st.st_mode):
+                        dev_paths += [path]
+                except:
+                    pass
+
     ret, out, err = run_command("nvme list --output-format=json --verbose")
     if ret != 0:
         raise RuntimeError("Error getting NVMe list: '%s %s'" % (out, err))
@@ -237,16 +250,13 @@ def find_nvme_ctrl_devs_for_subnqn(subnqn):
 
     dev_paths = []
     for dev in decoded['Devices']:
-        if dev['SubsystemNQN'] == subnqn:
-            for ctrl in dev['Controllers']:
-                path = os.path.join('/dev/', ctrl['Controller'])
-                try:
-                    st = os.lstat(path)
-                    # nvme controller node is a character device
-                    if stat.S_ISCHR(st.st_mode):
-                        dev_paths += [path]
-                except:
-                    pass
+        # nvme-cli 2.x
+        if 'Subsystems' in dev:
+            for subsys in dev['Subsystems']:
+                _check_subsys(subsys, dev_paths)
+        # nvme-cli 1.x
+        if 'SubsystemNQN' in dev:
+            _check_subsys(dev, dev_paths)
 
     return dev_paths
 
@@ -257,6 +267,18 @@ def find_nvme_ns_devs_for_subnqn(subnqn):
 
     :param str subnqn: subsystem nqn
     """
+
+    def _check_subsys(subsys, ns_dev_paths):
+        if subsys['SubsystemNQN'] == subnqn:
+            for ns in subsys['Namespaces']:
+                path = os.path.join('/dev/', ns['NameSpace'])
+                try:
+                    st = os.lstat(path)
+                    if stat.S_ISBLK(st.st_mode):
+                        ns_dev_paths += [path]
+                except:
+                    pass
+
     ret, out, err = run_command("nvme list --output-format=json --verbose")
     if ret != 0:
         raise RuntimeError("Error getting NVMe list: '%s %s'" % (out, err))
@@ -268,33 +290,51 @@ def find_nvme_ns_devs_for_subnqn(subnqn):
 
     ns_dev_paths = []
     for dev in decoded['Devices']:
-        if dev['SubsystemNQN'] == subnqn:
-            for ns in dev['Namespaces']:
-                path = os.path.join('/dev/', ns['NameSpace'])
-                try:
-                    st = os.lstat(path)
-                    if stat.S_ISBLK(st.st_mode):
-                        ns_dev_paths += [path]
-                except:
-                    pass
+        # nvme-cli 2.x
+        if 'Subsystems' in dev:
+            for subsys in dev['Subsystems']:
+                _check_subsys(subsys, ns_dev_paths)
+        # nvme-cli 1.x
+        if 'SubsystemNQN' in dev:
+            _check_subsys(dev, ns_dev_paths)
 
     return ns_dev_paths
 
 
-def setup_nvme_target(dev_paths, subnqn, hostnqn):
+def get_nvme_hostnqn():
+    """
+    Retrieves NVMe host NQN string from /etc/nvme/hostnqn or uses nvme-cli to generate
+    new one (stable, typically generated from machine DMI data) when not available.
+    """
+
+    hostnqn = None
+    try:
+        hostnqn = read_file('/etc/nvme/hostnqn')
+    except:
+        pass
+
+    if (hostnqn is None or hostnqn.strip().len < 1):
+        ret, hostnqn, err = run_command('nvme gen-hostnqn')
+        if ret != 0:
+            raise RuntimeError("Cannot get host NQN: '%s %s'" % (hostnqn, err))
+
+    return hostnqn.strip()
+
+
+def setup_nvme_target(dev_paths, subnqn):
     """
     Sets up a new NVMe target loop device (using nvmetcli) on top of the
     :param:`dev_paths` backing block devices.
 
     :param set dev_paths: set of backing block device paths
     :param str subnqn: Subsystem NQN
-    :param str hostnqn: NVMe host NQN
     """
 
     # modprobe required nvme target modules
-    ret, out, err = run_command("modprobe nvmet nvme_loop")
-    if ret != 0:
-        raise RuntimeError("Cannot load required NVMe target modules: '%s %s'" % (out, err))
+    for module in ['nvmet', 'nvme-loop']:
+        ret, out, err = run_command("modprobe %s" % module)
+        if ret != 0:
+            raise RuntimeError("Cannot load required module %s: '%s %s'" % (module, out, err))
 
     # create a JSON file for nvmetcli
     with tempfile.NamedTemporaryFile(mode='wt',delete=False) as tmp:
@@ -312,11 +352,6 @@ def setup_nvme_target(dev_paths, subnqn, hostnqn):
 
         json = """
 {
-  "hosts": [
-    {
-      "nqn": "%s"
-    }
-  ],
   "ports": [
     {
       "addr": {
@@ -335,11 +370,8 @@ def setup_nvme_target(dev_paths, subnqn, hostnqn):
   ],
   "subsystems": [
     {
-      "allowed_hosts": [
-        "%s"
-      ],
       "attr": {
-        "allow_any_host": "0"
+        "allow_any_host": "1"
       },
       "namespaces": [
 %s
@@ -349,7 +381,7 @@ def setup_nvme_target(dev_paths, subnqn, hostnqn):
   ]
 }
 """
-        tmp.write(json % (hostnqn, subnqn, hostnqn, namespaces, subnqn))
+        tmp.write(json % (subnqn, namespaces, subnqn))
 
     # export the loop device on the target
     ret, out, err = run_command("nvmetcli restore %s" % tcli_json_file)
@@ -377,14 +409,13 @@ def create_nvmet_device(dev_path):
     :rtype: str
     """
 
-    # TODO: there can be only one.
-    HOSTNQN = 'libblockdev_hostnqn'
     SUBNQN = 'libblockdev_subnqn'
+    hostnqn = get_nvme_hostnqn()
 
-    setup_nvme_target([dev_path], SUBNQN, HOSTNQN)
+    setup_nvme_target([dev_path], SUBNQN)
 
     # connect initiator to the newly created target
-    ret, out, err = run_command("nvme connect --transport=loop --hostnqn=%s --nqn=%s" % (HOSTNQN, SUBNQN))
+    (ret, out, err) = run_command("nvme connect --transport=loop --hostnqn=%s --nqn=%s" % (hostnqn, SUBNQN))
     if ret != 0:
         raise RuntimeError("Error connecting to the NVMe target: '%s %s'" % (out, err))
 
