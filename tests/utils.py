@@ -313,7 +313,7 @@ def get_nvme_hostnqn():
     except:
         pass
 
-    if (hostnqn is None or hostnqn.strip().len < 1):
+    if hostnqn is None or len(hostnqn.strip()) < 1:
         ret, hostnqn, err = run_command('nvme gen-hostnqn')
         if ret != 0:
             raise RuntimeError("Cannot get host NQN: '%s %s'" % (hostnqn, err))
