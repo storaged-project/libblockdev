@@ -544,6 +544,7 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
     close (fd);
 
     info = g_new0 (BDNVMENamespaceInfo, 1);
+    info->nsid = nsid;
     info->nsize = GUINT64_FROM_LE (ns_info.nsze);
     info->ncap = GUINT64_FROM_LE (ns_info.ncap);
     info->nuse = GUINT64_FROM_LE (ns_info.nuse);
@@ -589,22 +590,19 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
 
     /* translate the LBA Format array */
     ptr_array = g_ptr_array_new ();
-    for (i = 0; i < ns_info.nlbaf; i++) {
+    nvme_id_ns_flbas_to_lbaf_inuse (ns_info.flbas, &flbas);
+    for (i = 0; i <= ns_info.nlbaf + ns_info.nulbaf; i++) {
         BDNVMELBAFormat *lbaf = g_new0 (BDNVMELBAFormat, 1);
         lbaf->data_size = 1 << ns_info.lbaf[i].ds;
         lbaf->relative_performance = ns_info.lbaf[i].rp + 1;
         g_ptr_array_add (ptr_array, lbaf);
+        if (i == flbas) {
+            info->current_lba_format.data_size = lbaf->data_size;
+            info->current_lba_format.relative_performance = lbaf->relative_performance;
+        }
     }
     g_ptr_array_add (ptr_array, NULL);  /* trailing NULL element */
     info->lba_formats = (BDNVMELBAFormat **) g_ptr_array_free (ptr_array, FALSE);
-
-    nvme_id_ns_flbas_to_lbaf_inuse (ns_info.flbas, &flbas);
-    /* Note that for some devices nlbaf may be zero and flbas is thus invalid */
-    if (flbas < ns_info.nlbaf) {
-        g_warn_if_fail (info->lba_formats[flbas] != NULL);
-        info->current_lba_format.data_size = info->lba_formats[flbas]->data_size;
-        info->current_lba_format.relative_performance = info->lba_formats[flbas]->relative_performance;
-    }
 
     return info;
 }
