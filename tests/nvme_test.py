@@ -397,6 +397,45 @@ class NVMeFabricsTestCase(NVMeTest):
             self.assertTrue(re.match(r'/dev/nvme[0-9]+n[0-9]+', ns))
             self.assertTrue(os.path.exists(ns))
 
+            # verify the sysfs paths
+            ret, ns_sysfs_path, err = run_command("udevadm info --query=path %s" % ns)
+            if ret != 0:
+                raise RuntimeError("Error getting udev info for %s: '%s'" % (ns,  err))
+            self.assertIsNotNone(ns_sysfs_path)
+            self.assertGreater(len(ns_sysfs_path), 0)
+            ns_sysfs_path = "/sys" + ns_sysfs_path
+            ret, ctrl_sysfs_path, err = run_command("udevadm info --query=path %s" % ctrls[0])
+            if ret != 0:
+                raise RuntimeError("Error getting udev info for %s: '%s'" % (ctrls[0],  err))
+            self.assertIsNotNone(ctrl_sysfs_path)
+            self.assertGreater(len(ctrl_sysfs_path), 0)
+            ctrl_sysfs_path = "/sys" + ctrl_sysfs_path
+
+            ctrl_sysfs_paths = BlockDev.nvme_find_ctrls_for_ns(ns_sysfs_path, None, None, None)
+            self.assertIsNotNone(ctrl_sysfs_paths)
+            self.assertEqual(len(ctrl_sysfs_paths), 1)
+            self.assertEqual(ctrl_sysfs_path, ctrl_sysfs_paths[0])
+
+            ctrl_sysfs_paths = BlockDev.nvme_find_ctrls_for_ns(ns_sysfs_path + "xxx", None, None, None)
+            self.assertEqual(len(ctrl_sysfs_paths), 0)
+            ctrl_sysfs_paths = BlockDev.nvme_find_ctrls_for_ns(ns_sysfs_path, self.SUBNQN, None, None)
+            self.assertEqual(len(ctrl_sysfs_paths), 1)
+            self.assertEqual(ctrl_sysfs_path, ctrl_sysfs_paths[0])
+            ctrl_sysfs_paths = BlockDev.nvme_find_ctrls_for_ns(ns_sysfs_path, self.SUBNQN, self.hostnqn, None)
+            self.assertEqual(len(ctrl_sysfs_paths), 1)
+            self.assertEqual(ctrl_sysfs_path, ctrl_sysfs_paths[0])
+
+            ctrl_sysfs_paths = BlockDev.nvme_find_ctrls_for_ns(ns_sysfs_path, "unknownsubsysnqn", None, None)
+            self.assertEqual(len(ctrl_sysfs_paths), 0)
+            ctrl_sysfs_paths = BlockDev.nvme_find_ctrls_for_ns(ns_sysfs_path, None, "unknownhostnqn", None)
+            self.assertEqual(len(ctrl_sysfs_paths), 0)
+            ctrl_sysfs_paths = BlockDev.nvme_find_ctrls_for_ns(ns_sysfs_path, self.SUBNQN, "unknownhostnqn", None)
+            self.assertEqual(len(ctrl_sysfs_paths), 0)
+            ctrl_sysfs_paths = BlockDev.nvme_find_ctrls_for_ns(ns_sysfs_path, None, None, "unknownhostid")
+            self.assertEqual(len(ctrl_sysfs_paths), 0)
+            ctrl_sysfs_paths = BlockDev.nvme_find_ctrls_for_ns(ns_sysfs_path, self.SUBNQN, self.hostnqn, "unknownhostid")
+            self.assertEqual(len(ctrl_sysfs_paths), 0)
+
         # disconnect
         BlockDev.nvme_disconnect(self.SUBNQN)
         for c in ctrls:
