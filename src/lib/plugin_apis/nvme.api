@@ -466,10 +466,10 @@ GType bd_nvme_smart_log_get_type ();
  *                an unrecovered data integrity error (e.g. uncorrectable ECC, CRC checksum failure, or LBA tag mismatch).
  * @num_err_log_entries: Number of Error Information Log Entries: the number of Error Information log
  *                       entries over the life of the controller.
- * @temperature: Composite Temperature: temperature in degrees Celsius that represents the current composite
- *               temperature of the controller and associated namespaces or %-273 when not applicable.
+ * @temperature: Composite Temperature: temperature in Kelvins that represents the current composite
+ *               temperature of the controller and associated namespaces or %0 when not applicable.
  * @temp_sensors: Temperature Sensor 1-8: array of the current temperature reported by temperature sensors
- *                1-8 in degrees Celsius or %-273 when the particular sensor is not available.
+ *                1-8 in Kelvins or %0 when the particular sensor is not available.
  * @wctemp: Warning Composite Temperature Threshold (WCTEMP): indicates the minimum Composite Temperature (@temperature)
  *          value that indicates an overheating condition during which controller operation continues.
  *          A value of %0 indicates that no warning temperature threshold value is reported by the controller.
@@ -496,10 +496,10 @@ typedef struct BDNVMESmartLog {
     guint64 unsafe_shutdowns;
     guint64 media_errors;
     guint64 num_err_log_entries;
-    gint temperature;
-    gint temp_sensors[8];
-    guint wctemp;
-    guint cctemp;
+    guint16 temperature;
+    guint16 temp_sensors[8];
+    guint16 wctemp;
+    guint16 cctemp;
     guint warning_temp_time;
     guint critical_temp_time;
 } BDNVMESmartLog;

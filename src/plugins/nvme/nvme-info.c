@@ -678,9 +678,9 @@ BDNVMESmartLog * bd_nvme_get_smart_log (const gchar *device, GError **error) {
     log->media_errors = int128_to_guint64 (smart_log.media_errors);
     log->num_err_log_entries = int128_to_guint64 (smart_log.num_err_log_entries);
 
-    log->temperature = ((smart_log.temperature[1] << 8) | smart_log.temperature[0]) - 273;
+    log->temperature = (smart_log.temperature[1] << 8) | smart_log.temperature[0];
     for (i = 0; i < G_N_ELEMENTS (smart_log.temp_sensor); i++)
-        log->temp_sensors[i] = GUINT16_FROM_LE (smart_log.temp_sensor[i]) - 273;
+        log->temp_sensors[i] = GUINT16_FROM_LE (smart_log.temp_sensor[i]);
     log->warning_temp_time = GUINT32_FROM_LE (smart_log.warning_temp_time);
     log->critical_temp_time = GUINT32_FROM_LE (smart_log.critical_comp_time);
 
