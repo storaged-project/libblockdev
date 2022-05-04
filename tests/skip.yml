@@ -137,3 +137,9 @@
     - distro: "centos"
       version: "9"
       reason: "snapshot merge doesn't work on CentOS 9 Stream with LVM DBus API"
+
+- test: (lvm_test|lvm_dbus_tests).LvmTestLVcreateType
+  skip_on:
+    - distro: "centos"
+      version: "9"
+      reason: "Creating RAID 1 LV on CentOS/RHEL 9 causes a system deadlock"
