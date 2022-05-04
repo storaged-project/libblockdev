@@ -76,3 +76,9 @@
   skip_on:
     - arch: "i686"
       reason: "Cache attach/detach fails with ENOMEM on 32bit systems"
+
+- test: (lvm_test|lvm_dbus_tests).LvmTestLVcreateType
+  skip_on:
+    - distro: "centos"
+      version: "9"
+      reason: "Creating RAID 1 LV on CentOS/RHEL 9 causes a system deadlock"
