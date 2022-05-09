@@ -442,7 +442,7 @@ typedef struct BDNVMESelfTestLogEntry {
 /**
  * BDNVMESelfTestLog:
  * @current_operation: Current running device self-test operation. There's no corresponding record in @entries for a device self-test operation that is in progress.
- * @current_operation_completion: Percentage of the currently running device self-test operation.
+ * @current_operation_completion: Percentage of the currently running device self-test operation. Only valid when @current_operation is other than #BD_NVME_SELF_TEST_ACTION_NOT_RUNNING.
  * @entries: (array zero-terminated=1) (element-type BDNVMESelfTestLogEntry): Self-test log entries for the last 20 operations, sorted from newest (first element) to oldest.
  */
 typedef struct BDNVMESelfTestLog {

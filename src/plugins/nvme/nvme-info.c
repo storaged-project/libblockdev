@@ -831,8 +831,7 @@ BDNVMESelfTestLog * bd_nvme_get_self_test_log (const gchar *device, GError **err
         default:
             log->current_operation = BD_NVME_SELF_TEST_ACTION_VENDOR_SPECIFIC;
     }
-    if (log->current_operation == BD_NVME_SELF_TEST_ACTION_SHORT ||
-        log->current_operation == BD_NVME_SELF_TEST_ACTION_EXTENDED)
+    if ((self_test_log.current_operation & NVME_ST_CURR_OP_MASK) > 0)
         log->current_operation_completion = self_test_log.completion & NVME_ST_CURR_OP_CMPL_MASK;
 
     ptr_array = g_ptr_array_new ();
