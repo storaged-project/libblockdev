@@ -72,7 +72,7 @@
       version: "9"
       reason: "latest libnvme is not yet available on CentOS 9"
 
-- test: lvm_test.LvmPVVGLVWritecacheAttachDetachTestCase
+- test: (lvm_test|lvm_dbus_tests).LvmPVVGLVWritecacheAttachDetachTestCase
   skip_on:
     - arch: "i686"
       reason: "Cache attach/detach fails with ENOMEM on 32bit systems"
