@@ -382,5 +382,6 @@ gboolean bd_nvme_sanitize (const gchar *device, BDNVMESanitizeAction action, gbo
         return FALSE;
     }
 
+    close (args.fd);
     return TRUE;
 }
