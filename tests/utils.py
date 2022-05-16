@@ -268,16 +268,25 @@ def find_nvme_ns_devs_for_subnqn(subnqn):
     :param str subnqn: subsystem nqn
     """
 
+    def _check_namespaces(node, ns_dev_paths):
+        for ns in node['Namespaces']:
+            path = os.path.join('/dev/', ns['NameSpace'])
+            try:
+                st = os.lstat(path)
+                if stat.S_ISBLK(st.st_mode):
+                    ns_dev_paths += [path]
+            except:
+                pass
+
     def _check_subsys(subsys, ns_dev_paths):
         if subsys['SubsystemNQN'] == subnqn:
-            for ns in subsys['Namespaces']:
-                path = os.path.join('/dev/', ns['NameSpace'])
-                try:
-                    st = os.lstat(path)
-                    if stat.S_ISBLK(st.st_mode):
-                        ns_dev_paths += [path]
-                except:
-                    pass
+            if 'Namespaces' in subsys:
+                _check_namespaces(subsys, ns_dev_paths)
+            # kernel 4.18
+            if 'Controllers' in subsys:
+                for ctrl in subsys['Controllers']:
+                    if 'Namespaces' in ctrl:
+                        _check_namespaces(ctrl, ns_dev_paths)
 
     ret, out, err = run_command("nvme list --output-format=json --verbose")
     if ret != 0:
