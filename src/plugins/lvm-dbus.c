@@ -1160,6 +1160,124 @@ static gchar* _lvm_metadata_lv_name (const gchar *vg_name, const gchar *lv_name,
     return g_strstrip (g_strdelimit (ret, "[]", ' '));
 }
 
+static BDLVMSEGdata** _lvm_segs (const gchar *vg_name, const gchar *lv_name, GError **error) {
+    GVariant *prop = NULL;
+    BDLVMSEGdata **segs;
+    gsize n_segs;
+    GVariantIter iter, iter2;
+    GVariant *pv_segs, *pv_name_prop;
+    const gchar *pv;
+    gchar *pv_name;
+    guint64 pv_first_pe, pv_last_pe;
+    int i;
+
+    prop = get_lv_property (vg_name, lv_name, "Devices", error);
+    if (!prop)
+        return NULL;
+
+    /* Count number of segments */
+    n_segs = 0;
+    g_variant_iter_init (&iter, prop);
+    while (g_variant_iter_next (&iter, "(&o@a(tts))", NULL, &pv_segs)) {
+      n_segs += g_variant_n_children (pv_segs);
+      g_variant_unref (pv_segs);
+    }
+
+    if (n_segs == 0) {
+      g_variant_unref (prop);
+      return NULL;
+    }
+
+    /* Build segments */
+    segs = g_new0 (BDLVMSEGdata *, n_segs+1);
+    i = 0;
+    g_variant_iter_init (&iter, prop);
+    while (g_variant_iter_next (&iter, "(&o@a(tts))", &pv, &pv_segs)) {
+      pv_name_prop = get_object_property (pv, PV_INTF, "Name", NULL);
+      if (pv_name_prop) {
+        g_variant_get (pv_name_prop, "&s", &pv_name);
+        g_variant_iter_init (&iter2, pv_segs);
+        while (g_variant_iter_next (&iter2, "(tt&s)", &pv_first_pe, &pv_last_pe, NULL)) {
+          BDLVMSEGdata *seg = g_new0(BDLVMSEGdata, 1);
+          seg->pv_start_pe = pv_first_pe;
+          seg->size_pe = pv_last_pe - pv_first_pe + 1;
+          seg->pvdev = g_strdup (pv_name);
+          segs[i++] = seg;
+        }
+        g_variant_unref (pv_name_prop);
+      }
+      g_variant_unref (pv_segs);
+    }
+
+    g_variant_unref (prop);
+    return segs;
+}
+
+static void _lvm_data_and_metadata_lvs (const gchar *vg_name, const gchar *lv_name,
+                                        gchar ***data_lvs_ret, gchar ***metadata_lvs_ret,
+                                        GError **error) {
+  GVariant *prop;
+  gsize n_hidden_lvs;
+  gchar **data_lvs;
+  gchar **metadata_lvs;
+  GVariantIter iter, iter2;
+  int i_data;
+  int i_metadata;
+  const gchar *sublv;
+  GVariant *sublv_roles_prop;
+  GVariant *sublv_name_prop;
+  gchar *sublv_name;
+  const gchar *role;
+
+  prop = get_lv_property (vg_name, lv_name, "HiddenLvs", error);
+  if (!prop) {
+    *data_lvs_ret = NULL;
+    *metadata_lvs_ret = NULL;
+    return;
+  }
+
+  n_hidden_lvs = g_variant_n_children (prop);
+  data_lvs = g_new0(gchar *, n_hidden_lvs + 1);
+  metadata_lvs = g_new0(gchar *, n_hidden_lvs + 1);
+
+  i_data = 0;
+  i_metadata = 0;
+  g_variant_iter_init (&iter, prop);
+  while (g_variant_iter_next (&iter, "&o", &sublv)) {
+    sublv_roles_prop = get_object_property (sublv, LV_INTF, "Roles", NULL);
+    if (sublv_roles_prop) {
+      sublv_name_prop = get_object_property (sublv, LV_INTF, "Name", NULL);
+      if (sublv_name_prop) {
+        g_variant_get (sublv_name_prop, "s", &sublv_name);
+        if (sublv_name) {
+          sublv_name = g_strstrip (g_strdelimit (sublv_name, "[]", ' '));
+          g_variant_iter_init (&iter2, sublv_roles_prop);
+          while (g_variant_iter_next (&iter2, "&s", &role)) {
+            if (g_strcmp0 (role, "image") == 0) {
+              data_lvs[i_data++] = sublv_name;
+              sublv_name = NULL;
+              break;
+            } else if (g_strcmp0 (role, "metadata") == 0) {
+              metadata_lvs[i_metadata++] = sublv_name;
+              sublv_name = NULL;
+              break;
+            }
+          }
+          g_free (sublv_name);
+        }
+        g_variant_unref (sublv_name_prop);
+      }
+      g_variant_unref (sublv_roles_prop);
+    }
+  }
+
+  *data_lvs_ret = data_lvs;
+  *metadata_lvs_ret = metadata_lvs;
+
+  g_variant_unref (prop);
+  return;
+}
+
 static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error) {
     BDLVMLVdata *data = g_new0 (BDLVMLVdata, 1);
     GVariantDict dict;
@@ -1185,7 +1303,11 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error) {
             the first one now. */
     value = g_variant_dict_lookup_value (&dict, "SegType", (GVariantType*) "as");
     if (value) {
-        g_variant_get_child (value, 0, "s", &(data->segtype));
+        const gchar *st;
+        g_variant_get_child (value, 0, "&s", &st);
+        if (g_strcmp0 (st, "error") == 0)
+          st = "linear";
+        data->segtype = g_strdup (st);
         g_variant_unref (value);
     }
 
@@ -2633,14 +2755,44 @@ BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError *
         return NULL;
 
     ret = get_lv_data_from_props (props, error);
-    if (ret && ((g_strcmp0 (ret->segtype, "thin-pool") == 0) ||
-                (g_strcmp0 (ret->segtype, "cache-pool") == 0))) {
+    if (!ret)
+        return NULL;
+
+    if (g_strcmp0 (ret->segtype, "thin-pool") == 0 ||
+        g_strcmp0 (ret->segtype, "cache-pool") == 0) {
         ret->data_lv = _lvm_data_lv_name (vg_name, lv_name, error);
         ret->metadata_lv = _lvm_metadata_lv_name (vg_name, lv_name, error);
     }
-    if (ret && g_strcmp0 (ret->segtype, "vdo-pool") == 0) {
+    if (g_strcmp0 (ret->segtype, "vdo-pool") == 0) {
         ret->data_lv = _lvm_data_lv_name (vg_name, lv_name, error);
     }
+
+    return ret;
+}
+
+BDLVMLVdata* bd_lvm_lvinfo_tree (const gchar *vg_name, const gchar *lv_name, GError **error) {
+    GVariant *props = NULL;
+    BDLVMLVdata* ret = NULL;
+
+    props = get_lv_properties (vg_name, lv_name, error);
+    if (!props)
+        /* the error is already populated */
+        return NULL;
+
+    ret = get_lv_data_from_props (props, error);
+    if (!ret)
+        return NULL;
+
+    if (g_strcmp0 (ret->segtype, "thin-pool") == 0 ||
+        g_strcmp0 (ret->segtype, "cache-pool") == 0) {
+        ret->data_lv = _lvm_data_lv_name (vg_name, lv_name, error);
+        ret->metadata_lv = _lvm_metadata_lv_name (vg_name, lv_name, error);
+    }
+    if (g_strcmp0 (ret->segtype, "vdo-pool") == 0) {
+        ret->data_lv = _lvm_data_lv_name (vg_name, lv_name, error);
+    }
+    ret->segs = _lvm_segs (vg_name, lv_name, error);
+    _lvm_data_and_metadata_lvs (vg_name, lv_name, &ret->data_lvs, &ret->metadata_lvs, error);
 
     return ret;
 }
@@ -2825,6 +2977,140 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
         } else if (g_strcmp0 (ret[j]->segtype, "vdo-pool") == 0) {
             ret[j]->data_lv = _lvm_data_lv_name (ret[j]->vg_name, ret[j]->lv_name, &l_error);
         }
+        if (l_error) {
+            g_slist_free_full (matched_lvs, g_free);
+            for (guint64 i = 0; i <= j; i++)
+                bd_lvm_lvdata_free (ret[i]);
+            g_free (ret);
+            g_propagate_error (error, l_error);
+            return NULL;
+        }
+        j++;
+        lv = g_slist_next (lv);
+    }
+    g_slist_free_full (matched_lvs, g_free);
+
+    ret[j] = NULL;
+    return ret;
+}
+
+BDLVMLVdata** bd_lvm_lvs_tree (const gchar *vg_name, GError **error) {
+    gchar **lvs = NULL;
+    guint64 n_lvs = 0;
+    GVariant *props = NULL;
+    BDLVMLVdata **ret = NULL;
+    guint64 j = 0;
+    GSList *matched_lvs = NULL;
+    GSList *lv = NULL;
+    gboolean success = FALSE;
+    GError *l_error = NULL;
+
+    lvs = get_existing_objects (LV_OBJ_PREFIX, &l_error);
+    if (!lvs && l_error) {
+        g_propagate_error (error, l_error);
+        return NULL;
+    }
+    success = filter_lvs_by_vg (lvs, vg_name, &matched_lvs, &n_lvs, error);
+    g_free (lvs);
+    if (!success) {
+        g_slist_free_full (matched_lvs, g_free);
+        return NULL;
+    }
+
+    lvs = get_existing_objects (THIN_POOL_OBJ_PREFIX, &l_error);
+    if (!lvs && l_error) {
+        g_propagate_error (error, l_error);
+        g_slist_free_full (matched_lvs, g_free);
+        return NULL;
+    }
+    success = filter_lvs_by_vg (lvs, vg_name, &matched_lvs, &n_lvs, error);
+    g_free (lvs);
+    if (!success) {
+        g_slist_free_full (matched_lvs, g_free);
+        return NULL;
+    }
+
+    lvs = get_existing_objects (CACHE_POOL_OBJ_PREFIX, &l_error);
+    if (!lvs && l_error) {
+        g_propagate_error (error, l_error);
+        g_slist_free_full (matched_lvs, g_free);
+        return NULL;
+    }
+    success = filter_lvs_by_vg (lvs, vg_name, &matched_lvs, &n_lvs, error);
+    g_free (lvs);
+    if (!success) {
+        g_slist_free_full (matched_lvs, g_free);
+        return NULL;
+    }
+
+    lvs = get_existing_objects (VDO_POOL_OBJ_PREFIX, &l_error);
+    if (!lvs && l_error) {
+        g_propagate_error (error, l_error);
+        g_slist_free_full (matched_lvs, g_free);
+        return NULL;
+    }
+    success = filter_lvs_by_vg (lvs, vg_name, &matched_lvs, &n_lvs, error);
+    g_free (lvs);
+    if (!success) {
+        g_slist_free_full (matched_lvs, g_free);
+        return NULL;
+    }
+
+    lvs = get_existing_objects (HIDDEN_LV_OBJ_PREFIX, &l_error);
+    if (!lvs && l_error) {
+        g_propagate_error (error, l_error);
+        g_slist_free_full (matched_lvs, g_free);
+        return NULL;
+    }
+    success = filter_lvs_by_vg (lvs, vg_name, &matched_lvs, &n_lvs, error);
+    g_free (lvs);
+    if (!success) {
+        g_slist_free_full (matched_lvs, g_free);
+        return NULL;
+    }
+
+    if (n_lvs == 0) {
+        /* no LVs */
+        ret = g_new0 (BDLVMLVdata*, 1);
+        ret[0] = NULL;
+        g_slist_free_full (matched_lvs, g_free);
+        return ret;
+    }
+
+    /* we have been prepending to the list so far, but it will be nicer if we
+       reverse it (to get back the original order) */
+    matched_lvs = g_slist_reverse (matched_lvs);
+
+    /* now create the return value -- NULL-terminated array of BDLVMLVdata */
+    ret = g_new0 (BDLVMLVdata*, n_lvs + 1);
+
+    lv = matched_lvs;
+    while (lv) {
+        props = get_object_properties (lv->data, LV_CMN_INTF, &l_error);
+        if (!props) {
+            g_slist_free_full (matched_lvs, g_free);
+            g_free (ret);
+            g_propagate_error (error, l_error);
+            return NULL;
+        }
+        ret[j] = get_lv_data_from_props (props, &l_error);
+        if (!(ret[j])) {
+            g_slist_free_full (matched_lvs, g_free);
+            for (guint64 i = 0; i < j; i++)
+                bd_lvm_lvdata_free (ret[i]);
+            g_free (ret);
+            g_propagate_error (error, l_error);
+            return NULL;
+        } else if ((g_strcmp0 (ret[j]->segtype, "thin-pool") == 0) ||
+                   (g_strcmp0 (ret[j]->segtype, "cache-pool") == 0)) {
+            ret[j]->data_lv = _lvm_data_lv_name (ret[j]->vg_name, ret[j]->lv_name, &l_error);
+            ret[j]->metadata_lv = _lvm_metadata_lv_name (ret[j]->vg_name, ret[j]->lv_name, &l_error);
+        } else if (g_strcmp0 (ret[j]->segtype, "vdo-pool") == 0) {
+            ret[j]->data_lv = _lvm_data_lv_name (ret[j]->vg_name, ret[j]->lv_name, &l_error);
+        }
+        ret[j]->segs = _lvm_segs (ret[j]->vg_name, ret[j]->lv_name, &l_error);
+        _lvm_data_and_metadata_lvs (ret[j]->vg_name, ret[j]->lv_name, &ret[j]->data_lvs, &ret[j]->metadata_lvs,
+                                    &l_error);
         if (l_error) {
             g_slist_free_full (matched_lvs, g_free);
             for (guint64 i = 0; i <= j; i++)

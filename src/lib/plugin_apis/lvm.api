@@ -271,6 +271,93 @@ GType bd_lvm_vgdata_get_type () {
     return type;
 }
 
+#define BD_LVM_TYPE_SEGDATA (bd_lvm_segdata_get_type ())
+GType bd_lvm_segdata_get_type();
+
+/**
+ * BDLVMSEGdata:
+ * @size_pe: Size of this segment in extents
+ * @pv_start_pe: Where it starts in the physical volume in extents
+ * @pvdev: Device name of the physical volume or NULL
+ */
+typedef struct BDLVMSEGdata {
+    guint64 size_pe;
+    guint64 pv_start_pe;
+    gchar *pvdev;
+} BDLVMSEGdata;
+
+/**
+ * bd_lvm_segdata_copy: (skip)
+ * @data: (nullable): %BDLVMSEGdata to copy
+ *
+ * Creates a new copy of @data.
+ */
+BDLVMSEGdata* bd_lvm_segdata_copy (BDLVMSEGdata *data) {
+    if (data == NULL)
+        return NULL;
+
+    BDLVMSEGdata *new_data = g_new0 (BDLVMSEGdata, 1);
+
+    new_data->size_pe = data->size_pe;
+    new_data->pv_start_pe = data->pv_start_pe;
+    new_data->pvdev = g_strdup (data->pvdev);
+    return new_data;
+}
+
+/**
+ * bd_lvm_segdata_free: (skip)
+ * @data: (nullable): %BDLVMSEGdata to free
+ *
+ * Frees @data.
+ */
+void bd_lvm_segdata_free (BDLVMSEGdata *data) {
+    if (data == NULL)
+        return;
+
+    g_free (data->pvdev);
+    g_free (data);
+}
+
+GType bd_lvm_segdata_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDLVMSEGdata",
+                                            (GBoxedCopyFunc) bd_lvm_segdata_copy,
+                                            (GBoxedFreeFunc) bd_lvm_segdata_free)       ;
+    }
+
+    return type;
+}
+
+static BDLVMSEGdata **copy_segs (BDLVMSEGdata **segs) {
+    int i, len;
+    BDLVMSEGdata **new_segs;
+
+    if (segs == NULL)
+       return NULL;
+
+    for (len = 0; segs[len]; len++)
+        ;
+
+    new_segs = g_new0 (BDLVMSEGdata *, len+1);
+    for (i = 0; i < len; i++)
+        new_segs[i] = bd_lvm_segdata_copy (segs[i]);
+
+    return new_segs;
+}
+
+static void free_segs (BDLVMSEGdata **segs) {
+    int i;
+
+    if (segs == NULL)
+       return;
+
+    for (i = 0; segs[i]; i++)
+        bd_lvm_segdata_free (segs[i]);
+    (g_free) (segs);
+}
+
 #define BD_LVM_TYPE_LVDATA (bd_lvm_lvdata_get_type ())
 GType bd_lvm_lvdata_get_type();
 
@@ -292,6 +379,29 @@ GType bd_lvm_lvdata_get_type();
  * @metadata_percent: available metadata space in a thin pool
  * @copy_percent: synchronization percentage of a mirrored logical volume
  * @lv_tags: (array zero-terminated=1): list of LVM tags for this LV
+ * @data_lvs: (nullable) (array zero-terminated=1): list of data sub-LVs this LV (for raids, etc).
+ * @metadata_lvs: (nullable) (array zero-terminated=1): list of metadata sub-LVS for this LV (for raids, etc).
+ * @segs: (nullable) (array zero-terminated=1): The segments of this LV.
+ *
+ * The @segs, @data_lvs, and @metadata_lvs fields are only filled by a
+ * call to bd_lvm_lvinfo_tree or bd_lvm_lvs_tree.  They are all NULL
+ * normally.  If they are filled, they follow these rules:
+ *
+ * A LV is either stored directly on physical volumes, or is made up
+ * of sub-LVs.  If it is stored on PVs, the @segs list is non-empty
+ * and the @data_lvs and @metadata_lvs fields are both NULL.  If it is
+ * made up of sub-LVs, then @segs is NULL, @data_lvs is non-empty and
+ * @metadata_lvs might or might not be empty but is non-NULL.  The
+ * sub-LVs contained in @data_lv and @metadata_lv are always included
+ * in @data_lvs and @metadata_lvs, respectively.
+ *
+ * For a partial LV, the @segs list might not be complete; i.e., the
+ * sum of the sizes of the listed segments might not be equal to the
+ * size reported for the LV itself.
+ *
+ * Also, the order of entries in @segs must be assumed to be random;
+ * it does not correspond to the order of segements in the logical
+ * volume itself.
  */
 typedef struct BDLVMLVdata {
     gchar *lv_name;
@@ -310,6 +420,9 @@ typedef struct BDLVMLVdata {
     guint64 metadata_percent;
     guint64 copy_percent;
     gchar **lv_tags;
+    gchar **data_lvs;
+    gchar **metadata_lvs;
+    BDLVMSEGdata **segs;
 } BDLVMLVdata;
 
 /**
@@ -340,6 +453,9 @@ BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
     new_data->metadata_percent = data->metadata_percent;
     new_data->copy_percent = data->copy_percent;
     new_data->lv_tags = g_strdupv (data->lv_tags);
+    new_data->data_lvs = g_strdupv (data->data_lvs);
+    new_data->metadata_lvs = g_strdupv (data->metadata_lvs);
+    new_data->segs = copy_segs (data->segs);
     return new_data;
 }
 
@@ -365,6 +481,9 @@ void bd_lvm_lvdata_free (BDLVMLVdata *data) {
     g_free (data->roles);
     g_free (data->move_pv);
     g_strfreev (data->lv_tags);
+    g_strfreev (data->data_lvs);
+    g_strfreev (data->metadata_lvs);
+    free_segs (data->segs);
     g_free (data);
 }
 
@@ -1232,6 +1351,21 @@ gboolean bd_lvm_delete_lv_tags (const gchar *vg_name, const gchar *lv_name, cons
 BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError **error);
 
 /**
+ * bd_lvm_lvinfo_tree:
+ * @vg_name: name of the VG that contains the LV to get information about
+ * @lv_name: name of the LV to get information about
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * This function will fill out the data_lvs, metadata_lvs, and segs fields as well.
+ *
+ * Returns: (transfer full): information about the @vg_name/@lv_name LV or %NULL in case
+ * of error (the @error) gets populated in those cases)
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+BDLVMLVdata* bd_lvm_lvinfo_tree (const gchar *vg_name, const gchar *lv_name, GError **error);
+
+/**
  * bd_lvm_lvs:
  * @vg_name: (nullable): name of the VG to get information about LVs from
  * @error: (out) (optional): place to store error (if any)
@@ -1242,6 +1376,20 @@ BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError *
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
  */
 BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error);
+
+/**
+ * bd_lvm_lvs_tree:
+ * @vg_name: (nullable): name of the VG to get information about LVs from
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * This function will fill out the data_lvs, metadata_lvs, and segs fields as well.
+ *
+ * Returns: (array zero-terminated=1): information about LVs found in the given
+ * @vg_name VG or in system if @vg_name is %NULL.
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_QUERY
+ */
+BDLVMLVdata** bd_lvm_lvs_tree (const gchar *vg_name, GError **error);
 
 /**
  * bd_lvm_thpoolcreate:

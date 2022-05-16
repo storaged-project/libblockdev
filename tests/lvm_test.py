@@ -831,6 +831,33 @@ class LvmTestPartialLVs(LvmPVVGLVTestCase):
         self.assertTrue(info)
         self.assertEqual(info.attr[8], "-")
 
+        # Check that lvs_tree returns the expected structure
+
+        def assert_lv_subs(info, segtype, len_segs, len_data, len_metadata):
+            self.assertTrue(info)
+            self.assertEqual(info.segtype, segtype)
+            self.assertEqual(len(info.segs), len_segs)
+            self.assertEqual(len(info.data_lvs), len_data)
+            self.assertEqual(len(info.metadata_lvs), len_metadata)
+
+        def assert_lv_single_pv(info, pv):
+            if pv:
+                assert_lv_subs(info, "linear", 1, 0, 0)
+                self.assertEqual(info.segs[0].pvdev, pv)
+            else:
+                assert_lv_subs(info, "linear", 0, 0, 0)
+
+        def assert_raid1_structure(pv1, pv2):
+            lvs = { lv.lv_name: lv for lv in BlockDev.lvm_lvs_tree("testVG") }
+            info = lvs["testLV"]
+            assert_lv_subs(info, "raid1", 0, 2, 2)
+            assert_lv_single_pv(lvs["["+info.data_lvs[0]+"]"], pv1)
+            assert_lv_single_pv(lvs["["+info.data_lvs[1]+"]"], pv2)
+            assert_lv_single_pv(lvs["["+info.metadata_lvs[0]+"]"], pv1)
+            assert_lv_single_pv(lvs["["+info.metadata_lvs[1]+"]"], pv2)
+
+        assert_raid1_structure(self.loop_dev, self.loop_dev2)
+
         # Disconnect the second PV, this should cause it to be flagged
         # as missing, and testLV to be reported as "partial".
         delete_lio_device(self.loop_dev2)
@@ -848,13 +875,8 @@ class LvmTestPartialLVs(LvmPVVGLVTestCase):
         self.assertTrue(info)
         self.assertEqual(info.attr[8], "p")
 
-        # repair testLV with the third PV
-        with wait_for_sync("testVG", "testLV"):
-            succ = BlockDev.lvm_lvrepair("testVG", "testLV", [self.loop_dev3])
-            self.assertTrue(succ)
-
-        info = BlockDev.lvm_lvinfo("testVG", "testLV")
-        self.assertEqual(info.attr[8], "-")
+        # lvs_tree should report the second stripe to be missing
+        assert_raid1_structure(self.loop_dev, None)
 
         # remove records of missing PVs
         succ = BlockDev.lvm_vgreduce("testVG", None, None)
@@ -866,6 +888,19 @@ class LvmTestPartialLVs(LvmPVVGLVTestCase):
             if pv.pv_uuid == loop_dev2_pv_uuid:
                 found = True
         self.assertFalse(found)
+
+        # lvs_tree should still report the second stripe to be missing
+        assert_raid1_structure(self.loop_dev, None)
+
+        # repair testLV with the third PV
+        with wait_for_sync("testVG", "testLV"):
+            succ = BlockDev.lvm_lvrepair("testVG", "testLV", [self.loop_dev3])
+            self.assertTrue(succ)
+
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
+        self.assertEqual(info.attr[8], "-")
+
+        assert_raid1_structure(self.loop_dev, self.loop_dev3)
 
 class LvmTestLVcreateWithExtra(LvmPVVGLVTestCase):
     def __init__(self, *args, **kwargs):
@@ -1207,6 +1242,12 @@ class LvmTestLVsMultiSegment(LvmPVVGLVTestCase):
         self.assertEqual(len(lvs), 1)
         self.assertListEqual([lv.lv_name for lv in lvs], ["testLV"])
 
+        # the LV will have a single segment on loop_dev
+        info = BlockDev.lvm_lvinfo_tree("testVG", "testLV")
+        self.assertEqual(info.segtype, "linear")
+        self.assertEqual(len(info.segs), 1)
+        self.assertEqual(info.segs[0].pvdev, self.loop_dev)
+
         # add second LV
         succ = BlockDev.lvm_lvcreate("testVG", "testLV2", 10 * 1024**2)
         self.assertTrue(succ)
@@ -1218,6 +1259,13 @@ class LvmTestLVsMultiSegment(LvmPVVGLVTestCase):
         # by resizing the first LV we will create two segments
         succ = BlockDev.lvm_lvresize("testVG", "testLV", 20 * 1024**2, None)
         self.assertTrue(succ)
+
+        info = BlockDev.lvm_lvinfo_tree("testVG", "testLV")
+        self.assertEqual(info.segtype, "linear")
+        self.assertEqual(len(info.segs), 2)
+        self.assertEqual(info.segs[0].pvdev, self.loop_dev)
+        self.assertEqual(info.segs[1].pvdev, self.loop_dev)
+        self.assertNotEqual(info.segs[0].pv_start_pe, info.segs[1].pv_start_pe)
 
         lvs = BlockDev.lvm_lvs("testVG")
         self.assertEqual(len(lvs), 2)
