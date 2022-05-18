@@ -89,6 +89,7 @@ BDLVMPVdata* bd_lvm_pvdata_copy (BDLVMPVdata *data) {
     new_data->vg_free_count = data->vg_free_count;
     new_data->vg_pv_count = data->vg_pv_count;
     new_data->pv_tags = g_strdupv (data->pv_tags);
+    new_data->missing = data->missing;
 
     return new_data;
 }
@@ -542,6 +543,9 @@ static BDLVMPVdata* get_pv_data_from_table (GHashTable *table, gboolean free_tab
         data->pv_tags = g_strsplit (value, ",", -1);
     else
         data->pv_tags = NULL;
+
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_PV_MISSING");
+    data->missing = (g_strcmp0 (value, "missing") == 0);
 
     if (free_table)
         g_hash_table_destroy (table);
@@ -1175,7 +1179,7 @@ BDLVMPVdata* bd_lvm_pvinfo (const gchar *device, GError **error) {
     const gchar *args[10] = {"pvs", "--unit=b", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--noheadings",
                        "-o", "pv_name,pv_uuid,pv_free,pv_size,pe_start,vg_name,vg_uuid,vg_size," \
-                       "vg_free,vg_extent_size,vg_extent_count,vg_free_count,pv_count,pv_tags",
+                       "vg_free,vg_extent_size,vg_extent_count,vg_free_count,pv_count,pv_tags,pv_missing",
                        device, NULL};
     GHashTable *table = NULL;
     gboolean success = FALSE;
@@ -1194,7 +1198,7 @@ BDLVMPVdata* bd_lvm_pvinfo (const gchar *device, GError **error) {
 
     for (lines_p = lines; *lines_p; lines_p++) {
         table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 14)) {
+        if (table && (num_items == 15)) {
             g_clear_error (error);
             g_strfreev (lines);
             return get_pv_data_from_table (table, TRUE);
@@ -1222,7 +1226,7 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
     const gchar *args[9] = {"pvs", "--unit=b", "--nosuffix", "--nameprefixes",
                        "--unquoted", "--noheadings",
                        "-o", "pv_name,pv_uuid,pv_free,pv_size,pe_start,vg_name,vg_uuid,vg_size," \
-                       "vg_free,vg_extent_size,vg_extent_count,vg_free_count,pv_count,pv_tags",
+                       "vg_free,vg_extent_size,vg_extent_count,vg_free_count,pv_count,pv_tags,pv_missing",
                        NULL};
     GHashTable *table = NULL;
     gboolean success = FALSE;
@@ -1256,7 +1260,7 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
 
     for (lines_p = lines; *lines_p; lines_p++) {
         table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 14)) {
+        if (table && (num_items == 15)) {
             /* valid line, try to parse and record it */
             pvdata = get_pv_data_from_table (table, TRUE);
             if (pvdata)
@@ -1739,6 +1743,41 @@ gboolean bd_lvm_lvresize (const gchar *vg_name, const gchar *lv_name, guint64 si
     success = call_lvm_and_report_error (args, extra, TRUE, error);
     g_free ((gchar *) args[3]);
     g_free ((gchar *) args[4]);
+
+    return success;
+}
+
+/**
+ * bd_lvm_lvrepair:
+ * @vg_name: name of the VG containing the to-be-repaired LV
+ * @lv_name: name of the to-be-repaired LV
+ * @pv_list: (array zero-terminated=1): list of PVs to be used for the repair
+ * @extra: (nullable) (array zero-terminated=1): extra options for the LV repair
+ *                                                 (just passed to LVM as is)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the @vg_name/@lv_name LV was successfully repaired or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_lvrepair (const gchar *vg_name, const gchar *lv_name, const gchar **pv_list, const BDExtraArg **extra, GError **error) {
+    guint i = 0;
+    guint pv_list_len = pv_list ? g_strv_length ((gchar **) pv_list) : 0;
+    const gchar **argv = g_new0 (const gchar*, pv_list_len + 5);
+    gboolean success = FALSE;
+
+    argv[0] = "lvconvert";
+    argv[1] = "--repair";
+    argv[2] = "--yes";
+    argv[3] = g_strdup_printf ("%s/%s", vg_name, lv_name);
+    for (i=4; i < (pv_list_len + 4); i++) {
+        argv[i] = pv_list[i-4];
+    }
+    argv[i] = NULL;
+
+    success = call_lvm_and_report_error (argv, extra, TRUE, error);
+    g_free ((gchar *) argv[3]);
+    g_free (argv);
 
     return success;
 }
