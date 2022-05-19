@@ -135,7 +135,7 @@ static __u8 find_lbaf_for_size (int fd, __u32 nsid, guint16 lba_data_size, GErro
        return flbas;
     }
 
-    for (i = 0; i < ns_info.nlbaf; i++)
+    for (i = 0; i <= ns_info.nlbaf + ns_info.nulbaf; i++)
         if (1UL << ns_info.lbaf[i].ds == lba_data_size && ns_info.lbaf[i].ms == 0)
             return i;
 
