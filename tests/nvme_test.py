@@ -170,9 +170,7 @@ class NVMeTestCase(NVMeTest):
             BlockDev.nvme_get_error_log_entries("/dev/nonexistent")
 
         log = BlockDev.nvme_get_error_log_entries(self.nvme_dev)
-        # expect an empty log...
         self.assertIsNotNone(log)
-        self.assertEqual(len(log), 1)
         # TODO: find a way to spoof drive errors
 
 
