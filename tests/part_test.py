@@ -356,7 +356,7 @@ class PartCreatePartFullCase(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertTrue(abs(ps4.start - (ps3.start + ps3.size + 1)) < ps.start)
         self.assertEqual(ps4.size, 10 * 1024**2)
-        self.assertEqual(ps4.flags, 0)  # no flags (combination of bit flags)
+        self.assertIn(ps4.flags, [0, 128])  # no flags or extended+lba (combination of bit flags)
 
         # no more primary partitions allowed in the MSDOS table
         with self.assertRaises(GLib.GError):
@@ -404,7 +404,7 @@ class PartCreatePartFullCase(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertTrue(abs(ps3.start - (ps2.start + ps2.size + 1)) < ps.start)
         self.assertEqual(ps3.size, 30 * 1024**2)
-        self.assertEqual(ps3.flags, 0)  # no flags (combination of bit flags)
+        self.assertIn(ps3.flags, [0, 128])  # no flags or extended+lba (combination of bit flags)
 
         # the logical partition has number 5 even though the extended partition
         # has number 3
@@ -871,7 +871,7 @@ class PartGetPartByPos(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertTrue(abs(ps3.start - (ps2.start + ps2.size + 1)) < ps.start)
         self.assertEqual(ps3.size, 35 * 1024**2)
-        self.assertEqual(ps3.flags, 0)  # no flags (combination of bit flags)
+        self.assertIn(ps3.flags, [0, 128])  # no flags or extended+lba (combination of bit flags)
 
         # the logical partition has number 5 even though the extended partition
         # has number 3
