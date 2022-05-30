@@ -355,6 +355,8 @@ class NVMeFabricsTestCase(NVMeTest):
         # disconnect
         with self.assertRaisesRegexp(GLib.GError, r"No subsystems matching '.*' NQN found."):
             BlockDev.nvme_disconnect(self.SUBNQN + "xx")
+        with self.assertRaisesRegexp(GLib.GError, r"Unable to match a NVMeoF controller for the specified block device /dev/nvme.*xx"):
+            BlockDev.nvme_disconnect_by_path(ctrls[0] + "xx")
         # should disconnect both connections as long the SUBNQN matches
         BlockDev.nvme_disconnect(self.SUBNQN)
         for c in ctrls:
@@ -435,7 +437,7 @@ class NVMeFabricsTestCase(NVMeTest):
             self.assertEqual(len(ctrl_sysfs_paths), 0)
 
         # disconnect
-        BlockDev.nvme_disconnect(self.SUBNQN)
+        BlockDev.nvme_disconnect_by_path(ctrls[0])
         for c in ctrls:
             self.assertFalse(os.path.exists(c))
         for ns in namespaces:
