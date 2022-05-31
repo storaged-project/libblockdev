@@ -1176,8 +1176,8 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_CREATE
  */
 gboolean bd_lvm_vgcreate (const gchar *name, const gchar **pv_list, guint64 pe_size, const BDExtraArg **extra, GError **error) {
-    guint8 i = 0;
-    guint8 pv_list_len = pv_list ? g_strv_length ((gchar **) pv_list) : 0;
+    guint i = 0;
+    guint pv_list_len = pv_list ? g_strv_length ((gchar **) pv_list) : 0;
     const gchar **argv = g_new0 (const gchar*, pv_list_len + 5);
     pe_size = RESOLVE_PE_SIZE (pe_size);
     gboolean success = FALSE;
@@ -1810,8 +1810,20 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
         if (table && (num_items == 15)) {
             /* valid line, try to parse and record it */
             lvdata = get_lv_data_from_table (table, TRUE);
-            if (lvdata)
-                g_ptr_array_add (lvs, lvdata);
+            if (lvdata) {
+                /* ignore duplicate entries in lvs output, these are caused by multi segments LVs */
+                for (gsize i = 0; i < lvs->len; i++) {
+                    if (g_strcmp0 (((BDLVMLVdata *) g_ptr_array_index (lvs, i))->lv_name, lvdata->lv_name) == 0) {
+                        g_debug ("Duplicate LV entry for '%s' found in lvs output", lvdata->lv_name);
+                        bd_lvm_lvdata_free (lvdata);
+                        lvdata = NULL;
+                        break;
+                    }
+                }
+
+                if (lvdata)
+                    g_ptr_array_add (lvs, lvdata);
+            }
         } else
             if (table)
                 g_hash_table_destroy (table);
@@ -1993,7 +2005,10 @@ gboolean bd_lvm_set_global_config (const gchar *new_config, GError **error UNUSE
     g_free (global_config_str);
 
     /* now store the new one */
-    global_config_str = g_strdup (new_config);
+    if (!new_config || g_strcmp0 (new_config, "") == 0)
+         global_config_str = NULL;
+    else
+        global_config_str = g_strdup (new_config);
 
     g_mutex_unlock (&global_config_lock);
     return TRUE;

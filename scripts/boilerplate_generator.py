@@ -80,7 +80,6 @@ def gather_defs_and_func_info(line_iter, includes):
         elif in_skip or line.strip().startswith("/* BpG-skip"):
             in_skip = True
         elif line.rstrip() == "}" and in_body:
-            in_body = False
             # nothing more for this function
             break
         elif in_body:

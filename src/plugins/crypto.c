@@ -876,7 +876,7 @@ static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 k
             bd_utils_report_finished (progress_id, (*error)->message);
             return FALSE;
         }
-        bd_utils_report_progress (progress_id, ((data_size != 0) && key_file) ? 70 : 100, "Added key");
+        bd_utils_report_progress (progress_id, key_file ? 70 : 100, "Added key");
     }
 
     if (key_file) {
@@ -2269,7 +2269,6 @@ static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libv
     GIOChannel *out_file = NULL;
     GIOStatus status = G_IO_STATUS_ERROR;
     gsize bytes_written = 0;
-    GError *tmp_error = NULL;
 
     packet_data = libvk_volume_create_packet_asymmetric_with_format (volume, &packet_data_size, secret_type, cert,
                                                                      ui, LIBVK_PACKET_FORMAT_ASYMMETRIC_WRAP_SECRET_ONLY, error);
@@ -2293,7 +2292,7 @@ static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libv
         g_free(packet_data);
 
         /* try to shutdown the channel, but if it fails, we cannot do anything about it here */
-        g_io_channel_shutdown (out_file, TRUE, &tmp_error);
+        g_io_channel_shutdown (out_file, TRUE, NULL);
 
         /* error is already populated */
         g_io_channel_unref (out_file);
@@ -2305,7 +2304,7 @@ static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libv
     g_free (packet_data);
     if (status != G_IO_STATUS_NORMAL) {
         /* try to shutdown the channel, but if it fails, we cannot do anything about it here */
-        g_io_channel_shutdown (out_file, TRUE, &tmp_error);
+        g_io_channel_shutdown (out_file, TRUE, NULL);
 
         /* error is already populated */
         g_io_channel_unref (out_file);
