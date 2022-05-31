@@ -345,11 +345,16 @@ gboolean bd_nvme_disconnect (const gchar *subsysnqn, GError **error) {
 gboolean bd_nvme_disconnect_by_path (const gchar *path, GError **error) {
     nvme_root_t root;
     nvme_ctrl_t ctrl;
+    const gchar *p;
     int ret;
+
+    p = path;
+    if (g_str_has_prefix (p, "/dev/"))
+        p += 5;
 
     root = nvme_scan (NULL);
     nvme_init_logging (root, -1, false, false);
-    ctrl = nvme_scan_ctrl (root, path);
+    ctrl = nvme_scan_ctrl (root, p);
     if (!ctrl) {
         g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_NO_MATCH,
                      "Unable to match a NVMeoF controller for the specified block device %s.",
