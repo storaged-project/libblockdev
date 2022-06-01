@@ -695,6 +695,7 @@
     <keyword type="constant" name="BD_FS_ERROR_NOT_MOUNTED" link="libblockdev-FS.html#BD-FS-ERROR-NOT-MOUNTED:CAPS"/>
     <keyword type="constant" name="BD_FS_ERROR_AUTH" link="libblockdev-FS.html#BD-FS-ERROR-AUTH:CAPS"/>
     <keyword type="constant" name="BD_FS_ERROR_TECH_UNAVAIL" link="libblockdev-FS.html#BD-FS-ERROR-TECH-UNAVAIL:CAPS"/>
+    <keyword type="constant" name="BD_FS_ERROR_UNKNOWN_FS" link="libblockdev-FS.html#BD-FS-ERROR-UNKNOWN-FS:CAPS"/>
     <keyword type="constant" name="BD_FS_TECH_GENERIC" link="libblockdev-FS.html#BD-FS-TECH-GENERIC:CAPS"/>
     <keyword type="constant" name="BD_FS_TECH_MOUNT" link="libblockdev-FS.html#BD-FS-TECH-MOUNT:CAPS"/>
     <keyword type="constant" name="BD_FS_TECH_EXT2" link="libblockdev-FS.html#BD-FS-TECH-EXT2:CAPS"/>
