@@ -1,3 +1,39 @@
+Libblockdev 2.27
+----------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Full list of changes**
+
+Tomas Bzatek (1):
+
+- fs: Return BD_FS_ERROR_UNKNOWN_FS on mounting unknown filesystem
+
+Vojtech Trefny (21):
+
+- overrides: Fix translating exceptions in ErrorProxy
+- tests: Do not check that swap flag is not supported on DOS table
+- tests: Lower expected free space on newly created Ext filesystems
+- tests: Remove test for NTFS read-only mounting
+- vdo_stats: Default to 100 % savings for invalid savings values
+- lvm: Fix reading statistics for VDO pools with VDO 8
+- tests: Fix creating loop device for CryptoTestLuksSectorSize
+- tests: Use losetup to create 4k sector size loop device for testing
+- s390: Remove double fclose in bd_s390_dasd_online (#2045784)
+- lvm-dbus: Add support for changing compression and deduplication
+- tests: Skip test_lvcreate_type on CentOS/RHEL 9
+- tests: Fix expected extended partition flags with new parted
+- lvm: Do not set global config to and empty string
+- lvm: Do not include duplicate entries in bd_lvm_lvs output
+- lvm: Use correct integer type in for comparison
+- crypto: Remove useless comparison in progress report in luks_format
+- boilerplate_generator: Remove unused variable assignment
+- kbd: Add missing progress reporting to bd_kbd_bcache_create
+- kbd: Fix leaking error in bd_kbd_bcache_detach
+- kbd: Fix potential NULL pointer dereference in bd_kbd_bcache_create
+- crypto: Remove unused and leaking error in write_escrow_data_file
+
 Libblockdev 2.26
 ----------------
 

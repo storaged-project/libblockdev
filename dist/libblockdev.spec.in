@@ -124,7 +124,7 @@
 %define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?vdo_copts} %{?tools_copts} %{?gi_copts}
 
 Name:        libblockdev
-Version:     2.26
+Version:     2.27
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -979,6 +979,30 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Jun 01 2022 Vojtech Trefny <vtrefny@redhat.com> - 2.27-1
+- crypto: Remove unused and leaking error in write_escrow_data_file (vtrefny)
+- kbd: Fix potential NULL pointer dereference in bd_kbd_bcache_create (vtrefny)
+- kbd: Fix leaking error in bd_kbd_bcache_detach (vtrefny)
+- kbd: Add missing progress reporting to bd_kbd_bcache_create (vtrefny)
+- boilerplate_generator: Remove unused variable assignment (vtrefny)
+- crypto: Remove useless comparison in progress report in luks_format (vtrefny)
+- lvm: Use correct integer type in for comparison (vtrefny)
+- lvm: Do not include duplicate entries in bd_lvm_lvs output (vtrefny)
+- lvm: Do not set global config to and empty string (vtrefny)
+- tests: Fix expected extended partition flags with new parted (vtrefny)
+- tests: Skip test_lvcreate_type on CentOS/RHEL 9 (vtrefny)
+- lvm-dbus: Add support for changing compression and deduplication (vtrefny)
+- s390: Remove double fclose in bd_s390_dasd_online (#2045784) (vtrefny)
+- fs: Return BD_FS_ERROR_UNKNOWN_FS on mounting unknown filesystem (tbzatek)
+- tests: Use losetup to create 4k sector size loop device for testing (vtrefny)
+- tests: Fix creating loop device for CryptoTestLuksSectorSize (vtrefny)
+- lvm: Fix reading statistics for VDO pools with VDO 8 (vtrefny)
+- vdo_stats: Default to 100 % savings for invalid savings values (vtrefny)
+- tests: Remove test for NTFS read-only mounting (vtrefny)
+- tests: Lower expected free space on newly created Ext filesystems (vtrefny)
+- tests: Do not check that swap flag is not supported on DOS table (vtrefny)
+- overrides: Fix translating exceptions in ErrorProxy (vtrefny)
+
 * Wed Jul 28 2021 Vojtech Trefny <vtrefny@redhat.com> - 2.26-1
 - Add missing plugins to the default config (vtrefny)
 - remove unused variable and fix build with LLVM/clang (tpgxyz)
