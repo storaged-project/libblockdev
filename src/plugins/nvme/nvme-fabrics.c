@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <malloc.h>
 #include <linux/fs.h>
+#include <glib/gstdio.h>
 
 #include <libnvme.h>
 #include <uuid/uuid.h>
@@ -761,4 +762,153 @@ gchar ** bd_nvme_find_ctrls_for_ns (const gchar *ns_sysfs_path, const gchar *sub
 
     g_ptr_array_add (ptr_array, NULL);  /* trailing NULL element */
     return (gchar **) g_ptr_array_free (ptr_array, FALSE);
+}
+
+
+/**
+ * bd_nvme_get_host_nqn:
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * Reads the Host NQN (NVM Qualified Name) value from the global `/etc/nvme/hostnqn`
+ * file. An empty string is an indication that no Host NQN has been set.
+ *
+ * Returns: (transfer full): the Host NQN string or an empty string if none set.
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gchar * bd_nvme_get_host_nqn (G_GNUC_UNUSED GError **error) {
+    char *hostnqn;
+
+    /* FIXME: libnvme SYSCONFDIR might be different from PACKAGE_SYSCONF_DIR */
+    hostnqn = nvmf_hostnqn_from_file ();
+    return hostnqn ? hostnqn : g_strdup ("");
+}
+
+/**
+ * bd_nvme_generate_host_nqn:
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * Compute new Host NQN (NVM Qualified Name) value for the current system. This
+ * takes in account various system identifiers (DMI, device tree) with the goal
+ * of a stable unique identifier whenever feasible.
+ *
+ * Returns: (transfer full): the Host NQN string or %NULL with @error set.
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gchar * bd_nvme_generate_host_nqn (GError **error) {
+    char *nqn;
+
+    nqn = nvmf_hostnqn_generate ();
+    if (!nqn)
+        g_set_error_literal (error, BD_NVME_ERROR, BD_NVME_ERROR_INVALID_ARGUMENT,
+                             "Unable to generate Host NQN.");
+
+    return nqn;
+}
+
+/**
+ * bd_nvme_get_host_id:
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * Reads the Host ID value from the global `/etc/nvme/hostid` file. An empty
+ * string is an indication that no Host ID has been set.
+ *
+ * Returns: (transfer full): the Host ID string or an empty string if none set.
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gchar * bd_nvme_get_host_id (G_GNUC_UNUSED GError **error) {
+    char *hostid;
+
+    hostid = nvmf_hostid_from_file ();
+    return hostid ? hostid : g_strdup ("");
+}
+
+/**
+ * bd_nvme_set_host_nqn:
+ * @host_nqn: The Host NVM Qualified Name.
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * Writes the Host NQN (NVM Qualified Name) value to the system `/etc/nvme/hostnqn` file.
+ * No validation of the string is performed.
+ *
+ * Returns: %TRUE if the value was set successfully or %FALSE otherwise with @error set.
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gboolean bd_nvme_set_host_nqn (const gchar *host_nqn, GError **error) {
+    gchar *path;
+    gchar *filename;
+    gchar *s;
+    gboolean ret;
+
+    g_return_val_if_fail (host_nqn != NULL, FALSE);
+
+    path = g_build_path (G_DIR_SEPARATOR_S, PACKAGE_SYSCONF_DIR, "nvme", NULL);
+    if (g_mkdir_with_parents (path, 0755) != 0 && errno != EEXIST) {
+        g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                     "Error creating %s: %s",
+                     path, strerror_l (errno, _C_LOCALE));
+        g_free (path);
+        return FALSE;
+    }
+    filename = g_build_filename (path, "hostnqn", NULL);
+    if (host_nqn[strlen (host_nqn) - 1] != '\n')
+        s = g_strdup_printf ("%s\n", host_nqn);
+    else
+        s = g_strdup (host_nqn);
+    ret = g_file_set_contents (filename, s, -1, error);
+    if (ret)
+        g_chmod (filename, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+
+    g_free (s);
+    g_free (path);
+    g_free (filename);
+
+    return ret;
+}
+
+/**
+ * bd_nvme_set_host_id:
+ * @host_id: The Host ID.
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * Writes the Host ID value to the system `/etc/nvme/hostid` file.
+ * No validation of the string is performed.
+ *
+ * Returns: %TRUE if the value was set successfully or %FALSE otherwise with @error set.
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gboolean bd_nvme_set_host_id (const gchar *host_id, GError **error) {
+    gchar *path;
+    gchar *filename;
+    gchar *s;
+    gboolean ret;
+
+    g_return_val_if_fail (host_id != NULL, FALSE);
+
+    path = g_build_path (G_DIR_SEPARATOR_S, PACKAGE_SYSCONF_DIR, "nvme", NULL);
+    if (g_mkdir_with_parents (path, 0755) != 0 && errno != EEXIST) {
+        g_set_error (error, G_FILE_ERROR, g_file_error_from_errno (errno),
+                     "Error creating %s: %s",
+                     path, strerror_l (errno, _C_LOCALE));
+        g_free (path);
+        return FALSE;
+    }
+    filename = g_build_filename (path, "hostid", NULL);
+    if (host_id[strlen (host_id) - 1] != '\n')
+        s = g_strdup_printf ("%s\n", host_id);
+    else
+        s = g_strdup (host_id);
+    ret = g_file_set_contents (filename, s, -1, error);
+    if (ret)
+        g_chmod (filename, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+
+    g_free (s);
+    g_free (path);
+    g_free (filename);
+
+    return ret;
 }

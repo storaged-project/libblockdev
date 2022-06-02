@@ -853,6 +853,11 @@ bd_nvme_sanitize_log_free
 bd_nvme_sanitize_log_copy
 BDNVMESanitizeAction
 bd_nvme_sanitize
+bd_nvme_get_host_nqn
+bd_nvme_get_host_id
+bd_nvme_generate_host_nqn
+bd_nvme_set_host_nqn
+bd_nvme_set_host_id
 bd_nvme_connect
 bd_nvme_disconnect
 bd_nvme_disconnect_by_path

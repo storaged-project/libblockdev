@@ -653,6 +653,13 @@ gboolean               bd_nvme_sanitize              (const gchar               
                                                       gboolean                      overwrite_invert_pattern,
                                                       GError                      **error);
 
+gchar *                bd_nvme_get_host_nqn          (GError           **error);
+gchar *                bd_nvme_generate_host_nqn     (GError           **error);
+gchar *                bd_nvme_get_host_id           (GError           **error);
+gboolean               bd_nvme_set_host_nqn          (const gchar       *host_nqn,
+                                                      GError           **error);
+gboolean               bd_nvme_set_host_id           (const gchar       *host_id,
+                                                      GError           **error);
 
 gboolean               bd_nvme_connect               (const gchar       *subsysnqn,
                                                       const gchar       *transport,

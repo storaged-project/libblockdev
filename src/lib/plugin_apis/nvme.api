@@ -1293,6 +1293,74 @@ gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, BDNVMEForma
 gboolean bd_nvme_sanitize (const gchar *device, BDNVMESanitizeAction action, gboolean no_dealloc, gint overwrite_pass_count, guint32 overwrite_pattern, gboolean overwrite_invert_pattern, GError **error);
 
 /**
+ * bd_nvme_get_host_nqn:
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * Reads the Host NQN (NVM Qualified Name) value from the global `/etc/nvme/hostnqn`
+ * file. An empty string is an indication that no Host NQN has been set.
+ *
+ * Returns: (transfer full): the Host NQN string or an empty string if none set.
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gchar * bd_nvme_get_host_nqn (GError **error);
+
+/**
+ * bd_nvme_generate_host_nqn:
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * Compute new Host NQN (NVM Qualified Name) value for the current system. This
+ * takes in account various system identifiers (DMI, device tree) with the goal
+ * of a stable unique identifier whenever feasible.
+ *
+ * Returns: (transfer full): the Host NQN string or %NULL with @error set.
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gchar * bd_nvme_generate_host_nqn (GError **error);
+
+/**
+ * bd_nvme_get_host_id:
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * Reads the Host ID value from the global `/etc/nvme/hostid` file. An empty
+ * string is an indication that no Host ID has been set.
+ *
+ * Returns: (transfer full): the Host ID string or an empty string if none set.
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gchar * bd_nvme_get_host_id (GError **error);
+
+/**
+ * bd_nvme_set_host_nqn:
+ * @host_nqn: The Host NVM Qualified Name.
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * Writes the Host NQN (NVM Qualified Name) value to the system `/etc/nvme/hostnqn` file.
+ * No validation of the string is performed.
+ *
+ * Returns: %TRUE if the value was set successfully or %FALSE otherwise with @error set.
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gboolean bd_nvme_set_host_nqn (const gchar *host_nqn, GError **error);
+
+/**
+ * bd_nvme_set_host_id:
+ * @host_id: The Host ID.
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * Writes the Host ID value to the system `/etc/nvme/hostid` file.
+ * No validation of the string is performed.
+ *
+ * Returns: %TRUE if the value was set successfully or %FALSE otherwise with @error set.
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gboolean bd_nvme_set_host_id (const gchar *host_id, GError **error);
+
+/**
  * bd_nvme_connect:
  * @subsysnqn: The name for the NVMe subsystem to connect to.
  * @transport: The network fabric used for a NVMe-over-Fabrics network.
