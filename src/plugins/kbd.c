@@ -634,7 +634,7 @@ BDKBDZramStats* bd_kbd_zram_get_stats (const gchar *device, GError **error) {
     BDKBDZramStats *ret = NULL;
 
     if (!check_module_deps (&avail_module_deps, MODULE_DEPS_ZRAM_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
+        return NULL;
 
     ret = g_new0 (BDKBDZramStats, 1);
 

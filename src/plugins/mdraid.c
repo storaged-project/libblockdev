@@ -957,12 +957,12 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
     gboolean found_array_line = FALSE;
 
     if (!check_deps (&avail_deps, DEPS_MDADM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
+        return NULL;
 
     success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
     if (!success)
         /* error is already populated */
-        return FALSE;
+        return NULL;
 
     table = parse_mdadm_vars (output, "\n", ":", &num_items);
     g_free (output);
@@ -997,7 +997,7 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
     if (!success) {
         /* error is already populated */
         bd_md_examine_data_free (ret);
-        return FALSE;
+        return NULL;
     }
 
     /* try to get a better information about RAID level because it may be
@@ -1019,7 +1019,7 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
     if (!success) {
         /* error is already populated */
         bd_md_examine_data_free (ret);
-        return FALSE;
+        return NULL;
     }
 
     /* try to find the "ARRAY /dev/md/something" pair in the output */
@@ -1080,7 +1080,7 @@ BDMDDetailData* bd_md_detail (const gchar *raid_spec, GError **error) {
     BDMDDetailData *ret = NULL;
 
     if (!check_deps (&avail_deps, DEPS_MDADM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
+        return NULL;
 
     mdadm_spec = get_mdadm_spec_from_input (raid_spec, error);
     if (!mdadm_spec)
