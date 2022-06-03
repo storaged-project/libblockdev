@@ -2130,7 +2130,7 @@ gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup
 gboolean bd_crypto_luks_set_label (const gchar *device, const gchar *label, const gchar *subsystem, GError **error) {
     g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
                  "Label can be set only on LUKS 2 devices and requires libcryptsetup >= 2.0");
-    return NULL;
+    return FALSE;
 }
 #else
 gboolean bd_crypto_luks_set_label (const gchar *device, const gchar *label, const gchar *subsystem, GError **error) {

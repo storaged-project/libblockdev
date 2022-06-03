@@ -295,7 +295,7 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
     if (!probe) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to create a new probe");
-        return FALSE;
+        return NULL;
     }
 
     fd = open (device, O_RDONLY|O_CLOEXEC);
@@ -303,7 +303,7 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to open the device '%s'", device);
         blkid_free_probe (probe);
-        return FALSE;
+        return NULL;
     }
 
     /* we may need to try multiple times with some delays in case the device is
@@ -318,7 +318,7 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
                      "Failed to create a probe for the device '%s'", device);
         blkid_free_probe (probe);
         synced_close (fd);
-        return FALSE;
+        return NULL;
     }
 
     blkid_probe_enable_partitions (probe, 1);

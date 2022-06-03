@@ -2769,7 +2769,7 @@ gchar* bd_lvm_cache_pool_name (const gchar *vg_name, const gchar *cached_lv, GEr
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
                      "Failed to determine cache pool name from: '%s'", ret);
         g_free (ret);
-        return FALSE;
+        return NULL;
     }
     name_start++;
 
@@ -2778,7 +2778,7 @@ gchar* bd_lvm_cache_pool_name (const gchar *vg_name, const gchar *cached_lv, GEr
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
                      "Failed to determine cache pool name from: '%s'", ret);
         g_free (ret);
-        return FALSE;
+        return NULL;
     }
 
     pool_name = g_strndup (name_start, name_end - name_start);
