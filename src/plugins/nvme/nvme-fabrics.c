@@ -231,6 +231,8 @@ gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const 
     host_nqn_val = g_strdup (host_nqn);
     if (host_nqn_val == NULL)
         host_nqn_val = nvmf_hostnqn_from_file ();
+    if (host_nqn_val == NULL)
+        host_nqn_val = nvmf_hostnqn_generate ();
     host_id_val = g_strdup (host_id);
     if (host_id_val == NULL)
         host_id_val = nvmf_hostid_from_file ();
@@ -519,6 +521,8 @@ BDNVMEDiscoveryLogEntry ** bd_nvme_discover (const gchar *discovery_ctrl, gboole
     host_nqn_val = g_strdup (host_nqn);
     if (host_nqn_val == NULL)
         host_nqn_val = nvmf_hostnqn_from_file ();
+    if (host_nqn_val == NULL)
+        host_nqn_val = nvmf_hostnqn_generate ();
     host_id_val = g_strdup (host_id);
     if (host_id_val == NULL)
         host_id_val = nvmf_hostid_from_file ();
