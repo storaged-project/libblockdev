@@ -409,7 +409,7 @@ static gchar *decode_nvme_rev (guint32 ver) {
 
 /**
  * bd_nvme_get_controller_info:
- * @device: a NVMe controller device (e.g. /dev/nvme0)
+ * @device: a NVMe controller device (e.g. `/dev/nvme0`)
  * @error: (out) (nullable): place to store error (if any)
  *
  * Retrieves information about the NVMe controller (the Identify Controller command)
@@ -526,7 +526,7 @@ BDNVMEControllerInfo * bd_nvme_get_controller_info (const gchar *device, GError 
 
 /**
  * bd_nvme_get_namespace_info:
- * @device: a NVMe namespace device (e.g. /dev/nvme0n1)
+ * @device: a NVMe namespace device (e.g. `/dev/nvme0n1`)
  * @error: (out) (nullable): place to store error (if any)
  *
  * Retrieves information about the NVMe namespace (the Identify Namespace command)
@@ -641,10 +641,10 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
 
 /**
  * bd_nvme_get_smart_log:
- * @device: a NVMe controller device (e.g. /dev/nvme0)
+ * @device: a NVMe controller device (e.g. `/dev/nvme0`)
  * @error: (out) (nullable): place to store error (if any)
  *
- * Retrieves drive SMART and general health information (Log Identifier %02h).
+ * Retrieves drive SMART and general health information (Log Identifier `02h`).
  * The information provided is over the life of the controller and is retained across power cycles.
  *
  * Returns: (transfer full): health log data or %NULL in case of an error (with @error set).
@@ -731,10 +731,10 @@ BDNVMESmartLog * bd_nvme_get_smart_log (const gchar *device, GError **error) {
 
 /**
  * bd_nvme_get_error_log_entries:
- * @device: a NVMe controller device (e.g. /dev/nvme0)
+ * @device: a NVMe controller device (e.g. `/dev/nvme0`)
  * @error: (out) (nullable): place to store error (if any)
  *
- * Retrieves Error Information Log (Log Identifier %01h) entries, used to describe
+ * Retrieves Error Information Log (Log Identifier `01h`) entries, used to describe
  * extended error information for a command that completed with error or to report
  * an error that is not specific to a particular command. This log is global to the
  * controller. The ordering of the entries is based on the time when the error
@@ -812,10 +812,10 @@ BDNVMEErrorLogEntry ** bd_nvme_get_error_log_entries (const gchar *device, GErro
 
 /**
  * bd_nvme_get_self_test_log:
- * @device: a NVMe controller device (e.g. /dev/nvme0)
+ * @device: a NVMe controller device (e.g. `/dev/nvme0`)
  * @error: (out) (nullable): place to store error (if any)
  *
- * Retrieves drive self-test log (Log Identifier %06h). Provides the status of a self-test operation
+ * Retrieves drive self-test log (Log Identifier `06h`). Provides the status of a self-test operation
  * in progress and the percentage complete of that operation, along with the results of the last
  * 20 device self-test operations.
  *
@@ -950,10 +950,10 @@ BDNVMESelfTestLog * bd_nvme_get_self_test_log (const gchar *device, GError **err
 
 /**
  * bd_nvme_get_sanitize_log:
- * @device: a NVMe controller device (e.g. /dev/nvme0)
+ * @device: a NVMe controller device (e.g. `/dev/nvme0`)
  * @error: (out) (nullable): place to store error (if any)
  *
- * Retrieves the drive sanitize status log (Log Identifier %81h) that includes information
+ * Retrieves the drive sanitize status log (Log Identifier `81h`) that includes information
  * about the most recent sanitize operation and the sanitize operation time estimates.
  *
  * As advised in the NVMe specification whitepaper the host should limit polling

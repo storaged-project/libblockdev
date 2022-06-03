@@ -138,7 +138,7 @@ static void parse_extra_args (const BDExtraArg **extra, struct nvme_fabrics_conf
  * @subsysnqn: The name for the NVMe subsystem to connect to.
  * @transport: The network fabric used for a NVMe-over-Fabrics network.
  * @transport_addr: (nullable): The network address of the Controller. For transports using IP addressing (e.g. `rdma`) this should be an IP-based address.
- * @transport_svcid: (nullable): The transport service id.  For transports using IP addressing (e.g. `rdma`) this field is the port number. By default, the IP port number for the `RDMA` transport is %4420.
+ * @transport_svcid: (nullable): The transport service id.  For transports using IP addressing (e.g. `rdma`) this field is the port number. By default, the IP port number for the `RDMA` transport is `4420`.
  * @host_traddr: (nullable): The network address used on the host to connect to the Controller. For TCP, this sets the source address on the socket.
  * @host_iface: (nullable): The network interface used on the host to connect to the Controller (e.g. IP `eth1`, `enp2s0`). This forces the connection to be made on a specific interface instead of letting the system decide.
  * @host_nqn: (nullable): Overrides the default Host NQN that identifies the NVMe Host. If this option is %NULL, the default is read from `/etc/nvme/hostnqn` first.
@@ -171,7 +171,7 @@ static void parse_extra_args (const BDExtraArg **extra, struct nvme_fabrics_conf
  * - `"queue_size"`: Number of elements in the I/O queues.
  * - `"keep_alive_tmo"`: The keep alive timeout (in seconds).
  * - `"reconnect_delay"`: The delay (in seconds) before reconnect is attempted after a connect loss.
- * - `"ctrl_loss_tmo"`: The controller loss timeout period (in seconds). A special value of %-1 will cause reconnecting forever.
+ * - `"ctrl_loss_tmo"`: The controller loss timeout period (in seconds). A special value of `-1` will cause reconnecting forever.
  * - `"fast_io_fail_tmo"`: Fast I/O Fail timeout (in seconds).
  * - `"tos"`: Type of service.
  * - `"duplicate_connect"`: Allow duplicated connections between same transport host and subsystem port. Boolean value.
@@ -421,7 +421,7 @@ BDNVMEDiscoveryLogEntry * bd_nvme_discovery_log_entry_copy (BDNVMEDiscoveryLogEn
  * @persistent: Persistent discovery connection.
  * @transport: The network fabric used for a NVMe-over-Fabrics network.
  * @transport_addr: (nullable): The network address of the Controller. For transports using IP addressing (e.g. `rdma`) this should be an IP-based address.
- * @transport_svcid: (nullable): The transport service id.  For transports using IP addressing (e.g. `rdma`) this field is the port number. By default, the IP port number for the `RDMA` transport is %4420.
+ * @transport_svcid: (nullable): The transport service id.  For transports using IP addressing (e.g. `rdma`) this field is the port number. By default, the IP port number for the `RDMA` transport is `4420`.
  * @host_traddr: (nullable): The network address used on the host to connect to the Controller. For TCP, this sets the source address on the socket.
  * @host_iface: (nullable): The network interface used on the host to connect to the Controller (e.g. IP `eth1`, `enp2s0`). This forces the connection to be made on a specific interface instead of letting the system decide.
  * @host_nqn: (nullable): Overrides the default Host NQN that identifies the NVMe Host. If this option is %NULL, the default is read from `/etc/nvme/hostnqn` first.
@@ -457,7 +457,7 @@ BDNVMEDiscoveryLogEntry * bd_nvme_discovery_log_entry_copy (BDNVMEDiscoveryLogEn
  * - `"queue_size"`: Number of elements in the I/O queues.
  * - `"keep_alive_tmo"`: The keep alive timeout (in seconds).
  * - `"reconnect_delay"`: The delay (in seconds) before reconnect is attempted after a connect loss.
- * - `"ctrl_loss_tmo"`: The controller loss timeout period (in seconds). A special value of %-1 will cause reconnecting forever.
+ * - `"ctrl_loss_tmo"`: The controller loss timeout period (in seconds). A special value of `-1` will cause reconnecting forever.
  * - `"fast_io_fail_tmo"`: Fast I/O Fail timeout (in seconds).
  * - `"tos"`: Type of service.
  * - `"duplicate_connect"`: Allow duplicated connections between same transport host and subsystem port. Boolean value.

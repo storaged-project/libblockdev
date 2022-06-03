@@ -39,7 +39,7 @@
 
 /**
  * bd_nvme_device_self_test:
- * @device: a NVMe controller or namespace device (e.g. /dev/nvme0)
+ * @device: a NVMe controller or namespace device (e.g. `/dev/nvme0`)
  * @action: self-test action to take.
  * @error: (out) (nullable): place to store error (if any)
  *
@@ -146,8 +146,8 @@ static __u8 find_lbaf_for_size (int fd, __u32 nsid, guint16 lba_data_size, GErro
 
 /**
  * bd_nvme_format:
- * @device: NVMe namespace or controller device to format (e.g. /dev/nvme0n1)
- * @lba_data_size: desired LBA data size (i.e. a sector size) in bytes or %0 to keep current. See #BDNVMELBAFormat and bd_nvme_get_namespace_info().
+ * @device: NVMe namespace or controller device to format (e.g. `/dev/nvme0n1`)
+ * @lba_data_size: desired LBA data size (i.e. a sector size) in bytes or `0` to keep current. See #BDNVMELBAFormat and bd_nvme_get_namespace_info().
  * @secure_erase: optional secure erase action to take.
  * @error: (out) (nullable): place to store error (if any)
  *
@@ -156,7 +156,7 @@ static __u8 find_lbaf_for_size (int fd, __u32 nsid, guint16 lba_data_size, GErro
  * to change LBA sector size. Optional secure erase method can be specified as well.
  *
  * Supported LBA data sizes for a given namespace can be listed using the bd_nvme_get_namespace_info()
- * call. In case of a special value %0 the current LBA format for a given namespace will be
+ * call. In case of a special value `0` the current LBA format for a given namespace will be
  * retained. When called on a controller device the first namespace is used as a reference.
  *
  * Note that the NVMe controller may define a Format NVM attribute indicating that the format
@@ -295,7 +295,7 @@ gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, BDNVMEForma
 
 /**
  * bd_nvme_sanitize:
- * @device: NVMe namespace or controller device to format (e.g. /dev/nvme0n1)
+ * @device: NVMe namespace or controller device to format (e.g. `/dev/nvme0n1`)
  * @action: the sanitize action to perform.
  * @no_dealloc: instruct the controller to not deallocate the affected media area.
  * @overwrite_pass_count: number of overwrite passes [1-15] or 0 for the default (16 passes).
