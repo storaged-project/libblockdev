@@ -130,7 +130,7 @@ static gboolean extract_e2fsck_progress (const gchar *line, guint8 *completion) 
     perc = filter_line_fsck (line, 5, error);
     if (perc < 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                         "An error occured when trying to parse a line with progress");
+                         "An error occurred when trying to parse a line with progress");
         return FALSE;
     }
 
