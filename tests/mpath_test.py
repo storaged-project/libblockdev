@@ -1,6 +1,7 @@
 import unittest
 import os
 import overrides_hack
+import shutil
 
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, get_version, TestTags, tag_test
 from gi.repository import BlockDev, GLib
@@ -48,6 +49,21 @@ class MpathTestCase(MpathTest):
         # just test that some non-mpath is not reported as a multipath member
         # device and no error is reported
         self.assertFalse(BlockDev.mpath_is_mpath_member("/dev/loop0"))
+
+    @tag_test(TestTags.NOSTORAGE)
+    def test_get_mpath_members(self):
+        """Verify that get_mpath_members works as expected"""
+        ret = BlockDev.mpath_get_mpath_members()
+        self.assertIsNotNone(ret)
+
+    @tag_test(TestTags.NOSTORAGE)
+    def test_set_friendly_names(self):
+        """Verify that set_friendly_names works as expected"""
+        if not shutil.which('mpathconf'):
+            self.skipTest("skipping The 'mpathconf' utility is not available")
+        else:
+            succ = BlockDev.mpath_set_friendly_names(True)
+            self.assertTrue(succ)
 
 class MpathUnloadTest(MpathTest):
     def setUp(self):
