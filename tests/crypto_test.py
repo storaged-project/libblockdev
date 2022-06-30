@@ -145,8 +145,8 @@ class CryptoTestFormat(CryptoTestCase):
         succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-xts-plain64", 0, None, self.keyfile, 0)
         self.assertTrue(succ)
 
-        # the simple case with password blob
-        succ = BlockDev.crypto_luks_format_blob(self.loop_dev, "aes-xts-plain64", 0, [ord(c) for c in PASSWD], 0)
+        # the simple case with password luks2_blob
+        succ = BlockDev.crypto_luks_format_luks2_blob(self.loop_dev, "aes-xts-plain64", 0, [ord(c) for c in PASSWD], 0,BlockDev.CryptoLUKSVersion.LUKS2, None)
         self.assertTrue(succ)
 
         # simple case with extra options
@@ -324,6 +324,9 @@ class CryptoTestResize(CryptoTestCase):
         succ = BlockDev.crypto_luks_resize("libblockdevTestLUKS", 0, None, self.keyfile)
         self.assertTrue(succ)
 
+        succ = BlockDev.crypto_luks_resize_luks2_blob("libblockdevTestLUKS", 0, [ord(c) for c in PASSWD])
+        self.assertTrue(succ)
+
         succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
         self.assertTrue(succ)
 
@@ -358,6 +361,12 @@ class CryptoTestOpenClose(CryptoTestCase):
 
         # use just the LUKS device name
         succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_open_blob(self.loop_dev, "libblockdevTestLUKS", [ord(c) for c in PASSWD], False)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_close("/dev/mapper/libblockdevTestLUKS")
         self.assertTrue(succ)
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
@@ -796,6 +805,12 @@ class CryptoTestSuspendResume(CryptoTestCase):
             BlockDev.crypto_luks_resume("libblockdevTestLUKS", None, "wrong-keyfile")
 
         succ = BlockDev.crypto_luks_resume("libblockdevTestLUKS", PASSWD, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_suspend("/dev/mapper/libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_resume_blob("libblockdevTestLUKS", [ord(c) for c in PASSWD])
         self.assertTrue(succ)
 
         _ret, state, _err = run_command("lsblk -oSTATE -n /dev/mapper/libblockdevTestLUKS")
