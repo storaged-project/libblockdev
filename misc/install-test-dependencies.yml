@@ -35,6 +35,7 @@
     with_items:
       - libfdisk-devel
       - keyutils-libs-devel
+      - libnvme-devel
     when: ansible_distribution == 'Fedora'
 
   - name: Install test dependencies (Fedora)
