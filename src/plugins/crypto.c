@@ -53,15 +53,6 @@
 #define DEFAULT_LUKS_KEYSIZE_BITS 256
 #define DEFAULT_LUKS_CIPHER "aes-xts-plain64"
 
-#ifdef LIBCRYPTSETUP_23
-/* 0 for autodetect since 2.3.0 */
-#define DEFAULT_INTEGRITY_TAG_SIZE 0
-#else
-/* we need some sane default for older versions, users should specify tag size when using
-   other algorithms than the default crc32c */
-#define DEFAULT_INTEGRITY_TAG_SIZE 4
-#endif
-
 #ifdef LIBCRYPTSETUP_24
 /* 0 for autodetect since 2.4.0 */
 #define DEFAULT_LUKS2_SECTOR_SIZE 0
@@ -376,11 +367,6 @@ gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **erro
             } else
                 return TRUE;
         case BD_CRYPTO_TECH_LUKS2:
-#ifndef LIBCRYPTSETUP_2
-            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                         "LUKS 2 technology requires libcryptsetup >= 2.0");
-            return FALSE;
-#endif
             ret = mode & (BD_CRYPTO_TECH_MODE_CREATE|BD_CRYPTO_TECH_MODE_OPEN_CLOSE|BD_CRYPTO_TECH_MODE_QUERY|
                           BD_CRYPTO_TECH_MODE_ADD_KEY|BD_CRYPTO_TECH_MODE_REMOVE_KEY|BD_CRYPTO_TECH_MODE_RESIZE|
                           BD_CRYPTO_TECH_MODE_SUSPEND_RESUME|BD_CRYPTO_TECH_MODE_BACKUP_RESTORE);
@@ -412,11 +398,6 @@ gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **erro
             } else
                 return TRUE;
         case BD_CRYPTO_TECH_INTEGRITY:
-#ifndef LIBCRYPTSETUP_2
-            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                         "Integrity technology requires libcryptsetup >= 2.0");
-            return FALSE;
-#endif
             ret = mode & (BD_CRYPTO_TECH_MODE_CREATE|BD_CRYPTO_TECH_MODE_OPEN_CLOSE|BD_CRYPTO_TECH_MODE_QUERY);
             if (ret != mode) {
                 g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
@@ -425,11 +406,6 @@ gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **erro
             } else
                 return TRUE;
         case BD_CRYPTO_TECH_BITLK:
-#ifndef LIBCRYPTSETUP_23
-            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                         "BITLK technology requires libcryptsetup >= 2.3.0");
-            return FALSE;
-#endif
             ret = mode & BD_CRYPTO_TECH_MODE_OPEN_CLOSE;
             if (ret != mode) {
                 g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
@@ -726,7 +702,6 @@ gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error) {
     return (gchar *)ret;
 }
 
-#ifdef LIBCRYPTSETUP_2
 static struct crypt_pbkdf_type *get_pbkdf_params (BDCryptoLUKSPBKDF *user_pbkdf, GError **error) {
     const struct crypt_pbkdf_type *default_pbkdf = NULL;
     struct crypt_pbkdf_type *new_pbkdf = NULL;
@@ -795,7 +770,6 @@ static struct crypt_pbkdf_type *get_pbkdf_params (BDCryptoLUKSPBKDF *user_pbkdf,
 
     return new_pbkdf;
 }
-#endif
 
 static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 key_size, const guint8 *pass_data, gsize data_size, const gchar *key_file, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra, GError **error) {
     struct crypt_device *cd = NULL;
@@ -817,10 +791,8 @@ static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 k
 
     if (luks_version == BD_CRYPTO_LUKS_VERSION_LUKS1)
         crypt_version = CRYPT_LUKS1;
-#ifdef LIBCRYPTSETUP_2
     else if (luks_version == BD_CRYPTO_LUKS_VERSION_LUKS2)
         crypt_version = CRYPT_LUKS2;
-#endif
     else {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
                      "Unknown or unsupported LUKS version specified");
@@ -910,7 +882,6 @@ static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 k
             ret = crypt_format (cd, crypt_version, cipher_specs[0], cipher_specs[1],
                                 NULL, NULL, key_size, &params);
         }
-#ifdef LIBCRYPTSETUP_2
         else if (luks_version == BD_CRYPTO_LUKS_VERSION_LUKS2) {
             struct crypt_params_luks2 params = ZERO_INIT;
             struct crypt_pbkdf_type *pbkdf = get_pbkdf_params (extra->pbkdf, &l_error);
@@ -936,7 +907,6 @@ static gboolean luks_format (const gchar *device, const gchar *cipher, guint64 k
                                 NULL, NULL, key_size, &params);
             g_free (pbkdf);
         }
-#endif
     } else
         ret = crypt_format (cd, crypt_version, cipher_specs[0], cipher_specs[1],
                             NULL, NULL, key_size, NULL);
@@ -1691,15 +1661,9 @@ static gboolean luks_resize (const gchar *luks_device, guint64 size, const guint
         } else
             buf_len = data_len;
 
-#ifdef LIBCRYPTSETUP_2
         ret = crypt_activate_by_passphrase (cd, NULL, CRYPT_ANY_SLOT,
                                             key_buffer ? key_buffer : (char*) pass_data,
                                             buf_len, cad.flags & CRYPT_ACTIVATE_KEYRING_KEY);
-#else
-        ret = crypt_activate_by_passphrase (cd, NULL, CRYPT_ANY_SLOT,
-                                            key_buffer ? key_buffer : (char*) pass_data,
-                                            buf_len, 0);
-#endif
         g_free (key_buffer);
 
         if (ret < 0) {
@@ -1718,7 +1682,6 @@ static gboolean luks_resize (const gchar *luks_device, guint64 size, const guint
 
     ret = crypt_resize (cd, luks_device, size);
     if (ret != 0) {
-#ifdef LIBCRYPTSETUP_2
         if (ret == -EPERM && g_strcmp0 (crypt_get_type (cd), CRYPT_LUKS2) == 0) {
             g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_RESIZE_PERM,
                          "Insufficient permissions to resize device. You need to specify"
@@ -1730,7 +1693,6 @@ static gboolean luks_resize (const gchar *luks_device, guint64 size, const guint
             return FALSE;
 
         }
-#endif
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_RESIZE_FAILED,
                      "Failed to resize device: %s", strerror_l(-ret, c_locale));
         crypt_free (cd);
@@ -2126,13 +2088,6 @@ gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup
  *
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_MODIFY
  */
-#ifndef LIBCRYPTSETUP_2
-gboolean bd_crypto_luks_set_label (const gchar *device, const gchar *label, const gchar *subsystem, GError **error) {
-    g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                 "Label can be set only on LUKS 2 devices and requires libcryptsetup >= 2.0");
-    return FALSE;
-}
-#else
 gboolean bd_crypto_luks_set_label (const gchar *device, const gchar *label, const gchar *subsystem, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
@@ -2171,7 +2126,6 @@ gboolean bd_crypto_luks_set_label (const gchar *device, const gchar *label, cons
 
     return TRUE;
 }
-#endif
 
 /**
  * bd_crypto_luks_set_uuid:
@@ -2350,10 +2304,8 @@ BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *device, GError **error) {
     version = crypt_get_type (cd);
     if (g_strcmp0 (version, CRYPT_LUKS1) == 0)
         info->version = BD_CRYPTO_LUKS_VERSION_LUKS1;
-#ifdef LIBCRYPTSETUP_2
     else if (g_strcmp0 (version, CRYPT_LUKS2) == 0)
         info->version = BD_CRYPTO_LUKS_VERSION_LUKS2;
-#endif
     else {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
                      "Unknown or unsupported LUKS version");
@@ -2365,12 +2317,7 @@ BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *device, GError **error) {
     info->mode = g_strdup (crypt_get_cipher_mode (cd));
     info->uuid = g_strdup (crypt_get_uuid (cd));
     info->backing_device = g_strdup (crypt_get_device_name (cd));
-
-#ifdef LIBCRYPTSETUP_2
     info->sector_size = crypt_get_sector_size (cd);
-#else
-    info->sector_size = 0;
-#endif
 
     if (info->version == BD_CRYPTO_LUKS_VERSION_LUKS2) {
         success = get_subsystem_label (crypt_get_device_name (cd) , &(info->subsystem), &(info->label), error);
@@ -2398,13 +2345,6 @@ BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *device, GError **error) {
  *
  * Tech category: %BD_CRYPTO_TECH_INTEGRITY%BD_CRYPTO_TECH_MODE_QUERY
  */
-#ifndef LIBCRYPTSETUP_2
-BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device __attribute__((unused)), GError **error) {
-    g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                 "Integrity technology requires libcryptsetup >= 2.0");
-    return NULL;
-}
-#else
 BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **error) {
     struct crypt_device *cd = NULL;
     struct crypt_params_integrity ip = ZERO_INIT;
@@ -2456,7 +2396,6 @@ BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **e
     crypt_free (cd);
     return info;
 }
-#endif
 
 /* added in cryptsetup 2.4.0 */
 #ifndef LIBCRYPTSETUP_24
@@ -2475,11 +2414,6 @@ static int crypt_token_max (const char *type __attribute__((unused))) {
  *
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
  */
-#ifndef LIBCRYPTSETUP_2
-BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device __attribute__((unused)), GError **error) {
-    return NULL;
-}
-#else
 BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError **error) {
     struct crypt_device *cd = NULL;
     GPtrArray *tokens = NULL;
@@ -2543,7 +2477,6 @@ BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError *
     g_ptr_array_add (tokens, NULL);
     return (BDCryptoLUKSTokenInfo **) g_ptr_array_free (tokens, FALSE);
 }
-#endif
 
 static int _wipe_progress (guint64 size, guint64 offset, void *usrptr) {
     /* "convert" the progress from 0-100 to 50-100 because wipe starts at 50 in bd_crypto_integrity_format */
@@ -2606,7 +2539,7 @@ gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm
 
     params.integrity_key_size = key_size;
     params.integrity = algorithm;
-    params.tag_size = params.tag_size ? params.tag_size : DEFAULT_INTEGRITY_TAG_SIZE;
+    params.tag_size = params.tag_size ? params.tag_size : 0;
 
     ret = crypt_format (cd, CRYPT_INTEGRITY, NULL, NULL, NULL, NULL, 0, &params);
     if (ret != 0) {
@@ -2964,19 +2897,8 @@ gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const g
         params.flags |= CRYPT_TCRYPT_HIDDEN_HEADER;
     if (system)
         params.flags |= CRYPT_TCRYPT_SYSTEM_HEADER;
-
-#ifndef LIBCRYPTSETUP_2
-    if (veracrypt && veracrypt_pim != 0) {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                     "Compiled against a version of libcryptsetup that does not support the VeraCrypt PIM setting.");
-        bd_utils_report_finished (progress_id, l_error->message);
-        g_propagate_error (error, l_error);
-        return FALSE;
-    }
-#else
     if (veracrypt && veracrypt_pim != 0)
         params.veracrypt_pim = veracrypt_pim;
-#endif
 
     ret = crypt_load (cd, CRYPT_TCRYPT, &params);
     if (ret != 0) {
@@ -3266,11 +3188,6 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
  *
  * Tech category: %BD_CRYPTO_TECH_BITLK-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
-#ifndef LIBCRYPTSETUP_23
-gboolean bd_crypto_bitlk_open (const gchar *device UNUSED, const gchar *name UNUSED, const guint8* pass_data UNUSED, gsize data_len UNUSED, gboolean read_only UNUSED, GError **error) {
-    /* this will return FALSE and set error, because BITLK technology is not available */
-    return bd_crypto_is_tech_avail (BD_CRYPTO_TECH_BITLK, BD_CRYPTO_TECH_MODE_OPEN_CLOSE, error);
-#else
 gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
@@ -3329,7 +3246,6 @@ gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, const gui
     crypt_free (cd);
     bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
-#endif
 }
 
 /**
@@ -3341,12 +3257,6 @@ gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, const gui
  *
  * Tech category: %BD_CRYPTO_TECH_BITLK-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
-#ifndef LIBCRYPTSETUP_23
-gboolean bd_crypto_bitlk_close (const gchar *bitlk_device UNUSED, GError **error) {
-    /* this will return FALSE and set error, because BITLK technology is not available */
-    return bd_crypto_is_tech_avail (BD_CRYPTO_TECH_BITLK, BD_CRYPTO_TECH_MODE_OPEN_CLOSE, error);
-#else
 gboolean bd_crypto_bitlk_close (const gchar *bitlk_device, GError **error) {
     return _crypto_close (bitlk_device, "BITLK", error);
-#endif
 }
