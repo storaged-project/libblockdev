@@ -196,3 +196,4 @@
 
   - name: Start LVM DBus service
     service: name=lvm2-lvmdbusd state=started
+    ignore_errors: yes
