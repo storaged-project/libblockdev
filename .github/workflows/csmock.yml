@@ -26,7 +26,7 @@ jobs:
 
       - name: Build the container
         run: |
-          sudo -E XDG_RUNTIME_DIR= podman build --no-cache -t ${{ env.CI_CONTAINER }} -f misc/csmock.Dockerfile .
+          sudo -E XDG_RUNTIME_DIR= podman build --no-cache -t ${{ env.CI_CONTAINER }} -f misc/ci.Dockerfile .
 
       - name: Run csmock build in the container
         run: |
