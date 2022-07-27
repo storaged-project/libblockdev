@@ -258,6 +258,37 @@ BDNVMESelfTestLogEntry * bd_nvme_self_test_log_entry_copy (BDNVMESelfTestLogEntr
 }
 
 /**
+ * bd_nvme_self_test_result_to_string:
+ * @result: A %BDNVMESelfTestResult.
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: (transfer none): A string representation of @result for use as an identifier string
+ *                           or %NULL when the code is unknown.
+ */
+const gchar * bd_nvme_self_test_result_to_string (BDNVMESelfTestResult result, GError **error) {
+    static const gchar * const str[] = {
+        [BD_NVME_SELF_TEST_RESULT_NO_ERROR] = "success",
+        [BD_NVME_SELF_TEST_RESULT_ABORTED] = "aborted",
+        [BD_NVME_SELF_TEST_RESULT_CTRL_RESET] = "ctrl_reset",
+        [BD_NVME_SELF_TEST_RESULT_NS_REMOVED] = "ns_removed",
+        [BD_NVME_SELF_TEST_RESULT_ABORTED_FORMAT] = "aborted_format",
+        [BD_NVME_SELF_TEST_RESULT_FATAL_ERROR] = "fatal_error",
+        [BD_NVME_SELF_TEST_RESULT_UNKNOWN_SEG_FAIL] = "unknown_seg_fail",
+        [BD_NVME_SELF_TEST_RESULT_KNOWN_SEG_FAIL] = "known_seg_fail",
+        [BD_NVME_SELF_TEST_RESULT_ABORTED_UNKNOWN] = "aborted_unknown",
+        [BD_NVME_SELF_TEST_RESULT_ABORTED_SANITIZE] = "aborted_sanitize"
+    };
+
+    if (result >= G_N_ELEMENTS (str)) {
+        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_INVALID_ARGUMENT,
+                     "Invalid result code %d", result);
+        return NULL;
+    }
+
+    return str[result];
+}
+
+/**
  * bd_nvme_self_test_log_free: (skip)
  * @log: (nullable): %BDNVMESelfTestLog to free
  *

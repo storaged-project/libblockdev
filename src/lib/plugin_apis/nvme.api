@@ -704,6 +704,15 @@ typedef enum {
     BD_NVME_SELF_TEST_RESULT_ABORTED_SANITIZE = 9,
 } BDNVMESelfTestResult;
 
+/**
+ * bd_nvme_self_test_result_to_string:
+ * @result: A %BDNVMESelfTestResult.
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: (transfer none): A string representation of @result for use as an identifier string
+ *                           or %NULL when the code is unknown.
+ */
+const gchar * bd_nvme_self_test_result_to_string (BDNVMESelfTestResult result, GError **error);
 
 #define BD_NVME_TYPE_SELF_TEST_LOG_ENTRY (bd_nvme_self_test_log_entry_get_type ())
 GType bd_nvme_self_test_log_entry_get_type ();

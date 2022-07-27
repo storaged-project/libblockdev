@@ -591,6 +591,7 @@ BDNVMEErrorLogEntry * bd_nvme_error_log_entry_copy (BDNVMEErrorLogEntry *entry);
 
 void bd_nvme_self_test_log_entry_free (BDNVMESelfTestLogEntry *entry);
 BDNVMESelfTestLogEntry * bd_nvme_self_test_log_entry_copy (BDNVMESelfTestLogEntry *entry);
+const gchar * bd_nvme_self_test_result_to_string (BDNVMESelfTestResult result, GError **error);
 
 void bd_nvme_self_test_log_free (BDNVMESelfTestLog *log);
 BDNVMESelfTestLog * bd_nvme_self_test_log_copy (BDNVMESelfTestLog *log);
