@@ -26,15 +26,19 @@ jobs:
 
       - name: Build the container
         run: |
-          sudo -E XDG_RUNTIME_DIR= podman build --no-cache -t ${{ env.CI_CONTAINER }} -f misc/ci.Dockerfile .
+          podman build --no-cache -t ${{ env.CI_CONTAINER }} -f misc/ci.Dockerfile .
+
+      - name: Start the container
+        run: |
+          podman run -d -t --name ${{ env.CI_CONTAINER }} --privileged --volume "$(pwd):/app" --workdir "/app" ${{ env.CI_CONTAINER }}
+
+      - name: Install test dependencies in the container
+        run: |
+          podman exec -it ${{ env.CI_CONTAINER }} bash -c "ansible-playbook -i "localhost," -c local misc/install-test-dependencies.yml"
 
       - name: Run csmock build in the container
         run: |
-          sudo podman run -i --rm --privileged --volume "$(pwd):/app" --workdir "/app" ${{ env.CI_CONTAINER }} <<EOF
-          set -eux
-          ansible-playbook -i "localhost," -c local misc/install-test-dependencies.yml
-          /ci/run_csmock_tests -c /ci/copr-builder.conf -p libblockdev-udisks -t ${{ env.CSMOCK_TOOLS }} -r ${{ env.CSMOCK_CHROOTS }}
-          EOF
+          podman exec -it ${{ env.CI_CONTAINER }} bash -c "/ci/run_csmock_tests -c /ci/copr-builder.conf -p libblockdev-udisks -t ${{ env.CSMOCK_TOOLS }} -r ${{ env.CSMOCK_CHROOTS }}"
 
       - name: Upload the csmock logs
         if: always()
