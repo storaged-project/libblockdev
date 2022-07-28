@@ -186,6 +186,17 @@ class NVMeTestCase(NVMeTest):
             # Cannot retrieve self-test log on a nvme target loop devices
             BlockDev.nvme_get_self_test_log(self.nvme_dev)
 
+        self.assertEqual(BlockDev.nvme_self_test_result_to_string(BlockDev.NVMESelfTestResult.NO_ERROR), "success")
+        self.assertEqual(BlockDev.nvme_self_test_result_to_string(BlockDev.NVMESelfTestResult.ABORTED), "aborted")
+        self.assertEqual(BlockDev.nvme_self_test_result_to_string(BlockDev.NVMESelfTestResult.CTRL_RESET), "ctrl_reset")
+        self.assertEqual(BlockDev.nvme_self_test_result_to_string(BlockDev.NVMESelfTestResult.NS_REMOVED), "ns_removed")
+        self.assertEqual(BlockDev.nvme_self_test_result_to_string(BlockDev.NVMESelfTestResult.ABORTED_FORMAT), "aborted_format")
+        self.assertEqual(BlockDev.nvme_self_test_result_to_string(BlockDev.NVMESelfTestResult.FATAL_ERROR), "fatal_error")
+        self.assertEqual(BlockDev.nvme_self_test_result_to_string(BlockDev.NVMESelfTestResult.UNKNOWN_SEG_FAIL), "unknown_seg_fail")
+        self.assertEqual(BlockDev.nvme_self_test_result_to_string(BlockDev.NVMESelfTestResult.KNOWN_SEG_FAIL), "known_seg_fail")
+        self.assertEqual(BlockDev.nvme_self_test_result_to_string(BlockDev.NVMESelfTestResult.ABORTED_UNKNOWN), "aborted_unknown")
+        self.assertEqual(BlockDev.nvme_self_test_result_to_string(BlockDev.NVMESelfTestResult.ABORTED_SANITIZE), "aborted_sanitize")
+
 
     @tag_test(TestTags.CORE)
     def test_self_test(self):
