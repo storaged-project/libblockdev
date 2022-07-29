@@ -17,6 +17,7 @@
 
 /* nvme-error.c */
 void _nvme_status_to_error (gint status, gboolean fabrics, GError **error);
+void _nvme_fabrics_errno_to_gerror (int result, int _errno, GError **error);
 
 /* nvme-info.c */
 gint _open_dev (const gchar *device, GError **error);

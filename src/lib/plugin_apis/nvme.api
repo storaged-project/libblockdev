@@ -25,6 +25,12 @@ GQuark bd_nvme_error_quark (void) {
  * @BD_NVME_ERROR_SC_PATH: Path related error.
  * @BD_NVME_ERROR_SC_VENDOR_SPECIFIC: NVMe Vendor specific error.
  * @BD_NVME_ERROR_NO_MATCH: No matching resource found (e.g. a Fabrics Controller).
+ * @BD_NVME_ERROR_CONNECT: General connection error.
+ * @BD_NVME_ERROR_CONNECT_ALREADY: Already connected.
+ * @BD_NVME_ERROR_CONNECT_INVALID: Invalid argument specified.
+ * @BD_NVME_ERROR_CONNECT_ADDRINUSE: HostNQN already in use.
+ * @BD_NVME_ERROR_CONNECT_NODEV: Invalid interface.
+ * @BD_NVME_ERROR_CONNECT_OPNOTSUPP: Operation not supported.
  */
 /* BpG-skip-end */
 typedef enum {
@@ -39,6 +45,12 @@ typedef enum {
     BD_NVME_ERROR_SC_PATH,
     BD_NVME_ERROR_SC_VENDOR_SPECIFIC,
     BD_NVME_ERROR_NO_MATCH,
+    BD_NVME_ERROR_CONNECT,
+    BD_NVME_ERROR_CONNECT_ALREADY,
+    BD_NVME_ERROR_CONNECT_INVALID,
+    BD_NVME_ERROR_CONNECT_ADDRINUSE,
+    BD_NVME_ERROR_CONNECT_NODEV,
+    BD_NVME_ERROR_CONNECT_OPNOTSUPP,
 } BDNVMEError;
 
 typedef enum {
