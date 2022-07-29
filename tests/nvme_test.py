@@ -324,6 +324,14 @@ class NVMeFabricsTestCase(NVMeTest):
         if not ignore_errors and (ret != 0 or 'disconnected 0 ' in out):
             raise RuntimeError("Error disconnecting the '%s' subsystem NQN: '%s %s'" % (subnqn, out, err))
 
+    def _get_sysconf_dir(self):
+        try:
+            makefile = read_file(os.path.join(os.environ['LIBBLOCKDEV_PROJ_DIR'], 'Makefile'))
+            r = re.search(r'sysconfdir = (.*)', makefile)
+            return r.group(1)
+        except:
+            return None
+
     @tag_test(TestTags.CORE)
     def test_connect_single_ns(self):
         """Test simple connect and disconnect"""
@@ -529,6 +537,11 @@ class NVMeFabricsTestCase(NVMeTest):
         FAKE_HOSTNQN2 = 'nqn.2014-08.org.nvmexpress:uuid:beefbeef-beef-beef-beef-beefdeadbeef'
         FAKE_HOSTID1 = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'
         FAKE_HOSTID2 = 'beefbeef-beef-beef-beef-beefdeadbeef'
+
+        # libnvme might have been configured with a different prefix than libblockdev
+        sysconf_dir = self._get_sysconf_dir()
+        if sysconf_dir != '/etc':
+            self.skipTest("libblockdev was not configured with standard prefix (/usr)")
 
         # test that no device node exists for given subsystem nqn
         ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
