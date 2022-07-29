@@ -50,10 +50,12 @@ void _nvme_status_to_error (gint status, gboolean fabrics, GError **error)
 
     if (error == NULL)
         return;
-
     if (status == 0) {
         g_clear_error (error);
-    } else if (status < 0) {
+        return;
+    }
+
+    if (status < 0) {
         /* generic errno errors */
         switch (errno) {
             case EWOULDBLOCK:
@@ -64,6 +66,7 @@ void _nvme_status_to_error (gint status, gboolean fabrics, GError **error)
         }
         g_set_error_literal (error, BD_NVME_ERROR, code,
                              strerror_l (errno, _C_LOCALE));
+        return;
     } else {
         /* NVMe status codes */
         switch (nvme_status_code_type (status)) {
@@ -86,5 +89,72 @@ void _nvme_status_to_error (gint status, gboolean fabrics, GError **error)
                 code = BD_NVME_ERROR_SC_GENERIC;
         }
         g_set_error_literal (error, BD_NVME_ERROR, code, nvme_status_to_string (status, fabrics));
+        return;
     }
+    g_warn_if_reached ();
+}
+
+void _nvme_fabrics_errno_to_gerror (int result, int _errno, GError **error)
+{
+    gint code;
+
+    if (error == NULL)
+        return;
+    if (result == 0) {
+        g_clear_error (error);
+        return;
+    }
+
+    if (_errno >= ENVME_CONNECT_RESOLVE) {
+        switch (_errno) {
+            case ENVME_CONNECT_ADDRFAM:
+            case ENVME_CONNECT_TRADDR:
+            case ENVME_CONNECT_TARG:
+            case ENVME_CONNECT_AARG:
+            case ENVME_CONNECT_INVAL_TR:
+                code = BD_NVME_ERROR_INVALID_ARGUMENT;
+                break;
+            case ENVME_CONNECT_RESOLVE:
+            case ENVME_CONNECT_OPEN:
+            case ENVME_CONNECT_WRITE:
+            case ENVME_CONNECT_READ:
+            case ENVME_CONNECT_PARSE:
+            case ENVME_CONNECT_LOOKUP_SUBSYS_NAME:
+            case ENVME_CONNECT_LOOKUP_SUBSYS:
+                code = BD_NVME_ERROR_CONNECT;
+                break;
+#ifdef HAVE_LIBNVME_1_1
+            case ENVME_CONNECT_ALREADY:
+                code = BD_NVME_ERROR_CONNECT_ALREADY;
+                break;
+            case ENVME_CONNECT_INVAL:
+                code = BD_NVME_ERROR_CONNECT_INVALID;
+                break;
+            case ENVME_CONNECT_ADDRINUSE:
+                code = BD_NVME_ERROR_CONNECT_ADDRINUSE;
+                break;
+            case ENVME_CONNECT_NODEV:
+                code = BD_NVME_ERROR_CONNECT_NODEV;
+                break;
+            case ENVME_CONNECT_OPNOTSUPP:
+                code = BD_NVME_ERROR_CONNECT_OPNOTSUPP;
+                break;
+#endif
+            default:
+                code = BD_NVME_ERROR_CONNECT;
+        }
+        g_set_error_literal (error, BD_NVME_ERROR, code, nvme_errno_to_string (_errno));
+        return;
+    } else {
+        switch (errno) {
+            case EWOULDBLOCK:
+                code = BD_NVME_ERROR_BUSY;
+                break;
+            default:
+                code = BD_NVME_ERROR_FAILED;
+        }
+        g_set_error_literal (error, BD_NVME_ERROR, code, strerror_l (errno, _C_LOCALE));
+        return;
+    }
+    g_warn_if_reached ();
 }

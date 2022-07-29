@@ -256,9 +256,8 @@ gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const 
 
     ctrl = nvme_create_ctrl (root, subsysnqn, transport, transport_addr, host_traddr, host_iface, transport_svcid);
     if (ctrl == NULL) {
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "Error creating the controller: %s",
-                     strerror_l (errno, _C_LOCALE));
+        _nvme_fabrics_errno_to_gerror (-1, errno, error);
+        g_prefix_error (error, "Error creating the controller: ");
         nvme_free_tree (root);
         return FALSE;
     }
@@ -267,9 +266,8 @@ gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const 
 
     ret = nvmf_add_ctrl (host, ctrl, &cfg);
     if (ret != 0) {
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "Error connecting the controller: %s",
-                     (errno >= ENVME_CONNECT_RESOLVE) ? nvme_errno_to_string (errno) : strerror_l (errno, _C_LOCALE));
+        _nvme_fabrics_errno_to_gerror (ret, errno, error);
+        g_prefix_error (error, "Error connecting the controller: ");
         nvme_free_ctrl (ctrl);
         nvme_free_tree (root);
         return FALSE;
@@ -574,18 +572,16 @@ BDNVMEDiscoveryLogEntry ** bd_nvme_discover (const gchar *discovery_ctrl, gboole
     if (!ctrl) {
         ctrl = nvme_create_ctrl (root, NVME_DISC_SUBSYS_NAME, transport, transport_addr, host_traddr, host_iface, transport_svcid);
         if (ctrl == NULL) {
-            g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                         "Error creating the controller: %s",
-                         strerror_l (errno, _C_LOCALE));
+            _nvme_fabrics_errno_to_gerror (-1, errno, error);
+            g_prefix_error (error, "Error creating the controller: ");
             nvme_free_tree (root);
             return NULL;
         }
         nvme_ctrl_set_discovery_ctrl (ctrl, TRUE);
         ret = nvmf_add_ctrl (host, ctrl, &cfg);
         if (ret != 0) {
-            g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                         "Error connecting the controller: %s",
-                         (errno >= ENVME_CONNECT_RESOLVE) ? nvme_errno_to_string (errno) : strerror_l (errno, _C_LOCALE));
+            _nvme_fabrics_errno_to_gerror (ret, errno, error);
+            g_prefix_error (error, "Error connecting the controller: ");
             nvme_free_ctrl (ctrl);
             nvme_free_tree (root);
             return NULL;
