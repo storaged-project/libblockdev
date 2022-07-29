@@ -1,8 +1,7 @@
-name: Run static analysis using csmock
+name: Build RPM packages
 
 env:
-  CSMOCK_CHROOTS: "default"
-  CSMOCK_TOOLS: "clang cppcheck gcc"
+  MOCK_CHROOTS: "fedora-rawhide fedora-36 fedora-35"
 
 on:
   pull_request:
@@ -11,10 +10,10 @@ on:
 
 jobs:
   build:
-    name: csmock
+    name: rpmbuild
     runs-on: ubuntu-22.04
     env:
-      CI_CONTAINER: libblockdev-ci-csmock
+      CI_CONTAINER: libblockdev-ci-rpmbuild
     steps:
       - name: Checkout libblockdev repository
         uses: actions/checkout@v3
@@ -36,13 +35,13 @@ jobs:
         run: |
           podman exec -it ${{ env.CI_CONTAINER }} bash -c "ansible-playbook -i "localhost," -c local misc/install-test-dependencies.yml"
 
-      - name: Run csmock build in the container
+      - name: Run RPM mock builds in the container
         run: |
-          podman exec -it ${{ env.CI_CONTAINER }} bash -c "/ci/run_csmock_tests -c /ci/copr-builder.conf -p libblockdev-udisks -t ${{ env.CSMOCK_TOOLS }} -r ${{ env.CSMOCK_CHROOTS }}"
+          podman exec -it ${{ env.CI_CONTAINER }} bash -c "/ci/run_rpmbuild_tests -c /ci/copr-builder.conf -p libblockdev-udisks -r ${{ env.MOCK_CHROOTS }}"
 
-      - name: Upload the csmock logs
+      - name: Upload the rpmbuild logs
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: csmock_logs
-          path: csmock_*/*
+          name: rpmbuild_logs
+          path: rpmbuild_*.log

@@ -1,3 +1,5 @@
+# latest fedora image for running some of our tests in GH actions
+
 FROM registry.fedoraproject.org/fedora:latest
 
 RUN set -e; \
