@@ -42,5 +42,11 @@
     <literal>TRUE</literal> to preserve the original behaviour.
   </para>
 
+  <para>
+    Following functions have a new parameter <literal>fstype</literal> that allows to skip scanning the device
+    for signature. Use <literal>NULL</literal> to preserve the original behaviour.
+    Affected functions: <literal>bd_fs_resize</literal>, <literal>bd_fs_repair</literal>, <literal>bd_fs_check</literal>, <literal>bd_fs_set_label</literal>, <literal>bd_fs_set_uuid</literal>, <literal>bd_fs_get_size</literal> and <literal>bd_fs_get_free_space</literal>
+  </para>
+
   </simplesect>
 </chapter>

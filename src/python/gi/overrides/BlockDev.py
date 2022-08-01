@@ -617,6 +617,48 @@ def fs_udf_mkfs(device, media_type=None, revision=None, block_size=0, extra=None
     return _fs_udf_mkfs(device, media_type, revision, block_size, extra)
 __all__.append("fs_udf_mkfs")
 
+_fs_resize = BlockDev.fs_resize
+@override(BlockDev.fs_resize)
+def fs_resize(device, new_size, fstype=None):
+    return _fs_resize(device, new_size, fstype)
+__all__.append("fs_resize")
+
+_fs_repair = BlockDev.fs_repair
+@override(BlockDev.fs_repair)
+def fs_repair(device, fstype=None):
+    return _fs_repair(device, fstype)
+__all__.append("fs_repair")
+
+_fs_check = BlockDev.fs_check
+@override(BlockDev.fs_check)
+def fs_check(device, fstype=None):
+    return _fs_check(device, fstype)
+__all__.append("fs_check")
+
+_fs_set_label = BlockDev.fs_set_label
+@override(BlockDev.fs_set_label)
+def fs_set_label(device, label, fstype=None):
+    return _fs_set_label(device, label, fstype)
+__all__.append("fs_set_label")
+
+_fs_set_uuid = BlockDev.fs_set_uuid
+@override(BlockDev.fs_set_uuid)
+def fs_set_uuid(device, uuid, fstype=None):
+    return _fs_set_uuid(device, uuid, fstype)
+__all__.append("fs_set_uuid")
+
+_fs_get_size = BlockDev.fs_get_size
+@override(BlockDev.fs_get_size)
+def fs_get_size(device, fstype=None):
+    return _fs_get_size(device, fstype)
+__all__.append("fs_get_size")
+
+_fs_get_free_space = BlockDev.fs_get_free_space
+@override(BlockDev.fs_get_free_space)
+def fs_get_free_space(device, fstype=None):
+    return _fs_get_free_space(device, fstype)
+__all__.append("fs_get_free_space")
+
 
 try:
     _kbd_bcache_create = BlockDev.kbd_bcache_create
