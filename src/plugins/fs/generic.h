@@ -27,13 +27,13 @@ typedef struct BDFSMkfsOptions {
 
 gboolean bd_fs_mkfs (const gchar *device, const gchar *fstype, BDFSMkfsOptions *options, const BDExtraArg **extra, GError **error);
 
-gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error);
-gboolean bd_fs_repair (const gchar *device, GError **error);
-gboolean bd_fs_check (const gchar *device, GError **error);
-gboolean bd_fs_set_label (const gchar *device, const gchar *label, GError **error);
-gboolean bd_fs_set_uuid (const gchar *device, const gchar *uuid, GError **error);
-guint64 bd_fs_get_size (const gchar *device, GError **error);
-guint64 bd_fs_get_free_space (const gchar *device, GError **error);
+gboolean bd_fs_resize (const gchar *device, guint64 new_size, const gchar *fstype, GError **error);
+gboolean bd_fs_repair (const gchar *device, const gchar *fstype, GError **error);
+gboolean bd_fs_check (const gchar *device, const gchar *fstype, GError **error);
+gboolean bd_fs_set_label (const gchar *device, const gchar *label, const gchar *fstype, GError **error);
+gboolean bd_fs_set_uuid (const gchar *device, const gchar *uuid, const gchar *fstype, GError **error);
+guint64 bd_fs_get_size (const gchar *device, const gchar *fstype, GError **error);
+guint64 bd_fs_get_free_space (const gchar *device, const gchar *fstype, GError **error);
 
 typedef enum {
     BD_FS_OFFLINE_SHRINK = 1 << 1,

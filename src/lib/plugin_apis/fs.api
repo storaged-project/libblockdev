@@ -955,17 +955,23 @@ gboolean bd_fs_is_mountpoint (const gchar *path, GError **error);
  * @device: the device the file system of which to resize
  * @new_size: new requested size for the file system (if 0, the file system is
  *            adapted to the underlying block device)
+ * @fstype: (nullable): the filesystem type on @device or %NULL to detect
  * @error: (out) (optional): place to store error (if any)
+ *
+ * Resize filesystem on @device. This calls other fs resize functions from this
+ * plugin based on provides or detected filesystem (e.g. bd_fs_xfs_resize for XFS).
+ * This function will return an error for unknown/unsupported filesystems.
  *
  * Returns: whether the file system on @device was successfully resized or not
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_RESIZE
  */
-gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error);
+gboolean bd_fs_resize (const gchar *device, guint64 new_size, const gchar *fstype, GError **error);
 
- /**
+/**
  * bd_fs_repair:
  * @device: the device the file system of which to repair
+ * @fstype: (nullable): the filesystem type on @device or %NULL to detect
  * @error: (out) (optional): place to store error (if any)
  *
  * Repair filesystem on @device. This calls other fs repair functions from this
@@ -976,11 +982,12 @@ gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error);
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_REPAIR
  */
-gboolean bd_fs_repair (const gchar *device, GError **error);
+gboolean bd_fs_repair (const gchar *device, const gchar *fstype, GError **error);
 
 /**
  * bd_fs_check:
  * @device: the device the file system of which to check
+ * @fstype: (nullable): the filesystem type on @device or %NULL to detect
  * @error: (out) (optional): place to store error (if any)
  *
  * Check filesystem on @device. This calls other fs check functions from this
@@ -991,12 +998,13 @@ gboolean bd_fs_repair (const gchar *device, GError **error);
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_CHECK
  */
-gboolean bd_fs_check (const gchar *device, GError **error);
+gboolean bd_fs_check (const gchar *device, const gchar *fstype, GError **error);
 
 /**
  * bd_fs_set_label:
  * @device: the device with file system to set the label for
  * @label: label to set
+ * @fstype: (nullable): the filesystem type on @device or %NULL to detect
  * @error: (out) (optional): place to store error (if any)
  *
  * Set label for filesystem on @device. This calls other fs label functions from this
@@ -1007,12 +1015,13 @@ gboolean bd_fs_check (const gchar *device, GError **error);
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_SET_LABEL
  */
-gboolean bd_fs_set_label (const gchar *device, const gchar *label, GError **error);
+gboolean bd_fs_set_label (const gchar *device, const gchar *label, const gchar *fstype, GError **error);
 
 /**
  * bd_fs_set_uuid:
  * @device: the device with file system to set the UUID for
  * @uuid: (nullable): UUID to set or %NULL to generate a new one
+ * @fstype: (nullable): the filesystem type on @device or %NULL to detect
  * @error: (out) (optional): place to store error (if any)
  *
  * Set UUID for filesystem on @device. This calls other fs UUID functions from this
@@ -1023,7 +1032,7 @@ gboolean bd_fs_set_label (const gchar *device, const gchar *label, GError **erro
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_SET_UUID
  */
-gboolean bd_fs_set_uuid (const gchar *device, const gchar *uuid, GError **error);
+gboolean bd_fs_set_uuid (const gchar *device, const gchar *uuid, const gchar *fstype, GError **error);
 
 /**
  * bd_fs_xfs_check_uuid:
@@ -1040,6 +1049,7 @@ gboolean bd_fs_xfs_check_uuid (const gchar *uuid, GError **error);
 /**
  * bd_fs_get_size:
  * @device: the device with file system to get size for
+ * @fstype: (nullable): the filesystem type on @device or %NULL to detect
  * @error: (out) (optional): place to store error (if any)
  *
  * Get size for filesystem on @device. This calls other fs info functions from this
@@ -1050,11 +1060,12 @@ gboolean bd_fs_xfs_check_uuid (const gchar *uuid, GError **error);
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
  */
-guint64 bd_fs_get_size (const gchar *device, GError **error);
+guint64 bd_fs_get_size (const gchar *device, const gchar *fstype, GError **error);
 
 /**
  * bd_fs_get_free_space:
  * @device: the device with file system to get free space for
+ * @fstype: (nullable): the filesystem type on @device or %NULL to detect
  * @error: (out) (optional): place to store error (if any)
  *
  * Get free space for filesystem on @device. This calls other fs info functions from this
@@ -1065,7 +1076,7 @@ guint64 bd_fs_get_size (const gchar *device, GError **error);
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
  */
-guint64 bd_fs_get_free_space (const gchar *device, GError **error);
+guint64 bd_fs_get_free_space (const gchar *device, const gchar *fstype, GError **error);
 
 /**
  * BDFSMkfsOptionsFlags:

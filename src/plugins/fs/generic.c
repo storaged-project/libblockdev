@@ -641,9 +641,9 @@ static gboolean btrfs_set_label (const gchar *device, const gchar *label, GError
     return success;
 }
 
-static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 new_size, const gchar *label, const gchar *uuid, GError **error) {
+static gboolean device_operation (const gchar *device, const gchar *fstype, BDFsOpType op, guint64 new_size, const gchar *label, const gchar *uuid, GError **error) {
     const gchar* op_name = NULL;
-    g_autofree gchar* fstype = NULL;
+    g_autofree gchar* detected_fstype = NULL;
 
     /* MKFS is covered as a special case, it's a bug to use this function for this case */
     g_assert_true (op != BD_FS_MKFS);
@@ -651,23 +651,26 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
     /* GET_SIZE is covered as a special case, it's a bug to use this function for this case */
     g_assert_true (op != BD_FS_GET_SIZE);
 
-    fstype = bd_fs_get_fstype (device, error);
     if (!fstype) {
-        if (error) {
-            if (*error == NULL) {
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
-                            "No filesystem detected on the device '%s'", device);
+        detected_fstype = bd_fs_get_fstype (device, error);
+        if (!detected_fstype) {
+            if (error) {
+                if (*error == NULL) {
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
+                                "No filesystem detected on the device '%s'", device);
+                    return FALSE;
+                } else {
+                    g_prefix_error (error, "Error when trying to detect filesystem on '%s': ", device);
+                    return FALSE;
+                }
+            } else
                 return FALSE;
-            } else {
-                g_prefix_error (error, "Error when trying to detect filesystem on '%s': ", device);
-                return FALSE;
-            }
-        } else
-            return FALSE;
-    }
+        }
+    } else
+        detected_fstype = g_strdup (fstype);
 
-    if (g_strcmp0 (fstype, "ext2") == 0 || g_strcmp0 (fstype, "ext3") == 0
-                                        || g_strcmp0 (fstype, "ext4") == 0) {
+    if (g_strcmp0 (detected_fstype, "ext2") == 0 || g_strcmp0 (detected_fstype, "ext3") == 0
+                                                 || g_strcmp0 (detected_fstype, "ext4") == 0) {
         switch (op) {
             case BD_FS_RESIZE:
                 return bd_fs_ext4_resize (device, new_size, NULL, error);
@@ -682,7 +685,7 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
             default:
                 g_assert_not_reached ();
         }
-    } else if (g_strcmp0 (fstype, "xfs") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "xfs") == 0) {
         switch (op) {
             case BD_FS_RESIZE:
                 return xfs_resize_device (device, new_size, NULL, error);
@@ -697,7 +700,7 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
             default:
                 g_assert_not_reached ();
         }
-    } else if (g_strcmp0 (fstype, "vfat") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "vfat") == 0) {
         switch (op) {
             case BD_FS_RESIZE:
                 return bd_fs_vfat_resize (device, new_size, error);
@@ -712,7 +715,7 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
             default:
                 g_assert_not_reached ();
         }
-    } else if (g_strcmp0 (fstype, "ntfs") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "ntfs") == 0) {
         switch (op) {
             case BD_FS_RESIZE:
                 return bd_fs_ntfs_resize (device, new_size, error);
@@ -727,7 +730,7 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
             default:
                 g_assert_not_reached ();
         }
-    } else if (g_strcmp0 (fstype, "f2fs") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "f2fs") == 0) {
         switch (op) {
             case BD_FS_RESIZE:
                 return f2fs_resize_device (device, new_size, error);
@@ -742,7 +745,7 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
             default:
                 g_assert_not_reached ();
         }
-    } else if (g_strcmp0 (fstype, "nilfs2") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "nilfs2") == 0) {
         switch (op) {
             case BD_FS_RESIZE:
                 return nilfs2_resize_device (device, new_size, error);
@@ -757,7 +760,7 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
             default:
                 g_assert_not_reached ();
         }
-    } else if (g_strcmp0 (fstype, "exfat") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "exfat") == 0) {
         switch (op) {
             case BD_FS_RESIZE:
                 break;
@@ -772,7 +775,7 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
             default:
                 g_assert_not_reached ();
         }
-    } else if (g_strcmp0 (fstype, "btrfs") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "btrfs") == 0) {
         switch (op) {
             case BD_FS_RESIZE:
                 return btrfs_resize_device (device, new_size, error);
@@ -787,7 +790,7 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
             default:
                 g_assert_not_reached ();
         }
-    } else if (g_strcmp0 (fstype, "udf") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "udf") == 0) {
         switch (op) {
             case BD_FS_RESIZE:
                 break;
@@ -823,7 +826,7 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
             g_assert_not_reached ();
     }
     g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
-                 "%s filesystem '%s' is not supported.", op_name, fstype);
+                 "%s filesystem '%s' is not supported.", op_name, detected_fstype);
     return FALSE;
 }
 
@@ -832,23 +835,25 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
  * @device: the device the file system of which to resize
  * @new_size: new requested size for the file system (if 0, the file system is
  *            adapted to the underlying block device)
+ * @fstype: (nullable): the filesystem type on @device or %NULL to detect
  * @error: (out) (optional): place to store error (if any)
  *
  * Resize filesystem on @device. This calls other fs resize functions from this
- * plugin based on detected filesystem (e.g. bd_fs_xfs_resize for XFS). This
- * function will return an error for unknown/unsupported filesystems.
+ * plugin based on provided or detected filesystem (e.g. bd_fs_xfs_resize for XFS).
+ * This function will return an error for unknown/unsupported filesystems.
  *
  * Returns: whether the file system on @device was successfully resized or not
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_RESIZE
  */
-gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error) {
-    return device_operation (device, BD_FS_RESIZE, new_size, NULL, NULL, error);
+gboolean bd_fs_resize (const gchar *device, guint64 new_size, const gchar *fstype, GError **error) {
+    return device_operation (device, fstype, BD_FS_RESIZE, new_size, NULL, NULL, error);
 }
 
 /**
  * bd_fs_repair:
  * @device: the device the file system of which to repair
+ * @fstype: (nullable): the filesystem type on @device or %NULL to detect
  * @error: (out) (optional): place to store error (if any)
  *
  * Repair filesystem on @device. This calls other fs repair functions from this
@@ -859,13 +864,14 @@ gboolean bd_fs_resize (const gchar *device, guint64 new_size, GError **error) {
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_REPAIR
  */
-gboolean bd_fs_repair (const gchar *device, GError **error) {
-    return device_operation (device, BD_FS_REPAIR, 0, NULL, NULL, error);
+gboolean bd_fs_repair (const gchar *device, const gchar *fstype, GError **error) {
+    return device_operation (device, fstype, BD_FS_REPAIR, 0, NULL, NULL, error);
  }
 
 /**
  * bd_fs_check:
  * @device: the device the file system of which to check
+ * @fstype: (nullable): the filesystem type on @device or %NULL to detect
  * @error: (out) (optional): place to store error (if any)
  *
  * Check filesystem on @device. This calls other fs check functions from this
@@ -876,14 +882,15 @@ gboolean bd_fs_repair (const gchar *device, GError **error) {
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_CHECK
  */
-gboolean bd_fs_check (const gchar *device, GError **error) {
-    return device_operation (device, BD_FS_CHECK, 0, NULL, NULL, error);
+gboolean bd_fs_check (const gchar *device, const gchar *fstype, GError **error) {
+    return device_operation (device, fstype, BD_FS_CHECK, 0, NULL, NULL, error);
 }
 
 /**
  * bd_fs_set_label:
  * @device: the device with file system to set the label for
  * @label: label to set
+ * @fstype: (nullable): the filesystem type on @device or %NULL to detect
  * @error: (out) (optional): place to store error (if any)
  *
  * Set label for filesystem on @device. This calls other fs label functions from this
@@ -894,14 +901,15 @@ gboolean bd_fs_check (const gchar *device, GError **error) {
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_SET_LABEL
  */
-gboolean bd_fs_set_label (const gchar *device, const gchar *label, GError **error) {
-    return device_operation (device, BD_FS_LABEL, 0, label, NULL, error);
+gboolean bd_fs_set_label (const gchar *device, const gchar *label, const gchar *fstype, GError **error) {
+    return device_operation (device, fstype, BD_FS_LABEL, 0, label, NULL, error);
 }
 
 /**
  * bd_fs_set_uuid:
  * @device: the device with file system to set the UUID for
  * @uuid: (nullable): UUID to set or %NULL to generate a new one
+ * @fstype: (nullable): the filesystem type on @device or %NULL to detect
  * @error: (out) (optional): place to store error (if any)
  *
  * Set UUID for filesystem on @device. This calls other fs UUID functions from this
@@ -912,8 +920,8 @@ gboolean bd_fs_set_label (const gchar *device, const gchar *label, GError **erro
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_SET_UUID
  */
-gboolean bd_fs_set_uuid (const gchar *device, const gchar *uuid, GError **error) {
-    return device_operation (device, BD_FS_UUID, 0, NULL, uuid, error);
+gboolean bd_fs_set_uuid (const gchar *device, const gchar *uuid, const gchar *fstype, GError **error) {
+    return device_operation (device, fstype, BD_FS_UUID, 0, NULL, uuid, error);
 }
 
 static BDFSXfsInfo* xfs_get_info (const gchar *device, GError **error) {
@@ -944,6 +952,7 @@ static BDFSXfsInfo* xfs_get_info (const gchar *device, GError **error) {
 /**
  * bd_fs_get_size:
  * @device: the device with file system to get size for
+ * @fstype: (nullable): the filesystem type on @device or %NULL to detect
  * @error: (out) (optional): place to store error (if any)
  *
  * Get size for filesystem on @device. This calls other fs info functions from this
@@ -954,27 +963,30 @@ static BDFSXfsInfo* xfs_get_info (const gchar *device, GError **error) {
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
  */
-guint64 bd_fs_get_size (const gchar *device, GError **error) {
-    g_autofree gchar* fstype = NULL;
+guint64 bd_fs_get_size (const gchar *device, const gchar *fstype, GError **error) {
+    g_autofree gchar* detected_fstype = NULL;
     guint64 size = 0;
 
-    fstype = bd_fs_get_fstype (device, error);
     if (!fstype) {
-        if (error) {
-            if (*error == NULL) {
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
-                             "No filesystem detected on the device '%s'", device);
+        detected_fstype = bd_fs_get_fstype (device, error);
+        if (!detected_fstype) {
+            if (error) {
+                if (*error == NULL) {
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
+                                "No filesystem detected on the device '%s'", device);
+                    return 0;
+                } else {
+                    g_prefix_error (error, "Error when trying to detect filesystem on '%s': ", device);
+                    return 0;
+                }
+            } else
                 return 0;
-            } else {
-                g_prefix_error (error, "Error when trying to detect filesystem on '%s': ", device);
-                return 0;
-            }
-        } else
-            return 0;
-    }
+        }
+    } else
+        detected_fstype = g_strdup (fstype);
 
-    if (g_strcmp0 (fstype, "ext2") == 0 || g_strcmp0 (fstype, "ext3") == 0
-                                        || g_strcmp0 (fstype, "ext4") == 0) {
+    if (g_strcmp0 (detected_fstype, "ext2") == 0 || g_strcmp0 (detected_fstype, "ext3") == 0
+                                                 || g_strcmp0 (detected_fstype, "ext4") == 0) {
         BDFSExt4Info* info = bd_fs_ext4_get_info (device, error);
         if (info) {
             size = info->block_size * info->block_count;
@@ -982,56 +994,56 @@ guint64 bd_fs_get_size (const gchar *device, GError **error) {
         }
         return size;
 
-    } else if (g_strcmp0 (fstype, "xfs") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "xfs") == 0) {
         BDFSXfsInfo *info = xfs_get_info (device, error);
         if (info) {
             size = info->block_size * info->block_count;
             bd_fs_xfs_info_free (info);
         }
         return size;
-    } else if (g_strcmp0 (fstype, "vfat") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "vfat") == 0) {
         BDFSVfatInfo *info = bd_fs_vfat_get_info (device, error);
         if (info) {
             size = info->cluster_size * info->cluster_count;
             bd_fs_vfat_info_free (info);
         }
         return size;
-    } else if (g_strcmp0 (fstype, "ntfs") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "ntfs") == 0) {
         BDFSNtfsInfo *info = bd_fs_ntfs_get_info (device, error);
         if (info) {
             size = info->size;
             bd_fs_ntfs_info_free (info);
         }
         return size;
-    } else if (g_strcmp0 (fstype, "f2fs") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "f2fs") == 0) {
         BDFSF2FSInfo *info = bd_fs_f2fs_get_info (device, error);
         if (info) {
             size = info->sector_size * info->sector_count;
             bd_fs_f2fs_info_free (info);
         }
         return size;
-    } else if (g_strcmp0 (fstype, "nilfs2") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "nilfs2") == 0) {
         BDFSNILFS2Info *info = bd_fs_nilfs2_get_info (device, error);
         if (info) {
             size = info->size;
             bd_fs_nilfs2_info_free (info);
         }
         return size;
-    } else if (g_strcmp0 (fstype, "exfat") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "exfat") == 0) {
         BDFSExfatInfo *info = bd_fs_exfat_get_info (device, error);
         if (info) {
             size = info->sector_size * info->sector_count;
             bd_fs_exfat_info_free (info);
         }
         return size;
-    } else if (g_strcmp0 (fstype, "btrfs") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "btrfs") == 0) {
         BDFSBtrfsInfo *info = btrfs_get_info (device, error);
         if (info) {
             size = info->size;
             bd_fs_btrfs_info_free (info);
         }
         return size;
-    } else if (g_strcmp0 (fstype, "udf") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "udf") == 0) {
         BDFSUdfInfo *info = bd_fs_udf_get_info (device, error);
         if (info) {
             size = info->block_size * info->block_count;
@@ -1040,7 +1052,7 @@ guint64 bd_fs_get_size (const gchar *device, GError **error) {
         return size;
     } else {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
-                    "Getting size of filesystem '%s' is not supported.", fstype);
+                    "Getting size of filesystem '%s' is not supported.", detected_fstype);
         return 0;
     }
 }
@@ -1048,6 +1060,7 @@ guint64 bd_fs_get_size (const gchar *device, GError **error) {
 /**
  * bd_fs_get_free_space:
  * @device: the device with file system to get free space for
+ * @fstype: (nullable): the filesystem type on @device or %NULL to detect
  * @error: (out) (optional): place to store error (if any)
  *
  * Get free space for filesystem on @device. This calls other fs info functions from this
@@ -1058,27 +1071,30 @@ guint64 bd_fs_get_size (const gchar *device, GError **error) {
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
  */
-guint64 bd_fs_get_free_space (const gchar *device, GError **error) {
-    g_autofree gchar* fstype = NULL;
+guint64 bd_fs_get_free_space (const gchar *device, const gchar *fstype, GError **error) {
+    g_autofree gchar* detected_fstype = NULL;
     guint64 size = 0;
 
-    fstype = bd_fs_get_fstype (device, error);
     if (!fstype) {
-        if (error) {
-            if (*error == NULL) {
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
-                            "No filesystem detected on the device '%s'", device);
+        detected_fstype = bd_fs_get_fstype (device, error);
+        if (!detected_fstype) {
+            if (error) {
+                if (*error == NULL) {
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
+                                "No filesystem detected on the device '%s'", device);
+                    return 0;
+                } else {
+                    g_prefix_error (error, "Error when trying to detect filesystem on '%s': ", device);
+                    return 0;
+                }
+            } else
                 return 0;
-            } else {
-                g_prefix_error (error, "Error when trying to detect filesystem on '%s': ", device);
-                return 0;
-            }
-        } else
-            return 0;
-    }
+        }
+    } else
+        detected_fstype = g_strdup (fstype);
 
-    if (g_strcmp0 (fstype, "ext2") == 0 || g_strcmp0 (fstype, "ext3") == 0
-                                        || g_strcmp0 (fstype, "ext4") == 0) {
+    if (g_strcmp0 (detected_fstype, "ext2") == 0 || g_strcmp0 (detected_fstype, "ext3") == 0
+                                                 || g_strcmp0 (detected_fstype, "ext4") == 0) {
         BDFSExt4Info* info = bd_fs_ext4_get_info (device, error);
         if (info) {
             size = info->block_size * info->free_blocks;
@@ -1086,28 +1102,28 @@ guint64 bd_fs_get_free_space (const gchar *device, GError **error) {
         }
         return size;
 
-    } else if (g_strcmp0 (fstype, "vfat") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "vfat") == 0) {
         BDFSVfatInfo *info = bd_fs_vfat_get_info (device, error);
         if (info) {
             size = info->cluster_size * info->free_cluster_count;
             bd_fs_vfat_info_free (info);
         }
         return size;
-    } else if (g_strcmp0 (fstype, "ntfs") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "ntfs") == 0) {
         BDFSNtfsInfo *info = bd_fs_ntfs_get_info (device, error);
         if (info) {
             size = info->free_space;
             bd_fs_ntfs_info_free (info);
         }
         return size;
-    } else if (g_strcmp0 (fstype, "nilfs2") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "nilfs2") == 0) {
         BDFSNILFS2Info *info = bd_fs_nilfs2_get_info (device, error);
         if (info) {
             size = info->block_size * info->free_blocks;
             bd_fs_nilfs2_info_free (info);
         }
         return size;
-    } else if (g_strcmp0 (fstype, "btrfs") == 0) {
+    } else if (g_strcmp0 (detected_fstype, "btrfs") == 0) {
         BDFSBtrfsInfo *info = btrfs_get_info (device, error);
         if (info) {
             size = info->free_space;
@@ -1116,7 +1132,7 @@ guint64 bd_fs_get_free_space (const gchar *device, GError **error) {
         return size;
     } else {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
-                    "Getting free space on filesystem '%s' is not supported.", fstype);
+                    "Getting free space on filesystem '%s' is not supported.", detected_fstype);
         return 0;
     }
 }
