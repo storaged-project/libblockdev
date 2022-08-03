@@ -399,27 +399,28 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
 static gchar* fs_mount (const gchar *device, gchar *fstype, gboolean *unmount, GError **error) {
     gchar *mountpoint = NULL;
     gboolean ret = FALSE;
+    GError *l_error = NULL;
 
-    mountpoint = bd_fs_get_mountpoint (device, error);
+    mountpoint = bd_fs_get_mountpoint (device, &l_error);
     if (!mountpoint) {
-        if (*error == NULL) {
+        if (l_error == NULL) {
             /* device is not mounted -- we need to mount it */
             mountpoint = g_build_path (G_DIR_SEPARATOR_S, g_get_tmp_dir (), "blockdev.XXXXXX", NULL);
             mountpoint = g_mkdtemp (mountpoint);
             if (!mountpoint) {
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                             "Failed to create temporary directory for mounting '%s' "
-                             "before resizing it.", device);
+                             "Failed to create temporary directory for mounting '%s'.", device);
                 return NULL;
             }
-            ret = bd_fs_mount (device, mountpoint, fstype, NULL, NULL, error);
+            ret = bd_fs_mount (device, mountpoint, fstype, NULL, NULL, &l_error);
             if (!ret) {
-                g_prefix_error (error, "Failed to mount '%s' before resizing it: ", device);
+                g_propagate_prefixed_error (error, l_error, "Failed to mount '%s': ", device);
                 return NULL;
             } else
                 *unmount = TRUE;
         } else {
-            g_prefix_error (error, "Error when trying to get mountpoint for '%s': ", device);
+            g_propagate_prefixed_error (error, l_error,
+                                        "Error when trying to get mountpoint for '%s': ", device);
             return NULL;
         }
     } else
