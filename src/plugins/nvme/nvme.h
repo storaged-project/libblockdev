@@ -275,14 +275,14 @@ typedef enum {
  * @avail_spare: Available Spare: a normalized percentage (0% to 100%) of the remaining spare capacity available.
  * @spare_thresh: Available Spare Threshold: a normalized percentage (0% to 100%) of the available spare threshold.
  * @percent_used: Percentage Used: a vendor specific estimate of the percentage drive life used based on the
- *                actual usage and the manufacturer's prediction. A value of %100 indicates that the estimated
+ *                actual usage and the manufacturer's prediction. A value of 100 indicates that the estimated
  *                endurance has been consumed, but may not indicate an NVM subsystem failure.
- *                The value is allowed to exceed %100.
+ *                The value is allowed to exceed 100.
  * @total_data_read: An estimated calculation of total data read in bytes based on calculation of data
- *                   units read from the host. A value of %0 indicates that the number of Data Units Read
+ *                   units read from the host. A value of 0 indicates that the number of Data Units Read
  *                   is not reported.
  * @total_data_written: An estimated calculation of total data written in bytes based on calculation
- *                      of data units written by the host. A value of %0 indicates that the number
+ *                      of data units written by the host. A value of 0 indicates that the number
  *                      of Data Units Written is not reported.
  * @ctrl_busy_time: Amount of time the controller is busy with I/O commands, reported in minutes.
  * @power_cycles: The number of power cycles.
@@ -293,16 +293,16 @@ typedef enum {
  * @num_err_log_entries: Number of Error Information Log Entries: the number of Error Information log
  *                       entries over the life of the controller.
  * @temperature: Composite Temperature: temperature in Kelvins that represents the current composite
- *               temperature of the controller and associated namespaces or %0 when not applicable.
+ *               temperature of the controller and associated namespaces or 0 when not applicable.
  * @temp_sensors: Temperature Sensor 1-8: array of the current temperature reported by temperature sensors
- *                1-8 in Kelvins or %0 when the particular sensor is not available.
+ *                1-8 in Kelvins or 0 when the particular sensor is not available.
  * @wctemp: Warning Composite Temperature Threshold (WCTEMP): indicates the minimum Composite Temperature (@temperature)
  *          value that indicates an overheating condition during which controller operation continues.
- *          A value of %0 indicates that no warning temperature threshold value is reported by the controller.
+ *          A value of 0 indicates that no warning temperature threshold value is reported by the controller.
  * @cctemp: Critical Composite Temperature Threshold (CCTEMP): indicates the minimum Composite Temperature (@temperature)
  *          value that indicates a critical overheating condition (e.g., may prevent continued normal operation,
  *          possibility of data loss, automatic device shutdown, extreme performance throttling, or permanent damage).
- *          A value of %0 indicates that no critical temperature threshold value is reported by the controller.
+ *          A value of 0 indicates that no critical temperature threshold value is reported by the controller.
  * @warning_temp_time: Warning Composite Temperature Time: the amount of time in minutes that the Composite Temperature (@temperature)
  *                     is greater than or equal to the Warning Composite Temperature Threshold (@wctemp) and less than the
  *                     Critical Composite Temperature Threshold (@cctemp).
@@ -369,7 +369,7 @@ typedef enum {
 /**
  * BDNVMEErrorLogEntry:
  * @error_count: internal error counter, a unique identifier for the error.
- * @command_id: the Command Identifier of the command that the error is associated with or %0xffff if the error is not specific to a particular command.
+ * @command_id: the Command Identifier of the command that the error is associated with or `0xffff` if the error is not specific to a particular command.
  * @command_specific: Command Specific Information specific to @command_id.
  * @command_status: the Status code for the command that completed.
  * @command_error: translated command error in the BD_NVME_ERROR domain or %NULL in case @command_status indicates success.
@@ -566,7 +566,7 @@ typedef enum {
  * @sq_flow_control_disable: Indicates that the controller is capable of disabling SQ flow control.
  * @sq_flow_control_required: Indicates that the controller requires use of SQ flow control.
  * @port_id: A NVM subsystem port. Different NVMe Transports or address families may utilize the same Port ID value (eg. a Port ID may support both iWARP and RoCE).
- * @ctrl_id: A Controller ID. Special value of %0xFFFF indicates a dynamic controller model and a value of %0xFFFE indicates a temporary ID in a static controller model that should be replaced by a real ID after a connection is established.
+ * @ctrl_id: A Controller ID. Special value of `0xFFFF` indicates a dynamic controller model and a value of `0xFFFE` indicates a temporary ID in a static controller model that should be replaced by a real ID after a connection is established.
  * @transport_addr: Transport Address.
  * @transport_svcid: Transport Service Identifier.
  * @subsys_nqn: Subsystem Qualified Name. For a Discovery Service the value should be the well-known Discovery Service NQN (`nqn.2014-08.org.nvmexpress.discovery`).
@@ -653,6 +653,13 @@ gboolean               bd_nvme_sanitize              (const gchar               
                                                       gboolean                      overwrite_invert_pattern,
                                                       GError                      **error);
 
+gchar *                bd_nvme_get_host_nqn          (GError           **error);
+gchar *                bd_nvme_generate_host_nqn     (GError           **error);
+gchar *                bd_nvme_get_host_id           (GError           **error);
+gboolean               bd_nvme_set_host_nqn          (const gchar       *host_nqn,
+                                                      GError           **error);
+gboolean               bd_nvme_set_host_id           (const gchar       *host_id,
+                                                      GError           **error);
 
 gboolean               bd_nvme_connect               (const gchar       *subsysnqn,
                                                       const gchar       *transport,

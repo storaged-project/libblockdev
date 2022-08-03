@@ -461,14 +461,14 @@ GType bd_nvme_smart_log_get_type ();
  * @avail_spare: Available Spare: a normalized percentage (0% to 100%) of the remaining spare capacity available.
  * @spare_thresh: Available Spare Threshold: a normalized percentage (0% to 100%) of the available spare threshold.
  * @percent_used: Percentage Used: a vendor specific estimate of the percentage drive life used based on the
- *                actual usage and the manufacturer's prediction. A value of %100 indicates that the estimated
+ *                actual usage and the manufacturer's prediction. A value of 100 indicates that the estimated
  *                endurance has been consumed, but may not indicate an NVM subsystem failure.
- *                The value is allowed to exceed %100.
+ *                The value is allowed to exceed 100.
  * @total_data_read: An estimated calculation of total data read in bytes based on calculation of data
- *                   units read from the host. A value of %0 indicates that the number of Data Units Read
+ *                   units read from the host. A value of 0 indicates that the number of Data Units Read
  *                   is not reported.
  * @total_data_written: An estimated calculation of total data written in bytes based on calculation
- *                      of data units written by the host. A value of %0 indicates that the number
+ *                      of data units written by the host. A value of 0 indicates that the number
  *                      of Data Units Written is not reported.
  * @ctrl_busy_time: Amount of time the controller is busy with I/O commands, reported in minutes.
  * @power_cycles: The number of power cycles.
@@ -479,16 +479,16 @@ GType bd_nvme_smart_log_get_type ();
  * @num_err_log_entries: Number of Error Information Log Entries: the number of Error Information log
  *                       entries over the life of the controller.
  * @temperature: Composite Temperature: temperature in Kelvins that represents the current composite
- *               temperature of the controller and associated namespaces or %0 when not applicable.
+ *               temperature of the controller and associated namespaces or 0 when not applicable.
  * @temp_sensors: Temperature Sensor 1-8: array of the current temperature reported by temperature sensors
- *                1-8 in Kelvins or %0 when the particular sensor is not available.
+ *                1-8 in Kelvins or 0 when the particular sensor is not available.
  * @wctemp: Warning Composite Temperature Threshold (WCTEMP): indicates the minimum Composite Temperature (@temperature)
  *          value that indicates an overheating condition during which controller operation continues.
- *          A value of %0 indicates that no warning temperature threshold value is reported by the controller.
+ *          A value of 0 indicates that no warning temperature threshold value is reported by the controller.
  * @cctemp: Critical Composite Temperature Threshold (CCTEMP): indicates the minimum Composite Temperature (@temperature)
  *          value that indicates a critical overheating condition (e.g., may prevent continued normal operation,
  *          possibility of data loss, automatic device shutdown, extreme performance throttling, or permanent damage).
- *          A value of %0 indicates that no critical temperature threshold value is reported by the controller.
+ *          A value of 0 indicates that no critical temperature threshold value is reported by the controller.
  * @warning_temp_time: Warning Composite Temperature Time: the amount of time in minutes that the Composite Temperature (@temperature)
  *                     is greater than or equal to the Warning Composite Temperature Threshold (@wctemp) and less than the
  *                     Critical Composite Temperature Threshold (@cctemp).
@@ -602,7 +602,7 @@ GType bd_nvme_error_log_entry_get_type ();
 /**
  * BDNVMEErrorLogEntry:
  * @error_count: internal error counter, a unique identifier for the error.
- * @command_id: the Command Identifier of the command that the error is associated with or %0xffff if the error is not specific to a particular command.
+ * @command_id: the Command Identifier of the command that the error is associated with or `0xffff` if the error is not specific to a particular command.
  * @command_specific: Command Specific Information specific to @command_id.
  * @command_status: the Status code for the command that completed.
  * @command_error: translated command error in the BD_NVME_ERROR domain or %NULL in case @command_status indicates success.
@@ -1031,7 +1031,7 @@ GType bd_nvme_discovery_log_entry_get_type ();
  * @sq_flow_control_disable: Indicates that the controller is capable of disabling SQ flow control.
  * @sq_flow_control_required: Indicates that the controller requires use of SQ flow control.
  * @port_id: A NVM subsystem port. Different NVMe Transports or address families may utilize the same Port ID value (eg. a Port ID may support both iWARP and RoCE).
- * @ctrl_id: A Controller ID. Special value of %0xFFFF indicates a dynamic controller model and a value of %0xFFFE indicates a temporary ID in a static controller model that should be replaced by a real ID after a connection is established.
+ * @ctrl_id: A Controller ID. Special value of `0xFFFF` indicates a dynamic controller model and a value of `0xFFFE` indicates a temporary ID in a static controller model that should be replaced by a real ID after a connection is established.
  * @transport_addr: Transport Address.
  * @transport_svcid: Transport Service Identifier.
  * @subsys_nqn: Subsystem Qualified Name. For a Discovery Service the value should be the well-known Discovery Service NQN (`nqn.2014-08.org.nvmexpress.discovery`).
@@ -1101,7 +1101,7 @@ GType bd_nvme_discovery_log_entry_get_type () {
 
 /**
  * bd_nvme_get_controller_info:
- * @device: a NVMe controller device (e.g. /dev/nvme0)
+ * @device: a NVMe controller device (e.g. `/dev/nvme0`)
  * @error: (out) (nullable): place to store error (if any)
  *
  * Retrieves information about the NVMe controller (the Identify Controller command)
@@ -1115,7 +1115,7 @@ BDNVMEControllerInfo * bd_nvme_get_controller_info (const gchar *device, GError 
 
 /**
  * bd_nvme_get_namespace_info:
- * @device: a NVMe namespace device (e.g. /dev/nvme0n1)
+ * @device: a NVMe namespace device (e.g. `/dev/nvme0n1`)
  * @error: (out) (nullable): place to store error (if any)
  *
  * Retrieves information about the NVMe namespace (the Identify Namespace command)
@@ -1129,10 +1129,10 @@ BDNVMENamespaceInfo * bd_nvme_get_namespace_info (const gchar *device, GError **
 
 /**
  * bd_nvme_get_smart_log:
- * @device: a NVMe controller device (e.g. /dev/nvme0)
+ * @device: a NVMe controller device (e.g. `/dev/nvme0`)
  * @error: (out) (nullable): place to store error (if any)
  *
- * Retrieves drive SMART and general health information (Log Identifier %02h).
+ * Retrieves drive SMART and general health information (Log Identifier `02h`).
  * The information provided is over the life of the controller and is retained across power cycles.
  *
  * Returns: (transfer full): health log data or %NULL in case of an error (with @error set).
@@ -1143,10 +1143,10 @@ BDNVMESmartLog * bd_nvme_get_smart_log (const gchar *device, GError **error);
 
 /**
  * bd_nvme_get_error_log_entries:
- * @device: a NVMe controller device (e.g. /dev/nvme0)
+ * @device: a NVMe controller device (e.g. `/dev/nvme0`)
  * @error: (out) (nullable): place to store error (if any)
  *
- * Retrieves Error Information Log (Log Identifier %01h) entries, used to describe
+ * Retrieves Error Information Log (Log Identifier `01h`) entries, used to describe
  * extended error information for a command that completed with error or to report
  * an error that is not specific to a particular command. This log is global to the
  * controller. The ordering of the entries is based on the time when the error
@@ -1163,10 +1163,10 @@ BDNVMEErrorLogEntry ** bd_nvme_get_error_log_entries (const gchar *device, GErro
 
 /**
  * bd_nvme_get_self_test_log:
- * @device: a NVMe controller device (e.g. /dev/nvme0)
+ * @device: a NVMe controller device (e.g. `/dev/nvme0`)
  * @error: (out) (nullable): place to store error (if any)
  *
- * Retrieves drive self-test log (Log Identifier %06h). Provides the status of a self-test operation
+ * Retrieves drive self-test log (Log Identifier `06h`). Provides the status of a self-test operation
  * in progress and the percentage complete of that operation, along with the results of the last
  * 20 device self-test operations.
  *
@@ -1178,10 +1178,10 @@ BDNVMESelfTestLog * bd_nvme_get_self_test_log (const gchar *device, GError **err
 
 /**
  * bd_nvme_get_sanitize_log:
- * @device: a NVMe controller device (e.g. /dev/nvme0)
+ * @device: a NVMe controller device (e.g. `/dev/nvme0`)
  * @error: (out) (nullable): place to store error (if any)
  *
- * Retrieves the drive sanitize status log (Log Identifier %81h) that includes information
+ * Retrieves the drive sanitize status log (Log Identifier `81h`) that includes information
  * about the most recent sanitize operation and the sanitize operation time estimates.
  *
  * As advised in the NVMe specification whitepaper the host should limit polling
@@ -1196,7 +1196,7 @@ BDNVMESanitizeLog * bd_nvme_get_sanitize_log (const gchar *device, GError **erro
 
 /**
  * bd_nvme_device_self_test:
- * @device: a NVMe controller or namespace device (e.g. /dev/nvme0)
+ * @device: a NVMe controller or namespace device (e.g. `/dev/nvme0`)
  * @action: self-test action to take.
  * @error: (out) (nullable): place to store error (if any)
  *
@@ -1217,8 +1217,8 @@ gboolean bd_nvme_device_self_test (const gchar *device, BDNVMESelfTestAction act
 
 /**
  * bd_nvme_format:
- * @device: NVMe namespace or controller device to format (e.g. /dev/nvme0n1)
- * @lba_data_size: desired LBA data size (i.e. a sector size) in bytes or %0 to keep current. See #BDNVMELBAFormat and bd_nvme_get_namespace_info().
+ * @device: NVMe namespace or controller device to format (e.g. `/dev/nvme0n1`)
+ * @lba_data_size: desired LBA data size (i.e. a sector size) in bytes or `0` to keep current. See #BDNVMELBAFormat and bd_nvme_get_namespace_info().
  * @secure_erase: optional secure erase action to take.
  * @error: (out) (nullable): place to store error (if any)
  *
@@ -1227,7 +1227,7 @@ gboolean bd_nvme_device_self_test (const gchar *device, BDNVMESelfTestAction act
  * to change LBA sector size. Optional secure erase method can be specified as well.
  *
  * Supported LBA data sizes for a given namespace can be listed using the bd_nvme_get_namespace_info()
- * call. In case of a special value %0 the current LBA format for a given namespace will be
+ * call. In case of a special value `0` the current LBA format for a given namespace will be
  * retained. When called on a controller device the first namespace is used as a reference.
  *
  * Note that the NVMe controller may define a Format NVM attribute indicating that the format
@@ -1248,7 +1248,7 @@ gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, BDNVMEForma
 
 /**
  * bd_nvme_sanitize:
- * @device: NVMe namespace or controller device to format (e.g. /dev/nvme0n1)
+ * @device: NVMe namespace or controller device to format (e.g. `/dev/nvme0n1`)
  * @action: the sanitize action to perform.
  * @no_dealloc: instruct the controller to not deallocate the affected media area.
  * @overwrite_pass_count: number of overwrite passes [1-15] or 0 for the default (16 passes).
@@ -1293,11 +1293,79 @@ gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, BDNVMEForma
 gboolean bd_nvme_sanitize (const gchar *device, BDNVMESanitizeAction action, gboolean no_dealloc, gint overwrite_pass_count, guint32 overwrite_pattern, gboolean overwrite_invert_pattern, GError **error);
 
 /**
+ * bd_nvme_get_host_nqn:
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * Reads the Host NQN (NVM Qualified Name) value from the global `/etc/nvme/hostnqn`
+ * file. An empty string is an indication that no Host NQN has been set.
+ *
+ * Returns: (transfer full): the Host NQN string or an empty string if none set.
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gchar * bd_nvme_get_host_nqn (GError **error);
+
+/**
+ * bd_nvme_generate_host_nqn:
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * Compute new Host NQN (NVM Qualified Name) value for the current system. This
+ * takes in account various system identifiers (DMI, device tree) with the goal
+ * of a stable unique identifier whenever feasible.
+ *
+ * Returns: (transfer full): the Host NQN string or %NULL with @error set.
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gchar * bd_nvme_generate_host_nqn (GError **error);
+
+/**
+ * bd_nvme_get_host_id:
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * Reads the Host ID value from the global `/etc/nvme/hostid` file. An empty
+ * string is an indication that no Host ID has been set.
+ *
+ * Returns: (transfer full): the Host ID string or an empty string if none set.
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gchar * bd_nvme_get_host_id (GError **error);
+
+/**
+ * bd_nvme_set_host_nqn:
+ * @host_nqn: The Host NVM Qualified Name.
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * Writes the Host NQN (NVM Qualified Name) value to the system `/etc/nvme/hostnqn` file.
+ * No validation of the string is performed.
+ *
+ * Returns: %TRUE if the value was set successfully or %FALSE otherwise with @error set.
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gboolean bd_nvme_set_host_nqn (const gchar *host_nqn, GError **error);
+
+/**
+ * bd_nvme_set_host_id:
+ * @host_id: The Host ID.
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * Writes the Host ID value to the system `/etc/nvme/hostid` file.
+ * No validation of the string is performed.
+ *
+ * Returns: %TRUE if the value was set successfully or %FALSE otherwise with @error set.
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gboolean bd_nvme_set_host_id (const gchar *host_id, GError **error);
+
+/**
  * bd_nvme_connect:
  * @subsysnqn: The name for the NVMe subsystem to connect to.
  * @transport: The network fabric used for a NVMe-over-Fabrics network.
  * @transport_addr: (nullable): The network address of the Controller. For transports using IP addressing (e.g. `rdma`) this should be an IP-based address.
- * @transport_svcid: (nullable): The transport service id.  For transports using IP addressing (e.g. `rdma`) this field is the port number. By default, the IP port number for the `RDMA` transport is %4420.
+ * @transport_svcid: (nullable): The transport service id.  For transports using IP addressing (e.g. `rdma`) this field is the port number. By default, the IP port number for the `RDMA` transport is `4420`.
  * @host_traddr: (nullable): The network address used on the host to connect to the Controller. For TCP, this sets the source address on the socket.
  * @host_iface: (nullable): The network interface used on the host to connect to the Controller (e.g. IP `eth1`, `enp2s0`). This forces the connection to be made on a specific interface instead of letting the system decide.
  * @host_nqn: (nullable): Overrides the default Host NQN that identifies the NVMe Host. If this option is %NULL, the default is read from `/etc/nvme/hostnqn` first.
@@ -1330,7 +1398,7 @@ gboolean bd_nvme_sanitize (const gchar *device, BDNVMESanitizeAction action, gbo
  * - `"queue_size"`: Number of elements in the I/O queues.
  * - `"keep_alive_tmo"`: The keep alive timeout (in seconds).
  * - `"reconnect_delay"`: The delay (in seconds) before reconnect is attempted after a connect loss.
- * - `"ctrl_loss_tmo"`: The controller loss timeout period (in seconds).
+ * - `"ctrl_loss_tmo"`: The controller loss timeout period (in seconds). A special value of `-1` will cause reconnecting forever.
  * - `"fast_io_fail_tmo"`: Fast I/O Fail timeout (in seconds).
  * - `"tos"`: Type of service.
  * - `"duplicate_connect"`: Allow duplicated connections between same transport host and subsystem port. Boolean value.
@@ -1393,7 +1461,7 @@ gboolean bd_nvme_disconnect_by_path (const gchar *path, GError **error);
  * @persistent: Persistent discovery connection.
  * @transport: The network fabric used for a NVMe-over-Fabrics network.
  * @transport_addr: (nullable): The network address of the Controller. For transports using IP addressing (e.g. `rdma`) this should be an IP-based address.
- * @transport_svcid: (nullable): The transport service id.  For transports using IP addressing (e.g. `rdma`) this field is the port number. By default, the IP port number for the `RDMA` transport is %4420.
+ * @transport_svcid: (nullable): The transport service id.  For transports using IP addressing (e.g. `rdma`) this field is the port number. By default, the IP port number for the `RDMA` transport is `4420`.
  * @host_traddr: (nullable): The network address used on the host to connect to the Controller. For TCP, this sets the source address on the socket.
  * @host_iface: (nullable): The network interface used on the host to connect to the Controller (e.g. IP `eth1`, `enp2s0`). This forces the connection to be made on a specific interface instead of letting the system decide.
  * @host_nqn: (nullable): Overrides the default Host NQN that identifies the NVMe Host. If this option is %NULL, the default is read from `/etc/nvme/hostnqn` first.
@@ -1429,7 +1497,7 @@ gboolean bd_nvme_disconnect_by_path (const gchar *path, GError **error);
  * - `"queue_size"`: Number of elements in the I/O queues.
  * - `"keep_alive_tmo"`: The keep alive timeout (in seconds).
  * - `"reconnect_delay"`: The delay (in seconds) before reconnect is attempted after a connect loss.
- * - `"ctrl_loss_tmo"`: The controller loss timeout period (in seconds). A special value of %-1 will cause reconnecting forever.
+ * - `"ctrl_loss_tmo"`: The controller loss timeout period (in seconds). A special value of `-1` will cause reconnecting forever.
  * - `"fast_io_fail_tmo"`: Fast I/O Fail timeout (in seconds).
  * - `"tos"`: Type of service.
  * - `"duplicate_connect"`: Allow duplicated connections between same transport host and subsystem port. Boolean value.

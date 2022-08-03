@@ -265,6 +265,7 @@ if __name__ == '__main__':
 
     testdir = os.path.abspath(os.path.dirname(__file__))
     projdir = os.path.abspath(os.path.normpath(os.path.join(testdir, '..')))
+    os.environ['LIBBLOCKDEV_PROJ_DIR'] = projdir
 
     args = parse_args()
     if args.installed:

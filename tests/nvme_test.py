@@ -3,7 +3,7 @@ import os
 import re
 import overrides_hack
 
-from utils import create_sparse_tempfile, create_nvmet_device, delete_nvmet_device, setup_nvme_target, teardown_nvme_target, find_nvme_ctrl_devs_for_subnqn, find_nvme_ns_devs_for_subnqn, get_nvme_hostnqn, run_command, TestTags, tag_test
+from utils import create_sparse_tempfile, create_nvmet_device, delete_nvmet_device, setup_nvme_target, teardown_nvme_target, find_nvme_ctrl_devs_for_subnqn, find_nvme_ns_devs_for_subnqn, get_nvme_hostnqn, run_command, TestTags, tag_test, read_file, write_file
 from gi.repository import BlockDev, GLib
 from distutils.spawn import find_executable
 
@@ -313,10 +313,24 @@ class NVMeFabricsTestCase(NVMeTest):
         for i in self.dev_files:
             os.unlink(i)
 
+    def _safe_unlink(self, f):
+        try:
+            os.unlink(f)
+        except FileNotFoundError:
+            pass
+
     def _nvme_disconnect(self, subnqn, ignore_errors=False):
         ret, out, err = run_command("nvme disconnect --nqn=%s" % subnqn)
         if not ignore_errors and (ret != 0 or 'disconnected 0 ' in out):
             raise RuntimeError("Error disconnecting the '%s' subsystem NQN: '%s %s'" % (subnqn, out, err))
+
+    def _get_sysconf_dir(self):
+        try:
+            makefile = read_file(os.path.join(os.environ['LIBBLOCKDEV_PROJ_DIR'], 'Makefile'))
+            r = re.search(r'sysconfdir = (.*)', makefile)
+            return r.group(1)
+        except:
+            return None
 
     @tag_test(TestTags.CORE)
     def test_connect_single_ns(self):
@@ -331,8 +345,13 @@ class NVMeFabricsTestCase(NVMeTest):
             BlockDev.nvme_disconnect(self.SUBNQN)
 
         # nothing to connect to
-        with self.assertRaisesRegexp(GLib.GError, r"Error connecting the controller: "):
+        msg = r'Error connecting the controller: '
+        with self.assertRaisesRegexp(GLib.GError, msg):
             BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, self.hostnqn, None)
+        with self.assertRaisesRegexp(GLib.GError, msg):
+            BlockDev.nvme_connect(self.SUBNQN, 'loop', '127.0.0.1', None, None, None, self.hostnqn, None)
+        with self.assertRaisesRegexp(GLib.GError, msg):
+            BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, None, None)
 
         self._setup_target(1)
 
@@ -506,3 +525,113 @@ class NVMeFabricsTestCase(NVMeTest):
 
         # close the persistent connection
         BlockDev.nvme_disconnect(DISCOVERY_NQN)
+
+
+    @tag_test(TestTags.CORE)
+    def test_host_nqn(self):
+        """Test Host NQN/ID manipulation and a simple connect"""
+
+        HOSTNQN_PATH = '/etc/nvme/hostnqn'
+        HOSTID_PATH = '/etc/nvme/hostid'
+        FAKE_HOSTNQN1 = 'nqn.2014-08.org.nvmexpress:uuid:ffffffff-ffff-ffff-ffff-ffffffffffff'
+        FAKE_HOSTNQN2 = 'nqn.2014-08.org.nvmexpress:uuid:beefbeef-beef-beef-beef-beefdeadbeef'
+        FAKE_HOSTID1 = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'
+        FAKE_HOSTID2 = 'beefbeef-beef-beef-beef-beefdeadbeef'
+
+        # libnvme might have been configured with a different prefix than libblockdev
+        sysconf_dir = self._get_sysconf_dir()
+        if sysconf_dir != '/etc':
+            self.skipTest("libblockdev was not configured with standard prefix (/usr)")
+
+        # test that no device node exists for given subsystem nqn
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(ctrls), 0)
+
+        # save hostnqn and hostid files
+        try:
+            saved_hostnqn = read_file(HOSTNQN_PATH)
+            self.addCleanup(write_file, HOSTNQN_PATH, saved_hostnqn)
+        except:
+            self.addCleanup(self._safe_unlink, HOSTNQN_PATH)
+            pass
+        try:
+            saved_hostid = read_file(HOSTID_PATH)
+            self.addCleanup(write_file, HOSTID_PATH, saved_hostid)
+        except:
+            self.addCleanup(self._safe_unlink, HOSTID_PATH)
+            pass
+
+        self._safe_unlink(HOSTNQN_PATH)
+        self._safe_unlink(HOSTID_PATH)
+        hostnqn = BlockDev.nvme_get_host_nqn()
+        self.assertEqual(len(hostnqn), 0)
+        hostnqn = BlockDev.nvme_generate_host_nqn()
+        self.assertTrue(hostnqn.startswith('nqn.2014-08.org.nvmexpress:uuid:'))
+        hostid = BlockDev.nvme_get_host_id()
+        self.assertEqual(len(hostid), 0)
+
+        # connection without hostnqn set
+        self._setup_target(1)
+        ret = BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, None, None)
+        self.addCleanup(self._nvme_disconnect, self.SUBNQN, ignore_errors=True)
+        self.assertTrue(ret)
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(ctrls), 1)
+        sysfs_hostnqn = read_file('/sys/class/nvme/%s/hostnqn' % os.path.basename(ctrls[0]))
+        self.assertEqual(sysfs_hostnqn.strip(), BlockDev.nvme_generate_host_nqn())
+        BlockDev.nvme_disconnect(self.SUBNQN)
+
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(ctrls), 0)
+
+        ret = BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, FAKE_HOSTNQN1, FAKE_HOSTID1)
+        self.assertTrue(ret)
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(ctrls), 1)
+        sysfs_hostnqn = read_file('/sys/class/nvme/%s/hostnqn' % os.path.basename(ctrls[0]))
+        sysfs_hostid = read_file('/sys/class/nvme/%s/hostid' % os.path.basename(ctrls[0]))
+        self.assertEqual(sysfs_hostnqn.strip(), FAKE_HOSTNQN1)
+        self.assertEqual(sysfs_hostid.strip(), FAKE_HOSTID1)
+        BlockDev.nvme_disconnect(self.SUBNQN)
+
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(ctrls), 0)
+
+        # fill with custom IDs
+        ret = BlockDev.nvme_set_host_nqn(FAKE_HOSTNQN1)
+        self.assertTrue(ret)
+        ret = BlockDev.nvme_set_host_id(FAKE_HOSTID1)
+        self.assertTrue(ret)
+        hostnqn = BlockDev.nvme_get_host_nqn()
+        self.assertEqual(hostnqn, FAKE_HOSTNQN1)
+        hostid = BlockDev.nvme_get_host_id()
+        self.assertEqual(hostid, FAKE_HOSTID1)
+
+        ret = BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, None, None)
+        self.assertTrue(ret)
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(ctrls), 1)
+        sysfs_hostnqn = read_file('/sys/class/nvme/%s/hostnqn' % os.path.basename(ctrls[0]))
+        sysfs_hostid = read_file('/sys/class/nvme/%s/hostid' % os.path.basename(ctrls[0]))
+        self.assertEqual(sysfs_hostnqn.strip(), FAKE_HOSTNQN1)
+        self.assertEqual(sysfs_hostid.strip(), FAKE_HOSTID1)
+        BlockDev.nvme_disconnect(self.SUBNQN)
+
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(ctrls), 0)
+
+        ret = BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, FAKE_HOSTNQN2, FAKE_HOSTID2)
+        self.assertTrue(ret)
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(ctrls), 1)
+        sysfs_hostnqn = read_file('/sys/class/nvme/%s/hostnqn' % os.path.basename(ctrls[0]))
+        sysfs_hostid = read_file('/sys/class/nvme/%s/hostid' % os.path.basename(ctrls[0]))
+        self.assertEqual(sysfs_hostnqn.strip(), FAKE_HOSTNQN2)
+        self.assertEqual(sysfs_hostid.strip(), FAKE_HOSTID2)
+        BlockDev.nvme_disconnect(self.SUBNQN)
+
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
+        self.assertEqual(len(ctrls), 0)
+
+        self._safe_unlink(HOSTNQN_PATH)
+        self._safe_unlink(HOSTID_PATH)
