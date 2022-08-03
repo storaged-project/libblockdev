@@ -107,6 +107,7 @@ GType bd_lvm_pvdata_get_type();
  * @vg_free_count: number of free extents in the PV's VG
  * @vg_pv_count: number of PVs that belong to this PV's VG
  * @pv_tags: (array zero-terminated=1): list of LVM tags for this PV
+ * @missing: whether this PV is missing from the system or not
  */
 typedef struct BDLVMPVdata {
     gchar *pv_name;
