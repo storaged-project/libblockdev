@@ -597,12 +597,19 @@ class MDTestDDFRAID(MDTestCase):
         self.assertEqual(edata.level, "container")
         self.assertEqual(edata.metadata, "ddf")
 
+        # ddf container detail
         ddata = BlockDev.md_detail("bd_test_md")
         self.assertIsNotNone(ddata)
         self.assertIsNotNone(ddata.uuid)
         self.assertEqual(ddata.uuid, edata.uuid)
         self.assertEqual(ddata.level, "container")
         self.assertEqual(ddata.metadata, "ddf")
+
+        # array detail
+        ddata = BlockDev.md_detail("bd_test_ddf")
+        self.assertIsNotNone(ddata)
+        self.assertEqual(ddata.level, "raid0")
+        self.assertEqual(ddata.container, "/dev/md/bd_test_md")
 
 
 class FakeMDADMutilTest(MDTest):

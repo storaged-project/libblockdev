@@ -118,6 +118,7 @@ BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data) {
     new_data->spare_devices = data->spare_devices;
     new_data->clean = data->clean;
     new_data->uuid = g_strdup (data->uuid);
+    new_data->container = g_strdup (data->container);
 
     return new_data;
 }
@@ -137,6 +138,7 @@ void bd_md_detail_data_free (BDMDDetailData *data) {
     g_free (data->creation_time);
     g_free (data->level);
     g_free (data->uuid);
+    g_free (data->container);
 
     g_free (data);
 }
@@ -1163,35 +1165,38 @@ BDMDDetailData* bd_md_detail (const gchar *raid_spec, GError **error) {
         g_free (orig_uuid);
     }
 
-    if (!ret->uuid) {
-        argv[2] = "--export";
-        argv[3] = mdadm_spec;
-        success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
-        if (!success) {
-            /* error is already populated */
-            bd_md_detail_data_free (ret);
-            return NULL;
-        }
-
-        /* try to get a better information about RAID level because it may be
-           missing in the output without --export */
-        output_fields = g_strsplit (output, "\n", 0);
-        g_free (output);
-        output = NULL;
-        for (i = 0; (i < g_strv_length (output_fields) - 1); i++)
-            if (g_str_has_prefix (output_fields[i], "MD_UUID=")) {
-                value = strchr (output_fields[i], '=');
-                value++;
-                ret->uuid = bd_md_canonicalize_uuid (value, error);
-                if (!ret->uuid) {
-                    g_prefix_error (error, "Failed to canonicalize MD UUID '%s': ", value);
-                    bd_md_detail_data_free (ret);
-                    g_strfreev (output_fields);
-                    return NULL;
-                }
-            }
-        g_strfreev (output_fields);
+    argv[2] = "--export";
+    argv[3] = mdadm_spec;
+    success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
+    if (!success) {
+        /* error is already populated */
+        bd_md_detail_data_free (ret);
+        return NULL;
     }
+
+    /* try to get a better information about RAID level because it may be
+        missing in the output without --export */
+    output_fields = g_strsplit (output, "\n", 0);
+    g_free (output);
+    output = NULL;
+    for (i = 0; (i < g_strv_length (output_fields) - 1); i++) {
+        if (!ret->uuid && g_str_has_prefix (output_fields[i], "MD_UUID=")) {
+            value = strchr (output_fields[i], '=');
+            value++;
+            ret->uuid = bd_md_canonicalize_uuid (value, error);
+            if (!ret->uuid) {
+                g_prefix_error (error, "Failed to canonicalize MD UUID '%s': ", value);
+                bd_md_detail_data_free (ret);
+                g_strfreev (output_fields);
+                return NULL;
+            }
+        } else if (g_str_has_prefix (output_fields[i], "MD_CONTAINER=")) {
+            value = strchr (output_fields[i], '=');
+            value++;
+            ret->container = g_strdup (value);
+        }
+    }
+    g_strfreev (output_fields);
 
     return ret;
 }

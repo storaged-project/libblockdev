@@ -53,6 +53,7 @@ typedef struct BDMDDetailData {
     guint64 spare_devices;
     gboolean clean;
     gchar *uuid;
+    gchar *container;
 } BDMDDetailData;
 
 void bd_md_detail_data_free (BDMDDetailData *data);

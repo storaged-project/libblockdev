@@ -132,6 +132,7 @@ GType bd_md_detail_data_get_type();
  * @spare_devices: number of spare devices in the MD array
  * @clean: whether the MD array is clean or not
  * @uuid: uuid of the MD array
+ * @container: path of the MD container this device belongs to
  */
 typedef struct BDMDDetailData {
     gchar *device;
@@ -149,6 +150,7 @@ typedef struct BDMDDetailData {
     guint64 spare_devices;
     gboolean clean;
     gchar *uuid;
+    gchar *container;
 } BDMDDetailData;
 
 /**
@@ -177,6 +179,7 @@ BDMDDetailData* bd_md_detail_data_copy (BDMDDetailData *data) {
     new_data->spare_devices = data->spare_devices;
     new_data->clean = data->clean;
     new_data->uuid = g_strdup (data->uuid);
+    new_data->container = g_strdup (data->container);
 
     return new_data;
 }
@@ -197,6 +200,7 @@ void bd_md_detail_data_free (BDMDDetailData *data) {
     g_free (data->creation_time);
     g_free (data->level);
     g_free (data->uuid);
+    g_free (data->container);
 
     g_free (data);
 }
