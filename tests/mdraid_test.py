@@ -5,7 +5,7 @@ import time
 from contextlib import contextmanager
 import overrides_hack
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test, run_command
 from gi.repository import BlockDev, GLib
 
 
@@ -89,14 +89,16 @@ class MDNoDevTestCase(MDTest):
 
 class MDTestCase(MDTest):
 
+    _sparse_size = 10 * 1024**2
+
     def setUp(self):
         if os.uname()[-1] == "i686":
             self.skipTest("Skipping hanging MD RAID tests on i686")
 
         self.addCleanup(self._clean_up)
-        self.dev_file = create_sparse_tempfile("md_test", 10 * 1024**2)
-        self.dev_file2 = create_sparse_tempfile("md_test", 10 * 1024**2)
-        self.dev_file3 = create_sparse_tempfile("md_test", 10 * 1024**2)
+        self.dev_file = create_sparse_tempfile("md_test", self._sparse_size)
+        self.dev_file2 = create_sparse_tempfile("md_test", self._sparse_size)
+        self.dev_file3 = create_sparse_tempfile("md_test", self._sparse_size)
 
         try:
             self.loop_dev = create_lio_device(self.dev_file)
@@ -561,6 +563,54 @@ class MDTestRequestSyncAction(MDTestCase):
         with open("/sys/block/%s/md/last_sync_action" % node) as f:
             action = f.read().strip()
         self.assertEqual(action, "check")
+
+
+class MDTestDDFRAID(MDTestCase):
+
+    _sparse_size = 50 * 1024**2
+
+    def _clean_up(self):
+        try:
+            BlockDev.md_deactivate("bd_test_ddf")
+        except:
+            pass
+        try:
+            BlockDev.md_deactivate(BlockDev.md_node_from_name("bd_test_ddf"))
+        except:
+            pass
+
+        super(MDTestDDFRAID, self)._clean_up()
+
+    def test_examine_ddf_container(self):
+        succ = BlockDev.md_create("bd_test_md", "container",
+                                  [self.loop_dev, self.loop_dev2],
+                                  0, "ddf", False)
+        self.assertTrue(succ)
+
+        # we cannot create the array with libblockdev because we cannot pass the --raid-devices option
+        ret, _out, err = run_command("mdadm --create /dev/md/bd_test_ddf --run --level=raid0 --raid-devices=2 /dev/md/bd_test_md")
+        self.assertEqual(ret, 0, msg="Failed to create RAID for DDF test: %s" % err)
+
+        edata = BlockDev.md_examine(self.loop_dev)
+        self.assertIsNotNone(edata)
+        self.assertIsNotNone(edata.uuid)
+        self.assertEqual(edata.level, "container")
+        self.assertEqual(edata.metadata, "ddf")
+
+        # ddf container detail
+        ddata = BlockDev.md_detail("bd_test_md")
+        self.assertIsNotNone(ddata)
+        self.assertIsNotNone(ddata.uuid)
+        self.assertEqual(ddata.uuid, edata.uuid)
+        self.assertEqual(ddata.level, "container")
+        self.assertEqual(ddata.metadata, "ddf")
+
+        # array detail
+        ddata = BlockDev.md_detail("bd_test_ddf")
+        self.assertIsNotNone(ddata)
+        self.assertEqual(ddata.level, "raid0")
+        self.assertEqual(ddata.container, "/dev/md/bd_test_md")
+
 
 class FakeMDADMutilTest(MDTest):
     # no setUp nor tearDown needed, we are gonna use fake utils
