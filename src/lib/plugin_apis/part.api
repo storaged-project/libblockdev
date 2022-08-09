@@ -416,4 +416,4 @@ const gchar* bd_part_get_part_table_type_str (BDPartTableType type, GError **err
  */
 const gchar* bd_part_get_type_str (BDPartType type, GError **error);
 
-#endif  /* BD_KBD_API */
+#endif  /* BD_PART_API */

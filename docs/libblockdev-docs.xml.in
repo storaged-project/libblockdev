@@ -40,7 +40,6 @@
     <xi:include href="xml/plugins.xml"/>
     <xi:include href="xml/part.xml"/>
     <xi:include href="xml/swap.xml"/>
-    <xi:include href="xml/kbd.xml"/>
     <xi:include href="xml/s390.xml"/>
     <xi:include href="xml/utils.xml"/>
   </chapter>

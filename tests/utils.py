@@ -74,7 +74,7 @@ def fake_utils(path="."):
     finally:
         os.environ["PATH"] = old_path
 
-ALL_UTILS = {"lvm", "btrfs", "mkswap", "swaplabel", "multipath", "mpathconf", "dmsetup", "mdadm", "make-bcache",
+ALL_UTILS = {"lvm", "btrfs", "mkswap", "swaplabel", "multipath", "mpathconf", "dmsetup", "mdadm",
              "mkfs.exfat", "fsck.exfat", "tune.exfat",
              "mke2fs", "e2fsck", "tune2fs", "dumpe2fs", "resize2fs",
              "mkfs.f2fs", "fsck.f2fs", "fsck.f2fs", "dump.f2fs", "resize.f2fs",

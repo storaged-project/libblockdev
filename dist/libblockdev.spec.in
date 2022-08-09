@@ -1,6 +1,5 @@
 %define with_python3 @WITH_PYTHON3@
 %define with_gtk_doc @WITH_GTK_DOC@
-%define with_bcache @WITH_BCACHE@
 %define with_btrfs @WITH_BTRFS@
 %define with_crypto @WITH_CRYPTO@
 %define with_dm @WITH_DM@
@@ -10,7 +9,6 @@
 %define with_mdraid @WITH_MDRAID@
 %define with_mpath @WITH_MPATH@
 %define with_swap @WITH_SWAP@
-%define with_kbd @WITH_KBD@
 %define with_part @WITH_PART@
 %define with_fs @WITH_FS@
 %define with_nvdimm @WITH_NVDIMM@
@@ -24,12 +22,6 @@
 %if (! 0%{?fedora} && 0%{?rhel} <= 7) || %{with_python3} == 0
 %define with_python3 0
 %define python3_copts  --without-python3
-%endif
-
-# bcache is not available on RHEL
-%if (0%{?rhel}) || %{with_bcache} == 0
-%define with_bcache 0
-%define bcache_copts --without-bcache
 %endif
 
 # lvm_dbus is not available on older RHEL
@@ -84,9 +76,6 @@
 %if %{with_swap} != 1
 %define swap_copts --without-swap
 %endif
-%if %{with_kbd} != 1
-%define kbd_copts --without-kbd
-%endif
 %if %{with_part} != 1
 %define part_copts --without-part
 %endif
@@ -106,7 +95,7 @@
 %define nvme_copts --without-nvme
 %endif
 
-%define configure_opts %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?tools_copts} %{?gi_copts} %{?nvme_copts}
+%define configure_opts %{?python3_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?tools_copts} %{?gi_copts} %{?nvme_copts}
 
 Name:        libblockdev
 Version:     2.99
@@ -295,32 +284,6 @@ Requires: dosfstools
 %description fs-devel
 This package contains header files and pkg-config files needed for development
 with the libblockdev-fs plugin/library.
-%endif
-
-
-%if %{with_kbd}
-%package kbd
-BuildRequires: libbytesize-devel
-Summary:     The KBD plugin for the libblockdev library
-Requires: %{name}-utils%{?_isa} = %{version}-%{release}
-%if %{with_bcache}
-Requires: bcache-tools >= 1.0.8
-%endif
-
-%description kbd
-The libblockdev library plugin (and in the same time a standalone library)
-providing the functionality related to kernel block devices (namely zRAM and
-Bcache).
-
-%package kbd-devel
-Summary:     Development files for the libblockdev-kbd plugin/library
-Requires: %{name}-kbd%{?_isa} = %{version}-%{release}
-Requires: %{name}-utils-devel%{?_isa} = %{version}-%{release}
-Requires: glib2-devel
-
-%description kbd-devel
-This package contains header files and pkg-config files needed for development
-with the libblockdev-kbd plugin/library.
 %endif
 
 
@@ -583,10 +546,6 @@ Requires: %{name}-dm%{?_isa} = %{version}-%{release}
 Requires: %{name}-fs%{?_isa} = %{version}-%{release}
 %endif
 
-%if %{with_kbd}
-Requires: %{name}-kbd%{?_isa} = %{version}-%{release}
-%endif
-
 %if %{with_loop}
 Requires: %{name}-loop%{?_isa} = %{version}-%{release}
 %endif
@@ -699,10 +658,6 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %ldconfig_scriptlets s390
 %endif
 
-%if %{with_kbd}
-%ldconfig_scriptlets kbd
-%endif
-
 
 %files
 %{!?_licensedir:%global license %%doc}
@@ -795,17 +750,6 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %dir %{_includedir}/blockdev/fs
 %{_includedir}/blockdev/fs.h
 %{_includedir}/blockdev/fs/*.h
-%endif
-
-
-%if %{with_kbd}
-%files kbd
-%{_libdir}/libbd_kbd.so.*
-
-%files kbd-devel
-%{_libdir}/libbd_kbd.so
-%dir %{_includedir}/blockdev
-%{_includedir}/blockdev/kbd.h
 %endif
 
 

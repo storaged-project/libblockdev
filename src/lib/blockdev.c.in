@@ -19,8 +19,6 @@
 #include "plugin_apis/dm.c"
 #include "plugin_apis/mdraid.h"
 #include "plugin_apis/mdraid.c"
-#include "plugin_apis/kbd.h"
-#include "plugin_apis/kbd.c"
 #include "plugin_apis/part.h"
 #include "plugin_apis/part.c"
 #include "plugin_apis/fs.h"
@@ -62,9 +60,9 @@ static gchar * default_plugin_so[BD_PLUGIN_UNDEF] = {
     "libbd_swap.so."@MAJOR_VER@, "libbd_loop.so."@MAJOR_VER@,
     "libbd_crypto.so."@MAJOR_VER@, "libbd_mpath.so."@MAJOR_VER@,
     "libbd_dm.so."@MAJOR_VER@, "libbd_mdraid.so."@MAJOR_VER@,
-    "libbd_kbd.so."@MAJOR_VER@,"libbd_s390.so."@MAJOR_VER@,
-    "libbd_part.so."@MAJOR_VER@, "libbd_fs.so."@MAJOR_VER@,
-    "libbd_nvdimm.so."@MAJOR_VER@, "libbd_nvme.so."@MAJOR_VER@
+    "libbd_s390.so."@MAJOR_VER@, "libbd_part.so."@MAJOR_VER@,
+    "libbd_fs.so."@MAJOR_VER@, "libbd_nvdimm.so."@MAJOR_VER@,
+    "libbd_nvme.so."@MAJOR_VER@
 };
 static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_LVM, NULL}, NULL},
@@ -75,7 +73,6 @@ static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_MPATH, NULL}, NULL},
     {{BD_PLUGIN_DM, NULL}, NULL},
     {{BD_PLUGIN_MDRAID, NULL}, NULL},
-    {{BD_PLUGIN_KBD, NULL}, NULL},
     {{BD_PLUGIN_S390, NULL}, NULL},
     {{BD_PLUGIN_PART, NULL}, NULL},
     {{BD_PLUGIN_FS, NULL}, NULL},
@@ -83,7 +80,7 @@ static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_NVME, NULL}, NULL},
 };
 static gchar* plugin_names[BD_PLUGIN_UNDEF] = {
-    "lvm", "btrfs", "swap", "loop", "crypto", "mpath", "dm", "mdraid", "kbd", "s390", "part", "fs", "nvdimm", "nvme"
+    "lvm", "btrfs", "swap", "loop", "crypto", "mpath", "dm", "mdraid", "s390", "part", "fs", "nvdimm", "nvme"
 };
 
 static void set_plugin_so_name (BDPlugin name, const gchar *so_name) {
@@ -217,10 +214,6 @@ static void unload_plugins (void) {
         bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to close the mdraid plugin");
     plugins[BD_PLUGIN_MDRAID].handle = NULL;
 
-    if (plugins[BD_PLUGIN_KBD].handle && !unload_kbd (plugins[BD_PLUGIN_KBD].handle))
-        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to close the kbd plugin");
-    plugins[BD_PLUGIN_KBD].handle = NULL;
-
 #if defined(__s390__) || defined(__s390x__)
     if (plugins[BD_PLUGIN_S390].handle && !unload_s390 (plugins[BD_PLUGIN_S390].handle))
         bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to close the s390 plugin");
@@ -270,8 +263,6 @@ static void do_load (GSList **plugins_sonames) {
         load_plugin_from_sonames (BD_PLUGIN_DM, load_dm_from_plugin, &(plugins[BD_PLUGIN_DM].handle), plugins_sonames[BD_PLUGIN_DM]);
     if (!plugins[BD_PLUGIN_MDRAID].handle && plugins_sonames[BD_PLUGIN_MDRAID])
         load_plugin_from_sonames (BD_PLUGIN_MDRAID, load_mdraid_from_plugin, &(plugins[BD_PLUGIN_MDRAID].handle), plugins_sonames[BD_PLUGIN_MDRAID]);
-    if (!plugins[BD_PLUGIN_KBD].handle && plugins_sonames[BD_PLUGIN_KBD])
-        load_plugin_from_sonames (BD_PLUGIN_KBD, load_kbd_from_plugin, &(plugins[BD_PLUGIN_KBD].handle), plugins_sonames[BD_PLUGIN_KBD]);
 #if defined(__s390__) || defined(__s390x__)
     if (!plugins[BD_PLUGIN_S390].handle && plugins_sonames[BD_PLUGIN_S390])
         load_plugin_from_sonames (BD_PLUGIN_S390, load_s390_from_plugin, &(plugins[BD_PLUGIN_S390].handle), plugins_sonames[BD_PLUGIN_S390]);
