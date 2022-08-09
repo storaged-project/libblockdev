@@ -61,8 +61,14 @@ class LvmNoDevTestCase(LVMTestCase):
     def test_get_supported_pe_sizes(self):
         """Verify that supported PE sizes are really supported"""
 
-        for size in BlockDev.lvm_get_supported_pe_sizes():
+        supported = BlockDev.lvm_get_supported_pe_sizes()
+
+        for size in supported:
             self.assertTrue(BlockDev.lvm_is_supported_pe_size(size))
+
+        self.assertIn(4 * 1024, supported)
+        self.assertIn(4 * 1024 **2, supported)
+        self.assertIn(16 * 1024**3, supported)
 
     @tag_test(TestTags.NOSTORAGE)
     def test_get_max_lv_size(self):
