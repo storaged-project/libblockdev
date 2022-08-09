@@ -1365,7 +1365,7 @@ gboolean bd_lvm_is_supported_pe_size (guint64 size, GError **error UNUSED) {
  * bd_lvm_get_supported_pe_sizes:
  * @error: (out) (optional): place to store error (if any)
  *
- * Returns: (transfer full) (array zero-terminated=1): list of supported PE sizes
+ * Returns: (transfer full) (array fixed-size=25): list of supported PE sizes
  *
  * Tech category: %BD_LVM_TECH_CALCS no mode (it is ignored)
  */
