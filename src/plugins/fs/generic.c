@@ -50,6 +50,77 @@ typedef enum {
     BD_FS_GET_FREE_SPACE,
 } BDFsOpType;
 
+static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
+    /* padding for BD_FS_TECH_GENERIC and MOUNT to make accessing the FS techs simpler */
+    { 0 }, { 0 },
+    /* EXT2 */
+    { .resize = BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK,
+      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD,
+      .fsck = BD_FS_FSCK_CHECK | BD_FS_FSCK_REPAIR,
+      .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
+      .features =  BD_FS_FEATURE_OWNERS },
+    /* EXT3 */
+    { .resize = BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK,
+      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD,
+      .fsck = BD_FS_FSCK_CHECK | BD_FS_FSCK_REPAIR,
+      .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
+      .features =  BD_FS_FEATURE_OWNERS },
+    /* EXT4 */
+    { .resize = BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK,
+      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD,
+      .fsck = BD_FS_FSCK_CHECK | BD_FS_FSCK_REPAIR,
+      .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
+      .features =  BD_FS_FEATURE_OWNERS },
+    /* XFS */
+    { .resize = BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW,
+      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD,
+      .fsck = BD_FS_FSCK_CHECK | BD_FS_FSCK_REPAIR,
+      .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
+      .features =  BD_FS_FEATURE_OWNERS },
+    /* VFAT */
+    { .resize = BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK,
+      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID,
+      .fsck = BD_FS_FSCK_CHECK | BD_FS_FSCK_REPAIR,
+      .configure = BD_FS_SUPPORT_SET_LABEL,
+      .features = 0 },
+    /* NTFS */
+    { .resize = BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK,
+      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_DRY_RUN,
+      .fsck = BD_FS_FSCK_CHECK | BD_FS_FSCK_REPAIR,
+      .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
+      .features = 0 },
+    /* F2FS */
+    { .resize = BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK,
+      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_NODISCARD,
+      .fsck = BD_FS_FSCK_CHECK | BD_FS_FSCK_REPAIR,
+      .configure =  0,
+      .features = BD_FS_FEATURE_OWNERS },
+    /* NILFS2 */
+    { .resize = BD_FS_ONLINE_GROW | BD_FS_ONLINE_SHRINK,
+      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD,
+      .fsck = 0,
+      .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
+      .features = BD_FS_FEATURE_OWNERS },
+    /* EXFAT */
+    { .resize = 0,
+      .mkfs = BD_FS_MKFS_LABEL,
+      .fsck = BD_FS_FSCK_CHECK | BD_FS_FSCK_REPAIR,
+      .configure = BD_FS_SUPPORT_SET_LABEL,
+      .features = 0 },
+    /* BTRFS */
+    { .resize = BD_FS_ONLINE_GROW | BD_FS_ONLINE_SHRINK,
+      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_NODISCARD,
+      .fsck = BD_FS_FSCK_CHECK | BD_FS_FSCK_REPAIR,
+      .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
+      .features = BD_FS_FEATURE_OWNERS },
+    /* UDF */
+    { .resize = 0,
+      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID,
+      .fsck = 0,
+      .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
+      .features = BD_FS_FEATURE_OWNERS },
+};
+
 /**
  * BDFSInfo:
  * @type: filesystem identifier, must be present
@@ -74,32 +145,165 @@ typedef struct BDFSInfo {
     const gchar *uuid_util;
 } BDFSInfo;
 
-static const BDFSInfo fs_info[] = {
-    {"xfs", "mkfs.xfs", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD, "xfs_db", "xfs_repair", "xfs_growfs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW, "xfs_admin", "xfs_admin", "xfs_admin"},
-    {"ext2", "mkfs.ext2", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD, "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs", "dumpe2fs", "tune2fs"},
-    {"ext3", "mkfs.ext3", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD, "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs", "dumpe2fs", "tune2fs"},
-    {"ext4", "mkfs.ext4", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD, "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs", "dumpe2fs", "tune2fs"},
-    {"vfat", "mkfs.vfat", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID, "fsck.vfat", "fsck.vfat", "vfat-resize", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "fatlabel", "fsck.vfat", NULL},
-    {"ntfs", "mkfs.ntfs", BD_FS_MKFS_LABEL | BD_FS_MKFS_DRY_RUN, "ntfsfix", "ntfsfix", "ntfsresize", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "ntfslabel", "ntfscluster", "ntfslabel"},
-    {"f2fs", "mkfs.f2fs", BD_FS_MKFS_LABEL | BD_FS_MKFS_NODISCARD, "fsck.f2fs", "fsck.f2fs", "resize.f2fs", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, NULL, "dump.f2fs", NULL},
-    {"nilfs2", "mkfs.nilfs", BD_FS_MKFS_LABEL | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD, NULL, NULL, "nilfs-resize", BD_FS_ONLINE_GROW | BD_FS_ONLINE_SHRINK, "tune-nilfs", "tune-nilfs", "tune-nilfs"},
-    {"exfat", "mkfs.exfat", BD_FS_MKFS_LABEL, "fsck.exfat", "fsck.exfat", NULL, 0, "tune.exfat", "tune.exfat", NULL},
-    {"btrfs", "mkfs.btrfs", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_NODISCARD, "btrfsck", "btrfsck", "btrfs", BD_FS_ONLINE_GROW | BD_FS_ONLINE_SHRINK, "btrfs", "btrfs", "btrfstune"},
-    {"udf", "mkudffs", BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID, NULL, NULL, NULL, 0, "udflabel", "udfinfo", "udflabel"},
-    {NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, NULL}
+static const BDFSInfo fs_info[BD_FS_LAST_FS] = {
+    /* padding for BD_FS_TECH_GENERIC and MOUNT to make accessing the FS techs simpler */
+    { 0 }, { 0 },
+    /* EXT2 */
+    { .type = "ext2",
+      .mkfs_util = "mkfs.ext2",
+      .mkfs_options = fs_features[BD_FS_TECH_EXT2].mkfs,
+      .check_util = "e2fsck",
+      .repair_util = "e2fsck",
+      .resize_util = "resize2fs",
+      .resize_mode = fs_features[BD_FS_TECH_EXT2].resize,
+      .label_util = "tune2fs",
+      .info_util = "dumpe2fs",
+      .uuid_util = "tune2fs" },
+    /* EXT3 */
+    { .type = "ext3",
+      .mkfs_util = "mkfs.ext3",
+      .mkfs_options = fs_features[BD_FS_TECH_EXT3].mkfs,
+      .check_util = "e2fsck",
+      .repair_util = "e2fsck",
+      .resize_util = "resize2fs",
+      .resize_mode = fs_features[BD_FS_TECH_EXT3].resize,
+      .label_util = "tune2fs",
+      .info_util = "dumpe2fs",
+      .uuid_util = "tune2fs" },
+    /* EXT4 */
+    { .type = "ext4",
+      .mkfs_util = "mkfs.ext4",
+      .mkfs_options = fs_features[BD_FS_TECH_EXT4].mkfs,
+      .check_util = "e2fsck",
+      .repair_util = "e2fsck",
+      .resize_util = "resize2fs",
+      .resize_mode = fs_features[BD_FS_TECH_EXT4].resize,
+      .label_util = "tune2fs",
+      .info_util = "dumpe2fs",
+      .uuid_util = "tune2fs" },
+    /* XFS */
+    { .type = "xfs",
+      .mkfs_util = "mkfs.xfs",
+      .mkfs_options = fs_features[BD_FS_TECH_XFS].mkfs,
+      .check_util = "xfs_db",
+      .repair_util = "xfs_repair",
+      .resize_util = "xfs_growfs",
+      .resize_mode = fs_features[BD_FS_TECH_XFS].resize,
+      .label_util = "xfs_admin",
+      .info_util = "xfs_admin",
+      .uuid_util = "xfs_admin" },
+    /* VFAT */
+    { .type = "vfat",
+      .mkfs_util = "mkfs.vfat",
+      .mkfs_options = fs_features[BD_FS_TECH_VFAT].mkfs,
+      .check_util = "fsck.vfat",
+      .repair_util = "fsck.vfat",
+      .resize_util = "vfat-resize",
+      .resize_mode = fs_features[BD_FS_TECH_VFAT].resize,
+      .label_util = "fatlabel",
+      .info_util = "fsck.vfat",
+      .uuid_util = NULL },
+    /* NTFS */
+    { .type = "ntfs",
+      .mkfs_util = "mkfs.ntfs",
+      .mkfs_options = fs_features[BD_FS_TECH_NTFS].mkfs,
+      .check_util = "ntfsfix",
+      .repair_util = "ntfsfix",
+      .resize_util = "ntfsresize",
+      .resize_mode = fs_features[BD_FS_TECH_NTFS].resize,
+      .label_util = "ntfslabel",
+      .info_util = "ntfscluster",
+      .uuid_util = "ntfslabel" },
+    /* F2FS */
+    { .type = "f2fs",
+      .mkfs_util = "mkfs.f2fs",
+      .mkfs_options = fs_features[BD_FS_TECH_F2FS].mkfs,
+      .check_util = "fsck.f2fs",
+      .repair_util = "fsck.f2fs",
+      .resize_util = "resize.f2fs",
+      .resize_mode = fs_features[BD_FS_TECH_F2FS].resize,
+      .label_util = NULL,
+      .info_util = "dump.f2fs",
+      .uuid_util = NULL },
+    /* NILFS2 */
+    { .type = "nilfs2",
+      .mkfs_util = "mkfs.nilfs",
+      .mkfs_options = fs_features[BD_FS_TECH_NILFS2].mkfs,
+      .check_util = NULL,
+      .repair_util = NULL,
+      .resize_util = "nilfs-resize",
+      .resize_mode = fs_features[BD_FS_TECH_NILFS2].resize,
+      .label_util = "tune-nilfs",
+      .info_util = "tune-nilfs",
+      .uuid_util = "tune-nilfs" },
+    /* EXFAT */
+    { .type = "exfat",
+      .mkfs_util = "mkfs.exfat",
+      .mkfs_options = fs_features[BD_FS_TECH_EXFAT].mkfs,
+      .check_util = "fsck.exfat",
+      .repair_util = "fsck.exfat",
+      .resize_util = NULL,
+      .resize_mode = fs_features[BD_FS_TECH_EXFAT].resize,
+      .label_util = "tune.exfat",
+      .info_util = "tune.exfat",
+      .uuid_util = NULL },
+    /* BTRFS */
+    { .type = "btrfs",
+      .mkfs_util = "mkfs.btrfs",
+      .mkfs_options = fs_features[BD_FS_TECH_BTRFS].mkfs,
+      .check_util = "btrfsck",
+      .repair_util = "btrfsck",
+      .resize_util = "btrfs",
+      .resize_mode = fs_features[BD_FS_TECH_BTRFS].resize,
+      .label_util = "btrfs",
+      .info_util = "btrfs",
+      .uuid_util = "btrfstune" },
+    /* UDF */
+    { .type = "udf",
+      .mkfs_util = "mkudffs",
+      .mkfs_options = fs_features[BD_FS_TECH_UDF].mkfs,
+      .check_util = NULL,
+      .repair_util = NULL,
+      .resize_util = NULL,
+      .resize_mode = fs_features[BD_FS_TECH_UDF].resize,
+      .label_util = "udflabel",
+      .info_util = "udfinfo",
+      .uuid_util = "udflabel" },
 };
 
-static const BDFSInfo *
-get_fs_info (const gchar *type)
-{
-    g_return_val_if_fail (type != NULL, NULL);
-
-    for (guint n = 0; fs_info[n].type != NULL; n++) {
-        if (strcmp (fs_info[n].type, type) == 0)
-            return &fs_info[n];
+/**
+ * fstype_to_tech: (skip)
+ * @fstype: filesystem type to get tech for
+ *
+ * Returns %BDFSTech for specified @fstype. Returns
+ * %BD_FS_TECH_GENERIC for unknown/unsupported filesystems.
+ */
+static BDFSTech fstype_to_tech (const gchar *fstype) {
+    if (g_strcmp0 (fstype, "exfat") == 0) {
+        return BD_FS_TECH_EXFAT;
+    } else if (g_strcmp0 (fstype, "ext2") == 0) {
+        return BD_FS_TECH_EXT2;
+    } else if (g_strcmp0 (fstype, "ext3") == 0) {
+        return BD_FS_TECH_EXT3;
+    } else if (g_strcmp0 (fstype, "ext4") == 0) {
+        return BD_FS_TECH_EXT4;
+    } else if (g_strcmp0 (fstype, "f2fs") == 0) {
+        return BD_FS_TECH_F2FS;
+    } else if (g_strcmp0 (fstype, "nilfs2") == 0) {
+        return BD_FS_TECH_NILFS2;
+    } else if (g_strcmp0 (fstype, "ntfs") == 0) {
+        return BD_FS_TECH_NTFS;
+    } else if (g_strcmp0 (fstype, "vfat") == 0) {
+        return BD_FS_TECH_VFAT;
+    } else if (g_strcmp0 (fstype, "xfs") == 0) {
+        return BD_FS_TECH_XFS;
+    } else if (g_strcmp0 (fstype, "btrfs") == 0) {
+        return BD_FS_TECH_BTRFS;
+    } else if (g_strcmp0 (fstype, "udf") == 0) {
+        return BD_FS_TECH_UDF;
+    } else {
+        return BD_FS_TECH_GENERIC;
     }
-
-    return NULL;
 }
 
 /**
@@ -1143,6 +1347,7 @@ static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar *
     const BDFSInfo *fsinfo = NULL;
     const gchar* op_name = NULL;
     const gchar* exec_util = NULL;
+    BDFSTech tech;
 
     if (required_utility != NULL)
         *required_utility = NULL;
@@ -1153,47 +1358,52 @@ static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar *
     if (options != NULL)
         *options = 0;
 
-    fsinfo = get_fs_info (fs_type);
-    if (fsinfo != NULL) {
-        switch (op) {
-            case BD_FS_MKFS:
-                op_name = "Creating";
-                exec_util = fsinfo->mkfs_util;
-                break;
-            case BD_FS_RESIZE:
-                op_name = "Resizing";
-                exec_util = fsinfo->resize_util;
-                break;
-            case BD_FS_REPAIR:
-                op_name = "Repairing";
-                exec_util = fsinfo->repair_util;
-                break;
-            case BD_FS_CHECK:
-                op_name = "Checking";
-                exec_util = fsinfo->check_util;
-                break;
-            case BD_FS_LABEL:
-                op_name = "Setting the label of";
-                exec_util = fsinfo->label_util;
-                break;
-            case BD_FS_UUID:
-                op_name = "Setting UUID of";
-                exec_util = fs_info->uuid_util;
-                break;
-            case BD_FS_GET_SIZE:
-                op_name = "Getting size of";
-                exec_util = fsinfo->info_util;
-                break;
-            case BD_FS_GET_FREE_SPACE:
-                op_name = "Getting free space on";
-                exec_util = fsinfo->info_util;
-                break;
-            default:
-                g_assert_not_reached ();
-        }
+    tech = fstype_to_tech (fs_type);
+    if (tech == BD_FS_TECH_GENERIC) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
+                     "Filesystem '%s' is not supported.", fs_type);
+        return FALSE;
+    }
+    fsinfo = &fs_info[tech];
+
+    switch (op) {
+        case BD_FS_MKFS:
+            op_name = "Creating";
+            exec_util = fsinfo->mkfs_util;
+            break;
+        case BD_FS_RESIZE:
+            op_name = "Resizing";
+            exec_util = fsinfo->resize_util;
+            break;
+        case BD_FS_REPAIR:
+            op_name = "Repairing";
+            exec_util = fsinfo->repair_util;
+            break;
+        case BD_FS_CHECK:
+            op_name = "Checking";
+            exec_util = fsinfo->check_util;
+            break;
+        case BD_FS_LABEL:
+            op_name = "Setting the label of";
+            exec_util = fsinfo->label_util;
+            break;
+        case BD_FS_UUID:
+            op_name = "Setting UUID of";
+            exec_util = fsinfo->uuid_util;
+            break;
+        case BD_FS_GET_SIZE:
+            op_name = "Getting size of";
+            exec_util = fsinfo->info_util;
+            break;
+        case BD_FS_GET_FREE_SPACE:
+            op_name = "Getting free space on";
+            exec_util = fsinfo->info_util;
+            break;
+        default:
+            g_assert_not_reached ();
     }
 
-    if (fsinfo == NULL || exec_util == NULL) {
+    if (exec_util == NULL) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
                      "%s filesystem '%s' is not supported.", op_name, fs_type);
         return FALSE;
@@ -1529,4 +1739,26 @@ gboolean bd_fs_mkfs (const gchar *device, const gchar *fstype, BDFSMkfsOptions *
     g_free (extra_args);
 
     return ret;
+}
+
+/**
+ * bd_fs_features:
+ * @fstype: name of the filesystem to get features for (e.g. "ext4")
+ * @error (allow-none): (out): place to store error (if any)
+ *
+ * Returns (transfer-none): features supported by @fstype, see %BDFSFeatures for more information.
+ *
+ * Tech category: always available
+ *
+ */
+const BDFSFeatures* bd_fs_features (const gchar *fstype, GError **error) {
+    BDFSTech tech = fstype_to_tech (fstype);
+
+    if (tech == BD_FS_TECH_GENERIC) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
+                     "Filesystem '%s' is not supported.", fstype);
+        return NULL;
+    }
+
+    return &fs_features[tech];
 }

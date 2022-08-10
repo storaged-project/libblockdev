@@ -22,6 +22,29 @@ class BtrfsTestCase(FSTestCase):
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="btrfs_test")
 
 
+class BtrfsTestFeatures(BtrfsTestCase):
+
+    def test_xfs_features(self):
+        features = BlockDev.fs_features("btrfs")
+        self.assertIsNotNone(features)
+
+        self.assertTrue(features.resize & BlockDev.FsResizeFlags.ONLINE_GROW)
+        self.assertTrue(features.resize & BlockDev.FsResizeFlags.ONLINE_GROW)
+
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.LABEL)
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.UUID)
+        self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.DRY_RUN)
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.NODISCARD)
+
+        self.assertTrue(features.fsck & BlockDev.FSFsckFlags.CHECK)
+        self.assertTrue(features.fsck & BlockDev.FSFsckFlags.REPAIR)
+
+        self.assertTrue(features.configure & BlockDev.FSConfigureFlags.LABEL)
+        self.assertTrue(features.configure & BlockDev.FSConfigureFlags.UUID)
+
+        self.assertTrue(features.features & BlockDev.FSFeatureFlags.OWNERS)
+
+
 class BtrfsTestMkfs(BtrfsTestCase):
     def test_btrfs_mkfs(self):
         """Verify that it is possible to create a new btrfs file system"""

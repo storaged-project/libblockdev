@@ -107,6 +107,28 @@ class F2FSTestAvailability(F2FSTestCase):
             with self.assertRaisesRegex(GLib.GError, "Too low version of fsck.f2fs. At least 1.11.0 required."):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.F2FS, BlockDev.FSTechMode.CHECK)
 
+class F2FSTestFeatures(F2FSTestCase):
+
+    def test_xfs_features(self):
+        features = BlockDev.fs_features("f2fs")
+        self.assertIsNotNone(features)
+
+        self.assertTrue(features.resize & BlockDev.FsResizeFlags.OFFLINE_GROW)
+        self.assertTrue(features.resize & BlockDev.FsResizeFlags.OFFLINE_SHRINK)
+
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.LABEL)
+        self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.UUID)
+        self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.DRY_RUN)
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.NODISCARD)
+
+        self.assertTrue(features.fsck & BlockDev.FSFsckFlags.CHECK)
+        self.assertTrue(features.fsck & BlockDev.FSFsckFlags.REPAIR)
+
+        self.assertEqual(features.configure, 0)
+
+        self.assertTrue(features.features & BlockDev.FSFeatureFlags.OWNERS)
+
+
 class F2FSTestMkfs(F2FSTestCase):
     def test_f2fs_mkfs(self):
         """Verify that it is possible to create a new f2fs file system"""

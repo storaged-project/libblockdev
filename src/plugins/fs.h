@@ -23,7 +23,7 @@ typedef enum {
 
 /* XXX: where the file systems start at the enum of technologies */
 #define BD_FS_OFFSET 2
-#define BD_FS_LAST_FS 14
+#define BD_FS_LAST_FS 13
 typedef enum {
     BD_FS_TECH_GENERIC  = 0,
     BD_FS_TECH_MOUNT    = 1,

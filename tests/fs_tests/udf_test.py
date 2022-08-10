@@ -20,6 +20,27 @@ class UdfTestCase(FSTestCase):
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="udf_test")
 
 
+class UdfTestFeatures(UdfTestCase):
+
+    def test_xfs_features(self):
+        features = BlockDev.fs_features("udf")
+        self.assertIsNotNone(features)
+
+        self.assertEqual(features.resize, 0)
+
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.LABEL)
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.UUID)
+        self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.DRY_RUN)
+        self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.NODISCARD)
+
+        self.assertEqual(features.fsck, 0)
+
+        self.assertTrue(features.configure & BlockDev.FSConfigureFlags.LABEL)
+        self.assertTrue(features.configure & BlockDev.FSConfigureFlags.UUID)
+
+        self.assertTrue(features.features & BlockDev.FSFeatureFlags.OWNERS)
+
+
 class UdfTestMkfs(UdfTestCase):
     def test_udf_mkfs(self):
         """Verify that it is possible to create a new udf file system"""

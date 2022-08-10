@@ -69,6 +69,28 @@ class ExfatTestAvailability(ExfatTestCase):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.EXFAT, BlockDev.FSTechMode.SET_LABEL)
 
 
+class ExfatTestFeatures(ExfatTestCase):
+
+    def test_vfat_features(self):
+        features = BlockDev.fs_features("exfat")
+        self.assertIsNotNone(features)
+
+        self.assertEqual(features.resize, 0)
+
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.LABEL)
+        self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.UUID)
+        self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.DRY_RUN)
+        self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.NODISCARD)
+
+        self.assertTrue(features.fsck & BlockDev.FSFsckFlags.CHECK)
+        self.assertTrue(features.fsck & BlockDev.FSFsckFlags.REPAIR)
+
+        self.assertTrue(features.configure & BlockDev.FSConfigureFlags.LABEL)
+        self.assertFalse(features.configure & BlockDev.FSConfigureFlags.UUID)
+
+        self.assertEqual(features.features, 0)
+
+
 class ExfatTestMkfs(ExfatTestCase):
     def test_exfat_mkfs(self):
         """Verify that it is possible to create a new exfat file system"""
