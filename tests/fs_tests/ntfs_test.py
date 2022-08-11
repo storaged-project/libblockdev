@@ -105,6 +105,9 @@ class NTFSTestFeatures(NTFSNoDevTestCase):
 
         self.assertEqual(features.features, 0)
 
+        self.assertEqual(features.partition_id, "0x07")
+        self.assertEqual(features.partition_type, "ebd0a0a2-b9e5-4433-87c0-68b6b72699c7")
+
 
 class NTFSTestMkfs(NTFSTestCase):
     def test_ntfs_mkfs(self):

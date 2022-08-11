@@ -138,6 +138,9 @@ class F2FSTestFeatures(F2FSNoDevTestCase):
 
         self.assertTrue(features.features & BlockDev.FSFeatureFlags.OWNERS)
 
+        self.assertEqual(features.partition_id, "0x83")
+        self.assertEqual(features.partition_type, "0fc63daf-8483-4772-8e79-3d69d8477de4")
+
 
 class F2FSTestMkfs(F2FSTestCase):
     def test_f2fs_mkfs(self):
