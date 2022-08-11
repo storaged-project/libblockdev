@@ -6,13 +6,17 @@ import re
 from packaging.version import Version
 
 
-from .fs_test import FSTestCase, mounted, check_output
+from .fs_test import FSTestCase, FSNoDevTestCase, mounted, check_output
 
 import overrides_hack
 import utils
 from utils import TestTags, tag_test
 
 from gi.repository import BlockDev, GLib
+
+
+class GenericNoDevTestCase(FSNoDevTestCase):
+    pass
 
 
 class GenericTestCase(FSTestCase):
@@ -173,7 +177,7 @@ class TestClean(GenericTestCase):
         self.assertEqual(fs_type, b"")
 
 
-class CanResizeRepairCheckLabel(GenericTestCase):
+class CanResizeRepairCheckLabel(GenericNoDevTestCase):
     def test_can_resize(self):
         """Verify that tooling query works for resize"""
 

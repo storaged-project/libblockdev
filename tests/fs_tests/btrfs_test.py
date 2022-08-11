@@ -1,12 +1,20 @@
 import tempfile
 
-from .fs_test import FSTestCase, mounted
+from .fs_test import FSTestCase, FSNoDevTestCase, mounted
 
 import overrides_hack
 import utils
 from utils import TestTags, tag_test
 
 from gi.repository import BlockDev, GLib
+
+
+class BtrfsNoDevTestCase(FSNoDevTestCase):
+    def setUp(self):
+        if not self.btrfs_avail:
+            self.skipTest("skipping Btrfs: not available")
+
+        super(BtrfsNoDevTestCase, self).setUp()
 
 
 class BtrfsTestCase(FSTestCase):
@@ -22,7 +30,7 @@ class BtrfsTestCase(FSTestCase):
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="btrfs_test")
 
 
-class BtrfsTestFeatures(BtrfsTestCase):
+class BtrfsTestFeatures(BtrfsNoDevTestCase):
 
     def test_xfs_features(self):
         features = BlockDev.fs_features("btrfs")

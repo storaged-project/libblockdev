@@ -2,13 +2,17 @@ import tempfile
 
 from packaging.version import Version
 
-from .fs_test import FSTestCase, mounted, check_output
+from .fs_test import FSTestCase, FSNoDevTestCase, mounted, check_output
 
 import overrides_hack
 import utils
 from utils import TestTags, tag_test
 
 from gi.repository import BlockDev, GLib
+
+
+class XfsNoDevTestCase(FSNoDevTestCase):
+    pass
 
 
 class XfsTestCase(FSTestCase):
@@ -18,7 +22,7 @@ class XfsTestCase(FSTestCase):
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="xfs_test")
 
 
-class XfsTestAvailability(XfsTestCase):
+class XfsTestAvailability(XfsNoDevTestCase):
 
     def setUp(self):
         super(XfsTestAvailability, self).setUp()
@@ -74,7 +78,7 @@ class XfsTestAvailability(XfsTestCase):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.XFS, BlockDev.FSTechMode.RESIZE)
 
 
-class XfsTestFeatures(XfsTestCase):
+class XfsTestFeatures(XfsNoDevTestCase):
 
     def test_xfs_features(self):
         features = BlockDev.fs_features("xfs")

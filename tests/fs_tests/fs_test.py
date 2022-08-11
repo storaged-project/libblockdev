@@ -34,10 +34,9 @@ def check_output(args, ignore_retcode=True):
             raise
 
 
-class FSTestCase(unittest.TestCase):
+class FSNoDevTestCase(unittest.TestCase):
 
     requested_plugins = BlockDev.plugin_specs_from_names(("fs", "loop"))
-    loop_size = 150 * 1024**2
 
     @classmethod
     def setUpClass(cls):
@@ -97,6 +96,11 @@ class FSTestCase(unittest.TestCase):
                                                       BlockDev.FSTechMode.SET_LABEL)
         except Exception :
             cls.udf_avail = False
+
+
+class FSTestCase(FSNoDevTestCase):
+
+    loop_size = 150 * 1024**2
 
     def setUp(self):
         self.addCleanup(self._clean_up)

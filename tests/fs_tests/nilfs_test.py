@@ -1,12 +1,20 @@
 import tempfile
 
-from .fs_test import FSTestCase, mounted
+from .fs_test import FSTestCase, FSNoDevTestCase, mounted
 
 import overrides_hack
 import utils
 from utils import TestTags, tag_test
 
 from gi.repository import BlockDev, GLib
+
+
+class NILFS2NoDevTestCase(FSNoDevTestCase):
+    def setUp(self):
+        if not self.nilfs2_avail:
+            self.skipTest("skipping NILFS2: not available")
+
+        super(NILFS2NoDevTestCase, self).setUp()
 
 
 class NILFS2TestCase(FSTestCase):
@@ -19,7 +27,7 @@ class NILFS2TestCase(FSTestCase):
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="nilfs2_test")
 
 
-class NILFS2TestAvailability(NILFS2TestCase):
+class NILFS2TestAvailability(NILFS2NoDevTestCase):
 
     def setUp(self):
         super(NILFS2TestAvailability, self).setUp()
@@ -66,7 +74,7 @@ class NILFS2TestAvailability(NILFS2TestCase):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2, BlockDev.FSTechMode.RESIZE)
 
 
-class NILFS2TestFeatures(NILFS2TestCase):
+class NILFS2TestFeatures(NILFS2NoDevTestCase):
 
     def test_vfat_features(self):
         features = BlockDev.fs_features("nilfs2")

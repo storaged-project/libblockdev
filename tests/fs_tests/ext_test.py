@@ -1,12 +1,16 @@
 import tempfile
 
-from .fs_test import FSTestCase, mounted
+from .fs_test import FSTestCase, FSNoDevTestCase, mounted
 
 import overrides_hack
 import utils
 from utils import TestTags, tag_test
 
 from gi.repository import BlockDev, GLib
+
+
+class ExtNoDevTestCase(FSNoDevTestCase):
+    pass
 
 
 class ExtTestCase(FSTestCase):
@@ -16,7 +20,7 @@ class ExtTestCase(FSTestCase):
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="ext_test")
 
 
-class ExtTestAvailability(ExtTestCase):
+class ExtTestAvailability(ExtNoDevTestCase):
 
     def setUp(self):
         super(ExtTestAvailability, self).setUp()
@@ -86,7 +90,7 @@ class ExtTestAvailability(ExtTestCase):
         self._test_ext_available(tech=BlockDev.FSTech.EXT4)
 
 
-class ExtTestFeatures(ExtTestCase):
+class ExtTestFeatures(ExtNoDevTestCase):
 
     def _test_ext_features(self, ext_version):
         features = BlockDev.fs_features(ext_version)
