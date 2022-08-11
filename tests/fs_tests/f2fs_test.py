@@ -3,13 +3,39 @@ import re
 
 from packaging.version import Version
 
-from .fs_test import FSTestCase, mounted
+from .fs_test import FSTestCase, FSNoDevTestCase, mounted
 
 import overrides_hack
 import utils
 from utils import TestTags, tag_test
 
 from gi.repository import BlockDev, GLib
+
+
+def _check_fsck_f2fs_version():
+    # if it can run -V to get version it can do the check
+    ret, _out, _err = utils.run_command("fsck.f2fs -V")
+    return ret == 0
+
+
+def _can_resize_f2fs():
+    ret, out, _err = utils.run_command("resize.f2fs -V")
+    if ret != 0:
+        # we can't even check the version
+        return False
+
+    m = re.search(r"resize.f2fs ([\d\.]+)", out)
+    if not m or len(m.groups()) != 1:
+        raise RuntimeError("Failed to determine f2fs version from: %s" % out)
+    return Version(m.groups()[0]) >= Version("1.12.0")
+
+
+class F2FSNoDevTestCase(FSNoDevTestCase):
+    def setUp(self):
+        if not self.f2fs_avail:
+            self.skipTest("skipping F2FS: not available")
+
+        super(F2FSNoDevTestCase, self).setUp()
 
 
 class F2FSTestCase(FSTestCase):
@@ -21,24 +47,8 @@ class F2FSTestCase(FSTestCase):
 
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="f2fs_test")
 
-    def _can_resize_f2fs(self):
-        ret, out, _err = utils.run_command("resize.f2fs -V")
-        if ret != 0:
-            # we can't even check the version
-            return False
 
-        m = re.search(r"resize.f2fs ([\d\.]+)", out)
-        if not m or len(m.groups()) != 1:
-            raise RuntimeError("Failed to determine f2fs version from: %s" % out)
-        return Version(m.groups()[0]) >= Version("1.12.0")
-
-    def _check_fsck_f2fs_version(self):
-        # if it can run -V to get version it can do the check
-        ret, _out, _err = utils.run_command("fsck.f2fs -V")
-        return ret == 0
-
-
-class F2FSTestAvailability(F2FSTestCase):
+class F2FSTestAvailability(F2FSNoDevTestCase):
 
     def setUp(self):
         super(F2FSTestAvailability, self).setUp()
@@ -60,13 +70,13 @@ class F2FSTestAvailability(F2FSTestCase):
         with self.assertRaisesRegex(GLib.GError, "doesn't support setting label"):
             BlockDev.fs_is_tech_avail(BlockDev.FSTech.F2FS, BlockDev.FSTechMode.SET_LABEL)
 
-        if self._check_fsck_f2fs_version():
+        if _check_fsck_f2fs_version():
             available = BlockDev.fs_is_tech_avail(BlockDev.FSTech.F2FS,
                                                   BlockDev.FSTechMode.CHECK |
                                                   BlockDev.FSTechMode.REPAIR)
             self.assertTrue(available)
 
-        if self._can_resize_f2fs():
+        if _can_resize_f2fs():
             available = BlockDev.fs_is_tech_avail(BlockDev.FSTech.F2FS,
                                                   BlockDev.FSTechMode.RESIZE)
             self.assertTrue(available)
@@ -107,7 +117,7 @@ class F2FSTestAvailability(F2FSTestCase):
             with self.assertRaisesRegex(GLib.GError, "Too low version of fsck.f2fs. At least 1.11.0 required."):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.F2FS, BlockDev.FSTechMode.CHECK)
 
-class F2FSTestFeatures(F2FSTestCase):
+class F2FSTestFeatures(F2FSNoDevTestCase):
 
     def test_xfs_features(self):
         features = BlockDev.fs_features("f2fs")
@@ -214,7 +224,7 @@ class F2FSTestCheck(F2FSTestCase):
         succ = BlockDev.fs_f2fs_mkfs(self.loop_dev, None)
         self.assertTrue(succ)
 
-        if not self._check_fsck_f2fs_version():
+        if not _check_fsck_f2fs_version():
             with self.assertRaisesRegex(GLib.GError, "Too low version of fsck.f2fs. At least 1.11.0 required."):
                 BlockDev.fs_f2fs_check(self.loop_dev, None)
         else:
@@ -260,7 +270,7 @@ class F2FSResize(F2FSTestCase):
             BlockDev.fs_f2fs_resize(self.loop_dev, 100 * 1024**2 / 512, False)
 
         # if we can't shrink we'll just check it returns some sane error
-        if not self._can_resize_f2fs():
+        if not _can_resize_f2fs():
             with self.assertRaisesRegex(GLib.GError, "Too low version of resize.f2fs. At least 1.12.0 required."):
                 BlockDev.fs_f2fs_resize(self.loop_dev, 100 * 1024**2 / 512, True)
             return

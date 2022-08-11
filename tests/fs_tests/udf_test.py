@@ -1,12 +1,20 @@
 import tempfile
 
-from .fs_test import FSTestCase, mounted
+from .fs_test import FSTestCase, FSNoDevTestCase, mounted
 
 import overrides_hack
 import utils
 from utils import TestTags, tag_test
 
 from gi.repository import BlockDev, GLib
+
+
+class UdfNoDevTestCase(FSNoDevTestCase):
+    def setUp(self):
+        if not self.udf_avail:
+            self.skipTest("skipping UDF: not available")
+
+        super(UdfNoDevTestCase, self).setUp()
 
 
 class UdfTestCase(FSTestCase):
@@ -20,7 +28,7 @@ class UdfTestCase(FSTestCase):
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="udf_test")
 
 
-class UdfTestFeatures(UdfTestCase):
+class UdfTestFeatures(UdfNoDevTestCase):
 
     def test_xfs_features(self):
         features = BlockDev.fs_features("udf")

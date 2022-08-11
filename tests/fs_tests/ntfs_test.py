@@ -1,12 +1,20 @@
 import tempfile
 import overrides_hack
 
-from .fs_test import FSTestCase, mounted
+from .fs_test import FSTestCase, FSNoDevTestCase, mounted
 
 import utils
 from utils import TestTags, tag_test
 
 from gi.repository import BlockDev, GLib
+
+
+class NTFSNoDevTestCase(FSNoDevTestCase):
+    def setUp(self):
+        if not self.ntfs_avail:
+            self.skipTest("skipping NTFS: not available")
+
+        super(NTFSNoDevTestCase, self).setUp()
 
 
 class NTFSTestCase(FSTestCase):
@@ -19,7 +27,7 @@ class NTFSTestCase(FSTestCase):
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="ntfs_test")
 
 
-class NTFSTestAvailability(NTFSTestCase):
+class NTFSTestAvailability(NTFSNoDevTestCase):
 
     def setUp(self):
         super(NTFSTestAvailability, self).setUp()
@@ -75,7 +83,7 @@ class NTFSTestAvailability(NTFSTestCase):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS, BlockDev.FSTechMode.SET_UUID)
 
 
-class NTFSTestFeatures(NTFSTestCase):
+class NTFSTestFeatures(NTFSNoDevTestCase):
 
     def test_vfat_features(self):
         features = BlockDev.fs_features("ntfs")

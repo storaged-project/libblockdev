@@ -3,13 +3,17 @@ import tempfile
 
 from packaging.version import Version
 
-from .fs_test import FSTestCase, mounted
+from .fs_test import FSTestCase, FSNoDevTestCase, mounted
 
 import overrides_hack
 import utils
 from utils import TestTags, tag_test
 
 from gi.repository import BlockDev, GLib
+
+
+class VfatNoDevTestCase(FSNoDevTestCase):
+    pass
 
 
 class VfatTestCase(FSTestCase):
@@ -32,7 +36,7 @@ class VfatTestCase(FSTestCase):
         return Version(m.groups()[0])
 
 
-class VfatTestAvailability(VfatTestCase):
+class VfatTestAvailability(VfatNoDevTestCase):
 
     def setUp(self):
         super(VfatTestAvailability, self).setUp()
@@ -85,7 +89,7 @@ class VfatTestAvailability(VfatTestCase):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.RESIZE)
 
 
-class VfatTestFeatures(VfatTestCase):
+class VfatTestFeatures(VfatNoDevTestCase):
 
     def test_vfat_features(self):
         features = BlockDev.fs_features("vfat")
