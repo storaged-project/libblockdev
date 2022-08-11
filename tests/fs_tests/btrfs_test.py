@@ -32,7 +32,7 @@ class BtrfsTestCase(FSTestCase):
 
 class BtrfsTestFeatures(BtrfsNoDevTestCase):
 
-    def test_xfs_features(self):
+    def test_btrfs_features(self):
         features = BlockDev.fs_features("btrfs")
         self.assertIsNotNone(features)
 

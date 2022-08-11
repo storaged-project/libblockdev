@@ -30,7 +30,7 @@ class UdfTestCase(FSTestCase):
 
 class UdfTestFeatures(UdfNoDevTestCase):
 
-    def test_xfs_features(self):
+    def test_udf_features(self):
         features = BlockDev.fs_features("udf")
         self.assertIsNotNone(features)
 
