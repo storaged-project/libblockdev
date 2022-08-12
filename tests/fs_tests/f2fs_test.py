@@ -119,7 +119,7 @@ class F2FSTestAvailability(F2FSNoDevTestCase):
 
 class F2FSTestFeatures(F2FSNoDevTestCase):
 
-    def test_xfs_features(self):
+    def test_f2fs_features(self):
         features = BlockDev.fs_features("f2fs")
         self.assertIsNotNone(features)
 

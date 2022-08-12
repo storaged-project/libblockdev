@@ -85,7 +85,7 @@ class NTFSTestAvailability(NTFSNoDevTestCase):
 
 class NTFSTestFeatures(NTFSNoDevTestCase):
 
-    def test_vfat_features(self):
+    def test_ntfs_features(self):
         features = BlockDev.fs_features("ntfs")
         self.assertIsNotNone(features)
 

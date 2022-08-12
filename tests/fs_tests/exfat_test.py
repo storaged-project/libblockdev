@@ -79,7 +79,7 @@ class ExfatTestAvailability(ExfatNoDevTestCase):
 
 class ExfatTestFeatures(ExfatNoDevTestCase):
 
-    def test_vfat_features(self):
+    def test_exfat_features(self):
         features = BlockDev.fs_features("exfat")
         self.assertIsNotNone(features)
 
