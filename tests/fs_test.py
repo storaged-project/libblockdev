@@ -56,6 +56,7 @@ class FSTestCase(unittest.TestCase):
 
     requested_plugins = BlockDev.plugin_specs_from_names(("fs", "loop"))
     _vfat_version = _get_dosfstools_version()
+    _loop_size = 100 * 1024**2
 
     @classmethod
     def setUpClass(cls):
@@ -77,8 +78,8 @@ class FSTestCase(unittest.TestCase):
 
     def setUp(self):
         self.addCleanup(self._clean_up)
-        self.dev_file = utils.create_sparse_tempfile("fs_test", 100 * 1024**2)
-        self.dev_file2 = utils.create_sparse_tempfile("fs_test", 100 * 1024**2)
+        self.dev_file = utils.create_sparse_tempfile("fs_test", self._loop_size)
+        self.dev_file2 = utils.create_sparse_tempfile("fs_test", self._loop_size)
         try:
             self.loop_dev = utils.create_lio_device(self.dev_file)
         except RuntimeError as e:
@@ -572,6 +573,8 @@ class ExtResize(FSTestCase):
                               resize_function=BlockDev.fs_ext4_resize)
 
 class XfsTestMkfs(FSTestCase):
+    _loop_size = 500 * 1024**2
+
     @tag_test(TestTags.CORE)
     def test_xfs_mkfs(self):
         """Verify that it is possible to create a new xfs file system"""
@@ -593,6 +596,8 @@ class XfsTestMkfs(FSTestCase):
         BlockDev.fs_wipe(self.loop_dev, True)
 
 class XfsTestWipe(FSTestCase):
+    _loop_size = 500 * 1024**2
+
     def test_xfs_wipe(self):
         """Verify that it is possible to wipe an xfs file system"""
 
@@ -623,6 +628,8 @@ class XfsTestWipe(FSTestCase):
         BlockDev.fs_wipe(self.loop_dev, True)
 
 class XfsTestCheck(FSTestCase):
+    _loop_size = 500 * 1024**2
+
     def test_xfs_check(self):
         """Verify that it is possible to check an xfs file system"""
 
@@ -642,6 +649,8 @@ class XfsTestCheck(FSTestCase):
         self.assertTrue(succ)
 
 class XfsTestRepair(FSTestCase):
+    _loop_size = 500 * 1024**2
+
     def test_xfs_repair(self):
         """Verify that it is possible to repair an xfs file system"""
 
@@ -659,6 +668,8 @@ class XfsTestRepair(FSTestCase):
         self.assertTrue(succ)
 
 class XfsGetInfo(FSTestCase):
+    _loop_size = 500 * 1024**2
+
     @tag_test(TestTags.CORE)
     def test_xfs_get_info(self):
         """Verify that it is possible to get info about an xfs file system"""
@@ -673,12 +684,14 @@ class XfsGetInfo(FSTestCase):
             fi = BlockDev.fs_xfs_get_info(self.loop_dev)
 
         self.assertEqual(fi.block_size, 4096)
-        self.assertEqual(fi.block_count, 100 * 1024**2 / 4096)
+        self.assertEqual(fi.block_count, 500 * 1024**2 / 4096)
         self.assertEqual(fi.label, "")
         # should be an non-empty string
         self.assertTrue(fi.uuid)
 
 class XfsSetLabel(FSTestCase):
+    _loop_size = 500 * 1024**2
+
     def test_xfs_set_label(self):
         """Verify that it is possible to set label of an xfs file system"""
 
@@ -712,6 +725,8 @@ class XfsSetLabel(FSTestCase):
         self.assertEqual(fi.label, "")
 
 class XfsResize(FSTestCase):
+    _loop_size = 500 * 1024**2
+
     def _destroy_lvm(self):
         run("vgremove --yes libbd_fs_tests >/dev/null 2>&1")
         run("pvremove --yes %s >/dev/null 2>&1" % self.loop_dev)
@@ -721,7 +736,7 @@ class XfsResize(FSTestCase):
 
         run("pvcreate -ff -y %s >/dev/null 2>&1" % self.loop_dev)
         run("vgcreate -s10M libbd_fs_tests %s >/dev/null 2>&1" % self.loop_dev)
-        run("lvcreate -n xfs_test -L50M libbd_fs_tests >/dev/null 2>&1")
+        run("lvcreate -n xfs_test -L350M libbd_fs_tests >/dev/null 2>&1")
         self.addCleanup(self._destroy_lvm)
         lv = "/dev/libbd_fs_tests/xfs_test"
 
@@ -731,7 +746,7 @@ class XfsResize(FSTestCase):
         with mounted(lv, self.mount_dir):
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
-        self.assertEqual(fi.block_size * fi.block_count, 50 * 1024**2)
+        self.assertEqual(fi.block_size * fi.block_count, 350 * 1024**2)
 
         # no change, nothing should happen
         with mounted(lv, self.mount_dir):
@@ -741,7 +756,7 @@ class XfsResize(FSTestCase):
         with mounted(lv, self.mount_dir):
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
-        self.assertEqual(fi.block_size * fi.block_count, 50 * 1024**2)
+        self.assertEqual(fi.block_size * fi.block_count, 350 * 1024**2)
 
         # (still) impossible to shrink an XFS file system
         xfs_version = _get_xfs_version()
@@ -750,7 +765,7 @@ class XfsResize(FSTestCase):
                 with self.assertRaises(GLib.GError):
                     succ = BlockDev.fs_resize(lv, 40 * 1024**2)
 
-        run("lvresize -L70M libbd_fs_tests/xfs_test >/dev/null 2>&1")
+        run("lvresize -L400M libbd_fs_tests/xfs_test >/dev/null 2>&1")
         # should grow
         with mounted(lv, self.mount_dir):
             succ = BlockDev.fs_xfs_resize(self.mount_dir, 0, None)
@@ -758,26 +773,26 @@ class XfsResize(FSTestCase):
         with mounted(lv, self.mount_dir):
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
-        self.assertEqual(fi.block_size * fi.block_count, 70 * 1024**2)
+        self.assertEqual(fi.block_size * fi.block_count, 400 * 1024**2)
 
-        run("lvresize -L90M libbd_fs_tests/xfs_test >/dev/null 2>&1")
-        # should grow just to 80 MiB
+        run("lvresize -L450M libbd_fs_tests/xfs_test >/dev/null 2>&1")
+        # should grow just to 430 MiB
         with mounted(lv, self.mount_dir):
-            succ = BlockDev.fs_xfs_resize(self.mount_dir, 80 * 1024**2 / fi.block_size, None)
+            succ = BlockDev.fs_xfs_resize(self.mount_dir, 430 * 1024**2 / fi.block_size, None)
         self.assertTrue(succ)
         with mounted(lv, self.mount_dir):
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
-        self.assertEqual(fi.block_size * fi.block_count, 80 * 1024**2)
+        self.assertEqual(fi.block_size * fi.block_count, 430 * 1024**2)
 
-        # should grow to 90 MiB
+        # should grow to 450 MiB
         with mounted(lv, self.mount_dir):
             succ = BlockDev.fs_xfs_resize(self.mount_dir, 0, None)
         self.assertTrue(succ)
         with mounted(lv, self.mount_dir):
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
-        self.assertEqual(fi.block_size * fi.block_count, 90 * 1024**2)
+        self.assertEqual(fi.block_size * fi.block_count, 450 * 1024**2)
 
 class VfatTestMkfs(FSTestCase):
     def test_vfat_mkfs(self):
@@ -1277,6 +1292,7 @@ class MountTest(FSTestCase):
 
 class GenericCheck(FSTestCase):
     log = []
+    _loop_size = 500 * 1024**2
 
     def _test_generic_check(self, mkfs_function):
         # clean the device
@@ -1326,6 +1342,8 @@ class GenericCheck(FSTestCase):
         self._test_generic_check(mkfs_function=BlockDev.fs_ntfs_mkfs)
 
 class GenericRepair(FSTestCase):
+    _loop_size = 500 * 1024**2
+
     def _test_generic_repair(self, mkfs_function):
         # clean the device
         succ = BlockDev.fs_clean(self.loop_dev)
@@ -1352,6 +1370,8 @@ class GenericRepair(FSTestCase):
         self._test_generic_repair(mkfs_function=BlockDev.fs_ntfs_mkfs)
 
 class GenericSetLabel(FSTestCase):
+    _loop_size = 500 * 1024**2
+
     def _test_generic_set_label(self, mkfs_function):
         # clean the device
         succ = BlockDev.fs_clean(self.loop_dev)
@@ -1378,6 +1398,8 @@ class GenericSetLabel(FSTestCase):
         self._test_generic_set_label(mkfs_function=BlockDev.fs_ntfs_mkfs)
 
 class GenericResize(FSTestCase):
+    _loop_size = 500 * 1024**2
+
     def _test_generic_resize(self, mkfs_function, fs_info_func=None, info_size_func=None):
         # clean the device
         succ = BlockDev.fs_clean(self.loop_dev)
@@ -1462,7 +1484,7 @@ class GenericResize(FSTestCase):
 
         run("pvcreate -ff -y %s >/dev/null 2>&1" % self.loop_dev)
         run("vgcreate -s10M libbd_fs_tests %s >/dev/null 2>&1" % self.loop_dev)
-        run("lvcreate -n xfs_test -L50M libbd_fs_tests >/dev/null 2>&1")
+        run("lvcreate -n xfs_test -L350M libbd_fs_tests >/dev/null 2>&1")
         self.addCleanup(self._destroy_lvm)
 
         lv = "/dev/libbd_fs_tests/xfs_test"
@@ -1476,7 +1498,7 @@ class GenericResize(FSTestCase):
         with mounted(lv, self.mount_dir):
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
-        self.assertEqual(fi.block_size * fi.block_count, 50 * 1024**2)
+        self.assertEqual(fi.block_size * fi.block_count, 350 * 1024**2)
 
         # no change, nothing should happen
         with mounted(lv, self.mount_dir):
@@ -1486,7 +1508,7 @@ class GenericResize(FSTestCase):
         with mounted(lv, self.mount_dir):
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
-        self.assertEqual(fi.block_size * fi.block_count, 50 * 1024**2)
+        self.assertEqual(fi.block_size * fi.block_count, 350 * 1024**2)
 
         # (still) impossible to shrink an XFS file system
         xfs_version = _get_xfs_version()
@@ -1495,7 +1517,7 @@ class GenericResize(FSTestCase):
                 with self.assertRaises(GLib.GError):
                     succ = BlockDev.fs_resize(lv, 40 * 1024**2)
 
-        run("lvresize -L70M libbd_fs_tests/xfs_test >/dev/null 2>&1")
+        run("lvresize -L400M libbd_fs_tests/xfs_test >/dev/null 2>&1")
         # should grow
         with mounted(lv, self.mount_dir):
             succ = BlockDev.fs_resize(lv, 0)
@@ -1503,29 +1525,30 @@ class GenericResize(FSTestCase):
         with mounted(lv, self.mount_dir):
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
-        self.assertEqual(fi.block_size * fi.block_count, 70 * 1024**2)
+        self.assertEqual(fi.block_size * fi.block_count, 400 * 1024**2)
 
-        run("lvresize -L90M libbd_fs_tests/xfs_test >/dev/null 2>&1")
-        # should grow just to 80 MiB
+        run("lvresize -L450M libbd_fs_tests/xfs_test >/dev/null 2>&1")
+        # should grow just to 430 MiB
         with mounted(lv, self.mount_dir):
-            succ = BlockDev.fs_resize(lv, 80 * 1024**2)
+            succ = BlockDev.fs_resize(lv, 430 * 1024**2)
         self.assertTrue(succ)
         with mounted(lv, self.mount_dir):
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
-        self.assertEqual(fi.block_size * fi.block_count, 80 * 1024**2)
+        self.assertEqual(fi.block_size * fi.block_count, 430 * 1024**2)
 
-        # should grow to 90 MiB
+        # should grow to 450 MiB
         with mounted(lv, self.mount_dir):
             succ = BlockDev.fs_resize(lv, 0)
         self.assertTrue(succ)
         with mounted(lv, self.mount_dir):
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
-        self.assertEqual(fi.block_size * fi.block_count, 90 * 1024**2)
+        self.assertEqual(fi.block_size * fi.block_count, 450 * 1024**2)
 
 
 class FSFreezeTest(FSTestCase):
+    _loop_size = 500 * 1024**2
 
     def _clean_up(self):
         try:
