@@ -452,6 +452,15 @@ class GenericMkfs(GenericTestCase):
         label = "LABEL"
         self._test_ext_generic_mkfs("udf", BlockDev.fs_udf_get_info, label, None)
 
+    def test_generic_mkfs_no_options(self):
+        """ Test that fs_mkfs works without options specified """
+        succ = BlockDev.fs_mkfs(self.loop_dev, "ext2")
+        self.assertTrue(succ)
+
+        info = BlockDev.fs_ext2_get_info(self.loop_dev)
+        self.assertIsNotNone(info)
+        self.assertFalse(info.label)  # label should be empty by default
+
     def test_can_mkfs(self):
         """ Test checking whether mkfs is supported """
         # lets pick a filesystem that supports everything and is always available
