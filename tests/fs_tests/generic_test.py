@@ -461,6 +461,12 @@ class GenericMkfs(GenericTestCase):
         self.assertIsNotNone(info)
         self.assertFalse(info.label)  # label should be empty by default
 
+    def test_fail_generic_mkfs(self):
+        """ Test that generic mkfs fails correctly with unknown/unsupported filesystem """
+
+        with self.assertRaisesRegex(GLib.GError, "Filesystem 'non-existing-fs' is not supported"):
+            BlockDev.fs_mkfs(self.loop_dev, "non-existing-fs")
+
     def test_can_mkfs(self):
         """ Test checking whether mkfs is supported """
         # lets pick a filesystem that supports everything and is always available
