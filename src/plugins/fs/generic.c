@@ -249,7 +249,7 @@ static const BDFSInfo fs_info[BD_FS_LAST_FS] = {
       .uuid_util = NULL },
     /* NILFS2 */
     { .type = "nilfs2",
-      .mkfs_util = "mkfs.nilfs",
+      .mkfs_util = "mkfs.nilfs2",
       .mkfs_options = fs_features[BD_FS_TECH_NILFS2].mkfs,
       .check_util = NULL,
       .repair_util = NULL,
