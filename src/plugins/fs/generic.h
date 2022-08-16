@@ -31,6 +31,7 @@ gboolean bd_fs_resize (const gchar *device, guint64 new_size, const gchar *fstyp
 gboolean bd_fs_repair (const gchar *device, const gchar *fstype, GError **error);
 gboolean bd_fs_check (const gchar *device, const gchar *fstype, GError **error);
 gboolean bd_fs_set_label (const gchar *device, const gchar *label, const gchar *fstype, GError **error);
+gboolean bd_fs_check_label (const gchar *fstype, const gchar *label, GError **error);
 gboolean bd_fs_set_uuid (const gchar *device, const gchar *uuid, const gchar *fstype, GError **error);
 guint64 bd_fs_get_size (const gchar *device, const gchar *fstype, GError **error);
 guint64 bd_fs_get_free_space (const gchar *device, const gchar *fstype, GError **error);

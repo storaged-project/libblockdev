@@ -619,6 +619,9 @@ class GenericSetLabel(GenericTestCase):
         succ = mkfs_function(self.loop_dev, None)
         self.assertTrue(succ)
 
+        succ = BlockDev.fs_check_label(fstype, "new_label")
+        self.assertTrue(succ)
+
         # set label (expected to succeed)
         succ = BlockDev.fs_set_label(self.loop_dev, "new_label")
         self.assertTrue(succ)
