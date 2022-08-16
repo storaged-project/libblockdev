@@ -696,6 +696,10 @@ class GenericSetUUID(GenericTestCase):
         succ = BlockDev.fs_set_uuid(self.loop_dev, None, fstype)
         self.assertTrue(succ)
 
+        # check uuid format
+        succ = BlockDev.fs_check_uuid(fstype, test_uuid)
+        self.assertTrue(succ)
+
     def test_ext4_generic_set_uuid(self):
         """Test generic set_uuid function with an ext4 file system"""
         self._test_generic_set_uuid(mkfs_function=BlockDev.fs_ext4_mkfs, fstype="ext4")

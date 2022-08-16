@@ -48,6 +48,7 @@ typedef enum {
     BD_FS_LABEL_CHECK,
     BD_FS_GET_SIZE,
     BD_FS_UUID,
+    BD_FS_UUID_CHECK,
     BD_FS_GET_FREE_SPACE,
 } BDFsOpType;
 
@@ -912,6 +913,8 @@ static gboolean device_operation (const gchar *device, const gchar *fstype, BDFs
                 return bd_fs_ext4_check_label (label, error);
             case BD_FS_UUID:
                 return bd_fs_ext4_set_uuid (device, uuid, error);
+            case BD_FS_UUID_CHECK:
+                return bd_fs_ext4_check_uuid (uuid, error);
             default:
                 g_assert_not_reached ();
         }
@@ -929,6 +932,8 @@ static gboolean device_operation (const gchar *device, const gchar *fstype, BDFs
                 return bd_fs_xfs_check_label (label, error);
             case BD_FS_UUID:
                 return bd_fs_xfs_set_uuid (device, uuid, error);
+            case BD_FS_UUID_CHECK:
+                return bd_fs_xfs_check_uuid (uuid, error);
             default:
                 g_assert_not_reached ();
         }
@@ -945,6 +950,8 @@ static gboolean device_operation (const gchar *device, const gchar *fstype, BDFs
             case BD_FS_LABEL:
                 return bd_fs_vfat_set_label (device, label, error);
             case BD_FS_UUID:
+                break;
+            case BD_FS_UUID_CHECK:
                 break;
             default:
                 g_assert_not_reached ();
@@ -963,6 +970,8 @@ static gboolean device_operation (const gchar *device, const gchar *fstype, BDFs
                 return bd_fs_ntfs_set_label (device, label, error);
             case BD_FS_UUID:
                 return bd_fs_ntfs_set_uuid (device, uuid, error);
+            case BD_FS_UUID_CHECK:
+                return bd_fs_ntfs_check_uuid (uuid, error);
             default:
                 g_assert_not_reached ();
         }
@@ -979,6 +988,8 @@ static gboolean device_operation (const gchar *device, const gchar *fstype, BDFs
             case BD_FS_LABEL_CHECK:
                 break;
             case BD_FS_UUID:
+                break;
+            case BD_FS_UUID_CHECK:
                 break;
             default:
                 g_assert_not_reached ();
@@ -997,6 +1008,8 @@ static gboolean device_operation (const gchar *device, const gchar *fstype, BDFs
                 return bd_fs_nilfs2_check_label (label, error);
             case BD_FS_UUID:
                 return bd_fs_nilfs2_set_uuid (device, uuid, error);
+            case BD_FS_UUID_CHECK:
+                return bd_fs_nilfs2_check_uuid (uuid, error);
             default:
                 g_assert_not_reached ();
         }
@@ -1013,6 +1026,8 @@ static gboolean device_operation (const gchar *device, const gchar *fstype, BDFs
             case BD_FS_LABEL_CHECK:
                 return bd_fs_exfat_check_label (label, error);
             case BD_FS_UUID:
+                break;
+            case BD_FS_UUID_CHECK:
                 break;
             default:
                 g_assert_not_reached ();
@@ -1031,6 +1046,8 @@ static gboolean device_operation (const gchar *device, const gchar *fstype, BDFs
                 return bd_fs_btrfs_check_label (label, error);
             case BD_FS_UUID:
                 return bd_fs_btrfs_set_uuid (device, uuid, error);
+            case BD_FS_UUID_CHECK:
+                return bd_fs_btrfs_check_uuid (uuid, error);
             default:
                 g_assert_not_reached ();
         }
@@ -1048,6 +1065,8 @@ static gboolean device_operation (const gchar *device, const gchar *fstype, BDFs
                 return bd_fs_udf_check_label (label, error);
             case BD_FS_UUID:
                 return bd_fs_udf_set_uuid (device, uuid, error);
+            case BD_FS_UUID_CHECK:
+                return bd_fs_udf_check_uuid (uuid, error);
             default:
                 g_assert_not_reached ();
         }
@@ -1070,6 +1089,9 @@ static gboolean device_operation (const gchar *device, const gchar *fstype, BDFs
             break;
         case BD_FS_UUID:
             op_name = "Setting UUID of";
+            break;
+        case BD_FS_UUID_CHECK:
+            op_name = "Checking UUID format for";
             break;
         default:
             g_assert_not_reached ();
@@ -1177,6 +1199,30 @@ gboolean bd_fs_check_label (const gchar *fstype, const gchar *label, GError **er
  */
 gboolean bd_fs_set_label (const gchar *device, const gchar *label, const gchar *fstype, GError **error) {
     return device_operation (device, fstype, BD_FS_LABEL, 0, label, NULL, error);
+}
+
+/**
+ * bd_fs_check_uuid:
+ * @fstype: the filesystem type to check @uuid for
+ * @uuid: uuid to check
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * This calls other fs check uuid functions from this plugin based on the provided
+ * filesystem (e.g. bd_fs_xfs_check_uuid for XFS). This function will return
+ * an error for unknown/unsupported filesystems.
+ *
+ * Returns: whether @uuid is a valid UUID for the @fstype file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_check_uuid (const gchar *fstype, const gchar *uuid, GError **error) {
+    if (!fstype) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
+                     "Filesystem type must be specified to check UUID format");
+        return FALSE;
+    }
+    return device_operation (NULL, fstype, BD_FS_UUID_CHECK, 0, NULL, uuid, error);
 }
 
 /**
