@@ -156,7 +156,7 @@ class FSTestCase(FSNoDevTestCase):
         utils.run("vgremove --yes %s >/dev/null 2>&1" % vgname)
         utils.run("pvremove --yes %s >/dev/null 2>&1" % self.loop_dev)
 
-    def _setup_lvm(self, vgname, lvname):
+    def _setup_lvm(self, vgname, lvname, lvsize="50M"):
         ret, _out, err = utils.run_command("pvcreate -ff -y %s" % self.loop_dev)
         if ret != 0:
             raise RuntimeError("Failed to create PV for fs tests: %s" % err)
@@ -166,7 +166,7 @@ class FSTestCase(FSNoDevTestCase):
             raise RuntimeError("Failed to create VG for fs tests: %s" % err)
         self.addCleanup(self._destroy_lvm, vgname)
 
-        ret, _out, err = utils.run_command("lvcreate -n %s -L50M %s" % (lvname, vgname))
+        ret, _out, err = utils.run_command("lvcreate -n %s -L%s %s" % (lvname, lvsize, vgname))
         if ret != 0:
             raise RuntimeError("Failed to create LV for fs tests: %s" % err)
 

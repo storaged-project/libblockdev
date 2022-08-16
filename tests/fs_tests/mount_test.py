@@ -108,7 +108,7 @@ class MountTestCase(FSTestCase):
 
         backing_file = utils.create_sparse_tempfile("ro_mount", 50 * 1024**2)
         self.addCleanup(os.unlink, backing_file)
-        self.assertTrue(BlockDev.fs_xfs_mkfs(backing_file, None))
+        self.assertTrue(BlockDev.fs_ext2_mkfs(backing_file, None))
 
         succ, dev = BlockDev.loop_setup(backing_file, 0, 0, True, False)
         self.assertTrue(succ)
