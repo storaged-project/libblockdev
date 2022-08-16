@@ -2540,6 +2540,8 @@ typedef enum {
  * @fsck: support for fsck operations (check and repair)
  * @configure: support for changing properties of an existing filesystem
  * @features: other supported features
+ * @partition_id: partition ID used for this filesystem on MSDOS partitions
+ * @partition_type: partition type/GUID used for this filesystem GPT partitions
  */
 typedef struct BDFSFeatures {
     BDFsResizeFlags resize;
@@ -2547,6 +2549,8 @@ typedef struct BDFSFeatures {
     BDFSFsckFlags fsck;
     BDFSConfigureFlags configure;
     BDFSFeatureFlags features;
+    const gchar *partition_id;
+    const gchar *partition_type;
 } BDFSFeatures;
 
 /**
@@ -2566,6 +2570,8 @@ BDFSFeatures* bd_fs_features_copy (BDFSFeatures *data) {
     ret->fsck = data->fsck;
     ret->configure = data->configure;
     ret->features = data->features;
+    ret->partition_id = data->partition_id;
+    ret->partition_type = data->partition_type;
 
     return ret;
 }

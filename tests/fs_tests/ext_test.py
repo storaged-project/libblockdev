@@ -113,6 +113,9 @@ class ExtTestFeatures(ExtNoDevTestCase):
 
         self.assertTrue(features.features & BlockDev.FSFeatureFlags.OWNERS)
 
+        self.assertEqual(features.partition_id, "0x83")
+        self.assertEqual(features.partition_type, "0fc63daf-8483-4772-8e79-3d69d8477de4")
+
     def test_ext2_features(self):
         self._test_ext_features("ext2")
 

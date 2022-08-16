@@ -62,6 +62,8 @@ typedef struct BDFSFeatures {
     BDFSFsckFlags fsck;
     BDFSConfigureFlags configure;
     BDFSFeatureFlags features;
+    const gchar *partition_id;
+    const gchar *partition_type;
 } BDFSFeatures;
 
 const BDFSFeatures* bd_fs_features (const gchar *type, GError **error);

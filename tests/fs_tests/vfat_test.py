@@ -111,6 +111,9 @@ class VfatTestFeatures(VfatNoDevTestCase):
 
         self.assertEqual(features.features, 0)
 
+        self.assertEqual(features.partition_id, "0x0c")
+        self.assertEqual(features.partition_type, "ebd0a0a2-b9e5-4433-87c0-68b6b72699c7")
+
 
 class VfatTestMkfs(VfatTestCase):
     def test_vfat_mkfs(self):
