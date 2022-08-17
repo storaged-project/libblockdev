@@ -116,7 +116,7 @@ def _get_extra(extra, kwargs, cmd_extra=True):
 
 
 class FSMkfsOptions(BlockDev.FSMkfsOptions):
-    def __new__(cls, label="", uuid="", dry_run=False, no_discard=False):
+    def __new__(cls, label=None, uuid=None, dry_run=False, no_discard=False):
         ret = BlockDev.FSMkfsOptions()
         ret.__class__ = cls
 
@@ -402,8 +402,10 @@ __all__.append("fs_mount")
 
 _fs_mkfs = BlockDev.fs_mkfs
 @override(BlockDev.fs_mkfs)
-def fs_mkfs(device, fstype, options=0, extra=None, **kwargs):
+def fs_mkfs(device, fstype, options=None, extra=None, **kwargs):
     extra = _get_extra(extra, kwargs)
+    if options is None:
+        options = FSMkfsOptions()
     return _fs_mkfs(device, fstype, options, extra)
 __all__.append("fs_mkfs")
 
