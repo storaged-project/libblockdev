@@ -140,6 +140,9 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
     if (options->uuid)
         g_ptr_array_add (options_array, bd_extra_arg_new ("-U", options->uuid));
 
+    if (options->dry_run)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-n", ""));
+
     if (options->no_discard)
         g_ptr_array_add (options_array, bd_extra_arg_new ("-K", ""));
 
