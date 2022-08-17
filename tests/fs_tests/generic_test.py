@@ -619,6 +619,9 @@ class GenericSetLabel(GenericTestCase):
         succ = mkfs_function(self.loop_dev, None)
         self.assertTrue(succ)
 
+        succ = BlockDev.fs_check_label(fstype, "new_label")
+        self.assertTrue(succ)
+
         # set label (expected to succeed)
         succ = BlockDev.fs_set_label(self.loop_dev, "new_label")
         self.assertTrue(succ)
@@ -691,6 +694,10 @@ class GenericSetUUID(GenericTestCase):
 
         # set empty/random UUID
         succ = BlockDev.fs_set_uuid(self.loop_dev, None, fstype)
+        self.assertTrue(succ)
+
+        # check uuid format
+        succ = BlockDev.fs_check_uuid(fstype, test_uuid)
         self.assertTrue(succ)
 
     def test_ext4_generic_set_uuid(self):

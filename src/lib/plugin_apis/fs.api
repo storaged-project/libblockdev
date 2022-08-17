@@ -1001,6 +1001,23 @@ gboolean bd_fs_repair (const gchar *device, const gchar *fstype, GError **error)
 gboolean bd_fs_check (const gchar *device, const gchar *fstype, GError **error);
 
 /**
+ * bd_fs_check_label:
+ * @fstype: the filesystem type to check @label for
+ * @label: label to check
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * This calls other fs check label functions from this plugin based on the provided
+ * filesystem (e.g. bd_fs_xfs_check_label for XFS). This function will return
+ * an error for unknown/unsupported filesystems.
+ *
+ * Returns: whether @label is a valid label for the @fstype file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_check_label (const gchar *fstype, const gchar *label, GError **error);
+
+/**
  * bd_fs_set_label:
  * @device: the device with file system to set the label for
  * @label: label to set
@@ -1016,6 +1033,23 @@ gboolean bd_fs_check (const gchar *device, const gchar *fstype, GError **error);
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_SET_LABEL
  */
 gboolean bd_fs_set_label (const gchar *device, const gchar *label, const gchar *fstype, GError **error);
+
+/**
+ * bd_fs_check_uuid:
+ * @fstype: the filesystem type to check @uuid for
+ * @uuid: uuid to check
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * This calls other fs check uuid functions from this plugin based on the provided
+ * filesystem (e.g. bd_fs_xfs_check_uuid for XFS). This function will return
+ * an error for unknown/unsupported filesystems.
+ *
+ * Returns: whether @uuid is a valid UUID for the @fstype file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_check_uuid (const gchar *fstype, const gchar *uuid, GError **error);
 
 /**
  * bd_fs_set_uuid:
