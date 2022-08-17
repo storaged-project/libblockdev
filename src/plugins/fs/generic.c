@@ -490,7 +490,7 @@ gboolean bd_fs_clean (const gchar *device, gboolean force, GError **error) {
         g_clear_error (&l_error);
         return TRUE;
     } else {
-        g_propagate_prefixed_error (error, l_error, "Failed to clean %s:", device);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
   } else
