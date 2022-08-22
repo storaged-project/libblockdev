@@ -39,6 +39,9 @@
 #include "ntfs.h"
 #include "f2fs.h"
 
+#define UNUSED __attribute__((unused))
+
+
 typedef enum {
     BD_FS_MKFS,
     BD_FS_RESIZE,
@@ -294,6 +297,28 @@ static const BDFSInfo fs_info[BD_FS_LAST_FS] = {
       .info_util = "udfinfo",
       .uuid_util = "udflabel" },
 };
+
+/**
+ * bd_fs_supported_filesystems:
+ * @error: (out) (optional): currently unused
+ *
+ * Returns: (transfer container) (array zero-terminated=1): list of filesystems supported by this plugin
+ *
+ * Note: This returns filesystems supported by libblockdev, but not necessarily
+ *       by the systems this is running on, for this information you need to
+ *       run one of the `bd_fs_can_` functions.
+ *
+ * Tech category: always available
+ */
+const gchar** bd_fs_supported_filesystems (GError **error UNUSED) {
+    const gchar **filesystems = g_new0 (const gchar *, BD_FS_LAST_FS - BD_FS_OFFSET + 1);
+    gint i = 0;
+
+    for (i = 0; i < BD_FS_LAST_FS - BD_FS_OFFSET; i++)
+        filesystems[i] = fs_info[i + BD_FS_OFFSET].type;
+
+    return filesystems;
+}
 
 /**
  * fstype_to_tech: (skip)

@@ -25,6 +25,8 @@ typedef struct BDFSMkfsOptions {
     guint8 reserve[32];
 } BDFSMkfsOptions;
 
+const gchar** bd_fs_supported_filesystems (GError **error);
+
 gboolean bd_fs_mkfs (const gchar *device, const gchar *fstype, BDFSMkfsOptions *options, const BDExtraArg **extra, GError **error);
 
 gboolean bd_fs_resize (const gchar *device, guint64 new_size, const gchar *fstype, GError **error);
