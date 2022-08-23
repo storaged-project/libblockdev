@@ -814,6 +814,20 @@ GType bd_fs_udf_info_get_type () {
 gboolean bd_fs_is_tech_avail (BDFSTech tech, guint64 mode, GError **error);
 
 /**
+ * bd_fs_supported_filesystems:
+ * @error: (out) (optional): currently unused
+ *
+ * Returns: (transfer container) (array zero-terminated=1): list of filesystems supported by this plugin
+ *
+ * Note: This returns filesystems supported by libblockdev, but not necessarily
+ *       by the systems this is running on, for this information you need to
+ *       run one of the `bd_fs_can_` functions.
+ *
+ * Tech category: always available
+ */
+const gchar** bd_fs_supported_filesystems (GError **error);
+
+/**
  * bd_fs_wipe:
  * @device: the device to wipe signatures from
  * @all: whether to wipe all (%TRUE) signatures or just the first (%FALSE) one
