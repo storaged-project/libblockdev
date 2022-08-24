@@ -275,6 +275,7 @@ with the libblockdev-dm plugin/library.
 BuildRequires: libblkid-devel
 BuildRequires: libmount-devel
 BuildRequires: libuuid-devel
+BuildRequires: e2fsprogs-devel
 Summary:     The FS plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} = %{version}-%{release}
 

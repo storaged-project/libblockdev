@@ -47,6 +47,7 @@
       - device-mapper-multipath
       - dosfstools
       - e2fsprogs
+      - e2fsprogs-devel
       - f2fs-tools
       - glibc-all-langpacks
       - lvm2-dbusd
@@ -111,6 +112,7 @@
       - device-mapper-multipath
       - dosfstools
       - e2fsprogs
+      - e2fsprogs-devel
       - glibc-all-langpacks
       - kmod-kvdo
       - lvm2-dbusd
@@ -174,6 +176,7 @@
       - cryptsetup
       - dosfstools
       - e2fsprogs
+      - libext2fs-dev
       - f2fs-tools
       - libnss3-tools
       - locales-all

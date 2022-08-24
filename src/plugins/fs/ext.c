@@ -17,6 +17,9 @@
  * Author: Vratislav Podzimek <vpodzime@redhat.com>
  */
 
+#include <ext2fs.h>
+#include <e2p.h>
+
 #include <blockdev/utils.h>
 #include <check_deps.h>
 
@@ -37,18 +40,15 @@ static GMutex deps_check_lock;
 #define DEPS_E2FSCK_MASK (1 << DEPS_E2FSCK)
 #define DEPS_TUNE2FS 2
 #define DEPS_TUNE2FS_MASK (1 << DEPS_TUNE2FS)
-#define DEPS_DUMPE2FS 3
-#define DEPS_DUMPE2FS_MASK (1 << DEPS_DUMPE2FS)
-#define DEPS_RESIZE2FS 4
+#define DEPS_RESIZE2FS 3
 #define DEPS_RESIZE2FS_MASK (1 << DEPS_RESIZE2FS)
 
-#define DEPS_LAST 5
+#define DEPS_LAST 4
 
 static const UtilDep deps[DEPS_LAST] = {
     {"mke2fs", NULL, NULL, NULL},
     {"e2fsck", NULL, NULL, NULL},
     {"tune2fs", NULL, NULL, NULL},
-    {"dumpe2fs", NULL, NULL, NULL},
     {"resize2fs", NULL, NULL, NULL},
 };
 
@@ -58,7 +58,7 @@ static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
     DEPS_E2FSCK_MASK,       /* check */
     DEPS_E2FSCK_MASK,       /* repair */
     DEPS_TUNE2FS_MASK,      /* set-label */
-    DEPS_DUMPE2FS_MASK,     /* query */
+    0,                      /* query */
     DEPS_RESIZE2FS_MASK,    /* resize */
     DEPS_TUNE2FS_MASK       /* set-uuid */
 };
@@ -739,115 +739,55 @@ gboolean bd_fs_ext4_check_uuid (const gchar *uuid, GError **error) {
     return check_uuid (uuid, error);
 }
 
-/**
- * parse_output_vars: (skip)
- * @str: string to parse
- * @item_sep: item separator(s) (key-value pairs separator)
- * @key_val_sep: key-value separator(s) (typically ":" or "=")
- * @num_items: (out): number of parsed items (key-value pairs)
- *
- * Returns: (transfer full): GHashTable containing the key-value pairs parsed
- * from the @str.
- */
-static GHashTable* parse_output_vars (const gchar *str, const gchar *item_sep, const gchar *key_val_sep, guint *num_items) {
-    GHashTable *table = NULL;
-    gchar **items = NULL;
-    gchar **item_p = NULL;
-    gchar **key_val = NULL;
-
-    table = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-    *num_items = 0;
-
-    items = g_strsplit_set (str, item_sep, 0);
-    for (item_p=items; *item_p; item_p++) {
-        key_val = g_strsplit (*item_p, key_val_sep, 2);
-        if (g_strv_length (key_val) == 2) {
-            /* we only want to process valid lines (with the separator) */
-            g_hash_table_insert (table, g_strstrip (key_val[0]), g_strstrip (key_val[1]));
-            g_free (key_val);
-            (*num_items)++;
-        } else
-            /* invalid line, just free key_val */
-            g_strfreev (key_val);
-    }
-
-    g_strfreev (items);
-    return table;
+static gchar *decode_fs_state (unsigned short state) {
+    return g_strdup_printf("%s%s",
+                           (state & EXT2_VALID_FS) ? "clean" : "not clean",
+                           (state & EXT2_ERROR_FS) ? " with errors" : "");
 }
 
-static BDFSExtInfo* get_ext_info_from_table (GHashTable *table, gboolean free_table) {
-    BDFSExtInfo *ret = g_new0 (BDFSExtInfo, 1);
-    gchar *value = NULL;
-
-    ret->label = g_strdup ((gchar*) g_hash_table_lookup (table, "Filesystem volume name"));
-    if (!ret->label || g_strcmp0 (ret->label, "<none>") == 0) {
-        g_free (ret->label);
-        ret->label = g_strdup ("");
-    }
-
-    ret->uuid = g_strdup ((gchar*) g_hash_table_lookup (table, "Filesystem UUID"));
-    if (!ret->uuid || g_strcmp0 (ret->uuid, "<none>") == 0) {
-        g_free (ret->uuid);
-        ret->uuid = g_strdup ("");
-    }
-
-    ret->state = g_strdup ((gchar*) g_hash_table_lookup (table, "Filesystem state"));
-
-    value = (gchar*) g_hash_table_lookup (table, "Block size");
-    if (value)
-        ret->block_size = g_ascii_strtoull (value, NULL, 0);
-    else
-        ret->block_size = 0;
-    value = (gchar*) g_hash_table_lookup (table, "Block count");
-    if (value)
-        ret->block_count = g_ascii_strtoull (value, NULL, 0);
-    else
-        ret->block_count = 0;
-    value = (gchar*) g_hash_table_lookup (table, "Free blocks");
-    if (value)
-        ret->free_blocks = g_ascii_strtoull (value, NULL, 0);
-    else
-        ret->free_blocks = 0;
-
-    if (free_table)
-        g_hash_table_destroy (table);
-
-    return ret;
+static gchar *decode_uuid (void *uuid) {
+    const char *str = e2p_uuid2str(uuid);
+    if (g_strcmp0 (str, "<none>") == 0)
+        str = "";
+    return g_strdup (str);
 }
 
 static BDFSExtInfo* ext_get_info (const gchar *device, GError **error) {
-    const gchar *args[4] = {"dumpe2fs", "-h", device, NULL};
-    gboolean success = FALSE;
-    gchar *output = NULL;
-    GHashTable *table = NULL;
-    guint num_items = 0;
+    errcode_t retval;
+    ext2_filsys fs;
+    struct ext2_super_block *sb;
     BDFSExtInfo *ret = NULL;
 
-    if (!check_deps (&avail_deps, DEPS_DUMPE2FS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
-        return NULL;
+    int flags = (EXT2_FLAG_JOURNAL_DEV_OK | EXT2_FLAG_SOFTSUPP_FEATURES |
+                 EXT2_FLAG_64BITS | EXT2_FLAG_SUPER_ONLY |
+                 EXT2_FLAG_IGNORE_CSUM_ERRORS);
 
-    success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
-    if (!success) {
-        /* error is already populated */
-        return NULL;
-    }
+#ifdef EXT2_FLAG_THREADS
+    flags |= EXT2_FLAG_THREADS;
+#endif
 
-    table = parse_output_vars (output, "\n", ":", &num_items);
-    g_free (output);
-    if (!table || (num_items == 0)) {
-        /* something bad happened or some expected items were missing  */
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse ext4 file system information");
-        if (table)
-            g_hash_table_destroy (table);
-        return NULL;
-    }
-
-    ret = get_ext_info_from_table (table, TRUE);
-    if (!ret) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse ext4 file system information");
+    retval = ext2fs_open (device,
+                          flags,
+                          0, // use_superblock
+                          0, // use_blocksize
+                          unix_io_manager,
+                          &fs);
+    if (retval) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL, "Failed to open ext4 file system");
         return NULL;
     }
 
+    sb = fs->super;
+    ret = g_new0 (BDFSExtInfo, 1);
+
+    ret->label = g_strndup ((gchar *)sb->s_volume_name, sizeof (sb->s_volume_name));
+    ret->uuid = decode_uuid (sb->s_uuid);
+    ret->state = decode_fs_state (sb->s_state);
+    ret->block_size = EXT2_BLOCK_SIZE (sb);
+    ret->block_count = ext2fs_blocks_count (sb);
+    ret->free_blocks = ext2fs_free_blocks_count (sb);
+
+    ext2fs_close_free (&fs);
     return ret;
 }
 
