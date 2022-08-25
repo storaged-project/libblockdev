@@ -103,6 +103,7 @@ class VfatTestFeatures(VfatNoDevTestCase):
         self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.DRY_RUN)
         self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.NODISCARD)
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.FORCE)
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.NOPT)
 
         self.assertTrue(features.fsck & BlockDev.FSFsckFlags.CHECK)
         self.assertTrue(features.fsck & BlockDev.FSFsckFlags.REPAIR)
@@ -110,7 +111,7 @@ class VfatTestFeatures(VfatNoDevTestCase):
         self.assertTrue(features.configure & BlockDev.FSConfigureFlags.LABEL)
         self.assertFalse(features.configure & BlockDev.FSConfigureFlags.UUID)
 
-        self.assertEqual(features.features, 0)
+        self.assertEqual(features.features, BlockDev.FSFeatureFlags.PARTITION_TABLE)
 
         self.assertEqual(features.partition_id, "0x0c")
         self.assertEqual(features.partition_type, "ebd0a0a2-b9e5-4433-87c0-68b6b72699c7")

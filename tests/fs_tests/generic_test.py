@@ -434,6 +434,20 @@ class GenericMkfs(GenericTestCase):
             extra = None
         self._test_ext_generic_mkfs("vfat", BlockDev.fs_vfat_get_info, label, None, False, extra)
 
+    def test_vfat_generic_mkfs_no_pt(self):
+        """ Test generic mkfs with vfat and mbr=no """
+
+        options = BlockDev.FSMkfsOptions(no_pt=True)
+
+        succ = BlockDev.fs_mkfs(self.loop_dev, "vfat", options, None)
+        self.assertTrue(succ)
+
+        fstype = BlockDev.fs_get_fstype (self.loop_dev)
+        self.assertEqual(fstype, "vfat")
+
+        # there should be no partition
+        self.assertFalse(os.path.exists(self.loop_dev + "1"))
+
     def test_xfs_generic_mkfs(self):
         """ Test generic mkfs with XFS """
         label = "label"

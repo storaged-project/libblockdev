@@ -16,6 +16,7 @@ typedef enum {
     BD_FS_MKFS_DRY_RUN   = 1 << 2,
     BD_FS_MKFS_NODISCARD = 1 << 3,
     BD_FS_MKFS_FORCE     = 1 << 4,
+    BD_FS_MKFS_NOPT      = 1 << 5,
 } BDFSMkfsOptionsFlags;
 
 typedef struct BDFSMkfsOptions {
@@ -24,6 +25,7 @@ typedef struct BDFSMkfsOptions {
     gboolean dry_run;
     gboolean no_discard;
     gboolean force;
+    gboolean no_pt;
     guint8 reserve[32];
 } BDFSMkfsOptions;
 
@@ -60,6 +62,7 @@ typedef enum {
 
 typedef enum {
     BD_FS_FEATURE_OWNERS  = 1 << 1,
+    BD_FS_FEATURE_PARTITION_TABLE = 1 << 2,
 } BDFSFeatureFlags;
 
 typedef struct BDFSFeatures {

@@ -96,6 +96,7 @@ class NTFSTestFeatures(NTFSNoDevTestCase):
         self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.UUID)
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.DRY_RUN)
         self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.NODISCARD)
+        self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.NOPT)
 
         self.assertTrue(features.fsck & BlockDev.FSFsckFlags.CHECK)
         self.assertTrue(features.fsck & BlockDev.FSFsckFlags.REPAIR)
