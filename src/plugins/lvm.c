@@ -134,6 +134,52 @@ void bd_lvm_vgdata_free (BDLVMVGdata *data) {
     g_free (data);
 }
 
+BDLVMSEGdata* bd_lvm_segdata_copy (BDLVMSEGdata *data) {
+    if (data == NULL)
+        return NULL;
+
+    BDLVMSEGdata *new_data = g_new0 (BDLVMSEGdata, 1);
+
+    new_data->size_pe = data->size_pe;
+    new_data->pv_start_pe = data->pv_start_pe;
+    new_data->pvdev = g_strdup (data->pvdev);
+    return new_data;
+}
+
+void bd_lvm_segdata_free (BDLVMSEGdata *data) {
+    if (data == NULL)
+        return;
+
+    g_free (data->pvdev);
+    g_free (data);
+}
+
+static BDLVMSEGdata **copy_segs (BDLVMSEGdata **segs) {
+    int len;
+    BDLVMSEGdata **new_segs;
+
+    if (segs == NULL)
+       return NULL;
+
+    for (len = 0; segs[len]; len++)
+        ;
+
+    new_segs = g_new0 (BDLVMSEGdata *, len+1);
+    for (int i = 0; i < len; i++)
+        new_segs[i] = bd_lvm_segdata_copy (segs[i]);
+
+    return new_segs;
+}
+
+static void free_segs (BDLVMSEGdata **segs) {
+    if (segs == NULL)
+       return;
+
+    for (int i = 0; segs[i]; i++)
+        bd_lvm_segdata_free (segs[i]);
+    (g_free) (segs);
+}
+
 BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
     if (data == NULL)
         return NULL;
@@ -156,6 +202,9 @@ BDLVMLVdata* bd_lvm_lvdata_copy (BDLVMLVdata *data) {
     new_data->metadata_percent = data->metadata_percent;
     new_data->copy_percent = data->copy_percent;
     new_data->lv_tags = g_strdupv (data->lv_tags);
+    new_data->data_lvs = g_strdupv (data->data_lvs);
+    new_data->metadata_lvs = g_strdupv (data->metadata_lvs);
+    new_data->segs = copy_segs (data->segs);
     return new_data;
 }
 
@@ -175,6 +224,9 @@ void bd_lvm_lvdata_free (BDLVMLVdata *data) {
     g_free (data->roles);
     g_free (data->move_pv);
     g_strfreev (data->lv_tags);
+    g_strfreev (data->data_lvs);
+    g_strfreev (data->metadata_lvs);
+    free_segs (data->segs);
     g_free (data);
 }
 
@@ -614,6 +666,30 @@ static BDLVMVGdata* get_vg_data_from_table (GHashTable *table, gboolean free_tab
     return data;
 }
 
+static gchar **prepare_sublvs (gchar **values, gchar *extra_value) {
+  /* LVM2 guarantees: No "/dev/" prefixes or "[unknown]" in a list of sub-lvs. */
+  gboolean found_extra = FALSE;
+  for (int i = 0; values[i]; i++) {
+    gchar *paren = strrchr (values[i], '(');
+    if (paren) {
+      /* LVM2 guarantees: start offsets of sub-lvs are always zero. */
+      *paren = '\0';
+    }
+    if (g_strcmp0 (extra_value, values[i]) == 0)
+      found_extra = TRUE;
+  }
+  if (extra_value && *extra_value && !found_extra) {
+    int len = g_strv_length (values);
+    gchar **new_values = g_new0 (gchar *, len+2);
+    for (int j = 0; j < len; j++)
+      new_values[j] = values[j];
+    new_values[len] = g_strdup (extra_value);
+    g_free (values);
+    values = new_values;
+  }
+  return values;
+}
+
 static BDLVMLVdata* get_lv_data_from_table (GHashTable *table, gboolean free_table) {
     BDLVMLVdata *data = g_new0 (BDLVMLVdata, 1);
     gchar *value = NULL;
@@ -629,7 +705,19 @@ static BDLVMLVdata* get_lv_data_from_table (GHashTable *table, gboolean free_tab
         data->size = 0;
 
     data->attr = g_strdup (g_hash_table_lookup (table, "LVM2_LV_ATTR"));
-    data->segtype = g_strdup (g_hash_table_lookup (table, "LVM2_SEGTYPE"));
+
+    value = g_hash_table_lookup (table, "LVM2_SEGTYPE");
+    if (g_strcmp0 (value, "error") == 0) {
+      /* A segment type "error" appears when "vgreduce
+       * --removemissing" replaces a missing PV with a device mapper
+       * "error" target.  It very likely was a "linear" segment before that
+       * and will again be "linear" after repair.  Let's not expose
+       * this implementation detail.
+       */
+      value = "linear";
+    }
+    data->segtype = g_strdup (value);
+
     data->origin = g_strdup (g_hash_table_lookup (table, "LVM2_ORIGIN"));
     data->pool_lv = g_strdup (g_hash_table_lookup (table, "LVM2_POOL_LV"));
     data->data_lv = g_strdup (g_hash_table_lookup (table, "LVM2_DATA_LV"));
@@ -668,10 +756,77 @@ static BDLVMLVdata* get_lv_data_from_table (GHashTable *table, gboolean free_tab
     g_strstrip (g_strdelimit (data->data_lv, "[]", ' '));
     g_strstrip (g_strdelimit (data->metadata_lv, "[]", ' '));
 
+    value = (gchar*) g_hash_table_lookup (table, "LVM2_DEVICES");
+    if (value) {
+      gchar **values = g_strsplit (value, ",", -1);
+
+      /* If values starts with "/dev/", we have a single PV.
+
+         If the list is empty, this is probably an "error" segment
+         resulting from a "vgreduce --removemissing" operation.
+
+         If the value starts with "[unknown]", it is a segment with a
+         missing PV that hasn't been converted to an "error" segment
+         yet.
+
+         Otherwise it is a list of sub-lvs.
+
+         LVM2 guarantees: only one entry if the first is a PV
+         Additional segments are added in merge_lv_data below.
+      */
+      if (!values[0] || g_str_has_prefix (values[0], "[unknown]")) {
+        data->segs = g_new0 (BDLVMSEGdata *, 1);
+        data->segs[0] = NULL;
+        g_strfreev (values);
+      } else if (g_str_has_prefix (values[0], "/dev/")) {
+        data->segs = g_new0 (BDLVMSEGdata *, 2);
+        data->segs[0] = g_new0 (BDLVMSEGdata, 1);
+        data->segs[1] = NULL;
+
+        gchar *paren = strrchr (values[0], '(');
+        if (paren) {
+          data->segs[0]->pv_start_pe = atoi(paren+1);
+          *paren = '\0';
+        }
+        data->segs[0]->pvdev = g_strdup (values[0]);
+        value = (gchar*) g_hash_table_lookup (table, "LVM2_SEG_SIZE_PE");
+        if (value)
+          data->segs[0]->size_pe = g_ascii_strtoull (value, NULL, 0);
+        g_strfreev (values);
+      } else {
+        data->data_lvs = prepare_sublvs (values, data->data_lv);
+        value = (gchar*) g_hash_table_lookup (table, "LVM2_METADATA_DEVICES");
+        data->metadata_lvs = prepare_sublvs (g_strsplit (value ?: "", ",", -1), data->metadata_lv);
+      }
+    }
+
     if (free_table)
         g_hash_table_destroy (table);
 
     return data;
+}
+
+static void merge_lv_data (BDLVMLVdata *data, BDLVMLVdata *more_data) {
+  /* LVM2 guarantees:
+     - more_data->data_lvs is NULL
+     - more_data->metadata_lvs is NULL
+     - more_data->segs has zero or one entry
+     - more_data->seg_type is the same as data->seg_type (after mapping "error" to "linear")
+  */
+
+  if (more_data->segs && more_data->segs[0]) {
+    int i;
+    for (i = 0; data->segs && data->segs[i]; i++)
+      ;
+
+    BDLVMSEGdata **new_segs = g_new0 (BDLVMSEGdata *, i+2);
+    for (i = 0; data->segs && data->segs[i]; i++)
+      new_segs[i] = data->segs[i];
+    new_segs[i] = more_data->segs[0];
+    g_free (data->segs);
+    data->segs = new_segs;
+    more_data->segs[0] = NULL;
+  }
 }
 
 static BDLVMVDOPooldata* get_vdo_data_from_table (GHashTable *table, gboolean free_table) {
@@ -1974,6 +2129,54 @@ BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError *
     return NULL;
 }
 
+BDLVMLVdata* bd_lvm_lvinfo_tree (const gchar *vg_name, const gchar *lv_name, GError **error) {
+    const gchar *args[11] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
+                       "--unquoted", "--units=b", "-a",
+                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv,role,move_pv,data_percent,metadata_percent,copy_percent,lv_tags,devices,metadata_devices,seg_size_pe",
+                       NULL, NULL};
+
+    GHashTable *table = NULL;
+    gboolean success = FALSE;
+    gchar *output = NULL;
+    gchar **lines = NULL;
+    gchar **lines_p = NULL;
+    guint num_items;
+    BDLVMLVdata *result = NULL;
+
+    args[9] = g_strdup_printf ("%s/%s", vg_name, lv_name);
+
+    success = call_lvm_and_capture_output (args, NULL, &output, error);
+    g_free ((gchar *) args[9]);
+
+    if (!success)
+        /* the error is already populated from the call */
+        return NULL;
+
+    lines = g_strsplit (output, "\n", 0);
+    g_free (output);
+
+    for (lines_p = lines; *lines_p; lines_p++) {
+        table = parse_lvm_vars ((*lines_p), &num_items);
+        if (table && (num_items == 19)) {
+            BDLVMLVdata *lvdata = get_lv_data_from_table (table, TRUE);
+            if (result) {
+                merge_lv_data (result, lvdata);
+                bd_lvm_lvdata_free (lvdata);
+            } else
+                result = lvdata;
+        } else {
+            if (table)
+                g_hash_table_destroy (table);
+        }
+    }
+    g_strfreev (lines);
+
+    if (result == NULL)
+      g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                   "Failed to parse information about the LV");
+    return result;
+}
+
 /**
  * bd_lvm_lvs:
  * @vg_name: (nullable): name of the VG to get information about LVs from
@@ -2037,6 +2240,85 @@ BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error) {
                         bd_utils_log_format (BD_UTILS_LOG_DEBUG,
                                              "Duplicate LV entry for '%s' found in lvs output",
                                              lvdata->lv_name);
+                        bd_lvm_lvdata_free (lvdata);
+                        lvdata = NULL;
+                        break;
+                    }
+                }
+
+                if (lvdata)
+                    g_ptr_array_add (lvs, lvdata);
+            }
+        } else
+            if (table)
+                g_hash_table_destroy (table);
+    }
+
+    g_strfreev (lines);
+
+    if (lvs->len == 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_PARSE,
+                     "Failed to parse information about LVs");
+        g_ptr_array_free (lvs, TRUE);
+        return NULL;
+    }
+
+    /* returning NULL-terminated array of BDLVMLVdata */
+    g_ptr_array_add (lvs, NULL);
+    return (BDLVMLVdata **) g_ptr_array_free (lvs, FALSE);
+}
+
+BDLVMLVdata** bd_lvm_lvs_tree (const gchar *vg_name, GError **error) {
+    const gchar *args[11] = {"lvs", "--noheadings", "--nosuffix", "--nameprefixes",
+                       "--unquoted", "--units=b", "-a",
+                       "-o", "vg_name,lv_name,lv_uuid,lv_size,lv_attr,segtype,origin,pool_lv,data_lv,metadata_lv,role,move_pv,data_percent,metadata_percent,copy_percent,lv_tags,devices,metadata_devices,seg_size_pe",
+                       NULL, NULL};
+
+    GHashTable *table = NULL;
+    gboolean success = FALSE;
+    gchar *output = NULL;
+    gchar **lines = NULL;
+    gchar **lines_p = NULL;
+    guint num_items;
+    GPtrArray *lvs;
+    BDLVMLVdata *lvdata = NULL;
+    GError *l_error = NULL;
+
+    lvs = g_ptr_array_new ();
+
+    if (vg_name)
+        args[9] = vg_name;
+
+    success = call_lvm_and_capture_output (args, NULL, &output, &l_error);
+    if (!success) {
+        if (g_error_matches (l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
+            /* no output => no LVs, not an error */
+            g_clear_error (&l_error);
+            /* return an empty list */
+            g_ptr_array_add (lvs, NULL);
+            return (BDLVMLVdata **) g_ptr_array_free (lvs, FALSE);
+        }
+        else {
+            /* the error is already populated from the call */
+            g_ptr_array_free (lvs, TRUE);
+            g_propagate_error (error, l_error);
+            return NULL;
+        }
+    }
+
+    lines = g_strsplit (output, "\n", 0);
+    g_free (output);
+
+    for (lines_p = lines; *lines_p; lines_p++) {
+        table = parse_lvm_vars ((*lines_p), &num_items);
+        if (table && (num_items == 19)) {
+            /* valid line, try to parse and record it */
+            lvdata = get_lv_data_from_table (table, TRUE);
+            if (lvdata) {
+                for (gsize i = 0; i < lvs->len; i++) {
+                    BDLVMLVdata *other = (BDLVMLVdata *) g_ptr_array_index (lvs, i);
+                    if (g_strcmp0 (other->lv_name, lvdata->lv_name) == 0) {
+                        merge_lv_data (other, lvdata);
                         bd_lvm_lvdata_free (lvdata);
                         lvdata = NULL;
                         break;

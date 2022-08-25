@@ -294,6 +294,9 @@ bd_lvm_pvdata_copy
 BDLVMVGdata
 bd_lvm_vgdata_free
 bd_lvm_vgdata_copy
+BDLVMSEGdata
+bd_lvm_segdata_free
+bd_lvm_segdata_copy
 BDLVMLVdata
 bd_lvm_lvdata_free
 bd_lvm_lvdata_copy
@@ -352,7 +355,9 @@ bd_lvm_lvsnapshotmerge
 bd_lvm_add_lv_tags
 bd_lvm_delete_lv_tags
 bd_lvm_lvinfo
+bd_lvm_lvinfo_tree
 bd_lvm_lvs
+bd_lvm_lvs_tree
 bd_lvm_thpoolcreate
 bd_lvm_thpool_convert
 bd_lvm_thlvcreate

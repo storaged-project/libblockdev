@@ -128,6 +128,12 @@ typedef struct BDLVMVGdata {
 void bd_lvm_vgdata_free (BDLVMVGdata *data);
 BDLVMVGdata* bd_lvm_vgdata_copy (BDLVMVGdata *data);
 
+typedef struct BDLVMSEGdata {
+    guint64 size_pe;
+    guint64 pv_start_pe;
+    gchar *pvdev;
+} BDLVMSEGdata;
+
 typedef struct BDLVMLVdata {
     gchar *lv_name;
     gchar *vg_name;
@@ -145,6 +151,9 @@ typedef struct BDLVMLVdata {
     guint64 metadata_percent;
     guint64 copy_percent;
     gchar **lv_tags;
+    gchar **data_lvs;
+    gchar **metadata_lvs;
+    BDLVMSEGdata **segs;
 } BDLVMLVdata;
 
 void bd_lvm_lvdata_free (BDLVMLVdata *data);
@@ -279,7 +288,9 @@ gboolean bd_lvm_lvsnapshotmerge (const gchar *vg_name, const gchar *snapshot_nam
 gboolean bd_lvm_add_lv_tags (const gchar *vg_name, const gchar *lv_name, const gchar **tags, GError **error);
 gboolean bd_lvm_delete_lv_tags (const gchar *vg_name, const gchar *lv_name, const gchar **tags, GError **error);
 BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError **error);
+BDLVMLVdata* bd_lvm_lvinfo_tree (const gchar *vg_name, const gchar *lv_name, GError **error);
 BDLVMLVdata** bd_lvm_lvs (const gchar *vg_name, GError **error);
+BDLVMLVdata** bd_lvm_lvs_tree (const gchar *vg_name, GError **error);
 
 gboolean bd_lvm_thpoolcreate (const gchar *vg_name, const gchar *lv_name, guint64 size, guint64 md_size, guint64 chunk_size, const gchar *profile, const BDExtraArg **extra, GError **error);
 gboolean bd_lvm_thlvcreate (const gchar *vg_name, const gchar *pool_name, const gchar *lv_name, guint64 size, const BDExtraArg **extra, GError **error);
