@@ -88,3 +88,15 @@
     - distro: "centos"
       version: "9"
       reason: "Creating RAID 1 LV on CentOS/RHEL 9 causes kernel panic"
+
+- test: (lvm_test|lvm_dbus_tests).LvmTestPartialLVs
+  skip_on:
+    - distro: "fedora"
+      version: "38"
+      reason: "Force-removing PV for the test hangs with kernel 6.0.0"
+
+- test: kbd_test.KbdTestBcache*
+  skip_on:
+    - distro: "fedora"
+      version: "38"
+      reason: "Bcache attach/detach hangs with kernel 6.0.0"
