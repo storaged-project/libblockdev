@@ -145,6 +145,9 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
     if (options->uuid)
         g_ptr_array_add (options_array, bd_extra_arg_new ("-i", options->uuid));
 
+    if (options->force)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-I", ""));
+
     if (extra) {
         for (extra_p = extra; *extra_p; extra_p++)
             g_ptr_array_add (options_array, bd_extra_arg_copy ((BDExtraArg *) *extra_p));

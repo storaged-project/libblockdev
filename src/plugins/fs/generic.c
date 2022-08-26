@@ -60,7 +60,8 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
     { 0 }, { 0 },
     /* EXT2 */
     { .resize = BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK,
-      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD,
+      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD |
+              BD_FS_MKFS_FORCE,
       .fsck = BD_FS_FSCK_CHECK | BD_FS_FSCK_REPAIR,
       .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
       .features =  BD_FS_FEATURE_OWNERS,
@@ -68,7 +69,8 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
       .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4" },
     /* EXT3 */
     { .resize = BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK,
-      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD,
+      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD |
+              BD_FS_MKFS_FORCE,
       .fsck = BD_FS_FSCK_CHECK | BD_FS_FSCK_REPAIR,
       .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
       .features =  BD_FS_FEATURE_OWNERS,
@@ -76,7 +78,8 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
       .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4" },
     /* EXT4 */
     { .resize = BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK,
-      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD,
+      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD |
+              BD_FS_MKFS_FORCE,
       .fsck = BD_FS_FSCK_CHECK | BD_FS_FSCK_REPAIR,
       .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
       .features =  BD_FS_FEATURE_OWNERS,
@@ -84,7 +87,8 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
       .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4" },
     /* XFS */
     { .resize = BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW,
-      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD,
+      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD |
+              BD_FS_MKFS_FORCE,
       .fsck = BD_FS_FSCK_CHECK | BD_FS_FSCK_REPAIR,
       .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
       .features =  BD_FS_FEATURE_OWNERS,
@@ -92,7 +96,7 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
       .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4" },
     /* VFAT */
     { .resize = BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK,
-      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID,
+      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_FORCE,
       .fsck = BD_FS_FSCK_CHECK | BD_FS_FSCK_REPAIR,
       .configure = BD_FS_SUPPORT_SET_LABEL,
       .features = 0,
@@ -108,7 +112,7 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
       .partition_type = "ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" },
     /* F2FS */
     { .resize = BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK,
-      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_NODISCARD,
+      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_NODISCARD | BD_FS_MKFS_FORCE,
       .fsck = BD_FS_FSCK_CHECK | BD_FS_FSCK_REPAIR,
       .configure =  0,
       .features = BD_FS_FEATURE_OWNERS,
@@ -116,7 +120,7 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
       .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4" },
     /* NILFS2 */
     { .resize = BD_FS_ONLINE_GROW | BD_FS_ONLINE_SHRINK,
-      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD,
+      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD | BD_FS_MKFS_FORCE,
       .fsck = 0,
       .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
       .features = BD_FS_FEATURE_OWNERS,
@@ -132,7 +136,7 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
       .partition_type = "ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" },
     /* BTRFS */
     { .resize = BD_FS_ONLINE_GROW | BD_FS_ONLINE_SHRINK,
-      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_NODISCARD,
+      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_NODISCARD | BD_FS_MKFS_FORCE,
       .fsck = BD_FS_FSCK_CHECK | BD_FS_FSCK_REPAIR,
       .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
       .features = BD_FS_FEATURE_OWNERS,

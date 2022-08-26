@@ -116,7 +116,7 @@ def _get_extra(extra, kwargs, cmd_extra=True):
 
 
 class FSMkfsOptions(BlockDev.FSMkfsOptions):
-    def __new__(cls, label=None, uuid=None, dry_run=False, no_discard=False):
+    def __new__(cls, label=None, uuid=None, dry_run=False, no_discard=False, force=False):
         ret = BlockDev.FSMkfsOptions()
         ret.__class__ = cls
 
@@ -124,6 +124,7 @@ class FSMkfsOptions(BlockDev.FSMkfsOptions):
         ret.uuid = uuid
         ret.dry_run = dry_run
         ret.no_discard = no_discard
+        ret.force = force
 
         return ret
 FSMkfsOptions = override(FSMkfsOptions)

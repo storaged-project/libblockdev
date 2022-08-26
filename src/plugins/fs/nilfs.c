@@ -146,6 +146,9 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
     if (options->no_discard)
         g_ptr_array_add (options_array, bd_extra_arg_new ("-K", ""));
 
+    if (options->force)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-f", ""));
+
     if (extra) {
         for (extra_p = extra; *extra_p; extra_p++)
             g_ptr_array_add (options_array, bd_extra_arg_copy ((BDExtraArg *) *extra_p));

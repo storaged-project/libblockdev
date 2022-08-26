@@ -15,6 +15,7 @@ typedef enum {
     BD_FS_MKFS_UUID      = 1 << 1,
     BD_FS_MKFS_DRY_RUN   = 1 << 2,
     BD_FS_MKFS_NODISCARD = 1 << 3,
+    BD_FS_MKFS_FORCE     = 1 << 4,
 } BDFSMkfsOptionsFlags;
 
 typedef struct BDFSMkfsOptions {
@@ -22,6 +23,7 @@ typedef struct BDFSMkfsOptions {
     const gchar *uuid;
     gboolean dry_run;
     gboolean no_discard;
+    gboolean force;
     guint8 reserve[32];
 } BDFSMkfsOptions;
 

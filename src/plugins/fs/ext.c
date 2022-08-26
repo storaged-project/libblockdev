@@ -253,6 +253,9 @@ static BDExtraArg **ext_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg
     if (options->no_discard)
         g_ptr_array_add (options_array, bd_extra_arg_new ("-E", "nodiscard"));
 
+    if (options->force)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-F", ""));
+
     if (extra) {
         for (extra_p = extra; *extra_p; extra_p++)
             g_ptr_array_add (options_array, bd_extra_arg_copy ((BDExtraArg *) *extra_p));

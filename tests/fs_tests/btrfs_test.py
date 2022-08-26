@@ -43,6 +43,7 @@ class BtrfsTestFeatures(BtrfsNoDevTestCase):
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.UUID)
         self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.DRY_RUN)
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.NODISCARD)
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.FORCE)
 
         self.assertTrue(features.fsck & BlockDev.FSFsckFlags.CHECK)
         self.assertTrue(features.fsck & BlockDev.FSFsckFlags.REPAIR)
