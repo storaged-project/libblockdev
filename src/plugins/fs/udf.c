@@ -274,20 +274,6 @@ gboolean bd_fs_udf_mkfs (const gchar *device, const gchar *media_type, gchar *re
 }
 
 /**
- * bd_fs_udf_wipe:
- * @device: the device to wipe a UDF signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether the UDF signature was successfully wiped from the @device or
- *          not
- *
- * Tech category: %BD_FS_TECH_UDF-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_udf_wipe (const gchar *device, GError **error) {
-    return wipe_fs (device, "udf", FALSE, error);
-}
-
-/**
  * bd_fs_udf_set_label:
  * @device: the device containing the file system to set label for
  * @label: label to set

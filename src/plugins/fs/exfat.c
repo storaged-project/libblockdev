@@ -169,20 +169,6 @@ gboolean bd_fs_exfat_mkfs (const gchar *device, const BDExtraArg **extra, GError
 }
 
 /**
- * bd_fs_exfat_wipe:
- * @device: the device to wipe a exfat signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether the exfat signature was successfully wiped from the @device or
- *          not
- *
- * Tech category: %BD_FS_TECH_EXFAT-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_exfat_wipe (const gchar *device, GError **error) {
-    return wipe_fs (device, "exfat", FALSE, error);
-}
-
-/**
  * bd_fs_exfat_check:
  * @device: the device containing the file system to check
  * @extra: (nullable) (array zero-terminated=1): extra options for the repair (right now

@@ -332,48 +332,6 @@ gboolean bd_fs_ext4_mkfs (const gchar *device, const BDExtraArg **extra, GError 
     return ext_mkfs (device, extra, EXT4, error);
 }
 
-/**
- * bd_fs_ext2_wipe:
- * @device: the device to wipe an ext2 signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether an ext2 signature was successfully wiped from the @device or
- *          not
- *
- * Tech category: %BD_FS_TECH_EXT2-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_ext2_wipe (const gchar *device, GError **error) {
-    return wipe_fs (device, EXT2, FALSE, error);
-}
-
-/**
- * bd_fs_ext3_wipe:
- * @device: the device to wipe an ext3 signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether an ext3 signature was successfully wiped from the @device or
- *          not
- *
- * Tech category: %BD_FS_TECH_EXT3-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_ext3_wipe (const gchar *device, GError **error) {
-    return wipe_fs (device, EXT3, FALSE, error);
-}
-
-/**
- * bd_fs_ext4_wipe:
- * @device: the device to wipe an ext4 signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether an ext4 signature was successfully wiped from the @device or
- *          not
- *
- * Tech category: %BD_FS_TECH_EXT4-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_ext4_wipe (const gchar *device, GError **error) {
-    return wipe_fs (device, EXT4, FALSE, error);
-}
-
 static gboolean ext_check (const gchar *device, const BDExtraArg **extra, GError **error) {
     /* Force checking even if the file system seems clean. AND
      * Open the filesystem read-only, and assume an answer of no to all

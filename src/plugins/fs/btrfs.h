@@ -15,7 +15,6 @@ BDFSBtrfsInfo* bd_fs_btrfs_info_copy (BDFSBtrfsInfo *data);
 void bd_fs_btrfs_info_free (BDFSBtrfsInfo *data);
 
 gboolean bd_fs_btrfs_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
-gboolean bd_fs_btrfs_wipe (const gchar *device, GError **error);
 gboolean bd_fs_btrfs_check (const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_fs_btrfs_repair (const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_fs_btrfs_set_label (const gchar *mpoint, const gchar *label, GError **error);

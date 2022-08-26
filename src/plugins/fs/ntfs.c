@@ -157,19 +157,6 @@ gboolean bd_fs_ntfs_mkfs (const gchar *device, const BDExtraArg **extra, GError 
 }
 
 /**
- * bd_fs_ntfs_wipe:
- * @device: the device to wipe an ntfs signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether an ntfs signature was successfully wiped from the @device or not
- *
- * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_ntfs_wipe (const gchar *device, GError **error) {
-    return wipe_fs (device, "ntfs", TRUE, error);
-}
-
-/**
  * bd_fs_ntfs_check:
  * @device: the device containing the file system to check
  * @error: (out) (optional): place to store error (if any)

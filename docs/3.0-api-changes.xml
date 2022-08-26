@@ -48,5 +48,10 @@
     Affected functions: <literal>bd_fs_resize</literal>, <literal>bd_fs_repair</literal>, <literal>bd_fs_check</literal>, <literal>bd_fs_set_label</literal>, <literal>bd_fs_set_uuid</literal>, <literal>bd_fs_get_size</literal> and <literal>bd_fs_get_free_space</literal>
   </para>
 
+  <para>
+    Type-specific <literal>bd_fs_..._wipe</literal> functions have been removed. Use <literal>bd_fs_wipe</literal> or <literal>bd_fs_clean</literal> instead.
+    Affected functions: <literal>bd_fs_btrfs_wipe</literal>, <literal>bd_fs_ext2_wipe</literal>, <literal>bd_fs_ext3_wipe</literal>, <literal>bd_fs_ext4_wipe</literal>, <literal>bd_fs_exfat_wipe</literal>, <literal>bd_fs_f2fs_wipe</literal>, <literal>bd_fs_nilfs2_wipe</literal>, <literal>bd_fs_ntfs_wipe</literal>, <literal>bd_fs_vfat_wipe</literal>, <literal>bd_fs_udf_wipe</literal>, <literal>bd_fs_xfs_wipe</literal>
+  </para>
+
   </simplesect>
 </chapter>

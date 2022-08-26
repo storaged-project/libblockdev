@@ -159,20 +159,6 @@ gboolean bd_fs_btrfs_mkfs (const gchar *device, const BDExtraArg **extra, GError
 }
 
 /**
- * bd_fs_btrfs_wipe:
- * @device: the device to wipe a Btrfs signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether the Btrfs signature was successfully wiped from the @device or
- *          not
- *
- * Tech category: %BD_FS_TECH_BTRFS-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_btrfs_wipe (const gchar *device, GError **error) {
-    return wipe_fs (device, "btrfs", FALSE, error);
-}
-
-/**
  * bd_fs_btrfs_check:
  * @device: the device containing the file system to check
  * @extra: (nullable) (array zero-terminated=1): extra options for the check (right now

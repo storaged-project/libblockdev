@@ -178,20 +178,6 @@ gboolean bd_fs_vfat_mkfs (const gchar *device, const BDExtraArg **extra, GError 
 }
 
 /**
- * bd_fs_vfat_wipe:
- * @device: the device to wipe an vfat signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether an vfat signature was successfully wiped from the @device or
- *          not
- *
- * Tech category: %BD_FS_TECH_VFAT-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_vfat_wipe (const gchar *device, GError **error) {
-    return wipe_fs (device, "vfat", TRUE, error);
-}
-
-/**
  * bd_fs_vfat_check:
  * @device: the device containing the file system to check
  * @extra: (nullable) (array zero-terminated=1): extra options for the repair (right now

@@ -189,37 +189,6 @@ class F2FSMkfsWithFeatures(F2FSTestCase):
         self.assertTrue(fi.features & BlockDev.FSF2FSFeature.ENCRYPT)
 
 
-class F2FSTestWipe(F2FSTestCase):
-    def test_f2fs_wipe(self):
-        """Verify that it is possible to wipe an f2fs file system"""
-
-        succ = BlockDev.fs_f2fs_mkfs(self.loop_dev, None)
-        self.assertTrue(succ)
-
-        succ = BlockDev.fs_f2fs_wipe(self.loop_dev)
-        self.assertTrue(succ)
-
-        # already wiped, should fail this time
-        with self.assertRaises(GLib.GError):
-            BlockDev.fs_f2fs_wipe(self.loop_dev)
-
-        utils.run("pvcreate -ff -y %s >/dev/null" % self.loop_dev)
-
-        # LVM PV signature, not an f2fs file system
-        with self.assertRaises(GLib.GError):
-            BlockDev.fs_f2fs_wipe(self.loop_dev)
-
-        BlockDev.fs_wipe(self.loop_dev, True)
-
-        utils.run("mkfs.ext2 -F %s >/dev/null 2>&1" % self.loop_dev)
-
-        # ext2, not an f2fs file system
-        with self.assertRaises(GLib.GError):
-            BlockDev.fs_f2fs_wipe(self.loop_dev)
-
-        BlockDev.fs_wipe(self.loop_dev, True)
-
-
 class F2FSTestCheck(F2FSTestCase):
     def test_f2fs_check(self):
         """Verify that it is possible to check an f2fs file system"""

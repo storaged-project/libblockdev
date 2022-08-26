@@ -32,7 +32,6 @@ BDFSF2FSInfo* bd_fs_f2fs_info_copy (BDFSF2FSInfo *data);
 void bd_fs_f2fs_info_free (BDFSF2FSInfo *data);
 
 gboolean bd_fs_f2fs_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
-gboolean bd_fs_f2fs_wipe (const gchar *device, GError **error);
 gboolean bd_fs_f2fs_check (const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_fs_f2fs_repair (const gchar *device, const BDExtraArg **extra, GError **error);
 BDFSF2FSInfo* bd_fs_f2fs_get_info (const gchar *device, GError **error);

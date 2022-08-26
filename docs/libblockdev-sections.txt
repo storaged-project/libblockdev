@@ -631,7 +631,6 @@ bd_fs_ext2_set_label
 bd_fs_ext2_check_label
 bd_fs_ext2_set_uuid
 bd_fs_ext2_check_uuid
-bd_fs_ext2_wipe
 bd_fs_ext3_check
 bd_fs_ext3_get_info
 bd_fs_ext3_info_copy
@@ -643,7 +642,6 @@ bd_fs_ext3_set_label
 bd_fs_ext3_check_label
 bd_fs_ext3_set_uuid
 bd_fs_ext3_check_uuid
-bd_fs_ext3_wipe
 bd_fs_ext4_check
 bd_fs_ext4_get_info
 bd_fs_ext4_info_copy
@@ -655,7 +653,6 @@ bd_fs_ext4_set_label
 bd_fs_ext4_check_label
 bd_fs_ext4_set_uuid
 bd_fs_ext4_check_uuid
-bd_fs_ext4_wipe
 BDFSXfsInfo
 bd_fs_xfs_check
 bd_fs_xfs_get_info
@@ -668,7 +665,6 @@ bd_fs_xfs_set_label
 bd_fs_xfs_check_label
 bd_fs_xfs_set_uuid
 bd_fs_xfs_check_uuid
-bd_fs_xfs_wipe
 BDFSVfatInfo
 bd_fs_vfat_check
 bd_fs_vfat_get_info
@@ -679,7 +675,6 @@ bd_fs_vfat_repair
 bd_fs_vfat_resize
 bd_fs_vfat_set_label
 bd_fs_vfat_check_label
-bd_fs_vfat_wipe
 BDFSTech
 BDFSTechMode
 BDFsResizeFlags
@@ -692,7 +687,6 @@ bd_fs_ntfs_repair
 bd_fs_ntfs_resize
 bd_fs_ntfs_set_label
 bd_fs_ntfs_check_label
-bd_fs_ntfs_wipe
 bd_fs_ntfs_info_copy
 bd_fs_ntfs_info_free
 bd_fs_ntfs_set_uuid
@@ -702,7 +696,6 @@ BDFSF2FSFeature
 bd_fs_f2fs_info_copy
 bd_fs_f2fs_info_free
 bd_fs_f2fs_mkfs
-bd_fs_f2fs_wipe
 bd_fs_f2fs_check
 bd_fs_f2fs_repair
 bd_fs_f2fs_get_info
@@ -717,7 +710,6 @@ bd_fs_nilfs2_set_label
 bd_fs_nilfs2_check_label
 bd_fs_nilfs2_set_uuid
 bd_fs_nilfs2_check_uuid
-bd_fs_nilfs2_wipe
 BDFSExfatInfo
 bd_fs_exfat_check
 bd_fs_exfat_get_info
@@ -727,13 +719,11 @@ bd_fs_exfat_mkfs
 bd_fs_exfat_repair
 bd_fs_exfat_set_label
 bd_fs_exfat_check_label
-bd_fs_exfat_wipe
 BDFSBtrfsInfo
 bd_fs_btrfs_get_info
 bd_fs_btrfs_info_copy
 bd_fs_btrfs_info_free
 bd_fs_btrfs_mkfs
-bd_fs_btrfs_wipe
 bd_fs_btrfs_check
 bd_fs_btrfs_repair
 bd_fs_btrfs_set_label
@@ -750,7 +740,6 @@ bd_fs_udf_set_label
 bd_fs_udf_check_label
 bd_fs_udf_set_uuid
 bd_fs_udf_check_uuid
-bd_fs_udf_wipe
 </SECTION>
 
 <SECTION>

@@ -189,50 +189,6 @@ class ExtMkfsWithLabel(ExtTestCase):
                                        info_function=BlockDev.fs_ext4_get_info)
 
 
-class ExtTestWipe(ExtTestCase):
-    def _test_ext_wipe(self, mkfs_function, wipe_function):
-        succ = mkfs_function(self.loop_dev, None)
-        self.assertTrue(succ)
-
-        succ = wipe_function(self.loop_dev)
-        self.assertTrue(succ)
-
-        # already wiped, should fail this time
-        with self.assertRaises(GLib.GError):
-            wipe_function(self.loop_dev)
-
-        utils.run("pvcreate -ff -y %s >/dev/null" % self.loop_dev)
-
-        # LVM PV signature, not an ext4 file system
-        with self.assertRaises(GLib.GError):
-            wipe_function(self.loop_dev)
-
-        BlockDev.fs_wipe(self.loop_dev, True)
-
-        utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
-
-        # vfat, not an ext4 file system
-        with self.assertRaises(GLib.GError):
-            wipe_function(self.loop_dev)
-
-        BlockDev.fs_wipe(self.loop_dev, True)
-
-    def test_ext2_wipe(self):
-        """Verify that it is possible to wipe an ext2 file system"""
-        self._test_ext_wipe(mkfs_function=BlockDev.fs_ext2_mkfs,
-                            wipe_function=BlockDev.fs_ext2_wipe)
-
-    def test_ext3_wipe(self):
-        """Verify that it is possible to wipe an ext3 file system"""
-        self._test_ext_wipe(mkfs_function=BlockDev.fs_ext3_mkfs,
-                            wipe_function=BlockDev.fs_ext3_wipe)
-
-    def test_ext4_wipe(self):
-        """Verify that it is possible to wipe an ext4 file system"""
-        self._test_ext_wipe(mkfs_function=BlockDev.fs_ext4_mkfs,
-                            wipe_function=BlockDev.fs_ext4_wipe)
-
-
 class ExtTestCheck(ExtTestCase):
     def _test_ext_check(self, mkfs_function, check_function):
         succ = mkfs_function(self.loop_dev, None)

@@ -16,7 +16,6 @@ BDFSVfatInfo* bd_fs_vfat_info_copy (BDFSVfatInfo *data);
 void bd_fs_vfat_info_free (BDFSVfatInfo *data);
 
 gboolean bd_fs_vfat_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
-gboolean bd_fs_vfat_wipe (const gchar *device, GError **error);
 gboolean bd_fs_vfat_check (const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError **error);
