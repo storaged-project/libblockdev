@@ -604,6 +604,7 @@ bd_fs_resize
 bd_fs_repair
 bd_fs_check
 bd_fs_set_label
+bd_fs_check_label
 bd_fs_get_size
 bd_fs_get_free_space
 bd_fs_can_resize
@@ -614,12 +615,21 @@ bd_fs_can_get_size
 bd_fs_can_get_free_space
 bd_fs_can_set_uuid
 bd_fs_set_uuid
+bd_fs_check_uuid
+BDFSConfigureFlags
+BDFSFeatureFlags
+BDFSFeatures
+bd_fs_features
+bd_fs_features_copy
+bd_fs_features_free
+BDFSFsckFlags
 BDFSMkfsOptions
 BDFSMkfsOptionsFlags
 bd_fs_can_mkfs
 bd_fs_mkfs
 bd_fs_mkfs_options_copy
 bd_fs_mkfs_options_free
+bd_fs_supported_filesystems
 bd_fs_ext2_check
 bd_fs_ext2_get_info
 bd_fs_ext2_info_copy
@@ -848,6 +858,7 @@ bd_nvme_self_test_log_free
 bd_nvme_self_test_log_copy
 bd_nvme_self_test_log_entry_free
 bd_nvme_self_test_log_entry_copy
+bd_nvme_self_test_result_to_string
 bd_nvme_device_self_test
 BDNVMEFormatSecureErase
 bd_nvme_format
