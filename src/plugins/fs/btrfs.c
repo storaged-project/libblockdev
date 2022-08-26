@@ -150,7 +150,7 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
  *
  */
 gboolean bd_fs_btrfs_mkfs (const gchar *device, const BDExtraArg **extra, GError **error) {
-    const gchar *args[4] = {"mkfs.btrfs", "-f", device, NULL};
+    const gchar *args[3] = {"mkfs.btrfs", device, NULL};
 
     if (!check_deps (&avail_deps, DEPS_MKFSBTRFS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
