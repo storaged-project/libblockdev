@@ -74,7 +74,7 @@ void bd_fs_mkfs_options_free (BDFSMkfsOptions *data) {
     g_free (data);
 }
 
-#define BD_FS_MKFS_OPTIONS (bd_fs_mkfs_options_get_type ())
+#define BD_FS_TYPE_MKFS_OPTIONS (bd_fs_mkfs_options_get_type ())
 
 GType bd_fs_mkfs_options_get_type () {
     static GType type = 0;
