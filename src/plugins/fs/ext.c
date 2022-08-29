@@ -253,6 +253,9 @@ static BDExtraArg **ext_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg
     if (options->no_discard)
         g_ptr_array_add (options_array, bd_extra_arg_new ("-E", "nodiscard"));
 
+    if (options->force)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-F", ""));
+
     if (extra) {
         for (extra_p = extra; *extra_p; extra_p++)
             g_ptr_array_add (options_array, bd_extra_arg_copy ((BDExtraArg *) *extra_p));
@@ -279,7 +282,7 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
 }
 
 static gboolean ext_mkfs (const gchar *device, const BDExtraArg **extra, const gchar *ext_version, GError **error) {
-    const gchar *args[6] = {"mke2fs", "-t", ext_version, "-F", device, NULL};
+    const gchar *args[5] = {"mke2fs", "-t", ext_version, device, NULL};
 
     if (!check_deps (&avail_deps, DEPS_MKE2FS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;

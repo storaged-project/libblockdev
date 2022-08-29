@@ -145,6 +145,9 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
     if (options->uuid)
         g_ptr_array_add (options_array, bd_extra_arg_new ("-i", options->uuid));
 
+    if (options->force)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-I", ""));
+
     if (extra) {
         for (extra_p = extra; *extra_p; extra_p++)
             g_ptr_array_add (options_array, bd_extra_arg_copy ((BDExtraArg *) *extra_p));
@@ -169,7 +172,7 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
  * Tech category: %BD_FS_TECH_VFAT-%BD_FS_TECH_MODE_MKFS
  */
 gboolean bd_fs_vfat_mkfs (const gchar *device, const BDExtraArg **extra, GError **error) {
-    const gchar *args[4] = {"mkfs.vfat", "-I", device, NULL};
+    const gchar *args[3] = {"mkfs.vfat", device, NULL};
 
     if (!check_deps (&avail_deps, DEPS_MKFSVFAT_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;

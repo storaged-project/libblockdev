@@ -127,6 +127,9 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
     if (options->no_discard)
         g_ptr_array_add (options_array, bd_extra_arg_new ("-K", ""));
 
+    if (options->force)
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-f", ""));
+
     if (extra) {
         for (extra_p = extra; *extra_p; extra_p++)
             g_ptr_array_add (options_array, bd_extra_arg_copy ((BDExtraArg *) *extra_p));
@@ -150,7 +153,7 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
  *
  */
 gboolean bd_fs_btrfs_mkfs (const gchar *device, const BDExtraArg **extra, GError **error) {
-    const gchar *args[4] = {"mkfs.btrfs", "-f", device, NULL};
+    const gchar *args[3] = {"mkfs.btrfs", device, NULL};
 
     if (!check_deps (&avail_deps, DEPS_MKFSBTRFS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;

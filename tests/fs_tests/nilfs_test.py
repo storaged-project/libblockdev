@@ -87,6 +87,7 @@ class NILFS2TestFeatures(NILFS2NoDevTestCase):
         self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.UUID)
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.DRY_RUN)
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.NODISCARD)
+        self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.FORCE)
 
         self.assertEqual(features.fsck, 0)
 

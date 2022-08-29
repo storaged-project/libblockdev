@@ -657,7 +657,7 @@ def mount(device, where, ro=False):
 
 def umount(what, retry=True):
     try:
-        os.system("umount %s >/dev/null 2>&1" % what)
+        os.system("umount -A -l %s >/dev/null 2>&1" % what)
         os.rmdir(what)
     except OSError as e:
         # retry the umount if the device is busy
