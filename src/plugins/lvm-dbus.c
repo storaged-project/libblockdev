@@ -453,6 +453,14 @@ static gchar** get_existing_objects (const gchar *obj_prefix, GError **error) {
     return ret;
 }
 
+
+/**
+ * get_object_path:
+ * @obj_id: get object path for an LVM object (vgname/lvname)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: (transfer full): object path
+ */
 static gchar* get_object_path (const gchar *obj_id, GError **error) {
     GVariant *args = NULL;
     GVariant *ret = NULL;
@@ -481,6 +489,15 @@ static gchar* get_object_path (const gchar *obj_id, GError **error) {
     return obj_path;
 }
 
+/**
+ * get_object_property:
+ * @obj_path: lvmdbusd object path
+ * @iface: interface on @obj_path object
+ * @property: property to get from @obj_path and @iface
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: (transfer full): object path
+ */
 static GVariant* get_object_property (const gchar *obj_path, const gchar *iface, const gchar *property, GError **error) {
     GVariant *args = NULL;
     GVariant *ret = NULL;
@@ -503,6 +520,15 @@ static GVariant* get_object_property (const gchar *obj_path, const gchar *iface,
     return real_ret;
 }
 
+/**
+ * get_lvm_object_property:
+ * @obj_id: LVM object to get the property for (vgname/lvname)
+ * @iface: interface where @property is defined
+ * @property: property to get from @obj_id and @iface
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: (transfer full): property variant
+ */
 static GVariant* get_lvm_object_property (const gchar *obj_id, const gchar *iface, const gchar *property, GError **error) {
     gchar *obj_path = NULL;
     GVariant *ret = NULL;
@@ -547,6 +573,22 @@ static gboolean unbox_params_and_add (GVariant *params, GVariantBuilder *builder
     return FALSE;
 }
 
+/**
+ * call_lvm_method
+ * @obj: lvmdbusd object path
+ * @intf: interface to call @method on
+ * @method: method to call
+ * @params: parameters for @method
+ * @extra_params: extra parameters for @method
+ * @extra_args: extra command line argument to be passed to the LVM command
+ * @task_id: (out): task ID to watch progress of the operation
+ * @progress_id: (out): progress ID to watch progress of the operation
+ * @lock_config: whether to lock %global_config_lock or not (if %FALSE is given, caller is responsible
+ *               for holding the lock for this call)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: (transfer full): return value of @method (variant)
+ */
 static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, guint64 *task_id, guint64 *progress_id, gboolean lock_config, GError **error) {
     GVariant *config = NULL;
     GVariant *devices = NULL;
@@ -662,6 +704,20 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
     return ret;
 }
 
+/**
+ * call_lvm_method_sync
+ * @obj: lvmdbusd object path
+ * @intf: interface to call @method on
+ * @method: method to call
+ * @params: parameters for @method
+ * @extra_params: extra parameters for @method
+ * @extra_args: extra command line argument to be passed to the LVM command
+ * @lock_config: whether to lock %global_config_lock or not (if %FALSE is given, caller is responsible
+ *               for holding the lock for this call)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether calling the method was successful or not
+ */
 static gboolean call_lvm_method_sync (const gchar *obj, const gchar *intf, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, gboolean lock_config, GError **error) {
     GVariant *ret = NULL;
     gchar *obj_path = NULL;
@@ -972,7 +1028,7 @@ static GVariant* get_vdo_properties (const gchar *vg_name, const gchar *pool_nam
     return ret;
 }
 
-static BDLVMPVdata* get_pv_data_from_props (GVariant *props, GError **error) {
+static BDLVMPVdata* get_pv_data_from_props (GVariant *props, GError **error UNUSED) {
     BDLVMPVdata *data = g_new0 (BDLVMPVdata, 1);
     GVariantDict dict;
     gchar *path = NULL;
@@ -981,6 +1037,7 @@ static BDLVMPVdata* get_pv_data_from_props (GVariant *props, GError **error) {
     gsize n_children = 0;
     gsize i = 0;
     gchar **tags = NULL;
+    GError *l_error = NULL;
 
     g_variant_dict_init (&dict, props);
 
@@ -1010,10 +1067,16 @@ static BDLVMPVdata* get_pv_data_from_props (GVariant *props, GError **error) {
         return data;
     }
 
-    vg_props = get_object_properties (path, VG_INTF, error);
+    vg_props = get_object_properties (path, VG_INTF, &l_error);
     g_variant_dict_clear (&dict);
-    if (!vg_props)
+    if (!vg_props) {
+        if (l_error) {
+            bd_utils_log_format (BD_UTILS_LOG_DEBUG, "Failed to get VG properties for PV %s: %s",
+                                 data->pv_name, l_error->message);
+            g_clear_error (&l_error);
+        }
         return data;
+    }
 
     g_variant_dict_init (&dict, vg_props);
     g_variant_dict_lookup (&dict, "Name", "s", &(data->vg_name));
@@ -1088,18 +1151,16 @@ static gchar* _lvm_data_lv_name (const gchar *vg_name, const gchar *lv_name, GEr
     g_variant_unref (prop);
 
     if (g_strcmp0 (segtype, "thin-pool") == 0)
-        prop = get_object_property (obj_path, THPOOL_INTF, "DataLv", error);
+        prop = get_object_property (obj_path, THPOOL_INTF, "DataLv", NULL);
     else if (g_strcmp0 (segtype, "cache-pool") == 0)
-        prop = get_object_property (obj_path, CACHE_POOL_INTF, "DataLv", error);
+        prop = get_object_property (obj_path, CACHE_POOL_INTF, "DataLv", NULL);
     else if (g_strcmp0 (segtype, "vdo-pool") == 0)
-        prop = get_object_property (obj_path, VDO_POOL_INTF, "DataLv", error);
+        prop = get_object_property (obj_path, VDO_POOL_INTF, "DataLv", NULL);
 
     g_free (segtype);
     g_free (obj_path);
-    if (!prop) {
-        g_clear_error (error);
+    if (!prop)
         return NULL;
-    }
     g_variant_get (prop, "o", &obj_path);
     g_variant_unref (prop);
 
@@ -1132,14 +1193,12 @@ static gchar* _lvm_metadata_lv_name (const gchar *vg_name, const gchar *lv_name,
     if (!obj_path)
         return NULL;
 
-    prop = get_object_property (obj_path, THPOOL_INTF, "MetaDataLv", error);
+    prop = get_object_property (obj_path, THPOOL_INTF, "MetaDataLv", NULL);
     if (!prop)
-        prop = get_object_property (obj_path, CACHE_POOL_INTF, "MetaDataLv", error);
+        prop = get_object_property (obj_path, CACHE_POOL_INTF, "MetaDataLv", NULL);
     g_free (obj_path);
-    if (!prop) {
-        g_clear_error (error);
+    if (!prop)
         return NULL;
-    }
     g_variant_get (prop, "o", &obj_path);
     g_variant_unref (prop);
 
@@ -1278,7 +1337,7 @@ static void _lvm_data_and_metadata_lvs (const gchar *vg_name, const gchar *lv_na
   return;
 }
 
-static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error) {
+static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error UNUSED) {
     BDLVMLVdata *data = g_new0 (BDLVMLVdata, 1);
     GVariantDict dict;
     GVariant *value = NULL;
@@ -1324,14 +1383,14 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error) {
 
     /* returns an object path for the VG */
     g_variant_dict_lookup (&dict, "Vg", "o", &path);
-    name = get_object_property (path, VG_INTF, "Name", error);
+    name = get_object_property (path, VG_INTF, "Name", NULL);
     g_free (path);
     g_variant_get (name, "s", &(data->vg_name));
     g_variant_unref (name);
 
     g_variant_dict_lookup (&dict, "OriginLv", "o", &path);
     if (g_strcmp0 (path, "/") != 0) {
-        name = get_object_property (path, LV_CMN_INTF, "Name", error);
+        name = get_object_property (path, LV_CMN_INTF, "Name", NULL);
         g_variant_get (name, "s", &(data->origin));
         g_variant_unref (name);
     }
@@ -1340,7 +1399,7 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error) {
 
     g_variant_dict_lookup (&dict, "PoolLv", "o", &path);
     if (g_strcmp0 (path, "/") != 0) {
-        name = get_object_property (path, LV_CMN_INTF, "Name", error);
+        name = get_object_property (path, LV_CMN_INTF, "Name", NULL);
         g_variant_get (name, "s", &(data->pool_lv));
         g_variant_unref (name);
     }
@@ -1351,7 +1410,7 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error) {
     if (path && g_strcmp0 (path, "/") != 0) {
         g_debug ("Have path");
         g_debug ("  %s", path);
-        name = get_object_property (path, PV_INTF, "Name", error);
+        name = get_object_property (path, PV_INTF, "Name", NULL);
         g_variant_get (name, "s", &(data->move_pv));
         g_variant_unref (name);
     }
@@ -1577,7 +1636,7 @@ guint64 bd_lvm_get_lv_physical_size (guint64 lv_size, guint64 pe_size, GError **
  *
  * Tech category: %BD_LVM_TECH_THIN_CALCS no mode (it is ignored)
  */
-guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean included, GError **error) {
+guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean included, GError **error UNUSED) {
     guint64 raw_md_size;
     pe_size = RESOLVE_PE_SIZE(pe_size);
 
@@ -1586,8 +1645,8 @@ guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean inclu
     else
         raw_md_size = (guint64) ceil (size * THPOOL_MD_FACTOR_NEW);
 
-    return MIN (bd_lvm_round_size_to_pe (raw_md_size, pe_size, TRUE, error),
-                bd_lvm_round_size_to_pe (BD_LVM_MAX_THPOOL_MD_SIZE, pe_size, TRUE, error));
+    return MIN (bd_lvm_round_size_to_pe (raw_md_size, pe_size, TRUE, NULL),
+                bd_lvm_round_size_to_pe (BD_LVM_MAX_THPOOL_MD_SIZE, pe_size, TRUE, NULL));
 }
 
 /**
@@ -2760,11 +2819,11 @@ BDLVMLVdata* bd_lvm_lvinfo (const gchar *vg_name, const gchar *lv_name, GError *
 
     if (g_strcmp0 (ret->segtype, "thin-pool") == 0 ||
         g_strcmp0 (ret->segtype, "cache-pool") == 0) {
-        ret->data_lv = _lvm_data_lv_name (vg_name, lv_name, error);
-        ret->metadata_lv = _lvm_metadata_lv_name (vg_name, lv_name, error);
+        ret->data_lv = _lvm_data_lv_name (vg_name, lv_name, NULL);
+        ret->metadata_lv = _lvm_metadata_lv_name (vg_name, lv_name, NULL);
     }
     if (g_strcmp0 (ret->segtype, "vdo-pool") == 0) {
-        ret->data_lv = _lvm_data_lv_name (vg_name, lv_name, error);
+        ret->data_lv = _lvm_data_lv_name (vg_name, lv_name, NULL);
     }
 
     return ret;
@@ -2785,14 +2844,14 @@ BDLVMLVdata* bd_lvm_lvinfo_tree (const gchar *vg_name, const gchar *lv_name, GEr
 
     if (g_strcmp0 (ret->segtype, "thin-pool") == 0 ||
         g_strcmp0 (ret->segtype, "cache-pool") == 0) {
-        ret->data_lv = _lvm_data_lv_name (vg_name, lv_name, error);
-        ret->metadata_lv = _lvm_metadata_lv_name (vg_name, lv_name, error);
+        ret->data_lv = _lvm_data_lv_name (vg_name, lv_name, NULL);
+        ret->metadata_lv = _lvm_metadata_lv_name (vg_name, lv_name, NULL);
     }
     if (g_strcmp0 (ret->segtype, "vdo-pool") == 0) {
-        ret->data_lv = _lvm_data_lv_name (vg_name, lv_name, error);
+        ret->data_lv = _lvm_data_lv_name (vg_name, lv_name, NULL);
     }
-    ret->segs = _lvm_segs (vg_name, lv_name, error);
-    _lvm_data_and_metadata_lvs (vg_name, lv_name, &ret->data_lvs, &ret->metadata_lvs, error);
+    ret->segs = _lvm_segs (vg_name, lv_name, NULL);
+    _lvm_data_and_metadata_lvs (vg_name, lv_name, &ret->data_lvs, &ret->metadata_lvs, NULL);
 
     return ret;
 }
