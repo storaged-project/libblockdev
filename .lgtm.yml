@@ -20,5 +20,6 @@ extraction:
       - "libbytesize-dev"
       - "libnss3-dev"
       - "libndctl-dev"
+      - "libext2fs-dev"
     configure:
       command: "./autogen.sh && ./configure --without-nvme"

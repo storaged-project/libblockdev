@@ -233,7 +233,8 @@ AS_IF([test "x$with_fs" != "xno"],
        LIBBLOCKDEV_PKG_CHECK_MODULES([MOUNT], [mount >= 2.23.0])
        # new versions of libmount has some new functions we can use
        AS_IF([$PKG_CONFIG --atleast-version=2.30.0 mount],
-             [AC_DEFINE([LIBMOUNT_NEW_ERR_API])], [])]
+             [AC_DEFINE([LIBMOUNT_NEW_ERR_API])], [])
+       LIBBLOCKDEV_PKG_CHECK_MODULES([EXT2FS], [ext2fs e2p])]
       [])
 
 AS_IF([test "x$with_tools" != "xno"],

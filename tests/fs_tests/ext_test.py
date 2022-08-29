@@ -56,11 +56,6 @@ class ExtTestAvailability(ExtNoDevTestCase):
             with self.assertRaisesRegex(GLib.GError, "The 'e2fsck' utility is not available"):
                 BlockDev.fs_is_tech_avail(tech, BlockDev.FSTechMode.REPAIR)
 
-        # now try without dumpe2fs
-        with utils.fake_path(all_but="dumpe2fs"):
-            with self.assertRaisesRegex(GLib.GError, "The 'dumpe2fs' utility is not available"):
-                BlockDev.fs_is_tech_avail(tech, BlockDev.FSTechMode.QUERY)
-
         # now try without tune2fs
         with utils.fake_path(all_but="tune2fs"):
             with self.assertRaisesRegex(GLib.GError, "The 'tune2fs' utility is not available"):
