@@ -70,7 +70,7 @@ typedef struct BDFSFeatures {
     const gchar *partition_type;
 } BDFSFeatures;
 
-const BDFSFeatures* bd_fs_features (const gchar *type, GError **error);
+const BDFSFeatures* bd_fs_features (const gchar *fstype, GError **error);
 
 gboolean bd_fs_can_mkfs (const gchar *type, BDFSMkfsOptionsFlags *options, gchar **required_utility, GError **error);
 gboolean bd_fs_can_resize (const gchar *type, BDFsResizeFlags *mode, gchar **required_utility, GError **error);

@@ -1884,7 +1884,7 @@ gboolean bd_fs_mkfs (const gchar *device, const gchar *fstype, BDFSMkfsOptions *
 /**
  * bd_fs_features:
  * @fstype: name of the filesystem to get features for (e.g. "ext4")
- * @error (allow-none): (out): place to store error (if any)
+ * @error: (allow-none): (out): place to store error (if any)
  *
  * Returns (transfer-none): features supported by @fstype, see %BDFSFeatures for more information.
  *

@@ -74,7 +74,7 @@ void bd_fs_mkfs_options_free (BDFSMkfsOptions *data) {
     g_free (data);
 }
 
-#define BD_FS_MKFS_OPTIONS (bd_fs_mkfs_options_get_type ())
+#define BD_FS_TYPE_MKFS_OPTIONS (bd_fs_mkfs_options_get_type ())
 
 GType bd_fs_mkfs_options_get_type () {
     static GType type = 0;
@@ -2652,7 +2652,7 @@ GType bd_fs_features_get_type () {
 /**
  * bd_fs_features:
  * @fstype: name of the filesystem to get features for (e.g. "ext4")
- * @error (allow-none): (out): place to store error (if any)
+ * @error: (allow-none): (out): place to store error (if any)
  *
  * Returns (transfer-none): features supported by @fstype, see %BDFSFeatures for more information.
  *
