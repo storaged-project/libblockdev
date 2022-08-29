@@ -40,6 +40,7 @@ class UdfTestFeatures(UdfNoDevTestCase):
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.UUID)
         self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.DRY_RUN)
         self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.NODISCARD)
+        self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.NOPT)
 
         self.assertEqual(features.fsck, 0)
 
@@ -47,6 +48,7 @@ class UdfTestFeatures(UdfNoDevTestCase):
         self.assertTrue(features.configure & BlockDev.FSConfigureFlags.UUID)
 
         self.assertTrue(features.features & BlockDev.FSFeatureFlags.OWNERS)
+        self.assertTrue(features.features & BlockDev.FSFeatureFlags.PARTITION_TABLE)
 
         self.assertEqual(features.partition_id, "0x07")
         self.assertEqual(features.partition_type, "ebd0a0a2-b9e5-4433-87c0-68b6b72699c7")

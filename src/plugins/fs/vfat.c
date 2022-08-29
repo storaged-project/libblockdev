@@ -134,6 +134,8 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
     GPtrArray *options_array = g_ptr_array_new ();
     const BDExtraArg **extra_p = NULL;
     gchar *label;
+    UtilDep dep = {"mkfs.vfat", "4.2", "--help", "mkfs.fat\\s+([\\d\\.]+).+"};
+    gboolean new_vfat = FALSE;
 
     if (options->label) {
         /* convert the label uppercase */
@@ -147,6 +149,15 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
 
     if (options->force)
         g_ptr_array_add (options_array, bd_extra_arg_new ("-I", ""));
+
+    if (options->no_pt) {
+        /* only mkfs.vfat >= 4.2 (sometimes) creates the partition table */
+        new_vfat = bd_utils_check_util_version (dep.name, dep.version,
+                                                dep.ver_arg, dep.ver_regexp,
+                                                NULL);
+        if (new_vfat)
+            g_ptr_array_add (options_array, bd_extra_arg_new ("--mbr=no", ""));
+    }
 
     if (extra) {
         for (extra_p = extra; *extra_p; extra_p++)

@@ -34,6 +34,7 @@ typedef enum {
  * @force: whether to run mkfs with the `--force` (or similar) option, the behaviour of this
  *         option depends on the filesystem, but in general it allows overwriting other
  *         preexisting formats detected on the device
+ * @no_pt: whether to disable (protective) partition table creation during mkfs
  * @reserve: reserve for future expansion
  */
 typedef struct BDFSMkfsOptions {
@@ -42,6 +43,7 @@ typedef struct BDFSMkfsOptions {
     gboolean dry_run;
     gboolean no_discard;
     gboolean force;
+    gboolean no_pt;
     guint8 reserve[32];
 } BDFSMkfsOptions;
 
@@ -62,6 +64,7 @@ BDFSMkfsOptions* bd_fs_mkfs_options_copy (BDFSMkfsOptions *data) {
     ret->dry_run = data->dry_run;
     ret->no_discard = data->no_discard;
     ret->force = data->force;
+    ret->no_pt = data->no_pt;
 
     return ret;
 }
@@ -1141,6 +1144,7 @@ typedef enum {
     BD_FS_MKFS_DRY_RUN   = 1 << 2,
     BD_FS_MKFS_NODISCARD = 1 << 3,
     BD_FS_MKFS_FORCE     = 1 << 4,
+    BD_FS_MKFS_NOPT      = 1 << 5,
 } BDFSMkfsOptionsFlags;
 
 /**
@@ -2453,7 +2457,8 @@ typedef enum {
 } BDFSFsckFlags;
 
 typedef enum {
-    BD_FS_FEATURE_OWNERS  = 1 << 1
+    BD_FS_FEATURE_OWNERS  = 1 << 1,
+    BD_FS_FEATURE_PARTITION_TABLE = 1 << 2
 } BDFSFeatureFlags;
 
 /**

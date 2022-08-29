@@ -131,6 +131,7 @@ class F2FSTestFeatures(F2FSNoDevTestCase):
         self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.DRY_RUN)
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.NODISCARD)
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.FORCE)
+        self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.NOPT)
 
         self.assertTrue(features.fsck & BlockDev.FSFsckFlags.CHECK)
         self.assertTrue(features.fsck & BlockDev.FSFsckFlags.REPAIR)
@@ -138,6 +139,7 @@ class F2FSTestFeatures(F2FSNoDevTestCase):
         self.assertEqual(features.configure, 0)
 
         self.assertTrue(features.features & BlockDev.FSFeatureFlags.OWNERS)
+        self.assertFalse(features.features & BlockDev.FSFeatureFlags.PARTITION_TABLE)
 
         self.assertEqual(features.partition_id, "0x83")
         self.assertEqual(features.partition_type, "0fc63daf-8483-4772-8e79-3d69d8477de4")

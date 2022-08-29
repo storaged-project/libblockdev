@@ -88,6 +88,7 @@ class NILFS2TestFeatures(NILFS2NoDevTestCase):
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.DRY_RUN)
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.NODISCARD)
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.FORCE)
+        self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.NOPT)
 
         self.assertEqual(features.fsck, 0)
 
@@ -95,6 +96,7 @@ class NILFS2TestFeatures(NILFS2NoDevTestCase):
         self.assertTrue(features.configure & BlockDev.FSConfigureFlags.UUID)
 
         self.assertTrue(features.features & BlockDev.FSFeatureFlags.OWNERS)
+        self.assertFalse(features.features & BlockDev.FSFeatureFlags.PARTITION_TABLE)
 
         self.assertEqual(features.partition_id, "0x83")
         self.assertEqual(features.partition_type, "0fc63daf-8483-4772-8e79-3d69d8477de4")

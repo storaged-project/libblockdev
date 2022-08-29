@@ -116,7 +116,7 @@ def _get_extra(extra, kwargs, cmd_extra=True):
 
 
 class FSMkfsOptions(BlockDev.FSMkfsOptions):
-    def __new__(cls, label=None, uuid=None, dry_run=False, no_discard=False, force=False):
+    def __new__(cls, label=None, uuid=None, dry_run=False, no_discard=False, force=False, no_pt=False):
         ret = BlockDev.FSMkfsOptions()
         ret.__class__ = cls
 
@@ -125,6 +125,7 @@ class FSMkfsOptions(BlockDev.FSMkfsOptions):
         ret.dry_run = dry_run
         ret.no_discard = no_discard
         ret.force = force
+        ret.no_pt = no_pt
 
         return ret
 FSMkfsOptions = override(FSMkfsOptions)
@@ -1361,7 +1362,3 @@ __all__.append("s390")
 
 utils = ErrorProxy("utils", BlockDev, [(GLib.Error, UtilsError)])
 __all__.append("utils")
-
-
-# for enums with only single member GIO doesn't create the "short" name, so lets add it here
-BlockDev.FSFeatureFlags.OWNERS = BlockDev.FSFeatureFlags.FS_FEATURE_OWNERS
