@@ -180,20 +180,6 @@ gboolean bd_fs_nilfs2_mkfs (const gchar *device, const BDExtraArg **extra, GErro
 }
 
 /**
- * bd_fs_nilfs2_wipe:
- * @device: the device to wipe a nilfs signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether the nilfs signature was successfully wiped from the @device or
- *          not
- *
- * Tech category: %BD_FS_TECH_NILFS2-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_nilfs2_wipe (const gchar *device, GError **error) {
-    return wipe_fs (device, "nilfs2", TRUE, error);
-}
-
-/**
  * bd_fs_nilfs2_set_label:
  * @device: the device containing the file system to set label for
  * @label: label to set

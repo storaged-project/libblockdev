@@ -153,37 +153,6 @@ class VfatMkfsWithLabel(VfatTestCase):
         self.assertEqual(fi.label, "TEST_LABEL")
 
 
-class VfatTestWipe(VfatTestCase):
-    def test_vfat_wipe(self):
-        """Verify that it is possible to wipe an vfat file system"""
-
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
-        self.assertTrue(succ)
-
-        succ = BlockDev.fs_vfat_wipe(self.loop_dev)
-        self.assertTrue(succ)
-
-        # already wiped, should fail this time
-        with self.assertRaises(GLib.GError):
-            BlockDev.fs_vfat_wipe(self.loop_dev)
-
-        utils.run("pvcreate -ff -y %s >/dev/null" % self.loop_dev)
-
-        # LVM PV signature, not an vfat file system
-        with self.assertRaises(GLib.GError):
-            BlockDev.fs_vfat_wipe(self.loop_dev)
-
-        BlockDev.fs_wipe(self.loop_dev, True)
-
-        utils.run("mkfs.ext2 -F %s >/dev/null 2>&1" % self.loop_dev)
-
-        # ext2, not an vfat file system
-        with self.assertRaises(GLib.GError):
-            BlockDev.fs_vfat_wipe(self.loop_dev)
-
-        BlockDev.fs_wipe(self.loop_dev, True)
-
-
 class VfatTestCheck(VfatTestCase):
     def test_vfat_check(self):
         """Verify that it is possible to check an vfat file system"""

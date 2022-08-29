@@ -1355,42 +1355,6 @@ gboolean bd_fs_ext3_mkfs (const gchar *device, const BDExtraArg **extra, GError 
 gboolean bd_fs_ext4_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
 
 /**
- * bd_fs_ext2_wipe:
- * @device: the device to wipe an ext2 signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether an ext2 signature was successfully wiped from the @device or
- *          not
- *
- * Tech category: %BD_FS_TECH_EXT2-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_ext2_wipe (const gchar *device, GError **error);
-
-/**
- * bd_fs_ext3_wipe:
- * @device: the device to wipe an ext3 signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether an ext3 signature was successfully wiped from the @device or
- *          not
- *
- * Tech category: %BD_FS_TECH_EXT3-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_ext3_wipe (const gchar *device, GError **error);
-
-/**
- * bd_fs_ext4_wipe:
- * @device: the device to wipe an ext4 signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether an ext4 signature was successfully wiped from the @device or
- *          not
- *
- * Tech category: %BD_FS_TECH_EXT4-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_ext4_wipe (const gchar *device, GError **error);
-
-/**
  * bd_fs_ext2_check:
  * @device: the device the file system on which to check
  * @extra: (nullable) (array zero-terminated=1): extra options for the check (right now
@@ -1725,18 +1689,6 @@ gboolean bd_fs_ext4_resize (const gchar *device, guint64 new_size, const BDExtra
 gboolean bd_fs_xfs_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
 
 /**
- * bd_fs_xfs_wipe:
- * @device: the device to wipe an xfs signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether an xfs signature was successfully wiped from the @device or
- *          not
- *
- * Tech category: %BD_FS_TECH_XFS-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_xfs_wipe (const gchar *device, GError **error);
-
-/**
  * bd_fs_xfs_check:
  * @device: the device containing the file system to check
  * @error: (out) (optional): place to store error (if any)
@@ -1849,18 +1801,6 @@ gboolean bd_fs_xfs_resize (const gchar *mpoint, guint64 new_size, const BDExtraA
 gboolean bd_fs_vfat_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
 
 /**
- * bd_fs_vfat_wipe:
- * @device: the device to wipe an vfat signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether an vfat signature was successfully wiped from the @device or
- *          not
- *
- * Tech category: %BD_FS_TECH_VFAT-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_vfat_wipe (const gchar *device, GError **error);
-
-/**
  * bd_fs_vfat_check:
  * @device: the device containing the file system to check
  * @extra: (nullable) (array zero-terminated=1): extra options for the repair (right now
@@ -1949,17 +1889,6 @@ gboolean bd_fs_vfat_resize (const gchar *device, guint64 new_size, GError **erro
  * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_MKFS
  */
 gboolean bd_fs_ntfs_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
-
-/**
- * bd_fs_ntfs_wipe:
- * @device: the device to wipe an ntfs signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether an ntfs signature was successfully wiped from the @device or not
- *
- * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_ntfs_wipe (const gchar *device, GError **error);
 
 /**
  * bd_fs_ntfs_check:
@@ -2075,18 +2004,6 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error);
 gboolean bd_fs_f2fs_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
 
 /**
- * bd_fs_f2fs_wipe:
- * @device: the device to wipe an f2fs signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether an f2fs signature was successfully wiped from the @device or
- *          not
- *
- * Tech category: %BD_FS_TECH_F2FS-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_f2fs_wipe (const gchar *device, GError **error);
-
-/**
  * bd_fs_f2fs_check:
  * @device: the device containing the file system to check
  * @extra: (nullable) (array zero-terminated=1): extra options for the repair (right now
@@ -2153,18 +2070,6 @@ gboolean bd_fs_f2fs_resize (const gchar *device, guint64 new_size, gboolean safe
  * Tech category: %BD_FS_TECH_NILFS2-%BD_FS_TECH_MODE_MKFS
  */
 gboolean bd_fs_nilfs2_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
-
-/**
- * bd_fs_nilfs2_wipe:
- * @device: the device to wipe a nilfs signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether the nilfs signature was successfully wiped from the @device or
- *          not
- *
- * Tech category: %BD_FS_TECH_NILFS2-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_nilfs2_wipe (const gchar *device, GError **error);
 
 /**
  * bd_fs_nilfs2_set_label:
@@ -2255,18 +2160,6 @@ gboolean bd_fs_nilfs2_resize (const gchar *device, guint64 new_size, GError **er
 gboolean bd_fs_exfat_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
 
 /**
- * bd_fs_exfat_wipe:
- * @device: the device to wipe a exfat signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether the exfat signature was successfully wiped from the @device or
- *          not
- *
- * Tech category: %BD_FS_TECH_EXFAT-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_exfat_wipe (const gchar *device, GError **error);
-
-/**
  * bd_fs_exfat_check:
  * @device: the device containing the file system to check
  * @extra: (nullable) (array zero-terminated=1): extra options for the repair (right now
@@ -2342,18 +2235,6 @@ BDFSExfatInfo* bd_fs_exfat_get_info (const gchar *device, GError **error);
  *
  */
 gboolean bd_fs_btrfs_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
-
-/**
- * bd_fs_btrfs_wipe:
- * @device: the device to wipe a Btrfs signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether the Btrfs signature was successfully wiped from the @device or
- *          not
- *
- * Tech category: %BD_FS_TECH_BTRFS-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_btrfs_wipe (const gchar *device, GError **error);
 
 /**
  * bd_fs_btrfs_check:
@@ -2491,18 +2372,6 @@ gboolean bd_fs_btrfs_resize (const gchar *mpoint, guint64 new_size, const BDExtr
  * Tech category: %BD_FS_TECH_UDF-%BD_FS_TECH_MODE_MKFS
  */
 gboolean bd_fs_udf_mkfs (const gchar *device, const gchar *media_type, gchar *revision, guint64 block_size, const BDExtraArg **extra, GError **error);
-
-/**
- * bd_fs_udf_wipe:
- * @device: the device to wipe a UDF signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether the UDF signature was successfully wiped from the @device or
- *          not
- *
- * Tech category: %BD_FS_TECH_UDF-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_udf_wipe (const gchar *device, GError **error);
 
 /**
  * bd_fs_udf_set_label:

@@ -218,20 +218,6 @@ gboolean bd_fs_f2fs_mkfs (const gchar *device, const BDExtraArg **extra, GError 
 }
 
 /**
- * bd_fs_f2fs_wipe:
- * @device: the device to wipe an f2fs signature from
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether an f2fs signature was successfully wiped from the @device or
- *          not
- *
- * Tech category: %BD_FS_TECH_F2FS-%BD_FS_TECH_MODE_WIPE
- */
-gboolean bd_fs_f2fs_wipe (const gchar *device, GError **error) {
-    return wipe_fs (device, "f2fs", TRUE, error);
-}
-
-/**
  * bd_fs_f2fs_check:
  * @device: the device containing the file system to check
  * @extra: (nullable) (array zero-terminated=1): extra options for the repair (right now

@@ -16,7 +16,6 @@ BDFSNILFS2Info* bd_fs_nilfs2_info_copy (BDFSNILFS2Info *data);
 void bd_fs_nilfs2_info_free (BDFSNILFS2Info *data);
 
 gboolean bd_fs_nilfs2_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
-gboolean bd_fs_nilfs2_wipe (const gchar *device, GError **error);
 gboolean bd_fs_nilfs2_set_label (const gchar *device, const gchar *label, GError **error);
 gboolean bd_fs_nilfs2_check_label (const gchar *label, GError **error);
 gboolean bd_fs_nilfs2_set_uuid (const gchar *device, const gchar *uuid, GError **error);

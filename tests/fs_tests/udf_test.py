@@ -91,37 +91,6 @@ class UdfTestMkfs(UdfTestCase):
         self.assertEqual(fi.block_size, 4096)
 
 
-class UdfTestWipe(UdfTestCase):
-    def test_udf_wipe(self):
-        """Verify that it is possible to wipe an udf file system"""
-
-        succ = BlockDev.fs_udf_mkfs(self.loop_dev, None)
-        self.assertTrue(succ)
-
-        succ = BlockDev.fs_udf_wipe(self.loop_dev)
-        self.assertTrue(succ)
-
-        # already wiped, should fail this time
-        with self.assertRaises(GLib.GError):
-            BlockDev.fs_udf_wipe(self.loop_dev)
-
-        utils.run("pvcreate -ff -y %s >/dev/null" % self.loop_dev)
-
-        # LVM PV signature, not an udf file system
-        with self.assertRaises(GLib.GError):
-            BlockDev.fs_udf_wipe(self.loop_dev)
-
-        BlockDev.fs_wipe(self.loop_dev, True)
-
-        utils.run("mkfs.ext2 -F %s >/dev/null 2>&1" % self.loop_dev)
-
-        # ext2, not an udf file system
-        with self.assertRaises(GLib.GError):
-            BlockDev.fs_udf_wipe(self.loop_dev)
-
-        BlockDev.fs_wipe(self.loop_dev, True)
-
-
 class UdfGetInfo(UdfTestCase):
     def test_udf_get_info(self):
         """Verify that it is possible to get info about an udf file system"""

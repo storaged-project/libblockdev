@@ -92,37 +92,6 @@ class BtrfsMkfsWithLabel(BtrfsTestCase):
         self.assertEqual(fi.label, "test_label")
 
 
-class BtrfsTestWipe(BtrfsTestCase):
-    def test_btrfs_wipe(self):
-        """Verify that it is possible to wipe an exfat file system"""
-
-        succ = BlockDev.fs_btrfs_mkfs(self.loop_dev, None)
-        self.assertTrue(succ)
-
-        succ = BlockDev.fs_btrfs_wipe(self.loop_dev)
-        self.assertTrue(succ)
-
-        # already wiped, should fail this time
-        with self.assertRaises(GLib.GError):
-            BlockDev.fs_btrfs_wipe(self.loop_dev)
-
-        utils.run("pvcreate -ff -y %s >/dev/null" % self.loop_dev)
-
-        # LVM PV signature, not a btrfs file system
-        with self.assertRaises(GLib.GError):
-            BlockDev.fs_btrfs_wipe(self.loop_dev)
-
-        BlockDev.fs_wipe(self.loop_dev, True)
-
-        utils.run("mkfs.ext2 -F %s >/dev/null 2>&1" % self.loop_dev)
-
-        # ext2, not a btrfs file system
-        with self.assertRaises(GLib.GError):
-            BlockDev.fs_btrfs_wipe(self.loop_dev)
-
-        BlockDev.fs_wipe(self.loop_dev, True)
-
-
 class BtrfsTestCheck(BtrfsTestCase):
     def test_btrfs_check(self):
         """Verify that it is possible to check an btrfs file system"""
@@ -277,7 +246,7 @@ class BtrfsMultiDevice(BtrfsTestCase):
 
     def _clean_up(self):
         utils.umount(self.mount_dir)
-        BlockDev.fs_btrfs_wipe(self.loop_dev2)
+        BlockDev.fs_wipe(self.loop_dev2, True)
 
         super(BtrfsMultiDevice, self)._clean_up()
 

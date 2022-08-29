@@ -19,7 +19,6 @@ BDFSUdfInfo* bd_fs_udf_info_copy (BDFSUdfInfo *data);
 void bd_fs_udf_info_free (BDFSUdfInfo *data);
 
 gboolean bd_fs_udf_mkfs (const gchar *device, const gchar *media_type, gchar *revision, guint64 block_size, const BDExtraArg **extra, GError **error);
-gboolean bd_fs_udf_wipe (const gchar *device, GError **error);
 gboolean bd_fs_udf_set_label (const gchar *device, const gchar *label, GError **error);
 gboolean bd_fs_udf_check_label (const gchar *label, GError **error);
 gboolean bd_fs_udf_set_uuid (const gchar *device, const gchar *uuid, GError **error);
