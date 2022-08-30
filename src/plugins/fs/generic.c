@@ -264,9 +264,9 @@ static const BDFSInfo fs_info[BD_FS_LAST_FS] = {
       .repair_util = NULL,
       .resize_util = "nilfs-resize",
       .resize_mode = fs_features[BD_FS_TECH_NILFS2].resize,
-      .label_util = "tune-nilfs",
-      .info_util = "tune-nilfs",
-      .uuid_util = "tune-nilfs" },
+      .label_util = "nilfs-tune",
+      .info_util = "nilfs-tune",
+      .uuid_util = "nilfs-tune" },
     /* EXFAT */
     { .type = "exfat",
       .mkfs_util = "mkfs.exfat",
