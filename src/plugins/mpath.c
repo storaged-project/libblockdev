@@ -415,6 +415,7 @@ gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error) {
                                             names->name);
                 g_free (dev_path);
                 dm_task_destroy (task_names);
+                g_strfreev (deps);
                 return FALSE;
             }
             for (dev_name = deps; !ret && *dev_name; dev_name++)
