@@ -3671,8 +3671,9 @@ gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name,
 gboolean bd_lvm_cache_attach (const gchar *vg_name, const gchar *data_lv, const gchar *cache_pool_lv, const BDExtraArg **extra, GError **error) {
     GVariantBuilder builder;
     GVariant *params = NULL;
-    g_autofree gchar *lv_id = NULL;
+    gchar *lv_id = NULL;
     g_autofree gchar *lv_obj_path = NULL;
+    gboolean ret = FALSE;
 
     lv_id = g_strdup_printf ("%s/%s", vg_name, data_lv);
     lv_obj_path = get_object_path (lv_id, error);
@@ -3686,7 +3687,9 @@ gboolean bd_lvm_cache_attach (const gchar *vg_name, const gchar *data_lv, const 
 
     lv_id = g_strdup_printf ("%s/%s", vg_name, cache_pool_lv);
 
-    return call_lvm_obj_method_sync (lv_id, CACHE_POOL_INTF, "CacheLv", params, NULL, extra, TRUE, error);
+    ret = call_lvm_obj_method_sync (lv_id, CACHE_POOL_INTF, "CacheLv", params, NULL, extra, TRUE, error);
+    g_free (lv_id);
+    return ret;
 }
 
 /**
@@ -3807,7 +3810,7 @@ gboolean bd_lvm_cache_create_cached_lv (const gchar *vg_name, const gchar *lv_na
 gboolean bd_lvm_writecache_attach (const gchar *vg_name, const gchar *data_lv, const gchar *cache_lv, const BDExtraArg **extra, GError **error) {
     GVariantBuilder builder;
     GVariant *params = NULL;
-    g_autofree gchar *lv_id = NULL;
+    gchar *lv_id = NULL;
     g_autofree gchar *lv_obj_path = NULL;
     gboolean success = FALSE;
 
@@ -3832,7 +3835,9 @@ gboolean bd_lvm_writecache_attach (const gchar *vg_name, const gchar *data_lv, c
 
     lv_id = g_strdup_printf ("%s/%s", vg_name, cache_lv);
 
-    return call_lvm_obj_method_sync (lv_id, LV_INTF, "WriteCacheLv", params, NULL, extra, TRUE, error);
+    success = call_lvm_obj_method_sync (lv_id, LV_INTF, "WriteCacheLv", params, NULL, extra, TRUE, error);
+    g_free (lv_id);
+    return success;
 }
 
 /**
