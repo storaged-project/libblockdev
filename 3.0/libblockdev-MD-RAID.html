@@ -1,0 +1,1694 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>MD RAID: libblockdev Reference Manual for libblockdev 2.99.</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 2.99.">
+<link rel="up" href="ch01.html" title="libblockdev Reference Manual">
+<link rel="prev" href="libblockdev-LVM.html" title="LVM">
+<link rel="next" href="libblockdev-Mpath.html" title="Mpath">
+<meta name="generator" content="GTK-Doc V1.33.1 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#libblockdev-MD-RAID.description" class="shortcut">Description</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="libblockdev-LVM.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="libblockdev-Mpath.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="refentry">
+<a name="libblockdev-MD-RAID"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libblockdev-MD-RAID.top_of_page"></a>MD RAID</span></h2>
+<p>MD RAID — plugin for basic operations with MD RAID</p>
+</td>
+<td class="gallery_image" valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1">
+<a name="libblockdev-MD-RAID.functions"></a><h2>Functions</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="functions_proto_type">
+<col class="functions_proto_name">
+</colgroup>
+<tbody>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-check-deps" title="bd_md_check_deps ()">bd_md_check_deps</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-init" title="bd_md_init ()">bd_md_init</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-close" title="bd_md_close ()">bd_md_close</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-error-quark" title="bd_md_error_quark ()">bd_md_error_quark</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-MD-RAID.html#BDMDExamineData" title="BDMDExamineData"><span class="returnvalue">BDMDExamineData</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-examine-data-copy" title="bd_md_examine_data_copy ()">bd_md_examine_data_copy</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-examine-data-free" title="bd_md_examine_data_free ()">bd_md_examine_data_free</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-detail-data-free" title="bd_md_detail_data_free ()">bd_md_detail_data_free</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-MD-RAID.html#BDMDDetailData" title="BDMDDetailData"><span class="returnvalue">BDMDDetailData</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-detail-data-copy" title="bd_md_detail_data_copy ()">bd_md_detail_data_copy</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-get-superblock-size" title="bd_md_get_superblock_size ()">bd_md_get_superblock_size</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-create" title="bd_md_create ()">bd_md_create</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-destroy" title="bd_md_destroy ()">bd_md_destroy</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-deactivate" title="bd_md_deactivate ()">bd_md_deactivate</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-activate" title="bd_md_activate ()">bd_md_activate</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-run" title="bd_md_run ()">bd_md_run</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-nominate" title="bd_md_nominate ()">bd_md_nominate</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-denominate" title="bd_md_denominate ()">bd_md_denominate</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-add" title="bd_md_add ()">bd_md_add</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-remove" title="bd_md_remove ()">bd_md_remove</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-MD-RAID.html#BDMDExamineData" title="BDMDExamineData"><span class="returnvalue">BDMDExamineData</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-examine" title="bd_md_examine ()">bd_md_examine</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-canonicalize-uuid" title="bd_md_canonicalize_uuid ()">bd_md_canonicalize_uuid</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-get-md-uuid" title="bd_md_get_md_uuid ()">bd_md_get_md_uuid</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-MD-RAID.html#BDMDDetailData" title="BDMDDetailData"><span class="returnvalue">BDMDDetailData</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-detail" title="bd_md_detail ()">bd_md_detail</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-node-from-name" title="bd_md_node_from_name ()">bd_md_node_from_name</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-name-from-node" title="bd_md_name_from_node ()">bd_md_name_from_node</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-get-status" title="bd_md_get_status ()">bd_md_get_status</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-set-bitmap-location" title="bd_md_set_bitmap_location ()">bd_md_set_bitmap_location</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-get-bitmap-location" title="bd_md_get_bitmap_location ()">bd_md_get_bitmap_location</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-request-sync-action" title="bd_md_request_sync_action ()">bd_md_request_sync_action</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-is-tech-avail" title="bd_md_is_tech_avail ()">bd_md_is_tech_avail</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="libblockdev-MD-RAID.other"></a><h2>Types and Values</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="other_proto_type">
+<col class="other_proto_name">
+</colgroup>
+<tbody>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-MD-RAID.html#BD-MD-SUPERBLOCK-SIZE:CAPS" title="BD_MD_SUPERBLOCK_SIZE">BD_MD_SUPERBLOCK_SIZE</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-MD-RAID.html#BD-MD-CHUNK-SIZE:CAPS" title="BD_MD_CHUNK_SIZE">BD_MD_CHUNK_SIZE</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-MD-RAID.html#BD-MD-ERROR:CAPS" title="BD_MD_ERROR">BD_MD_ERROR</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-MD-RAID.html#BDMDError" title="enum BDMDError">BDMDError</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword"> </td>
+<td class="function_name"><a class="link" href="libblockdev-MD-RAID.html#BDMDExamineData" title="BDMDExamineData">BDMDExamineData</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword"> </td>
+<td class="function_name"><a class="link" href="libblockdev-MD-RAID.html#BDMDDetailData" title="BDMDDetailData">BDMDDetailData</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-MD-RAID.html#BDMDTech" title="enum BDMDTech">BDMDTech</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-MD-RAID.html#BDMDTechMode" title="enum BDMDTechMode">BDMDTechMode</a></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="libblockdev-MD-RAID.includes"></a><h2>Includes</h2>
+<pre class="synopsis">#include &lt;mdraid.h&gt;
+</pre>
+</div>
+<div class="refsect1">
+<a name="libblockdev-MD-RAID.description"></a><h2>Description</h2>
+<p>A plugin for basic operations with MD RAID. Also sizes are in
+bytes unless specified otherwise.</p>
+</div>
+<div class="refsect1">
+<a name="libblockdev-MD-RAID.functions_details"></a><h2>Functions</h2>
+<div class="refsect2">
+<a name="bd-md-check-deps"></a><h3>bd_md_check_deps ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_md_check_deps (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-check-deps.returns"></a><h4>Returns</h4>
+<p> whether the plugin's runtime dependencies are satisfied or not</p>
+<p>Function checking plugin's runtime dependencies.</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-init"></a><h3>bd_md_init ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_md_init (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p>Initializes the plugin. **This function is called automatically by the
+library's initialization functions.**</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-close"></a><h3>bd_md_close ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_md_close (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p>Cleans up after the plugin. **This function is called automatically by the
+library's functions that unload it.**</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-error-quark"></a><h3>bd_md_error_quark ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
+bd_md_error_quark (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-examine-data-copy"></a><h3>bd_md_examine_data_copy ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-MD-RAID.html#BDMDExamineData" title="BDMDExamineData"><span class="returnvalue">BDMDExamineData</span></a> *
+bd_md_examine_data_copy (<em class="parameter"><code><a class="link" href="libblockdev-MD-RAID.html#BDMDExamineData" title="BDMDExamineData"><span class="type">BDMDExamineData</span></a> *data</code></em>);</pre>
+<p>Creates a new copy of <em class="parameter"><code>data</code></em>
+.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="bd-md-examine-data-copy.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>data</p></td>
+<td class="parameter_description"><p><a class="link" href="libblockdev-MD-RAID.html#BDMDExamineData" title="BDMDExamineData"><code class="literal">BDMDExamineData</code></a> to copy. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-examine-data-free"></a><h3>bd_md_examine_data_free ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_md_examine_data_free (<em class="parameter"><code><a class="link" href="libblockdev-MD-RAID.html#BDMDExamineData" title="BDMDExamineData"><span class="type">BDMDExamineData</span></a> *data</code></em>);</pre>
+<p>Frees <em class="parameter"><code>data</code></em>
+.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="bd-md-examine-data-free.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>data</p></td>
+<td class="parameter_description"><p><a class="link" href="libblockdev-MD-RAID.html#BDMDExamineData" title="BDMDExamineData"><code class="literal">BDMDExamineData</code></a> to free. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-detail-data-free"></a><h3>bd_md_detail_data_free ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_md_detail_data_free (<em class="parameter"><code><a class="link" href="libblockdev-MD-RAID.html#BDMDDetailData" title="BDMDDetailData"><span class="type">BDMDDetailData</span></a> *data</code></em>);</pre>
+<p>Frees <em class="parameter"><code>data</code></em>
+.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="bd-md-detail-data-free.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>data</p></td>
+<td class="parameter_description"><p><a class="link" href="libblockdev-MD-RAID.html#BDMDDetailData" title="BDMDDetailData"><code class="literal">BDMDDetailData</code></a> to free. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-detail-data-copy"></a><h3>bd_md_detail_data_copy ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-MD-RAID.html#BDMDDetailData" title="BDMDDetailData"><span class="returnvalue">BDMDDetailData</span></a> *
+bd_md_detail_data_copy (<em class="parameter"><code><a class="link" href="libblockdev-MD-RAID.html#BDMDDetailData" title="BDMDDetailData"><span class="type">BDMDDetailData</span></a> *data</code></em>);</pre>
+<p>Creates a new copy of <em class="parameter"><code>data</code></em>
+.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="bd-md-detail-data-copy.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>data</p></td>
+<td class="parameter_description"><p><a class="link" href="libblockdev-MD-RAID.html#BDMDDetailData" title="BDMDDetailData"><code class="literal">BDMDDetailData</code></a> to copy. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-get-superblock-size"></a><h3>bd_md_get_superblock_size ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
+bd_md_get_superblock_size (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> member_size</code></em>,
+                           <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *version</code></em>,
+                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-get-superblock-size.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>member_size</p></td>
+<td class="parameter_description"><p>size of an array member</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>version</p></td>
+<td class="parameter_description"><p>metadata version or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use the current default version. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-get-superblock-size.returns"></a><h4>Returns</h4>
+<p> Calculated superblock size for an array with a given <em class="parameter"><code>member_size</code></em>
+and metadata <em class="parameter"><code>version</code></em>
+or default if unsupported <em class="parameter"><code>version</code></em>
+is used.</p>
+<p>Tech category: always available</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-create"></a><h3>bd_md_create ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_md_create (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device_name</code></em>,
+              <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *level</code></em>,
+              <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **disks</code></em>,
+              <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> spares</code></em>,
+              <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *version</code></em>,
+              <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> bitmap</code></em>,
+              <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> chunk_size</code></em>,
+              <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+              <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-create.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device_name</p></td>
+<td class="parameter_description"><p>name of the device to create</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>level</p></td>
+<td class="parameter_description"><p>RAID level (as understood by mdadm, see mdadm(8))</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>disks</p></td>
+<td class="parameter_description"><p>disks to use for the new RAID (including spares). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>spares</p></td>
+<td class="parameter_description"><p>number of spare devices</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>version</p></td>
+<td class="parameter_description"><p>metadata version. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>bitmap</p></td>
+<td class="parameter_description"><p>whether to create an internal bitmap on the device or not</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>chunk_size</p></td>
+<td class="parameter_description"><p>chunk size of the device to create</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p>extra options for the creation (right now
+passed to the 'mdadm' utility). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-create.returns"></a><h4>Returns</h4>
+<p> whether the new MD RAID device <em class="parameter"><code>device_name</code></em>
+was successfully created or not</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-CREATE:CAPS"><code class="literal">BD_MD_TECH_MODE_CREATE</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-destroy"></a><h3>bd_md_destroy ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_md_destroy (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+               <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-destroy.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>device to destroy MD RAID metadata on</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-destroy.returns"></a><h4>Returns</h4>
+<p> whether the MD RAID metadata was successfully destroyed on <em class="parameter"><code>device</code></em>
+or not</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-DELETE:CAPS"><code class="literal">BD_MD_TECH_MODE_DELETE</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-deactivate"></a><h3>bd_md_deactivate ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_md_deactivate (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *raid_spec</code></em>,
+                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-deactivate.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>raid_spec</p></td>
+<td class="parameter_description"><p>specification of the RAID device (name, node or path)</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-deactivate.returns"></a><h4>Returns</h4>
+<p> whether the RAID device <em class="parameter"><code>raid_spec</code></em>
+was successfully deactivated or not</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_MD_TECH_MODE_MODIFY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-activate"></a><h3>bd_md_activate ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_md_activate (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *raid_spec</code></em>,
+                <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **members</code></em>,
+                <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *uuid</code></em>,
+                <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> start_degraded</code></em>,
+                <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-activate.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>raid_spec</p></td>
+<td class="parameter_description"><p>specification of the RAID device (name, node or path) to activate (if not given "--scan" is implied and <em class="parameter"><code>members</code></em>
+is ignored). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>members</p></td>
+<td class="parameter_description"><p>member devices to be considered for <em class="parameter"><code>device</code></em>
+activation. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>uuid</p></td>
+<td class="parameter_description"><p>UUID (in the MD RAID format!) of the MD RAID to activate. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>start_degraded</p></td>
+<td class="parameter_description"><p>whether to start the array even if it's degraded</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p>extra options for the activation (right now
+passed to the 'mdadm' utility). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-activate.returns"></a><h4>Returns</h4>
+<p> whether the MD RAID <em class="parameter"><code>device</code></em>
+was successfully activated or not</p>
+<p>Note: either <em class="parameter"><code>members</code></em>
+or <em class="parameter"><code>uuid</code></em>
+(or both) have to be specified.</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_MD_TECH_MODE_MODIFY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-run"></a><h3>bd_md_run ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_md_run (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *raid_spec</code></em>,
+           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-run.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>raid_spec</p></td>
+<td class="parameter_description"><p>specification of the (possibly degraded) RAID device (name, node or path) to be started</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-run.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>raid_spec</code></em>
+was successfully started or not</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_MD_TECH_MODE_MODIFY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-nominate"></a><h3>bd_md_nominate ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_md_nominate (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-nominate.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>device to nominate (add to its appropriate RAID) as a MD RAID device</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-nominate.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>device</code></em>
+was successfully nominated (added to its
+appropriate RAID) or not</p>
+<p>Note: may start the MD RAID if it becomes ready by adding <em class="parameter"><code>device</code></em>
+.</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_MD_TECH_MODE_MODIFY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-denominate"></a><h3>bd_md_denominate ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_md_denominate (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-denominate.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>device to denominate (remove from its appropriate RAID) as a MD RAID device</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-denominate.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>device</code></em>
+was successfully denominated (added to its
+appropriate RAID) or not</p>
+<p>Note: may start the MD RAID if it becomes ready by adding <em class="parameter"><code>device</code></em>
+.</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_MD_TECH_MODE_MODIFY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-add"></a><h3>bd_md_add ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_md_add (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *raid_spec</code></em>,
+           <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+           <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> raid_devs</code></em>,
+           <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-add.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>raid_spec</p></td>
+<td class="parameter_description"><p>specification of the RAID device (name, node or path) to add <em class="parameter"><code>device</code></em>
+into</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>name of the device to add to the <em class="parameter"><code>raid_spec</code></em>
+RAID device</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>raid_devs</p></td>
+<td class="parameter_description"><p>number of devices the <em class="parameter"><code>raid_spec</code></em>
+RAID should actively use or 0
+to leave unspecified (see below)</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p>extra options for the addition (right now
+passed to the 'mdadm' utility). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-add.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>device</code></em>
+was successfully added to the <em class="parameter"><code>raid_spec</code></em>
+RAID or
+not</p>
+<p>The <em class="parameter"><code>raid_devs</code></em>
+parameter is used when adding devices to a raid array that has
+no actual redundancy. In this case it is necessary to explicitly grow the
+array all at once rather than manage it in the sense of adding spares.</p>
+<p>Whether the new device will be added as a spare or an active member is
+decided by mdadm.</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_MD_TECH_MODE_MODIFY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-remove"></a><h3>bd_md_remove ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_md_remove (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *raid_spec</code></em>,
+              <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+              <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> fail</code></em>,
+              <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+              <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-remove.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>raid_spec</p></td>
+<td class="parameter_description"><p>specification of the RAID device (name, node or path) to remove <em class="parameter"><code>device</code></em>
+from</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>device to remove from the <em class="parameter"><code>raid_spec</code></em>
+RAID</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>fail</p></td>
+<td class="parameter_description"><p>whether to mark the <em class="parameter"><code>device</code></em>
+as failed before removing</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p>extra options for the removal (right now
+passed to the 'mdadm' utility). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-remove.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>device</code></em>
+was successfully removed from the <em class="parameter"><code>raid_spec</code></em>
+RAID or not.</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_MD_TECH_MODE_MODIFY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-examine"></a><h3>bd_md_examine ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-MD-RAID.html#BDMDExamineData" title="BDMDExamineData"><span class="returnvalue">BDMDExamineData</span></a> *
+bd_md_examine (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+               <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-examine.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>name of the device (a member of an MD RAID) to examine</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-examine.returns"></a><h4>Returns</h4>
+<p> information about the MD RAID extracted from the <em class="parameter"><code>device</code></em>
+</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-QUERY:CAPS"><code class="literal">BD_MD_TECH_MODE_QUERY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-canonicalize-uuid"></a><h3>bd_md_canonicalize_uuid ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+bd_md_canonicalize_uuid (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *uuid</code></em>,
+                         <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-canonicalize-uuid.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>uuid</p></td>
+<td class="parameter_description"><p>UUID to canonicalize</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-canonicalize-uuid.returns"></a><h4>Returns</h4>
+<p>canonicalized form of <em class="parameter"><code>uuid</code></em>
+</p>
+<p>This function expects a UUID in the form that mdadm returns. The change is as
+follows: 3386ff85:f5012621:4a435f06:1eb47236 -&gt; 3386ff85-f501-2621-4a43-5f061eb47236</p>
+<p>Tech category: always available. </p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-get-md-uuid"></a><h3>bd_md_get_md_uuid ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+bd_md_get_md_uuid (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *uuid</code></em>,
+                   <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-get-md-uuid.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>uuid</p></td>
+<td class="parameter_description"><p>UUID to transform into format used by MD RAID</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-get-md-uuid.returns"></a><h4>Returns</h4>
+<p>transformed form of <em class="parameter"><code>uuid</code></em>
+</p>
+<p>This function expects a UUID in the canonical (traditional format) and
+returns a UUID in the format used by MD RAID and is thus reverse to
+<a class="link" href="libblockdev-MD-RAID.html#bd-md-canonicalize-uuid" title="bd_md_canonicalize_uuid ()"><code class="function">bd_md_canonicalize_uuid()</code></a>. The change is as follows:
+3386ff85-f501-2621-4a43-5f061eb47236 -&gt; 3386ff85:f5012621:4a435f06:1eb47236</p>
+<p>Tech category: always available. </p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-detail"></a><h3>bd_md_detail ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-MD-RAID.html#BDMDDetailData" title="BDMDDetailData"><span class="returnvalue">BDMDDetailData</span></a> *
+bd_md_detail (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *raid_spec</code></em>,
+              <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-detail.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>raid_spec</p></td>
+<td class="parameter_description"><p>specification of the RAID device (name, node or path) to examine</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-detail.returns"></a><h4>Returns</h4>
+<p> information about the MD RAID <em class="parameter"><code>raid_spec</code></em>
+</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-QUERY:CAPS"><code class="literal">BD_MD_TECH_MODE_QUERY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-node-from-name"></a><h3>bd_md_node_from_name ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+bd_md_node_from_name (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
+                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-node-from-name.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>name</p></td>
+<td class="parameter_description"><p>name of the MD RAID</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-node-from-name.returns"></a><h4>Returns</h4>
+<p> device node of the <em class="parameter"><code>name</code></em>
+MD RAID or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
+<p>Tech category: always available</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-name-from-node"></a><h3>bd_md_name_from_node ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+bd_md_name_from_node (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *node</code></em>,
+                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-name-from-node.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>node</p></td>
+<td class="parameter_description"><p>path of the MD RAID's device node</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-name-from-node.returns"></a><h4>Returns</h4>
+<p> <em class="parameter"><code>name</code></em>
+of the MD RAID the device node belongs to or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
+<p>Tech category: always available</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-get-status"></a><h3>bd_md_get_status ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+bd_md_get_status (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *raid_spec</code></em>,
+                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-get-status.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>raid_spec</p></td>
+<td class="parameter_description"><p>specification of the RAID device (name, node or path) to get status</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-get-status.returns"></a><h4>Returns</h4>
+<p>status of the <em class="parameter"><code>raid_spec</code></em>
+RAID.</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-QUERY:CAPS"><code class="literal">BD_MD_TECH_MODE_QUERY</code></a>. </p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-set-bitmap-location"></a><h3>bd_md_set_bitmap_location ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_md_set_bitmap_location (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *raid_spec</code></em>,
+                           <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *location</code></em>,
+                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-set-bitmap-location.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>raid_spec</p></td>
+<td class="parameter_description"><p>specification of the RAID device (name, node or path) to set the bitmap location</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>location</p></td>
+<td class="parameter_description"><p>bitmap location (none, internal or path)</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-set-bitmap-location.returns"></a><h4>Returns</h4>
+<p> whether <em class="parameter"><code>location</code></em>
+was successfully set for <em class="parameter"><code>raid_spec</code></em>
+</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_MD_TECH_MODE_MODIFY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-get-bitmap-location"></a><h3>bd_md_get_bitmap_location ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+bd_md_get_bitmap_location (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *raid_spec</code></em>,
+                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-get-bitmap-location.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>raid_spec</p></td>
+<td class="parameter_description"><p>specification of the RAID device (name, node or path) to get the bitmap location</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-get-bitmap-location.returns"></a><h4>Returns</h4>
+<p>bitmap location for <em class="parameter"><code>raid_spec</code></em>
+</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-QUERY:CAPS"><code class="literal">BD_MD_TECH_MODE_QUERY</code></a>. </p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-request-sync-action"></a><h3>bd_md_request_sync_action ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_md_request_sync_action (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *raid_spec</code></em>,
+                           <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *action</code></em>,
+                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-request-sync-action.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>raid_spec</p></td>
+<td class="parameter_description"><p>specification of the RAID device (name, node or path) to request sync action on</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>action</p></td>
+<td class="parameter_description"><p>requested sync action (resync, recovery, check, repair or idle)</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-request-sync-action.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>action</code></em>
+was successfully requested for the <em class="parameter"><code>raid_spec</code></em>
+RAID or not.</p>
+<p>Tech category: <a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"><code class="literal">BD_MD_TECH_MDRAID</code></a>-<a class="link" href="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_MD_TECH_MODE_MODIFY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-md-is-tech-avail"></a><h3>bd_md_is_tech_avail ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_md_is_tech_avail (<em class="parameter"><code><a class="link" href="libblockdev-MD-RAID.html#BDMDTech" title="enum BDMDTech"><span class="type">BDMDTech</span></a> tech</code></em>,
+                     <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> mode</code></em>,
+                     <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-md-is-tech-avail.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>tech</p></td>
+<td class="parameter_description"><p>the queried tech</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>mode</p></td>
+<td class="parameter_description"><p>a bit mask of queried modes of operation for <em class="parameter"><code>tech</code></em>
+</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (details about why the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is not available). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-md-is-tech-avail.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is available -- supported by the
+plugin implementation and having all the runtime dependencies available</p>
+</div>
+</div>
+</div>
+<div class="refsect1">
+<a name="libblockdev-MD-RAID.other_details"></a><h2>Types and Values</h2>
+<div class="refsect2">
+<a name="BD-MD-SUPERBLOCK-SIZE:CAPS"></a><h3>BD_MD_SUPERBLOCK_SIZE</h3>
+<pre class="programlisting">#define             BD_MD_SUPERBLOCK_SIZE</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-MD-CHUNK-SIZE:CAPS"></a><h3>BD_MD_CHUNK_SIZE</h3>
+<pre class="programlisting">#define             BD_MD_CHUNK_SIZE</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-MD-ERROR:CAPS"></a><h3>BD_MD_ERROR</h3>
+<pre class="programlisting">#define             BD_MD_ERROR</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDMDError"></a><h3>enum BDMDError</h3>
+<div class="refsect3">
+<a name="BDMDError.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-MD-ERROR-PARSE:CAPS"></a>BD_MD_ERROR_PARSE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-MD-ERROR-BAD-FORMAT:CAPS"></a>BD_MD_ERROR_BAD_FORMAT</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-MD-ERROR-NO-MATCH:CAPS"></a>BD_MD_ERROR_NO_MATCH</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-MD-ERROR-INVAL:CAPS"></a>BD_MD_ERROR_INVAL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-MD-ERROR-FAIL:CAPS"></a>BD_MD_ERROR_FAIL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-MD-ERROR-TECH-UNAVAIL:CAPS"></a>BD_MD_ERROR_TECH_UNAVAIL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDMDExamineData"></a><h3>BDMDExamineData</h3>
+<pre class="programlisting">typedef struct {
+    gchar *device;
+    gchar *level;
+    guint64 num_devices;
+    gchar *name;
+    guint64 size;
+    gchar *uuid;
+    guint64 update_time;
+    gchar *dev_uuid;
+    guint64 events;
+    gchar *metadata;
+    guint64 chunk_size;
+} BDMDExamineData;
+</pre>
+<div class="refsect3">
+<a name="BDMDExamineData.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="struct_members_name">
+<col class="struct_members_description">
+<col width="200px" class="struct_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDMDExamineData.device"></a>device</code></em>;</p></td>
+<td class="struct_member_description"><p>path of the MD device</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDMDExamineData.level"></a>level</code></em>;</p></td>
+<td class="struct_member_description"><p>RAID level of the device</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDMDExamineData.num-devices"></a>num_devices</code></em>;</p></td>
+<td class="struct_member_description"><p>number of devices used by the MD device</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDMDExamineData.name"></a>name</code></em>;</p></td>
+<td class="struct_member_description"><p>name of the MD device</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDMDExamineData.size"></a>size</code></em>;</p></td>
+<td class="struct_member_description"><p>size of the MD device</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDMDExamineData.uuid"></a>uuid</code></em>;</p></td>
+<td class="struct_member_description"><p>array UUID</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDMDExamineData.update-time"></a>update_time</code></em>;</p></td>
+<td class="struct_member_description"><p>update time of the MD device</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDMDExamineData.dev-uuid"></a>dev_uuid</code></em>;</p></td>
+<td class="struct_member_description"><p>UUID of the member device</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDMDExamineData.events"></a>events</code></em>;</p></td>
+<td class="struct_member_description"><p>number of events on the MD device</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDMDExamineData.metadata"></a>metadata</code></em>;</p></td>
+<td class="struct_member_description"><p>version of the metadata used by the MD device</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDMDExamineData.chunk-size"></a>chunk_size</code></em>;</p></td>
+<td class="struct_member_description"><p>chunk size used by the MD device</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDMDDetailData"></a><h3>BDMDDetailData</h3>
+<pre class="programlisting">typedef struct {
+    gchar *device;
+    gchar *metadata;
+    gchar *creation_time;
+    gchar *level;
+    gchar *name;
+    guint64 array_size;
+    guint64 use_dev_size;
+    guint64 raid_devices;
+    guint64 total_devices;
+    guint64 active_devices;
+    guint64 working_devices;
+    guint64 failed_devices;
+    guint64 spare_devices;
+    gboolean clean;
+    gchar *uuid;
+    gchar *container;
+} BDMDDetailData;
+</pre>
+<div class="refsect3">
+<a name="BDMDDetailData.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="struct_members_name">
+<col class="struct_members_description">
+<col width="200px" class="struct_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDMDDetailData.device"></a>device</code></em>;</p></td>
+<td class="struct_member_description"><p>path of the device</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDMDDetailData.metadata"></a>metadata</code></em>;</p></td>
+<td class="struct_member_description"><p>version of the metadata used by the device</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDMDDetailData.creation-time"></a>creation_time</code></em>;</p></td>
+<td class="struct_member_description"><p>creation time</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDMDDetailData.level"></a>level</code></em>;</p></td>
+<td class="struct_member_description"><p>level of the MD RAID</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDMDDetailData.name"></a>name</code></em>;</p></td>
+<td class="struct_member_description"><p>name of the MD device</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDMDDetailData.array-size"></a>array_size</code></em>;</p></td>
+<td class="struct_member_description"><p>size of the MD array</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDMDDetailData.use-dev-size"></a>use_dev_size</code></em>;</p></td>
+<td class="struct_member_description"><p>size of the used space</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDMDDetailData.raid-devices"></a>raid_devices</code></em>;</p></td>
+<td class="struct_member_description"><p>number of devices in the MD array</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDMDDetailData.total-devices"></a>total_devices</code></em>;</p></td>
+<td class="struct_member_description"><p>total number of devices in the MD array</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDMDDetailData.active-devices"></a>active_devices</code></em>;</p></td>
+<td class="struct_member_description"><p>number of active devices in the MD array</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDMDDetailData.working-devices"></a>working_devices</code></em>;</p></td>
+<td class="struct_member_description"><p>number of working devices in the MD array</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDMDDetailData.failed-devices"></a>failed_devices</code></em>;</p></td>
+<td class="struct_member_description"><p>number of failed devices in the MD array</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDMDDetailData.spare-devices"></a>spare_devices</code></em>;</p></td>
+<td class="struct_member_description"><p>number of spare devices in the MD array</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> <em class="structfield"><code><a name="BDMDDetailData.clean"></a>clean</code></em>;</p></td>
+<td class="struct_member_description"><p>whether the MD array is clean or not</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDMDDetailData.uuid"></a>uuid</code></em>;</p></td>
+<td class="struct_member_description"><p>uuid of the MD array</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDMDDetailData.container"></a>container</code></em>;</p></td>
+<td class="struct_member_description"><p>path of the MD container this device belongs to</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDMDTech"></a><h3>enum BDMDTech</h3>
+<div class="refsect3">
+<a name="BDMDTech.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody><tr>
+<td class="enum_member_name"><p><a name="BD-MD-TECH-MDRAID:CAPS"></a>BD_MD_TECH_MDRAID</p></td>
+<td> </td>
+<td> </td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDMDTechMode"></a><h3>enum BDMDTechMode</h3>
+<div class="refsect3">
+<a name="BDMDTechMode.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-MD-TECH-MODE-CREATE:CAPS"></a>BD_MD_TECH_MODE_CREATE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-MD-TECH-MODE-DELETE:CAPS"></a>BD_MD_TECH_MODE_DELETE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-MD-TECH-MODE-MODIFY:CAPS"></a>BD_MD_TECH_MODE_MODIFY</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-MD-TECH-MODE-QUERY:CAPS"></a>BD_MD_TECH_MODE_QUERY</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.33.1</div>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Testing libblockdev: libblockdev Reference Manual for libblockdev 2.99.</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 2.99.">
+<link rel="up" href="index.html" title="libblockdev Reference Manual for libblockdev 2.99.">
+<link rel="prev" href="ch02.html" title="GI Overrides">
+<link rel="next" href="30-api-changes.html" title="API changes in libblockdev 3.0">
+<meta name="generator" content="GTK-Doc V1.33.1 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts"></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><img src="up-insensitive.png" width="16" height="16" border="0"></td>
+<td><a accesskey="p" href="ch02.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="30-api-changes.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="chapter">
+<div class="titlepage"><div><div><h1 class="title">
+<a name="id-1.4"></a>Testing libblockdev</h1></div></div></div>
+<p>
+      libblockdev's test suite is written using the standard unittest.TestCase framework
+      in Python. Tests are separated in modules, usually one per libblockdev plugin - e.g.
+      BTRFS, LVM, Crypto. There are one or more base classes in each module used to
+      setup the environment and perform some testing. More specific test scenarios
+      inherit from these base classes.
+    </p>
+<p>
+      Before running the tests you have to prepare your system so that libblockdev
+      can be built from source.
+    </p>
+<p>
+      Install all build requirements. On Fedora this can be done with
+      </p>
+<pre class="screen"><strong class="userinput"><code>
+cat dist/libblockdev.spec.in | grep BuildRequires: | cut -f2 -d: | cut -f2 -d' ' | xargs dnf -y install
+      </code></strong></pre>
+<p>
+
+      Configure the build scripts
+
+      </p>
+<pre class="screen"><strong class="userinput"><code>./autogen.sh
+./configure</code></strong></pre>
+<p>
+    </p>
+<p>
+      To execute the Pylint code analysis tool run:
+
+      </p>
+<pre class="screen"><strong class="userinput"><code>make check</code></strong></pre>
+<p>
+
+      The check target is a dependency of all test targets and you don't have to
+      execute it explicitly when testing.
+    </p>
+<p>
+      To execute the test suite from inside the source directory run one of these
+      commands:
+
+      </p>
+<pre class="screen"><strong class="userinput"><code>make test</code></strong></pre>
+<p>
+
+      executes all safe tests or
+
+      </p>
+<pre class="screen"><strong class="userinput"><code>make fast-test</code></strong></pre>
+<p>
+
+      executes all fast tests or
+
+      </p>
+<pre class="screen"><strong class="userinput"><code>make test-all</code></strong></pre>
+<p>
+
+      executes all tests, including ones which may result in kernel panic or
+      take more time to complete or
+
+      </p>
+<pre class="screen"><strong class="userinput"><code>make test-plugin-NAME</code></strong></pre>
+<p>
+
+      executes only tests for given plugin and similarly
+
+      </p>
+<pre class="screen"><strong class="userinput"><code>make fast-test-plugin-NAME</code></strong></pre>
+<p>
+
+      executes only fast tests for given plugin.
+    </p>
+<p>
+      It is also possible to run only subset of available tests or only one test
+      using the `run_tests.py` script:
+
+      </p>
+<pre class="screen"><strong class="userinput"><code># python3 tests/run_tests.py fs_test.GenericResize</code></strong></pre>
+<p>
+
+      executes all tests from the <span class="emphasis"><em>GenericResize</em></span> test class
+      from filesystem plugin test cases and
+
+      </p>
+<pre class="screen"><strong class="userinput"><code># python3 tests/run_tests.py fs_test.GenericResize.test_ext2_generic_resize</code></strong></pre>
+<p>
+
+      executes only <span class="emphasis"><em>test_ext2_generic_resize</em></span> from this class.
+
+      This script also allows skipping slow tests or running potentially dangerous
+      tests. Use:
+
+      </p>
+<pre class="screen"><strong class="userinput"><code>$ python3 tests/run_tests.py --help</code></strong></pre>
+<p>
+
+      to see all available options.
+
+    </p>
+<p>
+      It is also possible to generate test coverage reports using the Python coverage
+      tool:
+
+      </p>
+<pre class="screen"><strong class="userinput"><code>make coverage</code></strong></pre>
+<p>
+
+      is equivalent to `make test'.
+
+      </p>
+<pre class="screen"><strong class="userinput"><code>make coverage-all</code></strong></pre>
+<p>
+
+      is equivalent to `make test-all'.
+    </p>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.33.1</div>
+</body>
+</html>

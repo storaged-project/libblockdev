@@ -1,0 +1,534 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>blockdev library: libblockdev Reference Manual for libblockdev 2.99.</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 2.99.">
+<link rel="up" href="ch01.html" title="libblockdev Reference Manual">
+<link rel="prev" href="ch01.html" title="libblockdev Reference Manual">
+<link rel="next" href="libblockdev-BTRFS.html" title="BTRFS">
+<meta name="generator" content="GTK-Doc V1.33.1 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#libblockdev-blockdev-library.description" class="shortcut">Description</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="ch01.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="libblockdev-BTRFS.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="refentry">
+<a name="libblockdev-blockdev-library"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libblockdev-blockdev-library.top_of_page"></a>blockdev library</span></h2>
+<p>blockdev library — a library for doing low-level operations with block devices</p>
+</td>
+<td class="gallery_image" valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1">
+<a name="libblockdev-blockdev-library.functions"></a><h2>Functions</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="functions_proto_type">
+<col class="functions_proto_name">
+</colgroup>
+<tbody>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-blockdev-library.html#bd-init" title="bd_init ()">bd_init</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-blockdev-library.html#bd-ensure-init" title="bd_ensure_init ()">bd_ensure_init</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-blockdev-library.html#bd-try-init" title="bd_try_init ()">bd_try_init</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-blockdev-library.html#bd-reinit" title="bd_reinit ()">bd_reinit</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-blockdev-library.html#bd-try-reinit" title="bd_try_reinit ()">bd_try_reinit</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-blockdev-library.html#bd-is-initialized" title="bd_is_initialized ()">bd_is_initialized</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-blockdev-library.html#bd-switch-init-checks" title="bd_switch_init_checks ()">bd_switch_init_checks</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-blockdev-library.html#bd-init-error-quark" title="bd_init_error_quark ()">bd_init_error_quark</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="libblockdev-blockdev-library.other"></a><h2>Types and Values</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="other_proto_type">
+<col class="other_proto_name">
+</colgroup>
+<tbody>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-blockdev-library.html#BD-INIT-ERROR:CAPS" title="BD_INIT_ERROR">BD_INIT_ERROR</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-blockdev-library.html#BDInitError" title="enum BDInitError">BDInitError</a></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="libblockdev-blockdev-library.includes"></a><h2>Includes</h2>
+<pre class="synopsis">#include &lt;blockdev.h&gt;
+</pre>
+</div>
+<div class="refsect1">
+<a name="libblockdev-blockdev-library.description"></a><h2>Description</h2>
+</div>
+<div class="refsect1">
+<a name="libblockdev-blockdev-library.functions_details"></a><h2>Functions</h2>
+<div class="refsect2">
+<a name="bd-init"></a><h3>bd_init ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_init (<em class="parameter"><code><span class="type">BDPluginSpec</span> **require_plugins</code></em>,
+         <em class="parameter"><code><a class="link" href="libblockdev-Utils.html#BDUtilsLogFunc" title="BDUtilsLogFunc ()"><span class="type">BDUtilsLogFunc</span></a> log_func</code></em>,
+         <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-init.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>require_plugins</p></td>
+<td class="parameter_description"><p><a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated list
+of plugins that should be loaded (if no so_name is specified
+for the plugin, the default is used) or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to load all
+plugins. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>log_func</p></td>
+<td class="parameter_description"><p>logging function to use. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-init.returns"></a><h4>Returns</h4>
+<p> whether the library was successfully initialized with all the
+required or default (see <em class="parameter"><code>require_plugins</code></em>
+) plugins or not</p>
+<p>Example of libblockdev initialization with 'fs' and 'lvm' plugins. Specific
+version of the lvm plugin is required:</p>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="n">GError</span><span class="w"> </span><span class="o">*</span><span class="n">error</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="n">gboolean</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"></span>
+<span class="n">BDPluginSpec</span><span class="w"> </span><span class="n">fs_plugin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">BD_PLUGIN_FS</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">};</span><span class="w"></span>
+<span class="n">BDPluginSpec</span><span class="w"> </span><span class="n">lvm_plugin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">BD_PLUGIN_LVM</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;libbd_lvm.so.2&quot;</span><span class="p">};</span><span class="w"></span>
+<span class="n">BDPluginSpec</span><span class="w"> </span><span class="o">*</span><span class="n">plugins</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="o">&amp;</span><span class="n">fs_plugin</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">lvm_plugin</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">};</span><span class="w"></span>
+<span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bd_init</span><span class="w"> </span><span class="p">(</span><span class="n">plugins</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">error</span><span class="p">);</span><span class="w"></span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-ensure-init"></a><h3>bd_ensure_init ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_ensure_init (<em class="parameter"><code><span class="type">BDPluginSpec</span> **require_plugins</code></em>,
+                <em class="parameter"><code><a class="link" href="libblockdev-Utils.html#BDUtilsLogFunc" title="BDUtilsLogFunc ()"><span class="type">BDUtilsLogFunc</span></a> log_func</code></em>,
+                <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Checks the state of the library and if it is uninitialized or not all the
+<em class="parameter"><code>require_plugins</code></em>
+ plugins are available, tries to (re)initialize it. Otherwise
+just returns early. The difference between:</p>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">bd_is_initialized</span><span class="p">())</span><span class="w"></span>
+<span class="w">    </span><span class="n">bd_init</span><span class="p">(</span><span class="n">None</span><span class="p">,</span><span class="w"> </span><span class="n">None</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">error</span><span class="p">);</span><span class="w"></span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p></p>
+<p>and this function is that this function does the check and init in an atomic
+way (holding the lock preventing other threads from doing changes in
+between).</p>
+<div class="refsect3">
+<a name="bd-ensure-init.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>require_plugins</p></td>
+<td class="parameter_description"><p><a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated list
+of plugins that should be loaded (if no so_name is specified
+for the plugin, the default is used) or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to load all
+plugins. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>log_func</p></td>
+<td class="parameter_description"><p>logging function to use. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-ensure-init.returns"></a><h4>Returns</h4>
+<p> whether the library was successfully initialized with all the
+required or default (see <em class="parameter"><code>require_plugins</code></em>
+) plugins or not either
+before or by this call</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-try-init"></a><h3>bd_try_init ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_try_init (<em class="parameter"><code><span class="type">BDPluginSpec</span> **request_plugins</code></em>,
+             <em class="parameter"><code><a class="link" href="libblockdev-Utils.html#BDUtilsLogFunc" title="BDUtilsLogFunc ()"><span class="type">BDUtilsLogFunc</span></a> log_func</code></em>,
+             <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> ***loaded_plugin_names</code></em>,
+             <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-try-init.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>request_plugins</p></td>
+<td class="parameter_description"><p><a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated list
+of plugins that should be loaded (if no so_name is specified
+for the plugin, the default is used) or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to load all
+plugins. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>log_func</p></td>
+<td class="parameter_description"><p>logging function to use. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>loaded_plugin_names</p></td>
+<td class="parameter_description"><p>names
+of the successfully loaded plugins. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>][<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="The caller owns the data container, but not the data inside it."><span class="acronym">transfer container</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-try-init.returns"></a><h4>Returns</h4>
+<p> whether the library was successfully initialized with all the
+required or default (see <em class="parameter"><code>require_plugins</code></em>
+) plugins or not</p>
+<p>*UNLIKE IN CASE OF <a class="link" href="libblockdev-blockdev-library.html#bd-init" title="bd_init ()"><code class="function">bd_init()</code></a> AND <a class="link" href="libblockdev-blockdev-library.html#bd-ensure-init" title="bd_ensure_init ()"><code class="function">bd_ensure_init()</code></a>, FAILURE TO LOAD A PLUGIN
+IS NOT CONSIDERED ERROR*</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-reinit"></a><h3>bd_reinit ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_reinit (<em class="parameter"><code><span class="type">BDPluginSpec</span> **require_plugins</code></em>,
+           <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> reload</code></em>,
+           <em class="parameter"><code><a class="link" href="libblockdev-Utils.html#BDUtilsLogFunc" title="BDUtilsLogFunc ()"><span class="type">BDUtilsLogFunc</span></a> log_func</code></em>,
+           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-reinit.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>require_plugins</p></td>
+<td class="parameter_description"><p><a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated list
+of plugins that should be loaded (if no so_name is specified
+for the plugin, the default is used) or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to load all
+plugins. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>reload</p></td>
+<td class="parameter_description"><p>whether to reload the already loaded plugins or not</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>log_func</p></td>
+<td class="parameter_description"><p>logging function to use or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+to keep the old one. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-reinit.returns"></a><h4>Returns</h4>
+<p> whether the library was successfully initialized or not</p>
+<p>If <em class="parameter"><code>reload</code></em>
+is <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> all the plugins are closed and reloaded otherwise only
+the missing plugins are loaded.</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-try-reinit"></a><h3>bd_try_reinit ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_try_reinit (<em class="parameter"><code><span class="type">BDPluginSpec</span> **require_plugins</code></em>,
+               <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> reload</code></em>,
+               <em class="parameter"><code><a class="link" href="libblockdev-Utils.html#BDUtilsLogFunc" title="BDUtilsLogFunc ()"><span class="type">BDUtilsLogFunc</span></a> log_func</code></em>,
+               <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> ***loaded_plugin_names</code></em>,
+               <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-try-reinit.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>require_plugins</p></td>
+<td class="parameter_description"><p><a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>-terminated list
+of plugins that should be loaded (if no so_name is specified
+for the plugin, the default is used) or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to load all
+plugins. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>reload</p></td>
+<td class="parameter_description"><p>whether to reload the already loaded plugins or not</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>log_func</p></td>
+<td class="parameter_description"><p>logging function to use or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+to keep the old one. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>loaded_plugin_names</p></td>
+<td class="parameter_description"><p>names of the successfully
+loaded plugins. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>][<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="The caller owns the data container, but not the data inside it."><span class="acronym">transfer container</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-try-reinit.returns"></a><h4>Returns</h4>
+<p> whether the library was successfully initialized or not</p>
+<p>If <em class="parameter"><code>reload</code></em>
+is <a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> all the plugins are closed and reloaded otherwise only
+the missing plugins are loaded.</p>
+<p>*UNLIKE IN CASE OF <a class="link" href="libblockdev-blockdev-library.html#bd-init" title="bd_init ()"><code class="function">bd_init()</code></a> AND <a class="link" href="libblockdev-blockdev-library.html#bd-ensure-init" title="bd_ensure_init ()"><code class="function">bd_ensure_init()</code></a>, FAILURE TO LOAD A PLUGIN
+IS NOT CONSIDERED ERROR*</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-is-initialized"></a><h3>bd_is_initialized ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_is_initialized (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<div class="refsect3">
+<a name="bd-is-initialized.returns"></a><h4>Returns</h4>
+<p> whether the library is initialized or not</p>
+<p>The library is considered initialized if some of the *init*() functions
+was/were called and either at least one plugin is loaded or 0 plugins are
+loaded after an explicit call that requested 0 plugins to be loaded.</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-switch-init-checks"></a><h3>bd_switch_init_checks ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_switch_init_checks (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> enable</code></em>,
+                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Enables or disables plugins' init checks based on <em class="parameter"><code>enable</code></em>
+.</p>
+<p>Note: The current implementation (un)sets the LIBBLOCKDEV_SKIP_DEP_CHECKS
+      environment variable.</p>
+<div class="refsect3">
+<a name="bd-switch-init-checks.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>enable</p></td>
+<td class="parameter_description"><p>whether to enable init checks (<a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a>) or not (<a href="../glib/glib-Standard-Macros.html#FALSE:CAPS"><code class="literal">FALSE</code></a>)</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-init-error-quark"></a><h3>bd_init_error_quark ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
+bd_init_error_quark (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+</div>
+</div>
+<div class="refsect1">
+<a name="libblockdev-blockdev-library.other_details"></a><h2>Types and Values</h2>
+<div class="refsect2">
+<a name="BD-INIT-ERROR:CAPS"></a><h3>BD_INIT_ERROR</h3>
+<pre class="programlisting">#define BD_INIT_ERROR bd_init_error_quark ()
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDInitError"></a><h3>enum BDInitError</h3>
+<div class="refsect3">
+<a name="BDInitError.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-INIT-ERROR-PLUGINS-FAILED:CAPS"></a>BD_INIT_ERROR_PLUGINS_FAILED</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-INIT-ERROR-NOT-IMPLEMENTED:CAPS"></a>BD_INIT_ERROR_NOT_IMPLEMENTED</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-INIT-ERROR-FAILED:CAPS"></a>BD_INIT_ERROR_FAILED</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.33.1</div>
+</body>
+</html>

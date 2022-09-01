@@ -1,0 +1,821 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>s390: libblockdev Reference Manual for libblockdev 2.99.</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 2.99.">
+<link rel="up" href="ch01.html" title="libblockdev Reference Manual">
+<link rel="prev" href="libblockdev-KernelBlockDevices.html" title="KernelBlockDevices">
+<link rel="next" href="libblockdev-Utils.html" title="Utils">
+<meta name="generator" content="GTK-Doc V1.33.1 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#libblockdev-s390.description" class="shortcut">Description</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="libblockdev-KernelBlockDevices.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="libblockdev-Utils.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="refentry">
+<a name="libblockdev-s390"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libblockdev-s390.top_of_page"></a>s390</span></h2>
+<p>s390 — plugin for operations with s390</p>
+</td>
+<td class="gallery_image" valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1">
+<a name="libblockdev-s390.functions"></a><h2>Functions</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="functions_proto_type">
+<col class="functions_proto_name">
+</colgroup>
+<tbody>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-s390.html#bd-s390-check-deps" title="bd_s390_check_deps ()">bd_s390_check_deps</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-s390.html#bd-s390-init" title="bd_s390_init ()">bd_s390_init</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-s390.html#bd-s390-close" title="bd_s390_close ()">bd_s390_close</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-s390.html#bd-s390-error-quark" title="bd_s390_error_quark ()">bd_s390_error_quark</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-s390.html#bd-s390-dasd-format" title="bd_s390_dasd_format ()">bd_s390_dasd_format</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-s390.html#bd-s390-dasd-needs-format" title="bd_s390_dasd_needs_format ()">bd_s390_dasd_needs_format</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-s390.html#bd-s390-sanitize-dev-input" title="bd_s390_sanitize_dev_input ()">bd_s390_sanitize_dev_input</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-s390.html#bd-s390-dasd-online" title="bd_s390_dasd_online ()">bd_s390_dasd_online</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-s390.html#bd-s390-dasd-is-ldl" title="bd_s390_dasd_is_ldl ()">bd_s390_dasd_is_ldl</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-s390.html#bd-s390-dasd-is-fba" title="bd_s390_dasd_is_fba ()">bd_s390_dasd_is_fba</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-s390.html#bd-s390-zfcp-sanitize-wwpn-input" title="bd_s390_zfcp_sanitize_wwpn_input ()">bd_s390_zfcp_sanitize_wwpn_input</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-s390.html#bd-s390-zfcp-sanitize-lun-input" title="bd_s390_zfcp_sanitize_lun_input ()">bd_s390_zfcp_sanitize_lun_input</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-s390.html#bd-s390-zfcp-online" title="bd_s390_zfcp_online ()">bd_s390_zfcp_online</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-s390.html#bd-s390-zfcp-scsi-offline" title="bd_s390_zfcp_scsi_offline ()">bd_s390_zfcp_scsi_offline</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-s390.html#bd-s390-zfcp-offline" title="bd_s390_zfcp_offline ()">bd_s390_zfcp_offline</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-s390.html#bd-s390-is-tech-avail" title="bd_s390_is_tech_avail ()">bd_s390_is_tech_avail</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="libblockdev-s390.other"></a><h2>Types and Values</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="other_proto_type">
+<col class="other_proto_name">
+</colgroup>
+<tbody>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-s390.html#BDS390Error" title="enum BDS390Error">BDS390Error</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-s390.html#BD-S390-ERROR:CAPS" title="BD_S390_ERROR">BD_S390_ERROR</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-s390.html#BDS390Tech" title="enum BDS390Tech">BDS390Tech</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-s390.html#BDS390TechMode" title="enum BDS390TechMode">BDS390TechMode</a></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="libblockdev-s390.includes"></a><h2>Includes</h2>
+<pre class="synopsis">#include &lt;s390.h&gt;
+</pre>
+</div>
+<div class="refsect1">
+<a name="libblockdev-s390.description"></a><h2>Description</h2>
+<p>A plugin for operations with s390 devices.</p>
+</div>
+<div class="refsect1">
+<a name="libblockdev-s390.functions_details"></a><h2>Functions</h2>
+<div class="refsect2">
+<a name="bd-s390-check-deps"></a><h3>bd_s390_check_deps ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_s390_check_deps (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<div class="refsect3">
+<a name="bd-s390-check-deps.returns"></a><h4>Returns</h4>
+<p> whether the plugin's runtime dependencies are satisfied or not</p>
+<p>Function checking plugin's runtime dependencies.</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-s390-init"></a><h3>bd_s390_init ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_s390_init (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p>Initializes the plugin. **This function is called automatically by the
+library's initialization functions.**</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-s390-close"></a><h3>bd_s390_close ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_s390_close (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p>Cleans up after the plugin. **This function is called automatically by the
+library's functions that unload it.**</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-s390-error-quark"></a><h3>bd_s390_error_quark ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
+bd_s390_error_quark (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-s390-dasd-format"></a><h3>bd_s390_dasd_format ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_s390_dasd_format (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *dasd</code></em>,
+                     <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                     <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-s390-dasd-format.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>dasd</p></td>
+<td class="parameter_description"><p>dasd to format</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p>extra options for the formatting (right now
+passed to the 'dasdfmt' utility). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-s390-dasd-format.returns"></a><h4>Returns</h4>
+<p> whether dasdfmt was successful or not</p>
+<p>Tech category: <a class="link" href="libblockdev-s390.html#BD-S390-TECH-DASD:CAPS"><code class="literal">BD_S390_TECH_DASD</code></a>-<a class="link" href="libblockdev-s390.html#BD-S390-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_S390_TECH_MODE_MODIFY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-s390-dasd-needs-format"></a><h3>bd_s390_dasd_needs_format ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_s390_dasd_needs_format (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *dasd</code></em>,
+                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-s390-dasd-needs-format.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>dasd</p></td>
+<td class="parameter_description"><p>dasd to check, whether it needs dasdfmt run on it</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-s390-dasd-needs-format.returns"></a><h4>Returns</h4>
+<p> whether a dasd needs dasdfmt run against it</p>
+<p>Tech category: <a class="link" href="libblockdev-s390.html#BD-S390-TECH-DASD:CAPS"><code class="literal">BD_S390_TECH_DASD</code></a>-<a class="link" href="libblockdev-s390.html#BD-S390-TECH-MODE-QUERY:CAPS"><code class="literal">BD_S390_TECH_MODE_QUERY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-s390-sanitize-dev-input"></a><h3>bd_s390_sanitize_dev_input ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+bd_s390_sanitize_dev_input (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *dev</code></em>,
+                            <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-s390-sanitize-dev-input.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>dev</p></td>
+<td class="parameter_description"><p>a DASD or zFCP device number</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-s390-sanitize-dev-input.returns"></a><h4>Returns</h4>
+<p>a synthesized dasd or zfcp device number</p>
+<p>Tech category: always available. </p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-s390-dasd-online"></a><h3>bd_s390_dasd_online ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_s390_dasd_online (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *dasd</code></em>,
+                     <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-s390-dasd-online.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>dasd</p></td>
+<td class="parameter_description"><p>dasd to switch online</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-s390-dasd-online.returns"></a><h4>Returns</h4>
+<p> whether a dasd was successfully switched online</p>
+<p>Tech category: <a class="link" href="libblockdev-s390.html#BD-S390-TECH-DASD:CAPS"><code class="literal">BD_S390_TECH_DASD</code></a>-<a class="link" href="libblockdev-s390.html#BD-S390-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_S390_TECH_MODE_MODIFY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-s390-dasd-is-ldl"></a><h3>bd_s390_dasd_is_ldl ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_s390_dasd_is_ldl (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *dasd</code></em>,
+                     <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-s390-dasd-is-ldl.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>dasd</p></td>
+<td class="parameter_description"><p>dasd to check, whether it is LDL formatted</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-s390-dasd-is-ldl.returns"></a><h4>Returns</h4>
+<p> whether a dasd is LDL formatted</p>
+<p>Tech category: <a class="link" href="libblockdev-s390.html#BD-S390-TECH-DASD:CAPS"><code class="literal">BD_S390_TECH_DASD</code></a>-<a class="link" href="libblockdev-s390.html#BD-S390-TECH-MODE-QUERY:CAPS"><code class="literal">BD_S390_TECH_MODE_QUERY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-s390-dasd-is-fba"></a><h3>bd_s390_dasd_is_fba ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_s390_dasd_is_fba (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *dasd</code></em>,
+                     <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-s390-dasd-is-fba.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>dasd</p></td>
+<td class="parameter_description"><p>dasd to check, whether it is FBA</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-s390-dasd-is-fba.returns"></a><h4>Returns</h4>
+<p> whether a dasd is FBA</p>
+<p>Tech category: <a class="link" href="libblockdev-s390.html#BD-S390-TECH-DASD:CAPS"><code class="literal">BD_S390_TECH_DASD</code></a>-<a class="link" href="libblockdev-s390.html#BD-S390-TECH-MODE-QUERY:CAPS"><code class="literal">BD_S390_TECH_MODE_QUERY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-s390-zfcp-sanitize-wwpn-input"></a><h3>bd_s390_zfcp_sanitize_wwpn_input ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+bd_s390_zfcp_sanitize_wwpn_input (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *wwpn</code></em>,
+                                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-s390-zfcp-sanitize-wwpn-input.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>wwpn</p></td>
+<td class="parameter_description"><p>a zFCP WWPN identifier</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-s390-zfcp-sanitize-wwpn-input.returns"></a><h4>Returns</h4>
+<p>a synthesized zFCP WWPN</p>
+<p>Tech category: always available. </p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-s390-zfcp-sanitize-lun-input"></a><h3>bd_s390_zfcp_sanitize_lun_input ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+bd_s390_zfcp_sanitize_lun_input (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lun</code></em>,
+                                 <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-s390-zfcp-sanitize-lun-input.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>lun</p></td>
+<td class="parameter_description"><p>a zFCP LUN identifier</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-s390-zfcp-sanitize-lun-input.returns"></a><h4>Returns</h4>
+<p>a synthesized zFCP LUN</p>
+<p>Tech category: always available. </p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-s390-zfcp-online"></a><h3>bd_s390_zfcp_online ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_s390_zfcp_online (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *devno</code></em>,
+                     <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *wwpn</code></em>,
+                     <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lun</code></em>,
+                     <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-s390-zfcp-online.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>devno</p></td>
+<td class="parameter_description"><p>a zFCP device number</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>wwpn</p></td>
+<td class="parameter_description"><p>a zFCP WWPN identifier</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>lun</p></td>
+<td class="parameter_description"><p>a zFCP LUN identifier</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-s390-zfcp-online.returns"></a><h4>Returns</h4>
+<p> whether a zFCP device was successfully switched online</p>
+<p>Tech category: <a class="link" href="libblockdev-s390.html#BD-S390-TECH-ZFCP:CAPS"><code class="literal">BD_S390_TECH_ZFCP</code></a>-<a class="link" href="libblockdev-s390.html#BD-S390-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_S390_TECH_MODE_MODIFY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-s390-zfcp-scsi-offline"></a><h3>bd_s390_zfcp_scsi_offline ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_s390_zfcp_scsi_offline (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *devno</code></em>,
+                           <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *wwpn</code></em>,
+                           <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lun</code></em>,
+                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-s390-zfcp-scsi-offline.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>devno</p></td>
+<td class="parameter_description"><p>a zFCP device number</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>wwpn</p></td>
+<td class="parameter_description"><p>a zFCP WWPN identifier</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>lun</p></td>
+<td class="parameter_description"><p>a zFCP LUN identifier</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-s390-zfcp-scsi-offline.returns"></a><h4>Returns</h4>
+<p> whether a LUN was successfully removed from associated WWPN</p>
+<p>This function looks through /proc/scsi/scsi and manually removes LUNs from
+associated WWPNs. zFCP devices are SCSI devices accessible over FCP protocol.
+In z/OS the IODF (I/O definition file) contains basic information about the
+I/O config, but WWPN and LUN configuration is done at the OS level, hence
+this function becomes necessary when switching the device offline. This
+particular sequence of actions is for some reason unnecessary when switching
+the device online. Chalk it up to s390x being s390x.</p>
+<p>Tech category: <a class="link" href="libblockdev-s390.html#BD-S390-TECH-ZFCP:CAPS"><code class="literal">BD_S390_TECH_ZFCP</code></a>-<a class="link" href="libblockdev-s390.html#BD-S390-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_S390_TECH_MODE_MODIFY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-s390-zfcp-offline"></a><h3>bd_s390_zfcp_offline ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_s390_zfcp_offline (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *devno</code></em>,
+                      <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *wwpn</code></em>,
+                      <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *lun</code></em>,
+                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-s390-zfcp-offline.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>devno</p></td>
+<td class="parameter_description"><p>zfcp device number</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>wwpn</p></td>
+<td class="parameter_description"><p>zfcp WWPN (World Wide Port Number)</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>lun</p></td>
+<td class="parameter_description"><p>zfcp LUN (Logical Unit Number)</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-s390-zfcp-offline.returns"></a><h4>Returns</h4>
+<p> whether a zfcp device was successfully switched offline</p>
+<p>Tech category: <a class="link" href="libblockdev-s390.html#BD-S390-TECH-ZFCP:CAPS"><code class="literal">BD_S390_TECH_ZFCP</code></a>-<a class="link" href="libblockdev-s390.html#BD-S390-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_S390_TECH_MODE_MODIFY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-s390-is-tech-avail"></a><h3>bd_s390_is_tech_avail ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_s390_is_tech_avail (<em class="parameter"><code><a class="link" href="libblockdev-s390.html#BDS390Tech" title="enum BDS390Tech"><span class="type">BDS390Tech</span></a> tech</code></em>,
+                       <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> mode</code></em>,
+                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-s390-is-tech-avail.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>tech</p></td>
+<td class="parameter_description"><p>the queried tech</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>mode</p></td>
+<td class="parameter_description"><p>a bit mask of queried modes of operation (<a class="link" href="libblockdev-s390.html#BDS390TechMode" title="enum BDS390TechMode"><span class="type">BDS390TechMode</span></a>) for <em class="parameter"><code>tech</code></em>
+</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (details about why the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is not available). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-s390-is-tech-avail.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is available -- supported by the
+plugin implementation and having all the runtime dependencies available</p>
+</div>
+</div>
+</div>
+<div class="refsect1">
+<a name="libblockdev-s390.other_details"></a><h2>Types and Values</h2>
+<div class="refsect2">
+<a name="BDS390Error"></a><h3>enum BDS390Error</h3>
+<div class="refsect3">
+<a name="BDS390Error.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-S390-ERROR-DEVICE:CAPS"></a>BD_S390_ERROR_DEVICE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-S390-ERROR-FORMAT-FAILED:CAPS"></a>BD_S390_ERROR_FORMAT_FAILED</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-S390-ERROR-DASDFMT:CAPS"></a>BD_S390_ERROR_DASDFMT</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-S390-ERROR-IO:CAPS"></a>BD_S390_ERROR_IO</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-S390-ERROR-TECH-UNAVAIL:CAPS"></a>BD_S390_ERROR_TECH_UNAVAIL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-S390-ERROR:CAPS"></a><h3>BD_S390_ERROR</h3>
+<pre class="programlisting">#define             BD_S390_ERROR</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDS390Tech"></a><h3>enum BDS390Tech</h3>
+<div class="refsect3">
+<a name="BDS390Tech.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-S390-TECH-DASD:CAPS"></a>BD_S390_TECH_DASD</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-S390-TECH-ZFCP:CAPS"></a>BD_S390_TECH_ZFCP</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDS390TechMode"></a><h3>enum BDS390TechMode</h3>
+<div class="refsect3">
+<a name="BDS390TechMode.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-S390-TECH-MODE-MODIFY:CAPS"></a>BD_S390_TECH_MODE_MODIFY</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-S390-TECH-MODE-QUERY:CAPS"></a>BD_S390_TECH_MODE_QUERY</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.33.1</div>
+</body>
+</html>
