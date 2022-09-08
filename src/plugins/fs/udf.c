@@ -179,14 +179,14 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
     const BDExtraArg **extra_p = NULL;
     g_autofree gchar *vid = NULL;
 
-    if (options->label) {
+    if (options->label && g_strcmp0 (options->label, "") != 0) {
         vid = get_vid (options->label);
 
         g_ptr_array_add (options_array, bd_extra_arg_new ("--lvid", options->label));
         g_ptr_array_add (options_array, bd_extra_arg_new ("--vid", vid));
     }
 
-    if (options->uuid)
+    if (options->uuid && g_strcmp0 (options->uuid, "") != 0)
         g_ptr_array_add (options_array, bd_extra_arg_new ("-u", options->uuid));
 
     if (extra) {

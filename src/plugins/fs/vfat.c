@@ -137,14 +137,14 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
     UtilDep dep = {"mkfs.vfat", "4.2", "--help", "mkfs.fat\\s+([\\d\\.]+).+"};
     gboolean new_vfat = FALSE;
 
-    if (options->label) {
+    if (options->label && g_strcmp0 (options->label, "") != 0) {
         /* convert the label uppercase */
         label = g_ascii_strup (options->label, -1);
         g_ptr_array_add (options_array, bd_extra_arg_new ("-n", label));
         g_free (label);
     }
 
-    if (options->uuid)
+    if (options->uuid && g_strcmp0 (options->uuid, "") != 0)
         g_ptr_array_add (options_array, bd_extra_arg_new ("-i", options->uuid));
 
     if (options->force)

@@ -313,7 +313,7 @@ class CanResizeRepairCheckLabel(GenericNoDevTestCase):
 
 class GenericMkfs(GenericTestCase):
 
-    def _test_ext_generic_mkfs(self, fsname, info_fn, label=None, uuid=None, force=False, extra=None):
+    def _test_ext_generic_mkfs(self, fsname, info_fn, label=None, uuid=None, force=False, extra=None, default_label=None):
         # clean the device
         succ = BlockDev.fs_clean(self.loop_dev)
         self.assertTrue(succ)
@@ -341,8 +341,14 @@ class GenericMkfs(GenericTestCase):
 
         info = info_fn(self.loop_dev)
         self.assertIsNotNone(info)
-        if label:
-            self.assertEqual(info.label, label)
+        if label is not None:
+            if label == "":
+                if default_label:
+                    self.assertEqual(info.label, default_label)
+                else:
+                    self.assertEqual(info.label, "")
+            else:
+                self.assertEqual(info.label, label)
         if uuid:
             self.assertEqual(info.uuid, uuid)
 
@@ -400,15 +406,29 @@ class GenericMkfs(GenericTestCase):
         uuid = "8802574c-587b-43b9-a6be-9de77759d2c5"
         self._test_ext_generic_mkfs("ext3", BlockDev.fs_ext3_get_info, label, uuid, False)
 
+        # now try with empty label and UUID
+        label = ""
+        uuid = ""
+        self._test_ext_generic_mkfs("ext3", BlockDev.fs_ext3_get_info, label, uuid, False)
+
     def test_ext4_generic_mkfs(self):
         """ Test generic mkfs with ext4 """
         label = "label"
         uuid = "8802574c-587b-43b9-a6be-9de77759d2c5"
         self._test_ext_generic_mkfs("ext4", BlockDev.fs_ext4_get_info, label, uuid, False)
 
+        # now try with empty label and UUID
+        label = ""
+        uuid = ""
+        self._test_ext_generic_mkfs("ext4", BlockDev.fs_ext4_get_info, label, uuid, False)
+
     def test_f2fs_generic_mkfs(self):
         """ Test generic mkfs with F2FS """
         label = "label"
+        self._test_ext_generic_mkfs("f2fs", BlockDev.fs_f2fs_get_info, label, None, True)
+
+        # now try with empty label
+        label = ""
         self._test_ext_generic_mkfs("f2fs", BlockDev.fs_f2fs_get_info, label, None, True)
 
     def test_nilfs2_generic_mkfs(self):
@@ -418,11 +438,19 @@ class GenericMkfs(GenericTestCase):
         label = "label"
         self._test_ext_generic_mkfs("nilfs2", BlockDev.fs_nilfs2_get_info, label, None, True)
 
+        # now try with empty label
+        label = ""
+        self._test_ext_generic_mkfs("nilfs2", BlockDev.fs_nilfs2_get_info, label, None, True)
+
     def test_ntfs_generic_mkfs(self):
         """ Test generic mkfs with NTFS """
         if not self.ntfs_avail:
             self.skipTest("skipping NTFS: not available")
         label = "label"
+        self._test_ext_generic_mkfs("ntfs", BlockDev.fs_ntfs_get_info, label, None)
+
+        # now try with empty label
+        label = ""
         self._test_ext_generic_mkfs("ntfs", BlockDev.fs_ntfs_get_info, label, None)
 
     def test_vfat_generic_mkfs(self):
@@ -432,6 +460,10 @@ class GenericMkfs(GenericTestCase):
             extra = [BlockDev.ExtraArg.new("--mbr=n", "")]
         else:
             extra = None
+        self._test_ext_generic_mkfs("vfat", BlockDev.fs_vfat_get_info, label, None, False, extra)
+
+        # now try with empty label
+        label = ""
         self._test_ext_generic_mkfs("vfat", BlockDev.fs_vfat_get_info, label, None, False, extra)
 
     def test_vfat_generic_mkfs_no_pt(self):
@@ -460,6 +492,11 @@ class GenericMkfs(GenericTestCase):
 
         self._test_ext_generic_mkfs("xfs", _xfs_info, label, uuid, True)
 
+        # now try with empty label and UUID
+        label = ""
+        uuid = ""
+        self._test_ext_generic_mkfs("xfs", _xfs_info, label, uuid, True)
+
     def test_btrfs_generic_mkfs(self):
         """ Test generic mkfs with Btrfs """
         if not self.btrfs_avail:
@@ -474,12 +511,21 @@ class GenericMkfs(GenericTestCase):
 
         self._test_ext_generic_mkfs("btrfs", _btrfs_info, label, uuid, True)
 
+        # now try with empty label and UUID
+        label = ""
+        uuid = ""
+        self._test_ext_generic_mkfs("btrfs", _btrfs_info, label, uuid, True)
+
     def test_udf_generic_mkfs(self):
         """ Test generic mkfs with udf """
         if not self.udf_avail:
             self.skipTest("skipping UDF: not available")
         label = "LABEL"
         self._test_ext_generic_mkfs("udf", BlockDev.fs_udf_get_info, label, None)
+
+        # now try with empty label
+        label = ""
+        self._test_ext_generic_mkfs("udf", BlockDev.fs_udf_get_info, label, None, default_label="LinuxUDF")
 
     def test_generic_mkfs_no_options(self):
         """ Test that fs_mkfs works without options specified """
