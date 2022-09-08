@@ -35,6 +35,23 @@ void bd_extra_arg_free (BDExtraArg *arg) {
     g_free (arg);
 }
 
+/**
+ * bd_extra_arg_list_free:
+ * @args: (nullable) (array zero-terminated=1): A list of %BDExtraArg to free
+ *
+ * Frees @args and all its elements.
+ */
+void bd_extra_arg_list_free (BDExtraArg **args) {
+    BDExtraArg **a;
+
+    if (args == NULL)
+        return;
+
+    for (a = args; *a; a++)
+        bd_extra_arg_free (*a);
+    g_free (args);
+}
+
 GType bd_extra_arg_get_type (void) {
     static GType type = 0;
 

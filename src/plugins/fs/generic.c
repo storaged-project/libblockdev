@@ -1878,10 +1878,7 @@ gboolean bd_fs_mkfs (const gchar *device, const gchar *fstype, BDFSMkfsOptions *
         return FALSE;
     }
 
-    for (BDExtraArg **arg_p = extra_args; *arg_p; arg_p++)
-        bd_extra_arg_free (*arg_p);
-    g_free (extra_args);
-
+    bd_extra_arg_list_free (extra_args);
     return ret;
 }
 
