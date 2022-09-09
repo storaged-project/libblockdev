@@ -128,10 +128,10 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
     const BDExtraArg **extra_p = NULL;
     gchar *uuid_option = NULL;
 
-    if (options->label)
+    if (options->label && g_strcmp0 (options->label, "") != 0)
         g_ptr_array_add (options_array, bd_extra_arg_new ("-L", options->label));
 
-    if (options->uuid) {
+    if (options->uuid && g_strcmp0 (options->uuid, "") != 0) {
         uuid_option = g_strdup_printf ("uuid=%s", options->uuid);
         g_ptr_array_add (options_array, bd_extra_arg_new ("-m", uuid_option));
         g_free (uuid_option);
