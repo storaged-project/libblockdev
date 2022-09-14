@@ -1,3 +1,40 @@
+Libblockdev 2.28
+----------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Full list of changes**
+
+Michael Biebl (1):
+
+- Fix typos
+
+Vojtech Trefny (17):
+
+- lvm: Fix bd_lvm_get_supported_pe_sizes in Python on 32bit
+- tests: Create bigger devices for XFS tests
+- tests: Use ext instead of xfs in MountTestCase.test_mount_ro_device
+- mpath: Memory leak fix
+- spec: Require the same version utils from plugins
+- mdraid: Try harder to get container UUID in bd_md_detail
+- Add a test case for DDF arrays/containers
+- mdraid: Do not ignore errors from bd_md_canonicalize_uuid in bd_md_examine
+- mdraid: Try harder to get container UUID in bd_md_examine
+- mdraid: Fix copy-paste error when checking return value
+- tests: Wait for raid and mirrored LVs to be synced before removing
+- tests: Make smaller images for test_lvcreate_type
+- dm: Fix comparing DM RAID member devices UUID
+- mdraid: Fix use after free
+- ci: Add .lgtm.yaml config for LGTM
+- ci: Add GitHub actions for running rpmbuilds and csmock
+- mpath: Fix potential NULL pointer dereference
+
+zhanghongtao (1):
+
+- Fix mismatched functions return value type
+
+
 Libblockdev 2.27
 ----------------
 

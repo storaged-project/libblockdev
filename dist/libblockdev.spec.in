@@ -124,7 +124,7 @@
 %define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?vdo_copts} %{?tools_copts} %{?gi_copts}
 
 Name:        libblockdev
-Version:     2.27
+Version:     2.28
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPLv2+
@@ -979,6 +979,27 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Sep 14 2022 Vojtech Trefny <vtrefny@redhat.com> - 2.28-1
+- mpath: Fix potential NULL pointer dereference (vtrefny)
+- ci: Add GitHub actions for running rpmbuilds and csmock (vtrefny)
+- ci: Add .lgtm.yaml config for LGTM (vtrefny)
+- mdraid: Fix use after free (vtrefny)
+- dm: Fix comparing DM RAID member devices UUID (vtrefny)
+- tests: Make smaller images for test_lvcreate_type (vtrefny)
+- tests: Wait for raid and mirrored LVs to be synced before removing (vtrefny)
+- mdraid: Fix copy-paste error when checking return value (vtrefny)
+- mdraid: Try harder to get container UUID in bd_md_examine (vtrefny)
+- mdraid: Do not ignore errors from bd_md_canonicalize_uuid in bd_md_examine (vtrefny)
+- Add a test case for DDF arrays/containers (vtrefny)
+- mdraid: Try harder to get container UUID in bd_md_detail (vtrefny)
+- Fix mismatched functions return value type (zhanghongtao22)
+- spec: Require the same version utils from plugins (vtrefny)
+- mpath: Memory leak fix (vtrefny)
+- tests: Use ext instead of xfs in MountTestCase.test_mount_ro_device (vtrefny)
+- tests: Create bigger devices for XFS tests (vtrefny)
+- lvm: Fix bd_lvm_get_supported_pe_sizes in Python on 32bit (vtrefny)
+- Fix typos (biebl)
+
 * Wed Jun 01 2022 Vojtech Trefny <vtrefny@redhat.com> - 2.27-1
 - crypto: Remove unused and leaking error in write_escrow_data_file (vtrefny)
 - kbd: Fix potential NULL pointer dereference in bd_kbd_bcache_create (vtrefny)
