@@ -188,12 +188,12 @@ version of the lvm plugin is required:</p>
 4
 5
 6</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="n">GError</span> <span class="o">*</span><span class="n">error</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-<span class="n">gboolean</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">FALSE</span><span class="p">;</span>
-<span class="n">BDPluginSpec</span> <span class="n">fs_plugin</span> <span class="o">=</span> <span class="p">{</span><span class="n">BD_PLUGIN_FS</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">};</span>
-<span class="n">BDPluginSpec</span> <span class="n">lvm_plugin</span> <span class="o">=</span> <span class="p">{</span><span class="n">BD_PLUGIN_LVM</span><span class="p">,</span> <span class="s">&quot;libbd_lvm.so.2&quot;</span><span class="p">};</span>
-<span class="n">BDPluginSpec</span> <span class="o">*</span><span class="n">plugins</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="o">&amp;</span><span class="n">fs_plugin</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">lvm_plugin</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">};</span>
-<span class="n">ret</span> <span class="o">=</span> <span class="n">bd_init</span> <span class="p">(</span><span class="n">plugins</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">error</span><span class="p">);</span></pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="n">GError</span><span class="w"> </span><span class="o">*</span><span class="n">error</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span><span class="w"></span>
+<span class="n">gboolean</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FALSE</span><span class="p">;</span><span class="w"></span>
+<span class="n">BDPluginSpec</span><span class="w"> </span><span class="n">fs_plugin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">BD_PLUGIN_FS</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">};</span><span class="w"></span>
+<span class="n">BDPluginSpec</span><span class="w"> </span><span class="n">lvm_plugin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">BD_PLUGIN_LVM</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;libbd_lvm.so.2&quot;</span><span class="p">};</span><span class="w"></span>
+<span class="n">BDPluginSpec</span><span class="w"> </span><span class="o">*</span><span class="n">plugins</span><span class="p">[]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="o">&amp;</span><span class="n">fs_plugin</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">lvm_plugin</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">};</span><span class="w"></span>
+<span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bd_init</span><span class="w"> </span><span class="p">(</span><span class="n">plugins</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">error</span><span class="p">);</span><span class="w"></span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -219,8 +219,8 @@ just returns early. The difference between:</p>
       <tr>
         <td class="listing_lines" align="right"><pre>1
 2</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">bd_is_initialized</span><span class="p">())</span>
-    <span class="n">bd_init</span><span class="p">(</span><span class="n">None</span><span class="p">,</span> <span class="n">None</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">error</span><span class="p">);</span></pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="n">bd_is_initialized</span><span class="p">())</span><span class="w"></span>
+<span class="w">    </span><span class="n">bd_init</span><span class="p">(</span><span class="n">None</span><span class="p">,</span><span class="w"> </span><span class="n">None</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">error</span><span class="p">);</span><span class="w"></span></pre></td>
       </tr>
     </tbody>
   </table>

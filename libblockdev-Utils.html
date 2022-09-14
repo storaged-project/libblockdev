@@ -1177,10 +1177,10 @@ This will result in calling <code class="literal">mkfs.xfs</code> with <code cla
 2
 3
 4</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="n">BDExtraArg</span> <span class="n">label_arg</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;-L&quot;</span><span class="p">,</span> <span class="s">&quot;label&quot;</span><span class="p">};</span>
-<span class="k">const</span> <span class="n">BDExtraArg</span> <span class="o">*</span><span class="n">extra_args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="o">&amp;</span><span class="n">label_arg</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">};</span>
+        <td class="listing_code"><pre class="programlisting"><span class="n">BDExtraArg</span><span class="w"> </span><span class="n">label_arg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="s">&quot;-L&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;label&quot;</span><span class="p">};</span><span class="w"></span>
+<span class="k">const</span><span class="w"> </span><span class="n">BDExtraArg</span><span class="w"> </span><span class="o">*</span><span class="n">extra_args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="o">&amp;</span><span class="n">label_arg</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">};</span><span class="w"></span>
 
-<span class="n">ret</span> <span class="o">=</span> <span class="n">bd_fs_xfs_mkfs</span> <span class="p">(</span><span class="s">&quot;/dev/sda&quot;</span><span class="p">,</span> <span class="n">extra_args</span><span class="p">,</span> <span class="n">error</span><span class="p">);</span></pre></td>
+<span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bd_fs_xfs_mkfs</span><span class="w"> </span><span class="p">(</span><span class="s">&quot;/dev/sda&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">extra_args</span><span class="p">,</span><span class="w"> </span><span class="n">error</span><span class="p">);</span><span class="w"></span></pre></td>
       </tr>
     </tbody>
   </table>
