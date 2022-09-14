@@ -1,0 +1,25 @@
+extraction:
+  cpp:
+    prepare:
+      packages:
+      - "libblkid-dev"
+      - "libglib2.0-dev"
+      - "libcryptsetup-dev"
+      - "libpython3-dev"
+      - "libdevmapper-dev"
+      - "libudev-dev"
+      - "libkmod-dev"
+      - "libparted-dev"
+      - "libmount-dev"
+      - "libdmraid-dev"
+      - "libgirepository1.0-dev"
+      - "gobject-introspection"
+      - "libyaml-dev"
+      - "autoconf-archive"
+      - "libvolume-key-dev"
+      - "libbytesize-dev"
+      - "libnss3-dev"
+      - "libndctl-dev"
+      - "libext2fs-dev"
+    configure:
+      command: "./autogen.sh && ./configure"

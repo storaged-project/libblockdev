@@ -957,12 +957,12 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
     gboolean found_array_line = FALSE;
 
     if (!check_deps (&avail_deps, DEPS_MDADM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
+        return NULL;
 
     success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
     if (!success)
         /* error is already populated */
-        return FALSE;
+        return NULL;
 
     table = parse_mdadm_vars (output, "\n", ":", &num_items);
     g_free (output);
@@ -983,12 +983,24 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
     orig_data = ret->uuid;
     if (orig_data) {
         ret->uuid = bd_md_canonicalize_uuid (orig_data, error);
+        if (!ret->uuid) {
+            g_prefix_error (error, "Failed to canonicalize MD UUID '%s': ", orig_data);
+            g_free (orig_data);
+            bd_md_examine_data_free (ret);
+            return NULL;
+        }
         g_free (orig_data);
     }
 
     orig_data = ret->dev_uuid;
     if (orig_data) {
         ret->dev_uuid = bd_md_canonicalize_uuid (orig_data, error);
+        if (!ret->dev_uuid) {
+            g_prefix_error (error, "Failed to canonicalize MD UUID '%s': ", orig_data);
+            g_free (orig_data);
+            bd_md_examine_data_free (ret);
+            return NULL;
+        }
         g_free (orig_data);
     }
 
@@ -997,7 +1009,7 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
     if (!success) {
         /* error is already populated */
         bd_md_examine_data_free (ret);
-        return FALSE;
+        return NULL;
     }
 
     /* try to get a better information about RAID level because it may be
@@ -1011,6 +1023,16 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
             value++;
             g_free (ret->level);
             ret->level = g_strdup (value);
+        } else if (!ret->uuid && g_str_has_prefix (output_fields[i], "MD_UUID=")) {
+            value = strchr (output_fields[i], '=');
+            value++;
+            ret->uuid = bd_md_canonicalize_uuid (value, error);
+            if (!ret->uuid) {
+                g_prefix_error (error, "Failed to canonicalize MD UUID '%s': ", value);
+                bd_md_examine_data_free (ret);
+                g_strfreev (output_fields);
+                return NULL;
+            }
         }
     g_strfreev (output_fields);
 
@@ -1019,7 +1041,7 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
     if (!success) {
         /* error is already populated */
         bd_md_examine_data_free (ret);
-        return FALSE;
+        return NULL;
     }
 
     /* try to find the "ARRAY /dev/md/something" pair in the output */
@@ -1070,17 +1092,20 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
  * Tech category: %BD_MD_TECH_MDRAID-%BD_MD_TECH_MODE_QUERY
  */
 BDMDDetailData* bd_md_detail (const gchar *raid_spec, GError **error) {
-    const gchar *argv[] = {"mdadm", "--detail", NULL, NULL};
+    const gchar *argv[] = {"mdadm", "--detail", NULL, NULL, NULL};
     gchar *output = NULL;
     gboolean success = FALSE;
     GHashTable *table = NULL;
     guint num_items = 0;
     gchar *orig_uuid = NULL;
-    gchar *mdadm_spec = NULL;
+    g_autofree gchar *mdadm_spec = NULL;
+    gchar *value = NULL;
+    gchar **output_fields = NULL;
+    guint i = 0;
     BDMDDetailData *ret = NULL;
 
     if (!check_deps (&avail_deps, DEPS_MDADM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
+        return NULL;
 
     mdadm_spec = get_mdadm_spec_from_input (raid_spec, error);
     if (!mdadm_spec)
@@ -1090,16 +1115,13 @@ BDMDDetailData* bd_md_detail (const gchar *raid_spec, GError **error) {
     argv[2] = mdadm_spec;
 
     success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
-    if (!success) {
-        g_free (mdadm_spec);
+    if (!success)
         /* error is already populated */
         return NULL;
-    }
 
     table = parse_mdadm_vars (output, "\n", ":", &num_items);
     g_free (output);
     if (!table || (num_items == 0)) {
-        g_free (mdadm_spec);
         /* something bad happened or some expected items were missing  */
         g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to parse mddetail data");
         if (table)
@@ -1109,7 +1131,6 @@ BDMDDetailData* bd_md_detail (const gchar *raid_spec, GError **error) {
 
     ret = get_detail_data_from_table (table, TRUE);
     if (!ret) {
-        g_free (mdadm_spec);
         g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE, "Failed to get mddetail data");
         return NULL;
     }
@@ -1122,7 +1143,35 @@ BDMDDetailData* bd_md_detail (const gchar *raid_spec, GError **error) {
         g_free (orig_uuid);
     }
 
-    g_free (mdadm_spec);
+    if (!ret->uuid) {
+        argv[2] = "--export";
+        argv[3] = mdadm_spec;
+        success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
+        if (!success) {
+            /* error is already populated */
+            bd_md_detail_data_free (ret);
+            return NULL;
+        }
+
+        /* try to get a better information about RAID level because it may be
+           missing in the output without --export */
+        output_fields = g_strsplit (output, "\n", 0);
+        g_free (output);
+        output = NULL;
+        for (i = 0; (i < g_strv_length (output_fields) - 1); i++)
+            if (g_str_has_prefix (output_fields[i], "MD_UUID=")) {
+                value = strchr (output_fields[i], '=');
+                value++;
+                ret->uuid = bd_md_canonicalize_uuid (value, error);
+                if (!ret->uuid) {
+                    g_prefix_error (error, "Failed to canonicalize MD UUID '%s': ", value);
+                    bd_md_detail_data_free (ret);
+                    g_strfreev (output_fields);
+                    return NULL;
+                }
+            }
+        g_strfreev (output_fields);
+    }
 
     return ret;
 }

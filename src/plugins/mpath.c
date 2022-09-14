@@ -407,10 +407,15 @@ gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error) {
         /* we are only interested in multipath maps */
         if (map_is_multipath (names->name, error)) {
             deps = get_map_deps (names->name, NULL, error);
-            if (*error) {
-                g_prefix_error (error, "Failed to determine deps for '%s'", names->name);
+            if (!deps) {
+                if (*error)
+                    g_prefix_error (error, "Failed to determine deps for '%s'", names->name);
+                else
+                    g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_NOT_ROOT,
+                                 "No deps found for '%s'", names->name);
                 g_free (dev_path);
                 dm_task_destroy (task_names);
+                g_strfreev (deps);
                 return FALSE;
             }
             for (dev_name = deps; !ret && *dev_name; dev_name++)

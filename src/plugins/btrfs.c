@@ -502,7 +502,7 @@ guint64 bd_btrfs_get_default_subvolume_id (const gchar *mountpoint, GError **err
 
     if (!check_deps (&avail_deps, DEPS_BTRFS_MASK, deps, DEPS_LAST, &deps_check_lock, error) ||
         !check_module_deps (&avail_module_deps, MODULE_DEPS_BTRFS_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
+        return 0;
 
     regex = g_regex_new ("ID (\\d+) .*", 0, 0, error);
     if (!regex) {
@@ -623,7 +623,7 @@ BDBtrfsDeviceInfo** bd_btrfs_list_devices (const gchar *device, GError **error) 
 
     if (!check_deps (&avail_deps, DEPS_BTRFS_MASK, deps, DEPS_LAST, &deps_check_lock, error) ||
         !check_module_deps (&avail_module_deps, MODULE_DEPS_BTRFS_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
+        return NULL;
 
     regex = g_regex_new (pattern, G_REGEX_EXTENDED, 0, error);
     if (!regex) {
@@ -703,7 +703,7 @@ BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (const gchar *mountpoint, gboole
 
     if (!check_deps (&avail_deps, DEPS_BTRFS_MASK, deps, DEPS_LAST, &deps_check_lock, error) ||
         !check_module_deps (&avail_module_deps, MODULE_DEPS_BTRFS_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
+        return NULL;
 
     if (snapshots_only) {
         argv[4] = "-s";
@@ -817,7 +817,7 @@ BDBtrfsFilesystemInfo* bd_btrfs_filesystem_info (const gchar *device, GError **e
 
     if (!check_deps (&avail_deps, DEPS_BTRFS_MASK, deps, DEPS_LAST, &deps_check_lock, error) ||
         !check_module_deps (&avail_module_deps, MODULE_DEPS_BTRFS_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
+        return NULL;
 
     regex = g_regex_new (pattern, G_REGEX_EXTENDED, 0, error);
     if (!regex) {

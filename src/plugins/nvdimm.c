@@ -258,7 +258,7 @@ gchar* bd_nvdimm_namespace_get_devname (const gchar *device, GError **error) {
     if (success != 0) {
         g_set_error (error, BD_NVDIMM_ERROR, BD_NVDIMM_ERROR_NAMESPACE_FAIL,
                      "Failed to create ndctl context");
-        return FALSE;
+        return NULL;
     }
 
     ndctl_bus_foreach (ctx, bus) {

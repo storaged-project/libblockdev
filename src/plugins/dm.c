@@ -482,7 +482,7 @@ static gboolean raid_dev_matches_spec (struct raid_dev *raid_dev, const gchar *n
 
     context = udev_new ();
     device = udev_device_new_from_subsystem_sysname (context, "block", dev_name);
-    dev_uuid = udev_device_get_property_value (device, "UUID");
+    dev_uuid = udev_device_get_property_value (device, "ID_FS_UUID");
     major_str = udev_device_get_property_value (device, "MAJOR");
     minor_str = udev_device_get_property_value (device, "MINOR");
 

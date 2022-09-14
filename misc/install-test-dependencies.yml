@@ -1,0 +1,171 @@
+# This is a simple ansible playbook for installing packages needed by the
+# libblockdev test suite.
+# You can do this by using 'make install-requires' or manually using
+# 'ansible-playbook -K -i "localhost," -c local install-test-dependencies.yml'
+# Currently only Fedora, CentOS 8 and Debian/Ubuntu are supported by this playbook.
+
+---
+- hosts: all
+  become: true
+
+  tasks:
+####### Fedora
+  - name: Install basic build tools (Fedora)
+    package: name={{item}} state=present
+    with_items:
+      - gcc
+      - make
+      - libtool
+      - autoconf
+      - automake
+    when: ansible_distribution == 'Fedora'
+
+  - name: Install dnf-plugins-core for dnf builddep (Fedora)
+    package: name=dnf-plugins-core state=present
+    when: ansible_distribution == 'Fedora'
+
+  - name: Install build dependencies (Fedora)
+    command: "dnf -y builddep libblockdev --nogpgcheck"
+    args:
+      warn: false
+    when: ansible_distribution == 'Fedora'
+
+  - name: Install test dependencies (Fedora)
+    package: name={{item}} state=present
+    with_items:
+      - btrfs-progs
+      - bcache-tools
+      - cryptsetup
+      - device-mapper-multipath
+      - dosfstools
+      - e2fsprogs
+      - e2fsprogs-devel
+      - glibc-all-langpacks
+      - lvm2-dbusd
+      - mdadm
+      - ndctl
+      - nss-tools
+      - ntfsprogs
+      - python3-bytesize
+      - python3-dbus
+      - python3-packaging
+      - python3-pylint
+      - python3-yaml
+      - targetcli
+      - volume_key
+      - xfsprogs
+    when: ansible_distribution == 'Fedora'
+
+####### CentOS 8
+  - name: Install basic build tools (CentOS 8)
+    package: name={{item}} state=present
+    with_items:
+      - gcc
+      - make
+      - libtool
+      - autoconf
+      - automake
+    when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
+
+  - name: Enable EPEL repository (CentOS 8)
+    package: name=epel-release state=present
+    when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
+
+  - name: Enable powertools repository (CentOS 8)
+    command: yum config-manager --set-enabled powertools
+    when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
+
+  - name: Install dnf-plugins-core for dnf builddep (CentOS 8)
+    package: name=dnf-plugins-core state=present
+    when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
+
+  - name: Install build dependencies (CentOS 8)
+    command: "dnf -y builddep libblockdev --nogpgcheck"
+    args:
+      warn: false
+    when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
+
+  - name: Install test dependencies (CentOS 8)
+    package: name={{item}} state=present
+    with_items:
+      - cryptsetup
+      - device-mapper-multipath
+      - dosfstools
+      - e2fsprogs
+      - e2fsprogs-devel
+      - glibc-all-langpacks
+      - kmod-kvdo
+      - lvm2-dbusd
+      - mdadm
+      - ndctl
+      - nss-tools
+      - ntfsprogs
+      - python3-bytesize
+      - python3-dbus
+      - python3-packaging
+      - python3-pylint
+      - python3-yaml
+      - targetcli
+      - vdo
+      - volume_key
+      - xfsprogs
+    when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
+
+####### Debian/Ubuntu
+  - name: Update apt cache (Debian/Ubuntu)
+    apt:
+      update_cache: yes
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+  - name: Install basic build tools (Debian/Ubuntu)
+    package: name={{item}} state=present
+    with_items:
+      - gcc
+      - make
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+  - name: Add source repositories (Debian/Ubuntu)
+    shell: "grep '^deb ' /etc/apt/sources.list | perl -pe 's/deb /deb-src /' >> /etc/apt/sources.list"
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+  - name: Update apt cache (Debian/Ubuntu)
+    apt:
+      update_cache: yes
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+  - name: Install build dependencies (Debian/Ubuntu)
+    apt:
+      name: libblockdev
+      state: build-dep
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+  - name: Install test dependencies (Debian/Ubuntu)
+    package: name={{item}} state=present
+    with_items:
+      - bcache-tools
+      - btrfs-progs
+      - cryptsetup
+      - dosfstools
+      - e2fsprogs
+      - libext2fs-dev
+      - libnss3-tools
+      - locales-all
+      - lvm2-dbusd
+      - mdadm
+      - ndctl
+      - ntfs-3g
+      - pylint3
+      - python3-bytesize
+      - python3-packaging
+      - python3-pydbus
+      - python3-yaml
+      - targetcli-fb
+      - volume-key
+      - xfsprogs
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+####### Common actions
+
+  - name: Start LVM DBus service
+    service: name=lvm2-lvmdbusd state=started
+    ignore_errors: yes
