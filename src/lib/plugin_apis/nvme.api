@@ -258,10 +258,12 @@ GType bd_nvme_lba_format_get_type ();
  * BDNVMELBAFormat:
  * Namespace LBA Format Data Structure.
  * @data_size: LBA data size (i.e. a sector size) in bytes.
+ * @metadata_size: metadata size in bytes or `0` in case of no metadata support.
  * @relative_performance: Relative Performance index, see #BDNVMELBAFormatRelativePerformance.
  */
 typedef struct BDNVMELBAFormat {
     guint16 data_size;
+    guint16 metadata_size;
     BDNVMELBAFormatRelativePerformance relative_performance;
 } BDNVMELBAFormat;
 
@@ -289,6 +291,7 @@ BDNVMELBAFormat * bd_nvme_lba_format_copy (BDNVMELBAFormat *fmt) {
 
     new_fmt = g_new0 (BDNVMELBAFormat, 1);
     new_fmt->data_size = fmt->data_size;
+    new_fmt->metadata_size = fmt->metadata_size;
     new_fmt->relative_performance = fmt->relative_performance;
 
     return new_fmt;
@@ -1219,6 +1222,7 @@ gboolean bd_nvme_device_self_test (const gchar *device, BDNVMESelfTestAction act
  * bd_nvme_format:
  * @device: NVMe namespace or controller device to format (e.g. `/dev/nvme0n1`)
  * @lba_data_size: desired LBA data size (i.e. a sector size) in bytes or `0` to keep current. See #BDNVMELBAFormat and bd_nvme_get_namespace_info().
+ * @metadata_size: desired metadata size in bytes or `0` for default. See #BDNVMELBAFormat and bd_nvme_get_namespace_info().
  * @secure_erase: optional secure erase action to take.
  * @error: (out) (nullable): place to store error (if any)
  *
@@ -1244,7 +1248,7 @@ gboolean bd_nvme_device_self_test (const gchar *device, BDNVMESelfTestAction act
  *
  * Tech category: %BD_NVME_TECH_NVME-%BD_NVME_TECH_MODE_MANAGE
  */
-gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, BDNVMEFormatSecureErase secure_erase, GError **error);
+gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, guint16 metadata_size, BDNVMEFormatSecureErase secure_erase, GError **error);
 
 /**
  * bd_nvme_sanitize:

@@ -115,7 +115,7 @@ gboolean bd_nvme_device_self_test (const gchar *device, BDNVMESelfTestAction act
 
 
 /* returns 0xff in case of error (the NVMe standard defines total of 16 flba records) */
-static __u8 find_lbaf_for_size (int fd, __u32 nsid, guint16 lba_data_size, GError **error) {
+static __u8 find_lbaf_for_size (int fd, __u32 nsid, guint16 lba_data_size, guint16 metadata_size, GError **error) {
     int ret;
     struct nvme_id_ns ns_info = ZERO_INIT;
     __u8 flbas = 0;
@@ -136,7 +136,7 @@ static __u8 find_lbaf_for_size (int fd, __u32 nsid, guint16 lba_data_size, GErro
     }
 
     for (i = 0; i <= ns_info.nlbaf + ns_info.nulbaf; i++)
-        if (1UL << ns_info.lbaf[i].ds == lba_data_size && ns_info.lbaf[i].ms == 0)
+        if (1UL << ns_info.lbaf[i].ds == lba_data_size && GUINT16_FROM_LE (ns_info.lbaf[i].ms) == metadata_size)
             return i;
 
     g_set_error_literal (error, BD_NVME_ERROR, BD_NVME_ERROR_INVALID_ARGUMENT,
@@ -148,6 +148,7 @@ static __u8 find_lbaf_for_size (int fd, __u32 nsid, guint16 lba_data_size, GErro
  * bd_nvme_format:
  * @device: NVMe namespace or controller device to format (e.g. `/dev/nvme0n1`)
  * @lba_data_size: desired LBA data size (i.e. a sector size) in bytes or `0` to keep current. See #BDNVMELBAFormat and bd_nvme_get_namespace_info().
+ * @metadata_size: desired metadata size in bytes or `0` for default. See #BDNVMELBAFormat and bd_nvme_get_namespace_info().
  * @secure_erase: optional secure erase action to take.
  * @error: (out) (nullable): place to store error (if any)
  *
@@ -173,7 +174,7 @@ static __u8 find_lbaf_for_size (int fd, __u32 nsid, guint16 lba_data_size, GErro
  *
  * Tech category: %BD_NVME_TECH_NVME-%BD_NVME_TECH_MODE_MANAGE
  */
-gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, BDNVMEFormatSecureErase secure_erase, GError **error) {
+gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, guint16 metadata_size, BDNVMEFormatSecureErase secure_erase, GError **error) {
     int ret;
     gboolean ctrl_device = FALSE;
     struct nvme_id_ctrl ctrl_id = ZERO_INIT;
@@ -230,7 +231,7 @@ gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, BDNVMEForma
     }
 
     /* find out the desired LBA data format index */
-    args.lbaf = find_lbaf_for_size (args.fd, args.nsid, lba_data_size, error);
+    args.lbaf = find_lbaf_for_size (args.fd, args.nsid, lba_data_size, metadata_size, error);
     if (args.lbaf == 0xff) {
         close (args.fd);
         return FALSE;

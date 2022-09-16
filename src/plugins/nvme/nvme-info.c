@@ -103,6 +103,7 @@ BDNVMELBAFormat * bd_nvme_lba_format_copy (BDNVMELBAFormat *fmt) {
 
     new_fmt = g_new0 (BDNVMELBAFormat, 1);
     new_fmt->data_size = fmt->data_size;
+    new_fmt->metadata_size = fmt->metadata_size;
     new_fmt->relative_performance = fmt->relative_performance;
 
     return new_fmt;
@@ -625,10 +626,12 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
     for (i = 0; i <= ns_info.nlbaf + ns_info.nulbaf; i++) {
         BDNVMELBAFormat *lbaf = g_new0 (BDNVMELBAFormat, 1);
         lbaf->data_size = 1 << ns_info.lbaf[i].ds;
+        lbaf->metadata_size = GUINT16_FROM_LE (ns_info.lbaf[i].ms);
         lbaf->relative_performance = ns_info.lbaf[i].rp + 1;
         g_ptr_array_add (ptr_array, lbaf);
         if (i == flbas) {
             info->current_lba_format.data_size = lbaf->data_size;
+            info->current_lba_format.metadata_size = lbaf->metadata_size;
             info->current_lba_format.relative_performance = lbaf->relative_performance;
         }
     }
