@@ -185,10 +185,12 @@ typedef enum {
  * BDNVMELBAFormat:
  * Namespace LBA Format Data Structure.
  * @data_size: LBA data size (i.e. a sector size) in bytes.
+ * @metadata_size: metadata size in bytes or `0` in case of no metadata support.
  * @relative_performance: Relative Performance index, see #BDNVMELBAFormatRelativePerformance.
  */
 typedef struct BDNVMELBAFormat {
     guint16 data_size;
+    guint16 metadata_size;
     BDNVMELBAFormatRelativePerformance relative_performance;
 } BDNVMELBAFormat;
 
@@ -643,6 +645,7 @@ gboolean               bd_nvme_device_self_test      (const gchar               
 
 gboolean               bd_nvme_format                (const gchar                  *device,
                                                       guint16                       lba_data_size,
+                                                      guint16                       metadata_size,
                                                       BDNVMEFormatSecureErase       secure_erase,
                                                       GError                      **error);
 gboolean               bd_nvme_sanitize              (const gchar                  *device,

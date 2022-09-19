@@ -84,6 +84,7 @@ class NVMeTestCase(NVMeTest):
         self.assertGreater(len(info.uuid), 0)
         self.assertFalse(info.write_protected)
         self.assertEqual(info.current_lba_format.data_size, 512)
+        self.assertEqual(info.current_lba_format.metadata_size, 0)
         self.assertEqual(info.current_lba_format.relative_performance, BlockDev.NVMELBAFormatRelativePerformance.BEST)
 
     @tag_test(TestTags.CORE)
@@ -238,20 +239,20 @@ class NVMeTestCase(NVMeTest):
         """Test issuing the format command"""
 
         with self.assertRaisesRegexp(GLib.GError, r".*Failed to open device .*': No such file or directory"):
-            BlockDev.nvme_format("/dev/nonexistent", 0, BlockDev.NVMEFormatSecureErase.NONE)
+            BlockDev.nvme_format("/dev/nonexistent", 0, 0, BlockDev.NVMEFormatSecureErase.NONE)
 
         message = r"Couldn't match desired LBA data block size in a device supported LBA format data sizes"
         with self.assertRaisesRegexp(GLib.GError, message):
-            BlockDev.nvme_format(self.nvme_ns_dev, 123, BlockDev.NVMEFormatSecureErase.NONE)
+            BlockDev.nvme_format(self.nvme_ns_dev, 123, 0, BlockDev.NVMEFormatSecureErase.NONE)
         with self.assertRaisesRegexp(GLib.GError, message):
-            BlockDev.nvme_format(self.nvme_dev, 123, BlockDev.NVMEFormatSecureErase.NONE)
+            BlockDev.nvme_format(self.nvme_dev, 123, 0, BlockDev.NVMEFormatSecureErase.NONE)
 
         # format doesn't really work on the kernel loop target
         message = r"Format NVM command error: Invalid Command Opcode: A reserved coded value or an unsupported value in the command opcode field|Format NVM command error: Invalid Queue Identifier: The creation of the I/O Completion Queue failed due to an invalid queue identifier specified as part of the command"
         with self.assertRaisesRegexp(GLib.GError, message):
-            BlockDev.nvme_format(self.nvme_ns_dev, 0, BlockDev.NVMEFormatSecureErase.NONE)
+            BlockDev.nvme_format(self.nvme_ns_dev, 0, 0, BlockDev.NVMEFormatSecureErase.NONE)
         with self.assertRaisesRegexp(GLib.GError, message):
-            BlockDev.nvme_format(self.nvme_dev, 0, BlockDev.NVMEFormatSecureErase.NONE)
+            BlockDev.nvme_format(self.nvme_dev, 0, 0, BlockDev.NVMEFormatSecureErase.NONE)
 
 
     @tag_test(TestTags.CORE)
