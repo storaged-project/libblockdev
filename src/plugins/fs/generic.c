@@ -1292,7 +1292,8 @@ static BDFSXfsInfo* xfs_get_info (const gchar *device, GError **error) {
             bd_utils_log_format (BD_UTILS_LOG_INFO, "Failed to unmount %s after getting information about it: %s", device, local_error->message);
             g_clear_error (&local_error);
         } else
-            g_rmdir (mountpoint);
+            if (g_rmdir (mountpoint) != 0)
+                bd_utils_log_format (BD_UTILS_LOG_INFO, "Failed to remove temporary mountpoint '%s'", mountpoint);
     }
 
     return xfs_info;
