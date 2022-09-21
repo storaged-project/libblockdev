@@ -133,10 +133,6 @@ BuildRequires: autoconf-archive
 
 Requires: %{name}-utils%{?_isa} = %{version}-%{release}
 
-# Needed for the escrow tests in tests/crypto_test.py, but not used to build
-# BuildRequires: volume_key
-# BuildRequires: nss-tools
-
 %description
 The libblockdev is a C library with GObject introspection support that can be
 used for doing low-level operations with block devices like setting up LVM,
