@@ -1,5 +1,11 @@
+SUBDIRS = .
+
 if WITH_FS
-SUBDIRS = . fs
+SUBDIRS += fs
+endif
+
+if WITH_NVME
+SUBDIRS += nvme
 endif
 
 lib_LTLIBRARIES =

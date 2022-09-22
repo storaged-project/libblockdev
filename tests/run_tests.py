@@ -14,7 +14,7 @@ import yaml
 
 from distutils.spawn import find_executable
 
-LIBDIRS = 'src/utils/.libs:src/plugins/.libs:src/plugins/fs/.libs:src/lib/.libs'
+LIBDIRS = 'src/utils/.libs:src/plugins/.libs:src/plugins/fs/.libs:src/lib/.libs:src/plugins/nvme/.libs'
 GIDIR = 'src/lib'
 
 SKIP_CONFIG = 'skip.yml'
@@ -188,6 +188,7 @@ if __name__ == '__main__':
 
     testdir = os.path.abspath(os.path.dirname(__file__))
     projdir = os.path.abspath(os.path.normpath(os.path.join(testdir, '..')))
+    os.environ['LIBBLOCKDEV_PROJ_DIR'] = projdir
 
     args = parse_args()
     if args.installed:

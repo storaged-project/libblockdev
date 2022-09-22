@@ -40,6 +40,10 @@ if !WITH_NVDIMM
 DISTCHECK_CONFIGURE_FLAGS += --without-nvdimm
 endif
 
+if !WITH_NVME
+DISTCHECK_CONFIGURE_FLAGS += --without-nvme
+endif
+
 if !WITH_SWAP
 DISTCHECK_CONFIGURE_FLAGS += --without-swap
 endif
@@ -68,7 +72,7 @@ MAINTAINERCLEANFILES = Makefile.in aclocal.m4 config.guess config.sub \
     configure depcomp install-sh ltmain.sh missing py-compile compile ar-lib \
     m4/*.m4
 
-LIBDIRS = src/utils/.libs:src/plugins/.libs:src/plugins/fs/.libs:src/lib/.libs
+LIBDIRS = src/utils/.libs:src/plugins/.libs:src/plugins/fs/.libs:src/plugins/nvme/.libs:src/lib/.libs
 GIDIR = src/lib
 
 if WITH_PYTHON3
@@ -93,6 +97,7 @@ PLUGINS = btrfs \
 	mdraid \
 	mpath \
 	nvdimm \
+	nvme \
 	part \
 	s390 \
 	swap \

@@ -51,6 +51,7 @@ bd_plugins = { "lvm": BlockDev.Plugin.LVM,
                "fs": BlockDev.Plugin.FS,
                "s390": BlockDev.Plugin.S390,
                "nvdimm": BlockDev.Plugin.NVDIMM,
+               "nvme": BlockDev.Plugin.NVME,
                "vdo": BlockDev.Plugin.VDO,
 }
 
@@ -877,6 +878,21 @@ def nvdimm_namespace_disable(namespace, extra=None, **kwargs):
 __all__.append("nvdimm_namespace_disable")
 
 
+_nvme_connect = BlockDev.nvme_connect
+@override(BlockDev.nvme_connect)
+def nvme_connect(subsysnqn, transport, transport_addr, transport_svcid, host_traddr, host_iface, host_nqn, host_id, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _nvme_connect(subsysnqn, transport, transport_addr, transport_svcid, host_traddr, host_iface, host_nqn, host_id, extra)
+__all__.append("nvme_connect")
+
+_nvme_discover = BlockDev.nvme_discover
+@override(BlockDev.nvme_discover)
+def nvme_discover(discovery_ctrl, persistent, transport, transport_addr, transport_svcid, host_traddr, host_iface, host_nqn, host_id, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _nvme_discover(discovery_ctrl, persistent, transport, transport_addr, transport_svcid, host_traddr, host_iface, host_nqn, host_id, extra)
+__all__.append("nvme_discover")
+
+
 _vdo_create = BlockDev.vdo_create
 @override(BlockDev.vdo_create)
 def vdo_create(name, backing_device, logical_size=0, index_memory=0, compression=True, deduplication=True, write_policy=BlockDev.VDOWritePolicy.AUTO, extra=None, **kwargs):
@@ -1175,6 +1191,10 @@ class NVDIMMError(BlockDevError):
     pass
 __all__.append("NVDIMMError")
 
+class NVMEError(BlockDevError):
+    pass
+__all__.append("NVMEError")
+
 class VDOError(BlockDevError):
     pass
 __all__.append("VDOError")
@@ -1227,6 +1247,9 @@ __all__.append("fs")
 
 nvdimm = ErrorProxy("nvdimm", BlockDev, [(GLib.Error, NVDIMMError)], [not_implemented_rule])
 __all__.append("nvdimm")
+
+nvme = ErrorProxy("nvme", BlockDev, [(GLib.Error, NVMEError)], [not_implemented_rule])
+__all__.append("nvme")
 
 s390 = ErrorProxy("s390", BlockDev, [(GLib.Error, S390Error)], [not_implemented_rule])
 __all__.append("s390")

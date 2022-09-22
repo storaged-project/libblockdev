@@ -21,6 +21,7 @@ LT_INIT
 AC_CONFIG_FILES([Makefile src/Makefile \
                           src/plugins/Makefile \
                           src/plugins/fs/Makefile \
+                          src/plugins/nvme/Makefile \
                           src/utils/Makefile \
                           src/utils/blockdev-utils.pc \
                           src/lib/Makefile \
@@ -181,6 +182,17 @@ AS_IF([test "x$with_tools" != "xno"],
       [AC_SUBST([WITH_TOOLS], [1])],
       [])
 
+AC_ARG_WITH([nvme],
+    AS_HELP_STRING([--with-nvme], [support nvme @<:@default=yes@:>@]),
+    [],
+    [with_nvme=yes])
+
+AC_SUBST([WITH_NVME], [0])
+AM_CONDITIONAL(WITH_NVME, test "x$with_nvme" != "xno")
+AS_IF([test "x$with_nvme" != "xno"],
+      [AC_DEFINE([WITH_BD_NVME], [], [Define if nvme is supported]) AC_SUBST([WITH_NVME], [1])],
+      [])
+
 LIBBLOCKDEV_PLUGIN([BTRFS], [btrfs])
 LIBBLOCKDEV_PLUGIN([CRYPTO], [crypto])
 LIBBLOCKDEV_PLUGIN([DM], [dm])
@@ -194,6 +206,7 @@ LIBBLOCKDEV_PLUGIN([KBD], [kbd])
 LIBBLOCKDEV_PLUGIN([PART], [part])
 LIBBLOCKDEV_PLUGIN([FS], [fs])
 LIBBLOCKDEV_PLUGIN([NVDIMM], [nvdimm])
+LIBBLOCKDEV_PLUGIN([NVME], [nvme])
 LIBBLOCKDEV_PLUGIN([VDO], [vdo])
 
 AM_CONDITIONAL(WITH_PART_O_WITH_FS, test "x$with_part" != "xno" -o "x$with_fs" != "xno")
@@ -267,8 +280,15 @@ AS_IF([test "x$with_nvdimm" != "xno"],
              [AC_DEFINE([LIBNDCTL_NEW_MODES])], [])]
       [])
 
+AS_IF([test "x$with_nvme" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([NVME], [libnvme >= 1.0])
+      AS_IF([$PKG_CONFIG --atleast-version=1.1 libnvme],
+            [AC_DEFINE([HAVE_LIBNVME_1_1])], [])
+      ],
+      [])
+
 AS_IF([test "x$with_vdo" != "xno"],
-      [LIBBLOCKDEV_PKG_CHECK_MODULES([YAML], [yaml-0.1])]
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([YAML], [yaml-0.1])],
       [])
 
 AC_SUBST([skip_patterns], [$skip_patterns])
@@ -332,6 +352,7 @@ echo "
         MDRAID plugin:              ${with_mdraid}
         MPath plugin                ${with_mpath}
         NVDIMM plugin:              ${with_nvdimm}
+        NVMe plugin:                ${with_nvme}
         Part plugin:                ${with_part}
         S390 plugin:                ${s390_info}
         Swap plugin:                ${with_swap}

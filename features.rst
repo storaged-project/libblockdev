@@ -303,6 +303,18 @@ NVDIMM
    * namespace_reconfigure
    * list_namespaces
 
+NVMe
+-----
+
+:supported technologies:
+   NVMe controller and namespace information
+
+:functions:
+   * get_controller_info
+   * get_namespace_info
+   * get_smart_log
+   * get_error_log_entries
+
 VDO
 ---
 
