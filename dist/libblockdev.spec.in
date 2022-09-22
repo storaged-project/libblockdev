@@ -131,9 +131,7 @@ BuildRequires: gtk-doc
 BuildRequires: glib2-doc
 BuildRequires: autoconf-archive
 
-# Needed for the escrow tests in tests/crypto_test.py, but not used to build
-# BuildRequires: volume_key
-# BuildRequires: nss-tools
+Requires: %{name}-utils%{?_isa} = %{version}-%{release}
 
 %description
 The libblockdev is a C library with GObject introspection support that can be
@@ -147,6 +145,7 @@ no information about VGs when creating an LV).
 %package devel
 Summary:     Development files for libblockdev
 Requires: %{name}%{?_isa} = %{version}-%{release}
+Requires: %{name}-utils-devel%{?_isa} = %{version}-%{release}
 Requires: glib2-devel
 
 %description devel
@@ -209,6 +208,7 @@ with the libblockdev-btrfs plugin/library.
 
 %if %{with_crypto}
 %package crypto
+Requires: %{name}-utils%{?_isa} = %{version}-%{release}
 BuildRequires: cryptsetup-devel
 BuildRequires: libblkid-devel
 BuildRequires: keyutils-libs-devel
@@ -227,6 +227,7 @@ providing the functionality related to encrypted devices (LUKS).
 %package crypto-devel
 Summary:     Development files for the libblockdev-crypto plugin/library
 Requires: %{name}-crypto%{?_isa} = %{version}-%{release}
+Requires: %{name}-utils-devel%{?_isa} = %{version}-%{release}
 Requires: glib2-devel
 
 %description crypto-devel
@@ -529,8 +530,8 @@ with the libblockdev-swap plugin/library.
 %if %{with_tools}
 %package tools
 Summary:    Various nice tools based on libblockdev
-Requires:   %{name}
-Requires:   %{name}-lvm
+Requires:   %{name} = %{version}-%{release}
+Requires:   %{name}-lvm = %{version}-%{release}
 BuildRequires: libbytesize-devel
 BuildRequires: parted-devel
 %if %{with_lvm_dbus} == 1
