@@ -202,11 +202,13 @@ typedef struct BDNVMELBAFormat {
  *                                    in the NVM subsystem concurrently.
  * @BD_NVME_NS_FEAT_FORMAT_PROGRESS: indicates the capability to report the percentage of the namespace
  *                                   that remains to be formatted.
+ * @BD_NVME_NS_FEAT_ROTATIONAL: indicates a rotational medium.
  */
 typedef enum {
     BD_NVME_NS_FEAT_THIN             = 1 << 0,
     BD_NVME_NS_FEAT_MULTIPATH_SHARED = 1 << 1,
     BD_NVME_NS_FEAT_FORMAT_PROGRESS  = 1 << 2,
+    BD_NVME_NS_FEAT_ROTATIONAL       = 1 << 3,
 } BDNVMENamespaceFeature;
 
 /**
