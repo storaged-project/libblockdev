@@ -71,6 +71,13 @@
 
 #define UNUSED __attribute__((unused))
 
+#if !defined(HAVE_STRERROR_L)
+static char *strerror_l(int errnum, locale_t locale UNUSED)
+{
+	return strerror(errnum);
+}
+#endif
+
 /**
  * SECTION: crypto
  * @short_description: plugin for operations with encrypted devices
