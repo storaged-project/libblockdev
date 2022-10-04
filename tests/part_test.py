@@ -143,6 +143,7 @@ class PartCreatePartCase(PartTestCase):
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 10 * 1024**2)
+        self.assertEqual(ps.id, "0x83")  # default ID "linux filesystem"
 
         ps2 = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
         self.assertEqual(ps.path, ps2.path)
@@ -348,6 +349,7 @@ class PartCreatePartFullCase(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertLess(abs(ps4.start - (ps3.start + ps3.size + 1)), ps.start)
         self.assertEqual(ps4.size, 10 * 1024**2)
+        self.assertIn(ps4.id, ("0x05", "0x0f", "0x85"))
 
         # no more primary partitions allowed in the MSDOS table
         with self.assertRaises(GLib.GError):
@@ -1194,8 +1196,9 @@ class PartSetIdCase(PartTestCase):
 
         succ = BlockDev.part_set_part_id (self.loop_dev, ps.path, "0x8e")
         self.assertTrue(succ)
-        part_id = BlockDev.part_get_part_id (self.loop_dev, ps.path)
-        self.assertEqual(part_id, "0x8e")
+
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertEqual(ps.id, "0x8e")
 
         # we can't change part id to extended partition id
         with self.assertRaises(GLib.GError):

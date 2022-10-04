@@ -52,6 +52,7 @@ GType bd_part_spec_get_type();
  * BDPartSpec:
  * @path: path of the partition (block device)
  * @name: name of the partition (for GPT partitions)
+ * @id: id of the partition (for MSDOS partitions)
  * @type_guid: GUID of the partition's type (GPT)
  * @type: bit combination of partition's types (#BDPartType)
  * @start: start of the partition
@@ -60,6 +61,7 @@ GType bd_part_spec_get_type();
 typedef struct BDPartSpec {
     gchar *path;
     gchar *name;
+    gchar *id;
     gchar *type_guid;
     guint64 type;
     guint64 start;
@@ -74,6 +76,7 @@ BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
 
     ret->path = g_strdup (data->path);
     ret->name = g_strdup (data->name);
+    ret->id = g_strdup (data->id);
     ret->type_guid = g_strdup (data->type_guid);
     ret->type = data->type;
     ret->start = data->start;
@@ -88,6 +91,7 @@ void bd_part_spec_free (BDPartSpec *data) {
 
     g_free (data->path);
     g_free (data->name);
+    g_free (data->id);
     g_free (data->type_guid);
     g_free (data);
 }
@@ -357,18 +361,6 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
  * Tech category: %BD_PART_TECH_MODE_MODIFY_PART + the tech according to the partition table type
  */
 gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar *part_id, GError **error);
-
-/**
- * bd_part_get_part_id:
- * @disk: device the partition belongs to
- * @part: partition the should be set for
- * @error: (out): place to store error (if any)
- *
- * Returns (transfer full): partition id type or %NULL in case of error
- *
- * Tech category: %BD_PART_TECH_MODE_QUERY_PART + the tech according to the partition table type
- */
-gchar* bd_part_get_part_id (const gchar *disk, const gchar *part, GError **error);
 
 /**
  * bd_part_get_part_table_type_str:

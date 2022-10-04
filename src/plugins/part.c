@@ -66,6 +66,7 @@ BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
 
     ret->path = g_strdup (data->path);
     ret->name = g_strdup (data->name);
+    ret->id = g_strdup (data->id);
     ret->type_guid = g_strdup (data->type_guid);
     ret->type = data->type;
     ret->start = data->start;
@@ -80,6 +81,7 @@ void bd_part_spec_free (BDPartSpec *data) {
 
     g_free (data->path);
     g_free (data->name);
+    g_free (data->id);
     g_free (data->type_guid);
     g_free (data);
 }
@@ -535,6 +537,19 @@ static BDPartSpec* get_part_spec_fdisk (struct fdisk_context *cxt, struct fdisk_
               return NULL;
           }
         }
+    } else if (g_strcmp0 (fdisk_label_get_name (lb), "dos") == 0) {
+        /* freespace and extended have no type/ids */
+        if (ret->type == BD_PART_TYPE_NORMAL || ret->type == BD_PART_TYPE_LOGICAL || ret->type == BD_PART_TYPE_EXTENDED) {
+            ptype = fdisk_partition_get_type (pa);
+            if (!ptype) {
+                g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                             "Failed to get partition type.");
+                bd_part_spec_free (ret);
+                return NULL;
+            }
+            ret->id = g_strdup_printf ("0x%02x", fdisk_parttype_get_code (ptype));
+        }
+    }
 
     return ret;
 }
@@ -1918,97 +1933,6 @@ gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar 
     close_context (cxt);
     bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
-}
-
-/**
- * bd_part_get_part_id:
- * @disk: device the partition belongs to
- * @part: partition the should be set for
- * @error: (out): place to store error (if any)
- *
- * Returns (transfer full): partition id type or %NULL in case of error
- *
- * Tech category: %BD_PART_TECH_MODE_QUERY_PART + the tech according to the partition table type
- */
-gchar* bd_part_get_part_id (const gchar *disk, const gchar *part, GError **error) {
-    struct fdisk_context *cxt = NULL;
-    struct fdisk_label *lb = NULL;
-    struct fdisk_partition *pa = NULL;
-    struct fdisk_parttype *ptype = NULL;
-    const gchar *label_name = NULL;
-    guint part_id = 0;
-    gchar *ret = NULL;
-    gint status = 0;
-    gint part_num = 0;
-    guint64 progress_id = 0;
-    gchar *msg = NULL;
-
-    msg = g_strdup_printf ("Started getting id on the partition '%s'", part);
-    progress_id = bd_utils_report_started (msg);
-    g_free (msg);
-
-    part_num = get_part_num (part, error);
-    if (part_num == -1) {
-        bd_utils_report_finished (progress_id, (*error)->message);
-        return NULL;
-    }
-
-    /* first partition in fdisk is 0 */
-    part_num--;
-
-    cxt = get_device_context (disk, error);
-    if (!cxt) {
-        /* error is already populated */
-        return NULL;
-    }
-
-    lb = fdisk_get_label (cxt, NULL);
-    if (!lb) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                     "Failed to read partition table on device '%s'", disk);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        close_context (cxt);
-        return NULL;
-    }
-
-    label_name = fdisk_label_get_name (lb);
-    if (g_strcmp0 (label_name, table_type_str[BD_PART_TABLE_MSDOS]) != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
-                     "Partition ID is not supported on '%s' partition table", label_name);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        close_context (cxt);
-        return NULL;
-    }
-
-    status = fdisk_get_partition (cxt, part_num, &pa);
-    if (status != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                     "Failed to get partition %d on device '%s'", part_num, disk);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        close_context (cxt);
-        return NULL;
-    }
-
-    ptype = fdisk_partition_get_type (pa);
-    if (!ptype) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                     "Failed to get partition type for partition %d on device '%s'", part_num, disk);
-        bd_utils_report_finished (progress_id, (*error)->message);
-        fdisk_unref_partition (pa);
-        close_context (cxt);
-        return NULL;
-    }
-
-    part_id = fdisk_parttype_get_code (ptype);
-    ret = g_strdup_printf ("0x%.2x", part_id);
-
-    fdisk_unref_parttype (ptype);
-    fdisk_unref_partition (pa);
-    close_context (cxt);
-
-    bd_utils_report_finished (progress_id, "Completed");
-
-    return ret;
 }
 
 /**

@@ -566,7 +566,6 @@ bd_part_get_part_by_pos
 bd_part_set_part_name
 bd_part_set_part_type
 bd_part_set_part_id
-bd_part_get_part_id
 bd_part_error_quark
 BDPartTech
 BDPartTechMode
