@@ -103,7 +103,6 @@ class PartGetDiskSpecCase(PartTestCase):
         self.assertEqual(ps.sector_size, 512)
         self.assertGreaterEqual(ps.size, 100 * 1024**2 - 512)
         self.assertEqual(ps.table_type, BlockDev.PartTableType.UNDEF)
-        self.assertEqual(ps.flags, 0)
 
         succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
         self.assertTrue(succ)
@@ -114,7 +113,6 @@ class PartGetDiskSpecCase(PartTestCase):
         self.assertEqual(ps.sector_size, 512)
         self.assertGreaterEqual(ps.size, 100 * 1024**2 - 512)
         self.assertEqual(ps.table_type, BlockDev.PartTableType.MSDOS)
-        self.assertEqual(ps.flags, 0)
 
         succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.GPT, True)
         self.assertTrue(succ)
@@ -125,7 +123,6 @@ class PartGetDiskSpecCase(PartTestCase):
         self.assertEqual(ps.sector_size, 512)
         self.assertGreaterEqual(ps.size, 100 * 1024**2 - 512)
         self.assertEqual(ps.table_type, BlockDev.PartTableType.GPT)
-        self.assertEqual(ps.flags, 0)
 
 class PartCreatePartCase(PartTestCase):
     @tag_test(TestTags.CORE)
@@ -146,14 +143,12 @@ class PartCreatePartCase(PartTestCase):
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 10 * 1024**2)
-        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
 
         ps2 = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
         self.assertEqual(ps.path, ps2.path)
         self.assertEqual(ps.type, ps2.type);
         self.assertEqual(ps.start, ps2.start)
         self.assertEqual(ps.size, ps2.size)
-        self.assertEqual(ps.flags, ps2.flags)
 
         pss = BlockDev.part_get_disk_parts (self.loop_dev)
         self.assertEqual(len(pss), 1)
@@ -162,7 +157,6 @@ class PartCreatePartCase(PartTestCase):
         self.assertEqual(ps.type, ps3.type)
         self.assertEqual(ps.start, ps3.start)
         self.assertEqual(ps.size, ps3.size)
-        self.assertEqual(ps.flags, ps3.flags)
 
     def test_create_part_minimal_start_optimal(self):
         """Verify that it is possible to create a parition with minimal start and optimal alignment"""
@@ -181,14 +175,12 @@ class PartCreatePartCase(PartTestCase):
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertLessEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 2 * 1024**2)
-        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
 
         ps2 = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
         self.assertEqual(ps.path, ps2.path)
         self.assertEqual(ps.type, ps2.type);
         self.assertEqual(ps.start, ps2.start)
         self.assertEqual(ps.size, ps2.size)
-        self.assertEqual(ps.flags, ps2.flags)
 
         pss = BlockDev.part_get_disk_parts (self.loop_dev)
         self.assertEqual(len(pss), 1)
@@ -197,7 +189,6 @@ class PartCreatePartCase(PartTestCase):
         self.assertEqual(ps.type, ps3.type)
         self.assertEqual(ps.start, ps3.start)
         self.assertEqual(ps.size, ps3.size)
-        self.assertEqual(ps.flags, ps3.flags)
 
     def test_create_part_minimal_start(self):
         """Verify that it is possible to create a parition with minimal start"""
@@ -216,14 +207,12 @@ class PartCreatePartCase(PartTestCase):
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 512)
         self.assertEqual(ps.size, 2 * 1024**2)
-        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
 
         ps2 = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
         self.assertEqual(ps.path, ps2.path)
         self.assertEqual(ps.type, ps2.type);
         self.assertEqual(ps.start, ps2.start)
         self.assertEqual(ps.size, ps2.size)
-        self.assertEqual(ps.flags, ps2.flags)
 
         pss = BlockDev.part_get_disk_parts (self.loop_dev)
         self.assertEqual(len(pss), 1)
@@ -232,7 +221,6 @@ class PartCreatePartCase(PartTestCase):
         self.assertEqual(ps.type, ps3.type)
         self.assertEqual(ps.start, ps3.start)
         self.assertEqual(ps.size, ps3.size)
-        self.assertEqual(ps.flags, ps3.flags)
 
 class PartCreatePartFullCase(PartTestCase):
     @tag_test(TestTags.CORE)
@@ -276,7 +264,6 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 10 * 1024**2)
-        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
 
         ps2 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps.start + ps.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -287,7 +274,6 @@ class PartCreatePartFullCase(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertLess(abs(ps2.start - (ps.start + ps.size + 1)), ps.start)
         self.assertEqual(ps2.size, 10 * 1024**2)
-        self.assertEqual(ps2.flags, 0)  # no flags (combination of bit flags)
 
         ps3 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps2.start + ps2.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -298,7 +284,6 @@ class PartCreatePartFullCase(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertLess(abs(ps3.start - (ps2.start + ps2.size + 1)), ps.start)
         self.assertEqual(ps3.size, 10 * 1024**2)
-        self.assertEqual(ps3.flags, 0)  # no flags (combination of bit flags)
 
         ps4 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps3.start + ps3.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -309,7 +294,6 @@ class PartCreatePartFullCase(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertLess(abs(ps4.start - (ps3.start + ps3.size + 1)), ps.start)
         self.assertEqual(ps4.size, 10 * 1024**2)
-        self.assertEqual(ps4.flags, 0)  # no flags (combination of bit flags)
 
         # no more primary partitions allowed in the MSDOS table
         with self.assertRaises(GLib.GError):
@@ -334,7 +318,6 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 10 * 1024**2)
-        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
 
         ps2 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps.start + ps.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -345,7 +328,6 @@ class PartCreatePartFullCase(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertLess(abs(ps2.start - (ps.start + ps.size + 1)), ps.start)
         self.assertEqual(ps2.size, 10 * 1024**2)
-        self.assertEqual(ps2.flags, 0)  # no flags (combination of bit flags)
 
         ps3 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps2.start + ps2.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -356,7 +338,6 @@ class PartCreatePartFullCase(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertLess(abs(ps3.start - (ps2.start + ps2.size + 1)), ps.start)
         self.assertEqual(ps3.size, 10 * 1024**2)
-        self.assertEqual(ps3.flags, 0)  # no flags (combination of bit flags)
 
         ps4 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.EXTENDED, ps3.start + ps3.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -367,7 +348,6 @@ class PartCreatePartFullCase(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertLess(abs(ps4.start - (ps3.start + ps3.size + 1)), ps.start)
         self.assertEqual(ps4.size, 10 * 1024**2)
-        self.assertEqual(ps4.flags, 0)  # no flags (combination of bit flags)
 
         # no more primary partitions allowed in the MSDOS table
         with self.assertRaises(GLib.GError):
@@ -393,7 +373,6 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 10 * 1024**2)
-        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
 
         ps2 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps.start + ps.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -404,7 +383,6 @@ class PartCreatePartFullCase(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertLess(abs(ps2.start - (ps.start + ps.size + 1)), ps.start)
         self.assertEqual(ps2.size, 10 * 1024**2)
-        self.assertEqual(ps2.flags, 0)  # no flags (combination of bit flags)
 
         ps3 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.EXTENDED, ps2.start + ps2.size + 1,
                                          30 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -415,7 +393,6 @@ class PartCreatePartFullCase(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertLess(abs(ps3.start - (ps2.start + ps2.size + 1)), ps.start)
         self.assertEqual(ps3.size, 30 * 1024**2)
-        self.assertEqual(ps3.flags, 0)  # no flags (combination of bit flags)
 
         # the logical partition has number 5 even though the extended partition
         # has number 3
@@ -428,7 +405,6 @@ class PartCreatePartFullCase(PartTestCase):
         # should need at most 2 MiB extra space
         self.assertTrue(ps3.start < ps5.start < ps3.start + ps3.size)
         self.assertLess(abs(ps5.size - 10 * 1024**2), 2 * 1024**2)
-        self.assertEqual(ps5.flags, 0)  # no flags (combination of bit flags)
 
         ps6 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps5.start + ps5.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -439,7 +415,6 @@ class PartCreatePartFullCase(PartTestCase):
         # should need at most 2 MiB extra space
         self.assertTrue(ps3.start < ps6.start < ps3.start + ps3.size)
         self.assertEqual(ps6.size, 10 * 1024**2)
-        self.assertEqual(ps6.flags, 0)  # no flags (combination of bit flags)
 
         ps7 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps6.start + ps6.size + 2 * 1024**2,
                                          5 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -451,7 +426,6 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertTrue(ps3.start < ps7.start < ps3.start + ps3.size)
         self.assertLess(abs(ps7.start - (ps6.start + ps6.size + 2 * 1024**2)), 512)
         self.assertEqual(ps7.size, 5 * 1024**2)
-        self.assertEqual(ps7.flags, 0)  # no flags (combination of bit flags)
 
         # here we go with the partition number 4
         ps4 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps3.start + ps3.size + 1,
@@ -463,7 +437,6 @@ class PartCreatePartFullCase(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertLess(abs(ps4.start - (ps3.start + ps3.size + 1)), ps.start)
         self.assertEqual(ps4.size, 10 * 1024**2)
-        self.assertEqual(ps4.flags, 0)  # no flags (combination of bit flags)
 
         # no more primary partitions allowed in the MSDOS table
         with self.assertRaises(GLib.GError):
@@ -485,7 +458,6 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 10 * 1024**2)
-        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
 
         ps2 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps.start + ps.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -496,7 +468,6 @@ class PartCreatePartFullCase(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertLess(abs(ps2.start - (ps.start + ps.size + 1)), ps.start)
         self.assertEqual(ps2.size, 10 * 1024**2)
-        self.assertEqual(ps2.flags, 0)  # no flags (combination of bit flags)
 
         ps3 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps2.start + ps2.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -507,7 +478,6 @@ class PartCreatePartFullCase(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertLess(abs(ps3.start - (ps2.start + ps2.size + 1)), ps.start)
         self.assertEqual(ps3.size, 10 * 1024**2)
-        self.assertEqual(ps3.flags, 0)  # no flags (combination of bit flags)
 
         # no extended partitions allowed in the GPT table
         with self.assertRaises(GLib.GError):
@@ -534,7 +504,6 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 10 * 1024**2)
-        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
 
         ps2 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps.start + ps.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -545,7 +514,6 @@ class PartCreatePartFullCase(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertLess(abs(ps2.start - (ps.start + ps.size + 1)), ps.start)
         self.assertEqual(ps2.size, 10 * 1024**2)
-        self.assertEqual(ps2.flags, 0)  # no flags (combination of bit flags)
 
         ps3 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps2.start + ps2.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -556,7 +524,6 @@ class PartCreatePartFullCase(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertLess(abs(ps3.start - (ps2.start + ps2.size + 1)), ps.start)
         self.assertEqual(ps3.size, 10 * 1024**2)
-        self.assertEqual(ps3.flags, 0)  # no flags (combination of bit flags)
 
         # we should get a logical partition which has number 5
         ps5 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps3.start + ps3.size + 1,
@@ -575,7 +542,6 @@ class PartCreatePartFullCase(PartTestCase):
         # than 2 MiB after its start
         self.assertLessEqual(ps5.start, ps4.start + 2*1024**2)
         self.assertEqual(ps5.size, 10 * 1024**2)
-        self.assertEqual(ps5.flags, 0)  # no flags (combination of bit flags)
 
         ps6 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps5.start + ps5.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -585,7 +551,6 @@ class PartCreatePartFullCase(PartTestCase):
         # logical partitions start 1 MiB after each other (no idea why)
         self.assertLessEqual(abs(ps6.start - (ps5.start + ps5.size + 1)), 1024**2 + 512)
         self.assertEqual(ps6.size, 10 * 1024**2)
-        self.assertEqual(ps6.flags, 0)  # no flags (combination of bit flags)
 
         ps7 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps6.start + ps6.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -595,7 +560,6 @@ class PartCreatePartFullCase(PartTestCase):
         # logical partitions start 1 MiB after each other (no idea why)
         self.assertLessEqual(abs(ps7.start - (ps6.start + ps6.size + 1)), 1024**2 + 512)
         self.assertEqual(ps7.size, 10 * 1024**2)
-        self.assertEqual(ps7.flags, 0)  # no flags (combination of bit flags)
 
         # no more primary nor extended partitions allowed in the MSDOS table and
         # there should be no space
@@ -622,7 +586,6 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 10 * 1024**2)
-        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
 
         ps2 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps.start + ps.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -633,7 +596,6 @@ class PartCreatePartFullCase(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertLess(abs(ps2.start - (ps.start + ps.size + 1)), ps.start)
         self.assertEqual(ps2.size, 10 * 1024**2)
-        self.assertEqual(ps2.flags, 0)  # no flags (combination of bit flags)
 
         ps3 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps2.start + ps2.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -644,7 +606,6 @@ class PartCreatePartFullCase(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertLess(abs(ps3.start - (ps2.start + ps2.size + 1)), ps.start)
         self.assertEqual(ps3.size, 10 * 1024**2)
-        self.assertEqual(ps3.flags, 0)  # no flags (combination of bit flags)
 
         # we should get just next primary partition (GPT)
         ps4 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NEXT, ps3.start + ps3.size + 1,
@@ -849,7 +810,6 @@ class PartGetPartByPos(PartTestCase):
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 10 * 1024**2)
-        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
 
         ps2 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps.start + ps.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -860,7 +820,6 @@ class PartGetPartByPos(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertLess(abs(ps2.start - (ps.start + ps.size + 1)), ps.start)
         self.assertEqual(ps2.size, 10 * 1024**2)
-        self.assertEqual(ps2.flags, 0)  # no flags (combination of bit flags)
 
         ps3 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.EXTENDED, ps2.start + ps2.size + 1,
                                          35 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -871,7 +830,6 @@ class PartGetPartByPos(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertLess(abs(ps3.start - (ps2.start + ps2.size + 1)), ps.start)
         self.assertEqual(ps3.size, 35 * 1024**2)
-        self.assertEqual(ps3.flags, 0)  # no flags (combination of bit flags)
 
         # the logical partition has number 5 even though the extended partition
         # has number 3
@@ -884,7 +842,6 @@ class PartGetPartByPos(PartTestCase):
         # should need at most 2 MiB extra space
         self.assertTrue(ps3.start < ps5.start < ps3.start + ps3.size)
         self.assertLess(abs(ps5.size - 10 * 1024**2), 2 * 1024**2)
-        self.assertEqual(ps5.flags, 0)  # no flags (combination of bit flags)
 
         ps6 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps5.start + ps5.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -895,7 +852,6 @@ class PartGetPartByPos(PartTestCase):
         # should need at most 2 MiB extra space
         self.assertTrue(ps3.start < ps6.start < ps3.start + ps3.size)
         self.assertEqual(ps6.size, 10 * 1024**2)
-        self.assertEqual(ps6.flags, 0)  # no flags (combination of bit flags)
 
         ps7 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.LOGICAL, ps6.start + ps6.size + 2 * 1024**2,
                                          5 * 1024**2, BlockDev.PartAlign.OPTIMAL)
@@ -907,7 +863,6 @@ class PartGetPartByPos(PartTestCase):
         self.assertTrue(ps3.start < ps7.start < ps3.start + ps3.size)
         self.assertLess(abs(ps7.start - (ps6.start + ps6.size + 2 * 1024**2)), 512)
         self.assertEqual(ps7.size, 5 * 1024**2)
-        self.assertEqual(ps7.flags, 0)  # no flags (combination of bit flags)
 
         # here we go with the partition number 4
         ps4 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps3.start + ps3.size + 1,
@@ -919,7 +874,6 @@ class PartGetPartByPos(PartTestCase):
         # as is the start of the first part from the start of the disk
         self.assertLess(abs(ps4.start - (ps3.start + ps3.size + 1)), ps.start)
         self.assertEqual(ps4.size, 10 * 1024**2)
-        self.assertEqual(ps4.flags, 0)  # no flags (combination of bit flags)
 
 
         ## now try to get the partitions
@@ -931,7 +885,6 @@ class PartGetPartByPos(PartTestCase):
             self.assertEqual(ret.start, part.start)
             self.assertEqual(ret.size, part.size)
             self.assertEqual(ret.type, part.type)
-            self.assertEqual(ret.flags, part.flags)
 
         # free space in the extended partition
         ret = BlockDev.part_get_part_by_pos(self.loop_dev, ps3.start + 33 * 1024**2)
@@ -1133,281 +1086,6 @@ class PartCreateDeletePartCase(PartTestCase):
         pss = BlockDev.part_get_disk_parts (self.loop_dev)
         self.assertEqual(len(pss), 0)
 
-class PartSetFlagCase(PartTestCase):
-    def test_set_part_flag(self):
-        """Verify that it is possible to set a partition flag"""
-
-        # we first need a partition table
-        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
-        self.assertTrue(succ)
-
-        # for now, let's just create a typical primary partition starting at the
-        # sector 2048, 10 MiB big with optimal alignment
-        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
-
-        # we should get proper data back
-        self.assertTrue(ps)
-        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
-
-        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.BOOT, True)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.BOOT)
-
-        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.BOOT, False)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertFalse(ps.flags & BlockDev.PartFlag.BOOT)
-
-        # add another partition and do some more tests on that one
-        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps.start + ps.size + 1, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
-
-        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.BOOT, True)
-        self.assertTrue(succ)
-        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.LVM, True)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.BOOT)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.LVM)
-
-        # GPT_HIDDEN is not supported on the MSDOS table
-        with self.assertRaises(GLib.GError):
-            BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_HIDDEN, True)
-        with self.assertRaises(GLib.GError):
-            BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_HIDDEN, False)
-
-        # also try some GPT-only flags
-        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.GPT, True)
-        self.assertTrue(succ)
-
-        # for now, let's just create a typical primary partition starting at the
-        # sector 2048, 10 MiB big with optimal alignment
-        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
-
-        # we should get proper data back
-        self.assertTrue(ps)
-        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
-
-        # remove a flag that is not set
-        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_READ_ONLY, False)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertEqual(ps.flags, 0)
-
-        # set read-only flag (twice to be sure that second set doesn't change it)
-        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_READ_ONLY, True)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_READ_ONLY)
-        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_READ_ONLY, True)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_READ_ONLY)
-
-        # set hidden and remove read-only flag
-        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_HIDDEN, True)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_HIDDEN)
-        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_READ_ONLY, False)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertFalse(ps.flags & BlockDev.PartFlag.GPT_READ_ONLY)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_HIDDEN)
-
-        # set no-automount flag
-        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_NO_AUTOMOUNT, True)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertFalse(ps.flags & BlockDev.PartFlag.GPT_READ_ONLY)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_HIDDEN)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_NO_AUTOMOUNT)
-
-    def test_set_part_flag_hidden(self):
-        """Verify that it is possible to set the hidden partition flag"""
-
-        # hidden (and lba) flag is special, because the way it is set depends on
-        # the filesystem (different part ID for FAT12/16/32 and NTFS) so better
-        # start with a clean test environment
-
-        # we first need a partition table
-        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
-        self.assertTrue(succ)
-
-        # for now, let's just create a typical primary partition starting at the
-        # sector 2048, 80 MiB big with optimal alignment
-        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 80 * 1024**2, BlockDev.PartAlign.OPTIMAL)
-        self.assertTrue(ps)
-        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
-
-        # no filesystem -> hidden shouldn't be set
-        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.HIDDEN, True)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertEqual(ps.flags, 0)
-
-        # now format the partition to FAT12
-        ret, out, err = run_command("mkfs.fat -F 12 %s" % ps.path)
-        if ret != 0:
-            self.fail("Failed to format partition to fat12 for flag test case:\n%s\n%s" % (out, err))
-        self.addCleanup(run_command, "wipefs -a %s" % ps.path)
-
-        # hidden is supported on FAT12
-        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.HIDDEN, True)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.HIDDEN)
-
-        # remove the flag
-        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.HIDDEN, False)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertFalse(ps.flags & BlockDev.PartFlag.HIDDEN)
-
-        # now format the partition to FAT32
-        ret, out, err = run_command("mkfs.fat -F 32 %s" % ps.path)
-        if ret != 0:
-            self.fail("Failed to format partition to fat32 for flag test case:\n%s\n%s" % (out, err))
-
-        # hidden is supported on FAT32
-        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.HIDDEN, True)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.HIDDEN)
-
-        # lba is also supported on FAT32
-        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.LBA, True)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.LBA)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.HIDDEN)
-
-        # unset the lba flag
-        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.LBA, False)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertFalse(ps.flags & BlockDev.PartFlag.LBA)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.HIDDEN)
-
-
-class PartSetDiskFlagCase(PartTestCase):
-    def test_set_disk_flag(self):
-        """Verify that it is possible to set disk flag(s)"""
-
-        with self.assertRaises(GLib.GError):
-            BlockDev.part_set_disk_flag ("/non/existing/device", BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT, True)
-
-        ps = BlockDev.part_get_disk_spec (self.loop_dev)
-        self.assertTrue(ps)
-        self.assertEqual(ps.flags, 0)
-        self.assertEqual(ps.table_type, BlockDev.PartTableType.UNDEF)
-        # no label/table
-        with self.assertRaises(GLib.GError):
-            BlockDev.part_set_disk_flag (self.loop_dev, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT, True)
-
-        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
-        self.assertTrue(succ)
-
-        ps = BlockDev.part_get_disk_spec (self.loop_dev)
-        self.assertTrue(ps)
-        self.assertEqual(ps.table_type, BlockDev.PartTableType.MSDOS)
-        self.assertEqual(ps.flags, 0)
-        # not supported on the MSDOS table
-        with self.assertRaises(GLib.GError):
-            BlockDev.part_set_disk_flag (self.loop_dev, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT, True)
-
-
-        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.GPT, True)
-        self.assertTrue(succ)
-
-        ps = BlockDev.part_get_disk_spec (self.loop_dev)
-        self.assertTrue(ps)
-        self.assertEqual(ps.table_type, BlockDev.PartTableType.GPT)
-        self.assertEqual(ps.flags, 0)
-
-        succ = BlockDev.part_set_disk_flag (self.loop_dev, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT, True)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_disk_spec (self.loop_dev)
-        self.assertTrue(ps)
-        self.assertEqual(ps.flags, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT)
-
-        # try to set the flag again, just to make sure it doesn't change
-        succ = BlockDev.part_set_disk_flag (self.loop_dev, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT, True)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_disk_spec (self.loop_dev)
-        self.assertTrue(ps)
-        self.assertEqual(ps.flags, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT)
-
-        succ = BlockDev.part_set_disk_flag (self.loop_dev, BlockDev.PartDiskFlag.PART_DISK_FLAG_GPT_PMBR_BOOT, False)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_disk_spec (self.loop_dev)
-        self.assertTrue(ps)
-        self.assertEqual(ps.flags, 0)
-
-class PartSetFlagsCase(PartTestCase):
-    def test_set_part_flags(self):
-        """Verify that it is possible to set multiple partition flags at once"""
-
-        # we first need a partition table
-        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
-        self.assertTrue(succ)
-
-        # for now, let's just create a typical primary partition starting at the
-        # sector 2048, 10 MiB big with optimal alignment
-        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
-
-        # we should get proper data back
-        self.assertTrue(ps)
-        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
-
-        succ = BlockDev.part_set_part_flags (self.loop_dev, ps.path, BlockDev.PartFlag.BOOT)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.BOOT)
-
-        # 0 -> unset all
-        succ = BlockDev.part_set_part_flags (self.loop_dev, ps.path, 0)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertFalse(ps.flags & BlockDev.PartFlag.BOOT)
-
-        # add another partition and do some more tests on that one
-        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps.start + ps.size + 1, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
-
-        succ = BlockDev.part_set_part_flags (self.loop_dev, ps.path, BlockDev.PartFlag.BOOT | BlockDev.PartFlag.LVM)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.BOOT)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.LVM)
-
-        # HPSERVICE flag not supported on the MSDOS table
-        with self.assertRaises(GLib.GError):
-            BlockDev.part_set_part_flags (self.loop_dev, ps.path, BlockDev.PartFlag.HPSERVICE)
-
-        # also try some GPT-only flags
-        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.GPT, True)
-        self.assertTrue(succ)
-
-        # for now, let's just create a typical primary partition starting at the
-        # sector 2048, 10 MiB big with optimal alignment
-        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
-
-        # we should get proper data back
-        self.assertTrue(ps)
-        self.assertEqual(ps.flags, 0)  # no flags (combination of bit flags)
-
-        succ = BlockDev.part_set_part_flags (self.loop_dev, ps.path, BlockDev.PartFlag.GPT_READ_ONLY | BlockDev.PartFlag.GPT_HIDDEN)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_READ_ONLY)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.GPT_HIDDEN)
-
-        succ = BlockDev.part_set_part_flags (self.loop_dev, ps.path, 0) # no flags
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertFalse(ps.flags & BlockDev.PartFlag.GPT_READ_ONLY)
-        self.assertFalse(ps.flags & BlockDev.PartFlag.GPT_HIDDEN)
-
 
 class PartSetNameCase(PartTestCase):
     def test_set_part_name(self):
@@ -1526,7 +1204,7 @@ class PartSetIdCase(PartTestCase):
 
 class PartSetGptFlagsCase(PartTestCase):
     def test_set_part_type(self):
-        """Verify that it is possible to set and get partition flags on GPT"""
+        """Verify that it is possible to set and get partition type on GPT"""
 
         esp_guid = "C12A7328-F81F-11D2-BA4B-00A0C93EC93B"
 
@@ -1538,24 +1216,10 @@ class PartSetGptFlagsCase(PartTestCase):
         # sector 2048, 10 MiB big with optimal alignment
         ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
 
-        # set GUID (part type) to check that changing flags doesn't change it
+        # set GUID (part type)
         succ = BlockDev.part_set_part_type (self.loop_dev, ps.path, esp_guid)
         self.assertTrue(succ)
         ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertEqual(ps.type_guid, esp_guid)
-
-        # set LEGACY_BOOT flag and test it
-        succ = BlockDev.part_set_part_flag (self.loop_dev, ps.path, BlockDev.PartFlag.LEGACY_BOOT, True)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.LEGACY_BOOT)
-        self.assertEqual(ps.type_guid, esp_guid)
-
-        # same but set_part_flags
-        succ = BlockDev.part_set_part_flags (self.loop_dev, ps.path, BlockDev.PartFlag.LEGACY_BOOT)
-        self.assertTrue(succ)
-        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
-        self.assertTrue(ps.flags & BlockDev.PartFlag.LEGACY_BOOT)
         self.assertEqual(ps.type_guid, esp_guid)
 
 class PartNoDevCase(PartTestCase):
