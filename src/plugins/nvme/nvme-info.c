@@ -431,7 +431,7 @@ BDNVMEControllerInfo * bd_nvme_get_controller_info (const gchar *device, GError 
     if (fd < 0)
         return NULL;
 
-    /* send the NVME_IDENTIFY_CNS_NS + NVME_IDENTIFY_CNS_CTRL ioctl */
+    /* send the NVME_IDENTIFY_CNS_CTRL ioctl */
     ret = nvme_identify_ctrl (fd, &ctrl_id);
     if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
@@ -539,10 +539,14 @@ BDNVMEControllerInfo * bd_nvme_get_controller_info (const gchar *device, GError 
  */
 BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **error) {
     int ret;
-    int ret_desc;
+    int ret_ctrl;
+    int ret_desc = -1;
+    int ret_ns_ind = -1;
     int fd;
     __u32 nsid = 0;
+    struct nvme_id_ctrl ctrl_id = ZERO_INIT;
     struct nvme_id_ns ns_info = ZERO_INIT;
+    struct nvme_id_independent_id_ns ns_info_ind = ZERO_INIT;
     uint8_t desc[NVME_IDENTIFY_DATA_SIZE] = ZERO_INIT;
     guint8 flbas;
     guint i;
@@ -565,7 +569,6 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
     }
 
     /* send the NVME_IDENTIFY_CNS_NS ioctl */
-    ret_desc = nvme_identify_ns_descs (fd, nsid, (struct nvme_ns_id_desc *) &desc);
     ret = nvme_identify_ns (fd, nsid, &ns_info);
     if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
@@ -573,6 +576,17 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
         close (fd);
         return NULL;
     }
+
+    /* send the NVME_IDENTIFY_CNS_CTRL ioctl */
+    ret_ctrl = nvme_identify_ctrl (fd, &ctrl_id);
+
+    /* send the NVME_IDENTIFY_CNS_NS_DESC_LIST ioctl, NVMe 1.3 */
+    if (ret_ctrl == 0 && GUINT32_FROM_LE (ctrl_id.ver) >= 0x10300)
+        ret_desc = nvme_identify_ns_descs (fd, nsid, (struct nvme_ns_id_desc *) &desc);
+
+    /* send the NVME_IDENTIFY_CNS_CSI_INDEPENDENT_ID_NS ioctl, NVMe 2.0 */
+    if (ret_ctrl == 0 && GUINT32_FROM_LE (ctrl_id.ver) >= 0x20000)
+        ret_ns_ind = nvme_identify_independent_identify_ns (fd, nsid, &ns_info_ind);
     close (fd);
 
     info = g_new0 (BDNVMENamespaceInfo, 1);
@@ -618,6 +632,10 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
                     break;
             }
         }
+    }
+    if (ret_ns_ind == 0) {
+        if ((ns_info_ind.nsfeat & 1 << 4) == 1 << 4)
+            info->features |= BD_NVME_NS_FEAT_ROTATIONAL;
     }
 
     /* translate the LBA Format array */

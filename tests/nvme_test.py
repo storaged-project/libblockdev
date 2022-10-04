@@ -73,6 +73,7 @@ class NVMeTestCase(NVMeTest):
         self.assertFalse(info.features & BlockDev.NVMENamespaceFeature.THIN)
         self.assertTrue (info.features & BlockDev.NVMENamespaceFeature.MULTIPATH_SHARED)
         self.assertFalse(info.features & BlockDev.NVMENamespaceFeature.FORMAT_PROGRESS)
+        self.assertFalse(info.features & BlockDev.NVMENamespaceFeature.ROTATIONAL)
         self.assertEqual(info.eui64, "0000000000000000")
         self.assertEqual(info.format_progress_remaining, 0)
         self.assertEqual(len(info.lba_formats), 1)
