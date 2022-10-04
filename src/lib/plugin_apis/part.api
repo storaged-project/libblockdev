@@ -57,6 +57,7 @@ GType bd_part_spec_get_type();
  * @type: bit combination of partition's types (#BDPartType)
  * @start: start of the partition
  * @size: size of the partition
+ * @attrs: partition GPT attributes
  */
 typedef struct BDPartSpec {
     gchar *path;
@@ -66,6 +67,7 @@ typedef struct BDPartSpec {
     guint64 type;
     guint64 start;
     guint64 size;
+    guint64 attrs;
 } BDPartSpec;
 
 BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
@@ -81,6 +83,7 @@ BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
     ret->type = data->type;
     ret->start = data->start;
     ret->size = data->size;
+    ret->attrs = data->attrs;
 
     return ret;
 }

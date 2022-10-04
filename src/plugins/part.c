@@ -71,6 +71,7 @@ BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
     ret->type = data->type;
     ret->start = data->start;
     ret->size = data->size;
+    ret->attrs = data->attrs;
 
     return ret;
 }
@@ -402,7 +403,7 @@ gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean
     return TRUE;
 }
 
-static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_num, guint64 *flags, GError **error) {
+static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_num, guint64 *attrs, GError **error) {
     struct fdisk_context *cxt = NULL;
     struct fdisk_label *lb = NULL;
     struct fdisk_partition *pa = NULL;
@@ -437,11 +438,11 @@ static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_nu
         return NULL;
     }
 
-    if (flags) {
-        status = fdisk_gpt_get_partition_attrs (cxt, part_num, flags);
+    if (attrs) {
+        status = fdisk_gpt_get_partition_attrs (cxt, part_num, attrs);
         if (status < 0) {
             g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                        "Failed to read GPT flags");
+                         "Failed to read GPT attributes");
             close_context (cxt);
             return NULL;
         }
@@ -531,7 +532,7 @@ static BDPartSpec* get_part_spec_fdisk (struct fdisk_context *cxt, struct fdisk_
     if (g_strcmp0 (fdisk_label_get_name (lb), "gpt") == 0) {
         if (ret->type == BD_PART_TYPE_NORMAL) {
           /* only 'normal' partitions have GUIDs */
-          ret->type_guid = get_part_type_guid_and_gpt_flags (devname, fdisk_partition_get_partno (pa) + 1, NULL, error);
+          ret->type_guid = get_part_type_guid_and_gpt_flags (devname, fdisk_partition_get_partno (pa) + 1, &(ret->attrs), error);
           if (!ret->type_guid && *error) {
               bd_part_spec_free (ret);
               return NULL;

@@ -48,6 +48,7 @@ typedef struct BDPartSpec {
     guint64 type;
     guint64 start;
     guint64 size;
+    guint64 attrs;
 } BDPartSpec;
 
 BDPartSpec* bd_part_spec_copy (BDPartSpec *data);

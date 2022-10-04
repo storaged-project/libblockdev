@@ -460,6 +460,7 @@ class PartCreatePartFullCase(PartTestCase):
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
         self.assertEqual(ps.start, 2048 * 512)
         self.assertEqual(ps.size, 10 * 1024**2)
+        self.assertEqual(ps.attrs, 0)
 
         ps2 = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, ps.start + ps.size + 1,
                                          10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
