@@ -54,4 +54,21 @@
   </para>
 
   </simplesect>
+
+  <simplesect><title>Part plugin</title>
+
+  <para>
+    The part plugin has been rewritten to use libfdisk library instead of libparted. The following functions, enums and definitions related to partition and disk flags have been removed.
+    <literal>bd_part_set_part_flag</literal>, <literal>bd_part_get_flag_str</literal>, <literal>bd_part_set_disk_flag</literal>, <literal>bd_part_set_part_flags</literal>, <literal>BDPartFlag</literal> and <literal>BDPartDiskFlag</literal>.
+  </para>
+    We recommend using the <literal>bd_part_set_part_type</literal> and <literal> bd_part_set_part_id</literal> functions to set partition GUID (GPT) or ID (MSDOS) to set the required type/id instead.
+  <para>
+    New functions <literal>bd_part_set_part_bootable</literal> and <literal>bd_part_set_part_attributes</literal> have been added to allow controlling the bootable flag (MSDOS) and partition attributes (GPT).
+  </para>
+
+  <para>
+    The <literal>bd_part_get_part_id</literal> function has been removed. The partition id parameter is now available in <literal>BDPartSpec</literal>.
+  </para>
+
+  </simplesect>
 </chapter>
