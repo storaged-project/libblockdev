@@ -1236,7 +1236,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
 
     if (type == BD_PART_TYPE_REQ_LOGICAL) {
         /* next_partno doesn't work for logical partitions, for these the
-           current maximal number of partitions suppported by the label
+           current maximal number of partitions supported by the label
            is the next (logical) partition number */
         partno = fdisk_get_npartitions (cxt);
 

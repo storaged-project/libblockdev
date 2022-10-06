@@ -127,7 +127,7 @@ class PartGetDiskSpecCase(PartTestCase):
 class PartCreatePartCase(PartTestCase):
     @tag_test(TestTags.CORE)
     def test_create_part_simple(self):
-        """Verify that it is possible to create a parition"""
+        """Verify that it is possible to create a partition"""
 
         # we first need a partition table
         succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
@@ -160,7 +160,7 @@ class PartCreatePartCase(PartTestCase):
         self.assertEqual(ps.size, ps3.size)
 
     def test_create_part_minimal_start_optimal(self):
-        """Verify that it is possible to create a parition with minimal start and optimal alignment"""
+        """Verify that it is possible to create a partition with minimal start and optimal alignment"""
 
         # we first need a partition table
         succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
@@ -192,7 +192,7 @@ class PartCreatePartCase(PartTestCase):
         self.assertEqual(ps.size, ps3.size)
 
     def test_create_part_minimal_start(self):
-        """Verify that it is possible to create a parition with minimal start"""
+        """Verify that it is possible to create a partition with minimal start"""
 
         # we first need a partition table
         succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
@@ -908,7 +908,7 @@ class PartGetPartByPos(PartTestCase):
         self.assertEqual(ret.start, ps4.start + ps4.size)
         self.assertLessEqual(ret.size, (100 * 1024**2) - (ps4.start + ps4.size))
 
-        # metadata at the start of the extendeded partition
+        # metadata at the start of the extended partition
         ret = BlockDev.part_get_part_by_pos(self.loop_dev, ps3.start)
         self.assertIsNotNone(ret)
         self.assertIsNone(ret.path)
@@ -929,7 +929,7 @@ class PartGetPartByPos(PartTestCase):
 
 class PartCreateResizePartCase(PartTestCase):
     def test_create_resize_part_two(self):
-        """Verify that it is possible to create and resize two paritions"""
+        """Verify that it is possible to create and resize two partitions"""
 
         # we first need a partition table
         succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
@@ -972,7 +972,7 @@ class PartCreateResizePartCase(PartTestCase):
         self.assertGreaterEqual(ps2.size, ps2_size - 2 * 1024**2)  # almost as big as before
 
     def test_create_resize_part_single(self):
-        """Verify that it is possible to create and resize a parition"""
+        """Verify that it is possible to create and resize a partition"""
 
         try:
             fdisk_version = self._get_fdisk_version()
@@ -1072,7 +1072,7 @@ class PartCreateResizePartCase(PartTestCase):
 class PartCreateDeletePartCase(PartTestCase):
     @tag_test(TestTags.CORE)
     def test_create_delete_part_simple(self):
-        """Verify that it is possible to create and delete a parition"""
+        """Verify that it is possible to create and delete a partition"""
 
         # we first need a partition table
         succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
