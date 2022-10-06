@@ -1894,7 +1894,7 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
  *
  * Returns: whether the @part_id type was successfully set for @part or not
  *
- * Tech category: %BD_PART_TECH_MSDOS-%BD_PART_TECH_MODE_MODIFY_PART
+ * Tech category: %BD_PART_TECH_MBR-%BD_PART_TECH_MODE_MODIFY_PART
  */
 gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar *part_id, GError **error) {
     guint64 progress_id = 0;
