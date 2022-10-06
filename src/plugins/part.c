@@ -17,20 +17,12 @@
  * Author: Vratislav Podzimek <vpodzime@redhat.com>
  */
 
-#include <string.h>
 #include <ctype.h>
-#include <stdlib.h>
-#include <math.h>
-#include <inttypes.h>
-#include <unistd.h>
 #include <sys/file.h>
 #include <fcntl.h>
-#include <sys/ioctl.h>
-#include <linux/fs.h>
 #include <blockdev/utils.h>
 #include <libfdisk.h>
 #include <locale.h>
-#include <blkid.h>
 
 #include "part.h"
 
