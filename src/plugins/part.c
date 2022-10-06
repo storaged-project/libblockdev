@@ -220,7 +220,9 @@ static void close_context (struct fdisk_context *cxt) {
 
     if (ret != 0)
         /* XXX: should report error here? */
-        g_warning ("Failed to close and sync the device: %s", strerror_l (-ret, c_locale));
+        bd_utils_log_format (BD_UTILS_LOG_WARNING,
+                             "Failed to close and sync the device: %s",
+                             strerror_l (-ret, c_locale));
 
     fdisk_unref_context (cxt);
 }
