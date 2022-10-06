@@ -387,9 +387,11 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
     }
 
     success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
-    if (!success)
+    if (!success) {
         /* error is already populated */
+        bd_fs_ntfs_info_free (ret);
         return NULL;
+    }
 
     lines = g_strsplit (output, "\n", 0);
     g_free (output);
