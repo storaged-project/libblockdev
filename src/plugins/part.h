@@ -110,6 +110,7 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
 gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gchar *type_guid, GError **error);
 gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar *part_id, GError **error);
 gboolean bd_part_set_part_bootable (const gchar *disk, const gchar *part, gboolean bootable, GError **error);
+gboolean bd_part_set_part_attributes (const gchar *disk, const gchar *part, guint64 attrs, GError **error);
 
 const gchar* bd_part_get_part_table_type_str (BDPartTableType type, GError **error);
 const gchar* bd_part_get_type_str (BDPartType type, GError **error);

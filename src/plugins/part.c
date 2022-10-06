@@ -2005,6 +2005,50 @@ gboolean bd_part_set_part_bootable (const gchar *disk, const gchar *part, gboole
 }
 
 /**
+ * bd_part_set_part_attributes:
+ * @disk: device the partition belongs to
+ * @part: partition the attributes should be set for
+ * @attrs: GPT attributes to set on @part
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @attrs GPT attributes were successfully set for @part or not
+ *
+ * Tech category: %BD_PART_TECH_GPT-%BD_PART_TECH_MODE_MODIFY_PART
+ */
+gboolean bd_part_set_part_attributes (const gchar *disk, const gchar *part, guint64 attrs, GError **error) {
+    struct fdisk_context *cxt = NULL;
+    gint part_num = 0;
+    gint ret = 0;
+
+    part_num = get_part_num (part, error);
+    if (part_num == -1)
+        return FALSE;
+
+    /* /dev/sda1 is the partition number 0 in libfdisk */
+    part_num--;
+
+    cxt = get_device_context (disk, error);
+    if (!cxt)
+        return FALSE;
+
+    ret = fdisk_gpt_set_partition_attrs (cxt, part_num, attrs);
+    if (ret < 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to set GPT attributes: %s", strerror_l (-ret, c_locale));
+        return FALSE;
+    }
+
+    if (!write_label (cxt, NULL, disk, FALSE, error)) {
+        close_context (cxt);
+        return FALSE;
+    }
+
+    close_context (cxt);
+
+    return TRUE;
+}
+
+/**
  * bd_part_get_part_table_type_str:
  * @type: table type to get string representation for
  * @error: (out): place to store error (if any)

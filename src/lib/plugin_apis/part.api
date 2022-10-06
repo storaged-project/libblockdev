@@ -382,6 +382,19 @@ gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar 
 gboolean bd_part_set_part_bootable (const gchar *disk, const gchar *part, gboolean bootable, GError **error);
 
 /**
+ * bd_part_set_part_attributes:
+ * @disk: device the partition belongs to
+ * @part: partition the attributes should be set for
+ * @attrs: GPT attributes to set on @part
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @attrs GPT attributes were successfully set for @part or not
+ *
+ * Tech category: %BD_PART_TECH_GPT-%BD_PART_TECH_MODE_MODIFY_PART
+ */
+gboolean bd_part_set_part_attributes (const gchar *disk, const gchar *part, guint64 attrs, GError **error);
+
+/**
  * bd_part_get_part_table_type_str:
  * @type: table type to get string representation for
  * @error: (out): place to store error (if any)

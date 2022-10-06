@@ -1251,6 +1251,30 @@ class PartSetGptFlagsCase(PartTestCase):
         ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
         self.assertEqual(ps.type_guid, esp_guid)
 
+
+class PartSetGptAttrsCase(PartTestCase):
+    def test_set_part_attributes(self):
+        """Verify that it is possible to set and get partition attributes"""
+
+        # we first need a GPT partition table
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.GPT, True)
+        self.assertTrue(succ)
+
+        # for now, let's just create a typical primary partition starting at the
+        # sector 2048, 10 MiB big with optimal alignment
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+
+        # set some GPT attributes
+        attrs = 0
+        attrs |= (1 << 0)  # system partition
+        attrs |= (1 << 60)  # read only
+        attrs |= (1 << 62)  # hidden
+        succ = BlockDev.part_set_part_attributes (self.loop_dev, ps.path, attrs)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertEqual(ps.attrs, attrs)
+
+
 class PartNoDevCase(PartTestCase):
 
     def setUp(self):
