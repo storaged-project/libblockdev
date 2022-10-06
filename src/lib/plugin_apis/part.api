@@ -57,6 +57,7 @@ GType bd_part_spec_get_type();
  * @type: bit combination of partition's types (#BDPartType)
  * @start: start of the partition
  * @size: size of the partition
+ * @bootable: whether the bootable flag is set or not (for MSDOS partitions)
  * @attrs: partition GPT attributes
  */
 typedef struct BDPartSpec {
@@ -67,6 +68,7 @@ typedef struct BDPartSpec {
     guint64 type;
     guint64 start;
     guint64 size;
+    gboolean bootable;
     guint64 attrs;
 } BDPartSpec;
 
@@ -83,6 +85,7 @@ BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
     ret->type = data->type;
     ret->start = data->start;
     ret->size = data->size;
+    ret->bootable = data->bootable;
     ret->attrs = data->attrs;
 
     return ret;
@@ -364,6 +367,19 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
  * Tech category: %BD_PART_TECH_MODE_MODIFY_PART + the tech according to the partition table type
  */
 gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar *part_id, GError **error);
+
+/**
+ * bd_part_set_part_bootable:
+ * @disk: device the partition belongs to
+ * @part: partition the bootable flag should be set for
+ * @bootable: whether to set or unset the bootable flag
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @bootable flag was successfully set for @part or not
+ *
+ * Tech category: %BD_PART_TECH_MBR-%BD_PART_TECH_MODE_MODIFY_PART
+ */
+gboolean bd_part_set_part_bootable (const gchar *disk, const gchar *part, gboolean bootable, GError **error);
 
 /**
  * bd_part_get_part_table_type_str:

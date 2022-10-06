@@ -1206,6 +1206,31 @@ class PartSetIdCase(PartTestCase):
             BlockDev.part_set_part_id (self.loop_dev, ps.path, "0x85")
 
 
+class PartSetBootableFlagCase(PartTestCase):
+    def test_set_part_type(self):
+        """Verify that it is possible to set bootable flag on MSDOS"""
+
+        # we first need a MBR partition table
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
+        self.assertTrue(succ)
+
+        # for now, let's just create a typical primary partition starting at the
+        # sector 2048, 10 MiB big with optimal alignment
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+
+        # set the flag
+        succ = BlockDev.part_set_part_bootable (self.loop_dev, ps.path, True)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertTrue(ps.bootable)
+
+        # unset the flag
+        succ = BlockDev.part_set_part_bootable (self.loop_dev, ps.path, False)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertFalse(ps.bootable)
+
+
 class PartSetGptFlagsCase(PartTestCase):
     def test_set_part_type(self):
         """Verify that it is possible to set and get partition type on GPT"""

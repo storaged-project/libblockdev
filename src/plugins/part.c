@@ -71,6 +71,7 @@ BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
     ret->type = data->type;
     ret->start = data->start;
     ret->size = data->size;
+    ret->bootable = data->bootable;
     ret->attrs = data->attrs;
 
     return ret;
@@ -550,6 +551,8 @@ static BDPartSpec* get_part_spec_fdisk (struct fdisk_context *cxt, struct fdisk_
             }
             ret->id = g_strdup_printf ("0x%02x", fdisk_parttype_get_code (ptype));
         }
+        if (fdisk_partition_is_bootable (pa) == 1)
+            ret->bootable = TRUE;
     }
 
     return ret;
@@ -1933,6 +1936,71 @@ gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar 
 
     close_context (cxt);
     bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
+}
+
+/**
+ * bd_part_set_part_bootable:
+ * @disk: device the partition belongs to
+ * @part: partition the bootable flag should be set for
+ * @bootable: whether to set or unset the bootable flag
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @bootable flag was successfully set for @part or not
+ *
+ * Tech category: %BD_PART_TECH_MBR-%BD_PART_TECH_MODE_MODIFY_PART
+ */
+gboolean bd_part_set_part_bootable (const gchar *disk, const gchar *part, gboolean bootable, GError **error) {
+    struct fdisk_context *cxt = NULL;
+    gint part_num = 0;
+    struct fdisk_partition *pa = NULL;
+    gint ret = 0;
+
+    part_num = get_part_num (part, error);
+    if (part_num == -1)
+        return FALSE;
+
+    /* /dev/sda1 is the partition number 0 in libfdisk */
+    part_num--;
+
+    cxt = get_device_context (disk, error);
+    if (!cxt)
+        return FALSE;
+
+    ret = fdisk_get_partition (cxt, part_num, &pa);
+    if (ret != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to get partition '%d'.", part_num);
+        close_context (cxt);
+        return FALSE;
+    }
+
+    ret = fdisk_partition_is_bootable (pa);
+    if ((ret == 1 && bootable) || (ret != 1 && !bootable)) {
+        /* boot flag is already set as desired, no change needed */
+        fdisk_unref_partition (pa);
+        close_context (cxt);
+        return TRUE;
+    }
+
+    ret = fdisk_toggle_partition_flag (cxt, part_num, DOS_FLAG_ACTIVE);
+    if (ret != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to set partition bootable flag: %s", strerror_l (-ret, c_locale));
+        fdisk_unref_partition (pa);
+        close_context (cxt);
+        return FALSE;
+    }
+
+    if (!write_label (cxt, NULL, disk, FALSE, error)) {
+        fdisk_unref_partition (pa);
+        close_context (cxt);
+        return FALSE;
+    }
+
+    fdisk_unref_partition (pa);
+    close_context (cxt);
+
     return TRUE;
 }
 
