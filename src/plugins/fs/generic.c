@@ -672,12 +672,14 @@ static gchar* fs_mount (const gchar *device, gchar *fstype, gboolean *unmount, G
             ret = bd_fs_mount (device, mountpoint, fstype, NULL, NULL, &l_error);
             if (!ret) {
                 g_propagate_prefixed_error (error, l_error, "Failed to mount '%s': ", device);
+                g_free (mountpoint);
                 return NULL;
             } else
                 *unmount = TRUE;
         } else {
             g_propagate_prefixed_error (error, l_error,
                                         "Error when trying to get mountpoint for '%s': ", device);
+            g_free (mountpoint);
             return NULL;
         }
     } else
