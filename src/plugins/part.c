@@ -1728,7 +1728,7 @@ static gboolean set_part_type (struct fdisk_context *cxt, gint part_num, const g
 /**
  * bd_part_set_part_name:
  * @disk: device the partition belongs to
- * @part: partition the should be set for
+ * @part: partition the name should be set for
  * @name: name to set
  * @error: (out): place to store error (if any)
  *
@@ -1831,7 +1831,7 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
 /**
  * bd_part_set_part_type:
  * @disk: device the partition belongs to
- * @part: partition the should be set for
+ * @part: partition the type should be set for
  * @type_guid: GUID of the type
  * @error: (out): place to store error (if any)
  *
@@ -1883,7 +1883,7 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
 /**
  * bd_part_set_part_id:
  * @disk: device the partition belongs to
- * @part: partition the should be set for
+ * @part: partition the ID should be set for
  * @part_id: partition Id
  * @error: (out): place to store error (if any)
  *
