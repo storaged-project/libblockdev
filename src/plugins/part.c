@@ -1798,6 +1798,7 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to set name on the partition '%s' on device '%s': %s",
                      part, disk, strerror_l (-status, c_locale));
+        fdisk_unref_partition (pa);
         close_context (cxt);
         bd_utils_report_finished (progress_id, (*error)->message);
         return FALSE;
