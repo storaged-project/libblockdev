@@ -280,6 +280,47 @@ gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const 
     return TRUE;
 }
 
+static gboolean _disconnect (const gchar *subsysnqn, const gchar *path, GError **error, gboolean *found) {
+    nvme_root_t root;
+    nvme_host_t host;
+    nvme_subsystem_t subsys;
+    nvme_ctrl_t ctrl;
+    int ret;
+
+    root = nvme_create_root (NULL, -1);
+    if (root == NULL) {
+        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
+                     "Failed to create topology root: %s",
+                     strerror_l (errno, _C_LOCALE));
+        return FALSE;
+    }
+    ret = nvme_scan_topology (root, NULL, NULL);
+    if (ret < 0) {
+        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
+                     "Failed to scan topology: %s",
+                     strerror_l (errno, _C_LOCALE));
+        nvme_free_tree (root);
+        return FALSE;
+    }
+    nvme_for_each_host (root, host)
+        nvme_for_each_subsystem (host, subsys)
+            if (!subsysnqn || g_strcmp0 (nvme_subsystem_get_nqn (subsys), subsysnqn) == 0)
+                nvme_subsystem_for_each_ctrl (subsys, ctrl)
+                    if (!path || g_strcmp0 (nvme_ctrl_get_name (ctrl), path) == 0) {
+                        ret = nvme_disconnect_ctrl (ctrl);
+                        if (ret != 0) {
+                            g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
+                                         "Error disconnecting the controller: %s",
+                                         strerror_l (errno, _C_LOCALE));
+                            nvme_free_tree (root);
+                            return FALSE;
+                        }
+                        *found = TRUE;
+                    }
+    nvme_free_tree (root);
+    return TRUE;
+}
+
 /**
  * bd_nvme_disconnect:
  * @subsysnqn: The name of the NVMe subsystem to disconnect.
@@ -295,37 +336,16 @@ gboolean bd_nvme_connect (const gchar *subsysnqn, const gchar *transport, const 
  * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
  */
 gboolean bd_nvme_disconnect (const gchar *subsysnqn, GError **error) {
-    nvme_root_t root;
-    nvme_host_t host;
-    nvme_subsystem_t subsys;
-    nvme_ctrl_t ctrl;
     gboolean found = FALSE;
 
-    root = nvme_scan (NULL);
-    nvme_init_logging (root, -1, false, false);
-    nvme_for_each_host (root, host)
-        nvme_for_each_subsystem (host, subsys)
-            if (g_strcmp0 (nvme_subsystem_get_nqn (subsys), subsysnqn) == 0)
-                nvme_subsystem_for_each_ctrl (subsys, ctrl) {
-                    int ret;
+    if (!_disconnect (subsysnqn, NULL, error, &found))
+        return FALSE;
 
-                    ret = nvme_disconnect_ctrl (ctrl);
-                    if (ret != 0) {
-                        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                                     "Error disconnecting the controller: %s",
-                                     strerror_l (errno, _C_LOCALE));
-                        nvme_free_tree (root);
-                        return FALSE;
-                    }
-                    found = TRUE;
-                }
-    nvme_free_tree (root);
     if (!found) {
         g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_NO_MATCH,
                      "No subsystems matching '%s' NQN found.", subsysnqn);
         return FALSE;
     }
-
     return TRUE;
 }
 
@@ -343,36 +363,21 @@ gboolean bd_nvme_disconnect (const gchar *subsysnqn, GError **error) {
  * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
  */
 gboolean bd_nvme_disconnect_by_path (const gchar *path, GError **error) {
-    nvme_root_t root;
-    nvme_ctrl_t ctrl;
     const gchar *p;
-    int ret;
+    gboolean found = FALSE;
 
     p = path;
     if (g_str_has_prefix (p, "/dev/"))
         p += 5;
 
-    root = nvme_scan (NULL);
-    nvme_init_logging (root, -1, false, false);
-    ctrl = nvme_scan_ctrl (root, p);
-    if (!ctrl) {
+    if (!_disconnect (NULL, p, error, &found))
+        return FALSE;
+
+    if (!found) {
         g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_NO_MATCH,
-                     "Unable to match a NVMeoF controller for the specified block device %s.",
-                     path);
-        nvme_free_tree (root);
+                     "No controllers matching the %s device name found.", path);
         return FALSE;
     }
-
-    ret = nvme_disconnect_ctrl (ctrl);
-    if (ret != 0) {
-        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
-                     "Error disconnecting the controller: %s",
-                     strerror_l (errno, _C_LOCALE));
-        nvme_free_tree (root);
-        return FALSE;
-    }
-    nvme_free_tree (root);
-
     return TRUE;
 }
 
