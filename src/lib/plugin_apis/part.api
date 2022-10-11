@@ -182,7 +182,7 @@ typedef enum {
  * bd_part_is_tech_avail:
  * @tech: the queried tech
  * @mode: a bit mask of queried modes of operation (#BDPartTechMode) for @tech
- * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ * @error: (out) (optional): place to store error (details about why the @tech-@mode combination is not available)
  *
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
@@ -195,7 +195,7 @@ gboolean bd_part_is_tech_avail (BDPartTech tech, guint64 mode, GError **error);
  * @type: type of the partition table to create
  * @ignore_existing: whether to ignore/overwrite the existing table or not
  *                   (reports an error if %FALSE and there's some table on @disk)
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the partition table was successfully created or not
  *
@@ -207,7 +207,7 @@ gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean
  * bd_part_get_part_spec:
  * @disk: disk to remove the partition from
  * @part: partition to get spec for
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): spec of the @part partition from @disk or %NULL in case of error
  *
@@ -219,7 +219,7 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
  * bd_part_get_part_by_pos:
  * @disk: disk to remove the partition from
  * @position: position (in bytes) determining the partition
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): spec of the partition from @disk spanning over the @position or %NULL if no such
  *          partition exists or in case of error (@error is set)
@@ -231,7 +231,7 @@ BDPartSpec* bd_part_get_part_by_pos (const gchar *disk, guint64 position, GError
 /**
  * bd_part_get_disk_spec:
  * @disk: disk to get information about
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): information about the given @disk or %NULL (in case of error)
  *
@@ -242,7 +242,7 @@ BDPartDiskSpec* bd_part_get_disk_spec (const gchar *disk, GError **error);
 /**
  * bd_part_get_disk_parts:
  * @disk: disk to get information about partitions for
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full) (array zero-terminated=1): specs of the partitions from @disk or %NULL in case of error
  *
@@ -253,7 +253,7 @@ BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error);
 /**
  * bd_part_get_disk_free_regions:
  * @disk: disk to get free regions for
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full) (array zero-terminated=1): specs of the free regions from @disk or %NULL in case of error
  *
@@ -266,7 +266,7 @@ BDPartSpec** bd_part_get_disk_free_regions (const gchar *disk, GError **error);
  * @disk: disk to get the best free region for
  * @type: type of the partition that is planned to be added
  * @size: size of the partition to be added
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): spec of the best free region on @disk for a new partition of type @type
  *                           with the size of @size or %NULL if there is none such region or if
@@ -290,7 +290,7 @@ BDPartSpec* bd_part_get_best_free_region (const gchar *disk, BDPartType type, gu
  * @start: where the partition should start (i.e. offset from the disk start)
  * @size: desired size of the partition (if 0, a max-sized partition is created)
  * @align: alignment to use for the partition
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): specification of the created partition or %NULL in case of error
  *
@@ -305,7 +305,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
  * bd_part_delete_part:
  * @disk: disk to remove the partition from
  * @part: partition to remove
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the @part partition was successfully deleted from @disk
  *
@@ -319,7 +319,7 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
  * @part: partition to resize
  * @size: new partition size, 0 for maximal size
  * @align: alignment to use for the partition end
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the @part partition was successfully resized on @disk to @size
  *
@@ -334,7 +334,7 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
  * @disk: device the partition belongs to
  * @part: partition the name should be set for
  * @name: name to set
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the name was successfully set or not
  *
@@ -347,7 +347,7 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
  * @disk: device the partition belongs to
  * @part: partition the type should be set for
  * @type_guid: GUID of the type
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the @type_guid type was successfully set for @part or not
  *
@@ -360,7 +360,7 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
  * @disk: device the partition belongs to
  * @part: partition the ID should be set for
  * @part_id: partition Id
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the @part_id type was successfully set for @part or not
  *
@@ -373,7 +373,7 @@ gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar 
  * @disk: device the partition belongs to
  * @part: partition the bootable flag should be set for
  * @bootable: whether to set or unset the bootable flag
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the @bootable flag was successfully set for @part or not
  *
@@ -386,7 +386,7 @@ gboolean bd_part_set_part_bootable (const gchar *disk, const gchar *part, gboole
  * @disk: device the partition belongs to
  * @part: partition the attributes should be set for
  * @attrs: GPT attributes to set on @part
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the @attrs GPT attributes were successfully set for @part or not
  *
@@ -397,7 +397,7 @@ gboolean bd_part_set_part_attributes (const gchar *disk, const gchar *part, guin
 /**
  * bd_part_get_part_table_type_str:
  * @type: table type to get string representation for
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer none): string representation of @table_type
  *
@@ -408,7 +408,7 @@ const gchar* bd_part_get_part_table_type_str (BDPartTableType type, GError **err
 /**
  * bd_part_get_type_str:
  * @type: type to get string representation for
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer none): string representation of @type
  *
