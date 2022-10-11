@@ -2065,7 +2065,7 @@ gboolean bd_lvm_add_lv_tags (const gchar *vg_name, const gchar *lv_name, const g
  * @vg_name: name of the VG that contains the LV to set tags on
  * @lv_name: name of the LV to set tags on
  * @tags: (array zero-terminated=1): list of tags to remove
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the tags were successfully removed from @device or not
  *
