@@ -24,49 +24,6 @@ typedef enum {
 } BDPartTableType;
 
 typedef enum {
-    BD_PART_DISK_FLAG_GPT_PMBR_BOOT = 1
-} BDPartDiskFlag;
-
-/* BpG-skip */
-/**
- * BDPartFlag:
- *
- * Partition flags supported by libblockdev. First part of the flags (up to
- * @BD_PART_FLAG_BASIC_LAST) corresponds to the flags supported by libparted
- * (see https://www.gnu.org/software/parted/manual/parted.html#set). Second
- * part corresponds to the flags supported by sgdisk (GPT, see `sgdisk -A=list`).
- *
- * The only exception from the above is @BD_PART_FLAG_LEGACY_BOOT which is
- * supported by libparted too but is GPT specific.
- *
- */
-/* BpG-skip-end */
-typedef enum {
-    BD_PART_FLAG_BOOT = 1 << 1,
-    BD_PART_FLAG_ROOT = 1 << 2,
-    BD_PART_FLAG_SWAP = 1 << 3,
-    BD_PART_FLAG_HIDDEN = 1 << 4,
-    BD_PART_FLAG_RAID = 1 << 5,
-    BD_PART_FLAG_LVM = 1 << 6,
-    BD_PART_FLAG_LBA = 1 << 7,
-    BD_PART_FLAG_HPSERVICE = 1 << 8,
-    BD_PART_FLAG_CPALO = 1 << 9,
-    BD_PART_FLAG_PREP = 1 << 10,
-    BD_PART_FLAG_MSFT_RESERVED = 1 << 11,
-    BD_PART_FLAG_BIOS_GRUB = 1 << 12,
-    BD_PART_FLAG_APPLE_TV_RECOVERY = 1 << 13,
-    BD_PART_FLAG_DIAG = 1 << 14,
-    BD_PART_FLAG_LEGACY_BOOT = 1 << 15,
-    BD_PART_FLAG_MSFT_DATA = 1 << 16,
-    BD_PART_FLAG_IRST = 1 << 17,
-    BD_PART_FLAG_ESP = 1 << 18,
-    BD_PART_FLAG_GPT_SYSTEM_PART = 1 << 25,
-    BD_PART_FLAG_GPT_READ_ONLY = 1 << 26,
-    BD_PART_FLAG_GPT_HIDDEN = 1 << 27,
-    BD_PART_FLAG_GPT_NO_AUTOMOUNT = 1 << 28
-} BDPartFlag;
-
-typedef enum {
     BD_PART_TYPE_NORMAL    = 0x00,
     BD_PART_TYPE_LOGICAL   = 0x01,
     BD_PART_TYPE_EXTENDED  = 0x02,
@@ -95,20 +52,24 @@ GType bd_part_spec_get_type();
  * BDPartSpec:
  * @path: path of the partition (block device)
  * @name: name of the partition (for GPT partitions)
+ * @id: id of the partition (for MSDOS partitions)
  * @type_guid: GUID of the partition's type (GPT)
  * @type: bit combination of partition's types (#BDPartType)
  * @start: start of the partition
  * @size: size of the partition
- * @flags: bit combination of partition's flags (#BDPartFlag)
+ * @bootable: whether the bootable flag is set or not (for MSDOS partitions)
+ * @attrs: partition GPT attributes
  */
 typedef struct BDPartSpec {
     gchar *path;
     gchar *name;
+    gchar *id;
     gchar *type_guid;
     guint64 type;
     guint64 start;
     guint64 size;
-    guint64 flags;
+    gboolean bootable;
+    guint64 attrs;
 } BDPartSpec;
 
 BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
@@ -119,10 +80,13 @@ BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
 
     ret->path = g_strdup (data->path);
     ret->name = g_strdup (data->name);
+    ret->id = g_strdup (data->id);
     ret->type_guid = g_strdup (data->type_guid);
     ret->type = data->type;
     ret->start = data->start;
     ret->size = data->size;
+    ret->bootable = data->bootable;
+    ret->attrs = data->attrs;
 
     return ret;
 }
@@ -133,6 +97,7 @@ void bd_part_spec_free (BDPartSpec *data) {
 
     g_free (data->path);
     g_free (data->name);
+    g_free (data->id);
     g_free (data->type_guid);
     g_free (data);
 }
@@ -158,14 +123,12 @@ GType bd_part_disk_spec_get_type();
  * @table_type: type of the disk's partition table
  * @size: size of the disk
  * @sector_size: disk's sector size
- * @flags: bit combination of the disk's flags (#BDPartDiskFlag)
  */
 typedef struct BDPartDiskSpec {
     gchar *path;
     BDPartTableType table_type;
     guint64 size;
     guint64 sector_size;
-    guint64 flags;
 } BDPartDiskSpec;
 
 BDPartDiskSpec* bd_part_disk_spec_copy (BDPartDiskSpec *data) {
@@ -178,7 +141,6 @@ BDPartDiskSpec* bd_part_disk_spec_copy (BDPartDiskSpec *data) {
     ret->table_type = data->table_type;
     ret->size = data->size;
     ret->sector_size = data->sector_size;
-    ret->flags = data->flags;
 
     return ret;
 }
@@ -368,55 +330,9 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
 gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size, BDPartAlign align, GError **error);
 
 /**
- * bd_part_set_part_flag:
- * @disk: disk the partition belongs to
- * @part: partition to set the flag on
- * @flag: flag to set
- * @state: state to set for the @flag (%TRUE = enabled)
- * @error: (out): place to store error (if any)
- *
- * Returns: whether the flag @flag was successfully set on the @part partition
- * or not.
- *
- * Tech category: %BD_PART_TECH_MODE_MODIFY_PART + the tech according to the partition table type
- */
-gboolean bd_part_set_part_flag (const gchar *disk, const gchar *part, BDPartFlag flag, gboolean state, GError **error);
-
-/**
- * bd_part_set_disk_flag:
- * @disk: disk the partition belongs to
- * @flag: flag to set
- * @state: state to set for the @flag (%TRUE = enabled)
- * @error: (out): place to store error (if any)
- *
- * Returns: whether the flag @flag was successfully set on the @disk or not
- *
- * Tech category: %BD_PART_TECH_MODE_MODIFY_TABLE + the tech according to the partition table type
- */
-gboolean bd_part_set_disk_flag (const gchar *disk, BDPartDiskFlag flag, gboolean state, GError **error);
-
-/**
- * bd_part_set_part_flags:
- * @disk: disk the partition belongs to
- * @part: partition to set the flag on
- * @flags: flags to set (mask combined from #BDPartFlag numbers)
- * @error: (out): place to store error (if any)
- *
- * Returns: whether the @flags were successfully set on the @part partition or
- *          not
- *
- * Note: Unsets all the other flags on the partition.
- *       Only GPT-specific flags and the legacy boot flag are supported on GPT
- *       partition tables.
- *
- * Tech category: %BD_PART_TECH_MODE_MODIFY_PART + the tech according to the partition table type
- */
-gboolean bd_part_set_part_flags (const gchar *disk, const gchar *part, guint64 flags, GError **error);
-
-/**
  * bd_part_set_part_name:
  * @disk: device the partition belongs to
- * @part: partition the should be set for
+ * @part: partition the name should be set for
  * @name: name to set
  * @error: (out): place to store error (if any)
  *
@@ -429,7 +345,7 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
 /**
  * bd_part_set_part_type:
  * @disk: device the partition belongs to
- * @part: partition the should be set for
+ * @part: partition the type should be set for
  * @type_guid: GUID of the type
  * @error: (out): place to store error (if any)
  *
@@ -442,27 +358,41 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
 /**
  * bd_part_set_part_id:
  * @disk: device the partition belongs to
- * @part: partition the should be set for
+ * @part: partition the ID should be set for
  * @part_id: partition Id
  * @error: (out): place to store error (if any)
  *
  * Returns: whether the @part_id type was successfully set for @part or not
  *
- * Tech category: %BD_PART_TECH_MODE_MODIFY_PART + the tech according to the partition table type
+ * Tech category: %BD_PART_TECH_MBR-%BD_PART_TECH_MODE_MODIFY_PART
  */
 gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar *part_id, GError **error);
 
 /**
- * bd_part_get_part_id:
+ * bd_part_set_part_bootable:
  * @disk: device the partition belongs to
- * @part: partition the should be set for
+ * @part: partition the bootable flag should be set for
+ * @bootable: whether to set or unset the bootable flag
  * @error: (out): place to store error (if any)
  *
- * Returns (transfer full): partition id type or %NULL in case of error
+ * Returns: whether the @bootable flag was successfully set for @part or not
  *
- * Tech category: %BD_PART_TECH_MODE_QUERY_PART + the tech according to the partition table type
+ * Tech category: %BD_PART_TECH_MBR-%BD_PART_TECH_MODE_MODIFY_PART
  */
-gchar* bd_part_get_part_id (const gchar *disk, const gchar *part, GError **error);
+gboolean bd_part_set_part_bootable (const gchar *disk, const gchar *part, gboolean bootable, GError **error);
+
+/**
+ * bd_part_set_part_attributes:
+ * @disk: device the partition belongs to
+ * @part: partition the attributes should be set for
+ * @attrs: GPT attributes to set on @part
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @attrs GPT attributes were successfully set for @part or not
+ *
+ * Tech category: %BD_PART_TECH_GPT-%BD_PART_TECH_MODE_MODIFY_PART
+ */
+gboolean bd_part_set_part_attributes (const gchar *disk, const gchar *part, guint64 attrs, GError **error);
 
 /**
  * bd_part_get_part_table_type_str:
@@ -474,17 +404,6 @@ gchar* bd_part_get_part_id (const gchar *disk, const gchar *part, GError **error
  * Tech category: the tech according to @type
  */
 const gchar* bd_part_get_part_table_type_str (BDPartTableType type, GError **error);
-
-/**
- * bd_part_get_flag_str:
- * @flag: flag to get string representation for
- * @error: (out): place to store error (if any)
- *
- * Returns: (transfer none): string representation of @flag
- *
- * Tech category: always available
- */
-const gchar* bd_part_get_flag_str (BDPartFlag flag, GError **error);
 
 /**
  * bd_part_get_type_str:
