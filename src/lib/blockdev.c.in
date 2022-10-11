@@ -394,7 +394,7 @@ GQuark bd_init_error_quark (void)
  *                 for the plugin, the default is used) or %NULL to load all
  *                 plugins
  * @log_func: (nullable) (scope notified): logging function to use
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the library was successfully initialized with all the
  *          required or default (see @require_plugins) plugins or not
@@ -459,7 +459,7 @@ gboolean bd_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GErro
  *                 for the plugin, the default is used) or %NULL to load all
  *                 plugins
  * @log_func: (nullable) (scope notified): logging function to use
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Checks the state of the library and if it is uninitialized or not all the
  * @require_plugins plugins are available, tries to (re)initialize it. Otherwise
@@ -537,7 +537,7 @@ gboolean bd_ensure_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func
  * @log_func: (nullable) (scope notified): logging function to use
  * @loaded_plugin_names: (optional) (out) (transfer container) (array zero-terminated=1): names
  *                       of the successfully loaded plugins
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the library was successfully initialized with all the
  *          required or default (see @require_plugins) plugins or not
@@ -593,7 +593,7 @@ gboolean bd_try_init(BDPluginSpec **request_plugins, BDUtilsLogFunc log_func,
  * @reload: whether to reload the already loaded plugins or not
  * @log_func: (nullable) (scope notified): logging function to use or %NULL
  *                                           to keep the old one
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the library was successfully initialized or not
  *
@@ -645,7 +645,7 @@ gboolean bd_reinit (BDPluginSpec **require_plugins, gboolean reload, BDUtilsLogF
  *                                           to keep the old one
  * @loaded_plugin_names: (optional) (out) (transfer container) (array zero-terminated=1): names of the successfully
  *                                                                loaded plugins
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the library was successfully initialized or not
  *
@@ -772,7 +772,7 @@ gchar* bd_get_plugin_name (BDPlugin plugin) {
 /**
  * bd_switch_init_checks:
  * @enable: whether to enable init checks (%TRUE) or not (%FALSE)
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Enables or disables plugins' init checks based on @enable.
  *
