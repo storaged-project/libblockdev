@@ -321,7 +321,7 @@ void bd_part_close (void) {
  * bd_part_is_tech_avail:
  * @tech: the queried tech
  * @mode: a bit mask of queried modes of operation (#BDPartTechMode) for @tech
- * @error: (out): place to store error (details about why the @tech-@mode combination is not available)
+ * @error: (out) (optional): place to store error (details about why the @tech-@mode combination is not available)
  *
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
@@ -347,7 +347,7 @@ static const gchar *table_type_str[BD_PART_TABLE_UNDEF] = {"dos", "gpt"};
  * @type: type of the partition table to create
  * @ignore_existing: whether to ignore/overwrite the existing table or not
  *                   (reports an error if %FALSE and there's some table on @disk)
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the partition table was successfully created or not
  *
@@ -358,37 +358,42 @@ gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean
     gint ret = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
+    GError *l_error = NULL;
 
     msg = g_strdup_printf ("Starting creation of a new partition table on '%s'", disk);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    cxt = get_device_context (disk, error);
+    cxt = get_device_context (disk, &l_error);
     if (!cxt) {
         /* error is already populated */
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
     if (!ignore_existing && fdisk_has_label (cxt)) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_EXISTS,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_EXISTS,
                      "Device '%s' already contains a partition table", disk);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         close_context (cxt);
         return FALSE;
     }
 
     ret = fdisk_create_disklabel (cxt, table_type_str[type]);
     if (ret != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to create a new disklabel for disk '%s': %s", disk, strerror_l (-ret, c_locale));
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         close_context (cxt);
         return FALSE;
     }
 
-    if (!write_label (cxt, NULL, disk, FALSE, error)) {
-        bd_utils_report_finished (progress_id, (*error)->message);
+    if (!write_label (cxt, NULL, disk, FALSE, &l_error)) {
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         close_context (cxt);
         return FALSE;
     }
@@ -484,6 +489,7 @@ static BDPartSpec* get_part_spec_fdisk (struct fdisk_context *cxt, struct fdisk_
     BDPartSpec *ret = NULL;
     const gchar *devname = NULL;
     const gchar *partname = NULL;
+    GError *l_error = NULL;
 
     ret = g_new0 (BDPartSpec, 1);
 
@@ -527,8 +533,9 @@ static BDPartSpec* get_part_spec_fdisk (struct fdisk_context *cxt, struct fdisk_
     if (g_strcmp0 (fdisk_label_get_name (lb), "gpt") == 0) {
         if (ret->type == BD_PART_TYPE_NORMAL) {
           /* only 'normal' partitions have GUIDs */
-          ret->type_guid = get_part_type_guid_and_gpt_flags (devname, fdisk_partition_get_partno (pa) + 1, &(ret->attrs), error);
-          if (!ret->type_guid && *error) {
+          ret->type_guid = get_part_type_guid_and_gpt_flags (devname, fdisk_partition_get_partno (pa) + 1, &(ret->attrs), &l_error);
+          if (!ret->type_guid && l_error) {
+              g_propagate_error (error, l_error);
               bd_part_spec_free (ret);
               return NULL;
           }
@@ -556,7 +563,7 @@ static BDPartSpec* get_part_spec_fdisk (struct fdisk_context *cxt, struct fdisk_
  * bd_part_get_part_spec:
  * @disk: disk to remove the partition from
  * @part: partition to get spec for
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): spec of the @part partition from @disk or %NULL in case of error
  *
@@ -723,7 +730,7 @@ static BDPartSpec** get_disk_parts (const gchar *disk, gboolean parts, gboolean 
  * bd_part_get_part_by_pos:
  * @disk: disk to remove the partition from
  * @position: position (in bytes) determining the partition
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): spec of the partition from @disk spanning over the @position or %NULL if no such
  *          partition exists or in case of error (@error is set)
@@ -763,7 +770,7 @@ BDPartSpec* bd_part_get_part_by_pos (const gchar *disk, guint64 position, GError
 /**
  * bd_part_get_disk_spec:
  * @disk: disk to get information about
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): information about the given @disk or %NULL (in case of error)
  *
@@ -810,7 +817,7 @@ BDPartDiskSpec* bd_part_get_disk_spec (const gchar *disk, GError **error) {
 /**
  * bd_part_get_disk_parts:
  * @disk: disk to get information about partitions for
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full) (array zero-terminated=1): specs of the partitions from @disk or %NULL in case of error
  *
@@ -823,7 +830,7 @@ BDPartSpec** bd_part_get_disk_parts (const gchar *disk, GError **error) {
 /**
  * bd_part_get_disk_free_regions:
  * @disk: disk to get free regions for
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full) (array zero-terminated=1): specs of the free regions from @disk or %NULL in case of error
  *
@@ -838,7 +845,7 @@ BDPartSpec** bd_part_get_disk_free_regions (const gchar *disk, GError **error) {
  * @disk: disk to get the best free region for
  * @type: type of the partition that is planned to be added
  * @size: size of the partition to be added
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): spec of the best free region on @disk for a new partition of type @type
  *                           with the size of @size or %NULL if there is none such region or if
@@ -920,7 +927,7 @@ BDPartSpec* bd_part_get_best_free_region (const gchar *disk, BDPartType type, gu
  * @start: where the partition should start (i.e. offset from the disk start)
  * @size: desired size of the partition (if 0, a max-sized partition is created)
  * @align: alignment to use for the partition
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): specification of the created partition or %NULL in case of error
  *
@@ -952,35 +959,39 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
     size_t partno = 0;
     gchar *ppath = NULL;
     gboolean new_extended = FALSE;
+    GError *l_error = NULL;
 
     msg = g_strdup_printf ("Started adding partition to '%s'", disk);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    cxt = get_device_context (disk, error);
+    cxt = get_device_context (disk, &l_error);
     if (!cxt) {
         /* error is already populated */
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return NULL;
     }
 
     status = fdisk_get_partitions (cxt, &table);
     if (status != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to get existing partitions on the device: %s", strerror_l (-status, c_locale));
         fdisk_unref_partition (npa);
         close_context (cxt);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return NULL;
    }
 
     npa = fdisk_new_partition ();
     if (!npa) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
-                         "Failed to create new partition object");
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to create new partition object");
         fdisk_unref_table (table);
         close_context (cxt);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return NULL;
     }
 
@@ -995,11 +1006,12 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
 
     status = fdisk_save_user_grain (cxt, grain_size);
     if (status != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to setup alignment");
         fdisk_unref_table (table);
         close_context (cxt);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return NULL;
     }
 
@@ -1007,11 +1019,12 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
      * effective */
     status = fdisk_reset_device_properties (cxt);
     if (status != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to setup alignment");
         fdisk_unref_table (table);
         close_context (cxt);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return NULL;
     }
 
@@ -1047,12 +1060,13 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
         size = end - start;
 
         if (fdisk_partition_set_size (npa, size) != 0) {
-            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+            g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                          "Failed to set partition size");
             fdisk_unref_table (table);
             fdisk_unref_partition (npa);
             close_context (cxt);
-            bd_utils_report_finished (progress_id, (*error)->message);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
             return NULL;
         }
     }
@@ -1066,12 +1080,13 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
       type = BD_PART_TYPE_REQ_NORMAL;
 
     if (on_gpt && type != BD_PART_TYPE_REQ_NORMAL) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Only normal partitions are supported on GPT.");
         fdisk_unref_table (table);
         fdisk_unref_partition (npa);
         close_context (cxt);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return NULL;
     }
 
@@ -1096,13 +1111,14 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
             else {
                 /* trying to create a partition inside an existing one, but not
                    an extended one -> error */
-                g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                              "Cannot create a partition inside an existing non-extended one");
                 fdisk_unref_partition (npa);
                 fdisk_free_iter (iter);
                 fdisk_unref_table (table);
                 close_context (cxt);
-                bd_utils_report_finished (progress_id, (*error)->message);
+                bd_utils_report_finished (progress_id, l_error->message);
+                g_propagate_error (error, l_error);
                 return NULL;
             }
         } else if (epa)
@@ -1116,22 +1132,24 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
             new_extended = TRUE;
             n_epa = fdisk_new_partition ();
             if (!n_epa) {
-                g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                              "Failed to create new partition object");
                 fdisk_unref_partition (npa);
                 close_context (cxt);
-                bd_utils_report_finished (progress_id, (*error)->message);
+                bd_utils_report_finished (progress_id, l_error->message);
+                g_propagate_error (error, l_error);
                 return NULL;
             }
             if (fdisk_partition_set_start (n_epa, start) != 0) {
-                g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                              "Failed to set partition start");
                 fdisk_unref_partition (n_epa);
                 fdisk_unref_partition (npa);
                 fdisk_free_iter (iter);
                 fdisk_unref_table (table);
                 close_context (cxt);
-                bd_utils_report_finished (progress_id, (*error)->message);
+                bd_utils_report_finished (progress_id, l_error->message);
+                g_propagate_error (error, l_error);
                 return NULL;
             }
 
@@ -1139,21 +1157,23 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
 
             status = fdisk_partition_next_partno (npa, cxt, &partno);
             if (status != 0) {
-                g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                              "Failed to get new extended partition number");
                 fdisk_unref_partition (npa);
                 close_context (cxt);
-                bd_utils_report_finished (progress_id, (*error)->message);
+                bd_utils_report_finished (progress_id, l_error->message);
+                g_propagate_error (error, l_error);
                 return NULL;
             }
 
             status = fdisk_partition_set_partno (npa, partno);
             if (status != 0) {
-                g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                              "Failed to set new extended partition number");
                 fdisk_unref_partition (npa);
                 close_context (cxt);
-                bd_utils_report_finished (progress_id, (*error)->message);
+                bd_utils_report_finished (progress_id, l_error->message);
+                g_propagate_error (error, l_error);
                 return NULL;
             }
 
@@ -1163,14 +1183,15 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
             /* "05" for extended partition */
             ptype = fdisk_label_parse_parttype (fdisk_get_label (cxt, NULL), "05");
             if (fdisk_partition_set_type (n_epa, ptype) != 0) {
-                g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                              "Failed to set partition type");
                 fdisk_unref_partition (n_epa);
                 fdisk_unref_partition (npa);
                 fdisk_free_iter (iter);
                 fdisk_unref_table (table);
                 close_context (cxt);
-                bd_utils_report_finished (progress_id, (*error)->message);
+                bd_utils_report_finished (progress_id, l_error->message);
+                g_propagate_error (error, l_error);
                 return NULL;
             }
             fdisk_unref_parttype (ptype);
@@ -1178,13 +1199,14 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
             status = fdisk_add_partition (cxt, n_epa, NULL);
             fdisk_unref_partition (n_epa);
             if (status != 0) {
-                g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                              "Failed to add new partition to the table: %s", strerror_l (-status, c_locale));
                 fdisk_unref_partition (npa);
                 fdisk_free_iter (iter);
                 fdisk_unref_table (table);
                 close_context (cxt);
-                bd_utils_report_finished (progress_id, (*error)->message);
+                bd_utils_report_finished (progress_id, l_error->message);
+                g_propagate_error (error, l_error);
                 return NULL;
             }
             /* shift the start 2 MiB further as that's where the first logical
@@ -1204,12 +1226,13 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
         /* "05" for extended partition */
         ptype = fdisk_label_parse_parttype (fdisk_get_label (cxt, NULL), "05");
         if (fdisk_partition_set_type (npa, ptype) != 0) {
-            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+            g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                          "Failed to set partition type");
             fdisk_unref_table (table);
             fdisk_unref_partition (npa);
             close_context (cxt);
-            bd_utils_report_finished (progress_id, (*error)->message);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
             return NULL;
         }
 
@@ -1217,12 +1240,13 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
     }
 
     if (fdisk_partition_set_start (npa, start) != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to set partition start");
         fdisk_unref_table (table);
         fdisk_unref_partition (npa);
         close_context (cxt);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return NULL;
     }
 
@@ -1235,42 +1259,46 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
     } else {
         status = fdisk_partition_next_partno (npa, cxt, &partno);
         if (status != 0) {
-            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+            g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                          "Failed to get new partition number");
             fdisk_unref_table (table);
             fdisk_unref_partition (npa);
             close_context (cxt);
-            bd_utils_report_finished (progress_id, (*error)->message);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
             return NULL;
         }
     }
 
     status = fdisk_partition_set_partno (npa, partno);
     if (status != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to set new partition number");
         fdisk_unref_table (table);
         fdisk_unref_partition (npa);
         close_context (cxt);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return NULL;
     }
 
     status = fdisk_add_partition (cxt, npa, NULL);
     if (status != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to add new partition to the table: %s", strerror_l (-status, c_locale));
         fdisk_unref_table (table);
         fdisk_unref_partition (npa);
         close_context (cxt);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return NULL;
     }
 
     /* for new extended partition we need to force reread whole partition table with
        libfdisk < 2.36.1 */
-    if (!write_label (cxt, table, disk, new_extended && fdisk_version < 2361, error)) {
-        bd_utils_report_finished (progress_id, (*error)->message);
+    if (!write_label (cxt, table, disk, new_extended && fdisk_version < 2361, &l_error)) {
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         fdisk_unref_table (table);
         fdisk_unref_partition (npa);
         close_context (cxt);
@@ -1304,7 +1332,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
  * bd_part_delete_part:
  * @disk: disk to remove the partition from
  * @part: partition to remove
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the @part partition was successfully deleted from @disk
  *
@@ -1317,47 +1345,53 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
     gint ret = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
+    GError *l_error = NULL;
 
     msg = g_strdup_printf ("Started deleting partition '%s'", part);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    part_num = get_part_num (part, error);
+    part_num = get_part_num (part, &l_error);
     if (part_num == -1) {
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
     /* /dev/sda1 is the partition number 0 in libfdisk */
     part_num--;
-    cxt = get_device_context (disk, error);
+    cxt = get_device_context (disk, &l_error);
     if (!cxt) {
         /* error is already populated */
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
     ret = fdisk_get_partitions (cxt, &table);
     if (ret != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to get existing partitions on the device: %s", strerror_l (-ret, c_locale));
         close_context (cxt);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
    }
 
     ret = fdisk_delete_partition (cxt, (size_t) part_num);
     if (ret != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to delete partition '%d' on device '%s': %s", part_num+1, disk, strerror_l (-ret, c_locale));
         fdisk_unref_table (table);
         close_context (cxt);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
-    if (!write_label (cxt, table, disk, FALSE, error)) {
-        bd_utils_report_finished (progress_id, (*error)->message);
+    if (!write_label (cxt, table, disk, FALSE, &l_error)) {
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         fdisk_unref_table (table);
         close_context (cxt);
         return FALSE;
@@ -1450,7 +1484,7 @@ static gboolean get_max_part_size (struct fdisk_table *tb, guint partno, guint64
  * @part: partition to resize
  * @size: new partition size, 0 for maximal size
  * @align: alignment to use for the partition end
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the @part partition was successfully resized on @disk to @size
  *
@@ -1473,43 +1507,49 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
     guint64 end = 0;
     gint version = 0;
     gchar *msg = NULL;
+    GError *l_error = NULL;
 
     msg = g_strdup_printf ("Started resizing partition '%s'", part);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    part_num = get_part_num (part, error);
+    part_num = get_part_num (part, &l_error);
     if (part_num == -1) {
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
     /* /dev/sda1 is the partition number 0 in libfdisk */
     part_num--;
-    cxt = get_device_context (disk, error);
+    cxt = get_device_context (disk, &l_error);
     if (!cxt) {
         /* error is already populated */
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
     /* get existing partitions and free spaces and sort the table */
     ret = fdisk_get_partitions (cxt, &table);
     if (ret != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to get existing partitions on the device: %s", strerror_l (-ret, c_locale));
         fdisk_unref_table (table);
         close_context (cxt);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
     ret = fdisk_get_freespaces (cxt, &table);
     if (ret != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to get free spaces on the device: %s", strerror_l (-ret, c_locale));
         fdisk_unref_table (table);
         close_context (cxt);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
@@ -1517,21 +1557,25 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
 
     ret = fdisk_get_partition (cxt, part_num, &pa);
     if (ret != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to get partition %d on device '%s'", part_num, disk);
         fdisk_unref_table (table);
         close_context (cxt);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
     if (fdisk_partition_has_size (pa))
         old_size = (guint64) fdisk_partition_get_size (pa);
     else {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to get size for partition %d on device '%s'", part_num, disk);
         fdisk_unref_partition (pa);
         fdisk_unref_table (table);
         close_context (cxt);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
@@ -1545,12 +1589,13 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
         grain_size = (guint64) fdisk_get_minimal_iosize (cxt);
     /* else OPTIMAL or unknown -> nothing to do */
 
-    if (!get_max_part_size (table, part_num, &max_size, error)) {
-        g_prefix_error (error, "Failed to get maximal size for '%s': ", part);
+    if (!get_max_part_size (table, part_num, &max_size, &l_error)) {
+        g_prefix_error (&l_error, "Failed to get maximal size for '%s': ", part);
         fdisk_unref_table (table);
         fdisk_unref_partition (pa);
         close_context (cxt);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
@@ -1575,12 +1620,13 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
         }
 
         if (fdisk_partition_set_size (pa, max_size) != 0) {
-            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+            g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                          "Failed to set size for partition %d on device '%s'", part_num, disk);
             fdisk_unref_table (table);
             fdisk_unref_partition (pa);
             close_context (cxt);
-            bd_utils_report_finished (progress_id, (*error)->message);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
             return FALSE;
         }
     } else {
@@ -1605,41 +1651,45 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
                                      size * sector_size, part, max_size * sector_size);
                 size = max_size;
             } else {
-                g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                              "Requested size %"G_GUINT64_FORMAT" is bigger than max size (%"G_GUINT64_FORMAT") for partition '%s'",
                              size * sector_size, max_size * sector_size, part);
                 fdisk_unref_table (table);
                 fdisk_unref_partition (pa);
                 close_context (cxt);
-                bd_utils_report_finished (progress_id, (*error)->message);
+                bd_utils_report_finished (progress_id, l_error->message);
+                g_propagate_error (error, l_error);
                 return FALSE;
             }
         }
 
         if (fdisk_partition_set_size (pa, size) != 0) {
-            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+            g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                          "Failed to set partition size");
             fdisk_unref_table (table);
             fdisk_unref_partition (pa);
             close_context (cxt);
-            bd_utils_report_finished (progress_id, (*error)->message);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
             return FALSE;
         }
     }
 
     ret = fdisk_set_partition (cxt, part_num, pa);
     if (ret != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to resize partition '%s': %s", part, strerror_l (-ret, c_locale));
         fdisk_unref_table (table);
         fdisk_unref_partition (pa);
         close_context (cxt);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
-    if (!write_label (cxt, table, disk, FALSE, error)) {
-        bd_utils_report_finished (progress_id, (*error)->message);
+    if (!write_label (cxt, table, disk, FALSE, &l_error)) {
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         fdisk_unref_table (table);
         fdisk_unref_partition (pa);
         close_context (cxt);
@@ -1730,7 +1780,7 @@ static gboolean set_part_type (struct fdisk_context *cxt, gint part_num, const g
  * @disk: device the partition belongs to
  * @part: partition the name should be set for
  * @name: name to set
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the name was successfully set or not
  *
@@ -1745,6 +1795,7 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
     gint status = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
+    GError *l_error = NULL;
 
     msg = g_strdup_printf ("Started setting name on the partition '%s'", part);
     progress_id = bd_utils_report_started (msg);
@@ -1758,26 +1809,30 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
 
     lb = fdisk_get_label (cxt, NULL);
     if (!lb) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to read partition table on device '%s'", disk);
         close_context (cxt);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
     label_name = fdisk_label_get_name (lb);
     if (g_strcmp0 (label_name, table_type_str[BD_PART_TABLE_GPT]) != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Partition names unsupported on the device '%s' ('%s')", disk,
                      label_name);
         close_context (cxt);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
-    part_num = get_part_num (part, error);
+    part_num = get_part_num (part, &l_error);
     if (part_num == -1) {
         close_context (cxt);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
@@ -1786,39 +1841,44 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
 
     status = fdisk_get_partition (cxt, part_num, &pa);
     if (status != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to get partition '%s' on device '%s': %s",
                      part, disk, strerror_l (-status, c_locale));
         close_context (cxt);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
     status = fdisk_partition_set_name (pa, name);
     if (status != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to set name on the partition '%s' on device '%s': %s",
                      part, disk, strerror_l (-status, c_locale));
         fdisk_unref_partition (pa);
         close_context (cxt);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
     status = fdisk_set_partition (cxt, part_num, pa);
     if (status != 0) {
-        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to set name on the partition '%s' on device '%s': %s",
                      part, disk, strerror_l (-status, c_locale));
         fdisk_unref_partition (pa);
         close_context (cxt);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
     fdisk_unref_partition (pa);
 
-    if (!write_label (cxt, NULL, disk, FALSE, error)) {
-        bd_utils_report_finished (progress_id, (*error)->message);
+    if (!write_label (cxt, NULL, disk, FALSE, &l_error)) {
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         close_context (cxt);
         return FALSE;
     }
@@ -1833,7 +1893,7 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
  * @disk: device the partition belongs to
  * @part: partition the type should be set for
  * @type_guid: GUID of the type
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the @type_guid type was successfully set for @part or not
  *
@@ -1844,33 +1904,40 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
     gchar *msg = NULL;
     struct fdisk_context *cxt = NULL;
     gint part_num = 0;
+    GError *l_error = NULL;
 
     msg = g_strdup_printf ("Started setting type on the partition '%s'", part);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    part_num = get_part_num (part, error);
-    if (part_num == -1)
+    part_num = get_part_num (part, &l_error);
+    if (part_num == -1) {
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
+    }
 
     /* /dev/sda1 is the partition number 0 in libfdisk */
     part_num--;
 
-    cxt = get_device_context (disk, error);
+    cxt = get_device_context (disk, &l_error);
     if (!cxt) {
         /* error is already populated */
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
-    if (!set_part_type (cxt, part_num, type_guid, BD_PART_TABLE_GPT, error)) {
-        bd_utils_report_finished (progress_id, (*error)->message);
+    if (!set_part_type (cxt, part_num, type_guid, BD_PART_TABLE_GPT, &l_error)) {
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         close_context (cxt);
         return FALSE;
     }
 
-    if (!write_label (cxt, NULL, disk, FALSE, error)) {
-        bd_utils_report_finished (progress_id, (*error)->message);
+    if (!write_label (cxt, NULL, disk, FALSE, &l_error)) {
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         close_context (cxt);
         return FALSE;
     }
@@ -1885,7 +1952,7 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
  * @disk: device the partition belongs to
  * @part: partition the ID should be set for
  * @part_id: partition Id
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the @part_id type was successfully set for @part or not
  *
@@ -1896,35 +1963,40 @@ gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar 
     gchar *msg = NULL;
     struct fdisk_context *cxt = NULL;
     gint part_num = 0;
+    GError *l_error = NULL;
 
     msg = g_strdup_printf ("Started setting id on the partition '%s'", part);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    part_num = get_part_num (part, error);
+    part_num = get_part_num (part, &l_error);
     if (part_num == -1) {
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
     /* /dev/sda1 is the partition number 0 in libfdisk */
     part_num--;
 
-    cxt = get_device_context (disk, error);
+    cxt = get_device_context (disk, &l_error);
     if (!cxt) {
         /* error is already populated */
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
-    if (!set_part_type (cxt, part_num, part_id, BD_PART_TABLE_MSDOS, error)) {
-        bd_utils_report_finished (progress_id, (*error)->message);
+    if (!set_part_type (cxt, part_num, part_id, BD_PART_TABLE_MSDOS, &l_error)) {
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         close_context (cxt);
         return FALSE;
     }
 
-    if (!write_label (cxt, NULL, disk, FALSE, error)) {
-        bd_utils_report_finished (progress_id, (*error)->message);
+    if (!write_label (cxt, NULL, disk, FALSE, &l_error)) {
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         close_context (cxt);
         return FALSE;
     }
@@ -1939,7 +2011,7 @@ gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar 
  * @disk: device the partition belongs to
  * @part: partition the bootable flag should be set for
  * @bootable: whether to set or unset the bootable flag
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the @bootable flag was successfully set for @part or not
  *
@@ -2004,7 +2076,7 @@ gboolean bd_part_set_part_bootable (const gchar *disk, const gchar *part, gboole
  * @disk: device the partition belongs to
  * @part: partition the attributes should be set for
  * @attrs: GPT attributes to set on @part
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether the @attrs GPT attributes were successfully set for @part or not
  *
@@ -2046,7 +2118,7 @@ gboolean bd_part_set_part_attributes (const gchar *disk, const gchar *part, guin
 /**
  * bd_part_get_part_table_type_str:
  * @type: table type to get string representation for
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer none): string representation of @table_type
  *
@@ -2068,7 +2140,7 @@ static const gchar* const part_types[6] = { "primary", "logical", "extended", "f
 /**
  * bd_part_get_type_str:
  * @type: type to get string representation for
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer none): string representation of @type
  *
