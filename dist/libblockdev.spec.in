@@ -209,7 +209,7 @@ with the libblockdev-btrfs plugin/library.
 %if %{with_crypto}
 %package crypto
 Requires: %{name}-utils%{?_isa} = %{version}-%{release}
-BuildRequires: cryptsetup-devel
+BuildRequires: cryptsetup-devel >= 2.3.0
 BuildRequires: libblkid-devel
 BuildRequires: keyutils-libs-devel
 
