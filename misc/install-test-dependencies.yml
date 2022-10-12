@@ -185,7 +185,7 @@
       - ndctl
       - nilfs-tools
       - ntfs-3g
-      - pylint3
+      - pylint
       - python3-bytesize
       - python3-packaging
       - python3-pydbus
