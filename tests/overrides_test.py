@@ -10,7 +10,7 @@ class OverridesTest(unittest.TestCase):
     # all plugins except for 'btrfs', 'fs' and 'mpath' -- these don't have all
     # the dependencies on CentOS/Debian and we don't need them for this test
     requested_plugins = BlockDev.plugin_specs_from_names(("crypto", "dm",
-                                                          "kbd", "loop", "lvm",
+                                                          "loop", "lvm",
                                                           "mdraid", "part", "swap"))
 
     @classmethod
@@ -71,8 +71,8 @@ class OverridesUnloadTestCase(unittest.TestCase):
     # all plugins except for 'btrfs', 'fs' and 'mpath' -- these don't have all
     # the dependencies on CentOS/Debian and we don't need them for this test
     requested_plugins = BlockDev.plugin_specs_from_names(("crypto", "dm",
-                                                          "kbd", "loop",
-                                                          "mdraid", "part", "swap"))
+                                                          "loop", "mdraid",
+                                                          "part", "swap"))
 
     @classmethod
     def setUpClass(cls):

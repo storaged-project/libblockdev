@@ -19,15 +19,10 @@
 # - multiple combinations of reasons are supported.
 # - 'reason' and at least one of 'distro', 'version' and 'arch' is required
 # - 'test' (ID of the test case) can be specified as a regular expression
-#   for example 'kbd_test.KbdBcacheTestCase.*' to skip all kbd tests
+#   for example 'mpath_test.MpathUnloadTest.*' to skip all mpath unload tests
 # - all "skips" can specified as a list, for example 'version: [10, 11]'
 
 ---
-
-- test: kbd_test.KbdBcache*
-  skip_on:
-    - distro: "debian"
-      reason: "running bcache tests causes system to run out of kernel memory on Debian"
 
 - test: mdraid_test.MDTestAddRemove.test_add_remove
   skip_on:

@@ -122,17 +122,6 @@ AC_CHECK_HEADERS([dlfcn.h string.h unistd.h sys/fcntl.h sys/ioctl.h linux/random
                  [LIBBLOCKDEV_SOFT_FAILURE([Header file $ac_header not found.])],
                  [])
 
-AC_ARG_WITH([bcache],
-    AS_HELP_STRING([--with-bcache], [support bcache @<:@default=yes@:>@]),
-    [],
-    [with_bcache=yes])
-
-AC_SUBST([WITH_BCACHE], [0])
-AM_CONDITIONAL(WITH_BCACHE, test "x$with_bcache" != "xno")
-AS_IF([test "x$with_bcache" != "xno"],
-      [AC_DEFINE([WITH_BD_BCACHE], [], [Define if bcache is supported]) AC_SUBST([WITH_BCACHE], [1])],
-      [])
-
 AC_ARG_WITH([escrow],
     AS_HELP_STRING([--with-escrow], [support escrow @<:@default=yes@:>@]),
     [],
@@ -186,7 +175,6 @@ LIBBLOCKDEV_PLUGIN([LVM_DBUS], [lvm_dbus])
 LIBBLOCKDEV_PLUGIN([MDRAID], [mdraid])
 LIBBLOCKDEV_PLUGIN([MPATH], [mpath])
 LIBBLOCKDEV_PLUGIN([SWAP], [swap])
-LIBBLOCKDEV_PLUGIN([KBD], [kbd])
 LIBBLOCKDEV_PLUGIN([PART], [part])
 LIBBLOCKDEV_PLUGIN([FS], [fs])
 LIBBLOCKDEV_PLUGIN([NVDIMM], [nvdimm])
@@ -252,7 +240,7 @@ AS_IF([test "x$with_fs" != "xno" -o "x$with_crypto" != "xno" -o "x$with_swap" !=
              [Define as neutral value if libblkid doesn't provide the definition])])]
       [])
 
-AS_IF([test "x$with_btrfs" != "xno" -o "x$with_mdraid" != "xno" -o "x$with_kbd" != "xno" -o "x$with_tools" != "xno"],
+AS_IF([test "x$with_btrfs" != "xno" -o "x$with_mdraid" != "xno" -o "x$with_tools" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([BYTESIZE], [bytesize >= 0.1])],
       [])
 
@@ -318,8 +306,6 @@ echo "
         DM plugin:                  ${with_dm}
             dmraid support:         ${with_dmraid}
         FS plugin:                  ${with_fs}
-        KBD plugin:                 ${with_kbd}
-            Bcache support:         ${with_bcache}
         Loop plugin:                ${with_loop}
         LVM plugin:                 ${with_lvm}
         LVM DBus plugin:            ${with_lvm_dbus}

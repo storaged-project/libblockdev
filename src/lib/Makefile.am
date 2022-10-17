@@ -20,8 +20,7 @@ libblockdev_la_CPPFLAGS = -I${builddir}/../../include/
 libblockdev_la_SOURCES = blockdev.c blockdev.h plugins.c plugins.h
 
 if HAVE_INTROSPECTION
-GIHEADERS = ${builddir}/plugin_apis/kbd.h \
-	${builddir}/plugin_apis/mdraid.h \
+GIHEADERS = ${builddir}/plugin_apis/mdraid.h \
 	${builddir}/plugin_apis/swap.h \
 	${builddir}/plugin_apis/btrfs.h \
 	${builddir}/plugin_apis/lvm.h \

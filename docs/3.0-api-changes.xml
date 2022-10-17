@@ -71,4 +71,11 @@
   </para>
 
   </simplesect>
+
+    <simplesect><title>KBD plugin</title>
+  <para>
+    KBD plugin (providing support for bcache and zRAM devices) has been removed.
+  </para>
+
+  </simplesect>
 </chapter>

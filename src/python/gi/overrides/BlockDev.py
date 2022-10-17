@@ -50,7 +50,6 @@ bd_plugins = { "lvm": BlockDev.Plugin.LVM,
                "swap": BlockDev.Plugin.SWAP,
                "mdraid": BlockDev.Plugin.MDRAID,
                "mpath": BlockDev.Plugin.MPATH,
-               "kbd": BlockDev.Plugin.KBD,
                "part": BlockDev.Plugin.PART,
                "fs": BlockDev.Plugin.FS,
                "s390": BlockDev.Plugin.S390,
@@ -664,19 +663,6 @@ def fs_get_free_space(device, fstype=None):
 __all__.append("fs_get_free_space")
 
 
-try:
-    _kbd_bcache_create = BlockDev.kbd_bcache_create
-    @override(BlockDev.kbd_bcache_create)
-    def kbd_bcache_create(backing_device, cache_device, extra=None, **kwargs):
-        extra = _get_extra(extra, kwargs)
-        return _kbd_bcache_create(backing_device, cache_device, extra)
-    __all__.append("kbd_bcache_create")
-except AttributeError:
-    # the bcache support may not be available
-    # TODO: do this more generically
-    pass
-
-
 _lvm_round_size_to_pe = BlockDev.lvm_round_size_to_pe
 @override(BlockDev.lvm_round_size_to_pe)
 def lvm_round_size_to_pe(size, pe_size=0, roundup=True):
@@ -1024,19 +1010,6 @@ def swap_swapon(device, priority=-1):
 __all__.append("swap_swapon")
 
 
-_kbd_zram_create_devices = BlockDev.kbd_zram_create_devices
-@override(BlockDev.kbd_zram_create_devices)
-def kbd_zram_create_devices(num_devices, sizes, nstreams=None):
-    return _kbd_zram_create_devices(num_devices, sizes, nstreams)
-__all__.append("kbd_zram_create_devices")
-
-_kbd_zram_add_device = BlockDev.kbd_zram_add_device
-@override(BlockDev.kbd_zram_add_device)
-def kbd_zram_add_device(size, nstreams=0):
-    return _kbd_zram_add_device(size, nstreams)
-__all__.append("kbd_zram_add_device")
-
-
 _part_create_table = BlockDev.part_create_table
 @override(BlockDev.part_create_table)
 def part_create_table(disk, type, ignore_existing=True):
@@ -1275,10 +1248,6 @@ class SwapPagesizeError(SwapActivateError):
     pass
 __all__.extend(("SwapError", "SwapActivateError", "SwapOldError", "SwapSuspendError", "SwapUnknownError", "SwapPagesizeError"))
 
-class KbdError(BlockDevError):
-    pass
-__all__.append("KbdError")
-
 class PartError(BlockDevError):
     pass
 __all__.append("PartError")
@@ -1341,9 +1310,6 @@ __all__.append("mpath")
 
 swap = ErrorProxy("swap", BlockDev, [(GLib.Error, SwapError)], [not_implemented_rule, swap_activate_rule, swap_old_rule, swap_suspend_rule, swap_unknown_rule, swap_pagesize_rule])
 __all__.append("swap")
-
-kbd = ErrorProxy("kbd", BlockDev, [(GLib.Error, KbdError)], [not_implemented_rule])
-__all__.append("kbd")
 
 part = ErrorProxy("part", BlockDev, [(GLib.Error, PartError)], [not_implemented_rule])
 __all__.append("part")

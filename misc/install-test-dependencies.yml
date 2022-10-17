@@ -42,7 +42,6 @@
     package: name={{item}} state=present
     with_items:
       - btrfs-progs
-      - bcache-tools
       - cryptsetup
       - device-mapper-multipath
       - dosfstools
@@ -171,7 +170,6 @@
   - name: Install test dependencies (Debian/Ubuntu)
     package: name={{item}} state=present
     with_items:
-      - bcache-tools
       - btrfs-progs
       - cryptsetup
       - dosfstools

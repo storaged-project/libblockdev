@@ -269,27 +269,6 @@ s390
    * s390_zfcp_offline
 
 
-KBD (Kernel Block Devices)
----------------------------
-
-:supported technologies:
-   bcache, zram
-
-:functions:
-   * bcache_create
-   * bcache_destroy
-   * bcache_attach
-   * bcache_detach
-   * bcache_status
-   * bcache_set_mode
-   * bcache_get_mode
-   * bcache_get_backing_device
-   * bcache_get_cache_device
-
-   * zram_create_devices
-   * zram_destroy_devices
-   * zram_get_stats
-
 NVDIMM
 -------
 

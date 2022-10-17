@@ -13,8 +13,8 @@ class LibraryOpsTestCase(unittest.TestCase):
     # all plugins except for 'btrfs', 'fs' and 'mpath' -- these don't have all
     # the dependencies on CentOS/Debian and we don't need them for this test
     requested_plugins = BlockDev.plugin_specs_from_names(("crypto", "dm",
-                                                          "kbd", "loop",
-                                                          "mdraid", "part", "swap"))
+                                                          "loop", "mdraid",
+                                                          "part", "swap"))
 
     @classmethod
     def setUpClass(cls):
@@ -129,7 +129,7 @@ class LibraryOpsTestCase(unittest.TestCase):
 
         # ensure_init to load all plugins back
         self.assertTrue(BlockDev.ensure_init(self.requested_plugins, None))
-        self.assertGreaterEqual(len(BlockDev.get_available_plugin_names()), 7)
+        self.assertGreaterEqual(len(BlockDev.get_available_plugin_names()), 6)
 
     def test_try_reinit(self):
         """Verify that try_reinit() works as expected"""

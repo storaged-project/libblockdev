@@ -50,10 +50,6 @@ if WITH_SWAP
 lib_LTLIBRARIES += libbd_swap.la
 endif
 
-if WITH_KBD
-lib_LTLIBRARIES += libbd_kbd.la
-endif
-
 if WITH_PART
 lib_LTLIBRARIES += libbd_part.la
 endif
@@ -154,14 +150,6 @@ libbd_swap_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_swap_la_SOURCES = swap.c swap.h check_deps.c check_deps.h
 endif
 
-if WITH_KBD
-libbd_kbd_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(BYTESIZE_CFLAGS) -Wall -Wextra -Werror
-libbd_kbd_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(GIO_LIBS) $(BYTESIZE_LIBS)
-libbd_kbd_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
-libbd_kbd_la_CPPFLAGS = -I${builddir}/../../include/
-libbd_kbd_la_SOURCES = kbd.c kbd.h check_deps.c check_deps.h
-endif
-
 if WITH_S390
 libbd_s390_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) -Wall -Wextra -Werror
 libbd_s390_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(GIO_LIBS)
@@ -216,10 +204,6 @@ endif
 
 if WITH_SWAP
 libinclude_HEADERS += swap.h
-endif
-
-if WITH_KBD
-libinclude_HEADERS += kbd.h
 endif
 
 if WITH_PART

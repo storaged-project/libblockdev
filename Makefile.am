@@ -48,10 +48,6 @@ if !WITH_SWAP
 DISTCHECK_CONFIGURE_FLAGS += --without-swap
 endif
 
-if !WITH_KBD
-DISTCHECK_CONFIGURE_FLAGS += --without-kbd
-endif
-
 if !WITH_PART
 DISTCHECK_CONFIGURE_FLAGS += --without-part
 endif
@@ -91,7 +87,6 @@ PLUGINS = btrfs \
 	crypto \
 	dm \
 	fs \
-	kbd \
 	loop \
 	lvm \
 	mdraid \
