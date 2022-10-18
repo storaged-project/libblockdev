@@ -1,11 +1,11 @@
 import unittest
 import os
 import re
+import shutil
 import overrides_hack
 
 from utils import create_sparse_tempfile, create_nvmet_device, delete_nvmet_device, setup_nvme_target, teardown_nvme_target, find_nvme_ctrl_devs_for_subnqn, find_nvme_ns_devs_for_subnqn, get_nvme_hostnqn, run_command, TestTags, tag_test, read_file, write_file
 from gi.repository import BlockDev, GLib
-from distutils.spawn import find_executable
 
 
 class NVMeTest(unittest.TestCase):
@@ -13,9 +13,9 @@ class NVMeTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if not find_executable("nvme"):
+        if not shutil.which("nvme"):
             raise unittest.SkipTest("nvme executable (nvme-cli package) not found in $PATH, skipping.")
-        if not find_executable("nvmetcli"):
+        if not shutil.which("nvmetcli"):
             raise unittest.SkipTest("nvmetcli executable not found in $PATH, skipping.")
         ret, out, err = run_command("modprobe nvme-fabrics")
         if ret != 0:
