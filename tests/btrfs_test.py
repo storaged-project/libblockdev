@@ -4,10 +4,10 @@ import unittest
 import os
 import six
 import re
+import shutil
 import time
 
-from distutils.version import LooseVersion
-from distutils.spawn import find_executable
+from packaging.version import Version
 
 import overrides_hack
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, mount, umount, run_command, TestTags, tag_test
@@ -29,7 +29,7 @@ class BtrfsTestCase(unittest.TestCase):
         if not BlockDev.utils_have_kernel_module("btrfs"):
             raise unittest.SkipTest('Btrfs kernel module not available, skipping.')
 
-        if not find_executable("btrfs"):
+        if not shutil.which("btrfs"):
             raise unittest.SkipTest("btrfs executable not foundin $PATH, skipping.")
 
         if not BlockDev.is_initialized():
@@ -71,7 +71,7 @@ class BtrfsTestCase(unittest.TestCase):
         m = re.search(r"[Bb]trfs.* v([\d\.]+)", out)
         if not m or len(m.groups()) != 1:
             raise RuntimeError("Failed to determine btrfs version from: %s" % out)
-        return LooseVersion(m.groups()[0])
+        return Version(m.groups()[0])
 
 class BtrfsTestCreateQuerySimple(BtrfsTestCase):
     @tag_test(TestTags.CORE)
@@ -186,7 +186,7 @@ class BtrfsTestCreateDeleteSubvolume(BtrfsTestCase):
         """Verify that it is possible to create/delete subvolume"""
 
         btrfs_version = self._get_btrfs_version()
-        if btrfs_version >= LooseVersion('4.13.2'):
+        if btrfs_version >= Version('4.13.2'):
             self.skipTest('subvolumes list is broken with btrfs-progs v4.13.2')
 
         succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None, None)

@@ -10,7 +10,7 @@ import re
 import six
 import overrides_hack
 
-from distutils.version import LooseVersion
+from packaging.version import Version
 
 from gi.repository import BlockDev, GLib
 
@@ -41,7 +41,7 @@ def _get_dosfstools_version():
     m = re.search(r"mkfs\.fat ([\d\.]+)", out)
     if not m or len(m.groups()) != 1:
         raise RuntimeError("Failed to determine dosfstools version from: %s" % out)
-    return LooseVersion(m.groups()[0])
+    return Version(m.groups()[0])
 
 
 def _get_xfs_version():
@@ -49,7 +49,7 @@ def _get_xfs_version():
     m = re.search(r"mkfs\.xfs version ([\d\.]+)", out)
     if not m or len(m.groups()) != 1:
         raise RuntimeError("Failed to determine xfsprogs version from: %s" % out)
-    return LooseVersion(m.groups()[0])
+    return Version(m.groups()[0])
 
 
 class FSTestCase(unittest.TestCase):
@@ -91,7 +91,7 @@ class FSTestCase(unittest.TestCase):
 
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="ext4_test")
 
-        if self._vfat_version <= LooseVersion("4.1"):
+        if self._vfat_version <= Version("4.1"):
             self._mkfs_options = None
         else:
             self._mkfs_options = [BlockDev.ExtraArg.new("--mbr=n", "")]
@@ -150,7 +150,7 @@ class TestGenericWipe(FSTestCase):
 
         # vfat has multiple signatures on the device so it allows us to test the
         # 'all' argument of fs_wipe()
-        if self._vfat_version >= LooseVersion("4.2"):
+        if self._vfat_version >= Version("4.2"):
             ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1 --mbr=n" % self.loop_dev)
         else:
             ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
@@ -175,7 +175,7 @@ class TestGenericWipe(FSTestCase):
         self.assertEqual(fs_type, b"")
 
         # now do the wipe all in a one step
-        if self._vfat_version >= LooseVersion("4.2"):
+        if self._vfat_version >= Version("4.2"):
             ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1 --mbr=n" % self.loop_dev)
         else:
             ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
@@ -233,7 +233,7 @@ class TestClean(FSTestCase):
 
         # vfat has multiple signatures on the device so it allows us to test
         # that clean removes all signatures
-        if self._vfat_version >= LooseVersion("4.2"):
+        if self._vfat_version >= Version("4.2"):
             ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1 --mbr=n" % self.loop_dev)
         else:
             ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
@@ -760,7 +760,7 @@ class XfsResize(FSTestCase):
 
         # (still) impossible to shrink an XFS file system
         xfs_version = _get_xfs_version()
-        if xfs_version < LooseVersion("5.1.12"):
+        if xfs_version < Version("5.1.12"):
             with mounted(lv, self.mount_dir):
                 with self.assertRaises(GLib.GError):
                     succ = BlockDev.fs_resize(lv, 40 * 1024**2)
@@ -1465,7 +1465,7 @@ class GenericResize(FSTestCase):
     def test_vfat_generic_resize(self):
         """Test generic resize function with a vfat file system"""
         def mkfs_vfat(device, options=None):
-            if self._vfat_version >= LooseVersion("4.2"):
+            if self._vfat_version >= Version("4.2"):
                 if options:
                     return BlockDev.fs_vfat_mkfs(device, options + [BlockDev.ExtraArg.new("--mbr=n", "")])
                 else:
@@ -1512,7 +1512,7 @@ class GenericResize(FSTestCase):
 
         # (still) impossible to shrink an XFS file system
         xfs_version = _get_xfs_version()
-        if xfs_version < LooseVersion("5.1.12"):
+        if xfs_version < Version("5.1.12"):
             with mounted(lv, self.mount_dir):
                 with self.assertRaises(GLib.GError):
                     succ = BlockDev.fs_resize(lv, 40 * 1024**2)

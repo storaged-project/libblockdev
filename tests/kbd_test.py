@@ -1,10 +1,10 @@
 import unittest
 import os
 import re
+import shutil
 import time
 from contextlib import contextmanager
-from distutils.version import LooseVersion
-from distutils.spawn import find_executable
+from packaging.version import Version
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, wipe_all, fake_path, read_file, TestTags, tag_test
 from bytesize import bytesize
 import overrides_hack
@@ -164,8 +164,8 @@ class KbdZRAMStatsTestCase(KbdZRAMTestCase):
         """Verify that it is possible to get stats for a zram device"""
 
         # location of some sysfs files we use is different since linux 4.11
-        kernel_version = os.uname()[2]
-        if LooseVersion(kernel_version) >= LooseVersion("4.11"):
+        ver = BlockDev.utils_get_linux_version()
+        if Version("%d.%d.%d" % (ver.major, ver.minor, ver.micro)) >= Version("4.11"):
             self._zram_get_stats_new()
         else:
             self._zram_get_stats_old()
@@ -261,7 +261,7 @@ class KbdBcacheNodevTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if not find_executable("make-bcache"):
+        if not shutil.which("make-bcache"):
             raise unittest.SkipTest("make-bcache executable not found in $PATH, skipping.")
 
         if not BlockDev.is_initialized():
@@ -291,7 +291,7 @@ class KbdBcacheTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if not find_executable("make-bcache"):
+        if not shutil.which("make-bcache"):
             raise unittest.SkipTest("make-bcache executable not found in $PATH, skipping.")
 
         if not BlockDev.is_initialized():
