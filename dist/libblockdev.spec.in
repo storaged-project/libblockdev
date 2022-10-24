@@ -120,6 +120,10 @@ BuildRequires: gtk-doc
 BuildRequires: glib2-doc
 BuildRequires: autoconf-archive
 
+# obsolete removed subpackages to allow upgrades
+Obsoletes: libblockdev-kbd
+Obsoletes: libblockdev-kbd-devel
+
 Requires: %{name}-utils%{?_isa} = %{version}-%{release}
 
 %description
