@@ -1,5 +1,6 @@
 import unittest
 import os
+import resource
 import overrides_hack
 
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, run_command, run, TestTags, tag_test
@@ -102,8 +103,15 @@ class SwapTestCase(SwapTest):
     def test_swapon_pagesize(self):
         """Verify that activating swap with different pagesize fails"""
 
-        # create swap with 64k pagesize
-        ret, out, err = run_command("mkswap --pagesize 65536 %s" % self.loop_dev)
+        # pick some wrong page size: 8k on 64k and 64k everywhere else
+        pagesize = resource.getpagesize()
+        if pagesize == 65536:
+            wrong_pagesize = 8192
+        else:
+            wrong_pagesize = 65536
+
+        # create swap with "wrong" pagesize
+        ret, out, err = run_command("mkswap --pagesize %s %s" % (wrong_pagesize, self.loop_dev))
         if ret != 0:
             self.fail("Failed to prepare swap for pagesize test: %s %s" % (out, err))
 
