@@ -911,11 +911,13 @@ gboolean bd_fs_unfreeze (const gchar *mountpoint, GError **error);
  * @spec: mount point or device to unmount
  * @lazy: enable/disable lazy unmount
  * @force: enable/disable force unmount
- * @extra: (nullable) (array zero-terminated=1): extra options for the unmount
- *                                                 currently only 'run_as_uid'
- *                                                 and 'run_as_gid' are supported
- *                                                 value must be a valid non zero
- *                                                 uid (gid)
+ * @extra: (nullable) (array zero-terminated=1): extra options for the unmount;
+ *                                               currently only 'run_as_uid'
+ *                                               and 'run_as_gid' are supported
+ *                                               value must be a valid non zero
+ *                                               uid (gid), if you specify one of
+ *                                               these, the function will run in
+ *                                               a child process with real user
  * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether @spec was successfully unmounted or not
@@ -932,11 +934,13 @@ gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const 
  *                            entry from fstab will be used
  * @fstype: (nullable): filesystem type
  * @options: (nullable): comma delimited options for mount
- * @extra: (nullable) (array zero-terminated=1): extra options for the unmount
- *                                                 currently only 'run_as_uid'
- *                                                 and 'run_as_gid' are supported
- *                                                 value must be a valid non zero
- *                                                 uid (gid)
+ * @extra: (nullable) (array zero-terminated=1): extra options for the mount;
+ *                                               currently only 'run_as_uid'
+ *                                               and 'run_as_gid' are supported
+ *                                               value must be a valid non zero
+ *                                               uid (gid), if you specify one of
+ *                                               these, the function will run in
+ *                                               a child process with real user
  * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether @device (or @mountpoint) was successfully mounted or not
