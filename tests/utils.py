@@ -154,7 +154,7 @@ def _get_lio_dev_path(store_wwn, tgt_wwn, store_name, retry=True):
     else:
         return os.path.realpath(globs[0])
 
-def create_lio_device(fpath):
+def create_lio_device(fpath, block_size=0):
     """
     Creates a new LIO loopback device (using targetcli) on top of the
     :param:`fpath` backing file.
@@ -185,6 +185,13 @@ def create_lio_device(fpath):
     status = subprocess.call(["targetcli", "/backstores/fileio/%s set attribute optimal_sectors=2048" % store_name], stdout=DEVNULL)
     if status != 0:
         raise RuntimeError("Failed to set optimal alignment for '%s'" % store_name)
+
+    # set sector/block size if requested
+    if block_size:
+        status = subprocess.call(["targetcli", "/backstores/fileio/%s set attribute block_size=%d" % (store_name, block_size)],
+                                  stdout=DEVNULL)
+        if status != 0:
+            raise RuntimeError("Failed to set block size for '%s'" % store_name)
 
     # create a new loopback device
     out = subprocess.check_output(["targetcli", "/loopback create"])

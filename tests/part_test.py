@@ -12,6 +12,7 @@ from packaging.version import Version
 class PartTestCase(unittest.TestCase):
 
     requested_plugins = BlockDev.plugin_specs_from_names(("part",))
+    block_size = 512
 
     @classmethod
     def _get_fdisk_version(cls):
@@ -33,7 +34,7 @@ class PartTestCase(unittest.TestCase):
         self.dev_file = create_sparse_tempfile("part_test", 100 * 1024**2)
         self.dev_file2 = create_sparse_tempfile("part_test", 100 * 1024**2)
         try:
-            self.loop_dev = create_lio_device(self.dev_file)
+            self.loop_dev = create_lio_device(self.dev_file, self.block_size)
         except RuntimeError as e:
             raise RuntimeError("Failed to setup loop device for testing: %s" % e)
         try:
@@ -89,6 +90,10 @@ class PartCreateTableCase(PartTestCase):
         self.assertTrue(succ)
 
 
+class PartCreateTableCase4k(PartCreateTableCase):
+    block_size = 4096
+
+
 class PartGetDiskSpecCase(PartTestCase):
     @tag_test(TestTags.CORE)
     def test_get_disk_spec(self):
@@ -100,7 +105,7 @@ class PartGetDiskSpecCase(PartTestCase):
         ps = BlockDev.part_get_disk_spec (self.loop_dev)
         self.assertTrue(ps)
         self.assertEqual(ps.path, self.loop_dev)
-        self.assertEqual(ps.sector_size, 512)
+        self.assertEqual(ps.sector_size, self.block_size)
         self.assertGreaterEqual(ps.size, 100 * 1024**2 - 512)
         self.assertEqual(ps.table_type, BlockDev.PartTableType.UNDEF)
 
@@ -110,7 +115,7 @@ class PartGetDiskSpecCase(PartTestCase):
         ps = BlockDev.part_get_disk_spec (self.loop_dev)
         self.assertTrue(ps)
         self.assertEqual(ps.path, self.loop_dev)
-        self.assertEqual(ps.sector_size, 512)
+        self.assertEqual(ps.sector_size, self.block_size)
         self.assertGreaterEqual(ps.size, 100 * 1024**2 - 512)
         self.assertEqual(ps.table_type, BlockDev.PartTableType.MSDOS)
 
@@ -120,9 +125,14 @@ class PartGetDiskSpecCase(PartTestCase):
         ps = BlockDev.part_get_disk_spec (self.loop_dev)
         self.assertTrue(ps)
         self.assertEqual(ps.path, self.loop_dev)
-        self.assertEqual(ps.sector_size, 512)
+        self.assertEqual(ps.sector_size, self.block_size)
         self.assertGreaterEqual(ps.size, 100 * 1024**2 - 512)
         self.assertEqual(ps.table_type, BlockDev.PartTableType.GPT)
+
+
+class PartGetDiskSpecCase4k(PartGetDiskSpecCase):
+    block_size = 4096
+
 
 class PartCreatePartCase(PartTestCase):
     @tag_test(TestTags.CORE)
@@ -134,15 +144,15 @@ class PartCreatePartCase(PartTestCase):
         self.assertTrue(succ)
 
         # for now, let's just create a typical primary partition starting at the
-        # sector 2048, 10 MiB big with optimal alignment
-        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+        # sector 2048, 16 MiB big with optimal alignment
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 16 * 1024**2, BlockDev.PartAlign.OPTIMAL)
 
         # we should get proper data back
         self.assertTrue(ps)
         self.assertEqual(ps.path, self.loop_dev + "1")
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
-        self.assertEqual(ps.start, 2048 * 512)
-        self.assertEqual(ps.size, 10 * 1024**2)
+        self.assertEqual(ps.start, 2048 * self.block_size)
+        self.assertEqual(ps.size, 16 * 1024**2)
         self.assertEqual(ps.id, "0x83")  # default ID "linux filesystem"
 
         ps2 = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
@@ -167,15 +177,15 @@ class PartCreatePartCase(PartTestCase):
         self.assertTrue(succ)
 
         # for now, let's just create a typical primary partition starting at the
-        # sector 2048, 10 MiB big with optimal alignment
-        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 1, 2 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+        # sector 2048, 16 MiB big with optimal alignment
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 1, 16 * 1024**2, BlockDev.PartAlign.OPTIMAL)
 
         # we should get proper data back
         self.assertTrue(ps)
         self.assertEqual(ps.path, self.loop_dev + "1")
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
-        self.assertLessEqual(ps.start, 2048 * 512)
-        self.assertEqual(ps.size, 2 * 1024**2)
+        self.assertLessEqual(ps.start, 2048 * self.block_size)
+        self.assertEqual(ps.size, 16 * 1024**2)
 
         ps2 = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
         self.assertEqual(ps.path, ps2.path)
@@ -199,14 +209,14 @@ class PartCreatePartCase(PartTestCase):
         self.assertTrue(succ)
 
         # for now, let's just create a typical primary partition starting at the
-        # sector 2048, 10 MiB big with optimal alignment
+        # sector 2048, 2 MiB big with none alignment
         ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 1, 2 * 1024**2, BlockDev.PartAlign.NONE)
 
         # we should get proper data back
         self.assertTrue(ps)
         self.assertEqual(ps.path, self.loop_dev + "1")
         self.assertEqual(ps.type, BlockDev.PartType.NORMAL)
-        self.assertEqual(ps.start, 512)
+        self.assertEqual(ps.start, self.block_size)
         self.assertEqual(ps.size, 2 * 1024**2)
 
         ps2 = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
@@ -222,6 +232,11 @@ class PartCreatePartCase(PartTestCase):
         self.assertEqual(ps.type, ps3.type)
         self.assertEqual(ps.start, ps3.start)
         self.assertEqual(ps.size, ps3.size)
+
+
+class PartCreatePartCase4k(PartCreatePartCase):
+    block_size = 4096
+
 
 class PartCreatePartFullCase(PartTestCase):
     @tag_test(TestTags.CORE)
@@ -961,7 +976,7 @@ class PartCreateResizePartCase(PartTestCase):
         ps1 = BlockDev.part_get_part_spec(self.loop_dev, ps1.path)
         self.assertEqual(ps1.start, ps1_start)  # offset must not be moved
         self.assertGreaterEqual(ps1.size, ps1_half)  # at least requested size
-        self.assertLess(ps1.size, ps1_half + 2 * 1024**2)  # and only slightly bigger
+        self.assertLess(ps1.size, ps1_half + 2048 * self.block_size)  # but also not too big (assuming end alignment based on sector size)
 
         ps2_size = ps2.size
         ps2_start = ps2.start
@@ -978,15 +993,16 @@ class PartCreateResizePartCase(PartTestCase):
             fdisk_version = self._get_fdisk_version()
         except Exception as e:
             resize_tolerance = 0
+            fdisk_version = Version("0")
+
+        if fdisk_version < Version("2.33"):
+            # older versions of libfdisk don't count free space between partitions as a usable
+            # free space which also means max size for resize is about 1 MiB smaller because
+            # the free space between the partition being resized and the "free space" partition
+            # after it is not counted as usable free space
+            resize_tolerance = 2048 * self.block_size
         else:
-            if fdisk_version < Version("2.33"):
-                # older versions of libfdisk don't count free space between partitions as a usable
-                # free space which also means max size for resize is about 1 MiB smaller because
-                # the free space between the partition being resized and the "free space" partition
-                # after it is not counted as usable free space
-                resize_tolerance = 1 * 1024**2
-            else:
-               resize_tolerance = 0
+            resize_tolerance = 0
 
         # we first need a partition table
         succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.GPT, True)
@@ -1003,7 +1019,7 @@ class PartCreateResizePartCase(PartTestCase):
         ps = BlockDev.part_get_part_spec(self.loop_dev, ps.path)
         self.assertEqual(initial_start, ps.start)  # offset must not be moved
         self.assertGreaterEqual(ps.size, new_size)  # at least the requested size
-        self.assertLess(ps.size, new_size + 1 * 1024**2)  # but also not too big (assuming 1 MiB alignment)
+        self.assertLess(ps.size, new_size + 2048 * self.block_size)  # but also not too big (assuming end alignment based on sector size)
 
         # resize to maximum
         succ = BlockDev.part_resize_part (self.loop_dev, ps.path, 0, BlockDev.PartAlign.OPTIMAL)
@@ -1043,6 +1059,10 @@ class PartCreateResizePartCase(PartTestCase):
         self.assertEqual(initial_start, ps.start)
         self.assertGreaterEqual(ps.size, new_size) # at least the requested size
 
+        if fdisk_version < Version("2.33") and self.block_size != 512:
+            # XXX end alignment when resizing is way of with 4096 block and old libfdisk
+            return
+
         # resize to previous maximum with no alignment explicitly
         succ = BlockDev.part_resize_part (self.loop_dev, ps.path, initial_size, BlockDev.PartAlign.NONE)
         self.assertTrue(succ)
@@ -1068,6 +1088,11 @@ class PartCreateResizePartCase(PartTestCase):
         ps = BlockDev.part_get_part_spec(self.loop_dev, ps.path)
         self.assertEqual(initial_start, ps.start)
         self.assertGreaterEqual(ps.size, unaligned_max) # at least the requested size
+
+
+class PartCreateResizePartCase4k(PartCreateResizePartCase):
+    block_size = 4096
+
 
 class PartCreateDeletePartCase(PartTestCase):
     @tag_test(TestTags.CORE)
