@@ -479,6 +479,12 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
     current_uid = getuid ();
     current_gid = getgid ();
 
+    if (geteuid () != 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Not running as root, cannot change the UID/GID.");
+        return FALSE;
+    }
+
     if (pipe(pipefd) == -1) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Error creating pipe.");
@@ -605,7 +611,7 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
  * @force: enable/disable force unmount
  * @extra: (nullable) (array zero-terminated=1): extra options for the unmount;
  *                                               currently only 'run_as_uid'
- *                                               and 'run_as_gid' are supported
+ *                                               and 'run_as_gid' are supported;
  *                                               value must be a valid non zero
  *                                               uid (gid), if you specify one of
  *                                               these, the function will run in
@@ -686,7 +692,7 @@ gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const 
  * @options: (nullable): comma delimited options for mount
  * @extra: (nullable) (array zero-terminated=1): extra options for the mount;
  *                                               currently only 'run_as_uid'
- *                                               and 'run_as_gid' are supported
+ *                                               and 'run_as_gid' are supported;
  *                                               value must be a valid non zero
  *                                               uid (gid), if you specify one of
  *                                               these, the function will run in

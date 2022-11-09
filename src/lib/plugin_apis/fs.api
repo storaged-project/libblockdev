@@ -913,7 +913,7 @@ gboolean bd_fs_unfreeze (const gchar *mountpoint, GError **error);
  * @force: enable/disable force unmount
  * @extra: (nullable) (array zero-terminated=1): extra options for the unmount;
  *                                               currently only 'run_as_uid'
- *                                               and 'run_as_gid' are supported
+ *                                               and 'run_as_gid' are supported;
  *                                               value must be a valid non zero
  *                                               uid (gid), if you specify one of
  *                                               these, the function will run in
@@ -936,7 +936,7 @@ gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const 
  * @options: (nullable): comma delimited options for mount
  * @extra: (nullable) (array zero-terminated=1): extra options for the mount;
  *                                               currently only 'run_as_uid'
- *                                               and 'run_as_gid' are supported
+ *                                               and 'run_as_gid' are supported;
  *                                               value must be a valid non zero
  *                                               uid (gid), if you specify one of
  *                                               these, the function will run in
