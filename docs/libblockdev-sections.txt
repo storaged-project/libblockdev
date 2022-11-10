@@ -57,7 +57,6 @@ bd_btrfs_is_tech_avail
 bd_crypto_check_deps
 bd_crypto_close
 bd_crypto_init
-BD_CRYPTO_LUKS_METADATA_SIZE
 bd_crypto_error_quark
 BD_CRYPTO_ERROR
 BDCryptoError
