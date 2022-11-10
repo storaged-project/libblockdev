@@ -4,10 +4,6 @@
 #ifndef BD_CRYPTO
 #define BD_CRYPTO
 
-#define BD_CRYPTO_CHI_SQUARE_LOWER_LIMIT 136
-#define BD_CRYPTO_CHI_SQUARE_UPPER_LIMIT 426
-#define BD_CRYPTO_CHI_SQUARE_BYTES_TO_CHECK 512
-
 GQuark bd_crypto_error_quark (void);
 #define BD_CRYPTO_ERROR bd_crypto_error_quark ()
 typedef enum {
