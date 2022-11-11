@@ -1,8 +1,6 @@
 #include <glib.h>
 #include <blockdev/utils.h>
 
-#define BD_CRYPTO_LUKS_METADATA_SIZE G_GUINT64_CONSTANT (2097152ULL) // 2 MiB
-
 GQuark bd_crypto_error_quark (void) {
     return g_quark_from_static_string ("g-bd-crypto-error-quark");
 }

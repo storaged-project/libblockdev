@@ -53,6 +53,10 @@
 #define DEFAULT_LUKS_KEYSIZE_BITS 256
 #define DEFAULT_LUKS_CIPHER "aes-xts-plain64"
 
+#define SQUARE_LOWER_LIMIT 136
+#define SQUARE_UPPER_LIMIT 426
+#define SQUARE_BYTES_TO_CHECK 512
+
 #ifdef LIBCRYPTSETUP_24
 /* 0 for autodetect since 2.4.0 */
 #define DEFAULT_LUKS2_SECTOR_SIZE 0
@@ -2875,7 +2879,7 @@ gboolean bd_crypto_keyring_add_key (const gchar *key_desc, const guint8 *key_dat
  */
 gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error) {
     gint fd = -1;
-    guchar buf[BD_CRYPTO_CHI_SQUARE_BYTES_TO_CHECK];
+    guchar buf[SQUARE_BYTES_TO_CHECK];
     guint symbols[256] = {0};
     gfloat chi_square = 0.0;
     gfloat e = (gfloat) sizeof(buf) / (gfloat) 256.0;
@@ -2915,7 +2919,7 @@ gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error) 
     chi_square /= e;
 
     bd_utils_report_finished (progress_id, "Completed");
-    return BD_CRYPTO_CHI_SQUARE_LOWER_LIMIT < chi_square && chi_square < BD_CRYPTO_CHI_SQUARE_UPPER_LIMIT;
+    return SQUARE_LOWER_LIMIT < chi_square && chi_square < SQUARE_UPPER_LIMIT;
 }
 
 /**
