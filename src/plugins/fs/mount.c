@@ -434,26 +434,36 @@ static gboolean do_mount (MountArgs *args, GError **error) {
     return success;
 }
 
-static gboolean set_uid (uid_t uid, GError **error) {
+static gboolean set_ruid (uid_t uid, GError **error) {
     if (setresuid (uid, -1, -1) != 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                    "Error setting uid: %m");
+                     "Error setting ruid: %m");
         return FALSE;
     }
 
     return TRUE;
 }
 
-static gboolean set_gid (gid_t gid, GError **error) {
+static gboolean set_rgid (gid_t gid, GError **error) {
     if (setresgid (gid, -1, -1) != 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                    "Error setting gid: %m");
+                     "Error setting rgid: %m");
         return FALSE;
     }
 
     return TRUE;
 }
 
+
+/**
+ * run_as_user:
+ *
+ * Runs given @func in a child process with real user and group ID specified by
+ * @run_as_uid and @run_as_gid. The child process is ended after @func is finished.
+ * This is used to run mount and unmount functions in a similar way how the `mount`
+ * command, which is a suid binary, works and is used to set the libmount context
+ * to restricted.
+ */
 static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, gid_t run_as_gid, GError ** error) {
     uid_t current_uid = -1;
     gid_t current_gid = -1;
@@ -468,6 +478,12 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
 
     current_uid = getuid ();
     current_gid = getgid ();
+
+    if (geteuid () != 0) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Not running as root, cannot change the UID/GID.");
+        return FALSE;
+    }
 
     if (pipe(pipefd) == -1) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
@@ -485,7 +501,7 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
         close (pipefd[0]);
 
         if (run_as_gid != current_gid) {
-            if (!set_gid (run_as_gid, error)) {
+            if (!set_rgid (run_as_gid, error)) {
                 if (write(pipefd[1], (*error)->message, strlen((*error)->message)) < 0)
                     _exit (BD_FS_ERROR_PIPE);
                 else
@@ -494,7 +510,7 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
         }
 
         if (run_as_uid != current_uid) {
-            if (!set_uid (run_as_uid, error)) {
+            if (!set_ruid (run_as_uid, error)) {
                 if (write(pipefd[1], (*error)->message, strlen((*error)->message)) < 0)
                     _exit (BD_FS_ERROR_PIPE);
                 else
@@ -593,11 +609,13 @@ static gboolean run_as_user (MountFunc func, MountArgs *args, uid_t run_as_uid, 
  * @spec: mount point or device to unmount
  * @lazy: enable/disable lazy unmount
  * @force: enable/disable force unmount
- * @extra: (nullable) (array zero-terminated=1): extra options for the unmount
- *                                                 currently only 'run_as_uid'
- *                                                 and 'run_as_gid' are supported
- *                                                 value must be a valid non zero
- *                                                 uid (gid)
+ * @extra: (nullable) (array zero-terminated=1): extra options for the unmount;
+ *                                               currently only 'run_as_uid'
+ *                                               and 'run_as_gid' are supported;
+ *                                               value must be a valid non zero
+ *                                               uid (gid), if you specify one of
+ *                                               these, the function will run in
+ *                                               a child process with real user
  * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether @spec was successfully unmounted or not
@@ -672,11 +690,14 @@ gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const 
  *                            entry from fstab will be used
  * @fstype: (nullable): filesystem type
  * @options: (nullable): comma delimited options for mount
- * @extra: (nullable) (array zero-terminated=1): extra options for the mount
- *                                                 currently only 'run_as_uid'
- *                                                 and 'run_as_gid' are supported
- *                                                 value must be a valid non zero
- *                                                 uid (gid)
+ * @extra: (nullable) (array zero-terminated=1): extra options for the mount;
+ *                                               currently only 'run_as_uid'
+ *                                               and 'run_as_gid' are supported;
+ *                                               value must be a valid non zero
+ *                                               uid (gid), if you specify one of
+ *                                               these, the function will run in
+ *                                               a child process with real user
+ *                                               and/or group ID set to these values.
  * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether @device (or @mountpoint) was successfully mounted or not
