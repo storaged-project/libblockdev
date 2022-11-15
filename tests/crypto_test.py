@@ -692,7 +692,7 @@ class CryptoTestEscrow(CryptoTestCase):
 
             subprocess.check_call(['certutil', '-d', self.nss_dir, '-S', '-x', '-n',
                 'escrow_cert', '-s', 'CN=Escrow Test', '-t', ',,TC', '-z',
-                noise_file.name])
+                noise_file.name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
         # Export the public certificate
         handle, self.public_cert = tempfile.mkstemp(prefix='libblockdev_test_escrow')
