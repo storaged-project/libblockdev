@@ -3265,8 +3265,19 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
         }
 
         out_path = g_strdup_printf ("%s/%s-escrow-backup-passphrase", directory, volume_ident);
-        ret = write_escrow_data_file (volume, ui, LIBVK_SECRET_PASSPHRASE, out_path, cert, error);
+        ret = write_escrow_data_file (volume, ui, LIBVK_SECRET_PASSPHRASE, out_path, cert, &l_error);
         g_free (out_path);
+
+        if (!ret) {
+            CERT_DestroyCertificate (cert);
+            libvk_volume_free (volume);
+            libvk_ui_free (ui);
+            g_free (volume_ident);
+            g_free (cert_data_copy);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
+            return FALSE;
+        }
     }
 
     CERT_DestroyCertificate (cert);
