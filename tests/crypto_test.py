@@ -731,8 +731,8 @@ class CryptoTestEscrow(CryptoTestCase):
             stdin=subprocess.PIPE)
         p.communicate(input=('%s\0%s\0' % (PASSWD2, PASSWD2)).encode('utf-8'))
         if p.returncode != 0:
-            raise subprocess.CalledProcessError(p.returncode, 'volume_key'
-)
+            raise subprocess.CalledProcessError(p.returncode, 'volume_key')
+
         # Restore access to the volume
         # PASSWD3 is the new passphrase for the LUKS device
         p = subprocess.Popen(['volume_key', '--restore', '-b', self.loop_dev,
