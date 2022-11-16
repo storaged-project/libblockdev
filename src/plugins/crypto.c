@@ -3090,7 +3090,6 @@ static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libv
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_ESCROW_FAILED,
                      "Failed to get escrow data: %s", l_error->message);
         g_clear_error (&l_error);
-        libvk_volume_free (volume);
         return FALSE;
     }
 
