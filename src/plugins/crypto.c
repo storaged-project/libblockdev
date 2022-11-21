@@ -2269,14 +2269,14 @@ static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libv
     GIOChannel *out_file = NULL;
     GIOStatus status = G_IO_STATUS_ERROR;
     gsize bytes_written = 0;
+    GError *l_error = NULL;
 
     packet_data = libvk_volume_create_packet_asymmetric_with_format (volume, &packet_data_size, secret_type, cert,
-                                                                     ui, LIBVK_PACKET_FORMAT_ASYMMETRIC_WRAP_SECRET_ONLY, error);
-
+                                                                     ui, LIBVK_PACKET_FORMAT_ASYMMETRIC_WRAP_SECRET_ONLY, &l_error);
     if (!packet_data) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_ESCROW_FAILED,
-                     "Failed to get escrow data");
-        libvk_volume_free (volume);
+                     "Failed to get escrow data: %s", l_error->message);
+        g_clear_error (&l_error);
         return FALSE;
     }
 
