@@ -72,7 +72,7 @@ class LvmNoDevTestCase(LVMTestCase):
 
     @classmethod
     def setUpClass(cls):
-        # we are cheking for info log messages and default level is warning
+        # we are checking for info log messages and default level is warning
         BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_INFO)
 
         super(LvmNoDevTestCase, cls).setUpClass()
@@ -854,7 +854,7 @@ class LvmTestLVcreateWithExtra(LvmPVVGLVTestCase):
 
     @classmethod
     def setUpClass(cls):
-        # we are cheking for info log messages and default level is warning
+        # we are checking for info log messages and default level is warning
         BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_INFO)
 
         super(LvmTestLVcreateWithExtra, cls).setUpClass()

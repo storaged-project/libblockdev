@@ -400,7 +400,7 @@ GType bd_lvm_lvdata_get_type();
  * size reported for the LV itself.
  *
  * Also, the order of entries in @segs must be assumed to be random;
- * it does not correspond to the order of segements in the logical
+ * it does not correspond to the order of segments in the logical
  * volume itself.
  */
 typedef struct BDLVMLVdata {
@@ -1284,7 +1284,7 @@ gboolean bd_lvm_lvdeactivate (const gchar *vg_name, const gchar *lv_name, const 
  * bd_lvm_lvsnapshotcreate:
  * @vg_name: name of the VG containing the LV a new snapshot should be created of
  * @origin_name: name of the LV a new snapshot should be created of
- * @snapshot_name: name fo the to-be-created snapshot
+ * @snapshot_name: name of the to-be-created snapshot
  * @size: requested size for the snapshot
  * @extra: (nullable) (array zero-terminated=1): extra options for the LV snapshot creation
  *                                                 (just passed to LVM as is)
@@ -1443,7 +1443,7 @@ gchar* bd_lvm_thlvpoolname (const gchar *vg_name, const gchar *lv_name, GError *
  * bd_lvm_thsnapshotcreate:
  * @vg_name: name of the VG containing the thin LV a new snapshot should be created of
  * @origin_name: name of the thin LV a new snapshot should be created of
- * @snapshot_name: name fo the to-be-created snapshot
+ * @snapshot_name: name of the to-be-created snapshot
  * @pool_name: (nullable): name of the thin pool to create the snapshot in or %NULL if not specified
  * @extra: (nullable) (array zero-terminated=1): extra options for the thin LV snapshot creation
  *                                                 (just passed to LVM as is)
@@ -1558,7 +1558,7 @@ gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name,
 /**
  * bd_lvm_cache_attach:
  * @vg_name: name of the VG containing the @data_lv and the @cache_pool_lv LVs
- * @data_lv: data LV to attache the @cache_pool_lv to
+ * @data_lv: data LV to attach the @cache_pool_lv to
  * @cache_pool_lv: cache pool LV to attach to the @data_lv
  * @extra: (nullable) (array zero-terminated=1): extra options for the cache attachment
  *                                                 (just passed to LVM as is)

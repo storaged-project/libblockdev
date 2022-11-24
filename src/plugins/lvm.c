@@ -1012,7 +1012,7 @@ guint64 bd_lvm_round_size_to_pe (guint64 size, guint64 pe_size, gboolean roundup
 guint64 bd_lvm_get_lv_physical_size (guint64 lv_size, guint64 pe_size, GError **error) {
     pe_size = RESOLVE_PE_SIZE(pe_size);
 
-    /* the LV just takes space rounded up the the a multiple of extent size */
+    /* the LV just takes space rounded up to the multiple of extent size */
     return bd_lvm_round_size_to_pe (lv_size, pe_size, TRUE, error);
 }
 
@@ -1155,7 +1155,7 @@ gboolean bd_lvm_pvcreate (const gchar *device, guint64 data_alignment, guint64 m
  * Returns: whether the PV's size was successfully changed or not
  *
  * If given @size different from 0, sets the PV's size to the given value (see
- * pvresize(8)). If given @size 0, adjusts the PV's size to the underlaying
+ * pvresize(8)). If given @size 0, adjusts the PV's size to the underlying
  * block device's size.
  *
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_MODIFY
@@ -1995,7 +1995,7 @@ gboolean bd_lvm_lvdeactivate (const gchar *vg_name, const gchar *lv_name, const 
  * bd_lvm_lvsnapshotcreate:
  * @vg_name: name of the VG containing the LV a new snapshot should be created of
  * @origin_name: name of the LV a new snapshot should be created of
- * @snapshot_name: name fo the to-be-created snapshot
+ * @snapshot_name: name of the to-be-created snapshot
  * @size: requested size for the snapshot
  * @extra: (nullable) (array zero-terminated=1): extra options for the LV snapshot creation
  *                                                 (just passed to LVM as is)
@@ -2457,7 +2457,7 @@ gchar* bd_lvm_thlvpoolname (const gchar *vg_name, const gchar *lv_name, GError *
  * bd_lvm_thsnapshotcreate:
  * @vg_name: name of the VG containing the thin LV a new snapshot should be created of
  * @origin_name: name of the thin LV a new snapshot should be created of
- * @snapshot_name: name fo the to-be-created snapshot
+ * @snapshot_name: name of the to-be-created snapshot
  * @pool_name: (nullable): name of the thin pool to create the snapshot in or %NULL if not specified
  * @extra: (nullable) (array zero-terminated=1): extra options for the thin LV snapshot creation
  *                                                 (just passed to LVM as is)
@@ -2784,7 +2784,7 @@ gboolean bd_lvm_cache_create_pool (const gchar *vg_name, const gchar *pool_name,
 /**
  * bd_lvm_cache_attach:
  * @vg_name: name of the VG containing the @data_lv and the @cache_pool_lv LVs
- * @data_lv: data LV to attache the @cache_pool_lv to
+ * @data_lv: data LV to attach the @cache_pool_lv to
  * @cache_pool_lv: cache pool LV to attach to the @data_lv
  * @extra: (nullable) (array zero-terminated=1): extra options for the cache attachment
  *                                                 (just passed to LVM as is)

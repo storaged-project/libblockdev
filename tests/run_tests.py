@@ -27,7 +27,7 @@ def _get_tests_from_suite(suite, tests):
     """ Extract tests from the test suite """
     # 'tests' we get from 'unittest.defaultTestLoader.discover' are "wrapped"
     # in multiple 'unittest.suite.TestSuite' classes/lists so we need to "unpack"
-    # the indivudual test cases
+    # the individual test cases
     for test in suite:
         if isinstance(test, unittest.suite.TestSuite):
             _get_tests_from_suite(test, tests)
@@ -50,7 +50,7 @@ def _get_test_tags(test):
 
     test_fn = getattr(test, test._testMethodName)
 
-    # it is possible to either tag a test funcion or the class so we need to
+    # it is possible to either tag a test function or the class so we need to
     # check both for the tag
     if getattr(test_fn, "slow", False) or getattr(test_fn.__self__, "slow", False):
         tags.add(TestTags.SLOW)
@@ -229,7 +229,7 @@ class DebugTestResult(unittest.TextTestResult):
 
 
 def _should_skip(distro=None, version=None, arch=None, reason=None):
-    # all these can be lists or a single value, so covert everything to list
+    # all these can be lists or a single value, so convert everything to list
     if distro is not None and type(distro) is not list:
         distro = [distro]
     if version is not None and type(version) is not list:
