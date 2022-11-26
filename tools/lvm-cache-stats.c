@@ -106,7 +106,7 @@ int main (int argc, char *argv[]) {
         return 1;
     }
 
-    /* check that we are runnig as root */
+    /* check that we are running as root */
     if ((getuid() != 0) || (geteuid() != 0)) {
         fprintf (stderr, "This utility must be run as root.\n");
         return 1;

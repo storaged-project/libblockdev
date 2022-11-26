@@ -91,8 +91,8 @@ BDCryptoLUKSPBKDF* bd_crypto_luks_pbkdf_new (const gchar *type, const gchar *has
  *               Note: this field is valid only for LUKS 2
  * @label: LUKS header label or NULL
  *         Note: this field is valid only for LUKS 2
- * @subsytem: LUKS header subsystem or NULL
- *            Note: this field is valid only for LUKS 2
+ * @subsystem: LUKS header subsystem or NULL
+ *             Note: this field is valid only for LUKS 2
  * @pbkdf: key derivation function specification or NULL for default
  *         Note: this field is valid only for LUKS 2
  */

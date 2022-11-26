@@ -314,7 +314,7 @@ def generate_source_header(api_file, out_dir, skip_patterns=None):
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("Needs a file name and output directory, exitting.")
+        print("Needs a file name and output directory, exiting.")
         print("Usage: %s FILE_NAME OUTPUT_DIR [SKIP_PATTERNS]" % sys.argv[0])
         sys.exit(1)
 

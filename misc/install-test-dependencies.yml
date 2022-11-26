@@ -26,8 +26,6 @@
 
   - name: Install build dependencies (Fedora)
     command: "dnf -y builddep libblockdev --nogpgcheck"
-    args:
-      warn: false
     when: ansible_distribution == 'Fedora'
 
   - name: Install build dependencies not covered by dnf builddep (Fedora)
@@ -93,8 +91,6 @@
 
   - name: Install build dependencies (CentOS 8)
     command: "dnf -y builddep libblockdev --nogpgcheck"
-    args:
-      warn: false
     when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
 
   - name: Install build dependencies not covered by dnf builddep (CentOS 8)

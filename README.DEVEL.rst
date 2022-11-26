@@ -62,7 +62,7 @@ If a new plugin is being added:
 2. code in ``src/lib/blockdev.c.in`` has to be adapted to load the plugin's
    implementation and report its state
 
-3. related defitions have to be added to the related autotools files
+3. related definitions have to be added to the related autotools files
 
 4. the plugin has to be added to the particular place in the documentation
    (the ``docs/libblockdev-sections.txt`` file)

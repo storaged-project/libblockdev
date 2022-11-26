@@ -63,7 +63,7 @@ class OverridesTestCase(OverridesTest):
         # test that overrides are used over the proxy
         expected_padding = BlockDev.lvm_round_size_to_pe(int(math.ceil(11 * 1024**2 * 0.2)),
                                                          4 * 1024**2, True)
-        # the original lvm_get_thpool_padding takes 3 arguments, but one is enough for the overriden version
+        # the original lvm_get_thpool_padding takes 3 arguments, but one is enough for the overridden version
         self.assertEqual(BlockDev.lvm_get_thpool_padding(11 * 1024**2),
                          expected_padding)
 

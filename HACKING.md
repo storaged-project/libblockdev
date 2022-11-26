@@ -35,7 +35,7 @@ MAKING RELEASES
 
  - [ ] Update the documentation by rsyncing the contents of the *docs/html*
        folder elsewhere, switching to the *gh-pages* branch, rsyncing the
-       contents back and commiting it as an update of the docs for the new
+       contents back and committing it as an update of the docs for the new
        release.
 
 

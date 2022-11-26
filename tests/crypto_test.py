@@ -110,7 +110,7 @@ class CryptoTestGenerateBackupPassphrase(CryptoTestCase):
 class CryptoTestFormat(CryptoTestCase):
     @tag_test(TestTags.SLOW, TestTags.CORE)
     def test_luks_format(self):
-        """Verify that formating device as LUKS works"""
+        """Verify that formatting device as LUKS works"""
 
         # no passphrase nor keyfile
         with self.assertRaises(GLib.GError):
@@ -131,7 +131,7 @@ class CryptoTestFormat(CryptoTestCase):
     @tag_test(TestTags.SLOW, TestTags.CORE)
     @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_format(self):
-        """Verify that formating device as LUKS 2 works"""
+        """Verify that formatting device as LUKS 2 works"""
 
         # no passphrase nor keyfile
         with self.assertRaises(GLib.GError):
@@ -243,7 +243,7 @@ class CryptoTestFormat(CryptoTestCase):
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
     def test_luks_format_key_size(self):
-        """Verify that formating device as LUKS works"""
+        """Verify that formatting device as LUKS works"""
 
         # aes-xts: key size should default to 512
         succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-xts-plain64", 0, PASSWD, None, 0)

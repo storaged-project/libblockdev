@@ -17,7 +17,7 @@ class NVDIMMTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         if not shutil.which("ndctl"):
-            raise unittest.SkipTest("ndctl executable not foundin $PATH, skipping.")
+            raise unittest.SkipTest("ndctl executable not found in $PATH, skipping.")
 
         if not BlockDev.is_initialized():
             BlockDev.init(cls.requested_plugins, None)
@@ -111,7 +111,7 @@ class NVDIMMNamespaceTestCase(NVDIMMTestCase):
 
     @tag_test(TestTags.EXTRADEPS, TestTags.UNSAFE)
     def test_enable_disable(self):
-        # non-existing/unknow namespace
+        # non-existing/unknown namespace
         with self.assertRaises(GLib.GError):
             BlockDev.nvdimm_namespace_enable("definitely-not-a-namespace")
 
@@ -144,13 +144,13 @@ class NVDIMMNamespaceTestCase(NVDIMMTestCase):
                                                   BlockDev.NVDIMMNamespaceMode.SECTOR,
                                                   False)
 
-        # non-existing/unknow mode
+        # non-existing/unknown mode
         with self.assertRaises(GLib.GError):
             BlockDev.nvdimm_namespace_reconfigure(self.sys_info["dev"],
                                                   BlockDev.NVDIMMNamespaceMode.UNKNOWN,
                                                   True)
 
-        # non-existing/unknow namespace
+        # non-existing/unknown namespace
         with self.assertRaises(GLib.GError):
             BlockDev.nvdimm_namespace_reconfigure("definitely-not-a-namespace",
                                                   BlockDev.NVDIMMNamespaceMode.SECTOR,
