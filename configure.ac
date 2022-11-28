@@ -253,7 +253,8 @@ AS_IF([test "x$with_nvdimm" != "xno"],
       [])
 
 AS_IF([test "x$with_nvme" != "xno"],
-      [LIBBLOCKDEV_PKG_CHECK_MODULES([NVME], [libnvme >= 1.0])
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([UUID], [uuid])
+       LIBBLOCKDEV_PKG_CHECK_MODULES([NVME], [libnvme >= 1.0])
       AS_IF([$PKG_CONFIG --atleast-version=1.1 libnvme],
             [AC_DEFINE([HAVE_LIBNVME_1_1])], [])
       ],
