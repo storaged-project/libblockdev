@@ -180,7 +180,7 @@ LIBBLOCKDEV_PLUGIN([FS], [fs])
 LIBBLOCKDEV_PLUGIN([NVDIMM], [nvdimm])
 LIBBLOCKDEV_PLUGIN([NVME], [nvme])
 
-dnl these two modules are always needed
+dnl these packages/modules are always needed
 LIBBLOCKDEV_PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.42.2])
 LIBBLOCKDEV_PKG_CHECK_MODULES([GOBJECT], [gobject-2.0 >= 2.42.2])
 LIBBLOCKDEV_PKG_CHECK_MODULES([GIO], [gio-2.0 >= 2.42.2])
