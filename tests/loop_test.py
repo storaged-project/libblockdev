@@ -107,7 +107,30 @@ class LoopTestSetupSectorSize(LoopTestCase):
         with open("/sys/block/%s/queue/logical_block_size" % self.loop, "r") as f:
             self.assertEqual(f.read().strip(), "4096")
 
-# XXX: any sane way how to test part_probe=True/False?
+class LoopTestSetupPartprobe(LoopTestCase):
+    def testLoop_setup_partprobe(self):
+        """Verify that loop_setup with part_scan specified works as expected"""
+        # part scan on
+        succ, self.loop = BlockDev.loop_setup(self.dev_file, part_scan=True)
+        self.assertTrue(succ)
+        self.assertTrue(self.loop)
+
+        with open("/sys/block/%s/loop/partscan" % self.loop, "r") as f:
+            self.assertEqual(f.read().strip(), "1")
+
+        succ = BlockDev.loop_teardown(self.loop)
+        self.assertTrue(succ)
+
+        # part scan off
+        succ, self.loop = BlockDev.loop_setup(self.dev_file, part_scan=False)
+        self.assertTrue(succ)
+        self.assertTrue(self.loop)
+
+        with open("/sys/block/%s/loop/partscan" % self.loop, "r") as f:
+            self.assertEqual(f.read().strip(), "0")
+
+        succ = BlockDev.loop_teardown(self.loop)
+        self.assertTrue(succ)
 
 class LoopTestGetLoopName(LoopTestCase):
     @tag_test(TestTags.CORE)
