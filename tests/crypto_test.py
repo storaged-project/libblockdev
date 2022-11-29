@@ -1123,9 +1123,10 @@ class CryptoTestLuksSectorSize(CryptoTestCase):
         self.dev_file2 = create_sparse_tempfile("crypto_test", 1024**3)
 
         # create a 4k sector loop device
-        ret, out, err = run_command("losetup -f %s --show --sector-size 4096" % self.dev_file)
-        self.assertEqual(ret, 0, "Failed to setup loop device for testing: %s" % err)
-        self.loop_dev = out.strip()
+        succ, loop = BlockDev.loop_setup(self.dev_file, sector_size=4096)
+        if not succ:
+            raise RuntimeError("Failed to setup loop device for testing")
+        self.loop_dev = "/dev/%s" % loop
 
         succ, loop = BlockDev.loop_setup(self.dev_file2)
         if not succ:
