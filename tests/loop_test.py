@@ -95,6 +95,18 @@ class LoopTestSetupReadOnly(LoopTestCase):
         with open("/sys/block/%s/ro" % self.loop, "r") as f:
             self.assertEqual(f.read().strip(), "1")
 
+class LoopTestSetupSectorSize(LoopTestCase):
+    def testLoop_setup_sector_size(self):
+        """Verify that loop_setup with sector_size specified works as expected"""
+        # test 4k sector size
+        succ, self.loop = BlockDev.loop_setup(self.dev_file, sector_size=4096)
+        self.assertTrue(succ)
+        self.assertTrue(self.loop)
+
+        # logical_block_size should be 4096
+        with open("/sys/block/%s/queue/logical_block_size" % self.loop, "r") as f:
+            self.assertEqual(f.read().strip(), "4096")
+
 # XXX: any sane way how to test part_probe=True/False?
 
 class LoopTestGetLoopName(LoopTestCase):

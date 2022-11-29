@@ -78,4 +78,13 @@
   </para>
 
   </simplesect>
+
+  <simplesect><title>Loop plugin</title>
+  <para>
+    <literal>bd_loop_setup</literal> and <literal>bd_loop_setup_from_fd</literal> has a new parameter <literal>sector_size</literal>.
+    Use <literal>0</literal> to preserve the original behaviour.
+  </para>
+
+  </simplesect>
+
 </chapter>

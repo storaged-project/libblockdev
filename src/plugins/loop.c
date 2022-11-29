@@ -184,6 +184,7 @@ gchar* bd_loop_get_loop_name (const gchar *file, GError **error UNUSED) {
  * @size: maximum size of the device (or 0 to leave unspecified)
  * @read_only: whether to setup as read-only (%TRUE) or read-write (%FALSE)
  * @part_scan: whether to enforce partition scan on the newly created device or not
+ * @sector_size: logical sector size for the loop device in bytes (or 0 for default)
  * @loop_name: (optional) (out): if not %NULL, it is used to store the name of the loop device
  * @error: (out) (optional): place to store error (if any)
  *
@@ -191,7 +192,7 @@ gchar* bd_loop_get_loop_name (const gchar *file, GError **error UNUSED) {
  *
  * Tech category: %BD_LOOP_TECH_LOOP-%BD_LOOP_TECH_MODE_CREATE
  */
-gboolean bd_loop_setup (const gchar *file, guint64 offset, guint64 size, gboolean read_only, gboolean part_scan, const gchar **loop_name, GError **error) {
+gboolean bd_loop_setup (const gchar *file, guint64 offset, guint64 size, gboolean read_only, gboolean part_scan, guint64 sector_size, const gchar **loop_name, GError **error) {
     gint fd = -1;
     gboolean ret = FALSE;
 
@@ -204,7 +205,7 @@ gboolean bd_loop_setup (const gchar *file, guint64 offset, guint64 size, gboolea
         return FALSE;
     }
 
-    ret = bd_loop_setup_from_fd (fd, offset, size, read_only, part_scan, loop_name, error);
+    ret = bd_loop_setup_from_fd (fd, offset, size, read_only, part_scan, sector_size, loop_name, error);
     close (fd);
     return ret;
 }
@@ -216,6 +217,7 @@ gboolean bd_loop_setup (const gchar *file, guint64 offset, guint64 size, gboolea
  * @size: maximum size of the device (or 0 to leave unspecified)
  * @read_only: whether to setup as read-only (%TRUE) or read-write (%FALSE)
  * @part_scan: whether to enforce partition scan on the newly created device or not
+ * @sector_size: logical sector size for the loop device in bytes (or 0 for default)
  * @loop_name: (optional) (out): if not %NULL, it is used to store the name of the loop device
  * @error: (out) (optional): place to store error (if any)
  *
@@ -223,7 +225,7 @@ gboolean bd_loop_setup (const gchar *file, guint64 offset, guint64 size, gboolea
  *
  * Tech category: %BD_LOOP_TECH_LOOP-%BD_LOOP_TECH_MODE_CREATE
  */
-gboolean bd_loop_setup_from_fd (gint fd, guint64 offset, guint64 size, gboolean read_only, gboolean part_scan, const gchar **loop_name, GError **error) {
+gboolean bd_loop_setup_from_fd (gint fd, guint64 offset, guint64 size, gboolean read_only, gboolean part_scan, guint64 sector_size, const gchar **loop_name, GError **error) {
     gint loop_control_fd = -1;
     gint loop_number = -1;
     gchar *loop_device = NULL;
@@ -311,6 +313,26 @@ gboolean bd_loop_setup_from_fd (gint fd, guint64 offset, guint64 size, gboolean 
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
+    }
+
+    if (sector_size > 0) {
+        for (n_try=10, status=-1; (status != 0) && (n_try > 0); n_try--) {
+            status = ioctl (loop_fd, LOOP_SET_BLOCK_SIZE, (unsigned long) sector_size);
+            if (status < 0 && errno == EAGAIN)
+                g_usleep (100 * 1000); /* microseconds */
+            else
+                break;
+        }
+
+        if (status != 0) {
+            g_set_error (&l_error, BD_LOOP_ERROR, BD_LOOP_ERROR_FAIL,
+                         "Failed to set sector size for the %s device: %m", loop_device);
+            g_free (loop_device);
+            close (loop_fd);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
+            return FALSE;
+        }
     }
 
     if (loop_name)
