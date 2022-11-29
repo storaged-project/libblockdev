@@ -370,8 +370,8 @@ __all__.append("dm_get_member_raid_sets")
 
 _loop_setup = BlockDev.loop_setup
 @override(BlockDev.loop_setup)
-def loop_setup(file, offset=0, size=0, read_only=False, part_scan=True):
-    return _loop_setup(file, offset, size, read_only, part_scan)
+def loop_setup(file, offset=0, size=0, read_only=False, part_scan=True, sector_size=0):
+    return _loop_setup(file, offset, size, read_only, part_scan, sector_size)
 __all__.append("loop_setup")
 
 
