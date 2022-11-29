@@ -30,9 +30,10 @@ class LoopTestCase(unittest.TestCase):
             pass
         os.unlink(self.dev_file)
 
+
 class LoopTestSetupBasic(LoopTestCase):
     @tag_test(TestTags.CORE)
-    def testLoop_setup_teardown_basic(self):
+    def test_loop_setup_teardown_basic(self):
         """Verify that basic loop_setup and loop_teardown work as expected"""
 
         succ, self.loop = BlockDev.loop_setup(self.dev_file)
@@ -48,8 +49,9 @@ class LoopTestSetupBasic(LoopTestCase):
         b_file = BlockDev.loop_get_backing_file(self.loop)
         self.assertIsNone(b_file)
 
+
 class LoopTestSetupOffset(LoopTestCase):
-    def testLoop_setup_with_offset(self):
+    def test_loop_setup_with_offset(self):
         """Verify that loop_setup with offset specified works as expected"""
 
         # now test with the offset
@@ -67,7 +69,7 @@ class LoopTestSetupOffset(LoopTestCase):
 
 
 class LoopTestSetupOffsetSize(LoopTestCase):
-    def testLoop_setup_with_offset_and_size(self):
+    def test_loop_setup_with_offset_and_size(self):
         """Verify that loop_setup with offset and size specified works as expected"""
 
         # now test with the offset and size
@@ -83,8 +85,9 @@ class LoopTestSetupOffsetSize(LoopTestCase):
         succ = BlockDev.loop_teardown(self.loop)
         self.assertTrue(succ)
 
+
 class LoopTestSetupReadOnly(LoopTestCase):
-    def testLoop_setup_read_only(self):
+    def test_loop_setup_read_only(self):
         """Verify that loop_setup with read_only specified works as expected"""
         # test read-only
         succ, self.loop = BlockDev.loop_setup(self.dev_file, 0, 0, True)
@@ -95,8 +98,9 @@ class LoopTestSetupReadOnly(LoopTestCase):
         with open("/sys/block/%s/ro" % self.loop, "r") as f:
             self.assertEqual(f.read().strip(), "1")
 
+
 class LoopTestSetupSectorSize(LoopTestCase):
-    def testLoop_setup_sector_size(self):
+    def test_loop_setup_sector_size(self):
         """Verify that loop_setup with sector_size specified works as expected"""
         # test 4k sector size
         succ, self.loop = BlockDev.loop_setup(self.dev_file, sector_size=4096)
@@ -107,8 +111,9 @@ class LoopTestSetupSectorSize(LoopTestCase):
         with open("/sys/block/%s/queue/logical_block_size" % self.loop, "r") as f:
             self.assertEqual(f.read().strip(), "4096")
 
+
 class LoopTestSetupPartprobe(LoopTestCase):
-    def testLoop_setup_partprobe(self):
+    def test_loop_setup_partprobe(self):
         """Verify that loop_setup with part_scan specified works as expected"""
         # part scan on
         succ, self.loop = BlockDev.loop_setup(self.dev_file, part_scan=True)
@@ -132,30 +137,39 @@ class LoopTestSetupPartprobe(LoopTestCase):
         succ = BlockDev.loop_teardown(self.loop)
         self.assertTrue(succ)
 
+
 class LoopTestGetLoopName(LoopTestCase):
     @tag_test(TestTags.CORE)
-    def testLoop_get_loop_name(self):
+    def test_loop_get_loop_name(self):
         """Verify that loop_get_loop_name works as expected"""
 
         self.assertIs(BlockDev.loop_get_loop_name("/non/existing"), None)
 
         succ, self.loop = BlockDev.loop_setup(self.dev_file)
+        self.assertTrue(succ)
+        self.assertTrue(self.loop)
+
         ret_loop = BlockDev.loop_get_loop_name(self.dev_file)
         self.assertEqual(ret_loop, self.loop)
 
+
 class LoopTestGetBackingFile(LoopTestCase):
     @tag_test(TestTags.CORE)
-    def testLoop_get_backing_file(self):
+    def test_loop_get_backing_file(self):
         """Verify that loop_get_backing_file works as expected"""
 
         self.assertIs(BlockDev.loop_get_backing_file("/non/existing"), None)
 
         succ, self.loop = BlockDev.loop_setup(self.dev_file)
+        self.assertTrue(succ)
+        self.assertTrue(self.loop)
+
         f_name = BlockDev.loop_get_backing_file(self.loop)
         self.assertEqual(f_name, self.dev_file)
 
+
 class LoopTestGetSetAutoclear(LoopTestCase):
-    def testLoop_get_set_autoclear(self):
+    def test_loop_get_set_autoclear(self):
         """Verify that getting and setting the autoclear flag works as expected"""
 
         with self.assertRaises(GLib.Error):
@@ -165,6 +179,9 @@ class LoopTestGetSetAutoclear(LoopTestCase):
             BlockDev.loop_set_autoclear("/non/existing", True)
 
         succ, self.loop = BlockDev.loop_setup(self.dev_file)
+        self.assertTrue(succ)
+        self.assertTrue(self.loop)
+
         self.assertFalse(BlockDev.loop_get_autoclear(self.loop))
 
         # open the loop device so that it doesn't disappear once we set
