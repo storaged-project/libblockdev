@@ -2375,7 +2375,7 @@ static gboolean get_subsystem_label (const gchar *device, gchar **subsystem, gch
  * @device: a device to get information about
  * @error: (out) (optional): place to store error (if any)
  *
- * Returns: information about the @device or %NULL in case of error
+ * Returns (transfer full): information about the @device or %NULL in case of error
  *
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
  */
@@ -2448,7 +2448,7 @@ BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *device, GError **error) {
  * @device: a device to get information about
  * @error: (out) (optional): place to store error (if any)
  *
- * Returns: information about the @device or %NULL in case of error
+ * Returns (transfer full): information about the @device or %NULL in case of error
  *
  * Tech category: %BD_CRYPTO_TECH_INTEGRITY%BD_CRYPTO_TECH_MODE_QUERY
  */
@@ -2517,7 +2517,7 @@ static int crypt_token_max (const char *type __attribute__((unused))) {
  * @device: a device to get LUKS2 token information about
  * @error: (out) (optional): place to store error (if any)
  *
- * Returns: (array zero-terminated=1): information about tokens on @device
+ * Returns: (array zero-terminated=1) (transfer full): information about tokens on @device
  *
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
  */
