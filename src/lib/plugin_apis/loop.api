@@ -104,18 +104,6 @@ GType bd_loop_info_get_type () {
 }
 
 /**
- * bd_loop_get_backing_file:
- * @dev_name: name of the loop device to get backing file for (e.g. "loop0")
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: (transfer full): path of the device's backing file or %NULL if none
- *                           is found
- *
- * Tech category: %BD_LOOP_TECH_LOOP-%BD_LOOP_TECH_MODE_QUERY
- */
-gchar* bd_loop_get_backing_file (const gchar *dev_name, GError **error);
-
-/**
  * bd_loop_info:
  * @loop: name of the loop device to get information about (e.g. "loop0")
  * @error: (out) (optional): place to store error (if any)

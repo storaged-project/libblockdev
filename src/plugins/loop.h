@@ -60,7 +60,6 @@ void bd_loop_close (void);
 
 gboolean bd_loop_is_tech_avail (BDLoopTech tech, guint64 mode, GError **error);
 
-gchar* bd_loop_get_backing_file (const gchar *dev_name, GError **error);
 BDLoopInfo* bd_loop_info (const gchar *loop, GError **error);
 
 gchar* bd_loop_get_loop_name (const gchar *file, GError **error);
