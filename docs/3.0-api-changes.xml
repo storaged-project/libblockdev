@@ -86,7 +86,7 @@
   </para>
 
   <para>
-    <literal>bd_loop_get_autoclear</literal> has been removed. Use <literal>bd_loop_info</literal> instead.
+    <literal>bd_loop_get_backing_file</literal> and <literal>bd_loop_get_autoclear</literal> have been removed. Use <literal>bd_loop_info</literal> instead.
   </para>
 
   </simplesect>

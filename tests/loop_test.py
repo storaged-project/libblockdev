@@ -172,21 +172,6 @@ class LoopTestGetLoopName(LoopTestCase):
         self.assertEqual(ret_loop, self.loop)
 
 
-class LoopTestGetBackingFile(LoopTestCase):
-    @tag_test(TestTags.CORE)
-    def test_loop_get_backing_file(self):
-        """Verify that loop_get_backing_file works as expected"""
-
-        self.assertIs(BlockDev.loop_get_backing_file("/non/existing"), None)
-
-        succ, self.loop = BlockDev.loop_setup(self.dev_file)
-        self.assertTrue(succ)
-        self.assertTrue(self.loop)
-
-        f_name = BlockDev.loop_get_backing_file(self.loop)
-        self.assertEqual(f_name, self.dev_file)
-
-
 class LoopTestGetSetAutoclear(LoopTestCase):
     def test_loop_get_set_autoclear(self):
         """Verify that getting and setting the autoclear flag works as expected"""
