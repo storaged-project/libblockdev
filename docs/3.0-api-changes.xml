@@ -85,6 +85,10 @@
     Use <literal>0</literal> to preserve the original behaviour.
   </para>
 
+  <para>
+    <literal>bd_loop_get_autoclear</literal> has been removed. Use <literal>bd_loop_info</literal> instead.
+  </para>
+
   </simplesect>
 
 </chapter>

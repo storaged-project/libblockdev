@@ -40,14 +40,17 @@ class LoopTestSetupBasic(LoopTestCase):
         self.assertTrue(succ)
         self.assertTrue(self.loop)
 
+        info = BlockDev.loop_info(self.loop)
+        self.assertIsNotNone(info)
+        self.assertEqual(info.backing_file, self.dev_file)
+        self.assertEqual(info.offset, 0)
+        self.assertFalse(info.autoclear)
+        self.assertFalse(info.direct_io)
+        self.assertTrue(info.part_scan)
+        self.assertFalse(info.read_only)
+
         succ = BlockDev.loop_teardown(self.loop)
         self.assertTrue(succ)
-
-        # give kernel+udev time to update stuff under /sys and try to get the
-        # backing file -- there should be none after the teardown
-        time.sleep(1)
-        b_file = BlockDev.loop_get_backing_file(self.loop)
-        self.assertIsNone(b_file)
 
 
 class LoopTestSetupOffset(LoopTestCase):
@@ -58,6 +61,10 @@ class LoopTestSetupOffset(LoopTestCase):
         succ, self.loop = BlockDev.loop_setup(self.dev_file, 10 * 1024**2)
         self.assertTrue(succ)
         self.assertTrue(self.loop)
+
+        info = BlockDev.loop_info(self.loop)
+        self.assertIsNotNone(info)
+        self.assertEqual(info.offset, 10 * 1024**2)
 
         # should have smaller size due to the offset
         with open("/sys/block/%s/size" % self.loop, "r") as f:
@@ -94,6 +101,10 @@ class LoopTestSetupReadOnly(LoopTestCase):
         self.assertTrue(succ)
         self.assertTrue(self.loop)
 
+        info = BlockDev.loop_info(self.loop)
+        self.assertIsNotNone(info)
+        self.assertTrue(info.read_only)
+
         # should be read-only
         with open("/sys/block/%s/ro" % self.loop, "r") as f:
             self.assertEqual(f.read().strip(), "1")
@@ -120,6 +131,10 @@ class LoopTestSetupPartprobe(LoopTestCase):
         self.assertTrue(succ)
         self.assertTrue(self.loop)
 
+        info = BlockDev.loop_info(self.loop)
+        self.assertIsNotNone(info)
+        self.assertTrue(info.part_scan)
+
         with open("/sys/block/%s/loop/partscan" % self.loop, "r") as f:
             self.assertEqual(f.read().strip(), "1")
 
@@ -130,6 +145,10 @@ class LoopTestSetupPartprobe(LoopTestCase):
         succ, self.loop = BlockDev.loop_setup(self.dev_file, part_scan=False)
         self.assertTrue(succ)
         self.assertTrue(self.loop)
+
+        info = BlockDev.loop_info(self.loop)
+        self.assertIsNotNone(info)
+        self.assertFalse(info.part_scan)
 
         with open("/sys/block/%s/loop/partscan" % self.loop, "r") as f:
             self.assertEqual(f.read().strip(), "0")
@@ -172,17 +191,13 @@ class LoopTestGetSetAutoclear(LoopTestCase):
     def test_loop_get_set_autoclear(self):
         """Verify that getting and setting the autoclear flag works as expected"""
 
-        with self.assertRaises(GLib.Error):
-            BlockDev.loop_get_autoclear("/non/existing")
-
-        with self.assertRaises(GLib.Error):
-            BlockDev.loop_set_autoclear("/non/existing", True)
-
         succ, self.loop = BlockDev.loop_setup(self.dev_file)
         self.assertTrue(succ)
         self.assertTrue(self.loop)
 
-        self.assertFalse(BlockDev.loop_get_autoclear(self.loop))
+        info = BlockDev.loop_info(self.loop)
+        self.assertIsNotNone(info)
+        self.assertFalse(info.autoclear)
 
         # open the loop device so that it doesn't disappear once we set
         # autoclear to True (it's otherwise not being used so it may get cleared
@@ -191,15 +206,23 @@ class LoopTestGetSetAutoclear(LoopTestCase):
         self.addCleanup(os.close, fd)
 
         self.assertTrue(BlockDev.loop_set_autoclear(self.loop, True))
-        self.assertTrue(BlockDev.loop_get_autoclear(self.loop))
+        info = BlockDev.loop_info(self.loop)
+        self.assertIsNotNone(info)
+        self.assertTrue(info.autoclear)
 
         self.assertTrue(BlockDev.loop_set_autoclear(self.loop, False))
-        self.assertFalse(BlockDev.loop_get_autoclear(self.loop))
+        info = BlockDev.loop_info(self.loop)
+        self.assertIsNotNone(info)
+        self.assertFalse(info.autoclear)
 
         # now the same, but with the "/dev/" prefix
         loop = "/dev/" + self.loop
         self.assertTrue(BlockDev.loop_set_autoclear(loop, True))
-        self.assertTrue(BlockDev.loop_get_autoclear(loop))
+        info = BlockDev.loop_info(self.loop)
+        self.assertIsNotNone(info)
+        self.assertTrue(info.autoclear)
 
         self.assertTrue(BlockDev.loop_set_autoclear(loop, False))
-        self.assertFalse(BlockDev.loop_get_autoclear(loop))
+        info = BlockDev.loop_info(self.loop)
+        self.assertIsNotNone(info)
+        self.assertFalse(info.autoclear)
