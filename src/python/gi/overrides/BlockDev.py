@@ -1081,6 +1081,16 @@ def plugin_specs_from_names(plugin_names):
 __all__.append("plugin_specs_from_names")
 
 
+## for backward compatibility only, remove before 3.0 release
+def loop_get_backing_file(dev_name):
+    try:
+        info = BlockDev.loop_info(dev_name)
+    except Exception as e:
+        return None
+    return info.backing_file
+__all__.append("loop_get_backing_file")
+
+
 XRule = namedtuple("XRule", ["orig_exc", "regexp", "code", "new_exc"])
 # XXX: how to document namedtuple fields?
 """
