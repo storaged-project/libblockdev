@@ -56,8 +56,6 @@ case $host_cpu in
   *) on_s390=no ;;
 esac
 
-skip_patterns=""
-
 AC_ARG_WITH([s390],
     AS_HELP_STRING([--with-s390], [support s390 @<:@default=check@:>@]),
     [],
@@ -260,7 +258,6 @@ AS_IF([test "x$with_nvme" != "xno"],
       ],
       [])
 
-AC_SUBST([skip_patterns], [$skip_patterns])
 AC_SUBST([MAJOR_VER], [\"2\"])
 
 CFLAGS="$CFLAGS -std=gnu99"

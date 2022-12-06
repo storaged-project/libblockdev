@@ -5,7 +5,7 @@ HEADER_FILES := $(patsubst %.api,%.h,${API_FILES})
 all-local: generate_boilerplate
 
 %.c %.h: %.api ${srcdir}/../../../scripts/boilerplate_generator.py
-	${PYTHON} ${srcdir}/../../../scripts/boilerplate_generator.py $*.api ./ ${skip_patterns}
+	${PYTHON} ${srcdir}/../../../scripts/boilerplate_generator.py $*.api ./
 
 generate_boilerplate: ${SOURCE_FILES} ${HEADER_FILES}
 
