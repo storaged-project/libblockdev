@@ -34,17 +34,85 @@ typedef enum {
  */
 gboolean bd_loop_is_tech_avail (BDLoopTech tech, guint64 mode, GError **error);
 
+#define BD_LOOP_TYPE_INFO (bd_loop_info_get_type ())
+GType bd_loop_info_get_type();
+
 /**
- * bd_loop_get_backing_file:
- * @dev_name: name of the loop device to get backing file for (e.g. "loop0")
+ * BDLoopInfo:
+ * @backing_file: backing file for the give loop device;
+ * @offset: offset of the start of the device (in @backing_file);
+ * @autoclear: whether the autoclear flag is set or not;
+ * @direct_io: whether direct IO is enabled or not;
+ * @part_scan: whether the partition scan is enforced or not;
+ * @read_only: whether the device is read-only or not;
+ */
+typedef struct BDLoopInfo {
+    gchar *backing_file;
+    guint64 offset;
+    gboolean autoclear;
+    gboolean direct_io;
+    gboolean part_scan;
+    gboolean read_only;
+} BDLoopInfo;
+
+/**
+ * bd_loop_info_free: (skip)
+ * @info: (nullable): %BDLoopInfo to free
+ *
+ * Frees @info.
+ */
+void bd_loop_info_free (BDLoopInfo *info) {
+    if (info == NULL)
+        return;
+
+    g_free (info->backing_file);
+    g_free (info);
+}
+
+/**
+ * bd_loop_info_copy: (skip)
+ * @info: (nullable): %BDLoopInfo to copy
+ *
+ * Creates a new copy of @info.
+ */
+BDLoopInfo* bd_loop_info_copy (BDLoopInfo *info) {
+    if (info == NULL)
+        return NULL;
+
+    BDLoopInfo *new_info = g_new0 (BDLoopInfo, 1);
+
+    new_info->backing_file = g_strdup (info->backing_file);
+    new_info->offset = info->offset;
+    new_info->autoclear = info->autoclear;
+    new_info->direct_io = info->direct_io;
+    new_info->part_scan = info->part_scan;
+    new_info->read_only = info->read_only;
+
+    return new_info;
+}
+
+GType bd_loop_info_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDLoopInfo",
+                                            (GBoxedCopyFunc) bd_loop_info_copy,
+                                            (GBoxedFreeFunc) bd_loop_info_free);
+    }
+
+    return type;
+}
+
+/**
+ * bd_loop_info:
+ * @loop: name of the loop device to get information about (e.g. "loop0")
  * @error: (out) (optional): place to store error (if any)
  *
- * Returns: (transfer full): path of the device's backing file or %NULL if none
- *                           is found
+ * Returns: (transfer full): information about the @loop device or %NULL in case of error
  *
  * Tech category: %BD_LOOP_TECH_LOOP-%BD_LOOP_TECH_MODE_QUERY
  */
-gchar* bd_loop_get_backing_file (const gchar *dev_name, GError **error);
+BDLoopInfo* bd_loop_info (const gchar *loop, GError **error);
 
 /**
  * bd_loop_get_loop_name:
@@ -64,6 +132,7 @@ gchar* bd_loop_get_loop_name (const gchar *file, GError **error);
  * @size: maximum size of the device (or 0 to leave unspecified)
  * @read_only: whether to setup as read-only (%TRUE) or read-write (%FALSE)
  * @part_scan: whether to enforce partition scan on the newly created device or not
+ * @sector_size: logical sector size for the loop device in bytes (or 0 for default)
  * @loop_name: (optional) (out): if not %NULL, it is used to store the name of the loop device
  * @error: (out) (optional): place to store error (if any)
  *
@@ -71,7 +140,7 @@ gchar* bd_loop_get_loop_name (const gchar *file, GError **error);
  *
  * Tech category: %BD_LOOP_TECH_LOOP-%BD_LOOP_TECH_MODE_CREATE
  */
-gboolean bd_loop_setup (const gchar *file, guint64 offset, guint64 size, gboolean read_only, gboolean part_scan, const gchar **loop_name, GError **error);
+gboolean bd_loop_setup (const gchar *file, guint64 offset, guint64 size, gboolean read_only, gboolean part_scan, guint64 sector_size, const gchar **loop_name, GError **error);
 
 /**
  * bd_loop_setup_from_fd:
@@ -80,6 +149,7 @@ gboolean bd_loop_setup (const gchar *file, guint64 offset, guint64 size, gboolea
  * @size: maximum size of the device (or 0 to leave unspecified)
  * @read_only: whether to setup as read-only (%TRUE) or read-write (%FALSE)
  * @part_scan: whether to enforce partition scan on the newly created device or not
+ * @sector_size: logical sector size for the loop device in bytes (or 0 for default)
  * @loop_name: (optional) (out): if not %NULL, it is used to store the name of the loop device
  * @error: (out) (optional): place to store error (if any)
  *
@@ -87,7 +157,7 @@ gboolean bd_loop_setup (const gchar *file, guint64 offset, guint64 size, gboolea
  *
  * Tech category: %BD_LOOP_TECH_LOOP-%BD_LOOP_TECH_MODE_CREATE
  */
-gboolean bd_loop_setup_from_fd (gint fd, guint64 offset, guint64 size, gboolean read_only, gboolean part_scan, const gchar **loop_name, GError **error);
+gboolean bd_loop_setup_from_fd (gint fd, guint64 offset, guint64 size, gboolean read_only, gboolean part_scan, guint64 sector_size, const gchar **loop_name, GError **error);
 
 /**
  * bd_loop_teardown:
@@ -99,17 +169,6 @@ gboolean bd_loop_setup_from_fd (gint fd, guint64 offset, guint64 size, gboolean 
  * Tech category: %BD_LOOP_TECH_LOOP-%BD_LOOP_TECH_MODE_DESTROY
  */
 gboolean bd_loop_teardown (const gchar *loop, GError **error);
-
-/**
- * bd_loop_get_autoclear:
- * @loop: path or name of the loop device
- * @error: (out) (optional): place to store error (if any)
- *
- * Returns: whether the autoclear flag is set on the @loop device or not (if %FALSE, @error may be set)
- *
- * Tech category: %BD_LOOP_TECH_LOOP-%BD_LOOP_TECH_MODE_QUERY
- */
-gboolean bd_loop_get_autoclear (const gchar *loop, GError **error);
 
 /**
  * bd_loop_set_autoclear:

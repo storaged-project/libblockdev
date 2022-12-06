@@ -370,8 +370,8 @@ __all__.append("dm_get_member_raid_sets")
 
 _loop_setup = BlockDev.loop_setup
 @override(BlockDev.loop_setup)
-def loop_setup(file, offset=0, size=0, read_only=False, part_scan=True):
-    return _loop_setup(file, offset, size, read_only, part_scan)
+def loop_setup(file, offset=0, size=0, read_only=False, part_scan=True, sector_size=0):
+    return _loop_setup(file, offset, size, read_only, part_scan, sector_size)
 __all__.append("loop_setup")
 
 
@@ -1079,6 +1079,16 @@ def plugin_specs_from_names(plugin_names):
 
     return ret
 __all__.append("plugin_specs_from_names")
+
+
+## for backward compatibility only, remove before 3.0 release
+def loop_get_backing_file(dev_name):
+    try:
+        info = BlockDev.loop_info(dev_name)
+    except Exception as e:
+        return None
+    return info.backing_file
+__all__.append("loop_get_backing_file")
 
 
 XRule = namedtuple("XRule", ["orig_exc", "regexp", "code", "new_exc"])
