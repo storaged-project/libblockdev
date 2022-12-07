@@ -224,7 +224,6 @@ gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **erro
 
 gchar* bd_crypto_generate_backup_passphrase(GError **error);
 gboolean bd_crypto_device_is_luks (const gchar *device, GError **error);
-gchar* bd_crypto_luks_uuid (const gchar *device, GError **error);
 guint64 bd_crypto_luks_get_metadata_size (const gchar *device, GError **error);
 gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error);
 gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint64 key_size, const gchar *passphrase, const gchar *key_file, guint64 min_entropy, GError **error);

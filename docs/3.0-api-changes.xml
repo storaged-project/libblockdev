@@ -28,6 +28,14 @@
 
   </simplesect>
 
+  <simplesect><title>Crypto plugin</title>
+
+  <para>
+    <literal>bd_crypto_luks_uuid()</literal> has been removed, use <literal>uuid</literal> from <link linkend="BDCryptoLUKSInfo">BDCryptoLUKSInfo</link> instead.
+  </para>
+
+  </simplesect>
+
   <simplesect><title>NVDIMM plugin</title>
   <para>
     <literal>bd_nvdimm_namepace_get_supported_sector_sizes</literal> has been removed, use <literal>bd_nvdimm_namespace_get_supported_sector_sizes</literal> instead.

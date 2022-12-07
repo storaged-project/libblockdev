@@ -1091,6 +1091,12 @@ def loop_get_backing_file(dev_name):
 __all__.append("loop_get_backing_file")
 
 
+def crypto_luks_uuid(device):
+    info = BlockDev.crypto_luks_info(device)
+    return info.uuid
+__all__.append("crypto_luks_uuid")
+
+
 XRule = namedtuple("XRule", ["orig_exc", "regexp", "code", "new_exc"])
 # XXX: how to document namedtuple fields?
 """
