@@ -43,6 +43,7 @@ typedef enum {
 typedef struct BDPartSpec {
     gchar *path;
     gchar *name;
+    gchar *uuid;
     gchar *id;
     gchar *type_guid;
     guint64 type;
@@ -111,6 +112,7 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
 gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar *part_id, GError **error);
 gboolean bd_part_set_part_bootable (const gchar *disk, const gchar *part, gboolean bootable, GError **error);
 gboolean bd_part_set_part_attributes (const gchar *disk, const gchar *part, guint64 attrs, GError **error);
+gboolean bd_part_set_part_uuid (const gchar *disk, const gchar *part, const gchar *uuid, GError **error);
 
 const gchar* bd_part_get_part_table_type_str (BDPartTableType type, GError **error);
 const gchar* bd_part_get_type_str (BDPartType type, GError **error);
