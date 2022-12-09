@@ -603,12 +603,7 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
     info->format_progress_remaining = ns_info.fpi & NVME_NS_FPI_REMAINING;
     /* TODO: what the ns_info.nvmcap really stands for? */
     info->write_protected = (ns_info.nsattr & NVME_NS_NSATTR_WRITE_PROTECTED) == NVME_NS_NSATTR_WRITE_PROTECTED;
-    info->nguid = g_malloc0 (sizeof (ns_info.nguid) * 2 + 1);
-    for (i = 0; i < G_N_ELEMENTS (ns_info.nguid); i++)
-        snprintf (info->nguid + i * 2, 3, "%02x", ns_info.nguid[i]);
-    info->eui64 = g_malloc0 (sizeof (ns_info.eui64) * 2 + 1);
-    for (i = 0; i < G_N_ELEMENTS (ns_info.eui64); i++)
-        snprintf (info->eui64 + i * 2, 3, "%02x", ns_info.eui64[i]);
+
     if (ret_desc == 0) {
         for (i = 0; i < NVME_IDENTIFY_DATA_SIZE; i += len) {
             struct nvme_ns_id_desc *d = (void *) desc + i;
@@ -620,8 +615,14 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
 
             switch (d->nidt) {
                 case NVME_NIDT_EUI64:
+                    info->eui64 = g_malloc0 (d->nidl * 2 + 1);
+                    for (i = 0; i < d->nidl; i++)
+                        snprintf (info->eui64 + i * 2, 3, "%02x", d->nid[i]);
+                    break;
                 case NVME_NIDT_NGUID:
-                    /* already have these from nvme_identify_ns() */
+                    info->nguid = g_malloc0 (d->nidl * 2 + 1);
+                    for (i = 0; i < d->nidl; i++)
+                        snprintf (info->nguid + i * 2, 3, "%02x", d->nid[i]);
                     break;
                 case NVME_NIDT_UUID:
                     uuid_unparse (d->nid, uuid_buf);
@@ -632,6 +633,17 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
                     break;
             }
         }
+    }
+
+    if (info->nguid == NULL && ns_info.nguid[G_N_ELEMENTS (ns_info.nguid) - 1] > 0) {
+        info->nguid = g_malloc0 (sizeof (ns_info.nguid) * 2 + 1);
+        for (i = 0; i < G_N_ELEMENTS (ns_info.nguid); i++)
+            snprintf (info->nguid + i * 2, 3, "%02x", ns_info.nguid[i]);
+    }
+    if (info->eui64 == NULL && ns_info.eui64[G_N_ELEMENTS (ns_info.eui64) - 1] > 0) {
+        info->eui64 = g_malloc0 (sizeof (ns_info.eui64) * 2 + 1);
+        for (i = 0; i < G_N_ELEMENTS (ns_info.eui64); i++)
+            snprintf (info->eui64 + i * 2, 3, "%02x", ns_info.eui64[i]);
     }
     if (ret_ns_ind == 0) {
         if ((ns_info_ind.nsfeat & 1 << 4) == 1 << 4)
