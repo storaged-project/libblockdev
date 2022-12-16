@@ -59,6 +59,7 @@ BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
     ret->path = g_strdup (data->path);
     ret->name = g_strdup (data->name);
     ret->id = g_strdup (data->id);
+    ret->uuid = g_strdup (data->uuid);
     ret->type_guid = g_strdup (data->type_guid);
     ret->type = data->type;
     ret->start = data->start;
@@ -75,6 +76,7 @@ void bd_part_spec_free (BDPartSpec *data) {
 
     g_free (data->path);
     g_free (data->name);
+    g_free (data->uuid);
     g_free (data->id);
     g_free (data->type_guid);
     g_free (data);
@@ -489,6 +491,7 @@ static BDPartSpec* get_part_spec_fdisk (struct fdisk_context *cxt, struct fdisk_
     BDPartSpec *ret = NULL;
     const gchar *devname = NULL;
     const gchar *partname = NULL;
+    const gchar *partuuid = NULL;
     GError *l_error = NULL;
 
     ret = g_new0 (BDPartSpec, 1);
@@ -505,6 +508,10 @@ static BDPartSpec* get_part_spec_fdisk (struct fdisk_context *cxt, struct fdisk_
     partname = fdisk_partition_get_name (pa);
     if (partname)
         ret->name = g_strdup (partname);
+
+    partuuid = fdisk_partition_get_uuid (pa);
+    if (partuuid)
+        ret->uuid = g_strdup (partuuid);
 
     if (fdisk_partition_is_container (pa))
         ret->type = BD_PART_TYPE_EXTENDED;
@@ -1993,6 +2000,119 @@ gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar 
         close_context (cxt);
         return FALSE;
     }
+
+    if (!write_label (cxt, NULL, disk, FALSE, &l_error)) {
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        close_context (cxt);
+        return FALSE;
+    }
+
+    close_context (cxt);
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
+}
+
+/**
+ * bd_part_set_part_uuid:
+ * @disk: device the partition belongs to
+ * @part: partition the UUID should be set for
+ * @uuid: partition UUID to set
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the @uuid type was successfully set for @part or not
+ *
+ * Tech category: %BD_PART_TECH_GPT-%BD_PART_TECH_MODE_MODIFY_PART
+ */
+gboolean bd_part_set_part_uuid (const gchar *disk, const gchar *part, const gchar *uuid, GError **error) {
+    struct fdisk_context *cxt = NULL;
+    struct fdisk_partition *pa = NULL;
+    struct fdisk_label *lb = NULL;
+    const gchar *label_name = NULL;
+    gint part_num = 0;
+    gint status = 0;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+    GError *l_error = NULL;
+
+    msg = g_strdup_printf ("Started setting UUID on the partition '%s'", part);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    cxt = get_device_context (disk, error);
+    if (!cxt) {
+        /* error is already populated */
+        return FALSE;
+    }
+
+    lb = fdisk_get_label (cxt, NULL);
+    if (!lb) {
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to read partition table on device '%s'", disk);
+        close_context (cxt);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        return FALSE;
+    }
+
+    label_name = fdisk_label_get_name (lb);
+    if (g_strcmp0 (label_name, table_type_str[BD_PART_TABLE_GPT]) != 0) {
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Partition UUIDs unsupported on the device '%s' ('%s')", disk,
+                     label_name);
+        close_context (cxt);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        return FALSE;
+    }
+
+    part_num = get_part_num (part, &l_error);
+    if (part_num == -1) {
+        close_context (cxt);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        return FALSE;
+    }
+
+    /* /dev/sda1 is the partition number 0 in libfdisk */
+    part_num--;
+
+    status = fdisk_get_partition (cxt, part_num, &pa);
+    if (status != 0) {
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to get partition '%s' on device '%s': %s",
+                     part, disk, strerror_l (-status, c_locale));
+        close_context (cxt);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        return FALSE;
+    }
+
+    status = fdisk_partition_set_uuid (pa, uuid);
+    if (status != 0) {
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to set UUID on the partition '%s' on device '%s': %s",
+                     part, disk, strerror_l (-status, c_locale));
+        fdisk_unref_partition (pa);
+        close_context (cxt);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        return FALSE;
+    }
+
+    status = fdisk_set_partition (cxt, part_num, pa);
+    if (status != 0) {
+        g_set_error (&l_error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to set UUID on the partition '%s' on device '%s': %s",
+                     part, disk, strerror_l (-status, c_locale));
+        fdisk_unref_partition (pa);
+        close_context (cxt);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        return FALSE;
+    }
+
+    fdisk_unref_partition (pa);
 
     if (!write_label (cxt, NULL, disk, FALSE, &l_error)) {
         bd_utils_report_finished (progress_id, l_error->message);

@@ -1160,6 +1160,43 @@ class PartSetNameCase(PartTestCase):
         self.assertTrue(ps)
         self.assertIn(ps.name, ("", None))  # no name
 
+
+class PartSetUUIDCase(PartTestCase):
+
+    test_uuid = "4D7086C4-A4D3-432F-819E-73DA03870DF9"
+
+    def test_set_part_uuid(self):
+        """Verify that it is possible to set partition UUID"""
+
+        # we first need a GPT partition table
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.GPT, True)
+        self.assertTrue(succ)
+
+        # for now, let's just create a typical primary partition starting at the
+        # sector 2048, 10 MiB big with optimal alignment
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+
+        succ = BlockDev.part_set_part_uuid (self.loop_dev, ps.path, self.test_uuid)
+        self.assertTrue(succ)
+        ps = BlockDev.part_get_part_spec (self.loop_dev, ps.path)
+        self.assertEqual(ps.uuid, self.test_uuid)
+
+        # let's now test an MSDOS partition table (doesn't support UUIDs)
+        succ = BlockDev.part_create_table (self.loop_dev, BlockDev.PartTableType.MSDOS, True)
+        self.assertTrue(succ)
+
+        # for now, let's just create a typical primary partition starting at the
+        # sector 2048, 10 MiB big with optimal alignment
+        ps = BlockDev.part_create_part (self.loop_dev, BlockDev.PartTypeReq.NORMAL, 2048*512, 10 * 1024**2, BlockDev.PartAlign.OPTIMAL)
+
+        # we should still get proper data back
+        self.assertTrue(ps)
+        self.assertIn(ps.uuid, ("", None))  # no name
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.part_set_part_name (self.loop_dev, ps.path, self.test_uuid)
+
+
 class PartSetTypeCase(PartTestCase):
     def test_set_part_type(self):
         """Verify that it is possible to set and get partition type"""
