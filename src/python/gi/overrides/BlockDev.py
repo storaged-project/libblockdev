@@ -321,6 +321,14 @@ def crypto_bitlk_open(device, name, passphrase, read_only=False):
     return _crypto_bitlk_open(device, name, passphrase, read_only)
 __all__.append("crypto_bitlk_open")
 
+_crypto_fvault2_open = BlockDev.crypto_fvault2_open
+@override(BlockDev.crypto_fvault2_open)
+def crypto_fvault2_open(device, name, passphrase, read_only=False):
+    if isinstance(passphrase, str):
+        passphrase = [ord(c) for c in passphrase]
+    return _crypto_fvault2_open(device, name, passphrase, read_only)
+__all__.append("crypto_fvault2_open")
+
 
 _crypto_keyring_add_key = BlockDev.crypto_keyring_add_key
 @override(BlockDev.crypto_keyring_add_key)

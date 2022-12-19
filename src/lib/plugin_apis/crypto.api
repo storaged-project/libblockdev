@@ -1250,3 +1250,29 @@ gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, const gui
  * Tech category: %BD_CRYPTO_TECH_BITLK-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_bitlk_close (const gchar *bitlk_device, GError **error);
+
+/**
+ * bd_crypto_fvault2_open:
+ * @device: the device to open
+ * @name: name for the FVAULT2 device
+ * @pass_data: (array length=data_len): a passphrase for the FVAULT2 volume (may contain arbitrary binary data)
+ * @data_len: length of the @pass_data buffer
+ * @read_only: whether to open as read-only or not (meaning read-write)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_FVAULT2-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+ gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);
+
+/**
+ * bd_crypto_fvault2_close:
+ * @fvault2_device: FVAULT2 device to close
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the given @fvault2_device was successfully closed or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_FVAULT2-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+gboolean bd_crypto_fvault2_close (const gchar *fvault2_device, GError **error);

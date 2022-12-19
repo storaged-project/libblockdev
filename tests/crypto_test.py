@@ -28,6 +28,7 @@ def check_cryptsetup_version(version):
 
 HAVE_LUKS2 = check_cryptsetup_version("2.0.3")
 HAVE_BITLK = check_cryptsetup_version("2.3.0")
+HAVE_FVAULT2 = check_cryptsetup_version("2.6.0")
 
 
 class CryptoTestCase(unittest.TestCase):
@@ -1388,6 +1389,65 @@ class CryptoTestBitlk(CryptoTestCase):
         succ = BlockDev.crypto_bitlk_close("libblockdevTestBitlk")
         self.assertTrue(succ)
         self.assertFalse(os.path.exists("/dev/mapper/libblockdevTestBitlk"))
+
+
+class CryptoTestFVAULT2(CryptoTestCase):
+
+    # we can't create FileVault2 formats using libblockdev
+    # so we are using these images from cryptsetup test suite
+    # https://gitlab.com/cryptsetup/cryptsetup/-/blob/master/tests/fvault2-images.tar.xz
+    fvault2_img = "fvault2.img"
+    passphrase = "heslo123"
+    tempdir = None
+
+    @classmethod
+    def setUpClass(cls):
+        super(CryptoTestFVAULT2, cls).setUpClass()
+        cls.tempdir = tempfile.mkdtemp(prefix="bd_test_fvault2")
+        images = os.path.join(os.path.dirname(__file__), "fvault2-images.tar.gz")
+        with tarfile.open(images, "r") as tar:
+            tar.extractall(cls.tempdir)
+
+    @classmethod
+    def tearDownClass(cls):
+        super(CryptoTestFVAULT2, cls).tearDownClass()
+        shutil.rmtree(cls.tempdir)
+
+    def setUp(self):
+        self.addCleanup(self._clean_up)
+
+        succ, loop = BlockDev.loop_setup(os.path.join(self.tempdir, self.fvault2_img))
+        if  not succ:
+            raise RuntimeError("Failed to setup loop device for testing")
+        self.fvault2_dev = "/dev/%s" % loop
+
+    def _clean_up(self):
+        try:
+            BlockDev.crypto_fvault2_close("libblockdevTestFVAULT2")
+        except:
+            pass
+
+        succ = BlockDev.loop_teardown(self.fvault2_dev)
+        if not succ:
+            raise RuntimeError("Failed to tear down loop device used for testing")
+
+    @unittest.skipUnless(HAVE_FVAULT2, "FVAULT2 not supported")
+    def test_fvault2_open_close(self):
+        """Verify that opening/closing a FileVault2 device works"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_fvault2_open("/non/existing/device", "libblockdevTestFVAULT2", self.passphrase)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_fvault2_open(self.fvault2_dev, "libblockdevTestFVAULT2", "wrong-passhprase")
+
+        succ = BlockDev.crypto_fvault2_open(self.fvault2_dev, "libblockdevTestFVAULT2", self.passphrase)
+        self.assertTrue(succ)
+        self.assertTrue(os.path.exists("/dev/mapper/libblockdevTestFVAULT2"))
+
+        succ = BlockDev.crypto_fvault2_close("libblockdevTestFVAULT2")
+        self.assertTrue(succ)
+        self.assertFalse(os.path.exists("/dev/mapper/libblockdevTestFVAULT2"))
 
 
 class CryptoTestIntegrity(CryptoTestCase):

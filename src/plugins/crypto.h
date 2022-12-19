@@ -40,6 +40,7 @@ typedef enum {
     BD_CRYPTO_TECH_INTEGRITY,
     BD_CRYPTO_TECH_BITLK,
     BD_CRYPTO_TECH_KEYRING,
+    BD_CRYPTO_TECH_FVAULT2,
 } BDCryptoTech;
 
 typedef enum {
@@ -269,6 +270,9 @@ gboolean bd_crypto_tc_close (const gchar *tc_device, GError **error);
 
 gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);
 gboolean bd_crypto_bitlk_close (const gchar *bitlk_device, GError **error);
+
+gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);
+gboolean bd_crypto_fvault2_close (const gchar *fvault2_device, GError **error);
 
 gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, const gchar *cert_data, const gchar *directory, const gchar *backup_passphrase, GError **error);
 
