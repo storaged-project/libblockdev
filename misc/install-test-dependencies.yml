@@ -37,6 +37,7 @@
       - keyutils-libs-devel
       - libnvme-devel
       - e2fsprogs-devel
+      - json-glib-devel
     when: ansible_distribution == 'Fedora'
 
   - name: Install test dependencies (Fedora)
@@ -103,6 +104,7 @@
       - libfdisk-dev
       - libkeyutils-dev
       - libext2fs-dev
+      - libjson-glib-dev
     when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
   - name: Install test dependencies (Debian/Ubuntu)

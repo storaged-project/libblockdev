@@ -99,6 +99,7 @@ srpm_build_deps:
  - glib2-doc
  - gobject-introspection-devel
  - gtk-doc
+ - json-glib-devel
  - keyutils-libs-devel
  - kmod-devel
  - libblkid-devel

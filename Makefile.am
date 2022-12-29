@@ -44,6 +44,10 @@ if !WITH_NVME
 DISTCHECK_CONFIGURE_FLAGS += --without-nvme
 endif
 
+if !WITH_SMART
+DISTCHECK_CONFIGURE_FLAGS += --without-smart
+endif
+
 if !WITH_SWAP
 DISTCHECK_CONFIGURE_FLAGS += --without-swap
 endif
@@ -95,6 +99,7 @@ PLUGINS = btrfs \
 	nvme \
 	part \
 	s390 \
+	smart \
 	swap
 
 ALT_PLUGINS = lvm-dbus

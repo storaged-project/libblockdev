@@ -153,6 +153,17 @@ AS_IF([test "x$with_nvme" != "xno"],
       [AC_DEFINE([WITH_BD_NVME], [], [Define if nvme is supported]) AC_SUBST([WITH_NVME], [1])],
       [])
 
+AC_ARG_WITH([smart],
+    AS_HELP_STRING([--with-smart], [support smart @<:@default=yes@:>@]),
+    [],
+    [with_smart=yes])
+
+AC_SUBST([WITH_SMART], [0])
+AM_CONDITIONAL(WITH_SMART, test "x$with_smart" != "xno")
+AS_IF([test "x$with_smart" != "xno"],
+      [AC_DEFINE([WITH_BD_SMART], [], [Define if smart is supported]) AC_SUBST([WITH_SMART], [1])],
+      [])
+
 LIBBLOCKDEV_PLUGIN([BTRFS], [btrfs])
 LIBBLOCKDEV_PLUGIN([CRYPTO], [crypto])
 LIBBLOCKDEV_PLUGIN([DM], [dm])
@@ -166,6 +177,7 @@ LIBBLOCKDEV_PLUGIN([PART], [part])
 LIBBLOCKDEV_PLUGIN([FS], [fs])
 LIBBLOCKDEV_PLUGIN([NVDIMM], [nvdimm])
 LIBBLOCKDEV_PLUGIN([NVME], [nvme])
+LIBBLOCKDEV_PLUGIN([SMART], [smart])
 
 dnl these packages/modules are always needed
 LIBBLOCKDEV_PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.42.2])
@@ -248,6 +260,10 @@ AS_IF([test "x$with_nvme" != "xno"],
       ],
       [])
 
+AS_IF([test "x$with_smart" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([JSON_GLIB], [json-glib-1.0])],
+      [])
+
 AC_SUBST([MAJOR_VER], [3])
 
 CFLAGS="$CFLAGS -std=gnu99"
@@ -302,6 +318,7 @@ echo "
         NVMe plugin:                ${with_nvme}
         Part plugin:                ${with_part}
         S390 plugin:                ${s390_info}
+        S.M.A.R.T. plugin:          ${with_smart}
         Swap plugin:                ${with_swap}
 
         GObject introspection:      ${found_introspection}

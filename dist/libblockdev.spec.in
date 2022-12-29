@@ -16,6 +16,7 @@
 %define with_escrow @WITH_ESCROW@
 %define with_tools @WITH_TOOLS@
 %define with_nvme @WITH_NVME@
+%define with_smart @WITH_SMART@
 
 # btrfs is not available on RHEL > 7
 %if 0%{?rhel} > 7 || %{with_btrfs} == 0
@@ -73,8 +74,11 @@
 %if %{with_nvme} != 1
 %define nvme_copts --without-nvme
 %endif
+%if %{with_smart} != 1
+%define smart_copts --without-smart
+%endif
 
-%define configure_opts %{?python3_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?tools_copts} %{?gi_copts} %{?nvme_copts}
+%define configure_opts %{?python3_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?tools_copts} %{?gi_copts} %{?nvme_copts} %{?smart_copts}
 
 Name:        libblockdev
 Version:     3.1.1
@@ -447,6 +451,29 @@ with the libblockdev-part plugin/library.
 %endif
 
 
+%if %{with_smart}
+%package smart
+BuildRequires: json-glib-devel
+Summary:     The S.M.A.R.T. plugin for the libblockdev library
+Requires: %{name}-utils%{?_isa} = %{version}-%{release}
+Requires: smartmontools >= 7.0
+
+%description smart
+The libblockdev library plugin (and in the same time a standalone library)
+providing S.M.A.R.T. monitoring and testing functionality.
+
+%package smart-devel
+Summary:     Development files for the libblockdev-smart plugin/library
+Requires: %{name}-smart%{?_isa} = %{version}-%{release}
+Requires: %{name}-utils-devel%{?_isa} = %{version}-%{release}
+Requires: glib2-devel
+
+%description smart-devel
+This package contains header files and pkg-config files needed for development
+with the libblockdev-smart plugin/library.
+%endif
+
+
 %if %{with_swap}
 %package swap
 BuildRequires: libblkid-devel
@@ -554,6 +581,10 @@ Requires: %{name}-nvme%{?_isa} = %{version}-%{release}
 Requires: %{name}-part%{?_isa} = %{version}-%{release}
 %endif
 
+%if %{with_smart}
+Requires: %{name}-smart%{?_isa} = %{version}-%{release}
+%endif
+
 %if %{with_swap}
 Requires: %{name}-swap%{?_isa} = %{version}-%{release}
 %endif
@@ -628,6 +659,10 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 
 %if %{with_part}
 %ldconfig_scriptlets part
+%endif
+
+%if %{with_smart}
+%ldconfig_scriptlets smart
 %endif
 
 %if %{with_swap}
@@ -818,6 +853,17 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_libdir}/libbd_part.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/part.h
+%endif
+
+
+%if %{with_smart}
+%files smart
+%{_libdir}/libbd_smart.so.*
+
+%files smart-devel
+%{_libdir}/libbd_smart.so
+%dir %{_includedir}/blockdev
+%{_includedir}/blockdev/smart.h
 %endif
 
 

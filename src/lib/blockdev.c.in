@@ -27,6 +27,8 @@
 #include "plugin_apis/nvdimm.c"
 #include "plugin_apis/nvme.h"
 #include "plugin_apis/nvme.c"
+#include "plugin_apis/smart.h"
+#include "plugin_apis/smart.c"
 
 #if defined(__s390__) || defined(__s390x__)
 #include "plugin_apis/s390.h"
@@ -61,7 +63,7 @@ static gchar * default_plugin_so[BD_PLUGIN_UNDEF] = {
     "libbd_dm.so.@MAJOR_VER@", "libbd_mdraid.so.@MAJOR_VER@",
     "libbd_s390.so.@MAJOR_VER@", "libbd_part.so.@MAJOR_VER@",
     "libbd_fs.so.@MAJOR_VER@", "libbd_nvdimm.so.@MAJOR_VER@",
-    "libbd_nvme.so.@MAJOR_VER@"
+    "libbd_nvme.so.@MAJOR_VER@", "libbd_smart.so.@MAJOR_VER@",
 };
 static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_LVM, NULL}, NULL},
@@ -77,9 +79,10 @@ static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_FS, NULL}, NULL},
     {{BD_PLUGIN_NVDIMM, NULL}, NULL},
     {{BD_PLUGIN_NVME, NULL}, NULL},
+    {{BD_PLUGIN_SMART, NULL}, NULL},
 };
 static gchar* plugin_names[BD_PLUGIN_UNDEF] = {
-    "lvm", "btrfs", "swap", "loop", "crypto", "mpath", "dm", "mdraid", "s390", "part", "fs", "nvdimm", "nvme"
+    "lvm", "btrfs", "swap", "loop", "crypto", "mpath", "dm", "mdraid", "s390", "part", "fs", "nvdimm", "nvme", "smart"
 };
 
 static void set_plugin_so_name (BDPlugin name, const gchar *so_name) {
@@ -234,6 +237,10 @@ static void unload_plugins (void) {
     if (plugins[BD_PLUGIN_NVME].handle && !unload_nvme (plugins[BD_PLUGIN_NVME].handle))
         bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to close the nvme plugin");
     plugins[BD_PLUGIN_NVME].handle = NULL;
+
+    if (plugins[BD_PLUGIN_SMART].handle && !unload_smart (plugins[BD_PLUGIN_SMART].handle))
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to close the smart plugin");
+    plugins[BD_PLUGIN_SMART].handle = NULL;
 }
 
 static void load_plugin_from_sonames (BDPlugin plugin, LoadFunc load_fn, void **handle, GSList *sonames) {
@@ -274,6 +281,8 @@ static void do_load (GSList **plugins_sonames) {
         load_plugin_from_sonames (BD_PLUGIN_NVDIMM, load_nvdimm_from_plugin, &(plugins[BD_PLUGIN_NVDIMM].handle), plugins_sonames[BD_PLUGIN_NVDIMM]);
     if (!plugins[BD_PLUGIN_NVME].handle && plugins_sonames[BD_PLUGIN_NVME])
         load_plugin_from_sonames (BD_PLUGIN_NVME, load_nvme_from_plugin, &(plugins[BD_PLUGIN_NVME].handle), plugins_sonames[BD_PLUGIN_NVME]);
+    if (!plugins[BD_PLUGIN_SMART].handle && plugins_sonames[BD_PLUGIN_SMART])
+        load_plugin_from_sonames (BD_PLUGIN_SMART, load_smart_from_plugin, &(plugins[BD_PLUGIN_SMART].handle), plugins_sonames[BD_PLUGIN_SMART]);
 }
 
 static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload, guint64 *num_loaded) {
@@ -283,7 +292,7 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload, g
     GSequence *config_files = NULL;
     GSList *plugins_sonames[BD_PLUGIN_UNDEF] = {NULL, NULL, NULL, NULL, NULL,
                                                 NULL, NULL, NULL, NULL, NULL,
-                                                NULL};
+                                                NULL, NULL};
     BDPlugin plugin_name = BD_PLUGIN_UNDEF;
     guint64 required_plugins_mask = 0;
 
