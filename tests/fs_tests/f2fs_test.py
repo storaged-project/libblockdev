@@ -250,6 +250,11 @@ class F2FSResize(F2FSTestCase):
                 BlockDev.fs_f2fs_resize(self.loop_dev, 100 * 1024**2 / 512, True)
             return
 
+        fi = BlockDev.fs_f2fs_get_info(self.loop_dev)
+        if fi.sector_size == 0:
+            # XXX latest versions of dump.f2fs don't print the sector size
+            self.skipTest("Cannot get sector size of the f2fs filesystem, skipping")
+
         succ = BlockDev.fs_f2fs_resize(self.loop_dev, 100 * 1024**2 / 512, True)
         self.assertTrue(succ)
 

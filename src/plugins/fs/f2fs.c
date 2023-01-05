@@ -280,7 +280,7 @@ BDFSF2FSInfo* bd_fs_f2fs_get_info (const gchar *device, GError **error) {
     gchar *output = NULL;
     gboolean success = FALSE;
     gchar const * const pattern = "[\\S\\s]+" \
-                                  "Info:\\ssector\\ssize\\s=\\s(?P<ssize>\\d+)\\s+" \
+                                  "(Info:\\ssector\\ssize\\s=\\s(?P<ssize>\\d+)?\\s+)?" \
                                   "[\\S\\s]+" \
                                   "Info:\\ssuperblock\\sfeatures\\s=\\s(?P<features>\\d+)\\s:" \
                                   "[\\S\\s]+" \
