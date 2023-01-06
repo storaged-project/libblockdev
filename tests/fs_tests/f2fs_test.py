@@ -180,7 +180,7 @@ class F2FSMkfsWithLabel(F2FSTestCase):
 
 
 class F2FSMkfsWithFeatures(F2FSTestCase):
-    def test_f2fs_mkfs_with_label(self):
+    def test_f2fs_mkfs_with_features(self):
         """Verify that it is possible to create an f2fs file system with extra features enabled"""
 
         ea = BlockDev.ExtraArg.new("-O", "encrypt")
