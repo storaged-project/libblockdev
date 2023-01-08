@@ -90,8 +90,8 @@
       version: "38"
       reason: "Force-removing PV for the test hangs with kernel 6.0.0"
 
-- test: kbd_test.KbdTestBcache*
+- test: mdraid_test.MDTestDDFRAID
   skip_on:
     - distro: "fedora"
       version: "38"
-      reason: "Bcache attach/detach hangs with kernel 6.0.0"
+      reason: "Creating DDF containers is broken on rawhide with kernel 6.2.0"
