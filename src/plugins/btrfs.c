@@ -689,7 +689,7 @@ BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (const gchar *mountpoint, gboole
     gchar **line_p = NULL;
     gchar const * const pattern = "ID\\s+(?P<id>\\d+)\\s+gen\\s+\\d+\\s+(cgen\\s+\\d+\\s+)?" \
                                   "parent\\s+(?P<parent_id>\\d+)\\s+top\\s+level\\s+\\d+\\s+" \
-                                  "(otime\\s+\\d{4}-\\d{2}-\\d{2}\\s+\\d\\d:\\d\\d:\\d\\d\\s+)?"\
+                                  "(otime\\s+(\\d{4}-\\d{2}-\\d{2}\\s+\\d\\d:\\d\\d:\\d\\d|-)\\s+)?"\
                                   "path\\s+(?P<path>\\S+)";
     GRegex *regex = NULL;
     GMatchInfo *match_info = NULL;
