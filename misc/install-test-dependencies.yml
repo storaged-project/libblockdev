@@ -64,6 +64,7 @@
       - python3-packaging
       - python3-pylint
       - python3-yaml
+      - smartmontools
       - targetcli
       - udftools
       - volume_key
@@ -128,6 +129,7 @@
       - python3-packaging
       - python3-pydbus
       - python3-yaml
+      - smartmontools
       - targetcli-fb
       - udftools
       - volume-key
