@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# shift the argument switches
+while (( "$#" )); do
+    if [[ $1 != --* ]]; then
+        break;
+    fi
+    shift
+done
+
+F="tests/smart_dumps/$1.json"
+cat "$F"
+
+# parse out the exit code
+EXIT_CODE=`cat "$F" | grep '"exit_status": ' | sed 's/.*: *//'`
+if [[ ! -z $EXIT_CODE ]]; then
+  exit $EXIT_CODE
+fi

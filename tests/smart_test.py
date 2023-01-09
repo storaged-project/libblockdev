@@ -19,9 +19,6 @@ class SMARTTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        if not shutil.which("smartctl"):
-            raise unittest.SkipTest("smartctl executable not found in $PATH, skipping.")
-
         if not BlockDev.is_initialized():
             BlockDev.init(cls.requested_plugins, None)
         else:
@@ -86,6 +83,9 @@ class SMARTTest(unittest.TestCase):
     def test_ata_info(self):
         """Test SMART ATA info on LIO, loop and scsi_debug devices"""
 
+        if not shutil.which("smartctl"):
+            raise unittest.SkipTest("smartctl executable not found in $PATH, skipping.")
+
         # non-existing device
         msg = r".*Error getting ATA SMART info: Smartctl open device: /dev/.* failed: No such device"
         with self.assertRaisesRegex(GLib.GError, msg):
@@ -124,3 +124,49 @@ class SMARTTest(unittest.TestCase):
         with self.assertRaisesRegex(GLib.GError, msg):
             BlockDev.smart_ata_get_info(self.loop_dev, True)
 
+
+    @tag_test(TestTags.CORE)
+    def test_ata_real_dumps(self):
+        """Test SMART ATA info on supplied JSON dumps (from real devices)"""
+
+        with fake_utils("tests/fake_utils/smartctl"):
+            for d in ["TOSHIBA_THNSNH128GBST", "Hitachi_HDS5C3020ALA632", "HGST_HMS5C4040BLE640",
+                      "HGST_HUS726060ALA640", "INTEL_SSDSC2BB120G4L", "WDC_WD10EFRX-68PJCN0"]:
+                data = BlockDev.smart_ata_get_info(d, False)
+                self.assertIsNotNone(data)
+                self.assertTrue(data.overall_status_passed)
+                self.assertGreater(data.power_cycle_count, 0)
+                self.assertGreater(data.power_on_time, 0)
+                self.assertEqual(data.self_test_percent_remaining, 0)
+                self.assertGreater(data.smart_capabilities, 0)
+                self.assertTrue(data.smart_enabled)
+                self.assertTrue(data.smart_supported)
+                self.assertGreater(data.temperature, 0)
+                self.assertGreater(len(data.attributes), 0)
+                for attr in data.attributes:
+                    self.assertGreater(attr.id, 0)
+                    self.assertGreater(len(attr.name), 0)
+
+    @tag_test(TestTags.CORE)
+    def test_ata_error_dumps(self):
+        """Test SMART ATA info on supplied JSON dumps (error cases)"""
+
+        with fake_utils("tests/fake_utils/smartctl"):
+            msg = r"Reported smartctl JSON format version too low: 0"
+            with self.assertRaisesRegex(GLib.GError, msg):
+                BlockDev.smart_ata_get_info("01_old_ver", False)
+
+            msg = r"Error getting ATA SMART info: Command line did not parse."
+            with self.assertRaisesRegex(GLib.GError, msg):
+                BlockDev.smart_ata_get_info("02_exit_err", False)
+
+            data = BlockDev.smart_ata_get_info("03_exit_err_32", False)
+            self.assertIsNotNone(data)
+
+            msg = r"Error getting ATA SMART info: .* Parse error: unexpected character"
+            with self.assertRaisesRegex(GLib.GError, msg):
+                BlockDev.smart_ata_get_info("04_malformed", False)
+
+            msg = r"Empty response"
+            with self.assertRaisesRegex(GLib.GError, msg):
+                BlockDev.smart_ata_get_info("05_empty", False)
