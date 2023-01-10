@@ -843,4 +843,5 @@ bd_smart_ata_copy
 bd_smart_ata_free
 bd_smart_ata_attribute_copy
 bd_smart_ata_attribute_free
+bd_smart_set_enabled
 </SECTION>

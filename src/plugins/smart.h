@@ -225,5 +225,8 @@ gboolean bd_smart_is_tech_avail (BDSmartTech tech, guint64 mode, GError **error)
 BDSmartATA *   bd_smart_ata_get_info               (const gchar  *device,
                                                     gboolean      nowakeup,
                                                     GError      **error);
+gboolean       bd_smart_set_enabled                (const gchar  *device,
+                                                    gboolean      enabled,
+                                                    GError      **error);
 
 #endif  /* BD_SMART */
