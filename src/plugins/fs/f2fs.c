@@ -279,43 +279,18 @@ BDFSF2FSInfo* bd_fs_f2fs_get_info (const gchar *device, GError **error) {
     const gchar *argv[3] = {"dump.f2fs", device, NULL};
     gchar *output = NULL;
     gboolean success = FALSE;
-    gchar const * const pattern = "[\\S\\s]+" \
-                                  "Info:\\ssector\\ssize\\s=\\s(?P<ssize>\\d+)\\s+" \
-                                  "[\\S\\s]+" \
-                                  "Info:\\ssuperblock\\sfeatures\\s=\\s(?P<features>\\d+)\\s:" \
-                                  "[\\S\\s]+" \
-                                  "Info:\\stotal\\sFS\\ssectors\\s=\\s(?P<sectors>\\d+).+" \
-                                  "[\\S\\s]+";
-    GRegex *regex = NULL;
-    GMatchInfo *match_info = NULL;
     BDFSF2FSInfo*ret = NULL;
-    gchar *item = NULL;
+    gchar **lines = NULL;
+    gchar **line_p = NULL;
+    gchar *val_start = NULL;
 
     if (!check_deps (&avail_deps, DEPS_DUMPF2FS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return NULL;
-
-    regex = g_regex_new (pattern, G_REGEX_EXTENDED, 0, error);
-    if (!regex) {
-        g_warning ("Failed to create new GRegex");
-        /* error is already populated */
-        return NULL;
-    }
 
     success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
     if (!success) {
         /* error is already populated from the call above or just empty
            output */
-        g_regex_unref (regex);
-        return NULL;
-    }
-
-    success = g_regex_match (regex, output, 0, &match_info);
-    if (!success) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to parse f2fs info.");
-        g_regex_unref (regex);
-        g_match_info_free (match_info);
-        g_free (output);
         return NULL;
     }
 
@@ -325,28 +300,57 @@ BDFSF2FSInfo* bd_fs_f2fs_get_info (const gchar *device, GError **error) {
     if (!success) {
         /* error is already populated */
         bd_fs_f2fs_info_free (ret);
-        g_match_info_free (match_info);
-        g_regex_unref (regex);
         g_free (output);
         return NULL;
     }
 
-    item = g_match_info_fetch_named (match_info, "ssize");
-    ret->sector_size = g_ascii_strtoull (item, NULL, 0);
-    g_free (item);
-
-    item = g_match_info_fetch_named (match_info, "sectors");
-    ret->sector_count = g_ascii_strtoull (item, NULL, 0);
-    g_free (item);
-
-    item = g_match_info_fetch_named (match_info, "features");
-    ret->features = g_ascii_strtoull (item, NULL, 16);
-    g_free (item);
-
-    g_match_info_free (match_info);
-    g_regex_unref (regex);
+    lines = g_strsplit (output, "\n", 0);
     g_free (output);
+    line_p = lines;
 
+    while (line_p && *line_p && !g_str_has_prefix (*line_p, "Info: sector size"))
+        line_p++;
+    if (!line_p || !(*line_p)) {
+        /* Sector size is not printed with dump.f2fs 1.15 */
+        ret->sector_size = 0;
+    } else {
+        /* extract data from something like this: "Info: sector size = 4096" */
+        val_start = strchr (*line_p, '=');
+        val_start++;
+        ret->sector_size = g_ascii_strtoull (val_start, NULL, 0);
+    }
+
+    line_p = lines;
+    while (line_p && *line_p && !g_str_has_prefix (*line_p, "Info: total FS sectors"))
+        line_p++;
+    if (!line_p || !(*line_p)) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse F2FS file system information");
+        g_strfreev (lines);
+        bd_fs_f2fs_info_free (ret);
+        return NULL;
+    }
+
+    /* extract data from something like this: "Info: total sectors = 3932160 (15360 MB)" */
+    val_start = strchr (*line_p, '=');
+    val_start++;
+    ret->sector_count = g_ascii_strtoull (val_start, NULL, 0);
+
+    line_p = lines;
+    while (line_p && *line_p && !g_str_has_prefix (*line_p, "Info: superblock features"))
+        line_p++;
+    if (!line_p || !(*line_p)) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse F2FS file system information");
+        g_strfreev (lines);
+        bd_fs_f2fs_info_free (ret);
+        return NULL;
+    }
+
+    /* extract data from something like this: "Info: superblock features = 0" */
+    val_start = strchr (*line_p, '=');
+    val_start++;
+    ret->features = g_ascii_strtoull (val_start, NULL, 16);
+
+    g_strfreev (lines);
     return ret;
 }
 

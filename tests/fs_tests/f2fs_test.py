@@ -180,7 +180,7 @@ class F2FSMkfsWithLabel(F2FSTestCase):
 
 
 class F2FSMkfsWithFeatures(F2FSTestCase):
-    def test_f2fs_mkfs_with_label(self):
+    def test_f2fs_mkfs_with_features(self):
         """Verify that it is possible to create an f2fs file system with extra features enabled"""
 
         ea = BlockDev.ExtraArg.new("-O", "encrypt")
@@ -252,6 +252,11 @@ class F2FSResize(F2FSTestCase):
 
         succ = BlockDev.fs_f2fs_resize(self.loop_dev, 100 * 1024**2 / 512, True)
         self.assertTrue(succ)
+
+        fi = BlockDev.fs_f2fs_get_info(self.loop_dev)
+        if fi.sector_size == 0:
+            # XXX latest versions of dump.f2fs don't print the sector size
+            self.skipTest("Cannot get sector size of the f2fs filesystem, skipping")
 
         fi = BlockDev.fs_f2fs_get_info(self.loop_dev)
         self.assertEqual(fi.sector_count * fi.sector_size, 100 * 1024**2)
