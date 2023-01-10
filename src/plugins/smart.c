@@ -780,3 +780,59 @@ BDSmartATA * bd_smart_ata_get_info (const gchar *device, gboolean nowakeup, GErr
 
     return data;
 }
+
+/**
+ * bd_smart_set_enabled:
+ * @device: SMART-capable device.
+ * @enabled: whether to enable or disable the SMART functionality
+ * @error: (out) (optional): place to store error (if any).
+ *
+ * Enables or disables SMART functionality on device.
+ *
+ * Returns: %TRUE when the functionality was set successfully or %FALSE in case of an error (with @error set).
+ *
+ * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_INFO
+ */
+gboolean bd_smart_set_enabled (const gchar *device, gboolean enabled, GError **error) {
+    const gchar *args[5] = { "smartctl", "--json", "--smart=on", device, NULL };
+    gint wait_status = 0;
+    gchar *stdout = NULL;
+    gchar *stderr = NULL;
+    JsonParser *parser;
+    gboolean ret;
+
+    if (!enabled)
+        args[2] = "--smart=off";
+
+    /* TODO: set UTF-8 locale for JSON? */
+    if (!g_spawn_sync (NULL /* working_directory */,
+                       (gchar **) args,
+                       NULL /* envp */,
+                       G_SPAWN_SEARCH_PATH,
+                       NULL /* child_setup */,
+                       NULL /* user_data */,
+                       &stdout,
+                       &stderr,
+                       &wait_status,
+                       error)) {
+        g_prefix_error (error, "Error setting SMART functionality: ");
+        return FALSE;
+    }
+
+    if (stdout)
+        g_strstrip (stdout);
+    if (stderr)
+        g_strstrip (stderr);
+
+    parser = json_parser_new ();
+    ret = parse_smartctl_error (wait_status, stdout, stderr, FALSE, parser, error);
+    g_free (stdout);
+    g_free (stderr);
+    g_object_unref (parser);
+    if (! ret) {
+        g_prefix_error (error, "Error setting SMART functionality: ");
+        return FALSE;
+    }
+
+    return TRUE;
+}

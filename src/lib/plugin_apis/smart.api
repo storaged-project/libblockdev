@@ -352,4 +352,18 @@ GType bd_smart_ata_get_type () {
  */
 BDSmartATA * bd_smart_ata_get_info (const gchar *device, gboolean nowakeup, GError **error);
 
+/**
+ * bd_smart_set_enabled:
+ * @device: SMART-capable device.
+ * @enabled: whether to enable or disable the SMART functionality
+ * @error: (out) (optional): place to store error (if any).
+ *
+ * Enables or disables SMART functionality on device.
+ *
+ * Returns: %TRUE when the functionality was set successfully or %FALSE in case of an error (with @error set).
+ *
+ * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_INFO
+ */
+gboolean bd_smart_set_enabled (const gchar *device, gboolean enabled, GError **error);
+
 #endif  /* BD_SMART_API */
