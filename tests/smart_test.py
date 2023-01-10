@@ -213,3 +213,47 @@ class SMARTTest(unittest.TestCase):
         self.addCleanup(self._clean_scsi_debug)
         BlockDev.smart_set_enabled(self.scsi_debug_dev, False)
         BlockDev.smart_set_enabled(self.scsi_debug_dev, True)
+
+
+    @tag_test(TestTags.CORE)
+    def test_smart_selftest(self):
+        """Test SMART self-test functionality over LIO, loop and scsi_debug devices"""
+
+        if not shutil.which("smartctl"):
+            raise unittest.SkipTest("smartctl executable not found in $PATH, skipping.")
+
+        # non-existing device
+        msg = r"Error executing SMART self-test: /dev/.*: Unable to detect device type"
+        for t in [BlockDev.SmartSelfTestOp.OFFLINE, BlockDev.SmartSelfTestOp.SHORT,
+                  BlockDev.SmartSelfTestOp.LONG, BlockDev.SmartSelfTestOp.CONVEYANCE,
+                  BlockDev.SmartSelfTestOp.ABORT]:
+            with self.assertRaisesRegex(GLib.GError, msg):
+                BlockDev.smart_device_self_test("/dev/nonexistent", t)
+
+        # LIO device (SCSI)
+        self._setup_lio()
+        self.addCleanup(self._clean_lio)
+        msg = r"Error executing SMART self-test: Some SMART or other ATA command to the disk failed, or there was a checksum error in a SMART data structure."
+        for t in [BlockDev.SmartSelfTestOp.OFFLINE, BlockDev.SmartSelfTestOp.SHORT,
+                  BlockDev.SmartSelfTestOp.LONG, BlockDev.SmartSelfTestOp.ABORT]:
+            with self.assertRaisesRegex(GLib.GError, msg):
+                BlockDev.smart_device_self_test(self.lio_dev, t)
+        BlockDev.smart_device_self_test(self.lio_dev, BlockDev.SmartSelfTestOp.CONVEYANCE)
+
+        # loop device
+        self._setup_loop()
+        self.addCleanup(self._clean_loop)
+        msg = r"Error executing SMART self-test: /dev/.*: Unable to detect device type"
+        for t in [BlockDev.SmartSelfTestOp.OFFLINE, BlockDev.SmartSelfTestOp.SHORT,
+                  BlockDev.SmartSelfTestOp.LONG, BlockDev.SmartSelfTestOp.CONVEYANCE,
+                  BlockDev.SmartSelfTestOp.ABORT]:
+            with self.assertRaisesRegex(GLib.GError, msg):
+                BlockDev.smart_device_self_test(self.loop_dev, t)
+
+        # scsi_debug
+        self._setup_scsi_debug()
+        self.addCleanup(self._clean_scsi_debug)
+        for t in [BlockDev.SmartSelfTestOp.OFFLINE, BlockDev.SmartSelfTestOp.SHORT,
+                  BlockDev.SmartSelfTestOp.LONG, BlockDev.SmartSelfTestOp.CONVEYANCE,
+                  BlockDev.SmartSelfTestOp.ABORT]:
+            BlockDev.smart_device_self_test(self.scsi_debug_dev, t)
