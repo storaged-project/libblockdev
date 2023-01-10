@@ -333,6 +333,25 @@ GType bd_smart_ata_get_type () {
 }
 
 
+/* BpG-skip */
+/**
+ * BDSmartSelfTestOp:
+ * @BD_SMART_SELF_TEST_OP_ABORT: Abort a running SMART self-test.
+ * @BD_SMART_SELF_TEST_OP_OFFLINE: SMART Immediate Offline Test in background (ATA) or a default self test in foreground (SCSI).
+ * @BD_SMART_SELF_TEST_OP_SHORT: SMART Short Self Test in background (ATA) or "Background short" self-test (SCSI).
+ * @BD_SMART_SELF_TEST_OP_LONG: SMART Extended Self Test in background (ATA) or "Background long" self-test (SCSI).
+ * @BD_SMART_SELF_TEST_OP_CONVEYANCE: SMART Conveyance Self Test in background (ATA only).
+ */
+/* BpG-skip-end */
+typedef enum {
+    BD_SMART_SELF_TEST_OP_ABORT,
+    BD_SMART_SELF_TEST_OP_OFFLINE,
+    BD_SMART_SELF_TEST_OP_SHORT,
+    BD_SMART_SELF_TEST_OP_LONG,
+    BD_SMART_SELF_TEST_OP_CONVEYANCE,
+} BDSmartSelfTestOp;
+
+
 /**
  * bd_smart_ata_get_info:
  * @device: device to check.
@@ -365,5 +384,19 @@ BDSmartATA * bd_smart_ata_get_info (const gchar *device, gboolean nowakeup, GErr
  * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_INFO
  */
 gboolean bd_smart_set_enabled (const gchar *device, gboolean enabled, GError **error);
+
+/**
+ * bd_smart_device_self_test:
+ * @device: device to trigger the test on.
+ * @operation: #BDSmartSelfTestOp self-test operation.
+ * @error: (out) (optional): place to store error (if any).
+ *
+ * Executes or aborts device self-test.
+ *
+ * Returns: %TRUE when the self-test was trigerred successfully or %FALSE in case of an error (with @error set).
+ *
+ * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_SELFTEST
+ */
+gboolean bd_smart_device_self_test (const gchar *device, BDSmartSelfTestOp operation, GError **error);
 
 #endif  /* BD_SMART_API */

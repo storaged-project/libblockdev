@@ -836,3 +836,78 @@ gboolean bd_smart_set_enabled (const gchar *device, gboolean enabled, GError **e
 
     return TRUE;
 }
+
+/**
+ * bd_smart_device_self_test:
+ * @device: device to trigger the test on.
+ * @operation: #BDSmartSelfTestOp self-test operation.
+ * @error: (out) (optional): place to store error (if any).
+ *
+ * Executes or aborts device self-test.
+ *
+ * Returns: %TRUE when the self-test was trigerred successfully or %FALSE in case of an error (with @error set).
+ *
+ * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_SELFTEST
+ */
+gboolean bd_smart_device_self_test (const gchar *device, BDSmartSelfTestOp operation, GError **error) {
+    const gchar *args[5] = { "smartctl", "--json", "--test=", device, NULL };
+    gint wait_status = 0;
+    gchar *stdout = NULL;
+    gchar *stderr = NULL;
+    JsonParser *parser;
+    gboolean ret;
+
+    switch (operation) {
+        case BD_SMART_SELF_TEST_OP_ABORT:
+            args[2] = "--abort";
+            break;
+        case BD_SMART_SELF_TEST_OP_OFFLINE:
+            args[2] = "--test=offline";
+            break;
+        case BD_SMART_SELF_TEST_OP_SHORT:
+            args[2] = "--test=short";
+            break;
+        case BD_SMART_SELF_TEST_OP_LONG:
+            args[2] = "--test=long";
+            break;
+        case BD_SMART_SELF_TEST_OP_CONVEYANCE:
+            args[2] = "--test=conveyance";
+            break;
+        default:
+            g_set_error_literal (error, BD_SMART_ERROR, BD_SMART_ERROR_INVALID_ARGUMENT,
+                                 "Invalid self-test operation.");
+            return FALSE;
+    }
+
+    /* TODO: set UTF-8 locale for JSON? */
+    if (!g_spawn_sync (NULL /* working_directory */,
+                       (gchar **) args,
+                       NULL /* envp */,
+                       G_SPAWN_SEARCH_PATH,
+                       NULL /* child_setup */,
+                       NULL /* user_data */,
+                       &stdout,
+                       &stderr,
+                       &wait_status,
+                       error)) {
+        g_prefix_error (error, "Error executing SMART self-test: ");
+        return FALSE;
+    }
+
+    if (stdout)
+        g_strstrip (stdout);
+    if (stderr)
+        g_strstrip (stderr);
+
+    parser = json_parser_new ();
+    ret = parse_smartctl_error (wait_status, stdout, stderr, FALSE, parser, error);
+    g_free (stdout);
+    g_free (stderr);
+    g_object_unref (parser);
+    if (! ret) {
+        g_prefix_error (error, "Error executing SMART self-test: ");
+        return FALSE;
+    }
+
+    return TRUE;
+}

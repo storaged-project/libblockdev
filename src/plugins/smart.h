@@ -199,6 +199,22 @@ typedef struct BDSmartATA {
     guint temperature;
 } BDSmartATA;
 
+/**
+ * BDSmartSelfTestOp:
+ * @BD_SMART_SELF_TEST_OP_ABORT: Abort a running SMART self-test.
+ * @BD_SMART_SELF_TEST_OP_OFFLINE: SMART Immediate Offline Test in background (ATA) or a default self test in foreground (SCSI).
+ * @BD_SMART_SELF_TEST_OP_SHORT: SMART Short Self Test in background (ATA) or "Background short" self-test (SCSI).
+ * @BD_SMART_SELF_TEST_OP_LONG: SMART Extended Self Test in background (ATA) or "Background long" self-test (SCSI).
+ * @BD_SMART_SELF_TEST_OP_CONVEYANCE: SMART Conveyance Self Test in background (ATA only).
+ */
+typedef enum {
+    BD_SMART_SELF_TEST_OP_ABORT,
+    BD_SMART_SELF_TEST_OP_OFFLINE,
+    BD_SMART_SELF_TEST_OP_SHORT,
+    BD_SMART_SELF_TEST_OP_LONG,
+    BD_SMART_SELF_TEST_OP_CONVEYANCE,
+} BDSmartSelfTestOp;
+
 
 void bd_smart_ata_free (BDSmartATA *data);
 BDSmartATA * bd_smart_ata_copy (BDSmartATA *data);
@@ -222,11 +238,14 @@ void     bd_smart_close (void);
 gboolean bd_smart_is_tech_avail (BDSmartTech tech, guint64 mode, GError **error);
 
 
-BDSmartATA *   bd_smart_ata_get_info               (const gchar  *device,
-                                                    gboolean      nowakeup,
-                                                    GError      **error);
-gboolean       bd_smart_set_enabled                (const gchar  *device,
-                                                    gboolean      enabled,
-                                                    GError      **error);
+BDSmartATA *   bd_smart_ata_get_info     (const gchar        *device,
+                                          gboolean            nowakeup,
+                                          GError            **error);
+gboolean       bd_smart_set_enabled      (const gchar        *device,
+                                          gboolean            enabled,
+                                          GError            **error);
+gboolean       bd_smart_device_self_test (const gchar        *device,
+                                          BDSmartSelfTestOp   operation,
+                                          GError            **error);
 
 #endif  /* BD_SMART */
