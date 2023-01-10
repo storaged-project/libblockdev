@@ -170,3 +170,46 @@ class SMARTTest(unittest.TestCase):
             msg = r"Empty response"
             with self.assertRaisesRegex(GLib.GError, msg):
                 BlockDev.smart_ata_get_info("05_empty", False)
+
+
+    @tag_test(TestTags.CORE)
+    def test_smart_enable_disable(self):
+        """Test turning SMART functionality on/off over LIO, loop and scsi_debug devices"""
+        # FYI: take this test with a grain of salt - smartctl behaves unpredictably on unsupported
+        #      devices, often not reporting any error at all despite the device clearly not supporting
+        #      the SMART functionality
+
+        if not shutil.which("smartctl"):
+            raise unittest.SkipTest("smartctl executable not found in $PATH, skipping.")
+
+        # non-existing device
+        msg = r"Error setting SMART functionality: /dev/.*: Unable to detect device type"
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled("/dev/nonexistent", False)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled("/dev/nonexistent", True)
+
+        # LIO device (SCSI)
+        self._setup_lio()
+        self.addCleanup(self._clean_lio)
+        msg = r"Error setting SMART functionality: Some SMART or other ATA command to the disk failed, or there was a checksum error in a SMART data structure."
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled(self.lio_dev, False)
+        # smartctl doesn't report failure when turning SMART on
+        BlockDev.smart_set_enabled(self.lio_dev, True)
+
+        # loop device
+        self._setup_loop()
+        self.addCleanup(self._clean_loop)
+        # Sadly there's no specific message reported for loop devices (not being an ATA device)
+        msg = r"Error setting SMART functionality: /dev/.*: Unable to detect device type"
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled(self.loop_dev, False)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled(self.loop_dev, True)
+
+        # scsi_debug
+        self._setup_scsi_debug()
+        self.addCleanup(self._clean_scsi_debug)
+        BlockDev.smart_set_enabled(self.scsi_debug_dev, False)
+        BlockDev.smart_set_enabled(self.scsi_debug_dev, True)
