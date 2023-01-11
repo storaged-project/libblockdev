@@ -29,7 +29,6 @@
 #include <linux/fs.h>
 
 #include <libnvme.h>
-#include <uuid/uuid.h>
 
 #include <blockdev/utils.h>
 #include <check_deps.h>
