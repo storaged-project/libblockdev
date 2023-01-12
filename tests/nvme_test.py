@@ -116,7 +116,7 @@ class NVMeTestCase(NVMeTest):
         self.assertFalse(info.features & BlockDev.NVMEControllerFeature.ENCLOSURE)
         self.assertFalse(info.features & BlockDev.NVMEControllerFeature.MGMT_PCIE)
         self.assertFalse(info.features & BlockDev.NVMEControllerFeature.MGMT_SMBUS)
-        self.assertEqual(info.fguid, "")
+        self.assertIsNone(info.fguid)
         self.assertEqual(info.pci_vendor_id, 0)
         self.assertEqual(info.pci_subsys_vendor_id, 0)
         self.assertIn("Linux", info.model_number)
