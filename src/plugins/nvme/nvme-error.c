@@ -28,7 +28,6 @@
 #include <malloc.h>
 
 #include <libnvme.h>
-#include <uuid/uuid.h>
 
 #include <blockdev/utils.h>
 #include <check_deps.h>
@@ -123,7 +122,6 @@ void _nvme_fabrics_errno_to_gerror (int result, int _errno, GError **error)
             case ENVME_CONNECT_LOOKUP_SUBSYS:
                 code = BD_NVME_ERROR_CONNECT;
                 break;
-#ifdef HAVE_LIBNVME_1_1
             case ENVME_CONNECT_ALREADY:
                 code = BD_NVME_ERROR_CONNECT_ALREADY;
                 break;
@@ -139,7 +137,6 @@ void _nvme_fabrics_errno_to_gerror (int result, int _errno, GError **error)
             case ENVME_CONNECT_OPNOTSUPP:
                 code = BD_NVME_ERROR_CONNECT_OPNOTSUPP;
                 break;
-#endif
             default:
                 code = BD_NVME_ERROR_CONNECT;
         }

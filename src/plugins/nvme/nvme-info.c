@@ -28,7 +28,6 @@
 #include <malloc.h>
 
 #include <libnvme.h>
-#include <uuid/uuid.h>
 
 #include <blockdev/utils.h>
 #include <check_deps.h>
@@ -408,6 +407,23 @@ static gchar *decode_nvme_rev (guint32 ver) {
         return g_strdup_printf ("%u.%u.%u", mjr, mnr, ter);
 }
 
+static gchar *_uuid_to_str (unsigned char uuid[NVME_UUID_LEN]) {
+    gchar uuid_buf[NVME_UUID_LEN_STRING] = ZERO_INIT;
+
+    if (nvme_uuid_to_string (uuid, uuid_buf) == 0)
+        return g_strdup (uuid_buf);
+    return NULL;
+}
+
+static gboolean _nvme_a_is_zero (const __u8 a[], int len) {
+    int i;
+
+    for (i = 0; i < len; i++)
+        if (a[i] > 0)
+            return FALSE;
+    return TRUE;
+}
+
 /**
  * bd_nvme_get_controller_info:
  * @device: a NVMe controller device (e.g. `/dev/nvme0`)
@@ -461,9 +477,8 @@ BDNVMEControllerInfo * bd_nvme_get_controller_info (const gchar *device, GError 
     info->pci_vendor_id = GUINT16_FROM_LE (ctrl_id.vid);
     info->pci_subsys_vendor_id = GUINT16_FROM_LE (ctrl_id.ssvid);
     info->ctrl_id = GUINT16_FROM_LE (ctrl_id.cntlid);
-    /* TODO: decode fguid as 128-bit hex string? */
-    info->fguid = g_strdup_printf ("%-.*s", (int) sizeof (ctrl_id.fguid), ctrl_id.fguid);
-    g_strstrip (info->fguid);
+    if (!_nvme_a_is_zero (ctrl_id.fguid, sizeof (ctrl_id.fguid)))
+        info->fguid = _uuid_to_str (ctrl_id.fguid);
     info->model_number = g_strndup (ctrl_id.mn, sizeof (ctrl_id.mn));
     g_strstrip (info->model_number);
     info->serial_number = g_strndup (ctrl_id.sn, sizeof (ctrl_id.sn));
@@ -607,7 +622,6 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
     if (ret_desc == 0) {
         for (i = 0; i < NVME_IDENTIFY_DATA_SIZE; i += len) {
             struct nvme_ns_id_desc *d = (void *) desc + i;
-            gchar uuid_buf[37] = ZERO_INIT;
 
             if (!d->nidl)
                 break;
@@ -625,8 +639,7 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
                         snprintf (info->nguid + i * 2, 3, "%02x", d->nid[i]);
                     break;
                 case NVME_NIDT_UUID:
-                    uuid_unparse (d->nid, uuid_buf);
-                    info->uuid = g_strdup (uuid_buf);
+                    info->uuid = _uuid_to_str (d->nid);
                     break;
                 case NVME_NIDT_CSI:
                     /* unused */
@@ -635,14 +648,14 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
         }
     }
 
-    if (info->nguid == NULL && ns_info.nguid[G_N_ELEMENTS (ns_info.nguid) - 1] > 0) {
+    if (info->nguid == NULL && !_nvme_a_is_zero (ns_info.nguid, sizeof (ns_info.nguid))) {
         info->nguid = g_malloc0 (sizeof (ns_info.nguid) * 2 + 1);
-        for (i = 0; i < G_N_ELEMENTS (ns_info.nguid); i++)
+        for (i = 0; i < sizeof (ns_info.nguid); i++)
             snprintf (info->nguid + i * 2, 3, "%02x", ns_info.nguid[i]);
     }
-    if (info->eui64 == NULL && ns_info.eui64[G_N_ELEMENTS (ns_info.eui64) - 1] > 0) {
+    if (info->eui64 == NULL && !_nvme_a_is_zero (ns_info.eui64, sizeof (ns_info.eui64))) {
         info->eui64 = g_malloc0 (sizeof (ns_info.eui64) * 2 + 1);
-        for (i = 0; i < G_N_ELEMENTS (ns_info.eui64); i++)
+        for (i = 0; i < sizeof (ns_info.eui64); i++)
             snprintf (info->eui64 + i * 2, 3, "%02x", ns_info.eui64[i]);
     }
     if (ret_ns_ind == 0) {
