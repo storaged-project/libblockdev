@@ -17,7 +17,6 @@ typedef enum {
 
 typedef enum {
     BD_DM_TECH_MAP = 0,
-    BD_DM_TECH_RAID,
 } BDDMTech;
 
 typedef enum {
@@ -111,53 +110,3 @@ gchar* bd_dm_get_subsystem_from_name (const gchar *device_name, GError **error);
  * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_QUERY
  */
 gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean active_only, GError **error);
-
-/**
- * bd_dm_get_member_raid_sets:
- * @name: (nullable): name of the member
- * @uuid: (nullable): uuid of the member
- * @major: major number of the device or -1 if not specified
- * @minor: minor number of the device or -1 if not specified
- * @error: (out) (optional): variable to store error (if any)
- *
- * Returns: (transfer full) (array zero-terminated=1): list of names of the RAID sets related to
- * the member or %NULL in case of error
- *
- * One of @name, @uuid or @major:@minor has to be given.
- *
- * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_MODE_QUERY
- */
-gchar** bd_dm_get_member_raid_sets (const gchar *name, const gchar *uuid, gint major, gint minor, GError **error);
-
-/**
- * bd_dm_activate_raid_set:
- * @name: name of the DM RAID set to activate
- * @error: (out) (optional): variable to store error (if any)
- *
- * Returns: whether the RAID set @name was successfully activate or not
- *
- * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_MODE_CREATE_ACTIVATE
- */
-gboolean bd_dm_activate_raid_set (const gchar *name, GError **error);
-
-/**
- * bd_dm_deactivate_raid_set:
- * @name: name of the DM RAID set to deactivate
- * @error: (out) (optional): variable to store error (if any)
- *
- * Returns: whether the RAID set @name was successfully deactivate or not
- *
- * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_MODE_REMOVE_DEACTIVATE
- */
-gboolean bd_dm_deactivate_raid_set (const gchar *name, GError **error);
-
-/**
- * bd_dm_get_raid_set_type:
- * @name: name of the DM RAID set to get the type of
- * @error: (out) (optional): variable to store error (if any)
- *
- * Returns: string representation of the @name RAID set's type
- *
- * Tech category: %BD_DM_TECH_RAID-%BD_DM_TECH_MODE_QUERY
- */
-gchar* bd_dm_get_raid_set_type (const gchar *name, GError **error);

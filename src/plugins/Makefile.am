@@ -86,12 +86,6 @@ libbd_dm_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(GIO_LIBS
 libbd_dm_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
 libbd_dm_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_dm_la_SOURCES = dm.c dm.h check_deps.c check_deps.h dm_logging.c dm_logging.h
-if WITH_DMRAID
-libbd_dm_la_CFLAGS += $(UDEV_CFLAGS)
-libbd_dm_la_LIBADD += $(UDEV_LIBS) -ldmraid
-# Dear author of libdmdraid, VERSION really is not a good name for an enum member!
-libbd_dm_la_CPPFLAGS += -UVERSION
-endif
 endif
 
 if WITH_LOOP

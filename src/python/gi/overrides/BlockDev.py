@@ -369,12 +369,6 @@ def dm_create_linear(map_name, device, length, uuid=None):
     return _dm_create_linear(map_name, device, length, uuid)
 __all__.append("dm_create_linear")
 
-_dm_get_member_raid_sets = BlockDev.dm_get_member_raid_sets
-@override(BlockDev.dm_get_member_raid_sets)
-def dm_get_member_raid_sets(name=None, uuid=None, major=-1, minor=-1):
-    return _dm_get_member_raid_sets(name, uuid, major, minor)
-__all__.append("dm_get_member_raid_sets")
-
 
 _loop_setup = BlockDev.loop_setup
 @override(BlockDev.loop_setup)
