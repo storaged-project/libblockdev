@@ -283,9 +283,6 @@ BuildRequires: systemd-devel
 Summary:     The Device Mapper plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} = %{version}-%{release}
 Requires: device-mapper
-%if %{with_dmraid}
-Requires: dmraid
-%endif
 
 %description dm
 The libblockdev library plugin (and in the same time a standalone library)
