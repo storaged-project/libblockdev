@@ -257,3 +257,54 @@ class SMARTTest(unittest.TestCase):
                   BlockDev.SmartSelfTestOp.LONG, BlockDev.SmartSelfTestOp.CONVEYANCE,
                   BlockDev.SmartSelfTestOp.ABORT]:
             BlockDev.smart_device_self_test(self.scsi_debug_dev, t)
+
+
+    @tag_test(TestTags.CORE)
+    def test_scsi_info(self):
+        """Test SMART SCSI info on LIO, loop and scsi_debug devices"""
+
+        if not shutil.which("smartctl"):
+            raise unittest.SkipTest("smartctl executable not found in $PATH, skipping.")
+
+        # non-existing device
+        msg = r".*Error getting SCSI SMART info: Smartctl open device: /dev/.* failed: No such device"
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_scsi_get_info("/dev/nonexistent")
+
+        # LIO device (SCSI)
+        self._setup_lio()
+        msg = r".*Error getting SCSI SMART info: Some SMART or other ATA command to the disk failed, or there was a checksum error in a SMART data structure."
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_scsi_get_info(self.lio_dev)
+
+        # loop device
+        self._setup_loop()
+        self.addCleanup(self._clean_loop)
+        msg = r"Error getting SCSI SMART info: Device open failed or device did not return an IDENTIFY DEVICE structure."
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_scsi_get_info(self.loop_dev)
+
+        # scsi_debug
+        self._setup_scsi_debug()
+        self.addCleanup(self._clean_scsi_debug)
+        msg = r".*Error getting SCSI SMART info: Some SMART or other ATA command to the disk failed, or there was a checksum error in a SMART data structure."
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_scsi_get_info(self.scsi_debug_dev)
+
+
+    @tag_test(TestTags.CORE)
+    def test_scsi_real_dumps(self):
+        """Test SMART SCSI info on supplied JSON dumps (from real devices)"""
+
+        with fake_utils("tests/fake_utils/smartctl"):
+            for d in ["WD4001FYYG-01SL3", "HGST_HUSMR3280ASS200", "SEAGATE_ST600MP0036",
+                      "TOSHIBA_AL15SEB120NY", "TOSHIBA_AL15SEB18EQY", "TOSHIBA_KPM5XMUG400G"]:
+                data = BlockDev.smart_scsi_get_info(d)
+                self.assertIsNotNone(data)
+                self.assertTrue(data.overall_status_passed)
+                self.assertTrue(data.smart_supported)
+                self.assertGreater(data.power_on_time, 0)
+                self.assertGreater(data.temperature, 0)
+                self.assertGreater(data.temperature_drive_trip, 0)
+                self.assertGreater(data.read_processed_bytes, 1000000)
+                self.assertGreater(data.write_processed_bytes, 1000000)
