@@ -843,6 +843,12 @@ bd_smart_ata_copy
 bd_smart_ata_free
 bd_smart_ata_attribute_copy
 bd_smart_ata_attribute_free
+BDSmartSCSIInformationalException
+BDSmartSCSIBackgroundScanStatus
+BDSmartSCSI
+bd_smart_scsi_get_info
+bd_smart_scsi_free
+bd_smart_scsi_copy
 bd_smart_set_enabled
 BDSmartSelfTestOp
 bd_smart_device_self_test
