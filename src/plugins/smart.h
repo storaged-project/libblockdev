@@ -199,6 +199,177 @@ typedef struct BDSmartATA {
     guint temperature;
 } BDSmartATA;
 
+
+/* TODO: check against some other SCSI implementation for the right wording */
+/**
+ * BDSmartSCSIInformationalException:
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_NONE: No SCSI Informational Exception raised.
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_ABORTED_COMMAND: Warning - aborted command [asc 0x0b, ascq 0x00].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_TEMPERATURE_EXCEEDED: Warning - specified temperature exceeded [asc 0x0b, ascq 0x01].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_ENCLOSURE_DEGRADED: Warning - enclosure degraded [asc 0x0b, ascq 0x02].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_BACKGROUND_SELFTEST_FAILED: Warning - background self-test failed [asc 0x0b, ascq 0x03].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_BACKGROUND_PRESCAN_MEDIUM_ERROR: Warning - background pre-scan detected medium error [asc 0x0b, ascq 0x04].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_BACKGROUND_SCAN_MEDIUM_ERROR: Warning - background medium scan detected medium error [asc 0x0b, ascq 0x05].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_NV_CACHE_VOLATILE: Warning - non-volatile cache now volatile [asc 0x0b, ascq 0x06].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_NV_CACHE_DEGRADED_POWER: Warning - degraded power to non-volatile cache  [asc 0x0b, ascq 0x07].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_POWER_LOSS_EXPECTED: Warning - power loss expected [asc 0x0b, ascq 0x08].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_STATISTICS_NOTIFICATION: Warning - device statistics notification active [asc 0x0b, ascq 0x09].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_CRITICAL_TEMP: Warning - high critical temperature limit exceeded [asc 0x0b, ascq 0x0a].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_CRITICAL_TEMP: Warning - low critical temperature limit exceeded [asc 0x0b, ascq 0x0b].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_OPERATING_TEMP: Warning - high operating temperature limit exceeded [asc 0x0b, ascq 0x0c].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_OPERATING_TEMP: Warning - low operating temperature limit exceeded [asc 0x0b, ascq 0x0d].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_CRITICAL_HUMIDITY: Warning - high critical humidity limit exceeded [asc 0x0b, ascq 0x0e].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_CRITICAL_HUMIDITY: Warning - low critical humidity limit exceeded [asc 0x0b, ascq 0x0f].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_OPERATING_HUMIDITY: Warning - high operating humidity limit exceeded [asc 0x0b, ascq 0x10].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_OPERATING_HUMIDITY: Warning - low operating humidity limit exceeded [asc 0x0b, ascq 0x11].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MICROCODE_SECURITY_RISK: Warning - microcode security at risk [asc 0x0b, ascq 0x12].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MICROCODE_SIGNATURE_VALIDATION_FAILURE: Warning - microcode digital signature validation failure [asc 0x0b, ascq 0x13].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_PHYSICAL_ELEMENT_STATUS_CHANGE: Warning - physical element status change [asc 0x0b, ascq 0x14].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_FAILURE_PREDICTION_THRESH: Failure prediction threshold exceeded [asc 0x5d, ascq 0x00, ascq 0xff].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MEDIA_FAILURE_PREDICTION_THRESH: Media failure prediction threshold exceeded [asc 0x5d, ascq 0x01].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOGICAL_UNIT_FAILURE_PREDICTION_THRESH: Logical unit failure prediction threshold exceeded [asc 0x5d, ascq 0x02].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_SPARE_EXHAUSTION_PREDICTION_THRESH: Spare area exhaustion prediction threshold exceeded [asc 0x5d, ascq 0x03].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HARDWARE_IMPENDING_FAILURE: Hardware impending failure [asc 0x5d, ascq 0x10..0x1d].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_CONTROLLER_IMPENDING_FAILURE: Controller impending failure [asc 0x5d, ascq 0x20..0x2c].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_DATA_CHANNEL_IMPENDING_FAILURE: Data channel impending failure [asc 0x5d, ascq 0x30..0x3c].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_SERVO_IMPENDING_FAILURE: Servo impending failure [asc 0x5d, ascq 0x40..0x4c].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_SPINDLE_IMPENDING_FAILURE: Spindle impending failure [asc 0x5d, ascq 0x50..0x5c].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_FIRMWARE_IMPENDING_FAILURE: Firmware impending failure [asc 0x5d, ascq 0x60..0x6c].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MEDIA_ENDURANCE_LIMIT: Media impending failure endurance limit met [asc 0x5d, ascq 0x73].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_UNSPECIFIED: Unspecified warning.
+ */
+typedef enum {
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_NONE,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_ABORTED_COMMAND,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_TEMPERATURE_EXCEEDED,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_ENCLOSURE_DEGRADED,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_BACKGROUND_SELFTEST_FAILED,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_BACKGROUND_PRESCAN_MEDIUM_ERROR,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_BACKGROUND_SCAN_MEDIUM_ERROR,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_NV_CACHE_VOLATILE,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_NV_CACHE_DEGRADED_POWER,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_POWER_LOSS_EXPECTED,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_STATISTICS_NOTIFICATION,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_CRITICAL_TEMP,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_CRITICAL_TEMP,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_OPERATING_TEMP,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_OPERATING_TEMP,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_CRITICAL_HUMIDITY,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_CRITICAL_HUMIDITY,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_OPERATING_HUMIDITY,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_OPERATING_HUMIDITY,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MICROCODE_SECURITY_RISK,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MICROCODE_SIGNATURE_VALIDATION_FAILURE,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_PHYSICAL_ELEMENT_STATUS_CHANGE,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_FAILURE_PREDICTION_THRESH,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MEDIA_FAILURE_PREDICTION_THRESH,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOGICAL_UNIT_FAILURE_PREDICTION_THRESH,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_SPARE_EXHAUSTION_PREDICTION_THRESH,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HARDWARE_IMPENDING_FAILURE,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_CONTROLLER_IMPENDING_FAILURE,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_DATA_CHANNEL_IMPENDING_FAILURE,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_SERVO_IMPENDING_FAILURE,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_SPINDLE_IMPENDING_FAILURE,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_FIRMWARE_IMPENDING_FAILURE,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MEDIA_ENDURANCE_LIMIT,
+    BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_UNSPECIFIED,
+} BDSmartSCSIInformationalException;
+
+/**
+ * BDSmartSCSIBackgroundScanStatus:
+ * @BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_NO_SCANS_ACTIVE: No scans active.
+ * @BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_SCAN_ACTIVE: Scan is active.
+ * @BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_PRESCAN_ACTIVE: Pre-scan is active.
+ * @BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_ERROR_FATAL: Halted due to fatal error.
+ * @BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_PATTERN_VENDOR_SPECIFIC: Halted due to a vendor specific pattern of error.
+ * @BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_ERROR_PLIST: Halted due to medium formatted without P-List.
+ * @BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_VENDOR_SPECIFIC: Halted - vendor specific cause.
+ * @BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_TEMPERATURE: Halted due to temperature out of range.
+ * @BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_BMS_TIMER: Waiting until BMS interval timer expires.
+ */
+typedef enum {
+    BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_NO_SCANS_ACTIVE                = 0x00,
+    BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_SCAN_ACTIVE                    = 0x01,
+    BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_PRESCAN_ACTIVE                 = 0x02,
+    BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_ERROR_FATAL             = 0x03,
+    BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_PATTERN_VENDOR_SPECIFIC = 0x04,
+    BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_ERROR_PLIST             = 0x05,
+    BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_VENDOR_SPECIFIC         = 0x06,
+    BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_TEMPERATURE             = 0x07,
+    BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_BMS_TIMER                      = 0x08,
+} BDSmartSCSIBackgroundScanStatus;
+
+/**
+ * BDSmartSCSI:
+ * @smart_supported: Indicates that the device has SMART capability.
+ * @smart_enabled: Indicates that the SMART support is enabled.
+ * @overall_status_passed: %TRUE if the device SMART overall-health self-assessment test result has passed, %FALSE otherwise with @scsi_ie fields set.
+ * @scsi_ie: The reported SCSI Informational Exception in a simplified form. See #BDSmartSCSIInformationalException.
+ * @scsi_ie_asc: The reported SCSI Informational Exception ASC (Additional Sense Code) value (only values of 0xb - warnings and 0x5d - impending failures are taken in account).
+ * @scsi_ie_ascq: The reported SCSI Informational Exception ASCQ (Additional Sense Code Qualifier) value.
+ * @scsi_ie_string: String representation of the current SCSI Informational Exception.
+ * @background_scan_status: Background scan status, see #BDSmartSCSIBackgroundScanStatus.
+ * @background_scan_progress: Percent of a background scan progress.
+ * @background_scan_runs: Number of background scans performed.
+ * @background_medium_scan_runs: Number of background medium scans performed.
+ * @read_errors_corrected_eccfast: Error counter log - read errors corrected by ECC fast.
+ * @read_errors_corrected_eccdelayed: Error counter log - read errors corrected by ECC delayed.
+ * @read_errors_corrected_rereads: Error counter log - read errors corrected by rereads.
+ * @read_errors_corrected_total: Error counter log - total read errors corrected.
+ * @read_errors_uncorrected: Error counter log - total uncorrected read errors.
+ * @read_processed_bytes: Error counter log - total bytes processed.
+ * @write_errors_corrected_eccfast: Error counter log - write errors corrected by ECC fast.
+ * @write_errors_corrected_eccdelayed: Error counter log - write errors corrected by ECC delayed.
+ * @write_errors_corrected_rewrites: Error counter log - write errors corrected by rewrites.
+ * @write_errors_corrected_total: Error counter log - total write errors corrected.
+ * @write_errors_uncorrected: Error counter log - total uncorrected write errors.
+ * @write_processed_bytes: Error counter log - total bytes processed.
+ * @start_stop_cycle_count: Accumulated start-stop cycles.
+ * @start_stop_cycle_lifetime: Specified cycle count over device lifetime.
+ * @load_unload_cycle_count: Accumulated load-unload cycles.
+ * @load_unload_cycle_lifetime: Specified load-unload count over device lifetime.
+ * @scsi_grown_defect_list: Elements in grown defect list.
+ * @power_on_time: Accumulated power on time in minutes.
+ * @temperature_warning_enabled: Indicates that temperature warning is enabled.
+ * @temperature: The current drive temperature in Kelvin or 0 when temperature is not reported.
+ * @temperature_drive_trip: The drive trip temperature in Kelvin or 0 when temperature is not reported.
+ */
+typedef struct BDSmartSCSI {
+    gboolean smart_supported;
+    gboolean smart_enabled;
+    gboolean overall_status_passed;
+    BDSmartSCSIInformationalException scsi_ie;
+    guint8 scsi_ie_asc;
+    guint8 scsi_ie_ascq;
+    gchar *scsi_ie_string;
+    BDSmartSCSIBackgroundScanStatus background_scan_status;
+    gdouble background_scan_progress;
+    guint background_scan_runs;
+    guint background_medium_scan_runs;
+    guint read_errors_corrected_eccfast;
+    guint read_errors_corrected_eccdelayed;
+    guint read_errors_corrected_rereads;
+    guint read_errors_corrected_total;
+    guint read_errors_uncorrected;
+    guint64 read_processed_bytes;
+    guint write_errors_corrected_eccfast;
+    guint write_errors_corrected_eccdelayed;
+    guint write_errors_corrected_rewrites;
+    guint write_errors_corrected_total;
+    guint write_errors_uncorrected;
+    guint64 write_processed_bytes;
+    guint start_stop_cycle_count;
+    guint start_stop_cycle_lifetime;
+    guint load_unload_cycle_count;
+    guint load_unload_cycle_lifetime;
+    guint scsi_grown_defect_list;
+    guint power_on_time;
+    gboolean temperature_warning_enabled;
+    guint temperature;
+    guint temperature_drive_trip;
+} BDSmartSCSI;
+
+
 /**
  * BDSmartSelfTestOp:
  * @BD_SMART_SELF_TEST_OP_ABORT: Abort a running SMART self-test.
@@ -222,6 +393,9 @@ BDSmartATA * bd_smart_ata_copy (BDSmartATA *data);
 void bd_smart_ata_attribute_free (BDSmartATAAttribute *attr);
 BDSmartATAAttribute * bd_smart_ata_attribute_copy (BDSmartATAAttribute *attr);
 
+void bd_smart_scsi_free (BDSmartSCSI *data);
+BDSmartSCSI * bd_smart_scsi_copy (BDSmartSCSI *data);
+
 /*
  * If using the plugin as a standalone library, the following functions should
  * be called to:
@@ -240,6 +414,8 @@ gboolean bd_smart_is_tech_avail (BDSmartTech tech, guint64 mode, GError **error)
 
 BDSmartATA *   bd_smart_ata_get_info     (const gchar        *device,
                                           gboolean            nowakeup,
+                                          GError            **error);
+BDSmartSCSI *  bd_smart_scsi_get_info    (const gchar        *device,
                                           GError            **error);
 gboolean       bd_smart_set_enabled      (const gchar        *device,
                                           gboolean            enabled,

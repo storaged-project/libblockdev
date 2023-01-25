@@ -205,6 +205,39 @@ BDSmartATA * bd_smart_ata_copy (BDSmartATA *data) {
     return new_data;
 }
 
+/**
+ * bd_smart_scsi_free: (skip)
+ * @data: (nullable): %BDSmartSCSI to free
+ *
+ * Frees @data.
+ */
+void bd_smart_scsi_free (BDSmartSCSI *data) {
+    if (data == NULL)
+        return;
+
+    g_free (data->scsi_ie_string);
+    g_free (data);
+}
+
+/**
+ * bd_smart_scsi_copy: (skip)
+ * @data: (nullable): %BDSmartSCSI to copy
+ *
+ * Creates a new copy of @data.
+ */
+BDSmartSCSI * bd_smart_scsi_copy (BDSmartSCSI *data) {
+    BDSmartSCSI *new_data;
+
+    if (data == NULL)
+        return NULL;
+
+    new_data = g_new0 (BDSmartSCSI, 1);
+    memcpy (new_data, data, sizeof (BDSmartSCSI));
+    new_data->scsi_ie_string = g_strdup (data->scsi_ie_string);
+
+    return new_data;
+}
+
 
 static const gchar * get_error_message_from_exit_code (gint exit_code) {
     /*
@@ -716,6 +749,334 @@ static BDSmartATA * parse_ata_smart (JsonParser *parser, GError **error) {
     return data;
 }
 
+
+static BDSmartSCSI * parse_scsi_smart (JsonParser *parser, G_GNUC_UNUSED GError **error) {
+    BDSmartSCSI *data;
+    JsonReader *reader;
+
+    data = g_new0 (BDSmartSCSI, 1);
+    reader = json_reader_new (json_parser_get_root (parser));
+
+    /* smart_support section */
+    if (json_reader_read_member (reader, "smart_support")) {
+        if (json_reader_read_member (reader, "available"))
+            data->smart_supported = json_reader_get_boolean_value (reader);
+        json_reader_end_member (reader);
+        if (json_reader_read_member (reader, "enabled"))
+            data->smart_enabled = json_reader_get_boolean_value (reader);
+        json_reader_end_member (reader);
+    }
+    json_reader_end_member (reader);
+
+    /* smart_status section */
+    if (json_reader_read_member (reader, "smart_status")) {
+        if (json_reader_read_member (reader, "passed"))
+            data->overall_status_passed = json_reader_get_boolean_value (reader);
+        json_reader_end_member (reader);
+        if (json_reader_read_member (reader, "scsi")) {
+            gint64 asc = -1;
+            gint64 ascq = -1;
+
+            if (json_reader_read_member (reader, "asc")) {
+                asc = json_reader_get_int_value (reader);
+                data->scsi_ie_asc = asc;
+            }
+            json_reader_end_member (reader);
+            if (json_reader_read_member (reader, "ascq")) {
+                ascq = json_reader_get_int_value (reader);
+                data->scsi_ie_ascq = ascq;
+            }
+            json_reader_end_member (reader);
+            if (json_reader_read_member (reader, "ie_string"))
+                data->scsi_ie_string = g_strdup (json_reader_get_string_value (reader));
+            json_reader_end_member (reader);
+
+            if (asc == 0xb && ascq >= 0) {
+                switch (ascq) {
+                    case 0x00:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_ABORTED_COMMAND;
+                        break;
+                    case 0x01:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_TEMPERATURE_EXCEEDED;
+                        break;
+                    case 0x02:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_ENCLOSURE_DEGRADED;
+                        break;
+                    case 0x03:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_BACKGROUND_SELFTEST_FAILED;
+                        break;
+                    case 0x04:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_BACKGROUND_PRESCAN_MEDIUM_ERROR;
+                        break;
+                    case 0x05:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_BACKGROUND_SCAN_MEDIUM_ERROR;
+                        break;
+                    case 0x06:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_NV_CACHE_VOLATILE;
+                        break;
+                    case 0x07:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_NV_CACHE_DEGRADED_POWER;
+                        break;
+                    case 0x08:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_POWER_LOSS_EXPECTED;
+                        break;
+                    case 0x09:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_STATISTICS_NOTIFICATION;
+                        break;
+                    case 0x0a:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_CRITICAL_TEMP;
+                        break;
+                    case 0x0b:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_CRITICAL_TEMP;
+                        break;
+                    case 0x0c:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_OPERATING_TEMP;
+                        break;
+                    case 0x0d:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_OPERATING_TEMP;
+                        break;
+                    case 0x0e:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_CRITICAL_HUMIDITY;
+                        break;
+                    case 0x0f:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_CRITICAL_HUMIDITY;
+                        break;
+                    case 0x10:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_OPERATING_HUMIDITY;
+                        break;
+                    case 0x11:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_OPERATING_HUMIDITY;
+                        break;
+                    case 0x12:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MICROCODE_SECURITY_RISK;
+                        break;
+                    case 0x13:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MICROCODE_SIGNATURE_VALIDATION_FAILURE;
+                        break;
+                    case 0x14:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_PHYSICAL_ELEMENT_STATUS_CHANGE;
+                        break;
+                    default:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_UNSPECIFIED;
+                        break;
+                }
+            } else if (asc == 0x5d && ascq >= 0) {
+                switch (ascq) {
+                    case 0x00:
+                    case 0xff:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_FAILURE_PREDICTION_THRESH;
+                        break;
+                    case 0x01:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MEDIA_FAILURE_PREDICTION_THRESH;
+                        break;
+                    case 0x02:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOGICAL_UNIT_FAILURE_PREDICTION_THRESH;
+                        break;
+                    case 0x03:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_SPARE_EXHAUSTION_PREDICTION_THRESH;
+                        break;
+                    case 0x73:
+                        data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MEDIA_ENDURANCE_LIMIT;
+                        break;
+                    default:
+                        if (ascq >= 0x10 && ascq <= 0x1d)
+                            data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HARDWARE_IMPENDING_FAILURE;
+                        else if (ascq >= 0x20 && ascq <= 0x2c)
+                            data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_CONTROLLER_IMPENDING_FAILURE;
+                        else if (ascq >= 0x30 && ascq <= 0x3c)
+                            data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_DATA_CHANNEL_IMPENDING_FAILURE;
+                        else if (ascq >= 0x40 && ascq <= 0x4c)
+                            data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_SERVO_IMPENDING_FAILURE;
+                        else if (ascq >= 0x50 && ascq <= 0x5c)
+                            data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_SPINDLE_IMPENDING_FAILURE;
+                        else if (ascq >= 0x60 && ascq <= 0x6c)
+                            data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_FIRMWARE_IMPENDING_FAILURE;
+                        else
+                            data->scsi_ie = BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_UNSPECIFIED;
+                        break;
+                }
+            }
+        }
+        json_reader_end_member (reader);
+    }
+    json_reader_end_member (reader);
+
+    /* temperature_warning section */
+    if (json_reader_read_member (reader, "temperature_warning")) {
+        if (json_reader_read_member (reader, "enabled"))
+            data->temperature_warning_enabled = json_reader_get_boolean_value (reader);
+        json_reader_end_member (reader);
+    }
+    json_reader_end_member (reader);
+
+    /* temperature section */
+    if (json_reader_read_member (reader, "temperature")) {
+        if (json_reader_read_member (reader, "current"))
+            data->temperature = json_reader_get_int_value (reader) + 273;
+        json_reader_end_member (reader);
+        if (json_reader_read_member (reader, "drive_trip"))
+            data->temperature_drive_trip = json_reader_get_int_value (reader) + 273;
+        json_reader_end_member (reader);
+    }
+    json_reader_end_member (reader);
+
+    /* scsi_background_scan section */
+    if (json_reader_read_member (reader, "scsi_background_scan")) {
+        if (json_reader_read_member (reader, "status")) {
+            if (json_reader_read_member (reader, "value")) {
+                guint64 val = json_reader_get_int_value (reader);
+
+                switch (val) {
+                    case 0x00:
+                        data->background_scan_status = BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_NO_SCANS_ACTIVE;
+                        break;
+                    case 0x01:
+                        data->background_scan_status = BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_SCAN_ACTIVE;
+                        break;
+                    case 0x02:
+                        data->background_scan_status = BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_PRESCAN_ACTIVE;
+                        break;
+                    case 0x03:
+                        data->background_scan_status = BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_ERROR_FATAL;
+                        break;
+                    case 0x04:
+                        data->background_scan_status = BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_PATTERN_VENDOR_SPECIFIC;
+                        break;
+                    case 0x05:
+                        data->background_scan_status = BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_ERROR_PLIST;
+                        break;
+                    case 0x06:
+                        data->background_scan_status = BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_VENDOR_SPECIFIC;
+                        break;
+                    case 0x07:
+                        data->background_scan_status = BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_TEMPERATURE;
+                        break;
+                    case 0x08:
+                        data->background_scan_status = BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_BMS_TIMER;
+                        break;
+                    default:
+                        /* just copy the value, it corresponds to the above anyway */
+                        data->background_scan_status = val;
+                }
+            }
+            json_reader_end_member (reader);
+            if (json_reader_read_member (reader, "scan_progress")) {
+                const gchar *val = json_reader_get_string_value (reader);
+                float d = 0.0;
+
+                if (sscanf (val, "%f%%", &d) == 1)
+                    data->background_scan_progress = d;
+            }
+            json_reader_end_member (reader);
+            if (json_reader_read_member (reader, "number_scans_performed"))
+                data->background_scan_runs = json_reader_get_int_value (reader);
+            json_reader_end_member (reader);
+            if (json_reader_read_member (reader, "number_medium_scans_performed"))
+                data->background_medium_scan_runs = json_reader_get_int_value (reader);
+            json_reader_end_member (reader);
+
+        }
+        json_reader_end_member (reader);
+    }
+    json_reader_end_member (reader);
+
+    /* scsi_start_stop_cycle_counter section */
+    if (json_reader_read_member (reader, "scsi_start_stop_cycle_counter")) {
+        if (json_reader_read_member (reader, "specified_cycle_count_over_device_lifetime"))
+            data->start_stop_cycle_lifetime = json_reader_get_int_value (reader);
+        json_reader_end_member (reader);
+        if (json_reader_read_member (reader, "accumulated_start_stop_cycles"))
+            data->start_stop_cycle_count = json_reader_get_int_value (reader);
+        json_reader_end_member (reader);
+        if (json_reader_read_member (reader, "specified_load_unload_count_over_device_lifetime"))
+            data->load_unload_cycle_lifetime = json_reader_get_int_value (reader);
+        json_reader_end_member (reader);
+        if (json_reader_read_member (reader, "accumulated_load_unload_cycles"))
+            data->load_unload_cycle_count = json_reader_get_int_value (reader);
+        json_reader_end_member (reader);
+    }
+    json_reader_end_member (reader);
+
+    /* scsi_grown_defect_list section */
+    if (json_reader_read_member (reader, "scsi_grown_defect_list"))
+        data->scsi_grown_defect_list = json_reader_get_int_value (reader);
+    json_reader_end_member (reader);
+
+    /* scsi_error_counter_log section */
+    if (json_reader_read_member (reader, "scsi_error_counter_log")) {
+        if (json_reader_read_member (reader, "read")) {
+            if (json_reader_read_member (reader, "errors_corrected_by_eccfast"))
+                data->read_errors_corrected_eccfast = json_reader_get_int_value (reader);
+            json_reader_end_member (reader);
+            if (json_reader_read_member (reader, "errors_corrected_by_eccdelayed"))
+                data->read_errors_corrected_eccdelayed = json_reader_get_int_value (reader);
+            json_reader_end_member (reader);
+            if (json_reader_read_member (reader, "errors_corrected_by_rereads_rewrites"))
+                data->read_errors_corrected_rereads = json_reader_get_int_value (reader);
+            json_reader_end_member (reader);
+            if (json_reader_read_member (reader, "total_errors_corrected"))
+                data->read_errors_corrected_total = json_reader_get_int_value (reader);
+            json_reader_end_member (reader);
+            if (json_reader_read_member (reader, "total_uncorrected_errors"))
+                data->read_errors_uncorrected = json_reader_get_int_value (reader);
+            json_reader_end_member (reader);
+            if (json_reader_read_member (reader, "gigabytes_processed")) {
+                const gchar *val = json_reader_get_string_value (reader);
+                gdouble d = 0.0;
+
+                if (val)
+                    d = g_ascii_strtod (val, NULL);
+                data->read_processed_bytes = d * 1000000000;
+            }
+            json_reader_end_member (reader);
+        }
+        json_reader_end_member (reader);
+        if (json_reader_read_member (reader, "write")) {
+            if (json_reader_read_member (reader, "errors_corrected_by_eccfast"))
+                data->write_errors_corrected_eccfast = json_reader_get_int_value (reader);
+            json_reader_end_member (reader);
+            if (json_reader_read_member (reader, "errors_corrected_by_eccdelayed"))
+                data->write_errors_corrected_eccdelayed = json_reader_get_int_value (reader);
+            json_reader_end_member (reader);
+            if (json_reader_read_member (reader, "errors_corrected_by_rereads_rewrites"))
+                data->write_errors_corrected_rewrites = json_reader_get_int_value (reader);
+            json_reader_end_member (reader);
+            if (json_reader_read_member (reader, "total_errors_corrected"))
+                data->write_errors_corrected_total = json_reader_get_int_value (reader);
+            json_reader_end_member (reader);
+            if (json_reader_read_member (reader, "total_uncorrected_errors"))
+                data->write_errors_uncorrected = json_reader_get_int_value (reader);
+            json_reader_end_member (reader);
+            if (json_reader_read_member (reader, "gigabytes_processed")) {
+                const gchar *val = json_reader_get_string_value (reader);
+                gdouble d = 0.0;
+
+                if (val)
+                    d = g_ascii_strtod (val, NULL);
+                data->write_processed_bytes = d * 1000000000;
+            }
+            json_reader_end_member (reader);
+        }
+        json_reader_end_member (reader);
+    }
+    json_reader_end_member (reader);
+
+    /* power_on_time section */
+    if (json_reader_read_member (reader, "power_on_time")) {
+        if (json_reader_read_member (reader, "hours"))
+            data->power_on_time += json_reader_get_int_value (reader) * 60;
+        json_reader_end_member (reader);
+        if (json_reader_read_member (reader, "minutes"))
+            data->power_on_time += json_reader_get_int_value (reader);
+        json_reader_end_member (reader);
+    }
+    json_reader_end_member (reader);
+
+    g_object_unref (reader);
+    return data;
+}
+
+
 /**
  * bd_smart_ata_get_info:
  * @device: device to check.
@@ -780,6 +1141,64 @@ BDSmartATA * bd_smart_ata_get_info (const gchar *device, gboolean nowakeup, GErr
 
     return data;
 }
+
+
+/**
+ * bd_smart_scsi_get_info:
+ * @device: device to check.
+ * @error: (out) (optional): place to store error (if any).
+ *
+ * Retrieve SMART information from SCSI or SAS-compliant drive.
+ *
+ * Returns: (transfer full): SCSI SMART log or %NULL in case of an error (with @error set).
+ *
+ * Tech category: %BD_SMART_TECH_SCSI-%BD_SMART_TECH_MODE_INFO
+ */
+BDSmartSCSI * bd_smart_scsi_get_info (const gchar *device, GError **error) {
+    const gchar *args[11] = { "smartctl", "--info", "--health", "--attributes", "--log=error", "--log=background",  "--json", "--device=scsi", device, NULL };
+    gint wait_status = 0;
+    gchar *stdout = NULL;
+    gchar *stderr = NULL;
+    JsonParser *parser;
+    BDSmartSCSI *data = NULL;
+    gboolean ret;
+
+    /* TODO: set UTF-8 locale for JSON? */
+    if (!g_spawn_sync (NULL /* working_directory */,
+                       (gchar **) args,
+                       NULL /* envp */,
+                       G_SPAWN_SEARCH_PATH,
+                       NULL /* child_setup */,
+                       NULL /* user_data */,
+                       &stdout,
+                       &stderr,
+                       &wait_status,
+                       error)) {
+        g_prefix_error (error, "Error getting SCSI SMART info: ");
+        return NULL;
+    }
+
+    if (stdout)
+        g_strstrip (stdout);
+    if (stderr)
+        g_strstrip (stderr);
+
+    parser = json_parser_new ();
+    ret = parse_smartctl_error (wait_status, stdout, stderr, FALSE, parser, error);
+    g_free (stdout);
+    g_free (stderr);
+    if (! ret) {
+        g_prefix_error (error, "Error getting SCSI SMART info: ");
+        g_object_unref (parser);
+        return NULL;
+    }
+
+    data = parse_scsi_smart (parser, error);
+    g_object_unref (parser);
+
+    return data;
+}
+
 
 /**
  * bd_smart_set_enabled:
