@@ -235,7 +235,7 @@ DEVICE MAPPER
 --------------
 
 :supported technologies:
-   basic operations with raw device mapper and DM RAID sets
+   basic operations with raw device mapper
 
 :functions:
    * create_linear
@@ -243,10 +243,6 @@ DEVICE MAPPER
    * node_from_name
    * name_from_node
    * map_exists
-   * get_member_raid_sets
-   * activate_raid_set
-   * deactivate_raid_set
-   * get_raid_set_type
 
 
 s390

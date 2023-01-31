@@ -17,7 +17,6 @@ typedef enum {
 
 typedef enum {
     BD_DM_TECH_MAP = 0,
-    BD_DM_TECH_RAID,
 } BDDMTech;
 
 typedef enum {
@@ -47,9 +46,5 @@ gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean a
 gchar* bd_dm_name_from_node (const gchar *dm_node, GError **error);
 gchar* bd_dm_node_from_name (const gchar *map_name, GError **error);
 gchar* bd_dm_get_subsystem_from_name (const gchar *device_name, GError **error);
-gchar** bd_dm_get_member_raid_sets (const gchar *name, const gchar *uuid, gint major, gint minor, GError **error);
-gboolean bd_dm_activate_raid_set (const gchar *name, GError **error);
-gboolean bd_dm_deactivate_raid_set (const gchar *name, GError **error);
-gchar* bd_dm_get_raid_set_type (const gchar *name, GError **error);
 
 #endif  /* BD_DM */

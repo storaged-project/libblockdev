@@ -131,17 +131,6 @@ AS_IF([test "x$with_escrow" != "xno"],
       [AC_DEFINE([WITH_BD_ESCROW], [], [Define if escrow is supported]) AC_SUBST([WITH_ESCROW], [1])],
       [])
 
-AC_ARG_WITH([dmraid],
-    AS_HELP_STRING([--with-dmraid], [support dmraid @<:@default=yes@:>@]),
-    [],
-    [with_dmraid=yes])
-
-AC_SUBST([WITH_DMRAID], [0])
-AM_CONDITIONAL(WITH_DMRAID, test "x$with_dmraid" != "xno")
-AS_IF([test "x$with_dmraid" != "xno"],
-      [AC_DEFINE([WITH_BD_DMRAID], [], [Define if dmraid is supported]) AC_SUBST([WITH_DMRAID], [1])],
-      [])
-
 AC_ARG_WITH([tools],
     AS_HELP_STRING([--with-tools], [build tools @<:@default=yes@:>@]),
     [],
@@ -202,10 +191,6 @@ AS_IF([test "x$with_crypto" != "xno"],
 
 AS_IF([test "x$with_dm" != "xno" -o "x$with_lvm" != "xno" -o "x$with_lvm_dbus" != "xno" -o "x$with_mpath" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([DEVMAPPER], [devmapper >= 1.02.93])],
-      [])
-
-AS_IF([test "x$with_dm" != "xno" -a "x$with_dmraid" != "xno"],
-      [LIBBLOCKDEV_CHECK_HEADER([dmraid/dmraid.h], [], [dmraid.h not available])],
       [])
 
 AS_IF([test "x$with_part" != "xno"],
@@ -300,7 +285,6 @@ echo "
         Crypto plugin:              ${with_crypto}
             escrow support:         ${with_escrow}
         DM plugin:                  ${with_dm}
-            dmraid support:         ${with_dmraid}
         FS plugin:                  ${with_fs}
         Loop plugin:                ${with_loop}
         LVM plugin:                 ${with_lvm}

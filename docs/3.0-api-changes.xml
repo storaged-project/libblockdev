@@ -99,4 +99,11 @@
 
   </simplesect>
 
+  <simplesect><title>DM plugin</title>
+  <para>
+    Support for DM RAID (<literal>BD_DM_TECH_RAID</literal> technology) was removed from the plugin. Following functions were removed without replacement: <literal>bd_dm_get_member_raid_sets</literal>, <literal>bd_dm_activate_raid_set</literal>, <literal>bd_dm_deactivate_raid_set</literal> and <literal>bd_dm_get_raid_set_type</literal>.
+  </para>
+
+  </simplesect>
+
 </chapter>
