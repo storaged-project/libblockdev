@@ -69,6 +69,7 @@ const BDFSInfo fs_info[] = {
     {"ext4", "e2fsck", "e2fsck", "resize2fs", BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "tune2fs"},
     {"vfat", "fsck.vfat", "fsck.vfat", "", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "fatlabel"},
     {"ntfs", "ntfsfix", "ntfsfix", "ntfsresize", BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK, "ntfslabel"},
+    {"exfat", "fsck.exfat", "fsck.exfat", NULL, 0, "exfatlabel"},
     {NULL, NULL, NULL, NULL, 0, NULL}
 };
 
@@ -513,6 +514,19 @@ static gboolean device_operation (const gchar *device, BDFsOpType op, guint64 ne
                 return bd_fs_ntfs_check (device, error);
             case BD_FS_LABEL:
                 return bd_fs_ntfs_set_label (device, label, error);
+        }
+    } else if (g_strcmp0 (fstype, "exfat") == 0) {
+        switch (op) {
+            case BD_FS_RESIZE:
+                break;
+            case BD_FS_REPAIR:
+                return bd_fs_exfat_repair (device, NULL, error);
+            case BD_FS_CHECK:
+                return bd_fs_exfat_check (device, NULL, error);
+            case BD_FS_LABEL:
+                return bd_fs_exfat_set_label (device, label, error);
+            default:
+                g_assert_not_reached ();
         }
     }
     switch (op) {
