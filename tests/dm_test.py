@@ -156,3 +156,8 @@ class DMUnloadTest(DevMapperTestCase):
         # load the plugins back
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
         self.assertIn("dm", BlockDev.get_available_plugin_names())
+
+    @tag_test(TestTags.NOSTORAGE)
+    def test_check_dm_tech(self):
+        """ Verify that BlockDev.DMTech works from Python as expected """
+        self.assertTrue(hasattr(BlockDev.DMTech, "MAP"))

@@ -370,6 +370,12 @@ def dm_create_linear(map_name, device, length, uuid=None):
 __all__.append("dm_create_linear")
 
 
+# XXX enums with just one member are broken with GI
+class DMTech():
+    MAP = BlockDev.DMTech.DM_TECH_MAP
+__all__.append("DMTech")
+
+
 _loop_setup = BlockDev.loop_setup
 @override(BlockDev.loop_setup)
 def loop_setup(file, offset=0, size=0, read_only=False, part_scan=True, sector_size=0):
