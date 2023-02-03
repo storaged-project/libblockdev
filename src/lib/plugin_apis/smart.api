@@ -15,14 +15,12 @@ GQuark bd_smart_error_quark (void) {
  * @BD_SMART_ERROR_TECH_UNAVAIL: SMART support not available.
  * @BD_SMART_ERROR_FAILED: General error.
  * @BD_SMART_ERROR_INVALID_ARGUMENT: Invalid argument.
- * @BD_SMART_ERROR_DRIVE_SLEEPING: Device is in a low-power mode.
  */
 /* BpG-skip-end */
 typedef enum {
     BD_SMART_ERROR_TECH_UNAVAIL,
     BD_SMART_ERROR_FAILED,
     BD_SMART_ERROR_INVALID_ARGUMENT,
-    BD_SMART_ERROR_DRIVE_SLEEPING,
 } BDSmartError;
 
 typedef enum {
@@ -576,21 +574,15 @@ typedef enum {
 /**
  * bd_smart_ata_get_info:
  * @device: device to check.
- * @nowakeup: prevent drive waking up if in a low-power mode.
  * @error: (out) (optional): place to store error (if any).
  *
  * Retrieve SMART information from the drive.
- *
- * Specify @nowakeup to prevent drive spinning up when in a low-power mode,
- * #BD_SMART_ERROR_DRIVE_SLEEPING will be returned in such case. Note that
- * smartctl may actually return this error on non-ATA devices or when
- * device identification fails.
  *
  * Returns: (transfer full): ATA SMART log or %NULL in case of an error (with @error set).
  *
  * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_INFO
  */
-BDSmartATA * bd_smart_ata_get_info (const gchar *device, gboolean nowakeup, GError **error);
+BDSmartATA * bd_smart_ata_get_info (const gchar *device, GError **error);
 
 /**
  * bd_smart_scsi_get_info:

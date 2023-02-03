@@ -12,13 +12,11 @@ GQuark bd_smart_error_quark (void);
  * @BD_SMART_ERROR_TECH_UNAVAIL: SMART support not available.
  * @BD_SMART_ERROR_FAILED: General error.
  * @BD_SMART_ERROR_INVALID_ARGUMENT: Invalid argument.
- * @BD_SMART_ERROR_DRIVE_SLEEPING: Device is in a low-power mode.
  */
 typedef enum {
     BD_SMART_ERROR_TECH_UNAVAIL,
     BD_SMART_ERROR_FAILED,
     BD_SMART_ERROR_INVALID_ARGUMENT,
-    BD_SMART_ERROR_DRIVE_SLEEPING,
 } BDSmartError;
 
 typedef enum {
@@ -413,7 +411,6 @@ gboolean bd_smart_is_tech_avail (BDSmartTech tech, guint64 mode, GError **error)
 
 
 BDSmartATA *   bd_smart_ata_get_info     (const gchar        *device,
-                                          gboolean            nowakeup,
                                           GError            **error);
 BDSmartSCSI *  bd_smart_scsi_get_info    (const gchar        *device,
                                           GError            **error);
