@@ -87,42 +87,30 @@ class SMARTTest(unittest.TestCase):
             raise unittest.SkipTest("smartctl executable not found in $PATH, skipping.")
 
         # non-existing device
-        msg = r".*Error getting ATA SMART info: Smartctl open device: /dev/.* failed: No such device"
+        msg = r".*Error getting ATA SMART info: /dev/.*: Unable to detect device type"
         with self.assertRaisesRegex(GLib.GError, msg):
-            BlockDev.smart_ata_get_info("/dev/nonexistent", False)
-        with self.assertRaisesRegex(GLib.GError, msg):
-            BlockDev.smart_ata_get_info("/dev/nonexistent", True)
+            BlockDev.smart_ata_get_info("/dev/nonexistent")
 
         # LIO device (SCSI)
         self._setup_lio()
         self.addCleanup(self._clean_lio)
-        msg = r"Error getting ATA SMART info: Device open failed or device did not return an IDENTIFY DEVICE structure."
+        msg = r"Missing 'ata_smart_data' section: The member .ata_smart_data. is not defined in the object at the current position."
         with self.assertRaisesRegex(GLib.GError, msg):
-            BlockDev.smart_ata_get_info(self.lio_dev, False)
-        msg = r"Device is in a low-power mode"     # FIXME
-        with self.assertRaisesRegex(GLib.GError, msg):
-            BlockDev.smart_ata_get_info(self.lio_dev, True)
+            BlockDev.smart_ata_get_info(self.lio_dev)
 
         # loop device
         self._setup_loop()
         self.addCleanup(self._clean_loop)
-        # Sadly there's no specific message reported for loop devices (not being an ATA device)
-        msg = r"Error getting ATA SMART info: Device open failed or device did not return an IDENTIFY DEVICE structure."
+        msg = r".*Error getting ATA SMART info: /dev/.*: Unable to detect device type"
         with self.assertRaisesRegex(GLib.GError, msg):
-            BlockDev.smart_ata_get_info(self.loop_dev, False)
-        msg = r"Device is in a low-power mode"     # FIXME
-        with self.assertRaisesRegex(GLib.GError, msg):
-            BlockDev.smart_ata_get_info(self.loop_dev, True)
+            BlockDev.smart_ata_get_info(self.loop_dev)
 
         # scsi_debug
         self._setup_scsi_debug()
         self.addCleanup(self._clean_scsi_debug)
-        msg = r"Error getting ATA SMART info: Device open failed or device did not return an IDENTIFY DEVICE structure."
+        msg = r"Missing 'ata_smart_data' section: The member .ata_smart_data. is not defined in the object at the current position."
         with self.assertRaisesRegex(GLib.GError, msg):
-            BlockDev.smart_ata_get_info(self.scsi_debug_dev, False)
-        msg = r"Device is in a low-power mode"     # FIXME
-        with self.assertRaisesRegex(GLib.GError, msg):
-            BlockDev.smart_ata_get_info(self.loop_dev, True)
+            BlockDev.smart_ata_get_info(self.scsi_debug_dev)
 
 
     @tag_test(TestTags.CORE)
@@ -132,7 +120,7 @@ class SMARTTest(unittest.TestCase):
         with fake_utils("tests/fake_utils/smartctl"):
             for d in ["TOSHIBA_THNSNH128GBST", "Hitachi_HDS5C3020ALA632", "HGST_HMS5C4040BLE640",
                       "HGST_HUS726060ALA640", "INTEL_SSDSC2BB120G4L", "WDC_WD10EFRX-68PJCN0"]:
-                data = BlockDev.smart_ata_get_info(d, False)
+                data = BlockDev.smart_ata_get_info(d)
                 self.assertIsNotNone(data)
                 self.assertTrue(data.overall_status_passed)
                 self.assertGreater(data.power_cycle_count, 0)
@@ -154,22 +142,22 @@ class SMARTTest(unittest.TestCase):
         with fake_utils("tests/fake_utils/smartctl"):
             msg = r"Reported smartctl JSON format version too low: 0"
             with self.assertRaisesRegex(GLib.GError, msg):
-                BlockDev.smart_ata_get_info("01_old_ver", False)
+                BlockDev.smart_ata_get_info("01_old_ver")
 
             msg = r"Error getting ATA SMART info: Command line did not parse."
             with self.assertRaisesRegex(GLib.GError, msg):
-                BlockDev.smart_ata_get_info("02_exit_err", False)
+                BlockDev.smart_ata_get_info("02_exit_err")
 
-            data = BlockDev.smart_ata_get_info("03_exit_err_32", False)
+            data = BlockDev.smart_ata_get_info("03_exit_err_32")
             self.assertIsNotNone(data)
 
             msg = r"Error getting ATA SMART info: .* Parse error: unexpected character"
             with self.assertRaisesRegex(GLib.GError, msg):
-                BlockDev.smart_ata_get_info("04_malformed", False)
+                BlockDev.smart_ata_get_info("04_malformed")
 
             msg = r"Empty response"
             with self.assertRaisesRegex(GLib.GError, msg):
-                BlockDev.smart_ata_get_info("05_empty", False)
+                BlockDev.smart_ata_get_info("05_empty")
 
 
     @tag_test(TestTags.CORE)

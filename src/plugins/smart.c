@@ -340,10 +340,9 @@ static gchar ** parse_error_messages (JsonReader *reader) {
 }
 
 
-#define STANDBY_RET_CODE 255      /* custom return code to indicate sleeping drive */
 #define MIN_JSON_FORMAT_VER 1     /* minimal json_format_version */
 
-static gboolean parse_smartctl_error (gint wait_status, const gchar *stdout, const gchar *stderr, gboolean nowakeup, JsonParser *parser, GError **error) {
+static gboolean parse_smartctl_error (gint wait_status, const gchar *stdout, const gchar *stderr, JsonParser *parser, GError **error) {
     gint status = 0;
     gint res;
     JsonReader *reader;
@@ -364,11 +363,6 @@ static gboolean parse_smartctl_error (gint wait_status, const gchar *stdout, con
         g_clear_error (&l_error);
     }
 
-    if (nowakeup && status == STANDBY_RET_CODE) {
-        g_set_error_literal (error, BD_SMART_ERROR, BD_SMART_ERROR_DRIVE_SLEEPING,
-                             "Device is in a low-power mode");
-        return FALSE;
-    }
     if ((!stdout || strlen (stdout) == 0) &&
         (!stderr || strlen (stderr) == 0)) {
         g_set_error_literal (error, BD_SMART_ERROR, BD_SMART_ERROR_FAILED,
@@ -1080,31 +1074,22 @@ static BDSmartSCSI * parse_scsi_smart (JsonParser *parser, G_GNUC_UNUSED GError 
 /**
  * bd_smart_ata_get_info:
  * @device: device to check.
- * @nowakeup: prevent drive waking up if in a low-power mode.
  * @error: (out) (optional): place to store error (if any).
  *
  * Retrieve SMART information from the drive.
- *
- * Specify @nowakeup to prevent drive spinning up when in a low-power mode,
- * #BD_SMART_ERROR_DRIVE_SLEEPING will be returned in such case. Note that
- * smartctl may actually return this error on non-ATA devices or when
- * device identification fails.
  *
  * Returns: (transfer full): ATA SMART log or %NULL in case of an error (with @error set).
  *
  * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_INFO
  */
-BDSmartATA * bd_smart_ata_get_info (const gchar *device, gboolean nowakeup, GError **error) {
-    const gchar *args[11] = { "smartctl", "--info", "--health", "--capabilities", "--attributes", "--json", "--nocheck=never", "--device=ata" /* TODO */, "--badsum=ignore", device, NULL };
+BDSmartATA * bd_smart_ata_get_info (const gchar *device, GError **error) {
+    const gchar *args[8] = { "smartctl", "--info", "--health", "--capabilities", "--attributes", "--json", device, NULL };
     gint wait_status = 0;
     gchar *stdout = NULL;
     gchar *stderr = NULL;
     JsonParser *parser;
     BDSmartATA *data = NULL;
     gboolean ret;
-
-    if (nowakeup)
-        args[6] = "--nocheck=standby," G_STRINGIFY (STANDBY_RET_CODE);
 
     /* TODO: set UTF-8 locale for JSON? */
     if (!g_spawn_sync (NULL /* working_directory */,
@@ -1127,7 +1112,7 @@ BDSmartATA * bd_smart_ata_get_info (const gchar *device, gboolean nowakeup, GErr
         g_strstrip (stderr);
 
     parser = json_parser_new ();
-    ret = parse_smartctl_error (wait_status, stdout, stderr, nowakeup, parser, error);
+    ret = parse_smartctl_error (wait_status, stdout, stderr, parser, error);
     g_free (stdout);
     g_free (stderr);
     if (! ret) {
@@ -1184,7 +1169,7 @@ BDSmartSCSI * bd_smart_scsi_get_info (const gchar *device, GError **error) {
         g_strstrip (stderr);
 
     parser = json_parser_new ();
-    ret = parse_smartctl_error (wait_status, stdout, stderr, FALSE, parser, error);
+    ret = parse_smartctl_error (wait_status, stdout, stderr, parser, error);
     g_free (stdout);
     g_free (stderr);
     if (! ret) {
@@ -1244,7 +1229,7 @@ gboolean bd_smart_set_enabled (const gchar *device, gboolean enabled, GError **e
         g_strstrip (stderr);
 
     parser = json_parser_new ();
-    ret = parse_smartctl_error (wait_status, stdout, stderr, FALSE, parser, error);
+    ret = parse_smartctl_error (wait_status, stdout, stderr, parser, error);
     g_free (stdout);
     g_free (stderr);
     g_object_unref (parser);
@@ -1319,7 +1304,7 @@ gboolean bd_smart_device_self_test (const gchar *device, BDSmartSelfTestOp opera
         g_strstrip (stderr);
 
     parser = json_parser_new ();
-    ret = parse_smartctl_error (wait_status, stdout, stderr, FALSE, parser, error);
+    ret = parse_smartctl_error (wait_status, stdout, stderr, parser, error);
     g_free (stdout);
     g_free (stderr);
     g_object_unref (parser);
