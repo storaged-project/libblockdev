@@ -721,6 +721,12 @@ gchar ** bd_nvme_find_ctrls_for_ns (const gchar *ns_sysfs_path, const gchar *sub
     nvme_ctrl_t c;
     nvme_ns_t n;
     char realp[PATH_MAX];
+    gchar *subsysnqn_p;
+
+    /* libnvme strips trailing spaces and newlines when reading values from sysfs */
+    subsysnqn_p = g_strdup (subsysnqn);
+    if (subsysnqn_p)
+        g_strchomp (subsysnqn_p);
 
     ptr_array = g_ptr_array_new ();
 
@@ -736,7 +742,7 @@ gchar ** bd_nvme_find_ctrls_for_ns (const gchar *ns_sysfs_path, const gchar *sub
         nvme_for_each_subsystem (h, s) {
             gboolean found = FALSE;
 
-            if (subsysnqn && g_strcmp0 (nvme_subsystem_get_nqn (s), subsysnqn) != 0)
+            if (subsysnqn && g_strcmp0 (nvme_subsystem_get_nqn (s), subsysnqn_p) != 0)
                 continue;
 
             nvme_subsystem_for_each_ctrl (s, c)
@@ -767,6 +773,7 @@ gchar ** bd_nvme_find_ctrls_for_ns (const gchar *ns_sysfs_path, const gchar *sub
         }
     }
     nvme_free_tree (root);
+    g_free (subsysnqn_p);
 
     g_ptr_array_add (ptr_array, NULL);  /* trailing NULL element */
     return (gchar **) g_ptr_array_free (ptr_array, FALSE);
