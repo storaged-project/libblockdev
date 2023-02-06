@@ -129,7 +129,7 @@ typedef enum {
  * @model_number: The model number.
  * @serial_number: The serial number.
  * @firmware_ver: The currently active firmware revision.
- * @nvme_ver: The NVM Express base specification that the controller implementation supports.
+ * @nvme_ver: The NVM Express base specification that the controller implementation supports or %NULL when not reported by the device.
  * @features: features and capabilities present for this controller, see #BDNVMEControllerFeature.
  * @controller_type: The controller type.
  * @selftest_ext_time: Extended Device Self-test Time, if #BD_NVME_CTRL_FEAT_SELFTEST is supported then this field

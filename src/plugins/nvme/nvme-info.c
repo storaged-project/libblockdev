@@ -401,6 +401,8 @@ static gchar *decode_nvme_rev (guint32 ver) {
     if (mjr >= 2 || mnr >= 2)
         ter = ver & 0xFF;
 
+    if (mjr == 0 && mnr == 0)
+        return NULL;
     if (ter == 0)
         return g_strdup_printf ("%u.%u", mjr, mnr);
     else
