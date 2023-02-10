@@ -212,7 +212,8 @@ gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtr
     }
 
     old_env = g_get_environ ();
-    new_env = g_environ_setenv (old_env, "LC_ALL", "C", TRUE);
+    new_env = g_environ_setenv (old_env, "LC_ALL", "C.UTF-8", TRUE);
+    new_env = g_environ_unsetenv (new_env, "LANGUAGE");
 
     task_id = log_running (args ? args : argv);
     success = g_spawn_sync (NULL, args ? (gchar **) args : (gchar **) argv, new_env, G_SPAWN_SEARCH_PATH,
@@ -416,7 +417,8 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
     task_id = log_running (args ? args : argv);
 
     old_env = g_get_environ ();
-    new_env = g_environ_setenv (old_env, "LC_ALL", "C", TRUE);
+    new_env = g_environ_setenv (old_env, "LC_ALL", "C.UTF-8", TRUE);
+    new_env = g_environ_unsetenv (new_env, "LANGUAGE");
 
     ret = g_spawn_async_with_pipes (NULL, args ? (gchar**) args : (gchar**) argv, new_env,
                                     G_SPAWN_DEFAULT|G_SPAWN_SEARCH_PATH|G_SPAWN_DO_NOT_REAP_CHILD,
