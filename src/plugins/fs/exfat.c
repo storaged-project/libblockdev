@@ -256,9 +256,22 @@ gboolean bd_fs_exfat_set_label (const gchar *device, const gchar *label, GError 
  * Tech category: always available
  */
 gboolean bd_fs_exfat_check_label (const gchar *label, GError **error) {
-    if (strlen (label) > 11) {
+    gsize bytes_written;
+    g_autofree gchar *str = NULL;
+
+    if (g_utf8_validate (label, -1, NULL)) {
+        str = g_convert (label, -1, "UTF-16LE", "UTF-8", NULL, &bytes_written, NULL);
+    }
+
+    if (!str) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
-                     "Label for exFAT filesystem must be at most 11 characters long.");
+                     "Label for exFAT filesystem must be a valid UTF-8 string.");
+        return FALSE;
+    }
+
+    if (bytes_written > 22) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                     "Label for exFAT filesystem is too long.");
         return FALSE;
     }
 

@@ -208,5 +208,5 @@ class ExfatSetLabel(ExfatTestCase):
         succ = BlockDev.fs_exfat_check_label("TEST_LABEL")
         self.assertTrue(succ)
 
-        with self.assertRaisesRegex(GLib.GError, "at most 11 characters long."):
+        with self.assertRaisesRegex(GLib.GError, "is too long."):
             BlockDev.fs_exfat_check_label(12 * "a")
