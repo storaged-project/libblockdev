@@ -45,6 +45,7 @@
       - dosfstools
       - e2fsprogs
       - e2fsprogs-devel
+      - exfatprogs
       - f2fs-tools
       - glibc-all-langpacks
       - lvm2-dbusd
@@ -170,6 +171,7 @@
       - cryptsetup
       - dosfstools
       - e2fsprogs
+      - exfatprogs
       - libext2fs-dev
       - f2fs-tools
       - libnss3-tools
