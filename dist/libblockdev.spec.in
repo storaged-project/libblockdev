@@ -60,7 +60,7 @@
 %endif
 
 # dmraid is not available on RHEL > 7
-%if 0%{?rhel} > 7
+%if 0%{?rhel} > 7 || 0%{?fedora} > 37
 %define with_dmraid 0
 %endif
 
