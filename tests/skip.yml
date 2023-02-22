@@ -89,3 +89,9 @@
     - distro: "fedora"
       version: "38"
       reason: "Force-removing PV for the test hangs with kernel 6.0.0"
+
+- test: lvm_dbus_tests.LvmTestLVcreateRemove
+  skip_on:
+   - distro: "centos"
+     version: "8"
+     reason: "LVM DBus doesn't include error message from the command line on CentOS/RHEL 8"
