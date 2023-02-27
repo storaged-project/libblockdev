@@ -249,11 +249,14 @@ static volatile guint avail_features = 0;
 static volatile guint avail_module_deps = 0;
 static GMutex deps_check_lock;
 
-#define DEPS_LVMDEVICES 0
+#define DEPS_LVM 0
+#define DEPS_LVM_MASK (1 << DEPS_LVM)
+#define DEPS_LVMDEVICES 1
 #define DEPS_LVMDEVICES_MASK (1 << DEPS_LVMDEVICES)
-#define DEPS_LAST 1
+#define DEPS_LAST 2
 
 static const UtilDep deps[DEPS_LAST] = {
+    {"lvm", LVM_MIN_VERSION, "version", "LVM version:\\s+([\\d\\.]+)"},
     {"lvmdevices", NULL, NULL, NULL},
 };
 
@@ -2121,6 +2124,7 @@ gboolean bd_lvm_lvresize (const gchar *vg_name, const gchar *lv_name, guint64 si
     GVariantBuilder builder;
     GVariantType *type = NULL;
     GVariant *params = NULL;
+    GVariant *extra_params = NULL;
 
     g_variant_builder_init (&builder, G_VARIANT_TYPE_TUPLE);
     g_variant_builder_add_value (&builder, g_variant_new ("t", size));
@@ -2130,7 +2134,12 @@ gboolean bd_lvm_lvresize (const gchar *vg_name, const gchar *lv_name, guint64 si
     params = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
 
-    call_lv_method_sync (vg_name, lv_name, "Resize", params, NULL, extra, TRUE, error);
+    g_variant_builder_init (&builder, G_VARIANT_TYPE_DICTIONARY);
+    g_variant_builder_add (&builder, "{sv}", "--fs", g_variant_new ("s", "ignore"));
+    extra_params = g_variant_builder_end (&builder);
+    g_variant_builder_clear (&builder);
+
+    call_lv_method_sync (vg_name, lv_name, "Resize", params, extra_params, extra, TRUE, error);
     return (*error == NULL);
 }
 
