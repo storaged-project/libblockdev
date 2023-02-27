@@ -877,6 +877,10 @@ class LvmTestLVresize(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_lvdeactivate("testVG", "testLV", None)
         self.assertTrue(succ)
 
+        # try to resize when deactivated
+        succ = BlockDev.lvm_lvresize("testVG", "testLV", 768 * 1024**2, None)
+        self.assertTrue(succ)
+
 class LvmTestLVrename(LvmPVVGLVTestCase):
     def test_lvrename(self):
         """Verify that it's possible to rename an LV"""

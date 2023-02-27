@@ -32,6 +32,8 @@
 #define SECTOR_SIZE 512
 #define VDO_POOL_SUFFIX "vpool"
 
+#define LVM_VERSION_FSRESIZE "2.03.19"
+
 static GMutex global_config_lock;
 static gchar *global_config_str = NULL;
 
@@ -2125,6 +2127,14 @@ gboolean bd_lvm_lvresize (const gchar *vg_name, const gchar *lv_name, guint64 si
     GVariantType *type = NULL;
     GVariant *params = NULL;
     GVariant *extra_params = NULL;
+    gboolean success = FALSE;
+    BDLVMLVdata *lvinfo = NULL;
+    GError *l_error = NULL;
+
+    lvinfo = bd_lvm_lvinfo (vg_name, lv_name, error);
+    if (!lvinfo)
+        /* error is already populated */
+        return FALSE;
 
     g_variant_builder_init (&builder, G_VARIANT_TYPE_TUPLE);
     g_variant_builder_add_value (&builder, g_variant_new ("t", size));
@@ -2134,10 +2144,20 @@ gboolean bd_lvm_lvresize (const gchar *vg_name, const gchar *lv_name, guint64 si
     params = g_variant_builder_end (&builder);
     g_variant_builder_clear (&builder);
 
-    g_variant_builder_init (&builder, G_VARIANT_TYPE_DICTIONARY);
-    g_variant_builder_add (&builder, "{sv}", "--fs", g_variant_new ("s", "ignore"));
-    extra_params = g_variant_builder_end (&builder);
-    g_variant_builder_clear (&builder);
+    if (lvinfo->attr[4] != 'a') {
+        /* starting with 2.03.19 we need to add extra option to allow resizing of inactive LVs */
+        success = bd_utils_check_util_version (deps[DEPS_LVM].name, LVM_VERSION_FSRESIZE,
+                                            deps[DEPS_LVM].ver_arg, deps[DEPS_LVM].ver_regexp, &l_error);
+        if (success) {
+            g_variant_builder_init (&builder, G_VARIANT_TYPE_DICTIONARY);
+            g_variant_builder_add (&builder, "{sv}", "--fs", g_variant_new ("s", "ignore"));
+            extra_params = g_variant_builder_end (&builder);
+            g_variant_builder_clear (&builder);
+        } else
+            g_clear_error (&l_error);
+    }
+
+    bd_lvm_lvdata_free (lvinfo);
 
     call_lv_method_sync (vg_name, lv_name, "Resize", params, extra_params, extra, TRUE, error);
     return (*error == NULL);
