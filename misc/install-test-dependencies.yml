@@ -36,6 +36,7 @@
       - libfdisk-devel
       - keyutils-libs-devel
       - libnvme-devel
+      - e2fsprogs-devel
     when: ansible_distribution == 'Fedora'
 
   - name: Install test dependencies (Fedora)
@@ -46,7 +47,6 @@
       - device-mapper-multipath
       - dosfstools
       - e2fsprogs
-      - e2fsprogs-devel
       - exfatprogs
       - f2fs-tools
       - glibc-all-langpacks
@@ -101,6 +101,7 @@
     with_items:
       - libfdisk-devel
       - keyutils-libs-devel
+      - e2fsprogs-devel
     when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
 
   - name: Install test dependencies (CentOS 8)
@@ -110,7 +111,6 @@
       - device-mapper-multipath
       - dosfstools
       - e2fsprogs
-      - e2fsprogs-devel
       - glibc-all-langpacks
       - kmod-kvdo
       - lvm2-dbusd
@@ -164,6 +164,7 @@
     with_items:
       - libfdisk-dev
       - libkeyutils-dev
+      - libext2fs-dev
     when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
   - name: Install test dependencies (Debian/Ubuntu)
@@ -174,7 +175,6 @@
       - dosfstools
       - e2fsprogs
       - exfatprogs
-      - libext2fs-dev
       - f2fs-tools
       - libnss3-tools
       - locales-all
