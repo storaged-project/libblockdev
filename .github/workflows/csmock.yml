@@ -34,7 +34,7 @@ jobs:
 
       - name: Install test dependencies in the container
         run: |
-          podman exec -it ${{ env.CI_CONTAINER }} bash -c "ansible-playbook -i "localhost," -c local misc/install-test-dependencies.yml"
+          podman exec -it ${{ env.CI_CONTAINER }} bash -c "ansible-playbook -i "localhost," -c local misc/install-test-dependencies.yml -e 'test_dependencies=false'"
 
       - name: Run csmock build in the container
         run: |
