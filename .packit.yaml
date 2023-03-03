@@ -1,0 +1,55 @@
+actions:
+  post-upstream-clone:
+    - './autogen.sh'
+    - './configure'
+  create-archive:
+    - 'make'
+    - 'make local'
+    - 'bash -c "ls *.tar*"'
+
+jobs:
+- job: copr_build
+  metadata:
+    targets:
+    - fedora-rawhide-aarch64
+    - fedora-rawhide-ppc64le
+    - fedora-rawhide-x86_64
+    - fedora-latest-aarch64
+    - fedora-latest-ppc64le
+    - fedora-latest-x86_64
+    - fedora-latest-stable-aarch64
+    - fedora-latest-stable-ppc64le
+    - fedora-latest-stable-x86_64
+  trigger: pull_request
+
+srpm_build_deps:
+ - make
+ - gcc
+ - libtool
+ - autoconf
+ - autoconf-archive
+ - automake
+ - cryptsetup-devel
+ - device-mapper-devel
+ - e2fsprogs-devel
+ - glib2-devel
+ - glib2-doc
+ - gobject-introspection-devel
+ - gtk-doc
+ - keyutils-libs-devel
+ - kmod-devel
+ - libblkid-devel
+ - libbytesize-devel
+ - libfdisk-devel
+ - libmount-devel
+ - libnvme-devel
+ - libuuid-devel
+ - ndctl-devel
+ - nss-devel
+ - parted-devel
+ - python3-devel
+ - systemd-devel
+ - volume_key-devel
+
+downstream_package_name: libblockdev
+specfile_path: dist/libblockdev.spec
