@@ -45,6 +45,7 @@
 #endif
 
 #define LVM_MIN_VERSION "2.02.116"
+#define LVM_VERSION_FSRESIZE "2.03.19"
 
 static GMutex global_config_lock;
 static gchar *global_config_str = NULL;
@@ -1889,15 +1890,36 @@ gboolean bd_lvm_lvrename (const gchar *vg_name, const gchar *lv_name, const gcha
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_MODIFY
  */
 gboolean bd_lvm_lvresize (const gchar *vg_name, const gchar *lv_name, guint64 size, const BDExtraArg **extra, GError **error) {
-    const gchar *args[6] = {"lvresize", "--force", "-L", NULL, NULL, NULL};
+    const gchar *args[8] = {"lvresize", "--force", "-L", NULL, NULL, NULL, NULL, NULL};
     gboolean success = FALSE;
+    guint8 next_arg = 4;
+    g_autofree gchar *lvspec = NULL;
+    BDLVMLVdata *lvinfo = NULL;
+
+    lvinfo = bd_lvm_lvinfo (vg_name, lv_name, error);
+    if (!lvinfo)
+        /* error is already populated */
+        return FALSE;
 
     args[3] = g_strdup_printf ("%"G_GUINT64_FORMAT"K", size/1024);
-    args[4] = g_strdup_printf ("%s/%s", vg_name, lv_name);
+
+    if (lvinfo->attr[4] != 'a') {
+        /* starting with 2.03.19 we need to add extra option to allow resizing of inactive LVs */
+        success = bd_utils_check_util_version (deps[DEPS_LVM].name, LVM_VERSION_FSRESIZE,
+                                               deps[DEPS_LVM].ver_arg, deps[DEPS_LVM].ver_regexp, NULL);
+        if (success) {
+            args[next_arg++] = "--fs";
+            args[next_arg++] = "ignore";
+        }
+    }
+
+    bd_lvm_lvdata_free (lvinfo);
+
+    lvspec = g_strdup_printf ("%s/%s", vg_name, lv_name);
+    args[next_arg++] = lvspec;
 
     success = call_lvm_and_report_error (args, extra, TRUE, error);
     g_free ((gchar *) args[3]);
-    g_free ((gchar *) args[4]);
 
     return success;
 }
