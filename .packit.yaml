@@ -22,6 +22,20 @@ jobs:
     - fedora-latest-stable-x86_64
   trigger: pull_request
 
+- job: copr_build
+  trigger: commit
+  owner: "@storage"
+  project: blivet-daily
+  branch: master
+  preserve_project: true
+
+- job: copr_build
+  trigger: commit
+  owner: "@storage"
+  project: udisks-daily
+  branch: master
+  preserve_project: true
+
 srpm_build_deps:
  - make
  - gcc
