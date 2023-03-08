@@ -7,6 +7,8 @@
 ---
 - hosts: all
   become: true
+  vars:
+    test_dependencies: true  # whether to install test dependencies or not
 
   tasks:
 ####### Fedora
@@ -34,6 +36,7 @@
       - libfdisk-devel
       - keyutils-libs-devel
       - libnvme-devel
+      - e2fsprogs-devel
     when: ansible_distribution == 'Fedora'
 
   - name: Install test dependencies (Fedora)
@@ -44,7 +47,6 @@
       - device-mapper-multipath
       - dosfstools
       - e2fsprogs
-      - e2fsprogs-devel
       - exfatprogs
       - f2fs-tools
       - glibc-all-langpacks
@@ -65,7 +67,7 @@
       - udftools
       - volume_key
       - xfsprogs
-    when: ansible_distribution == 'Fedora'
+    when: ansible_distribution == 'Fedora' and test_dependencies|bool
 
 ####### CentOS 8
   - name: Install basic build tools (CentOS 8)
@@ -99,6 +101,7 @@
     with_items:
       - libfdisk-devel
       - keyutils-libs-devel
+      - e2fsprogs-devel
     when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
 
   - name: Install test dependencies (CentOS 8)
@@ -108,7 +111,6 @@
       - device-mapper-multipath
       - dosfstools
       - e2fsprogs
-      - e2fsprogs-devel
       - glibc-all-langpacks
       - kmod-kvdo
       - lvm2-dbusd
@@ -127,7 +129,7 @@
       - vdo
       - volume_key
       - xfsprogs
-    when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
+    when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8' and test_dependencies|bool
 
 ####### Debian/Ubuntu
   - name: Update apt cache (Debian/Ubuntu)
@@ -162,6 +164,7 @@
     with_items:
       - libfdisk-dev
       - libkeyutils-dev
+      - libext2fs-dev
     when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
   - name: Install test dependencies (Debian/Ubuntu)
@@ -172,7 +175,6 @@
       - dosfstools
       - e2fsprogs
       - exfatprogs
-      - libext2fs-dev
       - f2fs-tools
       - libnss3-tools
       - locales-all
@@ -190,10 +192,11 @@
       - udftools
       - volume-key
       - xfsprogs
-    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' and test_dependencies|bool
 
 ####### Common actions
 
   - name: Start LVM DBus service
     service: name=lvm2-lvmdbusd state=started
     ignore_errors: yes
+    when: test_dependencies|bool
