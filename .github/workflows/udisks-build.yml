@@ -1,0 +1,45 @@
+name: UDisks build
+
+on:
+  pull_request:
+    branches:
+     - master
+
+jobs:
+  build:
+    name: udisks-build
+    runs-on: ubuntu-22.04
+    env:
+      CI_CONTAINER: libblockdev-ci-udisks-build
+    steps:
+      - name: Checkout libblockdev repository
+        uses: actions/checkout@v3
+
+      - name: Install podman
+        run: |
+          sudo apt -qq update
+          sudo apt -y -qq install podman
+
+      - name: Build the container
+        run: |
+          podman build --no-cache -t ${{ env.CI_CONTAINER }} -f misc/ci.Dockerfile .
+
+      - name: Start the container
+        run: |
+          podman run -d -t --name ${{ env.CI_CONTAINER }} --privileged --volume "$(pwd):/app" --workdir "/app" ${{ env.CI_CONTAINER }}
+
+      - name: Install UDisks build dependencies in the container
+        run: |
+          podman exec -it ${{ env.CI_CONTAINER }} bash -c "dnf -y builddep --skip-unavailable /udisks/packaging/udisks2.spec"
+
+      - name: Install libblockdev build dependencies in the container
+        run: |
+          podman exec -it ${{ env.CI_CONTAINER }} bash -c "ansible-playbook -i "localhost," -c local misc/install-test-dependencies.yml -e 'test_dependencies=false'"
+
+      - name: Build and install libblockdev in the container
+        run: |
+          podman exec -it ${{ env.CI_CONTAINER }} bash -c "./autogen.sh && ./configure --prefix=/usr && make -j && make install"
+
+      - name: Build UDisks in the container
+        run: |
+          podman exec -it ${{ env.CI_CONTAINER }} bash -c "cd /udisks && ./autogen.sh --enable-modules && make -j"
