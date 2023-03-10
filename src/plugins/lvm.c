@@ -22,6 +22,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <blockdev/utils.h>
+#include <libdevmapper.h>
 
 #include "lvm.h"
 #include "check_deps.h"
@@ -31,10 +32,25 @@
 #define INT_FLOAT_EPS 1e-5
 #define SECTOR_SIZE 512
 #define VDO_POOL_SUFFIX "vpool"
+#define DEFAULT_PE_SIZE (4 MiB)
 #define USE_DEFAULT_PE_SIZE 0
-#define RESOLVE_PE_SIZE(size) ((size) == USE_DEFAULT_PE_SIZE ? BD_LVM_DEFAULT_PE_SIZE : (size))
+#define RESOLVE_PE_SIZE(size) ((size) == USE_DEFAULT_PE_SIZE ? DEFAULT_PE_SIZE : (size))
 #define THPOOL_MD_FACTOR_NEW (0.2)
 #define THPOOL_MD_FACTOR_EXISTS (1 / 6.0)
+
+#define MIN_PE_SIZE (1 KiB)
+#define MAX_PE_SIZE (16 GiB)
+
+#define MIN_THPOOL_MD_SIZE (4 MiB)
+/* DM_THIN_MAX_METADATA_SIZE is in 512 sectors */
+#define MAX_THPOOL_MD_SIZE (DM_THIN_MAX_METADATA_SIZE * 512)
+
+#define MIN_THPOOL_CHUNK_SIZE (64 KiB)
+#define MAX_THPOOL_CHUNK_SIZE (1 GiB)
+#define DEFAULT_CHUNK_SIZE (64 KiB)
+
+/* according to lvmcache (7) */
+#define MIN_CACHE_MD_SIZE (8 MiB)
 
 #ifdef __LP64__
 /* 64bit system */
@@ -932,7 +948,7 @@ static BDLVMVDOPooldata* get_vdo_data_from_table (GHashTable *table, gboolean fr
  * Tech category: %BD_LVM_TECH_CALCS no mode (it is ignored)
  */
 gboolean bd_lvm_is_supported_pe_size (guint64 size, GError **error UNUSED) {
-    return (((size % 2) == 0) && (size >= (BD_LVM_MIN_PE_SIZE)) && (size <= (BD_LVM_MAX_PE_SIZE)));
+    return (((size % 2) == 0) && (size >= (MIN_PE_SIZE)) && (size <= (MAX_PE_SIZE)));
 }
 
 /**
@@ -945,11 +961,11 @@ gboolean bd_lvm_is_supported_pe_size (guint64 size, GError **error UNUSED) {
  */
 guint64 *bd_lvm_get_supported_pe_sizes (GError **error UNUSED) {
     guint8 i;
-    guint64 val = BD_LVM_MIN_PE_SIZE;
-    guint8 num_items = ((guint8) round (log2 ((double) BD_LVM_MAX_PE_SIZE))) - ((guint8) round (log2 ((double) BD_LVM_MIN_PE_SIZE))) + 2;
+    guint64 val = MIN_PE_SIZE;
+    guint8 num_items = ((guint8) round (log2 ((double) MAX_PE_SIZE))) - ((guint8) round (log2 ((double) MIN_PE_SIZE))) + 2;
     guint64 *ret = g_new0 (guint64, num_items);
 
-    for (i=0; (val <= BD_LVM_MAX_PE_SIZE); i++, val = val * 2)
+    for (i=0; (val <= MAX_PE_SIZE); i++, val = val * 2)
         ret[i] = val;
 
     ret[num_items-1] = 0;
@@ -1039,13 +1055,13 @@ guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean inclu
         raw_md_size = (guint64) ceil (size * THPOOL_MD_FACTOR_NEW);
 
     return MIN (bd_lvm_round_size_to_pe(raw_md_size, pe_size, TRUE, error),
-                bd_lvm_round_size_to_pe(BD_LVM_MAX_THPOOL_MD_SIZE, pe_size, TRUE, error));
+                bd_lvm_round_size_to_pe(MAX_THPOOL_MD_SIZE, pe_size, TRUE, error));
 }
 
 /**
  * bd_lvm_get_thpool_meta_size:
  * @size: size of the thin pool
- * @chunk_size: chunk size of the thin pool or 0 to use the default (%BD_LVM_DEFAULT_CHUNK_SIZE)
+ * @chunk_size: chunk size of the thin pool or 0 to use the default
  * @n_snapshots: ignored
  * @error: (out) (optional): place to store error (if any)
  *
@@ -1060,12 +1076,12 @@ guint64 bd_lvm_get_thpool_meta_size (guint64 size, guint64 chunk_size, guint64 n
     guint64 md_size = 0;
 
     /* based on lvcreate metadata size calculation */
-    md_size = UINT64_C(64) * size / (chunk_size ? chunk_size : BD_LVM_DEFAULT_CHUNK_SIZE);
+    md_size = UINT64_C(64) * size / (chunk_size ? chunk_size : DEFAULT_CHUNK_SIZE);
 
-    if (md_size > BD_LVM_MAX_THPOOL_MD_SIZE)
-        md_size = BD_LVM_MAX_THPOOL_MD_SIZE;
-    else if (md_size < BD_LVM_MIN_THPOOL_MD_SIZE)
-        md_size = BD_LVM_MIN_THPOOL_MD_SIZE;
+    if (md_size > MAX_THPOOL_MD_SIZE)
+        md_size = MAX_THPOOL_MD_SIZE;
+    else if (md_size < MIN_THPOOL_MD_SIZE)
+        md_size = MIN_THPOOL_MD_SIZE;
 
     return md_size;
 }
@@ -1080,7 +1096,7 @@ guint64 bd_lvm_get_thpool_meta_size (guint64 size, guint64 chunk_size, guint64 n
  * Tech category: %BD_LVM_TECH_THIN_CALCS no mode (it is ignored)
  */
 gboolean bd_lvm_is_valid_thpool_md_size (guint64 size, GError **error UNUSED) {
-    return ((BD_LVM_MIN_THPOOL_MD_SIZE <= size) && (size <= BD_LVM_MAX_THPOOL_MD_SIZE));
+    return ((MIN_THPOOL_MD_SIZE <= size) && (size <= MAX_THPOOL_MD_SIZE));
 }
 
 /**
@@ -1096,7 +1112,7 @@ gboolean bd_lvm_is_valid_thpool_md_size (guint64 size, GError **error UNUSED) {
 gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard, GError **error UNUSED) {
     gdouble size_log2 = 0.0;
 
-    if ((size < BD_LVM_MIN_THPOOL_CHUNK_SIZE) || (size > BD_LVM_MAX_THPOOL_CHUNK_SIZE))
+    if ((size < MIN_THPOOL_CHUNK_SIZE) || (size > MAX_THPOOL_CHUNK_SIZE))
         return FALSE;
 
     /* To support discard, chunk size must be a power of two. Otherwise it must be a
@@ -2621,7 +2637,7 @@ gchar** bd_lvm_get_devices_filter (GError **error UNUSED) {
  * Tech category: %BD_LVM_TECH_CACHE_CALCS no mode (it is ignored)
  */
 guint64 bd_lvm_cache_get_default_md_size (guint64 cache_size, GError **error UNUSED) {
-    return MAX ((guint64) cache_size / 1000, BD_LVM_MIN_CACHE_MD_SIZE);
+    return MAX ((guint64) cache_size / 1000, MIN_CACHE_MD_SIZE);
 }
 
 /**

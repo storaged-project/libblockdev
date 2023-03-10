@@ -19,6 +19,13 @@
     <literal>BD_LVM_MAX_LV_SIZE</literal> constant has been removed, use <literal>bd_lvm_get_max_lv_size()</literal> instead.
   </para>
 
+  <para>
+    Multiple thinpool and cache metadata size related constants have been removed without replacement. We recommend using functions like <literal>bd_lvm_get_thpool_meta_size</literal> instead.
+    Removed constants: <literal>BD_LVM_MIN_THPOOL_MD_SIZE</literal>, <literal>BD_LVM_MAX_THPOOL_MD_SIZE</literal>, <literal>BD_LVM_MIN_THPOOL_CHUNK_SIZE</literal>,
+    <literal>BD_LVM_MIN_CACHE_MD_SIZE</literal>, <literal>BD_LVM_DEFAULT_CHUNK_SIZE</literal>, <literal>BD_LVM_MAX_PE_SIZE</literal>, <literal>BD_LVM_MIN_PE_SIZE</literal>,
+    <literal>BD_LVM_DEFAULT_PE_START</literal> and <literal>BD_LVM_DEFAULT_PE_SIZE</literal>.
+  </para>
+
   </simplesect>
 
   <simplesect><title>VDO plugin</title>

@@ -190,8 +190,9 @@ class LvmNoDevTestCase(LVMTestCase):
         self.assertEqual(BlockDev.lvm_get_thpool_meta_size(1 * 1024**4, 128 * 1024),
                          512 * 1024**2)
 
+        # min metadata size is 4 MiB
         self.assertEqual(BlockDev.lvm_get_thpool_meta_size(100 * 1024**2, 128 * 1024),
-                         BlockDev.LVM_MIN_THPOOL_MD_SIZE)
+                         4 * 1024**2)
 
     @tag_test(TestTags.NOSTORAGE)
     def test_is_valid_thpool_md_size(self):
