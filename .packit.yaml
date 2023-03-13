@@ -6,6 +6,8 @@ actions:
     - 'make'
     - 'make local'
     - 'bash -c "ls *.tar*"'
+  get-current-version:
+    - 'bash -c "./configure --version | head -n1 | cut -f3 -d\" \""'
 
 jobs:
 - job: copr_build
