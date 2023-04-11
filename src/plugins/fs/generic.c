@@ -1275,32 +1275,6 @@ gboolean bd_fs_set_uuid (const gchar *device, const gchar *uuid, const gchar *fs
     return device_operation (device, fstype, BD_FS_UUID, 0, NULL, uuid, error);
 }
 
-static BDFSXfsInfo* xfs_get_info (const gchar *device, GError **error) {
-    g_autofree gchar* mountpoint = NULL;
-    gboolean unmount = FALSE;
-    gboolean ret = FALSE;
-    GError *local_error = NULL;
-    BDFSXfsInfo* xfs_info = NULL;
-
-    mountpoint = fs_mount (device, "xfs", &unmount, error);
-    if (!mountpoint)
-        return NULL;
-
-    xfs_info = bd_fs_xfs_get_info (device, error);
-
-    if (unmount) {
-        ret = bd_fs_unmount (mountpoint, FALSE, FALSE, NULL, &local_error);
-        if (!ret) {
-            bd_utils_log_format (BD_UTILS_LOG_INFO, "Failed to unmount %s after getting information about it: %s", device, local_error->message);
-            g_clear_error (&local_error);
-        } else
-            if (g_rmdir (mountpoint) != 0)
-                bd_utils_log_format (BD_UTILS_LOG_INFO, "Failed to remove temporary mountpoint '%s'", mountpoint);
-    }
-
-    return xfs_info;
-}
-
 /**
  * bd_fs_get_size:
  * @device: the device with file system to get size for
@@ -1347,7 +1321,7 @@ guint64 bd_fs_get_size (const gchar *device, const gchar *fstype, GError **error
         return size;
 
     } else if (g_strcmp0 (detected_fstype, "xfs") == 0) {
-        BDFSXfsInfo *info = xfs_get_info (device, error);
+        BDFSXfsInfo *info = bd_fs_xfs_get_info (device, error);
         if (info) {
             size = info->block_size * info->block_count;
             bd_fs_xfs_info_free (info);
