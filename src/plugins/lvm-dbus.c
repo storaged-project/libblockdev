@@ -1430,8 +1430,6 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error UNUS
 
     g_variant_dict_lookup (&dict, "MovePv", "o", &path);
     if (path && g_strcmp0 (path, "/") != 0) {
-        g_debug ("Have path");
-        g_debug ("  %s", path);
         name = get_object_property (path, PV_INTF, "Name", NULL);
         g_variant_get (name, "s", &(data->move_pv));
         g_variant_unref (name);
