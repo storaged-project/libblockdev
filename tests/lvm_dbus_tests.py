@@ -1848,14 +1848,6 @@ class LvmPVVGcachedThpoolstatsTestCase(LvmPVVGLVTestCase):
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LVMTechTest(LVMTestCase):
 
-    def setUp(self):
-        # set init checks to false -- we want runtime checks for this
-        BlockDev.switch_init_checks(False)
-
-        # set everything back and reinit just to be sure
-        self.addCleanup(BlockDev.switch_init_checks, True)
-        self.addCleanup(BlockDev.reinit, [self.ps, self.ps2], True, None)
-
     @tag_test(TestTags.NOSTORAGE)
     def test_tech_available(self):
         """Verify that checking lvm dbus availability by technology works as expected"""

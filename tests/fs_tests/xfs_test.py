@@ -26,13 +26,6 @@ class XfsTestCase(FSTestCase):
 
 class XfsTestAvailability(XfsNoDevTestCase):
 
-    def setUp(self):
-        super(XfsTestAvailability, self).setUp()
-
-        # set everything back and reinit just to be sure
-        self.addCleanup(BlockDev.switch_init_checks, True)
-        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
-
     def test_xfs_available(self):
         """Verify that it is possible to check xfs tech availability"""
         available = BlockDev.fs_is_tech_avail(BlockDev.FSTech.XFS,
@@ -45,7 +38,6 @@ class XfsTestAvailability(XfsNoDevTestCase):
                                               BlockDev.FSTechMode.SET_UUID)
         self.assertTrue(available)
 
-        BlockDev.switch_init_checks(False)
         BlockDev.reinit(self.requested_plugins, True, None)
 
         # now try without mkfs.xfs

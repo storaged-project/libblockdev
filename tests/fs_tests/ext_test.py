@@ -22,13 +22,6 @@ class ExtTestCase(FSTestCase):
 
 class ExtTestAvailability(ExtNoDevTestCase):
 
-    def setUp(self):
-        super(ExtTestAvailability, self).setUp()
-
-        # set everything back and reinit just to be sure
-        self.addCleanup(BlockDev.switch_init_checks, True)
-        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
-
     def _test_ext_available(self, tech):
         available = BlockDev.fs_is_tech_avail(tech,
                                               BlockDev.FSTechMode.MKFS |
@@ -40,7 +33,6 @@ class ExtTestAvailability(ExtNoDevTestCase):
                                               BlockDev.FSTechMode.SET_UUID)
         self.assertTrue(available)
 
-        BlockDev.switch_init_checks(False)
         BlockDev.reinit(self.requested_plugins, True, None)
 
         # now try without mke2fs

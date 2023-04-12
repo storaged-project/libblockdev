@@ -29,13 +29,6 @@ class ExfatTestCase(FSTestCase):
 
 class ExfatTestAvailability(ExfatNoDevTestCase):
 
-    def setUp(self):
-        super(ExfatTestAvailability, self).setUp()
-
-        # set everything back and reinit just to be sure
-        self.addCleanup(BlockDev.switch_init_checks, True)
-        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
-
     def test_exfat_available(self):
         """Verify that it is possible to check exfat tech availability"""
         available = BlockDev.fs_is_tech_avail(BlockDev.FSTech.EXFAT,
@@ -51,8 +44,6 @@ class ExfatTestAvailability(ExfatNoDevTestCase):
         with self.assertRaisesRegex(GLib.GError, "doesn't support resizing"):
             BlockDev.fs_is_tech_avail(BlockDev.FSTech.EXFAT, BlockDev.FSTechMode.RESIZE)
 
-
-        BlockDev.switch_init_checks(False)
         BlockDev.reinit(self.requested_plugins, True, None)
 
         # now try without mkfs.exfat

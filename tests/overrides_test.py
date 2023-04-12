@@ -15,12 +15,10 @@ class OverridesTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        BlockDev.switch_init_checks(False)
         if not BlockDev.is_initialized():
             BlockDev.init(cls.requested_plugins, None)
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
-        BlockDev.switch_init_checks(True)
 
 class OverridesTestCase(OverridesTest):
     @tag_test(TestTags.NOSTORAGE, TestTags.CORE)

@@ -50,13 +50,6 @@ class F2FSTestCase(FSTestCase):
 
 class F2FSTestAvailability(F2FSNoDevTestCase):
 
-    def setUp(self):
-        super(F2FSTestAvailability, self).setUp()
-
-        # set everything back and reinit just to be sure
-        self.addCleanup(BlockDev.switch_init_checks, True)
-        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
-
     def test_f2fs_available(self):
         """Verify that it is possible to check f2fs tech availability"""
         available = BlockDev.fs_is_tech_avail(BlockDev.FSTech.F2FS,
@@ -81,8 +74,6 @@ class F2FSTestAvailability(F2FSNoDevTestCase):
                                                   BlockDev.FSTechMode.RESIZE)
             self.assertTrue(available)
 
-
-        BlockDev.switch_init_checks(False)
         BlockDev.reinit(self.requested_plugins, True, None)
 
         # now try without mkfs.f2fs
@@ -109,7 +100,6 @@ class F2FSTestAvailability(F2FSNoDevTestCase):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.F2FS, BlockDev.FSTechMode.RESIZE)
 
     def test_f2fs_fsck_too_low(self):
-        BlockDev.switch_init_checks(False)
         BlockDev.reinit(self.requested_plugins, True, None)
 
         # now try fake "low version of f2fs

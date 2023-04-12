@@ -62,37 +62,6 @@ static const UtilDep deps[DEPS_LAST] = {
 
 
 /**
- * bd_dm_check_deps:
- *
- * Returns: whether the plugin's runtime dependencies are satisfied or not
- *
- * Function checking plugin's runtime dependencies.
- *
- */
-gboolean bd_dm_check_deps (void) {
-    GError *error = NULL;
-    guint i = 0;
-    gboolean status = FALSE;
-    gboolean ret = TRUE;
-
-    for (i=0; i < DEPS_LAST; i++) {
-        status = bd_utils_check_util_version (deps[i].name, deps[i].version,
-                                              deps[i].ver_arg, deps[i].ver_regexp, &error);
-        if (!status)
-            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
-        else
-            g_atomic_int_or (&avail_deps, 1 << i);
-        g_clear_error (&error);
-        ret = ret && status;
-    }
-
-    if (!ret)
-        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Cannot load the DM plugin");
-
-    return ret;
-}
-
-/**
  * bd_dm_init:
  *
  * Initializes the plugin. **This function is called automatically by the

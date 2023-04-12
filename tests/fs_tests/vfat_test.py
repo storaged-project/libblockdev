@@ -38,13 +38,6 @@ class VfatTestCase(FSTestCase):
 
 class VfatTestAvailability(VfatNoDevTestCase):
 
-    def setUp(self):
-        super(VfatTestAvailability, self).setUp()
-
-        # set everything back and reinit just to be sure
-        self.addCleanup(BlockDev.switch_init_checks, True)
-        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
-
     def test_vfat_available(self):
         """Verify that it is possible to check vfat tech availability"""
         available = BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT,
@@ -59,7 +52,6 @@ class VfatTestAvailability(VfatNoDevTestCase):
         with self.assertRaisesRegex(GLib.GError, "doesn't support setting UUID"):
             BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.SET_UUID)
 
-        BlockDev.switch_init_checks(False)
         BlockDev.reinit(self.requested_plugins, True, None)
 
         # now try without mkfs.vfat

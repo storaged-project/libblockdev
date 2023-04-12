@@ -536,13 +536,11 @@ class BtrfsJustBigEnoughTestCase (BtrfsTestCase):
 
 
 class FakeBtrfsUtilsTestCase(BtrfsTestCase):
-    # no setUp nor tearDown needed, we are gonna use fake utils
-    def setUp(self):
-        pass
-
     @tag_test(TestTags.NOSTORAGE)
     def test_list_subvols_weird_docker_data(self):
         """Verify that list_subvolumes works as expected on weird data from one Docker use case"""
+
+        BlockDev.btrfs_is_tech_avail(BlockDev.BtrfsTech.FS, 0)
 
         with fake_utils("tests/fake_utils/btrfs_subvols_docker"):
             subvols = BlockDev.btrfs_list_subvolumes("fake_dev", False)
@@ -556,60 +554,23 @@ class FakeBtrfsUtilsTestCase(BtrfsTestCase):
         # check that one of the weird subvols is in the list of subvolumes
         self.assertTrue(any(subvol for subvol in subvols if subvol.path == "docker/btrfs/subvolumes/f2062b736fbabbe4da752632ac4deae87fcb916add6d7d8f5cecee4cbdc41fd9"))
 
-class BTRFSUnloadTest(BtrfsTestCase):
-    def setUp(self):
-        # make sure the library is initialized with all plugins loaded for other
-        # tests
-        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
-
+class BTRFSSkipTest(BtrfsTestCase):
     @tag_test(TestTags.NOSTORAGE)
-    def test_check_low_version(self):
-        """Verify that checking the minimum BTRFS version works as expected"""
-
-        # unload all plugins first
-        self.assertTrue(BlockDev.reinit([], True, None))
+    def test_missing_dependencies(self):
+        """Verify that checking for technology support works as expected"""
 
         with fake_utils("tests/fake_utils/btrfs_low_version/"):
-            # too low version of BTRFS available, the BTRFS plugin should fail to load
-            with self.assertRaises(GLib.GError):
-                BlockDev.reinit(self.requested_plugins, True, None)
+            # too low version of BTRFS available
+            with self.assertRaisesRegexp(GLib.GError, "Too low version of btrfs"):
+                BlockDev.btrfs_is_tech_avail(BlockDev.BtrfsTech.FS, 0)
 
-            self.assertNotIn("btrfs", BlockDev.get_available_plugin_names())
-
-        # load the plugins back
-        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
-        self.assertIn("btrfs", BlockDev.get_available_plugin_names())
-
-    @tag_test(TestTags.NOSTORAGE)
-    def test_check_new_version_format(self):
-        """Verify that checking the minimum BTRFS version works as expected with the new format"""
-
-        # unload all plugins first
-        self.assertTrue(BlockDev.reinit([], True, None))
+        with fake_path(all_but="btrfs"):
+            # no btrfs tool available
+            with self.assertRaisesRegexp(GLib.GError, "The 'btrfs' utility is not available"):
+                BlockDev.btrfs_is_tech_avail(BlockDev.BtrfsTech.FS, 0)
 
         # check that new version format is correctly parsed
         with fake_utils("tests/fake_utils/btrfs_new_version_format/"):
-            BlockDev.reinit(self.requested_plugins, True, None)
+            avail = BlockDev.btrfs_is_tech_avail(BlockDev.BtrfsTech.FS, 0)
+            self.assertTrue(avail)
 
-        self.assertIn("btrfs", BlockDev.get_available_plugin_names())
-
-        BlockDev.reinit(self.requested_plugins, True, None)
-        self.assertIn("btrfs", BlockDev.get_available_plugin_names())
-
-    @tag_test(TestTags.NOSTORAGE)
-    def test_check_no_btrfs(self):
-        """Verify that checking btrfs tool availability works as expected"""
-
-        # unload all plugins first
-        self.assertTrue(BlockDev.reinit([], True, None))
-
-        with fake_path(all_but="btrfs"):
-            # no btrfs tool available, the BTRFS plugin should fail to load
-            with self.assertRaises(GLib.GError):
-                BlockDev.reinit(self.requested_plugins, True, None)
-
-            self.assertNotIn("btrfs", BlockDev.get_available_plugin_names())
-
-        # load the plugins back
-        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
-        self.assertIn("btrfs", BlockDev.get_available_plugin_names())

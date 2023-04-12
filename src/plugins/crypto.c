@@ -280,19 +280,6 @@ BDCryptoLUKSTokenInfo* bd_crypto_luks_token_info_copy (BDCryptoLUKSTokenInfo *in
 /* "C" locale to get the locale-agnostic error messages */
 static locale_t c_locale = (locale_t) 0;
 
-/**
- * bd_crypto_check_deps:
- *
- * Returns: whether the plugin's runtime dependencies are satisfied or not
- *
- * Function checking plugin's runtime dependencies.
- *
- */
-gboolean bd_crypto_check_deps (void) {
-    /* nothing to do here */
-    return TRUE;
-}
-
 static void crypto_log_redirect (gint level, const gchar *msg, void *usrptr __attribute__((unused))) {
     gchar *message = NULL;
 

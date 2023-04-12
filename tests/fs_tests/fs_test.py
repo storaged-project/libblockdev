@@ -40,12 +40,10 @@ class FSNoDevTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        BlockDev.switch_init_checks(False)
         if not BlockDev.is_initialized():
             BlockDev.init(cls.requested_plugins, None)
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
-        BlockDev.switch_init_checks(True)
 
         try:
             cls.ntfs_avail = BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS,

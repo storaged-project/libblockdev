@@ -29,13 +29,6 @@ class NILFS2TestCase(FSTestCase):
 
 class NILFS2TestAvailability(NILFS2NoDevTestCase):
 
-    def setUp(self):
-        super(NILFS2TestAvailability, self).setUp()
-
-        # set everything back and reinit just to be sure
-        self.addCleanup(BlockDev.switch_init_checks, True)
-        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
-
     def test_nilfs2_available(self):
         """Verify that it is possible to check nilfs2 tech availability"""
         available = BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2,
@@ -52,7 +45,6 @@ class NILFS2TestAvailability(NILFS2NoDevTestCase):
         with self.assertRaisesRegex(GLib.GError, "doesn't support filesystem repair"):
             BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2, BlockDev.FSTechMode.REPAIR)
 
-        BlockDev.switch_init_checks(False)
         BlockDev.reinit(self.requested_plugins, True, None)
 
         # now try without mkfs.nilfs2

@@ -8,13 +8,11 @@ bd_try_init
 bd_reinit
 bd_try_reinit
 bd_is_initialized
-bd_switch_init_checks
 bd_init_error_quark
 </SECTION>
 
 <SECTION>
 <FILE>btrfs</FILE>
-bd_btrfs_check_deps
 bd_btrfs_init
 bd_btrfs_close
 BD_BTRFS_MAIN_VOLUME_ID
@@ -54,7 +52,6 @@ bd_btrfs_is_tech_avail
 
 <SECTION>
 <FILE>crypto</FILE>
-bd_crypto_check_deps
 bd_crypto_close
 bd_crypto_init
 bd_crypto_error_quark
@@ -137,7 +134,6 @@ bd_crypto_is_tech_avail
 
 <SECTION>
 <FILE>dm</FILE>
-bd_dm_check_deps
 bd_dm_close
 bd_dm_init
 bd_dm_error_quark
@@ -246,7 +242,6 @@ BD_UTILS_LOG_DEBUG
 
 <SECTION>
 <FILE>loop</FILE>
-bd_loop_check_deps
 bd_loop_init
 bd_loop_close
 bd_loop_error_quark
@@ -266,7 +261,6 @@ bd_loop_is_tech_avail
 
 <SECTION>
 <FILE>lvm</FILE>
-bd_lvm_check_deps
 bd_lvm_close
 bd_lvm_init
 bd_lvm_error_quark
@@ -392,7 +386,6 @@ bd_lvm_is_tech_avail
 
 <SECTION>
 <FILE>mdraid</FILE>
-bd_md_check_deps
 bd_md_init
 bd_md_close
 BD_MD_SUPERBLOCK_SIZE
@@ -433,7 +426,6 @@ bd_md_is_tech_avail
 
 <SECTION>
 <FILE>mpath</FILE>
-bd_mpath_check_deps
 bd_mpath_init
 bd_mpath_close
 bd_mpath_error_quark
@@ -465,7 +457,6 @@ bd_plugin_spec_get_type
 
 <SECTION>
 <FILE>swap</FILE>
-bd_swap_check_deps
 bd_swap_init
 bd_swap_close
 bd_swap_error_quark
@@ -483,7 +474,6 @@ bd_swap_is_tech_avail
 
 <SECTION>
 <FILE>part</FILE>
-bd_part_check_deps
 bd_part_init
 bd_part_close
 BD_PART_ERROR
@@ -525,7 +515,6 @@ bd_part_disk_spec_free
 
 <SECTION>
 <FILE>fs</FILE>
-bd_fs_check_deps
 bd_fs_init
 bd_fs_close
 BDFSExt2Info
@@ -697,7 +686,6 @@ bd_fs_udf_check_uuid
 
 <SECTION>
 <FILE>s390</FILE>
-bd_s390_check_deps
 bd_s390_init
 bd_s390_close
 bd_s390_error_quark
@@ -721,7 +709,6 @@ bd_s390_is_tech_avail
 
 <SECTION>
 <FILE>nvdimm</FILE>
-bd_nvdimm_check_deps
 bd_nvdimm_close
 bd_nvdimm_init
 bd_nvdimm_error_quark
@@ -747,7 +734,6 @@ bd_nvdimm_is_tech_avail
 
 <SECTION>
 <FILE>nvme</FILE>
-bd_nvme_check_deps
 bd_nvme_close
 bd_nvme_init
 bd_nvme_error_quark
