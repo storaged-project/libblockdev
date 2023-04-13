@@ -42,6 +42,7 @@ class MpathTestCase(MpathTest):
         # device and no error is reported
         self.assertFalse(BlockDev.mpath_is_mpath_member("/dev/loop0"))
 
+class MpathNoDevTestCase(MpathTest):
     @tag_test(TestTags.NOSTORAGE)
     def test_get_mpath_members(self):
         """Verify that get_mpath_members works as expected"""

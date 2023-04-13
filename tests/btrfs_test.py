@@ -18,8 +18,7 @@ def wipefs(device):
     os.system("wipefs -a %s > /dev/null" % device)
 
 
-class BtrfsTestCase(unittest.TestCase):
-
+class BtrfsTest(unittest.TestCase):
     requested_plugins = BlockDev.plugin_specs_from_names(("btrfs",))
 
     @classmethod
@@ -35,6 +34,9 @@ class BtrfsTestCase(unittest.TestCase):
             BlockDev.init(cls.requested_plugins, None)
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
+
+
+class BtrfsTestCase(BtrfsTest):
 
     def setUp(self):
         self.addCleanup(self._clean_up)
@@ -535,7 +537,7 @@ class BtrfsJustBigEnoughTestCase (BtrfsTestCase):
         self.assertTrue(succ)
 
 
-class FakeBtrfsUtilsTestCase(BtrfsTestCase):
+class FakeBtrfsUtilsTestCase(BtrfsTest):
     @tag_test(TestTags.NOSTORAGE)
     def test_list_subvols_weird_docker_data(self):
         """Verify that list_subvolumes works as expected on weird data from one Docker use case"""
@@ -554,7 +556,7 @@ class FakeBtrfsUtilsTestCase(BtrfsTestCase):
         # check that one of the weird subvols is in the list of subvolumes
         self.assertTrue(any(subvol for subvol in subvols if subvol.path == "docker/btrfs/subvolumes/f2062b736fbabbe4da752632ac4deae87fcb916add6d7d8f5cecee4cbdc41fd9"))
 
-class BTRFSSkipTest(BtrfsTestCase):
+class BTRFSSkipTest(BtrfsTest):
     @tag_test(TestTags.NOSTORAGE)
     def test_missing_dependencies(self):
         """Verify that checking for technology support works as expected"""
