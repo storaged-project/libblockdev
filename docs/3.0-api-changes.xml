@@ -5,6 +5,16 @@
   This is a list of API changes in libblockdev 3.0 with suggested replacements.
   </para>
 
+  <simplesect><title>Library</title>
+  <para>
+    <literal>bd_switch_init_checks()</literal> has been removed. Checks for runtime dependencies during libblockdev initialization are now disabled and plugins will be loaded even if a runtime dependency is missing.
+  </para>
+  <para>
+    <literal>bd_"plugin"_check_deps</literal> functions have been removed from all plugins. Use <literal>bd_"plugin"_is_tech_avail</literal> to check for plugin dependencies.
+  </para>
+
+  </simplesect>
+
   <simplesect><title>LVM plugin</title>
 
   <para>
