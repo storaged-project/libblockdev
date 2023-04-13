@@ -184,10 +184,6 @@ class BtrfsTestCreateDeleteSubvolume(BtrfsTestCase):
     def test_create_delete_subvolume(self):
         """Verify that it is possible to create/delete subvolume"""
 
-        btrfs_version = self._get_btrfs_version()
-        if btrfs_version >= Version('4.13.2'):
-            self.skipTest('subvolumes list is broken with btrfs-progs v4.13.2')
-
         succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None, None)
         self.assertTrue(succ)
 
