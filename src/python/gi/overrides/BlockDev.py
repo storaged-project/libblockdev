@@ -995,6 +995,12 @@ def md_activate(raid_spec=None, members=None, uuid=None, start_degraded=True, ex
 __all__.append("md_activate")
 
 
+# XXX enums with just one member are broken with GI
+class MDTech():
+    MDRAID = BlockDev.MDTech.MD_TECH_MDRAID
+__all__.append("MDTech")
+
+
 if os.uname()[4].startswith('s390'):
     _s390_dasd_format = BlockDev.s390_dasd_format
     @override(BlockDev.s390_dasd_format)
@@ -1016,6 +1022,12 @@ _swap_swapon = BlockDev.swap_swapon
 def swap_swapon(device, priority=-1):
     return _swap_swapon(device, priority)
 __all__.append("swap_swapon")
+
+
+# XXX enums with just one member are broken with GI
+class SwapTech():
+    SWAP = BlockDev.SwapTech.SWAP_TECH_SWAP
+__all__.append("SwapTech")
 
 
 _part_create_table = BlockDev.part_create_table
@@ -1059,6 +1071,12 @@ def nvdimm_namespace_disable(namespace, extra=None, **kwargs):
     extra = _get_extra(extra, kwargs)
     return _nvdimm_namespace_disable(namespace, extra)
 __all__.append("nvdimm_namespace_disable")
+
+
+# XXX enums with just one member are broken with GI
+class NVDIMMTech():
+    NAMESPACE = BlockDev.NVDIMMTech.NVDIMM_TECH_NAMESPACE
+__all__.append("NVDIMMTech")
 
 
 _nvme_connect = BlockDev.nvme_connect

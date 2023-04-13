@@ -202,16 +202,16 @@ class SwapTechAvailable(SwapTest):
 
             with self.assertRaises(GLib.GError):
                 # we have swaplabel but not mkswap, so this should fail
-                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP_TECH_SWAP,
+                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP,
                                             BlockDev.SwapTechMode.CREATE | BlockDev.SwapTechMode.SET_LABEL)
 
             with self.assertRaises(GLib.GError):
                 # we have swaplabel but not mkswap, so this should fail
-                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP_TECH_SWAP,
+                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP,
                                             BlockDev.SwapTechMode.CREATE)
 
             # only label checked -- should pass
-            succ = BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP_TECH_SWAP,
+            succ = BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP,
                                                BlockDev.SwapTechMode.SET_LABEL)
             self.assertTrue(succ)
 
@@ -220,15 +220,15 @@ class SwapTechAvailable(SwapTest):
 
             with self.assertRaises(GLib.GError):
                 # we have mkswap but not swaplabel, so this should fail
-                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP_TECH_SWAP,
+                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP,
                                             BlockDev.SwapTechMode.CREATE | BlockDev.SwapTechMode.SET_LABEL)
 
             with self.assertRaises(GLib.GError):
                 # we have mkswap but not swaplabel, so this should fail
-                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP_TECH_SWAP,
+                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP,
                                             BlockDev.SwapTechMode.SET_LABEL)
 
             # only label checked -- should pass
-            succ = BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP_TECH_SWAP,
+            succ = BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP,
                                                BlockDev.SwapTechMode.CREATE)
             self.assertTrue(succ)
