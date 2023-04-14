@@ -177,12 +177,7 @@ class XfsGetInfo(XfsTestCase):
         succ = BlockDev.fs_xfs_mkfs(self.loop_dev, None)
         self.assertTrue(succ)
 
-        with self.assertRaisesRegex(GLib.GError, "not mounted"):
-            fi = BlockDev.fs_xfs_get_info(self.loop_dev)
-
-        with mounted(self.loop_dev, self.mount_dir):
-            fi = BlockDev.fs_xfs_get_info(self.loop_dev)
-
+        fi = BlockDev.fs_xfs_get_info(self.loop_dev)
         self.assertEqual(fi.block_size, 4096)
         self.assertEqual(fi.block_count, self.loop_size / 4096)
         self.assertEqual(fi.label, "")
