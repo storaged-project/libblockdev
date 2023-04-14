@@ -62,6 +62,8 @@ def udev_settle():
 
 @contextmanager
 def fake_utils(path="."):
+    if not os.path.exists(path):
+        raise RuntimeError("Path '%s' not found" % path)
     old_path = os.environ.get("PATH", "")
     if old_path:
         new_path = path + ":" + old_path
