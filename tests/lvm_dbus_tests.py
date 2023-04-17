@@ -1050,8 +1050,8 @@ class LvmTestLVresize(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_lvdeactivate("testVG", "testLV", None)
         self.assertTrue(succ)
 
-        # try to resize when deactivated
-        succ = BlockDev.lvm_lvresize("testVG", "testLV", 768 * 1024**2, None)
+        # try to shrink when deactivated
+        succ = BlockDev.lvm_lvresize("testVG", "testLV", 400 * 1024**2, None)
         self.assertTrue(succ)
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
