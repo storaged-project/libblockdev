@@ -1123,6 +1123,12 @@ def crypto_luks_uuid(device):
 __all__.append("crypto_luks_uuid")
 
 
+def switch_init_checks(enable):
+    # no-op, init checks are no longer supported
+    return
+__all__.append("switch_init_checks")
+
+
 XRule = namedtuple("XRule", ["orig_exc", "regexp", "code", "new_exc"])
 # XXX: how to document namedtuple fields?
 """
