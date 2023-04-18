@@ -1872,10 +1872,57 @@ gboolean bd_lvm_vgreduce (const gchar *vg_name, const gchar *device, const BDExt
     return ((*error) == NULL);
 }
 
+gboolean _vglock_start_stop (const gchar *vg_name, gboolean start, const BDExtraArg **extra, GError **error) {
+    GVariantBuilder builder;
+    GVariant *params = NULL;
+
+    g_variant_builder_init (&builder, G_VARIANT_TYPE_DICTIONARY);
+    if (start)
+        g_variant_builder_add (&builder, "{sv}", "--lockstart", g_variant_new ("s", ""));
+    else
+        g_variant_builder_add (&builder, "{sv}", "--lockstop", g_variant_new ("s", ""));
+    params = g_variant_builder_end (&builder);
+    g_variant_builder_clear (&builder);
+
+    call_lvm_obj_method_sync (vg_name, VG_INTF, "Change", NULL, params, extra, TRUE, error);
+
+    return ((*error) == NULL);
+}
+
+/**
+ * bd_lvm_vglock_start:
+ * @vg_name: a shared VG to start the lockspace in lvmlockd
+ * @extra: (nullable) (array zero-terminated=1): extra options for the vgchange command
+ *                                               (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the lock was successfully started for @vg_name or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_vglock_start (const gchar *vg_name, const BDExtraArg **extra, GError **error) {
+    return _vglock_start_stop (vg_name, TRUE, extra, error);
+}
+
+/**
+ * bd_lvm_vglock_stop:
+ * @vg_name: a shared VG to stop the lockspace in lvmlockd
+ * @extra: (nullable) (array zero-terminated=1): extra options for the vgchange command
+ *                                               (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the lock was successfully stopped for @vg_name or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_vglock_stop (const gchar *vg_name, const BDExtraArg **extra, GError **error) {
+    return _vglock_start_stop (vg_name, FALSE, extra, error);
+}
+
 /**
  * bd_lvm_vginfo:
  * @vg_name: a VG to get information about
- * @error: (out): place to store error (if any)
+ * @error: (out) (optional): place to store error (if any)
  *
  * Returns: (transfer full): information about the @vg_name VG or %NULL in case
  * of error (the @error) gets populated in those cases)

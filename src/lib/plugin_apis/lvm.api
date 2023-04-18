@@ -603,6 +603,7 @@ typedef enum {
     BD_LVM_TECH_GLOB_CONF,
     BD_LVM_TECH_VDO,
     BD_LVM_TECH_DEVICES,
+    BD_LVM_TECH_SHARED,
 } BDLVMTech;
 
 typedef enum {
@@ -942,6 +943,32 @@ gboolean bd_lvm_vgextend (const gchar *vg_name, const gchar *device, const BDExt
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_MODIFY
  */
 gboolean bd_lvm_vgreduce (const gchar *vg_name, const gchar *device, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_lvm_vglock_start:
+ * @vg_name: a shared VG to start the lockspace in lvmlockd
+ * @extra: (nullable) (array zero-terminated=1): extra options for the vgchange command
+ *                                               (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the lock was successfully started for @vg_name or not
+ *
+ * Tech category: %BD_LVM_TECH_SHARED-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_vglock_start (const gchar *vg_name, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_lvm_vglock_stop:
+ * @vg_name: a shared VG to stop the lockspace in lvmlockd
+ * @extra: (nullable) (array zero-terminated=1): extra options for the vgchange command
+ *                                               (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the lock was successfully stopped for @vg_name or not
+ *
+ * Tech category: %BD_LVM_TECH_SHARED-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_vglock_stop (const gchar *vg_name, const BDExtraArg **extra, GError **error);
 
 /**
  * bd_lvm_vginfo:

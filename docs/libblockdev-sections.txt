@@ -286,6 +286,8 @@ bd_lvm_vgactivate
 bd_lvm_vgdeactivate
 bd_lvm_vgextend
 bd_lvm_vgreduce
+bd_lvm_vglock_start
+bd_lvm_vglock_stop
 bd_lvm_vginfo
 bd_lvm_vgs
 bd_lvm_lvorigin
