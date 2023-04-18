@@ -197,6 +197,7 @@ typedef enum {
     BD_LVM_TECH_VDO,
     BD_LVM_TECH_WRITECACHE,
     BD_LVM_TECH_DEVICES,
+    BD_LVM_TECH_SHARED,
 } BDLVMTech;
 
 typedef enum {
@@ -251,6 +252,8 @@ gboolean bd_lvm_vgextend (const gchar *vg_name, const gchar *device, const BDExt
 gboolean bd_lvm_vgreduce (const gchar *vg_name, const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_lvm_add_vg_tags (const gchar *vg_name, const gchar **tags, GError **error);
 gboolean bd_lvm_delete_vg_tags (const gchar *vg_name, const gchar **tags, GError **error);
+gboolean bd_lvm_vglock_start (const gchar *vg_name, const BDExtraArg **extra, GError **error);
+gboolean bd_lvm_vglock_stop (const gchar *vg_name, const BDExtraArg **extra, GError **error);
 BDLVMVGdata* bd_lvm_vginfo (const gchar *vg_name, GError **error);
 BDLVMVGdata** bd_lvm_vgs (GError **error);
 
