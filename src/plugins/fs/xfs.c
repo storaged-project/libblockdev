@@ -232,7 +232,7 @@ gboolean bd_fs_xfs_set_label (const gchar *device, const gchar *label, GError **
  * Tech category: %BD_FS_TECH_XFS-%BD_FS_TECH_MODE_QUERY
  */
 BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
-    const gchar *args[3] = ZERO_INIT;
+    const gchar *args[6] = ZERO_INIT;
     gboolean success = FALSE;
     gchar *output = NULL;
     BDFSXfsInfo *ret = NULL;
@@ -252,9 +252,12 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
         return NULL;
     }
 
-    args[0] = "xfs_info";
-    args[1] = device;
-    args[2] = NULL;
+    args[0] = "xfs_db";
+    args[1] = "-r";
+    args[2] = "-c";
+    args[3] = "info";
+    args[4] = device;
+    args[5] = NULL;
     success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
     if (!success) {
         /* error is already populated */
