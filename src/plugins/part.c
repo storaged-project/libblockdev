@@ -841,6 +841,14 @@ static gboolean resize_part (PedPartition *part, PedDevice *dev, PedDisk *disk, 
         constr = ped_constraint_any (dev);
 
     geom = ped_disk_get_max_partition_geometry (disk, part, constr);
+    if (!geom) {
+        set_parted_error (error, BD_PART_ERROR_FAIL);
+        g_prefix_error (error, "Failed to create geometry for partition on device '%s'", dev->path);
+        ped_constraint_destroy (constr);
+        finish_alignment_constraint (disk, orig_flag_state);
+        return FALSE;
+    }
+
     if (!ped_geometry_set_start (geom, start)) {
         set_parted_error (error, BD_PART_ERROR_FAIL);
         g_prefix_error (error, "Failed to set partition start on device '%s'", dev->path);
