@@ -282,19 +282,6 @@ static gboolean write_label (struct fdisk_context *cxt, struct fdisk_table *orig
 }
 
 /**
- * bd_part_check_deps:
- *
- * Returns: whether the plugin's runtime dependencies are satisfied or not
- *
- * Function checking plugin's runtime dependencies.
- *
- */
-gboolean bd_part_check_deps (void) {
-    /* no runtime dependencies */
-    return TRUE;
-}
-
-/**
  * bd_part_init:
  *
  * Initializes the plugin. **This function is called automatically by the

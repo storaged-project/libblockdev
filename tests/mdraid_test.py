@@ -613,6 +613,14 @@ class MDTestDDFRAID(MDTestCase):
 
 
 class FakeMDADMutilTest(MDTest):
+
+    def setUp(self):
+        super().setUp()
+
+        # we need to force the check now to make sure that libblockdev doesn't use
+        # the fake tools below to try to get mdadm version
+        BlockDev.md_is_tech_avail(BlockDev.MDTech.MDRAID, 0)
+
     # no setUp nor tearDown needed, we are gonna use fake utils
     @tag_test(TestTags.NOSTORAGE)
     def test_fw_raid_uppercase_examine(self):
@@ -657,44 +665,17 @@ class FakeMDADMutilTest(MDTest):
         self.assertEqual(detail_data.name, "localhost:fedora")
 
 
-class MDUnloadTest(MDTestCase):
-    def setUp(self):
-        # make sure the library is initialized with all plugins loaded for other
-        # tests
-        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
-
+class MDDepsTest(MDTest):
     @tag_test(TestTags.NOSTORAGE)
-    def test_check_low_version(self):
-        """Verify that checking the minimum mdsetup version works as expected"""
-
-        # unload all plugins first
-        self.assertTrue(BlockDev.reinit([], True, None))
+    def test_missing_dependencies(self):
+        """Verify that checking for technology support works as expected"""
 
         with fake_utils("tests/fake_utils/mdraid_low_version/"):
-            # too low version of mdsetup available, the MD plugin should fail to load
-            with self.assertRaises(GLib.GError):
-                BlockDev.reinit(self.requested_plugins, True, None)
-
-            self.assertNotIn("mdraid", BlockDev.get_available_plugin_names())
-
-        # load the plugins back
-        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
-        self.assertIn("mdraid", BlockDev.get_available_plugin_names())
-
-    @tag_test(TestTags.NOSTORAGE)
-    def test_check_no_md(self):
-        """Verify that checking mdsetup tool availability works as expected"""
-
-        # unload all plugins first
-        self.assertTrue(BlockDev.reinit([], True, None))
+            # too low version of mdsetup available
+            with self.assertRaisesRegex(GLib.GError, "Too low version of mdadm"):
+                BlockDev.md_is_tech_avail(BlockDev.MDTech.MDRAID, 0)
 
         with fake_path(all_but="mdadm"):
-            # no mdadm available, the MD plugin should fail to load
-            with self.assertRaises(GLib.GError):
-                BlockDev.reinit(self.requested_plugins, True, None)
-
-            self.assertNotIn("mdraid", BlockDev.get_available_plugin_names())
-
-        # load the plugins back
-        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
-        self.assertIn("mdraid", BlockDev.get_available_plugin_names())
+            # no mdadm available
+            with self.assertRaisesRegex(GLib.GError, "The 'mdadm' utility is not available"):
+                BlockDev.md_is_tech_avail(BlockDev.MDTech.MDRAID, 0)

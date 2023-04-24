@@ -187,29 +187,19 @@ class NVDIMMNamespaceTestCase(NVDIMMTestCase):
         self.assertEqual(info.mode, BlockDev.NVDIMMNamespaceMode.SECTOR)
 
 
-class NVDIMMUnloadTest(NVDIMMTestCase):
-    def setUp(self):
-        # make sure the library is initialized with all plugins loaded for other
-        # tests
-        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
-
+class NVDIMMDepsTest(NVDIMMTestCase):
     @tag_test(TestTags.NOSTORAGE)
-    def test_check_no_ndctl(self):
-        """Verify that checking ndctl tool availability works as expected"""
-
-        # unload all plugins first
-        self.assertTrue(BlockDev.reinit([], True, None))
+    def test_missing_dependencies(self):
+        """Verify that checking for technology support works as expected"""
 
         with fake_path(all_but="ndctl"):
-            # no ndctl tool available, the NVDIMM plugin should fail to load
-            with self.assertRaises(GLib.GError):
-                BlockDev.reinit(self.requested_plugins, True, None)
+            # no ndctl tool available
+            with self.assertRaisesRegex(GLib.GError, "The 'ndctl' utility is not available"):
+                BlockDev.nvdimm_is_tech_avail(BlockDev.NVDIMMTech.NAMESPACE, BlockDev.NVDIMMTechMode.RECONFIGURE)
 
-            self.assertNotIn("nvdimm", BlockDev.get_available_plugin_names())
-
-        # load the plugins back
-        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
-        self.assertIn("nvdimm", BlockDev.get_available_plugin_names())
+            # ndctl is needed only for reconfigure
+            avail = BlockDev.nvdimm_is_tech_avail(BlockDev.NVDIMMTech.NAMESPACE, BlockDev.NVDIMMTechMode.CREATE)
+            self.assertTrue(avail)
 
 
 class NVDIMMNoDevTest(NVDIMMTestCase):

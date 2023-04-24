@@ -49,19 +49,6 @@ GQuark bd_loop_error_quark (void)
 }
 
 /**
- * bd_loop_check_deps:
- *
- * Returns: whether the plugin's runtime dependencies are satisfied or not
- *
- * Function checking plugin's runtime dependencies.
- *
- */
-gboolean bd_loop_check_deps (void) {
-    /* nothing to check here */
-    return TRUE;
-}
-
-/**
  * bd_loop_init:
  *
  * Initializes the plugin. **This function is called automatically by the

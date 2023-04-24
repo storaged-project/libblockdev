@@ -12,19 +12,11 @@ class MpathTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        distro, _version = get_version()
-        if distro == "debian":
-            os.environ["LIBBLOCKDEV_SKIP_DEP_CHECKS"] = ""
-
         if not BlockDev.is_initialized():
             BlockDev.init(cls.requested_plugins, None)
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
 
-    @classmethod
-    def tearDownClass(cls):
-        if "LIBBLOCKDEV_SKIP_DEP_CHECKS" in os.environ.keys():
-            os.environ.pop("LIBBLOCKDEV_SKIP_DEP_CHECKS")
 
 class MpathTestCase(MpathTest):
     def setUp(self):
@@ -50,6 +42,7 @@ class MpathTestCase(MpathTest):
         # device and no error is reported
         self.assertFalse(BlockDev.mpath_is_mpath_member("/dev/loop0"))
 
+class MpathNoDevTestCase(MpathTest):
     @tag_test(TestTags.NOSTORAGE)
     def test_get_mpath_members(self):
         """Verify that get_mpath_members works as expected"""
@@ -65,63 +58,24 @@ class MpathTestCase(MpathTest):
             succ = BlockDev.mpath_set_friendly_names(True)
             self.assertTrue(succ)
 
-class MpathUnloadTest(MpathTest):
-    def setUp(self):
-        # make sure the library is initialized with all plugins loaded for other
-        # tests
-        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
 
+class MpathDepsTest(MpathTest):
     @tag_test(TestTags.NOSTORAGE)
-    def test_check_low_version(self):
-        """Verify that checking the minimum dmsetup version works as expected"""
-
-        # unload all plugins first
-        self.assertTrue(BlockDev.reinit([], True, None))
+    def test_missing_dependencies(self):
+        """Verify that checking for technology support works as expected"""
 
         with fake_utils("tests/fake_utils/mpath_low_version/"):
-            # too low version of the multipath tool available, the mpath plugin
-            # should fail to load
-            with self.assertRaises(GLib.GError):
-                BlockDev.reinit(self.requested_plugins, True, None)
-
-            self.assertNotIn("mpath", BlockDev.get_available_plugin_names())
-
-        # load the plugins back
-        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
-        self.assertIn("mpath", BlockDev.get_available_plugin_names())
-
-    @tag_test(TestTags.NOSTORAGE)
-    def test_check_no_multipath(self):
-        """Verify that checking multipath tool availability works as expected"""
-
-        # unload all plugins first
-        self.assertTrue(BlockDev.reinit([], True, None))
+            with self.assertRaisesRegex(GLib.GError, "Too low version of multipath"):
+                BlockDev.mpath_is_tech_avail(BlockDev.MpathTech.BASE, BlockDev.MpathTechMode.QUERY)
 
         with fake_path(all_but="multipath"):
-            # no multipath available, the mpath plugin should fail to load
-            with self.assertRaises(GLib.GError):
-                BlockDev.reinit(self.requested_plugins, True, None)
-
-            self.assertNotIn("mpath", BlockDev.get_available_plugin_names())
-
-        # load the plugins back
-        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
-        self.assertIn("mpath", BlockDev.get_available_plugin_names())
-
-    @tag_test(TestTags.NOSTORAGE)
-    def test_check_no_mpathconf(self):
-        """Verify that checking mpathconf tool availability works as expected"""
-
-        # unload all plugins first
-        self.assertTrue(BlockDev.reinit([], True, None))
+            with self.assertRaisesRegex(GLib.GError, "The 'multipath' utility is not available"):
+                BlockDev.mpath_is_tech_avail(BlockDev.MpathTech.BASE, BlockDev.MpathTechMode.QUERY)
 
         with fake_path(all_but="mpathconf"):
-            # no mpathconf available, the mpath plugin should fail to load
-            with self.assertRaises(GLib.GError):
-                BlockDev.reinit(self.requested_plugins, True, None)
+            # "base" should be available without mpathconf
+            avail = BlockDev.mpath_is_tech_avail(BlockDev.MpathTech.BASE, BlockDev.MpathTechMode.QUERY)
+            self.assertTrue(avail)
 
-            self.assertNotIn("mpath", BlockDev.get_available_plugin_names())
-
-        # load the plugins back
-        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
-        self.assertIn("mpath", BlockDev.get_available_plugin_names())
+            with self.assertRaisesRegex(GLib.GError, "The 'mpathconf' utility is not available"):
+                BlockDev.mpath_is_tech_avail(BlockDev.MpathTech.FRIENDLY_NAMES, BlockDev.MpathTechMode.MODIFY)

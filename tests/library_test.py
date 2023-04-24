@@ -23,10 +23,6 @@ class LibraryOpsTestCase(unittest.TestCase):
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
 
-    @classmethod
-    def tearDownClass(cls):
-        BlockDev.switch_init_checks(True)
-
     def my_log_func(self, level, msg):
         # not much to verify here
         self.assertTrue(isinstance(level, int))
@@ -131,27 +127,6 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertTrue(BlockDev.ensure_init(self.requested_plugins, None))
         self.assertGreaterEqual(len(BlockDev.get_available_plugin_names()), 6)
 
-    def test_try_reinit(self):
-        """Verify that try_reinit() works as expected"""
-
-        # try reinitializing with only some utilities being available and thus
-        # only some plugins able to load
-        with fake_path("tests/fake_utils/lib_missing_utils", keep_utils=["swapon", "swapoff", "mkswap", "swaplabel"]):
-            succ, loaded = BlockDev.try_reinit(self.requested_plugins, True, None)
-            self.assertFalse(succ)
-            for plug_name in ("swap", "crypto"):
-                self.assertIn(plug_name, loaded)
-
-        # reset back to all plugins
-        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
-
-        # now the same with a subset of plugins requested
-        plugins = BlockDev.plugin_specs_from_names(["swap", "crypto"])
-        with fake_path("tests/fake_utils/lib_missing_utils", keep_utils=["swapon", "swapoff", "mkswap", "swaplabel"]):
-            succ, loaded = BlockDev.try_reinit(plugins, True, None)
-            self.assertTrue(succ)
-            self.assertEqual(set(loaded), set(["swap", "crypto"]))
-
     def test_non_en_init(self):
         """Verify that the library initializes with lang different from en_US"""
 
@@ -173,7 +148,6 @@ class PluginsTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        BlockDev.switch_init_checks(False)
         if not BlockDev.is_initialized():
             BlockDev.init(cls.requested_plugins, None)
         else:
@@ -183,10 +157,6 @@ class PluginsTestCase(unittest.TestCase):
             cls.devices_avail = BlockDev.lvm_is_tech_avail(BlockDev.LVMTech.DEVICES, 0)
         except:
             cls.devices_avail = False
-
-    @classmethod
-    def tearDownClass(cls):
-        BlockDev.switch_init_checks(True)
 
     def setUp(self):
         self.orig_config_dir = os.environ.get("LIBBLOCKDEV_CONFIG_DIR", "")
@@ -342,91 +312,3 @@ class PluginsTestCase(unittest.TestCase):
 
         # clean after ourselves
         os.system ("rm -f src/plugins/.libs/libbd_lvm2.so")
-
-    # recompiles the LVM plugin
-    @tag_test(TestTags.SLOW, TestTags.SOURCEONLY)
-    def test_plugin_fallback(self):
-        """Verify that fallback when loading plugins works as expected"""
-
-        if not self.devices_avail:
-            self.skipTest("skipping plugin fallback test: missing some LVM dependencies")
-
-        BlockDev.switch_init_checks(True)
-        self.addCleanup(BlockDev.switch_init_checks, False)
-
-        # library should be successfully initialized
-        self.assertTrue(BlockDev.is_initialized())
-
-        # max LV size should be something sane (not 1024 bytes)
-        orig_max_size = BlockDev.lvm_get_max_lv_size()
-        self.assertNotEqual(orig_max_size, 1024)
-
-        # change the sources and recompile
-        os.system("sed -ri 's?gboolean bd_lvm_check_deps \(void\) \{?gboolean bd_lvm_check_deps (void) { return FALSE;//test-change?' src/plugins/lvm.c > /dev/null")
-        os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
-
-        # proclaim the new build a different plugin
-        os.system("cp src/plugins/.libs/libbd_lvm.so src/plugins/.libs/libbd_lvm2.so.2")
-        self.addCleanup(os.system, "rm -f src/plugins/.libs/libbd_lvm2.so")
-
-        # change the sources back and recompile
-        os.system("sed -ri 's?gboolean bd_lvm_check_deps \(void\) \{ return FALSE;//test-change?gboolean bd_lvm_check_deps (void) {?' src/plugins/lvm.c > /dev/null")
-        os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
-
-        # now reinit the library with the config preferring the new build
-        orig_conf_dir = os.environ.get("LIBBLOCKDEV_CONFIG_DIR")
-        os.environ["LIBBLOCKDEV_CONFIG_DIR"] = "tests/test_configs/plugin_prio_conf.d"
-        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
-
-        # the original plugin should be loaded because the new one should fail
-        # to load (due to check() returning FALSE)
-        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm.so.2")
-        self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
-
-        # reinit with the original config
-        if orig_conf_dir:
-            os.environ["LIBBLOCKDEV_CONFIG_DIR"] = orig_conf_dir
-        else:
-            del os.environ["LIBBLOCKDEV_CONFIG_DIR"]
-        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
-
-        self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
-
-        # now reinit the library with the another config preferring the new
-        # build
-        orig_conf_dir = os.environ.get("LIBBLOCKDEV_CONFIG_DIR")
-        os.environ["LIBBLOCKDEV_CONFIG_DIR"] = "tests/test_configs/plugin_multi_conf.d"
-        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
-
-        # the original plugin should be loaded because the new one should fail
-        # to load (due to check() returning FALSE)
-        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm.so.2")
-        self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
-
-        # reinit with the original config
-        if orig_conf_dir:
-            os.environ["LIBBLOCKDEV_CONFIG_DIR"] = orig_conf_dir
-        else:
-            del os.environ["LIBBLOCKDEV_CONFIG_DIR"]
-        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
-
-        self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
-
-
-class DepChecksTestCase(unittest.TestCase):
-    requested_plugins = BlockDev.plugin_specs_from_names(( "swap",))
-
-    def test_dep_checks_disabled(self):
-        """Verify that disabling runtime dep checks works"""
-
-        with fake_path(all_but="mkswap"):
-            # should fail because of 'mkswap' missing
-            with self.assertRaises(GLib.GError):
-                BlockDev.reinit(self.requested_plugins, True, None)
-
-        os.environ["LIBBLOCKDEV_SKIP_DEP_CHECKS"] = ""
-        self.addCleanup(os.environ.pop, "LIBBLOCKDEV_SKIP_DEP_CHECKS")
-
-        with fake_path(all_but="mkswap"):
-            # should load just fine, skipping the runtime dep checks
-            self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))

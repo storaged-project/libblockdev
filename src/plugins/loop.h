@@ -49,12 +49,10 @@ BDLoopInfo* bd_loop_info_copy (BDLoopInfo *info);
  * If using the plugin as a standalone library, the following functions should
  * be called to:
  *
- * check_deps() - check plugin's dependencies, returning TRUE if satisfied
  * init()       - initialize the plugin, returning TRUE on success
  * close()      - clean after the plugin at the end or if no longer used
  *
  */
-gboolean bd_loop_check_deps (void);
 gboolean bd_loop_init (void);
 void bd_loop_close (void);
 

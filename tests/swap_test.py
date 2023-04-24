@@ -162,83 +162,34 @@ class SwapTestCase(SwapTest):
         self.assertFalse(on)
 
 
-class SwapUnloadTest(SwapTest):
-    def setUp(self):
-        # make sure the library is initialized with all plugins loaded for other
-        # tests
-        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
-
+class SwapDepsTest(SwapTest):
     @tag_test(TestTags.NOSTORAGE)
-    def test_check_low_version(self):
-        """Verify that checking the minimum swap utils versions works as expected"""
-
-        # unload all plugins first
-        self.assertTrue(BlockDev.reinit([], True, None))
+    def test_missing_dependencies(self):
+        """Verify that checking for technology support works as expected"""
 
         with fake_utils("tests/fake_utils/swap_low_version/"):
-            # too low version of mkswap available, the swap plugin should fail to load
-            with self.assertRaises(GLib.GError):
-                BlockDev.reinit(self.requested_plugins, True, None)
-
-            self.assertNotIn("swap", BlockDev.get_available_plugin_names())
-
-        # load the plugins back
-        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
-        self.assertIn("swap", BlockDev.get_available_plugin_names())
-
-    @tag_test(TestTags.NOSTORAGE)
-    def test_check_no_mkswap(self):
-        """Verify that checking mkswap and swaplabel tools availability
-           works as expected
-        """
-
-        # unload all plugins first
-        self.assertTrue(BlockDev.reinit([], True, None))
+            # too low version of mkswap available
+            with self.assertRaisesRegexp(GLib.GError, "Too low version of mkswap"):
+                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP, BlockDev.SwapTechMode.CREATE)
 
         with fake_path(all_but="mkswap"):
-            # no mkswap available, the swap plugin should fail to load
-            with self.assertRaises(GLib.GError):
-                BlockDev.reinit(self.requested_plugins, True, None)
-
-            self.assertNotIn("swap", BlockDev.get_available_plugin_names())
+            # no mkswap available
+            with self.assertRaisesRegexp(GLib.GError, "The 'mkswap' utility is not available"):
+                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP, BlockDev.SwapTechMode.CREATE)
 
         with fake_path(all_but="swaplabel"):
-            # no swaplabel available, the swap plugin should fail to load
-            with self.assertRaises(GLib.GError):
-                BlockDev.reinit(self.requested_plugins, True, None)
-
-            self.assertNotIn("swap", BlockDev.get_available_plugin_names())
-
-        # load the plugins back
-        self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
-        self.assertIn("swap", BlockDev.get_available_plugin_names())
-
-    @tag_test(TestTags.NOSTORAGE)
-    def test_check_no_mkswap_runtime(self):
-        """Verify that runtime checking mkswap tool availability works as expected"""
-
-        # unload all plugins first
-        self.assertTrue(BlockDev.reinit([], True, None))
-
-        # make sure the initial checks during plugin loading are skipped
-        BlockDev.switch_init_checks(False)
-        self.addCleanup(BlockDev.switch_init_checks, True)
+            # no swaplabel available
+            with self.assertRaisesRegexp(GLib.GError, "The 'swaplabel' utility is not available"):
+                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP, BlockDev.SwapTechMode.SET_LABEL)
 
         with fake_path(all_but="mkswap"):
-            # no mkswap available, but checks disabled, the swap plugin should load just fine
-            self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
-            self.assertIn("swap", BlockDev.get_available_plugin_names())
-
             with self.assertRaisesRegexp(GLib.GError, "The 'mkswap' utility is not available"):
                 # the device shouldn't matter, the function should return an
                 # error before any other checks or actions
                 BlockDev.swap_mkswap("/dev/device", "LABEL", None)
 
+
 class SwapTechAvailable(SwapTest):
-    def setUp(self):
-        # set everything back and reinit just to be sure
-        self.addCleanup(BlockDev.switch_init_checks, True)
-        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
 
     @tag_test(TestTags.NOSTORAGE)
     def test_check_tech_available(self):
@@ -247,39 +198,37 @@ class SwapTechAvailable(SwapTest):
         """
 
         with fake_path(all_but="mkswap"):
-            BlockDev.switch_init_checks(False)
             BlockDev.reinit(self.requested_plugins, True, None)
 
             with self.assertRaises(GLib.GError):
                 # we have swaplabel but not mkswap, so this should fail
-                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP_TECH_SWAP,
+                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP,
                                             BlockDev.SwapTechMode.CREATE | BlockDev.SwapTechMode.SET_LABEL)
 
             with self.assertRaises(GLib.GError):
                 # we have swaplabel but not mkswap, so this should fail
-                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP_TECH_SWAP,
+                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP,
                                             BlockDev.SwapTechMode.CREATE)
 
             # only label checked -- should pass
-            succ = BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP_TECH_SWAP,
+            succ = BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP,
                                                BlockDev.SwapTechMode.SET_LABEL)
             self.assertTrue(succ)
 
         with fake_path(all_but="swaplabel"):
-            BlockDev.switch_init_checks(False)
             BlockDev.reinit(self.requested_plugins, True, None)
 
             with self.assertRaises(GLib.GError):
                 # we have mkswap but not swaplabel, so this should fail
-                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP_TECH_SWAP,
+                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP,
                                             BlockDev.SwapTechMode.CREATE | BlockDev.SwapTechMode.SET_LABEL)
 
             with self.assertRaises(GLib.GError):
                 # we have mkswap but not swaplabel, so this should fail
-                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP_TECH_SWAP,
+                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP,
                                             BlockDev.SwapTechMode.SET_LABEL)
 
             # only label checked -- should pass
-            succ = BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP_TECH_SWAP,
+            succ = BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP,
                                                BlockDev.SwapTechMode.CREATE)
             self.assertTrue(succ)

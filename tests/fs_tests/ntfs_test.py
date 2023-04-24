@@ -29,13 +29,6 @@ class NTFSTestCase(FSTestCase):
 
 class NTFSTestAvailability(NTFSNoDevTestCase):
 
-    def setUp(self):
-        super(NTFSTestAvailability, self).setUp()
-
-        # set everything back and reinit just to be sure
-        self.addCleanup(BlockDev.switch_init_checks, True)
-        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
-
     def test_ntfs_available(self):
         """Verify that it is possible to check ntfs tech availability"""
         available = BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS,
@@ -48,7 +41,6 @@ class NTFSTestAvailability(NTFSNoDevTestCase):
                                               BlockDev.FSTechMode.SET_UUID)
         self.assertTrue(available)
 
-        BlockDev.switch_init_checks(False)
         BlockDev.reinit(self.requested_plugins, True, None)
 
         # now try without mkntfs

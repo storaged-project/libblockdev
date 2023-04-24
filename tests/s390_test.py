@@ -82,7 +82,7 @@ class S390TestCase(unittest.TestCase):
 
 
 @unittest.skipUnless(os.uname()[4].startswith('s390'), "s390x architecture required")
-class S390UnloadTest(unittest.TestCase):
+class S390DepsTest(unittest.TestCase):
 
     requested_plugins = BlockDev.plugin_specs_from_names(("s390",))
 
@@ -95,20 +95,10 @@ class S390UnloadTest(unittest.TestCase):
             BlockDev.reinit(cls.requested_plugins, True, None)
 
     @tag_test(TestTags.EXTRADEPS, TestTags.NOSTORAGE)
-    def test_check_no_dasdfmt(self):
-        """Verify that checking dasdfmt tool availability works as expected"""
-
-        # unload all plugins first
-        self.assertTrue(BlockDev.reinit([], True, None))
+    def test_missing_dependencies(self):
+        """Verify that checking for technology support works as expected"""
 
         with fake_path(all_but="dasdfmt"):
             # dasdfmt is not available, so the s390 plugin should fail to load
-            with self.assertRaises(GLib.GError):
-                BlockDev.reinit(self.requested_plugins, True, None)
-
-            self.assertNotIn("s390", BlockDev.get_available_plugin_names())
-
-    def setUp(self):
-        # make sure the library is initialized with all plugins loaded for other
-        # tests
-        self.addCleanup(BlockDev.reinit, self.requested_plugins, True, None)
+            with self.assertRaisesRegex(GLib.GError, "The 'dasdfmt' utility is not available"):
+                BlockDev.s390_is_tech_avail(BlockDev.S390Tech.DASD, BlockDev.S390TechMode.MODIFY)

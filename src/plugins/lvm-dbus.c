@@ -324,35 +324,6 @@ static const UtilFeatureDep features[FEATURES_LAST] = {
 static const gchar*const module_deps[MODULE_DEPS_LAST] = { "kvdo" };
 
 /**
- * bd_lvm_check_deps:
- *
- * Returns: whether the plugin's runtime dependencies are satisfied or not
- *
- * Function checking plugin's runtime dependencies.
- *
- */
-gboolean bd_lvm_check_deps (void) {
-    GError *error = NULL;
-    guint i = 0;
-    gboolean success = FALSE;
-    gboolean check_ret = TRUE;
-
-    for (i=0; i < DBUS_DEPS_LAST; i++) {
-        success = check_dbus_deps (&avail_dbus_deps, DBUS_DEPS_LVMDBUSD_MASK, dbus_deps, DBUS_DEPS_LAST, &deps_check_lock, &error);
-        if (!success) {
-            bd_utils_log_format (BD_UTILS_LOG_WARNING, "%s", error->message);
-            g_clear_error (&error);
-        }
-        check_ret = check_ret && success;
-    }
-
-    if (!check_ret)
-        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Cannot load the LVM plugin");
-
-    return check_ret;
-}
-
-/**
  * bd_lvm_init:
  *
  * Initializes the plugin. **This function is called automatically by the
