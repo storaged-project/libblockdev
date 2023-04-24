@@ -2115,6 +2115,27 @@ gboolean bd_lvm_lvresize (const gchar *vg_name, const gchar *lv_name, guint64 si
     return (*error == NULL);
 }
 
+static gboolean _lvm_lvactivate (const gchar *vg_name, const gchar *lv_name, gboolean ignore_skip, gboolean shared, const BDExtraArg **extra, GError **error) {
+    GVariant *params = NULL;
+    GVariantBuilder builder;
+    GVariant *extra_params = NULL;
+
+    if (shared)
+        params = g_variant_new ("(t)", (guint64) 1 << 6);
+    else
+        params = g_variant_new ("(t)", (guint64) 0);
+
+    if (ignore_skip) {
+        g_variant_builder_init (&builder, G_VARIANT_TYPE_DICTIONARY);
+        g_variant_builder_add (&builder, "{sv}", "-K", g_variant_new ("s", ""));
+        extra_params = g_variant_builder_end (&builder);
+        g_variant_builder_clear (&builder);
+    }
+    call_lv_method_sync (vg_name, lv_name, "Activate", params, extra_params, extra, TRUE, error);
+
+    return (*error == NULL);
+}
+
 /**
  * bd_lvm_lvactivate:
  * @vg_name: name of the VG containing the to-be-activated LV
@@ -2129,19 +2150,25 @@ gboolean bd_lvm_lvresize (const gchar *vg_name, const gchar *lv_name, guint64 si
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_MODIFY
  */
 gboolean bd_lvm_lvactivate (const gchar *vg_name, const gchar *lv_name, gboolean ignore_skip, const BDExtraArg **extra, GError **error) {
-    GVariant *params = g_variant_new ("(t)", (guint64) 0);
-    GVariantBuilder builder;
-    GVariant *extra_params = NULL;
+    return _lvm_lvactivate (vg_name, lv_name, ignore_skip, FALSE, extra, error);
+}
 
-    if (ignore_skip) {
-        g_variant_builder_init (&builder, G_VARIANT_TYPE_DICTIONARY);
-        g_variant_builder_add (&builder, "{sv}", "-K", g_variant_new ("s", ""));
-        extra_params = g_variant_builder_end (&builder);
-        g_variant_builder_clear (&builder);
-    }
-    call_lv_method_sync (vg_name, lv_name, "Activate", params, extra_params, extra, TRUE, error);
-
-    return (*error == NULL);
+/**
+ * bd_lvm_lvactivate_shared:
+ * @vg_name: name of the VG containing the to-be-activated LV
+ * @lv_name: name of the to-be-activated LV
+ * @ignore_skip: whether to ignore the skip flag or not
+ * @shared: whether to activate the LV in shared mode
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the LV activation
+ *                                                 (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @vg_name/@lv_name LV was successfully activated or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_lvactivate_shared (const gchar *vg_name, const gchar *lv_name, gboolean ignore_skip, gboolean shared, const BDExtraArg **extra, GError **error) {
+    return _lvm_lvactivate (vg_name, lv_name, ignore_skip, shared, extra, error);
 }
 
 /**
