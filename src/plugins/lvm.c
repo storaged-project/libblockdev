@@ -1644,6 +1644,28 @@ gboolean bd_lvm_lvresize (const gchar *vg_name, const gchar *lv_name, guint64 si
     return success;
 }
 
+static gboolean _lvm_lvactivate (const gchar *vg_name, const gchar *lv_name, gboolean ignore_skip, gboolean shared, const BDExtraArg **extra, GError **error) {
+    const gchar *args[5] = {"lvchange", NULL, NULL, NULL, NULL};
+    guint8 next_arg = 2;
+    gboolean success = FALSE;
+
+    if (shared)
+        args[1] = "-asy";
+    else
+        args[1] = "-ay";
+
+    if (ignore_skip) {
+        args[next_arg] = "-K";
+        next_arg++;
+    }
+    args[next_arg] = g_strdup_printf ("%s/%s", vg_name, lv_name);
+
+    success = call_lvm_and_report_error (args, extra, TRUE, error);
+    g_free ((gchar *) args[next_arg]);
+
+    return success;
+}
+
 /**
  * bd_lvm_lvactivate:
  * @vg_name: name of the VG containing the to-be-activated LV
@@ -1658,20 +1680,25 @@ gboolean bd_lvm_lvresize (const gchar *vg_name, const gchar *lv_name, guint64 si
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_MODIFY
  */
 gboolean bd_lvm_lvactivate (const gchar *vg_name, const gchar *lv_name, gboolean ignore_skip, const BDExtraArg **extra, GError **error) {
-    const gchar *args[5] = {"lvchange", "-ay", NULL, NULL, NULL};
-    guint8 next_arg = 2;
-    gboolean success = FALSE;
+    return _lvm_lvactivate (vg_name, lv_name, ignore_skip, FALSE, extra, error);
+}
 
-    if (ignore_skip) {
-        args[next_arg] = "-K";
-        next_arg++;
-    }
-    args[next_arg] = g_strdup_printf ("%s/%s", vg_name, lv_name);
-
-    success = call_lvm_and_report_error (args, extra, TRUE, error);
-    g_free ((gchar *) args[next_arg]);
-
-    return success;
+/**
+ * bd_lvm_lvactivate_shared:
+ * @vg_name: name of the VG containing the to-be-activated LV
+ * @lv_name: name of the to-be-activated LV
+ * @ignore_skip: whether to ignore the skip flag or not
+ * @shared: whether to activate the LV in shared mode
+ * @extra: (allow-none) (array zero-terminated=1): extra options for the LV activation
+ *                                                 (just passed to LVM as is)
+ * @error: (out): place to store error (if any)
+ *
+ * Returns: whether the @vg_name/@lv_name LV was successfully activated or not
+ *
+ * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_lvactivate_shared (const gchar *vg_name, const gchar *lv_name, gboolean ignore_skip, gboolean shared, const BDExtraArg **extra, GError **error) {
+    return _lvm_lvactivate (vg_name, lv_name, ignore_skip, shared, extra, error);
 }
 
 /**
