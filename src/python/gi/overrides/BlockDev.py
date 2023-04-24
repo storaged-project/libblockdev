@@ -803,9 +803,9 @@ __all__.append("lvm_lvresize")
 
 _lvm_lvactivate = BlockDev.lvm_lvactivate
 @override(BlockDev.lvm_lvactivate)
-def lvm_lvactivate(vg_name, lv_name, ignore_skip=False, extra=None, **kwargs):
+def lvm_lvactivate(vg_name, lv_name, ignore_skip=False, shared=False, extra=None, **kwargs):
     extra = _get_extra(extra, kwargs)
-    return _lvm_lvactivate(vg_name, lv_name, ignore_skip, extra)
+    return _lvm_lvactivate(vg_name, lv_name, ignore_skip, shared, extra)
 __all__.append("lvm_lvactivate")
 
 _lvm_lvdeactivate = BlockDev.lvm_lvdeactivate

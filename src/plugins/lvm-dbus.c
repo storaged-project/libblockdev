@@ -2693,6 +2693,8 @@ gboolean bd_lvm_lvrepair (const gchar *vg_name UNUSED, const gchar *lv_name UNUS
  * @vg_name: name of the VG containing the to-be-activated LV
  * @lv_name: name of the to-be-activated LV
  * @ignore_skip: whether to ignore the skip flag or not
+ * @shared: whether to activate the LV in shared mode (used for shared LVM setups with lvmlockd,
+ *          use %FALSE if not sure)
  * @extra: (nullable) (array zero-terminated=1): extra options for the LV activation
  *                                                 (just passed to LVM as is)
  * @error: (out) (optional): place to store error (if any)
@@ -2701,10 +2703,15 @@ gboolean bd_lvm_lvrepair (const gchar *vg_name UNUSED, const gchar *lv_name UNUS
  *
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_MODIFY
  */
-gboolean bd_lvm_lvactivate (const gchar *vg_name, const gchar *lv_name, gboolean ignore_skip, const BDExtraArg **extra, GError **error) {
-    GVariant *params = g_variant_new ("(t)", (guint64) 0);
+gboolean bd_lvm_lvactivate (const gchar *vg_name, const gchar *lv_name, gboolean ignore_skip, gboolean shared, const BDExtraArg **extra, GError **error) {
+    GVariant *params = NULL;
     GVariantBuilder builder;
     GVariant *extra_params = NULL;
+
+    if (shared)
+        params = g_variant_new ("(t)", (guint64) 1 << 6);
+    else
+        params = g_variant_new ("(t)", (guint64) 0);
 
     if (ignore_skip) {
         g_variant_builder_init (&builder, G_VARIANT_TYPE_DICTIONARY);

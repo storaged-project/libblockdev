@@ -26,6 +26,10 @@
     <literal>BD_LVM_DEFAULT_PE_START</literal> and <literal>BD_LVM_DEFAULT_PE_SIZE</literal>.
   </para>
 
+  <para>
+    <literal>bd_lvm_lvactivate()</literal> has a new parameter <literal>shared</literal>, use <literal>FALSE</literal> to preserve the original behaviour.
+  </para>
+
   </simplesect>
 
   <simplesect><title>VDO plugin</title>

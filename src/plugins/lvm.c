@@ -1980,6 +1980,8 @@ gboolean bd_lvm_lvrepair (const gchar *vg_name, const gchar *lv_name, const gcha
  * @vg_name: name of the VG containing the to-be-activated LV
  * @lv_name: name of the to-be-activated LV
  * @ignore_skip: whether to ignore the skip flag or not
+ * @shared: whether to activate the LV in shared mode (used for shared LVM setups with lvmlockd,
+ *          use %FALSE if not sure)
  * @extra: (nullable) (array zero-terminated=1): extra options for the LV activation
  *                                                 (just passed to LVM as is)
  * @error: (out) (optional): place to store error (if any)
@@ -1988,10 +1990,15 @@ gboolean bd_lvm_lvrepair (const gchar *vg_name, const gchar *lv_name, const gcha
  *
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_MODIFY
  */
-gboolean bd_lvm_lvactivate (const gchar *vg_name, const gchar *lv_name, gboolean ignore_skip, const BDExtraArg **extra, GError **error) {
-    const gchar *args[5] = {"lvchange", "-ay", NULL, NULL, NULL};
+gboolean bd_lvm_lvactivate (const gchar *vg_name, const gchar *lv_name, gboolean ignore_skip, gboolean shared, const BDExtraArg **extra, GError **error) {
+    const gchar *args[5] = {"lvchange", NULL, NULL, NULL, NULL};
     guint8 next_arg = 2;
     gboolean success = FALSE;
+
+    if (shared)
+        args[1] = "-asy";
+    else
+        args[1] = "-ay";
 
     if (ignore_skip) {
         args[next_arg] = "-K";
