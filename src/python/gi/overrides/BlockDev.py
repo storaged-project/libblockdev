@@ -998,6 +998,7 @@ __all__.append("md_activate")
 # XXX enums with just one member are broken with GI
 class MDTech():
     MDRAID = BlockDev.MDTech.MD_TECH_MDRAID
+    MD_TECH_MDRAID = BlockDev.MDTech.MD_TECH_MDRAID
 __all__.append("MDTech")
 
 
@@ -1027,6 +1028,7 @@ __all__.append("swap_swapon")
 # XXX enums with just one member are broken with GI
 class SwapTech():
     SWAP = BlockDev.SwapTech.SWAP_TECH_SWAP
+    SWAP_TECH_SWAP = BlockDev.SwapTech.SWAP_TECH_SWAP
 __all__.append("SwapTech")
 
 
@@ -1076,6 +1078,7 @@ __all__.append("nvdimm_namespace_disable")
 # XXX enums with just one member are broken with GI
 class NVDIMMTech():
     NAMESPACE = BlockDev.NVDIMMTech.NVDIMM_TECH_NAMESPACE
+    NVDIMM_TECH_NAMESPACE = BlockDev.NVDIMMTech.NVDIMM_TECH_NAMESPACE
 __all__.append("NVDIMMTech")
 
 
