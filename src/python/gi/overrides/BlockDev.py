@@ -386,7 +386,6 @@ __all__.append("loop_setup")
 # XXX enums with just one member are broken with GI
 class LoopTech():
     LOOP = BlockDev.LoopTech.LOOP_TECH_LOOP
-    LOOP_TECH_LOOP = BlockDev.LoopTech.LOOP_TECH_LOOP
 __all__.append("LoopTech")
 
 
@@ -1005,7 +1004,6 @@ __all__.append("md_activate")
 # XXX enums with just one member are broken with GI
 class MDTech():
     MDRAID = BlockDev.MDTech.MD_TECH_MDRAID
-    MD_TECH_MDRAID = BlockDev.MDTech.MD_TECH_MDRAID
 __all__.append("MDTech")
 
 
@@ -1035,7 +1033,6 @@ __all__.append("swap_swapon")
 # XXX enums with just one member are broken with GI
 class SwapTech():
     SWAP = BlockDev.SwapTech.SWAP_TECH_SWAP
-    SWAP_TECH_SWAP = BlockDev.SwapTech.SWAP_TECH_SWAP
 __all__.append("SwapTech")
 
 
@@ -1085,7 +1082,6 @@ __all__.append("nvdimm_namespace_disable")
 # XXX enums with just one member are broken with GI
 class NVDIMMTech():
     NAMESPACE = BlockDev.NVDIMMTech.NVDIMM_TECH_NAMESPACE
-    NVDIMM_TECH_NAMESPACE = BlockDev.NVDIMMTech.NVDIMM_TECH_NAMESPACE
 __all__.append("NVDIMMTech")
 
 
@@ -1115,28 +1111,6 @@ def plugin_specs_from_names(plugin_names):
 
     return ret
 __all__.append("plugin_specs_from_names")
-
-
-## for backward compatibility only, remove before 3.0 release
-def loop_get_backing_file(dev_name):
-    try:
-        info = BlockDev.loop_info(dev_name)
-    except Exception as e:
-        return None
-    return info.backing_file
-__all__.append("loop_get_backing_file")
-
-
-def crypto_luks_uuid(device):
-    info = BlockDev.crypto_luks_info(device)
-    return info.uuid
-__all__.append("crypto_luks_uuid")
-
-
-def switch_init_checks(enable):
-    # no-op, init checks are no longer supported
-    return
-__all__.append("switch_init_checks")
 
 
 XRule = namedtuple("XRule", ["orig_exc", "regexp", "code", "new_exc"])
