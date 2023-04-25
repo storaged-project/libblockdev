@@ -667,6 +667,38 @@ class LvmTestVGs(LvmPVVGTestCase):
         succ = BlockDev.lvm_pvremove(self.loop_dev, None)
         self.assertTrue(succ)
 
+class LvmTestVGLocking(LvmPVVGTestCase):
+    @tag_test(TestTags.UNSAFE)
+    def test_vglock_stop_start(self):
+        """Verify that it is possible to start and stop locking on a VG"""
+
+        # better not do anything if lvmlockd is running, shared VGs have
+        # a tendency to wreak havoc on your system if you look at them wrong
+        ret, _out, _err = run_command("systemctl is-active lvmlockd")
+        if ret == 0:
+            self.skipTest("lvmlockd is running, skipping")
+
+        _ret, out, _err = run_command("lvm config 'global/use_lvmlockd'")
+        if "use_lvmlockd=0" not in out:
+            self.skipTest("lvmlockd is enabled, skipping")
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0, None)
+        self.assertTrue(succ)
+
+        # this actually doesn't "test" anything, the commands will just say lvmlockd is not
+        # running and return 0, but that's good enough for us
+        succ = BlockDev.lvm_vglock_start("testVG")
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vglock_stop("testVG")
+        self.assertTrue(succ)
+
 class LvmTestPVTags(LvmPVVGTestCase):
     def test_pvtags(self):
         """Verify that it's possible to set and get info about PV tags"""

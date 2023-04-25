@@ -1607,6 +1607,47 @@ gboolean bd_lvm_delete_vg_tags (const gchar *vg_name, const gchar **tags, GError
     return _manage_lvm_tags (vg_name, tags, "--deltag", "vgchange", error);
 }
 
+gboolean _vglock_start_stop (const gchar *vg_name, gboolean start, const BDExtraArg **extra, GError **error) {
+    const gchar *args[4] = {"vgchange", NULL, vg_name, NULL};
+
+    if (start)
+        args[1] = "--lockstart";
+    else
+        args[1] = "--lockstop";
+
+    return call_lvm_and_report_error (args, extra, TRUE, error);
+}
+
+/**
+ * bd_lvm_vglock_start:
+ * @vg_name: a shared VG to start the lockspace in lvmlockd
+ * @extra: (nullable) (array zero-terminated=1): extra options for the vgchange command
+ *                                               (just passed to LVM as is)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the lock was successfully started for @vg_name or not
+ *
+ * Tech category: %BD_LVM_TECH_SHARED-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_vglock_start (const gchar *vg_name, const BDExtraArg **extra, GError **error) {
+    return _vglock_start_stop (vg_name, TRUE, extra, error);
+}
+
+/**
+ * bd_lvm_vglock_stop:
+ * @vg_name: a shared VG to stop the lockspace in lvmlockd
+ * @extra: (nullable) (array zero-terminated=1): extra options for the vgchange command
+ *                                               (just passed to LVM as is)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the lock was successfully stopped for @vg_name or not
+ *
+ * Tech category: %BD_LVM_TECH_SHARED-%BD_LVM_TECH_MODE_MODIFY
+ */
+gboolean bd_lvm_vglock_stop (const gchar *vg_name, const BDExtraArg **extra, GError **error) {
+    return _vglock_start_stop (vg_name, FALSE, extra, error);
+}
+
 /**
  * bd_lvm_vginfo:
  * @vg_name: a VG to get information about
