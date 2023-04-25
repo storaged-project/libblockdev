@@ -1,0 +1,45 @@
+name: Blivet tests
+
+on:
+  pull_request:
+    branches:
+     - master
+
+jobs:
+  build:
+    name: blivet-tests
+    runs-on: ubuntu-22.04
+    env:
+      CI_CONTAINER: libblockdev-ci-blivet-tests
+    steps:
+      - name: Checkout libblockdev repository
+        uses: actions/checkout@v3
+
+      - name: Install podman
+        run: |
+          sudo apt -qq update
+          sudo apt -y -qq install podman
+
+      - name: Build the container
+        run: |
+          podman build --no-cache -t ${{ env.CI_CONTAINER }} -f misc/ci.Dockerfile .
+
+      - name: Start the container
+        run: |
+          podman run -d -t --name ${{ env.CI_CONTAINER }} --privileged --volume "$(pwd):/app" --workdir "/app" ${{ env.CI_CONTAINER }}
+
+      - name: Install Blivet test dependencies in the container
+        run: |
+          podman exec -it ${{ env.CI_CONTAINER }} bash -c "ansible-playbook -i "localhost," -c local /blivet/misc/install-test-dependencies.yml"
+
+      - name: Install libblockdev build dependencies in the container
+        run: |
+          podman exec -it ${{ env.CI_CONTAINER }} bash -c "ansible-playbook -i "localhost," -c local misc/install-test-dependencies.yml -e 'test_dependencies=false'"
+
+      - name: Build and install libblockdev in the container
+        run: |
+          podman exec -it ${{ env.CI_CONTAINER }} bash -c "./autogen.sh && ./configure --prefix=/usr && make -j && make install"
+
+      - name: Run Blivet tests in the container
+        run: |
+          podman exec -it ${{ env.CI_CONTAINER }} bash -c "cd /blivet && make check"
