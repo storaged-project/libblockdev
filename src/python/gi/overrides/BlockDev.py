@@ -383,6 +383,13 @@ def loop_setup(file, offset=0, size=0, read_only=False, part_scan=True, sector_s
 __all__.append("loop_setup")
 
 
+# XXX enums with just one member are broken with GI
+class LoopTech():
+    LOOP = BlockDev.LoopTech.LOOP_TECH_LOOP
+    LOOP_TECH_LOOP = BlockDev.LoopTech.LOOP_TECH_LOOP
+__all__.append("LoopTech")
+
+
 _fs_wipe = BlockDev.fs_wipe
 @override(BlockDev.fs_wipe)
 def fs_wipe(spec, all=False, force=False):
