@@ -238,7 +238,7 @@ AS_IF([test "x$with_nvdimm" != "xno"],
       [])
 
 AS_IF([test "x$with_nvme" != "xno"],
-      [LIBBLOCKDEV_PKG_CHECK_MODULES([NVME], [libnvme >= 1.2])],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([NVME], [libnvme >= 1.3])],
       [])
 
 AC_SUBST([MAJOR_VER], [\"2\"])
