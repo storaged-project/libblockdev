@@ -27,6 +27,7 @@ GQuark bd_nvme_error_quark (void);
  * @BD_NVME_ERROR_CONNECT_ADDRINUSE: HostNQN already in use.
  * @BD_NVME_ERROR_CONNECT_NODEV: Invalid interface.
  * @BD_NVME_ERROR_CONNECT_OPNOTSUPP: Operation not supported.
+ * @BD_NVME_ERROR_CONNECT_REFUSED: Connection refused.
  */
 typedef enum {
     BD_NVME_ERROR_TECH_UNAVAIL,
@@ -46,6 +47,7 @@ typedef enum {
     BD_NVME_ERROR_CONNECT_ADDRINUSE,
     BD_NVME_ERROR_CONNECT_NODEV,
     BD_NVME_ERROR_CONNECT_OPNOTSUPP,
+    BD_NVME_ERROR_CONNECT_REFUSED,
 } BDNVMEError;
 
 typedef enum {
