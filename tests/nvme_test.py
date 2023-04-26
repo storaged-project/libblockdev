@@ -294,6 +294,7 @@ class NVMeFabricsTestCase(NVMeTest):
         self.loop_devs = []
         self.dev_files = []
         self.hostnqn = get_nvme_hostnqn()
+        self.have_stable_nqn = os.path.exists('/sys/class/dmi/id/product_uuid')
 
     def _setup_target(self, num_devices):
         self.addCleanup(self._clean_up)
@@ -579,8 +580,9 @@ class NVMeFabricsTestCase(NVMeTest):
         self.assertTrue(ret)
         ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
         self.assertEqual(len(ctrls), 1)
-        sysfs_hostnqn = read_file('/sys/class/nvme/%s/hostnqn' % os.path.basename(ctrls[0]))
-        self.assertEqual(sysfs_hostnqn.strip(), BlockDev.nvme_generate_host_nqn())
+        if self.have_stable_nqn:
+            sysfs_hostnqn = read_file('/sys/class/nvme/%s/hostnqn' % os.path.basename(ctrls[0]))
+            self.assertEqual(sysfs_hostnqn.strip(), BlockDev.nvme_generate_host_nqn())
         BlockDev.nvme_disconnect(self.SUBNQN)
 
         ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
