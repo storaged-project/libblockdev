@@ -125,6 +125,25 @@ static void parse_extra_args (const BDExtraArg **extra, struct nvme_fabrics_conf
         else
         if (g_strcmp0 ((*extra_i)->opt, "tls") == 0)
             SAFE_BOOL_CONV (cfg->tls)
+#ifdef HAVE_LIBNVME_1_4
+        else
+        if (g_strcmp0 ((*extra_i)->opt, "keyring") == 0) {
+            int keyring;
+
+            keyring = nvme_lookup_keyring ((*extra_i)->val);
+            if (keyring) {
+                cfg->keyring = keyring;
+                nvme_set_keyring (cfg->keyring);
+            }
+        } else
+        if (g_strcmp0 ((*extra_i)->opt, "tls_key") == 0) {
+            int key;
+
+            key = nvme_lookup_key ("psk", (*extra_i)->val);
+            if (key)
+                cfg->tls_key = key;
+        }
+#endif
     }
 
 #undef SAFE_INT_CONV
@@ -179,6 +198,8 @@ static void parse_extra_args (const BDExtraArg **extra, struct nvme_fabrics_conf
  * - `"data_digest"`: Generates/verifies data digest (TCP). Boolean value.
  * - `"tls"`: Enable TLS encryption (TCP). Boolean value.
  * - `"hostsymname"`: TP8010: NVMe host symbolic name.
+ * - `"keyring"`: Keyring to store and lookup keys. String value.
+ * - `"tls_key"`: TLS PSK for the connection. String value.
  *
  * Boolean values can be expressed by "0"/"1", "on"/"off" or "True"/"False" case-insensitive
  * strings. Failed numerical or boolean string conversions will result in the option being ignored.
