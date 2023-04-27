@@ -797,11 +797,5 @@ bd_nvme_set_host_id
 bd_nvme_connect
 bd_nvme_disconnect
 bd_nvme_disconnect_by_path
-BDNVMEDiscoveryLogEntry
-bd_nvme_discovery_log_entry_copy
-bd_nvme_discovery_log_entry_free
-BDNVMEAddressFamily
-BDNVMETCPSecurity
-bd_nvme_discover
 bd_nvme_find_ctrls_for_ns
 </SECTION>
