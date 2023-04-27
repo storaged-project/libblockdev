@@ -1415,6 +1415,8 @@ gboolean bd_nvme_set_host_id (const gchar *host_id, GError **error);
  * - `"data_digest"`: Generates/verifies data digest (TCP). Boolean value.
  * - `"tls"`: Enable TLS encryption (TCP). Boolean value.
  * - `"hostsymname"`: TP8010: NVMe host symbolic name.
+ * - `"keyring"`: Keyring to store and lookup keys. String value.
+ * - `"tls_key"`: TLS PSK for the connection. String value.
  *
  * Boolean values can be expressed by "0"/"1", "on"/"off" or "True"/"False" case-insensitive
  * strings. Failed numerical or boolean string conversions will result in the option being ignored.
