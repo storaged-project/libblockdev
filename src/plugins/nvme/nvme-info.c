@@ -365,15 +365,26 @@ BDNVMESanitizeLog * bd_nvme_sanitize_log_copy (BDNVMESanitizeLog *log) {
 }
 
 
-static guint64 int128_to_guint64 (__u8 *data)
+/* can't use real __int128 due to gobject-introspection */
+static guint64 int128_to_guint64 (__u8 data[16])
 {
     int i;
+    __u8 d[16];
     guint64 result = 0;
 
-    /* FIXME: would overflow, need to find 128-bit int */
+    /* endianness conversion */
+#if G_BYTE_ORDER == G_BIG_ENDIAN
+    for (i = 0; i < 16; i++)
+        d[i] = data[15 - i];
+#else
+    memcpy (d, data, sizeof (d));
+#endif
+
+    /* FIXME: would overflow */
+    /* https://github.com/linux-nvme/libnvme/issues/475 */
     for (i = 0; i < 16; i++) {
         result *= 256;
-        result += data[15 - i];
+        result += d[15 - i];
     }
     return result;
 }

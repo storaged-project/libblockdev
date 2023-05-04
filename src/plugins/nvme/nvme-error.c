@@ -137,6 +137,9 @@ void _nvme_fabrics_errno_to_gerror (int result, int _errno, GError **error)
             case ENVME_CONNECT_OPNOTSUPP:
                 code = BD_NVME_ERROR_CONNECT_OPNOTSUPP;
                 break;
+            case ENVME_CONNECT_CONNREFUSED:
+                code = BD_NVME_ERROR_CONNECT_REFUSED;
+                break;
             default:
                 code = BD_NVME_ERROR_CONNECT;
         }
