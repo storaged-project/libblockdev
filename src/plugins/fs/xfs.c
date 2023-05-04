@@ -337,6 +337,7 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
     gchar **lines = NULL;
     gchar **line_p = NULL;
     gchar *val_start = NULL;
+    g_autofree gchar* mountpoint = NULL;
 
     if (!check_deps (&avail_deps, DEPS_XFS_ADMIN_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return NULL;
@@ -350,12 +351,30 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
         return NULL;
     }
 
-    args[0] = "xfs_db";
-    args[1] = "-r";
-    args[2] = "-c";
-    args[3] = "info";
-    args[4] = device;
-    args[5] = NULL;
+    /* It is important to use xfs_spaceman for a mounted filesystem
+       since xfs_db might return old information.  xfs_info would be
+       able to do the job for us (running xfs_spaceman or xfs_db
+       depending on whether the fs is mounted), but it doesn't pass
+       "-r" to xfs_db, which is important to avoid spurious udev
+       events just for reading information.
+    */
+
+    mountpoint = bd_fs_get_mountpoint (device, NULL);
+    if (mountpoint) {
+      args[0] = "xfs_spaceman";
+      args[1] = "-c";
+      args[2] = "info";
+      args[3] = mountpoint;
+      args[4] = NULL;
+    } else {
+      args[0] = "xfs_db";
+      args[1] = "-r";
+      args[2] = "-c";
+      args[3] = "info";
+      args[4] = device;
+      args[5] = NULL;
+    }
+
     success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
     if (!success) {
         /* error is already populated */
