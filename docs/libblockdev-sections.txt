@@ -469,6 +469,7 @@ bd_swap_swapon
 bd_swap_swapoff
 bd_swap_swapstatus
 bd_swap_set_label
+bd_swap_set_uuid
 BDSwapTech
 BDSwapTechMode
 bd_swap_is_tech_avail

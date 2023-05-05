@@ -77,6 +77,12 @@ class SwapTestCase(SwapTest):
         _ret, out, _err = run_command("blkid -ovalue -sLABEL -p %s" % self.loop_dev)
         self.assertEqual(out, "BlockDevSwap")
 
+        succ = BlockDev.swap_set_uuid(self.loop_dev, uuid=self.test_uuid)
+        self.assertTrue(succ)
+
+        _ret, out, _err = run_command("blkid -ovalue -sUUID -p %s" % self.loop_dev)
+        self.assertEqual(out, self.test_uuid)
+
         succ = BlockDev.swap_swapon(self.loop_dev, -1)
         self.assertTrue(succ)
 
@@ -226,6 +232,11 @@ class SwapTechAvailable(SwapTest):
                                                BlockDev.SwapTechMode.SET_LABEL)
             self.assertTrue(succ)
 
+            # only UUID checked -- should pass
+            succ = BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP,
+                                               BlockDev.SwapTechMode.SET_UUID)
+            self.assertTrue(succ)
+
         with fake_path(all_but="swaplabel"):
             BlockDev.reinit(self.requested_plugins, True, None)
 
@@ -238,6 +249,11 @@ class SwapTechAvailable(SwapTest):
                 # we have mkswap but not swaplabel, so this should fail
                 BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP,
                                             BlockDev.SwapTechMode.SET_LABEL)
+
+            with self.assertRaises(GLib.GError):
+                # we have mkswap but not swaplabel, so this should fail
+                BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP,
+                                            BlockDev.SwapTechMode.SET_UUID)
 
             # only label checked -- should pass
             succ = BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP,
