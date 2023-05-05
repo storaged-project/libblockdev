@@ -12,6 +12,18 @@ from utils import TestTags, tag_test
 from gi.repository import BlockDev, GLib
 
 
+def _get_dosfstools_version():
+    _ret, out, _err = utils.run_command("mkfs.vfat --help")
+    # mkfs.fat 4.1 (2017-01-24)
+    m = re.search(r"mkfs\.fat ([\d\.]+)", out)
+    if not m or len(m.groups()) != 1:
+        raise RuntimeError("Failed to determine dosfstools version from: %s" % out)
+    return Version(m.groups()[0])
+
+
+DOSFSTOOLS_VERSION = _get_dosfstools_version()
+
+
 class VfatNoDevTestCase(FSNoDevTestCase):
     pass
 
@@ -22,18 +34,10 @@ class VfatTestCase(FSTestCase):
 
         self.mount_dir = tempfile.mkdtemp(prefix="libblockdev.", suffix="vfat_test")
 
-        if self._get_dosfstools_version() <= Version("4.1"):
+        if DOSFSTOOLS_VERSION <= Version("4.1"):
             self._mkfs_options = None
         else:
             self._mkfs_options = [BlockDev.ExtraArg.new("--mbr=n", "")]
-
-    def _get_dosfstools_version(self):
-        _ret, out, _err = utils.run_command("mkfs.vfat --help")
-        # mkfs.fat 4.1 (2017-01-24)
-        m = re.search(r"mkfs\.fat ([\d\.]+)", out)
-        if not m or len(m.groups()) != 1:
-            raise RuntimeError("Failed to determine dosfstools version from: %s" % out)
-        return Version(m.groups()[0])
 
 
 class VfatTestAvailability(VfatNoDevTestCase):
@@ -49,8 +53,12 @@ class VfatTestAvailability(VfatNoDevTestCase):
                                               BlockDev.FSTechMode.RESIZE)
         self.assertTrue(available)
 
-        with self.assertRaisesRegex(GLib.GError, "doesn't support setting UUID"):
-            BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.SET_UUID)
+        if DOSFSTOOLS_VERSION >= Version("4.2"):
+            uuid_avail = BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.SET_UUID)
+            self.assertTrue(uuid_avail)
+        else:
+            with self.assertRaisesRegex(GLib.GError, "Too low version of fatlabel"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.SET_UUID)
 
         BlockDev.reinit(self.requested_plugins, True, None)
 
@@ -74,6 +82,9 @@ class VfatTestAvailability(VfatNoDevTestCase):
         with utils.fake_path(all_but="fatlabel"):
             with self.assertRaisesRegex(GLib.GError, "The 'fatlabel' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.SET_LABEL)
+
+            with self.assertRaisesRegex(GLib.GError, "The 'fatlabel' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT, BlockDev.FSTechMode.SET_UUID)
 
         # now try without vfat-resize
         with utils.fake_path(all_but="vfat-resize"):
@@ -101,7 +112,7 @@ class VfatTestFeatures(VfatNoDevTestCase):
         self.assertTrue(features.fsck & BlockDev.FSFsckFlags.REPAIR)
 
         self.assertTrue(features.configure & BlockDev.FSConfigureFlags.LABEL)
-        self.assertFalse(features.configure & BlockDev.FSConfigureFlags.UUID)
+        self.assertTrue(features.configure & BlockDev.FSConfigureFlags.UUID)
 
         self.assertEqual(features.features, BlockDev.FSFeatureFlags.PARTITION_TABLE)
 
@@ -219,6 +230,55 @@ class VfatSetLabel(VfatTestCase):
 
         with self.assertRaisesRegex(GLib.GError, "at most 11 characters long."):
             BlockDev.fs_vfat_check_label(12 * "a")
+
+
+class VfatSetUUID(VfatTestCase):
+    def test_vfat_set_uuid(self):
+        """Verify that it is possible to set UUID/volume ID of an vfat file system"""
+
+        if DOSFSTOOLS_VERSION <= Version("4.1"):
+            self.skipTest("dosfstools >= 4.2 needed to set UUID")
+
+        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_vfat_set_uuid(self.loop_dev, "2E24EC82")
+        self.assertTrue(succ)
+        fi = BlockDev.fs_vfat_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.uuid, "2E24-EC82")
+
+        # should be also support with the dash
+        succ = BlockDev.fs_vfat_set_uuid(self.loop_dev, "2E24-EC82")
+        self.assertTrue(succ)
+        fi = BlockDev.fs_vfat_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.uuid, "2E24-EC82")
+
+        succ = BlockDev.fs_vfat_set_uuid(self.loop_dev, "")
+        self.assertTrue(succ)
+        fi = BlockDev.fs_vfat_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertTrue(fi.uuid)  # new random, not empty
+        self.assertNotEqual(fi.uuid, "2E24-EC82")
+
+        succ = BlockDev.fs_vfat_check_uuid("2E24EC82")
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_vfat_check_uuid("2E24-EC82")
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_vfat_check_uuid("0000-0000")
+        self.assertTrue(succ)
+
+        with self.assertRaisesRegex(GLib.GError, "must be a hexadecimal number."):
+            BlockDev.fs_vfat_check_uuid("z")
+
+        with self.assertRaisesRegex(GLib.GError, "must be a hexadecimal number."):
+            BlockDev.fs_vfat_check_uuid("aaaa-")
+
+        with self.assertRaisesRegex(GLib.GError, "must fit into 32 bits."):
+            BlockDev.fs_vfat_check_uuid(10 * "f")
 
 
 class VfatResize(VfatTestCase):

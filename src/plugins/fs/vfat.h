@@ -20,6 +20,8 @@ gboolean bd_fs_vfat_check (const gchar *device, const BDExtraArg **extra, GError
 gboolean bd_fs_vfat_repair (const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_fs_vfat_set_label (const gchar *device, const gchar *label, GError **error);
 gboolean bd_fs_vfat_check_label (const gchar *label, GError **error);
+gboolean bd_fs_vfat_set_uuid (const gchar *device, const gchar *uuid, GError **error);
+gboolean bd_fs_vfat_check_uuid (const gchar *uuid, GError **error);
 BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error);
 gboolean bd_fs_vfat_resize (const gchar *device, guint64 new_size, GError **error);
 

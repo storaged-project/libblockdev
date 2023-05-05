@@ -769,7 +769,7 @@ class GenericSetLabel(GenericTestCase):
 
 
 class GenericSetUUID(GenericTestCase):
-    def _test_generic_set_uuid(self, mkfs_function, fstype, test_uuid="4d7086c4-a4d3-432f-819e-73da03870df9"):
+    def _test_generic_set_uuid(self, mkfs_function, fstype, test_uuid="4d7086c4-a4d3-432f-819e-73da03870df9", expected_uuid=None):
         # clean the device
         succ = BlockDev.fs_clean(self.loop_dev)
 
@@ -781,7 +781,10 @@ class GenericSetUUID(GenericTestCase):
         self.assertTrue(succ)
 
         fs_uuid = check_output(["blkid", "-ovalue", "-sUUID", "-p", self.loop_dev]).decode().strip()
-        self.assertEqual(fs_uuid, test_uuid)
+        if expected_uuid:
+            self.assertEqual(fs_uuid, expected_uuid)
+        else:
+            self.assertEqual(fs_uuid, test_uuid)
 
         # set empty/random UUID
         succ = BlockDev.fs_set_uuid(self.loop_dev, None, fstype)
@@ -807,9 +810,17 @@ class GenericSetUUID(GenericTestCase):
 
     def test_vfat_generic_set_uuid(self):
         """Test generic set_uuid function with a vfat file system"""
-        with self.assertRaises(GLib.GError):
-            # vfat doesn't support setting UUID
-            self._test_generic_set_uuid(mkfs_function=BlockDev.fs_vfat_mkfs, fstype="vfat")
+        if self._vfat_version < Version("4.2"):
+            self.skipTest("dosfstools >= 4.2 needed to set UUID")
+
+        def mkfs_vfat(device, options=None):
+            if self._vfat_version >= Version("4.2"):
+                return BlockDev.fs_vfat_mkfs(device, [BlockDev.ExtraArg.new("--mbr=n", "")])
+            else:
+                return BlockDev.fs_vfat_mkfs(device, options)
+
+        self._test_generic_set_uuid(mkfs_function=mkfs_vfat, fstype="vfat", test_uuid="2E24EC82",
+                                    expected_uuid="2E24-EC82")
 
     def test_f2fs_generic_set_uuid(self):
         """Test generic set_uuid function with a f2fs file system"""

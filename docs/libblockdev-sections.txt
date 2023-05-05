@@ -619,6 +619,8 @@ bd_fs_vfat_repair
 bd_fs_vfat_resize
 bd_fs_vfat_set_label
 bd_fs_vfat_check_label
+bd_fs_vfat_set_uuid
+bd_fs_vfat_check_uuid
 BDFSTech
 BDFSTechMode
 BDFsResizeFlags

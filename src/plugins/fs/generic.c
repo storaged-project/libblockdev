@@ -98,7 +98,7 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
     { .resize = BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK,
       .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_FORCE | BD_FS_MKFS_NOPT,
       .fsck = BD_FS_FSCK_CHECK | BD_FS_FSCK_REPAIR,
-      .configure = BD_FS_SUPPORT_SET_LABEL,
+      .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
       .features = BD_FS_FEATURE_PARTITION_TABLE,
       .partition_id = "0x0c",
       .partition_type = "ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" },
@@ -233,7 +233,7 @@ static const BDFSInfo fs_info[BD_FS_LAST_FS] = {
       .resize_mode = fs_features[BD_FS_TECH_VFAT].resize,
       .label_util = "fatlabel",
       .info_util = "fsck.vfat",
-      .uuid_util = NULL },
+      .uuid_util = "fatlabel" },
     /* NTFS */
     { .type = "ntfs",
       .mkfs_util = "mkfs.ntfs",
@@ -981,9 +981,9 @@ static gboolean device_operation (const gchar *device, const gchar *fstype, BDFs
             case BD_FS_LABEL:
                 return bd_fs_vfat_set_label (device, label, error);
             case BD_FS_UUID:
-                break;
+                return bd_fs_vfat_set_uuid (device, uuid, error);
             case BD_FS_UUID_CHECK:
-                break;
+                return bd_fs_vfat_check_uuid (uuid, error);
             default:
                 g_assert_not_reached ();
         }
