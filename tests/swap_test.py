@@ -19,6 +19,8 @@ class SwapTest(unittest.TestCase):
             BlockDev.reinit(cls.requested_plugins, True, None)
 
 class SwapTestCase(SwapTest):
+    test_uuid = "4d7086c4-a4d3-432f-819e-73da03870df9"
+
     def setUp(self):
         self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("swap_test", self.dev_size)
@@ -99,6 +101,15 @@ class SwapTestCase(SwapTest):
 
         _ret, out, _err = run_command("blkid -ovalue -sLABEL -p %s" % self.loop_dev)
         self.assertEqual(out, "BlockDevSwap")
+
+    def test_mkswap_with_uuid(self):
+        """Verify that mkswap with uuid works as expected"""
+
+        succ = BlockDev.swap_mkswap(self.loop_dev, uuid=self.test_uuid)
+        self.assertTrue(succ)
+
+        _ret, out, _err = run_command("blkid -ovalue -sUUID -p %s" % self.loop_dev)
+        self.assertEqual(out, self.test_uuid)
 
     def test_swapon_pagesize(self):
         """Verify that activating swap with different pagesize fails"""

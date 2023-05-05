@@ -40,7 +40,7 @@ void bd_swap_close (void);
 
 gboolean bd_swap_is_tech_avail (BDSwapTech tech, guint64 mode, GError **error);
 
-gboolean bd_swap_mkswap (const gchar *device, const gchar *label, const BDExtraArg **extra, GError **error);
+gboolean bd_swap_mkswap (const gchar *device, const gchar *label, const gchar *uuid, const BDExtraArg **extra, GError **error);
 gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error);
 gboolean bd_swap_swapoff (const gchar *device, GError **error);
 gboolean bd_swap_swapstatus (const gchar *device, GError **error);

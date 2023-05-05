@@ -111,6 +111,7 @@ gboolean bd_swap_is_tech_avail (BDSwapTech tech UNUSED, guint64 mode, GError **e
  * bd_swap_mkswap:
  * @device: a device to create swap space on
  * @label: (nullable): a label for the swap space device
+ * @uuid: (nullable): UUID for the swap space device
  * @extra: (nullable) (array zero-terminated=1): extra options for the creation (right now
  *                                                 passed to the 'mkswap' utility)
  * @error: (out) (optional): place to store error (if any)
@@ -119,7 +120,7 @@ gboolean bd_swap_is_tech_avail (BDSwapTech tech UNUSED, guint64 mode, GError **e
  *
  * Tech category: %BD_SWAP_TECH_SWAP-%BD_SWAP_TECH_MODE_CREATE
  */
-gboolean bd_swap_mkswap (const gchar *device, const gchar *label, const BDExtraArg **extra, GError **error) {
+gboolean bd_swap_mkswap (const gchar *device, const gchar *label, const gchar *uuid, const BDExtraArg **extra, GError **error) {
     guint8 next_arg = 2;
 
     if (!check_deps (&avail_deps, DEPS_MKSWAP_MASK, deps, DEPS_LAST, &deps_check_lock, error))
@@ -133,6 +134,13 @@ gboolean bd_swap_mkswap (const gchar *device, const gchar *label, const BDExtraA
         argv[next_arg] = "-L";
         next_arg++;
         argv[next_arg] = label;
+        next_arg++;
+    }
+
+    if (uuid) {
+        argv[next_arg] = "-U";
+        next_arg++;
+        argv[next_arg] = uuid;
         next_arg++;
     }
 
