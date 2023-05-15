@@ -35,11 +35,9 @@ class ExfatTestAvailability(ExfatNoDevTestCase):
                                               BlockDev.FSTechMode.MKFS |
                                               BlockDev.FSTechMode.REPAIR |
                                               BlockDev.FSTechMode.CHECK |
-                                              BlockDev.FSTechMode.SET_LABEL)
+                                              BlockDev.FSTechMode.SET_LABEL |
+                                              BlockDev.FSTechMode.SET_UUID)
         self.assertTrue(available)
-
-        with self.assertRaisesRegex(GLib.GError, "doesn't support setting UUID"):
-            BlockDev.fs_is_tech_avail(BlockDev.FSTech.EXFAT, BlockDev.FSTechMode.SET_UUID)
 
         with self.assertRaisesRegex(GLib.GError, "doesn't support resizing"):
             BlockDev.fs_is_tech_avail(BlockDev.FSTech.EXFAT, BlockDev.FSTechMode.RESIZE)
@@ -67,6 +65,9 @@ class ExfatTestAvailability(ExfatNoDevTestCase):
             with self.assertRaisesRegex(GLib.GError, "The 'tune.exfat' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.EXFAT, BlockDev.FSTechMode.SET_LABEL)
 
+            with self.assertRaisesRegex(GLib.GError, "The 'tune.exfat' utility is not available"):
+                BlockDev.fs_is_tech_avail(BlockDev.FSTech.EXFAT, BlockDev.FSTechMode.SET_UUID)
+
 
 class ExfatTestFeatures(ExfatNoDevTestCase):
 
@@ -86,7 +87,7 @@ class ExfatTestFeatures(ExfatNoDevTestCase):
         self.assertTrue(features.fsck & BlockDev.FSFsckFlags.REPAIR)
 
         self.assertTrue(features.configure & BlockDev.FSConfigureFlags.LABEL)
-        self.assertFalse(features.configure & BlockDev.FSConfigureFlags.UUID)
+        self.assertTrue(features.configure & BlockDev.FSConfigureFlags.UUID)
 
         self.assertEqual(features.features, 0)
 
@@ -201,3 +202,58 @@ class ExfatSetLabel(ExfatTestCase):
 
         with self.assertRaisesRegex(GLib.GError, "is too long."):
             BlockDev.fs_exfat_check_label(12 * "a")
+
+
+class ExfatSetUUID(ExfatTestCase):
+    def test_exfat_set_uuid(self):
+        """Verify that it is possible to set UUID/volume ID of an exfat file system"""
+
+        succ = BlockDev.fs_exfat_mkfs(self.loop_dev)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_exfat_set_uuid(self.loop_dev, "0x2E24EC82")
+        self.assertTrue(succ)
+        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.uuid, "2E24-EC82")
+
+        succ = BlockDev.fs_exfat_set_uuid(self.loop_dev, "2E24EC82")
+        self.assertTrue(succ)
+        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.uuid, "2E24-EC82")
+
+        # should be also support with the dash
+        succ = BlockDev.fs_exfat_set_uuid(self.loop_dev, "2E24-EC82")
+        self.assertTrue(succ)
+        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertEqual(fi.uuid, "2E24-EC82")
+
+        succ = BlockDev.fs_exfat_set_uuid(self.loop_dev, "")
+        self.assertTrue(succ)
+        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        self.assertTrue(fi)
+        self.assertTrue(fi.uuid)  # new random, not empty
+        self.assertNotEqual(fi.uuid, "2E24-EC82")
+
+        succ = BlockDev.fs_exfat_check_uuid("0x2E24EC82")
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_exfat_check_uuid("2E24EC82")
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_exfat_check_uuid("2E24-EC82")
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_exfat_check_uuid("0000-0000")
+        self.assertTrue(succ)
+
+        with self.assertRaisesRegex(GLib.GError, "must be a hexadecimal number."):
+            BlockDev.fs_exfat_check_uuid("z")
+
+        with self.assertRaisesRegex(GLib.GError, "must be a hexadecimal number."):
+            BlockDev.fs_exfat_check_uuid("aaaa-")
+
+        with self.assertRaisesRegex(GLib.GError, "must fit into 32 bits."):
+            BlockDev.fs_exfat_check_uuid(10 * "f")

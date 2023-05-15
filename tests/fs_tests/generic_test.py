@@ -769,7 +769,7 @@ class GenericSetLabel(GenericTestCase):
 
 
 class GenericSetUUID(GenericTestCase):
-    def _test_generic_set_uuid(self, mkfs_function, fstype, test_uuid="4d7086c4-a4d3-432f-819e-73da03870df9"):
+    def _test_generic_set_uuid(self, mkfs_function, fstype, test_uuid="4d7086c4-a4d3-432f-819e-73da03870df9", expected_uuid=None):
         # clean the device
         succ = BlockDev.fs_clean(self.loop_dev)
 
@@ -781,7 +781,10 @@ class GenericSetUUID(GenericTestCase):
         self.assertTrue(succ)
 
         fs_uuid = check_output(["blkid", "-ovalue", "-sUUID", "-p", self.loop_dev]).decode().strip()
-        self.assertEqual(fs_uuid, test_uuid)
+        if expected_uuid:
+            self.assertEqual(fs_uuid, expected_uuid)
+        else:
+            self.assertEqual(fs_uuid, test_uuid)
 
         # set empty/random UUID
         succ = BlockDev.fs_set_uuid(self.loop_dev, None, fstype)
@@ -829,9 +832,8 @@ class GenericSetUUID(GenericTestCase):
         """Test generic set_uuid function with a exfat file system"""
         if not self.exfat_avail:
             self.skipTest("skipping exFAT: not available")
-        with self.assertRaisesRegex(GLib.GError, "Setting UUID of filesystem 'exfat' is not supported."):
-            # exfat doesn't support setting UUID
-            self._test_generic_set_uuid(mkfs_function=BlockDev.fs_exfat_mkfs, fstype="exfat")
+        self._test_generic_set_uuid(mkfs_function=BlockDev.fs_exfat_mkfs, fstype="exfat", test_uuid="2E24EC82",
+                                    expected_uuid="2E24-EC82")
 
     def test_btrfs_generic_set_uuid(self):
         """Test generic set_uuid function with a btrfs file system"""

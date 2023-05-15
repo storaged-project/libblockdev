@@ -51,7 +51,7 @@ static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
     DEPS_TUNEEXFAT_MASK,    /* set-label */
     DEPS_TUNEEXFAT_MASK,    /* query */
     0,                      /* resize */
-    0,                      /* set-uuid */
+    DEPS_TUNEEXFAT_MASK,    /* set-uuid */
 };
 
 /* line prefixes in tune.exfat output for parsing */
@@ -79,11 +79,7 @@ bd_fs_exfat_is_tech_avail (BDFSTech tech UNUSED, guint64 mode, GError **error) {
     guint32 required = 0;
     guint i = 0;
 
-    if (mode & BD_FS_TECH_MODE_SET_UUID) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL,
-                     "exFAT doesn't support setting UUID for an existing device.");
-        return FALSE;
-    } else if (mode & BD_FS_TECH_MODE_RESIZE) {
+    if (mode & BD_FS_TECH_MODE_RESIZE) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL,
                      "exFAT currently doesn't support resizing.");
         return FALSE;
@@ -275,6 +271,99 @@ gboolean bd_fs_exfat_check_label (const gchar *label, GError **error) {
         return FALSE;
     }
 
+    return TRUE;
+}
+
+/**
+ * bd_fs_exfat_set_uuid:
+ * @device: the device containing the file system to set uuid for
+ * @uuid: (nullable): volume ID to set or %NULL to generate a new one
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the volume ID of exFAT file system on the @device was
+ *          successfully set or not
+ *
+ * Tech category: %BD_FS_TECH_EXFAT-%BD_FS_TECH_MODE_SET_UUID
+ */
+gboolean bd_fs_exfat_set_uuid (const gchar *device, const gchar *uuid, GError **error) {
+    const gchar *args[5] = {"tune.exfat", "-I", NULL, device, NULL};
+    g_autofree gchar *new_uuid = NULL;
+    size_t len = 0;
+    guint32 rand = 0;
+
+    if (!check_deps (&avail_deps, DEPS_TUNEEXFAT_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
+    if (!uuid || g_strcmp0 (uuid, "") == 0) {
+        rand = g_random_int ();
+        new_uuid = g_strdup_printf ("0x%08x", rand);
+        args[2] = new_uuid;
+    } else {
+        if (g_str_has_prefix (uuid, "0x")) {
+            /* already format taken by tune.exfat: hexadecimal number with the 0x prefix */
+            args[2] = uuid;
+        } else {
+            len = strlen (uuid);
+            if (len == 9 && uuid[4] == '-') {
+                /* we want to support vol ID in the "udev format", e.g. "2E24-EC82" */
+                new_uuid = g_new0 (gchar, 11);
+                memcpy (new_uuid, "0x", 2);
+                memcpy (new_uuid + 2, uuid, 4);
+                memcpy (new_uuid + 6, uuid + 5, 4);
+                args[2] = new_uuid;
+            } else {
+                new_uuid = g_strdup_printf ("0x%s", uuid);
+                args[2] = new_uuid;
+            }
+        }
+    }
+
+    return bd_utils_exec_and_report_error (args, NULL, error);
+}
+
+/**
+ * bd_fs_exfat_check_uuid:
+ * @uuid: UUID to check
+ * @error: (out) (optional): place to store error
+ *
+ * Returns: whether @uuid is a valid UUID for the exFAT file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_exfat_check_uuid (const gchar *uuid, GError **error) {
+    guint64 vol_id;
+    gchar *new_uuid = NULL;
+    gchar *endptr = NULL;
+    size_t len = 0;
+
+    if (!uuid)
+        return TRUE;
+
+    len = strlen (uuid);
+    if (len == 9 && uuid[4] == '-') {
+        new_uuid = g_new0 (gchar, 9);
+        memcpy (new_uuid, uuid, 4);
+        memcpy (new_uuid + 4, uuid + 5, 4);
+    } else
+        new_uuid = g_strdup (uuid);
+
+    vol_id = g_ascii_strtoull (new_uuid, &endptr, 16);
+    if ((vol_id == 0 && endptr == new_uuid) || (endptr && *endptr)) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
+                     "UUID for exFAT filesystem must be a hexadecimal number.");
+        g_free (new_uuid);
+        return FALSE;
+    }
+
+    if (vol_id > G_MAXUINT32) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
+                     "UUID for exFAT filesystem must fit into 32 bits.");
+        g_free (new_uuid);
+        return FALSE;
+    }
+
+    g_free (new_uuid);
     return TRUE;
 }
 
