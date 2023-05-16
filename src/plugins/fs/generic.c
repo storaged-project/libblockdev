@@ -130,7 +130,7 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
     { .resize = 0,
       .mkfs = BD_FS_MKFS_LABEL,
       .fsck = BD_FS_FSCK_CHECK | BD_FS_FSCK_REPAIR,
-      .configure = BD_FS_SUPPORT_SET_LABEL,
+      .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
       .features = 0,
       .partition_id = "0x07",
       .partition_type = "ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" },
@@ -277,7 +277,7 @@ static const BDFSInfo fs_info[BD_FS_LAST_FS] = {
       .resize_mode = fs_features[BD_FS_TECH_EXFAT].resize,
       .label_util = "tune.exfat",
       .info_util = "tune.exfat",
-      .uuid_util = NULL },
+      .uuid_util = "tune.exfat" },
     /* BTRFS */
     { .type = "btrfs",
       .mkfs_util = "mkfs.btrfs",
@@ -1057,9 +1057,9 @@ static gboolean device_operation (const gchar *device, const gchar *fstype, BDFs
             case BD_FS_LABEL_CHECK:
                 return bd_fs_exfat_check_label (label, error);
             case BD_FS_UUID:
-                break;
+                return bd_fs_exfat_set_uuid (device, uuid, error);
             case BD_FS_UUID_CHECK:
-                break;
+                return bd_fs_exfat_check_uuid (uuid, error);
             default:
                 g_assert_not_reached ();
         }

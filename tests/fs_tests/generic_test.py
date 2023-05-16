@@ -840,9 +840,8 @@ class GenericSetUUID(GenericTestCase):
         """Test generic set_uuid function with a exfat file system"""
         if not self.exfat_avail:
             self.skipTest("skipping exFAT: not available")
-        with self.assertRaisesRegex(GLib.GError, "Setting UUID of filesystem 'exfat' is not supported."):
-            # exfat doesn't support setting UUID
-            self._test_generic_set_uuid(mkfs_function=BlockDev.fs_exfat_mkfs, fstype="exfat")
+        self._test_generic_set_uuid(mkfs_function=BlockDev.fs_exfat_mkfs, fstype="exfat", test_uuid="2E24EC82",
+                                    expected_uuid="2E24-EC82")
 
     def test_btrfs_generic_set_uuid(self):
         """Test generic set_uuid function with a btrfs file system"""

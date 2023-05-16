@@ -665,6 +665,8 @@ bd_fs_exfat_mkfs
 bd_fs_exfat_repair
 bd_fs_exfat_set_label
 bd_fs_exfat_check_label
+bd_fs_exfat_set_uuid
+bd_fs_exfat_check_uuid
 BDFSBtrfsInfo
 bd_fs_btrfs_get_info
 bd_fs_btrfs_info_copy
