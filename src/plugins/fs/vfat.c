@@ -39,25 +39,28 @@ static GMutex deps_check_lock;
 #define DEPS_FSCKVFAT_MASK (1 << DEPS_FSCKVFAT)
 #define DEPS_RESIZEVFAT 3
 #define DEPS_RESIZEVFAT_MASK (1 << DEPS_RESIZEVFAT)
+#define DEPS_FATLABELUUID 4
+#define DEPS_FATLABELUUID_MASK (1 << DEPS_FATLABELUUID)
 
-#define DEPS_LAST 4
+#define DEPS_LAST 5
 
 static const UtilDep deps[DEPS_LAST] = {
     {"mkfs.vfat", NULL, NULL, NULL},
     {"fatlabel", NULL, NULL, NULL},
     {"fsck.vfat", NULL, NULL, NULL},
     {"vfat-resize", NULL, NULL, NULL},
+    {"fatlabel", "4.2", "--version", "fatlabel\\s+([\\d\\.]+).+"},
 };
 
 static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
-    DEPS_MKFSVFAT_MASK,   /* mkfs */
-    0,                    /* wipe */
-    DEPS_FSCKVFAT_MASK,   /* check */
-    DEPS_FSCKVFAT_MASK,   /* repair */
-    DEPS_FATLABEL_MASK,   /* set-label */
-    DEPS_FSCKVFAT_MASK,   /* query */
-    DEPS_RESIZEVFAT_MASK, /* resize */
-    0                     /* set-uuid */
+    DEPS_MKFSVFAT_MASK,     /* mkfs */
+    0,                      /* wipe */
+    DEPS_FSCKVFAT_MASK,     /* check */
+    DEPS_FSCKVFAT_MASK,     /* repair */
+    DEPS_FATLABEL_MASK,     /* set-label */
+    DEPS_FSCKVFAT_MASK,     /* query */
+    DEPS_RESIZEVFAT_MASK,   /* resize */
+    DEPS_FATLABELUUID_MASK, /* set-uuid */
 };
 
 #define UNUSED __attribute__((unused))
@@ -81,12 +84,6 @@ gboolean __attribute__ ((visibility ("hidden")))
 bd_fs_vfat_is_tech_avail (BDFSTech tech UNUSED, guint64 mode, GError **error) {
     guint32 required = 0;
     guint i = 0;
-
-    if (mode & BD_FS_TECH_MODE_SET_UUID) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_TECH_UNAVAIL,
-                     "FAT doesn't support setting UUID for an existing device.");
-        return FALSE;
-    }
 
     for (i = 0; i <= BD_FS_MODE_LAST; i++)
         if (mode & (1 << i))
@@ -325,6 +322,89 @@ gboolean bd_fs_vfat_check_label (const gchar *label, GError **error) {
             return FALSE;
         }
 
+    return TRUE;
+}
+
+/**
+ * bd_fs_vfat_set_uuid:
+ * @device: the device containing the file system to set uuid for
+ * @uuid: (nullable): volume ID to set or %NULL to generate a new one
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the volume ID of vfat file system on the @device was
+ *          successfully set or not
+ *
+ * Tech category: %BD_FS_TECH_VFAT-%BD_FS_TECH_MODE_SET_UUID
+ */
+gboolean bd_fs_vfat_set_uuid (const gchar *device, const gchar *uuid, GError **error) {
+    const gchar *args[5] = {"fatlabel", "-i", device, NULL, NULL};
+    g_autofree gchar *new_uuid = NULL;
+    size_t len = 0;
+
+    if (!check_deps (&avail_deps, DEPS_FATLABELUUID_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
+    if (!uuid || g_strcmp0 (uuid, "") == 0)
+        args[3] = "--reset";
+    else {
+        len = strlen (uuid);
+        /* we want to support vol ID in the "udev format", e.g. "2E24-EC82" */
+        if (len == 9 && uuid[4] == '-') {
+            new_uuid = g_new0 (gchar, 9);
+            memcpy (new_uuid, uuid, 4);
+            memcpy (new_uuid + 4, uuid + 5, 4);
+        } else
+            new_uuid = g_strdup (uuid);
+
+        args[3] = new_uuid;
+    }
+
+    return bd_utils_exec_and_report_error (args, NULL, error);
+}
+
+/**
+ * bd_fs_vfat_check_uuid:
+ * @uuid: UUID to check
+ * @error: (out) (optional): place to store error
+ *
+ * Returns: whether @uuid is a valid UUID for the vfat file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_vfat_check_uuid (const gchar *uuid, GError **error) {
+    guint64 vol_id;
+    gchar *new_uuid = NULL;
+    gchar *endptr = NULL;
+    size_t len = 0;
+
+    if (!uuid)
+        return TRUE;
+
+    len = strlen (uuid);
+    if (len == 9 && uuid[4] == '-') {
+        new_uuid = g_new0 (gchar, 9);
+        memcpy (new_uuid, uuid, 4);
+        memcpy (new_uuid + 4, uuid + 5, 4);
+    } else
+        new_uuid = g_strdup (uuid);
+
+    vol_id = g_ascii_strtoull (new_uuid, &endptr, 16);
+    if ((vol_id == 0 && endptr == new_uuid) || (endptr && *endptr)) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
+                     "UUID for VFAT filesystem must be a hexadecimal number.");
+        g_free (new_uuid);
+        return FALSE;
+    }
+
+    if (vol_id > G_MAXUINT32) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UUID_INVALID,
+                     "UUID for VFAT filesystem must fit into 32 bits.");
+        g_free (new_uuid);
+        return FALSE;
+    }
+
+    g_free (new_uuid);
     return TRUE;
 }
 
