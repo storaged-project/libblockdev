@@ -62,8 +62,8 @@ class DevMapperGetSubsystemFromName(DevMapperTestCase):
     def test_get_subsystem_from_name_crypt(self):
         """Verify that it is possible to get luks device subsystem from its name"""
         self.addCleanup(self._destroy_crypt)
-        run("echo \"key\" | cryptsetup luksFormat %s -" %self.loop_dev)
-        run("echo \"key\" | cryptsetup open %s libbd_dm_tests-subsystem_crypt --key-file=-" %self.loop_dev)
+        run("echo \"supersecretkey\" | cryptsetup luksFormat %s -" %self.loop_dev)
+        run("echo \"supersecretkey\" | cryptsetup open %s libbd_dm_tests-subsystem_crypt --key-file=-" %self.loop_dev)
         subsystem = BlockDev.dm_get_subsystem_from_name("libbd_dm_tests-subsystem_crypt")
         self.assertEqual(subsystem, "CRYPT")
 
