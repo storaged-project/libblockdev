@@ -938,7 +938,7 @@ class CryptoTestInfo(CryptoTestCase):
         self.assertEqual(info.uuid, uuid)
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
-    def test_luks_format(self):
+    def test_luks_info(self):
         """Verify that we can get information about a LUKS device"""
 
         succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 256, PASSWD, None, 0)
@@ -961,7 +961,7 @@ class CryptoTestInfo(CryptoTestCase):
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
     @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
-    def test_luks2_format(self):
+    def test_luks2_info(self):
         """Verify that we can get information about a LUKS 2 device"""
 
         extra = BlockDev.CryptoLUKSExtra()
@@ -993,7 +993,7 @@ class CryptoTestSetLabel(CryptoTestCase):
     subsystem = "bbbbbb"
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
-    def test_luks_format(self):
+    def test_luks_set_label(self):
         """Verify that we can set label on a LUKS device"""
 
         succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 256, PASSWD, None, 0)
@@ -1009,7 +1009,7 @@ class CryptoTestSetLabel(CryptoTestCase):
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
     @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
-    def test_luks2_format(self):
+    def test_luks2_set_label(self):
         """Verify that we can set label on a LUKS 2 device"""
 
         succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 256, PASSWD, None, 0,
@@ -1049,7 +1049,7 @@ class CryptoTestSetUuid(CryptoTestCase):
     test_uuid = "4d7086c4-a4d3-432f-819e-73da03870df9"
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
-    def test_luks_format(self):
+    def test_luks_set_uuid(self):
         """Verify that we can set label on a LUKS device"""
 
         succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 256, PASSWD, None, 0)
@@ -1071,7 +1071,7 @@ class CryptoTestSetUuid(CryptoTestCase):
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
     @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
-    def test_luks2_format(self):
+    def test_luks2_set_uuid(self):
         """Verify that we can set label on a LUKS 2 device"""
 
         succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 256, PASSWD, None, 0,
