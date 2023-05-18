@@ -433,7 +433,7 @@ def create_nvmet_device(dev_path):
     setup_nvme_target([dev_path], SUBNQN)
 
     # connect initiator to the newly created target
-    (ret, out, err) = run_command("nvme connect --transport=loop --hostnqn=%s --nqn=%s" % (hostnqn, SUBNQN))
+    (ret, out, err) = run_command("nvme connect -t loop -q %s -n %s" % (hostnqn, SUBNQN))
     if ret != 0:
         raise RuntimeError("Error connecting to the NVMe target: '%s %s'" % (out, err))
 
@@ -455,7 +455,7 @@ def delete_nvmet_device(nvme_dev):
         subnqn, dev_path = _nvmet_devs[nvme_dev]
 
         # disconnect the initiator
-        ret, out, err = run_command("nvme disconnect --nqn=%s" % subnqn)
+        ret, out, err = run_command("nvme disconnect -n %s" % subnqn)
         if ret != 0:
             raise RuntimeError("Error disconnecting the '%s' nqn: '%s %s'" % (subnqn, out, err))
 
