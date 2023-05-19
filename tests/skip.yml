@@ -29,11 +29,6 @@
     - distro: "debian"
       reason: "Removing spare disks from an array is broken on Debian"
 
-- test: mpath_test.MpathUnloadTest.*
-  skip_on:
-    - distro: "debian"
-      reason: "dependency checks are skipped on Debian"
-
 - test: nvdimm_test.NVDIMMNoDevTest.test_supported_sector_sizes
   skip_on:
     - arch: "i686"
@@ -50,45 +45,16 @@
       version: "9"
       reason: "snapshot merge doesn't work on CentOS 9 Stream with LVM DBus API"
 
-- test: nvdimm_test.NVDIMMNamespaceTestCase.(test_enable_disable|test_namespace_reconfigure)
-  skip_on:
-    - distro: "fedora"
-      version: ["36", "37"]
-      reason: "Namespace disabling and reconfiguration hangs in kernel on rawhide"
-
 - test: nvme_test
   skip_on:
     - distro: "debian"
+      version: "11"
       reason: "latest libnvme is not yet available on Debian"
-
-- test: nvme_test
-  skip_on:
-    - distro: "centos"
-      version: "9"
-      reason: "latest libnvme is not yet available on CentOS 9"
 
 - test: (lvm_test|lvm_dbus_tests).LvmPVVGLVWritecacheAttachDetachTestCase
   skip_on:
     - arch: "i686"
       reason: "Cache attach/detach fails with ENOMEM on 32bit systems"
-
-- test: (lvm_test|lvm_dbus_tests).LvmTestLVcreateType
-  skip_on:
-    - distro: "centos"
-      version: "9"
-      reason: "Creating RAID 1 LV on CentOS/RHEL 9 causes a system deadlock"
-
-- test: (lvm_test|lvm_dbus_tests).LvmTestPartialLVs
-  skip_on:
-    - distro: "centos"
-      version: "9"
-      reason: "Creating RAID 1 LV on CentOS/RHEL 9 causes kernel panic"
-
-- test: (lvm_test|lvm_dbus_tests).LvmTestPartialLVs
-  skip_on:
-    - distro: "fedora"
-      version: "38"
-      reason: "Force-removing PV for the test hangs with kernel 6.0.0"
 
 - test: lvm_dbus_tests.LvmTestLVcreateRemove
   skip_on:
@@ -101,3 +67,9 @@
    - distro: "centos"
      version: "9"
      reason: "LVM >= 2.03.19 is not yet available breaking our check for LVM resize on CentOS 9 Stream"
+
+- test: nvme_test
+  skip_on:
+    - distro: "centos"
+      version: "8"
+      reason: "required version of libnvme is not available CentOS 8"
