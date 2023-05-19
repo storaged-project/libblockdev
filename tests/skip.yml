@@ -111,3 +111,9 @@
    - distro: "centos"
      version: "8"
      reason: "LVM DBus doesn't include error message from the command line on CentOS/RHEL 8"
+
+- test: (lvm_test|lvm_dbus_tests).LvmTestLVresize.test_lvresize
+  skip_on:
+   - distro: "centos"
+     version: "9"
+     reason: "LVM >= 2.03.19 is not yet available breaking our check for LVM resize on CentOS 9 Stream"
