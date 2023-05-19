@@ -18,6 +18,7 @@
  */
 
 #include <blockdev/utils.h>
+#include <libmount/libmount.h>
 
 #include <check_deps.h>
 #include "fs.h"
@@ -57,6 +58,9 @@ GQuark bd_fs_error_quark (void)
  *
  */
 gboolean bd_fs_init (void) {
+    /* tell libmount to honour the LIBMOUNT_DEBUG env var */
+    mnt_init_debug (0);
+
     return TRUE;
 }
 
