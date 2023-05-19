@@ -101,3 +101,9 @@
    - distro: "centos"
      version: "9"
      reason: "LVM >= 2.03.19 is not yet available breaking our check for LVM resize on CentOS 9 Stream"
+
+- test: nvme_test
+  skip_on:
+    - distro: "centos"
+      version: "8"
+      reason: "required version of libnvme is not available CentOS 8"
