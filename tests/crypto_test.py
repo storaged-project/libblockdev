@@ -175,6 +175,23 @@ class CryptoTestFormat(CryptoTestCase):
             self.fail("Failed to get pbkdf information from:\n%s %s" % (out, err))
         self.assertEqual(m.group(1), "pbkdf2")
 
+    def _is_fips_enabled(self):
+        if not os.path.exists("/proc/sys/crypto/fips_enabled"):
+            # if the file doesn't exist, we are definitely not in FIPS mode
+            return False
+
+        with open("/proc/sys/crypto/fips_enabled", "r") as f:
+            enabled = f.read()
+        return enabled.strip() == "1"
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
+    def test_luks2_format_pbkdf_options(self):
+        """Verify that formatting device as LUKS 2 works"""
+
+        if self._is_fips_enabled():
+            self.skipTest("FIPS mode is enabled, cannot use argon2, skipping")
+
         # different options for argon2 -- all parameters set
         pbkdf = BlockDev.CryptoLUKSPBKDF(type="argon2id", max_memory_kb=100*1024, iterations=10, parallel_threads=1)
         extra = BlockDev.CryptoLUKSExtra(pbkdf=pbkdf)
@@ -938,7 +955,7 @@ class CryptoTestInfo(CryptoTestCase):
         self.assertEqual(info.uuid, uuid)
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
-    def test_luks_format(self):
+    def test_luks_info(self):
         """Verify that we can get information about a LUKS device"""
 
         succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 256, PASSWD, None, 0)
@@ -961,7 +978,7 @@ class CryptoTestInfo(CryptoTestCase):
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
     @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
-    def test_luks2_format(self):
+    def test_luks2_info(self):
         """Verify that we can get information about a LUKS 2 device"""
 
         extra = BlockDev.CryptoLUKSExtra()
@@ -993,7 +1010,7 @@ class CryptoTestSetLabel(CryptoTestCase):
     subsystem = "bbbbbb"
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
-    def test_luks_format(self):
+    def test_luks_set_label(self):
         """Verify that we can set label on a LUKS device"""
 
         succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 256, PASSWD, None, 0)
@@ -1009,7 +1026,7 @@ class CryptoTestSetLabel(CryptoTestCase):
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
     @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
-    def test_luks2_format(self):
+    def test_luks2_set_label(self):
         """Verify that we can set label on a LUKS 2 device"""
 
         succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 256, PASSWD, None, 0,
@@ -1049,7 +1066,7 @@ class CryptoTestSetUuid(CryptoTestCase):
     test_uuid = "4d7086c4-a4d3-432f-819e-73da03870df9"
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
-    def test_luks_format(self):
+    def test_luks_set_uuid(self):
         """Verify that we can set label on a LUKS device"""
 
         succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 256, PASSWD, None, 0)
@@ -1071,7 +1088,7 @@ class CryptoTestSetUuid(CryptoTestCase):
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
     @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
-    def test_luks2_format(self):
+    def test_luks2_set_uuid(self):
         """Verify that we can set label on a LUKS 2 device"""
 
         succ = BlockDev.crypto_luks_format(self.loop_dev, "aes-cbc-essiv:sha256", 256, PASSWD, None, 0,
