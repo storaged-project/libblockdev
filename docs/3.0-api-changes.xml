@@ -123,4 +123,11 @@
 
   </simplesect>
 
+  <simplesect><title>Swap plugin</title>
+  <para>
+    <literal>bd_swap_mkswap</literal> has a new optional parameter <literal>uuid</literal>.
+  </para>
+
+  </simplesect>
+
 </chapter>

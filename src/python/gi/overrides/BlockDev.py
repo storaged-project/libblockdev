@@ -1020,9 +1020,9 @@ if os.uname()[4].startswith('s390'):
 
 _swap_mkswap = BlockDev.swap_mkswap
 @override(BlockDev.swap_mkswap)
-def swap_mkswap(device, label=None, extra=None, **kwargs):
+def swap_mkswap(device, label=None, uuid=None, extra=None, **kwargs):
     extra = _get_extra(extra, kwargs)
-    return _swap_mkswap(device, label, extra)
+    return _swap_mkswap(device, label, uuid, extra)
 __all__.append("swap_mkswap")
 
 _swap_swapon = BlockDev.swap_swapon

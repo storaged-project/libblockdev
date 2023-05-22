@@ -103,6 +103,8 @@ gboolean bd_swap_is_tech_avail (BDSwapTech tech UNUSED, guint64 mode, GError **e
         requires |= DEPS_MKSWAP_MASK;
     if (mode & BD_SWAP_TECH_MODE_SET_LABEL)
         requires |= DEPS_SWAPLABEL_MASK;
+    if (mode & BD_SWAP_TECH_MODE_SET_UUID)
+        requires |= DEPS_SWAPLABEL_MASK;
 
     return check_deps (&avail_deps, requires, deps, DEPS_LAST, &deps_check_lock, error);
 }
@@ -111,6 +113,7 @@ gboolean bd_swap_is_tech_avail (BDSwapTech tech UNUSED, guint64 mode, GError **e
  * bd_swap_mkswap:
  * @device: a device to create swap space on
  * @label: (nullable): a label for the swap space device
+ * @uuid: (nullable): UUID for the swap space device
  * @extra: (nullable) (array zero-terminated=1): extra options for the creation (right now
  *                                                 passed to the 'mkswap' utility)
  * @error: (out) (optional): place to store error (if any)
@@ -119,7 +122,7 @@ gboolean bd_swap_is_tech_avail (BDSwapTech tech UNUSED, guint64 mode, GError **e
  *
  * Tech category: %BD_SWAP_TECH_SWAP-%BD_SWAP_TECH_MODE_CREATE
  */
-gboolean bd_swap_mkswap (const gchar *device, const gchar *label, const BDExtraArg **extra, GError **error) {
+gboolean bd_swap_mkswap (const gchar *device, const gchar *label, const gchar *uuid, const BDExtraArg **extra, GError **error) {
     guint8 next_arg = 2;
 
     if (!check_deps (&avail_deps, DEPS_MKSWAP_MASK, deps, DEPS_LAST, &deps_check_lock, error))
@@ -133,6 +136,13 @@ gboolean bd_swap_mkswap (const gchar *device, const gchar *label, const BDExtraA
         argv[next_arg] = "-L";
         next_arg++;
         argv[next_arg] = label;
+        next_arg++;
+    }
+
+    if (uuid) {
+        argv[next_arg] = "-U";
+        next_arg++;
+        argv[next_arg] = uuid;
         next_arg++;
     }
 
@@ -442,6 +452,25 @@ gboolean bd_swap_swapstatus (const gchar *device, GError **error) {
  */
 gboolean bd_swap_set_label (const gchar *device, const gchar *label, GError **error) {
     const gchar *argv[5] = {"swaplabel", "-L", label, device, NULL};
+
+    if (!check_deps (&avail_deps, DEPS_SWAPLABEL_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
+    return bd_utils_exec_and_report_error (argv, NULL, error);
+}
+
+/**
+ * bd_swap_set_uuid:
+ * @device: a device to set UUID on
+ * @uuid: UUID that will be set
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the UUID was successfully set or not
+ *
+ * Tech category: %BD_SWAP_TECH_SWAP-%BD_SWAP_TECH_MODE_SET_UUID
+ */
+gboolean bd_swap_set_uuid (const gchar *device, const gchar *uuid, GError **error) {
+    const gchar *argv[5] = {"swaplabel", "-U", uuid, device, NULL};
 
     if (!check_deps (&avail_deps, DEPS_SWAPLABEL_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
