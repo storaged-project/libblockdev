@@ -1012,15 +1012,15 @@ class LvmTestLVactivateDeactivate(LvmPVVGLVTestCase):
         self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.lvm_lvactivate("nonexistingVG", "testLV", True, None)
+            BlockDev.lvm_lvactivate("nonexistingVG", "testLV", True)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.lvm_lvactivate("testVG", "nonexistingLV", True, None)
+            BlockDev.lvm_lvactivate("testVG", "nonexistingLV", True)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.lvm_lvactivate("nonexistingVG", "nonexistingLV", True, None)
+            BlockDev.lvm_lvactivate("nonexistingVG", "nonexistingLV", True)
 
-        succ = BlockDev.lvm_lvactivate("testVG", "testLV", True, None)
+        succ = BlockDev.lvm_lvactivate("testVG", "testLV", True)
         self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
@@ -1035,7 +1035,15 @@ class LvmTestLVactivateDeactivate(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_lvdeactivate("testVG", "testLV", None)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_lvactivate("testVG", "testLV", True, None)
+        succ = BlockDev.lvm_lvactivate("testVG", "testLV", True)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvdeactivate("testVG", "testLV", None)
+        self.assertTrue(succ)
+
+        # try activating in shared mode, unfortunately no way to check whether it really
+        # works or not
+        succ = BlockDev.lvm_lvactivate("testVG", "testLV", True, True)
         self.assertTrue(succ)
 
         succ = BlockDev.lvm_lvdeactivate("testVG", "testLV", None)
