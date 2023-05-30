@@ -153,6 +153,8 @@ typedef enum {
  * @backing_device: name of the underlying block device
  * @sector_size: size (in bytes) of encryption sector
  *               Note: sector size is valid only for LUKS 2
+ * @label: label of the LUKS device (valid only for LUKS 2)
+ * @subsystem: subsystem of the LUKS device (valid only for LUKS 2)
  */
 typedef struct BDCryptoLUKSInfo {
     BDCryptoLUKSVersion version;
