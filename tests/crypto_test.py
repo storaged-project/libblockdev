@@ -1399,9 +1399,65 @@ class CryptoTestBitlk(CryptoTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.crypto_bitlk_open(self.bitlk_dev, "libblockdevTestBitlk", "wrong-passhprase")
 
+        # info - block device
+        info = BlockDev.crypto_bitlk_info(self.bitlk_dev)
+        self.assertIsNotNone(info)
+        self.assertEqual(info.uuid, "8f595209-f5b9-49a0-85d4-cb8f80258c27")
+        self.assertEqual(info.cipher, "aes")
+        self.assertEqual(info.mode, "xts-plain64")
+        self.assertEqual(info.sector_size, 512)
+
         succ = BlockDev.crypto_bitlk_open(self.bitlk_dev, "libblockdevTestBitlk", self.passphrase)
         self.assertTrue(succ)
         self.assertTrue(os.path.exists("/dev/mapper/libblockdevTestBitlk"))
+
+        # info - cleartext device
+        info = BlockDev.crypto_bitlk_info("libblockdevTestBitlk")
+        self.assertIsNotNone(info)
+        self.assertEqual(info.uuid, "8f595209-f5b9-49a0-85d4-cb8f80258c27")
+        self.assertEqual(info.cipher, "aes")
+        self.assertEqual(info.mode, "xts-plain64")
+        self.assertEqual(info.backing_device, self.bitlk_dev)
+        self.assertEqual(info.sector_size, 512)
+
+        info = BlockDev.crypto_bitlk_info("/dev/mapper/libblockdevTestBitlk")
+        self.assertIsNotNone(info)
+
+        succ = BlockDev.crypto_bitlk_close("libblockdevTestBitlk")
+        self.assertTrue(succ)
+        self.assertFalse(os.path.exists("/dev/mapper/libblockdevTestBitlk"))
+
+    @unittest.skipUnless(HAVE_BITLK, "BITLK not supported")
+    def test_bitlk_info(self):
+        """Verify that we get information about a BitLocker device"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_bitlk_info("/non/existing/device")
+
+        # info - block device
+        info = BlockDev.crypto_bitlk_info(self.bitlk_dev)
+        self.assertIsNotNone(info)
+        self.assertEqual(info.uuid, "8f595209-f5b9-49a0-85d4-cb8f80258c27")
+        self.assertEqual(info.cipher, "aes")
+        self.assertEqual(info.mode, "xts-plain64")
+        self.assertEqual(info.sector_size, 512)
+
+        succ = BlockDev.crypto_bitlk_open(self.bitlk_dev, "libblockdevTestBitlk", self.passphrase)
+        self.assertTrue(succ)
+        self.assertTrue(os.path.exists("/dev/mapper/libblockdevTestBitlk"))
+
+        # info - cleartext device (name)
+        info = BlockDev.crypto_bitlk_info("libblockdevTestBitlk")
+        self.assertIsNotNone(info)
+        self.assertEqual(info.uuid, "8f595209-f5b9-49a0-85d4-cb8f80258c27")
+        self.assertEqual(info.cipher, "aes")
+        self.assertEqual(info.mode, "xts-plain64")
+        self.assertEqual(info.backing_device, self.bitlk_dev)
+        self.assertEqual(info.sector_size, 512)
+
+        # info - cleartext device (path)
+        info = BlockDev.crypto_bitlk_info("/dev/mapper/libblockdevTestBitlk")
+        self.assertIsNotNone(info)
 
         succ = BlockDev.crypto_bitlk_close("libblockdevTestBitlk")
         self.assertTrue(succ)

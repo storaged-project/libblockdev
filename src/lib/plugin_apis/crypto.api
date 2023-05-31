@@ -435,6 +435,75 @@ GType bd_crypto_luks_info_get_type () {
     return type;
 }
 
+#define BD_CRYPTO_TYPE_BITLK_INFO (bd_crypto_bitlk_info_get_type ())
+GType bd_crypto_bitlk_info_get_type();
+
+/**
+ * BDCryptoBITLKInfo:
+ * @cipher: used cipher (e.g. "aes")
+ * @mode: used cipher mode (e.g. "xts-plain")
+ * @uuid: UUID of the BITLK device
+ * @backing_device: name of the underlying block device
+ * @sector_size: size (in bytes) of encryption sector
+ */
+typedef struct BDCryptoBITLKInfo {
+    gchar *cipher;
+    gchar *mode;
+    gchar *uuid;
+    gchar *backing_device;
+    gint64 sector_size;
+} BDCryptoBITLKInfo;
+
+/**
+ * bd_crypto_bitlk_info_free: (skip)
+ * @info: (nullable): %BDCryptoBITLKInfo to free
+ *
+ * Frees @info.
+ */
+void bd_crypto_bitlk_info_free (BDCryptoBITLKInfo *info) {
+    if (info == NULL)
+        return;
+
+    g_free (info->cipher);
+    g_free (info->mode);
+    g_free (info->uuid);
+    g_free (info->backing_device);
+    g_free (info);
+}
+
+/**
+ * bd_crypto_bitlk_info_copy: (skip)
+ * @info: (nullable): %BDCryptoBITLKInfo to copy
+ *
+ * Creates a new copy of @info.
+ */
+BDCryptoBITLKInfo* bd_crypto_bitlk_info_copy (BDCryptoBITLKInfo *info) {
+    if (info == NULL)
+        return NULL;
+
+    BDCryptoBITLKInfo *new_info = g_new0 (BDCryptoBITLKInfo, 1);
+
+    new_info->cipher = g_strdup (info->cipher);
+    new_info->mode = g_strdup (info->mode);
+    new_info->uuid = g_strdup (info->uuid);
+    new_info->backing_device = g_strdup (info->backing_device);
+    new_info->sector_size = info->sector_size;
+
+    return new_info;
+}
+
+GType bd_crypto_bitlk_info_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDCryptoBITLKInfo",
+                                            (GBoxedCopyFunc) bd_crypto_bitlk_info_copy,
+                                            (GBoxedFreeFunc) bd_crypto_bitlk_info_free);
+    }
+
+    return type;
+}
+
 #define BD_CRYPTO_TYPE_INTEGRITY_INFO (bd_crypto_integrity_info_get_type ())
 GType bd_crypto_integrity_info_get_type();
 
@@ -1056,6 +1125,17 @@ gboolean bd_crypto_luks_set_uuid (const gchar *device, const gchar *uuid, GError
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
  */
 BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *device, GError **error);
+
+/**
+ * bd_crypto_bitlk_info:
+ * @device: a device to get information about
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns (transfer full): information about the @device or %NULL in case of error
+ *
+ * Tech category: %BD_CRYPTO_TECH_BITLK-%BD_CRYPTO_TECH_MODE_QUERY
+ */
+BDCryptoBITLKInfo* bd_crypto_bitlk_info (const gchar *device, GError **error);
 
 /**
  * bd_crypto_integrity_info:

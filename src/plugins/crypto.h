@@ -153,6 +153,8 @@ typedef enum {
  * @backing_device: name of the underlying block device
  * @sector_size: size (in bytes) of encryption sector
  *               Note: sector size is valid only for LUKS 2
+ * @label: label of the LUKS device (valid only for LUKS 2)
+ * @subsystem: subsystem of the LUKS device (valid only for LUKS 2)
  */
 typedef struct BDCryptoLUKSInfo {
     BDCryptoLUKSVersion version;
@@ -167,6 +169,25 @@ typedef struct BDCryptoLUKSInfo {
 
 void bd_crypto_luks_info_free (BDCryptoLUKSInfo *info);
 BDCryptoLUKSInfo* bd_crypto_luks_info_copy (BDCryptoLUKSInfo *info);
+
+/**
+ * BDCryptoBITLKInfo:
+ * @cipher: used cipher (e.g. "aes")
+ * @mode: used cipher mode (e.g. "xts-plain")
+ * @uuid: UUID of the BITLK device
+ * @backing_device: name of the underlying block device
+ * @sector_size: size (in bytes) of encryption sector
+ */
+typedef struct BDCryptoBITLKInfo {
+    gchar *cipher;
+    gchar *mode;
+    gchar *uuid;
+    gchar *backing_device;
+    gint64 sector_size;
+} BDCryptoBITLKInfo;
+
+void bd_crypto_bitlk_info_free (BDCryptoBITLKInfo *info);
+BDCryptoBITLKInfo* bd_crypto_bitlk_info_copy (BDCryptoBITLKInfo *info);
 
 /**
  * BDCryptoIntegrityInfo:
@@ -252,6 +273,7 @@ gboolean bd_crypto_luks_set_label (const gchar *device, const gchar *label, cons
 gboolean bd_crypto_luks_set_uuid (const gchar *device, const gchar *uuid, GError **error);
 
 BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *device, GError **error);
+BDCryptoBITLKInfo* bd_crypto_bitlk_info (const gchar *device, GError **error);
 BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **error);
 BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError **error);
 

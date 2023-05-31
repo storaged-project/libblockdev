@@ -228,6 +228,32 @@ BDCryptoLUKSInfo* bd_crypto_luks_info_copy (BDCryptoLUKSInfo *info) {
     return new_info;
 }
 
+void bd_crypto_bitlk_info_free (BDCryptoBITLKInfo *info) {
+    if (info == NULL)
+        return;
+
+    g_free (info->cipher);
+    g_free (info->mode);
+    g_free (info->uuid);
+    g_free (info->backing_device);
+    g_free (info);
+}
+
+BDCryptoBITLKInfo* bd_crypto_bitlk_info_copy (BDCryptoBITLKInfo *info) {
+    if (info == NULL)
+        return NULL;
+
+    BDCryptoBITLKInfo *new_info = g_new0 (BDCryptoBITLKInfo, 1);
+
+    new_info->cipher = g_strdup (info->cipher);
+    new_info->mode = g_strdup (info->mode);
+    new_info->uuid = g_strdup (info->uuid);
+    new_info->backing_device = g_strdup (info->backing_device);
+    new_info->sector_size = info->sector_size;
+
+    return new_info;
+}
+
 void bd_crypto_integrity_info_free (BDCryptoIntegrityInfo *info) {
     if (info == NULL)
         return;
@@ -397,10 +423,10 @@ gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **erro
             } else
                 return TRUE;
         case BD_CRYPTO_TECH_BITLK:
-            ret = mode & BD_CRYPTO_TECH_MODE_OPEN_CLOSE;
+            ret = mode & (BD_CRYPTO_TECH_MODE_OPEN_CLOSE|BD_CRYPTO_TECH_MODE_QUERY);
             if (ret != mode) {
                 g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                             "Only 'open' supported for BITLK");
+                             "Only 'open' and 'query' supported for BITLK");
                 return FALSE;
             } else
                 return TRUE;
@@ -2401,6 +2427,56 @@ BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *device, GError **error) {
         info->label = g_strdup ("");
         info->subsystem = g_strdup ("");
     }
+
+    crypt_free (cd);
+
+    return info;
+}
+
+/**
+ * bd_crypto_bitlk_info:
+ * @device: a device to get information about
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns (transfer full): information about the @device or %NULL in case of error
+ *
+ * Tech category: %BD_CRYPTO_TECH_BITLK-%BD_CRYPTO_TECH_MODE_QUERY
+ */
+BDCryptoBITLKInfo* bd_crypto_bitlk_info (const gchar *device, GError **error) {
+    struct crypt_device *cd = NULL;
+    BDCryptoBITLKInfo *info = NULL;
+    gint ret;
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        /* not a block device, try init_by_name */
+        crypt_free (cd);
+        cd = NULL;
+        ret = crypt_init_by_name (&cd, device);
+    } else {
+        ret = crypt_load (cd, CRYPT_BITLK, NULL);
+        if (ret != 0) {
+            /* not a BITLK device, try init_by_name */
+            crypt_free (cd);
+            cd = NULL;
+            ret = crypt_init_by_name (&cd, device);
+        }
+    }
+
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        return NULL;
+    }
+
+    info = g_new0 (BDCryptoBITLKInfo, 1);
+
+    info->cipher = g_strdup (crypt_get_cipher (cd));
+    info->mode = g_strdup (crypt_get_cipher_mode (cd));
+    info->uuid = g_strdup (crypt_get_uuid (cd));
+    info->backing_device = g_strdup (crypt_get_device_name (cd));
+    info->sector_size = crypt_get_sector_size (cd);
 
     crypt_free (cd);
 
