@@ -117,3 +117,9 @@
    - distro: "centos"
      version: "9"
      reason: "LVM >= 2.03.19 is not yet available breaking our check for LVM resize on CentOS 9 Stream"
+
+- test: fs_test.ExtTestCheck.test_ext4_check
+  skip_on:
+  - distro: "fedora"
+    version: "39"
+    reason: "Ext4 cannot be checked when mounted with latest with e2fsprogs 1.47"
