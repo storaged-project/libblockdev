@@ -31,7 +31,7 @@ Vagrant.configure("2") do |config|
   config.vm.provider :libvirt do |v|
     v.memory = "2048"
     v.cpus = os_cpu_cores
-    v.volume_cache = :unsafe
+    v.disk_driver :cache => "unsafe"
   end
 
   # just some handy stuff to have in shell OOTB
@@ -47,20 +47,20 @@ Vagrant.configure("2") do |config|
     ansible.extra_vars = { ansible_python_interpreter:"/usr/bin/python3" }
   end
 
-  config.vm.define "bd-f36", primary: true, autostart: true do |f36|
-    f36.vm.box = "fedora/36-cloud-base"
+  config.vm.define "bd-f38", primary: true, autostart: true do |f38|
+    f38.vm.box = "fedora/38-cloud-base"
   end
 
-  config.vm.define "bd-f35", primary: false, autostart: false do |f35|
-    f35.vm.box = "fedora/35-cloud-base"
+  config.vm.define "bd-f37", primary: false, autostart: false do |f37|
+    f37.vm.box = "fedora/37-cloud-base"
   end
 
   config.vm.define "bd-cs8", primary: false, autostart: false do |cs8|
     cs8.vm.box = "centos/stream8"
   end
 
-  config.vm.define "bd-u2004", primary: false, autostart: false do |u2004|
-    u2004.vm.box = "generic/ubuntu2004"
+  config.vm.define "bd-u2204", primary: false, autostart: false do |u2204|
+    u2204.vm.box = "generic/ubuntu2204"
   end
 
   config.vm.define "bd-debiant", primary: false, autostart: false do |debiant|
