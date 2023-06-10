@@ -35,6 +35,7 @@ from collections import namedtuple, defaultdict
 
 from bytesize import Size
 from gi.importer import modules
+from gi.module import FunctionInfo
 from gi.overrides import override
 from gi.repository import GLib
 from gi.repository import GObject
@@ -67,7 +68,7 @@ def _default_str(self):
 def _default_repr(self):
     s = "{str}\n".format(str=str(self))
     for member in dir(self):
-        if not member.startswith("_") and member not in ("copy", "free"):
+        if not member.startswith("_") and member not in ("copy", "free") and not isinstance(self.__getattribute__(member), FunctionInfo):
             value = getattr(self, member)
             if "size" in member and isinstance(value, int):
                 s += " {member}: {value} ({hvalue})\n".format(member=member, value=value, hvalue=Size(value).human_readable())
