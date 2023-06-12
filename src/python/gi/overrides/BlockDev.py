@@ -261,50 +261,50 @@ class CryptoLUKSExtra(BlockDev.CryptoLUKSExtra):
 CryptoLUKSExtra = override(CryptoLUKSExtra)
 __all__.append("CryptoLUKSExtra")
 
+class CryptoKeyslotContext(BlockDev.CryptoKeyslotContext):
+    def __new__(cls, passphrase=None, keyfile=None, keyfile_offset=0, key_size=0):
+        if (passphrase and keyfile):
+            raise ValueError("Only one of 'passphrase' and 'keyfile' may be specified at time")
+        if passphrase:
+            if isinstance(passphrase, str):
+                ret = BlockDev.CryptoKeyslotContext.new_passphrase([ord(c) for c in passphrase])
+            else:
+                ret = BlockDev.CryptoKeyslotContext.new_passphrase(passphrase)
+        if keyfile:
+            ret = BlockDev.CryptoKeyslotContext.new_keyfile(keyfile, keyfile_offset, key_size)
+        ret.__class__ = cls
+        return ret
+    def __init__(self, *args, **kwargs):   # pylint: disable=unused-argument
+        super(CryptoKeyslotContext, self).__init__()  #pylint: disable=bad-super-call
+CryptoKeyslotContext = override(CryptoKeyslotContext)
+__all__.append("CryptoKeyslotContext")
+
 # calling `crypto_luks_format_luks2` with `luks_version` set to
 # `BlockDev.CryptoLUKSVersion.LUKS1` and `extra` to `None` is the same
 # as using the "original" function `crypto_luks_format`
-_crypto_luks_format = BlockDev.crypto_luks_format_luks2
+_crypto_luks_format = BlockDev.crypto_luks_format
 @override(BlockDev.crypto_luks_format)
-def crypto_luks_format(device, cipher=None, key_size=0, passphrase=None, key_file=None, min_entropy=0, luks_version=BlockDev.CryptoLUKSVersion.LUKS1, extra=None):
-    return _crypto_luks_format(device, cipher, key_size, passphrase, key_file, min_entropy, luks_version, extra)
+def crypto_luks_format(device, cipher=None, key_size=0, context=None, min_entropy=0, luks_version=BlockDev.CryptoLUKSVersion.LUKS1, extra=None):
+    return _crypto_luks_format(device, cipher, key_size, context, min_entropy, luks_version, extra)
 __all__.append("crypto_luks_format")
 
 _crypto_luks_open = BlockDev.crypto_luks_open
 @override(BlockDev.crypto_luks_open)
-def crypto_luks_open(device, name, passphrase=None, key_file=None, read_only=False):
-    return _crypto_luks_open(device, name, passphrase, key_file, read_only)
+def crypto_luks_open(device, name, context, read_only=False):
+    return _crypto_luks_open(device, name, context, read_only)
 __all__.append("crypto_luks_open")
 
-_crypto_luks_resize = BlockDev.crypto_luks_resize_luks2
+_crypto_luks_resize = BlockDev.crypto_luks_resize
 @override(BlockDev.crypto_luks_resize)
-def crypto_luks_resize(luks_device, size=0, passphrase=None, key_file=None):
-    return _crypto_luks_resize(luks_device, size, passphrase, key_file)
+def crypto_luks_resize(luks_device, size=0, context=None):
+    return _crypto_luks_resize(luks_device, size, context)
 __all__.append("crypto_luks_resize")
-
-_crypto_luks_add_key = BlockDev.crypto_luks_add_key
-@override(BlockDev.crypto_luks_add_key)
-def crypto_luks_add_key(device, pass_=None, key_file=None, npass=None, nkey_file=None):
-    return _crypto_luks_add_key(device, pass_, key_file, npass, nkey_file)
-__all__.append("crypto_luks_add_key")
-
-_crypto_luks_remove_key = BlockDev.crypto_luks_remove_key
-@override(BlockDev.crypto_luks_remove_key)
-def crypto_luks_remove_key(device, pass_=None, key_file=None):
-    return _crypto_luks_remove_key(device, pass_, key_file)
-__all__.append("crypto_luks_remove_key")
 
 _crypto_escrow_device = BlockDev.crypto_escrow_device
 @override(BlockDev.crypto_escrow_device)
 def crypto_escrow_device(device, passphrase, cert_data, directory, backup_passphrase=None):
     return _crypto_escrow_device(device, passphrase, cert_data, directory, backup_passphrase)
 __all__.append("crypto_escrow_device")
-
-_crypto_luks_resume = BlockDev.crypto_luks_resume
-@override(BlockDev.crypto_luks_resume)
-def crypto_luks_resume(device, passphrase=None, key_file=None):
-    return _crypto_luks_resume(device, passphrase, key_file)
-__all__.append("crypto_luks_resume")
 
 _crypto_tc_open = BlockDev.crypto_tc_open_full
 @override(BlockDev.crypto_tc_open)
