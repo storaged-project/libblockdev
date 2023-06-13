@@ -26,7 +26,6 @@ def check_cryptsetup_version(version):
         return succ
 
 
-HAVE_LUKS2 = check_cryptsetup_version("2.0.3")
 HAVE_BITLK = check_cryptsetup_version("2.3.0")
 HAVE_FVAULT2 = check_cryptsetup_version("2.6.0")
 
@@ -134,7 +133,6 @@ class CryptoTestFormat(CryptoTestCase):
         self.assertTrue(succ)
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_format(self):
         """Verify that formatting device as LUKS 2 works"""
 
@@ -189,7 +187,6 @@ class CryptoTestFormat(CryptoTestCase):
         return enabled.strip() == "1"
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_format_pbkdf_options(self):
         """Verify that formatting device as LUKS 2 works"""
 
@@ -325,7 +322,6 @@ class CryptoTestResize(CryptoTestCase):
         self.assertTrue(succ)
 
     @tag_test(TestTags.SLOW)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_resize(self):
         """Verify that resizing LUKS 2 device works"""
 
@@ -399,7 +395,6 @@ class CryptoTestOpenClose(CryptoTestCase):
         self._luks_open_close(self._luks_format)
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_open_close(self):
         self._luks_open_close(self._luks2_format)
 
@@ -423,7 +418,6 @@ class CryptoTestOpenCloseKeyring(CryptoTestCase):
         self._luks_open_close_keyring(self._luks_format)
 
     @tag_test(TestTags.SLOW)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_open_close_keyring(self):
         self._luks_open_close_keyring(self._luks2_format)
 
@@ -448,7 +442,6 @@ class CryptoTestAddKey(CryptoTestCase):
         self._add_key(self._luks_format)
 
     @tag_test(TestTags.SLOW)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_add_key(self):
         self._add_key(self._luks2_format)
 
@@ -482,7 +475,6 @@ class CryptoTestRemoveKey(CryptoTestCase):
         self._remove_key(self._luks_format)
 
     @tag_test(TestTags.SLOW)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_remove_key(self):
         self._remove_key(self._luks2_format)
 
@@ -534,7 +526,6 @@ class CryptoTestChangeKey(CryptoTestCase):
         self._change_key(self._luks_format)
 
     @tag_test(TestTags.SLOW)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_change_key(self):
         self._change_key(self._luks2_format)
 
@@ -558,7 +549,6 @@ class CryptoTestIsLuks(CryptoTestCase):
         self._is_luks(self._luks_format)
 
     @tag_test(TestTags.SLOW)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_is_luks2(self):
         self._is_luks(self._luks2_format)
 
@@ -594,14 +584,12 @@ class CryptoTestLuksStatus(CryptoTestCase):
         self._luks_status(self._luks_format)
 
     @tag_test(TestTags.SLOW)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_status(self):
         self._luks_status(self._luks2_format)
 
 class CryptoTestGetMetadataSize(CryptoTestCase):
 
     @tag_test(TestTags.SLOW)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_get_metadata_size(self):
         """Verify that getting LUKS 2 device metadata size works"""
 
@@ -672,7 +660,6 @@ class CryptoTestLuksOpenRW(CryptoTestCase):
         self._luks_open_rw(self._luks_format)
 
     @tag_test(TestTags.SLOW)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_open_rw(self):
         self._luks_open_rw(self._luks2_format)
 
@@ -846,7 +833,6 @@ class CryptoTestSuspendResume(CryptoTestCase):
         self._luks_suspend_resume(self._luks_format)
 
     @tag_test(TestTags.SLOW)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_suspend_resume(self):
         """Verify that suspending/resuming LUKS 2 device works"""
         self._luks_suspend_resume(self._luks2_format)
@@ -893,7 +879,6 @@ class CryptoTestKillSlot(CryptoTestCase):
         self._luks_kill_slot(self._luks_format)
 
     @tag_test(TestTags.SLOW)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_kill_slot(self):
         """Verify that killing a key slot on LUKS 2 device works"""
         self._luks_kill_slot(self._luks2_format)
@@ -949,7 +934,6 @@ class CryptoTestHeaderBackupRestore(CryptoTestCase):
         self._luks_header_backup_restore(self._luks_format)
 
     @tag_test(TestTags.SLOW)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_header_backup_restore(self):
         """Verify that header backup/restore with LUKS2 works"""
         self._luks_header_backup_restore(self._luks2_format)
@@ -990,7 +974,6 @@ class CryptoTestInfo(CryptoTestCase):
         self.assertTrue(succ)
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_info(self):
         """Verify that we can get information about a LUKS 2 device"""
 
@@ -1038,7 +1021,6 @@ class CryptoTestSetLabel(CryptoTestCase):
         self.assertEqual(info.subsystem, "")
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_set_label(self):
         """Verify that we can set label on a LUKS 2 device"""
 
@@ -1097,7 +1079,6 @@ class CryptoTestSetUuid(CryptoTestCase):
         self.assertNotEqual(info.uuid, self.test_uuid)
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_set_uuid(self):
         """Verify that we can set label on a LUKS 2 device"""
 
@@ -1152,7 +1133,6 @@ class CryptoTestLuksSectorSize(CryptoTestCase):
         os.unlink(self.dev_file2)
 
     @tag_test(TestTags.SLOW)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_sector_size_autodetect(self):
         """Verify that we can autodetect 4k drives and set 4k sector size for them"""
         # format the 4k loop device, encryption sector size should default to 4096
@@ -1189,7 +1169,6 @@ class CryptoTestLuksSectorSize(CryptoTestCase):
 
 class CryptoTestLUKS2Integrity(CryptoTestCase):
     @tag_test(TestTags.SLOW)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_integrity(self):
         """Verify that we can get create a LUKS 2 device with integrity"""
 
@@ -1239,7 +1218,6 @@ class CryptoTestLUKSToken(CryptoTestCase):
         self.assertEqual(info[0].keyslot, 0)
 
     @tag_test(TestTags.SLOW)
-    @unittest.skipUnless(HAVE_LUKS2, "LUKS 2 not supported")
     def test_luks2_integrity(self):
         """Verify that we can get information about LUKS2 tokens"""
 
@@ -1534,7 +1512,6 @@ class CryptoTestIntegrity(CryptoTestCase):
     _dm_name = "libblockdevTestIntegrity"
     _sparse_size = 100 * 1024**2
 
-    @unittest.skipUnless(HAVE_LUKS2, "Integrity not supported")
     def test_integrity(self):
         # basic format+open+close test
         succ = BlockDev.crypto_integrity_format(self.loop_dev, "sha256", False)
@@ -1601,7 +1578,6 @@ class CryptoTestIntegrity(CryptoTestCase):
         self.assertFalse(os.path.exists("/dev/mapper/%s" % self._dm_name))
 
     @tag_test(TestTags.SLOW)
-    @unittest.skipUnless(HAVE_LUKS2, "Integrity not supported")
     def test_integrity_wipe(self):
         # also check that wipe progress reporting works
         progress_log = []
