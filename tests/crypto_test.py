@@ -587,46 +587,6 @@ class CryptoTestLuksStatus(CryptoTestCase):
     def test_luks2_status(self):
         self._luks_status(self._luks2_format)
 
-class CryptoTestGetMetadataSize(CryptoTestCase):
-
-    @tag_test(TestTags.SLOW)
-    def test_luks2_get_metadata_size(self):
-        """Verify that getting LUKS 2 device metadata size works"""
-
-        self._luks2_format(self.loop_dev, PASSWD, None)
-
-        meta_size = BlockDev.crypto_luks_get_metadata_size(self.loop_dev)
-
-        ret, out, err = run_command("cryptsetup luksDump %s" % self.loop_dev)
-        if ret != 0:
-            self.fail("Failed to get LUKS 2 header from %s:\n%s %s" % (self.loop_dev, out, err))
-
-        m = re.search(r"offset:\s*([0-9]+)\s*\[bytes\]", out)
-        if m is None:
-            self.fail("Failed to get LUKS 2 offset information from %s:\n%s %s" % (self.loop_dev, out, err))
-        offset = int(m.group(1))
-        self.assertEquals(meta_size, offset, "LUKS 2 metadata sizes differ")
-
-    @tag_test(TestTags.SLOW)
-    def test_luks_get_metadata_size(self):
-        """Verify that getting LUKS device metadata size works"""
-
-        self._luks_format(self.loop_dev, PASSWD, None)
-
-        meta_size = BlockDev.crypto_luks_get_metadata_size(self.loop_dev)
-
-        ret, out, err = run_command("cryptsetup luksDump %s" % self.loop_dev)
-        if ret != 0:
-            self.fail("Failed to get LUKS header from %s:\n%s %s" % (self.loop_dev, out, err))
-
-        m = re.search(r"Payload offset:\s*([0-9]+)", out)
-        if m is None:
-            self.fail("Failed to get LUKS 2 offset information from %s:\n%s %s" % (self.loop_dev, out, err))
-        # offset value is in 512B blocks; we need to multiply to get the real metadata size
-        offset = int(m.group(1)) * 512
-
-        self.assertEquals(meta_size, offset, "LUKS metadata sizes differ")
-
 class CryptoTestLuksOpenRW(CryptoTestCase):
     def _luks_open_rw(self, create_fn):
         """Verify that a LUKS device can be activated as RW as well as RO"""
@@ -949,6 +909,23 @@ class CryptoTestInfo(CryptoTestCase):
 
         _ret, uuid, _err = run_command("blkid -p -ovalue -sUUID %s" % self.loop_dev)
         self.assertEqual(info.uuid, uuid)
+
+        ret, out, err = run_command("cryptsetup luksDump %s" % self.loop_dev)
+        if ret != 0:
+            self.fail("Failed to get LUKS header from %s:\n%s %s" % (self.loop_dev, out, err))
+
+        if version == BlockDev.CryptoLUKSVersion.LUKS1:
+            m = re.search(r"Payload offset:\s*([0-9]+)", out)
+            if m is None:
+                self.fail("Failed to get LUKS offset information from %s:\n%s %s" % (self.loop_dev, out, err))
+            offset = int(m.group(1)) * 512
+        else:
+            m = re.search(r"offset:\s*([0-9]+)\s*\[bytes\]", out)
+            if m is None:
+                self.fail("Failed to get LUKS 2 offset information from %s:\n%s %s" % (self.loop_dev, out, err))
+            offset = int(m.group(1))
+
+        self.assertEquals(info.metadata_size, offset)
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
     def test_luks_info(self):

@@ -152,6 +152,7 @@ typedef enum {
  * @backing_device: name of the underlying block device
  * @sector_size: size (in bytes) of encryption sector
  *               Note: sector size is valid only for LUKS 2
+ * @metadata_size: LUKS metadata size
  * @label: label of the LUKS device (valid only for LUKS 2)
  * @subsystem: subsystem of the LUKS device (valid only for LUKS 2)
  */
@@ -162,6 +163,7 @@ typedef struct BDCryptoLUKSInfo {
     gchar *uuid;
     gchar *backing_device;
     gint64 sector_size;
+    guint64 metadata_size;
     gchar *label;
     gchar *subsystem;
 } BDCryptoLUKSInfo;
@@ -251,7 +253,6 @@ gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **erro
 
 gchar* bd_crypto_generate_backup_passphrase(GError **error);
 gboolean bd_crypto_device_is_luks (const gchar *device, GError **error);
-guint64 bd_crypto_luks_get_metadata_size (const gchar *device, GError **error);
 gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error);
 
 gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint64 key_size, BDCryptoKeyslotContext *context, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra,GError **error);
