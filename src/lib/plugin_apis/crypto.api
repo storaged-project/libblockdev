@@ -1154,8 +1154,7 @@ gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error);
  * bd_crypto_tc_open:
  * @device: the device to open
  * @name: name for the TrueCrypt/VeraCrypt device
- * @pass_data: (array length=data_len): a passphrase for the TrueCrypt/VeraCrypt volume (may contain arbitrary binary data)
- * @data_len: length of the @pass_data buffer
+ * @context: (nullable): passphrase key slot context for this TrueCrypt/VeraCrypt volume
  * @read_only: whether to open as read-only or not (meaning read-write)
  * @keyfiles: (nullable) (array zero-terminated=1): paths to the keyfiles for the TrueCrypt/VeraCrypt volume
  * @hidden: whether a hidden volume inside the volume should be opened
@@ -1168,7 +1167,7 @@ gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error);
  *
  * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
-gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, const gchar **keyfiles, gboolean hidden, gboolean system, gboolean veracrypt, guint32 veracrypt_pim, gboolean read_only, GError **error);
+gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, const gchar **keyfiles, gboolean hidden, gboolean system, gboolean veracrypt, guint32 veracrypt_pim, gboolean read_only, GError **error);
 
 /**
  * bd_crypto_tc_close:
@@ -1200,8 +1199,7 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
  * bd_crypto_bitlk_open:
  * @device: the device to open
  * @name: name for the BITLK device
- * @pass_data: (array length=data_len): a passphrase for the BITLK volume (may contain arbitrary binary data)
- * @data_len: length of the @pass_data buffer
+ * @context: key slot context (passphrase/keyfile/token...) for this BITLK device
  * @read_only: whether to open as read-only or not (meaning read-write)
  * @error: (out) (optional): place to store error (if any)
  *
@@ -1209,7 +1207,7 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
  *
  * Tech category: %BD_CRYPTO_TECH_BITLK-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
-gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);
+gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error);
 
 /**
  * bd_crypto_bitlk_close:
@@ -1226,8 +1224,7 @@ gboolean bd_crypto_bitlk_close (const gchar *bitlk_device, GError **error);
  * bd_crypto_fvault2_open:
  * @device: the device to open
  * @name: name for the FVAULT2 device
- * @pass_data: (array length=data_len): a passphrase for the FVAULT2 volume (may contain arbitrary binary data)
- * @data_len: length of the @pass_data buffer
+ * @context: key slot context (passphrase/keyfile/token...) for this FVAULT2 volume
  * @read_only: whether to open as read-only or not (meaning read-write)
  * @error: (out) (optional): place to store error (if any)
  *
@@ -1235,7 +1232,7 @@ gboolean bd_crypto_bitlk_close (const gchar *bitlk_device, GError **error);
  *
  * Tech category: %BD_CRYPTO_TECH_FVAULT2-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
- gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);
+gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error);
 
 /**
  * bd_crypto_fvault2_close:

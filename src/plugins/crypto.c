@@ -2664,8 +2664,7 @@ gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error) 
  * bd_crypto_tc_open:
  * @device: the device to open
  * @name: name for the TrueCrypt/VeraCrypt device
- * @pass_data: (array length=data_len): a passphrase for the TrueCrypt/VeraCrypt volume (may contain arbitrary binary data)
- * @data_len: length of the @pass_data buffer
+ * @context: (nullable): passphrase key slot context for this TrueCrypt/VeraCrypt volume
  * @read_only: whether to open as read-only or not (meaning read-write)
  * @keyfiles: (nullable) (array zero-terminated=1): paths to the keyfiles for the TrueCrypt/VeraCrypt volume
  * @hidden: whether a hidden volume inside the volume should be opened
@@ -2678,7 +2677,7 @@ gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error) 
  *
  * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
-gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, const gchar **keyfiles, gboolean hidden, gboolean system, gboolean veracrypt, guint32 veracrypt_pim, gboolean read_only, GError **error) {
+gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, const gchar **keyfiles, gboolean hidden, gboolean system, gboolean veracrypt, guint32 veracrypt_pim, gboolean read_only, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
     guint64 progress_id = 0;
@@ -2697,7 +2696,7 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8
         keyfiles_count = i;
     }
 
-    if ((data_len == 0) && (keyfiles_count == 0)) {
+    if ((context == NULL) && (keyfiles_count == 0)) {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
                      "No passphrase nor key file specified, cannot open.");
         bd_utils_report_finished (progress_id, l_error->message);
@@ -2714,8 +2713,8 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8
         return FALSE;
     }
 
-    params.passphrase = (const char*) pass_data;
-    params.passphrase_size = data_len;
+    params.passphrase = context ? (const char*) context->u.passphrase.pass_data : NULL;
+    params.passphrase_size = context ? context->u.passphrase.data_len : 0;
     params.keyfiles = keyfiles;
     params.keyfiles_count = keyfiles_count;
 
@@ -3018,8 +3017,7 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
  * bd_crypto_bitlk_open:
  * @device: the device to open
  * @name: name for the BITLK device
- * @pass_data: (array length=data_len): a passphrase for the BITLK volume (may contain arbitrary binary data)
- * @data_len: length of the @pass_data buffer
+ * @context: key slot context (passphrase/keyfile/token...) for this BITLK device
  * @read_only: whether to open as read-only or not (meaning read-write)
  * @error: (out) (optional): place to store error (if any)
  *
@@ -3027,24 +3025,18 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
  *
  * Tech category: %BD_CRYPTO_TECH_BITLK-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
-gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error) {
+gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
     GError *l_error = NULL;
+    gchar *key_buffer = NULL;
+    gsize buf_len = 0;
 
     msg = g_strdup_printf ("Started opening '%s' BITLK device", device);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
-
-    if (data_len == 0) {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
-                     "No passphrase specified, cannot open.");
-        bd_utils_report_finished (progress_id, l_error->message);
-        g_propagate_error (error, l_error);
-        return FALSE;
-    }
 
     ret = crypt_init (&cd, device);
     if (ret != 0) {
@@ -3065,8 +3057,26 @@ gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, const gui
         return FALSE;
     }
 
-    ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, (char*) pass_data,
-                                        data_len, read_only ? CRYPT_ACTIVATE_READONLY : 0);
+    if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE) {
+        ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT,
+                                            (const char *) context->u.passphrase.pass_data,
+                                            context->u.passphrase.data_len,
+                                            read_only ? CRYPT_ACTIVATE_READONLY : 0);
+    } else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE) {
+        ret = crypt_keyfile_device_read (cd, context->u.keyfile.keyfile, &key_buffer, &buf_len,
+                                         context->u.keyfile.keyfile_offset, context->u.keyfile.key_size, 0);
+        if (ret != 0) {
+            g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYFILE_FAILED,
+                         "Failed to read key from file '%s: %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
+            crypt_free (cd);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
+            return FALSE;
+        }
+        ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, key_buffer, buf_len,
+                                            read_only ? CRYPT_ACTIVATE_READONLY : 0);
+        crypt_safe_free (key_buffer);
+    }
 
     if (ret < 0) {
         if (ret == -EPERM)
@@ -3104,8 +3114,7 @@ gboolean bd_crypto_bitlk_close (const gchar *bitlk_device, GError **error) {
  * bd_crypto_fvault2_open:
  * @device: the device to open
  * @name: name for the FVAULT2 device
- * @pass_data: (array length=data_len): a passphrase for the FVAULT2 volume (may contain arbitrary binary data)
- * @data_len: length of the @pass_data buffer
+ * @context: key slot context (passphrase/keyfile/token...) for this FVAULT2 volume
  * @read_only: whether to open as read-only or not (meaning read-write)
  * @error: (out) (optional): place to store error (if any)
  *
@@ -3114,28 +3123,22 @@ gboolean bd_crypto_bitlk_close (const gchar *bitlk_device, GError **error) {
  * Tech category: %BD_CRYPTO_TECH_FVAULT2-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 #ifndef LIBCRYPTSETUP_26
-gboolean bd_crypto_fvault2_open (const gchar *device UNUSED, const gchar *name UNUSED, const guint8* pass_data UNUSED, gsize data_len UNUSED, gboolean read_only UNUSED, GError **error) {
+gboolean bd_crypto_fvault2_open (const gchar *device UNUSED, const gchar *name UNUSED, BDCryptoKeyslotContext *context UNUSED, gboolean read_only UNUSED, GError **error) {
     /* this will return FALSE and set error, because FVAULT2 technology is not available */
     return bd_crypto_is_tech_avail (BD_CRYPTO_TECH_FVAULT2, BD_CRYPTO_TECH_MODE_OPEN_CLOSE, error);
 #else
-gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error) {
+gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
     GError *l_error = NULL;
+    gchar *key_buffer = NULL;
+    gsize buf_len = 0;
 
     msg = g_strdup_printf ("Started opening '%s' FVAULT2 device", device);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
-
-    if (data_len == 0) {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
-                     "No passphrase specified, cannot open.");
-        bd_utils_report_finished (progress_id, l_error->message);
-        g_propagate_error (error, l_error);
-        return FALSE;
-    }
 
     ret = crypt_init (&cd, device);
     if (ret != 0) {
@@ -3156,8 +3159,26 @@ gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, const g
         return FALSE;
     }
 
-    ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, (char*) pass_data,
-                                        data_len, read_only ? CRYPT_ACTIVATE_READONLY : 0);
+    if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE) {
+        ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT,
+                                            (const char *) context->u.passphrase.pass_data,
+                                            context->u.passphrase.data_len,
+                                            read_only ? CRYPT_ACTIVATE_READONLY : 0);
+    } else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE) {
+        ret = crypt_keyfile_device_read (cd, context->u.keyfile.keyfile, &key_buffer, &buf_len,
+                                         context->u.keyfile.keyfile_offset, context->u.keyfile.key_size, 0);
+        if (ret != 0) {
+            g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYFILE_FAILED,
+                         "Failed to read key from file '%s: %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
+            crypt_free (cd);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
+            return FALSE;
+        }
+        ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, key_buffer, buf_len,
+                                            read_only ? CRYPT_ACTIVATE_READONLY : 0);
+        crypt_safe_free (key_buffer);
+    }
 
     if (ret < 0) {
         if (ret == -EPERM)

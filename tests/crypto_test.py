@@ -1266,12 +1266,15 @@ class CryptoTestTrueCrypt(CryptoTestCase):
         """Verify that opening/closing TrueCrypt device works"""
 
         with self.assertRaises(GLib.GError):
-            BlockDev.crypto_tc_open("/non/existing/device", "libblockdevTestTC", self.passphrase)
+            ctx = BlockDev.CryptoKeyslotContext(passphrase=self.passphrase)
+            BlockDev.crypto_tc_open("/non/existing/device", "libblockdevTestTC", ctx)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.crypto_tc_open(self.tc_dev, "libblockdevTestTC", "wrong-passhprase")
+            ctx = BlockDev.CryptoKeyslotContext(passphrase="wrong-passphrase")
+            BlockDev.crypto_tc_open(self.tc_dev, "libblockdevTestTC", ctx)
 
-        succ = BlockDev.crypto_tc_open(self.tc_dev, "libblockdevTestTC", self.passphrase)
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=self.passphrase)
+        succ = BlockDev.crypto_tc_open(self.tc_dev, "libblockdevTestTC", ctx)
         self.assertTrue(succ)
         self.assertTrue(os.path.exists("/dev/mapper/libblockdevTestTC"))
 
@@ -1284,12 +1287,15 @@ class CryptoTestTrueCrypt(CryptoTestCase):
         """Verify that opening/closing VeraCrypt device works"""
 
         with self.assertRaises(GLib.GError):
-            BlockDev.crypto_tc_open("/non/existing/device", "libblockdevTestTC", self.passphrase)
+            ctx = BlockDev.CryptoKeyslotContext(passphrase=self.passphrase)
+            BlockDev.crypto_tc_open("/non/existing/device", "libblockdevTestTC", ctx)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.crypto_tc_open(self.vc_dev, "libblockdevTestTC", "wrong-passhprase")
+            ctx = BlockDev.CryptoKeyslotContext(passphrase="wrong-passphrase")
+            BlockDev.crypto_tc_open(self.vc_dev, "libblockdevTestTC", ctx)
 
-        succ = BlockDev.crypto_tc_open(self.vc_dev, "libblockdevTestTC", self.passphrase, veracrypt=True)
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=self.passphrase)
+        succ = BlockDev.crypto_tc_open(self.vc_dev, "libblockdevTestTC", ctx, veracrypt=True)
         self.assertTrue(succ)
         self.assertTrue(os.path.exists("/dev/mapper/libblockdevTestTC"))
 
@@ -1343,10 +1349,12 @@ class CryptoTestBitlk(CryptoTestCase):
         """Verify that opening/closing a BitLocker device works"""
 
         with self.assertRaises(GLib.GError):
-            BlockDev.crypto_bitlk_open("/non/existing/device", "libblockdevTestBitlk", self.passphrase)
+            ctx = BlockDev.CryptoKeyslotContext(passphrase=self.passphrase)
+            BlockDev.crypto_bitlk_open("/non/existing/device", "libblockdevTestBitlk", ctx)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.crypto_bitlk_open(self.bitlk_dev, "libblockdevTestBitlk", "wrong-passhprase")
+            ctx = BlockDev.CryptoKeyslotContext(passphrase="wrong-passprase")
+            BlockDev.crypto_bitlk_open(self.bitlk_dev, "libblockdevTestBitlk", ctx)
 
         # info - block device
         info = BlockDev.crypto_bitlk_info(self.bitlk_dev)
@@ -1356,7 +1364,8 @@ class CryptoTestBitlk(CryptoTestCase):
         self.assertEqual(info.mode, "xts-plain64")
         self.assertEqual(info.sector_size, 512)
 
-        succ = BlockDev.crypto_bitlk_open(self.bitlk_dev, "libblockdevTestBitlk", self.passphrase)
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=self.passphrase)
+        succ = BlockDev.crypto_bitlk_open(self.bitlk_dev, "libblockdevTestBitlk", ctx)
         self.assertTrue(succ)
         self.assertTrue(os.path.exists("/dev/mapper/libblockdevTestBitlk"))
 
@@ -1391,7 +1400,8 @@ class CryptoTestBitlk(CryptoTestCase):
         self.assertEqual(info.mode, "xts-plain64")
         self.assertEqual(info.sector_size, 512)
 
-        succ = BlockDev.crypto_bitlk_open(self.bitlk_dev, "libblockdevTestBitlk", self.passphrase)
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=self.passphrase)
+        succ = BlockDev.crypto_bitlk_open(self.bitlk_dev, "libblockdevTestBitlk", ctx)
         self.assertTrue(succ)
         self.assertTrue(os.path.exists("/dev/mapper/libblockdevTestBitlk"))
 
@@ -1458,12 +1468,15 @@ class CryptoTestFVAULT2(CryptoTestCase):
         """Verify that opening/closing a FileVault2 device works"""
 
         with self.assertRaises(GLib.GError):
-            BlockDev.crypto_fvault2_open("/non/existing/device", "libblockdevTestFVAULT2", self.passphrase)
+            ctx = BlockDev.CryptoKeyslotContext(passphrase=self.passphrase)
+            BlockDev.crypto_fvault2_open("/non/existing/device", "libblockdevTestFVAULT2", ctx)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.crypto_fvault2_open(self.fvault2_dev, "libblockdevTestFVAULT2", "wrong-passhprase")
+            ctx = BlockDev.CryptoKeyslotContext(passphrase="wrong-passphrase")
+            BlockDev.crypto_fvault2_open(self.fvault2_dev, "libblockdevTestFVAULT2", ctx)
 
-        succ = BlockDev.crypto_fvault2_open(self.fvault2_dev, "libblockdevTestFVAULT2", self.passphrase)
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=self.passphrase)
+        succ = BlockDev.crypto_fvault2_open(self.fvault2_dev, "libblockdevTestFVAULT2", ctx)
         self.assertTrue(succ)
         self.assertTrue(os.path.exists("/dev/mapper/libblockdevTestFVAULT2"))
 
