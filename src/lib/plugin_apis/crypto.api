@@ -691,7 +691,7 @@ gboolean bd_crypto_device_is_luks (const gchar *device, GError **error);
  *
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
  */
-gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error);
+const gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error);
 
 
 typedef enum {

@@ -606,7 +606,7 @@ gboolean bd_crypto_device_is_luks (const gchar *device, GError **error) {
  *
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
  */
-gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error) {
+const gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret_num;
     const gchar *ret = NULL;
@@ -640,10 +640,7 @@ gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error) {
     }
 
     crypt_free (cd);
-    /* cast the "const" away because this API requires returning a
-       non-const string, though the caller isn't allowed to modify its
-       contents */
-    return (gchar *)ret;
+    return ret;
 }
 
 static struct crypt_pbkdf_type *get_pbkdf_params (BDCryptoLUKSPBKDF *user_pbkdf, GError **error) {
