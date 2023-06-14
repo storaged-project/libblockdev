@@ -38,10 +38,6 @@
 
 #include "crypto.h"
 
-#ifndef CRYPT_LUKS
-#define CRYPT_LUKS NULL
-#endif
-
 #ifdef __clang__
 #define ZERO_INIT {}
 #else
@@ -2540,17 +2536,8 @@ gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const
         activate_flags |= CRYPT_ACTIVATE_RECALCULATE;
     if (flags & BD_CRYPTO_INTEGRITY_OPEN_ALLOW_DISCARDS)
         activate_flags |= CRYPT_ACTIVATE_ALLOW_DISCARDS;
-    if (flags & BD_CRYPTO_INTEGRITY_OPEN_NO_JOURNAL_BITMAP) {
-#ifndef CRYPT_ACTIVATE_NO_JOURNAL_BITMAP
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                     "Cannot activate %s with bitmap, installed version of cryptsetup doesn't support this option.", device);
-        bd_utils_report_finished (progress_id, l_error->message);
-        g_propagate_error (error, l_error);
-        return FALSE;
-#else
+    if (flags & BD_CRYPTO_INTEGRITY_OPEN_NO_JOURNAL_BITMAP)
         activate_flags |= CRYPT_ACTIVATE_NO_JOURNAL_BITMAP;
-#endif
-    }
 
     if (flags & BD_CRYPTO_INTEGRITY_OPEN_RECALCULATE_RESET) {
 #ifndef CRYPT_ACTIVATE_RECALCULATE_RESET
