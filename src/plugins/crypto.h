@@ -283,8 +283,7 @@ gboolean bd_crypto_integrity_close (const gchar *integrity_device, GError **erro
 gboolean bd_crypto_keyring_add_key (const gchar *key_desc, const guint8 *key_data, gsize data_len, GError **error);
 
 gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error);
-gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);
-gboolean bd_crypto_tc_open_full (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, const gchar **keyfiles, gboolean hidden, gboolean system, gboolean veracrypt, guint32 veracrypt_pim, gboolean read_only, GError **error);
+gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, const gchar **keyfiles, gboolean hidden, gboolean system, gboolean veracrypt, guint32 veracrypt_pim, gboolean read_only, GError **error);
 gboolean bd_crypto_tc_close (const gchar *tc_device, GError **error);
 
 gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, const guint8* pass_data, gsize data_len, gboolean read_only, GError **error);

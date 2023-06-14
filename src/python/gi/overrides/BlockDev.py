@@ -306,7 +306,7 @@ def crypto_escrow_device(device, passphrase, cert_data, directory, backup_passph
     return _crypto_escrow_device(device, passphrase, cert_data, directory, backup_passphrase)
 __all__.append("crypto_escrow_device")
 
-_crypto_tc_open = BlockDev.crypto_tc_open_full
+_crypto_tc_open = BlockDev.crypto_tc_open
 @override(BlockDev.crypto_tc_open)
 def crypto_tc_open(device, name, passphrase, read_only=False, keyfiles=None, hidden=False, system=False, veracrypt=False, veracrypt_pim=0):
     if isinstance(passphrase, str):
