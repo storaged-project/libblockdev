@@ -237,6 +237,7 @@ BDCryptoKeyslotContext* bd_crypto_keyslot_context_copy (BDCryptoKeyslotContext *
 
 BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_passphrase (const guint8 *pass_data, gsize data_len, GError **error);
 BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_keyfile (const gchar *keyfile, guint64 keyfile_offset, gsize key_size, GError **error);
+BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_keyring (const gchar *key_desc, GError **error);
 
 /*
  * If using the plugin as a standalone library, the following functions should
@@ -257,7 +258,6 @@ const gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error);
 
 gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint64 key_size, BDCryptoKeyslotContext *context, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra,GError **error);
 gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error);
-gboolean bd_crypto_luks_open_keyring (const gchar *device, const gchar *name, const gchar *key_desc, gboolean read_only, GError **error);
 gboolean bd_crypto_luks_close (const gchar *luks_device, GError **error);
 gboolean bd_crypto_luks_add_key (const gchar *device, BDCryptoKeyslotContext *context, BDCryptoKeyslotContext *ncontext, GError **error);
 gboolean bd_crypto_luks_remove_key (const gchar *device, BDCryptoKeyslotContext *context, GError **error);

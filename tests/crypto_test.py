@@ -390,6 +390,17 @@ class CryptoTestOpenClose(CryptoTestCase):
         succ = BlockDev.crypto_luks_close("/dev/mapper/libblockdevTestLUKS")
         self.assertTrue(succ)
 
+        # add the passphrase to kernel keyring and try to open with it
+        succ = BlockDev.crypto_keyring_add_key("myshinylittlekey", [ord(c) for c in PASSWD])
+        self.assertTrue(succ)
+
+        ctx = BlockDev.CryptoKeyslotContext(keyring="myshinylittlekey")
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", ctx)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
     @tag_test(TestTags.SLOW, TestTags.CORE)
     def test_luks_open_close(self):
         self._luks_open_close(self._luks_format)
@@ -397,29 +408,6 @@ class CryptoTestOpenClose(CryptoTestCase):
     @tag_test(TestTags.SLOW, TestTags.CORE)
     def test_luks2_open_close(self):
         self._luks_open_close(self._luks2_format)
-
-class CryptoTestOpenCloseKeyring(CryptoTestCase):
-    def _luks_open_close_keyring(self, create_fn):
-        """Verify that opening/closing LUKS device works"""
-
-        create_fn(self.loop_dev, PASSWD, self.keyfile)
-
-        succ = BlockDev.crypto_keyring_add_key("myshinylittlekey", [ord(c) for c in PASSWD])
-        self.assertTrue(succ)
-
-        succ = BlockDev.crypto_luks_open_keyring(self.loop_dev, "libblockdevTestLUKS", "myshinylittlekey", False)
-        self.assertTrue(succ)
-
-        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
-        self.assertTrue(succ)
-
-    @tag_test(TestTags.SLOW)
-    def test_luks_open_close_keyring(self):
-        self._luks_open_close_keyring(self._luks_format)
-
-    @tag_test(TestTags.SLOW)
-    def test_luks2_open_close_keyring(self):
-        self._luks_open_close_keyring(self._luks2_format)
 
 class CryptoTestAddKey(CryptoTestCase):
     def _add_key(self, create_fn):

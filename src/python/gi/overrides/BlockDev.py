@@ -262,9 +262,9 @@ CryptoLUKSExtra = override(CryptoLUKSExtra)
 __all__.append("CryptoLUKSExtra")
 
 class CryptoKeyslotContext(BlockDev.CryptoKeyslotContext):
-    def __new__(cls, passphrase=None, keyfile=None, keyfile_offset=0, key_size=0):
-        if (passphrase and keyfile):
-            raise ValueError("Only one of 'passphrase' and 'keyfile' may be specified at time")
+    def __new__(cls, passphrase=None, keyfile=None, keyfile_offset=0, key_size=0, keyring=None):
+        if sum(bool(x) for x in (passphrase, keyfile, keyring)) != 1:
+            raise ValueError("Only one of 'passphrase', 'keyfile' and 'keyring' may be specified at time")
         if passphrase:
             if isinstance(passphrase, str):
                 ret = BlockDev.CryptoKeyslotContext.new_passphrase([ord(c) for c in passphrase])
@@ -272,7 +272,8 @@ class CryptoKeyslotContext(BlockDev.CryptoKeyslotContext):
                 ret = BlockDev.CryptoKeyslotContext.new_passphrase(passphrase)
         if keyfile:
             ret = BlockDev.CryptoKeyslotContext.new_keyfile(keyfile, keyfile_offset, key_size)
-        ret.__class__ = cls
+        if keyring:
+            ret = BlockDev.CryptoKeyslotContext.new_keyring(keyring)
         return ret
     def __init__(self, *args, **kwargs):   # pylint: disable=unused-argument
         super(CryptoKeyslotContext, self).__init__()  #pylint: disable=bad-super-call

@@ -78,6 +78,7 @@ bd_crypto_keyslot_context_free
 bd_crypto_keyslot_context_copy
 bd_crypto_keyslot_context_new_passphrase
 bd_crypto_keyslot_context_new_keyfile
+bd_crypto_keyslot_context_new_keyring
 bd_crypto_luks_open
 bd_crypto_luks_close
 bd_crypto_luks_add_key
@@ -112,7 +113,6 @@ bd_crypto_luks_token_info_free
 bd_crypto_luks_token_info_copy
 bd_crypto_luks_token_info
 bd_crypto_keyring_add_key
-bd_crypto_luks_open_keyring
 bd_crypto_tc_open
 bd_crypto_tc_close
 bd_crypto_escrow_device

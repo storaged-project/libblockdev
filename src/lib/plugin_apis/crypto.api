@@ -698,6 +698,7 @@ typedef enum {
     BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_NONE = 0,
     BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE,
     BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE,
+    BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING,
 } BDCryptoKeyslotContextType;
 
 struct _BDCryptoKeyslotContext {
@@ -714,6 +715,10 @@ struct _BDCryptoKeyslotContext {
             guint64 keyfile_offset;
             gsize key_size;
         } keyfile;
+
+        struct {
+            gchar *key_desc;
+        } keyring;
     } u;
 };
 typedef struct _BDCryptoKeyslotContext BDCryptoKeyslotContext;
@@ -735,6 +740,8 @@ void bd_crypto_keyslot_context_free (BDCryptoKeyslotContext *context) {
         g_free (context->u.passphrase.pass_data);
     else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE)
         g_free (context->u.keyfile.keyfile);
+    else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING)
+        g_free (context->u.keyring.key_desc);
 
     g_free (context);
 }
@@ -760,7 +767,8 @@ BDCryptoKeyslotContext* bd_crypto_keyslot_context_copy (BDCryptoKeyslotContext *
         new_context->u.keyfile.keyfile = g_strdup (context->u.keyfile.keyfile);
         new_context->u.keyfile.keyfile_offset = context->u.keyfile.keyfile_offset;
         new_context->u.keyfile.key_size = context->u.keyfile.key_size;
-    }
+    } else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING)
+        new_context->u.keyring.key_desc = g_strdup (context->u.keyring.key_desc);
 
     return new_context;
 }
@@ -805,6 +813,21 @@ BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_passphrase (const guint8 *
 BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_keyfile (const gchar *keyfile, guint64 keyfile_offset, gsize key_size, GError **error);
 
 /**
+ * bd_crypto_keyslot_context_new_keyring:
+ * @key_desc: kernel keyring key description
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns (transfer full): new %BDCryptoKeyslotContext initialized by @key_desc or
+ *                          %NULL in case of error
+ *
+ * Note: Keyslot passphrase must be stored in 'user' key type and the key has to be reachable
+ *       by process context on behalf of which this function is called.
+ *
+ * Tech category: always available
+ */
+BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_keyring (const gchar *key_desc, GError **error);
+
+/**
  * bd_crypto_luks_format:
  * @device: a device to format as LUKS
  * @cipher: (nullable): cipher specification (type-mode, e.g. "aes-xts-plain64") or %NULL to use the default
@@ -840,23 +863,6 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error);
-
-/**
- * bd_crypto_luks_open_keyring:
- * @device: the device to open
- * @name: name for the LUKS device
- * @key_desc: kernel keyring key description
- * @read_only: whether to open as read-only or not (meaning read-write)
- * @error: (out) (optional): place to store error (if any)
- *
- * Note: Keyslot passphrase must be stored in 'user' key type and the key has to be reachable
- *       by process context on behalf of which this function is called.
- *
- * Returns: whether the @device was successfully opened or not
- *
- * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
- */
-gboolean bd_crypto_luks_open_keyring (const gchar *device, const gchar *name, const gchar *key_desc, gboolean read_only, GError **error);
 
 /**
  * bd_crypto_luks_close:

@@ -716,6 +716,7 @@ typedef enum {
     BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_NONE = 0,
     BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE,
     BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE,
+    BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING,
 } BDCryptoKeyslotContextType;
 
 struct _BDCryptoKeyslotContext {
@@ -732,6 +733,10 @@ struct _BDCryptoKeyslotContext {
             guint64 keyfile_offset;
             gsize key_size;
         } keyfile;
+
+        struct {
+            gchar *key_desc;
+        } keyring;
     } u;
 };
 typedef struct _BDCryptoKeyslotContext BDCryptoKeyslotContext;
@@ -744,6 +749,8 @@ void bd_crypto_keyslot_context_free (BDCryptoKeyslotContext *context) {
         g_free (context->u.passphrase.pass_data);
     else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE)
         g_free (context->u.keyfile.keyfile);
+    else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING)
+        g_free (context->u.keyring.key_desc);
 
     g_free (context);
 }
@@ -763,7 +770,8 @@ BDCryptoKeyslotContext* bd_crypto_keyslot_context_copy (BDCryptoKeyslotContext *
         new_context->u.keyfile.keyfile = g_strdup (context->u.keyfile.keyfile);
         new_context->u.keyfile.keyfile_offset = context->u.keyfile.keyfile_offset;
         new_context->u.keyfile.key_size = context->u.keyfile.key_size;
-    }
+    } else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING)
+        new_context->u.keyring.key_desc = g_strdup (context->u.keyring.key_desc);
 
     return new_context;
 }
@@ -822,6 +830,31 @@ BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_keyfile (const gchar *keyf
     context->u.keyfile.keyfile = g_strdup (keyfile);
     context->u.keyfile.keyfile_offset = keyfile_offset;
     context->u.keyfile.key_size = key_size;
+
+    return context;
+}
+
+/**
+ * bd_crypto_keyslot_context_new_keyring:
+ * @key_desc: kernel keyring key description
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns (transfer full): new %BDCryptoKeyslotContext initialized by @key_desc or
+ *                          %NULL in case of error
+ *
+ * Note: Keyslot passphrase must be stored in 'user' key type and the key has to be reachable
+ *       by process context on behalf of which this function is called.
+ *
+ * Tech category: always available
+ */
+BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_keyring (const gchar *key_desc, GError **error UNUSED) {
+    BDCryptoKeyslotContext *context = NULL;
+
+    context = g_new0 (BDCryptoKeyslotContext, 1);
+
+    context->type = BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING;
+
+    context->u.keyring.key_desc = g_strdup (key_desc);
 
     return context;
 }
@@ -1097,7 +1130,9 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, BDCryptoKe
         ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, key_buffer, buf_len,
                                             read_only ? CRYPT_ACTIVATE_READONLY : 0);
         crypt_safe_free (key_buffer);
-    }
+    } else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING)
+        ret = crypt_activate_by_keyring (cd, name, context->u.keyring.key_desc, CRYPT_ANY_SLOT,
+                                         read_only ? CRYPT_ACTIVATE_READONLY : 0);
 
     if (ret < 0) {
         if (ret == -EPERM)
@@ -1117,73 +1152,6 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, BDCryptoKe
     bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
 }
-
-/**
- * bd_crypto_luks_open_keyring:
- * @device: the device to open
- * @name: name for the LUKS device
- * @key_desc: kernel keyring key description
- * @read_only: whether to open as read-only or not (meaning read-write)
- * @error: (out) (optional): place to store error (if any)
- *
- * Note: Keyslot passphrase must be stored in 'user' key type and the key has to be reachable
- *       by process context on behalf of which this function is called.
- *
- * Returns: whether the @device was successfully opened or not
- *
- * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
- */
-gboolean bd_crypto_luks_open_keyring (const gchar *device, const gchar *name, const gchar *key_desc, gboolean read_only, GError **error) {
-    struct crypt_device *cd = NULL;
-    guint64 progress_id = 0;
-    gint ret = 0;
-    gchar *msg = NULL;
-    GError *l_error = NULL;
-
-    msg = g_strdup_printf ("Started opening '%s' LUKS device", device);
-    progress_id = bd_utils_report_started (msg);
-    g_free (msg);
-
-    ret = crypt_init (&cd, device);
-    if (ret != 0) {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
-        bd_utils_report_finished (progress_id, l_error->message);
-        g_propagate_error (error, l_error);
-        return FALSE;
-    }
-
-    ret = crypt_load (cd, CRYPT_LUKS, NULL);
-    if (ret != 0) {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to load device's parameters: %s", strerror_l (-ret, c_locale));
-        crypt_free (cd);
-        bd_utils_report_finished (progress_id, l_error->message);
-        g_propagate_error (error, l_error);
-        return FALSE;
-    }
-
-    ret = crypt_activate_by_keyring (cd, name, key_desc, CRYPT_ANY_SLOT,
-                                     read_only ? CRYPT_ACTIVATE_READONLY : 0);
-    if (ret < 0) {
-        if (ret == -EPERM)
-            g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                         "Failed to activate device: Incorrect passphrase.");
-        else
-            g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                         "Failed to activate device: %s", strerror_l (-ret, c_locale));
-
-        crypt_free (cd);
-        bd_utils_report_finished (progress_id, l_error->message);
-        g_propagate_error (error, l_error);
-        return FALSE;
-    }
-
-    crypt_free (cd);
-    bd_utils_report_finished (progress_id, "Completed");
-    return TRUE;
-}
-
 
 static gboolean _crypto_close (const gchar *device, const gchar *tech_name, GError **error) {
     struct crypt_device *cd = NULL;
