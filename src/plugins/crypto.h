@@ -238,6 +238,7 @@ BDCryptoKeyslotContext* bd_crypto_keyslot_context_copy (BDCryptoKeyslotContext *
 BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_passphrase (const guint8 *pass_data, gsize data_len, GError **error);
 BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_keyfile (const gchar *keyfile, guint64 keyfile_offset, gsize key_size, GError **error);
 BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_keyring (const gchar *key_desc, GError **error);
+BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_volume_key (const guint8 *volume_key, gsize volume_key_size, GError **error);
 
 /*
  * If using the plugin as a standalone library, the following functions should
@@ -276,8 +277,8 @@ BDCryptoBITLKInfo* bd_crypto_bitlk_info (const gchar *device, GError **error);
 BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **error);
 BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError **error);
 
-gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm, gboolean wipe, const guint8* key_data, gsize key_size, BDCryptoIntegrityExtra *extra, GError **error);
-gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const gchar *algorithm, const guint8* key_data, gsize key_size, BDCryptoIntegrityOpenFlags flags, BDCryptoIntegrityExtra *extra, GError **error);
+gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm, gboolean wipe, BDCryptoKeyslotContext *context, BDCryptoIntegrityExtra *extra, GError **error);
+gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const gchar *algorithm, BDCryptoKeyslotContext *context, BDCryptoIntegrityOpenFlags flags, BDCryptoIntegrityExtra *extra, GError **error);
 gboolean bd_crypto_integrity_close (const gchar *integrity_device, GError **error);
 
 gboolean bd_crypto_keyring_add_key (const gchar *key_desc, const guint8 *key_data, gsize data_len, GError **error);

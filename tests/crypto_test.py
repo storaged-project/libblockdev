@@ -1507,12 +1507,12 @@ class CryptoTestIntegrity(CryptoTestCase):
         self.assertFalse(os.path.exists("/dev/mapper/%s" % self._dm_name))
 
         # same now with a keyed algorithm
-        key = list(secrets.token_bytes(64))
+        ctx = BlockDev.CryptoKeyslotContext(volume_key=list(secrets.token_bytes(64)))
 
-        succ = BlockDev.crypto_integrity_format(self.loop_dev, "hmac(sha256)", False, key)
+        succ = BlockDev.crypto_integrity_format(self.loop_dev, "hmac(sha256)", False, ctx)
         self.assertTrue(succ)
 
-        succ = BlockDev.crypto_integrity_open(self.loop_dev, self._dm_name, "hmac(sha256)", key)
+        succ = BlockDev.crypto_integrity_open(self.loop_dev, self._dm_name, "hmac(sha256)", ctx)
         self.assertTrue(succ)
         self.assertTrue(os.path.exists("/dev/mapper/%s" % self._dm_name))
 

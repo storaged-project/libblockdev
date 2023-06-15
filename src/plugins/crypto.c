@@ -717,6 +717,7 @@ typedef enum {
     BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE,
     BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE,
     BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING,
+    BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_VOLUME_KEY,
 } BDCryptoKeyslotContextType;
 
 struct _BDCryptoKeyslotContext {
@@ -737,6 +738,11 @@ struct _BDCryptoKeyslotContext {
         struct {
             gchar *key_desc;
         } keyring;
+
+        struct {
+            guint8 *volume_key;
+            gsize volume_key_size;
+        } volume_key;
     } u;
 };
 typedef struct _BDCryptoKeyslotContext BDCryptoKeyslotContext;
@@ -751,6 +757,8 @@ void bd_crypto_keyslot_context_free (BDCryptoKeyslotContext *context) {
         g_free (context->u.keyfile.keyfile);
     else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING)
         g_free (context->u.keyring.key_desc);
+    else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_VOLUME_KEY)
+        g_free (context->u.volume_key.volume_key);
 
     g_free (context);
 }
@@ -772,6 +780,11 @@ BDCryptoKeyslotContext* bd_crypto_keyslot_context_copy (BDCryptoKeyslotContext *
         new_context->u.keyfile.key_size = context->u.keyfile.key_size;
     } else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING)
         new_context->u.keyring.key_desc = g_strdup (context->u.keyring.key_desc);
+    else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_VOLUME_KEY) {
+        new_context->u.volume_key.volume_key = g_new0 (guint8, context->u.volume_key.volume_key_size);
+        memcpy (new_context->u.volume_key.volume_key, context->u.volume_key.volume_key, context->u.volume_key.volume_key_size);
+        new_context->u.volume_key.volume_key_size = context->u.volume_key.volume_key_size;
+    }
 
     return new_context;
 }
@@ -855,6 +868,38 @@ BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_keyring (const gchar *key_
     context->type = BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING;
 
     context->u.keyring.key_desc = g_strdup (key_desc);
+
+    return context;
+}
+
+/**
+ * bd_crypto_keyslot_context_new_volume_key:
+ * @volume_key: (array length=volume_key_size): a volume key for the new context (may contain arbitrary binary data)
+ * @volume_key_size: length of the @volume_key_size buffer
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns (transfer full): new %BDCryptoKeyslotContext initialized by volume key or
+ *                          %NULL in case of error
+ *
+ * Tech category: always available
+ */
+BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_volume_key (const guint8 *volume_key, gsize volume_key_size, GError **error) {
+    BDCryptoKeyslotContext *context = NULL;
+
+    if (!volume_key || volume_key_size == 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_NO_KEY,
+                     "No volume key specified.");
+        return NULL;
+    }
+
+    context = g_new0 (BDCryptoKeyslotContext, 1);
+
+    context->type = BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_VOLUME_KEY;
+
+    context->u.volume_key.volume_key = g_new0 (guint8, volume_key_size);
+    memcpy (context->u.volume_key.volume_key, volume_key, volume_key_size);
+
+    context->u.volume_key.volume_key_size = volume_key_size;
 
     return context;
 }
@@ -2345,8 +2390,7 @@ static int _wipe_progress (guint64 size, guint64 offset, void *usrptr) {
  * @device: a device to format as integrity
  * @algorithm: integrity algorithm specification (e.g. "crc32c" or "sha256")
  * @wipe: whether to wipe the device after format; a device that is not initially wiped will contain invalid checksums
- * @key_data: (nullable) (array length=key_size): integrity key or %NULL if not needed
- * @key_size: size the integrity key and @key_data
+ * @context: (nullable): key slot context (passphrase/keyfile/token...) for this device
  * @extra: (nullable): extra arguments for integrity format creation
  * @error: (out) (optional): place to store error (if any)
  *
@@ -2357,7 +2401,7 @@ static int _wipe_progress (guint64 size, guint64 offset, void *usrptr) {
  *
  * Tech category: %BD_CRYPTO_TECH_INTEGRITY-%BD_CRYPTO_TECH_MODE_CREATE
  */
-gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm, gboolean wipe, const guint8* key_data, gsize key_size, BDCryptoIntegrityExtra *extra, GError **error) {
+gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm, gboolean wipe, BDCryptoKeyslotContext *context, BDCryptoIntegrityExtra *extra, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret;
     guint64 progress_id = 0;
@@ -2391,7 +2435,7 @@ gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm
         params.buffer_sectors = extra->buffer_sectors;
     }
 
-    params.integrity_key_size = key_size;
+    params.integrity_key_size = context ? context->u.volume_key.volume_key_size : 0;
     params.integrity = algorithm;
     params.tag_size = params.tag_size ? params.tag_size : 0;
 
@@ -2412,7 +2456,9 @@ gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm
         tmp_name = g_strdup_printf ("bd-temp-integrity-%s-%d", dev_name, g_random_int ());
         tmp_path = g_strdup_printf ("%s/%s", crypt_get_dir (), tmp_name);
 
-        ret = crypt_activate_by_volume_key (cd, tmp_name, (const char *) key_data, key_size,
+        ret = crypt_activate_by_volume_key (cd, tmp_name,
+                                            context ? (const char *) context->u.volume_key.volume_key : NULL,
+                                            context ? context->u.volume_key.volume_key_size : 0,
                                             CRYPT_ACTIVATE_PRIVATE | CRYPT_ACTIVATE_NO_JOURNAL);
         if (ret != 0) {
             g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
@@ -2460,8 +2506,7 @@ gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm
  * @device: integrity device to open
  * @name: name for the opened @device
  * @algorithm: (nullable): integrity algorithm specification (e.g. "crc32c" or "sha256") or %NULL to use the default
- * @key_data: (nullable) (array length=key_size): integrity key or %NULL if not needed
- * @key_size: size the integrity key and @key_data
+ * @context: (nullable): key slot context (passphrase/keyfile/token...) for this device
  * @flags: flags for the integrity device activation
  * @extra: (nullable): extra arguments for integrity open
  * @error: (out) (optional): place to store error (if any)
@@ -2470,7 +2515,7 @@ gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm
  *
  * Tech category: %BD_CRYPTO_TECH_INTEGRITY-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
-gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const gchar *algorithm, const guint8* key_data, gsize key_size, BDCryptoIntegrityOpenFlags flags, BDCryptoIntegrityExtra *extra, GError **error) {
+gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const gchar *algorithm, BDCryptoKeyslotContext *context, BDCryptoIntegrityOpenFlags flags, BDCryptoIntegrityExtra *extra, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
     guint64 progress_id = 0;
@@ -2480,7 +2525,7 @@ gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const
     GError *l_error = NULL;
 
     params.integrity = algorithm;
-    params.integrity_key_size = key_size;
+    params.integrity_key_size = context ? context->u.volume_key.volume_key_size : 0;
 
     if (extra) {
         params.sector_size = extra->sector_size;
@@ -2539,7 +2584,10 @@ gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const
         return FALSE;
     }
 
-    ret = crypt_activate_by_volume_key (cd, name, (const char *) key_data, key_size, activate_flags);
+    ret = crypt_activate_by_volume_key (cd, name,
+                                        context ? (const char *) context->u.volume_key.volume_key : NULL,
+                                        context ? context->u.volume_key.volume_key_size : 0,
+                                        activate_flags);
     if (ret < 0) {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to activate device: %s", strerror_l (-ret, c_locale));

@@ -699,6 +699,7 @@ typedef enum {
     BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE,
     BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE,
     BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING,
+    BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_VOLUME_KEY,
 } BDCryptoKeyslotContextType;
 
 struct _BDCryptoKeyslotContext {
@@ -719,6 +720,11 @@ struct _BDCryptoKeyslotContext {
         struct {
             gchar *key_desc;
         } keyring;
+
+        struct {
+            guint8 *volume_key;
+            gsize volume_key_size;
+        } volume_key;
     } u;
 };
 typedef struct _BDCryptoKeyslotContext BDCryptoKeyslotContext;
@@ -742,6 +748,8 @@ void bd_crypto_keyslot_context_free (BDCryptoKeyslotContext *context) {
         g_free (context->u.keyfile.keyfile);
     else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING)
         g_free (context->u.keyring.key_desc);
+    else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_VOLUME_KEY)
+        g_free (context->u.volume_key.volume_key);
 
     g_free (context);
 }
@@ -769,6 +777,11 @@ BDCryptoKeyslotContext* bd_crypto_keyslot_context_copy (BDCryptoKeyslotContext *
         new_context->u.keyfile.key_size = context->u.keyfile.key_size;
     } else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING)
         new_context->u.keyring.key_desc = g_strdup (context->u.keyring.key_desc);
+    else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_VOLUME_KEY) {
+        new_context->u.volume_key.volume_key = g_new0 (guint8, context->u.volume_key.volume_key_size);
+        memcpy (new_context->u.volume_key.volume_key, context->u.volume_key.volume_key, context->u.volume_key.volume_key_size);
+        new_context->u.volume_key.volume_key_size = context->u.volume_key.volume_key_size;
+    }
 
     return new_context;
 }
@@ -826,6 +839,19 @@ BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_keyfile (const gchar *keyf
  * Tech category: always available
  */
 BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_keyring (const gchar *key_desc, GError **error);
+
+/**
+ * bd_crypto_keyslot_context_new_volume_key:
+ * @volume_key: (array length=volume_key_size): a volume key for the new context (may contain arbitrary binary data)
+ * @volume_key_size: length of the @volume_key_size buffer
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns (transfer full): new %BDCryptoKeyslotContext initialized by volume key or
+ *                          %NULL in case of error
+ *
+ * Tech category: always available
+ */
+BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_volume_key (const guint8 *volume_key, gsize volume_key_size, GError **error);
 
 /**
  * bd_crypto_luks_format:
@@ -1070,8 +1096,7 @@ BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError *
  * @device: a device to format as integrity
  * @algorithm: integrity algorithm specification (e.g. "crc32c" or "sha256") or %NULL to use the default
  * @wipe: whether to wipe the device after format; a device that is not initially wiped will contain invalid checksums
- * @key_data: (nullable) (array length=key_size): integrity key or %NULL if not needed
- * @key_size: size the integrity key and @key_data
+ * @context: (nullable): key slot context (passphrase/keyfile/token...) for this device
  * @extra: (nullable): extra arguments for integrity format creation
  * @error: (out) (optional): place to store error (if any)
  *
@@ -1082,15 +1107,14 @@ BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError *
  *
  * Tech category: %BD_CRYPTO_TECH_INTEGRITY-%BD_CRYPTO_TECH_MODE_CREATE
  */
-gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm, gboolean wipe, const guint8* key_data, gsize key_size, BDCryptoIntegrityExtra *extra, GError **error);
+gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm, gboolean wipe, BDCryptoKeyslotContext *context, BDCryptoIntegrityExtra *extra, GError **error);
 
 /**
  * bd_crypto_integrity_open:
  * @device: integrity device to open
  * @name: name for the opened @device
  * @algorithm: (nullable): integrity algorithm specification (e.g. "crc32c" or "sha256") or %NULL to use the default
- * @key_data: (nullable) (array length=key_size): integrity key or %NULL if not needed
- * @key_size: size the integrity key and @key_data
+ * @context: (nullable): key slot context (passphrase/keyfile/token...) for this device
  * @flags: flags for the integrity device activation
  * @extra: (nullable): extra arguments for integrity open
  * @error: (out) (optional): place to store error (if any)
@@ -1099,7 +1123,7 @@ gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm
  *
  * Tech category: %BD_CRYPTO_TECH_INTEGRITY-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
-gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const gchar *algorithm, const guint8* key_data, gsize key_size, BDCryptoIntegrityOpenFlags flags, BDCryptoIntegrityExtra *extra, GError **error);
+gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const gchar *algorithm, BDCryptoKeyslotContext *context, BDCryptoIntegrityOpenFlags flags, BDCryptoIntegrityExtra *extra, GError **error);
 
 /**
  * bd_crypto_integrity_close:
