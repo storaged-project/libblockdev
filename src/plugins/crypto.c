@@ -920,6 +920,8 @@ BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_volume_key (const guint8 *
  * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
  * FOREVER).
  *
+ * Supported @context types for this function: passphrase, key file
+ *
  * Returns: whether the given @device was successfully formatted as LUKS or not
  * (the @error) contains the error in such cases)
  *
@@ -1104,6 +1106,13 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
             return FALSE;
         }
         bd_utils_report_progress (progress_id, 100, "Added key");
+    } else {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                     "Only 'passphrase' and 'key file' context types are valid for LUKS format.");
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        crypt_free (cd);
+        return FALSE;
     }
 
     crypt_free (cd);
@@ -1119,6 +1128,8 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
  * @context: key slot context (passphrase/keyfile/token...) to open this LUKS @device
  * @read_only: whether to open as read-only or not (meaning read-write)
  * @error: (out) (optional): place to store error (if any)
+ *
+ * Supported @context types for this function: passphrase, key file, keyring
  *
  * Returns: whether the @device was successfully opened or not
  *
@@ -1178,6 +1189,14 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, BDCryptoKe
     } else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING)
         ret = crypt_activate_by_keyring (cd, name, context->u.keyring.key_desc, CRYPT_ANY_SLOT,
                                          read_only ? CRYPT_ACTIVATE_READONLY : 0);
+    else {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                     "Only 'passphrase', 'key file' and 'keyring' context types are valid for LUKS open.");
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        crypt_free (cd);
+        return FALSE;
+    }
 
     if (ret < 0) {
         if (ret == -EPERM)
@@ -1253,6 +1272,8 @@ gboolean bd_crypto_luks_close (const gchar *luks_device, GError **error) {
  * @ncontext: new key slot context (passphrase/keyfile/token...) to add to this LUKS @device
  * @error: (out) (optional): place to store error (if any)
  *
+ * Supported @context types for this function: passphrase, key file
+ *
  * Returns: whether the @ncontext was successfully added to @device
  * or not
  *
@@ -1302,6 +1323,13 @@ gboolean bd_crypto_luks_add_key (const gchar *device, BDCryptoKeyslotContext *co
     } else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE) {
         key_buf = (char *) context->u.passphrase.pass_data;
         buf_len = context->u.passphrase.data_len;
+    } else {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                     "Only 'passphrase' and 'key file' context types are valid for LUKS add key.");
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        crypt_free (cd);
+        return FALSE;
     }
 
     if (ncontext->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE) {
@@ -1321,6 +1349,13 @@ gboolean bd_crypto_luks_add_key (const gchar *device, BDCryptoKeyslotContext *co
     } else if (ncontext->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE) {
         nkey_buf = (char *) ncontext->u.passphrase.pass_data;
         nbuf_len = ncontext->u.passphrase.data_len;
+    } else {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                     "Only 'passphrase' and 'key file' context types are valid for LUKS add key.");
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        crypt_free (cd);
+        return FALSE;
     }
 
     ret = crypt_keyslot_add_by_passphrase (cd, CRYPT_ANY_SLOT, key_buf, buf_len, nkey_buf, nbuf_len);
@@ -1348,6 +1383,8 @@ gboolean bd_crypto_luks_add_key (const gchar *device, BDCryptoKeyslotContext *co
  * @device: device to add new key to
  * @context: key slot context (passphrase/keyfile/token...) to remove from this LUKS @device
  * @error: (out) (optional): place to store error (if any)
+ *
+ * Supported @context types for this function: passphrase, key file
  *
  * Returns: whether the key was successfully removed or not
  *
@@ -1402,6 +1439,13 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, BDCryptoKeyslotContext 
         }
         ret = crypt_activate_by_passphrase (cd, NULL, CRYPT_ANY_SLOT, key_buf, buf_len, 0);
         crypt_safe_free (key_buf);
+    } else {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                     "Only 'passphrase' and 'key file' context types are valid for LUKS remove key.");
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        crypt_free (cd);
+        return FALSE;
     }
 
     if (ret < 0) {
@@ -1434,6 +1478,8 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, BDCryptoKeyslotContext 
  * @context: key slot context (passphrase/keyfile/token...) for this LUKS @device
  * @ncontext: new key slot context (passphrase/keyfile/token...) to add to this LUKS @device
  * @error: (out) (optional): place to store error (if any)
+ *
+ * Supported @context types for this function: passphrase, key file
  *
  * Returns: whether the key was successfully changed or not
  *
@@ -1488,6 +1534,13 @@ gboolean bd_crypto_luks_change_key (const gchar *device, BDCryptoKeyslotContext 
     } else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE) {
         key_buf = (char *) context->u.passphrase.pass_data;
         buf_len = context->u.passphrase.data_len;
+    } else {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                     "Only 'passphrase' and 'key file' context types are valid for LUKS change key.");
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        crypt_free (cd);
+        return FALSE;
     }
 
     if (ncontext->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE) {
@@ -1507,6 +1560,13 @@ gboolean bd_crypto_luks_change_key (const gchar *device, BDCryptoKeyslotContext 
     } else if (ncontext->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE) {
         nkey_buf = (char *) ncontext->u.passphrase.pass_data;
         nbuf_len = ncontext->u.passphrase.data_len;
+    } else {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                     "Only 'passphrase' and 'key file' context types are valid for LUKS change key.");
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        crypt_free (cd);
+        return FALSE;
     }
 
     ret = crypt_keyslot_change_by_passphrase (cd, CRYPT_ANY_SLOT, CRYPT_ANY_SLOT,
@@ -1540,6 +1600,8 @@ gboolean bd_crypto_luks_change_key (const gchar *device, BDCryptoKeyslotContext 
  * @size: requested size in sectors or 0 to adapt to the backing device
  * @context: (nullable): key slot context (passphrase/keyfile/token...) for this LUKS @device
  * @error: (out) (optional): place to store error (if any)
+ *
+ * Supported @context types for this function: passphrase, key file
  *
  * Returns: whether the @luks_device was successfully resized or not
  *
@@ -1603,6 +1665,13 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, BDCrypto
             ret = crypt_activate_by_passphrase (cd, NULL, CRYPT_ANY_SLOT, key_buffer, buf_len,
                                                 cad.flags & CRYPT_ACTIVATE_KEYRING_KEY);
             crypt_safe_free (key_buffer);
+        } else {
+            g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                        "Only 'passphrase' and 'key file' context types are valid for LUKS resize.");
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
+            crypt_free (cd);
+            return FALSE;
         }
 
         if (ret < 0) {
@@ -1695,6 +1764,8 @@ gboolean bd_crypto_luks_suspend (const gchar *luks_device, GError **error) {
  * @context: (nullable): key slot context (passphrase/keyfile/token...) for @luks_device
  * @error: (out) (optional): place to store error (if any)
  *
+ * Supported @context types for this function: passphrase, key file
+ *
  * Returns: whether the given @luks_device was successfully resumed or not
  *
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_SUSPEND_RESUME
@@ -1748,6 +1819,13 @@ gboolean bd_crypto_luks_resume (const gchar *luks_device, BDCryptoKeyslotContext
         }
         ret = crypt_resume_by_passphrase (cd, luks_device, CRYPT_ANY_SLOT, key_buffer, buf_len);
         crypt_safe_free (key_buffer);
+    } else {
+            g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                        "Only 'passphrase' and 'key file' context types are valid for LUKS resume.");
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
+            crypt_free (cd);
+            return FALSE;
     }
 
     if (ret < 0) {
@@ -2396,6 +2474,8 @@ static int _wipe_progress (guint64 size, guint64 offset, void *usrptr) {
  *
  * Formats the given @device as integrity according to the other parameters given.
  *
+ * Supported @context types for this function: volume key
+ *
  * Returns: whether the given @device was successfully formatted as integrity or not
  * (the @error) contains the error in such cases)
  *
@@ -2415,6 +2495,14 @@ gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm
     msg = g_strdup_printf ("Started formatting '%s' as integrity device", device);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
+
+    if (context && context->type != BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_VOLUME_KEY) {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                    "Only 'volume key' context type is valid for integrity format.");
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        return FALSE;
+    }
 
     ret = crypt_init (&cd, device);
     if (ret != 0) {
@@ -2511,6 +2599,8 @@ gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm
  * @extra: (nullable): extra arguments for integrity open
  * @error: (out) (optional): place to store error (if any)
  *
+ * Supported @context types for this function: volume key
+ *
  * Returns: whether the @device was successfully opened or not
  *
  * Tech category: %BD_CRYPTO_TECH_INTEGRITY-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
@@ -2523,6 +2613,14 @@ gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const
     struct crypt_params_integrity params = ZERO_INIT;
     guint32 activate_flags = 0;
     GError *l_error = NULL;
+
+    if (context && context->type != BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_VOLUME_KEY) {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                     "Only 'volume key' context type is valid for integrity format.");
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        return FALSE;
+    }
 
     params.integrity = algorithm;
     params.integrity_key_size = context ? context->u.volume_key.volume_key_size : 0;
@@ -2721,6 +2819,8 @@ gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error) 
  * @veracrypt_pim: VeraCrypt PIM value (only used if @veracrypt is %TRUE)
  * @error: (out) (optional): place to store error (if any)
  *
+ * Supported @context types for this function: passphrase
+ *
  * Returns: whether the @device was successfully opened or not
  *
  * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
@@ -2742,6 +2842,15 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, BDCryptoKeys
     if (keyfiles) {
         for (i=0; *(keyfiles + i); i++);
         keyfiles_count = i;
+    }
+
+    if (context && context->type != BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE) {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                     "Only 'passphrase' context type is valid for TC open.");
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        crypt_free (cd);
+        return FALSE;
     }
 
     if ((context == NULL) && (keyfiles_count == 0)) {
@@ -3069,6 +3178,8 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
  * @read_only: whether to open as read-only or not (meaning read-write)
  * @error: (out) (optional): place to store error (if any)
  *
+ * Supported @context types for this function: passphrase, key file
+ *
  * Returns: whether the @device was successfully opened or not
  *
  * Tech category: %BD_CRYPTO_TECH_BITLK-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
@@ -3124,6 +3235,13 @@ gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, BDCryptoK
         ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, key_buffer, buf_len,
                                             read_only ? CRYPT_ACTIVATE_READONLY : 0);
         crypt_safe_free (key_buffer);
+    } else {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                     "Only 'passphrase' and 'key file' context types are valid for BITLK open.");
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        crypt_free (cd);
+        return FALSE;
     }
 
     if (ret < 0) {
@@ -3165,6 +3283,8 @@ gboolean bd_crypto_bitlk_close (const gchar *bitlk_device, GError **error) {
  * @context: key slot context (passphrase/keyfile/token...) for this FVAULT2 volume
  * @read_only: whether to open as read-only or not (meaning read-write)
  * @error: (out) (optional): place to store error (if any)
+ *
+ * Supported @context types for this function: passphrase, key file
  *
  * Returns: whether the @device was successfully opened or not
  *
@@ -3226,6 +3346,13 @@ gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, BDCrypt
         ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, key_buffer, buf_len,
                                             read_only ? CRYPT_ACTIVATE_READONLY : 0);
         crypt_safe_free (key_buffer);
+    } else {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                     "Only 'passphrase' and 'key file' context types are valid for FVAULT2 open.");
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        crypt_free (cd);
+        return FALSE;
     }
 
     if (ret < 0) {

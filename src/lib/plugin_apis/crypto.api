@@ -869,6 +869,8 @@ BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_volume_key (const guint8 *
  * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
  * FOREVER).
  *
+ * Supported @context types for this function: passphrase, key file
+ *
  * Returns: whether the given @device was successfully formatted as LUKS or not
  * (the @error) contains the error in such cases)
  *
@@ -883,6 +885,8 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
  * @context: key slot context (passphrase/keyfile/token...) to open this LUKS @device
  * @read_only: whether to open as read-only or not (meaning read-write)
  * @error: (out) (optional): place to store error (if any)
+ *
+ * Supported @context types for this function: passphrase, key file, keyring
  *
  * Returns: whether the @device was successfully opened or not
  *
@@ -908,6 +912,8 @@ gboolean bd_crypto_luks_close (const gchar *luks_device, GError **error);
  * @ncontext: new key slot context (passphrase/keyfile/token...) to add to this LUKS @device
  * @error: (out) (optional): place to store error (if any)
  *
+ * Supported @context types for this function: passphrase, key file
+ *
  * Returns: whether the @ncontext was successfully added to @device
  * or not
  *
@@ -920,6 +926,8 @@ gboolean bd_crypto_luks_add_key (const gchar *device, BDCryptoKeyslotContext *co
  * @device: device to add new key to
  * @context: key slot context (passphrase/keyfile/token...) to remove from this LUKS @device
  * @error: (out) (optional): place to store error (if any)
+ *
+ * Supported @context types for this function: passphrase, key file
  *
  * Returns: whether the key was successfully removed or not
  *
@@ -934,6 +942,8 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, BDCryptoKeyslotContext 
  * @ncontext: new key slot context (passphrase/keyfile/token...) to add to this LUKS @device
  * @error: (out) (optional): place to store error (if any)
  *
+ * Supported @context types for this function: passphrase, key file
+ *
  * Returns: whether the key was successfully changed or not
  *
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_ADD_KEY&%BD_CRYPTO_TECH_MODE_REMOVE_KEY
@@ -946,6 +956,8 @@ gboolean bd_crypto_luks_change_key (const gchar *device, BDCryptoKeyslotContext 
  * @size: requested size in sectors or 0 to adapt to the backing device
  * @context: (nullable): key slot context (passphrase/keyfile/token...) for this LUKS @device
  * @error: (out) (optional): place to store error (if any)
+ *
+ * Supported @context types for this function: passphrase, key file
  *
  * Returns: whether the @luks_device was successfully resized or not
  *
@@ -973,6 +985,8 @@ gboolean bd_crypto_luks_suspend (const gchar *luks_device, GError **error);
  * @luks_device: LUKS device to resume
  * @context: (nullable): key slot context (passphrase/keyfile/token...) for @luks_device
  * @error: (out) (optional): place to store error (if any)
+ *
+ * Supported @context types for this function: passphrase, key file
  *
  * Returns: whether the given @luks_device was successfully resumed or not
  *
@@ -1102,6 +1116,8 @@ BDCryptoLUKSTokenInfo** bd_crypto_luks_token_info (const gchar *device, GError *
  *
  * Formats the given @device as integrity according to the other parameters given.
  *
+ * Supported @context types for this function: volume key
+ *
  * Returns: whether the given @device was successfully formatted as integrity or not
  * (the @error) contains the error in such cases)
  *
@@ -1118,6 +1134,8 @@ gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm
  * @flags: flags for the integrity device activation
  * @extra: (nullable): extra arguments for integrity open
  * @error: (out) (optional): place to store error (if any)
+ *
+ * Supported @context types for this function: volume key
  *
  * Returns: whether the @device was successfully opened or not
  *
@@ -1187,6 +1205,8 @@ gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error);
  * @veracrypt_pim: VeraCrypt PIM value (only used if @veracrypt is %TRUE)
  * @error: (out) (optional): place to store error (if any)
  *
+ * Supported @context types for this function: passphrase
+ *
  * Returns: whether the @device was successfully opened or not
  *
  * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
@@ -1227,6 +1247,8 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
  * @read_only: whether to open as read-only or not (meaning read-write)
  * @error: (out) (optional): place to store error (if any)
  *
+ * Supported @context types for this function: passphrase, key file
+ *
  * Returns: whether the @device was successfully opened or not
  *
  * Tech category: %BD_CRYPTO_TECH_BITLK-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
@@ -1251,6 +1273,8 @@ gboolean bd_crypto_bitlk_close (const gchar *bitlk_device, GError **error);
  * @context: key slot context (passphrase/keyfile/token...) for this FVAULT2 volume
  * @read_only: whether to open as read-only or not (meaning read-write)
  * @error: (out) (optional): place to store error (if any)
+ *
+ * Supported @context types for this function: passphrase, key file
  *
  * Returns: whether the @device was successfully opened or not
  *

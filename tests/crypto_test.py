@@ -367,6 +367,10 @@ class CryptoTestOpenClose(CryptoTestCase):
             ctx = BlockDev.CryptoKeyslotContext(keyfile="wrong-keyfile")
             BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", ctx, False)
 
+        with self.assertRaisesRegex(GLib.GError, "Only .* context types are valid for LUKS open"):
+            ctx = BlockDev.CryptoKeyslotContext(volume_key=list(secrets.token_bytes(64)))
+            BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", ctx, False)
+
         ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
         succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", ctx, False)
         self.assertTrue(succ)
