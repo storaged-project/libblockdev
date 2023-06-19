@@ -55,6 +55,40 @@
     <literal>bd_crypto_luks_uuid()</literal> has been removed, use <literal>uuid</literal> from <link linkend="BDCryptoLUKSInfo">BDCryptoLUKSInfo</link> instead.
   </para>
 
+  <para>
+    <literal>bd_crypto_luks_get_metadata_size()</literal> has been removed, use <literal>metadata_size</literal> from
+    <link linkend="BDCryptoLUKSInfo">BDCryptoLUKSInfo</link> instead.
+  </para>
+
+  <para>
+    LUKS2-specific functions were removed. The "generic" LUKS functions which now support both LUKSv1 and LUKSv2 should be used instead.
+    Affected functions: <literal>bd_crypto_luks_format_luks2</literal> and <literal>bd_crypto_luks_resize_luks2</literal>.
+  </para>
+
+  <para>
+    <literal>bd_crypto_luks_open_keyring</literal> has been removed, <literal>bd_crypto_luks_open</literal> with the keyring context (see below)
+    can be used instead.
+  </para>
+
+  <para>
+   <literal>bd_crypto_tc_open_full</literal> has been removed, <literal>bd_crypto_tc_open</literal> can be used instead.
+   <literal>bd_crypto_tc_open</literal> arguments have been changed to match the "full" function.
+  </para>
+
+  <para>
+    Functions that allowed using arbitrary binary data for passphrases were removed. The "generic" functions should be used instead,
+    see the key slot context information below.
+
+    Affected functions: <literal>bd_crypto_luks_format_blob</literal>, <literal>bd_crypto_luks_format_luks2_blob</literal>,
+    <literal>bd_crypto_luks_open_blob</literal>, <literal>bd_crypto_luks_add_key_blob</literal>, <literal>bd_crypto_luks_remove_key_blob</literal>,
+    <literal>bd_crypto_luks_change_key_blob</literal>, <literal></literal> and <literal>bd_crypto_luks_resume_blob</literal>.
+  </para>
+
+  <para>
+    All functions that require some type of passphrase or key as an input now expect <literal>BDCryptoKeyslotContext</literal> instead.
+    This is a private opaque context that needs to be set by one of the <literal>bd_crypto_keyslot_context_new_*</literal> functions
+    based on the type of the context required.
+  </para>
   </simplesect>
 
   <simplesect><title>NVDIMM plugin</title>
