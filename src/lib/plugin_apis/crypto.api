@@ -891,6 +891,15 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
  * Returns: whether the @device was successfully opened or not
  *
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ *
+ * Example of using %bd_crypto_luks_open with %BDCryptoKeyslotContext:
+ *
+ * |[<!-- language="C" -->
+ * BDCryptoKeyslotContext *context = NULL;
+ *
+ * context = bd_crypto_keyslot_context_new_passphrase ("passphrase", 10, NULL);
+ * bd_crypto_luks_open ("/dev/vda1", "luks-device", context, FALSE, NULL);
+ * ]|
  */
 gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error);
 
