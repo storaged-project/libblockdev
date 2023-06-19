@@ -574,7 +574,6 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
     if (!fd) {
         boolrc = bd_utils_exec_and_report_error_no_progress (zfcp_cio_free, NULL, NULL);
         if (!boolrc) {
-            fclose (fd);
             g_free (online);
             g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                          "Could not remove device %s from device ignore list.", devno);
