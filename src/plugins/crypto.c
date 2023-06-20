@@ -2605,7 +2605,7 @@ gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm
  * bd_crypto_integrity_open:
  * @device: integrity device to open
  * @name: name for the opened @device
- * @algorithm: (nullable): integrity algorithm specification (e.g. "crc32c" or "sha256") or %NULL to use the default
+ * @algorithm: integrity algorithm specification (e.g. "crc32c" or "sha256")
  * @context: (nullable): key slot context (passphrase/keyfile/token...) for this device
  * @flags: flags for the integrity device activation
  * @extra: (nullable): extra arguments for integrity open

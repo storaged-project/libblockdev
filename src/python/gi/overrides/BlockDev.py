@@ -356,7 +356,7 @@ __all__.append("CryptoIntegrityExtra")
 
 _crypto_integrity_format = BlockDev.crypto_integrity_format
 @override(BlockDev.crypto_integrity_format)
-def crypto_integrity_format(device, algorithm=None, wipe=True, context=None, extra=None):
+def crypto_integrity_format(device, algorithm, wipe=True, context=None, extra=None):
     return _crypto_integrity_format(device, algorithm, wipe, context, extra)
 __all__.append("crypto_integrity_format")
 
