@@ -97,7 +97,7 @@ class CryptoTestCase(unittest.TestCase):
     def _luks2_format(self, device, passphrase, keyfile=None):
         return self._luks_format(device, passphrase, keyfile, BlockDev.CryptoLUKSVersion.LUKS2)
 
-class CryptoTestGenerateBackupPassphrase(CryptoTestCase):
+class CryptoNoDevTestCase(CryptoTestCase):
     def setUp(self):
         # we don't need block devices for this test
         pass
@@ -110,6 +110,33 @@ class CryptoTestGenerateBackupPassphrase(CryptoTestCase):
         for _i in range(100):
             bp = BlockDev.crypto_generate_backup_passphrase()
             self.assertRegex(bp, exp)
+
+    @tag_test(TestTags.NOSTORAGE)
+    def test_keyslot_context(self):
+        """Verify that keyslot context can be correctly created"""
+
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
+        self.assertIsNotNone(ctx)
+        self.assertEqual(ctx.type, BlockDev.CryptoKeyslotContextType.PASSPHRASE)
+
+        ctx = BlockDev.CryptoKeyslotContext(keyfile="keyfile")
+        self.assertIsNotNone(ctx)
+        self.assertEqual(ctx.type, BlockDev.CryptoKeyslotContextType.KEYFILE)
+
+        ctx = BlockDev.CryptoKeyslotContext(keyring="keyring")
+        self.assertIsNotNone(ctx)
+        self.assertEqual(ctx.type, BlockDev.CryptoKeyslotContextType.KEYRING)
+
+        ctx = BlockDev.CryptoKeyslotContext(volume_key=[ord(c) for c in PASSWD])
+        self.assertIsNotNone(ctx)
+        self.assertEqual(ctx.type, BlockDev.CryptoKeyslotContextType.VOLUME_KEY)
+
+        # invalid values and combinations
+        with self.assertRaisesRegex(ValueError, "Exactly one of .* must be specified"):
+            BlockDev.CryptoKeyslotContext()
+
+        with self.assertRaisesRegex(ValueError, "Exactly one of .* must be specified"):
+            BlockDev.CryptoKeyslotContext(passphrase=PASSWD, keyfile="keyfile")
 
 class CryptoTestFormat(CryptoTestCase):
     @tag_test(TestTags.SLOW, TestTags.CORE)
