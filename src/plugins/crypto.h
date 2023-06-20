@@ -101,7 +101,7 @@ typedef struct BDCryptoLUKSExtra {
     guint64 data_alignment;
     gchar *data_device;
     gchar *integrity;
-    guint64 sector_size;
+    guint32 sector_size;
     gchar *label;
     gchar *subsystem;
     BDCryptoLUKSPBKDF *pbkdf;
@@ -109,7 +109,7 @@ typedef struct BDCryptoLUKSExtra {
 
 void bd_crypto_luks_extra_free (BDCryptoLUKSExtra *extra);
 BDCryptoLUKSExtra* bd_crypto_luks_extra_copy (BDCryptoLUKSExtra *extra);
-BDCryptoLUKSExtra* bd_crypto_luks_extra_new (guint64 data_alignment, const gchar *data_device, const gchar *integrity, guint64 sector_size, const gchar *label, const gchar *subsystem, BDCryptoLUKSPBKDF *pbkdf);
+BDCryptoLUKSExtra* bd_crypto_luks_extra_new (guint64 data_alignment, const gchar *data_device, const gchar *integrity, guint32 sector_size, const gchar *label, const gchar *subsystem, BDCryptoLUKSPBKDF *pbkdf);
 
 /**
  * BDCryptoIntegrityExtra:
@@ -133,7 +133,7 @@ typedef struct BDCryptoIntegrityExtra {
 
 void bd_crypto_integrity_extra_free (BDCryptoIntegrityExtra *extra);
 BDCryptoIntegrityExtra* bd_crypto_integrity_extra_copy (BDCryptoIntegrityExtra *extra);
-BDCryptoIntegrityExtra* bd_crypto_integrity_extra_new (guint64 sector_size, guint64 journal_size, guint journal_watermark, guint journal_commit_time, guint64 interleave_sectors, guint64 tag_size, guint64 buffer_sectors);
+BDCryptoIntegrityExtra* bd_crypto_integrity_extra_new (guint32 sector_size, guint64 journal_size, guint journal_watermark, guint journal_commit_time, guint64 interleave_sectors, guint64 tag_size, guint64 buffer_sectors);
 
 typedef enum {
     BD_CRYPTO_INTEGRITY_OPEN_NO_JOURNAL         = 1 << 0,
@@ -163,7 +163,7 @@ typedef struct BDCryptoLUKSInfo {
     gchar *mode;
     gchar *uuid;
     gchar *backing_device;
-    gint64 sector_size;
+    guint32 sector_size;
     guint64 metadata_size;
     gchar *label;
     gchar *subsystem;
@@ -185,7 +185,7 @@ typedef struct BDCryptoBITLKInfo {
     gchar *mode;
     gchar *uuid;
     gchar *backing_device;
-    gint64 sector_size;
+    guint32 sector_size;
 } BDCryptoBITLKInfo;
 
 void bd_crypto_bitlk_info_free (BDCryptoBITLKInfo *info);

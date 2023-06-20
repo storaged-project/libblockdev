@@ -143,7 +143,7 @@ void bd_crypto_luks_extra_free (BDCryptoLUKSExtra *extra) {
     g_free (extra);
 }
 
-BDCryptoLUKSExtra* bd_crypto_luks_extra_new (guint64 data_alignment, const gchar *data_device, const gchar *integrity, guint64 sector_size, const gchar *label, const gchar *subsystem, BDCryptoLUKSPBKDF *pbkdf) {
+BDCryptoLUKSExtra* bd_crypto_luks_extra_new (guint64 data_alignment, const gchar *data_device, const gchar *integrity, guint32 sector_size, const gchar *label, const gchar *subsystem, BDCryptoLUKSPBKDF *pbkdf) {
     BDCryptoLUKSExtra *ret = g_new0 (BDCryptoLUKSExtra, 1);
     ret->integrity = g_strdup (integrity);
     ret->data_alignment = data_alignment;
@@ -156,7 +156,7 @@ BDCryptoLUKSExtra* bd_crypto_luks_extra_new (guint64 data_alignment, const gchar
     return ret;
 }
 
-BDCryptoIntegrityExtra* bd_crypto_integrity_extra_new (guint64 sector_size, guint64 journal_size, guint journal_watermark, guint journal_commit_time, guint64 interleave_sectors, guint64 tag_size, guint64 buffer_sectors) {
+BDCryptoIntegrityExtra* bd_crypto_integrity_extra_new (guint32 sector_size, guint64 journal_size, guint journal_watermark, guint journal_commit_time, guint64 interleave_sectors, guint64 tag_size, guint64 buffer_sectors) {
     BDCryptoIntegrityExtra *ret = g_new0 (BDCryptoIntegrityExtra, 1);
     ret->sector_size = sector_size;
     ret->journal_size = journal_size;
@@ -2252,7 +2252,8 @@ BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *device, GError **error) {
     info->mode = g_strdup (crypt_get_cipher_mode (cd));
     info->uuid = g_strdup (crypt_get_uuid (cd));
     info->backing_device = g_strdup (crypt_get_device_name (cd));
-    info->sector_size = crypt_get_sector_size (cd);
+    ret = crypt_get_sector_size (cd);
+    info->sector_size = ret > 0 ? ret : 0;
     info->metadata_size = SECTOR_SIZE * crypt_get_data_offset (cd);
 
     if (info->version == BD_CRYPTO_LUKS_VERSION_LUKS2) {
@@ -2315,7 +2316,8 @@ BDCryptoBITLKInfo* bd_crypto_bitlk_info (const gchar *device, GError **error) {
     info->mode = g_strdup (crypt_get_cipher_mode (cd));
     info->uuid = g_strdup (crypt_get_uuid (cd));
     info->backing_device = g_strdup (crypt_get_device_name (cd));
-    info->sector_size = crypt_get_sector_size (cd);
+    ret = crypt_get_sector_size (cd);
+    info->sector_size = ret > 0 ? ret : 0;
 
     crypt_free (cd);
 
