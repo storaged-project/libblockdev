@@ -68,8 +68,9 @@
  * @title: Crypto
  * @include: crypto.h
  *
- * A plugin for operations with encrypted devices. For now, only
- * LUKS devices are supported.
+ * A plugin for operations with encrypted devices. Currently LUKS, Integrity,
+ * TrueCrypt/VeraCrypt, BitLocker and FileVault2 devices are supported.
+ * See %BDCryptoTech for full list of supported technologies.
  *
  * Functions taking a parameter called "device" require the backing device to be
  * passed. On the other hand functions taking the "luks_device" parameter
