@@ -1576,6 +1576,7 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, cons
     gboolean success = FALSE;
     gchar *key_buf = NULL;
     gsize buf_len = 0;
+    GError *l_error = NULL;
 
     msg = g_strdup_printf ("Started removing key from the LUKS device '%s'", device);
     progress_id = bd_utils_report_started (msg);
@@ -1591,38 +1592,42 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, const gchar *pass, cons
 
     ret = crypt_load (cd, CRYPT_LUKS, NULL);
     if (ret != 0) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to load device's parameters: %s", strerror_l (-ret, c_locale));
         crypt_free (cd);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
     if (!pass && !key_file) {
-        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_REMOVE_KEY,
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_REMOVE_KEY,
                      "No passphrase nor key file given, cannot remove key.");
         crypt_free (cd);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
     if (key_file) {
         ret = crypt_keyfile_device_read (cd, key_file, &key_buf, &buf_len, 0, 0, 0);
         if (ret != 0) {
-            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYFILE_FAILED,
+            g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYFILE_FAILED,
                          "Failed to load key from file '%s: %s", key_file, strerror_l (-ret, c_locale));
             crypt_free (cd);
-            bd_utils_report_finished (progress_id, (*error)->message);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
             return FALSE;
         }
     } else
         buf_len = strlen (pass);
 
-    success = _crypto_luks_remove_key (cd, key_buf ? (const guint8*) key_buf : (const guint8*) pass, buf_len, error);
+    success = _crypto_luks_remove_key (cd, key_buf ? (const guint8*) key_buf : (const guint8*) pass, buf_len, &l_error);
     if (!success) {
         crypt_safe_free (key_buf);
         crypt_free (cd);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
