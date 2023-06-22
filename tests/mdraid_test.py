@@ -173,12 +173,12 @@ class MDTestCreateDeactivateDestroy(MDTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.md_create("bd_test_md2", "raid1",
                                ["/non/existing/device", self.loop_dev2],
-                               1, None, True)
+                               1, None, None)
 
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, True)
+                                      1, None, None)
             self.assertTrue(succ)
 
         # newly created array should be 'clean'
@@ -203,7 +203,7 @@ class MDTestCreateWithChunkSize(MDTestCase):
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid0",
                                       [self.loop_dev, self.loop_dev2],
-                                      0, None, False, 512 * 1024)
+                                      0, None, None, 512 * 1024)
             self.assertTrue(succ)
 
         ex_data = BlockDev.md_examine(self.loop_dev)
@@ -227,7 +227,7 @@ class MDTestActivateDeactivate(MDTestCase):
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, True)
+                                      1, None, None)
             self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
@@ -271,7 +271,7 @@ class MDTestActivateWithUUID(MDTestCase):
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, True)
+                                      1, None, None)
             self.assertTrue(succ)
 
         with wait_for_action("resync"):
@@ -293,7 +293,7 @@ class MDTestActivateByUUID(MDTestCase):
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, True)
+                                      1, None, None)
             self.assertTrue(succ)
 
         with wait_for_action("resync"):
@@ -325,7 +325,7 @@ class MDTestNominateDenominate(MDTestCase):
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, False)
+                                      1, None, None)
             self.assertTrue(succ)
 
         with wait_for_action("resync"):
@@ -361,7 +361,7 @@ class MDTestAddRemove(MDTestCase):
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2],
-                                      0, None, False)
+                                      0, None, None)
             self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
@@ -417,7 +417,7 @@ class MDTestExamineDetail(MDTestCase):
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, True)
+                                      1, None, None)
             self.assertTrue(succ)
 
         ex_data = BlockDev.md_examine(self.loop_dev)
@@ -473,7 +473,7 @@ class MDTestNameNodeBijection(MDTestCase):
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, True)
+                                      1, None, None)
             self.assertTrue(succ)
 
         node = BlockDev.md_node_from_name("bd_test_md")
@@ -504,8 +504,22 @@ class MDTestSetBitmapLocation(MDTestCase):
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, True)
+                                      1, None, "none")
             self.assertTrue(succ)
+
+        loc = BlockDev.md_get_bitmap_location("bd_test_md")
+        self.assertEqual(loc, "none")
+
+        BlockDev.md_deactivate("bd_test_md")
+
+        with wait_for_action("resync"):
+            succ = BlockDev.md_create("bd_test_md", "raid1",
+                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
+                                      1, None, "internal")
+            self.assertTrue(succ)
+
+        loc = BlockDev.md_get_bitmap_location("bd_test_md")
+        self.assertEqual(loc, "+8")
 
         succ = BlockDev.md_set_bitmap_location("bd_test_md", "none")
         self.assertTrue(succ)
@@ -553,7 +567,7 @@ class MDTestRequestSyncAction(MDTestCase):
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
                                       [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, True)
+                                      1, None, None)
             self.assertTrue(succ)
 
         with wait_for_action("check"):
@@ -584,7 +598,7 @@ class MDTestDDFRAID(MDTestCase):
     def test_examine_ddf_container(self):
         succ = BlockDev.md_create("bd_test_md", "container",
                                   [self.loop_dev, self.loop_dev2],
-                                  0, "ddf", False)
+                                  0, "ddf", None)
         self.assertTrue(succ)
 
         # we cannot create the array with libblockdev because we cannot pass the --raid-devices option
