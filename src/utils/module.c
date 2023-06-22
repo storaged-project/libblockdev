@@ -328,10 +328,10 @@ BDUtilsLinuxVersion * bd_utils_get_linux_version (GError **error) {
 gint bd_utils_check_linux_version (guint major, guint minor, guint micro) {
     gint ret;
 
-    g_warn_if_fail (have_linux_ver == TRUE);
+    if (!have_linux_ver)
+        bd_utils_get_linux_version (NULL);
 
     G_LOCK (detected_linux_ver);
-
     ret = detected_linux_ver.major - major;
     if (ret == 0)
         ret = detected_linux_ver.minor - minor;
