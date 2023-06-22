@@ -35,6 +35,7 @@ from collections import namedtuple, defaultdict
 
 from bytesize import Size
 from gi.importer import modules
+from gi.module import FunctionInfo
 from gi.overrides import override
 from gi.repository import GLib
 from gi.repository import GObject
@@ -67,7 +68,7 @@ def _default_str(self):
 def _default_repr(self):
     s = "{str}\n".format(str=str(self))
     for member in dir(self):
-        if not member.startswith("_") and member not in ("copy", "free"):
+        if not member.startswith("_") and member not in ("copy", "free") and not isinstance(self.__getattribute__(member), FunctionInfo):
             value = getattr(self, member)
             if "size" in member and isinstance(value, int):
                 s += " {member}: {value} ({hvalue})\n".format(member=member, value=value, hvalue=Size(value).human_readable())
@@ -260,38 +261,47 @@ class CryptoLUKSExtra(BlockDev.CryptoLUKSExtra):
 CryptoLUKSExtra = override(CryptoLUKSExtra)
 __all__.append("CryptoLUKSExtra")
 
+class CryptoKeyslotContext(BlockDev.CryptoKeyslotContext):
+    def __new__(cls, passphrase=None, keyfile=None, keyfile_offset=0, key_size=0, keyring=None, volume_key=None):
+        if sum(bool(x) for x in (passphrase, keyfile, keyring, volume_key)) != 1:
+            raise ValueError("Exactly one of 'passphrase', 'keyfile', 'keyring' and 'volume_key' must be specified")
+        if passphrase:
+            if isinstance(passphrase, str):
+                ret = BlockDev.CryptoKeyslotContext.new_passphrase([ord(c) for c in passphrase])
+            else:
+                ret = BlockDev.CryptoKeyslotContext.new_passphrase(passphrase)
+        if keyfile:
+            ret = BlockDev.CryptoKeyslotContext.new_keyfile(keyfile, keyfile_offset, key_size)
+        if keyring:
+            ret = BlockDev.CryptoKeyslotContext.new_keyring(keyring)
+        if volume_key:
+            ret = BlockDev.CryptoKeyslotContext.new_volume_key(volume_key)
+        return ret
+    def __init__(self, *args, **kwargs):   # pylint: disable=unused-argument
+        super(CryptoKeyslotContext, self).__init__()  #pylint: disable=bad-super-call
+CryptoKeyslotContext = override(CryptoKeyslotContext)
+__all__.append("CryptoKeyslotContext")
+
 # calling `crypto_luks_format_luks2` with `luks_version` set to
 # `BlockDev.CryptoLUKSVersion.LUKS1` and `extra` to `None` is the same
 # as using the "original" function `crypto_luks_format`
-_crypto_luks_format = BlockDev.crypto_luks_format_luks2
+_crypto_luks_format = BlockDev.crypto_luks_format
 @override(BlockDev.crypto_luks_format)
-def crypto_luks_format(device, cipher=None, key_size=0, passphrase=None, key_file=None, min_entropy=0, luks_version=BlockDev.CryptoLUKSVersion.LUKS1, extra=None):
-    return _crypto_luks_format(device, cipher, key_size, passphrase, key_file, min_entropy, luks_version, extra)
+def crypto_luks_format(device, cipher=None, key_size=0, context=None, min_entropy=0, luks_version=BlockDev.CryptoLUKSVersion.LUKS1, extra=None):
+    return _crypto_luks_format(device, cipher, key_size, context, min_entropy, luks_version, extra)
 __all__.append("crypto_luks_format")
 
 _crypto_luks_open = BlockDev.crypto_luks_open
 @override(BlockDev.crypto_luks_open)
-def crypto_luks_open(device, name, passphrase=None, key_file=None, read_only=False):
-    return _crypto_luks_open(device, name, passphrase, key_file, read_only)
+def crypto_luks_open(device, name, context, read_only=False):
+    return _crypto_luks_open(device, name, context, read_only)
 __all__.append("crypto_luks_open")
 
-_crypto_luks_resize = BlockDev.crypto_luks_resize_luks2
+_crypto_luks_resize = BlockDev.crypto_luks_resize
 @override(BlockDev.crypto_luks_resize)
-def crypto_luks_resize(luks_device, size=0, passphrase=None, key_file=None):
-    return _crypto_luks_resize(luks_device, size, passphrase, key_file)
+def crypto_luks_resize(luks_device, size=0, context=None):
+    return _crypto_luks_resize(luks_device, size, context)
 __all__.append("crypto_luks_resize")
-
-_crypto_luks_add_key = BlockDev.crypto_luks_add_key
-@override(BlockDev.crypto_luks_add_key)
-def crypto_luks_add_key(device, pass_=None, key_file=None, npass=None, nkey_file=None):
-    return _crypto_luks_add_key(device, pass_, key_file, npass, nkey_file)
-__all__.append("crypto_luks_add_key")
-
-_crypto_luks_remove_key = BlockDev.crypto_luks_remove_key
-@override(BlockDev.crypto_luks_remove_key)
-def crypto_luks_remove_key(device, pass_=None, key_file=None):
-    return _crypto_luks_remove_key(device, pass_, key_file)
-__all__.append("crypto_luks_remove_key")
 
 _crypto_escrow_device = BlockDev.crypto_escrow_device
 @override(BlockDev.crypto_escrow_device)
@@ -299,13 +309,7 @@ def crypto_escrow_device(device, passphrase, cert_data, directory, backup_passph
     return _crypto_escrow_device(device, passphrase, cert_data, directory, backup_passphrase)
 __all__.append("crypto_escrow_device")
 
-_crypto_luks_resume = BlockDev.crypto_luks_resume
-@override(BlockDev.crypto_luks_resume)
-def crypto_luks_resume(device, passphrase=None, key_file=None):
-    return _crypto_luks_resume(device, passphrase, key_file)
-__all__.append("crypto_luks_resume")
-
-_crypto_tc_open = BlockDev.crypto_tc_open_full
+_crypto_tc_open = BlockDev.crypto_tc_open
 @override(BlockDev.crypto_tc_open)
 def crypto_tc_open(device, name, passphrase, read_only=False, keyfiles=None, hidden=False, system=False, veracrypt=False, veracrypt_pim=0):
     if isinstance(passphrase, str):
@@ -352,14 +356,14 @@ __all__.append("CryptoIntegrityExtra")
 
 _crypto_integrity_format = BlockDev.crypto_integrity_format
 @override(BlockDev.crypto_integrity_format)
-def crypto_integrity_format(device, algorithm=None, wipe=True, key_data=None, extra=None):
-    return _crypto_integrity_format(device, algorithm, wipe, key_data, extra)
+def crypto_integrity_format(device, algorithm, wipe=True, context=None, extra=None):
+    return _crypto_integrity_format(device, algorithm, wipe, context, extra)
 __all__.append("crypto_integrity_format")
 
 _crypto_integrity_open = BlockDev.crypto_integrity_open
 @override(BlockDev.crypto_integrity_open)
-def crypto_integrity_open(device, name, algorithm, key_data=None, flags=0, extra=None):
-    return _crypto_integrity_open(device, name, algorithm, key_data, flags, extra)
+def crypto_integrity_open(device, name, algorithm, context=None, flags=0, extra=None):
+    return _crypto_integrity_open(device, name, algorithm, context, flags, extra)
 __all__.append("crypto_integrity_open")
 
 
