@@ -701,13 +701,13 @@ gboolean bd_fs_ext4_check_uuid (const gchar *uuid, GError **error) {
 }
 
 static gchar *decode_fs_state (unsigned short state) {
-    return g_strdup_printf("%s%s",
-                           (state & EXT2_VALID_FS) ? "clean" : "not clean",
-                           (state & EXT2_ERROR_FS) ? " with errors" : "");
+    return g_strdup_printf ("%s%s",
+                            (state & EXT2_VALID_FS) ? "clean" : "not clean",
+                            (state & EXT2_ERROR_FS) ? " with errors" : "");
 }
 
 static gchar *decode_uuid (void *uuid) {
-    const char *str = e2p_uuid2str(uuid);
+    const char *str = e2p_uuid2str (uuid);
     if (g_strcmp0 (str, "<none>") == 0)
         str = "";
     return g_strdup (str);

@@ -35,6 +35,8 @@
 #define ZERO_INIT {0}
 #endif
 
+#define UNUSED __attribute__((unused))
+
 extern char **environ;
 
 static GMutex id_counter_lock;
@@ -823,7 +825,7 @@ gboolean bd_utils_check_util_version (const gchar *util, const gchar *version, c
  *
  * Returns: whether progress reporting was successfully initialized or not
  */
-gboolean bd_utils_init_prog_reporting (BDUtilsProgFunc new_prog_func, GError **error __attribute__((unused))) {
+gboolean bd_utils_init_prog_reporting (BDUtilsProgFunc new_prog_func, GError **error UNUSED) {
     /* XXX: the error attribute will likely be used in the future when this
        function gets more complicated */
 
@@ -841,7 +843,7 @@ gboolean bd_utils_init_prog_reporting (BDUtilsProgFunc new_prog_func, GError **e
  *
  * Returns: whether progress reporting was successfully initialized or not
  */
-gboolean bd_utils_init_prog_reporting_thread (BDUtilsProgFunc new_prog_func, GError **error __attribute__((unused))) {
+gboolean bd_utils_init_prog_reporting_thread (BDUtilsProgFunc new_prog_func, GError **error UNUSED) {
     /* XXX: the error attribute will likely be used in the future when this
        function gets more complicated */
 
@@ -850,7 +852,7 @@ gboolean bd_utils_init_prog_reporting_thread (BDUtilsProgFunc new_prog_func, GEr
     return TRUE;
 }
 
-static void thread_progress_muted (guint64 task_id __attribute__((unused)), BDUtilsProgStatus status __attribute__((unused)), guint8 completion __attribute__((unused)), gchar *msg __attribute__((unused))) {
+static void thread_progress_muted (guint64 task_id UNUSED, BDUtilsProgStatus status UNUSED, guint8 completion UNUSED, gchar *msg UNUSED) {
     /* This function serves as a special value for the progress reporting
      * function to detect that nothing is done here. If clients use their own
      * empty function then bd_utils_prog_reporting_initialized will return TRUE
@@ -865,7 +867,7 @@ static void thread_progress_muted (guint64 task_id __attribute__((unused)), BDUt
  * Returns: whether progress reporting for the current thread was successfully
  * muted (deinitialized even in presence of a global reporting function) or not
  */
-gboolean bd_utils_mute_prog_reporting_thread (GError **error __attribute__((unused))) {
+gboolean bd_utils_mute_prog_reporting_thread (GError **error UNUSED) {
     /* XXX: the error attribute will likely be used in the future when this
        function gets more complicated */
 

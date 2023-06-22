@@ -145,7 +145,7 @@ static gboolean do_unmount (MountArgs *args, GError **error) {
     if (mnt_context_set_target (cxt, args->spec) != 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to set '%s' as target for umount", args->spec);
-        mnt_free_context(cxt);
+        mnt_free_context (cxt);
         return FALSE;
     }
 
@@ -153,7 +153,7 @@ static gboolean do_unmount (MountArgs *args, GError **error) {
         if (mnt_context_enable_lazy (cxt, TRUE) != 0) {
             g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                          "Failed to set lazy unmount for '%s'", args->spec);
-            mnt_free_context(cxt);
+            mnt_free_context (cxt);
             return FALSE;
         }
     }
@@ -162,7 +162,7 @@ static gboolean do_unmount (MountArgs *args, GError **error) {
         if (mnt_context_enable_force (cxt, TRUE) != 0) {
             g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                          "Failed to set force unmount for '%s'", args->spec);
-            mnt_free_context(cxt);
+            mnt_free_context (cxt);
             return FALSE;
         }
     }
@@ -174,7 +174,7 @@ static gboolean do_unmount (MountArgs *args, GError **error) {
     success = get_unmount_error_old (cxt, ret, args->spec, error);
 #endif
 
-    mnt_free_context(cxt);
+    mnt_free_context (cxt);
     return success;
 }
 
@@ -372,7 +372,7 @@ static gboolean do_mount (MountArgs *args, GError **error) {
     if (!args->mountpoint && !args->device) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "You must specify at least one of: mount point, device.");
-        mnt_free_context(cxt);
+        mnt_free_context (cxt);
         return FALSE;
     }
 
@@ -380,7 +380,7 @@ static gboolean do_mount (MountArgs *args, GError **error) {
         if (mnt_context_set_target (cxt, args->mountpoint) != 0) {
             g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                          "Failed to set '%s' as target for mount", args->mountpoint);
-            mnt_free_context(cxt);
+            mnt_free_context (cxt);
             return FALSE;
         }
     }
@@ -389,7 +389,7 @@ static gboolean do_mount (MountArgs *args, GError **error) {
         if (mnt_context_set_source (cxt, args->device) != 0) {
             g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                          "Failed to set '%s' as source for mount", args->device);
-            mnt_free_context(cxt);
+            mnt_free_context (cxt);
             return FALSE;
         }
     }
@@ -398,7 +398,7 @@ static gboolean do_mount (MountArgs *args, GError **error) {
         if (mnt_context_set_fstype (cxt, args->fstype) != 0) {
             g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                          "Failed to set '%s' as fstype for mount", args->fstype);
-            mnt_free_context(cxt);
+            mnt_free_context (cxt);
             return FALSE;
         }
     }
@@ -407,7 +407,7 @@ static gboolean do_mount (MountArgs *args, GError **error) {
         if (mnt_context_set_options (cxt, args->options) != 0) {
             g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                          "Failed to set '%s' as options for mount", args->options);
-            mnt_free_context(cxt);
+            mnt_free_context (cxt);
             return FALSE;
         }
     }
@@ -430,7 +430,7 @@ static gboolean do_mount (MountArgs *args, GError **error) {
     success = get_mount_error_old (cxt, ret, args, error);
 #endif
 
-    mnt_free_context(cxt);
+    mnt_free_context (cxt);
     return success;
 }
 

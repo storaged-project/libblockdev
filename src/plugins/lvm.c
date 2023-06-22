@@ -425,11 +425,11 @@ static gboolean call_lvm_and_report_error (const gchar **args, const BDExtraArg 
     for (i=0; i < args_length; i++)
         argv[i+1] = args[i];
     if (global_config_str) {
-        config_arg = g_strdup_printf("--config=%s", global_config_str);
+        config_arg = g_strdup_printf ("--config=%s", global_config_str);
         argv[++args_length] = config_arg;
     }
     if (global_devices_str) {
-        devices_arg = g_strdup_printf("--devices=%s", global_devices_str);
+        devices_arg = g_strdup_printf ("--devices=%s", global_devices_str);
         argv[++args_length] = devices_arg;
     }
     argv[++args_length] = NULL;
@@ -463,11 +463,11 @@ static gboolean call_lvm_and_capture_output (const gchar **args, const BDExtraAr
     for (i=0; i < args_length; i++)
         argv[i+1] = args[i];
     if (global_config_str) {
-        config_arg = g_strdup_printf("--config=%s", global_config_str);
+        config_arg = g_strdup_printf ("--config=%s", global_config_str);
         argv[++args_length] = config_arg;
     }
     if (global_devices_str) {
-        devices_arg = g_strdup_printf("--devices=%s", global_devices_str);
+        devices_arg = g_strdup_printf ("--devices=%s", global_devices_str);
         argv[++args_length] = devices_arg;
     }
     argv[++args_length] = NULL;
@@ -771,7 +771,7 @@ static BDLVMLVdata* get_lv_data_from_table (GHashTable *table, gboolean free_tab
 
         gchar *paren = strrchr (values[0], '(');
         if (paren) {
-          data->segs[0]->pv_start_pe = atoi(paren+1);
+          data->segs[0]->pv_start_pe = atoi (paren+1);
           *paren = '\0';
         }
         data->segs[0]->pvdev = g_strdup (values[0]);
@@ -971,7 +971,7 @@ guint64 bd_lvm_get_max_lv_size (GError **error UNUSED) {
  * Tech category: %BD_LVM_TECH_CALCS no mode (it is ignored)
  */
 guint64 bd_lvm_round_size_to_pe (guint64 size, guint64 pe_size, gboolean roundup, GError **error UNUSED) {
-    pe_size = RESOLVE_PE_SIZE(pe_size);
+    pe_size = RESOLVE_PE_SIZE (pe_size);
     guint64 delta = size % pe_size;
     if (delta == 0)
         return size;
@@ -996,7 +996,7 @@ guint64 bd_lvm_round_size_to_pe (guint64 size, guint64 pe_size, gboolean roundup
  * Tech category: %BD_LVM_TECH_CALCS no mode (it is ignored)
  */
 guint64 bd_lvm_get_lv_physical_size (guint64 lv_size, guint64 pe_size, GError **error) {
-    pe_size = RESOLVE_PE_SIZE(pe_size);
+    pe_size = RESOLVE_PE_SIZE (pe_size);
 
     /* the LV just takes space rounded up to the multiple of extent size */
     return bd_lvm_round_size_to_pe (lv_size, pe_size, TRUE, error);
@@ -1016,15 +1016,15 @@ guint64 bd_lvm_get_lv_physical_size (guint64 lv_size, guint64 pe_size, GError **
  */
 guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean included, GError **error) {
     guint64 raw_md_size;
-    pe_size = RESOLVE_PE_SIZE(pe_size);
+    pe_size = RESOLVE_PE_SIZE (pe_size);
 
     if (included)
         raw_md_size = (guint64) ceil (size * THPOOL_MD_FACTOR_EXISTS);
     else
         raw_md_size = (guint64) ceil (size * THPOOL_MD_FACTOR_NEW);
 
-    return MIN (bd_lvm_round_size_to_pe(raw_md_size, pe_size, TRUE, error),
-                bd_lvm_round_size_to_pe(MAX_THPOOL_MD_SIZE, pe_size, TRUE, error));
+    return MIN (bd_lvm_round_size_to_pe (raw_md_size, pe_size, TRUE, error),
+                bd_lvm_round_size_to_pe (MAX_THPOOL_MD_SIZE, pe_size, TRUE, error));
 }
 
 /**
@@ -1045,7 +1045,7 @@ guint64 bd_lvm_get_thpool_meta_size (guint64 size, guint64 chunk_size, guint64 n
     guint64 md_size = 0;
 
     /* based on lvcreate metadata size calculation */
-    md_size = UINT64_C(64) * size / (chunk_size ? chunk_size : DEFAULT_CHUNK_SIZE);
+    md_size = UINT64_C (64) * size / (chunk_size ? chunk_size : DEFAULT_CHUNK_SIZE);
 
     if (md_size > MAX_THPOOL_MD_SIZE)
         md_size = MAX_THPOOL_MD_SIZE;
@@ -2427,17 +2427,17 @@ gboolean bd_lvm_thpoolcreate (const gchar *vg_name, const gchar *lv_name, guint6
     args[3] = g_strdup_printf ("%"G_GUINT64_FORMAT"K", size/1024);
 
     if (md_size != 0) {
-        args[next_arg] = g_strdup_printf("--poolmetadatasize=%"G_GUINT64_FORMAT"K", md_size / 1024);
+        args[next_arg] = g_strdup_printf ("--poolmetadatasize=%"G_GUINT64_FORMAT"K", md_size / 1024);
         next_arg++;
     }
 
     if (chunk_size != 0) {
-        args[next_arg] = g_strdup_printf("--chunksize=%"G_GUINT64_FORMAT"K", chunk_size / 1024);
+        args[next_arg] = g_strdup_printf ("--chunksize=%"G_GUINT64_FORMAT"K", chunk_size / 1024);
         next_arg++;
     }
 
     if (profile) {
-        args[next_arg] = g_strdup_printf("--profile=%s", profile);
+        args[next_arg] = g_strdup_printf ("--profile=%s", profile);
         next_arg++;
     }
 
@@ -3183,7 +3183,7 @@ BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_l
         return NULL;
     }
 
-    if (dm_task_run(task) == 0) {
+    if (dm_task_run (task) == 0) {
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_DM_ERROR,
                      "Failed to run the DM task for the cache map '%s': ", map_name);
         dm_task_destroy (task);
@@ -3207,7 +3207,7 @@ BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_l
         return NULL;
     }
 
-    dm_get_next_target(task, NULL, &start, &length, &type, &params);
+    dm_get_next_target (task, NULL, &start, &length, &type, &params);
 
     if (dm_get_status_cache (pool, params, &status) == 0) {
         g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_CACHE_INVAL,
@@ -3816,7 +3816,7 @@ BDLVMVDOWritePolicy bd_lvm_get_vdo_write_policy_from_str (const gchar *policy_st
  */
 GHashTable* bd_lvm_vdo_get_stats_full (const gchar *vg_name, const gchar *pool_name, GError **error) {
     g_autofree gchar *kvdo_name = g_strdup_printf ("%s-%s-%s", vg_name, pool_name, VDO_POOL_SUFFIX);
-    return vdo_get_stats_full(kvdo_name, error);
+    return vdo_get_stats_full (kvdo_name, error);
 }
 
 /**

@@ -151,7 +151,7 @@ gboolean bd_s390_dasd_needs_format (const gchar *dasd, GError **error) {
     FILE *fd = NULL;
 
     path = g_strdup_printf ("/sys/bus/ccw/drivers/dasd-eckd/%s/status", dasd);
-    fd = fopen(path, "r");
+    fd = fopen (path, "r");
     g_free (path);
     if (!fd) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
@@ -161,9 +161,9 @@ gboolean bd_s390_dasd_needs_format (const gchar *dasd, GError **error) {
     }
 
     /* read 'status' value; will either be 'unformatted' or 'online' */
-    memset (status, 0, sizeof(status));
+    memset (status, 0, sizeof (status));
     rc = fgets (status, 12, fd);
-    fclose(fd);
+    fclose (fd);
 
     if (!rc) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
@@ -171,7 +171,7 @@ gboolean bd_s390_dasd_needs_format (const gchar *dasd, GError **error) {
         return FALSE;
     }
 
-    if (g_ascii_strncasecmp (status, "unformatted", strlen(status)) == 0) {
+    if (g_ascii_strncasecmp (status, "unformatted", strlen (status)) == 0) {
         bd_utils_log_format (BD_UTILS_LOG_WARNING, "Device %s status is %s, needs dasdfmt.", dasd, status);
         return TRUE;
     }
@@ -204,7 +204,7 @@ gboolean bd_s390_dasd_online (const gchar *dasd, GError **error) {
     g_free (msg);
 
     path = g_strdup_printf ("/sys/bus/ccw/drivers/dasd-eckd/%s/online", dasd);
-    fd = fopen(path, "r+");
+    fd = fopen (path, "r+");
     if (!fd) {
         /* DASD might be in device ignore list; try to rm it */
         rc = bd_utils_exec_and_report_error_no_progress (argv, NULL, &l_error);
@@ -215,7 +215,7 @@ gboolean bd_s390_dasd_online (const gchar *dasd, GError **error) {
             return rc;
         }
         /* fd is NULL at this point, so try to open it */
-        fd = fopen(path, "r+");
+        fd = fopen (path, "r+");
         g_free (path);
 
         if (!fd) {
@@ -232,13 +232,13 @@ gboolean bd_s390_dasd_online (const gchar *dasd, GError **error) {
     }
 
     /* check whether our DASD is online; if not, set it */
-    online = fgetc(fd);
+    online = fgetc (fd);
 
     if (online == EOF) {
         /* there was some error checking the 'online' status */
         g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "Error checking if device %s is online", dasd);
-        fclose(fd);
+        fclose (fd);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
@@ -246,7 +246,7 @@ gboolean bd_s390_dasd_online (const gchar *dasd, GError **error) {
     if (online == 1) {
         g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "DASD device %s is already online.", dasd);
-        fclose(fd);
+        fclose (fd);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
@@ -254,10 +254,10 @@ gboolean bd_s390_dasd_online (const gchar *dasd, GError **error) {
     else {
         /* reset file cursor before writing to it */
         rewind (fd);
-        wrc = fputs("1", fd);
+        wrc = fputs ("1", fd);
     }
 
-    fclose(fd);
+    fclose (fd);
 
     if (wrc == EOF) {
         g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
@@ -286,7 +286,7 @@ gboolean bd_s390_dasd_is_ldl (const gchar *dasd, GError **error) {
     gint blksize = 0;
     dasd_information2_t dasd_info;
 
-    memset(&dasd_info, 0, sizeof(dasd_info));
+    memset (&dasd_info, 0, sizeof (dasd_info));
 
     /* complete the device name */
     if (g_str_has_prefix (dasd, "/dev/")) {
@@ -297,7 +297,7 @@ gboolean bd_s390_dasd_is_ldl (const gchar *dasd, GError **error) {
     }
 
     /* open the device */
-    if ((f = open(devname, O_RDONLY)) == -1) {
+    if ((f = open (devname, O_RDONLY)) == -1) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "Unable to open device %s", devname);
         g_free (devname);
@@ -307,21 +307,21 @@ gboolean bd_s390_dasd_is_ldl (const gchar *dasd, GError **error) {
     g_free (devname);
 
     /* check if this is a block device */
-    if (ioctl(f, BLKSSZGET, &blksize) != 0) {
-        close(f);
+    if (ioctl (f, BLKSSZGET, &blksize) != 0) {
+        close (f);
         return FALSE;
     }
 
     /* get some info about DASD */
-    if (ioctl(f, BIODASDINFO2, &dasd_info) != 0) {
-        close(f);
+    if (ioctl (f, BIODASDINFO2, &dasd_info) != 0) {
+        close (f);
         return FALSE;
     }
 
-    close(f);
+    close (f);
 
     /* check we're not on an FBA DASD, since dasdfmt can't run on them */
-    if (strncmp(dasd_info.type, "FBA", 3) == 0) {
+    if (strncmp (dasd_info.type, "FBA", 3) == 0) {
         return FALSE;
     }
 
@@ -344,7 +344,7 @@ gboolean bd_s390_dasd_is_fba (const gchar *dasd, GError **error) {
     gint blksize = 0;
     dasd_information2_t dasd_info;
 
-    memset(&dasd_info, 0, sizeof(dasd_info));
+    memset (&dasd_info, 0, sizeof (dasd_info));
 
     /* complete the device name */
     if (g_str_has_prefix (dasd, "/dev/")) {
@@ -355,7 +355,7 @@ gboolean bd_s390_dasd_is_fba (const gchar *dasd, GError **error) {
     }
 
     /* open the device */
-    if ((f = open(devname, O_RDONLY)) == -1) {
+    if ((f = open (devname, O_RDONLY)) == -1) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "Unable to open device %s", devname);
         g_free (devname);
@@ -365,21 +365,21 @@ gboolean bd_s390_dasd_is_fba (const gchar *dasd, GError **error) {
     g_free (devname);
 
     /* check if this is a block device */
-    if (ioctl(f, BLKSSZGET, &blksize) != 0) {
-        close(f);
+    if (ioctl (f, BLKSSZGET, &blksize) != 0) {
+        close (f);
         return FALSE;
     }
 
     /* get some info about DASD */
-    if (ioctl(f, BIODASDINFO2, &dasd_info) != 0) {
-        close(f);
+    if (ioctl (f, BIODASDINFO2, &dasd_info) != 0) {
+        close (f);
         return FALSE;
     }
 
-    close(f);
+    close (f);
 
     /* check if we're on an FBA DASD */
-    return strncmp(dasd_info.type, "FBA", 3) == 0;
+    return strncmp (dasd_info.type, "FBA", 3) == 0;
 }
 
 /**
@@ -410,7 +410,7 @@ gchar* bd_s390_sanitize_dev_input (const gchar *dev, GError **error) {
 
     /* we only care about the last piece of the device number, since
      * that's the only part which will need formatting */
-    tok = g_strrstr(lcdev, ".");
+    tok = g_strrstr (lcdev, ".");
 
     if (tok) {
         tmptok = tok + 1; /* want to ignore the delimiter char */
@@ -420,15 +420,15 @@ gchar* bd_s390_sanitize_dev_input (const gchar *dev, GError **error) {
     }
 
     /* calculate if/how much to pad tok with */
-    if (strlen(tmptok) < 4)
-        prepend = g_strnfill((4 - strlen(tmptok)), '0');
+    if (strlen (tmptok) < 4)
+        prepend = g_strnfill ((4 - strlen (tmptok)), '0');
 
     /* combine it all together */
     if (prepend == NULL) {
-        ret = g_strdup_printf("0.0.%s", tmptok);
+        ret = g_strdup_printf ("0.0.%s", tmptok);
     }
     else {
-        ret = g_strdup_printf("0.0.%s%s", prepend, tmptok);
+        ret = g_strdup_printf ("0.0.%s%s", prepend, tmptok);
     }
     g_free (prepend);
     g_free (lcdev);
@@ -450,7 +450,7 @@ gchar* bd_s390_zfcp_sanitize_wwpn_input (const gchar *wwpn, GError **error) {
     gchar *lcwwpn = NULL;
 
     /* first make sure we're not being played */
-    if ((wwpn == NULL) || (!*wwpn) || (strlen(wwpn) < 2)) {
+    if ((wwpn == NULL) || (!*wwpn) || (strlen (wwpn) < 2)) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "WWPN not specified or invalid");
         return NULL;
@@ -459,12 +459,12 @@ gchar* bd_s390_zfcp_sanitize_wwpn_input (const gchar *wwpn, GError **error) {
     /* convert everything to lowercase */
     lcwwpn = g_ascii_strdown (wwpn, -1);
 
-    if (strncmp(lcwwpn, "0x", 2) == 0) {
+    if (strncmp (lcwwpn, "0x", 2) == 0) {
         /* user entered a properly formatted wwpn */
-        fullwwpn = g_strdup_printf("%s", lcwwpn);
+        fullwwpn = g_strdup_printf ("%s", lcwwpn);
     }
     else {
-        fullwwpn = g_strdup_printf("0x%s", lcwwpn);
+        fullwwpn = g_strdup_printf ("0x%s", lcwwpn);
     }
     g_free (lcwwpn);
     return fullwwpn;
@@ -487,7 +487,7 @@ gchar* bd_s390_zfcp_sanitize_lun_input (const gchar *lun, GError **error) {
     gchar *append = NULL;
 
     /* first make sure we're not being played */
-    if ((lun == NULL) || (!*lun) || (strlen(lun) > 18)) {
+    if ((lun == NULL) || (!*lun) || (strlen (lun) > 18)) {
         g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "LUN not specified or invalid");
         return NULL;
@@ -496,7 +496,7 @@ gchar* bd_s390_zfcp_sanitize_lun_input (const gchar *lun, GError **error) {
     /* convert everything to lowercase */
     lclun = g_ascii_strdown (lun, -1);
 
-    if ((g_str_has_prefix(lclun, "0x")) && (strlen(lclun) == 18)) {
+    if ((g_str_has_prefix (lclun, "0x")) && (strlen (lclun) == 18)) {
         /* user entered a properly formatted lun */
         fulllun = g_strdup_printf ("%s", lclun);
     }
@@ -510,16 +510,16 @@ gchar* bd_s390_zfcp_sanitize_lun_input (const gchar *lun, GError **error) {
             tmplun = lclun;
         }
 
-        if (strlen(tmplun) < 4) {
+        if (strlen (tmplun) < 4) {
             /* check if/how many zeros we pad to the left */
-            prepend = g_strnfill((4 - strlen(tmplun)), '0');
+            prepend = g_strnfill ((4 - strlen (tmplun)), '0');
             /* check if/how many zeros we pad to the right */
-            append = g_strnfill((16 - (strlen(tmplun) + strlen(prepend))), '0');
+            append = g_strnfill ((16 - (strlen (tmplun) + strlen (prepend))), '0');
         }
         else {
             /* didn't need to pad anything on the left; so just check if/how
              * many zeros we pad to the right */
-            append = g_strnfill((16 - (strlen(tmplun))), '0');
+            append = g_strnfill ((16 - (strlen (tmplun))), '0');
         }
 
         /* now combine everything together */
@@ -732,7 +732,7 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
  *
  * Tech category: %BD_S390_TECH_ZFCP-%BD_S390_TECH_MODE_MODIFY
  */
-gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const gchar *lun, GError **error) {
+gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const gchar *lun, GError **error) {
     FILE *scsifd = NULL;
     FILE *fd = NULL;
     size_t len = 0;
@@ -772,8 +772,8 @@ gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const 
         return FALSE;
     }
 
-    while ((read = getline(&line, &len, scsifd)) != -1) {
-        if (!g_str_has_prefix(line, "Host")) {
+    while ((read = getline (&line, &len, scsifd)) != -1) {
+        if (!g_str_has_prefix (line, "Host")) {
             continue;
         }
 
@@ -822,7 +822,7 @@ gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const 
             g_propagate_error (error, l_error);
             return FALSE;
         }
-        fclose(fd);
+        fclose (fd);
         g_free (wwpn_path);
 
         /* read LUN value */
@@ -843,7 +843,7 @@ gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const 
             g_propagate_error (error, l_error);
             return FALSE;
         }
-        fclose(fd);
+        fclose (fd);
         g_free (lun_path);
         g_free (fcpsysfs);
 
@@ -921,7 +921,7 @@ gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gcha
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    success = bd_s390_zfcp_scsi_offline(devno, wwpn, lun, NULL);
+    success = bd_s390_zfcp_scsi_offline (devno, wwpn, lun, NULL);
     if (!success) {
         g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "Could not correctly delete SCSI device of zFCP %s with WWPN %s, LUN %s", devno, wwpn, lun);

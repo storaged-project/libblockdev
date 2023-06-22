@@ -91,8 +91,6 @@ void bd_dm_close (void) {
     dm_log_init_verbose (0);
 }
 
-#define UNUSED __attribute__((unused))
-
 /**
  * bd_dm_is_tech_avail:
  * @tech: the queried tech
@@ -279,15 +277,15 @@ gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean a
         return FALSE;
     }
 
-    task_list = dm_task_create(DM_DEVICE_LIST);
+    task_list = dm_task_create (DM_DEVICE_LIST);
     if (!task_list) {
         g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
                      "Failed to create DM task");
         return FALSE;
     }
 
-    dm_task_run(task_list);
-    names = dm_task_get_names(task_list);
+    dm_task_run (task_list);
+    names = dm_task_get_names (task_list);
 
     if (!names || !names->dev)
         return FALSE;
@@ -301,7 +299,7 @@ gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean a
             continue;
 
         /* get device info */
-        task_info = dm_task_create(DM_DEVICE_INFO);
+        task_info = dm_task_create (DM_DEVICE_INFO);
         if (!task_info) {
             g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
                          "Failed to create DM task");
