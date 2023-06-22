@@ -161,6 +161,14 @@
 
   </simplesect>
 
+  <simplesect><title>MDRAID plugin</title>
+  <para>
+    The <literal>bitmap</literal> argument of the <literal>bd_md_create</literal> function now accepts arbitrary string instead of a boolean value.
+    Previous value of <literal>FALSE</literal> is now represented by <literal>NULL</literal>, i.e. letting <literal>mdadm</literal> decide itself whether to create an internal bitmap or not.
+  </para>
+
+  </simplesect>
+
   <simplesect><title>Swap plugin</title>
   <para>
     <literal>bd_swap_mkswap</literal> has a new optional parameter <literal>uuid</literal>.
