@@ -1,3 +1,242 @@
+Libblockdev 2.28
+----------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Full list of changes**
+
+Michael Biebl (1):
+
+- Fix typos
+
+Vojtech Trefny (17):
+
+- lvm: Fix bd_lvm_get_supported_pe_sizes in Python on 32bit
+- tests: Create bigger devices for XFS tests
+- tests: Use ext instead of xfs in MountTestCase.test_mount_ro_device
+- mpath: Memory leak fix
+- spec: Require the same version utils from plugins
+- mdraid: Try harder to get container UUID in bd_md_detail
+- Add a test case for DDF arrays/containers
+- mdraid: Do not ignore errors from bd_md_canonicalize_uuid in bd_md_examine
+- mdraid: Try harder to get container UUID in bd_md_examine
+- mdraid: Fix copy-paste error when checking return value
+- tests: Wait for raid and mirrored LVs to be synced before removing
+- tests: Make smaller images for test_lvcreate_type
+- dm: Fix comparing DM RAID member devices UUID
+- mdraid: Fix use after free
+- ci: Add .lgtm.yaml config for LGTM
+- ci: Add GitHub actions for running rpmbuilds and csmock
+- mpath: Fix potential NULL pointer dereference
+
+zhanghongtao (1):
+
+- Fix mismatched functions return value type
+
+
+Libblockdev 2.27
+----------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Full list of changes**
+
+Tomas Bzatek (1):
+
+- fs: Return BD_FS_ERROR_UNKNOWN_FS on mounting unknown filesystem
+
+Vojtech Trefny (21):
+
+- overrides: Fix translating exceptions in ErrorProxy
+- tests: Do not check that swap flag is not supported on DOS table
+- tests: Lower expected free space on newly created Ext filesystems
+- tests: Remove test for NTFS read-only mounting
+- vdo_stats: Default to 100 % savings for invalid savings values
+- lvm: Fix reading statistics for VDO pools with VDO 8
+- tests: Fix creating loop device for CryptoTestLuksSectorSize
+- tests: Use losetup to create 4k sector size loop device for testing
+- s390: Remove double fclose in bd_s390_dasd_online (#2045784)
+- lvm-dbus: Add support for changing compression and deduplication
+- tests: Skip test_lvcreate_type on CentOS/RHEL 9
+- tests: Fix expected extended partition flags with new parted
+- lvm: Do not set global config to and empty string
+- lvm: Do not include duplicate entries in bd_lvm_lvs output
+- lvm: Use correct integer type in for comparison
+- crypto: Remove useless comparison in progress report in luks_format
+- boilerplate_generator: Remove unused variable assignment
+- kbd: Add missing progress reporting to bd_kbd_bcache_create
+- kbd: Fix leaking error in bd_kbd_bcache_detach
+- kbd: Fix potential NULL pointer dereference in bd_kbd_bcache_create
+- crypto: Remove unused and leaking error in write_escrow_data_file
+
+Libblockdev 2.26
+----------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Full list of changes**
+
+Manuel Wassermann (1):
+
+- exec: Fix deprecated glib function call Glib will rename
+  "g_spawn_check_exit_status()" to "g_spawn_check_wait_status()" in version
+  2.69.
+
+Tomasz Paweł Gajc (1):
+
+- remove unused variable and fix build with LLVM/clang
+
+Vojtech Trefny (22):
+
+- NEWS.rts: Fix markup
+- crypto: Fix default key size for non XTS ciphers
+- vdo: Do not use g_memdup in bd_vdo_stats_copy
+- fs: Allow using empty label for vfat with newest dosfstools
+- tests: Call fs_vfat_mkfs with "--mbr=n" extra option in tests
+- kbd: Fix memory leak
+- crypto: Fix memory leak
+- dm: Fix memory leak in the DM plugin and DM logging redirect function
+- fs: Fix memory leak
+- kbd: Fix memory leak
+- lvm-dbus: Fix memory leak
+- mdraid: Fix memory leak
+- swap: Fix memory leak
+- tests: Make sure the test temp mount is always unmounted
+- tests: Do not check that XFS shrink fails with xfsprogs >= 5.12
+- tests: Temporarily skip test_snapshotcreate_lvorigin_snapshotmerge
+- Fix skipping tests on Debian testing
+- crypto: Let cryptsetup autodect encryption sector size when not specified
+- tests: Do not try to remove VG before removing the VDO pool
+- tests: Force remove LVM VG /dev/ entry not removed by vgremove
+- tests: Tag LvmPVVGLVcachePoolCreateRemoveTestCase as unstable
+- Add missing plugins to the default config
+
+
+Libblockdev 2.25
+----------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Full list of changes**
+
+Tomas Bzatek (6):
+
+- exec: Fix polling for stdout and stderr
+- exec: Use non-blocking read and process the buffer manually
+- exec: Clarify the BDUtilsProgExtract callback documentation
+- tests: Add bufferbloat exec tests
+- tests: Add null-byte exec tests
+- lvm: Fix bd_lvm_vdopooldata_* symbols
+
+Vojtech Trefny (10):
+
+- exec: Fix setting locale for util calls
+- fs: Do not report error when errors were fixed by e2fsck
+- README: Use CI status image for 2.x-branch on 2.x
+- fs: Fix compile error in ext_repair caused by cherry pick from master
+- Mark all GIR file constants as guint64
+- lvm: Set thin metadata limits to match limits LVM uses in lvcreate
+- lvm: Do not use thin_metadata_size to recommend thin metadata size
+- lvm: Use the UNUSED macro instead of __attribute__((unused))
+- Fix max size limit for LVM thinpool metadata
+- loop: Retry LOOP_SET_STATUS64 on EAGAIN
+
+
+Libblockdev 2.24
+----------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Notable changes**
+
+- vdo
+
+  - VDO plugin has been deprecated in this release (functionality replaced by LVM VDO)
+
+- lvm
+
+  - support for creating and managing LVM VDO volumes added
+
+- crypto
+
+  - support for unlocking of BitLocker-compatible format BITLK added (requires cryptsetup 2.3.0)
+
+**Full list of changes**
+
+Lars Wendler (1):
+
+- configure.ac: Avoid bashisms
+
+Matt Thompson (1):
+
+- Fixed a number of memory leaks in lvm-dbus plugin
+
+Matt Whitlock (1):
+
+- configure.ac: Avoid more bashisms
+
+Tomas Bzatek (4):
+
+- utils: Add functions to get and check current linux kernel version
+- vdo: Fix a memleak
+- exec: Fix a memleak
+- mount: Fix a memleak
+
+Vojtech Trefny (47):
+
+- Sync spec with downstream
+- Use 'explicit_bzero' to erase passphrases from key files
+- Add new function 'bd_fs_wipe_force' to control force wipe
+- Fix linking against utils on Debian
+- exec.c: Fix reading outputs with null bytes
+- fs: Fix checking for UID/GID == 0
+- Fix expected cache pool name with newest LVM
+- Fix memory leak in LVM DBus plugin
+- Manually remove symlinks not removed by udev in tests
+- Add a helper function for closing an active crypto device
+- Add support for BitLocker encrypted devices using cryptsetup
+- ext: Return empty string instead of "<none>" for empty UUID
+- Fix typo in (un)mount error messages
+- vdo: Run "vdo create" with "--force"
+- lvm-dbus: Do not activate LVs during pvscan --cache
+- lvm-dbus: Fix memory leak in bd_lvm_thlvpoolname
+- tests: Specify loader for yaml.load in VDO tests
+- Add a function to check if a tool supports given feature
+- Do not hardcode pylint executable name in Makefile
+- Fix LVM plugin so names in tests
+- Add support for creating and managing VDO LVs with LVM
+- Add some helper functions to get LVM VDO mode and state strings
+- Fix converting to VDO pool without name for the VDO LV
+- Add write policy and index size to LVM VDO data
+- Fix getting string representation of unknown VDO state index
+- Fix getting VDO data in the LVM DBus plugin
+- Allow calling LVM functions without locking global_config_lock
+- Add extra parameters for creating LVM VDO volumes
+- Add function to get LVM VDO write policy from a string
+- exec: Disable encoding when reading data from stdout/stderr
+- Fix copy-paste bug in lvm.api
+- Move VDO statistics code to a separate file
+- Add functions to get VDO stats for LVM VDO volumes
+- lvm-dbus: Get data LV name for LVM VDO pools too
+- lvm: Add a function to get VDO pool name for a VDO LV
+- lvm-dbus: Add LVM VDO pools to bd_lvm_lvs
+- tests: Skip LVM VDO tests if kvdo module cannot be loaded
+- Do not skip LVM VDO tests when the kvdo module is already loaded
+- lvm: Fix getting cache stats for cache thinpools
+- Create a common function to get label and uuid of a filesystem
+- Do not open devices as read-write for read-only fs operations
+- Use libblkid to get label and UUID for XFS filesystems
+- Do not check VDO saving percent value in LVM DBus tests
+- utils: Remove deadcode in exec.c
+- fs: Fix potential NULL pointer dereference in mount.c
+- Fix multiple uninitialized values discovered by coverity
+- Mark VDO plugin as deprecated since 2.24
+
 Libblockdev 2.23
 ----------------
 
