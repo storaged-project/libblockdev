@@ -15,7 +15,7 @@ libblockdev_la_CFLAGS += $(GOBJECT_CFLAGS)
 libblockdev_la_LIBADD += $(GOBJECT_LIBS)
 endif
 
-libblockdev_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 2:0:0 -Wl,--no-undefined
+libblockdev_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 3:0:0 -Wl,--no-undefined
 libblockdev_la_CPPFLAGS = -I${builddir}/../../include/
 libblockdev_la_SOURCES = blockdev.c blockdev.h plugins.c plugins.h
 
@@ -40,17 +40,17 @@ if WITH_S390
 GIHEADERS += ${builddir}/plugin_apis/s390.h
 endif
 
-BlockDev-2.0.gir: libblockdev.la
+BlockDev-3.0.gir: libblockdev.la
 
-BlockDev_2_0_gir_FILES = $(GIHEADERS)
-BlockDev_2_0_gir_LIBS = libblockdev.la
-BlockDev_2_0_gir_INCLUDES = GObject-2.0 Gio-2.0
-BlockDev_2_0_gir_CFLAGS = -I${builddir}/../../include/
-BlockDev_2_0_gir_LDFLAGS = -L${builddir}/../utils/ -lbd_utils
-BlockDev_2_0_gir_SCANNERFLAGS = --warn-error --warn-all --identifier-prefix=BD --symbol-prefix=bd
-BlockDev_2_0_gir_EXPORT_PACKAGES = blockdev
+BlockDev_3_0_gir_FILES = $(GIHEADERS)
+BlockDev_3_0_gir_LIBS = libblockdev.la
+BlockDev_3_0_gir_INCLUDES = GObject-2.0 Gio-2.0
+BlockDev_3_0_gir_CFLAGS = -I${builddir}/../../include/
+BlockDev_3_0_gir_LDFLAGS = -L${builddir}/../utils/ -lbd_utils
+BlockDev_3_0_gir_SCANNERFLAGS = --warn-error --warn-all --identifier-prefix=BD --symbol-prefix=bd
+BlockDev_3_0_gir_EXPORT_PACKAGES = blockdev
 
-INTROSPECTION_GIRS = BlockDev-2.0.gir
+INTROSPECTION_GIRS = BlockDev-3.0.gir
 
 typelibdir = $(libdir)/girepository-1.0
 typelib_DATA = $(INTROSPECTION_GIRS:.gir=.typelib)
@@ -58,7 +58,7 @@ typelib_DATA = $(INTROSPECTION_GIRS:.gir=.typelib)
 girdir = $(datadir)/gir-1.0
 gir_DATA = $(INTROSPECTION_GIRS)
 
-CLEANFILES = BlockDev-2.0.gir $(typelib_DATA)
+CLEANFILES = BlockDev-3.0.gir $(typelib_DATA)
 endif
 
 pkgconfigdir = $(libdir)/pkgconfig

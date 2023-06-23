@@ -1,3 +1,24 @@
+Libblockdev 3.0
+---------------
+
+New major release of the libblockdev library. This release contains a large
+API overhaul, please check the documentation for full list of API changes.
+
+**Notable changes**
+
+- VDO a KBD plugins were removed.
+- New NVMe plugin was added.
+- Runtime dependencies are no longer checked during plugin initialization.
+- Part plugin was rewritten to use libfdisk instead of libparted.
+- Crypto plugin API went through an extensive rewrite.
+- Support for new technologies was added to the crypto plugin: FileVault2 encryption,
+  DM Integrity, LUKS2 tokens.
+- Filesystem plugin adds support for btrfs, F2FS, NILFS2, exFAT and UDF.
+- Support for new filesystem operations was added to the plugin: setting label and UUID,
+  generic mkfs function and API for getting feature support for filesystems.
+- dmraid support was removed from the DM plugin.
+- Python 2 support was dropped.
+
 Libblockdev 2.28
 ----------------
 

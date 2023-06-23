@@ -396,7 +396,7 @@ GQuark bd_init_error_quark (void)
  * GError *error = NULL;
  * gboolean ret = FALSE;
  * BDPluginSpec fs_plugin = {BD_PLUGIN_FS, NULL};
- * BDPluginSpec lvm_plugin = {BD_PLUGIN_LVM, "libbd_lvm.so.2"};
+ * BDPluginSpec lvm_plugin = {BD_PLUGIN_LVM, "libbd_lvm.so.3"};
  *
  * BDPluginSpec *plugins[] = {&fs_plugin, &lvm_plugin, NULL};
  *

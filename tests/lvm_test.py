@@ -34,7 +34,7 @@ class LVMTestCase(unittest.TestCase):
     def setUpClass(cls):
         ps = BlockDev.PluginSpec()
         ps.name = BlockDev.Plugin.LVM
-        ps.so_name = "libbd_lvm.so.2"
+        ps.so_name = "libbd_lvm.so.3"
         cls.requested_plugins = [ps]
 
         if not BlockDev.is_initialized():
