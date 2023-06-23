@@ -116,6 +116,11 @@
     Affected functions: <literal>bd_fs_btrfs_wipe</literal>, <literal>bd_fs_ext2_wipe</literal>, <literal>bd_fs_ext3_wipe</literal>, <literal>bd_fs_ext4_wipe</literal>, <literal>bd_fs_exfat_wipe</literal>, <literal>bd_fs_f2fs_wipe</literal>, <literal>bd_fs_nilfs2_wipe</literal>, <literal>bd_fs_ntfs_wipe</literal>, <literal>bd_fs_vfat_wipe</literal>, <literal>bd_fs_udf_wipe</literal>, <literal>bd_fs_xfs_wipe</literal>
   </para>
 
+  <para>
+   <literal>bd_fs_ntfs_check</literal>, <literal>bd_fs_ntfs_repair</literal> and <literal>bd_fs_xfs_check</literal> have a new parameter <literal>extra</literal>
+   that allows specifying extra options for the fsck tools. This makes the functionality consistent with the other filesystems.
+  </para>
+
   </simplesect>
 
   <simplesect><title>Part plugin</title>

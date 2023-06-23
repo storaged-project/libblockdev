@@ -159,13 +159,15 @@ gboolean bd_fs_ntfs_mkfs (const gchar *device, const BDExtraArg **extra, GError 
 /**
  * bd_fs_ntfs_check:
  * @device: the device containing the file system to check
+ * @extra: (nullable) (array zero-terminated=1): extra options for the repair (right now
+ *                                               passed to the 'ntfsfix' utility)
  * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether an ntfs file system on the @device is clean or not
  *
  * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_CHECK
  */
-gboolean bd_fs_ntfs_check (const gchar *device, GError **error) {
+gboolean bd_fs_ntfs_check (const gchar *device, const BDExtraArg **extra, GError **error) {
     const gchar *args[4] = {"ntfsfix", "-n", device, NULL};
     gint status = 0;
     gboolean ret = FALSE;
@@ -173,7 +175,7 @@ gboolean bd_fs_ntfs_check (const gchar *device, GError **error) {
     if (!check_deps (&avail_deps, DEPS_NTFSFIX_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
 
-    ret = bd_utils_exec_and_report_status_error (args, NULL, &status, error);
+    ret = bd_utils_exec_and_report_status_error (args, extra, &status, error);
     if (!ret && (status == 1)) {
         /* no error should be reported for exit code 1 -- Recoverable errors have been detected */
         g_clear_error (error);
@@ -184,6 +186,8 @@ gboolean bd_fs_ntfs_check (const gchar *device, GError **error) {
 /**
  * bd_fs_ntfs_repair:
  * @device: the device containing the file system to repair
+ * @extra: (nullable) (array zero-terminated=1): extra options for the repair (right now
+ *                                               passed to the 'ntfsfix' utility)
  * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether an NTFS file system on the @device was successfully repaired
@@ -191,13 +195,13 @@ gboolean bd_fs_ntfs_check (const gchar *device, GError **error) {
  *
  * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_REPAIR
  */
-gboolean bd_fs_ntfs_repair (const gchar *device, GError **error) {
+gboolean bd_fs_ntfs_repair (const gchar *device, const BDExtraArg **extra, GError **error) {
     const gchar *args[4] = {"ntfsfix", "-d", device, NULL};
 
     if (!check_deps (&avail_deps, DEPS_NTFSFIX_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
 
-    return bd_utils_exec_and_report_error (args, NULL, error);
+    return bd_utils_exec_and_report_error (args, extra, error);
 }
 
 /**

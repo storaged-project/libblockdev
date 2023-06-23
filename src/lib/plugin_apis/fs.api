@@ -1699,6 +1699,8 @@ gboolean bd_fs_xfs_mkfs (const gchar *device, const BDExtraArg **extra, GError *
 /**
  * bd_fs_xfs_check:
  * @device: the device containing the file system to check
+ * @extra: (nullable) (array zero-terminated=1): extra options for the repair (right now
+ *                                               passed to the 'xfs_repair' utility)
  * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether an xfs file system on the @device is clean or not
@@ -1708,7 +1710,7 @@ gboolean bd_fs_xfs_mkfs (const gchar *device, const BDExtraArg **extra, GError *
  *
  * Tech category: %BD_FS_TECH_XFS-%BD_FS_TECH_MODE_CHECK
  */
-gboolean bd_fs_xfs_check (const gchar *device, GError **error);
+gboolean bd_fs_xfs_check (const gchar *device, const BDExtraArg **extra, GError **error);
 
 /**
  * bd_fs_xfs_repair:
@@ -1927,17 +1929,21 @@ gboolean bd_fs_ntfs_mkfs (const gchar *device, const BDExtraArg **extra, GError 
 /**
  * bd_fs_ntfs_check:
  * @device: the device containing the file system to check
+ * @extra: (nullable) (array zero-terminated=1): extra options for the repair (right now
+ *                                               passed to the 'ntfsfix' utility)
  * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether an ntfs file system on the @device is clean or not
  *
  * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_CHECK
  */
-gboolean bd_fs_ntfs_check (const gchar *device, GError **error);
+gboolean bd_fs_ntfs_check (const gchar *device, const BDExtraArg **extra, GError **error);
 
 /**
  * bd_fs_ntfs_repair:
  * @device: the device containing the file system to repair
+ * @extra: (nullable) (array zero-terminated=1): extra options for the repair (right now
+ *                                               passed to the 'ntfsfix' utility)
  * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether an NTFS file system on the @device was successfully repaired
@@ -1945,7 +1951,7 @@ gboolean bd_fs_ntfs_check (const gchar *device, GError **error);
  *
  * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_REPAIR
  */
-gboolean bd_fs_ntfs_repair (const gchar *device, GError **error);
+gboolean bd_fs_ntfs_repair (const gchar *device, const BDExtraArg **extra, GError **error);
 
 /**
  * bd_fs_ntfs_set_label:
