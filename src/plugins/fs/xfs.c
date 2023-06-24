@@ -180,6 +180,8 @@ gboolean bd_fs_xfs_mkfs (const gchar *device, const BDExtraArg **extra, GError *
 /**
  * bd_fs_xfs_check:
  * @device: the device containing the file system to check
+ * @extra: (nullable) (array zero-terminated=1): extra options for the repair (right now
+ *                                               passed to the 'xfs_repair' utility)
  * @error: (out) (optional): place to store error (if any)
  *
  * Returns: whether an xfs file system on the @device is clean or not
@@ -189,7 +191,7 @@ gboolean bd_fs_xfs_mkfs (const gchar *device, const BDExtraArg **extra, GError *
  *
  * Tech category: %BD_FS_TECH_XFS-%BD_FS_TECH_MODE_CHECK
  */
-gboolean bd_fs_xfs_check (const gchar *device, GError **error) {
+gboolean bd_fs_xfs_check (const gchar *device, const BDExtraArg **extra, GError **error) {
     const gchar *args[4] = {"xfs_repair", "-n", device, NULL};
     gboolean ret = FALSE;
     GError *l_error = NULL;
@@ -197,7 +199,7 @@ gboolean bd_fs_xfs_check (const gchar *device, GError **error) {
     if (!check_deps (&avail_deps, DEPS_XFS_REPAIR_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
 
-    ret = bd_utils_exec_and_report_error (args, NULL, &l_error);
+    ret = bd_utils_exec_and_report_error (args, extra, &l_error);
     if (!ret) {
         if (l_error && g_error_matches (l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED)) {
             /* non-zero exit status -> the fs is not clean, but not an error */

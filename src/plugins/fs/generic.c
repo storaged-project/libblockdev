@@ -956,7 +956,7 @@ static gboolean device_operation (const gchar *device, const gchar *fstype, BDFs
             case BD_FS_REPAIR:
                 return bd_fs_xfs_repair (device, NULL, error);
             case BD_FS_CHECK:
-                return bd_fs_xfs_check (device, error);
+                return bd_fs_xfs_check (device, NULL, error);
             case BD_FS_LABEL:
                 return bd_fs_xfs_set_label (device, label, error);
             case BD_FS_LABEL_CHECK:
@@ -992,9 +992,9 @@ static gboolean device_operation (const gchar *device, const gchar *fstype, BDFs
             case BD_FS_RESIZE:
                 return bd_fs_ntfs_resize (device, new_size, error);
             case BD_FS_REPAIR:
-                return bd_fs_ntfs_repair (device, error);
+                return bd_fs_ntfs_repair (device, NULL, error);
             case BD_FS_CHECK:
-                return bd_fs_ntfs_check (device, error);
+                return bd_fs_ntfs_check (device, NULL, error);
             case BD_FS_LABEL_CHECK:
                 return bd_fs_ntfs_check_label (label, error);
             case BD_FS_LABEL:

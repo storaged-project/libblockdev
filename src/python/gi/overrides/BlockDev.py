@@ -519,6 +519,13 @@ def fs_xfs_mkfs(device, extra=None, **kwargs):
     return _fs_xfs_mkfs(device, extra)
 __all__.append("fs_xfs_mkfs")
 
+_fs_xfs_check = BlockDev.fs_xfs_check
+@override(BlockDev.fs_xfs_check)
+def fs_xfs_check(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_xfs_check(device, extra)
+__all__.append("fs_xfs_check")
+
 _fs_xfs_repair = BlockDev.fs_xfs_repair
 @override(BlockDev.fs_xfs_repair)
 def fs_xfs_repair(device, extra=None, **kwargs):
@@ -532,6 +539,20 @@ def fs_xfs_resize(device, size, extra=None, **kwargs):
     extra = _get_extra(extra, kwargs)
     return _fs_xfs_resize(device, size, extra)
 __all__.append("fs_xfs_resize")
+
+_fs_ntfs_check = BlockDev.fs_ntfs_check
+@override(BlockDev.fs_ntfs_check)
+def fs_ntfs_check(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_ntfs_check(device, extra)
+__all__.append("fs_ntfs_check")
+
+_fs_ntfs_repair = BlockDev.fs_ntfs_repair
+@override(BlockDev.fs_ntfs_repair)
+def fs_ntfs_repair(device, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _fs_ntfs_repair(device, extra)
+__all__.append("fs_ntfs_repair")
 
 _fs_vfat_mkfs = BlockDev.fs_vfat_mkfs
 @override(BlockDev.fs_vfat_mkfs)

@@ -15,7 +15,7 @@ BDFSXfsInfo* bd_fs_xfs_info_copy (BDFSXfsInfo *data);
 void bd_fs_xfs_info_free (BDFSXfsInfo *data);
 
 gboolean bd_fs_xfs_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
-gboolean bd_fs_xfs_check (const gchar *device, GError **error);
+gboolean bd_fs_xfs_check (const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_fs_xfs_repair (const gchar *device, const BDExtraArg **extra, GError **error);
 gboolean bd_fs_xfs_set_label (const gchar *device, const gchar *label, GError **error);
 gboolean bd_fs_xfs_check_label (const gchar *label, GError **error);
