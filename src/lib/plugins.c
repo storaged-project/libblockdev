@@ -16,6 +16,9 @@
  * Creates a new copy of @spec.
  */
 BDPluginSpec* bd_plugin_spec_copy (BDPluginSpec *spec) {
+    if (!spec)
+        return NULL;
+
     BDPluginSpec *new_spec = g_new0 (BDPluginSpec, 1);
 
     new_spec->name = spec->name;
@@ -31,6 +34,8 @@ BDPluginSpec* bd_plugin_spec_copy (BDPluginSpec *spec) {
  * Frees @spec.
  */
 void bd_plugin_spec_free (BDPluginSpec *spec) {
+    if (!spec)
+        return;
     g_free ((gchar *) spec->so_name);
     g_free (spec);
 }

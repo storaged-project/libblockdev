@@ -298,9 +298,9 @@ static BDMDExamineData* get_examine_data_from_table (GHashTable *table, gboolean
 
     value = (gchar*) g_hash_table_lookup (table, "Update Time");
     if (value) {
-        memset(&tm, 0, sizeof(struct tm));
-        strptime(value, "%a %b %e %H:%M:%S %Y", &tm);
-        strftime(time_str, sizeof(time_str), "%s" , &tm);
+        memset (&tm, 0, sizeof (struct tm));
+        strptime (value, "%a %b %e %H:%M:%S %Y", &tm);
+        strftime (time_str, sizeof (time_str), "%s" , &tm);
 
         data->update_time = g_ascii_strtoull (time_str, NULL, 0);
     } else
@@ -439,7 +439,7 @@ static BDMDDetailData* get_detail_data_from_table (GHashTable *table, gboolean f
  *
  * Returns: (transfer full): RAID node name
  */
-static gchar* get_sysfs_name_from_input(const gchar *input, GError **error) {
+static gchar* get_sysfs_name_from_input (const gchar *input, GError **error) {
   gchar* sysfs_name = NULL;
   gchar* path = NULL;
 
@@ -470,7 +470,7 @@ static gchar* get_sysfs_name_from_input(const gchar *input, GError **error) {
  * Takes some RAID specification (raid name, node name, path or name symlink)
  * and returns a new specification suitable for mdadm command.
  */
-static gchar* get_mdadm_spec_from_input(const gchar *input, GError **error) {
+static gchar* get_mdadm_spec_from_input (const gchar *input, GError **error) {
   gchar* md_path_str = NULL;
   gchar* name_path_str = NULL;
   gchar* mdadm_spec = NULL;

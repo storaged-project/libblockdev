@@ -424,10 +424,10 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, gboolean force, GError *
         return FALSE;
     }
 
-    blkid_probe_enable_partitions(probe, 1);
-    blkid_probe_set_partitions_flags(probe, BLKID_PARTS_MAGIC);
-    blkid_probe_enable_superblocks(probe, 1);
-    blkid_probe_set_superblocks_flags(probe, BLKID_SUBLKS_MAGIC | BLKID_SUBLKS_BADCSUM);
+    blkid_probe_enable_partitions (probe, 1);
+    blkid_probe_set_partitions_flags (probe, BLKID_PARTS_MAGIC);
+    blkid_probe_enable_superblocks (probe, 1);
+    blkid_probe_set_superblocks_flags (probe, BLKID_SUBLKS_MAGIC | BLKID_SUBLKS_BADCSUM);
 
     /* we may need to try multiple times with some delays in case the device is
        busy at the very moment */
@@ -1536,7 +1536,7 @@ static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar *
     if (options != NULL)
         *options = fsinfo->mkfs_options;
 
-    if (strlen(exec_util) == 0) { /* empty string if no util needed */
+    if (strlen (exec_util) == 0) { /* empty string if no util needed */
         return TRUE;
     }
 

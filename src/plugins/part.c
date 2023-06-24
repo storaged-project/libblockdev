@@ -202,7 +202,7 @@ static struct fdisk_context* get_device_context (const gchar *disk, GError **err
         return NULL;
     }
 
-    fdisk_disable_dialogs(cxt, 1);
+    fdisk_disable_dialogs (cxt, 1);
     fdisk_set_ask (cxt, fdisk_ask_callback, NULL);
     return cxt;
 }
@@ -486,7 +486,7 @@ static BDPartSpec* get_part_spec_fdisk (struct fdisk_context *cxt, struct fdisk_
     devname = fdisk_get_devname (cxt);
 
     if (fdisk_partition_has_partno (pa)) {
-        if (isdigit (devname[strlen(devname) - 1]))
+        if (isdigit (devname[strlen (devname) - 1]))
             ret->path = g_strdup_printf ("%sp%zu", devname, fdisk_partition_get_partno (pa) + 1);
         else
             ret->path = g_strdup_printf ("%s%zu", devname, fdisk_partition_get_partno (pa) + 1);
@@ -1300,7 +1300,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
     }
 
     if (fdisk_partition_has_partno (npa)) {
-        if (isdigit (disk[strlen(disk) - 1]))
+        if (isdigit (disk[strlen (disk) - 1]))
             ppath = g_strdup_printf ("%sp%zu", disk, fdisk_partition_get_partno (npa) + 1);
         else
             ppath = g_strdup_printf ("%s%zu", disk, fdisk_partition_get_partno (npa) + 1);

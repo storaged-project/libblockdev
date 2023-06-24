@@ -231,7 +231,7 @@ static gboolean map_is_multipath (const gchar *map_name, GError **error) {
         return FALSE;
     }
 
-    dm_get_next_target(task, NULL, &start, &length, &type, &params);
+    dm_get_next_target (task, NULL, &start, &length, &type, &params);
     if (g_strcmp0 (type, "multipath") == 0)
         ret = TRUE;
     else
@@ -340,7 +340,7 @@ gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error) {
 
     /* we check if the 'device' is a dependency of any multipath map  */
     /* get maps */
-    task_names = dm_task_create(DM_DEVICE_LIST);
+    task_names = dm_task_create (DM_DEVICE_LIST);
     if (!task_names) {
         bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to create DM task");
         g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
@@ -348,8 +348,8 @@ gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error) {
         return FALSE;
     }
 
-    dm_task_run(task_names);
-    names = dm_task_get_names(task_names);
+    dm_task_run (task_names);
+    names = dm_task_get_names (task_names);
 
     if (!names || !names->dev)
         return FALSE;
@@ -443,7 +443,7 @@ gchar** bd_mpath_get_mpath_members (GError **error) {
 
     /* we check if the 'device' is a dependency of any multipath map  */
     /* get maps */
-    task_names = dm_task_create(DM_DEVICE_LIST);
+    task_names = dm_task_create (DM_DEVICE_LIST);
 	if (!task_names) {
         bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to create DM task");
         g_set_error (&l_error, BD_MPATH_ERROR, BD_MPATH_ERROR_DM_ERROR,
@@ -453,8 +453,8 @@ gchar** bd_mpath_get_mpath_members (GError **error) {
         return NULL;
     }
 
-    dm_task_run(task_names);
-	names = dm_task_get_names(task_names);
+    dm_task_run (task_names);
+	names = dm_task_get_names (task_names);
 
     if (!names || !names->dev) {
         bd_utils_report_finished (progress_id, "Completed");

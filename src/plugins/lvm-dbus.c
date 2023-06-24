@@ -335,7 +335,7 @@ gboolean bd_lvm_init (void) {
 
     /* the check() call should create the DBus connection for us, but let's not
        completely rely on it */
-    if (G_UNLIKELY(!bus) && !setup_dbus_connection (&error)) {
+    if (G_UNLIKELY (!bus) && !setup_dbus_connection (&error)) {
         g_critical ("Failed to setup DBus connection: %s", error->message);
         return FALSE;
     }
@@ -644,7 +644,7 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
 
     if (!config_extra_params)
         /* create an empty dictionary with the extra arguments */
-        config_extra_params = g_variant_new_array (G_VARIANT_TYPE("{sv}"), NULL, 0);
+        config_extra_params = g_variant_new_array (G_VARIANT_TYPE ("{sv}"), NULL, 0);
 
     /* create new GVariant holding the given parameters with the global
        config and extra_params merged together appended */
@@ -1584,7 +1584,7 @@ guint64 bd_lvm_get_max_lv_size (GError **error UNUSED) {
  * Tech category: %BD_LVM_TECH_CALCS no mode (it is ignored)
  */
 guint64 bd_lvm_round_size_to_pe (guint64 size, guint64 pe_size, gboolean roundup, GError **error UNUSED) {
-    pe_size = RESOLVE_PE_SIZE(pe_size);
+    pe_size = RESOLVE_PE_SIZE (pe_size);
     guint64 delta = size % pe_size;
     if (delta == 0)
         return size;
@@ -1609,7 +1609,7 @@ guint64 bd_lvm_round_size_to_pe (guint64 size, guint64 pe_size, gboolean roundup
  * Tech category: %BD_LVM_TECH_CALCS no mode (it is ignored)
  */
 guint64 bd_lvm_get_lv_physical_size (guint64 lv_size, guint64 pe_size, GError **error) {
-    pe_size = RESOLVE_PE_SIZE(pe_size);
+    pe_size = RESOLVE_PE_SIZE (pe_size);
 
     /* the LV just takes space rounded up to the multiple of extent size */
     return bd_lvm_round_size_to_pe (lv_size, pe_size, TRUE, error);
@@ -1629,7 +1629,7 @@ guint64 bd_lvm_get_lv_physical_size (guint64 lv_size, guint64 pe_size, GError **
  */
 guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean included, GError **error UNUSED) {
     guint64 raw_md_size;
-    pe_size = RESOLVE_PE_SIZE(pe_size);
+    pe_size = RESOLVE_PE_SIZE (pe_size);
 
     if (included)
         raw_md_size = (guint64) ceil (size * THPOOL_MD_FACTOR_EXISTS);
@@ -1658,7 +1658,7 @@ guint64 bd_lvm_get_thpool_meta_size (guint64 size, guint64 chunk_size, guint64 n
     guint64 md_size = 0;
 
     /* based on lvcreate metadata size calculation */
-    md_size = UINT64_C(64) * size / (chunk_size ? chunk_size : DEFAULT_CHUNK_SIZE);
+    md_size = UINT64_C (64) * size / (chunk_size ? chunk_size : DEFAULT_CHUNK_SIZE);
 
     if (md_size > MAX_THPOOL_MD_SIZE)
         md_size = MAX_THPOOL_MD_SIZE;
@@ -4708,7 +4708,7 @@ BDLVMVDOWritePolicy bd_lvm_get_vdo_write_policy_from_str (const gchar *policy_st
  */
 GHashTable* bd_lvm_vdo_get_stats_full (const gchar *vg_name, const gchar *pool_name, GError **error) {
     g_autofree gchar *kvdo_name = g_strdup_printf ("%s-%s-%s", vg_name, pool_name, VDO_POOL_SUFFIX);
-    return vdo_get_stats_full(kvdo_name, error);
+    return vdo_get_stats_full (kvdo_name, error);
 }
 
 /**

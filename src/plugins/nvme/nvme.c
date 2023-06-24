@@ -36,7 +36,7 @@
 
 /**
  * SECTION: nvme
- * @short_description: NVMe device reporting and management.
+ * @short_description: plugin for NVMe device reporting and management
  * @title: NVMe
  * @include: nvme.h
  *
