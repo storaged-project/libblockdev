@@ -17,7 +17,7 @@
  * Author: Vratislav Podzimek <vpodzime@redhat.com>
  */
 
-#define _XOPEN_SOURCE  // needed for time.h
+#define _XOPEN_SOURCE  /* needed for time.h */
 
 #include <glib.h>
 #include <unistd.h>
