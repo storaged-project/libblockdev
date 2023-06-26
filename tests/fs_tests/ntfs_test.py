@@ -81,8 +81,8 @@ class NTFSTestFeatures(NTFSNoDevTestCase):
         features = BlockDev.fs_features("ntfs")
         self.assertIsNotNone(features)
 
-        self.assertTrue(features.resize & BlockDev.FsResizeFlags.OFFLINE_GROW)
-        self.assertTrue(features.resize & BlockDev.FsResizeFlags.OFFLINE_SHRINK)
+        self.assertTrue(features.resize & BlockDev.FSResizeFlags.OFFLINE_GROW)
+        self.assertTrue(features.resize & BlockDev.FSResizeFlags.OFFLINE_SHRINK)
 
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.LABEL)
         self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.UUID)

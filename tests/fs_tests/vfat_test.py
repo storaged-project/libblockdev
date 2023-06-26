@@ -98,8 +98,8 @@ class VfatTestFeatures(VfatNoDevTestCase):
         features = BlockDev.fs_features("vfat")
         self.assertIsNotNone(features)
 
-        self.assertTrue(features.resize & BlockDev.FsResizeFlags.OFFLINE_GROW)
-        self.assertTrue(features.resize & BlockDev.FsResizeFlags.OFFLINE_SHRINK)
+        self.assertTrue(features.resize & BlockDev.FSResizeFlags.OFFLINE_GROW)
+        self.assertTrue(features.resize & BlockDev.FSResizeFlags.OFFLINE_SHRINK)
 
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.LABEL)
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.UUID)

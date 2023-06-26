@@ -48,7 +48,7 @@ typedef enum {
     BD_FS_OFFLINE_GROW = 1 << 2,
     BD_FS_ONLINE_SHRINK = 1 << 3,
     BD_FS_ONLINE_GROW = 1 << 4
-} BDFsResizeFlags;
+} BDFSResizeFlags;
 
 typedef enum {
     BD_FS_SUPPORT_SET_LABEL = 1 << 1,
@@ -66,7 +66,7 @@ typedef enum {
 } BDFSFeatureFlags;
 
 typedef struct BDFSFeatures {
-    BDFsResizeFlags resize;
+    BDFSResizeFlags resize;
     BDFSMkfsOptionsFlags mkfs;
     BDFSFsckFlags fsck;
     BDFSConfigureFlags configure;
@@ -78,7 +78,7 @@ typedef struct BDFSFeatures {
 const BDFSFeatures* bd_fs_features (const gchar *fstype, GError **error);
 
 gboolean bd_fs_can_mkfs (const gchar *type, BDFSMkfsOptionsFlags *options, gchar **required_utility, GError **error);
-gboolean bd_fs_can_resize (const gchar *type, BDFsResizeFlags *mode, gchar **required_utility, GError **error);
+gboolean bd_fs_can_resize (const gchar *type, BDFSResizeFlags *mode, gchar **required_utility, GError **error);
 gboolean bd_fs_can_check (const gchar *type, gchar **required_utility, GError **error);
 gboolean bd_fs_can_repair (const gchar *type, gchar **required_utility, GError **error);
 gboolean bd_fs_can_set_label (const gchar *type, gchar **required_utility, GError **error);

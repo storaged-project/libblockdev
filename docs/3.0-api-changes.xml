@@ -121,6 +121,14 @@
    that allows specifying extra options for the fsck tools. This makes the functionality consistent with the other filesystems.
   </para>
 
+  <para>
+   <literal>BDFsResizeFlags</literal> enum was renamed to <literal>BDFSResizeFlags</literal>.
+  </para>
+
+  <para>
+   <literal>BDFsError</literal> enum was renamed to <literal>BDFSError</literal>.
+  </para>
+
   </simplesect>
 
   <simplesect><title>Part plugin</title>

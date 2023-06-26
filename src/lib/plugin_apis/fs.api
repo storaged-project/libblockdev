@@ -23,7 +23,7 @@ typedef enum {
     BD_FS_ERROR_TECH_UNAVAIL,
     BD_FS_ERROR_UUID_INVALID,
     BD_FS_ERROR_UNKNOWN_FS,
-} BDFsError;
+} BDFSError;
 
 /**
  * BDFSMkfsOptions:
@@ -1169,7 +1169,7 @@ typedef enum {
 gboolean bd_fs_can_mkfs (const gchar *type, BDFSMkfsOptionsFlags *options, gchar **required_utility, GError **error);
 
 /**
- * BDFsResizeFlags:
+ * BDFSResizeFlags:
  * Flags indicating whether a filesystem resize action supports growing and/or
  * shrinking if mounted or unmounted.
  */
@@ -1178,7 +1178,7 @@ typedef enum {
     BD_FS_OFFLINE_GROW = 1 << 2,
     BD_FS_ONLINE_SHRINK = 1 << 3,
     BD_FS_ONLINE_GROW = 1 << 4
-} BDFsResizeFlags;
+} BDFSResizeFlags;
 
 /**
  * bd_fs_can_resize:
@@ -1196,7 +1196,7 @@ typedef enum {
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
  */
-gboolean bd_fs_can_resize (const gchar *type, BDFsResizeFlags *mode, gchar **required_utility, GError **error);
+gboolean bd_fs_can_resize (const gchar *type, BDFSResizeFlags *mode, gchar **required_utility, GError **error);
 
 /**
  * bd_fs_can_check:
@@ -2533,7 +2533,7 @@ typedef enum {
  * @partition_type: partition type/GUID used for this filesystem GPT partitions
  */
 typedef struct BDFSFeatures {
-    BDFsResizeFlags resize;
+    BDFSResizeFlags resize;
     BDFSMkfsOptionsFlags mkfs;
     BDFSFsckFlags fsck;
     BDFSConfigureFlags configure;

@@ -53,7 +53,7 @@ typedef enum {
     BD_FS_UUID,
     BD_FS_UUID_CHECK,
     BD_FS_GET_FREE_SPACE,
-} BDFsOpType;
+} BDFSOpType;
 
 static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
     /* padding for BD_FS_TECH_GENERIC and MOUNT to make accessing the FS techs simpler */
@@ -170,7 +170,7 @@ typedef struct BDFSInfo {
     const gchar *check_util;
     const gchar *repair_util;
     const gchar *resize_util;
-    BDFsResizeFlags resize_mode;
+    BDFSResizeFlags resize_mode;
     const gchar *label_util;
     const gchar *info_util;
     const gchar *uuid_util;
@@ -901,7 +901,7 @@ static gboolean btrfs_set_label (const gchar *device, const gchar *label, GError
     return success;
 }
 
-static gboolean device_operation (const gchar *device, const gchar *fstype, BDFsOpType op, guint64 new_size, const gchar *label, const gchar *uuid, GError **error) {
+static gboolean device_operation (const gchar *device, const gchar *fstype, BDFSOpType op, guint64 new_size, const gchar *label, const gchar *uuid, GError **error) {
     const gchar* op_name = NULL;
     g_autofree gchar* detected_fstype = NULL;
 
@@ -1463,7 +1463,7 @@ guint64 bd_fs_get_free_space (const gchar *device, const gchar *fstype, GError *
     }
 }
 
-static gboolean query_fs_operation (const gchar *fs_type, BDFsOpType op, gchar **required_utility, BDFsResizeFlags *mode, BDFSMkfsOptionsFlags *options, GError **error) {
+static gboolean query_fs_operation (const gchar *fs_type, BDFSOpType op, gchar **required_utility, BDFSResizeFlags *mode, BDFSMkfsOptionsFlags *options, GError **error) {
     gboolean ret;
     const BDFSInfo *fsinfo = NULL;
     const gchar* op_name = NULL;
@@ -1582,7 +1582,7 @@ gboolean bd_fs_can_mkfs (const gchar *type, BDFSMkfsOptionsFlags *options, gchar
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
  */
-gboolean bd_fs_can_resize (const gchar *type, BDFsResizeFlags *mode, gchar **required_utility, GError **error) {
+gboolean bd_fs_can_resize (const gchar *type, BDFSResizeFlags *mode, gchar **required_utility, GError **error) {
     return query_fs_operation (type, BD_FS_RESIZE, required_utility, mode, NULL, error);
 }
 
