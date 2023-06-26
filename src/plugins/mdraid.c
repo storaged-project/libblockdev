@@ -539,7 +539,7 @@ guint64 bd_md_get_superblock_size (guint64 member_size, const gchar *version, GE
  * @disks: (array zero-terminated=1): disks to use for the new RAID (including spares)
  * @spares: number of spare devices
  * @version: (nullable): metadata version
- * @bitmap: whether to create an internal bitmap on the device or not
+ * @bitmap: (nullable): write-intent bitmap location ('none', 'internal') or %NULL to let mdadm decide (i.e. internal > 100GB)
  * @chunk_size: chunk size of the device to create
  * @extra: (nullable) (array zero-terminated=1): extra options for the creation (right now
  *                                                 passed to the 'mdadm' utility)
@@ -549,7 +549,7 @@ guint64 bd_md_get_superblock_size (guint64 member_size, const gchar *version, GE
  *
  * Tech category: %BD_MD_TECH_MDRAID-%BD_MD_TECH_MODE_CREATE
  */
-gboolean bd_md_create (const gchar *device_name, const gchar *level, const gchar **disks, guint64 spares, const gchar *version, gboolean bitmap, guint64 chunk_size, const BDExtraArg **extra, GError **error) {
+gboolean bd_md_create (const gchar *device_name, const gchar *level, const gchar **disks, guint64 spares, const gchar *version, const gchar *bitmap, guint64 chunk_size, const BDExtraArg **extra, GError **error) {
     const gchar **argv = NULL;
     /* {"mdadm", "create", device, "--run", "level", "raid-devices",...} */
     guint argv_len = 6;
@@ -561,6 +561,7 @@ gboolean bd_md_create (const gchar *device_name, const gchar *level, const gchar
     gchar *spares_str = NULL;
     gchar *version_str = NULL;
     gchar *chunk_str = NULL;
+    gchar *bitmap_str = NULL;
     gboolean ret = FALSE;
 
     if (!check_deps (&avail_deps, DEPS_MDADM_MASK, deps, DEPS_LAST, &deps_check_lock, error))
@@ -598,8 +599,10 @@ gboolean bd_md_create (const gchar *device_name, const gchar *level, const gchar
         version_str = g_strdup_printf ("--metadata=%s", version);
         argv[argv_top++] = version_str;
     }
-    if (bitmap)
-        argv[argv_top++] = "--bitmap=internal";
+    if (bitmap) {
+        bitmap_str = g_strdup_printf ("--bitmap=%s", bitmap);
+        argv[argv_top++] = bitmap_str;
+    }
     if (chunk_size != 0) {
         chunk_str = g_strdup_printf ("--chunk=%"G_GUINT64_FORMAT, chunk_size/1024);
         argv[argv_top++] = chunk_str;
@@ -616,6 +619,7 @@ gboolean bd_md_create (const gchar *device_name, const gchar *level, const gchar
     g_free (spares_str);
     g_free (version_str);
     g_free (chunk_str);
+    g_free (bitmap_str);
     g_free (argv);
 
     return ret;
