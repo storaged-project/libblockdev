@@ -72,8 +72,8 @@ class NILFS2TestFeatures(NILFS2NoDevTestCase):
         features = BlockDev.fs_features("nilfs2")
         self.assertIsNotNone(features)
 
-        self.assertTrue(features.resize & BlockDev.FsResizeFlags.ONLINE_GROW)
-        self.assertTrue(features.resize & BlockDev.FsResizeFlags.ONLINE_SHRINK)
+        self.assertTrue(features.resize & BlockDev.FSResizeFlags.ONLINE_GROW)
+        self.assertTrue(features.resize & BlockDev.FSResizeFlags.ONLINE_SHRINK)
 
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.LABEL)
         self.assertFalse(features.mkfs & BlockDev.FSMkfsOptionsFlags.UUID)

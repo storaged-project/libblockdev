@@ -78,8 +78,8 @@ class XfsTestFeatures(XfsNoDevTestCase):
         features = BlockDev.fs_features("xfs")
         self.assertIsNotNone(features)
 
-        self.assertTrue(features.resize & BlockDev.FsResizeFlags.OFFLINE_GROW)
-        self.assertTrue(features.resize & BlockDev.FsResizeFlags.ONLINE_GROW)
+        self.assertTrue(features.resize & BlockDev.FSResizeFlags.OFFLINE_GROW)
+        self.assertTrue(features.resize & BlockDev.FSResizeFlags.ONLINE_GROW)
 
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.LABEL)
         self.assertTrue(features.mkfs & BlockDev.FSMkfsOptionsFlags.UUID)

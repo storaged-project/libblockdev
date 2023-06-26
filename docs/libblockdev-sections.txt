@@ -517,7 +517,7 @@ bd_fs_close
 BDFSExt2Info
 BDFSExt3Info
 BDFSExt4Info
-BDFsError
+BDFSError
 BD_FS_ERROR
 bd_fs_error_quark
 bd_fs_wipe
@@ -618,7 +618,7 @@ bd_fs_vfat_set_uuid
 bd_fs_vfat_check_uuid
 BDFSTech
 BDFSTechMode
-BDFsResizeFlags
+BDFSResizeFlags
 bd_fs_is_tech_avail
 BDFSNtfsInfo
 bd_fs_ntfs_check

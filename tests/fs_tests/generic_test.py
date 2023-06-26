@@ -191,9 +191,9 @@ class CanResizeRepairCheckLabel(GenericNoDevTestCase):
         os.environ["PATH"] = old_path
         self.assertFalse(avail)
         self.assertEqual(util, "resize2fs")
-        self.assertEqual(mode, BlockDev.FsResizeFlags.ONLINE_GROW |
-                               BlockDev.FsResizeFlags.OFFLINE_GROW |
-                               BlockDev.FsResizeFlags.OFFLINE_SHRINK)
+        self.assertEqual(mode, BlockDev.FSResizeFlags.ONLINE_GROW |
+                               BlockDev.FSResizeFlags.OFFLINE_GROW |
+                               BlockDev.FSResizeFlags.OFFLINE_SHRINK)
 
         avail = BlockDev.fs_can_resize("vfat")
         self.assertTrue(avail)
