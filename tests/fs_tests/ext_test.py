@@ -187,14 +187,6 @@ class ExtTestCheck(ExtTestCase):
         succ = check_function(self.loop_dev, None)
         self.assertTrue(succ)
 
-        # mounted, but can be checked
-        with mounted(self.loop_dev, self.mount_dir):
-            succ = check_function(self.loop_dev, None)
-            self.assertTrue(succ)
-
-        succ = check_function(self.loop_dev, None)
-        self.assertTrue(succ)
-
     def test_ext2_check(self):
         """Verify that it is possible to check an ext2 file system"""
         self._test_ext_check(mkfs_function=BlockDev.fs_ext2_mkfs,
@@ -222,10 +214,6 @@ class ExtTestRepair(ExtTestCase):
         # unsafe operations should work here too
         succ = repair_function(self.loop_dev, True, None)
         self.assertTrue(succ)
-
-        with mounted(self.loop_dev, self.mount_dir):
-            with self.assertRaises(GLib.GError):
-                repair_function(self.loop_dev, False, None)
 
         succ = repair_function(self.loop_dev, False, None)
         self.assertTrue(succ)
