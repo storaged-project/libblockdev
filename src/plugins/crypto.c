@@ -3026,7 +3026,7 @@ static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libv
 
     return TRUE;
 }
-#endif // WITH_BD_ESCROW
+#endif /* WITH_BD_ESCROW */
 
 /**
  * bd_crypto_escrow_device:
@@ -3180,7 +3180,7 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
     bd_utils_report_finished (progress_id, "Completed");
     return ret;
 }
-#endif // WITH_BD_ESCROW
+#endif /* WITH_BD_ESCROW */
 
 /**
  * bd_crypto_bitlk_open:

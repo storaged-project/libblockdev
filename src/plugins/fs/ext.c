@@ -729,8 +729,8 @@ static BDFSExtInfo* ext_get_info (const gchar *device, GError **error) {
 
     retval = ext2fs_open (device,
                           flags,
-                          0, // use_superblock
-                          0, // use_blocksize
+                          0, /* use_superblock */
+                          0, /* use_blocksize */
                           unix_io_manager,
                           &fs);
     if (retval) {

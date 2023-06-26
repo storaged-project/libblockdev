@@ -12,6 +12,7 @@ typedef enum {
     BD_DM_ERROR_TASK,
     BD_DM_ERROR_RAID_FAIL,
     BD_DM_ERROR_RAID_NO_DEVS,
+    BD_DM_ERROR_RAID_NO_EXIST,
     BD_DM_ERROR_TECH_UNAVAIL,
 } BDDMError;
 
@@ -68,7 +69,7 @@ gboolean bd_dm_remove (const gchar *map_name, GError **error);
  * @error: (out) (optional): place to store error (if any)
  *
  * Returns: map name of the map providing the @dm_node device or %NULL
- * (@error) contains the error in such cases)
+ * (@error) contains the error in such cases
  *
  * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_QUERY
  */
@@ -80,7 +81,7 @@ gchar* bd_dm_name_from_node (const gchar *dm_node, GError **error);
  * @error: (out) (optional): place to store error (if any)
  *
  * Returns: DM node name for the @map_name map or %NULL (@error) contains
- * the error in such cases)
+ * the error in such cases
  *
  * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_QUERY
  */

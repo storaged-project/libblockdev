@@ -4,8 +4,7 @@
 #ifndef BD_MD
 #define BD_MD
 
-/* taken from blivet */
-// these defaults were determined empirically
+/* these defaults were determined empirically (taken from blivet) */
 #define BD_MD_SUPERBLOCK_SIZE (2 MiB)
 #define BD_MD_CHUNK_SIZE (512 KiB)
 
