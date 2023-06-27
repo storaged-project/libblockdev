@@ -267,7 +267,7 @@ class PluginsTestCase(unittest.TestCase):
         os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
 
         # proclaim the new build a different plugin
-        os.system("cp src/plugins/.libs/libbd_lvm.so src/plugins/.libs/libbd_lvm2.so.2")
+        os.system("cp src/plugins/.libs/libbd_lvm.so src/plugins/.libs/libbd_lvm2.so.3")
 
         # change the sources back and recompile
         os.system("sed -ri 's?1024;//test-change?MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
@@ -279,7 +279,7 @@ class PluginsTestCase(unittest.TestCase):
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
 
         # new LVM plugin loaded, max LV size should be 1024 bytes
-        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm2.so.2")
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm2.so.3")
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), 1024)
 
         # reinit with the original config
@@ -298,7 +298,7 @@ class PluginsTestCase(unittest.TestCase):
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
 
         # new LVM plugin loaded, max LV size should be 1024 bytes
-        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm2.so.2")
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm2.so.3")
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), 1024)
 
         # reinit with the original config
