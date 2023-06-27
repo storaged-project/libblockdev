@@ -34,6 +34,12 @@
 
 #define MOUNT_ERR_BUF_SIZE 1024
 
+#ifdef __clang__
+#define ZERO_INIT {}
+#else
+#define ZERO_INIT {0}
+#endif
+
 typedef struct MountArgs {
     const gchar *mountpoint;
     const gchar *device;
@@ -247,7 +253,7 @@ static gboolean get_mount_error_old (struct libmnt_context *cxt, int rc, MountAr
                   }
                   /* new versions of libmount do this automatically */
                   else {
-                      MountArgs ro_args;
+                      MountArgs ro_args = ZERO_INIT;
                       gboolean success = FALSE;
 
                       ro_args.device = args->device;
@@ -629,7 +635,7 @@ gboolean bd_fs_unmount (const gchar *spec, gboolean lazy, gboolean force, const 
     gid_t current_gid = -1;
     const BDExtraArg **extra_p = NULL;
     gchar *endptr = NULL;
-    MountArgs args;
+    MountArgs args = ZERO_INIT;
     GError *l_error = NULL;
     gboolean ret = FALSE;
 
@@ -711,7 +717,7 @@ gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar 
     gid_t current_gid = -1;
     const BDExtraArg **extra_p = NULL;
     gchar *endptr = NULL;
-    MountArgs args;
+    MountArgs args = ZERO_INIT;
     GError *l_error = NULL;
     gboolean ret = FALSE;
 

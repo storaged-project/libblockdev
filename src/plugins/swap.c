@@ -130,7 +130,7 @@ gboolean bd_swap_mkswap (const gchar *device, const gchar *label, const gchar *u
 
     /* We use -f to force since mkswap tends to refuse creation on lvs with
        a message about erasing bootbits sectors on whole disks. Bah. */
-    const gchar *argv[6] = {"mkswap", "-f", NULL, NULL, NULL, NULL};
+    const gchar *argv[8] = {"mkswap", "-f", NULL, NULL, NULL, NULL, NULL, NULL};
 
     if (label) {
         argv[next_arg] = "-L";

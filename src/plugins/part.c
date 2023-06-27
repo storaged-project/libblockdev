@@ -152,6 +152,10 @@ static gint get_part_num (const gchar *part, GError **error) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                      "Invalid partition path given: '%s'. Cannot extract partition number", part);
         return -1;
+    } else if (part_num < 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                     "Invalid partition path given: '%s'.", part);
+        return -1;
     }
 
     return part_num;
