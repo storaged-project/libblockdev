@@ -7,11 +7,11 @@
 GQuark bd_s390_error_quark (void);
 #define BD_S390_ERROR bd_s390_error_quark ()
 typedef enum {
+    BD_S390_ERROR_TECH_UNAVAIL,
     BD_S390_ERROR_DEVICE,
     BD_S390_ERROR_FORMAT_FAILED,
     BD_S390_ERROR_DASDFMT,
     BD_S390_ERROR_IO,
-    BD_S390_ERROR_TECH_UNAVAIL,
 } BDS390Error;
 
 typedef enum {
