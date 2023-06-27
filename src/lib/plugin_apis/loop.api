@@ -10,9 +10,9 @@ GQuark bd_loop_error_quark (void) {
 
 #define BD_LOOP_ERROR bd_loop_error_quark ()
 typedef enum {
-    BD_LOOP_ERROR_DEVICE,
-    BD_LOOP_ERROR_FAIL,
     BD_LOOP_ERROR_TECH_UNAVAIL,
+    BD_LOOP_ERROR_FAIL,
+    BD_LOOP_ERROR_DEVICE,
 } BDLoopError;
 
 typedef enum {
