@@ -1,6 +1,9 @@
 #include <glib.h>
 #include <blockdev/utils.h>
 
+#ifndef BD_S390
+#define BD_S390
+
 GQuark bd_s390_error_quark (void);
 #define BD_S390_ERROR bd_s390_error_quark ()
 typedef enum {
@@ -47,3 +50,5 @@ gchar* bd_s390_zfcp_sanitize_lun_input (const gchar *lun, GError **error);
 gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar *lun, GError **error);
 gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const gchar *lun, GError **error);
 gboolean bd_s390_zfcp_offline(const gchar *devno, const gchar *wwpn, const gchar *lun, GError **error);
+
+#endif  /* BD_S390 */

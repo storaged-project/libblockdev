@@ -1,6 +1,9 @@
 #include <glib.h>
 #include <blockdev/utils.h>
 
+#ifndef BD_S390_API
+#define BD_S390_API
+
 GQuark bd_s390_error_quark (void) {
     return g_quark_from_static_string ("g-bd-s390-error-quark");
 }
@@ -171,3 +174,5 @@ gboolean bd_s390_zfcp_scsi_offline(const gchar *devno, const gchar *wwpn, const 
  * Tech category: %BD_S390_TECH_ZFCP-%BD_S390_TECH_MODE_MODIFY
  */
 gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gchar *lun, GError **error);
+
+#endif  /* BD_S390_API */

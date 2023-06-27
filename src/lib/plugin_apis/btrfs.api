@@ -2,6 +2,9 @@
 #include <glib-object.h>
 #include <blockdev/utils.h>
 
+#ifndef BD_BTRFS_API
+#define BD_BTRFS_API
+
 #define BD_BTRFS_MAIN_VOLUME_ID 5
 #define BD_BTRFS_MIN_MEMBER_SIZE G_GUINT64_CONSTANT (134217728ULL) /* 128 MiB */
 
@@ -457,3 +460,5 @@ gboolean bd_btrfs_repair (const gchar *device, const BDExtraArg **extra, GError 
  * Tech category: %BD_BTRFS_TECH_FS-%BD_BTRFS_TECH_MODE_MODIFY
  */
 gboolean bd_btrfs_change_label (const gchar *mountpoint, const gchar *label, GError **error);
+
+#endif  /* BD_BTRFS_API */

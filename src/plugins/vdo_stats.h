@@ -19,8 +19,13 @@
 
 #include <glib.h>
 
+#ifndef BD_VDO_STATS
+#define BD_VDO_STATS
+
 gboolean get_stat_val_double (GHashTable *stats, const gchar *key, gdouble *val);
 gboolean get_stat_val64 (GHashTable *stats, const gchar *key, gint64 *val);
 gboolean get_stat_val64_default (GHashTable *stats, const gchar *key, gint64 *val, gint64 def);
 
 GHashTable* vdo_get_stats_full (const gchar *name, GError **error);
+
+#endif  /* BD_VDO_STATS */

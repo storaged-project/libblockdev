@@ -1,6 +1,9 @@
 #include <glib.h>
 #include <blockdev/utils.h>
 
+#ifndef BD_CRYPTO_API
+#define BD_CRYPTO_API
+
 GQuark bd_crypto_error_quark (void) {
     return g_quark_from_static_string ("g-bd-crypto-error-quark");
 }
@@ -1304,3 +1307,5 @@ gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, BDCrypt
  * Tech category: %BD_CRYPTO_TECH_FVAULT2-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_fvault2_close (const gchar *fvault2_device, GError **error);
+
+#endif  /* BD_CRYPTO_API */
