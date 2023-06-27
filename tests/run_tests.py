@@ -42,6 +42,7 @@ def _get_test_tags(test):
     """ Get test tags for single test case """
 
     tags = set()
+    tags.add(TestTags.ALL)
 
     # test failed to load, usually some ImportError or something really broken
     # in the test file, just return empty list and let it fail
@@ -181,9 +182,11 @@ def parse_args():
         args.include_tags.add(TestTags.REGRESSION.value)
 
     # for backwards compatibility we want to exclude unsafe and unstable by default
-    if not args.jenkins and TestTags.UNSAFE.value not in args.include_tags:
+    if not args.jenkins and not (TestTags.UNSAFE.value in args.include_tags or
+                                 TestTags.ALL.value in args.include_tags):
         args.exclude_tags.add(TestTags.UNSAFE.value)
-    if not args.lucky and TestTags.UNSTABLE.value not in args.include_tags:
+    if not args.lucky and not (TestTags.UNSTABLE.value in args.include_tags or
+                               TestTags.ALL.value in args.include_tags):
         args.exclude_tags.add(TestTags.UNSTABLE.value)
 
     return args
