@@ -1330,7 +1330,7 @@ __all__.append("BlockDevNotImplementedError")
 
 not_implemented_rule = XRule(GLib.Error, re.compile(r".*The function '.*' called, but not implemented!"), None, BlockDevNotImplementedError)
 
-fs_nofs_rule = XRule(GLib.Error, None, 3, FSNoFSError)
+fs_nofs_rule = XRule(GLib.Error, None, 4, FSNoFSError)
 swap_activate_rule = XRule(GLib.Error, None, 1, SwapActivateError)
 swap_old_rule = XRule(GLib.Error, None, 3, SwapOldError)
 swap_suspend_rule = XRule(GLib.Error, None, 4, SwapSuspendError)
