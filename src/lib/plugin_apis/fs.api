@@ -1005,6 +1005,8 @@ gboolean bd_fs_resize (const gchar *device, guint64 new_size, const gchar *fstyp
  * plugin based on detected filesystem (e.g. bd_fs_xfs_repair for XFS). This
  * function will return an error for unknown/unsupported filesystems.
  *
+ * Most filesystem tools typically require the filesystem not to be mounted.
+ *
  * Returns: whether the file system on @device was successfully repaired or not
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_REPAIR
@@ -1017,9 +1019,14 @@ gboolean bd_fs_repair (const gchar *device, const gchar *fstype, GError **error)
  * @fstype: (nullable): the filesystem type on @device or %NULL to detect
  * @error: (out) (optional): place to store error (if any)
  *
- * Check filesystem on @device. This calls other fs check functions from this
- * plugin based on detected filesystem (e.g. bd_fs_xfs_check for XFS). This
- * function will return an error for unknown/unsupported filesystems.
+ * Check filesystem on @device avoiding any modifications or repairs.
+ * This calls other fs check functions from this plugin based on detected
+ * filesystem (e.g. bd_fs_xfs_check for XFS). This function will return
+ * an error for unknown/unsupported filesystems.
+ *
+ * Note that depending on a corresponding filesystem type and configured
+ * features running this function on a mounted filesystem may result
+ * in false errors reported.
  *
  * Returns: whether the file system on @device passed the consistency check or not
  *
