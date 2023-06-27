@@ -6,13 +6,13 @@
 GQuark bd_dm_error_quark (void);
 #define BD_DM_ERROR bd_dm_error_quark ()
 typedef enum {
+    BD_DM_ERROR_TECH_UNAVAIL,
     BD_DM_ERROR_SYS,
     BD_DM_ERROR_NOT_ROOT,
     BD_DM_ERROR_TASK,
     BD_DM_ERROR_RAID_FAIL,
     BD_DM_ERROR_RAID_NO_DEVS,
     BD_DM_ERROR_RAID_NO_EXIST,
-    BD_DM_ERROR_TECH_UNAVAIL,
 } BDDMError;
 
 typedef enum {
