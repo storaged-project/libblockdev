@@ -1,4 +1,4 @@
-# image for building documentation for Python bindings, see HACKING.md for more details
+# image for building documentation for Python bindings, see README.DEVEL.md for more details
 
 FROM debian:testing
 LABEL maintainer Vojtech Trefny <vtrefny@redhat.com>
