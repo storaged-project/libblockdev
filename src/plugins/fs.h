@@ -6,6 +6,7 @@
 GQuark bd_fs_error_quark (void);
 #define BD_FS_ERROR bd_fs_error_quark ()
 typedef enum {
+    BD_FS_ERROR_TECH_UNAVAIL,
     BD_FS_ERROR_INVAL,
     BD_FS_ERROR_PARSE,
     BD_FS_ERROR_FAIL,
@@ -15,7 +16,6 @@ typedef enum {
     BD_FS_ERROR_NOT_SUPPORTED,
     BD_FS_ERROR_NOT_MOUNTED,
     BD_FS_ERROR_AUTH,
-    BD_FS_ERROR_TECH_UNAVAIL,
     BD_FS_ERROR_LABEL_INVALID,
     BD_FS_ERROR_UUID_INVALID,
     BD_FS_ERROR_UNKNOWN_FS,

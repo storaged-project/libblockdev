@@ -12,9 +12,9 @@
 GQuark bd_init_error_quark (void);
 #define BD_INIT_ERROR bd_init_error_quark ()
 typedef enum {
+    BD_INIT_ERROR_FAILED,
     BD_INIT_ERROR_PLUGINS_FAILED,
     BD_INIT_ERROR_NOT_IMPLEMENTED,
-    BD_INIT_ERROR_FAILED,
 } BDInitError;
 
 gboolean bd_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func, GError **error);

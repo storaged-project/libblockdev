@@ -7,11 +7,11 @@
 GQuark bd_nvdimm_error_quark (void);
 #define BD_NVDIMM_ERROR bd_nvdimm_error_quark ()
 typedef enum {
-    BD_NVDIMM_ERROR_NAMESPACE_PARSE,
+    BD_NVDIMM_ERROR_TECH_UNAVAIL,
     BD_NVDIMM_ERROR_NAMESPACE_FAIL,
+    BD_NVDIMM_ERROR_NAMESPACE_PARSE,
     BD_NVDIMM_ERROR_NAMESPACE_NOEXIST,
     BD_NVDIMM_ERROR_NAMESPACE_MODE_INVAL,
-    BD_NVDIMM_ERROR_TECH_UNAVAIL,
 } BDNVDIMMError;
 
 typedef enum {
@@ -21,7 +21,7 @@ typedef enum {
     BD_NVDIMM_NAMESPACE_MODE_DAX,
     BD_NVDIMM_NAMESPACE_MODE_FSDAX,
     BD_NVDIMM_NAMESPACE_MODE_DEVDAX,
-    BD_NVDIMM_NAMESPACE_MODE_UNKNOWN
+    BD_NVDIMM_NAMESPACE_MODE_UNKNOWN,
 } BDNVDIMMNamespaceMode;
 
 typedef struct BDNVDIMMNamespaceInfo {
@@ -77,4 +77,4 @@ gboolean bd_nvdimm_namespace_reconfigure (const gchar* namespace, BDNVDIMMNamesp
 
 const guint64 *bd_nvdimm_namespace_get_supported_sector_sizes (BDNVDIMMNamespaceMode mode, GError **error);
 
-#endif  /* BD_CRYPTO */
+#endif  /* BD_NVDIMM */

@@ -1,19 +1,22 @@
 #include <glib.h>
 #include <blockdev/utils.h>
 
+#ifndef BD_DM_API
+#define BD_DM_API
+
 GQuark bd_dm_error_quark (void) {
     return g_quark_from_static_string ("g-bd-dm-error-quark");
 }
 
 #define BD_DM_ERROR bd_dm_error_quark ()
 typedef enum {
+    BD_DM_ERROR_TECH_UNAVAIL,
     BD_DM_ERROR_SYS,
     BD_DM_ERROR_NOT_ROOT,
     BD_DM_ERROR_TASK,
     BD_DM_ERROR_RAID_FAIL,
     BD_DM_ERROR_RAID_NO_DEVS,
     BD_DM_ERROR_RAID_NO_EXIST,
-    BD_DM_ERROR_TECH_UNAVAIL,
 } BDDMError;
 
 typedef enum {
@@ -111,3 +114,5 @@ gchar* bd_dm_get_subsystem_from_name (const gchar *device_name, GError **error);
  * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_QUERY
  */
 gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean active_only, GError **error);
+
+#endif  /* BD_DM_API */

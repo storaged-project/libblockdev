@@ -11,12 +11,12 @@
 GQuark bd_md_error_quark (void);
 #define BD_MD_ERROR bd_md_error_quark ()
 typedef enum {
+    BD_MD_ERROR_TECH_UNAVAIL,
+    BD_MD_ERROR_FAIL,
     BD_MD_ERROR_PARSE,
     BD_MD_ERROR_BAD_FORMAT,
     BD_MD_ERROR_NO_MATCH,
     BD_MD_ERROR_INVAL,
-    BD_MD_ERROR_FAIL,
-    BD_MD_ERROR_TECH_UNAVAIL,
 } BDMDError;
 
 typedef struct BDMDExamineData {

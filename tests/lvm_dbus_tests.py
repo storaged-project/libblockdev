@@ -2164,7 +2164,7 @@ class LVMVDOTest(LVMTestCase):
         self.assertEqual(lv_info.size, 35 * 1024**3)
 
     @tag_test(TestTags.SLOW)
-    def test_enabla_disable_compression(self):
+    def test_enable_disable_compression(self):
         succ = BlockDev.lvm_vdo_pool_create("testVDOVG", "vdoLV", "vdoPool", 7 * 1024**3, 35 * 1024**3,
                                             300 * 1024**2)
         self.assertTrue(succ)

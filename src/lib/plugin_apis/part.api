@@ -11,16 +11,16 @@ GQuark bd_part_error_quark (void) {
 
 #define BD_PART_ERROR bd_part_error_quark ()
 typedef enum {
-    BD_PART_ERROR_EXISTS,
-    BD_PART_ERROR_INVAL,
-    BD_PART_ERROR_FAIL,
     BD_PART_ERROR_TECH_UNAVAIL,
+    BD_PART_ERROR_FAIL,
+    BD_PART_ERROR_INVAL,
+    BD_PART_ERROR_EXISTS,
 } BDPartError;
 
 typedef enum {
-    BD_PART_TABLE_MSDOS = 0,
+    BD_PART_TABLE_MSDOS,
     BD_PART_TABLE_GPT,
-    BD_PART_TABLE_UNDEF
+    BD_PART_TABLE_UNDEF,
 } BDPartTableType;
 
 typedef enum {
@@ -40,9 +40,9 @@ typedef enum {
 } BDPartTypeReq;
 
 typedef enum {
+    BD_PART_ALIGN_NONE,
     BD_PART_ALIGN_MINIMAL,
     BD_PART_ALIGN_OPTIMAL,
-    BD_PART_ALIGN_NONE
 } BDPartAlign;
 
 #define BD_PART_TYPE_SPEC (bd_part_spec_get_type ())

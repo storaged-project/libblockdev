@@ -1,12 +1,16 @@
 #include <glib.h>
 #include <blockdev/utils.h>
 
+#ifndef BD_CRYPTO_API
+#define BD_CRYPTO_API
+
 GQuark bd_crypto_error_quark (void) {
     return g_quark_from_static_string ("g-bd-crypto-error-quark");
 }
 
 #define BD_CRYPTO_ERROR bd_crypto_error_quark ()
 typedef enum {
+    BD_CRYPTO_ERROR_TECH_UNAVAIL,
     BD_CRYPTO_ERROR_DEVICE,
     BD_CRYPTO_ERROR_STATE,
     BD_CRYPTO_ERROR_INVALID_SPEC,
@@ -21,7 +25,6 @@ typedef enum {
     BD_CRYPTO_ERROR_CERT_DECODE,
     BD_CRYPTO_ERROR_ESCROW_FAILED,
     BD_CRYPTO_ERROR_INVALID_PARAMS,
-    BD_CRYPTO_ERROR_TECH_UNAVAIL,
     BD_CRYPTO_ERROR_KEYRING,
     BD_CRYPTO_ERROR_KEYFILE_FAILED,
     BD_CRYPTO_ERROR_INVALID_CONTEXT,
@@ -1304,3 +1307,5 @@ gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, BDCrypt
  * Tech category: %BD_CRYPTO_TECH_FVAULT2-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_fvault2_close (const gchar *fvault2_device, GError **error);
+
+#endif  /* BD_CRYPTO_API */
