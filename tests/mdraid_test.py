@@ -46,6 +46,10 @@ class MDNoDevTestCase(MDTest):
             BlockDev.reinit(cls.requested_plugins, True, None)
 
     @tag_test(TestTags.NOSTORAGE)
+    def test_plugin_version(self):
+       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.MDRAID), "libbd_mdraid.so.3")
+
+    @tag_test(TestTags.NOSTORAGE)
     def test_get_superblock_size(self):
         """Verify that superblock size si calculated properly"""
 

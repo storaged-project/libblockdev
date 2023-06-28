@@ -103,6 +103,10 @@ class CryptoNoDevTestCase(CryptoTestCase):
         pass
 
     @tag_test(TestTags.NOSTORAGE)
+    def test_plugin_version(self):
+       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.CRYPTO), "libbd_crypto.so.3")
+
+    @tag_test(TestTags.NOSTORAGE)
     def test_generate_backup_passhprase(self):
         """Verify that backup passphrase generation works as expected"""
 

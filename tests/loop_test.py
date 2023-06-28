@@ -30,6 +30,11 @@ class LoopTestCase(unittest.TestCase):
             pass
         os.unlink(self.dev_file)
 
+class LoopPluginVersionCase(LoopTestCase):
+    @tag_test(TestTags.NOSTORAGE)
+    def test_plugin_version(self):
+       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LOOP), "libbd_loop.so.3")
+
 
 class LoopTestSetupBasic(LoopTestCase):
     @tag_test(TestTags.CORE)

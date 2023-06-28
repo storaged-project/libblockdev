@@ -35,6 +35,10 @@ class BtrfsTest(unittest.TestCase):
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
 
+class BtrfsPluginVersionCase(BtrfsTest):
+    @tag_test(TestTags.NOSTORAGE)
+    def test_plugin_version(self):
+       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.BTRFS), "libbd_btrfs.so.3")
 
 class BtrfsTestCase(BtrfsTest):
 

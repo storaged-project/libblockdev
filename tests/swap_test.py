@@ -18,6 +18,11 @@ class SwapTest(unittest.TestCase):
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
 
+class SwapPluginVersionTestCase(SwapTest):
+    @tag_test(TestTags.NOSTORAGE)
+    def test_plugin_version(self):
+       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.SWAP), "libbd_swap.so.3")
+
 class SwapTestCase(SwapTest):
     test_uuid = "4d7086c4-a4d3-432f-819e-73da03870df9"
 
