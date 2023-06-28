@@ -3,6 +3,10 @@ import os
 import overrides_hack
 
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, get_version, TestTags, tag_test
+
+import gi
+gi.require_version("BlockDev", "2.0")
+
 from gi.repository import BlockDev, GLib
 
 class MpathTest(unittest.TestCase):

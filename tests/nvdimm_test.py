@@ -8,6 +8,10 @@ import overrides_hack
 from packaging.version import Version
 
 from utils import run_command, read_file, fake_path, TestTags, tag_test
+
+import gi
+gi.require_version("BlockDev", "2.0")
+
 from gi.repository import BlockDev, GLib
 
 

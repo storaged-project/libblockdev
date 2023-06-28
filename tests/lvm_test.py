@@ -12,6 +12,10 @@ from contextlib import contextmanager
 from packaging.version import Version
 
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test, run_command
+
+import gi
+gi.require_version("BlockDev", "2.0")
+
 from gi.repository import BlockDev, GLib
 
 

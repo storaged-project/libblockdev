@@ -8,6 +8,10 @@ import six
 import shutil
 
 from utils import run_command, read_file, fake_path, create_sparse_tempfile, create_lio_device, delete_lio_device, TestTags, tag_test
+
+import gi
+gi.require_version("BlockDev", "2.0")
+
 from gi.repository import BlockDev, GLib
 from bytesize import bytesize
 

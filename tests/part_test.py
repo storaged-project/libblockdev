@@ -3,6 +3,9 @@ import os
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, TestTags, tag_test
 import overrides_hack
 
+import gi
+gi.require_version("BlockDev", "2.0")
+
 from gi.repository import BlockDev, GLib
 
 

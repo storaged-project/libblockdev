@@ -12,6 +12,9 @@ import overrides_hack
 
 from packaging.version import Version
 
+import gi
+gi.require_version("BlockDev", "2.0")
+
 from gi.repository import BlockDev, GLib
 
 
