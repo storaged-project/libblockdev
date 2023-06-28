@@ -641,7 +641,6 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %config %{_sysconfdir}/libblockdev/conf.d/00-default.cfg
 
 %files devel
-%doc features.rst specs.rst
 %{_libdir}/libblockdev.so
 %dir %{_includedir}/blockdev
 %{_includedir}/blockdev/blockdev.h
