@@ -5,6 +5,9 @@ import six
 import overrides_hack
 from utils import fake_utils, create_sparse_tempfile, create_lio_device, delete_lio_device, run_command, TestTags, tag_test, read_file
 
+import gi
+gi.require_version("BlockDev", "2.0")
+
 from gi.repository import BlockDev, GLib
 
 

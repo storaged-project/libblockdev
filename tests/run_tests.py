@@ -210,6 +210,10 @@ if __name__ == '__main__':
         sys.path.append(projdir)
         sys.path.append(os.path.join(projdir, 'src/python'))
 
+    if not args.installed:
+        import gi.overrides
+        gi.overrides.__path__.insert(0, os.path.join(projdir, 'src/python/gi/overrides'))
+
     start_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     loader = unittest.defaultTestLoader
