@@ -2,11 +2,11 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>s390: libblockdev Reference Manual</title>
+<title>s390: libblockdev Reference Manual for libblockdev 3.0.</title>
 <meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
-<link rel="home" href="index.html" title="libblockdev Reference Manual">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.0.">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
-<link rel="prev" href="libblockdev-KernelBlockDevices.html" title="KernelBlockDevices">
+<link rel="prev" href="libblockdev-Swap.html" title="Swap">
 <link rel="next" href="libblockdev-Utils.html" title="Utils">
 <meta name="generator" content="GTK-Doc V1.33.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
@@ -19,7 +19,7 @@
 </td>
 <td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
 <td><a accesskey="u" href="ch01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
-<td><a accesskey="p" href="libblockdev-KernelBlockDevices.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="p" href="libblockdev-Swap.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
 <td><a accesskey="n" href="libblockdev-Utils.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
 </tr></table>
 <div class="refentry">
@@ -39,14 +39,6 @@
 <col class="functions_proto_name">
 </colgroup>
 <tbody>
-<tr>
-<td class="function_type">
-<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-</td>
-<td class="function_name">
-<a class="link" href="libblockdev-s390.html#bd-s390-check-deps" title="bd_s390_check_deps ()">bd_s390_check_deps</a> <span class="c_punctuation">()</span>
-</td>
-</tr>
 <tr>
 <td class="function_type">
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
@@ -209,17 +201,6 @@
 <div class="refsect1">
 <a name="libblockdev-s390.functions_details"></a><h2>Functions</h2>
 <div class="refsect2">
-<a name="bd-s390-check-deps"></a><h3>bd_s390_check_deps ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_s390_check_deps (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
-<div class="refsect3">
-<a name="bd-s390-check-deps.returns"></a><h4>Returns</h4>
-<p> whether the plugin's runtime dependencies are satisfied or not</p>
-<p>Function checking plugin's runtime dependencies.</p>
-</div>
-</div>
-<hr>
-<div class="refsect2">
 <a name="bd-s390-init"></a><h3>bd_s390_init ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 bd_s390_init (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
@@ -266,12 +247,12 @@ bd_s390_dasd_format (<em class="parameter"><code>const <a href="../glib/glib-Bas
 <td class="parameter_name"><p>extra</p></td>
 <td class="parameter_description"><p>extra options for the formatting (right now
 passed to the 'dasdfmt' utility). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -305,7 +286,7 @@ bd_s390_dasd_needs_format (<em class="parameter"><code>const <a href="../glib/gl
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -330,11 +311,18 @@ bd_s390_sanitize_dev_input (<em class="parameter"><code>const <a href="../glib/g
 <col class="parameters_description">
 <col width="200px" class="parameters_annotations">
 </colgroup>
-<tbody><tr>
+<tbody>
+<tr>
+<td class="parameter_name"><p>dev</p></td>
+<td class="parameter_description"><p>a DASD or zFCP device number</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
-</tr></tbody>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
 </table></div>
 </div>
 <div class="refsect3">
@@ -367,7 +355,7 @@ bd_s390_dasd_online (<em class="parameter"><code>const <a href="../glib/glib-Bas
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -401,7 +389,7 @@ bd_s390_dasd_is_ldl (<em class="parameter"><code>const <a href="../glib/glib-Bas
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -435,7 +423,7 @@ bd_s390_dasd_is_fba (<em class="parameter"><code>const <a href="../glib/glib-Bas
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -460,11 +448,18 @@ bd_s390_zfcp_sanitize_wwpn_input (<em class="parameter"><code>const <a href="../
 <col class="parameters_description">
 <col width="200px" class="parameters_annotations">
 </colgroup>
-<tbody><tr>
+<tbody>
+<tr>
+<td class="parameter_name"><p>wwpn</p></td>
+<td class="parameter_description"><p>a zFCP WWPN identifier</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
-</tr></tbody>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
 </table></div>
 </div>
 <div class="refsect3">
@@ -488,11 +483,18 @@ bd_s390_zfcp_sanitize_lun_input (<em class="parameter"><code>const <a href="../g
 <col class="parameters_description">
 <col width="200px" class="parameters_annotations">
 </colgroup>
-<tbody><tr>
+<tbody>
+<tr>
+<td class="parameter_name"><p>lun</p></td>
+<td class="parameter_description"><p>a zFCP LUN identifier</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
-</tr></tbody>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
 </table></div>
 </div>
 <div class="refsect3">
@@ -518,11 +520,28 @@ bd_s390_zfcp_online (<em class="parameter"><code>const <a href="../glib/glib-Bas
 <col class="parameters_description">
 <col width="200px" class="parameters_annotations">
 </colgroup>
-<tbody><tr>
+<tbody>
+<tr>
+<td class="parameter_name"><p>devno</p></td>
+<td class="parameter_description"><p>a zFCP device number</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>wwpn</p></td>
+<td class="parameter_description"><p>a zFCP WWPN identifier</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>lun</p></td>
+<td class="parameter_description"><p>a zFCP LUN identifier</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
-</tr></tbody>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
 </table></div>
 </div>
 <div class="refsect3">
@@ -547,11 +566,28 @@ bd_s390_zfcp_scsi_offline (<em class="parameter"><code>const <a href="../glib/gl
 <col class="parameters_description">
 <col width="200px" class="parameters_annotations">
 </colgroup>
-<tbody><tr>
+<tbody>
+<tr>
+<td class="parameter_name"><p>devno</p></td>
+<td class="parameter_description"><p>a zFCP device number</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>wwpn</p></td>
+<td class="parameter_description"><p>a zFCP WWPN identifier</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>lun</p></td>
+<td class="parameter_description"><p>a zFCP LUN identifier</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
-</tr></tbody>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
 </table></div>
 </div>
 <div class="refsect3">
@@ -602,7 +638,7 @@ bd_s390_zfcp_offline (<em class="parameter"><code>const <a href="../glib/glib-Ba
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -645,7 +681,7 @@ bd_s390_is_tech_avail (<em class="parameter"><code><a class="link" href="libbloc
 <td class="parameter_description"><p>place to store error (details about why the <em class="parameter"><code>tech</code></em>
 -<em class="parameter"><code>mode</code></em>
 combination is not available). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -673,6 +709,11 @@ plugin implementation and having all the runtime dependencies available</p>
 </colgroup>
 <tbody>
 <tr>
+<td class="enum_member_name"><p><a name="BD-S390-ERROR-TECH-UNAVAIL:CAPS"></a>BD_S390_ERROR_TECH_UNAVAIL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
 <td class="enum_member_name"><p><a name="BD-S390-ERROR-DEVICE:CAPS"></a>BD_S390_ERROR_DEVICE</p></td>
 <td> </td>
 <td> </td>
@@ -689,11 +730,6 @@ plugin implementation and having all the runtime dependencies available</p>
 </tr>
 <tr>
 <td class="enum_member_name"><p><a name="BD-S390-ERROR-IO:CAPS"></a>BD_S390_ERROR_IO</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-S390-ERROR-TECH-UNAVAIL:CAPS"></a>BD_S390_ERROR_TECH_UNAVAIL</p></td>
 <td> </td>
 <td> </td>
 </tr>

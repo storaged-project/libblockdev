@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>API changes in libblockdev 3.0: libblockdev Reference Manual for libblockdev 3.0.</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.0.">
+<link rel="up" href="index.html" title="libblockdev Reference Manual for libblockdev 3.0.">
+<link rel="prev" href="ch03.html" title="Testing libblockdev">
+<link rel="next" href="api-index-full.html" title="API Index">
+<meta name="generator" content="GTK-Doc V1.33.1 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts"></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><img src="up-insensitive.png" width="16" height="16" border="0"></td>
+<td><a accesskey="p" href="ch03.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="api-index-full.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="chapter">
+<div class="titlepage"><div><div><h1 class="title">
+<a name="30-api-changes"></a>API changes in libblockdev 3.0</h1></div></div></div>
+<p>
+  This is a list of API changes in libblockdev 3.0 with suggested replacements.
+  </p>
+<div class="simplesect">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="id-1.5.3"></a>Library</h2></div></div></div>
+<p>
+    <code class="literal">bd_switch_init_checks()</code> has been removed. Checks for runtime dependencies during libblockdev initialization are now disabled and plugins will be loaded even if a runtime dependency is missing.
+  </p>
+<p>
+    <code class="literal">bd_"plugin"_check_deps</code> functions have been removed from all plugins. Use <code class="literal">bd_"plugin"_is_tech_avail</code> to check for plugin dependencies.
+  </p>
+</div>
+<div class="simplesect">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="id-1.5.4"></a>LVM plugin</h2></div></div></div>
+<p>
+    <code class="literal">bd_lvm_data_lv_name()</code> has been removed, use <code class="literal">data_lv</code> from <a class="link" href="libblockdev-LVM.html#BDLVMLVdata" title="BDLVMLVdata">BDLVMLVdata</a> instead.
+  </p>
+<p>
+    <code class="literal">bd_lvm_metadadata_lv_name()</code> has been removed, use <code class="literal">metadata_lv</code> from <a class="link" href="libblockdev-LVM.html#BDLVMLVdata" title="BDLVMLVdata">BDLVMLVdata</a> instead.
+  </p>
+<p>
+    <code class="literal">BD_LVM_MAX_LV_SIZE</code> constant has been removed, use <code class="literal">bd_lvm_get_max_lv_size()</code> instead.
+  </p>
+<p>
+    Multiple thinpool and cache metadata size related constants have been removed without replacement. We recommend using functions like <code class="literal">bd_lvm_get_thpool_meta_size</code> instead.
+    Removed constants: <code class="literal">BD_LVM_MIN_THPOOL_MD_SIZE</code>, <code class="literal">BD_LVM_MAX_THPOOL_MD_SIZE</code>, <code class="literal">BD_LVM_MIN_THPOOL_CHUNK_SIZE</code>,
+    <code class="literal">BD_LVM_MIN_CACHE_MD_SIZE</code>, <code class="literal">BD_LVM_DEFAULT_CHUNK_SIZE</code>, <code class="literal">BD_LVM_MAX_PE_SIZE</code>, <code class="literal">BD_LVM_MIN_PE_SIZE</code>,
+    <code class="literal">BD_LVM_DEFAULT_PE_START</code> and <code class="literal">BD_LVM_DEFAULT_PE_SIZE</code>.
+  </p>
+<p>
+    <code class="literal">bd_lvm_lvactivate()</code> has a new parameter <code class="literal">shared</code>, use <code class="literal">FALSE</code> to preserve the original behaviour.
+  </p>
+</div>
+<div class="simplesect">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="id-1.5.5"></a>VDO plugin</h2></div></div></div>
+<p>
+    VDO plugin has been removed.
+  </p>
+</div>
+<div class="simplesect">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="id-1.5.6"></a>Crypto plugin</h2></div></div></div>
+<p>
+    <code class="literal">bd_crypto_luks_uuid()</code> has been removed, use <code class="literal">uuid</code> from <a class="link" href="libblockdev-Crypto.html#BDCryptoLUKSInfo" title="BDCryptoLUKSInfo">BDCryptoLUKSInfo</a> instead.
+  </p>
+<p>
+    <code class="literal">bd_crypto_luks_get_metadata_size()</code> has been removed, use <code class="literal">metadata_size</code> from
+    <a class="link" href="libblockdev-Crypto.html#BDCryptoLUKSInfo" title="BDCryptoLUKSInfo">BDCryptoLUKSInfo</a> instead.
+  </p>
+<p>
+    LUKS2-specific functions were removed. The "generic" LUKS functions which now support both LUKSv1 and LUKSv2 should be used instead.
+    Affected functions: <code class="literal">bd_crypto_luks_format_luks2</code> and <code class="literal">bd_crypto_luks_resize_luks2</code>.
+  </p>
+<p>
+    <code class="literal">bd_crypto_luks_open_keyring</code> has been removed, <code class="literal">bd_crypto_luks_open</code> with the keyring context (see below)
+    can be used instead.
+  </p>
+<p>
+   <code class="literal">bd_crypto_tc_open_full</code> has been removed, <code class="literal">bd_crypto_tc_open</code> can be used instead.
+   <code class="literal">bd_crypto_tc_open</code> arguments have been changed to match the "full" function.
+  </p>
+<p>
+    Functions that allowed using arbitrary binary data for passphrases were removed. The "generic" functions should be used instead,
+    see the key slot context information below.
+
+    Affected functions: <code class="literal">bd_crypto_luks_format_blob</code>, <code class="literal">bd_crypto_luks_format_luks2_blob</code>,
+    <code class="literal">bd_crypto_luks_open_blob</code>, <code class="literal">bd_crypto_luks_add_key_blob</code>, <code class="literal">bd_crypto_luks_remove_key_blob</code>,
+    <code class="literal">bd_crypto_luks_change_key_blob</code>, <code class="literal"></code> and <code class="literal">bd_crypto_luks_resume_blob</code>.
+  </p>
+<p>
+    All functions that require some type of passphrase or key as an input now expect <code class="literal">BDCryptoKeyslotContext</code> instead.
+    This is a private opaque context that needs to be set by one of the <code class="literal">bd_crypto_keyslot_context_new_*</code> functions
+    based on the type of the context required.
+  </p>
+</div>
+<div class="simplesect">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="id-1.5.7"></a>NVDIMM plugin</h2></div></div></div>
+<p>
+    <code class="literal">bd_nvdimm_namepace_get_supported_sector_sizes</code> has been removed, use <code class="literal">bd_nvdimm_namespace_get_supported_sector_sizes</code> instead.
+  </p>
+</div>
+<div class="simplesect">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="id-1.5.8"></a>FS plugin</h2></div></div></div>
+<p>
+    <code class="literal">bd_fs_clean</code> and <code class="literal">bd_fs_wipe</code> have new parameter <code class="literal">force</code>
+    that allows controlling whether the signatures will be removed from a mounted device or not. Use
+    <code class="literal">TRUE</code> to preserve the original behaviour.
+  </p>
+<p>
+    Following functions have a new parameter <code class="literal">fstype</code> that allows to skip scanning the device
+    for signature. Use <code class="literal">NULL</code> to preserve the original behaviour.
+    Affected functions: <code class="literal">bd_fs_resize</code>, <code class="literal">bd_fs_repair</code>, <code class="literal">bd_fs_check</code>, <code class="literal">bd_fs_set_label</code>, <code class="literal">bd_fs_set_uuid</code>, <code class="literal">bd_fs_get_size</code> and <code class="literal">bd_fs_get_free_space</code>
+  </p>
+<p>
+    Type-specific <code class="literal">bd_fs_..._wipe</code> functions have been removed. Use <code class="literal">bd_fs_wipe</code> or <code class="literal">bd_fs_clean</code> instead.
+    Affected functions: <code class="literal">bd_fs_btrfs_wipe</code>, <code class="literal">bd_fs_ext2_wipe</code>, <code class="literal">bd_fs_ext3_wipe</code>, <code class="literal">bd_fs_ext4_wipe</code>, <code class="literal">bd_fs_exfat_wipe</code>, <code class="literal">bd_fs_f2fs_wipe</code>, <code class="literal">bd_fs_nilfs2_wipe</code>, <code class="literal">bd_fs_ntfs_wipe</code>, <code class="literal">bd_fs_vfat_wipe</code>, <code class="literal">bd_fs_udf_wipe</code>, <code class="literal">bd_fs_xfs_wipe</code>
+  </p>
+<p>
+   <code class="literal">bd_fs_ntfs_check</code>, <code class="literal">bd_fs_ntfs_repair</code> and <code class="literal">bd_fs_xfs_check</code> have a new parameter <code class="literal">extra</code>
+   that allows specifying extra options for the fsck tools. This makes the functionality consistent with the other filesystems.
+  </p>
+<p>
+   <code class="literal">BDFsResizeFlags</code> enum was renamed to <code class="literal">BDFSResizeFlags</code>.
+  </p>
+<p>
+   <code class="literal">BDFsError</code> enum was renamed to <code class="literal">BDFSError</code>.
+  </p>
+</div>
+<div class="simplesect">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="id-1.5.9"></a>Part plugin</h2></div></div></div>
+<p>
+    The part plugin has been rewritten to use libfdisk library instead of libparted. The following functions, enums and definitions related to partition and disk flags have been removed.
+    <code class="literal">bd_part_set_part_flag</code>, <code class="literal">bd_part_get_flag_str</code>, <code class="literal">bd_part_set_disk_flag</code>, <code class="literal">bd_part_set_part_flags</code>, <code class="literal">BDPartFlag</code> and <code class="literal">BDPartDiskFlag</code>.
+  </p>
+    We recommend using the <code class="literal">bd_part_set_part_type</code> and <code class="literal"> bd_part_set_part_id</code> functions to set partition GUID (GPT) or ID (MSDOS) to set the required type/id instead.
+  <p>
+    New functions <code class="literal">bd_part_set_part_bootable</code> and <code class="literal">bd_part_set_part_attributes</code> have been added to allow controlling the bootable flag (MSDOS) and partition attributes (GPT).
+  </p>
+<p>
+    The <code class="literal">bd_part_get_part_id</code> function has been removed. The partition id parameter is now available in <code class="literal">BDPartSpec</code>.
+  </p>
+</div>
+<div class="simplesect">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="id-1.5.10"></a>KBD plugin</h2></div></div></div>
+<p>
+    KBD plugin (providing support for bcache and zRAM devices) has been removed.
+  </p>
+</div>
+<div class="simplesect">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="id-1.5.11"></a>Loop plugin</h2></div></div></div>
+<p>
+    <code class="literal">bd_loop_setup</code> and <code class="literal">bd_loop_setup_from_fd</code> has a new parameter <code class="literal">sector_size</code>.
+    Use <code class="literal">0</code> to preserve the original behaviour.
+  </p>
+<p>
+    <code class="literal">bd_loop_get_backing_file</code> and <code class="literal">bd_loop_get_autoclear</code> have been removed. Use <code class="literal">bd_loop_info</code> instead.
+  </p>
+</div>
+<div class="simplesect">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="id-1.5.12"></a>DM plugin</h2></div></div></div>
+<p>
+    Support for DM RAID (<code class="literal">BD_DM_TECH_RAID</code> technology) was removed from the plugin. Following functions were removed without replacement: <code class="literal">bd_dm_get_member_raid_sets</code>, <code class="literal">bd_dm_activate_raid_set</code>, <code class="literal">bd_dm_deactivate_raid_set</code> and <code class="literal">bd_dm_get_raid_set_type</code>.
+  </p>
+</div>
+<div class="simplesect">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="id-1.5.13"></a>MDRAID plugin</h2></div></div></div>
+<p>
+    The <code class="literal">bitmap</code> argument of the <code class="literal">bd_md_create</code> function now accepts arbitrary string instead of a boolean value.
+    Previous value of <code class="literal">FALSE</code> is now represented by <code class="literal">NULL</code>, i.e. letting <code class="literal">mdadm</code> decide itself whether to create an internal bitmap or not.
+  </p>
+</div>
+<div class="simplesect">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="id-1.5.14"></a>Swap plugin</h2></div></div></div>
+<p>
+    <code class="literal">bd_swap_mkswap</code> has a new optional parameter <code class="literal">uuid</code>.
+  </p>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.33.1</div>
+</body>
+</html>

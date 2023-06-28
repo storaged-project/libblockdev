@@ -2,9 +2,9 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Mpath: libblockdev Reference Manual</title>
+<title>Mpath: libblockdev Reference Manual for libblockdev 3.0.</title>
 <meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
-<link rel="home" href="index.html" title="libblockdev Reference Manual">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.0.">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-MD-RAID.html" title="MD RAID">
 <link rel="next" href="libblockdev-NVDIMM.html" title="NVDIMM">
@@ -39,14 +39,6 @@
 <col class="functions_proto_name">
 </colgroup>
 <tbody>
-<tr>
-<td class="function_type">
-<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-</td>
-<td class="function_name">
-<a class="link" href="libblockdev-Mpath.html#bd-mpath-check-deps" title="bd_mpath_check_deps ()">bd_mpath_check_deps</a> <span class="c_punctuation">()</span>
-</td>
-</tr>
 <tr>
 <td class="function_type">
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
@@ -153,17 +145,6 @@
 <div class="refsect1">
 <a name="libblockdev-Mpath.functions_details"></a><h2>Functions</h2>
 <div class="refsect2">
-<a name="bd-mpath-check-deps"></a><h3>bd_mpath_check_deps ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_mpath_check_deps (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
-<div class="refsect3">
-<a name="bd-mpath-check-deps.returns"></a><h4>Returns</h4>
-<p> whether the plugin's runtime dependencies are satisfied or not</p>
-<p>Function checking plugin's runtime dependencies.</p>
-</div>
-</div>
-<hr>
-<div class="refsect2">
 <a name="bd-mpath-init"></a><h3>bd_mpath_init ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 bd_mpath_init (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
@@ -201,7 +182,7 @@ bd_mpath_flush_mpaths (<em class="parameter"><code><a href="../glib/glib-Error-R
 <tbody><tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr></tbody>
 </table></div>
 </div>
@@ -235,7 +216,7 @@ bd_mpath_is_mpath_member (<em class="parameter"><code>const <a href="../glib/gli
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -264,7 +245,7 @@ bd_mpath_get_mpath_members (<em class="parameter"><code><a href="../glib/glib-Er
 <tbody><tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr></tbody>
 </table></div>
 </div>
@@ -300,7 +281,7 @@ bd_mpath_set_friendly_names (<em class="parameter"><code><a href="../glib/glib-B
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -343,7 +324,7 @@ bd_mpath_is_tech_avail (<em class="parameter"><code><a class="link" href="libblo
 <td class="parameter_description"><p>place to store error (details about why the <em class="parameter"><code>tech</code></em>
 -<em class="parameter"><code>mode</code></em>
 combination is not available). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -352,7 +333,7 @@ combination is not available). </p></td>
 <a name="bd-mpath-is-tech-avail.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>tech</code></em>
 -<em class="parameter"><code>mode</code></em>
-combination is avaible -- supported by the
+combination is available -- supported by the
 plugin implementation and having all the runtime dependencies available</p>
 </div>
 </div>
@@ -376,6 +357,16 @@ plugin implementation and having all the runtime dependencies available</p>
 </colgroup>
 <tbody>
 <tr>
+<td class="enum_member_name"><p><a name="BD-MPATH-ERROR-TECH-UNAVAIL:CAPS"></a>BD_MPATH_ERROR_TECH_UNAVAIL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-MPATH-ERROR-INVAL:CAPS"></a>BD_MPATH_ERROR_INVAL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
 <td class="enum_member_name"><p><a name="BD-MPATH-ERROR-FLUSH:CAPS"></a>BD_MPATH_ERROR_FLUSH</p></td>
 <td> </td>
 <td> </td>
@@ -387,16 +378,6 @@ plugin implementation and having all the runtime dependencies available</p>
 </tr>
 <tr>
 <td class="enum_member_name"><p><a name="BD-MPATH-ERROR-DM-ERROR:CAPS"></a>BD_MPATH_ERROR_DM_ERROR</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-MPATH-ERROR-INVAL:CAPS"></a>BD_MPATH_ERROR_INVAL</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-MPATH-ERROR-TECH-UNAVAIL:CAPS"></a>BD_MPATH_ERROR_TECH_UNAVAIL</p></td>
 <td> </td>
 <td> </td>
 </tr>

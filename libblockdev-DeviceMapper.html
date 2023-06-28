@@ -2,9 +2,9 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>DeviceMapper: libblockdev Reference Manual</title>
+<title>DeviceMapper: libblockdev Reference Manual for libblockdev 3.0.</title>
 <meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
-<link rel="home" href="index.html" title="libblockdev Reference Manual">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.0.">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-Crypto.html" title="Crypto">
 <link rel="next" href="libblockdev-FS.html" title="FS">
@@ -39,14 +39,6 @@
 <col class="functions_proto_name">
 </colgroup>
 <tbody>
-<tr>
-<td class="function_type">
-<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-</td>
-<td class="function_name">
-<a class="link" href="libblockdev-DeviceMapper.html#bd-dm-check-deps" title="bd_dm_check_deps ()">bd_dm_check_deps</a> <span class="c_punctuation">()</span>
-</td>
-</tr>
 <tr>
 <td class="function_type">
 <span class="returnvalue">void</span>
@@ -121,38 +113,6 @@
 </tr>
 <tr>
 <td class="function_type">
-<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> **
-</td>
-<td class="function_name">
-<a class="link" href="libblockdev-DeviceMapper.html#bd-dm-get-member-raid-sets" title="bd_dm_get_member_raid_sets ()">bd_dm_get_member_raid_sets</a> <span class="c_punctuation">()</span>
-</td>
-</tr>
-<tr>
-<td class="function_type">
-<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-</td>
-<td class="function_name">
-<a class="link" href="libblockdev-DeviceMapper.html#bd-dm-activate-raid-set" title="bd_dm_activate_raid_set ()">bd_dm_activate_raid_set</a> <span class="c_punctuation">()</span>
-</td>
-</tr>
-<tr>
-<td class="function_type">
-<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-</td>
-<td class="function_name">
-<a class="link" href="libblockdev-DeviceMapper.html#bd-dm-deactivate-raid-set" title="bd_dm_deactivate_raid_set ()">bd_dm_deactivate_raid_set</a> <span class="c_punctuation">()</span>
-</td>
-</tr>
-<tr>
-<td class="function_type">
-<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
-</td>
-<td class="function_name">
-<a class="link" href="libblockdev-DeviceMapper.html#bd-dm-get-raid-set-type" title="bd_dm_get_raid_set_type ()">bd_dm_get_raid_set_type</a> <span class="c_punctuation">()</span>
-</td>
-</tr>
-<tr>
-<td class="function_type">
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
@@ -200,17 +160,6 @@
 </div>
 <div class="refsect1">
 <a name="libblockdev-DeviceMapper.functions_details"></a><h2>Functions</h2>
-<div class="refsect2">
-<a name="bd-dm-check-deps"></a><h3>bd_dm_check_deps ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_dm_check_deps (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
-<div class="refsect3">
-<a name="bd-dm-check-deps.returns"></a><h4>Returns</h4>
-<p> whether the plugin's runtime dependencies are satisfied or not</p>
-<p>Function checking plugin's runtime dependencies.</p>
-</div>
-</div>
-<hr>
 <div class="refsect2">
 <a name="bd-dm-close"></a><h3>bd_dm_close ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
@@ -269,12 +218,12 @@ bd_dm_create_linear (<em class="parameter"><code>const <a href="../glib/glib-Bas
 <tr>
 <td class="parameter_name"><p>uuid</p></td>
 <td class="parameter_description"><p>UUID for the new dev mapper device or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if not specified. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -311,7 +260,7 @@ bd_dm_remove (<em class="parameter"><code>const <a href="../glib/glib-Basic-Type
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -346,7 +295,7 @@ bd_dm_name_from_node (<em class="parameter"><code>const <a href="../glib/glib-Ba
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -356,7 +305,7 @@ bd_dm_name_from_node (<em class="parameter"><code>const <a href="../glib/glib-Ba
 <p> map name of the map providing the <em class="parameter"><code>dm_node</code></em>
 device or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 (<em class="parameter"><code>error</code></em>
-) contains the error in such cases)</p>
+) contains the error in such cases</p>
 <p>Tech category: <a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-MAP:CAPS"><code class="literal">BD_DM_TECH_MAP</code></a>-<a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_DM_TECH_MODE_QUERY</code></a></p>
 </div>
 </div>
@@ -383,7 +332,7 @@ bd_dm_node_from_name (<em class="parameter"><code>const <a href="../glib/glib-Ba
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -393,7 +342,7 @@ bd_dm_node_from_name (<em class="parameter"><code>const <a href="../glib/glib-Ba
 <p> DM node name for the <em class="parameter"><code>map_name</code></em>
 map or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> (<em class="parameter"><code>error</code></em>
 ) contains
-the error in such cases)</p>
+the error in such cases</p>
 <p>Tech category: <a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-MAP:CAPS"><code class="literal">BD_DM_TECH_MAP</code></a>-<a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_DM_TECH_MODE_QUERY</code></a></p>
 </div>
 </div>
@@ -432,7 +381,7 @@ bd_dm_map_exists (<em class="parameter"><code>const <a href="../glib/glib-Basic-
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -470,7 +419,7 @@ bd_dm_get_subsystem_from_name (<em class="parameter"><code>const <a href="../gli
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -479,170 +428,6 @@ bd_dm_get_subsystem_from_name (<em class="parameter"><code>const <a href="../gli
 <a name="bd-dm-get-subsystem-from-name.returns"></a><h4>Returns</h4>
 <p> subsystem of the given device</p>
 <p>Tech category: <a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-MAP:CAPS"><code class="literal">BD_DM_TECH_MAP</code></a>-<a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_DM_TECH_MODE_QUERY</code></a></p>
-</div>
-</div>
-<hr>
-<div class="refsect2">
-<a name="bd-dm-get-member-raid-sets"></a><h3>bd_dm_get_member_raid_sets ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> **
-bd_dm_get_member_raid_sets (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
-                            <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *uuid</code></em>,
-                            <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> major</code></em>,
-                            <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> minor</code></em>,
-                            <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
-<div class="refsect3">
-<a name="bd-dm-get-member-raid-sets.parameters"></a><h4>Parameters</h4>
-<div class="informaltable"><table class="informaltable" width="100%" border="0">
-<colgroup>
-<col width="150px" class="parameters_name">
-<col class="parameters_description">
-<col width="200px" class="parameters_annotations">
-</colgroup>
-<tbody>
-<tr>
-<td class="parameter_name"><p>name</p></td>
-<td class="parameter_description"><p>name of the member. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
-</tr>
-<tr>
-<td class="parameter_name"><p>uuid</p></td>
-<td class="parameter_description"><p>uuid of the member. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
-</tr>
-<tr>
-<td class="parameter_name"><p>major</p></td>
-<td class="parameter_description"><p>major number of the device or -1 if not specified</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>minor</p></td>
-<td class="parameter_description"><p>minor number of the device or -1 if not specified</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p>variable to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
-</tr>
-</tbody>
-</table></div>
-</div>
-<div class="refsect3">
-<a name="bd-dm-get-member-raid-sets.returns"></a><h4>Returns</h4>
-<p>list of names of the RAID sets related to
-the member or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
-<p>One of <em class="parameter"><code>name</code></em>
-, <em class="parameter"><code>uuid</code></em>
-or <em class="parameter"><code>major</code></em>
-:<em class="parameter"><code>minor</code></em>
-has to be given.</p>
-<p>Tech category: <a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-RAID:CAPS"><code class="literal">BD_DM_TECH_RAID</code></a>-<a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_DM_TECH_MODE_QUERY</code></a>. </p>
-<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></p>
-</div>
-</div>
-<hr>
-<div class="refsect2">
-<a name="bd-dm-activate-raid-set"></a><h3>bd_dm_activate_raid_set ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_dm_activate_raid_set (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
-                         <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
-<div class="refsect3">
-<a name="bd-dm-activate-raid-set.parameters"></a><h4>Parameters</h4>
-<div class="informaltable"><table class="informaltable" width="100%" border="0">
-<colgroup>
-<col width="150px" class="parameters_name">
-<col class="parameters_description">
-<col width="200px" class="parameters_annotations">
-</colgroup>
-<tbody>
-<tr>
-<td class="parameter_name"><p>name</p></td>
-<td class="parameter_description"><p>name of the DM RAID set to activate</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p>variable to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
-</tr>
-</tbody>
-</table></div>
-</div>
-<div class="refsect3">
-<a name="bd-dm-activate-raid-set.returns"></a><h4>Returns</h4>
-<p> whether the RAID set <em class="parameter"><code>name</code></em>
-was successfully activate or not</p>
-<p>Tech category: <a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-RAID:CAPS"><code class="literal">BD_DM_TECH_RAID</code></a>-<a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-MODE-CREATE-ACTIVATE:CAPS"><code class="literal">BD_DM_TECH_MODE_CREATE_ACTIVATE</code></a></p>
-</div>
-</div>
-<hr>
-<div class="refsect2">
-<a name="bd-dm-deactivate-raid-set"></a><h3>bd_dm_deactivate_raid_set ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_dm_deactivate_raid_set (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
-                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
-<div class="refsect3">
-<a name="bd-dm-deactivate-raid-set.parameters"></a><h4>Parameters</h4>
-<div class="informaltable"><table class="informaltable" width="100%" border="0">
-<colgroup>
-<col width="150px" class="parameters_name">
-<col class="parameters_description">
-<col width="200px" class="parameters_annotations">
-</colgroup>
-<tbody>
-<tr>
-<td class="parameter_name"><p>name</p></td>
-<td class="parameter_description"><p>name of the DM RAID set to deactivate</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p>variable to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
-</tr>
-</tbody>
-</table></div>
-</div>
-<div class="refsect3">
-<a name="bd-dm-deactivate-raid-set.returns"></a><h4>Returns</h4>
-<p> whether the RAID set <em class="parameter"><code>name</code></em>
-was successfully deactivate or not</p>
-<p>Tech category: <a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-RAID:CAPS"><code class="literal">BD_DM_TECH_RAID</code></a>-<a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-MODE-REMOVE-DEACTIVATE:CAPS"><code class="literal">BD_DM_TECH_MODE_REMOVE_DEACTIVATE</code></a></p>
-</div>
-</div>
-<hr>
-<div class="refsect2">
-<a name="bd-dm-get-raid-set-type"></a><h3>bd_dm_get_raid_set_type ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
-bd_dm_get_raid_set_type (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *name</code></em>,
-                         <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
-<div class="refsect3">
-<a name="bd-dm-get-raid-set-type.parameters"></a><h4>Parameters</h4>
-<div class="informaltable"><table class="informaltable" width="100%" border="0">
-<colgroup>
-<col width="150px" class="parameters_name">
-<col class="parameters_description">
-<col width="200px" class="parameters_annotations">
-</colgroup>
-<tbody>
-<tr>
-<td class="parameter_name"><p>name</p></td>
-<td class="parameter_description"><p>name of the DM RAID set to get the type of</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p>variable to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
-</tr>
-</tbody>
-</table></div>
-</div>
-<div class="refsect3">
-<a name="bd-dm-get-raid-set-type.returns"></a><h4>Returns</h4>
-<p> string representation of the <em class="parameter"><code>name</code></em>
-RAID set's type</p>
-<p>Tech category: <a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-RAID:CAPS"><code class="literal">BD_DM_TECH_RAID</code></a>-<a class="link" href="libblockdev-DeviceMapper.html#BD-DM-TECH-MODE-QUERY:CAPS"><code class="literal">BD_DM_TECH_MODE_QUERY</code></a></p>
 </div>
 </div>
 <hr>
@@ -677,7 +462,7 @@ bd_dm_is_tech_avail (<em class="parameter"><code><a class="link" href="libblockd
 <td class="parameter_description"><p>place to store error (details about why the <em class="parameter"><code>tech</code></em>
 -<em class="parameter"><code>mode</code></em>
 combination is not available). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -686,7 +471,7 @@ combination is not available). </p></td>
 <a name="bd-dm-is-tech-avail.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>tech</code></em>
 -<em class="parameter"><code>mode</code></em>
-combination is avaible -- supported by the
+combination is available -- supported by the
 plugin implementation and having all the runtime dependencies available</p>
 </div>
 </div>
@@ -709,6 +494,11 @@ plugin implementation and having all the runtime dependencies available</p>
 <col width="200px" class="enum_members_annotations">
 </colgroup>
 <tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-DM-ERROR-TECH-UNAVAIL:CAPS"></a>BD_DM_ERROR_TECH_UNAVAIL</p></td>
+<td> </td>
+<td> </td>
+</tr>
 <tr>
 <td class="enum_member_name"><p><a name="BD-DM-ERROR-SYS:CAPS"></a>BD_DM_ERROR_SYS</p></td>
 <td> </td>
@@ -739,11 +529,6 @@ plugin implementation and having all the runtime dependencies available</p>
 <td> </td>
 <td> </td>
 </tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-DM-ERROR-TECH-UNAVAIL:CAPS"></a>BD_DM_ERROR_TECH_UNAVAIL</p></td>
-<td> </td>
-<td> </td>
-</tr>
 </tbody>
 </table></div>
 </div>
@@ -759,18 +544,11 @@ plugin implementation and having all the runtime dependencies available</p>
 <col class="enum_members_description">
 <col width="200px" class="enum_members_annotations">
 </colgroup>
-<tbody>
-<tr>
+<tbody><tr>
 <td class="enum_member_name"><p><a name="BD-DM-TECH-MAP:CAPS"></a>BD_DM_TECH_MAP</p></td>
 <td> </td>
 <td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-DM-TECH-RAID:CAPS"></a>BD_DM_TECH_RAID</p></td>
-<td> </td>
-<td> </td>
-</tr>
-</tbody>
+</tr></tbody>
 </table></div>
 </div>
 </div>

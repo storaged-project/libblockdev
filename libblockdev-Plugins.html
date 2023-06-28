@@ -2,11 +2,11 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Plugins: libblockdev Reference Manual</title>
+<title>Plugins: libblockdev Reference Manual for libblockdev 3.0.</title>
 <meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
-<link rel="home" href="index.html" title="libblockdev Reference Manual">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.0.">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
-<link rel="prev" href="libblockdev-NVDIMM.html" title="NVDIMM">
+<link rel="prev" href="libblockdev-NVMe.html" title="NVMe">
 <link rel="next" href="libblockdev-Part.html" title="Part">
 <meta name="generator" content="GTK-Doc V1.33.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
@@ -19,7 +19,7 @@
 </td>
 <td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
 <td><a accesskey="u" href="ch01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
-<td><a accesskey="p" href="libblockdev-NVDIMM.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="p" href="libblockdev-NVMe.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
 <td><a accesskey="n" href="libblockdev-Part.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
 </tr></table>
 <div class="refentry">
@@ -120,6 +120,21 @@ bd_plugin_spec_copy (<em class="parameter"><code><span class="type">BDPluginSpec
 <p>Creates a new copy of <em class="parameter"><code>spec</code></em>
 .</p>
 <p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="bd-plugin-spec-copy.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>spec</p></td>
+<td class="parameter_description"><p><code class="literal">BDPluginSpec</code> to copy. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr></tbody>
+</table></div>
+</div>
 </div>
 <hr>
 <div class="refsect2">
@@ -129,6 +144,21 @@ bd_plugin_spec_free (<em class="parameter"><code><span class="type">BDPluginSpec
 <p>Frees <em class="parameter"><code>spec</code></em>
 .</p>
 <p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="bd-plugin-spec-free.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>spec</p></td>
+<td class="parameter_description"><p><code class="literal">BDPluginSpec</code> to free. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr></tbody>
+</table></div>
+</div>
 </div>
 <hr>
 <div class="refsect2">
@@ -275,11 +305,6 @@ bd_get_plugin_name (<em class="parameter"><code><a class="link" href="libblockde
 <td> </td>
 </tr>
 <tr>
-<td class="enum_member_name"><p><a name="BD-PLUGIN-KBD:CAPS"></a>BD_PLUGIN_KBD</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
 <td class="enum_member_name"><p><a name="BD-PLUGIN-S390:CAPS"></a>BD_PLUGIN_S390</p></td>
 <td> </td>
 <td> </td>
@@ -300,7 +325,7 @@ bd_get_plugin_name (<em class="parameter"><code><a class="link" href="libblockde
 <td> </td>
 </tr>
 <tr>
-<td class="enum_member_name"><p><a name="BD-PLUGIN-VDO:CAPS"></a>BD_PLUGIN_VDO</p></td>
+<td class="enum_member_name"><p><a name="BD-PLUGIN-NVME:CAPS"></a>BD_PLUGIN_NVME</p></td>
 <td> </td>
 <td> </td>
 </tr>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<book xmlns="http://www.devhelp.net/book" title="libblockdev Reference Manual" link="index.html" author="" name="libblockdev" version="2" language="c" online="http://storaged.org/libblockdev/">
+<book xmlns="http://www.devhelp.net/book" title="libblockdev Reference Manual for libblockdev 3.0." link="index.html" author="" name="libblockdev" version="2" language="c">
   <chapters>
     <sub name="libblockdev Reference Manual" link="ch01.html">
       <sub name="blockdev library" link="libblockdev-blockdev-library.html"/>
@@ -12,16 +12,16 @@
       <sub name="MD RAID" link="libblockdev-MD-RAID.html"/>
       <sub name="Mpath" link="libblockdev-Mpath.html"/>
       <sub name="NVDIMM" link="libblockdev-NVDIMM.html"/>
+      <sub name="NVMe" link="libblockdev-NVMe.html"/>
       <sub name="Plugins" link="libblockdev-Plugins.html"/>
       <sub name="Part" link="libblockdev-Part.html"/>
       <sub name="Swap" link="libblockdev-Swap.html"/>
-      <sub name="KernelBlockDevices" link="libblockdev-KernelBlockDevices.html"/>
       <sub name="s390" link="libblockdev-s390.html"/>
       <sub name="Utils" link="libblockdev-Utils.html"/>
-      <sub name="VDO" link="libblockdev-VDO.html"/>
     </sub>
     <sub name="GI Overrides" link="ch02.html"/>
     <sub name="Testing libblockdev" link="ch03.html"/>
+    <sub name="API changes in libblockdev 3.0" link="30-api-changes.html"/>
     <sub name="API Index" link="api-index-full.html"/>
     <sub name="Index of deprecated API" link="deprecated-api-index.html"/>
     <sub name="Annotation Glossary" link="annotation-glossary.html"/>
@@ -33,11 +33,9 @@
     <keyword type="function" name="bd_reinit ()" link="libblockdev-blockdev-library.html#bd-reinit"/>
     <keyword type="function" name="bd_try_reinit ()" link="libblockdev-blockdev-library.html#bd-try-reinit"/>
     <keyword type="function" name="bd_is_initialized ()" link="libblockdev-blockdev-library.html#bd-is-initialized"/>
-    <keyword type="function" name="bd_switch_init_checks ()" link="libblockdev-blockdev-library.html#bd-switch-init-checks"/>
     <keyword type="function" name="bd_init_error_quark ()" link="libblockdev-blockdev-library.html#bd-init-error-quark"/>
     <keyword type="macro" name="BD_INIT_ERROR" link="libblockdev-blockdev-library.html#BD-INIT-ERROR:CAPS"/>
     <keyword type="enum" name="enum BDInitError" link="libblockdev-blockdev-library.html#BDInitError"/>
-    <keyword type="function" name="bd_btrfs_check_deps ()" link="libblockdev-BTRFS.html#bd-btrfs-check-deps"/>
     <keyword type="function" name="bd_btrfs_init ()" link="libblockdev-BTRFS.html#bd-btrfs-init"/>
     <keyword type="function" name="bd_btrfs_close ()" link="libblockdev-BTRFS.html#bd-btrfs-close"/>
     <keyword type="function" name="bd_btrfs_error_quark ()" link="libblockdev-BTRFS.html#bd-btrfs-error-quark"/>
@@ -73,72 +71,82 @@
     <keyword type="struct" name="BDBtrfsFilesystemInfo" link="libblockdev-BTRFS.html#BDBtrfsFilesystemInfo"/>
     <keyword type="enum" name="enum BDBtrfsTech" link="libblockdev-BTRFS.html#BDBtrfsTech"/>
     <keyword type="enum" name="enum BDBtrfsTechMode" link="libblockdev-BTRFS.html#BDBtrfsTechMode"/>
-    <keyword type="function" name="bd_crypto_check_deps ()" link="libblockdev-Crypto.html#bd-crypto-check-deps"/>
     <keyword type="function" name="bd_crypto_close ()" link="libblockdev-Crypto.html#bd-crypto-close"/>
     <keyword type="function" name="bd_crypto_init ()" link="libblockdev-Crypto.html#bd-crypto-init"/>
     <keyword type="function" name="bd_crypto_error_quark ()" link="libblockdev-Crypto.html#bd-crypto-error-quark"/>
     <keyword type="function" name="bd_crypto_generate_backup_passphrase ()" link="libblockdev-Crypto.html#bd-crypto-generate-backup-passphrase"/>
     <keyword type="function" name="bd_crypto_device_is_luks ()" link="libblockdev-Crypto.html#bd-crypto-device-is-luks"/>
     <keyword type="function" name="bd_crypto_device_seems_encrypted ()" link="libblockdev-Crypto.html#bd-crypto-device-seems-encrypted"/>
-    <keyword type="function" name="bd_crypto_luks_uuid ()" link="libblockdev-Crypto.html#bd-crypto-luks-uuid"/>
-    <keyword type="function" name="bd_crypto_luks_get_metadata_size ()" link="libblockdev-Crypto.html#bd-crypto-luks-get-metadata-size"/>
     <keyword type="function" name="bd_crypto_luks_status ()" link="libblockdev-Crypto.html#bd-crypto-luks-status"/>
     <keyword type="function" name="bd_crypto_luks_format ()" link="libblockdev-Crypto.html#bd-crypto-luks-format"/>
-    <keyword type="function" name="bd_crypto_luks_format_blob ()" link="libblockdev-Crypto.html#bd-crypto-luks-format-blob"/>
     <keyword type="function" name="bd_crypto_luks_extra_free ()" link="libblockdev-Crypto.html#bd-crypto-luks-extra-free"/>
     <keyword type="function" name="bd_crypto_luks_extra_copy ()" link="libblockdev-Crypto.html#bd-crypto-luks-extra-copy"/>
     <keyword type="function" name="bd_crypto_luks_extra_new ()" link="libblockdev-Crypto.html#bd-crypto-luks-extra-new"/>
     <keyword type="function" name="bd_crypto_luks_pbkdf_free ()" link="libblockdev-Crypto.html#bd-crypto-luks-pbkdf-free"/>
     <keyword type="function" name="bd_crypto_luks_pbkdf_copy ()" link="libblockdev-Crypto.html#bd-crypto-luks-pbkdf-copy"/>
     <keyword type="function" name="bd_crypto_luks_pbkdf_new ()" link="libblockdev-Crypto.html#bd-crypto-luks-pbkdf-new"/>
-    <keyword type="function" name="bd_crypto_luks_format_luks2 ()" link="libblockdev-Crypto.html#bd-crypto-luks-format-luks2"/>
-    <keyword type="function" name="bd_crypto_luks_format_luks2_blob ()" link="libblockdev-Crypto.html#bd-crypto-luks-format-luks2-blob"/>
+    <keyword type="function" name="bd_crypto_keyslot_context_free ()" link="libblockdev-Crypto.html#bd-crypto-keyslot-context-free"/>
+    <keyword type="function" name="bd_crypto_keyslot_context_copy ()" link="libblockdev-Crypto.html#bd-crypto-keyslot-context-copy"/>
+    <keyword type="function" name="bd_crypto_keyslot_context_new_passphrase ()" link="libblockdev-Crypto.html#bd-crypto-keyslot-context-new-passphrase"/>
+    <keyword type="function" name="bd_crypto_keyslot_context_new_keyfile ()" link="libblockdev-Crypto.html#bd-crypto-keyslot-context-new-keyfile"/>
+    <keyword type="function" name="bd_crypto_keyslot_context_new_keyring ()" link="libblockdev-Crypto.html#bd-crypto-keyslot-context-new-keyring"/>
+    <keyword type="function" name="bd_crypto_keyslot_context_new_volume_key ()" link="libblockdev-Crypto.html#bd-crypto-keyslot-context-new-volume-key"/>
     <keyword type="function" name="bd_crypto_luks_open ()" link="libblockdev-Crypto.html#bd-crypto-luks-open"/>
-    <keyword type="function" name="bd_crypto_luks_open_blob ()" link="libblockdev-Crypto.html#bd-crypto-luks-open-blob"/>
     <keyword type="function" name="bd_crypto_luks_close ()" link="libblockdev-Crypto.html#bd-crypto-luks-close"/>
     <keyword type="function" name="bd_crypto_luks_add_key ()" link="libblockdev-Crypto.html#bd-crypto-luks-add-key"/>
-    <keyword type="function" name="bd_crypto_luks_add_key_blob ()" link="libblockdev-Crypto.html#bd-crypto-luks-add-key-blob"/>
     <keyword type="function" name="bd_crypto_luks_remove_key ()" link="libblockdev-Crypto.html#bd-crypto-luks-remove-key"/>
-    <keyword type="function" name="bd_crypto_luks_remove_key_blob ()" link="libblockdev-Crypto.html#bd-crypto-luks-remove-key-blob"/>
     <keyword type="function" name="bd_crypto_luks_change_key ()" link="libblockdev-Crypto.html#bd-crypto-luks-change-key"/>
-    <keyword type="function" name="bd_crypto_luks_change_key_blob ()" link="libblockdev-Crypto.html#bd-crypto-luks-change-key-blob"/>
     <keyword type="function" name="bd_crypto_luks_resize ()" link="libblockdev-Crypto.html#bd-crypto-luks-resize"/>
-    <keyword type="function" name="bd_crypto_luks_resize_luks2 ()" link="libblockdev-Crypto.html#bd-crypto-luks-resize-luks2"/>
-    <keyword type="function" name="bd_crypto_luks_resize_luks2_blob ()" link="libblockdev-Crypto.html#bd-crypto-luks-resize-luks2-blob"/>
     <keyword type="function" name="bd_crypto_luks_suspend ()" link="libblockdev-Crypto.html#bd-crypto-luks-suspend"/>
-    <keyword type="function" name="bd_crypto_luks_resume_blob ()" link="libblockdev-Crypto.html#bd-crypto-luks-resume-blob"/>
     <keyword type="function" name="bd_crypto_luks_resume ()" link="libblockdev-Crypto.html#bd-crypto-luks-resume"/>
     <keyword type="function" name="bd_crypto_luks_kill_slot ()" link="libblockdev-Crypto.html#bd-crypto-luks-kill-slot"/>
     <keyword type="function" name="bd_crypto_luks_header_backup ()" link="libblockdev-Crypto.html#bd-crypto-luks-header-backup"/>
     <keyword type="function" name="bd_crypto_luks_header_restore ()" link="libblockdev-Crypto.html#bd-crypto-luks-header-restore"/>
+    <keyword type="function" name="bd_crypto_luks_set_label ()" link="libblockdev-Crypto.html#bd-crypto-luks-set-label"/>
+    <keyword type="function" name="bd_crypto_luks_set_uuid ()" link="libblockdev-Crypto.html#bd-crypto-luks-set-uuid"/>
     <keyword type="function" name="bd_crypto_luks_info_free ()" link="libblockdev-Crypto.html#bd-crypto-luks-info-free"/>
     <keyword type="function" name="bd_crypto_luks_info_copy ()" link="libblockdev-Crypto.html#bd-crypto-luks-info-copy"/>
     <keyword type="function" name="bd_crypto_luks_info ()" link="libblockdev-Crypto.html#bd-crypto-luks-info"/>
     <keyword type="function" name="bd_crypto_integrity_info_free ()" link="libblockdev-Crypto.html#bd-crypto-integrity-info-free"/>
     <keyword type="function" name="bd_crypto_integrity_info_copy ()" link="libblockdev-Crypto.html#bd-crypto-integrity-info-copy"/>
     <keyword type="function" name="bd_crypto_integrity_info ()" link="libblockdev-Crypto.html#bd-crypto-integrity-info"/>
+    <keyword type="function" name="bd_crypto_integrity_extra_copy ()" link="libblockdev-Crypto.html#bd-crypto-integrity-extra-copy"/>
+    <keyword type="function" name="bd_crypto_integrity_extra_free ()" link="libblockdev-Crypto.html#bd-crypto-integrity-extra-free"/>
+    <keyword type="function" name="bd_crypto_integrity_extra_new ()" link="libblockdev-Crypto.html#bd-crypto-integrity-extra-new"/>
+    <keyword type="function" name="bd_crypto_integrity_format ()" link="libblockdev-Crypto.html#bd-crypto-integrity-format"/>
+    <keyword type="function" name="bd_crypto_integrity_open ()" link="libblockdev-Crypto.html#bd-crypto-integrity-open"/>
+    <keyword type="function" name="bd_crypto_integrity_close ()" link="libblockdev-Crypto.html#bd-crypto-integrity-close"/>
+    <keyword type="function" name="bd_crypto_luks_token_info_free ()" link="libblockdev-Crypto.html#bd-crypto-luks-token-info-free"/>
+    <keyword type="function" name="bd_crypto_luks_token_info_copy ()" link="libblockdev-Crypto.html#bd-crypto-luks-token-info-copy"/>
+    <keyword type="function" name="bd_crypto_luks_token_info ()" link="libblockdev-Crypto.html#bd-crypto-luks-token-info"/>
+    <keyword type="function" name="bd_crypto_keyring_add_key ()" link="libblockdev-Crypto.html#bd-crypto-keyring-add-key"/>
     <keyword type="function" name="bd_crypto_tc_open ()" link="libblockdev-Crypto.html#bd-crypto-tc-open"/>
-    <keyword type="function" name="bd_crypto_tc_open_full ()" link="libblockdev-Crypto.html#bd-crypto-tc-open-full"/>
     <keyword type="function" name="bd_crypto_tc_close ()" link="libblockdev-Crypto.html#bd-crypto-tc-close"/>
     <keyword type="function" name="bd_crypto_escrow_device ()" link="libblockdev-Crypto.html#bd-crypto-escrow-device"/>
+    <keyword type="function" name="bd_crypto_bitlk_info ()" link="libblockdev-Crypto.html#bd-crypto-bitlk-info"/>
+    <keyword type="function" name="bd_crypto_bitlk_info_copy ()" link="libblockdev-Crypto.html#bd-crypto-bitlk-info-copy"/>
+    <keyword type="function" name="bd_crypto_bitlk_info_free ()" link="libblockdev-Crypto.html#bd-crypto-bitlk-info-free"/>
     <keyword type="function" name="bd_crypto_bitlk_open ()" link="libblockdev-Crypto.html#bd-crypto-bitlk-open"/>
     <keyword type="function" name="bd_crypto_bitlk_close ()" link="libblockdev-Crypto.html#bd-crypto-bitlk-close"/>
+    <keyword type="function" name="bd_crypto_fvault2_open ()" link="libblockdev-Crypto.html#bd-crypto-fvault2-open"/>
+    <keyword type="function" name="bd_crypto_fvault2_close ()" link="libblockdev-Crypto.html#bd-crypto-fvault2-close"/>
     <keyword type="function" name="bd_crypto_is_tech_avail ()" link="libblockdev-Crypto.html#bd-crypto-is-tech-avail"/>
-    <keyword type="macro" name="BD_CRYPTO_LUKS_METADATA_SIZE" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-METADATA-SIZE:CAPS"/>
     <keyword type="macro" name="BD_CRYPTO_ERROR" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR:CAPS"/>
     <keyword type="enum" name="enum BDCryptoError" link="libblockdev-Crypto.html#BDCryptoError"/>
     <keyword type="macro" name="BD_CRYPTO_BACKUP_PASSPHRASE_CHARSET" link="libblockdev-Crypto.html#BD-CRYPTO-BACKUP-PASSPHRASE-CHARSET:CAPS"/>
     <keyword type="macro" name="BD_CRYPTO_BACKUP_PASSPHRASE_LENGTH" link="libblockdev-Crypto.html#BD-CRYPTO-BACKUP-PASSPHRASE-LENGTH:CAPS"/>
-    <keyword type="macro" name="DEFAULT_LUKS_KEYSIZE_BITS" link="libblockdev-Crypto.html#DEFAULT-LUKS-KEYSIZE-BITS:CAPS"/>
-    <keyword type="macro" name="DEFAULT_LUKS_CIPHER" link="libblockdev-Crypto.html#DEFAULT-LUKS-CIPHER:CAPS"/>
     <keyword type="struct" name="BDCryptoLUKSExtra" link="libblockdev-Crypto.html#BDCryptoLUKSExtra"/>
     <keyword type="struct" name="BDCryptoLUKSPBKDF" link="libblockdev-Crypto.html#BDCryptoLUKSPBKDF"/>
     <keyword type="enum" name="enum BDCryptoLUKSVersion" link="libblockdev-Crypto.html#BDCryptoLUKSVersion"/>
+    <keyword type="struct" name="BDCryptoKeyslotContext" link="libblockdev-Crypto.html#BDCryptoKeyslotContext"/>
     <keyword type="struct" name="BDCryptoLUKSInfo" link="libblockdev-Crypto.html#BDCryptoLUKSInfo"/>
     <keyword type="struct" name="BDCryptoIntegrityInfo" link="libblockdev-Crypto.html#BDCryptoIntegrityInfo"/>
+    <keyword type="struct" name="BDCryptoIntegrityExtra" link="libblockdev-Crypto.html#BDCryptoIntegrityExtra"/>
+    <keyword type="enum" name="enum BDCryptoIntegrityOpenFlags" link="libblockdev-Crypto.html#BDCryptoIntegrityOpenFlags"/>
+    <keyword type="struct" name="BDCryptoLUKSTokenInfo" link="libblockdev-Crypto.html#BDCryptoLUKSTokenInfo"/>
+    <keyword type="struct" name="BDCryptoBITLKInfo" link="libblockdev-Crypto.html#BDCryptoBITLKInfo"/>
     <keyword type="enum" name="enum BDCryptoTech" link="libblockdev-Crypto.html#BDCryptoTech"/>
     <keyword type="enum" name="enum BDCryptoTechMode" link="libblockdev-Crypto.html#BDCryptoTechMode"/>
-    <keyword type="function" name="bd_dm_check_deps ()" link="libblockdev-DeviceMapper.html#bd-dm-check-deps"/>
     <keyword type="function" name="bd_dm_close ()" link="libblockdev-DeviceMapper.html#bd-dm-close"/>
     <keyword type="function" name="bd_dm_init ()" link="libblockdev-DeviceMapper.html#bd-dm-init"/>
     <keyword type="function" name="bd_dm_error_quark ()" link="libblockdev-DeviceMapper.html#bd-dm-error-quark"/>
@@ -148,21 +156,15 @@
     <keyword type="function" name="bd_dm_node_from_name ()" link="libblockdev-DeviceMapper.html#bd-dm-node-from-name"/>
     <keyword type="function" name="bd_dm_map_exists ()" link="libblockdev-DeviceMapper.html#bd-dm-map-exists"/>
     <keyword type="function" name="bd_dm_get_subsystem_from_name ()" link="libblockdev-DeviceMapper.html#bd-dm-get-subsystem-from-name"/>
-    <keyword type="function" name="bd_dm_get_member_raid_sets ()" link="libblockdev-DeviceMapper.html#bd-dm-get-member-raid-sets"/>
-    <keyword type="function" name="bd_dm_activate_raid_set ()" link="libblockdev-DeviceMapper.html#bd-dm-activate-raid-set"/>
-    <keyword type="function" name="bd_dm_deactivate_raid_set ()" link="libblockdev-DeviceMapper.html#bd-dm-deactivate-raid-set"/>
-    <keyword type="function" name="bd_dm_get_raid_set_type ()" link="libblockdev-DeviceMapper.html#bd-dm-get-raid-set-type"/>
     <keyword type="function" name="bd_dm_is_tech_avail ()" link="libblockdev-DeviceMapper.html#bd-dm-is-tech-avail"/>
     <keyword type="macro" name="BD_DM_ERROR" link="libblockdev-DeviceMapper.html#BD-DM-ERROR:CAPS"/>
     <keyword type="enum" name="enum BDDMError" link="libblockdev-DeviceMapper.html#BDDMError"/>
     <keyword type="enum" name="enum BDDMTech" link="libblockdev-DeviceMapper.html#BDDMTech"/>
     <keyword type="enum" name="enum BDDMTechMode" link="libblockdev-DeviceMapper.html#BDDMTechMode"/>
-    <keyword type="function" name="bd_fs_check_deps ()" link="libblockdev-FS.html#bd-fs-check-deps"/>
     <keyword type="function" name="bd_fs_init ()" link="libblockdev-FS.html#bd-fs-init"/>
     <keyword type="function" name="bd_fs_close ()" link="libblockdev-FS.html#bd-fs-close"/>
     <keyword type="function" name="bd_fs_error_quark ()" link="libblockdev-FS.html#bd-fs-error-quark"/>
     <keyword type="function" name="bd_fs_wipe ()" link="libblockdev-FS.html#bd-fs-wipe"/>
-    <keyword type="function" name="bd_fs_wipe_force ()" link="libblockdev-FS.html#bd-fs-wipe-force"/>
     <keyword type="function" name="bd_fs_clean ()" link="libblockdev-FS.html#bd-fs-clean"/>
     <keyword type="function" name="bd_fs_get_fstype ()" link="libblockdev-FS.html#bd-fs-get-fstype"/>
     <keyword type="function" name="bd_fs_freeze ()" link="libblockdev-FS.html#bd-fs-freeze"/>
@@ -175,10 +177,26 @@
     <keyword type="function" name="bd_fs_repair ()" link="libblockdev-FS.html#bd-fs-repair"/>
     <keyword type="function" name="bd_fs_check ()" link="libblockdev-FS.html#bd-fs-check"/>
     <keyword type="function" name="bd_fs_set_label ()" link="libblockdev-FS.html#bd-fs-set-label"/>
+    <keyword type="function" name="bd_fs_check_label ()" link="libblockdev-FS.html#bd-fs-check-label"/>
+    <keyword type="function" name="bd_fs_get_size ()" link="libblockdev-FS.html#bd-fs-get-size"/>
+    <keyword type="function" name="bd_fs_get_free_space ()" link="libblockdev-FS.html#bd-fs-get-free-space"/>
     <keyword type="function" name="bd_fs_can_resize ()" link="libblockdev-FS.html#bd-fs-can-resize"/>
     <keyword type="function" name="bd_fs_can_check ()" link="libblockdev-FS.html#bd-fs-can-check"/>
     <keyword type="function" name="bd_fs_can_repair ()" link="libblockdev-FS.html#bd-fs-can-repair"/>
     <keyword type="function" name="bd_fs_can_set_label ()" link="libblockdev-FS.html#bd-fs-can-set-label"/>
+    <keyword type="function" name="bd_fs_can_get_size ()" link="libblockdev-FS.html#bd-fs-can-get-size"/>
+    <keyword type="function" name="bd_fs_can_get_free_space ()" link="libblockdev-FS.html#bd-fs-can-get-free-space"/>
+    <keyword type="function" name="bd_fs_can_set_uuid ()" link="libblockdev-FS.html#bd-fs-can-set-uuid"/>
+    <keyword type="function" name="bd_fs_set_uuid ()" link="libblockdev-FS.html#bd-fs-set-uuid"/>
+    <keyword type="function" name="bd_fs_check_uuid ()" link="libblockdev-FS.html#bd-fs-check-uuid"/>
+    <keyword type="function" name="bd_fs_features ()" link="libblockdev-FS.html#bd-fs-features"/>
+    <keyword type="function" name="bd_fs_features_copy ()" link="libblockdev-FS.html#bd-fs-features-copy"/>
+    <keyword type="function" name="bd_fs_features_free ()" link="libblockdev-FS.html#bd-fs-features-free"/>
+    <keyword type="function" name="bd_fs_can_mkfs ()" link="libblockdev-FS.html#bd-fs-can-mkfs"/>
+    <keyword type="function" name="bd_fs_mkfs ()" link="libblockdev-FS.html#bd-fs-mkfs"/>
+    <keyword type="function" name="bd_fs_mkfs_options_copy ()" link="libblockdev-FS.html#bd-fs-mkfs-options-copy"/>
+    <keyword type="function" name="bd_fs_mkfs_options_free ()" link="libblockdev-FS.html#bd-fs-mkfs-options-free"/>
+    <keyword type="function" name="bd_fs_supported_filesystems ()" link="libblockdev-FS.html#bd-fs-supported-filesystems"/>
     <keyword type="function" name="bd_fs_ext2_check ()" link="libblockdev-FS.html#bd-fs-ext2-check"/>
     <keyword type="function" name="bd_fs_ext2_get_info ()" link="libblockdev-FS.html#bd-fs-ext2-get-info"/>
     <keyword type="function" name="bd_fs_ext2_info_copy ()" link="libblockdev-FS.html#bd-fs-ext2-info-copy"/>
@@ -187,7 +205,9 @@
     <keyword type="function" name="bd_fs_ext2_repair ()" link="libblockdev-FS.html#bd-fs-ext2-repair"/>
     <keyword type="function" name="bd_fs_ext2_resize ()" link="libblockdev-FS.html#bd-fs-ext2-resize"/>
     <keyword type="function" name="bd_fs_ext2_set_label ()" link="libblockdev-FS.html#bd-fs-ext2-set-label"/>
-    <keyword type="function" name="bd_fs_ext2_wipe ()" link="libblockdev-FS.html#bd-fs-ext2-wipe"/>
+    <keyword type="function" name="bd_fs_ext2_check_label ()" link="libblockdev-FS.html#bd-fs-ext2-check-label"/>
+    <keyword type="function" name="bd_fs_ext2_set_uuid ()" link="libblockdev-FS.html#bd-fs-ext2-set-uuid"/>
+    <keyword type="function" name="bd_fs_ext2_check_uuid ()" link="libblockdev-FS.html#bd-fs-ext2-check-uuid"/>
     <keyword type="function" name="bd_fs_ext3_check ()" link="libblockdev-FS.html#bd-fs-ext3-check"/>
     <keyword type="function" name="bd_fs_ext3_get_info ()" link="libblockdev-FS.html#bd-fs-ext3-get-info"/>
     <keyword type="function" name="bd_fs_ext3_info_copy ()" link="libblockdev-FS.html#bd-fs-ext3-info-copy"/>
@@ -196,7 +216,9 @@
     <keyword type="function" name="bd_fs_ext3_repair ()" link="libblockdev-FS.html#bd-fs-ext3-repair"/>
     <keyword type="function" name="bd_fs_ext3_resize ()" link="libblockdev-FS.html#bd-fs-ext3-resize"/>
     <keyword type="function" name="bd_fs_ext3_set_label ()" link="libblockdev-FS.html#bd-fs-ext3-set-label"/>
-    <keyword type="function" name="bd_fs_ext3_wipe ()" link="libblockdev-FS.html#bd-fs-ext3-wipe"/>
+    <keyword type="function" name="bd_fs_ext3_check_label ()" link="libblockdev-FS.html#bd-fs-ext3-check-label"/>
+    <keyword type="function" name="bd_fs_ext3_set_uuid ()" link="libblockdev-FS.html#bd-fs-ext3-set-uuid"/>
+    <keyword type="function" name="bd_fs_ext3_check_uuid ()" link="libblockdev-FS.html#bd-fs-ext3-check-uuid"/>
     <keyword type="function" name="bd_fs_ext4_check ()" link="libblockdev-FS.html#bd-fs-ext4-check"/>
     <keyword type="function" name="bd_fs_ext4_get_info ()" link="libblockdev-FS.html#bd-fs-ext4-get-info"/>
     <keyword type="function" name="bd_fs_ext4_info_copy ()" link="libblockdev-FS.html#bd-fs-ext4-info-copy"/>
@@ -205,7 +227,9 @@
     <keyword type="function" name="bd_fs_ext4_repair ()" link="libblockdev-FS.html#bd-fs-ext4-repair"/>
     <keyword type="function" name="bd_fs_ext4_resize ()" link="libblockdev-FS.html#bd-fs-ext4-resize"/>
     <keyword type="function" name="bd_fs_ext4_set_label ()" link="libblockdev-FS.html#bd-fs-ext4-set-label"/>
-    <keyword type="function" name="bd_fs_ext4_wipe ()" link="libblockdev-FS.html#bd-fs-ext4-wipe"/>
+    <keyword type="function" name="bd_fs_ext4_check_label ()" link="libblockdev-FS.html#bd-fs-ext4-check-label"/>
+    <keyword type="function" name="bd_fs_ext4_set_uuid ()" link="libblockdev-FS.html#bd-fs-ext4-set-uuid"/>
+    <keyword type="function" name="bd_fs_ext4_check_uuid ()" link="libblockdev-FS.html#bd-fs-ext4-check-uuid"/>
     <keyword type="function" name="bd_fs_xfs_check ()" link="libblockdev-FS.html#bd-fs-xfs-check"/>
     <keyword type="function" name="bd_fs_xfs_get_info ()" link="libblockdev-FS.html#bd-fs-xfs-get-info"/>
     <keyword type="function" name="bd_fs_xfs_info_copy ()" link="libblockdev-FS.html#bd-fs-xfs-info-copy"/>
@@ -214,7 +238,9 @@
     <keyword type="function" name="bd_fs_xfs_repair ()" link="libblockdev-FS.html#bd-fs-xfs-repair"/>
     <keyword type="function" name="bd_fs_xfs_resize ()" link="libblockdev-FS.html#bd-fs-xfs-resize"/>
     <keyword type="function" name="bd_fs_xfs_set_label ()" link="libblockdev-FS.html#bd-fs-xfs-set-label"/>
-    <keyword type="function" name="bd_fs_xfs_wipe ()" link="libblockdev-FS.html#bd-fs-xfs-wipe"/>
+    <keyword type="function" name="bd_fs_xfs_check_label ()" link="libblockdev-FS.html#bd-fs-xfs-check-label"/>
+    <keyword type="function" name="bd_fs_xfs_set_uuid ()" link="libblockdev-FS.html#bd-fs-xfs-set-uuid"/>
+    <keyword type="function" name="bd_fs_xfs_check_uuid ()" link="libblockdev-FS.html#bd-fs-xfs-check-uuid"/>
     <keyword type="function" name="bd_fs_vfat_check ()" link="libblockdev-FS.html#bd-fs-vfat-check"/>
     <keyword type="function" name="bd_fs_vfat_get_info ()" link="libblockdev-FS.html#bd-fs-vfat-get-info"/>
     <keyword type="function" name="bd_fs_vfat_info_copy ()" link="libblockdev-FS.html#bd-fs-vfat-info-copy"/>
@@ -223,7 +249,9 @@
     <keyword type="function" name="bd_fs_vfat_repair ()" link="libblockdev-FS.html#bd-fs-vfat-repair"/>
     <keyword type="function" name="bd_fs_vfat_resize ()" link="libblockdev-FS.html#bd-fs-vfat-resize"/>
     <keyword type="function" name="bd_fs_vfat_set_label ()" link="libblockdev-FS.html#bd-fs-vfat-set-label"/>
-    <keyword type="function" name="bd_fs_vfat_wipe ()" link="libblockdev-FS.html#bd-fs-vfat-wipe"/>
+    <keyword type="function" name="bd_fs_vfat_check_label ()" link="libblockdev-FS.html#bd-fs-vfat-check-label"/>
+    <keyword type="function" name="bd_fs_vfat_set_uuid ()" link="libblockdev-FS.html#bd-fs-vfat-set-uuid"/>
+    <keyword type="function" name="bd_fs_vfat_check_uuid ()" link="libblockdev-FS.html#bd-fs-vfat-check-uuid"/>
     <keyword type="function" name="bd_fs_is_tech_avail ()" link="libblockdev-FS.html#bd-fs-is-tech-avail"/>
     <keyword type="function" name="bd_fs_ntfs_check ()" link="libblockdev-FS.html#bd-fs-ntfs-check"/>
     <keyword type="function" name="bd_fs_ntfs_get_info ()" link="libblockdev-FS.html#bd-fs-ntfs-get-info"/>
@@ -231,43 +259,105 @@
     <keyword type="function" name="bd_fs_ntfs_repair ()" link="libblockdev-FS.html#bd-fs-ntfs-repair"/>
     <keyword type="function" name="bd_fs_ntfs_resize ()" link="libblockdev-FS.html#bd-fs-ntfs-resize"/>
     <keyword type="function" name="bd_fs_ntfs_set_label ()" link="libblockdev-FS.html#bd-fs-ntfs-set-label"/>
-    <keyword type="function" name="bd_fs_ntfs_wipe ()" link="libblockdev-FS.html#bd-fs-ntfs-wipe"/>
+    <keyword type="function" name="bd_fs_ntfs_check_label ()" link="libblockdev-FS.html#bd-fs-ntfs-check-label"/>
+    <keyword type="function" name="bd_fs_ntfs_info_copy ()" link="libblockdev-FS.html#bd-fs-ntfs-info-copy"/>
+    <keyword type="function" name="bd_fs_ntfs_info_free ()" link="libblockdev-FS.html#bd-fs-ntfs-info-free"/>
+    <keyword type="function" name="bd_fs_ntfs_set_uuid ()" link="libblockdev-FS.html#bd-fs-ntfs-set-uuid"/>
+    <keyword type="function" name="bd_fs_ntfs_check_uuid ()" link="libblockdev-FS.html#bd-fs-ntfs-check-uuid"/>
+    <keyword type="function" name="bd_fs_f2fs_info_copy ()" link="libblockdev-FS.html#bd-fs-f2fs-info-copy"/>
+    <keyword type="function" name="bd_fs_f2fs_info_free ()" link="libblockdev-FS.html#bd-fs-f2fs-info-free"/>
+    <keyword type="function" name="bd_fs_f2fs_mkfs ()" link="libblockdev-FS.html#bd-fs-f2fs-mkfs"/>
+    <keyword type="function" name="bd_fs_f2fs_check ()" link="libblockdev-FS.html#bd-fs-f2fs-check"/>
+    <keyword type="function" name="bd_fs_f2fs_repair ()" link="libblockdev-FS.html#bd-fs-f2fs-repair"/>
+    <keyword type="function" name="bd_fs_f2fs_get_info ()" link="libblockdev-FS.html#bd-fs-f2fs-get-info"/>
+    <keyword type="function" name="bd_fs_f2fs_resize ()" link="libblockdev-FS.html#bd-fs-f2fs-resize"/>
+    <keyword type="function" name="bd_fs_nilfs2_get_info ()" link="libblockdev-FS.html#bd-fs-nilfs2-get-info"/>
+    <keyword type="function" name="bd_fs_nilfs2_info_copy ()" link="libblockdev-FS.html#bd-fs-nilfs2-info-copy"/>
+    <keyword type="function" name="bd_fs_nilfs2_info_free ()" link="libblockdev-FS.html#bd-fs-nilfs2-info-free"/>
+    <keyword type="function" name="bd_fs_nilfs2_mkfs ()" link="libblockdev-FS.html#bd-fs-nilfs2-mkfs"/>
+    <keyword type="function" name="bd_fs_nilfs2_resize ()" link="libblockdev-FS.html#bd-fs-nilfs2-resize"/>
+    <keyword type="function" name="bd_fs_nilfs2_set_label ()" link="libblockdev-FS.html#bd-fs-nilfs2-set-label"/>
+    <keyword type="function" name="bd_fs_nilfs2_check_label ()" link="libblockdev-FS.html#bd-fs-nilfs2-check-label"/>
+    <keyword type="function" name="bd_fs_nilfs2_set_uuid ()" link="libblockdev-FS.html#bd-fs-nilfs2-set-uuid"/>
+    <keyword type="function" name="bd_fs_nilfs2_check_uuid ()" link="libblockdev-FS.html#bd-fs-nilfs2-check-uuid"/>
+    <keyword type="function" name="bd_fs_exfat_check ()" link="libblockdev-FS.html#bd-fs-exfat-check"/>
+    <keyword type="function" name="bd_fs_exfat_get_info ()" link="libblockdev-FS.html#bd-fs-exfat-get-info"/>
+    <keyword type="function" name="bd_fs_exfat_info_copy ()" link="libblockdev-FS.html#bd-fs-exfat-info-copy"/>
+    <keyword type="function" name="bd_fs_exfat_info_free ()" link="libblockdev-FS.html#bd-fs-exfat-info-free"/>
+    <keyword type="function" name="bd_fs_exfat_mkfs ()" link="libblockdev-FS.html#bd-fs-exfat-mkfs"/>
+    <keyword type="function" name="bd_fs_exfat_repair ()" link="libblockdev-FS.html#bd-fs-exfat-repair"/>
+    <keyword type="function" name="bd_fs_exfat_set_label ()" link="libblockdev-FS.html#bd-fs-exfat-set-label"/>
+    <keyword type="function" name="bd_fs_exfat_check_label ()" link="libblockdev-FS.html#bd-fs-exfat-check-label"/>
+    <keyword type="function" name="bd_fs_exfat_set_uuid ()" link="libblockdev-FS.html#bd-fs-exfat-set-uuid"/>
+    <keyword type="function" name="bd_fs_exfat_check_uuid ()" link="libblockdev-FS.html#bd-fs-exfat-check-uuid"/>
+    <keyword type="function" name="bd_fs_btrfs_get_info ()" link="libblockdev-FS.html#bd-fs-btrfs-get-info"/>
+    <keyword type="function" name="bd_fs_btrfs_info_copy ()" link="libblockdev-FS.html#bd-fs-btrfs-info-copy"/>
+    <keyword type="function" name="bd_fs_btrfs_info_free ()" link="libblockdev-FS.html#bd-fs-btrfs-info-free"/>
+    <keyword type="function" name="bd_fs_btrfs_mkfs ()" link="libblockdev-FS.html#bd-fs-btrfs-mkfs"/>
+    <keyword type="function" name="bd_fs_btrfs_check ()" link="libblockdev-FS.html#bd-fs-btrfs-check"/>
+    <keyword type="function" name="bd_fs_btrfs_repair ()" link="libblockdev-FS.html#bd-fs-btrfs-repair"/>
+    <keyword type="function" name="bd_fs_btrfs_set_label ()" link="libblockdev-FS.html#bd-fs-btrfs-set-label"/>
+    <keyword type="function" name="bd_fs_btrfs_check_label ()" link="libblockdev-FS.html#bd-fs-btrfs-check-label"/>
+    <keyword type="function" name="bd_fs_btrfs_set_uuid ()" link="libblockdev-FS.html#bd-fs-btrfs-set-uuid"/>
+    <keyword type="function" name="bd_fs_btrfs_check_uuid ()" link="libblockdev-FS.html#bd-fs-btrfs-check-uuid"/>
+    <keyword type="function" name="bd_fs_btrfs_resize ()" link="libblockdev-FS.html#bd-fs-btrfs-resize"/>
+    <keyword type="function" name="bd_fs_udf_get_info ()" link="libblockdev-FS.html#bd-fs-udf-get-info"/>
+    <keyword type="function" name="bd_fs_udf_info_copy ()" link="libblockdev-FS.html#bd-fs-udf-info-copy"/>
+    <keyword type="function" name="bd_fs_udf_info_free ()" link="libblockdev-FS.html#bd-fs-udf-info-free"/>
+    <keyword type="function" name="bd_fs_udf_mkfs ()" link="libblockdev-FS.html#bd-fs-udf-mkfs"/>
+    <keyword type="function" name="bd_fs_udf_set_label ()" link="libblockdev-FS.html#bd-fs-udf-set-label"/>
+    <keyword type="function" name="bd_fs_udf_check_label ()" link="libblockdev-FS.html#bd-fs-udf-check-label"/>
+    <keyword type="function" name="bd_fs_udf_set_uuid ()" link="libblockdev-FS.html#bd-fs-udf-set-uuid"/>
+    <keyword type="function" name="bd_fs_udf_check_uuid ()" link="libblockdev-FS.html#bd-fs-udf-check-uuid"/>
     <keyword type="typedef" name="BDFSExt2Info" link="libblockdev-FS.html#BDFSExt2Info"/>
     <keyword type="typedef" name="BDFSExt3Info" link="libblockdev-FS.html#BDFSExt3Info"/>
     <keyword type="typedef" name="BDFSExt4Info" link="libblockdev-FS.html#BDFSExt4Info"/>
-    <keyword type="enum" name="enum BDFsError" link="libblockdev-FS.html#BDFsError"/>
+    <keyword type="enum" name="enum BDFSError" link="libblockdev-FS.html#BDFSError"/>
     <keyword type="macro" name="BD_FS_ERROR" link="libblockdev-FS.html#BD-FS-ERROR:CAPS"/>
+    <keyword type="enum" name="enum BDFSConfigureFlags" link="libblockdev-FS.html#BDFSConfigureFlags"/>
+    <keyword type="enum" name="enum BDFSFeatureFlags" link="libblockdev-FS.html#BDFSFeatureFlags"/>
+    <keyword type="struct" name="BDFSFeatures" link="libblockdev-FS.html#BDFSFeatures"/>
+    <keyword type="enum" name="enum BDFSFsckFlags" link="libblockdev-FS.html#BDFSFsckFlags"/>
+    <keyword type="struct" name="BDFSMkfsOptions" link="libblockdev-FS.html#BDFSMkfsOptions"/>
+    <keyword type="enum" name="enum BDFSMkfsOptionsFlags" link="libblockdev-FS.html#BDFSMkfsOptionsFlags"/>
     <keyword type="struct" name="BDFSXfsInfo" link="libblockdev-FS.html#BDFSXfsInfo"/>
     <keyword type="struct" name="BDFSVfatInfo" link="libblockdev-FS.html#BDFSVfatInfo"/>
     <keyword type="enum" name="enum BDFSTech" link="libblockdev-FS.html#BDFSTech"/>
     <keyword type="enum" name="enum BDFSTechMode" link="libblockdev-FS.html#BDFSTechMode"/>
-    <keyword type="enum" name="enum BDFsResizeFlags" link="libblockdev-FS.html#BDFsResizeFlags"/>
+    <keyword type="enum" name="enum BDFSResizeFlags" link="libblockdev-FS.html#BDFSResizeFlags"/>
     <keyword type="struct" name="BDFSNtfsInfo" link="libblockdev-FS.html#BDFSNtfsInfo"/>
-    <keyword type="function" name="bd_loop_check_deps ()" link="libblockdev-Loop.html#bd-loop-check-deps"/>
+    <keyword type="struct" name="BDFSF2FSInfo" link="libblockdev-FS.html#BDFSF2FSInfo"/>
+    <keyword type="enum" name="enum BDFSF2FSFeature" link="libblockdev-FS.html#BDFSF2FSFeature"/>
+    <keyword type="struct" name="BDFSNILFS2Info" link="libblockdev-FS.html#BDFSNILFS2Info"/>
+    <keyword type="struct" name="BDFSExfatInfo" link="libblockdev-FS.html#BDFSExfatInfo"/>
+    <keyword type="struct" name="BDFSBtrfsInfo" link="libblockdev-FS.html#BDFSBtrfsInfo"/>
+    <keyword type="struct" name="BDFSUdfInfo" link="libblockdev-FS.html#BDFSUdfInfo"/>
     <keyword type="function" name="bd_loop_init ()" link="libblockdev-Loop.html#bd-loop-init"/>
     <keyword type="function" name="bd_loop_close ()" link="libblockdev-Loop.html#bd-loop-close"/>
     <keyword type="function" name="bd_loop_error_quark ()" link="libblockdev-Loop.html#bd-loop-error-quark"/>
-    <keyword type="function" name="bd_loop_get_backing_file ()" link="libblockdev-Loop.html#bd-loop-get-backing-file"/>
+    <keyword type="function" name="bd_loop_info ()" link="libblockdev-Loop.html#bd-loop-info"/>
+    <keyword type="function" name="bd_loop_info_copy ()" link="libblockdev-Loop.html#bd-loop-info-copy"/>
+    <keyword type="function" name="bd_loop_info_free ()" link="libblockdev-Loop.html#bd-loop-info-free"/>
     <keyword type="function" name="bd_loop_get_loop_name ()" link="libblockdev-Loop.html#bd-loop-get-loop-name"/>
     <keyword type="function" name="bd_loop_setup ()" link="libblockdev-Loop.html#bd-loop-setup"/>
     <keyword type="function" name="bd_loop_setup_from_fd ()" link="libblockdev-Loop.html#bd-loop-setup-from-fd"/>
     <keyword type="function" name="bd_loop_teardown ()" link="libblockdev-Loop.html#bd-loop-teardown"/>
-    <keyword type="function" name="bd_loop_get_autoclear ()" link="libblockdev-Loop.html#bd-loop-get-autoclear"/>
     <keyword type="function" name="bd_loop_set_autoclear ()" link="libblockdev-Loop.html#bd-loop-set-autoclear"/>
     <keyword type="function" name="bd_loop_is_tech_avail ()" link="libblockdev-Loop.html#bd-loop-is-tech-avail"/>
     <keyword type="macro" name="BD_LOOP_ERROR" link="libblockdev-Loop.html#BD-LOOP-ERROR:CAPS"/>
     <keyword type="enum" name="enum BDLoopError" link="libblockdev-Loop.html#BDLoopError"/>
+    <keyword type="struct" name="BDLoopInfo" link="libblockdev-Loop.html#BDLoopInfo"/>
     <keyword type="enum" name="enum BDLoopTech" link="libblockdev-Loop.html#BDLoopTech"/>
     <keyword type="enum" name="enum BDLoopTechMode" link="libblockdev-Loop.html#BDLoopTechMode"/>
-    <keyword type="function" name="bd_lvm_check_deps ()" link="libblockdev-LVM.html#bd-lvm-check-deps"/>
     <keyword type="function" name="bd_lvm_close ()" link="libblockdev-LVM.html#bd-lvm-close"/>
     <keyword type="function" name="bd_lvm_init ()" link="libblockdev-LVM.html#bd-lvm-init"/>
-    <keyword type="macro" name="RESOLVE_PE_SIZE()" link="libblockdev-LVM.html#RESOLVE-PE-SIZE:CAPS"/>
     <keyword type="function" name="bd_lvm_error_quark ()" link="libblockdev-LVM.html#bd-lvm-error-quark"/>
     <keyword type="function" name="bd_lvm_pvdata_free ()" link="libblockdev-LVM.html#bd-lvm-pvdata-free"/>
     <keyword type="function" name="bd_lvm_pvdata_copy ()" link="libblockdev-LVM.html#bd-lvm-pvdata-copy"/>
     <keyword type="function" name="bd_lvm_vgdata_free ()" link="libblockdev-LVM.html#bd-lvm-vgdata-free"/>
     <keyword type="function" name="bd_lvm_vgdata_copy ()" link="libblockdev-LVM.html#bd-lvm-vgdata-copy"/>
+    <keyword type="function" name="bd_lvm_segdata_free ()" link="libblockdev-LVM.html#bd-lvm-segdata-free"/>
+    <keyword type="function" name="bd_lvm_segdata_copy ()" link="libblockdev-LVM.html#bd-lvm-segdata-copy"/>
     <keyword type="function" name="bd_lvm_lvdata_free ()" link="libblockdev-LVM.html#bd-lvm-lvdata-free"/>
     <keyword type="function" name="bd_lvm_lvdata_copy ()" link="libblockdev-LVM.html#bd-lvm-lvdata-copy"/>
     <keyword type="function" name="bd_lvm_cache_stats_copy ()" link="libblockdev-LVM.html#bd-lvm-cache-stats-copy"/>
@@ -288,6 +378,8 @@
     <keyword type="function" name="bd_lvm_pvremove ()" link="libblockdev-LVM.html#bd-lvm-pvremove"/>
     <keyword type="function" name="bd_lvm_pvmove ()" link="libblockdev-LVM.html#bd-lvm-pvmove"/>
     <keyword type="function" name="bd_lvm_pvscan ()" link="libblockdev-LVM.html#bd-lvm-pvscan"/>
+    <keyword type="function" name="bd_lvm_add_pv_tags ()" link="libblockdev-LVM.html#bd-lvm-add-pv-tags"/>
+    <keyword type="function" name="bd_lvm_delete_pv_tags ()" link="libblockdev-LVM.html#bd-lvm-delete-pv-tags"/>
     <keyword type="function" name="bd_lvm_pvinfo ()" link="libblockdev-LVM.html#bd-lvm-pvinfo"/>
     <keyword type="function" name="bd_lvm_pvs ()" link="libblockdev-LVM.html#bd-lvm-pvs"/>
     <keyword type="function" name="bd_lvm_vgcreate ()" link="libblockdev-LVM.html#bd-lvm-vgcreate"/>
@@ -297,6 +389,10 @@
     <keyword type="function" name="bd_lvm_vgdeactivate ()" link="libblockdev-LVM.html#bd-lvm-vgdeactivate"/>
     <keyword type="function" name="bd_lvm_vgextend ()" link="libblockdev-LVM.html#bd-lvm-vgextend"/>
     <keyword type="function" name="bd_lvm_vgreduce ()" link="libblockdev-LVM.html#bd-lvm-vgreduce"/>
+    <keyword type="function" name="bd_lvm_vglock_start ()" link="libblockdev-LVM.html#bd-lvm-vglock-start"/>
+    <keyword type="function" name="bd_lvm_vglock_stop ()" link="libblockdev-LVM.html#bd-lvm-vglock-stop"/>
+    <keyword type="function" name="bd_lvm_add_vg_tags ()" link="libblockdev-LVM.html#bd-lvm-add-vg-tags"/>
+    <keyword type="function" name="bd_lvm_delete_vg_tags ()" link="libblockdev-LVM.html#bd-lvm-delete-vg-tags"/>
     <keyword type="function" name="bd_lvm_vginfo ()" link="libblockdev-LVM.html#bd-lvm-vginfo"/>
     <keyword type="function" name="bd_lvm_vgs ()" link="libblockdev-LVM.html#bd-lvm-vgs"/>
     <keyword type="function" name="bd_lvm_lvorigin ()" link="libblockdev-LVM.html#bd-lvm-lvorigin"/>
@@ -304,12 +400,17 @@
     <keyword type="function" name="bd_lvm_lvremove ()" link="libblockdev-LVM.html#bd-lvm-lvremove"/>
     <keyword type="function" name="bd_lvm_lvrename ()" link="libblockdev-LVM.html#bd-lvm-lvrename"/>
     <keyword type="function" name="bd_lvm_lvresize ()" link="libblockdev-LVM.html#bd-lvm-lvresize"/>
+    <keyword type="function" name="bd_lvm_lvrepair ()" link="libblockdev-LVM.html#bd-lvm-lvrepair"/>
     <keyword type="function" name="bd_lvm_lvactivate ()" link="libblockdev-LVM.html#bd-lvm-lvactivate"/>
     <keyword type="function" name="bd_lvm_lvdeactivate ()" link="libblockdev-LVM.html#bd-lvm-lvdeactivate"/>
     <keyword type="function" name="bd_lvm_lvsnapshotcreate ()" link="libblockdev-LVM.html#bd-lvm-lvsnapshotcreate"/>
     <keyword type="function" name="bd_lvm_lvsnapshotmerge ()" link="libblockdev-LVM.html#bd-lvm-lvsnapshotmerge"/>
+    <keyword type="function" name="bd_lvm_add_lv_tags ()" link="libblockdev-LVM.html#bd-lvm-add-lv-tags"/>
+    <keyword type="function" name="bd_lvm_delete_lv_tags ()" link="libblockdev-LVM.html#bd-lvm-delete-lv-tags"/>
     <keyword type="function" name="bd_lvm_lvinfo ()" link="libblockdev-LVM.html#bd-lvm-lvinfo"/>
+    <keyword type="function" name="bd_lvm_lvinfo_tree ()" link="libblockdev-LVM.html#bd-lvm-lvinfo-tree"/>
     <keyword type="function" name="bd_lvm_lvs ()" link="libblockdev-LVM.html#bd-lvm-lvs"/>
+    <keyword type="function" name="bd_lvm_lvs_tree ()" link="libblockdev-LVM.html#bd-lvm-lvs-tree"/>
     <keyword type="function" name="bd_lvm_thpoolcreate ()" link="libblockdev-LVM.html#bd-lvm-thpoolcreate"/>
     <keyword type="function" name="bd_lvm_thpool_convert ()" link="libblockdev-LVM.html#bd-lvm-thpool-convert"/>
     <keyword type="function" name="bd_lvm_thlvcreate ()" link="libblockdev-LVM.html#bd-lvm-thlvcreate"/>
@@ -327,8 +428,6 @@
     <keyword type="function" name="bd_lvm_cache_get_mode_str ()" link="libblockdev-LVM.html#bd-lvm-cache-get-mode-str"/>
     <keyword type="function" name="bd_lvm_cache_pool_name ()" link="libblockdev-LVM.html#bd-lvm-cache-pool-name"/>
     <keyword type="function" name="bd_lvm_cache_stats ()" link="libblockdev-LVM.html#bd-lvm-cache-stats"/>
-    <keyword type="function" name="bd_lvm_data_lv_name ()" link="libblockdev-LVM.html#bd-lvm-data-lv-name"/>
-    <keyword type="function" name="bd_lvm_metadata_lv_name ()" link="libblockdev-LVM.html#bd-lvm-metadata-lv-name"/>
     <keyword type="function" name="bd_lvm_vdolvpoolname ()" link="libblockdev-LVM.html#bd-lvm-vdolvpoolname"/>
     <keyword type="function" name="bd_lvm_get_vdo_operating_mode_str ()" link="libblockdev-LVM.html#bd-lvm-get-vdo-operating-mode-str"/>
     <keyword type="function" name="bd_lvm_get_vdo_compression_state_str ()" link="libblockdev-LVM.html#bd-lvm-get-vdo-compression-state-str"/>
@@ -336,33 +435,43 @@
     <keyword type="function" name="bd_lvm_get_vdo_write_policy_from_str ()" link="libblockdev-LVM.html#bd-lvm-get-vdo-write-policy-from-str"/>
     <keyword type="function" name="bd_lvm_vdo_get_stats ()" link="libblockdev-LVM.html#bd-lvm-vdo-get-stats"/>
     <keyword type="function" name="bd_lvm_vdo_get_stats_full ()" link="libblockdev-LVM.html#bd-lvm-vdo-get-stats-full"/>
+    <keyword type="function" name="bd_lvm_vdo_disable_compression ()" link="libblockdev-LVM.html#bd-lvm-vdo-disable-compression"/>
+    <keyword type="function" name="bd_lvm_vdo_disable_deduplication ()" link="libblockdev-LVM.html#bd-lvm-vdo-disable-deduplication"/>
+    <keyword type="function" name="bd_lvm_vdo_enable_compression ()" link="libblockdev-LVM.html#bd-lvm-vdo-enable-compression"/>
+    <keyword type="function" name="bd_lvm_vdo_enable_deduplication ()" link="libblockdev-LVM.html#bd-lvm-vdo-enable-deduplication"/>
+    <keyword type="function" name="bd_lvm_vdo_info ()" link="libblockdev-LVM.html#bd-lvm-vdo-info"/>
+    <keyword type="function" name="bd_lvm_vdo_pool_convert ()" link="libblockdev-LVM.html#bd-lvm-vdo-pool-convert"/>
+    <keyword type="function" name="bd_lvm_vdo_pool_create ()" link="libblockdev-LVM.html#bd-lvm-vdo-pool-create"/>
+    <keyword type="function" name="bd_lvm_vdo_pool_resize ()" link="libblockdev-LVM.html#bd-lvm-vdo-pool-resize"/>
+    <keyword type="function" name="bd_lvm_vdo_resize ()" link="libblockdev-LVM.html#bd-lvm-vdo-resize"/>
+    <keyword type="function" name="bd_lvm_vdopooldata_copy ()" link="libblockdev-LVM.html#bd-lvm-vdopooldata-copy"/>
+    <keyword type="function" name="bd_lvm_vdopooldata_free ()" link="libblockdev-LVM.html#bd-lvm-vdopooldata-free"/>
+    <keyword type="function" name="bd_lvm_devices_add ()" link="libblockdev-LVM.html#bd-lvm-devices-add"/>
+    <keyword type="function" name="bd_lvm_devices_delete ()" link="libblockdev-LVM.html#bd-lvm-devices-delete"/>
+    <keyword type="function" name="bd_lvm_get_devices_filter ()" link="libblockdev-LVM.html#bd-lvm-get-devices-filter"/>
+    <keyword type="function" name="bd_lvm_get_vdo_write_policy_str ()" link="libblockdev-LVM.html#bd-lvm-get-vdo-write-policy-str"/>
+    <keyword type="function" name="bd_lvm_set_devices_filter ()" link="libblockdev-LVM.html#bd-lvm-set-devices-filter"/>
+    <keyword type="function" name="bd_lvm_writecache_attach ()" link="libblockdev-LVM.html#bd-lvm-writecache-attach"/>
+    <keyword type="function" name="bd_lvm_writecache_create_cached_lv ()" link="libblockdev-LVM.html#bd-lvm-writecache-create-cached-lv"/>
+    <keyword type="function" name="bd_lvm_writecache_detach ()" link="libblockdev-LVM.html#bd-lvm-writecache-detach"/>
     <keyword type="function" name="bd_lvm_is_tech_avail ()" link="libblockdev-LVM.html#bd-lvm-is-tech-avail"/>
-    <keyword type="macro" name="BD_LVM_MAX_LV_SIZE" link="libblockdev-LVM.html#BD-LVM-MAX-LV-SIZE:CAPS" deprecated="2.23: Use bd_lvm_get_max_lv_size() function instead."/>
-    <keyword type="macro" name="BD_LVM_DEFAULT_PE_SIZE" link="libblockdev-LVM.html#BD-LVM-DEFAULT-PE-SIZE:CAPS"/>
-    <keyword type="macro" name="BD_LVM_DEFAULT_PE_START" link="libblockdev-LVM.html#BD-LVM-DEFAULT-PE-START:CAPS"/>
-    <keyword type="macro" name="BD_LVM_MIN_PE_SIZE" link="libblockdev-LVM.html#BD-LVM-MIN-PE-SIZE:CAPS"/>
-    <keyword type="macro" name="BD_LVM_MAX_PE_SIZE" link="libblockdev-LVM.html#BD-LVM-MAX-PE-SIZE:CAPS"/>
-    <keyword type="macro" name="USE_DEFAULT_PE_SIZE" link="libblockdev-LVM.html#USE-DEFAULT-PE-SIZE:CAPS"/>
-    <keyword type="macro" name="BD_LVM_MIN_THPOOL_MD_SIZE" link="libblockdev-LVM.html#BD-LVM-MIN-THPOOL-MD-SIZE:CAPS"/>
-    <keyword type="macro" name="BD_LVM_MAX_THPOOL_MD_SIZE" link="libblockdev-LVM.html#BD-LVM-MAX-THPOOL-MD-SIZE:CAPS"/>
-    <keyword type="macro" name="BD_LVM_MIN_THPOOL_CHUNK_SIZE" link="libblockdev-LVM.html#BD-LVM-MIN-THPOOL-CHUNK-SIZE:CAPS"/>
-    <keyword type="macro" name="BD_LVM_MAX_THPOOL_CHUNK_SIZE" link="libblockdev-LVM.html#BD-LVM-MAX-THPOOL-CHUNK-SIZE:CAPS"/>
-    <keyword type="macro" name="THPOOL_MD_FACTOR_NEW" link="libblockdev-LVM.html#THPOOL-MD-FACTOR-NEW:CAPS"/>
-    <keyword type="macro" name="THPOOL_MD_FACTOR_EXISTS" link="libblockdev-LVM.html#THPOOL-MD-FACTOR-EXISTS:CAPS"/>
-    <keyword type="macro" name="BD_LVM_MIN_CACHE_MD_SIZE" link="libblockdev-LVM.html#BD-LVM-MIN-CACHE-MD-SIZE:CAPS"/>
-    <keyword type="macro" name="BD_LVM_DEFAULT_CHUNK_SIZE" link="libblockdev-LVM.html#BD-LVM-DEFAULT-CHUNK-SIZE:CAPS"/>
     <keyword type="macro" name="BD_LVM_ERROR" link="libblockdev-LVM.html#BD-LVM-ERROR:CAPS"/>
     <keyword type="enum" name="enum BDLVMError" link="libblockdev-LVM.html#BDLVMError"/>
     <keyword type="struct" name="BDLVMPVdata" link="libblockdev-LVM.html#BDLVMPVdata"/>
     <keyword type="struct" name="BDLVMVGdata" link="libblockdev-LVM.html#BDLVMVGdata"/>
+    <keyword type="struct" name="BDLVMSEGdata" link="libblockdev-LVM.html#BDLVMSEGdata"/>
     <keyword type="struct" name="BDLVMLVdata" link="libblockdev-LVM.html#BDLVMLVdata"/>
     <keyword type="enum" name="enum BDLVMCacheMode" link="libblockdev-LVM.html#BDLVMCacheMode"/>
     <keyword type="enum" name="enum BDLVMCachePoolFlags" link="libblockdev-LVM.html#BDLVMCachePoolFlags"/>
     <keyword type="struct" name="BDLVMCacheStats" link="libblockdev-LVM.html#BDLVMCacheStats"/>
     <keyword type="struct" name="BDLVMVDOStats" link="libblockdev-LVM.html#BDLVMVDOStats"/>
+    <keyword type="enum" name="enum BDLVMVDOCompressionState" link="libblockdev-LVM.html#BDLVMVDOCompressionState"/>
+    <keyword type="enum" name="enum BDLVMVDOIndexState" link="libblockdev-LVM.html#BDLVMVDOIndexState"/>
+    <keyword type="enum" name="enum BDLVMVDOOperatingMode" link="libblockdev-LVM.html#BDLVMVDOOperatingMode"/>
+    <keyword type="struct" name="BDLVMVDOPooldata" link="libblockdev-LVM.html#BDLVMVDOPooldata"/>
+    <keyword type="enum" name="enum BDLVMVDOWritePolicy" link="libblockdev-LVM.html#BDLVMVDOWritePolicy"/>
     <keyword type="enum" name="enum BDLVMTech" link="libblockdev-LVM.html#BDLVMTech"/>
     <keyword type="enum" name="enum BDLVMTechMode" link="libblockdev-LVM.html#BDLVMTechMode"/>
-    <keyword type="function" name="bd_md_check_deps ()" link="libblockdev-MD-RAID.html#bd-md-check-deps"/>
     <keyword type="function" name="bd_md_init ()" link="libblockdev-MD-RAID.html#bd-md-init"/>
     <keyword type="function" name="bd_md_close ()" link="libblockdev-MD-RAID.html#bd-md-close"/>
     <keyword type="function" name="bd_md_error_quark ()" link="libblockdev-MD-RAID.html#bd-md-error-quark"/>
@@ -399,7 +508,6 @@
     <keyword type="struct" name="BDMDDetailData" link="libblockdev-MD-RAID.html#BDMDDetailData"/>
     <keyword type="enum" name="enum BDMDTech" link="libblockdev-MD-RAID.html#BDMDTech"/>
     <keyword type="enum" name="enum BDMDTechMode" link="libblockdev-MD-RAID.html#BDMDTechMode"/>
-    <keyword type="function" name="bd_mpath_check_deps ()" link="libblockdev-Mpath.html#bd-mpath-check-deps"/>
     <keyword type="function" name="bd_mpath_init ()" link="libblockdev-Mpath.html#bd-mpath-init"/>
     <keyword type="function" name="bd_mpath_close ()" link="libblockdev-Mpath.html#bd-mpath-close"/>
     <keyword type="function" name="bd_mpath_error_quark ()" link="libblockdev-Mpath.html#bd-mpath-error-quark"/>
@@ -412,7 +520,6 @@
     <keyword type="enum" name="enum BDMpathError" link="libblockdev-Mpath.html#BDMpathError"/>
     <keyword type="enum" name="enum BDMpathTech" link="libblockdev-Mpath.html#BDMpathTech"/>
     <keyword type="enum" name="enum BDMpathTechMode" link="libblockdev-Mpath.html#BDMpathTechMode"/>
-    <keyword type="function" name="bd_nvdimm_check_deps ()" link="libblockdev-NVDIMM.html#bd-nvdimm-check-deps"/>
     <keyword type="function" name="bd_nvdimm_close ()" link="libblockdev-NVDIMM.html#bd-nvdimm-close"/>
     <keyword type="function" name="bd_nvdimm_init ()" link="libblockdev-NVDIMM.html#bd-nvdimm-init"/>
     <keyword type="function" name="bd_nvdimm_error_quark ()" link="libblockdev-NVDIMM.html#bd-nvdimm-error-quark"/>
@@ -424,7 +531,9 @@
     <keyword type="function" name="bd_nvdimm_namespace_info ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-info"/>
     <keyword type="function" name="bd_nvdimm_list_namespaces ()" link="libblockdev-NVDIMM.html#bd-nvdimm-list-namespaces"/>
     <keyword type="function" name="bd_nvdimm_namespace_reconfigure ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-reconfigure"/>
-    <keyword type="function" name="bd_nvdimm_namepace_get_supported_sector_sizes ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namepace-get-supported-sector-sizes"/>
+    <keyword type="function" name="bd_nvdimm_namespace_get_supported_sector_sizes ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-get-supported-sector-sizes"/>
+    <keyword type="function" name="bd_nvdimm_namespace_info_copy ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-info-copy"/>
+    <keyword type="function" name="bd_nvdimm_namespace_info_free ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-info-free"/>
     <keyword type="function" name="bd_nvdimm_is_tech_avail ()" link="libblockdev-NVDIMM.html#bd-nvdimm-is-tech-avail"/>
     <keyword type="macro" name="BD_NVDIMM_ERROR" link="libblockdev-NVDIMM.html#BD-NVDIMM-ERROR:CAPS"/>
     <keyword type="enum" name="enum BDNVDIMMError" link="libblockdev-NVDIMM.html#BDNVDIMMError"/>
@@ -432,6 +541,68 @@
     <keyword type="struct" name="BDNVDIMMNamespaceInfo" link="libblockdev-NVDIMM.html#BDNVDIMMNamespaceInfo"/>
     <keyword type="enum" name="enum BDNVDIMMTech" link="libblockdev-NVDIMM.html#BDNVDIMMTech"/>
     <keyword type="enum" name="enum BDNVDIMMTechMode" link="libblockdev-NVDIMM.html#BDNVDIMMTechMode"/>
+    <keyword type="function" name="bd_nvme_close ()" link="libblockdev-NVMe.html#bd-nvme-close"/>
+    <keyword type="function" name="bd_nvme_init ()" link="libblockdev-NVMe.html#bd-nvme-init"/>
+    <keyword type="function" name="bd_nvme_error_quark ()" link="libblockdev-NVMe.html#bd-nvme-error-quark"/>
+    <keyword type="function" name="bd_nvme_is_tech_avail ()" link="libblockdev-NVMe.html#bd-nvme-is-tech-avail"/>
+    <keyword type="function" name="bd_nvme_get_controller_info ()" link="libblockdev-NVMe.html#bd-nvme-get-controller-info"/>
+    <keyword type="function" name="bd_nvme_controller_info_free ()" link="libblockdev-NVMe.html#bd-nvme-controller-info-free"/>
+    <keyword type="function" name="bd_nvme_controller_info_copy ()" link="libblockdev-NVMe.html#bd-nvme-controller-info-copy"/>
+    <keyword type="function" name="bd_nvme_lba_format_free ()" link="libblockdev-NVMe.html#bd-nvme-lba-format-free"/>
+    <keyword type="function" name="bd_nvme_lba_format_copy ()" link="libblockdev-NVMe.html#bd-nvme-lba-format-copy"/>
+    <keyword type="function" name="bd_nvme_get_namespace_info ()" link="libblockdev-NVMe.html#bd-nvme-get-namespace-info"/>
+    <keyword type="function" name="bd_nvme_namespace_info_free ()" link="libblockdev-NVMe.html#bd-nvme-namespace-info-free"/>
+    <keyword type="function" name="bd_nvme_namespace_info_copy ()" link="libblockdev-NVMe.html#bd-nvme-namespace-info-copy"/>
+    <keyword type="function" name="bd_nvme_get_smart_log ()" link="libblockdev-NVMe.html#bd-nvme-get-smart-log"/>
+    <keyword type="function" name="bd_nvme_smart_log_free ()" link="libblockdev-NVMe.html#bd-nvme-smart-log-free"/>
+    <keyword type="function" name="bd_nvme_smart_log_copy ()" link="libblockdev-NVMe.html#bd-nvme-smart-log-copy"/>
+    <keyword type="function" name="bd_nvme_get_error_log_entries ()" link="libblockdev-NVMe.html#bd-nvme-get-error-log-entries"/>
+    <keyword type="function" name="bd_nvme_error_log_entry_free ()" link="libblockdev-NVMe.html#bd-nvme-error-log-entry-free"/>
+    <keyword type="function" name="bd_nvme_error_log_entry_copy ()" link="libblockdev-NVMe.html#bd-nvme-error-log-entry-copy"/>
+    <keyword type="function" name="bd_nvme_get_self_test_log ()" link="libblockdev-NVMe.html#bd-nvme-get-self-test-log"/>
+    <keyword type="function" name="bd_nvme_self_test_log_free ()" link="libblockdev-NVMe.html#bd-nvme-self-test-log-free"/>
+    <keyword type="function" name="bd_nvme_self_test_log_copy ()" link="libblockdev-NVMe.html#bd-nvme-self-test-log-copy"/>
+    <keyword type="function" name="bd_nvme_self_test_log_entry_free ()" link="libblockdev-NVMe.html#bd-nvme-self-test-log-entry-free"/>
+    <keyword type="function" name="bd_nvme_self_test_log_entry_copy ()" link="libblockdev-NVMe.html#bd-nvme-self-test-log-entry-copy"/>
+    <keyword type="function" name="bd_nvme_self_test_result_to_string ()" link="libblockdev-NVMe.html#bd-nvme-self-test-result-to-string"/>
+    <keyword type="function" name="bd_nvme_device_self_test ()" link="libblockdev-NVMe.html#bd-nvme-device-self-test"/>
+    <keyword type="function" name="bd_nvme_format ()" link="libblockdev-NVMe.html#bd-nvme-format"/>
+    <keyword type="function" name="bd_nvme_get_sanitize_log ()" link="libblockdev-NVMe.html#bd-nvme-get-sanitize-log"/>
+    <keyword type="function" name="bd_nvme_sanitize_log_free ()" link="libblockdev-NVMe.html#bd-nvme-sanitize-log-free"/>
+    <keyword type="function" name="bd_nvme_sanitize_log_copy ()" link="libblockdev-NVMe.html#bd-nvme-sanitize-log-copy"/>
+    <keyword type="function" name="bd_nvme_sanitize ()" link="libblockdev-NVMe.html#bd-nvme-sanitize"/>
+    <keyword type="function" name="bd_nvme_get_host_nqn ()" link="libblockdev-NVMe.html#bd-nvme-get-host-nqn"/>
+    <keyword type="function" name="bd_nvme_get_host_id ()" link="libblockdev-NVMe.html#bd-nvme-get-host-id"/>
+    <keyword type="function" name="bd_nvme_generate_host_nqn ()" link="libblockdev-NVMe.html#bd-nvme-generate-host-nqn"/>
+    <keyword type="function" name="bd_nvme_set_host_nqn ()" link="libblockdev-NVMe.html#bd-nvme-set-host-nqn"/>
+    <keyword type="function" name="bd_nvme_set_host_id ()" link="libblockdev-NVMe.html#bd-nvme-set-host-id"/>
+    <keyword type="function" name="bd_nvme_connect ()" link="libblockdev-NVMe.html#bd-nvme-connect"/>
+    <keyword type="function" name="bd_nvme_disconnect ()" link="libblockdev-NVMe.html#bd-nvme-disconnect"/>
+    <keyword type="function" name="bd_nvme_disconnect_by_path ()" link="libblockdev-NVMe.html#bd-nvme-disconnect-by-path"/>
+    <keyword type="function" name="bd_nvme_find_ctrls_for_ns ()" link="libblockdev-NVMe.html#bd-nvme-find-ctrls-for-ns"/>
+    <keyword type="macro" name="BD_NVME_ERROR" link="libblockdev-NVMe.html#BD-NVME-ERROR:CAPS"/>
+    <keyword type="enum" name="enum BDNVMEError" link="libblockdev-NVMe.html#BDNVMEError"/>
+    <keyword type="enum" name="enum BDNVMETech" link="libblockdev-NVMe.html#BDNVMETech"/>
+    <keyword type="enum" name="enum BDNVMETechMode" link="libblockdev-NVMe.html#BDNVMETechMode"/>
+    <keyword type="enum" name="enum BDNVMEControllerFeature" link="libblockdev-NVMe.html#BDNVMEControllerFeature"/>
+    <keyword type="enum" name="enum BDNVMEControllerType" link="libblockdev-NVMe.html#BDNVMEControllerType"/>
+    <keyword type="struct" name="BDNVMEControllerInfo" link="libblockdev-NVMe.html#BDNVMEControllerInfo"/>
+    <keyword type="enum" name="enum BDNVMELBAFormatRelativePerformance" link="libblockdev-NVMe.html#BDNVMELBAFormatRelativePerformance"/>
+    <keyword type="struct" name="BDNVMELBAFormat" link="libblockdev-NVMe.html#BDNVMELBAFormat"/>
+    <keyword type="enum" name="enum BDNVMENamespaceFeature" link="libblockdev-NVMe.html#BDNVMENamespaceFeature"/>
+    <keyword type="struct" name="BDNVMENamespaceInfo" link="libblockdev-NVMe.html#BDNVMENamespaceInfo"/>
+    <keyword type="enum" name="enum BDNVMESmartCriticalWarning" link="libblockdev-NVMe.html#BDNVMESmartCriticalWarning"/>
+    <keyword type="struct" name="BDNVMESmartLog" link="libblockdev-NVMe.html#BDNVMESmartLog"/>
+    <keyword type="enum" name="enum BDNVMETransportType" link="libblockdev-NVMe.html#BDNVMETransportType"/>
+    <keyword type="struct" name="BDNVMEErrorLogEntry" link="libblockdev-NVMe.html#BDNVMEErrorLogEntry"/>
+    <keyword type="struct" name="BDNVMESelfTestLog" link="libblockdev-NVMe.html#BDNVMESelfTestLog"/>
+    <keyword type="struct" name="BDNVMESelfTestLogEntry" link="libblockdev-NVMe.html#BDNVMESelfTestLogEntry"/>
+    <keyword type="enum" name="enum BDNVMESelfTestAction" link="libblockdev-NVMe.html#BDNVMESelfTestAction"/>
+    <keyword type="enum" name="enum BDNVMESelfTestResult" link="libblockdev-NVMe.html#BDNVMESelfTestResult"/>
+    <keyword type="enum" name="enum BDNVMEFormatSecureErase" link="libblockdev-NVMe.html#BDNVMEFormatSecureErase"/>
+    <keyword type="enum" name="enum BDNVMESanitizeStatus" link="libblockdev-NVMe.html#BDNVMESanitizeStatus"/>
+    <keyword type="struct" name="BDNVMESanitizeLog" link="libblockdev-NVMe.html#BDNVMESanitizeLog"/>
+    <keyword type="enum" name="enum BDNVMESanitizeAction" link="libblockdev-NVMe.html#BDNVMESanitizeAction"/>
     <keyword type="function" name="bd_plugin_spec_copy ()" link="libblockdev-Plugins.html#bd-plugin-spec-copy"/>
     <keyword type="function" name="bd_plugin_spec_free ()" link="libblockdev-Plugins.html#bd-plugin-spec-free"/>
     <keyword type="function" name="bd_is_plugin_available ()" link="libblockdev-Plugins.html#bd-is-plugin-available"/>
@@ -439,7 +610,6 @@
     <keyword type="function" name="bd_get_plugin_soname ()" link="libblockdev-Plugins.html#bd-get-plugin-soname"/>
     <keyword type="function" name="bd_get_plugin_name ()" link="libblockdev-Plugins.html#bd-get-plugin-name"/>
     <keyword type="enum" name="enum BDPlugin" link="libblockdev-Plugins.html#BDPlugin"/>
-    <keyword type="function" name="bd_part_check_deps ()" link="libblockdev-Part.html#bd-part-check-deps"/>
     <keyword type="function" name="bd_part_init ()" link="libblockdev-Part.html#bd-part-init"/>
     <keyword type="function" name="bd_part_close ()" link="libblockdev-Part.html#bd-part-close"/>
     <keyword type="function" name="bd_part_create_table ()" link="libblockdev-Part.html#bd-part-create-table"/>
@@ -448,23 +618,21 @@
     <keyword type="function" name="bd_part_resize_part ()" link="libblockdev-Part.html#bd-part-resize-part"/>
     <keyword type="function" name="bd_part_get_disk_parts ()" link="libblockdev-Part.html#bd-part-get-disk-parts"/>
     <keyword type="function" name="bd_part_get_part_spec ()" link="libblockdev-Part.html#bd-part-get-part-spec"/>
-    <keyword type="function" name="bd_part_set_part_flag ()" link="libblockdev-Part.html#bd-part-set-part-flag"/>
     <keyword type="function" name="bd_part_spec_copy ()" link="libblockdev-Part.html#bd-part-spec-copy"/>
     <keyword type="function" name="bd_part_spec_free ()" link="libblockdev-Part.html#bd-part-spec-free"/>
     <keyword type="function" name="bd_part_spec_get_type ()" link="libblockdev-Part.html#bd-part-spec-get-type"/>
-    <keyword type="function" name="bd_part_get_flag_str ()" link="libblockdev-Part.html#bd-part-get-flag-str"/>
     <keyword type="function" name="bd_part_get_part_table_type_str ()" link="libblockdev-Part.html#bd-part-get-part-table-type-str"/>
     <keyword type="function" name="bd_part_get_type_str ()" link="libblockdev-Part.html#bd-part-get-type-str"/>
     <keyword type="function" name="bd_part_get_best_free_region ()" link="libblockdev-Part.html#bd-part-get-best-free-region"/>
     <keyword type="function" name="bd_part_get_disk_free_regions ()" link="libblockdev-Part.html#bd-part-get-disk-free-regions"/>
     <keyword type="function" name="bd_part_get_disk_spec ()" link="libblockdev-Part.html#bd-part-get-disk-spec"/>
     <keyword type="function" name="bd_part_get_part_by_pos ()" link="libblockdev-Part.html#bd-part-get-part-by-pos"/>
-    <keyword type="function" name="bd_part_set_disk_flag ()" link="libblockdev-Part.html#bd-part-set-disk-flag"/>
-    <keyword type="function" name="bd_part_set_part_flags ()" link="libblockdev-Part.html#bd-part-set-part-flags"/>
     <keyword type="function" name="bd_part_set_part_name ()" link="libblockdev-Part.html#bd-part-set-part-name"/>
     <keyword type="function" name="bd_part_set_part_type ()" link="libblockdev-Part.html#bd-part-set-part-type"/>
     <keyword type="function" name="bd_part_set_part_id ()" link="libblockdev-Part.html#bd-part-set-part-id"/>
-    <keyword type="function" name="bd_part_get_part_id ()" link="libblockdev-Part.html#bd-part-get-part-id"/>
+    <keyword type="function" name="bd_part_set_part_bootable ()" link="libblockdev-Part.html#bd-part-set-part-bootable"/>
+    <keyword type="function" name="bd_part_set_part_attributes ()" link="libblockdev-Part.html#bd-part-set-part-attributes"/>
+    <keyword type="function" name="bd_part_set_part_uuid ()" link="libblockdev-Part.html#bd-part-set-part-uuid"/>
     <keyword type="function" name="bd_part_error_quark ()" link="libblockdev-Part.html#bd-part-error-quark"/>
     <keyword type="function" name="bd_part_is_tech_avail ()" link="libblockdev-Part.html#bd-part-is-tech-avail"/>
     <keyword type="function" name="bd_part_disk_spec_copy ()" link="libblockdev-Part.html#bd-part-disk-spec-copy"/>
@@ -472,17 +640,14 @@
     <keyword type="macro" name="BD_PART_ERROR" link="libblockdev-Part.html#BD-PART-ERROR:CAPS"/>
     <keyword type="macro" name="BD_PART_TYPE_SPEC" link="libblockdev-Part.html#BD-PART-TYPE-SPEC:CAPS"/>
     <keyword type="enum" name="enum BDPartAlign" link="libblockdev-Part.html#BDPartAlign"/>
-    <keyword type="enum" name="enum BDPartFlag" link="libblockdev-Part.html#BDPartFlag"/>
     <keyword type="struct" name="BDPartSpec" link="libblockdev-Part.html#BDPartSpec"/>
     <keyword type="enum" name="enum BDPartType" link="libblockdev-Part.html#BDPartType"/>
     <keyword type="enum" name="enum BDPartTypeReq" link="libblockdev-Part.html#BDPartTypeReq"/>
     <keyword type="enum" name="enum BDPartError" link="libblockdev-Part.html#BDPartError"/>
     <keyword type="enum" name="enum BDPartTableType" link="libblockdev-Part.html#BDPartTableType"/>
-    <keyword type="enum" name="enum BDPartDiskFlag" link="libblockdev-Part.html#BDPartDiskFlag"/>
     <keyword type="struct" name="BDPartDiskSpec" link="libblockdev-Part.html#BDPartDiskSpec"/>
     <keyword type="enum" name="enum BDPartTech" link="libblockdev-Part.html#BDPartTech"/>
     <keyword type="enum" name="enum BDPartTechMode" link="libblockdev-Part.html#BDPartTechMode"/>
-    <keyword type="function" name="bd_swap_check_deps ()" link="libblockdev-Swap.html#bd-swap-check-deps"/>
     <keyword type="function" name="bd_swap_init ()" link="libblockdev-Swap.html#bd-swap-init"/>
     <keyword type="function" name="bd_swap_close ()" link="libblockdev-Swap.html#bd-swap-close"/>
     <keyword type="function" name="bd_swap_error_quark ()" link="libblockdev-Swap.html#bd-swap-error-quark"/>
@@ -491,44 +656,12 @@
     <keyword type="function" name="bd_swap_swapoff ()" link="libblockdev-Swap.html#bd-swap-swapoff"/>
     <keyword type="function" name="bd_swap_swapstatus ()" link="libblockdev-Swap.html#bd-swap-swapstatus"/>
     <keyword type="function" name="bd_swap_set_label ()" link="libblockdev-Swap.html#bd-swap-set-label"/>
+    <keyword type="function" name="bd_swap_set_uuid ()" link="libblockdev-Swap.html#bd-swap-set-uuid"/>
     <keyword type="function" name="bd_swap_is_tech_avail ()" link="libblockdev-Swap.html#bd-swap-is-tech-avail"/>
     <keyword type="macro" name="BD_SWAP_ERROR" link="libblockdev-Swap.html#BD-SWAP-ERROR:CAPS"/>
     <keyword type="enum" name="enum BDSwapError" link="libblockdev-Swap.html#BDSwapError"/>
     <keyword type="enum" name="enum BDSwapTech" link="libblockdev-Swap.html#BDSwapTech"/>
     <keyword type="enum" name="enum BDSwapTechMode" link="libblockdev-Swap.html#BDSwapTechMode"/>
-    <keyword type="function" name="bd_kbd_check_deps ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-check-deps"/>
-    <keyword type="function" name="bd_kbd_init ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-init"/>
-    <keyword type="function" name="bd_kbd_close ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-close"/>
-    <keyword type="function" name="bd_kbd_bcache_attach ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-bcache-attach"/>
-    <keyword type="function" name="bd_kbd_bcache_create ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-bcache-create"/>
-    <keyword type="function" name="bd_kbd_bcache_destroy ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-bcache-destroy"/>
-    <keyword type="function" name="bd_kbd_bcache_detach ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-bcache-detach"/>
-    <keyword type="function" name="bd_kbd_bcache_get_backing_device ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-bcache-get-backing-device"/>
-    <keyword type="function" name="bd_kbd_bcache_get_cache_device ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-bcache-get-cache-device"/>
-    <keyword type="function" name="bd_kbd_bcache_get_mode ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-bcache-get-mode"/>
-    <keyword type="function" name="bd_kbd_bcache_get_mode_from_str ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-bcache-get-mode-from-str"/>
-    <keyword type="function" name="bd_kbd_bcache_get_mode_str ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-bcache-get-mode-str"/>
-    <keyword type="function" name="bd_kbd_bcache_set_mode ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-bcache-set-mode"/>
-    <keyword type="function" name="bd_kbd_bcache_stats_copy ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-bcache-stats-copy"/>
-    <keyword type="function" name="bd_kbd_bcache_stats_free ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-bcache-stats-free"/>
-    <keyword type="function" name="bd_kbd_bcache_status ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-bcache-status"/>
-    <keyword type="function" name="bd_kbd_error_quark ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-error-quark"/>
-    <keyword type="function" name="bd_kbd_zram_create_devices ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-zram-create-devices"/>
-    <keyword type="function" name="bd_kbd_zram_destroy_devices ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-zram-destroy-devices"/>
-    <keyword type="function" name="bd_kbd_zram_add_device ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-zram-add-device"/>
-    <keyword type="function" name="bd_kbd_zram_remove_device ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-zram-remove-device"/>
-    <keyword type="function" name="bd_kbd_zram_get_stats ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-zram-get-stats"/>
-    <keyword type="function" name="bd_kbd_zram_stats_copy ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-zram-stats-copy"/>
-    <keyword type="function" name="bd_kbd_zram_stats_free ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-zram-stats-free"/>
-    <keyword type="function" name="bd_kbd_is_tech_avail ()" link="libblockdev-KernelBlockDevices.html#bd-kbd-is-tech-avail"/>
-    <keyword type="enum" name="enum BDKBDBcacheMode" link="libblockdev-KernelBlockDevices.html#BDKBDBcacheMode"/>
-    <keyword type="struct" name="BDKBDBcacheStats" link="libblockdev-KernelBlockDevices.html#BDKBDBcacheStats"/>
-    <keyword type="enum" name="enum BDKBDError" link="libblockdev-KernelBlockDevices.html#BDKBDError"/>
-    <keyword type="struct" name="BDKBDZramStats" link="libblockdev-KernelBlockDevices.html#BDKBDZramStats"/>
-    <keyword type="macro" name="BD_KBD_ERROR" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR:CAPS"/>
-    <keyword type="enum" name="enum BDKBDTech" link="libblockdev-KernelBlockDevices.html#BDKBDTech"/>
-    <keyword type="enum" name="enum BDKBDTechMode" link="libblockdev-KernelBlockDevices.html#BDKBDTechMode"/>
-    <keyword type="function" name="bd_s390_check_deps ()" link="libblockdev-s390.html#bd-s390-check-deps"/>
     <keyword type="function" name="bd_s390_init ()" link="libblockdev-s390.html#bd-s390-init"/>
     <keyword type="function" name="bd_s390_close ()" link="libblockdev-s390.html#bd-s390-close"/>
     <keyword type="function" name="bd_s390_error_quark ()" link="libblockdev-s390.html#bd-s390-error-quark"/>
@@ -558,6 +691,8 @@
     <keyword type="function" name="bd_utils_exec_and_capture_output ()" link="libblockdev-Utils.html#bd-utils-exec-and-capture-output"/>
     <keyword type="function" name="bd_utils_exec_and_report_error_no_progress ()" link="libblockdev-Utils.html#bd-utils-exec-and-report-error-no-progress"/>
     <keyword type="function" name="bd_utils_exec_and_report_progress ()" link="libblockdev-Utils.html#bd-utils-exec-and-report-progress"/>
+    <keyword type="function" name="bd_utils_exec_with_input ()" link="libblockdev-Utils.html#bd-utils-exec-with-input"/>
+    <keyword type="function" name="bd_utils_prog_reporting_initialized ()" link="libblockdev-Utils.html#bd-utils-prog-reporting-initialized"/>
     <keyword type="function" name="bd_utils_init_logging ()" link="libblockdev-Utils.html#bd-utils-init-logging"/>
     <keyword type="function" name="bd_utils_init_prog_reporting ()" link="libblockdev-Utils.html#bd-utils-init-prog-reporting"/>
     <keyword type="function" name="bd_utils_init_prog_reporting_thread ()" link="libblockdev-Utils.html#bd-utils-init-prog-reporting-thread"/>
@@ -565,13 +700,19 @@
     <keyword type="function" name="bd_utils_report_finished ()" link="libblockdev-Utils.html#bd-utils-report-finished"/>
     <keyword type="function" name="bd_utils_report_progress ()" link="libblockdev-Utils.html#bd-utils-report-progress"/>
     <keyword type="function" name="bd_utils_report_started ()" link="libblockdev-Utils.html#bd-utils-report-started"/>
+    <keyword type="function" name="bd_utils_get_next_task_id ()" link="libblockdev-Utils.html#bd-utils-get-next-task-id"/>
+    <keyword type="function" name="bd_utils_log_task_status ()" link="libblockdev-Utils.html#bd-utils-log-task-status"/>
     <keyword type="function" name="bd_utils_log ()" link="libblockdev-Utils.html#bd-utils-log"/>
+    <keyword type="function" name="bd_utils_log_format ()" link="libblockdev-Utils.html#bd-utils-log-format"/>
+    <keyword type="function" name="bd_utils_log_stdout ()" link="libblockdev-Utils.html#bd-utils-log-stdout"/>
     <keyword type="function" name="bd_utils_echo_str_to_file ()" link="libblockdev-Utils.html#bd-utils-echo-str-to-file"/>
+    <keyword type="function" name="bd_utils_set_log_level ()" link="libblockdev-Utils.html#bd-utils-set-log-level"/>
     <keyword type="function" name="bd_utils_check_util_version ()" link="libblockdev-Utils.html#bd-utils-check-util-version"/>
     <keyword type="function" name="bd_utils_version_cmp ()" link="libblockdev-Utils.html#bd-utils-version-cmp"/>
     <keyword type="function" name="bd_extra_arg_new ()" link="libblockdev-Utils.html#bd-extra-arg-new"/>
     <keyword type="function" name="bd_extra_arg_copy ()" link="libblockdev-Utils.html#bd-extra-arg-copy"/>
     <keyword type="function" name="bd_extra_arg_free ()" link="libblockdev-Utils.html#bd-extra-arg-free"/>
+    <keyword type="function" name="bd_extra_arg_list_free ()" link="libblockdev-Utils.html#bd-extra-arg-list-free"/>
     <keyword type="function" name="bd_extra_arg_get_type ()" link="libblockdev-Utils.html#bd-extra-arg-get-type"/>
     <keyword type="function" name="bd_utils_resolve_device ()" link="libblockdev-Utils.html#bd-utils-resolve-device"/>
     <keyword type="function" name="bd_utils_get_device_symlinks ()" link="libblockdev-Utils.html#bd-utils-get-device-symlinks"/>
@@ -581,11 +722,18 @@
     <keyword type="function" name="bd_utils_get_linux_version ()" link="libblockdev-Utils.html#bd-utils-get-linux-version"/>
     <keyword type="function" name="bd_utils_check_linux_version ()" link="libblockdev-Utils.html#bd-utils-check-linux-version"/>
     <keyword type="function" name="bd_utils_dbus_service_available ()" link="libblockdev-Utils.html#bd-utils-dbus-service-available"/>
+    <keyword type="function" name="bd_utils_dbus_error_quark ()" link="libblockdev-Utils.html#bd-utils-dbus-error-quark"/>
+    <keyword type="function" name="bd_utils_module_error_quark ()" link="libblockdev-Utils.html#bd-utils-module-error-quark"/>
     <keyword type="enum" name="enum BDUtilsProgStatus" link="libblockdev-Utils.html#BDUtilsProgStatus"/>
     <keyword type="macro" name="BD_UTILS_EXEC_ERROR" link="libblockdev-Utils.html#BD-UTILS-EXEC-ERROR:CAPS"/>
     <keyword type="enum" name="enum BDUtilsExecError" link="libblockdev-Utils.html#BDUtilsExecError"/>
     <keyword type="enum" name="enum BDUtilsDevUtilsError" link="libblockdev-Utils.html#BDUtilsDevUtilsError"/>
+    <keyword type="enum" name="enum BDUtilsDBusError" link="libblockdev-Utils.html#BDUtilsDBusError"/>
+    <keyword type="enum" name="enum BDUtilsModuleError" link="libblockdev-Utils.html#BDUtilsModuleError"/>
     <keyword type="macro" name="BD_UTILS_DEV_UTILS_ERROR" link="libblockdev-Utils.html#BD-UTILS-DEV-UTILS-ERROR:CAPS"/>
+    <keyword type="macro" name="BD_UTILS_DBUS_ERROR" link="libblockdev-Utils.html#BD-UTILS-DBUS-ERROR:CAPS"/>
+    <keyword type="macro" name="BD_UTILS_MODULE_ERROR" link="libblockdev-Utils.html#BD-UTILS-MODULE-ERROR:CAPS"/>
+    <keyword type="struct" name="BDUtilsLinuxVersion" link="libblockdev-Utils.html#BDUtilsLinuxVersion"/>
     <keyword type="struct" name="BDExtraArg" link="libblockdev-Utils.html#BDExtraArg"/>
     <keyword type="macro" name="EXBIBYTE" link="libblockdev-Utils.html#EXBIBYTE:CAPS"/>
     <keyword type="macro" name="EiB" link="libblockdev-Utils.html#EiB"/>
@@ -599,41 +747,32 @@
     <keyword type="macro" name="PiB" link="libblockdev-Utils.html#PiB"/>
     <keyword type="macro" name="TEBIBYTE" link="libblockdev-Utils.html#TEBIBYTE:CAPS"/>
     <keyword type="macro" name="TiB" link="libblockdev-Utils.html#TiB"/>
-    <keyword type="function" name="bd_vdo_check_deps ()" link="libblockdev-VDO.html#bd-vdo-check-deps" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_init ()" link="libblockdev-VDO.html#bd-vdo-init" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_close ()" link="libblockdev-VDO.html#bd-vdo-close" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_error_quark ()" link="libblockdev-VDO.html#bd-vdo-error-quark"/>
-    <keyword type="function" name="bd_vdo_get_write_policy_str ()" link="libblockdev-VDO.html#bd-vdo-get-write-policy-str" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_get_write_policy_from_str ()" link="libblockdev-VDO.html#bd-vdo-get-write-policy-from-str" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_info ()" link="libblockdev-VDO.html#bd-vdo-info" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_create ()" link="libblockdev-VDO.html#bd-vdo-create" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_remove ()" link="libblockdev-VDO.html#bd-vdo-remove" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_change_write_policy ()" link="libblockdev-VDO.html#bd-vdo-change-write-policy" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_enable_compression ()" link="libblockdev-VDO.html#bd-vdo-enable-compression" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_disable_compression ()" link="libblockdev-VDO.html#bd-vdo-disable-compression" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_enable_deduplication ()" link="libblockdev-VDO.html#bd-vdo-enable-deduplication" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_disable_deduplication ()" link="libblockdev-VDO.html#bd-vdo-disable-deduplication" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_activate ()" link="libblockdev-VDO.html#bd-vdo-activate" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_deactivate ()" link="libblockdev-VDO.html#bd-vdo-deactivate" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_start ()" link="libblockdev-VDO.html#bd-vdo-start" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_stop ()" link="libblockdev-VDO.html#bd-vdo-stop" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_grow_logical ()" link="libblockdev-VDO.html#bd-vdo-grow-logical" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_grow_physical ()" link="libblockdev-VDO.html#bd-vdo-grow-physical" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_get_stats ()" link="libblockdev-VDO.html#bd-vdo-get-stats" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_get_stats_full ()" link="libblockdev-VDO.html#bd-vdo-get-stats-full" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="function" name="bd_vdo_is_tech_avail ()" link="libblockdev-VDO.html#bd-vdo-is-tech-avail" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="enum" name="enum BDVDOError" link="libblockdev-VDO.html#BDVDOError"/>
-    <keyword type="macro" name="BD_VDO_ERROR" link="libblockdev-VDO.html#BD-VDO-ERROR:CAPS"/>
-    <keyword type="struct" name="BDVDOInfo" link="libblockdev-VDO.html#BDVDOInfo" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="struct" name="BDVDOStats" link="libblockdev-VDO.html#BDVDOStats" deprecated="2.24: Use LVM-VDO integration instead."/>
-    <keyword type="enum" name="enum BDVDOTech" link="libblockdev-VDO.html#BDVDOTech"/>
-    <keyword type="enum" name="enum BDVDOTechMode" link="libblockdev-VDO.html#BDVDOTechMode"/>
+    <keyword type="macro" name="EB" link="libblockdev-Utils.html#EB:CAPS"/>
+    <keyword type="macro" name="EXABYTE" link="libblockdev-Utils.html#EXABYTE:CAPS"/>
+    <keyword type="macro" name="GB" link="libblockdev-Utils.html#GB:CAPS"/>
+    <keyword type="macro" name="GIGABYTE" link="libblockdev-Utils.html#GIGABYTE:CAPS"/>
+    <keyword type="macro" name="KB" link="libblockdev-Utils.html#KB:CAPS"/>
+    <keyword type="macro" name="KILOBYTE" link="libblockdev-Utils.html#KILOBYTE:CAPS"/>
+    <keyword type="macro" name="MB" link="libblockdev-Utils.html#MB:CAPS"/>
+    <keyword type="macro" name="MEGABYTE" link="libblockdev-Utils.html#MEGABYTE:CAPS"/>
+    <keyword type="macro" name="PB" link="libblockdev-Utils.html#PB:CAPS"/>
+    <keyword type="macro" name="PETABYTE" link="libblockdev-Utils.html#PETABYTE:CAPS"/>
+    <keyword type="macro" name="TB" link="libblockdev-Utils.html#TB:CAPS"/>
+    <keyword type="macro" name="TERABYTE" link="libblockdev-Utils.html#TERABYTE:CAPS"/>
+    <keyword type="macro" name="BD_UTILS_LOG_EMERG" link="libblockdev-Utils.html#BD-UTILS-LOG-EMERG:CAPS"/>
+    <keyword type="macro" name="BD_UTILS_LOG_ALERT" link="libblockdev-Utils.html#BD-UTILS-LOG-ALERT:CAPS"/>
+    <keyword type="macro" name="BD_UTILS_LOG_CRIT" link="libblockdev-Utils.html#BD-UTILS-LOG-CRIT:CAPS"/>
+    <keyword type="macro" name="BD_UTILS_LOG_ERR" link="libblockdev-Utils.html#BD-UTILS-LOG-ERR:CAPS"/>
+    <keyword type="macro" name="BD_UTILS_LOG_WARNING" link="libblockdev-Utils.html#BD-UTILS-LOG-WARNING:CAPS"/>
+    <keyword type="macro" name="BD_UTILS_LOG_NOTICE" link="libblockdev-Utils.html#BD-UTILS-LOG-NOTICE:CAPS"/>
+    <keyword type="macro" name="BD_UTILS_LOG_INFO" link="libblockdev-Utils.html#BD-UTILS-LOG-INFO:CAPS"/>
+    <keyword type="macro" name="BD_UTILS_LOG_DEBUG" link="libblockdev-Utils.html#BD-UTILS-LOG-DEBUG:CAPS"/>
+    <keyword type="constant" name="BD_INIT_ERROR_FAILED" link="libblockdev-blockdev-library.html#BD-INIT-ERROR-FAILED:CAPS"/>
     <keyword type="constant" name="BD_INIT_ERROR_PLUGINS_FAILED" link="libblockdev-blockdev-library.html#BD-INIT-ERROR-PLUGINS-FAILED:CAPS"/>
     <keyword type="constant" name="BD_INIT_ERROR_NOT_IMPLEMENTED" link="libblockdev-blockdev-library.html#BD-INIT-ERROR-NOT-IMPLEMENTED:CAPS"/>
-    <keyword type="constant" name="BD_INIT_ERROR_FAILED" link="libblockdev-blockdev-library.html#BD-INIT-ERROR-FAILED:CAPS"/>
+    <keyword type="constant" name="BD_BTRFS_ERROR_TECH_UNAVAIL" link="libblockdev-BTRFS.html#BD-BTRFS-ERROR-TECH-UNAVAIL:CAPS"/>
     <keyword type="constant" name="BD_BTRFS_ERROR_DEVICE" link="libblockdev-BTRFS.html#BD-BTRFS-ERROR-DEVICE:CAPS"/>
     <keyword type="constant" name="BD_BTRFS_ERROR_PARSE" link="libblockdev-BTRFS.html#BD-BTRFS-ERROR-PARSE:CAPS"/>
-    <keyword type="constant" name="BD_BTRFS_ERROR_TECH_UNAVAIL" link="libblockdev-BTRFS.html#BD-BTRFS-ERROR-TECH-UNAVAIL:CAPS"/>
     <keyword type="constant" name="BD_BTRFS_TECH_FS" link="libblockdev-BTRFS.html#BD-BTRFS-TECH-FS:CAPS"/>
     <keyword type="constant" name="BD_BTRFS_TECH_MULTI_DEV" link="libblockdev-BTRFS.html#BD-BTRFS-TECH-MULTI-DEV:CAPS"/>
     <keyword type="constant" name="BD_BTRFS_TECH_SUBVOL" link="libblockdev-BTRFS.html#BD-BTRFS-TECH-SUBVOL:CAPS"/>
@@ -642,6 +781,7 @@
     <keyword type="constant" name="BD_BTRFS_TECH_MODE_DELETE" link="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-DELETE:CAPS"/>
     <keyword type="constant" name="BD_BTRFS_TECH_MODE_MODIFY" link="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-MODIFY:CAPS"/>
     <keyword type="constant" name="BD_BTRFS_TECH_MODE_QUERY" link="libblockdev-BTRFS.html#BD-BTRFS-TECH-MODE-QUERY:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_ERROR_TECH_UNAVAIL" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR-TECH-UNAVAIL:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_ERROR_DEVICE" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR-DEVICE:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_ERROR_STATE" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR-STATE:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_ERROR_INVALID_SPEC" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR-INVALID-SPEC:CAPS"/>
@@ -656,15 +796,24 @@
     <keyword type="constant" name="BD_CRYPTO_ERROR_CERT_DECODE" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR-CERT-DECODE:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_ERROR_ESCROW_FAILED" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR-ESCROW-FAILED:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_ERROR_INVALID_PARAMS" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR-INVALID-PARAMS:CAPS"/>
-    <keyword type="constant" name="BD_CRYPTO_ERROR_TECH_UNAVAIL" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR-TECH-UNAVAIL:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_ERROR_KEYRING" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR-KEYRING:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_ERROR_KEYFILE_FAILED" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR-KEYFILE-FAILED:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_ERROR_INVALID_CONTEXT" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR-INVALID-CONTEXT:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_LUKS_VERSION_LUKS1" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-VERSION-LUKS1:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_LUKS_VERSION_LUKS2" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-VERSION-LUKS2:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_INTEGRITY_OPEN_NO_JOURNAL" link="libblockdev-Crypto.html#BD-CRYPTO-INTEGRITY-OPEN-NO-JOURNAL:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_INTEGRITY_OPEN_RECOVERY" link="libblockdev-Crypto.html#BD-CRYPTO-INTEGRITY-OPEN-RECOVERY:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_INTEGRITY_OPEN_NO_JOURNAL_BITMAP" link="libblockdev-Crypto.html#BD-CRYPTO-INTEGRITY-OPEN-NO-JOURNAL-BITMAP:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_INTEGRITY_OPEN_RECALCULATE" link="libblockdev-Crypto.html#BD-CRYPTO-INTEGRITY-OPEN-RECALCULATE:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_INTEGRITY_OPEN_RECALCULATE_RESET" link="libblockdev-Crypto.html#BD-CRYPTO-INTEGRITY-OPEN-RECALCULATE-RESET:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_INTEGRITY_OPEN_ALLOW_DISCARDS" link="libblockdev-Crypto.html#BD-CRYPTO-INTEGRITY-OPEN-ALLOW-DISCARDS:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_LUKS" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS:CAPS"/>
-    <keyword type="constant" name="BD_CRYPTO_TECH_LUKS2" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS2:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_TRUECRYPT" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-TRUECRYPT:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_ESCROW" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-ESCROW:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_INTEGRITY" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-INTEGRITY:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_BITLK" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-BITLK:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_TECH_KEYRING" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-KEYRING:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_TECH_FVAULT2" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-FVAULT2:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_MODE_CREATE" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-CREATE:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_MODE_OPEN_CLOSE" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-OPEN-CLOSE:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_MODE_QUERY" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-QUERY:CAPS"/>
@@ -673,18 +822,19 @@
     <keyword type="constant" name="BD_CRYPTO_TECH_MODE_RESIZE" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-RESIZE:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_MODE_SUSPEND_RESUME" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-SUSPEND-RESUME:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_MODE_BACKUP_RESTORE" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-BACKUP-RESTORE:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_TECH_MODE_MODIFY" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-MODIFY:CAPS"/>
+    <keyword type="constant" name="BD_DM_ERROR_TECH_UNAVAIL" link="libblockdev-DeviceMapper.html#BD-DM-ERROR-TECH-UNAVAIL:CAPS"/>
     <keyword type="constant" name="BD_DM_ERROR_SYS" link="libblockdev-DeviceMapper.html#BD-DM-ERROR-SYS:CAPS"/>
     <keyword type="constant" name="BD_DM_ERROR_NOT_ROOT" link="libblockdev-DeviceMapper.html#BD-DM-ERROR-NOT-ROOT:CAPS"/>
     <keyword type="constant" name="BD_DM_ERROR_TASK" link="libblockdev-DeviceMapper.html#BD-DM-ERROR-TASK:CAPS"/>
     <keyword type="constant" name="BD_DM_ERROR_RAID_FAIL" link="libblockdev-DeviceMapper.html#BD-DM-ERROR-RAID-FAIL:CAPS"/>
     <keyword type="constant" name="BD_DM_ERROR_RAID_NO_DEVS" link="libblockdev-DeviceMapper.html#BD-DM-ERROR-RAID-NO-DEVS:CAPS"/>
     <keyword type="constant" name="BD_DM_ERROR_RAID_NO_EXIST" link="libblockdev-DeviceMapper.html#BD-DM-ERROR-RAID-NO-EXIST:CAPS"/>
-    <keyword type="constant" name="BD_DM_ERROR_TECH_UNAVAIL" link="libblockdev-DeviceMapper.html#BD-DM-ERROR-TECH-UNAVAIL:CAPS"/>
     <keyword type="constant" name="BD_DM_TECH_MAP" link="libblockdev-DeviceMapper.html#BD-DM-TECH-MAP:CAPS"/>
-    <keyword type="constant" name="BD_DM_TECH_RAID" link="libblockdev-DeviceMapper.html#BD-DM-TECH-RAID:CAPS"/>
     <keyword type="constant" name="BD_DM_TECH_MODE_CREATE_ACTIVATE" link="libblockdev-DeviceMapper.html#BD-DM-TECH-MODE-CREATE-ACTIVATE:CAPS"/>
     <keyword type="constant" name="BD_DM_TECH_MODE_REMOVE_DEACTIVATE" link="libblockdev-DeviceMapper.html#BD-DM-TECH-MODE-REMOVE-DEACTIVATE:CAPS"/>
     <keyword type="constant" name="BD_DM_TECH_MODE_QUERY" link="libblockdev-DeviceMapper.html#BD-DM-TECH-MODE-QUERY:CAPS"/>
+    <keyword type="constant" name="BD_FS_ERROR_TECH_UNAVAIL" link="libblockdev-FS.html#BD-FS-ERROR-TECH-UNAVAIL:CAPS"/>
     <keyword type="constant" name="BD_FS_ERROR_INVAL" link="libblockdev-FS.html#BD-FS-ERROR-INVAL:CAPS"/>
     <keyword type="constant" name="BD_FS_ERROR_PARSE" link="libblockdev-FS.html#BD-FS-ERROR-PARSE:CAPS"/>
     <keyword type="constant" name="BD_FS_ERROR_FAIL" link="libblockdev-FS.html#BD-FS-ERROR-FAIL:CAPS"/>
@@ -694,8 +844,21 @@
     <keyword type="constant" name="BD_FS_ERROR_NOT_SUPPORTED" link="libblockdev-FS.html#BD-FS-ERROR-NOT-SUPPORTED:CAPS"/>
     <keyword type="constant" name="BD_FS_ERROR_NOT_MOUNTED" link="libblockdev-FS.html#BD-FS-ERROR-NOT-MOUNTED:CAPS"/>
     <keyword type="constant" name="BD_FS_ERROR_AUTH" link="libblockdev-FS.html#BD-FS-ERROR-AUTH:CAPS"/>
-    <keyword type="constant" name="BD_FS_ERROR_TECH_UNAVAIL" link="libblockdev-FS.html#BD-FS-ERROR-TECH-UNAVAIL:CAPS"/>
+    <keyword type="constant" name="BD_FS_ERROR_LABEL_INVALID" link="libblockdev-FS.html#BD-FS-ERROR-LABEL-INVALID:CAPS"/>
+    <keyword type="constant" name="BD_FS_ERROR_UUID_INVALID" link="libblockdev-FS.html#BD-FS-ERROR-UUID-INVALID:CAPS"/>
     <keyword type="constant" name="BD_FS_ERROR_UNKNOWN_FS" link="libblockdev-FS.html#BD-FS-ERROR-UNKNOWN-FS:CAPS"/>
+    <keyword type="constant" name="BD_FS_SUPPORT_SET_LABEL" link="libblockdev-FS.html#BD-FS-SUPPORT-SET-LABEL:CAPS"/>
+    <keyword type="constant" name="BD_FS_SUPPORT_SET_UUID" link="libblockdev-FS.html#BD-FS-SUPPORT-SET-UUID:CAPS"/>
+    <keyword type="constant" name="BD_FS_FEATURE_OWNERS" link="libblockdev-FS.html#BD-FS-FEATURE-OWNERS:CAPS"/>
+    <keyword type="constant" name="BD_FS_FEATURE_PARTITION_TABLE" link="libblockdev-FS.html#BD-FS-FEATURE-PARTITION-TABLE:CAPS"/>
+    <keyword type="constant" name="BD_FS_FSCK_CHECK" link="libblockdev-FS.html#BD-FS-FSCK-CHECK:CAPS"/>
+    <keyword type="constant" name="BD_FS_FSCK_REPAIR" link="libblockdev-FS.html#BD-FS-FSCK-REPAIR:CAPS"/>
+    <keyword type="constant" name="BD_FS_MKFS_LABEL" link="libblockdev-FS.html#BD-FS-MKFS-LABEL:CAPS"/>
+    <keyword type="constant" name="BD_FS_MKFS_UUID" link="libblockdev-FS.html#BD-FS-MKFS-UUID:CAPS"/>
+    <keyword type="constant" name="BD_FS_MKFS_DRY_RUN" link="libblockdev-FS.html#BD-FS-MKFS-DRY-RUN:CAPS"/>
+    <keyword type="constant" name="BD_FS_MKFS_NODISCARD" link="libblockdev-FS.html#BD-FS-MKFS-NODISCARD:CAPS"/>
+    <keyword type="constant" name="BD_FS_MKFS_FORCE" link="libblockdev-FS.html#BD-FS-MKFS-FORCE:CAPS"/>
+    <keyword type="constant" name="BD_FS_MKFS_NOPT" link="libblockdev-FS.html#BD-FS-MKFS-NOPT:CAPS"/>
     <keyword type="constant" name="BD_FS_TECH_GENERIC" link="libblockdev-FS.html#BD-FS-TECH-GENERIC:CAPS"/>
     <keyword type="constant" name="BD_FS_TECH_MOUNT" link="libblockdev-FS.html#BD-FS-TECH-MOUNT:CAPS"/>
     <keyword type="constant" name="BD_FS_TECH_EXT2" link="libblockdev-FS.html#BD-FS-TECH-EXT2:CAPS"/>
@@ -704,6 +867,11 @@
     <keyword type="constant" name="BD_FS_TECH_XFS" link="libblockdev-FS.html#BD-FS-TECH-XFS:CAPS"/>
     <keyword type="constant" name="BD_FS_TECH_VFAT" link="libblockdev-FS.html#BD-FS-TECH-VFAT:CAPS"/>
     <keyword type="constant" name="BD_FS_TECH_NTFS" link="libblockdev-FS.html#BD-FS-TECH-NTFS:CAPS"/>
+    <keyword type="constant" name="BD_FS_TECH_F2FS" link="libblockdev-FS.html#BD-FS-TECH-F2FS:CAPS"/>
+    <keyword type="constant" name="BD_FS_TECH_NILFS2" link="libblockdev-FS.html#BD-FS-TECH-NILFS2:CAPS"/>
+    <keyword type="constant" name="BD_FS_TECH_EXFAT" link="libblockdev-FS.html#BD-FS-TECH-EXFAT:CAPS"/>
+    <keyword type="constant" name="BD_FS_TECH_BTRFS" link="libblockdev-FS.html#BD-FS-TECH-BTRFS:CAPS"/>
+    <keyword type="constant" name="BD_FS_TECH_UDF" link="libblockdev-FS.html#BD-FS-TECH-UDF:CAPS"/>
     <keyword type="constant" name="BD_FS_TECH_MODE_MKFS" link="libblockdev-FS.html#BD-FS-TECH-MODE-MKFS:CAPS"/>
     <keyword type="constant" name="BD_FS_TECH_MODE_WIPE" link="libblockdev-FS.html#BD-FS-TECH-MODE-WIPE:CAPS"/>
     <keyword type="constant" name="BD_FS_TECH_MODE_CHECK" link="libblockdev-FS.html#BD-FS-TECH-MODE-CHECK:CAPS"/>
@@ -711,31 +879,45 @@
     <keyword type="constant" name="BD_FS_TECH_MODE_SET_LABEL" link="libblockdev-FS.html#BD-FS-TECH-MODE-SET-LABEL:CAPS"/>
     <keyword type="constant" name="BD_FS_TECH_MODE_QUERY" link="libblockdev-FS.html#BD-FS-TECH-MODE-QUERY:CAPS"/>
     <keyword type="constant" name="BD_FS_TECH_MODE_RESIZE" link="libblockdev-FS.html#BD-FS-TECH-MODE-RESIZE:CAPS"/>
+    <keyword type="constant" name="BD_FS_TECH_MODE_SET_UUID" link="libblockdev-FS.html#BD-FS-TECH-MODE-SET-UUID:CAPS"/>
     <keyword type="constant" name="BD_FS_OFFLINE_SHRINK" link="libblockdev-FS.html#BD-FS-OFFLINE-SHRINK:CAPS"/>
     <keyword type="constant" name="BD_FS_OFFLINE_GROW" link="libblockdev-FS.html#BD-FS-OFFLINE-GROW:CAPS"/>
     <keyword type="constant" name="BD_FS_ONLINE_SHRINK" link="libblockdev-FS.html#BD-FS-ONLINE-SHRINK:CAPS"/>
     <keyword type="constant" name="BD_FS_ONLINE_GROW" link="libblockdev-FS.html#BD-FS-ONLINE-GROW:CAPS"/>
-    <keyword type="constant" name="BD_LOOP_ERROR_DEVICE" link="libblockdev-Loop.html#BD-LOOP-ERROR-DEVICE:CAPS"/>
-    <keyword type="constant" name="BD_LOOP_ERROR_FAIL" link="libblockdev-Loop.html#BD-LOOP-ERROR-FAIL:CAPS"/>
+    <keyword type="constant" name="BD_FS_F2FS_FEATURE_ENCRYPT" link="libblockdev-FS.html#BD-FS-F2FS-FEATURE-ENCRYPT:CAPS"/>
+    <keyword type="constant" name="BD_FS_F2FS_FEATURE_BLKZONED" link="libblockdev-FS.html#BD-FS-F2FS-FEATURE-BLKZONED:CAPS"/>
+    <keyword type="constant" name="BD_FS_F2FS_FEATURE_ATOMIC_WRITE" link="libblockdev-FS.html#BD-FS-F2FS-FEATURE-ATOMIC-WRITE:CAPS"/>
+    <keyword type="constant" name="BD_FS_F2FS_FEATURE_EXTRA_ATTR" link="libblockdev-FS.html#BD-FS-F2FS-FEATURE-EXTRA-ATTR:CAPS"/>
+    <keyword type="constant" name="BD_FS_F2FS_FEATURE_PRJQUOTA" link="libblockdev-FS.html#BD-FS-F2FS-FEATURE-PRJQUOTA:CAPS"/>
+    <keyword type="constant" name="BD_FS_F2FS_FEATURE_INODE_CHKSUM" link="libblockdev-FS.html#BD-FS-F2FS-FEATURE-INODE-CHKSUM:CAPS"/>
+    <keyword type="constant" name="BD_FS_F2FS_FEATURE_FLEXIBLE_INLINE_XATTR" link="libblockdev-FS.html#BD-FS-F2FS-FEATURE-FLEXIBLE-INLINE-XATTR:CAPS"/>
+    <keyword type="constant" name="BD_FS_F2FS_FEATURE_QUOTA_INO" link="libblockdev-FS.html#BD-FS-F2FS-FEATURE-QUOTA-INO:CAPS"/>
+    <keyword type="constant" name="BD_FS_F2FS_FEATURE_INODE_CRTIME" link="libblockdev-FS.html#BD-FS-F2FS-FEATURE-INODE-CRTIME:CAPS"/>
+    <keyword type="constant" name="BD_FS_F2FS_FEATURE_LOST_FOUND" link="libblockdev-FS.html#BD-FS-F2FS-FEATURE-LOST-FOUND:CAPS"/>
+    <keyword type="constant" name="BD_FS_F2FS_FEATURE_VERITY" link="libblockdev-FS.html#BD-FS-F2FS-FEATURE-VERITY:CAPS"/>
+    <keyword type="constant" name="BD_FS_F2FS_FEATURE_SB_CHKSUM" link="libblockdev-FS.html#BD-FS-F2FS-FEATURE-SB-CHKSUM:CAPS"/>
     <keyword type="constant" name="BD_LOOP_ERROR_TECH_UNAVAIL" link="libblockdev-Loop.html#BD-LOOP-ERROR-TECH-UNAVAIL:CAPS"/>
+    <keyword type="constant" name="BD_LOOP_ERROR_FAIL" link="libblockdev-Loop.html#BD-LOOP-ERROR-FAIL:CAPS"/>
+    <keyword type="constant" name="BD_LOOP_ERROR_DEVICE" link="libblockdev-Loop.html#BD-LOOP-ERROR-DEVICE:CAPS"/>
     <keyword type="constant" name="BD_LOOP_TECH_LOOP" link="libblockdev-Loop.html#BD-LOOP-TECH-LOOP:CAPS"/>
     <keyword type="constant" name="BD_LOOP_TECH_MODE_CREATE" link="libblockdev-Loop.html#BD-LOOP-TECH-MODE-CREATE:CAPS"/>
     <keyword type="constant" name="BD_LOOP_TECH_MODE_DESTROY" link="libblockdev-Loop.html#BD-LOOP-TECH-MODE-DESTROY:CAPS"/>
     <keyword type="constant" name="BD_LOOP_TECH_MODE_MODIFY" link="libblockdev-Loop.html#BD-LOOP-TECH-MODE-MODIFY:CAPS"/>
     <keyword type="constant" name="BD_LOOP_TECH_MODE_QUERY" link="libblockdev-Loop.html#BD-LOOP-TECH-MODE-QUERY:CAPS"/>
+    <keyword type="constant" name="BD_LVM_ERROR_TECH_UNAVAIL" link="libblockdev-LVM.html#BD-LVM-ERROR-TECH-UNAVAIL:CAPS"/>
+    <keyword type="constant" name="BD_LVM_ERROR_FAIL" link="libblockdev-LVM.html#BD-LVM-ERROR-FAIL:CAPS"/>
     <keyword type="constant" name="BD_LVM_ERROR_PARSE" link="libblockdev-LVM.html#BD-LVM-ERROR-PARSE:CAPS"/>
     <keyword type="constant" name="BD_LVM_ERROR_NOEXIST" link="libblockdev-LVM.html#BD-LVM-ERROR-NOEXIST:CAPS"/>
     <keyword type="constant" name="BD_LVM_ERROR_DM_ERROR" link="libblockdev-LVM.html#BD-LVM-ERROR-DM-ERROR:CAPS"/>
     <keyword type="constant" name="BD_LVM_ERROR_NOT_ROOT" link="libblockdev-LVM.html#BD-LVM-ERROR-NOT-ROOT:CAPS"/>
     <keyword type="constant" name="BD_LVM_ERROR_CACHE_INVAL" link="libblockdev-LVM.html#BD-LVM-ERROR-CACHE-INVAL:CAPS"/>
     <keyword type="constant" name="BD_LVM_ERROR_CACHE_NOCACHE" link="libblockdev-LVM.html#BD-LVM-ERROR-CACHE-NOCACHE:CAPS"/>
-    <keyword type="constant" name="BD_LVM_ERROR_TECH_UNAVAIL" link="libblockdev-LVM.html#BD-LVM-ERROR-TECH-UNAVAIL:CAPS"/>
-    <keyword type="constant" name="BD_LVM_ERROR_FAIL" link="libblockdev-LVM.html#BD-LVM-ERROR-FAIL:CAPS"/>
     <keyword type="constant" name="BD_LVM_ERROR_NOT_SUPPORTED" link="libblockdev-LVM.html#BD-LVM-ERROR-NOT-SUPPORTED:CAPS"/>
     <keyword type="constant" name="BD_LVM_ERROR_VDO_POLICY_INVAL" link="libblockdev-LVM.html#BD-LVM-ERROR-VDO-POLICY-INVAL:CAPS"/>
+    <keyword type="constant" name="BD_LVM_ERROR_DEVICES_DISABLED" link="libblockdev-LVM.html#BD-LVM-ERROR-DEVICES-DISABLED:CAPS"/>
+    <keyword type="constant" name="BD_LVM_CACHE_MODE_UNKNOWN" link="libblockdev-LVM.html#BD-LVM-CACHE-MODE-UNKNOWN:CAPS"/>
     <keyword type="constant" name="BD_LVM_CACHE_MODE_WRITETHROUGH" link="libblockdev-LVM.html#BD-LVM-CACHE-MODE-WRITETHROUGH:CAPS"/>
     <keyword type="constant" name="BD_LVM_CACHE_MODE_WRITEBACK" link="libblockdev-LVM.html#BD-LVM-CACHE-MODE-WRITEBACK:CAPS"/>
-    <keyword type="constant" name="BD_LVM_CACHE_MODE_UNKNOWN" link="libblockdev-LVM.html#BD-LVM-CACHE-MODE-UNKNOWN:CAPS"/>
     <keyword type="constant" name="BD_LVM_CACHE_POOL_STRIPED" link="libblockdev-LVM.html#BD-LVM-CACHE-POOL-STRIPED:CAPS"/>
     <keyword type="constant" name="BD_LVM_CACHE_POOL_RAID1" link="libblockdev-LVM.html#BD-LVM-CACHE-POOL-RAID1:CAPS"/>
     <keyword type="constant" name="BD_LVM_CACHE_POOL_RAID5" link="libblockdev-LVM.html#BD-LVM-CACHE-POOL-RAID5:CAPS"/>
@@ -746,6 +928,24 @@
     <keyword type="constant" name="BD_LVM_CACHE_POOL_META_RAID5" link="libblockdev-LVM.html#BD-LVM-CACHE-POOL-META-RAID5:CAPS"/>
     <keyword type="constant" name="BD_LVM_CACHE_POOL_META_RAID6" link="libblockdev-LVM.html#BD-LVM-CACHE-POOL-META-RAID6:CAPS"/>
     <keyword type="constant" name="BD_LVM_CACHE_POOL_META_RAID10" link="libblockdev-LVM.html#BD-LVM-CACHE-POOL-META-RAID10:CAPS"/>
+    <keyword type="constant" name="BD_LVM_VDO_COMPRESSION_UNKNOWN" link="libblockdev-LVM.html#BD-LVM-VDO-COMPRESSION-UNKNOWN:CAPS"/>
+    <keyword type="constant" name="BD_LVM_VDO_COMPRESSION_ONLINE" link="libblockdev-LVM.html#BD-LVM-VDO-COMPRESSION-ONLINE:CAPS"/>
+    <keyword type="constant" name="BD_LVM_VDO_COMPRESSION_OFFLINE" link="libblockdev-LVM.html#BD-LVM-VDO-COMPRESSION-OFFLINE:CAPS"/>
+    <keyword type="constant" name="BD_LVM_VDO_INDEX_UNKNOWN" link="libblockdev-LVM.html#BD-LVM-VDO-INDEX-UNKNOWN:CAPS"/>
+    <keyword type="constant" name="BD_LVM_VDO_INDEX_ERROR" link="libblockdev-LVM.html#BD-LVM-VDO-INDEX-ERROR:CAPS"/>
+    <keyword type="constant" name="BD_LVM_VDO_INDEX_CLOSED" link="libblockdev-LVM.html#BD-LVM-VDO-INDEX-CLOSED:CAPS"/>
+    <keyword type="constant" name="BD_LVM_VDO_INDEX_OPENING" link="libblockdev-LVM.html#BD-LVM-VDO-INDEX-OPENING:CAPS"/>
+    <keyword type="constant" name="BD_LVM_VDO_INDEX_CLOSING" link="libblockdev-LVM.html#BD-LVM-VDO-INDEX-CLOSING:CAPS"/>
+    <keyword type="constant" name="BD_LVM_VDO_INDEX_OFFLINE" link="libblockdev-LVM.html#BD-LVM-VDO-INDEX-OFFLINE:CAPS"/>
+    <keyword type="constant" name="BD_LVM_VDO_INDEX_ONLINE" link="libblockdev-LVM.html#BD-LVM-VDO-INDEX-ONLINE:CAPS"/>
+    <keyword type="constant" name="BD_LVM_VDO_MODE_UNKNOWN" link="libblockdev-LVM.html#BD-LVM-VDO-MODE-UNKNOWN:CAPS"/>
+    <keyword type="constant" name="BD_LVM_VDO_MODE_RECOVERING" link="libblockdev-LVM.html#BD-LVM-VDO-MODE-RECOVERING:CAPS"/>
+    <keyword type="constant" name="BD_LVM_VDO_MODE_READ_ONLY" link="libblockdev-LVM.html#BD-LVM-VDO-MODE-READ-ONLY:CAPS"/>
+    <keyword type="constant" name="BD_LVM_VDO_MODE_NORMAL" link="libblockdev-LVM.html#BD-LVM-VDO-MODE-NORMAL:CAPS"/>
+    <keyword type="constant" name="BD_LVM_VDO_WRITE_POLICY_UNKNOWN" link="libblockdev-LVM.html#BD-LVM-VDO-WRITE-POLICY-UNKNOWN:CAPS"/>
+    <keyword type="constant" name="BD_LVM_VDO_WRITE_POLICY_AUTO" link="libblockdev-LVM.html#BD-LVM-VDO-WRITE-POLICY-AUTO:CAPS"/>
+    <keyword type="constant" name="BD_LVM_VDO_WRITE_POLICY_SYNC" link="libblockdev-LVM.html#BD-LVM-VDO-WRITE-POLICY-SYNC:CAPS"/>
+    <keyword type="constant" name="BD_LVM_VDO_WRITE_POLICY_ASYNC" link="libblockdev-LVM.html#BD-LVM-VDO-WRITE-POLICY-ASYNC:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_BASIC" link="libblockdev-LVM.html#BD-LVM-TECH-BASIC:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_BASIC_SNAP" link="libblockdev-LVM.html#BD-LVM-TECH-BASIC-SNAP:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_THIN" link="libblockdev-LVM.html#BD-LVM-TECH-THIN:CAPS"/>
@@ -755,35 +955,38 @@
     <keyword type="constant" name="BD_LVM_TECH_CACHE_CALCS" link="libblockdev-LVM.html#BD-LVM-TECH-CACHE-CALCS:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_GLOB_CONF" link="libblockdev-LVM.html#BD-LVM-TECH-GLOB-CONF:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_VDO" link="libblockdev-LVM.html#BD-LVM-TECH-VDO:CAPS"/>
+    <keyword type="constant" name="BD_LVM_TECH_WRITECACHE" link="libblockdev-LVM.html#BD-LVM-TECH-WRITECACHE:CAPS"/>
+    <keyword type="constant" name="BD_LVM_TECH_DEVICES" link="libblockdev-LVM.html#BD-LVM-TECH-DEVICES:CAPS"/>
+    <keyword type="constant" name="BD_LVM_TECH_SHARED" link="libblockdev-LVM.html#BD-LVM-TECH-SHARED:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_MODE_CREATE" link="libblockdev-LVM.html#BD-LVM-TECH-MODE-CREATE:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_MODE_REMOVE" link="libblockdev-LVM.html#BD-LVM-TECH-MODE-REMOVE:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_MODE_MODIFY" link="libblockdev-LVM.html#BD-LVM-TECH-MODE-MODIFY:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_MODE_QUERY" link="libblockdev-LVM.html#BD-LVM-TECH-MODE-QUERY:CAPS"/>
+    <keyword type="constant" name="BD_MD_ERROR_TECH_UNAVAIL" link="libblockdev-MD-RAID.html#BD-MD-ERROR-TECH-UNAVAIL:CAPS"/>
+    <keyword type="constant" name="BD_MD_ERROR_FAIL" link="libblockdev-MD-RAID.html#BD-MD-ERROR-FAIL:CAPS"/>
     <keyword type="constant" name="BD_MD_ERROR_PARSE" link="libblockdev-MD-RAID.html#BD-MD-ERROR-PARSE:CAPS"/>
     <keyword type="constant" name="BD_MD_ERROR_BAD_FORMAT" link="libblockdev-MD-RAID.html#BD-MD-ERROR-BAD-FORMAT:CAPS"/>
     <keyword type="constant" name="BD_MD_ERROR_NO_MATCH" link="libblockdev-MD-RAID.html#BD-MD-ERROR-NO-MATCH:CAPS"/>
     <keyword type="constant" name="BD_MD_ERROR_INVAL" link="libblockdev-MD-RAID.html#BD-MD-ERROR-INVAL:CAPS"/>
-    <keyword type="constant" name="BD_MD_ERROR_FAIL" link="libblockdev-MD-RAID.html#BD-MD-ERROR-FAIL:CAPS"/>
-    <keyword type="constant" name="BD_MD_ERROR_TECH_UNAVAIL" link="libblockdev-MD-RAID.html#BD-MD-ERROR-TECH-UNAVAIL:CAPS"/>
     <keyword type="constant" name="BD_MD_TECH_MDRAID" link="libblockdev-MD-RAID.html#BD-MD-TECH-MDRAID:CAPS"/>
     <keyword type="constant" name="BD_MD_TECH_MODE_CREATE" link="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-CREATE:CAPS"/>
     <keyword type="constant" name="BD_MD_TECH_MODE_DELETE" link="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-DELETE:CAPS"/>
     <keyword type="constant" name="BD_MD_TECH_MODE_MODIFY" link="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-MODIFY:CAPS"/>
     <keyword type="constant" name="BD_MD_TECH_MODE_QUERY" link="libblockdev-MD-RAID.html#BD-MD-TECH-MODE-QUERY:CAPS"/>
+    <keyword type="constant" name="BD_MPATH_ERROR_TECH_UNAVAIL" link="libblockdev-Mpath.html#BD-MPATH-ERROR-TECH-UNAVAIL:CAPS"/>
+    <keyword type="constant" name="BD_MPATH_ERROR_INVAL" link="libblockdev-Mpath.html#BD-MPATH-ERROR-INVAL:CAPS"/>
     <keyword type="constant" name="BD_MPATH_ERROR_FLUSH" link="libblockdev-Mpath.html#BD-MPATH-ERROR-FLUSH:CAPS"/>
     <keyword type="constant" name="BD_MPATH_ERROR_NOT_ROOT" link="libblockdev-Mpath.html#BD-MPATH-ERROR-NOT-ROOT:CAPS"/>
     <keyword type="constant" name="BD_MPATH_ERROR_DM_ERROR" link="libblockdev-Mpath.html#BD-MPATH-ERROR-DM-ERROR:CAPS"/>
-    <keyword type="constant" name="BD_MPATH_ERROR_INVAL" link="libblockdev-Mpath.html#BD-MPATH-ERROR-INVAL:CAPS"/>
-    <keyword type="constant" name="BD_MPATH_ERROR_TECH_UNAVAIL" link="libblockdev-Mpath.html#BD-MPATH-ERROR-TECH-UNAVAIL:CAPS"/>
     <keyword type="constant" name="BD_MPATH_TECH_BASE" link="libblockdev-Mpath.html#BD-MPATH-TECH-BASE:CAPS"/>
     <keyword type="constant" name="BD_MPATH_TECH_FRIENDLY_NAMES" link="libblockdev-Mpath.html#BD-MPATH-TECH-FRIENDLY-NAMES:CAPS"/>
     <keyword type="constant" name="BD_MPATH_TECH_MODE_QUERY" link="libblockdev-Mpath.html#BD-MPATH-TECH-MODE-QUERY:CAPS"/>
     <keyword type="constant" name="BD_MPATH_TECH_MODE_MODIFY" link="libblockdev-Mpath.html#BD-MPATH-TECH-MODE-MODIFY:CAPS"/>
-    <keyword type="constant" name="BD_NVDIMM_ERROR_NAMESPACE_PARSE" link="libblockdev-NVDIMM.html#BD-NVDIMM-ERROR-NAMESPACE-PARSE:CAPS"/>
+    <keyword type="constant" name="BD_NVDIMM_ERROR_TECH_UNAVAIL" link="libblockdev-NVDIMM.html#BD-NVDIMM-ERROR-TECH-UNAVAIL:CAPS"/>
     <keyword type="constant" name="BD_NVDIMM_ERROR_NAMESPACE_FAIL" link="libblockdev-NVDIMM.html#BD-NVDIMM-ERROR-NAMESPACE-FAIL:CAPS"/>
+    <keyword type="constant" name="BD_NVDIMM_ERROR_NAMESPACE_PARSE" link="libblockdev-NVDIMM.html#BD-NVDIMM-ERROR-NAMESPACE-PARSE:CAPS"/>
     <keyword type="constant" name="BD_NVDIMM_ERROR_NAMESPACE_NOEXIST" link="libblockdev-NVDIMM.html#BD-NVDIMM-ERROR-NAMESPACE-NOEXIST:CAPS"/>
     <keyword type="constant" name="BD_NVDIMM_ERROR_NAMESPACE_MODE_INVAL" link="libblockdev-NVDIMM.html#BD-NVDIMM-ERROR-NAMESPACE-MODE-INVAL:CAPS"/>
-    <keyword type="constant" name="BD_NVDIMM_ERROR_TECH_UNAVAIL" link="libblockdev-NVDIMM.html#BD-NVDIMM-ERROR-TECH-UNAVAIL:CAPS"/>
     <keyword type="constant" name="BD_NVDIMM_NAMESPACE_MODE_RAW" link="libblockdev-NVDIMM.html#BD-NVDIMM-NAMESPACE-MODE-RAW:CAPS"/>
     <keyword type="constant" name="BD_NVDIMM_NAMESPACE_MODE_SECTOR" link="libblockdev-NVDIMM.html#BD-NVDIMM-NAMESPACE-MODE-SECTOR:CAPS"/>
     <keyword type="constant" name="BD_NVDIMM_NAMESPACE_MODE_MEMORY" link="libblockdev-NVDIMM.html#BD-NVDIMM-NAMESPACE-MODE-MEMORY:CAPS"/>
@@ -797,6 +1000,98 @@
     <keyword type="constant" name="BD_NVDIMM_TECH_MODE_ACTIVATE_DEACTIVATE" link="libblockdev-NVDIMM.html#BD-NVDIMM-TECH-MODE-ACTIVATE-DEACTIVATE:CAPS"/>
     <keyword type="constant" name="BD_NVDIMM_TECH_MODE_QUERY" link="libblockdev-NVDIMM.html#BD-NVDIMM-TECH-MODE-QUERY:CAPS"/>
     <keyword type="constant" name="BD_NVDIMM_TECH_MODE_RECONFIGURE" link="libblockdev-NVDIMM.html#BD-NVDIMM-TECH-MODE-RECONFIGURE:CAPS"/>
+    <keyword type="constant" name="BD_NVME_ERROR_TECH_UNAVAIL" link="libblockdev-NVMe.html#BD-NVME-ERROR-TECH-UNAVAIL:CAPS"/>
+    <keyword type="constant" name="BD_NVME_ERROR_FAILED" link="libblockdev-NVMe.html#BD-NVME-ERROR-FAILED:CAPS"/>
+    <keyword type="constant" name="BD_NVME_ERROR_BUSY" link="libblockdev-NVMe.html#BD-NVME-ERROR-BUSY:CAPS"/>
+    <keyword type="constant" name="BD_NVME_ERROR_INVALID_ARGUMENT" link="libblockdev-NVMe.html#BD-NVME-ERROR-INVALID-ARGUMENT:CAPS"/>
+    <keyword type="constant" name="BD_NVME_ERROR_WOULD_FORMAT_ALL_NS" link="libblockdev-NVMe.html#BD-NVME-ERROR-WOULD-FORMAT-ALL-NS:CAPS"/>
+    <keyword type="constant" name="BD_NVME_ERROR_SC_GENERIC" link="libblockdev-NVMe.html#BD-NVME-ERROR-SC-GENERIC:CAPS"/>
+    <keyword type="constant" name="BD_NVME_ERROR_SC_CMD_SPECIFIC" link="libblockdev-NVMe.html#BD-NVME-ERROR-SC-CMD-SPECIFIC:CAPS"/>
+    <keyword type="constant" name="BD_NVME_ERROR_SC_MEDIA" link="libblockdev-NVMe.html#BD-NVME-ERROR-SC-MEDIA:CAPS"/>
+    <keyword type="constant" name="BD_NVME_ERROR_SC_PATH" link="libblockdev-NVMe.html#BD-NVME-ERROR-SC-PATH:CAPS"/>
+    <keyword type="constant" name="BD_NVME_ERROR_SC_VENDOR_SPECIFIC" link="libblockdev-NVMe.html#BD-NVME-ERROR-SC-VENDOR-SPECIFIC:CAPS"/>
+    <keyword type="constant" name="BD_NVME_ERROR_NO_MATCH" link="libblockdev-NVMe.html#BD-NVME-ERROR-NO-MATCH:CAPS"/>
+    <keyword type="constant" name="BD_NVME_ERROR_CONNECT" link="libblockdev-NVMe.html#BD-NVME-ERROR-CONNECT:CAPS"/>
+    <keyword type="constant" name="BD_NVME_ERROR_CONNECT_ALREADY" link="libblockdev-NVMe.html#BD-NVME-ERROR-CONNECT-ALREADY:CAPS"/>
+    <keyword type="constant" name="BD_NVME_ERROR_CONNECT_INVALID" link="libblockdev-NVMe.html#BD-NVME-ERROR-CONNECT-INVALID:CAPS"/>
+    <keyword type="constant" name="BD_NVME_ERROR_CONNECT_ADDRINUSE" link="libblockdev-NVMe.html#BD-NVME-ERROR-CONNECT-ADDRINUSE:CAPS"/>
+    <keyword type="constant" name="BD_NVME_ERROR_CONNECT_NODEV" link="libblockdev-NVMe.html#BD-NVME-ERROR-CONNECT-NODEV:CAPS"/>
+    <keyword type="constant" name="BD_NVME_ERROR_CONNECT_OPNOTSUPP" link="libblockdev-NVMe.html#BD-NVME-ERROR-CONNECT-OPNOTSUPP:CAPS"/>
+    <keyword type="constant" name="BD_NVME_ERROR_CONNECT_REFUSED" link="libblockdev-NVMe.html#BD-NVME-ERROR-CONNECT-REFUSED:CAPS"/>
+    <keyword type="constant" name="BD_NVME_TECH_NVME" link="libblockdev-NVMe.html#BD-NVME-TECH-NVME:CAPS"/>
+    <keyword type="constant" name="BD_NVME_TECH_FABRICS" link="libblockdev-NVMe.html#BD-NVME-TECH-FABRICS:CAPS"/>
+    <keyword type="constant" name="BD_NVME_TECH_MODE_INFO" link="libblockdev-NVMe.html#BD-NVME-TECH-MODE-INFO:CAPS"/>
+    <keyword type="constant" name="BD_NVME_TECH_MODE_MANAGE" link="libblockdev-NVMe.html#BD-NVME-TECH-MODE-MANAGE:CAPS"/>
+    <keyword type="constant" name="BD_NVME_TECH_MODE_INITIATOR" link="libblockdev-NVMe.html#BD-NVME-TECH-MODE-INITIATOR:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_FEAT_MULTIPORT" link="libblockdev-NVMe.html#BD-NVME-CTRL-FEAT-MULTIPORT:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_FEAT_MULTICTRL" link="libblockdev-NVMe.html#BD-NVME-CTRL-FEAT-MULTICTRL:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_FEAT_SRIOV" link="libblockdev-NVMe.html#BD-NVME-CTRL-FEAT-SRIOV:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_FEAT_ANA_REPORTING" link="libblockdev-NVMe.html#BD-NVME-CTRL-FEAT-ANA-REPORTING:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_FEAT_FORMAT" link="libblockdev-NVMe.html#BD-NVME-CTRL-FEAT-FORMAT:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_FEAT_FORMAT_ALL_NS" link="libblockdev-NVMe.html#BD-NVME-CTRL-FEAT-FORMAT-ALL-NS:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_FEAT_NS_MGMT" link="libblockdev-NVMe.html#BD-NVME-CTRL-FEAT-NS-MGMT:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_FEAT_SELFTEST" link="libblockdev-NVMe.html#BD-NVME-CTRL-FEAT-SELFTEST:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_FEAT_SELFTEST_SINGLE" link="libblockdev-NVMe.html#BD-NVME-CTRL-FEAT-SELFTEST-SINGLE:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_FEAT_SANITIZE_CRYPTO" link="libblockdev-NVMe.html#BD-NVME-CTRL-FEAT-SANITIZE-CRYPTO:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_FEAT_SANITIZE_BLOCK" link="libblockdev-NVMe.html#BD-NVME-CTRL-FEAT-SANITIZE-BLOCK:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_FEAT_SANITIZE_OVERWRITE" link="libblockdev-NVMe.html#BD-NVME-CTRL-FEAT-SANITIZE-OVERWRITE:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_FEAT_SECURE_ERASE_ALL_NS" link="libblockdev-NVMe.html#BD-NVME-CTRL-FEAT-SECURE-ERASE-ALL-NS:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_FEAT_SECURE_ERASE_CRYPTO" link="libblockdev-NVMe.html#BD-NVME-CTRL-FEAT-SECURE-ERASE-CRYPTO:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_FEAT_STORAGE_DEVICE" link="libblockdev-NVMe.html#BD-NVME-CTRL-FEAT-STORAGE-DEVICE:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_FEAT_ENCLOSURE" link="libblockdev-NVMe.html#BD-NVME-CTRL-FEAT-ENCLOSURE:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_FEAT_MGMT_PCIE" link="libblockdev-NVMe.html#BD-NVME-CTRL-FEAT-MGMT-PCIE:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_FEAT_MGMT_SMBUS" link="libblockdev-NVMe.html#BD-NVME-CTRL-FEAT-MGMT-SMBUS:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_TYPE_UNKNOWN" link="libblockdev-NVMe.html#BD-NVME-CTRL-TYPE-UNKNOWN:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_TYPE_IO" link="libblockdev-NVMe.html#BD-NVME-CTRL-TYPE-IO:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_TYPE_DISCOVERY" link="libblockdev-NVMe.html#BD-NVME-CTRL-TYPE-DISCOVERY:CAPS"/>
+    <keyword type="constant" name="BD_NVME_CTRL_TYPE_ADMIN" link="libblockdev-NVMe.html#BD-NVME-CTRL-TYPE-ADMIN:CAPS"/>
+    <keyword type="constant" name="BD_NVME_LBA_FORMAT_RELATIVE_PERFORMANCE_UNKNOWN" link="libblockdev-NVMe.html#BD-NVME-LBA-FORMAT-RELATIVE-PERFORMANCE-UNKNOWN:CAPS"/>
+    <keyword type="constant" name="BD_NVME_LBA_FORMAT_RELATIVE_PERFORMANCE_BEST" link="libblockdev-NVMe.html#BD-NVME-LBA-FORMAT-RELATIVE-PERFORMANCE-BEST:CAPS"/>
+    <keyword type="constant" name="BD_NVME_LBA_FORMAT_RELATIVE_PERFORMANCE_BETTER" link="libblockdev-NVMe.html#BD-NVME-LBA-FORMAT-RELATIVE-PERFORMANCE-BETTER:CAPS"/>
+    <keyword type="constant" name="BD_NVME_LBA_FORMAT_RELATIVE_PERFORMANCE_GOOD" link="libblockdev-NVMe.html#BD-NVME-LBA-FORMAT-RELATIVE-PERFORMANCE-GOOD:CAPS"/>
+    <keyword type="constant" name="BD_NVME_LBA_FORMAT_RELATIVE_PERFORMANCE_DEGRADED" link="libblockdev-NVMe.html#BD-NVME-LBA-FORMAT-RELATIVE-PERFORMANCE-DEGRADED:CAPS"/>
+    <keyword type="constant" name="BD_NVME_NS_FEAT_THIN" link="libblockdev-NVMe.html#BD-NVME-NS-FEAT-THIN:CAPS"/>
+    <keyword type="constant" name="BD_NVME_NS_FEAT_MULTIPATH_SHARED" link="libblockdev-NVMe.html#BD-NVME-NS-FEAT-MULTIPATH-SHARED:CAPS"/>
+    <keyword type="constant" name="BD_NVME_NS_FEAT_FORMAT_PROGRESS" link="libblockdev-NVMe.html#BD-NVME-NS-FEAT-FORMAT-PROGRESS:CAPS"/>
+    <keyword type="constant" name="BD_NVME_NS_FEAT_ROTATIONAL" link="libblockdev-NVMe.html#BD-NVME-NS-FEAT-ROTATIONAL:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SMART_CRITICAL_WARNING_SPARE" link="libblockdev-NVMe.html#BD-NVME-SMART-CRITICAL-WARNING-SPARE:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SMART_CRITICAL_WARNING_TEMPERATURE" link="libblockdev-NVMe.html#BD-NVME-SMART-CRITICAL-WARNING-TEMPERATURE:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SMART_CRITICAL_WARNING_DEGRADED" link="libblockdev-NVMe.html#BD-NVME-SMART-CRITICAL-WARNING-DEGRADED:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SMART_CRITICAL_WARNING_READONLY" link="libblockdev-NVMe.html#BD-NVME-SMART-CRITICAL-WARNING-READONLY:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SMART_CRITICAL_WARNING_VOLATILE_MEM" link="libblockdev-NVMe.html#BD-NVME-SMART-CRITICAL-WARNING-VOLATILE-MEM:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SMART_CRITICAL_WARNING_PMR_READONLY" link="libblockdev-NVMe.html#BD-NVME-SMART-CRITICAL-WARNING-PMR-READONLY:CAPS"/>
+    <keyword type="constant" name="BD_NVME_TRANSPORT_TYPE_UNSPECIFIED" link="libblockdev-NVMe.html#BD-NVME-TRANSPORT-TYPE-UNSPECIFIED:CAPS"/>
+    <keyword type="constant" name="BD_NVME_TRANSPORT_TYPE_RDMA" link="libblockdev-NVMe.html#BD-NVME-TRANSPORT-TYPE-RDMA:CAPS"/>
+    <keyword type="constant" name="BD_NVME_TRANSPORT_TYPE_FC" link="libblockdev-NVMe.html#BD-NVME-TRANSPORT-TYPE-FC:CAPS"/>
+    <keyword type="constant" name="BD_NVME_TRANSPORT_TYPE_TCP" link="libblockdev-NVMe.html#BD-NVME-TRANSPORT-TYPE-TCP:CAPS"/>
+    <keyword type="constant" name="BD_NVME_TRANSPORT_TYPE_LOOP" link="libblockdev-NVMe.html#BD-NVME-TRANSPORT-TYPE-LOOP:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SELF_TEST_ACTION_NOT_RUNNING" link="libblockdev-NVMe.html#BD-NVME-SELF-TEST-ACTION-NOT-RUNNING:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SELF_TEST_ACTION_SHORT" link="libblockdev-NVMe.html#BD-NVME-SELF-TEST-ACTION-SHORT:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SELF_TEST_ACTION_EXTENDED" link="libblockdev-NVMe.html#BD-NVME-SELF-TEST-ACTION-EXTENDED:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SELF_TEST_ACTION_VENDOR_SPECIFIC" link="libblockdev-NVMe.html#BD-NVME-SELF-TEST-ACTION-VENDOR-SPECIFIC:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SELF_TEST_ACTION_ABORT" link="libblockdev-NVMe.html#BD-NVME-SELF-TEST-ACTION-ABORT:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SELF_TEST_RESULT_NO_ERROR" link="libblockdev-NVMe.html#BD-NVME-SELF-TEST-RESULT-NO-ERROR:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SELF_TEST_RESULT_ABORTED" link="libblockdev-NVMe.html#BD-NVME-SELF-TEST-RESULT-ABORTED:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SELF_TEST_RESULT_CTRL_RESET" link="libblockdev-NVMe.html#BD-NVME-SELF-TEST-RESULT-CTRL-RESET:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SELF_TEST_RESULT_NS_REMOVED" link="libblockdev-NVMe.html#BD-NVME-SELF-TEST-RESULT-NS-REMOVED:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SELF_TEST_RESULT_ABORTED_FORMAT" link="libblockdev-NVMe.html#BD-NVME-SELF-TEST-RESULT-ABORTED-FORMAT:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SELF_TEST_RESULT_FATAL_ERROR" link="libblockdev-NVMe.html#BD-NVME-SELF-TEST-RESULT-FATAL-ERROR:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SELF_TEST_RESULT_UNKNOWN_SEG_FAIL" link="libblockdev-NVMe.html#BD-NVME-SELF-TEST-RESULT-UNKNOWN-SEG-FAIL:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SELF_TEST_RESULT_KNOWN_SEG_FAIL" link="libblockdev-NVMe.html#BD-NVME-SELF-TEST-RESULT-KNOWN-SEG-FAIL:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SELF_TEST_RESULT_ABORTED_UNKNOWN" link="libblockdev-NVMe.html#BD-NVME-SELF-TEST-RESULT-ABORTED-UNKNOWN:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SELF_TEST_RESULT_ABORTED_SANITIZE" link="libblockdev-NVMe.html#BD-NVME-SELF-TEST-RESULT-ABORTED-SANITIZE:CAPS"/>
+    <keyword type="constant" name="BD_NVME_FORMAT_SECURE_ERASE_NONE" link="libblockdev-NVMe.html#BD-NVME-FORMAT-SECURE-ERASE-NONE:CAPS"/>
+    <keyword type="constant" name="BD_NVME_FORMAT_SECURE_ERASE_USER_DATA" link="libblockdev-NVMe.html#BD-NVME-FORMAT-SECURE-ERASE-USER-DATA:CAPS"/>
+    <keyword type="constant" name="BD_NVME_FORMAT_SECURE_ERASE_CRYPTO" link="libblockdev-NVMe.html#BD-NVME-FORMAT-SECURE-ERASE-CRYPTO:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SANITIZE_STATUS_NEVER_SANITIZED" link="libblockdev-NVMe.html#BD-NVME-SANITIZE-STATUS-NEVER-SANITIZED:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SANITIZE_STATUS_IN_PROGESS" link="libblockdev-NVMe.html#BD-NVME-SANITIZE-STATUS-IN-PROGESS:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SANITIZE_STATUS_SUCCESS" link="libblockdev-NVMe.html#BD-NVME-SANITIZE-STATUS-SUCCESS:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SANITIZE_STATUS_SUCCESS_NO_DEALLOC" link="libblockdev-NVMe.html#BD-NVME-SANITIZE-STATUS-SUCCESS-NO-DEALLOC:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SANITIZE_STATUS_FAILED" link="libblockdev-NVMe.html#BD-NVME-SANITIZE-STATUS-FAILED:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SANITIZE_ACTION_EXIT_FAILURE" link="libblockdev-NVMe.html#BD-NVME-SANITIZE-ACTION-EXIT-FAILURE:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SANITIZE_ACTION_BLOCK_ERASE" link="libblockdev-NVMe.html#BD-NVME-SANITIZE-ACTION-BLOCK-ERASE:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SANITIZE_ACTION_OVERWRITE" link="libblockdev-NVMe.html#BD-NVME-SANITIZE-ACTION-OVERWRITE:CAPS"/>
+    <keyword type="constant" name="BD_NVME_SANITIZE_ACTION_CRYPTO_ERASE" link="libblockdev-NVMe.html#BD-NVME-SANITIZE-ACTION-CRYPTO-ERASE:CAPS"/>
     <keyword type="constant" name="BD_PLUGIN_LVM" link="libblockdev-Plugins.html#BD-PLUGIN-LVM:CAPS"/>
     <keyword type="constant" name="BD_PLUGIN_BTRFS" link="libblockdev-Plugins.html#BD-PLUGIN-BTRFS:CAPS"/>
     <keyword type="constant" name="BD_PLUGIN_SWAP" link="libblockdev-Plugins.html#BD-PLUGIN-SWAP:CAPS"/>
@@ -805,39 +1100,15 @@
     <keyword type="constant" name="BD_PLUGIN_MPATH" link="libblockdev-Plugins.html#BD-PLUGIN-MPATH:CAPS"/>
     <keyword type="constant" name="BD_PLUGIN_DM" link="libblockdev-Plugins.html#BD-PLUGIN-DM:CAPS"/>
     <keyword type="constant" name="BD_PLUGIN_MDRAID" link="libblockdev-Plugins.html#BD-PLUGIN-MDRAID:CAPS"/>
-    <keyword type="constant" name="BD_PLUGIN_KBD" link="libblockdev-Plugins.html#BD-PLUGIN-KBD:CAPS"/>
     <keyword type="constant" name="BD_PLUGIN_S390" link="libblockdev-Plugins.html#BD-PLUGIN-S390:CAPS"/>
     <keyword type="constant" name="BD_PLUGIN_PART" link="libblockdev-Plugins.html#BD-PLUGIN-PART:CAPS"/>
     <keyword type="constant" name="BD_PLUGIN_FS" link="libblockdev-Plugins.html#BD-PLUGIN-FS:CAPS"/>
     <keyword type="constant" name="BD_PLUGIN_NVDIMM" link="libblockdev-Plugins.html#BD-PLUGIN-NVDIMM:CAPS"/>
-    <keyword type="constant" name="BD_PLUGIN_VDO" link="libblockdev-Plugins.html#BD-PLUGIN-VDO:CAPS"/>
+    <keyword type="constant" name="BD_PLUGIN_NVME" link="libblockdev-Plugins.html#BD-PLUGIN-NVME:CAPS"/>
     <keyword type="constant" name="BD_PLUGIN_UNDEF" link="libblockdev-Plugins.html#BD-PLUGIN-UNDEF:CAPS"/>
+    <keyword type="constant" name="BD_PART_ALIGN_NONE" link="libblockdev-Part.html#BD-PART-ALIGN-NONE:CAPS"/>
     <keyword type="constant" name="BD_PART_ALIGN_MINIMAL" link="libblockdev-Part.html#BD-PART-ALIGN-MINIMAL:CAPS"/>
     <keyword type="constant" name="BD_PART_ALIGN_OPTIMAL" link="libblockdev-Part.html#BD-PART-ALIGN-OPTIMAL:CAPS"/>
-    <keyword type="constant" name="BD_PART_ALIGN_NONE" link="libblockdev-Part.html#BD-PART-ALIGN-NONE:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_BOOT" link="libblockdev-Part.html#BD-PART-FLAG-BOOT:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_ROOT" link="libblockdev-Part.html#BD-PART-FLAG-ROOT:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_SWAP" link="libblockdev-Part.html#BD-PART-FLAG-SWAP:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_HIDDEN" link="libblockdev-Part.html#BD-PART-FLAG-HIDDEN:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_RAID" link="libblockdev-Part.html#BD-PART-FLAG-RAID:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_LVM" link="libblockdev-Part.html#BD-PART-FLAG-LVM:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_LBA" link="libblockdev-Part.html#BD-PART-FLAG-LBA:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_HPSERVICE" link="libblockdev-Part.html#BD-PART-FLAG-HPSERVICE:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_CPALO" link="libblockdev-Part.html#BD-PART-FLAG-CPALO:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_PREP" link="libblockdev-Part.html#BD-PART-FLAG-PREP:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_MSFT_RESERVED" link="libblockdev-Part.html#BD-PART-FLAG-MSFT-RESERVED:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_BIOS_GRUB" link="libblockdev-Part.html#BD-PART-FLAG-BIOS-GRUB:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_APPLE_TV_RECOVERY" link="libblockdev-Part.html#BD-PART-FLAG-APPLE-TV-RECOVERY:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_DIAG" link="libblockdev-Part.html#BD-PART-FLAG-DIAG:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_LEGACY_BOOT" link="libblockdev-Part.html#BD-PART-FLAG-LEGACY-BOOT:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_MSFT_DATA" link="libblockdev-Part.html#BD-PART-FLAG-MSFT-DATA:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_IRST" link="libblockdev-Part.html#BD-PART-FLAG-IRST:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_ESP" link="libblockdev-Part.html#BD-PART-FLAG-ESP:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_BASIC_LAST" link="libblockdev-Part.html#BD-PART-FLAG-BASIC-LAST:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_GPT_SYSTEM_PART" link="libblockdev-Part.html#BD-PART-FLAG-GPT-SYSTEM-PART:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_GPT_READ_ONLY" link="libblockdev-Part.html#BD-PART-FLAG-GPT-READ-ONLY:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_GPT_HIDDEN" link="libblockdev-Part.html#BD-PART-FLAG-GPT-HIDDEN:CAPS"/>
-    <keyword type="constant" name="BD_PART_FLAG_GPT_NO_AUTOMOUNT" link="libblockdev-Part.html#BD-PART-FLAG-GPT-NO-AUTOMOUNT:CAPS"/>
     <keyword type="constant" name="BD_PART_TYPE_NORMAL" link="libblockdev-Part.html#BD-PART-TYPE-NORMAL:CAPS"/>
     <keyword type="constant" name="BD_PART_TYPE_LOGICAL" link="libblockdev-Part.html#BD-PART-TYPE-LOGICAL:CAPS"/>
     <keyword type="constant" name="BD_PART_TYPE_EXTENDED" link="libblockdev-Part.html#BD-PART-TYPE-EXTENDED:CAPS"/>
@@ -848,14 +1119,13 @@
     <keyword type="constant" name="BD_PART_TYPE_REQ_LOGICAL" link="libblockdev-Part.html#BD-PART-TYPE-REQ-LOGICAL:CAPS"/>
     <keyword type="constant" name="BD_PART_TYPE_REQ_EXTENDED" link="libblockdev-Part.html#BD-PART-TYPE-REQ-EXTENDED:CAPS"/>
     <keyword type="constant" name="BD_PART_TYPE_REQ_NEXT" link="libblockdev-Part.html#BD-PART-TYPE-REQ-NEXT:CAPS"/>
-    <keyword type="constant" name="BD_PART_ERROR_EXISTS" link="libblockdev-Part.html#BD-PART-ERROR-EXISTS:CAPS"/>
-    <keyword type="constant" name="BD_PART_ERROR_INVAL" link="libblockdev-Part.html#BD-PART-ERROR-INVAL:CAPS"/>
-    <keyword type="constant" name="BD_PART_ERROR_FAIL" link="libblockdev-Part.html#BD-PART-ERROR-FAIL:CAPS"/>
     <keyword type="constant" name="BD_PART_ERROR_TECH_UNAVAIL" link="libblockdev-Part.html#BD-PART-ERROR-TECH-UNAVAIL:CAPS"/>
+    <keyword type="constant" name="BD_PART_ERROR_FAIL" link="libblockdev-Part.html#BD-PART-ERROR-FAIL:CAPS"/>
+    <keyword type="constant" name="BD_PART_ERROR_INVAL" link="libblockdev-Part.html#BD-PART-ERROR-INVAL:CAPS"/>
+    <keyword type="constant" name="BD_PART_ERROR_EXISTS" link="libblockdev-Part.html#BD-PART-ERROR-EXISTS:CAPS"/>
     <keyword type="constant" name="BD_PART_TABLE_MSDOS" link="libblockdev-Part.html#BD-PART-TABLE-MSDOS:CAPS"/>
     <keyword type="constant" name="BD_PART_TABLE_GPT" link="libblockdev-Part.html#BD-PART-TABLE-GPT:CAPS"/>
     <keyword type="constant" name="BD_PART_TABLE_UNDEF" link="libblockdev-Part.html#BD-PART-TABLE-UNDEF:CAPS"/>
-    <keyword type="constant" name="BD_PART_DISK_FLAG_GPT_PMBR_BOOT" link="libblockdev-Part.html#BD-PART-DISK-FLAG-GPT-PMBR-BOOT:CAPS"/>
     <keyword type="constant" name="BD_PART_TECH_MBR" link="libblockdev-Part.html#BD-PART-TECH-MBR:CAPS"/>
     <keyword type="constant" name="BD_PART_TECH_GPT" link="libblockdev-Part.html#BD-PART-TECH-GPT:CAPS"/>
     <keyword type="constant" name="BD_PART_TECH_MODE_CREATE_TABLE" link="libblockdev-Part.html#BD-PART-TECH-MODE-CREATE-TABLE:CAPS"/>
@@ -863,9 +1133,9 @@
     <keyword type="constant" name="BD_PART_TECH_MODE_QUERY_TABLE" link="libblockdev-Part.html#BD-PART-TECH-MODE-QUERY-TABLE:CAPS"/>
     <keyword type="constant" name="BD_PART_TECH_MODE_MODIFY_PART" link="libblockdev-Part.html#BD-PART-TECH-MODE-MODIFY-PART:CAPS"/>
     <keyword type="constant" name="BD_PART_TECH_MODE_QUERY_PART" link="libblockdev-Part.html#BD-PART-TECH-MODE-QUERY-PART:CAPS"/>
+    <keyword type="constant" name="BD_SWAP_ERROR_TECH_UNAVAIL" link="libblockdev-Swap.html#BD-SWAP-ERROR-TECH-UNAVAIL:CAPS"/>
     <keyword type="constant" name="BD_SWAP_ERROR_UNKNOWN_STATE" link="libblockdev-Swap.html#BD-SWAP-ERROR-UNKNOWN-STATE:CAPS"/>
     <keyword type="constant" name="BD_SWAP_ERROR_ACTIVATE" link="libblockdev-Swap.html#BD-SWAP-ERROR-ACTIVATE:CAPS"/>
-    <keyword type="constant" name="BD_SWAP_ERROR_TECH_UNAVAIL" link="libblockdev-Swap.html#BD-SWAP-ERROR-TECH-UNAVAIL:CAPS"/>
     <keyword type="constant" name="BD_SWAP_ERROR_ACTIVATE_OLD" link="libblockdev-Swap.html#BD-SWAP-ERROR-ACTIVATE-OLD:CAPS"/>
     <keyword type="constant" name="BD_SWAP_ERROR_ACTIVATE_SUSPEND" link="libblockdev-Swap.html#BD-SWAP-ERROR-ACTIVATE-SUSPEND:CAPS"/>
     <keyword type="constant" name="BD_SWAP_ERROR_ACTIVATE_UNKNOWN" link="libblockdev-Swap.html#BD-SWAP-ERROR-ACTIVATE-UNKNOWN:CAPS"/>
@@ -875,35 +1145,12 @@
     <keyword type="constant" name="BD_SWAP_TECH_MODE_ACTIVATE_DEACTIVATE" link="libblockdev-Swap.html#BD-SWAP-TECH-MODE-ACTIVATE-DEACTIVATE:CAPS"/>
     <keyword type="constant" name="BD_SWAP_TECH_MODE_QUERY" link="libblockdev-Swap.html#BD-SWAP-TECH-MODE-QUERY:CAPS"/>
     <keyword type="constant" name="BD_SWAP_TECH_MODE_SET_LABEL" link="libblockdev-Swap.html#BD-SWAP-TECH-MODE-SET-LABEL:CAPS"/>
-    <keyword type="constant" name="BD_KBD_MODE_WRITETHROUGH" link="libblockdev-KernelBlockDevices.html#BD-KBD-MODE-WRITETHROUGH:CAPS"/>
-    <keyword type="constant" name="BD_KBD_MODE_WRITEBACK" link="libblockdev-KernelBlockDevices.html#BD-KBD-MODE-WRITEBACK:CAPS"/>
-    <keyword type="constant" name="BD_KBD_MODE_WRITEAROUND" link="libblockdev-KernelBlockDevices.html#BD-KBD-MODE-WRITEAROUND:CAPS"/>
-    <keyword type="constant" name="BD_KBD_MODE_NONE" link="libblockdev-KernelBlockDevices.html#BD-KBD-MODE-NONE:CAPS"/>
-    <keyword type="constant" name="BD_KBD_MODE_UNKNOWN" link="libblockdev-KernelBlockDevices.html#BD-KBD-MODE-UNKNOWN:CAPS"/>
-    <keyword type="constant" name="BD_KBD_ERROR_INVAL" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-INVAL:CAPS"/>
-    <keyword type="constant" name="BD_KBD_ERROR_ZRAM_NOEXIST" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-ZRAM-NOEXIST:CAPS"/>
-    <keyword type="constant" name="BD_KBD_ERROR_ZRAM_INVAL" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-ZRAM-INVAL:CAPS"/>
-    <keyword type="constant" name="BD_KBD_ERROR_BCACHE_PARSE" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-BCACHE-PARSE:CAPS"/>
-    <keyword type="constant" name="BD_KBD_ERROR_BCACHE_SETUP_FAIL" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-BCACHE-SETUP-FAIL:CAPS"/>
-    <keyword type="constant" name="BD_KBD_ERROR_BCACHE_DETACH_FAIL" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-BCACHE-DETACH-FAIL:CAPS"/>
-    <keyword type="constant" name="BD_KBD_ERROR_BCACHE_NOT_ATTACHED" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-BCACHE-NOT-ATTACHED:CAPS"/>
-    <keyword type="constant" name="BD_KBD_ERROR_BCACHE_UUID" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-BCACHE-UUID:CAPS"/>
-    <keyword type="constant" name="BD_KBD_ERROR_BCACHE_MODE_FAIL" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-BCACHE-MODE-FAIL:CAPS"/>
-    <keyword type="constant" name="BD_KBD_ERROR_BCACHE_MODE_INVAL" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-BCACHE-MODE-INVAL:CAPS"/>
-    <keyword type="constant" name="BD_KBD_ERROR_BCACHE_NOEXIST" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-BCACHE-NOEXIST:CAPS"/>
-    <keyword type="constant" name="BD_KBD_ERROR_BCACHE_INVAL" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-BCACHE-INVAL:CAPS"/>
-    <keyword type="constant" name="BD_KBD_ERROR_TECH_UNAVAIL" link="libblockdev-KernelBlockDevices.html#BD-KBD-ERROR-TECH-UNAVAIL:CAPS"/>
-    <keyword type="constant" name="BD_KBD_TECH_ZRAM" link="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-ZRAM:CAPS"/>
-    <keyword type="constant" name="BD_KBD_TECH_BCACHE" link="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-BCACHE:CAPS"/>
-    <keyword type="constant" name="BD_KBD_TECH_MODE_CREATE" link="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-CREATE:CAPS"/>
-    <keyword type="constant" name="BD_KBD_TECH_MODE_DESTROY" link="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-DESTROY:CAPS"/>
-    <keyword type="constant" name="BD_KBD_TECH_MODE_MODIFY" link="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-MODIFY:CAPS"/>
-    <keyword type="constant" name="BD_KBD_TECH_MODE_QUERY" link="libblockdev-KernelBlockDevices.html#BD-KBD-TECH-MODE-QUERY:CAPS"/>
+    <keyword type="constant" name="BD_SWAP_TECH_MODE_SET_UUID" link="libblockdev-Swap.html#BD-SWAP-TECH-MODE-SET-UUID:CAPS"/>
+    <keyword type="constant" name="BD_S390_ERROR_TECH_UNAVAIL" link="libblockdev-s390.html#BD-S390-ERROR-TECH-UNAVAIL:CAPS"/>
     <keyword type="constant" name="BD_S390_ERROR_DEVICE" link="libblockdev-s390.html#BD-S390-ERROR-DEVICE:CAPS"/>
     <keyword type="constant" name="BD_S390_ERROR_FORMAT_FAILED" link="libblockdev-s390.html#BD-S390-ERROR-FORMAT-FAILED:CAPS"/>
     <keyword type="constant" name="BD_S390_ERROR_DASDFMT" link="libblockdev-s390.html#BD-S390-ERROR-DASDFMT:CAPS"/>
     <keyword type="constant" name="BD_S390_ERROR_IO" link="libblockdev-s390.html#BD-S390-ERROR-IO:CAPS"/>
-    <keyword type="constant" name="BD_S390_ERROR_TECH_UNAVAIL" link="libblockdev-s390.html#BD-S390-ERROR-TECH-UNAVAIL:CAPS"/>
     <keyword type="constant" name="BD_S390_TECH_DASD" link="libblockdev-s390.html#BD-S390-TECH-DASD:CAPS"/>
     <keyword type="constant" name="BD_S390_TECH_ZFCP" link="libblockdev-s390.html#BD-S390-TECH-ZFCP:CAPS"/>
     <keyword type="constant" name="BD_S390_TECH_MODE_MODIFY" link="libblockdev-s390.html#BD-S390-TECH-MODE-MODIFY:CAPS"/>
@@ -921,18 +1168,13 @@
     <keyword type="constant" name="BD_UTILS_EXEC_ERROR_UTIL_FEATURE_CHECK_ERROR" link="libblockdev-Utils.html#BD-UTILS-EXEC-ERROR-UTIL-FEATURE-CHECK-ERROR:CAPS"/>
     <keyword type="constant" name="BD_UTILS_EXEC_ERROR_UTIL_FEATURE_UNAVAILABLE" link="libblockdev-Utils.html#BD-UTILS-EXEC-ERROR-UTIL-FEATURE-UNAVAILABLE:CAPS"/>
     <keyword type="constant" name="BD_UTILS_DEV_UTILS_ERROR_FAILED" link="libblockdev-Utils.html#BD-UTILS-DEV-UTILS-ERROR-FAILED:CAPS"/>
-    <keyword type="constant" name="BD_VDO_ERROR_FAIL" link="libblockdev-VDO.html#BD-VDO-ERROR-FAIL:CAPS"/>
-    <keyword type="constant" name="BD_VDO_ERROR_PARSE" link="libblockdev-VDO.html#BD-VDO-ERROR-PARSE:CAPS"/>
-    <keyword type="constant" name="BD_VDO_ERROR_TECH_UNAVAIL" link="libblockdev-VDO.html#BD-VDO-ERROR-TECH-UNAVAIL:CAPS"/>
-    <keyword type="constant" name="BD_VDO_ERROR_POLICY_INVAL" link="libblockdev-VDO.html#BD-VDO-ERROR-POLICY-INVAL:CAPS"/>
-    <keyword type="constant" name="BD_VDO_TECH_VDO" link="libblockdev-VDO.html#BD-VDO-TECH-VDO:CAPS"/>
-    <keyword type="constant" name="BD_VDO_TECH_MODE_CREATE" link="libblockdev-VDO.html#BD-VDO-TECH-MODE-CREATE:CAPS"/>
-    <keyword type="constant" name="BD_VDO_TECH_MODE_REMOVE" link="libblockdev-VDO.html#BD-VDO-TECH-MODE-REMOVE:CAPS"/>
-    <keyword type="constant" name="BD_VDO_TECH_MODE_MODIFY" link="libblockdev-VDO.html#BD-VDO-TECH-MODE-MODIFY:CAPS"/>
-    <keyword type="constant" name="BD_VDO_TECH_MODE_ACTIVATE_DEACTIVATE" link="libblockdev-VDO.html#BD-VDO-TECH-MODE-ACTIVATE-DEACTIVATE:CAPS"/>
-    <keyword type="constant" name="BD_VDO_TECH_MODE_START_STOP" link="libblockdev-VDO.html#BD-VDO-TECH-MODE-START-STOP:CAPS"/>
-    <keyword type="constant" name="BD_VDO_TECH_MODE_QUERY" link="libblockdev-VDO.html#BD-VDO-TECH-MODE-QUERY:CAPS"/>
-    <keyword type="constant" name="BD_VDO_TECH_MODE_GROW" link="libblockdev-VDO.html#BD-VDO-TECH-MODE-GROW:CAPS"/>
+    <keyword type="constant" name="BD_UTILS_DBUS_ERROR_FAIL" link="libblockdev-Utils.html#BD-UTILS-DBUS-ERROR-FAIL:CAPS"/>
+    <keyword type="constant" name="BD_UTILS_DBUS_ERROR_NOEXIST" link="libblockdev-Utils.html#BD-UTILS-DBUS-ERROR-NOEXIST:CAPS"/>
+    <keyword type="constant" name="BD_UTILS_MODULE_ERROR_KMOD_INIT_FAIL" link="libblockdev-Utils.html#BD-UTILS-MODULE-ERROR-KMOD-INIT-FAIL:CAPS"/>
+    <keyword type="constant" name="BD_UTILS_MODULE_ERROR_FAIL" link="libblockdev-Utils.html#BD-UTILS-MODULE-ERROR-FAIL:CAPS"/>
+    <keyword type="constant" name="BD_UTILS_MODULE_ERROR_NOEXIST" link="libblockdev-Utils.html#BD-UTILS-MODULE-ERROR-NOEXIST:CAPS"/>
+    <keyword type="constant" name="BD_UTILS_MODULE_ERROR_MODULE_CHECK_ERROR" link="libblockdev-Utils.html#BD-UTILS-MODULE-ERROR-MODULE-CHECK-ERROR:CAPS"/>
+    <keyword type="constant" name="BD_UTILS_MODULE_ERROR_INVALID_PLATFORM" link="libblockdev-Utils.html#BD-UTILS-MODULE-ERROR-INVALID-PLATFORM:CAPS"/>
     <keyword type="member" name="BDBtrfsDeviceInfo.id" link="libblockdev-BTRFS.html#BDBtrfsDeviceInfo.id"/>
     <keyword type="member" name="BDBtrfsDeviceInfo.path" link="libblockdev-BTRFS.html#BDBtrfsDeviceInfo.path"/>
     <keyword type="member" name="BDBtrfsDeviceInfo.size" link="libblockdev-BTRFS.html#BDBtrfsDeviceInfo.size"/>
@@ -963,6 +1205,9 @@
     <keyword type="member" name="BDCryptoLUKSInfo.uuid" link="libblockdev-Crypto.html#BDCryptoLUKSInfo.uuid"/>
     <keyword type="member" name="BDCryptoLUKSInfo.backing-device" link="libblockdev-Crypto.html#BDCryptoLUKSInfo.backing-device"/>
     <keyword type="member" name="BDCryptoLUKSInfo.sector-size" link="libblockdev-Crypto.html#BDCryptoLUKSInfo.sector-size"/>
+    <keyword type="member" name="BDCryptoLUKSInfo.metadata-size" link="libblockdev-Crypto.html#BDCryptoLUKSInfo.metadata-size"/>
+    <keyword type="member" name="BDCryptoLUKSInfo.label" link="libblockdev-Crypto.html#BDCryptoLUKSInfo.label"/>
+    <keyword type="member" name="BDCryptoLUKSInfo.subsystem" link="libblockdev-Crypto.html#BDCryptoLUKSInfo.subsystem"/>
     <keyword type="member" name="BDCryptoIntegrityInfo.algorithm" link="libblockdev-Crypto.html#BDCryptoIntegrityInfo.algorithm"/>
     <keyword type="member" name="BDCryptoIntegrityInfo.key-size" link="libblockdev-Crypto.html#BDCryptoIntegrityInfo.key-size"/>
     <keyword type="member" name="BDCryptoIntegrityInfo.sector-size" link="libblockdev-Crypto.html#BDCryptoIntegrityInfo.sector-size"/>
@@ -971,6 +1216,35 @@
     <keyword type="member" name="BDCryptoIntegrityInfo.journal-size" link="libblockdev-Crypto.html#BDCryptoIntegrityInfo.journal-size"/>
     <keyword type="member" name="BDCryptoIntegrityInfo.journal-crypt" link="libblockdev-Crypto.html#BDCryptoIntegrityInfo.journal-crypt"/>
     <keyword type="member" name="BDCryptoIntegrityInfo.journal-integrity" link="libblockdev-Crypto.html#BDCryptoIntegrityInfo.journal-integrity"/>
+    <keyword type="member" name="BDCryptoIntegrityExtra.sector-size" link="libblockdev-Crypto.html#BDCryptoIntegrityExtra.sector-size"/>
+    <keyword type="member" name="BDCryptoIntegrityExtra.journal-size" link="libblockdev-Crypto.html#BDCryptoIntegrityExtra.journal-size"/>
+    <keyword type="member" name="BDCryptoIntegrityExtra.journal-watermark" link="libblockdev-Crypto.html#BDCryptoIntegrityExtra.journal-watermark"/>
+    <keyword type="member" name="BDCryptoIntegrityExtra.journal-commit-time" link="libblockdev-Crypto.html#BDCryptoIntegrityExtra.journal-commit-time"/>
+    <keyword type="member" name="BDCryptoIntegrityExtra.interleave-sectors" link="libblockdev-Crypto.html#BDCryptoIntegrityExtra.interleave-sectors"/>
+    <keyword type="member" name="BDCryptoIntegrityExtra.tag-size" link="libblockdev-Crypto.html#BDCryptoIntegrityExtra.tag-size"/>
+    <keyword type="member" name="BDCryptoIntegrityExtra.buffer-sectors" link="libblockdev-Crypto.html#BDCryptoIntegrityExtra.buffer-sectors"/>
+    <keyword type="member" name="BDCryptoLUKSTokenInfo.id" link="libblockdev-Crypto.html#BDCryptoLUKSTokenInfo.id"/>
+    <keyword type="member" name="BDCryptoLUKSTokenInfo.type" link="libblockdev-Crypto.html#BDCryptoLUKSTokenInfo.type"/>
+    <keyword type="member" name="BDCryptoLUKSTokenInfo.keyslot" link="libblockdev-Crypto.html#BDCryptoLUKSTokenInfo.keyslot"/>
+    <keyword type="member" name="BDCryptoBITLKInfo.cipher" link="libblockdev-Crypto.html#BDCryptoBITLKInfo.cipher"/>
+    <keyword type="member" name="BDCryptoBITLKInfo.mode" link="libblockdev-Crypto.html#BDCryptoBITLKInfo.mode"/>
+    <keyword type="member" name="BDCryptoBITLKInfo.uuid" link="libblockdev-Crypto.html#BDCryptoBITLKInfo.uuid"/>
+    <keyword type="member" name="BDCryptoBITLKInfo.backing-device" link="libblockdev-Crypto.html#BDCryptoBITLKInfo.backing-device"/>
+    <keyword type="member" name="BDCryptoBITLKInfo.sector-size" link="libblockdev-Crypto.html#BDCryptoBITLKInfo.sector-size"/>
+    <keyword type="member" name="BDFSFeatures.resize" link="libblockdev-FS.html#BDFSFeatures.resize"/>
+    <keyword type="member" name="BDFSFeatures.mkfs" link="libblockdev-FS.html#BDFSFeatures.mkfs"/>
+    <keyword type="member" name="BDFSFeatures.fsck" link="libblockdev-FS.html#BDFSFeatures.fsck"/>
+    <keyword type="member" name="BDFSFeatures.configure" link="libblockdev-FS.html#BDFSFeatures.configure"/>
+    <keyword type="member" name="BDFSFeatures.features" link="libblockdev-FS.html#BDFSFeatures.features"/>
+    <keyword type="member" name="BDFSFeatures.partition-id" link="libblockdev-FS.html#BDFSFeatures.partition-id"/>
+    <keyword type="member" name="BDFSFeatures.partition-type" link="libblockdev-FS.html#BDFSFeatures.partition-type"/>
+    <keyword type="member" name="BDFSMkfsOptions.label" link="libblockdev-FS.html#BDFSMkfsOptions.label"/>
+    <keyword type="member" name="BDFSMkfsOptions.uuid" link="libblockdev-FS.html#BDFSMkfsOptions.uuid"/>
+    <keyword type="member" name="BDFSMkfsOptions.dry-run" link="libblockdev-FS.html#BDFSMkfsOptions.dry-run"/>
+    <keyword type="member" name="BDFSMkfsOptions.no-discard" link="libblockdev-FS.html#BDFSMkfsOptions.no-discard"/>
+    <keyword type="member" name="BDFSMkfsOptions.force" link="libblockdev-FS.html#BDFSMkfsOptions.force"/>
+    <keyword type="member" name="BDFSMkfsOptions.no-pt" link="libblockdev-FS.html#BDFSMkfsOptions.no-pt"/>
+    <keyword type="member" name="BDFSMkfsOptions.reserve" link="libblockdev-FS.html#BDFSMkfsOptions.reserve"/>
     <keyword type="member" name="BDFSXfsInfo.label" link="libblockdev-FS.html#BDFSXfsInfo.label"/>
     <keyword type="member" name="BDFSXfsInfo.uuid" link="libblockdev-FS.html#BDFSXfsInfo.uuid"/>
     <keyword type="member" name="BDFSXfsInfo.block-size" link="libblockdev-FS.html#BDFSXfsInfo.block-size"/>
@@ -980,8 +1254,43 @@
     <keyword type="member" name="BDFSVfatInfo.cluster-size" link="libblockdev-FS.html#BDFSVfatInfo.cluster-size"/>
     <keyword type="member" name="BDFSVfatInfo.cluster-count" link="libblockdev-FS.html#BDFSVfatInfo.cluster-count"/>
     <keyword type="member" name="BDFSVfatInfo.free-cluster-count" link="libblockdev-FS.html#BDFSVfatInfo.free-cluster-count"/>
+    <keyword type="member" name="BDFSNtfsInfo.label" link="libblockdev-FS.html#BDFSNtfsInfo.label"/>
+    <keyword type="member" name="BDFSNtfsInfo.uuid" link="libblockdev-FS.html#BDFSNtfsInfo.uuid"/>
     <keyword type="member" name="BDFSNtfsInfo.size" link="libblockdev-FS.html#BDFSNtfsInfo.size"/>
     <keyword type="member" name="BDFSNtfsInfo.free-space" link="libblockdev-FS.html#BDFSNtfsInfo.free-space"/>
+    <keyword type="member" name="BDFSF2FSInfo.label" link="libblockdev-FS.html#BDFSF2FSInfo.label"/>
+    <keyword type="member" name="BDFSF2FSInfo.uuid" link="libblockdev-FS.html#BDFSF2FSInfo.uuid"/>
+    <keyword type="member" name="BDFSF2FSInfo.sector-size" link="libblockdev-FS.html#BDFSF2FSInfo.sector-size"/>
+    <keyword type="member" name="BDFSF2FSInfo.sector-count" link="libblockdev-FS.html#BDFSF2FSInfo.sector-count"/>
+    <keyword type="member" name="BDFSF2FSInfo.features" link="libblockdev-FS.html#BDFSF2FSInfo.features"/>
+    <keyword type="member" name="BDFSNILFS2Info.label" link="libblockdev-FS.html#BDFSNILFS2Info.label"/>
+    <keyword type="member" name="BDFSNILFS2Info.uuid" link="libblockdev-FS.html#BDFSNILFS2Info.uuid"/>
+    <keyword type="member" name="BDFSNILFS2Info.size" link="libblockdev-FS.html#BDFSNILFS2Info.size"/>
+    <keyword type="member" name="BDFSNILFS2Info.block-size" link="libblockdev-FS.html#BDFSNILFS2Info.block-size"/>
+    <keyword type="member" name="BDFSNILFS2Info.free-blocks" link="libblockdev-FS.html#BDFSNILFS2Info.free-blocks"/>
+    <keyword type="member" name="BDFSExfatInfo.label" link="libblockdev-FS.html#BDFSExfatInfo.label"/>
+    <keyword type="member" name="BDFSExfatInfo.uuid" link="libblockdev-FS.html#BDFSExfatInfo.uuid"/>
+    <keyword type="member" name="BDFSExfatInfo.sector-size" link="libblockdev-FS.html#BDFSExfatInfo.sector-size"/>
+    <keyword type="member" name="BDFSExfatInfo.sector-count" link="libblockdev-FS.html#BDFSExfatInfo.sector-count"/>
+    <keyword type="member" name="BDFSExfatInfo.cluster-count" link="libblockdev-FS.html#BDFSExfatInfo.cluster-count"/>
+    <keyword type="member" name="BDFSBtrfsInfo.label" link="libblockdev-FS.html#BDFSBtrfsInfo.label"/>
+    <keyword type="member" name="BDFSBtrfsInfo.uuid" link="libblockdev-FS.html#BDFSBtrfsInfo.uuid"/>
+    <keyword type="member" name="BDFSBtrfsInfo.size" link="libblockdev-FS.html#BDFSBtrfsInfo.size"/>
+    <keyword type="member" name="BDFSBtrfsInfo.free-space" link="libblockdev-FS.html#BDFSBtrfsInfo.free-space"/>
+    <keyword type="member" name="BDFSUdfInfo.label" link="libblockdev-FS.html#BDFSUdfInfo.label"/>
+    <keyword type="member" name="BDFSUdfInfo.uuid" link="libblockdev-FS.html#BDFSUdfInfo.uuid"/>
+    <keyword type="member" name="BDFSUdfInfo.revision" link="libblockdev-FS.html#BDFSUdfInfo.revision"/>
+    <keyword type="member" name="BDFSUdfInfo.lvid" link="libblockdev-FS.html#BDFSUdfInfo.lvid"/>
+    <keyword type="member" name="BDFSUdfInfo.vid" link="libblockdev-FS.html#BDFSUdfInfo.vid"/>
+    <keyword type="member" name="BDFSUdfInfo.block-size" link="libblockdev-FS.html#BDFSUdfInfo.block-size"/>
+    <keyword type="member" name="BDFSUdfInfo.block-count" link="libblockdev-FS.html#BDFSUdfInfo.block-count"/>
+    <keyword type="member" name="BDFSUdfInfo.free-blocks" link="libblockdev-FS.html#BDFSUdfInfo.free-blocks"/>
+    <keyword type="member" name="BDLoopInfo.backing-file" link="libblockdev-Loop.html#BDLoopInfo.backing-file"/>
+    <keyword type="member" name="BDLoopInfo.offset" link="libblockdev-Loop.html#BDLoopInfo.offset"/>
+    <keyword type="member" name="BDLoopInfo.autoclear" link="libblockdev-Loop.html#BDLoopInfo.autoclear"/>
+    <keyword type="member" name="BDLoopInfo.direct-io" link="libblockdev-Loop.html#BDLoopInfo.direct-io"/>
+    <keyword type="member" name="BDLoopInfo.part-scan" link="libblockdev-Loop.html#BDLoopInfo.part-scan"/>
+    <keyword type="member" name="BDLoopInfo.read-only" link="libblockdev-Loop.html#BDLoopInfo.read-only"/>
     <keyword type="member" name="BDLVMPVdata.pv-name" link="libblockdev-LVM.html#BDLVMPVdata.pv-name"/>
     <keyword type="member" name="BDLVMPVdata.pv-uuid" link="libblockdev-LVM.html#BDLVMPVdata.pv-uuid"/>
     <keyword type="member" name="BDLVMPVdata.pv-free" link="libblockdev-LVM.html#BDLVMPVdata.pv-free"/>
@@ -995,6 +1304,8 @@
     <keyword type="member" name="BDLVMPVdata.vg-extent-count" link="libblockdev-LVM.html#BDLVMPVdata.vg-extent-count"/>
     <keyword type="member" name="BDLVMPVdata.vg-free-count" link="libblockdev-LVM.html#BDLVMPVdata.vg-free-count"/>
     <keyword type="member" name="BDLVMPVdata.vg-pv-count" link="libblockdev-LVM.html#BDLVMPVdata.vg-pv-count"/>
+    <keyword type="member" name="BDLVMPVdata.pv-tags" link="libblockdev-LVM.html#BDLVMPVdata.pv-tags"/>
+    <keyword type="member" name="BDLVMPVdata.missing" link="libblockdev-LVM.html#BDLVMPVdata.missing"/>
     <keyword type="member" name="BDLVMVGdata.name" link="libblockdev-LVM.html#BDLVMVGdata.name"/>
     <keyword type="member" name="BDLVMVGdata.uuid" link="libblockdev-LVM.html#BDLVMVGdata.uuid"/>
     <keyword type="member" name="BDLVMVGdata.size" link="libblockdev-LVM.html#BDLVMVGdata.size"/>
@@ -1003,6 +1314,11 @@
     <keyword type="member" name="BDLVMVGdata.extent-count" link="libblockdev-LVM.html#BDLVMVGdata.extent-count"/>
     <keyword type="member" name="BDLVMVGdata.free-count" link="libblockdev-LVM.html#BDLVMVGdata.free-count"/>
     <keyword type="member" name="BDLVMVGdata.pv-count" link="libblockdev-LVM.html#BDLVMVGdata.pv-count"/>
+    <keyword type="member" name="BDLVMVGdata.exported" link="libblockdev-LVM.html#BDLVMVGdata.exported"/>
+    <keyword type="member" name="BDLVMVGdata.vg-tags" link="libblockdev-LVM.html#BDLVMVGdata.vg-tags"/>
+    <keyword type="member" name="BDLVMSEGdata.size-pe" link="libblockdev-LVM.html#BDLVMSEGdata.size-pe"/>
+    <keyword type="member" name="BDLVMSEGdata.pv-start-pe" link="libblockdev-LVM.html#BDLVMSEGdata.pv-start-pe"/>
+    <keyword type="member" name="BDLVMSEGdata.pvdev" link="libblockdev-LVM.html#BDLVMSEGdata.pvdev"/>
     <keyword type="member" name="BDLVMLVdata.lv-name" link="libblockdev-LVM.html#BDLVMLVdata.lv-name"/>
     <keyword type="member" name="BDLVMLVdata.vg-name" link="libblockdev-LVM.html#BDLVMLVdata.vg-name"/>
     <keyword type="member" name="BDLVMLVdata.uuid" link="libblockdev-LVM.html#BDLVMLVdata.uuid"/>
@@ -1018,6 +1334,10 @@
     <keyword type="member" name="BDLVMLVdata.data-percent" link="libblockdev-LVM.html#BDLVMLVdata.data-percent"/>
     <keyword type="member" name="BDLVMLVdata.metadata-percent" link="libblockdev-LVM.html#BDLVMLVdata.metadata-percent"/>
     <keyword type="member" name="BDLVMLVdata.copy-percent" link="libblockdev-LVM.html#BDLVMLVdata.copy-percent"/>
+    <keyword type="member" name="BDLVMLVdata.lv-tags" link="libblockdev-LVM.html#BDLVMLVdata.lv-tags"/>
+    <keyword type="member" name="BDLVMLVdata.data-lvs" link="libblockdev-LVM.html#BDLVMLVdata.data-lvs"/>
+    <keyword type="member" name="BDLVMLVdata.metadata-lvs" link="libblockdev-LVM.html#BDLVMLVdata.metadata-lvs"/>
+    <keyword type="member" name="BDLVMLVdata.segs" link="libblockdev-LVM.html#BDLVMLVdata.segs"/>
     <keyword type="member" name="BDLVMCacheStats.block-size" link="libblockdev-LVM.html#BDLVMCacheStats.block-size"/>
     <keyword type="member" name="BDLVMCacheStats.cache-size" link="libblockdev-LVM.html#BDLVMCacheStats.cache-size"/>
     <keyword type="member" name="BDLVMCacheStats.cache-used" link="libblockdev-LVM.html#BDLVMCacheStats.cache-used"/>
@@ -1038,6 +1358,15 @@
     <keyword type="member" name="BDLVMVDOStats.used-percent" link="libblockdev-LVM.html#BDLVMVDOStats.used-percent"/>
     <keyword type="member" name="BDLVMVDOStats.saving-percent" link="libblockdev-LVM.html#BDLVMVDOStats.saving-percent"/>
     <keyword type="member" name="BDLVMVDOStats.write-amplification-ratio" link="libblockdev-LVM.html#BDLVMVDOStats.write-amplification-ratio"/>
+    <keyword type="member" name="BDLVMVDOPooldata.operating-mode" link="libblockdev-LVM.html#BDLVMVDOPooldata.operating-mode"/>
+    <keyword type="member" name="BDLVMVDOPooldata.compression-state" link="libblockdev-LVM.html#BDLVMVDOPooldata.compression-state"/>
+    <keyword type="member" name="BDLVMVDOPooldata.index-state" link="libblockdev-LVM.html#BDLVMVDOPooldata.index-state"/>
+    <keyword type="member" name="BDLVMVDOPooldata.write-policy" link="libblockdev-LVM.html#BDLVMVDOPooldata.write-policy"/>
+    <keyword type="member" name="BDLVMVDOPooldata.used-size" link="libblockdev-LVM.html#BDLVMVDOPooldata.used-size"/>
+    <keyword type="member" name="BDLVMVDOPooldata.saving-percent" link="libblockdev-LVM.html#BDLVMVDOPooldata.saving-percent"/>
+    <keyword type="member" name="BDLVMVDOPooldata.index-memory-size" link="libblockdev-LVM.html#BDLVMVDOPooldata.index-memory-size"/>
+    <keyword type="member" name="BDLVMVDOPooldata.deduplication" link="libblockdev-LVM.html#BDLVMVDOPooldata.deduplication"/>
+    <keyword type="member" name="BDLVMVDOPooldata.compression" link="libblockdev-LVM.html#BDLVMVDOPooldata.compression"/>
     <keyword type="member" name="BDMDExamineData.device" link="libblockdev-MD-RAID.html#BDMDExamineData.device"/>
     <keyword type="member" name="BDMDExamineData.level" link="libblockdev-MD-RAID.html#BDMDExamineData.level"/>
     <keyword type="member" name="BDMDExamineData.num-devices" link="libblockdev-MD-RAID.html#BDMDExamineData.num-devices"/>
@@ -1064,6 +1393,7 @@
     <keyword type="member" name="BDMDDetailData.spare-devices" link="libblockdev-MD-RAID.html#BDMDDetailData.spare-devices"/>
     <keyword type="member" name="BDMDDetailData.clean" link="libblockdev-MD-RAID.html#BDMDDetailData.clean"/>
     <keyword type="member" name="BDMDDetailData.uuid" link="libblockdev-MD-RAID.html#BDMDDetailData.uuid"/>
+    <keyword type="member" name="BDMDDetailData.container" link="libblockdev-MD-RAID.html#BDMDDetailData.container"/>
     <keyword type="member" name="BDNVDIMMNamespaceInfo.dev" link="libblockdev-NVDIMM.html#BDNVDIMMNamespaceInfo.dev"/>
     <keyword type="member" name="BDNVDIMMNamespaceInfo.mode" link="libblockdev-NVDIMM.html#BDNVDIMMNamespaceInfo.mode"/>
     <keyword type="member" name="BDNVDIMMNamespaceInfo.size" link="libblockdev-NVDIMM.html#BDNVDIMMNamespaceInfo.size"/>
@@ -1071,43 +1401,99 @@
     <keyword type="member" name="BDNVDIMMNamespaceInfo.sector-size" link="libblockdev-NVDIMM.html#BDNVDIMMNamespaceInfo.sector-size"/>
     <keyword type="member" name="BDNVDIMMNamespaceInfo.blockdev" link="libblockdev-NVDIMM.html#BDNVDIMMNamespaceInfo.blockdev"/>
     <keyword type="member" name="BDNVDIMMNamespaceInfo.enabled" link="libblockdev-NVDIMM.html#BDNVDIMMNamespaceInfo.enabled"/>
+    <keyword type="member" name="BDNVMEControllerInfo.pci-vendor-id" link="libblockdev-NVMe.html#BDNVMEControllerInfo.pci-vendor-id"/>
+    <keyword type="member" name="BDNVMEControllerInfo.pci-subsys-vendor-id" link="libblockdev-NVMe.html#BDNVMEControllerInfo.pci-subsys-vendor-id"/>
+    <keyword type="member" name="BDNVMEControllerInfo.ctrl-id" link="libblockdev-NVMe.html#BDNVMEControllerInfo.ctrl-id"/>
+    <keyword type="member" name="BDNVMEControllerInfo.fguid" link="libblockdev-NVMe.html#BDNVMEControllerInfo.fguid"/>
+    <keyword type="member" name="BDNVMEControllerInfo.model-number" link="libblockdev-NVMe.html#BDNVMEControllerInfo.model-number"/>
+    <keyword type="member" name="BDNVMEControllerInfo.serial-number" link="libblockdev-NVMe.html#BDNVMEControllerInfo.serial-number"/>
+    <keyword type="member" name="BDNVMEControllerInfo.firmware-ver" link="libblockdev-NVMe.html#BDNVMEControllerInfo.firmware-ver"/>
+    <keyword type="member" name="BDNVMEControllerInfo.nvme-ver" link="libblockdev-NVMe.html#BDNVMEControllerInfo.nvme-ver"/>
+    <keyword type="member" name="BDNVMEControllerInfo.features" link="libblockdev-NVMe.html#BDNVMEControllerInfo.features"/>
+    <keyword type="member" name="BDNVMEControllerInfo.controller-type" link="libblockdev-NVMe.html#BDNVMEControllerInfo.controller-type"/>
+    <keyword type="member" name="BDNVMEControllerInfo.selftest-ext-time" link="libblockdev-NVMe.html#BDNVMEControllerInfo.selftest-ext-time"/>
+    <keyword type="member" name="BDNVMEControllerInfo.hmb-pref-size" link="libblockdev-NVMe.html#BDNVMEControllerInfo.hmb-pref-size"/>
+    <keyword type="member" name="BDNVMEControllerInfo.hmb-min-size" link="libblockdev-NVMe.html#BDNVMEControllerInfo.hmb-min-size"/>
+    <keyword type="member" name="BDNVMEControllerInfo.size-total" link="libblockdev-NVMe.html#BDNVMEControllerInfo.size-total"/>
+    <keyword type="member" name="BDNVMEControllerInfo.size-unalloc" link="libblockdev-NVMe.html#BDNVMEControllerInfo.size-unalloc"/>
+    <keyword type="member" name="BDNVMEControllerInfo.num-namespaces" link="libblockdev-NVMe.html#BDNVMEControllerInfo.num-namespaces"/>
+    <keyword type="member" name="BDNVMEControllerInfo.subsysnqn" link="libblockdev-NVMe.html#BDNVMEControllerInfo.subsysnqn"/>
+    <keyword type="member" name="BDNVMELBAFormat.data-size" link="libblockdev-NVMe.html#BDNVMELBAFormat.data-size"/>
+    <keyword type="member" name="BDNVMELBAFormat.metadata-size" link="libblockdev-NVMe.html#BDNVMELBAFormat.metadata-size"/>
+    <keyword type="member" name="BDNVMELBAFormat.relative-performance" link="libblockdev-NVMe.html#BDNVMELBAFormat.relative-performance"/>
+    <keyword type="member" name="BDNVMENamespaceInfo.nsid" link="libblockdev-NVMe.html#BDNVMENamespaceInfo.nsid"/>
+    <keyword type="member" name="BDNVMENamespaceInfo.eui64" link="libblockdev-NVMe.html#BDNVMENamespaceInfo.eui64"/>
+    <keyword type="member" name="BDNVMENamespaceInfo.uuid" link="libblockdev-NVMe.html#BDNVMENamespaceInfo.uuid"/>
+    <keyword type="member" name="BDNVMENamespaceInfo.nguid" link="libblockdev-NVMe.html#BDNVMENamespaceInfo.nguid"/>
+    <keyword type="member" name="BDNVMENamespaceInfo.nsize" link="libblockdev-NVMe.html#BDNVMENamespaceInfo.nsize"/>
+    <keyword type="member" name="BDNVMENamespaceInfo.ncap" link="libblockdev-NVMe.html#BDNVMENamespaceInfo.ncap"/>
+    <keyword type="member" name="BDNVMENamespaceInfo.nuse" link="libblockdev-NVMe.html#BDNVMENamespaceInfo.nuse"/>
+    <keyword type="member" name="BDNVMENamespaceInfo.features" link="libblockdev-NVMe.html#BDNVMENamespaceInfo.features"/>
+    <keyword type="member" name="BDNVMENamespaceInfo.format-progress-remaining" link="libblockdev-NVMe.html#BDNVMENamespaceInfo.format-progress-remaining"/>
+    <keyword type="member" name="BDNVMENamespaceInfo.write-protected" link="libblockdev-NVMe.html#BDNVMENamespaceInfo.write-protected"/>
+    <keyword type="member" name="BDNVMENamespaceInfo.lba-formats" link="libblockdev-NVMe.html#BDNVMENamespaceInfo.lba-formats"/>
+    <keyword type="member" name="BDNVMENamespaceInfo.current-lba-format" link="libblockdev-NVMe.html#BDNVMENamespaceInfo.current-lba-format"/>
+    <keyword type="member" name="BDNVMESmartLog.critical-warning" link="libblockdev-NVMe.html#BDNVMESmartLog.critical-warning"/>
+    <keyword type="member" name="BDNVMESmartLog.avail-spare" link="libblockdev-NVMe.html#BDNVMESmartLog.avail-spare"/>
+    <keyword type="member" name="BDNVMESmartLog.spare-thresh" link="libblockdev-NVMe.html#BDNVMESmartLog.spare-thresh"/>
+    <keyword type="member" name="BDNVMESmartLog.percent-used" link="libblockdev-NVMe.html#BDNVMESmartLog.percent-used"/>
+    <keyword type="member" name="BDNVMESmartLog.total-data-read" link="libblockdev-NVMe.html#BDNVMESmartLog.total-data-read"/>
+    <keyword type="member" name="BDNVMESmartLog.total-data-written" link="libblockdev-NVMe.html#BDNVMESmartLog.total-data-written"/>
+    <keyword type="member" name="BDNVMESmartLog.ctrl-busy-time" link="libblockdev-NVMe.html#BDNVMESmartLog.ctrl-busy-time"/>
+    <keyword type="member" name="BDNVMESmartLog.power-cycles" link="libblockdev-NVMe.html#BDNVMESmartLog.power-cycles"/>
+    <keyword type="member" name="BDNVMESmartLog.power-on-hours" link="libblockdev-NVMe.html#BDNVMESmartLog.power-on-hours"/>
+    <keyword type="member" name="BDNVMESmartLog.unsafe-shutdowns" link="libblockdev-NVMe.html#BDNVMESmartLog.unsafe-shutdowns"/>
+    <keyword type="member" name="BDNVMESmartLog.media-errors" link="libblockdev-NVMe.html#BDNVMESmartLog.media-errors"/>
+    <keyword type="member" name="BDNVMESmartLog.num-err-log-entries" link="libblockdev-NVMe.html#BDNVMESmartLog.num-err-log-entries"/>
+    <keyword type="member" name="BDNVMESmartLog.temperature" link="libblockdev-NVMe.html#BDNVMESmartLog.temperature"/>
+    <keyword type="member" name="BDNVMESmartLog.temp-sensors" link="libblockdev-NVMe.html#BDNVMESmartLog.temp-sensors"/>
+    <keyword type="member" name="BDNVMESmartLog.wctemp" link="libblockdev-NVMe.html#BDNVMESmartLog.wctemp"/>
+    <keyword type="member" name="BDNVMESmartLog.cctemp" link="libblockdev-NVMe.html#BDNVMESmartLog.cctemp"/>
+    <keyword type="member" name="BDNVMESmartLog.warning-temp-time" link="libblockdev-NVMe.html#BDNVMESmartLog.warning-temp-time"/>
+    <keyword type="member" name="BDNVMESmartLog.critical-temp-time" link="libblockdev-NVMe.html#BDNVMESmartLog.critical-temp-time"/>
+    <keyword type="member" name="BDNVMEErrorLogEntry.error-count" link="libblockdev-NVMe.html#BDNVMEErrorLogEntry.error-count"/>
+    <keyword type="member" name="BDNVMEErrorLogEntry.command-id" link="libblockdev-NVMe.html#BDNVMEErrorLogEntry.command-id"/>
+    <keyword type="member" name="BDNVMEErrorLogEntry.command-specific" link="libblockdev-NVMe.html#BDNVMEErrorLogEntry.command-specific"/>
+    <keyword type="member" name="BDNVMEErrorLogEntry.command-status" link="libblockdev-NVMe.html#BDNVMEErrorLogEntry.command-status"/>
+    <keyword type="member" name="BDNVMEErrorLogEntry.command-error" link="libblockdev-NVMe.html#BDNVMEErrorLogEntry.command-error"/>
+    <keyword type="member" name="BDNVMEErrorLogEntry.lba" link="libblockdev-NVMe.html#BDNVMEErrorLogEntry.lba"/>
+    <keyword type="member" name="BDNVMEErrorLogEntry.nsid" link="libblockdev-NVMe.html#BDNVMEErrorLogEntry.nsid"/>
+    <keyword type="member" name="BDNVMEErrorLogEntry.transport-type" link="libblockdev-NVMe.html#BDNVMEErrorLogEntry.transport-type"/>
+    <keyword type="member" name="BDNVMESelfTestLog.current-operation" link="libblockdev-NVMe.html#BDNVMESelfTestLog.current-operation"/>
+    <keyword type="member" name="BDNVMESelfTestLog.current-operation-completion" link="libblockdev-NVMe.html#BDNVMESelfTestLog.current-operation-completion"/>
+    <keyword type="member" name="BDNVMESelfTestLog.entries" link="libblockdev-NVMe.html#BDNVMESelfTestLog.entries"/>
+    <keyword type="member" name="BDNVMESelfTestLogEntry.result" link="libblockdev-NVMe.html#BDNVMESelfTestLogEntry.result"/>
+    <keyword type="member" name="BDNVMESelfTestLogEntry.action" link="libblockdev-NVMe.html#BDNVMESelfTestLogEntry.action"/>
+    <keyword type="member" name="BDNVMESelfTestLogEntry.segment" link="libblockdev-NVMe.html#BDNVMESelfTestLogEntry.segment"/>
+    <keyword type="member" name="BDNVMESelfTestLogEntry.power-on-hours" link="libblockdev-NVMe.html#BDNVMESelfTestLogEntry.power-on-hours"/>
+    <keyword type="member" name="BDNVMESelfTestLogEntry.nsid" link="libblockdev-NVMe.html#BDNVMESelfTestLogEntry.nsid"/>
+    <keyword type="member" name="BDNVMESelfTestLogEntry.failing-lba" link="libblockdev-NVMe.html#BDNVMESelfTestLogEntry.failing-lba"/>
+    <keyword type="member" name="BDNVMESelfTestLogEntry.status-code-error" link="libblockdev-NVMe.html#BDNVMESelfTestLogEntry.status-code-error"/>
+    <keyword type="member" name="BDNVMESanitizeLog.sanitize-progress" link="libblockdev-NVMe.html#BDNVMESanitizeLog.sanitize-progress"/>
+    <keyword type="member" name="BDNVMESanitizeLog.sanitize-status" link="libblockdev-NVMe.html#BDNVMESanitizeLog.sanitize-status"/>
+    <keyword type="member" name="BDNVMESanitizeLog.global-data-erased" link="libblockdev-NVMe.html#BDNVMESanitizeLog.global-data-erased"/>
+    <keyword type="member" name="BDNVMESanitizeLog.overwrite-passes" link="libblockdev-NVMe.html#BDNVMESanitizeLog.overwrite-passes"/>
+    <keyword type="member" name="BDNVMESanitizeLog.time-for-overwrite" link="libblockdev-NVMe.html#BDNVMESanitizeLog.time-for-overwrite"/>
+    <keyword type="member" name="BDNVMESanitizeLog.time-for-block-erase" link="libblockdev-NVMe.html#BDNVMESanitizeLog.time-for-block-erase"/>
+    <keyword type="member" name="BDNVMESanitizeLog.time-for-crypto-erase" link="libblockdev-NVMe.html#BDNVMESanitizeLog.time-for-crypto-erase"/>
+    <keyword type="member" name="BDNVMESanitizeLog.time-for-overwrite-nd" link="libblockdev-NVMe.html#BDNVMESanitizeLog.time-for-overwrite-nd"/>
+    <keyword type="member" name="BDNVMESanitizeLog.time-for-block-erase-nd" link="libblockdev-NVMe.html#BDNVMESanitizeLog.time-for-block-erase-nd"/>
+    <keyword type="member" name="BDNVMESanitizeLog.time-for-crypto-erase-nd" link="libblockdev-NVMe.html#BDNVMESanitizeLog.time-for-crypto-erase-nd"/>
     <keyword type="member" name="BDPartSpec.path" link="libblockdev-Part.html#BDPartSpec.path"/>
     <keyword type="member" name="BDPartSpec.name" link="libblockdev-Part.html#BDPartSpec.name"/>
+    <keyword type="member" name="BDPartSpec.uuid" link="libblockdev-Part.html#BDPartSpec.uuid"/>
+    <keyword type="member" name="BDPartSpec.id" link="libblockdev-Part.html#BDPartSpec.id"/>
     <keyword type="member" name="BDPartSpec.type-guid" link="libblockdev-Part.html#BDPartSpec.type-guid"/>
     <keyword type="member" name="BDPartSpec.type" link="libblockdev-Part.html#BDPartSpec.type"/>
     <keyword type="member" name="BDPartSpec.start" link="libblockdev-Part.html#BDPartSpec.start"/>
     <keyword type="member" name="BDPartSpec.size" link="libblockdev-Part.html#BDPartSpec.size"/>
-    <keyword type="member" name="BDPartSpec.flags" link="libblockdev-Part.html#BDPartSpec.flags"/>
+    <keyword type="member" name="BDPartSpec.bootable" link="libblockdev-Part.html#BDPartSpec.bootable"/>
+    <keyword type="member" name="BDPartSpec.attrs" link="libblockdev-Part.html#BDPartSpec.attrs"/>
     <keyword type="member" name="BDPartDiskSpec.path" link="libblockdev-Part.html#BDPartDiskSpec.path"/>
     <keyword type="member" name="BDPartDiskSpec.table-type" link="libblockdev-Part.html#BDPartDiskSpec.table-type"/>
     <keyword type="member" name="BDPartDiskSpec.size" link="libblockdev-Part.html#BDPartDiskSpec.size"/>
     <keyword type="member" name="BDPartDiskSpec.sector-size" link="libblockdev-Part.html#BDPartDiskSpec.sector-size"/>
-    <keyword type="member" name="BDPartDiskSpec.flags" link="libblockdev-Part.html#BDPartDiskSpec.flags"/>
-    <keyword type="member" name="BDKBDBcacheStats.state" link="libblockdev-KernelBlockDevices.html#BDKBDBcacheStats.state"/>
-    <keyword type="member" name="BDKBDBcacheStats.block-size" link="libblockdev-KernelBlockDevices.html#BDKBDBcacheStats.block-size"/>
-    <keyword type="member" name="BDKBDBcacheStats.cache-size" link="libblockdev-KernelBlockDevices.html#BDKBDBcacheStats.cache-size"/>
-    <keyword type="member" name="BDKBDBcacheStats.cache-used" link="libblockdev-KernelBlockDevices.html#BDKBDBcacheStats.cache-used"/>
-    <keyword type="member" name="BDKBDBcacheStats.hits" link="libblockdev-KernelBlockDevices.html#BDKBDBcacheStats.hits"/>
-    <keyword type="member" name="BDKBDBcacheStats.misses" link="libblockdev-KernelBlockDevices.html#BDKBDBcacheStats.misses"/>
-    <keyword type="member" name="BDKBDBcacheStats.bypass-hits" link="libblockdev-KernelBlockDevices.html#BDKBDBcacheStats.bypass-hits"/>
-    <keyword type="member" name="BDKBDBcacheStats.bypass-misses" link="libblockdev-KernelBlockDevices.html#BDKBDBcacheStats.bypass-misses"/>
-    <keyword type="member" name="BDVDOInfo.name" link="libblockdev-VDO.html#BDVDOInfo.name"/>
-    <keyword type="member" name="BDVDOInfo.device" link="libblockdev-VDO.html#BDVDOInfo.device"/>
-    <keyword type="member" name="BDVDOInfo.active" link="libblockdev-VDO.html#BDVDOInfo.active"/>
-    <keyword type="member" name="BDVDOInfo.deduplication" link="libblockdev-VDO.html#BDVDOInfo.deduplication"/>
-    <keyword type="member" name="BDVDOInfo.compression" link="libblockdev-VDO.html#BDVDOInfo.compression"/>
-    <keyword type="member" name="BDVDOInfo.logical-size" link="libblockdev-VDO.html#BDVDOInfo.logical-size"/>
-    <keyword type="member" name="BDVDOInfo.physical-size" link="libblockdev-VDO.html#BDVDOInfo.physical-size"/>
-    <keyword type="member" name="BDVDOInfo.index-memory" link="libblockdev-VDO.html#BDVDOInfo.index-memory"/>
-    <keyword type="member" name="BDVDOInfo.write-policy" link="libblockdev-VDO.html#BDVDOInfo.write-policy"/>
-    <keyword type="member" name="BDVDOStats.block-size" link="libblockdev-VDO.html#BDVDOStats.block-size"/>
-    <keyword type="member" name="BDVDOStats.logical-block-size" link="libblockdev-VDO.html#BDVDOStats.logical-block-size"/>
-    <keyword type="member" name="BDVDOStats.physical-blocks" link="libblockdev-VDO.html#BDVDOStats.physical-blocks"/>
-    <keyword type="member" name="BDVDOStats.data-blocks-used" link="libblockdev-VDO.html#BDVDOStats.data-blocks-used"/>
-    <keyword type="member" name="BDVDOStats.overhead-blocks-used" link="libblockdev-VDO.html#BDVDOStats.overhead-blocks-used"/>
-    <keyword type="member" name="BDVDOStats.logical-blocks-used" link="libblockdev-VDO.html#BDVDOStats.logical-blocks-used"/>
-    <keyword type="member" name="BDVDOStats.used-percent" link="libblockdev-VDO.html#BDVDOStats.used-percent"/>
-    <keyword type="member" name="BDVDOStats.saving-percent" link="libblockdev-VDO.html#BDVDOStats.saving-percent"/>
-    <keyword type="member" name="BDVDOStats.write-amplification-ratio" link="libblockdev-VDO.html#BDVDOStats.write-amplification-ratio"/>
+    <keyword type="member" name="BDExtraArg.opt" link="libblockdev-Utils.html#BDExtraArg.opt"/>
+    <keyword type="member" name="BDExtraArg.val" link="libblockdev-Utils.html#BDExtraArg.val"/>
   </functions>
 </book>

@@ -2,12 +2,12 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Utils: libblockdev Reference Manual</title>
+<title>Utils: libblockdev Reference Manual for libblockdev 3.0.</title>
 <meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
-<link rel="home" href="index.html" title="libblockdev Reference Manual">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.0.">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-s390.html" title="s390">
-<link rel="next" href="libblockdev-VDO.html" title="VDO">
+<link rel="next" href="ch02.html" title="GI Overrides">
 <meta name="generator" content="GTK-Doc V1.33.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
@@ -20,7 +20,7 @@
 <td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
 <td><a accesskey="u" href="ch01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
 <td><a accesskey="p" href="libblockdev-s390.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
-<td><a accesskey="n" href="libblockdev-VDO.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+<td><a accesskey="n" href="ch02.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
 </tr></table>
 <div class="refentry">
 <a name="libblockdev-Utils"></a><div class="titlepage"></div>
@@ -124,6 +124,22 @@
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-utils-exec-with-input" title="bd_utils_exec_with_input ()">bd_utils_exec_with_input</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-utils-prog-reporting-initialized" title="bd_utils_prog_reporting_initialized ()">bd_utils_prog_reporting_initialized</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
 <a class="link" href="libblockdev-Utils.html#bd-utils-init-logging" title="bd_utils_init_logging ()">bd_utils_init_logging</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
@@ -177,6 +193,22 @@
 </tr>
 <tr>
 <td class="function_type">
+<a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-utils-get-next-task-id" title="bd_utils_get_next_task_id ()">bd_utils_get_next_task_id</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-utils-log-task-status" title="bd_utils_log_task_status ()">bd_utils_log_task_status</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <span class="returnvalue">void</span>
 </td>
 <td class="function_name">
@@ -185,10 +217,34 @@
 </tr>
 <tr>
 <td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-utils-log-format" title="bd_utils_log_format ()">bd_utils_log_format</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-utils-log-stdout" title="bd_utils_log_stdout ()">bd_utils_log_stdout</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
 <a class="link" href="libblockdev-Utils.html#bd-utils-echo-str-to-file" title="bd_utils_echo_str_to_file ()">bd_utils_echo_str_to_file</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-utils-set-log-level" title="bd_utils_set_log_level ()">bd_utils_set_log_level</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -229,6 +285,14 @@
 </td>
 <td class="function_name">
 <a class="link" href="libblockdev-Utils.html#bd-extra-arg-free" title="bd_extra_arg_free ()">bd_extra_arg_free</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-extra-arg-list-free" title="bd_extra_arg_list_free ()">bd_extra_arg_list_free</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -281,7 +345,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<a href="libblockdev-Utils.html#BDUtilsLinuxVersion"><span class="returnvalue">BDUtilsLinuxVersion</span></a> *
+<a class="link" href="libblockdev-Utils.html#BDUtilsLinuxVersion" title="BDUtilsLinuxVersion"><span class="returnvalue">BDUtilsLinuxVersion</span></a> *
 </td>
 <td class="function_name">
 <a class="link" href="libblockdev-Utils.html#bd-utils-get-linux-version" title="bd_utils_get_linux_version ()">bd_utils_get_linux_version</a> <span class="c_punctuation">()</span>
@@ -301,6 +365,22 @@
 </td>
 <td class="function_name">
 <a class="link" href="libblockdev-Utils.html#bd-utils-dbus-service-available" title="bd_utils_dbus_service_available ()">bd_utils_dbus_service_available</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-utils-dbus-error-quark" title="bd_utils_dbus_error_quark ()">bd_utils_dbus_error_quark</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Utils.html#bd-utils-module-error-quark" title="bd_utils_module_error_quark ()">bd_utils_module_error_quark</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 </tbody>
@@ -331,8 +411,28 @@
 <td class="function_name"><a class="link" href="libblockdev-Utils.html#BDUtilsDevUtilsError" title="enum BDUtilsDevUtilsError">BDUtilsDevUtilsError</a></td>
 </tr>
 <tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#BDUtilsDBusError" title="enum BDUtilsDBusError">BDUtilsDBusError</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#BDUtilsModuleError" title="enum BDUtilsModuleError">BDUtilsModuleError</a></td>
+</tr>
+<tr>
 <td class="define_keyword">#define</td>
 <td class="function_name"><a class="link" href="libblockdev-Utils.html#BD-UTILS-DEV-UTILS-ERROR:CAPS" title="BD_UTILS_DEV_UTILS_ERROR">BD_UTILS_DEV_UTILS_ERROR</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#BD-UTILS-DBUS-ERROR:CAPS" title="BD_UTILS_DBUS_ERROR">BD_UTILS_DBUS_ERROR</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#BD-UTILS-MODULE-ERROR:CAPS" title="BD_UTILS_MODULE_ERROR">BD_UTILS_MODULE_ERROR</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword"> </td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#BDUtilsLinuxVersion" title="BDUtilsLinuxVersion">BDUtilsLinuxVersion</a></td>
 </tr>
 <tr>
 <td class="datatype_keyword"> </td>
@@ -385,6 +485,86 @@
 <tr>
 <td class="define_keyword">#define</td>
 <td class="function_name"><a class="link" href="libblockdev-Utils.html#TiB" title="TiB">TiB</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#EB:CAPS" title="EB">EB</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#EXABYTE:CAPS" title="EXABYTE">EXABYTE</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#GB:CAPS" title="GB">GB</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#GIGABYTE:CAPS" title="GIGABYTE">GIGABYTE</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#KB:CAPS" title="KB">KB</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#KILOBYTE:CAPS" title="KILOBYTE">KILOBYTE</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#MB:CAPS" title="MB">MB</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#MEGABYTE:CAPS" title="MEGABYTE">MEGABYTE</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#PB:CAPS" title="PB">PB</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#PETABYTE:CAPS" title="PETABYTE">PETABYTE</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#TB:CAPS" title="TB">TB</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#TERABYTE:CAPS" title="TERABYTE">TERABYTE</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#BD-UTILS-LOG-EMERG:CAPS" title="BD_UTILS_LOG_EMERG">BD_UTILS_LOG_EMERG</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#BD-UTILS-LOG-ALERT:CAPS" title="BD_UTILS_LOG_ALERT">BD_UTILS_LOG_ALERT</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#BD-UTILS-LOG-CRIT:CAPS" title="BD_UTILS_LOG_CRIT">BD_UTILS_LOG_CRIT</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#BD-UTILS-LOG-ERR:CAPS" title="BD_UTILS_LOG_ERR">BD_UTILS_LOG_ERR</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#BD-UTILS-LOG-WARNING:CAPS" title="BD_UTILS_LOG_WARNING">BD_UTILS_LOG_WARNING</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#BD-UTILS-LOG-NOTICE:CAPS" title="BD_UTILS_LOG_NOTICE">BD_UTILS_LOG_NOTICE</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#BD-UTILS-LOG-INFO:CAPS" title="BD_UTILS_LOG_INFO">BD_UTILS_LOG_INFO</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-Utils.html#BD-UTILS-LOG-DEBUG:CAPS" title="BD_UTILS_LOG_DEBUG">BD_UTILS_LOG_DEBUG</a></td>
 </tr>
 </tbody>
 </table></div>
@@ -484,7 +664,7 @@ from the collected standard output string or not.</p>
 <tr>
 <td class="parameter_name"><p>msg</p></td>
 <td class="parameter_description"><p>arbitrary progress message (for the user). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -559,12 +739,12 @@ bd_utils_exec_and_report_error (<em class="parameter"><code>const <a href="../gl
 <tr>
 <td class="parameter_name"><p>extra</p></td>
 <td class="parameter_description"><p>extra arguments. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -600,7 +780,7 @@ bd_utils_exec_and_report_status_error (<em class="parameter"><code>const <a href
 <tr>
 <td class="parameter_name"><p>extra</p></td>
 <td class="parameter_description"><p>extra arguments. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>status</p></td>
@@ -610,7 +790,7 @@ bd_utils_exec_and_report_status_error (<em class="parameter"><code>const <a href
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -648,7 +828,7 @@ output will be discarded.</p>
 <tr>
 <td class="parameter_name"><p>extra</p></td>
 <td class="parameter_description"><p>extra arguments. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>output</p></td>
@@ -658,7 +838,7 @@ output will be discarded.</p>
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -694,12 +874,12 @@ bd_utils_exec_and_report_error_no_progress
 <tr>
 <td class="parameter_name"><p>extra</p></td>
 <td class="parameter_description"><p>extra arguments. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -740,7 +920,7 @@ will be called with the respective chunk.</p>
 <tr>
 <td class="parameter_name"><p>extra</p></td>
 <td class="parameter_description"><p>extra arguments. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>prog_extract</p></td>
@@ -755,7 +935,7 @@ will be called with the respective chunk.</p>
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -764,6 +944,65 @@ will be called with the respective chunk.</p>
 <a name="bd-utils-exec-and-report-progress.returns"></a><h4>Returns</h4>
 <p> whether the <em class="parameter"><code>argv</code></em>
 was successfully executed (no error and exit code 0) or not</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-utils-exec-with-input"></a><h3>bd_utils_exec_with_input ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_utils_exec_with_input (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **argv</code></em>,
+                          <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *input</code></em>,
+                          <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                          <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-utils-exec-with-input.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>argv</p></td>
+<td class="parameter_description"><p>the argv array for the call. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>input</p></td>
+<td class="parameter_description"><p>input for the executed program. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p>extra arguments. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-utils-exec-with-input.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>argv</code></em>
+was successfully executed (no error and exit code 0) or not</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-utils-prog-reporting-initialized"></a><h3>bd_utils_prog_reporting_initialized ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_utils_prog_reporting_initialized (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<div class="refsect3">
+<a name="bd-utils-prog-reporting-initialized.returns"></a><h4>Returns</h4>
+<p> TRUE if progress reporting has been initialized, i.e. a reporting
+function was set up with either bd_utils_init_prog_reporting or
+bd_utils_init_prog_reporting_thread (takes precedence). FALSE if
+bd_utils_mute_prog_reporting_thread was used to mute the thread.</p>
 </div>
 </div>
 <hr>
@@ -784,13 +1023,15 @@ bd_utils_init_logging (<em class="parameter"><code><a class="link" href="libbloc
 <tr>
 <td class="parameter_name"><p>new_log_func</p></td>
 <td class="parameter_description"><p>logging function to use or
-<a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to reset to default. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
+<a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to disable logging; use
+<a class="link" href="libblockdev-Utils.html#bd-utils-log-stdout" title="bd_utils_log_stdout ()"><span class="type">bd_utils_log_stdout</span></a> to reset to
+the default behaviour. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -819,12 +1060,12 @@ bd_utils_init_prog_reporting (<em class="parameter"><code><a class="link" href="
 <td class="parameter_name"><p>new_prog_func</p></td>
 <td class="parameter_description"><p>progress reporting function to
 use or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to reset to default. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -854,12 +1095,12 @@ bd_utils_init_prog_reporting_thread (<em class="parameter"><code><a class="link"
 <td class="parameter_description"><p>progress reporting function to
 use on current thread or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 to reset to default or global. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>][<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="The callback is valid until the GDestroyNotify argument is called."><span class="acronym">scope notified</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -885,7 +1126,7 @@ bd_utils_mute_prog_reporting_thread (<em class="parameter"><code><a href="../gli
 <tbody><tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr></tbody>
 </table></div>
 </div>
@@ -986,12 +1227,113 @@ bd_utils_report_started (<em class="parameter"><code>const <a href="../glib/glib
 </div>
 <hr>
 <div class="refsect2">
+<a name="bd-utils-get-next-task-id"></a><h3>bd_utils_get_next_task_id ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
+bd_utils_get_next_task_id (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-utils-log-task-status"></a><h3>bd_utils_log_task_status ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_utils_log_task_status (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> task_id</code></em>,
+                          <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *msg</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-utils-log-task-status.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>task_id</p></td>
+<td class="parameter_description"><p>ID of the task the status of which is being logged</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>msg</p></td>
+<td class="parameter_description"><p>log message</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="bd-utils-log"></a><h3>bd_utils_log ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 bd_utils_log (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> level</code></em>,
               <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *msg</code></em>);</pre>
 <div class="refsect3">
 <a name="bd-utils-log.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>level</p></td>
+<td class="parameter_description"><p>log level</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>msg</p></td>
+<td class="parameter_description"><p>log message</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-utils-log-format"></a><h3>bd_utils_log_format ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_utils_log_format (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> level</code></em>,
+                     <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *format</code></em>,
+                     <em class="parameter"><code>...</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-utils-log-format.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>level</p></td>
+<td class="parameter_description"><p>log level</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>format</p></td>
+<td class="parameter_description"><p>printf-style format for the log message</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>...</p></td>
+<td class="parameter_description"><p>arguments for <em class="parameter"><code>format</code></em>
+</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-utils-log-stdout"></a><h3>bd_utils_log_stdout ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_utils_log_stdout (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> level</code></em>,
+                     <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *msg</code></em>);</pre>
+<p>Convenient function for logging to stdout. Can be used as <a class="link" href="libblockdev-Utils.html#BDUtilsLogFunc" title="BDUtilsLogFunc ()"><span class="type">BDUtilsLogFunc</span></a>.</p>
+<div class="refsect3">
+<a name="bd-utils-log-stdout.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1043,7 +1385,7 @@ bd_utils_echo_str_to_file (<em class="parameter"><code>const <a href="../glib/gl
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -1053,6 +1395,34 @@ bd_utils_echo_str_to_file (<em class="parameter"><code>const <a href="../glib/gl
 <p> whether the <em class="parameter"><code>str</code></em>
 was successfully written to <em class="parameter"><code>file_path</code></em>
 or not.</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-utils-set-log-level"></a><h3>bd_utils_set_log_level ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_utils_set_log_level (<em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gint"><span class="type">gint</span></a> level</code></em>);</pre>
+<p>Level of messages to log. Only messages with level &lt;= <em class="parameter"><code>level</code></em>
+ will be logged.
+For example using with <a class="link" href="libblockdev-Utils.html#BD-UTILS-LOG-WARNING:CAPS" title="BD_UTILS_LOG_WARNING"><span class="type">BD_UTILS_LOG_WARNING</span></a> (default value) only messages
+with log levels <a class="link" href="libblockdev-Utils.html#BD-UTILS-LOG-WARNING:CAPS" title="BD_UTILS_LOG_WARNING"><span class="type">BD_UTILS_LOG_WARNING</span></a>, <a class="link" href="libblockdev-Utils.html#BD-UTILS-LOG-ERR:CAPS" title="BD_UTILS_LOG_ERR"><span class="type">BD_UTILS_LOG_ERR</span></a>, ..., <a class="link" href="libblockdev-Utils.html#BD-UTILS-LOG-EMERG:CAPS" title="BD_UTILS_LOG_EMERG"><span class="type">BD_UTILS_LOG_EMERG</span></a>
+will be logged.</p>
+<p>Note: <a class="link" href="libblockdev-Utils.html#BD-UTILS-LOG-DEBUG:CAPS" title="BD_UTILS_LOG_DEBUG"><span class="type">BD_UTILS_LOG_DEBUG</span></a> level messages are always skipped unless compiled
+      with <code class="literal">--enable-debug</code> configure option.</p>
+<div class="refsect3">
+<a name="bd-utils-set-log-level.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>level</p></td>
+<td class="parameter_description"><p>log level</p></td>
+<td class="parameter_annotations"> </td>
+</tr></tbody>
+</table></div>
 </div>
 </div>
 <hr>
@@ -1082,14 +1452,14 @@ bd_utils_check_util_version (<em class="parameter"><code>const <a href="../glib/
 <td class="parameter_name"><p>version</p></td>
 <td class="parameter_description"><p>minimum required version of the utility or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 if no version is required. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>version_arg</p></td>
 <td class="parameter_description"><p>argument to use with the <em class="parameter"><code>util</code></em>
 to get version
 info or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to use "--version". </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>version_regexp</p></td>
@@ -1097,12 +1467,12 @@ info or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="liter
 info or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if only version is printed by "$ <em class="parameter"><code>util</code></em>
 <em class="parameter"><code>version_arg</code></em>
 ". </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -1145,7 +1515,7 @@ bd_utils_version_cmp (<em class="parameter"><code>const <a href="../glib/glib-Ba
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -1157,7 +1527,7 @@ is lower, the same or higher version as
 <em class="parameter"><code>ver_string2</code></em>
 respectively. If an error occurs, returns -2 and <em class="parameter"><code>error</code></em>
 is set.</p>
-<p>**ONLY SUPPORTS VERSION STRINGS OF FORMAT X[.Y[.Z-R]]]] where all components
+<p>**ONLY SUPPORTS VERSION STRINGS OF FORMAT <code class="literal">X[.Y[.Z[.Z2[.Z3...[-R]]]]]</code> where all components
 are natural numbers!**</p>
 </div>
 </div>
@@ -1177,10 +1547,10 @@ This will result in calling <code class="literal">mkfs.xfs</code> with <code cla
 2
 3
 4</pre></td>
-        <td class="listing_code"><pre class="programlisting"><span class="n">BDExtraArg</span><span class="w"> </span><span class="n">label_arg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="s">&quot;-L&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;label&quot;</span><span class="p">};</span><span class="w"></span>
-<span class="k">const</span><span class="w"> </span><span class="n">BDExtraArg</span><span class="w"> </span><span class="o">*</span><span class="n">extra_args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="o">&amp;</span><span class="n">label_arg</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">};</span><span class="w"></span>
+        <td class="listing_code"><pre class="programlisting"><span class="n">BDExtraArg</span><span class="w"> </span><span class="n">label_arg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="s">&quot;-L&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;label&quot;</span><span class="p">};</span>
+<span class="k">const</span><span class="w"> </span><span class="n">BDExtraArg</span><span class="w"> </span><span class="o">*</span><span class="n">extra_args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="o">&amp;</span><span class="n">label_arg</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">};</span>
 
-<span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bd_fs_xfs_mkfs</span><span class="w"> </span><span class="p">(</span><span class="s">&quot;/dev/sda&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">extra_args</span><span class="p">,</span><span class="w"> </span><span class="n">error</span><span class="p">);</span><span class="w"></span></pre></td>
+<span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bd_fs_xfs_mkfs</span><span class="w"> </span><span class="p">(</span><span class="s">&quot;/dev/sda&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">extra_args</span><span class="p">,</span><span class="w"> </span><span class="n">error</span><span class="p">);</span></pre></td>
       </tr>
     </tbody>
   </table>
@@ -1224,6 +1594,21 @@ This will result in calling <code class="literal">mkfs.xfs</code> with <code cla
 bd_extra_arg_copy (<em class="parameter"><code><a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> *arg</code></em>);</pre>
 <p>Creates a new copy of <em class="parameter"><code>arg</code></em>
 .</p>
+<div class="refsect3">
+<a name="bd-extra-arg-copy.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>arg</p></td>
+<td class="parameter_description"><p><a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><code class="literal">BDExtraArg</code></a> to copy. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr></tbody>
+</table></div>
+</div>
 </div>
 <hr>
 <div class="refsect2">
@@ -1232,6 +1617,44 @@ bd_extra_arg_copy (<em class="parameter"><code><a class="link" href="libblockdev
 bd_extra_arg_free (<em class="parameter"><code><a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> *arg</code></em>);</pre>
 <p>Frees <em class="parameter"><code>arg</code></em>
 .</p>
+<div class="refsect3">
+<a name="bd-extra-arg-free.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>arg</p></td>
+<td class="parameter_description"><p><a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><code class="literal">BDExtraArg</code></a> to free. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-extra-arg-list-free"></a><h3>bd_extra_arg_list_free ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_extra_arg_list_free (<em class="parameter"><code><a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **args</code></em>);</pre>
+<p>Frees <em class="parameter"><code>args</code></em>
+ and all its elements.</p>
+<div class="refsect3">
+<a name="bd-extra-arg-list-free.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>args</p></td>
+<td class="parameter_description"><p>A list of <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><code class="literal">BDExtraArg</code></a> to free. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr></tbody>
+</table></div>
+</div>
 </div>
 <hr>
 <div class="refsect2">
@@ -1263,7 +1686,7 @@ under "/dev")</p></td>
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -1299,7 +1722,7 @@ under "/dev")</p></td>
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -1336,7 +1759,7 @@ bd_utils_have_kernel_module (<em class="parameter"><code>const <a href="../glib/
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -1372,12 +1795,12 @@ bd_utils_load_kernel_module (<em class="parameter"><code>const <a href="../glib/
 <tr>
 <td class="parameter_name"><p>options</p></td>
 <td class="parameter_description"><p>module options. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -1411,7 +1834,7 @@ bd_utils_unload_kernel_module (<em class="parameter"><code>const <a href="../gli
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -1425,7 +1848,7 @@ was successfully unloaded or not</p>
 <hr>
 <div class="refsect2">
 <a name="bd-utils-get-linux-version"></a><h3>bd_utils_get_linux_version ()</h3>
-<pre class="programlisting"><a href="libblockdev-Utils.html#BDUtilsLinuxVersion"><span class="returnvalue">BDUtilsLinuxVersion</span></a> *
+<pre class="programlisting"><a class="link" href="libblockdev-Utils.html#BDUtilsLinuxVersion" title="BDUtilsLinuxVersion"><span class="returnvalue">BDUtilsLinuxVersion</span></a> *
 bd_utils_get_linux_version (<em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <p>Retrieves version of currently running Linux kernel. Acts also as an initializer for statically cached data.</p>
 <div class="refsect3">
@@ -1439,7 +1862,7 @@ bd_utils_get_linux_version (<em class="parameter"><code><a href="../glib/glib-Er
 <tbody><tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr></tbody>
 </table></div>
 </div>
@@ -1517,7 +1940,7 @@ bd_utils_dbus_service_available (<em class="parameter"><code><a href="../gio/GDB
 <tr>
 <td class="parameter_name"><p>connection</p></td>
 <td class="parameter_description"><p>existing GDBusConnection or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>bus_type</p></td>
@@ -1538,7 +1961,7 @@ is specified</p></td>
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -1547,6 +1970,20 @@ is specified</p></td>
 <a name="bd-utils-dbus-service-available.returns"></a><h4>Returns</h4>
 <p> whether the service was found in the system</p>
 </div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-utils-dbus-error-quark"></a><h3>bd_utils_dbus_error_quark ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
+bd_utils_dbus_error_quark (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-utils-module-error-quark"></a><h3>bd_utils_module_error_quark ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Quarks.html#GQuark"><span class="returnvalue">GQuark</span></a>
+bd_utils_module_error_quark (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
 </div>
 </div>
 <div class="refsect1">
@@ -1669,8 +2106,97 @@ is specified</p></td>
 </div>
 <hr>
 <div class="refsect2">
+<a name="BDUtilsDBusError"></a><h3>enum BDUtilsDBusError</h3>
+<div class="refsect3">
+<a name="BDUtilsDBusError.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-UTILS-DBUS-ERROR-FAIL:CAPS"></a>BD_UTILS_DBUS_ERROR_FAIL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-UTILS-DBUS-ERROR-NOEXIST:CAPS"></a>BD_UTILS_DBUS_ERROR_NOEXIST</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDUtilsModuleError"></a><h3>enum BDUtilsModuleError</h3>
+<div class="refsect3">
+<a name="BDUtilsModuleError.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-UTILS-MODULE-ERROR-KMOD-INIT-FAIL:CAPS"></a>BD_UTILS_MODULE_ERROR_KMOD_INIT_FAIL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-UTILS-MODULE-ERROR-FAIL:CAPS"></a>BD_UTILS_MODULE_ERROR_FAIL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-UTILS-MODULE-ERROR-NOEXIST:CAPS"></a>BD_UTILS_MODULE_ERROR_NOEXIST</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-UTILS-MODULE-ERROR-MODULE-CHECK-ERROR:CAPS"></a>BD_UTILS_MODULE_ERROR_MODULE_CHECK_ERROR</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-UTILS-MODULE-ERROR-INVALID-PLATFORM:CAPS"></a>BD_UTILS_MODULE_ERROR_INVALID_PLATFORM</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="BD-UTILS-DEV-UTILS-ERROR:CAPS"></a><h3>BD_UTILS_DEV_UTILS_ERROR</h3>
 <pre class="programlisting">#define BD_UTILS_DEV_UTILS_ERROR bd_utils_dev_utils_error_quark ()
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-UTILS-DBUS-ERROR:CAPS"></a><h3>BD_UTILS_DBUS_ERROR</h3>
+<pre class="programlisting">#define BD_UTILS_DBUS_ERROR bd_utils_dbus_error_quark ()
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-UTILS-MODULE-ERROR:CAPS"></a><h3>BD_UTILS_MODULE_ERROR</h3>
+<pre class="programlisting">#define BD_UTILS_MODULE_ERROR bd_utils_module_error_quark ()
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDUtilsLinuxVersion"></a><h3>BDUtilsLinuxVersion</h3>
+<pre class="programlisting">typedef struct {
+    guint major;
+    guint minor;
+    guint micro;
+} BDUtilsLinuxVersion;
 </pre>
 </div>
 <hr>
@@ -1682,6 +2208,30 @@ is specified</p></td>
 } BDExtraArg;
 </pre>
 <p>See <a class="link" href="libblockdev-Utils.html#bd-extra-arg-new" title="bd_extra_arg_new ()"><code class="function">bd_extra_arg_new()</code></a> for an example on how to construct the extra args.</p>
+<div class="refsect3">
+<a name="BDExtraArg.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="struct_members_name">
+<col class="struct_members_description">
+<col width="200px" class="struct_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDExtraArg.opt"></a>opt</code></em>;</p></td>
+<td class="struct_member_description"><p>extra option (command line option for most functions that allow extra options
+to be passed, e.g. "-L" to call <code class="literal">mkfs.xfs -L</code>)</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDExtraArg.val"></a>val</code></em>;</p></td>
+<td class="struct_member_description"><p>value for <em class="parameter"><code>opt</code></em>
+, can be an empty string or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> for options without parameter</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
 </div>
 <hr>
 <div class="refsect2">
@@ -1753,6 +2303,126 @@ is specified</p></td>
 <div class="refsect2">
 <a name="TiB"></a><h3>TiB</h3>
 <pre class="programlisting">#define TiB TEBIBYTE
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="EB:CAPS"></a><h3>EB</h3>
+<pre class="programlisting">#define EB EXABYTE
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="EXABYTE:CAPS"></a><h3>EXABYTE</h3>
+<pre class="programlisting">#define EXABYTE *1000ULL PETABYTE
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GB:CAPS"></a><h3>GB</h3>
+<pre class="programlisting">#define GB GIGABYTE
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GIGABYTE:CAPS"></a><h3>GIGABYTE</h3>
+<pre class="programlisting">#define GIGABYTE *1000ULL MEGABYTE
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="KB:CAPS"></a><h3>KB</h3>
+<pre class="programlisting">#define KB KILOBYTE
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="KILOBYTE:CAPS"></a><h3>KILOBYTE</h3>
+<pre class="programlisting">#define KILOBYTE *1000ULL
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="MB:CAPS"></a><h3>MB</h3>
+<pre class="programlisting">#define MB MEGABYTE
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="MEGABYTE:CAPS"></a><h3>MEGABYTE</h3>
+<pre class="programlisting">#define MEGABYTE *1000ULL KILOBYTE
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="PB:CAPS"></a><h3>PB</h3>
+<pre class="programlisting">#define PB PETABYTE
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="PETABYTE:CAPS"></a><h3>PETABYTE</h3>
+<pre class="programlisting">#define PETABYTE *1000ULL TERABYTE
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="TB:CAPS"></a><h3>TB</h3>
+<pre class="programlisting">#define TB TERABYTE
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="TERABYTE:CAPS"></a><h3>TERABYTE</h3>
+<pre class="programlisting">#define TERABYTE *1000ULL GIGABYTE
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-UTILS-LOG-EMERG:CAPS"></a><h3>BD_UTILS_LOG_EMERG</h3>
+<pre class="programlisting">#define BD_UTILS_LOG_EMERG   0
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-UTILS-LOG-ALERT:CAPS"></a><h3>BD_UTILS_LOG_ALERT</h3>
+<pre class="programlisting">#define BD_UTILS_LOG_ALERT   1
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-UTILS-LOG-CRIT:CAPS"></a><h3>BD_UTILS_LOG_CRIT</h3>
+<pre class="programlisting">#define BD_UTILS_LOG_CRIT    2
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-UTILS-LOG-ERR:CAPS"></a><h3>BD_UTILS_LOG_ERR</h3>
+<pre class="programlisting">#define BD_UTILS_LOG_ERR     3
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-UTILS-LOG-WARNING:CAPS"></a><h3>BD_UTILS_LOG_WARNING</h3>
+<pre class="programlisting">#define BD_UTILS_LOG_WARNING 4
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-UTILS-LOG-NOTICE:CAPS"></a><h3>BD_UTILS_LOG_NOTICE</h3>
+<pre class="programlisting">#define BD_UTILS_LOG_NOTICE  5
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-UTILS-LOG-INFO:CAPS"></a><h3>BD_UTILS_LOG_INFO</h3>
+<pre class="programlisting">#define BD_UTILS_LOG_INFO    6
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-UTILS-LOG-DEBUG:CAPS"></a><h3>BD_UTILS_LOG_DEBUG</h3>
+<pre class="programlisting">#define BD_UTILS_LOG_DEBUG   7
 </pre>
 </div>
 </div>

@@ -2,9 +2,9 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Part: libblockdev Reference Manual</title>
+<title>Part: libblockdev Reference Manual for libblockdev 3.0.</title>
 <meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
-<link rel="home" href="index.html" title="libblockdev Reference Manual">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.0.">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-Plugins.html" title="Plugins">
 <link rel="next" href="libblockdev-Swap.html" title="Swap">
@@ -39,14 +39,6 @@
 <col class="functions_proto_name">
 </colgroup>
 <tbody>
-<tr>
-<td class="function_type">
-<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-</td>
-<td class="function_name">
-<a class="link" href="libblockdev-Part.html#bd-part-check-deps" title="bd_part_check_deps ()">bd_part_check_deps</a> <span class="c_punctuation">()</span>
-</td>
-</tr>
 <tr>
 <td class="function_type">
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
@@ -113,14 +105,6 @@
 </tr>
 <tr>
 <td class="function_type">
-<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-</td>
-<td class="function_name">
-<a class="link" href="libblockdev-Part.html#bd-part-set-part-flag" title="bd_part_set_part_flag ()">bd_part_set_part_flag</a> <span class="c_punctuation">()</span>
-</td>
-</tr>
-<tr>
-<td class="function_type">
 <a class="link" href="libblockdev-Part.html#BDPartSpec" title="BDPartSpec"><span class="returnvalue">BDPartSpec</span></a> *
 </td>
 <td class="function_name">
@@ -141,13 +125,6 @@
 </td>
 <td class="function_name">
 <a class="link" href="libblockdev-Part.html#bd-part-spec-get-type" title="bd_part_spec_get_type ()">bd_part_spec_get_type</a> <span class="c_punctuation">()</span>
-</td>
-</tr>
-<tr>
-<td class="function_type">const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
-</td>
-<td class="function_name">
-<a class="link" href="libblockdev-Part.html#bd-part-get-flag-str" title="bd_part_get_flag_str ()">bd_part_get_flag_str</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -201,22 +178,6 @@
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
-<a class="link" href="libblockdev-Part.html#bd-part-set-disk-flag" title="bd_part_set_disk_flag ()">bd_part_set_disk_flag</a> <span class="c_punctuation">()</span>
-</td>
-</tr>
-<tr>
-<td class="function_type">
-<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-</td>
-<td class="function_name">
-<a class="link" href="libblockdev-Part.html#bd-part-set-part-flags" title="bd_part_set_part_flags ()">bd_part_set_part_flags</a> <span class="c_punctuation">()</span>
-</td>
-</tr>
-<tr>
-<td class="function_type">
-<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-</td>
-<td class="function_name">
 <a class="link" href="libblockdev-Part.html#bd-part-set-part-name" title="bd_part_set_part_name ()">bd_part_set_part_name</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
@@ -238,10 +199,26 @@
 </tr>
 <tr>
 <td class="function_type">
-<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
-<a class="link" href="libblockdev-Part.html#bd-part-get-part-id" title="bd_part_get_part_id ()">bd_part_get_part_id</a> <span class="c_punctuation">()</span>
+<a class="link" href="libblockdev-Part.html#bd-part-set-part-bootable" title="bd_part_set_part_bootable ()">bd_part_set_part_bootable</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Part.html#bd-part-set-part-attributes" title="bd_part_set_part_attributes ()">bd_part_set_part_attributes</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Part.html#bd-part-set-part-uuid" title="bd_part_set_part_uuid ()">bd_part_set_part_uuid</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -300,10 +277,6 @@
 <td class="function_name"><a class="link" href="libblockdev-Part.html#BDPartAlign" title="enum BDPartAlign">BDPartAlign</a></td>
 </tr>
 <tr>
-<td class="datatype_keyword">enum</td>
-<td class="function_name"><a class="link" href="libblockdev-Part.html#BDPartFlag" title="enum BDPartFlag">BDPartFlag</a></td>
-</tr>
-<tr>
 <td class="datatype_keyword"> </td>
 <td class="function_name"><a class="link" href="libblockdev-Part.html#BDPartSpec" title="BDPartSpec">BDPartSpec</a></td>
 </tr>
@@ -322,10 +295,6 @@
 <tr>
 <td class="datatype_keyword">enum</td>
 <td class="function_name"><a class="link" href="libblockdev-Part.html#BDPartTableType" title="enum BDPartTableType">BDPartTableType</a></td>
-</tr>
-<tr>
-<td class="datatype_keyword">enum</td>
-<td class="function_name"><a class="link" href="libblockdev-Part.html#BDPartDiskFlag" title="enum BDPartDiskFlag">BDPartDiskFlag</a></td>
 </tr>
 <tr>
 <td class="datatype_keyword"> </td>
@@ -354,26 +323,11 @@
 overview of which operations are supported. If there's anything missing,
 please don't hesitate to report it as this plugin (just like all the others)
 is subject to future development and enhancements.</p>
-<p>This particular implementation of the part plugin uses libparted for
-manipulations of both the MBR and GPT disk label types together with the
-sgdisk utility for some extra GPT-specific features libparted doesn't
-support. In the future, there's likely to be another implementation of this
-plugin based on libfdisk which provides full support for both MBR and GPT
-tables (and possibly some others).</p>
+<p>This particular implementation of the part plugin uses libfdisk for
+manipulations of both the MBR and GPT disk label types.</p>
 </div>
 <div class="refsect1">
 <a name="libblockdev-Part.functions_details"></a><h2>Functions</h2>
-<div class="refsect2">
-<a name="bd-part-check-deps"></a><h3>bd_part_check_deps ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_part_check_deps (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
-<div class="refsect3">
-<a name="bd-part-check-deps.returns"></a><h4>Returns</h4>
-<p> whether the plugin's runtime dependencies are satisfied or not</p>
-<p>Function checking plugin's runtime dependencies.</p>
-</div>
-</div>
-<hr>
 <div class="refsect2">
 <a name="bd-part-init"></a><h3>bd_part_init ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
@@ -426,7 +380,7 @@ bd_part_create_table (<em class="parameter"><code>const <a href="../glib/glib-Ba
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -487,7 +441,7 @@ partitions)</p></td>
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -532,7 +486,7 @@ bd_part_delete_part (<em class="parameter"><code>const <a href="../glib/glib-Bas
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -565,7 +519,7 @@ bd_part_resize_part (<em class="parameter"><code>const <a href="../glib/glib-Bas
 <tbody>
 <tr>
 <td class="parameter_name"><p>disk</p></td>
-<td class="parameter_description"><p>disk containing the paritition</p></td>
+<td class="parameter_description"><p>disk containing the partition</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
@@ -586,7 +540,7 @@ bd_part_resize_part (<em class="parameter"><code>const <a href="../glib/glib-Bas
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -624,7 +578,7 @@ bd_part_get_disk_parts (<em class="parameter"><code>const <a href="../glib/glib-
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -666,7 +620,7 @@ bd_part_get_part_spec (<em class="parameter"><code>const <a href="../glib/glib-B
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -678,62 +632,6 @@ partition from <em class="parameter"><code>disk</code></em>
 or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
 <p>Tech category: <a class="link" href="libblockdev-Part.html#BD-PART-TECH-MODE-QUERY-PART:CAPS"><code class="literal">BD_PART_TECH_MODE_QUERY_PART</code></a> + the tech according to the partition table type. </p>
 <p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
-</div>
-</div>
-<hr>
-<div class="refsect2">
-<a name="bd-part-set-part-flag"></a><h3>bd_part_set_part_flag ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_part_set_part_flag (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *disk</code></em>,
-                       <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *part</code></em>,
-                       <em class="parameter"><code><a class="link" href="libblockdev-Part.html#BDPartFlag" title="enum BDPartFlag"><span class="type">BDPartFlag</span></a> flag</code></em>,
-                       <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> state</code></em>,
-                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
-<div class="refsect3">
-<a name="bd-part-set-part-flag.parameters"></a><h4>Parameters</h4>
-<div class="informaltable"><table class="informaltable" width="100%" border="0">
-<colgroup>
-<col width="150px" class="parameters_name">
-<col class="parameters_description">
-<col width="200px" class="parameters_annotations">
-</colgroup>
-<tbody>
-<tr>
-<td class="parameter_name"><p>disk</p></td>
-<td class="parameter_description"><p>disk the partition belongs to</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>part</p></td>
-<td class="parameter_description"><p>partition to set the flag on</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>flag</p></td>
-<td class="parameter_description"><p>flag to set</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>state</p></td>
-<td class="parameter_description"><p>state to set for the <em class="parameter"><code>flag</code></em>
-(<a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> = enabled)</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
-</tr>
-</tbody>
-</table></div>
-</div>
-<div class="refsect3">
-<a name="bd-part-set-part-flag.returns"></a><h4>Returns</h4>
-<p> whether the flag <em class="parameter"><code>flag</code></em>
-was successfully set on the <em class="parameter"><code>part</code></em>
-partition
-or not.</p>
-<p>Tech category: <a class="link" href="libblockdev-Part.html#BD-PART-TECH-MODE-MODIFY-PART:CAPS"><code class="literal">BD_PART_TECH_MODE_MODIFY_PART</code></a> + the tech according to the partition table type</p>
 </div>
 </div>
 <hr>
@@ -753,42 +651,6 @@ bd_part_spec_free (<em class="parameter"><code><a class="link" href="libblockdev
 <a name="bd-part-spec-get-type"></a><h3>bd_part_spec_get_type ()</h3>
 <pre class="programlisting"><a href="../gobject/gobject-Type-Information.html#GType"><span class="returnvalue">GType</span></a>
 bd_part_spec_get_type ();</pre>
-</div>
-<hr>
-<div class="refsect2">
-<a name="bd-part-get-flag-str"></a><h3>bd_part_get_flag_str ()</h3>
-<pre class="programlisting">const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
-bd_part_get_flag_str (<em class="parameter"><code><a class="link" href="libblockdev-Part.html#BDPartFlag" title="enum BDPartFlag"><span class="type">BDPartFlag</span></a> flag</code></em>,
-                      <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
-<div class="refsect3">
-<a name="bd-part-get-flag-str.parameters"></a><h4>Parameters</h4>
-<div class="informaltable"><table class="informaltable" width="100%" border="0">
-<colgroup>
-<col width="150px" class="parameters_name">
-<col class="parameters_description">
-<col width="200px" class="parameters_annotations">
-</colgroup>
-<tbody>
-<tr>
-<td class="parameter_name"><p>flag</p></td>
-<td class="parameter_description"><p>flag to get string representation for</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
-</tr>
-</tbody>
-</table></div>
-</div>
-<div class="refsect3">
-<a name="bd-part-get-flag-str.returns"></a><h4>Returns</h4>
-<p>string representation of <em class="parameter"><code>flag</code></em>
-</p>
-<p>Tech category: always available. </p>
-<p><span class="annotation">[<acronym title="The data is owned by the callee, which is responsible of freeing it."><span class="acronym">transfer none</span></acronym>]</span></p>
-</div>
 </div>
 <hr>
 <div class="refsect2">
@@ -813,7 +675,7 @@ bd_part_get_part_table_type_str (<em class="parameter"><code><a class="link" hre
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -850,7 +712,7 @@ bd_part_get_type_str (<em class="parameter"><code><a class="link" href="libblock
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -898,7 +760,7 @@ bd_part_get_best_free_region (<em class="parameter"><code>const <a href="../glib
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -944,7 +806,7 @@ bd_part_get_disk_free_regions (<em class="parameter"><code>const <a href="../gli
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -980,7 +842,7 @@ bd_part_get_disk_spec (<em class="parameter"><code>const <a href="../glib/glib-B
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -1022,7 +884,7 @@ bd_part_get_part_by_pos (<em class="parameter"><code>const <a href="../glib/glib
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -1036,107 +898,6 @@ partition exists or in case of error (<em class="parameter"><code>error</code></
 is set)</p>
 <p>Tech category: <a class="link" href="libblockdev-Part.html#BD-PART-TECH-MODE-QUERY-PART:CAPS"><code class="literal">BD_PART_TECH_MODE_QUERY_PART</code></a> + the tech according to the partition table type. </p>
 <p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
-</div>
-</div>
-<hr>
-<div class="refsect2">
-<a name="bd-part-set-disk-flag"></a><h3>bd_part_set_disk_flag ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_part_set_disk_flag (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *disk</code></em>,
-                       <em class="parameter"><code><a class="link" href="libblockdev-Part.html#BDPartDiskFlag" title="enum BDPartDiskFlag"><span class="type">BDPartDiskFlag</span></a> flag</code></em>,
-                       <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> state</code></em>,
-                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
-<div class="refsect3">
-<a name="bd-part-set-disk-flag.parameters"></a><h4>Parameters</h4>
-<div class="informaltable"><table class="informaltable" width="100%" border="0">
-<colgroup>
-<col width="150px" class="parameters_name">
-<col class="parameters_description">
-<col width="200px" class="parameters_annotations">
-</colgroup>
-<tbody>
-<tr>
-<td class="parameter_name"><p>disk</p></td>
-<td class="parameter_description"><p>disk the partition belongs to</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>flag</p></td>
-<td class="parameter_description"><p>flag to set</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>state</p></td>
-<td class="parameter_description"><p>state to set for the <em class="parameter"><code>flag</code></em>
-(<a href="../glib/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> = enabled)</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
-</tr>
-</tbody>
-</table></div>
-</div>
-<div class="refsect3">
-<a name="bd-part-set-disk-flag.returns"></a><h4>Returns</h4>
-<p> whether the flag <em class="parameter"><code>flag</code></em>
-was successfully set on the <em class="parameter"><code>disk</code></em>
-or not</p>
-<p>Tech category: <a class="link" href="libblockdev-Part.html#BD-PART-TECH-MODE-MODIFY-TABLE:CAPS"><code class="literal">BD_PART_TECH_MODE_MODIFY_TABLE</code></a> + the tech according to the partition table type</p>
-</div>
-</div>
-<hr>
-<div class="refsect2">
-<a name="bd-part-set-part-flags"></a><h3>bd_part_set_part_flags ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
-bd_part_set_part_flags (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *disk</code></em>,
-                        <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *part</code></em>,
-                        <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> flags</code></em>,
-                        <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
-<div class="refsect3">
-<a name="bd-part-set-part-flags.parameters"></a><h4>Parameters</h4>
-<div class="informaltable"><table class="informaltable" width="100%" border="0">
-<colgroup>
-<col width="150px" class="parameters_name">
-<col class="parameters_description">
-<col width="200px" class="parameters_annotations">
-</colgroup>
-<tbody>
-<tr>
-<td class="parameter_name"><p>disk</p></td>
-<td class="parameter_description"><p>disk the partition belongs to</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>part</p></td>
-<td class="parameter_description"><p>partition to set the flag on</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>flags</p></td>
-<td class="parameter_description"><p>flags to set (mask combined from <a class="link" href="libblockdev-Part.html#BDPartFlag" title="enum BDPartFlag"><span class="type">BDPartFlag</span></a> numbers)</p></td>
-<td class="parameter_annotations"> </td>
-</tr>
-<tr>
-<td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
-</tr>
-</tbody>
-</table></div>
-</div>
-<div class="refsect3">
-<a name="bd-part-set-part-flags.returns"></a><h4>Returns</h4>
-<p> whether the <em class="parameter"><code>flags</code></em>
-were successfully set on the <em class="parameter"><code>part</code></em>
-partition or
-not</p>
-<p>Note: Unsets all the other flags on the partition.
-Only GPT-specific flags and the legacy boot flag are supported on GPT
-partition tables.</p>
-<p>Tech category: <a class="link" href="libblockdev-Part.html#BD-PART-TECH-MODE-MODIFY-PART:CAPS"><code class="literal">BD_PART_TECH_MODE_MODIFY_PART</code></a> + the tech according to the partition table type</p>
 </div>
 </div>
 <hr>
@@ -1163,7 +924,7 @@ bd_part_set_part_name (<em class="parameter"><code>const <a href="../glib/glib-B
 </tr>
 <tr>
 <td class="parameter_name"><p>part</p></td>
-<td class="parameter_description"><p>partition the should be set for</p></td>
+<td class="parameter_description"><p>partition the name should be set for</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
@@ -1174,7 +935,7 @@ bd_part_set_part_name (<em class="parameter"><code>const <a href="../glib/glib-B
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -1209,7 +970,7 @@ bd_part_set_part_type (<em class="parameter"><code>const <a href="../glib/glib-B
 </tr>
 <tr>
 <td class="parameter_name"><p>part</p></td>
-<td class="parameter_description"><p>partition the should be set for</p></td>
+<td class="parameter_description"><p>partition the type should be set for</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
@@ -1220,7 +981,7 @@ bd_part_set_part_type (<em class="parameter"><code>const <a href="../glib/glib-B
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -1257,7 +1018,7 @@ bd_part_set_part_id (<em class="parameter"><code>const <a href="../glib/glib-Bas
 </tr>
 <tr>
 <td class="parameter_name"><p>part</p></td>
-<td class="parameter_description"><p>partition the should be set for</p></td>
+<td class="parameter_description"><p>partition the ID should be set for</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
@@ -1268,7 +1029,7 @@ bd_part_set_part_id (<em class="parameter"><code>const <a href="../glib/glib-Bas
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -1278,20 +1039,19 @@ bd_part_set_part_id (<em class="parameter"><code>const <a href="../glib/glib-Bas
 <p> whether the <em class="parameter"><code>part_id</code></em>
 type was successfully set for <em class="parameter"><code>part</code></em>
 or not</p>
-<p>Tech category: <a class="link" href="libblockdev-Part.html#BD-PART-TECH-MODE-MODIFY-PART:CAPS"><code class="literal">BD_PART_TECH_MODE_MODIFY_PART</code></a> + the tech according to the partition table type</p>
+<p>Tech category: <a class="link" href="libblockdev-Part.html#BD-PART-TECH-MBR:CAPS"><code class="literal">BD_PART_TECH_MBR</code></a>-<a class="link" href="libblockdev-Part.html#BD-PART-TECH-MODE-MODIFY-PART:CAPS"><code class="literal">BD_PART_TECH_MODE_MODIFY_PART</code></a></p>
 </div>
 </div>
 <hr>
 <div class="refsect2">
-<a name="bd-part-get-part-id"></a><h3>bd_part_get_part_id ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
-bd_part_get_part_id (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *disk</code></em>,
-                     <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *part</code></em>,
-                     <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
-<p>Returns (transfer full): partition id type or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> in case of error</p>
-<p>Tech category: <a class="link" href="libblockdev-Part.html#BD-PART-TECH-MODE-QUERY-PART:CAPS"><code class="literal">BD_PART_TECH_MODE_QUERY_PART</code></a> + the tech according to the partition table type</p>
+<a name="bd-part-set-part-bootable"></a><h3>bd_part_set_part_bootable ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_part_set_part_bootable (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *disk</code></em>,
+                           <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *part</code></em>,
+                           <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> bootable</code></em>,
+                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <div class="refsect3">
-<a name="bd-part-get-part-id.parameters"></a><h4>Parameters</h4>
+<a name="bd-part-set-part-bootable.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -1306,16 +1066,125 @@ bd_part_get_part_id (<em class="parameter"><code>const <a href="../glib/glib-Bas
 </tr>
 <tr>
 <td class="parameter_name"><p>part</p></td>
-<td class="parameter_description"><p>partition the should be set for</p></td>
+<td class="parameter_description"><p>partition the bootable flag should be set for</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>bootable</p></td>
+<td class="parameter_description"><p>whether to set or unset the bootable flag</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
 <td class="parameter_description"><p>place to store error (if any). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
+</div>
+<div class="refsect3">
+<a name="bd-part-set-part-bootable.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>bootable</code></em>
+flag was successfully set for <em class="parameter"><code>part</code></em>
+or not</p>
+<p>Tech category: <a class="link" href="libblockdev-Part.html#BD-PART-TECH-MBR:CAPS"><code class="literal">BD_PART_TECH_MBR</code></a>-<a class="link" href="libblockdev-Part.html#BD-PART-TECH-MODE-MODIFY-PART:CAPS"><code class="literal">BD_PART_TECH_MODE_MODIFY_PART</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-part-set-part-attributes"></a><h3>bd_part_set_part_attributes ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_part_set_part_attributes (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *disk</code></em>,
+                             <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *part</code></em>,
+                             <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> attrs</code></em>,
+                             <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-part-set-part-attributes.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>disk</p></td>
+<td class="parameter_description"><p>device the partition belongs to</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>part</p></td>
+<td class="parameter_description"><p>partition the attributes should be set for</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>attrs</p></td>
+<td class="parameter_description"><p>GPT attributes to set on <em class="parameter"><code>part</code></em>
+</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-part-set-part-attributes.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>attrs</code></em>
+GPT attributes were successfully set for <em class="parameter"><code>part</code></em>
+or not</p>
+<p>Tech category: <a class="link" href="libblockdev-Part.html#BD-PART-TECH-GPT:CAPS"><code class="literal">BD_PART_TECH_GPT</code></a>-<a class="link" href="libblockdev-Part.html#BD-PART-TECH-MODE-MODIFY-PART:CAPS"><code class="literal">BD_PART_TECH_MODE_MODIFY_PART</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-part-set-part-uuid"></a><h3>bd_part_set_part_uuid ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_part_set_part_uuid (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *disk</code></em>,
+                       <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *part</code></em>,
+                       <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *uuid</code></em>,
+                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-part-set-part-uuid.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>disk</p></td>
+<td class="parameter_description"><p>device the partition belongs to</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>part</p></td>
+<td class="parameter_description"><p>partition the UUID should be set for</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>uuid</p></td>
+<td class="parameter_description"><p>partition UUID to set</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-part-set-part-uuid.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>uuid</code></em>
+type was successfully set for <em class="parameter"><code>part</code></em>
+or not</p>
+<p>Tech category: <a class="link" href="libblockdev-Part.html#BD-PART-TECH-MODE-MODIFY-PART:CAPS"><code class="literal">BD_PART_TECH_MODE_MODIFY_PART</code></a> + the tech according to the partition table type</p>
 </div>
 </div>
 <hr>
@@ -1357,7 +1226,7 @@ bd_part_is_tech_avail (<em class="parameter"><code><a class="link" href="libbloc
 <td class="parameter_description"><p>place to store error (details about why the <em class="parameter"><code>tech</code></em>
 -<em class="parameter"><code>mode</code></em>
 combination is not available). </p></td>
-<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>]</span></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
 </tr>
 </tbody>
 </table></div>
@@ -1408,156 +1277,17 @@ bd_part_disk_spec_free (<em class="parameter"><code><a class="link" href="libblo
 </colgroup>
 <tbody>
 <tr>
+<td class="enum_member_name"><p><a name="BD-PART-ALIGN-NONE:CAPS"></a>BD_PART_ALIGN_NONE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
 <td class="enum_member_name"><p><a name="BD-PART-ALIGN-MINIMAL:CAPS"></a>BD_PART_ALIGN_MINIMAL</p></td>
 <td> </td>
 <td> </td>
 </tr>
 <tr>
 <td class="enum_member_name"><p><a name="BD-PART-ALIGN-OPTIMAL:CAPS"></a>BD_PART_ALIGN_OPTIMAL</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-ALIGN-NONE:CAPS"></a>BD_PART_ALIGN_NONE</p></td>
-<td> </td>
-<td> </td>
-</tr>
-</tbody>
-</table></div>
-</div>
-</div>
-<hr>
-<div class="refsect2">
-<a name="BDPartFlag"></a><h3>enum BDPartFlag</h3>
-<p>Partition flags supported by libblockdev. First part of the flags (up to
-<em class="parameter"><code>BD_PART_FLAG_BASIC_LAST</code></em>
-) corresponds to the flags supported by libparted
-(see https://www.gnu.org/software/parted/manual/parted.html<span class="type">set</span>). Second
-part corresponds to the flags supported by sgdisk (GPT, see <code class="literal">sgdisk -A=list</code>).</p>
-<p>The only exception from the above is <em class="parameter"><code>BD_PART_FLAG_LEGACY_BOOT</code></em>
- which is
-supported by libparted too but is GPT specific.</p>
-<div class="refsect3">
-<a name="BDPartFlag.members"></a><h4>Members</h4>
-<div class="informaltable"><table class="informaltable" width="100%" border="0">
-<colgroup>
-<col width="300px" class="enum_members_name">
-<col class="enum_members_description">
-<col width="200px" class="enum_members_annotations">
-</colgroup>
-<tbody>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-BOOT:CAPS"></a>BD_PART_FLAG_BOOT</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-ROOT:CAPS"></a>BD_PART_FLAG_ROOT</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-SWAP:CAPS"></a>BD_PART_FLAG_SWAP</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-HIDDEN:CAPS"></a>BD_PART_FLAG_HIDDEN</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-RAID:CAPS"></a>BD_PART_FLAG_RAID</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-LVM:CAPS"></a>BD_PART_FLAG_LVM</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-LBA:CAPS"></a>BD_PART_FLAG_LBA</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-HPSERVICE:CAPS"></a>BD_PART_FLAG_HPSERVICE</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-CPALO:CAPS"></a>BD_PART_FLAG_CPALO</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-PREP:CAPS"></a>BD_PART_FLAG_PREP</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-MSFT-RESERVED:CAPS"></a>BD_PART_FLAG_MSFT_RESERVED</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-BIOS-GRUB:CAPS"></a>BD_PART_FLAG_BIOS_GRUB</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-APPLE-TV-RECOVERY:CAPS"></a>BD_PART_FLAG_APPLE_TV_RECOVERY</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-DIAG:CAPS"></a>BD_PART_FLAG_DIAG</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-LEGACY-BOOT:CAPS"></a>BD_PART_FLAG_LEGACY_BOOT</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-MSFT-DATA:CAPS"></a>BD_PART_FLAG_MSFT_DATA</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-IRST:CAPS"></a>BD_PART_FLAG_IRST</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-ESP:CAPS"></a>BD_PART_FLAG_ESP</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-BASIC-LAST:CAPS"></a>BD_PART_FLAG_BASIC_LAST</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-GPT-SYSTEM-PART:CAPS"></a>BD_PART_FLAG_GPT_SYSTEM_PART</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-GPT-READ-ONLY:CAPS"></a>BD_PART_FLAG_GPT_READ_ONLY</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-GPT-HIDDEN:CAPS"></a>BD_PART_FLAG_GPT_HIDDEN</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-FLAG-GPT-NO-AUTOMOUNT:CAPS"></a>BD_PART_FLAG_GPT_NO_AUTOMOUNT</p></td>
 <td> </td>
 <td> </td>
 </tr>
@@ -1571,11 +1301,14 @@ supported by libparted too but is GPT specific.</p>
 <pre class="programlisting">typedef struct {
     gchar *path;
     gchar *name;
+    gchar *uuid;
+    gchar *id;
     gchar *type_guid;
     guint64 type;
     guint64 start;
     guint64 size;
-    guint64 flags;
+    gboolean bootable;
+    guint64 attrs;
 } BDPartSpec;
 </pre>
 <div class="refsect3">
@@ -1595,6 +1328,16 @@ supported by libparted too but is GPT specific.</p>
 <tr>
 <td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDPartSpec.name"></a>name</code></em>;</p></td>
 <td class="struct_member_description"><p>name of the partition (for GPT partitions)</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDPartSpec.uuid"></a>uuid</code></em>;</p></td>
+<td class="struct_member_description"><p>UUID of the partition (for GPT partitions)</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *<em class="structfield"><code><a name="BDPartSpec.id"></a>id</code></em>;</p></td>
+<td class="struct_member_description"><p>id of the partition (for MSDOS partitions)</p></td>
 <td class="struct_member_annotations"> </td>
 </tr>
 <tr>
@@ -1618,8 +1361,13 @@ supported by libparted too but is GPT specific.</p>
 <td class="struct_member_annotations"> </td>
 </tr>
 <tr>
-<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDPartSpec.flags"></a>flags</code></em>;</p></td>
-<td class="struct_member_description"><p>bit combination of partition's flags (<a class="link" href="libblockdev-Part.html#BDPartFlag" title="enum BDPartFlag"><span class="type">BDPartFlag</span></a>)</p></td>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> <em class="structfield"><code><a name="BDPartSpec.bootable"></a>bootable</code></em>;</p></td>
+<td class="struct_member_description"><p>whether the bootable flag is set or not (for MSDOS partitions)</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDPartSpec.attrs"></a>attrs</code></em>;</p></td>
+<td class="struct_member_description"><p>partition GPT attributes</p></td>
 <td class="struct_member_annotations"> </td>
 </tr>
 </tbody>
@@ -1721,12 +1469,7 @@ supported by libparted too but is GPT specific.</p>
 </colgroup>
 <tbody>
 <tr>
-<td class="enum_member_name"><p><a name="BD-PART-ERROR-EXISTS:CAPS"></a>BD_PART_ERROR_EXISTS</p></td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="BD-PART-ERROR-INVAL:CAPS"></a>BD_PART_ERROR_INVAL</p></td>
+<td class="enum_member_name"><p><a name="BD-PART-ERROR-TECH-UNAVAIL:CAPS"></a>BD_PART_ERROR_TECH_UNAVAIL</p></td>
 <td> </td>
 <td> </td>
 </tr>
@@ -1736,7 +1479,12 @@ supported by libparted too but is GPT specific.</p>
 <td> </td>
 </tr>
 <tr>
-<td class="enum_member_name"><p><a name="BD-PART-ERROR-TECH-UNAVAIL:CAPS"></a>BD_PART_ERROR_TECH_UNAVAIL</p></td>
+<td class="enum_member_name"><p><a name="BD-PART-ERROR-INVAL:CAPS"></a>BD_PART_ERROR_INVAL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-PART-ERROR-EXISTS:CAPS"></a>BD_PART_ERROR_EXISTS</p></td>
 <td> </td>
 <td> </td>
 </tr>
@@ -1777,32 +1525,12 @@ supported by libparted too but is GPT specific.</p>
 </div>
 <hr>
 <div class="refsect2">
-<a name="BDPartDiskFlag"></a><h3>enum BDPartDiskFlag</h3>
-<div class="refsect3">
-<a name="BDPartDiskFlag.members"></a><h4>Members</h4>
-<div class="informaltable"><table class="informaltable" width="100%" border="0">
-<colgroup>
-<col width="300px" class="enum_members_name">
-<col class="enum_members_description">
-<col width="200px" class="enum_members_annotations">
-</colgroup>
-<tbody><tr>
-<td class="enum_member_name"><p><a name="BD-PART-DISK-FLAG-GPT-PMBR-BOOT:CAPS"></a>BD_PART_DISK_FLAG_GPT_PMBR_BOOT</p></td>
-<td> </td>
-<td> </td>
-</tr></tbody>
-</table></div>
-</div>
-</div>
-<hr>
-<div class="refsect2">
 <a name="BDPartDiskSpec"></a><h3>BDPartDiskSpec</h3>
 <pre class="programlisting">typedef struct {
     gchar *path;
     BDPartTableType table_type;
     guint64 size;
     guint64 sector_size;
-    guint64 flags;
 } BDPartDiskSpec;
 </pre>
 <div class="refsect3">
@@ -1832,11 +1560,6 @@ supported by libparted too but is GPT specific.</p>
 <tr>
 <td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDPartDiskSpec.sector-size"></a>sector_size</code></em>;</p></td>
 <td class="struct_member_description"><p>disk's sector size</p></td>
-<td class="struct_member_annotations"> </td>
-</tr>
-<tr>
-<td class="struct_member_name"><p><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> <em class="structfield"><code><a name="BDPartDiskSpec.flags"></a>flags</code></em>;</p></td>
-<td class="struct_member_description"><p>bit combination of the disk's flags (<a class="link" href="libblockdev-Part.html#BDPartDiskFlag" title="enum BDPartDiskFlag"><span class="type">BDPartDiskFlag</span></a>)</p></td>
 <td class="struct_member_annotations"> </td>
 </tr>
 </tbody>
