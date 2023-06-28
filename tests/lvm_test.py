@@ -83,6 +83,10 @@ class LvmNoDevTestCase(LVMTestCase):
         super(LvmNoDevTestCase, cls).tearDownClass()
 
     @tag_test(TestTags.NOSTORAGE)
+    def test_plugin_version(self):
+       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm.so.3")
+
+    @tag_test(TestTags.NOSTORAGE)
     def test_is_supported_pe_size(self):
         """Verify that lvm_is_supported_pe_size works as expected"""
 

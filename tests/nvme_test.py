@@ -26,6 +26,11 @@ class NVMeTest(unittest.TestCase):
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
 
+class NVMePluginVersionTestCase(NVMeTest):
+    @tag_test(TestTags.NOSTORAGE)
+    def test_plugin_version(self):
+       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.NVME), "libbd_nvme.so.3")
+
 
 class NVMeTestCase(NVMeTest):
     def setUp(self):

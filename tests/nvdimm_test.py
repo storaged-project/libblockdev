@@ -205,6 +205,10 @@ class NVDIMMDepsTest(NVDIMMTestCase):
 class NVDIMMNoDevTest(NVDIMMTestCase):
 
     @tag_test(TestTags.NOSTORAGE)
+    def test_plugin_version(self):
+       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.NVDIMM), "libbd_nvdimm.so.3")
+
+    @tag_test(TestTags.NOSTORAGE)
     def test_supported_sector_sizes(self):
         """Verify that getting supported sector sizes works as expected"""
 

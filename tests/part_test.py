@@ -57,6 +57,13 @@ class PartTestCase(unittest.TestCase):
             pass
         os.unlink(self.dev_file2)
 
+
+class PartCPluginVersionCase(PartTestCase):
+    @tag_test(TestTags.NOSTORAGE)
+    def test_plugin_version(self):
+       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.PART), "libbd_part.so.3")
+
+
 class PartCreateTableCase(PartTestCase):
     @tag_test(TestTags.CORE)
     def test_create_table(self):

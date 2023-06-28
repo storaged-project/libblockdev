@@ -17,6 +17,10 @@ class DevMapperTest(unittest.TestCase):
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
 
+class DevMapperPluginVersionCase(DevMapperTest):
+    @tag_test(TestTags.NOSTORAGE)
+    def test_plugin_version(self):
+       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.DM), "libbd_dm.so.3")
 
 class DevMapperTestCase(DevMapperTest):
 
