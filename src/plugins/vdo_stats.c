@@ -18,7 +18,6 @@
  */
 
 #include <glib.h>
-#include <parted/parted.h>
 #include <blockdev/utils.h>
 
 #include "vdo_stats.h"
