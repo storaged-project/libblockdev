@@ -113,6 +113,9 @@ typedef struct BDLVMSEGdata {
     gchar *pvdev;
 } BDLVMSEGdata;
 
+BDLVMSEGdata* bd_lvm_segdata_copy (BDLVMSEGdata *data);
+void bd_lvm_segdata_free (BDLVMSEGdata *data);
+
 typedef struct BDLVMLVdata {
     gchar *lv_name;
     gchar *vg_name;
