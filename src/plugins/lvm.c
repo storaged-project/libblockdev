@@ -1607,7 +1607,7 @@ gboolean bd_lvm_delete_vg_tags (const gchar *vg_name, const gchar **tags, GError
     return _manage_lvm_tags (vg_name, tags, "--deltag", "vgchange", error);
 }
 
-gboolean _vglock_start_stop (const gchar *vg_name, gboolean start, const BDExtraArg **extra, GError **error) {
+static gboolean _vglock_start_stop (const gchar *vg_name, gboolean start, const BDExtraArg **extra, GError **error) {
     const gchar *args[4] = {"vgchange", NULL, vg_name, NULL};
 
     if (start)
