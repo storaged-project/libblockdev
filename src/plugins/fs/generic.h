@@ -29,6 +29,9 @@ typedef struct BDFSMkfsOptions {
     guint8 reserve[32];
 } BDFSMkfsOptions;
 
+BDFSMkfsOptions* bd_fs_mkfs_options_copy (BDFSMkfsOptions *data);
+void bd_fs_mkfs_options_free (BDFSMkfsOptions *data);
+
 const gchar** bd_fs_supported_filesystems (GError **error);
 
 gboolean bd_fs_mkfs (const gchar *device, const gchar *fstype, BDFSMkfsOptions *options, const BDExtraArg **extra, GError **error);
@@ -74,6 +77,9 @@ typedef struct BDFSFeatures {
     const gchar *partition_id;
     const gchar *partition_type;
 } BDFSFeatures;
+
+BDFSFeatures* bd_fs_features_copy (BDFSFeatures *data);
+void bd_fs_features_free (BDFSFeatures *data);
 
 const BDFSFeatures* bd_fs_features (const gchar *fstype, GError **error);
 
