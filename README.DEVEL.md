@@ -167,11 +167,11 @@ Generating Python bindings documentation
 
 1. Copy generated documentation from the container to *docs/html*
 
-      `# cp -R $mnt/root/pgi-docgen/_docs/_build/BlockDev-2.0 <path_to_libblockdev>/docs/html`
+      `# cp -R $mnt/root/pgi-docgen/_docs/_build/BlockDev-3.0 <path_to_libblockdev>/docs/html`
 
       `# cp -R $mnt/root/pgi-docgen/_docs/_build/_static <path_to_libblockdev>/docs/html`
 
-1. Manually fix few issues in the *BlockDev-2.0/index.html*
+1. Manually fix few issues in the *BlockDev-3.0/index.html*
 
       - Fix version of libblockdev (pgi-docgen can't detect it so it uses version from Debian package).
       - Remove link to dependencies (we are not copying documentation generated for GLib and GObject because it more than 100 MB).

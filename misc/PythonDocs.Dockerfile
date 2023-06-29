@@ -14,11 +14,7 @@ RUN apt-get -y install python3 python3-pip python3-jinja2 python3-sphinx python3
 RUN apt-get -y install git
 
 # latest pgi from git
-RUN pip3 install "git+https://github.com/pygobject/pgi.git"
-
-# install libblockdev build dependencies
-RUN apt-get -y build-dep libblockdev
-RUN apt-get -y install libyaml-dev
+RUN pip3 install "git+https://github.com/pygobject/pgi.git" --break-system-packages
 
 WORKDIR /root
 
@@ -27,7 +23,12 @@ RUN git clone https://github.com/storaged-project/libblockdev
 
 WORKDIR /root/libblockdev
 
-RUN ./autogen.sh && ./configure --prefix=/usr && make -j6 && make install
+# install libblockdev build dependencies
+RUN apt-get -y install ansible
+RUN apt-get -y install libnvme-dev
+RUN ansible-playbook -K -i "localhost," -c local misc/install-test-dependencies.yml
+
+RUN ./autogen.sh && ./configure --prefix=/usr && make -j6 && DEB_PYTHON_INSTALL_LAYOUT="deb" make install
 
 WORKDIR /root
 
@@ -36,4 +37,4 @@ RUN git clone https://github.com/pygobject/pgi-docgen
 
 WORKDIR /root/pgi-docgen
 
-RUN ./tools/build.sh BlockDev-2.0
+RUN ./tools/build.sh BlockDev-3.0
