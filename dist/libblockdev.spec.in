@@ -482,6 +482,7 @@ Various nice storage-related tools based on libblockdev.
 %ifarch s390 s390x
 %package s390
 Summary:    The s390 plugin for the libblockdev library
+Requires: %{name}-utils%{?_isa} = %{version}-%{release}
 Requires: s390utils
 
 %description s390
