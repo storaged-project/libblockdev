@@ -84,6 +84,7 @@ License:     LGPL-2.1-or-later
 URL:         https://github.com/storaged-project/libblockdev
 Source0:     https://github.com/storaged-project/libblockdev/releases/download/%{version}-%{release}/%{name}-%{version}.tar.gz
 
+BuildRequires: make
 BuildRequires: glib2-devel
 %if %{with_gi}
 BuildRequires: gobject-introspection-devel
@@ -98,8 +99,10 @@ BuildRequires: glib2-doc
 BuildRequires: autoconf-archive
 
 # obsolete removed subpackages to allow upgrades
-Obsoletes: libblockdev-kbd
-Obsoletes: libblockdev-kbd-devel
+Provides: libblockdev-kbd = %{version}-%{release}
+Obsoletes: libblockdev-kbd < %{version}-%{release}
+Provides: libblockdev-kbd-devel = %{version}-%{release}
+Obsoletes: libblockdev-kbd-devel < %{version}-%{release}
 
 Requires: %{name}-utils%{?_isa} = %{version}-%{release}
 
@@ -351,7 +354,7 @@ with the libblockdev-mdraid plugin/library.
 BuildRequires: device-mapper-devel
 Summary:     The multipath plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} = %{version}-%{release}
-Requires: device-mapper-multipath
+Recommends: device-mapper-multipath
 
 %description mpath
 The libblockdev library plugin (and in the same time a standalone library)
@@ -557,7 +560,7 @@ A meta-package that pulls all the libblockdev plugins as dependencies.
 
 
 %prep
-%setup -q -n %{name}-%{version}
+%autosetup -n %{name}-%{version} -p1
 
 %build
 autoreconf -ivf
