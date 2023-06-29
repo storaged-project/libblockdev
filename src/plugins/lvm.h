@@ -312,7 +312,7 @@ gboolean bd_lvm_vdo_disable_deduplication (const gchar *vg_name, const gchar *po
 gboolean bd_lvm_thpool_convert (const gchar *vg_name, const gchar *data_lv, const gchar *metadata_lv, const gchar *name, const BDExtraArg **extra, GError **error);
 gboolean bd_lvm_cache_pool_convert (const gchar *vg_name, const gchar *data_lv, const gchar *metadata_lv, const gchar *name, const BDExtraArg **extra, GError **error);
 gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name, const gchar *pool_lv, const gchar *name, guint64 virtual_size, guint64 index_memory, gboolean compression, gboolean deduplication, BDLVMVDOWritePolicy write_policy, const BDExtraArg **extra, GError **error);
-gchar* bd_lvm_thlvpoolname (const gchar *vg_name, const gchar *lv_name, GError **error);
+gchar* bd_lvm_vdolvpoolname (const gchar *vg_name, const gchar *lv_name, GError **error);
 
 const gchar* bd_lvm_get_vdo_operating_mode_str (BDLVMVDOOperatingMode mode, GError **error);
 const gchar* bd_lvm_get_vdo_compression_state_str (BDLVMVDOCompressionState state, GError **error);
