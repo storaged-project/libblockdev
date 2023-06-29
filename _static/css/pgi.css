@@ -1,0 +1,204 @@
+@font-face {
+    font-family: 'Lato';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../fonts/lato-regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Lato';
+    font-style: normal;
+    font-weight: 700;
+    src: url('../fonts/lato-bold.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'DejaVu Sans Mono';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../fonts/DejaVuSansMono.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'DejaVu Sans Mono';
+    font-style: normal;
+    font-weight: 700;
+    src: url('../fonts/DejaVuSansMono-Bold.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'FontAwesome';
+    src: url('../fonts/fontawesome-webfont.ttf') format('truetype');
+}
+
+.local-toc {
+    display: none;
+}
+
+p {
+    font-size: 1em;
+}
+
+.wy-body-for-nav a:visited {
+    color: #3091d1;
+}
+
+@media screen and (min-width: 768px){
+    .local-toc {
+        position:fixed;
+        right: 1em;
+        bottom: 50px;
+        display: block;
+    }
+
+    .local-toc li
+    {
+        display:block;
+        text-align:right;
+        padding:0.3em 0;
+        text-transform:uppercase;
+        font-size: 0.9em;
+    }
+}
+
+.wy-nav-content {
+    margin: 0;
+}
+
+.wy-nav-content-wrap {
+    margin-left: 0;
+    background: #fcfcfc;
+}
+
+@media screen and (max-width: 768px){
+    img {
+        width: auto;
+    }
+}
+
+.wy-table-responsive table th,
+.wy-table-responsive table td {
+    white-space: normal;
+}
+
+.rst-content code.literal {
+    color: #777;
+    font-weight: normal;
+}
+
+.rst-content a tt, .rst-content code.xref {
+    color: #174666;
+}
+
+.versionmodified {
+    color: #a40000;
+    font-size: 0.9em;
+}
+
+tt.descname, .descclassname .pre, .descname .pre, .rst-content code, .rst-content tt, code.py, cite {
+    font-family: "Lato" !important;
+    font-size: 0.9rem;
+}
+
+.rst-content code, .rst-content tt {
+    padding: 0px 3px;
+}
+
+.rst-content table.field-list td {
+    padding-top: 8px;
+}
+
+table.navigation
+{
+    background: #e2e2e2;
+
+    border-spacing: 5px;
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 0.8em;
+}
+
+.fixed-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+    width: 100%;
+    border-top: solid 1px #babdb6;
+}
+
+.non-fixed-bar {
+    border-bottom: solid 1px #babdb6;
+}
+
+table.navigation td
+{
+    padding: 6px 8px;
+    height: 100%;
+    vertical-align: middle;
+    font-size: 1.1em;
+    font-weight:bold;
+    background-color: #efefef;
+}
+
+table.navigation .fa
+{
+    font-size: 1.3em;
+    color: #888;
+}
+
+table.navigation a .fa
+{
+    color: #000;
+}
+
+.graphviz svg {
+    max-width: 100%;
+}
+
+.viewcode-link {
+    color: #999 !important;
+}
+
+.rst-content .line-block {
+    margin-left: 0;
+}
+
+.rst-content dl:not(.docutils) dl dt .property {
+    padding-left: 8px;
+    color: #999;
+    font-size: 80%;
+}
+
+.rst-content table.field-list .field-name {
+    text-align: right;
+}
+
+.rst-content table.field-list table.field-list .field-name {
+    text-align: left;
+}
+
+cite {
+    font-weight: bold;
+    font-style: normal;
+    border: 1px solid #E1E4E5;
+    padding: 0px 5px;
+}
+
+.pgi-docs-external::after {
+  content: "\f08e";
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  padding-left: 0.4em;
+  font-size: 0.7em;
+}
+
+a[href^="mailto:"]::after {
+  content: "\f003";
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  padding-left: 0.4em;
+  font-size: 0.7em;
+}

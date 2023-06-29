@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>
+    BlockDev.LVMVDOStats -
+    
+      Structures -
+    
+    BlockDev 3.0
+  </title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/css/pgi.css" type="text/css" />
+  
+
+  
+  <script type="text/javascript">
+
+    function openSidebar(element) {
+        window.location.href = element.href + location.hash;
+        return false;
+    }
+
+    function inIframe() {
+        try {
+            return window.self !== window.top;
+        } catch (e) {
+            return true;
+        }
+    }
+
+    function onLoaded() {
+        if(!inIframe()) {
+            var icons = document.getElementsByClassName('open-sidebar');
+
+            for (var i = 0; i < icons.length; i ++) {
+                icons[i].style.display = 'table-cell';
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', onLoaded, false);
+
+  </script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="BlockDev.LVMVGdata" href="LVMVGdata.html" />
+    <link rel="prev" title="BlockDev.LVMVDOPooldata" href="LVMVDOPooldata.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+<div class="non-fixed-bar">
+  <table class="navigation" summary="Navigation header" cellpadding="2" cellspacing="10" width="100%"><tbody><tr valign="middle">
+
+<td class="open-sidebar" style="display:none"><a href="../../index.html#BlockDev-3.0/classes/LVMVDOStats.html" onclick="return openSidebar(this);"><i class="fa fa-search"></i></a></td>
+
+<td class="shortcuts" align="left" width="100%">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">BlockDev 3.0</a> &raquo;</li>
+      
+          <li><a href="../structs.html">Structures</a> &raquo;</li>
+      
+    <li>BlockDev.LVMVDOStats</li>
+  </ul>
+</td>
+<td><a accesskey="h" href="../index.html"><i class="fa fa-home"></i></a></td>
+
+
+<td><a accesskey="u" href="../structs.html"><i class="fa fa-chevron-up"></i></a></td>
+
+
+
+<td><a accesskey="p" href="LVMVDOPooldata.html"><i class="fa fa-chevron-left"></i></a></td>
+
+
+
+<td><a accesskey="n" href="LVMVGdata.html"><i class="fa fa-chevron-right"></i></a></td>
+
+
+</tr></tbody>
+</table>
+
+<div class="local-toc">
+    <ul>
+<li><a class="reference internal" href="#">BlockDev.LVMVDOStats</a><ul>
+<li><a class="reference internal" href="#fields">Fields</a></li>
+<li><a class="reference internal" href="#methods">Methods</a></li>
+<li><a class="reference internal" href="#details">Details</a><ul>
+<li><a class="reference internal" href="#BlockDev.LVMVDOStats"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMVDOStats</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+<div class="fixed-bar">
+  <table class="navigation" summary="Navigation header" cellpadding="2" cellspacing="10" width="100%"><tbody><tr valign="middle">
+
+<td class="open-sidebar" style="display:none"><a href="../../index.html#BlockDev-3.0/classes/LVMVDOStats.html" onclick="return openSidebar(this);"><i class="fa fa-search"></i></a></td>
+
+<td class="shortcuts" align="left" width="100%">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">BlockDev 3.0</a> &raquo;</li>
+      
+          <li><a href="../structs.html">Structures</a> &raquo;</li>
+      
+    <li>BlockDev.LVMVDOStats</li>
+  </ul>
+</td>
+<td><a accesskey="h" href="../index.html"><i class="fa fa-home"></i></a></td>
+
+
+<td><a accesskey="u" href="../structs.html"><i class="fa fa-chevron-up"></i></a></td>
+
+
+
+<td><a accesskey="p" href="LVMVDOPooldata.html"><i class="fa fa-chevron-left"></i></a></td>
+
+
+
+<td><a accesskey="n" href="LVMVGdata.html"><i class="fa fa-chevron-right"></i></a></td>
+
+
+</tr></tbody>
+</table>
+
+<div class="local-toc">
+    <ul>
+<li><a class="reference internal" href="#">BlockDev.LVMVDOStats</a><ul>
+<li><a class="reference internal" href="#fields">Fields</a></li>
+<li><a class="reference internal" href="#methods">Methods</a></li>
+<li><a class="reference internal" href="#details">Details</a><ul>
+<li><a class="reference internal" href="#BlockDev.LVMVDOStats"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMVDOStats</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+  <div class="wy-grid-for-nav">
+
+    
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="main">
+            
+  <section id="blockdev-lvmvdostats">
+<h1>BlockDev.LVMVDOStats<a class="headerlink" href="#blockdev-lvmvdostats" title="Permalink to this heading">¶</a></h1>
+<section id="fields">
+<span id="blockdev-lvmvdostats-fields"></span><h2>Fields<a class="headerlink" href="#fields" title="Permalink to this heading">¶</a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 16.4%" />
+<col style="width: 0.8%" />
+<col style="width: 0.8%" />
+<col style="width: 82.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Access</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>block_size</p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p></td>
+<td><p>r/w</p></td>
+<td><p>The block size of a VDO volume, in bytes.</p></td>
+</tr>
+<tr class="row-odd"><td><p>data_blocks_used</p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p></td>
+<td><p>r/w</p></td>
+<td><p>The number of physical blocks currently in use by a VDO volume to store data.</p></td>
+</tr>
+<tr class="row-even"><td><p>logical_block_size</p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p></td>
+<td><p>r/w</p></td>
+<td><p>The logical block size, in bytes.</p></td>
+</tr>
+<tr class="row-odd"><td><p>logical_blocks_used</p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p></td>
+<td><p>r/w</p></td>
+<td><p>The number of logical blocks currently mapped.</p></td>
+</tr>
+<tr class="row-even"><td><p>overhead_blocks_used</p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p></td>
+<td><p>r/w</p></td>
+<td><p>The number of physical blocks currently in use by a VDO volume to store VDO metadata.</p></td>
+</tr>
+<tr class="row-odd"><td><p>physical_blocks</p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p></td>
+<td><p>r/w</p></td>
+<td><p>The total number of physical blocks allocated for a VDO volume.</p></td>
+</tr>
+<tr class="row-even"><td><p>saving_percent</p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p></td>
+<td><p>r/w</p></td>
+<td><p>The percentage of physical blocks saved on a VDO volume (= [logical blocks used - physical blocks used] / logical blocks used).</p></td>
+</tr>
+<tr class="row-odd"><td><p>used_percent</p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p></td>
+<td><p>r/w</p></td>
+<td><p>The percentage of physical blocks used on a VDO volume (= used blocks / allocated blocks * 100).</p></td>
+</tr>
+<tr class="row-even"><td><p>write_amplification_ratio</p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a></p></td>
+<td><p>r/w</p></td>
+<td><p>The average number of block writes to the underlying storage per block written to the VDO device.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="methods">
+<span id="blockdev-lvmvdostats-methods"></span><h2>Methods<a class="headerlink" href="#methods" title="Permalink to this heading">¶</a></h2>
+<p>None</p>
+</section>
+<section id="details">
+<h2>Details<a class="headerlink" href="#details" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.LVMVDOStats">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">LVMVDOStats</span></span><a class="headerlink" href="#BlockDev.LVMVDOStats" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div> 
+
+</body>
+</html>

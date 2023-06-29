@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>
+    Callbacks -
+    
+    BlockDev 3.0
+  </title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/pgi.css" type="text/css" />
+  
+
+  
+  <script type="text/javascript">
+
+    function openSidebar(element) {
+        window.location.href = element.href + location.hash;
+        return false;
+    }
+
+    function inIframe() {
+        try {
+            return window.self !== window.top;
+        } catch (e) {
+            return true;
+        }
+    }
+
+    function onLoaded() {
+        if(!inIframe()) {
+            var icons = document.getElementsByClassName('open-sidebar');
+
+            for (var i = 0; i < icons.length; i ++) {
+                icons[i].style.display = 'table-cell';
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', onLoaded, false);
+
+  </script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Structures" href="structs.html" />
+    <link rel="prev" title="Functions" href="functions.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+<div class="non-fixed-bar">
+  <table class="navigation" summary="Navigation header" cellpadding="2" cellspacing="10" width="100%"><tbody><tr valign="middle">
+
+<td class="open-sidebar" style="display:none"><a href="./../index.html#BlockDev-3.0/callbacks.html" onclick="return openSidebar(this);"><i class="fa fa-search"></i></a></td>
+
+<td class="shortcuts" align="left" width="100%">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">BlockDev 3.0</a> &raquo;</li>
+      
+    <li>Callbacks</li>
+  </ul>
+</td>
+<td><a accesskey="h" href="index.html"><i class="fa fa-home"></i></a></td>
+
+
+<td><i class="fa fa-chevron-up"></i></td>
+
+
+
+<td><a accesskey="p" href="functions.html"><i class="fa fa-chevron-left"></i></a></td>
+
+
+
+<td><a accesskey="n" href="structs.html"><i class="fa fa-chevron-right"></i></a></td>
+
+
+</tr></tbody>
+</table>
+
+<div class="local-toc">
+    <ul>
+<li><a class="reference internal" href="#">Callbacks</a><ul>
+<li><a class="reference internal" href="#details">Details</a><ul>
+<li><a class="reference internal" href="#BlockDev.UtilsLogFunc"><code class="docutils literal notranslate"><span class="pre">BlockDev.UtilsLogFunc()</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UtilsProgExtract"><code class="docutils literal notranslate"><span class="pre">BlockDev.UtilsProgExtract()</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UtilsProgFunc"><code class="docutils literal notranslate"><span class="pre">BlockDev.UtilsProgFunc()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+<div class="fixed-bar">
+  <table class="navigation" summary="Navigation header" cellpadding="2" cellspacing="10" width="100%"><tbody><tr valign="middle">
+
+<td class="open-sidebar" style="display:none"><a href="./../index.html#BlockDev-3.0/callbacks.html" onclick="return openSidebar(this);"><i class="fa fa-search"></i></a></td>
+
+<td class="shortcuts" align="left" width="100%">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">BlockDev 3.0</a> &raquo;</li>
+      
+    <li>Callbacks</li>
+  </ul>
+</td>
+<td><a accesskey="h" href="index.html"><i class="fa fa-home"></i></a></td>
+
+
+<td><i class="fa fa-chevron-up"></i></td>
+
+
+
+<td><a accesskey="p" href="functions.html"><i class="fa fa-chevron-left"></i></a></td>
+
+
+
+<td><a accesskey="n" href="structs.html"><i class="fa fa-chevron-right"></i></a></td>
+
+
+</tr></tbody>
+</table>
+
+<div class="local-toc">
+    <ul>
+<li><a class="reference internal" href="#">Callbacks</a><ul>
+<li><a class="reference internal" href="#details">Details</a><ul>
+<li><a class="reference internal" href="#BlockDev.UtilsLogFunc"><code class="docutils literal notranslate"><span class="pre">BlockDev.UtilsLogFunc()</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UtilsProgExtract"><code class="docutils literal notranslate"><span class="pre">BlockDev.UtilsProgExtract()</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UtilsProgFunc"><code class="docutils literal notranslate"><span class="pre">BlockDev.UtilsProgFunc()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+  <div class="wy-grid-for-nav">
+
+    
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="main">
+            
+  <section id="callbacks">
+<h1>Callbacks<a class="headerlink" href="#callbacks" title="Permalink to this heading">¶</a></h1>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 1.0%" />
+<col style="width: 99.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td></td>
+<td><p><a class="reference internal" href="#BlockDev.UtilsLogFunc" title="BlockDev.UtilsLogFunc"><code class="xref py py-func docutils literal notranslate"><span class="pre">UtilsLogFunc</span></code></a> (level, msg)</p></td>
+</tr>
+<tr class="row-even"><td></td>
+<td><p><a class="reference internal" href="#BlockDev.UtilsProgExtract" title="BlockDev.UtilsProgExtract"><code class="xref py py-func docutils literal notranslate"><span class="pre">UtilsProgExtract</span></code></a> (line)</p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p><a class="reference internal" href="#BlockDev.UtilsProgFunc" title="BlockDev.UtilsProgFunc"><code class="xref py py-func docutils literal notranslate"><span class="pre">UtilsProgFunc</span></code></a> (task_id, status, completion, msg)</p></td>
+</tr>
+</tbody>
+</table>
+<section id="details">
+<h2>Details<a class="headerlink" href="#details" title="Permalink to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="BlockDev.UtilsLogFunc">
+<span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">UtilsLogFunc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.UtilsLogFunc" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>level</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – log level (as understood by syslog(3))</p></li>
+<li><p><strong>msg</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – log message</p></li>
+</ul>
+</dd>
+</dl>
+<p>Function type for logging function used by the libblockdev’s exec utils to
+log the information about program executing.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BlockDev.UtilsProgExtract">
+<span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">UtilsProgExtract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.UtilsProgExtract" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>line</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>) – line to extract progress from</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>whether the line was a progress reporting line and should be excluded
+from the collected standard output string or not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">completion<span class="colon">:</span></dt>
+<dd class="field-odd"><p>percentage of completion</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>, <strong>completion</strong>: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>)</p>
+</dd>
+</dl>
+<p>Callback function used to process a line captured from spawned command’s standard
+output and standard error output. Typically used to extract completion percentage
+of a long-running job.</p>
+<p>Note that both outputs are read simultaneously with no guarantees of message order
+this function is called with.</p>
+<p>The value the <cite>completion</cite> points to may contain value previously returned from
+this callback or zero when called for the first time. This is useful for extractors
+where only some kind of a tick mark is printed out as a progress and previous value
+is needed to compute an incremented value. It’s important to keep in mind that this
+function is only called over lines, i.e. progress reporting printing out tick marks
+(e.g. dots) without a newline character might not work properly.</p>
+<p>The <cite>line</cite> string usually contains trailing newline character, which may be absent
+however in case the spawned command exits without printing one. It’s guaranteed
+this function is called over remaining buffer no matter what the trailing
+character is.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="BlockDev.UtilsProgFunc">
+<span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">UtilsProgFunc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">completion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.UtilsProgFunc" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>task_id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – ID of the task/action the progress is reported for</p></li>
+<li><p><strong>status</strong> (<a class="reference internal" href="enums.html#BlockDev.UtilsProgStatus" title="BlockDev.UtilsProgStatus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlockDev.UtilsProgStatus</span></code></a>) – progress status</p></li>
+<li><p><strong>completion</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a>) – percentage of completion</p></li>
+<li><p><strong>msg</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>) – arbitrary progress message (for the user)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div> 
+
+</body>
+</html>

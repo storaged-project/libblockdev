@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>
+    BlockDev.NVMESelfTestLog -
+    
+      Structures -
+    
+    BlockDev 3.0
+  </title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/css/pgi.css" type="text/css" />
+  
+
+  
+  <script type="text/javascript">
+
+    function openSidebar(element) {
+        window.location.href = element.href + location.hash;
+        return false;
+    }
+
+    function inIframe() {
+        try {
+            return window.self !== window.top;
+        } catch (e) {
+            return true;
+        }
+    }
+
+    function onLoaded() {
+        if(!inIframe()) {
+            var icons = document.getElementsByClassName('open-sidebar');
+
+            for (var i = 0; i < icons.length; i ++) {
+                icons[i].style.display = 'table-cell';
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', onLoaded, false);
+
+  </script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="BlockDev.NVMESelfTestLogEntry" href="NVMESelfTestLogEntry.html" />
+    <link rel="prev" title="BlockDev.NVMESanitizeLog" href="NVMESanitizeLog.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+<div class="non-fixed-bar">
+  <table class="navigation" summary="Navigation header" cellpadding="2" cellspacing="10" width="100%"><tbody><tr valign="middle">
+
+<td class="open-sidebar" style="display:none"><a href="../../index.html#BlockDev-3.0/classes/NVMESelfTestLog.html" onclick="return openSidebar(this);"><i class="fa fa-search"></i></a></td>
+
+<td class="shortcuts" align="left" width="100%">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">BlockDev 3.0</a> &raquo;</li>
+      
+          <li><a href="../structs.html">Structures</a> &raquo;</li>
+      
+    <li>BlockDev.NVMESelfTestLog</li>
+  </ul>
+</td>
+<td><a accesskey="h" href="../index.html"><i class="fa fa-home"></i></a></td>
+
+
+<td><a accesskey="u" href="../structs.html"><i class="fa fa-chevron-up"></i></a></td>
+
+
+
+<td><a accesskey="p" href="NVMESanitizeLog.html"><i class="fa fa-chevron-left"></i></a></td>
+
+
+
+<td><a accesskey="n" href="NVMESelfTestLogEntry.html"><i class="fa fa-chevron-right"></i></a></td>
+
+
+</tr></tbody>
+</table>
+
+<div class="local-toc">
+    <ul>
+<li><a class="reference internal" href="#">BlockDev.NVMESelfTestLog</a><ul>
+<li><a class="reference internal" href="#fields">Fields</a></li>
+<li><a class="reference internal" href="#methods">Methods</a></li>
+<li><a class="reference internal" href="#details">Details</a><ul>
+<li><a class="reference internal" href="#BlockDev.NVMESelfTestLog"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMESelfTestLog</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+<div class="fixed-bar">
+  <table class="navigation" summary="Navigation header" cellpadding="2" cellspacing="10" width="100%"><tbody><tr valign="middle">
+
+<td class="open-sidebar" style="display:none"><a href="../../index.html#BlockDev-3.0/classes/NVMESelfTestLog.html" onclick="return openSidebar(this);"><i class="fa fa-search"></i></a></td>
+
+<td class="shortcuts" align="left" width="100%">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">BlockDev 3.0</a> &raquo;</li>
+      
+          <li><a href="../structs.html">Structures</a> &raquo;</li>
+      
+    <li>BlockDev.NVMESelfTestLog</li>
+  </ul>
+</td>
+<td><a accesskey="h" href="../index.html"><i class="fa fa-home"></i></a></td>
+
+
+<td><a accesskey="u" href="../structs.html"><i class="fa fa-chevron-up"></i></a></td>
+
+
+
+<td><a accesskey="p" href="NVMESanitizeLog.html"><i class="fa fa-chevron-left"></i></a></td>
+
+
+
+<td><a accesskey="n" href="NVMESelfTestLogEntry.html"><i class="fa fa-chevron-right"></i></a></td>
+
+
+</tr></tbody>
+</table>
+
+<div class="local-toc">
+    <ul>
+<li><a class="reference internal" href="#">BlockDev.NVMESelfTestLog</a><ul>
+<li><a class="reference internal" href="#fields">Fields</a></li>
+<li><a class="reference internal" href="#methods">Methods</a></li>
+<li><a class="reference internal" href="#details">Details</a><ul>
+<li><a class="reference internal" href="#BlockDev.NVMESelfTestLog"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMESelfTestLog</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+  <div class="wy-grid-for-nav">
+
+    
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="main">
+            
+  <section id="blockdev-nvmeselftestlog">
+<h1>BlockDev.NVMESelfTestLog<a class="headerlink" href="#blockdev-nvmeselftestlog" title="Permalink to this heading">¶</a></h1>
+<section id="fields">
+<span id="blockdev-nvmeselftestlog-fields"></span><h2>Fields<a class="headerlink" href="#fields" title="Permalink to this heading">¶</a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 16.4%" />
+<col style="width: 0.8%" />
+<col style="width: 0.8%" />
+<col style="width: 82.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Access</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>current_operation</p></td>
+<td><p><a class="reference internal" href="../enums.html#BlockDev.NVMESelfTestAction" title="BlockDev.NVMESelfTestAction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlockDev.NVMESelfTestAction</span></code></a></p></td>
+<td><p>r/w</p></td>
+<td><p>Current running device self-test operation. There’s no corresponding record in <cite>entries</cite> for a device self-test operation that is in progress.</p></td>
+</tr>
+<tr class="row-odd"><td><p>current_operation_completion</p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int</span></code></a></p></td>
+<td><p>r/w</p></td>
+<td><p>Percentage of the currently running device self-test operation. Only valid when <cite>current_operation</cite> is other than <a class="reference internal" href="../enums.html#BlockDev.NVMESelfTestAction.NOT_RUNNING" title="BlockDev.NVMESelfTestAction.NOT_RUNNING"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlockDev.NVMESelfTestAction.NOT_RUNNING</span></code></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p>entries</p></td>
+<td><p>[<a class="reference internal" href="NVMESelfTestLogEntry.html#BlockDev.NVMESelfTestLogEntry" title="BlockDev.NVMESelfTestLogEntry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlockDev.NVMESelfTestLogEntry</span></code></a>]</p></td>
+<td><p>r/w</p></td>
+<td><p>Self-test log entries for the last 20 operations, sorted from newest (first element) to oldest.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="methods">
+<span id="blockdev-nvmeselftestlog-methods"></span><h2>Methods<a class="headerlink" href="#methods" title="Permalink to this heading">¶</a></h2>
+<p>None</p>
+</section>
+<section id="details">
+<h2>Details<a class="headerlink" href="#details" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.NVMESelfTestLog">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">NVMESelfTestLog</span></span><a class="headerlink" href="#BlockDev.NVMESelfTestLog" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div> 
+
+</body>
+</html>

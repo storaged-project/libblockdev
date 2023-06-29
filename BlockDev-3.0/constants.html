@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>
+    Constants -
+    
+    BlockDev 3.0
+  </title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/pgi.css" type="text/css" />
+  
+
+  
+  <script type="text/javascript">
+
+    function openSidebar(element) {
+        window.location.href = element.href + location.hash;
+        return false;
+    }
+
+    function inIframe() {
+        try {
+            return window.self !== window.top;
+        } catch (e) {
+            return true;
+        }
+    }
+
+    function onLoaded() {
+        if(!inIframe()) {
+            var icons = document.getElementsByClassName('open-sidebar');
+
+            for (var i = 0; i < icons.length; i ++) {
+                icons[i].style.display = 'table-cell';
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', onLoaded, false);
+
+  </script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Symbol Mapping" href="mapping.html" />
+    <link rel="prev" title="Enums" href="enums.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+<div class="non-fixed-bar">
+  <table class="navigation" summary="Navigation header" cellpadding="2" cellspacing="10" width="100%"><tbody><tr valign="middle">
+
+<td class="open-sidebar" style="display:none"><a href="./../index.html#BlockDev-3.0/constants.html" onclick="return openSidebar(this);"><i class="fa fa-search"></i></a></td>
+
+<td class="shortcuts" align="left" width="100%">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">BlockDev 3.0</a> &raquo;</li>
+      
+    <li>Constants</li>
+  </ul>
+</td>
+<td><a accesskey="h" href="index.html"><i class="fa fa-home"></i></a></td>
+
+
+<td><i class="fa fa-chevron-up"></i></td>
+
+
+
+<td><a accesskey="p" href="enums.html"><i class="fa fa-chevron-left"></i></a></td>
+
+
+
+<td><a accesskey="n" href="mapping.html"><i class="fa fa-chevron-right"></i></a></td>
+
+
+</tr></tbody>
+</table>
+
+<div class="local-toc">
+    <ul>
+<li><a class="reference internal" href="#">Constants</a><ul>
+<li><a class="reference internal" href="#details">Details</a><ul>
+<li><a class="reference internal" href="#BlockDev.BTRFS_MAIN_VOLUME_ID"><code class="docutils literal notranslate"><span class="pre">BlockDev.BTRFS_MAIN_VOLUME_ID</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.BTRFS_MIN_MEMBER_SIZE"><code class="docutils literal notranslate"><span class="pre">BlockDev.BTRFS_MIN_MEMBER_SIZE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.MD_CHUNK_SIZE"><code class="docutils literal notranslate"><span class="pre">BlockDev.MD_CHUNK_SIZE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.MD_SUPERBLOCK_SIZE"><code class="docutils literal notranslate"><span class="pre">BlockDev.MD_SUPERBLOCK_SIZE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UTILS_LOG_ALERT"><code class="docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_ALERT</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UTILS_LOG_CRIT"><code class="docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_CRIT</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UTILS_LOG_DEBUG"><code class="docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_DEBUG</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UTILS_LOG_EMERG"><code class="docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_EMERG</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UTILS_LOG_ERR"><code class="docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_ERR</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UTILS_LOG_INFO"><code class="docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_INFO</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UTILS_LOG_NOTICE"><code class="docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_NOTICE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UTILS_LOG_WARNING"><code class="docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_WARNING</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+<div class="fixed-bar">
+  <table class="navigation" summary="Navigation header" cellpadding="2" cellspacing="10" width="100%"><tbody><tr valign="middle">
+
+<td class="open-sidebar" style="display:none"><a href="./../index.html#BlockDev-3.0/constants.html" onclick="return openSidebar(this);"><i class="fa fa-search"></i></a></td>
+
+<td class="shortcuts" align="left" width="100%">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">BlockDev 3.0</a> &raquo;</li>
+      
+    <li>Constants</li>
+  </ul>
+</td>
+<td><a accesskey="h" href="index.html"><i class="fa fa-home"></i></a></td>
+
+
+<td><i class="fa fa-chevron-up"></i></td>
+
+
+
+<td><a accesskey="p" href="enums.html"><i class="fa fa-chevron-left"></i></a></td>
+
+
+
+<td><a accesskey="n" href="mapping.html"><i class="fa fa-chevron-right"></i></a></td>
+
+
+</tr></tbody>
+</table>
+
+<div class="local-toc">
+    <ul>
+<li><a class="reference internal" href="#">Constants</a><ul>
+<li><a class="reference internal" href="#details">Details</a><ul>
+<li><a class="reference internal" href="#BlockDev.BTRFS_MAIN_VOLUME_ID"><code class="docutils literal notranslate"><span class="pre">BlockDev.BTRFS_MAIN_VOLUME_ID</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.BTRFS_MIN_MEMBER_SIZE"><code class="docutils literal notranslate"><span class="pre">BlockDev.BTRFS_MIN_MEMBER_SIZE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.MD_CHUNK_SIZE"><code class="docutils literal notranslate"><span class="pre">BlockDev.MD_CHUNK_SIZE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.MD_SUPERBLOCK_SIZE"><code class="docutils literal notranslate"><span class="pre">BlockDev.MD_SUPERBLOCK_SIZE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UTILS_LOG_ALERT"><code class="docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_ALERT</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UTILS_LOG_CRIT"><code class="docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_CRIT</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UTILS_LOG_DEBUG"><code class="docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_DEBUG</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UTILS_LOG_EMERG"><code class="docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_EMERG</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UTILS_LOG_ERR"><code class="docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_ERR</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UTILS_LOG_INFO"><code class="docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_INFO</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UTILS_LOG_NOTICE"><code class="docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_NOTICE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.UTILS_LOG_WARNING"><code class="docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_WARNING</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+  <div class="wy-grid-for-nav">
+
+    
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="main">
+            
+  <section id="constants">
+<h1>Constants<a class="headerlink" href="#constants" title="Permalink to this heading">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="#BlockDev.BTRFS_MAIN_VOLUME_ID" title="BlockDev.BTRFS_MAIN_VOLUME_ID"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlockDev.BTRFS_MAIN_VOLUME_ID</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.BTRFS_MIN_MEMBER_SIZE" title="BlockDev.BTRFS_MIN_MEMBER_SIZE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlockDev.BTRFS_MIN_MEMBER_SIZE</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.MD_CHUNK_SIZE" title="BlockDev.MD_CHUNK_SIZE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlockDev.MD_CHUNK_SIZE</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.MD_SUPERBLOCK_SIZE" title="BlockDev.MD_SUPERBLOCK_SIZE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlockDev.MD_SUPERBLOCK_SIZE</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.UTILS_LOG_ALERT" title="BlockDev.UTILS_LOG_ALERT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_ALERT</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.UTILS_LOG_CRIT" title="BlockDev.UTILS_LOG_CRIT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_CRIT</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.UTILS_LOG_DEBUG" title="BlockDev.UTILS_LOG_DEBUG"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_DEBUG</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.UTILS_LOG_EMERG" title="BlockDev.UTILS_LOG_EMERG"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_EMERG</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.UTILS_LOG_ERR" title="BlockDev.UTILS_LOG_ERR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_ERR</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.UTILS_LOG_INFO" title="BlockDev.UTILS_LOG_INFO"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_INFO</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.UTILS_LOG_NOTICE" title="BlockDev.UTILS_LOG_NOTICE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_NOTICE</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.UTILS_LOG_WARNING" title="BlockDev.UTILS_LOG_WARNING"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlockDev.UTILS_LOG_WARNING</span></code></a></p></li>
+</ul>
+<section id="details">
+<h2>Details<a class="headerlink" href="#details" title="Permalink to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="BlockDev.BTRFS_MAIN_VOLUME_ID">
+<span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">BTRFS_MAIN_VOLUME_ID</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">5</span></em><a class="headerlink" href="#BlockDev.BTRFS_MAIN_VOLUME_ID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="BlockDev.BTRFS_MIN_MEMBER_SIZE">
+<span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">BTRFS_MIN_MEMBER_SIZE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">134217728</span></em><a class="headerlink" href="#BlockDev.BTRFS_MIN_MEMBER_SIZE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="BlockDev.MD_CHUNK_SIZE">
+<span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">MD_CHUNK_SIZE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">524288</span></em><a class="headerlink" href="#BlockDev.MD_CHUNK_SIZE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="BlockDev.MD_SUPERBLOCK_SIZE">
+<span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">MD_SUPERBLOCK_SIZE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2097152</span></em><a class="headerlink" href="#BlockDev.MD_SUPERBLOCK_SIZE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="BlockDev.UTILS_LOG_ALERT">
+<span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">UTILS_LOG_ALERT</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.UTILS_LOG_ALERT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="BlockDev.UTILS_LOG_CRIT">
+<span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">UTILS_LOG_CRIT</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.UTILS_LOG_CRIT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="BlockDev.UTILS_LOG_DEBUG">
+<span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">UTILS_LOG_DEBUG</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">7</span></em><a class="headerlink" href="#BlockDev.UTILS_LOG_DEBUG" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="BlockDev.UTILS_LOG_EMERG">
+<span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">UTILS_LOG_EMERG</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#BlockDev.UTILS_LOG_EMERG" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="BlockDev.UTILS_LOG_ERR">
+<span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">UTILS_LOG_ERR</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">3</span></em><a class="headerlink" href="#BlockDev.UTILS_LOG_ERR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="BlockDev.UTILS_LOG_INFO">
+<span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">UTILS_LOG_INFO</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">6</span></em><a class="headerlink" href="#BlockDev.UTILS_LOG_INFO" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="BlockDev.UTILS_LOG_NOTICE">
+<span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">UTILS_LOG_NOTICE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">5</span></em><a class="headerlink" href="#BlockDev.UTILS_LOG_NOTICE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="BlockDev.UTILS_LOG_WARNING">
+<span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">UTILS_LOG_WARNING</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.UTILS_LOG_WARNING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div> 
+
+</body>
+</html>

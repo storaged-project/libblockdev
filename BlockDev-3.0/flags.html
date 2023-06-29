@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>
+    Flags -
+    
+    BlockDev 3.0
+  </title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+    <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/pgi.css" type="text/css" />
+  
+
+  
+  <script type="text/javascript">
+
+    function openSidebar(element) {
+        window.location.href = element.href + location.hash;
+        return false;
+    }
+
+    function inIframe() {
+        try {
+            return window.self !== window.top;
+        } catch (e) {
+            return true;
+        }
+    }
+
+    function onLoaded() {
+        if(!inIframe()) {
+            var icons = document.getElementsByClassName('open-sidebar');
+
+            for (var i = 0; i < icons.length; i ++) {
+                icons[i].style.display = 'table-cell';
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', onLoaded, false);
+
+  </script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Enums" href="enums.html" />
+    <link rel="prev" title="BlockDev.UtilsLinuxVersion" href="classes/UtilsLinuxVersion.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+<div class="non-fixed-bar">
+  <table class="navigation" summary="Navigation header" cellpadding="2" cellspacing="10" width="100%"><tbody><tr valign="middle">
+
+<td class="open-sidebar" style="display:none"><a href="./../index.html#BlockDev-3.0/flags.html" onclick="return openSidebar(this);"><i class="fa fa-search"></i></a></td>
+
+<td class="shortcuts" align="left" width="100%">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">BlockDev 3.0</a> &raquo;</li>
+      
+    <li>Flags</li>
+  </ul>
+</td>
+<td><a accesskey="h" href="index.html"><i class="fa fa-home"></i></a></td>
+
+
+<td><i class="fa fa-chevron-up"></i></td>
+
+
+
+<td><a accesskey="p" href="classes/UtilsLinuxVersion.html"><i class="fa fa-chevron-left"></i></a></td>
+
+
+
+<td><a accesskey="n" href="enums.html"><i class="fa fa-chevron-right"></i></a></td>
+
+
+</tr></tbody>
+</table>
+
+<div class="local-toc">
+    <ul>
+<li><a class="reference internal" href="#">Flags</a><ul>
+<li><a class="reference internal" href="#details">Details</a><ul>
+<li><a class="reference internal" href="#BlockDev.BtrfsTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.BtrfsTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.BtrfsTechMode.CREATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.BtrfsTechMode.CREATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.BtrfsTechMode.DELETE"><code class="docutils literal notranslate"><span class="pre">BlockDev.BtrfsTechMode.DELETE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.BtrfsTechMode.MODIFY"><code class="docutils literal notranslate"><span class="pre">BlockDev.BtrfsTechMode.MODIFY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.BtrfsTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.BtrfsTechMode.QUERY</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.CryptoIntegrityOpenFlags"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoIntegrityOpenFlags</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.CryptoIntegrityOpenFlags.NO_JOURNAL"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoIntegrityOpenFlags.NO_JOURNAL</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoIntegrityOpenFlags.RECALCULATE_RESET"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoIntegrityOpenFlags.RECALCULATE_RESET</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoIntegrityOpenFlags.RECOVERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoIntegrityOpenFlags.RECOVERY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoIntegrityOpenFlags.ALLOW_DISCARDS"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoIntegrityOpenFlags.ALLOW_DISCARDS</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoIntegrityOpenFlags.NO_JOURNAL_BITMAP"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoIntegrityOpenFlags.NO_JOURNAL_BITMAP</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoIntegrityOpenFlags.RECALCULATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoIntegrityOpenFlags.RECALCULATE</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode.CREATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode.CREATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode.BACKUP_RESTORE"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode.BACKUP_RESTORE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode.REMOVE_KEY"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode.REMOVE_KEY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode.OPEN_CLOSE"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode.OPEN_CLOSE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode.MODIFY"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode.MODIFY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode.RESIZE"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode.RESIZE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode.QUERY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode.SUSPEND_RESUME"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode.SUSPEND_RESUME</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode.ADD_KEY"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode.ADD_KEY</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.DMTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.DMTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.DMTechMode.CREATE_ACTIVATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.DMTechMode.CREATE_ACTIVATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.DMTechMode.REMOVE_DEACTIVATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.DMTechMode.REMOVE_DEACTIVATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.DMTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.DMTechMode.QUERY</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.FSConfigureFlags"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSConfigureFlags</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.FSConfigureFlags.LABEL"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSConfigureFlags.LABEL</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSConfigureFlags.UUID"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSConfigureFlags.UUID</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.ENCRYPT"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.ENCRYPT</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.VERITY"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.VERITY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.QUOTA_INO"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.QUOTA_INO</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.PRJQUOTA"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.PRJQUOTA</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.BLKZONED"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.BLKZONED</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.SB_CHKSUM"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.SB_CHKSUM</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.INODE_CRTIME"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.INODE_CRTIME</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.INODE_CHKSUM"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.INODE_CHKSUM</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.ATOMIC_WRITE"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.ATOMIC_WRITE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.LOST_FOUND"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.LOST_FOUND</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.FLEXIBLE_INLINE_XATTR"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.FLEXIBLE_INLINE_XATTR</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.EXTRA_ATTR"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.EXTRA_ATTR</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.FSFeatureFlags"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSFeatureFlags</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.FSFeatureFlags.OWNERS"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSFeatureFlags.OWNERS</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSFeatureFlags.PARTITION_TABLE"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSFeatureFlags.PARTITION_TABLE</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.FSFsckFlags"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSFsckFlags</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.FSFsckFlags.CHECK"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSFsckFlags.CHECK</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSFsckFlags.REPAIR"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSFsckFlags.REPAIR</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.FSMkfsOptionsFlags"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSMkfsOptionsFlags</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.FSMkfsOptionsFlags.LABEL"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSMkfsOptionsFlags.LABEL</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSMkfsOptionsFlags.FORCE"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSMkfsOptionsFlags.FORCE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSMkfsOptionsFlags.UUID"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSMkfsOptionsFlags.UUID</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSMkfsOptionsFlags.NOPT"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSMkfsOptionsFlags.NOPT</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSMkfsOptionsFlags.DRY_RUN"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSMkfsOptionsFlags.DRY_RUN</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSMkfsOptionsFlags.NODISCARD"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSMkfsOptionsFlags.NODISCARD</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.FSResizeFlags"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSResizeFlags</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.FSResizeFlags.ONLINE_GROW"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSResizeFlags.ONLINE_GROW</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSResizeFlags.OFFLINE_SHRINK"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSResizeFlags.OFFLINE_SHRINK</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSResizeFlags.OFFLINE_GROW"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSResizeFlags.OFFLINE_GROW</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSResizeFlags.ONLINE_SHRINK"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSResizeFlags.ONLINE_SHRINK</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.FSTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.FSTechMode.MKFS"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSTechMode.MKFS</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSTechMode.SET_UUID"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSTechMode.SET_UUID</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSTechMode.SET_LABEL"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSTechMode.SET_LABEL</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSTechMode.WIPE"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSTechMode.WIPE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSTechMode.QUERY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSTechMode.CHECK"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSTechMode.CHECK</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSTechMode.RESIZE"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSTechMode.RESIZE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSTechMode.REPAIR"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSTechMode.REPAIR</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.STRIPED"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.STRIPED</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.META_STRIPED"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.META_STRIPED</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.RAID10"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.RAID10</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.META_RAID10"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.META_RAID10</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.RAID1"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.RAID1</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.META_RAID1"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.META_RAID1</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.RAID5"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.RAID5</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.META_RAID5"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.META_RAID5</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.RAID6"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.RAID6</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.META_RAID6"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.META_RAID6</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.LVMTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.LVMTechMode.CREATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMTechMode.CREATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMTechMode.QUERY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMTechMode.REMOVE"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMTechMode.REMOVE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMTechMode.MODIFY"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMTechMode.MODIFY</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.LoopTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.LoopTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.LoopTechMode.CREATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.LoopTechMode.CREATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LoopTechMode.DESTROY"><code class="docutils literal notranslate"><span class="pre">BlockDev.LoopTechMode.DESTROY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LoopTechMode.MODIFY"><code class="docutils literal notranslate"><span class="pre">BlockDev.LoopTechMode.MODIFY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LoopTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.LoopTechMode.QUERY</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.MDTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.MDTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.MDTechMode.CREATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.MDTechMode.CREATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.MDTechMode.DELETE"><code class="docutils literal notranslate"><span class="pre">BlockDev.MDTechMode.DELETE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.MDTechMode.MODIFY"><code class="docutils literal notranslate"><span class="pre">BlockDev.MDTechMode.MODIFY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.MDTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.MDTechMode.QUERY</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.MpathTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.MpathTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.MpathTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.MpathTechMode.QUERY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.MpathTechMode.MODIFY"><code class="docutils literal notranslate"><span class="pre">BlockDev.MpathTechMode.MODIFY</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.NVDIMMTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVDIMMTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.NVDIMMTechMode.CREATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVDIMMTechMode.CREATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVDIMMTechMode.RECONFIGURE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVDIMMTechMode.RECONFIGURE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVDIMMTechMode.REMOVE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVDIMMTechMode.REMOVE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVDIMMTechMode.ACTIVATE_DEACTIVATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVDIMMTechMode.ACTIVATE_DEACTIVATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVDIMMTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVDIMMTechMode.QUERY</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.MULTIPORT"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.MULTIPORT</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.SANITIZE_BLOCK"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.SANITIZE_BLOCK</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.SELFTEST"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.SELFTEST</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.MGMT_SMBUS"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.MGMT_SMBUS</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.FORMAT"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.FORMAT</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.STORAGE_DEVICE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.STORAGE_DEVICE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.MULTICTRL"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.MULTICTRL</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.SANITIZE_OVERWRITE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.SANITIZE_OVERWRITE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.SELFTEST_SINGLE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.SELFTEST_SINGLE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.FORMAT_ALL_NS"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.FORMAT_ALL_NS</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.ENCLOSURE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.ENCLOSURE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.SRIOV"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.SRIOV</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.SECURE_ERASE_ALL_NS"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.SECURE_ERASE_ALL_NS</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.SANITIZE_CRYPTO"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.SANITIZE_CRYPTO</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.NS_MGMT"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.NS_MGMT</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.MGMT_PCIE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.MGMT_PCIE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.ANA_REPORTING"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.ANA_REPORTING</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.SECURE_ERASE_CRYPTO"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.SECURE_ERASE_CRYPTO</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.NVMENamespaceFeature"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMENamespaceFeature</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.NVMENamespaceFeature.THIN"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMENamespaceFeature.THIN</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMENamespaceFeature.MULTIPATH_SHARED"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMENamespaceFeature.MULTIPATH_SHARED</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMENamespaceFeature.FORMAT_PROGRESS"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMENamespaceFeature.FORMAT_PROGRESS</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMENamespaceFeature.ROTATIONAL"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMENamespaceFeature.ROTATIONAL</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.NVMESmartCriticalWarning"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMESmartCriticalWarning</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.NVMESmartCriticalWarning.SPARE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMESmartCriticalWarning.SPARE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMESmartCriticalWarning.VOLATILE_MEM"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMESmartCriticalWarning.VOLATILE_MEM</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMESmartCriticalWarning.TEMPERATURE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMESmartCriticalWarning.TEMPERATURE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMESmartCriticalWarning.PMR_READONLY"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMESmartCriticalWarning.PMR_READONLY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMESmartCriticalWarning.DEGRADED"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMESmartCriticalWarning.DEGRADED</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMESmartCriticalWarning.READONLY"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMESmartCriticalWarning.READONLY</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.NVMETechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMETechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.NVMETechMode.INFO"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMETechMode.INFO</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMETechMode.MANAGE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMETechMode.MANAGE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMETechMode.INITIATOR"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMETechMode.INITIATOR</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.PartTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.PartTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.PartTechMode.CREATE_TABLE"><code class="docutils literal notranslate"><span class="pre">BlockDev.PartTechMode.CREATE_TABLE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.PartTechMode.QUERY_PART"><code class="docutils literal notranslate"><span class="pre">BlockDev.PartTechMode.QUERY_PART</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.PartTechMode.MODIFY_TABLE"><code class="docutils literal notranslate"><span class="pre">BlockDev.PartTechMode.MODIFY_TABLE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.PartTechMode.QUERY_TABLE"><code class="docutils literal notranslate"><span class="pre">BlockDev.PartTechMode.QUERY_TABLE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.PartTechMode.MODIFY_PART"><code class="docutils literal notranslate"><span class="pre">BlockDev.PartTechMode.MODIFY_PART</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.SwapTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.SwapTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.SwapTechMode.CREATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.SwapTechMode.CREATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.SwapTechMode.ACTIVATE_DEACTIVATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.SwapTechMode.ACTIVATE_DEACTIVATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.SwapTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.SwapTechMode.QUERY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.SwapTechMode.SET_LABEL"><code class="docutils literal notranslate"><span class="pre">BlockDev.SwapTechMode.SET_LABEL</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.SwapTechMode.SET_UUID"><code class="docutils literal notranslate"><span class="pre">BlockDev.SwapTechMode.SET_UUID</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+<div class="fixed-bar">
+  <table class="navigation" summary="Navigation header" cellpadding="2" cellspacing="10" width="100%"><tbody><tr valign="middle">
+
+<td class="open-sidebar" style="display:none"><a href="./../index.html#BlockDev-3.0/flags.html" onclick="return openSidebar(this);"><i class="fa fa-search"></i></a></td>
+
+<td class="shortcuts" align="left" width="100%">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">BlockDev 3.0</a> &raquo;</li>
+      
+    <li>Flags</li>
+  </ul>
+</td>
+<td><a accesskey="h" href="index.html"><i class="fa fa-home"></i></a></td>
+
+
+<td><i class="fa fa-chevron-up"></i></td>
+
+
+
+<td><a accesskey="p" href="classes/UtilsLinuxVersion.html"><i class="fa fa-chevron-left"></i></a></td>
+
+
+
+<td><a accesskey="n" href="enums.html"><i class="fa fa-chevron-right"></i></a></td>
+
+
+</tr></tbody>
+</table>
+
+<div class="local-toc">
+    <ul>
+<li><a class="reference internal" href="#">Flags</a><ul>
+<li><a class="reference internal" href="#details">Details</a><ul>
+<li><a class="reference internal" href="#BlockDev.BtrfsTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.BtrfsTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.BtrfsTechMode.CREATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.BtrfsTechMode.CREATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.BtrfsTechMode.DELETE"><code class="docutils literal notranslate"><span class="pre">BlockDev.BtrfsTechMode.DELETE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.BtrfsTechMode.MODIFY"><code class="docutils literal notranslate"><span class="pre">BlockDev.BtrfsTechMode.MODIFY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.BtrfsTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.BtrfsTechMode.QUERY</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.CryptoIntegrityOpenFlags"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoIntegrityOpenFlags</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.CryptoIntegrityOpenFlags.NO_JOURNAL"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoIntegrityOpenFlags.NO_JOURNAL</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoIntegrityOpenFlags.RECALCULATE_RESET"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoIntegrityOpenFlags.RECALCULATE_RESET</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoIntegrityOpenFlags.RECOVERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoIntegrityOpenFlags.RECOVERY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoIntegrityOpenFlags.ALLOW_DISCARDS"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoIntegrityOpenFlags.ALLOW_DISCARDS</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoIntegrityOpenFlags.NO_JOURNAL_BITMAP"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoIntegrityOpenFlags.NO_JOURNAL_BITMAP</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoIntegrityOpenFlags.RECALCULATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoIntegrityOpenFlags.RECALCULATE</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode.CREATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode.CREATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode.BACKUP_RESTORE"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode.BACKUP_RESTORE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode.REMOVE_KEY"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode.REMOVE_KEY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode.OPEN_CLOSE"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode.OPEN_CLOSE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode.MODIFY"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode.MODIFY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode.RESIZE"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode.RESIZE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode.QUERY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode.SUSPEND_RESUME"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode.SUSPEND_RESUME</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.CryptoTechMode.ADD_KEY"><code class="docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode.ADD_KEY</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.DMTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.DMTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.DMTechMode.CREATE_ACTIVATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.DMTechMode.CREATE_ACTIVATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.DMTechMode.REMOVE_DEACTIVATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.DMTechMode.REMOVE_DEACTIVATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.DMTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.DMTechMode.QUERY</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.FSConfigureFlags"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSConfigureFlags</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.FSConfigureFlags.LABEL"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSConfigureFlags.LABEL</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSConfigureFlags.UUID"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSConfigureFlags.UUID</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.ENCRYPT"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.ENCRYPT</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.VERITY"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.VERITY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.QUOTA_INO"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.QUOTA_INO</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.PRJQUOTA"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.PRJQUOTA</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.BLKZONED"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.BLKZONED</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.SB_CHKSUM"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.SB_CHKSUM</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.INODE_CRTIME"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.INODE_CRTIME</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.INODE_CHKSUM"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.INODE_CHKSUM</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.ATOMIC_WRITE"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.ATOMIC_WRITE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.LOST_FOUND"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.LOST_FOUND</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.FLEXIBLE_INLINE_XATTR"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.FLEXIBLE_INLINE_XATTR</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSF2FSFeature.EXTRA_ATTR"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature.EXTRA_ATTR</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.FSFeatureFlags"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSFeatureFlags</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.FSFeatureFlags.OWNERS"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSFeatureFlags.OWNERS</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSFeatureFlags.PARTITION_TABLE"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSFeatureFlags.PARTITION_TABLE</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.FSFsckFlags"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSFsckFlags</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.FSFsckFlags.CHECK"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSFsckFlags.CHECK</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSFsckFlags.REPAIR"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSFsckFlags.REPAIR</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.FSMkfsOptionsFlags"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSMkfsOptionsFlags</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.FSMkfsOptionsFlags.LABEL"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSMkfsOptionsFlags.LABEL</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSMkfsOptionsFlags.FORCE"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSMkfsOptionsFlags.FORCE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSMkfsOptionsFlags.UUID"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSMkfsOptionsFlags.UUID</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSMkfsOptionsFlags.NOPT"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSMkfsOptionsFlags.NOPT</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSMkfsOptionsFlags.DRY_RUN"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSMkfsOptionsFlags.DRY_RUN</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSMkfsOptionsFlags.NODISCARD"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSMkfsOptionsFlags.NODISCARD</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.FSResizeFlags"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSResizeFlags</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.FSResizeFlags.ONLINE_GROW"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSResizeFlags.ONLINE_GROW</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSResizeFlags.OFFLINE_SHRINK"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSResizeFlags.OFFLINE_SHRINK</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSResizeFlags.OFFLINE_GROW"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSResizeFlags.OFFLINE_GROW</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSResizeFlags.ONLINE_SHRINK"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSResizeFlags.ONLINE_SHRINK</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.FSTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.FSTechMode.MKFS"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSTechMode.MKFS</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSTechMode.SET_UUID"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSTechMode.SET_UUID</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSTechMode.SET_LABEL"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSTechMode.SET_LABEL</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSTechMode.WIPE"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSTechMode.WIPE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSTechMode.QUERY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSTechMode.CHECK"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSTechMode.CHECK</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSTechMode.RESIZE"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSTechMode.RESIZE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.FSTechMode.REPAIR"><code class="docutils literal notranslate"><span class="pre">BlockDev.FSTechMode.REPAIR</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.STRIPED"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.STRIPED</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.META_STRIPED"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.META_STRIPED</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.RAID10"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.RAID10</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.META_RAID10"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.META_RAID10</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.RAID1"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.RAID1</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.META_RAID1"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.META_RAID1</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.RAID5"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.RAID5</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.META_RAID5"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.META_RAID5</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.RAID6"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.RAID6</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMCachePoolFlags.META_RAID6"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags.META_RAID6</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.LVMTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.LVMTechMode.CREATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMTechMode.CREATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMTechMode.QUERY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMTechMode.REMOVE"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMTechMode.REMOVE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LVMTechMode.MODIFY"><code class="docutils literal notranslate"><span class="pre">BlockDev.LVMTechMode.MODIFY</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.LoopTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.LoopTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.LoopTechMode.CREATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.LoopTechMode.CREATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LoopTechMode.DESTROY"><code class="docutils literal notranslate"><span class="pre">BlockDev.LoopTechMode.DESTROY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LoopTechMode.MODIFY"><code class="docutils literal notranslate"><span class="pre">BlockDev.LoopTechMode.MODIFY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.LoopTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.LoopTechMode.QUERY</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.MDTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.MDTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.MDTechMode.CREATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.MDTechMode.CREATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.MDTechMode.DELETE"><code class="docutils literal notranslate"><span class="pre">BlockDev.MDTechMode.DELETE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.MDTechMode.MODIFY"><code class="docutils literal notranslate"><span class="pre">BlockDev.MDTechMode.MODIFY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.MDTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.MDTechMode.QUERY</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.MpathTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.MpathTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.MpathTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.MpathTechMode.QUERY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.MpathTechMode.MODIFY"><code class="docutils literal notranslate"><span class="pre">BlockDev.MpathTechMode.MODIFY</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.NVDIMMTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVDIMMTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.NVDIMMTechMode.CREATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVDIMMTechMode.CREATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVDIMMTechMode.RECONFIGURE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVDIMMTechMode.RECONFIGURE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVDIMMTechMode.REMOVE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVDIMMTechMode.REMOVE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVDIMMTechMode.ACTIVATE_DEACTIVATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVDIMMTechMode.ACTIVATE_DEACTIVATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVDIMMTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVDIMMTechMode.QUERY</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.MULTIPORT"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.MULTIPORT</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.SANITIZE_BLOCK"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.SANITIZE_BLOCK</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.SELFTEST"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.SELFTEST</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.MGMT_SMBUS"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.MGMT_SMBUS</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.FORMAT"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.FORMAT</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.STORAGE_DEVICE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.STORAGE_DEVICE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.MULTICTRL"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.MULTICTRL</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.SANITIZE_OVERWRITE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.SANITIZE_OVERWRITE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.SELFTEST_SINGLE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.SELFTEST_SINGLE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.FORMAT_ALL_NS"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.FORMAT_ALL_NS</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.ENCLOSURE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.ENCLOSURE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.SRIOV"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.SRIOV</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.SECURE_ERASE_ALL_NS"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.SECURE_ERASE_ALL_NS</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.SANITIZE_CRYPTO"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.SANITIZE_CRYPTO</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.NS_MGMT"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.NS_MGMT</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.MGMT_PCIE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.MGMT_PCIE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.ANA_REPORTING"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.ANA_REPORTING</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMEControllerFeature.SECURE_ERASE_CRYPTO"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature.SECURE_ERASE_CRYPTO</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.NVMENamespaceFeature"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMENamespaceFeature</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.NVMENamespaceFeature.THIN"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMENamespaceFeature.THIN</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMENamespaceFeature.MULTIPATH_SHARED"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMENamespaceFeature.MULTIPATH_SHARED</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMENamespaceFeature.FORMAT_PROGRESS"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMENamespaceFeature.FORMAT_PROGRESS</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMENamespaceFeature.ROTATIONAL"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMENamespaceFeature.ROTATIONAL</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.NVMESmartCriticalWarning"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMESmartCriticalWarning</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.NVMESmartCriticalWarning.SPARE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMESmartCriticalWarning.SPARE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMESmartCriticalWarning.VOLATILE_MEM"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMESmartCriticalWarning.VOLATILE_MEM</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMESmartCriticalWarning.TEMPERATURE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMESmartCriticalWarning.TEMPERATURE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMESmartCriticalWarning.PMR_READONLY"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMESmartCriticalWarning.PMR_READONLY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMESmartCriticalWarning.DEGRADED"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMESmartCriticalWarning.DEGRADED</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMESmartCriticalWarning.READONLY"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMESmartCriticalWarning.READONLY</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.NVMETechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMETechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.NVMETechMode.INFO"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMETechMode.INFO</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMETechMode.MANAGE"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMETechMode.MANAGE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.NVMETechMode.INITIATOR"><code class="docutils literal notranslate"><span class="pre">BlockDev.NVMETechMode.INITIATOR</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.PartTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.PartTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.PartTechMode.CREATE_TABLE"><code class="docutils literal notranslate"><span class="pre">BlockDev.PartTechMode.CREATE_TABLE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.PartTechMode.QUERY_PART"><code class="docutils literal notranslate"><span class="pre">BlockDev.PartTechMode.QUERY_PART</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.PartTechMode.MODIFY_TABLE"><code class="docutils literal notranslate"><span class="pre">BlockDev.PartTechMode.MODIFY_TABLE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.PartTechMode.QUERY_TABLE"><code class="docutils literal notranslate"><span class="pre">BlockDev.PartTechMode.QUERY_TABLE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.PartTechMode.MODIFY_PART"><code class="docutils literal notranslate"><span class="pre">BlockDev.PartTechMode.MODIFY_PART</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#BlockDev.SwapTechMode"><code class="docutils literal notranslate"><span class="pre">BlockDev.SwapTechMode</span></code></a><ul>
+<li><a class="reference internal" href="#BlockDev.SwapTechMode.CREATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.SwapTechMode.CREATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.SwapTechMode.ACTIVATE_DEACTIVATE"><code class="docutils literal notranslate"><span class="pre">BlockDev.SwapTechMode.ACTIVATE_DEACTIVATE</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.SwapTechMode.QUERY"><code class="docutils literal notranslate"><span class="pre">BlockDev.SwapTechMode.QUERY</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.SwapTechMode.SET_LABEL"><code class="docutils literal notranslate"><span class="pre">BlockDev.SwapTechMode.SET_LABEL</span></code></a></li>
+<li><a class="reference internal" href="#BlockDev.SwapTechMode.SET_UUID"><code class="docutils literal notranslate"><span class="pre">BlockDev.SwapTechMode.SET_UUID</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+  <div class="wy-grid-for-nav">
+
+    
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="main">
+            
+  <section id="flags">
+<h1>Flags<a class="headerlink" href="#flags" title="Permalink to this heading">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="#BlockDev.BtrfsTechMode" title="BlockDev.BtrfsTechMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.BtrfsTechMode</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.CryptoIntegrityOpenFlags" title="BlockDev.CryptoIntegrityOpenFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.CryptoIntegrityOpenFlags</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.CryptoTechMode" title="BlockDev.CryptoTechMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.CryptoTechMode</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.DMTechMode" title="BlockDev.DMTechMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.DMTechMode</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.FSConfigureFlags" title="BlockDev.FSConfigureFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.FSConfigureFlags</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.FSF2FSFeature" title="BlockDev.FSF2FSFeature"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.FSF2FSFeature</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.FSFeatureFlags" title="BlockDev.FSFeatureFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.FSFeatureFlags</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.FSFsckFlags" title="BlockDev.FSFsckFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.FSFsckFlags</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.FSMkfsOptionsFlags" title="BlockDev.FSMkfsOptionsFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.FSMkfsOptionsFlags</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.FSResizeFlags" title="BlockDev.FSResizeFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.FSResizeFlags</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.FSTechMode" title="BlockDev.FSTechMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.FSTechMode</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.LVMCachePoolFlags" title="BlockDev.LVMCachePoolFlags"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.LVMCachePoolFlags</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.LVMTechMode" title="BlockDev.LVMTechMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.LVMTechMode</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.LoopTechMode" title="BlockDev.LoopTechMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.LoopTechMode</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.MDTechMode" title="BlockDev.MDTechMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.MDTechMode</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.MpathTechMode" title="BlockDev.MpathTechMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.MpathTechMode</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.NVDIMMTechMode" title="BlockDev.NVDIMMTechMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.NVDIMMTechMode</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.NVMEControllerFeature" title="BlockDev.NVMEControllerFeature"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.NVMEControllerFeature</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.NVMENamespaceFeature" title="BlockDev.NVMENamespaceFeature"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.NVMENamespaceFeature</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.NVMESmartCriticalWarning" title="BlockDev.NVMESmartCriticalWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.NVMESmartCriticalWarning</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.NVMETechMode" title="BlockDev.NVMETechMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.NVMETechMode</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.PartTechMode" title="BlockDev.PartTechMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.PartTechMode</span></code></a></p></li>
+<li><p><a class="reference internal" href="#BlockDev.SwapTechMode" title="BlockDev.SwapTechMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockDev.SwapTechMode</span></code></a></p></li>
+</ul>
+<section id="details">
+<h2>Details<a class="headerlink" href="#details" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.BtrfsTechMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">BtrfsTechMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.BtrfsTechMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.BtrfsTechMode.CREATE">
+<span class="sig-name descname"><span class="pre">CREATE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.BtrfsTechMode.CREATE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.BtrfsTechMode.DELETE">
+<span class="sig-name descname"><span class="pre">DELETE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.BtrfsTechMode.DELETE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.BtrfsTechMode.MODIFY">
+<span class="sig-name descname"><span class="pre">MODIFY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.BtrfsTechMode.MODIFY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.BtrfsTechMode.QUERY">
+<span class="sig-name descname"><span class="pre">QUERY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#BlockDev.BtrfsTechMode.QUERY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.CryptoIntegrityOpenFlags">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">CryptoIntegrityOpenFlags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.CryptoIntegrityOpenFlags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.CryptoIntegrityOpenFlags.NO_JOURNAL">
+<span class="sig-name descname"><span class="pre">NO_JOURNAL</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.CryptoIntegrityOpenFlags.NO_JOURNAL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.CryptoIntegrityOpenFlags.RECALCULATE_RESET">
+<span class="sig-name descname"><span class="pre">RECALCULATE_RESET</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">16</span></em><a class="headerlink" href="#BlockDev.CryptoIntegrityOpenFlags.RECALCULATE_RESET" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.CryptoIntegrityOpenFlags.RECOVERY">
+<span class="sig-name descname"><span class="pre">RECOVERY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.CryptoIntegrityOpenFlags.RECOVERY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.CryptoIntegrityOpenFlags.ALLOW_DISCARDS">
+<span class="sig-name descname"><span class="pre">ALLOW_DISCARDS</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">32</span></em><a class="headerlink" href="#BlockDev.CryptoIntegrityOpenFlags.ALLOW_DISCARDS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.CryptoIntegrityOpenFlags.NO_JOURNAL_BITMAP">
+<span class="sig-name descname"><span class="pre">NO_JOURNAL_BITMAP</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.CryptoIntegrityOpenFlags.NO_JOURNAL_BITMAP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.CryptoIntegrityOpenFlags.RECALCULATE">
+<span class="sig-name descname"><span class="pre">RECALCULATE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#BlockDev.CryptoIntegrityOpenFlags.RECALCULATE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.CryptoTechMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">CryptoTechMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.CryptoTechMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.CryptoTechMode.CREATE">
+<span class="sig-name descname"><span class="pre">CREATE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.CryptoTechMode.CREATE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.CryptoTechMode.BACKUP_RESTORE">
+<span class="sig-name descname"><span class="pre">BACKUP_RESTORE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">128</span></em><a class="headerlink" href="#BlockDev.CryptoTechMode.BACKUP_RESTORE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.CryptoTechMode.REMOVE_KEY">
+<span class="sig-name descname"><span class="pre">REMOVE_KEY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">16</span></em><a class="headerlink" href="#BlockDev.CryptoTechMode.REMOVE_KEY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.CryptoTechMode.OPEN_CLOSE">
+<span class="sig-name descname"><span class="pre">OPEN_CLOSE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.CryptoTechMode.OPEN_CLOSE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.CryptoTechMode.MODIFY">
+<span class="sig-name descname"><span class="pre">MODIFY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">256</span></em><a class="headerlink" href="#BlockDev.CryptoTechMode.MODIFY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.CryptoTechMode.RESIZE">
+<span class="sig-name descname"><span class="pre">RESIZE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">32</span></em><a class="headerlink" href="#BlockDev.CryptoTechMode.RESIZE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.CryptoTechMode.QUERY">
+<span class="sig-name descname"><span class="pre">QUERY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.CryptoTechMode.QUERY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.CryptoTechMode.SUSPEND_RESUME">
+<span class="sig-name descname"><span class="pre">SUSPEND_RESUME</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">64</span></em><a class="headerlink" href="#BlockDev.CryptoTechMode.SUSPEND_RESUME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.CryptoTechMode.ADD_KEY">
+<span class="sig-name descname"><span class="pre">ADD_KEY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#BlockDev.CryptoTechMode.ADD_KEY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.DMTechMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">DMTechMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.DMTechMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.DMTechMode.CREATE_ACTIVATE">
+<span class="sig-name descname"><span class="pre">CREATE_ACTIVATE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.DMTechMode.CREATE_ACTIVATE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.DMTechMode.REMOVE_DEACTIVATE">
+<span class="sig-name descname"><span class="pre">REMOVE_DEACTIVATE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.DMTechMode.REMOVE_DEACTIVATE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.DMTechMode.QUERY">
+<span class="sig-name descname"><span class="pre">QUERY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.DMTechMode.QUERY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.FSConfigureFlags">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">FSConfigureFlags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.FSConfigureFlags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSConfigureFlags.LABEL">
+<span class="sig-name descname"><span class="pre">LABEL</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.FSConfigureFlags.LABEL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSConfigureFlags.UUID">
+<span class="sig-name descname"><span class="pre">UUID</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.FSConfigureFlags.UUID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.FSF2FSFeature">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">FSF2FSFeature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.FSF2FSFeature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSF2FSFeature.ENCRYPT">
+<span class="sig-name descname"><span class="pre">ENCRYPT</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.FSF2FSFeature.ENCRYPT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSF2FSFeature.VERITY">
+<span class="sig-name descname"><span class="pre">VERITY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1024</span></em><a class="headerlink" href="#BlockDev.FSF2FSFeature.VERITY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSF2FSFeature.QUOTA_INO">
+<span class="sig-name descname"><span class="pre">QUOTA_INO</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">128</span></em><a class="headerlink" href="#BlockDev.FSF2FSFeature.QUOTA_INO" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSF2FSFeature.PRJQUOTA">
+<span class="sig-name descname"><span class="pre">PRJQUOTA</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">16</span></em><a class="headerlink" href="#BlockDev.FSF2FSFeature.PRJQUOTA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSF2FSFeature.BLKZONED">
+<span class="sig-name descname"><span class="pre">BLKZONED</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.FSF2FSFeature.BLKZONED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSF2FSFeature.SB_CHKSUM">
+<span class="sig-name descname"><span class="pre">SB_CHKSUM</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2048</span></em><a class="headerlink" href="#BlockDev.FSF2FSFeature.SB_CHKSUM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSF2FSFeature.INODE_CRTIME">
+<span class="sig-name descname"><span class="pre">INODE_CRTIME</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">256</span></em><a class="headerlink" href="#BlockDev.FSF2FSFeature.INODE_CRTIME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSF2FSFeature.INODE_CHKSUM">
+<span class="sig-name descname"><span class="pre">INODE_CHKSUM</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">32</span></em><a class="headerlink" href="#BlockDev.FSF2FSFeature.INODE_CHKSUM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSF2FSFeature.ATOMIC_WRITE">
+<span class="sig-name descname"><span class="pre">ATOMIC_WRITE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.FSF2FSFeature.ATOMIC_WRITE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSF2FSFeature.LOST_FOUND">
+<span class="sig-name descname"><span class="pre">LOST_FOUND</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">512</span></em><a class="headerlink" href="#BlockDev.FSF2FSFeature.LOST_FOUND" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSF2FSFeature.FLEXIBLE_INLINE_XATTR">
+<span class="sig-name descname"><span class="pre">FLEXIBLE_INLINE_XATTR</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">64</span></em><a class="headerlink" href="#BlockDev.FSF2FSFeature.FLEXIBLE_INLINE_XATTR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSF2FSFeature.EXTRA_ATTR">
+<span class="sig-name descname"><span class="pre">EXTRA_ATTR</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#BlockDev.FSF2FSFeature.EXTRA_ATTR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.FSFeatureFlags">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">FSFeatureFlags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.FSFeatureFlags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSFeatureFlags.OWNERS">
+<span class="sig-name descname"><span class="pre">OWNERS</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.FSFeatureFlags.OWNERS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSFeatureFlags.PARTITION_TABLE">
+<span class="sig-name descname"><span class="pre">PARTITION_TABLE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.FSFeatureFlags.PARTITION_TABLE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.FSFsckFlags">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">FSFsckFlags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.FSFsckFlags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSFsckFlags.CHECK">
+<span class="sig-name descname"><span class="pre">CHECK</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.FSFsckFlags.CHECK" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSFsckFlags.REPAIR">
+<span class="sig-name descname"><span class="pre">REPAIR</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.FSFsckFlags.REPAIR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.FSMkfsOptionsFlags">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">FSMkfsOptionsFlags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.FSMkfsOptionsFlags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<p>Flags indicating mkfs options are available for given filesystem type.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSMkfsOptionsFlags.LABEL">
+<span class="sig-name descname"><span class="pre">LABEL</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.FSMkfsOptionsFlags.LABEL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSMkfsOptionsFlags.FORCE">
+<span class="sig-name descname"><span class="pre">FORCE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">16</span></em><a class="headerlink" href="#BlockDev.FSMkfsOptionsFlags.FORCE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSMkfsOptionsFlags.UUID">
+<span class="sig-name descname"><span class="pre">UUID</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.FSMkfsOptionsFlags.UUID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSMkfsOptionsFlags.NOPT">
+<span class="sig-name descname"><span class="pre">NOPT</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">32</span></em><a class="headerlink" href="#BlockDev.FSMkfsOptionsFlags.NOPT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSMkfsOptionsFlags.DRY_RUN">
+<span class="sig-name descname"><span class="pre">DRY_RUN</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.FSMkfsOptionsFlags.DRY_RUN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSMkfsOptionsFlags.NODISCARD">
+<span class="sig-name descname"><span class="pre">NODISCARD</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#BlockDev.FSMkfsOptionsFlags.NODISCARD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.FSResizeFlags">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">FSResizeFlags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.FSResizeFlags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<p>Flags indicating whether a filesystem resize action supports growing and/or
+shrinking if mounted or unmounted.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSResizeFlags.ONLINE_GROW">
+<span class="sig-name descname"><span class="pre">ONLINE_GROW</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">16</span></em><a class="headerlink" href="#BlockDev.FSResizeFlags.ONLINE_GROW" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSResizeFlags.OFFLINE_SHRINK">
+<span class="sig-name descname"><span class="pre">OFFLINE_SHRINK</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.FSResizeFlags.OFFLINE_SHRINK" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSResizeFlags.OFFLINE_GROW">
+<span class="sig-name descname"><span class="pre">OFFLINE_GROW</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.FSResizeFlags.OFFLINE_GROW" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSResizeFlags.ONLINE_SHRINK">
+<span class="sig-name descname"><span class="pre">ONLINE_SHRINK</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#BlockDev.FSResizeFlags.ONLINE_SHRINK" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.FSTechMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">FSTechMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.FSTechMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSTechMode.MKFS">
+<span class="sig-name descname"><span class="pre">MKFS</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.FSTechMode.MKFS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSTechMode.SET_UUID">
+<span class="sig-name descname"><span class="pre">SET_UUID</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">128</span></em><a class="headerlink" href="#BlockDev.FSTechMode.SET_UUID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSTechMode.SET_LABEL">
+<span class="sig-name descname"><span class="pre">SET_LABEL</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">16</span></em><a class="headerlink" href="#BlockDev.FSTechMode.SET_LABEL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSTechMode.WIPE">
+<span class="sig-name descname"><span class="pre">WIPE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.FSTechMode.WIPE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSTechMode.QUERY">
+<span class="sig-name descname"><span class="pre">QUERY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">32</span></em><a class="headerlink" href="#BlockDev.FSTechMode.QUERY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSTechMode.CHECK">
+<span class="sig-name descname"><span class="pre">CHECK</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.FSTechMode.CHECK" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSTechMode.RESIZE">
+<span class="sig-name descname"><span class="pre">RESIZE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">64</span></em><a class="headerlink" href="#BlockDev.FSTechMode.RESIZE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.FSTechMode.REPAIR">
+<span class="sig-name descname"><span class="pre">REPAIR</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#BlockDev.FSTechMode.REPAIR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.LVMCachePoolFlags">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">LVMCachePoolFlags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.LVMCachePoolFlags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.LVMCachePoolFlags.STRIPED">
+<span class="sig-name descname"><span class="pre">STRIPED</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.LVMCachePoolFlags.STRIPED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.LVMCachePoolFlags.META_STRIPED">
+<span class="sig-name descname"><span class="pre">META_STRIPED</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1024</span></em><a class="headerlink" href="#BlockDev.LVMCachePoolFlags.META_STRIPED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.LVMCachePoolFlags.RAID10">
+<span class="sig-name descname"><span class="pre">RAID10</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">16</span></em><a class="headerlink" href="#BlockDev.LVMCachePoolFlags.RAID10" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.LVMCachePoolFlags.META_RAID10">
+<span class="sig-name descname"><span class="pre">META_RAID10</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">16384</span></em><a class="headerlink" href="#BlockDev.LVMCachePoolFlags.META_RAID10" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.LVMCachePoolFlags.RAID1">
+<span class="sig-name descname"><span class="pre">RAID1</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.LVMCachePoolFlags.RAID1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.LVMCachePoolFlags.META_RAID1">
+<span class="sig-name descname"><span class="pre">META_RAID1</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2048</span></em><a class="headerlink" href="#BlockDev.LVMCachePoolFlags.META_RAID1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.LVMCachePoolFlags.RAID5">
+<span class="sig-name descname"><span class="pre">RAID5</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.LVMCachePoolFlags.RAID5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.LVMCachePoolFlags.META_RAID5">
+<span class="sig-name descname"><span class="pre">META_RAID5</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4096</span></em><a class="headerlink" href="#BlockDev.LVMCachePoolFlags.META_RAID5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.LVMCachePoolFlags.RAID6">
+<span class="sig-name descname"><span class="pre">RAID6</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#BlockDev.LVMCachePoolFlags.RAID6" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.LVMCachePoolFlags.META_RAID6">
+<span class="sig-name descname"><span class="pre">META_RAID6</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8192</span></em><a class="headerlink" href="#BlockDev.LVMCachePoolFlags.META_RAID6" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.LVMTechMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">LVMTechMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.LVMTechMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.LVMTechMode.CREATE">
+<span class="sig-name descname"><span class="pre">CREATE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.LVMTechMode.CREATE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.LVMTechMode.QUERY">
+<span class="sig-name descname"><span class="pre">QUERY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">16</span></em><a class="headerlink" href="#BlockDev.LVMTechMode.QUERY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.LVMTechMode.REMOVE">
+<span class="sig-name descname"><span class="pre">REMOVE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.LVMTechMode.REMOVE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.LVMTechMode.MODIFY">
+<span class="sig-name descname"><span class="pre">MODIFY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#BlockDev.LVMTechMode.MODIFY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.LoopTechMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">LoopTechMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.LoopTechMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.LoopTechMode.CREATE">
+<span class="sig-name descname"><span class="pre">CREATE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.LoopTechMode.CREATE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.LoopTechMode.DESTROY">
+<span class="sig-name descname"><span class="pre">DESTROY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.LoopTechMode.DESTROY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.LoopTechMode.MODIFY">
+<span class="sig-name descname"><span class="pre">MODIFY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.LoopTechMode.MODIFY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.LoopTechMode.QUERY">
+<span class="sig-name descname"><span class="pre">QUERY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#BlockDev.LoopTechMode.QUERY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.MDTechMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">MDTechMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.MDTechMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.MDTechMode.CREATE">
+<span class="sig-name descname"><span class="pre">CREATE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.MDTechMode.CREATE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.MDTechMode.DELETE">
+<span class="sig-name descname"><span class="pre">DELETE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.MDTechMode.DELETE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.MDTechMode.MODIFY">
+<span class="sig-name descname"><span class="pre">MODIFY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.MDTechMode.MODIFY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.MDTechMode.QUERY">
+<span class="sig-name descname"><span class="pre">QUERY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#BlockDev.MDTechMode.QUERY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.MpathTechMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">MpathTechMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.MpathTechMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.MpathTechMode.QUERY">
+<span class="sig-name descname"><span class="pre">QUERY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.MpathTechMode.QUERY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.MpathTechMode.MODIFY">
+<span class="sig-name descname"><span class="pre">MODIFY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.MpathTechMode.MODIFY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.NVDIMMTechMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">NVDIMMTechMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.NVDIMMTechMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVDIMMTechMode.CREATE">
+<span class="sig-name descname"><span class="pre">CREATE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.NVDIMMTechMode.CREATE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVDIMMTechMode.RECONFIGURE">
+<span class="sig-name descname"><span class="pre">RECONFIGURE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">16</span></em><a class="headerlink" href="#BlockDev.NVDIMMTechMode.RECONFIGURE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVDIMMTechMode.REMOVE">
+<span class="sig-name descname"><span class="pre">REMOVE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.NVDIMMTechMode.REMOVE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVDIMMTechMode.ACTIVATE_DEACTIVATE">
+<span class="sig-name descname"><span class="pre">ACTIVATE_DEACTIVATE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.NVDIMMTechMode.ACTIVATE_DEACTIVATE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVDIMMTechMode.QUERY">
+<span class="sig-name descname"><span class="pre">QUERY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#BlockDev.NVDIMMTechMode.QUERY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.NVMEControllerFeature">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">NVMEControllerFeature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.NVMEControllerFeature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMEControllerFeature.MULTIPORT">
+<span class="sig-name descname"><span class="pre">MULTIPORT</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.NVMEControllerFeature.MULTIPORT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMEControllerFeature.SANITIZE_BLOCK">
+<span class="sig-name descname"><span class="pre">SANITIZE_BLOCK</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1024</span></em><a class="headerlink" href="#BlockDev.NVMEControllerFeature.SANITIZE_BLOCK" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMEControllerFeature.SELFTEST">
+<span class="sig-name descname"><span class="pre">SELFTEST</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">128</span></em><a class="headerlink" href="#BlockDev.NVMEControllerFeature.SELFTEST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMEControllerFeature.MGMT_SMBUS">
+<span class="sig-name descname"><span class="pre">MGMT_SMBUS</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">131072</span></em><a class="headerlink" href="#BlockDev.NVMEControllerFeature.MGMT_SMBUS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMEControllerFeature.FORMAT">
+<span class="sig-name descname"><span class="pre">FORMAT</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">16</span></em><a class="headerlink" href="#BlockDev.NVMEControllerFeature.FORMAT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMEControllerFeature.STORAGE_DEVICE">
+<span class="sig-name descname"><span class="pre">STORAGE_DEVICE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">16384</span></em><a class="headerlink" href="#BlockDev.NVMEControllerFeature.STORAGE_DEVICE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMEControllerFeature.MULTICTRL">
+<span class="sig-name descname"><span class="pre">MULTICTRL</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.NVMEControllerFeature.MULTICTRL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMEControllerFeature.SANITIZE_OVERWRITE">
+<span class="sig-name descname"><span class="pre">SANITIZE_OVERWRITE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2048</span></em><a class="headerlink" href="#BlockDev.NVMEControllerFeature.SANITIZE_OVERWRITE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMEControllerFeature.SELFTEST_SINGLE">
+<span class="sig-name descname"><span class="pre">SELFTEST_SINGLE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">256</span></em><a class="headerlink" href="#BlockDev.NVMEControllerFeature.SELFTEST_SINGLE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMEControllerFeature.FORMAT_ALL_NS">
+<span class="sig-name descname"><span class="pre">FORMAT_ALL_NS</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">32</span></em><a class="headerlink" href="#BlockDev.NVMEControllerFeature.FORMAT_ALL_NS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMEControllerFeature.ENCLOSURE">
+<span class="sig-name descname"><span class="pre">ENCLOSURE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">32768</span></em><a class="headerlink" href="#BlockDev.NVMEControllerFeature.ENCLOSURE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMEControllerFeature.SRIOV">
+<span class="sig-name descname"><span class="pre">SRIOV</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.NVMEControllerFeature.SRIOV" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMEControllerFeature.SECURE_ERASE_ALL_NS">
+<span class="sig-name descname"><span class="pre">SECURE_ERASE_ALL_NS</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4096</span></em><a class="headerlink" href="#BlockDev.NVMEControllerFeature.SECURE_ERASE_ALL_NS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMEControllerFeature.SANITIZE_CRYPTO">
+<span class="sig-name descname"><span class="pre">SANITIZE_CRYPTO</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">512</span></em><a class="headerlink" href="#BlockDev.NVMEControllerFeature.SANITIZE_CRYPTO" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMEControllerFeature.NS_MGMT">
+<span class="sig-name descname"><span class="pre">NS_MGMT</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">64</span></em><a class="headerlink" href="#BlockDev.NVMEControllerFeature.NS_MGMT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMEControllerFeature.MGMT_PCIE">
+<span class="sig-name descname"><span class="pre">MGMT_PCIE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">65536</span></em><a class="headerlink" href="#BlockDev.NVMEControllerFeature.MGMT_PCIE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMEControllerFeature.ANA_REPORTING">
+<span class="sig-name descname"><span class="pre">ANA_REPORTING</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#BlockDev.NVMEControllerFeature.ANA_REPORTING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMEControllerFeature.SECURE_ERASE_CRYPTO">
+<span class="sig-name descname"><span class="pre">SECURE_ERASE_CRYPTO</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8192</span></em><a class="headerlink" href="#BlockDev.NVMEControllerFeature.SECURE_ERASE_CRYPTO" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.NVMENamespaceFeature">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">NVMENamespaceFeature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.NVMENamespaceFeature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMENamespaceFeature.THIN">
+<span class="sig-name descname"><span class="pre">THIN</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.NVMENamespaceFeature.THIN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMENamespaceFeature.MULTIPATH_SHARED">
+<span class="sig-name descname"><span class="pre">MULTIPATH_SHARED</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.NVMENamespaceFeature.MULTIPATH_SHARED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMENamespaceFeature.FORMAT_PROGRESS">
+<span class="sig-name descname"><span class="pre">FORMAT_PROGRESS</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.NVMENamespaceFeature.FORMAT_PROGRESS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMENamespaceFeature.ROTATIONAL">
+<span class="sig-name descname"><span class="pre">ROTATIONAL</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#BlockDev.NVMENamespaceFeature.ROTATIONAL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.NVMESmartCriticalWarning">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">NVMESmartCriticalWarning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.NVMESmartCriticalWarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMESmartCriticalWarning.SPARE">
+<span class="sig-name descname"><span class="pre">SPARE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.NVMESmartCriticalWarning.SPARE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMESmartCriticalWarning.VOLATILE_MEM">
+<span class="sig-name descname"><span class="pre">VOLATILE_MEM</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">16</span></em><a class="headerlink" href="#BlockDev.NVMESmartCriticalWarning.VOLATILE_MEM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMESmartCriticalWarning.TEMPERATURE">
+<span class="sig-name descname"><span class="pre">TEMPERATURE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.NVMESmartCriticalWarning.TEMPERATURE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMESmartCriticalWarning.PMR_READONLY">
+<span class="sig-name descname"><span class="pre">PMR_READONLY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">32</span></em><a class="headerlink" href="#BlockDev.NVMESmartCriticalWarning.PMR_READONLY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMESmartCriticalWarning.DEGRADED">
+<span class="sig-name descname"><span class="pre">DEGRADED</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.NVMESmartCriticalWarning.DEGRADED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMESmartCriticalWarning.READONLY">
+<span class="sig-name descname"><span class="pre">READONLY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#BlockDev.NVMESmartCriticalWarning.READONLY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.NVMETechMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">NVMETechMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.NVMETechMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMETechMode.INFO">
+<span class="sig-name descname"><span class="pre">INFO</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.NVMETechMode.INFO" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMETechMode.MANAGE">
+<span class="sig-name descname"><span class="pre">MANAGE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.NVMETechMode.MANAGE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.NVMETechMode.INITIATOR">
+<span class="sig-name descname"><span class="pre">INITIATOR</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.NVMETechMode.INITIATOR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.PartTechMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">PartTechMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.PartTechMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.PartTechMode.CREATE_TABLE">
+<span class="sig-name descname"><span class="pre">CREATE_TABLE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.PartTechMode.CREATE_TABLE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.PartTechMode.QUERY_PART">
+<span class="sig-name descname"><span class="pre">QUERY_PART</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">16</span></em><a class="headerlink" href="#BlockDev.PartTechMode.QUERY_PART" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.PartTechMode.MODIFY_TABLE">
+<span class="sig-name descname"><span class="pre">MODIFY_TABLE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.PartTechMode.MODIFY_TABLE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.PartTechMode.QUERY_TABLE">
+<span class="sig-name descname"><span class="pre">QUERY_TABLE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.PartTechMode.QUERY_TABLE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.PartTechMode.MODIFY_PART">
+<span class="sig-name descname"><span class="pre">MODIFY_PART</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#BlockDev.PartTechMode.MODIFY_PART" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="BlockDev.SwapTechMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">BlockDev.</span></span><span class="sig-name descname"><span class="pre">SwapTechMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#BlockDev.SwapTechMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="../GLib-2.0/flags.html#GLib.Flags" title="(in GLib 2.0 v2.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">GLib.Flags</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.SwapTechMode.CREATE">
+<span class="sig-name descname"><span class="pre">CREATE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#BlockDev.SwapTechMode.CREATE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.SwapTechMode.ACTIVATE_DEACTIVATE">
+<span class="sig-name descname"><span class="pre">ACTIVATE_DEACTIVATE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#BlockDev.SwapTechMode.ACTIVATE_DEACTIVATE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.SwapTechMode.QUERY">
+<span class="sig-name descname"><span class="pre">QUERY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#BlockDev.SwapTechMode.QUERY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.SwapTechMode.SET_LABEL">
+<span class="sig-name descname"><span class="pre">SET_LABEL</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#BlockDev.SwapTechMode.SET_LABEL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="BlockDev.SwapTechMode.SET_UUID">
+<span class="sig-name descname"><span class="pre">SET_UUID</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#BlockDev.SwapTechMode.SET_UUID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div> 
+
+</body>
+</html>
