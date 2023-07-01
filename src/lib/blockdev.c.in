@@ -41,7 +41,7 @@
  *
  */
 
-#define DEFAULT_CONF_DIR_PATH "/etc/libblockdev/conf.d/"
+#define DEFAULT_CONF_DIR_PATH "/etc/libblockdev/@MAJOR_VER@/conf.d/"
 
 static GMutex init_lock;
 static gboolean initialized = FALSE;

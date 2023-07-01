@@ -1,4 +1,4 @@
-libbdconfdir = $(sysconfdir)/libblockdev/conf.d
+libbdconfdir = $(sysconfdir)/libblockdev/@MAJOR_VER@/conf.d
 dist_libbdconf_DATA = ${srcdir}/00-default.cfg
 
 if WITH_LVM_DBUS

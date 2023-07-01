@@ -641,8 +641,8 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %{_libdir}/girepository*/BlockDev*.typelib
 %endif
 %dir %{_sysconfdir}/libblockdev
-%dir %{_sysconfdir}/libblockdev/conf.d
-%config %{_sysconfdir}/libblockdev/conf.d/00-default.cfg
+%dir %{_sysconfdir}/libblockdev/@MAJOR_VER@/conf.d
+%config %{_sysconfdir}/libblockdev/@MAJOR_VER@/conf.d/00-default.cfg
 
 %files devel
 %{_libdir}/libblockdev.so
@@ -751,7 +751,7 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %if %{with_lvm_dbus}
 %files lvm-dbus
 %{_libdir}/libbd_lvm-dbus.so.*
-%config %{_sysconfdir}/libblockdev/conf.d/10-lvm-dbus.cfg
+%config %{_sysconfdir}/libblockdev/@MAJOR_VER@/conf.d/10-lvm-dbus.cfg
 
 %files lvm-dbus-devel
 %{_libdir}/libbd_lvm-dbus.so
