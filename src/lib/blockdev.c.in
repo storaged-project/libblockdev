@@ -55,13 +55,13 @@ typedef void* (*LoadFunc) (const gchar *so_name);
 
 /* KEEP THE ORDERING OF THESE ARRAYS MATCHING THE BDPluginName ENUM! */
 static gchar * default_plugin_so[BD_PLUGIN_UNDEF] = {
-    "libbd_lvm.so."@MAJOR_VER@, "libbd_btrfs.so."@MAJOR_VER@,
-    "libbd_swap.so."@MAJOR_VER@, "libbd_loop.so."@MAJOR_VER@,
-    "libbd_crypto.so."@MAJOR_VER@, "libbd_mpath.so."@MAJOR_VER@,
-    "libbd_dm.so."@MAJOR_VER@, "libbd_mdraid.so."@MAJOR_VER@,
-    "libbd_s390.so."@MAJOR_VER@, "libbd_part.so."@MAJOR_VER@,
-    "libbd_fs.so."@MAJOR_VER@, "libbd_nvdimm.so."@MAJOR_VER@,
-    "libbd_nvme.so."@MAJOR_VER@
+    "libbd_lvm.so.@MAJOR_VER@", "libbd_btrfs.so.@MAJOR_VER@",
+    "libbd_swap.so.@MAJOR_VER@", "libbd_loop.so.@MAJOR_VER@",
+    "libbd_crypto.so.@MAJOR_VER@", "libbd_mpath.so.@MAJOR_VER@",
+    "libbd_dm.so.@MAJOR_VER@", "libbd_mdraid.so.@MAJOR_VER@",
+    "libbd_s390.so.@MAJOR_VER@", "libbd_part.so.@MAJOR_VER@",
+    "libbd_fs.so.@MAJOR_VER@", "libbd_nvdimm.so.@MAJOR_VER@",
+    "libbd_nvme.so.@MAJOR_VER@"
 };
 static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_LVM, NULL}, NULL},
