@@ -28,6 +28,10 @@
 #include <blockdev/utils.h>
 #include "loop.h"
 
+#ifndef LOOP_SET_BLOCK_SIZE
+#define LOOP_SET_BLOCK_SIZE	0x4C09
+#endif
+
 /**
  * SECTION: loop
  * @short_description: plugin for operations with loop devices
