@@ -248,8 +248,8 @@ AC_SUBST([MAJOR_VER], [\"2\"])
 
 CFLAGS="$CFLAGS -std=gnu99"
 
-AC_OUTPUT
 LIBBLOCKDEV_FAILURES
+AC_OUTPUT
 
 
 if test "x$with_python3" != "xno" -a "x$python3" != "xno"; then
