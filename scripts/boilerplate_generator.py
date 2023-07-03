@@ -144,6 +144,7 @@ def get_arg_names(args):
 
 def get_func_boilerplate(fn_info):
     call_args_str = ", ".join(get_arg_names(fn_info.args))
+    args_ann_unused = fn_info.args.replace(",", " G_GNUC_UNUSED,")
 
     if "int" in fn_info.rtype:
         default_ret = "0"
@@ -159,12 +160,12 @@ def get_func_boilerplate(fn_info):
         default_ret = 0
 
     # first add the stub function doing nothing and just reporting error
-    ret = ("static {0.rtype} {0.name}_stub ({0.args}) {{\n" +
+    ret = ("static {0.rtype} {0.name}_stub ({2}) {{\n" +
            "    g_critical (\"The function '{0.name}' called, but not implemented!\");\n" +
            "    g_set_error (error, BD_INIT_ERROR, BD_INIT_ERROR_NOT_IMPLEMENTED,\n"+
            "                \"The function '{0.name}' called, but not implemented!\");\n"
            "    return {1};\n"
-           "}}\n\n").format(fn_info, default_ret)
+           "}}\n\n").format(fn_info, default_ret, args_ann_unused)
 
     # then add a variable holding a reference to the dynamically loaded function
     # (if any) initialized to the stub
