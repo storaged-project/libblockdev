@@ -746,7 +746,6 @@ struct _BDCryptoKeyslotContext {
         } volume_key;
     } u;
 };
-typedef struct _BDCryptoKeyslotContext BDCryptoKeyslotContext;
 
 void bd_crypto_keyslot_context_free (BDCryptoKeyslotContext *context) {
     if (context == NULL)
