@@ -7,9 +7,11 @@ for details.
 **Full list of changes**
 
 Giulio Benetti (1):
+
 - loop: define LOOP_SET_BLOCK_SIZE is not defined
 
 Tomas Bzatek (6):
+
 - nvme: Mark private symbols as hidden
 - build: Exit before AC_OUTPUT on error
 - loop: Remove unused variable
@@ -18,6 +20,7 @@ Tomas Bzatek (6):
 - fs: Simplify struct BDFSInfo
 
 Vojtech Trefny (11):
+
 - vdo_stats: Remove unused libparted include
 - lvm: Make _vglock_start_stop static
 - lvm: Fix declaration for bd_lvm_vdolvpoolname
