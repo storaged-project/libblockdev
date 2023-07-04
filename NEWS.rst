@@ -1,3 +1,35 @@
+Libblockdev 3.0.1
+------------------
+
+New bugfix release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Full list of changes**
+
+Giulio Benetti (1):
+- loop: define LOOP_SET_BLOCK_SIZE is not defined
+
+Tomas Bzatek (6):
+- nvme: Mark private symbols as hidden
+- build: Exit before AC_OUTPUT on error
+- loop: Remove unused variable
+- crypto: Remove stray struct redefinition
+- boilerplate_generator: Annotate stub func args as G_GNUC_UNUSED
+- fs: Simplify struct BDFSInfo
+
+Vojtech Trefny (11):
+- vdo_stats: Remove unused libparted include
+- lvm: Make _vglock_start_stop static
+- lvm: Fix declaration for bd_lvm_vdolvpoolname
+- loop: Remove bd_loop_get_autoclear definition
+- lvm: Add bd_lvm_segdata_copy/free to the header file
+- fs: Add missing copy and free functions to the header file
+- misc: Update steps and Dockerfile for Python documentation
+- dist: Sync spec with downstream
+- spec: Add dependency on libblockdev-utils to the s390 plugin
+- configure: Fix MAJOR_VER macro
+- Make the conf.d directory versioned
+
 Libblockdev 3.0
 ---------------
 
