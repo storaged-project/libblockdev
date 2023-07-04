@@ -155,10 +155,10 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
 /**
  * BDFSInfo:
  * @type: filesystem identifier, must be present
+ * @mkfs_util: required utility for filesystem creation, "" if not needed and NULL for no support
  * @check_util: required utility for consistency checking, "" if not needed and NULL for no support
  * @repair_util: required utility for repair, "" if not needed and NULL for no support
  * @resize_util: required utility for resize, "" if not needed and NULL for no support
- * @resize_mode: resize availability flags, 0 if no support
  * @label_util: required utility for labelling, "" if not needed and NULL for no support
  * @info_util: required utility for getting information about the filesystem, "" if not needed and NULL for no support
  * @uuid_util: required utility for setting UUID, "" if not needed and NULL for no support
@@ -166,137 +166,113 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
 typedef struct BDFSInfo {
     const gchar *type;
     const gchar *mkfs_util;
-    BDFSMkfsOptionsFlags mkfs_options;
     const gchar *check_util;
     const gchar *repair_util;
     const gchar *resize_util;
-    BDFSResizeFlags resize_mode;
     const gchar *label_util;
     const gchar *info_util;
     const gchar *uuid_util;
 } BDFSInfo;
 
-static const BDFSInfo fs_info[BD_FS_LAST_FS] = {
+const BDFSInfo fs_info[BD_FS_LAST_FS] = {
     /* padding for BD_FS_TECH_GENERIC and MOUNT to make accessing the FS techs simpler */
     { 0 }, { 0 },
     /* EXT2 */
     { .type = "ext2",
       .mkfs_util = "mkfs.ext2",
-      .mkfs_options = fs_features[BD_FS_TECH_EXT2].mkfs,
       .check_util = "e2fsck",
       .repair_util = "e2fsck",
       .resize_util = "resize2fs",
-      .resize_mode = fs_features[BD_FS_TECH_EXT2].resize,
       .label_util = "tune2fs",
       .info_util = "dumpe2fs",
       .uuid_util = "tune2fs" },
     /* EXT3 */
     { .type = "ext3",
       .mkfs_util = "mkfs.ext3",
-      .mkfs_options = fs_features[BD_FS_TECH_EXT3].mkfs,
       .check_util = "e2fsck",
       .repair_util = "e2fsck",
       .resize_util = "resize2fs",
-      .resize_mode = fs_features[BD_FS_TECH_EXT3].resize,
       .label_util = "tune2fs",
       .info_util = "dumpe2fs",
       .uuid_util = "tune2fs" },
     /* EXT4 */
     { .type = "ext4",
       .mkfs_util = "mkfs.ext4",
-      .mkfs_options = fs_features[BD_FS_TECH_EXT4].mkfs,
       .check_util = "e2fsck",
       .repair_util = "e2fsck",
       .resize_util = "resize2fs",
-      .resize_mode = fs_features[BD_FS_TECH_EXT4].resize,
       .label_util = "tune2fs",
       .info_util = "dumpe2fs",
       .uuid_util = "tune2fs" },
     /* XFS */
     { .type = "xfs",
       .mkfs_util = "mkfs.xfs",
-      .mkfs_options = fs_features[BD_FS_TECH_XFS].mkfs,
       .check_util = "xfs_db",
       .repair_util = "xfs_repair",
       .resize_util = "xfs_growfs",
-      .resize_mode = fs_features[BD_FS_TECH_XFS].resize,
       .label_util = "xfs_admin",
       .info_util = "xfs_admin",
       .uuid_util = "xfs_admin" },
     /* VFAT */
     { .type = "vfat",
       .mkfs_util = "mkfs.vfat",
-      .mkfs_options = fs_features[BD_FS_TECH_VFAT].mkfs,
       .check_util = "fsck.vfat",
       .repair_util = "fsck.vfat",
       .resize_util = "vfat-resize",
-      .resize_mode = fs_features[BD_FS_TECH_VFAT].resize,
       .label_util = "fatlabel",
       .info_util = "fsck.vfat",
       .uuid_util = "fatlabel" },
     /* NTFS */
     { .type = "ntfs",
       .mkfs_util = "mkfs.ntfs",
-      .mkfs_options = fs_features[BD_FS_TECH_NTFS].mkfs,
       .check_util = "ntfsfix",
       .repair_util = "ntfsfix",
       .resize_util = "ntfsresize",
-      .resize_mode = fs_features[BD_FS_TECH_NTFS].resize,
       .label_util = "ntfslabel",
       .info_util = "ntfscluster",
       .uuid_util = "ntfslabel" },
     /* F2FS */
     { .type = "f2fs",
       .mkfs_util = "mkfs.f2fs",
-      .mkfs_options = fs_features[BD_FS_TECH_F2FS].mkfs,
       .check_util = "fsck.f2fs",
       .repair_util = "fsck.f2fs",
       .resize_util = "resize.f2fs",
-      .resize_mode = fs_features[BD_FS_TECH_F2FS].resize,
       .label_util = NULL,
       .info_util = "dump.f2fs",
       .uuid_util = NULL },
     /* NILFS2 */
     { .type = "nilfs2",
       .mkfs_util = "mkfs.nilfs2",
-      .mkfs_options = fs_features[BD_FS_TECH_NILFS2].mkfs,
       .check_util = NULL,
       .repair_util = NULL,
       .resize_util = "nilfs-resize",
-      .resize_mode = fs_features[BD_FS_TECH_NILFS2].resize,
       .label_util = "nilfs-tune",
       .info_util = "nilfs-tune",
       .uuid_util = "nilfs-tune" },
     /* EXFAT */
     { .type = "exfat",
       .mkfs_util = "mkfs.exfat",
-      .mkfs_options = fs_features[BD_FS_TECH_EXFAT].mkfs,
       .check_util = "fsck.exfat",
       .repair_util = "fsck.exfat",
       .resize_util = NULL,
-      .resize_mode = fs_features[BD_FS_TECH_EXFAT].resize,
       .label_util = "tune.exfat",
       .info_util = "tune.exfat",
       .uuid_util = "tune.exfat" },
     /* BTRFS */
     { .type = "btrfs",
       .mkfs_util = "mkfs.btrfs",
-      .mkfs_options = fs_features[BD_FS_TECH_BTRFS].mkfs,
       .check_util = "btrfsck",
       .repair_util = "btrfsck",
       .resize_util = "btrfs",
-      .resize_mode = fs_features[BD_FS_TECH_BTRFS].resize,
       .label_util = "btrfs",
       .info_util = "btrfs",
       .uuid_util = "btrfstune" },
     /* UDF */
     { .type = "udf",
       .mkfs_util = "mkudffs",
-      .mkfs_options = fs_features[BD_FS_TECH_UDF].mkfs,
       .check_util = NULL,
       .repair_util = NULL,
       .resize_util = NULL,
-      .resize_mode = fs_features[BD_FS_TECH_UDF].resize,
       .label_util = "udflabel",
       .info_util = "udfinfo",
       .uuid_util = "udflabel" },
@@ -1538,10 +1514,10 @@ static gboolean query_fs_operation (const gchar *fs_type, BDFSOpType op, gchar *
     }
 
     if (mode != NULL)
-        *mode = fsinfo->resize_mode;
+        *mode = fs_features[tech].resize;
 
     if (options != NULL)
-        *options = fsinfo->mkfs_options;
+        *options = fs_features[tech].mkfs;
 
     if (strlen (exec_util) == 0) { /* empty string if no util needed */
         return TRUE;

@@ -148,7 +148,6 @@ static gchar* _loop_get_backing_file (const gchar *dev_name, GError **error) {
 BDLoopInfo* bd_loop_info (const gchar *loop, GError **error) {
     BDLoopInfo *info = NULL;
     g_autofree gchar *dev_loop = NULL;
-    g_autofree gchar *sys_path = NULL;
     gint fd = -1;
     struct loop_info64 li64;
     GError *l_error = NULL;
