@@ -1,6 +1,6 @@
 # configure.ac for libblockdev
 
-AC_INIT([libblockdev], [3.0], [], [], [https://github.com/storaged-project/libblockdev])
+AC_INIT([libblockdev], [3.0.1], [], [], [https://github.com/storaged-project/libblockdev])
 
 # Disable building static libraries.
 # This needs to be set before initializing automake

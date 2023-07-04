@@ -77,7 +77,7 @@
 %define configure_opts %{?python3_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?tools_copts} %{?gi_copts} %{?nvme_copts}
 
 Name:        libblockdev
-Version:     3.0
+Version:     3.0.1
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPL-2.1-or-later
@@ -845,5 +845,25 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Tue Jul 04 2023 Vojtech Trefny <vtrefny@redhat.com> - 3.0.1-1
+- fs: Simplify struct BDFSInfo (tbzatek)
+- boilerplate_generator: Annotate stub func args as G_GNUC_UNUSED (tbzatek)
+- crypto: Remove stray struct redefinition (tbzatek)
+- loop: Remove unused variable (tbzatek)
+- build: Exit before AC_OUTPUT on error (tbzatek)
+- loop: define LOOP_SET_BLOCK_SIZE is not defined (giulio.benetti)
+- Make the conf.d directory versioned (vtrefny)
+- configure: Fix MAJOR_VER macro (vtrefny)
+- spec: Add dependency on libblockdev-utils to the s390 plugin (vtrefny)
+- nvme: Mark private symbols as hidden (tbzatek)
+- dist: Sync spec with downstream (vtrefny)
+- misc: Update steps and Dockerfile for Python documentation (vtrefny)
+- fs: Add missing copy and free functions to the header file (vtrefny)
+- lvm: Add bd_lvm_segdata_copy/free to the header file (vtrefny)
+- loop: Remove bd_loop_get_autoclear definition (vtrefny)
+- lvm: Fix declaration for bd_lvm_vdolvpoolname (vtrefny)
+- lvm: Make _vglock_start_stop static (vtrefny)
+- vdo_stats: Remove unused libparted include (vtrefny)
+
 * Fri Jun 23 2023 Vojtech Trefny <vtrefny@redhat.com> - 3.0-1
 - Libblockdev 3.0 release
