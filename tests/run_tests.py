@@ -273,7 +273,7 @@ if __name__ == '__main__':
     args = parse_args()
     if args.installed:
         os.environ['LIBBLOCKDEV_TESTS_SKIP_OVERRIDE'] = ''
-        os.environ['LIBBLOCKDEV_CONFIG_DIR'] = '/etc/libblockdev/conf.d/'
+        os.environ['LIBBLOCKDEV_CONFIG_DIR'] = '/etc/libblockdev/3/conf.d/'
     else:
         if 'LD_LIBRARY_PATH' not in os.environ and 'GI_TYPELIB_PATH' not in os.environ:
             os.environ['LD_LIBRARY_PATH'] = LIBDIRS

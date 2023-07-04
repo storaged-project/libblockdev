@@ -244,7 +244,7 @@ AS_IF([test "x$with_nvme" != "xno"],
       ],
       [])
 
-AC_SUBST([MAJOR_VER], [\"2\"])
+AC_SUBST([MAJOR_VER], [3])
 
 CFLAGS="$CFLAGS -std=gnu99"
 
