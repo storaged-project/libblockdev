@@ -15,7 +15,7 @@ libblockdev_la_CFLAGS += $(GOBJECT_CFLAGS)
 libblockdev_la_LIBADD += $(GOBJECT_LIBS)
 endif
 
-libblockdev_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 3:0:0 -Wl,--no-undefined
+libblockdev_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 3:0:0 -Wl,--no-undefined -export-symbols-regex '^bd_.*'
 libblockdev_la_CPPFLAGS = -I${builddir}/../../include/
 libblockdev_la_SOURCES = blockdev.c blockdev.h plugins.c plugins.h
 
