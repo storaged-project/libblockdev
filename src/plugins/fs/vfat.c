@@ -419,7 +419,7 @@ gboolean bd_fs_vfat_check_uuid (const gchar *uuid, GError **error) {
  * Tech category: %BD_FS_TECH_VFAT-%BD_FS_TECH_MODE_QUERY
  */
 BDFSVfatInfo* bd_fs_vfat_get_info (const gchar *device, GError **error) {
-    const gchar *args[4] = {"fsck.vfat", "-nv", device, NULL};
+    const gchar *args[] = {"sh", "-c", "fsck.vfat -nv \"$0\"; true", device, NULL};
     gboolean success = FALSE;
     BDFSVfatInfo *ret = NULL;
     gchar *output = NULL;
