@@ -229,7 +229,7 @@ const BDFSInfo fs_info[BD_FS_LAST_FS] = {
       .repair_util = "ntfsfix",
       .resize_util = "ntfsresize",
       .label_util = "ntfslabel",
-      .info_util = "ntfscluster",
+      .info_util = "ntfsinfo",
       .uuid_util = "ntfslabel" },
     /* F2FS */
     { .type = "f2fs",

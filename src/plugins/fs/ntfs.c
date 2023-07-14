@@ -20,6 +20,7 @@
 #include <blockdev/utils.h>
 #include <check_deps.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "ntfs.h"
 #include "fs.h"
@@ -36,8 +37,8 @@ static GMutex deps_check_lock;
 #define DEPS_NTFSRESIZE_MASK (1 << DEPS_NTFSRESIZE)
 #define DEPS_NTFSLABEL 3
 #define DEPS_NTFSLABEL_MASK (1 << DEPS_NTFSLABEL)
-#define DEPS_NTFSCLUSTER 4
-#define DEPS_NTFSCLUSTER_MASK (1 << DEPS_NTFSCLUSTER)
+#define DEPS_NTFSINFO 4
+#define DEPS_NTFSINFO_MASK (1 << DEPS_NTFSINFO)
 
 #define DEPS_LAST 5
 
@@ -46,7 +47,7 @@ static const UtilDep deps[DEPS_LAST] = {
     {"ntfsfix", NULL, NULL, NULL},
     {"ntfsresize", NULL, NULL, NULL},
     {"ntfslabel", NULL, NULL, NULL},
-    {"ntfscluster", NULL, NULL, NULL},
+    {"ntfsinfo", NULL, NULL, NULL},
 };
 
 static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
@@ -55,7 +56,7 @@ static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
     DEPS_NTFSFIX_MASK,      /* check */
     DEPS_NTFSFIX_MASK,      /* repair */
     DEPS_NTFSLABEL_MASK,    /* set-label */
-    DEPS_NTFSCLUSTER_MASK,  /* query */
+    DEPS_NTFSINFO_MASK,     /* query */
     DEPS_NTFSRESIZE_MASK,   /* resize */
     DEPS_NTFSLABEL_MASK     /* set-uuid */
 };
@@ -356,7 +357,7 @@ gboolean bd_fs_ntfs_resize (const gchar *device, guint64 new_size, GError **erro
  * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_QUERY
  */
 BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
-    const gchar *args[3] = {"ntfscluster", device, NULL};
+    const gchar *args[4] = {"ntfsinfo", "-m", device, NULL};
     gboolean success = FALSE;
     gchar *output = NULL;
     BDFSNtfsInfo *ret = NULL;
@@ -365,8 +366,9 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
     gchar *val_start = NULL;
     g_autofree gchar* mountpoint = NULL;
     GError *l_error = NULL;
+    size_t cluster_size = 0;
 
-    if (!check_deps (&avail_deps, DEPS_NTFSCLUSTER_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+    if (!check_deps (&avail_deps, DEPS_NTFSINFO_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return NULL;
 
     mountpoint = bd_fs_get_mountpoint (device, &l_error);
@@ -400,8 +402,9 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
     lines = g_strsplit (output, "\n", 0);
     g_free (output);
     line_p = lines;
+
     /* find the beginning of the (data) section we are interested in */
-    while (line_p && *line_p && !g_str_has_prefix (*line_p, "bytes per volume"))
+    while (line_p && *line_p && !strstr (*line_p, "Cluster Size"))
         line_p++;
     if (!line_p || !(*line_p)) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NTFS file system information");
@@ -410,12 +413,12 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
         return NULL;
     }
 
-    /* extract data from something like this: "bytes per volume        : 998240256" */
+    /* extract data from something like this: "Cluster Size: 4096" */
     val_start = strchr (*line_p, ':');
     val_start++;
-    ret->size = g_ascii_strtoull (val_start, NULL, 0);
+    cluster_size = g_ascii_strtoull (val_start, NULL, 0);
 
-    while (line_p && *line_p && !g_str_has_prefix (*line_p, "bytes of free space"))
+    while (line_p && *line_p && !strstr (*line_p, "Volume Size in Clusters"))
         line_p++;
     if (!line_p || !(*line_p)) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NTFS file system information");
@@ -424,10 +427,24 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
         return NULL;
     }
 
-    /* extract data from something like this: "bytes of free space     : 992759808" */
+    /* extract data from something like this: "Volume Size in Clusters: 15314943" */
     val_start = strchr (*line_p, ':');
     val_start++;
-    ret->free_space = g_ascii_strtoull (val_start, NULL, 0);
+    ret->size = g_ascii_strtoull (val_start, NULL, 0) * cluster_size;
+
+    while (line_p && *line_p && !strstr (*line_p, "Free Clusters"))
+        line_p++;
+    if (!line_p || !(*line_p)) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NTFS file system information");
+        g_strfreev (lines);
+        bd_fs_ntfs_info_free (ret);
+        return NULL;
+    }
+
+    /* extract data from something like this: "Free Clusters: 7812655 (51,0%)" */
+    val_start = strchr (*line_p, ':');
+    val_start++;
+    ret->free_space = g_ascii_strtoull (val_start, NULL, 0) * cluster_size;
 
     g_strfreev (lines);
 
