@@ -84,14 +84,14 @@ static gint8 compute_percents (guint8 pass_cur, guint8 pass_total, gint val_cur,
  *
  * Returns: Zero or positive number as a percentage, -1 if not a percentage, -2 on an error
  */
-static gint8 filter_line_fsck (const gchar * line, guint8 total_stages, GError **error) {
+static gint8 filter_line_fsck (const gchar * line, guint8 total_stages) {
     static GRegex *output_regex = NULL;
     GMatchInfo *match_info;
     gint8 perc = -1;
 
     if (output_regex == NULL) {
         /* Compile regular expression that matches to e2fsck progress output */
-        output_regex = g_regex_new ("^([0-9][0-9]*) ([0-9][0-9]*) ([0-9][0-9]*) (/.*)", 0, 0, error);
+        output_regex = g_regex_new ("^([0-9][0-9]*) ([0-9][0-9]*) ([0-9][0-9]*) (/.*)", 0, 0, NULL);
         if (output_regex == NULL) {
             return -2;
         }
@@ -131,12 +131,11 @@ static gint8 filter_line_fsck (const gchar * line, guint8 total_stages, GError *
 static gboolean extract_e2fsck_progress (const gchar *line, guint8 *completion) {
     /* A magic number 5, e2fsck has 5 stages, but this can't be read from the output in advance. */
     gint8 perc;
-    GError **error = NULL;
 
-    perc = filter_line_fsck (line, 5, error);
+    perc = filter_line_fsck (line, 5);
     if (perc < 0) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                         "An error occurred when trying to parse a line with progress");
+        bd_utils_log (BD_UTILS_LOG_ERR,
+                      "An error occurred when trying to parse a line with progress");
         return FALSE;
     }
 
