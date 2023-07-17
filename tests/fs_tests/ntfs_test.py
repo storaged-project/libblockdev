@@ -56,9 +56,9 @@ class NTFSTestAvailability(NTFSNoDevTestCase):
             with self.assertRaisesRegex(GLib.GError, "The 'ntfsfix' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS, BlockDev.FSTechMode.REPAIR)
 
-        # now try without ntfscluster
-        with utils.fake_path(all_but="ntfscluster"):
-            with self.assertRaisesRegex(GLib.GError, "The 'ntfscluster' utility is not available"):
+        # now try without ntfsinfo
+        with utils.fake_path(all_but="ntfsinfo"):
+            with self.assertRaisesRegex(GLib.GError, "The 'ntfsinfo' utility is not available"):
                 BlockDev.fs_is_tech_avail(BlockDev.FSTech.NTFS, BlockDev.FSTechMode.QUERY)
 
         # now try without ntfsresize
