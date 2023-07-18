@@ -1121,6 +1121,9 @@ static gboolean device_operation (const gchar *device, const gchar *fstype, BDFS
  * plugin based on provided or detected filesystem (e.g. bd_fs_xfs_resize for XFS).
  * This function will return an error for unknown/unsupported filesystems.
  *
+ * Note: This function will mount @device for filesystems that can be resized only
+ *       when mounted (like XFS or Btrfs).
+ *
  * Returns: whether the file system on @device was successfully resized or not
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_RESIZE
@@ -1208,6 +1211,9 @@ gboolean bd_fs_check_label (const gchar *fstype, const gchar *label, GError **er
  * plugin based on detected filesystem (e.g. bd_fs_xfs_set_label for XFS). This
  * function will return an error for unknown/unsupported filesystems.
  *
+ * Note: This function will mount @device for filesystems that need to be mounted
+ *       to set label (like btrfs).
+ *
  * Returns: whether the file system on @device was successfully relabeled or not
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_SET_LABEL
@@ -1268,6 +1274,9 @@ gboolean bd_fs_set_uuid (const gchar *device, const gchar *uuid, const gchar *fs
  * Get size for filesystem on @device. This calls other fs info functions from this
  * plugin based on detected filesystem (e.g. bd_fs_xfs_get_info for XFS). This
  * function will return an error for unknown/unsupported filesystems.
+ *
+ * Note: This function will mount @device for filesystems that need to be mounted
+ *       to gather information (like btrfs).
  *
  * Returns: size of filesystem on @device, 0 in case of error.
  *
