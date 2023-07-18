@@ -164,7 +164,8 @@ BDLoopInfo* bd_loop_info (const gchar *loop, GError **error) {
 
     memset (&li64, 0, sizeof (li64));
     if (ioctl (fd, LOOP_GET_STATUS64, &li64) < 0) {
-        g_set_error (error, BD_LOOP_ERROR, BD_LOOP_ERROR_FAIL,
+        g_set_error (error, BD_LOOP_ERROR,
+                     errno == ENXIO ? BD_LOOP_ERROR_DEVICE : BD_LOOP_ERROR_FAIL,
                      "Failed to get status of the device %s: %m", loop);
         close (fd);
         return NULL;
