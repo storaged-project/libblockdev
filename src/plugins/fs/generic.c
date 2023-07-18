@@ -618,6 +618,7 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
  * fs_mount:
  * @device: the device to mount for an FS operation
  * @fstype: (nullable): filesystem type on @device
+ * @read_only: whether to mount @device ro or rw
  * @unmount: (out): whether caller should unmount the device (was mounted by us) or
  *                  not (was already mounted before)
  * @error: (out) (optional): place to store error (if any)
@@ -629,7 +630,7 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
  *
  * Returns: (transfer full): mountpoint @device is mounted at (or %NULL in case of error)
  */
-static gchar* fs_mount (const gchar *device, gchar *fstype, gboolean *unmount, GError **error) {
+static gchar* fs_mount (const gchar *device, gchar *fstype, gboolean read_only, gboolean *unmount, GError **error) {
     gchar *mountpoint = NULL;
     gboolean ret = FALSE;
     GError *l_error = NULL;
@@ -645,7 +646,7 @@ static gchar* fs_mount (const gchar *device, gchar *fstype, gboolean *unmount, G
                              "Failed to create temporary directory for mounting '%s'.", device);
                 return NULL;
             }
-            ret = bd_fs_mount (device, mountpoint, fstype, NULL, NULL, &l_error);
+            ret = bd_fs_mount (device, mountpoint, fstype, read_only ? "ro" : NULL, NULL, &l_error);
             if (!ret) {
                 g_propagate_prefixed_error (error, l_error, "Failed to mount '%s': ", device);
                 g_free (mountpoint);
@@ -685,7 +686,7 @@ static gboolean xfs_resize_device (const gchar *device, guint64 new_size, const 
     GError *local_error = NULL;
     BDFSXfsInfo* xfs_info = NULL;
 
-    mountpoint = fs_mount (device, "xfs", &unmount, error);
+    mountpoint = fs_mount (device, "xfs", FALSE, &unmount, error);
     if (!mountpoint)
         return FALSE;
 
@@ -747,7 +748,7 @@ static gboolean nilfs2_resize_device (const gchar *device, guint64 new_size, GEr
     gboolean unmount = FALSE;
     GError *local_error = NULL;
 
-    mountpoint = fs_mount (device, "nilfs2", &unmount, error);
+    mountpoint = fs_mount (device, "nilfs2", FALSE, &unmount, error);
     if (!mountpoint)
         return FALSE;
 
@@ -781,7 +782,7 @@ static BDFSBtrfsInfo* btrfs_get_info (const gchar *device, GError **error) {
     GError *local_error = NULL;
     BDFSBtrfsInfo* btrfs_info = NULL;
 
-    mountpoint = fs_mount (device, "btrfs", &unmount, error);
+    mountpoint = fs_mount (device, "btrfs", TRUE, &unmount, error);
     if (!mountpoint)
         return NULL;
 
@@ -816,7 +817,7 @@ static gboolean btrfs_resize_device (const gchar *device, guint64 new_size, GErr
     gboolean unmount = FALSE;
     GError *local_error = NULL;
 
-    mountpoint = fs_mount (device, "btrfs", &unmount, error);
+    mountpoint = fs_mount (device, "btrfs", FALSE, &unmount, error);
     if (!mountpoint)
         return FALSE;
 
@@ -850,7 +851,7 @@ static gboolean btrfs_set_label (const gchar *device, const gchar *label, GError
     gboolean unmount = FALSE;
     GError *local_error = NULL;
 
-    mountpoint = fs_mount (device, "btrfs", &unmount, error);
+    mountpoint = fs_mount (device, "btrfs", FALSE, &unmount, error);
     if (!mountpoint)
         return FALSE;
 
@@ -1120,6 +1121,9 @@ static gboolean device_operation (const gchar *device, const gchar *fstype, BDFS
  * plugin based on provided or detected filesystem (e.g. bd_fs_xfs_resize for XFS).
  * This function will return an error for unknown/unsupported filesystems.
  *
+ * Note: This function will mount @device for filesystems that can be resized only
+ *       when mounted (like XFS or Btrfs).
+ *
  * Returns: whether the file system on @device was successfully resized or not
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_RESIZE
@@ -1207,6 +1211,9 @@ gboolean bd_fs_check_label (const gchar *fstype, const gchar *label, GError **er
  * plugin based on detected filesystem (e.g. bd_fs_xfs_set_label for XFS). This
  * function will return an error for unknown/unsupported filesystems.
  *
+ * Note: This function will mount @device for filesystems that need to be mounted
+ *       to set label (like btrfs).
+ *
  * Returns: whether the file system on @device was successfully relabeled or not
  *
  * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_SET_LABEL
@@ -1267,6 +1274,9 @@ gboolean bd_fs_set_uuid (const gchar *device, const gchar *uuid, const gchar *fs
  * Get size for filesystem on @device. This calls other fs info functions from this
  * plugin based on detected filesystem (e.g. bd_fs_xfs_get_info for XFS). This
  * function will return an error for unknown/unsupported filesystems.
+ *
+ * Note: This function will mount @device for filesystems that need to be mounted
+ *       to gather information (like btrfs).
  *
  * Returns: size of filesystem on @device, 0 in case of error.
  *
