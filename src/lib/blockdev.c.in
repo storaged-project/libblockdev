@@ -296,7 +296,7 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload, g
 
         g_sequence_free (config_files);
     } else
-        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to load config files: %s. Using the built-in config",
+        bd_utils_log_format (BD_UTILS_LOG_INFO, "Failed to load config files: %s. Using the built-in config",
                              error->message);
     g_clear_error (&error);
 
