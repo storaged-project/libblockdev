@@ -77,7 +77,7 @@
 %define configure_opts %{?python3_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?tools_copts} %{?gi_copts} %{?nvme_copts}
 
 Name:        libblockdev
-Version:     3.0.1
+Version:     3.0.2
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPL-2.1-or-later
@@ -845,6 +845,18 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Thu Jul 20 2023 Vojtech Trefny <vtrefny@redhat.com> - 3.0.2-1
+- fs: Avoid excess logging in extract_e2fsck_progress (vtrefny)
+- loop: Report BD_LOOP_ERROR_DEVICE on empty loop devices (tbzatek)
+- lib: Silence the missing DEFAULT_CONF_DIR_PATH (tbzatek)
+- fs: Document that generic functions can mount filesystems (vtrefny)
+- fs: Use read-only mount where possible for generic FS functions (vtrefny)
+- docs: Fix test quotation (marecki)
+- fs: Fix unused error in extract_e2fsck_progress (vtrefny)
+- Use ntfsinfo instead of ntfscluster for faster bd_fs_ntfs_get_info (amubtdx)
+- Restrict list of exported symbols via -export-symbols-regex (biebl)
+- Fix formatting in NEWS.rst (vtrefny)
+
 * Tue Jul 04 2023 Vojtech Trefny <vtrefny@redhat.com> - 3.0.1-1
 - fs: Simplify struct BDFSInfo (tbzatek)
 - boilerplate_generator: Annotate stub func args as G_GNUC_UNUSED (tbzatek)
