@@ -10,6 +10,10 @@ from packaging.version import Version
 
 import overrides_hack
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, mount, umount, run_command, TestTags, tag_test
+
+import gi
+gi.require_version('GLib', '2.0')
+gi.require_version('BlockDev', '3.0')
 from gi.repository import GLib, BlockDev
 
 TEST_MNT = "/tmp/libblockdev_test_mnt"

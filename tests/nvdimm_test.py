@@ -7,7 +7,11 @@ import overrides_hack
 from packaging.version import Version
 
 from utils import run_command, read_file, fake_path, TestTags, tag_test
-from gi.repository import BlockDev, GLib
+
+import gi
+gi.require_version('GLib', '2.0')
+gi.require_version('BlockDev', '3.0')
+from gi.repository import GLib, BlockDev
 
 
 class NVDIMMTestCase(unittest.TestCase):

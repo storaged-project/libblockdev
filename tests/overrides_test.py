@@ -1,6 +1,9 @@
 import unittest
 import math
 import overrides_hack
+
+import gi
+gi.require_version('BlockDev', '3.0')
 from gi.repository import BlockDev
 
 from utils import TestTags, tag_test

@@ -4,7 +4,10 @@ import os
 import overrides_hack
 from utils import fake_utils, create_sparse_tempfile, create_lio_device, delete_lio_device, run_command, TestTags, tag_test, read_file
 
-from gi.repository import BlockDev, GLib
+import gi
+gi.require_version('GLib', '2.0')
+gi.require_version('BlockDev', '3.0')
+from gi.repository import GLib, BlockDev
 
 
 class UtilsTestCase(unittest.TestCase):

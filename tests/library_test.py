@@ -4,6 +4,9 @@ import re
 import overrides_hack
 from utils import fake_path, TestTags, tag_test
 
+import gi
+gi.require_version('GLib', '2.0')
+gi.require_version('BlockDev', '3.0')
 from gi.repository import GLib, BlockDev
 
 

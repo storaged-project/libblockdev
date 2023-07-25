@@ -4,10 +4,13 @@ import re
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, TestTags, tag_test, run_command
 import overrides_hack
 
-from gi.repository import BlockDev, GLib
 from bytesize.bytesize import Size, ROUND_UP
 from packaging.version import Version
 
+import gi
+gi.require_version('GLib', '2.0')
+gi.require_version('BlockDev', '3.0')
+from gi.repository import GLib, BlockDev
 
 class PartTestCase(unittest.TestCase):
 
