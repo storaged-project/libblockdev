@@ -193,11 +193,11 @@ class UtilsExecLoggingTest(UtilsTestCase):
         cnt = 65536
         succ, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", "for i in {1..%d}; do echo -n .; done" % cnt])
         self.assertTrue(succ)
-        self.assertEquals(len(out), cnt)
+        self.assertEqual(len(out), cnt)
 
         succ, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", "for i in {1..%d}; do echo -n .; echo -n \# >&2; done" % cnt])
         self.assertTrue(succ)
-        self.assertEquals(len(out), cnt)
+        self.assertEqual(len(out), cnt)
 
         # now exceed the system pipe buffer size
         # pipe(7): The maximum size (in bytes) of individual pipes that can be set by users without the CAP_SYS_RESOURCE capability.
@@ -206,11 +206,11 @@ class UtilsExecLoggingTest(UtilsTestCase):
 
         succ, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", "for i in {1..%d}; do echo -n .; done" % cnt])
         self.assertTrue(succ)
-        self.assertEquals(len(out), cnt)
+        self.assertEqual(len(out), cnt)
 
         succ, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", "for i in {1..%d}; do echo -n .; echo -n \# >&2; done" % cnt])
         self.assertTrue(succ)
-        self.assertEquals(len(out), cnt)
+        self.assertEqual(len(out), cnt)
 
         # make use of some newlines
         succ, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", "for i in {1..%d}; do echo -n .; if [ $(($i%%500)) -eq 0 ]; then echo ''; fi; done" % cnt])
