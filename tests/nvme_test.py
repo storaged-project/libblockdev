@@ -67,10 +67,10 @@ class NVMeTestCase(NVMeTest):
     def test_ns_info(self):
         """Test namespace info"""
 
-        with self.assertRaisesRegexp(GLib.GError, r".*Failed to open device .*': No such file or directory"):
+        with self.assertRaisesRegex(GLib.GError, r".*Failed to open device .*': No such file or directory"):
             BlockDev.nvme_get_namespace_info("/dev/nonexistent")
 
-        with self.assertRaisesRegexp(GLib.GError, r"Error getting Namespace Identifier \(NSID\): Inappropriate ioctl for device"):
+        with self.assertRaisesRegex(GLib.GError, r"Error getting Namespace Identifier \(NSID\): Inappropriate ioctl for device"):
             BlockDev.nvme_get_namespace_info(self.nvme_dev)
 
         # not much information can be gathered from loop-based NVMe target devices...
@@ -97,7 +97,7 @@ class NVMeTestCase(NVMeTest):
     def test_ctrl_info(self):
         """Test controller info"""
 
-        with self.assertRaisesRegexp(GLib.GError, r".*Failed to open device .*': No such file or directory"):
+        with self.assertRaisesRegex(GLib.GError, r".*Failed to open device .*': No such file or directory"):
             BlockDev.nvme_get_controller_info("/dev/nonexistent")
 
         info = BlockDev.nvme_get_controller_info(self.nvme_dev)
@@ -140,7 +140,7 @@ class NVMeTestCase(NVMeTest):
     def test_smart_log(self):
         """Test SMART health log"""
 
-        with self.assertRaisesRegexp(GLib.GError, r".*Failed to open device .*': No such file or directory"):
+        with self.assertRaisesRegex(GLib.GError, r".*Failed to open device .*': No such file or directory"):
             BlockDev.nvme_get_smart_log("/dev/nonexistent")
 
         log = BlockDev.nvme_get_smart_log(self.nvme_dev)
@@ -173,7 +173,7 @@ class NVMeTestCase(NVMeTest):
     def test_error_log(self):
         """Test error log retrieval"""
 
-        with self.assertRaisesRegexp(GLib.GError, r".*Failed to open device .*': No such file or directory"):
+        with self.assertRaisesRegex(GLib.GError, r".*Failed to open device .*': No such file or directory"):
             BlockDev.nvme_get_error_log_entries("/dev/nonexistent")
 
         log = BlockDev.nvme_get_error_log_entries(self.nvme_dev)
@@ -185,11 +185,11 @@ class NVMeTestCase(NVMeTest):
     def test_self_test_log(self):
         """Test self-test log retrieval"""
 
-        with self.assertRaisesRegexp(GLib.GError, r".*Failed to open device .*': No such file or directory"):
+        with self.assertRaisesRegex(GLib.GError, r".*Failed to open device .*': No such file or directory"):
             BlockDev.nvme_get_self_test_log("/dev/nonexistent")
 
         message = r"NVMe Get Log Page - Device Self-test Log command error: Invalid Field in Command: A reserved coded value or an unsupported value in a defined field|NVMe Get Log Page - Device Self-test Log command error: unrecognized"
-        with self.assertRaisesRegexp(GLib.GError, message):
+        with self.assertRaisesRegex(GLib.GError, message):
             # Cannot retrieve self-test log on a nvme target loop devices
             BlockDev.nvme_get_self_test_log(self.nvme_dev)
 
@@ -209,34 +209,34 @@ class NVMeTestCase(NVMeTest):
     def test_self_test(self):
         """Test issuing the self-test command"""
 
-        with self.assertRaisesRegexp(GLib.GError, r".*Failed to open device .*': No such file or directory"):
+        with self.assertRaisesRegex(GLib.GError, r".*Failed to open device .*': No such file or directory"):
             BlockDev.nvme_device_self_test("/dev/nonexistent", BlockDev.NVMESelfTestAction.SHORT)
 
         message = r"Invalid value specified for the self-test action"
-        with self.assertRaisesRegexp(GLib.GError, message):
+        with self.assertRaisesRegex(GLib.GError, message):
             BlockDev.nvme_device_self_test(self.nvme_dev, BlockDev.NVMESelfTestAction.NOT_RUNNING)
-        with self.assertRaisesRegexp(GLib.GError, message):
+        with self.assertRaisesRegex(GLib.GError, message):
             BlockDev.nvme_device_self_test(self.nvme_ns_dev, BlockDev.NVMESelfTestAction.NOT_RUNNING)
 
         message = r"NVMe Device Self-test command error: Invalid Command Opcode: A reserved coded value or an unsupported value in the command opcode field|NVMe Device Self-test command error: Invalid Queue Identifier: The creation of the I/O Completion Queue failed due to an invalid queue identifier specified as part of the command"
-        with self.assertRaisesRegexp(GLib.GError, message):
+        with self.assertRaisesRegex(GLib.GError, message):
             BlockDev.nvme_device_self_test(self.nvme_dev, BlockDev.NVMESelfTestAction.SHORT)
-        with self.assertRaisesRegexp(GLib.GError, message):
+        with self.assertRaisesRegex(GLib.GError, message):
             BlockDev.nvme_device_self_test(self.nvme_ns_dev, BlockDev.NVMESelfTestAction.SHORT)
 
-        with self.assertRaisesRegexp(GLib.GError, message):
+        with self.assertRaisesRegex(GLib.GError, message):
             BlockDev.nvme_device_self_test(self.nvme_dev, BlockDev.NVMESelfTestAction.EXTENDED)
-        with self.assertRaisesRegexp(GLib.GError, message):
+        with self.assertRaisesRegex(GLib.GError, message):
             BlockDev.nvme_device_self_test(self.nvme_ns_dev, BlockDev.NVMESelfTestAction.EXTENDED)
 
-        with self.assertRaisesRegexp(GLib.GError, message):
+        with self.assertRaisesRegex(GLib.GError, message):
             BlockDev.nvme_device_self_test(self.nvme_dev, BlockDev.NVMESelfTestAction.VENDOR_SPECIFIC)
-        with self.assertRaisesRegexp(GLib.GError, message):
+        with self.assertRaisesRegex(GLib.GError, message):
             BlockDev.nvme_device_self_test(self.nvme_ns_dev, BlockDev.NVMESelfTestAction.VENDOR_SPECIFIC)
 
-        with self.assertRaisesRegexp(GLib.GError, message):
+        with self.assertRaisesRegex(GLib.GError, message):
             BlockDev.nvme_device_self_test(self.nvme_dev, BlockDev.NVMESelfTestAction.ABORT)
-        with self.assertRaisesRegexp(GLib.GError, message):
+        with self.assertRaisesRegex(GLib.GError, message):
             BlockDev.nvme_device_self_test(self.nvme_ns_dev, BlockDev.NVMESelfTestAction.ABORT)
 
 
@@ -244,20 +244,20 @@ class NVMeTestCase(NVMeTest):
     def test_format(self):
         """Test issuing the format command"""
 
-        with self.assertRaisesRegexp(GLib.GError, r".*Failed to open device .*': No such file or directory"):
+        with self.assertRaisesRegex(GLib.GError, r".*Failed to open device .*': No such file or directory"):
             BlockDev.nvme_format("/dev/nonexistent", 0, 0, BlockDev.NVMEFormatSecureErase.NONE)
 
         message = r"Couldn't match desired LBA data block size in a device supported LBA format data sizes"
-        with self.assertRaisesRegexp(GLib.GError, message):
+        with self.assertRaisesRegex(GLib.GError, message):
             BlockDev.nvme_format(self.nvme_ns_dev, 123, 0, BlockDev.NVMEFormatSecureErase.NONE)
-        with self.assertRaisesRegexp(GLib.GError, message):
+        with self.assertRaisesRegex(GLib.GError, message):
             BlockDev.nvme_format(self.nvme_dev, 123, 0, BlockDev.NVMEFormatSecureErase.NONE)
 
         # format doesn't really work on the kernel loop target
         message = r"Format NVM command error: Invalid Command Opcode: A reserved coded value or an unsupported value in the command opcode field|Format NVM command error: Invalid Queue Identifier: The creation of the I/O Completion Queue failed due to an invalid queue identifier specified as part of the command"
-        with self.assertRaisesRegexp(GLib.GError, message):
+        with self.assertRaisesRegex(GLib.GError, message):
             BlockDev.nvme_format(self.nvme_ns_dev, 0, 0, BlockDev.NVMEFormatSecureErase.NONE)
-        with self.assertRaisesRegexp(GLib.GError, message):
+        with self.assertRaisesRegex(GLib.GError, message):
             BlockDev.nvme_format(self.nvme_dev, 0, 0, BlockDev.NVMEFormatSecureErase.NONE)
 
 
@@ -265,14 +265,14 @@ class NVMeTestCase(NVMeTest):
     def test_sanitize_log(self):
         """Test sanitize log retrieval"""
 
-        with self.assertRaisesRegexp(GLib.GError, r".*Failed to open device .*': No such file or directory"):
+        with self.assertRaisesRegex(GLib.GError, r".*Failed to open device .*': No such file or directory"):
             BlockDev.nvme_get_sanitize_log("/dev/nonexistent")
 
         message = r"NVMe Get Log Page - Sanitize Status Log command error: Invalid Field in Command: A reserved coded value or an unsupported value in a defined field|NVMe Get Log Page - Sanitize Status Log command error: unrecognized"
-        with self.assertRaisesRegexp(GLib.GError, message):
+        with self.assertRaisesRegex(GLib.GError, message):
             # Cannot retrieve sanitize log on a nvme target loop devices
             BlockDev.nvme_get_sanitize_log(self.nvme_dev)
-        with self.assertRaisesRegexp(GLib.GError, message):
+        with self.assertRaisesRegex(GLib.GError, message):
             BlockDev.nvme_get_sanitize_log(self.nvme_ns_dev)
 
 
@@ -281,14 +281,14 @@ class NVMeTestCase(NVMeTest):
         """Test issuing the sanitize command"""
 
         message = r".*Failed to open device .*': No such file or directory"
-        with self.assertRaisesRegexp(GLib.GError, message):
+        with self.assertRaisesRegex(GLib.GError, message):
             BlockDev.nvme_sanitize("/dev/nonexistent", BlockDev.NVMESanitizeAction.BLOCK_ERASE, False, 0, 0, False)
 
         message = r"Sanitize command error: Invalid Command Opcode: A reserved coded value or an unsupported value in the command opcode field|Sanitize command error: Invalid Queue Identifier: The creation of the I/O Completion Queue failed due to an invalid queue identifier specified as part of the command"
         for i in [BlockDev.NVMESanitizeAction.BLOCK_ERASE, BlockDev.NVMESanitizeAction.CRYPTO_ERASE, BlockDev.NVMESanitizeAction.OVERWRITE, BlockDev.NVMESanitizeAction.EXIT_FAILURE]:
-            with self.assertRaisesRegexp(GLib.GError, message):
+            with self.assertRaisesRegex(GLib.GError, message):
                 BlockDev.nvme_sanitize(self.nvme_dev, i, False, 0, 0, False)
-            with self.assertRaisesRegexp(GLib.GError, message):
+            with self.assertRaisesRegex(GLib.GError, message):
                 BlockDev.nvme_sanitize(self.nvme_ns_dev, i, False, 0, 0, False)
 
 
@@ -349,16 +349,16 @@ class NVMeFabricsTestCase(NVMeTest):
         self.assertEqual(len(ctrls), 0)
 
         # nothing to disconnect
-        with self.assertRaisesRegexp(GLib.GError, r"No subsystems matching '.*' NQN found."):
+        with self.assertRaisesRegex(GLib.GError, r"No subsystems matching '.*' NQN found."):
             BlockDev.nvme_disconnect(self.SUBNQN)
 
         # nothing to connect to
         msg = r'Error connecting the controller: '
-        with self.assertRaisesRegexp(GLib.GError, msg):
+        with self.assertRaisesRegex(GLib.GError, msg):
             BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, self.hostnqn, None)
-        with self.assertRaisesRegexp(GLib.GError, msg):
+        with self.assertRaisesRegex(GLib.GError, msg):
             BlockDev.nvme_connect(self.SUBNQN, 'loop', '127.0.0.1', None, None, None, self.hostnqn, None)
-        with self.assertRaisesRegexp(GLib.GError, msg):
+        with self.assertRaisesRegex(GLib.GError, msg):
             BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, None, None)
 
         self._setup_target(1)
@@ -391,9 +391,9 @@ class NVMeFabricsTestCase(NVMeTest):
             self.assertTrue(os.path.exists(c))
 
         # disconnect
-        with self.assertRaisesRegexp(GLib.GError, r"No subsystems matching '.*' NQN found."):
+        with self.assertRaisesRegex(GLib.GError, r"No subsystems matching '.*' NQN found."):
             BlockDev.nvme_disconnect(self.SUBNQN + "xx")
-        with self.assertRaisesRegexp(GLib.GError, r"No controllers matching the /dev/nvme.*xx device name found."):
+        with self.assertRaisesRegex(GLib.GError, r"No controllers matching the /dev/nvme.*xx device name found."):
             BlockDev.nvme_disconnect_by_path(ctrls[0] + "xx")
         # should disconnect both connections as long the SUBNQN matches
         BlockDev.nvme_disconnect(self.SUBNQN)

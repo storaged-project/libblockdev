@@ -948,7 +948,7 @@ class CryptoTestInfo(CryptoTestCase):
                 self.fail("Failed to get LUKS 2 offset information from %s:\n%s %s" % (self.loop_dev, out, err))
             offset = int(m.group(1))
 
-        self.assertEquals(info.metadata_size, offset)
+        self.assertEqual(info.metadata_size, offset)
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
     def test_luks_info(self):
