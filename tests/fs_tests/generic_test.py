@@ -1045,7 +1045,39 @@ class GenericResize(GenericTestCase):
         """Test generic resize function with an btrfs file system"""
         if not self.btrfs_avail:
             self.skipTest("skipping Btrfs: not available")
+
+        temps1 = set([temp for temp in os.listdir("/tmp") if temp.startswith("blockdev.")])
         self._test_generic_resize(mkfs_function=BlockDev.fs_btrfs_mkfs, min_size=300*1024**2, fstype="btrfs")
+        temps2 = set([temp for temp in os.listdir("/tmp") if temp.startswith("blockdev.")])
+
+        # make sure we didn't leak a temporary mount directory
+        self.assertFalse(temps2 - temps1)
+
+    def test_btrfs_generic_resize_mounted(self):
+        """Test generic resize function with a mounted btrfs file system"""
+        if not self.btrfs_avail:
+            self.skipTest("skipping Btrfs: not available")
+
+        # clean the device
+        succ = BlockDev.fs_clean(self.loop_dev)
+
+        succ = BlockDev.fs_btrfs_mkfs(self.loop_dev, None)
+        self.assertTrue(succ)
+        size = BlockDev.fs_get_size(self.loop_dev)
+
+        with mounted(self.loop_dev, self.mount_dir):
+            # shrink
+            succ = BlockDev.fs_resize(self.loop_dev, 300*1024**2)
+            self.assertTrue(succ)
+            new_size = BlockDev.fs_get_size(self.loop_dev)
+            self.assertAlmostEqual(new_size, 300*1024**2)
+
+            # resize to maximum size
+            succ = BlockDev.fs_resize(self.loop_dev, 0, "btrfs")
+            self.assertTrue(succ)
+            new_size = BlockDev.fs_get_size(self.loop_dev)
+            # should be back to original size
+            self.assertAlmostEqual(new_size, size)
 
     def test_udf_generic_resize(self):
         """Test generic resize function with an udf file system"""

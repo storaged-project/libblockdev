@@ -649,6 +649,7 @@ static gchar* fs_mount (const gchar *device, gchar *fstype, gboolean read_only, 
             ret = bd_fs_mount (device, mountpoint, fstype, read_only ? "ro" : NULL, NULL, &l_error);
             if (!ret) {
                 g_propagate_prefixed_error (error, l_error, "Failed to mount '%s': ", device);
+                g_rmdir (mountpoint);
                 g_free (mountpoint);
                 return NULL;
             } else
@@ -686,14 +687,14 @@ static gboolean xfs_resize_device (const gchar *device, guint64 new_size, const 
     GError *local_error = NULL;
     BDFSXfsInfo* xfs_info = NULL;
 
-    mountpoint = fs_mount (device, "xfs", FALSE, &unmount, error);
-    if (!mountpoint)
-        return FALSE;
-
     xfs_info = bd_fs_xfs_get_info (device, error);
     if (!xfs_info) {
         return FALSE;
     }
+
+    mountpoint = fs_mount (device, "xfs", FALSE, &unmount, error);
+    if (!mountpoint)
+        return FALSE;
 
     new_size = (new_size + xfs_info->block_size - 1) / xfs_info->block_size;
     bd_fs_xfs_info_free (xfs_info);
@@ -715,7 +716,8 @@ static gboolean xfs_resize_device (const gchar *device, guint64 new_size, const 
                    from the resize is more important so just ignore the
                    unmount error */
                 g_clear_error (&local_error);
-        }
+        } else
+            g_rmdir (mountpoint);
     }
 
     return success;
@@ -769,7 +771,8 @@ static gboolean nilfs2_resize_device (const gchar *device, guint64 new_size, GEr
                    from the resize is more important so just ignore the
                    unmount error */
                 g_clear_error (&local_error);
-        }
+        } else
+            g_rmdir (mountpoint);
     }
 
     return success;
@@ -804,7 +807,8 @@ static BDFSBtrfsInfo* btrfs_get_info (const gchar *device, GError **error) {
                    from the info is more important so just ignore the
                    unmount error */
                 g_clear_error (&local_error);
-        }
+        } else
+            g_rmdir (mountpoint);
     }
 
     return btrfs_info;
@@ -838,7 +842,8 @@ static gboolean btrfs_resize_device (const gchar *device, guint64 new_size, GErr
                    from the resize is more important so just ignore the
                    unmount error */
                 g_clear_error (&local_error);
-        }
+        } else
+            g_rmdir (mountpoint);
     }
 
     return success;
@@ -872,7 +877,8 @@ static gboolean btrfs_set_label (const gchar *device, const gchar *label, GError
                    from the set label is more important so just ignore the
                    unmount error */
                 g_clear_error (&local_error);
-        }
+        } else
+            g_rmdir (mountpoint);
     }
 
     return success;
