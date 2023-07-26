@@ -571,12 +571,12 @@ class BTRFSSkipTest(BtrfsTest):
 
         with fake_utils("tests/fake_utils/btrfs_low_version/"):
             # too low version of BTRFS available
-            with self.assertRaisesRegexp(GLib.GError, "Too low version of btrfs"):
+            with self.assertRaisesRegex(GLib.GError, "Too low version of btrfs"):
                 BlockDev.btrfs_is_tech_avail(BlockDev.BtrfsTech.FS, 0)
 
         with fake_path(all_but="btrfs"):
             # no btrfs tool available
-            with self.assertRaisesRegexp(GLib.GError, "The 'btrfs' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'btrfs' utility is not available"):
                 BlockDev.btrfs_is_tech_avail(BlockDev.BtrfsTech.FS, 0)
 
         # check that new version format is correctly parsed

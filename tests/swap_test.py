@@ -194,21 +194,21 @@ class SwapDepsTest(SwapTest):
 
         with fake_utils("tests/fake_utils/swap_low_version/"):
             # too low version of mkswap available
-            with self.assertRaisesRegexp(GLib.GError, "Too low version of mkswap"):
+            with self.assertRaisesRegex(GLib.GError, "Too low version of mkswap"):
                 BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP, BlockDev.SwapTechMode.CREATE)
 
         with fake_path(all_but="mkswap"):
             # no mkswap available
-            with self.assertRaisesRegexp(GLib.GError, "The 'mkswap' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'mkswap' utility is not available"):
                 BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP, BlockDev.SwapTechMode.CREATE)
 
         with fake_path(all_but="swaplabel"):
             # no swaplabel available
-            with self.assertRaisesRegexp(GLib.GError, "The 'swaplabel' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'swaplabel' utility is not available"):
                 BlockDev.swap_is_tech_avail(BlockDev.SwapTech.SWAP, BlockDev.SwapTechMode.SET_LABEL)
 
         with fake_path(all_but="mkswap"):
-            with self.assertRaisesRegexp(GLib.GError, "The 'mkswap' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'mkswap' utility is not available"):
                 # the device shouldn't matter, the function should return an
                 # error before any other checks or actions
                 BlockDev.swap_mkswap("/dev/device", "LABEL", None)
