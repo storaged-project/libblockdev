@@ -3,7 +3,11 @@ import os
 import overrides_hack
 
 from utils import fake_path, TestTags, tag_test
-from gi.repository import BlockDev, GLib
+
+import gi
+gi.require_version('GLib', '2.0')
+gi.require_version('BlockDev', '3.0')
+from gi.repository import GLib, BlockDev
 
 @unittest.skipUnless(os.uname()[4].startswith('s390'), "s390x architecture required")
 class S390TestCase(unittest.TestCase):

@@ -10,7 +10,11 @@ import re
 import tarfile
 
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, get_avail_locales, requires_locales, run_command, read_file, TestTags, tag_test
-from gi.repository import BlockDev, GLib
+
+import gi
+gi.require_version('GLib', '2.0')
+gi.require_version('BlockDev', '3.0')
+from gi.repository import GLib, BlockDev
 
 PASSWD = "myshinylittlepassword"
 PASSWD2 = "myshinylittlepassword2"

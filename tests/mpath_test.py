@@ -4,7 +4,11 @@ import overrides_hack
 import shutil
 
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, get_version, TestTags, tag_test
-from gi.repository import BlockDev, GLib
+
+import gi
+gi.require_version('GLib', '2.0')
+gi.require_version('BlockDev', '3.0')
+from gi.repository import GLib, BlockDev
 
 class MpathTest(unittest.TestCase):
 
