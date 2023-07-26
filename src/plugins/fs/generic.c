@@ -639,8 +639,7 @@ static gchar* fs_mount (const gchar *device, gchar *fstype, gboolean read_only, 
     if (!mountpoint) {
         if (l_error == NULL) {
             /* device is not mounted -- we need to mount it */
-            mountpoint = g_build_path (G_DIR_SEPARATOR_S, g_get_tmp_dir (), "blockdev.XXXXXX", NULL);
-            mountpoint = g_mkdtemp (mountpoint);
+            mountpoint = g_dir_make_tmp ("blockdev.XXXXXX", NULL);
             if (!mountpoint) {
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                              "Failed to create temporary directory for mounting '%s'.", device);
