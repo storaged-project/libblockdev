@@ -579,7 +579,7 @@ class CryptoTestGetMetadataSize(CryptoTestCase):
         if m is None:
             self.fail("Failed to get LUKS 2 offset information from %s:\n%s %s" % (self.loop_dev, out, err))
         offset = int(m.group(1))
-        self.assertEquals(meta_size, offset, "LUKS 2 metadata sizes differ")
+        self.assertEqual(meta_size, offset, "LUKS 2 metadata sizes differ")
 
     @tag_test(TestTags.SLOW)
     def test_luks_get_metadata_size(self):
@@ -600,7 +600,7 @@ class CryptoTestGetMetadataSize(CryptoTestCase):
         # offset value is in 512B blocks; we need to multiply to get the real metadata size
         offset = int(m.group(1)) * 512
 
-        self.assertEquals(meta_size, offset, "LUKS metadata sizes differ")
+        self.assertEqual(meta_size, offset, "LUKS metadata sizes differ")
 
 class CryptoTestLuksOpenRW(CryptoTestCase):
     def _luks_open_rw(self, create_fn):

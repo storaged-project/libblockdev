@@ -225,7 +225,7 @@ class SwapUnloadTest(SwapTest):
             self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
             self.assertIn("swap", BlockDev.get_available_plugin_names())
 
-            with self.assertRaisesRegexp(GLib.GError, "The 'mkswap' utility is not available"):
+            with self.assertRaisesRegex(GLib.GError, "The 'mkswap' utility is not available"):
                 # the device shouldn't matter, the function should return an
                 # error before any other checks or actions
                 BlockDev.swap_mkswap("/dev/device", "LABEL", None)
