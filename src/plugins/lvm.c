@@ -1920,26 +1920,18 @@ gboolean bd_lvm_lvresize (const gchar *vg_name, const gchar *lv_name, guint64 si
     gboolean success = FALSE;
     guint8 next_arg = 4;
     g_autofree gchar *lvspec = NULL;
-    BDLVMLVdata *lvinfo = NULL;
-
-    lvinfo = bd_lvm_lvinfo (vg_name, lv_name, error);
-    if (!lvinfo)
-        /* error is already populated */
-        return FALSE;
 
     args[3] = g_strdup_printf ("%"G_GUINT64_FORMAT"K", size/1024);
 
-    if (lvinfo->attr[4] != 'a') {
-        /* starting with 2.03.19 we need to add extra option to allow resizing of inactive LVs */
-        success = bd_utils_check_util_version (deps[DEPS_LVM].name, LVM_VERSION_FSRESIZE,
-                                               deps[DEPS_LVM].ver_arg, deps[DEPS_LVM].ver_regexp, NULL);
-        if (success) {
-            args[next_arg++] = "--fs";
-            args[next_arg++] = "ignore";
-        }
+    /* Starting with 2.03.19 we need to add an extra option to avoid
+       any filesystem related checks by lvresize.
+    */
+    success = bd_utils_check_util_version (deps[DEPS_LVM].name, LVM_VERSION_FSRESIZE,
+                                           deps[DEPS_LVM].ver_arg, deps[DEPS_LVM].ver_regexp, NULL);
+    if (success) {
+      args[next_arg++] = "--fs";
+      args[next_arg++] = "ignore";
     }
-
-    bd_lvm_lvdata_free (lvinfo);
 
     lvspec = g_strdup_printf ("%s/%s", vg_name, lv_name);
     args[next_arg++] = lvspec;
