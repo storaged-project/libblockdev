@@ -367,7 +367,7 @@ class NVMeFabricsTestCase(NVMeTest):
         self._setup_target(1)
 
         # make a connection
-        ret = BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, self.hostnqn, None)
+        ret = BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, None, None)
         self.addCleanup(self._nvme_disconnect, self.SUBNQN, ignore_errors=True)
         self.assertTrue(ret)
 
@@ -383,7 +383,7 @@ class NVMeFabricsTestCase(NVMeTest):
             self.assertTrue(os.path.exists(ns))
 
         # make a duplicate connection
-        ret = BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, self.hostnqn, None)
+        ret = BlockDev.nvme_connect(self.SUBNQN, 'loop', None, None, None, None, None, None)
         self.assertTrue(ret)
 
         # should see two controllers now
@@ -497,8 +497,8 @@ class NVMeFabricsTestCase(NVMeTest):
         HOSTID_PATH = '/etc/nvme/hostid'
         FAKE_HOSTNQN1 = 'nqn.2014-08.org.nvmexpress:uuid:ffffffff-ffff-ffff-ffff-ffffffffffff'
         FAKE_HOSTNQN2 = 'nqn.2014-08.org.nvmexpress:uuid:beefbeef-beef-beef-beef-beefdeadbeef'
-        FAKE_HOSTID1 = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'
-        FAKE_HOSTID2 = 'beefbeef-beef-beef-beef-beefdeadbeef'
+        FAKE_HOSTID1 = 'aaaaaaaa-ffff-ffff-ffff-ffffffffffff'
+        FAKE_HOSTID2 = 'beeeeeef-beef-beef-beef-beefdeadbeef'
 
         # libnvme might have been configured with a different prefix than libblockdev
         sysconf_dir = self._get_sysconf_dir()
