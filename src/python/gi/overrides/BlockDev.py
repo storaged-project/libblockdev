@@ -267,7 +267,7 @@ class CryptoKeyslotContext(BlockDev.CryptoKeyslotContext):
             raise ValueError("Exactly one of 'passphrase', 'keyfile', 'keyring' and 'volume_key' must be specified")
         if passphrase:
             if isinstance(passphrase, str):
-                ret = BlockDev.CryptoKeyslotContext.new_passphrase([ord(c) for c in passphrase])
+                ret = BlockDev.CryptoKeyslotContext.new_passphrase(passphrase.encode("utf-8"))
             else:
                 ret = BlockDev.CryptoKeyslotContext.new_passphrase(passphrase)
         if keyfile:
@@ -313,7 +313,7 @@ _crypto_tc_open = BlockDev.crypto_tc_open
 @override(BlockDev.crypto_tc_open)
 def crypto_tc_open(device, name, passphrase, read_only=False, keyfiles=None, hidden=False, system=False, veracrypt=False, veracrypt_pim=0):
     if isinstance(passphrase, str):
-        passphrase = [ord(c) for c in passphrase]
+        passphrase = passphrase.encode("utf-8")
     return _crypto_tc_open(device, name, passphrase, keyfiles, hidden, system, veracrypt, veracrypt_pim, read_only)
 __all__.append("crypto_tc_open")
 
@@ -321,7 +321,7 @@ _crypto_bitlk_open = BlockDev.crypto_bitlk_open
 @override(BlockDev.crypto_bitlk_open)
 def crypto_bitlk_open(device, name, passphrase, read_only=False):
     if isinstance(passphrase, str):
-        passphrase = [ord(c) for c in passphrase]
+        passphrase = passphrase.encode("utf-8")
     return _crypto_bitlk_open(device, name, passphrase, read_only)
 __all__.append("crypto_bitlk_open")
 
@@ -329,7 +329,7 @@ _crypto_fvault2_open = BlockDev.crypto_fvault2_open
 @override(BlockDev.crypto_fvault2_open)
 def crypto_fvault2_open(device, name, passphrase, read_only=False):
     if isinstance(passphrase, str):
-        passphrase = [ord(c) for c in passphrase]
+        passphrase = passphrase.encode("utf-8")
     return _crypto_fvault2_open(device, name, passphrase, read_only)
 __all__.append("crypto_fvault2_open")
 
@@ -338,7 +338,7 @@ _crypto_keyring_add_key = BlockDev.crypto_keyring_add_key
 @override(BlockDev.crypto_keyring_add_key)
 def crypto_keyring_add_key(key_desc, key):
     if isinstance(key, str):
-        key = [ord(c) for c in key]
+        key = key.encode("utf-8")
     return _crypto_keyring_add_key(key_desc, key)
 __all__.append("crypto_keyring_add_key")
 
