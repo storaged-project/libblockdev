@@ -1026,7 +1026,8 @@ BDNVMESelfTestLog * bd_nvme_get_self_test_log (const gchar *device, GError **err
 BDNVMESanitizeLog * bd_nvme_get_sanitize_log (const gchar *device, GError **error) {
     int ret;
     int fd;
-    struct nvme_sanitize_log_page sanitize_log = ZERO_INIT;
+    char buf[65536] = ZERO_INIT;
+    struct nvme_sanitize_log_page *sanitize_log;
     BDNVMESanitizeLog *log;
     __u16 sstat;
 
@@ -1036,7 +1037,7 @@ BDNVMESanitizeLog * bd_nvme_get_sanitize_log (const gchar *device, GError **erro
         return NULL;
 
     /* send the NVME_LOG_LID_SANITIZE ioctl */
-    ret = nvme_get_log_sanitize (fd, FALSE /* rae */, &sanitize_log);
+    ret = nvme_get_log_sanitize (fd, FALSE /* rae */, (struct nvme_sanitize_log_page *) &buf);
     if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
         g_prefix_error (error, "NVMe Get Log Page - Sanitize Status Log command error: ");
@@ -1045,12 +1046,16 @@ BDNVMESanitizeLog * bd_nvme_get_sanitize_log (const gchar *device, GError **erro
     }
     close (fd);
 
-    sstat = GUINT16_FROM_LE (sanitize_log.sstat);
+    /* need to use interim buffer that is large enough for broken drives
+     * returning more data than expected
+     */
+    sanitize_log = (struct nvme_sanitize_log_page *) &buf;
 
     log = g_new0 (BDNVMESanitizeLog, 1);
     log->sanitize_progress = 0;
+    sstat = GUINT16_FROM_LE (sanitize_log->sstat);
     if ((sstat & NVME_SANITIZE_SSTAT_STATUS_MASK) == NVME_SANITIZE_SSTAT_STATUS_IN_PROGESS)
-        log->sanitize_progress = ((gdouble) GUINT16_FROM_LE (sanitize_log.sprog) * 100) / 0x10000;
+        log->sanitize_progress = ((gdouble) GUINT16_FROM_LE (sanitize_log->sprog) * 100) / 0x10000;
     log->global_data_erased = sstat & NVME_SANITIZE_SSTAT_GLOBAL_DATA_ERASED;
     log->overwrite_passes = (sstat >> NVME_SANITIZE_SSTAT_COMPLETED_PASSES_SHIFT) & NVME_SANITIZE_SSTAT_COMPLETED_PASSES_MASK;
 
@@ -1073,12 +1078,12 @@ BDNVMESanitizeLog * bd_nvme_get_sanitize_log (const gchar *device, GError **erro
             break;
     }
 
-    log->time_for_overwrite = (GUINT32_FROM_LE (sanitize_log.eto) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log.eto);
-    log->time_for_block_erase = (GUINT32_FROM_LE (sanitize_log.etbe) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log.etbe);
-    log->time_for_crypto_erase = (GUINT32_FROM_LE (sanitize_log.etce) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log.etce);
-    log->time_for_overwrite_nd = (GUINT32_FROM_LE (sanitize_log.etond) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log.etond);
-    log->time_for_block_erase_nd = (GUINT32_FROM_LE (sanitize_log.etbend) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log.etbend);
-    log->time_for_crypto_erase_nd = (GUINT32_FROM_LE (sanitize_log.etcend) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log.etcend);
+    log->time_for_overwrite = (GUINT32_FROM_LE (sanitize_log->eto) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log->eto);
+    log->time_for_block_erase = (GUINT32_FROM_LE (sanitize_log->etbe) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log->etbe);
+    log->time_for_crypto_erase = (GUINT32_FROM_LE (sanitize_log->etce) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log->etce);
+    log->time_for_overwrite_nd = (GUINT32_FROM_LE (sanitize_log->etond) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log->etond);
+    log->time_for_block_erase_nd = (GUINT32_FROM_LE (sanitize_log->etbend) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log->etbend);
+    log->time_for_crypto_erase_nd = (GUINT32_FROM_LE (sanitize_log->etcend) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log->etcend);
 
     return log;
 }
