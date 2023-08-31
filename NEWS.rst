@@ -1,3 +1,33 @@
+Libblockdev 3.0.3
+------------------
+
+New bugfix release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Full list of changes**
+
+Marius Vollmer (1):
+
+- Always use "--fs ignore" with lvresize
+
+Michael Biebl (1):
+
+- tests: Specificy required versions when importing GLib and BlockDev
+  introspection
+
+Tomas Bzatek (3):
+
+- nvme: Use interim buffer for nvme_get_log_sanitize()
+- nvme: Generate HostID when missing
+- tests: Minor NVMe HostNQN fixes
+
+Vojtech Trefny (4):
+
+- tests: Replace deprecated unittest assert calls
+- fs: Fix leaking directories with temporary mounts
+- fs: Fix memory leak
+- crypto: Correctly convert passphrases from Python to C
+
 Libblockdev 3.0.2
 ------------------
 

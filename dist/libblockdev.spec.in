@@ -77,7 +77,7 @@
 %define configure_opts %{?python3_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?tools_copts} %{?gi_copts} %{?nvme_copts}
 
 Name:        libblockdev
-Version:     3.0.2
+Version:     3.0.3
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPL-2.1-or-later
@@ -845,6 +845,17 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Thu Aug 31 2023 Vojtech Trefny <vtrefny@redhat.com> - 3.0.3-1
+- crypto: Correctly convert passphrases from Python to C (vtrefny)
+- tests: Minor NVMe HostNQN fixes (tbzatek)
+- nvme: Generate HostID when missing (tbzatek)
+- Always use "--fs ignore" with lvresize (mvollmer)
+- nvme: Use interim buffer for nvme_get_log_sanitize() (tbzatek)
+- fs: Fix memory leak (vtrefny)
+- fs: Fix leaking directories with temporary mounts (vtrefny)
+- tests: Specificy required versions when importing GLib and BlockDev introspection (biebl)
+- tests: Replace deprecated unittest assert calls (vtrefny)
+
 * Thu Jul 20 2023 Vojtech Trefny <vtrefny@redhat.com> - 3.0.2-1
 - fs: Avoid excess logging in extract_e2fsck_progress (vtrefny)
 - loop: Report BD_LOOP_ERROR_DEVICE on empty loop devices (tbzatek)
