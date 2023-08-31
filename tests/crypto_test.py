@@ -448,6 +448,43 @@ class CryptoTestOpenClose(CryptoTestCase):
     def test_luks2_open_close(self):
         self._luks_open_close(self._luks2_format)
 
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_luks2_open_close_non_ascii_passphrase(self):
+        passphrase = "šššššššš"
+
+        self._luks2_format(self.loop_dev, passphrase)
+
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=passphrase)
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", ctx, False)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+        # lets try with keyfile
+        with tempfile.NamedTemporaryFile(mode="w") as f:
+            f.write(passphrase)
+            f.flush()
+
+            ctx = BlockDev.CryptoKeyslotContext(keyfile=f.name)
+            succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", ctx, False)
+            self.assertTrue(succ)
+
+            succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+            self.assertTrue(succ)
+
+        # and keyring too
+        succ = BlockDev.crypto_keyring_add_key("myshinylittlekey", passphrase)
+        self.assertTrue(succ)
+
+        ctx = BlockDev.CryptoKeyslotContext(keyring="myshinylittlekey")
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", ctx)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+
 class CryptoTestAddKey(CryptoTestCase):
     def _add_key(self, create_fn):
         """Verify that adding key to LUKS device works"""
