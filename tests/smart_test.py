@@ -134,6 +134,7 @@ class SMARTTest(unittest.TestCase):
                 for attr in data.attributes:
                     self.assertGreater(attr.id, 0)
                     self.assertGreater(len(attr.name), 0)
+                    self.assertGreater(len(attr.pretty_value_string), 0)
 
     @tag_test(TestTags.CORE)
     def test_ata_error_dumps(self):
