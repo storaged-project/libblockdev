@@ -832,6 +832,7 @@ bd_smart_is_tech_avail
 BD_SMART_TYPE_ATA
 BD_SMART_TYPE_ATA_ATTRIBUTE
 BDSmartATAAttribute
+BDSmartATAAttributeUnit
 BDSmartATAAttributeFlag
 BDSmartATACapabilities
 BDSmartATAOfflineDataCollectionCapabilities

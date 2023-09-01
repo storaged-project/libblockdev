@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
+#include <inttypes.h>
 
 #include <json-glib/json-glib.h>
 
@@ -137,7 +138,8 @@ void bd_smart_ata_attribute_free (BDSmartATAAttribute *attr) {
     if (attr == NULL)
         return;
     g_free (attr->name);
-    g_free (attr->value_raw_string);
+    g_free (attr->well_known_name);
+    g_free (attr->pretty_value_string);
     g_free (attr);
 }
 
@@ -156,7 +158,8 @@ BDSmartATAAttribute * bd_smart_ata_attribute_copy (BDSmartATAAttribute *attr) {
     new_attr = g_new0 (BDSmartATAAttribute, 1);
     memcpy (new_attr, attr, sizeof (BDSmartATAAttribute));
     new_attr->name = g_strdup (attr->name);
-    new_attr->value_raw_string = g_strdup (attr->value_raw_string);
+    new_attr->well_known_name = g_strdup (attr->well_known_name);
+    new_attr->pretty_value_string = g_strdup (attr->pretty_value_string);
 
     return new_attr;
 }
@@ -253,6 +256,170 @@ static const gchar * get_error_message_from_exit_code (gint exit_code) {
     if (exit_code & 0x04)
         return "Some SMART or other ATA command to the disk failed, or there was a checksum error in a SMART data structure.";
     return NULL;
+}
+
+
+struct WellKnownAttrInfo {
+    const gchar *libatasmart_name;
+    BDSmartATAAttributeUnit unit;
+    const gchar *smartmontools_names[7];  /* NULL-terminated */
+};
+
+/* This table was stolen from libatasmart, including the comment below: */
+/* This data is stolen from smartmontools */
+static const struct WellKnownAttrInfo well_known_attrs[256] = {
+    [1]   = { "raw-read-error-rate",         BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Raw_Read_Error_Count", "Raw_Read_Error_Rate", NULL }},
+    [2]   = { "throughput-performance",      BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN,   { "Throughput_Performance", NULL }},
+    [3]   = { "spin-up-time",                BD_SMART_ATA_ATTRIBUTE_UNIT_MSECONDS,  { "Spin_Up_Time", NULL }},
+    [4]   = { "start-stop-count",            BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Start_Stop_Count", NULL }},
+    [5]   = { "reallocated-sector-count",    BD_SMART_ATA_ATTRIBUTE_UNIT_SECTORS,   { "Reallocated_Block_Count", "Reallocated_Sector_Ct", NULL }},
+    [6]   = { "read-channel-margin",         BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN,   { "Read_Channel_Margin", NULL }},
+    [7]   = { "seek-error-rate",             BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Seek_Error_Rate", NULL }},
+    [8]   = { "seek-time-performance",       BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN,   { "Seek_Time_Performance", NULL }},
+    [9]   = { "power-on-hours",              BD_SMART_ATA_ATTRIBUTE_UNIT_MSECONDS,  { "Power_On_Hours", "Power_On_Hours_and_Msec", NULL }},
+    [10]  = { "spin-retry-count",            BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Spin_Retry_Count", NULL }},
+    [11]  = { "calibration-retry-count",     BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Calibration_Retry_Count", NULL }},
+    [12]  = { "power-cycle-count",           BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Power_Cycle_Count", "Device_Power_Cycle_Cnt", NULL }},
+    [13]  = { "read-soft-error-rate",        BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Read_Soft_Error_Rate", NULL }},
+    [170] = { "available-reserved-space",    BD_SMART_ATA_ATTRIBUTE_UNIT_PERCENT,   { "Available_Reservd_Space", "Reserved_Block_Pct", NULL }},
+    [171] = { "program-fail-count",          BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Program_Fail_Cnt", "Program_Fail_Count", "Program_Fail_Ct", NULL }},
+    [172] = { "erase-fail-count",            BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Erase_Fail_Cnt", "Erase_Fail_Ct", "Erase_Fail_Count", "Block_Erase_Failure", NULL }},
+    [175] = { "program-fail-count-chip",     BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Program_Fail_Count_Chip", NULL }},
+    [176] = { "erase-fail-count-chip",       BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Erase_Fail_Count_Chip", NULL }},
+    [177] = { "wear-leveling-count",         BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Wear_Leveling_Count", NULL }},
+    [178] = { "used-reserved-blocks-chip",   BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Used_Rsvd_Blk_Cnt_Chip", "Used_Rsrvd_Blk_Cnt_Wrst", NULL }},
+    [179] = { "used-reserved-blocks-total",  BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Used_Rsvd_Blk_Cnt_Tot", "Used_Rsrvd_Blk_Cnt_Tot", NULL }},
+    [180] = { "unused-reserved-blocks",      BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Unused_Rsvd_Blk_Cnt_Tot", NULL }},
+    [181] = { "program-fail-count-total",    BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Program_Fail_Cnt_Total", NULL }},
+    [182] = { "erase-fail-count-total",      BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Erase_Fail_Count_Total", NULL }},
+    [183] = { "runtime-bad-block-total",     BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Runtime_Bad_Block", NULL }},
+    [184] = { "end-to-end-error",            BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "End-to-End_Error", "End-to-End_Error_Count", NULL }},
+    [187] = { "reported-uncorrect",          BD_SMART_ATA_ATTRIBUTE_UNIT_SECTORS,   { "Reported_Uncorrect", "Reported_UE_Counts", NULL }},
+    [188] = { "command-timeout",             BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Command_Timeout", "Command_Timeouts", NULL }},
+    [189] = { "high-fly-writes",             BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "High_Fly_Writes", NULL }},
+    [190] = { "airflow-temperature-celsius", BD_SMART_ATA_ATTRIBUTE_UNIT_MKELVIN,   { "Airflow_Temperature_Cel", "Case_Temperature", "Drive_Temperature", "Temperature_Case", "Drive_Temp_Warning", "Temperature_Celsius", NULL }},
+    [191] = { "g-sense-error-rate",          BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "G-Sense_Error_Rate", NULL }},
+    [192] = { "power-off-retract-count",     BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Power-Off_Retract_Count", "Power-off_Retract_Count", NULL }},
+    [193] = { "load-cycle-count",            BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Load_Cycle_Count", NULL }},
+    [194] = { "temperature-celsius-2",       BD_SMART_ATA_ATTRIBUTE_UNIT_MKELVIN,   { "Temperature_Celsius", "Device_Temperature", "Drive_Temperature", "Temperature_Internal", NULL }},
+    [195] = { "hardware-ecc-recovered",      BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Hardware_ECC_Recovered", "Cumulativ_Corrected_ECC", "ECC_Error_Rate", NULL }},
+    [196] = { "reallocated-event-count",     BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Reallocated_Event_Count", NULL }},
+    [197] = { "current-pending-sector",      BD_SMART_ATA_ATTRIBUTE_UNIT_SECTORS,   { "Current_Pending_Sector", "Pending_Sector_Count", NULL }},
+    [198] = { "offline-uncorrectable",       BD_SMART_ATA_ATTRIBUTE_UNIT_SECTORS,   { "Offline_Uncorrectable", "Uncor_Read_Error_Ct", "Uncorrectable_Sector_Ct", NULL }},
+    [199] = { "udma-crc-error-count",        BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "CRC_Error_Count", "SATA_CRC_Error", "SATA_CRC_Error_Count", "UDMA_CRC_Error_Count", NULL }},
+    [200] = { "multi-zone-error-rate",       BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Multi_Zone_Error_Rate", NULL }},
+    [201] = { "soft-read-error-rate",        BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Soft_Read_Error_Rate", "Read_Error_Rate", "Uncorr_Soft_Read_Err_Rt", "Unc_Read_Error_Rate", "Unc_Soft_Read_Err_Rate", NULL }},
+    [202] = { "ta-increase-count",           BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Data_Address_Mark_Errs", NULL }},
+    [203] = { "run-out-cancel",              BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN,   { "Run_Out_Cancel", NULL }},
+    [204] = { "shock-count-write-open",      BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Soft_ECC_Correction", "Soft_ECC_Correction_Rt", "Soft_ECC_Correct_Rate", NULL }},
+    [205] = { "shock-rate-write-open",       BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Thermal_Asperity_Rate", NULL }},
+    [206] = { "flying-height",               BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN,   { "Flying_Height", NULL }},
+    [207] = { "spin-high-current",           BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN,   { "Spin_High_Current", NULL }},
+    [208] = { "spin-buzz",                   BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN,   { "Spin_Buzz", NULL }},
+    [209] = { "offline-seek-performance",    BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN,   { "Offline_Seek_Performnce", NULL }},
+    [220] = { "disk-shift",                  BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN,   { "Disk_Shift", NULL }},
+    [221] = { "g-sense-error-rate-2",        BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "G-Sense_Error_Rate", NULL }},
+    [222] = { "loaded-hours",                BD_SMART_ATA_ATTRIBUTE_UNIT_MSECONDS,  { "Loaded_Hours", NULL }},
+    [223] = { "load-retry-count",            BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Load_Retry_Count", NULL }},
+    [224] = { "load-friction",               BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN,   { "Load_Friction", NULL }},
+    [225] = { "load-cycle-count-2",          BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Load_Cycle_Count", NULL }},
+    [226] = { "load-in-time",                BD_SMART_ATA_ATTRIBUTE_UNIT_MSECONDS,  { "Load-in_Time", NULL }},
+    [227] = { "torq-amp-count",              BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Torq-amp_Count", NULL }},
+    [228] = { "power-off-retract-count-2",   BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Power-Off_Retract_Count", "Power-off_Retract_Count", NULL }},
+    [230] = { "head-amplitude",              BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN,   { "Head_Amplitude", NULL }},
+    [231] = { "temperature-celsius",         BD_SMART_ATA_ATTRIBUTE_UNIT_MKELVIN,   { "Temperature_Celsius", "Controller_Temperature", NULL }},
+    [232] = { "endurance-remaining",         BD_SMART_ATA_ATTRIBUTE_UNIT_PERCENT,   { "Spares_Remaining_Perc", "Perc_Avail_Resrvd_Space", NULL }},
+    [233] = { "power-on-seconds-2",          BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN,   { /* TODO */ NULL }},
+    [234] = { "uncorrectable-ecc-count",     BD_SMART_ATA_ATTRIBUTE_UNIT_SECTORS,   { /* TODO */ NULL }},
+    [235] = { "good-block-rate",             BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN,   { "Good/Sys_Block_Count", NULL }},
+    [240] = { "head-flying-hours",           BD_SMART_ATA_ATTRIBUTE_UNIT_MSECONDS,  { "Head_Flying_Hours", NULL }},
+    [241] = { "total-lbas-written",          BD_SMART_ATA_ATTRIBUTE_UNIT_MB,        { /* TODO: implement size calculation logic */ NULL }},
+    [242] = { "total-lbas-read",             BD_SMART_ATA_ATTRIBUTE_UNIT_MB,        { /* TODO: implement size calculation logic */ NULL }},
+    [250] = { "read-error-retry-rate",       BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Read_Error_Retry_Rate", "Read_Retry_Count", NULL }},
+};
+
+static void
+lookup_well_known_attr (BDSmartATAAttribute *a,
+                        gchar **well_known_name,
+                        gint64 *pretty_value,
+                        BDSmartATAAttributeUnit *pretty_unit)
+{
+    *well_known_name = g_strdup (well_known_attrs[a->id].libatasmart_name);
+    if (*well_known_name) {
+        /* verify matching attribute names */
+        const gchar * const *n;
+        gboolean trusted = FALSE;
+
+        for (n = well_known_attrs[a->id].smartmontools_names; *n; n++)
+            if (g_strcmp0 (*n, a->name) == 0) {
+                trusted = TRUE;
+                break;
+            }
+        if (trusted) {
+            char *endptr = NULL;
+            guint64 hour, min, sec, usec;
+
+            *pretty_unit = well_known_attrs[a->id].unit;
+            switch (well_known_attrs[a->id].unit) {
+                /* FIXME: we have the 64-bit raw value but no context how it's supposed
+                 *        to be represented. This is defined in the smartmontools drivedb
+                 *        yet not exposed over to JSON.
+                 */
+                case BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN:
+                case BD_SMART_ATA_ATTRIBUTE_UNIT_NONE:
+                case BD_SMART_ATA_ATTRIBUTE_UNIT_SECTORS:
+                    /* try converting whatever possible and simply ignore the rest */
+                    *pretty_value = g_ascii_strtoll (a->pretty_value_string, &endptr, 0);
+                    if (! endptr || endptr == a->pretty_value_string)
+                        *pretty_value = a->value_raw;
+                    break;
+                case BD_SMART_ATA_ATTRIBUTE_UNIT_MSECONDS:
+                    /* possible formats as printed by ata_format_attr_raw_value():
+                     *    "%lluh+%02llum (%u)"
+                     *    "%lluh+%02llum+%02llus"
+                     *    "%lluh+%02llum"
+                     *    "%uh+%02um+%02u.%03us"
+                     */
+                    hour = min = sec = usec = 0;
+                    if (sscanf (a->pretty_value_string, "%" PRIu64 "h+%" PRIu64 "m+%" PRIu64 "s.%" PRIu64 "s", &hour, &min, &sec, &usec) >= 2)
+                        *pretty_value = ((hour * 60 + min) * 60 + sec) * 1000 + usec;
+                    else
+                        *pretty_value = a->value_raw;
+                    break;
+                case BD_SMART_ATA_ATTRIBUTE_UNIT_MKELVIN:
+                    /* possible formats as printed by ata_format_attr_raw_value():
+                     *   "%d"
+                     *   "%d (Min/Max %d/%d)"
+                     *   "%d (Min/Max %d/%d #%d)"
+                     *   "%d (%d %d %d %d %d)"
+                     *   "%d.%d"
+                     */
+                    *pretty_value = g_ascii_strtoll (a->pretty_value_string, &endptr, 0);
+                    if (! endptr || endptr == a->pretty_value_string)
+                        *pretty_value = a->value_raw;
+                    else
+                        /* temperature in degrees Celsius, need millikelvins */
+                        *pretty_value = *pretty_value * 1000 + 273150;
+                    break;
+                case BD_SMART_ATA_ATTRIBUTE_UNIT_SMALL_PERCENT:
+                case BD_SMART_ATA_ATTRIBUTE_UNIT_PERCENT:
+                case BD_SMART_ATA_ATTRIBUTE_UNIT_MB:
+                default:
+                    /* not implemented */
+                    *pretty_unit = BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN;
+                    break;
+            }
+        } else {
+            g_free (*well_known_name);
+            *well_known_name = NULL;
+        }
+    }
+
+    if (*well_known_name == NULL) {
+        /* not a well-known attribute or failed verification */
+        *pretty_unit = 0;
+        *pretty_value = a->value_raw;
+    }
 }
 
 /* Returns num elements read or -1 in case of an error. */
@@ -486,7 +653,7 @@ static BDSmartATAAttribute ** parse_ata_smart_attributes (JsonReader *reader, GE
         attr->value_raw = json_reader_get_int_value (reader);
         json_reader_end_member (reader);
         _READ_AND_CHECK ("string");
-        attr->value_raw_string = g_strdup (json_reader_get_string_value (reader));
+        attr->pretty_value_string = g_strdup (json_reader_get_string_value (reader));
         json_reader_end_member (reader);
         json_reader_end_member (reader);
 
@@ -509,10 +676,14 @@ static BDSmartATAAttribute ** parse_ata_smart_attributes (JsonReader *reader, GE
             attr->flags |= BD_SMART_ATA_ATTRIBUTE_FLAG_OTHER;
         json_reader_end_member (reader);
         json_reader_end_member (reader);
+        json_reader_end_element (reader);
 
 #undef _READ_AND_CHECK
 
-        json_reader_end_element (reader);
+        lookup_well_known_attr (attr,
+                                &attr->well_known_name,
+                                &attr->pretty_value,
+                                &attr->pretty_value_unit);
         g_ptr_array_add (ptr_array, attr);
     }
 

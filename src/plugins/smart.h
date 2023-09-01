@@ -112,6 +112,28 @@ typedef enum {
 } BDSmartATACapabilities;
 
 /**
+ * BDSmartATAAttributeUnit:
+ * @BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN: Unknown.
+ * @BD_SMART_ATA_ATTRIBUTE_UNIT_NONE: Dimensionless value.
+ * @BD_SMART_ATA_ATTRIBUTE_UNIT_MSECONDS: Milliseconds.
+ * @BD_SMART_ATA_ATTRIBUTE_UNIT_SECTORS: Sectors.
+ * @BD_SMART_ATA_ATTRIBUTE_UNIT_MKELVIN: Millikelvin.
+ * @BD_SMART_ATA_ATTRIBUTE_UNIT_SMALL_PERCENT: Percentage with 3 decimal points.
+ * @BD_SMART_ATA_ATTRIBUTE_UNIT_PERCENT: Integer percentage.
+ * @BD_SMART_ATA_ATTRIBUTE_UNIT_MB: Megabytes.
+ */
+typedef enum {
+    BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN,
+    BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,
+    BD_SMART_ATA_ATTRIBUTE_UNIT_MSECONDS,
+    BD_SMART_ATA_ATTRIBUTE_UNIT_SECTORS,
+    BD_SMART_ATA_ATTRIBUTE_UNIT_MKELVIN,
+    BD_SMART_ATA_ATTRIBUTE_UNIT_SMALL_PERCENT,
+    BD_SMART_ATA_ATTRIBUTE_UNIT_PERCENT,
+    BD_SMART_ATA_ATTRIBUTE_UNIT_MB,
+} BDSmartATAAttributeUnit;
+
+/**
  * BDSmartATAAttributeFlag:
  * @BD_SMART_ATA_ATTRIBUTE_FLAG_PREFAILURE: Pre-failure/advisory bit: If the value of this bit equals zero, an attribute value less than or equal to its corresponding attribute threshold indicates an advisory condition where the usage or age of the device has exceeded its intended design life period. If the value of this bit equals one, an attribute value less than or equal to its corresponding attribute threshold indicates a prefailure condition where imminent loss of data is being predicted.
  * @BD_SMART_ATA_ATTRIBUTE_FLAG_ONLINE: On-line data collection bit: If the value of this bit equals zero, then the attribute value is updated only during off-line data collection activities. If the value of this bit equals one, then the attribute value is updated during normal operation of the device or during both normal operation and off-line testing.
@@ -134,27 +156,33 @@ typedef enum {
 /**
  * BDSmartATAAttribute:
  * @id: Attribute Identifier.
- * @name: The identifier as a string.
+ * @name: A free-form representation of the attribute name, implementation-dependent (e.g. libatasmart internal strings or smartmontools' drivedb.h names).
+ * @well_known_name: Translated well-known attribute name (in libatasmart style, e.g. 'raw-read-error-rate') or %NULL in case of unknown, untrusted or vendor-specific value.
  * @value: The normalized value or -1 if unknown.
  * @worst: The worst normalized value of -1 if unknown.
  * @threshold: The threshold of a normalized value or -1 if unknown.
  * @failed_past: Indicates a failure that happened in the past (the normalized worst value is below the threshold).
  * @failing_now: Indicates a failure that is happening now (the normalized value is below the threshold).
  * @value_raw: The raw value of the attribute.
- * @value_raw_string: String representation of the raw value.
  * @flags: Bitmask of attribute flags. See #BDSmartATAAttributeFlag.
+ * @pretty_value: Numerical representation of the parsed raw value, presented in @pretty_value_unit units.
+ * @pretty_value_unit: The unit of the parsed raw value.
+ * @pretty_value_string: A free-form string representation of the raw value intended for user presentation.
  */
 typedef struct BDSmartATAAttribute {
     guint8 id;
     gchar *name;
+    gchar *well_known_name;
     gint value;
     gint worst;
     gint threshold;
     gboolean failed_past;
     gboolean failing_now;
     guint64 value_raw;
-    gchar *value_raw_string;
     guint16 flags;
+    gint64 pretty_value;
+    BDSmartATAAttributeUnit pretty_value_unit;
+    gchar *pretty_value_string;
 } BDSmartATAAttribute;
 
 /**
