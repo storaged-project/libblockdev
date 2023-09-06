@@ -103,6 +103,10 @@ Provides: libblockdev-kbd = %{version}-%{release}
 Obsoletes: libblockdev-kbd < %{version}-%{release}
 Provides: libblockdev-kbd-devel = %{version}-%{release}
 Obsoletes: libblockdev-kbd-devel < %{version}-%{release}
+Provides: libblockdev-vdo = %{version}-%{release}
+Obsoletes: libblockdev-vdo < %{version}-%{release}
+Provides: libblockdev-vdo-devel = %{version}-%{release}
+Obsoletes: libblockdev-vdo-devel < %{version}-%{release}
 
 Requires: %{name}-utils%{?_isa} = %{version}-%{release}
 
