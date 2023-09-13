@@ -101,12 +101,8 @@ BuildRequires: autoconf-archive
 # obsolete removed subpackages to allow upgrades
 Provides: libblockdev-kbd = %{version}-%{release}
 Obsoletes: libblockdev-kbd < %{version}-%{release}
-Provides: libblockdev-kbd-devel = %{version}-%{release}
-Obsoletes: libblockdev-kbd-devel < %{version}-%{release}
 Provides: libblockdev-vdo = %{version}-%{release}
 Obsoletes: libblockdev-vdo < %{version}-%{release}
-Provides: libblockdev-vdo-devel = %{version}-%{release}
-Obsoletes: libblockdev-vdo-devel < %{version}-%{release}
 
 Requires: %{name}-utils%{?_isa} = %{version}-%{release}
 
@@ -124,6 +120,12 @@ Summary:     Development files for libblockdev
 Requires: %{name}%{?_isa} = %{version}-%{release}
 Requires: %{name}-utils-devel%{?_isa} = %{version}-%{release}
 Requires: glib2-devel
+
+# obsolete removed devel subpackages to allow upgrades
+Provides: libblockdev-kbd-devel = %{version}-%{release}
+Obsoletes: libblockdev-kbd-devel < %{version}-%{release}
+Provides: libblockdev-vdo-devel = %{version}-%{release}
+Obsoletes: libblockdev-vdo-devel < %{version}-%{release}
 
 %description devel
 This package contains header files and pkg-config files needed for development
