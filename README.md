@@ -16,7 +16,7 @@ Following storage technologies are supported by libblockdev
  - partitions
    - MSDOS, GPT
  - filesystem operations
-   - ext2, ext3, ext4, xfs, vfat, ntfs, exfat, btrfs, f2fs, nilfs2, udf
+   - ext2, ext3, ext4, xfs, vfat, ntfs, exfat, btrfs, f2fs, nilfs2, udf, bcachefs
    - mounting
  - LVM
    - thin provisioning, LVM RAID, cache, LVM VDO

@@ -1328,4 +1328,4 @@ class SupportedFilesystemsTest(GenericNoDevTestCase):
         filesystems = BlockDev.fs_supported_filesystems()
         self.assertListEqual(filesystems,
                              ["ext2", "ext3", "ext4", "xfs", "vfat", "ntfs",
-                              "f2fs", "nilfs2", "exfat", "btrfs", "udf"])
+                              "f2fs", "nilfs2", "exfat", "btrfs", "udf", "bcachefs"])

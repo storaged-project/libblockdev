@@ -69,6 +69,10 @@
       - xfsprogs
     when: ansible_distribution == 'Fedora' and test_dependencies|bool
 
+  - name: Install bcachefs-tools test dependency (Fedora)
+    package: name=bcachefs-tools state=present
+    when: ansible_distribution == 'Fedora' and ansible_distribution_version == '40' and test_dependencies|bool
+
 ####### CentOS 8
   - name: Install basic build tools (CentOS 8)
     package: name={{item}} state=present

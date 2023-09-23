@@ -153,6 +153,14 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
       .features = BD_FS_FEATURE_OWNERS | BD_FS_FEATURE_PARTITION_TABLE,
       .partition_id = "0x07",
       .partition_type = "ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" },
+    /* BCACHEFS */
+    { .resize = 0,
+      .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID,
+      .fsck = BD_FS_FSCK_CHECK | BD_FS_FSCK_REPAIR,
+      .configure = 0,
+      .features = BD_FS_FEATURE_OWNERS | BD_FS_FEATURE_PARTITION_TABLE,
+      .partition_id = "0x83", // TODO: figure out
+      .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4" }, // TODO: figure out
 };
 
 /**
@@ -291,6 +299,15 @@ const BDFSInfo fs_info[BD_FS_LAST_FS] = {
       .label_util = "udflabel",
       .info_util = "udfinfo",
       .uuid_util = "udflabel" },
+    /* BCACHEFS */
+    { .type = "bcachefs",
+      .mkfs_util = "mkfs.bcachefs",
+      .check_util = "fsck.bcachefs",
+      .repair_util = "fsck.bcachefs",
+      .resize_util = "bcachefs",
+      .label_util = "bcachefs",
+      .info_util = "bcachefs",
+      .uuid_util = "bcachefs" },
 };
 
 /**
@@ -345,6 +362,8 @@ static BDFSTech fstype_to_tech (const gchar *fstype) {
         return BD_FS_TECH_BTRFS;
     } else if (g_strcmp0 (fstype, "udf") == 0) {
         return BD_FS_TECH_UDF;
+    } else if (g_strcmp0 (fstype, "bcachefs") == 0) {
+        return BD_FS_TECH_BCACHEFS;
     } else {
         return BD_FS_TECH_GENERIC;
     }
@@ -1897,6 +1916,7 @@ extern BDExtraArg** bd_fs_vfat_mkfs_options (BDFSMkfsOptions *options, const BDE
 extern BDExtraArg** bd_fs_xfs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
 extern BDExtraArg** bd_fs_btrfs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
 extern BDExtraArg** bd_fs_udf_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
+extern BDExtraArg** bd_fs_bcachefs_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra);
 
 /**
  * bd_fs_mkfs:
@@ -1960,6 +1980,9 @@ gboolean bd_fs_mkfs (const gchar *device, const gchar *fstype, BDFSMkfsOptions *
     } else if (g_strcmp0 (fstype, "udf") == 0) {
         extra_args = bd_fs_udf_mkfs_options (options, extra);
         ret = bd_fs_udf_mkfs (device, NULL, NULL, 0, (const BDExtraArg **) extra_args, error);
+    } else if (g_strcmp0 (fstype, "bcachefs") == 0) {
+        extra_args = bd_fs_bcachefs_mkfs_options (options, extra);
+        ret = bd_fs_bcachefs_mkfs (device, (const BDExtraArg **) extra_args, error);
     } else {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
                      "Filesystem '%s' is not supported.", fstype);
