@@ -317,7 +317,7 @@ gboolean bd_fs_btrfs_check_uuid (const gchar *uuid, GError **error) {
  */
 BDFSBtrfsInfo* bd_fs_btrfs_get_info (const gchar *mpoint, GError **error) {
     const gchar *argv[6] = {"btrfs", "filesystem", "show", "--raw", mpoint, NULL};
-    gchar *output = NULL;
+    g_autofree gchar *output = NULL;
     gboolean success = FALSE;
     gchar const * const pattern = "Label:\\s+(none|'(?P<label>.+)')\\s+" \
                                   "uuid:\\s+(?P<uuid>\\S+)\\s+" \
@@ -327,7 +327,7 @@ BDFSBtrfsInfo* bd_fs_btrfs_get_info (const gchar *mpoint, GError **error) {
     GRegex *regex = NULL;
     GMatchInfo *match_info = NULL;
     BDFSBtrfsInfo *ret = NULL;
-    gchar *item = NULL;
+    g_autofree gchar *item = NULL;
     guint64 num_devices = 0;
     guint64 min_size = 0;
     gint scanned = 0;
@@ -354,7 +354,6 @@ BDFSBtrfsInfo* bd_fs_btrfs_get_info (const gchar *mpoint, GError **error) {
     if (!success) {
         g_regex_unref (regex);
         g_match_info_free (match_info);
-        g_free (output);
         return NULL;
     }
 
@@ -365,7 +364,6 @@ BDFSBtrfsInfo* bd_fs_btrfs_get_info (const gchar *mpoint, GError **error) {
 
     item = g_match_info_fetch_named (match_info, "num_devices");
     num_devices = g_ascii_strtoull (item, NULL, 0);
-    g_free (item);
     if (num_devices != 1) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Btrfs filesystem mounted on %s spans multiple devices (%"G_GUINT64_FORMAT")." \
@@ -373,18 +371,15 @@ BDFSBtrfsInfo* bd_fs_btrfs_get_info (const gchar *mpoint, GError **error) {
                      "Btrfs plugin instead.", mpoint, num_devices);
         g_match_info_free (match_info);
         g_regex_unref (regex);
-        g_free (output);
         bd_fs_btrfs_info_free (ret);
         return NULL;
     }
 
     item = g_match_info_fetch_named (match_info, "size");
     ret->size = g_ascii_strtoull (item, NULL, 0);
-    g_free (item);
 
     g_match_info_free (match_info);
     g_regex_unref (regex);
-    g_free (output);
 
     argv[1] = "inspect-internal";
     argv[2] = "min-dev-size";
@@ -404,12 +399,10 @@ BDFSBtrfsInfo* bd_fs_btrfs_get_info (const gchar *mpoint, GError **error) {
     if (scanned != 1) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE,
                      "Failed to parse btrfs filesystem min size.");
-        g_free (output);
         bd_fs_btrfs_info_free (ret);
         return NULL;
     }
 
-    g_free (output);
     ret->free_space = ret->size - min_size;
 
     return ret;
