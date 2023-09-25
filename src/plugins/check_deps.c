@@ -250,13 +250,13 @@ check_dbus_deps (volatile guint *avail_deps, guint req_deps, const DBusDep *buse
 }
 
 static gboolean _check_util_feature (const gchar *util, const gchar *feature, const gchar *feature_arg, const gchar *feature_regexp, GError **error) {
-    gchar *util_path = NULL;
+    g_autofree gchar *util_path = NULL;
     const gchar *argv[] = {util, feature_arg, NULL};
-    gchar *output = NULL;
+    g_autofree gchar *output = NULL;
     gboolean succ = FALSE;
     GRegex *regex = NULL;
     GMatchInfo *match_info = NULL;
-    gchar *features_str = NULL;
+    g_autofree gchar *features_str = NULL;
     GError *l_error = NULL;
 
     util_path = g_find_program_in_path (util);
@@ -265,7 +265,6 @@ static gboolean _check_util_feature (const gchar *util, const gchar *feature, co
                      "The '%s' utility is not available", util);
         return FALSE;
     }
-    g_free (util_path);
 
     succ = bd_utils_exec_and_capture_output (argv, NULL, &output, &l_error);
     if (!succ) {
@@ -284,7 +283,6 @@ static gboolean _check_util_feature (const gchar *util, const gchar *feature, co
     if (feature_regexp) {
         regex = g_regex_new (feature_regexp, 0, 0, error);
         if (!regex) {
-            g_free (output);
             /* error is already populated */
             return FALSE;
         }
@@ -293,7 +291,6 @@ static gboolean _check_util_feature (const gchar *util, const gchar *feature, co
         if (!succ) {
             g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_UTIL_FEATURE_CHECK_ERROR,
                          "Failed to determine %s's features from: %s", util, output);
-            g_free (output);
             g_regex_unref (regex);
             g_match_info_free (match_info);
             return FALSE;
@@ -309,22 +306,17 @@ static gboolean _check_util_feature (const gchar *util, const gchar *feature, co
     if (!features_str || (g_strcmp0 (features_str, "") == 0)) {
         g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_UTIL_FEATURE_CHECK_ERROR,
                      "Failed to determine %s's features from: %s", util, output);
-        g_free (features_str);
-        g_free (output);
         return FALSE;
     }
 
-    g_free (output);
 
     if (!g_strrstr (features_str, feature)) {
         g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_UTIL_FEATURE_UNAVAILABLE,
                      "Required feature %s not supported by this version of %s",
                      feature, util);
-        g_free (features_str);
         return FALSE;
     }
 
-    g_free (features_str);
     return TRUE;
 }
 
