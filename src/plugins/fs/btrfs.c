@@ -203,7 +203,7 @@ gboolean bd_fs_btrfs_repair (const gchar *device, const BDExtraArg **extra, GErr
 
 /**
  * bd_fs_btrfs_set_label:
- * @mpoint: the mount point of the file system to resize
+ * @mpoint: the mount point of the file system to set label for
  * @label: label to set
  * @error: (out) (optional): place to store error (if any)
  *
