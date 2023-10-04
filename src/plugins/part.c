@@ -188,7 +188,7 @@ static int fdisk_ask_callback (struct fdisk_context *cxt UNUSED, struct fdisk_as
     return 0;
 }
 
-static struct fdisk_context* get_device_context (const gchar *disk, GError **error) {
+static struct fdisk_context* get_device_context (const gchar *disk, gboolean read_only, GError **error) {
     struct fdisk_context *cxt = fdisk_new_context ();
     gint ret = 0;
 
@@ -198,7 +198,7 @@ static struct fdisk_context* get_device_context (const gchar *disk, GError **err
         return NULL;
     }
 
-    ret = fdisk_assign_device (cxt, disk, FALSE);
+    ret = fdisk_assign_device (cxt, disk, read_only);
     if (ret != 0) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to assign the new context to disk '%s': %s", disk, strerror_l (-ret, c_locale));
@@ -357,7 +357,7 @@ gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    cxt = get_device_context (disk, &l_error);
+    cxt = get_device_context (disk, FALSE, &l_error);
     if (!cxt) {
         /* error is already populated */
         bd_utils_report_finished (progress_id, l_error->message);
@@ -409,7 +409,7 @@ static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_nu
     /* first partition in fdisk is 0 */
     part_num--;
 
-    cxt = get_device_context (device, error);
+    cxt = get_device_context (device, TRUE, error);
     if (!cxt) {
         /* error is already populated */
         return NULL;
@@ -581,7 +581,7 @@ BDPartSpec* bd_part_get_part_spec (const gchar *disk, const gchar *part, GError 
     /* first partition in fdisk is 0 */
     part_num--;
 
-    cxt = get_device_context (disk, error);
+    cxt = get_device_context (disk, TRUE, error);
     if (!cxt) {
         /* error is already populated */
         return NULL;
@@ -613,7 +613,7 @@ static BDPartSpec** get_disk_parts (const gchar *disk, gboolean parts, gboolean 
     GPtrArray *array = NULL;
     gint status = 0;
 
-    cxt = get_device_context (disk, error);
+    cxt = get_device_context (disk, TRUE, error);
     if (!cxt) {
         /* error is already populated */
         return NULL;
@@ -782,7 +782,7 @@ BDPartDiskSpec* bd_part_get_disk_spec (const gchar *disk, GError **error) {
     BDPartTableType type = BD_PART_TABLE_UNDEF;
     gboolean found = FALSE;
 
-    cxt = get_device_context (disk, error);
+    cxt = get_device_context (disk, TRUE, error);
     if (!cxt) {
         /* error is already populated */
         return NULL;
@@ -963,7 +963,7 @@ BDPartSpec* bd_part_create_part (const gchar *disk, BDPartTypeReq type, guint64 
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    cxt = get_device_context (disk, &l_error);
+    cxt = get_device_context (disk, FALSE, &l_error);
     if (!cxt) {
         /* error is already populated */
         bd_utils_report_finished (progress_id, l_error->message);
@@ -1358,7 +1358,7 @@ gboolean bd_part_delete_part (const gchar *disk, const gchar *part, GError **err
 
     /* /dev/sda1 is the partition number 0 in libfdisk */
     part_num--;
-    cxt = get_device_context (disk, &l_error);
+    cxt = get_device_context (disk, FALSE, &l_error);
     if (!cxt) {
         /* error is already populated */
         bd_utils_report_finished (progress_id, l_error->message);
@@ -1520,7 +1520,7 @@ gboolean bd_part_resize_part (const gchar *disk, const gchar *part, guint64 size
 
     /* /dev/sda1 is the partition number 0 in libfdisk */
     part_num--;
-    cxt = get_device_context (disk, &l_error);
+    cxt = get_device_context (disk, FALSE, &l_error);
     if (!cxt) {
         /* error is already populated */
         bd_utils_report_finished (progress_id, l_error->message);
@@ -1799,7 +1799,7 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    cxt = get_device_context (disk, error);
+    cxt = get_device_context (disk, FALSE, error);
     if (!cxt) {
         /* error is already populated */
         return FALSE;
@@ -1918,7 +1918,7 @@ gboolean bd_part_set_part_type (const gchar *disk, const gchar *part, const gcha
     /* /dev/sda1 is the partition number 0 in libfdisk */
     part_num--;
 
-    cxt = get_device_context (disk, &l_error);
+    cxt = get_device_context (disk, FALSE, &l_error);
     if (!cxt) {
         /* error is already populated */
         bd_utils_report_finished (progress_id, l_error->message);
@@ -1977,7 +1977,7 @@ gboolean bd_part_set_part_id (const gchar *disk, const gchar *part, const gchar 
     /* /dev/sda1 is the partition number 0 in libfdisk */
     part_num--;
 
-    cxt = get_device_context (disk, &l_error);
+    cxt = get_device_context (disk, FALSE, &l_error);
     if (!cxt) {
         /* error is already populated */
         bd_utils_report_finished (progress_id, l_error->message);
@@ -2030,7 +2030,7 @@ gboolean bd_part_set_part_uuid (const gchar *disk, const gchar *part, const gcha
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    cxt = get_device_context (disk, error);
+    cxt = get_device_context (disk, FALSE, error);
     if (!cxt) {
         /* error is already populated */
         return FALSE;
@@ -2141,7 +2141,7 @@ gboolean bd_part_set_part_bootable (const gchar *disk, const gchar *part, gboole
     /* /dev/sda1 is the partition number 0 in libfdisk */
     part_num--;
 
-    cxt = get_device_context (disk, error);
+    cxt = get_device_context (disk, FALSE, error);
     if (!cxt)
         return FALSE;
 
@@ -2205,7 +2205,7 @@ gboolean bd_part_set_part_attributes (const gchar *disk, const gchar *part, guin
     /* /dev/sda1 is the partition number 0 in libfdisk */
     part_num--;
 
-    cxt = get_device_context (disk, error);
+    cxt = get_device_context (disk, FALSE, error);
     if (!cxt)
         return FALSE;
 
