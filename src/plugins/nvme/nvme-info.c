@@ -402,6 +402,21 @@ gint _open_dev (const gchar *device, GError **error) {
     return fd;
 }
 
+/* backported from nvme-cli: https://github.com/linux-nvme/nvme-cli/pull/2051 */
+#define ROUND_UP(N, S) ((((N) + (S) - 1) / (S)) * (S))
+
+void *_nvme_alloc (size_t len)
+{
+    size_t _len = ROUND_UP (len, 0x1000);
+    void *p;
+
+    if (posix_memalign ((void *) &p, getpagesize (), _len))
+        return NULL;
+
+    memset (p, 0, _len);
+    return p;
+}
+
 static gchar *decode_nvme_rev (guint32 ver) {
     guint16 mjr;
     guint8 mnr, ter = 0;
@@ -452,7 +467,7 @@ static gboolean _nvme_a_is_zero (const __u8 a[], int len) {
 BDNVMEControllerInfo * bd_nvme_get_controller_info (const gchar *device, GError **error) {
     int ret;
     int fd;
-    struct nvme_id_ctrl ctrl_id = ZERO_INIT;
+    struct nvme_id_ctrl *ctrl_id;
     BDNVMEControllerInfo *info;
 
     /* open the block device */
@@ -460,53 +475,56 @@ BDNVMEControllerInfo * bd_nvme_get_controller_info (const gchar *device, GError 
     if (fd < 0)
         return NULL;
 
+    ctrl_id = _nvme_alloc (sizeof (struct nvme_id_ctrl));
+    g_warn_if_fail (ctrl_id != NULL);
     /* send the NVME_IDENTIFY_CNS_CTRL ioctl */
-    ret = nvme_identify_ctrl (fd, &ctrl_id);
+    ret = nvme_identify_ctrl (fd, ctrl_id);
     if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
         g_prefix_error (error, "NVMe Identify Controller command error: ");
         close (fd);
+        free (ctrl_id);
         return NULL;
     }
     close (fd);
 
     info = g_new0 (BDNVMEControllerInfo, 1);
-    if ((ctrl_id.cmic & NVME_CTRL_CMIC_MULTI_PORT) == NVME_CTRL_CMIC_MULTI_PORT)
+    if ((ctrl_id->cmic & NVME_CTRL_CMIC_MULTI_PORT) == NVME_CTRL_CMIC_MULTI_PORT)
         info->features |= BD_NVME_CTRL_FEAT_MULTIPORT;
-    if ((ctrl_id.cmic & NVME_CTRL_CMIC_MULTI_CTRL) == NVME_CTRL_CMIC_MULTI_CTRL)
+    if ((ctrl_id->cmic & NVME_CTRL_CMIC_MULTI_CTRL) == NVME_CTRL_CMIC_MULTI_CTRL)
         info->features |= BD_NVME_CTRL_FEAT_MULTICTRL;
-    if ((ctrl_id.cmic & NVME_CTRL_CMIC_MULTI_SRIOV) == NVME_CTRL_CMIC_MULTI_SRIOV)
+    if ((ctrl_id->cmic & NVME_CTRL_CMIC_MULTI_SRIOV) == NVME_CTRL_CMIC_MULTI_SRIOV)
         info->features |= BD_NVME_CTRL_FEAT_SRIOV;
-    if ((ctrl_id.cmic & NVME_CTRL_CMIC_MULTI_ANA_REPORTING) == NVME_CTRL_CMIC_MULTI_ANA_REPORTING)
+    if ((ctrl_id->cmic & NVME_CTRL_CMIC_MULTI_ANA_REPORTING) == NVME_CTRL_CMIC_MULTI_ANA_REPORTING)
         info->features |= BD_NVME_CTRL_FEAT_ANA_REPORTING;
-    if ((ctrl_id.nvmsr & NVME_CTRL_NVMSR_NVMESD) == NVME_CTRL_NVMSR_NVMESD)
+    if ((ctrl_id->nvmsr & NVME_CTRL_NVMSR_NVMESD) == NVME_CTRL_NVMSR_NVMESD)
         info->features |= BD_NVME_CTRL_FEAT_STORAGE_DEVICE;
-    if ((ctrl_id.nvmsr & NVME_CTRL_NVMSR_NVMEE) == NVME_CTRL_NVMSR_NVMEE)
+    if ((ctrl_id->nvmsr & NVME_CTRL_NVMSR_NVMEE) == NVME_CTRL_NVMSR_NVMEE)
         info->features |= BD_NVME_CTRL_FEAT_ENCLOSURE;
-    if ((ctrl_id.mec & NVME_CTRL_MEC_PCIEME) == NVME_CTRL_MEC_PCIEME)
+    if ((ctrl_id->mec & NVME_CTRL_MEC_PCIEME) == NVME_CTRL_MEC_PCIEME)
         info->features |= BD_NVME_CTRL_FEAT_MGMT_PCIE;
-    if ((ctrl_id.mec & NVME_CTRL_MEC_SMBUSME) == NVME_CTRL_MEC_SMBUSME)
+    if ((ctrl_id->mec & NVME_CTRL_MEC_SMBUSME) == NVME_CTRL_MEC_SMBUSME)
         info->features |= BD_NVME_CTRL_FEAT_MGMT_SMBUS;
-    info->pci_vendor_id = GUINT16_FROM_LE (ctrl_id.vid);
-    info->pci_subsys_vendor_id = GUINT16_FROM_LE (ctrl_id.ssvid);
-    info->ctrl_id = GUINT16_FROM_LE (ctrl_id.cntlid);
-    if (!_nvme_a_is_zero (ctrl_id.fguid, sizeof (ctrl_id.fguid)))
-        info->fguid = _uuid_to_str (ctrl_id.fguid);
-    info->model_number = g_strndup (ctrl_id.mn, sizeof (ctrl_id.mn));
+    info->pci_vendor_id = GUINT16_FROM_LE (ctrl_id->vid);
+    info->pci_subsys_vendor_id = GUINT16_FROM_LE (ctrl_id->ssvid);
+    info->ctrl_id = GUINT16_FROM_LE (ctrl_id->cntlid);
+    if (!_nvme_a_is_zero (ctrl_id->fguid, sizeof (ctrl_id->fguid)))
+        info->fguid = _uuid_to_str (ctrl_id->fguid);
+    info->model_number = g_strndup (ctrl_id->mn, sizeof (ctrl_id->mn));
     g_strstrip (info->model_number);
-    info->serial_number = g_strndup (ctrl_id.sn, sizeof (ctrl_id.sn));
+    info->serial_number = g_strndup (ctrl_id->sn, sizeof (ctrl_id->sn));
     g_strstrip (info->serial_number);
-    info->firmware_ver = g_strndup (ctrl_id.fr, sizeof (ctrl_id.fr));
+    info->firmware_ver = g_strndup (ctrl_id->fr, sizeof (ctrl_id->fr));
     g_strstrip (info->firmware_ver);
-    info->nvme_ver = decode_nvme_rev (GUINT32_FROM_LE (ctrl_id.ver));
+    info->nvme_ver = decode_nvme_rev (GUINT32_FROM_LE (ctrl_id->ver));
     /* TODO: vwci: VPD Write Cycle Information */
-    if ((ctrl_id.oacs & NVME_CTRL_OACS_FORMAT) == NVME_CTRL_OACS_FORMAT)
+    if ((ctrl_id->oacs & NVME_CTRL_OACS_FORMAT) == NVME_CTRL_OACS_FORMAT)
         info->features |= BD_NVME_CTRL_FEAT_FORMAT;
-    if ((ctrl_id.oacs & NVME_CTRL_OACS_NS_MGMT) == NVME_CTRL_OACS_NS_MGMT)
+    if ((ctrl_id->oacs & NVME_CTRL_OACS_NS_MGMT) == NVME_CTRL_OACS_NS_MGMT)
         info->features |= BD_NVME_CTRL_FEAT_NS_MGMT;
-    if ((ctrl_id.oacs & NVME_CTRL_OACS_SELF_TEST) == NVME_CTRL_OACS_SELF_TEST)
+    if ((ctrl_id->oacs & NVME_CTRL_OACS_SELF_TEST) == NVME_CTRL_OACS_SELF_TEST)
         info->features |= BD_NVME_CTRL_FEAT_SELFTEST;
-    switch (ctrl_id.cntrltype) {
+    switch (ctrl_id->cntrltype) {
         case NVME_CTRL_CNTRLTYPE_IO:
             info->controller_type = BD_NVME_CTRL_TYPE_IO;
             break;
@@ -519,36 +537,37 @@ BDNVMEControllerInfo * bd_nvme_get_controller_info (const gchar *device, GError 
         default:
             info->controller_type = BD_NVME_CTRL_TYPE_UNKNOWN;
     }
-    info->hmb_pref_size = GUINT32_FROM_LE (ctrl_id.hmpre) * 4096LL;
-    info->hmb_min_size = GUINT32_FROM_LE (ctrl_id.hmmin) * 4096LL;
-    info->size_total = int128_to_guint64 (ctrl_id.tnvmcap);
-    info->size_unalloc = int128_to_guint64 (ctrl_id.unvmcap);
-    info->selftest_ext_time = GUINT16_FROM_LE (ctrl_id.edstt);
+    info->hmb_pref_size = GUINT32_FROM_LE (ctrl_id->hmpre) * 4096LL;
+    info->hmb_min_size = GUINT32_FROM_LE (ctrl_id->hmmin) * 4096LL;
+    info->size_total = int128_to_guint64 (ctrl_id->tnvmcap);
+    info->size_unalloc = int128_to_guint64 (ctrl_id->unvmcap);
+    info->selftest_ext_time = GUINT16_FROM_LE (ctrl_id->edstt);
     /* TODO: lpa: Log Page Attributes - NVME_CTRL_LPA_PERSETENT_EVENT: Persistent Event log */
-    if ((ctrl_id.dsto & NVME_CTRL_DSTO_ONE_DST) == NVME_CTRL_DSTO_ONE_DST)
+    if ((ctrl_id->dsto & NVME_CTRL_DSTO_ONE_DST) == NVME_CTRL_DSTO_ONE_DST)
         info->features |= BD_NVME_CTRL_FEAT_SELFTEST_SINGLE;
-    if ((ctrl_id.sanicap & NVME_CTRL_SANICAP_CES) == NVME_CTRL_SANICAP_CES)
+    if ((ctrl_id->sanicap & NVME_CTRL_SANICAP_CES) == NVME_CTRL_SANICAP_CES)
         info->features |= BD_NVME_CTRL_FEAT_SANITIZE_CRYPTO;
-    if ((ctrl_id.sanicap & NVME_CTRL_SANICAP_BES) == NVME_CTRL_SANICAP_BES)
+    if ((ctrl_id->sanicap & NVME_CTRL_SANICAP_BES) == NVME_CTRL_SANICAP_BES)
         info->features |= BD_NVME_CTRL_FEAT_SANITIZE_BLOCK;
-    if ((ctrl_id.sanicap & NVME_CTRL_SANICAP_OWS) == NVME_CTRL_SANICAP_OWS)
+    if ((ctrl_id->sanicap & NVME_CTRL_SANICAP_OWS) == NVME_CTRL_SANICAP_OWS)
         info->features |= BD_NVME_CTRL_FEAT_SANITIZE_OVERWRITE;
     /* struct nvme_id_ctrl.nn: If the &struct nvme_id_ctrl.mnan field is cleared to 0h,
      * then the struct nvme_id_ctrl.nn field also indicates the maximum number of namespaces
      * supported by the NVM subsystem.
      */
-    info->num_namespaces = GUINT32_FROM_LE (ctrl_id.mnan) == 0 ? GUINT32_FROM_LE (ctrl_id.nn) : GUINT32_FROM_LE (ctrl_id.mnan);
-    if ((ctrl_id.fna & NVME_CTRL_FNA_FMT_ALL_NAMESPACES) == NVME_CTRL_FNA_FMT_ALL_NAMESPACES)
+    info->num_namespaces = GUINT32_FROM_LE (ctrl_id->mnan) == 0 ? GUINT32_FROM_LE (ctrl_id->nn) : GUINT32_FROM_LE (ctrl_id->mnan);
+    if ((ctrl_id->fna & NVME_CTRL_FNA_FMT_ALL_NAMESPACES) == NVME_CTRL_FNA_FMT_ALL_NAMESPACES)
         info->features |= BD_NVME_CTRL_FEAT_FORMAT_ALL_NS;
-    if ((ctrl_id.fna & NVME_CTRL_FNA_SEC_ALL_NAMESPACES) == NVME_CTRL_FNA_SEC_ALL_NAMESPACES)
+    if ((ctrl_id->fna & NVME_CTRL_FNA_SEC_ALL_NAMESPACES) == NVME_CTRL_FNA_SEC_ALL_NAMESPACES)
         info->features |= BD_NVME_CTRL_FEAT_SECURE_ERASE_ALL_NS;
-    if ((ctrl_id.fna & NVME_CTRL_FNA_CRYPTO_ERASE) == NVME_CTRL_FNA_CRYPTO_ERASE)
+    if ((ctrl_id->fna & NVME_CTRL_FNA_CRYPTO_ERASE) == NVME_CTRL_FNA_CRYPTO_ERASE)
         info->features |= BD_NVME_CTRL_FEAT_SECURE_ERASE_CRYPTO;
     /* TODO: enum nvme_id_ctrl_oncs: NVME_CTRL_ONCS_WRITE_UNCORRECTABLE, NVME_CTRL_ONCS_WRITE_ZEROES... */
     /* TODO: nwpc: Namespace Write Protection Capabilities */
-    info->subsysnqn = g_strndup (ctrl_id.subnqn, sizeof (ctrl_id.subnqn));
+    info->subsysnqn = g_strndup (ctrl_id->subnqn, sizeof (ctrl_id->subnqn));
     g_strstrip (info->subsysnqn);
 
+    free (ctrl_id);
     return info;
 }
 
@@ -572,10 +591,10 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
     int ret_ns_ind = -1;
     int fd;
     __u32 nsid = 0;
-    struct nvme_id_ctrl ctrl_id = ZERO_INIT;
-    struct nvme_id_ns ns_info = ZERO_INIT;
-    struct nvme_id_independent_id_ns ns_info_ind = ZERO_INIT;
-    uint8_t desc[NVME_IDENTIFY_DATA_SIZE] = ZERO_INIT;
+    struct nvme_id_ctrl *ctrl_id;
+    struct nvme_id_ns *ns_info;
+    struct nvme_id_independent_id_ns *ns_info_ind = NULL;
+    struct nvme_ns_id_desc *descs = NULL;
     guint8 flbas;
     guint i;
     guint len;
@@ -597,44 +616,55 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
     }
 
     /* send the NVME_IDENTIFY_CNS_NS ioctl */
-    ret = nvme_identify_ns (fd, nsid, &ns_info);
+    ns_info = _nvme_alloc (sizeof (struct nvme_id_ns));
+    g_warn_if_fail (ns_info != NULL);
+    ret = nvme_identify_ns (fd, nsid, ns_info);
     if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
         g_prefix_error (error, "NVMe Identify Namespace command error: ");
         close (fd);
+        free (ns_info);
         return NULL;
     }
 
     /* send the NVME_IDENTIFY_CNS_CTRL ioctl */
-    ret_ctrl = nvme_identify_ctrl (fd, &ctrl_id);
+    ctrl_id = _nvme_alloc (sizeof (struct nvme_id_ctrl));
+    g_warn_if_fail (ctrl_id != NULL);
+    ret_ctrl = nvme_identify_ctrl (fd, ctrl_id);
 
     /* send the NVME_IDENTIFY_CNS_NS_DESC_LIST ioctl, NVMe 1.3 */
-    if (ret_ctrl == 0 && GUINT32_FROM_LE (ctrl_id.ver) >= 0x10300)
-        ret_desc = nvme_identify_ns_descs (fd, nsid, (struct nvme_ns_id_desc *) &desc);
+    if (ret_ctrl == 0 && GUINT32_FROM_LE (ctrl_id->ver) >= 0x10300) {
+        descs = _nvme_alloc (NVME_IDENTIFY_DATA_SIZE);
+        g_warn_if_fail (descs != NULL);
+        ret_desc = nvme_identify_ns_descs (fd, nsid, descs);
+    }
 
     /* send the NVME_IDENTIFY_CNS_CSI_INDEPENDENT_ID_NS ioctl, NVMe 2.0 */
-    if (ret_ctrl == 0 && GUINT32_FROM_LE (ctrl_id.ver) >= 0x20000)
-        ret_ns_ind = nvme_identify_independent_identify_ns (fd, nsid, &ns_info_ind);
+    if (ret_ctrl == 0 && GUINT32_FROM_LE (ctrl_id->ver) >= 0x20000) {
+        ns_info_ind = _nvme_alloc (sizeof (struct nvme_id_independent_id_ns));
+        g_warn_if_fail (ns_info_ind != NULL);
+        ret_ns_ind = nvme_identify_independent_identify_ns (fd, nsid, ns_info_ind);
+    }
     close (fd);
 
     info = g_new0 (BDNVMENamespaceInfo, 1);
     info->nsid = nsid;
-    info->nsize = GUINT64_FROM_LE (ns_info.nsze);
-    info->ncap = GUINT64_FROM_LE (ns_info.ncap);
-    info->nuse = GUINT64_FROM_LE (ns_info.nuse);
-    if ((ns_info.nsfeat & NVME_NS_FEAT_THIN) == NVME_NS_FEAT_THIN)
+    info->nsize = GUINT64_FROM_LE (ns_info->nsze);
+    info->ncap = GUINT64_FROM_LE (ns_info->ncap);
+    info->nuse = GUINT64_FROM_LE (ns_info->nuse);
+    if ((ns_info->nsfeat & NVME_NS_FEAT_THIN) == NVME_NS_FEAT_THIN)
         info->features |= BD_NVME_NS_FEAT_THIN;
-    if ((ns_info.nmic & NVME_NS_NMIC_SHARED) == NVME_NS_NMIC_SHARED)
+    if ((ns_info->nmic & NVME_NS_NMIC_SHARED) == NVME_NS_NMIC_SHARED)
         info->features |= BD_NVME_NS_FEAT_MULTIPATH_SHARED;
-    if ((ns_info.fpi & NVME_NS_FPI_SUPPORTED) == NVME_NS_FPI_SUPPORTED)
+    if ((ns_info->fpi & NVME_NS_FPI_SUPPORTED) == NVME_NS_FPI_SUPPORTED)
         info->features |= BD_NVME_NS_FEAT_FORMAT_PROGRESS;
-    info->format_progress_remaining = ns_info.fpi & NVME_NS_FPI_REMAINING;
-    /* TODO: what the ns_info.nvmcap really stands for? */
-    info->write_protected = (ns_info.nsattr & NVME_NS_NSATTR_WRITE_PROTECTED) == NVME_NS_NSATTR_WRITE_PROTECTED;
+    info->format_progress_remaining = ns_info->fpi & NVME_NS_FPI_REMAINING;
+    /* TODO: what the ns_info->nvmcap really stands for? */
+    info->write_protected = (ns_info->nsattr & NVME_NS_NSATTR_WRITE_PROTECTED) == NVME_NS_NSATTR_WRITE_PROTECTED;
 
     if (ret_desc == 0) {
         for (i = 0; i < NVME_IDENTIFY_DATA_SIZE; i += len) {
-            struct nvme_ns_id_desc *d = (void *) desc + i;
+            struct nvme_ns_id_desc *d = descs + i;
 
             if (!d->nidl)
                 break;
@@ -661,29 +691,29 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
         }
     }
 
-    if (info->nguid == NULL && !_nvme_a_is_zero (ns_info.nguid, sizeof (ns_info.nguid))) {
-        info->nguid = g_malloc0 (sizeof (ns_info.nguid) * 2 + 1);
-        for (i = 0; i < sizeof (ns_info.nguid); i++)
-            snprintf (info->nguid + i * 2, 3, "%02x", ns_info.nguid[i]);
+    if (info->nguid == NULL && !_nvme_a_is_zero (ns_info->nguid, sizeof (ns_info->nguid))) {
+        info->nguid = g_malloc0 (sizeof (ns_info->nguid) * 2 + 1);
+        for (i = 0; i < sizeof (ns_info->nguid); i++)
+            snprintf (info->nguid + i * 2, 3, "%02x", ns_info->nguid[i]);
     }
-    if (info->eui64 == NULL && !_nvme_a_is_zero (ns_info.eui64, sizeof (ns_info.eui64))) {
-        info->eui64 = g_malloc0 (sizeof (ns_info.eui64) * 2 + 1);
-        for (i = 0; i < sizeof (ns_info.eui64); i++)
-            snprintf (info->eui64 + i * 2, 3, "%02x", ns_info.eui64[i]);
+    if (info->eui64 == NULL && !_nvme_a_is_zero (ns_info->eui64, sizeof (ns_info->eui64))) {
+        info->eui64 = g_malloc0 (sizeof (ns_info->eui64) * 2 + 1);
+        for (i = 0; i < sizeof (ns_info->eui64); i++)
+            snprintf (info->eui64 + i * 2, 3, "%02x", ns_info->eui64[i]);
     }
     if (ret_ns_ind == 0) {
-        if ((ns_info_ind.nsfeat & 1 << 4) == 1 << 4)
+        if ((ns_info_ind->nsfeat & 1 << 4) == 1 << 4)
             info->features |= BD_NVME_NS_FEAT_ROTATIONAL;
     }
 
     /* translate the LBA Format array */
     ptr_array = g_ptr_array_new ();
-    nvme_id_ns_flbas_to_lbaf_inuse (ns_info.flbas, &flbas);
-    for (i = 0; i <= ns_info.nlbaf + ns_info.nulbaf; i++) {
+    nvme_id_ns_flbas_to_lbaf_inuse (ns_info->flbas, &flbas);
+    for (i = 0; i <= ns_info->nlbaf + ns_info->nulbaf; i++) {
         BDNVMELBAFormat *lbaf = g_new0 (BDNVMELBAFormat, 1);
-        lbaf->data_size = 1 << ns_info.lbaf[i].ds;
-        lbaf->metadata_size = GUINT16_FROM_LE (ns_info.lbaf[i].ms);
-        lbaf->relative_performance = ns_info.lbaf[i].rp + 1;
+        lbaf->data_size = 1 << ns_info->lbaf[i].ds;
+        lbaf->metadata_size = GUINT16_FROM_LE (ns_info->lbaf[i].ms);
+        lbaf->relative_performance = ns_info->lbaf[i].rp + 1;
         g_ptr_array_add (ptr_array, lbaf);
         if (i == flbas) {
             info->current_lba_format.data_size = lbaf->data_size;
@@ -694,6 +724,10 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
     g_ptr_array_add (ptr_array, NULL);  /* trailing NULL element */
     info->lba_formats = (BDNVMELBAFormat **) g_ptr_array_free (ptr_array, FALSE);
 
+    free (ctrl_id);
+    free (ns_info);
+    free (ns_info_ind);
+    free (descs);
     return info;
 }
 
@@ -714,8 +748,8 @@ BDNVMESmartLog * bd_nvme_get_smart_log (const gchar *device, GError **error) {
     int ret;
     int ret_identify;
     int fd;
-    struct nvme_id_ctrl ctrl_id = ZERO_INIT;
-    struct nvme_smart_log smart_log = ZERO_INIT;
+    struct nvme_id_ctrl *ctrl_id;
+    struct nvme_smart_log *smart_log;
     BDNVMESmartLog *log;
     guint i;
 
@@ -724,59 +758,66 @@ BDNVMESmartLog * bd_nvme_get_smart_log (const gchar *device, GError **error) {
     if (fd < 0)
         return NULL;
 
-    /* send the NVME_IDENTIFY_CNS_NS + NVME_IDENTIFY_CNS_CTRL ioctl */
-    ret_identify = nvme_identify_ctrl (fd, &ctrl_id);
+    /* send the NVME_IDENTIFY_CNS_CTRL ioctl */
+    ctrl_id = _nvme_alloc (sizeof (struct nvme_id_ctrl));
+    g_warn_if_fail (ctrl_id != NULL);
+    ret_identify = nvme_identify_ctrl (fd, ctrl_id);
     if (ret_identify != 0) {
         _nvme_status_to_error (ret_identify, FALSE, error);
         g_prefix_error (error, "NVMe Identify Controller command error: ");
         close (fd);
+        free (ctrl_id);
         return NULL;
     }
 
     /* send the NVME_LOG_LID_SMART ioctl */
-    ret = nvme_get_log_smart (fd, NVME_NSID_ALL, FALSE /* rae */, &smart_log);
+    smart_log = _nvme_alloc (sizeof (struct nvme_smart_log));
+    g_warn_if_fail (smart_log != NULL);
+    ret = nvme_get_log_smart (fd, NVME_NSID_ALL, FALSE /* rae */, smart_log);
     if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
         g_prefix_error (error, "NVMe Get Log Page - SMART / Health Information Log command error: ");
         close (fd);
+        free (ctrl_id);
+        free (smart_log);
         return NULL;
     }
     close (fd);
 
     log = g_new0 (BDNVMESmartLog, 1);
-    if ((smart_log.critical_warning & NVME_SMART_CRIT_SPARE) == NVME_SMART_CRIT_SPARE)
+    if ((smart_log->critical_warning & NVME_SMART_CRIT_SPARE) == NVME_SMART_CRIT_SPARE)
         log->critical_warning |= BD_NVME_SMART_CRITICAL_WARNING_SPARE;
-    if ((smart_log.critical_warning & NVME_SMART_CRIT_TEMPERATURE) == NVME_SMART_CRIT_TEMPERATURE)
+    if ((smart_log->critical_warning & NVME_SMART_CRIT_TEMPERATURE) == NVME_SMART_CRIT_TEMPERATURE)
         log->critical_warning |= BD_NVME_SMART_CRITICAL_WARNING_TEMPERATURE;
-    if ((smart_log.critical_warning & NVME_SMART_CRIT_DEGRADED) == NVME_SMART_CRIT_DEGRADED)
+    if ((smart_log->critical_warning & NVME_SMART_CRIT_DEGRADED) == NVME_SMART_CRIT_DEGRADED)
         log->critical_warning |= BD_NVME_SMART_CRITICAL_WARNING_DEGRADED;
-    if ((smart_log.critical_warning & NVME_SMART_CRIT_MEDIA) == NVME_SMART_CRIT_MEDIA)
+    if ((smart_log->critical_warning & NVME_SMART_CRIT_MEDIA) == NVME_SMART_CRIT_MEDIA)
         log->critical_warning |= BD_NVME_SMART_CRITICAL_WARNING_READONLY;
-    if ((smart_log.critical_warning & NVME_SMART_CRIT_VOLATILE_MEMORY) == NVME_SMART_CRIT_VOLATILE_MEMORY)
+    if ((smart_log->critical_warning & NVME_SMART_CRIT_VOLATILE_MEMORY) == NVME_SMART_CRIT_VOLATILE_MEMORY)
         log->critical_warning |= BD_NVME_SMART_CRITICAL_WARNING_VOLATILE_MEM;
-    if ((smart_log.critical_warning & NVME_SMART_CRIT_PMR_RO) == NVME_SMART_CRIT_PMR_RO)
+    if ((smart_log->critical_warning & NVME_SMART_CRIT_PMR_RO) == NVME_SMART_CRIT_PMR_RO)
         log->critical_warning |= BD_NVME_SMART_CRITICAL_WARNING_PMR_READONLY;
-    log->avail_spare = smart_log.avail_spare;
-    log->spare_thresh = smart_log.spare_thresh;
-    log->percent_used = smart_log.percent_used;
-    log->total_data_read = int128_to_guint64 (smart_log.data_units_read) * 1000 * 512;
-    log->total_data_written = int128_to_guint64 (smart_log.data_units_written) * 1000 * 512;
-    log->ctrl_busy_time = int128_to_guint64 (smart_log.ctrl_busy_time);
-    log->power_cycles = int128_to_guint64 (smart_log.power_cycles);
-    log->power_on_hours = int128_to_guint64 (smart_log.power_on_hours);
-    log->unsafe_shutdowns = int128_to_guint64 (smart_log.unsafe_shutdowns);
-    log->media_errors = int128_to_guint64 (smart_log.media_errors);
-    log->num_err_log_entries = int128_to_guint64 (smart_log.num_err_log_entries);
+    log->avail_spare = smart_log->avail_spare;
+    log->spare_thresh = smart_log->spare_thresh;
+    log->percent_used = smart_log->percent_used;
+    log->total_data_read = int128_to_guint64 (smart_log->data_units_read) * 1000 * 512;
+    log->total_data_written = int128_to_guint64 (smart_log->data_units_written) * 1000 * 512;
+    log->ctrl_busy_time = int128_to_guint64 (smart_log->ctrl_busy_time);
+    log->power_cycles = int128_to_guint64 (smart_log->power_cycles);
+    log->power_on_hours = int128_to_guint64 (smart_log->power_on_hours);
+    log->unsafe_shutdowns = int128_to_guint64 (smart_log->unsafe_shutdowns);
+    log->media_errors = int128_to_guint64 (smart_log->media_errors);
+    log->num_err_log_entries = int128_to_guint64 (smart_log->num_err_log_entries);
 
-    log->temperature = (smart_log.temperature[1] << 8) | smart_log.temperature[0];
-    for (i = 0; i < G_N_ELEMENTS (smart_log.temp_sensor); i++)
-        log->temp_sensors[i] = GUINT16_FROM_LE (smart_log.temp_sensor[i]);
-    log->warning_temp_time = GUINT32_FROM_LE (smart_log.warning_temp_time);
-    log->critical_temp_time = GUINT32_FROM_LE (smart_log.critical_comp_time);
+    log->temperature = (smart_log->temperature[1] << 8) | smart_log->temperature[0];
+    for (i = 0; i < G_N_ELEMENTS (smart_log->temp_sensor); i++)
+        log->temp_sensors[i] = GUINT16_FROM_LE (smart_log->temp_sensor[i]);
+    log->warning_temp_time = GUINT32_FROM_LE (smart_log->warning_temp_time);
+    log->critical_temp_time = GUINT32_FROM_LE (smart_log->critical_comp_time);
 
     if (ret_identify == 0) {
-        log->wctemp = GUINT16_FROM_LE (ctrl_id.wctemp);
-        log->cctemp = GUINT16_FROM_LE (ctrl_id.cctemp);
+        log->wctemp = GUINT16_FROM_LE (ctrl_id->wctemp);
+        log->cctemp = GUINT16_FROM_LE (ctrl_id->cctemp);
     }
 
     /* FIXME: intentionally not providing Host Controlled Thermal Management attributes
@@ -784,6 +825,8 @@ BDNVMESmartLog * bd_nvme_get_smart_log (const gchar *device, GError **error) {
      *        Power State attributes. Subject to re-evaluation in the future.
      */
 
+    free (ctrl_id);
+    free (smart_log);
     return log;
 }
 
@@ -810,7 +853,7 @@ BDNVMEErrorLogEntry ** bd_nvme_get_error_log_entries (const gchar *device, GErro
     int ret;
     int fd;
     guint elpe;
-    struct nvme_id_ctrl ctrl_id = ZERO_INIT;
+    struct nvme_id_ctrl *ctrl_id;
     struct nvme_error_log_page *err_log;
     GPtrArray *ptr_array;
     guint i;
@@ -821,23 +864,29 @@ BDNVMEErrorLogEntry ** bd_nvme_get_error_log_entries (const gchar *device, GErro
         return NULL;
 
     /* find out the maximum number of error log entries as reported by the controller */
-    ret = nvme_identify_ctrl (fd, &ctrl_id);
+    ctrl_id = _nvme_alloc (sizeof (struct nvme_id_ctrl));
+    g_warn_if_fail (ctrl_id != NULL);
+    ret = nvme_identify_ctrl (fd, ctrl_id);
     if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
         g_prefix_error (error, "NVMe Identify Controller command error: ");
         close (fd);
+        free (ctrl_id);
         return NULL;
     }
 
+    elpe = ctrl_id->elpe + 1;
+    free (ctrl_id);
+
     /* send the NVME_LOG_LID_ERROR ioctl */
-    elpe = ctrl_id.elpe + 1;
-    err_log = g_new0 (struct nvme_error_log_page, elpe);
+    err_log = _nvme_alloc (sizeof (struct nvme_error_log_page) * elpe);
+    g_warn_if_fail (err_log != NULL);
     ret = nvme_get_log_error (fd, elpe, FALSE /* rae */, err_log);
     if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
         g_prefix_error (error, "NVMe Get Log Page - Error Information Log Entry command error: ");
-        g_free (err_log);
         close (fd);
+        free (err_log);
         return NULL;
     }
     close (fd);
@@ -863,7 +912,7 @@ BDNVMEErrorLogEntry ** bd_nvme_get_error_log_entries (const gchar *device, GErro
         }
     }
     g_ptr_array_add (ptr_array, NULL);  /* trailing NULL element */
-    g_free (err_log);
+    free (err_log);
 
     return (BDNVMEErrorLogEntry **) g_ptr_array_free (ptr_array, FALSE);
 }
@@ -885,7 +934,7 @@ BDNVMEErrorLogEntry ** bd_nvme_get_error_log_entries (const gchar *device, GErro
 BDNVMESelfTestLog * bd_nvme_get_self_test_log (const gchar *device, GError **error) {
     int ret;
     int fd;
-    struct nvme_self_test_log self_test_log = ZERO_INIT;
+    struct nvme_self_test_log *self_test_log;
     BDNVMESelfTestLog *log;
     GPtrArray *ptr_array;
     guint i;
@@ -896,17 +945,20 @@ BDNVMESelfTestLog * bd_nvme_get_self_test_log (const gchar *device, GError **err
         return NULL;
 
     /* send the NVME_LOG_LID_DEVICE_SELF_TEST ioctl */
-    ret = nvme_get_log_device_self_test (fd, &self_test_log);
+    self_test_log = _nvme_alloc (sizeof (struct nvme_self_test_log));
+    g_warn_if_fail (self_test_log != NULL);
+    ret = nvme_get_log_device_self_test (fd, self_test_log);
     if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
         g_prefix_error (error, "NVMe Get Log Page - Device Self-test Log command error: ");
         close (fd);
+        free (self_test_log);
         return NULL;
     }
     close (fd);
 
     log = g_new0 (BDNVMESelfTestLog, 1);
-    switch (self_test_log.current_operation & NVME_ST_CURR_OP_MASK) {
+    switch (self_test_log->current_operation & NVME_ST_CURR_OP_MASK) {
         case NVME_ST_CURR_OP_NOT_RUNNING:
             log->current_operation = BD_NVME_SELF_TEST_ACTION_NOT_RUNNING;
             break;
@@ -921,8 +973,8 @@ BDNVMESelfTestLog * bd_nvme_get_self_test_log (const gchar *device, GError **err
         default:
             log->current_operation = BD_NVME_SELF_TEST_ACTION_VENDOR_SPECIFIC;
     }
-    if ((self_test_log.current_operation & NVME_ST_CURR_OP_MASK) > 0)
-        log->current_operation_completion = self_test_log.completion & NVME_ST_CURR_OP_CMPL_MASK;
+    if ((self_test_log->current_operation & NVME_ST_CURR_OP_MASK) > 0)
+        log->current_operation_completion = self_test_log->completion & NVME_ST_CURR_OP_CMPL_MASK;
 
     ptr_array = g_ptr_array_new ();
     for (i = 0; i < NVME_LOG_ST_MAX_RESULTS; i++) {
@@ -930,8 +982,8 @@ BDNVMESelfTestLog * bd_nvme_get_self_test_log (const gchar *device, GError **err
         guint8 dsts;
         guint8 code;
 
-        dsts = self_test_log.result[i].dsts & NVME_ST_RESULT_MASK;
-        code = self_test_log.result[i].dsts >> NVME_ST_CODE_SHIFT;
+        dsts = self_test_log->result[i].dsts & NVME_ST_RESULT_MASK;
+        code = self_test_log->result[i].dsts >> NVME_ST_CODE_SHIFT;
         if (dsts == NVME_ST_RESULT_NOT_USED)
             continue;
 
@@ -987,21 +1039,22 @@ BDNVMESelfTestLog * bd_nvme_get_self_test_log (const gchar *device, GError **err
                 g_warning ("Unhandled self-test log entry action code: %d", code);
                 entry->action = BD_NVME_SELF_TEST_ACTION_VENDOR_SPECIFIC;
         }
-        entry->segment = self_test_log.result[i].seg;
-        entry->power_on_hours = GUINT64_FROM_LE (self_test_log.result[i].poh);
-        if (self_test_log.result[i].vdi & NVME_ST_VALID_DIAG_INFO_NSID)
-            entry->nsid = GUINT32_FROM_LE (self_test_log.result[i].nsid);
-        if (self_test_log.result[i].vdi & NVME_ST_VALID_DIAG_INFO_FLBA)
-            entry->failing_lba = GUINT64_FROM_LE (self_test_log.result[i].flba);
-        if ((self_test_log.result[i].vdi & NVME_ST_VALID_DIAG_INFO_SC) &&
-            (self_test_log.result[i].vdi & NVME_ST_VALID_DIAG_INFO_SCT))
-            _nvme_status_to_error ((self_test_log.result[i].sct & 7) << 8 | self_test_log.result[i].sc,
+        entry->segment = self_test_log->result[i].seg;
+        entry->power_on_hours = GUINT64_FROM_LE (self_test_log->result[i].poh);
+        if (self_test_log->result[i].vdi & NVME_ST_VALID_DIAG_INFO_NSID)
+            entry->nsid = GUINT32_FROM_LE (self_test_log->result[i].nsid);
+        if (self_test_log->result[i].vdi & NVME_ST_VALID_DIAG_INFO_FLBA)
+            entry->failing_lba = GUINT64_FROM_LE (self_test_log->result[i].flba);
+        if ((self_test_log->result[i].vdi & NVME_ST_VALID_DIAG_INFO_SC) &&
+            (self_test_log->result[i].vdi & NVME_ST_VALID_DIAG_INFO_SCT))
+            _nvme_status_to_error ((self_test_log->result[i].sct & 7) << 8 | self_test_log->result[i].sc,
                                    FALSE, &entry->status_code_error);
 
         g_ptr_array_add (ptr_array, entry);
     }
     g_ptr_array_add (ptr_array, NULL);
     log->entries = (BDNVMESelfTestLogEntry **) g_ptr_array_free (ptr_array, FALSE);
+    free (self_test_log);
 
     return log;
 }
@@ -1026,7 +1079,6 @@ BDNVMESelfTestLog * bd_nvme_get_self_test_log (const gchar *device, GError **err
 BDNVMESanitizeLog * bd_nvme_get_sanitize_log (const gchar *device, GError **error) {
     int ret;
     int fd;
-    char buf[65536] = ZERO_INIT;
     struct nvme_sanitize_log_page *sanitize_log;
     BDNVMESanitizeLog *log;
     __u16 sstat;
@@ -1037,19 +1089,17 @@ BDNVMESanitizeLog * bd_nvme_get_sanitize_log (const gchar *device, GError **erro
         return NULL;
 
     /* send the NVME_LOG_LID_SANITIZE ioctl */
-    ret = nvme_get_log_sanitize (fd, FALSE /* rae */, (struct nvme_sanitize_log_page *) &buf);
+    sanitize_log = _nvme_alloc (sizeof (struct nvme_sanitize_log_page));
+    g_warn_if_fail (sanitize_log != NULL);
+    ret = nvme_get_log_sanitize (fd, FALSE /* rae */, sanitize_log);
     if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
         g_prefix_error (error, "NVMe Get Log Page - Sanitize Status Log command error: ");
         close (fd);
+        free (sanitize_log);
         return NULL;
     }
     close (fd);
-
-    /* need to use interim buffer that is large enough for broken drives
-     * returning more data than expected
-     */
-    sanitize_log = (struct nvme_sanitize_log_page *) &buf;
 
     log = g_new0 (BDNVMESanitizeLog, 1);
     log->sanitize_progress = 0;
@@ -1085,5 +1135,6 @@ BDNVMESanitizeLog * bd_nvme_get_sanitize_log (const gchar *device, GError **erro
     log->time_for_block_erase_nd = (GUINT32_FROM_LE (sanitize_log->etbend) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log->etbend);
     log->time_for_crypto_erase_nd = (GUINT32_FROM_LE (sanitize_log->etcend) == 0xffffffff) ? -1 : (gint64) GUINT32_FROM_LE (sanitize_log->etcend);
 
+    free (sanitize_log);
     return log;
 }
