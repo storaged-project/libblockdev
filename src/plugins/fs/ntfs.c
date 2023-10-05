@@ -325,22 +325,22 @@ gboolean bd_fs_ntfs_check_uuid (const gchar *uuid, GError **error) {
  * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_RESIZE
  */
 gboolean bd_fs_ntfs_resize (const gchar *device, guint64 new_size, GError **error) {
-    const gchar *args[5] = {"ntfsresize", NULL, NULL, NULL, NULL};
+    const gchar *args[6] = {"ntfsresize", "--no-progress-bar", NULL, NULL, NULL, NULL};
     gboolean ret = FALSE;
 
     if (!check_deps (&avail_deps, DEPS_NTFSRESIZE_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
 
     if (new_size != 0) {
-        args[1] = "-s";
-        args[2] = g_strdup_printf ("%"G_GUINT64_FORMAT, new_size);
-        args[3] = device;
+        args[2] = "-s";
+        args[3] = g_strdup_printf ("%"G_GUINT64_FORMAT, new_size);
+        args[4] = device;
     } else {
-        args[1] = device;
+        args[2] = device;
     }
     ret = bd_utils_exec_and_report_error (args, NULL, error);
 
-    g_free ((gchar *) args[2]);
+    g_free ((gchar *) args[3]);
     return ret;
 }
 
