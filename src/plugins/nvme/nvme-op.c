@@ -116,30 +116,37 @@ gboolean bd_nvme_device_self_test (const gchar *device, BDNVMESelfTestAction act
 /* returns 0xff in case of error (the NVMe standard defines total of 16 flba records) */
 static __u8 find_lbaf_for_size (int fd, __u32 nsid, guint16 lba_data_size, guint16 metadata_size, GError **error) {
     int ret;
-    struct nvme_id_ns ns_info = ZERO_INIT;
+    struct nvme_id_ns *ns_info;
     __u8 flbas = 0;
     guint i;
 
     /* TODO: find first attached namespace instead of hardcoding NSID = 1 */
-    ret = nvme_identify_ns (fd, nsid == 0xffffffff ? 1 : nsid, &ns_info);
+    ns_info = _nvme_alloc (sizeof (struct nvme_id_ns));
+    g_warn_if_fail (ns_info != NULL);
+    ret = nvme_identify_ns (fd, nsid == 0xffffffff ? 1 : nsid, ns_info);
     if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
         g_prefix_error (error, "NVMe Identify Namespace command error: ");
+        free (ns_info);
         return 0xff;
     }
 
     /* return currently used lbaf */
     if (lba_data_size == 0) {
-       nvme_id_ns_flbas_to_lbaf_inuse (ns_info.flbas, &flbas);
-       return flbas;
+        nvme_id_ns_flbas_to_lbaf_inuse (ns_info->flbas, &flbas);
+        free (ns_info);
+        return flbas;
     }
 
-    for (i = 0; i <= ns_info.nlbaf + ns_info.nulbaf; i++)
-        if (1UL << ns_info.lbaf[i].ds == lba_data_size && GUINT16_FROM_LE (ns_info.lbaf[i].ms) == metadata_size)
+    for (i = 0; i <= ns_info->nlbaf + ns_info->nulbaf; i++)
+        if (1UL << ns_info->lbaf[i].ds == lba_data_size && GUINT16_FROM_LE (ns_info->lbaf[i].ms) == metadata_size) {
+            free (ns_info);
             return i;
+        }
 
     g_set_error_literal (error, BD_NVME_ERROR, BD_NVME_ERROR_INVALID_ARGUMENT,
                          "Couldn't match desired LBA data block size in a device supported LBA format data sizes");
+    free (ns_info);
     return 0xff;
 }
 
@@ -176,7 +183,7 @@ static __u8 find_lbaf_for_size (int fd, __u32 nsid, guint16 lba_data_size, guint
 gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, guint16 metadata_size, BDNVMEFormatSecureErase secure_erase, GError **error) {
     int ret;
     gboolean ctrl_device = FALSE;
-    struct nvme_id_ctrl ctrl_id = ZERO_INIT;
+    struct nvme_id_ctrl *ctrl_id;
     struct nvme_format_nvm_args args = {
         .args_size = sizeof(args),
         .result = NULL,
@@ -207,11 +214,14 @@ gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, guint16 met
 
     /* check the FNA controller bit when formatting a single namespace */
     if (! ctrl_device) {
-        ret = nvme_identify_ctrl (args.fd, &ctrl_id);
+        ctrl_id = _nvme_alloc (sizeof (struct nvme_id_ctrl));
+        g_warn_if_fail (ctrl_id != NULL);
+        ret = nvme_identify_ctrl (args.fd, ctrl_id);
         if (ret != 0) {
             _nvme_status_to_error (ret, FALSE, error);
             g_prefix_error (error, "NVMe Identify Controller command error: ");
             close (args.fd);
+            free (ctrl_id);
             return FALSE;
         }
         /* from nvme-cli:
@@ -219,14 +229,16 @@ gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, guint16 met
          * attributes and a format (excluding secure erase) of any namespace results in a
          * format of all namespaces.
          */
-        if ((ctrl_id.fna & NVME_CTRL_FNA_FMT_ALL_NAMESPACES) == NVME_CTRL_FNA_FMT_ALL_NAMESPACES) {
+        if ((ctrl_id->fna & NVME_CTRL_FNA_FMT_ALL_NAMESPACES) == NVME_CTRL_FNA_FMT_ALL_NAMESPACES) {
             /* tell user that it would format other namespaces and that bd_nvme_format()
              * should be called on a controller device instead */
             g_set_error_literal (error, BD_NVME_ERROR, BD_NVME_ERROR_WOULD_FORMAT_ALL_NS,
                          "The NVMe controller indicates it would format all namespaces.");
             close (args.fd);
+            free (ctrl_id);
             return FALSE;
         }
+        free (ctrl_id);
     }
 
     /* find out the desired LBA data format index */
