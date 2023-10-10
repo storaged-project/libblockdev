@@ -24,7 +24,12 @@
 #include "logging.h"
 
 static BDUtilsLogFunc log_func = &bd_utils_log_stdout;
+
+#ifdef DEBUG
+static int log_level = BD_UTILS_LOG_DEBUG;
+#else
 static int log_level = BD_UTILS_LOG_WARNING;
+#endif
 
 /**
  * bd_utils_init_logging:
