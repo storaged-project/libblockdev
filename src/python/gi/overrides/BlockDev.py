@@ -30,7 +30,6 @@ no code duplication and it propagates non-callable objects directly.
 import inspect
 import os
 import re
-import sys
 from collections import namedtuple, defaultdict
 
 from bytesize import Size
