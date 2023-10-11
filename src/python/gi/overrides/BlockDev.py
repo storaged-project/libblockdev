@@ -85,6 +85,15 @@ for _cname, cls in all_boxed:
     cls.__repr__ = _default_repr
 
 
+class PluginSpec(BlockDev.PluginSpec):
+    def __new__(cls, name=BlockDev.Plugin.UNDEF, so_name=None):
+        ret = BlockDev.PluginSpec.new(name, so_name)
+        ret.__class__ = cls
+        return ret
+PluginSpec = override(PluginSpec)
+__all__.append("PluginSpec")
+
+
 class ExtraArg(BlockDev.ExtraArg):
     def __new__(cls, opt, val=""):
         ret = BlockDev.ExtraArg.new(opt, val)
@@ -1122,9 +1131,7 @@ __all__.append("nvme_connect")
 def plugin_specs_from_names(plugin_names):
     ret = []
     for name in plugin_names:
-        plugin = BlockDev.PluginSpec()
-        plugin.name = bd_plugins[name.lower()]
-        plugin.so_name = None
+        plugin = PluginSpec(name=bd_plugins[name.lower()], so_name=None)
         ret.append(plugin)
 
     return ret

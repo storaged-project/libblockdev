@@ -43,11 +43,8 @@ class LVMTestCase(unittest.TestCase):
     def setUpClass(cls):
         if lvm_dbus_running:
             # force the new plugin to be used
-            cls.ps = BlockDev.PluginSpec()
-            cls.ps.name = BlockDev.Plugin.LVM
-            cls.ps.so_name = "libbd_lvm-dbus.so.3"
-            cls.ps2 = BlockDev.PluginSpec()
-            cls.ps2.name = BlockDev.Plugin.LOOP
+            cls.ps = BlockDev.PluginSpec(name=BlockDev.Plugin.LVM, so_name="libbd_lvm-dbus.so.3")
+            cls.ps2 = BlockDev.PluginSpec(name=BlockDev.Plugin.LOOP)
             if not BlockDev.is_initialized():
                 BlockDev.init([cls.ps, cls.ps2], None)
             else:

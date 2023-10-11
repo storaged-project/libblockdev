@@ -447,6 +447,7 @@ bd_mpath_is_tech_avail
 BDPlugin
 bd_plugin_spec_copy
 bd_plugin_spec_free
+bd_plugin_spec_new
 bd_is_plugin_available
 bd_get_available_plugin_names
 bd_get_plugin_soname
