@@ -257,7 +257,7 @@ static gboolean setup_dbus_connection (GError **error) {
 
     addr = g_dbus_address_get_for_bus_sync (G_BUS_TYPE_SYSTEM, NULL, error);
     if (!addr) {
-        g_critical ("Failed to get system bus address: %s\n", (*error)->message);
+        bd_utils_log_format (BD_UTILS_LOG_CRIT, "Failed to get system bus address: %s\n", (*error)->message);
         return FALSE;
     }
 
@@ -269,7 +269,7 @@ static gboolean setup_dbus_connection (GError **error) {
     g_free (addr);
 
     if (!bus || g_dbus_connection_is_closed (bus)) {
-        g_critical ("Failed to create a new connection for the system bus: %s\n", (*error)->message);
+        bd_utils_log_format (BD_UTILS_LOG_CRIT, "Failed to create a new connection for the system bus: %s\n", (*error)->message);
         return FALSE;
     }
 
@@ -336,7 +336,7 @@ gboolean bd_lvm_init (void) {
     /* the check() call should create the DBus connection for us, but let's not
        completely rely on it */
     if (G_UNLIKELY (!bus) && !setup_dbus_connection (&error)) {
-        g_critical ("Failed to setup DBus connection: %s", error->message);
+        bd_utils_log_format (BD_UTILS_LOG_CRIT, "Failed to setup DBus connection: %s", error->message);
         return FALSE;
     }
 
@@ -363,9 +363,9 @@ void bd_lvm_close (void) {
     /* the check() call should create the DBus connection for us, but let's not
        completely rely on it */
     if (!g_dbus_connection_flush_sync (bus, NULL, &error))
-        g_critical ("Failed to flush DBus connection: %s", error->message);
+        bd_utils_log_format (BD_UTILS_LOG_CRIT, "Failed to flush DBus connection: %s", error->message);
     if (!g_dbus_connection_close_sync (bus, NULL, &error))
-        g_critical ("Failed to close DBus connection: %s", error->message);
+        bd_utils_log_format (BD_UTILS_LOG_CRIT, "Failed to close DBus connection: %s", error->message);
 
     dm_log_with_errno_init (NULL);
     dm_log_init_verbose (0);
