@@ -221,7 +221,7 @@ class UtilsExecLoggingTest(UtilsTestCase):
         self.assertTrue(succ)
         self.assertEqual(len(out), cnt)
 
-        succ, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", "for i in {1..%d}; do echo -n .; echo -n \# >&2; done" % cnt])
+        succ, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", r"for i in {1..%d}; do echo -n .; echo -n \# >&2; done" % cnt])
         self.assertTrue(succ)
         self.assertEqual(len(out), cnt)
 
@@ -234,7 +234,7 @@ class UtilsExecLoggingTest(UtilsTestCase):
         self.assertTrue(succ)
         self.assertEqual(len(out), cnt)
 
-        succ, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", "for i in {1..%d}; do echo -n .; echo -n \# >&2; done" % cnt])
+        succ, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", r"for i in {1..%d}; do echo -n .; echo -n \# >&2; done" % cnt])
         self.assertTrue(succ)
         self.assertEqual(len(out), cnt)
 
@@ -243,7 +243,7 @@ class UtilsExecLoggingTest(UtilsTestCase):
         self.assertTrue(succ)
         self.assertGreater(len(out), cnt)
 
-        succ, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", "for i in {1..%d}; do echo -n .; echo -n \# >&2; if [ $(($i%%500)) -eq 0 ]; then echo ''; echo '' >&2; fi; done" % cnt])
+        succ, out = BlockDev.utils_exec_and_capture_output(["bash", "-c", r"for i in {1..%d}; do echo -n .; echo -n \# >&2; if [ $(($i%%500)) -eq 0 ]; then echo ''; echo '' >&2; fi; done" % cnt])
         self.assertTrue(succ)
         self.assertGreater(len(out), cnt)
 
