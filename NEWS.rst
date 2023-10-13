@@ -1,3 +1,35 @@
+Libblockdev 3.0.4
+------------------
+
+New bugfix release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Full list of changes**
+
+Jelle van der Waa (3):
+
+- plugins: use g_autofree for free'ing g_char's
+- plugins: btrfs: use g_autofree where possible for g_free
+- fs: correct btrfs set label description
+
+Tomas Bzatek (1):
+
+- nvme: Rework memory allocation for device ioctls
+
+Vojtech Trefny (11):
+
+- spec: Obsolete vdo plugin packages
+- spec: Move obsoleted devel subpackages to libblockdev-devel
+- ci: Bump actions/checkout from v3 to v4
+- part: Do not open disk read-write for read only operations
+- fs: Disable progress for ntfsresize
+- packit: Add configuration for downstream builds
+- logging: Default to DEBUG log level if compiled with --enable-debug
+- Use log function when calling a plugin function that is not loaded
+- lvm-dbus: Replace g_critical calls with bd_utils_log_format
+- tests: Fail early when recompilation fails in library_test
+- tests: Fix "invalid escape sequence '\#'" warning from Python 3.12
+
 Libblockdev 3.0.3
 ------------------
 

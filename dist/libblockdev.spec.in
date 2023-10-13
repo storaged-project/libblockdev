@@ -77,7 +77,7 @@
 %define configure_opts %{?python3_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?tools_copts} %{?gi_copts} %{?nvme_copts}
 
 Name:        libblockdev
-Version:     3.0.3
+Version:     3.0.4
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPL-2.1-or-later
@@ -851,6 +851,23 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Fri Oct 13 2023 Vojtech Trefny <vtrefny@redhat.com> - 3.0.4-1
+- tests: Fix "invalid escape sequence '\#'" warning from Python 3.12 (vtrefny)
+- tests: Fail early when recompilation fails in library_test (vtrefny)
+- lvm-dbus: Replace g_critical calls with bd_utils_log_format (vtrefny)
+- Use log function when calling a plugin function that is not loaded (vtrefny)
+- logging: Default to DEBUG log level if compiled with --enable-debug (vtrefny)
+- nvme: Rework memory allocation for device ioctls (tbzatek)
+- packit: Add configuration for downstream builds (vtrefny)
+- fs: correct btrfs set label description (jvanderwaa)
+- fs: Disable progress for ntfsresize (vtrefny)
+- part: Do not open disk read-write for read only operations (vtrefny)
+- ci: Bump actions/checkout from v3 to v4 (vtrefny)
+- plugins: btrfs: use g_autofree where possible for g_free (jvanderwaa)
+- plugins: use g_autofree for free'ing g_char's (jvanderwaa)
+- spec: Move obsoleted devel subpackages to libblockdev-devel (vtrefny)
+- spec: Obsolete vdo plugin packages (vtrefny)
+
 * Thu Aug 31 2023 Vojtech Trefny <vtrefny@redhat.com> - 3.0.3-1
 - crypto: Correctly convert passphrases from Python to C (vtrefny)
 - tests: Minor NVMe HostNQN fixes (tbzatek)
