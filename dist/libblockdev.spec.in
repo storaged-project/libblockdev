@@ -868,6 +868,9 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 - spec: Move obsoleted devel subpackages to libblockdev-devel (vtrefny)
 - spec: Obsolete vdo plugin packages (vtrefny)
 
+* Wed Sep 06 2023 Vojtech Trefny <vtrefny@redhat.com> - 3.0.3-2
+- Obsolete vdo plugin packages (#2237477)
+
 * Thu Aug 31 2023 Vojtech Trefny <vtrefny@redhat.com> - 3.0.3-1
 - crypto: Correctly convert passphrases from Python to C (vtrefny)
 - tests: Minor NVMe HostNQN fixes (tbzatek)
@@ -891,6 +894,9 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 - Restrict list of exported symbols via -export-symbols-regex (biebl)
 - Fix formatting in NEWS.rst (vtrefny)
 
+* Tue Jul 04 2023 Python Maint <python-maint@redhat.com> - 3.0.1-2
+- Rebuilt for Python 3.12
+
 * Tue Jul 04 2023 Vojtech Trefny <vtrefny@redhat.com> - 3.0.1-1
 - fs: Simplify struct BDFSInfo (tbzatek)
 - boilerplate_generator: Annotate stub func args as G_GNUC_UNUSED (tbzatek)
@@ -910,6 +916,9 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 - lvm: Fix declaration for bd_lvm_vdolvpoolname (vtrefny)
 - lvm: Make _vglock_start_stop static (vtrefny)
 - vdo_stats: Remove unused libparted include (vtrefny)
+
+* Thu Jun 29 2023 Python Maint <python-maint@redhat.com> - 3.0-2
+- Rebuilt for Python 3.12
 
 * Fri Jun 23 2023 Vojtech Trefny <vtrefny@redhat.com> - 3.0-1
 - Libblockdev 3.0 release
