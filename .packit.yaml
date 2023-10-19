@@ -1,8 +1,10 @@
 actions:
   post-upstream-clone:
+    - 'cp dist/libblockdev.spec.in dist/libblockdev.spec'
+    - 'sed -i -E "s/@WITH_.+@/1/g" dist/libblockdev.spec'
+  create-archive:
     - './autogen.sh'
     - './configure'
-  create-archive:
     - 'make'
     - 'make local'
     - 'bash -c "ls *.tar*"'
