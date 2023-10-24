@@ -79,11 +79,17 @@ class SwapTestCase(SwapTest):
         succ = BlockDev.swap_mkswap(self.loop_dev, None, None)
         self.assertTrue(succ)
 
+        with self.assertRaisesRegex(GLib.GError, "at most 16 characters long."):
+            BlockDev.swap_check_label(17 * "a")
+
         succ = BlockDev.swap_set_label(self.loop_dev, "BlockDevSwap")
         self.assertTrue(succ)
 
         _ret, out, _err = run_command("blkid -ovalue -sLABEL -p %s" % self.loop_dev)
         self.assertEqual(out, "BlockDevSwap")
+
+        with self.assertRaisesRegex(GLib.GError, "not a valid RFC-4122 UUID"):
+            BlockDev.swap_check_uuid("aaaaaaa")
 
         succ = BlockDev.swap_set_uuid(self.loop_dev, uuid=self.test_uuid)
         self.assertTrue(succ)
