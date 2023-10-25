@@ -71,9 +71,7 @@ class LibraryOpsTestCase(unittest.TestCase):
     def test_require_plugins(self):
         """Verify that loading only required plugins works as expected"""
 
-        ps = BlockDev.PluginSpec()
-        ps.name = BlockDev.Plugin.SWAP
-        ps.so_name = ""
+        ps = BlockDev.PluginSpec(name=BlockDev.Plugin.SWAP, so_name="")
         self.assertTrue(BlockDev.reinit([ps], True, None))
         self.assertEqual(BlockDev.get_available_plugin_names(), ["swap"])
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
@@ -85,9 +83,7 @@ class LibraryOpsTestCase(unittest.TestCase):
         # should be loaded and working
         self.assertTrue(BlockDev.md_canonicalize_uuid("3386ff85:f5012621:4a435f06:1eb47236"))
 
-        ps = BlockDev.PluginSpec()
-        ps.name = BlockDev.Plugin.SWAP
-        ps.so_name = ""
+        ps = BlockDev.PluginSpec(name=BlockDev.Plugin.SWAP, so_name="")
         self.assertTrue(BlockDev.reinit([ps], True, None))
         self.assertEqual(BlockDev.get_available_plugin_names(), ["swap"])
 
@@ -237,9 +233,7 @@ class PluginsTestCase(unittest.TestCase):
         self.assertEqual(ret, 0, "Failed to recompile libblockdev for force plugin test")
 
         # force the new plugin to be used
-        ps = BlockDev.PluginSpec()
-        ps.name = BlockDev.Plugin.LVM
-        ps.so_name = "libbd_lvm2.so"
+        ps = BlockDev.PluginSpec(name=BlockDev.Plugin.LVM, so_name="libbd_lvm2.so")
         self.assertTrue(BlockDev.reinit([ps], True, None))
 
         # new LVM plugin loaded, max LV size should be 1024 bytes
@@ -249,9 +243,7 @@ class PluginsTestCase(unittest.TestCase):
         os.system ("rm -f src/plugins/.libs/libbd_lvm2.so")
 
         # force the old plugin to be used
-        ps = BlockDev.PluginSpec()
-        ps.name = BlockDev.Plugin.LVM
-        ps.so_name = "libbd_lvm.so"
+        ps = BlockDev.PluginSpec(name=BlockDev.Plugin.LVM, so_name="libbd_lvm.so")
         self.assertTrue(BlockDev.reinit([ps], True, None))
 
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
