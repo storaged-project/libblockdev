@@ -36,5 +36,6 @@ gboolean bd_fs_f2fs_check (const gchar *device, const BDExtraArg **extra, GError
 gboolean bd_fs_f2fs_repair (const gchar *device, const BDExtraArg **extra, GError **error);
 BDFSF2FSInfo* bd_fs_f2fs_get_info (const gchar *device, GError **error);
 gboolean bd_fs_f2fs_resize (const gchar *device, guint64 new_size, gboolean safe, const BDExtraArg **extra, GError **error);
+gboolean bd_fs_f2fs_check_label (const gchar *label, GError **error);
 
 #endif  /* BD_FS_F2FS */

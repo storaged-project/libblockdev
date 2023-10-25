@@ -420,3 +420,26 @@ gboolean bd_fs_f2fs_resize (const gchar *device, guint64 new_size, gboolean safe
     g_free (size_str);
     return ret;
 }
+
+/**
+ * bd_fs_f2fs_check_label:
+ * @label: label to check
+ * @error: (out) (optional): place to store error
+ *
+ * Returns: whether @label is a valid label for the f2fs file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_f2fs_check_label (const gchar *label, GError **error) {
+    size_t len = 0;
+
+    len = strlen (label);
+    if (len > 512) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_LABEL_INVALID,
+                     "Label for F2FS filesystem must be at most 512 characters long.");
+        return FALSE;
+    }
+
+    return TRUE;
+}

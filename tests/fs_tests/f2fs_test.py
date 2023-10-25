@@ -160,6 +160,12 @@ class F2FSMkfsWithLabel(F2FSTestCase):
     def test_f2fs_mkfs_with_label(self):
         """Verify that it is possible to create an f2fs file system with label"""
 
+        succ = BlockDev.fs_f2fs_check_label("TEST_LABEL")
+        self.assertTrue(succ)
+
+        with self.assertRaisesRegex(GLib.GError, "at most 512 characters long."):
+            BlockDev.fs_f2fs_check_label(513 * "a")
+
         ea = BlockDev.ExtraArg.new("-l", "TEST_LABEL")
         succ = BlockDev.fs_f2fs_mkfs(self.loop_dev, [ea])
         self.assertTrue(succ)
