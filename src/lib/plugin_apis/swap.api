@@ -17,6 +17,8 @@ typedef enum {
     BD_SWAP_ERROR_ACTIVATE_SUSPEND,
     BD_SWAP_ERROR_ACTIVATE_UNKNOWN,
     BD_SWAP_ERROR_ACTIVATE_PAGESIZE,
+    BD_SWAP_ERROR_LABEL_INVALID,
+    BD_SWAP_ERROR_UUID_INVALID,
 } BDSwapError;
 
 typedef enum {
@@ -93,6 +95,18 @@ gboolean bd_swap_swapoff (const gchar *device, GError **error);
 gboolean bd_swap_swapstatus (const gchar *device, GError **error);
 
 /**
+ * bd_swap_check_label:
+ * @label: label to check
+ * @error: (out) (optional): place to store error
+ *
+ * Returns: whether @label is a valid label for swap or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_swap_check_label (const gchar *label, GError **error);
+
+/**
  * bd_swap_set_label:
  * @device: a device to set label on
  * @label: label that will be set
@@ -103,6 +117,18 @@ gboolean bd_swap_swapstatus (const gchar *device, GError **error);
  * Tech category: %BD_SWAP_TECH_SWAP-%BD_SWAP_TECH_MODE_SET_LABEL
  */
 gboolean bd_swap_set_label (const gchar *device, const gchar *label, GError **error);
+
+/**
+ * bd_swap_check_uuid:
+ * @uuid: UUID to check
+ * @error: (out) (optional): place to store error
+ *
+ * Returns: whether @uuid is a valid UUID for swap or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_swap_check_uuid (const gchar *uuid, GError **error);
 
 /**
  * bd_swap_set_uuid:

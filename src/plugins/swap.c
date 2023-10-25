@@ -23,6 +23,7 @@
 #include <sys/swap.h>
 #include <fcntl.h>
 #include <blkid.h>
+#include <uuid.h>
 #include <blockdev/utils.h>
 
 #include "swap.h"
@@ -441,6 +442,26 @@ gboolean bd_swap_swapstatus (const gchar *device, GError **error) {
 }
 
 /**
+ * bd_swap_check_label:
+ * @label: label to check
+ * @error: (out) (optional): place to store error
+ *
+ * Returns: whether @label is a valid label for swap or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_swap_check_label (const gchar *label, GError **error) {
+    if (strlen (label) > 16) {
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_LABEL_INVALID,
+                     "Label for swap must be at most 16 characters long.");
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+/**
  * bd_swap_set_label:
  * @device: a device to set label on
  * @label: label that will be set
@@ -457,6 +478,38 @@ gboolean bd_swap_set_label (const gchar *device, const gchar *label, GError **er
         return FALSE;
 
     return bd_utils_exec_and_report_error (argv, NULL, error);
+}
+
+/**
+ * bd_swap_check_uuid:
+ * @uuid: UUID to check
+ * @error: (out) (optional): place to store error
+ *
+ * Returns: whether @uuid is a valid UUID for swap or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_swap_check_uuid (const gchar *uuid, GError **error) {
+    g_autofree gchar *lowercase = NULL;
+    gint ret = 0;
+    uuid_t uu;
+
+    if (!g_str_is_ascii (uuid)) {
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UUID_INVALID,
+                     "Provided UUID is not a valid RFC-4122 UUID.");
+        return FALSE;
+    }
+
+    lowercase = g_ascii_strdown (uuid, -1);
+    ret = uuid_parse (lowercase, uu);
+    if (ret < 0){
+        g_set_error (error, BD_SWAP_ERROR, BD_SWAP_ERROR_UUID_INVALID,
+                     "Provided UUID is not a valid RFC-4122 UUID.");
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 /**

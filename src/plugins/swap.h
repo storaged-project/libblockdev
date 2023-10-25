@@ -14,6 +14,8 @@ typedef enum {
     BD_SWAP_ERROR_ACTIVATE_SUSPEND,
     BD_SWAP_ERROR_ACTIVATE_UNKNOWN,
     BD_SWAP_ERROR_ACTIVATE_PAGESIZE,
+    BD_SWAP_ERROR_LABEL_INVALID,
+    BD_SWAP_ERROR_UUID_INVALID,
 } BDSwapError;
 
 typedef enum {
@@ -46,6 +48,8 @@ gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error);
 gboolean bd_swap_swapoff (const gchar *device, GError **error);
 gboolean bd_swap_swapstatus (const gchar *device, GError **error);
 gboolean bd_swap_set_label (const gchar *device, const gchar *label, GError **error);
+gboolean bd_swap_check_label (const gchar *label, GError **error);
 gboolean bd_swap_set_uuid (const gchar *device, const gchar *uuid, GError **error);
+gboolean bd_swap_check_uuid (const gchar *uuid, GError **error);
 
 #endif  /* BD_SWAP */

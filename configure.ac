@@ -197,6 +197,10 @@ AS_IF([test "x$with_part" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([FDISK], [fdisk >= 2.31.0])],
       [])
 
+AS_IF([test "x$with_swap" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([UUID], [uuid])],
+      [])
+
 AS_IF([test "x$with_fs" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([UUID], [uuid])
        LIBBLOCKDEV_PKG_CHECK_MODULES([MOUNT], [mount >= 2.23.0])

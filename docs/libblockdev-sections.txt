@@ -468,7 +468,9 @@ bd_swap_mkswap
 bd_swap_swapon
 bd_swap_swapoff
 bd_swap_swapstatus
+bd_swap_check_label
 bd_swap_set_label
+bd_swap_check_uuid
 bd_swap_set_uuid
 BDSwapTech
 BDSwapTechMode
