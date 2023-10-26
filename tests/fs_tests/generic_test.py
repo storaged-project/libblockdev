@@ -466,6 +466,9 @@ class GenericMkfs(GenericTestCase):
         label = ""
         self._test_ext_generic_mkfs("vfat", BlockDev.fs_vfat_get_info, label, None, False, extra)
 
+        # now try with UUID
+        self._test_ext_generic_mkfs("vfat", BlockDev.fs_vfat_get_info, None, "2E24-EC82", False, extra)
+
     def test_vfat_generic_mkfs_no_pt(self):
         """ Test generic mkfs with vfat and mbr=no """
 

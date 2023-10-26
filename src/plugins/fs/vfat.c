@@ -126,6 +126,22 @@ void bd_fs_vfat_info_free (BDFSVfatInfo *data) {
     g_free (data);
 }
 
+/* we want to support vol ID in the "udev format", e.g. "2E24-EC82" */
+static gchar *_fix_uuid (const gchar *uuid) {
+    gchar *new_uuid = NULL;
+    size_t len = 0;
+
+    len = strlen (uuid);
+    if (len == 9 && uuid[4] == '-') {
+        new_uuid = g_new0 (gchar, 9);
+        memcpy (new_uuid, uuid, 4);
+        memcpy (new_uuid + 4, uuid + 5, 4);
+    } else
+        new_uuid = g_strdup (uuid);
+
+    return new_uuid;
+}
+
 BDExtraArg __attribute__ ((visibility ("hidden")))
 **bd_fs_vfat_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
     GPtrArray *options_array = g_ptr_array_new ();
@@ -133,6 +149,7 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
     gchar *label;
     UtilDep dep = {"mkfs.vfat", "4.2", "--help", "mkfs.fat\\s+([\\d\\.]+).+"};
     gboolean new_vfat = FALSE;
+    gchar *new_uuid = NULL;
 
     if (options->label && g_strcmp0 (options->label, "") != 0) {
         /* convert the label uppercase */
@@ -141,8 +158,11 @@ BDExtraArg __attribute__ ((visibility ("hidden")))
         g_free (label);
     }
 
-    if (options->uuid && g_strcmp0 (options->uuid, "") != 0)
-        g_ptr_array_add (options_array, bd_extra_arg_new ("-i", options->uuid));
+    if (options->uuid && g_strcmp0 (options->uuid, "") != 0) {
+        new_uuid = _fix_uuid (options->uuid);
+        g_ptr_array_add (options_array, bd_extra_arg_new ("-i", new_uuid));
+        g_free (new_uuid);
+    }
 
     if (options->force)
         g_ptr_array_add (options_array, bd_extra_arg_new ("-I", ""));
@@ -339,7 +359,6 @@ gboolean bd_fs_vfat_check_label (const gchar *label, GError **error) {
 gboolean bd_fs_vfat_set_uuid (const gchar *device, const gchar *uuid, GError **error) {
     const gchar *args[5] = {"fatlabel", "-i", device, NULL, NULL};
     g_autofree gchar *new_uuid = NULL;
-    size_t len = 0;
 
     if (!check_deps (&avail_deps, DEPS_FATLABELUUID_MASK, deps, DEPS_LAST, &deps_check_lock, error))
         return FALSE;
@@ -347,15 +366,7 @@ gboolean bd_fs_vfat_set_uuid (const gchar *device, const gchar *uuid, GError **e
     if (!uuid || g_strcmp0 (uuid, "") == 0)
         args[3] = "--reset";
     else {
-        len = strlen (uuid);
-        /* we want to support vol ID in the "udev format", e.g. "2E24-EC82" */
-        if (len == 9 && uuid[4] == '-') {
-            new_uuid = g_new0 (gchar, 9);
-            memcpy (new_uuid, uuid, 4);
-            memcpy (new_uuid + 4, uuid + 5, 4);
-        } else
-            new_uuid = g_strdup (uuid);
-
+        new_uuid = _fix_uuid (uuid);
         args[3] = new_uuid;
     }
 
@@ -376,18 +387,11 @@ gboolean bd_fs_vfat_check_uuid (const gchar *uuid, GError **error) {
     guint64 vol_id;
     gchar *new_uuid = NULL;
     gchar *endptr = NULL;
-    size_t len = 0;
 
     if (!uuid)
         return TRUE;
 
-    len = strlen (uuid);
-    if (len == 9 && uuid[4] == '-') {
-        new_uuid = g_new0 (gchar, 9);
-        memcpy (new_uuid, uuid, 4);
-        memcpy (new_uuid + 4, uuid + 5, 4);
-    } else
-        new_uuid = g_strdup (uuid);
+    new_uuid = _fix_uuid (uuid);
 
     vol_id = g_ascii_strtoull (new_uuid, &endptr, 16);
     if ((vol_id == 0 && endptr == new_uuid) || (endptr && *endptr)) {
