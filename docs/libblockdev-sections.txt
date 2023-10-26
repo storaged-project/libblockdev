@@ -552,6 +552,7 @@ bd_fs_can_repair
 bd_fs_can_set_label
 bd_fs_can_get_size
 bd_fs_can_get_free_space
+bd_fs_can_get_info
 bd_fs_can_set_uuid
 bd_fs_set_uuid
 bd_fs_check_uuid
