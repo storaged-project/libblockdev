@@ -999,7 +999,7 @@ static gboolean device_operation (const gchar *device, const gchar *fstype, BDFS
             case BD_FS_LABEL:
                 break;
             case BD_FS_LABEL_CHECK:
-                break;
+                return bd_fs_f2fs_check_label (label, error);
             case BD_FS_UUID:
                 break;
             case BD_FS_UUID_CHECK:

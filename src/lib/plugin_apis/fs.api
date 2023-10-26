@@ -2116,6 +2116,18 @@ BDFSF2FSInfo* bd_fs_f2fs_get_info (const gchar *device, GError **error);
 gboolean bd_fs_f2fs_resize (const gchar *device, guint64 new_size, gboolean safe, const BDExtraArg **extra, GError **error);
 
 /**
+ * bd_fs_f2fs_check_label:
+ * @label: label to check
+ * @error: (out) (optional): place to store error
+ *
+ * Returns: whether @label is a valid label for the f2fs file system or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_fs_f2fs_check_label (const gchar *label, GError **error);
+
+/**
  * bd_fs_nilfs2_mkfs:
  * @device: the device to create a new nilfs fs on
  * @extra: (nullable) (array zero-terminated=1): extra options for the creation (right now

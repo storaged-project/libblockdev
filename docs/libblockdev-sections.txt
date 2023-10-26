@@ -651,6 +651,7 @@ bd_fs_f2fs_check
 bd_fs_f2fs_repair
 bd_fs_f2fs_get_info
 bd_fs_f2fs_resize
+bd_fs_f2fs_check_label
 BDFSNILFS2Info
 bd_fs_nilfs2_get_info
 bd_fs_nilfs2_info_copy
