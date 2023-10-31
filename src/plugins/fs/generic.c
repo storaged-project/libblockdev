@@ -53,6 +53,7 @@ typedef enum {
     BD_FS_UUID,
     BD_FS_UUID_CHECK,
     BD_FS_GET_FREE_SPACE,
+    BD_FS_GET_INFO,
 } BDFSOpType;
 
 static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
@@ -1518,6 +1519,10 @@ static gboolean query_fs_operation (const gchar *fs_type, BDFSOpType op, gchar *
             op_name = "Getting free space on";
             exec_util = fsinfo->info_util;
             break;
+        case BD_FS_GET_INFO:
+            op_name = "Getting filesystem info of";
+            exec_util = fsinfo->info_util;
+            break;
         default:
             g_assert_not_reached ();
     }
@@ -1699,6 +1704,25 @@ gboolean bd_fs_can_get_free_space (const gchar *type, gchar **required_utility, 
     }
 
     return query_fs_operation (type, BD_FS_GET_FREE_SPACE, required_utility, NULL, NULL, error);
+}
+
+/**
+ * bd_fs_can_get_info:
+ * @type: the filesystem type to be tested for info querying support
+ * @required_utility: (out) (transfer full): the utility binary which is required
+ *                                           for info querying (if missing i.e. return FALSE but no error)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Searches for the required utility to get info of the given filesystem and
+ * returns whether it is installed.
+ * Unknown filesystems or filesystems which do not support info querying result in errors.
+ *
+ * Returns: whether getting filesystem info is available
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
+ */
+gboolean bd_fs_can_get_info (const gchar *type, gchar **required_utility, GError **error) {
+    return query_fs_operation (type, BD_FS_GET_INFO, required_utility, NULL, NULL, error);
 }
 
 static gboolean fs_freeze (const char *mountpoint, gboolean freeze, GError **error) {

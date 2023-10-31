@@ -1156,6 +1156,23 @@ guint64 bd_fs_get_size (const gchar *device, const gchar *fstype, GError **error
 guint64 bd_fs_get_free_space (const gchar *device, const gchar *fstype, GError **error);
 
 /**
+ * bd_fs_can_get_info:
+ * @type: the filesystem type to be tested for info querying support
+ * @required_utility: (out) (transfer full): the utility binary which is required
+ *                                           for info querying (if missing i.e. return FALSE but no error)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Searches for the required utility to get info of the given filesystem and
+ * returns whether it is installed.
+ * Unknown filesystems or filesystems which do not support info querying result in errors.
+ *
+ * Returns: whether getting filesystem info is available
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
+ */
+gboolean bd_fs_can_get_info (const gchar *type, gchar **required_utility, GError **error);
+
+/**
  * BDFSMkfsOptionsFlags:
  * Flags indicating mkfs options are available for given filesystem type.
  */
