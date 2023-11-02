@@ -327,6 +327,36 @@ class CanResizeRepairCheckLabel(GenericNoDevTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_can_get_free_space("non-existing-fs")
 
+    def test_can_get_min_size(self):
+        """Verify that tooling query works for getting min size"""
+
+        avail, util = BlockDev.fs_can_get_min_size("ext4")
+        self.assertTrue(avail)
+        self.assertEqual(util, None)
+
+        old_path = os.environ.get("PATH", "")
+        os.environ["PATH"] = ""
+        avail, util = BlockDev.fs_can_get_min_size("ext4")
+        os.environ["PATH"] = old_path
+        self.assertFalse(avail)
+        self.assertEqual(util, "resize2fs")
+
+        avail, util = BlockDev.fs_can_get_min_size("ntfs")
+        self.assertTrue(avail)
+        self.assertEqual(util, None)
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_get_min_size("xfs")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_get_min_size("non-existing-fs")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_get_min_size("exfat")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_get_min_size("udf")
+
 
 class GenericMkfs(GenericTestCase):
 
@@ -1189,6 +1219,48 @@ class GenericGetFreeSpace(GenericTestCase):
 
         with self.assertRaisesRegex(GLib.GError, "Getting free space on filesystem 'udf' is not supported."):
             BlockDev.fs_get_free_space(self.loop_dev)
+
+
+class GenericGetMinSize(GenericTestCase):
+    def _test_get_min_size(self, mkfs_function, fstype):
+        # clean the device
+        succ = BlockDev.fs_clean(self.loop_dev)
+
+        succ = mkfs_function(self.loop_dev, None)
+        self.assertTrue(succ)
+
+        size = BlockDev.fs_get_min_size(self.loop_dev)
+        self.assertNotEqual(size, 0)
+
+    def test_ext2_test_get_min_size(self):
+        """Test generic min size function with an ext2 file system"""
+        self._test_get_min_size(mkfs_function=BlockDev.fs_ext2_mkfs, fstype="ext2")
+
+    def test_ext3_check_test_get_min_size(self):
+        """Test generic min size function with an ext3 file system"""
+        self._test_get_min_size(mkfs_function=BlockDev.fs_ext3_mkfs, fstype="ext3")
+
+    def test_ext4_test_get_min_size(self):
+        """Test generic min size function with an ext4 file system"""
+        self._test_get_min_size(mkfs_function=BlockDev.fs_ext4_mkfs, fstype="ext4")
+
+    def test_ntfs_test_get_min_size(self):
+        """Test generic min size function with an ntfs file system"""
+        if not self.ntfs_avail:
+            self.skipTest("skipping NTFS: not available")
+        self._test_get_min_size(mkfs_function=BlockDev.fs_ntfs_mkfs, fstype="ntfs")
+
+    def test_xfs_get_get_min_size(self):
+        """Test generic min size function with a xfs file system"""
+        # clean the device
+        succ = BlockDev.fs_clean(self.loop_dev)
+        self.assertTrue(succ)
+
+        succ = BlockDev.fs_xfs_mkfs(self.loop_dev)
+        self.assertTrue(succ)
+
+        with self.assertRaisesRegex(GLib.GError, "Getting minimum size of filesystem 'xfs' is not supported."):
+            BlockDev.fs_get_min_size(self.loop_dev)
 
 
 class FSFreezeTest(GenericTestCase):

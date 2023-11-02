@@ -336,7 +336,7 @@ class ExtSetLabel(ExtTestCase):
 
 
 class ExtResize(ExtTestCase):
-    def _test_ext_resize(self, mkfs_function, info_function, resize_function):
+    def _test_ext_resize(self, mkfs_function, info_function, resize_function, minsize_function):
         succ = mkfs_function(self.loop_dev, None)
         self.assertTrue(succ)
 
@@ -382,23 +382,33 @@ class ExtResize(ExtTestCase):
         # at least 90 % should be available, so it should be reported
         self.assertGreater(fi.free_blocks, 0.90 * self.loop_size / 1024)
 
+        # get min size and resize to it
+        size = minsize_function(self.loop_dev)
+        self.assertNotEqual(size, 0)
+
+        succ = resize_function(self.loop_dev, size)
+        self.assertTrue(succ)
+
     def test_ext2_resize(self):
         """Verify that it is possible to resize an ext2 file system"""
         self._test_ext_resize(mkfs_function=BlockDev.fs_ext2_mkfs,
                               info_function=BlockDev.fs_ext2_get_info,
-                              resize_function=BlockDev.fs_ext2_resize)
+                              resize_function=BlockDev.fs_ext2_resize,
+                              minsize_function=BlockDev.fs_ext2_get_min_size)
 
     def test_ext3_resize(self):
         """Verify that it is possible to resize an ext3 file system"""
         self._test_ext_resize(mkfs_function=BlockDev.fs_ext3_mkfs,
                               info_function=BlockDev.fs_ext3_get_info,
-                              resize_function=BlockDev.fs_ext3_resize)
+                              resize_function=BlockDev.fs_ext3_resize,
+                              minsize_function=BlockDev.fs_ext3_get_min_size)
 
     def test_ext4_resize(self):
         """Verify that it is possible to resize an ext4 file system"""
         self._test_ext_resize(mkfs_function=BlockDev.fs_ext4_mkfs,
                               info_function=BlockDev.fs_ext4_get_info,
-                              resize_function=BlockDev.fs_ext4_resize)
+                              resize_function=BlockDev.fs_ext4_resize,
+                              minsize_function=BlockDev.fs_ext4_get_min_size)
 
 
 class ExtSetUUID(ExtTestCase):

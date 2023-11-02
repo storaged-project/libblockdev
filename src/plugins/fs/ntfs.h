@@ -23,5 +23,6 @@ gboolean bd_fs_ntfs_set_uuid (const gchar *device, const gchar *uuid, GError **e
 gboolean bd_fs_ntfs_check_uuid ( const gchar *uuid, GError **error);
 BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error);
 gboolean bd_fs_ntfs_resize (const gchar *device, guint64 new_size, GError **error);
+guint64 bd_fs_ntfs_get_min_size (const gchar *device, GError **error);
 
 #endif  /* BD_FS_NTFS */

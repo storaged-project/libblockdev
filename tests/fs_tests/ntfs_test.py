@@ -173,6 +173,16 @@ class NTFSResize(NTFSTestCase):
         succ = BlockDev.fs_ntfs_resize(self.loop_dev, 0)
         self.assertTrue(succ)
 
+        succ = BlockDev.fs_ntfs_repair(self.loop_dev)
+        self.assertTrue(succ)
+
+        # get min size and resize to it
+        size = BlockDev.fs_ntfs_get_min_size(self.loop_dev)
+        self.assertNotEqual(size, 0)
+
+        succ = BlockDev.fs_ntfs_resize(self.loop_dev, size)
+        self.assertTrue(succ)
+
 
 class NTFSSetLabel(NTFSTestCase):
     def test_ntfs_set_label(self):

@@ -546,12 +546,14 @@ bd_fs_set_label
 bd_fs_check_label
 bd_fs_get_size
 bd_fs_get_free_space
+bd_fs_get_min_size
 bd_fs_can_resize
 bd_fs_can_check
 bd_fs_can_repair
 bd_fs_can_set_label
 bd_fs_can_get_size
 bd_fs_can_get_free_space
+bd_fs_can_get_min_size
 bd_fs_can_get_info
 bd_fs_can_set_uuid
 bd_fs_set_uuid
@@ -581,6 +583,7 @@ bd_fs_ext2_set_label
 bd_fs_ext2_check_label
 bd_fs_ext2_set_uuid
 bd_fs_ext2_check_uuid
+bd_fs_ext2_get_min_size
 bd_fs_ext3_check
 bd_fs_ext3_get_info
 bd_fs_ext3_info_copy
@@ -592,6 +595,7 @@ bd_fs_ext3_set_label
 bd_fs_ext3_check_label
 bd_fs_ext3_set_uuid
 bd_fs_ext3_check_uuid
+bd_fs_ext3_get_min_size
 bd_fs_ext4_check
 bd_fs_ext4_get_info
 bd_fs_ext4_info_copy
@@ -603,6 +607,7 @@ bd_fs_ext4_set_label
 bd_fs_ext4_check_label
 bd_fs_ext4_set_uuid
 bd_fs_ext4_check_uuid
+bd_fs_ext4_get_min_size
 BDFSXfsInfo
 bd_fs_xfs_check
 bd_fs_xfs_get_info
@@ -643,6 +648,7 @@ bd_fs_ntfs_info_copy
 bd_fs_ntfs_info_free
 bd_fs_ntfs_set_uuid
 bd_fs_ntfs_check_uuid
+bd_fs_ntfs_get_min_size
 BDFSF2FSInfo
 BDFSF2FSFeature
 bd_fs_f2fs_info_copy
