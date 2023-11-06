@@ -28,7 +28,7 @@
 
 /**
  * SECTION: nvdimm
- * @short_description: plugin for operations with nvdimm space
+ * @short_description: DEPRECATED plugin for operations with nvdimm space
  * @title: NVDIMM
  * @include: nvdimm.h
  *
@@ -89,6 +89,7 @@ static const UtilDep deps[DEPS_LAST] = {
  * Initializes the plugin. **This function is called automatically by the
  * library's initialization functions.**
  *
+ * Deprecated: 3.1: NVDIMM plugin will be removed in the next major release
  */
 gboolean bd_nvdimm_init (void) {
     /* nothing to do here */
@@ -101,6 +102,7 @@ gboolean bd_nvdimm_init (void) {
  * Cleans up after the plugin. **This function is called automatically by the
  * library's functions that unload it.**
  *
+ * Deprecated: 3.1: NVDIMM plugin will be removed in the next major release
  */
 void bd_nvdimm_close (void) {
     /* nothing to do here */
@@ -117,6 +119,8 @@ void bd_nvdimm_close (void) {
  *
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
+ *
+ * Deprecated: 3.1: NVDIMM plugin will be removed in the next major release
  */
 gboolean bd_nvdimm_is_tech_avail (BDNVDIMMTech tech, guint64 mode, GError **error) {
   /* all tech-mode combinations are supported by this implementation of the
@@ -143,6 +147,8 @@ gboolean bd_nvdimm_is_tech_avail (BDNVDIMMTech tech, guint64 mode, GError **erro
  * Returns: mode matching the @mode_str given or %BD_NVDIMM_NAMESPACE_MODE_UNKNOWN in case of no match
  *
  * Tech category: always available
+ *
+ * Deprecated: 3.1: NVDIMM plugin will be removed in the next major release
  */
 BDNVDIMMNamespaceMode bd_nvdimm_namespace_get_mode_from_str (const gchar *mode_str, GError **error) {
     if (g_strcmp0 (mode_str, "raw") == 0)
@@ -172,6 +178,8 @@ BDNVDIMMNamespaceMode bd_nvdimm_namespace_get_mode_from_str (const gchar *mode_s
  * Returns: (transfer none): string representation of @mode or %NULL in case of error
  *
  * Tech category: always available
+ *
+ * Deprecated: 3.1: NVDIMM plugin will be removed in the next major release
  */
 const gchar* bd_nvdimm_namespace_get_mode_str (BDNVDIMMNamespaceMode mode, GError **error) {
     if (mode <= BD_NVDIMM_NAMESPACE_MODE_UNKNOWN)
@@ -210,6 +218,8 @@ static struct ndctl_namespace* get_namespace_by_name (const gchar *namespace, st
  *                           (@error may be set to indicate error)
  *
  * Tech category: %BD_NVDIMM_TECH_NAMESPACE-%BD_NVDIMM_TECH_MODE_QUERY
+ *
+ * Deprecated: 3.1: NVDIMM plugin will be removed in the next major release
  */
 gchar* bd_nvdimm_namespace_get_devname (const gchar *device, GError **error) {
     struct ndctl_ctx *ctx = NULL;
@@ -272,6 +282,8 @@ gchar* bd_nvdimm_namespace_get_devname (const gchar *device, GError **error) {
  * Returns: whether the @namespace was successfully enabled or not
  *
  * Tech category: %BD_NVDIMM_TECH_NAMESPACE-%BD_NVDIMM_TECH_MODE_ACTIVATE_DEACTIVATE
+ *
+ * Deprecated: 3.1: NVDIMM plugin will be removed in the next major release
  */
 gboolean bd_nvdimm_namespace_enable (const gchar *namespace, const BDExtraArg **extra UNUSED, GError **error) {
     struct ndctl_ctx *ctx = NULL;
@@ -313,6 +325,8 @@ gboolean bd_nvdimm_namespace_enable (const gchar *namespace, const BDExtraArg **
  * Returns: whether the @namespace was successfully disabled or not
  *
  * Tech category: %BD_NVDIMM_TECH_NAMESPACE-%BD_NVDIMM_TECH_MODE_ACTIVATE_DEACTIVATE
+ *
+ * Deprecated: 3.1: NVDIMM plugin will be removed in the next major release
  */
 gboolean bd_nvdimm_namespace_disable (const gchar *namespace, const BDExtraArg **extra UNUSED, GError **error) {
     struct ndctl_ctx *ctx = NULL;
@@ -475,6 +489,8 @@ static BDNVDIMMNamespaceInfo* get_nvdimm_namespace_info (struct ndctl_namespace 
  *                           namespace was found (@error may be set to indicate error)
  *
  * Tech category: %BD_NVDIMM_TECH_NAMESPACE-%BD_NVDIMM_TECH_MODE_QUERY
+ *
+ * Deprecated: 3.1: NVDIMM plugin will be removed in the next major release
  */
 BDNVDIMMNamespaceInfo* bd_nvdimm_namespace_info (const gchar *namespace, const BDExtraArg **extra UNUSED, GError **error) {
     struct ndctl_ctx *ctx = NULL;
@@ -514,6 +530,8 @@ BDNVDIMMNamespaceInfo* bd_nvdimm_namespace_info (const gchar *namespace, const B
  *                                     %NULL if no namespaces were found (@error may be set to indicate error)
  *
  * Tech category: %BD_NVDIMM_TECH_NAMESPACE-%BD_NVDIMM_TECH_MODE_QUERY
+ *
+ * Deprecated: 3.1: NVDIMM plugin will be removed in the next major release
  */
 BDNVDIMMNamespaceInfo** bd_nvdimm_list_namespaces (const gchar *bus_name, const gchar *region_name, gboolean idle, const BDExtraArg **extra UNUSED, GError **error) {
     struct ndctl_ctx *ctx = NULL;
@@ -582,6 +600,8 @@ BDNVDIMMNamespaceInfo** bd_nvdimm_list_namespaces (const gchar *bus_name, const 
  * Returns: whether @namespace was successfully reconfigured or not
  *
  * Tech category: %BD_NVDIMM_TECH_NAMESPACE-%BD_NVDIMM_TECH_MODE_RECONFIGURE
+ *
+ * Deprecated: 3.1: NVDIMM plugin will be removed in the next major release
  */
 gboolean bd_nvdimm_namespace_reconfigure (const gchar* namespace, BDNVDIMMNamespaceMode mode, gboolean force, const BDExtraArg **extra, GError** error) {
     const gchar *args[8] = {"ndctl", "create-namespace", "-e", namespace, "-m", NULL, NULL, NULL};
@@ -620,6 +640,8 @@ static guint64 io_sector_sizes[] = { 0 };
  * Returns: (transfer none) (array zero-terminated=1): list of supported sector sizes for @mode
  *
  * Tech category: %BD_NVDIMM_TECH_NAMESPACE-%BD_NVDIMM_TECH_MODE_QUERY
+ *
+ * Deprecated: 3.1: NVDIMM plugin will be removed in the next major release
  */
 const guint64 *bd_nvdimm_namespace_get_supported_sector_sizes (BDNVDIMMNamespaceMode mode, GError **error) {
     switch (mode) {

@@ -298,7 +298,7 @@ echo "
         LVM DBus plugin:            ${with_lvm_dbus}
         MDRAID plugin:              ${with_mdraid}
         MPath plugin                ${with_mpath}
-        NVDIMM plugin:              ${with_nvdimm}
+        NVDIMM plugin (deprecated): ${with_nvdimm}
         NVMe plugin:                ${with_nvme}
         Part plugin:                ${with_part}
         S390 plugin:                ${s390_info}
