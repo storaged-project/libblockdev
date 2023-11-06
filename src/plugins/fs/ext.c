@@ -862,3 +862,95 @@ gboolean bd_fs_ext3_resize (const gchar *device, guint64 new_size, const BDExtra
 gboolean bd_fs_ext4_resize (const gchar *device, guint64 new_size, const BDExtraArg **extra, GError **error) {
     return ext_resize (device, new_size, extra, error);
 }
+
+static guint64 ext_get_min_size (const gchar *device, GError **error) {
+    const gchar *args[4] = {"resize2fs", "-P", device, NULL};
+    gboolean success = FALSE;
+    gchar *output = NULL;
+    gchar **lines = NULL;
+    gchar **line_p = NULL;
+    guint64 min_size = 0;
+    gchar **key_val = NULL;
+    BDFSExtInfo *info = NULL;
+
+    if (!check_deps (&avail_deps, DEPS_RESIZE2FS_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
+    info = ext_get_info (device, error);
+    if (!info)
+        return 0;
+
+    success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
+    if (!success) {
+        /* error is already populated */
+        bd_fs_ext2_info_free (info);
+        return 0;
+    }
+
+    lines = g_strsplit (output, "\n", 0);
+    g_free (output);
+
+    for (line_p=lines; *line_p; line_p++) {
+        if (g_str_has_prefix (*line_p, "Estimated minimum size")) {
+            key_val = g_strsplit (*line_p, ":", 2);
+            if (g_strv_length (key_val) == 2) {
+                min_size = g_ascii_strtoull (key_val[1], NULL, 0) * info->block_size;
+                g_strfreev (lines);
+                g_strfreev (key_val);
+                bd_fs_ext2_info_free (info);
+                return min_size;
+            } else {
+                g_strfreev (key_val);
+                break;
+            }
+        }
+    }
+
+    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                 "Failed to get minimum size for '%s'", device);
+    g_strfreev (lines);
+    bd_fs_ext2_info_free (info);
+    return 0;
+}
+
+/**
+ * bd_fs_ext2_get_min_size:
+ * @device: the device containing the file system to get min size for
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: smallest shrunken filesystem size as reported by ntfsresize
+ *          in case of error 0 is returned and @error is set
+ *
+ * Tech category: %BD_FS_TECH_EXT2-%BD_FS_TECH_MODE_RESIZE
+ */
+guint64 bd_fs_ext2_get_min_size (const gchar *device, GError **error) {
+    return ext_get_min_size (device, error);
+}
+
+/**
+ * bd_fs_ext3_get_min_size:
+ * @device: the device containing the file system to get min size for
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: smallest shrunken filesystem size as reported by ntfsresize
+ *          in case of error 0 is returned and @error is set
+ *
+ * Tech category: %BD_FS_TECH_EXT3-%BD_FS_TECH_MODE_RESIZE
+ */
+guint64 bd_fs_ext3_get_min_size (const gchar *device, GError **error) {
+    return ext_get_min_size (device, error);
+}
+
+/**
+ * bd_fs_ext4_get_min_size:
+ * @device: the device containing the file system to get min size for
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: smallest shrunken filesystem size as reported by ntfsresize
+ *          in case of error 0 is returned and @error is set
+ *
+ * Tech category: %BD_FS_TECH_EXT4-%BD_FS_TECH_MODE_RESIZE
+ */
+guint64 bd_fs_ext4_get_min_size (const gchar *device, GError **error) {
+    return ext_get_min_size (device, error);
+}

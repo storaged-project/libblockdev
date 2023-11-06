@@ -45,6 +45,7 @@ gboolean bd_fs_set_uuid (const gchar *device, const gchar *uuid, const gchar *fs
 gboolean bd_fs_check_uuid (const gchar *fstype, const gchar *uuid, GError **error);
 guint64 bd_fs_get_size (const gchar *device, const gchar *fstype, GError **error);
 guint64 bd_fs_get_free_space (const gchar *device, const gchar *fstype, GError **error);
+guint64 bd_fs_get_min_size (const gchar *device, const gchar *fstype, GError **error);
 
 typedef enum {
     BD_FS_OFFLINE_SHRINK = 1 << 1,
@@ -92,5 +93,6 @@ gboolean bd_fs_can_set_uuid (const gchar *type, gchar **required_utility, GError
 gboolean bd_fs_can_get_size (const gchar *type, gchar **required_utility, GError **error);
 gboolean bd_fs_can_get_free_space (const gchar *type, gchar **required_utility, GError **error);
 gboolean bd_fs_can_get_info (const gchar *type, gchar **required_utility, GError **error);
+gboolean bd_fs_can_get_min_size (const gchar *type, gchar **required_utility, GError **error);
 
 #endif  /* BD_FS_GENERIC */

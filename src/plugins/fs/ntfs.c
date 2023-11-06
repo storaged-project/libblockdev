@@ -450,3 +450,55 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
 
     return ret;
 }
+
+/**
+ * bd_fs_ntfs_get_min_size:
+ * @device: the device containing the file system to get min size for
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: smallest shrunken filesystem size as reported by ntfsresize
+ *          in case of error 0 is returned and @error is set
+ *
+ * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_RESIZE
+ */
+guint64 bd_fs_ntfs_get_min_size (const gchar *device, GError **error) {
+    const gchar *args[4] = {"ntfsresize", "--info", device, NULL};
+    gboolean success = FALSE;
+    gchar *output = NULL;
+    gchar **lines = NULL;
+    gchar **line_p = NULL;
+    guint64 min_size = 0;
+    gint scanned = 0;
+
+    if (!check_deps (&avail_deps, DEPS_NTFSRESIZE_MASK, deps, DEPS_LAST, &deps_check_lock, error))
+        return FALSE;
+
+    success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
+    if (!success)
+        /* error is already populated */
+        return 0;
+
+    lines = g_strsplit (output, "\n", 0);
+    g_free (output);
+
+    for (line_p=lines; *line_p; line_p++) {
+        if (g_str_has_prefix (*line_p, "You might resize at")) {
+            scanned = sscanf (*line_p, "You might resize at %" G_GUINT64_FORMAT " bytes %*s.",
+                              &min_size);
+            if (scanned != 1) {
+                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                             "Failed to get minimum size for '%s'", device);
+                g_strfreev (lines);
+                return 0;
+            } else {
+                g_strfreev (lines);
+                return min_size;
+            }
+        }
+    }
+
+    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                 "Failed to get minimum size for '%s'", device);
+    g_strfreev (lines);
+    return 0;
+}

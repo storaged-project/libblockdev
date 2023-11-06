@@ -54,6 +54,7 @@ typedef enum {
     BD_FS_UUID_CHECK,
     BD_FS_GET_FREE_SPACE,
     BD_FS_GET_INFO,
+    BD_FS_GET_MIN_SIZE,
 } BDFSOpType;
 
 static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
@@ -170,6 +171,7 @@ typedef struct BDFSInfo {
     const gchar *check_util;
     const gchar *repair_util;
     const gchar *resize_util;
+    const gchar *minsize_util;
     const gchar *label_util;
     const gchar *info_util;
     const gchar *uuid_util;
@@ -184,6 +186,7 @@ const BDFSInfo fs_info[BD_FS_LAST_FS] = {
       .check_util = "e2fsck",
       .repair_util = "e2fsck",
       .resize_util = "resize2fs",
+      .minsize_util = "resize2fs",
       .label_util = "tune2fs",
       .info_util = "dumpe2fs",
       .uuid_util = "tune2fs" },
@@ -193,6 +196,7 @@ const BDFSInfo fs_info[BD_FS_LAST_FS] = {
       .check_util = "e2fsck",
       .repair_util = "e2fsck",
       .resize_util = "resize2fs",
+      .minsize_util = "resize2fs",
       .label_util = "tune2fs",
       .info_util = "dumpe2fs",
       .uuid_util = "tune2fs" },
@@ -202,6 +206,7 @@ const BDFSInfo fs_info[BD_FS_LAST_FS] = {
       .check_util = "e2fsck",
       .repair_util = "e2fsck",
       .resize_util = "resize2fs",
+      .minsize_util = "resize2fs",
       .label_util = "tune2fs",
       .info_util = "dumpe2fs",
       .uuid_util = "tune2fs" },
@@ -211,6 +216,7 @@ const BDFSInfo fs_info[BD_FS_LAST_FS] = {
       .check_util = "xfs_db",
       .repair_util = "xfs_repair",
       .resize_util = "xfs_growfs",
+      .minsize_util = NULL,
       .label_util = "xfs_admin",
       .info_util = "xfs_admin",
       .uuid_util = "xfs_admin" },
@@ -220,6 +226,7 @@ const BDFSInfo fs_info[BD_FS_LAST_FS] = {
       .check_util = "fsck.vfat",
       .repair_util = "fsck.vfat",
       .resize_util = "vfat-resize",
+      .minsize_util = NULL,
       .label_util = "fatlabel",
       .info_util = "fsck.vfat",
       .uuid_util = "fatlabel" },
@@ -229,6 +236,7 @@ const BDFSInfo fs_info[BD_FS_LAST_FS] = {
       .check_util = "ntfsfix",
       .repair_util = "ntfsfix",
       .resize_util = "ntfsresize",
+      .minsize_util = "ntfsresize",
       .label_util = "ntfslabel",
       .info_util = "ntfsinfo",
       .uuid_util = "ntfslabel" },
@@ -238,6 +246,7 @@ const BDFSInfo fs_info[BD_FS_LAST_FS] = {
       .check_util = "fsck.f2fs",
       .repair_util = "fsck.f2fs",
       .resize_util = "resize.f2fs",
+      .minsize_util = NULL,
       .label_util = NULL,
       .info_util = "dump.f2fs",
       .uuid_util = NULL },
@@ -247,6 +256,7 @@ const BDFSInfo fs_info[BD_FS_LAST_FS] = {
       .check_util = NULL,
       .repair_util = NULL,
       .resize_util = "nilfs-resize",
+      .minsize_util = NULL,
       .label_util = "nilfs-tune",
       .info_util = "nilfs-tune",
       .uuid_util = "nilfs-tune" },
@@ -256,6 +266,7 @@ const BDFSInfo fs_info[BD_FS_LAST_FS] = {
       .check_util = "fsck.exfat",
       .repair_util = "fsck.exfat",
       .resize_util = NULL,
+      .minsize_util = NULL,
       .label_util = "tune.exfat",
       .info_util = "tune.exfat",
       .uuid_util = "tune.exfat" },
@@ -265,6 +276,7 @@ const BDFSInfo fs_info[BD_FS_LAST_FS] = {
       .check_util = "btrfsck",
       .repair_util = "btrfsck",
       .resize_util = "btrfs",
+      .minsize_util = NULL,
       .label_util = "btrfs",
       .info_util = "btrfs",
       .uuid_util = "btrfstune" },
@@ -274,6 +286,7 @@ const BDFSInfo fs_info[BD_FS_LAST_FS] = {
       .check_util = NULL,
       .repair_util = NULL,
       .resize_util = NULL,
+      .minsize_util = NULL,
       .label_util = "udflabel",
       .info_util = "udfinfo",
       .uuid_util = "udflabel" },
@@ -1462,6 +1475,53 @@ guint64 bd_fs_get_free_space (const gchar *device, const gchar *fstype, GError *
     }
 }
 
+/**
+ * bd_fs_get_min_size:
+ * @device: the device with file system to get minimum size for
+ * @fstype: (nullable): the filesystem type on @device or %NULL to detect
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Get minimum size for filesystem on @device. This calls other fs info functions from this
+ * plugin based on detected filesystem (e.g. bd_fs_ext4_get_min_size for ext4). This
+ * function will return an error for unknown/unsupported filesystems.
+ *
+ * Returns: minimum size of filesystem on @device, 0 in case of error.
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_RESIZE
+ */
+guint64 bd_fs_get_min_size (const gchar *device, const gchar *fstype, GError **error) {
+    g_autofree gchar* detected_fstype = NULL;
+
+    if (!fstype) {
+        detected_fstype = bd_fs_get_fstype (device, error);
+        if (!detected_fstype) {
+            if (error) {
+                if (*error == NULL) {
+                    g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
+                                "No filesystem detected on the device '%s'", device);
+                    return 0;
+                } else {
+                    g_prefix_error (error, "Error when trying to detect filesystem on '%s': ", device);
+                    return 0;
+                }
+            } else
+                return 0;
+        }
+    } else
+        detected_fstype = g_strdup (fstype);
+
+    if (g_strcmp0 (detected_fstype, "ext2") == 0 || g_strcmp0 (detected_fstype, "ext3") == 0
+                                                 || g_strcmp0 (detected_fstype, "ext4") == 0)
+        return bd_fs_ext2_get_min_size (device, error);
+    else if (g_strcmp0 (detected_fstype, "ntfs") == 0) {
+        return bd_fs_ntfs_get_min_size (device, error);
+    } else {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_SUPPORTED,
+                    "Getting minimum size of filesystem '%s' is not supported.", detected_fstype);
+        return 0;
+    }
+}
+
 static gboolean query_fs_operation (const gchar *fs_type, BDFSOpType op, gchar **required_utility, BDFSResizeFlags *mode, BDFSMkfsOptionsFlags *options, GError **error) {
     gboolean ret;
     const BDFSInfo *fsinfo = NULL;
@@ -1522,6 +1582,10 @@ static gboolean query_fs_operation (const gchar *fs_type, BDFSOpType op, gchar *
         case BD_FS_GET_INFO:
             op_name = "Getting filesystem info of";
             exec_util = fsinfo->info_util;
+            break;
+        case BD_FS_GET_MIN_SIZE:
+            op_name = "Getting minimum size of";
+            exec_util = fsinfo->minsize_util;
             break;
         default:
             g_assert_not_reached ();
@@ -1723,6 +1787,25 @@ gboolean bd_fs_can_get_free_space (const gchar *type, gchar **required_utility, 
  */
 gboolean bd_fs_can_get_info (const gchar *type, gchar **required_utility, GError **error) {
     return query_fs_operation (type, BD_FS_GET_INFO, required_utility, NULL, NULL, error);
+}
+
+/**
+ * bd_fs_can_get_min_size:
+ * @type: the filesystem type to be tested for installed minimum size querying support
+ * @required_utility: (out) (transfer full): the utility binary which is required
+ *                                           for size querying (if missing i.e. return FALSE but no error)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Searches for the required utility to get minimum size of the given filesystem and
+ * returns whether it is installed.
+ * Unknown filesystems or filesystems which do not support minimum size querying result in errors.
+ *
+ * Returns: whether getting filesystem size is available
+ *
+ * Tech category: %BD_FS_TECH_GENERIC-%BD_FS_TECH_MODE_QUERY
+ */
+gboolean bd_fs_can_get_min_size (const gchar *type, gchar **required_utility, GError **error) {
+    return query_fs_operation (type, BD_FS_GET_MIN_SIZE, required_utility, NULL, NULL, error);
 }
 
 static gboolean fs_freeze (const char *mountpoint, gboolean freeze, GError **error) {
