@@ -45,12 +45,6 @@
       version: "9"
       reason: "snapshot merge doesn't work on CentOS 9 Stream with LVM DBus API"
 
-- test: nvme_test
-  skip_on:
-    - distro: "debian"
-      version: "11"
-      reason: "latest libnvme is not yet available on Debian"
-
 - test: (lvm_test|lvm_dbus_tests).LvmPVVGLVWritecacheAttachDetachTestCase
   skip_on:
     - arch: "i686"
@@ -61,12 +55,6 @@
    - distro: "centos"
      version: "8"
      reason: "LVM DBus doesn't include error message from the command line on CentOS/RHEL 8"
-
-- test: (lvm_test|lvm_dbus_tests).LvmTestLVresize.test_lvresize
-  skip_on:
-   - distro: "centos"
-     version: "9"
-     reason: "LVM >= 2.03.19 is not yet available breaking our check for LVM resize on CentOS 9 Stream"
 
 - test: nvme_test
   skip_on:
