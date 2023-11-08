@@ -462,7 +462,6 @@ static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_nu
     if (!ptype_string) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to get partition type for partition %d on device '%s'", part_num, device);
-        fdisk_unref_parttype (ptype);
         fdisk_unref_partition (pa);
         close_context (cxt);
         return NULL;
@@ -470,7 +469,6 @@ static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_nu
 
     ret = g_strdup (ptype_string);
 
-    fdisk_unref_parttype (ptype);
     fdisk_unref_partition (pa);
     close_context (cxt);
     return ret;
