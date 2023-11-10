@@ -14,6 +14,9 @@ from gi.repository import GLib, BlockDev
 class NVMeTest(unittest.TestCase):
     requested_plugins = BlockDev.plugin_specs_from_names(("nvme", "loop"))
 
+    # kernel nvme target needs disk images on a real filesystem (not tmpfs)
+    TMPDIR = "/var/tmp"
+
     @classmethod
     def setUpClass(cls):
         if not shutil.which("nvme"):
@@ -29,6 +32,13 @@ class NVMeTest(unittest.TestCase):
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
 
+    def _safe_unlink(self, f):
+        try:
+            os.unlink(f)
+        except FileNotFoundError:
+            pass
+
+
 class NVMePluginVersionTestCase(NVMeTest):
     @tag_test(TestTags.NOSTORAGE)
     def test_plugin_version(self):
@@ -38,20 +48,16 @@ class NVMePluginVersionTestCase(NVMeTest):
 class NVMeTestCase(NVMeTest):
     def setUp(self):
         self.dev_file = None
-        self.loop_dev = None
         self.nvme_dev = None
         self.nvme_ns_dev = None
 
         self.addCleanup(self._clean_up)
-        self.dev_file = create_sparse_tempfile("nvme_test", 1024**3)
+        self.dev_file = create_sparse_tempfile("nvme_test", 1024**3, dir=self.TMPDIR)
 
-        ret, loop = BlockDev.loop_setup(self.dev_file)
-        if not ret:
-            raise RuntimeError("Failed to setup loop device %s for testing" % self.dev_file)
-        self.loop_dev = "/dev/%s" % loop
-
-        self.nvme_dev = create_nvmet_device(self.loop_dev)
+        self.nvme_dev = create_nvmet_device(self.dev_file)
         self.nvme_ns_dev = self.nvme_dev + "n1"
+
+        os.unlink(self.dev_file)
 
     def _clean_up(self):
         if self.nvme_dev:
@@ -61,10 +67,8 @@ class NVMeTestCase(NVMeTest):
                 # just move on, we can do no better here
                 pass
 
-        # detach the loop device
-        BlockDev.loop_teardown(self.loop_dev)
         if self.dev_file:
-            os.unlink(self.dev_file)
+            self._safe_unlink(self.dev_file)
 
     @tag_test(TestTags.CORE)
     def test_ns_info(self):
@@ -87,12 +91,12 @@ class NVMeTestCase(NVMeTest):
         self.assertEqual(len(info.lba_formats), 1)
         self.assertGreater(len(info.nguid), 0)
         self.assertEqual(info.nsid, 1)
-        self.assertEqual(info.ncap, 2097152)
-        self.assertEqual(info.nsize, 2097152)
-        self.assertEqual(info.nuse, 2097152)
+        self.assertEqual(info.ncap, 262144)
+        self.assertEqual(info.nsize, 262144)
+        self.assertEqual(info.nuse, 262144)
         self.assertGreater(len(info.uuid), 0)
         self.assertFalse(info.write_protected)
-        self.assertEqual(info.current_lba_format.data_size, 512)
+        self.assertEqual(info.current_lba_format.data_size, 4096)
         self.assertEqual(info.current_lba_format.metadata_size, 0)
         self.assertEqual(info.current_lba_format.relative_performance, BlockDev.NVMELBAFormatRelativePerformance.BEST)
 
@@ -160,7 +164,7 @@ class NVMeTestCase(NVMeTest):
         self.assertEqual(log.spare_thresh, 0)
         self.assertEqual(log.temp_sensors, [0, 0, 0, 0, 0, 0, 0, 0])
         self.assertEqual(log.temperature, 0)
-        self.assertGreater(log.total_data_read, 1)
+        self.assertEqual(log.total_data_read, 0)
         self.assertEqual(log.unsafe_shutdowns, 0)
         self.assertEqual(log.warning_temp_time, 0)
         self.assertEqual(log.wctemp, 0)
@@ -299,7 +303,6 @@ class NVMeFabricsTestCase(NVMeTest):
     SUBNQN = 'libblockdev_nvme'
 
     def setUp(self):
-        self.loop_devs = []
         self.dev_files = []
         self.hostnqn = get_nvme_hostnqn()
         self.have_stable_nqn = os.path.exists('/sys/class/dmi/id/product_uuid')
@@ -307,28 +310,15 @@ class NVMeFabricsTestCase(NVMeTest):
     def _setup_target(self, num_devices):
         self.addCleanup(self._clean_up)
         for i in range(num_devices):
-            self.dev_files += [create_sparse_tempfile("nvmeof_test%d" % i, 1024**3)]
-
-            ret, loop = BlockDev.loop_setup(self.dev_files[i])
-            if not ret:
-                raise RuntimeError("Failed to setup loop device %s for testing" % self.dev_files[i])
-            self.loop_devs += ["/dev/%s" % loop]
-        setup_nvme_target(self.loop_devs, self.SUBNQN)
+            self.dev_files += [create_sparse_tempfile("nvmeof_test%d" % i, 1024**3, dir=self.TMPDIR)]
+        setup_nvme_target(self.dev_files, self.SUBNQN)
+        for d in self.dev_files:
+            os.unlink(d)
 
     def _clean_up(self):
         teardown_nvme_target()
-
-        # detach loop devices
-        for i in self.loop_devs:
-            BlockDev.loop_teardown(i)
-        for i in self.dev_files:
-            os.unlink(i)
-
-    def _safe_unlink(self, f):
-        try:
-            os.unlink(f)
-        except FileNotFoundError:
-            pass
+        for d in self.dev_files:
+            self._safe_unlink(d)
 
     def _nvme_disconnect(self, subnqn, ignore_errors=False):
         ret, out, err = run_command("nvme disconnect --nqn=%s" % subnqn)

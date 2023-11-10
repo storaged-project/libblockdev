@@ -28,14 +28,14 @@ except ImportError:
 _lio_devs = dict()
 _nvmet_devs = dict()
 
-def create_sparse_tempfile(name, size):
+def create_sparse_tempfile(name, size, dir="/tmp"):
     """ Create a temporary sparse file.
 
         :param str name: suffix for filename
         :param size: the file size (in bytes)
         :returns: the path to the newly created file
     """
-    (fd, path) = tempfile.mkstemp(prefix="bd.", suffix="-%s" % name)
+    (fd, path) = tempfile.mkstemp(prefix="bd.", suffix="-%s" % name, dir=dir)
     os.close(fd)
     create_sparse_file(path, size)
     return path
