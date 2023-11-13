@@ -27,6 +27,7 @@ no code duplication and it propagates non-callable objects directly.
 
 """
 
+import copy
 import inspect
 import os
 import re
@@ -76,12 +77,22 @@ def _default_repr(self):
     return s
 
 
+def _default_copy(self, memo):
+    if hasattr(self, "copy"):
+        # use our copy function (if we have one)
+        return self.copy()
+    else:
+        # use python deepcopy and hope for the best
+        return copy.deepcopy(memo)
+
+
 # get all subclasses of GBoxed in this module
 all_boxed = inspect.getmembers(BlockDev,
                                lambda member: inspect.isclass(member) and issubclass(member, GObject.GBoxed))
 for _cname, cls in all_boxed:
     cls.__str__ = _default_str
     cls.__repr__ = _default_repr
+    cls.__deepcopy__ = _default_copy
 
 
 class PluginSpec(BlockDev.PluginSpec):
