@@ -1448,6 +1448,7 @@ static BDLVMVDOPooldata* get_vdo_data_from_props (GVariant *props, GError **erro
         data->operating_mode = BD_LVM_VDO_MODE_UNKNOWN;
     }
     g_free (value);
+    value = NULL;
 
     g_variant_dict_lookup (&dict, "CompressionState", "s", &value);
     if (g_strcmp0 (value, "online") == 0)
@@ -1459,6 +1460,7 @@ static BDLVMVDOPooldata* get_vdo_data_from_props (GVariant *props, GError **erro
         data->compression_state = BD_LVM_VDO_COMPRESSION_UNKNOWN;
     }
     g_free (value);
+    value = NULL;
 
     g_variant_dict_lookup (&dict, "IndexState", "s", &value);
     if (g_strcmp0 (value, "error") == 0)
@@ -1478,6 +1480,7 @@ static BDLVMVDOPooldata* get_vdo_data_from_props (GVariant *props, GError **erro
         data->index_state = BD_LVM_VDO_INDEX_UNKNOWN;
     }
     g_free (value);
+    value = NULL;
 
     g_variant_dict_lookup (&dict, "WritePolicy", "s", &value);
     if (g_strcmp0 (value, "auto") == 0)
@@ -1491,6 +1494,7 @@ static BDLVMVDOPooldata* get_vdo_data_from_props (GVariant *props, GError **erro
         data->write_policy = BD_LVM_VDO_WRITE_POLICY_UNKNOWN;
     }
     g_free (value);
+    value = NULL;
 
     g_variant_dict_lookup (&dict, "UsedSize", "t", &(data->used_size));
     g_variant_dict_lookup (&dict, "SavingPercent", "d", &(data->saving_percent));
@@ -1503,6 +1507,7 @@ static BDLVMVDOPooldata* get_vdo_data_from_props (GVariant *props, GError **erro
     else
         data->compression = FALSE;
     g_free (value);
+    value = NULL;
 
     g_variant_dict_lookup (&dict, "Deduplication", "s", &value);
     if (value && g_strcmp0 (value, "enabled") == 0)
@@ -1510,6 +1515,7 @@ static BDLVMVDOPooldata* get_vdo_data_from_props (GVariant *props, GError **erro
     else
         data->deduplication = FALSE;
     g_free (value);
+    value = NULL;
 
     g_variant_dict_clear (&dict);
     g_variant_unref (props);
