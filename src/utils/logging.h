@@ -32,7 +32,7 @@ gboolean bd_utils_init_logging (BDUtilsLogFunc new_log_func, GError **error);
 void bd_utils_set_log_level (gint level);
 
 void bd_utils_log (gint level, const gchar *msg);
-void bd_utils_log_format (gint level, const gchar *format, ...);
+void bd_utils_log_format (gint level, const gchar *format, ...) G_GNUC_PRINTF (2, 3);
 void bd_utils_log_stdout (gint level, const gchar *msg);
 
 #endif  /* BD_UTILS_LOGGING */
