@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 #include <uuid.h>
 
 #include <blockdev/utils.h>
@@ -58,7 +59,8 @@ get_uuid_label (const gchar *device, gchar **uuid, gchar **label, GError **error
     fd = open (device, O_RDONLY|O_CLOEXEC);
     if (fd == -1) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to create a probe for the device '%s'", device);
+                     "Failed to create a probe for the device '%s': %s",
+                     device, strerror_l (errno, _C_LOCALE));
         blkid_free_probe (probe);
         return FALSE;
     }
