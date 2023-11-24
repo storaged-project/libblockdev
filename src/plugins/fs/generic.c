@@ -26,6 +26,7 @@
 #include <sys/ioctl.h>
 #include <linux/fs.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include <blockdev/utils.h>
 
@@ -390,7 +391,8 @@ gboolean bd_fs_wipe (const gchar *device, gboolean all, gboolean force, GError *
     fd = open (device, mode);
     if (fd == -1) {
         g_set_error (&l_error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to open the device '%s'", device);
+                     "Failed to open the device '%s': %s",
+                     device, strerror_l (errno, _C_LOCALE));
         blkid_free_probe (probe);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
@@ -548,7 +550,8 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
     fd = open (device, O_RDONLY|O_CLOEXEC);
     if (fd == -1) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to open the device '%s'", device);
+                     "Failed to open the device '%s': %s",
+                     device, strerror_l (errno, _C_LOCALE));
         blkid_free_probe (probe);
         return NULL;
     }
@@ -1829,7 +1832,8 @@ static gboolean fs_freeze (const char *mountpoint, gboolean freeze, GError **err
     fd = open (mountpoint, O_RDONLY);
     if (fd == -1) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to open the mountpoint '%s'", mountpoint);
+                     "Failed to open the mountpoint '%s': %s",
+                     mountpoint, strerror_l (errno, _C_LOCALE));
         return FALSE;
     }
 
@@ -1840,7 +1844,9 @@ static gboolean fs_freeze (const char *mountpoint, gboolean freeze, GError **err
 
     if (status != 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to %s '%s': %m.", freeze ? "freeze" : "unfreeze", mountpoint);
+                     "Failed to %s '%s': %s.",
+                     freeze ? "freeze" : "unfreeze", mountpoint,
+                     strerror_l (errno, _C_LOCALE));
         close (fd);
         return FALSE;
     }

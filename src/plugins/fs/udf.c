@@ -22,6 +22,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <string.h>
+#include <errno.h>
 #include <sys/ioctl.h>
 #include <linux/fs.h>
 
@@ -206,13 +208,15 @@ static gint get_blocksize (const gchar *device, GError **error) {
     fd = open (device, O_RDONLY);
     if (fd < 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                    "Failed to open the device '%s' to get its block size", device);
+                    "Failed to open the device '%s' to get its block size: %s",
+                    device, strerror_l (errno, _C_LOCALE));
         return -1;
     }
 
     if (ioctl (fd, BLKSSZGET, &blksize) < 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                     "Failed to get block size of the device '%s'", device);
+                     "Failed to get block size of the device '%s': %s",
+                     device, strerror_l (errno, _C_LOCALE));
         close (fd);
         return -1;
     }
