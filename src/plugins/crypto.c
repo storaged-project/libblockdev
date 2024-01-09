@@ -1297,6 +1297,11 @@ gboolean bd_crypto_luks_add_key (const gchar *device, BDCryptoKeyslotContext *co
     gint ret = 0;
     guint64 progress_id = 0;
     GError *l_error = NULL;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started adding key to the LUKS device '%s'", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
 
     ret = crypt_init (&cd, device);
     if (ret != 0) {
