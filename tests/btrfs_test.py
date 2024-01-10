@@ -209,8 +209,10 @@ class BtrfsTestCreateDeleteSubvolume(BtrfsTestCase):
         self.assertEqual(len(subvols), 1)
 
         # already there
-        with self.assertRaises(GLib.GError):
-            BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1", None)
+        version = self._get_btrfs_version()
+        if version != Version("6.6.3"):
+            with self.assertRaises(GLib.GError):
+                BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1", None)
 
         succ = BlockDev.btrfs_delete_subvolume(TEST_MNT, "subvol1", None)
         self.assertTrue(succ)
@@ -219,8 +221,9 @@ class BtrfsTestCreateDeleteSubvolume(BtrfsTestCase):
         self.assertEqual(len(subvols), 0)
 
         # already removed
-        with self.assertRaises(GLib.GError):
-            BlockDev.btrfs_delete_subvolume(TEST_MNT, "subvol1", None)
+        if version != Version("6.6.3"):
+            with self.assertRaises(GLib.GError):
+                BlockDev.btrfs_delete_subvolume(TEST_MNT, "subvol1", None)
 
         succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1", None)
         self.assertTrue(succ)
