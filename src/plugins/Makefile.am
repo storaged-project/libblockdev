@@ -8,6 +8,10 @@ if WITH_NVME
 SUBDIRS += nvme
 endif
 
+if WITH_SMART
+SUBDIRS += smart
+endif
+
 lib_LTLIBRARIES =
 
 if WITH_BTRFS
@@ -44,10 +48,6 @@ endif
 
 if WITH_NVDIMM
 lib_LTLIBRARIES += libbd_nvdimm.la
-endif
-
-if WITH_SMART
-lib_LTLIBRARIES += libbd_smart.la
 endif
 
 if WITH_SWAP
@@ -140,14 +140,6 @@ libbd_nvdimm_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_nvdimm_la_SOURCES = nvdimm.c nvdimm.h check_deps.c check_deps.h
 endif
 
-if WITH_SMART
-libbd_smart_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(JSON_GLIB_CFLAGS) -Wall -Wextra -Werror
-libbd_smart_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(GIO_LIBS) $(JSON_GLIB_LIBS)
-libbd_smart_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 3:0:0 -Wl,--no-undefined
-libbd_smart_la_CPPFLAGS = -I${builddir}/../../include/
-libbd_smart_la_SOURCES = smart.c smart.h check_deps.c check_deps.h
-endif
-
 if WITH_SWAP
 libbd_swap_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(BLKID_CFLAGS) $(UUID_CFLAGS) -Wall -Wextra -Werror
 libbd_swap_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS) $(GIO_LIBS) $(BLKID_LIBS) $(UUID_LIBS)
@@ -206,10 +198,6 @@ endif
 
 if WITH_NVDIMM
 libinclude_HEADERS += nvdimm.h
-endif
-
-if WITH_SMART
-libinclude_HEADERS += smart.h
 endif
 
 if WITH_SWAP

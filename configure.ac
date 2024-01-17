@@ -22,6 +22,7 @@ AC_CONFIG_FILES([Makefile src/Makefile \
                           src/plugins/Makefile \
                           src/plugins/fs/Makefile \
                           src/plugins/nvme/Makefile \
+                          src/plugins/smart/Makefile \
                           src/utils/Makefile \
                           src/utils/blockdev-utils.pc \
                           src/lib/Makefile \
@@ -153,16 +154,21 @@ AS_IF([test "x$with_nvme" != "xno"],
       [AC_DEFINE([WITH_BD_NVME], [], [Define if nvme is supported]) AC_SUBST([WITH_NVME], [1])],
       [])
 
-AC_ARG_WITH([smart],
-    AS_HELP_STRING([--with-smart], [support smart @<:@default=yes@:>@]),
+AC_ARG_WITH([smartmontools],
+    AS_HELP_STRING([--with-smartmontools], [support ATA/SCSI S.M.A.R.T. via smartmontools @<:@default=yes@:>@]),
     [],
-    [with_smart=yes])
+    [with_smartmontools=yes])
+
+AC_SUBST([WITH_SMARTMONTOOLS], [0])
+AM_CONDITIONAL(WITH_SMARTMONTOOLS, test "x$with_smartmontools" != "xno")
+AS_IF([test "x$with_smartmontools" != "xno"],
+      [AC_DEFINE([WITH_BD_SMART], [], [Define if smart is supported])
+       AC_SUBST([WITH_SMART], [1])
+       AC_SUBST([WITH_SMARTMONTOOLS], [1])],
+      [])
 
 AC_SUBST([WITH_SMART], [0])
-AM_CONDITIONAL(WITH_SMART, test "x$with_smart" != "xno")
-AS_IF([test "x$with_smart" != "xno"],
-      [AC_DEFINE([WITH_BD_SMART], [], [Define if smart is supported]) AC_SUBST([WITH_SMART], [1])],
-      [])
+AM_CONDITIONAL(WITH_SMART, test "x$with_smartmontools" != "xno")
 
 LIBBLOCKDEV_PLUGIN([BTRFS], [btrfs])
 LIBBLOCKDEV_PLUGIN([CRYPTO], [crypto])
@@ -177,7 +183,7 @@ LIBBLOCKDEV_PLUGIN([PART], [part])
 LIBBLOCKDEV_PLUGIN([FS], [fs])
 LIBBLOCKDEV_PLUGIN([NVDIMM], [nvdimm])
 LIBBLOCKDEV_PLUGIN([NVME], [nvme])
-LIBBLOCKDEV_PLUGIN([SMART], [smart])
+LIBBLOCKDEV_PLUGIN([SMART], [smartmontools])
 
 dnl these packages/modules are always needed
 LIBBLOCKDEV_PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.42.2])
@@ -318,7 +324,7 @@ echo "
         NVMe plugin:                ${with_nvme}
         Part plugin:                ${with_part}
         S390 plugin:                ${s390_info}
-        S.M.A.R.T. plugin:          ${with_smart}
+        Smartmontools plugin:       ${with_smartmontools}
         Swap plugin:                ${with_swap}
 
         GObject introspection:      ${found_introspection}
