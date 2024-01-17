@@ -7,23 +7,14 @@ import shutil
 import overrides_hack
 
 from utils import run, create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test, write_file, run_command
+
+import gi
+gi.require_version('GLib', '2.0')
+gi.require_version('BlockDev', '3.0')
 from gi.repository import BlockDev, GLib
 
 
 class SMARTTest(unittest.TestCase):
-    requested_plugins = BlockDev.plugin_specs_from_names(("smart", "loop"))
-
-    @tag_test(TestTags.NOSTORAGE)
-    def test_plugin_version(self):
-       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.SMART), "libbd_smart.so.3")
-
-    @classmethod
-    def setUpClass(cls):
-        if not BlockDev.is_initialized():
-            BlockDev.init(cls.requested_plugins, None)
-        else:
-            BlockDev.reinit(cls.requested_plugins, True, None)
-
 
     def _setup_lio(self):
         self.lio_dev_file = create_sparse_tempfile("smart_test", 1024**3)
@@ -77,6 +68,23 @@ class SMARTTest(unittest.TestCase):
             self.run_command('modprobe -r scsi_debug')
         except:
             pass
+
+
+class SmartmontoolsTest(SMARTTest):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.ps = BlockDev.PluginSpec(name=BlockDev.Plugin.SMART, so_name="libbd_smartmontools.so.3")
+        cls.ps2 = BlockDev.PluginSpec(name=BlockDev.Plugin.LOOP)
+        if not BlockDev.is_initialized():
+            BlockDev.init([cls.ps, cls.ps2], None)
+        else:
+            BlockDev.reinit([cls.ps, cls.ps2], True, None)
+
+
+    @tag_test(TestTags.NOSTORAGE)
+    def test_plugin_version(self):
+       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.SMART), "libbd_smartmontools.so.3")
 
 
     @tag_test(TestTags.CORE)
