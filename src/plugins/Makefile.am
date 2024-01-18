@@ -8,9 +8,7 @@ if WITH_NVME
 SUBDIRS += nvme
 endif
 
-if WITH_SMART
 SUBDIRS += smart
-endif
 
 lib_LTLIBRARIES =
 

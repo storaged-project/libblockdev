@@ -154,6 +154,17 @@ AS_IF([test "x$with_nvme" != "xno"],
       [AC_DEFINE([WITH_BD_NVME], [], [Define if nvme is supported]) AC_SUBST([WITH_NVME], [1])],
       [])
 
+AC_ARG_WITH([smart],
+    AS_HELP_STRING([--with-smart], [support ATA S.M.A.R.T. via libatasmart @<:@default=yes@:>@]),
+    [],
+    [with_smart=yes])
+
+AC_SUBST([WITH_SMART], [0])
+AM_CONDITIONAL(WITH_SMART, test "x$with_smart" != "xno")
+AS_IF([test "x$with_smart" != "xno"],
+      [AC_SUBST([WITH_SMART], [1])],
+      [])
+
 AC_ARG_WITH([smartmontools],
     AS_HELP_STRING([--with-smartmontools], [support ATA/SCSI S.M.A.R.T. via smartmontools @<:@default=yes@:>@]),
     [],
@@ -162,13 +173,8 @@ AC_ARG_WITH([smartmontools],
 AC_SUBST([WITH_SMARTMONTOOLS], [0])
 AM_CONDITIONAL(WITH_SMARTMONTOOLS, test "x$with_smartmontools" != "xno")
 AS_IF([test "x$with_smartmontools" != "xno"],
-      [AC_DEFINE([WITH_BD_SMART], [], [Define if smart is supported])
-       AC_SUBST([WITH_SMART], [1])
-       AC_SUBST([WITH_SMARTMONTOOLS], [1])],
+      [AC_SUBST([WITH_SMARTMONTOOLS], [1])],
       [])
-
-AC_SUBST([WITH_SMART], [0])
-AM_CONDITIONAL(WITH_SMART, test "x$with_smartmontools" != "xno")
 
 LIBBLOCKDEV_PLUGIN([BTRFS], [btrfs])
 LIBBLOCKDEV_PLUGIN([CRYPTO], [crypto])
@@ -183,7 +189,7 @@ LIBBLOCKDEV_PLUGIN([PART], [part])
 LIBBLOCKDEV_PLUGIN([FS], [fs])
 LIBBLOCKDEV_PLUGIN([NVDIMM], [nvdimm])
 LIBBLOCKDEV_PLUGIN([NVME], [nvme])
-LIBBLOCKDEV_PLUGIN([SMART], [smartmontools])
+LIBBLOCKDEV_PLUGIN([SMART], [smart])
 
 dnl these packages/modules are always needed
 LIBBLOCKDEV_PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.42.2])
@@ -267,7 +273,13 @@ AS_IF([test "x$with_nvme" != "xno"],
       [])
 
 AS_IF([test "x$with_smart" != "xno"],
-      [LIBBLOCKDEV_PKG_CHECK_MODULES([JSON_GLIB], [json-glib-1.0])],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([SMART], [libatasmart >= 0.17])
+       AC_DEFINE([HAVE_SMART])],
+      [])
+
+AS_IF([test "x$with_smartmontools" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([JSON_GLIB], [json-glib-1.0])
+       AC_DEFINE([HAVE_SMARTMONTOOLS])],
       [])
 
 AC_SUBST([MAJOR_VER], [3])
@@ -295,39 +307,40 @@ echo "
                libblockdev $VERSION
              ====================
 
-        prefix:                     ${prefix}
-        libdir:                     ${libdir}
-        libexecdir:                 ${libexecdir}
-        bindir:                     ${bindir}
-        sbindir:                    ${sbindir}
-        datadir:                    ${datadir}
-        sysconfdir:                 ${sysconfdir}
-        localstatedir:              ${localstatedir}
-        docdir:                     ${docdir}
+        prefix:                       ${prefix}
+        libdir:                       ${libdir}
+        libexecdir:                   ${libexecdir}
+        bindir:                       ${bindir}
+        sbindir:                      ${sbindir}
+        datadir:                      ${datadir}
+        sysconfdir:                   ${sysconfdir}
+        localstatedir:                ${localstatedir}
+        docdir:                       ${docdir}
 
-        compiler:                   ${CC}
-        cflags:                     ${CFLAGS}
-        cppflags:                   ${CPPFLAGS}
-        ldflags:                    ${LDFLAGS}
+        compiler:                     ${CC}
+        cflags:                       ${CFLAGS}
+        cppflags:                     ${CPPFLAGS}
+        ldflags:                      ${LDFLAGS}
 
-        BTRFS plugin:               ${with_btrfs}
-        Crypto plugin:              ${with_crypto}
-            escrow support:         ${with_escrow}
-        DM plugin:                  ${with_dm}
-        FS plugin:                  ${with_fs}
-        Loop plugin:                ${with_loop}
-        LVM plugin:                 ${with_lvm}
-        LVM DBus plugin:            ${with_lvm_dbus}
-        MDRAID plugin:              ${with_mdraid}
-        MPath plugin                ${with_mpath}
-        NVDIMM plugin (deprecated): ${with_nvdimm}
-        NVMe plugin:                ${with_nvme}
-        Part plugin:                ${with_part}
-        S390 plugin:                ${s390_info}
-        Smartmontools plugin:       ${with_smartmontools}
-        Swap plugin:                ${with_swap}
+        BTRFS plugin:                 ${with_btrfs}
+        Crypto plugin:                ${with_crypto}
+            escrow support:           ${with_escrow}
+        DM plugin:                    ${with_dm}
+        FS plugin:                    ${with_fs}
+        Loop plugin:                  ${with_loop}
+        LVM plugin:                   ${with_lvm}
+        LVM DBus plugin:              ${with_lvm_dbus}
+        MDRAID plugin:                ${with_mdraid}
+        MPath plugin                  ${with_mpath}
+        NVDIMM plugin (deprecated):   ${with_nvdimm}
+        NVMe plugin:                  ${with_nvme}
+        Part plugin:                  ${with_part}
+        S390 plugin:                  ${s390_info}
+        SMART plugin (libatasmart):   ${with_smart}
+        SMART plugin (smartmontools): ${with_smartmontools}
+        Swap plugin:                  ${with_swap}
 
-        GObject introspection:      ${found_introspection}
-        Python 3 bindings:          ${python3_info}
-        tools:                      ${with_tools}
+        GObject introspection:        ${found_introspection}
+        Python 3 bindings:            ${python3_info}
+        tools:                        ${with_tools}
 "

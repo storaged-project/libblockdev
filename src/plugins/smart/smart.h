@@ -167,7 +167,7 @@ typedef enum {
  * @flags: Bitmask of attribute flags. See #BDSmartATAAttributeFlag.
  * @pretty_value: Numerical representation of the parsed raw value, presented in @pretty_value_unit units.
  * @pretty_value_unit: The unit of the parsed raw value.
- * @pretty_value_string: A free-form string representation of the raw value intended for user presentation.
+ * @pretty_value_string: A free-form string representation of the raw value intended for user presentation or %NULL.
  */
 typedef struct BDSmartATAAttribute {
     guint8 id;
@@ -191,16 +191,16 @@ typedef struct BDSmartATAAttribute {
  * @smart_enabled: Indicates that the SMART support is enabled.
  * @overall_status_passed: %TRUE if the device SMART overall-health self-assessment test result has passed.
  * @offline_data_collection_status: The offline data collection status. See #BDSmartATAOfflineDataCollectionStatus.
- * @auto_offline_data_collection_enabled: %TRUE if Automatic Offline Data Collection is enabled.
+ * @auto_offline_data_collection_enabled: %TRUE if Automatic Offline Data Collection is enabled. Only supported with the smartmontools plugin.
  * @offline_data_collection_completion: Total time in seconds to complete Offline data collection.
- * @offline_data_collection_capabilities: Bitmask of offline data collection capabilities, see #BDSmartATAOfflineDataCollectionCapabilities.
+ * @offline_data_collection_capabilities: Bitmask of offline data collection capabilities, see #BDSmartATAOfflineDataCollectionCapabilities. Only supported with the smartmontools plugin.
  * @self_test_status: Self-test execution status. See #BDSmartATASelfTestStatus.
  * @self_test_percent_remaining: The percentage remaining of a running self-test.
  * @self_test_polling_short: Short self-test routine recommended polling time in minutes or 0 if not supported.
  * @self_test_polling_extended: Extended self-test routine recommended polling time in minutes or 0 if not supported.
  * @self_test_polling_conveyance: Conveyance self-test routine recommended polling time in minutes or 0 if not supported.
- * @smart_capabilities: Bitmask of device misc. SMART capabilities. See #BDSmartATACapabilities.
- * @attributes: (array zero-terminated=1) (element-type BDSmartATAAttribute): A list of reported SMART attributes.
+ * @smart_capabilities: Bitmask of device misc. SMART capabilities. See #BDSmartATACapabilities. Only supported with the smartmontools plugin.
+ * @attributes: (array zero-terminated=1): A list of reported SMART attributes.
  * @power_on_time: The count of minutes in power-on state.
  * @power_cycle_count: The count of full hard disk power on/off cycles.
  * @temperature: The current drive temperature in Kelvin or 0 when temperature is not reported.
@@ -221,7 +221,7 @@ typedef struct BDSmartATA {
     guint smart_capabilities;
     BDSmartATAAttribute **attributes;
     guint power_on_time;
-    guint power_cycle_count;
+    guint64 power_cycle_count;
     guint temperature;
 } BDSmartATA;
 

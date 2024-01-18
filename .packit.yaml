@@ -102,6 +102,7 @@ srpm_build_deps:
  - json-glib-devel
  - keyutils-libs-devel
  - kmod-devel
+ - libatasmart-devel
  - libblkid-devel
  - libbytesize-devel
  - libfdisk-devel
