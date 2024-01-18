@@ -305,3 +305,151 @@ class SmartmontoolsTest(SMARTTest):
                 self.assertGreater(data.temperature_drive_trip, 0)
                 self.assertGreater(data.read_processed_bytes, 1000000)
                 self.assertGreater(data.write_processed_bytes, 1000000)
+
+
+class LibatasmartTest(SMARTTest):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.ps = BlockDev.PluginSpec(name=BlockDev.Plugin.SMART, so_name="libbd_smart.so.3")
+        cls.ps2 = BlockDev.PluginSpec(name=BlockDev.Plugin.LOOP)
+        if not BlockDev.is_initialized():
+            BlockDev.init([cls.ps, cls.ps2], None)
+        else:
+            BlockDev.reinit([cls.ps, cls.ps2], True, None)
+
+    @tag_test(TestTags.NOSTORAGE)
+    def test_plugin_version(self):
+       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.SMART), "libbd_smart.so.3")
+
+
+    @tag_test(TestTags.CORE)
+    def test_ata_info(self):
+        """Test SMART ATA info on LIO, loop and scsi_debug devices"""
+
+        # non-existing device
+        msg = r"Error opening device /dev/.*: No such file or directory"
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_ata_get_info("/dev/nonexistent")
+
+        msg = r"Error reading SMART data from device /dev/.*: Operation not supported"
+
+        # LIO device (SCSI)
+        self._setup_lio()
+        self.addCleanup(self._clean_lio)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_ata_get_info(self.lio_dev)
+
+        # loop device
+        self._setup_loop()
+        self.addCleanup(self._clean_loop)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_ata_get_info(self.loop_dev)
+
+        # scsi_debug
+        self._setup_scsi_debug()
+        self.addCleanup(self._clean_scsi_debug)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_ata_get_info(self.scsi_debug_dev)
+
+
+    @tag_test(TestTags.CORE)
+    def test_smart_enable_disable(self):
+        """Test turning SMART functionality on/off over LIO, loop and scsi_debug devices"""
+
+        msg = r"Enabling/disabling ATA SMART functionality is unavailable with libatasmart"
+
+        # non-existing device
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled("/dev/nonexistent", False)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled("/dev/nonexistent", True)
+
+        # LIO device (SCSI)
+        self._setup_lio()
+        self.addCleanup(self._clean_lio)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled(self.lio_dev, False)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled(self.lio_dev, True)
+
+        # loop device
+        self._setup_loop()
+        self.addCleanup(self._clean_loop)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled(self.loop_dev, False)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled(self.loop_dev, True)
+
+        # scsi_debug
+        self._setup_scsi_debug()
+        self.addCleanup(self._clean_scsi_debug)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled(self.scsi_debug_dev, False)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled(self.scsi_debug_dev, True)
+
+
+    @tag_test(TestTags.CORE)
+    def test_smart_selftest(self):
+        """Test SMART self-test functionality over LIO, loop and scsi_debug devices"""
+
+        tests = [BlockDev.SmartSelfTestOp.OFFLINE, BlockDev.SmartSelfTestOp.SHORT,
+                 BlockDev.SmartSelfTestOp.LONG, BlockDev.SmartSelfTestOp.CONVEYANCE,
+                 BlockDev.SmartSelfTestOp.ABORT]
+
+        # non-existing device
+        msg = r"Error opening device /dev/.*: No such file or directory"
+        for t in tests:
+            with self.assertRaisesRegex(GLib.GError, msg):
+                BlockDev.smart_device_self_test("/dev/nonexistent", t)
+
+        msg = r"Error triggering device self-test: Operation not supported"
+
+        # LIO device (SCSI)
+        self._setup_lio()
+        self.addCleanup(self._clean_lio)
+        for t in tests:
+            with self.assertRaisesRegex(GLib.GError, msg):
+                BlockDev.smart_device_self_test(self.lio_dev, t)
+
+        # loop device
+        self._setup_loop()
+        self.addCleanup(self._clean_loop)
+        for t in tests:
+            with self.assertRaisesRegex(GLib.GError, msg):
+                BlockDev.smart_device_self_test(self.loop_dev, t)
+
+        # scsi_debug
+        self._setup_scsi_debug()
+        self.addCleanup(self._clean_scsi_debug)
+        for t in tests:
+            with self.assertRaisesRegex(GLib.GError, msg):
+                BlockDev.smart_device_self_test(self.scsi_debug_dev, t)
+
+
+    @tag_test(TestTags.CORE)
+    def test_scsi_info(self):
+        """Test SMART SCSI info on LIO, loop and scsi_debug devices"""
+
+        # non-existing device
+        msg = r"SCSI SMART is unavailable with libatasmart"
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_scsi_get_info("/dev/nonexistent")
+
+        # LIO device (SCSI)
+        self._setup_lio()
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_scsi_get_info(self.lio_dev)
+
+        # loop device
+        self._setup_loop()
+        self.addCleanup(self._clean_loop)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_scsi_get_info(self.loop_dev)
+
+        # scsi_debug
+        self._setup_scsi_debug()
+        self.addCleanup(self._clean_scsi_debug)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_scsi_get_info(self.scsi_debug_dev)

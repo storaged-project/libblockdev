@@ -44,8 +44,12 @@ if !WITH_NVME
 DISTCHECK_CONFIGURE_FLAGS += --without-nvme
 endif
 
-if !WITH_SMARTMONTOOLS
-DISTCHECK_CONFIGURE_FLAGS += --without-smartmontools
+if !WITH_SMART
+DISTCHECK_CONFIGURE_FLAGS += --without-smart
+endif
+
+if WITH_SMARTMONTOOLS
+DISTCHECK_CONFIGURE_FLAGS += --with-smartmontools
 endif
 
 if !WITH_SWAP

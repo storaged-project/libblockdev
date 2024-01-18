@@ -38,6 +38,7 @@
       - libnvme-devel
       - e2fsprogs-devel
       - json-glib-devel
+      - libatasmart-devel
     when: ansible_distribution == 'Fedora'
 
   - name: Install test dependencies (Fedora)
@@ -105,6 +106,7 @@
       - keyutils-libs-devel
       - e2fsprogs-devel
       - json-glib-devel
+      - libatasmart-devel
     when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '8'
 
   - name: Install test dependencies (CentOS 8)
@@ -170,6 +172,7 @@
       - libkeyutils-dev
       - libext2fs-dev
       - libjson-glib-dev
+      - libatasmart-dev
     when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
   - name: Install test dependencies (Debian/Ubuntu)

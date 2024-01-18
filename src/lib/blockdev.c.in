@@ -63,7 +63,12 @@ static gchar * default_plugin_so[BD_PLUGIN_UNDEF] = {
     "libbd_dm.so.@MAJOR_VER@", "libbd_mdraid.so.@MAJOR_VER@",
     "libbd_s390.so.@MAJOR_VER@", "libbd_part.so.@MAJOR_VER@",
     "libbd_fs.so.@MAJOR_VER@", "libbd_nvdimm.so.@MAJOR_VER@",
-    "libbd_nvme.so.@MAJOR_VER@", "libbd_smartmontools.so.@MAJOR_VER@",
+    "libbd_nvme.so.@MAJOR_VER@",
+#if defined(HAVE_SMART) || !defined(HAVE_SMARTMONTOOLS)
+     "libbd_smart.so.@MAJOR_VER@",
+#else
+     "libbd_smartmontools.so.@MAJOR_VER@",
+#endif
 };
 static BDPluginStatus plugins[BD_PLUGIN_UNDEF] = {
     {{BD_PLUGIN_LVM, NULL}, NULL},
