@@ -1,3 +1,42 @@
+Libblockdev 3.1.0
+------------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Full list of changes**
+
+Tomas Bzatek (7):
+
+- tests: Default to /tmp for create_sparse_tempfile()
+- tests: Avoid setting up intermediary loop device for the nvme target
+- tests: Remove unreliable nvme attribute checks
+- lvm-dbus: Fix leaking error
+- lvm-dbus: Avoid using already-freed memory
+- utils: Add expected printf string annotation
+- fs: Report reason for open() and ioctl() failures
+
+Vojtech Trefny (18):
+
+- ci: Add an action to compile libblockdev with different compilers
+- Sync spec with downstream
+- Add BDPluginSpec constructor and use it in plugin_specs_from_names
+- overrides: Remove unused 'sys' import
+- ci: Manually prepare spec file for Packit
+- ci: Remove the custom version command for Packit
+- swap: Add support for checking label and UUID format
+- fs: Add a function to check label format for F2FS
+- fs: Add a generic function to check for fs info availability
+- fs: Fix allowed UUID for generic mkfs with VFAT
+- fs: Add support for getting filesystem min size for NTFS and Ext
+- tests: Remove some obsolete rules to skip tests
+- Mark NVDIMM plugin as deprecated since 3.1
+- part: Fix potential double free when getting parttype
+- tests: Use BDPluginSpec constructor in LVM DBus plugin tests
+- python: Add a deepcopy function to our structs
+- Fix missing progress initialization in bd_crypto_luks_add_key
+- tests: Skip some checks for btrfs errors with btrfs-progs 6.6.3
+
 Libblockdev 3.0.4
 ------------------
 

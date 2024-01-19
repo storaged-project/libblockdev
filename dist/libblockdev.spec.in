@@ -77,7 +77,7 @@
 %define configure_opts %{?python3_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?tools_copts} %{?gi_copts} %{?nvme_copts}
 
 Name:        libblockdev
-Version:     3.0.4
+Version:     3.1.0
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPL-2.1-or-later
@@ -851,6 +851,33 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Fri Jan 19 2024 Vojtech Trefny <vtrefny@redhat.com> - 3.1.0-1
+- tests: Skip some checks for btrfs errors with btrfs-progs 6.6.3 (vtrefny)
+- Fix missing progress initialization in bd_crypto_luks_add_key (vtrefny)
+- fs: Report reason for open() and ioctl() failures (tbzatek)
+- utils: Add expected printf string annotation (tbzatek)
+- lvm-dbus: Avoid using already-freed memory (tbzatek)
+- lvm-dbus: Fix leaking error (tbzatek)
+- python: Add a deepcopy function to our structs (vtrefny)
+- tests: Remove unreliable nvme attribute checks (tbzatek)
+- tests: Use BDPluginSpec constructor in LVM DBus plugin tests (vtrefny)
+- tests: Avoid setting up intermediary loop device for the nvme target (tbzatek)
+- tests: Default to /tmp for create_sparse_tempfile() (tbzatek)
+- part: Fix potential double free when getting parttype (vtrefny)
+- Mark NVDIMM plugin as deprecated since 3.1 (vtrefny)
+- tests: Remove some obsolete rules to skip tests (vtrefny)
+- fs: Add support for getting filesystem min size for NTFS and Ext (vtrefny)
+- fs: Fix allowed UUID for generic mkfs with VFAT (vtrefny)
+- fs: Add a generic function to check for fs info availability (vtrefny)
+- fs: Add a function to check label format for F2FS (vtrefny)
+- swap: Add support for checking label and UUID format (vtrefny)
+- ci: Remove the custom version command for Packit (vtrefny)
+- ci: Manually prepare spec file for Packit (vtrefny)
+- overrides: Remove unused 'sys' import (vtrefny)
+- Add BDPluginSpec constructor and use it in plugin_specs_from_names (vtrefny)
+- Sync spec with downstream (vtrefny)
+- ci: Add an action to compile libblockdev with different compilers (vtrefny)
+
 * Fri Oct 13 2023 Vojtech Trefny <vtrefny@redhat.com> - 3.0.4-1
 - tests: Fix "invalid escape sequence '\#'" warning from Python 3.12 (vtrefny)
 - tests: Fail early when recompilation fails in library_test (vtrefny)
