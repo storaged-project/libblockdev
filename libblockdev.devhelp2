@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<book xmlns="http://www.devhelp.net/book" title="libblockdev Reference Manual for libblockdev 3.0.4." link="index.html" author="" name="libblockdev" version="2" language="c">
+<book xmlns="http://www.devhelp.net/book" title="libblockdev Reference Manual for libblockdev 3.1.0." link="index.html" author="" name="libblockdev" version="2" language="c">
   <chapters>
     <sub name="libblockdev Reference Manual" link="ch01.html">
       <sub name="blockdev library" link="libblockdev-blockdev-library.html"/>
@@ -180,12 +180,15 @@
     <keyword type="function" name="bd_fs_check_label ()" link="libblockdev-FS.html#bd-fs-check-label"/>
     <keyword type="function" name="bd_fs_get_size ()" link="libblockdev-FS.html#bd-fs-get-size"/>
     <keyword type="function" name="bd_fs_get_free_space ()" link="libblockdev-FS.html#bd-fs-get-free-space"/>
+    <keyword type="function" name="bd_fs_get_min_size ()" link="libblockdev-FS.html#bd-fs-get-min-size"/>
     <keyword type="function" name="bd_fs_can_resize ()" link="libblockdev-FS.html#bd-fs-can-resize"/>
     <keyword type="function" name="bd_fs_can_check ()" link="libblockdev-FS.html#bd-fs-can-check"/>
     <keyword type="function" name="bd_fs_can_repair ()" link="libblockdev-FS.html#bd-fs-can-repair"/>
     <keyword type="function" name="bd_fs_can_set_label ()" link="libblockdev-FS.html#bd-fs-can-set-label"/>
     <keyword type="function" name="bd_fs_can_get_size ()" link="libblockdev-FS.html#bd-fs-can-get-size"/>
     <keyword type="function" name="bd_fs_can_get_free_space ()" link="libblockdev-FS.html#bd-fs-can-get-free-space"/>
+    <keyword type="function" name="bd_fs_can_get_min_size ()" link="libblockdev-FS.html#bd-fs-can-get-min-size"/>
+    <keyword type="function" name="bd_fs_can_get_info ()" link="libblockdev-FS.html#bd-fs-can-get-info"/>
     <keyword type="function" name="bd_fs_can_set_uuid ()" link="libblockdev-FS.html#bd-fs-can-set-uuid"/>
     <keyword type="function" name="bd_fs_set_uuid ()" link="libblockdev-FS.html#bd-fs-set-uuid"/>
     <keyword type="function" name="bd_fs_check_uuid ()" link="libblockdev-FS.html#bd-fs-check-uuid"/>
@@ -208,6 +211,7 @@
     <keyword type="function" name="bd_fs_ext2_check_label ()" link="libblockdev-FS.html#bd-fs-ext2-check-label"/>
     <keyword type="function" name="bd_fs_ext2_set_uuid ()" link="libblockdev-FS.html#bd-fs-ext2-set-uuid"/>
     <keyword type="function" name="bd_fs_ext2_check_uuid ()" link="libblockdev-FS.html#bd-fs-ext2-check-uuid"/>
+    <keyword type="function" name="bd_fs_ext2_get_min_size ()" link="libblockdev-FS.html#bd-fs-ext2-get-min-size"/>
     <keyword type="function" name="bd_fs_ext3_check ()" link="libblockdev-FS.html#bd-fs-ext3-check"/>
     <keyword type="function" name="bd_fs_ext3_get_info ()" link="libblockdev-FS.html#bd-fs-ext3-get-info"/>
     <keyword type="function" name="bd_fs_ext3_info_copy ()" link="libblockdev-FS.html#bd-fs-ext3-info-copy"/>
@@ -219,6 +223,7 @@
     <keyword type="function" name="bd_fs_ext3_check_label ()" link="libblockdev-FS.html#bd-fs-ext3-check-label"/>
     <keyword type="function" name="bd_fs_ext3_set_uuid ()" link="libblockdev-FS.html#bd-fs-ext3-set-uuid"/>
     <keyword type="function" name="bd_fs_ext3_check_uuid ()" link="libblockdev-FS.html#bd-fs-ext3-check-uuid"/>
+    <keyword type="function" name="bd_fs_ext3_get_min_size ()" link="libblockdev-FS.html#bd-fs-ext3-get-min-size"/>
     <keyword type="function" name="bd_fs_ext4_check ()" link="libblockdev-FS.html#bd-fs-ext4-check"/>
     <keyword type="function" name="bd_fs_ext4_get_info ()" link="libblockdev-FS.html#bd-fs-ext4-get-info"/>
     <keyword type="function" name="bd_fs_ext4_info_copy ()" link="libblockdev-FS.html#bd-fs-ext4-info-copy"/>
@@ -230,6 +235,7 @@
     <keyword type="function" name="bd_fs_ext4_check_label ()" link="libblockdev-FS.html#bd-fs-ext4-check-label"/>
     <keyword type="function" name="bd_fs_ext4_set_uuid ()" link="libblockdev-FS.html#bd-fs-ext4-set-uuid"/>
     <keyword type="function" name="bd_fs_ext4_check_uuid ()" link="libblockdev-FS.html#bd-fs-ext4-check-uuid"/>
+    <keyword type="function" name="bd_fs_ext4_get_min_size ()" link="libblockdev-FS.html#bd-fs-ext4-get-min-size"/>
     <keyword type="function" name="bd_fs_xfs_check ()" link="libblockdev-FS.html#bd-fs-xfs-check"/>
     <keyword type="function" name="bd_fs_xfs_get_info ()" link="libblockdev-FS.html#bd-fs-xfs-get-info"/>
     <keyword type="function" name="bd_fs_xfs_info_copy ()" link="libblockdev-FS.html#bd-fs-xfs-info-copy"/>
@@ -264,6 +270,7 @@
     <keyword type="function" name="bd_fs_ntfs_info_free ()" link="libblockdev-FS.html#bd-fs-ntfs-info-free"/>
     <keyword type="function" name="bd_fs_ntfs_set_uuid ()" link="libblockdev-FS.html#bd-fs-ntfs-set-uuid"/>
     <keyword type="function" name="bd_fs_ntfs_check_uuid ()" link="libblockdev-FS.html#bd-fs-ntfs-check-uuid"/>
+    <keyword type="function" name="bd_fs_ntfs_get_min_size ()" link="libblockdev-FS.html#bd-fs-ntfs-get-min-size"/>
     <keyword type="function" name="bd_fs_f2fs_info_copy ()" link="libblockdev-FS.html#bd-fs-f2fs-info-copy"/>
     <keyword type="function" name="bd_fs_f2fs_info_free ()" link="libblockdev-FS.html#bd-fs-f2fs-info-free"/>
     <keyword type="function" name="bd_fs_f2fs_mkfs ()" link="libblockdev-FS.html#bd-fs-f2fs-mkfs"/>
@@ -271,6 +278,7 @@
     <keyword type="function" name="bd_fs_f2fs_repair ()" link="libblockdev-FS.html#bd-fs-f2fs-repair"/>
     <keyword type="function" name="bd_fs_f2fs_get_info ()" link="libblockdev-FS.html#bd-fs-f2fs-get-info"/>
     <keyword type="function" name="bd_fs_f2fs_resize ()" link="libblockdev-FS.html#bd-fs-f2fs-resize"/>
+    <keyword type="function" name="bd_fs_f2fs_check_label ()" link="libblockdev-FS.html#bd-fs-f2fs-check-label"/>
     <keyword type="function" name="bd_fs_nilfs2_get_info ()" link="libblockdev-FS.html#bd-fs-nilfs2-get-info"/>
     <keyword type="function" name="bd_fs_nilfs2_info_copy ()" link="libblockdev-FS.html#bd-fs-nilfs2-info-copy"/>
     <keyword type="function" name="bd_fs_nilfs2_info_free ()" link="libblockdev-FS.html#bd-fs-nilfs2-info-free"/>
@@ -520,21 +528,21 @@
     <keyword type="enum" name="enum BDMpathError" link="libblockdev-Mpath.html#BDMpathError"/>
     <keyword type="enum" name="enum BDMpathTech" link="libblockdev-Mpath.html#BDMpathTech"/>
     <keyword type="enum" name="enum BDMpathTechMode" link="libblockdev-Mpath.html#BDMpathTechMode"/>
-    <keyword type="function" name="bd_nvdimm_close ()" link="libblockdev-NVDIMM.html#bd-nvdimm-close"/>
-    <keyword type="function" name="bd_nvdimm_init ()" link="libblockdev-NVDIMM.html#bd-nvdimm-init"/>
+    <keyword type="function" name="bd_nvdimm_close ()" link="libblockdev-NVDIMM.html#bd-nvdimm-close" deprecated="3.1: NVDIMM plugin will be removed in the next major release"/>
+    <keyword type="function" name="bd_nvdimm_init ()" link="libblockdev-NVDIMM.html#bd-nvdimm-init" deprecated="3.1: NVDIMM plugin will be removed in the next major release"/>
     <keyword type="function" name="bd_nvdimm_error_quark ()" link="libblockdev-NVDIMM.html#bd-nvdimm-error-quark"/>
-    <keyword type="function" name="bd_nvdimm_namespace_get_mode_from_str ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-get-mode-from-str"/>
-    <keyword type="function" name="bd_nvdimm_namespace_get_mode_str ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-get-mode-str"/>
-    <keyword type="function" name="bd_nvdimm_namespace_get_devname ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-get-devname"/>
-    <keyword type="function" name="bd_nvdimm_namespace_enable ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-enable"/>
-    <keyword type="function" name="bd_nvdimm_namespace_disable ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-disable"/>
-    <keyword type="function" name="bd_nvdimm_namespace_info ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-info"/>
-    <keyword type="function" name="bd_nvdimm_list_namespaces ()" link="libblockdev-NVDIMM.html#bd-nvdimm-list-namespaces"/>
-    <keyword type="function" name="bd_nvdimm_namespace_reconfigure ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-reconfigure"/>
-    <keyword type="function" name="bd_nvdimm_namespace_get_supported_sector_sizes ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-get-supported-sector-sizes"/>
+    <keyword type="function" name="bd_nvdimm_namespace_get_mode_from_str ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-get-mode-from-str" deprecated="3.1: NVDIMM plugin will be removed in the next major release"/>
+    <keyword type="function" name="bd_nvdimm_namespace_get_mode_str ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-get-mode-str" deprecated="3.1: NVDIMM plugin will be removed in the next major release"/>
+    <keyword type="function" name="bd_nvdimm_namespace_get_devname ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-get-devname" deprecated="3.1: NVDIMM plugin will be removed in the next major release"/>
+    <keyword type="function" name="bd_nvdimm_namespace_enable ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-enable" deprecated="3.1: NVDIMM plugin will be removed in the next major release"/>
+    <keyword type="function" name="bd_nvdimm_namespace_disable ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-disable" deprecated="3.1: NVDIMM plugin will be removed in the next major release"/>
+    <keyword type="function" name="bd_nvdimm_namespace_info ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-info" deprecated="3.1: NVDIMM plugin will be removed in the next major release"/>
+    <keyword type="function" name="bd_nvdimm_list_namespaces ()" link="libblockdev-NVDIMM.html#bd-nvdimm-list-namespaces" deprecated="3.1: NVDIMM plugin will be removed in the next major release"/>
+    <keyword type="function" name="bd_nvdimm_namespace_reconfigure ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-reconfigure" deprecated="3.1: NVDIMM plugin will be removed in the next major release"/>
+    <keyword type="function" name="bd_nvdimm_namespace_get_supported_sector_sizes ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-get-supported-sector-sizes" deprecated="3.1: NVDIMM plugin will be removed in the next major release"/>
     <keyword type="function" name="bd_nvdimm_namespace_info_copy ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-info-copy"/>
     <keyword type="function" name="bd_nvdimm_namespace_info_free ()" link="libblockdev-NVDIMM.html#bd-nvdimm-namespace-info-free"/>
-    <keyword type="function" name="bd_nvdimm_is_tech_avail ()" link="libblockdev-NVDIMM.html#bd-nvdimm-is-tech-avail"/>
+    <keyword type="function" name="bd_nvdimm_is_tech_avail ()" link="libblockdev-NVDIMM.html#bd-nvdimm-is-tech-avail" deprecated="3.1: NVDIMM plugin will be removed in the next major release"/>
     <keyword type="macro" name="BD_NVDIMM_ERROR" link="libblockdev-NVDIMM.html#BD-NVDIMM-ERROR:CAPS"/>
     <keyword type="enum" name="enum BDNVDIMMError" link="libblockdev-NVDIMM.html#BDNVDIMMError"/>
     <keyword type="enum" name="enum BDNVDIMMNamespaceMode" link="libblockdev-NVDIMM.html#BDNVDIMMNamespaceMode"/>
@@ -605,6 +613,7 @@
     <keyword type="enum" name="enum BDNVMESanitizeAction" link="libblockdev-NVMe.html#BDNVMESanitizeAction"/>
     <keyword type="function" name="bd_plugin_spec_copy ()" link="libblockdev-Plugins.html#bd-plugin-spec-copy"/>
     <keyword type="function" name="bd_plugin_spec_free ()" link="libblockdev-Plugins.html#bd-plugin-spec-free"/>
+    <keyword type="function" name="bd_plugin_spec_new ()" link="libblockdev-Plugins.html#bd-plugin-spec-new"/>
     <keyword type="function" name="bd_is_plugin_available ()" link="libblockdev-Plugins.html#bd-is-plugin-available"/>
     <keyword type="function" name="bd_get_available_plugin_names ()" link="libblockdev-Plugins.html#bd-get-available-plugin-names"/>
     <keyword type="function" name="bd_get_plugin_soname ()" link="libblockdev-Plugins.html#bd-get-plugin-soname"/>
@@ -655,7 +664,9 @@
     <keyword type="function" name="bd_swap_swapon ()" link="libblockdev-Swap.html#bd-swap-swapon"/>
     <keyword type="function" name="bd_swap_swapoff ()" link="libblockdev-Swap.html#bd-swap-swapoff"/>
     <keyword type="function" name="bd_swap_swapstatus ()" link="libblockdev-Swap.html#bd-swap-swapstatus"/>
+    <keyword type="function" name="bd_swap_check_label ()" link="libblockdev-Swap.html#bd-swap-check-label"/>
     <keyword type="function" name="bd_swap_set_label ()" link="libblockdev-Swap.html#bd-swap-set-label"/>
+    <keyword type="function" name="bd_swap_check_uuid ()" link="libblockdev-Swap.html#bd-swap-check-uuid"/>
     <keyword type="function" name="bd_swap_set_uuid ()" link="libblockdev-Swap.html#bd-swap-set-uuid"/>
     <keyword type="function" name="bd_swap_is_tech_avail ()" link="libblockdev-Swap.html#bd-swap-is-tech-avail"/>
     <keyword type="macro" name="BD_SWAP_ERROR" link="libblockdev-Swap.html#BD-SWAP-ERROR:CAPS"/>
@@ -1140,6 +1151,8 @@
     <keyword type="constant" name="BD_SWAP_ERROR_ACTIVATE_SUSPEND" link="libblockdev-Swap.html#BD-SWAP-ERROR-ACTIVATE-SUSPEND:CAPS"/>
     <keyword type="constant" name="BD_SWAP_ERROR_ACTIVATE_UNKNOWN" link="libblockdev-Swap.html#BD-SWAP-ERROR-ACTIVATE-UNKNOWN:CAPS"/>
     <keyword type="constant" name="BD_SWAP_ERROR_ACTIVATE_PAGESIZE" link="libblockdev-Swap.html#BD-SWAP-ERROR-ACTIVATE-PAGESIZE:CAPS"/>
+    <keyword type="constant" name="BD_SWAP_ERROR_LABEL_INVALID" link="libblockdev-Swap.html#BD-SWAP-ERROR-LABEL-INVALID:CAPS"/>
+    <keyword type="constant" name="BD_SWAP_ERROR_UUID_INVALID" link="libblockdev-Swap.html#BD-SWAP-ERROR-UUID-INVALID:CAPS"/>
     <keyword type="constant" name="BD_SWAP_TECH_SWAP" link="libblockdev-Swap.html#BD-SWAP-TECH-SWAP:CAPS"/>
     <keyword type="constant" name="BD_SWAP_TECH_MODE_CREATE" link="libblockdev-Swap.html#BD-SWAP-TECH-MODE-CREATE:CAPS"/>
     <keyword type="constant" name="BD_SWAP_TECH_MODE_ACTIVATE_DEACTIVATE" link="libblockdev-Swap.html#BD-SWAP-TECH-MODE-ACTIVATE-DEACTIVATE:CAPS"/>

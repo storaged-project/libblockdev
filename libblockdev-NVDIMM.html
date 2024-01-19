@@ -2,9 +2,9 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>NVDIMM: libblockdev Reference Manual for libblockdev 3.0.4.</title>
+<title>NVDIMM: libblockdev Reference Manual for libblockdev 3.1.0.</title>
 <meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
-<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.0.4.">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.1.0.">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-Mpath.html" title="Mpath">
 <link rel="next" href="libblockdev-NVMe.html" title="NVMe">
@@ -27,7 +27,7 @@
 <div class="refnamediv"><table width="100%"><tr>
 <td valign="top">
 <h2><span class="refentrytitle"><a name="libblockdev-NVDIMM.top_of_page"></a>NVDIMM</span></h2>
-<p>NVDIMM — plugin for operations with nvdimm space</p>
+<p>NVDIMM — DEPRECATED plugin for operations with nvdimm space</p>
 </td>
 <td class="gallery_image" valign="top" align="right"></td>
 </tr></table></div>
@@ -210,6 +210,10 @@
 <a name="bd-nvdimm-close"></a><h3>bd_nvdimm_close ()</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>
 bd_nvdimm_close (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_nvdimm_close</code> has been deprecated since version 3.1 and should not be used in newly-written code.</p>
+<p>NVDIMM plugin will be removed in the next major release</p>
+</div>
 <p>Cleans up after the plugin. **This function is called automatically by the
 library's functions that unload it.**</p>
 </div>
@@ -218,6 +222,10 @@ library's functions that unload it.**</p>
 <a name="bd-nvdimm-init"></a><h3>bd_nvdimm_init ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 bd_nvdimm_init (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_nvdimm_init</code> has been deprecated since version 3.1 and should not be used in newly-written code.</p>
+<p>NVDIMM plugin will be removed in the next major release</p>
+</div>
 <p>Initializes the plugin. **This function is called automatically by the
 library's initialization functions.**</p>
 </div>
@@ -234,6 +242,10 @@ bd_nvdimm_error_quark (<em class="parameter"><code><span class="type">void</span
 <pre class="programlisting"><a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMNamespaceMode" title="enum BDNVDIMMNamespaceMode"><span class="returnvalue">BDNVDIMMNamespaceMode</span></a>
 bd_nvdimm_namespace_get_mode_from_str (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *mode_str</code></em>,
                                        <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_nvdimm_namespace_get_mode_from_str</code> has been deprecated since version 3.1 and should not be used in newly-written code.</p>
+<p>NVDIMM plugin will be removed in the next major release</p>
+</div>
 <div class="refsect3">
 <a name="bd-nvdimm-namespace-get-mode-from-str.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -269,6 +281,10 @@ given or <a class="link" href="libblockdev-NVDIMM.html#BD-NVDIMM-NAMESPACE-MODE-
 <pre class="programlisting">const <a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
 bd_nvdimm_namespace_get_mode_str (<em class="parameter"><code><a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMNamespaceMode" title="enum BDNVDIMMNamespaceMode"><span class="type">BDNVDIMMNamespaceMode</span></a> mode</code></em>,
                                   <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_nvdimm_namespace_get_mode_str</code> has been deprecated since version 3.1 and should not be used in newly-written code.</p>
+<p>NVDIMM plugin will be removed in the next major release</p>
+</div>
 <div class="refsect3">
 <a name="bd-nvdimm-namespace-get-mode-str.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -305,6 +321,10 @@ or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">N
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
 bd_nvdimm_namespace_get_devname (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
                                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_nvdimm_namespace_get_devname</code> has been deprecated since version 3.1 and should not be used in newly-written code.</p>
+<p>NVDIMM plugin will be removed in the next major release</p>
+</div>
 <div class="refsect3">
 <a name="bd-nvdimm-namespace-get-devname.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -345,6 +365,10 @@ may be set to indicate error)</p>
 bd_nvdimm_namespace_enable (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *namespace</code></em>,
                             <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                             <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_nvdimm_namespace_enable</code> has been deprecated since version 3.1 and should not be used in newly-written code.</p>
+<p>NVDIMM plugin will be removed in the next major release</p>
+</div>
 <div class="refsect3">
 <a name="bd-nvdimm-namespace-enable.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -386,6 +410,10 @@ was successfully enabled or not</p>
 bd_nvdimm_namespace_disable (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *namespace</code></em>,
                              <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                              <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_nvdimm_namespace_disable</code> has been deprecated since version 3.1 and should not be used in newly-written code.</p>
+<p>NVDIMM plugin will be removed in the next major release</p>
+</div>
 <div class="refsect3">
 <a name="bd-nvdimm-namespace-disable.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -427,6 +455,10 @@ was successfully disabled or not</p>
 bd_nvdimm_namespace_info (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *namespace</code></em>,
                           <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                           <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_nvdimm_namespace_info</code> has been deprecated since version 3.1 and should not be used in newly-written code.</p>
+<p>NVDIMM plugin will be removed in the next major release</p>
+</div>
 <div class="refsect3">
 <a name="bd-nvdimm-namespace-info.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -472,6 +504,10 @@ bd_nvdimm_list_namespaces (<em class="parameter"><code>const <a href="../glib/gl
                            <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> idle</code></em>,
                            <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                            <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_nvdimm_list_namespaces</code> has been deprecated since version 3.1 and should not be used in newly-written code.</p>
+<p>NVDIMM plugin will be removed in the next major release</p>
+</div>
 <div class="refsect3">
 <a name="bd-nvdimm-list-namespaces.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -532,6 +568,10 @@ bd_nvdimm_namespace_reconfigure (<em class="parameter"><code>const <a href="../g
                                  <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gboolean"><span class="type">gboolean</span></a> force</code></em>,
                                  <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
                                  <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_nvdimm_namespace_reconfigure</code> has been deprecated since version 3.1 and should not be used in newly-written code.</p>
+<p>NVDIMM plugin will be removed in the next major release</p>
+</div>
 <div class="refsect3">
 <a name="bd-nvdimm-namespace-reconfigure.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -583,6 +623,10 @@ was successfully reconfigured or not</p>
 bd_nvdimm_namespace_get_supported_sector_sizes
                                (<em class="parameter"><code><a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMNamespaceMode" title="enum BDNVDIMMNamespaceMode"><span class="type">BDNVDIMMNamespaceMode</span></a> mode</code></em>,
                                 <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_nvdimm_namespace_get_supported_sector_sizes</code> has been deprecated since version 3.1 and should not be used in newly-written code.</p>
+<p>NVDIMM plugin will be removed in the next major release</p>
+</div>
 <div class="refsect3">
 <a name="bd-nvdimm-namespace-get-supported-sector-sizes.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">
@@ -668,6 +712,10 @@ bd_nvdimm_namespace_info_free (<em class="parameter"><code><a class="link" href=
 bd_nvdimm_is_tech_avail (<em class="parameter"><code><a class="link" href="libblockdev-NVDIMM.html#BDNVDIMMTech" title="enum BDNVDIMMTech"><span class="type">BDNVDIMMTech</span></a> tech</code></em>,
                          <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#guint64"><span class="type">guint64</span></a> mode</code></em>,
                          <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="warning">
+<p><code class="literal">bd_nvdimm_is_tech_avail</code> has been deprecated since version 3.1 and should not be used in newly-written code.</p>
+<p>NVDIMM plugin will be removed in the next major release</p>
+</div>
 <div class="refsect3">
 <a name="bd-nvdimm-is-tech-avail.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table class="informaltable" width="100%" border="0">

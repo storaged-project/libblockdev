@@ -2,9 +2,9 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>FS: libblockdev Reference Manual for libblockdev 3.0.4.</title>
+<title>FS: libblockdev Reference Manual for libblockdev 3.1.0.</title>
 <meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
-<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.0.4.">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.1.0.">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-DeviceMapper.html" title="DeviceMapper">
 <link rel="next" href="libblockdev-Loop.html" title="Loop">
@@ -193,6 +193,14 @@
 </tr>
 <tr>
 <td class="function_type">
+<a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-FS.html#bd-fs-get-min-size" title="bd_fs_get_min_size ()">bd_fs_get_min_size</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
@@ -237,6 +245,22 @@
 </td>
 <td class="function_name">
 <a class="link" href="libblockdev-FS.html#bd-fs-can-get-free-space" title="bd_fs_can_get_free_space ()">bd_fs_can_get_free_space</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-FS.html#bd-fs-can-get-min-size" title="bd_fs_can_get_min_size ()">bd_fs_can_get_min_size</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-FS.html#bd-fs-can-get-info" title="bd_fs_can_get_info ()">bd_fs_can_get_info</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -415,6 +439,14 @@
 </tr>
 <tr>
 <td class="function_type">
+<a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-FS.html#bd-fs-ext2-get-min-size" title="bd_fs_ext2_get_min_size ()">bd_fs_ext2_get_min_size</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
@@ -503,6 +535,14 @@
 </tr>
 <tr>
 <td class="function_type">
+<a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-FS.html#bd-fs-ext3-get-min-size" title="bd_fs_ext3_get_min_size ()">bd_fs_ext3_get_min_size</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 </td>
 <td class="function_name">
@@ -587,6 +627,14 @@
 </td>
 <td class="function_name">
 <a class="link" href="libblockdev-FS.html#bd-fs-ext4-check-uuid" title="bd_fs_ext4_check_uuid ()">bd_fs_ext4_check_uuid</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-FS.html#bd-fs-ext4-get-min-size" title="bd_fs_ext4_get_min_size ()">bd_fs_ext4_get_min_size</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -863,6 +911,14 @@
 </tr>
 <tr>
 <td class="function_type">
+<a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-FS.html#bd-fs-ntfs-get-min-size" title="bd_fs_ntfs_get_min_size ()">bd_fs_ntfs_get_min_size</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <a class="link" href="libblockdev-FS.html#BDFSF2FSInfo" title="BDFSF2FSInfo"><span class="returnvalue">BDFSF2FSInfo</span></a> *
 </td>
 <td class="function_name">
@@ -915,6 +971,14 @@
 </td>
 <td class="function_name">
 <a class="link" href="libblockdev-FS.html#bd-fs-f2fs-resize" title="bd_fs_f2fs_resize ()">bd_fs_f2fs_resize</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-FS.html#bd-fs-f2fs-check-label" title="bd_fs_f2fs_check_label ()">bd_fs_f2fs_check_label</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -2132,6 +2196,52 @@ or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">N
 </div>
 <hr>
 <div class="refsect2">
+<a name="bd-fs-get-min-size"></a><h3>bd_fs_get_min_size ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
+bd_fs_get_min_size (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                    <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *fstype</code></em>,
+                    <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Get minimum size for filesystem on <em class="parameter"><code>device</code></em>
+. This calls other fs info functions from this
+plugin based on detected filesystem (e.g. bd_fs_ext4_get_min_size for ext4). This
+function will return an error for unknown/unsupported filesystems.</p>
+<div class="refsect3">
+<a name="bd-fs-get-min-size.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>the device with file system to get minimum size for</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>fstype</p></td>
+<td class="parameter_description"><p>the filesystem type on <em class="parameter"><code>device</code></em>
+or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> to detect. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-fs-get-min-size.returns"></a><h4>Returns</h4>
+<p> minimum size of filesystem on <em class="parameter"><code>device</code></em>
+, 0 in case of error.</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-GENERIC:CAPS"><code class="literal">BD_FS_TECH_GENERIC</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-RESIZE:CAPS"><code class="literal">BD_FS_TECH_MODE_RESIZE</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="bd-fs-can-resize"></a><h3>bd_fs_can_resize ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 bd_fs_can_resize (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *type</code></em>,
@@ -2394,6 +2504,94 @@ for free space querying (if missing i.e. return FALSE but no error). </p></td>
 <div class="refsect3">
 <a name="bd-fs-can-get-free-space.returns"></a><h4>Returns</h4>
 <p> whether getting filesystem free space is available</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-GENERIC:CAPS"><code class="literal">BD_FS_TECH_GENERIC</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_FS_TECH_MODE_QUERY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-fs-can-get-min-size"></a><h3>bd_fs_can_get_min_size ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_fs_can_get_min_size (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *type</code></em>,
+                        <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **required_utility</code></em>,
+                        <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Searches for the required utility to get minimum size of the given filesystem and
+returns whether it is installed.
+Unknown filesystems or filesystems which do not support minimum size querying result in errors.</p>
+<div class="refsect3">
+<a name="bd-fs-can-get-min-size.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>type</p></td>
+<td class="parameter_description"><p>the filesystem type to be tested for installed minimum size querying support</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>required_utility</p></td>
+<td class="parameter_description"><p>the utility binary which is required
+for size querying (if missing i.e. return FALSE but no error). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-fs-can-get-min-size.returns"></a><h4>Returns</h4>
+<p> whether getting filesystem size is available</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-GENERIC:CAPS"><code class="literal">BD_FS_TECH_GENERIC</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_FS_TECH_MODE_QUERY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-fs-can-get-info"></a><h3>bd_fs_can_get_info ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_fs_can_get_info (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *type</code></em>,
+                    <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> **required_utility</code></em>,
+                    <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<p>Searches for the required utility to get info of the given filesystem and
+returns whether it is installed.
+Unknown filesystems or filesystems which do not support info querying result in errors.</p>
+<div class="refsect3">
+<a name="bd-fs-can-get-info.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>type</p></td>
+<td class="parameter_description"><p>the filesystem type to be tested for info querying support</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>required_utility</p></td>
+<td class="parameter_description"><p>the utility binary which is required
+for info querying (if missing i.e. return FALSE but no error). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-fs-can-get-info.returns"></a><h4>Returns</h4>
+<p> whether getting filesystem info is available</p>
 <p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-GENERIC:CAPS"><code class="literal">BD_FS_TECH_GENERIC</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-QUERY:CAPS"><code class="literal">BD_FS_TECH_MODE_QUERY</code></a></p>
 </div>
 </div>
@@ -3247,6 +3445,42 @@ is a valid UUID for the ext2 file system or not
 </div>
 <hr>
 <div class="refsect2">
+<a name="bd-fs-ext2-get-min-size"></a><h3>bd_fs_ext2_get_min_size ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
+bd_fs_ext2_get_min_size (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                         <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-fs-ext2-get-min-size.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>the device containing the file system to get min size for</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-fs-ext2-get-min-size.returns"></a><h4>Returns</h4>
+<p> smallest shrunken filesystem size as reported by ntfsresize
+in case of error 0 is returned and <em class="parameter"><code>error</code></em>
+is set</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT2:CAPS"><code class="literal">BD_FS_TECH_EXT2</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-RESIZE:CAPS"><code class="literal">BD_FS_TECH_MODE_RESIZE</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="bd-fs-ext3-check"></a><h3>bd_fs_ext3_check ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 bd_fs_ext3_check (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
@@ -3674,6 +3908,42 @@ is a valid UUID for the ext3 file system or not
 </div>
 <hr>
 <div class="refsect2">
+<a name="bd-fs-ext3-get-min-size"></a><h3>bd_fs_ext3_get_min_size ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
+bd_fs_ext3_get_min_size (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                         <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-fs-ext3-get-min-size.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>the device containing the file system to get min size for</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-fs-ext3-get-min-size.returns"></a><h4>Returns</h4>
+<p> smallest shrunken filesystem size as reported by ntfsresize
+in case of error 0 is returned and <em class="parameter"><code>error</code></em>
+is set</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT3:CAPS"><code class="literal">BD_FS_TECH_EXT3</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-RESIZE:CAPS"><code class="literal">BD_FS_TECH_MODE_RESIZE</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="bd-fs-ext4-check"></a><h3>bd_fs_ext4_check ()</h3>
 <pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
 bd_fs_ext4_check (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
@@ -4097,6 +4367,42 @@ is a valid UUID for the ext4 file system or not
 (reason is provided in <em class="parameter"><code>error</code></em>
 )</p>
 <p>Tech category: always available</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-fs-ext4-get-min-size"></a><h3>bd_fs_ext4_get_min_size ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
+bd_fs_ext4_get_min_size (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                         <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-fs-ext4-get-min-size.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>the device containing the file system to get min size for</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-fs-ext4-get-min-size.returns"></a><h4>Returns</h4>
+<p> smallest shrunken filesystem size as reported by ntfsresize
+in case of error 0 is returned and <em class="parameter"><code>error</code></em>
+is set</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-EXT4:CAPS"><code class="literal">BD_FS_TECH_EXT4</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-RESIZE:CAPS"><code class="literal">BD_FS_TECH_MODE_RESIZE</code></a></p>
 </div>
 </div>
 <hr>
@@ -5398,6 +5704,42 @@ is a valid UUID for the ntfs file system or not
 </div>
 <hr>
 <div class="refsect2">
+<a name="bd-fs-ntfs-get-min-size"></a><h3>bd_fs_ntfs_get_min_size ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#guint64"><span class="returnvalue">guint64</span></a>
+bd_fs_ntfs_get_min_size (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *device</code></em>,
+                         <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-fs-ntfs-get-min-size.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>the device containing the file system to get min size for</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-fs-ntfs-get-min-size.returns"></a><h4>Returns</h4>
+<p> smallest shrunken filesystem size as reported by ntfsresize
+in case of error 0 is returned and <em class="parameter"><code>error</code></em>
+is set</p>
+<p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-NTFS:CAPS"><code class="literal">BD_FS_TECH_NTFS</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-RESIZE:CAPS"><code class="literal">BD_FS_TECH_MODE_RESIZE</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="bd-fs-f2fs-info-copy"></a><h3>bd_fs_f2fs_info_copy ()</h3>
 <pre class="programlisting"><a class="link" href="libblockdev-FS.html#BDFSF2FSInfo" title="BDFSF2FSInfo"><span class="returnvalue">BDFSF2FSInfo</span></a> *
 bd_fs_f2fs_info_copy (<em class="parameter"><code><a class="link" href="libblockdev-FS.html#BDFSF2FSInfo" title="BDFSF2FSInfo"><span class="type">BDFSF2FSInfo</span></a> *data</code></em>);</pre>
@@ -5661,6 +6003,43 @@ passed to the 'resize.f2fs' utility). </p></td>
 <p> whether the file system on <em class="parameter"><code>device</code></em>
 was successfully resized or not</p>
 <p>Tech category: <a class="link" href="libblockdev-FS.html#BD-FS-TECH-F2FS:CAPS"><code class="literal">BD_FS_TECH_F2FS</code></a>-<a class="link" href="libblockdev-FS.html#BD-FS-TECH-MODE-RESIZE:CAPS"><code class="literal">BD_FS_TECH_MODE_RESIZE</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-fs-f2fs-check-label"></a><h3>bd_fs_f2fs_check_label ()</h3>
+<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+bd_fs_f2fs_check_label (<em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *label</code></em>,
+                        <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-fs-f2fs-check-label.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>label</p></td>
+<td class="parameter_description"><p>label to check</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-fs-f2fs-check-label.returns"></a><h4>Returns</h4>
+<p> whether <em class="parameter"><code>label</code></em>
+is a valid label for the f2fs file system or not
+(reason is provided in <em class="parameter"><code>error</code></em>
+)</p>
+<p>Tech category: always available</p>
 </div>
 </div>
 <hr>
