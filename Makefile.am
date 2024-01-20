@@ -157,7 +157,7 @@ coverage-all: all
 		$(COVERAGE) report --include="src/*" > coverage-report.log
 
 tag:
-	TAG="$(PACKAGE_VERSION)-1" ; \
+	TAG="$(PACKAGE_VERSION)" ; \
 	git tag -a -s -m "Tag as $$TAG" -f "$$TAG" && \
 	echo "Tagged as $$TAG"
 
@@ -179,7 +179,7 @@ bumpver:
 	tail --lines=+$$(($$cl + 1)) dist/libblockdev.spec.in > speclog ; \
 	(head -n $$cl dist/libblockdev.spec.in ; echo "$$DATELINE" ; make --quiet rpmlog 2>/dev/null ; echo ""; cat speclog) > dist/libblockdev.spec.in.new ; \
 	mv dist/libblockdev.spec.in.new dist/libblockdev.spec.in ; rm -f speclog ; \
-	sed -ri "s/(AC_INIT\(\[$(PACKAGE_NAME)\], \[)[0-9]+\.[0-9]+(\],.*)/\1$$VERSION.$$NEWSUBVERSION\2/" configure.ac ; \
+	sed -ri "s/(AC_INIT\(\[$(PACKAGE_NAME)\], \[)[0-9.]+(\],.*)/\1$$VERSION.$$NEWSUBVERSION\2/" configure.ac ; \
 	sed -ri "s/Version:(\\s+)[-0-9.]+/Version:\\1$$VERSION.$$NEWSUBVERSION/" dist/libblockdev.spec.in ;
 
 archive: distcheck
