@@ -154,7 +154,6 @@ void bd_btrfs_close (void) {
 }
 
 
-#define UNUSED __attribute__((unused))
 
 /**
  * bd_btrfs_is_tech_avail:
@@ -165,7 +164,7 @@ void bd_btrfs_close (void) {
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
  */
-gboolean bd_btrfs_is_tech_avail (BDBtrfsTech tech UNUSED, guint64 mode UNUSED, GError **error) {
+gboolean bd_btrfs_is_tech_avail (BDBtrfsTech tech G_GNUC_UNUSED, guint64 mode G_GNUC_UNUSED, GError **error) {
     /* all tech-mode combinations are supported by this implementation of the plugin */
     return check_deps (&avail_deps, DEPS_BTRFS_MASK, deps, DEPS_LAST, &deps_check_lock, error) &&
            check_module_deps (&avail_module_deps, MODULE_DEPS_BTRFS_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error);

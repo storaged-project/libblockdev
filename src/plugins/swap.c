@@ -87,7 +87,6 @@ void bd_swap_close (void) {
     /* nothing to do here */
 }
 
-#define UNUSED __attribute__((unused))
 
 /**
  * bd_swap_is_tech_avail:
@@ -98,7 +97,7 @@ void bd_swap_close (void) {
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
  */
-gboolean bd_swap_is_tech_avail (BDSwapTech tech UNUSED, guint64 mode, GError **error) {
+gboolean bd_swap_is_tech_avail (BDSwapTech tech G_GNUC_UNUSED, guint64 mode, GError **error) {
     guint32 requires = 0;
     if (mode & BD_SWAP_TECH_MODE_CREATE)
         requires |= DEPS_MKSWAP_MASK;

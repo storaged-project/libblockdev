@@ -29,7 +29,6 @@
 #include "exec.h"
 #include "logging.h"
 
-#define UNUSED __attribute__((unused))
 
 /**
  * bd_utils_module_error_quark: (skip)
@@ -39,9 +38,9 @@ GQuark bd_utils_module_error_quark (void)
     return g_quark_from_static_string ("g-bd-utils-module-error-quark");
 }
 
-static void utils_kmod_log_redirect (void *log_data UNUSED, int priority,
-                                     const char *file UNUSED, int line UNUSED,
-                                     const char *fn UNUSED, const char *format,
+static void utils_kmod_log_redirect (void *log_data G_GNUC_UNUSED, int priority,
+                                     const char *file G_GNUC_UNUSED, int line G_GNUC_UNUSED,
+                                     const char *fn G_GNUC_UNUSED, const char *format,
                                      va_list args) {
     gchar *kmod_msg = NULL;
     gchar *message = NULL;

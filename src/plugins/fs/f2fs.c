@@ -70,7 +70,6 @@ static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
     0                       /* set-uuid */
 };
 
-#define UNUSED __attribute__((unused))
 
 /* option to get version was added in 1.11.0 so we need to cover situation
    where the version is too old to check the version */
@@ -110,7 +109,7 @@ static gboolean can_check_f2fs_version (UtilDep dep, GError **error) {
  *          plugin implementation and having all the runtime dependencies available
  */
 gboolean __attribute__ ((visibility ("hidden")))
-bd_fs_f2fs_is_tech_avail (BDFSTech tech UNUSED, guint64 mode, GError **error) {
+bd_fs_f2fs_is_tech_avail (BDFSTech tech G_GNUC_UNUSED, guint64 mode, GError **error) {
     guint32 required = 0;
     guint i = 0;
 
