@@ -109,7 +109,6 @@ void bd_nvdimm_close (void) {
     return;
 }
 
-#define UNUSED __attribute__((unused))
 
 /**
  * bd_nvdimm_is_tech_avail:
@@ -285,7 +284,7 @@ gchar* bd_nvdimm_namespace_get_devname (const gchar *device, GError **error) {
  *
  * Deprecated: 3.1: NVDIMM plugin will be removed in the next major release
  */
-gboolean bd_nvdimm_namespace_enable (const gchar *namespace, const BDExtraArg **extra UNUSED, GError **error) {
+gboolean bd_nvdimm_namespace_enable (const gchar *namespace, const BDExtraArg **extra G_GNUC_UNUSED, GError **error) {
     struct ndctl_ctx *ctx = NULL;
     struct ndctl_namespace *ndns = NULL;
     gint ret = 0;
@@ -328,7 +327,7 @@ gboolean bd_nvdimm_namespace_enable (const gchar *namespace, const BDExtraArg **
  *
  * Deprecated: 3.1: NVDIMM plugin will be removed in the next major release
  */
-gboolean bd_nvdimm_namespace_disable (const gchar *namespace, const BDExtraArg **extra UNUSED, GError **error) {
+gboolean bd_nvdimm_namespace_disable (const gchar *namespace, const BDExtraArg **extra G_GNUC_UNUSED, GError **error) {
     struct ndctl_ctx *ctx = NULL;
     struct ndctl_namespace *ndns = NULL;
     gint ret = 0;
@@ -492,7 +491,7 @@ static BDNVDIMMNamespaceInfo* get_nvdimm_namespace_info (struct ndctl_namespace 
  *
  * Deprecated: 3.1: NVDIMM plugin will be removed in the next major release
  */
-BDNVDIMMNamespaceInfo* bd_nvdimm_namespace_info (const gchar *namespace, const BDExtraArg **extra UNUSED, GError **error) {
+BDNVDIMMNamespaceInfo* bd_nvdimm_namespace_info (const gchar *namespace, const BDExtraArg **extra G_GNUC_UNUSED, GError **error) {
     struct ndctl_ctx *ctx = NULL;
     struct ndctl_namespace *ndns = NULL;
     BDNVDIMMNamespaceInfo *info = NULL;
@@ -533,7 +532,8 @@ BDNVDIMMNamespaceInfo* bd_nvdimm_namespace_info (const gchar *namespace, const B
  *
  * Deprecated: 3.1: NVDIMM plugin will be removed in the next major release
  */
-BDNVDIMMNamespaceInfo** bd_nvdimm_list_namespaces (const gchar *bus_name, const gchar *region_name, gboolean idle, const BDExtraArg **extra UNUSED, GError **error) {
+BDNVDIMMNamespaceInfo** bd_nvdimm_list_namespaces (const gchar *bus_name, const gchar *region_name, gboolean idle,
+                                                   const BDExtraArg **extra G_GNUC_UNUSED, GError **error) {
     struct ndctl_ctx *ctx = NULL;
     struct ndctl_namespace *ndns = NULL;
     struct ndctl_region *region = NULL;

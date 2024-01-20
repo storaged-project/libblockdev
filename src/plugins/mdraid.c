@@ -179,7 +179,6 @@ void bd_md_close (void) {
     /* nothing to do here */
 }
 
-#define UNUSED __attribute__((unused))
 
 /**
  * bd_md_is_tech_avail:
@@ -190,7 +189,7 @@ void bd_md_close (void) {
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
  */
-gboolean bd_md_is_tech_avail (BDMDTech tech UNUSED, guint64 mode UNUSED, GError **error) {
+gboolean bd_md_is_tech_avail (BDMDTech tech G_GNUC_UNUSED, guint64 mode G_GNUC_UNUSED, GError **error) {
     /* all tech-mode combinations are supported by this implementation of the
        plugin, but it requires the 'mdadm' utility */
     return check_deps (&avail_deps, DEPS_MDADM_MASK, deps, DEPS_LAST, &deps_check_lock, error);
@@ -511,7 +510,7 @@ static gchar* get_mdadm_spec_from_input (const gchar *input, GError **error) {
  *
  * Tech category: always available
  */
-guint64 bd_md_get_superblock_size (guint64 member_size, const gchar *version, GError **error UNUSED) {
+guint64 bd_md_get_superblock_size (guint64 member_size, const gchar *version, GError **error G_GNUC_UNUSED) {
     guint64 headroom = BD_MD_SUPERBLOCK_SIZE;
     guint64 min_headroom = (1 MiB);
 

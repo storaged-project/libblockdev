@@ -75,7 +75,6 @@ void bd_loop_close (void) {
     /* nothing to do here */
 }
 
-#define UNUSED __attribute__((unused))
 
 /**
  * bd_loop_is_tech_avail:
@@ -86,7 +85,7 @@ void bd_loop_close (void) {
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
  */
-gboolean bd_loop_is_tech_avail (BDLoopTech tech UNUSED, guint64 mode UNUSED, GError **error UNUSED) {
+gboolean bd_loop_is_tech_avail (BDLoopTech tech G_GNUC_UNUSED, guint64 mode G_GNUC_UNUSED, GError **error G_GNUC_UNUSED) {
     /* all combinations are supported by this implementation of the plugin */
     return TRUE;
 }
@@ -206,7 +205,7 @@ BDLoopInfo* bd_loop_info (const gchar *loop, GError **error) {
  *
  * Tech category: %BD_LOOP_TECH_LOOP-%BD_LOOP_TECH_MODE_QUERY
  */
-gchar* bd_loop_get_loop_name (const gchar *file, GError **error UNUSED) {
+gchar* bd_loop_get_loop_name (const gchar *file, GError **error G_GNUC_UNUSED) {
     glob_t globbuf;
     gchar **path_p;
     gboolean success = FALSE;

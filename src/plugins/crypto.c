@@ -60,7 +60,6 @@
 #define DEFAULT_LUKS2_SECTOR_SIZE 512
 #endif
 
-#define UNUSED __attribute__((unused))
 
 /**
  * SECTION: crypto
@@ -304,7 +303,7 @@ BDCryptoLUKSTokenInfo* bd_crypto_luks_token_info_copy (BDCryptoLUKSTokenInfo *in
 /* "C" locale to get the locale-agnostic error messages */
 static locale_t c_locale = (locale_t) 0;
 
-static void crypto_log_redirect (gint level, const gchar *msg, void *usrptr UNUSED) {
+static void crypto_log_redirect (gint level, const gchar *msg, void *usrptr G_GNUC_UNUSED) {
     gchar *message = NULL;
 
     switch (level) {
@@ -465,7 +464,7 @@ GQuark bd_crypto_error_quark (void)
  *
  * Tech category: always available
  */
-gchar* bd_crypto_generate_backup_passphrase (GError **error UNUSED) {
+gchar* bd_crypto_generate_backup_passphrase (GError **error G_GNUC_UNUSED) {
     guint8 i = 0;
     guint8 offset = 0;
     guint8 charset_length = strlen (BD_CRYPTO_BACKUP_PASSPHRASE_CHARSET);
@@ -833,7 +832,7 @@ BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_passphrase (const guint8 *
  *
  * Tech category: always available
  */
-BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_keyfile (const gchar *keyfile, guint64 keyfile_offset, gsize key_size, GError **error UNUSED) {
+BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_keyfile (const gchar *keyfile, guint64 keyfile_offset, gsize key_size, GError **error G_GNUC_UNUSED) {
     BDCryptoKeyslotContext *context = NULL;
 
     context = g_new0 (BDCryptoKeyslotContext, 1);
@@ -860,7 +859,7 @@ BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_keyfile (const gchar *keyf
  *
  * Tech category: always available
  */
-BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_keyring (const gchar *key_desc, GError **error UNUSED) {
+BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_keyring (const gchar *key_desc, GError **error G_GNUC_UNUSED) {
     BDCryptoKeyslotContext *context = NULL;
 
     context = g_new0 (BDCryptoKeyslotContext, 1);
@@ -2392,7 +2391,7 @@ BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **e
 
 /* added in cryptsetup 2.4.0 */
 #ifndef LIBCRYPTSETUP_24
-static int crypt_token_max (const char *type UNUSED) {
+static int crypt_token_max (const char *type G_GNUC_UNUSED) {
     return 32;
 }
 #endif
@@ -2941,11 +2940,11 @@ gboolean bd_crypto_tc_close (const gchar *tc_device, GError **error) {
 }
 
 #ifdef WITH_BD_ESCROW
-static gchar *always_fail_cb (gpointer data UNUSED, const gchar *prompt UNUSED, int echo UNUSED) {
+static gchar *always_fail_cb (gpointer data G_GNUC_UNUSED, const gchar *prompt G_GNUC_UNUSED, int echo G_GNUC_UNUSED) {
     return NULL;
 }
 
-static gchar *give_passphrase_cb (gpointer data, const gchar *prompt UNUSED, unsigned failed_attempts) {
+static gchar *give_passphrase_cb (gpointer data, const gchar *prompt G_GNUC_UNUSED, unsigned failed_attempts) {
     if (failed_attempts == 0)
         /* Return a copy of the passphrase that will be freed by volume_key */
         return g_strdup (data);
@@ -3046,7 +3045,8 @@ static gboolean write_escrow_data_file (struct libvk_volume *volume, struct libv
  * Tech category: %BD_CRYPTO_TECH_ESCROW-%BD_CRYPTO_TECH_MODE_CREATE
  */
 #ifndef WITH_BD_ESCROW
-gboolean bd_crypto_escrow_device (const gchar *device UNUSED, const gchar *passphrase UNUSED, const gchar *cert_data UNUSED, const gchar *directory UNUSED, const gchar *backup_passphrase UNUSED, GError **error) {
+gboolean bd_crypto_escrow_device (const gchar *device G_GNUC_UNUSED, const gchar *passphrase G_GNUC_UNUSED,const gchar *cert_data G_GNUC_UNUSED,
+                                  const gchar *directory G_GNUC_UNUSED, const gchar *backup_passphrase G_GNUC_UNUSED, GError **error) {
     /* this will return FALSE and set error, because escrow technology is not available */
     return bd_crypto_is_tech_avail (BD_CRYPTO_TECH_ESCROW, BD_CRYPTO_TECH_MODE_CREATE, error);
 }
@@ -3307,7 +3307,8 @@ gboolean bd_crypto_bitlk_close (const gchar *bitlk_device, GError **error) {
  * Tech category: %BD_CRYPTO_TECH_FVAULT2-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 #ifndef LIBCRYPTSETUP_26
-gboolean bd_crypto_fvault2_open (const gchar *device UNUSED, const gchar *name UNUSED, BDCryptoKeyslotContext *context UNUSED, gboolean read_only UNUSED, GError **error) {
+gboolean bd_crypto_fvault2_open (const gchar *device G_GNUC_UNUSED, const gchar *name G_GNUC_UNUSED, BDCryptoKeyslotContext *context G_GNUC_UNUSED,
+                                 gboolean read_only G_GNUC_UNUSED, GError **error) {
     /* this will return FALSE and set error, because FVAULT2 technology is not available */
     return bd_crypto_is_tech_avail (BD_CRYPTO_TECH_FVAULT2, BD_CRYPTO_TECH_MODE_OPEN_CLOSE, error);
 #else
@@ -3401,7 +3402,7 @@ gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, BDCrypt
  * Tech category: %BD_CRYPTO_TECH_FVAULT2-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 #ifndef LIBCRYPTSETUP_26
-gboolean bd_crypto_fvault2_close (const gchar *fvault2_device UNUSED, GError **error) {
+gboolean bd_crypto_fvault2_close (const gchar *fvault2_device G_GNUC_UNUSED, GError **error) {
     /* this will return FALSE and set error, because FVAULT2 technology is not available */
     return bd_crypto_is_tech_avail (BD_CRYPTO_TECH_FVAULT2, BD_CRYPTO_TECH_MODE_OPEN_CLOSE, error);
 }

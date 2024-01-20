@@ -97,7 +97,6 @@ static gchar *global_devices_str = NULL;
 #define METHOD_CALL_TIMEOUT 5000
 #define PROGRESS_WAIT 500 * 1000 /* microseconds */
 
-#define UNUSED __attribute__((unused))
 
 static GDBusConnection *bus = NULL;
 
@@ -1025,7 +1024,7 @@ static GVariant* get_vdo_properties (const gchar *vg_name, const gchar *pool_nam
     return ret;
 }
 
-static BDLVMPVdata* get_pv_data_from_props (GVariant *props, GError **error UNUSED) {
+static BDLVMPVdata* get_pv_data_from_props (GVariant *props, GError **error G_GNUC_UNUSED) {
     BDLVMPVdata *data = g_new0 (BDLVMPVdata, 1);
     GVariantDict dict;
     gchar *path = NULL;
@@ -1091,7 +1090,7 @@ static BDLVMPVdata* get_pv_data_from_props (GVariant *props, GError **error UNUS
     return data;
 }
 
-static BDLVMVGdata* get_vg_data_from_props (GVariant *props, GError **error UNUSED) {
+static BDLVMVGdata* get_vg_data_from_props (GVariant *props, GError **error G_GNUC_UNUSED) {
     BDLVMVGdata *data = g_new0 (BDLVMVGdata, 1);
     GVariantDict dict;
     GVariant *value = NULL;
@@ -1334,7 +1333,7 @@ static void _lvm_data_and_metadata_lvs (const gchar *vg_name, const gchar *lv_na
   return;
 }
 
-static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error UNUSED) {
+static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error G_GNUC_UNUSED) {
     BDLVMLVdata *data = g_new0 (BDLVMLVdata, 1);
     GVariantDict dict;
     GVariant *value = NULL;
@@ -1429,7 +1428,7 @@ static BDLVMLVdata* get_lv_data_from_props (GVariant *props, GError **error UNUS
     return data;
 }
 
-static BDLVMVDOPooldata* get_vdo_data_from_props (GVariant *props, GError **error UNUSED) {
+static BDLVMVDOPooldata* get_vdo_data_from_props (GVariant *props, GError **error G_GNUC_UNUSED) {
     BDLVMVDOPooldata *data = g_new0 (BDLVMVDOPooldata, 1);
     GVariantDict dict;
     gchar *value = NULL;
@@ -1539,7 +1538,7 @@ static GVariant* create_size_str_param (guint64 size, const gchar *unit) {
  *
  * Tech category: %BD_LVM_TECH_CALCS no mode (it is ignored)
  */
-gboolean bd_lvm_is_supported_pe_size (guint64 size, GError **error UNUSED) {
+gboolean bd_lvm_is_supported_pe_size (guint64 size, GError **error G_GNUC_UNUSED) {
     return (((size % 2) == 0) && (size >= (MIN_PE_SIZE)) && (size <= (MAX_PE_SIZE)));
 }
 
@@ -1551,7 +1550,7 @@ gboolean bd_lvm_is_supported_pe_size (guint64 size, GError **error UNUSED) {
  *
  * Tech category: %BD_LVM_TECH_CALCS no mode (it is ignored)
  */
-guint64 *bd_lvm_get_supported_pe_sizes (GError **error UNUSED) {
+guint64 *bd_lvm_get_supported_pe_sizes (GError **error G_GNUC_UNUSED) {
     guint8 i;
     guint64 val = MIN_PE_SIZE;
     guint8 num_items = ((guint8) round (log2 ((double) MAX_PE_SIZE))) - ((guint8) round (log2 ((double) MIN_PE_SIZE))) + 2;
@@ -1573,7 +1572,7 @@ guint64 *bd_lvm_get_supported_pe_sizes (GError **error UNUSED) {
  *
  * Tech category: %BD_LVM_TECH_CALCS no mode (it is ignored)
  */
-guint64 bd_lvm_get_max_lv_size (GError **error UNUSED) {
+guint64 bd_lvm_get_max_lv_size (GError **error G_GNUC_UNUSED) {
     return MAX_LV_SIZE;
 }
 
@@ -1593,7 +1592,7 @@ guint64 bd_lvm_get_max_lv_size (GError **error UNUSED) {
  *
  * Tech category: %BD_LVM_TECH_CALCS no mode (it is ignored)
  */
-guint64 bd_lvm_round_size_to_pe (guint64 size, guint64 pe_size, gboolean roundup, GError **error UNUSED) {
+guint64 bd_lvm_round_size_to_pe (guint64 size, guint64 pe_size, gboolean roundup, GError **error G_GNUC_UNUSED) {
     pe_size = RESOLVE_PE_SIZE (pe_size);
     guint64 delta = size % pe_size;
     if (delta == 0)
@@ -1637,7 +1636,7 @@ guint64 bd_lvm_get_lv_physical_size (guint64 lv_size, guint64 pe_size, GError **
  *
  * Tech category: %BD_LVM_TECH_THIN_CALCS no mode (it is ignored)
  */
-guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean included, GError **error UNUSED) {
+guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean included, GError **error G_GNUC_UNUSED) {
     guint64 raw_md_size;
     pe_size = RESOLVE_PE_SIZE (pe_size);
 
@@ -1664,7 +1663,7 @@ guint64 bd_lvm_get_thpool_padding (guint64 size, guint64 pe_size, gboolean inclu
  *
  * Tech category: %BD_LVM_TECH_THIN_CALCS no mode (it is ignored)
  */
-guint64 bd_lvm_get_thpool_meta_size (guint64 size, guint64 chunk_size, guint64 n_snapshots UNUSED, GError **error UNUSED) {
+guint64 bd_lvm_get_thpool_meta_size (guint64 size, guint64 chunk_size, guint64 n_snapshots G_GNUC_UNUSED, GError **error G_GNUC_UNUSED) {
     guint64 md_size = 0;
 
     /* based on lvcreate metadata size calculation */
@@ -1687,7 +1686,7 @@ guint64 bd_lvm_get_thpool_meta_size (guint64 size, guint64 chunk_size, guint64 n
  *
  * Tech category: %BD_LVM_TECH_THIN_CALCS no mode (it is ignored)
  */
-gboolean bd_lvm_is_valid_thpool_md_size (guint64 size, GError **error UNUSED) {
+gboolean bd_lvm_is_valid_thpool_md_size (guint64 size, GError **error G_GNUC_UNUSED) {
     return ((MIN_THPOOL_MD_SIZE <= size) && (size <= MAX_THPOOL_MD_SIZE));
 }
 
@@ -1701,7 +1700,7 @@ gboolean bd_lvm_is_valid_thpool_md_size (guint64 size, GError **error UNUSED) {
  *
  * Tech category: %BD_LVM_TECH_THIN_CALCS no mode (it is ignored)
  */
-gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard, GError **error UNUSED) {
+gboolean bd_lvm_is_valid_thpool_chunk_size (guint64 size, gboolean discard, GError **error G_GNUC_UNUSED) {
     gdouble size_log2 = 0.0;
 
     if ((size < MIN_THPOOL_CHUNK_SIZE) || (size > MAX_THPOOL_CHUNK_SIZE))
@@ -2700,7 +2699,8 @@ gboolean bd_lvm_lvresize (const gchar *vg_name, const gchar *lv_name, guint64 si
  *
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_MODIFY
  */
-gboolean bd_lvm_lvrepair (const gchar *vg_name UNUSED, const gchar *lv_name UNUSED, const gchar **pv_list UNUSED, const BDExtraArg **extra UNUSED, GError **error) {
+gboolean bd_lvm_lvrepair (const gchar *vg_name G_GNUC_UNUSED, const gchar *lv_name G_GNUC_UNUSED, const gchar **pv_list G_GNUC_UNUSED,
+                          const BDExtraArg **extra G_GNUC_UNUSED, GError **error) {
   g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_TECH_UNAVAIL,
                "lvrepair is not supported by this plugin implementation.");
   return FALSE;
@@ -3420,7 +3420,7 @@ gboolean bd_lvm_thsnapshotcreate (const gchar *vg_name, const gchar *origin_name
  *
  * Tech category: %BD_LVM_TECH_GLOB_CONF no mode (it is ignored)
  */
-gboolean bd_lvm_set_global_config (const gchar *new_config, GError **error UNUSED) {
+gboolean bd_lvm_set_global_config (const gchar *new_config, GError **error G_GNUC_UNUSED) {
     /* XXX: the error attribute will likely be used in the future when
        some validation comes into the game */
 
@@ -3448,7 +3448,7 @@ gboolean bd_lvm_set_global_config (const gchar *new_config, GError **error UNUSE
  *
  * Tech category: %BD_LVM_TECH_GLOB_CONF no mode (it is ignored)
  */
-gchar* bd_lvm_get_global_config (GError **error UNUSED) {
+gchar* bd_lvm_get_global_config (GError **error G_GNUC_UNUSED) {
     gchar *ret = NULL;
 
     g_mutex_lock (&global_config_lock);
@@ -3495,7 +3495,7 @@ gboolean bd_lvm_set_devices_filter (const gchar **devices, GError **error) {
  *
  * Tech category: %BD_LVM_TECH_DEVICES no mode (it is ignored)
  */
-gchar** bd_lvm_get_devices_filter (GError **error UNUSED) {
+gchar** bd_lvm_get_devices_filter (GError **error G_GNUC_UNUSED) {
     gchar **ret = NULL;
 
     g_mutex_lock (&global_config_lock);
@@ -3519,7 +3519,7 @@ gchar** bd_lvm_get_devices_filter (GError **error UNUSED) {
  *
  * Tech category: %BD_LVM_TECH_CACHE_CALCS no mode (it is ignored)
  */
-guint64 bd_lvm_cache_get_default_md_size (guint64 cache_size, GError **error UNUSED) {
+guint64 bd_lvm_cache_get_default_md_size (guint64 cache_size, GError **error G_GNUC_UNUSED) {
     return MAX ((guint64) cache_size / 1000, MIN_CACHE_MD_SIZE);
 }
 
@@ -3529,7 +3529,7 @@ guint64 bd_lvm_cache_get_default_md_size (guint64 cache_size, GError **error UNU
  *
  * Get LV type string from flags.
  */
-static const gchar* get_lv_type_from_flags (BDLVMCachePoolFlags flags, gboolean meta, GError **error UNUSED) {
+static const gchar* get_lv_type_from_flags (BDLVMCachePoolFlags flags, gboolean meta, GError **error G_GNUC_UNUSED) {
     if (!meta) {
         if (flags & BD_LVM_CACHE_POOL_STRIPED)
             return "striped";
@@ -4509,7 +4509,10 @@ gboolean bd_lvm_vdo_pool_resize (const gchar *vg_name, const gchar *pool_name, g
  *
  * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_CREATE&%BD_LVM_TECH_MODE_MODIFY
  */
-gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name UNUSED, const gchar *pool_lv UNUSED, const gchar *name UNUSED, guint64 virtual_size UNUSED, guint64 index_memory UNUSED, gboolean compression UNUSED, gboolean deduplication UNUSED, BDLVMVDOWritePolicy write_policy UNUSED, const BDExtraArg **extra UNUSED, GError **error) {
+gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name G_GNUC_UNUSED, const gchar *pool_lv G_GNUC_UNUSED, const gchar *name G_GNUC_UNUSED,
+                                  guint64 virtual_size G_GNUC_UNUSED, guint64 index_memory G_GNUC_UNUSED, gboolean compression G_GNUC_UNUSED,
+                                  gboolean deduplication G_GNUC_UNUSED, BDLVMVDOWritePolicy write_policy G_GNUC_UNUSED,
+                                  const BDExtraArg **extra G_GNUC_UNUSED, GError **error) {
     return bd_lvm_is_tech_avail (BD_LVM_TECH_VDO, BD_LVM_TECH_MODE_CREATE | BD_LVM_TECH_MODE_MODIFY, error);
 }
 

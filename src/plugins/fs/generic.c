@@ -40,7 +40,6 @@
 #include "ntfs.h"
 #include "f2fs.h"
 
-#define UNUSED __attribute__((unused))
 
 
 typedef enum {
@@ -305,7 +304,7 @@ const BDFSInfo fs_info[BD_FS_LAST_FS] = {
  *
  * Tech category: always available
  */
-const gchar** bd_fs_supported_filesystems (GError **error UNUSED) {
+const gchar** bd_fs_supported_filesystems (GError **error G_GNUC_UNUSED) {
     const gchar **filesystems = g_new0 (const gchar *, BD_FS_LAST_FS - BD_FS_OFFSET + 1);
     gint i = 0;
 

@@ -63,7 +63,6 @@ static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
 #define CLUSTERS_PREFIX_LEN 25
 
 
-#define UNUSED __attribute__((unused))
 
 /**
  * bd_fs_exfat_is_tech_avail:
@@ -75,7 +74,7 @@ static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
  *          plugin implementation and having all the runtime dependencies available
  */
 gboolean __attribute__ ((visibility ("hidden")))
-bd_fs_exfat_is_tech_avail (BDFSTech tech UNUSED, guint64 mode, GError **error) {
+bd_fs_exfat_is_tech_avail (BDFSTech tech G_GNUC_UNUSED, guint64 mode, GError **error) {
     guint32 required = 0;
     guint i = 0;
 
