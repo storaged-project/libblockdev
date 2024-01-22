@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <blockdev/utils.h>
 #include <bs_size.h>
+#include <btrfsutil.h>
 
 #include "btrfs.h"
 #include "check_deps.h"
@@ -453,47 +454,13 @@ gboolean bd_btrfs_delete_subvolume (const gchar *mountpoint, const gchar *name, 
  * Tech category: %BD_BTRFS_TECH_SUBVOL-%BD_BTRFS_TECH_MODE_QUERY
  */
 guint64 bd_btrfs_get_default_subvolume_id (const gchar *mountpoint, GError **error) {
-    GRegex *regex = NULL;
-    GMatchInfo *match_info = NULL;
-    gboolean success = FALSE;
-    gchar *output = NULL;
-    gchar *match = NULL;
+    enum btrfs_util_error err;
     guint64 ret = 0;
-    const gchar *argv[5] = {"btrfs", "subvol", "get-default", mountpoint, NULL};
 
-    if (!check_deps (&avail_deps, DEPS_BTRFS_MASK, deps, DEPS_LAST, &deps_check_lock, error) ||
-        !check_module_deps (&avail_module_deps, MODULE_DEPS_BTRFS_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
-        return 0;
-
-    regex = g_regex_new ("ID (\\d+) .*", 0, 0, error);
-    if (!regex) {
-        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to create new GRegex");
-        /* error is already populated */
-        return 0;
+    err = btrfs_util_get_default_subvolume (mountpoint, &ret);
+    if (err) {
+        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_NOT_FOUND, "%s: %m", btrfs_util_strerror (err));
     }
-
-    success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
-    if (!success) {
-        g_regex_unref (regex);
-        return 0;
-    }
-
-    success = g_regex_match (regex, output, 0, &match_info);
-    if (!success) {
-        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_PARSE, "Failed to parse subvolume's ID");
-        g_regex_unref (regex);
-        g_match_info_free (match_info);
-        g_free (output);
-        return 0;
-    }
-
-    match = g_match_info_fetch (match_info, 1);
-    ret = g_ascii_strtoull (match, NULL, 0);
-
-    g_free (match);
-    g_match_info_free (match_info);
-    g_regex_unref (regex);
-    g_free (output);
 
     return ret;
 }
@@ -511,17 +478,15 @@ guint64 bd_btrfs_get_default_subvolume_id (const gchar *mountpoint, GError **err
  *
  * Tech category: %BD_BTRFS_TECH_SUBVOL-%BD_BTRFS_TECH_MODE_MODIFY
  */
-gboolean bd_btrfs_set_default_subvolume (const gchar *mountpoint, guint64 subvol_id, const BDExtraArg **extra, GError **error) {
-    const gchar *argv[6] = {"btrfs", "subvol", "set-default", NULL, mountpoint, NULL};
+gboolean bd_btrfs_set_default_subvolume (const gchar *mountpoint, guint64 subvol_id, G_GNUC_UNUSED const BDExtraArg **extra, GError **error) {
+    enum btrfs_util_error err;
     gboolean ret = FALSE;
 
-    if (!check_deps (&avail_deps, DEPS_BTRFS_MASK, deps, DEPS_LAST, &deps_check_lock, error) ||
-        !check_module_deps (&avail_module_deps, MODULE_DEPS_BTRFS_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
-
-    argv[3] = g_strdup_printf ("%"G_GUINT64_FORMAT, subvol_id);
-    ret = bd_utils_exec_and_report_error (argv, extra, error);
-    g_free ((gchar *) argv[3]);
+    err = btrfs_util_set_default_subvolume (mountpoint, subvol_id);
+    if (err)
+        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_NOT_FOUND, "%s: %m", btrfs_util_strerror (err));
+    else
+        ret = TRUE;
 
     return ret;
 }

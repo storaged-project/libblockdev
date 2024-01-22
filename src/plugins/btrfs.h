@@ -14,6 +14,7 @@ typedef enum {
     BD_BTRFS_ERROR_TECH_UNAVAIL,
     BD_BTRFS_ERROR_DEVICE,
     BD_BTRFS_ERROR_PARSE,
+    BD_BTRFS_ERROR_NOT_FOUND,
 } BDBtrfsError;
 
 typedef struct BDBtrfsDeviceInfo {
@@ -79,7 +80,7 @@ gboolean bd_btrfs_remove_device (const gchar *mountpoint, const gchar *device, c
 gboolean bd_btrfs_create_subvolume (const gchar *mountpoint, const gchar *name, const BDExtraArg **extra, GError **error);
 gboolean bd_btrfs_delete_subvolume (const gchar *mountpoint, const gchar *name, const BDExtraArg **extra, GError **error);
 guint64 bd_btrfs_get_default_subvolume_id (const gchar *mountpoint, GError **error);
-gboolean bd_btrfs_set_default_subvolume (const gchar *mountpoint, guint64 subvol_id, const BDExtraArg **extra, GError **error);
+gboolean bd_btrfs_set_default_subvolume (const gchar *mountpoint, guint64 subvol_id, G_GNUC_UNUSED const BDExtraArg **extra, GError **error);
 gboolean bd_btrfs_create_snapshot (const gchar *source, const gchar *dest, gboolean ro, const BDExtraArg **extra, GError **error);
 BDBtrfsDeviceInfo** bd_btrfs_list_devices (const gchar *device, GError **error);
 BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (const gchar *mountpoint, gboolean snapshots_only, GError **error);
