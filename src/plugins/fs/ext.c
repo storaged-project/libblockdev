@@ -155,7 +155,7 @@ static gboolean extract_e2fsck_progress (const gchar *line, guint8 *completion) 
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
  */
-gboolean __attribute__ ((visibility ("hidden")))
+G_GNUC_INTERNAL gboolean
 bd_fs_ext_is_tech_avail (BDFSTech tech G_GNUC_UNUSED, guint64 mode, GError **error) {
     guint32 required = 0;
     guint i = 0;
@@ -267,18 +267,18 @@ static BDExtraArg **ext_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg
     return (BDExtraArg **) g_ptr_array_free (options_array, FALSE);
 }
 
-BDExtraArg __attribute__ ((visibility ("hidden")))
-**bd_fs_ext2_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
+G_GNUC_INTERNAL BDExtraArg **
+bd_fs_ext2_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
     return ext_mkfs_options (options, extra);
 }
 
-BDExtraArg __attribute__ ((visibility ("hidden")))
-**bd_fs_ext3_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
+G_GNUC_INTERNAL BDExtraArg **
+bd_fs_ext3_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
     return ext_mkfs_options (options, extra);
 }
 
-BDExtraArg __attribute__ ((visibility ("hidden")))
-**bd_fs_ext4_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
+G_GNUC_INTERNAL BDExtraArg **
+bd_fs_ext4_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
     return ext_mkfs_options (options, extra);
 }
 

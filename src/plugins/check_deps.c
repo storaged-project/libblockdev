@@ -26,7 +26,7 @@
 #define DBUS_PROPS_IFACE "org.freedesktop.DBus.Properties"
 
 
-gboolean __attribute__ ((visibility ("hidden")))
+G_GNUC_INTERNAL gboolean
 check_deps (volatile guint *avail_deps, guint req_deps, const UtilDep *deps_specs, guint l_deps, GMutex *deps_check_lock, GError **error) {
     guint i = 0;
     gboolean ret = FALSE;
@@ -73,7 +73,7 @@ check_deps (volatile guint *avail_deps, guint req_deps, const UtilDep *deps_spec
     return (val & req_deps) == req_deps;
 }
 
-gboolean __attribute__ ((visibility ("hidden")))
+G_GNUC_INTERNAL gboolean
 check_module_deps (volatile guint *avail_deps, guint req_deps, const gchar *const*modules, guint l_modules, GMutex *deps_check_lock, GError **error) {
     guint i = 0;
     gboolean ret = FALSE;
@@ -165,7 +165,7 @@ static gboolean _check_dbus_api_version (GBusType bus_type, const gchar *version
     return cmp >= 0;
 }
 
-gboolean __attribute__ ((visibility ("hidden")))
+G_GNUC_INTERNAL gboolean
 check_dbus_deps (volatile guint *avail_deps, guint req_deps, const DBusDep *buses, guint l_buses, GMutex *deps_check_lock, GError **error) {
     guint i = 0;
     gboolean ret = FALSE;
@@ -320,7 +320,7 @@ static gboolean _check_util_feature (const gchar *util, const gchar *feature, co
     return TRUE;
 }
 
-gboolean __attribute__ ((visibility ("hidden")))
+G_GNUC_INTERNAL gboolean
 check_features (volatile guint *avail_deps, guint req_deps, const UtilFeatureDep *deps_specs, guint l_deps, GMutex *deps_check_lock, GError **error) {
     guint i = 0;
     gboolean ret = FALSE;

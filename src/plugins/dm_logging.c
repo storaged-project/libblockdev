@@ -25,7 +25,7 @@
 
 #include "dm_logging.h"
 
-void __attribute__ ((visibility ("hidden")))
+G_GNUC_INTERNAL void
 redirect_dm_log (int level, const char *file __attribute__((unused)), int line __attribute__((unused)),
                              int dm_errno_or_class __attribute__((unused)), const char *f, ...) {
     gchar *dm_msg = NULL;

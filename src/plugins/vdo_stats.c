@@ -25,7 +25,7 @@
 #define VDO_SYS_PATH "/sys/kvdo"
 
 
-gboolean __attribute__ ((visibility ("hidden")))
+G_GNUC_INTERNAL gboolean
 get_stat_val64 (GHashTable *stats, const gchar *key, gint64 *val) {
     const gchar *s;
     gchar *endptr = NULL;
@@ -41,14 +41,14 @@ get_stat_val64 (GHashTable *stats, const gchar *key, gint64 *val) {
     return TRUE;
 }
 
-gboolean __attribute__ ((visibility ("hidden")))
+G_GNUC_INTERNAL gboolean
 get_stat_val64_default (GHashTable *stats, const gchar *key, gint64 *val, gint64 def) {
     if (!get_stat_val64 (stats, key, val))
         *val = def;
     return TRUE;
 }
 
-gboolean __attribute__ ((visibility ("hidden")))
+G_GNUC_INTERNAL gboolean
 get_stat_val_double (GHashTable *stats, const gchar *key, gdouble *val) {
     const gchar *s;
     gchar *endptr = NULL;
@@ -149,8 +149,8 @@ static gchar* _dm_node_from_name (const gchar *map_name, GError **error) {
     return ret;
 }
 
-GHashTable __attribute__ ((visibility ("hidden")))
-*vdo_get_stats_full (const gchar *name, GError **error) {
+G_GNUC_INTERNAL GHashTable *
+vdo_get_stats_full (const gchar *name, GError **error) {
     GHashTable *stats;
     GDir *dir;
     gchar *stats_dir;
