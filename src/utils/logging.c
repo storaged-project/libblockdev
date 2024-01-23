@@ -41,7 +41,7 @@ static int log_level = BD_UTILS_LOG_WARNING;
  *
  * Returns: whether logging was successfully initialized or not
  */
-gboolean bd_utils_init_logging (BDUtilsLogFunc new_log_func, GError **error __attribute__((unused))) {
+gboolean bd_utils_init_logging (BDUtilsLogFunc new_log_func, GError **error G_GNUC_UNUSED) {
     /* XXX: the error attribute will likely be used in the future when this
        function gets more complicated */
 

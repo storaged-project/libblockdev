@@ -26,8 +26,8 @@
 #include "dm_logging.h"
 
 G_GNUC_INTERNAL void
-redirect_dm_log (int level, const char *file __attribute__((unused)), int line __attribute__((unused)),
-                             int dm_errno_or_class __attribute__((unused)), const char *f, ...) {
+redirect_dm_log (int level, const char *file G_GNUC_UNUSED, int line G_GNUC_UNUSED,
+                             int dm_errno_or_class G_GNUC_UNUSED, const char *f, ...) {
     gchar *dm_msg = NULL;
     gchar *message = NULL;
     gint ret = 0;
