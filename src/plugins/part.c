@@ -122,7 +122,6 @@ static gint log2i (guint x) {
     return ret;
 }
 
-#define UNUSED __attribute__((unused))
 
 /**
  * get_part_num: (skip)
@@ -161,7 +160,7 @@ static gint get_part_num (const gchar *part, GError **error) {
     return part_num;
 }
 
-static int fdisk_ask_callback (struct fdisk_context *cxt UNUSED, struct fdisk_ask *ask, void *data UNUSED) {
+static int fdisk_ask_callback (struct fdisk_context *cxt G_GNUC_UNUSED, struct fdisk_ask *ask, void *data G_GNUC_UNUSED) {
     gint type = 0;
     const gchar *fdisk_msg = NULL;
     gchar *message = NULL;
@@ -319,7 +318,7 @@ void bd_part_close (void) {
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
  */
-gboolean bd_part_is_tech_avail (BDPartTech tech, guint64 mode UNUSED, GError **error) {
+gboolean bd_part_is_tech_avail (BDPartTech tech, guint64 mode G_GNUC_UNUSED, GError **error) {
     switch (tech) {
     case BD_PART_TECH_MBR:
     case BD_PART_TECH_GPT:

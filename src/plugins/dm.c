@@ -30,7 +30,6 @@
 
 #define DM_MIN_VERSION "1.02.93"
 
-#define UNUSED __attribute__((unused))
 
 /**
  * SECTION: dm
@@ -100,7 +99,7 @@ void bd_dm_close (void) {
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
  */
-gboolean bd_dm_is_tech_avail (BDDMTech tech, guint64 mode UNUSED, GError **error) {
+gboolean bd_dm_is_tech_avail (BDDMTech tech, guint64 mode G_GNUC_UNUSED, GError **error) {
     /* all combinations are supported by this implementation of the plugin, but
        BD_DM_TECH_MAP requires the 'dmsetup' utility */
     switch (tech) {

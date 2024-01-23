@@ -63,7 +63,6 @@ static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
     DEPS_TUNE2FS_MASK       /* set-uuid */
 };
 
-#define UNUSED __attribute__((unused))
 
 static gint8 compute_percents (guint8 pass_cur, guint8 pass_total, gint val_cur, gint val_total) {
     gint perc;
@@ -157,7 +156,7 @@ static gboolean extract_e2fsck_progress (const gchar *line, guint8 *completion) 
  *          plugin implementation and having all the runtime dependencies available
  */
 gboolean __attribute__ ((visibility ("hidden")))
-bd_fs_ext_is_tech_avail (BDFSTech tech UNUSED, guint64 mode, GError **error) {
+bd_fs_ext_is_tech_avail (BDFSTech tech G_GNUC_UNUSED, guint64 mode, GError **error) {
     guint32 required = 0;
     guint i = 0;
     for (i = 0; i <= BD_FS_MODE_LAST; i++)

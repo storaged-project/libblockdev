@@ -35,7 +35,6 @@
 #define ZERO_INIT {0}
 #endif
 
-#define UNUSED __attribute__((unused))
 
 extern char **environ;
 
@@ -825,7 +824,7 @@ gboolean bd_utils_check_util_version (const gchar *util, const gchar *version, c
  *
  * Returns: whether progress reporting was successfully initialized or not
  */
-gboolean bd_utils_init_prog_reporting (BDUtilsProgFunc new_prog_func, GError **error UNUSED) {
+gboolean bd_utils_init_prog_reporting (BDUtilsProgFunc new_prog_func, GError **error G_GNUC_UNUSED) {
     /* XXX: the error attribute will likely be used in the future when this
        function gets more complicated */
 
@@ -843,7 +842,7 @@ gboolean bd_utils_init_prog_reporting (BDUtilsProgFunc new_prog_func, GError **e
  *
  * Returns: whether progress reporting was successfully initialized or not
  */
-gboolean bd_utils_init_prog_reporting_thread (BDUtilsProgFunc new_prog_func, GError **error UNUSED) {
+gboolean bd_utils_init_prog_reporting_thread (BDUtilsProgFunc new_prog_func, GError **error G_GNUC_UNUSED) {
     /* XXX: the error attribute will likely be used in the future when this
        function gets more complicated */
 
@@ -852,7 +851,8 @@ gboolean bd_utils_init_prog_reporting_thread (BDUtilsProgFunc new_prog_func, GEr
     return TRUE;
 }
 
-static void thread_progress_muted (guint64 task_id UNUSED, BDUtilsProgStatus status UNUSED, guint8 completion UNUSED, gchar *msg UNUSED) {
+static void thread_progress_muted (guint64 task_id G_GNUC_UNUSED, BDUtilsProgStatus status G_GNUC_UNUSED,
+                                   guint8 completion G_GNUC_UNUSED, gchar *msg G_GNUC_UNUSED) {
     /* This function serves as a special value for the progress reporting
      * function to detect that nothing is done here. If clients use their own
      * empty function then bd_utils_prog_reporting_initialized will return TRUE
@@ -867,7 +867,7 @@ static void thread_progress_muted (guint64 task_id UNUSED, BDUtilsProgStatus sta
  * Returns: whether progress reporting for the current thread was successfully
  * muted (deinitialized even in presence of a global reporting function) or not
  */
-gboolean bd_utils_mute_prog_reporting_thread (GError **error UNUSED) {
+gboolean bd_utils_mute_prog_reporting_thread (GError **error G_GNUC_UNUSED) {
     /* XXX: the error attribute will likely be used in the future when this
        function gets more complicated */
 
