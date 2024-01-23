@@ -32,7 +32,7 @@
 #include "fs.h"
 #include "common.h"
 
-gint __attribute__ ((visibility ("hidden")))
+G_GNUC_INTERNAL gint
 synced_close (gint fd) {
     gint ret = 0;
     ret = fsync (fd);
@@ -42,7 +42,7 @@ synced_close (gint fd) {
 }
 
 
-gboolean __attribute__ ((visibility ("hidden")))
+G_GNUC_INTERNAL gboolean
 get_uuid_label (const gchar *device, gchar **uuid, gchar **label, GError **error) {
     blkid_probe probe = NULL;
     gint fd = 0;
@@ -131,7 +131,7 @@ get_uuid_label (const gchar *device, gchar **uuid, gchar **label, GError **error
     return TRUE;
 }
 
-gboolean __attribute__ ((visibility ("hidden")))
+G_GNUC_INTERNAL gboolean
 check_uuid (const gchar *uuid, GError **error) {
     g_autofree gchar *lowercase = NULL;
     gint ret = 0;

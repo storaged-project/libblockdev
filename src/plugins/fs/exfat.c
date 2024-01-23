@@ -73,7 +73,7 @@ static guint32 fs_mode_util[BD_FS_MODE_LAST+1] = {
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
  */
-gboolean __attribute__ ((visibility ("hidden")))
+G_GNUC_INTERNAL gboolean
 bd_fs_exfat_is_tech_avail (BDFSTech tech G_GNUC_UNUSED, guint64 mode, GError **error) {
     guint32 required = 0;
     guint i = 0;
@@ -125,8 +125,8 @@ void bd_fs_exfat_info_free (BDFSExfatInfo *data) {
     g_free (data);
 }
 
-BDExtraArg __attribute__ ((visibility ("hidden")))
-**bd_fs_exfat_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
+G_GNUC_INTERNAL BDExtraArg **
+bd_fs_exfat_mkfs_options (BDFSMkfsOptions *options, const BDExtraArg **extra) {
     GPtrArray *options_array = g_ptr_array_new ();
     const BDExtraArg **extra_p = NULL;
 
