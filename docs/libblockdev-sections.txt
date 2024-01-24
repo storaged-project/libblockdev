@@ -840,6 +840,7 @@ BDSmartATAOfflineDataCollectionStatus
 BDSmartATASelfTestStatus
 BDSmartATA
 bd_smart_ata_get_info
+bd_smart_ata_get_info_from_data
 bd_smart_ata_copy
 bd_smart_ata_free
 bd_smart_ata_attribute_copy

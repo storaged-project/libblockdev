@@ -171,19 +171,7 @@ static void parse_attr_cb (G_GNUC_UNUSED SkDisk             *d,
     g_ptr_array_add (ptr_array, attr);
 }
 
-/**
- * bd_smart_ata_get_info:
- * @device: device to check.
- * @error: (out) (optional): place to store error (if any).
- *
- * Retrieve SMART information from the drive.
- *
- * Returns: (transfer full): ATA SMART log or %NULL in case of an error (with @error set).
- *
- * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_INFO
- */
-BDSmartATA * bd_smart_ata_get_info (const gchar *device, GError **error) {
-    SkDisk *d;
+static BDSmartATA * parse_sk_data (SkDisk *d, GError **error) {
     SkBool good = FALSE;
     SkBool available = FALSE;
     SkSmartOverall overall = SK_SMART_OVERALL_GOOD;
@@ -193,37 +181,25 @@ BDSmartATA * bd_smart_ata_get_info (const gchar *device, GError **error) {
     BDSmartATA *data;
     GPtrArray *ptr_array;
 
-    if (sk_disk_open (device, &d) != 0) {
-        g_set_error (error, BD_SMART_ERROR, BD_SMART_ERROR_FAILED,
-                     "Error opening device %s: %s",
-                     device,
-                     strerror_l (errno, _C_LOCALE));
-        return FALSE;
-    }
-
     if (sk_disk_smart_read_data (d) != 0) {
         g_set_error (error, BD_SMART_ERROR, BD_SMART_ERROR_FAILED,
-                     "Error reading SMART data from device %s: %s",
-                     device,
+                     "Error reading SMART data from device: %s",
                      strerror_l (errno, _C_LOCALE));
-        sk_disk_free (d);
-        return FALSE;
+        return NULL;
     }
 
     if (sk_disk_smart_status (d, &good) != 0) {
         g_set_error (error, BD_SMART_ERROR, BD_SMART_ERROR_FAILED,
                      "Error checking SMART data status: %s",
                      strerror_l (errno, _C_LOCALE));
-        sk_disk_free (d);
-        return FALSE;
+        return NULL;
     }
 
     if (sk_disk_smart_parse (d, &parsed_data) != 0) {
         g_set_error (error, BD_SMART_ERROR, BD_SMART_ERROR_FAILED,
                      "Error parsing SMART data: %s",
                      strerror_l (errno, _C_LOCALE));
-        sk_disk_free (d);
-        return FALSE;
+        return NULL;
     }
 
     data = g_new0 (BDSmartATA, 1);
@@ -319,20 +295,89 @@ BDSmartATA * bd_smart_ata_get_info (const gchar *device, GError **error) {
     data->temperature = temp_mkelvin / 1000;
 
     ptr_array = g_ptr_array_new_full (0, (GDestroyNotify) bd_smart_ata_attribute_free);
-    if (sk_disk_smart_parse_attributes (d, parse_attr_cb, data) != 0) {
+    if (sk_disk_smart_parse_attributes (d, parse_attr_cb, ptr_array) != 0) {
         g_set_error (error, BD_SMART_ERROR, BD_SMART_ERROR_FAILED,
                      "Error parsing SMART data: %s",
                      strerror_l (errno, _C_LOCALE));
-        sk_disk_free (d);
         g_ptr_array_free (ptr_array, TRUE);
         bd_smart_ata_free (data);
-        return FALSE;
+        return NULL;
     }
     g_ptr_array_add (ptr_array, NULL);
     data->attributes = (BDSmartATAAttribute **) g_ptr_array_free (ptr_array, FALSE);
 
-    sk_disk_free (d);
     return data;
+}
+
+/**
+ * bd_smart_ata_get_info:
+ * @device: device to check.
+ * @error: (out) (optional): place to store error (if any).
+ *
+ * Retrieve SMART information from the drive.
+ *
+ * Returns: (transfer full): ATA SMART log or %NULL in case of an error (with @error set).
+ *
+ * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_INFO
+ */
+BDSmartATA * bd_smart_ata_get_info (const gchar *device, GError **error) {
+    SkDisk *d;
+    BDSmartATA *data;
+
+    g_warn_if_fail (device != NULL);
+
+    if (sk_disk_open (device, &d) != 0) {
+        g_set_error (error, BD_SMART_ERROR, BD_SMART_ERROR_FAILED,
+                     "Error opening device %s: %s",
+                     device,
+                     strerror_l (errno, _C_LOCALE));
+        return NULL;
+    }
+
+    data = parse_sk_data (d, error);
+    sk_disk_free (d);
+
+    return data;
+}
+
+
+/**
+ * bd_smart_ata_get_info_from_data:
+ * @data: (array length=data_len): binary data to parse.
+ * @data_len: length of the data supplied.
+ * @error: (out) (optional): place to store error (if any).
+ *
+ * Retrieve SMART information from the supplied data.
+ *
+ * Returns: (transfer full): ATA SMART log or %NULL in case of an error (with @error set).
+ *
+ * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_INFO
+ */
+BDSmartATA * bd_smart_ata_get_info_from_data (const guint8 *data, gsize data_len, GError **error) {
+    SkDisk *d;
+    BDSmartATA *ata_data;
+
+    g_warn_if_fail (data != NULL);
+    g_warn_if_fail (data_len > 0);
+
+    if (sk_disk_open (NULL, &d) != 0) {
+        g_set_error (error, BD_SMART_ERROR, BD_SMART_ERROR_FAILED,
+                     "Error parsing blob data: %s",
+                     strerror_l (errno, _C_LOCALE));
+        return NULL;
+    }
+
+    if (sk_disk_set_blob (d, data, data_len) != 0) {
+        g_set_error (error, BD_SMART_ERROR, BD_SMART_ERROR_FAILED,
+                     "Error parsing blob data: %s",
+                     strerror_l (errno, _C_LOCALE));
+        return NULL;
+    }
+
+    ata_data = parse_sk_data (d, error);
+    sk_disk_free (d);
+
+    return ata_data;
 }
 
 

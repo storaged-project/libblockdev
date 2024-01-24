@@ -16,6 +16,15 @@ from gi.repository import BlockDev, GLib
 
 class SMARTTest(unittest.TestCase):
 
+    # dumps from real drives, both HDD and SSD
+    ATA_JSON_DUMPS = ["TOSHIBA_THNSNH128GBST", "Hitachi_HDS5C3020ALA632", "HGST_HMS5C4040BLE640",
+                      "HGST_HUS726060ALA640", "INTEL_SSDSC2BB120G4L", "WDC_WD10EFRX-68PJCN0"]
+    SCSI_JSON_DUMPS = ["WD4001FYYG-01SL3", "HGST_HUSMR3280ASS200", "SEAGATE_ST600MP0036",
+                      "TOSHIBA_AL15SEB120NY", "TOSHIBA_AL15SEB18EQY", "TOSHIBA_KPM5XMUG400G"]
+    SKDUMPS = ["TOSHIBA_THNSNH128GBST", "Hitachi_HDS721010CLA632", "WDC_WD20EARS-00MVWB0",
+               "SAMSUNG_HS122JC", "SAMSUNG_MMCRE28G5MXP-0VBH1", "IBM_IC25N020ATCS04-0",
+               "Maxtor_6Y120P0"]
+
     def _setup_lio(self):
         self.lio_dev_file = create_sparse_tempfile("smart_test", 1024**3)
         try:
@@ -122,12 +131,11 @@ class SmartmontoolsTest(SMARTTest):
 
 
     @tag_test(TestTags.CORE)
-    def test_ata_real_dumps(self):
-        """Test SMART ATA info on supplied JSON dumps (from real devices)"""
+    def test_ata_real_dumps_fake_tool(self):
+        """Test SMART ATA info on supplied JSON dumps (from real devices) via fake smartctl"""
 
         with fake_utils("tests/fake_utils/smartctl"):
-            for d in ["TOSHIBA_THNSNH128GBST", "Hitachi_HDS5C3020ALA632", "HGST_HMS5C4040BLE640",
-                      "HGST_HUS726060ALA640", "INTEL_SSDSC2BB120G4L", "WDC_WD10EFRX-68PJCN0"]:
+            for d in self.ATA_JSON_DUMPS:
                 data = BlockDev.smart_ata_get_info(d)
                 self.assertIsNotNone(data)
                 self.assertTrue(data.overall_status_passed)
@@ -143,6 +151,47 @@ class SmartmontoolsTest(SMARTTest):
                     self.assertGreater(attr.id, 0)
                     self.assertGreater(len(attr.name), 0)
                     self.assertGreater(len(attr.pretty_value_string), 0)
+
+    @tag_test(TestTags.CORE)
+    def test_ata_real_dumps_by_blob(self):
+        """Test SMART ATA info on supplied skdump blobs (from real devices)"""
+
+        # feed it with garbage
+        for d in ["/dev/zero", "/dev/random"]:
+            with open(d, "rb") as f:
+                content = f.read(1024)
+                msg = r"Error getting ATA SMART info: (Empty response|JSON data must be UTF-8 encoded)"
+                with self.assertRaisesRegex(GLib.GError, msg):
+                    BlockDev.smart_ata_get_info_from_data(content)
+
+        # feed it with skdumps
+        for d in self.SKDUMPS:
+            with open(os.path.join("tests", "smart_dumps", "%s.bin" % d), "rb") as f:
+                content = f.read()
+                msg = r"Error getting ATA SMART info: .* Parse error: .*"
+                with self.assertRaisesRegex(GLib.GError, msg):
+                    BlockDev.smart_ata_get_info_from_data(content)
+
+        # feed it with proper JSON
+        for d in self.ATA_JSON_DUMPS:
+            with open(os.path.join("tests", "smart_dumps", "%s.json" % d), "rb") as f:
+                content = f.read()
+                data = BlockDev.smart_ata_get_info_from_data(content)
+                self.assertIsNotNone(data)
+                self.assertTrue(data.overall_status_passed)
+                self.assertGreater(data.power_cycle_count, 0)
+                self.assertGreater(data.power_on_time, 0)
+                self.assertEqual(data.self_test_percent_remaining, 0)
+                self.assertGreater(data.smart_capabilities, 0)
+                self.assertTrue(data.smart_enabled)
+                self.assertTrue(data.smart_supported)
+                self.assertGreater(data.temperature, 0)
+                self.assertGreater(len(data.attributes), 0)
+                for attr in data.attributes:
+                    self.assertGreater(attr.id, 0)
+                    self.assertGreater(len(attr.name), 0)
+                    self.assertGreater(len(attr.pretty_value_string), 0)
+
 
     @tag_test(TestTags.CORE)
     def test_ata_error_dumps(self):
@@ -294,8 +343,7 @@ class SmartmontoolsTest(SMARTTest):
         """Test SMART SCSI info on supplied JSON dumps (from real devices)"""
 
         with fake_utils("tests/fake_utils/smartctl"):
-            for d in ["WD4001FYYG-01SL3", "HGST_HUSMR3280ASS200", "SEAGATE_ST600MP0036",
-                      "TOSHIBA_AL15SEB120NY", "TOSHIBA_AL15SEB18EQY", "TOSHIBA_KPM5XMUG400G"]:
+            for d in self.SCSI_JSON_DUMPS:
                 data = BlockDev.smart_scsi_get_info(d)
                 self.assertIsNotNone(data)
                 self.assertTrue(data.overall_status_passed)
@@ -332,7 +380,7 @@ class LibatasmartTest(SMARTTest):
         with self.assertRaisesRegex(GLib.GError, msg):
             BlockDev.smart_ata_get_info("/dev/nonexistent")
 
-        msg = r"Error reading SMART data from device /dev/.*: Operation not supported"
+        msg = r"Error reading SMART data from device: Operation not supported"
 
         # LIO device (SCSI)
         self._setup_lio()
@@ -453,3 +501,42 @@ class LibatasmartTest(SMARTTest):
         self.addCleanup(self._clean_scsi_debug)
         with self.assertRaisesRegex(GLib.GError, msg):
             BlockDev.smart_scsi_get_info(self.scsi_debug_dev)
+
+
+    @tag_test(TestTags.CORE)
+    def test_ata_real_dumps_by_blob(self):
+        """Test SMART ATA info on supplied skdump blobs (from real devices)"""
+
+        # feed it with garbage
+        for d in ["/dev/zero", "/dev/random"]:
+            with open(d, "rb") as f:
+                content = f.read(1024)
+                msg = r"Error parsing blob data: (Unknown error -61|Invalid argument)"
+                with self.assertRaisesRegex(GLib.GError, msg):
+                    BlockDev.smart_ata_get_info_from_data(content)
+
+        # feed it with JSON
+        for d in self.ATA_JSON_DUMPS:
+            with open(os.path.join("tests", "smart_dumps", "%s.json" % d), "rb") as f:
+                content = f.read()
+                msg = r"Error parsing blob data: Invalid argument"
+                with self.assertRaisesRegex(GLib.GError, msg):
+                    BlockDev.smart_ata_get_info_from_data(content)
+
+        # feed it with proper skdumps
+        for d in self.SKDUMPS:
+            with open(os.path.join("tests", "smart_dumps", "%s.bin" % d), "rb") as f:
+                content = f.read()
+                data = BlockDev.smart_ata_get_info_from_data(content)
+                self.assertIsNotNone(data)
+                self.assertGreater(data.power_cycle_count, 0)
+                self.assertGreater(data.power_on_time, 0)
+                self.assertEqual(data.smart_capabilities, 0)
+                self.assertTrue(data.smart_enabled)
+                self.assertTrue(data.smart_supported)
+                self.assertLess(data.temperature, 320)
+                self.assertGreater(len(data.attributes), 0)
+                for attr in data.attributes:
+                    self.assertGreater(attr.id, 0)
+                    self.assertGreater(len(attr.name), 0)
+                    self.assertGreater(len(attr.pretty_value_string), 0)
