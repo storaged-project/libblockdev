@@ -22,6 +22,6 @@
 #ifndef BD_DM_LOGGING
 #define BD_DM_LOGGING
 
-void redirect_dm_log (int level, const char *file, int line, int dm_errno_or_class, const char *f, ...);
+void redirect_dm_log (int level, const char *file, int line, int dm_errno_or_class, const char *f, ...) G_GNUC_PRINTF (5, 6);
 
 #endif  /* BD_DM_LOGGING */

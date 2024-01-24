@@ -86,7 +86,7 @@ static void set_plugin_so_name (BDPlugin name, const gchar *so_name) {
     plugins[name].spec.so_name = so_name;
 }
 
-static gint config_file_cmp (gconstpointer a, gconstpointer b, gpointer user_data __attribute__((unused))) {
+static gint config_file_cmp (gconstpointer a, gconstpointer b, gpointer user_data G_GNUC_UNUSED) {
     const gchar *name1 = (const gchar *) a;
     const gchar *name2 = (const gchar *) b;
 
