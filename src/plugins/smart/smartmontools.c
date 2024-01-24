@@ -1074,6 +1074,45 @@ BDSmartATA * bd_smart_ata_get_info (const gchar *device, GError **error) {
     return data;
 }
 
+/**
+ * bd_smart_ata_get_info_from_data:
+ * @data: (array length=data_len): binary data to parse.
+ * @data_len: length of the data supplied.
+ * @error: (out) (optional): place to store error (if any).
+ *
+ * Retrieve SMART information from the supplied data.
+ *
+ * Returns: (transfer full): ATA SMART log or %NULL in case of an error (with @error set).
+ *
+ * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_INFO
+ */
+BDSmartATA * bd_smart_ata_get_info_from_data (const guint8 *data, gsize data_len, GError **error) {
+    JsonParser *parser;
+    gchar *stdout;
+    BDSmartATA *ata_data = NULL;
+    gboolean ret;
+
+    g_warn_if_fail (data != NULL);
+    g_warn_if_fail (data_len > 0);
+
+    stdout = g_strndup ((gchar *)data, data_len);
+    g_strstrip (stdout);
+
+    parser = json_parser_new ();
+    ret = parse_smartctl_error (0, stdout, NULL, parser, error);
+    g_free (stdout);
+    if (! ret) {
+        g_prefix_error (error, "Error getting ATA SMART info: ");
+        g_object_unref (parser);
+        return NULL;
+    }
+
+    ata_data = parse_ata_smart (parser, error);
+    g_object_unref (parser);
+
+    return ata_data;
+}
+
 
 /**
  * bd_smart_scsi_get_info:

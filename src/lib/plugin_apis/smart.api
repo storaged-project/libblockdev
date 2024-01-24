@@ -617,6 +617,20 @@ typedef enum {
 BDSmartATA * bd_smart_ata_get_info (const gchar *device, GError **error);
 
 /**
+ * bd_smart_ata_get_info_from_data:
+ * @data: (array length=data_len): binary data to parse.
+ * @data_len: length of the data supplied.
+ * @error: (out) (optional): place to store error (if any).
+ *
+ * Retrieve SMART information from the supplied data.
+ *
+ * Returns: (transfer full): ATA SMART log or %NULL in case of an error (with @error set).
+ *
+ * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_INFO
+ */
+BDSmartATA * bd_smart_ata_get_info_from_data (const guint8 *data, gsize data_len, GError **error);
+
+/**
  * bd_smart_scsi_get_info:
  * @device: device to check.
  * @error: (out) (optional): place to store error (if any).
