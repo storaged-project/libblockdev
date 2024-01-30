@@ -274,7 +274,54 @@ AS_IF([test "x$with_nvme" != "xno"],
 
 AS_IF([test "x$with_smart" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([SMART], [libatasmart >= 0.17])
-       AC_DEFINE([HAVE_SMART])],
+       AC_DEFINE([HAVE_SMART])
+       drivedb_path="$datarootdir/smartmontools"
+       AC_ARG_WITH([drivedb],
+                   [AS_HELP_STRING([--with-drivedb@<:@=PATH@:>@],
+                                   [support for smartmontools drivedb.h (default=$datarootdir/smartmontools)])],
+                   [], [with_drivedb=$drivedb_path])
+       AX_RECURSIVE_EVAL([$with_drivedb], [drivedb_path])
+       case $drivedb_path in
+         yes)
+           ;;
+         /*)
+           if @<:@ -z ${drivedb_path##*drivedb.h} @:>@; then
+               drivedb_path=`dirname $drivedb_path`
+           fi
+           ;;
+         no|'')
+           ;;
+         *)
+           AC_MSG_RESULT([$drivedb_path])
+           AC_MSG_ERROR([The drivedb must be an absolute path.])
+           ;;
+       esac
+      ],
+      [])
+
+AS_IF([test "x$with_smart" != "xno"],
+      [SAVED_CFLAGS=$CFLAGS
+       CFLAGS+=" -I$drivedb_path"
+       AC_MSG_CHECKING([for drivedb.h presence])
+       AC_COMPILE_IFELSE(
+           [AC_LANG_PROGRAM([
+struct drive_settings {
+    const char* modelfamily;
+    const char* modelregexp;
+    const char* firmwareregexp;
+    const char* warningmsg;
+    const char* presets;
+};
+static const struct drive_settings builtin_knowndrives@<:@@:>@ = {
+#include <drivedb.h>
+};
+])],
+           [AC_MSG_RESULT([yes])
+            AC_DEFINE([HAVE_DRIVEDB_H])
+            AC_SUBST([DRIVEDB_H_CFLAGS], [-I$drivedb_path])],
+           [AC_MSG_RESULT([no])])
+       CFLAGS=$SAVED_CFLAGS
+       ],
       [])
 
 AS_IF([test "x$with_smartmontools" != "xno"],

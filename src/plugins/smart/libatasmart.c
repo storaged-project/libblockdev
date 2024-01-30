@@ -114,10 +114,16 @@ static gchar *print_value (uint64_t pretty_value, SkSmartAttributeUnit pretty_un
     return NULL;
 }
 
+struct ParseData {
+  GPtrArray *ptr_array;
+  const SkIdentifyParsedData *identify_data;
+  DriveDBAttr **drivedb_attrs;
+};
+
 static void parse_attr_cb (G_GNUC_UNUSED SkDisk             *d,
                            const SkSmartAttributeParsedData *a,
                            void                             *user_data) {
-    GPtrArray *ptr_array = user_data;
+    struct ParseData *data = user_data;
     BDSmartATAAttribute *attr;
 
     attr = g_new0 (BDSmartATAAttribute, 1);
@@ -168,7 +174,33 @@ static void parse_attr_cb (G_GNUC_UNUSED SkDisk             *d,
     }
     attr->pretty_value_string = print_value (a->pretty_value, a->pretty_unit);
 
-    g_ptr_array_add (ptr_array, attr);
+    /* validate against drivedb */
+    if (data->drivedb_attrs) {
+        DriveDBAttr **l;
+
+        for (l = data->drivedb_attrs; *l; l++) {
+            if ((*l)->id == a->id && well_known_attrs[a->id].libatasmart_name) {
+                const gchar * const *n;
+                gboolean match = FALSE;
+
+                for (n = well_known_attrs[a->id].smartmontools_names; *n; n++)
+                    if (g_ascii_strcasecmp ((*l)->name, *n) == 0) {
+                        match = TRUE;
+                        break;
+                    }
+
+                if (!match) {
+                    g_free (attr->well_known_name);
+                    attr->well_known_name = NULL;
+                    bd_utils_log_format (BD_UTILS_LOG_DEBUG,
+                                         "libatasmart: drive %s: attribute [%d] \"%s\"/\"%s\" not whitelisted, reporting unknown attr",
+                                         data->identify_data->model, a->id, a->name, (*l)->name);
+                }
+            }
+        }
+    }
+
+    g_ptr_array_add (data->ptr_array, attr);
 }
 
 static BDSmartATA * parse_sk_data (SkDisk *d, GError **error) {
@@ -180,6 +212,7 @@ static BDSmartATA * parse_sk_data (SkDisk *d, GError **error) {
     const SkSmartParsedData *parsed_data;
     BDSmartATA *data;
     GPtrArray *ptr_array;
+    struct ParseData parse_data = {0,};
 
     if (sk_disk_smart_read_data (d) != 0) {
         g_set_error (error, BD_SMART_ERROR, BD_SMART_ERROR_FAILED,
@@ -295,7 +328,16 @@ static BDSmartATA * parse_sk_data (SkDisk *d, GError **error) {
     data->temperature = temp_mkelvin / 1000;
 
     ptr_array = g_ptr_array_new_full (0, (GDestroyNotify) bd_smart_ata_attribute_free);
-    if (sk_disk_smart_parse_attributes (d, parse_attr_cb, ptr_array) != 0) {
+    parse_data.ptr_array = ptr_array;
+#ifdef HAVE_DRIVEDB_H
+    sk_disk_identify_parse (d, &parse_data.identify_data);
+    if (parse_data.identify_data)
+        parse_data.drivedb_attrs = drivedb_lookup_drive (parse_data.identify_data->model,
+                                                         parse_data.identify_data->firmware,
+                                                         FALSE /* include_defaults */);
+#endif
+
+    if (sk_disk_smart_parse_attributes (d, parse_attr_cb, &parse_data) != 0) {
         g_set_error (error, BD_SMART_ERROR, BD_SMART_ERROR_FAILED,
                      "Error parsing SMART data: %s",
                      strerror_l (errno, _C_LOCALE));
@@ -303,6 +345,7 @@ static BDSmartATA * parse_sk_data (SkDisk *d, GError **error) {
         bd_smart_ata_free (data);
         return NULL;
     }
+    free_drivedb_attrs (parse_data.drivedb_attrs);
     g_ptr_array_add (ptr_array, NULL);
     data->attributes = (BDSmartATAAttribute **) g_ptr_array_free (ptr_array, FALSE);
 
