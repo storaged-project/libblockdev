@@ -7,16 +7,13 @@
 #ifndef BD_SMART_PRIVATE
 #define BD_SMART_PRIVATE
 
-/* TODO: move to a common libblockdev header */
-#ifdef __clang__
-#define ZERO_INIT {}
-#else
-#define ZERO_INIT {0}
-#endif
-
 /* "C" locale to get the locale-agnostic error messages */
 #define _C_LOCALE (locale_t) 0
 
+typedef struct DriveDBAttr {
+    gint id;
+    gchar *name;
+} DriveDBAttr;
 
 struct WellKnownAttrInfo {
     const gchar *libatasmart_name;
@@ -24,7 +21,7 @@ struct WellKnownAttrInfo {
     const gchar *smartmontools_names[7];  /* NULL-terminated */
 };
 
-/* This table was stolen from libatasmart, including the comment below: */
+/* This table was initially stolen from libatasmart, including the comment below: */
 /* This data is stolen from smartmontools */
 static const struct WellKnownAttrInfo well_known_attrs[256] = {
     [1]   = { "raw-read-error-rate",         BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Raw_Read_Error_Count", "Raw_Read_Error_Rate", NULL }},
@@ -87,7 +84,7 @@ static const struct WellKnownAttrInfo well_known_attrs[256] = {
     [228] = { "power-off-retract-count-2",   BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Power-Off_Retract_Count", "Power-off_Retract_Count", NULL }},
     [230] = { "head-amplitude",              BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN,   { "Head_Amplitude", NULL }},
     [231] = { "temperature-celsius",         BD_SMART_ATA_ATTRIBUTE_UNIT_MKELVIN,   { "Temperature_Celsius", "Controller_Temperature", NULL }},
-    [232] = { "endurance-remaining",         BD_SMART_ATA_ATTRIBUTE_UNIT_PERCENT,   { "Spares_Remaining_Perc", "Perc_Avail_Resrvd_Space", NULL }},
+    [232] = { "endurance-remaining",         BD_SMART_ATA_ATTRIBUTE_UNIT_PERCENT,   { "Spares_Remaining_Perc", "Perc_Avail_Resrvd_Space", "Available_Reservd_Space", NULL }},
     [233] = { "power-on-seconds-2",          BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN,   { /* TODO */ NULL }},
     [234] = { "uncorrectable-ecc-count",     BD_SMART_ATA_ATTRIBUTE_UNIT_SECTORS,   { /* TODO */ NULL }},
     [235] = { "good-block-rate",             BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN,   { "Good/Sys_Block_Count", NULL }},
@@ -96,5 +93,12 @@ static const struct WellKnownAttrInfo well_known_attrs[256] = {
     [242] = { "total-lbas-read",             BD_SMART_ATA_ATTRIBUTE_UNIT_MB,        { /* TODO: implement size calculation logic */ NULL }},
     [250] = { "read-error-retry-rate",       BD_SMART_ATA_ATTRIBUTE_UNIT_NONE,      { "Read_Error_Retry_Rate", "Read_Retry_Count", NULL }},
 };
+
+
+G_GNUC_INTERNAL
+DriveDBAttr** drivedb_lookup_drive (const gchar *model, const gchar *fw, gboolean include_defaults);
+
+G_GNUC_INTERNAL
+void free_drivedb_attrs (DriveDBAttr **attrs);
 
 #endif  /* BD_SMART_PRIVATE */
