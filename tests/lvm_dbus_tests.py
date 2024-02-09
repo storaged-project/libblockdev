@@ -283,6 +283,22 @@ class LvmPVonlyTestCase(LVMTestCase):
 
     _sparse_size = 1024**3
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        if os.path.exists("/etc/lvm/devices/system.devices"):
+            raise unittest.SkipTest("LVM devices file exists, skipping LVM DBus tests")
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+
+        try:
+            os.remove("/etc/lvm/devices/bd_lvm_dbus.devices")
+        except FileNotFoundError:
+            pass
+
     # :TODO:
     #     * test pvmove (must create two PVs, a VG, a VG and some data in it
     #       first)
@@ -1748,5 +1764,5 @@ class LvmConfigTestPvremove(LvmPVonlyTestCase):
         self.assertTrue(succ)
 
         BlockDev.lvm_set_global_config("")
-        succ = BlockDev.lvm_pvremove(self.loop_dev)
+        succ = BlockDev.lvm_pvremove(self.loop_dev, None)
         self.assertTrue(succ)

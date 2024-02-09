@@ -268,6 +268,24 @@ class LvmPVonlyTestCase(LVMTestCase):
 
     _sparse_size = 1024**3
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        try:
+            BlockDev.lvm_set_global_config("devices {use_devicesfile = 0}")
+        except:
+            pass
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+
+        try:
+            BlockDev.lvm_set_global_config("")
+        except:
+            pass
+
     # :TODO:
     #     * test pvmove (must create two PVs, a VG, a VG and some data in it
     #       first)
@@ -1721,5 +1739,7 @@ class LvmConfigTestPvremove(LvmPVonlyTestCase):
         self.assertTrue(succ)
 
         BlockDev.lvm_set_global_config("")
-        succ = BlockDev.lvm_pvremove(self.loop_dev)
+
+        ea = BlockDev.ExtraArg.new("--config", "devices {use_devicesfile = 0}")
+        succ = BlockDev.lvm_pvremove(self.loop_dev, extra=[ea])
         self.assertTrue(succ)
