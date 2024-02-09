@@ -2166,7 +2166,10 @@ class LvmTestDevicesFile(LvmPVonlyTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree("/etc/lvm/devices/" + cls.devicefile, ignore_errors=True)
+        try:
+            os.remove("/etc/lvm/devices/" + cls.devicefile)
+        except FileNotFoundError:
+            pass
 
         super(LvmTestDevicesFile, cls).tearDownClass()
 
