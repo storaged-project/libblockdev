@@ -358,20 +358,16 @@ class LvmPVonlyTestCase(LVMTestCase):
             raise RuntimeError("Failed to setup loop device for testing: %s" % e)
 
     def _clean_up(self):
-        try:
-            BlockDev.lvm_pvremove(self.loop_dev, None)
-        except:
-            pass
+        for dev in (self.loop_dev, self.loop_dev2, self.loop_dev3):
+            try:
+                BlockDev.lvm_pvremove(dev)
+            except:
+                pass
 
-        try:
-            BlockDev.lvm_pvremove(self.loop_dev2, None)
-        except:
-            pass
-
-        try:
-            BlockDev.lvm_pvremove(self.loop_dev3, None)
-        except:
-            pass
+            try:
+                BlockDev.lvm_devices_delete(dev)
+            except:
+                pass
 
         try:
             delete_lio_device(self.loop_dev)
