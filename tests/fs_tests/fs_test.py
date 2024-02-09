@@ -151,26 +151,27 @@ class FSTestCase(FSNoDevTestCase):
         return Version(m.groups()[0])
 
     def _destroy_lvm(self, vgname):
-        utils.run("vgremove --yes %s >/dev/null 2>&1" % vgname)
-        utils.run("pvremove --yes %s >/dev/null 2>&1" % self.loop_dev)
+        utils.run("vgremove --yes %s --config \"devices {use_devicesfile = 0}\" >/dev/null 2>&1" % vgname)
+        utils.run("pvremove --yes %s --config \"devices {use_devicesfile = 0}\" >/dev/null 2>&1" % self.loop_dev)
 
     def _setup_lvm(self, vgname, lvname, lvsize="50M"):
-        ret, _out, err = utils.run_command("pvcreate -ff -y %s" % self.loop_dev)
+        ret, _out, err = utils.run_command("pvcreate -ff -y %s --config \"devices {use_devicesfile = 0}\"" % self.loop_dev)
         if ret != 0:
             raise RuntimeError("Failed to create PV for fs tests: %s" % err)
 
-        ret, _out, err = utils.run_command("vgcreate -s10M %s %s" % (vgname, self.loop_dev))
+        ret, _out, err = utils.run_command("vgcreate -s10M %s %s --config \"devices {use_devicesfile = 0}\"" % (vgname, self.loop_dev))
         if ret != 0:
             raise RuntimeError("Failed to create VG for fs tests: %s" % err)
         self.addCleanup(self._destroy_lvm, vgname)
 
-        ret, _out, err = utils.run_command("lvcreate -n %s -L%s %s" % (lvname, lvsize, vgname))
+        ret, _out, err = utils.run_command("lvcreate -n %s -L%s %s --config \"devices {use_devicesfile = 0}\"" % (lvname, lvsize, vgname))
         if ret != 0:
+            import pdb; pdb.set_trace()
             raise RuntimeError("Failed to create LV for fs tests: %s" % err)
 
         return "/dev/%s/%s" % (vgname, lvname)
 
     def _lvresize(self, vgname, lvname, size):
-        ret, _out, err = utils.run_command("lvresize -L%s %s/%s" % (size, vgname, lvname))
+        ret, _out, err = utils.run_command("lvresize -L%s %s/%s --config \"devices {use_devicesfile = 0}\"" % (size, vgname, lvname))
         if ret != 0:
             raise RuntimeError("Failed to resize LV for fs tests: %s" % err)

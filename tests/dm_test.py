@@ -52,8 +52,8 @@ class DevMapperTestCase(DevMapperTest):
 
 class DevMapperGetSubsystemFromName(DevMapperTestCase):
     def _destroy_lvm(self):
-        run("vgremove --yes libbd_dm_tests >/dev/null 2>&1")
-        run("pvremove --yes %s >/dev/null 2>&1" % self.loop_dev)
+        run("vgremove --yes libbd_dm_tests --config \"devices {use_devicesfile = 0}\" >/dev/null 2>&1")
+        run("pvremove --yes %s --config \"devices {use_devicesfile = 0}\" >/dev/null 2>&1" % self.loop_dev)
 
     def _destroy_crypt(self):
         run("cryptsetup close libbd_dm_tests-subsystem_crypt >/dev/null 2>&1")
@@ -61,8 +61,8 @@ class DevMapperGetSubsystemFromName(DevMapperTestCase):
     def test_get_subsystem_from_name_lvm(self):
         """Verify that it is possible to get lvm device subsystem from its name"""
         self.addCleanup(self._destroy_lvm)
-        run("vgcreate libbd_dm_tests %s >/dev/null 2>&1" % self.loop_dev)
-        run("lvcreate -n subsystem_lvm -L50M libbd_dm_tests >/dev/null 2>&1")
+        run("vgcreate libbd_dm_tests %s --config \"devices {use_devicesfile = 0}\" >/dev/null 2>&1" % self.loop_dev)
+        run("lvcreate -n subsystem_lvm -L50M libbd_dm_tests --config \"devices {use_devicesfile = 0}\" >/dev/null 2>&1")
 
         subsystem = BlockDev.dm_get_subsystem_from_name("libbd_dm_tests-subsystem_lvm")
         self.assertEqual(subsystem, "LVM")
