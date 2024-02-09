@@ -47,7 +47,7 @@ class TestGenericWipe(GenericTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_wipe("/non/existing/device", True)
 
-        ret = utils.run("pvcreate -ff -y %s >/dev/null 2>&1" % self.loop_dev)
+        ret = utils.run("pvcreate -ff -y %s --config \"devices {use_devicesfile = 0}\" >/dev/null 2>&1" % self.loop_dev)
         self.assertEqual(ret, 0)
 
         succ = BlockDev.fs_wipe(self.loop_dev, True)
@@ -55,7 +55,7 @@ class TestGenericWipe(GenericTestCase):
 
         # now test the same multiple times in a row
         for i in range(10):
-            ret = utils.run("pvcreate -ff -y %s >/dev/null 2>&1" % self.loop_dev)
+            ret = utils.run("pvcreate -ff -y %s --config \"devices {use_devicesfile = 0}\" >/dev/null 2>&1" % self.loop_dev)
             self.assertEqual(ret, 0)
 
             succ = BlockDev.fs_wipe(self.loop_dev, True)
@@ -133,7 +133,7 @@ class TestClean(GenericTestCase):
         succ = BlockDev.fs_clean(self.loop_dev)
         self.assertTrue(succ)
 
-        ret = utils.run("pvcreate -ff -y %s >/dev/null 2>&1" % self.loop_dev)
+        ret = utils.run("pvcreate -ff -y %s --config \"devices {use_devicesfile = 0}\" >/dev/null 2>&1" % self.loop_dev)
         self.assertEqual(ret, 0)
 
         succ = BlockDev.fs_clean(self.loop_dev)
