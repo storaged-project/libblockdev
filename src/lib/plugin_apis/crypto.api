@@ -1077,6 +1077,21 @@ gboolean bd_crypto_luks_set_label (const gchar *device, const gchar *label, cons
 gboolean bd_crypto_luks_set_uuid (const gchar *device, const gchar *uuid, GError **error);
 
 /**
+ * bd_crypto_luks_convert:
+ * @device:  a LUKS device to convert to a different version of LUKS
+ * @target_version: the LUKS version to convert to
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the @device was converted to @target_version.
+ *          False, if the @device is already in the @target_version format.
+ *
+ * Warning: LUKS header loss is possible. See bd_crypto_luks_header_backup() and bd_crypto_luks_header_restore()
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_MODIFY
+ */
+gboolean bd_crypto_luks_convert (const gchar *device, BDCryptoLUKSVersion target_version, GError **error);
+
+/**
  * bd_crypto_luks_info:
  * @device: a device to get information about
  * @error: (out) (optional): place to store error (if any)
