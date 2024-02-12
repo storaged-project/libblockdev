@@ -446,17 +446,17 @@ class UtilsDevUtilsSymlinksTestCase(UtilsTestCase):
         self.assertGreaterEqual(len(symlinks), 2)
 
         # create an LV to get a device with more symlinks
-        ret, _out, _err = run_command ("pvcreate %s" % self.loop_dev)
+        ret, _out, _err = run_command ("pvcreate %s --config \"devices {use_devicesfile = 0}\"" % self.loop_dev)
         self.assertEqual(ret, 0)
-        self.addCleanup(run_command, "pvremove %s" % self.loop_dev)
+        self.addCleanup(run_command, "pvremove %s --config \"devices {use_devicesfile = 0}\"" % self.loop_dev)
 
-        ret, _out, _err = run_command ("vgcreate utilsTestVG %s" % self.loop_dev)
+        ret, _out, _err = run_command ("vgcreate utilsTestVG %s --config \"devices {use_devicesfile = 0}\"" % self.loop_dev)
         self.assertEqual(ret, 0)
-        self.addCleanup(run_command, "vgremove -y utilsTestVG")
+        self.addCleanup(run_command, "vgremove -y utilsTestVG --config \"devices {use_devicesfile = 0}\"")
 
-        ret, _out, _err = run_command ("lvcreate -n utilsTestLV -L 12M utilsTestVG")
+        ret, _out, _err = run_command ("lvcreate -n utilsTestLV -L 12M utilsTestVG --config \"devices {use_devicesfile = 0}\"")
         self.assertEqual(ret, 0)
-        self.addCleanup(run_command, "lvremove -y utilsTestVG/utilsTestLV")
+        self.addCleanup(run_command, "lvremove -y utilsTestVG/utilsTestLV --config \"devices {use_devicesfile = 0}\"")
 
         symlinks = BlockDev.utils_get_device_symlinks("utilsTestVG/utilsTestLV")
         # there should be at least 4 symlinks for an LV
