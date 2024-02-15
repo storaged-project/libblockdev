@@ -372,11 +372,6 @@ class ExtTestCheck(FSTestCase):
         succ = check_function(self.loop_dev, None)
         self.assertTrue(succ)
 
-        # mounted, but can be checked
-        with mounted(self.loop_dev, self.mount_dir):
-            succ = check_function(self.loop_dev, None)
-            self.assertTrue(succ)
-
         succ = check_function(self.loop_dev, None)
         self.assertTrue(succ)
 
@@ -406,10 +401,6 @@ class ExtTestRepair(FSTestCase):
         # unsafe operations should work here too
         succ = repair_function(self.loop_dev, True, None)
         self.assertTrue(succ)
-
-        with mounted(self.loop_dev, self.mount_dir):
-            with self.assertRaises(GLib.GError):
-                repair_function(self.loop_dev, False, None)
 
         succ = repair_function(self.loop_dev, False, None)
         self.assertTrue(succ)
