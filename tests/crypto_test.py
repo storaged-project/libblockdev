@@ -1140,6 +1140,58 @@ class CryptoTestSetUuid(CryptoTestCase):
         self.assertNotEqual(info.uuid, self.test_uuid)
 
 
+class CryptoTestConvert(CryptoTestCase):
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_convert_luks1_to_luks2(self):
+        """Verify that we can convert a device from LUKS1 format to LUKS2"""
+
+        self._luks_format(self.loop_dev, PASSWD, luks_version=BlockDev.CryptoLUKSVersion.LUKS1)
+
+        succ = BlockDev.crypto_luks_convert(self.loop_dev, BlockDev.CryptoLUKSVersion.LUKS2)
+        self.assertTrue(succ)
+
+        info = BlockDev.crypto_luks_info(self.loop_dev)
+        self.assertIsNotNone(info)
+        self.assertEqual(info.version, BlockDev.CryptoLUKSVersion.LUKS2)
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_convert_luks1_to_luks2_to_luks1(self):
+        """Verify that we can convert a device from LUKS1 format to LUKS2 and back to LUKS1"""
+
+        self._luks_format(self.loop_dev, PASSWD, luks_version=BlockDev.CryptoLUKSVersion.LUKS1)
+
+        # LUKS1 -> LUKS2
+        succ = BlockDev.crypto_luks_convert(self.loop_dev, BlockDev.CryptoLUKSVersion.LUKS2)
+        self.assertTrue(succ)
+
+        info = BlockDev.crypto_luks_info(self.loop_dev)
+        self.assertIsNotNone(info)
+        self.assertEqual(info.version, BlockDev.CryptoLUKSVersion.LUKS2)
+
+        # LUKS2 -> LUKS1
+        succ = BlockDev.crypto_luks_convert(self.loop_dev, BlockDev.CryptoLUKSVersion.LUKS1)
+        self.assertTrue(succ)
+
+        info = BlockDev.crypto_luks_info(self.loop_dev)
+        self.assertIsNotNone(info)
+        self.assertEqual(info.version, BlockDev.CryptoLUKSVersion.LUKS1)
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_convert_luks2_to_luks2_fails(self):
+        """Verify that conversion to the present format fails"""
+
+        self._luks_format(self.loop_dev, PASSWD, luks_version=BlockDev.CryptoLUKSVersion.LUKS2)
+
+        with self.assertRaisesRegex(GLib.GError, r"Conversion to the LUKS2 type was requested, but device .* is "
+                                                 r"already of type: LUKS2"):
+            BlockDev.crypto_luks_convert(self.loop_dev, BlockDev.CryptoLUKSVersion.LUKS2)
+
+        info = BlockDev.crypto_luks_info(self.loop_dev)
+        self.assertIsNotNone(info)
+        self.assertEqual(info.version, BlockDev.CryptoLUKSVersion.LUKS2)
+
+
 class CryptoTestLuksSectorSize(CryptoTestCase):
     def setUp(self):
         if not check_cryptsetup_version("2.4.0"):

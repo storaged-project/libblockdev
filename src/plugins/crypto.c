@@ -2108,6 +2108,69 @@ gboolean bd_crypto_luks_set_uuid (const gchar *device, const gchar *uuid, GError
     return TRUE;
 }
 
+/**
+ * bd_crypto_luks_convert:
+ * @device:  a LUKS device to convert to a different version of LUKS
+ * @target_version: the LUKS version to convert to
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the @device was converted to @target_version.
+ *          False, if the @device is already in the @target_version format.
+ *
+ * Warning: LUKS header loss is possible. See bd_crypto_luks_header_backup() and bd_crypto_luks_header_restore()
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_MODIFY
+ */
+gboolean bd_crypto_luks_convert (const gchar *device, BDCryptoLUKSVersion target_version, GError **error) {
+    struct crypt_device *cd = NULL;
+    const char *cd_type;
+    const char *target_type;
+    gint ret = 0;
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        return FALSE;
+    }
+
+    ret = crypt_load (cd, CRYPT_LUKS, NULL);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to load device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        return FALSE;
+    }
+
+    cd_type = crypt_get_type (cd);
+    if (g_strcmp0 (cd_type, CRYPT_LUKS1) != 0 &&
+        g_strcmp0 (cd_type, CRYPT_LUKS2) != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_CONVERT_FAILED,
+                     "It is possible to convert only between LUKS1 and LUKS2 formats. Device %s is of type: %s", device, cd_type);
+        crypt_free (cd);
+        return FALSE;
+    }
+
+    target_type = target_version == BD_CRYPTO_LUKS_VERSION_LUKS1 ? CRYPT_LUKS1 : CRYPT_LUKS2;
+    if (g_strcmp0 (cd_type, target_type) == 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_CONVERT_FAILED,
+                     "Conversion to the %s type was requested, but device %s is already of type: %s", target_type, device, cd_type);
+        crypt_free (cd);
+        return FALSE;
+    }
+
+    ret = crypt_convert (cd, target_type, NULL);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Conversion failed: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+    return TRUE;
+}
+
 static gint synced_close (gint fd) {
     gint ret = 0;
     ret = fsync (fd);
