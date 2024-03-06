@@ -229,6 +229,10 @@ AS_IF([test "x$with_fs" != "xno" -o "x$with_crypto" != "xno" -o "x$with_swap" !=
              [Define as neutral value if libblkid doesn't provide the definition])])]
       [])
 
+AS_IF([test "x$with_btrfs" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([LIBBTRFSUTIL], [libbtrfsutil >= 5.1])],
+      [])
+
 AS_IF([test "x$with_btrfs" != "xno" -o "x$with_mdraid" != "xno" -o "x$with_tools" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([BYTESIZE], [bytesize >= 0.1])],
       [])

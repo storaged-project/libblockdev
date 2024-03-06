@@ -274,7 +274,7 @@ class BtrfsTestGetDefaultSubvolumeID(BtrfsTestCase):
         self.assertTrue(succ)
 
         # not mounted yet, should fail
-        with self.assertRaisesRegex(GLib.GError, r".*(can't|cannot) access.*"):
+        with self.assertRaisesRegex(GLib.GError, r".*Could not open: No such file or directory.*"):
             ret = BlockDev.btrfs_get_default_subvolume_id(TEST_MNT)
 
         mount(self.loop_dev, TEST_MNT)
@@ -288,6 +288,10 @@ class BtrfsTestSetDefaultSubvolumeID(BtrfsTestCase):
 
         succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None, None)
         self.assertTrue(succ)
+
+        # not mounted yet, should fail
+        with self.assertRaisesRegex(GLib.GError, r".*Could not open: No such file or directory.*"):
+            ret = BlockDev.btrfs_get_default_subvolume_id(TEST_MNT)
 
         mount(self.loop_dev, TEST_MNT)
 

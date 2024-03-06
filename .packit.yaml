@@ -62,6 +62,7 @@ srpm_build_deps:
  - autoconf
  - autoconf-archive
  - automake
+ - btrfs-progs-devel
  - cryptsetup-devel
  - device-mapper-devel
  - e2fsprogs-devel

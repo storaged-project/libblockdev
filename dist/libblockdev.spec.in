@@ -164,7 +164,7 @@ with the libblockdev-utils library.
 
 %if %{with_btrfs}
 %package btrfs
-BuildRequires: libbytesize-devel
+BuildRequires: libbytesize-devel btrfs-progs-devel
 Summary:     The BTRFS plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} = %{version}-%{release}
 Requires: btrfs-progs

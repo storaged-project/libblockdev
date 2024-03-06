@@ -33,6 +33,7 @@
   - name: Install build dependencies not covered by dnf builddep (Fedora)
     package: name={{item}} state=present
     with_items:
+      - btrfs-progs-devel
       - libfdisk-devel
       - keyutils-libs-devel
       - libnvme-devel
@@ -162,6 +163,7 @@
   - name: Install build dependencies not covered by apt build-dep (Debian/Ubuntu)
     package: name={{item}} state=present
     with_items:
+      - libbtrfsutil-dev
       - libfdisk-dev
       - libkeyutils-dev
       - libext2fs-dev
