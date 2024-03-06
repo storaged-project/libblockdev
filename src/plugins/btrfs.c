@@ -28,6 +28,8 @@
 #include "check_deps.h"
 
 #define BTRFS_MIN_VERSION "3.18.2"
+// HACK: btrfsutil issue?
+#define BTRFS_FSID_SIZE 16
 
 /**
  * SECTION: btrfs
@@ -208,23 +210,6 @@ static BDBtrfsDeviceInfo* get_device_info_from_match (GMatchInfo *match_info) {
         bs_clear_error (&error);
         g_free (item);
     }
-
-    return ret;
-}
-
-static BDBtrfsSubvolumeInfo* get_subvolume_info_from_match (GMatchInfo *match_info) {
-    BDBtrfsSubvolumeInfo *ret = g_new(BDBtrfsSubvolumeInfo, 1);
-    gchar *item = NULL;
-
-    item = g_match_info_fetch_named (match_info, "id");
-    ret->id = g_ascii_strtoull (item, NULL, 0);
-    g_free (item);
-
-    item = g_match_info_fetch_named (match_info, "parent_id");
-    ret->parent_id = g_ascii_strtoull (item, NULL, 0);
-    g_free (item);
-
-    ret->path = g_match_info_fetch_named (match_info, "path");
 
     return ret;
 }
@@ -608,112 +593,52 @@ BDBtrfsDeviceInfo** bd_btrfs_list_devices (const gchar *device, GError **error) 
  * Tech category: %BD_BTRFS_TECH_SUBVOL-%BD_BTRFS_TECH_MODE_QUERY
  */
 BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (const gchar *mountpoint, gboolean snapshots_only, GError **error) {
-    const gchar *argv[7] = {"btrfs", "subvol", "list", "-p", NULL, NULL, NULL};
-    gchar *output = NULL;
-    gboolean success = FALSE;
-    gchar **lines = NULL;
-    gchar **line_p = NULL;
-    gchar const * const pattern = "ID\\s+(?P<id>\\d+)\\s+gen\\s+\\d+\\s+(cgen\\s+\\d+\\s+)?" \
-                                  "parent\\s+(?P<parent_id>\\d+)\\s+top\\s+level\\s+\\d+\\s+" \
-                                  "(otime\\s+(\\d{4}-\\d{2}-\\d{2}\\s+\\d\\d:\\d\\d:\\d\\d|-)\\s+)?"\
-                                  "path\\s+(?P<path>\\S+)";
-    GRegex *regex = NULL;
-    GMatchInfo *match_info = NULL;
-    guint64 i = 0;
-    guint64 y = 0;
-    guint64 next_sorted_idx = 0;
-    GPtrArray *subvol_infos;
-    BDBtrfsSubvolumeInfo* item = NULL;
-    BDBtrfsSubvolumeInfo* swap_item = NULL;
+    struct btrfs_util_subvolume_iterator *iter;
+    enum btrfs_util_error err;
+    char *path;
+    char empty_uuid[BTRFS_FSID_SIZE] = {0};
+    struct btrfs_util_subvolume_info info;
     BDBtrfsSubvolumeInfo** ret = NULL;
-    GError *l_error = NULL;
+    GPtrArray *subvol_infos;
 
-    if (!check_deps (&avail_deps, DEPS_BTRFS_MASK, deps, DEPS_LAST, &deps_check_lock, error) ||
-        !check_module_deps (&avail_module_deps, MODULE_DEPS_BTRFS_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
-        return NULL;
-
-    if (snapshots_only) {
-        argv[4] = "-s";
-        argv[5] = mountpoint;
-    } else
-        argv[4] = mountpoint;
-
-    regex = g_regex_new (pattern, G_REGEX_EXTENDED, 0, error);
-    if (!regex) {
-        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to create new GRegex");
-        /* error is already populated */
+    err = btrfs_util_create_subvolume_iterator (mountpoint, 5, 0, &iter);
+    if (err) {
+        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_NOT_FOUND, "%s: %m", btrfs_util_strerror (err));
         return NULL;
     }
-
-    success = bd_utils_exec_and_capture_output (argv, NULL, &output, &l_error);
-    if (!success) {
-        g_regex_unref (regex);
-        if (g_error_matches (l_error,  BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
-            /* no output -> no subvolumes */
-            g_clear_error (&l_error);
-            return g_new0 (BDBtrfsSubvolumeInfo*, 1);
-        } else {
-            g_propagate_error (error, l_error);
-            return NULL;
-        }
-    }
-
-    lines = g_strsplit (output, "\n", 0);
-    g_free (output);
 
     subvol_infos = g_ptr_array_new ();
-    for (line_p = lines; *line_p; line_p++) {
-        success = g_regex_match (regex, *line_p, 0, &match_info);
-        if (!success) {
-            g_match_info_free (match_info);
+    while (!(err = btrfs_util_subvolume_iterator_next_info (iter, &path, &info))) {
+        /* See uapi/linux/btrfs.h */
+        if (snapshots_only && memcmp (info.parent_uuid, empty_uuid, BTRFS_FSID_SIZE) == 0)
             continue;
-        }
 
-        g_ptr_array_add (subvol_infos, get_subvolume_info_from_match (match_info));
-        g_match_info_free (match_info);
+        BDBtrfsSubvolumeInfo *subvol = g_new (BDBtrfsSubvolumeInfo, 1);
+        subvol->id = info.id;
+        subvol->parent_id = info.parent_id;
+        subvol->path = g_strdup (path);
+        g_ptr_array_add (subvol_infos, subvol);
+
+        free (path);
     }
 
-    g_strfreev (lines);
-    g_regex_unref (regex);
+    btrfs_util_destroy_subvolume_iterator (iter);
 
-    if (subvol_infos->len == 0) {
-        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_PARSE, "Failed to parse information about subvolumes");
-        g_ptr_array_free (subvol_infos, TRUE);
-        return NULL;
-    }
+    // TODO: this can be Stop iteration: Success (3)
+    // if (err) {
+    //     g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_NOT_FOUND, "%s: %m", btrfs_util_strerror (err));
+    //     return NULL;
+    // }
 
     /* now we know how much space to allocate for the result (subvols + NULL) */
     ret = g_new0 (BDBtrfsSubvolumeInfo*, subvol_infos->len + 1);
 
-    /* we need to sort the subvolumes in a way that no child subvolume appears
-       in the list before its parent (sub)volume */
-
-    /* let's start by moving all top-level (sub)volumes to the beginning */
+    guint64 i = 0;
+    BDBtrfsSubvolumeInfo* item = NULL;
     for (i=0; i < subvol_infos->len; i++) {
         item = (BDBtrfsSubvolumeInfo*) g_ptr_array_index (subvol_infos, i);
-        if (item->parent_id == BD_BTRFS_MAIN_VOLUME_ID)
-            /* top-level (sub)volume */
-            ret[next_sorted_idx++] = item;
+        ret[i] = item;
     }
-    /* top-level (sub)volumes are now processed */
-    for (i=0; i < next_sorted_idx; i++)
-        g_ptr_array_remove_fast (subvol_infos, ret[i]);
-
-    /* now sort the rest in a way that we search for an already sorted parent or sibling */
-    for (i=0; i < subvol_infos->len; i++) {
-        item = (BDBtrfsSubvolumeInfo*) g_ptr_array_index (subvol_infos, i);
-        ret[next_sorted_idx] = item;
-        /* move the item towards beginning of the array checking if some parent
-           or sibling has been already processed/sorted before or we reached the
-           top-level (sub)volumes */
-        for (y=next_sorted_idx; (y > 0 && (ret[y-1]->id != item->parent_id) && (ret[y-1]->parent_id != item->parent_id) && (ret[y-1]->parent_id != BD_BTRFS_MAIN_VOLUME_ID)); y--) {
-            swap_item = ret[y-1];
-            ret[y-1] = ret[y];
-            ret[y] = swap_item;
-        }
-        next_sorted_idx++;
-    }
-    ret[next_sorted_idx] = NULL;
 
     /* now just free the pointer array */
     g_ptr_array_free (subvol_infos, TRUE);
