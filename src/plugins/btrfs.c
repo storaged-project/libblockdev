@@ -374,22 +374,24 @@ gboolean bd_btrfs_remove_device (const gchar *mountpoint, const gchar *device, c
  *
  * Tech category: %BD_BTRFS_TECH_SUBVOL-%BD_BTRFS_TECH_MODE_CREATE
  */
-gboolean bd_btrfs_create_subvolume (const gchar *mountpoint, const gchar *name, const BDExtraArg **extra, GError **error) {
+gboolean bd_btrfs_create_subvolume (const gchar *mountpoint, const gchar *name, G_GNUC_UNUSED const BDExtraArg **extra, GError **error) {
     gchar *path = NULL;
     gboolean success = FALSE;
-    const gchar *argv[5] = {"btrfs", "subvol", "create", NULL, NULL};
-
-    if (!check_deps (&avail_deps, DEPS_BTRFS_MASK, deps, DEPS_LAST, &deps_check_lock, error) ||
-        !check_module_deps (&avail_module_deps, MODULE_DEPS_BTRFS_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
+    enum btrfs_util_error err;
 
     if (g_str_has_suffix (mountpoint, "/"))
         path = g_strdup_printf ("%s%s", mountpoint, name);
     else
         path = g_strdup_printf ("%s/%s", mountpoint, name);
-    argv[3] = path;
 
-    success = bd_utils_exec_and_report_error (argv, extra, error);
+
+    err = btrfs_util_create_subvolume (path, 0 ,NULL ,NULL);
+    if (err) {
+        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_DEVICE, "%s: %m", btrfs_util_strerror (err));
+    } else {
+        success = TRUE;
+    }
+
     g_free (path);
 
     return success;
@@ -407,22 +409,24 @@ gboolean bd_btrfs_create_subvolume (const gchar *mountpoint, const gchar *name, 
  *
  * Tech category: %BD_BTRFS_TECH_SUBVOL-%BD_BTRFS_TECH_MODE_DELETE
  */
-gboolean bd_btrfs_delete_subvolume (const gchar *mountpoint, const gchar *name, const BDExtraArg **extra, GError **error) {
+gboolean bd_btrfs_delete_subvolume (const gchar *mountpoint, const gchar *name, G_GNUC_UNUSED const BDExtraArg **extra, GError **error) {
     gchar *path = NULL;
     gboolean success = FALSE;
-    const gchar *argv[5] = {"btrfs", "subvol", "delete", NULL, NULL};
-
-    if (!check_deps (&avail_deps, DEPS_BTRFS_MASK, deps, DEPS_LAST, &deps_check_lock, error) ||
-        !check_module_deps (&avail_module_deps, MODULE_DEPS_BTRFS_MASK, module_deps, MODULE_DEPS_LAST, &deps_check_lock, error))
-        return FALSE;
+    enum btrfs_util_error err;
 
     if (g_str_has_suffix (mountpoint, "/"))
         path = g_strdup_printf ("%s%s", mountpoint, name);
     else
         path = g_strdup_printf ("%s/%s", mountpoint, name);
-    argv[3] = path;
 
-    success = bd_utils_exec_and_report_error (argv, extra, error);
+    // TODO: support BTRFS_UTIL_DELETE_SUBVOLUME_RECURSIVE
+    err = btrfs_util_delete_subvolume (path, 0);
+    if (err) {
+        g_set_error (error, BD_BTRFS_ERROR, BD_BTRFS_ERROR_DEVICE, "%s: %m", btrfs_util_strerror (err));
+    } else {
+        success = TRUE;
+    }
+
     g_free (path);
 
     return success;
