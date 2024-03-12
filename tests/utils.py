@@ -241,6 +241,8 @@ def find_nvme_ctrl_devs_for_subnqn(subnqn):
     def _check_subsys(subsys, dev_paths):
         if subsys['SubsystemNQN'] == subnqn:
             for ctrl in subsys['Controllers']:
+                if ctrl['Transport'] != 'loop':
+                    continue
                 path = os.path.join('/dev/', ctrl['Controller'])
                 try:
                     st = os.lstat(path)
