@@ -347,13 +347,45 @@ class BtrfsTestListSubvolumes(BtrfsTestCase):
         succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1", None)
         self.assertTrue(succ)
 
+        succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol1/bar", None)
+        self.assertTrue(succ)
+
         subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
-        self.assertEqual(len(subvols), 1)
+        self.assertEqual(len(subvols), 2)
         self.assertEqual(subvols[0].parent_id, 5)
         self.assertEqual(subvols[0].path, "subvol1")
+        self.assertEqual(subvols[1].path, "subvol1/bar")
+
+    @tag_test(TestTags.CORE)
+    def test_list_subvolumes_different_mount(self):
+        """Verify that it is possible get to info about subvolumes with subvol= mount option"""
+
+        succ = BlockDev.btrfs_create_volume([self.loop_dev], "myShinyBtrfs", None, None, None)
+        self.assertTrue(succ)
+
+        mount(self.loop_dev, TEST_MNT)
+
+        succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "one", None)
+        self.assertTrue(succ)
+        succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "one/two", None)
+        self.assertTrue(succ)
+
+        os.system("mkdir -p mkdir -p %s/one/two/one/two" % (TEST_MNT))
+
+        succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "one/two/one/two/three", None)
+        self.assertTrue(succ)
+
+        umount(TEST_MNT)
+        os.makedirs(TEST_MNT)
+        os.system("mount -o subvol=%s %s %s" % ("one/two", self.loop_dev, TEST_MNT))
+
+        subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
+        self.assertEqual(len(subvols), 3)
+        self.assertEqual(subvols[0].path, "one")
+        self.assertEqual(subvols[1].path, "one/two")
+        self.assertEqual(subvols[2].path, "one/two/one/two/three")
 
 class BtrfsTestFilesystemInfo(BtrfsTestCase):
-    @tag_test(TestTags.CORE)
     def test_filesystem_info(self):
         """Verify that it is possible to get filesystem info"""
 

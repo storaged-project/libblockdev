@@ -643,7 +643,7 @@ BDBtrfsDeviceInfo** bd_btrfs_list_devices (const gchar *device, GError **error) 
  * Tech category: %BD_BTRFS_TECH_SUBVOL-%BD_BTRFS_TECH_MODE_QUERY
  */
 BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (const gchar *mountpoint, gboolean snapshots_only, GError **error) {
-    const gchar *argv[7] = {"btrfs", "subvol", "list", "-p", NULL, NULL, NULL};
+    const gchar *argv[8] = {"btrfs", "subvol", "list", "-a", "-p", NULL, NULL, NULL};
     gchar *output = NULL;
     gboolean success = FALSE;
     gchar **lines = NULL;
@@ -651,7 +651,7 @@ BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (const gchar *mountpoint, gboole
     gchar const * const pattern = "ID\\s+(?P<id>\\d+)\\s+gen\\s+\\d+\\s+(cgen\\s+\\d+\\s+)?" \
                                   "parent\\s+(?P<parent_id>\\d+)\\s+top\\s+level\\s+\\d+\\s+" \
                                   "(otime\\s+(\\d{4}-\\d{2}-\\d{2}\\s+\\d\\d:\\d\\d:\\d\\d|-)\\s+)?"\
-                                  "path\\s+(?P<path>\\S+)";
+                                  "path\\s+(<FS_TREE>/)?(?P<path>\\S+)";
     GRegex *regex = NULL;
     GMatchInfo *match_info = NULL;
     guint64 i = 0;
@@ -668,10 +668,10 @@ BDBtrfsSubvolumeInfo** bd_btrfs_list_subvolumes (const gchar *mountpoint, gboole
         return NULL;
 
     if (snapshots_only) {
-        argv[4] = "-s";
-        argv[5] = mountpoint;
+        argv[5] = "-s";
+        argv[6] = mountpoint;
     } else
-        argv[4] = mountpoint;
+        argv[5] = mountpoint;
 
     regex = g_regex_new (pattern, G_REGEX_EXTENDED, 0, error);
     if (!regex) {
