@@ -109,7 +109,13 @@ class NVMeTestCase(NVMeTest):
 
         info = BlockDev.nvme_get_controller_info(self.nvme_dev)
         self.assertEqual(info.ctrl_id, 1)
-
+        self.assertEqual(info.pci_vendor_id, 0)
+        self.assertEqual(info.pci_subsys_vendor_id, 0)
+        self.assertIsNone(info.fguid)
+        self.assertIn("Linux", info.model_number)
+        self.assertGreater(len(info.serial_number), 0)
+        self.assertGreater(len(info.firmware_ver), 0)
+        self.assertGreater(len(info.nvme_ver), 0)
         self.assertTrue (info.features & BlockDev.NVMEControllerFeature.MULTIPORT)
         self.assertTrue (info.features & BlockDev.NVMEControllerFeature.MULTICTRL)
         self.assertFalse(info.features & BlockDev.NVMEControllerFeature.SRIOV)
@@ -128,19 +134,13 @@ class NVMeTestCase(NVMeTest):
         self.assertFalse(info.features & BlockDev.NVMEControllerFeature.ENCLOSURE)
         self.assertFalse(info.features & BlockDev.NVMEControllerFeature.MGMT_PCIE)
         self.assertFalse(info.features & BlockDev.NVMEControllerFeature.MGMT_SMBUS)
-        self.assertIsNone(info.fguid)
-        self.assertEqual(info.pci_vendor_id, 0)
-        self.assertEqual(info.pci_subsys_vendor_id, 0)
-        self.assertIn("Linux", info.model_number)
-        self.assertGreater(len(info.serial_number), 0)
-        self.assertGreater(len(info.firmware_ver), 0)
-        self.assertGreater(len(info.nvme_ver), 0)
-        self.assertEqual(info.hmb_min_size, 0)
-        self.assertEqual(info.hmb_pref_size, 0)
-        self.assertEqual(info.num_namespaces, 1024)
+        self.assertEqual(info.controller_type, BlockDev.NVMEControllerType.IO)
         self.assertEqual(info.selftest_ext_time, 0)
+        self.assertEqual(info.hmb_pref_size, 0)
+        self.assertEqual(info.hmb_min_size, 0)
         self.assertEqual(info.size_total, 0)
         self.assertEqual(info.size_unalloc, 0)
+        self.assertEqual(info.num_namespaces, 1024)
         self.assertEqual(info.subsysnqn, "libblockdev_subnqn")
 
     @tag_test(TestTags.CORE)
@@ -299,6 +299,7 @@ class NVMeTestCase(NVMeTest):
 
 class NVMeFabricsTestCase(NVMeTest):
     SUBNQN = 'libblockdev_nvme'
+    DISCOVERY_NQN = 'nqn.2014-08.org.nvmexpress.discovery'
 
     def setUp(self):
         self.dev_files = []
@@ -586,3 +587,95 @@ class NVMeFabricsTestCase(NVMeTest):
 
         self._safe_unlink(HOSTNQN_PATH)
         self._safe_unlink(HOSTID_PATH)
+
+
+    @tag_test(TestTags.CORE)
+    def test_persistent_dc(self):
+        """Test connecting a persistent Discovery Controller"""
+
+        # test that no device node exists for given subsystem nqn
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.DISCOVERY_NQN)
+        self.assertEqual(len(ctrls), 0)
+
+        # nothing to disconnect
+        with self.assertRaisesRegex(GLib.GError, r"No subsystems matching '.*' NQN found."):
+            BlockDev.nvme_disconnect(self.DISCOVERY_NQN)
+
+        # nothing to connect to
+        msg = r'Error connecting the controller: '
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.nvme_connect(self.DISCOVERY_NQN, 'loop', None, None, None, None, self.hostnqn, None)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.nvme_connect(self.DISCOVERY_NQN, 'loop', '127.0.0.1', None, None, None, self.hostnqn, None)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.nvme_connect(self.DISCOVERY_NQN, 'loop', None, None, None, None, None, None)
+
+        self._setup_target(1)
+
+        # make a connection
+        ret = BlockDev.nvme_connect(self.DISCOVERY_NQN, 'loop', None, None, None, None, None, None)
+        # TODO: there are some extra steps to make the DC actually persistent, a simple
+        # connect like this appears to be working fine for our needs though.
+        self.addCleanup(self._nvme_disconnect, self.DISCOVERY_NQN, ignore_errors=True)
+        self.assertTrue(ret)
+
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.DISCOVERY_NQN)
+        self.assertEqual(len(ctrls), 1)
+        for c in ctrls:
+            self.assertTrue(re.match(r'/dev/nvme[0-9]+', c))
+            self.assertTrue(os.path.exists(c))
+
+        namespaces = find_nvme_ns_devs_for_subnqn(self.DISCOVERY_NQN)
+        self.assertEqual(len(namespaces), 0)
+
+        # issue an IDENTIFY_CTRL command
+        info = BlockDev.nvme_get_controller_info(ctrls[0])
+        self.assertEqual(info.ctrl_id, 1)
+        self.assertEqual(info.pci_vendor_id, 0)
+        self.assertEqual(info.pci_subsys_vendor_id, 0)
+        self.assertIsNone(info.fguid)
+        self.assertIn("Linux", info.model_number)
+        self.assertGreater(len(info.serial_number), 0)
+        self.assertGreater(len(info.firmware_ver), 0)
+        self.assertGreater(len(info.nvme_ver), 0)
+        self.assertFalse(info.features & BlockDev.NVMEControllerFeature.MULTIPORT)
+        self.assertFalse(info.features & BlockDev.NVMEControllerFeature.MULTICTRL)
+        self.assertFalse(info.features & BlockDev.NVMEControllerFeature.SRIOV)
+        self.assertFalse(info.features & BlockDev.NVMEControllerFeature.ANA_REPORTING)
+        self.assertFalse(info.features & BlockDev.NVMEControllerFeature.FORMAT)
+        self.assertFalse(info.features & BlockDev.NVMEControllerFeature.FORMAT_ALL_NS)
+        self.assertFalse(info.features & BlockDev.NVMEControllerFeature.NS_MGMT)
+        self.assertFalse(info.features & BlockDev.NVMEControllerFeature.SELFTEST)
+        self.assertFalse(info.features & BlockDev.NVMEControllerFeature.SELFTEST_SINGLE)
+        self.assertFalse(info.features & BlockDev.NVMEControllerFeature.SANITIZE_CRYPTO)
+        self.assertFalse(info.features & BlockDev.NVMEControllerFeature.SANITIZE_BLOCK)
+        self.assertFalse(info.features & BlockDev.NVMEControllerFeature.SANITIZE_OVERWRITE)
+        self.assertFalse(info.features & BlockDev.NVMEControllerFeature.SECURE_ERASE_ALL_NS)
+        self.assertFalse(info.features & BlockDev.NVMEControllerFeature.SECURE_ERASE_CRYPTO)
+        self.assertFalse(info.features & BlockDev.NVMEControllerFeature.STORAGE_DEVICE)
+        self.assertFalse(info.features & BlockDev.NVMEControllerFeature.ENCLOSURE)
+        self.assertFalse(info.features & BlockDev.NVMEControllerFeature.MGMT_PCIE)
+        self.assertFalse(info.features & BlockDev.NVMEControllerFeature.MGMT_SMBUS)
+        self.assertEqual(info.controller_type, BlockDev.NVMEControllerType.DISCOVERY)
+        self.assertEqual(info.selftest_ext_time, 0)
+        self.assertEqual(info.hmb_pref_size, 0)
+        self.assertEqual(info.hmb_min_size, 0)
+        self.assertEqual(info.size_total, 0)
+        self.assertEqual(info.size_unalloc, 0)
+        self.assertEqual(info.num_namespaces, 0)
+        self.assertEqual(info.subsysnqn, self.DISCOVERY_NQN)
+
+        # disconnect
+        with self.assertRaisesRegex(GLib.GError, r"No subsystems matching '.*' NQN found."):
+            BlockDev.nvme_disconnect(self.DISCOVERY_NQN + "xx")
+        with self.assertRaisesRegex(GLib.GError, r"No controllers matching the /dev/nvme.*xx device name found."):
+            BlockDev.nvme_disconnect_by_path(ctrls[0] + "xx")
+        BlockDev.nvme_disconnect(self.DISCOVERY_NQN)
+        for c in ctrls:
+            self.assertFalse(os.path.exists(c))
+        for ns in namespaces:
+            self.assertFalse(os.path.exists(ns))
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.DISCOVERY_NQN)
+        self.assertEqual(len(ctrls), 0)
+        namespaces = find_nvme_ns_devs_for_subnqn(self.DISCOVERY_NQN)
+        self.assertEqual(len(namespaces), 0)
