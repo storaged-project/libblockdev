@@ -27,6 +27,20 @@ class NVMeTest(unittest.TestCase):
             BlockDev.reinit(cls.requested_plugins, True, None)
 
 
+class NVMePluginVersionTestCase(NVMeTest):
+    @tag_test(TestTags.NOSTORAGE)
+    def test_plugin_version(self):
+       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.NVME), "libbd_nvme.so.2")
+
+    @tag_test(TestTags.NOSTORAGE)
+    def test_availability(self):
+        avail = BlockDev.nvme_is_tech_avail(BlockDev.NVMETech.NVME, 0)
+        self.assertTrue(avail)
+
+        avail = BlockDev.nvme_is_tech_avail(BlockDev.NVMETech.FABRICS, 0)
+        self.assertTrue(avail)
+
+
 class NVMeTestCase(NVMeTest):
     def setUp(self):
         self.dev_file = None
