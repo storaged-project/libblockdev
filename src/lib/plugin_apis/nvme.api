@@ -66,6 +66,17 @@ typedef enum {
     BD_NVME_TECH_MODE_INITIATOR    = 1 << 2,
 } BDNVMETechMode;
 
+/**
+ * bd_nvme_is_tech_avail:
+ * @tech: the queried tech
+ * @mode: a bit mask of queried modes of operation (#BDNVMETechMode) for @tech
+ * @error: (out) (nullable): place to store error (details about why the @tech-@mode combination is not available)
+ *
+ * Returns: whether the @tech-@mode combination is available -- supported by the
+ *          plugin implementation and having all the runtime dependencies available
+ */
+gboolean bd_nvme_is_tech_avail (BDNVMETech tech, G_GNUC_UNUSED guint64 mode, GError **error);
+
 
 /* BpG-skip */
 /**
