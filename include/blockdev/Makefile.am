@@ -1,6 +1,7 @@
 all-local:
 	for header in ${srcdir}/../../src/plugins/*.h; do ln -sf $${header} ./; done
 	for header in ${srcdir}/../../src/plugins/nvme/nvme.h; do ln -sf $${header} ./; done
+	for header in ${srcdir}/../../src/plugins/smart/smart.h; do ln -sf $${header} ./; done
 	for header in ${srcdir}/../../src/utils/*.h; do ln -sf $${header} ./; done
 	for header in ${srcdir}/../../src/lib/*.h; do ln -sf $${header} ./; done
 	mkdir -p fs;
