@@ -184,6 +184,10 @@ endif
 
 if WITH_LVM
 libinclude_HEADERS += lvm.h
+else
+if WITH_LVM_DBUS
+libinclude_HEADERS += lvm.h
+endif
 endif
 
 if WITH_MDRAID
