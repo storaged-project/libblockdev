@@ -1406,7 +1406,7 @@ gboolean bd_lvm_pvresize (const gchar *device, guint64 size, const BDExtraArg **
     if (!obj_path)
         return FALSE;
 
-    params = g_variant_new ("(u)", size);
+    params = g_variant_new ("(t)", size);
     call_lvm_method_sync (obj_path, PV_INTF, "ReSize", params, NULL, extra, TRUE, error);
 
     return (*error == NULL);

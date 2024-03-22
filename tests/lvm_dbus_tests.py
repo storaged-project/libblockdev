@@ -387,8 +387,14 @@ class LvmTestPVresize(LvmPVonlyTestCase):
         succ = BlockDev.lvm_pvresize(self.loop_dev, 200 * 1024**2, None)
         self.assertTrue(succ)
 
+        info = BlockDev.lvm_pvinfo(self.loop_dev)
+        self.assertEqual(info.pv_size, 200 * 1024**2)
+
         succ = BlockDev.lvm_pvresize(self.loop_dev, 200 * 1024**3, None)
         self.assertTrue(succ)
+
+        info = BlockDev.lvm_pvinfo(self.loop_dev)
+        self.assertEqual(info.pv_size, 200 * 1024**3)
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmTestPVscan(LvmPVonlyTestCase):
