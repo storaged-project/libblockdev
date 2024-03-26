@@ -1,3 +1,46 @@
+Libblockdev 2.29
+----------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Full list of changes**
+
+Marius Vollmer (2):
+
+- fs: Don't require XFS filesystem to be mounted when getting info
+- fs/xfs: Open device read-only for xfs_info
+
+Tomas Bzatek (1):
+
+- tests: Remove ext fs_check tests on mounted filesystem
+
+Vojtech Trefny (24):
+- Do not use distutils to get Python library path
+- tests: Use shutil.which instead of distutils.spawn.find_executable
+- tests: Use packaging.version instead of distutils.version
+- tests: Use BlockDev.utils_get_linux_version instead of os.uname
+- spec: Change license string to the SPDX format required by Fedora
+- crypto: Fix GError overwrite from libvolume_key
+- crypto: Fix double free in write_escrow_data_file
+- btrfs: Fix parsing snapshot info without valid otime
+- tests: Skip DDF RAID tests on rawhide
+- tests: Remove rules for skipping tests on old/unsupported releases
+- fs: Add support for exFAT filesystem
+- spec: Remove dependency on dmraid
+- spec: Stop building dm plugin with dmraid support on Fedora >= 38
+- tests: Skip lvm_dbus_tests.LvmTestLVcreateRemove on CentOS 8
+- tests: XFS no longer needs to be mounted to get info
+- part: Fix segfault when adding a partition too big for MSDOS
+- Allow resizing of inactive LVs with latest LVM
+- tests: Skip test_ext4_check on rawhide
+- s390: Do not try to close an unopened stream
+- tests: Require BlockDev 2.0 in the tests
+- Add part plugin to the plugin config files
+- tests: Replace deprecated unittest assert calls
+- Disable LVM devices config file when running tests
+- lvm-dbus: Fix passing size for pvresize over DBus
+
 Libblockdev 2.28
 ----------------
 

@@ -124,7 +124,7 @@
 %define configure_opts %{?python2_copts} %{?python3_copts} %{?bcache_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?kbd_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?vdo_copts} %{?tools_copts} %{?gi_copts}
 
 Name:        libblockdev
-Version:     2.28
+Version:     2.29
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPL-2.1-or-later
@@ -976,6 +976,35 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Tue Mar 26 2024 Vojtech Trefny <vtrefny@redhat.com> - 2.29-1
+- lvm-dbus: Fix passing size for pvresize over DBus (vtrefny)
+- tests: Remove ext fs_check tests on mounted filesystem (tbzatek)
+- Disable LVM devices config file when running tests (vtrefny)
+- tests: Replace deprecated unittest assert calls (vtrefny)
+- Add part plugin to the plugin config files (vtrefny)
+- tests: Require BlockDev 2.0 in the tests (vtrefny)
+- s390: Do not try to close an unopened stream (vtrefny)
+- tests: Skip test_ext4_check on rawhide (vtrefny)
+- Allow resizing of inactive LVs with latest LVM (vtrefny)
+- fs/xfs: Open device read-only for xfs_info (mvollmer)
+- part: Fix segfault when adding a partition too big for MSDOS (vtrefny)
+- tests: XFS no longer needs to be mounted to get info (vtrefny)
+- fs: Don't require XFS filesystem to be mounted when getting info (mvollmer)
+- tests: Skip lvm_dbus_tests.LvmTestLVcreateRemove on CentOS 8 (vtrefny)
+- spec: Stop building dm plugin with dmraid support on Fedora >= 38 (vtrefny)
+- spec: Remove dependency on dmraid (vtrefny)
+- fs: Add support for exFAT filesystem (vtrefny)
+- tests: Remove rules for skipping tests on old/unsupported releases (vtrefny)
+- tests: Skip DDF RAID tests on rawhide (vtrefny)
+- btrfs: Fix parsing snapshot info without valid otime (vtrefny)
+- crypto: Fix double free in write_escrow_data_file (vtrefny)
+- crypto: Fix GError overwrite from libvolume_key (vtrefny)
+- spec: Change license string to the SPDX format required by Fedora (vtrefny)
+- tests: Use BlockDev.utils_get_linux_version instead of os.uname (vtrefny)
+- tests: Use packaging.version instead of distutils.version (vtrefny)
+- tests: Use shutil.which instead of distutils.spawn.find_executable (vtrefny)
+- Do not use distutils to get Python library path (vtrefny)
+
 * Wed Sep 14 2022 Vojtech Trefny <vtrefny@redhat.com> - 2.28-1
 - mpath: Fix potential NULL pointer dereference (vtrefny)
 - ci: Add GitHub actions for running rpmbuilds and csmock (vtrefny)
