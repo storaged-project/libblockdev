@@ -95,6 +95,12 @@ class FSNoDevTestCase(unittest.TestCase):
         except Exception :
             cls.udf_avail = False
 
+        try:
+            cls.bcachefs_avail = BlockDev.fs_is_tech_avail(BlockDev.FSTech.BCACHEFS,
+                                                      BlockDev.FSTechMode.MKFS |
+                                                      BlockDev.FSTechMode.SET_LABEL)
+        except Exception :
+            cls.bcachefs_avail = False
 
 class FSTestCase(FSNoDevTestCase):
 
