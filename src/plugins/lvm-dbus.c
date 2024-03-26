@@ -342,6 +342,7 @@ gboolean bd_lvm_init (void) {
        completely rely on it */
     if (G_UNLIKELY (!bus) && !setup_dbus_connection (&error)) {
         bd_utils_log_format (BD_UTILS_LOG_CRIT, "Failed to setup DBus connection: %s", error->message);
+        g_clear_error (&error);
         return FALSE;
     }
 
