@@ -77,7 +77,7 @@
 %define configure_opts %{?python3_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?tools_copts} %{?gi_copts} %{?nvme_copts}
 
 Name:        libblockdev
-Version:     3.1.0
+Version:     3.1.1
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPL-2.1-or-later
@@ -851,6 +851,20 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Tue Mar 26 2024 Vojtech Trefny <vtrefny@redhat.com> - 3.1.1-1
+- lvm-dbus: Fix passing size for pvresize over DBus (vtrefny)
+- nvme: Add bd_nvme_is_tech_avail to the API file (vtrefny)
+- tests: Add NVMe controller type checks (tbzatek)
+- tests: Add NVMe persistent discovery controller tests (tbzatek)
+- tests: Fix removing custom LVM devices file (vtrefny)
+- tests: Ignore LVM devices file for non-LVM tests (vtrefny)
+- tests: Manually remove removed PVs from LVM devices file (vtrefny)
+- dm_logging: Annotate redirect_dm_log() printf format (tbzatek)
+- Fix some more occurrences of missing port to G_GNUC_UNUSED (tbzatek)
+- Port to G_GNUC_INTERNAL for controlling symbols visibility (tbzatek)
+- Use glib2 G_GNUC_UNUSED in place of UNUSED locally defined (giulio.benetti)
+- Makefile: Fix bumpver to work with micro versions (vtrefny)
+
 * Fri Jan 19 2024 Vojtech Trefny <vtrefny@redhat.com> - 3.1.0-1
 - tests: Skip some checks for btrfs errors with btrfs-progs 6.6.3 (vtrefny)
 - Fix missing progress initialization in bd_crypto_luks_add_key (vtrefny)
