@@ -256,7 +256,7 @@ static gboolean setup_dbus_connection (GError **error) {
 
     addr = g_dbus_address_get_for_bus_sync (G_BUS_TYPE_SYSTEM, NULL, error);
     if (!addr) {
-        bd_utils_log_format (BD_UTILS_LOG_CRIT, "Failed to get system bus address: %s\n", (*error)->message);
+        g_prefix_error (error, "Failed to get system bus address: ");
         return FALSE;
     }
 
@@ -267,8 +267,14 @@ static gboolean setup_dbus_connection (GError **error) {
 
     g_free (addr);
 
-    if (!bus || g_dbus_connection_is_closed (bus)) {
-        bd_utils_log_format (BD_UTILS_LOG_CRIT, "Failed to create a new connection for the system bus: %s\n", (*error)->message);
+    if (!bus) {
+        g_prefix_error (error, "Failed to create a new connection for the system bus: ");
+        return FALSE;
+    }
+
+    if (g_dbus_connection_is_closed (bus)) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                     "Connection is closed");
         return FALSE;
     }
 
