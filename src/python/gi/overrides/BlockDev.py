@@ -1018,7 +1018,7 @@ __all__.append("md_get_superblock_size")
 
 _md_create = BlockDev.md_create
 @override(BlockDev.md_create)
-def md_create(device_name, level, disks, spares=0, version=None, bitmap=False, chunk_size=0, extra=None, **kwargs):
+def md_create(device_name, level, disks, spares=0, version=None, bitmap=None, chunk_size=0, extra=None, **kwargs):
     extra = _get_extra(extra, kwargs)
     return _md_create(device_name, level, disks, spares, version, bitmap, chunk_size, extra)
 __all__.append("md_create")
