@@ -524,6 +524,9 @@ class CryptoTestRemoveKey(CryptoTestCase):
         succ = BlockDev.crypto_luks_add_key(self.loop_dev, ctx, nctx2)
         self.assertTrue(succ)
 
+        nctx3 = BlockDev.CryptoKeyslotContext(keyfile=self.keyfile)
+        succ = BlockDev.crypto_luks_add_key(self.loop_dev, ctx, nctx3)
+
         with self.assertRaises(GLib.GError):
             wctx = BlockDev.CryptoKeyslotContext(passphrase="wrong-passphrase")
             BlockDev.crypto_luks_remove_key(self.loop_dev, wctx)
@@ -532,6 +535,9 @@ class CryptoTestRemoveKey(CryptoTestCase):
         self.assertTrue(succ)
 
         succ = BlockDev.crypto_luks_remove_key(self.loop_dev, nctx2)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_remove_key(self.loop_dev, nctx3)
         self.assertTrue(succ)
 
     @tag_test(TestTags.SLOW)
