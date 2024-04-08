@@ -727,6 +727,10 @@ gint bd_utils_version_cmp (const gchar *ver_string1, const gchar *ver_string2, G
  *                  info or %NULL if only version is printed by "$ @util @version_arg"
  * @error: (out) (optional): place to store error (if any)
  *
+ * Note: Both supplied @version and parsed result using @version_regexp must be in format
+ *       `X[.Y[.Z[.Z2[.Z3...[-R]]]]]` where all components are natural numbers, see
+ *       %bd_utils_version_cmp for details.
+ *
  * Returns: whether the @util is available in a version >= @version or not
  *          (@error is set in such case).
  */
