@@ -342,8 +342,12 @@ class CanResizeRepairCheckLabel(GenericNoDevTestCase):
         self.assertEqual(util, "resize2fs")
 
         avail, util = BlockDev.fs_can_get_min_size("ntfs")
-        self.assertTrue(avail)
-        self.assertEqual(util, None)
+        if self.ntfs_avail:
+            self.assertTrue(avail)
+            self.assertEqual(util, None)
+        else:
+            self.assertFalse(avail)
+            self.assertEqual(util, "ntfsresize")
 
         with self.assertRaises(GLib.GError):
             BlockDev.fs_can_get_min_size("xfs")
