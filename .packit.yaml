@@ -30,6 +30,18 @@ jobs:
   project: blivet-daily
   branch: master
   preserve_project: true
+  actions:
+    post-upstream-clone:
+      - 'cp dist/libblockdev.spec.in dist/libblockdev.spec'
+      - 'sed -i -E "s/@WITH_.+@/1/g" dist/libblockdev.spec'
+      # bump release to 99 to always be ahead of Fedora builds
+      - 'bash -c "sed -i -r \"s/Release:(\s*)\S+/Release:     99%{?dist}/\" dist/libblockdev.spec"'
+    create-archive:
+      - './autogen.sh'
+      - './configure'
+      - 'make'
+      - 'make local'
+      - 'bash -c "ls *.tar*"'
 
 - job: copr_build
   trigger: commit
@@ -37,6 +49,18 @@ jobs:
   project: udisks-daily
   branch: master
   preserve_project: true
+  actions:
+    post-upstream-clone:
+      - 'cp dist/libblockdev.spec.in dist/libblockdev.spec'
+      - 'sed -i -E "s/@WITH_.+@/1/g" dist/libblockdev.spec'
+      # bump release to 99 to always be ahead of Fedora builds
+      - 'bash -c "sed -i -r \"s/Release:(\s*)\S+/Release:     99%{?dist}/\" dist/libblockdev.spec"'
+    create-archive:
+      - './autogen.sh'
+      - './configure'
+      - 'make'
+      - 'make local'
+      - 'bash -c "ls *.tar*"'
 
 - job: propose_downstream
   trigger: release
