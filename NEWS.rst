@@ -1,3 +1,32 @@
+Libblockdev 3.1.1
+------------------
+
+New bugfix release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Full list of changes**
+
+Giulio Benetti (1):
+
+- Use glib2 G_GNUC_UNUSED in place of UNUSED locally defined
+
+Tomas Bzatek (5):
+
+- Port to G_GNUC_INTERNAL for controlling symbols visibility
+- Fix some more occurrences of missing port to G_GNUC_UNUSED
+- dm_logging: Annotate redirect_dm_log() printf format
+- tests: Add NVMe persistent discovery controller tests
+- tests: Add NVMe controller type checks
+
+Vojtech Trefny (6):
+
+- Makefile: Fix bumpver to work with micro versions
+- tests: Manually remove removed PVs from LVM devices file
+- tests: Ignore LVM devices file for non-LVM tests
+- tests: Fix removing custom LVM devices file
+- nvme: Add bd_nvme_is_tech_avail to the API file
+- lvm-dbus: Fix passing size for pvresize over DBus
+
 Libblockdev 3.1.0
 ------------------
 
