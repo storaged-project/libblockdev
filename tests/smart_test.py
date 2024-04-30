@@ -23,7 +23,7 @@ class SMARTTest(unittest.TestCase):
                       "TOSHIBA_AL15SEB120NY", "TOSHIBA_AL15SEB18EQY", "TOSHIBA_KPM5XMUG400G"]
     SKDUMPS = ["TOSHIBA_THNSNH128GBST", "Hitachi_HDS721010CLA632", "WDC_WD20EARS-00MVWB0",
                "SAMSUNG_HS122JC", "SAMSUNG_MMCRE28G5MXP-0VBH1", "IBM_IC25N020ATCS04-0",
-               "Maxtor_6Y120P0"]
+               "Maxtor_6Y120P0", "SiliconPower_SSD_SBFM61.3"]
 
     def _setup_lio(self):
         self.lio_dev_file = create_sparse_tempfile("smart_test", 1024**3)
