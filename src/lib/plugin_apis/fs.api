@@ -527,6 +527,7 @@ typedef enum {
     BD_FS_TECH_EXFAT,
     BD_FS_TECH_BTRFS,
     BD_FS_TECH_UDF,
+    BD_FS_TECH_BCACHEFS,
 } BDFSTech;
 
 typedef enum {
@@ -806,6 +807,63 @@ GType bd_fs_udf_info_get_type () {
         type = g_boxed_type_register_static("BDFSUdfInfo",
                                             (GBoxedCopyFunc) bd_fs_udf_info_copy,
                                             (GBoxedFreeFunc) bd_fs_udf_info_free);
+    }
+
+    return type;
+}
+
+/**
+ * BDFSBcachefsInfo:
+ * @uuid: uuid of the filesystem
+ * @size: size of the filesystem in bytes
+ * @free_space: free space on the filesystem in bytes
+ */
+typedef struct BDFSBcachefsInfo {
+    gchar *uuid;
+    guint64 size;
+    guint64 free_space;
+} BDFSBcachefsInfo;
+
+/**
+ * bd_fs_bcachefs_info_copy: (skip)
+ * @data: (nullable): %BDFSBcachefsInfo to copy
+ *
+ * Creates a new copy of @data.
+ */
+BDFSBcachefsInfo* bd_fs_bcachefs_info_copy (BDFSBcachefsInfo *data) {
+    if (data == NULL)
+        return NULL;
+
+    BDFSBcachefsInfo *ret = g_new0 (BDFSBcachefsInfo, 1);
+
+    ret->uuid = g_strdup (data->uuid);
+    ret->size = data->size;
+    ret->free_space = data->free_space;
+
+    return ret;
+}
+
+/**
+ * bd_fs_bcachefs_info_free: (skip)
+ * @data: (nullable): %BDFSBcachefsInfo to free
+ *
+ * Frees @data.
+ */
+void bd_fs_bcachefs_info_free (BDFSBcachefsInfo *data) {
+    if (data == NULL)
+        return;
+
+    g_free (data->uuid);
+    g_free (data);
+}
+
+GType bd_fs_bcachefs_info_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDFSBcachefsInfo",
+                                            (GBoxedCopyFunc) bd_fs_bcachefs_info_copy,
+                                            (GBoxedFreeFunc) bd_fs_bcachefs_info_free);
     }
 
     return type;
@@ -2633,6 +2691,35 @@ gboolean bd_fs_udf_check_uuid (const gchar *uuid, GError **error);
  * Tech category: %BD_FS_TECH_UDF-%BD_FS_TECH_MODE_QUERY
  */
 BDFSUdfInfo* bd_fs_udf_get_info (const gchar *device, GError **error);
+
+/**
+ * bd_fs_bcachefs_mkfs:
+ * @device: the device to create a new bcachefs fs on
+ * @extra: (nullable) (array zero-terminated=1): extra options for the creation (right now
+ *                                                 passed to the 'mkfs.bcachefs' utility)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether a new bcachefs fs was successfully created on @device or not
+ *
+ * Tech category: %BD_FS_TECH_BCACHEFS-%BD_FS_TECH_MODE_MKFS
+ *
+ */
+gboolean bd_fs_bcachefs_mkfs (const gchar *device, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_fs_bcachefs_get_info:
+ * @mpoint: a mountpoint of the bcachefs filesystem to get information about
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: (transfer full): information about the file system on @device or
+ *                           %NULL in case of error
+ *
+ * Note: This function WON'T WORK for multi device bcachefs filesystems,
+ *       for more complicated setups use the bcachefs plugin instead.
+ *
+ * Tech category: %BD_FS_TECH_BCACHEFS-%BD_FS_TECH_MODE_QUERY
+ */
+BDFSBcachefsInfo* bd_fs_bcachefs_get_info (const gchar *mpoint, GError **error);
 
 typedef enum {
     BD_FS_SUPPORT_SET_LABEL = 1 << 1,

@@ -14,3 +14,4 @@ from .vfat_test import *
 from .xfs_test import *
 from .btrfs_test import *
 from .udf_test import *
+from .bcachefs_test import *
