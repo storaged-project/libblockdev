@@ -114,6 +114,49 @@ static gchar *print_value (uint64_t pretty_value, SkSmartAttributeUnit pretty_un
     return NULL;
 }
 
+struct ParseTempData {
+  guint attr_id;
+  guint64 value;
+  DriveDBAttr **drivedb_attrs;
+};
+
+static void parse_temp_attr_cb (G_GNUC_UNUSED SkDisk             *d,
+                                const SkSmartAttributeParsedData *a,
+                                void                             *user_data) {
+    struct ParseTempData *data = user_data;
+
+    if (a->id != data->attr_id)
+        return;
+    if ((data->attr_id == 194 || data->attr_id == 190) &&
+        a->pretty_unit != SK_SMART_ATTRIBUTE_UNIT_MKELVIN)
+        return;
+    /* TODO: Validate against drivedb when we have backwards mapping
+     *       from smartmontools attribute names back to libatasmart names.
+     *       At this point the well_known_attrs[] table serves only
+     *       for forward validation.
+     */
+    data->value = a->pretty_value;
+}
+
+static guint64 calculate_temperature(SkDisk *d, DriveDBAttr **drivedb_attrs) {
+    const guint temp_attrs[2] = {194, 190, /* 9, 220 */ };   /* as defined in smartmontools/atacmds.cpp:ata_return_temperature_value() */
+    unsigned long int i;
+
+    for (i = 0; i < G_N_ELEMENTS (temp_attrs); i++) {
+        struct ParseTempData parse_data = {
+            .attr_id = temp_attrs[i],
+            .drivedb_attrs = drivedb_attrs,
+            .value = 0,
+        };
+
+        if (sk_disk_smart_parse_attributes (d, parse_temp_attr_cb, &parse_data) != 0)
+            break;
+        if (parse_data.value != 0)
+            return parse_data.value;
+    }
+    return 0;
+}
+
 struct ParseData {
   GPtrArray *ptr_array;
   const SkIdentifyParsedData *identify_data;
@@ -207,7 +250,6 @@ static BDSmartATA * parse_sk_data (SkDisk *d, GError **error) {
     SkBool good = FALSE;
     SkBool available = FALSE;
     SkSmartOverall overall = SK_SMART_OVERALL_GOOD;
-    uint64_t temp_mkelvin = 0;
     uint64_t power_on_msec = 0;
     const SkSmartParsedData *parsed_data;
     BDSmartATA *data;
@@ -324,9 +366,6 @@ static BDSmartATA * parse_sk_data (SkDisk *d, GError **error) {
 
     sk_disk_smart_get_power_cycle (d, &data->power_cycle_count);
 
-    sk_disk_smart_get_temperature (d, &temp_mkelvin);
-    data->temperature = temp_mkelvin / 1000;
-
     ptr_array = g_ptr_array_new_full (0, (GDestroyNotify) bd_smart_ata_attribute_free);
     parse_data.ptr_array = ptr_array;
 #ifdef HAVE_DRIVEDB_H
@@ -336,6 +375,7 @@ static BDSmartATA * parse_sk_data (SkDisk *d, GError **error) {
                                                          parse_data.identify_data->firmware,
                                                          FALSE /* include_defaults */);
 #endif
+    data->temperature = calculate_temperature (d, parse_data.drivedb_attrs) / 1000;
 
     if (sk_disk_smart_parse_attributes (d, parse_attr_cb, &parse_data) != 0) {
         g_set_error (error, BD_SMART_ERROR, BD_SMART_ERROR_FAILED,
