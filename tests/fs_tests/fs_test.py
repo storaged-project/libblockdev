@@ -61,12 +61,18 @@ class FSNoDevTestCase(unittest.TestCase):
         except:
             cls.f2fs_avail = False
 
+        if not BlockDev.utils_have_kernel_module("f2fs"):
+            cls.f2fs_avail = False
+
         try:
             cls.nilfs2_avail = BlockDev.fs_is_tech_avail(BlockDev.FSTech.NILFS2,
                                                          BlockDev.FSTechMode.MKFS |
                                                          BlockDev.FSTechMode.RESIZE |
                                                          BlockDev.FSTechMode.SET_LABEL)
         except:
+            cls.nilfs2_avail = False
+
+        if not BlockDev.utils_have_kernel_module("nilfs2"):
             cls.nilfs2_avail = False
 
         try:
@@ -86,6 +92,9 @@ class FSNoDevTestCase(unittest.TestCase):
                                                         BlockDev.FSTechMode.CHECK |
                                                         BlockDev.FSTechMode.SET_LABEL)
         except:
+            cls.btrfs_avail = False
+
+        if not BlockDev.utils_have_kernel_module("btrfs"):
             cls.btrfs_avail = False
 
         try:
