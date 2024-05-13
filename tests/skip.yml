@@ -49,15 +49,3 @@
   skip_on:
     - arch: "i686"
       reason: "Cache attach/detach fails with ENOMEM on 32bit systems"
-
-- test: lvm_dbus_tests.LvmTestLVcreateRemove
-  skip_on:
-   - distro: "centos"
-     version: "8"
-     reason: "LVM DBus doesn't include error message from the command line on CentOS/RHEL 8"
-
-- test: nvme_test
-  skip_on:
-    - distro: "centos"
-      version: "8"
-      reason: "required version of libnvme is not available CentOS 8"
