@@ -286,16 +286,15 @@ class CryptoKeyslotContext(BlockDev.CryptoKeyslotContext):
             raise ValueError("Exactly one of 'passphrase', 'keyfile', 'keyring' and 'volume_key' must be specified")
         if passphrase:
             if isinstance(passphrase, str):
-                ret = BlockDev.CryptoKeyslotContext.new_passphrase(passphrase.encode("utf-8"))
+                return BlockDev.CryptoKeyslotContext.new_passphrase(passphrase.encode("utf-8"))
             else:
-                ret = BlockDev.CryptoKeyslotContext.new_passphrase(passphrase)
+                return BlockDev.CryptoKeyslotContext.new_passphrase(passphrase)
         if keyfile:
-            ret = BlockDev.CryptoKeyslotContext.new_keyfile(keyfile, keyfile_offset, key_size)
+            return BlockDev.CryptoKeyslotContext.new_keyfile(keyfile, keyfile_offset, key_size)
         if keyring:
-            ret = BlockDev.CryptoKeyslotContext.new_keyring(keyring)
+            return BlockDev.CryptoKeyslotContext.new_keyring(keyring)
         if volume_key:
-            ret = BlockDev.CryptoKeyslotContext.new_volume_key(volume_key)
-        return ret
+            return BlockDev.CryptoKeyslotContext.new_volume_key(volume_key)
     def __init__(self, *args, **kwargs):   # pylint: disable=unused-argument
         super(CryptoKeyslotContext, self).__init__()  #pylint: disable=bad-super-call
 CryptoKeyslotContext = override(CryptoKeyslotContext)
