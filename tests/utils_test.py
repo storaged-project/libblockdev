@@ -484,3 +484,25 @@ class UtilsLinuxKernelVersionTest(UtilsTestCase):
         self.assertEqual(ver.major, ver2.major)
         self.assertEqual(ver.minor, ver2.minor)
         self.assertEqual(ver.micro, ver2.micro)
+
+
+class UtilsKernelModuleTest(UtilsTestCase):
+    @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
+    def test_have_kernel_module(self):
+        """ Test checking for kernel modules """
+
+        have = BlockDev.utils_have_kernel_module("definitely-not-existing-kernel-module")
+        self.assertFalse(have)
+
+        # loop should be everywhere, right?
+        have = BlockDev.utils_have_kernel_module("loop")
+        self.assertTrue(have)
+
+        # lets check some filesystems support and compare with 'modprobe' results
+        for fs in ("ext2", "ext3", "ext4", "xfs", "btrfs"):
+            have_fs = BlockDev.utils_have_kernel_module(fs)
+            ret, _out, _err = run_command("modprobe --dry-run %s" % fs)
+            if ret == 0:
+                self.assertTrue(have_fs)
+            else:
+                self.assertFalse(have_fs)

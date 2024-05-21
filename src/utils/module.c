@@ -85,6 +85,7 @@ gboolean bd_utils_have_kernel_module (const gchar *module_name, GError **error) 
     gint ret = 0;
     struct kmod_ctx *ctx = NULL;
     struct kmod_module *mod = NULL;
+    struct kmod_list *list = NULL;
     gchar *null_config = NULL;
     const gchar *path = NULL;
     gboolean have_path = FALSE;
@@ -100,21 +101,30 @@ gboolean bd_utils_have_kernel_module (const gchar *module_name, GError **error) 
     }
     set_kmod_logging (ctx);
 
-    ret = kmod_module_new_from_name (ctx, module_name, &mod);
+    ret = kmod_module_new_from_lookup (ctx, module_name, &list);
     if (ret < 0) {
         g_set_error (error, BD_UTILS_MODULE_ERROR, BD_UTILS_MODULE_ERROR_FAIL,
                      "Failed to get the module: %s", strerror_l (-ret, c_locale));
+        kmod_unref (ctx);
+        kmod_module_unref_list (list);
+        freelocale (c_locale);
+        return FALSE;
+    }
+
+    if (list == NULL) {
         kmod_unref (ctx);
         freelocale (c_locale);
         return FALSE;
     }
 
+    mod = kmod_module_get_module (list);
     path = kmod_module_get_path (mod);
     have_path = (path != NULL) && (g_strcmp0 (path, "") != 0);
     if (!have_path) {
       builtin = kmod_module_get_initstate (mod) == KMOD_MODULE_BUILTIN;
     }
     kmod_module_unref (mod);
+    kmod_module_unref_list (list);
     kmod_unref (ctx);
     freelocale (c_locale);
 
