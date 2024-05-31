@@ -37,6 +37,8 @@
       - keyutils-libs-devel
       - libnvme-devel
       - e2fsprogs-devel
+      - json-glib-devel
+      - libatasmart-devel
     when: ansible_distribution == 'Fedora'
 
   - name: Install test dependencies (Fedora)
@@ -63,6 +65,7 @@
       - python3-packaging
       - python3-pylint
       - python3-yaml
+      - smartmontools
       - targetcli
       - udftools
       - volume_key
@@ -103,6 +106,8 @@
       - libfdisk-dev
       - libkeyutils-dev
       - libext2fs-dev
+      - libjson-glib-dev
+      - libatasmart-dev
     when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
   - name: Install test dependencies (Debian/Ubuntu)
@@ -126,6 +131,7 @@
       - python3-packaging
       - python3-pydbus
       - python3-yaml
+      - smartmontools
       - targetcli-fb
       - udftools
       - volume-key

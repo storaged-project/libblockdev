@@ -8,6 +8,8 @@ if WITH_NVME
 SUBDIRS += nvme
 endif
 
+SUBDIRS += smart
+
 lib_LTLIBRARIES =
 
 if WITH_BTRFS
@@ -182,6 +184,10 @@ endif
 
 if WITH_LVM
 libinclude_HEADERS += lvm.h
+else
+if WITH_LVM_DBUS
+libinclude_HEADERS += lvm.h
+endif
 endif
 
 if WITH_MDRAID

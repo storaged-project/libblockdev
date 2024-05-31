@@ -17,7 +17,7 @@ import yaml
 
 from utils import TestTags, get_version
 
-LIBDIRS = 'src/utils/.libs:src/plugins/.libs:src/plugins/fs/.libs:src/lib/.libs:src/plugins/nvme/.libs'
+LIBDIRS = 'src/utils/.libs:src/plugins/.libs:src/plugins/fs/.libs:src/lib/.libs:src/plugins/nvme/.libs:src/plugins/smart/.libs'
 GIDIR = 'src/lib'
 
 SKIP_CONFIG = 'skip.yml'
