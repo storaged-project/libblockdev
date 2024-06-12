@@ -40,7 +40,7 @@ gboolean print_lv_stats (const char *vg_name, const char *lv_name, GError **erro
     printf ("%s/%s:\n", vg_name, lv_name);
     printf ("  mode:      %13s\n", bd_lvm_cache_get_mode_str (stats->mode, error)); /* ignoring 'error', must be a valid mode */
     printf ("  LV size:      "); print_size (lv_data->size, TRUE);
-    printf ("  cache size:   "); print_size (stats->cache_size, TRUE);
+    printf ("  cache size:   "); print_size (stats->cache_size, FALSE); print_ratio (stats->cache_size, lv_data->size, TRUE, TRUE);
     printf ("  cache used:   "); print_size (stats->cache_used, FALSE); print_ratio (stats->cache_used, stats->cache_size, TRUE, TRUE);
     printf ("  read misses:  %10"G_GUINT64_FORMAT"\n", stats->read_misses);
     printf ("  read hits:    %10"G_GUINT64_FORMAT, stats->read_hits); print_ratio (stats->read_hits, stats->read_hits + stats->read_misses, TRUE, TRUE);
@@ -66,6 +66,7 @@ gboolean print_lv_stats_json(const char *vg_name, const char *lv_name, GError **
     printf ("  \"mode\": \"%s\",\n", bd_lvm_cache_get_mode_str (stats->mode, error)); /* ignoring 'error', must be a valid mode */
     printf ("  \"lv-size\": %"G_GUINT64_FORMAT",\n", lv_data->size);
     printf ("  \"cache-size\": %"G_GUINT64_FORMAT",\n", stats->cache_size);
+    printf ("  \"cache-size-pct\": %0.2f,\n", (double) stats->cache_size / lv_data->size);
     printf ("  \"cache-used\": %"G_GUINT64_FORMAT",\n", stats->cache_size);
     printf ("  \"cache-used-pct\": %0.2f,\n", (double) stats->cache_used / stats->cache_size);
     printf ("  \"read-misses\": %"G_GUINT64_FORMAT",\n", stats->read_misses);
