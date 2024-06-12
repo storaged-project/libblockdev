@@ -1,0 +1,22 @@
+# reverse dependency test for blivet
+enabled: false
+
+adjust+:
+  when: revdeps == yes
+  enabled: true
+
+prepare:
+    how: ansible
+    playbook:
+        - https://raw.githubusercontent.com/storaged-project/blivet/master/misc/install-test-dependencies.yml
+
+discover:
+    how: shell
+    url: https://github.com/storaged-project/blivet
+    ref: master
+    tests:
+      - name: all
+        test: make test
+
+execute:
+    how: tmt
