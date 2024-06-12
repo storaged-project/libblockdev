@@ -8,13 +8,13 @@ on:
 jobs:
   build:
     name: compilation
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     strategy:
       fail-fast: false
       matrix:
-        compiler: ['gcc-9', 'gcc-10', 'gcc-11', 'gcc-12', 'gcc-13',
-                   'clang-13', 'clang-14', 'clang-15', 'clang-16', 'clang-17']
+        compiler: ['gcc-10', 'gcc-11', 'gcc-12', 'gcc-13', 'gcc-14',
+                   'clang-14', 'clang-15', 'clang-16', 'clang-17', 'clang-18']
 
     steps:
     - uses: actions/checkout@v4
@@ -24,25 +24,13 @@ jobs:
         sudo apt -y install ansible
         ansible-playbook -b -i "localhost," -c local misc/install-test-dependencies.yml -e "test_dependencies=false"
 
-    - name: Enable additional repositories (gcc)
-      run: |
-        sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa
-        sudo apt update
-
-    - name: Enable additional repositories (clang)
-      run: |
-        wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
-        echo "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-16 main" | sudo tee /etc/apt/sources.list.d/llvm.list
-        echo "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-17 main" | sudo tee -a /etc/apt/sources.list.d/llvm.list
-        sudo apt update
-
     - name: Install compiler
       run: |
         sudo apt -y install ${{ matrix.compiler }}
 
     - name: Configure
       run: |
-        ./autogen.sh && CC=${{ matrix.compiler }} ./configure --without-nvme
+        ./autogen.sh && CC=${{ matrix.compiler }} ./configure
 
     - name: Make
       run: |
