@@ -285,26 +285,11 @@ static gchar ** parse_error_messages (JsonReader *reader) {
 
 #define MIN_JSON_FORMAT_VER 1     /* minimal json_format_version */
 
-static gboolean parse_smartctl_error (gint wait_status, const gchar *stdout, const gchar *stderr, JsonParser *parser, GError **error) {
-    gint status = 0;
+static gboolean parse_smartctl_error (gint status, const gchar *stdout, const gchar *stderr, JsonParser *parser, GError **error) {
     gint res;
     JsonReader *reader;
     gint64 ver_info[2] = { 0, 0 };
     GError *l_error = NULL;
-
-#if !GLIB_CHECK_VERSION(2, 69, 0)
-#define g_spawn_check_wait_status(x,y) (g_spawn_check_exit_status (x,y))
-#endif
-
-    if (!g_spawn_check_wait_status (wait_status, &l_error)) {
-        if (g_error_matches (l_error, G_SPAWN_ERROR, G_SPAWN_ERROR_FAILED)) {
-            /* process was terminated abnormally (e.g. using a signal) */
-            g_propagate_error (error, l_error);
-            return FALSE;
-        }
-        status = l_error->code;
-        g_clear_error (&l_error);
-    }
 
     if ((!stdout || strlen (stdout) == 0) &&
         (!stderr || strlen (stderr) == 0)) {
@@ -1021,6 +1006,7 @@ static BDSmartSCSI * parse_scsi_smart (JsonParser *parser, G_GNUC_UNUSED GError 
 /**
  * bd_smart_ata_get_info:
  * @device: device to check.
+ * @extra: (nullable) (array zero-terminated=1): extra options to pass through.
  * @error: (out) (optional): place to store error (if any).
  *
  * Retrieve SMART information from the drive.
@@ -1029,26 +1015,16 @@ static BDSmartSCSI * parse_scsi_smart (JsonParser *parser, G_GNUC_UNUSED GError 
  *
  * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_INFO
  */
-BDSmartATA * bd_smart_ata_get_info (const gchar *device, GError **error) {
+BDSmartATA * bd_smart_ata_get_info (const gchar *device, const BDExtraArg **extra, GError **error) {
     const gchar *args[8] = { "smartctl", "--info", "--health", "--capabilities", "--attributes", "--json", device, NULL };
-    gint wait_status = 0;
+    gint status = 0;
     gchar *stdout = NULL;
     gchar *stderr = NULL;
     JsonParser *parser;
     BDSmartATA *data = NULL;
     gboolean ret;
 
-    /* TODO: set UTF-8 locale for JSON? */
-    if (!g_spawn_sync (NULL /* working_directory */,
-                       (gchar **) args,
-                       NULL /* envp */,
-                       G_SPAWN_SEARCH_PATH,
-                       NULL /* child_setup */,
-                       NULL /* user_data */,
-                       &stdout,
-                       &stderr,
-                       &wait_status,
-                       error)) {
+    if (!bd_utils_exec_and_capture_output_no_progress (args, extra, &stdout, &stderr, &status, error)) {
         g_prefix_error (error, "Error getting ATA SMART info: ");
         return NULL;
     }
@@ -1059,7 +1035,7 @@ BDSmartATA * bd_smart_ata_get_info (const gchar *device, GError **error) {
         g_strstrip (stderr);
 
     parser = json_parser_new ();
-    ret = parse_smartctl_error (wait_status, stdout, stderr, parser, error);
+    ret = parse_smartctl_error (status, stdout, stderr, parser, error);
     g_free (stdout);
     g_free (stderr);
     if (! ret) {
@@ -1117,6 +1093,7 @@ BDSmartATA * bd_smart_ata_get_info_from_data (const guint8 *data, gsize data_len
 /**
  * bd_smart_scsi_get_info:
  * @device: device to check.
+ * @extra: (nullable) (array zero-terminated=1): extra options to pass through.
  * @error: (out) (optional): place to store error (if any).
  *
  * Retrieve SMART information from SCSI or SAS-compliant drive.
@@ -1125,26 +1102,16 @@ BDSmartATA * bd_smart_ata_get_info_from_data (const guint8 *data, gsize data_len
  *
  * Tech category: %BD_SMART_TECH_SCSI-%BD_SMART_TECH_MODE_INFO
  */
-BDSmartSCSI * bd_smart_scsi_get_info (const gchar *device, GError **error) {
-    const gchar *args[11] = { "smartctl", "--info", "--health", "--attributes", "--log=error", "--log=background",  "--json", "--device=scsi", device, NULL };
-    gint wait_status = 0;
+BDSmartSCSI * bd_smart_scsi_get_info (const gchar *device, const BDExtraArg **extra, GError **error) {
+    const gchar *args[9] = { "smartctl", "--info", "--health", "--attributes", "--log=error", "--log=background", "--json", device, NULL };
+    gint status = 0;
     gchar *stdout = NULL;
     gchar *stderr = NULL;
     JsonParser *parser;
     BDSmartSCSI *data = NULL;
     gboolean ret;
 
-    /* TODO: set UTF-8 locale for JSON? */
-    if (!g_spawn_sync (NULL /* working_directory */,
-                       (gchar **) args,
-                       NULL /* envp */,
-                       G_SPAWN_SEARCH_PATH,
-                       NULL /* child_setup */,
-                       NULL /* user_data */,
-                       &stdout,
-                       &stderr,
-                       &wait_status,
-                       error)) {
+    if (!bd_utils_exec_and_capture_output_no_progress (args, extra, &stdout, &stderr, &status, error)) {
         g_prefix_error (error, "Error getting SCSI SMART info: ");
         return NULL;
     }
@@ -1155,7 +1122,7 @@ BDSmartSCSI * bd_smart_scsi_get_info (const gchar *device, GError **error) {
         g_strstrip (stderr);
 
     parser = json_parser_new ();
-    ret = parse_smartctl_error (wait_status, stdout, stderr, parser, error);
+    ret = parse_smartctl_error (status, stdout, stderr, parser, error);
     g_free (stdout);
     g_free (stderr);
     if (! ret) {
@@ -1175,6 +1142,7 @@ BDSmartSCSI * bd_smart_scsi_get_info (const gchar *device, GError **error) {
  * bd_smart_set_enabled:
  * @device: SMART-capable device.
  * @enabled: whether to enable or disable the SMART functionality
+ * @extra: (nullable) (array zero-terminated=1): extra options to pass through.
  * @error: (out) (optional): place to store error (if any).
  *
  * Enables or disables SMART functionality on device.
@@ -1183,9 +1151,9 @@ BDSmartSCSI * bd_smart_scsi_get_info (const gchar *device, GError **error) {
  *
  * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_INFO
  */
-gboolean bd_smart_set_enabled (const gchar *device, gboolean enabled, GError **error) {
+gboolean bd_smart_set_enabled (const gchar *device, gboolean enabled, const BDExtraArg **extra, GError **error) {
     const gchar *args[5] = { "smartctl", "--json", "--smart=on", device, NULL };
-    gint wait_status = 0;
+    gint status = 0;
     gchar *stdout = NULL;
     gchar *stderr = NULL;
     JsonParser *parser;
@@ -1194,17 +1162,7 @@ gboolean bd_smart_set_enabled (const gchar *device, gboolean enabled, GError **e
     if (!enabled)
         args[2] = "--smart=off";
 
-    /* TODO: set UTF-8 locale for JSON? */
-    if (!g_spawn_sync (NULL /* working_directory */,
-                       (gchar **) args,
-                       NULL /* envp */,
-                       G_SPAWN_SEARCH_PATH,
-                       NULL /* child_setup */,
-                       NULL /* user_data */,
-                       &stdout,
-                       &stderr,
-                       &wait_status,
-                       error)) {
+    if (!bd_utils_exec_and_capture_output_no_progress (args, extra, &stdout, &stderr, &status, error)) {
         g_prefix_error (error, "Error setting SMART functionality: ");
         return FALSE;
     }
@@ -1215,7 +1173,7 @@ gboolean bd_smart_set_enabled (const gchar *device, gboolean enabled, GError **e
         g_strstrip (stderr);
 
     parser = json_parser_new ();
-    ret = parse_smartctl_error (wait_status, stdout, stderr, parser, error);
+    ret = parse_smartctl_error (status, stdout, stderr, parser, error);
     g_free (stdout);
     g_free (stderr);
     g_object_unref (parser);
@@ -1231,6 +1189,7 @@ gboolean bd_smart_set_enabled (const gchar *device, gboolean enabled, GError **e
  * bd_smart_device_self_test:
  * @device: device to trigger the test on.
  * @operation: #BDSmartSelfTestOp self-test operation.
+ * @extra: (nullable) (array zero-terminated=1): extra options to pass through.
  * @error: (out) (optional): place to store error (if any).
  *
  * Executes or aborts device self-test.
@@ -1239,9 +1198,9 @@ gboolean bd_smart_set_enabled (const gchar *device, gboolean enabled, GError **e
  *
  * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_SELFTEST
  */
-gboolean bd_smart_device_self_test (const gchar *device, BDSmartSelfTestOp operation, GError **error) {
+gboolean bd_smart_device_self_test (const gchar *device, BDSmartSelfTestOp operation, const BDExtraArg **extra, GError **error) {
     const gchar *args[5] = { "smartctl", "--json", "--test=", device, NULL };
-    gint wait_status = 0;
+    gint status = 0;
     gchar *stdout = NULL;
     gchar *stderr = NULL;
     JsonParser *parser;
@@ -1269,17 +1228,7 @@ gboolean bd_smart_device_self_test (const gchar *device, BDSmartSelfTestOp opera
             return FALSE;
     }
 
-    /* TODO: set UTF-8 locale for JSON? */
-    if (!g_spawn_sync (NULL /* working_directory */,
-                       (gchar **) args,
-                       NULL /* envp */,
-                       G_SPAWN_SEARCH_PATH,
-                       NULL /* child_setup */,
-                       NULL /* user_data */,
-                       &stdout,
-                       &stderr,
-                       &wait_status,
-                       error)) {
+    if (!bd_utils_exec_and_capture_output_no_progress (args, extra, &stdout, &stderr, &status, error)) {
         g_prefix_error (error, "Error executing SMART self-test: ");
         return FALSE;
     }
@@ -1290,7 +1239,7 @@ gboolean bd_smart_device_self_test (const gchar *device, BDSmartSelfTestOp opera
         g_strstrip (stderr);
 
     parser = json_parser_new ();
-    ret = parse_smartctl_error (wait_status, stdout, stderr, parser, error);
+    ret = parse_smartctl_error (status, stdout, stderr, parser, error);
     g_free (stdout);
     g_free (stderr);
     g_object_unref (parser);

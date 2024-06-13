@@ -395,6 +395,7 @@ static BDSmartATA * parse_sk_data (SkDisk *d, GError **error) {
 /**
  * bd_smart_ata_get_info:
  * @device: device to check.
+ * @extra: (nullable) (array zero-terminated=1): extra options to pass through.
  * @error: (out) (optional): place to store error (if any).
  *
  * Retrieve SMART information from the drive.
@@ -403,7 +404,7 @@ static BDSmartATA * parse_sk_data (SkDisk *d, GError **error) {
  *
  * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_INFO
  */
-BDSmartATA * bd_smart_ata_get_info (const gchar *device, GError **error) {
+BDSmartATA * bd_smart_ata_get_info (const gchar *device, G_GNUC_UNUSED const BDExtraArg **extra, GError **error) {
     SkDisk *d;
     BDSmartATA *data;
 
@@ -467,6 +468,7 @@ BDSmartATA * bd_smart_ata_get_info_from_data (const guint8 *data, gsize data_len
 /**
  * bd_smart_scsi_get_info:
  * @device: device to check.
+ * @extra: (nullable) (array zero-terminated=1): extra options to pass through.
  * @error: (out) (optional): place to store error (if any).
  *
  * Retrieve SMART information from SCSI or SAS-compliant drive.
@@ -475,7 +477,7 @@ BDSmartATA * bd_smart_ata_get_info_from_data (const guint8 *data, gsize data_len
  *
  * Tech category: %BD_SMART_TECH_SCSI-%BD_SMART_TECH_MODE_INFO
  */
-BDSmartSCSI * bd_smart_scsi_get_info (G_GNUC_UNUSED const gchar *device, GError **error) {
+BDSmartSCSI * bd_smart_scsi_get_info (G_GNUC_UNUSED const gchar *device, G_GNUC_UNUSED const BDExtraArg **extra, GError **error) {
     g_set_error (error, BD_SMART_ERROR, BD_SMART_ERROR_TECH_UNAVAIL, "SCSI SMART is unavailable with libatasmart");
     return FALSE;
 }
@@ -485,6 +487,7 @@ BDSmartSCSI * bd_smart_scsi_get_info (G_GNUC_UNUSED const gchar *device, GError 
  * bd_smart_set_enabled:
  * @device: SMART-capable device.
  * @enabled: whether to enable or disable the SMART functionality
+ * @extra: (nullable) (array zero-terminated=1): extra options to pass through.
  * @error: (out) (optional): place to store error (if any).
  *
  * Enables or disables SMART functionality on device.
@@ -493,7 +496,7 @@ BDSmartSCSI * bd_smart_scsi_get_info (G_GNUC_UNUSED const gchar *device, GError 
  *
  * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_INFO
  */
-gboolean bd_smart_set_enabled (G_GNUC_UNUSED const gchar *device, G_GNUC_UNUSED gboolean enabled, GError **error) {
+gboolean bd_smart_set_enabled (G_GNUC_UNUSED const gchar *device, G_GNUC_UNUSED gboolean enabled, G_GNUC_UNUSED const BDExtraArg **extra, GError **error) {
     g_set_error (error, BD_SMART_ERROR, BD_SMART_ERROR_TECH_UNAVAIL, "Enabling/disabling ATA SMART functionality is unavailable with libatasmart");
     return FALSE;
 }
@@ -503,6 +506,7 @@ gboolean bd_smart_set_enabled (G_GNUC_UNUSED const gchar *device, G_GNUC_UNUSED 
  * bd_smart_device_self_test:
  * @device: device to trigger the test on.
  * @operation: #BDSmartSelfTestOp self-test operation.
+ * @extra: (nullable) (array zero-terminated=1): extra options to pass through.
  * @error: (out) (optional): place to store error (if any).
  *
  * Executes or aborts device self-test.
@@ -511,7 +515,7 @@ gboolean bd_smart_set_enabled (G_GNUC_UNUSED const gchar *device, G_GNUC_UNUSED 
  *
  * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_SELFTEST
  */
-gboolean bd_smart_device_self_test (const gchar *device, BDSmartSelfTestOp operation, GError **error) {
+gboolean bd_smart_device_self_test (const gchar *device, BDSmartSelfTestOp operation, G_GNUC_UNUSED const BDExtraArg **extra, GError **error) {
     SkDisk *d;
     SkSmartSelfTest op;
     gboolean ret;

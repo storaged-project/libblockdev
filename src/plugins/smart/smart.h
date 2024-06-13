@@ -1,5 +1,6 @@
 #include <glib.h>
 #include <glib-object.h>
+#include <blockdev/utils.h>
 
 #ifndef BD_SMART
 #define BD_SMART
@@ -439,17 +440,21 @@ gboolean bd_smart_is_tech_avail (BDSmartTech tech, guint64 mode, GError **error)
 
 
 BDSmartATA *   bd_smart_ata_get_info            (const gchar        *device,
+                                                 const BDExtraArg  **extra,
                                                  GError            **error);
 BDSmartATA *   bd_smart_ata_get_info_from_data  (const guint8       *data,
                                                  gsize               data_len,
                                                  GError            **error);
 BDSmartSCSI *  bd_smart_scsi_get_info           (const gchar        *device,
+                                                 const BDExtraArg  **extra,
                                                  GError            **error);
 gboolean       bd_smart_set_enabled             (const gchar        *device,
                                                  gboolean            enabled,
+                                                 const BDExtraArg  **extra,
                                                  GError            **error);
 gboolean       bd_smart_device_self_test        (const gchar        *device,
                                                  BDSmartSelfTestOp   operation,
+                                                 const BDExtraArg  **extra,
                                                  GError            **error);
 
 #endif  /* BD_SMART */
