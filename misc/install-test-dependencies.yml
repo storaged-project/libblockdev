@@ -87,7 +87,11 @@
 
   - name: Add source repositories (Debian/Ubuntu)
     shell: "grep '^deb ' /etc/apt/sources.list | perl -pe 's/deb /deb-src /' >> /etc/apt/sources.list"
-    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    when: ansible_distribution == 'Debian' or (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version < '24')
+
+  - name: Add source repositories (Debian/Ubuntu)
+    shell: "sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/ubuntu.sources"
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version >= '24'
 
   - name: Update apt cache (Debian/Ubuntu)
     apt:
