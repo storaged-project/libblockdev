@@ -96,28 +96,52 @@ class SmartmontoolsTest(unittest.TestCase):
         # non-existing device
         msg = r".*Error getting ATA SMART info: /dev/.*: Unable to detect device type"
         with self.assertRaisesRegex(GLib.GError, msg):
-            BlockDev.smart_ata_get_info("/dev/nonexistent")
+            BlockDev.smart_ata_get_info("/dev/nonexistent", None)
+        msg = r".*Error getting ATA SMART info: /dev/.*: Unknown device type 'xxx'"
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_ata_get_info("/dev/nonexistent", [BlockDev.ExtraArg.new("--device=xxx", "")])
+        msg = r".*Error getting ATA SMART info: Smartctl open device: /dev/.* failed: No such device"
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_ata_get_info("/dev/nonexistent", [BlockDev.ExtraArg.new("--device=ata", "")])
 
         # LIO device (SCSI)
         self._setup_lio()
         self.addCleanup(self._clean_lio)
         msg = r"Error parsing smartctl JSON data: The member .ata_smart_data. is not defined in the object at the current position."
         with self.assertRaisesRegex(GLib.GError, msg):
-            BlockDev.smart_ata_get_info(self.lio_dev)
+            BlockDev.smart_ata_get_info(self.lio_dev, None)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_ata_get_info(self.lio_dev, [BlockDev.ExtraArg.new("--device=scsi", "")])
+        msg = r"Error getting ATA SMART info: Device open failed or device did not return an IDENTIFY DEVICE structure."
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_ata_get_info(self.lio_dev, [BlockDev.ExtraArg.new("--device=ata", "")])
+        msg = r"Error getting ATA SMART info: Read NVMe Identify Controller failed: NVME_IOCTL_ADMIN_CMD: Invalid argument"
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_ata_get_info(self.lio_dev, [BlockDev.ExtraArg.new("--device=nvme", "")])
 
         # loop device
         self._setup_loop()
         self.addCleanup(self._clean_loop)
         msg = r".*Error getting ATA SMART info: /dev/.*: Unable to detect device type"
         with self.assertRaisesRegex(GLib.GError, msg):
-            BlockDev.smart_ata_get_info(self.loop_dev)
+            BlockDev.smart_ata_get_info(self.loop_dev, None)
+        msg = r"Error getting ATA SMART info: Device open failed or device did not return an IDENTIFY DEVICE structure."
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_ata_get_info(self.loop_dev, [BlockDev.ExtraArg.new("--device=scsi", "")])
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_ata_get_info(self.loop_dev, [BlockDev.ExtraArg.new("--device=ata", "")])
 
         # scsi_debug
         self._setup_scsi_debug()
         self.addCleanup(self._clean_scsi_debug)
         msg = r"Error parsing smartctl JSON data: The member .ata_smart_data. is not defined in the object at the current position."
         with self.assertRaisesRegex(GLib.GError, msg):
-            BlockDev.smart_ata_get_info(self.scsi_debug_dev)
+            BlockDev.smart_ata_get_info(self.scsi_debug_dev, None)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_ata_get_info(self.scsi_debug_dev, [BlockDev.ExtraArg.new("--device=scsi", "")])
+        msg = r"Error getting ATA SMART info: Device open failed or device did not return an IDENTIFY DEVICE structure."
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_ata_get_info(self.scsi_debug_dev, [BlockDev.ExtraArg.new("--device=ata", "")])
 
     @tag_test(TestTags.CORE)
     def test_ata_real_dumps_fake_tool(self):
@@ -213,6 +237,11 @@ class SmartmontoolsTest(unittest.TestCase):
             BlockDev.smart_set_enabled("/dev/nonexistent", False)
         with self.assertRaisesRegex(GLib.GError, msg):
             BlockDev.smart_set_enabled("/dev/nonexistent", True)
+        msg = r"Error setting SMART functionality: Smartctl open device: /dev/.* failed: No such device"
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled("/dev/nonexistent", False, [BlockDev.ExtraArg.new("--device=ata", "")])
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled("/dev/nonexistent", True, [BlockDev.ExtraArg.new("--device=ata", "")])
 
         # LIO device (SCSI)
         self._setup_lio()
@@ -220,8 +249,16 @@ class SmartmontoolsTest(unittest.TestCase):
         msg = r"Error setting SMART functionality: Some SMART or other ATA command to the disk failed, or there was a checksum error in a SMART data structure."
         with self.assertRaisesRegex(GLib.GError, msg):
             BlockDev.smart_set_enabled(self.lio_dev, False)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled(self.lio_dev, False, [BlockDev.ExtraArg.new("--device=scsi", "")])
         # smartctl doesn't report failure when turning SMART on
         BlockDev.smart_set_enabled(self.lio_dev, True)
+        BlockDev.smart_set_enabled(self.lio_dev, True, [BlockDev.ExtraArg.new("--device=scsi", "")])
+        msg = r"Error setting SMART functionality: Device open failed or device did not return an IDENTIFY DEVICE structure."
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled(self.lio_dev, False, [BlockDev.ExtraArg.new("--device=ata", "")])
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled(self.lio_dev, True, [BlockDev.ExtraArg.new("--device=ata", "")])
 
         # loop device
         self._setup_loop()
@@ -232,12 +269,28 @@ class SmartmontoolsTest(unittest.TestCase):
             BlockDev.smart_set_enabled(self.loop_dev, False)
         with self.assertRaisesRegex(GLib.GError, msg):
             BlockDev.smart_set_enabled(self.loop_dev, True)
+        msg = r"Error setting SMART functionality: Device open failed or device did not return an IDENTIFY DEVICE structure."
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled(self.loop_dev, False, [BlockDev.ExtraArg.new("--device=scsi", "")])
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled(self.loop_dev, True, [BlockDev.ExtraArg.new("--device=scsi", "")])
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled(self.loop_dev, False, [BlockDev.ExtraArg.new("--device=ata", "")])
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled(self.loop_dev, True, [BlockDev.ExtraArg.new("--device=ata", "")])
 
         # scsi_debug
         self._setup_scsi_debug()
         self.addCleanup(self._clean_scsi_debug)
         BlockDev.smart_set_enabled(self.scsi_debug_dev, False)
         BlockDev.smart_set_enabled(self.scsi_debug_dev, True)
+        BlockDev.smart_set_enabled(self.scsi_debug_dev, False, [BlockDev.ExtraArg.new("--device=scsi", "")])
+        BlockDev.smart_set_enabled(self.scsi_debug_dev, True, [BlockDev.ExtraArg.new("--device=scsi", "")])
+        msg = r"Error setting SMART functionality: Device open failed or device did not return an IDENTIFY DEVICE structure."
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled(self.scsi_debug_dev, False, [BlockDev.ExtraArg.new("--device=ata", "")])
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_set_enabled(self.scsi_debug_dev, True, [BlockDev.ExtraArg.new("--device=ata", "")])
 
     @tag_test(TestTags.CORE)
     def test_smart_selftest(self):
@@ -247,32 +300,48 @@ class SmartmontoolsTest(unittest.TestCase):
             raise unittest.SkipTest("smartctl executable not found in $PATH, skipping.")
 
         # non-existing device
-        msg = r"Error executing SMART self-test: /dev/.*: Unable to detect device type"
         for t in [BlockDev.SmartSelfTestOp.OFFLINE, BlockDev.SmartSelfTestOp.SHORT,
                   BlockDev.SmartSelfTestOp.LONG, BlockDev.SmartSelfTestOp.CONVEYANCE,
                   BlockDev.SmartSelfTestOp.ABORT]:
+            msg = r"Error executing SMART self-test: /dev/.*: Unable to detect device type"
             with self.assertRaisesRegex(GLib.GError, msg):
                 BlockDev.smart_device_self_test("/dev/nonexistent", t)
+            msg = r"Error executing SMART self-test: /dev/.*: Unknown device type 'xxx'"
+            with self.assertRaisesRegex(GLib.GError, msg):
+                BlockDev.smart_device_self_test("/dev/nonexistent", t, [BlockDev.ExtraArg.new("--device=xxx", "")])
+            msg = r"Error executing SMART self-test: Smartctl open device: /dev/.* failed: No such device"
+            with self.assertRaisesRegex(GLib.GError, msg):
+                BlockDev.smart_device_self_test("/dev/nonexistent", t, [BlockDev.ExtraArg.new("--device=scsi", "")])
 
         # LIO device (SCSI)
         self._setup_lio()
         self.addCleanup(self._clean_lio)
-        msg = r"Error executing SMART self-test: Some SMART or other ATA command to the disk failed, or there was a checksum error in a SMART data structure."
         for t in [BlockDev.SmartSelfTestOp.OFFLINE, BlockDev.SmartSelfTestOp.SHORT,
                   BlockDev.SmartSelfTestOp.LONG, BlockDev.SmartSelfTestOp.ABORT]:
+            msg = r"Error executing SMART self-test: Some SMART or other ATA command to the disk failed, or there was a checksum error in a SMART data structure."
             with self.assertRaisesRegex(GLib.GError, msg):
                 BlockDev.smart_device_self_test(self.lio_dev, t)
+            with self.assertRaisesRegex(GLib.GError, msg):
+                BlockDev.smart_device_self_test(self.lio_dev, t, [BlockDev.ExtraArg.new("--device=scsi", "")])
+            msg = r"Error executing SMART self-test: Device open failed or device did not return an IDENTIFY DEVICE structure."
+            with self.assertRaisesRegex(GLib.GError, msg):
+                BlockDev.smart_device_self_test(self.lio_dev, t, [BlockDev.ExtraArg.new("--device=ata", "")])
         BlockDev.smart_device_self_test(self.lio_dev, BlockDev.SmartSelfTestOp.CONVEYANCE)
 
         # loop device
         self._setup_loop()
         self.addCleanup(self._clean_loop)
-        msg = r"Error executing SMART self-test: /dev/.*: Unable to detect device type"
         for t in [BlockDev.SmartSelfTestOp.OFFLINE, BlockDev.SmartSelfTestOp.SHORT,
                   BlockDev.SmartSelfTestOp.LONG, BlockDev.SmartSelfTestOp.CONVEYANCE,
                   BlockDev.SmartSelfTestOp.ABORT]:
+            msg = r"Error executing SMART self-test: /dev/.*: Unable to detect device type"
             with self.assertRaisesRegex(GLib.GError, msg):
                 BlockDev.smart_device_self_test(self.loop_dev, t)
+            msg = r"Error executing SMART self-test: Device open failed or device did not return an IDENTIFY DEVICE structure."
+            with self.assertRaisesRegex(GLib.GError, msg):
+                BlockDev.smart_device_self_test(self.loop_dev, t, [BlockDev.ExtraArg.new("--device=ata", "")])
+            with self.assertRaisesRegex(GLib.GError, msg):
+                BlockDev.smart_device_self_test(self.loop_dev, t, [BlockDev.ExtraArg.new("--device=scsi", "")])
 
         # scsi_debug
         self._setup_scsi_debug()
@@ -281,6 +350,10 @@ class SmartmontoolsTest(unittest.TestCase):
                   BlockDev.SmartSelfTestOp.LONG, BlockDev.SmartSelfTestOp.CONVEYANCE,
                   BlockDev.SmartSelfTestOp.ABORT]:
             BlockDev.smart_device_self_test(self.scsi_debug_dev, t)
+            BlockDev.smart_device_self_test(self.scsi_debug_dev, t, [BlockDev.ExtraArg.new("--device=scsi", "")])
+            msg = r"Error executing SMART self-test: Device open failed or device did not return an IDENTIFY DEVICE structure."
+            with self.assertRaisesRegex(GLib.GError, msg):
+                BlockDev.smart_device_self_test(self.scsi_debug_dev, t, [BlockDev.ExtraArg.new("--device=ata", "")])
 
     @tag_test(TestTags.CORE)
     def test_scsi_info(self):
@@ -290,29 +363,49 @@ class SmartmontoolsTest(unittest.TestCase):
             raise unittest.SkipTest("smartctl executable not found in $PATH, skipping.")
 
         # non-existing device
-        msg = r".*Error getting SCSI SMART info: Smartctl open device: /dev/.* failed: No such device"
+        msg = r"Error getting SCSI SMART info: /dev/.*: Unable to detect device type"
         with self.assertRaisesRegex(GLib.GError, msg):
-            BlockDev.smart_scsi_get_info("/dev/nonexistent")
+            BlockDev.smart_scsi_get_info("/dev/nonexistent", None)
+        msg = r"Error getting SCSI SMART info: Smartctl open device: /dev/.* failed: No such device"
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_scsi_get_info("/dev/nonexistent", [BlockDev.ExtraArg.new("--device=scsi", "")])
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_scsi_get_info("/dev/nonexistent", [BlockDev.ExtraArg.new("--device=ata", "")])
 
         # LIO device (SCSI)
         self._setup_lio()
-        msg = r".*Error getting SCSI SMART info: Some SMART or other ATA command to the disk failed, or there was a checksum error in a SMART data structure."
+        msg = r"Error getting SCSI SMART info: Some SMART or other ATA command to the disk failed, or there was a checksum error in a SMART data structure."
         with self.assertRaisesRegex(GLib.GError, msg):
-            BlockDev.smart_scsi_get_info(self.lio_dev)
+            BlockDev.smart_scsi_get_info(self.lio_dev, None)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_scsi_get_info(self.lio_dev, [BlockDev.ExtraArg.new("--device=scsi", "")])
+        msg = r"Error getting SCSI SMART info: Device open failed or device did not return an IDENTIFY DEVICE structure."
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_scsi_get_info(self.lio_dev, [BlockDev.ExtraArg.new("--device=ata", "")])
 
         # loop device
         self._setup_loop()
         self.addCleanup(self._clean_loop)
+        msg = r"Error getting SCSI SMART info: /dev/.*: Unable to detect device type"
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_scsi_get_info(self.loop_dev, None)
         msg = r"Error getting SCSI SMART info: Device open failed or device did not return an IDENTIFY DEVICE structure."
         with self.assertRaisesRegex(GLib.GError, msg):
-            BlockDev.smart_scsi_get_info(self.loop_dev)
+            BlockDev.smart_scsi_get_info(self.loop_dev, [BlockDev.ExtraArg.new("--device=scsi", "")])
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_scsi_get_info(self.loop_dev, [BlockDev.ExtraArg.new("--device=ata", "")])
 
         # scsi_debug
         self._setup_scsi_debug()
         self.addCleanup(self._clean_scsi_debug)
-        msg = r".*Error getting SCSI SMART info: Some SMART or other ATA command to the disk failed, or there was a checksum error in a SMART data structure."
+        msg = r"Error getting SCSI SMART info: Some SMART or other ATA command to the disk failed, or there was a checksum error in a SMART data structure."
         with self.assertRaisesRegex(GLib.GError, msg):
-            BlockDev.smart_scsi_get_info(self.scsi_debug_dev)
+            BlockDev.smart_scsi_get_info(self.scsi_debug_dev, None)
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_scsi_get_info(self.scsi_debug_dev, [BlockDev.ExtraArg.new("--device=scsi", "")])
+        msg = r"Error getting SCSI SMART info: Device open failed or device did not return an IDENTIFY DEVICE structure."
+        with self.assertRaisesRegex(GLib.GError, msg):
+            BlockDev.smart_scsi_get_info(self.scsi_debug_dev, [BlockDev.ExtraArg.new("--device=ata", "")])
 
     @tag_test(TestTags.CORE)
     def test_scsi_real_dumps(self):
