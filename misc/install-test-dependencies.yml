@@ -52,6 +52,7 @@
       - exfatprogs
       - f2fs-tools
       - glibc-all-langpacks
+      - kernel-modules-extra
       - lvm2-dbusd
       - mdadm
       - ndctl
