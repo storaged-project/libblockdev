@@ -135,6 +135,37 @@ static void log_done (guint64 task_id, gint exit_code) {
     return;
 }
 
+static const gchar ** _append_extra_args (const gchar **argv, const BDExtraArg **extra) {
+    const gchar **args = NULL;
+    guint args_len = 0;
+    const BDExtraArg **extra_p = NULL;
+    const gchar **arg_p = NULL;
+    guint i = 0;
+
+    if (!extra)
+        return NULL;
+
+    args_len = g_strv_length ((gchar **) argv);
+    for (extra_p = extra; *extra_p; extra_p++) {
+        if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "") != 0))
+            args_len++;
+        if ((*extra_p)->val && (g_strcmp0 ((*extra_p)->val, "") != 0))
+            args_len++;
+    }
+
+    args = g_new0 (const gchar *, args_len + 1);
+    for (arg_p = argv; *arg_p; arg_p++)
+        args[i++] = *arg_p;
+    for (extra_p = extra; *extra_p; extra_p++) {
+        if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "") != 0))
+            args[i++] = (*extra_p)->opt;
+        if ((*extra_p)->val && (g_strcmp0 ((*extra_p)->val, "") != 0))
+            args[i++] = (*extra_p)->val;
+    }
+
+    return args;
+}
+
 /**
  * bd_utils_exec_and_report_error:
  * @argv: (array zero-terminated=1): the argv array for the call
@@ -179,38 +210,12 @@ gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtr
     gchar *stderr_data = NULL;
     guint64 task_id = 0;
     const gchar **args = NULL;
-    guint args_len = 0;
-    const gchar **arg_p = NULL;
-    const BDExtraArg **extra_p = NULL;
     gint exit_status = 0;
-    guint i = 0;
     gchar **old_env = NULL;
     gchar **new_env = NULL;
     GError *l_error = NULL;
 
-    if (extra) {
-        args_len = g_strv_length ((gchar **) argv);
-        for (extra_p=extra; *extra_p; extra_p++) {
-            if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "") != 0))
-                args_len++;
-            if ((*extra_p)->val && (g_strcmp0 ((*extra_p)->val, "") != 0))
-                args_len++;
-        }
-        args = g_new0 (const gchar*, args_len + 1);
-        for (arg_p=argv; *arg_p; arg_p++, i++)
-            args[i] = *arg_p;
-        for (extra_p=extra; *extra_p; extra_p++) {
-            if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "") != 0)) {
-                args[i] = (*extra_p)->opt;
-                i++;
-            }
-            if ((*extra_p)->val && (g_strcmp0 ((*extra_p)->val, "") != 0)) {
-                args[i] = (*extra_p)->val;
-                i++;
-            }
-        }
-        args[i] = NULL;
-    }
+    args = _append_extra_args (argv, extra);
 
     old_env = g_get_environ ();
     new_env = g_environ_setenv (old_env, "LC_ALL", "C.UTF-8", TRUE);
@@ -273,7 +278,6 @@ gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtr
     g_free (stderr_data);
     return TRUE;
 }
-
 
 /* buffer size in bytes used to read from stdout and stderr */
 #define _EXEC_BUF_SIZE 64*1024
@@ -358,10 +362,7 @@ _process_fd_event (gint fd, struct pollfd *poll_fd, GString *read_buffer, GStrin
 
 static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExtraArg **extra, BDUtilsProgExtract prog_extract, const gchar *input, gint *proc_status, gchar **stdout, gchar **stderr, GError **error) {
     const gchar **args = NULL;
-    guint args_len = 0;
-    const gchar **arg_p = NULL;
     gchar *args_str = NULL;
-    const BDExtraArg **extra_p = NULL;
     guint64 task_id = 0;
     guint64 progress_id = 0;
     gchar *msg = NULL;
@@ -373,7 +374,6 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
     gint status = 0;
     gboolean ret = FALSE;
     gint poll_status = 0;
-    guint i = 0;
     guint8 completion = 0;
     struct pollfd fds[2] = { ZERO_INIT, ZERO_INIT };
     int flags;
@@ -390,30 +390,7 @@ static gboolean _utils_exec_and_report_progress (const gchar **argv, const BDExt
     gboolean success = TRUE;
     GError *l_error = NULL;
 
-    /* TODO: share this code between functions */
-    if (extra) {
-        args_len = g_strv_length ((gchar **) argv);
-        for (extra_p=extra; *extra_p; extra_p++) {
-            if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "") != 0))
-                args_len++;
-            if ((*extra_p)->val && (g_strcmp0 ((*extra_p)->val, "") != 0))
-                args_len++;
-        }
-        args = g_new0 (const gchar*, args_len + 1);
-        for (arg_p=argv; *arg_p; arg_p++, i++)
-            args[i] = *arg_p;
-        for (extra_p=extra; *extra_p; extra_p++) {
-            if ((*extra_p)->opt && (g_strcmp0 ((*extra_p)->opt, "") != 0)) {
-                args[i] = (*extra_p)->opt;
-                i++;
-            }
-            if ((*extra_p)->val && (g_strcmp0 ((*extra_p)->val, "") != 0)) {
-                args[i] = (*extra_p)->val;
-                i++;
-            }
-        }
-        args[i] = NULL;
-    }
+    args = _append_extra_args (argv, extra);
 
     task_id = log_running (args ? args : argv);
 
