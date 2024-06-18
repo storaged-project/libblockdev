@@ -85,6 +85,11 @@ jobs:
   dist_git_branches:
     - fedora-branched
 
+- job: tests
+  trigger: pull_request
+  targets:
+    - fedora-latest-stable
+
 # run tests for libblockdev consumers, see plans/ with `revdeps == yes`
 - job: tests
   identifier: revdeps
