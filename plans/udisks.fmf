@@ -1,0 +1,22 @@
+# reverse dependency test for udisks
+enabled: false
+
+adjust+:
+  when: revdeps_udisks == yes
+  enabled: true
+
+prepare:
+    how: ansible
+    playbook:
+        - https://raw.githubusercontent.com/storaged-project/udisks/master/misc/install-test-dependencies.yml
+
+discover:
+    how: shell
+    url: https://github.com/storaged-project/udisks
+    ref: master
+    tests:
+      - name: all
+        test: ./autogen.sh --enable-modules && make -j && sudo make dbus-tests
+
+execute:
+    how: tmt
