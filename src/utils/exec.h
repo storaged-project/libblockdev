@@ -66,6 +66,7 @@ gboolean bd_utils_exec_and_report_error (const gchar **argv, const BDExtraArg **
 gboolean bd_utils_exec_and_report_error_no_progress (const gchar **argv, const BDExtraArg **extra, GError **error);
 gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtraArg **extra, gint *status, GError **error);
 gboolean bd_utils_exec_and_capture_output (const gchar **argv, const BDExtraArg **extra, gchar **output, GError **error);
+gboolean bd_utils_exec_and_capture_output_no_progress (const gchar **argv, const BDExtraArg **extra, gchar **output, gchar **stderr, gint *status, GError **error);
 gboolean bd_utils_exec_and_report_progress (const gchar **argv, const BDExtraArg **extra, BDUtilsProgExtract prog_extract, gint *proc_status, GError **error);
 gboolean bd_utils_exec_with_input (const gchar **argv, const gchar *input, const BDExtraArg **extra, GError **error);
 gint bd_utils_version_cmp (const gchar *ver_string1, const gchar *ver_string2, GError **error);

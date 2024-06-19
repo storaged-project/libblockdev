@@ -196,15 +196,17 @@ gboolean bd_utils_exec_and_report_error_no_progress (const gchar **argv, const B
 }
 
 /**
- * bd_utils_exec_and_report_status_error:
+ * bd_utils_exec_and_capture_output_no_progress:
  * @argv: (array zero-terminated=1): the argv array for the call
  * @extra: (nullable) (array zero-terminated=1): extra arguments
- * @status: (out): place to store the status
+ * @output: (out) (optional): place to store stdout to
+ * @stderr: (out) (optional): place to store stderr to
+ * @status: (out): place to store the process return code
  * @error: (out) (optional): place to store error (if any)
  *
- * Returns: whether the @argv was successfully executed (no error and exit code 0) or not
+ * Returns: whether the @argv was successfully executed capturing the output or not
  */
-gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtraArg **extra, gint *status, GError **error) {
+gboolean bd_utils_exec_and_capture_output_no_progress (const gchar **argv, const BDExtraArg **extra, gchar **output, gchar **stderr, gint *status, GError **error) {
     gboolean success = FALSE;
     gchar *stdout_data = NULL;
     gchar *stderr_data = NULL;
@@ -224,14 +226,13 @@ gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtr
     task_id = log_running (args ? args : argv);
     success = g_spawn_sync (NULL, args ? (gchar **) args : (gchar **) argv, new_env, G_SPAWN_SEARCH_PATH,
                             NULL, NULL, &stdout_data, &stderr_data, &exit_status, error);
+    g_strfreev (new_env);
     if (!success) {
         /* error is already populated from the call */
-        g_strfreev (new_env);
         g_free (stdout_data);
         g_free (stderr_data);
         return FALSE;
     }
-    g_strfreev (new_env);
 
     /* g_spawn_sync set the status in the same way waitpid() does, we need
        to get the process exit code manually (this is similar to calling
@@ -259,24 +260,46 @@ gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtr
     log_done (task_id, *status);
 
     g_free (args);
+    if (output)
+        *output = stdout_data;
+    else
+        g_free (stdout_data);
+    if (stderr)
+        *stderr = stderr_data;
+    else
+        g_free (stderr_data);
 
-    if (*status != 0) {
-        if (stderr_data && (g_strcmp0 ("", stderr_data) != 0)) {
+    return TRUE;
+}
+
+/**
+ * bd_utils_exec_and_report_status_error:
+ * @argv: (array zero-terminated=1): the argv array for the call
+ * @extra: (nullable) (array zero-terminated=1): extra arguments
+ * @status: (out): place to store the status
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether the @argv was successfully executed (no error and exit code 0) or not
+ */
+gboolean bd_utils_exec_and_report_status_error (const gchar **argv, const BDExtraArg **extra, gint *status, GError **error) {
+    gboolean ret;
+    gchar *stdout_data = NULL;
+    gchar *stderr_data = NULL;
+
+    ret = bd_utils_exec_and_capture_output_no_progress (argv, extra, &stdout_data, &stderr_data, status, error);
+
+    if (ret && *status != 0) {
+        if (stderr_data && (g_strcmp0 ("", stderr_data) != 0))
             g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
                          "Process reported exit code %d: %s", *status, stderr_data);
-            g_free (stdout_data);
-        } else {
+        else
             g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_FAILED,
                          "Process reported exit code %d: %s", *status, stdout_data);
-            g_free (stderr_data);
-        }
-
-        return FALSE;
+        ret = FALSE;
     }
-
     g_free (stdout_data);
     g_free (stderr_data);
-    return TRUE;
+    return ret;
 }
 
 /* buffer size in bytes used to read from stdout and stderr */
