@@ -90,9 +90,9 @@ jobs:
   targets:
     - fedora-latest-stable
 
-# run tests for libblockdev consumers, see plans/ with `revdeps == yes`
+# run tests for libblockdev consumers, see plans/ with `revdeps_blivet == yes`
 - job: tests
-  identifier: revdeps
+  identifier: revdeps_blivet
   trigger: pull_request
   notifications:
     failure_comment:
@@ -106,7 +106,24 @@ jobs:
           id: https://copr.fedorainfracloud.org/coprs/g/storage/blivet-daily/repo/fedora-$releasever/group_storage-blivet-daily-fedora-$releasever.repo
         tmt:
           context:
-            revdeps: "yes"
+            revdeps_blivet: "yes"
+
+- job: tests
+  identifier: revdeps_udisks
+  trigger: pull_request
+  notifications:
+    failure_comment:
+      message: "udisks tests failed for commit {commit_sha}. @vojtechtrefny @tbzatek please check."
+  targets:
+    - fedora-latest-stable
+  tf_extra_params:
+    environments:
+      - artifacts:
+        - type: repository-file
+          id: https://copr.fedorainfracloud.org/coprs/g/storage/udisks-daily/repo/fedora-$releasever/group_storage-udisks-daily-fedora-$releasever.repo
+        tmt:
+          context:
+            revdeps_udisks: "yes"
 
 srpm_build_deps:
  - make

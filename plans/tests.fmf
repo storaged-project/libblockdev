@@ -1,7 +1,7 @@
 summary: Run tests
 
 adjust+:
-  when: revdeps == yes
+  when: revdeps_blivet == yes or revdeps_udisks == yes
   enabled: false
 
 prepare:

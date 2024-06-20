@@ -2,7 +2,7 @@
 enabled: false
 
 adjust+:
-  when: revdeps == yes
+  when: revdeps_blivet == yes
   enabled: true
 
 prepare:
