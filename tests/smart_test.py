@@ -19,7 +19,9 @@ class SMARTTest(unittest.TestCase):
     # dumps from real drives, both HDD and SSD
     SKDUMPS = ["TOSHIBA_THNSNH128GBST", "Hitachi_HDS721010CLA632", "WDC_WD20EARS-00MVWB0",
                "SAMSUNG_HS122JC", "SAMSUNG_MMCRE28G5MXP-0VBH1", "IBM_IC25N020ATCS04-0",
-               "Maxtor_6Y120P0", "SiliconPower_SSD_SBFM61.3"]
+               "Maxtor_6Y120P0", "SiliconPower_SSD_SBFM61.3", "Patriot_Burst_240GB",
+               "KINGSTON_SA400S37480G_SBFKQ13", "GIGABYTE_GP-GSTFS31100TNTD",
+               "Biwintech_SSD_SX500"]
 
     @classmethod
     def setUpClass(cls):
