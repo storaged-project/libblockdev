@@ -78,8 +78,15 @@ class UtilsExecLoggingTest(UtilsTestCase):
         succ = BlockDev.utils_exec_and_report_error(["true"])
         self.assertTrue(succ)
 
+        succ = BlockDev.utils_exec_and_capture_output_no_progress(["true"])
+        self.assertTrue(succ)
+
         with self.assertRaisesRegex(GLib.GError, r"Process reported exit code 1"):
             succ = BlockDev.utils_exec_and_report_error(["/bin/false"])
+
+        succ, out, stderr, status = BlockDev.utils_exec_and_capture_output_no_progress(["/bin/false"])
+        self.assertTrue(succ)
+        self.assertEqual(status, 1)
 
         succ, out = BlockDev.utils_exec_and_capture_output(["echo", "hi"])
         self.assertTrue(succ)
@@ -247,6 +254,15 @@ class UtilsExecLoggingTest(UtilsTestCase):
         self.assertTrue(succ)
         self.assertGreater(len(out), cnt)
 
+        (succ, out, stderr, status)  = BlockDev.utils_exec_and_capture_output_no_progress(["bash", "-c", r"for i in {1..%d}; do echo -n .; echo -n \# >&2; if [ $(($i%%500)) -eq 0 ]; then echo ''; echo '' >&2; fi; done" % cnt])
+        self.assertTrue(succ)
+        self.assertGreater(len(out), cnt)
+
+        (succ, out, stderr, status) = BlockDev.utils_exec_and_capture_output_no_progress(["bash", "-c", r"for i in {1..%d}; do echo -n . >&2; echo -n \# >&2; if [ $(($i%%500)) -eq 0 ]; then echo '' >&2; fi; done; exit 123" % cnt])
+        self.assertTrue(succ)
+        self.assertEqual(status, 123)
+        self.assertEqual(len(out), 0)
+        self.assertGreater(len(stderr), cnt)
 
     EXEC_PROGRESS_MSG = "Aloha, I'm the progress line you should match."
 
