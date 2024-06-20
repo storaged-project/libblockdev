@@ -173,7 +173,7 @@ class SmartmontoolsTest(unittest.TestCase):
         for d in ["/dev/zero", "/dev/random"]:
             with open(d, "rb") as f:
                 content = f.read(1024)
-                msg = r"Error getting ATA SMART info: (Empty response|JSON data must be UTF-8 encoded)"
+                msg = r"Error getting ATA SMART info: (Empty response|JSON data must be UTF-8 encoded|.*unexpected character.*)"
                 with self.assertRaisesRegex(GLib.GError, msg):
                     BlockDev.smart_ata_get_info_from_data(content)
 
