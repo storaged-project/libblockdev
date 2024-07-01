@@ -82,7 +82,7 @@ BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
 
     ret->path = g_strdup (data->path);
     ret->name = g_strdup (data->name);
-    ret->name = g_strdup (data->uuid);
+    ret->uuid = g_strdup (data->uuid);
     ret->id = g_strdup (data->id);
     ret->type_guid = g_strdup (data->type_guid);
     ret->type = data->type;
