@@ -1929,11 +1929,11 @@ class LVMVDOTest(LVMTestCase):
 
     @classmethod
     def setUpClass(cls):
-        if not BlockDev.utils_have_kernel_module("kvdo"):
+        if not BlockDev.utils_have_kernel_module("dm-vdo"):
             raise unittest.SkipTest("VDO kernel module not available, skipping.")
 
         try:
-            BlockDev.utils_load_kernel_module("kvdo")
+            BlockDev.utils_load_kernel_module("dm-vdo")
         except GLib.GError as e:
             if "File exists" not in e.message:
                 raise unittest.SkipTest("cannot load VDO kernel module, skipping.")
