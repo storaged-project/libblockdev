@@ -217,6 +217,10 @@ AS_IF([test "x$with_dm" != "xno" -o "x$with_lvm" != "xno" -o "x$with_lvm_dbus" !
       [LIBBLOCKDEV_PKG_CHECK_MODULES([DEVMAPPER], [devmapper >= 1.02.93])],
       [])
 
+AS_IF([test "x$with_lvm" != "xno" -o "x$with_lvm_dbus" != "xno"],
+      [LIBBLOCKDEV_PKG_CHECK_MODULES([YAML], [yaml-0.1])],
+      [])
+
 AS_IF([test "x$with_part" != "xno"],
       [LIBBLOCKDEV_PKG_CHECK_MODULES([FDISK], [fdisk >= 2.31.0])],
       [])

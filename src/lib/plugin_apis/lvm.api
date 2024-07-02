@@ -1965,10 +1965,10 @@ BDLVMVDOWritePolicy bd_lvm_get_vdo_write_policy_from_str (const gchar *policy_st
  *                                                    statistics or %NULL in case of error
  *                                                    (@error gets populated in those cases)
  *
- * Statistics are collected from the values exposed by the kernel `kvdo` module
- * at the `/sys/kvdo/<VDO_NAME>/statistics/` path.
+ * Statistics are collected from the values exposed by the kernel `dm-vdo` module.
+ *
  * Some of the keys are computed to mimic the information produced by the vdo tools.
- * Please note the contents of the hashtable may vary depending on the actual kvdo module version.
+ * Please note the contents of the hashtable may vary depending on the actual dm-vdo module version.
  *
  * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_QUERY
  */

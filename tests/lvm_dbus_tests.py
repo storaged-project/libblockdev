@@ -2091,7 +2091,9 @@ class LVMVDOTest(LVMTestCase):
         pool_info = BlockDev.lvm_lvinfo("testVDOVG", "vdoPool")
         self.assertEqual(pool_info.segtype, "vdo-pool")
         self.assertEqual(pool_info.data_lv, "vdoPool_vdata")
-        self.assertGreater(pool_info.data_percent, 0)
+        lvm_version = self._get_lvm_version()
+        if lvm_version >= Version("2.03.24"):
+            self.assertGreater(pool_info.data_percent, 0)
 
         pool = BlockDev.lvm_vdolvpoolname("testVDOVG", "vdoLV")
         self.assertEqual(pool, lv_info.pool_lv)

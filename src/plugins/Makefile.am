@@ -99,16 +99,16 @@ libbd_loop_la_SOURCES = loop.c loop.h
 endif
 
 if WITH_LVM
-libbd_lvm_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(DEVMAPPER_CFLAGS) -Wall -Wextra -Werror
-libbd_lvm_la_LIBADD = ${builddir}/../utils/libbd_utils.la -lm $(GLIB_LIBS) $(GIO_LIBS) $(DEVMAPPER_LIBS)
+libbd_lvm_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(DEVMAPPER_CFLAGS) $(YAML_CFLAGS) -Wall -Wextra -Werror
+libbd_lvm_la_LIBADD = ${builddir}/../utils/libbd_utils.la -lm $(GLIB_LIBS) $(GIO_LIBS) $(DEVMAPPER_LIBS) $(YAML_LIBS)
 libbd_lvm_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 3:0:0 -Wl,--no-undefined -export-symbols-regex '^bd_.*'
 libbd_lvm_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_lvm_la_SOURCES = lvm.c lvm.h check_deps.c check_deps.h dm_logging.c dm_logging.h vdo_stats.c vdo_stats.h
 endif
 
 if WITH_LVM_DBUS
-libbd_lvm_dbus_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(DEVMAPPER_CFLAGS) -Wall -Wextra -Werror
-libbd_lvm_dbus_la_LIBADD = ${builddir}/../utils/libbd_utils.la -lm $(GLIB_LIBS) $(GIO_LIBS) $(DEVMAPPER_LIBS)
+libbd_lvm_dbus_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(DEVMAPPER_CFLAGS) $(YAML_CFLAGS) -Wall -Wextra -Werror
+libbd_lvm_dbus_la_LIBADD = ${builddir}/../utils/libbd_utils.la -lm $(GLIB_LIBS) $(GIO_LIBS) $(DEVMAPPER_LIBS) $(YAML_LIBS)
 libbd_lvm_dbus_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 3:0:0 -Wl,--no-undefined -export-symbols-regex '^bd_.*'
 libbd_lvm_dbus_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_lvm_dbus_la_SOURCES = lvm-dbus.c lvm.h check_deps.c check_deps.h dm_logging.c dm_logging.h vdo_stats.c vdo_stats.h
