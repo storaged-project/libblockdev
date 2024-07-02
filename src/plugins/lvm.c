@@ -329,7 +329,7 @@ static const UtilFeatureDep features[FEATURES_LAST] = {
 #define MODULE_DEPS_VDO_MASK (1 << MODULE_DEPS_VDO)
 #define MODULE_DEPS_LAST 1
 
-static const gchar*const module_deps[MODULE_DEPS_LAST] = { "kvdo" };
+static const gchar*const module_deps[MODULE_DEPS_LAST] = { "dm-vdo" };
 
 
 /**
