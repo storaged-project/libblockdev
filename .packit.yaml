@@ -149,6 +149,7 @@ srpm_build_deps:
  - libmount-devel
  - libnvme-devel
  - libuuid-devel
+ - libyaml-devel
  - ndctl-devel
  - nss-devel
  - parted-devel
