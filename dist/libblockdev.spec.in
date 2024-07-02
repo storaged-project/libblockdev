@@ -298,6 +298,7 @@ with the libblockdev-loop plugin/library.
 %if %{with_lvm}
 %package lvm
 BuildRequires: device-mapper-devel
+BuildRequires: libyaml-devel
 Summary:     The LVM plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} = %{version}-%{release}
 Requires: lvm2
@@ -320,6 +321,7 @@ with the libblockdev-lvm plugin/library.
 %if %{with_lvm_dbus}
 %package lvm-dbus
 BuildRequires: device-mapper-devel
+BuildRequires: libyaml-devel
 Summary:     The LVM plugin for the libblockdev library
 Requires: %{name}-utils%{?_isa} = %{version}-%{release}
 Requires: lvm2-dbusd >= 2.02.156
