@@ -2030,11 +2030,11 @@ class LVMVDOTest(LVMTestCase):
 
     @classmethod
     def setUpClass(cls):
-        if not BlockDev.utils_have_kernel_module("kvdo"):
+        if not BlockDev.utils_have_kernel_module("dm-vdo"):
             raise unittest.SkipTest("VDO kernel module not available, skipping.")
 
         try:
-            BlockDev.utils_load_kernel_module("kvdo")
+            BlockDev.utils_load_kernel_module("dm-vdo")
         except GLib.GError as e:
             if "File exists" not in e.message:
                 raise unittest.SkipTest("cannot load VDO kernel module, skipping.")
@@ -2091,7 +2091,9 @@ class LVMVDOTest(LVMTestCase):
         pool_info = BlockDev.lvm_lvinfo("testVDOVG", "vdoPool")
         self.assertEqual(pool_info.segtype, "vdo-pool")
         self.assertEqual(pool_info.data_lv, "vdoPool_vdata")
-        self.assertGreater(pool_info.data_percent, 0)
+        lvm_version = self._get_lvm_version()
+        if lvm_version >= Version("2.03.24"):
+            self.assertGreater(pool_info.data_percent, 0)
 
         pool = BlockDev.lvm_vdolvpoolname("testVDOVG", "vdoLV")
         self.assertEqual(pool, lv_info.pool_lv)
