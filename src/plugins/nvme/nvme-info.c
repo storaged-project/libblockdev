@@ -672,16 +672,19 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
 
             switch (d->nidt) {
                 case NVME_NIDT_EUI64:
+                    g_free (info->eui64);
                     info->eui64 = g_malloc0 (d->nidl * 2 + 1);
                     for (i = 0; i < d->nidl; i++)
                         snprintf (info->eui64 + i * 2, 3, "%02x", d->nid[i]);
                     break;
                 case NVME_NIDT_NGUID:
+                    g_free (info->nguid);
                     info->nguid = g_malloc0 (d->nidl * 2 + 1);
                     for (i = 0; i < d->nidl; i++)
                         snprintf (info->nguid + i * 2, 3, "%02x", d->nid[i]);
                     break;
                 case NVME_NIDT_UUID:
+                    g_free (info->uuid);
                     info->uuid = _uuid_to_str (d->nid);
                     break;
                 case NVME_NIDT_CSI:
