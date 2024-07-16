@@ -394,6 +394,11 @@ class CryptoTestOpenClose(CryptoTestCase):
             ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
             BlockDev.crypto_luks_open("/non/existing/device", "libblockdevTestLUKS", ctx, False)
 
+        with self.assertRaisesRegex(GLib.GError, r"Device name cannot contain '/' character"):
+            ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
+            BlockDev.crypto_luks_open(self.loop_dev, "libblockdev/TestLUKS", ctx, False)
+
+
         with self.assertRaisesRegex(GLib.GError, r"Incorrect passphrase"):
             ctx = BlockDev.CryptoKeyslotContext(passphrase="wrong-passphrase")
             BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", ctx, False)
