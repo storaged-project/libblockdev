@@ -61,6 +61,7 @@ BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
     ret->id = g_strdup (data->id);
     ret->uuid = g_strdup (data->uuid);
     ret->type_guid = g_strdup (data->type_guid);
+    ret->type_name = g_strdup (data->type_name);
     ret->type = data->type;
     ret->start = data->start;
     ret->size = data->size;
@@ -79,6 +80,7 @@ void bd_part_spec_free (BDPartSpec *data) {
     g_free (data->uuid);
     g_free (data->id);
     g_free (data->type_guid);
+    g_free (data->type_name);
     g_free (data);
 }
 
@@ -395,7 +397,7 @@ gboolean bd_part_create_table (const gchar *disk, BDPartTableType type, gboolean
     return TRUE;
 }
 
-static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_num, guint64 *attrs, GError **error) {
+static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_num, guint64 *attrs, char **type_name, GError **error) {
     struct fdisk_context *cxt = NULL;
     struct fdisk_label *lb = NULL;
     struct fdisk_partition *pa = NULL;
@@ -457,6 +459,19 @@ static gchar* get_part_type_guid_and_gpt_flags (const gchar *device, int part_nu
         return NULL;
     }
 
+    /* part type name -- human readable string, e.g. "Microsoft Reserved Partition" */
+    ptype_string = fdisk_parttype_get_name (ptype);
+    if (!ptype_string) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to get partition type string for partition %d on device '%s'", part_num, device);
+        fdisk_unref_partition (pa);
+        close_context (cxt);
+        return NULL;
+    }
+
+    *type_name = g_strdup (ptype_string);
+
+    /* part type string -- GUID as a string */
     ptype_string = fdisk_parttype_get_string (ptype);
     if (!ptype_string) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
@@ -528,7 +543,8 @@ static BDPartSpec* get_part_spec_fdisk (struct fdisk_context *cxt, struct fdisk_
     if (g_strcmp0 (fdisk_label_get_name (lb), "gpt") == 0) {
         if (ret->type == BD_PART_TYPE_NORMAL) {
           /* only 'normal' partitions have GUIDs */
-          ret->type_guid = get_part_type_guid_and_gpt_flags (devname, fdisk_partition_get_partno (pa) + 1, &(ret->attrs), &l_error);
+          ret->type_guid = get_part_type_guid_and_gpt_flags (devname, fdisk_partition_get_partno (pa) + 1,
+                                                             &(ret->attrs), &(ret->type_name), &l_error);
           if (!ret->type_guid && l_error) {
               g_propagate_error (error, l_error);
               bd_part_spec_free (ret);
