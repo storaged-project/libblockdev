@@ -1120,6 +1120,22 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
     return TRUE;
 }
 
+static gboolean _is_dm_name_valid (const gchar *name, GError **error) {
+    if (strlen (name) >= 128) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
+                     "Device name can be at most 127 characters long.");
+        return FALSE;
+    }
+
+    if (strchr (name, '/')) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
+                     "Device name cannot contain '/' character.");
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
 /**
  * bd_crypto_luks_open:
  * @device: the device to open
@@ -1151,6 +1167,9 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, BDCryptoKe
     guint64 progress_id = 0;
     gchar *msg = NULL;
     GError *l_error = NULL;
+
+    if (!_is_dm_name_valid (name, error))
+        return FALSE;
 
     msg = g_strdup_printf ("Started opening '%s' LUKS device", device);
     progress_id = bd_utils_report_started (msg);
@@ -2736,6 +2755,9 @@ gboolean bd_crypto_integrity_open (const gchar *device, const gchar *name, const
 #endif
     }
 
+    if (!_is_dm_name_valid (name, error))
+        return FALSE;
+
     msg = g_strdup_printf ("Started opening '%s' integrity device", device);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
@@ -2911,6 +2933,9 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, BDCryptoKeys
     gsize keyfiles_count = 0;
     guint i;
     GError *l_error = NULL;
+
+    if (!_is_dm_name_valid (name, error))
+        return FALSE;
 
     msg = g_strdup_printf ("Started opening '%s' TrueCrypt/VeraCrypt device", device);
     progress_id = bd_utils_report_started (msg);
@@ -3271,6 +3296,9 @@ gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, BDCryptoK
     gchar *key_buffer = NULL;
     gsize buf_len = 0;
 
+    if (!_is_dm_name_valid (name, error))
+        return FALSE;
+
     msg = g_strdup_printf ("Started opening '%s' BITLK device", device);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
@@ -3382,6 +3410,9 @@ gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, BDCrypt
     GError *l_error = NULL;
     gchar *key_buffer = NULL;
     gsize buf_len = 0;
+
+    if (!_is_dm_name_valid (name, error))
+        return FALSE;
 
     msg = g_strdup_printf ("Started opening '%s' FVAULT2 device", device);
     progress_id = bd_utils_report_started (msg);
