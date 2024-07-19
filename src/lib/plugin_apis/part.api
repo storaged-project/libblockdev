@@ -72,6 +72,7 @@ typedef struct BDPartSpec {
     guint64 size;
     gboolean bootable;
     guint64 attrs;
+    gchar *type_name;
 } BDPartSpec;
 
 BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
@@ -85,6 +86,7 @@ BDPartSpec* bd_part_spec_copy (BDPartSpec *data) {
     ret->uuid = g_strdup (data->uuid);
     ret->id = g_strdup (data->id);
     ret->type_guid = g_strdup (data->type_guid);
+    ret->type_name = g_strdup (data->type_name);
     ret->type = data->type;
     ret->start = data->start;
     ret->size = data->size;
@@ -103,6 +105,7 @@ void bd_part_spec_free (BDPartSpec *data) {
     g_free (data->uuid);
     g_free (data->id);
     g_free (data->type_guid);
+    g_free (data->type_name);
     g_free (data);
 }
 

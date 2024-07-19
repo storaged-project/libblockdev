@@ -51,6 +51,7 @@ typedef struct BDPartSpec {
     guint64 size;
     gboolean bootable;
     guint64 attrs;
+    gchar *type_name;
 } BDPartSpec;
 
 BDPartSpec* bd_part_spec_copy (BDPartSpec *data);
