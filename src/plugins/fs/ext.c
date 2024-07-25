@@ -917,7 +917,7 @@ static guint64 ext_get_min_size (const gchar *device, GError **error) {
  * @device: the device containing the file system to get min size for
  * @error: (out) (optional): place to store error (if any)
  *
- * Returns: smallest shrunken filesystem size as reported by ntfsresize
+ * Returns: smallest shrunken filesystem size as reported by resize2fs
  *          in case of error 0 is returned and @error is set
  *
  * Tech category: %BD_FS_TECH_EXT2-%BD_FS_TECH_MODE_RESIZE
@@ -931,7 +931,7 @@ guint64 bd_fs_ext2_get_min_size (const gchar *device, GError **error) {
  * @device: the device containing the file system to get min size for
  * @error: (out) (optional): place to store error (if any)
  *
- * Returns: smallest shrunken filesystem size as reported by ntfsresize
+ * Returns: smallest shrunken filesystem size as reported by resize2fs
  *          in case of error 0 is returned and @error is set
  *
  * Tech category: %BD_FS_TECH_EXT3-%BD_FS_TECH_MODE_RESIZE
@@ -945,7 +945,7 @@ guint64 bd_fs_ext3_get_min_size (const gchar *device, GError **error) {
  * @device: the device containing the file system to get min size for
  * @error: (out) (optional): place to store error (if any)
  *
- * Returns: smallest shrunken filesystem size as reported by ntfsresize
+ * Returns: smallest shrunken filesystem size as reported by resize2fs
  *          in case of error 0 is returned and @error is set
  *
  * Tech category: %BD_FS_TECH_EXT4-%BD_FS_TECH_MODE_RESIZE
