@@ -319,5 +319,6 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
 
 gboolean bd_crypto_opal_is_supported (const gchar *device, GError **error);
 gboolean bd_crypto_opal_wipe (const gchar *device, BDCryptoKeyslotContext *context, GError **error);
-
+gboolean bd_crypto_opal_format (const gchar *device, const gchar *cipher, guint64 key_size, BDCryptoKeyslotContext *context, guint64 min_entropy, BDCryptoLUKSHWEncryptionType hw_encryption,
+                                BDCryptoKeyslotContext *opal_context, BDCryptoLUKSExtra *extra, GError **error);
 #endif  /* BD_CRYPTO */

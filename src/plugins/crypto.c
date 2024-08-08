@@ -51,6 +51,8 @@
 #define DEFAULT_LUKS_KEYSIZE_BITS 256
 #define DEFAULT_LUKS_CIPHER "aes-xts-plain64"
 
+#define DEFAULT_OPAL_KEYSIZE_BITS 256
+
 #define SQUARE_LOWER_LIMIT 136
 #define SQUARE_UPPER_LIMIT 426
 #define SQUARE_BYTES_TO_CHECK 512
@@ -438,6 +440,19 @@ gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **erro
             if (ret != mode) {
                 g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
                              "Only 'open' supported for FVAULT2");
+                return FALSE;
+            } else
+                return TRUE;
+        case BD_CRYPTO_TECH_SED_OPAL:
+#ifndef LIBCRYPTSETUP_27
+            g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                         "OPAL technology requires libcryptsetup >= 2.7.0");
+            return FALSE;
+#endif
+            ret = mode & (BD_CRYPTO_TECH_MODE_CREATE|BD_CRYPTO_TECH_MODE_QUERY|BD_CRYPTO_TECH_MODE_MODIFY);
+            if (ret != mode) {
+                g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                             "Only 'create', 'query' and 'modify' supported for OPAL");
                 return FALSE;
             } else
                 return TRUE;
@@ -906,30 +921,22 @@ BDCryptoKeyslotContext* bd_crypto_keyslot_context_new_volume_key (const guint8 *
     return context;
 }
 
-/**
- * bd_crypto_luks_format:
- * @device: a device to format as LUKS
- * @cipher: (nullable): cipher specification (type-mode, e.g. "aes-xts-plain64") or %NULL to use the default
- * @key_size: size of the volume key in bits or 0 to use the default
- * @context: key slot context (passphrase/keyfile/token...) for this LUKS device
- * @min_entropy: minimum random data entropy (in bits) required to format @device as LUKS
- * @luks_version: whether to use LUKS v1 or LUKS v2
- * @extra: (nullable): extra arguments for LUKS format creation
- * @error: (out) (optional): place to store error (if any)
- *
- * Formats the given @device as LUKS according to the other parameters given. If
- * @min_entropy is specified (greater than 0), the function waits for enough
- * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
- * FOREVER).
- *
- * Supported @context types for this function: passphrase, key file
- *
- * Returns: whether the given @device was successfully formatted as LUKS or not
- * (the @error) contains the error in such cases)
- *
- * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_CREATE
- */
-gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint64 key_size, BDCryptoKeyslotContext *context, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra,GError **error) {
+
+
+gboolean _crypto_luks_format (const gchar *device,
+                              const gchar *cipher,
+                              guint64 key_size,
+                              BDCryptoKeyslotContext *context,
+                              guint64 min_entropy,
+                              BDCryptoLUKSVersion luks_version,
+                              BDCryptoLUKSExtra *extra,
+                              BDCryptoLUKSHWEncryptionType hw_encryption,
+#ifdef LIBCRYPTSETUP_27
+                              BDCryptoKeyslotContext *opal_context,
+#else
+                              BDCryptoKeyslotContext *opal_context G_GNUC_UNUSED,
+#endif
+                               GError **error) {
     struct crypt_device *cd = NULL;
     gint ret;
     gchar **cipher_specs = NULL;
@@ -941,6 +948,14 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
     gchar *msg = NULL;
     const gchar* crypt_version = NULL;
     GError *l_error = NULL;
+
+#ifdef LIBCRYPTSETUP_27
+    struct crypt_params_hw_opal opal_params = {
+		.user_key_size = DEFAULT_OPAL_KEYSIZE_BITS / 8
+	};
+
+    gboolean is_opal = (hw_encryption == BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_ONLY || hw_encryption == BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_AND_SW);
+#endif
 
     msg = g_strdup_printf ("Started formatting '%s' as LUKS device", device);
     progress_id = bd_utils_report_started (msg);
@@ -967,24 +982,32 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
         return FALSE;
     }
 
-    cipher = cipher ? cipher : DEFAULT_LUKS_CIPHER;
-    cipher_specs = g_strsplit (cipher, "-", 2);
-    if (g_strv_length (cipher_specs) != 2) {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_SPEC,
-                     "Invalid cipher specification: '%s'", cipher);
-        crypt_free (cd);
-        g_strfreev (cipher_specs);
-        bd_utils_report_finished (progress_id, l_error->message);
-        g_propagate_error (error, l_error);
-        return FALSE;
-    }
+    if (hw_encryption == BD_CRYPTO_LUKS_HW_ENCRYPTION_SW_ONLY || hw_encryption == BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_AND_SW) {
+        cipher = cipher ? cipher : DEFAULT_LUKS_CIPHER;
+        cipher_specs = g_strsplit (cipher, "-", 2);
+        if (g_strv_length (cipher_specs) != 2) {
+            g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_SPEC,
+                        "Invalid cipher specification: '%s'", cipher);
+            crypt_free (cd);
+            g_strfreev (cipher_specs);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
+            return FALSE;
+        }
 
-    if (key_size == 0) {
-        if (g_str_has_prefix (cipher_specs[1], "xts-"))
-            key_size = DEFAULT_LUKS_KEYSIZE_BITS * 2;
-        else
-            key_size = DEFAULT_LUKS_KEYSIZE_BITS;
-    }
+        if (key_size == 0) {
+            if (g_str_has_prefix (cipher_specs[1], "xts-"))
+                key_size = DEFAULT_LUKS_KEYSIZE_BITS * 2;
+            else
+                key_size = DEFAULT_LUKS_KEYSIZE_BITS;
+        }
+    } else
+        cipher_specs = g_new0 (gchar*, 2);
+
+#ifdef LIBCRYPTSETUP_27
+    if (is_opal)
+        key_size += DEFAULT_OPAL_KEYSIZE_BITS;
+#endif
 
     /* key_size should be in bytes */
     key_size = key_size / 8;
@@ -1010,6 +1033,35 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
             return FALSE;
         }
     }
+
+#ifdef LIBCRYPTSETUP_27
+    if (is_opal) {
+        if (opal_context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE) {
+            opal_params.admin_key = (char *) opal_context->u.passphrase.pass_data;
+            opal_params.admin_key_size = opal_context->u.passphrase.data_len;
+        } else {
+            g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                         "Only 'passphrase' context type is valid for OPAL format.");
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
+            crypt_free (cd);
+            g_strfreev (cipher_specs);
+            return FALSE;
+        }
+    }
+
+    if (is_opal) {
+        /* XXX: workaround for a bug in cryptsetup where crypt_format_luks2_opal doesn't
+         *      initialize crypto backend leading to an abort during the call, setting
+         *      the pbkdf parameters will run the initialization so just get the default
+         *      params and set them
+         *      See also: https://gitlab.com/cryptsetup/cryptsetup/-/commit/42f4a68705384eeecb5b31b71cc8a8fe19bca916
+         */
+        const struct crypt_pbkdf_type *pbkdf_default;
+        pbkdf_default = crypt_get_pbkdf_default (CRYPT_LUKS2);
+        crypt_set_pbkdf_type (cd, pbkdf_default);
+    }
+#endif
 
     if (extra) {
         if (luks_version == BD_CRYPTO_LUKS_VERSION_LUKS1) {
@@ -1052,13 +1104,29 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
             params.sector_size = extra->sector_size ? extra->sector_size : DEFAULT_LUKS2_SECTOR_SIZE;
             params.label = extra->label;
             params.subsystem = extra->subsystem;
-            ret = crypt_format (cd, crypt_version, cipher_specs[0], cipher_specs[1],
-                                NULL, NULL, key_size, &params);
+
+#ifdef LIBCRYPTSETUP_27
+            if (is_opal)
+                ret = crypt_format_luks2_opal (cd, cipher_specs[0], cipher_specs[1],
+                                               NULL, NULL, key_size, &params, &opal_params);
+            else
+#endif
+                ret = crypt_format (cd, crypt_version, cipher_specs[0], cipher_specs[1],
+                                    NULL, NULL, key_size, &params);
             g_free (pbkdf);
         }
-    } else
-        ret = crypt_format (cd, crypt_version, cipher_specs[0], cipher_specs[1],
-                            NULL, NULL, key_size, NULL);
+    } else {
+#ifdef LIBCRYPTSETUP_27
+        if (is_opal) {
+            struct crypt_params_luks2 params = ZERO_INIT;
+            params.pbkdf = crypt_get_pbkdf_default (CRYPT_LUKS2);
+            ret = crypt_format_luks2_opal (cd, cipher_specs[0], cipher_specs[1],
+                                            NULL, NULL, key_size, &params, &opal_params);
+        } else
+#endif
+            ret = crypt_format (cd, crypt_version, cipher_specs[0], cipher_specs[1],
+                                NULL, NULL, key_size, NULL);
+    }
     g_strfreev (cipher_specs);
 
     if (ret != 0) {
@@ -1121,6 +1189,33 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
 
     bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
+}
+
+/**
+ * bd_crypto_luks_format:
+ * @device: a device to format as LUKS
+ * @cipher: (nullable): cipher specification (type-mode, e.g. "aes-xts-plain64") or %NULL to use the default
+ * @key_size: size of the volume key in bits or 0 to use the default
+ * @context: key slot context (passphrase/keyfile/token...) for this LUKS device
+ * @min_entropy: minimum random data entropy (in bits) required to format @device as LUKS
+ * @luks_version: whether to use LUKS v1 or LUKS v2
+ * @extra: (nullable): extra arguments for LUKS format creation
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Formats the given @device as LUKS according to the other parameters given. If
+ * @min_entropy is specified (greater than 0), the function waits for enough
+ * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
+ * FOREVER).
+ *
+ * Supported @context types for this function: passphrase, key file
+ *
+ * Returns: whether the given @device was successfully formatted as LUKS or not
+ * (the @error) contains the error in such cases)
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_CREATE
+ */
+gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint64 key_size, BDCryptoKeyslotContext *context, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra,GError **error) {
+    return _crypto_luks_format (device, cipher, key_size, context, min_entropy, luks_version, extra, BD_CRYPTO_LUKS_HW_ENCRYPTION_SW_ONLY, NULL, error);
 }
 
 static gboolean _is_dm_name_valid (const gchar *name, GError **error) {
@@ -3660,5 +3755,66 @@ gboolean bd_crypto_opal_wipe_device (const gchar *device, BDCryptoKeyslotContext
     crypt_free (cd);
     bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
+}
+#endif
+
+/**
+ * bd_crypto_opal_format:
+ * @device: a device to format as LUKS HW-OPAL
+ * @cipher: (nullable): cipher specification (type-mode, e.g. "aes-xts-plain64") or %NULL to use the default
+ * @key_size: size of the volume key in bits or 0 to use the default
+ * @context: key slot context (passphrase/keyfile/token...) for this LUKS device
+ * @min_entropy: minimum random data entropy (in bits) required to format @device as LUKS
+ * @hw_encryption: type of hardware encryption (SW+HW or HW only)
+ * @opal_context: OPAL admin passphrase
+ * @extra: (nullable): extra arguments for LUKS format creation
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Formats the given @device as LUKS HW-OPAL according to the other parameters given. If
+ * @min_entropy is specified (greater than 0), the function waits for enough
+ * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
+ * FOREVER).
+ *
+ * Supported @context types for this function: passphrase, key file
+ * Supported @opal_context types for this function: passphrase
+ *
+ * Returns: whether the given @device was successfully formatted as LUKS HW-OPAL or not
+ * (the @error contains the error in such cases)
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_CREATE
+ */
+#ifndef LIBCRYPTSETUP_27
+gboolean bd_crypto_opal_format (const gchar *device G_GNUC_UNUSED, const gchar *cipher G_GNUC_UNUSED, guint64 key_size G_GNUC_UNUSED, BDCryptoKeyslotContext *context G_GNUC_UNUSED,
+                                guint64 min_entropy G_GNUC_UNUSED, BDCryptoLUKSHWEncryptionType hw_encryption G_GNUC_UNUSED,
+                                BDCryptoKeyslotContext *opal_context G_GNUC_UNUSED, BDCryptoLUKSExtra *extra G_GNUC_UNUSED, GError **error) {
+    /* this will return FALSE and set error, because OPAL technology is not available */
+    return bd_crypto_is_tech_avail (BD_CRYPTO_TECH_SED_OPAL, BD_CRYPTO_TECH_MODE_CREATE, error);
+}
+#else
+gboolean bd_crypto_opal_format (const gchar *device, const gchar *cipher, guint64 key_size, BDCryptoKeyslotContext *context, guint64 min_entropy, BDCryptoLUKSHWEncryptionType hw_encryption,
+                                BDCryptoKeyslotContext *opal_context, BDCryptoLUKSExtra *extra, GError **error) {
+
+    gboolean ret = FALSE;
+
+    if (hw_encryption != BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_AND_SW && hw_encryption != BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_ONLY) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
+                     "Either hardware and software encryption or hardware encryption only must be selected for OPAL format");
+        return FALSE;
+    }
+
+    if (hw_encryption == BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_ONLY && cipher != NULL) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
+                     "Cipher cannot be specified for hardware encryption only OPAL devices");
+        return FALSE;
+    }
+
+    ret = bd_crypto_opal_is_supported (device, NULL);
+    if (!ret) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_FORMAT_FAILED,
+                     "OPAL doesn't seem to be supported on %s", device);
+        return FALSE;
+    }
+
+    return _crypto_luks_format (device, cipher, key_size, context, min_entropy, BD_CRYPTO_LUKS_VERSION_LUKS2, extra, hw_encryption, opal_context, error);
 }
 #endif
