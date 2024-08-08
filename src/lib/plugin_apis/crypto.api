@@ -1337,4 +1337,18 @@ gboolean bd_crypto_fvault2_close (const gchar *fvault2_device, GError **error);
  */
 gboolean bd_crypto_opal_is_supported (const gchar *device, GError **error);
 
+/**
+ * bd_crypto_opal_wipe_device:
+ * @device: LUKS HW-OPAL device to wipe
+ * @context: OPAL admin passphrase context
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether @device was successfully wiped or not.
+ *
+ * Supported @context types for this function: passphrase
+ *
+ * Tech category: %BD_CRYPTO_TECH_SED_OPAL-%BD_CRYPTO_TECH_MODE_MODIFY
+ */
+gboolean bd_crypto_opal_wipe_device (const gchar *device, BDCryptoKeyslotContext *context, GError **error);
+
 #endif  /* BD_CRYPTO_API */
