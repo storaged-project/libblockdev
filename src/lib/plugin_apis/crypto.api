@@ -365,6 +365,22 @@ typedef enum {
 GType bd_crypto_luks_info_get_type();
 
 /**
+ * BDCryptoLUKSHWEncryptionType:
+ * @BD_CRYPTO_LUKS_HW_ENCRYPTION_UNKNOWN: used for unknown/unsupported hardware encryption or when
+ *                                        error was detected when getting the information
+ * @BD_CRYPTO_LUKS_HW_ENCRYPTION_SW_ONLY: hardware encryption is not configured on this device
+ * @BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_ONLY: only OPAL hardware encryption is configured on this device
+ * @BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_AND_SW: both OPAL hardware encryption and software encryption
+ *                                               (using LUKS/dm-crypt) is configured on this device
+ */
+typedef enum {
+    BD_CRYPTO_LUKS_HW_ENCRYPTION_UNKNOWN = 0,
+    BD_CRYPTO_LUKS_HW_ENCRYPTION_SW_ONLY,
+    BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_ONLY,
+    BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_AND_SW,
+} BDCryptoLUKSHWEncryptionType;
+
+/**
  * BDCryptoLUKSInfo:
  * @version: LUKS version
  * @cipher: used cipher (e.g. "aes")
@@ -376,6 +392,7 @@ GType bd_crypto_luks_info_get_type();
  * @metadata_size: LUKS metadata size
  * @label: label of the LUKS device (valid only for LUKS 2)
  * @subsystem: subsystem of the LUKS device (valid only for LUKS 2)
+ * @hw_encryption: hardware encryption type
  */
 typedef struct BDCryptoLUKSInfo {
     BDCryptoLUKSVersion version;
@@ -387,6 +404,7 @@ typedef struct BDCryptoLUKSInfo {
     guint64 metadata_size;
     gchar *label;
     gchar *subsystem;
+    BDCryptoLUKSHWEncryptionType hw_encryption;
 } BDCryptoLUKSInfo;
 
 /**
@@ -429,6 +447,7 @@ BDCryptoLUKSInfo* bd_crypto_luks_info_copy (BDCryptoLUKSInfo *info) {
     new_info->metadata_size = info->metadata_size;
     new_info->label = g_strdup (info->label);
     new_info->subsystem = g_strdup (info->subsystem);
+    new_info->hw_encryption = info->hw_encryption;
 
     return new_info;
 }
