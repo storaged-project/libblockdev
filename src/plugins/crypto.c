@@ -36,6 +36,8 @@
 #include <volume_key/libvolume_key.h>
 #endif
 
+#include <linux/sed-opal.h>
+
 #include "crypto.h"
 
 #ifdef __clang__
@@ -3504,3 +3506,44 @@ gboolean bd_crypto_fvault2_close (const gchar *fvault2_device, GError **error) {
     return _crypto_close (fvault2_device, "FVAULT2", error);
 }
 #endif
+
+/**
+ * bd_crypto_opal_is_supported:
+ * @device: device to check for OPAL support
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: %TRUE if the given @device supports OPAL or %FALSE if not or
+ * failed to determine (the @error is populated with the error in such
+ * cases).
+ *
+ * Tech category: %BD_CRYPTO_TECH_SED_OPAL-%BD_CRYPTO_TECH_MODE_QUERY
+ */
+gboolean bd_crypto_opal_is_supported (const gchar *device, GError **error) {
+    gint fd = -1;
+    gint ret = 0;
+    struct opal_status st = ZERO_INIT;
+
+    fd = open (device, O_RDONLY|O_CLOEXEC);
+    if (fd == -1) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to open the device '%s'", device);
+        return FALSE;
+    }
+
+    ret = ioctl (fd, IOC_OPAL_GET_STATUS, &st);
+    if (ret < 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to get opal status for the device '%s': %s",
+                     device,
+                     strerror_l (-ret, c_locale));
+        close (fd);
+        return FALSE;
+    }
+
+    close (fd);
+
+    if (st.flags & (OPAL_FL_SUPPORTED|OPAL_FL_LOCKING_SUPPORTED|OPAL_FL_LOCKING_ENABLED))
+        return TRUE;
+    else
+        return FALSE;
+}

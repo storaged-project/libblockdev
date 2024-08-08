@@ -38,6 +38,7 @@ typedef enum {
     BD_CRYPTO_TECH_BITLK,
     BD_CRYPTO_TECH_KEYRING,
     BD_CRYPTO_TECH_FVAULT2,
+    BD_CRYPTO_TECH_SED_OPAL,
 } BDCryptoTech;
 
 typedef enum {
@@ -1322,5 +1323,18 @@ gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, BDCrypt
  * Tech category: %BD_CRYPTO_TECH_FVAULT2-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_fvault2_close (const gchar *fvault2_device, GError **error);
+
+/**
+ * bd_crypto_opal_is_supported:
+ * @device: device to check for OPAL support
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: %TRUE if the given @device supports OPAL or %FALSE if not or
+ * failed to determine (the @error is populated with the error in such
+ * cases).
+ *
+ * Tech category: %BD_CRYPTO_TECH_SED_OPAL-%BD_CRYPTO_TECH_MODE_QUERY
+ */
+gboolean bd_crypto_opal_is_supported (const gchar *device, GError **error);
 
 #endif  /* BD_CRYPTO_API */
