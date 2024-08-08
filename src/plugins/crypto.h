@@ -147,20 +147,20 @@ typedef enum {
 } BDCryptoIntegrityOpenFlags;
 
 /**
- * BDCryptoLUKSSEDOPALType:
- * @BD_CRYPTO_LUKS_SED_OPAL_UNKNOWN: used for unknown/unsupported hardware encryption or when
- *                                   error was raised when getting the information
- * @BD_CRYPTO_LUKS_SED_OPAL_SW_ONLY: OPAL hardware encryption is not configured on this device
- * @BD_CRYPTO_LUKS_SED_OPAL_HW_ONLY: only OPAL hardware encryption is configured on this device
- * @BD_CRYPTO_LUKS_SED_OPAL_HW_AND_SW: both OPAL hardware encryption and software encryption
- *                                     (using LUKS/dm-crypt) is configured on this device
+ * BDCryptoLUKSHWEncryptionType:
+ * @BD_CRYPTO_LUKS_HW_ENCRYPTION_UNKNOWN: used for unknown/unsupported hardware encryption or when
+ *                                        error was detected when getting the information
+ * @BD_CRYPTO_LUKS_HW_ENCRYPTION_SW_ONLY: hardware encryption is not configured on this device
+ * @BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_ONLY: only OPAL hardware encryption is configured on this device
+ * @BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_AND_SW: both OPAL hardware encryption and software encryption
+ *                                               (using LUKS/dm-crypt) is configured on this device
  */
 typedef enum {
-    BD_CRYPTO_LUKS_SED_OPAL_UNKNOWN = 0,
-    BD_CRYPTO_LUKS_SED_OPAL_SW_ONLY,
-    BD_CRYPTO_LUKS_SED_OPAL_HW_ONLY,
-    BD_CRYPTO_LUKS_SED_OPAL_HW_AND_SW,
-} BDCryptoLUKSSEDOPALType;
+    BD_CRYPTO_LUKS_HW_ENCRYPTION_UNKNOWN = 0,
+    BD_CRYPTO_LUKS_HW_ENCRYPTION_SW_ONLY,
+    BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_ONLY,
+    BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_AND_SW,
+} BDCryptoLUKSHWEncryptionType;
 
 /**
  * BDCryptoLUKSInfo:
@@ -186,7 +186,7 @@ typedef struct BDCryptoLUKSInfo {
     guint64 metadata_size;
     gchar *label;
     gchar *subsystem;
-    BDCryptoLUKSSEDOPALType hw_encryption;
+    BDCryptoLUKSHWEncryptionType hw_encryption;
 } BDCryptoLUKSInfo;
 
 void bd_crypto_luks_info_free (BDCryptoLUKSInfo *info);

@@ -223,6 +223,7 @@ BDCryptoLUKSInfo* bd_crypto_luks_info_copy (BDCryptoLUKSInfo *info) {
     new_info->metadata_size = info->metadata_size;
     new_info->label = g_strdup (info->label);
     new_info->subsystem = g_strdup (info->subsystem);
+    new_info->hw_encryption = info->hw_encryption;
 
     return new_info;
 }
@@ -2354,6 +2355,32 @@ BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *device, GError **error) {
         info->label = g_strdup ("");
         info->subsystem = g_strdup ("");
     }
+
+#ifdef LIBCRYPTSETUP_27
+    ret = crypt_get_hw_encryption_type (cd);
+    if (ret < 0) {
+        info->hw_encryption = BD_CRYPTO_LUKS_HW_ENCRYPTION_UNKNOWN;
+        bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to get HW encryption type: %s", strerror_l (-ret, c_locale));
+    } else {
+        switch (ret) {
+            case CRYPT_SW_ONLY:
+                info->hw_encryption = BD_CRYPTO_LUKS_HW_ENCRYPTION_SW_ONLY;
+                break;
+            case CRYPT_SW_AND_OPAL_HW:
+                info->hw_encryption = BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_AND_SW;
+                break;
+            case CRYPT_OPAL_HW_ONLY:
+                info->hw_encryption = BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_ONLY;
+                break;
+            default:
+                bd_utils_log_format (BD_UTILS_LOG_WARNING, "Unknown HW encryption type: %d", ret);
+                info->hw_encryption = BD_CRYPTO_LUKS_HW_ENCRYPTION_UNKNOWN;
+                break;
+        }
+    }
+#else
+    info->hw_encryption = BD_CRYPTO_LUKS_HW_ENCRYPTION_UNKNOWN;
+#endif
 
     crypt_free (cd);
 
