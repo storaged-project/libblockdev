@@ -1370,4 +1370,31 @@ gboolean bd_crypto_opal_is_supported (const gchar *device, GError **error);
  */
 gboolean bd_crypto_opal_wipe_device (const gchar *device, BDCryptoKeyslotContext *context, GError **error);
 
+/**
+ * bd_crypto_opal_format:
+ * @device: a device to format as LUKS HW-OPAL
+ * @cipher: (nullable): cipher specification (type-mode, e.g. "aes-xts-plain64") or %NULL to use the default
+ * @key_size: size of the volume key in bits or 0 to use the default
+ * @context: key slot context (passphrase/keyfile/token...) for this LUKS device
+ * @min_entropy: minimum random data entropy (in bits) required to format @device as LUKS
+ * @hw_encryption: type of hardware encryption (SW+HW or HW only)
+ * @opal_context: OPAL admin passphrase
+ * @extra: (nullable): extra arguments for LUKS format creation
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Formats the given @device as LUKS HW-OPAL according to the other parameters given. If
+ * @min_entropy is specified (greater than 0), the function waits for enough
+ * entropy to be available in the random data pool (WHICH MAY POTENTIALLY TAKE
+ * FOREVER).
+ *
+ * Supported @context types for this function: passphrase, key file
+ * Supported @opal_context types for this function: passphrase
+ *
+ * Returns: whether the given @device was successfully formatted as LUKS HW-OPAL or not
+ * (the @error contains the error in such cases)
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_CREATE
+ */
+gboolean bd_crypto_opal_format (const gchar *device, const gchar *cipher, guint64 key_size, BDCryptoKeyslotContext *context, guint64 min_entropy, BDCryptoLUKSHWEncryptionType hw_encryption, BDCryptoKeyslotContext *opal_context, BDCryptoLUKSExtra *extra, GError **error);
+
 #endif  /* BD_CRYPTO_API */
