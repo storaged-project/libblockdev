@@ -3547,3 +3547,91 @@ gboolean bd_crypto_opal_is_supported (const gchar *device, GError **error) {
     else
         return FALSE;
 }
+
+/**
+ * bd_crypto_opal_wipe_device:
+ * @device: LUKS HW-OPAL device to wipe
+ * @context: OPAL admin passphrase context
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether @device was successfully wiped or not.
+ *
+ * Supported @context types for this function: passphrase
+ *
+ * Tech category: %BD_CRYPTO_TECH_SED_OPAL-%BD_CRYPTO_TECH_MODE_MODIFY
+ */
+#ifndef LIBCRYPTSETUP_27
+gboolean bd_crypto_opal_wipe_device (const gchar *device G_GNUC_UNUSED, BDCryptoKeyslotContext *context G_GNUC_UNUSED, GError **error) {
+    /* this will return FALSE and set error, because OPAL technology is not available */
+    return bd_crypto_is_tech_avail (BD_CRYPTO_TECH_SED_OPAL, BD_CRYPTO_TECH_MODE_QUERY, error);
+}
+#else
+gboolean bd_crypto_opal_wipe_device (const gchar *device, BDCryptoKeyslotContext *context, GError **error) {
+    gchar *key_buf = NULL;
+    gsize buf_len = 0;
+    struct crypt_device *cd = NULL;
+    gint ret = 0;
+    guint64 progress_id = 0;
+    GError *l_error = NULL;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started wiping '%s' LUKS HW-OPAL device", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        return FALSE;
+    }
+
+    ret = crypt_load (cd, CRYPT_LUKS, NULL);
+    if (ret != 0) {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to load device's parameters: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        return FALSE;
+    }
+
+    ret = crypt_get_hw_encryption_type (cd);
+    if (ret != CRYPT_OPAL_HW_ONLY && ret != CRYPT_SW_AND_OPAL_HW) {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Device %s isn't a LUKS HW-OPAL device.", device);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        crypt_free (cd);
+        return FALSE;
+    }
+
+    if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE) {
+        key_buf = (char *) context->u.passphrase.pass_data;
+        buf_len = context->u.passphrase.data_len;
+    } else {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                     "Only 'passphrase' context type is valid for OPAL wipe.");
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        crypt_free (cd);
+        return FALSE;
+    }
+
+    ret = crypt_wipe_hw_opal (cd, CRYPT_LUKS2_SEGMENT, key_buf, buf_len, 0);
+    if (ret != 0) {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to wipe LUKS HW-OPAL device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
+}
+#endif

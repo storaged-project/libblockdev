@@ -318,5 +318,6 @@ gboolean bd_crypto_fvault2_close (const gchar *fvault2_device, GError **error);
 gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, const gchar *cert_data, const gchar *directory, const gchar *backup_passphrase, GError **error);
 
 gboolean bd_crypto_opal_is_supported (const gchar *device, GError **error);
+gboolean bd_crypto_opal_wipe (const gchar *device, BDCryptoKeyslotContext *context, GError **error);
 
 #endif  /* BD_CRYPTO */
