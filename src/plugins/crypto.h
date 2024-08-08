@@ -42,6 +42,7 @@ typedef enum {
     BD_CRYPTO_TECH_BITLK,
     BD_CRYPTO_TECH_KEYRING,
     BD_CRYPTO_TECH_FVAULT2,
+    BD_CRYPTO_TECH_SED_OPAL,
 } BDCryptoTech;
 
 typedef enum {
@@ -146,6 +147,22 @@ typedef enum {
 } BDCryptoIntegrityOpenFlags;
 
 /**
+ * BDCryptoLUKSSEDOPALType:
+ * @BD_CRYPTO_LUKS_SED_OPAL_UNKNOWN: used for unknown/unsupported hardware encryption or when
+ *                                   error was raised when getting the information
+ * @BD_CRYPTO_LUKS_SED_OPAL_SW_ONLY: OPAL hardware encryption is not configured on this device
+ * @BD_CRYPTO_LUKS_SED_OPAL_HW_ONLY: only OPAL hardware encryption is configured on this device
+ * @BD_CRYPTO_LUKS_SED_OPAL_HW_AND_SW: both OPAL hardware encryption and software encryption
+ *                                     (using LUKS/dm-crypt) is configured on this device
+ */
+typedef enum {
+    BD_CRYPTO_LUKS_SED_OPAL_UNKNOWN = 0,
+    BD_CRYPTO_LUKS_SED_OPAL_SW_ONLY,
+    BD_CRYPTO_LUKS_SED_OPAL_HW_ONLY,
+    BD_CRYPTO_LUKS_SED_OPAL_HW_AND_SW,
+} BDCryptoLUKSSEDOPALType;
+
+/**
  * BDCryptoLUKSInfo:
  * @version: LUKS version
  * @cipher: used cipher (e.g. "aes")
@@ -157,6 +174,7 @@ typedef enum {
  * @metadata_size: LUKS metadata size
  * @label: label of the LUKS device (valid only for LUKS 2)
  * @subsystem: subsystem of the LUKS device (valid only for LUKS 2)
+ * @hw_encryption: hardware encryption type
  */
 typedef struct BDCryptoLUKSInfo {
     BDCryptoLUKSVersion version;
@@ -168,6 +186,7 @@ typedef struct BDCryptoLUKSInfo {
     guint64 metadata_size;
     gchar *label;
     gchar *subsystem;
+    BDCryptoLUKSSEDOPALType hw_encryption;
 } BDCryptoLUKSInfo;
 
 void bd_crypto_luks_info_free (BDCryptoLUKSInfo *info);
@@ -297,5 +316,7 @@ gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, BDCrypt
 gboolean bd_crypto_fvault2_close (const gchar *fvault2_device, GError **error);
 
 gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, const gchar *cert_data, const gchar *directory, const gchar *backup_passphrase, GError **error);
+
+gboolean bd_crypto_opal_is_supported (const gchar *device, GError **error);
 
 #endif  /* BD_CRYPTO */
