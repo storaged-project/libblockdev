@@ -126,6 +126,9 @@ bd_crypto_bitlk_open
 bd_crypto_bitlk_close
 bd_crypto_fvault2_open
 bd_crypto_fvault2_close
+bd_crypto_opal_is_supported
+bd_crypto_opal_wipe
+bd_crypto_opal_format
 BDCryptoTech
 BDCryptoTechMode
 bd_crypto_is_tech_avail

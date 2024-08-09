@@ -32,6 +32,7 @@ def check_cryptsetup_version(version):
 
 HAVE_BITLK = check_cryptsetup_version("2.3.0")
 HAVE_FVAULT2 = check_cryptsetup_version("2.6.0")
+HAVE_OPAL = check_cryptsetup_version("2.7.0")
 
 
 class CryptoTestCase(unittest.TestCase):
@@ -1724,3 +1725,77 @@ class CryptoTestIntegrity(CryptoTestCase):
         succ = BlockDev.crypto_integrity_close(self._dm_name)
         self.assertTrue(succ)
         self.assertFalse(os.path.exists("/dev/mapper/%s" % self._dm_name))
+
+
+class CryptoTestLUKSOpal(CryptoTestCase):
+
+    @unittest.skipUnless(HAVE_OPAL, "OPAL not supported")
+    @tag_test(TestTags.SLOW)
+    def test_luks_opal_sanity(self):
+        """Basic sanity check for LUKS HW-OPAL support"""
+        with self.assertRaisesRegex(GLib.GError, r"Failed to get opal status for the device"):
+            BlockDev.crypto_opal_is_supported(self.loop_dev)
+
+        with self.assertRaisesRegex(GLib.GError, r"OPAL doesn't seem to be supported on"):
+            BlockDev.crypto_opal_format(self.loop_dev, context=BlockDev.CryptoKeyslotContext(passphrase="aaaaa"),
+                                        opal_context=BlockDev.CryptoKeyslotContext(passphrase="aaaaa"))
+
+        # "normal" LUKS device
+        self._luks_format(self.loop_dev, PASSWD, None)
+
+        with self.assertRaisesRegex(GLib.GError, r"isn't a LUKS HW-OPAL device"):
+            BlockDev.crypto_opal_wipe_device(self.loop_dev,
+                                             BlockDev.CryptoKeyslotContext(passphrase="aaaaa"))
+
+        info = BlockDev.crypto_luks_info(self.loop_dev)
+        self.assertEqual(info.hw_encryption, BlockDev.CryptoLUKSHWEncryptionType.SW_ONLY)
+
+    @unittest.skip("requires special hardware")
+    @tag_test(TestTags.SLOW)
+    def test_luks_opal_full(self):
+        """ Full LUKS HW-OPAL support test"""
+        # requires a disk that supports OPAL so this test case will be always skipped and
+        # exists only for manual testing purposes outside CI
+        DISK = ""
+        OPAL_PASSWD = "anaconda"
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)            # LUKS passphrase
+        opal_ctx = BlockDev.CryptoKeyslotContext(passphrase=OPAL_PASSWD)  # OPAL admin passphrase
+
+        ret = BlockDev.crypto_opal_is_supported(DISK)
+        self.assertTrue(ret)
+
+        # OPAL only
+        ret = BlockDev.crypto_opal_format(DISK, context=ctx, opal_context=opal_ctx,
+                                          hw_encryption=BlockDev.CryptoLUKSHWEncryptionType.OPAL_HW_ONLY)
+        self.assertTrue(ret)
+
+        info = BlockDev.crypto_luks_info(DISK)
+        self.assertEqual(info.hw_encryption, BlockDev.CryptoLUKSHWEncryptionType.OPAL_HW_ONLY)
+        self.assertEqual(info.subsystem, "HW-OPAL")
+
+        succ = BlockDev.crypto_luks_open(DISK, "libblockdevTestLUKS", ctx, False)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+        ret = BlockDev.crypto_opal_wipe_device(DISK, opal_ctx)
+        self.assertTrue(ret)
+
+        # OPAL + dm-crypt
+        ret = BlockDev.crypto_opal_format(DISK, context=ctx, opal_context=opal_ctx,
+                                          hw_encryption=BlockDev.CryptoLUKSHWEncryptionType.OPAL_HW_AND_SW)
+        self.assertTrue(ret)
+
+        info = BlockDev.crypto_luks_info(DISK)
+        self.assertEqual(info.hw_encryption, BlockDev.CryptoLUKSHWEncryptionType.OPAL_HW_AND_SW)
+        self.assertEqual(info.subsystem, "HW-OPAL")
+
+        succ = BlockDev.crypto_luks_open(DISK, "libblockdevTestLUKS", ctx, False)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+        ret = BlockDev.crypto_opal_wipe_device(DISK, opal_ctx)
+        self.assertTrue(ret)
