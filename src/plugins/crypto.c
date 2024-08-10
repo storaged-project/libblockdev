@@ -36,7 +36,9 @@
 #include <volume_key/libvolume_key.h>
 #endif
 
+#ifdef HAVE_LINUX_OPAL
 #include <linux/sed-opal.h>
+#endif
 
 #include "crypto.h"
 
@@ -444,9 +446,9 @@ gboolean bd_crypto_is_tech_avail (BDCryptoTech tech, guint64 mode, GError **erro
             } else
                 return TRUE;
         case BD_CRYPTO_TECH_SED_OPAL:
-#ifndef LIBCRYPTSETUP_27
+#if !defined(LIBCRYPTSETUP_27) || !defined(HAVE_LINUX_OPAL)
             g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                         "OPAL technology requires libcryptsetup >= 2.7.0");
+                         "OPAL technology requires libcryptsetup >= 2.7.0 and kernel with SED OPAL support");
             return FALSE;
 #endif
             ret = mode & (BD_CRYPTO_TECH_MODE_CREATE|BD_CRYPTO_TECH_MODE_QUERY|BD_CRYPTO_TECH_MODE_MODIFY);
@@ -3640,6 +3642,12 @@ gboolean bd_crypto_fvault2_close (const gchar *fvault2_device, GError **error) {
  *
  * Tech category: %BD_CRYPTO_TECH_SED_OPAL-%BD_CRYPTO_TECH_MODE_QUERY
  */
+#ifndef HAVE_LINUX_OPAL
+gboolean bd_crypto_opal_is_supported (const gchar *device G_GNUC_UNUSED, GError **error) {
+    /* this will return FALSE and set error, because OPAL technology is not available */
+    return bd_crypto_is_tech_avail (BD_CRYPTO_TECH_SED_OPAL, BD_CRYPTO_TECH_MODE_QUERY, error);
+}
+#else
 gboolean bd_crypto_opal_is_supported (const gchar *device, GError **error) {
     gint fd = -1;
     gint ret = 0;
@@ -3669,6 +3677,7 @@ gboolean bd_crypto_opal_is_supported (const gchar *device, GError **error) {
     else
         return FALSE;
 }
+#endif
 
 /**
  * bd_crypto_opal_wipe_device:
