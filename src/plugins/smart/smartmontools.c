@@ -33,7 +33,7 @@
 #include "smart-private.h"
 
 /**
- * SECTION: smart
+ * SECTION: smart-smartmontools
  * @short_description: SMART device reporting and management.
  * @title: SMART
  * @include: smart.h
