@@ -386,6 +386,13 @@ def crypto_integrity_open(device, name, algorithm, context=None, flags=0, extra=
 __all__.append("crypto_integrity_open")
 
 
+_crypto_opal_format = BlockDev.crypto_opal_format
+@override(BlockDev.crypto_opal_format)
+def crypto_opal_format(device, cipher=None, key_size=0, context=None, min_entropy=0, opal_context=None, hw_encryption=BlockDev.CryptoLUKSHWEncryptionType.OPAL_HW_AND_SW, extra=None):
+    return _crypto_opal_format(device, cipher, key_size, context, min_entropy, hw_encryption, opal_context, extra)
+__all__.append("crypto_opal_format")
+
+
 _dm_create_linear = BlockDev.dm_create_linear
 @override(BlockDev.dm_create_linear)
 def dm_create_linear(map_name, device, length, uuid=None):
