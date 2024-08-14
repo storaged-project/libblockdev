@@ -286,7 +286,7 @@ AS_IF([test "x$with_smart" != "xno"],
        drivedb_path="$datarootdir/smartmontools"
        AC_ARG_WITH([drivedb],
                    [AS_HELP_STRING([--with-drivedb@<:@=PATH@:>@],
-                                   [support for smartmontools drivedb.h (default=$datarootdir/smartmontools)])],
+                                   [support for smartmontools drivedb.h (EXPERIMENTAL) (default=$datarootdir/smartmontools)])],
                    [], [with_drivedb=$drivedb_path])
        AX_RECURSIVE_EVAL([$with_drivedb], [drivedb_path])
        case $drivedb_path in

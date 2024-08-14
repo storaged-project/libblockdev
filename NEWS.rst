@@ -1,3 +1,20 @@
+Libblockdev 3.2.0 (unreleased)
+------------------
+
+This release brings new smart plugin with two actual plugin implementations:
+libatasmart (default) and smartmontools (experimental). Please check the smart
+plugin documentation for specifics and limitations.
+
+Note to distributors: the default smart plugin is based on libatasmart and
+requires no extra dependencies. The smartmontools plugin needs a runtime
+dependency on 'smartctl' executable besides a json-glib-1.0 build dep.
+A path to drivedb.h database can be specified with the --with-drivedb
+option. The latter two features are mostly provided for testing.
+
+**Full list of changes**
+
+TODO
+
 Libblockdev 3.1.1
 ------------------
 
