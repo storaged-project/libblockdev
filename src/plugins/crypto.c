@@ -3861,17 +3861,17 @@ gboolean bd_crypto_opal_reset_device (const gchar *device, BDCryptoKeyslotContex
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    ret = crypt_init (&cd, device);
-    if (ret != 0) {
-        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
-                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+    if (!bd_crypto_opal_is_supported (device, &l_error)) {
+        g_prefix_error (&l_error, "OPAL doesn't seem to be supported on %s: ", device);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
     }
 
-    if (!bd_crypto_opal_is_supported (device, &l_error)) {
-        g_prefix_error (&l_error, "OPAL doesn't seem to be supported on %s: ", device);
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
@@ -3885,7 +3885,7 @@ gboolean bd_crypto_opal_reset_device (const gchar *device, BDCryptoKeyslotContex
                                          context->u.keyfile.keyfile_offset, context->u.keyfile.key_size, 0);
         if (ret != 0) {
             g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYFILE_FAILED,
-                         "Failed to read key from file '%s: %s", context->u.keyfile.keyfile,
+                         "Failed to read key from file '%s': %s", context->u.keyfile.keyfile,
                          strerror_l (-ret, c_locale));
             crypt_free (cd);
             bd_utils_report_finished (progress_id, l_error->message);
