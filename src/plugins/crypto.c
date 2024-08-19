@@ -1304,7 +1304,7 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, BDCryptoKe
                                          context->u.keyfile.keyfile_offset, context->u.keyfile.key_size, 0);
         if (ret != 0) {
             g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYFILE_FAILED,
-                         "Failed to read key from file '%s: %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
+                         "Failed to read key from file '%s': %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
             crypt_free (cd);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
@@ -1563,7 +1563,7 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, BDCryptoKeyslotContext 
                                          context->u.keyfile.keyfile_offset, context->u.keyfile.key_size, 0);
         if (ret != 0) {
             g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYFILE_FAILED,
-                         "Failed to read key from file '%s: %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
+                         "Failed to read key from file '%s': %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
             crypt_free (cd);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
@@ -1787,7 +1787,7 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, BDCrypto
                                              context->u.keyfile.keyfile_offset, context->u.keyfile.key_size, 0);
             if (ret != 0) {
                 g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYFILE_FAILED,
-                            "Failed to read key from file '%s: %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
+                             "Failed to read key from file '%s': %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
                 crypt_free (cd);
                 bd_utils_report_finished (progress_id, l_error->message);
                 g_propagate_error (error, l_error);
@@ -1942,7 +1942,7 @@ gboolean bd_crypto_luks_resume (const gchar *luks_device, BDCryptoKeyslotContext
                                          context->u.keyfile.keyfile_offset, context->u.keyfile.key_size, 0);
         if (ret != 0) {
             g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYFILE_FAILED,
-                         "Failed to read key from file '%s: %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
+                         "Failed to read key from file '%s': %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
             crypt_free (cd);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
@@ -3458,7 +3458,7 @@ gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, BDCryptoK
                                          context->u.keyfile.keyfile_offset, context->u.keyfile.key_size, 0);
         if (ret != 0) {
             g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYFILE_FAILED,
-                         "Failed to read key from file '%s: %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
+                         "Failed to read key from file '%s': %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
             crypt_free (cd);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
@@ -3573,7 +3573,7 @@ gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, BDCrypt
                                          context->u.keyfile.keyfile_offset, context->u.keyfile.key_size, 0);
         if (ret != 0) {
             g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYFILE_FAILED,
-                         "Failed to read key from file '%s: %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
+                         "Failed to read key from file '%s': %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
             crypt_free (cd);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
