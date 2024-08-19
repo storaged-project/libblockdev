@@ -52,6 +52,5 @@
 
 - test: (lvm_test|lvm_dbus_tests).LVMVDOTest
   skip_on:
-    - distro: "centos"
-      version: "10"
-      reason: "vdo userspace tools are not yet available on RHEL/CentOS 10"
+    - distro: "debian"
+      reason: "vdo userspace tools are not available on Debian"
