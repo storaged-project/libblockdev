@@ -1750,6 +1750,10 @@ class CryptoTestLUKSOpal(CryptoTestCase):
         info = BlockDev.crypto_luks_info(self.loop_dev)
         self.assertEqual(info.hw_encryption, BlockDev.CryptoLUKSHWEncryptionType.SW_ONLY)
 
+        with self.assertRaisesRegex(GLib.GError, r"OPAL doesn't seem to be supported on"):
+            BlockDev.crypto_opal_reset_device(self.loop_dev,
+                                              BlockDev.CryptoKeyslotContext(passphrase="aaaaa"))
+
     @unittest.skip("requires special hardware")
     @tag_test(TestTags.SLOW)
     def test_luks_opal_full(self):

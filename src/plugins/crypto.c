@@ -1304,7 +1304,7 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, BDCryptoKe
                                          context->u.keyfile.keyfile_offset, context->u.keyfile.key_size, 0);
         if (ret != 0) {
             g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYFILE_FAILED,
-                         "Failed to read key from file '%s: %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
+                         "Failed to read key from file '%s': %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
             crypt_free (cd);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
@@ -1563,7 +1563,7 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, BDCryptoKeyslotContext 
                                          context->u.keyfile.keyfile_offset, context->u.keyfile.key_size, 0);
         if (ret != 0) {
             g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYFILE_FAILED,
-                         "Failed to read key from file '%s: %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
+                         "Failed to read key from file '%s': %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
             crypt_free (cd);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
@@ -1787,7 +1787,7 @@ gboolean bd_crypto_luks_resize (const gchar *luks_device, guint64 size, BDCrypto
                                              context->u.keyfile.keyfile_offset, context->u.keyfile.key_size, 0);
             if (ret != 0) {
                 g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYFILE_FAILED,
-                            "Failed to read key from file '%s: %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
+                             "Failed to read key from file '%s': %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
                 crypt_free (cd);
                 bd_utils_report_finished (progress_id, l_error->message);
                 g_propagate_error (error, l_error);
@@ -1942,7 +1942,7 @@ gboolean bd_crypto_luks_resume (const gchar *luks_device, BDCryptoKeyslotContext
                                          context->u.keyfile.keyfile_offset, context->u.keyfile.key_size, 0);
         if (ret != 0) {
             g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYFILE_FAILED,
-                         "Failed to read key from file '%s: %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
+                         "Failed to read key from file '%s': %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
             crypt_free (cd);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
@@ -3458,7 +3458,7 @@ gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, BDCryptoK
                                          context->u.keyfile.keyfile_offset, context->u.keyfile.key_size, 0);
         if (ret != 0) {
             g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYFILE_FAILED,
-                         "Failed to read key from file '%s: %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
+                         "Failed to read key from file '%s': %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
             crypt_free (cd);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
@@ -3573,7 +3573,7 @@ gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, BDCrypt
                                          context->u.keyfile.keyfile_offset, context->u.keyfile.key_size, 0);
         if (ret != 0) {
             g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYFILE_FAILED,
-                         "Failed to read key from file '%s: %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
+                         "Failed to read key from file '%s': %s", context->u.keyfile.keyfile, strerror_l (-ret, c_locale));
             crypt_free (cd);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
@@ -3825,5 +3825,94 @@ gboolean bd_crypto_opal_format (const gchar *device, const gchar *cipher, guint6
     }
 
     return _crypto_luks_format (device, cipher, key_size, context, min_entropy, BD_CRYPTO_LUKS_VERSION_LUKS2, extra, hw_encryption, opal_context, error);
+}
+#endif
+
+/**
+ * bd_crypto_opal_reset_device:
+ * @device: LUKS HW-OPAL device to run PSID reset on
+ * @context: PSID context
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: whether PSI reset on @device was successful or not.
+ *
+ * Warning: PSID reset will remove all data from @device!
+ *
+ * Supported @context types for this function: passphrase, key file
+ *
+ * Tech category: %BD_CRYPTO_TECH_SED_OPAL-%BD_CRYPTO_TECH_MODE_MODIFY
+ */
+#ifndef LIBCRYPTSETUP_27
+gboolean bd_crypto_opal_reset_device (const gchar *device G_GNUC_UNUSED, BDCryptoKeyslotContext *context G_GNUC_UNUSED, GError **error) {
+    /* this will return FALSE and set error, because OPAL technology is not available */
+    return bd_crypto_is_tech_avail (BD_CRYPTO_TECH_SED_OPAL, BD_CRYPTO_TECH_MODE_QUERY, error);
+}
+#else
+gboolean bd_crypto_opal_reset_device (const gchar *device, BDCryptoKeyslotContext *context, GError **error) {
+    gchar *key_buf = NULL;
+    gsize buf_len = 0;
+    struct crypt_device *cd = NULL;
+    gint ret = 0;
+    guint64 progress_id = 0;
+    GError *l_error = NULL;
+    gchar *msg = NULL;
+
+    msg = g_strdup_printf ("Started PSID reset on '%s' LUKS HW-OPAL device", device);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    if (!bd_crypto_opal_is_supported (device, &l_error)) {
+        g_prefix_error (&l_error, "OPAL doesn't seem to be supported on %s: ", device);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        return FALSE;
+    }
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        return FALSE;
+    }
+
+    if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE) {
+        key_buf = (char *) context->u.passphrase.pass_data;
+        buf_len = context->u.passphrase.data_len;
+    } else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE) {
+        ret = crypt_keyfile_device_read (cd, context->u.keyfile.keyfile, &key_buf, &buf_len,
+                                         context->u.keyfile.keyfile_offset, context->u.keyfile.key_size, 0);
+        if (ret != 0) {
+            g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYFILE_FAILED,
+                         "Failed to read key from file '%s': %s", context->u.keyfile.keyfile,
+                         strerror_l (-ret, c_locale));
+            crypt_free (cd);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
+            return FALSE;
+        }
+    } else {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
+                     "Only 'passphrase' and 'key file' context types are valid for OPAL PSID reset.");
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        crypt_free (cd);
+        return FALSE;
+    }
+
+    ret = crypt_wipe_hw_opal (cd, CRYPT_NO_SEGMENT, key_buf, buf_len, 0);
+    if (ret != 0) {
+        g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to wipe LUKS HW-OPAL device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
 }
 #endif
