@@ -301,6 +301,18 @@ class CryptoKeyslotContext(BlockDev.CryptoKeyslotContext):
 CryptoKeyslotContext = override(CryptoKeyslotContext)
 __all__.append("CryptoKeyslotContext")
 
+class CryptoLUKSReencryptParams(BlockDev.CryptoLUKSReencryptParams):
+    def __new__(cls, key_size, cipher, cipher_mode, resilience="checksum" , hash="sha256", max_hotzone_size=0, sector_size=512, new_volume_key=True, offline=False, pbkdf=None):
+        if pbkdf is None:
+            pbkdf = CryptoLUKSPBKDF()
+        ret = BlockDev.CryptoLUKSReencryptParams.new(key_size=key_size, cipher=cipher, cipher_mode=cipher_mode, resilience=resilience, hash=hash, max_hotzone_size=max_hotzone_size, sector_size=sector_size, new_volume_key=new_volume_key, offline=offline, pbkdf=pbkdf)
+        ret.__class__ = cls
+        return ret
+    def __init__(self, *args, **kwargs):  # pylint: disable=unused-argument
+        super(CryptoLUKSReencryptParams, self).__init__()  #pylint: disable=bad-super-call
+CryptoLUKSReencryptParams = override(CryptoLUKSReencryptParams)
+__all__.append("CryptoLUKSReencryptParams")
+
 # calling `crypto_luks_format_luks2` with `luks_version` set to
 # `BlockDev.CryptoLUKSVersion.LUKS1` and `extra` to `None` is the same
 # as using the "original" function `crypto_luks_format`

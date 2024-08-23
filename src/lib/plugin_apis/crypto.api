@@ -28,6 +28,7 @@ typedef enum {
     BD_CRYPTO_ERROR_KEYRING,
     BD_CRYPTO_ERROR_KEYFILE_FAILED,
     BD_CRYPTO_ERROR_INVALID_CONTEXT,
+    BD_CRYPTO_ERROR_REENCRYPT_FAILED,
 } BDCryptoError;
 
 typedef enum {
@@ -1110,6 +1111,193 @@ gboolean bd_crypto_luks_set_uuid (const gchar *device, const gchar *uuid, GError
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_MODIFY
  */
 gboolean bd_crypto_luks_convert (const gchar *device, BDCryptoLUKSVersion target_version, GError **error);
+
+
+#define BD_CRYPTO_TYPE_LUKS_REENCRYPT_PARAMS (bd_crypto_luks_reencrypt_params_get_type ())
+GType bd_crypto_luks_reencrypt_params_get_type();
+
+/**
+ * BDCryptoLUKSReencryptParams:
+ * @key_size         new volume key size if @new_volume_key is true. Ignored otherwise
+ * @cipher           new cipher
+ * @cipher_mode      new cipher mode
+ * @resilience       resilience mode to be used during reencryption
+ * @hash             used hash for "checksum" resilience type, ignored otherwise
+ * @max_hotzone_size max hotzone size
+ * @sector_size      sector size. Note that 0 is not a valid value
+ * @new_volume_key   whether to generate a new volume key or keep the existing one
+ * @offline          whether to perform an offline or online reencryption,
+ *                     i.e. whether a device is active in the time of reencryption or not
+ * @pbkdf            PBDKF function parameters for a new keyslot
+ */
+typedef struct BDCryptoLUKSReencryptParams {
+    guint32 key_size;
+    gchar *cipher;
+    gchar *cipher_mode;
+    gchar *resilience;
+    gchar *hash;
+    guint64 max_hotzone_size;
+    guint32 sector_size;
+    gboolean new_volume_key;
+    gboolean offline;
+    BDCryptoLUKSPBKDF *pbkdf;
+} BDCryptoLUKSReencryptParams;
+
+/**
+ * bd_crypto_luks_reencrypt_params_copy: (skip)
+ * @params: (nullable): %BDCryptoLUKSReencryptParams to copy
+ *
+ * Creates a copy of @params.
+ */
+BDCryptoLUKSReencryptParams* bd_crypto_luks_reencrypt_params_copy (BDCryptoLUKSReencryptParams* params) {
+    if (params == NULL)
+        return NULL;
+
+    BDCryptoLUKSReencryptParams *new_params = g_new0 (BDCryptoLUKSReencryptParams, 1);
+    new_params->key_size = params->key_size;
+    new_params->cipher = g_strdup (params->cipher);
+    new_params->cipher_mode = g_strdup (params->cipher_mode);
+    new_params->resilience = g_strdup (params->resilience);
+    new_params->hash = g_strdup (params->hash);
+    new_params->max_hotzone_size = params->max_hotzone_size;
+    new_params->sector_size = params->sector_size;
+    new_params->new_volume_key = params->new_volume_key;
+    new_params->offline = params->offline;
+    new_params->pbkdf = bd_crypto_luks_pbkdf_copy(params->pbkdf);
+
+    return new_params;
+}
+
+/**
+ * bd_crypto_luks_reencrypt_params_free: (skip)
+ * @params: (nullable): %BDCryptoLUKSReencryptParams to free
+ *
+ * Frees @params.
+ */
+void bd_crypto_luks_reencrypt_params_free (BDCryptoLUKSReencryptParams* params) {
+    if (params == NULL)
+        return;
+
+    g_free (params->cipher);
+    g_free (params->cipher_mode);
+    g_free (params->resilience);
+    g_free (params->hash);
+    bd_crypto_luks_pbkdf_free(params->pbkdf);
+}
+
+/**
+ * bd_crypto_luks_reencrypt_params_new: (constructor)
+ * @key_size                    new volume key size if @new_volume_key is true. Ignored otherwise
+ * @cipher: (nullable):         new cipher
+ * @cipher_mode: (nullable):    new cipher mode
+ * @resilience: (nullable):     resilience mode to be used during reencryption
+ * @hash: (nullable):           used hash for "checksum" resilience type, ignored otherwise
+ * @max_hotzone_size            max hotzone size
+ * @sector_size                 sector size. Note that 0 is not a valid value
+ * @new_volume_key              whether to generate a new volume key or keep the existing one
+ * @offline                     whether to perform an offline or online reencryption,
+ *                                  i.e. whether a device is active in the time of reencryption or not
+ * @pbkdf: (nullable):          PBDKF function parameters for a new keyslot
+ */
+BDCryptoLUKSReencryptParams* bd_crypto_luks_reencrypt_params_new (guint32 key_size, gchar *cipher, gchar *cipher_mode, gchar *resilience, gchar *hash, guint64 max_hotzone_size, guint32 sector_size, gboolean new_volume_key, gboolean offline, BDCryptoLUKSPBKDF *pbkdf) {
+    BDCryptoLUKSReencryptParams *ret = g_new0 (BDCryptoLUKSReencryptParams, 1);
+    ret->key_size = key_size;
+    ret->cipher = g_strdup (cipher);
+    ret->cipher_mode = g_strdup (cipher_mode);
+    ret->resilience = g_strdup (resilience);
+    ret->hash = g_strdup (hash);
+    ret->max_hotzone_size = max_hotzone_size;
+    ret->sector_size = sector_size;
+    ret->new_volume_key = new_volume_key;
+    ret->offline = offline;
+    ret->pbkdf = bd_crypto_luks_pbkdf_copy(pbkdf);
+
+    return ret;
+}
+
+GType bd_crypto_luks_reencrypt_params_get_type () {
+    static GType type = 0;
+
+    if (G_UNLIKELY(type == 0)) {
+        type = g_boxed_type_register_static("BDCryptoLUKSReencryptParams",
+                                            (GBoxedCopyFunc) bd_crypto_luks_reencrypt_params_copy,
+                                            (GBoxedFreeFunc) bd_crypto_luks_reencrypt_params_free);
+    }
+
+    return type;
+}
+
+/**
+ * BDCryptoLUKSReencryptProgFunc:
+ * @size    size of the device being reencrypted
+ * @offset  current offset
+ *
+ * A callback function called during reencryption to report progress. Also used to possibly stop reencryption.
+ *
+ * Returns: 0, if the reencryption should continue.
+ *          A non-zero value to stop the reencryption
+ */
+typedef int (*BDCryptoLUKSReencryptProgFunc) (guint64 size, guint64 offset);
+
+typedef enum {
+    BD_CRYPTO_LUKS_REENCRYPT_NONE = 0,
+    BD_CRYPTO_LUKS_REENCRYPT_CLEAN,
+    BD_CRYPTO_LUKS_REENCRYPT_CRASH,
+    BD_CRYPTO_LUKS_REENCRYPT_INVALID
+} BDCryptoLUKSReencryptStatus;
+
+typedef enum {
+    BD_CRYPTO_LUKS_REENCRYPT = 0,
+    BD_CRYPTO_LUKS_ENCRYPT,
+    BD_CRYPTO_LUKS_DECRYPT,
+} BDCryptoLUKSReencryptMode;
+
+/**
+ * bd_crypto_luks_reencrypt:
+ * @device:     device to reencrypt. Either an active device name for online reencryption, or a block device for offline reencryption.
+ *              Must match the @params's "offline" parameter
+ * @params:     reencryption parameters
+ * @context:    key slot context to unlock @device. The newly created keyslot will use the same context
+ * @prog_func: (scope call) (nullable): progress function. Also used to possibly stop reencryption
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Reencrypts @device. This could mean a change of cipher, cipher mode, or volume key, based on @params
+ *
+ * Returns: true,  if the reencryption was successful or gracefully stopped with @prog_func.
+ *          false, if an error occurred.
+ *
+ * Supported @context types for this function: passphrase
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_MODIFY
+ */
+gboolean bd_crypto_luks_reencrypt(const gchar *device, BDCryptoLUKSReencryptParams *params, BDCryptoKeyslotContext *context, BDCryptoLUKSReencryptProgFunc prog_func, GError **error);
+
+/**
+ * bd_crypto_luks_reencrypt_status:
+ * @device:                     an active device name or a block device
+ * @mode: (out):                the exact operation in the "reencryption family"
+ *                                Has no meaning if the return value is BD_CRYPTO_LUKS_REENCRYPT_NONE
+ * @error: (out) (optional):    place to store error (if any)
+ *
+ * Returns: state of @device's reencryption
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_QUERY
+ */
+BDCryptoLUKSReencryptStatus bd_crypto_luks_reencrypt_status (const gchar *device, BDCryptoLUKSReencryptMode *mode, GError **error);
+
+/**
+ * bd_crypto_luks_reencrypt_resume:
+ * @device:     device with a stopped reencryption. An active device name or a block device
+ * @context:    key slot context to unlock @device
+ * @prog_func: (scope call) (nullable): progress function. Also used to possibly stop reencryption
+ * @error: (out) (optional):    place to store error (if any)
+ *
+ * Returns: true,  if the reencryption finished successfully or was gracefully stopped with @prog_func.
+ *          false, if an error occurred.
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_MODIFY
+ */
+gboolean bd_crypto_luks_reencrypt_resume (const gchar *device, BDCryptoKeyslotContext *context, BDCryptoLUKSReencryptProgFunc prog_func, GError **error);
 
 /**
  * bd_crypto_luks_info:
