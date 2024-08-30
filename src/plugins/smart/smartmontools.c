@@ -32,15 +32,6 @@
 #include "smart.h"
 #include "smart-private.h"
 
-/**
- * SECTION: smart-smartmontools
- * @short_description: SMART device reporting and management.
- * @title: SMART
- * @include: smart.h
- *
- * A plugin for SMART device reporting and management, based around smartmontools.
- */
-
 #define SMARTCTL_MIN_VERSION "7.0"
 
 static volatile guint avail_deps = 0;
