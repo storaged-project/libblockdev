@@ -502,7 +502,7 @@ gboolean bd_smart_set_enabled (G_GNUC_UNUSED const gchar *device, G_GNUC_UNUSED 
  *
  * Executes or aborts device self-test.
  *
- * Returns: %TRUE when the self-test was trigerred successfully or %FALSE in case of an error (with @error set).
+ * Returns: %TRUE when the self-test was triggered successfully or %FALSE in case of an error (with @error set).
  *
  * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_SELFTEST
  */
