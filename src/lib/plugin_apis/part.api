@@ -60,6 +60,7 @@ GType bd_part_spec_get_type();
  * @size: size of the partition
  * @bootable: whether the bootable flag is set or not (for MSDOS partitions)
  * @attrs: partition GPT attributes
+ * @type_name: human readable representation of @type_guid
  */
 typedef struct BDPartSpec {
     gchar *path;

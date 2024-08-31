@@ -32,15 +32,6 @@
 #include "smart.h"
 #include "smart-private.h"
 
-/**
- * SECTION: smart-smartmontools
- * @short_description: SMART device reporting and management.
- * @title: SMART
- * @include: smart.h
- *
- * A plugin for SMART device reporting and management, based around smartmontools.
- */
-
 #define SMARTCTL_MIN_VERSION "7.0"
 
 static volatile guint avail_deps = 0;
@@ -1194,7 +1185,7 @@ gboolean bd_smart_set_enabled (const gchar *device, gboolean enabled, const BDEx
  *
  * Executes or aborts device self-test.
  *
- * Returns: %TRUE when the self-test was trigerred successfully or %FALSE in case of an error (with @error set).
+ * Returns: %TRUE when the self-test was triggered successfully or %FALSE in case of an error (with @error set).
  *
  * Tech category: %BD_SMART_TECH_ATA-%BD_SMART_TECH_MODE_SELFTEST
  */
