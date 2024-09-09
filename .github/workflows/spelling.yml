@@ -1,0 +1,34 @@
+name: Check spelling using codespell and spellintian
+
+on:
+  pull_request:
+    branches:
+     - master
+
+jobs:
+  build:
+    name: spelling
+    runs-on: ubuntu-24.04
+    env:
+      CI_CONTAINER: libblockdev-ci-spelling
+    steps:
+      - name: Checkout libblockdev repository
+        uses: actions/checkout@v4
+        with:
+          path: libblockdev
+
+      - name: Install codespell and lintian
+        run: |
+          sudo apt -qq update
+          sudo apt -y -qq install codespell lintian
+
+      - name: Get the storaged-project/ci repository
+        uses: actions/checkout@v4
+        with:
+          repository: storaged-project/ci
+          path: ci
+
+      - name: Run the checks
+        run: |
+          python3 ../ci/run_spell_checks -p libblockdev -i gir
+        working-directory: ./libblockdev
