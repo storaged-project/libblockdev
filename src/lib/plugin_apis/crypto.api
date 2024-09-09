@@ -755,7 +755,7 @@ struct _BDCryptoKeyslotContext {
 };
 typedef struct _BDCryptoKeyslotContext BDCryptoKeyslotContext;
 
-#define BD_CRYPTO_KEYSLOT_CONTEXT (bd_crypto_keyslot_context_get_type ())
+#define BD_CRYPTO_TYPE_KEYSLOT_CONTEXT (bd_crypto_keyslot_context_get_type ())
 GType bd_crypto_keyslot_context_get_type();
 
 /**
