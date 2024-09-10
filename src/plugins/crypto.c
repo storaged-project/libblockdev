@@ -3642,7 +3642,7 @@ gboolean bd_crypto_fvault2_close (const gchar *fvault2_device, GError **error) {
  *
  * Tech category: %BD_CRYPTO_TECH_SED_OPAL-%BD_CRYPTO_TECH_MODE_QUERY
  */
-#ifndef HAVE_LINUX_OPAL
+#if !defined(HAVE_LINUX_OPAL) || !defined(IOC_OPAL_GET_STATUS)
 gboolean bd_crypto_opal_is_supported (const gchar *device G_GNUC_UNUSED, GError **error) {
     /* this will return FALSE and set error, because OPAL technology is not available */
     return bd_crypto_is_tech_avail (BD_CRYPTO_TECH_SED_OPAL, BD_CRYPTO_TECH_MODE_QUERY, error);
