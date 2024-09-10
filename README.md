@@ -26,14 +26,16 @@ Following storage technologies are supported by libblockdev
  - encryption
    - LUKS, TrueCrypt/VeraCrypt, BitLocker, FileVault2
    - integrity
+   - SED OPAL
  - DM (device mapper)
  - loop devices
  - MD RAID
  - multipath
  - s390
    - DASD, zFCP
- - NVDIMM namespaces
+ - NVDIMM namespaces (deprecated)
  - NVMe
+ - SMART
 
 #### Architecture
 
