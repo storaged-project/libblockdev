@@ -1,4 +1,4 @@
-Libblockdev 3.2.0 (unreleased)
+Libblockdev 3.2.0
 ------------------
 
 This release brings new smart plugin with two actual plugin implementations:
@@ -13,7 +13,137 @@ option. The latter two features are mostly provided for testing.
 
 **Full list of changes**
 
-TODO
+Giulio Benetti (1):
+
+- Use glib2 G_GNUC_UNUSED in place of UNUSED locally defined
+
+Jelle van der Waa (3):
+
+- tests: split multi device tests into a new testcase class
+- tests: introduce setup_test_device helper function
+- btrfs: make btrfs subvolume listing consistent
+
+Michal Rostecki (1):
+
+- build: Fix linking with LLD
+
+Stepan Yakimovich (1):
+
+- crypto: Add support for conversion between different LUKS formats
+
+Tomas Bzatek (35):
+
+- Port to G_GNUC_INTERNAL for controlling symbols visibility
+- Fix some more occurrences of missing port to G_GNUC_UNUSED
+- dm_logging: Annotate redirect_dm_log() printf format
+- tests: Add NVMe persistent discovery controller tests
+- tests: Add NVMe controller type checks
+- New SMART plugin
+- smart: Add bd_smart_set_enabled()
+- smart: Add bd_smart_device_self_test()
+- tests: Add basic SMART tests
+- tests: Add SMART tests over supplied JSON dumps
+- tests: Add tests for bd_smart_set_enabled()
+- tests: Add tests for bd_smart_device_self_test()
+- smart: Add SCSI/SAS status retrieval
+- tests: Add SCSI SMART tests
+- smart: Remove the ATA low-power mode detection
+- smart: Introduce well-known attribute names, validation and pretty values
+- smart: Refactor and split into libbd_smartmontools
+- smart: Introduce new libatasmart plugin
+- smart: Implement bd_smart_ata_get_info_from_data()
+- smart: Use smartmontools drivedb.h for libatasmart validation
+- build: Install lvm.h when only lvm_dbus enabled
+- tests: Add SiliconPower SSD skdump reporting incorrect temp
+- smart: Rework libatasmart temperature reporting
+- tests: Split libatasmart and smartmontool tests
+- utils/exec: Refactor extra args append out
+- utils/exec: Add bd_utils_exec_and_capture_output_no_progress()
+- tests: Add bd_utils_exec_and_capture_output_no_progress() tests
+- smart: Add BDExtraArg arguments
+- tests: Adapt smart plugin tests for the added extra arguments
+- tests: Fix smartmontools plugin parsing of /dev/random
+- tests: Add more libatasmart skdump samples
+- nvme: Fix potential memory leak
+- smart: Mark drivedb integration as experimental
+- smart: Add documentation
+- NEWS: add preliminary release notes for the smart plugin
+
+Vojtech Trefny (60):
+
+- Makefile: Do not include release in the tag
+- Makefile: Fix bumpver to work with micro versions
+- tests: Manually remove removed PVs from LVM devices file
+- tests: Ignore LVM devices file for non-LVM tests
+- tests: Fix removing custom LVM devices file
+- nvme: Add bd_nvme_is_tech_avail to the API file
+- lvm-dbus: Fix passing size for pvresize over DBus
+- lvm-dbus: Fix potential segfault in bd_lvm_init
+- lvm-dbus: Fix leaking error in bd_lvm_init
+- crypto: Fix double free in bd_crypto_luks_remove_key
+- utils: Clarify usage of version in bd_utils_check_util_version
+- Bump version to 3.1.1
+- ci: Set custom release number for Packit
+- tests: Fix running tests without ntfsprogs
+- ci: Get version for packit from the SPEC file
+- ci: Fix bumping release for Packit builds
+- tests: Skip filesystem tests if kernel module is not available
+- misc: Vagrantfile update
+- misc: Remove CentOS 8 Stream from Vagrantfile and test dependencies
+- Fix pylint possibly-used-before-assignment warning in BlockDev.py
+- utils: Check also for aliases in bd_utils_have_kernel_module
+- tests: Skip ExFAT UUID tests with recent exfatprogs
+- fs: Ignore unused-parameter warning in the FS plugin
+- fs: Ignore shift-count-overflow warning in FS plugin
+- fs: Fix ignoring errors from libext2fs
+- ci: Use Ubuntu 24.04 in GitHub actions
+- misc: Fix enabling source repositories on latest Ubuntu
+- ci: Run Blivet reverse dependency tests on pull requests
+- ci: Add a simple tmt test and run it via packit
+- misc: Add kernel-modules-extra to test dependencies
+- ci: Run UDisks reverse dependency tests on pull requests
+- tests: Skip exFAT UUID tests also on Fedora 39
+- docs: Fix link to Python bindings documentation
+- part: Fix copy-paste bug in bd_part_spec_copy
+- infra: Add dependabot to automatically update GH actions
+- lvm: Check for dm-vdo instead of kvdo module for VDO support
+- lvm: Get VDO stats from device mapper instead of /sys/kvdo
+- misc: Add vdo to test dependencies on Fedora
+- tests: Temporarily skip LVM VDO tests on RHEL/CentOS 10
+- crypto: Show error when trying using an invalid DM name
+- part: Add human readable partition type to BDPartSpec
+- fs: Fix docstring for bd_fs_ext?_get_min_size functions
+- tests: No longer need to skip exfat UUID tests on Fedora
+- crypto: Add a function to check for OPAL support for a device
+- crypto: Add a function to wipe a LUKS HW-OPAL device
+- crypto: Add information about HW encryption to BDCryptoLUKSInfo
+- crypto: Add support for creating new LUKS HW-OPAL devices
+- tests: Add a simple test case for LUKS HW-OPAL support
+- crypto: Check for kernel SED OPAL support for OPAL operations
+- ci: Remove priority from Testing farm repositories
+- crypto: Add a function to run OPAL PSID reset
+- tests: Fix skipping VDO tests on Debian and CentOS 10
+- crypto: Fix name of bd_crypto_opal_wipe_device in crypto.h
+- crypto: Fixing missing quotation marks in some error messages
+- docs: Add BDCryptoLUKSHWEncryptionType to libblockdev-sections.txt
+- docs: Fix documentation for the SMART plugin
+- part: Document type_name in BDPartSpec docstring
+- misc: Fix typos
+- crypto: Fix GType macro for crypto context
+- ci: Add a simple GH action to run spelling tools on our code
+
+Vratislav Podzimek (1):
+
+- Add cache size ratio to the output of lvm-cache-stats
+
+dependabot[bot] (2):
+
+- infra: bump actions/upload-artifact from 3 to 4
+- infra: bump github/codeql-action from 2 to 3
+
+guazhang (1):
+
+- fixed md_create issue #1013
 
 Libblockdev 3.1.1
 ------------------
