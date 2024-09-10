@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<book xmlns="http://www.devhelp.net/book" title="libblockdev Reference Manual for libblockdev 3.1.1." link="index.html" author="" name="libblockdev" version="2" language="c">
+<book xmlns="http://www.devhelp.net/book" title="libblockdev Reference Manual for libblockdev 3.2.0." link="index.html" author="" name="libblockdev" version="2" language="c">
   <chapters>
     <sub name="libblockdev Reference Manual" link="ch01.html">
       <sub name="blockdev library" link="libblockdev-blockdev-library.html"/>
@@ -15,6 +15,7 @@
       <sub name="NVMe" link="libblockdev-NVMe.html"/>
       <sub name="Plugins" link="libblockdev-Plugins.html"/>
       <sub name="Part" link="libblockdev-Part.html"/>
+      <sub name="SMART" link="libblockdev-SMART.html"/>
       <sub name="Swap" link="libblockdev-Swap.html"/>
       <sub name="s390" link="libblockdev-s390.html"/>
       <sub name="Utils" link="libblockdev-Utils.html"/>
@@ -104,6 +105,7 @@
     <keyword type="function" name="bd_crypto_luks_header_restore ()" link="libblockdev-Crypto.html#bd-crypto-luks-header-restore"/>
     <keyword type="function" name="bd_crypto_luks_set_label ()" link="libblockdev-Crypto.html#bd-crypto-luks-set-label"/>
     <keyword type="function" name="bd_crypto_luks_set_uuid ()" link="libblockdev-Crypto.html#bd-crypto-luks-set-uuid"/>
+    <keyword type="function" name="bd_crypto_luks_convert ()" link="libblockdev-Crypto.html#bd-crypto-luks-convert"/>
     <keyword type="function" name="bd_crypto_luks_info_free ()" link="libblockdev-Crypto.html#bd-crypto-luks-info-free"/>
     <keyword type="function" name="bd_crypto_luks_info_copy ()" link="libblockdev-Crypto.html#bd-crypto-luks-info-copy"/>
     <keyword type="function" name="bd_crypto_luks_info ()" link="libblockdev-Crypto.html#bd-crypto-luks-info"/>
@@ -130,6 +132,10 @@
     <keyword type="function" name="bd_crypto_bitlk_close ()" link="libblockdev-Crypto.html#bd-crypto-bitlk-close"/>
     <keyword type="function" name="bd_crypto_fvault2_open ()" link="libblockdev-Crypto.html#bd-crypto-fvault2-open"/>
     <keyword type="function" name="bd_crypto_fvault2_close ()" link="libblockdev-Crypto.html#bd-crypto-fvault2-close"/>
+    <keyword type="function" name="bd_crypto_opal_is_supported ()" link="libblockdev-Crypto.html#bd-crypto-opal-is-supported"/>
+    <keyword type="function" name="bd_crypto_opal_wipe_device ()" link="libblockdev-Crypto.html#bd-crypto-opal-wipe-device"/>
+    <keyword type="function" name="bd_crypto_opal_format ()" link="libblockdev-Crypto.html#bd-crypto-opal-format"/>
+    <keyword type="function" name="bd_crypto_opal_reset_device ()" link="libblockdev-Crypto.html#bd-crypto-opal-reset-device"/>
     <keyword type="function" name="bd_crypto_is_tech_avail ()" link="libblockdev-Crypto.html#bd-crypto-is-tech-avail"/>
     <keyword type="macro" name="BD_CRYPTO_ERROR" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR:CAPS"/>
     <keyword type="enum" name="enum BDCryptoError" link="libblockdev-Crypto.html#BDCryptoError"/>
@@ -145,6 +151,7 @@
     <keyword type="enum" name="enum BDCryptoIntegrityOpenFlags" link="libblockdev-Crypto.html#BDCryptoIntegrityOpenFlags"/>
     <keyword type="struct" name="BDCryptoLUKSTokenInfo" link="libblockdev-Crypto.html#BDCryptoLUKSTokenInfo"/>
     <keyword type="struct" name="BDCryptoBITLKInfo" link="libblockdev-Crypto.html#BDCryptoBITLKInfo"/>
+    <keyword type="enum" name="enum BDCryptoLUKSHWEncryptionType" link="libblockdev-Crypto.html#BDCryptoLUKSHWEncryptionType"/>
     <keyword type="enum" name="enum BDCryptoTech" link="libblockdev-Crypto.html#BDCryptoTech"/>
     <keyword type="enum" name="enum BDCryptoTechMode" link="libblockdev-Crypto.html#BDCryptoTechMode"/>
     <keyword type="function" name="bd_dm_close ()" link="libblockdev-DeviceMapper.html#bd-dm-close"/>
@@ -657,6 +664,40 @@
     <keyword type="struct" name="BDPartDiskSpec" link="libblockdev-Part.html#BDPartDiskSpec"/>
     <keyword type="enum" name="enum BDPartTech" link="libblockdev-Part.html#BDPartTech"/>
     <keyword type="enum" name="enum BDPartTechMode" link="libblockdev-Part.html#BDPartTechMode"/>
+    <keyword type="function" name="bd_smart_check_deps ()" link="libblockdev-SMART.html#bd-smart-check-deps"/>
+    <keyword type="function" name="bd_smart_close ()" link="libblockdev-SMART.html#bd-smart-close"/>
+    <keyword type="function" name="bd_smart_init ()" link="libblockdev-SMART.html#bd-smart-init"/>
+    <keyword type="function" name="bd_smart_error_quark ()" link="libblockdev-SMART.html#bd-smart-error-quark"/>
+    <keyword type="function" name="bd_smart_is_tech_avail ()" link="libblockdev-SMART.html#bd-smart-is-tech-avail"/>
+    <keyword type="function" name="bd_smart_ata_get_info ()" link="libblockdev-SMART.html#bd-smart-ata-get-info"/>
+    <keyword type="function" name="bd_smart_ata_get_info_from_data ()" link="libblockdev-SMART.html#bd-smart-ata-get-info-from-data"/>
+    <keyword type="function" name="bd_smart_ata_copy ()" link="libblockdev-SMART.html#bd-smart-ata-copy"/>
+    <keyword type="function" name="bd_smart_ata_free ()" link="libblockdev-SMART.html#bd-smart-ata-free"/>
+    <keyword type="function" name="bd_smart_ata_attribute_copy ()" link="libblockdev-SMART.html#bd-smart-ata-attribute-copy"/>
+    <keyword type="function" name="bd_smart_ata_attribute_free ()" link="libblockdev-SMART.html#bd-smart-ata-attribute-free"/>
+    <keyword type="function" name="bd_smart_scsi_get_info ()" link="libblockdev-SMART.html#bd-smart-scsi-get-info"/>
+    <keyword type="function" name="bd_smart_scsi_free ()" link="libblockdev-SMART.html#bd-smart-scsi-free"/>
+    <keyword type="function" name="bd_smart_scsi_copy ()" link="libblockdev-SMART.html#bd-smart-scsi-copy"/>
+    <keyword type="function" name="bd_smart_set_enabled ()" link="libblockdev-SMART.html#bd-smart-set-enabled"/>
+    <keyword type="function" name="bd_smart_device_self_test ()" link="libblockdev-SMART.html#bd-smart-device-self-test"/>
+    <keyword type="macro" name="BD_SMART_ERROR" link="libblockdev-SMART.html#BD-SMART-ERROR:CAPS"/>
+    <keyword type="enum" name="enum BDSmartError" link="libblockdev-SMART.html#BDSmartError"/>
+    <keyword type="enum" name="enum BDSmartTech" link="libblockdev-SMART.html#BDSmartTech"/>
+    <keyword type="enum" name="enum BDSmartTechMode" link="libblockdev-SMART.html#BDSmartTechMode"/>
+    <keyword type="macro" name="BD_SMART_TYPE_ATA" link="libblockdev-SMART.html#BD-SMART-TYPE-ATA:CAPS"/>
+    <keyword type="macro" name="BD_SMART_TYPE_ATA_ATTRIBUTE" link="libblockdev-SMART.html#BD-SMART-TYPE-ATA-ATTRIBUTE:CAPS"/>
+    <keyword type="struct" name="BDSmartATAAttribute" link="libblockdev-SMART.html#BDSmartATAAttribute"/>
+    <keyword type="enum" name="enum BDSmartATAAttributeUnit" link="libblockdev-SMART.html#BDSmartATAAttributeUnit"/>
+    <keyword type="enum" name="enum BDSmartATAAttributeFlag" link="libblockdev-SMART.html#BDSmartATAAttributeFlag"/>
+    <keyword type="enum" name="enum BDSmartATACapabilities" link="libblockdev-SMART.html#BDSmartATACapabilities"/>
+    <keyword type="enum" name="enum BDSmartATAOfflineDataCollectionCapabilities" link="libblockdev-SMART.html#BDSmartATAOfflineDataCollectionCapabilities"/>
+    <keyword type="enum" name="enum BDSmartATAOfflineDataCollectionStatus" link="libblockdev-SMART.html#BDSmartATAOfflineDataCollectionStatus"/>
+    <keyword type="enum" name="enum BDSmartATASelfTestStatus" link="libblockdev-SMART.html#BDSmartATASelfTestStatus"/>
+    <keyword type="struct" name="BDSmartATA" link="libblockdev-SMART.html#BDSmartATA"/>
+    <keyword type="enum" name="enum BDSmartSCSIInformationalException" link="libblockdev-SMART.html#BDSmartSCSIInformationalException"/>
+    <keyword type="enum" name="enum BDSmartSCSIBackgroundScanStatus" link="libblockdev-SMART.html#BDSmartSCSIBackgroundScanStatus"/>
+    <keyword type="struct" name="BDSmartSCSI" link="libblockdev-SMART.html#BDSmartSCSI"/>
+    <keyword type="enum" name="enum BDSmartSelfTestOp" link="libblockdev-SMART.html#BDSmartSelfTestOp"/>
     <keyword type="function" name="bd_swap_init ()" link="libblockdev-Swap.html#bd-swap-init"/>
     <keyword type="function" name="bd_swap_close ()" link="libblockdev-Swap.html#bd-swap-close"/>
     <keyword type="function" name="bd_swap_error_quark ()" link="libblockdev-Swap.html#bd-swap-error-quark"/>
@@ -700,6 +741,7 @@
     <keyword type="function" name="bd_utils_exec_and_report_error ()" link="libblockdev-Utils.html#bd-utils-exec-and-report-error"/>
     <keyword type="function" name="bd_utils_exec_and_report_status_error ()" link="libblockdev-Utils.html#bd-utils-exec-and-report-status-error"/>
     <keyword type="function" name="bd_utils_exec_and_capture_output ()" link="libblockdev-Utils.html#bd-utils-exec-and-capture-output"/>
+    <keyword type="function" name="bd_utils_exec_and_capture_output_no_progress ()" link="libblockdev-Utils.html#bd-utils-exec-and-capture-output-no-progress"/>
     <keyword type="function" name="bd_utils_exec_and_report_error_no_progress ()" link="libblockdev-Utils.html#bd-utils-exec-and-report-error-no-progress"/>
     <keyword type="function" name="bd_utils_exec_and_report_progress ()" link="libblockdev-Utils.html#bd-utils-exec-and-report-progress"/>
     <keyword type="function" name="bd_utils_exec_with_input ()" link="libblockdev-Utils.html#bd-utils-exec-with-input"/>
@@ -810,6 +852,7 @@
     <keyword type="constant" name="BD_CRYPTO_ERROR_KEYRING" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR-KEYRING:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_ERROR_KEYFILE_FAILED" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR-KEYFILE-FAILED:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_ERROR_INVALID_CONTEXT" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR-INVALID-CONTEXT:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_ERROR_CONVERT_FAILED" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR-CONVERT-FAILED:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_LUKS_VERSION_LUKS1" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-VERSION-LUKS1:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_LUKS_VERSION_LUKS2" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-VERSION-LUKS2:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_INTEGRITY_OPEN_NO_JOURNAL" link="libblockdev-Crypto.html#BD-CRYPTO-INTEGRITY-OPEN-NO-JOURNAL:CAPS"/>
@@ -818,6 +861,10 @@
     <keyword type="constant" name="BD_CRYPTO_INTEGRITY_OPEN_RECALCULATE" link="libblockdev-Crypto.html#BD-CRYPTO-INTEGRITY-OPEN-RECALCULATE:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_INTEGRITY_OPEN_RECALCULATE_RESET" link="libblockdev-Crypto.html#BD-CRYPTO-INTEGRITY-OPEN-RECALCULATE-RESET:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_INTEGRITY_OPEN_ALLOW_DISCARDS" link="libblockdev-Crypto.html#BD-CRYPTO-INTEGRITY-OPEN-ALLOW-DISCARDS:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_LUKS_HW_ENCRYPTION_UNKNOWN" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-HW-ENCRYPTION-UNKNOWN:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_LUKS_HW_ENCRYPTION_SW_ONLY" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-HW-ENCRYPTION-SW-ONLY:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_ONLY" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-HW-ENCRYPTION-OPAL-HW-ONLY:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_LUKS_HW_ENCRYPTION_OPAL_HW_AND_SW" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-HW-ENCRYPTION-OPAL-HW-AND-SW:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_LUKS" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_TRUECRYPT" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-TRUECRYPT:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_ESCROW" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-ESCROW:CAPS"/>
@@ -825,6 +872,7 @@
     <keyword type="constant" name="BD_CRYPTO_TECH_BITLK" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-BITLK:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_KEYRING" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-KEYRING:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_FVAULT2" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-FVAULT2:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_TECH_SED_OPAL" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-SED-OPAL:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_MODE_CREATE" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-CREATE:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_MODE_OPEN_CLOSE" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-OPEN-CLOSE:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_TECH_MODE_QUERY" link="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-QUERY:CAPS"/>
@@ -1116,6 +1164,7 @@
     <keyword type="constant" name="BD_PLUGIN_FS" link="libblockdev-Plugins.html#BD-PLUGIN-FS:CAPS"/>
     <keyword type="constant" name="BD_PLUGIN_NVDIMM" link="libblockdev-Plugins.html#BD-PLUGIN-NVDIMM:CAPS"/>
     <keyword type="constant" name="BD_PLUGIN_NVME" link="libblockdev-Plugins.html#BD-PLUGIN-NVME:CAPS"/>
+    <keyword type="constant" name="BD_PLUGIN_SMART" link="libblockdev-Plugins.html#BD-PLUGIN-SMART:CAPS"/>
     <keyword type="constant" name="BD_PLUGIN_UNDEF" link="libblockdev-Plugins.html#BD-PLUGIN-UNDEF:CAPS"/>
     <keyword type="constant" name="BD_PART_ALIGN_NONE" link="libblockdev-Part.html#BD-PART-ALIGN-NONE:CAPS"/>
     <keyword type="constant" name="BD_PART_ALIGN_MINIMAL" link="libblockdev-Part.html#BD-PART-ALIGN-MINIMAL:CAPS"/>
@@ -1144,6 +1193,105 @@
     <keyword type="constant" name="BD_PART_TECH_MODE_QUERY_TABLE" link="libblockdev-Part.html#BD-PART-TECH-MODE-QUERY-TABLE:CAPS"/>
     <keyword type="constant" name="BD_PART_TECH_MODE_MODIFY_PART" link="libblockdev-Part.html#BD-PART-TECH-MODE-MODIFY-PART:CAPS"/>
     <keyword type="constant" name="BD_PART_TECH_MODE_QUERY_PART" link="libblockdev-Part.html#BD-PART-TECH-MODE-QUERY-PART:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ERROR_TECH_UNAVAIL" link="libblockdev-SMART.html#BD-SMART-ERROR-TECH-UNAVAIL:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ERROR_FAILED" link="libblockdev-SMART.html#BD-SMART-ERROR-FAILED:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ERROR_INVALID_ARGUMENT" link="libblockdev-SMART.html#BD-SMART-ERROR-INVALID-ARGUMENT:CAPS"/>
+    <keyword type="constant" name="BD_SMART_TECH_ATA" link="libblockdev-SMART.html#BD-SMART-TECH-ATA:CAPS"/>
+    <keyword type="constant" name="BD_SMART_TECH_SCSI" link="libblockdev-SMART.html#BD-SMART-TECH-SCSI:CAPS"/>
+    <keyword type="constant" name="BD_SMART_TECH_MODE_INFO" link="libblockdev-SMART.html#BD-SMART-TECH-MODE-INFO:CAPS"/>
+    <keyword type="constant" name="BD_SMART_TECH_MODE_SELFTEST" link="libblockdev-SMART.html#BD-SMART-TECH-MODE-SELFTEST:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN" link="libblockdev-SMART.html#BD-SMART-ATA-ATTRIBUTE-UNIT-UNKNOWN:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_ATTRIBUTE_UNIT_NONE" link="libblockdev-SMART.html#BD-SMART-ATA-ATTRIBUTE-UNIT-NONE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_ATTRIBUTE_UNIT_MSECONDS" link="libblockdev-SMART.html#BD-SMART-ATA-ATTRIBUTE-UNIT-MSECONDS:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_ATTRIBUTE_UNIT_SECTORS" link="libblockdev-SMART.html#BD-SMART-ATA-ATTRIBUTE-UNIT-SECTORS:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_ATTRIBUTE_UNIT_MKELVIN" link="libblockdev-SMART.html#BD-SMART-ATA-ATTRIBUTE-UNIT-MKELVIN:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_ATTRIBUTE_UNIT_SMALL_PERCENT" link="libblockdev-SMART.html#BD-SMART-ATA-ATTRIBUTE-UNIT-SMALL-PERCENT:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_ATTRIBUTE_UNIT_PERCENT" link="libblockdev-SMART.html#BD-SMART-ATA-ATTRIBUTE-UNIT-PERCENT:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_ATTRIBUTE_UNIT_MB" link="libblockdev-SMART.html#BD-SMART-ATA-ATTRIBUTE-UNIT-MB:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_ATTRIBUTE_FLAG_PREFAILURE" link="libblockdev-SMART.html#BD-SMART-ATA-ATTRIBUTE-FLAG-PREFAILURE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_ATTRIBUTE_FLAG_ONLINE" link="libblockdev-SMART.html#BD-SMART-ATA-ATTRIBUTE-FLAG-ONLINE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_ATTRIBUTE_FLAG_PERFORMANCE" link="libblockdev-SMART.html#BD-SMART-ATA-ATTRIBUTE-FLAG-PERFORMANCE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_ATTRIBUTE_FLAG_ERROR_RATE" link="libblockdev-SMART.html#BD-SMART-ATA-ATTRIBUTE-FLAG-ERROR-RATE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_ATTRIBUTE_FLAG_EVENT_COUNT" link="libblockdev-SMART.html#BD-SMART-ATA-ATTRIBUTE-FLAG-EVENT-COUNT:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_ATTRIBUTE_FLAG_SELF_PRESERVING" link="libblockdev-SMART.html#BD-SMART-ATA-ATTRIBUTE-FLAG-SELF-PRESERVING:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_ATTRIBUTE_FLAG_OTHER" link="libblockdev-SMART.html#BD-SMART-ATA-ATTRIBUTE-FLAG-OTHER:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_CAP_ATTRIBUTE_AUTOSAVE" link="libblockdev-SMART.html#BD-SMART-ATA-CAP-ATTRIBUTE-AUTOSAVE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_CAP_AUTOSAVE_TIMER" link="libblockdev-SMART.html#BD-SMART-ATA-CAP-AUTOSAVE-TIMER:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_CAP_ERROR_LOGGING" link="libblockdev-SMART.html#BD-SMART-ATA-CAP-ERROR-LOGGING:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_CAP_GP_LOGGING" link="libblockdev-SMART.html#BD-SMART-ATA-CAP-GP-LOGGING:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_OFFLINE_DATA_COLLECTION_CAP_NOT_SUPPORTED" link="libblockdev-SMART.html#BD-SMART-ATA-OFFLINE-DATA-COLLECTION-CAP-NOT-SUPPORTED:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_OFFLINE_DATA_COLLECTION_CAP_EXEC_OFFLINE_IMMEDIATE" link="libblockdev-SMART.html#BD-SMART-ATA-OFFLINE-DATA-COLLECTION-CAP-EXEC-OFFLINE-IMMEDIATE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_OFFLINE_DATA_COLLECTION_CAP_OFFLINE_ABORT" link="libblockdev-SMART.html#BD-SMART-ATA-OFFLINE-DATA-COLLECTION-CAP-OFFLINE-ABORT:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_OFFLINE_DATA_COLLECTION_CAP_OFFLINE_SURFACE_SCAN" link="libblockdev-SMART.html#BD-SMART-ATA-OFFLINE-DATA-COLLECTION-CAP-OFFLINE-SURFACE-SCAN:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_OFFLINE_DATA_COLLECTION_CAP_SELF_TEST" link="libblockdev-SMART.html#BD-SMART-ATA-OFFLINE-DATA-COLLECTION-CAP-SELF-TEST:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_OFFLINE_DATA_COLLECTION_CAP_CONVEYANCE_SELF_TEST" link="libblockdev-SMART.html#BD-SMART-ATA-OFFLINE-DATA-COLLECTION-CAP-CONVEYANCE-SELF-TEST:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_OFFLINE_DATA_COLLECTION_CAP_SELECTIVE_SELF_TEST" link="libblockdev-SMART.html#BD-SMART-ATA-OFFLINE-DATA-COLLECTION-CAP-SELECTIVE-SELF-TEST:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_OFFLINE_DATA_COLLECTION_STATUS_NEVER_STARTED" link="libblockdev-SMART.html#BD-SMART-ATA-OFFLINE-DATA-COLLECTION-STATUS-NEVER-STARTED:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_OFFLINE_DATA_COLLECTION_STATUS_NO_ERROR" link="libblockdev-SMART.html#BD-SMART-ATA-OFFLINE-DATA-COLLECTION-STATUS-NO-ERROR:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_OFFLINE_DATA_COLLECTION_STATUS_IN_PROGRESS" link="libblockdev-SMART.html#BD-SMART-ATA-OFFLINE-DATA-COLLECTION-STATUS-IN-PROGRESS:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_OFFLINE_DATA_COLLECTION_STATUS_SUSPENDED_INTR" link="libblockdev-SMART.html#BD-SMART-ATA-OFFLINE-DATA-COLLECTION-STATUS-SUSPENDED-INTR:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_OFFLINE_DATA_COLLECTION_STATUS_ABORTED_INTR" link="libblockdev-SMART.html#BD-SMART-ATA-OFFLINE-DATA-COLLECTION-STATUS-ABORTED-INTR:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_OFFLINE_DATA_COLLECTION_STATUS_ABORTED_ERROR" link="libblockdev-SMART.html#BD-SMART-ATA-OFFLINE-DATA-COLLECTION-STATUS-ABORTED-ERROR:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_OFFLINE_DATA_COLLECTION_STATUS_VENDOR_SPECIFIC" link="libblockdev-SMART.html#BD-SMART-ATA-OFFLINE-DATA-COLLECTION-STATUS-VENDOR-SPECIFIC:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_OFFLINE_DATA_COLLECTION_STATUS_RESERVED" link="libblockdev-SMART.html#BD-SMART-ATA-OFFLINE-DATA-COLLECTION-STATUS-RESERVED:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_SELF_TEST_STATUS_COMPLETED_NO_ERROR" link="libblockdev-SMART.html#BD-SMART-ATA-SELF-TEST-STATUS-COMPLETED-NO-ERROR:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_SELF_TEST_STATUS_ABORTED_HOST" link="libblockdev-SMART.html#BD-SMART-ATA-SELF-TEST-STATUS-ABORTED-HOST:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_SELF_TEST_STATUS_INTR_HOST_RESET" link="libblockdev-SMART.html#BD-SMART-ATA-SELF-TEST-STATUS-INTR-HOST-RESET:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_SELF_TEST_STATUS_ERROR_FATAL" link="libblockdev-SMART.html#BD-SMART-ATA-SELF-TEST-STATUS-ERROR-FATAL:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_SELF_TEST_STATUS_ERROR_UNKNOWN" link="libblockdev-SMART.html#BD-SMART-ATA-SELF-TEST-STATUS-ERROR-UNKNOWN:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_SELF_TEST_STATUS_ERROR_ELECTRICAL" link="libblockdev-SMART.html#BD-SMART-ATA-SELF-TEST-STATUS-ERROR-ELECTRICAL:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_SELF_TEST_STATUS_ERROR_SERVO" link="libblockdev-SMART.html#BD-SMART-ATA-SELF-TEST-STATUS-ERROR-SERVO:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_SELF_TEST_STATUS_ERROR_READ" link="libblockdev-SMART.html#BD-SMART-ATA-SELF-TEST-STATUS-ERROR-READ:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_SELF_TEST_STATUS_ERROR_HANDLING" link="libblockdev-SMART.html#BD-SMART-ATA-SELF-TEST-STATUS-ERROR-HANDLING:CAPS"/>
+    <keyword type="constant" name="BD_SMART_ATA_SELF_TEST_STATUS_IN_PROGRESS" link="libblockdev-SMART.html#BD-SMART-ATA-SELF-TEST-STATUS-IN-PROGRESS:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_NONE" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-NONE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_ABORTED_COMMAND" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-ABORTED-COMMAND:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_TEMPERATURE_EXCEEDED" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-TEMPERATURE-EXCEEDED:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_ENCLOSURE_DEGRADED" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-ENCLOSURE-DEGRADED:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_BACKGROUND_SELFTEST_FAILED" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-BACKGROUND-SELFTEST-FAILED:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_BACKGROUND_PRESCAN_MEDIUM_ERROR" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-BACKGROUND-PRESCAN-MEDIUM-ERROR:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_BACKGROUND_SCAN_MEDIUM_ERROR" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-BACKGROUND-SCAN-MEDIUM-ERROR:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_NV_CACHE_VOLATILE" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-NV-CACHE-VOLATILE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_NV_CACHE_DEGRADED_POWER" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-NV-CACHE-DEGRADED-POWER:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_POWER_LOSS_EXPECTED" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-POWER-LOSS-EXPECTED:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_STATISTICS_NOTIFICATION" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-STATISTICS-NOTIFICATION:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_CRITICAL_TEMP" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-HIGH-CRITICAL-TEMP:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_CRITICAL_TEMP" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-LOW-CRITICAL-TEMP:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_OPERATING_TEMP" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-HIGH-OPERATING-TEMP:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_OPERATING_TEMP" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-LOW-OPERATING-TEMP:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_CRITICAL_HUMIDITY" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-HIGH-CRITICAL-HUMIDITY:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_CRITICAL_HUMIDITY" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-LOW-CRITICAL-HUMIDITY:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_OPERATING_HUMIDITY" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-HIGH-OPERATING-HUMIDITY:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_OPERATING_HUMIDITY" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-LOW-OPERATING-HUMIDITY:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MICROCODE_SECURITY_RISK" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-MICROCODE-SECURITY-RISK:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MICROCODE_SIGNATURE_VALIDATION_FAILURE" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-MICROCODE-SIGNATURE-VALIDATION-FAILURE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_PHYSICAL_ELEMENT_STATUS_CHANGE" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-PHYSICAL-ELEMENT-STATUS-CHANGE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_FAILURE_PREDICTION_THRESH" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-FAILURE-PREDICTION-THRESH:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MEDIA_FAILURE_PREDICTION_THRESH" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-MEDIA-FAILURE-PREDICTION-THRESH:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOGICAL_UNIT_FAILURE_PREDICTION_THRESH" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-LOGICAL-UNIT-FAILURE-PREDICTION-THRESH:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_SPARE_EXHAUSTION_PREDICTION_THRESH" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-SPARE-EXHAUSTION-PREDICTION-THRESH:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HARDWARE_IMPENDING_FAILURE" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-HARDWARE-IMPENDING-FAILURE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_CONTROLLER_IMPENDING_FAILURE" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-CONTROLLER-IMPENDING-FAILURE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_DATA_CHANNEL_IMPENDING_FAILURE" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-DATA-CHANNEL-IMPENDING-FAILURE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_SERVO_IMPENDING_FAILURE" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-SERVO-IMPENDING-FAILURE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_SPINDLE_IMPENDING_FAILURE" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-SPINDLE-IMPENDING-FAILURE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_FIRMWARE_IMPENDING_FAILURE" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-FIRMWARE-IMPENDING-FAILURE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MEDIA_ENDURANCE_LIMIT" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-MEDIA-ENDURANCE-LIMIT:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_UNSPECIFIED" link="libblockdev-SMART.html#BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-UNSPECIFIED:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_NO_SCANS_ACTIVE" link="libblockdev-SMART.html#BD-SMART-SCSI-BACKGROUND-SCAN-STATUS-NO-SCANS-ACTIVE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_SCAN_ACTIVE" link="libblockdev-SMART.html#BD-SMART-SCSI-BACKGROUND-SCAN-STATUS-SCAN-ACTIVE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_PRESCAN_ACTIVE" link="libblockdev-SMART.html#BD-SMART-SCSI-BACKGROUND-SCAN-STATUS-PRESCAN-ACTIVE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_ERROR_FATAL" link="libblockdev-SMART.html#BD-SMART-SCSI-BACKGROUND-SCAN-STATUS-HALTED-ERROR-FATAL:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_PATTERN_VENDOR_SPECIFIC" link="libblockdev-SMART.html#BD-SMART-SCSI-BACKGROUND-SCAN-STATUS-HALTED-PATTERN-VENDOR-SPECIFIC:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_ERROR_PLIST" link="libblockdev-SMART.html#BD-SMART-SCSI-BACKGROUND-SCAN-STATUS-HALTED-ERROR-PLIST:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_VENDOR_SPECIFIC" link="libblockdev-SMART.html#BD-SMART-SCSI-BACKGROUND-SCAN-STATUS-HALTED-VENDOR-SPECIFIC:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_TEMPERATURE" link="libblockdev-SMART.html#BD-SMART-SCSI-BACKGROUND-SCAN-STATUS-HALTED-TEMPERATURE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_BMS_TIMER" link="libblockdev-SMART.html#BD-SMART-SCSI-BACKGROUND-SCAN-STATUS-BMS-TIMER:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SELF_TEST_OP_ABORT" link="libblockdev-SMART.html#BD-SMART-SELF-TEST-OP-ABORT:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SELF_TEST_OP_OFFLINE" link="libblockdev-SMART.html#BD-SMART-SELF-TEST-OP-OFFLINE:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SELF_TEST_OP_SHORT" link="libblockdev-SMART.html#BD-SMART-SELF-TEST-OP-SHORT:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SELF_TEST_OP_LONG" link="libblockdev-SMART.html#BD-SMART-SELF-TEST-OP-LONG:CAPS"/>
+    <keyword type="constant" name="BD_SMART_SELF_TEST_OP_CONVEYANCE" link="libblockdev-SMART.html#BD-SMART-SELF-TEST-OP-CONVEYANCE:CAPS"/>
     <keyword type="constant" name="BD_SWAP_ERROR_TECH_UNAVAIL" link="libblockdev-Swap.html#BD-SWAP-ERROR-TECH-UNAVAIL:CAPS"/>
     <keyword type="constant" name="BD_SWAP_ERROR_UNKNOWN_STATE" link="libblockdev-Swap.html#BD-SWAP-ERROR-UNKNOWN-STATE:CAPS"/>
     <keyword type="constant" name="BD_SWAP_ERROR_ACTIVATE" link="libblockdev-Swap.html#BD-SWAP-ERROR-ACTIVATE:CAPS"/>
@@ -1221,6 +1369,7 @@
     <keyword type="member" name="BDCryptoLUKSInfo.metadata-size" link="libblockdev-Crypto.html#BDCryptoLUKSInfo.metadata-size"/>
     <keyword type="member" name="BDCryptoLUKSInfo.label" link="libblockdev-Crypto.html#BDCryptoLUKSInfo.label"/>
     <keyword type="member" name="BDCryptoLUKSInfo.subsystem" link="libblockdev-Crypto.html#BDCryptoLUKSInfo.subsystem"/>
+    <keyword type="member" name="BDCryptoLUKSInfo.hw-encryption" link="libblockdev-Crypto.html#BDCryptoLUKSInfo.hw-encryption"/>
     <keyword type="member" name="BDCryptoIntegrityInfo.algorithm" link="libblockdev-Crypto.html#BDCryptoIntegrityInfo.algorithm"/>
     <keyword type="member" name="BDCryptoIntegrityInfo.key-size" link="libblockdev-Crypto.html#BDCryptoIntegrityInfo.key-size"/>
     <keyword type="member" name="BDCryptoIntegrityInfo.sector-size" link="libblockdev-Crypto.html#BDCryptoIntegrityInfo.sector-size"/>
@@ -1502,10 +1651,73 @@
     <keyword type="member" name="BDPartSpec.size" link="libblockdev-Part.html#BDPartSpec.size"/>
     <keyword type="member" name="BDPartSpec.bootable" link="libblockdev-Part.html#BDPartSpec.bootable"/>
     <keyword type="member" name="BDPartSpec.attrs" link="libblockdev-Part.html#BDPartSpec.attrs"/>
+    <keyword type="member" name="BDPartSpec.type-name" link="libblockdev-Part.html#BDPartSpec.type-name"/>
     <keyword type="member" name="BDPartDiskSpec.path" link="libblockdev-Part.html#BDPartDiskSpec.path"/>
     <keyword type="member" name="BDPartDiskSpec.table-type" link="libblockdev-Part.html#BDPartDiskSpec.table-type"/>
     <keyword type="member" name="BDPartDiskSpec.size" link="libblockdev-Part.html#BDPartDiskSpec.size"/>
     <keyword type="member" name="BDPartDiskSpec.sector-size" link="libblockdev-Part.html#BDPartDiskSpec.sector-size"/>
+    <keyword type="member" name="BDSmartATAAttribute.id" link="libblockdev-SMART.html#BDSmartATAAttribute.id"/>
+    <keyword type="member" name="BDSmartATAAttribute.name" link="libblockdev-SMART.html#BDSmartATAAttribute.name"/>
+    <keyword type="member" name="BDSmartATAAttribute.well-known-name" link="libblockdev-SMART.html#BDSmartATAAttribute.well-known-name"/>
+    <keyword type="member" name="BDSmartATAAttribute.value" link="libblockdev-SMART.html#BDSmartATAAttribute.value"/>
+    <keyword type="member" name="BDSmartATAAttribute.worst" link="libblockdev-SMART.html#BDSmartATAAttribute.worst"/>
+    <keyword type="member" name="BDSmartATAAttribute.threshold" link="libblockdev-SMART.html#BDSmartATAAttribute.threshold"/>
+    <keyword type="member" name="BDSmartATAAttribute.failed-past" link="libblockdev-SMART.html#BDSmartATAAttribute.failed-past"/>
+    <keyword type="member" name="BDSmartATAAttribute.failing-now" link="libblockdev-SMART.html#BDSmartATAAttribute.failing-now"/>
+    <keyword type="member" name="BDSmartATAAttribute.value-raw" link="libblockdev-SMART.html#BDSmartATAAttribute.value-raw"/>
+    <keyword type="member" name="BDSmartATAAttribute.flags" link="libblockdev-SMART.html#BDSmartATAAttribute.flags"/>
+    <keyword type="member" name="BDSmartATAAttribute.pretty-value" link="libblockdev-SMART.html#BDSmartATAAttribute.pretty-value"/>
+    <keyword type="member" name="BDSmartATAAttribute.pretty-value-unit" link="libblockdev-SMART.html#BDSmartATAAttribute.pretty-value-unit"/>
+    <keyword type="member" name="BDSmartATAAttribute.pretty-value-string" link="libblockdev-SMART.html#BDSmartATAAttribute.pretty-value-string"/>
+    <keyword type="member" name="BDSmartATA.smart-supported" link="libblockdev-SMART.html#BDSmartATA.smart-supported"/>
+    <keyword type="member" name="BDSmartATA.smart-enabled" link="libblockdev-SMART.html#BDSmartATA.smart-enabled"/>
+    <keyword type="member" name="BDSmartATA.overall-status-passed" link="libblockdev-SMART.html#BDSmartATA.overall-status-passed"/>
+    <keyword type="member" name="BDSmartATA.offline-data-collection-status" link="libblockdev-SMART.html#BDSmartATA.offline-data-collection-status"/>
+    <keyword type="member" name="BDSmartATA.auto-offline-data-collection-enabled" link="libblockdev-SMART.html#BDSmartATA.auto-offline-data-collection-enabled"/>
+    <keyword type="member" name="BDSmartATA.offline-data-collection-completion" link="libblockdev-SMART.html#BDSmartATA.offline-data-collection-completion"/>
+    <keyword type="member" name="BDSmartATA.offline-data-collection-capabilities" link="libblockdev-SMART.html#BDSmartATA.offline-data-collection-capabilities"/>
+    <keyword type="member" name="BDSmartATA.self-test-status" link="libblockdev-SMART.html#BDSmartATA.self-test-status"/>
+    <keyword type="member" name="BDSmartATA.self-test-percent-remaining" link="libblockdev-SMART.html#BDSmartATA.self-test-percent-remaining"/>
+    <keyword type="member" name="BDSmartATA.self-test-polling-short" link="libblockdev-SMART.html#BDSmartATA.self-test-polling-short"/>
+    <keyword type="member" name="BDSmartATA.self-test-polling-extended" link="libblockdev-SMART.html#BDSmartATA.self-test-polling-extended"/>
+    <keyword type="member" name="BDSmartATA.self-test-polling-conveyance" link="libblockdev-SMART.html#BDSmartATA.self-test-polling-conveyance"/>
+    <keyword type="member" name="BDSmartATA.smart-capabilities" link="libblockdev-SMART.html#BDSmartATA.smart-capabilities"/>
+    <keyword type="member" name="BDSmartATA.attributes" link="libblockdev-SMART.html#BDSmartATA.attributes"/>
+    <keyword type="member" name="BDSmartATA.power-on-time" link="libblockdev-SMART.html#BDSmartATA.power-on-time"/>
+    <keyword type="member" name="BDSmartATA.power-cycle-count" link="libblockdev-SMART.html#BDSmartATA.power-cycle-count"/>
+    <keyword type="member" name="BDSmartATA.temperature" link="libblockdev-SMART.html#BDSmartATA.temperature"/>
+    <keyword type="member" name="BDSmartSCSI.smart-supported" link="libblockdev-SMART.html#BDSmartSCSI.smart-supported"/>
+    <keyword type="member" name="BDSmartSCSI.smart-enabled" link="libblockdev-SMART.html#BDSmartSCSI.smart-enabled"/>
+    <keyword type="member" name="BDSmartSCSI.overall-status-passed" link="libblockdev-SMART.html#BDSmartSCSI.overall-status-passed"/>
+    <keyword type="member" name="BDSmartSCSI.scsi-ie" link="libblockdev-SMART.html#BDSmartSCSI.scsi-ie"/>
+    <keyword type="member" name="BDSmartSCSI.scsi-ie-asc" link="libblockdev-SMART.html#BDSmartSCSI.scsi-ie-asc"/>
+    <keyword type="member" name="BDSmartSCSI.scsi-ie-ascq" link="libblockdev-SMART.html#BDSmartSCSI.scsi-ie-ascq"/>
+    <keyword type="member" name="BDSmartSCSI.scsi-ie-string" link="libblockdev-SMART.html#BDSmartSCSI.scsi-ie-string"/>
+    <keyword type="member" name="BDSmartSCSI.background-scan-status" link="libblockdev-SMART.html#BDSmartSCSI.background-scan-status"/>
+    <keyword type="member" name="BDSmartSCSI.background-scan-progress" link="libblockdev-SMART.html#BDSmartSCSI.background-scan-progress"/>
+    <keyword type="member" name="BDSmartSCSI.background-scan-runs" link="libblockdev-SMART.html#BDSmartSCSI.background-scan-runs"/>
+    <keyword type="member" name="BDSmartSCSI.background-medium-scan-runs" link="libblockdev-SMART.html#BDSmartSCSI.background-medium-scan-runs"/>
+    <keyword type="member" name="BDSmartSCSI.read-errors-corrected-eccfast" link="libblockdev-SMART.html#BDSmartSCSI.read-errors-corrected-eccfast"/>
+    <keyword type="member" name="BDSmartSCSI.read-errors-corrected-eccdelayed" link="libblockdev-SMART.html#BDSmartSCSI.read-errors-corrected-eccdelayed"/>
+    <keyword type="member" name="BDSmartSCSI.read-errors-corrected-rereads" link="libblockdev-SMART.html#BDSmartSCSI.read-errors-corrected-rereads"/>
+    <keyword type="member" name="BDSmartSCSI.read-errors-corrected-total" link="libblockdev-SMART.html#BDSmartSCSI.read-errors-corrected-total"/>
+    <keyword type="member" name="BDSmartSCSI.read-errors-uncorrected" link="libblockdev-SMART.html#BDSmartSCSI.read-errors-uncorrected"/>
+    <keyword type="member" name="BDSmartSCSI.read-processed-bytes" link="libblockdev-SMART.html#BDSmartSCSI.read-processed-bytes"/>
+    <keyword type="member" name="BDSmartSCSI.write-errors-corrected-eccfast" link="libblockdev-SMART.html#BDSmartSCSI.write-errors-corrected-eccfast"/>
+    <keyword type="member" name="BDSmartSCSI.write-errors-corrected-eccdelayed" link="libblockdev-SMART.html#BDSmartSCSI.write-errors-corrected-eccdelayed"/>
+    <keyword type="member" name="BDSmartSCSI.write-errors-corrected-rewrites" link="libblockdev-SMART.html#BDSmartSCSI.write-errors-corrected-rewrites"/>
+    <keyword type="member" name="BDSmartSCSI.write-errors-corrected-total" link="libblockdev-SMART.html#BDSmartSCSI.write-errors-corrected-total"/>
+    <keyword type="member" name="BDSmartSCSI.write-errors-uncorrected" link="libblockdev-SMART.html#BDSmartSCSI.write-errors-uncorrected"/>
+    <keyword type="member" name="BDSmartSCSI.write-processed-bytes" link="libblockdev-SMART.html#BDSmartSCSI.write-processed-bytes"/>
+    <keyword type="member" name="BDSmartSCSI.start-stop-cycle-count" link="libblockdev-SMART.html#BDSmartSCSI.start-stop-cycle-count"/>
+    <keyword type="member" name="BDSmartSCSI.start-stop-cycle-lifetime" link="libblockdev-SMART.html#BDSmartSCSI.start-stop-cycle-lifetime"/>
+    <keyword type="member" name="BDSmartSCSI.load-unload-cycle-count" link="libblockdev-SMART.html#BDSmartSCSI.load-unload-cycle-count"/>
+    <keyword type="member" name="BDSmartSCSI.load-unload-cycle-lifetime" link="libblockdev-SMART.html#BDSmartSCSI.load-unload-cycle-lifetime"/>
+    <keyword type="member" name="BDSmartSCSI.scsi-grown-defect-list" link="libblockdev-SMART.html#BDSmartSCSI.scsi-grown-defect-list"/>
+    <keyword type="member" name="BDSmartSCSI.power-on-time" link="libblockdev-SMART.html#BDSmartSCSI.power-on-time"/>
+    <keyword type="member" name="BDSmartSCSI.temperature-warning-enabled" link="libblockdev-SMART.html#BDSmartSCSI.temperature-warning-enabled"/>
+    <keyword type="member" name="BDSmartSCSI.temperature" link="libblockdev-SMART.html#BDSmartSCSI.temperature"/>
+    <keyword type="member" name="BDSmartSCSI.temperature-drive-trip" link="libblockdev-SMART.html#BDSmartSCSI.temperature-drive-trip"/>
     <keyword type="member" name="BDExtraArg.opt" link="libblockdev-Utils.html#BDExtraArg.opt"/>
     <keyword type="member" name="BDExtraArg.val" link="libblockdev-Utils.html#BDExtraArg.val"/>
   </functions>

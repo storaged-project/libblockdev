@@ -2,13 +2,13 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>API Index: libblockdev Reference Manual for libblockdev 3.1.1.</title>
+<title>API Index: libblockdev Reference Manual for libblockdev 3.2.0.</title>
 <meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
-<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.1.1.">
-<link rel="up" href="index.html" title="libblockdev Reference Manual for libblockdev 3.1.1.">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.2.0.">
+<link rel="up" href="index.html" title="libblockdev Reference Manual for libblockdev 3.2.0.">
 <link rel="prev" href="30-api-changes.html" title="API changes in libblockdev 3.0">
 <link rel="next" href="deprecated-api-index.html" title="Index of deprecated API">
-<meta name="generator" content="GTK-Doc V1.33.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.34.0 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -223,6 +223,10 @@
 </dt>
 <dd></dd>
 <dt>
+<a class="link" href="libblockdev-Crypto.html#BDCryptoLUKSHWEncryptionType" title="enum BDCryptoLUKSHWEncryptionType">BDCryptoLUKSHWEncryptionType</a>, enum in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
 <a class="link" href="libblockdev-Crypto.html#BDCryptoLUKSInfo" title="BDCryptoLUKSInfo">BDCryptoLUKSInfo</a>, struct in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
 </dt>
 <dd></dd>
@@ -395,6 +399,10 @@
 </dt>
 <dd></dd>
 <dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-convert" title="bd_crypto_luks_convert ()">bd_crypto_luks_convert</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
 <a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-extra-copy" title="bd_crypto_luks_extra_copy ()">bd_crypto_luks_extra_copy</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
 </dt>
 <dd></dd>
@@ -488,6 +496,22 @@
 <dd></dd>
 <dt>
 <a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-token-info-free" title="bd_crypto_luks_token_info_free ()">bd_crypto_luks_token_info_free</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-opal-format" title="bd_crypto_opal_format ()">bd_crypto_opal_format</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-opal-is-supported" title="bd_crypto_opal_is_supported ()">bd_crypto_opal_is_supported</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-opal-reset-device" title="bd_crypto_opal_reset_device ()">bd_crypto_opal_reset_device</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-opal-wipe-device" title="bd_crypto_opal_wipe_device ()">bd_crypto_opal_wipe_device</a>, function in <a class="link" href="libblockdev-Crypto.html" title="Crypto">Crypto</a>
 </dt>
 <dd></dd>
 <dt>
@@ -2759,6 +2783,142 @@
 </dt>
 <dd></dd>
 <dt>
+<a class="link" href="libblockdev-SMART.html#BDSmartATA" title="BDSmartATA">BDSmartATA</a>, struct in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#BDSmartATAAttribute" title="BDSmartATAAttribute">BDSmartATAAttribute</a>, struct in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#BDSmartATAAttributeFlag" title="enum BDSmartATAAttributeFlag">BDSmartATAAttributeFlag</a>, enum in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#BDSmartATAAttributeUnit" title="enum BDSmartATAAttributeUnit">BDSmartATAAttributeUnit</a>, enum in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#BDSmartATACapabilities" title="enum BDSmartATACapabilities">BDSmartATACapabilities</a>, enum in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#BDSmartATAOfflineDataCollectionCapabilities" title="enum BDSmartATAOfflineDataCollectionCapabilities">BDSmartATAOfflineDataCollectionCapabilities</a>, enum in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#BDSmartATAOfflineDataCollectionStatus" title="enum BDSmartATAOfflineDataCollectionStatus">BDSmartATAOfflineDataCollectionStatus</a>, enum in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#BDSmartATASelfTestStatus" title="enum BDSmartATASelfTestStatus">BDSmartATASelfTestStatus</a>, enum in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#BDSmartError" title="enum BDSmartError">BDSmartError</a>, enum in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#BDSmartSCSI" title="BDSmartSCSI">BDSmartSCSI</a>, struct in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#BDSmartSCSIBackgroundScanStatus" title="enum BDSmartSCSIBackgroundScanStatus">BDSmartSCSIBackgroundScanStatus</a>, enum in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#BDSmartSCSIInformationalException" title="enum BDSmartSCSIInformationalException">BDSmartSCSIInformationalException</a>, enum in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#BDSmartSelfTestOp" title="enum BDSmartSelfTestOp">BDSmartSelfTestOp</a>, enum in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#BDSmartTech" title="enum BDSmartTech">BDSmartTech</a>, enum in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#BDSmartTechMode" title="enum BDSmartTechMode">BDSmartTechMode</a>, enum in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#bd-smart-ata-attribute-copy" title="bd_smart_ata_attribute_copy ()">bd_smart_ata_attribute_copy</a>, function in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#bd-smart-ata-attribute-free" title="bd_smart_ata_attribute_free ()">bd_smart_ata_attribute_free</a>, function in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#bd-smart-ata-copy" title="bd_smart_ata_copy ()">bd_smart_ata_copy</a>, function in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#bd-smart-ata-free" title="bd_smart_ata_free ()">bd_smart_ata_free</a>, function in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#bd-smart-ata-get-info" title="bd_smart_ata_get_info ()">bd_smart_ata_get_info</a>, function in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#bd-smart-ata-get-info-from-data" title="bd_smart_ata_get_info_from_data ()">bd_smart_ata_get_info_from_data</a>, function in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#bd-smart-check-deps" title="bd_smart_check_deps ()">bd_smart_check_deps</a>, function in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#bd-smart-close" title="bd_smart_close ()">bd_smart_close</a>, function in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#bd-smart-device-self-test" title="bd_smart_device_self_test ()">bd_smart_device_self_test</a>, function in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#BD-SMART-ERROR:CAPS" title="BD_SMART_ERROR">BD_SMART_ERROR</a>, macro in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#bd-smart-error-quark" title="bd_smart_error_quark ()">bd_smart_error_quark</a>, function in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#bd-smart-init" title="bd_smart_init ()">bd_smart_init</a>, function in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#bd-smart-is-tech-avail" title="bd_smart_is_tech_avail ()">bd_smart_is_tech_avail</a>, function in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#bd-smart-scsi-copy" title="bd_smart_scsi_copy ()">bd_smart_scsi_copy</a>, function in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#bd-smart-scsi-free" title="bd_smart_scsi_free ()">bd_smart_scsi_free</a>, function in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#bd-smart-scsi-get-info" title="bd_smart_scsi_get_info ()">bd_smart_scsi_get_info</a>, function in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#bd-smart-set-enabled" title="bd_smart_set_enabled ()">bd_smart_set_enabled</a>, function in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#BD-SMART-TYPE-ATA:CAPS" title="BD_SMART_TYPE_ATA">BD_SMART_TYPE_ATA</a>, macro in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
+<a class="link" href="libblockdev-SMART.html#BD-SMART-TYPE-ATA-ATTRIBUTE:CAPS" title="BD_SMART_TYPE_ATA_ATTRIBUTE">BD_SMART_TYPE_ATA_ATTRIBUTE</a>, macro in <a class="link" href="libblockdev-SMART.html" title="SMART">SMART</a>
+</dt>
+<dd></dd>
+<dt>
 <a class="link" href="libblockdev-Swap.html#BDSwapError" title="enum BDSwapError">BDSwapError</a>, enum in <a class="link" href="libblockdev-Swap.html" title="Swap">Swap</a>
 </dt>
 <dd></dd>
@@ -2921,6 +3081,10 @@
 </dt>
 <dd></dd>
 <dt>
+<a class="link" href="libblockdev-Utils.html#bd-utils-exec-and-capture-output-no-progress" title="bd_utils_exec_and_capture_output_no_progress ()">bd_utils_exec_and_capture_output_no_progress</a>, function in <a class="link" href="libblockdev-Utils.html" title="Utils">Utils</a>
+</dt>
+<dd></dd>
+<dt>
 <a class="link" href="libblockdev-Utils.html#bd-utils-exec-and-report-error" title="bd_utils_exec_and_report_error ()">bd_utils_exec_and_report_error</a>, function in <a class="link" href="libblockdev-Utils.html" title="Utils">Utils</a>
 </dt>
 <dd></dd>
@@ -3074,6 +3238,6 @@
 <dd></dd>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.33.1</div>
+<hr>Generated by GTK-Doc V1.34.0</div>
 </body>
 </html>

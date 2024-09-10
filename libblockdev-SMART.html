@@ -1,0 +1,2140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>SMART: libblockdev Reference Manual for libblockdev 3.2.0.</title>
+<meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.2.0.">
+<link rel="up" href="ch01.html" title="libblockdev Reference Manual">
+<link rel="prev" href="libblockdev-Part.html" title="Part">
+<link rel="next" href="libblockdev-Swap.html" title="Swap">
+<meta name="generator" content="GTK-Doc V1.34.0 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
+                  <a href="#libblockdev-SMART.description" class="shortcut">Description</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="libblockdev-Part.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="libblockdev-Swap.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="refentry">
+<a name="libblockdev-SMART"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="libblockdev-SMART.top_of_page"></a>SMART</span></h2>
+<p>SMART — S.M.A.R.T. device reporting and management.</p>
+</td>
+<td class="gallery_image" valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1">
+<a name="libblockdev-SMART.functions"></a><h2>Functions</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="functions_proto_type">
+<col class="functions_proto_name">
+</colgroup>
+<tbody>
+<tr>
+<td class="function_type">
+<span class="returnvalue">gboolean</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-SMART.html#bd-smart-check-deps" title="bd_smart_check_deps ()">bd_smart_check_deps</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-SMART.html#bd-smart-close" title="bd_smart_close ()">bd_smart_close</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">gboolean</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-SMART.html#bd-smart-init" title="bd_smart_init ()">bd_smart_init</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">GQuark</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-SMART.html#bd-smart-error-quark" title="bd_smart_error_quark ()">bd_smart_error_quark</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">gboolean</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-SMART.html#bd-smart-is-tech-avail" title="bd_smart_is_tech_avail ()">bd_smart_is_tech_avail</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-SMART.html#BDSmartATA" title="BDSmartATA"><span class="returnvalue">BDSmartATA</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-SMART.html#bd-smart-ata-get-info" title="bd_smart_ata_get_info ()">bd_smart_ata_get_info</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-SMART.html#BDSmartATA" title="BDSmartATA"><span class="returnvalue">BDSmartATA</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-SMART.html#bd-smart-ata-get-info-from-data" title="bd_smart_ata_get_info_from_data ()">bd_smart_ata_get_info_from_data</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-SMART.html#BDSmartATA" title="BDSmartATA"><span class="returnvalue">BDSmartATA</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-SMART.html#bd-smart-ata-copy" title="bd_smart_ata_copy ()">bd_smart_ata_copy</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-SMART.html#bd-smart-ata-free" title="bd_smart_ata_free ()">bd_smart_ata_free</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-SMART.html#BDSmartATAAttribute" title="BDSmartATAAttribute"><span class="returnvalue">BDSmartATAAttribute</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-SMART.html#bd-smart-ata-attribute-copy" title="bd_smart_ata_attribute_copy ()">bd_smart_ata_attribute_copy</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-SMART.html#bd-smart-ata-attribute-free" title="bd_smart_ata_attribute_free ()">bd_smart_ata_attribute_free</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-SMART.html#BDSmartSCSI" title="BDSmartSCSI"><span class="returnvalue">BDSmartSCSI</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-SMART.html#bd-smart-scsi-get-info" title="bd_smart_scsi_get_info ()">bd_smart_scsi_get_info</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">void</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-SMART.html#bd-smart-scsi-free" title="bd_smart_scsi_free ()">bd_smart_scsi_free</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<a class="link" href="libblockdev-SMART.html#BDSmartSCSI" title="BDSmartSCSI"><span class="returnvalue">BDSmartSCSI</span></a> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-SMART.html#bd-smart-scsi-copy" title="bd_smart_scsi_copy ()">bd_smart_scsi_copy</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">gboolean</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-SMART.html#bd-smart-set-enabled" title="bd_smart_set_enabled ()">bd_smart_set_enabled</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">gboolean</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-SMART.html#bd-smart-device-self-test" title="bd_smart_device_self_test ()">bd_smart_device_self_test</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="libblockdev-SMART.other"></a><h2>Types and Values</h2>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="other_proto_type">
+<col class="other_proto_name">
+</colgroup>
+<tbody>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-SMART.html#BD-SMART-ERROR:CAPS" title="BD_SMART_ERROR">BD_SMART_ERROR</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-SMART.html#BDSmartError" title="enum BDSmartError">BDSmartError</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-SMART.html#BDSmartTech" title="enum BDSmartTech">BDSmartTech</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-SMART.html#BDSmartTechMode" title="enum BDSmartTechMode">BDSmartTechMode</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-SMART.html#BD-SMART-TYPE-ATA:CAPS" title="BD_SMART_TYPE_ATA">BD_SMART_TYPE_ATA</a></td>
+</tr>
+<tr>
+<td class="define_keyword">#define</td>
+<td class="function_name"><a class="link" href="libblockdev-SMART.html#BD-SMART-TYPE-ATA-ATTRIBUTE:CAPS" title="BD_SMART_TYPE_ATA_ATTRIBUTE">BD_SMART_TYPE_ATA_ATTRIBUTE</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword"> </td>
+<td class="function_name"><a class="link" href="libblockdev-SMART.html#BDSmartATAAttribute" title="BDSmartATAAttribute">BDSmartATAAttribute</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-SMART.html#BDSmartATAAttributeUnit" title="enum BDSmartATAAttributeUnit">BDSmartATAAttributeUnit</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-SMART.html#BDSmartATAAttributeFlag" title="enum BDSmartATAAttributeFlag">BDSmartATAAttributeFlag</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-SMART.html#BDSmartATACapabilities" title="enum BDSmartATACapabilities">BDSmartATACapabilities</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-SMART.html#BDSmartATAOfflineDataCollectionCapabilities" title="enum BDSmartATAOfflineDataCollectionCapabilities">BDSmartATAOfflineDataCollectionCapabilities</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-SMART.html#BDSmartATAOfflineDataCollectionStatus" title="enum BDSmartATAOfflineDataCollectionStatus">BDSmartATAOfflineDataCollectionStatus</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-SMART.html#BDSmartATASelfTestStatus" title="enum BDSmartATASelfTestStatus">BDSmartATASelfTestStatus</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword"> </td>
+<td class="function_name"><a class="link" href="libblockdev-SMART.html#BDSmartATA" title="BDSmartATA">BDSmartATA</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-SMART.html#BDSmartSCSIInformationalException" title="enum BDSmartSCSIInformationalException">BDSmartSCSIInformationalException</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-SMART.html#BDSmartSCSIBackgroundScanStatus" title="enum BDSmartSCSIBackgroundScanStatus">BDSmartSCSIBackgroundScanStatus</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword"> </td>
+<td class="function_name"><a class="link" href="libblockdev-SMART.html#BDSmartSCSI" title="BDSmartSCSI">BDSmartSCSI</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-SMART.html#BDSmartSelfTestOp" title="enum BDSmartSelfTestOp">BDSmartSelfTestOp</a></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="libblockdev-SMART.includes"></a><h2>Includes</h2>
+<pre class="synopsis">#include &lt;smart.h&gt;
+</pre>
+</div>
+<div class="refsect1">
+<a name="libblockdev-SMART.description"></a><h2>Description</h2>
+<p>Plugin for ATA and SCSI/SAS S.M.A.R.T. device reporting and management. For NVMe
+health reporting please use the native <a class="link" href="libblockdev-NVMe.html" title="NVMe"><code class="literal">nvme</code></a> plugin.</p>
+<p>This libblockdev plugin strives to provide good enough abstraction on top of vastly
+different backend implementations. Two plugin implementations are available:
+<code class="literal">libatasmart</code> (default) and <code class="literal">smartmontools</code> (experimental).</p>
+<p>Not all plugin implementations provide full functionality and it is advised
+to use standard libblockdev tech query functions for feature availability testing.
+For example, the <code class="literal">libatasmart</code> plugin only provides ATA functionality and error
+is returned when any SCSI function is called.</p>
+<div class="refsect3">
+<a name="id-1.2.15.6.5"></a><h4>libatasmart plugin</h4>
+<p>An implementation proven for over a decade, being essentially a port of UDisks code.
+The <code class="literal">libatasmart</code> library is reasonably lightweight with minimal dependencies,
+light on I/O and consuming C API directly with clearly defined data types.
+However essentially no quirks or any drive database is present in the library
+(apart from a couple of very old laptop drives).</p>
+</div>
+<div class="refsect3">
+<a name="id-1.2.15.6.6"></a><h4>smartmontools plugin</h4>
+<p>In contrast to libatasmart, the smartmontools project is a feature-rich
+implementation supporting specialties like vendor-specific data blocks. It is
+a considerably heavier implementation I/O-wise due to device type detection and
+retrieval of more data blocks from the drive.</p>
+<p>There's no C API at the moment and the plugin resorts to executing the <code class="literal">smartctl</code>
+command and parsing its JSON output, that is by nature loosely-defined. This
+presents challenges in data type conversions, interpretation of printed values
+and volatile JSON key presence. Besides, executing external commands always brings
+certain performance overhead and caution is advised when retrieving SMART data
+from multiple drives in parallel.</p>
+</div>
+<div class="refsect3">
+<a name="id-1.2.15.6.7"></a><h4>Attribute naming and value interpretation</h4>
+<p>Check <a class="link" href="libblockdev-SMART.html#BDSmartATAAttribute" title="BDSmartATAAttribute"><span class="type">BDSmartATAAttribute</span></a> for the struct members overview first. The plugin
+public API provides both the implementation-specific attribute names/values
+as well as unified ('well-known', translated) interpretation that is preferred
+for general use.</p>
+<p>The <code class="literal">well_known_name</code> property follows the libatasmart-style naming -
+e.g. <code class="literal">'power-on-hours'</code>. Unknown or untrusted attributes are either provided
+in the form of <code class="literal">'attribute-123'</code> or by <code class="literal">NULL</code>.</p>
+<p>Similarly, value of an attribute is provided in variety of interpretations,
+subject to availability:</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>the <code class="literal">value</code>, <code class="literal">worst</code> and <code class="literal">threshold</code> are normalized values in typical S.M.A.R.T. fashion</p></li>
+<li class="listitem"><p>the <code class="literal">value_raw</code> as a 64-bit untranslated value with no further context
+of which bits are actually valid for a particular attribute</p></li>
+<li class="listitem"><p>the <code class="literal">pretty_value_string</code> as an implementation-specific string representation,
+intended for end-user display</p></li>
+<li class="listitem"><p>the <code class="literal">pretty_value</code> and <code class="literal">pretty_value_unit</code> as a libatasmart-style of unified value/type pair</p></li>
+</ul></div>
+<p>Both libblockdev plugins strive for best effort of providing accurate values,
+however there are often challenges ranging from string-to-number conversion,
+multiple values being unpacked from a single raw number or not having enough
+context provided by the underlying library for a trusted value interpretation.</p>
+</div>
+<div class="refsect3">
+<a name="id-1.2.15.6.8"></a><h4>Attribute validation</h4>
+<p>It may seem obvious to use numerical attribute ID as an authoritative attribute
+identifier, however in reality drive vendors tend not to stick with public
+specifications. Attributes are often reused for vendor-specific values and this
+differs from model to model even for a single vendor. This is more often the case
+with SSD drives than traditional HDDs.</p>
+<p>Historically it brought confusion and false alarms on user's end and eventually
+led to some form of quirk database in most projects. Maintaining such database
+is a lifetime task and the only successful effort is the smartmontools' <code class="literal">drivedb.h</code>
+collection. Quirks are needed for about everything - meaning of a particular
+attribute (i.e. a 'well-known' name), interpretation of a raw value, all this
+filtered by drive model string and firmware revision.</p>
+<p>However even there not everything is consistent and slight variations in
+a 'well-known' name can be found. Besides, the attribute naming syntax differs
+from our chosen libatasmart-style form.</p>
+<p>For this reason an internal libblockdev translation table has been introduced
+to ensure a bit of consistency. The translation table is kept conservative,
+is by no means complete and may get extended in future libblockdev releases.
+As a result, some attributes may be reported as 'untrusted' or 'unknown'.</p>
+<p>The translation table at this point doesn't handle 'moves' where a different
+attribute ID has been assigned for otherwise well defined attribute.</p>
+<p>An experimental <code class="literal">drivedb.h</code> parser is provided for the libatasmart plugin
+as an additional tier of validation based on actual drive model + firmware match.
+Being a C header file, the <code class="literal">drivedb.h</code> definitions are compiled in the plugin.
+There's no support for loading external <code class="literal">drivedb.h</code> file though. This however
+only serves for validation. Providing backwards mapping to libatasmart-style
+of attributes is considered as a TODO.</p>
+</div>
+<div class="refsect3">
+<a name="id-1.2.15.6.9"></a><h4>Device type detection, multipath</h4>
+<p>There's a big difference in how a drive is accessed. While libatasmart performs
+essentially no device type detection and sends a I/O request right away
+(with usual error handling), <code class="literal">smartctl</code> implements a logic to determine which
+protocol to use, supporting various passthrough mechanisms and interface bridges.
+Such detection is not always reliable though, having known issues with <code class="literal">dm-multipath</code>
+for example. For this case most plugin functions provide the <code class="literal">'extra'</code> argument
+allowing consumers to provide specific arguments such as <code class="literal">'--device=' for device
+type override</code>. This is only supported by the smartmontools plugin and ignored
+by the libatasmart plugin.</p>
+</div>
+</div>
+<div class="refsect1">
+<a name="libblockdev-SMART.functions_details"></a><h2>Functions</h2>
+<div class="refsect2">
+<a name="bd-smart-check-deps"></a><h3>bd_smart_check_deps ()</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>
+bd_smart_check_deps (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<div class="refsect3">
+<a name="bd-smart-check-deps.returns"></a><h4>Returns</h4>
+<p> whether the plugin's runtime dependencies are satisfied or not</p>
+<p>Function checking plugin's runtime dependencies.</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-smart-close"></a><h3>bd_smart_close ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_smart_close (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p>Cleans up after the plugin. **This function is called automatically by the
+library's functions that unload it.**</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-smart-init"></a><h3>bd_smart_init ()</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>
+bd_smart_init (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p>Initializes the plugin. **This function is called automatically by the
+library's initialization functions.**</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-smart-error-quark"></a><h3>bd_smart_error_quark ()</h3>
+<pre class="programlisting"><span class="returnvalue">GQuark</span>
+bd_smart_error_quark (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-smart-is-tech-avail"></a><h3>bd_smart_is_tech_avail ()</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>
+bd_smart_is_tech_avail (<em class="parameter"><code><a class="link" href="libblockdev-SMART.html#BDSmartTech" title="enum BDSmartTech"><span class="type">BDSmartTech</span></a> tech</code></em>,
+                        <em class="parameter"><code><span class="type">guint64</span> mode</code></em>,
+                        <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-smart-is-tech-avail.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>tech</p></td>
+<td class="parameter_description"><p>the queried tech</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>mode</p></td>
+<td class="parameter_description"><p>a bit mask of queried modes of operation (<a class="link" href="libblockdev-SMART.html#BDSmartTechMode" title="enum BDSmartTechMode"><span class="type">BDSmartTechMode</span></a>) for <em class="parameter"><code>tech</code></em>
+</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (details about why the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is not available). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-smart-is-tech-avail.returns"></a><h4>Returns</h4>
+<p> whether the <em class="parameter"><code>tech</code></em>
+-<em class="parameter"><code>mode</code></em>
+combination is available -- supported by the
+plugin implementation and having all the runtime dependencies available</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-smart-ata-get-info"></a><h3>bd_smart_ata_get_info ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-SMART.html#BDSmartATA" title="BDSmartATA"><span class="returnvalue">BDSmartATA</span></a> *
+bd_smart_ata_get_info (<em class="parameter"><code>const <span class="type">gchar</span> *device</code></em>,
+                       <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                       <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<p>Retrieve SMART information from the drive.</p>
+<div class="refsect3">
+<a name="bd-smart-ata-get-info.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>device to check.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p>extra options to pass through. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-smart-ata-get-info.returns"></a><h4>Returns</h4>
+<p>ATA SMART log or <code class="literal">NULL</code> in case of an error (with <em class="parameter"><code>error</code></em>
+set).</p>
+<p>Tech category: <a class="link" href="libblockdev-SMART.html#BD-SMART-TECH-ATA:CAPS"><code class="literal">BD_SMART_TECH_ATA</code></a>-<a class="link" href="libblockdev-SMART.html#BD-SMART-TECH-MODE-INFO:CAPS"><code class="literal">BD_SMART_TECH_MODE_INFO</code></a>. </p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-smart-ata-get-info-from-data"></a><h3>bd_smart_ata_get_info_from_data ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-SMART.html#BDSmartATA" title="BDSmartATA"><span class="returnvalue">BDSmartATA</span></a> *
+bd_smart_ata_get_info_from_data (<em class="parameter"><code>const <span class="type">guint8</span> *data</code></em>,
+                                 <em class="parameter"><code><span class="type">gsize</span> data_len</code></em>,
+                                 <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<p>Retrieve SMART information from the supplied data.</p>
+<div class="refsect3">
+<a name="bd-smart-ata-get-info-from-data.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>data</p></td>
+<td class="parameter_description"><p>binary data to parse. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> length=data_len]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>data_len</p></td>
+<td class="parameter_description"><p>length of the data supplied.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-smart-ata-get-info-from-data.returns"></a><h4>Returns</h4>
+<p>ATA SMART log or <code class="literal">NULL</code> in case of an error (with <em class="parameter"><code>error</code></em>
+set).</p>
+<p>Tech category: <a class="link" href="libblockdev-SMART.html#BD-SMART-TECH-ATA:CAPS"><code class="literal">BD_SMART_TECH_ATA</code></a>-<a class="link" href="libblockdev-SMART.html#BD-SMART-TECH-MODE-INFO:CAPS"><code class="literal">BD_SMART_TECH_MODE_INFO</code></a>. </p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-smart-ata-copy"></a><h3>bd_smart_ata_copy ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-SMART.html#BDSmartATA" title="BDSmartATA"><span class="returnvalue">BDSmartATA</span></a> *
+bd_smart_ata_copy (<em class="parameter"><code><a class="link" href="libblockdev-SMART.html#BDSmartATA" title="BDSmartATA"><span class="type">BDSmartATA</span></a> *data</code></em>);</pre>
+<p>Creates a new copy of <em class="parameter"><code>data</code></em>
+.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="bd-smart-ata-copy.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>data</p></td>
+<td class="parameter_description"><p><a class="link" href="libblockdev-SMART.html#BDSmartATA" title="BDSmartATA"><code class="literal">BDSmartATA</code></a> to copy. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-smart-ata-free"></a><h3>bd_smart_ata_free ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_smart_ata_free (<em class="parameter"><code><a class="link" href="libblockdev-SMART.html#BDSmartATA" title="BDSmartATA"><span class="type">BDSmartATA</span></a> *data</code></em>);</pre>
+<p>Frees <em class="parameter"><code>data</code></em>
+.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="bd-smart-ata-free.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>data</p></td>
+<td class="parameter_description"><p><a class="link" href="libblockdev-SMART.html#BDSmartATA" title="BDSmartATA"><code class="literal">BDSmartATA</code></a> to free. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-smart-ata-attribute-copy"></a><h3>bd_smart_ata_attribute_copy ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-SMART.html#BDSmartATAAttribute" title="BDSmartATAAttribute"><span class="returnvalue">BDSmartATAAttribute</span></a> *
+bd_smart_ata_attribute_copy (<em class="parameter"><code><a class="link" href="libblockdev-SMART.html#BDSmartATAAttribute" title="BDSmartATAAttribute"><span class="type">BDSmartATAAttribute</span></a> *attr</code></em>);</pre>
+<p>Creates a new copy of <em class="parameter"><code>attr</code></em>
+.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="bd-smart-ata-attribute-copy.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>attr</p></td>
+<td class="parameter_description"><p><a class="link" href="libblockdev-SMART.html#BDSmartATAAttribute" title="BDSmartATAAttribute"><code class="literal">BDSmartATAAttribute</code></a> to copy. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-smart-ata-attribute-free"></a><h3>bd_smart_ata_attribute_free ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_smart_ata_attribute_free (<em class="parameter"><code><a class="link" href="libblockdev-SMART.html#BDSmartATAAttribute" title="BDSmartATAAttribute"><span class="type">BDSmartATAAttribute</span></a> *attr</code></em>);</pre>
+<p>Frees <em class="parameter"><code>attr</code></em>
+.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="bd-smart-ata-attribute-free.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>attr</p></td>
+<td class="parameter_description"><p><a class="link" href="libblockdev-SMART.html#BDSmartATAAttribute" title="BDSmartATAAttribute"><code class="literal">BDSmartATAAttribute</code></a> to free. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-smart-scsi-get-info"></a><h3>bd_smart_scsi_get_info ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-SMART.html#BDSmartSCSI" title="BDSmartSCSI"><span class="returnvalue">BDSmartSCSI</span></a> *
+bd_smart_scsi_get_info (<em class="parameter"><code>const <span class="type">gchar</span> *device</code></em>,
+                        <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                        <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<p>Retrieve SMART information from SCSI or SAS-compliant drive.</p>
+<div class="refsect3">
+<a name="bd-smart-scsi-get-info.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>device to check.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p>extra options to pass through. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-smart-scsi-get-info.returns"></a><h4>Returns</h4>
+<p>SCSI SMART log or <code class="literal">NULL</code> in case of an error (with <em class="parameter"><code>error</code></em>
+set).</p>
+<p>Tech category: <a class="link" href="libblockdev-SMART.html#BD-SMART-TECH-SCSI:CAPS"><code class="literal">BD_SMART_TECH_SCSI</code></a>-<a class="link" href="libblockdev-SMART.html#BD-SMART-TECH-MODE-INFO:CAPS"><code class="literal">BD_SMART_TECH_MODE_INFO</code></a>. </p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-smart-scsi-free"></a><h3>bd_smart_scsi_free ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>
+bd_smart_scsi_free (<em class="parameter"><code><a class="link" href="libblockdev-SMART.html#BDSmartSCSI" title="BDSmartSCSI"><span class="type">BDSmartSCSI</span></a> *data</code></em>);</pre>
+<p>Frees <em class="parameter"><code>data</code></em>
+.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="bd-smart-scsi-free.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>data</p></td>
+<td class="parameter_description"><p><a class="link" href="libblockdev-SMART.html#BDSmartSCSI" title="BDSmartSCSI"><code class="literal">BDSmartSCSI</code></a> to free. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-smart-scsi-copy"></a><h3>bd_smart_scsi_copy ()</h3>
+<pre class="programlisting"><a class="link" href="libblockdev-SMART.html#BDSmartSCSI" title="BDSmartSCSI"><span class="returnvalue">BDSmartSCSI</span></a> *
+bd_smart_scsi_copy (<em class="parameter"><code><a class="link" href="libblockdev-SMART.html#BDSmartSCSI" title="BDSmartSCSI"><span class="type">BDSmartSCSI</span></a> *data</code></em>);</pre>
+<p>Creates a new copy of <em class="parameter"><code>data</code></em>
+.</p>
+<p><span class="annotation">[<acronym title="Exposed in C code, not necessarily available in other languages."><span class="acronym">skip</span></acronym>]</span></p>
+<div class="refsect3">
+<a name="bd-smart-scsi-copy.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody><tr>
+<td class="parameter_name"><p>data</p></td>
+<td class="parameter_description"><p><a class="link" href="libblockdev-SMART.html#BDSmartSCSI" title="BDSmartSCSI"><code class="literal">BDSmartSCSI</code></a> to copy. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-smart-set-enabled"></a><h3>bd_smart_set_enabled ()</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>
+bd_smart_set_enabled (<em class="parameter"><code>const <span class="type">gchar</span> *device</code></em>,
+                      <em class="parameter"><code><span class="type">gboolean</span> enabled</code></em>,
+                      <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                      <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<p>Enables or disables SMART functionality on device.</p>
+<div class="refsect3">
+<a name="bd-smart-set-enabled.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>SMART-capable device.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>enabled</p></td>
+<td class="parameter_description"><p>whether to enable or disable the SMART functionality</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p>extra options to pass through. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-smart-set-enabled.returns"></a><h4>Returns</h4>
+<p> <code class="literal">TRUE</code> when the functionality was set successfully or <code class="literal">FALSE</code> in case of an error (with <em class="parameter"><code>error</code></em>
+set).</p>
+<p>Tech category: <a class="link" href="libblockdev-SMART.html#BD-SMART-TECH-ATA:CAPS"><code class="literal">BD_SMART_TECH_ATA</code></a>-<a class="link" href="libblockdev-SMART.html#BD-SMART-TECH-MODE-INFO:CAPS"><code class="literal">BD_SMART_TECH_MODE_INFO</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-smart-device-self-test"></a><h3>bd_smart_device_self_test ()</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>
+bd_smart_device_self_test (<em class="parameter"><code>const <span class="type">gchar</span> *device</code></em>,
+                           <em class="parameter"><code><a class="link" href="libblockdev-SMART.html#BDSmartSelfTestOp" title="enum BDSmartSelfTestOp"><span class="type">BDSmartSelfTestOp</span></a> operation</code></em>,
+                           <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                           <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<p>Executes or aborts device self-test.</p>
+<div class="refsect3">
+<a name="bd-smart-device-self-test.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>device to trigger the test on.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>operation</p></td>
+<td class="parameter_description"><p><a class="link" href="libblockdev-SMART.html#BDSmartSelfTestOp" title="enum BDSmartSelfTestOp"><span class="type">BDSmartSelfTestOp</span></a> self-test operation.</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p>extra options to pass through. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-smart-device-self-test.returns"></a><h4>Returns</h4>
+<p> <code class="literal">TRUE</code> when the self-test was triggered successfully or <code class="literal">FALSE</code> in case of an error (with <em class="parameter"><code>error</code></em>
+set).</p>
+<p>Tech category: <a class="link" href="libblockdev-SMART.html#BD-SMART-TECH-ATA:CAPS"><code class="literal">BD_SMART_TECH_ATA</code></a>-<a class="link" href="libblockdev-SMART.html#BD-SMART-TECH-MODE-SELFTEST:CAPS"><code class="literal">BD_SMART_TECH_MODE_SELFTEST</code></a></p>
+</div>
+</div>
+</div>
+<div class="refsect1">
+<a name="libblockdev-SMART.other_details"></a><h2>Types and Values</h2>
+<div class="refsect2">
+<a name="BD-SMART-ERROR:CAPS"></a><h3>BD_SMART_ERROR</h3>
+<pre class="programlisting">#define             BD_SMART_ERROR</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDSmartError"></a><h3>enum BDSmartError</h3>
+<div class="refsect3">
+<a name="BDSmartError.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ERROR-TECH-UNAVAIL:CAPS"></a>BD_SMART_ERROR_TECH_UNAVAIL</p></td>
+<td class="enum_member_description">
+<p>SMART support not available.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ERROR-FAILED:CAPS"></a>BD_SMART_ERROR_FAILED</p></td>
+<td class="enum_member_description">
+<p>General error.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ERROR-INVALID-ARGUMENT:CAPS"></a>BD_SMART_ERROR_INVALID_ARGUMENT</p></td>
+<td class="enum_member_description">
+<p>Invalid argument.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDSmartTech"></a><h3>enum BDSmartTech</h3>
+<div class="refsect3">
+<a name="BDSmartTech.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-TECH-ATA:CAPS"></a>BD_SMART_TECH_ATA</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-TECH-SCSI:CAPS"></a>BD_SMART_TECH_SCSI</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDSmartTechMode"></a><h3>enum BDSmartTechMode</h3>
+<div class="refsect3">
+<a name="BDSmartTechMode.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-TECH-MODE-INFO:CAPS"></a>BD_SMART_TECH_MODE_INFO</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-TECH-MODE-SELFTEST:CAPS"></a>BD_SMART_TECH_MODE_SELFTEST</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-SMART-TYPE-ATA:CAPS"></a><h3>BD_SMART_TYPE_ATA</h3>
+<pre class="programlisting">#define BD_SMART_TYPE_ATA (bd_smart_ata_get_type ())
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BD-SMART-TYPE-ATA-ATTRIBUTE:CAPS"></a><h3>BD_SMART_TYPE_ATA_ATTRIBUTE</h3>
+<pre class="programlisting">#define BD_SMART_TYPE_ATA_ATTRIBUTE (bd_smart_ata_attribute_get_type ())
+</pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDSmartATAAttribute"></a><h3>BDSmartATAAttribute</h3>
+<pre class="programlisting">typedef struct {
+    guint8 id;
+    gchar *name;
+    gchar *well_known_name;
+    gint value;
+    gint worst;
+    gint threshold;
+    gboolean failed_past;
+    gboolean failing_now;
+    guint64 value_raw;
+    guint16 flags;
+    gint64 pretty_value;
+    BDSmartATAAttributeUnit pretty_value_unit;
+    gchar *pretty_value_string;
+} BDSmartATAAttribute;
+</pre>
+<div class="refsect3">
+<a name="BDSmartATAAttribute.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="struct_members_name">
+<col class="struct_members_description">
+<col width="200px" class="struct_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint8</span> <em class="structfield"><code><a name="BDSmartATAAttribute.id"></a>id</code></em>;</p></td>
+<td class="struct_member_description"><p>Attribute Identifier.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gchar</span> *<em class="structfield"><code><a name="BDSmartATAAttribute.name"></a>name</code></em>;</p></td>
+<td class="struct_member_description"><p>A free-form representation of the attribute name, implementation-dependent (e.g. libatasmart internal strings or smartmontools' drivedb.h names).</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gchar</span> *<em class="structfield"><code><a name="BDSmartATAAttribute.well-known-name"></a>well_known_name</code></em>;</p></td>
+<td class="struct_member_description"><p>Translated well-known attribute name (in libatasmart style, e.g. 'raw-read-error-rate') or <code class="literal">NULL</code> in case of unknown, untrusted or vendor-specific value.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gint</span> <em class="structfield"><code><a name="BDSmartATAAttribute.value"></a>value</code></em>;</p></td>
+<td class="struct_member_description"><p>The normalized value or -1 if unknown.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gint</span> <em class="structfield"><code><a name="BDSmartATAAttribute.worst"></a>worst</code></em>;</p></td>
+<td class="struct_member_description"><p>The worst normalized value of -1 if unknown.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gint</span> <em class="structfield"><code><a name="BDSmartATAAttribute.threshold"></a>threshold</code></em>;</p></td>
+<td class="struct_member_description"><p>The threshold of a normalized value or -1 if unknown.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gboolean</span> <em class="structfield"><code><a name="BDSmartATAAttribute.failed-past"></a>failed_past</code></em>;</p></td>
+<td class="struct_member_description"><p>Indicates a failure that happened in the past (the normalized worst value is below the threshold).</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gboolean</span> <em class="structfield"><code><a name="BDSmartATAAttribute.failing-now"></a>failing_now</code></em>;</p></td>
+<td class="struct_member_description"><p>Indicates a failure that is happening now (the normalized value is below the threshold).</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint64</span> <em class="structfield"><code><a name="BDSmartATAAttribute.value-raw"></a>value_raw</code></em>;</p></td>
+<td class="struct_member_description"><p>The raw value of the attribute.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint16</span> <em class="structfield"><code><a name="BDSmartATAAttribute.flags"></a>flags</code></em>;</p></td>
+<td class="struct_member_description"><p>Bitmask of attribute flags. See <a class="link" href="libblockdev-SMART.html#BDSmartATAAttributeFlag" title="enum BDSmartATAAttributeFlag"><span class="type">BDSmartATAAttributeFlag</span></a>.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gint64</span> <em class="structfield"><code><a name="BDSmartATAAttribute.pretty-value"></a>pretty_value</code></em>;</p></td>
+<td class="struct_member_description"><p>Numerical representation of the parsed raw value, presented in <em class="parameter"><code>pretty_value_unit</code></em>
+units.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a class="link" href="libblockdev-SMART.html#BDSmartATAAttributeUnit" title="enum BDSmartATAAttributeUnit"><span class="type">BDSmartATAAttributeUnit</span></a> <em class="structfield"><code><a name="BDSmartATAAttribute.pretty-value-unit"></a>pretty_value_unit</code></em>;</p></td>
+<td class="struct_member_description"><p>The unit of the parsed raw value.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gchar</span> *<em class="structfield"><code><a name="BDSmartATAAttribute.pretty-value-string"></a>pretty_value_string</code></em>;</p></td>
+<td class="struct_member_description"><p>A free-form string representation of the raw value intended for user presentation or <code class="literal">NULL</code>.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDSmartATAAttributeUnit"></a><h3>enum BDSmartATAAttributeUnit</h3>
+<div class="refsect3">
+<a name="BDSmartATAAttributeUnit.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-ATTRIBUTE-UNIT-UNKNOWN:CAPS"></a>BD_SMART_ATA_ATTRIBUTE_UNIT_UNKNOWN</p></td>
+<td class="enum_member_description">
+<p>Unknown.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-ATTRIBUTE-UNIT-NONE:CAPS"></a>BD_SMART_ATA_ATTRIBUTE_UNIT_NONE</p></td>
+<td class="enum_member_description">
+<p>Dimensionless value.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-ATTRIBUTE-UNIT-MSECONDS:CAPS"></a>BD_SMART_ATA_ATTRIBUTE_UNIT_MSECONDS</p></td>
+<td class="enum_member_description">
+<p>Milliseconds.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-ATTRIBUTE-UNIT-SECTORS:CAPS"></a>BD_SMART_ATA_ATTRIBUTE_UNIT_SECTORS</p></td>
+<td class="enum_member_description">
+<p>Sectors.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-ATTRIBUTE-UNIT-MKELVIN:CAPS"></a>BD_SMART_ATA_ATTRIBUTE_UNIT_MKELVIN</p></td>
+<td class="enum_member_description">
+<p>Millikelvin.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-ATTRIBUTE-UNIT-SMALL-PERCENT:CAPS"></a>BD_SMART_ATA_ATTRIBUTE_UNIT_SMALL_PERCENT</p></td>
+<td class="enum_member_description">
+<p>Percentage with 3 decimal points.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-ATTRIBUTE-UNIT-PERCENT:CAPS"></a>BD_SMART_ATA_ATTRIBUTE_UNIT_PERCENT</p></td>
+<td class="enum_member_description">
+<p>Integer percentage.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-ATTRIBUTE-UNIT-MB:CAPS"></a>BD_SMART_ATA_ATTRIBUTE_UNIT_MB</p></td>
+<td class="enum_member_description">
+<p>Megabytes.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDSmartATAAttributeFlag"></a><h3>enum BDSmartATAAttributeFlag</h3>
+<div class="refsect3">
+<a name="BDSmartATAAttributeFlag.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-ATTRIBUTE-FLAG-PREFAILURE:CAPS"></a>BD_SMART_ATA_ATTRIBUTE_FLAG_PREFAILURE</p></td>
+<td class="enum_member_description">
+<p>Pre-failure/advisory bit: If the value of this bit equals zero, an attribute value less than or equal to its corresponding attribute threshold indicates an advisory condition where the usage or age of the device has exceeded its intended design life period. If the value of this bit equals one, an attribute value less than or equal to its corresponding attribute threshold indicates a prefailure condition where imminent loss of data is being predicted.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-ATTRIBUTE-FLAG-ONLINE:CAPS"></a>BD_SMART_ATA_ATTRIBUTE_FLAG_ONLINE</p></td>
+<td class="enum_member_description">
+<p>On-line data collection bit: If the value of this bit equals zero, then the attribute value is updated only during off-line data collection activities. If the value of this bit equals one, then the attribute value is updated during normal operation of the device or during both normal operation and off-line testing.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-ATTRIBUTE-FLAG-PERFORMANCE:CAPS"></a>BD_SMART_ATA_ATTRIBUTE_FLAG_PERFORMANCE</p></td>
+<td class="enum_member_description">
+<p>Performance type bit (vendor specific).</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-ATTRIBUTE-FLAG-ERROR-RATE:CAPS"></a>BD_SMART_ATA_ATTRIBUTE_FLAG_ERROR_RATE</p></td>
+<td class="enum_member_description">
+<p>Errorrate type bit (vendor specific).</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-ATTRIBUTE-FLAG-EVENT-COUNT:CAPS"></a>BD_SMART_ATA_ATTRIBUTE_FLAG_EVENT_COUNT</p></td>
+<td class="enum_member_description">
+<p>Eventcount bit (vendor specific).</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-ATTRIBUTE-FLAG-SELF-PRESERVING:CAPS"></a>BD_SMART_ATA_ATTRIBUTE_FLAG_SELF_PRESERVING</p></td>
+<td class="enum_member_description">
+<p>Selfpereserving bit (vendor specific).</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-ATTRIBUTE-FLAG-OTHER:CAPS"></a>BD_SMART_ATA_ATTRIBUTE_FLAG_OTHER</p></td>
+<td class="enum_member_description">
+<p>Reserved.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDSmartATACapabilities"></a><h3>enum BDSmartATACapabilities</h3>
+<div class="refsect3">
+<a name="BDSmartATACapabilities.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-CAP-ATTRIBUTE-AUTOSAVE:CAPS"></a>BD_SMART_ATA_CAP_ATTRIBUTE_AUTOSAVE</p></td>
+<td class="enum_member_description">
+<p>Saves SMART data before entering power-saving mode.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-CAP-AUTOSAVE-TIMER:CAPS"></a>BD_SMART_ATA_CAP_AUTOSAVE_TIMER</p></td>
+<td class="enum_member_description">
+<p>Supports SMART auto save timer.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-CAP-ERROR-LOGGING:CAPS"></a>BD_SMART_ATA_CAP_ERROR_LOGGING</p></td>
+<td class="enum_member_description">
+<p>Error logging supported.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-CAP-GP-LOGGING:CAPS"></a>BD_SMART_ATA_CAP_GP_LOGGING</p></td>
+<td class="enum_member_description">
+<p>General Purpose Logging supported.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDSmartATAOfflineDataCollectionCapabilities"></a><h3>enum BDSmartATAOfflineDataCollectionCapabilities</h3>
+<div class="refsect3">
+<a name="BDSmartATAOfflineDataCollectionCapabilities.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-OFFLINE-DATA-COLLECTION-CAP-NOT-SUPPORTED:CAPS"></a>BD_SMART_ATA_OFFLINE_DATA_COLLECTION_CAP_NOT_SUPPORTED</p></td>
+<td class="enum_member_description">
+<p>Offline data collection not supported.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-OFFLINE-DATA-COLLECTION-CAP-EXEC-OFFLINE-IMMEDIATE:CAPS"></a>BD_SMART_ATA_OFFLINE_DATA_COLLECTION_CAP_EXEC_OFFLINE_IMMEDIATE</p></td>
+<td class="enum_member_description">
+<p>Execute Offline Immediate function supported.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-OFFLINE-DATA-COLLECTION-CAP-OFFLINE-ABORT:CAPS"></a>BD_SMART_ATA_OFFLINE_DATA_COLLECTION_CAP_OFFLINE_ABORT</p></td>
+<td class="enum_member_description">
+<p>Abort Offline collection upon new command.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-OFFLINE-DATA-COLLECTION-CAP-OFFLINE-SURFACE-SCAN:CAPS"></a>BD_SMART_ATA_OFFLINE_DATA_COLLECTION_CAP_OFFLINE_SURFACE_SCAN</p></td>
+<td class="enum_member_description">
+<p>Offline surface scan supported.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-OFFLINE-DATA-COLLECTION-CAP-SELF-TEST:CAPS"></a>BD_SMART_ATA_OFFLINE_DATA_COLLECTION_CAP_SELF_TEST</p></td>
+<td class="enum_member_description">
+<p>Self-test supported.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-OFFLINE-DATA-COLLECTION-CAP-CONVEYANCE-SELF-TEST:CAPS"></a>BD_SMART_ATA_OFFLINE_DATA_COLLECTION_CAP_CONVEYANCE_SELF_TEST</p></td>
+<td class="enum_member_description">
+<p>Conveyance Self-test supported.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-OFFLINE-DATA-COLLECTION-CAP-SELECTIVE-SELF-TEST:CAPS"></a>BD_SMART_ATA_OFFLINE_DATA_COLLECTION_CAP_SELECTIVE_SELF_TEST</p></td>
+<td class="enum_member_description">
+<p>Selective Self-test supported.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDSmartATAOfflineDataCollectionStatus"></a><h3>enum BDSmartATAOfflineDataCollectionStatus</h3>
+<div class="refsect3">
+<a name="BDSmartATAOfflineDataCollectionStatus.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-OFFLINE-DATA-COLLECTION-STATUS-NEVER-STARTED:CAPS"></a>BD_SMART_ATA_OFFLINE_DATA_COLLECTION_STATUS_NEVER_STARTED</p></td>
+<td class="enum_member_description">
+<p>Offline data collection activity was never started.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-OFFLINE-DATA-COLLECTION-STATUS-NO-ERROR:CAPS"></a>BD_SMART_ATA_OFFLINE_DATA_COLLECTION_STATUS_NO_ERROR</p></td>
+<td class="enum_member_description">
+<p>Offline data collection activity was completed without error. Indicates a passed test.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-OFFLINE-DATA-COLLECTION-STATUS-IN-PROGRESS:CAPS"></a>BD_SMART_ATA_OFFLINE_DATA_COLLECTION_STATUS_IN_PROGRESS</p></td>
+<td class="enum_member_description">
+<p>Offline data collection activity is in progress.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-OFFLINE-DATA-COLLECTION-STATUS-SUSPENDED-INTR:CAPS"></a>BD_SMART_ATA_OFFLINE_DATA_COLLECTION_STATUS_SUSPENDED_INTR</p></td>
+<td class="enum_member_description">
+<p>Offline data collection activity was suspended by an interrupting command from host.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-OFFLINE-DATA-COLLECTION-STATUS-ABORTED-INTR:CAPS"></a>BD_SMART_ATA_OFFLINE_DATA_COLLECTION_STATUS_ABORTED_INTR</p></td>
+<td class="enum_member_description">
+<p>Offline data collection activity was aborted by an interrupting command from host.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-OFFLINE-DATA-COLLECTION-STATUS-ABORTED-ERROR:CAPS"></a>BD_SMART_ATA_OFFLINE_DATA_COLLECTION_STATUS_ABORTED_ERROR</p></td>
+<td class="enum_member_description">
+<p>Offline data collection activity was aborted by the device with a fatal error. Indicates a failed test.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-OFFLINE-DATA-COLLECTION-STATUS-VENDOR-SPECIFIC:CAPS"></a>BD_SMART_ATA_OFFLINE_DATA_COLLECTION_STATUS_VENDOR_SPECIFIC</p></td>
+<td class="enum_member_description">
+<p>Offline data collection activity is in a Vendor Specific state.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-OFFLINE-DATA-COLLECTION-STATUS-RESERVED:CAPS"></a>BD_SMART_ATA_OFFLINE_DATA_COLLECTION_STATUS_RESERVED</p></td>
+<td class="enum_member_description">
+<p>Offline data collection activity is in a Reserved state.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDSmartATASelfTestStatus"></a><h3>enum BDSmartATASelfTestStatus</h3>
+<div class="refsect3">
+<a name="BDSmartATASelfTestStatus.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-SELF-TEST-STATUS-COMPLETED-NO-ERROR:CAPS"></a>BD_SMART_ATA_SELF_TEST_STATUS_COMPLETED_NO_ERROR</p></td>
+<td class="enum_member_description">
+<p>The previous self-test routine completed without error or no self-test has ever been run.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-SELF-TEST-STATUS-ABORTED-HOST:CAPS"></a>BD_SMART_ATA_SELF_TEST_STATUS_ABORTED_HOST</p></td>
+<td class="enum_member_description">
+<p>The self-test routine was aborted by the host.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-SELF-TEST-STATUS-INTR-HOST-RESET:CAPS"></a>BD_SMART_ATA_SELF_TEST_STATUS_INTR_HOST_RESET</p></td>
+<td class="enum_member_description">
+<p>The self-test routine was interrupted by the host with a hard or soft reset.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-SELF-TEST-STATUS-ERROR-FATAL:CAPS"></a>BD_SMART_ATA_SELF_TEST_STATUS_ERROR_FATAL</p></td>
+<td class="enum_member_description">
+<p>A fatal error or unknown test error occurred while the device was executing its self-test routine and the device was unable to complete the self-test routine.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-SELF-TEST-STATUS-ERROR-UNKNOWN:CAPS"></a>BD_SMART_ATA_SELF_TEST_STATUS_ERROR_UNKNOWN</p></td>
+<td class="enum_member_description">
+<p>The previous self-test completed having a test element that failed and the test element that failed is not known.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-SELF-TEST-STATUS-ERROR-ELECTRICAL:CAPS"></a>BD_SMART_ATA_SELF_TEST_STATUS_ERROR_ELECTRICAL</p></td>
+<td class="enum_member_description">
+<p>The previous self-test completed having the electrical element of the test failed.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-SELF-TEST-STATUS-ERROR-SERVO:CAPS"></a>BD_SMART_ATA_SELF_TEST_STATUS_ERROR_SERVO</p></td>
+<td class="enum_member_description">
+<p>The previous self-test completed having the servo (and/or seek) element of the test failed.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-SELF-TEST-STATUS-ERROR-READ:CAPS"></a>BD_SMART_ATA_SELF_TEST_STATUS_ERROR_READ</p></td>
+<td class="enum_member_description">
+<p>The previous self-test completed having the read element of the test failed.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-SELF-TEST-STATUS-ERROR-HANDLING:CAPS"></a>BD_SMART_ATA_SELF_TEST_STATUS_ERROR_HANDLING</p></td>
+<td class="enum_member_description">
+<p>The previous self-test completed having a test element that failed and the device is suspected of having handling damage.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-ATA-SELF-TEST-STATUS-IN-PROGRESS:CAPS"></a>BD_SMART_ATA_SELF_TEST_STATUS_IN_PROGRESS</p></td>
+<td class="enum_member_description">
+<p>Self-test routine in progress.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDSmartATA"></a><h3>BDSmartATA</h3>
+<pre class="programlisting">typedef struct {
+    gboolean smart_supported;
+    gboolean smart_enabled;
+    gboolean overall_status_passed;
+    BDSmartATAOfflineDataCollectionStatus offline_data_collection_status;
+    gboolean auto_offline_data_collection_enabled;
+    gint offline_data_collection_completion;
+    guint offline_data_collection_capabilities;
+    BDSmartATASelfTestStatus self_test_status;
+    gint self_test_percent_remaining;
+    gint self_test_polling_short;
+    gint self_test_polling_extended;
+    gint self_test_polling_conveyance;
+    guint smart_capabilities;
+    BDSmartATAAttribute **attributes;
+    guint power_on_time;
+    guint64 power_cycle_count;
+    guint temperature;
+} BDSmartATA;
+</pre>
+<div class="refsect3">
+<a name="BDSmartATA.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="struct_members_name">
+<col class="struct_members_description">
+<col width="200px" class="struct_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="struct_member_name"><p><span class="type">gboolean</span> <em class="structfield"><code><a name="BDSmartATA.smart-supported"></a>smart_supported</code></em>;</p></td>
+<td class="struct_member_description"><p>Indicates that the device has SMART capability.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gboolean</span> <em class="structfield"><code><a name="BDSmartATA.smart-enabled"></a>smart_enabled</code></em>;</p></td>
+<td class="struct_member_description"><p>Indicates that the SMART support is enabled.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gboolean</span> <em class="structfield"><code><a name="BDSmartATA.overall-status-passed"></a>overall_status_passed</code></em>;</p></td>
+<td class="struct_member_description"><p><code class="literal">TRUE</code> if the device SMART overall-health self-assessment test result has passed.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a class="link" href="libblockdev-SMART.html#BDSmartATAOfflineDataCollectionStatus" title="enum BDSmartATAOfflineDataCollectionStatus"><span class="type">BDSmartATAOfflineDataCollectionStatus</span></a> <em class="structfield"><code><a name="BDSmartATA.offline-data-collection-status"></a>offline_data_collection_status</code></em>;</p></td>
+<td class="struct_member_description"><p>The offline data collection status. See <a class="link" href="libblockdev-SMART.html#BDSmartATAOfflineDataCollectionStatus" title="enum BDSmartATAOfflineDataCollectionStatus"><span class="type">BDSmartATAOfflineDataCollectionStatus</span></a>.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gboolean</span> <em class="structfield"><code><a name="BDSmartATA.auto-offline-data-collection-enabled"></a>auto_offline_data_collection_enabled</code></em>;</p></td>
+<td class="struct_member_description"><p><code class="literal">TRUE</code> if Automatic Offline Data Collection is enabled. Only supported with the smartmontools plugin.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gint</span> <em class="structfield"><code><a name="BDSmartATA.offline-data-collection-completion"></a>offline_data_collection_completion</code></em>;</p></td>
+<td class="struct_member_description"><p>Total time in seconds to complete Offline data collection.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartATA.offline-data-collection-capabilities"></a>offline_data_collection_capabilities</code></em>;</p></td>
+<td class="struct_member_description"><p>Bitmask of offline data collection capabilities, see <a class="link" href="libblockdev-SMART.html#BDSmartATAOfflineDataCollectionCapabilities" title="enum BDSmartATAOfflineDataCollectionCapabilities"><span class="type">BDSmartATAOfflineDataCollectionCapabilities</span></a>. Only supported with the smartmontools plugin.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a class="link" href="libblockdev-SMART.html#BDSmartATASelfTestStatus" title="enum BDSmartATASelfTestStatus"><span class="type">BDSmartATASelfTestStatus</span></a> <em class="structfield"><code><a name="BDSmartATA.self-test-status"></a>self_test_status</code></em>;</p></td>
+<td class="struct_member_description"><p>Self-test execution status. See <a class="link" href="libblockdev-SMART.html#BDSmartATASelfTestStatus" title="enum BDSmartATASelfTestStatus"><span class="type">BDSmartATASelfTestStatus</span></a>.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gint</span> <em class="structfield"><code><a name="BDSmartATA.self-test-percent-remaining"></a>self_test_percent_remaining</code></em>;</p></td>
+<td class="struct_member_description"><p>The percentage remaining of a running self-test.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gint</span> <em class="structfield"><code><a name="BDSmartATA.self-test-polling-short"></a>self_test_polling_short</code></em>;</p></td>
+<td class="struct_member_description"><p>Short self-test routine recommended polling time in minutes or 0 if not supported.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gint</span> <em class="structfield"><code><a name="BDSmartATA.self-test-polling-extended"></a>self_test_polling_extended</code></em>;</p></td>
+<td class="struct_member_description"><p>Extended self-test routine recommended polling time in minutes or 0 if not supported.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gint</span> <em class="structfield"><code><a name="BDSmartATA.self-test-polling-conveyance"></a>self_test_polling_conveyance</code></em>;</p></td>
+<td class="struct_member_description"><p>Conveyance self-test routine recommended polling time in minutes or 0 if not supported.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartATA.smart-capabilities"></a>smart_capabilities</code></em>;</p></td>
+<td class="struct_member_description"><p>Bitmask of device misc. SMART capabilities. See <a class="link" href="libblockdev-SMART.html#BDSmartATACapabilities" title="enum BDSmartATACapabilities"><span class="type">BDSmartATACapabilities</span></a>. Only supported with the smartmontools plugin.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a class="link" href="libblockdev-SMART.html#BDSmartATAAttribute" title="BDSmartATAAttribute"><span class="type">BDSmartATAAttribute</span></a> **<em class="structfield"><code><a name="BDSmartATA.attributes"></a>attributes</code></em>;</p></td>
+<td class="struct_member_description"><p>A list of reported SMART attributes. </p></td>
+<td class="struct_member_annotations"><span class="annotation">[<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartATA.power-on-time"></a>power_on_time</code></em>;</p></td>
+<td class="struct_member_description"><p>The count of minutes in power-on state.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint64</span> <em class="structfield"><code><a name="BDSmartATA.power-cycle-count"></a>power_cycle_count</code></em>;</p></td>
+<td class="struct_member_description"><p>The count of full hard disk power on/off cycles.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartATA.temperature"></a>temperature</code></em>;</p></td>
+<td class="struct_member_description"><p>The current drive temperature in Kelvin or 0 when temperature is not reported.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDSmartSCSIInformationalException"></a><h3>enum BDSmartSCSIInformationalException</h3>
+<div class="refsect3">
+<a name="BDSmartSCSIInformationalException.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-NONE:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_NONE</p></td>
+<td class="enum_member_description">
+<p>No SCSI Informational Exception raised.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-ABORTED-COMMAND:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_ABORTED_COMMAND</p></td>
+<td class="enum_member_description">
+<p>Warning - aborted command [asc 0x0b, ascq 0x00].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-TEMPERATURE-EXCEEDED:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_TEMPERATURE_EXCEEDED</p></td>
+<td class="enum_member_description">
+<p>Warning - specified temperature exceeded [asc 0x0b, ascq 0x01].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-ENCLOSURE-DEGRADED:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_ENCLOSURE_DEGRADED</p></td>
+<td class="enum_member_description">
+<p>Warning - enclosure degraded [asc 0x0b, ascq 0x02].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-BACKGROUND-SELFTEST-FAILED:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_BACKGROUND_SELFTEST_FAILED</p></td>
+<td class="enum_member_description">
+<p>Warning - background self-test failed [asc 0x0b, ascq 0x03].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-BACKGROUND-PRESCAN-MEDIUM-ERROR:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_BACKGROUND_PRESCAN_MEDIUM_ERROR</p></td>
+<td class="enum_member_description">
+<p>Warning - background pre-scan detected medium error [asc 0x0b, ascq 0x04].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-BACKGROUND-SCAN-MEDIUM-ERROR:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_BACKGROUND_SCAN_MEDIUM_ERROR</p></td>
+<td class="enum_member_description">
+<p>Warning - background medium scan detected medium error [asc 0x0b, ascq 0x05].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-NV-CACHE-VOLATILE:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_NV_CACHE_VOLATILE</p></td>
+<td class="enum_member_description">
+<p>Warning - non-volatile cache now volatile [asc 0x0b, ascq 0x06].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-NV-CACHE-DEGRADED-POWER:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_NV_CACHE_DEGRADED_POWER</p></td>
+<td class="enum_member_description">
+<p>Warning - degraded power to non-volatile cache  [asc 0x0b, ascq 0x07].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-POWER-LOSS-EXPECTED:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_POWER_LOSS_EXPECTED</p></td>
+<td class="enum_member_description">
+<p>Warning - power loss expected [asc 0x0b, ascq 0x08].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-STATISTICS-NOTIFICATION:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_STATISTICS_NOTIFICATION</p></td>
+<td class="enum_member_description">
+<p>Warning - device statistics notification active [asc 0x0b, ascq 0x09].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-HIGH-CRITICAL-TEMP:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_CRITICAL_TEMP</p></td>
+<td class="enum_member_description">
+<p>Warning - high critical temperature limit exceeded [asc 0x0b, ascq 0x0a].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-LOW-CRITICAL-TEMP:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_CRITICAL_TEMP</p></td>
+<td class="enum_member_description">
+<p>Warning - low critical temperature limit exceeded [asc 0x0b, ascq 0x0b].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-HIGH-OPERATING-TEMP:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_OPERATING_TEMP</p></td>
+<td class="enum_member_description">
+<p>Warning - high operating temperature limit exceeded [asc 0x0b, ascq 0x0c].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-LOW-OPERATING-TEMP:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_OPERATING_TEMP</p></td>
+<td class="enum_member_description">
+<p>Warning - low operating temperature limit exceeded [asc 0x0b, ascq 0x0d].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-HIGH-CRITICAL-HUMIDITY:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_CRITICAL_HUMIDITY</p></td>
+<td class="enum_member_description">
+<p>Warning - high critical humidity limit exceeded [asc 0x0b, ascq 0x0e].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-LOW-CRITICAL-HUMIDITY:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_CRITICAL_HUMIDITY</p></td>
+<td class="enum_member_description">
+<p>Warning - low critical humidity limit exceeded [asc 0x0b, ascq 0x0f].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-HIGH-OPERATING-HUMIDITY:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_OPERATING_HUMIDITY</p></td>
+<td class="enum_member_description">
+<p>Warning - high operating humidity limit exceeded [asc 0x0b, ascq 0x10].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-LOW-OPERATING-HUMIDITY:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOW_OPERATING_HUMIDITY</p></td>
+<td class="enum_member_description">
+<p>Warning - low operating humidity limit exceeded [asc 0x0b, ascq 0x11].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-MICROCODE-SECURITY-RISK:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MICROCODE_SECURITY_RISK</p></td>
+<td class="enum_member_description">
+<p>Warning - microcode security at risk [asc 0x0b, ascq 0x12].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-MICROCODE-SIGNATURE-VALIDATION-FAILURE:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MICROCODE_SIGNATURE_VALIDATION_FAILURE</p></td>
+<td class="enum_member_description">
+<p>Warning - microcode digital signature validation failure [asc 0x0b, ascq 0x13].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-PHYSICAL-ELEMENT-STATUS-CHANGE:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_PHYSICAL_ELEMENT_STATUS_CHANGE</p></td>
+<td class="enum_member_description">
+<p>Warning - physical element status change [asc 0x0b, ascq 0x14].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-FAILURE-PREDICTION-THRESH:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_FAILURE_PREDICTION_THRESH</p></td>
+<td class="enum_member_description">
+<p>Failure prediction threshold exceeded [asc 0x5d, ascq 0x00, ascq 0xff].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-MEDIA-FAILURE-PREDICTION-THRESH:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MEDIA_FAILURE_PREDICTION_THRESH</p></td>
+<td class="enum_member_description">
+<p>Media failure prediction threshold exceeded [asc 0x5d, ascq 0x01].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-LOGICAL-UNIT-FAILURE-PREDICTION-THRESH:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_LOGICAL_UNIT_FAILURE_PREDICTION_THRESH</p></td>
+<td class="enum_member_description">
+<p>Logical unit failure prediction threshold exceeded [asc 0x5d, ascq 0x02].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-SPARE-EXHAUSTION-PREDICTION-THRESH:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_SPARE_EXHAUSTION_PREDICTION_THRESH</p></td>
+<td class="enum_member_description">
+<p>Spare area exhaustion prediction threshold exceeded [asc 0x5d, ascq 0x03].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-HARDWARE-IMPENDING-FAILURE:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HARDWARE_IMPENDING_FAILURE</p></td>
+<td class="enum_member_description">
+<p>Hardware impending failure [asc 0x5d, ascq 0x10..0x1d].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-CONTROLLER-IMPENDING-FAILURE:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_CONTROLLER_IMPENDING_FAILURE</p></td>
+<td class="enum_member_description">
+<p>Controller impending failure [asc 0x5d, ascq 0x20..0x2c].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-DATA-CHANNEL-IMPENDING-FAILURE:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_DATA_CHANNEL_IMPENDING_FAILURE</p></td>
+<td class="enum_member_description">
+<p>Data channel impending failure [asc 0x5d, ascq 0x30..0x3c].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-SERVO-IMPENDING-FAILURE:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_SERVO_IMPENDING_FAILURE</p></td>
+<td class="enum_member_description">
+<p>Servo impending failure [asc 0x5d, ascq 0x40..0x4c].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-SPINDLE-IMPENDING-FAILURE:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_SPINDLE_IMPENDING_FAILURE</p></td>
+<td class="enum_member_description">
+<p>Spindle impending failure [asc 0x5d, ascq 0x50..0x5c].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-FIRMWARE-IMPENDING-FAILURE:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_FIRMWARE_IMPENDING_FAILURE</p></td>
+<td class="enum_member_description">
+<p>Firmware impending failure [asc 0x5d, ascq 0x60..0x6c].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-MEDIA-ENDURANCE-LIMIT:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_MEDIA_ENDURANCE_LIMIT</p></td>
+<td class="enum_member_description">
+<p>Media impending failure endurance limit met [asc 0x5d, ascq 0x73].</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-INFORMATIONAL-EXCEPTION-UNSPECIFIED:CAPS"></a>BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_UNSPECIFIED</p></td>
+<td class="enum_member_description">
+<p>Unspecified warning.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDSmartSCSIBackgroundScanStatus"></a><h3>enum BDSmartSCSIBackgroundScanStatus</h3>
+<div class="refsect3">
+<a name="BDSmartSCSIBackgroundScanStatus.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-BACKGROUND-SCAN-STATUS-NO-SCANS-ACTIVE:CAPS"></a>BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_NO_SCANS_ACTIVE</p></td>
+<td class="enum_member_description">
+<p>No scans active.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-BACKGROUND-SCAN-STATUS-SCAN-ACTIVE:CAPS"></a>BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_SCAN_ACTIVE</p></td>
+<td class="enum_member_description">
+<p>Scan is active.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-BACKGROUND-SCAN-STATUS-PRESCAN-ACTIVE:CAPS"></a>BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_PRESCAN_ACTIVE</p></td>
+<td class="enum_member_description">
+<p>Pre-scan is active.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-BACKGROUND-SCAN-STATUS-HALTED-ERROR-FATAL:CAPS"></a>BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_ERROR_FATAL</p></td>
+<td class="enum_member_description">
+<p>Halted due to fatal error.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-BACKGROUND-SCAN-STATUS-HALTED-PATTERN-VENDOR-SPECIFIC:CAPS"></a>BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_PATTERN_VENDOR_SPECIFIC</p></td>
+<td class="enum_member_description">
+<p>Halted due to a vendor specific pattern of error.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-BACKGROUND-SCAN-STATUS-HALTED-ERROR-PLIST:CAPS"></a>BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_ERROR_PLIST</p></td>
+<td class="enum_member_description">
+<p>Halted due to medium formatted without P-List.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-BACKGROUND-SCAN-STATUS-HALTED-VENDOR-SPECIFIC:CAPS"></a>BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_VENDOR_SPECIFIC</p></td>
+<td class="enum_member_description">
+<p>Halted - vendor specific cause.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-BACKGROUND-SCAN-STATUS-HALTED-TEMPERATURE:CAPS"></a>BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_HALTED_TEMPERATURE</p></td>
+<td class="enum_member_description">
+<p>Halted due to temperature out of range.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SCSI-BACKGROUND-SCAN-STATUS-BMS-TIMER:CAPS"></a>BD_SMART_SCSI_BACKGROUND_SCAN_STATUS_BMS_TIMER</p></td>
+<td class="enum_member_description">
+<p>Waiting until BMS interval timer expires.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDSmartSCSI"></a><h3>BDSmartSCSI</h3>
+<pre class="programlisting">typedef struct {
+    gboolean smart_supported;
+    gboolean smart_enabled;
+    gboolean overall_status_passed;
+    BDSmartSCSIInformationalException scsi_ie;
+    guint8 scsi_ie_asc;
+    guint8 scsi_ie_ascq;
+    gchar *scsi_ie_string;
+    BDSmartSCSIBackgroundScanStatus background_scan_status;
+    gdouble background_scan_progress;
+    guint background_scan_runs;
+    guint background_medium_scan_runs;
+    guint read_errors_corrected_eccfast;
+    guint read_errors_corrected_eccdelayed;
+    guint read_errors_corrected_rereads;
+    guint read_errors_corrected_total;
+    guint read_errors_uncorrected;
+    guint64 read_processed_bytes;
+    guint write_errors_corrected_eccfast;
+    guint write_errors_corrected_eccdelayed;
+    guint write_errors_corrected_rewrites;
+    guint write_errors_corrected_total;
+    guint write_errors_uncorrected;
+    guint64 write_processed_bytes;
+    guint start_stop_cycle_count;
+    guint start_stop_cycle_lifetime;
+    guint load_unload_cycle_count;
+    guint load_unload_cycle_lifetime;
+    guint scsi_grown_defect_list;
+    guint power_on_time;
+    gboolean temperature_warning_enabled;
+    guint temperature;
+    guint temperature_drive_trip;
+} BDSmartSCSI;
+</pre>
+<div class="refsect3">
+<a name="BDSmartSCSI.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="struct_members_name">
+<col class="struct_members_description">
+<col width="200px" class="struct_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="struct_member_name"><p><span class="type">gboolean</span> <em class="structfield"><code><a name="BDSmartSCSI.smart-supported"></a>smart_supported</code></em>;</p></td>
+<td class="struct_member_description"><p>Indicates that the device has SMART capability.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gboolean</span> <em class="structfield"><code><a name="BDSmartSCSI.smart-enabled"></a>smart_enabled</code></em>;</p></td>
+<td class="struct_member_description"><p>Indicates that the SMART support is enabled.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gboolean</span> <em class="structfield"><code><a name="BDSmartSCSI.overall-status-passed"></a>overall_status_passed</code></em>;</p></td>
+<td class="struct_member_description"><p><code class="literal">TRUE</code> if the device SMART overall-health self-assessment test result has passed, <code class="literal">FALSE</code> otherwise with <em class="parameter"><code>scsi_ie</code></em>
+fields set.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a class="link" href="libblockdev-SMART.html#BDSmartSCSIInformationalException" title="enum BDSmartSCSIInformationalException"><span class="type">BDSmartSCSIInformationalException</span></a> <em class="structfield"><code><a name="BDSmartSCSI.scsi-ie"></a>scsi_ie</code></em>;</p></td>
+<td class="struct_member_description"><p>The reported SCSI Informational Exception in a simplified form. See <a class="link" href="libblockdev-SMART.html#BDSmartSCSIInformationalException" title="enum BDSmartSCSIInformationalException"><span class="type">BDSmartSCSIInformationalException</span></a>.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint8</span> <em class="structfield"><code><a name="BDSmartSCSI.scsi-ie-asc"></a>scsi_ie_asc</code></em>;</p></td>
+<td class="struct_member_description"><p>The reported SCSI Informational Exception ASC (Additional Sense Code) value (only values of 0xb - warnings and 0x5d - impending failures are taken in account).</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint8</span> <em class="structfield"><code><a name="BDSmartSCSI.scsi-ie-ascq"></a>scsi_ie_ascq</code></em>;</p></td>
+<td class="struct_member_description"><p>The reported SCSI Informational Exception ASCQ (Additional Sense Code Qualifier) value.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gchar</span> *<em class="structfield"><code><a name="BDSmartSCSI.scsi-ie-string"></a>scsi_ie_string</code></em>;</p></td>
+<td class="struct_member_description"><p>String representation of the current SCSI Informational Exception.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><a class="link" href="libblockdev-SMART.html#BDSmartSCSIBackgroundScanStatus" title="enum BDSmartSCSIBackgroundScanStatus"><span class="type">BDSmartSCSIBackgroundScanStatus</span></a> <em class="structfield"><code><a name="BDSmartSCSI.background-scan-status"></a>background_scan_status</code></em>;</p></td>
+<td class="struct_member_description"><p>Background scan status, see <a class="link" href="libblockdev-SMART.html#BDSmartSCSIBackgroundScanStatus" title="enum BDSmartSCSIBackgroundScanStatus"><span class="type">BDSmartSCSIBackgroundScanStatus</span></a>.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gdouble</span> <em class="structfield"><code><a name="BDSmartSCSI.background-scan-progress"></a>background_scan_progress</code></em>;</p></td>
+<td class="struct_member_description"><p>Percent of a background scan progress.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.background-scan-runs"></a>background_scan_runs</code></em>;</p></td>
+<td class="struct_member_description"><p>Number of background scans performed.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.background-medium-scan-runs"></a>background_medium_scan_runs</code></em>;</p></td>
+<td class="struct_member_description"><p>Number of background medium scans performed.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.read-errors-corrected-eccfast"></a>read_errors_corrected_eccfast</code></em>;</p></td>
+<td class="struct_member_description"><p>Error counter log - read errors corrected by ECC fast.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.read-errors-corrected-eccdelayed"></a>read_errors_corrected_eccdelayed</code></em>;</p></td>
+<td class="struct_member_description"><p>Error counter log - read errors corrected by ECC delayed.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.read-errors-corrected-rereads"></a>read_errors_corrected_rereads</code></em>;</p></td>
+<td class="struct_member_description"><p>Error counter log - read errors corrected by rereads.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.read-errors-corrected-total"></a>read_errors_corrected_total</code></em>;</p></td>
+<td class="struct_member_description"><p>Error counter log - total read errors corrected.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.read-errors-uncorrected"></a>read_errors_uncorrected</code></em>;</p></td>
+<td class="struct_member_description"><p>Error counter log - total uncorrected read errors.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint64</span> <em class="structfield"><code><a name="BDSmartSCSI.read-processed-bytes"></a>read_processed_bytes</code></em>;</p></td>
+<td class="struct_member_description"><p>Error counter log - total bytes processed.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.write-errors-corrected-eccfast"></a>write_errors_corrected_eccfast</code></em>;</p></td>
+<td class="struct_member_description"><p>Error counter log - write errors corrected by ECC fast.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.write-errors-corrected-eccdelayed"></a>write_errors_corrected_eccdelayed</code></em>;</p></td>
+<td class="struct_member_description"><p>Error counter log - write errors corrected by ECC delayed.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.write-errors-corrected-rewrites"></a>write_errors_corrected_rewrites</code></em>;</p></td>
+<td class="struct_member_description"><p>Error counter log - write errors corrected by rewrites.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.write-errors-corrected-total"></a>write_errors_corrected_total</code></em>;</p></td>
+<td class="struct_member_description"><p>Error counter log - total write errors corrected.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.write-errors-uncorrected"></a>write_errors_uncorrected</code></em>;</p></td>
+<td class="struct_member_description"><p>Error counter log - total uncorrected write errors.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint64</span> <em class="structfield"><code><a name="BDSmartSCSI.write-processed-bytes"></a>write_processed_bytes</code></em>;</p></td>
+<td class="struct_member_description"><p>Error counter log - total bytes processed.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.start-stop-cycle-count"></a>start_stop_cycle_count</code></em>;</p></td>
+<td class="struct_member_description"><p>Accumulated start-stop cycles.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.start-stop-cycle-lifetime"></a>start_stop_cycle_lifetime</code></em>;</p></td>
+<td class="struct_member_description"><p>Specified cycle count over device lifetime.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.load-unload-cycle-count"></a>load_unload_cycle_count</code></em>;</p></td>
+<td class="struct_member_description"><p>Accumulated load-unload cycles.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.load-unload-cycle-lifetime"></a>load_unload_cycle_lifetime</code></em>;</p></td>
+<td class="struct_member_description"><p>Specified load-unload count over device lifetime.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.scsi-grown-defect-list"></a>scsi_grown_defect_list</code></em>;</p></td>
+<td class="struct_member_description"><p>Elements in grown defect list.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.power-on-time"></a>power_on_time</code></em>;</p></td>
+<td class="struct_member_description"><p>Accumulated power on time in minutes.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">gboolean</span> <em class="structfield"><code><a name="BDSmartSCSI.temperature-warning-enabled"></a>temperature_warning_enabled</code></em>;</p></td>
+<td class="struct_member_description"><p>Indicates that temperature warning is enabled.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.temperature"></a>temperature</code></em>;</p></td>
+<td class="struct_member_description"><p>The current drive temperature in Kelvin or 0 when temperature is not reported.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+<tr>
+<td class="struct_member_name"><p><span class="type">guint</span> <em class="structfield"><code><a name="BDSmartSCSI.temperature-drive-trip"></a>temperature_drive_trip</code></em>;</p></td>
+<td class="struct_member_description"><p>The drive trip temperature in Kelvin or 0 when temperature is not reported.</p></td>
+<td class="struct_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDSmartSelfTestOp"></a><h3>enum BDSmartSelfTestOp</h3>
+<div class="refsect3">
+<a name="BDSmartSelfTestOp.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SELF-TEST-OP-ABORT:CAPS"></a>BD_SMART_SELF_TEST_OP_ABORT</p></td>
+<td class="enum_member_description">
+<p>Abort a running SMART self-test.</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SELF-TEST-OP-OFFLINE:CAPS"></a>BD_SMART_SELF_TEST_OP_OFFLINE</p></td>
+<td class="enum_member_description">
+<p>SMART Immediate Offline Test in background (ATA) or a default self test in foreground (SCSI).</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SELF-TEST-OP-SHORT:CAPS"></a>BD_SMART_SELF_TEST_OP_SHORT</p></td>
+<td class="enum_member_description">
+<p>SMART Short Self Test in background (ATA) or "Background short" self-test (SCSI).</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SELF-TEST-OP-LONG:CAPS"></a>BD_SMART_SELF_TEST_OP_LONG</p></td>
+<td class="enum_member_description">
+<p>SMART Extended Self Test in background (ATA) or "Background long" self-test (SCSI).</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-SMART-SELF-TEST-OP-CONVEYANCE:CAPS"></a>BD_SMART_SELF_TEST_OP_CONVEYANCE</p></td>
+<td class="enum_member_description">
+<p>SMART Conveyance Self Test in background (ATA only).</p>
+</td>
+<td class="enum_member_annotations"> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>Generated by GTK-Doc V1.34.0</div>
+</body>
+</html>

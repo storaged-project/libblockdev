@@ -2,13 +2,13 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Plugins: libblockdev Reference Manual for libblockdev 3.1.1.</title>
+<title>Plugins: libblockdev Reference Manual for libblockdev 3.2.0.</title>
 <meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
-<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.1.1.">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.2.0.">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-NVMe.html" title="NVMe">
 <link rel="next" href="libblockdev-Part.html" title="Part">
-<meta name="generator" content="GTK-Doc V1.33.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.34.0 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -65,7 +65,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+<span class="returnvalue">gboolean</span>
 </td>
 <td class="function_name">
 <a class="link" href="libblockdev-Plugins.html#bd-is-plugin-available" title="bd_is_plugin_available ()">bd_is_plugin_available</a> <span class="c_punctuation">()</span>
@@ -73,7 +73,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> **
+<span class="returnvalue">gchar</span> **
 </td>
 <td class="function_name">
 <a class="link" href="libblockdev-Plugins.html#bd-get-available-plugin-names" title="bd_get_available_plugin_names ()">bd_get_available_plugin_names</a> <span class="c_punctuation">()</span>
@@ -81,7 +81,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+<span class="returnvalue">gchar</span> *
 </td>
 <td class="function_name">
 <a class="link" href="libblockdev-Plugins.html#bd-get-plugin-soname" title="bd_get_plugin_soname ()">bd_get_plugin_soname</a> <span class="c_punctuation">()</span>
@@ -89,7 +89,7 @@
 </tr>
 <tr>
 <td class="function_type">
-<a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+<span class="returnvalue">gchar</span> *
 </td>
 <td class="function_name">
 <a class="link" href="libblockdev-Plugins.html#bd-get-plugin-name" title="bd_get_plugin_name ()">bd_get_plugin_name</a> <span class="c_punctuation">()</span>
@@ -173,7 +173,7 @@ bd_plugin_spec_free (<em class="parameter"><code><span class="type">BDPluginSpec
 <a name="bd-plugin-spec-new"></a><h3>bd_plugin_spec_new ()</h3>
 <pre class="programlisting"><span class="returnvalue">BDPluginSpec</span> *
 bd_plugin_spec_new (<em class="parameter"><code><a class="link" href="libblockdev-Plugins.html#BDPlugin" title="enum BDPlugin"><span class="type">BDPlugin</span></a> name</code></em>,
-                    <em class="parameter"><code>const <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *so_name</code></em>);</pre>
+                    <em class="parameter"><code>const <span class="type">gchar</span> *so_name</code></em>);</pre>
 <p><span class="annotation">[<acronym title="This symbol is a constructor, not a static method."><span class="acronym">constructor</span></acronym>]</span></p>
 <div class="refsect3">
 <a name="bd-plugin-spec-new.parameters"></a><h4>Parameters</h4>
@@ -191,7 +191,7 @@ bd_plugin_spec_new (<em class="parameter"><code><a class="link" href="libblockde
 </tr>
 <tr>
 <td class="parameter_name"><p>so_name</p></td>
-<td class="parameter_description"><p>SO name of the plugin to load or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> for default. </p></td>
+<td class="parameter_description"><p>SO name of the plugin to load or <code class="literal">NULL</code> for default. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 </tbody>
@@ -206,7 +206,7 @@ bd_plugin_spec_new (<em class="parameter"><code><a class="link" href="libblockde
 <hr>
 <div class="refsect2">
 <a name="bd-is-plugin-available"></a><h3>bd_is_plugin_available ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>
 bd_is_plugin_available (<em class="parameter"><code><a class="link" href="libblockdev-Plugins.html#BDPlugin" title="enum BDPlugin"><span class="type">BDPlugin</span></a> plugin</code></em>);</pre>
 <div class="refsect3">
 <a name="bd-is-plugin-available.parameters"></a><h4>Parameters</h4>
@@ -231,7 +231,7 @@ bd_is_plugin_available (<em class="parameter"><code><a class="link" href="libblo
 <hr>
 <div class="refsect2">
 <a name="bd-get-available-plugin-names"></a><h3>bd_get_available_plugin_names ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> **
+<pre class="programlisting"><span class="returnvalue">gchar</span> **
 bd_get_available_plugin_names (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
 <div class="refsect3">
 <a name="bd-get-available-plugin-names.returns"></a><h4>Returns</h4>
@@ -243,7 +243,7 @@ names of plugins that are available. </p>
 <hr>
 <div class="refsect2">
 <a name="bd-get-plugin-soname"></a><h3>bd_get_plugin_soname ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+<pre class="programlisting"><span class="returnvalue">gchar</span> *
 bd_get_plugin_soname (<em class="parameter"><code><a class="link" href="libblockdev-Plugins.html#BDPlugin" title="enum BDPlugin"><span class="type">BDPlugin</span></a> plugin</code></em>);</pre>
 <div class="refsect3">
 <a name="bd-get-plugin-soname.parameters"></a><h4>Parameters</h4>
@@ -263,14 +263,14 @@ bd_get_plugin_soname (<em class="parameter"><code><a class="link" href="libblock
 <div class="refsect3">
 <a name="bd-get-plugin-soname.returns"></a><h4>Returns</h4>
 <p>name of the shared object loaded for the plugin or
-<a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if none is loaded. </p>
+<code class="literal">NULL</code> if none is loaded. </p>
 <p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
 </div>
 </div>
 <hr>
 <div class="refsect2">
 <a name="bd-get-plugin-name"></a><h3>bd_get_plugin_name ()</h3>
-<pre class="programlisting"><a href="../glib/glib-Basic-Types.html#gchar"><span class="returnvalue">gchar</span></a> *
+<pre class="programlisting"><span class="returnvalue">gchar</span> *
 bd_get_plugin_name (<em class="parameter"><code><a class="link" href="libblockdev-Plugins.html#BDPlugin" title="enum BDPlugin"><span class="type">BDPlugin</span></a> plugin</code></em>);</pre>
 <div class="refsect3">
 <a name="bd-get-plugin-name.parameters"></a><h4>Parameters</h4>
@@ -373,6 +373,11 @@ bd_get_plugin_name (<em class="parameter"><code><a class="link" href="libblockde
 <td> </td>
 </tr>
 <tr>
+<td class="enum_member_name"><p><a name="BD-PLUGIN-SMART:CAPS"></a>BD_PLUGIN_SMART</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
 <td class="enum_member_name"><p><a name="BD-PLUGIN-UNDEF:CAPS"></a>BD_PLUGIN_UNDEF</p></td>
 <td> </td>
 <td> </td>
@@ -384,6 +389,6 @@ bd_get_plugin_name (<em class="parameter"><code><a class="link" href="libblockde
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.33.1</div>
+<hr>Generated by GTK-Doc V1.34.0</div>
 </body>
 </html>
