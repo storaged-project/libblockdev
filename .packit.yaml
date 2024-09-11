@@ -1,7 +1,7 @@
 actions:
   post-upstream-clone:
     - 'cp dist/libblockdev.spec.in dist/libblockdev.spec'
-    - 'sed -i -E "s/@WITH_.+@/1/g" dist/libblockdev.spec'
+    - 'sed -i -e "s/@WITH_.+@/1/g" -e "s/@MAJOR_VER@/3/g" dist/libblockdev.spec'
   create-archive:
     - './autogen.sh'
     - './configure'
@@ -37,7 +37,7 @@ jobs:
       # bump release to 99 to always be ahead of Fedora builds
       - 'bash -c "sed -i -r \"s/Release:(\s*)\S+/Release:     99%{?dist}/\" dist/libblockdev.spec.in"'
       - 'cp dist/libblockdev.spec.in dist/libblockdev.spec'
-      - 'sed -i -E "s/@WITH_.+@/1/g" dist/libblockdev.spec'
+      - 'sed -i -e "s/@WITH_.+@/1/g" -e "s/@MAJOR_VER@/3/g" dist/libblockdev.spec'
     create-archive:
       - './autogen.sh'
       - './configure'
@@ -58,7 +58,7 @@ jobs:
       # bump release to 99 to always be ahead of Fedora builds
       - 'bash -c "sed -i -r \"s/Release:(\s*)\S+/Release:     99%{?dist}/\" dist/libblockdev.spec.in"'
       - 'cp dist/libblockdev.spec.in dist/libblockdev.spec'
-      - 'sed -i -E "s/@WITH_.+@/1/g" dist/libblockdev.spec'
+      - 'sed -i -e "s/@WITH_.+@/1/g" -e "s/@MAJOR_VER@/3/g" dist/libblockdev.spec'
     create-archive:
       - './autogen.sh'
       - './configure'
