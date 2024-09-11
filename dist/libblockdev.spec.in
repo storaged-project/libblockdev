@@ -635,7 +635,19 @@ A meta-package that pulls all the libblockdev plugins as dependencies.
 %autosetup -n %{name}-%{version} -p1
 
 %build
+# workaround for https://bugzilla.redhat.com/show_bug.cgi?id=2247319
+%ifarch aarch64
+find . -name Makefile.am | xargs sed -i -e 's/-Werror//g'
+%endif
+
 autoreconf -ivf
+
+# workaround for https://bugzilla.redhat.com/show_bug.cgi?id=2247319
+%ifarch aarch64
+%global _fortify_level 0
+%global optflags $(echo %optflags | sed -e 's/-O2/-O0/g') -Wp,-D_FORTIFY_SOURCE=0
+%endif
+
 %configure %{?configure_opts}
 %{__make} %{?_smp_mflags}
 
@@ -1053,6 +1065,37 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 - Makefile: Fix bumpver to work with micro versions (vtrefny)
 - Makefile: Do not include release in the tag (vtrefny)
 
+* Thu Aug 15 2024 Vojtech Trefny <vtrefny@redhat.com> - 3.1.1-11
+- crypto: LUKS OPAL support (#2304174)
+
+* Fri Jul 26 2024 Vojtech Trefny <vtrefny@redhat.com> - 3.1.1-10
+- fs: Ignore unused-parameter warning in the FS plugin
+
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.1.1-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Fri Jun 07 2024 Python Maint <python-maint@redhat.com> - 3.1.1-8
+- Rebuilt for Python 3.13
+
+* Thu Apr 11 2024 Dan Horák <dan[at]danny.cz> - 3.1.1-7
+- Disable -Werror and build with -O0 on aarch64 to workaround #2247319
+
+* Mon Apr 08 2024 Dan Horák <dan[at]danny.cz> - 3.1.1-6
+- Back to standard build by reverting instrumentations for #2247319
+
+* Fri Apr 05 2024 Dan Horák <dan[at]danny.cz> - 3.1.1-5
+- Apply ASAN instrumentation for #2247319
+
+* Wed Mar 27 2024 Adam Williamson <awilliam@redhat.com> - 3.1.1-4
+- Apply UBSAN instrumentation per Dan Horák for #2247319
+
+* Tue Mar 26 2024 Adam Williamson <awilliam@redhat.com> - 3.1.1-3
+- Drop the de-optimization changes from -2
+
+* Tue Mar 26 2024 Adam Williamson <awilliam@redhat.com> - 3.1.1-2
+- Backport proposed upstream fix for #2247319
+- Disable -Werror and build with -O0 to help further debug #2247319
+
 * Tue Mar 26 2024 Vojtech Trefny <vtrefny@redhat.com> - 3.1.1-1
 - lvm-dbus: Fix passing size for pvresize over DBus (vtrefny)
 - nvme: Add bd_nvme_is_tech_avail to the API file (vtrefny)
@@ -1066,6 +1109,21 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 - Port to G_GNUC_INTERNAL for controlling symbols visibility (tbzatek)
 - Use glib2 G_GNUC_UNUSED in place of UNUSED locally defined (giulio.benetti)
 - Makefile: Fix bumpver to work with micro versions (vtrefny)
+
+* Sat Mar 23 2024 Adam Williamson <awilliam@redhat.com> - 3.1.0-6
+- Slightly stronger workaround attempt for #2247319
+
+* Sat Mar 23 2024 Adam Williamson <awilliam@redhat.com> - 3.1.0-5
+- Tentative workaround for #2247319 based on diagnosis from -4
+
+* Fri Mar 22 2024 Adam Williamson <awilliam@redhat.com> - 3.1.0-4
+- Try something else dumb to diagnose #2247319
+
+* Thu Mar 21 2024 Adam Williamson <awilliam@redhat.com> - 3.1.0-3
+- Disable some log statements to see if it works around #2247319
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.1.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
 
 * Fri Jan 19 2024 Vojtech Trefny <vtrefny@redhat.com> - 3.1.0-1
 - tests: Skip some checks for btrfs errors with btrfs-progs 6.6.3 (vtrefny)
