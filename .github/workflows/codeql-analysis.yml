@@ -35,7 +35,7 @@ jobs:
     - name: Install build dependencies
       run: |
         sudo apt -y install ansible
-        ansible-playbook -b -i "localhost," -c local misc/install-test-dependencies.yml
+        ansible-playbook -b -i "localhost," -c local misc/install-test-dependencies.yml -e "test_dependencies=false"
 
     - name: Build
       run: |
