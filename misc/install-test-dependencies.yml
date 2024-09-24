@@ -142,6 +142,7 @@
       - smartmontools
       - targetcli-fb
       - udftools
+      - vdo
       - volume-key
       - xfsprogs
     when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' and test_dependencies|bool
