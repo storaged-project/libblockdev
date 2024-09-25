@@ -53,4 +53,5 @@
 - test: (lvm_test|lvm_dbus_tests).LVMVDOTest
   skip_on:
     - distro: "debian"
-      reason: "vdo userspace tools are not available on Debian"
+      arch: "i686"
+      reason: "vdo userspace tools are not available on 32bit Debian"
