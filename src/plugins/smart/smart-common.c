@@ -146,13 +146,24 @@
  * libblockdev generally tends to avoid any udev interaction, leaving the burden
  * to callers.
  *
- * Valid values for this property include `auto`, `linux-ide`, `sat16`, `sat12`,
- * `sunplus`, `jmicron`.
+ * Valid values for this property include:
+ * - `'sat16'`: 16 Byte SCSI ATA SAT Passthru
+ * - `'sat12'`: 12 Byte SCSI ATA SAT Passthru
+ * - `'linux-ide'`: Native Linux IDE
+ * - `'sunplus'`: SunPlus USB/ATA bridges
+ * - `'jmicron'`: JMicron USB/ATA bridges
+ * - `'none'`: No access method, avoid any I/O and ignore the device
+ * - `'auto'`: Autodetection based on parent subsystem (default)
  *
  * A common example to override QEMU ATA device type, which often requires legacy
  * IDE protocol:
  * |[
  * KERNEL=="sd*", ENV{ID_VENDOR}=="ATA", ENV{ID_MODEL}=="QEMU_HARDDISK", ENV{ID_ATA}=="1", ENV{ID_ATA_SMART_ACCESS}="linux-ide"
+ * ]|
+ *
+ * An example of blacklisting a USB device, in case of errors caused by reading SMART data:
+ * |[
+ * ATTRS{idVendor}=="152d", ATTRS{idProduct}=="2329", ENV{ID_ATA_SMART_ACCESS}="none"
  * ]|
  */
 
