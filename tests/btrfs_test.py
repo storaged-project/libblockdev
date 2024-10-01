@@ -9,7 +9,7 @@ import time
 from packaging.version import Version
 
 import overrides_hack
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, mount, umount, run_command, TestTags, tag_test
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, mount, umount, run_command, TestTags, tag_test, required_plugins
 
 import gi
 gi.require_version('GLib', '2.0')
@@ -21,6 +21,8 @@ TEST_MNT = "/tmp/libblockdev_test_mnt"
 def wipefs(device):
     os.system("wipefs -a %s > /dev/null" % device)
 
+
+@required_plugins(("btrfs",))
 class BtrfsTest(unittest.TestCase):
     requested_plugins = BlockDev.plugin_specs_from_names(("btrfs",))
 

@@ -11,7 +11,7 @@ from packaging.version import Version
 from itertools import chain
 import sys
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, run_command, TestTags, tag_test, read_file
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, run_command, TestTags, tag_test, read_file, required_plugins
 
 import gi
 gi.require_version('GLib', '2.0')
@@ -38,6 +38,7 @@ def wait_for_sync(vg_name, lv_name):
             time.sleep(1)
 
 
+@required_plugins(("lvm-dbus",))
 class LVMTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

@@ -6,9 +6,10 @@ import gi
 gi.require_version('BlockDev', '3.0')
 from gi.repository import BlockDev
 
-from utils import TestTags, tag_test
+from utils import TestTags, tag_test, required_plugins
 
 
+@required_plugins(("crypto", "dm", "loop", "lvm", "mdraid", "part", "swap"))
 class OverridesTest(unittest.TestCase):
     # all plugins except for 'btrfs', 'fs' and 'mpath' -- these don't have all
     # the dependencies on CentOS/Debian and we don't need them for this test

@@ -5,7 +5,7 @@ import time
 from contextlib import contextmanager
 import overrides_hack
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test, run_command
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test, run_command, required_plugins
 
 import gi
 gi.require_version('GLib', '2.0')
@@ -27,6 +27,8 @@ def wait_for_action(action_name):
                 print("Sleeping")
                 time.sleep(1)
 
+
+@required_plugins(("mdraid",))
 class MDTest(unittest.TestCase):
 
     requested_plugins = BlockDev.plugin_specs_from_names(("mdraid",))

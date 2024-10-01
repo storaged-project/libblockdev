@@ -41,7 +41,8 @@ AC_CONFIG_FILES([Makefile src/Makefile \
                           scripts/Makefile \
                           tools/Makefile \
                           data/Makefile \
-                          data/conf.d/Makefile])
+                          data/conf.d/Makefile \
+                          tests/Makefile])
 
 m4_ifdef([GOBJECT_INTROSPECTION_CHECK],
 [GOBJECT_INTROSPECTION_CHECK([1.3.0])],

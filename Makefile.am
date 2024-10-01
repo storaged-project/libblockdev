@@ -65,7 +65,7 @@ DISTCHECK_CONFIGURE_FLAGS += --without-s390
 endif
 
 
-SUBDIRS = include src dist scripts data tools
+SUBDIRS = include src dist scripts data tools tests
 if WITH_GTK_DOC
 SUBDIRS += docs
 endif

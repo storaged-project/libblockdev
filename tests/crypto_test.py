@@ -9,7 +9,7 @@ import locale
 import re
 import tarfile
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, get_avail_locales, requires_locales, run_command, read_file, TestTags, tag_test
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, get_avail_locales, requires_locales, run_command, read_file, TestTags, tag_test, required_plugins
 
 import gi
 gi.require_version('GLib', '2.0')
@@ -35,6 +35,7 @@ HAVE_FVAULT2 = check_cryptsetup_version("2.6.0")
 HAVE_OPAL = check_cryptsetup_version("2.7.0")
 
 
+@required_plugins(("crypto", "loop"))
 class CryptoTestCase(unittest.TestCase):
 
     requested_plugins = BlockDev.plugin_specs_from_names(("crypto", "loop"))
