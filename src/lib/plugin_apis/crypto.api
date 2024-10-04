@@ -1273,6 +1273,29 @@ typedef enum {
 gboolean bd_crypto_luks_reencrypt(const gchar *device, BDCryptoLUKSReencryptParams *params, BDCryptoKeyslotContext *context, BDCryptoLUKSReencryptProgFunc prog_func, GError **error);
 
 /**
+ * bd_crypto_luks_encrypt:
+ * @device:     device to encrypt. Either an active device name for online encryption, or a block device for offline encryption.
+ *              Must match the @params's "offline" parameter
+ * @params:     encryption parameters
+ * @context:    key slot context to unlock @device. The newly created keyslot will use the same context
+ * @prog_func: (scope call) (nullable): progress function. Also used to possibly stop encryption
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Encrypts @device. In contrast to %bd_crypto_luks_format, possible existent data on @device is not destroyed,
+ * but encrypted, i.e., is usable after activating device.
+ *
+ * Important: you need to ensure that there is enough free (unallocated) space on @device for a LUKS header (recomended 16 to 32 MiB).
+ *
+ * Returns: true,  if the encryption was successful or gracefully stopped with @prog_func.
+ *          false, if an error occurred.
+ *
+ * Supported @context types for this function: passphrase
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_MODIFY
+ */
+gboolean bd_crypto_luks_encrypt (const gchar *device, BDCryptoLUKSReencryptParams *params, BDCryptoKeyslotContext *context, BDCryptoLUKSReencryptProgFunc prog_func, GError **error);
+
+/**
  * bd_crypto_luks_reencrypt_status:
  * @device:                     an active device name or a block device
  * @mode: (out):                the exact operation in the "reencryption family"

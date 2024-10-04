@@ -304,7 +304,8 @@ gboolean bd_crypto_luks_convert (const gchar *device, BDCryptoLUKSVersion target
  * @hash             used hash for "checksum" resilience type, ignored otherwise
  * @max_hotzone_size max hotzone size
  * @sector_size      sector size. Note that 0 is not a valid value
- * @new_volume_key   whether to generate a new volume key or keep the existing one
+ * @new_volume_key   whether to generate a new volume key or keep the existing one.
+ *                     Makes sense only for reencryption (not encryption or decryption).
  * @offline          whether to perform an offline or online reencryption,
  *                     i.e. whether a device is active in the time of reencryption or not
  * @pbkdf            PBDKF function parameters for a new keyslot
@@ -352,6 +353,7 @@ typedef enum {
 } BDCryptoLUKSReencryptMode;
 
 gboolean bd_crypto_luks_reencrypt(const gchar *device, BDCryptoLUKSReencryptParams *params, BDCryptoKeyslotContext *context, BDCryptoLUKSReencryptProgFunc prog_func, GError **error);
+gboolean bd_crypto_luks_encrypt(const gchar *device, BDCryptoLUKSReencryptParams *params, BDCryptoKeyslotContext *context, BDCryptoLUKSReencryptProgFunc prog_func, GError **error);
 BDCryptoLUKSReencryptStatus bd_crypto_luks_reencrypt_status (const gchar *device, BDCryptoLUKSReencryptMode *mode, GError **error);
 gboolean bd_crypto_luks_reencrypt_resume (const gchar *device, BDCryptoKeyslotContext *context, BDCryptoLUKSReencryptProgFunc prog_func, GError **error);
 
