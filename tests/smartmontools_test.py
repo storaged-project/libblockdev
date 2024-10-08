@@ -6,7 +6,7 @@ import time
 import shutil
 import overrides_hack
 
-from utils import run, create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test, write_file, run_command
+from utils import run, create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test, write_file, run_command, required_plugins
 
 import gi
 gi.require_version('GLib', '2.0')
@@ -14,6 +14,7 @@ gi.require_version('BlockDev', '3.0')
 from gi.repository import BlockDev, GLib
 
 
+@required_plugins(("smartmontools",))
 class SmartmontoolsTest(unittest.TestCase):
 
     # dumps from real drives, both HDD and SSD

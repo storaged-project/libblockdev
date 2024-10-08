@@ -559,6 +559,21 @@ def skip_on(skip_on_distros=None, skip_on_version="", skip_on_arch="", reason=""
 
     return decorator
 
+def required_plugins(plugins):
+    def decorator(func):
+        try:
+            from config_h import ENABLED_PLUGINS
+        except ImportError:
+            # config_h doesn't exist -> we're running tests against installed libblockdev
+            return func
+
+        unavail = [p for p in plugins if p not in ENABLED_PLUGINS]
+        if unavail:
+            msg = "Skipping, libblockdev was compiled without plugins required for this test case: %s" % ", ".join(unavail)
+            return unittest.skip(msg)(func)
+        return func
+    return decorator
+
 # taken from libbytesize's tests/locale_utils.py
 def get_avail_locales():
     return {loc.decode(errors="replace").strip() for loc in subprocess.check_output(["locale", "-a"]).split()}

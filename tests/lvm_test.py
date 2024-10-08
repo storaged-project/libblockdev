@@ -9,7 +9,7 @@ import time
 from contextlib import contextmanager
 from packaging.version import Version
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test, run_command, read_file
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test, run_command, read_file, required_plugins
 
 import gi
 gi.require_version('GLib', '2.0')
@@ -32,6 +32,7 @@ def wait_for_sync(vg_name, lv_name):
             time.sleep(1)
 
 
+@required_plugins(("lvm",))
 class LVMTestCase(unittest.TestCase):
 
     @classmethod

@@ -56,3 +56,4 @@ dist/libblockdev.spec
 tools/lvm-cache-stats
 tools/vfat-resize
 misc/.vagrant
+tests/config_h.py

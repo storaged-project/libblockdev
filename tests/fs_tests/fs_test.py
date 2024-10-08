@@ -33,7 +33,7 @@ def check_output(args, ignore_retcode=True):
         else:
             raise
 
-
+@utils.required_plugins(("fs", "loop"))
 class FSNoDevTestCase(unittest.TestCase):
 
     requested_plugins = BlockDev.plugin_specs_from_names(("fs", "loop"))

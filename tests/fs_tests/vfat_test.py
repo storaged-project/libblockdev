@@ -42,6 +42,7 @@ class VfatTestCase(FSTestCase):
 
 class VfatTestAvailability(VfatNoDevTestCase):
 
+    @utils.required_plugins(("tools",))
     def test_vfat_available(self):
         """Verify that it is possible to check vfat tech availability"""
         available = BlockDev.fs_is_tech_avail(BlockDev.FSTech.VFAT,
@@ -281,6 +282,7 @@ class VfatSetUUID(VfatTestCase):
             BlockDev.fs_vfat_check_uuid(10 * "f")
 
 
+@utils.required_plugins(("tools",))
 class VfatResize(VfatTestCase):
     def test_vfat_resize(self):
         """Verify that it is possible to resize an vfat file system"""

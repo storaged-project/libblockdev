@@ -4,13 +4,15 @@ import re
 import shutil
 import overrides_hack
 
-from utils import create_sparse_tempfile, create_nvmet_device, delete_nvmet_device, setup_nvme_target, teardown_nvme_target, find_nvme_ctrl_devs_for_subnqn, find_nvme_ns_devs_for_subnqn, get_nvme_hostnqn, run_command, TestTags, tag_test, read_file, write_file
+from utils import create_sparse_tempfile, create_nvmet_device, delete_nvmet_device, setup_nvme_target, teardown_nvme_target, find_nvme_ctrl_devs_for_subnqn, find_nvme_ns_devs_for_subnqn, get_nvme_hostnqn, run_command, TestTags, tag_test, read_file, write_file, required_plugins
 
 import gi
 gi.require_version('GLib', '2.0')
 gi.require_version('BlockDev', '3.0')
 from gi.repository import GLib, BlockDev
 
+
+@required_plugins(("nvme", "loop"))
 class NVMeTest(unittest.TestCase):
     requested_plugins = BlockDev.plugin_specs_from_names(("nvme", "loop"))
 

@@ -2,7 +2,7 @@ import os
 import unittest
 import re
 import overrides_hack
-from utils import fake_path, TestTags, tag_test
+from utils import fake_path, TestTags, tag_test, required_plugins
 
 import gi
 gi.require_version('GLib', '2.0')
@@ -10,6 +10,7 @@ gi.require_version('BlockDev', '3.0')
 from gi.repository import GLib, BlockDev
 
 
+@required_plugins(("crypto","dm", "loop", "mdraid", "part", "swap"))
 class LibraryOpsTestCase(unittest.TestCase):
     log = ""
 

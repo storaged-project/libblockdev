@@ -980,6 +980,7 @@ class GenericResize(GenericTestCase):
         self.assertEqual(new_size, size)
 
     @tag_test(TestTags.UNSTABLE)
+    @utils.required_plugins(("tools",))
     def test_vfat_generic_resize(self):
         """Test generic resize function with a vfat file system"""
         def mkfs_vfat(device, options=None):
