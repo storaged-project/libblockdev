@@ -1474,9 +1474,16 @@ gboolean bd_lvm_thsnapshotcreate (const gchar *vg_name, const gchar *origin_name
 
 /**
  * bd_lvm_set_global_config:
- * @new_config: (nullable): string representation of the new global LVM
- *                            configuration to set or %NULL to reset to default
+ * @new_config: (nullable): string representation of the new global libblockdev LVM
+ *                          configuration to set or %NULL to reset to default
  * @error: (out) (optional): place to store error (if any)
+ *
+ *
+ * Note: This function sets configuration options for LVM calls internally
+ *       in libblockdev, it doesn't change the global lvm.conf config file.
+ *       Calling this function with `backup {backup=0 archive=0}` for example
+ *       means `--config=backup {backup=0 archive=0}"` will be added to all
+ *       calls libblockdev makes.
  *
  * Returns: whether the new requested global config @new_config was successfully
  *          set or not
@@ -1489,8 +1496,11 @@ gboolean bd_lvm_set_global_config (const gchar *new_config, GError **error);
  * bd_lvm_get_global_config:
  * @error: (out) (optional): place to store error (if any)
  *
- * Returns: a copy of a string representation of the currently set LVM global
- *          configuration
+ * Returns: (transfer full): a copy of a string representation of the currently
+ *                           set libblockdev LVM global configuration
+ *
+ * Note: This function does not change the global `lvm.conf` config
+ *       file, see %bd_lvm_set_global_config for details.
  *
  * Tech category: %BD_LVM_TECH_GLOB_CONF no mode (it is ignored)
  */
