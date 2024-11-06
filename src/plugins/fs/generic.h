@@ -77,6 +77,8 @@ typedef struct BDFSFeatures {
     BDFSFeatureFlags features;
     const gchar *partition_id;
     const gchar *partition_type;
+    guint64 min_size;
+    guint64 max_size;
 } BDFSFeatures;
 
 BDFSFeatures* bd_fs_features_copy (BDFSFeatures *data);

@@ -2658,6 +2658,8 @@ typedef enum {
  * @features: other supported features
  * @partition_id: partition ID used for this filesystem on MSDOS partitions
  * @partition_type: partition type/GUID used for this filesystem GPT partitions
+ * @min_size: minimum size when creating this filesystem
+ * @max_size: maximum size when creating this filesystem
  */
 typedef struct BDFSFeatures {
     BDFSResizeFlags resize;
@@ -2667,6 +2669,8 @@ typedef struct BDFSFeatures {
     BDFSFeatureFlags features;
     const gchar *partition_id;
     const gchar *partition_type;
+    guint64 min_size;
+    guint64 max_size;
 } BDFSFeatures;
 
 /**
@@ -2688,6 +2692,8 @@ BDFSFeatures* bd_fs_features_copy (BDFSFeatures *data) {
     ret->features = data->features;
     ret->partition_id = data->partition_id;
     ret->partition_type = data->partition_type;
+    ret->min_size = data->min_size;
+    ret->max_size = data->max_size;
 
     return ret;
 }
