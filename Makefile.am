@@ -172,8 +172,8 @@ tag:
 
 rpmlog:
 	@cl=`grep -n %changelog dist/libblockdev.spec.in |cut -d : -f 1 |head -1` ; \
-	version_release=`tail --lines=+$$(($$cl + 1)) dist/libblockdev.spec.in|head -1|cut -d- -f2-3|sed 's/ //g'` ; \
-	git log --no-merges --pretty="format:- %s (%ae)" "$$version_release.." |sed -e 's/@.*)/)/' ; \
+	version=`tail --lines=+$$(($$cl + 1)) dist/libblockdev.spec.in|head -1|cut -d- -f2|sed 's/ //g'` ; \
+	git log --no-merges --pretty="format:- %s (%ae)" "$$version.." |sed -e 's/@.*)/)/' ; \
 	echo
 
 shortlog:
