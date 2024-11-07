@@ -144,7 +144,7 @@
       - udftools
       - volume-key
       - xfsprogs
-    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' and test_dependencies|bool
+    when: (ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu') and test_dependencies|bool
 
 ####### Common actions
 

@@ -130,16 +130,41 @@
  *
  * ## Device type detection, multipath #
  *
- * There's a big difference in how a drive is accessed. While libatasmart performs
- * essentially no device type detection and sends a I/O request right away
- * (with usual error handling), `smartctl` implements a logic to determine which
- * protocol to use, supporting various passthrough mechanisms and interface bridges.
- * Such detection is not always reliable though, having known issues with `dm-multipath`
- * for example. For this case most plugin functions provide the `'extra'` argument
- * allowing consumers to provide specific arguments such as `'--device=' for device
- * type override`. This is only supported by the smartmontools plugin and ignored
- * by the libatasmart plugin.
+ * There's a big difference in how a drive is accessed. While `libatasmart` performs
+ * only very basic device type detection based on parent subsystem as retrieved from
+ * the udev database, `smartctl` implements logic to determine which protocol to use,
+ * supporting variety of passthrough mechanisms and interface bridges. Such detection
+ * is not always reliable though, having known issues with `dm-multipath` for example.
  *
+ * For this case most plugin functions consume the `extra` argument allowing
+ * callers to specify arguments such as `--device=` for device type override. This
+ * is only supported by the smartmontools plugin and ignored by the libatasmart
+ * plugin.
+ *
+ * As a well kept secret libatasmart has historically supported device type override
+ * via the `ID_ATA_SMART_ACCESS` udev property. There's no public C API for this and
+ * libblockdev generally tends to avoid any udev interaction, leaving the burden
+ * to callers.
+ *
+ * Valid values for this property include:
+ * - `'sat16'`: 16 Byte SCSI ATA SAT Passthru
+ * - `'sat12'`: 12 Byte SCSI ATA SAT Passthru
+ * - `'linux-ide'`: Native Linux IDE
+ * - `'sunplus'`: SunPlus USB/ATA bridges
+ * - `'jmicron'`: JMicron USB/ATA bridges
+ * - `'none'`: No access method, avoid any I/O and ignore the device
+ * - `'auto'`: Autodetection based on parent subsystem (default)
+ *
+ * A common example to override QEMU ATA device type, which often requires legacy
+ * IDE protocol:
+ * |[
+ * KERNEL=="sd*", ENV{ID_VENDOR}=="ATA", ENV{ID_MODEL}=="QEMU_HARDDISK", ENV{ID_ATA}=="1", ENV{ID_ATA_SMART_ACCESS}="linux-ide"
+ * ]|
+ *
+ * An example of blacklisting a USB device, in case of errors caused by reading SMART data:
+ * |[
+ * ATTRS{idVendor}=="152d", ATTRS{idProduct}=="2329", ENV{ID_ATA_SMART_ACCESS}="none"
+ * ]|
  */
 
 /**

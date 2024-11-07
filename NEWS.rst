@@ -1,3 +1,33 @@
+Libblockdev 3.2.1
+------------------
+
+New bugfix release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Full list of changes**
+
+James Hilliard (1):
+
+- crypto: check that IOC_OPAL_GET_STATUS is defined
+
+Tomas Bzatek (3):
+
+- smart: Clarify use of ID_ATA_SMART_ACCESS udev property
+- smart: Clarify ID_ATA_SMART_ACCESS udev property values
+- nvme: Avoid element-type g-i annotations
+
+Vojtech Trefny (9):
+
+- README: Update supported technologies
+- dist: Fix source URL in spec
+- packit: Fix generating spec from template
+- dist: Sync spec with downstream
+- misc: Fix installing test dependencies on Debian/Ubuntu
+- ci: Do not try to install test dependencies for CodeQL analysis
+- lvm: Clarify the global config functionallity in libblockdev
+- ci: Install 'python3-libdnf5' for TMT test plans
+- Makefile: Fix generating RPM log during bumpver
+
 Libblockdev 3.2.0
 ------------------
 

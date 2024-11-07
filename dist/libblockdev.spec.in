@@ -85,12 +85,12 @@
 %define configure_opts %{?python3_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?tools_copts} %{?gi_copts} %{?nvme_copts} %{?smart_copts} %{?smartmontools_copts}
 
 Name:        libblockdev
-Version:     3.2.0
+Version:     3.2.1
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPL-2.1-or-later
 URL:         https://github.com/storaged-project/libblockdev
-Source0:     https://github.com/storaged-project/libblockdev/releases/download/%{version}-%{release}/%{name}-%{version}.tar.gz
+Source0:     https://github.com/storaged-project/libblockdev/releases/download/%{version}/%{name}-%{version}.tar.gz
 
 BuildRequires: make
 BuildRequires: glib2-devel
@@ -635,7 +635,19 @@ A meta-package that pulls all the libblockdev plugins as dependencies.
 %autosetup -n %{name}-%{version} -p1
 
 %build
+# workaround for https://bugzilla.redhat.com/show_bug.cgi?id=2247319
+%ifarch aarch64
+find . -name Makefile.am | xargs sed -i -e 's/-Werror//g'
+%endif
+
 autoreconf -ivf
+
+# workaround for https://bugzilla.redhat.com/show_bug.cgi?id=2247319
+%ifarch aarch64
+%global _fortify_level 0
+%global optflags $(echo %optflags | sed -e 's/-O2/-O0/g') -Wp,-D_FORTIFY_SOURCE=0
+%endif
+
 %configure %{?configure_opts}
 %{__make} %{?_smp_mflags}
 
@@ -946,6 +958,21 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Thu Nov 07 2024 Vojtech Trefny <vtrefny@redhat.com> - 3.2.1-1
+- Makefile: Fix generating RPM log during bumpver (vtrefny)
+- nvme: Avoid element-type g-i annotations (tbzatek)
+- ci: Install 'python3-libdnf5' for TMT test plans (vtrefny)
+- lvm: Clarify the global config functionallity in libblockdev (vtrefny)
+- smart: Clarify ID_ATA_SMART_ACCESS udev property values (tbzatek)
+- smart: Clarify use of ID_ATA_SMART_ACCESS udev property (tbzatek)
+- ci: Do not try to install test dependencies for CodeQL analysis (vtrefny)
+- misc: Fix installing test dependencies on Debian/Ubuntu (vtrefny)
+- dist: Sync spec with downstream (vtrefny)
+- crypto: check that IOC_OPAL_GET_STATUS is defined (james.hilliard1)
+- packit: Fix generating spec from template (vtrefny)
+- dist: Fix source URL in spec (vtrefny)
+- README: Update supported technologies (vtrefny)
+
 * Tue Sep 10 2024 Vojtech Trefny <vtrefny@redhat.com> - 3.2.0-1
 - ci: Add a simple GH action to run spelling tools on our code (vtrefny)
 - crypto: Fix GType macro for crypto context (vtrefny)
@@ -1053,6 +1080,37 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 - Makefile: Fix bumpver to work with micro versions (vtrefny)
 - Makefile: Do not include release in the tag (vtrefny)
 
+* Thu Aug 15 2024 Vojtech Trefny <vtrefny@redhat.com> - 3.1.1-11
+- crypto: LUKS OPAL support (#2304174)
+
+* Fri Jul 26 2024 Vojtech Trefny <vtrefny@redhat.com> - 3.1.1-10
+- fs: Ignore unused-parameter warning in the FS plugin
+
+* Thu Jul 18 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.1.1-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
+
+* Fri Jun 07 2024 Python Maint <python-maint@redhat.com> - 3.1.1-8
+- Rebuilt for Python 3.13
+
+* Thu Apr 11 2024 Dan Horák <dan[at]danny.cz> - 3.1.1-7
+- Disable -Werror and build with -O0 on aarch64 to workaround #2247319
+
+* Mon Apr 08 2024 Dan Horák <dan[at]danny.cz> - 3.1.1-6
+- Back to standard build by reverting instrumentations for #2247319
+
+* Fri Apr 05 2024 Dan Horák <dan[at]danny.cz> - 3.1.1-5
+- Apply ASAN instrumentation for #2247319
+
+* Wed Mar 27 2024 Adam Williamson <awilliam@redhat.com> - 3.1.1-4
+- Apply UBSAN instrumentation per Dan Horák for #2247319
+
+* Tue Mar 26 2024 Adam Williamson <awilliam@redhat.com> - 3.1.1-3
+- Drop the de-optimization changes from -2
+
+* Tue Mar 26 2024 Adam Williamson <awilliam@redhat.com> - 3.1.1-2
+- Backport proposed upstream fix for #2247319
+- Disable -Werror and build with -O0 to help further debug #2247319
+
 * Tue Mar 26 2024 Vojtech Trefny <vtrefny@redhat.com> - 3.1.1-1
 - lvm-dbus: Fix passing size for pvresize over DBus (vtrefny)
 - nvme: Add bd_nvme_is_tech_avail to the API file (vtrefny)
@@ -1066,6 +1124,21 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 - Port to G_GNUC_INTERNAL for controlling symbols visibility (tbzatek)
 - Use glib2 G_GNUC_UNUSED in place of UNUSED locally defined (giulio.benetti)
 - Makefile: Fix bumpver to work with micro versions (vtrefny)
+
+* Sat Mar 23 2024 Adam Williamson <awilliam@redhat.com> - 3.1.0-6
+- Slightly stronger workaround attempt for #2247319
+
+* Sat Mar 23 2024 Adam Williamson <awilliam@redhat.com> - 3.1.0-5
+- Tentative workaround for #2247319 based on diagnosis from -4
+
+* Fri Mar 22 2024 Adam Williamson <awilliam@redhat.com> - 3.1.0-4
+- Try something else dumb to diagnose #2247319
+
+* Thu Mar 21 2024 Adam Williamson <awilliam@redhat.com> - 3.1.0-3
+- Disable some log statements to see if it works around #2247319
+
+* Thu Jan 25 2024 Fedora Release Engineering <releng@fedoraproject.org> - 3.1.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_40_Mass_Rebuild
 
 * Fri Jan 19 2024 Vojtech Trefny <vtrefny@redhat.com> - 3.1.0-1
 - tests: Skip some checks for btrfs errors with btrfs-progs 6.6.3 (vtrefny)

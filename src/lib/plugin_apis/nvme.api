@@ -364,7 +364,7 @@ GType bd_nvme_namespace_info_get_type ();
  * @features: features and capabilities present for this namespace, see #BDNVMENamespaceFeature.
  * @format_progress_remaining: The percentage value remaining of a format operation in progress.
  * @write_protected: %TRUE if the namespace is currently write protected and all write access to the namespace shall fail.
- * @lba_formats: (array zero-terminated=1) (element-type BDNVMELBAFormat): A list of supported LBA Formats.
+ * @lba_formats: (array zero-terminated=1): A list of supported LBA Formats.
  * @current_lba_format: A LBA Format currently used for the namespace. Contains zeroes in case of
  *                      an invalid or no supported LBA Format reported.
  */
@@ -800,7 +800,7 @@ GType bd_nvme_self_test_log_get_type ();
  * BDNVMESelfTestLog:
  * @current_operation: Current running device self-test operation. There's no corresponding record in @entries for a device self-test operation that is in progress.
  * @current_operation_completion: Percentage of the currently running device self-test operation. Only valid when @current_operation is other than #BD_NVME_SELF_TEST_ACTION_NOT_RUNNING.
- * @entries: (array zero-terminated=1) (element-type BDNVMESelfTestLogEntry): Self-test log entries for the last 20 operations, sorted from newest (first element) to oldest.
+ * @entries: (array zero-terminated=1): Self-test log entries for the last 20 operations, sorted from newest (first element) to oldest.
  */
 typedef struct BDNVMESelfTestLog {
     BDNVMESelfTestAction current_operation;
