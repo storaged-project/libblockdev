@@ -68,7 +68,9 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
       .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
       .features =  BD_FS_FEATURE_OWNERS,
       .partition_id = "0x83",
-      .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4" },
+      .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4",
+      .min_size = 1 MiB,
+      .max_size = 8 TiB },
     /* EXT3 */
     { .resize = BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK,
       .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD |
@@ -77,7 +79,9 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
       .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
       .features =  BD_FS_FEATURE_OWNERS,
       .partition_id = "0x83",
-      .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4" },
+      .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4",
+      .min_size = 1 MiB,
+      .max_size = 16 TiB },
     /* EXT4 */
     { .resize = BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK,
       .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD |
@@ -86,7 +90,9 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
       .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
       .features =  BD_FS_FEATURE_OWNERS,
       .partition_id = "0x83",
-      .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4" },
+      .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4",
+      .min_size = 1 MiB,
+      .max_size = 1 EiB },
     /* XFS */
     { .resize = BD_FS_ONLINE_GROW | BD_FS_OFFLINE_GROW,
       .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD |
@@ -95,7 +101,9 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
       .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
       .features =  BD_FS_FEATURE_OWNERS,
       .partition_id = "0x83",
-      .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4" },
+      .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4",
+      .min_size = 300 MiB,
+      .max_size = 16 EiB - 1 },
     /* VFAT */
     { .resize = BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK,
       .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_FORCE | BD_FS_MKFS_NOPT,
@@ -103,7 +111,9 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
       .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
       .features = BD_FS_FEATURE_PARTITION_TABLE,
       .partition_id = "0x0c",
-      .partition_type = "ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" },
+      .partition_type = "ebd0a0a2-b9e5-4433-87c0-68b6b72699c7",
+      .min_size = 1 MiB,
+      .max_size = 1 TiB },
     /* NTFS */
     { .resize = BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK,
       .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_DRY_RUN,
@@ -111,7 +121,9 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
       .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
       .features = 0,
       .partition_id = "0x07",
-      .partition_type = "ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" },
+      .partition_type = "ebd0a0a2-b9e5-4433-87c0-68b6b72699c7",
+      .min_size = 1 MiB,
+      .max_size = 16 TiB },
     /* F2FS */
     { .resize = BD_FS_OFFLINE_GROW | BD_FS_OFFLINE_SHRINK,
       .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_NODISCARD | BD_FS_MKFS_FORCE,
@@ -119,7 +131,9 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
       .configure =  0,
       .features = BD_FS_FEATURE_OWNERS,
       .partition_id = "0x83",
-      .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4" },
+      .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4",
+      .min_size = 1 MiB,
+      .max_size = 16 TiB },
     /* NILFS2 */
     { .resize = BD_FS_ONLINE_GROW | BD_FS_ONLINE_SHRINK,
       .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_DRY_RUN | BD_FS_MKFS_NODISCARD | BD_FS_MKFS_FORCE,
@@ -127,7 +141,9 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
       .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
       .features = BD_FS_FEATURE_OWNERS,
       .partition_id = "0x83",
-      .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4" },
+      .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4",
+      .min_size = 1 MiB,
+      .max_size = 16 TiB },
     /* EXFAT */
     { .resize = 0,
       .mkfs = BD_FS_MKFS_LABEL,
@@ -135,7 +151,9 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
       .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
       .features = 0,
       .partition_id = "0x07",
-      .partition_type = "ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" },
+      .partition_type = "ebd0a0a2-b9e5-4433-87c0-68b6b72699c7",
+      .min_size = 3 MiB,
+      .max_size = 512 TiB },
     /* BTRFS */
     { .resize = BD_FS_ONLINE_GROW | BD_FS_ONLINE_SHRINK,
       .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID | BD_FS_MKFS_NODISCARD | BD_FS_MKFS_FORCE,
@@ -143,7 +161,9 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
       .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
       .features = BD_FS_FEATURE_OWNERS,
       .partition_id = "0x83",
-      .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4" },
+      .partition_type = "0fc63daf-8483-4772-8e79-3d69d8477de4",
+      .min_size = 256 MiB,
+      .max_size = 16 EiB - 1 },
     /* UDF */
     { .resize = 0,
       .mkfs = BD_FS_MKFS_LABEL | BD_FS_MKFS_UUID,
@@ -151,7 +171,9 @@ static const BDFSFeatures fs_features[BD_FS_LAST_FS] = {
       .configure = BD_FS_SUPPORT_SET_LABEL | BD_FS_SUPPORT_SET_UUID,
       .features = BD_FS_FEATURE_OWNERS | BD_FS_FEATURE_PARTITION_TABLE,
       .partition_id = "0x07",
-      .partition_type = "ebd0a0a2-b9e5-4433-87c0-68b6b72699c7" },
+      .partition_type = "ebd0a0a2-b9e5-4433-87c0-68b6b72699c7",
+      .min_size = 2 MiB,
+      .max_size = 16 TiB },
 };
 
 /**
