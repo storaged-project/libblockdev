@@ -85,7 +85,7 @@
 %define configure_opts %{?python3_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?tools_copts} %{?gi_copts} %{?nvme_copts} %{?smart_copts} %{?smartmontools_copts}
 
 Name:        libblockdev
-Version:     3.2.0
+Version:     3.2.1
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPL-2.1-or-later
@@ -958,6 +958,21 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Thu Nov 07 2024 Vojtech Trefny <vtrefny@redhat.com> - 3.2.1-1
+- Makefile: Fix generating RPM log during bumpver (vtrefny)
+- nvme: Avoid element-type g-i annotations (tbzatek)
+- ci: Install 'python3-libdnf5' for TMT test plans (vtrefny)
+- lvm: Clarify the global config functionallity in libblockdev (vtrefny)
+- smart: Clarify ID_ATA_SMART_ACCESS udev property values (tbzatek)
+- smart: Clarify use of ID_ATA_SMART_ACCESS udev property (tbzatek)
+- ci: Do not try to install test dependencies for CodeQL analysis (vtrefny)
+- misc: Fix installing test dependencies on Debian/Ubuntu (vtrefny)
+- dist: Sync spec with downstream (vtrefny)
+- crypto: check that IOC_OPAL_GET_STATUS is defined (james.hilliard1)
+- packit: Fix generating spec from template (vtrefny)
+- dist: Fix source URL in spec (vtrefny)
+- README: Update supported technologies (vtrefny)
+
 * Tue Sep 10 2024 Vojtech Trefny <vtrefny@redhat.com> - 3.2.0-1
 - ci: Add a simple GH action to run spelling tools on our code (vtrefny)
 - crypto: Fix GType macro for crypto context (vtrefny)
