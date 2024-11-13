@@ -1444,6 +1444,24 @@ class CryptoTestTrueCrypt(CryptoTestCase):
         self.assertTrue(succ)
         self.assertFalse(os.path.exists("/dev/mapper/libblockdevTestTC"))
 
+    @tag_test(TestTags.NOSTORAGE)
+    def test_seems_encrypted(self):
+        """Verify that BlockDev.crypto_device_seems_encrypted works"""
+
+        # truecrypt device without header
+        enc = BlockDev.crypto_device_seems_encrypted(self.tc_dev)
+        self.assertTrue(enc)
+
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=self.passphrase)
+        succ = BlockDev.crypto_tc_open(self.tc_dev, "libblockdevTestTC", ctx)
+        self.assertTrue(succ)
+
+        # the cleartext device is not encrypted
+        enc = BlockDev.crypto_device_seems_encrypted("/dev/mapper/libblockdevTestTC")
+        self.assertFalse(enc)
+
+        succ = BlockDev.crypto_tc_close("libblockdevTestTC")
+
 
 class CryptoTestBitlk(CryptoTestCase):
 
