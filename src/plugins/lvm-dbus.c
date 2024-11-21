@@ -2706,10 +2706,34 @@ gboolean bd_lvm_lvresize (const gchar *vg_name, const gchar *lv_name, guint64 si
  *
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_MODIFY
  */
-gboolean bd_lvm_lvrepair (const gchar *vg_name G_GNUC_UNUSED, const gchar *lv_name G_GNUC_UNUSED, const gchar **pv_list G_GNUC_UNUSED,
-                          const BDExtraArg **extra G_GNUC_UNUSED, GError **error) {
-  g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_TECH_UNAVAIL,
-               "lvrepair is not supported by this plugin implementation.");
+gboolean bd_lvm_lvrepair (const gchar *vg_name, const gchar *lv_name, const gchar **pv_list,
+                          const BDExtraArg **extra, GError **error) {
+    GVariantBuilder builder;
+    GVariant *params = NULL;
+    gchar *path = NULL;
+    const gchar **pv = NULL;
+    GVariant *pvs = NULL;
+
+    /* build the array of PVs (object paths) */
+    g_variant_builder_init (&builder, G_VARIANT_TYPE_OBJECT_PATH_ARRAY);
+    for (pv=pv_list; *pv; pv++) {
+        path = get_object_path (*pv, error);
+        if (!path) {
+            g_variant_builder_clear (&builder);
+            return FALSE;
+        }
+        g_variant_builder_add_value (&builder, g_variant_new ("o", path));
+    }
+    pvs = g_variant_builder_end (&builder);
+    g_variant_builder_clear (&builder);
+
+    g_variant_builder_init (&builder, G_VARIANT_TYPE_TUPLE);
+    g_variant_builder_add_value (&builder, pvs);
+    params = g_variant_builder_end (&builder);
+    g_variant_builder_clear (&builder);
+
+    return call_lv_method_sync (vg_name, lv_name, "RepairRaidLv", params, NULL, extra, TRUE, error);
+
   return FALSE;
 }
 
