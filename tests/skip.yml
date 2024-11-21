@@ -55,3 +55,7 @@
     - distro: "debian"
       arch: "i686"
       reason: "vdo userspace tools are not available on 32bit Debian"
+
+- test: lvm_dbus_tests.LvmTestPartialLVs
+  skip_on:
+    - reason: "LVM DBus doesn't support LV repair yet"
