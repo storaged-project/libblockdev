@@ -351,6 +351,7 @@ class LvmPVonlyTestCase(LVMTestCase):
         self.addCleanup(self._clean_up)
         self.dev_file = create_sparse_tempfile("lvm_test", self._sparse_size)
         self.dev_file2 = create_sparse_tempfile("lvm_test", self._sparse_size)
+        self.dev_file3 = create_sparse_tempfile("lvm_test", self._sparse_size)
         try:
             self.loop_dev = create_lio_device(self.dev_file)
         except RuntimeError as e:
@@ -359,9 +360,13 @@ class LvmPVonlyTestCase(LVMTestCase):
             self.loop_dev2 = create_lio_device(self.dev_file2)
         except RuntimeError as e:
             raise RuntimeError("Failed to setup loop device for testing: %s" % e)
+        try:
+            self.loop_dev3 = create_lio_device(self.dev_file3)
+        except RuntimeError as e:
+            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
 
     def _clean_up(self):
-        for dev in (self.loop_dev, self.loop_dev2):
+        for dev in (self.loop_dev, self.loop_dev2, self.loop_dev3):
             try:
                 BlockDev.lvm_pvremove(dev)
             except:
@@ -385,6 +390,13 @@ class LvmPVonlyTestCase(LVMTestCase):
             # just move on, we can do no better here
             pass
         os.unlink(self.dev_file2)
+
+        try:
+            delete_lio_device(self.loop_dev3)
+        except RuntimeError:
+            # just move on, we can do no better here
+            pass
+        os.unlink(self.dev_file3)
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmTestPVcreateRemove(LvmPVonlyTestCase):
@@ -1306,7 +1318,10 @@ class LvmTestPartialLVs(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0, None)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0, None)
+        succ = BlockDev.lvm_pvcreate(self.loop_dev3, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2, self.loop_dev3], 0, None)
         self.assertTrue(succ)
 
         info = BlockDev.lvm_pvinfo(self.loop_dev2)
@@ -1389,6 +1404,16 @@ class LvmTestPartialLVs(LvmPVVGLVTestCase):
 
         # lvs_tree should still report the second stripe to be missing
         assert_raid1_structure(self.loop_dev, None)
+
+        # repair testLV with the third PV
+        with wait_for_sync("testVG", "testLV"):
+            succ = BlockDev.lvm_lvrepair("testVG", "testLV", [self.loop_dev3])
+            self.assertTrue(succ)
+
+        info = BlockDev.lvm_lvinfo("testVG", "testLV")
+        self.assertEqual(info.attr[8], "-")
+
+        assert_raid1_structure(self.loop_dev, self.loop_dev3)
 
 @unittest.skipUnless(lvm_dbus_running, "LVM DBus not running")
 class LvmTestLVsAll(LvmPVVGthpoolTestCase):
