@@ -251,7 +251,7 @@ def find_nvme_ctrl_devs_for_subnqn(subnqn):
                         dev_paths += [path]
                 except:
                     pass
-
+    time.sleep(1)
     ret, out, err = run_command("nvme list --output-format=json --verbose")
     if ret != 0:
         raise RuntimeError("Error getting NVMe list: '%s %s'" % (out, err))
