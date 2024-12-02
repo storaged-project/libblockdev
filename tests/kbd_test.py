@@ -106,6 +106,7 @@ class KbdZRAMDevicesTestCase(KbdZRAMTestCase):
                 self.assertTrue(BlockDev.kbd_zram_create_devices(2, [10 * 1024**2, 10 * 1024**2], [1, 1]))
             for zram_dev in ("/dev/zram0", "/dev/zram1"):
                 self.assertTrue(BlockDev.swap_swapoff(zram_dev))
+            time.sleep(1)
             self.assertEqual(os.system("rmmod zram"), 0)
 
             # should work just fine now
