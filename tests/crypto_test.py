@@ -702,6 +702,12 @@ class CryptoTestLuksOpenRW(CryptoTestCase):
 
 class CryptoTestEscrow(CryptoTestCase):
     def setUp(self):
+        # I am not able to generate a self-signed certificate that would work in FIPS
+        # so let's just skip this for now
+        fips = read_file("/proc/sys/crypto/fips_enabled")
+        if int(fips) == 1:
+            self.skipTest("Skipping escrow tests in FIPS mode")
+
         super(CryptoTestEscrow, self).setUp()
 
         # Create the certificate used to encrypt the escrow packet and backup passphrase.
