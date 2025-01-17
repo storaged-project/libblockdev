@@ -117,3 +117,8 @@
    - distro: "centos"
      version: "9"
      reason: "LVM >= 2.03.19 is not yet available breaking our check for LVM resize on CentOS 9 Stream"
+
+- test: kbd_test.KbdZRAMDevicesTestCase
+  skip_on:
+    - distro: "debian"
+      reason: "running zram tests on Debian causes NULL pointer dereference in kernel"
