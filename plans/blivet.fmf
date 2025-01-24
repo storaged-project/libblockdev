@@ -16,9 +16,12 @@ prepare:
       - sudo dnf -y update
 
   - name: ansible
-    how: ansible
-    playbook:
-        - https://raw.githubusercontent.com/storaged-project/blivet/master/misc/install-test-dependencies.yml
+    how: shell
+    script:
+      - sudo dnf install -y curl ansible
+      - curl -Ok https://raw.githubusercontent.com/storaged-project/blivet/main/misc/install-test-dependencies.yml
+      - curl -Ok https://raw.githubusercontent.com/storaged-project/blivet/main/misc/blivet-tasks.yml
+      - ansible-playbook -K -i "localhost," -c local install-test-dependencies.yml
 
 discover:
     how: shell
