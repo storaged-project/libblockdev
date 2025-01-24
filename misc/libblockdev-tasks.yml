@@ -66,6 +66,68 @@
     - xfsprogs
   when: ansible_distribution == 'Fedora' and test_dependencies|bool
 
+####### CentOS
+- name: Install basic build tools (CentOS)
+  package: name={{item}} state=present
+  with_items:
+    - gcc
+    - make
+    - libtool
+    - autoconf
+    - automake
+  when: ansible_distribution == 'CentOS'
+
+- name: Install dnf-plugins-core for dnf builddep (CentOS)
+  package: name=dnf-plugins-core state=present
+  when: ansible_distribution == 'CentOS'
+
+- name: Install build dependencies (CentOS)
+  command: "dnf -y builddep libblockdev --nogpgcheck"
+  when: ansible_distribution == 'CentOS'
+
+- name: Install build dependencies not covered by dnf builddep (CentOS)
+  package: name={{item}} state=present
+  with_items:
+    - libfdisk-devel
+    - keyutils-libs-devel
+    - libnvme-devel
+    - e2fsprogs-devel
+    - json-glib-devel
+    - libatasmart-devel
+    - libyaml-devel
+  when: ansible_distribution == 'CentOS'
+
+- name: Install test dependencies (CentOS)
+  package: name={{item}} state=present
+  with_items:
+    - cryptsetup
+    - device-mapper-multipath
+    - dosfstools
+    - e2fsprogs
+    - glibc-all-langpacks
+    - lvm2-dbusd
+    - mdadm
+    - ndctl
+    - nss-tools
+    - nvme-cli
+    - nvmetcli
+    - python3-bytesize
+    - python3-dbus
+    - python3-packaging
+    - python3-yaml
+    - smartmontools
+    - targetcli
+    - vdo
+    - volume_key
+    - xfsprogs
+  when: ansible_distribution == 'CentOS' and test_dependencies|bool
+
+- name: Install pylint using pip (CentOS)
+  pip:
+    name: ['pylint']
+    extra_args: --break-system-packages
+  when: ansible_distribution == 'CentOS' and test_dependencies|bool
+
 ####### Debian/Ubuntu
 - name: Update apt cache (Debian/Ubuntu)
   apt:
