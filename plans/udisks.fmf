@@ -19,9 +19,12 @@ prepare:
       - if rpm -q amazon-ec2-utils; then rpm -e --verbose amazon-ec2-utils && udevadm trigger; fi
 
   - name: ansible
-    how: ansible
-    playbook:
-        - https://raw.githubusercontent.com/storaged-project/udisks/master/misc/install-test-dependencies.yml
+    how: shell
+    script:
+      - sudo dnf install -y curl ansible
+      - curl -Ok https://raw.githubusercontent.com/storaged-project/udisks/master/misc/install-test-dependencies.yml
+      - curl -Ok https://raw.githubusercontent.com/storaged-project/udisks/master/misc/udisks-tasks.yml
+      - ansible-playbook -K -i "localhost," -c local install-test-dependencies.yml
 
 discover:
     how: shell
