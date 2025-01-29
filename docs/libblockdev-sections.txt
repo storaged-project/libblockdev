@@ -388,6 +388,7 @@ bd_lvm_set_devices_filter
 bd_lvm_writecache_attach
 bd_lvm_writecache_create_cached_lv
 bd_lvm_writecache_detach
+bd_lvm_config_get
 BDLVMTech
 BDLVMTechMode
 bd_lvm_is_tech_avail

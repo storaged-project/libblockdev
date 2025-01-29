@@ -3970,3 +3970,58 @@ gboolean bd_lvm_devices_delete (const gchar *device, const gchar *devices_file, 
 
     return bd_utils_exec_and_report_error (args, extra, error);
 }
+
+/**
+ * bd_lvm_config_get:
+ * @section: (nullable): LVM config section, e.g. 'global' or %NULL to print the entire config
+ * @setting: (nullable): name of the specific setting, e.g. 'umask' or %NULL to print the entire @section
+ * @type: type of the config, e.g. 'full' or 'current'
+ * @values_only: whether to include only values without keys in the output
+ * @global_config: whether to include our internal global config in the call or not
+ * @extra: (nullable) (array zero-terminated=1): extra options for the lvmconfig command
+ *                                               (just passed to LVM as is)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: (transfer full): Requested LVM config @section and @setting configuration or %NULL in case of error.
+ *
+ * Tech category: %BD_LVM_TECH_CONFIG no mode (it is ignored)
+ */
+gchar* bd_lvm_config_get (const gchar *section, const gchar *setting, const gchar *type, gboolean values_only, gboolean global_config, const BDExtraArg **extra, GError **error) {
+    g_autofree gchar *conf_spec = NULL;
+    g_autofree gchar *config_arg = NULL;
+    const gchar *args[7] = {"lvmconfig", "--typeconfig", NULL, NULL, NULL, NULL, NULL};
+    guint next_arg = 2;
+    gchar *output = NULL;
+    gboolean success = FALSE;
+
+    if (!section && setting) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_FAIL,
+                     "Specifying setting without section is not supported.");
+        return NULL;
+    }
+
+    if (section)
+        if (setting)
+            conf_spec = g_strdup_printf ("%s/%s", section, setting);
+        else
+            conf_spec = g_strdup (section);
+    else
+        conf_spec = NULL;
+
+    args[next_arg++] = type;
+    args[next_arg++] = conf_spec;
+    if (values_only)
+        args[next_arg++] = "--valuesonly";
+
+    g_mutex_lock (&global_config_lock);
+    if (global_config && global_config_str) {
+        config_arg = g_strdup_printf ("--config=%s", global_config_str);
+        args[next_arg++] = config_arg;
+    }
+    g_mutex_unlock (&global_config_lock);
+
+    success = bd_utils_exec_and_capture_output (args, extra, &output, error);
+    if (!success)
+        return NULL;
+    return g_strchomp (output);
+}
