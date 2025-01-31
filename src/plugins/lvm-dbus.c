@@ -300,7 +300,7 @@ static GMutex deps_check_lock;
 static const UtilDep deps[DEPS_LAST] = {
     {"lvm", LVM_MIN_VERSION, "version", "LVM version:\\s+([\\d\\.]+)"},
     {"lvmdevices", NULL, NULL, NULL},
-    {"lvmconfig", NULL, NULL, NULL},
+    {"lvmconfig", "2.03.17", "--version", "LVM version:\\s+([\\d\\.]+)"},
 };
 
 #define DBUS_DEPS_LVMDBUSD 0

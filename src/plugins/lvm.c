@@ -307,11 +307,14 @@ static GMutex deps_check_lock;
 #define DEPS_LVM_MASK (1 << DEPS_LVM)
 #define DEPS_LVMDEVICES 1
 #define DEPS_LVMDEVICES_MASK (1 << DEPS_LVMDEVICES)
-#define DEPS_LAST 2
+#define DEPS_LVMCONFIG 2
+#define DEPS_LVMCONFIG_MASK (1 << DEPS_LVMCONFIG)
+#define DEPS_LAST 3
 
 static const UtilDep deps[DEPS_LAST] = {
     {"lvm", LVM_MIN_VERSION, "version", "LVM version:\\s+([\\d\\.]+)"},
     {"lvmdevices", NULL, NULL, NULL},
+    {"lvmconfig", "2.03.17", "--version", "LVM version:\\s+([\\d\\.]+)"},
 };
 
 #define FEATURES_VDO 0
