@@ -201,6 +201,7 @@ typedef enum {
     BD_LVM_TECH_WRITECACHE,
     BD_LVM_TECH_DEVICES,
     BD_LVM_TECH_SHARED,
+    BD_LVM_TECH_CONFIG,
 } BDLVMTech;
 
 typedef enum {
@@ -329,5 +330,7 @@ GHashTable* bd_lvm_vdo_get_stats_full (const gchar *vg_name, const gchar *pool_n
 
 gboolean bd_lvm_devices_add (const gchar *device, const gchar *devices_file, const BDExtraArg **extra, GError **error);
 gboolean bd_lvm_devices_delete (const gchar *device, const gchar *devices_file, const BDExtraArg **extra, GError **error);
+
+gchar* bd_lvm_config_get (const gchar *section, const gchar *setting, const gchar *type, gboolean values_only, gboolean global_config, const BDExtraArg **extra, GError **error);
 
 #endif /* BD_LVM */

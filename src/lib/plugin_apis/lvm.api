@@ -737,6 +737,7 @@ typedef enum {
     BD_LVM_TECH_WRITECACHE,
     BD_LVM_TECH_DEVICES,
     BD_LVM_TECH_SHARED,
+    BD_LVM_TECH_CONFIG,
 } BDLVMTech;
 
 typedef enum {
@@ -2025,5 +2026,22 @@ gboolean bd_lvm_devices_add (const gchar *device, const gchar *devices_file, con
  * Tech category: %BD_LVM_TECH_DEVICES no mode (it is ignored)
  */
 gboolean bd_lvm_devices_delete (const gchar *device, const gchar *devices_file, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_lvm_config_get:
+ * @section: (nullable): LVM config section, e.g. 'global' or %NULL to print the entire config
+ * @setting: (nullable): name of the specific setting, e.g. 'umask' or %NULL to print the entire @section
+ * @type: type of the config, e.g. 'full' or 'current'
+ * @values_only: whether to include only values without keys in the output
+ * @global_config: whether to include our internal global config in the call or not
+ * @extra: (nullable) (array zero-terminated=1): extra options for the lvmconfig command
+ *                                               (just passed to LVM as is)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Returns: (transfer full): Requested LVM config @section and @setting configuration or %NULL in case of error.
+ *
+ * Tech category: %BD_LVM_TECH_CONFIG no mode (it is ignored)
+ */
+gchar* bd_lvm_config_get (const gchar *section, const gchar *setting, const gchar *type, gboolean values_only, gboolean global_config, const BDExtraArg **extra, GError **error);
 
 #endif  /* BD_LVM_API */

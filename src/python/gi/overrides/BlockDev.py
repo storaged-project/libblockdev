@@ -1016,6 +1016,13 @@ def lvm_devices_delete(device, devices_file=None, extra=None, **kwargs):
     return _lvm_devices_delete(device, devices_file, extra)
 __all__.append("lvm_devices_delete")
 
+_lvm_config_get = BlockDev.lvm_config_get
+@override(BlockDev.lvm_config_get)
+def lvm_config_get(section=None, setting=None, type="full", values_only=True, global_config=True, extra=None, **kwargs):
+    extra = _get_extra(extra, kwargs)
+    return _lvm_config_get(section, setting, type, values_only, global_config, extra)
+__all__.append("lvm_config_get")
+
 
 _md_get_superblock_size = BlockDev.md_get_superblock_size
 @override(BlockDev.md_get_superblock_size)

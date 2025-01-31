@@ -82,6 +82,7 @@ class LvmNoDevTestCase(LVMTestCase):
     def tearDownClass(cls):
         # reset back to default
         BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_WARNING)
+        BlockDev.lvm_set_global_config(None)
 
         super(LvmNoDevTestCase, cls).tearDownClass()
 
@@ -331,6 +332,48 @@ class LvmNoDevTestCase(LVMTestCase):
 
         with self.assertRaises(GLib.GError):
             BlockDev.lvm_cache_get_mode_from_str("bla")
+
+    @tag_test(TestTags.NOSTORAGE)
+    def test_lvm_config(self):
+        """Verify that we can correctly read from LVM config"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_config_get(None, "dir")
+
+        # get entire config
+        conf = BlockDev.lvm_config_get()
+        self.assertTrue(conf)
+        self.assertTrue(conf.startswith("config"))
+
+        # get just the "devices" section
+        conf = BlockDev.lvm_config_get("devices")
+        self.assertTrue(conf)
+        self.assertTrue(conf.startswith("devices"))
+
+        # let's be brave and assume devices/dir is set everywhere ti /dev
+        devdir = BlockDev.lvm_config_get("devices", "dir", "full")
+        self.assertEqual(devdir, "\"/dev\"")
+
+        devdir = BlockDev.lvm_config_get("devices", "dir", "full", values_only=False)
+        self.assertEqual(devdir, "dir=\"/dev\"")
+
+        devdir = BlockDev.lvm_config_get("devices", "dir", "default")
+        self.assertEqual(devdir, "\"/dev\"")
+
+        # let's try to override some results with --config
+        BlockDev.lvm_set_global_config("devices/dir=/test")
+
+        devdir = BlockDev.lvm_config_get("devices", "dir", "full")
+        self.assertEqual(devdir, "\"/test\"")
+
+        # "default" config should not be affected by --config
+        devdir = BlockDev.lvm_config_get("devices", "dir", "default")
+        self.assertEqual(devdir, "\"/dev\"")
+
+        # disable global config
+        devdir = BlockDev.lvm_config_get("devices", "dir", "full", global_config=False)
+        self.assertEqual(devdir, "\"/dev\"")
+
 
 class LvmPVonlyTestCase(LVMTestCase):
 
