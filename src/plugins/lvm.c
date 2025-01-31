@@ -307,11 +307,14 @@ static GMutex deps_check_lock;
 #define DEPS_LVM_MASK (1 << DEPS_LVM)
 #define DEPS_LVMDEVICES 1
 #define DEPS_LVMDEVICES_MASK (1 << DEPS_LVMDEVICES)
-#define DEPS_LAST 2
+#define DEPS_LVMCONFIG 2
+#define DEPS_LVMCONFIG_MASK (1 << DEPS_LVMCONFIG)
+#define DEPS_LAST 3
 
 static const UtilDep deps[DEPS_LAST] = {
     {"lvm", LVM_MIN_VERSION, "version", "LVM version:\\s+([\\d\\.]+)"},
     {"lvmdevices", NULL, NULL, NULL},
+    {"lvmconfig", "2.03.17", "--version", "LVM version:\\s+([\\d\\.]+)"},
 };
 
 #define FEATURES_VDO 0
@@ -396,6 +399,8 @@ gboolean bd_lvm_is_tech_avail (BDLVMTech tech, guint64 mode, GError **error) {
                    check_deps (&avail_deps, DEPS_LVM_MASK, deps, DEPS_LAST, &deps_check_lock, error);
     case BD_LVM_TECH_DEVICES:
             return check_deps (&avail_deps, DEPS_LVMDEVICES_MASK, deps, DEPS_LAST, &deps_check_lock, error);
+    case BD_LVM_TECH_CONFIG:
+        return check_deps (&avail_deps, DEPS_LVMCONFIG_MASK, deps, DEPS_LAST, &deps_check_lock, error);
     default:
         /* everything is supported by this implementation of the plugin */
         return check_deps (&avail_deps, DEPS_LVM_MASK, deps, DEPS_LAST, &deps_check_lock, error);

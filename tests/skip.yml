@@ -59,3 +59,9 @@
 - test: lvm_dbus_tests.LvmTestPartialLVs
   skip_on:
     - reason: "LVM DBus doesn't support LV repair yet"
+
+- test: (lvm_test|lvm_dbus_tests).LvmNoDevTestCase.test_lvm_config
+  skip_on:
+    - distro: "debian"
+      version: "12"
+      reason: "LVM >= 2.03.17 needed for LVM config parsing with --valuesonly"
