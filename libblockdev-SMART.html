@@ -2,9 +2,9 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>SMART: libblockdev Reference Manual for libblockdev 3.2.0.</title>
+<title>SMART: libblockdev Reference Manual for libblockdev 3.2.1.</title>
 <meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
-<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.2.0.">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.2.1.">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-Part.html" title="Part">
 <link rel="next" href="libblockdev-Swap.html" title="Swap">
@@ -345,15 +345,56 @@ of attributes is considered as a TODO.</p>
 </div>
 <div class="refsect3">
 <a name="id-1.2.15.6.9"></a><h4>Device type detection, multipath</h4>
-<p>There's a big difference in how a drive is accessed. While libatasmart performs
-essentially no device type detection and sends a I/O request right away
-(with usual error handling), <code class="literal">smartctl</code> implements a logic to determine which
-protocol to use, supporting various passthrough mechanisms and interface bridges.
-Such detection is not always reliable though, having known issues with <code class="literal">dm-multipath</code>
-for example. For this case most plugin functions provide the <code class="literal">'extra'</code> argument
-allowing consumers to provide specific arguments such as <code class="literal">'--device=' for device
-type override</code>. This is only supported by the smartmontools plugin and ignored
-by the libatasmart plugin.</p>
+<p>There's a big difference in how a drive is accessed. While <code class="literal">libatasmart</code> performs
+only very basic device type detection based on parent subsystem as retrieved from
+the udev database, <code class="literal">smartctl</code> implements logic to determine which protocol to use,
+supporting variety of passthrough mechanisms and interface bridges. Such detection
+is not always reliable though, having known issues with <code class="literal">dm-multipath</code> for example.</p>
+<p>For this case most plugin functions consume the <code class="literal">extra</code> argument allowing
+callers to specify arguments such as <code class="literal">--device=</code> for device type override. This
+is only supported by the smartmontools plugin and ignored by the libatasmart
+plugin.</p>
+<p>As a well kept secret libatasmart has historically supported device type override
+via the <code class="literal">ID_ATA_SMART_ACCESS</code> udev property. There's no public C API for this and
+libblockdev generally tends to avoid any udev interaction, leaving the burden
+to callers.</p>
+<p>Valid values for this property include:</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p><code class="literal">'sat16'</code>: 16 Byte SCSI ATA SAT Passthru</p></li>
+<li class="listitem"><p><code class="literal">'sat12'</code>: 12 Byte SCSI ATA SAT Passthru</p></li>
+<li class="listitem"><p><code class="literal">'linux-ide'</code>: Native Linux IDE</p></li>
+<li class="listitem"><p><code class="literal">'sunplus'</code>: SunPlus USB/ATA bridges</p></li>
+<li class="listitem"><p><code class="literal">'jmicron'</code>: JMicron USB/ATA bridges</p></li>
+<li class="listitem"><p><code class="literal">'none'</code>: No access method, avoid any I/O and ignore the device</p></li>
+<li class="listitem"><p><code class="literal">'auto'</code>: Autodetection based on parent subsystem (default)</p></li>
+</ul></div>
+<p>A common example to override QEMU ATA device type, which often requires legacy
+IDE protocol:</p>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="n">KERNEL</span><span class="o">==</span><span class="s">&quot;sd*&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ENV</span><span class="p">{</span><span class="n">ID_VENDOR</span><span class="p">}</span><span class="o">==</span><span class="s">&quot;ATA&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ENV</span><span class="p">{</span><span class="n">ID_MODEL</span><span class="p">}</span><span class="o">==</span><span class="s">&quot;QEMU_HARDDISK&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ENV</span><span class="p">{</span><span class="n">ID_ATA</span><span class="p">}</span><span class="o">==</span><span class="s">&quot;1&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ENV</span><span class="p">{</span><span class="n">ID_ATA_SMART_ACCESS</span><span class="p">}</span><span class="o">=</span><span class="s">&quot;linux-ide&quot;</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p></p>
+<p>An example of blacklisting a USB device, in case of errors caused by reading SMART data:</p>
+<div class="informalexample">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="n">ATTRS</span><span class="p">{</span><span class="n">idVendor</span><span class="p">}</span><span class="o">==</span><span class="s">&quot;152d&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ATTRS</span><span class="p">{</span><span class="n">idProduct</span><span class="p">}</span><span class="o">==</span><span class="s">&quot;2329&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">ENV</span><span class="p">{</span><span class="n">ID_ATA_SMART_ACCESS</span><span class="p">}</span><span class="o">=</span><span class="s">&quot;none&quot;</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p></p>
 </div>
 </div>
 <div class="refsect1">
