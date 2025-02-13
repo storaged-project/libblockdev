@@ -85,7 +85,7 @@
 %define configure_opts %{?python3_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?tools_copts} %{?gi_copts} %{?nvme_copts} %{?smart_copts} %{?smartmontools_copts}
 
 Name:        libblockdev
-Version:     3.2.1
+Version:     3.3.0
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPL-2.1-or-later
@@ -958,6 +958,40 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Thu Feb 13 2025 Vojtech Trefny <vtrefny@redhat.com> - 3.3.0-1
+- lvm: Fix check for BD_LVM_TECH_CONFIG availability in CLI plugin (vtrefny)
+- lvm: Require higher version of LVM for lvm.conf parsing (vtrefny)
+- lvm: Add support for reading lvm.conf (vtrefny)
+- misc: Do not use "with_items" when installing packages (vtrefny)
+- ci: Manually download udisks playbooks for revdeps tests (vtrefny)
+- ci: Remove amazon-ec2-utils if installed (vtrefny)
+- ci: Manually download blivet playbooks for revdeps tests (vtrefny)
+- misc: Add build and test dependecies for CentOS (vtrefny)
+- misc: Separate Ansible tasks into a different file (vtrefny)
+- tests: Skip escrow tests in FIPS mode (vtrefny)
+- tests: Skip lvm_dbus_tests.LvmTestPartialLVs for now (vtrefny)
+- lvm-dbus: Add support for repairing RAID LVs (vtrefny)
+- packit: Fix replacement of placeholders in post-upstream-clone (nforro)
+- tests: Add a simple test case for bd_crypto_device_seems_encrypted (vtrefny)
+- New version - 3.2.1 (vtrefny)
+- Makefile: Fix generating RPM log during bumpver (vtrefny)
+- nvme: Avoid element-type g-i annotations (tbzatek)
+- fs: Add filesystem size limits to BDFSFeatures (vtrefny)
+- ci: Install 'python3-libdnf5' for TMT test plans (vtrefny)
+- tests: Add KINGSTON SA400S37240G SSD skdump (tbzatek)
+- lvm: Clarify the global config functionallity in libblockdev (vtrefny)
+- Skip tests for plugins disabled during compile time (vtrefny)
+- smart: Clarify ID_ATA_SMART_ACCESS udev property values (tbzatek)
+- smart: Clarify use of ID_ATA_SMART_ACCESS udev property (tbzatek)
+- ci: Do not try to install test dependencies for CodeQL analysis (vtrefny)
+- misc: Fix installing test dependencies on Debian/Ubuntu (vtrefny)
+- tests: Enable LVM VDO tests on Debian (vtrefny)
+- dist: Sync spec with downstream (vtrefny)
+- crypto: check that IOC_OPAL_GET_STATUS is defined (james.hilliard1)
+- packit: Fix generating spec from template (vtrefny)
+- dist: Fix source URL in spec (vtrefny)
+- README: Update supported technologies (vtrefny)
+
 * Thu Nov 07 2024 Vojtech Trefny <vtrefny@redhat.com> - 3.2.1-1
 - Makefile: Fix generating RPM log during bumpver (vtrefny)
 - nvme: Avoid element-type g-i annotations (tbzatek)

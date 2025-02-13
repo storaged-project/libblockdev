@@ -1,3 +1,41 @@
+Libblockdev 3.3.0
+------------------
+
+New minor release of the libblockdev library with multiple fixes. See below
+for details.
+
+**Full list of changes**
+
+Nikola Forró (1):
+
+- packit: Fix replacement of placeholders in post-upstream-clone
+
+Tomas Bzatek (4):
+
+- tests: Add KINGSTON SA400S37240G SSD skdump
+
+Vojtech Trefny (26):
+
+- tests: Enable LVM VDO tests on Debian
+- Skip tests for plugins disabled during compile time
+- fs: Add filesystem size limits to BDFSFeatures
+- Makefile: Fix generating RPM log during bumpver
+- New version - 3.2.1
+- tests: Add a simple test case for bd_crypto_device_seems_encrypted
+- lvm-dbus: Add support for repairing RAID LVs
+- tests: Skip lvm_dbus_tests.LvmTestPartialLVs for now
+- tests: Skip escrow tests in FIPS mode
+- misc: Separate Ansible tasks into a different file
+- misc: Add build and test dependecies for CentOS
+- ci: Manually download blivet playbooks for revdeps tests
+- ci: Remove amazon-ec2-utils if installed
+- ci: Manually download udisks playbooks for revdeps tests
+- misc: Do not use "with_items" when installing packages
+- lvm: Add support for reading lvm.conf
+- lvm: Require higher version of LVM for lvm.conf parsing
+- lvm: Fix check for BD_LVM_TECH_CONFIG availability in CLI plugin
+
+
 Libblockdev 3.2.1
 ------------------
 
