@@ -2,9 +2,9 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>LVM: libblockdev Reference Manual for libblockdev 3.2.1.</title>
+<title>LVM: libblockdev Reference Manual for libblockdev 3.3.0.</title>
 <meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
-<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.2.1.">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.3.0.">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-Loop.html" title="Loop">
 <link rel="next" href="libblockdev-MD-RAID.html" title="MD RAID">
@@ -872,6 +872,14 @@
 </td>
 <td class="function_name">
 <a class="link" href="libblockdev-LVM.html#bd-lvm-writecache-detach" title="bd_lvm_writecache_detach ()">bd_lvm_writecache_detach</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">gchar</span> *
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-LVM.html#bd-lvm-config-get" title="bd_lvm_config_get ()">bd_lvm_config_get</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -5584,6 +5592,75 @@ or not</p>
 </div>
 <hr>
 <div class="refsect2">
+<a name="bd-lvm-config-get"></a><h3>bd_lvm_config_get ()</h3>
+<pre class="programlisting"><span class="returnvalue">gchar</span> *
+bd_lvm_config_get (<em class="parameter"><code>const <span class="type">gchar</span> *section</code></em>,
+                   <em class="parameter"><code>const <span class="type">gchar</span> *setting</code></em>,
+                   <em class="parameter"><code>const <span class="type">gchar</span> *type</code></em>,
+                   <em class="parameter"><code><span class="type">gboolean</span> values_only</code></em>,
+                   <em class="parameter"><code><span class="type">gboolean</span> global_config</code></em>,
+                   <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                   <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<div class="refsect3">
+<a name="bd-lvm-config-get.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>section</p></td>
+<td class="parameter_description"><p>LVM config section, e.g. 'global' or <code class="literal">NULL</code> to print the entire config. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>setting</p></td>
+<td class="parameter_description"><p>name of the specific setting, e.g. 'umask' or <code class="literal">NULL</code> to print the entire <em class="parameter"><code>section</code></em>
+. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>type</p></td>
+<td class="parameter_description"><p>type of the config, e.g. 'full' or 'current'</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>values_only</p></td>
+<td class="parameter_description"><p>whether to include only values without keys in the output</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>global_config</p></td>
+<td class="parameter_description"><p>whether to include our internal global config in the call or not</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p>extra options for the lvmconfig command
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-lvm-config-get.returns"></a><h4>Returns</h4>
+<p>Requested LVM config <em class="parameter"><code>section</code></em>
+and <em class="parameter"><code>setting</code></em>
+configuration or <code class="literal">NULL</code> in case of error.</p>
+<p>Tech category: <a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-CONFIG:CAPS"><code class="literal">BD_LVM_TECH_CONFIG</code></a> no mode (it is ignored). </p>
+<p><span class="annotation">[<acronym title="The caller owns the data, and is responsible for free it."><span class="acronym">transfer full</span></acronym>]</span></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
 <a name="bd-lvm-is-tech-avail"></a><h3>bd_lvm_is_tech_avail ()</h3>
 <pre class="programlisting"><span class="returnvalue">gboolean</span>
 bd_lvm_is_tech_avail (<em class="parameter"><code><a class="link" href="libblockdev-LVM.html#BDLVMTech" title="enum BDLVMTech"><span class="type">BDLVMTech</span></a> tech</code></em>,
@@ -6650,6 +6727,11 @@ per block written to the VDO device.</p></td>
 </tr>
 <tr>
 <td class="enum_member_name"><p><a name="BD-LVM-TECH-SHARED:CAPS"></a>BD_LVM_TECH_SHARED</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-LVM-TECH-CONFIG:CAPS"></a>BD_LVM_TECH_CONFIG</p></td>
 <td> </td>
 <td> </td>
 </tr>

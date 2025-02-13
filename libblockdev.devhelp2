@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<book xmlns="http://www.devhelp.net/book" title="libblockdev Reference Manual for libblockdev 3.2.1." link="index.html" author="" name="libblockdev" version="2" language="c">
+<book xmlns="http://www.devhelp.net/book" title="libblockdev Reference Manual for libblockdev 3.3.0." link="index.html" author="" name="libblockdev" version="2" language="c">
   <chapters>
     <sub name="libblockdev Reference Manual" link="ch01.html">
       <sub name="blockdev library" link="libblockdev-blockdev-library.html"/>
@@ -469,6 +469,7 @@
     <keyword type="function" name="bd_lvm_writecache_attach ()" link="libblockdev-LVM.html#bd-lvm-writecache-attach"/>
     <keyword type="function" name="bd_lvm_writecache_create_cached_lv ()" link="libblockdev-LVM.html#bd-lvm-writecache-create-cached-lv"/>
     <keyword type="function" name="bd_lvm_writecache_detach ()" link="libblockdev-LVM.html#bd-lvm-writecache-detach"/>
+    <keyword type="function" name="bd_lvm_config_get ()" link="libblockdev-LVM.html#bd-lvm-config-get"/>
     <keyword type="function" name="bd_lvm_is_tech_avail ()" link="libblockdev-LVM.html#bd-lvm-is-tech-avail"/>
     <keyword type="macro" name="BD_LVM_ERROR" link="libblockdev-LVM.html#BD-LVM-ERROR:CAPS"/>
     <keyword type="enum" name="enum BDLVMError" link="libblockdev-LVM.html#BDLVMError"/>
@@ -1017,6 +1018,7 @@
     <keyword type="constant" name="BD_LVM_TECH_WRITECACHE" link="libblockdev-LVM.html#BD-LVM-TECH-WRITECACHE:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_DEVICES" link="libblockdev-LVM.html#BD-LVM-TECH-DEVICES:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_SHARED" link="libblockdev-LVM.html#BD-LVM-TECH-SHARED:CAPS"/>
+    <keyword type="constant" name="BD_LVM_TECH_CONFIG" link="libblockdev-LVM.html#BD-LVM-TECH-CONFIG:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_MODE_CREATE" link="libblockdev-LVM.html#BD-LVM-TECH-MODE-CREATE:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_MODE_REMOVE" link="libblockdev-LVM.html#BD-LVM-TECH-MODE-REMOVE:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_MODE_MODIFY" link="libblockdev-LVM.html#BD-LVM-TECH-MODE-MODIFY:CAPS"/>
@@ -1400,6 +1402,8 @@
     <keyword type="member" name="BDFSFeatures.features" link="libblockdev-FS.html#BDFSFeatures.features"/>
     <keyword type="member" name="BDFSFeatures.partition-id" link="libblockdev-FS.html#BDFSFeatures.partition-id"/>
     <keyword type="member" name="BDFSFeatures.partition-type" link="libblockdev-FS.html#BDFSFeatures.partition-type"/>
+    <keyword type="member" name="BDFSFeatures.min-size" link="libblockdev-FS.html#BDFSFeatures.min-size"/>
+    <keyword type="member" name="BDFSFeatures.max-size" link="libblockdev-FS.html#BDFSFeatures.max-size"/>
     <keyword type="member" name="BDFSMkfsOptions.label" link="libblockdev-FS.html#BDFSMkfsOptions.label"/>
     <keyword type="member" name="BDFSMkfsOptions.uuid" link="libblockdev-FS.html#BDFSMkfsOptions.uuid"/>
     <keyword type="member" name="BDFSMkfsOptions.dry-run" link="libblockdev-FS.html#BDFSMkfsOptions.dry-run"/>
