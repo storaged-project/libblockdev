@@ -8,6 +8,8 @@ import subprocess
 import locale
 import re
 import tarfile
+import hashlib
+
 
 from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, get_avail_locales, requires_locales, run_command, read_file, TestTags, tag_test, required_plugins
 
@@ -52,6 +54,7 @@ class CryptoTestCase(unittest.TestCase):
             BlockDev.init(cls.requested_plugins, None)
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
+        #BlockDev.utils_init_logging(print)
 
     def setUp(self):
         self.addCleanup(self._clean_up)
@@ -93,15 +96,15 @@ class CryptoTestCase(unittest.TestCase):
 
         os.unlink(self.keyfile)
 
-    def _luks_format(self, device, passphrase, keyfile=None, luks_version=BlockDev.CryptoLUKSVersion.LUKS1):
+    def _luks_format(self, device, passphrase, keyfile=None, luks_version=BlockDev.CryptoLUKSVersion.LUKS1, cipher=None, key_size=0):
         ctx = BlockDev.CryptoKeyslotContext(passphrase=passphrase)
-        BlockDev.crypto_luks_format(device, context=ctx, luks_version=luks_version)
+        BlockDev.crypto_luks_format(device, context=ctx, luks_version=luks_version, cipher=cipher, key_size=key_size)
         if keyfile:
             nctx = BlockDev.CryptoKeyslotContext(keyfile=keyfile)
             BlockDev.crypto_luks_add_key(device, ctx, nctx)
 
-    def _luks2_format(self, device, passphrase, keyfile=None):
-        return self._luks_format(device, passphrase, keyfile, BlockDev.CryptoLUKSVersion.LUKS2)
+    def _luks2_format(self, device, passphrase, keyfile=None, cipher=None, key_size=0):
+        return self._luks_format(device, passphrase, keyfile, BlockDev.CryptoLUKSVersion.LUKS2, cipher, key_size)
 
 class CryptoNoDevTestCase(CryptoTestCase):
     def setUp(self):
@@ -1209,6 +1212,364 @@ class CryptoTestConvert(CryptoTestCase):
         info = BlockDev.crypto_luks_info(self.loop_dev)
         self.assertIsNotNone(info)
         self.assertEqual(info.version, BlockDev.CryptoLUKSVersion.LUKS2)
+
+
+class CryptoTestReencrypt(CryptoTestCase):
+
+    def _luks_reencrypt(self, device, ctx, offline, new_volume_key=True, prog_func=None, requested_mode="cbc-essiv:sha256", sector_size=512):
+        mode_before = BlockDev.crypto_luks_info(device).mode
+
+        params = BlockDev.CryptoLUKSReencryptParams(
+            key_size=256,
+            cipher="aes",
+            cipher_mode=requested_mode,
+            offline=offline,
+            new_volume_key=new_volume_key,
+            sector_size=sector_size
+        )
+
+        succ = BlockDev.crypto_luks_reencrypt(device, params, ctx, prog_func)
+        self.assertTrue(succ)
+
+        mode_after = BlockDev.crypto_luks_info(device).mode
+        self.assertEqual(mode_after, requested_mode)
+        self.assertNotEqual(mode_before, mode_after)
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_offline_reencryption(self):
+        """ Verify that offline reencryption works """
+        self._luks2_format(self.loop_dev, PASSWD)
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
+
+        self._luks_reencrypt(device=self.loop_dev, ctx=ctx, offline=True)
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_sector_size_change(self):
+        """ Verify that sector size can be changed during reencryption """
+        self._luks2_format(self.loop_dev, PASSWD)
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
+
+        info = BlockDev.crypto_luks_info(self.loop_dev)
+        self.assertIsNotNone(info)
+        self.assertEqual(info.sector_size, 512)
+
+        self._luks_reencrypt(device=self.loop_dev, ctx=ctx, offline=True, sector_size=4096)
+
+        info = BlockDev.crypto_luks_info(self.loop_dev)
+        self.assertIsNotNone(info)
+        self.assertEqual(info.sector_size, 4096)
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_online_reencryption(self):
+        """ Verify that online reencryption works """
+        self._luks2_format(self.loop_dev, PASSWD)
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
+
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", ctx, False)
+        self.assertTrue(succ)
+
+        self._luks_reencrypt(device="libblockdevTestLUKS", ctx=ctx, offline=False)
+
+    first_reported_size = 0
+    last_offset = 0
+
+    def _progress_callback(self, size: int, offset: int) -> int:
+        if self.first_reported_size == 0:
+            self.first_reported_size = size
+
+        self.assertEqual(self.first_reported_size, size) # assert that size of the device hasn't change
+        self.assertTrue(offset >= self.last_offset) # the direction of reencryption is hardcoded to FORWARD,
+                                                    #   so the offset number shouldn't be less than the previously reported
+        self.assertTrue(offset <= size)
+        self.last_offset = offset
+        return 0
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_progress_reporting(self):
+        """ Verify that progress reporting works in reencryption """
+        self._luks2_format(self.loop_dev, PASSWD)
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
+
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", ctx, False)
+        self.assertTrue(succ)
+
+        self.first_reported_size = 0
+        self.last_offset = 0
+        self._luks_reencrypt(device="libblockdevTestLUKS", ctx=ctx, offline=False, prog_func=self._progress_callback)
+
+        self.assertNotEqual(self.first_reported_size, 0)
+        self.assertNotEqual(self.last_offset, 0)
+
+    def _get_volume_key(self) -> bytes:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            volume_key_file_path = os.path.join(temp_dir, "libblockdev_crypto_reencryption_volume.key")
+
+            ret, out, err = run_command("echo '%s' | cryptsetup luksDump --dump-volume-key --volume-key-file %s %s"
+                                        % (PASSWD, volume_key_file_path, self.loop_dev))
+            if ret != 0:
+                self.fail("Failed to get volume key from %s:\n%s %s" % (self.loop_dev, out, err))
+
+            with open(volume_key_file_path, 'rb') as file:
+                volume_key = file.read()
+
+        return volume_key
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_volume_key_change(self):
+        """ Verify that a new volume key is generated in reencryption """
+        self._luks2_format(self.loop_dev, PASSWD)
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
+
+        volume_key_before = self._get_volume_key()
+        self._luks_reencrypt(device=self.loop_dev, ctx=ctx, offline=True)
+        volume_key_after = self._get_volume_key()
+
+        self.assertNotEqual(volume_key_before, volume_key_after)
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_no_volume_key_change(self):
+        """ Verify that an existing volume key can be used in reencryption """
+        self._luks2_format(self.loop_dev, PASSWD, key_size=256) # the default key size for AES-XTS is 512 b.
+                                                                # CBC with such key size is not supported,
+                                                                # so reencryption with the same volume key would fail.
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
+
+        volume_key_before = self._get_volume_key()
+        self._luks_reencrypt(device=self.loop_dev, ctx=ctx, offline=True, new_volume_key=False)
+        volume_key_after = self._get_volume_key()
+
+        self.assertEqual(volume_key_before, volume_key_after)
+
+    stop_counter = 0
+    def _stop_after_two(self, size: int, offset: int) -> int:
+        if self.stop_counter >= 2:
+            return 1
+
+        self.stop_counter += 1
+        return 0
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_stop_resume_offline(self):
+        """ Verify that offline reencryption can be stopped and resumed """
+        self._luks2_format(self.loop_dev, PASSWD)
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
+
+        status, mode = BlockDev.crypto_luks_reencrypt_status(self.loop_dev)
+        self.assertEqual(status, BlockDev.CryptoLUKSReencryptStatus.NONE)
+
+        self.stop_counter = 0
+        self._luks_reencrypt(device=self.loop_dev, ctx=ctx, offline=True, prog_func=self._stop_after_two)
+        self.assertEqual(self.stop_counter, 2)
+
+        # reencryption should be stopped now
+        status, mode = BlockDev.crypto_luks_reencrypt_status(self.loop_dev)
+        self.assertEqual(status, BlockDev.CryptoLUKSReencryptStatus.CLEAN)
+        self.assertEqual(mode, BlockDev.CryptoLUKSReencryptMode.REENCRYPT)
+
+        succ = BlockDev.crypto_luks_reencrypt_resume(self.loop_dev, ctx, None)
+        self.assertTrue(succ)
+
+        status, mode = BlockDev.crypto_luks_reencrypt_status(self.loop_dev)
+        self.assertEqual(status, BlockDev.CryptoLUKSReencryptStatus.NONE)
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_stop_resume_online(self):
+        """ Verify that online reencryption can be stopped and resumed """
+        self._luks2_format(self.loop_dev, PASSWD)
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
+
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", ctx, False)
+        self.assertTrue(succ)
+
+        status, mode = BlockDev.crypto_luks_reencrypt_status("libblockdevTestLUKS")
+        self.assertEqual(status, BlockDev.CryptoLUKSReencryptStatus.NONE)
+
+        self.stop_counter = 0
+        self._luks_reencrypt(device="libblockdevTestLUKS", ctx=ctx, offline=False, prog_func=self._stop_after_two)
+        self.assertEqual(self.stop_counter, 2)
+
+        # reencryption should be stopped now
+        status, mode = BlockDev.crypto_luks_reencrypt_status("libblockdevTestLUKS")
+        self.assertEqual(status, BlockDev.CryptoLUKSReencryptStatus.CLEAN)
+        self.assertEqual(mode, BlockDev.CryptoLUKSReencryptMode.REENCRYPT)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", ctx, False)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_reencrypt_resume("libblockdevTestLUKS", ctx, None)
+        self.assertTrue(succ)
+
+        status, mode = BlockDev.crypto_luks_reencrypt_status("libblockdevTestLUKS")
+        self.assertEqual(status, BlockDev.CryptoLUKSReencryptStatus.NONE)
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_resume_xfail(self):
+        """ Verify that non-existent reencryption cannot be resumed """
+
+        self._luks2_format(self.loop_dev, PASSWD)
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
+
+        with self.assertRaisesRegex(GLib.GError, r"Failed to initialize previously stopped reencryption:"):
+            succ = BlockDev.crypto_luks_reencrypt_resume(self.loop_dev, ctx, None)
+            self.assertFalse(succ)
+
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", ctx, False)
+        self.assertTrue(succ)
+        with self.assertRaisesRegex(GLib.GError, r"Failed to initialize previously stopped reencryption:"):
+            succ = BlockDev.crypto_luks_reencrypt_resume("libblockdevTestLUKS", ctx, None)
+            self.assertFalse(succ)
+
+
+class CryptoTestEncrypt(CryptoTestCase):
+    def compute_checksum(self, directory: str, algorithm='sha256') -> str:
+        # Source: ChatGPT
+        READ_SIZE = 8192 # 8 KB
+        hash_func = hashlib.new(algorithm)
+
+        # Iterate over all files in the directory
+        for root, _, files in os.walk(directory):
+            for file_name in sorted(files):  # Sort files for consistent checksum
+                file_path = os.path.join(root, file_name)
+                try:
+                    with open(file_path, 'rb') as f:
+                        # Read and update the hash for each block of the file
+                        while chunk := f.read(READ_SIZE):
+                            hash_func.update(chunk)
+                except (OSError, IOError) as e:
+                    print()
+                    print(f"Error reading file {file_name}: {e}")
+
+        # Return the final checksum in hexadecimal format
+        return hash_func.hexdigest()
+
+    def fill_fs_with_random_data(self, directory: str):
+        # Source: ChatGPT
+        WRITE_SIZE = 1024 * 1024  # 1MB
+        file_count = 0
+
+        try:
+            while True:
+                file_name = os.path.join(directory, f'randomfile_{file_count}')
+                with open(file_name, 'wb') as f:
+                    # Write random data
+                    f.write(os.urandom(WRITE_SIZE))
+                file_count += 1
+
+        except OSError:
+            # The whole space is filled
+            pass
+
+        self.assertTrue(file_count > 0)
+
+    def setUp(self):
+        CryptoTestCase.setUp(self)
+
+        _ret, out, _err = run_command(f"blockdev --getsize64 {self.loop_dev}")
+        partition_size = int(out) # bytes
+        needed_fs_size = (int) (partition_size / (1024 * 1024)) - 32 # in MB, leave 32 MB for LUKS2 headers
+
+        # create filesystem
+        ret, _out, _err = run_command(f"mkfs.ext4 {self.loop_dev} {needed_fs_size}m")
+        self.assertEqual(ret, 0)
+
+        # add a file to filesystem to later check, if it is still readable after encryption
+        with tempfile.TemporaryDirectory() as mount_path:
+            try:
+                ret, _out, _err = run_command("mount %s %s" % (self.loop_dev, mount_path))
+                self.assertEqual(ret, 0)
+
+                self.fill_fs_with_random_data(mount_path)
+                self.fs_hash = self.compute_checksum(mount_path)
+            finally:
+                ret, _out, _err = run_command("umount %s" % mount_path)
+                self.assertEqual(ret, 0)
+
+    def _clean_up(self):
+        CryptoTestCase._clean_up(self)
+        self.fs_hash = None
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_offline_encryption(self):
+        """ Verify that offline encryption works """
+        is_luks = BlockDev.crypto_device_is_luks(self.loop_dev)
+        self.assertFalse(is_luks)
+
+        self.assertTrue(self.fs_hash is not None)
+        self.assertTrue(len(self.fs_hash) > 0)
+
+        params = BlockDev.CryptoLUKSReencryptParams(key_size=256, cipher="aes", cipher_mode="cbc-essiv:sha256", offline=True, resilience="datashift")
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
+
+        succ = BlockDev.crypto_luks_encrypt(self.loop_dev, params, ctx)
+        self.assertTrue(succ)
+
+        is_luks = BlockDev.crypto_device_is_luks(self.loop_dev)
+        self.assertTrue(is_luks)
+
+        succ = BlockDev.crypto_luks_open(self.loop_dev, "libblockdevTestLUKS", ctx, False)
+        self.assertTrue(succ)
+        self.assertTrue(os.path.exists("/dev/mapper/libblockdevTestLUKS"))
+
+        with tempfile.TemporaryDirectory() as mount_path:
+            try:
+                ret, _out, _err = run_command("mount /dev/mapper/libblockdevTestLUKS %s" % mount_path)
+                self.assertEqual(ret, 0)
+
+                self.assertEqual(self.fs_hash, self.compute_checksum(mount_path))
+
+            finally:
+                ret, _out, _err = run_command("umount %s" % mount_path)
+                self.assertEqual(ret, 0)
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_online_encryption_xfail(self):
+        """ Verify that online encryption fails when a file system is mounted directly """
+        is_luks = BlockDev.crypto_device_is_luks(self.loop_dev)
+        self.assertFalse(is_luks)
+
+        with tempfile.TemporaryDirectory() as mount_path:
+            ret, _out, _err = run_command("mount %s %s" % (self.loop_dev, mount_path))
+            self.assertEqual(ret, 0)
+
+            params = BlockDev.CryptoLUKSReencryptParams(key_size=256, cipher="aes", cipher_mode="cbc-essiv:sha256", offline=False, resilience="datashift")
+            ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
+
+            with self.assertRaises(GLib.GError):
+                succ = BlockDev.crypto_luks_encrypt(self.loop_dev, params, ctx)
+
+            ret, _out, _err = run_command("umount %s" % mount_path)
+            self.assertEqual(ret, 0)
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_online_encryption(self):
+        """ Verify that online encryption work when a file system is mounted on top of dm-linear """
+        is_luks = BlockDev.crypto_device_is_luks(self.loop_dev)
+        self.assertFalse(is_luks)
+
+        try:
+            ret, _out, _err = run_command("dmsetup create libblockdevTestLUKS --table '0 2097152 linear /dev/sda 0'")
+            self.assertEqual(ret, 0)
+            self.assertTrue(os.path.exists("/dev/mapper/libblockdevTestLUKS"))
+
+            with tempfile.TemporaryDirectory() as mount_path:
+                try:
+                    ret, _out, _err = run_command("mount %s %s" % ("/dev/mapper/libblockdevTestLUKS", mount_path))
+                    self.assertEqual(ret, 0)
+
+                    params = BlockDev.CryptoLUKSReencryptParams(key_size=256, cipher="aes", cipher_mode="cbc-essiv:sha256", offline=False, resilience="datashift")
+                    ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
+
+                    succ = BlockDev.crypto_luks_encrypt(self.loop_dev, params, ctx)
+                    self.assertTrue(succ)
+                finally:
+                    ret, _out, _err = run_command("umount %s" % mount_path)
+                    self.assertEqual(ret, 0)
+        finally:
+            ret, _out, _err = run_command("dmsetup remove libblockdevTestLUKS")
+            self.assertEqual(ret, 0)
+
 
 
 class CryptoTestLuksSectorSize(CryptoTestCase):
