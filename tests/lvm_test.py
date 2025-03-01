@@ -1986,6 +1986,9 @@ class LVMVDOTest(LVMTestCase):
         if lvm_version < Version("2.3.07"):
             raise unittest.SkipTest("LVM version 2.3.07 or newer needed for LVM VDO.")
 
+        if not shutil.which("vdoformat"):
+            raise unittest.SkipTest("vdoformat executable not found in $PATH, skipping.")
+
         super().setUpClass()
 
     def setUp(self):
