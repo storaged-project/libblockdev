@@ -207,6 +207,8 @@ AS_IF([test "x$with_crypto" != "xno"],
             [AC_DEFINE([LIBCRYPTSETUP_26])], [])
       AS_IF([$PKG_CONFIG --atleast-version=2.7.0 libcryptsetup],
             [AC_DEFINE([LIBCRYPTSETUP_27])], [])
+      AS_IF([$PKG_CONFIG --atleast-version=2.8.0 libcryptsetup],
+            [AC_DEFINE([LIBCRYPTSETUP_28])], [])
       AC_CHECK_HEADER([linux/sed-opal.h],
                       [AC_DEFINE([HAVE_LINUX_OPAL])], [])
       AS_IF([test "x$with_escrow" != "xno"],
