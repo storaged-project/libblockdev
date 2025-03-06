@@ -1979,6 +1979,82 @@ gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup
 }
 
 /**
+ * bd_crypto_luks_set_persistent_flags:
+ * @device: a LUKS device to set the persistent flags on
+ * @flags: flags to set
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Note: This function is valid only for LUKS2.
+ *
+ * Returns: whether the given @flags were successfully set or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_MODIFY
+ */
+gboolean bd_crypto_luks_set_persistent_flags (const gchar *device, BDCryptoLUKSPersistentFlags flags, GError **error) {
+    struct crypt_device *cd = NULL;
+    gint ret = 0;
+    guint32 crypt_flags = 0;
+
+    ret = crypt_init (&cd, device);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to initialize device: %s", strerror_l (-ret, c_locale));
+        return FALSE;
+    }
+
+    ret = crypt_load (cd, CRYPT_LUKS, NULL);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to load device: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        return FALSE;
+    }
+
+    if (g_strcmp0 (crypt_get_type (cd), CRYPT_LUKS2) != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Persistent flags can be set only on LUKS v2");
+        crypt_free (cd);
+        return FALSE;
+    }
+
+    if (flags & BD_CRYPTO_LUKS_ACTIVATE_ALLOW_DISCARDS)
+        crypt_flags |= CRYPT_ACTIVATE_ALLOW_DISCARDS;
+    if (flags & BD_CRYPTO_LUKS_ACTIVATE_SAME_CPU_CRYPT)
+        crypt_flags |= CRYPT_ACTIVATE_SAME_CPU_CRYPT;
+    if (flags & BD_CRYPTO_LUKS_ACTIVATE_SUBMIT_FROM_CRYPT_CPUS)
+        crypt_flags |= CRYPT_ACTIVATE_SUBMIT_FROM_CRYPT_CPUS;
+    if (flags & BD_CRYPTO_LUKS_ACTIVATE_NO_JOURNAL)
+        crypt_flags |= CRYPT_ACTIVATE_NO_JOURNAL;
+    if (flags & BD_CRYPTO_LUKS_ACTIVATE_NO_READ_WORKQUEUE)
+        crypt_flags |= CRYPT_ACTIVATE_NO_READ_WORKQUEUE;
+    if (flags & BD_CRYPTO_LUKS_ACTIVATE_NO_WRITE_WORKQUEUE)
+        crypt_flags |= CRYPT_ACTIVATE_NO_WRITE_WORKQUEUE;
+    if (flags & BD_CRYPTO_LUKS_ACTIVATE_HIGH_PRIORITY) {
+#ifdef LIBCRYPTSETUP_28
+        crypt_flags |= CRYPT_ACTIVATE_HIGH_PRIORITY;
+#else
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
+                     "Libcryptsetup 2.8 or newer is needed for 'high priority' flag support");
+        crypt_free (cd);
+        return FALSE;
+#endif
+    }
+
+
+    ret = crypt_persistent_flags_set (cd, CRYPT_FLAGS_ACTIVATION, crypt_flags);
+    if (ret != 0) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                     "Failed to set flags: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
+        return FALSE;
+    }
+
+    crypt_free (cd);
+
+    return TRUE;
+}
+
+/**
  * bd_crypto_luks_info:
  * @luks_device: a device to get information about
  * @error: (out): place to store error (if any)

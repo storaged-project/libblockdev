@@ -155,6 +155,16 @@ typedef enum {
     BD_CRYPTO_INTEGRITY_OPEN_ALLOW_DISCARDS     = 1 << 5,
 } BDCryptoIntegrityOpenFlags;
 
+typedef enum {
+    BD_CRYPTO_LUKS_ACTIVATE_ALLOW_DISCARDS          = 1 << 0,
+    BD_CRYPTO_LUKS_ACTIVATE_SAME_CPU_CRYPT          = 1 << 1,
+    BD_CRYPTO_LUKS_ACTIVATE_SUBMIT_FROM_CRYPT_CPUS  = 1 << 2,
+    BD_CRYPTO_LUKS_ACTIVATE_NO_JOURNAL              = 1 << 3,
+    BD_CRYPTO_LUKS_ACTIVATE_NO_READ_WORKQUEUE       = 1 << 4,
+    BD_CRYPTO_LUKS_ACTIVATE_NO_WRITE_WORKQUEUE      = 1 << 5,
+    BD_CRYPTO_LUKS_ACTIVATE_HIGH_PRIORITY           = 1 << 6,
+} BDCryptoLUKSPersistentFlags;
+
 /**
  * BDCryptoLUKSInfo:
  * @version: LUKS version
@@ -244,6 +254,7 @@ gboolean bd_crypto_luks_resume (const gchar *luks_device, const gchar *passphras
 gboolean bd_crypto_luks_kill_slot (const gchar *device, gint slot, GError **error);
 gboolean bd_crypto_luks_header_backup (const gchar *device, const gchar *backup_file, GError **error);
 gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup_file, GError **error);
+gboolean bd_crypto_luks_set_persistent_flags (const gchar *device, BDCryptoLUKSPersistentFlags flags, GError **error);
 
 BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *luks_device, GError **error);
 BDCryptoIntegrityInfo* bd_crypto_integrity_info (const gchar *device, GError **error);

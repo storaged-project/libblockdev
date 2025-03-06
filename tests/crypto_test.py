@@ -978,6 +978,35 @@ class CryptoTestInfo(CryptoTestCase):
         self.assertTrue(succ)
 
 
+class CryptoTestSetPersistentFlags(CryptoTestCase):
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_luks_set_persistent_flags(self):
+        """Verify that we can set flags on a LUKS device"""
+
+        self._luks_format(self.loop_dev, PASSWD, None)
+
+        with self.assertRaisesRegex(GLib.GError, "Persistent flags can be set only on LUKS v2"):
+            BlockDev.crypto_luks_set_persistent_flags(self.loop_dev,
+                                                      BlockDev.CryptoLUKSPersistentFlags.ALLOW_DISCARDS)
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_luks_set_persistent_flags(self):
+        """Verify that we can set flags on a LUKS 2 device"""
+
+        self._luks2_format(self.loop_dev, PASSWD, None)
+
+        succ = BlockDev.crypto_luks_set_persistent_flags(self.loop_dev,
+                                                         BlockDev.CryptoLUKSPersistentFlags.ALLOW_DISCARDS)
+        self.assertTrue(succ)
+
+        _ret, out, err = run_command("cryptsetup luksDump %s" % self.loop_dev)
+        m = re.search(r"Flags:\s*(\S+)\s*", out)
+        if not m or len(m.groups()) != 1:
+            self.fail("Failed to get label information from:\n%s %s" % (out, err))
+        self.assertEqual(m.group(1), "allow-discards")
+
+
 class CryptoTestLuksSectorSize(CryptoTestCase):
     def setUp(self):
         if not check_cryptsetup_version("2.4.0"):
