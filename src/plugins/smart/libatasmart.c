@@ -240,7 +240,6 @@ static void parse_attr_cb (G_GNUC_UNUSED SkDisk             *d,
 static BDSmartATA * parse_sk_data (SkDisk *d, GError **error) {
     SkBool good = FALSE;
     SkBool available = FALSE;
-    SkSmartOverall overall = SK_SMART_OVERALL_GOOD;
     uint64_t power_on_msec = 0;
     const SkSmartParsedData *parsed_data;
     BDSmartATA *data;
@@ -276,9 +275,7 @@ static BDSmartATA * parse_sk_data (SkDisk *d, GError **error) {
      * sk_disk_smart_read_data() would've already returned an error.
      */
     data->smart_enabled = TRUE;
-
-    sk_disk_smart_get_overall (d, &overall);
-    data->overall_status_passed = overall == SK_SMART_OVERALL_GOOD;
+    data->overall_status_passed = good;
 
     switch (parsed_data->offline_data_collection_status) {
         case SK_SMART_OFFLINE_DATA_COLLECTION_STATUS_NEVER:
