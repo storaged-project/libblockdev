@@ -203,10 +203,15 @@ class NVMeTestCase(NVMeTest):
         with self.assertRaisesRegex(GLib.GError, r".*Failed to open device .*': No such file or directory"):
             BlockDev.nvme_get_self_test_log("/dev/nonexistent")
 
-        message = r"NVMe Get Log Page - Device Self-test Log command error: Invalid Field in Command: A reserved coded value or an unsupported value in a defined field|NVMe Get Log Page - Device Self-test Log command error: unrecognized"
-        with self.assertRaisesRegex(GLib.GError, message):
-            # Cannot retrieve self-test log on a nvme target loop devices
-            BlockDev.nvme_get_self_test_log(self.nvme_dev)
+        try:
+            # Cannot retrieve self-test log on a nvme target loop devices with older nvmetcli
+            ret = BlockDev.nvme_get_self_test_log(self.nvme_dev)
+        except GLib.GError as e:
+            message = r"NVMe Get Log Page - Device Self-test Log command error: Invalid Field in Command: A reserved coded value or an unsupported value in a defined field|NVMe Get Log Page - Device Self-test Log command error: unrecognized"
+            match = re.search(message, str(e))
+            self.assertIsNotNone(match, "Unexpected error when getting self test log: %s" % str(e))
+        else:
+            self.assertIsNotNone(ret)
 
         self.assertEqual(BlockDev.nvme_self_test_result_to_string(BlockDev.NVMESelfTestResult.NO_ERROR), "success")
         self.assertEqual(BlockDev.nvme_self_test_result_to_string(BlockDev.NVMESelfTestResult.ABORTED), "aborted")
@@ -283,12 +288,25 @@ class NVMeTestCase(NVMeTest):
         with self.assertRaisesRegex(GLib.GError, r".*Failed to open device .*': No such file or directory"):
             BlockDev.nvme_get_sanitize_log("/dev/nonexistent")
 
-        message = r"NVMe Get Log Page - Sanitize Status Log command error: Invalid Field in Command: A reserved coded value or an unsupported value in a defined field|NVMe Get Log Page - Sanitize Status Log command error: unrecognized"
-        with self.assertRaisesRegex(GLib.GError, message):
-            # Cannot retrieve sanitize log on a nvme target loop devices
-            BlockDev.nvme_get_sanitize_log(self.nvme_dev)
-        with self.assertRaisesRegex(GLib.GError, message):
-            BlockDev.nvme_get_sanitize_log(self.nvme_ns_dev)
+        try:
+            # Cannot retrieve sanitize log on a nvme target loop devices with older nvmetcli
+            ret = BlockDev.nvme_get_sanitize_log(self.nvme_dev)
+        except GLib.GError as e:
+            message = r"NVMe Get Log Page - Sanitize Status Log command error: Invalid Field in Command: A reserved coded value or an unsupported value in a defined field|NVMe Get Log Page - Sanitize Status Log command error: unrecognized"
+            match = re.search(message, str(e))
+            self.assertIsNotNone(match, "Unexpected error when getting sanitize log: %s" % str(e))
+        else:
+            self.assertIsNotNone(ret)
+
+        try:
+            # Cannot retrieve sanitize log on a nvme target loop devices with older nvmetcli
+            ret = BlockDev.nvme_get_sanitize_log(self.nvme_ns_dev)
+        except GLib.GError as e:
+            message = r"NVMe Get Log Page - Sanitize Status Log command error: Invalid Field in Command: A reserved coded value or an unsupported value in a defined field|NVMe Get Log Page - Sanitize Status Log command error: unrecognized"
+            match = re.search(message, str(e))
+            self.assertIsNotNone(match, "Unexpected error when getting sanitize log: %s" % str(e))
+        else:
+            self.assertIsNotNone(ret)
 
 
     @tag_test(TestTags.CORE)
