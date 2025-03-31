@@ -65,3 +65,9 @@
     - distro: "debian"
       version: "12"
       reason: "LVM >= 2.03.17 needed for LVM config parsing with --valuesonly"
+
+- test: nvdimm_test.NVDIMMNamespaceTestCase.test_namespace_reconfigure
+  skip_on:
+    - distro: "fedora"
+      version: "43"
+      reason: "The fake in-memory namespace doesn't support sector mode in kernel 6.15"
