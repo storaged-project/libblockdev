@@ -26,7 +26,7 @@ prepare:
 discover:
     how: shell
     url: https://github.com/storaged-project/blivet
-    ref: master
+    ref: main
     tests:
       - name: all
         test: make test
