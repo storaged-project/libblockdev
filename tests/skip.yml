@@ -71,3 +71,9 @@
     - distro: "fedora"
       version: "43"
       reason: "The fake in-memory namespace doesn't support sector mode in kernel 6.15"
+
+- test: nvme_test.NVMeTestCase.(test_sanitize_log|test_self_test_log)
+  skip_on:
+    - distro: "fedora"
+      version: ["42", "43"]
+      reason: "latest libnvme returns some invalid/unexpected values for sanitize and self test log"
