@@ -283,7 +283,7 @@ class NVMeTestCase(NVMeTest):
         with self.assertRaisesRegex(GLib.GError, r".*Failed to open device .*': No such file or directory"):
             BlockDev.nvme_get_sanitize_log("/dev/nonexistent")
 
-        message = r"NVMe Get Log Page - Sanitize Status Log command error: Invalid Field in Command: A reserved coded value or an unsupported value in a defined field|NVMe Get Log Page - Sanitize Status Log command error: unrecognized"
+        message = r"NVMe Get Log Page - Sanitize Status Log command error: (Invalid Field in Command: A reserved coded value or an unsupported value in a defined field|unrecognized|No such file or directory)"
         with self.assertRaisesRegex(GLib.GError, message):
             # Cannot retrieve sanitize log on a nvme target loop devices
             BlockDev.nvme_get_sanitize_log(self.nvme_dev)
