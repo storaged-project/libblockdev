@@ -365,11 +365,11 @@ typedef enum {
  * @transport_type: type of the transport associated with the error.
  */
 typedef struct BDNVMEErrorLogEntry {
-    guint64 error_count;
-    guint16 command_id;
-    guint64 command_specific;
-    guint16 command_status;
     GError *command_error;
+    guint64 error_count;
+    guint64 command_specific;
+    guint16 command_id;
+    guint16 command_status;
     guint64 lba;
     guint32 nsid;
     BDNVMETransportType transport_type;
@@ -432,8 +432,8 @@ typedef struct BDNVMESelfTestLogEntry {
     BDNVMESelfTestResult result;
     BDNVMESelfTestAction action;
     guint8 segment;
-    guint64 power_on_hours;
     guint32 nsid;
+    guint64 power_on_hours;
     guint64 failing_lba;
     GError *status_code_error;
 } BDNVMESelfTestLogEntry;

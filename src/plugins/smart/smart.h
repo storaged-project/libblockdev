@@ -179,8 +179,8 @@ typedef struct BDSmartATAAttribute {
     gint threshold;
     gboolean failed_past;
     gboolean failing_now;
-    guint64 value_raw;
     guint16 flags;
+    guint64 value_raw;
     gint64 pretty_value;
     BDSmartATAAttributeUnit pretty_value_unit;
     gchar *pretty_value_string;
@@ -220,10 +220,10 @@ typedef struct BDSmartATA {
     gint self_test_polling_extended;
     gint self_test_polling_conveyance;
     guint smart_capabilities;
-    BDSmartATAAttribute **attributes;
     guint power_on_time;
-    guint64 power_cycle_count;
     guint temperature;
+    BDSmartATAAttribute **attributes;
+    guint64 power_cycle_count;
 } BDSmartATA;
 
 
@@ -368,8 +368,8 @@ typedef struct BDSmartSCSI {
     BDSmartSCSIInformationalException scsi_ie;
     guint8 scsi_ie_asc;
     guint8 scsi_ie_ascq;
-    gchar *scsi_ie_string;
     BDSmartSCSIBackgroundScanStatus background_scan_status;
+    gchar *scsi_ie_string;
     gdouble background_scan_progress;
     guint background_scan_runs;
     guint background_medium_scan_runs;

@@ -124,8 +124,8 @@ BDCryptoLUKSExtra* bd_crypto_luks_extra_new (guint64 data_alignment, const gchar
  * @buffer_sectors: number of sectors in one buffer
  */
 typedef struct BDCryptoIntegrityExtra {
-    guint32 sector_size;
     guint64 journal_size;
+    guint32 sector_size;
     guint journal_watermark;
     guint journal_commit_time;
     guint32 interleave_sectors;
@@ -187,11 +187,11 @@ typedef enum {
  * @hw_encryption: hardware encryption type
  */
 typedef struct BDCryptoLUKSInfo {
-    BDCryptoLUKSVersion version;
     gchar *cipher;
     gchar *mode;
     gchar *uuid;
     gchar *backing_device;
+    BDCryptoLUKSVersion version;
     guint32 sector_size;
     guint64 metadata_size;
     gchar *label;
@@ -253,8 +253,8 @@ BDCryptoIntegrityInfo* bd_crypto_integrity_info_copy (BDCryptoIntegrityInfo *inf
  * @keyslot: keyslot this token is assigned to or -1 for inactive/unassigned tokens
  */
 typedef struct BDCryptoLUKSTokenInfo {
-    guint id;
     gchar *type;
+    guint id;
     gint keyslot;
 } BDCryptoLUKSTokenInfo;
 
