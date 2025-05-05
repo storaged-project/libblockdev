@@ -66,8 +66,7 @@
       version: "12"
       reason: "LVM >= 2.03.17 needed for LVM config parsing with --valuesonly"
 
-- test: nvdimm_test.NVDIMMNamespaceTestCase.test_namespace_reconfigure
+- test: nvdimm_test
   skip_on:
-    - distro: "fedora"
-      version: "43"
-      reason: "The fake in-memory namespace doesn't support sector mode in kernel 6.15"
+    - distro: ["fedora", "centos", "debian"]
+      reason: "NVDIMM plugin is deprecated"
