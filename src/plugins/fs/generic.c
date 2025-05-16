@@ -409,7 +409,7 @@ static gboolean xfs_resize_device (const gchar *device, guint64 new_size, const 
                              "before resizing it.", device);
                 return FALSE;
             }
-            ret = bd_fs_mount (device, mountpoint, "xfs", NULL, NULL, error);
+            ret = bd_fs_mount (device, mountpoint, "xfs", "nosuid,nodev", NULL, error);
             if (!ret) {
                 g_prefix_error (error, "Failed to mount '%s' before resizing it: ", device);
                 return FALSE;
