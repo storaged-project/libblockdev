@@ -24,6 +24,8 @@ libbd_lvm_la_CPPFLAGS = -I${builddir}/../../../include/ -I${srcdir}/../ -I. -DPA
 libbd_lvm_la_SOURCES = \
 	lvm.c \
 	lvm.h \
+	lvm-private.h \
+	lvm-common.c \
 	vdo_stats.c \
 	vdo_stats.h \
 	../check_deps.c \
@@ -45,6 +47,8 @@ libbd_lvm_dbus_la_CPPFLAGS = -I${builddir}/../../../include/ -I${srcdir}/../ -I.
 libbd_lvm_dbus_la_SOURCES = \
 	lvm-dbus.c \
 	lvm.h \
+	lvm-private.h \
+	lvm-common.c \
 	vdo_stats.c \
 	vdo_stats.h \
 	../check_deps.c \
