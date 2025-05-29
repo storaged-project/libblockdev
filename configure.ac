@@ -21,6 +21,7 @@ LT_INIT
 AC_CONFIG_FILES([Makefile src/Makefile \
                           src/plugins/Makefile \
                           src/plugins/fs/Makefile \
+                          src/plugins/lvm/Makefile \
                           src/plugins/nvme/Makefile \
                           src/plugins/smart/Makefile \
                           src/utils/Makefile \

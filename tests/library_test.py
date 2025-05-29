@@ -164,8 +164,8 @@ class PluginsTestCase(unittest.TestCase):
 
     def _clean_up(self):
         # change the sources back and recompile
-        os.system("sed -ri 's?1024;//test-change?MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
-        os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
+        os.system("sed -ri 's?1024;//test-change?MAX_LV_SIZE;?' src/plugins/lvm/lvm-common.c > /dev/null")
+        os.system("make -C src/plugins/lvm/ libbd_lvm.la >/dev/null 2>&1")
 
         os.environ["LIBBLOCKDEV_CONFIG_DIR"] = self.orig_config_dir
 
@@ -182,8 +182,8 @@ class PluginsTestCase(unittest.TestCase):
         self.assertNotEqual(orig_max_size, 1024)
 
         # change the sources and recompile
-        os.system("sed -ri 's?MAX_LV_SIZE;?1024;//test-change?' src/plugins/lvm.c > /dev/null")
-        ret = os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
+        os.system("sed -ri 's?MAX_LV_SIZE;?1024;//test-change?' src/plugins/lvm/lvm-common.c > /dev/null")
+        ret = os.system("make -C src/plugins/lvm/ libbd_lvm.la >/dev/null 2>&1")
         self.assertEqual(ret, 0, "Failed to recompile libblockdev for reload test")
 
         # library should successfully reinitialize without reloading plugins
@@ -199,8 +199,8 @@ class PluginsTestCase(unittest.TestCase):
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), 1024)
 
         # change the sources back and recompile
-        os.system("sed -ri 's?1024;//test-change?MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
-        os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
+        os.system("sed -ri 's?1024;//test-change?MAX_LV_SIZE;?' src/plugins/lvm/lvm-common.c > /dev/null")
+        os.system("make -C src/plugins/lvm/ libbd_lvm.la >/dev/null 2>&1")
 
         # library should successfully reinitialize reloading original plugins
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
@@ -221,16 +221,16 @@ class PluginsTestCase(unittest.TestCase):
         self.assertNotEqual(orig_max_size, 1024)
 
         # change the sources and recompile
-        os.system("sed -ri 's?MAX_LV_SIZE;?1024;//test-change?' src/plugins/lvm.c > /dev/null")
-        ret = os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
+        os.system("sed -ri 's?MAX_LV_SIZE;?1024;//test-change?' src/plugins/lvm/lvm-common.c > /dev/null")
+        ret = os.system("make -C src/plugins/lvm/ libbd_lvm.la >/dev/null 2>&1")
         self.assertEqual(ret, 0, "Failed to recompile libblockdev for force plugin test")
 
         # proclaim the new build a different plugin
-        os.system("cp src/plugins/.libs/libbd_lvm.so src/plugins/.libs/libbd_lvm2.so")
+        os.system("cp src/plugins/lvm/.libs/libbd_lvm.so src/plugins/lvm/.libs/libbd_lvm2.so")
 
         # change the sources back and recompile
-        os.system("sed -ri 's?1024;//test-change?MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
-        ret = os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
+        os.system("sed -ri 's?1024;//test-change?MAX_LV_SIZE;?' src/plugins/lvm/lvm-common.c > /dev/null")
+        ret = os.system("make -C src/plugins/lvm/ libbd_lvm.la >/dev/null 2>&1")
         self.assertEqual(ret, 0, "Failed to recompile libblockdev for force plugin test")
 
         # force the new plugin to be used
@@ -241,7 +241,7 @@ class PluginsTestCase(unittest.TestCase):
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), 1024)
 
         # clean after ourselves
-        os.system ("rm -f src/plugins/.libs/libbd_lvm2.so")
+        os.system ("rm -f src/plugins/lvm/.libs/libbd_lvm2.so")
 
         # force the old plugin to be used
         ps = BlockDev.PluginSpec(name=BlockDev.Plugin.LVM, so_name="libbd_lvm.so")
@@ -262,16 +262,16 @@ class PluginsTestCase(unittest.TestCase):
         self.assertNotEqual(orig_max_size, 1024)
 
         # change the sources and recompile
-        os.system("sed -ri 's?MAX_LV_SIZE;?1024;//test-change?' src/plugins/lvm.c > /dev/null")
-        ret = os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
+        os.system("sed -ri 's?MAX_LV_SIZE;?1024;//test-change?' src/plugins/lvm/lvm-common.c > /dev/null")
+        ret = os.system("make -C src/plugins/lvm/ libbd_lvm.la >/dev/null 2>&1")
         self.assertEqual(ret, 0, "Failed to recompile libblockdev for plugin priority test")
 
         # proclaim the new build a different plugin
-        os.system("cp src/plugins/.libs/libbd_lvm.so src/plugins/.libs/libbd_lvm2.so.3")
+        os.system("cp src/plugins/lvm/.libs/libbd_lvm.so src/plugins/lvm/.libs/libbd_lvm2.so.3")
 
         # change the sources back and recompile
-        os.system("sed -ri 's?1024;//test-change?MAX_LV_SIZE;?' src/plugins/lvm.c > /dev/null")
-        ret = os.system("make -C src/plugins/ libbd_lvm.la >/dev/null 2>&1")
+        os.system("sed -ri 's?1024;//test-change?MAX_LV_SIZE;?' src/plugins/lvm/lvm-common.c > /dev/null")
+        ret = os.system("make -C src/plugins/lvm/ libbd_lvm.la >/dev/null 2>&1")
         self.assertEqual(ret, 0, "Failed to recompile libblockdev for plugin priority test")
 
         # now reinit the library with the config preferring the new build
@@ -312,4 +312,4 @@ class PluginsTestCase(unittest.TestCase):
         self.assertEqual(BlockDev.lvm_get_max_lv_size(), orig_max_size)
 
         # clean after ourselves
-        os.system ("rm -f src/plugins/.libs/libbd_lvm2.so")
+        os.system ("rm -f src/plugins/lvm/.libs/libbd_lvm2.so")

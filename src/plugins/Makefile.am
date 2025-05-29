@@ -8,6 +8,7 @@ if WITH_NVME
 SUBDIRS += nvme
 endif
 
+SUBDIRS += lvm
 SUBDIRS += smart
 
 lib_LTLIBRARIES =
@@ -26,14 +27,6 @@ endif
 
 if WITH_LOOP
 lib_LTLIBRARIES += libbd_loop.la
-endif
-
-if WITH_LVM
-lib_LTLIBRARIES += libbd_lvm.la
-endif
-
-if WITH_LVM_DBUS
-lib_LTLIBRARIES += libbd_lvm-dbus.la
 endif
 
 if WITH_MDRAID
@@ -96,22 +89,6 @@ libbd_loop_la_LIBADD = ${builddir}/../utils/libbd_utils.la $(GLIB_LIBS)
 libbd_loop_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 3:0:0 -Wl,--no-undefined -export-symbols-regex '^bd_.*'
 libbd_loop_la_CPPFLAGS = -I${builddir}/../../include/
 libbd_loop_la_SOURCES = loop.c loop.h
-endif
-
-if WITH_LVM
-libbd_lvm_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(DEVMAPPER_CFLAGS) $(YAML_CFLAGS) -Wall -Wextra -Werror
-libbd_lvm_la_LIBADD = ${builddir}/../utils/libbd_utils.la -lm $(GLIB_LIBS) $(GIO_LIBS) $(DEVMAPPER_LIBS) $(YAML_LIBS)
-libbd_lvm_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 3:0:0 -Wl,--no-undefined -export-symbols-regex '^bd_.*'
-libbd_lvm_la_CPPFLAGS = -I${builddir}/../../include/
-libbd_lvm_la_SOURCES = lvm.c lvm.h check_deps.c check_deps.h dm_logging.c dm_logging.h vdo_stats.c vdo_stats.h
-endif
-
-if WITH_LVM_DBUS
-libbd_lvm_dbus_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_CFLAGS) $(DEVMAPPER_CFLAGS) $(YAML_CFLAGS) -Wall -Wextra -Werror
-libbd_lvm_dbus_la_LIBADD = ${builddir}/../utils/libbd_utils.la -lm $(GLIB_LIBS) $(GIO_LIBS) $(DEVMAPPER_LIBS) $(YAML_LIBS)
-libbd_lvm_dbus_la_LDFLAGS = -L${srcdir}/../utils/ -version-info 3:0:0 -Wl,--no-undefined -export-symbols-regex '^bd_.*'
-libbd_lvm_dbus_la_CPPFLAGS = -I${builddir}/../../include/
-libbd_lvm_dbus_la_SOURCES = lvm-dbus.c lvm.h check_deps.c check_deps.h dm_logging.c dm_logging.h vdo_stats.c vdo_stats.h
 endif
 
 if WITH_MDRAID
@@ -180,14 +157,6 @@ endif
 
 if WITH_LOOP
 libinclude_HEADERS += loop.h
-endif
-
-if WITH_LVM
-libinclude_HEADERS += lvm.h
-else
-if WITH_LVM_DBUS
-libinclude_HEADERS += lvm.h
-endif
 endif
 
 if WITH_MDRAID
