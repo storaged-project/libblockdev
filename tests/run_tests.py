@@ -342,9 +342,13 @@ if __name__ == '__main__':
         if skip_id:
             test_name, test_module = _split_test_id(test_id)
             reason = "not supported on this distribution in this version and arch: %s" % skipping[skip_id]
-            print("%s (%s)\n%s ... skipped '%s'" % (test_name, test_module,
-                                                    test._testMethodDoc, reason),
-                  file=sys.stderr)
+            if test._testMethodDoc:
+                print("%s (%s)\n%s ... skipped '%s'" % (test_name, test_module,
+                                                        test._testMethodDoc, reason),
+                      file=sys.stderr)
+            else:
+                print("%s (%s) ... skipped '%s'" % (test_name, test_module, reason),
+                      file=sys.stderr)
             continue
 
         # finally add the test to the suite
