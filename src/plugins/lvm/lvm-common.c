@@ -787,3 +787,66 @@ gchar* bd_lvm_config_get (const gchar *section, const gchar *setting, const gcha
         return NULL;
     return g_strchomp (output);
 }
+
+gboolean _vgcfgbackup_restore (const gchar *command, const gchar *vg_name, const gchar *file, const BDExtraArg **extra, GError **error) {
+    const gchar *args[6] = {"lvm", NULL, NULL, NULL, NULL, NULL};
+    guint next_arg = 1;
+    gchar *output = NULL;
+    g_autofree gchar *config_arg = NULL;
+
+    args[next_arg++] = command;
+    if (file) {
+        args[next_arg++] = "-f";
+        args[next_arg++] = file;
+    }
+    args[next_arg++] = vg_name;
+
+    g_mutex_lock (&global_config_lock);
+    if (global_config_str) {
+        config_arg = g_strdup_printf ("--config=%s", global_config_str);
+        args[next_arg++] = config_arg;
+    }
+    g_mutex_unlock (&global_config_lock);
+
+    return bd_utils_exec_and_capture_output (args, extra, &output, error);
+}
+
+/**
+ * bd_lvm_vgcfgbackup:
+ * @vg_name: name of the VG to backup configuration
+ * @backup_file: (nullable): file to save the backup to or %NULL for using the default backup file
+ *                           in /etc/lvm/backup
+ * @extra: (nullable) (array zero-terminated=1): extra options for the vgcfgbackup command
+ *                                               (just passed to LVM as is)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Note: This function does not back up the data content of LVs. See `vgcfbackup(8)` man page
+ *       for more information.
+ *
+ * Returns: Whether the backup was successfully created or not.
+ *
+ * Tech category: %BD_LVM_TECH_VG_CFG_BACKUP_RESTORE no mode (it is ignored)
+ */
+gboolean bd_lvm_vgcfgbackup (const gchar *vg_name, const gchar *backup_file, const BDExtraArg **extra, GError **error) {
+    return _vgcfgbackup_restore ("vgcfgbackup", vg_name, backup_file, extra, error);
+}
+
+/**
+ * bd_lvm_vgcfgrestore:
+ * @vg_name: name of the VG to restore configuration
+ * @backup_file: (nullable): file to restore VG configuration from to or %NULL for using the
+ *                           latest backup in /etc/lvm/backup
+ * @extra: (nullable) (array zero-terminated=1): extra options for the vgcfgrestore command
+ *                                               (just passed to LVM as is)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Note: This function restores VG configuration created by %bd_lvm_vgcfgbackup from given
+ *       @backup_file or from the latest backup in /etc/lvm/backup.
+ *
+ * Returns: Whether the configuration was successfully restored or not.
+ *
+ * Tech category: %BD_LVM_TECH_VG_CFG_BACKUP_RESTORE no mode (it is ignored)
+ */
+gboolean bd_lvm_vgcfgrestore (const gchar *vg_name, const gchar *backup_file, const BDExtraArg **extra, GError **error) {
+    return _vgcfgbackup_restore ("vgcfgrestore", vg_name, backup_file, extra, error);
+}

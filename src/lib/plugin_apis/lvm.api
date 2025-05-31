@@ -738,6 +738,7 @@ typedef enum {
     BD_LVM_TECH_DEVICES,
     BD_LVM_TECH_SHARED,
     BD_LVM_TECH_CONFIG,
+    BD_LVM_TECH_VG_CFG_BACKUP_RESTORE,
 } BDLVMTech;
 
 typedef enum {
@@ -2043,5 +2044,41 @@ gboolean bd_lvm_devices_delete (const gchar *device, const gchar *devices_file, 
  * Tech category: %BD_LVM_TECH_CONFIG no mode (it is ignored)
  */
 gchar* bd_lvm_config_get (const gchar *section, const gchar *setting, const gchar *type, gboolean values_only, gboolean global_config, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_lvm_vgcfgbackup:
+ * @vg_name: name of the VG to backup configuration
+ * @backup_file: (nullable): file to save the backup to or %NULL for using the default backup file
+ *                           in /etc/lvm/backup
+ * @extra: (nullable) (array zero-terminated=1): extra options for the vgcfgbackup command
+ *                                               (just passed to LVM as is)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Note: This function does not back up the data content of LVs. See `vgcfbackup(8)` man page
+ *       for more information.
+ *
+ * Returns: Whether the backup was successfully created or not.
+ *
+ * Tech category: %BD_LVM_TECH_VG_CFG_BACKUP_RESTORE no mode (it is ignored)
+ */
+gboolean bd_lvm_vgcfgbackup (const gchar *vg_name, const gchar *backup_file, const BDExtraArg **extra, GError **error);
+
+/**
+ * bd_lvm_vgcfgrestore:
+ * @vg_name: name of the VG to restore configuration
+ * @backup_file: (nullable): file to restore VG configuration from to or %NULL for using the
+ *                           latest backup in /etc/lvm/backup
+ * @extra: (nullable) (array zero-terminated=1): extra options for the vgcfgrestore command
+ *                                               (just passed to LVM as is)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Note: This function restores VG configuration created by %bd_lvm_vgcfgbackup from given
+ *       @backup_file or from the latest backup in /etc/lvm/backup.
+ *
+ * Returns: Whether the configuration was successfully restored or not.
+ *
+ * Tech category: %BD_LVM_TECH_VG_CFG_BACKUP_RESTORE no mode (it is ignored)
+ */
+gboolean bd_lvm_vgcfgrestore (const gchar *vg_name, const gchar *backup_file, const BDExtraArg **extra, GError **error);
 
 #endif  /* BD_LVM_API */

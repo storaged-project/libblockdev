@@ -5,6 +5,7 @@ import math
 import overrides_hack
 import re
 import shutil
+import tempfile
 import time
 from contextlib import contextmanager
 from packaging.version import Version
@@ -2291,3 +2292,33 @@ class LvmConfigTestPvremove(LvmPVonlyTestCase):
         BlockDev.lvm_set_global_config("")
         succ = BlockDev.lvm_pvremove(self.loop_dev)
         self.assertTrue(succ)
+
+
+class LvmTestBackupRestore(LvmPVVGTestCase):
+    def test_vgcfgbackup_restore(self):
+        """Verify that it is possible to backup and restore VG configuration"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0, None)
+        self.assertTrue(succ)
+
+        with tempfile.TemporaryDirectory() as d:
+            succ = BlockDev.lvm_vgcfgbackup("testVG", os.path.join(d, "testVGbackup"))
+            self.assertTrue(succ)
+            self.assertTrue(os.path.isfile(os.path.join(d, "testVGbackup")))
+
+            succ = BlockDev.lvm_vgcfgrestore("testVG", os.path.join(d, "testVGbackup"))
+            self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcfgbackup("testVG", None)
+        self.assertTrue(succ)
+
+        # default location is /etc/lvm/backup/<vgname>
+        self.assertTrue(os.path.isfile("/etc/lvm/backup/testVG"))
+
+        succ = BlockDev.lvm_vgcfgrestore("testVG", None)
+        self.assertTrue(succ)
+
+        os.unlink("/etc/lvm/backup/testVG")
