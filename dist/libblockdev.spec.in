@@ -85,7 +85,7 @@
 %define configure_opts %{?python3_copts} %{?lvm_dbus_copts} %{?btrfs_copts} %{?crypto_copts} %{?dm_copts} %{?loop_copts} %{?lvm_copts} %{?lvm_dbus_copts} %{?mdraid_copts} %{?mpath_copts} %{?swap_copts} %{?part_copts} %{?fs_copts} %{?nvdimm_copts} %{?tools_copts} %{?gi_copts} %{?nvme_copts} %{?smart_copts} %{?smartmontools_copts}
 
 Name:        libblockdev
-Version:     3.3.0
+Version:     3.3.1
 Release:     1%{?dist}
 Summary:     A library for low-level manipulation with block devices
 License:     LGPL-2.1-or-later
@@ -958,6 +958,9 @@ find %{buildroot} -type f -name "*.la" | xargs %{__rm}
 %files plugins-all
 
 %changelog
+* Wed Jun 18 2025 Vojtech Trefny <vtrefny@redhat.com> - 3.3.1-1
+- Don't allow suid and dev set on fs resize (Thomas.Blume)
+
 * Thu Feb 13 2025 Vojtech Trefny <vtrefny@redhat.com> - 3.3.0-1
 - lvm: Fix check for BD_LVM_TECH_CONFIG availability in CLI plugin (vtrefny)
 - lvm: Require higher version of LVM for lvm.conf parsing (vtrefny)
