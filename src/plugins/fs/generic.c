@@ -683,7 +683,7 @@ static gchar* fs_mount (const gchar *device, gchar *fstype, gboolean read_only, 
                              "Failed to create temporary directory for mounting '%s'.", device);
                 return NULL;
             }
-            ret = bd_fs_mount (device, mountpoint, fstype, read_only ? "ro" : NULL, NULL, &l_error);
+            ret = bd_fs_mount (device, mountpoint, fstype, read_only ? "nosuid,nodev,ro" : "nosuid,nodev", NULL, &l_error);
             if (!ret) {
                 g_propagate_prefixed_error (error, l_error, "Failed to mount '%s': ", device);
                 g_rmdir (mountpoint);
