@@ -1,3 +1,9 @@
+Libblockdev 2.30
+----------------
+
+New bugfix release of of libblockdev library fixing the LPE security issue CVE-2025-6019.
+
+
 Libblockdev 2.29
 ----------------
 
