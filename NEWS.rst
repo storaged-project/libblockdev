@@ -1,3 +1,15 @@
+Libblockdev 3.3.1
+------------------
+
+New bugfix release of libblockdev library fixing the LPE issue CVE-2025-6019.
+
+**Full list of changes**
+
+Thomas Blume (1):
+
+- Don't allow suid and dev set on fs resize
+
+
 Libblockdev 3.3.0
 ------------------
 
