@@ -313,7 +313,7 @@ AS_IF([test "x$with_smart" != "xno"],
 
 AS_IF([test "x$with_smart" != "xno"],
       [SAVED_CFLAGS=$CFLAGS
-       CFLAGS+=" -I$drivedb_path"
+       CFLAGS="${CFLAGS} -I$drivedb_path"
        AC_MSG_CHECKING([for drivedb.h presence])
        AC_COMPILE_IFELSE(
            [AC_LANG_PROGRAM([
