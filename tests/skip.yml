@@ -70,3 +70,9 @@
   skip_on:
     - distro: ["fedora", "centos", "debian"]
       reason: "NVDIMM plugin is deprecated"
+
+- test: crypto_test.CryptoTestOpenClose.test_luks_open_close
+  skip_on:
+    - distro: "fedora"
+      version: "43"
+      reason: "Bug in cryptsetup aborting when activating LUKSv1 with keyring"
