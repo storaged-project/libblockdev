@@ -28,6 +28,14 @@ jobs:
   branch: master
 
 - job: copr_build
+  targets:
+    - centos-stream-10-aarch64
+    - centos-stream-10-ppc64le
+    - centos-stream-10-x86_64
+  trigger: pull_request
+  branch: rhel10-branch
+
+- job: copr_build
   trigger: commit
   owner: "@storage"
   project: blivet-daily
