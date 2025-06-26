@@ -100,6 +100,12 @@ jobs:
     - fedora-latest-stable
   branch: master
 
+- job: tests
+  trigger: pull_request
+  targets:
+    - centos-stream-10-x86_64
+  branch: rhel10-branch
+
 # run tests for libblockdev consumers, see plans/ with `revdeps_blivet == yes`
 - job: tests
   identifier: revdeps_blivet
