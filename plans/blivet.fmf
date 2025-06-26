@@ -9,21 +9,24 @@ prepare:
   - name: copr
     how: shell
     script:
-      - sudo dnf install -y 'dnf-command(copr)'
+      - sudo dnf install -y python3-libdnf5 'dnf-command(copr)'
       - sudo dnf copr enable -y @storage/udisks-daily
       # TF prioritizes Fedora tag repo over all others, in particular our daily COPR
       - for f in $(grep -l -r 'testing-farm-tag-repository' /etc/yum.repos.d); do sed -i '/priority/d' "$f" ;done
       - sudo dnf -y update
 
   - name: ansible
-    how: ansible
-    playbook:
-        - https://raw.githubusercontent.com/storaged-project/blivet/master/misc/install-test-dependencies.yml
+    how: shell
+    script:
+      - sudo dnf install -y curl ansible
+      - curl -Ok https://raw.githubusercontent.com/storaged-project/blivet/main/misc/install-test-dependencies.yml
+      - curl -Ok https://raw.githubusercontent.com/storaged-project/blivet/main/misc/blivet-tasks.yml
+      - ansible-playbook -K -i "localhost," -c local install-test-dependencies.yml
 
 discover:
     how: shell
     url: https://github.com/storaged-project/blivet
-    ref: master
+    ref: main
     tests:
       - name: all
         test: make test
