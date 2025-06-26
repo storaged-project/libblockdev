@@ -9,16 +9,22 @@ prepare:
   - name: copr
     how: shell
     script:
-      - sudo dnf install -y 'dnf-command(copr)'
+      - sudo dnf install -y python3-libdnf5 'dnf-command(copr)'
       - sudo dnf copr enable -y @storage/udisks-daily
       # TF prioritizes Fedora tag repo over all others, in particular our daily COPR
       - for f in $(grep -l -r 'testing-farm-tag-repository' /etc/yum.repos.d); do sed -i '/priority/d' "$f" ;done
       - sudo dnf -y update
+      # amazon-ec2-utils creates sda -> nvme symlinks breaking our tests
+      # amazon-ec2-utils also ships /etc/udev/rules.d/60-cdrom_id.rules that breaks scsi_debug cdrom capabilities
+      - if rpm -q amazon-ec2-utils; then rpm -e --verbose amazon-ec2-utils && udevadm trigger; fi
 
   - name: ansible
-    how: ansible
-    playbook:
-        - https://raw.githubusercontent.com/storaged-project/udisks/master/misc/install-test-dependencies.yml
+    how: shell
+    script:
+      - sudo dnf install -y curl ansible
+      - curl -Ok https://raw.githubusercontent.com/storaged-project/udisks/master/misc/install-test-dependencies.yml
+      - curl -Ok https://raw.githubusercontent.com/storaged-project/udisks/master/misc/udisks-tasks.yml
+      - ansible-playbook -K -i "localhost," -c local install-test-dependencies.yml
 
 discover:
     how: shell
