@@ -25,6 +25,7 @@ jobs:
     - fedora-latest-stable-ppc64le
     - fedora-latest-stable-x86_64
   trigger: pull_request
+  branch: master
 
 - job: copr_build
   trigger: commit
@@ -89,6 +90,7 @@ jobs:
   trigger: pull_request
   targets:
     - fedora-latest-stable
+  branch: master
 
 # run tests for libblockdev consumers, see plans/ with `revdeps_blivet == yes`
 - job: tests
@@ -99,6 +101,7 @@ jobs:
       message: "Blivet tests failed for commit {commit_sha}. @vojtechtrefny please check."
   targets:
     - fedora-latest-stable
+  branch: master
   tf_extra_params:
     environments:
       - artifacts:
@@ -116,6 +119,7 @@ jobs:
       message: "udisks tests failed for commit {commit_sha}. @vojtechtrefny @tbzatek please check."
   targets:
     - fedora-latest-stable
+  branch: master
   tf_extra_params:
     environments:
       - artifacts:
