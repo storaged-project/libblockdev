@@ -13,17 +13,16 @@ actions:
 
 jobs:
 - job: copr_build
-  metadata:
-    targets:
-    - fedora-rawhide-aarch64
-    - fedora-rawhide-ppc64le
-    - fedora-rawhide-x86_64
-    - fedora-latest-aarch64
-    - fedora-latest-ppc64le
-    - fedora-latest-x86_64
-    - fedora-latest-stable-aarch64
-    - fedora-latest-stable-ppc64le
-    - fedora-latest-stable-x86_64
+  targets:
+  - fedora-rawhide-aarch64
+  - fedora-rawhide-ppc64le
+  - fedora-rawhide-x86_64
+  - fedora-latest-aarch64
+  - fedora-latest-ppc64le
+  - fedora-latest-x86_64
+  - fedora-latest-stable-aarch64
+  - fedora-latest-stable-ppc64le
+  - fedora-latest-stable-x86_64
   trigger: pull_request
   branch: master
 
