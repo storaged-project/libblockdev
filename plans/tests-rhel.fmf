@@ -3,7 +3,7 @@ summary: Run tests
 adjust+:
   - when: revdeps_blivet == yes or revdeps_udisks == yes
     enabled: false
-  - when: distro == centos
+  - when: distro == fedora
     enabled: false
 
 prepare:
@@ -11,7 +11,7 @@ prepare:
     how: shell
     script:
       - sudo dnf install -y python3-libdnf5 'dnf-command(copr)'
-      - sudo dnf copr enable -y @storage/udisks-daily
+      - sudo dnf copr enable -y @storage/udisks-daily centos-stream-10-x86_64
       # TF prioritizes Fedora tag repo over all others, in particular our daily COPR
       - for f in $(grep -l -r 'testing-farm-tag-repository' /etc/yum.repos.d); do sed -i '/priority/d' "$f" ;done
       - sudo dnf -y update

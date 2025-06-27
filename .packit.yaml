@@ -13,18 +13,26 @@ actions:
 
 jobs:
 - job: copr_build
-  metadata:
-    targets:
-    - fedora-rawhide-aarch64
-    - fedora-rawhide-ppc64le
-    - fedora-rawhide-x86_64
-    - fedora-latest-aarch64
-    - fedora-latest-ppc64le
-    - fedora-latest-x86_64
-    - fedora-latest-stable-aarch64
-    - fedora-latest-stable-ppc64le
-    - fedora-latest-stable-x86_64
+  targets:
+  - fedora-rawhide-aarch64
+  - fedora-rawhide-ppc64le
+  - fedora-rawhide-x86_64
+  - fedora-latest-aarch64
+  - fedora-latest-ppc64le
+  - fedora-latest-x86_64
+  - fedora-latest-stable-aarch64
+  - fedora-latest-stable-ppc64le
+  - fedora-latest-stable-x86_64
   trigger: pull_request
+  branch: master
+
+- job: copr_build
+  targets:
+    - centos-stream-10-aarch64
+    - centos-stream-10-ppc64le
+    - centos-stream-10-x86_64
+  trigger: pull_request
+  branch: rhel10-branch
 
 - job: copr_build
   trigger: commit
@@ -89,6 +97,13 @@ jobs:
   trigger: pull_request
   targets:
     - fedora-latest-stable
+  branch: master
+
+- job: tests
+  trigger: pull_request
+  targets:
+    - centos-stream-10-x86_64
+  branch: rhel10-branch
 
 # run tests for libblockdev consumers, see plans/ with `revdeps_blivet == yes`
 - job: tests
@@ -99,6 +114,7 @@ jobs:
       message: "Blivet tests failed for commit {commit_sha}. @vojtechtrefny please check."
   targets:
     - fedora-latest-stable
+  branch: master
   tf_extra_params:
     environments:
       - artifacts:
@@ -116,6 +132,7 @@ jobs:
       message: "udisks tests failed for commit {commit_sha}. @vojtechtrefny @tbzatek please check."
   targets:
     - fedora-latest-stable
+  branch: master
   tf_extra_params:
     environments:
       - artifacts:
