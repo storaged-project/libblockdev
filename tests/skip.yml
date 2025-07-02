@@ -80,5 +80,5 @@
 - test: mdraid_test.MDTestNominateDenominate.test_nominate_denominate
   skip_on:
     - distro: "centos"
-      version: "10"
+      version: ["9", "10"]
       reason: "Race condition in denominate with latest mdadm v4.4"
