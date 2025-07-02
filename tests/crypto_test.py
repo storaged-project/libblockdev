@@ -103,6 +103,15 @@ class CryptoTestCase(unittest.TestCase):
     def _luks2_format(self, device, passphrase, keyfile=None):
         return self._luks_format(device, passphrase, keyfile, BlockDev.CryptoLUKSVersion.LUKS2)
 
+    def _is_fips_enabled(self):
+        if not os.path.exists("/proc/sys/crypto/fips_enabled"):
+            # if the file doesn't exist, we are definitely not in FIPS mode
+            return False
+
+        with open("/proc/sys/crypto/fips_enabled", "r") as f:
+            enabled = f.read()
+        return enabled.strip() == "1"
+
 class CryptoNoDevTestCase(CryptoTestCase):
     def setUp(self):
         # we don't need block devices for this test
@@ -213,15 +222,6 @@ class CryptoTestFormat(CryptoTestCase):
         if not m or len(m.groups()) != 1:
             self.fail("Failed to get pbkdf information from:\n%s %s" % (out, err))
         self.assertEqual(m.group(1), "pbkdf2")
-
-    def _is_fips_enabled(self):
-        if not os.path.exists("/proc/sys/crypto/fips_enabled"):
-            # if the file doesn't exist, we are definitely not in FIPS mode
-            return False
-
-        with open("/proc/sys/crypto/fips_enabled", "r") as f:
-            enabled = f.read()
-        return enabled.strip() == "1"
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
     def test_luks2_format_pbkdf_options(self):
@@ -704,8 +704,7 @@ class CryptoTestEscrow(CryptoTestCase):
     def setUp(self):
         # I am not able to generate a self-signed certificate that would work in FIPS
         # so let's just skip this for now
-        fips = read_file("/proc/sys/crypto/fips_enabled")
-        if int(fips) == 1:
+        if self._is_fips_enabled():
             self.skipTest("Skipping escrow tests in FIPS mode")
 
         super(CryptoTestEscrow, self).setUp()
