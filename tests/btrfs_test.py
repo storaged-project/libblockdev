@@ -358,6 +358,13 @@ class BtrfsTestListSubvolumes(BtrfsTestCase):
         self.assertEqual(subvols[0].path, "subvol1")
         self.assertEqual(subvols[1].path, "subvol1/bar")
 
+        # test also subvolumes with spaces in name
+        succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "subvol with spaces", None)
+        self.assertTrue(succ)
+
+        subvols = BlockDev.btrfs_list_subvolumes(TEST_MNT, False)
+        self.assertTrue(any(subvol.path == "subvol with spaces" for subvol in subvols))
+
     @tag_test(TestTags.CORE)
     def test_list_subvolumes_different_mount(self):
         """Verify that it is possible get to info about subvolumes with subvol= mount option"""
