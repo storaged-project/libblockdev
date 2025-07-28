@@ -39,18 +39,12 @@
     - distro: "debian"
       reason: "mount.ntfs-3g randomly hangs on Debian testing"
 
-- test: lvm_dbus_tests.LvmTestLVsnapshots.test_snapshotcreate_lvorigin_snapshotmerge
-  skip_on:
-    - distro: "centos"
-      version: "9"
-      reason: "snapshot merge doesn't work on CentOS 9 Stream with LVM DBus API"
-
-- test: (lvm_test|lvm_dbus_tests).LvmPVVGLVWritecacheAttachDetachTestCase
+- test: (lvm_test|lvm_dbus_tests).LvmTestCache.test_writecache_attach_detach
   skip_on:
     - arch: "i686"
       reason: "Cache attach/detach fails with ENOMEM on 32bit systems"
 
-- test: (lvm_test|lvm_dbus_tests).LVMVDOTest
+- test: (lvm_test|lvm_dbus_tests).LvmVDOTest
   skip_on:
     - distro: "debian"
       arch: "i686"
