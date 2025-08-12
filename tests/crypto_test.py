@@ -492,36 +492,19 @@ class CryptoTestOpenClose(CryptoTestCase):
         self.assertTrue(succ)
 
 
-class CryptoTestAddKey(CryptoTestCase):
-    def _add_key(self, create_fn):
-        """Verify that adding key to LUKS device works"""
+class CryptoTestAddRemoveKey(CryptoTestCase):
+    def _remove_key(self, create_fn):
+        """Verify that adding/removing key to/from LUKS device works"""
 
         create_fn(self.loop_devs[0], PASSWD, None)
 
+        # add key, wrong passphrase
         with self.assertRaises(GLib.GError):
             ctx = BlockDev.CryptoKeyslotContext(passphrase="wrong-passphrase")
             nctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD2)
             BlockDev.crypto_luks_add_key(self.loop_devs[0], ctx, nctx)
 
-        ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
-        nctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD2)
-        succ = BlockDev.crypto_luks_add_key(self.loop_devs[0], ctx, nctx)
-        self.assertTrue(succ)
-
-    @tag_test(TestTags.SLOW)
-    def test_luks_add_key(self):
-        self._add_key(self._luks_format)
-
-    @tag_test(TestTags.SLOW)
-    def test_luks2_add_key(self):
-        self._add_key(self._luks2_format)
-
-class CryptoTestRemoveKey(CryptoTestCase):
-    def _remove_key(self, create_fn):
-        """Verify that removing key from LUKS device works"""
-
-        create_fn(self.loop_devs[0], PASSWD, None)
-
+        # add key, correct passphrase
         ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
         nctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD2)
         succ = BlockDev.crypto_luks_add_key(self.loop_devs[0], ctx, nctx)
@@ -534,10 +517,12 @@ class CryptoTestRemoveKey(CryptoTestCase):
         nctx3 = BlockDev.CryptoKeyslotContext(keyfile=self.keyfile)
         succ = BlockDev.crypto_luks_add_key(self.loop_devs[0], ctx, nctx3)
 
+        # remove key, wrong passphrase
         with self.assertRaises(GLib.GError):
             wctx = BlockDev.CryptoKeyslotContext(passphrase="wrong-passphrase")
             BlockDev.crypto_luks_remove_key(self.loop_devs[0], wctx)
 
+        # remove key, correct passphrase
         succ = BlockDev.crypto_luks_remove_key(self.loop_devs[0], ctx)
         self.assertTrue(succ)
 
@@ -606,30 +591,6 @@ class CryptoTestChangeKey(CryptoTestCase):
     def test_luks2_change_key(self):
         self._change_key(self._luks2_format)
 
-class CryptoTestIsLuks(CryptoTestCase):
-    _num_devices = 2
-
-    def _is_luks(self, create_fn):
-        """Verify that LUKS device recognition works"""
-
-        with self.assertRaises(GLib.GError):
-            BlockDev.crypto_device_is_luks("/non/existing/device")
-
-        create_fn(self.loop_devs[0], PASSWD, None)
-
-        is_luks = BlockDev.crypto_device_is_luks(self.loop_devs[0])
-        self.assertTrue(is_luks)
-
-        is_luks = BlockDev.crypto_device_is_luks(self.loop_devs[1])
-        self.assertFalse(is_luks)
-
-    @tag_test(TestTags.SLOW)
-    def test_is_luks(self):
-        self._is_luks(self._luks_format)
-
-    @tag_test(TestTags.SLOW)
-    def test_is_luks2(self):
-        self._is_luks(self._luks2_format)
 
 class CryptoTestLuksStatus(CryptoTestCase):
     def _luks_status(self, create_fn):
@@ -983,6 +944,7 @@ class CryptoTestHeaderBackupRestore(CryptoTestCase):
         self._luks_header_backup_restore(self._luks2_format)
 
 class CryptoTestInfo(CryptoTestCase):
+    _num_devices = 2
 
     def _verify_luks_info(self, info, version):
         self.assertIsNotNone(info)
@@ -1034,6 +996,13 @@ class CryptoTestInfo(CryptoTestCase):
         succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
         self.assertTrue(succ)
 
+        # test the crypto_device_is_luks function too
+        is_luks = BlockDev.crypto_device_is_luks(self.loop_devs[0])
+        self.assertTrue(is_luks)
+
+        is_luks = BlockDev.crypto_device_is_luks(self.loop_devs[1])
+        self.assertFalse(is_luks)
+
     @tag_test(TestTags.SLOW, TestTags.CORE)
     def test_luks2_info(self):
         """Verify that we can get information about a LUKS 2 device"""
@@ -1061,32 +1030,21 @@ class CryptoTestInfo(CryptoTestCase):
         succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
         self.assertTrue(succ)
 
+        # test the crypto_device_is_luks function too
+        is_luks = BlockDev.crypto_device_is_luks(self.loop_devs[0])
+        self.assertTrue(is_luks)
 
-class CryptoTestSetLabel(CryptoTestCase):
+        is_luks = BlockDev.crypto_device_is_luks(self.loop_devs[1])
+        self.assertFalse(is_luks)
+
+
+class CryptoTestSetLabelUuid(CryptoTestCase):
 
     label = "aaaaaa"
     subsystem = "bbbbbb"
+    test_uuid = "4d7086c4-a4d3-432f-819e-73da03870df9"
 
-    @tag_test(TestTags.SLOW, TestTags.CORE)
-    def test_luks_set_label(self):
-        """Verify that we can set label on a LUKS device"""
-
-        self._luks_format(self.loop_devs[0], PASSWD)
-
-        with self.assertRaisesRegex(GLib.GError, r"Label can be set only on LUKS 2"):
-            BlockDev.crypto_luks_set_label(self.loop_devs[0], self.label, self.subsystem)
-
-        info = BlockDev.crypto_luks_info(self.loop_devs[0])
-        self.assertIsNotNone(info)
-        self.assertEqual(info.label, "")
-        self.assertEqual(info.subsystem, "")
-
-    @tag_test(TestTags.SLOW, TestTags.CORE)
-    def test_luks2_set_label(self):
-        """Verify that we can set label on a LUKS 2 device"""
-
-        self._luks2_format(self.loop_devs[0], PASSWD)
-
+    def _test_set_label(self):
         succ = BlockDev.crypto_luks_set_label(self.loop_devs[0], self.label, self.subsystem)
         self.assertTrue(succ)
 
@@ -1114,50 +1072,46 @@ class CryptoTestSetLabel(CryptoTestCase):
         _ret, subsystem, _err = run_command("blkid -p -ovalue -sSUBSYSTEM %s" % self.loop_devs[0])
         self.assertEqual(subsystem, "")
 
+    def _test_set_uuid(self):
+        succ = BlockDev.crypto_luks_set_uuid(self.loop_devs[0], self.test_uuid)
+        self.assertTrue(succ)
 
-class CryptoTestSetUuid(CryptoTestCase):
+        info = BlockDev.crypto_luks_info(self.loop_devs[0])
+        self.assertIsNotNone(info)
+        self.assertEqual(info.uuid, self.test_uuid)
 
-    test_uuid = "4d7086c4-a4d3-432f-819e-73da03870df9"
+        succ = BlockDev.crypto_luks_set_uuid(self.loop_devs[0], None)
+        self.assertTrue(succ)
+
+        info = BlockDev.crypto_luks_info(self.loop_devs[0])
+        self.assertIsNotNone(info)
+        self.assertNotEqual(info.uuid, self.test_uuid)
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
-    def test_luks_set_uuid(self):
-        """Verify that we can set label on a LUKS device"""
+    def test_luks_set_label_uuid(self):
+        """Verify that we can set label and UUID on a LUKS device"""
 
         self._luks_format(self.loop_devs[0], PASSWD)
 
-        succ = BlockDev.crypto_luks_set_uuid(self.loop_devs[0], self.test_uuid)
-        self.assertTrue(succ)
+        # setting label is not supported on LUKS1
+        with self.assertRaisesRegex(GLib.GError, r"Label can be set only on LUKS 2"):
+            BlockDev.crypto_luks_set_label(self.loop_devs[0], self.label, self.subsystem)
 
         info = BlockDev.crypto_luks_info(self.loop_devs[0])
         self.assertIsNotNone(info)
-        self.assertEqual(info.uuid, self.test_uuid)
+        self.assertEqual(info.label, "")
+        self.assertEqual(info.subsystem, "")
 
-        succ = BlockDev.crypto_luks_set_uuid(self.loop_devs[0], None)
-        self.assertTrue(succ)
-
-        info = BlockDev.crypto_luks_info(self.loop_devs[0])
-        self.assertIsNotNone(info)
-        self.assertNotEqual(info.uuid, self.test_uuid)
+        # setting UUID is supported on LUKS1
+        self._test_set_uuid()
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
-    def test_luks2_set_uuid(self):
-        """Verify that we can set label on a LUKS 2 device"""
+    def test_luks2_set_label_uuid(self):
+        """Verify that we can set label and UUID on a LUKS 2 device"""
 
         self._luks2_format(self.loop_devs[0], PASSWD)
-
-        succ = BlockDev.crypto_luks_set_uuid(self.loop_devs[0], self.test_uuid)
-        self.assertTrue(succ)
-
-        info = BlockDev.crypto_luks_info(self.loop_devs[0])
-        self.assertIsNotNone(info)
-        self.assertEqual(info.uuid, self.test_uuid)
-
-        succ = BlockDev.crypto_luks_set_uuid(self.loop_devs[0], None)
-        self.assertTrue(succ)
-
-        info = BlockDev.crypto_luks_info(self.loop_devs[0])
-        self.assertIsNotNone(info)
-        self.assertNotEqual(info.uuid, self.test_uuid)
+        self._test_set_label()
+        self._test_set_uuid()
 
 
 class CryptoTestSetPersistentFlags(CryptoTestCase):
@@ -1218,20 +1172,7 @@ class CryptoTestConvert(CryptoTestCase):
         self.assertIsNotNone(info)
         self.assertEqual(info.version, BlockDev.CryptoLUKSVersion.LUKS2)
 
-        # LUKS2 -> LUKS1
-        succ = BlockDev.crypto_luks_convert(self.loop_devs[0], BlockDev.CryptoLUKSVersion.LUKS1)
-        self.assertTrue(succ)
-
-        info = BlockDev.crypto_luks_info(self.loop_devs[0])
-        self.assertIsNotNone(info)
-        self.assertEqual(info.version, BlockDev.CryptoLUKSVersion.LUKS1)
-
-    @tag_test(TestTags.SLOW, TestTags.CORE)
-    def test_convert_luks2_to_luks2_fails(self):
-        """Verify that conversion to the present format fails"""
-
-        self._luks_format(self.loop_devs[0], PASSWD, luks_version=BlockDev.CryptoLUKSVersion.LUKS2)
-
+        # LUKS2 -> LUKS2 (fail)
         with self.assertRaisesRegex(GLib.GError, r"Conversion to the LUKS2 type was requested, but device .* is "
                                                  r"already of type: LUKS2"):
             BlockDev.crypto_luks_convert(self.loop_devs[0], BlockDev.CryptoLUKSVersion.LUKS2)
@@ -1239,6 +1180,14 @@ class CryptoTestConvert(CryptoTestCase):
         info = BlockDev.crypto_luks_info(self.loop_devs[0])
         self.assertIsNotNone(info)
         self.assertEqual(info.version, BlockDev.CryptoLUKSVersion.LUKS2)
+
+        # LUKS2 -> LUKS1
+        succ = BlockDev.crypto_luks_convert(self.loop_devs[0], BlockDev.CryptoLUKSVersion.LUKS1)
+        self.assertTrue(succ)
+
+        info = BlockDev.crypto_luks_info(self.loop_devs[0])
+        self.assertIsNotNone(info)
+        self.assertEqual(info.version, BlockDev.CryptoLUKSVersion.LUKS1)
 
 
 class CryptoTestLuksSectorSize(CryptoTestCase):
