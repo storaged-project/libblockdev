@@ -38,40 +38,40 @@ class MountTestCase(FSTestCase):
     def test_mount(self):
         """ Test basic mounting and unmounting """
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
         tmp = tempfile.mkdtemp(prefix="libblockdev.", suffix="mount_test")
         self.addCleanup(os.rmdir, tmp)
 
-        self.addCleanup(utils.umount, self.loop_dev)
+        self.addCleanup(utils.umount, self.loop_devs[0])
 
         # try mounting unknown filesystem type
         with self.assertRaisesRegex(GLib.GError, r"Filesystem type .* not configured in kernel."):
-            BlockDev.fs_mount(self.loop_dev, tmp, "nonexisting", None)
+            BlockDev.fs_mount(self.loop_devs[0], tmp, "nonexisting", None)
 
-        succ = BlockDev.fs_mount(self.loop_dev, tmp, "vfat", None)
+        succ = BlockDev.fs_mount(self.loop_devs[0], tmp, "vfat", None)
         self.assertTrue(succ)
         self.assertTrue(os.path.ismount(tmp))
 
         succ = BlockDev.fs_is_mountpoint(tmp)
         self.assertTrue(succ)
 
-        mnt = BlockDev.fs_get_mountpoint(self.loop_dev)
+        mnt = BlockDev.fs_get_mountpoint(self.loop_devs[0])
         self.assertEqual(mnt, tmp)
 
-        succ = BlockDev.fs_unmount(self.loop_dev, False, False, None)
+        succ = BlockDev.fs_unmount(self.loop_devs[0], False, False, None)
         self.assertTrue(succ)
         self.assertFalse(os.path.ismount(tmp))
 
         succ = BlockDev.fs_is_mountpoint(tmp)
         self.assertFalse(succ)
 
-        mnt = BlockDev.fs_get_mountpoint(self.loop_dev)
+        mnt = BlockDev.fs_get_mountpoint(self.loop_devs[0])
         self.assertIsNone(mnt)
 
         # mount again to test unmount using the mountpoint
-        succ = BlockDev.fs_mount(self.loop_dev, tmp, None, None)
+        succ = BlockDev.fs_mount(self.loop_devs[0], tmp, None, None)
         self.assertTrue(succ)
         self.assertTrue(os.path.ismount(tmp))
 
@@ -80,26 +80,26 @@ class MountTestCase(FSTestCase):
         self.assertFalse(os.path.ismount(tmp))
 
         # mount with some options
-        succ = BlockDev.fs_mount(self.loop_dev, tmp, "vfat", "ro,noexec")
+        succ = BlockDev.fs_mount(self.loop_devs[0], tmp, "vfat", "ro,noexec")
         self.assertTrue(succ)
         self.assertTrue(os.path.ismount(tmp))
         _ret, out, _err = utils.run_command("grep %s /proc/mounts" % tmp)
         self.assertTrue(out)
         self.assertIn("ro,noexec", out)
 
-        succ = BlockDev.fs_unmount(self.loop_dev, False, False, None)
+        succ = BlockDev.fs_unmount(self.loop_devs[0], False, False, None)
         self.assertTrue(succ)
         self.assertFalse(os.path.ismount(tmp))
 
         # mount with UID=0 and GUID=0
-        succ = BlockDev.fs_mount(self.loop_dev, tmp, run_as_uid="0", run_as_gid="0")
+        succ = BlockDev.fs_mount(self.loop_devs[0], tmp, run_as_uid="0", run_as_gid="0")
         self.assertTrue(succ)
         self.assertTrue(os.path.ismount(tmp))
 
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_mount(self.loop_dev, tmp, run_as_uid="a", run_as_gid="a")
+            BlockDev.fs_mount(self.loop_devs[0], tmp, run_as_uid="a", run_as_gid="a")
 
-        succ = BlockDev.fs_unmount(self.loop_dev, False, False, None)
+        succ = BlockDev.fs_unmount(self.loop_devs[0], False, False, None)
         self.assertTrue(succ)
         self.assertFalse(os.path.ismount(tmp))
 
@@ -147,26 +147,26 @@ class MountTestCase(FSTestCase):
         fstab = utils.read_file("/etc/fstab")
         self.addCleanup(utils.write_file, "/etc/fstab", fstab)
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
         tmp = tempfile.mkdtemp(prefix="libblockdev.", suffix="mount_fstab_test")
         self.addCleanup(os.rmdir, tmp)
 
-        utils.write_file("/etc/fstab", "%s %s vfat defaults 0 0\n" % (self.loop_dev, tmp))
+        utils.write_file("/etc/fstab", "%s %s vfat defaults 0 0\n" % (self.loop_devs[0], tmp))
 
         # try to mount and unmount using the device
-        self.addCleanup(utils.umount, self.loop_dev)
-        succ = BlockDev.fs_mount(device=self.loop_dev)
+        self.addCleanup(utils.umount, self.loop_devs[0])
+        succ = BlockDev.fs_mount(device=self.loop_devs[0])
         self.assertTrue(succ)
         self.assertTrue(os.path.ismount(tmp))
 
-        succ = BlockDev.fs_unmount(self.loop_dev)
+        succ = BlockDev.fs_unmount(self.loop_devs[0])
         self.assertTrue(succ)
         self.assertFalse(os.path.ismount(tmp))
 
         # try to mount and unmount just using the mountpoint
-        self.addCleanup(utils.umount, self.loop_dev)
+        self.addCleanup(utils.umount, self.loop_devs[0])
         succ = BlockDev.fs_mount(mountpoint=tmp)
         self.assertTrue(succ)
         self.assertTrue(os.path.ismount(tmp))
@@ -182,44 +182,44 @@ class MountTestCase(FSTestCase):
         fstab = utils.read_file("/etc/fstab")
         self.addCleanup(utils.write_file, "/etc/fstab", fstab)
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
         tmp = tempfile.mkdtemp(prefix="libblockdev.", suffix="mount_fstab_user_test")
         self.addCleanup(os.rmdir, tmp)
 
-        utils.write_file("/etc/fstab", "%s %s vfat defaults,users 0 0\n" % (self.loop_dev, tmp))
+        utils.write_file("/etc/fstab", "%s %s vfat defaults,users 0 0\n" % (self.loop_devs[0], tmp))
 
         uid, gid = self._add_user()
         self.addCleanup(self._remove_user)
 
         # try to mount and unmount the device as the user
-        self.addCleanup(utils.umount, self.loop_dev)
-        succ = BlockDev.fs_mount(device=self.loop_dev, run_as_uid=uid, run_as_gid=gid)
+        self.addCleanup(utils.umount, self.loop_devs[0])
+        succ = BlockDev.fs_mount(device=self.loop_devs[0], run_as_uid=uid, run_as_gid=gid)
         self.assertTrue(succ)
         self.assertTrue(os.path.ismount(tmp))
 
-        succ = BlockDev.fs_unmount(self.loop_dev, run_as_uid=uid, run_as_gid=gid)
+        succ = BlockDev.fs_unmount(self.loop_devs[0], run_as_uid=uid, run_as_gid=gid)
         self.assertTrue(succ)
         self.assertFalse(os.path.ismount(tmp))
 
         # remove the 'users' option
-        utils.write_file("/etc/fstab", "%s %s vfat defaults 0 0\n" % (self.loop_dev, tmp))
+        utils.write_file("/etc/fstab", "%s %s vfat defaults 0 0\n" % (self.loop_devs[0], tmp))
 
         # try to mount and unmount the device as the user --> should fail now
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_mount(device=self.loop_dev, run_as_uid=uid, run_as_gid=gid)
+            BlockDev.fs_mount(device=self.loop_devs[0], run_as_uid=uid, run_as_gid=gid)
 
         self.assertFalse(os.path.ismount(tmp))
 
         # now mount as root to test unmounting
-        self.addCleanup(utils.umount, self.loop_dev)
-        succ = BlockDev.fs_mount(device=self.loop_dev)
+        self.addCleanup(utils.umount, self.loop_devs[0])
+        succ = BlockDev.fs_mount(device=self.loop_devs[0])
         self.assertTrue(succ)
         self.assertTrue(os.path.ismount(tmp))
 
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_unmount(self.loop_dev, run_as_uid=uid, run_as_gid=gid)
+            BlockDev.fs_unmount(self.loop_devs[0], run_as_uid=uid, run_as_gid=gid)
         self.assertTrue(os.path.ismount(tmp))
 
     def test_mount_nilfs(self):
@@ -230,27 +230,27 @@ class MountTestCase(FSTestCase):
         if not self.nilfs2_avail:
             self.skipTest("skipping NILFS mount test: not available")
 
-        succ = BlockDev.fs_nilfs2_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_nilfs2_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
         tmp = tempfile.mkdtemp(prefix="libblockdev.", suffix="mount_test")
         self.addCleanup(os.rmdir, tmp)
 
-        self.addCleanup(utils.umount, self.loop_dev)
+        self.addCleanup(utils.umount, self.loop_devs[0])
 
-        succ = BlockDev.fs_mount(self.loop_dev, tmp, "nilfs2", None)
+        succ = BlockDev.fs_mount(self.loop_devs[0], tmp, "nilfs2", None)
         self.assertTrue(succ)
         self.assertTrue(os.path.ismount(tmp))
 
-        succ = BlockDev.fs_unmount(self.loop_dev, False, False, None)
+        succ = BlockDev.fs_unmount(self.loop_devs[0], False, False, None)
         self.assertTrue(succ)
         self.assertFalse(os.path.ismount(tmp))
 
-        mnt = BlockDev.fs_get_mountpoint(self.loop_dev)
+        mnt = BlockDev.fs_get_mountpoint(self.loop_devs[0])
         self.assertIsNone(mnt)
 
         # mount again to test unmount using the mountpoint
-        succ = BlockDev.fs_mount(self.loop_dev, tmp, None, None)
+        succ = BlockDev.fs_mount(self.loop_devs[0], tmp, None, None)
         self.assertTrue(succ)
         self.assertTrue(os.path.ismount(tmp))
 
@@ -259,13 +259,13 @@ class MountTestCase(FSTestCase):
         self.assertFalse(os.path.ismount(tmp))
 
         # mount with some options
-        succ = BlockDev.fs_mount(self.loop_dev, tmp, "nilfs2", "ro")
+        succ = BlockDev.fs_mount(self.loop_devs[0], tmp, "nilfs2", "ro")
         self.assertTrue(succ)
         self.assertTrue(os.path.ismount(tmp))
         _ret, out, _err = utils.run_command("grep %s /proc/mounts" % tmp)
         self.assertTrue(out)
         self.assertIn("ro", out)
 
-        succ = BlockDev.fs_unmount(self.loop_dev, False, False, None)
+        succ = BlockDev.fs_unmount(self.loop_devs[0], False, False, None)
         self.assertTrue(succ)
         self.assertFalse(os.path.ismount(tmp))

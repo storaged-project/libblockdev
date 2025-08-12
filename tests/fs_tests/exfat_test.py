@@ -102,18 +102,18 @@ class ExfatTestMkfs(ExfatTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_exfat_mkfs("/non/existing/device", None)
 
-        succ = BlockDev.fs_exfat_mkfs(self.loop_dev)
+        succ = BlockDev.fs_exfat_mkfs(self.loop_devs[0])
         self.assertTrue(succ)
 
         # just try if we can mount the file system
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             pass
 
         # check the fstype
-        fstype = BlockDev.fs_get_fstype(self.loop_dev)
+        fstype = BlockDev.fs_get_fstype(self.loop_devs[0])
         self.assertEqual(fstype, "exfat")
 
-        BlockDev.fs_wipe(self.loop_dev, True)
+        BlockDev.fs_wipe(self.loop_devs[0], True)
 
 
 class ExfatMkfsWithLabel(ExfatTestCase):
@@ -121,10 +121,10 @@ class ExfatMkfsWithLabel(ExfatTestCase):
         """Verify that it is possible to create an exfat file system with label"""
 
         ea = BlockDev.ExtraArg.new("-n", "test_label")
-        succ = BlockDev.fs_exfat_mkfs(self.loop_dev, [ea])
+        succ = BlockDev.fs_exfat_mkfs(self.loop_devs[0], [ea])
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        fi = BlockDev.fs_exfat_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "test_label")
 
@@ -133,10 +133,10 @@ class ExfatTestCheck(ExfatTestCase):
     def test_exfat_check(self):
         """Verify that it is possible to check an exfat file system"""
 
-        succ = BlockDev.fs_exfat_mkfs(self.loop_dev)
+        succ = BlockDev.fs_exfat_mkfs(self.loop_devs[0])
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_exfat_check(self.loop_dev)
+        succ = BlockDev.fs_exfat_check(self.loop_devs[0])
         self.assertTrue(succ)
 
 
@@ -144,10 +144,10 @@ class ExfatTestRepair(ExfatTestCase):
     def test_exfat_repair(self):
         """Verify that it is possible to repair an exfat file system"""
 
-        succ = BlockDev.fs_exfat_mkfs(self.loop_dev)
+        succ = BlockDev.fs_exfat_mkfs(self.loop_devs[0])
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_exfat_repair(self.loop_dev)
+        succ = BlockDev.fs_exfat_repair(self.loop_devs[0])
         self.assertTrue(succ)
 
 
@@ -155,10 +155,10 @@ class ExfatGetInfo(ExfatTestCase):
     def test_exfat_get_info(self):
         """Verify that it is possible to get info about an exfat file system"""
 
-        succ = BlockDev.fs_exfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_exfat_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        fi = BlockDev.fs_exfat_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
         # should be an non-empty string
@@ -172,28 +172,28 @@ class ExfatSetLabel(ExfatTestCase):
     def test_exfat_set_label(self):
         """Verify that it is possible to set label of an exfat file system"""
 
-        succ = BlockDev.fs_exfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_exfat_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        fi = BlockDev.fs_exfat_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
 
-        succ = BlockDev.fs_exfat_set_label(self.loop_dev, "test_label")
+        succ = BlockDev.fs_exfat_set_label(self.loop_devs[0], "test_label")
         self.assertTrue(succ)
-        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        fi = BlockDev.fs_exfat_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "test_label")
 
-        succ = BlockDev.fs_exfat_set_label(self.loop_dev, "test_label2")
+        succ = BlockDev.fs_exfat_set_label(self.loop_devs[0], "test_label2")
         self.assertTrue(succ)
-        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        fi = BlockDev.fs_exfat_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "test_label2")
 
-        succ = BlockDev.fs_exfat_set_label(self.loop_dev, "")
+        succ = BlockDev.fs_exfat_set_label(self.loop_devs[0], "")
         self.assertTrue(succ)
-        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        fi = BlockDev.fs_exfat_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
 
@@ -208,31 +208,31 @@ class ExfatSetUUID(ExfatTestCase):
     def test_exfat_set_uuid(self):
         """Verify that it is possible to set UUID/volume ID of an exfat file system"""
 
-        succ = BlockDev.fs_exfat_mkfs(self.loop_dev)
+        succ = BlockDev.fs_exfat_mkfs(self.loop_devs[0])
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_exfat_set_uuid(self.loop_dev, "0x2E24EC82")
+        succ = BlockDev.fs_exfat_set_uuid(self.loop_devs[0], "0x2E24EC82")
         self.assertTrue(succ)
-        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        fi = BlockDev.fs_exfat_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.uuid, "2E24-EC82")
 
-        succ = BlockDev.fs_exfat_set_uuid(self.loop_dev, "2E24EC82")
+        succ = BlockDev.fs_exfat_set_uuid(self.loop_devs[0], "2E24EC82")
         self.assertTrue(succ)
-        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        fi = BlockDev.fs_exfat_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.uuid, "2E24-EC82")
 
         # should be also support with the dash
-        succ = BlockDev.fs_exfat_set_uuid(self.loop_dev, "2E24-EC82")
+        succ = BlockDev.fs_exfat_set_uuid(self.loop_devs[0], "2E24-EC82")
         self.assertTrue(succ)
-        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        fi = BlockDev.fs_exfat_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.uuid, "2E24-EC82")
 
-        succ = BlockDev.fs_exfat_set_uuid(self.loop_dev, "")
+        succ = BlockDev.fs_exfat_set_uuid(self.loop_devs[0], "")
         self.assertTrue(succ)
-        fi = BlockDev.fs_exfat_get_info(self.loop_dev)
+        fi = BlockDev.fs_exfat_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertTrue(fi.uuid)  # new random, not empty
         self.assertNotEqual(fi.uuid, "2E24-EC82")

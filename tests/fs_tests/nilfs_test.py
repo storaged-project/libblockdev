@@ -101,18 +101,18 @@ class NILFS2TestMkfs(NILFS2TestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_nilfs2_mkfs("/non/existing/device", None)
 
-        succ = BlockDev.fs_nilfs2_mkfs(self.loop_dev)
+        succ = BlockDev.fs_nilfs2_mkfs(self.loop_devs[0])
         self.assertTrue(succ)
 
         # just try if we can mount the file system
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             pass
 
         # check the fstype
-        fstype = BlockDev.fs_get_fstype(self.loop_dev)
+        fstype = BlockDev.fs_get_fstype(self.loop_devs[0])
         self.assertEqual(fstype, "nilfs2")
 
-        BlockDev.fs_wipe(self.loop_dev, True)
+        BlockDev.fs_wipe(self.loop_devs[0], True)
 
 
 class NILFS2MkfsWithLabel(NILFS2TestCase):
@@ -120,10 +120,10 @@ class NILFS2MkfsWithLabel(NILFS2TestCase):
         """Verify that it is possible to create an nilfs2 file system with label"""
 
         ea = BlockDev.ExtraArg.new("-L", "test_label")
-        succ = BlockDev.fs_nilfs2_mkfs(self.loop_dev, [ea])
+        succ = BlockDev.fs_nilfs2_mkfs(self.loop_devs[0], [ea])
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_nilfs2_get_info(self.loop_dev)
+        fi = BlockDev.fs_nilfs2_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "test_label")
 
@@ -132,10 +132,10 @@ class NILFS2GetInfo(NILFS2TestCase):
     def test_nilfs2_get_info(self):
         """Verify that it is possible to get info about an nilfs2 file system"""
 
-        succ = BlockDev.fs_nilfs2_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_nilfs2_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_nilfs2_get_info(self.loop_dev)
+        fi = BlockDev.fs_nilfs2_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
         # should be an non-empty string
@@ -149,28 +149,28 @@ class NILFS2SetLabel(NILFS2TestCase):
     def test_nilfs2_set_label(self):
         """Verify that it is possible to set label of an nilfs2 file system"""
 
-        succ = BlockDev.fs_nilfs2_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_nilfs2_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_nilfs2_get_info(self.loop_dev)
+        fi = BlockDev.fs_nilfs2_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
 
-        succ = BlockDev.fs_nilfs2_set_label(self.loop_dev, "test_label")
+        succ = BlockDev.fs_nilfs2_set_label(self.loop_devs[0], "test_label")
         self.assertTrue(succ)
-        fi = BlockDev.fs_nilfs2_get_info(self.loop_dev)
+        fi = BlockDev.fs_nilfs2_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "test_label")
 
-        succ = BlockDev.fs_nilfs2_set_label(self.loop_dev, "test_label2")
+        succ = BlockDev.fs_nilfs2_set_label(self.loop_devs[0], "test_label2")
         self.assertTrue(succ)
-        fi = BlockDev.fs_nilfs2_get_info(self.loop_dev)
+        fi = BlockDev.fs_nilfs2_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "test_label2")
 
-        succ = BlockDev.fs_nilfs2_set_label(self.loop_dev, "")
+        succ = BlockDev.fs_nilfs2_set_label(self.loop_devs[0], "")
         self.assertTrue(succ)
-        fi = BlockDev.fs_nilfs2_get_info(self.loop_dev)
+        fi = BlockDev.fs_nilfs2_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
 
@@ -185,27 +185,27 @@ class NILFS2Resize(NILFS2TestCase):
     def test_nilfs2_resize(self):
         """Verify that it is possible to resize an nilfs2 file system"""
 
-        succ = BlockDev.fs_nilfs2_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_nilfs2_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
         with self.assertRaisesRegex(GLib.GError, "is not currently mounted"):
-            BlockDev.fs_nilfs2_resize(self.loop_dev, 100 * 1024**2)
+            BlockDev.fs_nilfs2_resize(self.loop_devs[0], 100 * 1024**2)
 
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             # shrink
-            succ = BlockDev.fs_nilfs2_resize(self.loop_dev, 100 * 1024**2)
+            succ = BlockDev.fs_nilfs2_resize(self.loop_devs[0], 100 * 1024**2)
             self.assertTrue(succ)
 
             # grow
-            succ = BlockDev.fs_nilfs2_resize(self.loop_dev, 120 * 1024**2)
+            succ = BlockDev.fs_nilfs2_resize(self.loop_devs[0], 120 * 1024**2)
             self.assertTrue(succ)
 
             # shrink again
-            succ = BlockDev.fs_nilfs2_resize(self.loop_dev, 100 * 1024**2)
+            succ = BlockDev.fs_nilfs2_resize(self.loop_devs[0], 100 * 1024**2)
             self.assertTrue(succ)
 
             # resize to maximum size
-            succ = BlockDev.fs_nilfs2_resize(self.loop_dev, 0)
+            succ = BlockDev.fs_nilfs2_resize(self.loop_devs[0], 0)
             self.assertTrue(succ)
 
 
@@ -216,19 +216,19 @@ class NILFS2SetUUID(NILFS2TestCase):
     def test_nilfs2_set_uuid(self):
         """Verify that it is possible to set UUID of an nilfs2 file system"""
 
-        succ = BlockDev.fs_nilfs2_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_nilfs2_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_nilfs2_set_uuid(self.loop_dev, self.test_uuid)
+        succ = BlockDev.fs_nilfs2_set_uuid(self.loop_devs[0], self.test_uuid)
         self.assertTrue(succ)
-        fi = BlockDev.fs_nilfs2_get_info(self.loop_dev)
+        fi = BlockDev.fs_nilfs2_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.uuid, self.test_uuid)
 
         # no uuid -> random
-        succ = BlockDev.fs_nilfs2_set_uuid(self.loop_dev, None)
+        succ = BlockDev.fs_nilfs2_set_uuid(self.loop_devs[0], None)
         self.assertTrue(succ)
-        fi = BlockDev.fs_nilfs2_get_info(self.loop_dev)
+        fi = BlockDev.fs_nilfs2_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertNotEqual(fi.uuid, "")
         self.assertNotEqual(fi.uuid, self.test_uuid)

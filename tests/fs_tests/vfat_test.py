@@ -128,18 +128,18 @@ class VfatTestMkfs(VfatTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_vfat_mkfs("/non/existing/device", self._mkfs_options)
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_devs[0], self._mkfs_options)
         self.assertTrue(succ)
 
         # just try if we can mount the file system
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             pass
 
         # check the fstype
-        fstype = BlockDev.fs_get_fstype(self.loop_dev)
+        fstype = BlockDev.fs_get_fstype(self.loop_devs[0])
         self.assertEqual(fstype, "vfat")
 
-        BlockDev.fs_wipe(self.loop_dev, True)
+        BlockDev.fs_wipe(self.loop_devs[0], True)
 
 
 class VfatMkfsWithLabel(VfatTestCase):
@@ -148,12 +148,12 @@ class VfatMkfsWithLabel(VfatTestCase):
 
         ea = BlockDev.ExtraArg.new("-n", "TEST_LABEL")
         if self._mkfs_options:
-            succ = BlockDev.fs_vfat_mkfs(self.loop_dev, [ea] + self._mkfs_options)
+            succ = BlockDev.fs_vfat_mkfs(self.loop_devs[0], [ea] + self._mkfs_options)
         else:
-            succ = BlockDev.fs_vfat_mkfs(self.loop_dev, [ea])
+            succ = BlockDev.fs_vfat_mkfs(self.loop_devs[0], [ea])
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_vfat_get_info(self.loop_dev)
+        fi = BlockDev.fs_vfat_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "TEST_LABEL")
 
@@ -162,13 +162,13 @@ class VfatTestCheck(VfatTestCase):
     def test_vfat_check(self):
         """Verify that it is possible to check an vfat file system"""
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_devs[0], self._mkfs_options)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_vfat_check(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_check(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_vfat_check(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_check(self.loop_devs[0], None)
         self.assertTrue(succ)
 
 
@@ -176,10 +176,10 @@ class VfatTestRepair(VfatTestCase):
     def test_vfat_repair(self):
         """Verify that it is possible to repair an vfat file system"""
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_devs[0], self._mkfs_options)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_vfat_repair(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_repair(self.loop_devs[0], None)
         self.assertTrue(succ)
 
 
@@ -187,10 +187,10 @@ class VfatGetInfo(VfatTestCase):
     def test_vfat_get_info(self):
         """Verify that it is possible to get info about an vfat file system"""
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_devs[0], self._mkfs_options)
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_vfat_get_info(self.loop_dev)
+        fi = BlockDev.fs_vfat_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
         # should be an non-empty string
@@ -201,28 +201,28 @@ class VfatSetLabel(VfatTestCase):
     def test_vfat_set_label(self):
         """Verify that it is possible to set label of an vfat file system"""
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_devs[0], self._mkfs_options)
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_vfat_get_info(self.loop_dev)
+        fi = BlockDev.fs_vfat_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
 
-        succ = BlockDev.fs_vfat_set_label(self.loop_dev, "TEST_LABEL")
+        succ = BlockDev.fs_vfat_set_label(self.loop_devs[0], "TEST_LABEL")
         self.assertTrue(succ)
-        fi = BlockDev.fs_vfat_get_info(self.loop_dev)
+        fi = BlockDev.fs_vfat_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "TEST_LABEL")
 
-        succ = BlockDev.fs_vfat_set_label(self.loop_dev, "TEST_LABEL2")
+        succ = BlockDev.fs_vfat_set_label(self.loop_devs[0], "TEST_LABEL2")
         self.assertTrue(succ)
-        fi = BlockDev.fs_vfat_get_info(self.loop_dev)
+        fi = BlockDev.fs_vfat_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "TEST_LABEL2")
 
-        succ = BlockDev.fs_vfat_set_label(self.loop_dev, "")
+        succ = BlockDev.fs_vfat_set_label(self.loop_devs[0], "")
         self.assertTrue(succ)
-        fi = BlockDev.fs_vfat_get_info(self.loop_dev)
+        fi = BlockDev.fs_vfat_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
 
@@ -240,25 +240,25 @@ class VfatSetUUID(VfatTestCase):
         if DOSFSTOOLS_VERSION <= Version("4.1"):
             self.skipTest("dosfstools >= 4.2 needed to set UUID")
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_devs[0], self._mkfs_options)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_vfat_set_uuid(self.loop_dev, "2E24EC82")
+        succ = BlockDev.fs_vfat_set_uuid(self.loop_devs[0], "2E24EC82")
         self.assertTrue(succ)
-        fi = BlockDev.fs_vfat_get_info(self.loop_dev)
+        fi = BlockDev.fs_vfat_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.uuid, "2E24-EC82")
 
         # should be also support with the dash
-        succ = BlockDev.fs_vfat_set_uuid(self.loop_dev, "2E24-EC82")
+        succ = BlockDev.fs_vfat_set_uuid(self.loop_devs[0], "2E24-EC82")
         self.assertTrue(succ)
-        fi = BlockDev.fs_vfat_get_info(self.loop_dev)
+        fi = BlockDev.fs_vfat_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.uuid, "2E24-EC82")
 
-        succ = BlockDev.fs_vfat_set_uuid(self.loop_dev, "")
+        succ = BlockDev.fs_vfat_set_uuid(self.loop_devs[0], "")
         self.assertTrue(succ)
-        fi = BlockDev.fs_vfat_get_info(self.loop_dev)
+        fi = BlockDev.fs_vfat_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertTrue(fi.uuid)  # new random, not empty
         self.assertNotEqual(fi.uuid, "2E24-EC82")
@@ -287,21 +287,21 @@ class VfatResize(VfatTestCase):
     def test_vfat_resize(self):
         """Verify that it is possible to resize an vfat file system"""
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, self._mkfs_options)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_devs[0], self._mkfs_options)
         self.assertTrue(succ)
 
         # shrink
-        succ = BlockDev.fs_vfat_resize(self.loop_dev, 130 * 1024**2)
+        succ = BlockDev.fs_vfat_resize(self.loop_devs[0], 130 * 1024**2)
         self.assertTrue(succ)
 
         # grow
-        succ = BlockDev.fs_vfat_resize(self.loop_dev, 140 * 1024**2)
+        succ = BlockDev.fs_vfat_resize(self.loop_devs[0], 140 * 1024**2)
         self.assertTrue(succ)
 
         # shrink again
-        succ = BlockDev.fs_vfat_resize(self.loop_dev, 130 * 1024**2)
+        succ = BlockDev.fs_vfat_resize(self.loop_devs[0], 130 * 1024**2)
         self.assertTrue(succ)
 
         # resize to maximum size
-        succ = BlockDev.fs_vfat_resize(self.loop_dev, 0)
+        succ = BlockDev.fs_vfat_resize(self.loop_devs[0], 0)
         self.assertTrue(succ)

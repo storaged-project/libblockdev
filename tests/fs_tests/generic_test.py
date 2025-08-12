@@ -47,78 +47,78 @@ class TestGenericWipe(GenericTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_wipe("/non/existing/device", True)
 
-        ret = utils.run("pvcreate -ff -y %s --config \"devices {use_devicesfile = 0}\" >/dev/null 2>&1" % self.loop_dev)
+        ret = utils.run("pvcreate -ff -y %s --config \"devices {use_devicesfile = 0}\" >/dev/null 2>&1" % self.loop_devs[0])
         self.assertEqual(ret, 0)
 
-        succ = BlockDev.fs_wipe(self.loop_dev, True)
+        succ = BlockDev.fs_wipe(self.loop_devs[0], True)
         self.assertTrue(succ)
 
         # now test the same multiple times in a row
         for i in range(10):
-            ret = utils.run("pvcreate -ff -y %s --config \"devices {use_devicesfile = 0}\" >/dev/null 2>&1" % self.loop_dev)
+            ret = utils.run("pvcreate -ff -y %s --config \"devices {use_devicesfile = 0}\" >/dev/null 2>&1" % self.loop_devs[0])
             self.assertEqual(ret, 0)
 
-            succ = BlockDev.fs_wipe(self.loop_dev, True)
+            succ = BlockDev.fs_wipe(self.loop_devs[0], True)
             self.assertTrue(succ)
 
         # vfat has multiple signatures on the device so it allows us to test the
         # 'all' argument of fs_wipe()
         if self._vfat_version >= Version("4.2"):
-            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1 --mbr=n" % self.loop_dev)
+            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1 --mbr=n" % self.loop_devs[0])
         else:
-            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
+            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_devs[0])
         self.assertEqual(ret, 0)
 
         time.sleep(0.5)
-        succ = BlockDev.fs_wipe(self.loop_dev, False)
+        succ = BlockDev.fs_wipe(self.loop_devs[0], False)
         self.assertTrue(succ)
 
         # the second signature should still be there
         # XXX: lsblk uses the udev db so it we need to make sure it is up to date
         utils.run("udevadm settle")
-        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_dev]).strip()
+        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_devs[0]]).strip()
         self.assertEqual(fs_type, b"vfat")
 
         # get rid of all the remaining signatures (there could be vfat + PMBR for some reason)
-        succ = BlockDev.fs_wipe(self.loop_dev, True)
+        succ = BlockDev.fs_wipe(self.loop_devs[0], True)
         self.assertTrue(succ)
 
         utils.run("udevadm settle")
-        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_dev]).strip()
+        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_devs[0]]).strip()
         self.assertEqual(fs_type, b"")
 
         # now do the wipe all in a one step
         if self._vfat_version >= Version("4.2"):
-            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1 --mbr=n" % self.loop_dev)
+            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1 --mbr=n" % self.loop_devs[0])
         else:
-            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
+            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_devs[0])
         self.assertEqual(ret, 0)
 
-        succ = BlockDev.fs_wipe(self.loop_dev, True)
+        succ = BlockDev.fs_wipe(self.loop_devs[0], True)
         self.assertTrue(succ)
 
         utils.run("udevadm settle")
-        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_dev]).strip()
+        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_devs[0]]).strip()
         self.assertEqual(fs_type, b"")
 
         # try to wipe empty device
         with self.assertRaisesRegex(GLib.GError, "No signature detected on the device"):
-            BlockDev.fs_wipe(self.loop_dev, True)
+            BlockDev.fs_wipe(self.loop_devs[0], True)
 
     @tag_test(TestTags.CORE)
     def test_generic_wipe_force(self):
-        ret = utils.run("mkfs.ext2 %s >/dev/null 2>&1" % self.loop_dev)
+        ret = utils.run("mkfs.ext2 %s >/dev/null 2>&1" % self.loop_devs[0])
         self.assertEqual(ret, 0)
 
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             # default should be force=False
             with self.assertRaisesRegex(GLib.GError, "Failed to open the device"):
-                BlockDev.fs_wipe(self.loop_dev)
+                BlockDev.fs_wipe(self.loop_devs[0])
 
-            succ = BlockDev.fs_wipe(self.loop_dev, force=True)
+            succ = BlockDev.fs_wipe(self.loop_devs[0], force=True)
             self.assertTrue(succ)
 
-        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_dev]).strip()
+        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_devs[0]]).strip()
         self.assertEqual(fs_type, b"")
 
 
@@ -130,50 +130,50 @@ class TestClean(GenericTestCase):
             BlockDev.fs_clean("/non/existing/device")
 
         # empty device shouldn't fail
-        succ = BlockDev.fs_clean(self.loop_dev)
+        succ = BlockDev.fs_clean(self.loop_devs[0])
         self.assertTrue(succ)
 
-        ret = utils.run("pvcreate -ff -y %s --config \"devices {use_devicesfile = 0}\" >/dev/null 2>&1" % self.loop_dev)
+        ret = utils.run("pvcreate -ff -y %s --config \"devices {use_devicesfile = 0}\" >/dev/null 2>&1" % self.loop_devs[0])
         self.assertEqual(ret, 0)
 
-        succ = BlockDev.fs_clean(self.loop_dev)
+        succ = BlockDev.fs_clean(self.loop_devs[0])
         self.assertTrue(succ)
 
         # XXX: lsblk uses the udev db so it we need to make sure it is up to date
         utils.run("udevadm settle")
-        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_dev]).strip()
+        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_devs[0]]).strip()
         self.assertEqual(fs_type, b"")
 
         # vfat has multiple signatures on the device so it allows us to test
         # that clean removes all signatures
         if self._vfat_version >= Version("4.2"):
-            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1 --mbr=n" % self.loop_dev)
+            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1 --mbr=n" % self.loop_devs[0])
         else:
-            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_dev)
+            ret = utils.run("mkfs.vfat -I %s >/dev/null 2>&1" % self.loop_devs[0])
         self.assertEqual(ret, 0)
 
         time.sleep(0.5)
-        succ = BlockDev.fs_clean(self.loop_dev)
+        succ = BlockDev.fs_clean(self.loop_devs[0])
         self.assertTrue(succ)
 
         utils.run("udevadm settle")
-        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_dev]).strip()
+        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_devs[0]]).strip()
         self.assertEqual(fs_type, b"")
 
     @tag_test(TestTags.CORE)
     def test_generic_clean_force(self):
-        ret = utils.run("mkfs.ext2 %s >/dev/null 2>&1" % self.loop_dev)
+        ret = utils.run("mkfs.ext2 %s >/dev/null 2>&1" % self.loop_devs[0])
         self.assertEqual(ret, 0)
 
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             # default should be force=False
             with self.assertRaisesRegex(GLib.GError, "Failed to open the device"):
-                BlockDev.fs_clean(self.loop_dev)
+                BlockDev.fs_clean(self.loop_devs[0])
 
-            succ = BlockDev.fs_clean(self.loop_dev, force=True)
+            succ = BlockDev.fs_clean(self.loop_devs[0], force=True)
             self.assertTrue(succ)
 
-        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_dev]).strip()
+        fs_type = check_output(["blkid", "-ovalue", "-sTYPE", "-p", self.loop_devs[0]]).strip()
         self.assertEqual(fs_type, b"")
 
 
@@ -366,7 +366,7 @@ class GenericMkfs(GenericTestCase):
 
     def _test_ext_generic_mkfs(self, fsname, info_fn, label=None, uuid=None, force=False, extra=None, default_label=None):
         # clean the device
-        succ = BlockDev.fs_clean(self.loop_dev)
+        succ = BlockDev.fs_clean(self.loop_devs[0])
         self.assertTrue(succ)
 
         supported, flags, _util = BlockDev.fs_can_mkfs(fsname)
@@ -376,21 +376,21 @@ class GenericMkfs(GenericTestCase):
         if flags & BlockDev.FSMkfsOptionsFlags.DRY_RUN:
             # try dry run first
             options = BlockDev.FSMkfsOptions(None, None, True, False)
-            succ = BlockDev.fs_mkfs(self.loop_dev, fsname, options)
+            succ = BlockDev.fs_mkfs(self.loop_devs[0], fsname, options)
             self.assertTrue(succ)
 
-            fstype = BlockDev.fs_get_fstype (self.loop_dev)
+            fstype = BlockDev.fs_get_fstype (self.loop_devs[0])
             self.assertIsNone(fstype)
 
         options = BlockDev.FSMkfsOptions(label, uuid, False, False)
 
-        succ = BlockDev.fs_mkfs(self.loop_dev, fsname, options, extra)
+        succ = BlockDev.fs_mkfs(self.loop_devs[0], fsname, options, extra)
         self.assertTrue(succ)
 
-        fstype = BlockDev.fs_get_fstype (self.loop_dev)
+        fstype = BlockDev.fs_get_fstype (self.loop_devs[0])
         self.assertEqual(fstype, fsname)
 
-        info = info_fn(self.loop_dev)
+        info = info_fn(self.loop_devs[0])
         self.assertIsNotNone(info)
         if label is not None:
             if label == "":
@@ -406,11 +406,11 @@ class GenericMkfs(GenericTestCase):
         if force:
             # try overwriting the existing filesystem, should fail without force
             with self.assertRaises(GLib.GError):
-                BlockDev.fs_mkfs(self.loop_dev, fsname)
+                BlockDev.fs_mkfs(self.loop_devs[0], fsname)
 
             # now add the option
             options = BlockDev.FSMkfsOptions(force=True)
-            succ = BlockDev.fs_mkfs(self.loop_dev, fsname, options, extra)
+            succ = BlockDev.fs_mkfs(self.loop_devs[0], fsname, options, extra)
             self.assertTrue(succ)
 
     def test_exfat_generic_mkfs(self):
@@ -427,7 +427,7 @@ class GenericMkfs(GenericTestCase):
         self._test_ext_generic_mkfs("ext2", BlockDev.fs_ext2_get_info, label, uuid, False)
 
         # clean the device
-        succ = BlockDev.fs_clean(self.loop_dev)
+        succ = BlockDev.fs_clean(self.loop_devs[0])
         self.assertTrue(succ)
 
         options = BlockDev.FSMkfsOptions(label, uuid, False, False)
@@ -435,20 +435,20 @@ class GenericMkfs(GenericTestCase):
         # and try with a custom extra arg (we can get block size from the info)
         extra = BlockDev.ExtraArg("-b", "4096")
 
-        succ = BlockDev.fs_mkfs(self.loop_dev, "ext2", options, [extra])
+        succ = BlockDev.fs_mkfs(self.loop_devs[0], "ext2", options, [extra])
         self.assertTrue(succ)
 
-        fstype = BlockDev.fs_get_fstype (self.loop_dev)
+        fstype = BlockDev.fs_get_fstype (self.loop_devs[0])
         self.assertEqual(fstype, "ext2")
 
-        info = BlockDev.fs_ext2_get_info(self.loop_dev)
+        info = BlockDev.fs_ext2_get_info(self.loop_devs[0])
         self.assertEqual(info.label, label)
         self.assertEqual(info.uuid, uuid)
         self.assertEqual(info.block_size, 4096)
 
         # try with -F, it doesn't really do anything with stdin closed so just a sanity check
         options = BlockDev.FSMkfsOptions(force=True)
-        succ = BlockDev.fs_mkfs(self.loop_dev, "ext2", options)
+        succ = BlockDev.fs_mkfs(self.loop_devs[0], "ext2", options)
         self.assertTrue(succ)
 
     def test_ext3_generic_mkfs(self):
@@ -525,14 +525,14 @@ class GenericMkfs(GenericTestCase):
 
         options = BlockDev.FSMkfsOptions(no_pt=True)
 
-        succ = BlockDev.fs_mkfs(self.loop_dev, "vfat", options, None)
+        succ = BlockDev.fs_mkfs(self.loop_devs[0], "vfat", options, None)
         self.assertTrue(succ)
 
-        fstype = BlockDev.fs_get_fstype (self.loop_dev)
+        fstype = BlockDev.fs_get_fstype (self.loop_devs[0])
         self.assertEqual(fstype, "vfat")
 
         # there should be no partition
-        self.assertFalse(os.path.exists(self.loop_dev + "1"))
+        self.assertFalse(os.path.exists(self.loop_devs[0] + "1"))
 
     def test_xfs_generic_mkfs(self):
         """ Test generic mkfs with XFS """
@@ -583,10 +583,10 @@ class GenericMkfs(GenericTestCase):
 
     def test_generic_mkfs_no_options(self):
         """ Test that fs_mkfs works without options specified """
-        succ = BlockDev.fs_mkfs(self.loop_dev, "ext2")
+        succ = BlockDev.fs_mkfs(self.loop_devs[0], "ext2")
         self.assertTrue(succ)
 
-        info = BlockDev.fs_ext2_get_info(self.loop_dev)
+        info = BlockDev.fs_ext2_get_info(self.loop_devs[0])
         self.assertIsNotNone(info)
         self.assertFalse(info.label)  # label should be empty by default
 
@@ -594,7 +594,7 @@ class GenericMkfs(GenericTestCase):
         """ Test that generic mkfs fails correctly with unknown/unsupported filesystem """
 
         with self.assertRaisesRegex(GLib.GError, "Filesystem 'non-existing-fs' is not supported"):
-            BlockDev.fs_mkfs(self.loop_dev, "non-existing-fs")
+            BlockDev.fs_mkfs(self.loop_devs[0], "non-existing-fs")
 
     def test_can_mkfs(self):
         """ Test checking whether mkfs is supported """
@@ -614,18 +614,18 @@ class GenericCheck(GenericTestCase):
 
     def _test_generic_check(self, mkfs_function, fstype=None):
         # clean the device
-        succ = BlockDev.fs_clean(self.loop_dev)
+        succ = BlockDev.fs_clean(self.loop_devs[0])
 
-        succ = mkfs_function(self.loop_dev, None)
+        succ = mkfs_function(self.loop_devs[0], None)
         self.assertTrue(succ)
 
         self.log = []
         # check for consistency (expected to be ok)
-        succ = BlockDev.fs_check(self.loop_dev)
+        succ = BlockDev.fs_check(self.loop_devs[0])
         self.assertTrue(succ)
 
         if fstype:
-            succ = BlockDev.fs_check(self.loop_dev, fstype)
+            succ = BlockDev.fs_check(self.loop_devs[0], fstype)
             self.assertTrue(succ)
 
     def _my_progress_func(self, task, status, completion, msg):
@@ -702,17 +702,17 @@ class GenericCheck(GenericTestCase):
 class GenericRepair(GenericTestCase):
     def _test_generic_repair(self, mkfs_function, fstype):
         # clean the device
-        succ = BlockDev.fs_clean(self.loop_dev)
+        succ = BlockDev.fs_clean(self.loop_devs[0])
 
-        succ = mkfs_function(self.loop_dev, None)
+        succ = mkfs_function(self.loop_devs[0], None)
         self.assertTrue(succ)
 
         # repair (expected to succeed)
-        succ = BlockDev.fs_repair(self.loop_dev)
+        succ = BlockDev.fs_repair(self.loop_devs[0])
         self.assertTrue(succ)
 
         # repair (expected to succeed)
-        succ = BlockDev.fs_repair(self.loop_dev, fstype)
+        succ = BlockDev.fs_repair(self.loop_devs[0], fstype)
         self.assertTrue(succ)
 
     def test_ext4_generic_repair(self):
@@ -759,20 +759,20 @@ class GenericRepair(GenericTestCase):
 class GenericSetLabel(GenericTestCase):
     def _test_generic_set_label(self, mkfs_function, fstype):
         # clean the device
-        succ = BlockDev.fs_clean(self.loop_dev)
+        succ = BlockDev.fs_clean(self.loop_devs[0])
 
-        succ = mkfs_function(self.loop_dev, None)
+        succ = mkfs_function(self.loop_devs[0], None)
         self.assertTrue(succ)
 
         succ = BlockDev.fs_check_label(fstype, "new_label")
         self.assertTrue(succ)
 
         # set label (expected to succeed)
-        succ = BlockDev.fs_set_label(self.loop_dev, "new_label")
+        succ = BlockDev.fs_set_label(self.loop_devs[0], "new_label")
         self.assertTrue(succ)
 
         # set label (expected to succeed)
-        succ = BlockDev.fs_set_label(self.loop_dev, "new_label", fstype)
+        succ = BlockDev.fs_set_label(self.loop_devs[0], "new_label", fstype)
         self.assertTrue(succ)
 
     def test_ext4_generic_set_label(self):
@@ -825,23 +825,23 @@ class GenericSetLabel(GenericTestCase):
 class GenericSetUUID(GenericTestCase):
     def _test_generic_set_uuid(self, mkfs_function, fstype, test_uuid="4d7086c4-a4d3-432f-819e-73da03870df9", expected_uuid=None):
         # clean the device
-        succ = BlockDev.fs_clean(self.loop_dev)
+        succ = BlockDev.fs_clean(self.loop_devs[0])
 
-        succ = mkfs_function(self.loop_dev, None)
+        succ = mkfs_function(self.loop_devs[0], None)
         self.assertTrue(succ)
 
         # set uuid (expected to succeed)
-        succ = BlockDev.fs_set_uuid(self.loop_dev, test_uuid)
+        succ = BlockDev.fs_set_uuid(self.loop_devs[0], test_uuid)
         self.assertTrue(succ)
 
-        fs_uuid = check_output(["blkid", "-ovalue", "-sUUID", "-p", self.loop_dev]).decode().strip()
+        fs_uuid = check_output(["blkid", "-ovalue", "-sUUID", "-p", self.loop_devs[0]]).decode().strip()
         if expected_uuid:
             self.assertEqual(fs_uuid, expected_uuid)
         else:
             self.assertEqual(fs_uuid, test_uuid)
 
         # set empty/random UUID
-        succ = BlockDev.fs_set_uuid(self.loop_dev, None, fstype)
+        succ = BlockDev.fs_set_uuid(self.loop_devs[0], None, fstype)
         self.assertTrue(succ)
 
         # check uuid format
@@ -913,22 +913,22 @@ class GenericSetUUID(GenericTestCase):
 class GenericResize(GenericTestCase):
     def _test_generic_resize(self, mkfs_function, fstype, size_delta=0, min_size=130*1024**2):
         # clean the device
-        succ = BlockDev.fs_clean(self.loop_dev)
+        succ = BlockDev.fs_clean(self.loop_devs[0])
 
-        succ = mkfs_function(self.loop_dev, None)
+        succ = mkfs_function(self.loop_devs[0], None)
         self.assertTrue(succ)
-        size = BlockDev.fs_get_size(self.loop_dev)
+        size = BlockDev.fs_get_size(self.loop_devs[0])
 
         # shrink
-        succ = BlockDev.fs_resize(self.loop_dev, min_size)
+        succ = BlockDev.fs_resize(self.loop_devs[0], min_size)
         self.assertTrue(succ)
-        new_size = BlockDev.fs_get_size(self.loop_dev)
+        new_size = BlockDev.fs_get_size(self.loop_devs[0])
         self.assertAlmostEqual(new_size, min_size, delta=size_delta)
 
         # resize to maximum size
-        succ = BlockDev.fs_resize(self.loop_dev, 0, fstype)
+        succ = BlockDev.fs_resize(self.loop_devs[0], 0, fstype)
         self.assertTrue(succ)
-        new_size = BlockDev.fs_get_size(self.loop_dev)
+        new_size = BlockDev.fs_get_size(self.loop_devs[0])
         # should be back to original size
         self.assertAlmostEqual(new_size, size, delta=size_delta)
 
@@ -959,23 +959,23 @@ class GenericResize(GenericTestCase):
             return fi.size + 4096
 
         # clean the device
-        succ = BlockDev.fs_clean(self.loop_dev)
+        succ = BlockDev.fs_clean(self.loop_devs[0])
 
-        succ = mkfs_prepare(self.loop_dev)
+        succ = mkfs_prepare(self.loop_devs[0])
         self.assertTrue(succ)
 
-        size = ntfs_size(self.loop_dev)
+        size = ntfs_size(self.loop_devs[0])
 
         # shrink
-        succ = BlockDev.fs_resize(self.loop_dev, 80 * 1024**2)
+        succ = BlockDev.fs_resize(self.loop_devs[0], 80 * 1024**2)
         self.assertTrue(succ)
-        new_size = ntfs_size(self.loop_dev)
+        new_size = ntfs_size(self.loop_devs[0])
         self.assertEqual(new_size, 80 * 1024**2)
 
         # resize to maximum size
-        succ = BlockDev.fs_resize(self.loop_dev, 0, "ntfs")
+        succ = BlockDev.fs_resize(self.loop_devs[0], 0, "ntfs")
         self.assertTrue(succ)
-        new_size = ntfs_size(self.loop_dev)
+        new_size = ntfs_size(self.loop_devs[0])
         # should be back to original size
         self.assertEqual(new_size, size)
 
@@ -1087,14 +1087,14 @@ class GenericResize(GenericTestCase):
             self.skipTest("skipping exFAT: not available")
 
         # clean the device
-        succ = BlockDev.fs_clean(self.loop_dev)
+        succ = BlockDev.fs_clean(self.loop_devs[0])
 
-        succ = BlockDev.fs_exfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_exfat_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
         # no resize support for exFAT
         with self.assertRaisesRegex(GLib.GError, "Resizing filesystem 'exfat' is not supported."):
-            BlockDev.fs_resize(self.loop_dev, 80 * 1024**2)
+            BlockDev.fs_resize(self.loop_devs[0], 80 * 1024**2)
 
     def test_btrfs_generic_resize(self):
         """Test generic resize function with an btrfs file system"""
@@ -1114,23 +1114,23 @@ class GenericResize(GenericTestCase):
             self.skipTest("skipping Btrfs: not available")
 
         # clean the device
-        succ = BlockDev.fs_clean(self.loop_dev)
+        succ = BlockDev.fs_clean(self.loop_devs[0])
 
-        succ = BlockDev.fs_btrfs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_btrfs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
-        size = BlockDev.fs_get_size(self.loop_dev)
+        size = BlockDev.fs_get_size(self.loop_devs[0])
 
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             # shrink
-            succ = BlockDev.fs_resize(self.loop_dev, 300*1024**2)
+            succ = BlockDev.fs_resize(self.loop_devs[0], 300*1024**2)
             self.assertTrue(succ)
-            new_size = BlockDev.fs_get_size(self.loop_dev)
+            new_size = BlockDev.fs_get_size(self.loop_devs[0])
             self.assertAlmostEqual(new_size, 300*1024**2)
 
             # resize to maximum size
-            succ = BlockDev.fs_resize(self.loop_dev, 0, "btrfs")
+            succ = BlockDev.fs_resize(self.loop_devs[0], 0, "btrfs")
             self.assertTrue(succ)
-            new_size = BlockDev.fs_get_size(self.loop_dev)
+            new_size = BlockDev.fs_get_size(self.loop_devs[0])
             # should be back to original size
             self.assertAlmostEqual(new_size, size)
 
@@ -1140,30 +1140,30 @@ class GenericResize(GenericTestCase):
             self.skipTest("skipping UDF: not available")
 
         # clean the device
-        succ = BlockDev.fs_clean(self.loop_dev)
+        succ = BlockDev.fs_clean(self.loop_devs[0])
 
-        succ = BlockDev.fs_udf_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_udf_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
         # no resize support for UDF
         with self.assertRaisesRegex(GLib.GError, "Resizing filesystem 'udf' is not supported."):
-            BlockDev.fs_resize(self.loop_dev, 80 * 1024**2)
+            BlockDev.fs_resize(self.loop_devs[0], 80 * 1024**2)
 
 
 class GenericGetFreeSpace(GenericTestCase):
     def _test_get_free_space(self, mkfs_function, fstype, size_delta=0):
         # clean the device
-        succ = BlockDev.fs_clean(self.loop_dev)
+        succ = BlockDev.fs_clean(self.loop_devs[0])
 
-        succ = mkfs_function(self.loop_dev, None)
+        succ = mkfs_function(self.loop_devs[0], None)
         self.assertTrue(succ)
-        size = BlockDev.fs_get_size(self.loop_dev)
-        free = BlockDev.fs_get_free_space(self.loop_dev)
+        size = BlockDev.fs_get_size(self.loop_devs[0])
+        free = BlockDev.fs_get_free_space(self.loop_devs[0])
         self.assertNotEqual(free, 0)
         self.assertLessEqual(free, size)
 
-        size = BlockDev.fs_get_size(self.loop_dev, fstype)
-        free = BlockDev.fs_get_free_space(self.loop_dev, fstype)
+        size = BlockDev.fs_get_size(self.loop_devs[0], fstype)
+        free = BlockDev.fs_get_free_space(self.loop_devs[0], fstype)
         self.assertNotEqual(free, 0)
         self.assertLessEqual(free, size)
 
@@ -1216,25 +1216,25 @@ class GenericGetFreeSpace(GenericTestCase):
             self.skipTest("skipping UDF: not available")
 
         # clean the device
-        succ = BlockDev.fs_clean(self.loop_dev)
+        succ = BlockDev.fs_clean(self.loop_devs[0])
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_udf_mkfs(self.loop_dev)
+        succ = BlockDev.fs_udf_mkfs(self.loop_devs[0])
         self.assertTrue(succ)
 
         with self.assertRaisesRegex(GLib.GError, "Getting free space on filesystem 'udf' is not supported."):
-            BlockDev.fs_get_free_space(self.loop_dev)
+            BlockDev.fs_get_free_space(self.loop_devs[0])
 
 
 class GenericGetMinSize(GenericTestCase):
     def _test_get_min_size(self, mkfs_function, fstype):
         # clean the device
-        succ = BlockDev.fs_clean(self.loop_dev)
+        succ = BlockDev.fs_clean(self.loop_devs[0])
 
-        succ = mkfs_function(self.loop_dev, None)
+        succ = mkfs_function(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        size = BlockDev.fs_get_min_size(self.loop_dev)
+        size = BlockDev.fs_get_min_size(self.loop_devs[0])
         self.assertNotEqual(size, 0)
 
     def test_ext2_test_get_min_size(self):
@@ -1258,32 +1258,32 @@ class GenericGetMinSize(GenericTestCase):
     def test_xfs_get_get_min_size(self):
         """Test generic min size function with a xfs file system"""
         # clean the device
-        succ = BlockDev.fs_clean(self.loop_dev)
+        succ = BlockDev.fs_clean(self.loop_devs[0])
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_xfs_mkfs(self.loop_dev)
+        succ = BlockDev.fs_xfs_mkfs(self.loop_devs[0])
         self.assertTrue(succ)
 
         with self.assertRaisesRegex(GLib.GError, "Getting minimum size of filesystem 'xfs' is not supported."):
-            BlockDev.fs_get_min_size(self.loop_dev)
+            BlockDev.fs_get_min_size(self.loop_devs[0])
 
 
 class FSFreezeTest(GenericTestCase):
 
     def _clean_up(self):
         try:
-            BlockDev.fs_unfreeze(self.loop_dev)
+            BlockDev.fs_unfreeze(self.loop_devs[0])
         except:
             pass
 
-        BlockDev.fs_wipe(self.loop_dev, True)
+        BlockDev.fs_wipe(self.loop_devs[0], True)
 
         super(FSFreezeTest, self)._clean_up()
 
     def test_freeze_xfs(self):
         """ Test basic freezing and un-freezing with XFS """
 
-        succ = BlockDev.fs_xfs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_xfs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
         # try to freeze with non-existing mountpoint
@@ -1293,8 +1293,8 @@ class FSFreezeTest(GenericTestCase):
         tmp = tempfile.mkdtemp(prefix="libblockdev.", suffix="freeze_test")
         self.addCleanup(os.rmdir, tmp)
 
-        self.addCleanup(utils.umount, self.loop_dev)
-        succ = BlockDev.fs_mount(self.loop_dev, tmp, "xfs", None)
+        self.addCleanup(utils.umount, self.loop_devs[0])
+        succ = BlockDev.fs_mount(self.loop_devs[0], tmp, "xfs", None)
         self.assertTrue(succ)
         self.assertTrue(os.path.ismount(tmp))
 
@@ -1312,14 +1312,14 @@ class FSFreezeTest(GenericTestCase):
     def test_freeze_vfat(self):
         """ Test basic freezing and un-freezing with FAT """
 
-        succ = BlockDev.fs_vfat_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_vfat_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
         tmp = tempfile.mkdtemp(prefix="libblockdev.", suffix="freeze_test")
         self.addCleanup(os.rmdir, tmp)
 
-        self.addCleanup(utils.umount, self.loop_dev)
-        succ = BlockDev.fs_mount(self.loop_dev, tmp, "vfat", None)
+        self.addCleanup(utils.umount, self.loop_devs[0])
+        succ = BlockDev.fs_mount(self.loop_devs[0], tmp, "vfat", None)
         self.assertTrue(succ)
         self.assertTrue(os.path.ismount(tmp))
 

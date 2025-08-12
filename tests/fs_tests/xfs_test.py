@@ -112,37 +112,37 @@ class XfsTestMkfs(XfsTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_xfs_mkfs("/non/existing/device", None)
 
-        succ = BlockDev.fs_xfs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_xfs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
         # just try if we can mount the file system
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             pass
 
         # check the fstype
-        fstype = BlockDev.fs_get_fstype(self.loop_dev)
+        fstype = BlockDev.fs_get_fstype(self.loop_devs[0])
         self.assertEqual(fstype, "xfs")
 
-        BlockDev.fs_wipe(self.loop_dev, True)
+        BlockDev.fs_wipe(self.loop_devs[0], True)
 
 
 class XfsTestCheck(XfsTestCase):
     def test_xfs_check(self):
         """Verify that it is possible to check an xfs file system"""
 
-        succ = BlockDev.fs_xfs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_xfs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_xfs_check(self.loop_dev)
+        succ = BlockDev.fs_xfs_check(self.loop_devs[0])
         self.assertTrue(succ)
 
         # mounted RO, can be checked and nothing happened in/to the file system,
         # so it should be just reported as clean
-        with mounted(self.loop_dev, self.mount_dir, ro=True):
-            succ = BlockDev.fs_xfs_check(self.loop_dev)
+        with mounted(self.loop_devs[0], self.mount_dir, ro=True):
+            succ = BlockDev.fs_xfs_check(self.loop_devs[0])
             self.assertTrue(succ)
 
-        succ = BlockDev.fs_xfs_check(self.loop_dev)
+        succ = BlockDev.fs_xfs_check(self.loop_devs[0])
         self.assertTrue(succ)
 
 
@@ -150,17 +150,17 @@ class XfsTestRepair(XfsTestCase):
     def test_xfs_repair(self):
         """Verify that it is possible to repair an xfs file system"""
 
-        succ = BlockDev.fs_xfs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_xfs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_xfs_repair(self.loop_dev, None)
+        succ = BlockDev.fs_xfs_repair(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             with self.assertRaises(GLib.GError):
-                BlockDev.fs_xfs_repair(self.loop_dev, None)
+                BlockDev.fs_xfs_repair(self.loop_devs[0], None)
 
-        succ = BlockDev.fs_xfs_repair(self.loop_dev, None)
+        succ = BlockDev.fs_xfs_repair(self.loop_devs[0], None)
         self.assertTrue(succ)
 
 
@@ -169,10 +169,10 @@ class XfsGetInfo(XfsTestCase):
     def test_xfs_get_info(self):
         """Verify that it is possible to get info about an xfs file system"""
 
-        succ = BlockDev.fs_xfs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_xfs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_xfs_get_info(self.loop_dev)
+        fi = BlockDev.fs_xfs_get_info(self.loop_devs[0])
         self.assertEqual(fi.block_size, 4096)
         self.assertEqual(fi.block_count, self.loop_size / 4096)
         self.assertEqual(fi.label, "")
@@ -184,32 +184,32 @@ class XfsSetLabel(XfsTestCase):
     def test_xfs_set_label(self):
         """Verify that it is possible to set label of an xfs file system"""
 
-        succ = BlockDev.fs_xfs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_xfs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        with mounted(self.loop_dev, self.mount_dir):
-            fi = BlockDev.fs_xfs_get_info(self.loop_dev)
+        with mounted(self.loop_devs[0], self.mount_dir):
+            fi = BlockDev.fs_xfs_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
 
-        succ = BlockDev.fs_xfs_set_label(self.loop_dev, "TEST_LABEL")
+        succ = BlockDev.fs_xfs_set_label(self.loop_devs[0], "TEST_LABEL")
         self.assertTrue(succ)
-        with mounted(self.loop_dev, self.mount_dir):
-            fi = BlockDev.fs_xfs_get_info(self.loop_dev)
+        with mounted(self.loop_devs[0], self.mount_dir):
+            fi = BlockDev.fs_xfs_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "TEST_LABEL")
 
-        succ = BlockDev.fs_xfs_set_label(self.loop_dev, "TEST_LABEL2")
+        succ = BlockDev.fs_xfs_set_label(self.loop_devs[0], "TEST_LABEL2")
         self.assertTrue(succ)
-        with mounted(self.loop_dev, self.mount_dir):
-            fi = BlockDev.fs_xfs_get_info(self.loop_dev)
+        with mounted(self.loop_devs[0], self.mount_dir):
+            fi = BlockDev.fs_xfs_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "TEST_LABEL2")
 
-        succ = BlockDev.fs_xfs_set_label(self.loop_dev, "")
+        succ = BlockDev.fs_xfs_set_label(self.loop_devs[0], "")
         self.assertTrue(succ)
-        with mounted(self.loop_dev, self.mount_dir):
-            fi = BlockDev.fs_xfs_get_info(self.loop_dev)
+        with mounted(self.loop_devs[0], self.mount_dir):
+            fi = BlockDev.fs_xfs_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
 
@@ -291,36 +291,36 @@ class XfsSetUUID(XfsTestCase):
     def test_xfs_set_uuid(self):
         """Verify that it is possible to set UUID of an xfs file system"""
 
-        succ = BlockDev.fs_xfs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_xfs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_xfs_set_uuid(self.loop_dev, self.test_uuid)
+        succ = BlockDev.fs_xfs_set_uuid(self.loop_devs[0], self.test_uuid)
         self.assertTrue(succ)
-        with mounted(self.loop_dev, self.mount_dir):
-            fi = BlockDev.fs_xfs_get_info(self.loop_dev)
+        with mounted(self.loop_devs[0], self.mount_dir):
+            fi = BlockDev.fs_xfs_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.uuid, self.test_uuid)
 
-        succ = BlockDev.fs_xfs_set_uuid(self.loop_dev, "nil")
+        succ = BlockDev.fs_xfs_set_uuid(self.loop_devs[0], "nil")
         self.assertTrue(succ)
 
         # can't use libblockdev because XFS without UUID can't be mounted
-        fs_type = check_output(["blkid", "-ovalue", "-sUUID", "-p", self.loop_dev]).strip()
+        fs_type = check_output(["blkid", "-ovalue", "-sUUID", "-p", self.loop_devs[0]]).strip()
         self.assertEqual(fs_type, b"")
 
-        succ = BlockDev.fs_xfs_set_uuid(self.loop_dev, "generate")
+        succ = BlockDev.fs_xfs_set_uuid(self.loop_devs[0], "generate")
         self.assertTrue(succ)
-        with mounted(self.loop_dev, self.mount_dir):
-            fi = BlockDev.fs_xfs_get_info(self.loop_dev)
+        with mounted(self.loop_devs[0], self.mount_dir):
+            fi = BlockDev.fs_xfs_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertNotEqual(fi.uuid, "")
         random_uuid = fi.uuid
 
         # no uuid -> random
-        succ = BlockDev.fs_xfs_set_uuid(self.loop_dev, None)
+        succ = BlockDev.fs_xfs_set_uuid(self.loop_devs[0], None)
         self.assertTrue(succ)
-        with mounted(self.loop_dev, self.mount_dir):
-            fi = BlockDev.fs_xfs_get_info(self.loop_dev)
+        with mounted(self.loop_devs[0], self.mount_dir):
+            fi = BlockDev.fs_xfs_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertNotEqual(fi.uuid, "")
         self.assertNotEqual(fi.uuid, random_uuid)
