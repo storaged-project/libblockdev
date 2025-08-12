@@ -170,6 +170,13 @@ class CryptoTestFormat(CryptoTestCase):
                                            extra=None)
         self.assertTrue(succ)
 
+        # just make sure default pbkdf iterations are used with extra=None
+        _ret, out, err = run_command("cryptsetup luksDump %s" % self.loop_devs[0])
+        m = re.search(r"MK iterations:\s*(\d+)\s*", out)
+        if not m or len(m.groups()) != 1:
+            self.fail("Failed to get pbkdf information from:\n%s %s" % (out, err))
+        self.assertGreater(int(m.group(1)), 1000)
+
         # create with a keyfile
         ctx = BlockDev.CryptoKeyslotContext(keyfile=self.keyfile, keyfile_offset=0, key_size=0)
         succ = BlockDev.crypto_luks_format(device=self.loop_devs[0], cipher="aes-xts-plain64",
@@ -222,6 +229,33 @@ class CryptoTestFormat(CryptoTestCase):
         if not m or len(m.groups()) != 1:
             self.fail("Failed to get pbkdf information from:\n%s %s" % (out, err))
         self.assertEqual(m.group(1), "pbkdf2")
+
+    @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_luks1_format_pbkdf_options(self):
+        """Verify that formatting device as LUKS 1 with extra PBKDF arguments works"""
+
+        # different options for pbkdf2 -- all parameters set
+        pbkdf = BlockDev.CryptoLUKSPBKDF(type="pbkdf2", iterations=1000)
+        extra = BlockDev.CryptoLUKSExtra(pbkdf=pbkdf)
+
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
+        succ = BlockDev.crypto_luks_format(self.loop_devs[0], "aes-xts-plain64", 0, ctx, 0,
+                                           BlockDev.CryptoLUKSVersion.LUKS1, extra)
+        self.assertTrue(succ)
+
+        _ret, out, err = run_command("cryptsetup luksDump %s" % self.loop_devs[0])
+        m = re.search(r"MK iterations:\s*(\d+)\s*", out)
+        if not m or len(m.groups()) != 1:
+            self.fail("Failed to get pbkdf information from:\n%s %s" % (out, err))
+        self.assertEqual(int(m.group(1)), 1000)
+
+        # invalid PBKDF
+        pbkdf = BlockDev.CryptoLUKSPBKDF(type="argon2id")
+        extra = BlockDev.CryptoLUKSExtra(pbkdf=pbkdf)
+        with self.assertRaisesRegex(GLib.GError, "Invalid pbkdf specified"):
+            BlockDev.crypto_luks_format(self.loop_devs[0], "aes-xts-plain64", 0, ctx, 0,
+                                        BlockDev.CryptoLUKSVersion.LUKS1, extra)
+        self.assertTrue(succ)
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
     def test_luks2_format_pbkdf_options(self):

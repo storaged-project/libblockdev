@@ -950,6 +950,7 @@ gboolean _crypto_luks_format (const gchar *device,
     gchar *msg = NULL;
     const gchar* crypt_version = NULL;
     GError *l_error = NULL;
+    struct crypt_pbkdf_type *pbkdf = NULL;
 
 #ifdef LIBCRYPTSETUP_27
     struct crypt_params_hw_opal opal_params = {
@@ -1068,7 +1069,7 @@ gboolean _crypto_luks_format (const gchar *device,
     if (extra) {
         if (luks_version == BD_CRYPTO_LUKS_VERSION_LUKS1) {
 
-            if (extra->integrity || extra->sector_size || extra->label || extra->subsystem || extra->pbkdf) {
+            if (extra->integrity || extra->sector_size || extra->label || extra->subsystem) {
                 g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
                              "Invalid extra arguments specified. Only `data_alignment`"
                              "and `data_device` are valid for LUKS 1.");
@@ -1079,11 +1080,35 @@ gboolean _crypto_luks_format (const gchar *device,
                 return FALSE;
             }
 
+            if (extra->pbkdf) {
+                if (g_strcmp0 (extra->pbkdf->type, "pbkdf2") != 0) {
+                    g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
+                                 "Invalid pbkdf specified. Only `pbkdf2` is valid for LUKS 1.");
+                crypt_free (cd);
+                g_strfreev (cipher_specs);
+                bd_utils_report_finished (progress_id, l_error->message);
+                g_propagate_error (error, l_error);
+                return FALSE;
+                }
+
+                pbkdf = get_pbkdf_params (extra->pbkdf, &l_error);
+                if (pbkdf == NULL && l_error != NULL) {
+                    crypt_free (cd);
+                    g_strfreev (cipher_specs);
+                    bd_utils_report_finished (progress_id, l_error->message);
+                    g_propagate_prefixed_error (error, l_error,
+                                                "Failed to get PBKDF parameters for '%s'.", device);
+                    return FALSE;
+                }
+                crypt_set_pbkdf_type (cd, pbkdf);
+            }
+
             struct crypt_params_luks1 params = ZERO_INIT;
             params.data_alignment = extra->data_alignment;
             params.data_device = extra->data_device;
             ret = crypt_format (cd, crypt_version, cipher_specs[0], cipher_specs[1],
                                 NULL, NULL, key_size, &params);
+            g_free (pbkdf);
         }
         else if (luks_version == BD_CRYPTO_LUKS_VERSION_LUKS2) {
             struct crypt_params_luks2 params = ZERO_INIT;
