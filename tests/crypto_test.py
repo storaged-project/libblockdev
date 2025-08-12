@@ -93,15 +93,20 @@ class CryptoTestCase(unittest.TestCase):
         self.dev_files.clear()
         self.loop_devs.clear()
 
-    def _luks_format(self, device, passphrase, keyfile=None, luks_version=BlockDev.CryptoLUKSVersion.LUKS1):
+    def _luks_format(self, device, passphrase, keyfile=None, luks_version=BlockDev.CryptoLUKSVersion.LUKS1, fast_pbkdf=False):
+        if fast_pbkdf:
+            pbkdf = BlockDev.CryptoLUKSPBKDF(type="pbkdf2", iterations=1000)
+            extra = BlockDev.CryptoLUKSExtra(pbkdf=pbkdf)
+        else:
+            extra = None
         ctx = BlockDev.CryptoKeyslotContext(passphrase=passphrase)
-        BlockDev.crypto_luks_format(device, context=ctx, luks_version=luks_version)
+        BlockDev.crypto_luks_format(device, context=ctx, luks_version=luks_version, extra=extra)
         if keyfile:
             nctx = BlockDev.CryptoKeyslotContext(keyfile=keyfile)
             BlockDev.crypto_luks_add_key(device, ctx, nctx)
 
-    def _luks2_format(self, device, passphrase, keyfile=None):
-        return self._luks_format(device, passphrase, keyfile, BlockDev.CryptoLUKSVersion.LUKS2)
+    def _luks2_format(self, device, passphrase, keyfile=None, fast_pbkdf=False):
+        return self._luks_format(device, passphrase, keyfile, BlockDev.CryptoLUKSVersion.LUKS2, fast_pbkdf=fast_pbkdf)
 
     def _is_fips_enabled(self):
         if not os.path.exists("/proc/sys/crypto/fips_enabled"):
@@ -375,7 +380,7 @@ class CryptoTestResize(CryptoTestCase):
         """Verify that resizing LUKS device works"""
 
         # the simple case with password
-        self._luks_format(self.loop_devs[0], PASSWD)
+        self._luks_format(self.loop_devs[0], PASSWD, fast_pbkdf=True)
 
         ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
         succ = BlockDev.crypto_luks_open(self.loop_devs[0], "libblockdevTestLUKS", ctx, False)
@@ -397,7 +402,7 @@ class CryptoTestResize(CryptoTestCase):
         """Verify that resizing LUKS 2 device works"""
 
         # the simple case with password
-        self._luks2_format(self.loop_devs[0], PASSWD, self.keyfile)
+        self._luks2_format(self.loop_devs[0], PASSWD, self.keyfile, fast_pbkdf=True)
 
         ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
         succ = BlockDev.crypto_luks_open(self.loop_devs[0], "libblockdevTestLUKS", ctx, False)
@@ -424,7 +429,7 @@ class CryptoTestOpenClose(CryptoTestCase):
     def _luks_open_close(self, create_fn):
         """Verify that opening/closing LUKS device works"""
 
-        create_fn(self.loop_devs[0], PASSWD, self.keyfile)
+        create_fn(self.loop_devs[0], PASSWD, self.keyfile, fast_pbkdf=True)
 
         with self.assertRaises(GLib.GError):
             ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
@@ -493,7 +498,7 @@ class CryptoTestOpenClose(CryptoTestCase):
     def test_luks2_open_close_non_ascii_passphrase(self):
         passphrase = "šššššššš"
 
-        self._luks2_format(self.loop_devs[0], passphrase)
+        self._luks2_format(self.loop_devs[0], passphrase, fast_pbkdf=True)
 
         ctx = BlockDev.CryptoKeyslotContext(passphrase=passphrase)
         succ = BlockDev.crypto_luks_open(self.loop_devs[0], "libblockdevTestLUKS", ctx, False)
@@ -530,7 +535,7 @@ class CryptoTestAddRemoveKey(CryptoTestCase):
     def _remove_key(self, create_fn):
         """Verify that adding/removing key to/from LUKS device works"""
 
-        create_fn(self.loop_devs[0], PASSWD, None)
+        create_fn(self.loop_devs[0], PASSWD, None, fast_pbkdf=True)
 
         # add key, wrong passphrase
         with self.assertRaises(GLib.GError):
@@ -605,7 +610,7 @@ class CryptoTestChangeKey(CryptoTestCase):
     def _change_key(self, create_fn):
         """Verify that changing key in LUKS device works"""
 
-        create_fn(self.loop_devs[0], PASSWD, None)
+        create_fn(self.loop_devs[0], PASSWD, None, fast_pbkdf=True)
 
         with self.assertRaisesRegex(GLib.GError, r"No keyslot with given passphrase found."):
             ctx = BlockDev.CryptoKeyslotContext(passphrase="wrong-passphrase")
@@ -633,7 +638,7 @@ class CryptoTestLuksStatus(CryptoTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.crypto_luks_status("/non/existing/device")
 
-        create_fn(self.loop_devs[0], PASSWD, None)
+        create_fn(self.loop_devs[0], PASSWD, None, fast_pbkdf=True)
 
         ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
         succ = BlockDev.crypto_luks_open(self.loop_devs[0], "libblockdevTestLUKS", ctx, False)
@@ -665,7 +670,7 @@ class CryptoTestLuksOpenRW(CryptoTestCase):
     def _luks_open_rw(self, create_fn):
         """Verify that a LUKS device can be activated as RW as well as RO"""
 
-        create_fn(self.loop_devs[0], PASSWD, None)
+        create_fn(self.loop_devs[0], PASSWD, None, fast_pbkdf=True)
 
         ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
         succ = BlockDev.crypto_luks_open(self.loop_devs[0], "libblockdevTestLUKS", ctx, False)
@@ -736,7 +741,7 @@ class CryptoTestEscrow(CryptoTestCase):
     def test_escrow_packet(self):
         """Verify that an escrow packet can be created for a device"""
 
-        self._luks_format(self.loop_devs[0], PASSWD)
+        self._luks_format(self.loop_devs[0], PASSWD, fast_pbkdf=True)
 
         escrow_dir = tempfile.mkdtemp(prefix='libblockdev_test_escrow')
         self.addCleanup(shutil.rmtree, escrow_dir)
@@ -779,7 +784,7 @@ class CryptoTestEscrow(CryptoTestCase):
     @tag_test(TestTags.SLOW)
     def test_backup_passphrase(self):
         """Verify that a backup passphrase can be created for a device"""
-        self._luks_format(self.loop_devs[0], PASSWD)
+        self._luks_format(self.loop_devs[0], PASSWD, fast_pbkdf=True)
 
         escrow_dir = tempfile.mkdtemp(prefix='libblockdev_test_escrow')
         self.addCleanup(shutil.rmtree, escrow_dir)
@@ -811,7 +816,7 @@ class CryptoTestEscrow(CryptoTestCase):
 class CryptoTestSuspendResume(CryptoTestCase):
     def _luks_suspend_resume(self, create_fn):
 
-        create_fn(self.loop_devs[0], PASSWD, self.keyfile)
+        create_fn(self.loop_devs[0], PASSWD, self.keyfile, fast_pbkdf=True)
 
         ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
         succ = BlockDev.crypto_luks_open(self.loop_devs[0], "libblockdevTestLUKS", ctx)
@@ -879,7 +884,7 @@ class CryptoTestSuspendResume(CryptoTestCase):
 class CryptoTestKillSlot(CryptoTestCase):
     def _luks_kill_slot(self, create_fn):
 
-        create_fn(self.loop_devs[0], PASSWD, None)
+        create_fn(self.loop_devs[0], PASSWD, None, fast_pbkdf=True)
 
         ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
         nctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD2)
@@ -931,7 +936,7 @@ class CryptoTestHeaderBackupRestore(CryptoTestCase):
         self.addCleanup(shutil.rmtree, self.backup_dir)
 
     def _luks_header_backup_restore(self, create_fn):
-        create_fn(self.loop_devs[0], PASSWD, None)
+        create_fn(self.loop_devs[0], PASSWD, None, fast_pbkdf=True)
 
         backup_file = os.path.join(self.backup_dir, "luks-header.txt")
 
@@ -1125,7 +1130,7 @@ class CryptoTestSetLabelUuid(CryptoTestCase):
     def test_luks_set_label_uuid(self):
         """Verify that we can set label and UUID on a LUKS device"""
 
-        self._luks_format(self.loop_devs[0], PASSWD)
+        self._luks_format(self.loop_devs[0], PASSWD, fast_pbkdf=True)
 
         # setting label is not supported on LUKS1
         with self.assertRaisesRegex(GLib.GError, r"Label can be set only on LUKS 2"):
@@ -1143,7 +1148,7 @@ class CryptoTestSetLabelUuid(CryptoTestCase):
     def test_luks2_set_label_uuid(self):
         """Verify that we can set label and UUID on a LUKS 2 device"""
 
-        self._luks2_format(self.loop_devs[0], PASSWD)
+        self._luks2_format(self.loop_devs[0], PASSWD, fast_pbkdf=True)
         self._test_set_label()
         self._test_set_uuid()
 
@@ -1154,7 +1159,7 @@ class CryptoTestSetPersistentFlags(CryptoTestCase):
     def test_luks_set_persistent_flags(self):
         """Verify that we can set flags on a LUKS device"""
 
-        self._luks_format(self.loop_devs[0], PASSWD)
+        self._luks_format(self.loop_devs[0], PASSWD, fast_pbkdf=True)
 
         with self.assertRaisesRegex(GLib.GError, "Persistent flags can be set only on LUKS v2"):
             BlockDev.crypto_luks_set_persistent_flags(self.loop_devs[0],
@@ -1164,7 +1169,7 @@ class CryptoTestSetPersistentFlags(CryptoTestCase):
     def test_luks_set_persistent_flags(self):
         """Verify that we can set flags on a LUKS 2 device"""
 
-        self._luks2_format(self.loop_devs[0], PASSWD)
+        self._luks2_format(self.loop_devs[0], PASSWD, fast_pbkdf=True)
 
         succ = BlockDev.crypto_luks_set_persistent_flags(self.loop_devs[0],
                                                          BlockDev.CryptoLUKSPersistentFlags.ALLOW_DISCARDS)
@@ -1183,7 +1188,8 @@ class CryptoTestConvert(CryptoTestCase):
     def test_convert_luks1_to_luks2(self):
         """Verify that we can convert a device from LUKS1 format to LUKS2"""
 
-        self._luks_format(self.loop_devs[0], PASSWD, luks_version=BlockDev.CryptoLUKSVersion.LUKS1)
+        self._luks_format(self.loop_devs[0], PASSWD, luks_version=BlockDev.CryptoLUKSVersion.LUKS1,
+                          fast_pbkdf=True)
 
         succ = BlockDev.crypto_luks_convert(self.loop_devs[0], BlockDev.CryptoLUKSVersion.LUKS2)
         self.assertTrue(succ)
@@ -1196,7 +1202,8 @@ class CryptoTestConvert(CryptoTestCase):
     def test_convert_luks1_to_luks2_to_luks1(self):
         """Verify that we can convert a device from LUKS1 format to LUKS2 and back to LUKS1"""
 
-        self._luks_format(self.loop_devs[0], PASSWD, luks_version=BlockDev.CryptoLUKSVersion.LUKS1)
+        self._luks_format(self.loop_devs[0], PASSWD, luks_version=BlockDev.CryptoLUKSVersion.LUKS1,
+                          fast_pbkdf=True)
 
         # LUKS1 -> LUKS2
         succ = BlockDev.crypto_luks_convert(self.loop_devs[0], BlockDev.CryptoLUKSVersion.LUKS2)
@@ -1264,7 +1271,7 @@ class CryptoTestLuksSectorSize(CryptoTestCase):
     def test_luks2_sector_size_autodetect(self):
         """Verify that we can autodetect 4k drives and set 4k sector size for them"""
         # format the 4k loop device, encryption sector size should default to 4096
-        self._luks2_format(self.loop_devs[0], PASSWD)
+        self._luks2_format(self.loop_devs[0], PASSWD, fast_pbkdf=True)
 
         ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
         succ = BlockDev.crypto_luks_open(self.loop_devs[0], "libblockdevTestLUKS", ctx, False)
@@ -1280,7 +1287,7 @@ class CryptoTestLuksSectorSize(CryptoTestCase):
         self.assertTrue(succ)
 
         # with the 512 loop device, we should still get 512
-        self._luks2_format(self.loop_devs[1], PASSWD)
+        self._luks2_format(self.loop_devs[1], PASSWD, fast_pbkdf=True)
 
         succ = BlockDev.crypto_luks_open(self.loop_devs[1], "libblockdevTestLUKS", ctx, False)
         self.assertTrue(succ)
@@ -1350,7 +1357,7 @@ class CryptoTestLUKSToken(CryptoTestCase):
         """Verify that we can get information about LUKS2 tokens"""
 
         # the simple case with password
-        self._luks2_format(self.loop_devs[0], PASSWD, None)
+        self._luks2_format(self.loop_devs[0], PASSWD, None, fast_pbkdf=True)
 
         info = BlockDev.crypto_luks_token_info(self.loop_devs[0])
         self.assertListEqual(info, [])
