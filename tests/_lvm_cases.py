@@ -22,11 +22,11 @@ from gi.repository import GLib, BlockDev
 
 
 def _get_lvm_version():
-        _ret, out, _err = run_command("lvm version")
-        m = re.search(r"LVM version:\s+([\d\.]+)", out)
-        if not m or len(m.groups()) != 1:
-            raise RuntimeError("Failed to determine LVM version from: %s" % out)
-        return Version(m.groups()[0])
+    _ret, out, _err = run_command("lvm version")
+    m = re.search(r"LVM version:\s+([\d\.]+)", out)
+    if not m or len(m.groups()) != 1:
+        raise RuntimeError("Failed to determine LVM version from: %s" % out)
+    return Version(m.groups()[0])
 
 LVM_VERSION = _get_lvm_version()
 
@@ -1243,7 +1243,7 @@ class LvmTestLVs(LvmPVVGLVTestCase):
         self.assertEqual(BlockDev.lvm_cache_pool_name("testVG", "testLV"), cpool_name)
 
     @tag_test(TestTags.SLOW)
-    def test_create_cached_lv(self):
+    def test_create_writecached_lv(self):
         """Verify that it is possible to create a cached LV in a single step"""
 
         if LVM_VERSION < Version("2.03.10") and self.test_type == "dbus":
@@ -1299,7 +1299,7 @@ class LvmTestLVs(LvmPVVGLVTestCase):
         self.assertEqual(stats.mode, BlockDev.LVMCacheMode.WRITETHROUGH)
 
     @tag_test(TestTags.SLOW)
-    def test_cache_get_stats(self):
+    def test_thinpool_cache_get_stats(self):
         """Verify that it is possible to get stats for a cached thinpool"""
 
         succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)

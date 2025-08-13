@@ -70,7 +70,7 @@ class PartTestCase(PartTest):
 class PartNoDevTestCase(PartTest):
     @tag_test(TestTags.NOSTORAGE)
     def test_plugin_version(self):
-       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.PART), "libbd_part.so.3")
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.PART), "libbd_part.so.3")
 
     @tag_test(TestTags.NOSTORAGE)
     def test_part_type_str(self):
@@ -184,7 +184,7 @@ class PartCreatePartCase(PartTestCase):
 
         ps2 = BlockDev.part_get_part_spec (self.loop_devs[0], ps.path)
         self.assertEqual(ps.path, ps2.path)
-        self.assertEqual(ps.type, ps2.type);
+        self.assertEqual(ps.type, ps2.type)
         self.assertEqual(ps.start, ps2.start)
         self.assertEqual(ps.size, ps2.size)
 
@@ -216,7 +216,7 @@ class PartCreatePartCase(PartTestCase):
 
         ps2 = BlockDev.part_get_part_spec (self.loop_devs[0], ps.path)
         self.assertEqual(ps.path, ps2.path)
-        self.assertEqual(ps.type, ps2.type);
+        self.assertEqual(ps.type, ps2.type)
         self.assertEqual(ps.start, ps2.start)
         self.assertEqual(ps.size, ps2.size)
 
@@ -248,7 +248,7 @@ class PartCreatePartCase(PartTestCase):
 
         ps2 = BlockDev.part_get_part_spec (self.loop_devs[0], ps.path)
         self.assertEqual(ps.path, ps2.path)
-        self.assertEqual(ps.type, ps2.type);
+        self.assertEqual(ps.type, ps2.type)
         self.assertEqual(ps.start, ps2.start)
         self.assertEqual(ps.size, ps2.size)
 
@@ -1018,7 +1018,7 @@ class PartCreateResizePartCase(PartTestCase):
 
         try:
             fdisk_version = self._get_fdisk_version()
-        except Exception as e:
+        except Exception:
             resize_tolerance = 0
             fdisk_version = Version("0")
 

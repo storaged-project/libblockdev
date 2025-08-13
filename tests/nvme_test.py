@@ -25,7 +25,7 @@ class NVMeTest(unittest.TestCase):
             raise unittest.SkipTest("nvme executable (nvme-cli package) not found in $PATH, skipping.")
         if not shutil.which("nvmetcli"):
             raise unittest.SkipTest("nvmetcli executable not found in $PATH, skipping.")
-        ret, out, err = run_command("modprobe nvme-fabrics")
+        ret, _out, _err = run_command("modprobe nvme-fabrics")
         if ret != 0:
             raise unittest.SkipTest("nvme-fabrics kernel module unavailable, skipping.")
 
@@ -44,7 +44,7 @@ class NVMeTest(unittest.TestCase):
 class NVMePluginVersionTestCase(NVMeTest):
     @tag_test(TestTags.NOSTORAGE)
     def test_plugin_version(self):
-       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.NVME), "libbd_nvme.so.3")
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.NVME), "libbd_nvme.so.3")
 
     @tag_test(TestTags.NOSTORAGE)
     def test_availability(self):
@@ -514,13 +514,11 @@ class NVMeFabricsTestCase(NVMeTest):
             self.addCleanup(write_file, HOSTNQN_PATH, saved_hostnqn)
         except:
             self.addCleanup(self._safe_unlink, HOSTNQN_PATH)
-            pass
         try:
             saved_hostid = read_file(HOSTID_PATH)
             self.addCleanup(write_file, HOSTID_PATH, saved_hostid)
         except:
             self.addCleanup(self._safe_unlink, HOSTID_PATH)
-            pass
 
         self._safe_unlink(HOSTNQN_PATH)
         self._safe_unlink(HOSTID_PATH)

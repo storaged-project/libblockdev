@@ -1,14 +1,12 @@
 import os
 import unittest
-import time
 import overrides_hack
 
 from utils import create_sparse_tempfile, TestTags, tag_test, required_plugins
 
 import gi
-gi.require_version('GLib', '2.0')
 gi.require_version('BlockDev', '3.0')
-from gi.repository import GLib, BlockDev
+from gi.repository import BlockDev
 
 
 @required_plugins(("loop",))
@@ -38,7 +36,7 @@ class LoopTestCase(unittest.TestCase):
 class LoopPluginVersionCase(LoopTestCase):
     @tag_test(TestTags.NOSTORAGE)
     def test_plugin_version(self):
-       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LOOP), "libbd_loop.so.3")
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LOOP), "libbd_loop.so.3")
 
 
 class LoopTestSetupBasic(LoopTestCase):

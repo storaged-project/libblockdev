@@ -124,7 +124,7 @@ class CryptoNoDevTestCase(CryptoTestCase):
 
     @tag_test(TestTags.NOSTORAGE)
     def test_plugin_version(self):
-       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.CRYPTO), "libbd_crypto.so.3")
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.CRYPTO), "libbd_crypto.so.3")
 
     @tag_test(TestTags.NOSTORAGE)
     def test_generate_backup_passhprase(self):
@@ -1166,7 +1166,7 @@ class CryptoTestSetPersistentFlags(CryptoTestCase):
                                                       BlockDev.CryptoLUKSPersistentFlags.ALLOW_DISCARDS)
 
     @tag_test(TestTags.SLOW, TestTags.CORE)
-    def test_luks_set_persistent_flags(self):
+    def test_luks2_set_persistent_flags(self):
         """Verify that we can set flags on a LUKS 2 device"""
 
         self._luks2_format(self.loop_devs[0], PASSWD, fast_pbkdf=True)

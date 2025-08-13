@@ -37,7 +37,7 @@ class LvmNoDevTestCase(_lvm_cases.LvmNoDevTestCase, LvmTestCase):
 
     @tag_test(TestTags.NOSTORAGE)
     def test_plugin_version(self):
-       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm.so.3")
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm.so.3")
 
     def test_tech_available(self):
         """Verify that checking lvm tool availability by technology works as expected"""

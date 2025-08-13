@@ -42,18 +42,9 @@ class MDTest(unittest.TestCase):
 
 class MDNoDevTestCase(MDTest):
 
-    requested_plugins = BlockDev.plugin_specs_from_names(("mdraid",))
-
-    @classmethod
-    def setUpClass(cls):
-        if not BlockDev.is_initialized():
-            BlockDev.init(cls.requested_plugins, None)
-        else:
-            BlockDev.reinit(cls.requested_plugins, True, None)
-
     @tag_test(TestTags.NOSTORAGE)
     def test_plugin_version(self):
-       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.MDRAID), "libbd_mdraid.so.3")
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.MDRAID), "libbd_mdraid.so.3")
 
     @tag_test(TestTags.NOSTORAGE)
     def test_get_superblock_size(self):
@@ -453,7 +444,7 @@ class MDTestNameNodeBijection(MDTestCase):
         with self.assertRaisesRegex(GLib.GError, r'No name'):
             BlockDev.md_name_from_node("no_such_node")
 
-        succ = BlockDev.md_deactivate("bd_test_md");
+        succ = BlockDev.md_deactivate("bd_test_md")
         self.assertTrue(succ)
 
         succ = BlockDev.md_destroy(self.loop_devs[0])

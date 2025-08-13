@@ -81,7 +81,7 @@ def fake_utils(path="."):
 ALL_UTILS = {"lvm", "btrfs", "mkswap", "swaplabel", "multipath", "mpathconf", "dmsetup", "mdadm",
              "mkfs.exfat", "fsck.exfat", "tune.exfat",
              "mke2fs", "e2fsck", "tune2fs", "dumpe2fs", "resize2fs",
-             "mkfs.f2fs", "fsck.f2fs", "fsck.f2fs", "dump.f2fs", "resize.f2fs",
+             "mkfs.f2fs", "fsck.f2fs", "dump.f2fs", "resize.f2fs",
              "mkfs.nilfs2", "nilfs-tune", "nilfs-resize",
              "mkntfs", "ntfsfix", "ntfsresize", "ntfslabel", "ntfsinfo",
              "mkfs.vfat", "fatlabel", "fsck.vfat", "vfat-resize",
