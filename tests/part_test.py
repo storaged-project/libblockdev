@@ -14,14 +14,9 @@ from gi.repository import GLib, BlockDev
 
 
 @required_plugins(("part",))
-class PartTestCase(unittest.TestCase):
+class PartTest(unittest.TestCase):
 
     requested_plugins = BlockDev.plugin_specs_from_names(("part",))
-    block_size = 512
-    _sparse_size = 100 * 1024**2
-    _num_devices = 1
-    loop_devs = []
-    dev_files = []
 
     @classmethod
     def _get_fdisk_version(cls):
@@ -37,6 +32,14 @@ class PartTestCase(unittest.TestCase):
             BlockDev.init(cls.requested_plugins, None)
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
+
+
+class PartTestCase(PartTest):
+    block_size = 512
+    _sparse_size = 100 * 1024**2
+    _num_devices = 1
+    loop_devs = []
+    dev_files = []
 
     def setUp(self):
         self.addCleanup(self._clean_up)
@@ -64,10 +67,19 @@ class PartTestCase(unittest.TestCase):
         self.loop_devs.clear()
 
 
-class PartCPluginVersionCase(PartTestCase):
+class PartNoDevTestCase(PartTest):
     @tag_test(TestTags.NOSTORAGE)
     def test_plugin_version(self):
        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.PART), "libbd_part.so.3")
+
+    @tag_test(TestTags.NOSTORAGE)
+    def test_part_type_str(self):
+        types = {BlockDev.PartType.NORMAL: 'primary', BlockDev.PartType.LOGICAL: 'logical',
+                 BlockDev.PartType.EXTENDED: 'extended', BlockDev.PartType.FREESPACE: 'free',
+                 BlockDev.PartType.METADATA: 'metadata', BlockDev.PartType.PROTECTED: 'primary'}
+
+        for key, value in types.items():
+            self.assertEqual(BlockDev.part_get_type_str(key), value)
 
 
 class PartCreateTableCase(PartTestCase):
@@ -1353,18 +1365,3 @@ class PartSetGptAttrsCase(PartTestCase):
         self.assertTrue(succ)
         ps = BlockDev.part_get_part_spec (self.loop_devs[0], ps.path)
         self.assertEqual(ps.attrs, attrs)
-
-
-class PartNoDevCase(PartTestCase):
-
-    def setUp(self):
-        # no devices needed for this test case
-        pass
-
-    def test_part_type_str(self):
-        types = {BlockDev.PartType.NORMAL: 'primary', BlockDev.PartType.LOGICAL: 'logical',
-                 BlockDev.PartType.EXTENDED: 'extended', BlockDev.PartType.FREESPACE: 'free',
-                 BlockDev.PartType.METADATA: 'metadata', BlockDev.PartType.PROTECTED: 'primary'}
-
-        for key, value in types.items():
-            self.assertEqual(BlockDev.part_get_type_str(key), value)
