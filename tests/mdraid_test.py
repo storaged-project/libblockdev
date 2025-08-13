@@ -214,27 +214,24 @@ class MDTestActivateDeactivate(MDTestCase):
     def test_activate_deactivate(self):
         """Verify that it is possible to activate and deactivate an MD RAID"""
 
-        with wait_for_action("resync"):
-            succ = BlockDev.md_create("bd_test_md", "raid1",
-                                      [self.loop_devs[0], self.loop_devs[1]],
-                                      0, None, None)
-            self.assertTrue(succ)
+        succ = BlockDev.md_create("bd_test_md", "raid0",
+                                    [self.loop_devs[0], self.loop_devs[1]],
+                                    0, None, None)
+        self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
             BlockDev.md_deactivate("non_existing_md")
 
-        with wait_for_action("resync"):
-            succ = BlockDev.md_deactivate("bd_test_md")
-            self.assertTrue(succ)
+        succ = BlockDev.md_deactivate("bd_test_md")
+        self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
             BlockDev.md_activate("bd_test_md",
                                  ["/non/existing/device", self.loop_devs[1]], None)
 
-        with wait_for_action("resync"):
-            succ = BlockDev.md_activate("bd_test_md",
-                                        [self.loop_devs[0], self.loop_devs[1]], None)
-            self.assertTrue(succ)
+        succ = BlockDev.md_activate("bd_test_md",
+                                    [self.loop_devs[0], self.loop_devs[1]], None)
+        self.assertTrue(succ)
 
         # try to activate again, should not fail, just no-op
         succ = BlockDev.md_activate("bd_test_md",
@@ -242,44 +239,42 @@ class MDTestActivateDeactivate(MDTestCase):
         self.assertTrue(succ)
 
         # try to deactivate using the node instead of name
-        with wait_for_action("resync"):
-            succ = BlockDev.md_deactivate(BlockDev.md_node_from_name("bd_test_md"))
-            self.assertTrue(succ)
+        succ = BlockDev.md_deactivate(BlockDev.md_node_from_name("bd_test_md"))
+        self.assertTrue(succ)
 
         # try to activate using full path, not just the name
         # (it should work too and blivet does this)
-        with wait_for_action("resync"):
-            succ = BlockDev.md_activate("/dev/md/bd_test_md",
-                                        [self.loop_devs[0], self.loop_devs[1]], None)
-            self.assertTrue(succ)
+        succ = BlockDev.md_activate("/dev/md/bd_test_md",
+                                    [self.loop_devs[0], self.loop_devs[1]], None)
+        self.assertTrue(succ)
 
-        with wait_for_action("resync"):
-            succ = BlockDev.md_deactivate("bd_test_md")
-            self.assertTrue(succ)
+        succ = BlockDev.md_deactivate("bd_test_md")
+        self.assertTrue(succ)
 
         md_info = BlockDev.md_examine(self.loop_devs[0])
         self.assertTrue(md_info)
         self.assertTrue(md_info.uuid)
 
         # try to activate with UUID and array name
-        with wait_for_action("resync"):
-            succ = BlockDev.md_activate("bd_test_md", [self.loop_devs[0], self.loop_devs[1]], md_info.uuid)
+        succ = BlockDev.md_activate("bd_test_md", [self.loop_devs[0], self.loop_devs[1]], md_info.uuid)
+        self.assertTrue(succ)
 
-        with wait_for_action("resync"):
-            succ = BlockDev.md_deactivate("bd_test_md")
-            self.assertTrue(succ)
+        succ = BlockDev.md_deactivate("bd_test_md")
+        self.assertTrue(succ)
 
         # try to activate by UUID only: should work with member devices specified
-        with wait_for_action("resync"):
-            succ = BlockDev.md_activate(None, [self.loop_devs[0], self.loop_devs[1]], md_info.uuid)
+        succ = BlockDev.md_activate(None, [self.loop_devs[0], self.loop_devs[1]], md_info.uuid)
+        self.assertTrue(succ)
 
-        with wait_for_action("resync"):
-            succ = BlockDev.md_deactivate("bd_test_md")
-            self.assertTrue(succ)
+        succ = BlockDev.md_deactivate("bd_test_md")
+        self.assertTrue(succ)
 
         # as well as without them
-        with wait_for_action("resync"):
-            succ = BlockDev.md_activate(None, None, md_info.uuid)
+        succ = BlockDev.md_activate(None, None, md_info.uuid)
+        self.assertTrue(succ)
+
+        succ = BlockDev.md_deactivate("bd_test_md")
+        self.assertTrue(succ)
 
 
 class MDTestNominateDenominate(MDTestCase):
