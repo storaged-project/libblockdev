@@ -253,18 +253,6 @@ class MDTestActivateDeactivate(MDTestCase):
                                         [self.loop_devs[0], self.loop_devs[1]], None)
             self.assertTrue(succ)
 
-
-class MDTestActivateWithUUID(MDTestCase):
-    @tag_test(TestTags.SLOW)
-    def test_activate_with_uuid(self):
-        """Verify that it is possible to activate an MD RAID with UUID"""
-
-        with wait_for_action("resync"):
-            succ = BlockDev.md_create("bd_test_md", "raid1",
-                                      [self.loop_devs[0], self.loop_devs[1]],
-                                      0, None, None)
-            self.assertTrue(succ)
-
         with wait_for_action("resync"):
             succ = BlockDev.md_deactivate("bd_test_md")
             self.assertTrue(succ)
@@ -273,30 +261,15 @@ class MDTestActivateWithUUID(MDTestCase):
         self.assertTrue(md_info)
         self.assertTrue(md_info.uuid)
 
+        # try to activate with UUID and array name
         with wait_for_action("resync"):
             succ = BlockDev.md_activate("bd_test_md", [self.loop_devs[0], self.loop_devs[1]], md_info.uuid)
 
-
-class MDTestActivateByUUID(MDTestCase):
-    @tag_test(TestTags.SLOW)
-    def test_activate_by_uuid(self):
-        """Verify that it is possible to activate an MD RAID by UUID"""
-
-        with wait_for_action("resync"):
-            succ = BlockDev.md_create("bd_test_md", "raid1",
-                                      [self.loop_devs[0], self.loop_devs[1]],
-                                      0, None, None)
-            self.assertTrue(succ)
-
         with wait_for_action("resync"):
             succ = BlockDev.md_deactivate("bd_test_md")
             self.assertTrue(succ)
 
-        md_info = BlockDev.md_examine(self.loop_devs[0])
-        self.assertTrue(md_info)
-        self.assertTrue(md_info.uuid)
-
-        # should work with member devices specified
+        # try to activate by UUID only: should work with member devices specified
         with wait_for_action("resync"):
             succ = BlockDev.md_activate(None, [self.loop_devs[0], self.loop_devs[1]], md_info.uuid)
 
