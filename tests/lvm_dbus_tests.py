@@ -28,7 +28,7 @@ class LvmDBusTestCase(_lvm_cases.LvmTestCase):
         if not BlockDev.is_initialized():
             BlockDev.init(cls.requested_plugins, None)
         else:
-                BlockDev.reinit(cls.requested_plugins, True, None)
+            BlockDev.reinit(cls.requested_plugins, True, None)
 
         try:
             cls.devices_avail = BlockDev.lvm_is_tech_avail(BlockDev.LVMTech.DEVICES, 0)
@@ -44,7 +44,7 @@ class LvmNoDevTestCase(_lvm_cases.LvmNoDevTestCase, LvmDBusTestCase):
 
     @tag_test(TestTags.NOSTORAGE)
     def test_plugin_version(self):
-       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm-dbus.so.3")
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LVM), "libbd_lvm-dbus.so.3")
 
     @tag_test(TestTags.NOSTORAGE)
     def test_tech_available(self):

@@ -142,18 +142,18 @@ class F2FSTestMkfs(F2FSTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_f2fs_mkfs("/non/existing/device", None)
 
-        succ = BlockDev.fs_f2fs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_f2fs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
         # just try if we can mount the file system
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             pass
 
         # check the fstype
-        fstype = BlockDev.fs_get_fstype(self.loop_dev)
+        fstype = BlockDev.fs_get_fstype(self.loop_devs[0])
         self.assertEqual(fstype, "f2fs")
 
-        BlockDev.fs_wipe(self.loop_dev, True)
+        BlockDev.fs_wipe(self.loop_devs[0], True)
 
 
 class F2FSMkfsWithLabel(F2FSTestCase):
@@ -167,10 +167,10 @@ class F2FSMkfsWithLabel(F2FSTestCase):
             BlockDev.fs_f2fs_check_label(513 * "a")
 
         ea = BlockDev.ExtraArg.new("-l", "TEST_LABEL")
-        succ = BlockDev.fs_f2fs_mkfs(self.loop_dev, [ea])
+        succ = BlockDev.fs_f2fs_mkfs(self.loop_devs[0], [ea])
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_f2fs_get_info(self.loop_dev)
+        fi = BlockDev.fs_f2fs_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "TEST_LABEL")
 
@@ -180,10 +180,10 @@ class F2FSMkfsWithFeatures(F2FSTestCase):
         """Verify that it is possible to create an f2fs file system with extra features enabled"""
 
         ea = BlockDev.ExtraArg.new("-O", "encrypt")
-        succ = BlockDev.fs_f2fs_mkfs(self.loop_dev, [ea])
+        succ = BlockDev.fs_f2fs_mkfs(self.loop_devs[0], [ea])
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_f2fs_get_info(self.loop_dev)
+        fi = BlockDev.fs_f2fs_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertTrue(fi.features & BlockDev.FSF2FSFeature.ENCRYPT)
 
@@ -192,14 +192,14 @@ class F2FSTestCheck(F2FSTestCase):
     def test_f2fs_check(self):
         """Verify that it is possible to check an f2fs file system"""
 
-        succ = BlockDev.fs_f2fs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_f2fs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
         if not _check_fsck_f2fs_version():
             with self.assertRaisesRegex(GLib.GError, "Too low version of fsck.f2fs. At least 1.11.0 required."):
-                BlockDev.fs_f2fs_check(self.loop_dev, None)
+                BlockDev.fs_f2fs_check(self.loop_devs[0], None)
         else:
-            succ = BlockDev.fs_f2fs_check(self.loop_dev, None)
+            succ = BlockDev.fs_f2fs_check(self.loop_devs[0], None)
             self.assertTrue(succ)
 
 
@@ -207,10 +207,10 @@ class F2FSTestRepair(F2FSTestCase):
     def test_f2fs_repair(self):
         """Verify that it is possible to repair an f2fs file system"""
 
-        succ = BlockDev.fs_f2fs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_f2fs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_f2fs_repair(self.loop_dev, None)
+        succ = BlockDev.fs_f2fs_repair(self.loop_devs[0], None)
         self.assertTrue(succ)
 
 
@@ -218,10 +218,10 @@ class F2FSGetInfo(F2FSTestCase):
     def test_f2fs_get_info(self):
         """Verify that it is possible to get info about an f2fs file system"""
 
-        succ = BlockDev.fs_f2fs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_f2fs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_f2fs_get_info(self.loop_dev)
+        fi = BlockDev.fs_f2fs_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
         # should be an non-empty string
@@ -233,47 +233,47 @@ class F2FSResize(F2FSTestCase):
     def test_f2fs_resize(self):
         """Verify that it is possible to resize an f2fs file system"""
 
-        succ = BlockDev.fs_f2fs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_f2fs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
         # shrink without the safe option -- should fail
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_f2fs_resize(self.loop_dev, 100 * 1024**2 / 512, False)
+            BlockDev.fs_f2fs_resize(self.loop_devs[0], 100 * 1024**2 / 512, False)
 
         # if we can't shrink we'll just check it returns some sane error
         if not _can_resize_f2fs():
             with self.assertRaisesRegex(GLib.GError, "Too low version of resize.f2fs. At least 1.12.0 required."):
-                BlockDev.fs_f2fs_resize(self.loop_dev, 100 * 1024**2 / 512, True)
+                BlockDev.fs_f2fs_resize(self.loop_devs[0], 100 * 1024**2 / 512, True)
             return
 
-        succ = BlockDev.fs_f2fs_resize(self.loop_dev, 100 * 1024**2 / 512, True)
+        succ = BlockDev.fs_f2fs_resize(self.loop_devs[0], 100 * 1024**2 / 512, True)
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_f2fs_get_info(self.loop_dev)
+        fi = BlockDev.fs_f2fs_get_info(self.loop_devs[0])
         if fi.sector_size == 0:
             # XXX latest versions of dump.f2fs don't print the sector size
             self.skipTest("Cannot get sector size of the f2fs filesystem, skipping")
 
-        fi = BlockDev.fs_f2fs_get_info(self.loop_dev)
+        fi = BlockDev.fs_f2fs_get_info(self.loop_devs[0])
         self.assertEqual(fi.sector_count * fi.sector_size, 100 * 1024**2)
 
         # grow
-        succ = BlockDev.fs_f2fs_resize(self.loop_dev, 120 * 1024**2 / 512, True)
+        succ = BlockDev.fs_f2fs_resize(self.loop_devs[0], 120 * 1024**2 / 512, True)
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_f2fs_get_info(self.loop_dev)
+        fi = BlockDev.fs_f2fs_get_info(self.loop_devs[0])
         self.assertEqual(fi.sector_count * fi.sector_size, 120 * 1024**2)
 
         # shrink again
-        succ = BlockDev.fs_f2fs_resize(self.loop_dev, 100 * 1024**2 / 512, True)
+        succ = BlockDev.fs_f2fs_resize(self.loop_devs[0], 100 * 1024**2 / 512, True)
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_f2fs_get_info(self.loop_dev)
+        fi = BlockDev.fs_f2fs_get_info(self.loop_devs[0])
         self.assertEqual(fi.sector_count * fi.sector_size, 100 * 1024**2)
 
         # resize to maximum size
-        succ = BlockDev.fs_f2fs_resize(self.loop_dev, 0, False)
+        succ = BlockDev.fs_f2fs_resize(self.loop_devs[0], 0, False)
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_f2fs_get_info(self.loop_dev)
+        fi = BlockDev.fs_f2fs_get_info(self.loop_devs[0])
         self.assertEqual(fi.sector_count * fi.sector_size, self.loop_size)

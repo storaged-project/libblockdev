@@ -26,7 +26,7 @@ class SwapTest(unittest.TestCase):
 class SwapPluginVersionTestCase(SwapTest):
     @tag_test(TestTags.NOSTORAGE)
     def test_plugin_version(self):
-       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.SWAP), "libbd_swap.so.3")
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.SWAP), "libbd_swap.so.3")
 
 class SwapTestCase(SwapTest):
     test_uuid = "4d7086c4-a4d3-432f-819e-73da03870df9"
@@ -115,21 +115,14 @@ class SwapTestCase(SwapTest):
         on = BlockDev.swap_swapstatus(self.loop_dev)
         self.assertFalse(on)
 
-    def test_mkswap_with_label(self):
+    def test_mkswap_with_label_uuid(self):
         """Verify that mkswap with label works as expected"""
 
-        succ = BlockDev.swap_mkswap(self.loop_dev, "BlockDevSwap", None)
+        succ = BlockDev.swap_mkswap(self.loop_dev, label="BlockDevSwap", uuid=self.test_uuid)
         self.assertTrue(succ)
 
         _ret, out, _err = run_command("blkid -ovalue -sLABEL -p %s" % self.loop_dev)
         self.assertEqual(out, "BlockDevSwap")
-
-    def test_mkswap_with_uuid(self):
-        """Verify that mkswap with uuid works as expected"""
-
-        succ = BlockDev.swap_mkswap(self.loop_dev, uuid=self.test_uuid)
-        self.assertTrue(succ)
-
         _ret, out, _err = run_command("blkid -ovalue -sUUID -p %s" % self.loop_dev)
         self.assertEqual(out, self.test_uuid)
 

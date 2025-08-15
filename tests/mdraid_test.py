@@ -42,18 +42,9 @@ class MDTest(unittest.TestCase):
 
 class MDNoDevTestCase(MDTest):
 
-    requested_plugins = BlockDev.plugin_specs_from_names(("mdraid",))
-
-    @classmethod
-    def setUpClass(cls):
-        if not BlockDev.is_initialized():
-            BlockDev.init(cls.requested_plugins, None)
-        else:
-            BlockDev.reinit(cls.requested_plugins, True, None)
-
     @tag_test(TestTags.NOSTORAGE)
     def test_plugin_version(self):
-       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.MDRAID), "libbd_mdraid.so.3")
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.MDRAID), "libbd_mdraid.so.3")
 
     @tag_test(TestTags.NOSTORAGE)
     def test_get_superblock_size(self):
@@ -100,28 +91,25 @@ class MDNoDevTestCase(MDTest):
 class MDTestCase(MDTest):
 
     _sparse_size = 10 * 1024**2
+    _num_devices = 2
+    loop_devs = []
+    dev_files = []
 
     def setUp(self):
         if os.uname()[-1] == "i686":
             self.skipTest("Skipping hanging MD RAID tests on i686")
 
         self.addCleanup(self._clean_up)
-        self.dev_file = create_sparse_tempfile("md_test", self._sparse_size)
-        self.dev_file2 = create_sparse_tempfile("md_test", self._sparse_size)
-        self.dev_file3 = create_sparse_tempfile("md_test", self._sparse_size)
 
-        try:
-            self.loop_dev = create_lio_device(self.dev_file)
-        except RuntimeError as e:
-            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
-        try:
-            self.loop_dev2 = create_lio_device(self.dev_file2)
-        except RuntimeError as e:
-            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
-        try:
-            self.loop_dev3 = create_lio_device(self.dev_file3)
-        except RuntimeError as e:
-            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
+        for i in range(self._num_devices):
+            dev_file = create_sparse_tempfile("md_test", self._sparse_size)
+            self.dev_files.append(dev_file)
+
+            try:
+                loop_dev = create_lio_device(self.dev_files[i])
+                self.loop_devs.append(loop_dev)
+            except RuntimeError as e:
+                raise RuntimeError("Failed to setup loop device for testing: %s" % e)
 
     def _clean_up(self):
         try:
@@ -132,18 +120,13 @@ class MDTestCase(MDTest):
             BlockDev.md_deactivate(BlockDev.md_node_from_name("bd_test_md"))
         except:
             pass
-        try:
-            BlockDev.md_destroy(self.loop_dev)
-        except:
-            pass
-        try:
-            BlockDev.md_destroy(self.loop_dev2)
-        except:
-            pass
-        try:
-            BlockDev.md_destroy(self.loop_dev3)
-        except:
-            pass
+
+        for i in range(self._num_devices):
+            try:
+                BlockDev.md_destroy(self.loop_devs[i])
+            except:
+                pass
+
         try:
             BlockDev.md_deactivate("bd_test_md")
         except:
@@ -153,26 +136,16 @@ class MDTestCase(MDTest):
         except:
             pass
 
-        try:
-            delete_lio_device(self.loop_dev)
-        except RuntimeError:
-            # just move on, we can do no better here
-            pass
-        os.unlink(self.dev_file)
+        for i in range(self._num_devices):
+            try:
+                delete_lio_device(self.loop_devs[i])
+            except RuntimeError:
+                # just move on, we can do no better here
+                pass
+            os.unlink(self.dev_files[i])
 
-        try:
-            delete_lio_device(self.loop_dev2)
-        except RuntimeError:
-            # just move on, we can do no better here
-            pass
-        os.unlink(self.dev_file2)
-
-        try:
-            delete_lio_device(self.loop_dev3)
-        except RuntimeError:
-            # just move on, we can do no better here
-            pass
-        os.unlink(self.dev_file3)
+        self.dev_files.clear()
+        self.loop_devs.clear()
 
 
 class MDTestCreateDeactivateDestroy(MDTestCase):
@@ -182,13 +155,13 @@ class MDTestCreateDeactivateDestroy(MDTestCase):
 
         with self.assertRaises(GLib.GError):
             BlockDev.md_create("bd_test_md2", "raid1",
-                               ["/non/existing/device", self.loop_dev2],
-                               1, None, None)
+                               ["/non/existing/device", self.loop_devs[1]],
+                               0, None, None)
 
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
-                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, None)
+                                      [self.loop_devs[0], self.loop_devs[1]],
+                                      0, None, None)
             self.assertTrue(succ)
 
         # newly created array should be 'clean'
@@ -198,12 +171,11 @@ class MDTestCreateDeactivateDestroy(MDTestCase):
         succ = BlockDev.md_deactivate("bd_test_md")
         self.assertTrue(succ)
 
-        succ = BlockDev.md_destroy(self.loop_dev)
+        succ = BlockDev.md_destroy(self.loop_devs[0])
         self.assertTrue(succ)
-        succ = BlockDev.md_destroy(self.loop_dev2)
+        succ = BlockDev.md_destroy(self.loop_devs[1])
         self.assertTrue(succ)
-        succ = BlockDev.md_destroy(self.loop_dev3)
-        self.assertTrue(succ)
+
 
 class MDTestCreateWithChunkSize(MDTestCase):
     @tag_test(TestTags.SLOW)
@@ -212,146 +184,117 @@ class MDTestCreateWithChunkSize(MDTestCase):
 
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid0",
-                                      [self.loop_dev, self.loop_dev2],
+                                      [self.loop_devs[0], self.loop_devs[1]],
                                       0, None, None, 512 * 1024)
             self.assertTrue(succ)
 
-        ex_data = BlockDev.md_examine(self.loop_dev)
+        ex_data = BlockDev.md_examine(self.loop_devs[0])
         self.assertEqual(ex_data.chunk_size, 512 * 1024)
 
         succ = BlockDev.md_deactivate("bd_test_md")
         self.assertTrue(succ)
 
-        succ = BlockDev.md_destroy(self.loop_dev)
+        succ = BlockDev.md_destroy(self.loop_devs[0])
         self.assertTrue(succ)
-        succ = BlockDev.md_destroy(self.loop_dev2)
+        succ = BlockDev.md_destroy(self.loop_devs[1])
         self.assertTrue(succ)
-        succ = BlockDev.md_destroy(self.loop_dev3)
-        self.assertTrue(succ)
+
 
 class MDTestActivateDeactivate(MDTestCase):
     @tag_test(TestTags.SLOW, TestTags.CORE)
     def test_activate_deactivate(self):
         """Verify that it is possible to activate and deactivate an MD RAID"""
 
-        with wait_for_action("resync"):
-            succ = BlockDev.md_create("bd_test_md", "raid1",
-                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, None)
-            self.assertTrue(succ)
+        succ = BlockDev.md_create("bd_test_md", "raid0",
+                                    [self.loop_devs[0], self.loop_devs[1]],
+                                    0, None, None)
+        self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
             BlockDev.md_deactivate("non_existing_md")
 
-        with wait_for_action("resync"):
-            succ = BlockDev.md_deactivate("bd_test_md")
-            self.assertTrue(succ)
+        succ = BlockDev.md_deactivate("bd_test_md")
+        self.assertTrue(succ)
 
         with self.assertRaises(GLib.GError):
             BlockDev.md_activate("bd_test_md",
-                                 ["/non/existing/device", self.loop_dev2, self.loop_dev3], None)
+                                 ["/non/existing/device", self.loop_devs[1]], None)
 
-        with wait_for_action("resync"):
-            succ = BlockDev.md_activate("bd_test_md",
-                                        [self.loop_dev, self.loop_dev2, self.loop_dev3], None)
-            self.assertTrue(succ)
+        succ = BlockDev.md_activate("bd_test_md",
+                                    [self.loop_devs[0], self.loop_devs[1]], None)
+        self.assertTrue(succ)
 
         # try to activate again, should not fail, just no-op
         succ = BlockDev.md_activate("bd_test_md",
-                                    [self.loop_dev, self.loop_dev2, self.loop_dev3], None)
+                                    [self.loop_devs[0], self.loop_devs[1]], None)
         self.assertTrue(succ)
 
         # try to deactivate using the node instead of name
-        with wait_for_action("resync"):
-            succ = BlockDev.md_deactivate(BlockDev.md_node_from_name("bd_test_md"))
-            self.assertTrue(succ)
+        succ = BlockDev.md_deactivate(BlockDev.md_node_from_name("bd_test_md"))
+        self.assertTrue(succ)
 
         # try to activate using full path, not just the name
         # (it should work too and blivet does this)
-        with wait_for_action("resync"):
-            succ = BlockDev.md_activate("/dev/md/bd_test_md",
-                                        [self.loop_dev, self.loop_dev2, self.loop_dev3], None)
-            self.assertTrue(succ)
+        succ = BlockDev.md_activate("/dev/md/bd_test_md",
+                                    [self.loop_devs[0], self.loop_devs[1]], None)
+        self.assertTrue(succ)
 
-class MDTestActivateWithUUID(MDTestCase):
-    @tag_test(TestTags.SLOW)
-    def test_activate_with_uuid(self):
-        """Verify that it is possible to activate an MD RAID with UUID"""
+        succ = BlockDev.md_deactivate("bd_test_md")
+        self.assertTrue(succ)
 
-        with wait_for_action("resync"):
-            succ = BlockDev.md_create("bd_test_md", "raid1",
-                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, None)
-            self.assertTrue(succ)
-
-        with wait_for_action("resync"):
-            succ = BlockDev.md_deactivate("bd_test_md")
-            self.assertTrue(succ)
-
-        md_info = BlockDev.md_examine(self.loop_dev)
+        md_info = BlockDev.md_examine(self.loop_devs[0])
         self.assertTrue(md_info)
         self.assertTrue(md_info.uuid)
 
-        with wait_for_action("resync"):
-            succ = BlockDev.md_activate("bd_test_md", [self.loop_dev, self.loop_dev2, self.loop_dev3], md_info.uuid)
+        # try to activate with UUID and array name
+        succ = BlockDev.md_activate("bd_test_md", [self.loop_devs[0], self.loop_devs[1]], md_info.uuid)
+        self.assertTrue(succ)
 
-class MDTestActivateByUUID(MDTestCase):
-    @tag_test(TestTags.SLOW)
-    def test_activate_by_uuid(self):
-        """Verify that it is possible to activate an MD RAID by UUID"""
+        succ = BlockDev.md_deactivate("bd_test_md")
+        self.assertTrue(succ)
 
-        with wait_for_action("resync"):
-            succ = BlockDev.md_create("bd_test_md", "raid1",
-                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, None)
-            self.assertTrue(succ)
+        # try to activate by UUID only: should work with member devices specified
+        succ = BlockDev.md_activate(None, [self.loop_devs[0], self.loop_devs[1]], md_info.uuid)
+        self.assertTrue(succ)
 
-        with wait_for_action("resync"):
-            succ = BlockDev.md_deactivate("bd_test_md")
-            self.assertTrue(succ)
-
-        md_info = BlockDev.md_examine(self.loop_dev)
-        self.assertTrue(md_info)
-        self.assertTrue(md_info.uuid)
-
-        # should work with member devices specified
-        with wait_for_action("resync"):
-            succ = BlockDev.md_activate(None, [self.loop_dev, self.loop_dev2, self.loop_dev3], md_info.uuid)
-
-        with wait_for_action("resync"):
-            succ = BlockDev.md_deactivate("bd_test_md")
-            self.assertTrue(succ)
+        succ = BlockDev.md_deactivate("bd_test_md")
+        self.assertTrue(succ)
 
         # as well as without them
-        with wait_for_action("resync"):
-            succ = BlockDev.md_activate(None, None, md_info.uuid)
+        succ = BlockDev.md_activate(None, None, md_info.uuid)
+        self.assertTrue(succ)
+
+        succ = BlockDev.md_deactivate("bd_test_md")
+        self.assertTrue(succ)
 
 
 class MDTestNominateDenominate(MDTestCase):
+    _num_devices = 3
+
     @tag_test(TestTags.SLOW)
     def test_nominate_denominate(self):
         """Verify that it is possible to nominate and denominate an MD RAID device"""
 
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
-                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
+                                      [self.loop_devs[0], self.loop_devs[1], self.loop_devs[2]],
                                       1, None, None)
             self.assertTrue(succ)
 
         with wait_for_action("resync"):
-            succ = BlockDev.md_denominate(self.loop_dev)
+            succ = BlockDev.md_denominate(self.loop_devs[0])
             self.assertTrue(succ)
 
         with wait_for_action("resync"):
-            succ = BlockDev.md_nominate(self.loop_dev)
+            succ = BlockDev.md_nominate(self.loop_devs[0])
             self.assertTrue(succ)
 
         with wait_for_action("resync"):
-            succ = BlockDev.md_denominate(self.loop_dev)
+            succ = BlockDev.md_denominate(self.loop_devs[0])
             self.assertTrue(succ)
 
         with wait_for_action("resync"):
-            succ = BlockDev.md_nominate(self.loop_dev)
+            succ = BlockDev.md_nominate(self.loop_devs[0])
             self.assertTrue(succ)
 
         with wait_for_action("resync"):
@@ -360,17 +303,19 @@ class MDTestNominateDenominate(MDTestCase):
 
 
 class MDTestAddRemove(MDTestCase):
+    _num_devices = 3
+
     @tag_test(TestTags.SLOW)
     def test_add_remove(self):
         """Verify that it is possible to add a device to and remove from an MD RAID"""
 
         # the MD array doesn't exist yet
         with self.assertRaises(GLib.GError):
-            BlockDev.md_add("bd_test_md", self.loop_dev3, 0, None)
+            BlockDev.md_add("bd_test_md", self.loop_devs[2], 0, None)
 
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
-                                      [self.loop_dev, self.loop_dev2],
+                                      [self.loop_devs[0], self.loop_devs[1]],
                                       0, None, None)
             self.assertTrue(succ)
 
@@ -378,7 +323,7 @@ class MDTestAddRemove(MDTestCase):
             BlockDev.md_add("bd_test_md", "/non/existing/device", 0, None)
 
         # add the device as a spare
-        succ = BlockDev.md_add("bd_test_md", self.loop_dev3, 0, None)
+        succ = BlockDev.md_add("bd_test_md", self.loop_devs[2], 0, None)
         self.assertTrue(succ)
 
         md_info = BlockDev.md_detail("bd_test_md")
@@ -386,11 +331,11 @@ class MDTestAddRemove(MDTestCase):
         self.assertEqual(md_info.spare_devices, 1)
 
         with self.assertRaises(GLib.GError):
-            BlockDev.md_add("bd_test_md", self.loop_dev3, 0, None)
+            BlockDev.md_add("bd_test_md", self.loop_devs[2], 0, None)
 
         # now remove the spare device (should be possible without --fail)
         with wait_for_action("resync"):
-            succ = BlockDev.md_remove("bd_test_md", self.loop_dev3, False, None)
+            succ = BlockDev.md_remove("bd_test_md", self.loop_devs[2], False, None)
             self.assertTrue(succ)
 
         md_info = BlockDev.md_detail("bd_test_md")
@@ -399,7 +344,7 @@ class MDTestAddRemove(MDTestCase):
 
         # remove one of the original devices (with --fail enabled)
         with wait_for_action("resync"):
-            succ = BlockDev.md_remove("bd_test_md", self.loop_dev2, True, None)
+            succ = BlockDev.md_remove("bd_test_md", self.loop_devs[1], True, None)
             self.assertTrue(succ)
 
         md_info = BlockDev.md_detail("bd_test_md")
@@ -410,7 +355,7 @@ class MDTestAddRemove(MDTestCase):
         # now try to add it back -- it should be re-added automatically as
         # a RAID device, not a spare device
         with wait_for_action("recovery"):
-            succ = BlockDev.md_add("bd_test_md", self.loop_dev2, 0, None)
+            succ = BlockDev.md_add("bd_test_md", self.loop_devs[1], 0, None)
             self.assertTrue(succ)
 
         md_info = BlockDev.md_detail("bd_test_md")
@@ -418,19 +363,21 @@ class MDTestAddRemove(MDTestCase):
         self.assertEqual(md_info.active_devices, 2)
         self.assertEqual(md_info.spare_devices, 0)
 
+
 class MDTestExamineDetail(MDTestCase):
-    # sleeps to let MD RAID sync things
+    _num_devices = 3
+
     @tag_test(TestTags.SLOW)
     def test_examine_detail(self):
         """Verify that it is possible to get info about an MD RAID"""
 
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
-                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
+                                      [self.loop_devs[0], self.loop_devs[1], self.loop_devs[2]],
                                       1, None, None)
             self.assertTrue(succ)
 
-        ex_data = BlockDev.md_examine(self.loop_dev)
+        ex_data = BlockDev.md_examine(self.loop_devs[0])
         # test that we got something
         self.assertTrue(ex_data)
 
@@ -475,6 +422,7 @@ class MDTestExamineDetail(MDTestCase):
         de_data = BlockDev.md_detail("/dev/%s" % node)
         self.assertTrue(de_data)
 
+
 class MDTestNameNodeBijection(MDTestCase):
     @tag_test(TestTags.SLOW)
     def test_name_node_bijection(self):
@@ -482,8 +430,8 @@ class MDTestNameNodeBijection(MDTestCase):
 
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
-                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, None)
+                                      [self.loop_devs[0], self.loop_devs[1]],
+                                      0, None, None)
             self.assertTrue(succ)
 
         node = BlockDev.md_node_from_name("bd_test_md")
@@ -496,15 +444,14 @@ class MDTestNameNodeBijection(MDTestCase):
         with self.assertRaisesRegex(GLib.GError, r'No name'):
             BlockDev.md_name_from_node("no_such_node")
 
-        succ = BlockDev.md_deactivate("bd_test_md");
+        succ = BlockDev.md_deactivate("bd_test_md")
         self.assertTrue(succ)
 
-        succ = BlockDev.md_destroy(self.loop_dev)
+        succ = BlockDev.md_destroy(self.loop_devs[0])
         self.assertTrue(succ)
-        succ = BlockDev.md_destroy(self.loop_dev2)
+        succ = BlockDev.md_destroy(self.loop_devs[1])
         self.assertTrue(succ)
-        succ = BlockDev.md_destroy(self.loop_dev3)
-        self.assertTrue(succ)
+
 
 class MDTestSetBitmapLocation(MDTestCase):
     @tag_test(TestTags.SLOW, TestTags.UNSTABLE)
@@ -513,8 +460,8 @@ class MDTestSetBitmapLocation(MDTestCase):
 
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
-                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, "none")
+                                      [self.loop_devs[0], self.loop_devs[1]],
+                                      0, None, "none")
             self.assertTrue(succ)
 
         loc = BlockDev.md_get_bitmap_location("bd_test_md")
@@ -524,8 +471,8 @@ class MDTestSetBitmapLocation(MDTestCase):
 
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
-                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, "internal")
+                                      [self.loop_devs[0], self.loop_devs[1]],
+                                      0, None, "internal")
             self.assertTrue(succ)
 
         loc = BlockDev.md_get_bitmap_location("bd_test_md")
@@ -576,8 +523,8 @@ class MDTestRequestSyncAction(MDTestCase):
 
         with wait_for_action("resync"):
             succ = BlockDev.md_create("bd_test_md", "raid1",
-                                      [self.loop_dev, self.loop_dev2, self.loop_dev3],
-                                      1, None, None)
+                                      [self.loop_devs[0], self.loop_devs[1]],
+                                      0, None, None)
             self.assertTrue(succ)
 
         with wait_for_action("check"):
@@ -607,7 +554,7 @@ class MDTestDDFRAID(MDTestCase):
 
     def test_examine_ddf_container(self):
         succ = BlockDev.md_create("bd_test_md", "container",
-                                  [self.loop_dev, self.loop_dev2],
+                                  [self.loop_devs[0], self.loop_devs[1]],
                                   0, "ddf", None)
         self.assertTrue(succ)
 
@@ -615,7 +562,7 @@ class MDTestDDFRAID(MDTestCase):
         ret, _out, err = run_command("mdadm --create /dev/md/bd_test_ddf --run --level=raid0 --raid-devices=2 /dev/md/bd_test_md")
         self.assertEqual(ret, 0, msg="Failed to create RAID for DDF test: %s" % err)
 
-        edata = BlockDev.md_examine(self.loop_dev)
+        edata = BlockDev.md_examine(self.loop_devs[0])
         self.assertIsNotNone(edata)
         self.assertIsNotNone(edata.uuid)
         self.assertEqual(edata.level, "container")

@@ -66,18 +66,18 @@ class BtrfsTestMkfs(BtrfsTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_btrfs_mkfs("/non/existing/device", None)
 
-        succ = BlockDev.fs_btrfs_mkfs(self.loop_dev)
+        succ = BlockDev.fs_btrfs_mkfs(self.loop_devs[0])
         self.assertTrue(succ)
 
         # just try if we can mount the file system
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             pass
 
         # check the fstype
-        fstype = BlockDev.fs_get_fstype(self.loop_dev)
+        fstype = BlockDev.fs_get_fstype(self.loop_devs[0])
         self.assertEqual(fstype, "btrfs")
 
-        BlockDev.fs_wipe(self.loop_dev, True)
+        BlockDev.fs_wipe(self.loop_devs[0], True)
 
 
 class BtrfsMkfsWithLabel(BtrfsTestCase):
@@ -85,10 +85,10 @@ class BtrfsMkfsWithLabel(BtrfsTestCase):
         """Verify that it is possible to create a btrfs file system with label"""
 
         ea = BlockDev.ExtraArg.new("-L", "test_label")
-        succ = BlockDev.fs_btrfs_mkfs(self.loop_dev, [ea])
+        succ = BlockDev.fs_btrfs_mkfs(self.loop_devs[0], [ea])
         self.assertTrue(succ)
 
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             fi = BlockDev.fs_btrfs_get_info(self.mount_dir)
         self.assertTrue(fi)
         self.assertEqual(fi.label, "test_label")
@@ -98,10 +98,10 @@ class BtrfsTestCheck(BtrfsTestCase):
     def test_btrfs_check(self):
         """Verify that it is possible to check an btrfs file system"""
 
-        succ = BlockDev.fs_btrfs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_btrfs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_btrfs_check(self.loop_dev, None)
+        succ = BlockDev.fs_btrfs_check(self.loop_devs[0], None)
         self.assertTrue(succ)
 
 
@@ -109,10 +109,10 @@ class BtrfsTestRepair(BtrfsTestCase):
     def test_btrfs_repair(self):
         """Verify that it is possible to repair a btrfs file system"""
 
-        succ = BlockDev.fs_btrfs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_btrfs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_btrfs_repair(self.loop_dev, None)
+        succ = BlockDev.fs_btrfs_repair(self.loop_devs[0], None)
         self.assertTrue(succ)
 
 
@@ -120,10 +120,10 @@ class BtrfsGetInfo(BtrfsTestCase):
     def test_btrfs_get_info(self):
         """Verify that it is possible to get info about a btrfs file system"""
 
-        succ = BlockDev.fs_btrfs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_btrfs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             fi = BlockDev.fs_btrfs_get_info(self.mount_dir)
 
         self.assertTrue(fi)
@@ -139,10 +139,10 @@ class BtrfsSetLabel(BtrfsTestCase):
     def test_btrfs_set_label(self):
         """Verify that it is possible to set label of a btrfs file system"""
 
-        succ = BlockDev.fs_btrfs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_btrfs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             fi = BlockDev.fs_btrfs_get_info(self.mount_dir)
             self.assertTrue(fi)
             self.assertEqual(fi.label, "")
@@ -182,20 +182,20 @@ class BtrfsSetUUID(BtrfsTestCase):
     def test_btrfs_set_uuid(self):
         """Verify that it is possible to set UUID of an btrfs file system"""
 
-        succ = BlockDev.fs_btrfs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_btrfs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_btrfs_set_uuid(self.loop_dev, self.test_uuid)
+        succ = BlockDev.fs_btrfs_set_uuid(self.loop_devs[0], self.test_uuid)
         self.assertTrue(succ)
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             fi = BlockDev.fs_btrfs_get_info(self.mount_dir)
         self.assertTrue(fi)
         self.assertEqual(fi.uuid, self.test_uuid)
 
         # no uuid -> random
-        succ = BlockDev.fs_btrfs_set_uuid(self.loop_dev, None)
+        succ = BlockDev.fs_btrfs_set_uuid(self.loop_devs[0], None)
         self.assertTrue(succ)
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             fi = BlockDev.fs_btrfs_get_info(self.mount_dir)
         self.assertTrue(fi)
         self.assertNotEqual(fi.uuid, "")
@@ -212,10 +212,10 @@ class BtrfsResize(BtrfsTestCase):
     def test_btrfs_resize(self):
         """Verify that it is possible to resize a btrfs file system"""
 
-        succ = BlockDev.fs_btrfs_mkfs(self.loop_dev)
+        succ = BlockDev.fs_btrfs_mkfs(self.loop_devs[0])
         self.assertTrue(succ)
 
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             succ = BlockDev.fs_btrfs_resize(self.mount_dir, 300 * 1024**2)
             self.assertTrue(succ)
 
@@ -245,23 +245,24 @@ class BtrfsResize(BtrfsTestCase):
 
 
 class BtrfsMultiDevice(BtrfsTestCase):
+    num_devices = 2
 
     def _clean_up(self):
         utils.umount(self.mount_dir)
-        BlockDev.fs_wipe(self.loop_dev2, True)
+        BlockDev.fs_wipe(self.loop_devs[1], True)
 
         super(BtrfsMultiDevice, self)._clean_up()
 
     def test_btrfs_multidevice(self):
         """Verify that filesystem plugin returns errors when used on multidevice volumes"""
 
-        ret, _out, _err = utils.run_command("mkfs.btrfs %s %s" % (self.loop_dev, self.loop_dev2))
+        ret, _out, _err = utils.run_command("mkfs.btrfs %s %s" % (self.loop_devs[0], self.loop_devs[1]))
         self.assertEqual(ret, 0)
 
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             with self.assertRaisesRegex(GLib.GError, "Filesystem plugin is not suitable for multidevice Btrfs volumes"):
                     BlockDev.fs_btrfs_get_info(self.mount_dir)
 
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             with self.assertRaisesRegex(GLib.GError, "Filesystem plugin is not suitable for multidevice Btrfs volumes"):
                 BlockDev.fs_btrfs_resize(self.mount_dir, 0)

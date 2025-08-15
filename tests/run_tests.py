@@ -194,7 +194,7 @@ def parse_args():
 def _split_test_id(test_id):
     # test.id() looks like 'crypto_test.CryptoTestResize.test_luks2_resize'
     # and we want to print 'test_luks2_resize (crypto_test.CryptoTestResize)'
-    test_desc = test.id().split(".")
+    test_desc = test_id.split(".")
     test_name = test_desc[-1]
     test_module = ".".join(test_desc[:-1])
 

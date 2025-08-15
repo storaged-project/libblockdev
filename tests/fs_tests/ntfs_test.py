@@ -109,18 +109,18 @@ class NTFSTestMkfs(NTFSTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_ntfs_mkfs("/non/existing/device", None)
 
-        succ = BlockDev.fs_ntfs_mkfs(self.loop_dev)
+        succ = BlockDev.fs_ntfs_mkfs(self.loop_devs[0])
         self.assertTrue(succ)
 
         # just try if we can mount the file system
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             pass
 
         # check the fstype
-        fstype = BlockDev.fs_get_fstype(self.loop_dev)
+        fstype = BlockDev.fs_get_fstype(self.loop_devs[0])
         self.assertEqual(fstype, "ntfs")
 
-        BlockDev.fs_wipe(self.loop_dev, True)
+        BlockDev.fs_wipe(self.loop_devs[0], True)
 
 
 class NTFSMkfsWithLabel(NTFSTestCase):
@@ -128,10 +128,10 @@ class NTFSMkfsWithLabel(NTFSTestCase):
         """Verify that it is possible to create an NTFS file system with label"""
 
         ea = BlockDev.ExtraArg.new("-L", "test_label")
-        succ = BlockDev.fs_ntfs_mkfs(self.loop_dev, [ea])
+        succ = BlockDev.fs_ntfs_mkfs(self.loop_devs[0], [ea])
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_ntfs_get_info(self.loop_dev)
+        fi = BlockDev.fs_ntfs_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "test_label")
 
@@ -140,10 +140,10 @@ class NTFSGetInfo(NTFSTestCase):
     def test_ntfs_get_info(self):
         """Verify that it is possible to get info about an NTFS file system"""
 
-        succ = BlockDev.fs_ntfs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_ntfs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_ntfs_get_info(self.loop_dev)
+        fi = BlockDev.fs_ntfs_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
         # should be an non-empty string
@@ -156,58 +156,58 @@ class NTFSResize(NTFSTestCase):
     def test_ntfs_resize(self):
         """Verify that it is possible to resize an NTFS file system"""
 
-        succ = BlockDev.fs_ntfs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_ntfs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_ntfs_repair(self.loop_dev)
+        succ = BlockDev.fs_ntfs_repair(self.loop_devs[0])
         self.assertTrue(succ)
 
         # shrink
-        succ = BlockDev.fs_ntfs_resize(self.loop_dev, 80 * 1024**2)
+        succ = BlockDev.fs_ntfs_resize(self.loop_devs[0], 80 * 1024**2)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_ntfs_repair(self.loop_dev)
+        succ = BlockDev.fs_ntfs_repair(self.loop_devs[0])
         self.assertTrue(succ)
 
         # resize to maximum size
-        succ = BlockDev.fs_ntfs_resize(self.loop_dev, 0)
+        succ = BlockDev.fs_ntfs_resize(self.loop_devs[0], 0)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_ntfs_repair(self.loop_dev)
+        succ = BlockDev.fs_ntfs_repair(self.loop_devs[0])
         self.assertTrue(succ)
 
         # get min size and resize to it
-        size = BlockDev.fs_ntfs_get_min_size(self.loop_dev)
+        size = BlockDev.fs_ntfs_get_min_size(self.loop_devs[0])
         self.assertNotEqual(size, 0)
 
-        succ = BlockDev.fs_ntfs_resize(self.loop_dev, size)
+        succ = BlockDev.fs_ntfs_resize(self.loop_devs[0], size)
         self.assertTrue(succ)
 
 
 class NTFSSetLabel(NTFSTestCase):
     def test_ntfs_set_label(self):
-        succ = BlockDev.fs_ntfs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_ntfs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_ntfs_get_info(self.loop_dev)
+        fi = BlockDev.fs_ntfs_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
 
-        succ = BlockDev.fs_ntfs_set_label(self.loop_dev, "TEST_LABEL")
+        succ = BlockDev.fs_ntfs_set_label(self.loop_devs[0], "TEST_LABEL")
         self.assertTrue(succ)
-        fi = BlockDev.fs_ntfs_get_info(self.loop_dev)
+        fi = BlockDev.fs_ntfs_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "TEST_LABEL")
 
-        succ = BlockDev.fs_ntfs_set_label(self.loop_dev, "TEST_LABEL2")
+        succ = BlockDev.fs_ntfs_set_label(self.loop_devs[0], "TEST_LABEL2")
         self.assertTrue(succ)
-        fi = BlockDev.fs_ntfs_get_info(self.loop_dev)
+        fi = BlockDev.fs_ntfs_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "TEST_LABEL2")
 
-        succ = BlockDev.fs_ntfs_set_label(self.loop_dev, "")
+        succ = BlockDev.fs_ntfs_set_label(self.loop_devs[0], "")
         self.assertTrue(succ)
-        fi = BlockDev.fs_ntfs_get_info(self.loop_dev)
+        fi = BlockDev.fs_ntfs_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
 
@@ -224,19 +224,19 @@ class NTFSSetUUID(NTFSTestCase):
 
     def test_ntfs_set_uuid(self):
         """Verify that it is possible to set UUID of an ntfs file system"""
-        succ = BlockDev.fs_ntfs_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_ntfs_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_ntfs_set_uuid(self.loop_dev, self.test_uuid)
+        succ = BlockDev.fs_ntfs_set_uuid(self.loop_devs[0], self.test_uuid)
         self.assertTrue(succ)
-        fi = BlockDev.fs_ntfs_get_info(self.loop_dev)
+        fi = BlockDev.fs_ntfs_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.uuid, self.test_uuid)
 
         # no uuid -> random
-        succ = BlockDev.fs_ntfs_set_uuid(self.loop_dev, None)
+        succ = BlockDev.fs_ntfs_set_uuid(self.loop_devs[0], None)
         self.assertTrue(succ)
-        fi = BlockDev.fs_ntfs_get_info(self.loop_dev)
+        fi = BlockDev.fs_ntfs_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertNotEqual(fi.uuid, "")
         self.assertNotEqual(fi.uuid, self.test_uuid)

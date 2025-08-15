@@ -51,7 +51,7 @@ class MpathTestCase(MpathTest):
 class MpathNoDevTestCase(MpathTest):
     @tag_test(TestTags.NOSTORAGE)
     def test_plugin_version(self):
-       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.MPATH), "libbd_mpath.so.3")
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.MPATH), "libbd_mpath.so.3")
 
     @tag_test(TestTags.NOSTORAGE)
     def test_get_mpath_members(self):

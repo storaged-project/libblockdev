@@ -25,7 +25,7 @@ class S390TestCase(unittest.TestCase):
 
     @tag_test(TestTags.NOSTORAGE)
     def test_plugin_version(self):
-       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.S390), "libbd_s390.so.3")
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.S390), "libbd_s390.so.3")
 
     @tag_test(TestTags.EXTRADEPS, TestTags.NOSTORAGE)
     def test_device_input(self):

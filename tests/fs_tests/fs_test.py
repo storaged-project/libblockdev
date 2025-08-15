@@ -108,39 +108,39 @@ class FSNoDevTestCase(unittest.TestCase):
 class FSTestCase(FSNoDevTestCase):
 
     loop_size = 150 * 1024**2
+    num_devices = 1
+    loop_devs = []
+    dev_files = []
 
     def setUp(self):
         self.addCleanup(self._clean_up)
-        self.dev_file = utils.create_sparse_tempfile("fs_test", self.loop_size)
-        self.dev_file2 = utils.create_sparse_tempfile("fs_test", self.loop_size)
-        try:
-            self.loop_dev = utils.create_lio_device(self.dev_file)
-        except RuntimeError as e:
-            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
-        try:
-            self.loop_dev2 = utils.create_lio_device(self.dev_file2)
-        except RuntimeError as e:
-            raise RuntimeError("Failed to setup loop device for testing: %s" % e)
+
+        for i in range(self.num_devices):
+            dev_file = utils.create_sparse_tempfile("crypto_test", self.loop_size)
+            self.dev_files.append(dev_file)
+
+            try:
+                loop_dev = utils.create_lio_device(self.dev_files[i])
+                self.loop_devs.append(loop_dev)
+            except RuntimeError as e:
+                raise RuntimeError("Failed to setup loop device for testing: %s" % e)
 
     def _clean_up(self):
-        try:
-            utils.delete_lio_device(self.loop_dev)
-        except RuntimeError:
-            # just move on, we can do no better here
-            pass
-        os.unlink(self.dev_file)
-
-        try:
-            utils.delete_lio_device(self.loop_dev2)
-        except RuntimeError:
-            # just move on, we can do no better here
-            pass
-        os.unlink(self.dev_file2)
-
         try:
             utils.umount(self.mount_dir)
         except:
             pass
+
+        for i in range(self.num_devices):
+            try:
+                utils.delete_lio_device(self.loop_devs[i])
+            except RuntimeError:
+                # just move on, we can do no better here
+                pass
+            os.unlink(self.dev_files[i])
+
+        self.dev_files.clear()
+        self.loop_devs.clear()
 
     def setro(self, device):
         ret, _out, _err = utils.run_command("blockdev --setro %s" % device)
@@ -161,14 +161,14 @@ class FSTestCase(FSNoDevTestCase):
 
     def _destroy_lvm(self, vgname):
         utils.run("vgremove --yes %s --config \"devices {use_devicesfile = 0}\" >/dev/null 2>&1" % vgname)
-        utils.run("pvremove --yes %s --config \"devices {use_devicesfile = 0}\" >/dev/null 2>&1" % self.loop_dev)
+        utils.run("pvremove --yes %s --config \"devices {use_devicesfile = 0}\" >/dev/null 2>&1" % self.loop_devs[0])
 
     def _setup_lvm(self, vgname, lvname, lvsize="50M"):
-        ret, _out, err = utils.run_command("pvcreate -ff -y %s --config \"devices {use_devicesfile = 0}\"" % self.loop_dev)
+        ret, _out, err = utils.run_command("pvcreate -ff -y %s --config \"devices {use_devicesfile = 0}\"" % self.loop_devs[0])
         if ret != 0:
             raise RuntimeError("Failed to create PV for fs tests: %s" % err)
 
-        ret, _out, err = utils.run_command("vgcreate -s10M %s %s --config \"devices {use_devicesfile = 0}\"" % (vgname, self.loop_dev))
+        ret, _out, err = utils.run_command("vgcreate -s10M %s %s --config \"devices {use_devicesfile = 0}\"" % (vgname, self.loop_devs[0]))
         if ret != 0:
             raise RuntimeError("Failed to create VG for fs tests: %s" % err)
         self.addCleanup(self._destroy_lvm, vgname)

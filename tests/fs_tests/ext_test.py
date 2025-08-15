@@ -121,18 +121,18 @@ class ExtTestMkfs(ExtTestCase):
         with self.assertRaises(GLib.GError):
             mkfs_function("/non/existing/device", None)
 
-        succ = mkfs_function(self.loop_dev, None)
+        succ = mkfs_function(self.loop_devs[0], None)
         self.assertTrue(succ)
 
         # just try if we can mount the file system
-        with mounted(self.loop_dev, self.mount_dir):
+        with mounted(self.loop_devs[0], self.mount_dir):
             pass
 
         # check the fstype
-        fstype = BlockDev.fs_get_fstype(self.loop_dev)
+        fstype = BlockDev.fs_get_fstype(self.loop_devs[0])
         self.assertEqual(fstype, ext_version)
 
-        BlockDev.fs_wipe(self.loop_dev, True)
+        BlockDev.fs_wipe(self.loop_devs[0], True)
 
     @tag_test(TestTags.CORE)
     def test_ext2_mkfs(self):
@@ -156,10 +156,10 @@ class ExtTestMkfs(ExtTestCase):
 class ExtMkfsWithLabel(ExtTestCase):
     def _test_ext_mkfs_with_label(self, mkfs_function, info_function):
         ea = BlockDev.ExtraArg.new("-L", "TEST_LABEL")
-        succ = mkfs_function(self.loop_dev, [ea])
+        succ = mkfs_function(self.loop_devs[0], [ea])
         self.assertTrue(succ)
 
-        fi = info_function(self.loop_dev)
+        fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "TEST_LABEL")
 
@@ -181,10 +181,10 @@ class ExtMkfsWithLabel(ExtTestCase):
 
 class ExtTestCheck(ExtTestCase):
     def _test_ext_check(self, mkfs_function, check_function):
-        succ = mkfs_function(self.loop_dev, None)
+        succ = mkfs_function(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        succ = check_function(self.loop_dev, None)
+        succ = check_function(self.loop_devs[0], None)
         self.assertTrue(succ)
 
     def test_ext2_check(self):
@@ -205,17 +205,17 @@ class ExtTestCheck(ExtTestCase):
 
 class ExtTestRepair(ExtTestCase):
     def _test_ext_repair(self, mkfs_function, repair_function):
-        succ = mkfs_function(self.loop_dev, None)
+        succ = mkfs_function(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        succ = repair_function(self.loop_dev, False, None)
+        succ = repair_function(self.loop_devs[0], False, None)
         self.assertTrue(succ)
 
         # unsafe operations should work here too
-        succ = repair_function(self.loop_dev, True, None)
+        succ = repair_function(self.loop_devs[0], True, None)
         self.assertTrue(succ)
 
-        succ = repair_function(self.loop_dev, False, None)
+        succ = repair_function(self.loop_devs[0], False, None)
         self.assertTrue(succ)
 
     def test_ext2_repair(self):
@@ -236,10 +236,10 @@ class ExtTestRepair(ExtTestCase):
 
 class ExtGetInfo(ExtTestCase):
     def _test_ext_get_info(self, mkfs_function, info_function):
-        succ = BlockDev.fs_ext4_mkfs(self.loop_dev, None)
+        succ = BlockDev.fs_ext4_mkfs(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        fi = BlockDev.fs_ext4_get_info(self.loop_dev)
+        fi = BlockDev.fs_ext4_get_info(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
         self.assertEqual(fi.block_count, self.loop_size / 1024)
@@ -250,8 +250,8 @@ class ExtGetInfo(ExtTestCase):
         self.assertTrue(fi.uuid)
         self.assertTrue(fi.state, "clean")
 
-        with mounted(self.loop_dev, self.mount_dir):
-            fi = BlockDev.fs_ext4_get_info(self.loop_dev)
+        with mounted(self.loop_devs[0], self.mount_dir):
+            fi = BlockDev.fs_ext4_get_info(self.loop_devs[0])
             self.assertEqual(fi.block_size, 1024)
             self.assertEqual(fi.block_count, self.loop_size / 1024)
             # at least 90 % should be available, so it should be reported
@@ -282,28 +282,28 @@ class ExtGetInfo(ExtTestCase):
 
 class ExtSetLabel(ExtTestCase):
     def _test_ext_set_label(self, mkfs_function, info_function, label_function, check_function):
-        succ = mkfs_function(self.loop_dev, None)
+        succ = mkfs_function(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        fi = info_function(self.loop_dev)
+        fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
 
-        succ = label_function(self.loop_dev, "TEST_LABEL")
+        succ = label_function(self.loop_devs[0], "TEST_LABEL")
         self.assertTrue(succ)
-        fi = info_function(self.loop_dev)
+        fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "TEST_LABEL")
 
-        succ = label_function(self.loop_dev, "TEST_LABEL2")
+        succ = label_function(self.loop_devs[0], "TEST_LABEL2")
         self.assertTrue(succ)
-        fi = info_function(self.loop_dev)
+        fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "TEST_LABEL2")
 
-        succ = label_function(self.loop_dev, "")
+        succ = label_function(self.loop_devs[0], "")
         self.assertTrue(succ)
-        fi = info_function(self.loop_dev)
+        fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.label, "")
 
@@ -337,27 +337,27 @@ class ExtSetLabel(ExtTestCase):
 
 class ExtResize(ExtTestCase):
     def _test_ext_resize(self, mkfs_function, info_function, resize_function, minsize_function):
-        succ = mkfs_function(self.loop_dev, None)
+        succ = mkfs_function(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        fi = info_function(self.loop_dev)
+        fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
         self.assertEqual(fi.block_count, self.loop_size / 1024)
         # at least 90 % should be available, so it should be reported
         self.assertGreater(fi.free_blocks, 0.90 * self.loop_size / 1024)
 
-        succ = resize_function(self.loop_dev, 50 * 1024**2, None)
+        succ = resize_function(self.loop_devs[0], 50 * 1024**2, None)
         self.assertTrue(succ)
-        fi = info_function(self.loop_dev)
+        fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
         self.assertEqual(fi.block_count, 50 * 1024**2 / 1024)
 
         # resize back
-        succ = resize_function(self.loop_dev, self.loop_size, None)
+        succ = resize_function(self.loop_devs[0], self.loop_size, None)
         self.assertTrue(succ)
-        fi = info_function(self.loop_dev)
+        fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
         self.assertEqual(fi.block_count, self.loop_size / 1024)
@@ -365,17 +365,17 @@ class ExtResize(ExtTestCase):
         self.assertGreater(fi.free_blocks, 0.90 * self.loop_size / 1024)
 
         # resize again
-        succ = resize_function(self.loop_dev, 50 * 1024**2, None)
+        succ = resize_function(self.loop_devs[0], 50 * 1024**2, None)
         self.assertTrue(succ)
-        fi = info_function(self.loop_dev)
+        fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
         self.assertEqual(fi.block_count, 50 * 1024**2 / 1024)
 
         # resize back again, this time to maximum size
-        succ = resize_function(self.loop_dev, 0, None)
+        succ = resize_function(self.loop_devs[0], 0, None)
         self.assertTrue(succ)
-        fi = info_function(self.loop_dev)
+        fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.block_size, 1024)
         self.assertEqual(fi.block_count, self.loop_size / 1024)
@@ -383,10 +383,10 @@ class ExtResize(ExtTestCase):
         self.assertGreater(fi.free_blocks, 0.90 * self.loop_size / 1024)
 
         # get min size and resize to it
-        size = minsize_function(self.loop_dev)
+        size = minsize_function(self.loop_devs[0])
         self.assertNotEqual(size, 0)
 
-        succ = resize_function(self.loop_dev, size)
+        succ = resize_function(self.loop_devs[0], size)
         self.assertTrue(succ)
 
     def test_ext2_resize(self):
@@ -416,43 +416,43 @@ class ExtSetUUID(ExtTestCase):
     test_uuid = "4d7086c4-a4d3-432f-819e-73da03870df9"
 
     def _test_ext_set_uuid(self, mkfs_function, info_function, label_function, check_function):
-        succ = mkfs_function(self.loop_dev, None)
+        succ = mkfs_function(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        fi = info_function(self.loop_dev)
+        fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
 
-        succ = label_function(self.loop_dev, self.test_uuid)
+        succ = label_function(self.loop_devs[0], self.test_uuid)
         self.assertTrue(succ)
-        fi = info_function(self.loop_dev)
+        fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.uuid, self.test_uuid)
 
-        succ = label_function(self.loop_dev, "clear")
+        succ = label_function(self.loop_devs[0], "clear")
         self.assertTrue(succ)
-        fi = info_function(self.loop_dev)
+        fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertEqual(fi.uuid, "")
 
-        succ = label_function(self.loop_dev, "random")
+        succ = label_function(self.loop_devs[0], "random")
         self.assertTrue(succ)
-        fi = info_function(self.loop_dev)
+        fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertNotEqual(fi.uuid, "")
         random_uuid = fi.uuid
 
-        succ = label_function(self.loop_dev, "time")
+        succ = label_function(self.loop_devs[0], "time")
         self.assertTrue(succ)
-        fi = info_function(self.loop_dev)
+        fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertNotEqual(fi.uuid, "")
         self.assertNotEqual(fi.uuid, random_uuid)
         time_uuid = fi.uuid
 
         # no UUID -> random
-        succ = label_function(self.loop_dev, None)
+        succ = label_function(self.loop_devs[0], None)
         self.assertTrue(succ)
-        fi = info_function(self.loop_dev)
+        fi = info_function(self.loop_devs[0])
         self.assertTrue(fi)
         self.assertNotEqual(fi.uuid, "")
         self.assertNotEqual(fi.uuid, time_uuid)

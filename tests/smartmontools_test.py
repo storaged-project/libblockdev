@@ -1,12 +1,11 @@
 import unittest
 import os
-import re
 import glob
 import time
 import shutil
 import overrides_hack
 
-from utils import run, create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test, write_file, run_command, required_plugins
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, TestTags, tag_test, write_file, run_command, required_plugins
 
 import gi
 gi.require_version('GLib', '2.0')
@@ -85,7 +84,7 @@ class SmartmontoolsTest(unittest.TestCase):
 
     @tag_test(TestTags.NOSTORAGE)
     def test_plugin_version(self):
-       self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.SMART), "libbd_smartmontools.so.3")
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.SMART), "libbd_smartmontools.so.3")
 
     @tag_test(TestTags.CORE)
     def test_ata_info(self):
