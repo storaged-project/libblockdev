@@ -17,7 +17,7 @@ jobs:
                    'clang-14', 'clang-15', 'clang-16', 'clang-17', 'clang-18']
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Install build dependencies
       run: |
