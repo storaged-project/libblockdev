@@ -13,7 +13,7 @@ jobs:
       CI_CONTAINER: libblockdev-ci-spelling
     steps:
       - name: Checkout libblockdev repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           path: libblockdev
 
@@ -23,7 +23,7 @@ jobs:
           sudo apt -y -qq install codespell lintian
 
       - name: Get the storaged-project/ci repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: storaged-project/ci
           path: ci
