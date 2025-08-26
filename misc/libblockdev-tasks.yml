@@ -204,10 +204,16 @@
       - smartmontools
       - targetcli-fb
       - udftools
-      - vdo
       - volume-key
       - xfsprogs
   when: (ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu') and test_dependencies|bool
+
+- name: Install vdo test dependencies (Debian/Ubuntu 64bit)
+  package:
+    state: present
+    name:
+      - vdo
+  when: (ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu') and test_dependencies|bool and ansible_architecture != 'i386'
 
 ####### Common actions
 
