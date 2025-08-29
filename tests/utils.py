@@ -231,6 +231,49 @@ def delete_lio_device(dev_path):
     else:
         raise RuntimeError("Unknown device '%s'" % dev_path)
 
+
+def setup_scsi_debug():
+    res, out, err = run_command('modprobe scsi_debug')
+    if res != 0:
+        raise RuntimeError("Failed to load scsi_debug module: %s %s" % (out, err))
+    dirs = []
+    n_tries = 0
+    while len(dirs) < 1 and n_tries < 5:
+        dirs = glob.glob('/sys/bus/pseudo/drivers/scsi_debug/adapter*/host*/target*/*:*/block')
+        time.sleep(0.5)
+        n_tries += 1
+    if len(dirs) < 1:
+        raise RuntimeError("Failed to setup SCSI debug device for testing")
+    scsi_debug_dev = os.listdir(dirs[0])
+    if len(scsi_debug_dev) != 1:
+        raise RuntimeError("Failed to setup SCSI debug device for testing")
+
+    scsi_debug_dev = '/dev/' + scsi_debug_dev[0]
+    if not os.path.exists(scsi_debug_dev):
+        raise RuntimeError("Failed to setup SCSI debug device for testing")
+
+    return scsi_debug_dev
+
+
+def clean_scsi_debug(scsi_debug_dev):
+    try:
+        device = scsi_debug_dev.split('/')[-1]
+        if os.path.exists('/sys/block/' + device):
+            write_file('/sys/block/%s/device/delete' % device, '1')
+        n_tries = 0
+        while os.path.exists(device) and n_tries < 5:
+            time.sleep(0.5)
+            n_tries += 1
+        n_tries = 0
+        while n_tries < 5:
+            res, _out, _err = run_command('modprobe -r scsi_debug')
+            if res == 0:
+                break
+            time.sleep(0.5)
+            n_tries += 1
+    except:
+        pass
+
 def find_nvme_ctrl_devs_for_subnqn(subnqn):
     """
     Find NVMe controller devices for the specified subsystem nqn

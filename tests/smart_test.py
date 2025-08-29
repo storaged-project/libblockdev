@@ -1,10 +1,8 @@
 import unittest
 import os
-import glob
-import time
 import overrides_hack
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, TestTags, tag_test, write_file, run_command, required_plugins
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, TestTags, tag_test, required_plugins, setup_scsi_debug, clean_scsi_debug
 
 import gi
 gi.require_version('GLib', '2.0')
@@ -59,29 +57,6 @@ class SMARTTest(unittest.TestCase):
             pass
         os.unlink(self.loop_dev_file)
 
-    def _setup_scsi_debug(self):
-        res, _out, _err = run_command('modprobe scsi_debug')
-        self.assertEqual(res, 0)
-        dirs = []
-        while len(dirs) < 1:
-            dirs = glob.glob('/sys/bus/pseudo/drivers/scsi_debug/adapter*/host*/target*/*:*/block')
-            time.sleep(0.1)
-        self.scsi_debug_dev = os.listdir(dirs[0])
-        self.assertEqual(len(self.scsi_debug_dev), 1)
-        self.scsi_debug_dev = '/dev/' + self.scsi_debug_dev[0]
-        self.assertTrue(os.path.exists(self.scsi_debug_dev))
-
-    def _clean_scsi_debug(self):
-        try:
-            device = self.scsi_debug_dev.split('/')[-1]
-            if os.path.exists('/sys/block/' + device):
-                self.write_file('/sys/block/%s/device/delete' % device, '1')
-            while os.path.exists(device):
-                time.sleep(0.1)
-            self.run_command('modprobe -r scsi_debug')
-        except:
-            pass
-
     @tag_test(TestTags.NOSTORAGE)
     def test_plugin_version(self):
         self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.SMART), "libbd_smart.so.3")
@@ -110,8 +85,8 @@ class SMARTTest(unittest.TestCase):
             BlockDev.smart_ata_get_info(self.loop_dev)
 
         # scsi_debug
-        self._setup_scsi_debug()
-        self.addCleanup(self._clean_scsi_debug)
+        self.scsi_debug_dev = setup_scsi_debug()
+        self.addCleanup(clean_scsi_debug, self.scsi_debug_dev)
         with self.assertRaisesRegex(GLib.GError, msg):
             BlockDev.smart_ata_get_info(self.scsi_debug_dev)
 
@@ -144,8 +119,8 @@ class SMARTTest(unittest.TestCase):
             BlockDev.smart_set_enabled(self.loop_dev, True)
 
         # scsi_debug
-        self._setup_scsi_debug()
-        self.addCleanup(self._clean_scsi_debug)
+        self.scsi_debug_dev = setup_scsi_debug()
+        self.addCleanup(clean_scsi_debug, self.scsi_debug_dev)
         with self.assertRaisesRegex(GLib.GError, msg):
             BlockDev.smart_set_enabled(self.scsi_debug_dev, False)
         with self.assertRaisesRegex(GLib.GError, msg):
@@ -182,8 +157,8 @@ class SMARTTest(unittest.TestCase):
                 BlockDev.smart_device_self_test(self.loop_dev, t)
 
         # scsi_debug
-        self._setup_scsi_debug()
-        self.addCleanup(self._clean_scsi_debug)
+        self.scsi_debug_dev = setup_scsi_debug()
+        self.addCleanup(clean_scsi_debug, self.scsi_debug_dev)
         for t in tests:
             with self.assertRaisesRegex(GLib.GError, msg):
                 BlockDev.smart_device_self_test(self.scsi_debug_dev, t)
@@ -199,6 +174,7 @@ class SMARTTest(unittest.TestCase):
 
         # LIO device (SCSI)
         self._setup_lio()
+        self.addCleanup(self._clean_lio)
         with self.assertRaisesRegex(GLib.GError, msg):
             BlockDev.smart_scsi_get_info(self.lio_dev)
 
@@ -209,8 +185,8 @@ class SMARTTest(unittest.TestCase):
             BlockDev.smart_scsi_get_info(self.loop_dev)
 
         # scsi_debug
-        self._setup_scsi_debug()
-        self.addCleanup(self._clean_scsi_debug)
+        self.scsi_debug_dev = setup_scsi_debug()
+        self.addCleanup(clean_scsi_debug, self.scsi_debug_dev)
         with self.assertRaisesRegex(GLib.GError, msg):
             BlockDev.smart_scsi_get_info(self.scsi_debug_dev)
 
