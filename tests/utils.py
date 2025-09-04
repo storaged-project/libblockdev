@@ -274,11 +274,43 @@ def clean_scsi_debug(scsi_debug_dev):
     except:
         pass
 
-def find_nvme_ctrl_devs_for_subnqn(subnqn):
+def _wait_for_nvme_controllers_ready(subnqn, timeout=3):
+    """
+    Wait for NVMe controllers with matching subsystem NQN to be in live state
+    
+    :param str subnqn: subsystem nqn to match controllers against
+    :param int timeout: timeout in seconds (default: 3)
+    """
+    start_time = time.time()
+    
+    while time.time() - start_time < timeout:
+        try:
+            for ctrl_path in glob.glob("/sys/class/nvme/nvme*/"):
+                state_file = os.path.join(ctrl_path, "state")
+                subsysnqn_file = os.path.join(ctrl_path, "subsysnqn")
+                try:
+                    state = read_file(state_file).strip()
+                    controller_subnqn = read_file(subsysnqn_file).strip()
+                    if state == "live" and controller_subnqn == subnqn:
+                        # Found a matching live controller
+                        os.system("udevadm settle")
+                        return
+                except:
+                    continue
+                
+        except:
+            pass
+        
+        time.sleep(1)
+    
+    os.system("udevadm settle")
+
+def find_nvme_ctrl_devs_for_subnqn(subnqn, wait_for_ready=True):
     """
     Find NVMe controller devices for the specified subsystem nqn
 
     :param str subnqn: subsystem nqn
+    :param bool wait_for_ready: whether to wait for controllers to be ready (default: True)
     """
 
     def _check_subsys(subsys, dev_paths):
@@ -295,6 +327,9 @@ def find_nvme_ctrl_devs_for_subnqn(subnqn):
                 except:
                     pass
 
+    # Wait for controllers to be ready if requested
+    if wait_for_ready:
+        _wait_for_nvme_controllers_ready(subnqn)
     ret, out, err = run_command("nvme list --output-format=json --verbose")
     if ret != 0:
         raise RuntimeError("Error getting NVMe list: '%s %s'" % (out, err))
@@ -317,11 +352,12 @@ def find_nvme_ctrl_devs_for_subnqn(subnqn):
     return dev_paths
 
 
-def find_nvme_ns_devs_for_subnqn(subnqn):
+def find_nvme_ns_devs_for_subnqn(subnqn, wait_for_ready=True):
     """
     Find NVMe namespace block devices for the specified subsystem nqn
 
     :param str subnqn: subsystem nqn
+    :param bool wait_for_ready: whether to wait for controllers to be ready (default: True)
     """
 
     def _check_namespaces(node, ns_dev_paths):
@@ -344,6 +380,8 @@ def find_nvme_ns_devs_for_subnqn(subnqn):
                     if 'Namespaces' in ctrl:
                         _check_namespaces(ctrl, ns_dev_paths)
 
+    if wait_for_ready:
+        _wait_for_nvme_controllers_ready(subnqn)
     ret, out, err = run_command("nvme list --output-format=json --verbose")
     if ret != 0:
         raise RuntimeError("Error getting NVMe list: '%s %s'" % (out, err))
