@@ -881,6 +881,13 @@ class LvmTestLVs(LvmPVVGLVTestCase):
         succ = BlockDev.lvm_lvremove("testVG", "testLV", True, None)
         self.assertTrue(succ)
 
+        # no PVs specified
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 512 * 1024**2, None, [], None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvremove("testVG", "testLV", True, None)
+        self.assertTrue(succ)
+
         # not enough space (only one PV)
         with self.assertRaisesRegex(GLib.GError, "Insufficient free space"):
             succ = BlockDev.lvm_lvcreate("testVG", "testLV", 1048 * 1024**2, None, [self.loop_dev], None)
