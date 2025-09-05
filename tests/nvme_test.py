@@ -416,7 +416,7 @@ class NVMeFabricsTestCase(NVMeTest):
         NUM_NS = 3
 
         # test that no device node exists for given subsystem nqn
-        ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN)
+        ctrls = find_nvme_ctrl_devs_for_subnqn(self.SUBNQN, wait_for_ready=False)
         self.assertEqual(len(ctrls), 0)
 
         self._setup_target(NUM_NS)
