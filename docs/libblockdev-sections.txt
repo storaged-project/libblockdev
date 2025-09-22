@@ -263,6 +263,7 @@ bd_loop_setup
 bd_loop_setup_from_fd
 bd_loop_teardown
 bd_loop_set_autoclear
+bd_loop_set_capacity
 BDLoopTech
 BDLoopTechMode
 bd_loop_is_tech_avail

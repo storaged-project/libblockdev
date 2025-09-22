@@ -66,5 +66,6 @@ gboolean bd_loop_setup_from_fd (gint fd, guint64 offset, guint64 size, gboolean 
 gboolean bd_loop_teardown (const gchar *loop, GError **error);
 
 gboolean bd_loop_set_autoclear (const gchar *loop, gboolean autoclear, GError **error);
+gboolean bd_loop_set_capacity (const gchar *loop, GError **error);
 
 #endif  /* BD_LOOP */
