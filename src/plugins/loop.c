@@ -517,3 +517,64 @@ gboolean bd_loop_set_autoclear (const gchar *loop, gboolean autoclear, GError **
     bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
 }
+
+/**
+ * bd_loop_set_capacity:
+ * @loop: path or name of the loop device
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Force the loop driver to reread the size of the file associated with the
+ * specified @loop device.
+ *
+ * Returns: whether the LOOP_SET_CAPACITY ioctl was successfully issued or not.
+ *
+ * Tech category: %BD_LOOP_TECH_LOOP-%BD_LOOP_TECH_MODE_MODIFY
+ */
+gboolean bd_loop_set_capacity (const gchar *loop, GError **error) {
+    gchar *dev_loop = NULL;
+    gint fd = -1;
+    guint64 progress_id = 0;
+    gchar *msg = NULL;
+    guint n_try = 0;
+    gint status = 0;
+    GError *l_error = NULL;
+
+    if (!g_str_has_prefix (loop, "/dev/"))
+        dev_loop = g_strdup_printf ("/dev/%s", loop);
+
+    msg = g_strdup_printf ("Started setting up capacity on the %s device",
+                           dev_loop ? dev_loop : loop);
+    progress_id = bd_utils_report_started (msg);
+    g_free (msg);
+
+    fd = open (dev_loop ? dev_loop : loop, O_RDWR);
+    g_free (dev_loop);
+    if (fd < 0) {
+        g_set_error (&l_error, BD_LOOP_ERROR, BD_LOOP_ERROR_DEVICE,
+                     "Failed to open device %s: %m", loop);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        return FALSE;
+    }
+
+    for (n_try=10, status=-1; (status != 0) && (n_try > 0); n_try--) {
+        status = ioctl (fd, LOOP_SET_CAPACITY, 0);
+        if (status < 0 && errno == EAGAIN)
+            g_usleep (100 * 1000); /* microseconds */
+        else
+            break;
+    }
+
+    if (status != 0) {
+        g_set_error (&l_error, BD_LOOP_ERROR, BD_LOOP_ERROR_FAIL,
+                     "Failed to set capacity of the device %s: %m", loop);
+        close (fd);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
+        return FALSE;
+    }
+
+    close (fd);
+    bd_utils_report_finished (progress_id, "Completed");
+    return TRUE;
+}

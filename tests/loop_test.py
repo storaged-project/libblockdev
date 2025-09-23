@@ -2,7 +2,7 @@ import os
 import unittest
 import overrides_hack
 
-from utils import create_sparse_tempfile, TestTags, tag_test, required_plugins
+from utils import create_sparse_tempfile, create_sparse_file, TestTags, tag_test, required_plugins
 
 import gi
 gi.require_version('BlockDev', '3.0')
@@ -11,6 +11,7 @@ from gi.repository import BlockDev
 
 @required_plugins(("loop",))
 class LoopTestCase(unittest.TestCase):
+    _loop_size = 100 * 1024**2
 
     requested_plugins = BlockDev.plugin_specs_from_names(("loop",))
 
@@ -23,7 +24,7 @@ class LoopTestCase(unittest.TestCase):
 
     def setUp(self):
         self.addCleanup(self._clean_up)
-        self.dev_file = create_sparse_tempfile("loop_test", 1024**3)
+        self.dev_file = create_sparse_tempfile("loop_test", self._loop_size)
         self.loop = None
 
     def _clean_up(self):
@@ -32,6 +33,10 @@ class LoopTestCase(unittest.TestCase):
         except:
             pass
         os.unlink(self.dev_file)
+
+    def _get_loop_size(self):
+        with open("/sys/block/%s/size" % self.loop, "r") as f:
+            return int(f.read()) * 512
 
 class LoopPluginVersionCase(LoopTestCase):
     @tag_test(TestTags.NOSTORAGE)
@@ -75,9 +80,7 @@ class LoopTestSetupOffset(LoopTestCase):
         self.assertEqual(info.offset, 10 * 1024**2)
 
         # should have smaller size due to the offset
-        with open("/sys/block/%s/size" % self.loop, "r") as f:
-            size = int(f.read()) * 512
-        self.assertEqual(size, 1024**3 - 10 * 1024 **2)
+        self.assertEqual(self._get_loop_size(), self._loop_size - 10 * 1024 **2)
 
         succ = BlockDev.loop_teardown(self.loop)
         self.assertTrue(succ)
@@ -93,9 +96,7 @@ class LoopTestSetupOffsetSize(LoopTestCase):
         self.assertTrue(self.loop)
 
         # should have size as specified
-        with open("/sys/block/%s/size" % self.loop, "r") as f:
-            size = int(f.read()) * 512
-        self.assertEqual(size, 50 * 1024**2)
+        self.assertEqual(self._get_loop_size(), 50 * 1024**2)
 
         succ = BlockDev.loop_teardown(self.loop)
         self.assertTrue(succ)
@@ -219,3 +220,23 @@ class LoopTestGetSetAutoclear(LoopTestCase):
         info = BlockDev.loop_info(self.loop)
         self.assertIsNotNone(info)
         self.assertFalse(info.autoclear)
+
+
+class LoopTestSetCapacity(LoopTestCase):
+    def test_loop_set_capacity(self):
+        succ, self.loop = BlockDev.loop_setup(self.dev_file)
+        self.assertTrue(succ)
+        self.assertTrue(self.loop)
+        self.assertEqual(self._get_loop_size(), self._loop_size)
+
+        # enlarge the backing file
+        create_sparse_file(self.dev_file, self._loop_size * 2)
+
+        # size shouldn't change without forcing re-read
+        self.assertEqual(self._get_loop_size(), self._loop_size)
+
+        succ = BlockDev.loop_set_capacity(self.loop)
+        self.assertTrue(succ)
+
+        # now the size should be updated
+        self.assertEqual(self._get_loop_size(), self._loop_size * 2)

@@ -185,4 +185,18 @@ gboolean bd_loop_teardown (const gchar *loop, GError **error);
  */
 gboolean bd_loop_set_autoclear (const gchar *loop, gboolean autoclear, GError **error);
 
+/**
+ * bd_loop_set_capacity:
+ * @loop: path or name of the loop device
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Force the loop driver to reread the size of the file associated with the
+ * specified @loop device.
+ *
+ * Returns: whether the LOOP_SET_CAPACITY ioctl was successfully issued or not.
+ *
+ * Tech category: %BD_LOOP_TECH_LOOP-%BD_LOOP_TECH_MODE_MODIFY
+ */
+gboolean bd_loop_set_capacity (const gchar *loop, GError **error);
+
 #endif  /* BD_LOOP_API */
