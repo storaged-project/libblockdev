@@ -2,9 +2,9 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Crypto: libblockdev Reference Manual for libblockdev 3.3.0.</title>
+<title>Crypto: libblockdev Reference Manual for libblockdev 3.4.0.</title>
 <meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
-<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.3.0.">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.4.0.">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-BTRFS.html" title="BTRFS">
 <link rel="next" href="libblockdev-DeviceMapper.html" title="DeviceMapper">
@@ -312,6 +312,14 @@
 </tr>
 <tr>
 <td class="function_type">
+<span class="returnvalue">gboolean</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-set-persistent-flags" title="bd_crypto_luks_set_persistent_flags ()">bd_crypto_luks_set_persistent_flags</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
 <span class="returnvalue">void</span>
 </td>
 <td class="function_name">
@@ -600,6 +608,10 @@
 <tr>
 <td class="datatype_keyword"> </td>
 <td class="function_name"><a class="link" href="libblockdev-Crypto.html#BDCryptoKeyslotContext" title="BDCryptoKeyslotContext">BDCryptoKeyslotContext</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="libblockdev-Crypto.html#BDCryptoLUKSPersistentFlags" title="enum BDCryptoLUKSPersistentFlags">BDCryptoLUKSPersistentFlags</a></td>
 </tr>
 <tr>
 <td class="datatype_keyword"> </td>
@@ -1988,6 +2000,48 @@ False, if the <em class="parameter"><code>device</code></em>
 is already in the <em class="parameter"><code>target_version</code></em>
 format.</p>
 <p>Warning: LUKS header loss is possible. See <a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-header-backup" title="bd_crypto_luks_header_backup ()"><code class="function">bd_crypto_luks_header_backup()</code></a> and <a class="link" href="libblockdev-Crypto.html#bd-crypto-luks-header-restore" title="bd_crypto_luks_header_restore ()"><code class="function">bd_crypto_luks_header_restore()</code></a></p>
+<p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS:CAPS"><code class="literal">BD_CRYPTO_TECH_LUKS</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_MODIFY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-crypto-luks-set-persistent-flags"></a><h3>bd_crypto_luks_set_persistent_flags ()</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>
+bd_crypto_luks_set_persistent_flags (<em class="parameter"><code>const <span class="type">gchar</span> *device</code></em>,
+                                     <em class="parameter"><code><a class="link" href="libblockdev-Crypto.html#BDCryptoLUKSPersistentFlags" title="enum BDCryptoLUKSPersistentFlags"><span class="type">BDCryptoLUKSPersistentFlags</span></a> flags</code></em>,
+                                     <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<p>Note: This function is valid only for LUKS2.</p>
+<div class="refsect3">
+<a name="bd-crypto-luks-set-persistent-flags.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>device</p></td>
+<td class="parameter_description"><p>a LUKS device to set the persistent flags on</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>flags</p></td>
+<td class="parameter_description"><p>flags to set</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-crypto-luks-set-persistent-flags.returns"></a><h4>Returns</h4>
+<p> whether the given <em class="parameter"><code>flags</code></em>
+were successfully set or not</p>
 <p>Tech category: <a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-LUKS:CAPS"><code class="literal">BD_CRYPTO_TECH_LUKS</code></a>-<a class="link" href="libblockdev-Crypto.html#BD-CRYPTO-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_CRYPTO_TECH_MODE_MODIFY</code></a></p>
 </div>
 </div>
@@ -3579,6 +3633,57 @@ Note: this field is valid only for LUKS 2</p></td>
     } u;
 } BDCryptoKeyslotContext;
 </pre>
+</div>
+<hr>
+<div class="refsect2">
+<a name="BDCryptoLUKSPersistentFlags"></a><h3>enum BDCryptoLUKSPersistentFlags</h3>
+<div class="refsect3">
+<a name="BDCryptoLUKSPersistentFlags.members"></a><h4>Members</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="enum_member_name"><p><a name="BD-CRYPTO-LUKS-ACTIVATE-ALLOW-DISCARDS:CAPS"></a>BD_CRYPTO_LUKS_ACTIVATE_ALLOW_DISCARDS</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-CRYPTO-LUKS-ACTIVATE-SAME-CPU-CRYPT:CAPS"></a>BD_CRYPTO_LUKS_ACTIVATE_SAME_CPU_CRYPT</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-CRYPTO-LUKS-ACTIVATE-SUBMIT-FROM-CRYPT-CPUS:CAPS"></a>BD_CRYPTO_LUKS_ACTIVATE_SUBMIT_FROM_CRYPT_CPUS</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-CRYPTO-LUKS-ACTIVATE-NO-JOURNAL:CAPS"></a>BD_CRYPTO_LUKS_ACTIVATE_NO_JOURNAL</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-CRYPTO-LUKS-ACTIVATE-NO-READ-WORKQUEUE:CAPS"></a>BD_CRYPTO_LUKS_ACTIVATE_NO_READ_WORKQUEUE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-CRYPTO-LUKS-ACTIVATE-NO-WRITE-WORKQUEUE:CAPS"></a>BD_CRYPTO_LUKS_ACTIVATE_NO_WRITE_WORKQUEUE</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-CRYPTO-LUKS-ACTIVATE-HIGH-PRIORITY:CAPS"></a>BD_CRYPTO_LUKS_ACTIVATE_HIGH_PRIORITY</p></td>
+<td> </td>
+<td> </td>
+</tr>
+</tbody>
+</table></div>
+</div>
 </div>
 <hr>
 <div class="refsect2">

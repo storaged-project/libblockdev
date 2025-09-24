@@ -2,9 +2,9 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>NVMe: libblockdev Reference Manual for libblockdev 3.3.0.</title>
+<title>NVMe: libblockdev Reference Manual for libblockdev 3.4.0.</title>
 <meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
-<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.3.0.">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.4.0.">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-NVDIMM.html" title="NVDIMM">
 <link rel="next" href="libblockdev-Plugins.html" title="Plugins">
@@ -1663,7 +1663,7 @@ Any <em class="parameter"><code>extra</code></em>
 </tr>
 <tr>
 <td class="parameter_name"><p>transport_svcid</p></td>
-<td class="parameter_description"><p>The transport service id.  For transports using IP addressing (e.g. <code class="literal">rdma</code>) this field is the port number. By default, the IP port number for the <code class="literal">RDMA</code> transport is <code class="literal">4420</code>. </p></td>
+<td class="parameter_description"><p>The transport service ID.  For transports using IP addressing (e.g. <code class="literal">tcp</code>, <code class="literal">rdma</code>) this field is the port number. The default port number for the <code class="literal">tcp</code> and <code class="literal">rdma</code> transports is <code class="literal">4420</code> and <code class="literal">8009</code> respectively when the well-known Discovery NQN is specified. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
 </tr>
 <tr>

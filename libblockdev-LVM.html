@@ -2,9 +2,9 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>LVM: libblockdev Reference Manual for libblockdev 3.3.0.</title>
+<title>LVM: libblockdev Reference Manual for libblockdev 3.4.0.</title>
 <meta name="generator" content="DocBook XSL Stylesheets Vsnapshot">
-<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.3.0.">
+<link rel="home" href="index.html" title="libblockdev Reference Manual for libblockdev 3.4.0.">
 <link rel="up" href="ch01.html" title="libblockdev Reference Manual">
 <link rel="prev" href="libblockdev-Loop.html" title="Loop">
 <link rel="next" href="libblockdev-MD-RAID.html" title="MD RAID">
@@ -373,6 +373,22 @@
 </td>
 <td class="function_name">
 <a class="link" href="libblockdev-LVM.html#bd-lvm-vglock-stop" title="bd_lvm_vglock_stop ()">bd_lvm_vglock_stop</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">gboolean</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-LVM.html#bd-lvm-vgcfgbackup" title="bd_lvm_vgcfgbackup ()">bd_lvm_vgcfgbackup</a> <span class="c_punctuation">()</span>
+</td>
+</tr>
+<tr>
+<td class="function_type">
+<span class="returnvalue">gboolean</span>
+</td>
+<td class="function_name">
+<a class="link" href="libblockdev-LVM.html#bd-lvm-vgcfgrestore" title="bd_lvm_vgcfgrestore ()">bd_lvm_vgcfgrestore</a> <span class="c_punctuation">()</span>
 </td>
 </tr>
 <tr>
@@ -2460,6 +2476,107 @@ bd_lvm_vglock_stop (<em class="parameter"><code>const <span class="type">gchar</
 <p> whether the lock was successfully stopped for <em class="parameter"><code>vg_name</code></em>
 or not</p>
 <p>Tech category: <a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-SHARED:CAPS"><code class="literal">BD_LVM_TECH_SHARED</code></a>-<a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-MODE-MODIFY:CAPS"><code class="literal">BD_LVM_TECH_MODE_MODIFY</code></a></p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-lvm-vgcfgbackup"></a><h3>bd_lvm_vgcfgbackup ()</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>
+bd_lvm_vgcfgbackup (<em class="parameter"><code>const <span class="type">gchar</span> *vg_name</code></em>,
+                    <em class="parameter"><code>const <span class="type">gchar</span> *backup_file</code></em>,
+                    <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                    <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<p>Note: This function does not back up the data content of LVs. See <code class="literal">vgcfbackup(8)</code> man page
+      for more information.</p>
+<div class="refsect3">
+<a name="bd-lvm-vgcfgbackup.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>vg_name</p></td>
+<td class="parameter_description"><p>name of the VG to backup configuration</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>backup_file</p></td>
+<td class="parameter_description"><p>file to save the backup to or <code class="literal">NULL</code> for using the default backup file
+in /etc/lvm/backup. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p>extra options for the vgcfgbackup command
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-lvm-vgcfgbackup.returns"></a><h4>Returns</h4>
+<p> Whether the backup was successfully created or not.</p>
+<p>Tech category: <a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-VG-CFG-BACKUP-RESTORE:CAPS"><code class="literal">BD_LVM_TECH_VG_CFG_BACKUP_RESTORE</code></a> no mode (it is ignored)</p>
+</div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="bd-lvm-vgcfgrestore"></a><h3>bd_lvm_vgcfgrestore ()</h3>
+<pre class="programlisting"><span class="returnvalue">gboolean</span>
+bd_lvm_vgcfgrestore (<em class="parameter"><code>const <span class="type">gchar</span> *vg_name</code></em>,
+                     <em class="parameter"><code>const <span class="type">gchar</span> *backup_file</code></em>,
+                     <em class="parameter"><code>const <a class="link" href="libblockdev-Utils.html#BDExtraArg" title="BDExtraArg"><span class="type">BDExtraArg</span></a> **extra</code></em>,
+                     <em class="parameter"><code><span class="type">GError</span> **error</code></em>);</pre>
+<p>Note: This function restores VG configuration created by <a class="link" href="libblockdev-LVM.html#bd-lvm-vgcfgbackup" title="bd_lvm_vgcfgbackup ()"><code class="literal">bd_lvm_vgcfgbackup</code></a> from given
+      <em class="parameter"><code>backup_file</code></em>
+ or from the latest backup in /etc/lvm/backup.</p>
+<div class="refsect3">
+<a name="bd-lvm-vgcfgrestore.parameters"></a><h4>Parameters</h4>
+<div class="informaltable"><table class="informaltable" width="100%" border="0">
+<colgroup>
+<col width="150px" class="parameters_name">
+<col class="parameters_description">
+<col width="200px" class="parameters_annotations">
+</colgroup>
+<tbody>
+<tr>
+<td class="parameter_name"><p>vg_name</p></td>
+<td class="parameter_description"><p>name of the VG to restore configuration</p></td>
+<td class="parameter_annotations"> </td>
+</tr>
+<tr>
+<td class="parameter_name"><p>backup_file</p></td>
+<td class="parameter_description"><p>file to restore VG configuration from to or <code class="literal">NULL</code> for using the
+latest backup in /etc/lvm/backup. </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>extra</p></td>
+<td class="parameter_description"><p>extra options for the vgcfgrestore command
+(just passed to LVM as is). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="NULL may be passed as the value in, out, in-out; or as a return value."><span class="acronym">nullable</span></acronym>][<acronym title="Parameter points to an array of items."><span class="acronym">array</span></acronym> zero-terminated=1]</span></td>
+</tr>
+<tr>
+<td class="parameter_name"><p>error</p></td>
+<td class="parameter_description"><p>place to store error (if any). </p></td>
+<td class="parameter_annotations"><span class="annotation">[<acronym title="Parameter for returning results. Default is transfer full."><span class="acronym">out</span></acronym>][<acronym title="NULL may be passed instead of a pointer to a location."><span class="acronym">optional</span></acronym>]</span></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect3">
+<a name="bd-lvm-vgcfgrestore.returns"></a><h4>Returns</h4>
+<p> Whether the configuration was successfully restored or not.</p>
+<p>Tech category: <a class="link" href="libblockdev-LVM.html#BD-LVM-TECH-VG-CFG-BACKUP-RESTORE:CAPS"><code class="literal">BD_LVM_TECH_VG_CFG_BACKUP_RESTORE</code></a> no mode (it is ignored)</p>
 </div>
 </div>
 <hr>
@@ -6732,6 +6849,11 @@ per block written to the VDO device.</p></td>
 </tr>
 <tr>
 <td class="enum_member_name"><p><a name="BD-LVM-TECH-CONFIG:CAPS"></a>BD_LVM_TECH_CONFIG</p></td>
+<td> </td>
+<td> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="BD-LVM-TECH-VG-CFG-BACKUP-RESTORE:CAPS"></a>BD_LVM_TECH_VG_CFG_BACKUP_RESTORE</p></td>
 <td> </td>
 <td> </td>
 </tr>

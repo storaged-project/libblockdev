@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<book xmlns="http://www.devhelp.net/book" title="libblockdev Reference Manual for libblockdev 3.3.0." link="index.html" author="" name="libblockdev" version="2" language="c">
+<book xmlns="http://www.devhelp.net/book" title="libblockdev Reference Manual for libblockdev 3.4.0." link="index.html" author="" name="libblockdev" version="2" language="c">
   <chapters>
     <sub name="libblockdev Reference Manual" link="ch01.html">
       <sub name="blockdev library" link="libblockdev-blockdev-library.html"/>
@@ -106,6 +106,7 @@
     <keyword type="function" name="bd_crypto_luks_set_label ()" link="libblockdev-Crypto.html#bd-crypto-luks-set-label"/>
     <keyword type="function" name="bd_crypto_luks_set_uuid ()" link="libblockdev-Crypto.html#bd-crypto-luks-set-uuid"/>
     <keyword type="function" name="bd_crypto_luks_convert ()" link="libblockdev-Crypto.html#bd-crypto-luks-convert"/>
+    <keyword type="function" name="bd_crypto_luks_set_persistent_flags ()" link="libblockdev-Crypto.html#bd-crypto-luks-set-persistent-flags"/>
     <keyword type="function" name="bd_crypto_luks_info_free ()" link="libblockdev-Crypto.html#bd-crypto-luks-info-free"/>
     <keyword type="function" name="bd_crypto_luks_info_copy ()" link="libblockdev-Crypto.html#bd-crypto-luks-info-copy"/>
     <keyword type="function" name="bd_crypto_luks_info ()" link="libblockdev-Crypto.html#bd-crypto-luks-info"/>
@@ -145,6 +146,7 @@
     <keyword type="struct" name="BDCryptoLUKSPBKDF" link="libblockdev-Crypto.html#BDCryptoLUKSPBKDF"/>
     <keyword type="enum" name="enum BDCryptoLUKSVersion" link="libblockdev-Crypto.html#BDCryptoLUKSVersion"/>
     <keyword type="struct" name="BDCryptoKeyslotContext" link="libblockdev-Crypto.html#BDCryptoKeyslotContext"/>
+    <keyword type="enum" name="enum BDCryptoLUKSPersistentFlags" link="libblockdev-Crypto.html#BDCryptoLUKSPersistentFlags"/>
     <keyword type="struct" name="BDCryptoLUKSInfo" link="libblockdev-Crypto.html#BDCryptoLUKSInfo"/>
     <keyword type="struct" name="BDCryptoIntegrityInfo" link="libblockdev-Crypto.html#BDCryptoIntegrityInfo"/>
     <keyword type="struct" name="BDCryptoIntegrityExtra" link="libblockdev-Crypto.html#BDCryptoIntegrityExtra"/>
@@ -358,6 +360,7 @@
     <keyword type="function" name="bd_loop_setup_from_fd ()" link="libblockdev-Loop.html#bd-loop-setup-from-fd"/>
     <keyword type="function" name="bd_loop_teardown ()" link="libblockdev-Loop.html#bd-loop-teardown"/>
     <keyword type="function" name="bd_loop_set_autoclear ()" link="libblockdev-Loop.html#bd-loop-set-autoclear"/>
+    <keyword type="function" name="bd_loop_set_capacity ()" link="libblockdev-Loop.html#bd-loop-set-capacity"/>
     <keyword type="function" name="bd_loop_is_tech_avail ()" link="libblockdev-Loop.html#bd-loop-is-tech-avail"/>
     <keyword type="macro" name="BD_LOOP_ERROR" link="libblockdev-Loop.html#BD-LOOP-ERROR:CAPS"/>
     <keyword type="enum" name="enum BDLoopError" link="libblockdev-Loop.html#BDLoopError"/>
@@ -406,6 +409,8 @@
     <keyword type="function" name="bd_lvm_vgreduce ()" link="libblockdev-LVM.html#bd-lvm-vgreduce"/>
     <keyword type="function" name="bd_lvm_vglock_start ()" link="libblockdev-LVM.html#bd-lvm-vglock-start"/>
     <keyword type="function" name="bd_lvm_vglock_stop ()" link="libblockdev-LVM.html#bd-lvm-vglock-stop"/>
+    <keyword type="function" name="bd_lvm_vgcfgbackup ()" link="libblockdev-LVM.html#bd-lvm-vgcfgbackup"/>
+    <keyword type="function" name="bd_lvm_vgcfgrestore ()" link="libblockdev-LVM.html#bd-lvm-vgcfgrestore"/>
     <keyword type="function" name="bd_lvm_add_vg_tags ()" link="libblockdev-LVM.html#bd-lvm-add-vg-tags"/>
     <keyword type="function" name="bd_lvm_delete_vg_tags ()" link="libblockdev-LVM.html#bd-lvm-delete-vg-tags"/>
     <keyword type="function" name="bd_lvm_vginfo ()" link="libblockdev-LVM.html#bd-lvm-vginfo"/>
@@ -856,6 +861,13 @@
     <keyword type="constant" name="BD_CRYPTO_ERROR_CONVERT_FAILED" link="libblockdev-Crypto.html#BD-CRYPTO-ERROR-CONVERT-FAILED:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_LUKS_VERSION_LUKS1" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-VERSION-LUKS1:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_LUKS_VERSION_LUKS2" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-VERSION-LUKS2:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_LUKS_ACTIVATE_ALLOW_DISCARDS" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-ACTIVATE-ALLOW-DISCARDS:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_LUKS_ACTIVATE_SAME_CPU_CRYPT" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-ACTIVATE-SAME-CPU-CRYPT:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_LUKS_ACTIVATE_SUBMIT_FROM_CRYPT_CPUS" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-ACTIVATE-SUBMIT-FROM-CRYPT-CPUS:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_LUKS_ACTIVATE_NO_JOURNAL" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-ACTIVATE-NO-JOURNAL:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_LUKS_ACTIVATE_NO_READ_WORKQUEUE" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-ACTIVATE-NO-READ-WORKQUEUE:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_LUKS_ACTIVATE_NO_WRITE_WORKQUEUE" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-ACTIVATE-NO-WRITE-WORKQUEUE:CAPS"/>
+    <keyword type="constant" name="BD_CRYPTO_LUKS_ACTIVATE_HIGH_PRIORITY" link="libblockdev-Crypto.html#BD-CRYPTO-LUKS-ACTIVATE-HIGH-PRIORITY:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_INTEGRITY_OPEN_NO_JOURNAL" link="libblockdev-Crypto.html#BD-CRYPTO-INTEGRITY-OPEN-NO-JOURNAL:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_INTEGRITY_OPEN_RECOVERY" link="libblockdev-Crypto.html#BD-CRYPTO-INTEGRITY-OPEN-RECOVERY:CAPS"/>
     <keyword type="constant" name="BD_CRYPTO_INTEGRITY_OPEN_NO_JOURNAL_BITMAP" link="libblockdev-Crypto.html#BD-CRYPTO-INTEGRITY-OPEN-NO-JOURNAL-BITMAP:CAPS"/>
@@ -1019,6 +1031,7 @@
     <keyword type="constant" name="BD_LVM_TECH_DEVICES" link="libblockdev-LVM.html#BD-LVM-TECH-DEVICES:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_SHARED" link="libblockdev-LVM.html#BD-LVM-TECH-SHARED:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_CONFIG" link="libblockdev-LVM.html#BD-LVM-TECH-CONFIG:CAPS"/>
+    <keyword type="constant" name="BD_LVM_TECH_VG_CFG_BACKUP_RESTORE" link="libblockdev-LVM.html#BD-LVM-TECH-VG-CFG-BACKUP-RESTORE:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_MODE_CREATE" link="libblockdev-LVM.html#BD-LVM-TECH-MODE-CREATE:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_MODE_REMOVE" link="libblockdev-LVM.html#BD-LVM-TECH-MODE-REMOVE:CAPS"/>
     <keyword type="constant" name="BD_LVM_TECH_MODE_MODIFY" link="libblockdev-LVM.html#BD-LVM-TECH-MODE-MODIFY:CAPS"/>
