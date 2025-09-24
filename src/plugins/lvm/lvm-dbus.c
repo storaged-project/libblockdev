@@ -693,7 +693,7 @@ static GVariant* call_lvm_method (const gchar *obj, const gchar *intf, const gch
 static gboolean call_lvm_method_sync (const gchar *obj, const gchar *intf, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, gboolean lock_config, GError **error) {
     GVariant *ret = NULL;
     gchar *obj_path = NULL;
-    gchar *task_path = NULL;
+    g_autofree gchar *task_path = NULL;
     guint64 log_task_id = 0;
     guint64 prog_id = 0;
     gdouble progress = 0.0;
@@ -726,7 +726,6 @@ static gboolean call_lvm_method_sync (const gchar *obj, const gchar *intf, const
             g_free (log_msg);
             /* got a valid result, just return */
             g_variant_unref (ret);
-            g_free (task_path);
             g_free (obj_path);
             bd_utils_report_finished (prog_id, "Completed");
             return TRUE;
@@ -740,7 +739,6 @@ static gboolean call_lvm_method_sync (const gchar *obj, const gchar *intf, const
                              method, obj, log_msg);
                 bd_utils_log_task_status (log_task_id, log_msg);
                 bd_utils_report_finished (prog_id, log_msg);
-                g_free (task_path);
                 g_free (log_msg);
                 return FALSE;
             }
@@ -751,7 +749,6 @@ static gboolean call_lvm_method_sync (const gchar *obj, const gchar *intf, const
             g_variant_unref (ret);
         } else {
             bd_utils_log_task_status (log_task_id, "No result, no job started");
-            g_free (task_path);
             bd_utils_report_finished (prog_id, "Completed");
             g_variant_unref (ret);
             return TRUE;
@@ -808,7 +805,6 @@ static gboolean call_lvm_method_sync (const gchar *obj, const gchar *intf, const
                             method, obj);
             bd_utils_report_finished (prog_id, l_error->message);
             g_propagate_error (error, l_error);
-            g_free (task_path);
             return FALSE;
         } else {
             g_variant_get (ret, "o", &obj_path);
@@ -837,7 +833,6 @@ static gboolean call_lvm_method_sync (const gchar *obj, const gchar *intf, const
                                      "Got unknown error when running '%s' method on the '%s' object.",
                                      method, obj);
                     }
-                    g_free (task_path);
                     g_propagate_error (error, l_error);
                     return FALSE;
                 } else
@@ -852,7 +847,6 @@ static gboolean call_lvm_method_sync (const gchar *obj, const gchar *intf, const
             if (ret)
                 g_variant_unref (ret);
 
-            g_free (task_path);
             return TRUE;
         }
     } else {
@@ -863,9 +857,6 @@ static gboolean call_lvm_method_sync (const gchar *obj, const gchar *intf, const
         bd_utils_report_finished (prog_id, "Completed");
         return FALSE;
     }
-    g_free (task_path);
-
-    return TRUE;
 }
 
 static gboolean call_lvm_obj_method_sync (const gchar *obj_id, const gchar *intf, const gchar *method, GVariant *params, GVariant *extra_params, const BDExtraArg **extra_args, gboolean lock_config, GError **error) {

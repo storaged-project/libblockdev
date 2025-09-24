@@ -686,7 +686,9 @@ static gchar* fs_mount (const gchar *device, gchar *fstype, gboolean read_only, 
             ret = bd_fs_mount (device, mountpoint, fstype, read_only ? "nosuid,nodev,ro" : "nosuid,nodev", NULL, &l_error);
             if (!ret) {
                 g_propagate_prefixed_error (error, l_error, "Failed to mount '%s': ", device);
-                g_rmdir (mountpoint);
+                if (g_rmdir (mountpoint) != 0)
+                    bd_utils_log_format (BD_UTILS_LOG_INFO, "Failed to remove temporary mountpoint '%s'",
+                                         mountpoint);
                 g_free (mountpoint);
                 return NULL;
             } else
@@ -702,6 +704,26 @@ static gchar* fs_mount (const gchar *device, gchar *fstype, gboolean read_only, 
 
     return mountpoint;
 }
+
+static gboolean fs_unmount (const gchar *device, const gchar *mountpoint, const gchar *operation, GError **error) {
+    gboolean ret = FALSE;
+    GError *local_error = NULL;
+
+    ret = bd_fs_unmount (mountpoint, FALSE, FALSE, NULL, &local_error);
+    if (!ret) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UNMOUNT_FAIL,
+                     "Failed to unmount '%s' after %s it: %s",
+                     device, operation, local_error->message);
+        g_clear_error (&local_error);
+        return FALSE;
+    } else {
+        if (g_rmdir (mountpoint) != 0)
+            bd_utils_log_format (BD_UTILS_LOG_INFO, "Failed to remove temporary mountpoint '%s'",
+                                 mountpoint);
+    }
+    return TRUE;
+}
+
 
 /**
  * xfs_resize_device:
@@ -739,22 +761,18 @@ static gboolean xfs_resize_device (const gchar *device, guint64 new_size, const 
     success = bd_fs_xfs_resize (mountpoint, new_size, extra, error);
 
     if (unmount) {
-        ret = bd_fs_unmount (mountpoint, FALSE, FALSE, NULL, &local_error);
+        ret = fs_unmount (device, mountpoint, "resizing", &local_error);
         if (!ret) {
             if (success) {
                 /* resize was successful but unmount failed */
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UNMOUNT_FAIL,
-                             "Failed to unmount '%s' after resizing it: %s",
-                             device, local_error->message);
-                g_clear_error (&local_error);
+                g_propagate_error (error, local_error);
                 return FALSE;
             } else
                 /* both resize and unmount were unsuccessful but the error
                    from the resize is more important so just ignore the
                    unmount error */
                 g_clear_error (&local_error);
-        } else
-            g_rmdir (mountpoint);
+        }
     }
 
     return success;
@@ -794,22 +812,18 @@ static gboolean nilfs2_resize_device (const gchar *device, guint64 new_size, GEr
     success = bd_fs_nilfs2_resize (device, new_size, error);
 
     if (unmount) {
-        ret = bd_fs_unmount (mountpoint, FALSE, FALSE, NULL, &local_error);
+        ret = fs_unmount (device, mountpoint, "resizing", &local_error);
         if (!ret) {
             if (success) {
                 /* resize was successful but unmount failed */
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UNMOUNT_FAIL,
-                             "Failed to unmount '%s' after resizing it: %s",
-                             device, local_error->message);
-                g_clear_error (&local_error);
+                g_propagate_error (error, local_error);
                 return FALSE;
             } else
                 /* both resize and unmount were unsuccessful but the error
                    from the resize is more important so just ignore the
                    unmount error */
                 g_clear_error (&local_error);
-        } else
-            g_rmdir (mountpoint);
+        }
     }
 
     return success;
@@ -829,14 +843,11 @@ static BDFSBtrfsInfo* btrfs_get_info (const gchar *device, GError **error) {
     btrfs_info = bd_fs_btrfs_get_info (mountpoint, error);
 
     if (unmount) {
-        ret = bd_fs_unmount (mountpoint, FALSE, FALSE, NULL, &local_error);
+        ret = fs_unmount (device, mountpoint, "getting info", &local_error);
         if (!ret) {
             if (btrfs_info) {
                 /* info was successful but unmount failed */
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UNMOUNT_FAIL,
-                             "Failed to unmount '%s' after getting info: %s",
-                             device, local_error->message);
-                g_clear_error (&local_error);
+                g_propagate_error (error, local_error);
                 bd_fs_btrfs_info_free (btrfs_info);
                 return NULL;
             } else
@@ -844,8 +855,7 @@ static BDFSBtrfsInfo* btrfs_get_info (const gchar *device, GError **error) {
                    from the info is more important so just ignore the
                    unmount error */
                 g_clear_error (&local_error);
-        } else
-            g_rmdir (mountpoint);
+        }
     }
 
     return btrfs_info;
@@ -865,22 +875,18 @@ static gboolean btrfs_resize_device (const gchar *device, guint64 new_size, GErr
     success = bd_fs_btrfs_resize (mountpoint, new_size, NULL, error);
 
     if (unmount) {
-        ret = bd_fs_unmount (mountpoint, FALSE, FALSE, NULL, &local_error);
+        ret = fs_unmount (device, mountpoint, "resizing", &local_error);
         if (!ret) {
             if (success) {
                 /* resize was successful but unmount failed */
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UNMOUNT_FAIL,
-                             "Failed to unmount '%s' after resizing it: %s",
-                             device, local_error->message);
-                g_clear_error (&local_error);
+                g_propagate_error (error, local_error);
                 return FALSE;
             } else
                 /* both resize and unmount were unsuccessful but the error
                    from the resize is more important so just ignore the
                    unmount error */
                 g_clear_error (&local_error);
-        } else
-            g_rmdir (mountpoint);
+        }
     }
 
     return success;
@@ -900,22 +906,18 @@ static gboolean btrfs_set_label (const gchar *device, const gchar *label, GError
     success = bd_fs_btrfs_set_label (mountpoint, label, error);
 
     if (unmount) {
-        ret = bd_fs_unmount (mountpoint, FALSE, FALSE, NULL, &local_error);
+        ret = fs_unmount (device, mountpoint, "setting label", &local_error);
         if (!ret) {
             if (success) {
-                /* resize was successful but unmount failed */
-                g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_UNMOUNT_FAIL,
-                             "Failed to unmount '%s' after setting label: %s",
-                             device, local_error->message);
-                g_clear_error (&local_error);
+                /* label was successful but unmount failed */
+                g_propagate_error (error, local_error);
                 return FALSE;
             } else
-                /* both set label and unmount were unsuccessful but the error
-                   from the set label is more important so just ignore the
+                /* both label and unmount were unsuccessful but the error
+                   from the label is more important so just ignore the
                    unmount error */
                 g_clear_error (&local_error);
-        } else
-            g_rmdir (mountpoint);
+        }
     }
 
     return success;
