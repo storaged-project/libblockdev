@@ -1,3 +1,79 @@
+Libblockdev 3.4.0
+
+New minor release of the libblockdev library with multiple fixes and new features. See below
+for details.
+
+**Notable changes**
+
+- bd_nvme_connect() now defaults to port 4420 or 8009 for discovery NQN respectively when
+the transport_svcid argument is not specified.
+
+**Full list of changes**
+
+Rodrigo Cox (1):
+
+- tests: Simplify NVMe controller waiting with basic polling
+
+Sam James (1):
+
+- configure.ac: fix bashism
+
+Tomas Bzatek (4):
+
+- smart: Use drive self-assessment as an overall status
+- tests: Fix NVMe sanitize log return codes
+- nvme: Default to well-known tr_svcid values when not specified
+- nvme: Handle memory allocation failures from _nvme_alloc()
+
+Vojtech Trefny (41):
+
+- tests: Skip LVM VDO tests if 'vdoformat' is not available
+- crypto: Add a function to set persistent flags for LUKS
+- docs: Add missing functions to docs/libblockdev-sections.txt
+- tests: Skip NVDIMM reconfigure tests on rawhide
+- ci: Switch branch for Blivet revdeps tests to 'main'
+- tests: Skip NVDIMM tests completely
+- Move LVM plugin to a separate directory
+- Move common LVM code to a separate file
+- Adjust library tests to the new LVM plugin directory structure
+- tests: Fix printing skipped test cases without docstring
+- lvm: Add support for running vgcfgbackup/restore
+- New version - 3.3.1
+- tests: Temporarily skip CryptoTestOpenClose with LUKS1 on rawhide
+- packit: Limit Fedora builds and tests to the 'master' branch
+- packit: Add RPM build for pull requests against the rhel10-branch
+- packit: Add tmt tests for rhel10-branch running on C10S
+- packit: Remove obsolete metadata dictionary from copr_build job
+- tests: Skip MDTestNominateDenominate in RHEL/CentOS 10
+- Fix parsing subvolumes with spaces in name
+- tests: Skip MDTestNominateDenominate on RHEL/CentOS 9 too
+- tests: Fix skipping escrow tests in FIPS mode
+- tests: Remove code duplication in LVM and LVM DBus tests
+- tests: Create more devices only for tests that need more devices
+- tests: Merge some of the LUKS test cases
+- crypto: Allow setting PBKDF arguments for LUKS1 too
+- tests: Use fast PBKDF parameters when creating LUKS devices
+- tests: Do not create two disks for all FS tests
+- tests: Do not require extra disks for spares for all MD tests
+- tests: Merge MD (de)activation test cases into one
+- tests: Use RAID0 for MD (de)activation test case
+- tests: Do not create two disks for all part tests
+- tests: Create a proper single "NoDev" test case for part tests
+- tests: Fix issues found by pylint
+- tests: Merge swap label and UUID test cases
+- misc: Do not try to install VDO on 32bit Debian
+- tests: Fix SCSI debug disks setup and cleanup in SMART tests
+- ci: Enable tests on aarch64 with packit and tmt
+- lvm-dbus: Fix calling lvcreate with empty list of PVs
+- Add a function to re-read size of the loop device
+- Fix issues discovered by static analysis
+- More static analysis issues fixes
+
+dependabot[bot] (1):
+
+- infra: bump actions/checkout from 4 to 5
+
+
 Libblockdev 3.3.1
 ------------------
 
