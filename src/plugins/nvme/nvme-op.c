@@ -121,8 +121,9 @@ static __u8 find_lbaf_for_size (int fd, __u32 nsid, guint16 lba_data_size, guint
     guint i;
 
     /* TODO: find first attached namespace instead of hardcoding NSID = 1 */
-    ns_info = _nvme_alloc (sizeof (struct nvme_id_ns));
-    g_warn_if_fail (ns_info != NULL);
+    ns_info = _nvme_alloc (sizeof (struct nvme_id_ns), error);
+    if (!ns_info)
+        return 0xff;
     ret = nvme_identify_ns (fd, nsid == 0xffffffff ? 1 : nsid, ns_info);
     if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
@@ -214,8 +215,11 @@ gboolean bd_nvme_format (const gchar *device, guint16 lba_data_size, guint16 met
 
     /* check the FNA controller bit when formatting a single namespace */
     if (! ctrl_device) {
-        ctrl_id = _nvme_alloc (sizeof (struct nvme_id_ctrl));
-        g_warn_if_fail (ctrl_id != NULL);
+        ctrl_id = _nvme_alloc (sizeof (struct nvme_id_ctrl), error);
+        if (!ctrl_id) {
+            close (args.fd);
+            return FALSE;
+        }
         ret = nvme_identify_ctrl (args.fd, ctrl_id);
         if (ret != 0) {
             _nvme_status_to_error (ret, FALSE, error);
