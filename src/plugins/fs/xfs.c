@@ -398,11 +398,23 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
 
     /* extract data from something like this: "data     =      bsize=4096   blocks=262400, imaxpct=25" */
     val_start = strchr (*line_p, '=');
+    if (!val_start) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
+        g_strfreev (lines);
+        bd_fs_xfs_info_free (ret);
+        return NULL;
+    }
     val_start++;
     while (isspace (*val_start))
         val_start++;
     if (g_str_has_prefix (val_start, "bsize")) {
         val_start = strchr (val_start, '=');
+        if (!val_start) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
+            g_strfreev (lines);
+            bd_fs_xfs_info_free (ret);
+            return NULL;
+        }
         val_start++;
         ret->block_size = g_ascii_strtoull (val_start, NULL, 0);
     } else {
@@ -415,6 +427,12 @@ BDFSXfsInfo* bd_fs_xfs_get_info (const gchar *device, GError **error) {
         val_start++;
     if (g_str_has_prefix (val_start, "blocks")) {
         val_start = strchr (val_start, '=');
+        if (!val_start) {
+            g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse xfs file system information");
+            g_strfreev (lines);
+            bd_fs_xfs_info_free (ret);
+            return NULL;
+        }
         val_start++;
         ret->block_count = g_ascii_strtoull (val_start, NULL, 0);
     } else {

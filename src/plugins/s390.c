@@ -790,10 +790,20 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
         hba_path = g_strdup_printf ("%s/hba_id", fcpsysfs);
         len = 0; /* should be zero, but re-set it just in case */
         fd = fopen (hba_path, "r");
+        if (!fd) {
+            g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
+                         "Failed to open %s: %m", hba_path);
+            g_free (hba_path);
+            g_free (fcpsysfs);
+            g_free (scsidev);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
+            return FALSE;
+        }
         rc = getline (&fcphbasysfs, &len, fd);
         if (rc == -1) {
             g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
-                         "Failed to read value from %s", hba_path);
+                         "Failed to read value from %s: %m", hba_path);
             fclose (fd);
             g_free (hba_path);
             g_free (fcpsysfs);
@@ -809,6 +819,17 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
         wwpn_path = g_strdup_printf ("%s/wwpn", fcpsysfs);
         len = 0;
         fd = fopen (wwpn_path, "r");
+        if (!fd) {
+            g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
+                         "Failed to open %s: %m", wwpn_path);
+            g_free (wwpn_path);
+            g_free (fcphbasysfs);
+            g_free (fcpsysfs);
+            g_free (scsidev);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
+            return FALSE;
+        }
         rc = getline (&fcpwwpnsysfs, &len, fd);
         if (rc == -1) {
             g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
@@ -829,6 +850,18 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
         lun_path = g_strdup_printf ("%s/fcp_lun", fcpsysfs);
         len = 0;
         fd = fopen (lun_path, "r");
+        if (!fd) {
+            g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
+                         "Failed to open %s: %m", lun_path);
+            g_free (lun_path);
+            g_free (fcpwwpnsysfs);
+            g_free (fcphbasysfs);
+            g_free (fcpsysfs);
+            g_free (scsidev);
+            bd_utils_report_finished (progress_id, l_error->message);
+            g_propagate_error (error, l_error);
+            return FALSE;
+        }
         rc = getline (&fcplunsysfs, &len, fd);
         if (rc == -1) {
             g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
