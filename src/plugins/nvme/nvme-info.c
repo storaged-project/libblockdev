@@ -405,13 +405,16 @@ gint _open_dev (const gchar *device, GError **error) {
 /* backported from nvme-cli: https://github.com/linux-nvme/nvme-cli/pull/2051 */
 #define ROUND_UP(N, S) ((((N) + (S) - 1) / (S)) * (S))
 
-void *_nvme_alloc (size_t len)
+void *_nvme_alloc (size_t len, GError **error)
 {
     size_t _len = ROUND_UP (len, 0x1000);
     void *p;
 
-    if (posix_memalign ((void *) &p, getpagesize (), _len))
+    if (posix_memalign ((void *) &p, getpagesize (), _len)) {
+        g_set_error (error, BD_NVME_ERROR, BD_NVME_ERROR_FAILED,
+                     "Memory allocation failed: %m");
         return NULL;
+    }
 
     memset (p, 0, _len);
     return p;
@@ -475,8 +478,9 @@ BDNVMEControllerInfo * bd_nvme_get_controller_info (const gchar *device, GError 
     if (fd < 0)
         return NULL;
 
-    ctrl_id = _nvme_alloc (sizeof (struct nvme_id_ctrl));
-    g_warn_if_fail (ctrl_id != NULL);
+    ctrl_id = _nvme_alloc (sizeof (struct nvme_id_ctrl), error);
+    if (!ctrl_id)
+        return NULL;
     /* send the NVME_IDENTIFY_CNS_CTRL ioctl */
     ret = nvme_identify_ctrl (fd, ctrl_id);
     if (ret != 0) {
@@ -616,8 +620,11 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
     }
 
     /* send the NVME_IDENTIFY_CNS_NS ioctl */
-    ns_info = _nvme_alloc (sizeof (struct nvme_id_ns));
-    g_warn_if_fail (ns_info != NULL);
+    ns_info = _nvme_alloc (sizeof (struct nvme_id_ns), error);
+    if (!ns_info) {
+        close (fd);
+        return NULL;
+    }
     ret = nvme_identify_ns (fd, nsid, ns_info);
     if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
@@ -628,22 +635,26 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
     }
 
     /* send the NVME_IDENTIFY_CNS_CTRL ioctl */
-    ctrl_id = _nvme_alloc (sizeof (struct nvme_id_ctrl));
-    g_warn_if_fail (ctrl_id != NULL);
+    ctrl_id = _nvme_alloc (sizeof (struct nvme_id_ctrl), error);
+    if (!ctrl_id) {
+        close (fd);
+        free (ns_info);
+        return NULL;
+    }
     ret_ctrl = nvme_identify_ctrl (fd, ctrl_id);
 
     /* send the NVME_IDENTIFY_CNS_NS_DESC_LIST ioctl, NVMe 1.3 */
     if (ret_ctrl == 0 && GUINT32_FROM_LE (ctrl_id->ver) >= 0x10300) {
-        descs = _nvme_alloc (NVME_IDENTIFY_DATA_SIZE);
-        g_warn_if_fail (descs != NULL);
-        ret_desc = nvme_identify_ns_descs (fd, nsid, descs);
+        descs = _nvme_alloc (NVME_IDENTIFY_DATA_SIZE, NULL);
+        if (descs != NULL)
+            ret_desc = nvme_identify_ns_descs (fd, nsid, descs);
     }
 
     /* send the NVME_IDENTIFY_CNS_CSI_INDEPENDENT_ID_NS ioctl, NVMe 2.0 */
     if (ret_ctrl == 0 && GUINT32_FROM_LE (ctrl_id->ver) >= 0x20000) {
-        ns_info_ind = _nvme_alloc (sizeof (struct nvme_id_independent_id_ns));
-        g_warn_if_fail (ns_info_ind != NULL);
-        ret_ns_ind = nvme_identify_independent_identify_ns (fd, nsid, ns_info_ind);
+        ns_info_ind = _nvme_alloc (sizeof (struct nvme_id_independent_id_ns), NULL);
+        if (ns_info_ind != NULL)
+            ret_ns_ind = nvme_identify_independent_identify_ns (fd, nsid, ns_info_ind);
     }
     close (fd);
 
@@ -762,8 +773,11 @@ BDNVMESmartLog * bd_nvme_get_smart_log (const gchar *device, GError **error) {
         return NULL;
 
     /* send the NVME_IDENTIFY_CNS_CTRL ioctl */
-    ctrl_id = _nvme_alloc (sizeof (struct nvme_id_ctrl));
-    g_warn_if_fail (ctrl_id != NULL);
+    ctrl_id = _nvme_alloc (sizeof (struct nvme_id_ctrl), error);
+    if (!ctrl_id) {
+        close (fd);
+        return NULL;
+    }
     ret_identify = nvme_identify_ctrl (fd, ctrl_id);
     if (ret_identify != 0) {
         _nvme_status_to_error (ret_identify, FALSE, error);
@@ -774,8 +788,12 @@ BDNVMESmartLog * bd_nvme_get_smart_log (const gchar *device, GError **error) {
     }
 
     /* send the NVME_LOG_LID_SMART ioctl */
-    smart_log = _nvme_alloc (sizeof (struct nvme_smart_log));
-    g_warn_if_fail (smart_log != NULL);
+    smart_log = _nvme_alloc (sizeof (struct nvme_smart_log), error);
+    if (!smart_log) {
+        close (fd);
+        free (ctrl_id);
+        return NULL;
+    }
     ret = nvme_get_log_smart (fd, NVME_NSID_ALL, FALSE /* rae */, smart_log);
     if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
@@ -867,8 +885,11 @@ BDNVMEErrorLogEntry ** bd_nvme_get_error_log_entries (const gchar *device, GErro
         return NULL;
 
     /* find out the maximum number of error log entries as reported by the controller */
-    ctrl_id = _nvme_alloc (sizeof (struct nvme_id_ctrl));
-    g_warn_if_fail (ctrl_id != NULL);
+    ctrl_id = _nvme_alloc (sizeof (struct nvme_id_ctrl), error);
+    if (!ctrl_id) {
+        close (fd);
+        return NULL;
+    }
     ret = nvme_identify_ctrl (fd, ctrl_id);
     if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
@@ -882,8 +903,11 @@ BDNVMEErrorLogEntry ** bd_nvme_get_error_log_entries (const gchar *device, GErro
     free (ctrl_id);
 
     /* send the NVME_LOG_LID_ERROR ioctl */
-    err_log = _nvme_alloc (sizeof (struct nvme_error_log_page) * elpe);
-    g_warn_if_fail (err_log != NULL);
+    err_log = _nvme_alloc (sizeof (struct nvme_error_log_page) * elpe, error);
+    if (!err_log) {
+        close (fd);
+        return NULL;
+    }
     ret = nvme_get_log_error (fd, elpe, FALSE /* rae */, err_log);
     if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
@@ -948,8 +972,11 @@ BDNVMESelfTestLog * bd_nvme_get_self_test_log (const gchar *device, GError **err
         return NULL;
 
     /* send the NVME_LOG_LID_DEVICE_SELF_TEST ioctl */
-    self_test_log = _nvme_alloc (sizeof (struct nvme_self_test_log));
-    g_warn_if_fail (self_test_log != NULL);
+    self_test_log = _nvme_alloc (sizeof (struct nvme_self_test_log), error);
+    if (!self_test_log) {
+        close (fd);
+        return NULL;
+    }
     ret = nvme_get_log_device_self_test (fd, self_test_log);
     if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
@@ -1092,8 +1119,11 @@ BDNVMESanitizeLog * bd_nvme_get_sanitize_log (const gchar *device, GError **erro
         return NULL;
 
     /* send the NVME_LOG_LID_SANITIZE ioctl */
-    sanitize_log = _nvme_alloc (sizeof (struct nvme_sanitize_log_page));
-    g_warn_if_fail (sanitize_log != NULL);
+    sanitize_log = _nvme_alloc (sizeof (struct nvme_sanitize_log_page), error);
+    if (!sanitize_log) {
+        close (fd);
+        return NULL;
+    }
     ret = nvme_get_log_sanitize (fd, FALSE /* rae */, sanitize_log);
     if (ret != 0) {
         _nvme_status_to_error (ret, FALSE, error);
