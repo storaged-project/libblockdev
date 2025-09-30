@@ -9,7 +9,7 @@ RUN echo "deb-src http://deb.debian.org/debian testing main" >> /etc/apt/sources
 RUN apt-get update
 
 # pgi-docgen dependencies
-RUN apt-get -y install python3 python3-pip python3-jinja2 python3-sphinx python3-bs4 python3-graphviz libgirepository-1.0-1 gir1.2-glib-2.0
+RUN apt-get -y install python3 python3-pip python3-jinja2 python3-sphinx python3-bs4 python3-graphviz libgirepository-1.0-1 libgirepository1.0-dev gir1.2-glib-2.0 gir1.2-glib-2.0-dev
 
 RUN apt-get -y install git
 
