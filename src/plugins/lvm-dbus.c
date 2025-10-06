@@ -1992,7 +1992,7 @@ gboolean bd_lvm_lvcreate (const gchar *vg_name, const gchar *lv_name, guint64 si
     GVariant *extra_params = NULL;
 
     /* build the array of PVs (object paths) */
-    if (pv_list) {
+    if (pv_list && *pv_list) {
         g_variant_builder_init (&builder, G_VARIANT_TYPE_ARRAY);
         for (pv=pv_list; *pv; pv++) {
             path = get_object_path (*pv, error);
