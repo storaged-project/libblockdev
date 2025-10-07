@@ -277,12 +277,12 @@ def clean_scsi_debug(scsi_debug_dev):
 def _wait_for_nvme_controllers_ready(subnqn, timeout=3):
     """
     Wait for NVMe controllers with matching subsystem NQN to be in live state
-    
+
     :param str subnqn: subsystem nqn to match controllers against
     :param int timeout: timeout in seconds (default: 3)
     """
     start_time = time.time()
-    
+
     while time.time() - start_time < timeout:
         try:
             for ctrl_path in glob.glob("/sys/class/nvme/nvme*/"):
@@ -297,12 +297,12 @@ def _wait_for_nvme_controllers_ready(subnqn, timeout=3):
                         return
                 except:
                     continue
-                
+
         except:
             pass
-        
+
         time.sleep(1)
-    
+
     os.system("udevadm settle")
 
 def find_nvme_ctrl_devs_for_subnqn(subnqn, wait_for_ready=True):
@@ -756,11 +756,18 @@ def run(cmd_string):
     return subprocess.call(cmd_string, close_fds=True, shell=True)
 
 
-def mount(device, where, ro=False):
+def mount(device, where, ro=False, options=None):
     if not os.path.isdir(where):
         os.makedirs(where)
+
     if ro:
-        os.system("mount -oro %s %s" % (device, where))
+        if options:
+            options += ",ro"
+        else:
+            options = "ro"
+
+    if options:
+        os.system("mount -o %s %s %s" % (options, device, where))
     else:
         os.system("mount %s %s" % (device, where))
 

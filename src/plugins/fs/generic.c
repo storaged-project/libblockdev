@@ -652,6 +652,57 @@ gchar* bd_fs_get_fstype (const gchar *device,  GError **error) {
     return fstype;
 }
 
+/* taken from kernel source: fs/xfs/libxfs/xfs_log_format.h: */
+ #define _XFS_UQUOTA_ACCT 0x0001  /* user quota accounting ON */
+ #define _XFS_UQUOTA_ENFD 0x0002  /* user quota limits enforced */
+ #define _XFS_GQUOTA_ACCT 0x0040  /* group quota accounting ON */
+ #define _XFS_GQUOTA_ENFD 0x0080  /* group quota limits enforced */
+ #define _XFS_PQUOTA_ACCT 0x0008  /* project quota accounting ON */
+ #define _XFS_PQUOTA_ENFD 0x0200  /* project quota limits enforced */
+
+static gboolean xfs_quota_mount_options (const gchar *device, GString *options, GError **error) {
+    g_autofree gchar *output = NULL;
+    gboolean success = FALSE;
+    const gchar *args[8] = {"xfs_db", "-r", device, "-c", "sb 0", "-c", "p qflags", NULL};
+    guint64 flags = 0;
+
+    success = bd_utils_exec_and_capture_output (args, NULL, &output, error);
+    if (!success) {
+        /* error is already populated */
+        return FALSE;
+    }
+
+    if (!g_str_has_prefix (output, "qflags = ")) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
+                     "Failed to parse XFS quota flags for %s from %s.", device, output);
+        return FALSE;
+    }
+
+    flags = g_ascii_strtoull (output + 9, NULL, 16);
+    if (flags & _XFS_UQUOTA_ACCT) {
+        if (flags & _XFS_UQUOTA_ENFD)
+            g_string_append_printf (options, "uquota,");
+        else
+            g_string_append_printf (options, "uqnoenforce,");
+    }
+
+    if (flags & _XFS_GQUOTA_ACCT) {
+        if (flags & _XFS_GQUOTA_ENFD)
+            g_string_append_printf (options, "gquota,");
+        else
+            g_string_append_printf (options, "gqnoenforce,");
+    }
+
+    if (flags & _XFS_PQUOTA_ACCT) {
+        if (flags & _XFS_PQUOTA_ENFD)
+            g_string_append_printf (options, "pquota,");
+        else
+            g_string_append_printf (options, "pqnoenforce,");
+    }
+
+    return TRUE;
+}
+
 /**
  * fs_mount:
  * @device: the device to mount for an FS operation
@@ -672,6 +723,8 @@ static gchar* fs_mount (const gchar *device, gchar *fstype, gboolean read_only, 
     gchar *mountpoint = NULL;
     gboolean ret = FALSE;
     GError *l_error = NULL;
+    GString *options = NULL;
+    g_autofree gchar *options_str = NULL;
 
     mountpoint = bd_fs_get_mountpoint (device, &l_error);
     if (!mountpoint) {
@@ -683,7 +736,23 @@ static gchar* fs_mount (const gchar *device, gchar *fstype, gboolean read_only, 
                              "Failed to create temporary directory for mounting '%s'.", device);
                 return NULL;
             }
-            ret = bd_fs_mount (device, mountpoint, fstype, read_only ? "nosuid,nodev,ro" : "nosuid,nodev", NULL, &l_error);
+
+            options = g_string_new (NULL);
+            if (g_strcmp0 (fstype, "xfs") == 0) {
+                ret = xfs_quota_mount_options (device, options, &l_error);
+                if (!ret) {
+                    bd_utils_log_format (BD_UTILS_LOG_INFO, "Failed to get XFS mount options: %s",
+                                         l_error->message);
+                    g_clear_error (&l_error);
+                }
+            }
+            if (read_only)
+                g_string_append_printf (options, "nosuid,nodev,ro");
+            else
+                g_string_append_printf (options, "nosuid,nodev");
+            options_str = g_string_free (options, FALSE);
+
+            ret = bd_fs_mount (device, mountpoint, fstype, options_str, NULL, &l_error);
             if (!ret) {
                 g_propagate_prefixed_error (error, l_error, "Failed to mount '%s': ", device);
                 if (g_rmdir (mountpoint) != 0)
