@@ -29,6 +29,8 @@
 #include <errno.h>
 #include <string.h>
 
+#include <blockdev/utils.h>
+
 #include "fs.h"
 #include "mount.h"
 
@@ -172,6 +174,8 @@ static gboolean do_unmount (MountArgs *args, GError **error) {
             return FALSE;
         }
     }
+
+    bd_utils_log_format (BD_UTILS_LOG_INFO, "Unmounting %s", args->spec);
 
     ret = mnt_context_umount (cxt);
 #ifdef LIBMOUNT_NEW_ERR_API
@@ -423,6 +427,12 @@ static gboolean do_mount (MountArgs *args, GError **error) {
     if (args->options && (mnt_optstr_get_option (args->options, "rw", NULL, NULL) == 0))
         mnt_context_enable_rwonly_mount (cxt, TRUE);
 #endif
+
+    bd_utils_log_format (BD_UTILS_LOG_INFO, "Mounting %s (fstype %s) to %s with options: %s",
+                         args->device ? args->device : "unspecified device",
+                         args->fstype ? args->fstype : "auto",
+                         args->mountpoint ? args->mountpoint : "unspecified mountpoint",
+                         args->options ? args->options : "none");
 
     ret = mnt_context_mount (cxt);
 
