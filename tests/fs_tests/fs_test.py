@@ -13,8 +13,8 @@ from gi.repository import BlockDev
 
 
 @contextmanager
-def mounted(device, where, ro=False):
-    utils.mount(device, where, ro)
+def mounted(device, where, ro=False, options=None):
+    utils.mount(device, where, ro, options)
 
     try:
         yield

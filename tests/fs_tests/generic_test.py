@@ -911,6 +911,15 @@ class GenericSetUUID(GenericTestCase):
 
 
 class GenericResize(GenericTestCase):
+    log = ""
+
+    def my_log_func(self, level, msg):
+        # not much to verify here
+        self.assertTrue(isinstance(level, int))
+        self.assertTrue(isinstance(msg, str))
+
+        self.log += msg + "\n"
+
     def _test_generic_resize(self, mkfs_function, fstype, size_delta=0, min_size=130*1024**2):
         # clean the device
         succ = BlockDev.fs_clean(self.loop_devs[0])
@@ -1024,34 +1033,64 @@ class GenericResize(GenericTestCase):
                 with self.assertRaises(GLib.GError):
                     succ = BlockDev.fs_resize(lv, 40 * 1024**2)
 
-        self._lvresize("libbd_fs_tests", "generic_test", "400M")
-        # should grow to 400 MiB (full size of the LV)
+        self._lvresize("libbd_fs_tests", "generic_test", "380M")
+        # should grow to 375 MiB (full size of the LV)
         with mounted(lv, self.mount_dir):
             succ = BlockDev.fs_resize(lv, 0)
         self.assertTrue(succ)
         with mounted(lv, self.mount_dir):
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
-        self.assertEqual(fi.block_size * fi.block_count, 400 * 1024**2)
+        self.assertEqual(fi.block_size * fi.block_count, 380 * 1024**2)
 
-        self._lvresize("libbd_fs_tests", "generic_test", "450M")
-        # grow just to 430 MiB
+        self._lvresize("libbd_fs_tests", "generic_test", "400M")
+        # grow just to 390 MiB
         with mounted(lv, self.mount_dir):
-            succ = BlockDev.fs_resize(lv, 430 * 1024**2)
+            succ = BlockDev.fs_resize(lv, 390 * 1024**2)
         self.assertTrue(succ)
         with mounted(lv, self.mount_dir):
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
-        self.assertEqual(fi.block_size * fi.block_count, 430 * 1024**2)
+        self.assertEqual(fi.block_size * fi.block_count, 390 * 1024**2)
 
-        # should grow to 450 MiB (full size of the LV)
+        # should grow to 400 MiB (full size of the LV)
         with mounted(lv, self.mount_dir):
             succ = BlockDev.fs_resize(lv, 0, "xfs")
         self.assertTrue(succ)
         with mounted(lv, self.mount_dir):
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
+        self.assertEqual(fi.block_size * fi.block_count, 400 * 1024**2)
+
+        self._lvresize("libbd_fs_tests", "generic_test", "420M")
+        # unmounted resize (should get automounted)
+        succ = BlockDev.fs_resize(lv, 0, "xfs")
+        self.assertTrue(succ)
+        with mounted(lv, self.mount_dir):
+            fi = BlockDev.fs_xfs_get_info(lv)
+        self.assertTrue(fi)
+        self.assertEqual(fi.block_size * fi.block_count, 420 * 1024**2)
+
+        # enable XFS quotas
+        with mounted(lv, self.mount_dir, options="uquota,gquota,pquota"):
+            pass
+
+        self._lvresize("libbd_fs_tests", "generic_test", "450M")
+        succ = BlockDev.utils_init_logging(self.my_log_func)
+        self.assertTrue(succ)
+        BlockDev.utils_set_log_level(BlockDev.UTILS_LOG_INFO)
+
+        succ = BlockDev.fs_resize(lv, 0, "xfs")
+        self.assertTrue(succ)
+        with mounted(lv, self.mount_dir):
+            fi = BlockDev.fs_xfs_get_info(lv)
+        self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 450 * 1024**2)
+
+        # quota options should be preserved during temp mount
+        self.assertIn("with options: uquota,gquota,pquota", self.log)
+
+        BlockDev.utils_init_logging(None)
 
     def _can_resize_f2fs(self):
         ret, out, _err = utils.run_command("resize.f2fs -V")
