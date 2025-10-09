@@ -1095,6 +1095,19 @@ gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup
 gboolean bd_crypto_luks_set_label (const gchar *device, const gchar *label, const gchar *subsystem, GError **error);
 
 /**
+ * bd_crypto_luks_check_label:
+ * @label: (nullable): label to check
+ * @subsystem: (nullable): subsystem to check
+ * @error: (out) (optional): place to store error
+ *
+ * Returns: whether @label and @subsystem are valid for LUKS2 or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_crypto_luks_check_label (const gchar *label, const gchar *subsystem, GError **error);
+
+/**
  * bd_crypto_luks_set_uuid:
  * @device: device to set UUID on
  * @uuid: (nullable): UUID to set or %NULL to generate a new one
