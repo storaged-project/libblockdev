@@ -301,6 +301,7 @@ gboolean bd_crypto_luks_kill_slot (const gchar *device, gint slot, GError **erro
 gboolean bd_crypto_luks_header_backup (const gchar *device, const gchar *backup_file, GError **error);
 gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup_file, GError **error);
 gboolean bd_crypto_luks_set_label (const gchar *device, const gchar *label, const gchar *subsystem, GError **error);
+gboolean bd_crypto_luks_check_label (const gchar *label, const gchar *subsystem, GError **error);
 gboolean bd_crypto_luks_set_uuid (const gchar *device, const gchar *uuid, GError **error);
 gboolean bd_crypto_luks_convert (const gchar *device, BDCryptoLUKSVersion target_version, GError **error);
 gboolean bd_crypto_luks_set_persistent_flags (const gchar *device, BDCryptoLUKSPersistentFlags flags, GError **error);

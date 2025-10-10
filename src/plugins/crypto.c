@@ -2160,6 +2160,33 @@ gboolean bd_crypto_luks_header_restore (const gchar *device, const gchar *backup
 }
 
 /**
+ * bd_crypto_luks_check_label:
+ * @label: (nullable): label to check
+ * @subsystem: (nullable): subsystem to check
+ * @error: (out) (optional): place to store error
+ *
+ * Returns: whether @label and @subsystem are valid for LUKS2 or not
+ *          (reason is provided in @error)
+ *
+ * Tech category: always available
+ */
+gboolean bd_crypto_luks_check_label (const gchar *label, const gchar *subsystem, GError **error) {
+    if (label && strlen (label) > 47) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
+                     "Label for LUKS must be at most 47 characters long");
+        return FALSE;
+    }
+
+    if (subsystem && strlen (subsystem) > 47) {
+        g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_PARAMS,
+                     "Subsystem for LUKS must be at most 47 characters long");
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+/**
  * bd_crypto_luks_set_label:
  * @device: device to set label on
  * @label: (nullable): label to set

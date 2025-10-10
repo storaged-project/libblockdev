@@ -1084,6 +1084,14 @@ class CryptoTestSetLabelUuid(CryptoTestCase):
     test_uuid = "4d7086c4-a4d3-432f-819e-73da03870df9"
 
     def _test_set_label(self):
+        succ = BlockDev.crypto_luks_check_label(self.label, self.subsystem)
+        self.assertTrue(succ)
+
+        with self.assertRaisesRegex(GLib.GError, "Label for LUKS must be at most 47 characters long"):
+            BlockDev.crypto_luks_check_label(label="a" * 48)
+        with self.assertRaisesRegex(GLib.GError, "Subsystem for LUKS must be at most 47 characters long"):
+            BlockDev.crypto_luks_check_label(subsystem="a" * 48)
+
         succ = BlockDev.crypto_luks_set_label(self.loop_devs[0], self.label, self.subsystem)
         self.assertTrue(succ)
 

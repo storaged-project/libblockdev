@@ -92,6 +92,7 @@ bd_crypto_luks_kill_slot
 bd_crypto_luks_header_backup
 bd_crypto_luks_header_restore
 bd_crypto_luks_set_label
+bd_crypto_luks_check_label
 bd_crypto_luks_set_uuid
 bd_crypto_luks_convert
 BDCryptoLUKSPersistentFlags
