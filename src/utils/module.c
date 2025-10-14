@@ -274,7 +274,7 @@ static gboolean have_linux_ver = FALSE;
 
 G_LOCK_DEFINE_STATIC (detected_linux_ver);
 
-BDUtilsLinuxVersion * _get_linux_version (gboolean lock, GError **error) {
+static BDUtilsLinuxVersion * _get_linux_version (gboolean lock, GError **error) {
     struct utsname buf;
 
     if (lock)
