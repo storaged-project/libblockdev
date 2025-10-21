@@ -924,6 +924,12 @@ static GVariant* get_lvm_object_properties (const gchar *obj_id, const gchar *if
     GVariant *ret = NULL;
     gchar *obj_path = NULL;
 
+    if (!obj_id || g_strcmp0 (obj_id, "") == 0) {
+        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_NOEXIST,
+                     "Invalid LVM ID specified");
+        return NULL;
+    }
+
     args = g_variant_new ("(s)", obj_id);
     /* consumes (frees) the 'args' parameter */
     ret = g_dbus_connection_call_sync (bus, LVM_BUS_NAME, MANAGER_OBJ, MANAGER_INTF,
