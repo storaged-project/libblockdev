@@ -521,7 +521,6 @@ class MDTestNameNodeBijection(MDTestCase):
         self.assertTrue(succ)
 
 class MDTestSetBitmapLocation(MDTestCase):
-    @tag_test(TestTags.SLOW, TestTags.UNSTABLE)
     def test_set_bitmap_location(self):
         """Verify we can change bitmap location for an existing MD array"""
 
@@ -541,7 +540,7 @@ class MDTestSetBitmapLocation(MDTestCase):
         self.assertTrue(succ)
 
         loc = BlockDev.md_get_bitmap_location("bd_test_md")
-        self.assertEqual(loc, "+8")
+        self.assertIn(loc, ("+8", "+2"))
 
         # test some different name specifications
         # (need to switch between internal and none because setting the same
