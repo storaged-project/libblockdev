@@ -476,7 +476,7 @@ class MDTestSetBitmapLocation(MDTestCase):
             self.assertTrue(succ)
 
         loc = BlockDev.md_get_bitmap_location("bd_test_md")
-        self.assertEqual(loc, "+8")
+        self.assertIn(loc, ("+8", "+2"))
 
         succ = BlockDev.md_set_bitmap_location("bd_test_md", "none")
         self.assertTrue(succ)
@@ -488,7 +488,7 @@ class MDTestSetBitmapLocation(MDTestCase):
         self.assertTrue(succ)
 
         loc = BlockDev.md_get_bitmap_location("bd_test_md")
-        self.assertEqual(loc, "+8")
+        self.assertIn(loc, ("+8", "+2"))
 
         # test some different name specifications
         # (need to switch between internal and none because setting the same

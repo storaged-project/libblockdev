@@ -1476,10 +1476,11 @@ gboolean bd_md_set_bitmap_location (const gchar *raid_spec, const gchar *locatio
  * Tech category: %BD_MD_TECH_MDRAID-%BD_MD_TECH_MODE_QUERY
  */
 gchar* bd_md_get_bitmap_location (const gchar *raid_spec, GError **error) {
-    gchar *raid_node = NULL;
-    gchar *sys_path = NULL;
+    g_autofree gchar *raid_node = NULL;
+    g_autofree gchar *sys_path = NULL;
     gchar *ret = NULL;
     gboolean success = FALSE;
+    GError *l_error = NULL;
 
     raid_node = get_sysfs_name_from_input (raid_spec, error);
     if (!raid_node)
@@ -1487,16 +1488,17 @@ gchar* bd_md_get_bitmap_location (const gchar *raid_spec, GError **error) {
         return NULL;
 
     sys_path = g_strdup_printf ("/sys/class/block/%s/md/bitmap/location", raid_node);
-    g_free (raid_node);
 
-    success = g_file_get_contents (sys_path, &ret, NULL, error);
+    success = g_file_get_contents (sys_path, &ret, NULL, &l_error);
     if (!success) {
-        /* error is already populated */
-        g_free (sys_path);
-        return NULL;
+        if (g_error_matches (l_error, G_FILE_ERROR, G_FILE_ERROR_NOENT)) {
+            g_clear_error (&l_error);
+            return g_strdup ("none");
+        } else {
+            g_propagate_prefixed_error (error, l_error, "Failed to get bitmap location: ");
+            return NULL;
+        }
     }
-
-    g_free (sys_path);
 
     return g_strstrip (ret);
 }
