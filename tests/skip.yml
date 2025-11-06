@@ -76,3 +76,9 @@
     - distro: "centos"
       version: ["9", "10"]
       reason: "Race condition in denominate with latest mdadm v4.4"
+
+- test: mdraid_test.MDTestActivateDeactivate
+  skip_on:
+    - distro: "centos"
+      version: "9"
+      reason: "Race condition in activate-deactivate test with latest kernel. RHEL-126233"
