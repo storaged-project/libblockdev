@@ -202,6 +202,25 @@ class MDTestCreateWithChunkSize(MDTestCase):
 
 class MDTestActivateDeactivate(MDTestCase):
     @tag_test(TestTags.SLOW, TestTags.CORE)
+    def test_activate_deactivate_core(self):
+        """Verify that it is possible to activate and deactivate an MD RAID"""
+
+        succ = BlockDev.md_create("bd_test_md", "raid0",
+                                    [self.loop_devs[0], self.loop_devs[1]],
+                                    0, None, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.md_deactivate("bd_test_md")
+        self.assertTrue(succ)
+
+        succ = BlockDev.md_activate("bd_test_md",
+                                    [self.loop_devs[0], self.loop_devs[1]], None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.md_deactivate("bd_test_md")
+        self.assertTrue(succ)
+
+    @tag_test(TestTags.SLOW, TestTags.CORE, TestTags.UNSTABLE)
     def test_activate_deactivate(self):
         """Verify that it is possible to activate and deactivate an MD RAID"""
 
