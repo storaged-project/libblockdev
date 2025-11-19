@@ -29,11 +29,6 @@
     - distro: "debian"
       reason: "Removing spare disks from an array is broken on Debian"
 
-- test: nvdimm_test.NVDIMMNoDevTest.test_supported_sector_sizes
-  skip_on:
-    - arch: "i686"
-      reason: "Lists of 64bit integers are broken on i686 with GI"
-
 - test: fs_tests.mount_test.MountTestCase.test_mount_ntfs
   skip_on:
     - distro: "debian"
@@ -54,28 +49,10 @@
   skip_on:
     - reason: "LVM DBus doesn't support LV repair yet"
 
-- test: (lvm_test|lvm_dbus_tests).LvmNoDevTestCase.test_lvm_config
-  skip_on:
-    - distro: "debian"
-      version: "12"
-      reason: "LVM >= 2.03.17 needed for LVM config parsing with --valuesonly"
-
 - test: nvdimm_test
   skip_on:
     - distro: ["fedora", "centos", "debian"]
       reason: "NVDIMM plugin is deprecated"
-
-- test: crypto_test.CryptoTestOpenClose.test_luks_open_close
-  skip_on:
-    - distro: "fedora"
-      version: "43"
-      reason: "Bug in cryptsetup aborting when activating LUKSv1 with keyring"
-
-- test: mdraid_test.MDTestNominateDenominate.test_nominate_denominate
-  skip_on:
-    - distro: "centos"
-      version: ["9", "10"]
-      reason: "Race condition in denominate with latest mdadm v4.4"
 
 - test: mdraid_test.MDTestActivateDeactivate
   skip_on:
