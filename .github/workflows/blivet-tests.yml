@@ -13,7 +13,7 @@ jobs:
       CI_CONTAINER: libblockdev-ci-blivet-tests
     steps:
       - name: Checkout libblockdev repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install podman
         run: |
