@@ -140,10 +140,10 @@ Making releases
  - [ ] Generate documentation for the Python bindings as described below and copy
        it to *docs/html*
 
- - [ ] Update the documentation by rsyncing the contents of the *docs/html*
-       folder elsewhere, switching to the *gh-pages* branch, rsyncing the
-       contents back and committing it as an update of the docs for the new
-       release.
+ - [ ] Update the documentation by copying the contents of the *docs/html*
+       folder to the *libblockdev* directory in the
+       [Storaged project website repository](https://github.com/storaged-project/storaged-project.github.io)
+       and commit and push the changes
 
 Generating Python bindings documentation
 -----------------------------------------
