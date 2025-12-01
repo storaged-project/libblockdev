@@ -172,6 +172,11 @@ typedef enum {
     BD_CRYPTO_LUKS_ACTIVATE_HIGH_PRIORITY           = 1 << 6,
 } BDCryptoLUKSPersistentFlags;
 
+typedef enum {
+    BD_CRYPTO_OPEN_ALLOW_DISCARDS  = 1 << 0,
+    BD_CRYPTO_OPEN_READONLY        = 1 << 1,
+} BDCryptoOpenFlags;
+
 /**
  * BDCryptoLUKSInfo:
  * @version: LUKS version
@@ -290,6 +295,7 @@ const gchar* bd_crypto_luks_status (const gchar *luks_device, GError **error);
 
 gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint64 key_size, BDCryptoKeyslotContext *context, guint64 min_entropy, BDCryptoLUKSVersion luks_version, BDCryptoLUKSExtra *extra,GError **error);
 gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error);
+gboolean bd_crypto_luks_open_flags (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, BDCryptoOpenFlags flags, GError **error);
 gboolean bd_crypto_luks_close (const gchar *luks_device, GError **error);
 gboolean bd_crypto_luks_add_key (const gchar *device, BDCryptoKeyslotContext *context, BDCryptoKeyslotContext *ncontext, GError **error);
 gboolean bd_crypto_luks_remove_key (const gchar *device, BDCryptoKeyslotContext *context, GError **error);
@@ -319,12 +325,15 @@ gboolean bd_crypto_keyring_add_key (const gchar *key_desc, const guint8 *key_dat
 
 gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error);
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, const gchar **keyfiles, gboolean hidden, gboolean system, gboolean veracrypt, guint32 veracrypt_pim, gboolean read_only, GError **error);
+gboolean bd_crypto_tc_open_flags (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, const gchar **keyfiles, gboolean hidden, gboolean system, gboolean veracrypt, guint32 veracrypt_pim, BDCryptoOpenFlags flags, GError **error);
 gboolean bd_crypto_tc_close (const gchar *tc_device, GError **error);
 
 gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error);
+gboolean bd_crypto_bitlk_open_flags (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, BDCryptoOpenFlags flags, GError **error);
 gboolean bd_crypto_bitlk_close (const gchar *bitlk_device, GError **error);
 
 gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error);
+gboolean bd_crypto_fvault2_open_flags (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, BDCryptoOpenFlags flags, GError **error);
 gboolean bd_crypto_fvault2_close (const gchar *fvault2_device, GError **error);
 
 gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, const gchar *cert_data, const gchar *directory, const gchar *backup_passphrase, GError **error);

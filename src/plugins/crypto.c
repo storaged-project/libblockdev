@@ -1262,11 +1262,11 @@ static gboolean _is_dm_name_valid (const gchar *name, GError **error) {
 }
 
 /**
- * bd_crypto_luks_open:
+ * bd_crypto_luks_open_flags:
  * @device: the device to open
  * @name: name for the LUKS device
  * @context: key slot context (passphrase/keyfile/token...) to open this LUKS @device
- * @read_only: whether to open as read-only or not (meaning read-write)
+ * @flags: activation flags for the LUKS device
  * @error: (out) (optional): place to store error (if any)
  *
  * Supported @context types for this function: passphrase, key file, keyring
@@ -1275,16 +1275,16 @@ static gboolean _is_dm_name_valid (const gchar *name, GError **error) {
  *
  * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  *
- * Example of using %bd_crypto_luks_open with %BDCryptoKeyslotContext:
+ * Example of using %bd_crypto_luks_open_flags with %BDCryptoKeyslotContext:
  *
  * |[<!-- language="C" -->
  * BDCryptoKeyslotContext *context = NULL;
  *
  * context = bd_crypto_keyslot_context_new_passphrase ("passphrase", 10, NULL);
- * bd_crypto_luks_open ("/dev/vda1", "luks-device", context, FALSE, NULL);
+ * bd_crypto_luks_open_flags ("/dev/vda1", "luks-device", context, 0, NULL);
  * ]|
  */
-gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error) {
+gboolean bd_crypto_luks_open_flags (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, BDCryptoOpenFlags flags, GError **error) {
     struct crypt_device *cd = NULL;
     gchar *key_buffer = NULL;
     gsize buf_len = 0;
@@ -1292,6 +1292,7 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, BDCryptoKe
     guint64 progress_id = 0;
     gchar *msg = NULL;
     GError *l_error = NULL;
+    guint32 crypt_flags = 0;
 
     if (!_is_dm_name_valid (name, error))
         return FALSE;
@@ -1319,11 +1320,16 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, BDCryptoKe
         return FALSE;
     }
 
+    if (flags & BD_CRYPTO_OPEN_ALLOW_DISCARDS)
+        crypt_flags |= CRYPT_ACTIVATE_ALLOW_DISCARDS;
+    if (flags & BD_CRYPTO_OPEN_READONLY)
+        crypt_flags |= CRYPT_ACTIVATE_READONLY;
+
     if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE) {
         ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT,
                                             (const char *) context->u.passphrase.pass_data,
                                             context->u.passphrase.data_len,
-                                            read_only ? CRYPT_ACTIVATE_READONLY : 0);
+                                            crypt_flags);
     } else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE) {
         ret = crypt_keyfile_device_read (cd, context->u.keyfile.keyfile, &key_buffer, &buf_len,
                                          context->u.keyfile.keyfile_offset, context->u.keyfile.key_size, 0);
@@ -1335,12 +1341,10 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, BDCryptoKe
             g_propagate_error (error, l_error);
             return FALSE;
         }
-        ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, key_buffer, buf_len,
-                                            read_only ? CRYPT_ACTIVATE_READONLY : 0);
+        ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, key_buffer, buf_len, crypt_flags);
         crypt_safe_free (key_buffer);
     } else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING)
-        ret = crypt_activate_by_keyring (cd, name, context->u.keyring.key_desc, CRYPT_ANY_SLOT,
-                                         read_only ? CRYPT_ACTIVATE_READONLY : 0);
+        ret = crypt_activate_by_keyring (cd, name, context->u.keyring.key_desc, CRYPT_ANY_SLOT, crypt_flags);
     else {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
                      "Only 'passphrase', 'key file' and 'keyring' context types are valid for LUKS open.");
@@ -1367,6 +1371,33 @@ gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, BDCryptoKe
     crypt_free (cd);
     bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
+}
+
+/**
+ * bd_crypto_luks_open:
+ * @device: the device to open
+ * @name: name for the LUKS device
+ * @context: key slot context (passphrase/keyfile/token...) to open this LUKS @device
+ * @read_only: whether to open as read-only or not (meaning read-write)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Supported @context types for this function: passphrase, key file, keyring
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ *
+ * Example of using %bd_crypto_luks_open with %BDCryptoKeyslotContext:
+ *
+ * |[<!-- language="C" -->
+ * BDCryptoKeyslotContext *context = NULL;
+ *
+ * context = bd_crypto_keyslot_context_new_passphrase ("passphrase", 10, NULL);
+ * bd_crypto_luks_open ("/dev/vda1", "luks-device", context, FALSE, NULL);
+ * ]|
+ */
+gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error) {
+    return bd_crypto_luks_open_flags (device, name, context, read_only ? BD_CRYPTO_OPEN_READONLY : 0, error);
 }
 
 static gboolean _crypto_close (const gchar *device, const gchar *tech_name, GError **error) {
@@ -3160,11 +3191,11 @@ gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error) 
 }
 
 /**
- * bd_crypto_tc_open:
+ * bd_crypto_tc_open_flags:
  * @device: the device to open
  * @name: name for the TrueCrypt/VeraCrypt device
  * @context: (nullable): passphrase key slot context for this TrueCrypt/VeraCrypt volume
- * @read_only: whether to open as read-only or not (meaning read-write)
+ * @flags: activation flags for the TrueCrypt/VeraCrypt device
  * @keyfiles: (nullable) (array zero-terminated=1): paths to the keyfiles for the TrueCrypt/VeraCrypt volume
  * @hidden: whether a hidden volume inside the volume should be opened
  * @system: whether to try opening as an encrypted system (with boot loader)
@@ -3178,7 +3209,7 @@ gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error) 
  *
  * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
-gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, const gchar **keyfiles, gboolean hidden, gboolean system, gboolean veracrypt, guint32 veracrypt_pim, gboolean read_only, GError **error) {
+gboolean bd_crypto_tc_open_flags (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, const gchar **keyfiles, gboolean hidden, gboolean system, gboolean veracrypt, guint32 veracrypt_pim, BDCryptoOpenFlags flags, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
     guint64 progress_id = 0;
@@ -3187,6 +3218,7 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, BDCryptoKeys
     gsize keyfiles_count = 0;
     guint i;
     GError *l_error = NULL;
+    guint32 crypt_flags = 0;
 
     if (!_is_dm_name_valid (name, error))
         return FALSE;
@@ -3250,9 +3282,12 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, BDCryptoKeys
         return FALSE;
     }
 
-    ret = crypt_activate_by_volume_key (cd, name, NULL, 0,
-                                        read_only ? CRYPT_ACTIVATE_READONLY : 0);
+    if (flags & BD_CRYPTO_OPEN_ALLOW_DISCARDS)
+        crypt_flags |= CRYPT_ACTIVATE_ALLOW_DISCARDS;
+    if (flags & BD_CRYPTO_OPEN_READONLY)
+        crypt_flags |= CRYPT_ACTIVATE_READONLY;
 
+    ret = crypt_activate_by_volume_key (cd, name, NULL, 0, crypt_flags);
     if (ret < 0) {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to activate device: %s", strerror_l (-ret, c_locale));
@@ -3265,6 +3300,29 @@ gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, BDCryptoKeys
     crypt_free (cd);
     bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
+}
+
+/**
+ * bd_crypto_tc_open:
+ * @device: the device to open
+ * @name: name for the TrueCrypt/VeraCrypt device
+ * @context: (nullable): passphrase key slot context for this TrueCrypt/VeraCrypt volume
+ * @read_only: whether to open as read-only or not (meaning read-write)
+ * @keyfiles: (nullable) (array zero-terminated=1): paths to the keyfiles for the TrueCrypt/VeraCrypt volume
+ * @hidden: whether a hidden volume inside the volume should be opened
+ * @system: whether to try opening as an encrypted system (with boot loader)
+ * @veracrypt: whether to try VeraCrypt modes (TrueCrypt modes are tried anyway)
+ * @veracrypt_pim: VeraCrypt PIM value (only used if @veracrypt is %TRUE)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Supported @context types for this function: passphrase
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, const gchar **keyfiles, gboolean hidden, gboolean system, gboolean veracrypt, guint32 veracrypt_pim, gboolean read_only, GError **error) {
+    return bd_crypto_tc_open_flags (device, name, context, keyfiles, hidden, system, veracrypt, veracrypt_pim, read_only ? BD_CRYPTO_OPEN_READONLY : 0, error);
 }
 
 /**
@@ -3528,11 +3586,11 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
 #endif /* WITH_BD_ESCROW */
 
 /**
- * bd_crypto_bitlk_open:
+ * bd_crypto_bitlk_open_flags:
  * @device: the device to open
  * @name: name for the BITLK device
  * @context: key slot context (passphrase/keyfile/token...) for this BITLK device
- * @read_only: whether to open as read-only or not (meaning read-write)
+ * @flags: activation flags for the BITLK device
  * @error: (out) (optional): place to store error (if any)
  *
  * Supported @context types for this function: passphrase, key file
@@ -3541,7 +3599,7 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
  *
  * Tech category: %BD_CRYPTO_TECH_BITLK-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
-gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error) {
+gboolean bd_crypto_bitlk_open_flags (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, BDCryptoOpenFlags flags, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
     guint64 progress_id = 0;
@@ -3549,6 +3607,7 @@ gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, BDCryptoK
     GError *l_error = NULL;
     gchar *key_buffer = NULL;
     gsize buf_len = 0;
+    guint32 crypt_flags = 0;
 
     if (!_is_dm_name_valid (name, error))
         return FALSE;
@@ -3576,11 +3635,16 @@ gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, BDCryptoK
         return FALSE;
     }
 
+    if (flags & BD_CRYPTO_OPEN_ALLOW_DISCARDS)
+        crypt_flags |= CRYPT_ACTIVATE_ALLOW_DISCARDS;
+    if (flags & BD_CRYPTO_OPEN_READONLY)
+        crypt_flags |= CRYPT_ACTIVATE_READONLY;
+
     if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE) {
         ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT,
                                             (const char *) context->u.passphrase.pass_data,
                                             context->u.passphrase.data_len,
-                                            read_only ? CRYPT_ACTIVATE_READONLY : 0);
+                                            crypt_flags);
     } else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE) {
         ret = crypt_keyfile_device_read (cd, context->u.keyfile.keyfile, &key_buffer, &buf_len,
                                          context->u.keyfile.keyfile_offset, context->u.keyfile.key_size, 0);
@@ -3592,8 +3656,7 @@ gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, BDCryptoK
             g_propagate_error (error, l_error);
             return FALSE;
         }
-        ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, key_buffer, buf_len,
-                                            read_only ? CRYPT_ACTIVATE_READONLY : 0);
+        ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, key_buffer, buf_len, crypt_flags);
         crypt_safe_free (key_buffer);
     } else {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
@@ -3624,6 +3687,24 @@ gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, BDCryptoK
 }
 
 /**
+ * bd_crypto_bitlk_open:
+ * @device: the device to open
+ * @name: name for the BITLK device
+ * @context: key slot context (passphrase/keyfile/token...) for this BITLK device
+ * @read_only: whether to open as read-only or not (meaning read-write)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Supported @context types for this function: passphrase, key file
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_BITLK-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error) {
+    return bd_crypto_bitlk_open_flags (device, name, context, read_only ? BD_CRYPTO_OPEN_READONLY : 0, error);
+}
+
+/**
  * bd_crypto_bitlk_close:
  * @bitlk_device: BITLK device to close
  * @error: (out) (optional): place to store error (if any)
@@ -3637,11 +3718,11 @@ gboolean bd_crypto_bitlk_close (const gchar *bitlk_device, GError **error) {
 }
 
 /**
- * bd_crypto_fvault2_open:
+ * bd_crypto_fvault2_open_flags:
  * @device: the device to open
  * @name: name for the FVAULT2 device
  * @context: key slot context (passphrase/keyfile/token...) for this FVAULT2 volume
- * @read_only: whether to open as read-only or not (meaning read-write)
+ * @flags: activation flags for the FVAULT2 device
  * @error: (out) (optional): place to store error (if any)
  *
  * Supported @context types for this function: passphrase, key file
@@ -3651,12 +3732,12 @@ gboolean bd_crypto_bitlk_close (const gchar *bitlk_device, GError **error) {
  * Tech category: %BD_CRYPTO_TECH_FVAULT2-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 #ifndef LIBCRYPTSETUP_26
-gboolean bd_crypto_fvault2_open (const gchar *device G_GNUC_UNUSED, const gchar *name G_GNUC_UNUSED, BDCryptoKeyslotContext *context G_GNUC_UNUSED,
-                                 gboolean read_only G_GNUC_UNUSED, GError **error) {
+gboolean bd_crypto_fvault2_open_flags (const gchar *device G_GNUC_UNUSED, const gchar *name G_GNUC_UNUSED, BDCryptoKeyslotContext *context G_GNUC_UNUSED,
+                                       BDCryptoOpenFlags flags G_GNUC_UNUSED, GError **error) {
     /* this will return FALSE and set error, because FVAULT2 technology is not available */
     return bd_crypto_is_tech_avail (BD_CRYPTO_TECH_FVAULT2, BD_CRYPTO_TECH_MODE_OPEN_CLOSE, error);
 #else
-gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error) {
+gboolean bd_crypto_fvault2_open_flags (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, BDCryptoOpenFlags flags, GError **error) {
     struct crypt_device *cd = NULL;
     gint ret = 0;
     guint64 progress_id = 0;
@@ -3664,6 +3745,7 @@ gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, BDCrypt
     GError *l_error = NULL;
     gchar *key_buffer = NULL;
     gsize buf_len = 0;
+    guint32 crypt_flags = 0;
 
     if (!_is_dm_name_valid (name, error))
         return FALSE;
@@ -3691,11 +3773,16 @@ gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, BDCrypt
         return FALSE;
     }
 
+    if (flags & BD_CRYPTO_OPEN_ALLOW_DISCARDS)
+        crypt_flags |= CRYPT_ACTIVATE_ALLOW_DISCARDS;
+    if (flags & BD_CRYPTO_OPEN_READONLY)
+        crypt_flags |= CRYPT_ACTIVATE_READONLY;
+
     if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE) {
         ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT,
                                             (const char *) context->u.passphrase.pass_data,
                                             context->u.passphrase.data_len,
-                                            read_only ? CRYPT_ACTIVATE_READONLY : 0);
+                                            crypt_flags);
     } else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE) {
         ret = crypt_keyfile_device_read (cd, context->u.keyfile.keyfile, &key_buffer, &buf_len,
                                          context->u.keyfile.keyfile_offset, context->u.keyfile.key_size, 0);
@@ -3707,8 +3794,7 @@ gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, BDCrypt
             g_propagate_error (error, l_error);
             return FALSE;
         }
-        ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, key_buffer, buf_len,
-                                            read_only ? CRYPT_ACTIVATE_READONLY : 0);
+        ret = crypt_activate_by_passphrase (cd, name, CRYPT_ANY_SLOT, key_buffer, buf_len, crypt_flags);
         crypt_safe_free (key_buffer);
     } else {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
@@ -3738,6 +3824,32 @@ gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, BDCrypt
     return TRUE;
 #endif
 }
+
+/**
+ * bd_crypto_fvault2_open:
+ * @device: the device to open
+ * @name: name for the FVAULT2 device
+ * @context: key slot context (passphrase/keyfile/token...) for this FVAULT2 volume
+ * @read_only: whether to open as read-only or not (meaning read-write)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Supported @context types for this function: passphrase, key file
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_FVAULT2-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+#ifndef LIBCRYPTSETUP_26
+gboolean bd_crypto_fvault2_open (const gchar *device G_GNUC_UNUSED, const gchar *name G_GNUC_UNUSED, BDCryptoKeyslotContext *context G_GNUC_UNUSED,
+                                 gboolean read_only G_GNUC_UNUSED, GError **error) {
+    /* this will return FALSE and set error, because FVAULT2 technology is not available */
+    return bd_crypto_is_tech_avail (BD_CRYPTO_TECH_FVAULT2, BD_CRYPTO_TECH_MODE_OPEN_CLOSE, error);
+}
+#else
+gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error) {
+    return bd_crypto_fvault2_open_flags (device, name, context, read_only ? BD_CRYPTO_OPEN_READONLY : 0, error);
+}
+#endif
 
 /**
  * bd_crypto_fvault2_close:

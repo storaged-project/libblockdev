@@ -361,6 +361,11 @@ typedef enum {
     BD_CRYPTO_INTEGRITY_OPEN_ALLOW_DISCARDS     = 1 << 5,
 } BDCryptoIntegrityOpenFlags;
 
+typedef enum {
+    BD_CRYPTO_OPEN_ALLOW_DISCARDS  = 1 << 0,
+    BD_CRYPTO_OPEN_READONLY        = 1 << 1,
+} BDCryptoOpenFlags;
+
 #define BD_CRYPTO_TYPE_LUKS_INFO (bd_crypto_luks_info_get_type ())
 GType bd_crypto_luks_info_get_type();
 
@@ -940,6 +945,31 @@ gboolean bd_crypto_luks_format (const gchar *device, const gchar *cipher, guint6
 gboolean bd_crypto_luks_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error);
 
 /**
+ * bd_crypto_luks_open_flags:
+ * @device: the device to open
+ * @name: name for the LUKS device
+ * @context: key slot context (passphrase/keyfile/token...) to open this LUKS @device
+ * @flags: activation flags for the LUKS device
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Supported @context types for this function: passphrase, key file, keyring
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_LUKS-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ *
+ * Example of using %bd_crypto_luks_open_flags with %BDCryptoKeyslotContext:
+ *
+ * |[<!-- language="C" -->
+ * BDCryptoKeyslotContext *context = NULL;
+ *
+ * context = bd_crypto_keyslot_context_new_passphrase ("passphrase", 10, NULL);
+ * bd_crypto_luks_open_flags ("/dev/vda1", "luks-device", context, 0, NULL);
+ * ]|
+ */
+gboolean bd_crypto_luks_open_flags (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, BDCryptoOpenFlags flags, GError **error);
+
+/**
  * bd_crypto_luks_close:
  * @luks_device: LUKS device to close
  * @error: (out) (optional): place to store error (if any)
@@ -1301,6 +1331,27 @@ gboolean bd_crypto_device_seems_encrypted (const gchar *device, GError **error);
 gboolean bd_crypto_tc_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, const gchar **keyfiles, gboolean hidden, gboolean system, gboolean veracrypt, guint32 veracrypt_pim, gboolean read_only, GError **error);
 
 /**
+ * bd_crypto_tc_open_flags:
+ * @device: the device to open
+ * @name: name for the TrueCrypt/VeraCrypt device
+ * @context: (nullable): passphrase key slot context for this TrueCrypt/VeraCrypt volume
+ * @flags: activation flags for the TrueCrypt/VeraCrypt device
+ * @keyfiles: (nullable) (array zero-terminated=1): paths to the keyfiles for the TrueCrypt/VeraCrypt volume
+ * @hidden: whether a hidden volume inside the volume should be opened
+ * @system: whether to try opening as an encrypted system (with boot loader)
+ * @veracrypt: whether to try VeraCrypt modes (TrueCrypt modes are tried anyway)
+ * @veracrypt_pim: VeraCrypt PIM value (only used if @veracrypt is %TRUE)
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Supported @context types for this function: passphrase
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_TRUECRYPT-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+gboolean bd_crypto_tc_open_flags (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, const gchar **keyfiles, gboolean hidden, gboolean system, gboolean veracrypt, guint32 veracrypt_pim, BDCryptoOpenFlags flags, GError **error);
+
+/**
  * bd_crypto_tc_close:
  * @tc_device: TrueCrypt/VeraCrypt device to close
  * @error: (out) (optional): place to store error (if any)
@@ -1343,6 +1394,22 @@ gboolean bd_crypto_escrow_device (const gchar *device, const gchar *passphrase, 
 gboolean bd_crypto_bitlk_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error);
 
 /**
+ * bd_crypto_bitlk_open_flags:
+ * @device: the device to open
+ * @name: name for the BITLK device
+ * @context: key slot context (passphrase/keyfile/token...) for this BITLK device
+ * @flags: activation flags for the BITLK device
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Supported @context types for this function: passphrase, key file
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_BITLK-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+gboolean bd_crypto_bitlk_open_flags (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, BDCryptoOpenFlags flags, GError **error);
+
+/**
  * bd_crypto_bitlk_close:
  * @bitlk_device: BITLK device to close
  * @error: (out) (optional): place to store error (if any)
@@ -1368,6 +1435,22 @@ gboolean bd_crypto_bitlk_close (const gchar *bitlk_device, GError **error);
  * Tech category: %BD_CRYPTO_TECH_FVAULT2-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
  */
 gboolean bd_crypto_fvault2_open (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, gboolean read_only, GError **error);
+
+/**
+ * bd_crypto_fvault2_open_flags:
+ * @device: the device to open
+ * @name: name for the FVAULT2 device
+ * @context: key slot context (passphrase/keyfile/token...) for this FVAULT2 volume
+ * @flags: activation flags for the FVAULT2 device
+ * @error: (out) (optional): place to store error (if any)
+ *
+ * Supported @context types for this function: passphrase, key file
+ *
+ * Returns: whether the @device was successfully opened or not
+ *
+ * Tech category: %BD_CRYPTO_TECH_FVAULT2-%BD_CRYPTO_TECH_MODE_OPEN_CLOSE
+ */
+gboolean bd_crypto_fvault2_open_flags (const gchar *device, const gchar *name, BDCryptoKeyslotContext *context, BDCryptoOpenFlags flags, GError **error);
 
 /**
  * bd_crypto_fvault2_close:

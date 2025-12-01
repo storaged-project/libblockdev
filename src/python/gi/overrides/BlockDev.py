@@ -336,6 +336,14 @@ def crypto_tc_open(device, name, passphrase, read_only=False, keyfiles=None, hid
     return _crypto_tc_open(device, name, passphrase, keyfiles, hidden, system, veracrypt, veracrypt_pim, read_only)
 __all__.append("crypto_tc_open")
 
+_crypto_tc_open_flags = BlockDev.crypto_tc_open_flags
+@override(BlockDev.crypto_tc_open_flags)
+def crypto_tc_open_flags(device, name, passphrase, flags=0, keyfiles=None, hidden=False, system=False, veracrypt=False, veracrypt_pim=0):
+    if isinstance(passphrase, str):
+        passphrase = passphrase.encode("utf-8")
+    return _crypto_tc_open_flags(device, name, passphrase, keyfiles, hidden, system, veracrypt, veracrypt_pim, flags)
+__all__.append("crypto_tc_open_flags")
+
 _crypto_bitlk_open = BlockDev.crypto_bitlk_open
 @override(BlockDev.crypto_bitlk_open)
 def crypto_bitlk_open(device, name, passphrase, read_only=False):
