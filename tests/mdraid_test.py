@@ -265,22 +265,25 @@ class MDTestActivateDeactivate(MDTestCase):
         self.assertTrue(md_info)
         self.assertTrue(md_info.uuid)
 
+        md_uuid = BlockDev.md_get_md_uuid(md_info.uuid)
+        self.assertIsNotNone(md_uuid)
+
         # try to activate with UUID and array name
-        succ = BlockDev.md_activate("bd_test_md", [self.loop_devs[0], self.loop_devs[1]], md_info.uuid)
+        succ = BlockDev.md_activate("bd_test_md", [self.loop_devs[0], self.loop_devs[1]], md_uuid)
         self.assertTrue(succ)
 
         succ = BlockDev.md_deactivate("bd_test_md")
         self.assertTrue(succ)
 
         # try to activate by UUID only: should work with member devices specified
-        succ = BlockDev.md_activate(None, [self.loop_devs[0], self.loop_devs[1]], md_info.uuid)
+        succ = BlockDev.md_activate(None, [self.loop_devs[0], self.loop_devs[1]], md_uuid)
         self.assertTrue(succ)
 
         succ = BlockDev.md_deactivate("bd_test_md")
         self.assertTrue(succ)
 
         # as well as without them
-        succ = BlockDev.md_activate(None, None, md_info.uuid)
+        succ = BlockDev.md_activate(None, None, md_uuid)
         self.assertTrue(succ)
 
         succ = BlockDev.md_deactivate("bd_test_md")
