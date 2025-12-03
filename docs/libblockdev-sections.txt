@@ -81,6 +81,8 @@ bd_crypto_keyslot_context_new_keyfile
 bd_crypto_keyslot_context_new_keyring
 bd_crypto_keyslot_context_new_volume_key
 bd_crypto_luks_open
+BDCryptoOpenFlags
+bd_crypto_luks_open_flags
 bd_crypto_luks_close
 bd_crypto_luks_add_key
 bd_crypto_luks_remove_key
@@ -119,6 +121,7 @@ bd_crypto_luks_token_info_copy
 bd_crypto_luks_token_info
 bd_crypto_keyring_add_key
 bd_crypto_tc_open
+bd_crypto_tc_open_flags
 bd_crypto_tc_close
 bd_crypto_escrow_device
 BDCryptoBITLKInfo
@@ -126,8 +129,10 @@ bd_crypto_bitlk_info
 bd_crypto_bitlk_info_copy
 bd_crypto_bitlk_info_free
 bd_crypto_bitlk_open
+bd_crypto_bitlk_open_flags
 bd_crypto_bitlk_close
 bd_crypto_fvault2_open
+bd_crypto_fvault2_open_flags
 bd_crypto_fvault2_close
 bd_crypto_opal_is_supported
 bd_crypto_opal_wipe_device

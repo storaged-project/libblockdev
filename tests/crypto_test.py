@@ -117,6 +117,15 @@ class CryptoTestCase(unittest.TestCase):
             enabled = f.read()
         return enabled.strip() == "1"
 
+    def _is_ro(self, dm_name):
+        dm_path = os.path.realpath("/dev/mapper/%s" % dm_name)
+        dm_basename = os.path.basename(dm_path)
+        sysfs_path = "/sys/block/%s/ro" % dm_basename
+
+        with open(sysfs_path, "r") as f:
+            ro = f.read()
+        return ro.strip() == "1"
+
 class CryptoNoDevTestCase(CryptoTestCase):
     def setUp(self):
         # we don't need block devices for this test
@@ -701,6 +710,35 @@ class CryptoTestLuksOpenRW(CryptoTestCase):
     @tag_test(TestTags.SLOW)
     def test_luks2_open_rw(self):
         self._luks_open_rw(self._luks2_format)
+
+class CryptoTestLuksOpenFlags(CryptoTestCase):
+    def _luks_open_flags(self, create_fn):
+        """Verify that a LUKS device can be activated with flags"""
+
+        create_fn(self.loop_devs[0], PASSWD, None, fast_pbkdf=True)
+
+        ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
+        succ = BlockDev.crypto_luks_open_flags(self.loop_devs[0], "libblockdevTestLUKS", ctx,
+                                               BlockDev.CryptoOpenFlags.ALLOW_DISCARDS | BlockDev.CryptoOpenFlags.READONLY)
+        self.assertTrue(succ)
+
+        # check that discard is enabled for the mapped device
+        _ret, out, _err = run_command("dmsetup table %s" % self._dm_name)
+        self.assertIn("allow_discards", out)
+
+        # check that the device is read-only
+        self.assertTrue(self._is_ro("libblockdevTestLUKS"))
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+    @tag_test(TestTags.SLOW)
+    def test_luks_open_flags(self):
+        self._luks_open_flags(self._luks_format)
+
+    @tag_test(TestTags.SLOW)
+    def test_luks2_open_flags(self):
+        self._luks_open_flags(self._luks2_format)
 
 class CryptoTestEscrow(CryptoTestCase):
     def setUp(self):
@@ -1481,6 +1519,21 @@ class CryptoTestTrueCrypt(CryptoTestCase):
         self.assertTrue(succ)
         self.assertFalse(os.path.exists("/dev/mapper/libblockdevTestTC"))
 
+        # open with flags
+        succ = BlockDev.crypto_tc_open_flags(self.vc_dev, "libblockdevTestTC", ctx, veracrypt=True,
+                                             flags=BlockDev.CryptoOpenFlags.ALLOW_DISCARDS | BlockDev.CryptoOpenFlags.READONLY)
+        self.assertTrue(succ)
+
+        # check that discard is enabled for the mapped device
+        _ret, out, _err = run_command("dmsetup table libblockdevTestTC")
+        self.assertIn("allow_discards", out)
+
+        # check that the device is read-only
+        self.assertTrue(self._is_ro("libblockdevTestTC"))
+
+        succ = BlockDev.crypto_tc_close("libblockdevTestTC")
+        self.assertTrue(succ)
+
     @tag_test(TestTags.NOSTORAGE)
     def test_seems_encrypted(self):
         """Verify that BlockDev.crypto_device_seems_encrypted works"""
@@ -1581,6 +1634,21 @@ class CryptoTestBitlk(CryptoTestCase):
         self.assertTrue(succ)
         self.assertFalse(os.path.exists("/dev/mapper/libblockdevTestBitlk"))
 
+        # open with flags
+        succ = BlockDev.crypto_bitlk_open_flags(self.bitlk_dev, "libblockdevTestBitlk", ctx,
+                                                BlockDev.CryptoOpenFlags.ALLOW_DISCARDS | BlockDev.CryptoOpenFlags.READONLY)
+        self.assertTrue(succ)
+
+        # check that discard is enabled for the mapped device
+        _ret, out, _err = run_command("dmsetup table libblockdevTestBitlk")
+        self.assertIn("allow_discards", out)
+
+        # check that the device is read-only
+        self.assertTrue(self._is_ro("libblockdevTestBitlk"))
+
+        succ = BlockDev.crypto_bitlk_close("libblockdevTestBitlk")
+        self.assertTrue(succ)
+
     @unittest.skipUnless(HAVE_BITLK, "BITLK not supported")
     def test_bitlk_info(self):
         """Verify that we get information about a BitLocker device"""
@@ -1680,6 +1748,20 @@ class CryptoTestFVAULT2(CryptoTestCase):
         self.assertTrue(succ)
         self.assertFalse(os.path.exists("/dev/mapper/libblockdevTestFVAULT2"))
 
+        # open with flags
+        succ = BlockDev.crypto_fvault2_open_flags(self.fvault2_dev, "libblockdevTestFVAULT2", ctx,
+                                                  BlockDev.CryptoOpenFlags.ALLOW_DISCARDS | BlockDev.CryptoOpenFlags.READONLY)
+        self.assertTrue(succ)
+
+        # check that discard is enabled for the mapped device
+        _ret, out, _err = run_command("dmsetup table libblockdevTestFVAULT2")
+        self.assertIn("allow_discards", out)
+
+        # check that the device is read-only
+        self.assertTrue(self._is_ro("libblockdevTestFVAULT2"))
+
+        succ = BlockDev.crypto_fvault2_close("libblockdevTestFVAULT2")
+        self.assertTrue(succ)
 
 class CryptoTestIntegrity(CryptoTestCase):
 
