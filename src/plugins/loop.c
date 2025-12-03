@@ -285,7 +285,7 @@ gboolean bd_loop_setup (const gchar *file, guint64 offset, guint64 size, gboolea
  * @loop_name: (optional) (out): if not %NULL, it is used to store the name of the loop device
  * @error: (out) (optional): place to store error (if any)
  *
- * Returns: whether an new loop device was successfully setup for @fd or not
+ * Returns: whether a new loop device was successfully setup for @fd or not
  *
  * Tech category: %BD_LOOP_TECH_LOOP-%BD_LOOP_TECH_MODE_CREATE
  */
