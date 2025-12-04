@@ -886,7 +886,8 @@ typedef enum {
 /**
  * BDNVMESanitizeStatus:
  * @BD_NVME_SANITIZE_STATUS_NEVER_SANITIZED: The NVM subsystem has never been sanitized.
- * @BD_NVME_SANITIZE_STATUS_IN_PROGESS: A sanitize operation is currently in progress.
+ * @BD_NVME_SANITIZE_STATUS_IN_PROGRESS: A sanitize operation is currently in progress.
+ * @BD_NVME_SANITIZE_STATUS_IN_PROGESS: Deprecated alias for %BD_NVME_SANITIZE_STATUS_IN_PROGRESS
  * @BD_NVME_SANITIZE_STATUS_SUCCESS: The most recent sanitize operation completed successfully including any additional media modification.
  * @BD_NVME_SANITIZE_STATUS_SUCCESS_NO_DEALLOC: The most recent sanitize operation for which No-Deallocate After Sanitize was requested has completed successfully with deallocation of all user data.
  * @BD_NVME_SANITIZE_STATUS_FAILED: The most recent sanitize operation failed.
@@ -894,7 +895,8 @@ typedef enum {
 /* BpG-skip-end */
 typedef enum {
     BD_NVME_SANITIZE_STATUS_NEVER_SANITIZED = 0,
-    BD_NVME_SANITIZE_STATUS_IN_PROGESS = 1,
+    BD_NVME_SANITIZE_STATUS_IN_PROGRESS = 1,
+    BD_NVME_SANITIZE_STATUS_IN_PROGESS = BD_NVME_SANITIZE_STATUS_IN_PROGRESS,
     BD_NVME_SANITIZE_STATUS_SUCCESS = 2,
     BD_NVME_SANITIZE_STATUS_SUCCESS_NO_DEALLOC = 3,
     BD_NVME_SANITIZE_STATUS_FAILED = 4,
