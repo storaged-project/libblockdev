@@ -1147,7 +1147,7 @@ BDNVMESanitizeLog * bd_nvme_get_sanitize_log (const gchar *device, GError **erro
             log->sanitize_status = BD_NVME_SANITIZE_STATUS_SUCCESS;
             break;
         case NVME_SANITIZE_SSTAT_STATUS_IN_PROGESS:
-            log->sanitize_status = BD_NVME_SANITIZE_STATUS_IN_PROGESS;
+            log->sanitize_status = BD_NVME_SANITIZE_STATUS_IN_PROGRESS;
             break;
         case NVME_SANITIZE_SSTAT_STATUS_COMPLETED_FAILED:
             log->sanitize_status = BD_NVME_SANITIZE_STATUS_FAILED;
