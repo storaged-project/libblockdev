@@ -141,7 +141,7 @@ typedef enum {
  * @BD_SMART_ATA_ATTRIBUTE_FLAG_PERFORMANCE: Performance type bit (vendor specific).
  * @BD_SMART_ATA_ATTRIBUTE_FLAG_ERROR_RATE: Errorrate type bit (vendor specific).
  * @BD_SMART_ATA_ATTRIBUTE_FLAG_EVENT_COUNT: Eventcount bit (vendor specific).
- * @BD_SMART_ATA_ATTRIBUTE_FLAG_SELF_PRESERVING: Selfpereserving bit (vendor specific).
+ * @BD_SMART_ATA_ATTRIBUTE_FLAG_SELF_PRESERVING: Self-preserving bit (vendor specific).
  * @BD_SMART_ATA_ATTRIBUTE_FLAG_OTHER: Reserved.
  */
 typedef enum {
@@ -238,7 +238,7 @@ typedef struct BDSmartATA {
  * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_BACKGROUND_PRESCAN_MEDIUM_ERROR: Warning - background pre-scan detected medium error [asc 0x0b, ascq 0x04].
  * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_BACKGROUND_SCAN_MEDIUM_ERROR: Warning - background medium scan detected medium error [asc 0x0b, ascq 0x05].
  * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_NV_CACHE_VOLATILE: Warning - non-volatile cache now volatile [asc 0x0b, ascq 0x06].
- * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_NV_CACHE_DEGRADED_POWER: Warning - degraded power to non-volatile cache  [asc 0x0b, ascq 0x07].
+ * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_NV_CACHE_DEGRADED_POWER: Warning - degraded power to non-volatile cache [asc 0x0b, ascq 0x07].
  * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_POWER_LOSS_EXPECTED: Warning - power loss expected [asc 0x0b, ascq 0x08].
  * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_STATISTICS_NOTIFICATION: Warning - device statistics notification active [asc 0x0b, ascq 0x09].
  * @BD_SMART_SCSI_INFORMATIONAL_EXCEPTION_HIGH_CRITICAL_TEMP: Warning - high critical temperature limit exceeded [asc 0x0b, ascq 0x0a].

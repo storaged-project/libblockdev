@@ -24,7 +24,7 @@ typedef enum {
 
 /**
  * BDLoopInfo:
- * @backing_file: backing file for the give loop device;
+ * @backing_file: backing file for the given loop device;
  * @offset: offset of the start of the device (in @backing_file);
  * @autoclear: whether the autoclear flag is set or not;
  * @direct_io: whether direct IO is enabled or not;

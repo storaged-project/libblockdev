@@ -258,7 +258,7 @@ typedef struct BDNVMENamespaceInfo {
  * @BD_NVME_SMART_CRITICAL_WARNING_SPARE: the available spare capacity has fallen below the threshold.
  * @BD_NVME_SMART_CRITICAL_WARNING_TEMPERATURE: a temperature is either greater than or equal to an over temperature threshold;
  *                                              or less than or equal to an under temperature threshold.
- * @BD_NVME_SMART_CRITICAL_WARNING_DEGRADED: the NVM subsystem reliability has been degraded due to  significant media
+ * @BD_NVME_SMART_CRITICAL_WARNING_DEGRADED: the NVM subsystem reliability has been degraded due to significant media
  *                                           related errors or any internal error that degrades NVM subsystem reliability.
  * @BD_NVME_SMART_CRITICAL_WARNING_READONLY: all of the media has been placed in read only mode. Unrelated to the write
  *                                           protection state of a namespace.
