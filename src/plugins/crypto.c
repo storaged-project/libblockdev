@@ -1358,6 +1358,9 @@ gboolean bd_crypto_luks_open_flags (const gchar *device, const gchar *name, BDCr
         if (ret == -EPERM)
           g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                        "Failed to activate device: Incorrect passphrase.");
+        else if (ret == -ETXTBSY)
+          g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
+                       "Failed to activate device: Unknown or unsupported LUKS2 requirements detected.");
         else
           g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                        "Failed to activate device: %s", strerror_l (-ret, c_locale));
