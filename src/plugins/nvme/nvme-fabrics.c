@@ -440,7 +440,7 @@ gboolean bd_nvme_disconnect_by_path (const gchar *path, GError **error) {
 
 /**
  * bd_nvme_find_ctrls_for_ns:
- * @ns_sysfs_path: NVMe namespace device file.
+ * @ns_sysfs_path: NVMe namespace sysfs path.
  * @subsysnqn: (nullable): Limit matching to the specified subsystem NQN.
  * @host_nqn: (nullable): Limit matching to the specified host NQN.
  * @host_id: (nullable): Limit matching to the specified host ID.
