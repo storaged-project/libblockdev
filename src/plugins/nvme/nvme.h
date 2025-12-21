@@ -629,5 +629,11 @@ gchar **               bd_nvme_find_ctrls_for_ns     (const gchar       *ns_sysf
                                                       const gchar       *host_id,
                                                       GError           **error);
 
+gchar **               bd_nvme_find_namespaces_for_ctrl (const gchar       *ctrl_sysfs_path,
+                                                         const gchar       *subsysnqn,
+                                                         const gchar       *host_nqn,
+                                                         const gchar       *host_id,
+                                                         GError           **error);
+
 
 #endif  /* BD_NVME */

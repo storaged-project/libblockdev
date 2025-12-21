@@ -1366,7 +1366,7 @@ gboolean bd_nvme_disconnect_by_path (const gchar *path, GError **error);
 
 /**
  * bd_nvme_find_ctrls_for_ns:
- * @ns_sysfs_path: NVMe namespace device file.
+ * @ns_sysfs_path: NVMe namespace sysfs path.
  * @subsysnqn: (nullable): Limit matching to the specified subsystem NQN.
  * @host_nqn: (nullable): Limit matching to the specified host NQN.
  * @host_id: (nullable): Limit matching to the specified host ID.
@@ -1381,5 +1381,23 @@ gboolean bd_nvme_disconnect_by_path (const gchar *path, GError **error);
  * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
  */
 gchar ** bd_nvme_find_ctrls_for_ns (const gchar *ns_sysfs_path, const gchar *subsysnqn, const gchar *host_nqn, const gchar *host_id, GError **error);
+
+/**
+ * bd_nvme_find_namespaces_for_ctrl:
+ * @ctrl_sysfs_path: NVMe controller sysfs path.
+ * @subsysnqn: (nullable): Limit matching to the specified subsystem NQN.
+ * @host_nqn: (nullable): Limit matching to the specified host NQN.
+ * @host_id: (nullable): Limit matching to the specified host ID.
+ * @error: (out) (nullable): Place to store error (if any).
+ *
+ * A convenient utility function to look up all namespaces associated
+ *  with the specified NVMe controller.
+ *
+ * Returns: (transfer full) (array zero-terminated=1): list of namespace sysfs paths
+ *          or %NULL in case of an error (with @error set).
+ *
+ * Tech category: %BD_NVME_TECH_FABRICS-%BD_NVME_TECH_MODE_INITIATOR
+ */
+gchar ** bd_nvme_find_namespaces_for_ctrl (const gchar *ctrl_sysfs_path, const gchar *subsysnqn, const gchar *host_nqn, const gchar *host_id, GError **error);
 
 #endif  /* BD_NVME_API */
