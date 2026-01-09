@@ -17,6 +17,7 @@ typedef enum {
     BD_DM_ERROR_RAID_FAIL,
     BD_DM_ERROR_RAID_NO_DEVS,
     BD_DM_ERROR_RAID_NO_EXIST,
+    BD_DM_ERROR_DEVICE_NOEXIST,
 } BDDMError;
 
 typedef enum {
