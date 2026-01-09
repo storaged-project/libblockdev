@@ -1734,7 +1734,7 @@ gboolean bd_crypto_luks_change_key (const gchar *device, BDCryptoKeyslotContext 
     }
 
     if (ncontext->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE) {
-        ret = crypt_keyfile_device_read (cd, ncontext->u.keyfile.keyfile, &key_buf, &buf_len,
+        ret = crypt_keyfile_device_read (cd, ncontext->u.keyfile.keyfile, &nkey_buf, &nbuf_len,
                                          ncontext->u.keyfile.keyfile_offset, ncontext->u.keyfile.key_size, 0);
         if (ret != 0) {
             g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEYFILE_FAILED,
