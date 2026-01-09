@@ -76,6 +76,31 @@ class DevMapperGetSubsystemFromName(DevMapperTestCase):
         subsystem = BlockDev.dm_get_subsystem_from_name("libbd_dm_tests-subsystem_crypt")
         self.assertEqual(subsystem, "CRYPT")
 
+    def test_get_subsystem_from_name_linear(self):
+        succ = BlockDev.dm_create_linear("testMap", self.loop_dev, 100, None)
+        self.assertTrue(succ)
+
+        # no UUID -- subsystem should be empty
+        subsystem = BlockDev.dm_get_subsystem_from_name("testMap")
+        self.assertEqual(subsystem, "")
+
+        succ = BlockDev.dm_remove("testMap")
+        self.assertTrue(succ)
+
+        # "UUID" without "prefix" -- subsystem should be empty
+        succ = BlockDev.dm_create_linear("testMap", self.loop_dev, 100, "TEST")
+        self.assertTrue(succ)
+
+        subsystem = BlockDev.dm_get_subsystem_from_name("testMap")
+        self.assertEqual(subsystem, "")
+
+        succ = BlockDev.dm_remove("testMap")
+        self.assertTrue(succ)
+
+        # non-existing device --> error
+        with self.assertRaisesRegex(GLib.GError, "does not exist"):
+            BlockDev.dm_get_subsystem_from_name("testMap")
+
 class DevMapperCreateRemoveLinear(DevMapperTestCase):
     @tag_test(TestTags.CORE)
     def test_create_remove_linear(self):
