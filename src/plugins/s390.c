@@ -812,6 +812,7 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
             g_propagate_error (error, l_error);
             return FALSE;
         }
+        g_strchomp (fcphbasysfs);
         fclose (fd);
         g_free (hba_path);
 
@@ -843,6 +844,7 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
             g_propagate_error (error, l_error);
             return FALSE;
         }
+        g_strchomp (fcpwwpnsysfs);
         fclose (fd);
         g_free (wwpn_path);
 
@@ -876,6 +878,7 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
             g_propagate_error (error, l_error);
             return FALSE;
         }
+        g_strchomp (fcplunsysfs);
         fclose (fd);
         g_free (lun_path);
         g_free (fcpsysfs);
@@ -883,7 +886,7 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
         /* make sure read values align with expected values */
         scsidel = g_strdup_printf ("%s/%s/delete", scsidevsysfs, scsidev);
         scsidel = g_strchomp (scsidel);
-        if ((fcphbasysfs == devno) && (fcpwwpnsysfs == wwpn) && (fcplunsysfs == lun)) {
+        if (g_strcmp0 (fcphbasysfs, devno) == 0 && g_strcmp0 (fcpwwpnsysfs, wwpn) == 0 && g_strcmp0 (fcplunsysfs, lun) == 0) {
             fd = fopen (scsidel, "w");
             if (!fd) {
                 g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
