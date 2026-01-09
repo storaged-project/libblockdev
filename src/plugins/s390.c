@@ -812,6 +812,7 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
             g_propagate_error (error, l_error);
             return FALSE;
         }
+        g_strchomp (fcphbasysfs);
         fclose (fd);
         g_free (hba_path);
 
@@ -843,6 +844,7 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
             g_propagate_error (error, l_error);
             return FALSE;
         }
+        g_strchomp (fcpwwpnsysfs);
         fclose (fd);
         g_free (wwpn_path);
 
@@ -876,6 +878,7 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
             g_propagate_error (error, l_error);
             return FALSE;
         }
+        g_strchomp (fcplunsysfs);
         fclose (fd);
         g_free (lun_path);
         g_free (fcpsysfs);
