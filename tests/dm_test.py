@@ -22,10 +22,6 @@ class DevMapperTest(unittest.TestCase):
         else:
             BlockDev.reinit(cls.requested_plugins, True, None)
 
-class DevMapperPluginVersionCase(DevMapperTest):
-    @tag_test(TestTags.NOSTORAGE)
-    def test_plugin_version(self):
-        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.DM), "libbd_dm.so.3")
 
 class DevMapperTestCase(DevMapperTest):
 
@@ -51,6 +47,7 @@ class DevMapperTestCase(DevMapperTest):
 
         os.unlink(self.dev_file)
 
+
 class DevMapperGetSubsystemFromName(DevMapperTestCase):
     def _destroy_lvm(self):
         run("vgremove --yes libbd_dm_tests --config \"devices {use_devicesfile = 0}\" >/dev/null 2>&1")
@@ -71,10 +68,11 @@ class DevMapperGetSubsystemFromName(DevMapperTestCase):
     def test_get_subsystem_from_name_crypt(self):
         """Verify that it is possible to get luks device subsystem from its name"""
         self.addCleanup(self._destroy_crypt)
-        run("echo \"supersecretkey\" | cryptsetup luksFormat %s -" %self.loop_dev)
+        run("echo \"supersecretkey\" | cryptsetup luksFormat --pbkdf=pbkdf2 --pbkdf-force-iterations=1000 %s -" %self.loop_dev)
         run("echo \"supersecretkey\" | cryptsetup open %s libbd_dm_tests-subsystem_crypt --key-file=-" %self.loop_dev)
         subsystem = BlockDev.dm_get_subsystem_from_name("libbd_dm_tests-subsystem_crypt")
         self.assertEqual(subsystem, "CRYPT")
+
 
     def test_get_subsystem_from_name_linear(self):
         succ = BlockDev.dm_create_linear("testMap", self.loop_dev, 100, None)
@@ -101,6 +99,7 @@ class DevMapperGetSubsystemFromName(DevMapperTestCase):
         with self.assertRaisesRegex(GLib.GError, "does not exist"):
             BlockDev.dm_get_subsystem_from_name("testMap")
 
+
 class DevMapperCreateRemoveLinear(DevMapperTestCase):
     @tag_test(TestTags.CORE)
     def test_create_remove_linear(self):
@@ -108,9 +107,12 @@ class DevMapperCreateRemoveLinear(DevMapperTestCase):
 
         succ = BlockDev.dm_create_linear("testMap", self.loop_dev, 100, None)
         self.assertTrue(succ)
+        self.assertTrue(os.path.exists("/dev/mapper/testMap"))
 
         succ = BlockDev.dm_remove("testMap")
         self.assertTrue(succ)
+        self.assertFalse(os.path.exists("/dev/mapper/testMap"))
+
 
 class DevMapperMapExists(DevMapperTestCase):
     def test_map_exists(self):
@@ -140,6 +142,7 @@ class DevMapperMapExists(DevMapperTestCase):
         succ = BlockDev.dm_map_exists("testMap", False, False)
         self.assertFalse(succ)
 
+
 class DevMapperNameNodeBijection(DevMapperTestCase):
     def test_name_node_bijection(self):
         """Verify that the map's node and map name points to each other"""
@@ -150,9 +153,11 @@ class DevMapperNameNodeBijection(DevMapperTestCase):
         self.assertEqual(BlockDev.dm_name_from_node(BlockDev.dm_node_from_name("testMap")),
                          "testMap")
 
-        self.assertTrue(succ)
 
-class DMDepsTest(DevMapperTest):
+class DMNoStorageTest(DevMapperTest):
+    @tag_test(TestTags.NOSTORAGE)
+    def test_plugin_version(self):
+        self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.DM), "libbd_dm.so.3")
 
     @tag_test(TestTags.NOSTORAGE)
     def test_missing_dependencies(self):
