@@ -315,12 +315,6 @@ gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean a
     guint64 next = 0;
     gboolean ret = FALSE;
 
-    if (geteuid () != 0) {
-        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_NOT_ROOT,
-                     "Not running as root, cannot query DM maps");
-        return FALSE;
-    }
-
     task_list = dm_task_create (DM_DEVICE_LIST);
     if (!task_list) {
         g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
