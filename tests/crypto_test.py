@@ -631,6 +631,33 @@ class CryptoTestChangeKey(CryptoTestCase):
         succ = BlockDev.crypto_luks_change_key(self.loop_devs[0], ctx, nctx)
         self.assertTrue(succ)
 
+        # old passphrase should no longer work
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_remove_key(self.loop_devs[0], ctx)
+
+        # new passphrase should work
+        succ = BlockDev.crypto_luks_open(self.loop_devs[0], "libblockdevTestLUKS", nctx)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+        # try with keyfile as well
+        kctx = BlockDev.CryptoKeyslotContext(keyfile=self.keyfile)
+        succ = BlockDev.crypto_luks_change_key(self.loop_devs[0], nctx, kctx)
+        self.assertTrue(succ)
+
+        # old passphrase should no longer work
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_remove_key(self.loop_devs[0], nctx)
+
+        # keyfile should work
+        succ = BlockDev.crypto_luks_open(self.loop_devs[0], "libblockdevTestLUKS", kctx)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
     @tag_test(TestTags.SLOW)
     def test_luks_change_key(self):
         self._change_key(self._luks_format)
