@@ -361,6 +361,25 @@ class CanResizeRepairCheckLabel(GenericNoDevTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.fs_can_get_min_size("udf")
 
+    def test_can_set_uuid(self):
+        """Verify that tooling query works for setting"""
+        avail, util = BlockDev.fs_can_set_uuid("ext4")
+        self.assertTrue(avail)
+        self.assertEqual(util, None)
+
+        old_path = os.environ.get("PATH", "")
+        os.environ["PATH"] = ""
+        avail, util = BlockDev.fs_can_set_uuid("ext4")
+        os.environ["PATH"] = old_path
+        self.assertFalse(avail)
+        self.assertEqual(util, "tune2fs")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_set_uuid("non-existing-fs")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_set_uuid("f2fs")
+
 
 class GenericMkfs(GenericTestCase):
 
