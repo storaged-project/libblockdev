@@ -72,6 +72,13 @@ class LvmTestPVs(_lvm_cases.LvmTestPVs, LvmTestCase):
         LvmTestCase.setUpClass()
 
 
+class LvmTestPVmove(_lvm_cases.LvmTestPVmove, LvmTestCase):
+    @classmethod
+    def setUpClass(cls):
+        _lvm_cases.LvmTestPVmove.setUpClass()
+        LvmTestCase.setUpClass()
+
+
 class LvmTestVGs(_lvm_cases.LvmTestVGs, LvmTestCase):
     @classmethod
     def setUpClass(cls):

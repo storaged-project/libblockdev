@@ -1547,6 +1547,43 @@ class LvmTestPartialLVs(LvmPVVGLVTestCase):
         assert_raid1_structure(self.loop_dev, self.loop_dev3)
 
 
+class LvmTestPVmove(LvmPVVGLVTestCase):
+    _sparse_size = 20*1024**2
+
+    @tag_test(TestTags.CORE)
+    def test_pvmove(self):
+        """Verify that it's possible to move extents from one PV to another"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev2, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev, self.loop_dev2], 0, None)
+        self.assertTrue(succ)
+
+        # create testLV on the first PV only
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 10 * 1024**2, None, [self.loop_dev], None)
+        self.assertTrue(succ)
+
+        # check that the LV is allocated on the first PV only
+        info = BlockDev.lvm_lvinfo_tree("testVG", "testLV")
+        self.assertIsNotNone(info)
+        self.assertEqual(len(info.segs), 1)
+        self.assertEqual(info.segs[0].pvdev, self.loop_dev)
+
+        # pvmove from first PV to the second
+        succ = BlockDev.lvm_pvmove(self.loop_dev, self.loop_dev2, None)
+        self.assertTrue(succ)
+
+        # check that the LV was moved to the second LV
+        info = BlockDev.lvm_lvinfo_tree("testVG", "testLV")
+        self.assertIsNotNone(info)
+        self.assertEqual(len(info.segs), 1)
+        self.assertEqual(info.segs[0].pvdev, self.loop_dev2)
+
+
 class LvmPVVGthpoolTestCase(LvmPVVGTestCase):
     def _clean_up(self):
         try:
