@@ -18,6 +18,7 @@
  */
 
 #include <glib.h>
+#include <string.h>
 #include <unistd.h>
 #include <blockdev/utils.h>
 #include <libdevmapper.h>
@@ -236,17 +237,61 @@ gchar* bd_dm_node_from_name (const gchar *map_name, GError **error) {
  * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_QUERY
  */
 gchar* bd_dm_get_subsystem_from_name (const gchar *device_name, GError **error) {
-    gchar *output = NULL;
-    gboolean success = FALSE;
-    const gchar *argv[] = {"dmsetup", "info", "-co", "subsystem", "--noheadings", device_name, NULL};
+    struct dm_task *task = NULL;
+    struct dm_info info;
+    const gchar *uuid = NULL;
+    gchar *subsystem = NULL;
+    gchar *hyphen_pos = NULL;
 
-    success = bd_utils_exec_and_capture_output (argv, NULL, &output, error);
-    if (!success)
-        /* error is already populated */
+    task = dm_task_create (DM_DEVICE_INFO);
+    if (!task) {
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
+                     "Failed to create DM task");
         return NULL;
+    }
 
-    output = g_strstrip (output);
-    return output;
+    if (!dm_task_set_name (task, device_name)) {
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
+                     "Failed to set device name for DM task");
+        dm_task_destroy (task);
+        return NULL;
+    }
+
+    if (!dm_task_run (task)) {
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
+                     "Failed to run DM task");
+        dm_task_destroy (task);
+        return NULL;
+    }
+
+    if (!dm_task_get_info (task, &info)) {
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_TASK,
+                     "Failed to get info from DM task");
+        dm_task_destroy (task);
+        return NULL;
+    }
+
+    if (!info.exists) {
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_DEVICE_NOEXIST,
+                     "DM device %s does not exist", device_name);
+        dm_task_destroy (task);
+        return NULL;
+    }
+
+    uuid = dm_task_get_uuid (task);
+    if (!uuid || !(*uuid)) {
+        dm_task_destroy (task);
+        return g_strdup ("");
+    }
+
+    hyphen_pos = strchr (uuid, '-');
+    if (hyphen_pos)
+        subsystem = g_strndup (uuid, hyphen_pos - uuid);
+    else
+        subsystem = g_strdup ("");
+
+    dm_task_destroy (task);
+    return subsystem;
 }
 
 /**
@@ -269,12 +314,6 @@ gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean a
     struct dm_info info;
     guint64 next = 0;
     gboolean ret = FALSE;
-
-    if (geteuid () != 0) {
-        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_NOT_ROOT,
-                     "Not running as root, cannot query DM maps");
-        return FALSE;
-    }
 
     task_list = dm_task_create (DM_DEVICE_LIST);
     if (!task_list) {
