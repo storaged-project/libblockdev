@@ -379,7 +379,7 @@ class BtrfsTestListSubvolumes(BtrfsTestCase):
         succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "one/two", None)
         self.assertTrue(succ)
 
-        os.system("mkdir -p mkdir -p %s/one/two/one/two" % (TEST_MNT))
+        os.system("mkdir -p %s/one/two/one/two" % (TEST_MNT))
 
         succ = BlockDev.btrfs_create_subvolume(TEST_MNT, "one/two/one/two/three", None)
         self.assertTrue(succ)
