@@ -874,12 +874,6 @@ BDLVMCacheStats* bd_lvm_cache_stats (const gchar *vg_name, const gchar *cached_l
     BDLVMCacheStats *ret = NULL;
     BDLVMLVdata *lvdata = NULL;
 
-    if (geteuid () != 0) {
-        g_set_error (error, BD_LVM_ERROR, BD_LVM_ERROR_NOT_ROOT,
-                     "Not running as root, cannot query DM maps");
-        return NULL;
-    }
-
     lvdata = bd_lvm_lvinfo (vg_name, cached_lv, error);
     if (!lvdata)
         return NULL;
