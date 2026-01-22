@@ -47,7 +47,8 @@
 
 - test: lvm_dbus_tests.LvmTestPartialLVs
   skip_on:
-    - reason: "LVM DBus doesn't support LV repair yet"
+    - distro: ["centos", "debian"]
+      reason: "LVM DBus doesn't support LV repair yet"
 
 - test: nvdimm_test
   skip_on:

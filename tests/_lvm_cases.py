@@ -757,6 +757,12 @@ class LvmTestVGs(LvmPVVGTestCase):
         succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
         self.assertTrue(succ)
 
+        # tags can be added only to pvs in a vg
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_add_pv_tags(self.loop_dev, ["a"])
+        with self.assertRaises(GLib.GError):
+            BlockDev.lvm_delete_pv_tags(self.loop_dev, ["a"])
+
         # only pvs in a vg can be tagged so we need a vg here
         succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0, None)
         self.assertTrue(succ)
@@ -2016,6 +2022,9 @@ class LvmVDOTest(LvmTestCase):
 
         state_str = BlockDev.lvm_get_vdo_compression_state_str(vdo_info.compression_state)
         self.assertEqual(state_str, "online")
+
+        index_str = BlockDev.lvm_get_vdo_index_state_str(vdo_info.index_state)
+        self.assertIn(index_str, ("online", "opening"))
 
     @tag_test(TestTags.SLOW)
     def test_vdo_pool_create_options(self):
