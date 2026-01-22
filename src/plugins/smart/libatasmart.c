@@ -40,7 +40,7 @@
  * Returns: whether the @tech-@mode combination is available -- supported by the
  *          plugin implementation and having all the runtime dependencies available
  */
-gboolean bd_smart_is_tech_avail (G_GNUC_UNUSED BDSmartTech tech, G_GNUC_UNUSED guint64 mode, GError **error) {
+gboolean bd_smart_is_tech_avail (BDSmartTech tech, G_GNUC_UNUSED guint64 mode, GError **error) {
     switch (tech) {
         case BD_SMART_TECH_ATA:
             return TRUE;

@@ -61,6 +61,16 @@ class SMARTTest(unittest.TestCase):
     def test_plugin_version(self):
         self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.SMART), "libbd_smart.so.3")
 
+    @tag_test(TestTags.NOSTORAGE)
+    def test_tech_available(self):
+        """Verify that checking availability works as expected"""
+        succ = BlockDev.smart_is_tech_avail(BlockDev.SmartTech.ATA, 0)
+        self.assertTrue(succ)
+
+        # SCSI not available with libatasmart
+        with self.assertRaises(GLib.GError):
+            BlockDev.smart_is_tech_avail(BlockDev.SmartTech.SCSI, 0)
+
     @tag_test(TestTags.CORE)
     def test_ata_info(self):
         """Test SMART ATA info on LIO, loop and scsi_debug devices"""
