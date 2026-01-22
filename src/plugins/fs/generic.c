@@ -1305,7 +1305,7 @@ gboolean bd_fs_check (const gchar *device, const gchar *fstype, GError **error) 
  * Tech category: always available
  */
 gboolean bd_fs_check_label (const gchar *fstype, const gchar *label, GError **error) {
-    if (!fstype) {
+    if (!fstype || strlen (fstype) == 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
                      "Filesystem type must be specified to check label format");
         return FALSE;
@@ -1352,7 +1352,7 @@ gboolean bd_fs_set_label (const gchar *device, const gchar *label, const gchar *
  * Tech category: always available
  */
 gboolean bd_fs_check_uuid (const gchar *fstype, const gchar *uuid, GError **error) {
-    if (!fstype) {
+    if (!fstype || strlen (fstype) == 0) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOFS,
                      "Filesystem type must be specified to check UUID format");
         return FALSE;

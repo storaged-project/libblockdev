@@ -776,22 +776,28 @@ class GenericRepair(GenericTestCase):
 
 
 class GenericSetLabel(GenericTestCase):
-    def _test_generic_set_label(self, mkfs_function, fstype):
+    def _test_generic_set_label(self, mkfs_function, fstype, test_label="new_label", expected_label="new_label", invalid_label=513*"a"):
         # clean the device
         succ = BlockDev.fs_clean(self.loop_devs[0])
 
         succ = mkfs_function(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_check_label(fstype, "new_label")
+        succ = BlockDev.fs_check_label(fstype, test_label)
         self.assertTrue(succ)
 
-        # set label (expected to succeed)
-        succ = BlockDev.fs_set_label(self.loop_devs[0], "new_label")
-        self.assertTrue(succ)
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_check_label(fstype, invalid_label)
 
         # set label (expected to succeed)
-        succ = BlockDev.fs_set_label(self.loop_devs[0], "new_label", fstype)
+        succ = BlockDev.fs_set_label(self.loop_devs[0], test_label)
+        self.assertTrue(succ)
+
+        fs_label = check_output(["blkid", "-ovalue", "-sLABEL", "-p", self.loop_devs[0]]).decode().strip()
+        self.assertEqual(fs_label, expected_label)
+
+        # set label (expected to succeed)
+        succ = BlockDev.fs_set_label(self.loop_devs[0], test_label, fstype)
         self.assertTrue(succ)
 
     def test_ext4_generic_set_label(self):
@@ -839,6 +845,28 @@ class GenericSetLabel(GenericTestCase):
         if not self.udf_avail:
             self.skipTest("skipping udf: not available")
         self._test_generic_set_label(mkfs_function=BlockDev.fs_udf_mkfs, fstype="udf")
+
+    def test_vfat_generic_set_label(self):
+        """Test generic set_label function with a vfat file system"""
+        if self._vfat_version < Version("4.2"):
+            self.skipTest("dosfstools >= 4.2 needed to set label")
+
+        def mkfs_vfat(device, options=None):
+            if self._vfat_version >= Version("4.2"):
+                return BlockDev.fs_vfat_mkfs(device, [BlockDev.ExtraArg.new("--mbr=n", "")])
+            else:
+                return BlockDev.fs_vfat_mkfs(device, options)
+
+        self._test_generic_set_label(mkfs_function=mkfs_vfat, fstype="vfat", expected_label="NEW_LABEL")
+
+    def test_fail_generic_check_label(self):
+        """ Test that generic check label fails correctly with unknown/unsupported filesystem """
+
+        with self.assertRaisesRegex(GLib.GError, "Checking label format for filesystem 'non-existing-fs' is not supported"):
+            BlockDev.fs_check_label("non-existing-fs", "label")
+
+        with self.assertRaisesRegex(GLib.GError, "Filesystem type must be specified to check label format"):
+            BlockDev.fs_check_label("", "label")
 
 
 class GenericSetUUID(GenericTestCase):
@@ -927,6 +955,15 @@ class GenericSetUUID(GenericTestCase):
         if not self.udf_avail:
             self.skipTest("skipping UDF: not available")
         self._test_generic_set_uuid(mkfs_function=BlockDev.fs_udf_mkfs, fstype="udf", test_uuid="5fae9ade7938dfc8")
+
+    def test_fail_generic_check_uuid(self):
+        """ Test that generic check_uuid fails correctly with unknown/unsupported filesystem """
+
+        with self.assertRaisesRegex(GLib.GError, "Checking UUID format for filesystem 'non-existing-fs' is not supported"):
+            BlockDev.fs_check_uuid("non-existing-fs", "uuid")
+
+        with self.assertRaisesRegex(GLib.GError, "Filesystem type must be specified to check UUID format"):
+            BlockDev.fs_check_uuid("", "uuid")
 
 
 class GenericResize(GenericTestCase):
