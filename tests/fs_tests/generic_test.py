@@ -1022,25 +1022,32 @@ class GenericResize(GenericTestCase):
 
         self._test_generic_resize(mkfs_function=mkfs_vfat, size_delta=1024**2, fstype="vfat")
 
-    def test_xfs_generic_resize(self):
-        """Test generic resize function with an xfs file system"""
-
+    def _test_xfs_generic_resize(self, mount):
         lv = self._setup_lvm(vgname="libbd_fs_tests", lvname="generic_test", lvsize="350M")
 
         succ = BlockDev.fs_xfs_mkfs(lv, None)
         self.assertTrue(succ)
 
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                fi = BlockDev.fs_xfs_get_info(lv)
+        else:
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 350 * 1024**2)
 
         # no change, nothing should happen
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                succ = BlockDev.fs_resize(lv, 0)
+        else:
             succ = BlockDev.fs_resize(lv, 0)
         self.assertTrue(succ)
 
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                fi = BlockDev.fs_xfs_get_info(lv)
+        else:
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 350 * 1024**2)
@@ -1054,29 +1061,47 @@ class GenericResize(GenericTestCase):
 
         self._lvresize("libbd_fs_tests", "generic_test", "380M")
         # should grow to 375 MiB (full size of the LV)
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                succ = BlockDev.fs_resize(lv, 0)
+        else:
             succ = BlockDev.fs_resize(lv, 0)
         self.assertTrue(succ)
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                fi = BlockDev.fs_xfs_get_info(lv)
+        else:
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 380 * 1024**2)
 
         self._lvresize("libbd_fs_tests", "generic_test", "400M")
         # grow just to 390 MiB
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                succ = BlockDev.fs_resize(lv, 390 * 1024**2)
+        else:
             succ = BlockDev.fs_resize(lv, 390 * 1024**2)
         self.assertTrue(succ)
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                fi = BlockDev.fs_xfs_get_info(lv)
+        else:
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 390 * 1024**2)
 
         # should grow to 400 MiB (full size of the LV)
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                succ = BlockDev.fs_resize(lv, 0, "xfs")
+        else:
             succ = BlockDev.fs_resize(lv, 0, "xfs")
         self.assertTrue(succ)
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                fi = BlockDev.fs_xfs_get_info(lv)
+        else:
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 400 * 1024**2)
@@ -1085,7 +1110,10 @@ class GenericResize(GenericTestCase):
         # unmounted resize (should get automounted)
         succ = BlockDev.fs_resize(lv, 0, "xfs")
         self.assertTrue(succ)
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                fi = BlockDev.fs_xfs_get_info(lv)
+        else:
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 420 * 1024**2)
@@ -1101,7 +1129,10 @@ class GenericResize(GenericTestCase):
 
         succ = BlockDev.fs_resize(lv, 0, "xfs")
         self.assertTrue(succ)
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                fi = BlockDev.fs_xfs_get_info(lv)
+        else:
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 450 * 1024**2)
@@ -1110,6 +1141,16 @@ class GenericResize(GenericTestCase):
         self.assertIn("with options: uquota,gquota,pquota", self.log)
 
         BlockDev.utils_init_logging(None)
+
+    def test_xfs_generic_resize(self):
+        """Test generic resize function with an xfs file system with automatic mounting"""
+        # FS is not mounted by the test, libblockdev should mount it when needed
+        self._test_xfs_generic_resize(mount=False)
+
+    def test_xfs_generic_resize_mounted(self):
+        """Test generic resize function with an xfs file system with manual mounting"""
+        # FS is mounted by the test, libblockdev should use the existing mountpoint
+        self._test_xfs_generic_resize(mount=True)
 
     def _can_resize_f2fs(self):
         ret, out, _err = utils.run_command("resize.f2fs -V")
