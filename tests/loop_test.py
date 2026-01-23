@@ -6,7 +6,9 @@ from utils import create_sparse_tempfile, create_sparse_file, TestTags, tag_test
 
 import gi
 gi.require_version('BlockDev', '3.0')
+gi.require_version('GLib', '2.0')
 from gi.repository import BlockDev
+from gi.repository import GLib
 
 
 @required_plugins(("loop",))
@@ -43,11 +45,20 @@ class LoopPluginVersionCase(LoopTestCase):
     def test_plugin_version(self):
         self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.LOOP), "libbd_loop.so.3")
 
+    @tag_test(TestTags.NOSTORAGE)
+    def test_tech_available(self):
+        """Verify that checking plugin availability works as expected"""
+        succ = BlockDev.loop_is_tech_avail(BlockDev.LoopTech.LOOP, 0)
+        self.assertTrue(succ)
+
 
 class LoopTestSetupBasic(LoopTestCase):
     @tag_test(TestTags.CORE)
     def test_loop_setup_teardown_basic(self):
         """Verify that basic loop_setup and loop_teardown work as expected"""
+
+        with self.assertRaisesRegex(GLib.GError, "Failed to open the backing file"):
+            BlockDev.loop_setup("/non/existing", 10 * 1024**2)
 
         succ, self.loop = BlockDev.loop_setup(self.dev_file)
         self.assertTrue(succ)
@@ -221,6 +232,9 @@ class LoopTestGetSetAutoclear(LoopTestCase):
         self.assertIsNotNone(info)
         self.assertFalse(info.autoclear)
 
+        with self.assertRaisesRegex(GLib.GError, "Failed to open device"):
+            BlockDev.loop_set_autoclear("/non/existing", True)
+
 
 class LoopTestSetCapacity(LoopTestCase):
     def test_loop_set_capacity(self):
@@ -240,3 +254,6 @@ class LoopTestSetCapacity(LoopTestCase):
 
         # now the size should be updated
         self.assertEqual(self._get_loop_size(), self._loop_size * 2)
+
+        with self.assertRaisesRegex(GLib.GError, "Failed to open device"):
+            BlockDev.loop_set_capacity("/non/existing")
