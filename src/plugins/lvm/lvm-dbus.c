@@ -1405,6 +1405,7 @@ static BDLVMVDOPooldata* get_vdo_data_from_props (GVariant *props, GError **erro
     BDLVMVDOPooldata *data = g_new0 (BDLVMVDOPooldata, 1);
     GVariantDict dict;
     gchar *value = NULL;
+    gdouble percent = 0;
 
     g_variant_dict_init (&dict, props);
 
@@ -1469,7 +1470,8 @@ static BDLVMVDOPooldata* get_vdo_data_from_props (GVariant *props, GError **erro
     value = NULL;
 
     g_variant_dict_lookup (&dict, "UsedSize", "t", &(data->used_size));
-    g_variant_dict_lookup (&dict, "SavingPercent", "d", &(data->saving_percent));
+    g_variant_dict_lookup (&dict, "SavingPercent", "d", &percent);
+    data->saving_percent = (int) percent;
 
     g_variant_dict_lookup (&dict, "IndexMemorySize", "t", &(data->index_memory_size));
 
