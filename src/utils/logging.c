@@ -110,6 +110,10 @@ void bd_utils_log_format (gint level, const gchar *format, ...) {
  *
  * Convenient function for logging to stdout. Can be used as #BDUtilsLogFunc.
  *
+ * Note: This function uses GLib logging functions like %g_info or %g_warning
+ *       for the printing to stdout/stderr so these messages can be redirected
+ *       when a custom log handler is set using e.g. %g_log_set_handler.
+ *
  */
 void bd_utils_log_stdout (gint level, const gchar *msg) {
     if (level > log_level)
