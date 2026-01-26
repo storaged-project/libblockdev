@@ -161,6 +161,31 @@ cat dist/libblockdev.spec.in | grep BuildRequires: | cut -f2 -d: | cut -f2 -d' '
 
       is equivalent to `make test-all'.
     </para>
+
+    <para>
+      To get full coverage report for the C code the LCOV tool can be used:
+
+      <screen><userinput>./autogen.sh</userinput></screen>
+      <screen><userinput>./configure CFLAGS="-O0 -g --coverage" LDFLAGS="--coverage" --prefix=/usr</userinput></screen>
+      <screen><userinput>make -j</userinput></screen>
+
+      to configure and build the project with coverage enabled, run
+
+      <screen><userinput>lcov --directory . --zerocounters</userinput></screen>
+      <screen><userinput>lcov --directory . --capture --initial --output-file coverage-base.info</userinput></screen>
+
+      to configure lcov, run tests as usual with
+
+      <screen><userinput>sudo python3 tests/run_tests.py --include-tags all</userinput></screen>
+
+      and produce the HTML report using
+
+      <screen><userinput>lcov --directory . --capture --output-file coverage-test.info</userinput></screen>
+      <screen><userinput>lcov --remove coverage-test.info  '/usr/*'  --output-file coverage-filtered.info</userinput></screen>
+      <screen><userinput>genhtml coverage-filtered.info --output-directory coverage-report --title "libblockdev Coverage Report" --show-details --legend</userinput></screen>
+
+    </para>
+
   </chapter>
 
   <xi:include href="3.0-api-changes.xml"><xi:fallback /></xi:include>
