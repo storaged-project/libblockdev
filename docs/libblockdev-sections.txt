@@ -834,6 +834,7 @@ bd_nvme_connect
 bd_nvme_disconnect
 bd_nvme_disconnect_by_path
 bd_nvme_find_ctrls_for_ns
+bd_nvme_find_namespaces_for_ctrl
 </SECTION>
 
 <SECTION>

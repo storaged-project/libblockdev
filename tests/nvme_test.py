@@ -476,6 +476,32 @@ class NVMeFabricsTestCase(NVMeTest):
             ctrl_sysfs_paths = BlockDev.nvme_find_ctrls_for_ns(ns_sysfs_path, self.SUBNQN, self.hostnqn, "unknownhostid")
             self.assertEqual(len(ctrl_sysfs_paths), 0)
 
+            # test bd_nvme_find_namespaces_for_ctrl()
+            ns_sysfs_paths = BlockDev.nvme_find_namespaces_for_ctrl(ctrl_sysfs_path, None, None, None)
+            self.assertIsNotNone(ns_sysfs_paths)
+            self.assertEqual(len(ns_sysfs_paths), NUM_NS)
+            self.assertIn(ns_sysfs_path, ns_sysfs_paths)
+
+            ns_sysfs_paths = BlockDev.nvme_find_namespaces_for_ctrl(ctrl_sysfs_path + "xxx", None, None, None)
+            self.assertEqual(len(ns_sysfs_paths), 0)
+            ns_sysfs_paths = BlockDev.nvme_find_namespaces_for_ctrl(ctrl_sysfs_path, self.SUBNQN, None, None)
+            self.assertEqual(len(ns_sysfs_paths), NUM_NS)
+            self.assertIn(ns_sysfs_path, ns_sysfs_paths)
+            ns_sysfs_paths = BlockDev.nvme_find_namespaces_for_ctrl(ctrl_sysfs_path, self.SUBNQN, self.hostnqn, None)
+            self.assertEqual(len(ns_sysfs_paths), NUM_NS)
+            self.assertIn(ns_sysfs_path, ns_sysfs_paths)
+
+            ns_sysfs_paths = BlockDev.nvme_find_namespaces_for_ctrl(ctrl_sysfs_path, "unknownsubsysnqn", None, None)
+            self.assertEqual(len(ns_sysfs_paths), 0)
+            ns_sysfs_paths = BlockDev.nvme_find_namespaces_for_ctrl(ctrl_sysfs_path, None, "unknownhostnqn", None)
+            self.assertEqual(len(ns_sysfs_paths), 0)
+            ns_sysfs_paths = BlockDev.nvme_find_namespaces_for_ctrl(ctrl_sysfs_path, self.SUBNQN, "unknownhostnqn", None)
+            self.assertEqual(len(ns_sysfs_paths), 0)
+            ns_sysfs_paths = BlockDev.nvme_find_namespaces_for_ctrl(ctrl_sysfs_path, None, None, "unknownhostid")
+            self.assertEqual(len(ns_sysfs_paths), 0)
+            ns_sysfs_paths = BlockDev.nvme_find_namespaces_for_ctrl(ctrl_sysfs_path, self.SUBNQN, self.hostnqn, "unknownhostid")
+            self.assertEqual(len(ns_sysfs_paths), 0)
+
         # disconnect
         BlockDev.nvme_disconnect_by_path(ctrls[0])
         for c in ctrls:
