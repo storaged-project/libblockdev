@@ -32,6 +32,19 @@
 #include "smart-private.h"
 
 /**
+ * bd_smart_check_deps:
+ *
+ * Returns: whether the plugin's runtime dependencies are satisfied or not
+ *
+ * Function checking plugin's runtime dependencies.
+ *
+ * Deprecated: 3.5: use %bd_smart_is_tech_avail instead
+ */
+gboolean bd_smart_check_deps (void) {
+    return TRUE;
+}
+
+/**
  * bd_smart_is_tech_avail:
  * @tech: the queried tech
  * @mode: a bit mask of queried modes of operation (#BDSmartTechMode) for @tech
