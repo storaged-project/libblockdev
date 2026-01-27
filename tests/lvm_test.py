@@ -57,6 +57,17 @@ class LvmNoDevTestCase(_lvm_cases.LvmNoDevTestCase, LvmTestCase):
         avail = BlockDev.lvm_is_tech_avail(BlockDev.LVMTech.BASIC, BlockDev.LVMTechMode.CREATE)
         self.assertTrue(avail)
 
+        with fake_path(all_but=("lvmconfig", "lvmdevices")):
+            self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
+
+            # no lvmconfig tool available, should fail
+            with self.assertRaises(GLib.GError):
+                BlockDev.lvm_is_tech_avail(BlockDev.LVMTech.CONFIG, 0)
+
+            # no lvmdevices tool available, should fail
+            with self.assertRaises(GLib.GError):
+                BlockDev.lvm_is_tech_avail(BlockDev.LVMTech.DEVICES, 0)
+
 
 class LvmVDOTest(_lvm_cases.LvmVDOTest, LvmTestCase):
     @classmethod
@@ -69,6 +80,13 @@ class LvmTestPVs(_lvm_cases.LvmTestPVs, LvmTestCase):
     @classmethod
     def setUpClass(cls):
         _lvm_cases.LvmTestPVs.setUpClass()
+        LvmTestCase.setUpClass()
+
+
+class LvmTestPVmove(_lvm_cases.LvmTestPVmove, LvmTestCase):
+    @classmethod
+    def setUpClass(cls):
+        _lvm_cases.LvmTestPVmove.setUpClass()
         LvmTestCase.setUpClass()
 
 

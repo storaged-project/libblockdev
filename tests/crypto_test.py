@@ -136,6 +136,28 @@ class CryptoNoDevTestCase(CryptoTestCase):
         self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.CRYPTO), "libbd_crypto.so.3")
 
     @tag_test(TestTags.NOSTORAGE)
+    def test_tech_available(self):
+        """Verify that checking crypto functionality availability by technology works as expected"""
+        succ = BlockDev.crypto_is_tech_avail(BlockDev.CryptoTech.LUKS, BlockDev.CryptoTechMode.CREATE)
+        self.assertTrue(succ)
+
+        if HAVE_BITLK:
+            succ = BlockDev.crypto_is_tech_avail(BlockDev.CryptoTech.BITLK, BlockDev.CryptoTechMode.OPEN_CLOSE)
+            self.assertTrue(succ)
+
+            # create is not supported with bitlk
+            with self.assertRaises(GLib.GError):
+                BlockDev.crypto_is_tech_avail(BlockDev.CryptoTech.BITLK, BlockDev.CryptoTechMode.CREATE)
+
+        if HAVE_FVAULT2:
+            succ = BlockDev.crypto_is_tech_avail(BlockDev.CryptoTech.FVAULT2, BlockDev.CryptoTechMode.OPEN_CLOSE)
+            self.assertTrue(succ)
+
+            # create is not supported with fvault
+            with self.assertRaises(GLib.GError):
+                BlockDev.crypto_is_tech_avail(BlockDev.CryptoTech.FVAULT2, BlockDev.CryptoTechMode.CREATE)
+
+    @tag_test(TestTags.NOSTORAGE)
     def test_generate_backup_passhprase(self):
         """Verify that backup passphrase generation works as expected"""
 
@@ -410,6 +432,9 @@ class CryptoTestResize(CryptoTestCase):
     def test_luks2_resize(self):
         """Verify that resizing LUKS 2 device works"""
 
+        with self.assertRaisesRegex(GLib.GError, "Failed to initialize device"):
+            BlockDev.crypto_luks_resize("non-existing-device", 0)
+
         # the simple case with password
         self._luks2_format(self.loop_devs[0], PASSWD, self.keyfile, fast_pbkdf=True)
 
@@ -448,6 +473,9 @@ class CryptoTestOpenClose(CryptoTestCase):
             ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
             BlockDev.crypto_luks_open(self.loop_devs[0], "libblockdev/TestLUKS", ctx, False)
 
+        with self.assertRaisesRegex(GLib.GError, r"Device name can be at most 127 characters long"):
+            ctx = BlockDev.CryptoKeyslotContext(passphrase=PASSWD)
+            BlockDev.crypto_luks_open(self.loop_devs[0], "a" * 128, ctx, False)
 
         with self.assertRaisesRegex(GLib.GError, r"Incorrect passphrase"):
             ctx = BlockDev.CryptoKeyslotContext(passphrase="wrong-passphrase")
@@ -558,12 +586,14 @@ class CryptoTestAddRemoveKey(CryptoTestCase):
         succ = BlockDev.crypto_luks_add_key(self.loop_devs[0], ctx, nctx)
         self.assertTrue(succ)
 
-        nctx2 = BlockDev.CryptoKeyslotContext(passphrase=PASSWD3)
+        nctx2 = BlockDev.CryptoKeyslotContext(keyfile=self.keyfile)
         succ = BlockDev.crypto_luks_add_key(self.loop_devs[0], ctx, nctx2)
         self.assertTrue(succ)
 
-        nctx3 = BlockDev.CryptoKeyslotContext(keyfile=self.keyfile)
-        succ = BlockDev.crypto_luks_add_key(self.loop_devs[0], ctx, nctx3)
+        # add key using the previously added keyfile
+        nctx3 = BlockDev.CryptoKeyslotContext(passphrase=PASSWD3)
+        succ = BlockDev.crypto_luks_add_key(self.loop_devs[0], nctx2, nctx3)
+        self.assertTrue(succ)
 
         # remove key, wrong passphrase
         with self.assertRaises(GLib.GError):
@@ -653,6 +683,22 @@ class CryptoTestChangeKey(CryptoTestCase):
 
         # keyfile should work
         succ = BlockDev.crypto_luks_open(self.loop_devs[0], "libblockdevTestLUKS", kctx)
+        self.assertTrue(succ)
+
+        succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")
+        self.assertTrue(succ)
+
+        # try with keyfile as the "old passphrase"
+        kctx = BlockDev.CryptoKeyslotContext(keyfile=self.keyfile)
+        succ = BlockDev.crypto_luks_change_key(self.loop_devs[0], kctx, ctx)
+        self.assertTrue(succ)
+
+        # keyfile should no longer work
+        with self.assertRaises(GLib.GError):
+            BlockDev.crypto_luks_remove_key(self.loop_devs[0], kctx)
+
+        # passphrase should work
+        succ = BlockDev.crypto_luks_open(self.loop_devs[0], "libblockdevTestLUKS", ctx)
         self.assertTrue(succ)
 
         succ = BlockDev.crypto_luks_close("libblockdevTestLUKS")

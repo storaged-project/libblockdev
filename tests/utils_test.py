@@ -1,6 +1,7 @@
 import unittest
 import re
 import os
+import glob
 import overrides_hack
 from utils import fake_utils, create_sparse_tempfile, create_lio_device, delete_lio_device, run_command, TestTags, tag_test, read_file
 
@@ -47,6 +48,12 @@ class UtilsExecProgressTest(UtilsTestCase):
         succ = BlockDev.utils_prog_reporting_initialized()
         self.assertFalse(succ)
 
+        succ = BlockDev.utils_init_prog_reporting_thread(self.my_progress_func)
+        self.assertTrue(succ)
+
+        succ = BlockDev.utils_mute_prog_reporting_thread()
+        self.assertTrue(succ)
+
 
 class UtilsExecLoggingTest(UtilsTestCase):
     log = ""
@@ -79,6 +86,9 @@ class UtilsExecLoggingTest(UtilsTestCase):
         self.assertTrue(succ)
 
         succ = BlockDev.utils_exec_and_capture_output_no_progress(["true"])
+        self.assertTrue(succ)
+
+        succ = BlockDev.utils_exec_and_report_error_no_progress(["true"])
         self.assertTrue(succ)
 
         with self.assertRaisesRegex(GLib.GError, r"Process reported exit code 1"):
@@ -481,7 +491,7 @@ class UtilsDevUtilsSymlinksTestCase(UtilsTestCase):
 
 class UtilsLinuxKernelVersionTest(UtilsTestCase):
     @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
-    def test_initialization(self):
+    def test_kernel_version(self):
         """ Test Linux kernel version detection"""
 
         ver = BlockDev.utils_get_linux_version()
@@ -507,6 +517,9 @@ class UtilsKernelModuleTest(UtilsTestCase):
     def test_have_kernel_module(self):
         """ Test checking for kernel modules """
 
+        with self.assertRaises(GLib.GError):
+            BlockDev.utils_have_kernel_module("invalid name]")
+
         have = BlockDev.utils_have_kernel_module("definitely-not-existing-kernel-module")
         self.assertFalse(have)
 
@@ -522,3 +535,42 @@ class UtilsKernelModuleTest(UtilsTestCase):
                 self.assertTrue(have_fs)
             else:
                 self.assertFalse(have_fs)
+
+    @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
+    def test_load_unload_kernel_module(self):
+        """ Test loading and unloading kernel module """
+        with self.assertRaises(GLib.GError):
+            BlockDev.utils_load_kernel_module("definitely-not-existing-kernel-module")
+        with self.assertRaises(GLib.GError):
+            BlockDev.utils_unload_kernel_module("definitely-not-existing-kernel-module")
+
+        if BlockDev.utils_have_kernel_module("loop") and not glob.glob('/dev/loop[0-9]*'):
+            # we have the loop module and no loop device exists so loading and unloading
+            # the module should be OK, right?
+            succ = BlockDev.utils_load_kernel_module("loop")
+            self.assertTrue(succ)
+
+            succ = BlockDev.utils_unload_kernel_module("loop")
+            self.assertTrue(succ)
+
+
+class UtilsLoggingTest(UtilsTestCase):
+    log = ""
+    handler = 0
+
+    def tearDown(self):
+        if self.handler:
+            GLib.log_remove_handler("", self.handler)
+
+    def log_func(self, domain, level, msg, usrptr):
+        self.log += msg
+
+    @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
+    def test_log_stdout(self):
+        """ Test that logging to stdout works as expected """
+        # we are using GLib g_info, g_warning, etc. functions so we can use GLib logging to
+        # redirect the message here
+        self.handler = GLib.log_set_handler("", GLib.LogLevelFlags.LEVEL_WARNING, self.log_func, None)
+
+        BlockDev.utils_log_stdout(BlockDev.UTILS_LOG_WARNING, "warning")
+        self.assertEqual(self.log, "warning")

@@ -196,12 +196,6 @@ static gboolean map_is_multipath (const gchar *map_name, GError **error) {
     gchar *params = NULL;
     gboolean ret = FALSE;
 
-    if (geteuid () != 0) {
-        g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_NOT_ROOT,
-                     "Not running as root, cannot query DM maps");
-        return FALSE;
-    }
-
     task = dm_task_create (DM_DEVICE_STATUS);
     if (!task) {
         bd_utils_log_format (BD_UTILS_LOG_WARNING, "Failed to create DM task");
@@ -250,12 +244,6 @@ static gchar** get_map_deps (const gchar *map_name, guint64 *n_deps, GError **er
     gchar **dep_devs = NULL;
     gchar *major_minor = NULL;
     GError *l_error = NULL;
-
-    if (geteuid () != 0) {
-        g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_NOT_ROOT,
-                     "Not running as root, cannot query DM maps");
-        return NULL;
-    }
 
     task = dm_task_create (DM_DEVICE_DEPS);
     if (!task) {
@@ -331,12 +319,6 @@ gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error) {
     gchar **dev_name = NULL;
     gboolean ret = FALSE;
     GError *l_error = NULL;
-
-    if (geteuid () != 0) {
-        g_set_error (error, BD_MPATH_ERROR, BD_MPATH_ERROR_NOT_ROOT,
-                     "Not running as root, cannot query DM maps");
-        return FALSE;
-    }
 
     /* we check if the 'device' is a dependency of any multipath map  */
     /* get maps */
@@ -432,14 +414,6 @@ gchar** bd_mpath_get_mpath_members (GError **error) {
     GError *l_error = NULL;
 
     progress_id = bd_utils_report_started ("Started getting mpath members");
-
-    if (geteuid () != 0) {
-        g_set_error (&l_error, BD_MPATH_ERROR, BD_MPATH_ERROR_NOT_ROOT,
-                     "Not running as root, cannot query DM maps");
-        bd_utils_report_finished (progress_id, l_error->message);
-        g_propagate_error (error, l_error);
-        return NULL;
-    }
 
     /* we check if the 'device' is a dependency of any multipath map  */
     /* get maps */

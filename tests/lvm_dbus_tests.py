@@ -3,7 +3,7 @@ from itertools import chain
 
 import _lvm_cases
 
-from utils import run_command, TestTags, tag_test, required_plugins
+from utils import run_command, TestTags, tag_test, required_plugins, fake_path
 
 import gi
 gi.require_version('GLib', '2.0')
@@ -69,6 +69,17 @@ class LvmNoDevTestCase(_lvm_cases.LvmNoDevTestCase, LvmDBusTestCase):
         with self.assertRaisesRegex(GLib.GError, "Only 'query' supported for thin calculations"):
             BlockDev.lvm_is_tech_avail(BlockDev.LVMTech.THIN_CALCS, BlockDev.LVMTechMode.CREATE)
 
+        with fake_path(all_but=("lvmconfig", "lvmdevices")):
+            self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
+
+            # no lvmconfig tool available, should fail
+            with self.assertRaises(GLib.GError):
+                BlockDev.lvm_is_tech_avail(BlockDev.LVMTech.CONFIG, 0)
+
+            # no lvmdevices tool available, should fail
+            with self.assertRaises(GLib.GError):
+                BlockDev.lvm_is_tech_avail(BlockDev.LVMTech.DEVICES, 0)
+
 
 class LvmVDOTest(_lvm_cases.LvmVDOTest, LvmDBusTestCase):
     @classmethod
@@ -85,6 +96,13 @@ class LvmTestPVs(_lvm_cases.LvmTestPVs, LvmDBusTestCase):
     @classmethod
     def setUpClass(cls):
         _lvm_cases.LvmTestPVs.setUpClass()
+        LvmDBusTestCase.setUpClass()
+
+
+class LvmTestPVmove(_lvm_cases.LvmTestPVmove, LvmDBusTestCase):
+    @classmethod
+    def setUpClass(cls):
+        _lvm_cases.LvmTestPVmove.setUpClass()
         LvmDBusTestCase.setUpClass()
 
 

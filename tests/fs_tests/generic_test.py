@@ -313,19 +313,19 @@ class CanResizeRepairCheckLabel(GenericNoDevTestCase):
     def test_can_get_info(self):
         """Verify that tooling query works for getting info"""
 
-        avail, util = BlockDev.fs_can_get_free_space("ext4")
+        avail, util = BlockDev.fs_can_get_info("ext4")
         self.assertTrue(avail)
         self.assertEqual(util, None)
 
         old_path = os.environ.get("PATH", "")
         os.environ["PATH"] = ""
-        avail, util = BlockDev.fs_can_get_free_space("ext4")
+        avail, util = BlockDev.fs_can_get_info("ext4")
         os.environ["PATH"] = old_path
         self.assertFalse(avail)
         self.assertEqual(util, "dumpe2fs")
 
         with self.assertRaises(GLib.GError):
-            BlockDev.fs_can_get_free_space("non-existing-fs")
+            BlockDev.fs_can_get_info("non-existing-fs")
 
     def test_can_get_min_size(self):
         """Verify that tooling query works for getting min size"""
@@ -360,6 +360,25 @@ class CanResizeRepairCheckLabel(GenericNoDevTestCase):
 
         with self.assertRaises(GLib.GError):
             BlockDev.fs_can_get_min_size("udf")
+
+    def test_can_set_uuid(self):
+        """Verify that tooling query works for setting"""
+        avail, util = BlockDev.fs_can_set_uuid("ext4")
+        self.assertTrue(avail)
+        self.assertEqual(util, None)
+
+        old_path = os.environ.get("PATH", "")
+        os.environ["PATH"] = ""
+        avail, util = BlockDev.fs_can_set_uuid("ext4")
+        os.environ["PATH"] = old_path
+        self.assertFalse(avail)
+        self.assertEqual(util, "tune2fs")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_set_uuid("non-existing-fs")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_can_set_uuid("f2fs")
 
 
 class GenericMkfs(GenericTestCase):
@@ -757,22 +776,28 @@ class GenericRepair(GenericTestCase):
 
 
 class GenericSetLabel(GenericTestCase):
-    def _test_generic_set_label(self, mkfs_function, fstype):
+    def _test_generic_set_label(self, mkfs_function, fstype, test_label="new_label", expected_label="new_label", invalid_label=513*"a"):
         # clean the device
         succ = BlockDev.fs_clean(self.loop_devs[0])
 
         succ = mkfs_function(self.loop_devs[0], None)
         self.assertTrue(succ)
 
-        succ = BlockDev.fs_check_label(fstype, "new_label")
+        succ = BlockDev.fs_check_label(fstype, test_label)
         self.assertTrue(succ)
 
-        # set label (expected to succeed)
-        succ = BlockDev.fs_set_label(self.loop_devs[0], "new_label")
-        self.assertTrue(succ)
+        with self.assertRaises(GLib.GError):
+            BlockDev.fs_check_label(fstype, invalid_label)
 
         # set label (expected to succeed)
-        succ = BlockDev.fs_set_label(self.loop_devs[0], "new_label", fstype)
+        succ = BlockDev.fs_set_label(self.loop_devs[0], test_label)
+        self.assertTrue(succ)
+
+        fs_label = check_output(["blkid", "-ovalue", "-sLABEL", "-p", self.loop_devs[0]]).decode().strip()
+        self.assertEqual(fs_label, expected_label)
+
+        # set label (expected to succeed)
+        succ = BlockDev.fs_set_label(self.loop_devs[0], test_label, fstype)
         self.assertTrue(succ)
 
     def test_ext4_generic_set_label(self):
@@ -820,6 +845,28 @@ class GenericSetLabel(GenericTestCase):
         if not self.udf_avail:
             self.skipTest("skipping udf: not available")
         self._test_generic_set_label(mkfs_function=BlockDev.fs_udf_mkfs, fstype="udf")
+
+    def test_vfat_generic_set_label(self):
+        """Test generic set_label function with a vfat file system"""
+        if self._vfat_version < Version("4.2"):
+            self.skipTest("dosfstools >= 4.2 needed to set label")
+
+        def mkfs_vfat(device, options=None):
+            if self._vfat_version >= Version("4.2"):
+                return BlockDev.fs_vfat_mkfs(device, [BlockDev.ExtraArg.new("--mbr=n", "")])
+            else:
+                return BlockDev.fs_vfat_mkfs(device, options)
+
+        self._test_generic_set_label(mkfs_function=mkfs_vfat, fstype="vfat", expected_label="NEW_LABEL")
+
+    def test_fail_generic_check_label(self):
+        """ Test that generic check label fails correctly with unknown/unsupported filesystem """
+
+        with self.assertRaisesRegex(GLib.GError, "Checking label format for filesystem 'non-existing-fs' is not supported"):
+            BlockDev.fs_check_label("non-existing-fs", "label")
+
+        with self.assertRaisesRegex(GLib.GError, "Filesystem type must be specified to check label format"):
+            BlockDev.fs_check_label("", "label")
 
 
 class GenericSetUUID(GenericTestCase):
@@ -908,6 +955,15 @@ class GenericSetUUID(GenericTestCase):
         if not self.udf_avail:
             self.skipTest("skipping UDF: not available")
         self._test_generic_set_uuid(mkfs_function=BlockDev.fs_udf_mkfs, fstype="udf", test_uuid="5fae9ade7938dfc8")
+
+    def test_fail_generic_check_uuid(self):
+        """ Test that generic check_uuid fails correctly with unknown/unsupported filesystem """
+
+        with self.assertRaisesRegex(GLib.GError, "Checking UUID format for filesystem 'non-existing-fs' is not supported"):
+            BlockDev.fs_check_uuid("non-existing-fs", "uuid")
+
+        with self.assertRaisesRegex(GLib.GError, "Filesystem type must be specified to check UUID format"):
+            BlockDev.fs_check_uuid("", "uuid")
 
 
 class GenericResize(GenericTestCase):
@@ -1003,25 +1059,32 @@ class GenericResize(GenericTestCase):
 
         self._test_generic_resize(mkfs_function=mkfs_vfat, size_delta=1024**2, fstype="vfat")
 
-    def test_xfs_generic_resize(self):
-        """Test generic resize function with an xfs file system"""
-
+    def _test_xfs_generic_resize(self, mount):
         lv = self._setup_lvm(vgname="libbd_fs_tests", lvname="generic_test", lvsize="350M")
 
         succ = BlockDev.fs_xfs_mkfs(lv, None)
         self.assertTrue(succ)
 
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                fi = BlockDev.fs_xfs_get_info(lv)
+        else:
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 350 * 1024**2)
 
         # no change, nothing should happen
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                succ = BlockDev.fs_resize(lv, 0)
+        else:
             succ = BlockDev.fs_resize(lv, 0)
         self.assertTrue(succ)
 
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                fi = BlockDev.fs_xfs_get_info(lv)
+        else:
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 350 * 1024**2)
@@ -1035,29 +1098,47 @@ class GenericResize(GenericTestCase):
 
         self._lvresize("libbd_fs_tests", "generic_test", "380M")
         # should grow to 375 MiB (full size of the LV)
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                succ = BlockDev.fs_resize(lv, 0)
+        else:
             succ = BlockDev.fs_resize(lv, 0)
         self.assertTrue(succ)
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                fi = BlockDev.fs_xfs_get_info(lv)
+        else:
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 380 * 1024**2)
 
         self._lvresize("libbd_fs_tests", "generic_test", "400M")
         # grow just to 390 MiB
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                succ = BlockDev.fs_resize(lv, 390 * 1024**2)
+        else:
             succ = BlockDev.fs_resize(lv, 390 * 1024**2)
         self.assertTrue(succ)
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                fi = BlockDev.fs_xfs_get_info(lv)
+        else:
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 390 * 1024**2)
 
         # should grow to 400 MiB (full size of the LV)
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                succ = BlockDev.fs_resize(lv, 0, "xfs")
+        else:
             succ = BlockDev.fs_resize(lv, 0, "xfs")
         self.assertTrue(succ)
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                fi = BlockDev.fs_xfs_get_info(lv)
+        else:
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 400 * 1024**2)
@@ -1066,7 +1147,10 @@ class GenericResize(GenericTestCase):
         # unmounted resize (should get automounted)
         succ = BlockDev.fs_resize(lv, 0, "xfs")
         self.assertTrue(succ)
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                fi = BlockDev.fs_xfs_get_info(lv)
+        else:
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 420 * 1024**2)
@@ -1082,7 +1166,10 @@ class GenericResize(GenericTestCase):
 
         succ = BlockDev.fs_resize(lv, 0, "xfs")
         self.assertTrue(succ)
-        with mounted(lv, self.mount_dir):
+        if mount:
+            with mounted(lv, self.mount_dir):
+                fi = BlockDev.fs_xfs_get_info(lv)
+        else:
             fi = BlockDev.fs_xfs_get_info(lv)
         self.assertTrue(fi)
         self.assertEqual(fi.block_size * fi.block_count, 450 * 1024**2)
@@ -1091,6 +1178,16 @@ class GenericResize(GenericTestCase):
         self.assertIn("with options: uquota,gquota,pquota", self.log)
 
         BlockDev.utils_init_logging(None)
+
+    def test_xfs_generic_resize(self):
+        """Test generic resize function with an xfs file system with automatic mounting"""
+        # FS is not mounted by the test, libblockdev should mount it when needed
+        self._test_xfs_generic_resize(mount=False)
+
+    def test_xfs_generic_resize_mounted(self):
+        """Test generic resize function with an xfs file system with manual mounting"""
+        # FS is mounted by the test, libblockdev should use the existing mountpoint
+        self._test_xfs_generic_resize(mount=True)
 
     def _can_resize_f2fs(self):
         ret, out, _err = utils.run_command("resize.f2fs -V")

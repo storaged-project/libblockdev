@@ -3,7 +3,7 @@ import os
 import overrides_hack
 import shutil
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, get_version, TestTags, tag_test, required_plugins
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test, required_plugins, run_command
 
 import gi
 gi.require_version('GLib', '2.0')
@@ -47,6 +47,18 @@ class MpathTestCase(MpathTest):
         # just test that some non-mpath is not reported as a multipath member
         # device and no error is reported
         self.assertFalse(BlockDev.mpath_is_mpath_member("/dev/loop0"))
+
+    def test_flush_mpaths(self):
+        """ Verify that mpath_flush_mpaths can be called """
+        # we have no multipath devices, but flush should still work (and do nothing)
+
+        ret, _out, _err = run_command("modprobe dm-multipath")
+        if ret != 0:
+            self.skipTest("cannot load dm-multipath, skipping")
+
+        succ = BlockDev.mpath_flush_mpaths()
+        self.assertTrue(succ)
+
 
 class MpathNoDevTestCase(MpathTest):
     @tag_test(TestTags.NOSTORAGE)

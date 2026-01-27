@@ -77,6 +77,30 @@ class LibraryOpsTestCase(unittest.TestCase):
         self.assertEqual(BlockDev.get_available_plugin_names(), ["swap"])
         self.assertTrue(BlockDev.reinit(self.requested_plugins, True, None))
 
+        # test the same with try_reinit
+        ps = BlockDev.PluginSpec(name=BlockDev.Plugin.SWAP, so_name="")
+        self.assertTrue(BlockDev.try_reinit([ps], True, None))
+        self.assertEqual(BlockDev.get_available_plugin_names(), ["swap"])
+        self.assertTrue(BlockDev.try_reinit(self.requested_plugins, True, None))
+
+    @tag_test(TestTags.CORE)
+    def test_get_plugin_name(self):
+        """Verify that getting plugin name works"""
+        self.assertEqual(BlockDev.get_plugin_name(BlockDev.Plugin.BTRFS), "btrfs")
+        self.assertEqual(BlockDev.get_plugin_name(BlockDev.Plugin.CRYPTO), "crypto")
+        self.assertEqual(BlockDev.get_plugin_name(BlockDev.Plugin.DM), "dm")
+        self.assertEqual(BlockDev.get_plugin_name(BlockDev.Plugin.FS), "fs")
+        self.assertEqual(BlockDev.get_plugin_name(BlockDev.Plugin.LOOP), "loop")
+        self.assertEqual(BlockDev.get_plugin_name(BlockDev.Plugin.LVM), "lvm")
+        self.assertEqual(BlockDev.get_plugin_name(BlockDev.Plugin.MDRAID), "mdraid")
+        self.assertEqual(BlockDev.get_plugin_name(BlockDev.Plugin.MPATH), "mpath")
+        self.assertEqual(BlockDev.get_plugin_name(BlockDev.Plugin.NVDIMM), "nvdimm")
+        self.assertEqual(BlockDev.get_plugin_name(BlockDev.Plugin.NVME), "nvme")
+        self.assertEqual(BlockDev.get_plugin_name(BlockDev.Plugin.PART), "part")
+        self.assertEqual(BlockDev.get_plugin_name(BlockDev.Plugin.S390), "s390")
+        self.assertEqual(BlockDev.get_plugin_name(BlockDev.Plugin.SMART), "smart")
+        self.assertEqual(BlockDev.get_plugin_name(BlockDev.Plugin.SWAP), "swap")
+
     @tag_test(TestTags.CORE)
     def test_not_implemented(self):
         """Verify that unloaded/unimplemented functions report errors"""
@@ -126,6 +150,20 @@ class LibraryOpsTestCase(unittest.TestCase):
         # ensure_init to load all plugins back
         self.assertTrue(BlockDev.ensure_init(self.requested_plugins, None))
         self.assertGreaterEqual(len(BlockDev.get_available_plugin_names()), 6)
+
+        # check that init and try_init fail correctly when already initialized
+        succ = BlockDev.utils_init_logging(self.my_log_func)
+        self.assertTrue(succ)
+
+        succ = BlockDev.init()
+        self.assertFalse(succ)
+        self.assertIn("bd_init() called more than once", self.log)
+        self.log = ""
+
+        succ, _plugins = BlockDev.try_init()
+        self.assertFalse(succ)
+        self.assertIn("bd_try_init() called more than once", self.log)
+        self.log = ""
 
     def test_non_en_init(self):
         """Verify that the library initializes with lang different from en_US"""

@@ -73,6 +73,15 @@ class PartNoDevTestCase(PartTest):
         self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.PART), "libbd_part.so.3")
 
     @tag_test(TestTags.NOSTORAGE)
+    def test_tech_available(self):
+        """Verify that checking plugin availability works as expected"""
+        succ = BlockDev.part_is_tech_avail(BlockDev.PartTech.MBR, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.part_is_tech_avail(BlockDev.PartTech.GPT, 0)
+        self.assertTrue(succ)
+
+    @tag_test(TestTags.NOSTORAGE)
     def test_part_type_str(self):
         types = {BlockDev.PartType.NORMAL: 'primary', BlockDev.PartType.LOGICAL: 'logical',
                  BlockDev.PartType.EXTENDED: 'extended', BlockDev.PartType.FREESPACE: 'free',
@@ -80,6 +89,13 @@ class PartNoDevTestCase(PartTest):
 
         for key, value in types.items():
             self.assertEqual(BlockDev.part_get_type_str(key), value)
+
+    @tag_test(TestTags.NOSTORAGE)
+    def test_part_table_type_str(self):
+        types = {BlockDev.PartTableType.MSDOS: 'dos', BlockDev.PartTableType.GPT: 'gpt'}
+
+        for key, value in types.items():
+            self.assertEqual(BlockDev.part_get_part_table_type_str(key), value)
 
 
 class PartCreateTableCase(PartTestCase):

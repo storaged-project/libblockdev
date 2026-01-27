@@ -3,7 +3,7 @@ import os
 import shutil
 import overrides_hack
 
-from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, TestTags, tag_test, required_plugins, setup_scsi_debug, clean_scsi_debug
+from utils import create_sparse_tempfile, create_lio_device, delete_lio_device, fake_utils, fake_path, TestTags, tag_test, required_plugins, setup_scsi_debug, clean_scsi_debug
 
 import gi
 gi.require_version('GLib', '2.0')
@@ -60,6 +60,21 @@ class SmartmontoolsTest(unittest.TestCase):
     @tag_test(TestTags.NOSTORAGE)
     def test_plugin_version(self):
         self.assertEqual(BlockDev.get_plugin_soname(BlockDev.Plugin.SMART), "libbd_smartmontools.so.3")
+
+    @tag_test(TestTags.NOSTORAGE)
+    def test_tech_available(self):
+        """Verify that checking availability works as expected"""
+        succ = BlockDev.smart_is_tech_avail(BlockDev.SmartTech.ATA, 0)
+        self.assertTrue(succ)
+
+        succ = BlockDev.smart_is_tech_avail(BlockDev.SmartTech.SCSI, 0)
+        self.assertTrue(succ)
+
+        with fake_path(all_but="smartctl"):
+            self.assertTrue(BlockDev.reinit([self.ps, self.ps2], True, None))
+
+            with self.assertRaises(GLib.GError):
+                BlockDev.smart_is_tech_avail(BlockDev.SmartTech.ATA, 0)
 
     @tag_test(TestTags.CORE)
     def test_ata_info(self):
