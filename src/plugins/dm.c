@@ -331,8 +331,10 @@ gboolean bd_dm_map_exists (const gchar *map_name, gboolean live_only, gboolean a
     dm_task_run (task_list);
     names = dm_task_get_names (task_list);
 
-    if (!names || !names->dev)
+    if (!names || !names->dev) {
+        dm_task_destroy (task_list);
         return FALSE;
+    }
 
     do {
         names = (void *)names + next;
