@@ -2592,6 +2592,7 @@ BDCryptoLUKSInfo* bd_crypto_luks_info (const gchar *device, GError **error) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
                      "Unknown or unsupported LUKS version");
         bd_crypto_luks_info_free (info);
+        crypt_free (cd);
         return NULL;
     }
 
