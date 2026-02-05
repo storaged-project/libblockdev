@@ -25,6 +25,9 @@
 GQuark bd_utils_dev_utils_error_quark (void);
 #define BD_UTILS_DEV_UTILS_ERROR bd_utils_dev_utils_error_quark ()
 
+/* "C" locale to get the locale-agnostic error messages */
+#define _C_LOCALE (locale_t) 0
+
 typedef enum {
     BD_UTILS_DEV_UTILS_ERROR_FAILED,
 } BDUtilsDevUtilsError;
