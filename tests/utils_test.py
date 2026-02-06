@@ -406,44 +406,10 @@ class UtilsExecLoggingTest(UtilsTestCase):
         self.assertTrue(status)
 
 
-class UtilsDevUtilsTestCase(UtilsTestCase):
-    @tag_test(TestTags.NOSTORAGE, TestTags.CORE)
-    def test_resolve_device(self):
-        """Verify that resolving device spec works as expected"""
-
-        with self.assertRaises(GLib.GError):
-            BlockDev.utils_resolve_device("no_such_device")
-
-        dev = "/dev/libblockdev-test-dev"
-        with open(dev, "w"):
-            pass
-        self.addCleanup(os.unlink, dev)
-
-        # full path, no symlink, should just return the same
-        self.assertEqual(BlockDev.utils_resolve_device(dev), dev)
-
-        # just the name of the device, should return the full path
-        self.assertEqual(BlockDev.utils_resolve_device(dev[5:]), dev)
-
-        dev_dir = "/dev/libblockdev-test-dir"
-        os.mkdir(dev_dir)
-        self.addCleanup(os.rmdir, dev_dir)
-
-        dev_link = dev_dir + "/test-dev-link"
-        os.symlink("../" + dev[5:], dev_link)
-        self.addCleanup(os.unlink, dev_link)
-
-        # should resolve the symlink
-        self.assertEqual(BlockDev.utils_resolve_device(dev_link), dev)
-
-        # should resolve the symlink even without the "/dev" prefix
-        self.assertEqual(BlockDev.utils_resolve_device(dev_link[5:]), dev)
-
-
-class UtilsDevUtilsSymlinksTestCase(UtilsTestCase):
+class UtilsStorageTestCase(UtilsTestCase):
     def setUp(self):
         self.addCleanup(self._clean_up)
-        self.dev_file = create_sparse_tempfile("lvm_test", 1024**3)
+        self.dev_file = create_sparse_tempfile("utils_test", 1024**3)
         try:
             self.loop_dev = create_lio_device(self.dev_file)
         except RuntimeError as e:
@@ -457,6 +423,57 @@ class UtilsDevUtilsSymlinksTestCase(UtilsTestCase):
             pass
         os.unlink(self.dev_file)
 
+    def _setup_lvm(self):
+        ret, _out, _err = run_command ("pvcreate %s --config \"devices {use_devicesfile = 0}\"" % self.loop_dev)
+        self.assertEqual(ret, 0)
+        self.addCleanup(run_command, "pvremove %s --config \"devices {use_devicesfile = 0}\"" % self.loop_dev)
+
+        ret, _out, _err = run_command ("vgcreate utilsTestVG %s --config \"devices {use_devicesfile = 0}\"" % self.loop_dev)
+        self.assertEqual(ret, 0)
+        self.addCleanup(run_command, "vgremove -y utilsTestVG --config \"devices {use_devicesfile = 0}\"")
+
+        ret, _out, _err = run_command ("lvcreate -n utilsTestLV -L 12M utilsTestVG --config \"devices {use_devicesfile = 0}\"")
+        self.assertEqual(ret, 0)
+        self.addCleanup(run_command, "lvremove -y utilsTestVG/utilsTestLV --config \"devices {use_devicesfile = 0}\"")
+
+
+class UtilsDevUtilsTestCase(UtilsStorageTestCase):
+    @tag_test(TestTags.CORE)
+    def test_resolve_device(self):
+        """Verify that resolving device spec works as expected"""
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.utils_resolve_device("no_such_device")
+
+        self._setup_lvm()
+        dev_link = "/dev/mapper/utilsTestVG-utilsTestLV"
+        dev_link2 = "/dev/utilsTestVG/utilsTestLV"
+        dev_node = os.path.realpath(dev_link)
+
+        # full path, no symlink, should just return the same
+        self.assertEqual(BlockDev.utils_resolve_device(dev_node), dev_node)
+
+        # just the name of the device, should return the full path
+        self.assertEqual(BlockDev.utils_resolve_device(dev_node[5:]), dev_node)
+
+        # should resolve the symlink
+        self.assertEqual(BlockDev.utils_resolve_device(dev_link), dev_node)
+
+        # should resolve the symlink even without the "/dev" prefix
+        self.assertEqual(BlockDev.utils_resolve_device(dev_link[5:]), dev_node)
+
+        # should resolve the other symlink too
+        self.assertEqual(BlockDev.utils_resolve_device(dev_link2), dev_node)
+
+        # should resolve the other symlink even without the "/dev" prefix
+        self.assertEqual(BlockDev.utils_resolve_device(dev_link2[5:]), dev_node)
+
+        # vg is not a block device, shouldn't be resolved
+        with self.assertRaisesRegex(GLib.GError, "not a block device"):
+            BlockDev.utils_resolve_device("/dev/utilsTestVG")
+
+
+class UtilsDevUtilsSymlinksTestCase(UtilsStorageTestCase):
     @tag_test(TestTags.CORE)
     def test_get_device_symlinks(self):
         """Verify that getting device symlinks works as expected"""
@@ -472,17 +489,7 @@ class UtilsDevUtilsSymlinksTestCase(UtilsTestCase):
         self.assertGreaterEqual(len(symlinks), 2)
 
         # create an LV to get a device with more symlinks
-        ret, _out, _err = run_command ("pvcreate %s --config \"devices {use_devicesfile = 0}\"" % self.loop_dev)
-        self.assertEqual(ret, 0)
-        self.addCleanup(run_command, "pvremove %s --config \"devices {use_devicesfile = 0}\"" % self.loop_dev)
-
-        ret, _out, _err = run_command ("vgcreate utilsTestVG %s --config \"devices {use_devicesfile = 0}\"" % self.loop_dev)
-        self.assertEqual(ret, 0)
-        self.addCleanup(run_command, "vgremove -y utilsTestVG --config \"devices {use_devicesfile = 0}\"")
-
-        ret, _out, _err = run_command ("lvcreate -n utilsTestLV -L 12M utilsTestVG --config \"devices {use_devicesfile = 0}\"")
-        self.assertEqual(ret, 0)
-        self.addCleanup(run_command, "lvremove -y utilsTestVG/utilsTestLV --config \"devices {use_devicesfile = 0}\"")
+        self._setup_lvm()
 
         symlinks = BlockDev.utils_get_device_symlinks("utilsTestVG/utilsTestLV")
         # there should be at least 4 symlinks for an LV

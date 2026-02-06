@@ -178,19 +178,21 @@ gboolean bd_dm_remove (const gchar *map_name, GError **error) {
 gchar* bd_dm_name_from_node (const gchar *dm_node, GError **error) {
     gchar *ret = NULL;
     gboolean success = FALSE;
+    g_autofree gchar *sys_path = g_strdup_printf ("/sys/class/block/%s/dm/name", dm_node);
 
-    gchar *sys_path = g_strdup_printf ("/sys/class/block/%s/dm/name", dm_node);
+    if (!dm_node || strlen (dm_node) == 0) {
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_DEVICE_NOEXIST,
+                     "No DM node specified");
+        return NULL;
+    }
 
     if (access (sys_path, R_OK) != 0) {
-        g_free (sys_path);
         g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_SYS,
                      "Failed to access dm node's parameters under /sys");
         return NULL;
     }
 
     success = g_file_get_contents (sys_path, &ret, NULL, error);
-    g_free (sys_path);
-
     if (!success) {
         /* error is already populated */
         g_free (ret);
@@ -211,20 +213,21 @@ gchar* bd_dm_name_from_node (const gchar *dm_node, GError **error) {
  * Tech category: %BD_DM_TECH_MAP-%BD_DM_TECH_MODE_QUERY
  */
 gchar* bd_dm_node_from_name (const gchar *map_name, GError **error) {
-    gchar *dev_path = NULL;
-    gchar *ret = NULL;
-    gchar *dev_mapper_path = g_strdup_printf ("/dev/mapper/%s", map_name);
+    g_autofree gchar *dev_path = NULL;
+    g_autofree gchar *dev_mapper_path = g_strdup_printf ("/dev/mapper/%s", map_name);
+
+    if (!map_name || strlen (map_name) == 0) {
+        g_set_error (error, BD_DM_ERROR, BD_DM_ERROR_DEVICE_NOEXIST,
+                     "No DM name specified");
+        return NULL;
+    }
 
     dev_path = bd_utils_resolve_device (dev_mapper_path, error);
-    g_free (dev_mapper_path);
     if (!dev_path)
         /* error is already populated */
         return NULL;
 
-    ret = g_path_get_basename (dev_path);
-    g_free (dev_path);
-
-    return ret;
+    return g_path_get_basename (dev_path);
 }
 
 /**

@@ -19,6 +19,8 @@
 
 #include <glib.h>
 #include <libudev.h>
+#include <sys/stat.h>
+#include <errno.h>
 
 #include "dev_utils.h"
 
@@ -28,6 +30,24 @@
 GQuark bd_utils_dev_utils_error_quark (void)
 {
     return g_quark_from_static_string ("g-bd-utils-dev_utils-error-quark");
+}
+
+static gboolean _is_block_device (const gchar *path, GError **error) {
+    struct stat sb;
+
+    if (stat (path, &sb) != 0) {
+        g_set_error (error, BD_UTILS_DEV_UTILS_ERROR, BD_UTILS_DEV_UTILS_ERROR_FAILED,
+                     "Failed to stat '%s': %s", path, strerror_l (errno, _C_LOCALE));
+        return FALSE;
+    }
+
+    if (!S_ISBLK (sb.st_mode)) {
+        g_set_error (error, BD_UTILS_DEV_UTILS_ERROR, BD_UTILS_DEV_UTILS_ERROR_FAILED,
+                     "'%s' is not a block device", path);
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 /**
@@ -40,11 +60,9 @@ GQuark bd_utils_dev_utils_error_quark (void)
  *                           for "/dev/md/my_raid") or %NULL in case of error
  */
 gchar* bd_utils_resolve_device (const gchar *dev_spec, GError **error) {
-    gchar *path = NULL;
-    gchar *symlink = NULL;
+    g_autofree gchar *path = NULL;
+    g_autofree gchar *symlink = NULL;
     GError *l_error = NULL;
-
-    /* TODO: check that the resulting path is a block device? */
 
     if (!g_str_has_prefix (dev_spec, "/dev/"))
         path = g_strdup_printf ("/dev/%s", dev_spec);
@@ -56,11 +74,15 @@ gchar* bd_utils_resolve_device (const gchar *dev_spec, GError **error) {
         if (g_error_matches (l_error, G_FILE_ERROR, G_FILE_ERROR_INVAL)) {
             /* invalid argument -> not a symlink -> nothing to resolve */
             g_clear_error (&l_error);
-            return path;
+            if (_is_block_device (path, error))
+                return g_steal_pointer (&path);
+            else {
+                g_prefix_error (error, "Failed to resolve '%s': ", dev_spec);
+                return NULL;
+            }
         } else {
             /* some other error, just report it */
             g_propagate_error (error, l_error);
-            g_free (path);
             return NULL;
         }
     }
@@ -70,9 +92,13 @@ gchar* bd_utils_resolve_device (const gchar *dev_spec, GError **error) {
         path = g_strdup_printf ("/dev/%s", symlink + 3);
     else
         path = g_strdup_printf ("/dev/%s", symlink);
-    g_free (symlink);
 
-    return path;
+    if (_is_block_device (path, error))
+        return g_steal_pointer (&path);
+    else {
+        g_prefix_error (error, "Failed to resolve '%s': ", dev_spec);
+        return NULL;
+    }
 }
 
 /**

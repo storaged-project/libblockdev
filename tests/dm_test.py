@@ -153,6 +153,12 @@ class DevMapperNameNodeBijection(DevMapperTestCase):
         self.assertEqual(BlockDev.dm_name_from_node(BlockDev.dm_node_from_name("testMap")),
                          "testMap")
 
+        with self.assertRaisesRegex(GLib.GError, "No DM name specified"):
+            BlockDev.dm_node_from_name("")
+
+        with self.assertRaisesRegex(GLib.GError, "No DM node specified"):
+            BlockDev.dm_name_from_node("")
+
 
 class DMNoStorageTest(DevMapperTest):
     @tag_test(TestTags.NOSTORAGE)
