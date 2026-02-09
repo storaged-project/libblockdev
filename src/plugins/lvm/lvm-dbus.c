@@ -4034,11 +4034,69 @@ gboolean bd_lvm_vdo_pool_resize (const gchar *vg_name, const gchar *pool_name, g
  *
  * Tech category: %BD_LVM_TECH_VDO-%BD_LVM_TECH_MODE_CREATE&%BD_LVM_TECH_MODE_MODIFY
  */
-gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name G_GNUC_UNUSED, const gchar *pool_lv G_GNUC_UNUSED, const gchar *name G_GNUC_UNUSED,
-                                  guint64 virtual_size G_GNUC_UNUSED, guint64 index_memory G_GNUC_UNUSED, gboolean compression G_GNUC_UNUSED,
-                                  gboolean deduplication G_GNUC_UNUSED, BDLVMVDOWritePolicy write_policy G_GNUC_UNUSED,
-                                  const BDExtraArg **extra G_GNUC_UNUSED, GError **error) {
-    return bd_lvm_is_tech_avail (BD_LVM_TECH_VDO, BD_LVM_TECH_MODE_CREATE | BD_LVM_TECH_MODE_MODIFY, error);
+gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name, const gchar *pool_lv, const gchar *name,
+                                  guint64 virtual_size, guint64 index_memory, gboolean compression,
+                                  gboolean deduplication, BDLVMVDOWritePolicy write_policy,
+                                  const BDExtraArg **extra, GError **error) {
+    GVariantBuilder builder;
+    GVariant *params = NULL;
+    GVariant *extra_params = NULL;
+    g_autofree gchar *obj_id = NULL;
+    g_autofree gchar *pool_lv_path = NULL;
+    g_autofree gchar *lvname = NULL;
+    gchar *old_config = NULL;
+    const gchar *write_policy_str = NULL;
+    gboolean ret = FALSE;
+
+    obj_id = g_strdup_printf ("%s/%s", vg_name, pool_lv);
+    pool_lv_path = get_object_path (obj_id, error);
+    if (!pool_lv_path)
+        return FALSE;
+
+    write_policy_str = bd_lvm_get_vdo_write_policy_str (write_policy, error);
+    if (write_policy_str == NULL)
+        return FALSE;
+
+    /* build the params tuple */
+    g_variant_builder_init (&builder, G_VARIANT_TYPE_TUPLE);
+
+    g_variant_builder_add_value (&builder, g_variant_new ("o", pool_lv_path));
+
+    if (!name) {
+        lvname = g_strdup_printf ("%s_vdolv", pool_lv);
+        g_variant_builder_add_value (&builder, g_variant_new ("s", lvname));
+    } else
+        g_variant_builder_add_value (&builder, g_variant_new ("s", name));
+
+    g_variant_builder_add_value (&builder, g_variant_new ("t", virtual_size));
+    params = g_variant_builder_end (&builder);
+    g_variant_builder_clear (&builder);
+
+    /* and now the extra_params params */
+    g_variant_builder_init (&builder, G_VARIANT_TYPE_DICTIONARY);
+    g_variant_builder_add_value (&builder, g_variant_new ("{sv}", "--compression", g_variant_new ("s", compression ? "y" : "n")));
+    g_variant_builder_add_value (&builder, g_variant_new ("{sv}", "--deduplication", g_variant_new ("s", deduplication ? "y" : "n")));
+    extra_params = g_variant_builder_end (&builder);
+    g_variant_builder_clear (&builder);
+
+    /* index_memory and write_policy can be specified only using the config */
+    g_mutex_lock (&global_config_lock);
+    old_config = global_config_str;
+    if (index_memory != 0)
+        global_config_str = g_strdup_printf ("%s allocation {vdo_index_memory_size_mb=%"G_GUINT64_FORMAT" vdo_write_policy=\"%s\"}", old_config ? old_config : "",
+                                                                                                                                     index_memory / (1024 * 1024),
+                                                                                                                                     write_policy_str);
+    else
+        global_config_str = g_strdup_printf ("%s allocation {vdo_write_policy=\"%s\"}", old_config ? old_config : "",
+                                                                                        write_policy_str);
+
+    ret = call_lvm_obj_method_sync (vg_name, VG_VDO_INTF, "CreateVdoPool", params, extra_params, extra, FALSE, error);
+
+    g_free (global_config_str);
+    global_config_str = old_config;
+    g_mutex_unlock (&global_config_lock);
+
+    return ret;
 }
 
 /**

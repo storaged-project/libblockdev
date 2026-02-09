@@ -87,10 +87,6 @@ class LvmVDOTest(_lvm_cases.LvmVDOTest, LvmDBusTestCase):
         _lvm_cases.LvmVDOTest.setUpClass()
         LvmDBusTestCase.setUpClass()
 
-    @tag_test(TestTags.SLOW)
-    def test_vdo_pool_convert(self):
-        self.skipTest("LVM VDO pool convert not implemented in LVM DBus API.")
-
 
 class LvmTestPVs(_lvm_cases.LvmTestPVs, LvmDBusTestCase):
     @classmethod

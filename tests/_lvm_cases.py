@@ -2141,7 +2141,9 @@ class LvmVDOTest(LvmTestCase):
         self.assertIsNotNone(lv_info)
         self.assertEqual(lv_info.size, 35 * 1024**3)
         self.assertEqual(lv_info.segtype, "vdo")
-        self.assertEqual(lv_info.pool_lv, "testLV")
+        if self.test_type != "dbus":
+            # XXX bug in lvmdbusd, PoolLV property not set correctly
+            self.assertEqual(lv_info.pool_lv, "testLV")
 
         pool_info = BlockDev.lvm_lvinfo("testVDOVG", "testLV")
         self.assertIsNotNone(pool_info)
