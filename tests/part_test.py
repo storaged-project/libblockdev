@@ -1312,6 +1312,16 @@ class PartSetIdCase(PartTestCase):
         with self.assertRaises(GLib.GError):
             BlockDev.part_set_part_id (self.loop_devs[0], ps.path, "0x85")
 
+        # some invalid ids
+        with self.assertRaises(GLib.GError):
+            BlockDev.part_set_part_id (self.loop_devs[0], ps.path, "83;id")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.part_set_part_id (self.loop_devs[0], ps.path, "0xfff")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.part_set_part_id (self.loop_devs[0], ps.path, "999")
+
 
 class PartSetBootableFlagCase(PartTestCase):
     def test_set_part_type(self):

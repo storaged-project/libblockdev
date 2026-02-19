@@ -1723,14 +1723,15 @@ static gboolean set_part_type (struct fdisk_context *cxt, gint part_num, const g
     struct fdisk_partition *pa = NULL;
     struct fdisk_parttype *ptype = NULL;
     const gchar *label_name = NULL;
+    gchar *endptr = NULL;
     gint status = 0;
     gint part_id_int = 0;
 
     /* check if part type/id is valid for MBR */
     if (table_type == BD_PART_TABLE_MSDOS) {
-        part_id_int = g_ascii_strtoull (type_str, NULL, 0);
+        part_id_int = g_ascii_strtoull (type_str, &endptr, 0);
 
-        if (part_id_int == 0) {
+        if (part_id_int == 0 || endptr == NULL || *endptr != '\0') {
             g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
                          "Invalid partition id given: '%s'.", type_str);
             return FALSE;
@@ -1770,6 +1771,18 @@ static gboolean set_part_type (struct fdisk_context *cxt, gint part_num, const g
                      "Failed to parse partition type.");
         fdisk_unref_partition (pa);
         return FALSE;
+    }
+
+    if (table_type == BD_PART_TABLE_MSDOS) {
+        /* for GPT types unknown by libfdisk might still be valid */
+        status = fdisk_parttype_is_unknown (ptype);
+        if (status != 0) {
+            g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_INVAL,
+                        "Invalid partition type given: '%s'.", type_str);
+            fdisk_unref_parttype (ptype);
+            fdisk_unref_partition (pa);
+            return FALSE;
+        }
     }
 
     status = fdisk_set_partition_type (cxt, part_num, ptype);
