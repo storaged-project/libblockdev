@@ -2208,6 +2208,7 @@ gboolean bd_part_set_part_bootable (const gchar *disk, const gchar *part, gboole
  */
 gboolean bd_part_set_part_attributes (const gchar *disk, const gchar *part, guint64 attrs, GError **error) {
     struct fdisk_context *cxt = NULL;
+    struct fdisk_partition *pa = NULL;
     gint part_num = 0;
     gint ret = 0;
 
@@ -2222,10 +2223,20 @@ gboolean bd_part_set_part_attributes (const gchar *disk, const gchar *part, guin
     if (!cxt)
         return FALSE;
 
+    ret = fdisk_get_partition (cxt, part_num, &pa);
+    if (ret != 0) {
+        g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
+                     "Failed to get partition '%d' on device '%s'.", part_num, disk);
+        close_context (cxt);
+        return FALSE;
+    }
+    fdisk_unref_partition (pa);
+
     ret = fdisk_gpt_set_partition_attrs (cxt, part_num, attrs);
     if (ret < 0) {
         g_set_error (error, BD_PART_ERROR, BD_PART_ERROR_FAIL,
                      "Failed to set GPT attributes: %s", strerror_l (-ret, c_locale));
+        close_context (cxt);
         return FALSE;
     }
 
