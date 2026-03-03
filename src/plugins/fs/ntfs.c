@@ -461,7 +461,7 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
  * Tech category: %BD_FS_TECH_NTFS-%BD_FS_TECH_MODE_RESIZE
  */
 guint64 bd_fs_ntfs_get_min_size (const gchar *device, GError **error) {
-    const gchar *args[4] = {"ntfsresize", "--info", device, NULL};
+    const gchar *args[5] = {"ntfsresize", "--no-progress-bar", "--info", device, NULL};
     gboolean success = FALSE;
     gchar *output = NULL;
     gchar **lines = NULL;
