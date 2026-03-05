@@ -2974,11 +2974,10 @@ gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm
         ret = crypt_deactivate (cd, tmp_name);
         if (ret != 0)
             bd_utils_log_format (BD_UTILS_LOG_ERR, "Failed to deactivate temporary device %s", tmp_name);
-
-    } else
-        bd_utils_report_finished (progress_id, "Completed");
+    }
 
     crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
 
     return TRUE;
 }
