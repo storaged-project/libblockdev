@@ -1489,7 +1489,7 @@ BDLVMVGdata* bd_lvm_vginfo (const gchar *vg_name, GError **error) {
 BDLVMVGdata** bd_lvm_vgs (GError **error) {
     const gchar *args[9] = {"vgs", "--noheadings", "--nosuffix", "--nameprefixes",
                       "--unquoted", "--units=b",
-                      "-o", "name,uuid,size,free,extent_size,extent_count,free_count,pv_count,vg_tags",
+                      "-o", "name,uuid,size,free,extent_size,extent_count,free_count,pv_count,vg_exported,vg_tags",
                       NULL};
     GHashTable *table = NULL;
     gboolean success = FALSE;
@@ -1524,7 +1524,7 @@ BDLVMVGdata** bd_lvm_vgs (GError **error) {
 
     for (lines_p = lines; *lines_p; lines_p++) {
         table = parse_lvm_vars ((*lines_p), &num_items);
-        if (table && (num_items == 9)) {
+        if (table && (num_items == 10)) {
             /* valid line, try to parse and record it */
             vgdata = get_vg_data_from_table (table, TRUE);
             if (vgdata)
