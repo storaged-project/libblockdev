@@ -677,12 +677,14 @@ gint bd_utils_version_cmp (const gchar *ver_string1, const gchar *ver_string2, G
     if (!success) {
         g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_INVAL_VER,
                      "Invalid or unsupported version (1) format: %s", ver_string1);
+        g_regex_unref (regex);
         return -2;
     }
     success = g_regex_match (regex, ver_string2, 0, NULL);
     if (!success) {
         g_set_error (error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_INVAL_VER,
                      "Invalid or unsupported version (2) format: %s", ver_string2);
+        g_regex_unref (regex);
         return -2;
     }
     g_regex_unref (regex);
