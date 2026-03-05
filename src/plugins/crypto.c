@@ -2260,7 +2260,7 @@ gboolean bd_crypto_luks_set_label (const gchar *device, const gchar *label, cons
 
     if (g_strcmp0 (crypt_get_type (cd), CRYPT_LUKS2) != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                     "Label can be set only on LUKS 2 devices: %s", strerror_l (-ret, c_locale));
+                     "Label can be set only on LUKS 2 devices.");
         crypt_free (cd);
         return FALSE;
     }
