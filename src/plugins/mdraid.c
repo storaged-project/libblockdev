@@ -1132,6 +1132,12 @@ BDMDDetailData* bd_md_detail (const gchar *raid_spec, GError **error) {
     orig_uuid = ret->uuid;
     if (orig_uuid) {
         ret->uuid = bd_md_canonicalize_uuid (orig_uuid, error);
+        if (!ret->uuid) {
+            g_prefix_error (error, "Failed to canonicalize MD UUID '%s': ", orig_uuid);
+            g_free (orig_uuid);
+            bd_md_detail_data_free (ret);
+            return NULL;
+        }
         g_free (orig_uuid);
     }
 
