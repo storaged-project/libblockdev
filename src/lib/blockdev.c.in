@@ -496,7 +496,7 @@ gboolean bd_ensure_init (BDPluginSpec **require_plugins, BDUtilsLogFunc log_func
                 missing = !bd_is_plugin_available((*check_plugin)->name);
         else
             /* all plugins requested */
-            for (plugin=BD_PLUGIN_LVM; plugin != BD_PLUGIN_UNDEF; plugin++)
+            for (plugin=BD_PLUGIN_LVM; !missing && plugin != BD_PLUGIN_UNDEF; plugin++)
                 missing = !bd_is_plugin_available(plugin);
 
         if (!missing) {
