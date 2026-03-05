@@ -770,14 +770,17 @@ void bd_crypto_keyslot_context_free (BDCryptoKeyslotContext *context) {
     if (context == NULL)
         return;
 
-    if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE)
+    if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE) {
+        explicit_bzero (context->u.passphrase.pass_data, context->u.passphrase.data_len);
         g_free (context->u.passphrase.pass_data);
-    else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE)
+    } else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE)
         g_free (context->u.keyfile.keyfile);
     else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING)
         g_free (context->u.keyring.key_desc);
-    else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_VOLUME_KEY)
+    else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_VOLUME_KEY) {
+        explicit_bzero (context->u.volume_key.volume_key, context->u.volume_key.volume_key_size);
         g_free (context->u.volume_key.volume_key);
+    }
 
     g_free (context);
 }
