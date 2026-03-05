@@ -1546,6 +1546,8 @@ gboolean bd_crypto_luks_add_key (const gchar *device, BDCryptoKeyslotContext *co
     } else {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
                      "Only 'passphrase' and 'key file' context types are valid for LUKS add key.");
+        if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE)
+            crypt_safe_free (key_buf);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         crypt_free (cd);
@@ -1757,6 +1759,8 @@ gboolean bd_crypto_luks_change_key (const gchar *device, BDCryptoKeyslotContext 
     } else {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
                      "Only 'passphrase' and 'key file' context types are valid for LUKS change key.");
+        if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE)
+            crypt_safe_free (key_buf);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         crypt_free (cd);
@@ -4150,6 +4154,9 @@ gboolean bd_crypto_opal_reset_device (const gchar *device, BDCryptoKeyslotContex
     }
 
     ret = crypt_wipe_hw_opal (cd, CRYPT_NO_SEGMENT, key_buf, buf_len, 0);
+    if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE)
+        crypt_safe_free (key_buf);
+
     if (ret != 0) {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to wipe LUKS HW-OPAL device: %s", strerror_l (-ret, c_locale));
