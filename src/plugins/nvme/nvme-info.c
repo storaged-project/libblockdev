@@ -479,8 +479,10 @@ BDNVMEControllerInfo * bd_nvme_get_controller_info (const gchar *device, GError 
         return NULL;
 
     ctrl_id = _nvme_alloc (sizeof (struct nvme_id_ctrl), error);
-    if (!ctrl_id)
+    if (!ctrl_id) {
+        close (fd);
         return NULL;
+    }
     /* send the NVME_IDENTIFY_CNS_CTRL ioctl */
     ret = nvme_identify_ctrl (fd, ctrl_id);
     if (ret != 0) {
