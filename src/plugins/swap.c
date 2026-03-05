@@ -424,15 +424,16 @@ gboolean bd_swap_swapstatus (const gchar *device, GError **error) {
         return TRUE;
     }
 
-    next_line = (strchr (file_content, '\n') + 1);
+    next_line = strchr (file_content, '\n');
     while (next_line && ((gsize)(next_line - file_content) < length)) {
+        next_line++;
         if (g_str_has_prefix (next_line, real_device ? real_device : device)) {
             g_free (real_device);
             g_free (file_content);
             return TRUE;
         }
 
-        next_line = (strchr (next_line, '\n') + 1);
+        next_line = strchr (next_line, '\n');
     }
 
     g_free (real_device);
