@@ -1157,14 +1157,15 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
     guint num_items;
     GPtrArray *pvs;
     BDLVMPVdata *pvdata = NULL;
+    GError *l_error = NULL;
 
     pvs = g_ptr_array_new ();
 
-    success = call_lvm_and_capture_output (args, NULL, &output, error);
+    success = call_lvm_and_capture_output (args, NULL, &output, &l_error);
     if (!success) {
-        if (g_error_matches (*error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
-            /* no output => no VGs, not an error */
-            g_clear_error (error);
+        if (g_error_matches (l_error, BD_UTILS_EXEC_ERROR, BD_UTILS_EXEC_ERROR_NOOUT)) {
+            /* no output => no PVs, not an error */
+            g_clear_error (&l_error);
             /* return an empty list */
             g_ptr_array_add (pvs, NULL);
             return (BDLVMPVdata **) g_ptr_array_free (pvs, FALSE);
@@ -1172,6 +1173,7 @@ BDLVMPVdata** bd_lvm_pvs (GError **error) {
         else {
             /* the error is already populated from the call */
             g_ptr_array_free (pvs, TRUE);
+            g_propagate_error (error, l_error);
             return NULL;
         }
     }
