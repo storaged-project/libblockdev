@@ -3917,7 +3917,7 @@ gboolean bd_crypto_opal_is_supported (const gchar *device, GError **error) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to get opal status for the device '%s': %s",
                      device,
-                     strerror_l (-ret, c_locale));
+                     strerror_l (errno, c_locale));
         close (fd);
         return FALSE;
     }
