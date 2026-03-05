@@ -601,6 +601,7 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
     struct nvme_ns_id_desc *descs = NULL;
     guint8 flbas;
     guint i;
+    guint j;
     guint len;
     BDNVMENamespaceInfo *info;
     GPtrArray *ptr_array;
@@ -685,14 +686,14 @@ BDNVMENamespaceInfo *bd_nvme_get_namespace_info (const gchar *device, GError **e
                 case NVME_NIDT_EUI64:
                     g_free (info->eui64);
                     info->eui64 = g_malloc0 (d->nidl * 2 + 1);
-                    for (i = 0; i < d->nidl; i++)
-                        snprintf (info->eui64 + i * 2, 3, "%02x", d->nid[i]);
+                    for (j = 0; j < d->nidl; j++)
+                        snprintf (info->eui64 + j * 2, 3, "%02x", d->nid[j]);
                     break;
                 case NVME_NIDT_NGUID:
                     g_free (info->nguid);
                     info->nguid = g_malloc0 (d->nidl * 2 + 1);
-                    for (i = 0; i < d->nidl; i++)
-                        snprintf (info->nguid + i * 2, 3, "%02x", d->nid[i]);
+                    for (j = 0; j < d->nidl; j++)
+                        snprintf (info->nguid + j * 2, 3, "%02x", d->nid[j]);
                     break;
                 case NVME_NIDT_UUID:
                     g_free (info->uuid);
