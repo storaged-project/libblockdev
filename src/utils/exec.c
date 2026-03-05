@@ -957,8 +957,13 @@ gboolean bd_utils_echo_str_to_file (const gchar *str, const gchar *file_path, GE
     gsize bytes_written = 0;
 
     out_file = g_io_channel_new_file (file_path, "w", error);
-    if (!out_file || g_io_channel_write_chars (out_file, str, -1, &bytes_written, error) != G_IO_STATUS_NORMAL) {
+    if (!out_file) {
         g_prefix_error (error, "Failed to write '%s' to file '%s': ", str, file_path);
+        return FALSE;
+    }
+    if (g_io_channel_write_chars (out_file, str, -1, &bytes_written, error) != G_IO_STATUS_NORMAL) {
+        g_prefix_error (error, "Failed to write '%s' to file '%s': ", str, file_path);
+        g_io_channel_unref (out_file);
         return FALSE;
     }
     if (g_io_channel_shutdown (out_file, TRUE, error) != G_IO_STATUS_NORMAL) {
