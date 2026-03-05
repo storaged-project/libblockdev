@@ -1058,7 +1058,6 @@ BDMDExamineData* bd_md_examine (const gchar *device, GError **error) {
         /* something bad happened or some expected items were missing  */
         g_set_error (error, BD_MD_ERROR, BD_MD_ERROR_PARSE,
                      "Failed to parse mdexamine metadata");
-        g_hash_table_destroy (table);
         bd_md_examine_data_free (ret);
         return NULL;
     }
