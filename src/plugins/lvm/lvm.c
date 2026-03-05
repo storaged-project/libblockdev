@@ -2562,7 +2562,7 @@ gboolean bd_lvm_cache_create_cached_lv (const gchar *vg_name, const gchar *lv_na
 
     success = bd_lvm_cache_attach (vg_name, lv_name, name, NULL, &l_error);
     if (!success) {
-        g_prefix_error (error, "Failed to attach the cache pool '%s' to the data LV: ", name);
+        g_prefix_error (&l_error, "Failed to attach the cache pool '%s' to the data LV: ", name);
         g_free (name);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
