@@ -332,8 +332,10 @@ static gboolean load_plugins (BDPluginSpec **require_plugins, gboolean reload, g
         unload_plugins ();
         /* clean all so names and populate back those that are requested or the
            defaults */
-        for (i=0; i < BD_PLUGIN_UNDEF; i++)
+        for (i=0; i < BD_PLUGIN_UNDEF; i++) {
+            g_free ((gchar *) plugins[i].spec.so_name);
             plugins[i].spec.so_name = NULL;
+        }
     }
 
     if (require_plugins) {
