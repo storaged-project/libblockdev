@@ -832,14 +832,12 @@ gchar* bd_fs_get_mountpoint (const gchar *device, GError **error) {
 
     target = mnt_fs_get_target (fs);
     if (!target) {
-        mnt_free_fs (fs);
         mnt_free_table (table);
         mnt_free_cache (cache);
         return NULL;
     }
 
     mountpoint = g_strdup (target);
-    mnt_free_fs (fs);
     mnt_free_table (table);
     mnt_free_cache (cache);
     return mountpoint;
@@ -890,13 +888,11 @@ gboolean bd_fs_is_mountpoint (const gchar *path, GError **error) {
 
     target = mnt_fs_get_target (fs);
     if (!target) {
-        mnt_free_fs (fs);
         mnt_free_table (table);
         mnt_free_cache (cache);
         return FALSE;
     }
 
-    mnt_free_fs (fs);
     mnt_free_table (table);
     mnt_free_cache (cache);
     return TRUE;
