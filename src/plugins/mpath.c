@@ -333,8 +333,10 @@ gboolean bd_mpath_is_mpath_member (const gchar *device, GError **error) {
     dm_task_run (task_names);
     names = dm_task_get_names (task_names);
 
-    if (!names || !names->dev)
+    if (!names || !names->dev) {
+        dm_task_destroy (task_names);
         return FALSE;
+    }
 
     /* in case the device is dev_path, we need to resolve it because maps's deps
        are devices and not their dev_paths */
@@ -431,6 +433,7 @@ gchar** bd_mpath_get_mpath_members (GError **error) {
     names = dm_task_get_names (task_names);
 
     if (!names || !names->dev) {
+        dm_task_destroy (task_names);
         bd_utils_report_finished (progress_id, "Completed");
         return NULL;
     }
