@@ -142,8 +142,10 @@ static gboolean process_config_file (const gchar *config_file, GSList **plugins_
     gsize n_sonames = 0;
 
     config = g_key_file_new ();
-    if (!g_key_file_load_from_file (config, config_file, G_KEY_FILE_NONE, error))
+    if (!g_key_file_load_from_file (config, config_file, G_KEY_FILE_NONE, error)) {
+        g_key_file_free (config);
         return FALSE;
+    }
 
     /* get sonames for each plugin (if specified) */
     for (i=0; (i < BD_PLUGIN_UNDEF); i++) {
