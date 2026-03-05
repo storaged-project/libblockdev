@@ -684,7 +684,7 @@ gboolean bd_nvme_set_host_nqn (const gchar *host_nqn, GError **error) {
         return FALSE;
     }
     filename = g_build_filename (path, "hostnqn", NULL);
-    if (host_nqn[strlen (host_nqn) - 1] != '\n')
+    if (strlen (host_nqn) == 0 || host_nqn[strlen (host_nqn) - 1] != '\n')
         s = g_strdup_printf ("%s\n", host_nqn);
     else
         s = g_strdup (host_nqn);
@@ -728,7 +728,7 @@ gboolean bd_nvme_set_host_id (const gchar *host_id, GError **error) {
         return FALSE;
     }
     filename = g_build_filename (path, "hostid", NULL);
-    if (host_id[strlen (host_id) - 1] != '\n')
+    if (strlen (host_id) == 0 || host_id[strlen (host_id) - 1] != '\n')
         s = g_strdup_printf ("%s\n", host_id);
     else
         s = g_strdup (host_id);
