@@ -308,6 +308,7 @@ gboolean bd_part_init (void) {
  *
  */
 void bd_part_close (void) {
+    freelocale (c_locale);
     c_locale = (locale_t) 0;
 }
 

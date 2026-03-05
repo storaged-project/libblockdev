@@ -360,6 +360,7 @@ gboolean bd_crypto_init (void) {
  *
  */
 void bd_crypto_close (void) {
+    freelocale (c_locale);
     c_locale = (locale_t) 0;
     crypt_set_log_callback (NULL, NULL, NULL);
     crypt_set_debug_level (CRYPT_DEBUG_NONE);
