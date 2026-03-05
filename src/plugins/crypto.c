@@ -1645,6 +1645,7 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, BDCryptoKeyslotContext 
     if (ret < 0) {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEY_SLOT,
                      "Failed to determine key slot: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
