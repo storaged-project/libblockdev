@@ -243,7 +243,7 @@ gboolean bd_s390_dasd_online (const gchar *dasd, GError **error) {
         g_propagate_error (error, l_error);
         return FALSE;
     }
-    if (online == 1) {
+    if (online == '1') {
         g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "DASD device %s is already online.", dasd);
         fclose (fd);
@@ -607,7 +607,7 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
         g_propagate_error (error, l_error);
         return FALSE;
     }
-    if (rc == 1) {
+    if (rc == '1') {
         /* otherwise device's status indicates that it's already online, so
            just close the fd and proceed; we don't return because although 'online'
            status may be correct, the device may not be completely online and ready
