@@ -3078,7 +3078,7 @@ gboolean bd_lvm_vdo_pool_convert (const gchar *vg_name, const gchar *pool_lv, co
                              "--deduplication", deduplication ? "y" : "n",
                              NULL, NULL, NULL, NULL, NULL, NULL};
     gboolean success = FALSE;
-    guint next_arg = 4;
+    guint next_arg = 8;
     gchar *size_str = NULL;
     gchar *lv_spec = NULL;
     gchar *old_config = NULL;
