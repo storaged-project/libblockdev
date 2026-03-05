@@ -1960,7 +1960,7 @@ gboolean bd_crypto_luks_suspend (const gchar *luks_device, GError **error) {
 /**
  * bd_crypto_luks_resume:
  * @luks_device: LUKS device to resume
- * @context: (nullable): key slot context (passphrase/keyfile/token...) for @luks_device
+ * @context: key slot context (passphrase/keyfile/token...) for @luks_device
  * @error: (out) (optional): place to store error (if any)
  *
  * Supported @context types for this function: passphrase, key file
