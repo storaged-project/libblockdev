@@ -286,7 +286,7 @@ static gchar** get_map_deps (const gchar *map_name, guint64 *n_deps, GError **er
         if (l_error) {
             g_propagate_prefixed_error (error, l_error, "Failed to resolve '%s' to device name",
                                         major_minor);
-            g_free (dep_devs);
+            g_strfreev (dep_devs);
             g_free (major_minor);
             return NULL;
         }
