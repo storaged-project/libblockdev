@@ -1592,7 +1592,7 @@ gchar* bd_lvm_lvorigin (const gchar *vg_name, const gchar *lv_name, GError **err
  * Tech category: %BD_LVM_TECH_BASIC-%BD_LVM_TECH_MODE_CREATE
  */
 gboolean bd_lvm_lvcreate (const gchar *vg_name, const gchar *lv_name, guint64 size, const gchar *type, const gchar **pv_list, const BDExtraArg **extra, GError **error) {
-    guint8 pv_list_len = pv_list ? g_strv_length ((gchar **) pv_list) : 0;
+    guint pv_list_len = pv_list ? g_strv_length ((gchar **) pv_list) : 0;
     const gchar **args = g_new0 (const gchar*, pv_list_len + 10);
     gboolean success = FALSE;
     guint64 i = 0;
