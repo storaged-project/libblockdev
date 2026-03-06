@@ -811,6 +811,7 @@ gchar* bd_fs_get_mountpoint (const gchar *device, GError **error) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to set cache for mount info table.");
         mnt_free_table (table);
+        mnt_free_cache (cache);
         return NULL;
     }
 
@@ -867,6 +868,7 @@ gboolean bd_fs_is_mountpoint (const gchar *path, GError **error) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Failed to set cache for mount info table.");
         mnt_free_table (table);
+        mnt_free_cache (cache);
         return FALSE;
     }
 
