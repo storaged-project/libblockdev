@@ -347,10 +347,11 @@ gboolean bd_swap_swapon (const gchar *device, gint priority, GError **error) {
                      "Failed to activate swap on %s: %m", device);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
+        return FALSE;
     }
 
     bd_utils_report_finished (progress_id, "Completed");
-    return ret == 0;
+    return TRUE;
 }
 
 /**
@@ -378,10 +379,11 @@ gboolean bd_swap_swapoff (const gchar *device, GError **error) {
                      "Failed to deactivate swap on %s: %m", device);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
+        return FALSE;
     }
 
     bd_utils_report_finished (progress_id, "Completed");
-    return ret == 0;
+    return TRUE;
 }
 
 /**
