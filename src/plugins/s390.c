@@ -797,6 +797,8 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
             g_free (hba_path);
             g_free (fcpsysfs);
             g_free (scsidev);
+            fclose (scsifd);
+            g_free (line);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
             return FALSE;
@@ -809,6 +811,8 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
             g_free (hba_path);
             g_free (fcpsysfs);
             g_free (scsidev);
+            fclose (scsifd);
+            g_free (line);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
             return FALSE;
@@ -828,6 +832,8 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
             g_free (fcphbasysfs);
             g_free (fcpsysfs);
             g_free (scsidev);
+            fclose (scsifd);
+            g_free (line);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
             return FALSE;
@@ -841,6 +847,8 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
             g_free (fcpsysfs);
             g_free (scsidev);
             fclose (fd);
+            fclose (scsifd);
+            g_free (line);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
             return FALSE;
@@ -861,6 +869,8 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
             g_free (fcphbasysfs);
             g_free (fcpsysfs);
             g_free (scsidev);
+            fclose (scsifd);
+            g_free (line);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
             return FALSE;
@@ -875,6 +885,8 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
             g_free (fcphbasysfs);
             g_free (fcpsysfs);
             g_free (scsidev);
+            fclose (scsifd);
+            g_free (line);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
             return FALSE;
@@ -897,6 +909,8 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
                 g_free (fcpwwpnsysfs);
                 g_free (fcphbasysfs);
                 g_free (scsidev);
+                fclose (scsifd);
+                g_free (line);
                 bd_utils_report_finished (progress_id, l_error->message);
                 g_propagate_error (error, l_error);
                 return FALSE;
@@ -911,19 +925,28 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
                 g_free (fcpwwpnsysfs);
                 g_free (fcphbasysfs);
                 g_free (scsidev);
+                fclose (scsifd);
+                g_free (line);
                 bd_utils_report_finished (progress_id, l_error->message);
                 g_propagate_error (error, l_error);
                 return FALSE;
             }
             fclose (fd);
         }
+
+        g_free (scsidel);
+        scsidel = NULL;
+        g_free (scsidev);
+        scsidev = NULL;
+        g_free (fcplunsysfs);
+        fcplunsysfs = NULL;
+        g_free (fcpwwpnsysfs);
+        fcpwwpnsysfs = NULL;
+        g_free (fcphbasysfs);
+        fcphbasysfs = NULL;
     }
     fclose (scsifd);
-    g_free (scsidel);
-    g_free (fcplunsysfs);
-    g_free (fcpwwpnsysfs);
-    g_free (fcphbasysfs);
-    g_free (scsidev);
+    g_free (line);
     bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
 }
