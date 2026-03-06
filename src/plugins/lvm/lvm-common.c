@@ -791,7 +791,6 @@ gchar* bd_lvm_config_get (const gchar *section, const gchar *setting, const gcha
 gboolean _vgcfgbackup_restore (const gchar *command, const gchar *vg_name, const gchar *file, const BDExtraArg **extra, GError **error) {
     const gchar *args[6] = {"lvm", NULL, NULL, NULL, NULL, NULL};
     guint next_arg = 1;
-    gchar *output = NULL;
     g_autofree gchar *config_arg = NULL;
 
     args[next_arg++] = command;
@@ -808,7 +807,7 @@ gboolean _vgcfgbackup_restore (const gchar *command, const gchar *vg_name, const
     }
     g_mutex_unlock (&global_config_lock);
 
-    return bd_utils_exec_and_capture_output (args, extra, &output, error);
+    return bd_utils_exec_and_report_error (args, extra, error);
 }
 
 /**
