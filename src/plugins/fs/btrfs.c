@@ -326,7 +326,7 @@ BDFSBtrfsInfo* bd_fs_btrfs_get_info (const gchar *mpoint, GError **error) {
     GRegex *regex = NULL;
     GMatchInfo *match_info = NULL;
     BDFSBtrfsInfo *ret = NULL;
-    g_autofree gchar *item = NULL;
+    gchar *item = NULL;
     guint64 num_devices = 0;
     guint64 min_size = 0;
     gint scanned = 0;
@@ -368,14 +368,17 @@ BDFSBtrfsInfo* bd_fs_btrfs_get_info (const gchar *mpoint, GError **error) {
                      "Btrfs filesystem mounted on %s spans multiple devices (%"G_GUINT64_FORMAT")." \
                      "Filesystem plugin is not suitable for multidevice Btrfs volumes, please use " \
                      "Btrfs plugin instead.", mpoint, num_devices);
+        g_free (item);
         g_match_info_free (match_info);
         g_regex_unref (regex);
         bd_fs_btrfs_info_free (ret);
         return NULL;
     }
 
+    g_free (item);
     item = g_match_info_fetch_named (match_info, "size");
     ret->size = g_ascii_strtoull (item, NULL, 0);
+    g_free (item);
 
     g_match_info_free (match_info);
     g_regex_unref (regex);
