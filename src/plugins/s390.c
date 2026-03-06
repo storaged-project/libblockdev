@@ -243,7 +243,7 @@ gboolean bd_s390_dasd_online (const gchar *dasd, GError **error) {
         g_propagate_error (error, l_error);
         return FALSE;
     }
-    if (online == 1) {
+    if (online == '1') {
         g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "DASD device %s is already online.", dasd);
         fclose (fd);
@@ -607,7 +607,7 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
         g_propagate_error (error, l_error);
         return FALSE;
     }
-    if (rc == 1) {
+    if (rc == '1') {
         /* otherwise device's status indicates that it's already online, so
            just close the fd and proceed; we don't return because although 'online'
            status may be correct, the device may not be completely online and ready
@@ -633,10 +633,11 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
     portdir = g_strdup_printf ("%s/%s/%s", zfcpsysfs, devno, wwpn);
     pdfd = opendir (portdir);
     if (!pdfd) {
-        g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
+        g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "WWPN %s not found for zFCP device %s", wwpn, devno);
         g_free (portdir);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
     closedir (pdfd);
@@ -796,6 +797,8 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
             g_free (hba_path);
             g_free (fcpsysfs);
             g_free (scsidev);
+            fclose (scsifd);
+            g_free (line);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
             return FALSE;
@@ -808,6 +811,8 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
             g_free (hba_path);
             g_free (fcpsysfs);
             g_free (scsidev);
+            fclose (scsifd);
+            g_free (line);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
             return FALSE;
@@ -827,6 +832,8 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
             g_free (fcphbasysfs);
             g_free (fcpsysfs);
             g_free (scsidev);
+            fclose (scsifd);
+            g_free (line);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
             return FALSE;
@@ -840,6 +847,8 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
             g_free (fcpsysfs);
             g_free (scsidev);
             fclose (fd);
+            fclose (scsifd);
+            g_free (line);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
             return FALSE;
@@ -860,6 +869,8 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
             g_free (fcphbasysfs);
             g_free (fcpsysfs);
             g_free (scsidev);
+            fclose (scsifd);
+            g_free (line);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
             return FALSE;
@@ -874,6 +885,8 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
             g_free (fcphbasysfs);
             g_free (fcpsysfs);
             g_free (scsidev);
+            fclose (scsifd);
+            g_free (line);
             bd_utils_report_finished (progress_id, l_error->message);
             g_propagate_error (error, l_error);
             return FALSE;
@@ -896,6 +909,8 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
                 g_free (fcpwwpnsysfs);
                 g_free (fcphbasysfs);
                 g_free (scsidev);
+                fclose (scsifd);
+                g_free (line);
                 bd_utils_report_finished (progress_id, l_error->message);
                 g_propagate_error (error, l_error);
                 return FALSE;
@@ -910,19 +925,28 @@ gboolean bd_s390_zfcp_scsi_offline (const gchar *devno, const gchar *wwpn, const
                 g_free (fcpwwpnsysfs);
                 g_free (fcphbasysfs);
                 g_free (scsidev);
+                fclose (scsifd);
+                g_free (line);
                 bd_utils_report_finished (progress_id, l_error->message);
                 g_propagate_error (error, l_error);
                 return FALSE;
             }
             fclose (fd);
         }
+
+        g_free (scsidel);
+        scsidel = NULL;
+        g_free (scsidev);
+        scsidev = NULL;
+        g_free (fcplunsysfs);
+        fcplunsysfs = NULL;
+        g_free (fcpwwpnsysfs);
+        fcpwwpnsysfs = NULL;
+        g_free (fcphbasysfs);
+        fcphbasysfs = NULL;
     }
     fclose (scsifd);
-    g_free (scsidel);
-    g_free (fcplunsysfs);
-    g_free (fcpwwpnsysfs);
-    g_free (fcphbasysfs);
-    g_free (scsidev);
+    g_free (line);
     bd_utils_report_finished (progress_id, "Completed");
     return TRUE;
 }
@@ -1022,7 +1046,7 @@ gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gcha
     g_free (offline);
     if (!success) {
         g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
-                     "Could not set zFCP device %s online", devno);
+                     "Could not set zFCP device %s offline", devno);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;

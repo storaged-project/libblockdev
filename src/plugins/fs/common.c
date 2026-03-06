@@ -115,7 +115,8 @@ get_uuid_label (const gchar *device, gchar **uuid, gchar **label, GError **error
                         "Failed to get UUID for the device '%s'", device);
             blkid_free_probe (probe);
             synced_close (fd);
-            g_free (label);
+            g_free (*label);
+            *label = NULL;
             return FALSE;
         }
 

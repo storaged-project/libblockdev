@@ -2134,7 +2134,8 @@ class LvmVDOTest(LvmTestCase):
         succ = BlockDev.lvm_lvcreate("testVDOVG", "testLV", 7 * 1024**3)
         self.assertTrue(succ)
 
-        succ = BlockDev.lvm_vdo_pool_convert("testVDOVG", "testLV", "vdoLV", 35 * 1024**3)
+        succ = BlockDev.lvm_vdo_pool_convert("testVDOVG", "testLV", "vdoLV", 35 * 1024**3,
+                                             0, True, False)
         self.assertTrue(succ)
 
         lv_info = BlockDev.lvm_lvinfo("testVDOVG", "vdoLV")
@@ -2152,7 +2153,7 @@ class LvmVDOTest(LvmTestCase):
         vdo_info = BlockDev.lvm_vdo_info("testVDOVG", "testLV")
         self.assertIsNotNone(vdo_info)
         self.assertTrue(vdo_info.compression)
-        self.assertTrue(vdo_info.deduplication)
+        self.assertFalse(vdo_info.deduplication)
         self.assertEqual(BlockDev.lvm_get_vdo_write_policy_str(vdo_info.write_policy), "auto")
 
     @tag_test(TestTags.SLOW)

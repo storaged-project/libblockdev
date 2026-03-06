@@ -360,6 +360,7 @@ gboolean bd_crypto_init (void) {
  *
  */
 void bd_crypto_close (void) {
+    freelocale (c_locale);
     c_locale = (locale_t) 0;
     crypt_set_log_callback (NULL, NULL, NULL);
     crypt_set_debug_level (CRYPT_DEBUG_NONE);
@@ -770,14 +771,17 @@ void bd_crypto_keyslot_context_free (BDCryptoKeyslotContext *context) {
     if (context == NULL)
         return;
 
-    if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE)
+    if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_PASSPHRASE) {
+        explicit_bzero (context->u.passphrase.pass_data, context->u.passphrase.data_len);
         g_free (context->u.passphrase.pass_data);
-    else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE)
+    } else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE)
         g_free (context->u.keyfile.keyfile);
     else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYRING)
         g_free (context->u.keyring.key_desc);
-    else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_VOLUME_KEY)
+    else if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_VOLUME_KEY) {
+        explicit_bzero (context->u.volume_key.volume_key, context->u.volume_key.volume_key_size);
         g_free (context->u.volume_key.volume_key);
+    }
 
     g_free (context);
 }
@@ -1543,6 +1547,8 @@ gboolean bd_crypto_luks_add_key (const gchar *device, BDCryptoKeyslotContext *co
     } else {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
                      "Only 'passphrase' and 'key file' context types are valid for LUKS add key.");
+        if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE)
+            crypt_safe_free (key_buf);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         crypt_free (cd);
@@ -1642,6 +1648,7 @@ gboolean bd_crypto_luks_remove_key (const gchar *device, BDCryptoKeyslotContext 
     if (ret < 0) {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_KEY_SLOT,
                      "Failed to determine key slot: %s", strerror_l (-ret, c_locale));
+        crypt_free (cd);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
@@ -1753,6 +1760,8 @@ gboolean bd_crypto_luks_change_key (const gchar *device, BDCryptoKeyslotContext 
     } else {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_INVALID_CONTEXT,
                      "Only 'passphrase' and 'key file' context types are valid for LUKS change key.");
+        if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE)
+            crypt_safe_free (key_buf);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         crypt_free (cd);
@@ -1951,7 +1960,7 @@ gboolean bd_crypto_luks_suspend (const gchar *luks_device, GError **error) {
 /**
  * bd_crypto_luks_resume:
  * @luks_device: LUKS device to resume
- * @context: (nullable): key slot context (passphrase/keyfile/token...) for @luks_device
+ * @context: key slot context (passphrase/keyfile/token...) for @luks_device
  * @error: (out) (optional): place to store error (if any)
  *
  * Supported @context types for this function: passphrase, key file
@@ -2252,7 +2261,7 @@ gboolean bd_crypto_luks_set_label (const gchar *device, const gchar *label, cons
 
     if (g_strcmp0 (crypt_get_type (cd), CRYPT_LUKS2) != 0) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_TECH_UNAVAIL,
-                     "Label can be set only on LUKS 2 devices: %s", strerror_l (-ret, c_locale));
+                     "Label can be set only on LUKS 2 devices.");
         crypt_free (cd);
         return FALSE;
     }
@@ -2965,11 +2974,10 @@ gboolean bd_crypto_integrity_format (const gchar *device, const gchar *algorithm
         ret = crypt_deactivate (cd, tmp_name);
         if (ret != 0)
             bd_utils_log_format (BD_UTILS_LOG_ERR, "Failed to deactivate temporary device %s", tmp_name);
-
-    } else
-        bd_utils_report_finished (progress_id, "Completed");
+    }
 
     crypt_free (cd);
+    bd_utils_report_finished (progress_id, "Completed");
 
     return TRUE;
 }
@@ -3909,7 +3917,7 @@ gboolean bd_crypto_opal_is_supported (const gchar *device, GError **error) {
         g_set_error (error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to get opal status for the device '%s': %s",
                      device,
-                     strerror_l (-ret, c_locale));
+                     strerror_l (errno, c_locale));
         close (fd);
         return FALSE;
     }
@@ -4146,6 +4154,9 @@ gboolean bd_crypto_opal_reset_device (const gchar *device, BDCryptoKeyslotContex
     }
 
     ret = crypt_wipe_hw_opal (cd, CRYPT_NO_SEGMENT, key_buf, buf_len, 0);
+    if (context->type == BD_CRYPTO_KEYSLOT_CONTEXT_TYPE_KEYFILE)
+        crypt_safe_free (key_buf);
+
     if (ret != 0) {
         g_set_error (&l_error, BD_CRYPTO_ERROR, BD_CRYPTO_ERROR_DEVICE,
                      "Failed to wipe LUKS HW-OPAL device: %s", strerror_l (-ret, c_locale));
