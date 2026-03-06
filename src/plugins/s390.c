@@ -633,10 +633,11 @@ gboolean bd_s390_zfcp_online (const gchar *devno, const gchar *wwpn, const gchar
     portdir = g_strdup_printf ("%s/%s/%s", zfcpsysfs, devno, wwpn);
     pdfd = opendir (portdir);
     if (!pdfd) {
-        g_set_error (error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
+        g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
                      "WWPN %s not found for zFCP device %s", wwpn, devno);
         g_free (portdir);
-        bd_utils_report_finished (progress_id, (*error)->message);
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
     closedir (pdfd);
