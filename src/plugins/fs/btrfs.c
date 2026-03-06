@@ -351,6 +351,8 @@ BDFSBtrfsInfo* bd_fs_btrfs_get_info (const gchar *mpoint, GError **error) {
 
     success = g_regex_match (regex, output, 0, &match_info);
     if (!success) {
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE,
+                     "Failed to parse btrfs filesystem information");
         g_regex_unref (regex);
         g_match_info_free (match_info);
         return NULL;
