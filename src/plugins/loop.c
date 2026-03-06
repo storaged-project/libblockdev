@@ -480,7 +480,7 @@ gboolean bd_loop_set_autoclear (const gchar *loop, gboolean autoclear, GError **
     if (!g_str_has_prefix (loop, "/dev/"))
         dev_loop = g_strdup_printf ("/dev/%s", loop);
 
-    msg = g_strdup_printf ("Started setting up the autoclear flag on the /dev/%s device",
+    msg = g_strdup_printf ("Started setting up the autoclear flag on the %s device",
                            dev_loop ? dev_loop : loop);
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
