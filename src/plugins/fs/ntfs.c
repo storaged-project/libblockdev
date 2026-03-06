@@ -372,7 +372,7 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
 
     mountpoint = bd_fs_get_mountpoint (device, &l_error);
     if (mountpoint != NULL) {
-        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_NOT_MOUNTED,
+        g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
                      "Can't get NTFS file system information for '%s': Device is mounted.", device);
         return NULL;
     } else {
