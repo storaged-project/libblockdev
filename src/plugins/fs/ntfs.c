@@ -403,7 +403,7 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
     line_p = lines;
 
     /* find the beginning of the (data) section we are interested in */
-    while (line_p && *line_p && !strstr (*line_p, "Cluster Size"))
+    while (line_p && *line_p && !strstr (*line_p, "Cluster Size:"))
         line_p++;
     if (!line_p || !(*line_p)) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NTFS file system information");
@@ -417,7 +417,7 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
     val_start++;
     cluster_size = g_ascii_strtoull (val_start, NULL, 0);
 
-    while (line_p && *line_p && !strstr (*line_p, "Volume Size in Clusters"))
+    while (line_p && *line_p && !strstr (*line_p, "Volume Size in Clusters:"))
         line_p++;
     if (!line_p || !(*line_p)) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NTFS file system information");
@@ -431,7 +431,7 @@ BDFSNtfsInfo* bd_fs_ntfs_get_info (const gchar *device, GError **error) {
     val_start++;
     ret->size = g_ascii_strtoull (val_start, NULL, 0) * cluster_size;
 
-    while (line_p && *line_p && !strstr (*line_p, "Free Clusters"))
+    while (line_p && *line_p && !strstr (*line_p, "Free Clusters:"))
         line_p++;
     if (!line_p || !(*line_p)) {
         g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_PARSE, "Failed to parse NTFS file system information");
