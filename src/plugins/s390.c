@@ -1022,7 +1022,7 @@ gboolean bd_s390_zfcp_offline (const gchar *devno, const gchar *wwpn, const gcha
     g_free (offline);
     if (!success) {
         g_set_error (&l_error, BD_S390_ERROR, BD_S390_ERROR_DEVICE,
-                     "Could not set zFCP device %s online", devno);
+                     "Could not set zFCP device %s offline", devno);
         bd_utils_report_finished (progress_id, l_error->message);
         g_propagate_error (error, l_error);
         return FALSE;
