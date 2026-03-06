@@ -1308,6 +1308,13 @@ class PartSetIdCase(PartTestCase):
         ps = BlockDev.part_get_part_spec (self.loop_devs[0], ps.path)
         self.assertEqual(ps.id, "0x8e")
 
+        # 0xc8 -- unknown to libfdisk, but still valid
+        succ = BlockDev.part_set_part_id (self.loop_devs[0], ps.path, "0xc8")
+        self.assertTrue(succ)
+
+        ps = BlockDev.part_get_part_spec (self.loop_devs[0], ps.path)
+        self.assertEqual(ps.id, "0xc8")
+
         # we can't change part id to extended partition id
         with self.assertRaises(GLib.GError):
             BlockDev.part_set_part_id (self.loop_devs[0], ps.path, "0x85")
@@ -1321,6 +1328,9 @@ class PartSetIdCase(PartTestCase):
 
         with self.assertRaises(GLib.GError):
             BlockDev.part_set_part_id (self.loop_devs[0], ps.path, "999")
+
+        with self.assertRaises(GLib.GError):
+            BlockDev.part_set_part_id (self.loop_devs[0], ps.path, "-1")
 
 
 class PartSetBootableFlagCase(PartTestCase):
