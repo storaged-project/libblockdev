@@ -620,7 +620,7 @@ static gboolean _lvm_devices_enabled () {
     gboolean ret = FALSE;
     GError *loc_error = NULL;
     gchar *output = NULL;
-    gboolean enabled = FALSE;
+    guint enabled = 0;
     gint scanned = 0;
     g_autofree gchar *config_arg = NULL;
 
@@ -643,7 +643,7 @@ static gboolean _lvm_devices_enabled () {
         if (scanned != 1)
             return FALSE;
 
-        return enabled;
+        return enabled != 0;
     } else {
         g_clear_error (&loc_error);
         g_free (output);
@@ -660,7 +660,7 @@ static gboolean _lvm_devices_enabled () {
         if (scanned != 1)
             return FALSE;
 
-        return enabled;
+        return enabled != 0;
     } else {
         g_clear_error (&loc_error);
         g_free (output);
