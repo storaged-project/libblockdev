@@ -1828,9 +1828,11 @@ gboolean bd_part_set_part_name (const gchar *disk, const gchar *part, const gcha
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    cxt = get_device_context (disk, FALSE, error);
+    cxt = get_device_context (disk, FALSE, &l_error);
     if (!cxt) {
         /* error is already populated */
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
@@ -2059,9 +2061,11 @@ gboolean bd_part_set_part_uuid (const gchar *disk, const gchar *part, const gcha
     progress_id = bd_utils_report_started (msg);
     g_free (msg);
 
-    cxt = get_device_context (disk, FALSE, error);
+    cxt = get_device_context (disk, FALSE, &l_error);
     if (!cxt) {
         /* error is already populated */
+        bd_utils_report_finished (progress_id, l_error->message);
+        g_propagate_error (error, l_error);
         return FALSE;
     }
 
