@@ -764,7 +764,7 @@ gboolean bd_fs_mount (const gchar *device, const gchar *mountpoint, const gchar 
                 }
             } else {
                 g_set_error (error, BD_FS_ERROR, BD_FS_ERROR_FAIL,
-                             "Unsupported argument for unmount: '%s'", (*extra_p)->opt);
+                             "Unsupported argument for mount: '%s'", (*extra_p)->opt);
                 return FALSE;
             }
         }
