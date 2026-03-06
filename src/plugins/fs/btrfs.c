@@ -358,7 +358,7 @@ BDFSBtrfsInfo* bd_fs_btrfs_get_info (const gchar *mpoint, GError **error) {
         return NULL;
     }
 
-    ret = g_new (BDFSBtrfsInfo, 1);
+    ret = g_new0 (BDFSBtrfsInfo, 1);
 
     ret->label = g_match_info_fetch_named (match_info, "label");
     ret->uuid = g_match_info_fetch_named (match_info, "uuid");
