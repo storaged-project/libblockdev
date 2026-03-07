@@ -482,6 +482,20 @@ class LvmTestPVs(LvmPVonlyTestCase):
         self.assertTrue(info)
         self.assertEqual(info.pv_name, self.loop_dev)
         self.assertTrue(info.pv_uuid)
+        self.assertGreater(info.pv_size, 0)
+        self.assertGreater(info.pv_free, 0)
+        self.assertGreater(info.pe_start, 0)
+        self.assertFalse(info.missing)
+
+        # PV not in a VG -- VG fields should be empty/zero
+        self.assertEqual(info.vg_name, None)
+        self.assertEqual(info.vg_uuid, None)
+        self.assertEqual(info.vg_size, 0)
+        self.assertEqual(info.vg_free, 0)
+        self.assertEqual(info.vg_extent_size, 0)
+        self.assertEqual(info.vg_extent_count, 0)
+        self.assertEqual(info.vg_free_count, 0)
+        self.assertEqual(info.vg_pv_count, 0)
 
     def test_pvs(self):
         """Verify that it's possible to gather info about PVs"""
@@ -685,6 +699,22 @@ class LvmTestVGs(LvmPVVGTestCase):
         self.assertLess(info.size, 2 * 1024**3)
         self.assertEqual(info.free, info.size)
         self.assertEqual(info.extent_size, 4 * 1024**2)
+        self.assertGreater(info.extent_count, 0)
+        self.assertEqual(info.free_count, info.extent_count)
+        self.assertEqual(info.size, info.extent_count * info.extent_size)
+        self.assertFalse(info.exported)
+
+        # check PV info when PV is part of a VG
+        pv_info = BlockDev.lvm_pvinfo(self.loop_dev)
+        self.assertTrue(pv_info)
+        self.assertEqual(pv_info.vg_name, "testVG")
+        self.assertEqual(pv_info.vg_uuid, info.uuid)
+        self.assertEqual(pv_info.vg_size, info.size)
+        self.assertEqual(pv_info.vg_free, info.free)
+        self.assertEqual(pv_info.vg_extent_size, info.extent_size)
+        self.assertEqual(pv_info.vg_extent_count, info.extent_count)
+        self.assertEqual(pv_info.vg_free_count, info.free_count)
+        self.assertEqual(pv_info.vg_pv_count, 2)
 
     def test_vgs(self):
         """Verify that it's possible to gather info about VGs"""
@@ -1133,6 +1163,14 @@ class LvmTestLVs(LvmPVVGLVTestCase):
         self.assertTrue(info.uuid)
         self.assertEqual(info.size, 512 * 1024**2)
         self.assertIn("public", info.roles.split(","))
+        self.assertEqual(info.segtype, "linear")
+        self.assertTrue(info.attr)
+        self.assertEqual(info.attr[0], "-")  # not a special volume type
+        self.assertEqual(info.origin, None)
+        self.assertEqual(info.pool_lv, None)
+        self.assertEqual(info.data_lv, None)
+        self.assertEqual(info.metadata_lv, None)
+        self.assertEqual(info.move_pv, None)
 
     def test_lvs(self):
         """Verify that it's possible to gather info about LVs"""
@@ -1182,6 +1220,8 @@ class LvmTestLVs(LvmPVVGLVTestCase):
         self.assertEqual(info.segtype, "linear")
         self.assertEqual(len(info.segs), 1)
         self.assertEqual(info.segs[0].pvdev, self.loop_dev)
+        # 10 MiB LV with 4 MiB PE size -> size_pe should be in the right range
+        self.assertGreater(info.segs[0].size_pe, 0)
 
         # add second LV
         succ = BlockDev.lvm_lvcreate("testVG", "testLV2", 10 * 1024**2)
@@ -1202,10 +1242,41 @@ class LvmTestLVs(LvmPVVGLVTestCase):
         self.assertEqual(info.segs[0].pvdev, self.loop_dev)
         self.assertEqual(info.segs[1].pvdev, self.loop_dev)
         self.assertNotEqual(info.segs[0].pv_start_pe, info.segs[1].pv_start_pe)
+        self.assertGreater(info.segs[0].size_pe, 0)
+        self.assertGreater(info.segs[1].size_pe, 0)
 
         lvs = BlockDev.lvm_lvs("testVG")
         self.assertEqual(len(lvs), 2)
         self.assertListEqual([lv.lv_name for lv in lvs], ["testLV", "testLV2"])
+
+    def test_lvs_tree(self):
+        """Verify that it's possible to gather tree info about LVs"""
+
+        succ = BlockDev.lvm_pvcreate(self.loop_dev, 0, 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_vgcreate("testVG", [self.loop_dev], 0, None)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV", 12 * 1024**2)
+        self.assertTrue(succ)
+
+        succ = BlockDev.lvm_lvcreate("testVG", "testLV2", 12 * 1024**2)
+        self.assertTrue(succ)
+        self.addCleanup(self._lvremove, "testVG", "testLV2")
+
+        lvs = BlockDev.lvm_lvs_tree("testVG")
+        self.assertEqual(len(lvs), 2)
+        self.assertCountEqual([lv.lv_name for lv in lvs], ["testLV", "testLV2"])
+
+        for lv in lvs:
+            self.assertEqual(lv.vg_name, "testVG")
+            self.assertEqual(lv.segtype, "linear")
+            self.assertTrue(lv.uuid)
+            self.assertEqual(lv.size, 12 * 1024**2)
+            self.assertEqual(len(lv.segs), 1)
+            self.assertEqual(lv.segs[0].pvdev, self.loop_dev)
+            self.assertGreater(lv.segs[0].size_pe, 0)
 
     @tag_test(TestTags.SLOW)
     def test_create_cached_lv(self):
